@@ -604,6 +604,111 @@ describe( 'settings HTML rendering', () => {
 		container.remove();
 	} );
 
+	it( 'prevents dismissing the navigation modal while a custom save is pending', async () => {
+		let rejectSave: ( error: Error ) => void = () => undefined;
+		const saveHandler = jest.fn(
+			() =>
+				new Promise< never >( ( _resolve, reject ) => {
+					rejectSave = reject;
+				} )
+		);
+
+		registerSettingsExtension( {
+			scope: { page: 'test-page', section: '' },
+			saveHandlers: {
+				pending: saveHandler,
+			},
+		} );
+
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'custom', handler: 'pending' },
+			shell: {
+				navigation: [
+					{
+						id: 'next-page',
+						label: 'Next page',
+						href: 'https://example.com/next',
+					},
+				],
+			},
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'test_field',
+							label: 'Test field',
+							type: 'text',
+							value: 'Initial value',
+						},
+					],
+				},
+			},
+		};
+
+		const { container, root } = renderElement(
+			<SettingsUIPage schema={ schema } />
+		);
+
+		const input = container.querySelector( 'input[type="text"]' );
+		const link = container.querySelector(
+			'a[href="https://example.com/next"]'
+		);
+
+		act( () => {
+			changeTextInput( input as HTMLInputElement, 'Changed value' );
+			link?.dispatchEvent(
+				new MouseEvent( 'click', {
+					bubbles: true,
+					cancelable: true,
+					button: 0,
+				} )
+			);
+		} );
+
+		await act( async () => {
+			getUnsavedChangesActionButton( 'Save' ).click();
+			await Promise.resolve();
+		} );
+
+		const discardButton = getUnsavedChangesActionButton( 'Discard' );
+		const modal = document.body.querySelector(
+			'.wc-settings-ui__unsaved-changes-modal'
+		);
+
+		expect( saveHandler ).toHaveBeenCalledTimes( 1 );
+		expect( discardButton ).toBeDisabled();
+		expect(
+			document.body.querySelector( 'button[aria-label="Close"]' )
+		).toBeNull();
+
+		act( () => {
+			discardButton.click();
+			modal?.dispatchEvent(
+				new KeyboardEvent( 'keydown', {
+					bubbles: true,
+					cancelable: true,
+					key: 'Escape',
+				} )
+			);
+		} );
+
+		expect( document.body.textContent ).toContain(
+			'You have unsaved changes'
+		);
+
+		await act( async () => {
+			rejectSave( new Error( 'Expected save failure.' ) );
+			await Promise.resolve();
+		} );
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
 	it( 'sanitizes info fields and group descriptions before rendering', () => {
 		const schema: SettingsUISchema = {
 			id: 'test-page',

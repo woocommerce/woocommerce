@@ -199,7 +199,10 @@ const UnsavedChangesModal = ( {
 		<Modal
 			className="wc-settings-ui__unsaved-changes-modal"
 			title={ __( 'You have unsaved changes', 'woocommerce' ) }
-			onRequestClose={ onClose }
+			isDismissible={ ! isSaving }
+			shouldCloseOnClickOutside={ ! isSaving }
+			shouldCloseOnEsc={ ! isSaving }
+			onRequestClose={ isSaving ? () => undefined : onClose }
 		>
 			<p>
 				{ __(
@@ -208,7 +211,11 @@ const UnsavedChangesModal = ( {
 				) }
 			</p>
 			<div className="wc-settings-ui__unsaved-changes-actions">
-				<Button variant="tertiary" onClick={ onDiscard }>
+				<Button
+					variant="tertiary"
+					disabled={ isSaving }
+					onClick={ onDiscard }
+				>
 					{ __( 'Discard', 'woocommerce' ) }
 				</Button>
 				<Button
@@ -745,13 +752,13 @@ export const SettingsUIPage = ( {
 	}, [ isDirty ] );
 
 	const handleDiscardNavigation = useCallback( () => {
-		if ( ! pendingNavigation ) {
+		if ( isSaving || ! pendingNavigation ) {
 			return;
 		}
 
 		allowNavigation();
 		window.location.assign( pendingNavigation.href );
-	}, [ allowNavigation, pendingNavigation ] );
+	}, [ allowNavigation, isSaving, pendingNavigation ] );
 
 	const handleSavePendingNavigation = useCallback( async () => {
 		if ( ! pendingNavigation ) {
