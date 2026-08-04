@@ -25,6 +25,10 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 	private const FAKE_BLOCK_EDITOR_EMAIL_IDS = array(
 		'email_without_mapping',
 		'email_with_empty_template',
+		// Own id: the renderer instance (and so its request-scoped cache) is
+		// shared across tests in the process, and the memoization test needs
+		// a cold cache.
+		'memoized_email',
 		'unpublished_draft_email',
 		'unpublished_auto_draft_email',
 		'trashed_email',
@@ -147,6 +151,43 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 		// Only the `wooemailtemplate` template renders this footer, proving the
 		// synthetic post was rendered through the explicitly passed template slug.
 		$this->assertStringContainsString( '. All Rights Reserved.', $rendered_email, 'The wooemailtemplate footer must be present, proving the template slug was passed through for the synthetic post' );
+	}
+
+	/**
+	 * @testdox Should compute the file template content once for repeated sends of the same email type.
+	 */
+	public function testItComputesFileTemplateContentOnceForRepeatedSends(): void {
+		$this->skip_if_unsupported_environment();
+
+		$wc_mail_mock = $this->create_wc_email_mock( 'memoized_email', 'Test Woo Content' );
+
+		$this->personalizer->set_context(
+			array(
+				'wc_email'        => $wc_mail_mock,
+				'recipient_email' => $wc_mail_mock->get_recipient(),
+			)
+		);
+
+		$compute_count = 0;
+		$count_filter  = function ( $post_data ) use ( &$compute_count ) {
+			++$compute_count;
+			return $post_data;
+		};
+		add_filter( 'woocommerce_email_content_post_data', $count_filter );
+
+		try {
+			$first  = $this->block_email_renderer->maybe_render_block_email( $wc_mail_mock );
+			$second = $this->block_email_renderer->maybe_render_block_email( $wc_mail_mock );
+		} finally {
+			remove_filter( 'woocommerce_email_content_post_data', $count_filter );
+		}
+
+		// Full renders are intentionally not compared: block supports generate
+		// unique `wp-elements-*` class names per render pass (non-deterministic
+		// on WP 7.1+), so only the memoized input is asserted, via the counter.
+		$this->assertNotNull( $first );
+		$this->assertNotNull( $second );
+		$this->assertSame( 1, $compute_count, 'The canonical file template content must be computed once per request for a given email type' );
 	}
 
 	/**

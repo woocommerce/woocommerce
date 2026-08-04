@@ -47,6 +47,16 @@ class BlockEmailRenderer {
 	private $template_manager;
 
 	/**
+	 * Request-scoped cache of file template content, keyed by email type and
+	 * locale. The canonical content is type-level (personalization happens
+	 * later), so repeated sends of the same email type in one request — e.g.
+	 * a bulk order status update — compute it once.
+	 *
+	 * @var array<string, string>
+	 */
+	private $file_template_content_cache = array();
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -92,8 +102,13 @@ class BlockEmailRenderer {
 			// The canonical content (including the `woocommerce_email_content_post_data`
 			// filter) is used, so what is sent matches both the editor scratchpad
 			// content and the hash the cleanup migration compared against before
-			// deleting a post.
-			$file_template_content = WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $wc_email );
+			// deleting a post. Keyed by locale as well: plugins may switch it
+			// per recipient, and the markup contains translated strings.
+			$cache_key = $wc_email->id . ':' . get_locale();
+			if ( ! isset( $this->file_template_content_cache[ $cache_key ] ) ) {
+				$this->file_template_content_cache[ $cache_key ] = WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $wc_email );
+			}
+			$file_template_content = $this->file_template_content_cache[ $cache_key ];
 			if ( '' === $file_template_content ) {
 				return null;
 			}
