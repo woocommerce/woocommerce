@@ -570,7 +570,8 @@ final class OrderWithdrawalFormProcessor {
 	 */
 	private function get_withdrawal_window_warning_message(): string {
 		return sprintf(
-			__( 'This order is older than %1$d days. Only orders within %2$d days of delivery are eligible for withdrawal.', 'woocommerce' ), // phpcs:ignore WordPress.WP.I18n.MissingTranslatorsComment
+			/* translators: 1: number of days since the order was placed. 2: length of the withdrawal window in days. */
+			__( 'This order is older than %1$d days. Only orders within %2$d days of delivery are eligible for withdrawal.', 'woocommerce' ),
 			self::WITHDRAWAL_WINDOW_IN_DAYS,
 			self::WITHDRAWAL_WINDOW_IN_DAYS
 		);
