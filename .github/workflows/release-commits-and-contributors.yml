@@ -13,6 +13,9 @@ on:
         required: true
         description: 'The beta version (in X.Y.Z-beta.1 or X.Y.Z-beta.2 format) to generate release posts for.'
 
+permissions:
+  contents: read
+
 env:
   ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
 
@@ -196,17 +199,21 @@ jobs:
         working-directory: tools/release-posts
         env:
           BETA_OUTPUT_PATH: ${{ runner.temp }}/beta-release-${{ needs.extract-versions.outputs.beta_version }}.html
+          BETA_VERSION: ${{ needs.extract-versions.outputs.beta_version }}
+          FINAL_VERSION: ${{ needs.extract-versions.outputs.final_version }}
           GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PREVIOUS_RELEASE_VERSION: ${{ needs.extract-versions.outputs.previous_release_version }}
+          RELEASE_DATE: ${{ needs.extract-versions.outputs.release_date }}
           RELEASE_OUTPUT_PATH: ${{ runner.temp }}/release-${{ needs.extract-versions.outputs.final_version }}.html
         run: |
-          pnpm run release-post beta "${{ needs.extract-versions.outputs.beta_version }}" \
-            --releaseDate "${{ needs.extract-versions.outputs.release_date }}" \
+          pnpm run release-post beta "$BETA_VERSION" \
+            --releaseDate "$RELEASE_DATE" \
             --outputOnly \
             --outputPath "$BETA_OUTPUT_PATH"
 
-          pnpm run release-post release "${{ needs.extract-versions.outputs.final_version }}" \
-            "${{ needs.extract-versions.outputs.previous_release_version }}" \
-            --releaseDate "${{ needs.extract-versions.outputs.release_date }}" \
+          pnpm run release-post release "$FINAL_VERSION" \
+            "$PREVIOUS_RELEASE_VERSION" \
+            --releaseDate "$RELEASE_DATE" \
             --outputOnly \
             --outputPath "$RELEASE_OUTPUT_PATH"
 

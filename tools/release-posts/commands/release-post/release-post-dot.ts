@@ -21,19 +21,13 @@ import dotenv from 'dotenv';
 import { renderTemplate } from '../../lib/render-template';
 import { createWpComDraftPost } from '../../lib/draft-post';
 import { getWordpressComAuthToken } from '../../lib/oauth-helper';
+import { formatReleaseDate, parseReleaseDate } from '../../lib/dates';
 
 const DEVELOPER_WOOCOMMERCE_SITE_ID = '96396764';
 
 const SOURCE_REPO = 'https://github.com/woocommerce/woocommerce.git';
 
 const VERSION_VALIDATION_REGEX = /^([0-9]+)\.([0-9]+)\.([0-9]+)$/;
-
-const getDefaultReleaseDate = () =>
-	new Date().toLocaleDateString( 'en-US', {
-		month: '2-digit',
-		day: '2-digit',
-		year: 'numeric',
-	} );
 
 dotenv.config();
 
@@ -53,7 +47,7 @@ const program = new Command()
 	.option(
 		'--releaseDate <date>',
 		'The release date as mm-dd-yyyy, defaults to today.',
-		getDefaultReleaseDate()
+		formatReleaseDate( new Date() )
 	)
 	.option( '--securityUpdate', 'Marks the release as a security update' )
 	.option(
@@ -79,7 +73,7 @@ const program = new Command()
 			'Releases',
 		];
 		const isOutputOnly = !! outputOnly;
-		const releaseDateValue = new Date( releaseDate );
+		const releaseDateValue = parseReleaseDate( releaseDate );
 
 		if ( ! VERSION_VALIDATION_REGEX.test( currentVersion ) ) {
 			throw new Error(
@@ -90,12 +84,6 @@ const program = new Command()
 		if ( ! VERSION_VALIDATION_REGEX.test( previousVersion ) ) {
 			throw new Error(
 				`Invalid previous version: ${ previousVersion }. Provide previous version in x.y.z format.`
-			);
-		}
-
-		if ( Number.isNaN( releaseDateValue.valueOf() ) ) {
-			throw new Error(
-				`Invalid release date: ${ releaseDate }. Provide release date as mm-dd-yyyy.`
 			);
 		}
 
@@ -113,6 +101,21 @@ const program = new Command()
 		if ( currentParsed.patch < 1 ) {
 			throw new Error(
 				`Invalid current version: ${ currentVersion }. Dot releases must have a patch version greater than 0.`
+			);
+		}
+
+		if (
+			currentParsed.major !== previousParsed.major ||
+			currentParsed.minor !== previousParsed.minor
+		) {
+			throw new Error(
+				`Invalid previous version: ${ previousVersion }. Dot release versions must have matching major and minor versions.`
+			);
+		}
+
+		if ( ! semver.lt( previousParsed, currentParsed ) ) {
+			throw new Error(
+				`Invalid previous version: ${ previousVersion }. It must precede ${ currentVersion }.`
 			);
 		}
 
@@ -196,11 +199,8 @@ const program = new Command()
 				);
 
 				Logger.notice( `Published draft dot release post at ${ URL }` );
+			} finally {
 				Logger.endTask();
-			} catch ( error: unknown ) {
-				if ( error instanceof Error ) {
-					Logger.error( error.message );
-				}
 			}
 		}
 	} );

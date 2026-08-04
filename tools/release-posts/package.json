@@ -5,7 +5,8 @@
 	"main": " ",
 	"scripts": {
 		"lint": "tsc --noEmit",
-		"release-post": "node -r ts-node/register ./commands/release-post/index.ts"
+		"release-post": "node -r ts-node/register ./commands/release-post/index.ts",
+		"test": "node --test -r ts-node/register test/*.test.ts"
 	},
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
@@ -45,9 +46,25 @@
 				"command": "lint",
 				"changes": [
 					"commands/**/*.ts",
-					"lib/**/*.ts"
+					"lib/**/*.ts",
+					"test/**/*.ts"
 				]
-			}
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test",
+					"changes": [
+						"commands/**/*.ts",
+						"lib/**/*.ts",
+						"test/**/*.ts"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					]
+				}
+			]
 		}
 	}
 }

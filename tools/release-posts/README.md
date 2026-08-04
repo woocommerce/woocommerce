@@ -19,7 +19,7 @@ To generate a dot release post, run `pnpm release-post dot "<currentVersion>" "<
 
 ## Publishing Draft Posts
 
-This tool will publish draft posts to `https://developer.woocommerce.com` for you if you omit the `--outputOnly` flag. There is some minimal first time setup for this though:
+This tool will publish draft posts to `https://developer.woocommerce.com` for you if you omit the `--outputOnly` flag. There is some minimal first-time setup for this though:
 
 1. Create a [WordPress.com application](https://developer.wordpress.com/apps/).
 2. Recommended settings:

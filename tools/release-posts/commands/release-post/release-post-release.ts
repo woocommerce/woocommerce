@@ -30,6 +30,7 @@ import {
 import { getWordpressComAuthToken } from '../../lib/oauth-helper';
 import { generateContributors } from '../../lib/contributors';
 import { editPostHTML } from '../../lib/edit-post';
+import { formatReleaseDate, parseReleaseDate } from '../../lib/dates';
 
 const DEVELOPER_WOOCOMMERCE_SITE_ID = '96396764';
 
@@ -60,11 +61,7 @@ const program = new Command()
 	.option(
 		'--releaseDate <date>',
 		'The release date as mm-dd-yyyy, defaults to today.',
-		new Date().toLocaleDateString( 'en-US', {
-			month: '2-digit',
-			day: '2-digit',
-			year: 'numeric',
-		} )
+		formatReleaseDate( new Date() )
 	)
 	.option( '--editPostId <postId>', 'Updates an existing post' )
 	.option(
@@ -84,7 +81,7 @@ const program = new Command()
 			'Releases',
 		];
 		const isOutputOnly = !! options.outputOnly;
-		const releaseDate = new Date( options.releaseDate );
+		const releaseDate = parseReleaseDate( options.releaseDate );
 
 		if ( ! VERSION_VALIDATION_REGEX.test( currentVersion ) ) {
 			throw new Error(
@@ -95,12 +92,6 @@ const program = new Command()
 		if ( ! VERSION_VALIDATION_REGEX.test( previousVersion ) ) {
 			throw new Error(
 				`Invalid previous version: ${ previousVersion }. Provide previous version in x.y.z format.`
-			);
-		}
-
-		if ( Number.isNaN( releaseDate.valueOf() ) ) {
-			throw new Error(
-				`Invalid release date: ${ options.releaseDate }. Provide release date as mm-dd-yyyy.`
 			);
 		}
 
@@ -191,9 +182,11 @@ const program = new Command()
 					authToken
 				);
 				postContent = prevPost.content;
-			} catch {
+			} catch ( error: unknown ) {
+				const details =
+					error instanceof Error ? `: ${ error.message }` : '';
 				throw new Error(
-					`Unable to fetch existing post with ID: ${ options.editPostId }`
+					`Unable to fetch existing post with ID ${ options.editPostId }${ details }`
 				);
 			}
 		}
@@ -289,11 +282,8 @@ const program = new Command()
 						  );
 
 				Logger.notice( `Published draft release post at ${ URL }` );
+			} finally {
 				Logger.endTask();
-			} catch ( error: unknown ) {
-				if ( error instanceof Error ) {
-					Logger.error( error.message );
-				}
 			}
 		}
 	} );

@@ -15,7 +15,11 @@ import dotenv from 'dotenv';
  */
 import { renderTemplate } from '../../lib/render-template';
 import { getWordpressComAuthToken } from '../../lib/oauth-helper';
-import { getSecondTuesdayOfTheMonth } from '../../lib/dates';
+import {
+	formatReleaseDate,
+	getSecondTuesdayOfTheMonth,
+	parseReleaseDate,
+} from '../../lib/dates';
 import { createWpComDraftPost } from '../../lib/draft-post';
 
 const DEVELOPER_WOOCOMMERCE_SITE_ID = '96396764';
@@ -33,13 +37,9 @@ const program = new Command()
 	.option(
 		'--releaseDate <date>',
 		'The date for the final release as mm-dd-yyyy, year inferred as current year, defaults to second tuesday of next month.',
-		getSecondTuesdayOfTheMonth(
-			new Date().getMonth() + 1
-		).toLocaleDateString( 'en-US', {
-			month: '2-digit',
-			day: '2-digit',
-			year: 'numeric',
-		} )
+		formatReleaseDate(
+			getSecondTuesdayOfTheMonth( new Date().getMonth() + 1 )
+		)
 	)
 	.option(
 		'--outputOnly',
@@ -73,23 +73,18 @@ const program = new Command()
 			'Releases',
 		];
 
-		const finalReleaseDate = new Date( releaseDate );
+		const finalReleaseDate = parseReleaseDate( releaseDate );
 		const isOutputOnly = !! outputOnly;
 		const semverVersion = semver.parse( releaseVersion );
 
 		if (
 			! semverVersion ||
+			semverVersion.prerelease.length !== 2 ||
 			semverVersion.prerelease[ 0 ] !== 'beta' ||
 			typeof semverVersion.prerelease[ 1 ] !== 'number'
 		) {
 			throw new Error(
 				`Invalid current version: ${ releaseVersion }. Provide current version in x.y.z-beta.n format.`
-			);
-		}
-
-		if ( Number.isNaN( finalReleaseDate.valueOf() ) ) {
-			throw new Error(
-				`Invalid release date: ${ releaseDate }. Provide release date as mm-dd-yyyy.`
 			);
 		}
 
@@ -137,17 +132,21 @@ const program = new Command()
 			Logger.notice( `Output written to ${ tmpFile }` );
 		} else {
 			Logger.startTask( 'Publishing draft release post' );
-			const { ID } = await createWpComDraftPost(
-				siteId,
-				`WooCommerce ${ semverVersion.major }.${ semverVersion.minor } Beta ${ prereleaseVersion } Released`,
-				html,
-				postTags,
-				authToken
-			);
-			Logger.notice(
-				`Release post created, edit it here: \nhttps://wordpress.com/post/developer.woocommerce.com/${ ID }`
-			);
-			Logger.endTask();
+
+			try {
+				const { ID } = await createWpComDraftPost(
+					siteId,
+					`WooCommerce ${ semverVersion.major }.${ semverVersion.minor } Beta ${ prereleaseVersion } Released`,
+					html,
+					postTags,
+					authToken
+				);
+				Logger.notice(
+					`Release post created, edit it here: \nhttps://wordpress.com/post/developer.woocommerce.com/${ ID }`
+				);
+			} finally {
+				Logger.endTask();
+			}
 		}
 	} );
 
