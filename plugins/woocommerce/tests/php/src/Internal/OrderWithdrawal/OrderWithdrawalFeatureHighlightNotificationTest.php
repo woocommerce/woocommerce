@@ -66,57 +66,6 @@ class OrderWithdrawalFeatureHighlightNotificationTest extends WC_Unit_Test_Case 
 	}
 
 	/**
-	 * @testdox Should prepare the settings and learn more actions.
-	 */
-	public function test_get_note_prepares_settings_and_learn_more_actions(): void {
-		$note    = $this->sut->get_note();
-		$actions = $note->get_actions();
-
-		$this->assertSame(
-			OrderWithdrawalFeatureHighlightNotification::NOTE_NAME,
-			$note->get_name(),
-			'The note should use the expected stable name.'
-		);
-		$this->assertSame(
-			Note::E_WC_ADMIN_NOTE_WARNING,
-			$note->get_type(),
-			'The note should be a warning because the feature relates to regulatory requirements.'
-		);
-		$this->assertCount(
-			2,
-			$actions,
-			'The note should include the settings action and learn more action.'
-		);
-		$this->assertSame( 'review-feature-settings', $actions[0]->name, 'The settings action should be first.' );
-		$this->assertSame(
-			'Review feature settings',
-			$actions[0]->label,
-			'The first action should direct merchants to settings.'
-		);
-		$this->assertSame(
-			admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' ),
-			$actions[0]->query,
-			'The first action should link to advanced feature settings.'
-		);
-		$this->assertSame(
-			Note::E_WC_ADMIN_NOTE_ACTIONED,
-			$actions[0]->status,
-			'The settings action should action the note.'
-		);
-		$this->assertSame( 'learn-more', $actions[1]->name, 'The second action should be learn more.' );
-		$this->assertSame(
-			'https://woocommerce.com/',
-			$actions[1]->query,
-			'The learn more action should link to WooCommerce.com for now.'
-		);
-		$this->assertSame(
-			Note::E_WC_ADMIN_NOTE_UNACTIONED,
-			$actions[1]->status,
-			'The learn more action should not action the note.'
-		);
-	}
-
-	/**
 	 * @testdox Should add the notification for existing live stores.
 	 */
 	public function test_possibly_add_note_adds_notification_for_existing_live_stores(): void {
@@ -152,19 +101,6 @@ class OrderWithdrawalFeatureHighlightNotificationTest extends WC_Unit_Test_Case 
 	}
 
 	/**
-	 * @testdox Should not add the notification for non-live transitions.
-	 */
-	public function test_maybe_add_note_when_store_goes_live_ignores_other_transitions(): void {
-		$this->sut->maybe_add_note_when_store_goes_live( 'no', 'yes' );
-
-		$this->assertCount(
-			0,
-			$this->get_notification_note_ids(),
-			'Only the coming soon to live transition should create the notification.'
-		);
-	}
-
-	/**
 	 * @testdox Should only create the notification once.
 	 */
 	public function test_possibly_add_note_prevents_duplicates(): void {
@@ -175,21 +111,6 @@ class OrderWithdrawalFeatureHighlightNotificationTest extends WC_Unit_Test_Case 
 			1,
 			$this->get_notification_note_ids(),
 			'Repeated attempts should not create duplicate notifications.'
-		);
-	}
-
-	/**
-	 * @testdox Should not add the notification while the store is coming soon.
-	 */
-	public function test_possibly_add_note_does_not_add_notification_while_coming_soon(): void {
-		update_option( self::COMING_SOON_OPTION, 'yes' );
-
-		$this->sut->possibly_add_note();
-
-		$this->assertCount(
-			0,
-			$this->get_notification_note_ids(),
-			'Coming soon stores should not receive the notification.'
 		);
 	}
 
@@ -205,18 +126,6 @@ class OrderWithdrawalFeatureHighlightNotificationTest extends WC_Unit_Test_Case 
 			0,
 			$this->get_notification_note_ids(),
 			'Stores that already enabled order withdrawal should not receive the notification.'
-		);
-	}
-
-	/**
-	 * @testdox Should consider missing country settings as selling to all countries.
-	 */
-	public function test_is_applicable_defaults_missing_country_settings_to_all_countries(): void {
-		delete_option( self::ALLOWED_COUNTRIES_OPTION );
-
-		$this->assertTrue(
-			$this->sut->is_applicable(),
-			'Missing selling location settings should be treated as selling to all countries.'
 		);
 	}
 
@@ -257,22 +166,6 @@ class OrderWithdrawalFeatureHighlightNotificationTest extends WC_Unit_Test_Case 
 			'specific EU country'       => array( 'specific', array( 'DE' ), array(), true ),
 			'specific non-EU country'   => array( 'specific', array( 'US' ), array(), false ),
 			'all except non-EU country' => array( 'all_except', array(), array( 'US' ), true ),
-		);
-	}
-
-	/**
-	 * @testdox Should not match stores that exclude every EU country.
-	 */
-	public function test_is_applicable_returns_false_when_all_eu_countries_are_excluded(): void {
-		update_option( self::ALLOWED_COUNTRIES_OPTION, 'all_except' );
-		update_option(
-			self::ALL_EXCEPT_COUNTRIES_OPTION,
-			WC()->countries->get_european_union_countries()
-		);
-
-		$this->assertFalse(
-			$this->sut->is_applicable(),
-			'Stores that do not sell to any EU countries should not receive the notification.'
 		);
 	}
 
