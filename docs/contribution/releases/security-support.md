@@ -1,6 +1,7 @@
 ---
 post_title: WooCommerce Security Patch Support Policy
 sidebar_label: Security Support
+sidebar_position: 10
 ---
 
 # Security Patch Support Policy
