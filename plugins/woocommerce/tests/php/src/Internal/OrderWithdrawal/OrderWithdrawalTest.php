@@ -643,7 +643,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	 */
 	public function test_controller_registers_order_deletion_cleanup_hooks(): void {
 		$controller = new OrderWithdrawalController();
-		$controller->init( $this->sut, new OrderWithdrawalFormView() );
+		$controller->init( $this->sut, new OrderWithdrawalFormView(), new OrderWithdrawalFeatureHighlightNotification() );
 
 		try {
 			$controller->register();
