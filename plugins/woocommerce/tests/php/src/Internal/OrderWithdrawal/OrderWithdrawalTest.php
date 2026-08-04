@@ -501,7 +501,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		$order->save();
 
 		$capture         = $this->capture_wp_mail();
-		$warning_message = 'This order is older than 14 days. Order withdrawal requests are only valid within 14 days of the order date.';
+		$warning_message = 'This order is older than 14 days. Only orders within 14 days of delivery are eligible for withdrawal.';
 
 		try {
 			$this->prepare_post_request(

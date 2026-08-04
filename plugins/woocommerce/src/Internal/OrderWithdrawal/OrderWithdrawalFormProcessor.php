@@ -39,7 +39,8 @@ final class OrderWithdrawalFormProcessor {
 	private const ORDER_WITHDRAWAL_REQUESTED_META_KEY = '_order_withdrawal_requested';
 	private const ORDER_WITHDRAWAL_REQUESTED_VALUE    = 'yes';
 	private const INBOX_NOTE_NAME_PREFIX              = 'wc-order-withdrawal-requested-';
-	private const WITHDRAWAL_WINDOW_IN_SECONDS        = 14 * DAY_IN_SECONDS;
+	private const WITHDRAWAL_WINDOW_IN_DAYS           = 14;
+	private const WITHDRAWAL_WINDOW_IN_SECONDS        = self::WITHDRAWAL_WINDOW_IN_DAYS * DAY_IN_SECONDS;
 	private const RATE_LIMIT_IP_PREFIX                = 'order_withdrawal_ip_';
 	private const RATE_LIMIT_EMAIL_PREFIX             = 'order_withdrawal_email_';
 	private const RATE_LIMIT_DELAY                    = MINUTE_IN_SECONDS / 2;
@@ -568,7 +569,11 @@ final class OrderWithdrawalFormProcessor {
 	 * Get the warning shown to merchants when a request is outside the valid window.
 	 */
 	private function get_withdrawal_window_warning_message(): string {
-		return __( 'This order is older than 14 days. Order withdrawal requests are only valid within 14 days of the order date.', 'woocommerce' );
+		return sprintf(
+			__( 'This order is older than %1$d days. Only orders within %2$d days of delivery are eligible for withdrawal.', 'woocommerce' ), // phpcs:ignore WordPress.WP.I18n.MissingTranslatorsComment
+			self::WITHDRAWAL_WINDOW_IN_DAYS,
+			self::WITHDRAWAL_WINDOW_IN_DAYS
+		);
 	}
 
 	/**
