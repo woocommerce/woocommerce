@@ -5,7 +5,7 @@ sidebar_label: Security Support
 
 # Security Patch Support Policy
 
-WooCommerce provides security patches for the **last 21 major versions**. As of WooCommerce 11.0, that means version **9.0 and newer**.
+WooCommerce provides security patches for the **last 21 major versions**. If the current stable WooCommerce version is 11.0, that means version **9.0 and newer**.
 
 "Major version" follows WooCommerce's release numbering (`10.8`, `10.9`, `11.0`, ...), not semantic versioning. At the current release cadence, 21 major versions correspond to roughly two years of releases.
 
@@ -25,4 +25,4 @@ Security vulnerabilities must be reported privately through Automattic's HackerO
 
 ## Keeping this page current
 
-The release run-book's post-release tasks include moving the floor line above forward when the stable release of a new major version ships.
+The release run-book's publish steps include moving the supported-version floor forward when the stable release of a new major version ships.
