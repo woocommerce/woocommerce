@@ -34,9 +34,6 @@ class CartTokenUtils {
 	/**
 	 * Get the cart token sent with the current HTTP request.
 	 *
-	 * The single source of truth for which session a request addresses. Reading it elsewhere (e.g. a
-	 * `/batch` sub-request header) lets the validated and the consumed token diverge.
-	 *
 	 * @since 11.1.0
 	 * @return string
 	 */

@@ -733,10 +733,7 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
-	 * Test a Cart-Token in a batch sub-request does not waive the nonce check.
-	 *
-	 * The session handler consumes the outer HTTP header, so a token that only appears in a
-	 * sub-request must not authorise a write.
+	 * Nested Cart-Token should be ignored in a batch request.
 	 */
 	public function test_batch_sub_request_cart_token_does_not_waive_nonce() {
 		$token = CartTokenUtils::get_cart_token( (string) wc()->session->get_customer_id() );

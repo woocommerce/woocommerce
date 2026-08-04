@@ -13,12 +13,8 @@ use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
 
 /**
- * The cart token selects which customer session a request loads. It must always be read from the
- * outer HTTP request via CartTokenUtils::get_request_cart_token().
+ * The cart token selects which customer session a request loads. It must always be read from a unified palce the via CartTokenUtils::get_request_cart_token().
  *
- * Reading `$_SERVER['HTTP_CART_TOKEN']` directly duplicates the unslash/sanitize handling, and
- * reading `Cart-Token` off a WP_REST_Request reads the sub-request under `/batch` -- so the token
- * that gets validated stops being the token that gets consumed.
  */
 class CartTokenSourceSniff implements Sniff {
 

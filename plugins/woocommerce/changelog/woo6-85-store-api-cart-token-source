@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Store API: resolve the cart token from the HTTP request headers when selecting and loading a cart session, and verify its signature before using its claims.
+Store API: Always resolve the cart token from a consistent place.
