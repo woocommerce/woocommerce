@@ -106,7 +106,7 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 		);
 		$note->set_content(
 			__(
-				'Stores selling to EU countries may need to offer customers a way to withdraw from qualifying orders. WooCommerce includes an order withdrawal feature you can enable from advanced feature settings.',
+				'Stores selling to EU countries may need to offer customers a way to withdraw from qualifying orders. WooCommerce includes an order withdrawal feature you can enable.',
 				'woocommerce'
 			)
 		);
