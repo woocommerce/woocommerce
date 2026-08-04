@@ -539,12 +539,12 @@ final class OrderWithdrawalFormProcessor {
 			);
 		}
 
-		if ( ! $matched_order instanceof WC_Order ) {
+		if ( $matched_order instanceof WC_Order ) {
+			if ( $this->is_order_outside_withdrawal_window( $matched_order ) ) {
+				$content .= ' ' . $this->get_withdrawal_window_warning_message();
+			}
+		} else {
 			$content .= ' ' . __( 'WooCommerce could not match this request to an order automatically.', 'woocommerce' );
-		}
-
-		if ( $matched_order instanceof WC_Order && $this->is_order_outside_withdrawal_window( $matched_order ) ) {
-			$content .= ' ' . $this->get_withdrawal_window_warning_message();
 		}
 
 		return $content;
