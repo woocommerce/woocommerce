@@ -499,6 +499,27 @@ describe( 'NativeSettingsField', () => {
 				expect( select?.selectedOptions[ 0 ] ).toBeDisabled();
 			}
 		);
+
+		it.each( [ {}, 'invalid' ] )(
+			'handles malformed non-array options without throwing',
+			( options ) => {
+				const field = {
+					id: 'wc_test_select',
+					label: 'Test select',
+					type: 'select' as const,
+					options,
+				} as unknown as SettingsUIField;
+
+				const container = render(
+					<NativeSettingsField { ...makeProps( field, 'legacy' ) } />
+				);
+
+				const select = container.querySelector( 'select' );
+				expect( select ).toBeInstanceOf( HTMLSelectElement );
+				expect( select ).toHaveValue( 'legacy' );
+				expect( select?.options ).toHaveLength( 1 );
+			}
+		);
 	} );
 
 	describe( 'text fields', () => {

@@ -140,7 +140,7 @@ export const NativeSettingsField = ( {
 
 	if ( field.type === 'select' || field.type === 'radio' ) {
 		const selectValue = toStringValue( value );
-		const options = field.options || [];
+		const options = Array.isArray( field.options ) ? field.options : [];
 		const selectOptions = options.some(
 			( option ) => option.value === selectValue
 		)
