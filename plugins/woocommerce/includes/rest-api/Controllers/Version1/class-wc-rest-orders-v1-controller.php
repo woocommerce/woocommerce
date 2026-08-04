@@ -674,13 +674,21 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		$product              = wc_get_product( $this->get_product_id( $posted, $action ) );
 		$current_product_id   = (int) $item->get_product_id( 'edit' );
 		$current_variation_id = (int) $item->get_variation_id( 'edit' );
-		$restore_variation_id = 'update' === $action
-			&& $current_variation_id
+		// set_product() clears a variation when given its parent. REST partial updates restore it only
+		// when the posted parent and SKU-resolved product still identify the current item.
+		// An explicit variation_id of 0 still demotes the item.
+		$same_product_update  = 'update' === $action
 			&& array_key_exists( 'product_id', $posted )
-			&& ( ! array_key_exists( 'variation_id', $posted ) || (int) $posted['variation_id'] === $current_variation_id )
 			&& $product instanceof WC_Product
 			&& (int) $posted['product_id'] === $current_product_id
 			&& in_array( $product->get_id(), array( $current_product_id, $current_variation_id ), true );
+		$restore_variation_id = $same_product_update
+			&& $current_variation_id
+			&& ( ! array_key_exists( 'variation_id', $posted ) || (int) $posted['variation_id'] === $current_variation_id );
+		$clear_variation_id   = $same_product_update
+			&& $current_variation_id
+			&& array_key_exists( 'variation_id', $posted )
+			&& 0 === (int) $posted['variation_id'];
 
 		if ( $product && $product !== $item->get_product() ) {
 			$item->set_product( $product );
@@ -694,6 +702,9 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 				$item->set_total( $total );
 				$item->set_subtotal( $total );
 			}
+		}
+		if ( $clear_variation_id ) {
+			$item->set_variation_id( 0 );
 		}
 
 		$this->maybe_set_item_props( $item, array( 'name', 'quantity', 'total', 'subtotal', 'tax_class' ), $posted );

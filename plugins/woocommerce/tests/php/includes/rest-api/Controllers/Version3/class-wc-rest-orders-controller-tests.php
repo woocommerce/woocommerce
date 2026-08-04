@@ -1221,7 +1221,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox PUT /orders with an unchanged parent preserves the variation despite a filtered view variation ID.
+	 * @testdox PUT /orders with an unchanged parent preserves the variation while ignoring view-context variation ID filters.
 	 */
 	public function test_update_line_item_with_unchanged_parent_preserves_variation_id(): void {
 		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
@@ -1264,11 +1264,16 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox PUT /orders with an explicit zero variation ID demotes a variation to its parent.
+	 * @testdox PUT /orders with an explicit zero variation ID demotes a variation even when SKU resolves to it.
 	 */
-	public function test_update_line_item_with_zero_variation_id_switches_to_parent(): void {
+	public function test_update_line_item_with_zero_variation_id_and_current_sku_switches_to_parent(): void {
 		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
-		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
+
+		$variation_sku = 'REST-V3-VARIATION-' . wp_generate_uuid4();
+		$variation->set_sku( $variation_sku );
+		$variation->save();
+
+		list( $order, $item_id ) = $this->create_order_with_variation_line_item( $variation );
 
 		$response = $this->dispatch_line_item_update(
 			$order->get_id(),
@@ -1276,6 +1281,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 				'id'           => $item_id,
 				'product_id'   => $parent->get_id(),
 				'variation_id' => 0,
+				'sku'          => $variation_sku,
 			)
 		);
 		$this->assertSame( 200, $response->get_status(), 'Explicitly demoting the line item should succeed.' );
@@ -1311,6 +1317,33 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$reloaded = new WC_Order_Item_Product( $item_id );
 		$this->assertSame( $variation->get_id(), $reloaded->get_variation_id(), 'The inherited parent SKU should not demote the variation.' );
 		$this->assertSame( $variation->get_id(), $reloaded->get_product()->get_id(), 'The line item should continue to resolve to the variation.' );
+	}
+
+	/**
+	 * @testdox PUT /orders does not preserve the variation when product_id conflicts with a SKU resolving to the current parent.
+	 */
+	public function test_update_line_item_with_different_product_id_and_current_parent_sku_does_not_preserve_variation(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+		$parent_sku                 = 'REST-V3-PARENT-' . wp_generate_uuid4();
+		$parent->set_sku( $parent_sku );
+		$parent->save();
+		list( $order, $item_id ) = $this->create_order_with_variation_line_item( $variation );
+		$different_product       = WC_Helper_Product::create_simple_product();
+
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
+			array(
+				'id'         => $item_id,
+				'product_id' => $different_product->get_id(),
+				'sku'        => $parent_sku,
+			)
+		);
+		$this->assertSame( 200, $response->get_status(), 'The SKU-selected product update should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'A conflicting product ID should prevent restoring the variation.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product_id(), 'The line item should retain the product selected by SKU.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the product selected by SKU.' );
 	}
 
 	/**

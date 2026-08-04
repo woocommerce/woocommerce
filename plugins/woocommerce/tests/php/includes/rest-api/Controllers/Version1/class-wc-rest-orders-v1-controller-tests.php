@@ -143,7 +143,7 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Updating with the unchanged parent preserves the variation despite a filtered view product ID.
+	 * @testdox Updating with the unchanged parent preserves the variation while ignoring view-context product ID filters.
 	 */
 	public function test_update_line_item_with_unchanged_parent_preserves_variation_id(): void {
 		list( $parent, $variation, $order, $item ) = $this->create_order_with_variation_line_item();
@@ -184,5 +184,38 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( $variation->get_id(), $reloaded->get_product()->get_id(), 'The line item should continue to resolve to the variation.' );
 		$this->assertSame( $parent->get_name(), $reloaded->get_name(), 'The line-item name should retain its pre-regression resynchronization behavior.' );
 		$this->assertSame( $parent->get_tax_class(), $reloaded->get_tax_class(), 'The line-item tax class should retain its pre-regression resynchronization behavior.' );
+	}
+
+	/**
+	 * @testdox Updating with an explicit zero variation ID clears the variation even when SKU resolves to it.
+	 */
+	public function test_update_line_item_with_zero_variation_id_and_current_sku_switches_to_parent(): void {
+		list( $parent, $variation, $order, $item ) = $this->create_order_with_variation_line_item();
+
+		$variation_sku = 'REST-V1-VARIATION-' . wp_generate_uuid4();
+		$variation->set_sku( $variation_sku );
+		$variation->save();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v1/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'id'           => $item->get_id(),
+						'product_id'   => $parent->get_id(),
+						'variation_id' => 0,
+						'sku'          => $variation_sku,
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), 'Explicitly demoting the line item should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item->get_id() );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'An explicit zero variation ID should clear the existing variation.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product_id(), 'The line item should retain the submitted parent product ID.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the parent product.' );
 	}
 }
