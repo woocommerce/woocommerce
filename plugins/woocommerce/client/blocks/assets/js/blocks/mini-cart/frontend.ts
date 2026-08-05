@@ -130,7 +130,6 @@ export type MiniCart = {
 		setupJQueryEventBridge: () => void;
 		disableScrollingOnBody: () => void;
 		focusFirstElement: () => void;
-		onCartChange: () => void;
 	};
 };
 
@@ -174,9 +173,6 @@ const { state: woocommerceState, actions } = store< WooCommerce >(
 	{},
 	{ lock: universalLock }
 );
-
-type CartItems = WooCommerce[ 'state' ][ 'cart' ][ 'items' ];
-let lastCartItemsRef: CartItems | undefined;
 
 const { state: miniCartState, actions: miniCartActions } = store< MiniCart >(
 	'woocommerce/mini-cart',
@@ -412,31 +408,6 @@ store< MiniCart >(
 			},
 			markAsHydrated() {
 				state.isHydrated = true;
-			},
-
-			/**
-			 * Watches cart state and prefetches the page when cart contents
-			 * change. This ensures content that depends on the cart (e.g.
-			 * cross-sells Product Collections) is fresh when the drawer opens.
-			 */
-			*onCartChange() {
-				const items = woocommerceState.cart?.items;
-
-				if ( lastCartItemsRef === undefined ) {
-					lastCartItemsRef = items;
-					return;
-				}
-
-				if ( items !== lastCartItemsRef ) {
-					lastCartItemsRef = items;
-
-					const { actions: routerActions } = yield import(
-						'@wordpress/interactivity-router'
-					);
-					yield routerActions.prefetch( window.location.href, {
-						force: true,
-					} );
-				}
 			},
 		},
 	},

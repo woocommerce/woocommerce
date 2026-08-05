@@ -229,22 +229,14 @@ class HandlerRegistry {
 			function ( $collection_args, $query ) {
 				$product_references = isset( $query['productReference'] ) ? array( $query['productReference'] ) : null;
 
-				// Location context detection alone fails because Mini Cart can be on any page.
+				// Check for explicit user choice first
 				$reference_type = $query['productReferenceType'] ?? null;
 
-				if ( 'cart' === $reference_type ) {
-					$is_cart_available = isset( WC()->cart ) && is_a( WC()->cart, 'WC_Cart' );
-
-					if ( $is_cart_available ) {
-						$cart_items = WC()->cart->get_cart();
-
-						$product_references = array_unique( array_map(
-							function ( $cart_item ) {
-								return absint( $cart_item['product_id'] );
-							},
-							$cart_items
-						) );
-					}
+				if ( Renderer::REFERENCE_TYPE_CART === $reference_type && empty( $product_references ) ) {
+					// User explicitly selected "From products in the cart".
+					// An explicit product selection, if present, always wins:
+					// a leftover cart reference type must not override it.
+					$product_references = Utils::get_cart_product_ids();
 				} elseif ( empty( $product_references ) ) {
 					// Fall back to location-based inference (backward compatibility).
 					$location = $collection_args['productCollectionLocation'] ?? array();
@@ -269,7 +261,7 @@ class HandlerRegistry {
 				$reference_type    = $request->get_param( 'productReferenceType' );
 
 				// Handle explicit cart reference type in editor preview.
-				if ( 'cart' === $reference_type ) {
+				if ( Renderer::REFERENCE_TYPE_CART === $reference_type ) {
 					// In editor, we can't access the actual cart, so return empty for preview.
 					// The block will show a placeholder or sample data.
 					$collection_args['upsellsProductReferences'] = array();
@@ -332,22 +324,15 @@ class HandlerRegistry {
 				$product_references = isset( $query['productReference'] ) ? array( $query['productReference'] ) : null;
 
 				// Check for explicit user choice first (productReferenceType).
-				// This ensures cross-sells work in Mini Cart where location context
-				// detection fails because Mini Cart can be on any page.
+				// The cart is a session-wide reference, valid on any page, so
+				// it cannot rely on location detection alone.
 				$reference_type = $query['productReferenceType'] ?? null;
 
-				if ( 'cart' === $reference_type ) {
+				if ( Renderer::REFERENCE_TYPE_CART === $reference_type && empty( $product_references ) ) {
 					// User explicitly selected "From products in the cart".
-					$is_cart_available = isset( WC()->cart ) && is_a( WC()->cart, 'WC_Cart' );
-					if ( $is_cart_available ) {
-						$product_references = array();
-						foreach ( WC()->cart->get_cart() as $cart_item ) {
-							if ( isset( $cart_item['product_id'] ) ) {
-								$product_references[] = absint( $cart_item['product_id'] );
-							}
-						}
-						$product_references = array_unique( array_filter( $product_references ) );
-					}
+					// An explicit product selection, if present, always wins:
+					// a leftover cart reference type must not override it.
+					$product_references = Utils::get_cart_product_ids();
 				} elseif ( empty( $product_references ) ) {
 					// Fall back to location-based inference (backward compatibility).
 					$location = $collection_args['productCollectionLocation'] ?? array();
@@ -372,7 +357,7 @@ class HandlerRegistry {
 				$product_reference = $request->get_param( 'productReference' );
 				$reference_type    = $request->get_param( 'productReferenceType' );
 
-				if ( 'cart' === $reference_type ) {
+				if ( Renderer::REFERENCE_TYPE_CART === $reference_type ) {
 					// In editor, we can't access the actual cart, so return empty for preview.
 					$collection_args['crossSellsProductReferences'] = array();
 					return $collection_args;

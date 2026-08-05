@@ -22,6 +22,14 @@ class Renderer {
 	const REFERENCE_TYPE_PRODUCT = 'product';
 
 	/**
+	 * Block context key through which an ancestor block can provide a product
+	 * reference type to Product Collection blocks rendered inside it (e.g. the
+	 * Mini-Cart overlay provides `cart` so cross-sells/upsells collections
+	 * resolve against the cart contents wherever the drawer is rendered).
+	 */
+	const PRODUCT_REFERENCE_CONTEXT = 'woocommerce/productCollection/referenceType';
+
+	/**
 	 * The render state of the product collection block.
 	 *
 	 * @var array
@@ -32,11 +40,12 @@ class Renderer {
 	);
 
 	/**
-	 * Whether the current Product Collection is inside a Mini Cart.
+	 * Whether an ancestor block provided a `cart` product reference context
+	 * for the Product Collection currently being rendered.
 	 *
 	 * @var bool
 	 */
-	private $is_in_mini_cart = false;
+	private $has_cart_reference_context = false;
 
 	/**
 	 * The Block with its attributes before it gets rendered
@@ -110,12 +119,13 @@ class Renderer {
 	public function handle_rendering( $block_content, $block ) {
 		$query                  = $block['attrs']['query'] ?? array();
 		$product_reference_type = $query['productReferenceType'] ?? null;
-		$is_cart_reference      = self::REFERENCE_TYPE_CART === $product_reference_type || $this->is_in_mini_cart;
+		$is_cart_reference      = self::REFERENCE_TYPE_CART === $product_reference_type || $this->has_cart_reference_context;
 
 		if ( $this->should_prevent_render() ) {
-			// For cart-referencing collections (e.g., cross-sells in Mini Cart),
-			// render an empty placeholder with router-region so the Interactivity
-			// Router can refresh it when the cart changes.
+			// For cart-referencing collections (e.g., cross-sells in the
+			// Mini-Cart overlay), render an empty placeholder with a
+			// router-region so the Interactivity Router can refresh it when
+			// the cart changes.
 			if ( $is_cart_reference ) {
 				$this->reset_render_state();
 				return $this->render_empty_placeholder();
@@ -124,10 +134,12 @@ class Renderer {
 			return '';
 		}
 
+		$block_content = $this->enhance_product_collection_with_interactivity( $block_content, $block );
+
 		// Reset the render state for the next render.
 		$this->reset_render_state();
 
-		return $this->enhance_product_collection_with_interactivity( $block_content, $block );
+		return $block_content;
 	}
 
 	/**
@@ -139,12 +151,13 @@ class Renderer {
 	 */
 	private function render_empty_placeholder() {
 		$query_id = $this->parsed_block['attrs']['queryId'] ?? null;
-		if ( ! $query_id ) {
+
+		if ( null === $query_id ) {
 			return '';
 		}
 
 		wp_enqueue_script_module( 'woocommerce/product-collection' );
-		wp_enqueue_script_module( 'woocommerce/product-collection-cross-sells' );
+		wp_enqueue_script_module( 'woocommerce/product-collection-cart-reference' );
 
 		ob_start();
 		?>
@@ -152,11 +165,11 @@ class Renderer {
 			class="wp-block-woocommerce-product-collection"
 			data-wp-interactive="woocommerce/product-collection"
 			data-wp-router-region="<?php echo esc_attr( 'wc-product-collection-' . $query_id ); ?>"
-			data-wp-watch--mini-cart="callbacks.onMiniCartOpen"
-			data-product-reference-type="cart"
+			data-wp-watch--cart-reference="callbacks.refreshCartReference"
+			data-product-reference-type="<?php echo esc_attr( self::REFERENCE_TYPE_CART ); ?>"
 		></div>
 		<?php
-		return ob_get_clean();
+		return (string) ob_get_clean();
 	}
 
 	/**
@@ -172,11 +185,11 @@ class Renderer {
 	 * Reset the render state.
 	 */
 	private function reset_render_state() {
-		$this->render_state    = array(
+		$this->render_state               = array(
 			'has_results'          => false,
 			'has_no_results_block' => false,
 		);
-		$this->is_in_mini_cart = false;
+		$this->has_cart_reference_context = false;
 	}
 
 	/**
@@ -228,11 +241,11 @@ class Renderer {
 				// For cart-referencing collections, add callback to refresh on drawer open.
 				$query                  = $block['attrs']['query'] ?? array();
 				$product_reference_type = $query['productReferenceType'] ?? null;
-				$is_cart_reference      = self::REFERENCE_TYPE_CART === $product_reference_type || $this->is_in_mini_cart;
+				$is_cart_reference      = self::REFERENCE_TYPE_CART === $product_reference_type || $this->has_cart_reference_context;
 				if ( $is_cart_reference ) {
-					wp_enqueue_script_module( 'woocommerce/product-collection-cross-sells' );
+					wp_enqueue_script_module( 'woocommerce/product-collection-cart-reference' );
 					$p->set_attribute( 'data-product-reference-type', self::REFERENCE_TYPE_CART );
-					$p->set_attribute( 'data-wp-watch--mini-cart', 'callbacks.onMiniCartOpen' );
+					$p->set_attribute( 'data-wp-watch--cart-reference', 'callbacks.refreshCartReference' );
 				}
 			}
 
@@ -419,15 +432,13 @@ class Renderer {
 		// Add iapi/provider to inner blocks so they can run this store's Interactivity API actions.
 		$context['iapi/provider'] = 'woocommerce/product-collection';
 
-		$block_name      = $parsed_block['blockName'] ?? '';
-		$is_in_mini_cart = ! empty( $context['woocommerce/miniCart'] );
+		$block_name = $parsed_block['blockName'] ?? '';
 
 		if ( 'woocommerce/product-collection' === $block_name ) {
-			$this->is_in_mini_cart = $is_in_mini_cart;
+			$this->has_cart_reference_context = $this->context_provides_cart_reference( $context );
 
 			// Set productCollectionLocation for the Product Collection block itself.
-			// Pass the block context so it can detect Mini Cart context.
-			$context['productCollectionLocation'] = ProductCollectionUtils::parse_frontend_location_context( $context );
+			$context['productCollectionLocation'] = $this->get_block_location_context( $context );
 			return $context;
 		}
 
@@ -447,11 +458,36 @@ class Renderer {
 				),
 			);
 		} else {
-			// Pass block context for Mini Cart detection.
-			$context['productCollectionLocation'] = ProductCollectionUtils::parse_frontend_location_context( $context );
+			$context['productCollectionLocation'] = $this->get_block_location_context( $context );
 		}
 
 		return $context;
+	}
+
+	/**
+	 * Whether the given block context provides a `cart` product reference
+	 * (see the PRODUCT_REFERENCE_CONTEXT constant).
+	 *
+	 * @param array $context The block context.
+	 * @return bool
+	 */
+	private function context_provides_cart_reference( $context ) {
+		return self::REFERENCE_TYPE_CART === ( $context[ self::PRODUCT_REFERENCE_CONTEXT ] ?? null );
+	}
+
+	/**
+	 * Get the location context for a block, honoring a context-provided
+	 * product reference before falling back to page-level detection.
+	 *
+	 * @param array $context The block context.
+	 * @return array The location context.
+	 */
+	private function get_block_location_context( $context ) {
+		if ( $this->context_provides_cart_reference( $context ) ) {
+			return ProductCollectionUtils::get_cart_location_context();
+		}
+
+		return $this->get_location_context();
 	}
 
 	/**

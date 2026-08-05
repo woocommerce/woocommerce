@@ -42,9 +42,10 @@ const entries = {
 	// Product Quantity block and the Grouped Product Selector block.
 	'woocommerce/add-to-cart-with-options-quantity-selector':
 		'./assets/js/blocks/add-to-cart-with-options/quantity-selector/frontend.ts',
-	// Product Collection cross-sells store part. Conditionally enqueued for cart-referencing collections.
-	'woocommerce/product-collection-cross-sells':
-		'./assets/js/blocks/product-collection/cross-sells-frontend.ts',
+	// Product Collection store part for cart-referencing collections
+	// (cross-sells, upsells). Conditionally enqueued.
+	'woocommerce/product-collection-cart-reference':
+		'./assets/js/blocks/product-collection/cart-reference-frontend.ts',
 	// Other
 	'@woocommerce/stores/woocommerce/cart':
 		'./assets/js/base/stores/woocommerce/cart.ts',

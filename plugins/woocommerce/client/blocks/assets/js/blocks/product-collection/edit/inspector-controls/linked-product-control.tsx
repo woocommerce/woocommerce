@@ -128,6 +128,12 @@ const enum PRODUCT_REFERENCE_TYPE {
 	SPECIFIC_PRODUCT = 'SPECIFIC_PRODUCT',
 }
 
+const isProductReferenceType = (
+	value: string
+): value is PRODUCT_REFERENCE_TYPE =>
+	value === PRODUCT_REFERENCE_TYPE.CURRENT_PRODUCT ||
+	value === PRODUCT_REFERENCE_TYPE.SPECIFIC_PRODUCT;
+
 const getFromCurrentProductRadioLabel = (
 	currentLocation: string,
 	hasCartReference: boolean,
@@ -189,16 +195,28 @@ const LinkedProductControl = ( {
 
 	// Sync initial radio state to attributes on mount.
 	// The UI shows "From current product/cart" selected based on location context.
+	// Intentionally runs only on mount: it is needed for compatibility
+	// with blocks saved before `productReferenceType` only.
 	useEffect( () => {
-		if ( ! showRadioControl ) return;
-		if ( query.productReferenceType !== undefined ) return;
+		if ( ! showRadioControl ) {
+			return;
+		}
+		if ( query.productReferenceType !== undefined ) {
+			return;
+		}
+		if ( ! isEmpty( productReference ) ) {
+			return;
+		}
 
 		setAttributes( {
 			query: {
 				...query,
-				productReferenceType: isCartLocation || hasCartReference ? 'cart' : null,
+				productReferenceType: isCartLocation
+					? REFERENCE_TYPE_CART
+					: null,
 			},
 		} );
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );
 
 	const showLinkedProductControl =
@@ -220,14 +238,17 @@ const LinkedProductControl = ( {
 					'woocommerce'
 			  );
 
-	const handleRadioControlChange = ( newValue: PRODUCT_REFERENCE_TYPE ) => {
+	const handleRadioControlChange = ( newValue: string ) => {
+		if ( ! isProductReferenceType( newValue ) ) {
+			return;
+		}
 		if ( newValue === PRODUCT_REFERENCE_TYPE.CURRENT_PRODUCT ) {
 			const { productReference: toSave, ...rest } = query;
 			prevReference.current = toSave;
 
 			// Only `cart` can't be inferred from location context.
 			const referenceType: ProductCollectionQuery[ 'productReferenceType' ] =
-				isCartLocation || hasCartReference ? 'cart' : null;
+				isCartLocation ? REFERENCE_TYPE_CART : null;
 
 			setAttributes( {
 				query: {
