@@ -1644,14 +1644,14 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 								),
 							),
 							'sku'              => array(
-								'description' => __( 'Product SKU.', 'woocommerce' ),
-								'type'        => 'string',
+								'description' => __( 'Product SKU. Null when the product no longer exists.', 'woocommerce' ),
+								'type'        => array( 'string', 'null' ),
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'global_unique_id' => array(
-								'description' => __( 'GTIN, UPC, EAN or ISBN.', 'woocommerce' ),
-								'type'        => 'string',
+								'description' => __( 'GTIN, UPC, EAN or ISBN. Null when the product no longer exists.', 'woocommerce' ),
+								'type'        => array( 'string', 'null' ),
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
