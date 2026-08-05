@@ -330,7 +330,9 @@ jobs:
           path: '${{ runner.temp }}/last-run-info'
 
       - name: 'Run tests (${{ matrix.testType }})'
-        timeout-minutes: ${{ ( github.event_name == 'pull_request' && ( ( matrix.testType == 'e2e' && 20 ) || ( matrix.testType == 'unit:php' && 20 ) ) ) || 360 }}
+        # `woocommercebot` PRs run on the `WooCommerce Release Checks` group (see `runs-on` above),
+        # which is slower than `ubuntu-latest`, so they need a larger e2e budget than other PRs.
+        timeout-minutes: ${{ ( github.event_name == 'pull_request' && ( ( matrix.testType == 'e2e' && ( github.event.pull_request.user.login == 'woocommercebot' && 30 || 20 ) ) || ( matrix.testType == 'unit:php' && 20 ) ) ) || 360 }}
         env:
           E2E_ENV_KEY: ${{ secrets.E2E_ENV_KEY }}
           CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
@@ -387,6 +389,7 @@ jobs:
           if-no-files-found: ignore
           include-hidden-files: true
           overwrite: true
+          retention-days: 3
 
       - name: 'Upload artifacts'
         if: ${{ always() && matrix.report.resultsPath != '' }}
@@ -394,6 +397,7 @@ jobs:
         with:
           name: '${{ matrix.report.resultsBlobName }}__${{ strategy.job-index }}'
           path: ${{ env.ARTIFACTS_PATH }}
+          retention-days: 7
 
   evaluate-project-jobs:
     # In order to add a required status check we need a consistent job that we can grab onto.
@@ -503,6 +507,7 @@ jobs:
           name: ${{ env.ARTIFACT_NAME }}
           pattern: ${{ matrix.report }}__*
           delete-merged: true
+          retention-days: 14
 
       - name: 'Publish report to dashboard'
         if: ${{ !! steps.merge-artifacts.outputs.artifact-id }}

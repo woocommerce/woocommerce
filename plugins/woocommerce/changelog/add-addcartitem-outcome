@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add a structured outcome to the cart store addCartItem action so consumers can read add success/failure directly instead of counting cart lines.

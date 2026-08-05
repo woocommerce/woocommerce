@@ -57,15 +57,14 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	/**
 	 * The updated coupon properties.
 	 *
-	 * Each save now records its updated properties in a local variable, so this
-	 * property no longer accumulates across saves. It is populated with the current
-	 * save's properties only for the duration of the
-	 * woocommerce_coupon_object_updated_props call, and emptied again afterwards, so
-	 * that code still reading it during that hook keeps working. Read the hook's
-	 * second argument instead.
+	 * Accumulates the properties written by every save performed through this data
+	 * store instance, with duplicates, and is never reset. It feeds the payload of
+	 * the deprecated woocommerce_coupon_object_updated_props action and must not be
+	 * removed while that action still fires. Use the woocommerce_coupon_updated_props
+	 * action to learn what the current save changed.
 	 *
 	 * @since 4.1.0
-	 * @deprecated 11.1.0 Use the second argument of woocommerce_coupon_object_updated_props.
+	 * @deprecated 11.1.0 Use the woocommerce_coupon_updated_props action.
 	 * @var array
 	 */
 	protected $updated_props = array();
@@ -322,26 +321,38 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			$updated = $this->update_or_delete_post_meta( $coupon, $meta_key, $value );
 
 			if ( $updated ) {
-				$updated_props[] = $prop;
+				$this->updated_props[] = $prop;
+				$updated_props[]       = $prop;
 			}
 		}
 
-		// Mirror the payload onto the deprecated property so that code still reading it
-		// during the hook sees this save's properties, then empty it again so nothing
-		// carries over to the next save.
-		$this->updated_props = $updated_props;
+		/**
+		 * Fires after a coupon's properties have been updated, with its historical
+		 * payload: the properties written by every save performed through this data
+		 * store instance, accumulated with duplicates and never reset.
+		 *
+		 * @param WC_Coupon $coupon        Coupon object.
+		 * @param string[]  $updated_props Properties updated by all saves through this data store instance, with duplicates.
+		 *
+		 * @since 3.0.0
+		 * @deprecated 11.1.0 Use woocommerce_coupon_updated_props, which reports only the current save's properties.
+		 */
+		do_action_deprecated(
+			'woocommerce_coupon_object_updated_props',
+			array( $coupon, $this->updated_props ),
+			'11.1.0',
+			'woocommerce_coupon_updated_props'
+		);
 
 		/**
 		 * Fires after a coupon's properties have been updated.
 		 *
 		 * @param WC_Coupon $coupon        Coupon object.
-		 * @param string[]  $updated_props Array of updated properties.
+		 * @param string[]  $updated_props Properties updated by the current save.
 		 *
-		 * @since 3.0.0
+		 * @since 11.1.0
 		 */
-		do_action( 'woocommerce_coupon_object_updated_props', $coupon, $updated_props );
-
-		$this->updated_props = array();
+		do_action( 'woocommerce_coupon_updated_props', $coupon, $updated_props );
 	}
 
 	/**

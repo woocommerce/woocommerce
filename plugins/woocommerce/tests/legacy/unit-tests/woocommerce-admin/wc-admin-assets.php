@@ -17,6 +17,8 @@ class WC_Admin_Tests_WCAdminAssets extends WP_UnitTestCase {
 	 * Setup
 	 */
 	public function setUp(): void {
+		parent::setUp();
+
 		add_filter( 'woocommerce_admin_features', array( $this, 'turn_on_unminified_js_feature' ), 20, 1 );
 	}
 
@@ -25,6 +27,8 @@ class WC_Admin_Tests_WCAdminAssets extends WP_UnitTestCase {
 	 */
 	public function tearDown(): void {
 		remove_filter( 'woocommerce_admin_features', array( $this, 'turn_on_unminified_js_feature' ), 20 );
+
+		parent::tearDown();
 	}
 
 	/**

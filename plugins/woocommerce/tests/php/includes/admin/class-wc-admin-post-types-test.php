@@ -116,6 +116,7 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 			'active simple schedule'   => array( ProductType::SIMPLE, '2000-01-01 00:00:00', '2099-12-31 23:59:59', '2000-01-01', '2099-12-31', '2000-01-01 00:00:00', '2099-12-31 23:59:59' ),
 			'future external schedule' => array( ProductType::EXTERNAL, '2098-01-01 00:00:00', '2098-12-31 23:59:59', '2098-02-01', '2098-11-30', '2098-02-01 00:00:00', '2098-11-30 23:59:59' ),
 			'expired simple schedule'  => array( ProductType::SIMPLE, '2000-01-01 00:00:00', '2001-01-01 23:59:59', '2000-01-01', '2001-01-01', '2000-01-01 00:00:00', '2001-01-01 23:59:59' ),
+			'valid leap day schedule'  => array( ProductType::SIMPLE, null, null, '2024-02-29', '2024-02-29', '2024-02-29 00:00:00', '2024-02-29 23:59:59' ),
 			'empty external schedule'  => array( ProductType::EXTERNAL, null, null, '', '', null, null ),
 		);
 	}
@@ -196,24 +197,48 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Quick Edit normalizes invalid sale dates like the full product editor.
+	 * @testdox Quick Edit preserves sale dates when submitted values are invalid.
+	 * @dataProvider invalid_sale_date_provider
+	 *
+	 * @param mixed $submitted_date Submitted sale date.
 	 */
-	public function test_quick_edit_matches_full_editor_invalid_date_behavior(): void {
+	public function test_quick_edit_preserves_sale_dates_for_invalid_values( $submitted_date ): void {
 		$product = $this->create_product( ProductType::SIMPLE );
+		$product->set_date_on_sale_from( '2098-01-01 00:00:00' );
+		$product->set_date_on_sale_to( '2098-12-31 23:59:59' );
+		$product->save();
 
 		$this->quick_edit(
 			$product,
 			array(
-				'_sale_price_dates_from' => 'invalid-date',
-				'_sale_price_dates_to'   => 'invalid-date',
+				'_sale_price_dates_from' => $submitted_date,
+				'_sale_price_dates_to'   => $submitted_date,
 			)
 		);
 
 		$updated_product = wc_get_product( $product->get_id() );
 
-		// Like the full editor, an invalid start becomes timestamp 0, which WC_Data treats as empty on reload.
-		$this->assert_date( null, $updated_product->get_date_on_sale_from( 'edit' ), 'start' );
-		$this->assert_date( '1970-01-01 23:59:59', $updated_product->get_date_on_sale_to( 'edit' ), 'end' );
+		$this->assert_date( '2098-01-01 00:00:00', $updated_product->get_date_on_sale_from( 'edit' ), 'start' );
+		$this->assert_date( '2098-12-31 23:59:59', $updated_product->get_date_on_sale_to( 'edit' ), 'end' );
+	}
+
+	/**
+	 * Provides invalid sale dates.
+	 *
+	 * @return array<string, array{mixed}>
+	 */
+	public static function invalid_sale_date_provider(): array {
+		return array(
+			'unparseable string' => array( 'tomorow' ),
+			'non-string value'   => array( array( '2025-02-28' ) ),
+			'invalid leap day'   => array( '2025-02-29' ),
+			'invalid June day'   => array( '2025-06-31' ),
+			'zero month'         => array( '2025-00-30' ),
+			'month without zero' => array( '2025-2-03' ),
+			'time suffix'        => array( '2025-02-03 00:00:00' ),
+			'whitespace only'    => array( ' ' ),
+			'padded date'        => array( ' 2025-02-03 ' ),
+		);
 	}
 
 	/**
