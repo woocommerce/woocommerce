@@ -560,26 +560,30 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	 */
 	public static function data_provider_test_registered_page_route_pattern_matches_current_request(): array {
 		return array(
-			'path parameter'                    => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample' ),
-			'case-insensitive static path'      => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2FROUTE-PARAMS%2Fsample' ),
-			'trailing slash in pattern'         => array( '/route-params/:itemName/', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample' ),
-			'repeated request slashes'          => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample%2F%2F' ),
-			'wildcard base path'                => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard' ),
-			'wildcard base trailing slash'      => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard%2F' ),
-			'wildcard descendant path'          => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard%2Ftheme%2Falpha' ),
-			'parameter and wildcard base'       => array( '/route-patterns/:itemId/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123' ),
-			'parameter and wildcard child'      => array( '/route-patterns/:itemId/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fdetails' ),
-			'parameter and wildcard nested'     => array( '/route-patterns/:itemId/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fdetails%2Fedit' ),
+			'path parameter'                        => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample' ),
+			'case-insensitive static path'          => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2FROUTE-PARAMS%2Fsample' ),
+			'trailing slash in pattern'             => array( '/route-params/:itemName/', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample' ),
+			'repeated request slashes'              => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample%2F%2F' ),
+			'wildcard base path'                    => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard' ),
+			// React Router strips all trailing slashes together with the `*`, so `/foo//*` renders
+			// `/foo/x` and `/foo`; verified against React Router 6.3 matchPath().
+			'wildcard after redundant slashes'      => array( '/route-wildcard//*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard%2Ftheme' ),
+			'wildcard base after redundant slashes' => array( '/route-wildcard//*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard' ),
+			'wildcard base trailing slash'          => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard%2F' ),
+			'wildcard descendant path'              => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard%2Ftheme%2Falpha' ),
+			'parameter and wildcard base'           => array( '/route-patterns/:itemId/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123' ),
+			'parameter and wildcard child'          => array( '/route-patterns/:itemId/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fdetails' ),
+			'parameter and wildcard nested'         => array( '/route-patterns/:itemId/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fdetails%2Fedit' ),
 			// React Router resolves a leading-slash-less registered route against the app root, so
 			// these render at `/route-params/sample` on the client and must be recognized here too.
-			'parameter without leading slash'   => array( 'route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample' ),
-			'static path without leading slash' => array( 'route-params', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params' ),
-			'wildcard without leading slash'    => array( 'route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard%2Ftheme' ),
+			'parameter without leading slash'       => array( 'route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample' ),
+			'static path without leading slash'     => array( 'route-params', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params' ),
+			'wildcard without leading slash'        => array( 'route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard%2Ftheme' ),
 			// React Router compares with JavaScript's Unicode-aware casing, so a non-ASCII segment
 			// reaches its route whatever case the request uses.
-			'non-ascii segment'                 => array( '/route-café/:itemId', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-caf%C3%A9%2F42' ),
-			'non-ascii segment upper-cased'     => array( '/route-café/:itemId', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-CAF%C3%89%2F42' ),
-			'non-ascii segment in request only' => array( '/route-CAFÉ/:itemId', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-caf%C3%A9%2F42' ),
+			'non-ascii segment'                     => array( '/route-café/:itemId', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-caf%C3%A9%2F42' ),
+			'non-ascii segment upper-cased'         => array( '/route-café/:itemId', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-CAF%C3%89%2F42' ),
+			'non-ascii segment in request only'     => array( '/route-CAFÉ/:itemId', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-caf%C3%A9%2F42' ),
 		);
 	}
 
@@ -636,6 +640,9 @@ class PageControllerTest extends WC_Unit_Test_Case {
 			'kelvin sign does not fold to k'             => array( '/route-k/:itemId', '/wp-admin/admin.php?page=wc-admin&path=' . rawurlencode( "/route-\u{212A}/42" ) ),
 			'capital sharp s does not fold to sharp s'   => array( '/route-straße/:itemId', '/wp-admin/admin.php?page=wc-admin&path=' . rawurlencode( "/route-stra\u{1E9E}e/42" ) ),
 			'astral case pair does not fold'             => array( "/route-\u{10400}/:itemId", '/wp-admin/admin.php?page=wc-admin&path=' . rawurlencode( "/route-\u{10428}/42" ) ),
+			// An all-slash splat remainder keeps a root slash: `//*` renders `//x`, not `/x`;
+			// verified against React Router 6.3 matchPath().
+			'all-slash splat requires its slashes'       => array( '//*', '/wp-admin/admin.php?page=wc-admin&path=%2Fx' ),
 			// A malformed UTF-8 request path falls back to byte-wise matching rather than failing.
 			'malformed utf-8 request path'               => array( '/route-café/:itemId', "/wp-admin/admin.php?page=wc-admin&path=%2Froute-caf\xE9%2F42" ),
 		);

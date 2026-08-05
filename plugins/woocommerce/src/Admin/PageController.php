@@ -230,6 +230,10 @@ class PageController {
 	private function split_normalized_registered_page_path( $registered_path ) {
 		$path_parts = $this->split_registered_page_path( $registered_path );
 
+		// React Router checks its bare-splat special case against the declared path before any
+		// normalization, so the matcher needs the pre-normalization app path as well.
+		$path_parts['declared_path'] = $path_parts['path'];
+
 		if ( '' !== $path_parts['path'] ) {
 			$path_parts['path'] = '/' . ltrim( $path_parts['path'], '/' );
 		}
@@ -273,8 +277,19 @@ class PageController {
 
 		$has_terminal_splat = 1 === preg_match( '#/\*$#', $route_pattern );
 
-		if ( $has_terminal_splat ) {
-			$route_pattern = substr( $route_pattern, 0, -2 );
+		if ( in_array( $registered_parts['declared_path'] ?? $route_pattern, array( '*', '/*' ), true ) ) {
+			// React Router special-cases the routes declared exactly `*` or `/*` — checked before
+			// normalization, so `//*` is not one — to match everything under the app root.
+			$route_pattern = '';
+		} elseif ( $has_terminal_splat ) {
+			// React Router strips all trailing slashes together with the `*`, so `/foo//*` matches
+			// `/foo/x` and `/foo`. An all-slash remainder keeps a root slash: `//*` matches `//x`
+			// but not `/x`.
+			$route_pattern = rtrim( substr( $route_pattern, 0, -2 ), '/' );
+
+			if ( '' === $route_pattern ) {
+				$route_pattern = '/';
+			}
 		} else {
 			$route_pattern = rtrim( $route_pattern, '/' );
 		}
