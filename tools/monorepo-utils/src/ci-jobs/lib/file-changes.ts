@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { execSync } from 'node:child_process';
+import { makeRe } from 'minimatch';
 
 /**
  * Internal dependencies
@@ -52,46 +53,28 @@ function getProjectPaths( graph: ProjectNode ): { [ name: string ]: string } {
 }
 
 /**
- * Files that cannot change the behaviour of any project's code.
+ * Compiles the ignore globs into matchers.
  *
- * Ownership is directory-based, so without this a package's `README.md` or changelog entry
- * marks that package as changed, and `job-processing` then treats every dependent project as
- * having changes too -- running their test jobs regardless of those jobs' own `changes` globs.
+ * The globs use the same syntax and the same compiler as a job's `changes` config, so a pattern
+ * that works in one works in the other.
  *
- * Keep in sync with the `needs-code-validation` filter in `.github/workflows/ci.yml`. Patterns
- * are case-sensitive for the same reason: `dorny/paths-filter` matches case-sensitively, and a
- * mismatch between the two layers would mean a file is ignored by one and not the other.
- */
-const MARKDOWN = /\.md$/;
-const PLUGIN_README = /(?:^|\/)readme\.txt$/;
-const DOCS_MANIFEST = 'docs/docs-manifest.json';
-
-/**
- * A changelog entry lives directly inside a `changelog/` directory. Real source files do too --
- * `tools/monorepo-utils/src/code-freeze/commands/changelog/index.ts`, for one -- so anything
- * carrying a source extension is deliberately not treated as an entry.
- */
-const CHANGELOG_ENTRY = /(?:^|\/)changelog\/[^/]+$/;
-const SOURCE_EXTENSION = /\.(?:[cm]?[jt]sx?|php|s?css|json|snap)$/;
-
-/**
- * Checks whether a file is incapable of affecting any project's behaviour.
+ * `dot` is on because `dorny/paths-filter` compiles its filters that way, and the same globs feed
+ * both. Without it minimatch refuses to let a globstar descend into dot directories, so the
+ * markdown pattern would skip `.ai/skills/foo/SKILL.md` here while the workflow gate ignored it --
+ * the two layers would disagree on 66 files in this repo.
  *
- * @param {string} filePath The repo-relative path to check.
- * @return {boolean} True when the file should be excluded from change detection.
+ * @param {Array.<string>} ignoreGlobs The globs to compile.
+ * @return {Array.<RegExp>} The compiled matchers.
  */
-function isNonCodeFile( filePath: string ): boolean {
-	if ( MARKDOWN.test( filePath ) || PLUGIN_README.test( filePath ) ) {
-		return true;
-	}
+function compileIgnoreGlobs( ignoreGlobs: string[] ): RegExp[] {
+	return ignoreGlobs.map( ( glob ) => {
+		const regex = makeRe( glob, { dot: true } );
+		if ( ! regex ) {
+			throw new Error( `"${ glob }" is an invalid ignore glob pattern.` );
+		}
 
-	if ( filePath === DOCS_MANIFEST ) {
-		return true;
-	}
-
-	return (
-		CHANGELOG_ENTRY.test( filePath ) && ! SOURCE_EXTENSION.test( filePath )
-	);
+		return regex;
+	} );
 }
 
 /**
@@ -125,15 +108,17 @@ function getChangedFilesForProject(
 /**
  * Pulls all of the files that have changed in the project graph since the given git ref.
  *
- * @param {Object} projectGraph The project graph to assign changes for.
- * @param {string} baseRef      The git ref to compare against for changes.
- * @param {string} prNumber     The PR number referencing the changes.
+ * @param {Object}         projectGraph The project graph to assign changes for.
+ * @param {string}         baseRef      The git ref to compare against for changes.
+ * @param {string}         prNumber     The PR number referencing the changes.
+ * @param {Array.<string>} ignoreGlobs  Globs for files that should never mark a project as changed.
  * @return {Object|true} A map of changed files keyed by the project name or true if all projects should be marked as changed.
  */
 export function getFileChanges(
 	projectGraph: ProjectNode,
 	baseRef: string,
-	prNumber: string
+	prNumber: string,
+	ignoreGlobs: string[] = []
 ): ProjectFileChanges | true {
 	// We're going to use git to figure out what files have changed.
 	let output = '';
@@ -160,10 +145,14 @@ export function getFileChanges(
 		return true;
 	}
 
-	// Drop files that cannot affect behaviour before anything claims ownership of them,
-	// so they never mark a project -- or, through the dependency graph, its dependents -- as changed.
+	// Drop ignored files before anything claims ownership of them. Ownership is directory-based,
+	// so an ignored file left in the list marks its project as changed, and `job-processing` then
+	// treats every dependent project as changed too -- running their test jobs regardless of those
+	// jobs' own `changes` globs. Filtering here covers all three ownership passes at once.
+	const ignoreMatchers = compileIgnoreGlobs( ignoreGlobs );
 	const changedFilePaths = allChangedFilePaths.filter(
-		( filePath ) => ! isNonCodeFile( filePath )
+		( filePath ) =>
+			! ignoreMatchers.some( ( regex ) => regex.test( filePath ) )
 	);
 
 	const ownedFilePaths = [];

@@ -33,6 +33,12 @@ const program = new Command( 'ci-jobs' )
 		'Github event for which to run the jobs. If not specified, all events will be considered.',
 		''
 	)
+	.option(
+		'--ignore <glob>',
+		'Glob for files that should never mark a project as changed. Repeatable.',
+		( glob: string, previous: string[] ) => previous.concat( glob ),
+		[] as string[]
+	)
 	.option( '--json', 'Save the jobs in a json file.' )
 	.option( '--list', 'List jobs in table format console.' )
 	.action( async ( options ) => {
@@ -59,7 +65,8 @@ const program = new Command( 'ci-jobs' )
 			fileChanges = getFileChanges(
 				projectGraph,
 				options.baseRef,
-				options.prNumber
+				options.prNumber,
+				options.ignore
 			);
 
 			Logger.endTask( true );

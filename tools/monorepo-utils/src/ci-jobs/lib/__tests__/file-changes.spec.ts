@@ -11,6 +11,21 @@ import { JobType } from '../config';
 
 jest.mock( 'node:child_process' );
 
+/**
+ * The globs `.github/workflows/ci.yml` passes as `--ignore`. Mirrored here so the tests exercise
+ * the patterns that actually run in CI rather than a simplified stand-in.
+ */
+const CI_IGNORE_GLOBS = [
+	'{,**/}*.md',
+	'docs/docs-manifest.json',
+	'{,**/}changelog/!(*.ts|*.tsx|*.js|*.jsx|*.mjs|*.cjs|*.php|*.json|*.scss|*.css)',
+	'.github/**',
+	'.husky/**',
+	'.cursor/**',
+	'.gitignore',
+	'{,**/}readme.txt',
+];
+
 describe( 'File Changes', () => {
 	afterEach( () => {
 		jest.resetAllMocks();
@@ -107,7 +122,44 @@ baz/project-d/baz.js`;
 		expect( fileChanges ).toStrictEqual( true );
 	} );
 
-	it( 'should not associate non-code files with any project', () => {
+	it( 'should not associate ignored files with any project', () => {
+		jest.mocked( execSync ).mockImplementation( ( command ) => {
+			if ( command === 'git diff --name-only origin/trunk' ) {
+				return `AGENTS.md
+test/project-a/README.md
+test/project-a/CLAUDE.md
+test/project-a/changelog/fix-123
+test/project-a/readme.txt
+docs/docs-manifest.json
+foo/project-b/docs/guide.md`;
+			}
+
+			throw new Error( 'Invalid command' );
+		} );
+
+		const fileChanges = getFileChanges(
+			{
+				name: 'project-a',
+				path: 'test/project-a',
+				dependencies: [
+					{
+						name: 'project-b',
+						path: 'foo/project-b',
+						dependencies: [],
+					},
+				],
+			},
+			'origin/trunk',
+			'',
+			CI_IGNORE_GLOBS
+		);
+
+		// Every file is ignored, so no project -- and therefore none of its
+		// dependents -- should be marked as changed.
+		expect( fileChanges ).toStrictEqual( {} );
+	} );
+
+	it( 'should associate every file when no ignore globs are given', () => {
 		jest.mocked( execSync ).mockImplementation( ( command ) => {
 			if ( command === 'git diff --name-only origin/trunk' ) {
 				return `AGENTS.md
@@ -138,15 +190,24 @@ foo/project-b/docs/guide.md`;
 			''
 		);
 
-		// None of these files can change behaviour, so no project -- and therefore
-		// none of its dependents -- should be marked as changed.
-		expect( fileChanges ).toStrictEqual( {} );
+		// The tool knows nothing about file types on its own: without globs it claims
+		// the same files it always has.
+		expect( fileChanges ).toStrictEqual( {
+			'project-a': [
+				'README.md',
+				'CLAUDE.md',
+				'changelog/fix-123',
+				'readme.txt',
+			],
+			'project-b': [ 'docs/guide.md' ],
+		} );
 	} );
 
 	it( 'should associate source files that live inside a changelog directory', () => {
 		jest.mocked( execSync ).mockImplementation( ( command ) => {
 			if ( command === 'git diff --name-only origin/trunk' ) {
-				return `test/project-a/src/commands/changelog/index.ts
+				return `test/project-a/changelog/index.ts
+test/project-a/src/commands/changelog/index.ts
 test/project-a/changelog/fix-123`;
 			}
 
@@ -160,16 +221,21 @@ test/project-a/changelog/fix-123`;
 				dependencies: [],
 			},
 			'origin/trunk',
-			''
+			'',
+			CI_IGNORE_GLOBS
 		);
 
-		// The entry is ignored; the module that happens to sit in a `changelog` directory is not.
+		// The entry is ignored; modules that happen to sit in a `changelog` directory are not,
+		// whether they are directly inside one or further down the tree.
 		expect( fileChanges ).toStrictEqual( {
-			'project-a': [ 'src/commands/changelog/index.ts' ],
+			'project-a': [
+				'changelog/index.ts',
+				'src/commands/changelog/index.ts',
+			],
 		} );
 	} );
 
-	it( 'should still associate code changes made alongside non-code files', () => {
+	it( 'should still associate code changes made alongside ignored files', () => {
 		jest.mocked( execSync ).mockImplementation( ( command ) => {
 			if ( command === 'git diff --name-only origin/trunk' ) {
 				return `test/project-a/README.md
@@ -193,7 +259,8 @@ foo/project-b/changelog/add-456`;
 				],
 			},
 			'origin/trunk',
-			''
+			'',
+			CI_IGNORE_GLOBS
 		);
 
 		expect( fileChanges ).toStrictEqual( {
@@ -201,10 +268,62 @@ foo/project-b/changelog/add-456`;
 		} );
 	} );
 
+	it( 'should ignore matching files inside dot directories', () => {
+		jest.mocked( execSync ).mockImplementation( ( command ) => {
+			if ( command === 'git diff --name-only origin/trunk' ) {
+				return `test/project-a/.ai/skills/guide/SKILL.md
+test/project-a/index.js`;
+			}
+
+			throw new Error( 'Invalid command' );
+		} );
+
+		const fileChanges = getFileChanges(
+			{
+				name: 'project-a',
+				path: 'test/project-a',
+				dependencies: [],
+			},
+			'origin/trunk',
+			'',
+			CI_IGNORE_GLOBS
+		);
+
+		// `dorny/paths-filter` compiles with `dot`, so `**` has to descend into dot
+		// directories here too -- otherwise the gate and this command disagree.
+		expect( fileChanges ).toStrictEqual( {
+			'project-a': [ 'index.js' ],
+		} );
+	} );
+
+	it( 'should throw for an ignore glob it cannot compile', () => {
+		jest.mocked( execSync ).mockImplementation( ( command ) => {
+			if ( command === 'git diff --name-only origin/trunk' ) {
+				return 'test/project-a/index.js';
+			}
+
+			throw new Error( 'Invalid command' );
+		} );
+
+		expect( () =>
+			getFileChanges(
+				{
+					name: 'project-a',
+					path: 'test/project-a',
+					dependencies: [],
+				},
+				'origin/trunk',
+				'',
+				[ '' ]
+			)
+		).toThrow( '"" is an invalid ignore glob pattern.' );
+	} );
+
 	it( 'should assign files to projects based on CI config patterns', () => {
 		jest.mocked( execSync ).mockImplementation( ( command ) => {
 			if ( command === 'git diff --name-only origin/trunk' ) {
-				return `plugins/woocommerce/tests/e2e/tests/blocks/test.spec.ts
+				return `plugins/woocommerce/changelog/fix-123
+plugins/woocommerce/tests/e2e/tests/blocks/test.spec.ts
 plugins/woocommerce/client/blocks/src/block.tsx`;
 			}
 
@@ -247,6 +366,7 @@ plugins/woocommerce/client/blocks/src/block.tsx`;
 		if ( fileChanges !== true ) {
 			expect( fileChanges ).toMatchObject( {
 				'@woocommerce/plugin-woocommerce': [
+					'changelog/fix-123',
 					'tests/e2e/tests/blocks/test.spec.ts',
 				],
 				'@woocommerce/block-library': [ 'src/block.tsx' ],
