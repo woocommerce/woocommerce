@@ -22,6 +22,8 @@ import { isProductResponseItem } from '@woocommerce/entities';
 import type {
 	AttributeTerm,
 	ProductResponseAttributeItem,
+	SelectableItem,
+	SelectableItemsContext,
 } from '@woocommerce/types';
 import { __ } from '@wordpress/i18n';
 import {
@@ -41,10 +43,6 @@ import { getSetting } from '@woocommerce/settings';
  * Internal dependencies
  */
 import { DEFAULT_ATTRIBUTES, EMPTY_TERM_VISUALS } from './constants';
-import type {
-	SelectableItem,
-	SelectableItemsContext,
-} from '../../../../types/type-defs/selectable-items';
 import type { VisualAttributeTerm } from '../../../../base/utils/visual-attribute-terms';
 
 const INNER_CHIPS = 'woocommerce/product-filter-chips';
