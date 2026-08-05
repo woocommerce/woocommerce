@@ -463,10 +463,9 @@ class PageController {
 			$this->determine_current_page();
 		}
 
-		/** @var array|false $current_page */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- Narrows the nullable property after determine_current_page().
-		$current_page = $this->current_page;
-
-		return $current_page;
+		// determine_current_page() always assigns, so null cannot escape; the coalesce states that
+		// invariant where static analysis can see it.
+		return $this->current_page ?? false;
 	}
 
 
