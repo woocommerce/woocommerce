@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Update the order summary taxes immediately when the customer changes country on the block checkout, even if the rest of the address is still being filled in.

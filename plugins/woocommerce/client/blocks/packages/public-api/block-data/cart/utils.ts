@@ -17,6 +17,8 @@ import { CurriedSelectorsOf } from '@wordpress/data/build-types/types';
  */
 import type { ValidationStoreDescriptor } from '../validation';
 import { STORE_KEY as VALIDATION_STORE_KEY } from '../validation/constants';
+import { CART_STORE_KEY } from './index';
+import type { CartStoreDescriptor } from './index';
 
 export const mapCartResponseToCart = ( responseCart: CartResponse ): Cart => {
 	return camelCaseKeys( responseCart ) as unknown as Cart;
@@ -96,6 +98,14 @@ export const getDirtyKeys = <
 
 /**
  * Validates dirty props before push.
+ *
+ * If the country field is dirty for an address, the dependent state and
+ * postcode fields are expected to be in a transitional state (cleared by the
+ * country-change handler in form.tsx). The country change itself is the
+ * meaningful update and should reach the server immediately so the order
+ * summary recalculates taxes. The dependent fields stay validatable for
+ * non-country changes, so an invalid postcode typed by the user still
+ * blocks the push.
  */
 export const validateDirtyProps = ( dirtyProps: {
 	billingAddress: BaseAddressKey[];
@@ -104,20 +114,56 @@ export const validateDirtyProps = ( dirtyProps: {
 	const validationStore = select(
 		VALIDATION_STORE_KEY
 	) as CurriedSelectorsOf< ValidationStoreDescriptor >;
+	const customerData = (
+		select( CART_STORE_KEY ) as CurriedSelectorsOf< CartStoreDescriptor >
+	 ).getCustomerData();
+
+	const invalidFieldsForAddress = (
+		prefix: 'billing_' | 'shipping_',
+		keys: BaseAddressKey[],
+		address: Partial< CartBillingAddress & CartShippingAddress >
+	) => {
+		const invalidKeys = keys.filter( ( key ) => {
+			return (
+				validationStore.getValidationError( prefix + key ) !== undefined
+			);
+		} );
+
+		if ( invalidKeys.length === 0 ) {
+			return [];
+		}
+
+		// A country change clears state and postcode to empty strings. Allow
+		// the country update to go through when those dependents are still
+		// empty (the country-change handler reset them) but keep blocking
+		// when the customer has typed a non-empty invalid value into one of
+		// the dependents. See #67344.
+		if (
+			keys.includes( 'country' ) &&
+			invalidKeys.every( ( key ) => {
+				if ( key !== 'state' && key !== 'postcode' ) {
+					return false;
+				}
+				return ( address[ key ] ?? '' ) === '';
+			} )
+		) {
+			return [];
+		}
+
+		return invalidKeys;
+	};
 
 	const invalidProps = [
-		...dirtyProps.billingAddress.filter( ( key ) => {
-			return (
-				validationStore.getValidationError( 'billing_' + key ) !==
-				undefined
-			);
-		} ),
-		...dirtyProps.shippingAddress.filter( ( key ) => {
-			return (
-				validationStore.getValidationError( 'shipping_' + key ) !==
-				undefined
-			);
-		} ),
+		...invalidFieldsForAddress(
+			'billing_',
+			dirtyProps.billingAddress,
+			customerData.billingAddress
+		),
+		...invalidFieldsForAddress(
+			'shipping_',
+			dirtyProps.shippingAddress,
+			customerData.shippingAddress
+		),
 	].filter( Boolean );
 
 	return invalidProps.length === 0;

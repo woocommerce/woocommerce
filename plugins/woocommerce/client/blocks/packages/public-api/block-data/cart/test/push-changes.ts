@@ -3,13 +3,17 @@
  */
 import * as wpDataFunctions from '@wordpress/data';
 import { cartStore, validationStore } from '@woocommerce/block-data';
+import { STORE_KEY as VALIDATION_STORE_KEY } from '../../validation/constants';
+import { CART_STORE_KEY } from '../index';
 
 /**
  * Internal dependencies
  */
 import { pushChanges } from '../push-changes';
+import { validateDirtyProps } from '../utils';
 
 let updateCustomerDataMock = jest.fn();
+const getValidationErrorMock = jest.fn().mockReturnValue( undefined );
 let getCustomerDataMock = jest.fn().mockReturnValue( {
 	billingAddress: {
 		first_name: 'John',
@@ -100,7 +104,10 @@ describe( 'pushChanges', () => {
 	beforeAll( () => {
 		wpDataFunctions.select.mockImplementation(
 			( storeNameOrDescriptor: unknown ) => {
-				if ( storeNameOrDescriptor === cartStore ) {
+				if (
+					storeNameOrDescriptor === cartStore ||
+					storeNameOrDescriptor === CART_STORE_KEY
+				) {
 					return {
 						...jest
 							.requireActual( '@wordpress/data' )
@@ -109,14 +116,12 @@ describe( 'pushChanges', () => {
 						getCustomerData: getCustomerDataMock,
 					};
 				}
-				if ( storeNameOrDescriptor === validationStore ) {
+				if (
+					storeNameOrDescriptor === validationStore ||
+					storeNameOrDescriptor === VALIDATION_STORE_KEY
+				) {
 					return {
-						...jest
-							.requireActual( '@wordpress/data' )
-							.select( storeNameOrDescriptor ),
-						getValidationError: jest
-							.fn()
-							.mockReturnValue( undefined ),
+						getValidationError: getValidationErrorMock,
 					};
 				}
 				return jest
@@ -477,5 +482,233 @@ describe( 'pushChanges', () => {
 			true,
 			false // because no shipping rate impacting fields are changed
 		);
+	} );
+} );
+
+describe( 'validateDirtyProps', () => {
+	beforeAll( () => {
+		// Re-register the select mock to also match the string store keys
+		// used by validateDirtyProps (it imports STORE_KEY constants, not the
+		// store objects).
+		wpDataFunctions.select.mockImplementation(
+			( storeNameOrDescriptor: unknown ) => {
+				if (
+					storeNameOrDescriptor === validationStore ||
+					storeNameOrDescriptor === VALIDATION_STORE_KEY
+				) {
+					return { getValidationError: getValidationErrorMock };
+				}
+				if (
+					storeNameOrDescriptor === cartStore ||
+					storeNameOrDescriptor === CART_STORE_KEY
+				) {
+					return { getCustomerData: getCustomerDataMock };
+				}
+				return jest
+					.requireActual( '@wordpress/data' )
+					.select( storeNameOrDescriptor );
+			}
+		);
+	} );
+	beforeEach( () => {
+		getValidationErrorMock.mockReset();
+		getValidationErrorMock.mockReturnValue( undefined );
+	} );
+
+	const setEmptyCountryClearedAddress = () => {
+		// Simulate the state after the country-change handler has cleared
+		// the dependent state and postcode fields to empty strings.
+		getCustomerDataMock.mockReturnValue( {
+			billingAddress: {
+				first_name: 'John',
+				last_name: 'Doe',
+				address_1: '123 Main St',
+				address_2: '',
+				city: '',
+				state: '',
+				postcode: '',
+				country: 'FR',
+				email: 'john.doe@mail.com',
+				phone: '555-555-5555',
+			},
+			shippingAddress: {
+				first_name: 'John',
+				last_name: 'Doe',
+				address_1: '123 Main St',
+				address_2: '',
+				city: '',
+				state: '',
+				postcode: '',
+				country: 'FR',
+				phone: '555-555-5555',
+			},
+		} );
+	};
+
+	const setValidationErrors = ( errors: Record< string, string > ) => {
+		getValidationErrorMock.mockImplementation(
+			( key: string ) => errors[ key ]
+		);
+	};
+
+	it( 'returns true when no dirty fields have validation errors', () => {
+		expect(
+			validateDirtyProps( {
+				billingAddress: [ 'country' ],
+				shippingAddress: [],
+			} )
+		).toBe( true );
+	} );
+
+	it( 'returns false when a dirty field other than state/postcode has a validation error', () => {
+		setValidationErrors( { billing_city: 'City is required' } );
+
+		expect(
+			validateDirtyProps( {
+				billingAddress: [ 'country', 'city' ],
+				shippingAddress: [],
+			} )
+		).toBe( false );
+	} );
+
+	it( 'returns false when state has a validation error and country is not dirty', () => {
+		setValidationErrors( { billing_state: 'State is required' } );
+
+		expect(
+			validateDirtyProps( {
+				billingAddress: [ 'state' ],
+				shippingAddress: [],
+			} )
+		).toBe( false );
+	} );
+
+	it( 'returns false when postcode has a validation error and country is not dirty', () => {
+		setValidationErrors( { billing_postcode: 'Invalid postcode' } );
+
+		expect(
+			validateDirtyProps( {
+				billingAddress: [ 'postcode' ],
+				shippingAddress: [],
+			} )
+		).toBe( false );
+	} );
+
+	it( 'returns true when country is dirty and state has a validation error', () => {
+		setEmptyCountryClearedAddress();
+		setValidationErrors( { billing_state: 'State is required' } );
+
+		expect(
+			validateDirtyProps( {
+				billingAddress: [ 'country', 'state', 'postcode' ],
+				shippingAddress: [],
+			} )
+		).toBe( true );
+	} );
+
+	it( 'returns true when country is dirty and postcode has a validation error', () => {
+		setEmptyCountryClearedAddress();
+		setValidationErrors( { billing_postcode: 'Invalid postcode' } );
+
+		expect(
+			validateDirtyProps( {
+				billingAddress: [ 'country', 'state', 'postcode' ],
+				shippingAddress: [],
+			} )
+		).toBe( true );
+	} );
+
+	it( 'returns true when country is dirty and both state and postcode have validation errors', () => {
+		setEmptyCountryClearedAddress();
+		setValidationErrors( {
+			billing_state: 'State is required',
+			billing_postcode: 'Invalid postcode',
+		} );
+
+		expect(
+			validateDirtyProps( {
+				billingAddress: [ 'country', 'state', 'postcode' ],
+				shippingAddress: [],
+			} )
+		).toBe( true );
+	} );
+
+	it( 'returns false when country is dirty and postcode is non-empty with a validation error (user-typed invalid value)', () => {
+		// Postcode is non-empty (user typed something bad) so the relaxation
+		// should not apply; the push must still be blocked.
+		getCustomerDataMock.mockReturnValue( {
+			billingAddress: {
+				first_name: 'John',
+				last_name: 'Doe',
+				address_1: '123 Main St',
+				address_2: '',
+				city: '',
+				state: '',
+				postcode: 'ABCDEF',
+				country: 'FR',
+				email: 'john.doe@mail.com',
+				phone: '555-555-5555',
+			},
+			shippingAddress: {
+				first_name: 'John',
+				last_name: 'Doe',
+				address_1: '123 Main St',
+				address_2: '',
+				city: '',
+				state: '',
+				postcode: '',
+				country: 'FR',
+				phone: '555-555-5555',
+			},
+		} );
+		setValidationErrors( { billing_postcode: 'Invalid postcode' } );
+
+		expect(
+			validateDirtyProps( {
+				billingAddress: [ 'country', 'state', 'postcode' ],
+				shippingAddress: [],
+			} )
+		).toBe( false );
+	} );
+
+	it( 'returns false when country is dirty but country itself has a validation error', () => {
+		setValidationErrors( { billing_country: 'Country is not allowed' } );
+
+		expect(
+			validateDirtyProps( {
+				billingAddress: [ 'country' ],
+				shippingAddress: [],
+			} )
+		).toBe( false );
+	} );
+
+	it( 'returns false when country is dirty, state/postcode are invalid, and another field is also invalid', () => {
+		setValidationErrors( {
+			billing_state: 'State is required',
+			billing_postcode: 'Invalid postcode',
+			billing_city: 'City is required',
+		} );
+
+		expect(
+			validateDirtyProps( {
+				billingAddress: [ 'country', 'state', 'postcode', 'city' ],
+				shippingAddress: [],
+			} )
+		).toBe( false );
+	} );
+
+	it( 'applies the relaxation to billing and shipping independently', () => {
+		setValidationErrors( {
+			billing_state: 'State is required',
+			shipping_state: 'State is required',
+		} );
+
+		// Billing has the relaxed case (country dirty, state invalid -> allow).
+		// Shipping has the blocking case (state dirty, country not dirty -> block).
+		expect(
+			validateDirtyProps( {
+				billingAddress: [ 'country', 'state', 'postcode' ],
+				shippingAddress: [ 'state' ],
+			} )
+		).toBe( false );
 	} );
 } );
