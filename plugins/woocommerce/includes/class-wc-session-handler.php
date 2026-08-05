@@ -320,12 +320,24 @@ class WC_Session_Handler extends WC_Session {
 	/**
 	 * Verify a hash produced by self::hash().
 	 *
+	 * Hashes produced by the previous `wp_fast_hash()` implementation are still accepted so that guest sessions
+	 * created before this change are not invalidated. That fallback can be removed once those cookies have expired.
+	 *
 	 * @param string $message Message to verify.
 	 * @param string $hash Hash to verify.
 	 * @return bool Whether the hash is valid.
 	 */
 	private function verify_hash( string $message, string $hash ) {
-		return hash_equals( $this->hash( $message ), $hash );
+		if ( hash_equals( $this->hash( $message ), $hash ) ) {
+			return true;
+		}
+
+		// `wp_fast_hash()` prefixes its output with `$generic$`, so only those cookies take the legacy path.
+		if ( function_exists( 'wp_verify_fast_hash' ) && str_starts_with( $hash, '$generic$' ) ) {
+			return wp_verify_fast_hash( $message, $hash );
+		}
+
+		return false;
 	}
 
 	/**
