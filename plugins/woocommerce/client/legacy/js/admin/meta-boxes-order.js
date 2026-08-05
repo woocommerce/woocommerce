@@ -1407,6 +1407,8 @@ jQuery( function ( $ ) {
 				$( '#woocommerce-order-notes button.add_note' ).text( label );
 			}
 			$( '#woocommerce-order-notes .add_note_email_settings' ).prop( 'hidden', ! isCustomer );
+			$( '#woocommerce-order-notes .add_note_cc_fields' ).prop( 'hidden', ! isCustomer );
+			$( '#woocommerce-order-notes .add_note_bcc_fields' ).prop( 'hidden', ! isCustomer );
 		},
 
 		add_order_note: function() {
@@ -1427,6 +1429,8 @@ jQuery( function ( $ ) {
 				post_id:   woocommerce_admin_meta_boxes.post_id,
 				note:      $( 'textarea#add_order_note' ).val(),
 				note_type: $( 'select#order_note_type' ).val(),
+				cc_email:  $( '#add_order_note_cc' ).val(),
+				bcc_email: $( '#add_order_note_bcc' ).val(),
 				security:  woocommerce_admin_meta_boxes.add_order_note_nonce
 			};
 

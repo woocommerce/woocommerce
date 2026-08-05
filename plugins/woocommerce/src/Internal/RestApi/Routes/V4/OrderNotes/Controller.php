@@ -286,8 +286,17 @@ class Controller extends AbstractController {
 			return $this->get_route_error_by_code( self::RESOURCE_EXISTS );
 		}
 
-		$order   = $this->get_order_by_id( (int) $request['order_id'] );
-		$note_id = $order ? $order->add_order_note( wp_kses_post( $request['note'] ), $request['is_customer_note'], true ) : null;
+		$order = $this->get_order_by_id( (int) $request['order_id'] );
+
+		$meta_data = array();
+		if ( ! empty( $request['cc_email'] ) ) {
+			$meta_data['cc'] = sanitize_text_field( $request['cc_email'] );
+		}
+		if ( ! empty( $request['bcc_email'] ) ) {
+			$meta_data['bcc'] = sanitize_text_field( $request['bcc_email'] );
+		}
+
+		$note_id = $order ? $order->add_order_note( wp_kses_post( $request['note'] ), $request['is_customer_note'], true, $meta_data ) : null;
 
 		if ( ! $note_id ) {
 			return $this->get_route_error_by_code( self::CANNOT_CREATE );

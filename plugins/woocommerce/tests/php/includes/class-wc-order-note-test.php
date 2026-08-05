@@ -93,4 +93,82 @@ class WC_Order_Note_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'Payment processed', get_comment_meta( $note_id, 'note_title', true ) );
 		$this->assertEquals( 'custom_value', get_comment_meta( $note_id, 'custom_field', true ) );
 	}
+
+	/**
+	 * Test add_order_note stores cc and bcc as comment meta when is_customer_note is true.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_enabled Whether to test with HPOS enabled or not.
+	 */
+	public function test_add_order_note_with_cc_bcc( $hpos_enabled ) {
+		$this->toggle_cot_authoritative( $hpos_enabled );
+
+		$order = wc_create_order();
+		$order->save();
+
+		$meta_data = array(
+			'cc'  => 'cc1@example.com, cc2@example.com',
+			'bcc' => 'bcc@example.com',
+		);
+
+		$note_id = $order->add_order_note( 'Test customer note', true, false, $meta_data );
+
+		$this->assertGreaterThan( 0, $note_id );
+		$this->assertEquals( 'cc1@example.com, cc2@example.com', get_comment_meta( $note_id, 'cc', true ) );
+		$this->assertEquals( 'bcc@example.com', get_comment_meta( $note_id, 'bcc', true ) );
+	}
+
+	/**
+	 * Test add_order_note sanitizes invalid cc/bcc emails.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_enabled Whether to test with HPOS enabled or not.
+	 */
+	public function test_add_order_note_sanitizes_cc_bcc( $hpos_enabled ) {
+		$this->toggle_cot_authoritative( $hpos_enabled );
+
+		$order = wc_create_order();
+		$order->save();
+
+		$meta_data = array(
+			'cc'  => 'valid@example.com, invalid-email, another@example.com',
+			'bcc' => 'bad-email',
+		);
+
+		$note_id = $order->add_order_note( 'Test sanitization', true, false, $meta_data );
+
+		$this->assertGreaterThan( 0, $note_id );
+		$this->assertEquals( 'valid@example.com, another@example.com', get_comment_meta( $note_id, 'cc', true ) );
+		$this->assertEquals( '', get_comment_meta( $note_id, 'bcc', true ) );
+	}
+
+	/**
+	 * Test add_order_note does NOT store cc/bcc for private notes.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_enabled Whether to test with HPOS enabled or not.
+	 */
+	public function test_private_note_ignores_cc_bcc( $hpos_enabled ) {
+		$this->toggle_cot_authoritative( $hpos_enabled );
+
+		$order = wc_create_order();
+		$order->save();
+
+		$meta_data = array(
+			'cc'  => 'cc@example.com',
+			'bcc' => 'bcc@example.com',
+		);
+
+		$note_id = $order->add_order_note( 'Private note', false, false, $meta_data );
+
+		$this->assertGreaterThan( 0, $note_id );
+		$this->assertEquals( '', get_comment_meta( $note_id, 'cc', true ) );
+		$this->assertEquals( '', get_comment_meta( $note_id, 'bcc', true ) );
+	}
 }

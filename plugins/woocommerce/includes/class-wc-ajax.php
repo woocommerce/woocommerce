@@ -1739,9 +1739,19 @@ class WC_AJAX {
 
 		$is_customer_note = ( 'customer' === $note_type ) ? 1 : 0;
 
+		$cc_email  = isset( $_POST['cc_email'] ) ? sanitize_text_field( wp_unslash( $_POST['cc_email'] ) ) : '';
+		$bcc_email = isset( $_POST['bcc_email'] ) ? sanitize_text_field( wp_unslash( $_POST['bcc_email'] ) ) : '';
+
 		if ( $post_id > 0 ) {
-			$order      = wc_get_order( $post_id );
-			$comment_id = $order->add_order_note( $note, $is_customer_note, true );
+			$order     = wc_get_order( $post_id );
+			$meta_data = array();
+			if ( ! empty( $cc_email ) ) {
+				$meta_data['cc'] = $cc_email;
+			}
+			if ( ! empty( $bcc_email ) ) {
+				$meta_data['bcc'] = $bcc_email;
+			}
+			$comment_id = $order->add_order_note( $note, $is_customer_note, true, $meta_data );
 			$note       = wc_get_order_note( $comment_id );
 
 			if ( ! $note ) {

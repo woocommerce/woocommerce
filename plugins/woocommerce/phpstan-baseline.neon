@@ -64389,7 +64389,7 @@ parameters:
 		-
 			message: '#^Access to property \$comment_ID on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\OrderNotes\\Schema\\WP_Comment\.$#'
 			identifier: class.notFound
-			count: 4
+			count: 2
 			path: src/Internal/RestApi/Routes/V4/OrderNotes/Schema/OrderNoteSchema.php
 
 		-

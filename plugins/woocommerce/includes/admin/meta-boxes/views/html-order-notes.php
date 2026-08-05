@@ -30,6 +30,22 @@ defined( 'ABSPATH' ) || exit;
 						echo wpautop( $content );
 						?>
 					</div>
+					<?php
+					$cc  = get_comment_meta( $note->id, 'cc', true );
+					$bcc = get_comment_meta( $note->id, 'bcc', true );
+					if ( ! empty( $cc ) || ! empty( $bcc ) ) :
+						?>
+						<div class="note_email_recipients">
+							<?php if ( ! empty( $cc ) ) : ?>
+								<span class="note_cc"><?php echo esc_html__( 'Cc: ', 'woocommerce' ) . esc_html( $cc ); ?></span>
+							<?php endif; ?>
+							<?php if ( ! empty( $bcc ) ) : ?>
+								<span class="note_bcc"><?php echo esc_html__( 'Bcc: ', 'woocommerce' ) . esc_html( $bcc ); ?></span>
+							<?php endif; ?>
+						</div>
+						<?php
+					endif;
+					?>
 				</div>
 				<p class="meta">
 					<abbr class="exact-date" title="<?php echo esc_attr( $note->date_created->date( 'Y-m-d H:i:s' ) ); ?>">

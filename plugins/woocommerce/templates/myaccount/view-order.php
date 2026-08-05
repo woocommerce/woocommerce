@@ -58,6 +58,14 @@ echo wp_kses_post(
 					<div class="woocommerce-OrderUpdate-description description">
 						<?php echo wp_kses_post( wpautop( wptexturize( $note->comment_content ) ) ); ?>
 					</div>
+					<?php
+					$cc = get_comment_meta( $note->comment_ID, 'cc', true );
+					if ( ! empty( $cc ) ) :
+						?>
+						<p class="woocommerce-OrderUpdate-cc"><?php echo esc_html__( 'Cc: ', 'woocommerce' ) . esc_html( $cc ); ?></p>
+						<?php
+					endif;
+					?>
 					<div class="clear"></div>
 				</div>
 				<div class="clear"></div>

@@ -136,7 +136,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool success
 	 */
 	public function payment_complete( $transaction_id = '' ) {
-		if ( ! $this->get_id() ) { // Order must exist.
+		if ( ! $this->get_id() ) {
+			// Order must exist.
 			return false;
 		}
 
@@ -400,7 +401,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool
 	 */
 	public function update_status( $new_status, $note = '', $manual = false ) {
-		if ( ! $this->get_id() ) { // Order must exist.
+		if ( ! $this->get_id() ) {
+			// Order must exist.
 			return false;
 		}
 
@@ -1821,7 +1823,8 @@ class WC_Order extends WC_Abstract_Order {
 							'download_id'         => $file['id'],
 							'product_id'          => $product->get_id(),
 							'product_name'        => $product->get_name(),
-							'product_url'         => $product->is_visible() ? $product->get_permalink() : '', // Since 3.3.0.
+							'product_url'         => $product->is_visible() ? $product->get_permalink() : '',
+							// Since 3.3.0.
 							'download_name'       => $file['name'],
 							'order_id'            => $this->get_id(),
 							'order_key'           => $this->get_order_key(),
@@ -2089,8 +2092,9 @@ class WC_Order extends WC_Abstract_Order {
 		} else {
 			$comment_author        = __( 'WooCommerce', 'woocommerce' );
 			$comment_author_email  = strtolower( __( 'WooCommerce', 'woocommerce' ) ) . '@';
-			$comment_author_email .= isset( $_SERVER['HTTP_HOST'] ) ? str_replace( 'www.', '', sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) ) : 'noreply.com'; // WPCS: input var ok.
-			$comment_author_email  = sanitize_email( $comment_author_email );
+			$comment_author_email .= isset( $_SERVER['HTTP_HOST'] ) ? str_replace( 'www.', '', sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) ) : 'noreply.com';
+			// WPCS: input var ok.
+			$comment_author_email = sanitize_email( $comment_author_email );
 		}
 		$commentdata = apply_filters(
 			'woocommerce_new_order_note_data',
@@ -2116,11 +2120,24 @@ class WC_Order extends WC_Abstract_Order {
 		if ( $is_customer_note ) {
 			add_comment_meta( $comment_id, 'is_customer_note', 1 );
 
+			$cc  = '';
+			$bcc = '';
+			if ( ! empty( $meta_data['cc'] ) ) {
+				$cc = self::sanitize_email_addresses( $meta_data['cc'] );
+				add_comment_meta( (int) $comment_id, 'cc', $cc );
+			}
+			if ( ! empty( $meta_data['bcc'] ) ) {
+				$bcc = self::sanitize_email_addresses( $meta_data['bcc'] );
+				add_comment_meta( (int) $comment_id, 'bcc', $bcc );
+			}
+
 			do_action(
 				'woocommerce_new_customer_note',
 				array(
 					'order_id'      => $this->get_id(),
 					'customer_note' => $commentdata['comment_content'],
+					'cc'            => $cc,
+					'bcc'           => $bcc,
 				)
 			);
 		}
@@ -2144,6 +2161,25 @@ class WC_Order extends WC_Abstract_Order {
 		do_action( 'woocommerce_order_note_added', $comment_id, $this );
 
 		return $comment_id;
+	}
+
+	/**
+	 * Sanitize a comma-separated list of email addresses.
+	 *
+	 * @param string $emails Comma-separated email addresses.
+	 * @return string Sanitized comma-separated email addresses.
+	 * @since 11.1.0
+	 */
+	public static function sanitize_email_addresses( $emails ) {
+		$addresses = array_map( 'trim', explode( ',', (string) $emails ) );
+		$addresses = array_filter(
+			$addresses,
+			function ( $email ) {
+				return is_email( $email ) !== false;
+			}
+		);
+		$addresses = array_map( 'sanitize_email', $addresses );
+		return implode( ', ', $addresses );
 	}
 
 	/**
