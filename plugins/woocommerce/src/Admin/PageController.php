@@ -334,6 +334,10 @@ class PageController {
 	/**
 	 * Get a specificity score for a registered page path.
 	 *
+	 * The shape and constants mirror React Router's computeScore route ranking: the segment count
+	 * seeds the score, any splat costs a penalty of 2, and each non-splat segment then adds 10
+	 * (static), 3 (parameter), or 1 (empty).
+	 *
 	 * Only meaningful for app paths that already matched the current request, which is why a `*`
 	 * segment can be scored as a wildcard here: the matcher only treats a terminal `/*` as a splat.
 	 *
