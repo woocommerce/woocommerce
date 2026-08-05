@@ -823,6 +823,50 @@ class WC_REST_Order_Refunds_Preview_Test extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A registered field's callback does not run when _fields excludes it.
+	 */
+	public function test_preview_registered_field_callback_skipped_when_not_requested(): void {
+		$executed = false;
+		register_rest_field(
+			'order_refund_preview',
+			'expensive_field',
+			array(
+				'get_callback' => function () use ( &$executed ) {
+					$executed = true;
+					return 'expensive_value';
+				},
+				'schema'       => array(
+					'description' => 'Test field.',
+					'type'        => 'string',
+				),
+			)
+		);
+
+		$order   = $this->create_order_with_product( 10.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/refunds/preview' );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'line_item_id' => $item_id,
+						'quantity'     => 1,
+					),
+				),
+			)
+		);
+		$request->set_param( '_fields', 'total' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertFalse( $executed, 'The excluded field callback must not execute.' );
+		$data = rest_filter_response_fields( $response, $this->server, $request )->get_data();
+		$this->assertArrayNotHasKey( 'expensive_field', $data );
+		$this->assertArrayHasKey( 'total', $data );
+	}
+
+	/**
 	 * @testdox The woocommerce_rest_prepare_order_refund_preview filter can mutate the response.
 	 */
 	public function test_preview_filter_can_mutate_response(): void {
