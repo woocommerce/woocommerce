@@ -425,15 +425,11 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 
 						$this->log_settings_ui_fallback( $settings_ui_page, $section, $schema_failure_reason );
 					} else {
-						$script_handles = $context->get_script_handles();
+						$context->get_script_handles();
 
 						if ( $context->has_script_handles_failed() ) {
 							$this->log_settings_ui_fallback( $settings_ui_page, $section, $context->get_script_handles_failure_reason() );
 						} else {
-							foreach ( $script_handles as $script_handle ) {
-								wp_enqueue_script( $script_handle );
-							}
-
 							$GLOBALS['hide_save_button'] = true;
 
 							printf(

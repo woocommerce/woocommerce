@@ -61,14 +61,12 @@ window.wcSettingsUI.registerSettingsExtension( {
 } );
 JS
 		);
-		wp_enqueue_script( self::REGISTERED_HANDLE );
 
 		wp_register_script( self::MISSING_HANDLE, false, array( 'wc-settings-ui' ), '1.0.0', true );
 		wp_add_inline_script(
 			self::MISSING_HANDLE,
 			'window.wcSettingsUIComponentTest = window.wcSettingsUIComponentTest || {}; window.wcSettingsUIComponentTest.missingRegistrationScriptExecuted = true;'
 		);
-		wp_enqueue_script( self::MISSING_HANDLE );
 	}
 
 	/**
