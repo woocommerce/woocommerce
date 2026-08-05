@@ -131,18 +131,33 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 	 * this controller's item schema (`order_refund`), so it would populate the
 	 * wrong field set; the preview publishes its schema as
 	 * `order_refund_preview` and must populate the fields registered for that
-	 * type. Runs before the response filter so filters see the complete payload.
+	 * type. Mirrors core's `_fields` handling: callbacks for fields the request
+	 * excludes are not executed, so extension callbacks do not run for
+	 * responses that will not carry their field. Runs before the response
+	 * filter so filters see the complete payload.
 	 *
 	 * @param array           $preview Preview response data.
 	 * @param WP_REST_Request $request The request.
 	 *
 	 * @return array
+	 *
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 */
 	private function add_preview_additional_fields( array $preview, $request ): array {
 		$additional_fields = $this->get_additional_fields( 'order_refund_preview' );
 
+		if ( empty( $additional_fields ) ) {
+			return $preview;
+		}
+
+		$fields_for_response = $this->get_preview_fields_for_response( $request );
+
 		foreach ( $additional_fields as $field_name => $field_options ) {
 			if ( empty( $field_options['get_callback'] ) || ! is_callable( $field_options['get_callback'] ) ) {
+				continue;
+			}
+
+			if ( ! in_array( $field_name, $fields_for_response, true ) ) {
 				continue;
 			}
 
@@ -150,6 +165,47 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 		}
 
 		return $preview;
+	}
+
+	/**
+	 * Get the preview fields a request asks for, mirroring core's
+	 * get_fields_for_response() against the preview schema instead of the
+	 * controller's item schema.
+	 *
+	 * @param WP_REST_Request $request The request.
+	 *
+	 * @return string[]
+	 *
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 */
+	private function get_preview_fields_for_response( $request ): array {
+		$schema     = $this->get_public_preview_schema();
+		$properties = isset( $schema['properties'] ) && is_array( $schema['properties'] ) ? $schema['properties'] : array();
+		$fields     = array_map( 'strval', array_keys( $properties ) );
+
+		if ( ! isset( $request['_fields'] ) || empty( $request['_fields'] ) ) {
+			return $fields;
+		}
+
+		$requested_fields = array_map(
+			static function ( $field ): string {
+				return trim( (string) $field );
+			},
+			wp_parse_list( $request['_fields'] )
+		);
+
+		if ( 0 === count( $requested_fields ) ) {
+			return $fields;
+		}
+
+		return array_values(
+			array_filter(
+				$fields,
+				function ( string $field ) use ( $requested_fields ): bool {
+					return rest_is_field_included( $field, $requested_fields );
+				}
+			)
+		);
 	}
 
 	/**
