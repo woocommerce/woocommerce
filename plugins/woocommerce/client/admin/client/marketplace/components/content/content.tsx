@@ -36,7 +36,7 @@ import PluginInstallNotice from '../woo-update-manager-plugin/plugin-install-not
 import SubscriptionsExpiredExpiringNotice from '~/marketplace/components/my-subscriptions/subscriptions-expired-expiring-notice';
 import LoadMoreButton from '../load-more-button/load-more-button';
 
-export default function Content(): JSX.Element {
+export default function Content(): React.JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );
 	const [ allProducts, setAllProducts ] = useState< Product[] >( [] );
 	const [ filteredProducts, setFilteredProducts ] = useState< Product[] >(
@@ -388,7 +388,7 @@ export default function Content(): JSX.Element {
 		}
 	}, [ firstNewProductId ] );
 
-	const renderContent = (): JSX.Element => {
+	const renderContent = (): React.JSX.Element => {
 		switch ( selectedTab ) {
 			case 'extensions':
 			case 'themes':

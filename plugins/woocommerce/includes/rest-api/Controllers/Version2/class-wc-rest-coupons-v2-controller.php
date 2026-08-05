@@ -1,4 +1,5 @@
 <?php
+
 /**
  * REST API Coupons controller
  *
@@ -8,6 +9,7 @@
  * @since   2.6.0
  */
 
+use Automattic\WooCommerce\Utilities\MetaDataUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -19,6 +21,9 @@ defined( 'ABSPATH' ) || exit;
  * @extends WC_REST_CRUD_Controller
  */
 class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
+
+
+
 
 	/**
 	 * Endpoint namespace.
@@ -46,7 +51,9 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base, array(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
@@ -58,7 +65,8 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 					'callback'            => array( $this, 'create_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 					'args'                => array_merge(
-						$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
+						$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+						array(
 							'code' => array(
 								'description' => __( 'Coupon code.', 'woocommerce' ),
 								'required'    => true,
@@ -72,7 +80,9 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 		);
 
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)',
+			array(
 				'args'   => array(
 					'id' => array(
 						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
@@ -110,7 +120,9 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 		);
 
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/batch', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/batch',
+			array(
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'batch_items' ),
@@ -275,6 +287,11 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 			return new WP_Error( 'woocommerce_rest_empty_coupon_code', sprintf( __( 'The coupon code cannot be empty.', 'woocommerce' ), 'code' ), array( 'status' => 400 ) );
 		}
 
+		// Handle setting discount type first because that is needed for validation.
+		if ( isset( $request['discount_type'] ) ) {
+			$coupon->set_discount_type( $request['discount_type'] );
+		}
+
 		// Handle all writable props.
 		foreach ( $data_keys as $key ) {
 			$value = $request[ $key ];
@@ -293,11 +310,7 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 						$coupon->set_code( $coupon_code );
 						break;
 					case 'meta_data':
-						if ( is_array( $value ) ) {
-							foreach ( $value as $meta ) {
-								$coupon->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
-							}
-						}
+						MetaDataUtil::update( $value, $coupon );
 						break;
 					case 'description':
 						$coupon->set_description( wp_filter_post_kses( $value ) );
@@ -348,10 +361,10 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 				),
 				'amount'                      => array(
 					'description' => __( 'The amount of discount. Should always be numeric, even if setting a percentage.', 'woocommerce' ),
-					'type'        => 'string',
+					'type'        => array( 'number', 'string' ),
 					'context'     => array( 'view', 'edit' ),
 				),
-				'status' => array(
+				'status'                      => array(
 					'description' => __( 'The status of the coupon. Should always be draft, published, or pending review', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -475,12 +488,12 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 				),
 				'minimum_amount'              => array(
 					'description' => __( 'Minimum order amount that needs to be in the cart before coupon applies.', 'woocommerce' ),
-					'type'        => 'string',
+					'type'        => array( 'number', 'string' ),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'maximum_amount'              => array(
 					'description' => __( 'Maximum order amount allowed when using the coupon.', 'woocommerce' ),
-					'type'        => 'string',
+					'type'        => array( 'number', 'string' ),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'email_restrictions'          => array(

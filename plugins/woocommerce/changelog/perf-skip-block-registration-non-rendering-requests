@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Skip block and pattern registration on requests that never render blocks. Add the woocommerce_should_register_blocks filter to let extensions opt out.

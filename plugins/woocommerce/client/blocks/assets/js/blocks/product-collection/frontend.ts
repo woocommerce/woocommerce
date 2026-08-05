@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { store, getElement, getContext } from '@wordpress/interactivity';
+import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
 /**
  * Internal dependencies
@@ -13,12 +14,31 @@ import {
 import { CoreCollectionNames } from './types';
 import './style.scss';
 
+// Stores are locked to prevent 3PD usage until the API is stable.
+const universalLock =
+	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+const { state: productsState } = store< ProductsStore >(
+	'woocommerce/products',
+	{},
+	{ lock: universalLock }
+);
+
 export type ProductCollectionStoreContext = {
-	// Available on the <li/> product element and deeper
-	productId?: number;
 	isPrefetchNextOrPreviousLink: string;
 	collection: CoreCollectionNames;
+	// Next/Previous Buttons block context
+	hideNextPreviousButtons: boolean;
+	isDisabledPrevious: boolean;
+	isDisabledNext: boolean;
+	ariaLabelPrevious: string;
+	ariaLabelNext: string;
 };
+
+// @wordpress/i18n is not available on the frontend.
+function isRTL(): boolean {
+	return document.documentElement?.dir === 'rtl';
+}
 
 function isValidLink( ref: HTMLElement | null ): ref is HTMLAnchorElement {
 	return (
@@ -29,6 +49,100 @@ function isValidLink( ref: HTMLElement | null ): ref is HTMLAnchorElement {
 		ref.origin === window.location.origin
 	);
 }
+
+const checkIfButtonsDisabled = (
+	productTemplate: HTMLElement | null,
+	currentScroll: number
+): {
+	isDisabledPrevious: boolean;
+	isDisabledNext: boolean;
+} => {
+	if ( ! productTemplate ) {
+		return {
+			isDisabledPrevious: true,
+			isDisabledNext: true,
+		};
+	}
+
+	const SCROLL_OFFSET = 5;
+	const { scrollWidth, clientWidth } = productTemplate;
+
+	if ( isRTL() ) {
+		return {
+			isDisabledPrevious: currentScroll > -SCROLL_OFFSET,
+			isDisabledNext:
+				currentScroll <= clientWidth - scrollWidth + SCROLL_OFFSET,
+		};
+	}
+
+	return {
+		isDisabledPrevious: currentScroll < SCROLL_OFFSET,
+		isDisabledNext:
+			currentScroll >= scrollWidth - clientWidth - SCROLL_OFFSET,
+	};
+};
+
+/**
+ * Scrolls the carousel by 90% of the container width and updates
+ * the isDisabledPrevious and isDisabledNext context values.
+ *
+ * @param direction - The direction to scroll.
+ */
+const scrollCarousel = ( direction: 'left' | 'right' ) => {
+	const { ref } = getElement();
+
+	const productCollection = ref?.closest(
+		'.wp-block-woocommerce-product-collection'
+	);
+	const productTemplate = productCollection?.querySelector(
+		'.wc-block-product-template'
+	) as HTMLElement;
+
+	if ( ! productTemplate ) {
+		return;
+	}
+
+	const productCollectionWidth = productCollection?.clientWidth;
+	// Arbitrary value to scroll the carousel by 90% of the container width.
+	const scrollBy = productCollectionWidth
+		? 0.9 * productCollectionWidth
+		: 400;
+
+	const multiplier = isRTL() ? -1 : 1;
+
+	productTemplate?.scrollBy( {
+		left: multiplier * ( direction === 'left' ? -scrollBy : scrollBy ),
+		behavior: 'smooth',
+	} );
+
+	const context = getContext< ProductCollectionStoreContext >();
+	const { scrollLeft } = productTemplate;
+	// scrollBy doesn't return the final position, so we need to calculate it.
+	const finalPosition =
+		direction === 'left'
+			? scrollLeft - multiplier * scrollBy
+			: scrollLeft + multiplier * scrollBy;
+
+	const { isDisabledPrevious, isDisabledNext } = checkIfButtonsDisabled(
+		productTemplate,
+		finalPosition
+	);
+
+	context.isDisabledPrevious = isDisabledPrevious;
+	context.isDisabledNext = isDisabledNext;
+};
+
+const onKeyDown = ( event: KeyboardEvent ) => {
+	if ( event.code === 'ArrowRight' ) {
+		event.preventDefault();
+		scrollCarousel( 'right' );
+	}
+
+	if ( event.code === 'ArrowLeft' ) {
+		event.preventDefault();
+		scrollCarousel( 'left' );
+	}
+};
 
 function isValidEvent( event: MouseEvent ): boolean {
 	return (
@@ -91,11 +205,37 @@ const productCollectionStore = {
 			}
 		},
 		*viewProduct() {
-			const { collection, productId } =
+			const { collection } =
 				getContext< ProductCollectionStoreContext >();
+
+			const productId = productsState.productInContext?.id;
 
 			if ( productId ) {
 				triggerViewedProductEvent( { collection, productId } );
+			}
+		},
+		// Next/Previous Buttons block actions
+		onClickPrevious: () => {
+			scrollCarousel( 'left' );
+		},
+		onClickNext: () => {
+			scrollCarousel( 'right' );
+		},
+		onKeyDownPrevious: ( event: KeyboardEvent ) => {
+			onKeyDown( event );
+		},
+		onKeyDownNext: ( event: KeyboardEvent ) => {
+			onKeyDown( event );
+		},
+		watchScroll: () => {
+			const context = getContext< ProductCollectionStoreContext >();
+			const { ref } = getElement();
+			if ( ref ) {
+				const { isDisabledPrevious, isDisabledNext } =
+					checkIfButtonsDisabled( ref, ref.scrollLeft );
+
+				context.isDisabledPrevious = isDisabledPrevious;
+				context.isDisabledNext = isDisabledNext;
 			}
 		},
 	},
@@ -121,6 +261,22 @@ const productCollectionStore = {
 				getContext< ProductCollectionStoreContext >();
 
 			triggerProductListRenderedEvent( { collection } );
+		},
+		initResizeObserver: () => {
+			const scrollableElement = getElement()?.ref;
+			if ( ! scrollableElement ) {
+				return;
+			}
+
+			const context = getContext< ProductCollectionStoreContext >();
+			const observer = new ResizeObserver( () => {
+				const hasOverflowX =
+					scrollableElement.scrollWidth >
+					scrollableElement.clientWidth;
+				context.hideNextPreviousButtons = ! hasOverflowX;
+			} );
+
+			observer.observe( scrollableElement );
 		},
 	},
 };

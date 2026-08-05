@@ -59,6 +59,13 @@ class FakePaymentGateway extends \WC_Payment_Gateway {
 	public $plugin_file = 'fake-plugin-slug/fake-plugin-file';
 
 	/**
+	 * The provider links list.
+	 *
+	 * @var array
+	 */
+	public $provider_links = array();
+
+	/**
 	 * The recommended payment methods list.
 	 *
 	 * @var array
@@ -66,7 +73,7 @@ class FakePaymentGateway extends \WC_Payment_Gateway {
 	public $recommended_payment_methods = array();
 
 	/**
-	 * Whether or not this gateway still requires setup to function.
+	 * Whether this gateway still requires setup to function.
 	 *
 	 * @var bool
 	 */
@@ -96,18 +103,32 @@ class FakePaymentGateway extends \WC_Payment_Gateway {
 	public $account_connected = true;
 
 	/**
+	 * The onboarding supported flag.
+	 *
+	 * @var bool
+	 */
+	public $onboarding_supported = true;
+
+	/**
+	 * The onboarding not supported message.
+	 *
+	 * @var string|null
+	 */
+	public $onboarding_not_supported_message = null;
+
+	/**
 	 * The onboarding started flag.
 	 *
 	 * @var bool
 	 */
-	public $onboarding_started = false;
+	public $onboarding_started;
 
 	/**
 	 * The onboarding completed flag.
 	 *
 	 * @var bool
 	 */
-	public $onboarding_completed = false;
+	public $onboarding_completed;
 
 	/**
 	 * The test mode onboarding flag.
@@ -133,10 +154,19 @@ class FakePaymentGateway extends \WC_Payment_Gateway {
 		foreach ( $props as $prop => $value ) {
 			$this->$prop = $value;
 		}
+
+		// Put in the default values for properties that are not set.
+		// Onboarding properties are set to the same value as account_connected by default.
+		if ( ! isset( $this->onboarding_started ) ) {
+			$this->onboarding_started = $this->account_connected;
+		}
+		if ( ! isset( $this->onboarding_completed ) ) {
+			$this->onboarding_completed = $this->account_connected;
+		}
 	}
 
 	/**
-	 * Return whether or not this gateway still requires setup to function.
+	 * Return whether this gateway still requires setup to function.
 	 *
 	 * @return bool
 	 */
@@ -178,6 +208,9 @@ class FakePaymentGateway extends \WC_Payment_Gateway {
 	 * @return array List of recommended payment methods for the given country.
 	 */
 	public function get_recommended_payment_methods( string $country_code = '' ) {
+		// Test stub does not vary by country.
+		unset( $country_code );
+
 		return $this->recommended_payment_methods;
 	}
 
@@ -209,6 +242,26 @@ class FakePaymentGateway extends \WC_Payment_Gateway {
 	}
 
 	/**
+	 * Check if the gateway supports onboarding.
+	 *
+	 * @param string $country_code Optional. The country code for which to check.
+	 * @return bool True if the gateway supports onboarding, false otherwise.
+	 */
+	public function is_onboarding_supported( $country_code = '' ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		return $this->onboarding_supported;
+	}
+
+	/**
+	 * Get the onboarding not supported message.
+	 *
+	 * @param string $country_code Optional. The country code for which to get the message.
+	 * @return string The onboarding not supported message.
+	 */
+	public function get_onboarding_not_supported_message( $country_code = '' ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		return $this->onboarding_not_supported_message;
+	}
+
+	/**
 	 * Check if the gateway has started onboarding.
 	 *
 	 * @return bool True if the gateway has started onboarding, false otherwise.
@@ -233,5 +286,23 @@ class FakePaymentGateway extends \WC_Payment_Gateway {
 	 */
 	public function is_in_test_mode_onboarding() {
 		return $this->test_mode_onboarding;
+	}
+
+	/**
+	 * Get the provider links list.
+	 *
+	 * @param string $country_code Optional. The country code for which the providers are being requested.
+	 *
+	 * @return array The provider links list.
+	 */
+	public function get_provider_links( string $country_code = '' ): array {
+		// Test stub does not vary by country.
+		unset( $country_code );
+
+		if ( isset( $this->provider_links ) ) {
+			return $this->provider_links;
+		}
+
+		return array();
 	}
 }

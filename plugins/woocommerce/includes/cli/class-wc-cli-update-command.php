@@ -83,8 +83,7 @@ class WC_CLI_Update_Command {
 		WC_Install::update_db_version();
 		$progress->finish();
 
-		WC_Admin_Notices::remove_notice( 'update', true );
-		( new WC_Notes_Run_Db_Update() )->set_notice_actioned();
+		\WC_Install::remove_update_db_notice();
 
 		WC()->call_static(
 			WP_CLI::class,

@@ -2,12 +2,17 @@
  * External dependencies
  */
 import { store, getContext, useLayoutEffect } from '@wordpress/interactivity';
+import '@woocommerce/stores/woocommerce/products';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
+import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
 /**
  * Internal dependencies
  */
-import type { AddToCartWithOptionsStore } from '../../../../blocks/add-to-cart-with-options/frontend';
+import type {
+	Context as AddToCartWithOptionsContext,
+	AddToCartWithOptionsStore,
+} from '../../../../blocks/add-to-cart-with-options/frontend';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
@@ -15,14 +20,13 @@ const universalLock =
 
 interface Context {
 	addToCartText: string;
-	productId: number;
-	productType: string;
 	groupedProductIds?: number[];
 	displayViewCart: boolean;
 	quantityToAdd: number;
 	tempQuantity: number;
 	animationStatus: AnimationStatus;
 	hasPressedButton: boolean;
+	inTheCartText: string;
 }
 
 enum AnimationStatus {
@@ -51,13 +55,31 @@ const { state: addToCartWithOptionsState } = store< AddToCartWithOptionsStore >(
 	{ lock: universalLock }
 );
 
+const { state: productsState } = store< ProductsStore >(
+	'woocommerce/products',
+	{},
+	{ lock: universalLock }
+);
+
 const productButtonStore = {
 	state: {
 		get quantity(): number {
-			const product = wooState.cart?.items.find(
-				( item ) => item.id === state.productId
+			const product = productsState.productInContext;
+
+			if ( ! product ) {
+				return 0;
+			}
+
+			const formContext = getContext< AddToCartWithOptionsContext >(
+				'woocommerce/add-to-cart-with-options'
 			);
-			return product?.quantity || 0;
+
+			const item = wooState.findItemInCart( {
+				id: product.id,
+				variation: formContext?.selectedAttributes,
+			} );
+
+			return item?.quantity ?? 0;
 		},
 		get slideInAnimation() {
 			const { animationStatus } = getContext< Context >();
@@ -72,9 +94,9 @@ const productButtonStore = {
 				animationStatus,
 				tempQuantity,
 				addToCartText,
-				productType,
 				groupedProductIds,
 				hasPressedButton,
+				inTheCartText,
 			} = getContext< Context >();
 
 			// We use the temporary quantity when there's no animation, or
@@ -86,12 +108,12 @@ const productButtonStore = {
 				? tempQuantity || 0
 				: state.quantity;
 
-			if ( productType === 'grouped' ) {
+			if ( productsState.productInContext?.type === 'grouped' ) {
 				const groupedProductIdsInCart = groupedProductIds?.map(
 					( productId ) => {
-						const product = wooState.cart?.items.find(
-							( item ) => item.id === productId
-						);
+						const product = wooState.findItemInCart( {
+							id: productId,
+						} );
 						return product?.quantity || 0;
 					}
 				);
@@ -99,16 +121,13 @@ const productButtonStore = {
 					groupedProductIdsInCart?.some( ( qty ) => qty > 0 ) &&
 					hasPressedButton
 				) {
-					return state.inTheCartText;
+					return inTheCartText;
 				}
 				return addToCartText;
 			}
 
 			if ( quantity > 0 ) {
-				return state.inTheCartText.replace(
-					'###',
-					quantity.toString()
-				);
+				return inTheCartText.replace( '###', quantity.toString() );
 			}
 
 			return addToCartText;
@@ -118,16 +137,14 @@ const productButtonStore = {
 			if ( ! displayViewCart ) return false;
 			return state.quantity > 0;
 		},
-		get productId() {
-			return (
-				addToCartWithOptionsState?.variationId ||
-				getContext< Context >().productId
-			);
-		},
 	},
 	actions: {
 		*addCartItem(): Generator< unknown, void > {
-			const context = getContext< Context >();
+			const product = productsState.productInContext;
+
+			if ( ! product ) {
+				return;
+			}
 
 			// Todo: Use the module exports instead of `store()` once the
 			// woocommerce store is public.
@@ -139,10 +156,20 @@ const productButtonStore = {
 				{ lock: universalLock }
 			);
 
-			yield actions.addCartItem( {
-				id: state.productId,
-				quantity: state.quantity + context.quantityToAdd,
-			} );
+			const context = getContext< Context >();
+
+			// Pass quantityToAdd as a delta. The cart store will add this
+			// to the current quantity, ensuring rapid clicks compound correctly.
+			yield actions.addCartItem(
+				{
+					id: product.id,
+					quantityToAdd: context.quantityToAdd,
+					type: product.type,
+				},
+				{
+					showCartUpdatesNotices: false,
+				}
+			);
 
 			context.displayViewCart = true;
 		},
@@ -155,7 +182,7 @@ const productButtonStore = {
 				{},
 				{ lock: universalLock }
 			);
-			actions.refreshCartItems();
+			void actions.refreshCartItems();
 		},
 		handleAnimationEnd( event: AnimationEvent ) {
 			const context = getContext< Context >();
@@ -173,7 +200,23 @@ const productButtonStore = {
 		},
 		handlePressedState() {
 			const context = getContext< Context >();
-			context.hasPressedButton = true;
+
+			// Only handle the pressed state if the form is valid.
+			if (
+				addToCartWithOptionsState?.isFormValid === undefined ||
+				addToCartWithOptionsState?.isFormValid
+			) {
+				context.hasPressedButton = true;
+
+				// Only animate if the quantity number changes and there is no
+				// animation in progress.
+				if (
+					context.tempQuantity !== state.quantity &&
+					context.animationStatus === AnimationStatus.IDLE
+				) {
+					context.animationStatus = AnimationStatus.SLIDE_OUT;
+				}
+			}
 		},
 	},
 	callbacks: {

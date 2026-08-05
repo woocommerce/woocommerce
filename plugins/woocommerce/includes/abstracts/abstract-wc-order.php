@@ -14,8 +14,12 @@ use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Enums\TaxBasedOn;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
+use Automattic\WooCommerce\Internal\Customers\SearchService as CustomersSearchService;
 use Automattic\WooCommerce\Internal\Orders\PaymentInfo;
+use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
@@ -74,7 +78,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Order items will be stored here, sometimes before they persist in the DB.
 	 *
 	 * @since 3.0.0
-	 * @var array<string, array<int, \WC_Order_Item>>
+	 * @var array<string, array<\WC_Order_Item>>
 	 */
 	protected $items = array();
 
@@ -85,6 +89,45 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @var array<\WC_Order_Item>
 	 */
 	protected $items_to_delete = array();
+
+	/**
+	 * Monotonic counter used to build collision-free temporary array keys for
+	 * not-yet-persisted items.
+	 *
+	 * Using count() is not safe for this: when items are removed and re-added before
+	 * save(), the count repeats a previous value, so two distinct unsaved items
+	 * map to the same 'new:<type><N>' key and the second silently overwrites the
+	 * first (it is then lost on save()). A never-reused counter guarantees a
+	 * unique key for every unsaved item for the lifetime of the object.
+	 *
+	 * @since 11.1.0
+	 * @var int
+	 */
+	protected $temp_item_id_counter = 0;
+
+	/**
+	 * Bulk order item types scheduled for deletion on save().
+	 *
+	 * Populated by remove_order_items() with a specific item type and processed by
+	 * save_items(), so that deletion happens atomically alongside persistence of any
+	 * replacement items. Superseded by $bulk_delete_all_items_pending, which removes
+	 * every item type.
+	 *
+	 * @since 11.0.0
+	 * @var array<string>
+	 */
+	protected $item_types_to_bulk_delete = array();
+
+	/**
+	 * Whether every order item type should be deleted on the next save().
+	 *
+	 * Set by remove_order_items() when called with no type (so every item type
+	 * should be removed). Processed and reset in save_items().
+	 *
+	 * @since 11.0.0
+	 * @var bool
+	 */
+	protected $bulk_delete_all_items_pending = false;
 
 	/**
 	 * Stores meta in cache for future reads.
@@ -226,11 +269,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 			$this->save_items();
 
-			if ( OrderUtil::orders_cache_usage_is_enabled() ) {
-				$order_cache = wc_get_container()->get( OrderCache::class );
-				$order_cache->remove( $this->get_id() );
-			}
-
 			/**
 			 * Trigger action after saving to the DB.
 			 *
@@ -262,6 +300,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @param Exception $e Exception object.
 	 * @param string    $message Message regarding exception thrown.
 	 * @since 3.7.0
+	 * @return void
 	 */
 	protected function handle_exception( $e, $message = 'Error' ) {
 		wc_get_logger()->error(
@@ -275,9 +314,51 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Save all order items which are part of this order.
+	 *
+	 * @return void
 	 */
 	protected function save_items() {
 		$items_changed = false;
+
+		if ( $this->bulk_delete_all_items_pending ) {
+			$this->data_store->delete_items( $this );
+			$this->bulk_delete_all_items_pending = false;
+			$this->item_types_to_bulk_delete     = array();
+			$items_changed                       = true;
+
+			/**
+			 * Trigger action after removing all order line items from the database.
+			 *
+			 * @param  WC_Order  $this  The current order object.
+			 * @param  string|null $type Order item type. Default null.
+			 *
+			 * @since 7.8.0
+			 */
+			do_action( 'woocommerce_removed_order_items', $this, null );
+		} elseif ( ! empty( $this->item_types_to_bulk_delete ) ) {
+			// Drain the queue one type at a time, dropping each entry only after delete_items() succeeds.
+			// If a delete or hook callback throws, save()'s catch handles it and any types that have not
+			// yet been processed remain queued for the next save() rather than being silently lost.
+			foreach ( array_values( array_unique( $this->item_types_to_bulk_delete ) ) as $type ) {
+				$this->data_store->delete_items( $this, $type );
+				$items_changed                   = true;
+				$this->item_types_to_bulk_delete = array_values(
+					array_filter(
+						$this->item_types_to_bulk_delete,
+						static function ( $pending ) use ( $type ) {
+							return $pending !== $type;
+						}
+					)
+				);
+
+				/**
+				 * This action is documented above.
+				 *
+				 * @since 7.8.0
+				 */
+				do_action( 'woocommerce_removed_order_items', $this, $type );
+			}//end foreach
+		}//end if
 
 		foreach ( $this->items_to_delete as $item ) {
 			$item->delete();
@@ -307,7 +388,15 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		if ( $items_changed ) {
-			delete_transient( 'wc_order_' . $this->get_id() . '_needs_processing' );
+			wp_cache_delete( 'order-needs-processing-' . $this->get_id(), 'orders' );
+
+			// Invalidate the order cache to prevent stale item data.
+			// This fixes a race condition where get_items() may have been called
+			// before items were saved, caching empty items arrays.
+			// See https://github.com/woocommerce/woocommerce/issues/62173.
+			if ( OrderUtil::orders_cache_usage_is_enabled() ) {
+				wc_get_container()->get( OrderCache::class )->remove( $this->get_id() );
+			}
 		}
 	}
 
@@ -633,6 +722,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @since 3.0.0
 	 * @param int $value Value to set.
+	 * @return void
 	 * @throws WC_Data_Exception Exception thrown if parent ID does not exist or is invalid.
 	 */
 	public function set_parent_id( $value ) {
@@ -692,6 +782,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Set order_version.
 	 *
 	 * @param string $value Value to set.
+	 * @return void
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_version( $value ) {
@@ -702,6 +793,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Set order_currency.
 	 *
 	 * @param string $value Value to set.
+	 * @return void
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_currency( $value ) {
@@ -715,6 +807,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Set prices_include_tax.
 	 *
 	 * @param bool $value Value to set.
+	 * @return void
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_prices_include_tax( $value ) {
@@ -725,6 +818,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Set date_created.
 	 *
 	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if there is no date.
+	 * @return void
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_date_created( $date = null ) {
@@ -735,6 +829,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Set date_modified.
 	 *
 	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if there is no date.
+	 * @return void
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_date_modified( $date = null ) {
@@ -745,6 +840,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Set discount_total.
 	 *
 	 * @param string $value Value to set.
+	 * @return void
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_discount_total( $value ) {
@@ -755,6 +851,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Set discount_tax.
 	 *
 	 * @param string $value Value to set.
+	 * @return void
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_discount_tax( $value ) {
@@ -765,6 +862,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Set shipping_total.
 	 *
 	 * @param string $value Value to set.
+	 * @return void
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_shipping_total( $value ) {
@@ -775,6 +873,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Set shipping_tax.
 	 *
 	 * @param string $value Value to set.
+	 * @return void
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_shipping_tax( $value ) {
@@ -786,6 +885,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Set cart tax.
 	 *
 	 * @param string $value Value to set.
+	 * @return void
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_cart_tax( $value ) {
@@ -797,6 +897,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Sets order tax (sum of cart and shipping tax). Used internally only.
 	 *
 	 * @param string $value Value to set.
+	 * @return void
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	protected function set_total_tax( $value ) {
@@ -818,6 +919,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			wc_deprecated_argument( 'total_type', '3.0', 'Use dedicated total setter methods instead.' );
 			return $this->legacy_set_total( $value, $deprecated );
 		}
+
+		if ( ! is_string( $value ) || 0 === strlen( $value ) ) {
+			$value = (float) $value;
+		}
+
 		$this->set_prop( 'total', wc_format_decimal( $value, wc_get_price_decimals() ) );
 	}
 
@@ -844,40 +950,77 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Remove all line items (products, coupons, shipping, taxes) from the order.
 	 *
-	 * @param string $type Order item type. Default null.
+	 * The items are cleared from the in-memory order immediately, but the database
+	 * deletion is deferred until the next call to save(). This keeps the checkout
+	 * "resume order" flow atomic: if anything between here and save() throws, the
+	 * previously persisted items remain intact in the database. As a consequence,
+	 * the `woocommerce_removed_order_items` action now fires from save_items()
+	 * (after the actual DB delete completes) rather than synchronously from this
+	 * method — listeners that observe the persisted state continue to see it as
+	 * before, but listeners pairing pre/post on the same call stack will see
+	 * the post-hook fire at save() time.
+	 *
+	 * @param string|null $type Order item type. Default null (remove every type).
+	 * @return void
 	 */
 	public function remove_order_items( $type = null ) {
+
+		// Guard against extension code passing non-string values. Anything not
+		// a string or null is ignored so it never reaches the deferred queue or
+		// the data store. Surface the misuse so it's traceable rather than silent.
+		if ( null !== $type && ! is_string( $type ) ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				/* translators: %s: PHP type that was passed instead of a string. */
+				sprintf( esc_html__( 'remove_order_items() expects a string item type or null; received %s.', 'woocommerce' ), esc_html( gettype( $type ) ) ),
+				'11.0.0'
+			);
+			return;
+		}
 
 		/**
 		 * Trigger action before removing all order line items. Allows you to track order items.
 		 *
 		 * @param  WC_Order  $this  The current order object.
-		 * @param  string $type Order item type. Default null.
+		 * @param  string|null $type Order item type. Default null.
 		 *
 		 * @since 7.8.0
 		 */
 		do_action( 'woocommerce_remove_order_items', $this, $type );
+
+		// Unsaved orders (id 0) have no persisted items — there's nothing to defer for deletion.
+		$has_persisted_items = $this->get_id() > 0;
+
 		if ( ! empty( $type ) ) {
-			$this->data_store->delete_items( $this, $type );
+			if ( $has_persisted_items ) {
+				$this->item_types_to_bulk_delete[] = $type;
+			}
 
 			$group = $this->type_to_group( $type );
 
 			if ( $group ) {
-				unset( $this->items[ $group ] );
+				// Set to an empty array (rather than unset) so that subsequent get_items() calls
+				// return the in-memory "removed" state without re-reading the still-present rows
+				// from the data store.
+				$this->items[ $group ] = array();
 			}
 		} else {
-			$this->data_store->delete_items( $this );
-			$this->items = array();
+			if ( $has_persisted_items ) {
+				$this->bulk_delete_all_items_pending = true;
+				$this->item_types_to_bulk_delete     = array();
+			}
+			$type_to_group = $this->get_item_types_to_group();
+			// Union with currently populated keys so any group already loaded into
+			// $this->items (including by direct manipulation) is reset too. This
+			// matches the historical "wipe everything" semantics that the original
+			// $this->items = array() provided.
+			$groups = array_unique(
+				array_merge( array_values( $type_to_group ), array_keys( $this->items ) )
+			);
+			foreach ( $groups as $group ) {
+				$this->items[ $group ] = array();
+			}
 		}
-		/**
-		 * Trigger action after removing all order line items.
-		 *
-		 * @param  WC_Order  $this  The current order object.
-		 * @param  string $type Order item type. Default null.
-		 *
-		 * @since 7.8.0
-		 */
-		do_action( 'woocommerce_removed_order_items', $this, $type );
 	}
 
 	/**
@@ -887,11 +1030,33 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return string
 	 */
 	protected function type_to_group( $type ) {
-		$type_to_group = apply_filters(
+		$type_to_group = $this->get_item_types_to_group();
+		return $type_to_group[ $type ] ?? '';
+	}
+
+	/**
+	 * Return the item type -> group mapping, after applying the
+	 * woocommerce_order_type_to_group filter so extension-registered types are
+	 * included.
+	 *
+	 * @since 11.0.0
+	 * @return array<string, string>
+	 */
+	protected function get_item_types_to_group() {
+		/**
+		 * Filter the order item type -> group mapping.
+		 *
+		 * Allows extensions to register custom order item types so they participate
+		 * in operations such as get_items() grouping and bulk in-memory clearing.
+		 *
+		 * @since 3.0.0
+		 *
+		 * @param array<string, string> $item_types_to_group The default mapping.
+		 */
+		return (array) apply_filters(
 			'woocommerce_order_type_to_group',
 			$this->item_types_to_group
 		);
-		return $type_to_group[ $type ] ?? '';
 	}
 
 	/**
@@ -922,11 +1087,23 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 			if ( $group ) {
 				if ( ! isset( $this->items[ $group ] ) ) {
-					$this->items[ $group ] = array_filter( $this->data_store->read_items( $this, $type ) );
+					$read_items = array_filter( $this->data_store->read_items( $this, $type ) );
+
+					// Prime the product cache to ensure that methods such as needs_processing, get_downloadable_items, and has_downloadable_item run
+					// on warm post meta caches for products. This addresses scenarios where the order object was not populated during a batch population.
+					if ( 'line_item' === $type && ! empty( $read_items ) ) {
+						$product_ids = array_map( static fn( $item ) => $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id(), $read_items );
+						_prime_post_caches( array_unique( array_filter( $product_ids ) ) );
+					}
+
+					// Set the back-reference to the parent order on each loaded item.
+					array_walk( $read_items, fn( $item ) => $item instanceof WC_Order_Item && $item->set_order( $this ) );
+
+					$this->items[ $group ] = $read_items;
 				}
 				// Don't use array_merge here because keys are numeric.
 				$items = $items + $this->items[ $group ];
-			}
+			}//end if
 		}
 
 		return apply_filters( 'woocommerce_order_get_items', $items, $this, $types );
@@ -1129,15 +1306,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		// Set parent.
-		$item->set_order_id( $this->get_id() );
+		$item instanceof WC_Order_Item ? $item->set_order( $this ) : $item->set_order_id( $this->get_id() );
 
 		// Append new row with generated temporary ID.
 		$item_id = $item->get_id();
-
 		if ( $item_id ) {
 			$this->items[ $items_key ][ $item_id ] = $item;
 		} else {
-			$this->items[ $items_key ][ 'new:' . $items_key . count( $this->items[ $items_key ] ) ] = $item;
+			$this->items[ $items_key ][ 'new:' . $items_key . $this->temp_item_id_counter++ ] = $item;
 		}
 	}
 
@@ -1149,6 +1325,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @throws Exception When not able to apply coupon.
 	 *
 	 * @param string $billing_email Billing email of order.
+	 * @return void
 	 */
 	public function hold_applied_coupons( $billing_email ) {
 		$held_keys          = array();
@@ -1175,7 +1352,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 					if ( ! isset( $user_ids_and_emails ) ) {
 						$user_alias          = get_current_user_id() ? wp_get_current_user()->ID : sanitize_email( $billing_email );
-						$user_ids_and_emails = $this->get_billing_and_current_user_aliases( $billing_email );
+						$user_ids_and_emails = $this->get_billing_and_current_user_ids_and_aliases( $billing_email );
 					}
 
 					$held_key_for_user = $this->hold_coupon_for_users( $coupon, $user_ids_and_emails, $user_alias );
@@ -1243,23 +1420,20 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Helper method to get all aliases for current user and provide billing email.
+	 * Helper method to get all aliases and IDs for current user and provided billing email.
 	 *
-	 * @param string $billing_email Billing email provided in form.
+	 * @param string $billing_email Billing email to look up for.
 	 *
-	 * @return array     Array of all aliases.
+	 * @return array     Array of all aliases and IDs.
 	 * @throws Exception When validation fails.
 	 */
-	private function get_billing_and_current_user_aliases( $billing_email ) {
+	private function get_billing_and_current_user_ids_and_aliases( $billing_email ): array {
 		$emails = array( $billing_email );
 		if ( get_current_user_id() ) {
 			$emails[] = wp_get_current_user()->user_email;
 		}
-		$emails              = array_unique(
-			array_map( 'strtolower', array_map( 'sanitize_email', $emails ) )
-		);
-		$customer_data_store = WC_Data_Store::load( 'customer' );
-		$user_ids            = $customer_data_store->get_user_ids_for_billing_email( $emails );
+		$emails   = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
+		$user_ids = wc_get_container()->get( CustomersSearchService::class )->find_user_ids_by_billing_email_for_coupons_usage_lookup( $emails );
 		return array_merge( $user_ids, $emails );
 	}
 
@@ -1287,7 +1461,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		// Check to make sure coupon is not already applied.
 		$applied_coupons = $this->get_items( 'coupon' );
 		foreach ( $applied_coupons as $applied_coupon ) {
-			if ( $applied_coupon->get_code() === $coupon->get_code() ) {
+			if ( wc_is_same_coupon( $applied_coupon->get_code(), $coupon->get_code() ) ) {
 				return new WP_Error(
 					'invalid_coupon',
 					sprintf(
@@ -1395,6 +1569,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * This method is public since WooCommerce 3.8.0.
 	 *
 	 * @since 3.2.0
+	 * @return void
 	 */
 	public function recalculate_coupons() {
 		// Reset line item totals.
@@ -1486,6 +1661,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @since 3.2.0
 	 * @param WC_Discounts $discounts Discounts class.
+	 * @return void
 	 */
 	protected function set_item_discount_amounts( $discounts ) {
 		$item_discounts = $discounts->get_discounts_by_item();
@@ -1514,6 +1690,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @since 3.2.0
 	 * @param WC_Discounts $discounts Discounts class.
+	 * @return void
 	 */
 	protected function set_coupon_discount_amounts( $discounts ) {
 		$coupons           = $this->get_items( 'coupon' );
@@ -1634,7 +1811,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$item->save();
 		$this->add_item( $item );
 		wc_do_deprecated_action( 'woocommerce_order_add_product', array( $this->get_id(), $item->get_id(), $product, $qty, $args ), '3.0', 'woocommerce_new_order_item action instead' );
-		delete_transient( 'wc_order_' . $this->get_id() . '_needs_processing' );
+		wp_cache_delete( 'order-needs-processing-' . $this->get_id(), 'orders' );
 		return $item->get_id();
 	}
 
@@ -1733,17 +1910,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	protected function get_tax_location( $args = array() ) {
 		$tax_based_on = get_option( 'woocommerce_tax_based_on' );
 
-		if ( 'shipping' === $tax_based_on && ! $this->get_shipping_country() ) {
-			$tax_based_on = 'billing';
+		if ( TaxBasedOn::SHIPPING === $tax_based_on && ! $this->get_shipping_country() ) {
+			$tax_based_on = TaxBasedOn::BILLING;
 		}
 
 		$args = wp_parse_args(
 			$args,
 			array(
-				'country'  => 'billing' === $tax_based_on ? $this->get_billing_country() : $this->get_shipping_country(),
-				'state'    => 'billing' === $tax_based_on ? $this->get_billing_state() : $this->get_shipping_state(),
-				'postcode' => 'billing' === $tax_based_on ? $this->get_billing_postcode() : $this->get_shipping_postcode(),
-				'city'     => 'billing' === $tax_based_on ? $this->get_billing_city() : $this->get_shipping_city(),
+				'country'  => TaxBasedOn::BILLING === $tax_based_on ? $this->get_billing_country() : $this->get_shipping_country(),
+				'state'    => TaxBasedOn::BILLING === $tax_based_on ? $this->get_billing_state() : $this->get_shipping_state(),
+				'postcode' => TaxBasedOn::BILLING === $tax_based_on ? $this->get_billing_postcode() : $this->get_shipping_postcode(),
+				'city'     => TaxBasedOn::BILLING === $tax_based_on ? $this->get_billing_city() : $this->get_shipping_city(),
 			)
 		);
 
@@ -1767,11 +1944,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Set shop base address as a tax location if order has local pickup shipping method.
 		if ( $apply_base_tax && count( array_intersect( $shipping_method_ids, $local_pickup_methods ) ) > 0 ) {
-			$tax_based_on = 'base';
+			$tax_based_on = TaxBasedOn::BASE;
 		}
 
 		// Default to base.
-		if ( 'base' === $tax_based_on || empty( $args['country'] ) ) {
+		if ( TaxBasedOn::BASE === $tax_based_on || empty( $args['country'] ) ) {
 			$args['country']  = WC()->countries->get_base_country();
 			$args['state']    = WC()->countries->get_base_state();
 			$args['postcode'] = WC()->countries->get_base_postcode();
@@ -1816,6 +1993,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Will use the base country unless customer addresses are set.
 	 *
 	 * @param array $args Added in 3.0.0 to pass things like location.
+	 * @return void
 	 */
 	public function calculate_taxes( $args = array() ) {
 		do_action( 'woocommerce_order_before_calculate_taxes', $args, $this );
@@ -1826,6 +2004,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( 'inherit' === $shipping_tax_class ) {
 			$found_classes      = array_intersect( array_merge( array( '' ), WC_Tax::get_tax_class_slugs() ), $this->get_items_tax_classes() );
 			$shipping_tax_class = count( $found_classes ) ? current( $found_classes ) : false;
+
+			// Orders without product line items have no tax class to inherit, so use the standard class.
+			if ( false === $shipping_tax_class && 0 === count( $this->get_items() ) ) {
+				$shipping_tax_class = '';
+			}
 		}
 
 		$is_vat_exempt = apply_filters( 'woocommerce_order_is_vat_exempt', 'yes' === $this->get_meta( 'is_vat_exempt' ), $this );
@@ -1867,6 +2050,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Update tax lines for the order based on the line item taxes themselves.
+	 *
+	 * @return void
 	 */
 	public function update_taxes() {
 		$cart_taxes     = array();
@@ -1896,17 +2081,27 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
+		$tax_rate_objects = wc_get_container()->get( TaxRateDataStore::class )->get_rate_objects_for_ids( array_keys( $cart_taxes + $shipping_taxes ) );
+
 		foreach ( $existing_taxes as $tax ) {
+			$tax_rate_id = $tax->get_rate_id();
 			// Remove taxes which no longer exist for cart/shipping.
-			if ( ( ! array_key_exists( $tax->get_rate_id(), $cart_taxes ) && ! array_key_exists( $tax->get_rate_id(), $shipping_taxes ) ) || in_array( $tax->get_rate_id(), $saved_rate_ids, true ) ) {
+			if ( ( ! array_key_exists( $tax_rate_id, $cart_taxes ) && ! array_key_exists( $tax_rate_id, $shipping_taxes ) ) || in_array( $tax_rate_id, $saved_rate_ids, true ) ) {
 				$this->remove_item( $tax->get_id() );
 				continue;
 			}
-			$saved_rate_ids[] = $tax->get_rate_id();
-			$tax->set_rate( $tax->get_rate_id() );
-			$tax->set_tax_total( isset( $cart_taxes[ $tax->get_rate_id() ] ) ? $cart_taxes[ $tax->get_rate_id() ] : 0 );
-			$tax->set_label( WC_Tax::get_rate_label( $tax->get_rate_id() ) );
-			$tax->set_shipping_tax_total( ! empty( $shipping_taxes[ $tax->get_rate_id() ] ) ? $shipping_taxes[ $tax->get_rate_id() ] : 0 );
+
+			$tax_rate_object_or_id = $tax_rate_objects[ $tax_rate_id ] ?? $tax_rate_id;
+
+			$tax->set_rate_id( $tax_rate_id );
+			$tax->set_rate_code( WC_Tax::get_rate_code( $tax_rate_object_or_id ) );
+			$tax->set_label( WC_Tax::get_rate_label( $tax_rate_object_or_id ) );
+			$tax->set_compound( WC_Tax::is_compound( $tax_rate_object_or_id ) );
+			$tax->set_rate_percent( WC_Tax::get_rate_percent_value( $tax_rate_object_or_id ) );
+			$tax->set_tax_total( $cart_taxes[ $tax_rate_id ] ?? 0 );
+			$tax->set_shipping_tax_total( ! empty( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0 );
+
+			$saved_rate_ids[] = $tax_rate_id;
 			$tax->save();
 		}
 
@@ -1914,10 +2109,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// New taxes.
 		foreach ( $new_rate_ids as $tax_rate_id ) {
+			$tax_rate_object_or_id = $tax_rate_objects[ $tax_rate_id ] ?? $tax_rate_id;
+
 			$item = new WC_Order_Item_Tax();
-			$item->set_rate( $tax_rate_id );
-			$item->set_tax_total( isset( $cart_taxes[ $tax_rate_id ] ) ? $cart_taxes[ $tax_rate_id ] : 0 );
+			$item->set_rate_id( $tax_rate_id );
+			$item->set_rate_code( WC_Tax::get_rate_code( $tax_rate_object_or_id ) );
+			$item->set_label( WC_Tax::get_rate_label( $tax_rate_object_or_id ) );
+			$item->set_compound( WC_Tax::is_compound( $tax_rate_object_or_id ) );
+			$item->set_rate_percent( WC_Tax::get_rate_percent_value( $tax_rate_object_or_id ) );
+			$item->set_tax_total( $cart_taxes[ $tax_rate_id ] ?? 0 );
 			$item->set_shipping_tax_total( ! empty( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0 );
+
 			$this->add_item( $item );
 		}
 
@@ -1968,13 +2170,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$shipping_total    = 0;
 		$cart_subtotal_tax = 0;
 		$cart_total_tax    = 0;
+		$price_decimals    = wc_get_price_decimals();
 
 		$cart_subtotal = $this->get_cart_subtotal_for_order();
 		$cart_total    = (float) $this->get_cart_total_for_order();
 
 		// Sum shipping costs.
 		foreach ( $this->get_shipping_methods() as $shipping ) {
-			$shipping_total += NumberUtil::round( $shipping->get_total(), wc_get_price_decimals() );
+			$shipping_total += NumberUtil::round( $shipping->get_total(), $price_decimals );
 		}
 
 		$this->set_shipping_total( $shipping_total );
@@ -1984,7 +2187,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$fee_total = (float) $item->get_total();
 
 			if ( 0 > $fee_total ) {
-				$max_discount = NumberUtil::round( $cart_total + $fees_total + $shipping_total, wc_get_price_decimals() ) * -1;
+				$max_discount = NumberUtil::round( $cart_total + $fees_total + $shipping_total, $price_decimals ) * -1;
 
 				if ( $fee_total < $max_discount && 0 > $max_discount ) {
 					$item->set_total( $max_discount );
@@ -2011,9 +2214,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
-		$this->set_discount_total( NumberUtil::round( $cart_subtotal - $cart_total, wc_get_price_decimals() ) );
+		$this->set_discount_total( NumberUtil::round( $cart_subtotal - $cart_total, $price_decimals ) );
 		$this->set_discount_tax( wc_round_tax_total( $cart_subtotal_tax - $cart_total_tax ) );
-		$this->set_total( NumberUtil::round( $cart_total + $fees_total + (float) $this->get_shipping_total() + (float) $this->get_cart_tax() + (float) $this->get_shipping_tax(), wc_get_price_decimals() ) );
+		$this->set_total( NumberUtil::round( $cart_total + $fees_total + (float) $this->get_shipping_total() + (float) $this->get_cart_tax() + (float) $this->get_shipping_tax(), $price_decimals ) );
 
 		if ( $this->has_cogs() && $this->cogs_is_enabled() ) {
 			$this->calculate_cogs_total_value();
@@ -2158,7 +2361,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function get_formatted_line_subtotal( $item, $tax_display = '' ) {
 		$tax_display = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
 
-		if ( 'excl' === $tax_display ) {
+		if ( TaxDisplayMode::EXCLUSIVE === $tax_display ) {
 			$ex_tax_label = $this->get_prices_include_tax() ? 1 : 0;
 
 			$subtotal = wc_price(
@@ -2198,7 +2401,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		if ( ! $compound ) {
 
-			if ( 'incl' === $tax_display ) {
+			if ( TaxDisplayMode::INCLUSIVE === $tax_display ) {
 				$subtotal_taxes = 0;
 				foreach ( $this->get_items() as $item ) {
 					$subtotal_taxes += self::round_line_tax( (float) $item->get_subtotal_tax(), false );
@@ -2208,11 +2411,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 			$subtotal = wc_price( $subtotal, array( 'currency' => $this->get_currency() ) );
 
-			if ( 'excl' === $tax_display && $this->get_prices_include_tax() && wc_tax_enabled() ) {
+			if ( TaxDisplayMode::EXCLUSIVE === $tax_display && $this->get_prices_include_tax() && wc_tax_enabled() ) {
 				$subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 			}
 		} else {
-			if ( 'incl' === $tax_display ) {
+			if ( TaxDisplayMode::INCLUSIVE === $tax_display ) {
 				return '';
 			}
 
@@ -2246,7 +2449,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		if ( 0 < abs( (float) $this->get_shipping_total() ) ) {
 
-			if ( 'excl' === $tax_display ) {
+			if ( TaxDisplayMode::EXCLUSIVE === $tax_display ) {
 
 				// Show shipping excluding tax.
 				$shipping = wc_price( $this->get_shipping_total(), array( 'currency' => $this->get_currency() ) );
@@ -2291,7 +2494,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		 *
 		 * @since 2.7.0.
 		 */
-		return apply_filters( 'woocommerce_order_discount_to_display', wc_price( $this->get_total_discount( 'excl' === $tax_display ), array( 'currency' => $this->get_currency() ) ), $this );
+		return apply_filters( 'woocommerce_order_discount_to_display', wc_price( $this->get_total_discount( TaxDisplayMode::EXCLUSIVE === $tax_display ), array( 'currency' => $this->get_currency() ) ), $this );
 	}
 
 	/**
@@ -2299,6 +2502,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @param array  $total_rows Reference to total rows array.
 	 * @param string $tax_display Excl or incl tax display mode.
+	 * @return void
 	 */
 	protected function add_order_item_totals_subtotal_row( &$total_rows, $tax_display ) {
 		$subtotal = $this->get_subtotal_to_display( false, $tax_display );
@@ -2317,6 +2521,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @param array  $total_rows Reference to total rows array.
 	 * @param string $tax_display Excl or incl tax display mode.
+	 * @return void
 	 */
 	protected function add_order_item_totals_discount_row( &$total_rows, $tax_display ) {
 		if ( $this->get_total_discount() > 0 ) {
@@ -2333,6 +2538,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @param array  $total_rows Reference to total rows array.
 	 * @param string $tax_display Excl or incl tax display mode.
+	 * @return void
 	 */
 	protected function add_order_item_totals_shipping_row( &$total_rows, $tax_display ) {
 		if ( $this->get_shipping_method() ) {
@@ -2350,6 +2556,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @param array  $total_rows Reference to total rows array.
 	 * @param string $tax_display Excl or incl tax display mode.
+	 * @return void
 	 */
 	protected function add_order_item_totals_fee_rows( &$total_rows, $tax_display ) {
 		$fees = $this->get_fees();
@@ -2362,7 +2569,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$total_rows[ 'fee_' . $fee->get_id() ] = array(
 					'type'  => 'fee',
 					'label' => $fee->get_name() . ':',
-					'value' => wc_price( 'excl' === $tax_display ? (float) $fee->get_total() : (float) $fee->get_total() + (float) $fee->get_total_tax(), array( 'currency' => $this->get_currency() ) ),
+					'value' => wc_price( TaxDisplayMode::EXCLUSIVE === $tax_display ? (float) $fee->get_total() : (float) $fee->get_total() + (float) $fee->get_total_tax(), array( 'currency' => $this->get_currency() ) ),
 				);
 			}
 		}
@@ -2373,10 +2580,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @param array  $total_rows Reference to total rows array.
 	 * @param string $tax_display Excl or incl tax display mode.
+	 * @return void
 	 */
 	protected function add_order_item_totals_tax_rows( &$total_rows, $tax_display ) {
 		// Tax for tax exclusive prices.
-		if ( 'excl' === $tax_display && wc_tax_enabled() ) {
+		if ( TaxDisplayMode::EXCLUSIVE === $tax_display && wc_tax_enabled() ) {
 			if ( 'itemized' === get_option( 'woocommerce_tax_total_display' ) ) {
 				foreach ( $this->get_tax_totals() as $code => $tax ) {
 					$total_rows[ sanitize_title( $code ) ] = array(
@@ -2400,6 +2608,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @param array  $total_rows Reference to total rows array.
 	 * @param string $tax_display Excl or incl tax display mode.
+	 * @return void
 	 */
 	protected function add_order_item_totals_total_row( &$total_rows, $tax_display ) {
 		$total_rows['order_total'] = array(
@@ -2476,7 +2685,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$needs_shipping = false;
 
 		foreach ( $this->get_items() as $item ) {
-			if ( is_a( $item, 'WC_Order_Item_Product' ) && $item->get_product()->needs_shipping() ) {
+			if ( ! is_a( $item, 'WC_Order_Item_Product' ) ) {
+				continue;
+			}
+
+			$product = $item->get_product();
+			if ( is_a( $product, 'WC_Product' ) && $product->needs_shipping() ) {
 				$needs_shipping = true;
 				break;
 			}
@@ -2602,6 +2816,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * WARNING! If the Cost of Goods Sold feature is disabled this method will have no effect.
 	 *
 	 * @param float $value The value to set for this order.
+	 * @return void
 	 *
 	 * @internal This method is intended for data store usage only, the value set here will be overridden by calculate_cogs_total_value.
 	 */
@@ -2609,5 +2824,35 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( $this->has_cogs() && $this->cogs_is_enabled( __METHOD__ ) ) {
 			$this->set_prop( 'cogs_total_value', $value );
 		}
+	}
+
+	/**
+	 * Return the HTML to render the total Cost of Goods Sold for the order.
+	 *
+	 * @param array|null $wc_price_arg Arguments to be passed to wc_price, defaults to an array containing only the currency symbol.
+	 * @return string
+	 */
+	public function get_cogs_total_value_html( ?array $wc_price_arg = null ): string {
+		if ( ! $this->cogs_is_enabled( __METHOD__ ) || ! $this->has_cogs() ) {
+			return '';
+		}
+
+		$cogs_total_value = $this->get_cogs_total_value();
+
+		/**
+		 * Filter to customize the total Cost of Goods Sold (COGS) value HTML for a given order.
+		 *
+		 * @since 10.3.0
+		 *
+		 * @param string   $total_html The formatted total COGS HTML.
+		 * @param float    $total      The total COGS value.
+		 * @param WC_Order $order      The order object.
+		 */
+		return apply_filters(
+			'woocommerce_order_cogs_total_value_html',
+			wc_price( $cogs_total_value, $wc_price_arg ?? array( 'currency' => $this->get_currency() ) ),
+			$cogs_total_value,
+			$this
+		);
 	}
 }

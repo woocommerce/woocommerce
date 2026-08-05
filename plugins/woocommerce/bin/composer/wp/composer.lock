@@ -223,16 +223,16 @@
         },
         {
             "name": "mck89/peast",
-            "version": "v1.17.0",
+            "version": "v1.17.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mck89/peast.git",
-                "reference": "3a752d39bd7d8dc1e19bcf424f3d5ac1a1ca6ad5"
+                "reference": "c6a63f32410d2e4ee2cd20fe94b35af147fb852d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mck89/peast/zipball/3a752d39bd7d8dc1e19bcf424f3d5ac1a1ca6ad5",
-                "reference": "3a752d39bd7d8dc1e19bcf424f3d5ac1a1ca6ad5",
+                "url": "https://api.github.com/repos/mck89/peast/zipball/c6a63f32410d2e4ee2cd20fe94b35af147fb852d",
+                "reference": "c6a63f32410d2e4ee2cd20fe94b35af147fb852d",
                 "shasum": ""
             },
             "require": {
@@ -245,7 +245,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.17.0-dev"
+                    "dev-master": "1.17.4-dev"
                 }
             },
             "autoload": {
@@ -266,9 +266,9 @@
             "description": "Peast is PHP library that generates AST for JavaScript code",
             "support": {
                 "issues": "https://github.com/mck89/peast/issues",
-                "source": "https://github.com/mck89/peast/tree/v1.17.0"
+                "source": "https://github.com/mck89/peast/tree/v1.17.4"
             },
-            "time": "2025-03-07T19:44:14+00:00"
+            "time": "2025-10-10T12:53:17+00:00"
         },
         {
             "name": "symfony/finder",
@@ -637,5 +637,5 @@
     "platform-overrides": {
         "php": "7.0"
     },
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }

@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Suggestions;
 
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestionIncentives;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions;
 use WC_Unit_Test_Case;
@@ -88,7 +89,8 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 		// Arrange.
 		update_option(
 			OnboardingProfile::DATA_OPTION,
-			array() // No data.
+			array()
+			// No data.
 		);
 
 		// Act.
@@ -103,7 +105,8 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			OnboardingProfile::DATA_OPTION,
 			array(
 				'business_choice'       => 'im_already_selling',
-				'selling_online_answer' => '', // No answer.
+				'selling_online_answer' => '',
+			// No answer.
 			)
 		);
 
@@ -125,174 +128,253 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 	public function data_provider_get_country_extensions_count_with_merchant_selling_online(): array {
 		// The counts are based on the data in PaymentExtensionSuggestions::$country_extensions.
 		$country_suggestions_count = array(
-			'CA' => 9,
-			'US' => 10,
-			'GB' => 13,
-			'AT' => 11,
-			'BE' => 10,
-			'BG' => 6,
-			'HR' => 7,
-			'CY' => 8,
-			'CZ' => 7,
-			'DK' => 10,
-			'EE' => 6,
-			'FI' => 10,
-			'FO' => 2,
-			'FR' => 11,
-			'GI' => 3,
-			'DE' => 11,
-			'GR' => 7,
-			'GL' => 2,
-			'HU' => 8,
-			'IE' => 10,
-			'IT' => 9,
-			'LV' => 5,
-			'LI' => 4,
-			'LT' => 6,
-			'LU' => 7,
-			'MT' => 6,
-			'MD' => 2,
-			'NL' => 9,
-			'NO' => 7,
-			'PL' => 8,
-			'PT' => 9,
-			'RO' => 7,
-			'SM' => 2,
-			'SK' => 6,
-			'ES' => 11,
-			'SE' => 8,
-			'CH' => 7,
-			'AG' => 4,
-			'AI' => 2,
-			'AR' => 4,
-			'AW' => 2,
-			'BS' => 4,
-			'BB' => 4,
-			'BZ' => 4,
-			'BM' => 4,
-			'BO' => 1,
-			'BQ' => 2,
-			'BR' => 5,
-			'VG' => 2,
-			'KY' => 4,
-			'CL' => 4,
-			'CO' => 4,
-			'CR' => 4,
-			'CW' => 2,
-			'DM' => 4,
-			'DO' => 4,
-			'EC' => 3,
-			'SV' => 4,
-			'FK' => 1,
-			'GF' => 3,
-			'GD' => 4,
-			'GP' => 3,
-			'GT' => 4,
-			'GY' => 2,
-			'HN' => 4,
-			'JM' => 4,
-			'MQ' => 3,
-			'MX' => 6,
-			'NI' => 4,
-			'PA' => 4,
-			'PY' => 1,
-			'PE' => 4,
-			'KN' => 4,
-			'LC' => 4,
-			'SX' => 2,
-			'VC' => 2,
-			'SR' => 2,
-			'TT' => 4,
-			'TC' => 4,
-			'UY' => 4,
-			'VI' => 2,
+			'CA' => 11,
+			'US' => 12,
+			'GB' => 15,
+			'AT' => 13,
+			'BE' => 11,
+			'BG' => 7,
+			'HR' => 8,
+			'CY' => 9,
+			'CZ' => 8,
+			'DK' => 12,
+			'EE' => 7,
+			'FI' => 11,
+			'FO' => 3,
+			'FR' => 12,
+			'GI' => 4,
+			'DE' => 13,
+			'GR' => 8,
+			'GL' => 3,
+			'HU' => 9,
+			'IE' => 11,
+			'IT' => 10,
+			'LV' => 6,
+			'LI' => 5,
+			'LT' => 7,
+			'LU' => 8,
+			'MT' => 7,
+			'MD' => 3,
+			'NL' => 10,
+			'NO' => 9,
+			'PL' => 9,
+			'PT' => 10,
+			'RO' => 8,
+			'SM' => 3,
+			'SK' => 7,
+			'ES' => 12,
+			'SE' => 10,
+			'CH' => 8,
+			'AG' => 5,
+			'AI' => 3,
+			'AR' => 5,
+			'AW' => 3,
+			'BS' => 5,
+			'BB' => 5,
+			'BZ' => 5,
+			'BM' => 5,
+			'BO' => 2,
+			'BQ' => 3,
+			'BR' => 6,
+			'VG' => 3,
+			'KY' => 5,
+			'CL' => 5,
+			'CO' => 5,
+			'CR' => 5,
+			'CW' => 3,
+			'DM' => 5,
+			'DO' => 5,
+			'EC' => 4,
+			'SV' => 5,
+			'FK' => 2,
+			'GF' => 4,
+			'GD' => 5,
+			'GP' => 4,
+			'GT' => 5,
+			'GY' => 5,
+			'HN' => 5,
+			'JM' => 5,
+			'MQ' => 4,
+			'MX' => 7,
+			'NI' => 5,
+			'PA' => 5,
+			'PY' => 2,
+			'PE' => 5,
+			'KN' => 5,
+			'LC' => 5,
+			'SX' => 3,
+			'VC' => 3,
+			'SR' => 3,
+			'TT' => 5,
+			'TC' => 5,
+			'UY' => 5,
+			'VI' => 3,
 			'VE' => 3,
-			'AU' => 10,
-			'BD' => 1,
-			'CN' => 4,
-			'FJ' => 2,
-			'GU' => 0,
-			'HK' => 7,
-			'IN' => 6,
+			'AU' => 12,
+			'BD' => 2,
+			'CN' => 5,
+			'FJ' => 3,
+			'GU' => 1,
+			'HK' => 8,
+			'IN' => 7,
 			'ID' => 4,
-			'JP' => 7,
-			'MY' => 5,
-			'NC' => 2,
-			'NZ' => 7,
-			'PW' => 2,
+			'JP' => 9,
+			'MY' => 6,
+			'NC' => 3,
+			'NZ' => 9,
+			'PW' => 3,
 			'PH' => 4,
-			'SG' => 6,
-			'LK' => 1,
-			'KR' => 2,
+			'SG' => 7,
+			'LK' => 2,
+			'KR' => 4,
 			'TH' => 5,
 			'VN' => 4,
-			'DZ' => 2,
-			'AO' => 0,
-			'BJ' => 0,
-			'BW' => 2,
-			'BF' => 0,
-			'BI' => 0,
-			'CM' => 0,
-			'CV' => 0,
-			'CF' => 0,
-			'TD' => 0,
-			'KM' => 0,
-			'CG' => 0,
-			'CI' => 0,
-			'EG' => 3,
-			'CD' => 0,
-			'DJ' => 0,
-			'GQ' => 0,
-			'ER' => 0,
-			'SZ' => 2,
-			'ET' => 0,
-			'GA' => 0,
-			'GH' => 1,
-			'GM' => 0,
-			'GN' => 0,
-			'GW' => 0,
-			'KE' => 2,
-			'LS' => 2,
-			'LR' => 0,
-			'LY' => 0,
-			'MG' => 0,
-			'MW' => 2,
-			'ML' => 0,
-			'MR' => 0,
-			'MU' => 2,
-			'MA' => 3,
-			'MZ' => 2,
-			'NA' => 0,
-			'NE' => 0,
-			'NG' => 1,
-			'RE' => 2,
-			'RW' => 0,
-			'ST' => 0,
-			'SN' => 2,
-			'SC' => 2,
-			'SL' => 0,
-			'SO' => 0,
-			'ZA' => 4,
-			'SS' => 0,
-			'TZ' => 0,
-			'TG' => 0,
-			'TN' => 0,
-			'UG' => 0,
-			'EH' => 0,
-			'ZM' => 0,
-			'ZW' => 0,
-			'BH' => 2,
-			'IQ' => 0,
-			'IL' => 1,
-			'JO' => 2,
-			'KW' => 2,
-			'LB' => 0,
-			'OM' => 3,
-			'PK' => 2,
-			'QA' => 2,
-			'SA' => 3,
-			'AE' => 6,
-			'YE' => 0,
+			'DZ' => 3,
+			'AO' => 1,
+			'BJ' => 1,
+			'BW' => 3,
+			'BF' => 1,
+			'BI' => 1,
+			'CM' => 1,
+			'CV' => 1,
+			'CF' => 1,
+			'TD' => 1,
+			'KM' => 1,
+			'CG' => 1,
+			'CI' => 1,
+			'EG' => 5,
+			'CD' => 1,
+			'DJ' => 1,
+			'GQ' => 1,
+			'ER' => 1,
+			'SZ' => 3,
+			'ET' => 1,
+			'GA' => 1,
+			'GH' => 2,
+			'GM' => 1,
+			'GN' => 1,
+			'GW' => 1,
+			'KE' => 3,
+			'LS' => 3,
+			'LR' => 1,
+			'LY' => 1,
+			'MG' => 1,
+			'MW' => 3,
+			'ML' => 1,
+			'MR' => 1,
+			'MU' => 3,
+			'YT' => 1,
+			'MA' => 4,
+			'MZ' => 3,
+			'NA' => 1,
+			'NE' => 1,
+			'NG' => 3,
+			'RE' => 3,
+			'RW' => 1,
+			'ST' => 1,
+			'SN' => 3,
+			'SC' => 3,
+			'SL' => 1,
+			'SO' => 1,
+			'ZA' => 6,
+			'SS' => 1,
+			'TZ' => 1,
+			'TG' => 1,
+			'TN' => 1,
+			'UG' => 1,
+			'EH' => 1,
+			'ZM' => 1,
+			'ZW' => 1,
+			'BH' => 4,
+			'IQ' => 1,
+			'IL' => 2,
+			'JO' => 5,
+			'KW' => 4,
+			'LB' => 1,
+			'OM' => 4,
+			'PK' => 4,
+			'QA' => 4,
+			'SA' => 6,
+			'AE' => 9,
+			'YE' => 1,
+			'AD' => 3,
+			'AF' => 1,
+			'AL' => 2,
+			'AM' => 1,
+			'AQ' => 1,
+			'AS' => 1,
+			'AX' => 1,
+			'AZ' => 1,
+			'BA' => 2,
+			'BL' => 2,
+			'BN' => 1,
+			'BT' => 1,
+			'BV' => 1,
+			'BY' => 1,
+			'CC' => 1,
+			'CK' => 1,
+			'CU' => 1,
+			'CX' => 1,
+			'FM' => 1,
+			'GE' => 2,
+			'GG' => 1,
+			'GS' => 1,
+			'HM' => 1,
+			'HT' => 1,
+			'IM' => 1,
+			'IO' => 1,
+			'IR' => 0,
+			'IS' => 3,
+			'JE' => 1,
+			'KG' => 1,
+			'KH' => 1,
+			'KI' => 1,
+			'KZ' => 2,
+			'LA' => 1,
+			'MC' => 2,
+			'ME' => 1,
+			'MF' => 1,
+			'MH' => 1,
+			'MK' => 1,
+			'MM' => 1,
+			'MN' => 1,
+			'MO' => 1,
+			'MP' => 1,
+			'MS' => 1,
+			'MV' => 1,
+			'NF' => 1,
+			'NP' => 1,
+			'NR' => 1,
+			'NU' => 1,
+			'PF' => 2,
+			'PG' => 1,
+			'PM' => 1,
+			'PN' => 1,
+			'PR' => 2,
+			'PS' => 1,
+			'RS' => 2,
+			'RU' => 1,
+			'SB' => 1,
+			'SD' => 1,
+			'SH' => 1,
+			'SI' => 6,
+			'SJ' => 1,
+			'TF' => 1,
+			'TJ' => 1,
+			'TK' => 1,
+			'TL' => 1,
+			'TM' => 1,
+			'TO' => 1,
+			'TR' => 1,
+			'TV' => 1,
+			'TW' => 2,
+			'UA' => 1,
+			'UM' => 1,
+			'UZ' => 1,
+			'VA' => 1,
+			'VU' => 1,
+			'WF' => 1,
+			'WS' => 1,
 		);
 
 		$data = array();
@@ -351,6 +433,88 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should tag Square as preferred (and preferred for offline) only when the merchant self-identified as selling offline.
+	 *
+	 * @dataProvider data_provider_square_offline_preferred_tags
+	 *
+	 * @param array|null $onboarding_profile     The onboarding profile option value. Null to simulate a skipped profiler.
+	 * @param bool       $expect_offline_preferred Whether Square is expected to carry the preferred (offline) tags.
+	 */
+	public function test_get_country_extensions_square_offline_preferred_tags( ?array $onboarding_profile, bool $expect_offline_preferred ) {
+		// Arrange.
+		if ( null === $onboarding_profile ) {
+			delete_option( OnboardingProfile::DATA_OPTION );
+		} else {
+			update_option( OnboardingProfile::DATA_OPTION, $onboarding_profile );
+		}
+
+		// Act.
+		$extensions   = $this->sut->get_country_extensions( 'US' );
+		$square_index = array_search( PaymentsExtensionSuggestions::SQUARE, array_column( $extensions, 'id' ), true );
+		$this->assertNotFalse( $square_index, 'Square should be in the US suggestions.' );
+		$square = $extensions[ $square_index ];
+
+		// Assert.
+		if ( $expect_offline_preferred ) {
+			$this->assertContains( PaymentsExtensionSuggestions::TAG_PREFERRED, $square['tags'] );
+			$this->assertContains( PaymentsExtensionSuggestions::TAG_PREFERRED_OFFLINE, $square['tags'] );
+		} else {
+			$this->assertNotContains( PaymentsExtensionSuggestions::TAG_PREFERRED, $square['tags'] );
+			$this->assertNotContains( PaymentsExtensionSuggestions::TAG_PREFERRED_OFFLINE, $square['tags'] );
+		}
+
+		delete_option( OnboardingProfile::DATA_OPTION );
+	}
+
+	/**
+	 * Data provider for test_get_country_extensions_square_offline_preferred_tags.
+	 *
+	 * @return array
+	 */
+	public function data_provider_square_offline_preferred_tags(): array {
+		return array(
+			'selling offline only'              => array(
+				array(
+					'business_choice'       => 'im_already_selling',
+					'selling_online_answer' => 'no_im_selling_offline',
+				),
+				true,
+			),
+			'selling both online and offline'   => array(
+				array(
+					'business_choice'       => 'im_already_selling',
+					'selling_online_answer' => 'im_selling_both_online_and_offline',
+				),
+				true,
+			),
+			'selling online only'               => array(
+				array(
+					'business_choice'       => 'im_already_selling',
+					'selling_online_answer' => 'yes_im_selling_online',
+				),
+				false,
+			),
+			'not already selling'               => array(
+				array(
+					'business_choice'       => 'im_just_starting_my_business',
+					'selling_online_answer' => 'no_im_selling_offline',
+				),
+				false,
+			),
+			'already selling, no online answer' => array(
+				array(
+					'business_choice' => 'im_already_selling',
+				),
+				false,
+			),
+			'profiler skipped'                  => array(
+				null,
+				false,
+			),
+		);
+	}
+
+	/**
 	 * Data provider for test_get_country_extensions_count_with_merchant_selling_offline.
 	 *
 	 * @return array
@@ -358,174 +522,253 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 	public function data_provider_get_country_extensions_count_with_merchant_selling_offline(): array {
 		// The counts are based on the data in PaymentExtensionSuggestions::$country_extensions.
 		$country_suggestions_count = array(
-			'CA' => 9,
-			'US' => 10,
-			'GB' => 13,
-			'AT' => 11,
-			'BE' => 10,
-			'BG' => 6,
-			'HR' => 7,
-			'CY' => 8,
-			'CZ' => 7,
-			'DK' => 10,
-			'EE' => 6,
-			'FI' => 10,
-			'FO' => 2,
-			'FR' => 11,
-			'GI' => 3,
-			'DE' => 11,
-			'GR' => 7,
-			'GL' => 2,
-			'HU' => 8,
-			'IE' => 10,
-			'IT' => 9,
-			'LV' => 5,
-			'LI' => 4,
-			'LT' => 6,
-			'LU' => 7,
-			'MT' => 6,
-			'MD' => 2,
-			'NL' => 9,
-			'NO' => 7,
-			'PL' => 8,
-			'PT' => 9,
-			'RO' => 7,
-			'SM' => 2,
-			'SK' => 6,
-			'ES' => 11,
-			'SE' => 8,
-			'CH' => 7,
-			'AG' => 4,
-			'AI' => 2,
-			'AR' => 4,
-			'AW' => 2,
-			'BS' => 4,
-			'BB' => 4,
-			'BZ' => 4,
-			'BM' => 4,
-			'BO' => 1,
-			'BQ' => 2,
-			'BR' => 5,
-			'VG' => 2,
-			'KY' => 4,
-			'CL' => 4,
-			'CO' => 4,
-			'CR' => 4,
-			'CW' => 2,
-			'DM' => 4,
-			'DO' => 4,
-			'EC' => 3,
-			'SV' => 4,
-			'FK' => 1,
-			'GF' => 3,
-			'GD' => 4,
-			'GP' => 3,
-			'GT' => 4,
-			'GY' => 2,
-			'HN' => 4,
-			'JM' => 4,
-			'MQ' => 3,
-			'MX' => 6,
-			'NI' => 4,
-			'PA' => 4,
-			'PY' => 1,
-			'PE' => 4,
-			'KN' => 4,
-			'LC' => 4,
-			'SX' => 2,
-			'VC' => 2,
-			'SR' => 2,
-			'TT' => 4,
-			'TC' => 4,
-			'UY' => 4,
-			'VI' => 2,
+			'CA' => 11,
+			'US' => 12,
+			'GB' => 15,
+			'AT' => 13,
+			'BE' => 11,
+			'BG' => 7,
+			'HR' => 8,
+			'CY' => 9,
+			'CZ' => 8,
+			'DK' => 12,
+			'EE' => 7,
+			'FI' => 11,
+			'FO' => 3,
+			'FR' => 12,
+			'GI' => 4,
+			'DE' => 13,
+			'GR' => 8,
+			'GL' => 3,
+			'HU' => 9,
+			'IE' => 11,
+			'IT' => 10,
+			'LV' => 6,
+			'LI' => 5,
+			'LT' => 7,
+			'LU' => 8,
+			'MT' => 7,
+			'MD' => 3,
+			'NL' => 10,
+			'NO' => 9,
+			'PL' => 9,
+			'PT' => 10,
+			'RO' => 8,
+			'SM' => 3,
+			'SK' => 7,
+			'ES' => 12,
+			'SE' => 10,
+			'CH' => 8,
+			'AG' => 5,
+			'AI' => 3,
+			'AR' => 5,
+			'AW' => 3,
+			'BS' => 5,
+			'BB' => 5,
+			'BZ' => 5,
+			'BM' => 5,
+			'BO' => 2,
+			'BQ' => 3,
+			'BR' => 6,
+			'VG' => 3,
+			'KY' => 5,
+			'CL' => 5,
+			'CO' => 5,
+			'CR' => 5,
+			'CW' => 3,
+			'DM' => 5,
+			'DO' => 5,
+			'EC' => 4,
+			'SV' => 5,
+			'FK' => 2,
+			'GF' => 4,
+			'GD' => 5,
+			'GP' => 4,
+			'GT' => 5,
+			'GY' => 5,
+			'HN' => 5,
+			'JM' => 5,
+			'MQ' => 4,
+			'MX' => 7,
+			'NI' => 5,
+			'PA' => 5,
+			'PY' => 2,
+			'PE' => 5,
+			'KN' => 5,
+			'LC' => 5,
+			'SX' => 3,
+			'VC' => 3,
+			'SR' => 3,
+			'TT' => 5,
+			'TC' => 5,
+			'UY' => 5,
+			'VI' => 3,
 			'VE' => 3,
-			'AU' => 10,
-			'BD' => 1,
-			'CN' => 4,
-			'FJ' => 2,
-			'GU' => 0,
-			'HK' => 7,
-			'IN' => 6,
+			'AU' => 12,
+			'BD' => 2,
+			'CN' => 5,
+			'FJ' => 3,
+			'GU' => 1,
+			'HK' => 8,
+			'IN' => 7,
 			'ID' => 4,
-			'JP' => 7,
-			'MY' => 5,
-			'NC' => 2,
-			'NZ' => 7,
-			'PW' => 2,
+			'JP' => 9,
+			'MY' => 6,
+			'NC' => 3,
+			'NZ' => 9,
+			'PW' => 3,
 			'PH' => 4,
-			'SG' => 6,
-			'LK' => 1,
-			'KR' => 2,
+			'SG' => 7,
+			'LK' => 2,
+			'KR' => 4,
 			'TH' => 5,
 			'VN' => 4,
-			'DZ' => 2,
-			'AO' => 0,
-			'BJ' => 0,
-			'BW' => 2,
-			'BF' => 0,
-			'BI' => 0,
-			'CM' => 0,
-			'CV' => 0,
-			'CF' => 0,
-			'TD' => 0,
-			'KM' => 0,
-			'CG' => 0,
-			'CI' => 0,
-			'EG' => 3,
-			'CD' => 0,
-			'DJ' => 0,
-			'GQ' => 0,
-			'ER' => 0,
-			'SZ' => 2,
-			'ET' => 0,
-			'GA' => 0,
-			'GH' => 1,
-			'GM' => 0,
-			'GN' => 0,
-			'GW' => 0,
-			'KE' => 2,
-			'LS' => 2,
-			'LR' => 0,
-			'LY' => 0,
-			'MG' => 0,
-			'MW' => 2,
-			'ML' => 0,
-			'MR' => 0,
-			'MU' => 2,
-			'MA' => 3,
-			'MZ' => 2,
-			'NA' => 0,
-			'NE' => 0,
-			'NG' => 1,
-			'RE' => 2,
-			'RW' => 0,
-			'ST' => 0,
-			'SN' => 2,
-			'SC' => 2,
-			'SL' => 0,
-			'SO' => 0,
-			'ZA' => 4,
-			'SS' => 0,
-			'TZ' => 0,
-			'TG' => 0,
-			'TN' => 0,
-			'UG' => 0,
-			'EH' => 0,
-			'ZM' => 0,
-			'ZW' => 0,
-			'BH' => 2,
-			'IQ' => 0,
-			'IL' => 1,
-			'JO' => 2,
-			'KW' => 2,
-			'LB' => 0,
-			'OM' => 3,
-			'PK' => 2,
-			'QA' => 2,
-			'SA' => 3,
-			'AE' => 6,
-			'YE' => 0,
+			'DZ' => 3,
+			'AO' => 1,
+			'BJ' => 1,
+			'BW' => 3,
+			'BF' => 1,
+			'BI' => 1,
+			'CM' => 1,
+			'CV' => 1,
+			'CF' => 1,
+			'TD' => 1,
+			'KM' => 1,
+			'CG' => 1,
+			'CI' => 1,
+			'EG' => 5,
+			'CD' => 1,
+			'DJ' => 1,
+			'GQ' => 1,
+			'ER' => 1,
+			'SZ' => 3,
+			'ET' => 1,
+			'GA' => 1,
+			'GH' => 2,
+			'GM' => 1,
+			'GN' => 1,
+			'GW' => 1,
+			'KE' => 3,
+			'LS' => 3,
+			'LR' => 1,
+			'LY' => 1,
+			'MG' => 1,
+			'MW' => 3,
+			'ML' => 1,
+			'MR' => 1,
+			'MU' => 3,
+			'YT' => 1,
+			'MA' => 4,
+			'MZ' => 3,
+			'NA' => 1,
+			'NE' => 1,
+			'NG' => 3,
+			'RE' => 3,
+			'RW' => 1,
+			'ST' => 1,
+			'SN' => 3,
+			'SC' => 3,
+			'SL' => 1,
+			'SO' => 1,
+			'ZA' => 6,
+			'SS' => 1,
+			'TZ' => 1,
+			'TG' => 1,
+			'TN' => 1,
+			'UG' => 1,
+			'EH' => 1,
+			'ZM' => 1,
+			'ZW' => 1,
+			'BH' => 4,
+			'IQ' => 1,
+			'IL' => 2,
+			'JO' => 5,
+			'KW' => 4,
+			'LB' => 1,
+			'OM' => 4,
+			'PK' => 4,
+			'QA' => 4,
+			'SA' => 6,
+			'AE' => 9,
+			'YE' => 1,
+			'AD' => 3,
+			'AF' => 1,
+			'AL' => 2,
+			'AM' => 1,
+			'AQ' => 1,
+			'AS' => 1,
+			'AX' => 1,
+			'AZ' => 1,
+			'BA' => 2,
+			'BL' => 2,
+			'BN' => 1,
+			'BT' => 1,
+			'BV' => 1,
+			'BY' => 1,
+			'CC' => 1,
+			'CK' => 1,
+			'CU' => 1,
+			'CX' => 1,
+			'FM' => 1,
+			'GE' => 2,
+			'GG' => 1,
+			'GS' => 1,
+			'HM' => 1,
+			'HT' => 1,
+			'IM' => 1,
+			'IO' => 1,
+			'IR' => 0,
+			'IS' => 3,
+			'JE' => 1,
+			'KG' => 1,
+			'KH' => 1,
+			'KI' => 1,
+			'KZ' => 2,
+			'LA' => 1,
+			'MC' => 2,
+			'ME' => 1,
+			'MF' => 1,
+			'MH' => 1,
+			'MK' => 1,
+			'MM' => 1,
+			'MN' => 1,
+			'MO' => 1,
+			'MP' => 1,
+			'MS' => 1,
+			'MV' => 1,
+			'NF' => 1,
+			'NP' => 1,
+			'NR' => 1,
+			'NU' => 1,
+			'PF' => 2,
+			'PG' => 1,
+			'PM' => 1,
+			'PN' => 1,
+			'PR' => 2,
+			'PS' => 1,
+			'RS' => 2,
+			'RU' => 1,
+			'SB' => 1,
+			'SD' => 1,
+			'SH' => 1,
+			'SI' => 6,
+			'SJ' => 1,
+			'TF' => 1,
+			'TJ' => 1,
+			'TK' => 1,
+			'TL' => 1,
+			'TM' => 1,
+			'TO' => 1,
+			'TR' => 1,
+			'TV' => 1,
+			'TW' => 2,
+			'UA' => 1,
+			'UM' => 1,
+			'UZ' => 1,
+			'VA' => 1,
+			'VU' => 1,
+			'WF' => 1,
+			'WS' => 1,
 		);
 
 		$data = array();
@@ -537,6 +780,26 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that GoCardless is placed immediately after Klarna Checkout in the GB suggestions order.
+	 *
+	 * The order of entries in PaymentsExtensionSuggestions::$country_extensions determines the
+	 * suggestions' display priority, so this guards against accidental reordering.
+	 */
+	public function test_get_country_extensions_gb_gocardless_order() {
+		// Act.
+		$extensions = $this->sut->get_country_extensions( 'GB' );
+		$ids        = array_column( $extensions, 'id' );
+
+		// Assert.
+		$this->assertCount( 15, $ids );
+		$klarna_checkout_index = array_search( PaymentsExtensionSuggestions::KLARNA_CHECKOUT, $ids, true );
+		$gocardless_index      = array_search( PaymentsExtensionSuggestions::GOCARDLESS, $ids, true );
+		$this->assertNotFalse( $klarna_checkout_index, 'Klarna Checkout should be in the GB suggestions.' );
+		$this->assertNotFalse( $gocardless_index, 'GoCardless should be in the GB suggestions.' );
+		$this->assertSame( $klarna_checkout_index + 1, $gocardless_index, 'GoCardless should immediately follow Klarna Checkout in the GB suggestions.' );
+	}
+
+	/**
 	 * Test getting payment extension suggestions by country with per-country config that uses merges.
 	 */
 	public function test_get_country_extensions_with_per_country_merges() {
@@ -544,12 +807,13 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 		$extensions = $this->sut->get_country_extensions( 'MX' );
 
 		// Assert.
-		$this->assertCount( 6, $extensions );
+		$this->assertCount( 7, $extensions );
 		$this->assertSame(
 			array(
 				PaymentsExtensionSuggestions::STRIPE,
-				PaymentsExtensionSuggestions::PAYPAL_FULL_STACK,
 				PaymentsExtensionSuggestions::MERCADO_PAGO,
+				PaymentsExtensionSuggestions::PAYPAL_FULL_STACK,
+				PaymentsExtensionSuggestions::VISA,
 				PaymentsExtensionSuggestions::PAYPAL_WALLET,
 				PaymentsExtensionSuggestions::KLARNA,
 				PaymentsExtensionSuggestions::HELIOPAY,
@@ -561,67 +825,511 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 		// It should have the preferred tag.
 		$this->assertContains( PaymentsExtensionSuggestions::TAG_PREFERRED, $stripe['tags'] );
 
-		$mercado_pago = $extensions[2];
-		// The links should be the expected ones.
+		$mercado_pago = $extensions[1];
+		// The links should include the country-specific Mercado Pago URLs merged with the base details.
 		$this->assertEqualsCanonicalizing(
 			array(
 				// These are coming from the per-country details.
 				array(
-					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_PRICING,
+					'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 					'url'   => 'https://www.mercadopago.com.mx/costs-section',
 				),
 				array(
-					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_TERMS,
+					'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 					'url'   => 'https://www.mercadopago.com.mx/ayuda/terminos-y-politicas_194',
 				),
 				// These are base details for the suggestion.
 				array(
-					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_ABOUT,
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 					'url'   => 'https://woocommerce.com/products/mercado-pago-checkout/',
 				),
 				array(
-					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_DOCS,
+					'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 					'url'   => 'https://woocommerce.com/document/mercado-pago/',
 				),
 				array(
-					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_SUPPORT,
+					'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 					'url'   => 'https://woocommerce.com/my-account/contact-support/?select=mercado-pago-checkout',
 				),
 			),
 			$mercado_pago['links']
 		);
-		// It should not have the preferred tag.
-		$this->assertNotContains( PaymentsExtensionSuggestions::TAG_PREFERRED, $mercado_pago['tags'] );
 
-		$klarna = $extensions[4];
+		$klarna = $extensions[5];
 		// The links should be the expected ones.
 		$this->assertEqualsCanonicalizing(
 			array(
 				// These are coming from the per-country details.
 				array(
-					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_PRICING,
+					'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 					'url'   => 'https://www.klarna.com/mx/negocios/',
 				),
 				array(
-					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_TERMS,
+					'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 					'url'   => 'https://www.klarna.com/mx/terminos-y-condiciones/',
 				),
 				// These are base details for the suggestion.
 				array(
-					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_ABOUT,
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 					'url'   => 'https://woocommerce.com/products/klarna-payments/',
 				),
 				array(
-					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_DOCS,
+					'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 					'url'   => 'https://woocommerce.com/document/klarna-payments/',
 				),
 				array(
-					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_SUPPORT,
+					'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 					'url'   => 'https://woocommerce.com/my-account/contact-support/?select=klarna-payments',
 				),
 			),
 			$klarna['links']
 		);
+	}
+
+	/**
+	 * Test that Mercado Pago is the preferred provider, Visa is demoted, and the country-localized links are merged
+	 * across the 5 LATAM markets where Mercado Pago has primary placement (AR, CL, CO, PE, UY).
+	 *
+	 * @dataProvider data_provider_mercado_pago_preferred_markets
+	 *
+	 * @param string $country_code    ISO 3166-1 alpha-2 country code.
+	 * @param string $mercadopago_tld TLD path for the country (e.g. `com.ar`, `cl`).
+	 */
+	public function test_get_country_extensions_with_mercado_pago_as_preferred_provider( string $country_code, string $mercadopago_tld ) {
+		// Act.
+		$extensions = $this->sut->get_country_extensions( $country_code );
+
+		// Assert ordering: Mercado Pago first, Visa demoted into the "other payment options" group.
+		$this->assertSame(
+			array(
+				PaymentsExtensionSuggestions::MERCADO_PAGO,
+				PaymentsExtensionSuggestions::PAYPAL_FULL_STACK,
+				PaymentsExtensionSuggestions::VISA,
+				PaymentsExtensionSuggestions::PAYPAL_WALLET,
+				PaymentsExtensionSuggestions::HELIOPAY,
+			),
+			array_column( $extensions, 'id' ),
+			"Mercado Pago should be the first suggestion in {$country_code}, with Visa demoted."
+		);
+
+		$mercado_pago = $extensions[0];
+		$this->assertContains(
+			PaymentsExtensionSuggestions::TAG_PREFERRED,
+			$mercado_pago['tags'],
+			"Mercado Pago should carry the preferred tag in {$country_code}."
+		);
+
+		$visa = $extensions[2];
+		$this->assertNotContains(
+			PaymentsExtensionSuggestions::TAG_PREFERRED,
+			$visa['tags'],
+			"Visa should not carry the preferred tag in {$country_code}."
+		);
+
+		// The country-localized PRICING/TERMS links should be merged on top of the base ABOUT/DOCS/SUPPORT links.
+		$this->assertEqualsCanonicalizing(
+			array(
+				// These are coming from the per-country details.
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+					'url'   => "https://www.mercadopago.{$mercadopago_tld}/costs-section",
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+					'url'   => "https://www.mercadopago.{$mercadopago_tld}/ayuda/terminos-y-politicas_194",
+				),
+				// These are base details for the suggestion.
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+					'url'   => 'https://woocommerce.com/products/mercado-pago-checkout/',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+					'url'   => 'https://woocommerce.com/document/mercado-pago/',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+					'url'   => 'https://woocommerce.com/my-account/contact-support/?select=mercado-pago-checkout',
+				),
+			),
+			$mercado_pago['links']
+		);
+	}
+
+	/**
+	 * Data provider for the markets where Mercado Pago is the preferred provider.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public function data_provider_mercado_pago_preferred_markets(): array {
+		return array(
+			'Argentina' => array( 'AR', 'com.ar' ),
+			'Chile'     => array( 'CL', 'cl' ),
+			'Colombia'  => array( 'CO', 'com.co' ),
+			'Peru'      => array( 'PE', 'com.pe' ),
+			'Uruguay'   => array( 'UY', 'com.uy' ),
+		);
+	}
+
+	/**
+	 * Test that in Brazil, Stripe stays preferred and Mercado Pago is the first entry in "other payment options"
+	 * with its Portuguese-localized links merged on top of the base details.
+	 */
+	public function test_get_country_extensions_with_mercado_pago_in_other_options_for_br() {
+		// Act.
+		$extensions = $this->sut->get_country_extensions( 'BR' );
+
+		// Assert ordering: Stripe preferred, Mercado Pago at index 1.
+		$this->assertSame(
+			array(
+				PaymentsExtensionSuggestions::STRIPE,
+				PaymentsExtensionSuggestions::MERCADO_PAGO,
+				PaymentsExtensionSuggestions::PAYPAL_FULL_STACK,
+				PaymentsExtensionSuggestions::VISA,
+				PaymentsExtensionSuggestions::PAYPAL_WALLET,
+				PaymentsExtensionSuggestions::HELIOPAY,
+			),
+			array_column( $extensions, 'id' )
+		);
+
+		$stripe = $extensions[0];
+		$this->assertContains( PaymentsExtensionSuggestions::TAG_PREFERRED, $stripe['tags'] );
+
+		// Mercado Pago should NOT carry the preferred tag in Brazil — Stripe stays primary per the 10.8 fallback.
+		$mercado_pago = $extensions[1];
+		$this->assertNotContains( PaymentsExtensionSuggestions::TAG_PREFERRED, $mercado_pago['tags'] );
+
+		// BR uses Portuguese paths (`ajuda/termos-e-politicas`) vs. Spanish (`ayuda/terminos-y-politicas`) in the other markets.
+		$this->assertEqualsCanonicalizing(
+			array(
+				// These are coming from the per-country details.
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+					'url'   => 'https://www.mercadopago.com.br/costs-section',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+					'url'   => 'https://www.mercadopago.com.br/ajuda/termos-e-politicas_194',
+				),
+				// These are base details for the suggestion.
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+					'url'   => 'https://woocommerce.com/products/mercado-pago-checkout/',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+					'url'   => 'https://woocommerce.com/document/mercado-pago/',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+					'url'   => 'https://woocommerce.com/my-account/contact-support/?select=mercado-pago-checkout',
+				),
+			),
+			$mercado_pago['links']
+		);
+	}
+
+	/**
+	 * @testdox Helcim is the last PSP suggestion in $country_code.
+	 *
+	 * @dataProvider data_provider_helcim_supported_countries
+	 *
+	 * @param string $country_code ISO 3166-1 alpha-2 country code.
+	 */
+	public function test_helcim_is_last_psp_suggestion_in_supported_countries( string $country_code ): void {
+		$extensions       = $this->sut->get_country_extensions( $country_code );
+		$extensions_by_id = array_column( $extensions, null, 'id' );
+		$psp_ids          = array_column(
+			array_filter(
+				$extensions,
+				static fn( array $extension ): bool => PaymentsExtensionSuggestions::TYPE_PSP === $extension['_type']
+			),
+			'id'
+		);
+		$helcim           = $extensions_by_id[ PaymentsExtensionSuggestions::HELCIM ] ?? null;
+
+		$this->assertSame(
+			PaymentsExtensionSuggestions::HELCIM,
+			end( $psp_ids ),
+			"Helcim should be the final PSP suggestion in {$country_code}."
+		);
+		$this->assertIsArray( $helcim, "Helcim should be suggested in {$country_code}." );
+		if ( ! is_array( $helcim ) ) {
+			return;
+		}
+
+		$this->assertNotContains(
+			PaymentsExtensionSuggestions::TAG_PREFERRED,
+			$helcim['tags'],
+			"Helcim should remain in other payment options for {$country_code}."
+		);
+	}
+
+	/**
+	 * @testdox Visa is the last "other payment provider" in Japan.
+	 */
+	public function test_visa_is_last_other_payment_provider_in_jp(): void {
+		$extensions = $this->sut->get_country_extensions( 'JP' );
+		$psp_ids    = array_column(
+			array_filter(
+				$extensions,
+				static fn( array $extension ): bool => PaymentsExtensionSuggestions::TYPE_PSP === $extension['_type']
+			),
+			'id'
+		);
+
+		$this->assertContains( PaymentsExtensionSuggestions::AIRWALLEX, $psp_ids, 'Airwallex should be suggested in JP.' );
+		$this->assertSame(
+			PaymentsExtensionSuggestions::VISA,
+			end( $psp_ids ),
+			'Visa should be the last PSP suggestion in JP.'
+		);
+	}
+
+	/**
+	 * @testdox KOMOJU is suggested between Square and Airwallex in Japan.
+	 */
+	public function test_komoju_is_suggested_between_square_and_airwallex_in_jp(): void {
+		$extensions       = $this->sut->get_country_extensions( 'JP' );
+		$extensions_by_id = array_column( $extensions, null, 'id' );
+		$psp_ids          = array_column(
+			array_filter(
+				$extensions,
+				static fn( array $extension ): bool => PaymentsExtensionSuggestions::TYPE_PSP === $extension['_type']
+			),
+			'id'
+		);
+		$komoju           = $extensions_by_id[ PaymentsExtensionSuggestions::KOMOJU ] ?? null;
+
+		$this->assertContains( PaymentsExtensionSuggestions::KOMOJU, $psp_ids, 'KOMOJU should be suggested in JP.' );
+		$this->assertSame(
+			array_search( PaymentsExtensionSuggestions::SQUARE, $psp_ids, true ) + 1,
+			array_search( PaymentsExtensionSuggestions::KOMOJU, $psp_ids, true ),
+			'KOMOJU should immediately follow Square in JP.'
+		);
+		$this->assertSame(
+			array_search( PaymentsExtensionSuggestions::KOMOJU, $psp_ids, true ) + 1,
+			array_search( PaymentsExtensionSuggestions::AIRWALLEX, $psp_ids, true ),
+			'KOMOJU should immediately precede Airwallex in JP.'
+		);
+
+		$this->assertIsArray( $komoju, 'KOMOJU should be suggested in JP.' );
+		if ( ! is_array( $komoju ) ) {
+			return;
+		}
+
+		$this->assertNotContains(
+			PaymentsExtensionSuggestions::TAG_PREFERRED,
+			$komoju['tags'],
+			'KOMOJU should remain in other payment options for JP.'
+		);
+	}
+
+	/**
+	 * Data provider for Helcim's supported countries.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function data_provider_helcim_supported_countries(): array {
+		return array(
+			'Canada'        => array( 'CA' ),
+			'United States' => array( 'US' ),
+		);
+	}
+
+	/**
+	 * @testdox Mastercard is the first, preferred PSP suggestion in $country_code.
+	 *
+	 * Guards the suggestion definition's default TAG_PREFERRED: the tag is declared once
+	 * on the definition rather than appended per country, so a regression there would be
+	 * invisible to the count-only assertions.
+	 *
+	 * @dataProvider data_provider_mastercard_preferred_countries
+	 *
+	 * @param string $country_code ISO 3166-1 alpha-2 country code.
+	 */
+	public function test_mastercard_is_first_and_preferred_in_supported_countries( string $country_code ): void {
+		$extensions       = $this->sut->get_country_extensions( $country_code );
+		$extensions_by_id = array_column( $extensions, null, 'id' );
+		$psp_ids          = array_column(
+			array_filter(
+				$extensions,
+				static fn( array $extension ): bool => PaymentsExtensionSuggestions::TYPE_PSP === $extension['_type']
+			),
+			'id'
+		);
+		$mastercard       = $extensions_by_id[ PaymentsExtensionSuggestions::MASTERCARD ] ?? null;
+
+		$this->assertIsArray( $mastercard, "Mastercard should be suggested in {$country_code}." );
+		if ( ! is_array( $mastercard ) ) {
+			return;
+		}
+
+		$this->assertSame(
+			PaymentsExtensionSuggestions::MASTERCARD,
+			reset( $psp_ids ),
+			"Mastercard should be the first PSP suggestion in {$country_code}."
+		);
+
+		$this->assertContains(
+			PaymentsExtensionSuggestions::TAG_PREFERRED,
+			$mastercard['tags'],
+			"Mastercard should be a preferred suggestion in {$country_code}."
+		);
+	}
+
+	/**
+	 * Data provider for the countries where Mastercard is a preferred suggestion.
+	 *
+	 * @return array Test cases with country codes.
+	 */
+	public function data_provider_mastercard_preferred_countries(): array {
+		return array(
+			'Egypt'        => array( 'EG' ),
+			'Nigeria'      => array( 'NG' ),
+			'South Africa' => array( 'ZA' ),
+			'Bahrain'      => array( 'BH' ),
+			'Jordan'       => array( 'JO' ),
+			'Kuwait'       => array( 'KW' ),
+			'Pakistan'     => array( 'PK' ),
+			'Qatar'        => array( 'QA' ),
+			'Saudi Arabia' => array( 'SA' ),
+		);
+	}
+
+	/**
+	 * @testdox Mastercard is suggested but not preferred in the UAE.
+	 *
+	 * The UAE is the one market where Mastercard is deliberately not preferred, expressed
+	 * as a `_remove` of the definition's default tag. Without this the exclusion could be
+	 * dropped without any test noticing.
+	 */
+	public function test_mastercard_is_not_preferred_in_ae(): void {
+		$extensions       = $this->sut->get_country_extensions( 'AE' );
+		$extensions_by_id = array_column( $extensions, null, 'id' );
+		$psp_ids          = array_column(
+			array_filter(
+				$extensions,
+				static fn( array $extension ): bool => PaymentsExtensionSuggestions::TYPE_PSP === $extension['_type']
+			),
+			'id'
+		);
+		$mastercard       = $extensions_by_id[ PaymentsExtensionSuggestions::MASTERCARD ] ?? null;
+
+		$this->assertIsArray( $mastercard, 'Mastercard should still be suggested in the UAE.' );
+		if ( ! is_array( $mastercard ) ) {
+			return;
+		}
+
+		$this->assertNotContains(
+			PaymentsExtensionSuggestions::TAG_PREFERRED,
+			$mastercard['tags'],
+			'Mastercard should remain in other payment options for the UAE.'
+		);
+
+		$this->assertNotSame(
+			PaymentsExtensionSuggestions::MASTERCARD,
+			reset( $psp_ids ),
+			'Mastercard should not lead the UAE PSP suggestions.'
+		);
+	}
+
+	/**
+	 * @testdox Helcim has complete base suggestion details.
+	 */
+	public function test_helcim_has_complete_base_details(): void {
+		$extension = $this->sut->get_by_id( 'helcim' );
+
+		$this->assertIsArray( $extension );
+		if ( ! is_array( $extension ) ) {
+			return;
+		}
+
+		$this->assertSame( PaymentsExtensionSuggestions::TYPE_PSP, $extension['_type'] );
+		$this->assertSame(
+			array(
+				'_type' => PaymentsExtensionSuggestions::PLUGIN_TYPE_WPORG,
+				'slug'  => 'helcim-commerce-for-woocommerce',
+			),
+			$extension['plugin']
+		);
+		$this->assertEqualsCanonicalizing(
+			array(
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+					'url'   => 'https://www.helcim.com/pricing/',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+					'url'   => 'https://woocommerce.com/products/helcim-commerce-for-woocommerce/',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+					'url'   => 'https://legal.helcim.com/terms-of-service/',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+					'url'   => 'https://woocommerce.com/document/helcim-commerce-for-woocommerce/',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+					'url'   => 'https://woocommerce.com/my-account/contact-support/?select=helcim-commerce-for-woocommerce',
+				),
+			),
+			$extension['links']
+		);
+		$this->assertNotEmpty( $extension['icon'] );
+		$this->assertNotEmpty( $extension['title'] );
+		$this->assertNotEmpty( $extension['description'] );
+	}
+
+	/**
+	 * @testdox KOMOJU has complete base suggestion details.
+	 */
+	public function test_komoju_has_complete_base_details(): void {
+		$extension = $this->sut->get_by_id( 'komoju' );
+
+		$this->assertIsArray( $extension );
+		if ( ! is_array( $extension ) ) {
+			return;
+		}
+
+		$this->assertSame( PaymentsExtensionSuggestions::TYPE_PSP, $extension['_type'] );
+		$this->assertSame(
+			array(
+				'_type' => PaymentsExtensionSuggestions::PLUGIN_TYPE_WPORG,
+				'slug'  => 'komoju-japanese-payments',
+			),
+			$extension['plugin']
+		);
+		$this->assertEqualsCanonicalizing(
+			array(
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+					'url'   => 'https://en.komoju.com/pricing/',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+					'url'   => 'https://woocommerce.com/products/komoju-japanese-payments/',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+					'url'   => 'https://toc.komoju.com/toc/',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+					'url'   => 'https://woocommerce.com/document/komoju-japanese-payments/',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+					'url'   => 'https://woocommerce.com/my-account/contact-support/?select=komoju-japanese-payments',
+				),
+			),
+			$extension['links']
+		);
+		$this->assertNotEmpty( $extension['icon'] );
+		$this->assertNotEmpty( $extension['title'] );
+		$this->assertNotEmpty( $extension['description'] );
 	}
 
 	/**

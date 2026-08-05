@@ -9,6 +9,7 @@ import {
 import type { BlockEditProps } from '@wordpress/blocks';
 import { useEffect } from '@wordpress/element';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
+import { useProduct } from '@woocommerce/entities';
 
 /**
  * Internal dependencies
@@ -56,6 +57,8 @@ const Edit = (
 		isDescendentOfSingleProductTemplate,
 	] );
 
+	const { product } = useProduct( context.postId );
+
 	return (
 		<>
 			<BlockControls>
@@ -67,7 +70,7 @@ const Edit = (
 				/>
 			</BlockControls>
 			<div { ...blockProps }>
-				<Block { ...blockAttrs } />
+				<Block isAdmin={ true } { ...blockAttrs } product={ product } />
 			</div>
 		</>
 	);

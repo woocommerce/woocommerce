@@ -33,7 +33,7 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 	 *
 	 * @return void
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 		$this->attribution_class = new OrderAttributionController();
 
@@ -56,6 +56,23 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 			->getMock();
 
 		$this->attribution_class->init( $legacy_proxy, $feature_mock, $wp_consent_mock, $logger_mock );
+	}
+
+	/**
+	 * Tears down the fixture, for example, close a network connection.
+	 *
+	 * This method is called after each test to reset static state.
+	 *
+	 * @return void
+	 */
+	public function tearDown(): void {
+		// Reset the static flag between tests using reflection.
+		$reflection = new \ReflectionClass( OrderAttributionController::class );
+		$property   = $reflection->getProperty( 'is_stamp_html_called' );
+		$property->setAccessible( true );
+		$property->setValue( null, false );
+
+		parent::tearDown();
 	}
 
 	/**
@@ -132,5 +149,130 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 
 			$this->assertEquals( $test_case['expected_output'], $output );
 		}
+	}
+
+	/**
+	 * Tests that stamp_html_element outputs the correct HTML element.
+	 *
+	 * @return void
+	 */
+	public function test_stamp_html_element_outputs_correct_html() {
+		ob_start();
+		$this->attribution_class->stamp_html_element();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( '<wc-order-attribution-inputs>', $output );
+		$this->assertStringContainsString( '</wc-order-attribution-inputs>', $output );
+	}
+
+	/**
+	 * Tests that stamp_html_element respects the single-output filter.
+	 *
+	 * @return void
+	 */
+	public function test_stamp_html_element_respects_single_output_filter() {
+		// Enable single-output mode via filter.
+		add_filter( 'wc_order_attribution_allow_multiple_elements', '__return_false' );
+
+		ob_start();
+		$this->attribution_class->stamp_html_element();
+		$this->attribution_class->stamp_html_element(); // Second call should be suppressed.
+		$output = ob_get_clean();
+
+		// Should only contain one instance.
+		$this->assertEquals( 1, substr_count( $output, '<wc-order-attribution-inputs>' ) );
+
+		remove_filter( 'wc_order_attribution_allow_multiple_elements', '__return_false' );
+	}
+
+	/**
+	 * Tests that stamp_html_element allows multiple outputs by default.
+	 *
+	 * @return void
+	 */
+	public function test_stamp_html_element_allows_multiple_outputs_by_default() {
+		ob_start();
+		$this->attribution_class->stamp_html_element();
+		$this->attribution_class->stamp_html_element(); // Second call should also output.
+		$output = ob_get_clean();
+
+		// Should contain two instances.
+		$this->assertEquals( 2, substr_count( $output, '<wc-order-attribution-inputs>' ) );
+	}
+
+	/**
+	 * Tests that the deprecated method calls the main method correctly.
+	 *
+	 * @return void
+	 */
+	public function test_deprecated_method_calls_main_method() {
+		$this->setExpectedDeprecated( 'Automattic\WooCommerce\Internal\Orders\OrderAttributionController::stamp_checkout_html_element_once' );
+
+		ob_start();
+		$this->attribution_class->stamp_checkout_html_element_once();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( '<wc-order-attribution-inputs>', $output );
+		$this->assertStringContainsString( '</wc-order-attribution-inputs>', $output );
+	}
+
+	/**
+	 * Tests that the static flag is reset between test cases.
+	 *
+	 * This test ensures our tearDown properly resets the static state.
+	 *
+	 * @return void
+	 */
+	public function test_static_flag_isolation_between_tests() {
+		// Enable single-output mode.
+		add_filter( 'wc_order_attribution_allow_multiple_elements', '__return_false' );
+
+		// First call should output.
+		ob_start();
+		$this->attribution_class->stamp_html_element();
+		$output1 = ob_get_clean();
+		$this->assertStringContainsString( '<wc-order-attribution-inputs>', $output1 );
+
+		// Second call should be suppressed.
+		ob_start();
+		$this->attribution_class->stamp_html_element();
+		$output2 = ob_get_clean();
+		$this->assertEmpty( $output2 );
+
+		remove_filter( 'wc_order_attribution_allow_multiple_elements', '__return_false' );
+	}
+
+	/**
+	 * Tests that the static flag is reset on each on_init call (simulating new requests).
+	 *
+	 * This ensures proper behavior in persistent PHP environments like PHP-FPM.
+	 *
+	 * @return void
+	 */
+	public function test_static_flag_resets_on_each_request() {
+		// Enable single-output mode.
+		add_filter( 'wc_order_attribution_allow_multiple_elements', '__return_false' );
+
+		// Simulate first request - output should work.
+		$this->attribution_class->on_init();
+		ob_start();
+		$this->attribution_class->stamp_html_element();
+		$output1 = ob_get_clean();
+		$this->assertStringContainsString( '<wc-order-attribution-inputs>', $output1 );
+
+		// Simulate second request - on_init resets the flag.
+		$this->attribution_class->on_init();
+		ob_start();
+		$this->attribution_class->stamp_html_element();
+		$output2 = ob_get_clean();
+		$this->assertStringContainsString( '<wc-order-attribution-inputs>', $output2, 'Output should work on second request after on_init reset' );
+
+		// Within same request, second call should be suppressed.
+		ob_start();
+		$this->attribution_class->stamp_html_element();
+		$output3 = ob_get_clean();
+		$this->assertEmpty( $output3, 'Second call within same request should be suppressed' );
+
+		remove_filter( 'wc_order_attribution_allow_multiple_elements', '__return_false' );
 	}
 }

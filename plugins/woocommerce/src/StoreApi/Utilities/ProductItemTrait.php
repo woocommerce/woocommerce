@@ -4,7 +4,7 @@ namespace Automattic\WooCommerce\StoreApi\Utilities;
 /**
  * ProductItemTrait
  *
- * Shared functionality for formating product item data.
+ * Shared functionality for formatting product item data.
  */
 trait ProductItemTrait {
 	/**
@@ -15,17 +15,18 @@ trait ProductItemTrait {
 	 * @return array
 	 */
 	protected function prepare_product_price_response( \WC_Product $product, $tax_display_mode = '' ) {
-		$tax_display_mode = $this->get_tax_display_mode( $tax_display_mode );
-		$price_function   = $this->get_price_function_from_tax_display_mode( $tax_display_mode );
-		$prices           = parent::prepare_product_price_response( $product, $tax_display_mode );
+		$tax_display_mode   = $this->get_tax_display_mode( $tax_display_mode );
+		$price_function     = $this->get_price_function_from_tax_display_mode( $tax_display_mode );
+		$prices             = parent::prepare_product_price_response( $product, $tax_display_mode );
+		$rounding_precision = wc_get_rounding_precision();
 
 		// Add raw prices (prices with greater precision).
-		$prices['raw_prices'] = [
-			'precision'     => wc_get_rounding_precision(),
-			'price'         => $this->prepare_money_response( $price_function( $product ), wc_get_rounding_precision() ),
-			'regular_price' => $this->prepare_money_response( $price_function( $product, [ 'price' => $product->get_regular_price() ] ), wc_get_rounding_precision() ),
-			'sale_price'    => $this->prepare_money_response( $price_function( $product, [ 'price' => $product->get_sale_price() ] ), wc_get_rounding_precision() ),
-		];
+		$prices['raw_prices'] = array(
+			'precision'     => $rounding_precision,
+			'price'         => $this->prepare_money_response( $price_function( $product ), $rounding_precision ),
+			'regular_price' => $this->prepare_money_response( $price_function( $product, array( 'price' => $product->get_regular_price() ) ), $rounding_precision ),
+			'sale_price'    => $this->prepare_money_response( $price_function( $product, array( 'price' => $product->get_sale_price() ) ), $rounding_precision ),
+		);
 
 		return $prices;
 	}
@@ -38,7 +39,7 @@ trait ProductItemTrait {
 	 * @return array
 	 */
 	protected function format_variation_data( $variation_data, $product ) {
-		$return = [];
+		$return = array();
 
 		if ( ! is_iterable( $variation_data ) ) {
 			return $return;
@@ -46,15 +47,29 @@ trait ProductItemTrait {
 
 		foreach ( $variation_data as $key => $value ) {
 			$taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', urldecode( $key ) ) );
-
 			if ( taxonomy_exists( $taxonomy ) ) {
 				// If this is a term slug, get the term's nice name.
 				$term = get_term_by( 'slug', $value, $taxonomy );
 				if ( ! is_wp_error( $term ) && $term && $term->name ) {
-					$value = $term->name;
+
+					/**
+					 * Filters the variation option name for taxonomy attributes.
+					 *
+					 * @since 10.7.0
+					 *
+					 * @internal Matches filter name in WooCommerce core.
+					 *
+					 * @param string      $name     The term name to display.
+					 * @param \WP_Term    $term     Term object.
+					 * @param string      $taxonomy Taxonomy name.
+					 * @param \WC_Product $product  Product data.
+					 * @return string
+					 */
+					$value = apply_filters( 'woocommerce_variation_option_name', $term->name, $term, $taxonomy, $product );
 				}
 				$label = wc_attribute_label( $taxonomy );
 			} else {
+
 				/**
 				 * Filters the variation option name.
 				 *
@@ -74,10 +89,11 @@ trait ProductItemTrait {
 				$label = wc_attribute_label( str_replace( 'attribute_', '', $key ), $product );
 			}
 
-			$return[] = [
-				'attribute' => $this->prepare_html_response( $label ),
-				'value'     => $this->prepare_html_response( $value ),
-			];
+			$return[] = array(
+				'raw_attribute' => $this->prepare_html_response( $key ),
+				'attribute'     => $this->prepare_html_response( $label ),
+				'value'         => $this->prepare_html_response( $value ),
+			);
 		}
 
 		return $return;

@@ -12,8 +12,8 @@ sidebar_label: Add link to logged data
 use Automattic\WooCommerce\Utilities\LoggingUtil;
 
 // Define the label and description for the logging option
-$label = \_\_( 'Enable logging', 'your-textdomain-here' );
-$description = \_\_( 'Log events and errors to help with troubleshooting.', 'your-textdomain-here' );
+$label = __( 'Enable logging', 'your-textdomain-here' );
+$description = __( 'Log events and errors to help with troubleshooting.', 'your-textdomain-here' );
 
 // Check if WooCommerce's logging feature is enabled.
 if ( LoggingUtil::logging_is_enabled() ) {
@@ -27,14 +27,14 @@ if ( LoggingUtil::logging_is_enabled() ) {
     );
     
     $label .= ' | ' . sprintf(
-        \_\_( '<a href="%s">View logs</a>', 'your-textdomain-here' ),
+        __( '<a href="%s">View logs</a>', 'your-textdomain-here' ),
         $logs_url
     );
 }
 
 // Add the logging option to the form fields.
-$form_fields\['yourpluginslug_debug'\] = array(
-  'title'       => \_\_( 'Debugging', 'your-textdomain-here' ),
+$form_fields['yourpluginslug_debug'] = array(
+  'title'       => __( 'Debugging', 'your-textdomain-here' ),
   'label'       => $label,
   'description' => $description,
   'type'        => 'checkbox',

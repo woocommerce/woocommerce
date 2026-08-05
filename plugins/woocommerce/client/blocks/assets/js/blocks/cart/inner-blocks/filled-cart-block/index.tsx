@@ -12,7 +12,8 @@ import { Edit, Save } from './edit';
 import metadata from './block.json';
 
 registerBlockType( 'woocommerce/filled-cart-block', {
-	...metadata,
+	apiVersion: metadata.apiVersion,
+	title: metadata.title,
 	icon: {
 		src: (
 			<Icon

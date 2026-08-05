@@ -2,7 +2,6 @@
 
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 
 /**
@@ -26,13 +25,18 @@ class Marketing extends Task {
 	public function on_activated_plugin( $plugin ) {
 		$plugin_basename = basename( plugin_basename( $plugin ), '.php' );
 
-		if ( $plugin_basename === 'multichannel-by-cedcommerce' &&
-			$this->task_list->visible &&
-			! $this->task_list->is_hidden() &&
-			! $this->is_complete()
-		) {
-			$this->mark_actioned();
-		}
+		// Example: How to mark the marketing task as complete when a specific plugin is activated.
+		/**
+		 * Example:
+		 * if (
+		 *     $plugin_basename === 'multichannel-by-cedcommerce' &&
+		 *     $this->task_list->visible &&
+		 *     ! $this->task_list->is_hidden() &&
+		 *     ! $this->is_complete()
+		 * ) {
+		 *     $this->mark_actioned();
+		 * }
+		 */
 	}
 
 	/**
@@ -49,6 +53,24 @@ class Marketing extends Task {
 	 */
 	public function get_id() {
 		return 'marketing';
+	}
+
+	/**
+	 * Contextual image URL.
+	 *
+	 * @return string
+	 */
+	public function get_image_url() {
+		return WC()->plugin_url() . '/assets/images/task_list/sales-illustration.svg';
+	}
+
+	/**
+	 * Alt text for the contextual image.
+	 *
+	 * @return string
+	 */
+	public function get_image_alt() {
+		return __( 'Marketing illustration', 'woocommerce' );
 	}
 
 	/**
@@ -87,7 +109,7 @@ class Marketing extends Task {
 	 * @return bool
 	 */
 	public function can_view() {
-		return Features::is_enabled( 'remote-free-extensions' );
+		return true;
 	}
 
 	/**

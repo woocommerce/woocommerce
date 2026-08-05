@@ -2,6 +2,9 @@
 
 namespace Automattic\WooCommerce\Internal\Utilities;
 
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+use WP_Error, WP_User;
+
 /**
  * Helper functions for working with users.
  */
@@ -24,6 +27,47 @@ class Users {
 		}
 
 		return is_multisite() ? $user->has_cap( 'manage_sites' ) : $user->has_cap( 'manage_options' );
+	}
+
+	/**
+	 * Get a user from a valid user ID, but only if the active user is able to see them.
+	 *
+	 * In a multisite context, that may mean that they both must be members of the current blog, or else the active
+	 * user must either have special permissions (manage_network_users) or else a special legacy mode
+	 * (woocommerce_network_wide_customers) is enabled.
+	 *
+	 * @param int      $user_id            The ID of the desired user.
+	 * @param int|null $requesting_user_id The ID of the user making the request. Optional, defaults to the current user.
+	 *
+	 * @return WP_User|WP_Error
+	 */
+	public static function get_user_in_current_site( $user_id, ?int $requesting_user_id = null ) {
+		// User ID is expected to be an integer. Cast it if we can (avoiding additional runtime warnings), else treat it as 0.
+		$user_id = is_numeric( $user_id ) ? (int) $user_id : 0;
+
+		$legacy_proxy       = wc_get_container()->get( LegacyProxy::class );
+		$requesting_user_id = $requesting_user_id > 0 ? $requesting_user_id : wp_get_current_user()->ID;
+		$error              = new WP_Error( 'wc_user_invalid_id', __( 'Invalid user ID.', 'woocommerce' ) );
+
+		if ( $user_id <= 0 ) {
+			return $error;
+		}
+
+		$user = get_userdata( $user_id );
+		if ( ! $user instanceof WP_User || ! $user->exists() ) {
+			return $error;
+		}
+
+		if (
+			$legacy_proxy->call_function( 'is_multisite' )
+			&& ! $legacy_proxy->call_function( 'is_user_member_of_blog', $user->ID )
+			&& ! $legacy_proxy->call_function( 'user_can', $requesting_user_id, 'manage_network_users' )
+			&& get_site_option( 'woocommerce_network_wide_customers', 'no' ) !== 'yes'
+		) {
+			return $error;
+		}
+
+		return $user;
 	}
 
 	/**
@@ -85,8 +129,8 @@ class Users {
 
 		// Email verification is required if the user cannot be identified, or if they supplied an email address but the nonce check failed.
 		$can_view_orders      = current_user_can( 'read_private_shop_orders' );
-		$session_email_match  = $session_email === $billing_email;
-		$supplied_email_match = $supplied_email === $billing_email;
+		$session_email_match  = ! empty( $session_email ) && 0 === strcasecmp( $session_email, $billing_email );
+		$supplied_email_match = ! empty( $supplied_email ) && 0 === strcasecmp( $supplied_email, $billing_email );
 
 		$email_verification_required = ! $session_email_match && ! $supplied_email_match && ! $can_view_orders;
 
@@ -116,16 +160,16 @@ class Users {
 	 * @param int    $user_id User ID.
 	 * @param string $key     Optional. The meta key to retrieve. By default, returns data for all keys.
 	 * @param bool   $single  Optional. Whether to return a single value. This parameter has no effect if `$key` is not
-	 *                        specified. Default false.
+	 *                        specified. Default true (WordPress's `get_user_meta()` defaults this to false).
 	 *
 	 * @return mixed An array of values if `$single` is false. The value of meta data field if `$single` is true.
 	 *               False for an invalid `$user_id` (non-numeric, zero, or negative value). An empty string if a valid
 	 *               but non-existing user ID is passed.
 	 */
-	public static function get_site_user_meta( int $user_id, string $key = '', bool $single = false ) {
+	public static function get_site_user_meta( int $user_id, string $key = '', bool $single = true ) {
 		global $wpdb;
 		$site_specific_key = $key . '_' . rtrim( $wpdb->get_blog_prefix( get_current_blog_id() ), '_' );
-		return get_user_meta( $user_id, $site_specific_key, true );
+		return get_user_meta( $user_id, $site_specific_key, $single );
 	}
 
 	/**

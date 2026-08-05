@@ -4,7 +4,7 @@
 import { Fragment } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
-import { PLACEHOLDER_IMG_SRC } from '@woocommerce/settings';
+import { PLACEHOLDER_IMG_SRC, getSetting } from '@woocommerce/settings';
 import {
 	useInnerBlockLayoutContext,
 	useProductDataContext,
@@ -14,20 +14,26 @@ import { withProductDataContext } from '@woocommerce/shared-hocs';
 import { useStoreEvents } from '@woocommerce/base-context/hooks';
 import type { HTMLAttributes } from 'react';
 import { decodeEntities } from '@wordpress/html-entities';
-import {
-	isString,
-	objectHasProp,
-	isEmpty,
-	ProductResponseItem,
-} from '@woocommerce/types';
+import { isEmpty, ProductResponseItem } from '@woocommerce/types';
+import { ProductEntityResponse } from '@woocommerce/entities';
 
 /**
  * Internal dependencies
  */
 import ProductSaleBadge from '../sale-badge/block';
 import './style.scss';
-import { BlockAttributes, ImageSizing, ProductImageContext } from './types';
-import { isTryingToDisplayLegacySaleBadge } from './utils';
+import { BlockAttributes, ProductImageContext } from './types';
+import { isTryingToDisplayLegacySaleBadge, resolveAspectRatio } from './utils';
+
+const buildStyles = ( props: Partial< ImageProps > ) => {
+	const { aspectRatio, height, width, scale } = props;
+	return {
+		height,
+		width,
+		objectFit: scale,
+		aspectRatio,
+	};
+};
 
 const chooseImage = ( product: ProductResponseItem, imageId?: number ) => {
 	// Default to placeholder image if no product images are available.
@@ -45,11 +51,15 @@ const chooseImage = ( product: ProductResponseItem, imageId?: number ) => {
 	return product.images[ 0 ];
 };
 
-const ImagePlaceholder = ( props ): JSX.Element => {
+const ImagePlaceholder = ( props: {
+	style?: Record< string, unknown >;
+} ): JSX.Element => {
+	const src = getSetting( 'placeholderImgSrcFullSize', PLACEHOLDER_IMG_SRC );
+
 	return (
 		<img
 			{ ...props }
-			src={ PLACEHOLDER_IMG_SRC }
+			src={ src }
 			// Decorative image with no value, so alt should be empty.
 			alt=""
 			width={ undefined }
@@ -69,9 +79,8 @@ interface ImageProps {
 		thumbnail?: string | undefined;
 	};
 	loaded: boolean;
-	showFullSize: boolean;
 	fallbackAlt: string;
-	scale: string;
+	scale: 'cover' | 'contain' | 'fill';
 	width?: string | undefined;
 	height?: string | undefined;
 	aspectRatio: string | undefined;
@@ -80,46 +89,49 @@ interface ImageProps {
 const Image = ( {
 	image,
 	loaded,
-	showFullSize,
 	fallbackAlt,
 	width,
 	scale,
 	height,
 	aspectRatio,
 }: ImageProps ): JSX.Element => {
-	const { thumbnail, src, srcset, sizes, alt } = image || {};
+	const { src, srcset, sizes, alt } = image || {};
 	const imageProps = {
 		alt: alt || fallbackAlt,
 		hidden: ! loaded,
-		src: thumbnail,
-		...( showFullSize && { src, srcSet: srcset, sizes } ),
+		src,
+		srcSet: srcset,
+		sizes,
 	};
 
-	const imageStyles: Record< string, string | undefined > = {
+	const imageStyles = buildStyles( {
 		height,
 		width,
-		objectFit: scale,
+		scale,
 		aspectRatio,
-	};
+	} );
+
+	if ( ! image ) {
+		return <ImagePlaceholder style={ imageStyles } />;
+	}
 
 	return (
-		<>
-			{ imageProps.src && (
-				/* eslint-disable-next-line jsx-a11y/alt-text */
-				<img
-					style={ imageStyles }
-					data-testid="product-image"
-					{ ...imageProps }
-				/>
-			) }
-			{ ! image && <ImagePlaceholder style={ imageStyles } /> }
-		</>
+		/* eslint-disable-next-line jsx-a11y/alt-text */
+		<img
+			style={ imageStyles }
+			data-testid="product-image"
+			{ ...imageProps }
+		/>
 	);
 };
 
 type Props = BlockAttributes &
 	Pick< ProductImageContext, 'imageId' > &
-	HTMLAttributes< HTMLDivElement > & { style?: Record< string, unknown > };
+	Omit< HTMLAttributes< HTMLDivElement >, 'style' > & {
+		isAdmin?: boolean;
+		product?: ProductResponseItem | ProductEntityResponse;
+		isResolving?: boolean;
+	};
 
 type LegacyProps = Props & {
 	product?: ProductResponseItem;
@@ -146,26 +158,55 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		className,
 		height,
 		imageId,
-		imageSizing = ImageSizing.SINGLE,
+		imageSizing,
 		scale,
 		showProductLink = true,
 		style,
 		width,
+		isAdmin,
+		product: productEntity,
+		isResolving,
 		...restProps
 	} = props;
 
 	const styleProps = useStyleProps( props );
 	const { parentClassName } = useInnerBlockLayoutContext();
-	const { product, isLoading } = useProductDataContext();
+	const { product, isLoading } = useProductDataContext( {
+		isAdmin,
+		product: productEntity,
+		isResolving,
+	} );
 	const { dispatchStoreEvent } = useStoreEvents();
 
+	const storeAspectRatio = getSetting< string | null >(
+		'thumbnailAspectRatio',
+		null
+	);
+	const finalAspectRatio = resolveAspectRatio(
+		style,
+		aspectRatio,
+		storeAspectRatio,
+		imageSizing
+	);
+	const aspectRatioClass = `wc-block-components-product-image--aspect-ratio-${
+		finalAspectRatio ? finalAspectRatio.replace( '/', '-' ) : 'auto'
+	}`;
+
 	if ( ! product?.id ) {
+		const imageStyles = buildStyles( {
+			height,
+			width,
+			scale,
+			aspectRatio: finalAspectRatio,
+		} );
+
 		return (
 			<>
 				<div
 					className={ clsx(
 						className,
 						'wc-block-components-product-image',
+						aspectRatioClass,
 						{
 							[ `${ parentClassName }__product-image` ]:
 								parentClassName,
@@ -174,7 +215,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 					) }
 					style={ styleProps.style }
 				>
-					<ImagePlaceholder />
+					<ImagePlaceholder style={ imageStyles } />
 				</div>
 				{ children }
 			</>
@@ -210,6 +251,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 				className={ clsx(
 					className,
 					'wc-block-components-product-image',
+					aspectRatioClass,
 					{
 						[ `${ parentClassName }__product-image` ]:
 							parentClassName,
@@ -225,22 +267,17 @@ export const Block = ( props: Props ): JSX.Element | null => {
 						{ ...restProps }
 					/>
 				) }
-				<ParentComponent { ...( showProductLink && anchorProps ) }>
+				<ParentComponent
+					{ ...( ! isAdmin && showProductLink && anchorProps ) }
+				>
 					<Image
 						fallbackAlt={ decodeEntities( product.name ) }
 						image={ image }
 						loaded={ ! isLoading }
-						showFullSize={ imageSizing !== ImageSizing.THUMBNAIL }
 						width={ width }
 						height={ height }
 						scale={ scale }
-						aspectRatio={
-							objectHasProp( style, 'dimensions' ) &&
-							objectHasProp( style.dimensions, 'aspectRatio' ) &&
-							isString( style.dimensions.aspectRatio )
-								? style.dimensions.aspectRatio
-								: aspectRatio
-						}
+						aspectRatio={ finalAspectRatio }
 					/>
 				</ParentComponent>
 			</div>

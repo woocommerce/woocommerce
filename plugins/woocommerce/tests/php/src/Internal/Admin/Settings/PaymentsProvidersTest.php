@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGateway;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
 use PHPUnit\Framework\MockObject\MockObject;
 use WC_Unit_Test_Case;
@@ -53,7 +54,25 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			->getMock();
 
 		$this->sut = new PaymentsProviders();
-		$this->sut->init( $this->mock_extension_suggestions );
+		$this->sut->init(
+			$this->mock_extension_suggestions,
+			wc_get_container()->get( LegacyProxy::class )
+		);
+	}
+
+	/**
+	 * Tear down test.
+	 */
+	public function tearDown(): void {
+		// Reset gateways, hooks, and cached provider data between tests.
+		remove_all_actions( 'wc_payment_gateways_initialized' );
+		WC()->payment_gateways()->payment_gateways = array();
+		WC()->payment_gateways()->init();
+		if ( isset( $this->sut ) ) {
+			$this->sut->clear_cache();
+		}
+
+		parent::tearDown();
 	}
 
 	/**
@@ -82,7 +101,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		);
 
 		// Clean up.
-		$this->sut->reset_memo();
+		$this->unload_core_paypal_pg();
 	}
 
 	/**
@@ -380,6 +399,209 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test getting payment gateway provider instance returns specific provider.
+	 */
+	public function test_get_payment_gateway_provider_instance_returns_specific_provider() {
+		// Arrange - woocommerce_payments is mapped to WooPayments provider.
+		$gateway_id = 'woocommerce_payments';
+
+		// Act.
+		$provider = $this->sut->get_payment_gateway_provider_instance( $gateway_id );
+
+		// Assert.
+		$this->assertInstanceOf(
+			PaymentsProviders\WooPayments::class,
+			$provider,
+			'Should return specific WooPayments provider instance'
+		);
+	}
+
+	/**
+	 * Test getting payment gateway provider instance returns specific provider with wildcard match.
+	 */
+	public function test_get_payment_gateway_provider_instance_returns_specific_provider_with_wildcard() {
+		// Arrange - stripe_* pattern matches stripe_ideal, and should return Stripe provider.
+		$gateway_id = 'stripe_ideal';
+
+		// Act.
+		$provider = $this->sut->get_payment_gateway_provider_instance( $gateway_id );
+
+		// Assert.
+		$this->assertInstanceOf(
+			PaymentsProviders\Stripe::class,
+			$provider,
+			'Should return Stripe provider for wildcard match'
+		);
+	}
+
+	/**
+	 * Test getting payment gateway provider instance returns the KOMOJU provider for a per-method wildcard match.
+	 */
+	public function test_get_payment_gateway_provider_instance_returns_komoju_provider_for_wildcard() {
+		// Arrange - komoju_* pattern matches komoju_konbini, and should return the Komoju provider,
+		// same as the exact 'komoju' gateway ID.
+		$gateway_id = 'komoju_konbini';
+
+		// Act.
+		$provider = $this->sut->get_payment_gateway_provider_instance( $gateway_id );
+
+		// Assert.
+		$this->assertInstanceOf(
+			PaymentsProviders\Komoju::class,
+			$provider,
+			'Should return Komoju provider for wildcard match'
+		);
+	}
+
+	/**
+	 * Test getting payment gateway provider instance returns generic provider when no mapping exists.
+	 */
+	public function test_get_payment_gateway_provider_instance_returns_generic_provider_when_no_mapping() {
+		// Arrange - Use a gateway ID that has no mapping.
+		$gateway_id = 'unknown_gateway_id';
+
+		// Act.
+		$provider = $this->sut->get_payment_gateway_provider_instance( $gateway_id );
+
+		// Assert - Verify it's the generic provider, not a specific subclass.
+		$this->assertSame(
+			PaymentGateway::class,
+			get_class( $provider ),
+			'Should return generic PaymentGateway instance when no mapping found'
+		);
+	}
+
+	/**
+	 * Test getting payment gateway provider instance returns cached instance.
+	 */
+	public function test_get_payment_gateway_provider_instance_returns_cached_instance() {
+		// Arrange.
+		$gateway_id = 'woocommerce_payments';
+
+		// Act - Get provider instance twice.
+		$provider1 = $this->sut->get_payment_gateway_provider_instance( $gateway_id );
+		$provider2 = $this->sut->get_payment_gateway_provider_instance( $gateway_id );
+
+		// Assert - Should return the same instance (cached).
+		$this->assertSame(
+			$provider1,
+			$provider2,
+			'Should return same cached instance for same gateway ID'
+		);
+	}
+
+	/**
+	 * Test getting payment gateway provider instance returns generic provider for invalid provider class.
+	 */
+	public function test_get_payment_gateway_provider_instance_returns_generic_provider_for_invalid_provider_class() {
+		// Arrange - Use reflection to inject an invalid provider class mapping.
+		$reflection = new \ReflectionClass( $this->sut );
+		$property   = $reflection->getProperty( 'payment_gateways_providers_class_map' );
+		$property->setAccessible( true );
+
+		// Get current map and add invalid mapping.
+		$current_map                    = $property->getValue( $this->sut );
+		$current_map['invalid_gateway'] = \stdClass::class; // stdClass does not extend PaymentGateway.
+		$property->setValue( $this->sut, $current_map );
+
+		// Expect the wc_doing_it_wrong notice.
+		$this->setExpectedIncorrectUsage( PaymentsProviders::class . '::get_payment_gateway_provider_instance' );
+
+		// Act.
+		$provider = $this->sut->get_payment_gateway_provider_instance( 'invalid_gateway' );
+
+		// Assert - Verify it's the generic provider, not a specific subclass.
+		$this->assertSame(
+			PaymentGateway::class,
+			get_class( $provider ),
+			'Should return generic PaymentGateway instance for invalid provider class'
+		);
+	}
+
+	/**
+	 * Test getting payment extension suggestion provider instance returns specific provider.
+	 */
+	public function test_get_payment_extension_suggestion_provider_instance_returns_specific_provider() {
+		// Arrange - woopayments PES ID is mapped to WooPayments provider.
+		$pes_id = ExtensionSuggestions::WOOPAYMENTS;
+
+		// Act.
+		$provider = $this->sut->get_payment_extension_suggestion_provider_instance( $pes_id );
+
+		// Assert.
+		$this->assertInstanceOf(
+			PaymentsProviders\WooPayments::class,
+			$provider,
+			'Should return specific WooPayments provider instance'
+		);
+	}
+
+	/**
+	 * Test getting payment extension suggestion provider instance returns generic provider when no mapping exists.
+	 */
+	public function test_get_payment_extension_suggestion_provider_instance_returns_generic_provider_when_no_mapping() {
+		// Arrange - Use a PES ID that has no mapping.
+		$pes_id = 'unknown_pes_id';
+
+		// Act.
+		$provider = $this->sut->get_payment_extension_suggestion_provider_instance( $pes_id );
+
+		// Assert - Verify it's the generic provider, not a specific subclass.
+		$this->assertSame(
+			PaymentGateway::class,
+			get_class( $provider ),
+			'Should return generic PaymentGateway instance when no mapping found'
+		);
+	}
+
+	/**
+	 * Test getting payment extension suggestion provider instance returns cached instance.
+	 */
+	public function test_get_payment_extension_suggestion_provider_instance_returns_cached_instance() {
+		// Arrange.
+		$pes_id = ExtensionSuggestions::WOOPAYMENTS;
+
+		// Act - Get provider instance twice.
+		$provider1 = $this->sut->get_payment_extension_suggestion_provider_instance( $pes_id );
+		$provider2 = $this->sut->get_payment_extension_suggestion_provider_instance( $pes_id );
+
+		// Assert - Should return the same instance (cached).
+		$this->assertSame(
+			$provider1,
+			$provider2,
+			'Should return same cached instance for same PES ID'
+		);
+	}
+
+	/**
+	 * Test getting payment extension suggestion provider instance returns generic provider for invalid provider class.
+	 */
+	public function test_get_payment_extension_suggestion_provider_instance_returns_generic_provider_for_invalid_provider_class() {
+		// Arrange - Use reflection to inject an invalid provider class mapping.
+		$reflection = new \ReflectionClass( $this->sut );
+		$property   = $reflection->getProperty( 'payment_extension_suggestions_providers_class_map' );
+		$property->setAccessible( true );
+
+		// Get current map and add invalid mapping.
+		$current_map                = $property->getValue( $this->sut );
+		$current_map['invalid_pes'] = \stdClass::class; // stdClass does not extend PaymentGateway.
+		$property->setValue( $this->sut, $current_map );
+
+		// Expect the wc_doing_it_wrong notice.
+		$this->setExpectedIncorrectUsage( PaymentsProviders::class . '::get_payment_extension_suggestion_provider_instance' );
+
+		// Act.
+		$provider = $this->sut->get_payment_extension_suggestion_provider_instance( 'invalid_pes' );
+
+		// Assert - Verify it's the generic provider, not a specific subclass.
+		$this->assertSame(
+			PaymentGateway::class,
+			get_class( $provider ),
+			'Should return generic PaymentGateway instance for invalid provider class'
+		);
+	}
+
+	/**
 	 * Test getting payment gateway base details.
 	 */
 	public function test_get_payment_gateway_base_details() {
@@ -401,6 +623,41 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'method_description'          => '',
 				'plugin_slug'                 => 'woocommerce-payments',
 				'plugin_file'                 => 'woocommerce-payments/woocommerce-payments.php',
+				'provider_links'              => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://woocommerce.com/docs/woocommerce-payments/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						'url'   => 'https://woocommerce.com/my-account/create-a-ticket/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+						'url'   => 'https://woocommerce.com/terms-conditions/',
+					),
+					// Invalid link entries to test validation. These should be filtered out.
+					array(
+						// Missing '_type' field.
+						'url' => 'https://example.com/missing-type/',
+					),
+					array(
+						// Missing 'url' field.
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+					),
+					array(
+						'_type' => '',
+						'url'   => 'https://example.com/empty-type/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+						'url'   => '',
+					),
+					// Invalid link, not an array at all.
+					'not_an_array',
+					// Invalid link with no data.
+					array(),
+				),
 				'recommended_payment_methods' => array(
 					// Basic PM.
 					array(
@@ -463,6 +720,27 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'Accept payments with WooPayments.', $gateway_details['description'] );
 		$this->assertArrayHasKey( 'supports', $gateway_details, 'Gateway `supports` entry is missing' );
 		$this->assertIsList( $gateway_details['supports'], 'Gateway `supports` entry is not a list' );
+		$this->assertArrayHasKey( 'links', $gateway_details, 'Gateway `links` entry is missing' );
+		$this->assertIsArray( $gateway_details['links'], 'Gateway `links` entry is not an array' );
+		$this->assertCount( 3, $gateway_details['links'], 'Gateway `links` should have 3 entries' );
+
+		// Validate each link has the required structure.
+		foreach ( $gateway_details['links'] as $link ) {
+			$this->assertIsArray( $link, 'Each link entry should be an array' );
+			$this->assertArrayHasKey( '_type', $link, 'Link entry should have `_type` field' );
+			$this->assertArrayHasKey( 'url', $link, 'Link entry should have `url` field' );
+			$this->assertNotEmpty( $link['_type'], 'Link `_type` should not be empty' );
+			$this->assertNotEmpty( $link['url'], 'Link `url` should not be empty' );
+		}
+
+		// Validate the specific link types and URLs.
+		$this->assertSame( PaymentsProviders::LINK_TYPE_DOCS, $gateway_details['links'][0]['_type'], 'First link should be DOCS type' );
+		$this->assertSame( 'https://woocommerce.com/docs/woocommerce-payments/', $gateway_details['links'][0]['url'], 'First link URL should match' );
+		$this->assertSame( PaymentsProviders::LINK_TYPE_SUPPORT, $gateway_details['links'][1]['_type'], 'Second link should be SUPPORT type' );
+		$this->assertSame( 'https://woocommerce.com/my-account/create-a-ticket/', $gateway_details['links'][1]['url'], 'Second link URL should match' );
+		$this->assertSame( PaymentsProviders::LINK_TYPE_TERMS, $gateway_details['links'][2]['_type'], 'Third link should be TERMS type' );
+		$this->assertSame( 'https://woocommerce.com/terms-conditions/', $gateway_details['links'][2]['url'], 'Third link URL should match' );
+
 		$this->assertArrayHasKey( 'state', $gateway_details, 'Gateway `state` entry is missing' );
 		$this->assertArrayHasKey( 'enabled', $gateway_details['state'], 'Gateway `state[enabled]` entry is missing' );
 		$this->assertTrue( $gateway_details['state']['enabled'], 'Gateway `state[enabled]` entry is not true' );
@@ -507,6 +785,12 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 					'description' => 'WooPay express checkout',
 					'icon'        => '', // The icon with an invalid URL is ignored.
 					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
+					'notice'      => array(
+						'badge'     => '',
+						'message'   => '',
+						'link_text' => '',
+						'link_url'  => '',
+					),
 				),
 				array(
 					'id'          => 'card',
@@ -517,6 +801,12 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 					'description' => '<strong>Accepts</strong> <b>all major</b><em>credit</em> and <a href="#" target="_blank">debit cards</a>.',
 					'icon'        => 'https://example.com/card-icon.png',
 					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
+					'notice'      => array(
+						'badge'     => '',
+						'message'   => '',
+						'link_text' => '',
+						'link_url'  => '',
+					),
 				),
 				array(
 					'id'          => 'basic2',
@@ -527,6 +817,12 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 					'description' => '',
 					'icon'        => '',
 					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
+					'notice'      => array(
+						'badge'     => '',
+						'message'   => '',
+						'link_text' => '',
+						'link_url'  => '',
+					),
 				),
 				array(
 					'id'          => 'basic',
@@ -537,6 +833,12 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 					'description' => '',
 					'icon'        => '',
 					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_SECONDARY,
+					'notice'      => array(
+						'badge'     => '',
+						'message'   => '',
+						'link_text' => '',
+						'link_url'  => '',
+					),
 				),
 			),
 			$gateway_details['onboarding']['recommended_payment_methods']
@@ -567,12 +869,468 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		// Assert that the custom provider supplied details are returned.
 		$this->assertSame( 'mollie_wc_gateway_bogus', $gateway_details['id'] );
 		// This settings URL is provided by the custom provider.
-		$this->assertSame( admin_url( 'admin.php?page=wc-settings&tab=mollie_settings&section=mollie_payment_methods' ), $gateway_details['management']['_links']['settings']['href'] );
+		$this->assertSame(
+			add_query_arg(
+				array( 'from' => Payments::FROM_PAYMENTS_SETTINGS ),
+				admin_url( 'admin.php?page=wc-settings&tab=mollie_settings&section=mollie_payment_methods' )
+			),
+			$gateway_details['management']['_links']['settings']['href']
+		);
 		$this->assertTrue( $gateway_details['state']['test_mode'] ); // It should be in test mode because of the DB options. The custom provider logic handles this.
 
 		// Clean up.
 		delete_option( 'mollie-payments-for-woocommerce_test_mode_enabled' );
 		delete_option( 'mollie-payments-for-woocommerce_test_api_key' );
+	}
+
+	/**
+	 * Test that get_payment_gateway_details fills in suggestion details.
+	 */
+	public function test_get_payment_gateway_details_fills_in_suggestion_details() {
+		// Arrange.
+		$plugin_slug  = 'woocommerce-gateway-stripe';
+		$fake_gateway = new FakePaymentGateway(
+			'stripe',
+			array(
+				'enabled'            => true,
+				'title'              => 'Basic Gateway Title',
+				'method_title'       => 'Basic Gateway Method Title',
+				'description'        => 'Basic gateway description',
+				'method_description' => '',
+				'plugin_slug'        => $plugin_slug,
+				'plugin_file'        => 'woocommerce-gateway-stripe/woocommerce-gateway-stripe.php',
+			),
+		);
+
+		// Mock a suggestion with rich details.
+		$suggestion = array(
+			'id'                => 'stripe',
+			'_priority'         => 1,
+			'_type'             => ExtensionSuggestions::TYPE_PSP,
+			'title'             => 'Stripe - Suggestion Title',
+			'description'       => 'Stripe - Suggestion Description',
+			'plugin'            => array(
+				'_type' => ExtensionSuggestions::PLUGIN_TYPE_WPORG,
+				'slug'  => $plugin_slug,
+			),
+			'icon'              => 'http://example.com/stripe-icon.png',
+			'image'             => 'http://example.com/stripe-image.png',
+			'short_description' => 'Short description from suggestion',
+			'links'             => array(
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+					'url'   => 'https://stripe.com/docs',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+					'url'   => 'https://stripe.com/support',
+				),
+			),
+			'tags'              => array( 'recommended', 'popular' ),
+			'_incentive'        => array(
+				'description' => 'Special offer',
+			),
+		);
+
+		$this->mock_extension_suggestions
+			->expects( $this->once() )
+			->method( 'get_by_plugin_slug' )
+			->with( $plugin_slug )
+			->willReturn( $suggestion );
+
+		// Act.
+		$gateway_details = $this->sut->get_payment_gateway_details( $fake_gateway, 0, 'US' );
+
+		// Assert that suggestion details are filled in.
+		$this->assertArrayHasKey( '_suggestion_id', $gateway_details, 'Gateway details should have _suggestion_id' );
+		$this->assertSame( 'stripe', $gateway_details['_suggestion_id'], 'Suggestion ID should match' );
+
+		// Verify title and description are filled in from suggestion.
+		$this->assertSame( 'Stripe - Suggestion Title', $gateway_details['title'], 'Title should be filled from suggestion' );
+		$this->assertSame( 'Stripe - Suggestion Description', $gateway_details['description'], 'Description should be filled from suggestion' );
+
+		// Verify icon and image are filled in from suggestion.
+		$this->assertArrayHasKey( 'icon', $gateway_details, 'Gateway details should have icon' );
+		$this->assertSame( 'http://example.com/stripe-icon.png', $gateway_details['icon'], 'Icon should be filled from suggestion' );
+		$this->assertArrayHasKey( 'image', $gateway_details, 'Gateway details should have image' );
+		$this->assertSame( 'http://example.com/stripe-image.png', $gateway_details['image'], 'Image should be filled from suggestion' );
+
+		// Verify links are filled in from suggestion.
+		$this->assertArrayHasKey( 'links', $gateway_details, 'Gateway details should have links' );
+		$this->assertIsArray( $gateway_details['links'], 'Links should be an array' );
+		$this->assertCount( 2, $gateway_details['links'], 'Should have 2 links from suggestion' );
+		$this->assertSame( PaymentsProviders::LINK_TYPE_DOCS, $gateway_details['links'][0]['_type'], 'First link should be DOCS type' );
+		$this->assertSame( 'https://stripe.com/docs', $gateway_details['links'][0]['url'], 'First link URL should match' );
+		$this->assertSame( PaymentsProviders::LINK_TYPE_SUPPORT, $gateway_details['links'][1]['_type'], 'Second link should be SUPPORT type' );
+		$this->assertSame( 'https://stripe.com/support', $gateway_details['links'][1]['url'], 'Second link URL should match' );
+
+		// Verify tags are filled in from suggestion.
+		$this->assertArrayHasKey( 'tags', $gateway_details, 'Gateway details should have tags' );
+		$this->assertIsArray( $gateway_details['tags'], 'Tags should be an array' );
+		$this->assertCount( 2, $gateway_details['tags'], 'Should have 2 tags from suggestion' );
+		$this->assertContains( 'recommended', $gateway_details['tags'], 'Tags should contain recommended' );
+		$this->assertContains( 'popular', $gateway_details['tags'], 'Tags should contain popular' );
+
+		// Verify incentive is filled in from suggestion.
+		$this->assertArrayHasKey( '_incentive', $gateway_details, 'Gateway details should have _incentive' );
+		$this->assertIsArray( $gateway_details['_incentive'], '_incentive should be an array' );
+		$this->assertSame( 'Special offer', $gateway_details['_incentive']['description'], 'Incentive description should match' );
+	}
+
+	/**
+	 * @testdox Gateway details are derived once with a neutral order and receive the requested order on every call.
+	 */
+	public function test_get_payment_gateway_details_is_cached(): void {
+		$fake_gateway = new FakePaymentGateway(
+			'fake-gateway-id',
+			array(
+				'plugin_slug' => 'fake-plugin-slug',
+				'plugin_file' => 'fake-plugin-slug/fake-plugin-file',
+			),
+		);
+
+		$provider = $this->createMock( PaymentGateway::class );
+		$provider
+			->expects( $this->once() )
+			->method( 'get_details' )
+			->with( $fake_gateway, 0, 'US' )
+			->willReturn(
+				array(
+					'id'     => 'fake-gateway-id',
+					'_order' => 0,
+					'title'  => 'Derived details',
+					'plugin' => array(
+						'slug' => 'fake-plugin-slug',
+					),
+				)
+			);
+		$this->set_payment_gateway_provider_instance( 'fake-gateway-id', $provider );
+
+		$this->mock_extension_suggestions
+			->expects( $this->once() )
+			->method( 'get_by_plugin_slug' )
+			->willReturn( null );
+
+		$first  = $this->sut->get_payment_gateway_details( $fake_gateway, 1, 'US' );
+		$second = $this->sut->get_payment_gateway_details( $fake_gateway, 5, 'US' );
+
+		$this->assertSame( 1, $first['_order'], 'The first call should use the requested order' );
+		$this->assertSame( 5, $second['_order'], 'Cached details should use the latest requested order' );
+		unset( $first['_order'], $second['_order'] );
+		$this->assertSame( $first, $second, 'Cached details should match the originally derived details' );
+	}
+
+	/**
+	 * @testdox Gateway details are cached separately for each user.
+	 */
+	public function test_get_payment_gateway_details_cache_per_user(): void {
+		$fake_gateway = new FakePaymentGateway(
+			'fake-gateway-id',
+			array(
+				'plugin_slug' => 'fake-plugin-slug',
+				'plugin_file' => 'fake-plugin-slug/fake-plugin-file',
+			),
+		);
+
+		$provider = $this->createMock( PaymentGateway::class );
+		$provider
+			->expects( $this->exactly( 2 ) )
+			->method( 'get_details' )
+			->willReturnCallback(
+				function ( $gateway, $order ) {
+					return array(
+						'id'     => $gateway->id,
+						'_order' => $order,
+						'title'  => (string) get_current_user_id(),
+						'plugin' => array(
+							'slug' => 'fake-plugin-slug',
+						),
+					);
+				}
+			);
+		$this->set_payment_gateway_provider_instance( 'fake-gateway-id', $provider );
+
+		$this->mock_extension_suggestions
+			->expects( $this->exactly( 2 ) )
+			->method( 'get_by_plugin_slug' )
+			->willReturn( null );
+
+		$first_user_details        = $this->sut->get_payment_gateway_details( $fake_gateway, 1, 'US' );
+		$first_user_cached_details = $this->sut->get_payment_gateway_details( $fake_gateway, 2, 'US' );
+
+		$second_user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $second_user_id );
+		$second_user_details        = $this->sut->get_payment_gateway_details( $fake_gateway, 3, 'US' );
+		$second_user_cached_details = $this->sut->get_payment_gateway_details( $fake_gateway, 4, 'US' );
+
+		$this->assertSame( (string) $this->store_admin_id, $first_user_details['title'] );
+		$this->assertSame( (string) $this->store_admin_id, $first_user_cached_details['title'] );
+		$this->assertSame( (string) $second_user_id, $second_user_details['title'] );
+		$this->assertSame( (string) $second_user_id, $second_user_cached_details['title'] );
+		$this->assertSame( 2, $first_user_cached_details['_order'] );
+		$this->assertSame( 4, $second_user_cached_details['_order'] );
+	}
+
+	/**
+	 * @testdox Gateway details are cached per country and recomputed after the cache is cleared.
+	 */
+	public function test_get_payment_gateway_details_cache_per_country_and_clear(): void {
+		$fake_gateway = new FakePaymentGateway(
+			'fake-gateway-id',
+			array(
+				'plugin_slug' => 'fake-plugin-slug',
+				'plugin_file' => 'fake-plugin-slug/fake-plugin-file',
+			),
+		);
+
+		$generation = 0;
+		$provider   = $this->createMock( PaymentGateway::class );
+		$provider
+			->expects( $this->exactly( 4 ) )
+			->method( 'get_details' )
+			->willReturnCallback(
+				function ( $gateway, $order, $country_code ) use ( &$generation ) {
+					$this->assertSame( 0, $order, 'Gateway details should always be derived with a neutral order' );
+					++$generation;
+					return array(
+						'id'     => $gateway->id,
+						'_order' => $order,
+						'title'  => $country_code . '-' . $generation,
+						'plugin' => array(
+							'slug' => 'fake-plugin-slug',
+						),
+					);
+				}
+			);
+		$this->set_payment_gateway_provider_instance( 'fake-gateway-id', $provider );
+
+		$this->mock_extension_suggestions
+			->expects( $this->exactly( 4 ) )
+			->method( 'get_by_plugin_slug' )
+			->willReturn( null );
+
+		$first_us = $this->sut->get_payment_gateway_details( $fake_gateway, 1, 'US' );
+		$first_de = $this->sut->get_payment_gateway_details( $fake_gateway, 2, 'DE' );
+		$this->sut->clear_cache();
+		$second_us = $this->sut->get_payment_gateway_details( $fake_gateway, 3, 'US' );
+		$this->setExpectedDeprecated( PaymentsProviders::class . '::reset_memo' );
+		$this->sut->reset_memo();
+		$third_us = $this->sut->get_payment_gateway_details( $fake_gateway, 4, 'US' );
+
+		$this->assertSame( 'US-1', $first_us['title'] );
+		$this->assertSame( 'DE-2', $first_de['title'] );
+		$this->assertSame( 'US-3', $second_us['title'] );
+		$this->assertSame( 'US-4', $third_us['title'] );
+		$this->assertSame( 1, $first_us['_order'] );
+		$this->assertSame( 2, $first_de['_order'] );
+		$this->assertSame( 3, $second_us['_order'] );
+		$this->assertSame( 4, $third_us['_order'] );
+	}
+
+	/**
+	 * @testdox clear_cache removes provider lists cached by the Payments service.
+	 */
+	public function test_clear_cache_removes_cached_provider_lists(): void {
+		wp_cache_set(
+			PaymentsProviders::PROVIDER_LISTS_REQUEST_CACHE_KEY,
+			array( 'US_display' => array( array( 'id' => 'stale-provider' ) ) ),
+			PaymentsProviders::PROVIDER_LISTS_REQUEST_CACHE_GROUP
+		);
+
+		$this->sut->clear_cache();
+
+		$this->assertFalse(
+			wp_cache_get( PaymentsProviders::PROVIDER_LISTS_REQUEST_CACHE_KEY, PaymentsProviders::PROVIDER_LISTS_REQUEST_CACHE_GROUP ),
+			'Provider lists derived from gateway data must not survive a providers cache clear.'
+		);
+	}
+
+	/**
+	 * Test that get_payment_gateway_details does not override gateway details with those from the suggestion
+	 * when they exist.
+	 */
+	public function test_get_payment_gateway_details_does_not_override_existing_details_with_suggestion_ones() {
+		// Arrange.
+		$plugin_slug   = 'woocommerce-gateway-stripe';
+		$gateway_links = array(
+			array(
+				'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+				'url'   => 'https://gateway.com/docs',
+			),
+		);
+		$fake_gateway  = new FakePaymentGateway(
+			'stripe',
+			array(
+				'enabled'        => true,
+				'plugin_slug'    => $plugin_slug,
+				'plugin_file'    => 'woocommerce-gateway-stripe/woocommerce-gateway-stripe.php',
+				'provider_links' => $gateway_links,
+			),
+		);
+
+		// Mock a suggestion with different links, plugin slug, tags, and incentive.
+		$suggestion = array(
+			'id'         => 'stripe',
+			'_priority'  => 1,
+			'_type'      => ExtensionSuggestions::TYPE_PSP,
+			'title'      => 'Stripe',
+			'plugin'     => array(
+				'_type' => ExtensionSuggestions::PLUGIN_TYPE_WPORG,
+				'slug'  => 'different-plugin-slug',
+			),
+			'links'      => array(
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+					'url'   => 'https://suggestion.com/support',
+				),
+			),
+			'tags'       => array( 'suggested-tag' ),
+			'_incentive' => array(
+				'description' => 'Suggestion incentive',
+			),
+		);
+
+		$this->mock_extension_suggestions
+			->expects( $this->once() )
+			->method( 'get_by_plugin_slug' )
+			->with( $plugin_slug )
+			->willReturn( $suggestion );
+
+		// Act.
+		$gateway_details = $this->sut->get_payment_gateway_details( $fake_gateway, 0, 'US' );
+
+		// Assert that gateway's own links are preserved (not overridden by suggestion).
+		$this->assertArrayHasKey( 'links', $gateway_details, 'Gateway details should have links' );
+		$this->assertCount( 1, $gateway_details['links'], 'Should have 1 link from gateway, not suggestion' );
+		$this->assertSame( PaymentsProviders::LINK_TYPE_DOCS, $gateway_details['links'][0]['_type'], 'Link type should be from gateway' );
+		$this->assertSame( 'https://gateway.com/docs', $gateway_details['links'][0]['url'], 'Link URL should be from gateway, not suggestion' );
+
+		// Assert that gateway's plugin details are preserved (not overridden by suggestion).
+		$this->assertArrayHasKey( 'plugin', $gateway_details, 'Gateway details should have plugin' );
+		$this->assertArrayHasKey( 'slug', $gateway_details['plugin'], 'Plugin should have slug' );
+		$this->assertSame( $plugin_slug, $gateway_details['plugin']['slug'], 'Plugin slug should be from gateway, not suggestion' );
+
+		// Assert that tags are filled from suggestion since gateway doesn't provide them.
+		$this->assertArrayHasKey( 'tags', $gateway_details, 'Gateway details should have tags' );
+		$this->assertIsArray( $gateway_details['tags'], 'Tags should be an array' );
+		$this->assertCount( 1, $gateway_details['tags'], 'Should have 1 tag from suggestion' );
+		$this->assertContains( 'suggested-tag', $gateway_details['tags'], 'Tags should contain suggested tag' );
+
+		// Assert that _incentive is filled from suggestion since gateway doesn't provide it.
+		$this->assertArrayHasKey( '_incentive', $gateway_details, 'Gateway details should have _incentive' );
+		$this->assertIsArray( $gateway_details['_incentive'], '_incentive should be an array' );
+		$this->assertSame( 'Suggestion incentive', $gateway_details['_incentive']['description'], 'Incentive description should be from suggestion' );
+	}
+
+	/**
+	 * Test that get_payment_gateway_details does not override title for excluded gateways.
+	 */
+	public function test_get_payment_gateway_details_does_not_override_excluded_gateway_titles() {
+		// Arrange.
+		$plugin_slug   = 'woocommerce-gateway-paypal';
+		$gateway_links = array(
+			array(
+				'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+				'url'   => 'https://paypal-gateway.com/docs',
+			),
+		);
+		$fake_gateway  = new FakePaymentGateway(
+			'ppcp-gateway',
+			array(
+				'enabled'            => true,
+				'title'              => 'PayPal Gateway Original Title',
+				'method_title'       => 'PayPal Gateway Original Method Title',
+				'description'        => 'PayPal gateway original description',
+				'method_description' => '',
+				'plugin_slug'        => $plugin_slug,
+				'plugin_file'        => 'woocommerce-gateway-paypal/woocommerce-gateway-paypal.php',
+				'provider_links'     => $gateway_links,
+			),
+		);
+
+		// Mock a PayPal full-stack suggestion (which is in the exclusion list).
+		$suggestion = array(
+			'id'          => ExtensionSuggestions::PAYPAL_FULL_STACK,
+			'_priority'   => 1,
+			'_type'       => ExtensionSuggestions::TYPE_PSP,
+			'title'       => 'PayPal - Suggestion Title (Should Not Override)',
+			'description' => 'PayPal - Suggestion Description (Should Not Override)',
+			'plugin'      => array(
+				'_type' => ExtensionSuggestions::PLUGIN_TYPE_WPORG,
+				'slug'  => $plugin_slug,
+			),
+			'icon'        => 'http://example.com/paypal-icon.png',
+			'links'       => array(
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+					'url'   => 'https://suggestion.com/support',
+				),
+			),
+		);
+
+		$this->mock_extension_suggestions
+			->expects( $this->once() )
+			->method( 'get_by_plugin_slug' )
+			->with( $plugin_slug )
+			->willReturn( $suggestion );
+
+		// Act.
+		$gateway_details = $this->sut->get_payment_gateway_details( $fake_gateway, 0, 'US' );
+
+		// Assert that title and description are NOT overridden for excluded gateways.
+		$this->assertSame( 'PayPal Gateway Original Method Title', $gateway_details['title'], 'Title should NOT be overridden for PayPal full-stack' );
+		$this->assertSame( 'PayPal gateway original description', $gateway_details['description'], 'Description should NOT be overridden for PayPal full-stack' );
+
+		// Assert that gateway's own links are preserved (not overridden by suggestion).
+		$this->assertArrayHasKey( 'links', $gateway_details, 'Gateway details should have links' );
+		$this->assertCount( 1, $gateway_details['links'], 'Should have 1 link from gateway, not suggestion' );
+		$this->assertSame( PaymentsProviders::LINK_TYPE_DOCS, $gateway_details['links'][0]['_type'], 'Link type should be from gateway' );
+		$this->assertSame( 'https://paypal-gateway.com/docs', $gateway_details['links'][0]['url'], 'Link URL should be from gateway, not suggestion' );
+
+		// But icon should still be filled in from suggestion.
+		$this->assertArrayHasKey( 'icon', $gateway_details, 'Gateway details should have icon' );
+		$this->assertSame( 'http://example.com/paypal-icon.png', $gateway_details['icon'], 'Icon should be filled from suggestion' );
+
+		// And suggestion ID should be attached.
+		$this->assertArrayHasKey( '_suggestion_id', $gateway_details, 'Gateway details should have _suggestion_id' );
+		$this->assertSame( ExtensionSuggestions::PAYPAL_FULL_STACK, $gateway_details['_suggestion_id'], 'Suggestion ID should match' );
+	}
+
+	/**
+	 * Test that get_payment_gateway_details skips suggestion matching for offline payment methods.
+	 *
+	 * Offline PMs (BACS, COD, Cheque) don't have extension suggestions or incentives.
+	 * The suggestion lookup should be skipped entirely for them.
+	 */
+	public function test_get_payment_gateway_details_skips_suggestion_matching_for_offline_pms() {
+		// Arrange.
+		$fake_gateway = new FakePaymentGateway(
+			WC_Gateway_BACS::ID,
+			array(
+				'enabled'            => true,
+				'title'              => 'Direct bank transfer',
+				'method_title'       => 'Direct bank transfer',
+				'description'        => 'Make your payment directly into our bank account.',
+				'method_description' => 'Take payments in person via BACS.',
+				'plugin_slug'        => 'woocommerce',
+				'plugin_file'        => 'woocommerce/woocommerce.php',
+			),
+		);
+
+		// The suggestion service should never be called for offline PMs.
+		$this->mock_extension_suggestions
+			->expects( $this->never() )
+			->method( 'get_by_plugin_slug' );
+
+		// Act.
+		$gateway_details = $this->sut->get_payment_gateway_details( $fake_gateway, 0, 'US' );
+
+		// Assert that the gateway is correctly identified as an offline PM.
+		$this->assertSame( PaymentsProviders::TYPE_OFFLINE_PM, $gateway_details['_type'] );
+
+		// Assert that no suggestion-derived fields are present.
+		$this->assertArrayNotHasKey( '_suggestion_id', $gateway_details );
+		$this->assertArrayNotHasKey( '_incentive', $gateway_details );
 	}
 
 	/**
@@ -595,6 +1353,9 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		// Assert.
 		// The PayPal gateway is a core gateway, so the slug is 'woocommerce'.
 		$this->assertSame( 'woocommerce', $slug );
+
+		// Clean up.
+		$this->unload_core_paypal_pg();
 	}
 
 	/**
@@ -642,7 +1403,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => null,
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url1',
 					),
 				),
@@ -663,7 +1424,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 2',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url2',
 					),
 				),
@@ -684,7 +1445,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 3',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url3',
 					),
 				),
@@ -705,7 +1466,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 4',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url4',
 					),
 				),
@@ -726,7 +1487,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 5',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url5',
 					),
 				),
@@ -841,7 +1602,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => null,
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url1',
 					),
 				),
@@ -862,7 +1623,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 2',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url2',
 					),
 				),
@@ -883,7 +1644,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 3',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url3',
 					),
 				),
@@ -904,7 +1665,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 4',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url4',
 					),
 				),
@@ -925,7 +1686,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 5',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url5',
 					),
 				),
@@ -954,6 +1715,9 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'suggestion2', $suggestions['preferred'][1]['id'] );
 		// The rest are in the other list, ordered by priority.
 		$this->assertSame( array( 'suggestion3', 'suggestion4', 'suggestion5' ), array_column( $suggestions['other'], 'id' ) );
+
+		// Clean up.
+		$this->unload_core_paypal_pg();
 	}
 
 	/**
@@ -978,7 +1742,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => null,
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url1',
 					),
 				),
@@ -999,7 +1763,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 2',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url2',
 					),
 				),
@@ -1020,7 +1784,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 3',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url3',
 					),
 				),
@@ -1041,7 +1805,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 4',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url4',
 					),
 				),
@@ -1062,7 +1826,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 5',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url5',
 					),
 				),
@@ -1129,7 +1893,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => null,
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url1',
 					),
 				),
@@ -1150,7 +1914,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 2',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url2',
 					),
 				),
@@ -1171,7 +1935,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 3',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url3',
 					),
 				),
@@ -1192,7 +1956,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 4',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url4',
 					),
 				),
@@ -1213,7 +1977,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 5',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url5',
 					),
 				),
@@ -1242,6 +2006,9 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		// The rest are in the other list, ordered by priority.
 		$this->assertCount( 3, $suggestions['other'] );
 		$this->assertSame( array( 'suggestion1', 'suggestion2', 'suggestion4' ), array_column( $suggestions['other'], 'id' ) );
+
+		// Clean up.
+		delete_user_meta( $this->store_admin_id, Payments::PAYMENTS_NOX_PROFILE_KEY );
 	}
 
 	/**
@@ -1268,7 +2035,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => null,
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url1',
 					),
 				),
@@ -1289,7 +2056,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 2',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url2',
 					),
 				),
@@ -1310,7 +2077,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 3',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url3',
 					),
 				),
@@ -1331,7 +2098,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 4',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url4',
 					),
 				),
@@ -1352,7 +2119,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 5',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url5',
 					),
 				),
@@ -1383,6 +2150,9 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'suggestion3', $suggestions['other'][0]['id'] );
 		// Suggestion4 is not present because a suggestion with the same plugin slug is already present (preferred APM).
 		// Suggestion5 is not present because a suggestion with the same plugin slug is already present (preferred PSP).
+
+		// Clean up.
+		$this->unload_core_paypal_pg();
 	}
 
 	/**
@@ -1417,17 +2187,15 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			'title'             => 'Suggestion 1',
 			'description'       => 'Description 1',
 			'plugin'            => array(
-				'_type'  => ExtensionSuggestions::PLUGIN_TYPE_WPORG,
-				'slug'   => 'woocommerce', // Use WooCommerce because it is an installed plugin, obviously.
-				'file'   => 'woocommerce/woocommerce',
-				'status' => PaymentsProviders::EXTENSION_INSTALLED,
+				'_type' => ExtensionSuggestions::PLUGIN_TYPE_WPORG,
+				'slug'  => 'woocommerce', // Use WooCommerce because it is an installed plugin, obviously.
 			),
 			'image'             => 'http://example.com/image1.png',
 			'icon'              => 'http://example.com/icon1.png',
 			'short_description' => null,
 			'links'             => array(
 				array(
-					'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 					'url'   => 'url1',
 				),
 			),
@@ -1439,11 +2207,18 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 										->with( $suggestion_id )
 										->willReturn( $suggestion_details );
 
+		$expected_suggestion = $suggestion_details;
+		// We expect enhanced details.
+		$expected_suggestion['plugin']['file']   = 'woocommerce/woocommerce'; // Ensure the file is set correctly.
+		$expected_suggestion['plugin']['status'] = PaymentsProviders::EXTENSION_INSTALLED; // Ensure the status is set correctly.
+		$expected_suggestion['category']         = PaymentsProviders::CATEGORY_PSP; // Ensure the category is set correctly.
+		$expected_suggestion['onboarding']       = array( 'type' => PaymentGateway::ONBOARDING_TYPE_EXTERNAL ); // Ensure the onboarding details are present.
+
 		// Act.
 		$suggestion = $this->sut->get_extension_suggestion_by_id( $suggestion_id );
 
 		// Assert.
-		$this->assertSame( $suggestion_details, $suggestion );
+		$this->assertEquals( $expected_suggestion, $suggestion );
 	}
 
 	/**
@@ -1469,7 +2244,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			'short_description' => null,
 			'links'             => array(
 				array(
-					'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 					'url'   => 'url1',
 				),
 			),
@@ -1481,11 +2256,18 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 										->with( $slug )
 										->willReturn( $suggestion_details );
 
+		$expected_suggestion = $suggestion_details;
+		// We expect enhanced details.
+		$expected_suggestion['plugin']['file']   = 'woocommerce/woocommerce'; // Ensure the file is set correctly.
+		$expected_suggestion['plugin']['status'] = PaymentsProviders::EXTENSION_INSTALLED; // Ensure the status is set correctly.
+		$expected_suggestion['category']         = PaymentsProviders::CATEGORY_PSP; // Ensure the category is set correctly.
+		$expected_suggestion['onboarding']       = array( 'type' => PaymentGateway::ONBOARDING_TYPE_EXTERNAL ); // Ensure the onboarding details are present.
+
 		// Act.
 		$suggestion = $this->sut->get_extension_suggestion_by_plugin_slug( $slug );
 
 		// Assert.
-		$this->assertSame( $suggestion_details, $suggestion );
+		$this->assertEquals( $expected_suggestion, $suggestion );
 	}
 
 	/**
@@ -1521,7 +2303,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			'short_description' => null,
 			'links'             => array(
 				array(
-					'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 					'url'   => 'url1',
 				),
 			),
@@ -1587,7 +2369,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			'short_description' => null,
 			'links'             => array(
 				array(
-					'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 					'url'   => 'url1',
 				),
 			),
@@ -1666,7 +2448,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			'short_description' => null,
 			'links'             => array(
 				array(
-					'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 					'url'   => 'url1',
 				),
 			),
@@ -1726,7 +2508,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			'short_description' => null,
 			'links'             => array(
 				array(
-					'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 					'url'   => 'url1',
 				),
 			),
@@ -1791,7 +2573,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			'short_description' => null,
 			'links'             => array(
 				array(
-					'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 					'url'   => 'url1',
 				),
 			),
@@ -1861,7 +2643,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			'short_description' => null,
 			'links'             => array(
 				array(
-					'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 					'url'   => 'url1',
 				),
 			),
@@ -1928,7 +2710,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			'short_description' => null,
 			'links'             => array(
 				array(
-					'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 					'url'   => 'url1',
 				),
 			),
@@ -1993,7 +2775,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		$this->expectExceptionMessage( 'Invalid suggestion ID.' );
 
 		// Act.
-		$result = $this->sut->hide_extension_suggestion( $suggestion_id );
+		$this->sut->hide_extension_suggestion( $suggestion_id );
 	}
 
 	/**
@@ -2056,9 +2838,189 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			$expect_option_update ? 'Expected order map option to BE updated but it was not.' : 'Expected order map option to NOT BE updated but it was.'
 		);
 		$this->assertSame( $expected_order_map, get_option( PaymentsProviders::PROVIDERS_ORDER_OPTION ) );
+	}
 
-		// Clean up.
-		$this->unmock_payment_gateways();
+	/**
+	 * Test the remove_shell_payment_gateways method.
+	 *
+	 * @dataProvider data_provider_test_remove_shell_payment_gateways
+	 *
+	 * @param array $gateways_to_mock     List of payment gateways instances to mock.
+	 * @param array $expected_gateway_ids List of expected gateway IDs after removing shell gateways.
+	 *
+	 * @return void
+	 */
+	public function test_remove_shell_payment_gateways( array $gateways_to_mock, array $expected_gateway_ids ) {
+		// Arrange.
+		$this->mock_payment_gateways( $gateways_to_mock );
+		$payment_gateways = $this->sut->get_payment_gateways( false ); // Get raw gateways list.
+
+		// Act.
+		$result = $this->sut->remove_shell_payment_gateways( $payment_gateways );
+
+		// Assert.
+		$actual_gateway_ids = array_values(
+			array_map(
+				function ( $gateway ) {
+					return $gateway->id;
+				},
+				$result
+			)
+		);
+
+		$this->assertSame( $expected_gateway_ids, $actual_gateway_ids );
+	}
+
+	/**
+	 * Data provider for test_remove_shell_payment_gateways.
+	 *
+	 * @return array
+	 */
+	public function data_provider_test_remove_shell_payment_gateways(): array {
+		return array(
+			'empty gateways list'                         => array(
+				array(),
+				array(),
+			),
+			'non-shell gateway only'                      => array(
+				array(
+					'gateway1' => array(
+						'enabled'            => true,
+						'method_title'       => 'Gateway 1 Title',
+						'method_description' => 'Gateway 1 Description',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+				),
+				array( 'gateway1' ),
+			),
+			'shell gateway only (should be preserved)'    => array(
+				array(
+					'gateway1' => array(
+						'enabled'            => true,
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+				),
+				array( 'gateway1' ),
+			),
+			'multiple shell gateways from same extension (all preserved)' => array(
+				array(
+					'gateway1' => array(
+						'enabled'            => true,
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+					'gateway2' => array(
+						'enabled'            => false,
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+				),
+				array( 'gateway1', 'gateway2' ),
+			),
+			'mix of shell and non-shell from same extension (shells removed)' => array(
+				array(
+					'shell_gateway1' => array(
+						'enabled'            => true,
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+					'real_gateway1'  => array(
+						'enabled'            => true,
+						'method_title'       => 'Real Gateway Title',
+						'method_description' => 'Real Gateway Description',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+					'shell_gateway2' => array(
+						'enabled'            => false,
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+				),
+				array( 'real_gateway1' ),
+			),
+			'multiple extensions with different shell configurations' => array(
+				array(
+					'plugin1_shell'      => array(
+						'enabled'            => true,
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+					'plugin1_real'       => array(
+						'enabled'            => true,
+						'method_title'       => 'Plugin 1 Real',
+						'method_description' => 'Plugin 1 Description',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+					'plugin2_shell_only' => array(
+						'enabled'            => true,
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin2',
+						'plugin_file'        => 'plugin2/plugin2',
+					),
+					'plugin3_real'       => array(
+						'enabled'            => true,
+						'method_title'       => 'Plugin 3 Real',
+						'method_description' => 'Plugin 3 Description',
+						'plugin_slug'        => 'plugin3',
+						'plugin_file'        => 'plugin3/plugin3',
+					),
+				),
+				array( 'plugin1_real', 'plugin2_shell_only', 'plugin3_real' ),
+			),
+			'shell gateway with missing plugin details (should be preserved)' => array(
+				array(
+					'gateway_no_plugin' => array(
+						'enabled'            => true,
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => '',
+						'plugin_file'        => '',
+					),
+				),
+				array( 'gateway_no_plugin' ),
+			),
+			'gateway with title only (not a shell)'       => array(
+				array(
+					'gateway1' => array(
+						'enabled'            => true,
+						'method_title'       => 'Gateway 1 Title',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+				),
+				array( 'gateway1' ),
+			),
+			'gateway with description only (not a shell)' => array(
+				array(
+					'gateway1' => array(
+						'enabled'            => true,
+						'method_title'       => '',
+						'method_description' => 'Gateway 1 Description',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+				),
+				array( 'gateway1' ),
+			),
+		);
 	}
 
 	/**
@@ -2097,18 +3059,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 
 		WC()->payment_gateways()->init();
 
-		$this->sut->reset_memo();
-	}
-
-	/**
-	 * Unmock the payment gateways.
-	 */
-	protected function unmock_payment_gateways() {
-		remove_all_actions( 'wc_payment_gateways_initialized' );
-		WC()->payment_gateways()->payment_gateways = array();
-		WC()->payment_gateways()->init();
-
-		$this->sut->reset_memo();
+		$this->sut->clear_cache();
 	}
 
 	/**
@@ -2353,15 +3304,16 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				array(
 					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 0,
 				),
+				// New gateways are placed above the offline group (default ordering).
 				array(
-					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
-					WC_Gateway_BACS::ID,
-					WC_Gateway_Cheque::ID,
-					WC_Gateway_COD::ID,
 					'gateway1',
 					'gateway2',
 					'gateway3_0',
 					'gateway3_1',
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					WC_Gateway_BACS::ID,
+					WC_Gateway_Cheque::ID,
+					WC_Gateway_COD::ID,
 				),
 				$gateways + $offline_payment_methods_gateways,
 				array(),
@@ -2371,17 +3323,18 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				array(
 					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 0,
 				),
+				// New gateways (and their suggestions) are placed above the offline group (default ordering).
 				array(
-					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
-					WC_Gateway_BACS::ID,
-					WC_Gateway_Cheque::ID,
-					WC_Gateway_COD::ID,
 					'_wc_pes_suggestion1',
 					'gateway1',
 					'gateway2',
 					'_wc_pes_suggestion3',
 					'gateway3_0',
 					'gateway3_1',
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					WC_Gateway_BACS::ID,
+					WC_Gateway_Cheque::ID,
+					WC_Gateway_COD::ID,
 				),
 				$gateways + $offline_payment_methods_gateways,
 				$suggestions,
@@ -4995,6 +5948,206 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that provider link types with mixed case are normalized to lowercase.
+	 *
+	 * @return void
+	 */
+	public function test_provider_links_normalize_mixed_case_types(): void {
+		// Arrange - Create a fake gateway that provides links with mixed-case types.
+		$fake_gateway = new FakePaymentGateway(
+			'test_gateway',
+			array(
+				'enabled'        => true,
+				'method_title'   => 'Test Gateway',
+				'plugin_slug'    => 'test-plugin',
+				'plugin_file'    => 'test-plugin/test-plugin',
+				'provider_links' => array(
+					array(
+						'_type' => 'Documentation', // Mixed case - should normalize to 'documentation'.
+						'url'   => 'https://example.com/docs',
+					),
+					array(
+						'_type' => 'SUPPORT', // All caps - should normalize to 'support'.
+						'url'   => 'https://example.com/support',
+					),
+					array(
+						'_type' => 'aBOut', // Random mixed - should normalize to 'about'.
+						'url'   => 'https://example.com/about',
+					),
+				),
+			),
+		);
+
+		// Act.
+		$gateway_details = $this->sut->get_payment_gateway_base_details( $fake_gateway, 0 );
+
+		// Assert.
+		$this->assertArrayHasKey( 'links', $gateway_details, 'Gateway should have links' );
+		$this->assertIsArray( $gateway_details['links'], 'Links should be an array' );
+		$this->assertCount( 3, $gateway_details['links'], 'Should have 3 valid links' );
+
+		// Verify all types are normalized to lowercase.
+		$this->assertSame( PaymentsProviders::LINK_TYPE_DOCS, $gateway_details['links'][0]['_type'], 'First link type should be normalized to lowercase' );
+		$this->assertSame( 'https://example.com/docs', $gateway_details['links'][0]['url'], 'First link URL should match' );
+
+		$this->assertSame( PaymentsProviders::LINK_TYPE_SUPPORT, $gateway_details['links'][1]['_type'], 'Second link type should be normalized to lowercase' );
+		$this->assertSame( 'https://example.com/support', $gateway_details['links'][1]['url'], 'Second link URL should match' );
+
+		$this->assertSame( PaymentsProviders::LINK_TYPE_ABOUT, $gateway_details['links'][2]['_type'], 'Third link type should be normalized to lowercase' );
+		$this->assertSame( 'https://example.com/about', $gateway_details['links'][2]['url'], 'Third link URL should match' );
+	}
+
+	/**
+	 * Test that provider links with disallowed URL schemes are filtered out.
+	 *
+	 * @return void
+	 */
+	public function test_provider_links_filter_disallowed_url_schemes(): void {
+		// Arrange - Create a fake gateway with various URL schemes.
+		$fake_gateway = new FakePaymentGateway(
+			'test_gateway',
+			array(
+				'enabled'        => true,
+				'method_title'   => 'Test Gateway',
+				'plugin_slug'    => 'test-plugin',
+				'plugin_file'    => 'test-plugin/test-plugin',
+				'provider_links' => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://example.com/docs', // Valid HTTPS URL.
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						'url'   => 'javascript:alert(1)', // Disallowed scheme - XSS attempt.
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+						'url'   => 'data:text/html,<script>alert(1)</script>', // Disallowed scheme.
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+						'url'   => 'http://example.com/pricing', // Valid HTTP URL.
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+						'url'   => 'vbscript:msgbox(1)', // Disallowed scheme.
+					),
+				),
+			),
+		);
+
+		// Act.
+		$gateway_details = $this->sut->get_payment_gateway_base_details( $fake_gateway, 0 );
+
+		// Assert.
+		$this->assertArrayHasKey( 'links', $gateway_details, 'Gateway should have links' );
+		$this->assertIsArray( $gateway_details['links'], 'Links should be an array' );
+		$this->assertCount( 2, $gateway_details['links'], 'Should have 2 valid links (3 malicious links filtered out)' );
+
+		// Verify only the valid HTTP/HTTPS links are included.
+		$this->assertSame( PaymentsProviders::LINK_TYPE_DOCS, $gateway_details['links'][0]['_type'], 'First link should be docs' );
+		$this->assertSame( 'https://example.com/docs', $gateway_details['links'][0]['url'], 'First link URL should be HTTPS' );
+
+		$this->assertSame( PaymentsProviders::LINK_TYPE_PRICING, $gateway_details['links'][1]['_type'], 'Second link should be pricing' );
+		$this->assertSame( 'http://example.com/pricing', $gateway_details['links'][1]['url'], 'Second link URL should be HTTP' );
+
+		// Verify that no javascript:, data:, or vbscript: URLs made it through.
+		foreach ( $gateway_details['links'] as $link ) {
+			$this->assertStringNotContainsString( 'javascript:', $link['url'], 'No javascript: URLs should be present' );
+			$this->assertStringNotContainsString( 'data:', $link['url'], 'No data: URLs should be present' );
+			$this->assertStringNotContainsString( 'vbscript:', $link['url'], 'No vbscript: URLs should be present' );
+		}
+	}
+
+	/**
+	 * Test that provider links are deduplicated by type and URL combination.
+	 *
+	 * @return void
+	 */
+	public function test_provider_links_deduplicate_by_type_and_url(): void {
+		// Arrange - Create a fake gateway with duplicate links (same type + URL).
+		$fake_gateway = new FakePaymentGateway(
+			'test_gateway',
+			array(
+				'enabled'        => true,
+				'method_title'   => 'Test Gateway',
+				'plugin_slug'    => 'test-plugin',
+				'plugin_file'    => 'test-plugin/test-plugin',
+				'provider_links' => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://example.com/docs',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://example.com/docs', // Exact duplicate - should be removed.
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://example.com/other-docs', // Same type, different URL - should be kept.
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						'url'   => 'https://example.com/docs', // Different type, same URL as first - should be kept.
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						'url'   => 'https://example.com/support',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						'url'   => 'https://example.com/support', // Exact duplicate - should be removed.
+					),
+				),
+			),
+		);
+
+		// Act.
+		$gateway_details = $this->sut->get_payment_gateway_base_details( $fake_gateway, 0 );
+
+		// Assert.
+		$this->assertArrayHasKey( 'links', $gateway_details, 'Gateway should have links' );
+		$this->assertIsArray( $gateway_details['links'], 'Links should be an array' );
+		$this->assertCount( 4, $gateway_details['links'], 'Should have 4 unique links (2 duplicates removed)' );
+
+		// Verify the deduplicated links are in the expected order (first occurrence kept).
+		$this->assertSame( PaymentsProviders::LINK_TYPE_DOCS, $gateway_details['links'][0]['_type'], 'First link should be docs' );
+		$this->assertSame( 'https://example.com/docs', $gateway_details['links'][0]['url'], 'First link URL' );
+
+		$this->assertSame( PaymentsProviders::LINK_TYPE_DOCS, $gateway_details['links'][1]['_type'], 'Second link should be docs with different URL' );
+		$this->assertSame( 'https://example.com/other-docs', $gateway_details['links'][1]['url'], 'Second link URL' );
+
+		$this->assertSame( PaymentsProviders::LINK_TYPE_SUPPORT, $gateway_details['links'][2]['_type'], 'Third link should be support with same URL as first docs' );
+		$this->assertSame( 'https://example.com/docs', $gateway_details['links'][2]['url'], 'Third link URL' );
+
+		$this->assertSame( PaymentsProviders::LINK_TYPE_SUPPORT, $gateway_details['links'][3]['_type'], 'Fourth link should be support' );
+		$this->assertSame( 'https://example.com/support', $gateway_details['links'][3]['url'], 'Fourth link URL' );
+
+		// Additional verification - ensure we don't have any duplicate type+URL combinations.
+		$seen_combinations = array();
+		foreach ( $gateway_details['links'] as $link ) {
+			$combination = $link['_type'] . '|' . $link['url'];
+			$this->assertArrayNotHasKey( $combination, $seen_combinations, 'Each type+URL combination should be unique' );
+			$seen_combinations[ $combination ] = true;
+		}
+	}
+
+	/**
+	 * Set a payment gateway provider instance for testing.
+	 *
+	 * @param string                 $gateway_id The gateway ID.
+	 * @param PaymentGateway         $provider   The provider instance.
+	 * @param PaymentsProviders|null $service    Optional service instance to update.
+	 */
+	private function set_payment_gateway_provider_instance( string $gateway_id, PaymentGateway $provider, ?PaymentsProviders $service = null ): void {
+		$service    = $service ?? $this->sut;
+		$reflection = new \ReflectionClass( $service );
+		$property   = $reflection->getProperty( 'instances' );
+		$property->setAccessible( true );
+		$property->setValue( $service, array( $gateway_id => $provider ) );
+	}
+
+	/**
 	 * Load the WC core PayPal gateway but not enable it.
 	 *
 	 * @return void
@@ -5013,8 +6166,8 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		WC()->payment_gateways()->payment_gateways = array();
 		WC()->payment_gateways()->init();
 
-		// Reset the controller memo to pick up the new gateway details.
-		$this->sut->reset_memo();
+		// Clear cached provider data to pick up the new gateway details.
+		$this->sut->clear_cache();
 	}
 
 	/**
@@ -5036,7 +6189,373 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		WC()->payment_gateways()->payment_gateways = array();
 		WC()->payment_gateways()->init();
 
-		// Reset the controller memo to pick up the new gateway details.
-		$this->sut->reset_memo();
+		// Clear cached provider data to pick up the new gateway details.
+		$this->sut->clear_cache();
+	}
+
+	/**
+	 * Cleanup the core PayPal gateway.
+	 */
+	private function unload_core_paypal_pg() {
+		delete_option( 'woocommerce_paypal_settings' );
+		delete_option( 'woocommerce_currency' );
+
+		$this->sut->clear_cache();
+	}
+
+	/**
+	 * @dataProvider data_provider_is_offline_group_last
+	 *
+	 * @param array $order_map The order map to test.
+	 * @param bool  $expected  Whether the offline group should be considered last.
+	 */
+	public function test_is_offline_group_last( array $order_map, bool $expected ) {
+		$sut = $this->sut;
+
+		$this->assertSame( $expected, $sut->is_offline_group_last( $order_map ) );
+	}
+
+	/**
+	 * Data provider for test_is_offline_group_last.
+	 */
+	public function data_provider_is_offline_group_last(): array {
+		return array(
+			'empty order map'                       => array(
+				array(),
+				false,
+			),
+			'no offline group in map'               => array(
+				array(
+					'gateway1' => 0,
+					'gateway2' => 1,
+				),
+				false,
+			),
+			'offline group is last'                 => array(
+				array(
+					'gateway1'            => 0,
+					'gateway2'            => 1,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 2,
+					WC_Gateway_BACS::ID   => 3,
+					WC_Gateway_Cheque::ID => 4,
+					WC_Gateway_COD::ID    => 5,
+				),
+				true,
+			),
+			'offline group is last, no offline PMs' => array(
+				array(
+					'gateway1' => 0,
+					'gateway2' => 1,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 2,
+				),
+				true,
+			),
+			'gateway after offline group'           => array(
+				array(
+					'gateway1'            => 0,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 1,
+					WC_Gateway_BACS::ID   => 2,
+					WC_Gateway_Cheque::ID => 3,
+					WC_Gateway_COD::ID    => 4,
+					'gateway2'            => 5,
+				),
+				false,
+			),
+			'offline group at start'                => array(
+				array(
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 0,
+					WC_Gateway_BACS::ID   => 1,
+					WC_Gateway_Cheque::ID => 2,
+					WC_Gateway_COD::ID    => 3,
+					'gateway1'            => 4,
+				),
+				false,
+			),
+			'only offline group and offline PMs'    => array(
+				array(
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 0,
+					WC_Gateway_BACS::ID   => 1,
+					WC_Gateway_Cheque::ID => 2,
+				),
+				true,
+			),
+			'only offline group'                    => array(
+				array(
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 0,
+				),
+				true,
+			),
+			'suggestion after offline group'        => array(
+				array(
+					'gateway1'            => 0,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 1,
+					WC_Gateway_BACS::ID   => 2,
+					WC_Gateway_Cheque::ID => 3,
+					WC_Gateway_COD::ID    => 4,
+					PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'suggestion1' => 5,
+				),
+				true,
+			),
+		);
+	}
+
+	/**
+	 * @dataProvider data_provider_enhance_order_map_new_gateway_placement
+	 *
+	 * @param array    $gateway_ids     The gateway IDs to register.
+	 * @param array    $start_order_map The starting order map.
+	 * @param string[] $expected_order  The expected order of IDs after enhancement.
+	 */
+	public function test_enhance_order_map_new_gateway_placement(
+		array $gateway_ids,
+		array $start_order_map,
+		array $expected_order
+	) {
+		// Mock payment gateways — all gateways including the new one are registered.
+		$this->mock_payment_gateways(
+			array_combine(
+				$gateway_ids,
+				array_map(
+					function () {
+						return array( 'enabled' => true );
+					},
+					$gateway_ids
+				)
+			)
+		);
+		// No suggestions for any gateway.
+		$this->mock_extension_suggestions
+			->expects( $this->any() )
+			->method( 'get_by_plugin_slug' )
+			->willReturn( null );
+
+		$sut = $this->sut;
+
+		$result = $sut->enhance_order_map( $start_order_map );
+
+		// Extract the order — keys sorted by value.
+		$actual_order = array_keys( $result );
+		// Filter to only the IDs we care about for assertion clarity.
+		$actual_order = array_values( array_intersect( $actual_order, $expected_order ) );
+
+		$this->assertSame( $expected_order, $actual_order );
+	}
+
+	/**
+	 * Data provider for test_enhance_order_map_new_gateway_placement.
+	 */
+	public function data_provider_enhance_order_map_new_gateway_placement(): array {
+		return array(
+			'new gateway placed above offline group (default ordering)'    => array(
+				// gateway_ids: all registered gateways.
+				array( 'gateway1', 'stripe', 'bacs', 'cheque', 'cod' ),
+				// start_order_map: existing map WITHOUT the new gateway.
+				array(
+					'gateway1'            => 0,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 1,
+					WC_Gateway_BACS::ID   => 2,
+					WC_Gateway_Cheque::ID => 3,
+					WC_Gateway_COD::ID    => 4,
+				),
+				// expected_order: stripe should be above offline group.
+				array( 'gateway1', 'stripe', PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP, WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID ),
+			),
+			'new gateway placed at end (custom ordering — offline group not last)' => array(
+				array( 'gateway1', 'stripe', 'bacs', 'cheque', 'cod' ),
+				array(
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 0,
+					WC_Gateway_BACS::ID   => 1,
+					WC_Gateway_Cheque::ID => 2,
+					WC_Gateway_COD::ID    => 3,
+					'gateway1'            => 4,
+				),
+				// expected_order: stripe at the end since offline group is not last.
+				array( PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP, WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID, 'gateway1', 'stripe' ),
+			),
+			'multiple new gateways placed above offline group'            => array(
+				array( 'gateway1', 'stripe', 'paypal', 'bacs', 'cheque', 'cod' ),
+				array(
+					'gateway1'            => 0,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 1,
+					WC_Gateway_BACS::ID   => 2,
+					WC_Gateway_Cheque::ID => 3,
+					WC_Gateway_COD::ID    => 4,
+				),
+				// expected_order: both stripe and paypal should be above offline group.
+				array( 'gateway1', 'stripe', 'paypal', PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP, WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID ),
+			),
+			'new gateway placed at end (no offline group in map)'          => array(
+				array( 'gateway1', 'stripe' ),
+				array(
+					'gateway1' => 0,
+				),
+				// expected_order: stripe at the end since there is no offline group.
+				array( 'gateway1', 'stripe' ),
+			),
+		);
+	}
+
+	/**
+	 * @dataProvider data_provider_enhance_order_map_new_gateway_with_suggestion
+	 *
+	 * @param array    $gateway_ids     The gateway IDs to register.
+	 * @param array    $gateway_slugs   Map of gateway ID to plugin slug.
+	 * @param array    $suggestions     The suggestions list.
+	 * @param array    $start_order_map The starting order map.
+	 * @param string[] $expected_order  The expected order of IDs after enhancement.
+	 */
+	public function test_enhance_order_map_new_gateway_with_suggestion(
+		array $gateway_ids,
+		array $gateway_slugs,
+		array $suggestions,
+		array $start_order_map,
+		array $expected_order
+	) {
+		// Mock payment gateways with their plugin slugs.
+		$gateway_details = array();
+		foreach ( $gateway_ids as $id ) {
+			$gateway_details[ $id ] = array(
+				'enabled'     => true,
+				'plugin_slug' => $gateway_slugs[ $id ] ?? $id,
+			);
+		}
+		$this->mock_payment_gateways( $gateway_details );
+
+		// Mock getting suggestions by plugin slug.
+		$this->mock_extension_suggestions
+			->expects( $this->any() )
+			->method( 'get_by_plugin_slug' )
+			->willReturnCallback(
+				function ( $plugin_slug ) use ( $suggestions ) {
+					foreach ( $suggestions as $suggestion ) {
+						if ( $suggestion['plugin']['slug'] === $plugin_slug ) {
+							return $suggestion;
+						}
+					}
+					return null;
+				}
+			);
+		$sut = $this->sut;
+
+		$result = $sut->enhance_order_map( $start_order_map );
+
+		// Extract the order — keys sorted by value.
+		$actual_order = array_keys( $result );
+		// Filter to only the IDs we care about for assertion clarity.
+		$actual_order = array_values( array_intersect( $actual_order, $expected_order ) );
+
+		$this->assertSame( $expected_order, $actual_order );
+	}
+
+	/**
+	 * Data provider for test_enhance_order_map_new_gateway_with_suggestion.
+	 */
+	public function data_provider_enhance_order_map_new_gateway_with_suggestion(): array {
+		$preferred_paypal = array(
+			'id'        => 'paypal',
+			'_type'     => ExtensionSuggestions::TYPE_PSP,
+			'_priority' => 0,
+			'plugin'    => array( 'slug' => 'woocommerce-paypal-payments' ),
+		);
+
+		return array(
+			'preferred provider before offline PMs — the gateway takes its placeholder' => array(
+				// gateway_ids.
+				array( 'gateway1', 'ppcp-gateway', 'bacs', 'cheque', 'cod' ),
+				// gateway_slugs.
+				array(
+					'gateway1'     => 'plugin1',
+					'ppcp-gateway' => 'woocommerce-paypal-payments',
+					'bacs'         => 'woocommerce',
+					'cheque'       => 'woocommerce',
+					'cod'          => 'woocommerce',
+				),
+				// suggestions.
+				array( $preferred_paypal ),
+				// start_order_map: preferred provider is before offline PMs, gateway not yet present.
+				array(
+					'gateway1'            => 0,
+					PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'paypal' => 1,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 2,
+					WC_Gateway_BACS::ID   => 3,
+					WC_Gateway_Cheque::ID => 4,
+					WC_Gateway_COD::ID    => 5,
+				),
+				// expected_order: PayPal gateway takes the preferred provider's placeholder place, before offline PMs.
+				array(
+					'gateway1',
+					PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'paypal',
+					'ppcp-gateway',
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					WC_Gateway_BACS::ID,
+					WC_Gateway_Cheque::ID,
+					WC_Gateway_COD::ID,
+				),
+			),
+			'suggestion exists but placeholder absent — gateway placed via default logic' => array(
+				// gateway_ids.
+				array( 'gateway1', 'ppcp-gateway', 'bacs', 'cheque', 'cod' ),
+				// gateway_slugs.
+				array(
+					'gateway1'     => 'plugin1',
+					'ppcp-gateway' => 'woocommerce-paypal-payments',
+					'bacs'         => 'woocommerce',
+					'cheque'       => 'woocommerce',
+					'cod'          => 'woocommerce',
+				),
+				// suggestions.
+				array( $preferred_paypal ),
+				// start_order_map: NO placeholder for the suggestion — gateway falls through to default placement.
+				array(
+					'gateway1'            => 0,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 1,
+					WC_Gateway_BACS::ID   => 2,
+					WC_Gateway_Cheque::ID => 3,
+					WC_Gateway_COD::ID    => 4,
+				),
+				// expected_order: PayPal gateway placed above offline group (default behavior), not at a placeholder.
+				array(
+					'gateway1',
+					'ppcp-gateway',
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					WC_Gateway_BACS::ID,
+					WC_Gateway_Cheque::ID,
+					WC_Gateway_COD::ID,
+				),
+			),
+			'preferred provider after offline PMs — the gateway takes its placeholder' => array(
+				// gateway_ids.
+				array( 'gateway1', 'ppcp-gateway', 'bacs', 'cheque', 'cod' ),
+				// gateway_slugs.
+				array(
+					'gateway1'     => 'plugin1',
+					'ppcp-gateway' => 'woocommerce-paypal-payments',
+					'bacs'         => 'woocommerce',
+					'cheque'       => 'woocommerce',
+					'cod'          => 'woocommerce',
+				),
+				// suggestions.
+				array( $preferred_paypal ),
+				// start_order_map: preferred provider is after offline PMs (custom ordering).
+				array(
+					'gateway1'            => 0,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 1,
+					WC_Gateway_BACS::ID   => 2,
+					WC_Gateway_Cheque::ID => 3,
+					WC_Gateway_COD::ID    => 4,
+					PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'paypal' => 5,
+				),
+				// expected_order: PayPal gateway takes the preferred provider's placeholder place, after offline PMs.
+				array(
+					'gateway1',
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					WC_Gateway_BACS::ID,
+					WC_Gateway_Cheque::ID,
+					WC_Gateway_COD::ID,
+					PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'paypal',
+					'ppcp-gateway',
+				),
+			),
+		);
 	}
 }

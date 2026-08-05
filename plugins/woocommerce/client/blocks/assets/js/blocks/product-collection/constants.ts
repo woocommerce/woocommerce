@@ -1,6 +1,6 @@
 /**
  * Purpose of this file:
- * This file defines constants for use in `plugins/woocommerce/client/blocks/assets/js/blocks-registry/product-collection/register-product-collection.tsx`.
+ * This file defines constants for use in `plugins/woocommerce/client/blocks/packages/public-api/blocks-registry/product-collection/register-product-collection.tsx`.
  * By isolating constants here, we avoid loading unnecessary JS file on the frontend (e.g., the /shop page), enhancing site performance.
  *
  * Context: https://github.com/woocommerce/woocommerce/pull/48141#issuecomment-2208770592.
@@ -23,7 +23,6 @@ import {
 	LayoutOptions,
 	WidthOptions,
 } from './types';
-import { ImageSizing } from '../../atomic/blocks/product-elements/image/types';
 
 export const PRODUCT_COLLECTION_BLOCK_NAME = blockJson.name;
 const PRODUCT_TITLE_NAME = `${ PRODUCT_COLLECTION_BLOCK_NAME }/product-title`;
@@ -114,76 +113,106 @@ export const DEFAULT_FILTERS: Pick<
 	priceRange: DEFAULT_QUERY.priceRange,
 };
 
+export const headingBlockName = 'core/heading';
+export const coreQueryPaginationBlockName = 'core/query-pagination';
+export const nextPreviousButtonsBlockName =
+	'woocommerce/product-gallery-large-image-next-previous';
+export const productTemplateBlockName = 'woocommerce/product-template';
+
 /**
  * Default inner block templates for the product collection block.
  * Exported for use in different collections, e.g., 'New Arrivals' collection.
  */
 export const INNER_BLOCKS_PRODUCT_TEMPLATE: InnerBlockTemplate = [
-	'woocommerce/product-template',
+	productTemplateBlockName,
 	{},
 	[
 		[
-			'woocommerce/product-image',
+			'core/group',
 			{
-				imageSizing: ImageSizing.THUMBNAIL,
-				showSaleBadge: false,
+				style: {
+					dimensions: {
+						minHeight: '100%',
+					},
+					spacing: {
+						blockGap: '0.75rem',
+					},
+				},
+				layout: {
+					type: 'flex',
+					orientation: 'vertical',
+					flexWrap: 'nowrap',
+					justifyContent: 'center',
+				},
 			},
 			[
 				[
-					'woocommerce/product-sale-badge',
+					'woocommerce/product-image',
 					{
-						align: 'right',
+						showSaleBadge: false,
+						style: {
+							dimensions: {
+								aspectRatio: '1/1',
+							},
+						},
+					},
+					[
+						[
+							'woocommerce/product-sale-badge',
+							{
+								align: 'right',
+							},
+						],
+					],
+				],
+				[
+					'core/post-title',
+					{
+						level: 2,
+						fontSize: 'medium',
+						style: {
+							layout: {
+								selfStretch: 'fill',
+								flexSize: null,
+							},
+							typography: {
+								lineHeight: '1.4',
+								textAlign: 'center',
+							},
+						},
+						isLink: true,
+						__woocommerceNamespace: PRODUCT_TITLE_NAME,
+					},
+				],
+				[
+					'woocommerce/product-price',
+					{
+						textAlign: 'center',
+						fontSize: 'small',
+					},
+				],
+				[
+					'woocommerce/product-button',
+					{
+						textAlign: 'center',
+						fontSize: 'small',
 					},
 				],
 			],
 		],
-		[
-			'core/post-title',
-			{
-				textAlign: 'center',
-				level: 2,
-				fontSize: 'medium',
-				style: {
-					spacing: {
-						margin: {
-							bottom: '0.75rem',
-							top: '0',
-						},
-					},
-					typography: {
-						lineHeight: '1.4',
-					},
-				},
-				isLink: true,
-				__woocommerceNamespace: PRODUCT_TITLE_NAME,
-			},
-		],
-		[
-			'woocommerce/product-price',
-			{
-				textAlign: 'center',
-				fontSize: 'small',
-			},
-		],
-		[
-			'woocommerce/product-button',
-			{
-				textAlign: 'center',
-				fontSize: 'small',
-			},
-		],
 	],
 ];
 
-export const coreQueryPaginationBlockName = 'core/query-pagination';
+export const paginationDefaultAttributes = {
+	layout: {
+		type: 'flex',
+		justifyContent: 'center',
+	},
+};
+
 export const INNER_BLOCKS_PAGINATION_TEMPLATE: InnerBlockTemplate = [
 	coreQueryPaginationBlockName,
-	{
-		layout: {
-			type: 'flex',
-			justifyContent: 'center',
-		},
-	},
+	paginationDefaultAttributes,
 ];
 
 export const INNER_BLOCKS_NO_RESULTS_TEMPLATE: InnerBlockTemplate = [

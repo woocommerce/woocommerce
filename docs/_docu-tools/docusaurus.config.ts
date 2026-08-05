@@ -1,7 +1,7 @@
 import { themes as prismThemes } from 'prism-react-renderer';
 import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
-import { filterSidebarItems } from "./src/js/sidebar-filters";
+import { filterSidebarItems } from './src/js/sidebar-filters';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -21,7 +21,14 @@ const config: Config = {
 	projectName: 'woocommerce', // Usually your repo name.
 
 	onBrokenLinks: 'throw',
-	onBrokenMarkdownLinks: 'warn',
+	onBrokenAnchors: 'warn',
+	markdown: {
+		hooks: {
+			onBrokenMarkdownLinks: 'warn',
+		},
+	},
+
+	trailingSlash: true,
 
 	// Even if you don't use internationalization, you can use this field to set
 	// useful metadata like html lang. For example, if your site is Chinese, you
@@ -30,6 +37,8 @@ const config: Config = {
 		defaultLocale: 'en',
 		locales: ['en'],
 	},
+
+	plugins: ['./llms-txt/index.ts', './consent-plugin/index.ts'],
 
 	presets: [
 		[
@@ -41,18 +50,21 @@ const config: Config = {
 					sidebarPath: './sidebars.ts',
 					path: '../',
 					exclude: ['_docu-tools/**'],
-					showLastUpdateTime: true,		
 					editUrl:
 						'https://github.com/woocommerce/woocommerce/tree/trunk/docs/docs/',
 					routeBasePath: '/',
 
 					// Custom sidebar filter to remove some items from the docs sidebar.
-					async sidebarItemsGenerator({ defaultSidebarItemsGenerator, ...args }) {
-						let sidebarItems = await defaultSidebarItemsGenerator(args);
+					async sidebarItemsGenerator({
+						defaultSidebarItemsGenerator,
+						...args
+					}) {
+						let sidebarItems = await defaultSidebarItemsGenerator(
+							args
+						);
 						sidebarItems = filterSidebarItems(sidebarItems);
 						return sidebarItems;
 					},
-
 				},
 				theme: {
 					customCss: './src/css/custom.css',
@@ -63,7 +75,7 @@ const config: Config = {
 
 	themeConfig: {
 		// Replace with your project's social card
-		image: 'img/woo-dev-site-logo.svg',
+		image: 'https://developer.woocommerce.com/docs/wp-content/uploads/sites/3/2025/03/woo-dev-docs-banner.png',
 		navbar: {
 			logo: {
 				alt: 'WooCommerce developer docs',
@@ -91,6 +103,11 @@ const config: Config = {
 					type: 'docSidebar',
 					sidebarId: 'cliSidebar',
 					label: 'CLI',
+				},
+				{
+					type: 'docSidebar',
+					sidebarId: 'marketplaceSidebar',
+					label: 'Marketplace',
 				},
 				{
 					href: 'https://developer.woocommerce.com/',
@@ -135,6 +152,10 @@ const config: Config = {
 					title: 'GROW WITH WOO',
 					items: [
 						{
+							label: 'WooCommerce Marketplace',
+							href: 'https://woocommerce.com/woocommerce-marketplace/',
+						},
+						{
 							label: 'Become a Woo agency partner',
 							href: 'https://woocommerce.com/for-agencies/',
 						},
@@ -160,16 +181,16 @@ const config: Config = {
 							href: 'https://github.com/woocommerce/woocommerce/',
 						},
 						{
+							label: 'WooCommerce Code Reference',
+							href: 'https://woocommerce.github.io/code-reference/',
+						},
+						{
 							label: 'Woo Storybook',
 							href: 'https://woocommerce.github.io/woocommerce/',
 						},
 						{
 							label: 'Merchant Documentation',
 							href: 'https://woocommerce.com/docs',
-						},
-						{
-							label: 'WooCommerce Marketplace',
-							href: 'https://woocommerce.com/woocommerce-marketplace/',
 						},
 						{
 							label: 'GitHub',

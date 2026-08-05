@@ -7,9 +7,10 @@ import {
 	useCallback,
 	useLayoutEffect,
 	useRef,
+	useEffect,
 } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { withSelect } from '@wordpress/data';
+import { withSelect, dispatch } from '@wordpress/data';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import {
@@ -43,6 +44,7 @@ import {
 	useTaskListsState,
 } from '~/hooks/use-tasklists-state';
 import { hasTwoColumnLayout } from './utils';
+import { isFeatureEnabled } from '~/utils/features';
 
 const TaskLists = lazy( () =>
 	import( /* webpackChunkName: "tasks" */ '../task-lists' ).then(
@@ -60,6 +62,7 @@ export const Layout = ( {
 	isLoadingTaskLists,
 } ) => {
 	const userPrefs = useUserPreferences();
+	const { createInfoNotice } = dispatch( 'core/notices' );
 
 	// Use hook to get setup task list state so when the task list is completed or hidden, the homescreen layout is updated immediately
 	const { setupTaskListActive: isSetupTaskListActive, setupTaskListHidden } =
@@ -89,6 +92,21 @@ export const Layout = ( {
 			window.removeEventListener( 'resize', maybeToggleColumns );
 		};
 	}, [ maybeToggleColumns ] );
+
+	useEffect( () => {
+		if ( query?.nox === 'test_account_created' ) {
+			createInfoNotice(
+				__(
+					'Your WooPayments test account was successfully created.',
+					'woocommerce'
+				),
+				{
+					type: 'info',
+					duration: 5000,
+				}
+			);
+		}
+	}, [ query?.nox, createInfoNotice ] );
 
 	const shouldStickColumns = isWideViewport.current && twoColumns;
 	const shouldShowMobileAppModal = query.mobileAppModal ?? false;
@@ -131,7 +149,7 @@ export const Layout = ( {
 					<InboxPanel />
 				</Column>
 				<Column shouldStick={ shouldStickColumns }>
-					{ window.wcAdminFeatures.analytics && <StatsOverview /> }
+					{ isFeatureEnabled( 'analytics' ) && <StatsOverview /> }
 					{ ! isSetupTaskListActive && <StoreManagementLinks /> }
 				</Column>
 			</>

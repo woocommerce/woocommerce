@@ -1,0 +1,20 @@
+.wc-block-components-local-pickup-rates-control {
+	.wc-block-components-local-pickup-select {
+		margin-bottom: $gap;
+		display: flex;
+		flex-direction: column;
+		gap: $gap-small;
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+	}
+
+	.wc-block-components-radio-control {
+		width: 100%;
+	}
+}
+
+.wc-block-components-local-pickup-select--multiple {
+	@include card-styles();
+}

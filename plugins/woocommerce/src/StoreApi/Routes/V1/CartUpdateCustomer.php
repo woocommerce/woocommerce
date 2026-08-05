@@ -42,31 +42,31 @@ class CartUpdateCustomer extends AbstractCartRoute {
 	 * @return array An array of endpoints.
 	 */
 	public function get_args() {
-		return [
-			[
+		return array(
+			array(
 				'methods'             => \WP_REST_Server::CREATABLE,
-				'callback'            => [ $this, 'get_response' ],
+				'callback'            => array( $this, 'get_response' ),
 				'permission_callback' => '__return_true',
-				'args'                => [
-					'billing_address'  => [
+				'args'                => array(
+					'billing_address'  => array(
 						'description'       => __( 'Billing address.', 'woocommerce' ),
 						'type'              => 'object',
-						'context'           => [ 'view', 'edit' ],
+						'context'           => array( 'view', 'edit' ),
 						'properties'        => $this->schema->billing_address_schema->get_properties(),
 						'sanitize_callback' => null,
-					],
-					'shipping_address' => [
+					),
+					'shipping_address' => array(
 						'description'       => __( 'Shipping address.', 'woocommerce' ),
 						'type'              => 'object',
-						'context'           => [ 'view', 'edit' ],
+						'context'           => array( 'view', 'edit' ),
 						'properties'        => $this->schema->shipping_address_schema->get_properties(),
 						'sanitize_callback' => null,
-					],
-				],
-			],
-			'schema'      => [ $this->schema, 'get_public_item_schema' ],
-			'allow_batch' => [ 'v1' => true ],
-		];
+					),
+				),
+			),
+			'schema'      => array( $this->schema, 'get_public_item_schema' ),
+			'allow_batch' => array( 'v1' => true ),
+		);
 	}
 
 	/**
@@ -110,11 +110,11 @@ class CartUpdateCustomer extends AbstractCartRoute {
 				'rest_invalid_param',
 				/* translators: %s: List of invalid parameters. */
 				sprintf( __( 'Invalid parameter(s): %s', 'woocommerce' ), implode( ', ', array_keys( $invalid_params ) ) ),
-				[
+				array(
 					'status'  => 400,
 					'params'  => $invalid_params,
 					'details' => $invalid_details,
-				]
+				)
 			);
 		}
 
@@ -131,23 +131,9 @@ class CartUpdateCustomer extends AbstractCartRoute {
 		$cart     = $this->cart_controller->get_cart_instance();
 		$customer = wc()->customer;
 
-		// Get data from request object and merge with customer object, then sanitize.
-		$billing  = $this->schema->billing_address_schema->sanitize_callback(
-			wp_parse_args(
-				$request['billing_address'] ?? [],
-				$this->get_customer_billing_address( $customer )
-			),
-			$request,
-			'billing_address'
-		);
-		$shipping = $this->schema->billing_address_schema->sanitize_callback(
-			wp_parse_args(
-				$request['shipping_address'] ?? [],
-				$this->get_customer_shipping_address( $customer )
-			),
-			$request,
-			'shipping_address'
-		);
+		// Get data from request object and merge with customer object.
+		$billing  = wp_parse_args( $request['billing_address'] ?? array(), $this->get_customer_billing_address( $customer ) );
+		$shipping = wp_parse_args( $request['shipping_address'] ?? array(), $this->get_customer_shipping_address( $customer ) );
 
 		// If the cart does not need shipping, shipping address is forced to match billing address unless defined.
 		if ( ! $cart->needs_shipping() && ! isset( $request['shipping_address'] ) ) {
@@ -242,7 +228,7 @@ class CartUpdateCustomer extends AbstractCartRoute {
 		$additional_fields = $this->additional_fields_controller->get_all_fields_from_object( $customer, 'billing' );
 
 		return array_merge(
-			[
+			array(
 				'first_name' => $customer->get_billing_first_name(),
 				'last_name'  => $customer->get_billing_last_name(),
 				'company'    => $customer->get_billing_company(),
@@ -254,7 +240,7 @@ class CartUpdateCustomer extends AbstractCartRoute {
 				'country'    => $customer->get_billing_country(),
 				'phone'      => $customer->get_billing_phone(),
 				'email'      => $customer->get_billing_email(),
-			],
+			),
 			$additional_fields
 		);
 	}
@@ -269,7 +255,7 @@ class CartUpdateCustomer extends AbstractCartRoute {
 		$additional_fields = $this->additional_fields_controller->get_all_fields_from_object( $customer, 'shipping' );
 
 		return array_merge(
-			[
+			array(
 				'first_name' => $customer->get_shipping_first_name(),
 				'last_name'  => $customer->get_shipping_last_name(),
 				'company'    => $customer->get_shipping_company(),
@@ -280,7 +266,7 @@ class CartUpdateCustomer extends AbstractCartRoute {
 				'postcode'   => $customer->get_shipping_postcode(),
 				'country'    => $customer->get_shipping_country(),
 				'phone'      => $customer->get_shipping_phone(),
-			],
+			),
 			$additional_fields
 		);
 	}

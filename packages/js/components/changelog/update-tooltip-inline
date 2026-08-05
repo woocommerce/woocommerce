@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Change Tooltip component to render Popover as inline

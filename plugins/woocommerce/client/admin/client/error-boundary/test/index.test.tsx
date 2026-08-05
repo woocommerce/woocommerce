@@ -25,11 +25,7 @@ describe( 'ErrorBoundary', () => {
 	beforeAll( () => {
 		// Opt Out of the jsdom error messages
 		window.addEventListener( 'error', onError );
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore - Ignore TS error for deleting window.location
 		delete window.location;
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore - Ignore TS error for assigning window.location
 		window.location = { reload: jest.fn() };
 	} );
 

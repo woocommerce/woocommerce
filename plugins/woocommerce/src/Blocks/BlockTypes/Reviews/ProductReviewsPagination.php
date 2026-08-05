@@ -35,7 +35,7 @@ class ProductReviewsPagination extends AbstractBlock {
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
 				'class'               => $classes,
-				'data-wp-interactive' => 'woocommerce/blockified-product-reviews',
+				'data-wp-interactive' => 'woocommerce/product-reviews',
 			)
 		);
 

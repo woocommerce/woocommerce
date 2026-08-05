@@ -78,7 +78,7 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 			return;
 		}
 
-		$refund_cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $refund->get_parent_id();
+		$refund_cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refund_ids' . $refund->get_parent_id();
 		wp_cache_delete( $refund_cache_key, 'orders' );
 
 		$this->delete_order_data_from_custom_order_tables( $refund_id );
@@ -143,6 +143,14 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 	 */
 	public function update( &$refund ) {
 		$this->persist_updates( $refund );
+		$refund->apply_changes();
+
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+		/**
+		 * This action is documented in woocommerce/includes/data-stores/class-wc-order-refund-data-store-cpt.php.
+		 */
+		do_action( 'woocommerce_update_order_refund', $refund->get_id(), $refund );
+		// phpcs:enable
 	}
 
 	/**

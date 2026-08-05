@@ -8,6 +8,7 @@
  * @version 2.1.0
  */
 
+use Automattic\WooCommerce\Enums\WeightUnit;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
@@ -186,26 +187,26 @@ function wc_get_weight( $weight, $to_unit, $from_unit = '' ) {
 	// Unify all units to kg first.
 	if ( $from_unit !== $to_unit ) {
 		switch ( $from_unit ) {
-			case 'g':
+			case WeightUnit::GRAM:
 				$weight *= 0.001;
 				break;
-			case 'lbs':
+			case WeightUnit::POUND:
 				$weight *= 0.453592;
 				break;
-			case 'oz':
+			case WeightUnit::OUNCE:
 				$weight *= 0.0283495;
 				break;
 		}
 
 		// Output desired unit.
 		switch ( $to_unit ) {
-			case 'g':
+			case WeightUnit::GRAM:
 				$weight *= 1000;
 				break;
-			case 'lbs':
+			case WeightUnit::POUND:
 				$weight *= 2.20462;
 				break;
-			case 'oz':
+			case WeightUnit::OUNCE:
 				$weight *= 35.274;
 				break;
 		}
@@ -287,6 +288,10 @@ function wc_format_refund_total( $amount ) {
  */
 function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 	$number = $number ?? '';
+
+	if ( '' === $number ) {
+		return '';
+	}
 
 	$locale   = localeconv();
 	$decimals = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'] );
@@ -375,12 +380,19 @@ function wc_format_coupon_code( $value ) {
  *
  * Due to the unfiltered_html captability that some (admin) users have, we need to account for slashes.
  *
+ * The html_entity_decode() call handles coupon codes that contain special characters like ampersands (&), quotes ("),
+ * and other HTML entities. Without this decoding step, coupon codes with special characters would fail to match
+ * during application, causing legitimate coupons to be rejected.
+ *
+ * @see WC_Cart_Test::test_coupon_codes_with_special_characters
+ *
  * @since  3.6.0
+ * @since  10.0.0 Decode HTML entities here instead of via woocommerce_coupon_code filter.
  * @param  string $value Coupon code to format.
  * @return string
  */
 function wc_sanitize_coupon_code( $value ) {
-	$value = wp_kses( sanitize_post_field( 'post_title', $value ?? '', 0, 'db' ), 'entities' );
+	$value = wp_kses( sanitize_post_field( 'post_title', html_entity_decode( $value ?? '', ENT_COMPAT, get_bloginfo( 'charset' ) ), 0, 'db' ), 'entities' );
 	return current_user_can( 'unfiltered_html' ) ? $value : stripslashes( $value );
 }
 
@@ -478,7 +490,24 @@ function wc_array_overlay( $a1, $a2 ) {
  * @return int|float
  */
 function wc_stock_amount( $amount ) {
-	return apply_filters( 'woocommerce_stock_amount', $amount );
+	/**
+	 * Filter the stock amount. If an invalid value is returned by hooks, falls back to intval( $amount ).
+	 *
+	 * @since  2.3
+	 * @param int|float $amount Stock amount.
+	 * @return int|float
+	 */
+	return NumberUtil::normalize( apply_filters( 'woocommerce_stock_amount', $amount ), intval( $amount ) );
+}
+
+/**
+ * Check if the stock amount is an integer.
+ *
+ * @since 10.1.0
+ * @return bool
+ */
+function wc_is_stock_amount_integer() {
+	return wc_stock_amount( 1 ) === 1;
 }
 
 /**
@@ -615,7 +644,7 @@ function wc_price( $price, $args = array() ) {
 	}
 
 	if ( $args['in_span'] ) {
-		$formatted_price = ( $negative ? '-' : '' ) . sprintf( $args['price_format'], '<span class="woocommerce-Price-currencySymbol">' . get_woocommerce_currency_symbol( $args['currency'] ) . '</span>', $price );
+		$formatted_price = ( $negative ? '-' : '' ) . sprintf( $args['price_format'], '<span class="woocommerce-Price-currencySymbol" translate="no">' . get_woocommerce_currency_symbol( $args['currency'] ) . '</span>', $price );
 		$aria_hidden     = $args['aria-hidden'] ? ' aria-hidden="true"' : '';
 		$return          = '<span class="woocommerce-Price-amount amount"' . $aria_hidden . '><bdi>' . $formatted_price . '</bdi></span>';
 	} else {
@@ -1053,12 +1082,23 @@ function wc_normalize_postcode( $postcode ) {
  * @return string
  */
 function wc_format_phone_number( $phone ) {
-	$phone = $phone ?? '';
+	$original = $phone ?? '';
 
-	if ( ! WC_Validation::is_phone( $phone ) ) {
-		return '';
-	}
-	return preg_replace( '/[^0-9\+\-\(\)\s]/', '-', preg_replace( '/[\x00-\x1F\x7F-\xFF]/', '', $phone ) );
+	$is_valid  = WC_Validation::is_phone_format( $original );
+	$formatted = $is_valid
+		? (string) preg_replace( '/[^0-9\+\-\(\)\s]/', '-', preg_replace( '/[\x00-\x1F\x7F-\xFF]/', '', $original ) )
+		: '';
+
+	/**
+	 * Filters the formatted phone number.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param string $formatted The formatted phone number, or an empty string if $original isn't a valid phone number.
+	 * @param string $original  The phone number passed to the function.
+	 * @param bool   $is_valid  Whether $original passed the default phone number validation.
+	 */
+	return apply_filters( 'woocommerce_format_phone_number', $formatted, $original, $is_valid );
 }
 
 /**
@@ -1201,11 +1241,28 @@ add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_price_num_de
 function wc_format_option_hold_stock_minutes( $value, $option, $raw_value ) {
 	$value = ! empty( $raw_value ) ? absint( $raw_value ) : ''; // Allow > 0 or set to ''.
 
-	wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
+	// Clear existing scheduled events.
+	if ( function_exists( 'as_unschedule_all_actions' ) ) {
+		as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
+	} else {
+		wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
+	}
 
 	if ( '' !== $value ) {
+		/**
+		 * Filters the interval at which to cancel unpaid orders in minutes.
+		 *
+		 * @since 5.1.0
+		 *
+		 * @param int $cancel_unpaid_interval The interval at which to cancel unpaid orders in minutes.
+		 */
 		$cancel_unpaid_interval = apply_filters( 'woocommerce_cancel_unpaid_orders_interval_minutes', absint( $value ) );
-		wp_schedule_single_event( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
+
+		if ( function_exists( 'as_schedule_single_action' ) ) {
+			as_schedule_single_action( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce', true );
+		} else {
+			wp_schedule_single_event( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
+		}
 	}
 
 	return $value;
@@ -1638,6 +1695,7 @@ add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_de
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_set_default_payment_method_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_orders_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_view_order_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_order_withdrawal_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_downloads_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_edit_account_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_edit_address_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );

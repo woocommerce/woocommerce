@@ -7,7 +7,8 @@ import type { Story, Meta } from '@storybook/react';
 /**
  * Internal dependencies
  */
-import QuantitySelector, { QuantitySelectorProps } from '..';
+import QuantitySelector from '..';
+import type { QuantitySelectorProps } from '../types';
 
 export default {
 	title: 'Base Components/QuantitySelector',

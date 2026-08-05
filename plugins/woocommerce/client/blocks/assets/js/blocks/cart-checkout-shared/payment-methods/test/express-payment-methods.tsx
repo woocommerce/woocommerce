@@ -1,7 +1,13 @@
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
+import {
+	act,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from '@testing-library/react';
 import { paymentStore } from '@woocommerce/block-data';
 import {
 	registerExpressPaymentMethod,
@@ -31,10 +37,10 @@ jest.mock( '../express-payment/express-payment-context', () => {
 	};
 } );
 
-const mockExpressPaymentMethodNames = [ 'paypal', 'google pay', 'apple pay' ];
+const mockExpressPaymentMethodNames = [ 'paypal', 'google-pay', 'apple-pay' ];
 
 const MockExpressButton = jest.fn( ( { name } ) => (
-	<div className="boo">{ `${ name } button` }</div>
+	<button className="boo">{ `${ name } button` }</button>
 ) );
 
 const MockEditorExpressButton = jest.fn( ( { name } ) => (
@@ -43,6 +49,27 @@ const MockEditorExpressButton = jest.fn( ( { name } ) => (
 
 const registerMockExpressPaymentMethods = () => {
 	mockExpressPaymentMethodNames.forEach( ( name ) => {
+		registerExpressPaymentMethod( {
+			name,
+			title: `${ name } payment method`,
+			description: `A test ${ name } payment method`,
+			gatewayId: 'test-express-payment-method',
+			paymentMethodId: name,
+			content: <MockExpressButton name={ name } />,
+			edit: <MockEditorExpressButton name={ name } />,
+			canMakePayment: () => true,
+			supports: {
+				features: [ 'products' ],
+			},
+		} );
+	} );
+	dispatch( paymentStore ).__internalUpdateAvailablePaymentMethods();
+};
+
+const registerSingleMockExpressPaymentMethod = () => {
+	// Use the first payment method to allow use of common deregister function.
+	const mockExpressPaymentMethodName = mockExpressPaymentMethodNames[ 0 ];
+	[ mockExpressPaymentMethodName ].forEach( ( name ) => {
 		registerExpressPaymentMethod( {
 			name,
 			title: `${ name } payment method`,
@@ -79,9 +106,108 @@ describe( 'Express payment methods', () => {
 			);
 			expect( noPaymentMethods.length ).toEqual( 1 );
 		} );
+
+		it( 'should use a div for the wrapper (a11y)', () => {
+			render( <ExpressPaymentMethods /> );
+			expect(
+				document.querySelector(
+					'.wc-block-components-express-payment__event-buttons'
+				)
+			).toHaveProperty( 'tagName', 'DIV' );
+			expect(
+				document.querySelector(
+					'ul.wc-block-components-express-payment__event-buttons'
+				)
+			).toBeNull();
+			expect( document.querySelectorAll( 'li' ).length ).toBe( 0 );
+		} );
+	} );
+
+	describe( 'Single payment method available', () => {
+		beforeAll( () => {
+			registerSingleMockExpressPaymentMethod();
+		} );
+		afterAll( () => {
+			deregisterMockExpressPaymentMethods();
+		} );
+		describe( 'In an editor context', () => {
+			beforeEach( () => {
+				mockEditorContext.mockImplementation( () => ( {
+					isEditor: true,
+				} ) );
+			} );
+			it( 'should use a div for the wrapper and express payment method elements (a11y)', () => {
+				render( <ExpressPaymentMethods /> );
+				expect(
+					document.querySelector(
+						'.wc-block-components-express-payment__event-buttons'
+					)
+				).toHaveProperty( 'tagName', 'DIV' );
+				expect(
+					document.querySelector(
+						'ul.wc-block-components-express-payment__event-buttons'
+					)
+				).toBeNull();
+				const mockExpressPaymentMethodName =
+					mockExpressPaymentMethodNames[ 0 ];
+				expect(
+					document.querySelectorAll(
+						'[id^="express-payment-method-"]'
+					).length
+				).toBe( 1 );
+				expect(
+					document.querySelector(
+						`#express-payment-method-${ mockExpressPaymentMethodName }`
+					)
+				).toBeInTheDocument();
+				expect(
+					document.querySelector(
+						`#express-payment-method-${ mockExpressPaymentMethodName }`
+					)
+				).toHaveProperty( 'tagName', 'DIV' );
+			} );
+		} );
+
+		describe( 'In a frontend context', () => {
+			it( 'should use a div for the wrapper and express payment method elements (a11y)', () => {
+				render( <ExpressPaymentMethods /> );
+				expect(
+					document.querySelector(
+						'.wc-block-components-express-payment__event-buttons'
+					)
+				).toHaveProperty( 'tagName', 'DIV' );
+				expect(
+					document.querySelector(
+						'ul.wc-block-components-express-payment__event-buttons'
+					)
+				).toBeNull();
+				const mockExpressPaymentMethodName =
+					mockExpressPaymentMethodNames[ 0 ];
+				expect(
+					document.querySelectorAll(
+						'[id^="express-payment-method-"]'
+					).length
+				).toBe( 1 );
+				expect(
+					document.querySelector(
+						`#express-payment-method-${ mockExpressPaymentMethodName }`
+					)
+				).toBeInTheDocument();
+				expect(
+					document.querySelector(
+						`#express-payment-method-${ mockExpressPaymentMethodName }`
+					)
+				).toHaveProperty( 'tagName', 'DIV' );
+			} );
+		} );
 	} );
 
 	describe( 'Payment methods available', () => {
+		beforeEach( () => {
+			mockEditorContext.mockImplementation( () => ( {
+				isEditor: false,
+			} ) );
+		} );
 		beforeAll( () => {
 			registerMockExpressPaymentMethods();
 		} );
@@ -111,6 +237,101 @@ describe( 'Express payment methods', () => {
 					'isPristine is deprecated since version 9.6.0. Please use isIdle instead. See: https://github.com/woocommerce/woocommerce-blocks/pull/8110'
 				);
 			} );
+
+			it( 'should use a ul wrapper and li for express payment method elements (a11y)', () => {
+				render( <ExpressPaymentMethods /> );
+
+				expect(
+					document.querySelector(
+						'.wc-block-components-express-payment__event-buttons'
+					)
+				).toHaveProperty( 'tagName', 'UL' );
+				mockExpressPaymentMethodNames.forEach( ( name ) => {
+					expect(
+						document.querySelector(
+							`#express-payment-method-${ name }`
+						)
+					).toBeInTheDocument();
+					expect(
+						document.querySelector(
+							`#express-payment-method-${ name }`
+						)
+					).toHaveProperty( 'tagName', 'LI' );
+				} );
+			} );
+
+			it( 'should add a focused class to the active express payment method item', async () => {
+				render( <ExpressPaymentMethods /> );
+
+				const button = screen.getByText( 'paypal button' );
+				const paymentMethodItem = document.querySelector(
+					'#express-payment-method-paypal'
+				);
+
+				await act( async () => {
+					button.focus();
+					fireEvent.focusIn( button );
+				} );
+
+				await waitFor( () =>
+					expect( paymentMethodItem ).toHaveClass(
+						'wc-block-components-express-payment__event-button--focused'
+					)
+				);
+
+				await act( async () => {
+					button.blur();
+					fireEvent.focusOut( button );
+					await new Promise( ( resolve ) =>
+						setTimeout( resolve, 0 )
+					);
+				} );
+
+				await waitFor( () =>
+					expect( paymentMethodItem ).not.toHaveClass(
+						'wc-block-components-express-payment__event-button--focused'
+					)
+				);
+			} );
+
+			it( 'should keep a focused express payment iframe when the window loses focus', async () => {
+				render( <ExpressPaymentMethods /> );
+
+				const paymentMethodItem = document.querySelector(
+					'#express-payment-method-paypal'
+				);
+				expect( paymentMethodItem ).not.toBeNull();
+
+				if ( ! paymentMethodItem ) {
+					throw new Error(
+						'Missing #express-payment-method-paypal in test DOM'
+					);
+				}
+
+				const iframe = document.createElement( 'iframe' );
+				paymentMethodItem.appendChild( iframe );
+
+				await act( async () => {
+					iframe.focus();
+					fireEvent.focusIn( iframe );
+				} );
+
+				await waitFor( () =>
+					expect( paymentMethodItem ).toHaveClass(
+						'wc-block-components-express-payment__event-button--focused'
+					)
+				);
+
+				await act( async () => {
+					window.dispatchEvent( new Event( 'blur' ) );
+				} );
+
+				await waitFor( () =>
+					expect( paymentMethodItem ).toHaveClass(
+						'wc-block-components-express-payment__event-button--focused'
+					)
+				);
+			} );
 		} );
 		describe( 'In an editor context', () => {
 			beforeEach( () => {
@@ -132,6 +353,33 @@ describe( 'Express payment methods', () => {
 						getExpectedExpressPaymentProps( name ),
 						{}
 					);
+				} );
+			} );
+
+			it( 'should use a ul wrapper and li for multiple express payment method elements (a11y)', () => {
+				render( <ExpressPaymentMethods /> );
+
+				expect(
+					document.querySelector(
+						'.wc-block-components-express-payment__event-buttons'
+					)
+				).toHaveProperty( 'tagName', 'UL' );
+				expect(
+					document.querySelectorAll(
+						'[id^="express-payment-method-"]'
+					).length
+				).toBe( mockExpressPaymentMethodNames.length );
+				mockExpressPaymentMethodNames.forEach( ( name ) => {
+					expect(
+						document.querySelector(
+							`#express-payment-method-${ name }`
+						)
+					).toBeInTheDocument();
+					expect(
+						document.querySelector(
+							`#express-payment-method-${ name }`
+						)
+					).toHaveProperty( 'tagName', 'LI' );
 				} );
 			} );
 		} );

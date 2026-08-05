@@ -29,12 +29,8 @@ export default function Edit( {
 	context: { commentId: number };
 } ) {
 	const blockProps = useBlockProps();
-	let [ date ] = useEntityProp(
-		'root',
-		'comment',
-		'date',
-		String( commentId )
-	);
+
+	let [ date ] = useEntityProp( 'root', 'comment', 'date', commentId );
 	const [ siteFormat = getDateSettings().formats.date ] = useEntityProp(
 		'root',
 		'site',

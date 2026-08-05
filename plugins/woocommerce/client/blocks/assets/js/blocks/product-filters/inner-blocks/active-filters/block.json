@@ -1,8 +1,8 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"name": "woocommerce/product-filter-active",
-	"title": "Active",
-	"description": "Display the currently active filters.",
+	"title": "Active Filters",
+	"description": "Display all active filters.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",

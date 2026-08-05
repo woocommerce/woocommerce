@@ -13,7 +13,6 @@ import {
 	PAYMENT_GATEWAYS_STORE_NAME,
 	pluginsStore,
 	Plugin,
-	type PaymentSelectors,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { getAdminLink } from '@woocommerce/settings';
@@ -53,14 +52,10 @@ const PaymentRecommendations = () => {
 			return {
 				installedPaymentGateway:
 					installingGatewayId &&
-					(
-						select(
-							PAYMENT_GATEWAYS_STORE_NAME
-						) as PaymentSelectors
-					 ).getPaymentGateway( installingGatewayId ),
-				installedPaymentGateways: (
-					select( PAYMENT_GATEWAYS_STORE_NAME ) as PaymentSelectors
-				 )
+					select( PAYMENT_GATEWAYS_STORE_NAME ).getPaymentGateway(
+						installingGatewayId
+					),
+				installedPaymentGateways: select( PAYMENT_GATEWAYS_STORE_NAME )
 					.getPaymentGateways()
 					.reduce(
 						(
@@ -171,8 +166,7 @@ const PaymentRecommendations = () => {
 			return (
 				! installedPaymentGateways[ plugin.id ] &&
 				plugin.plugins?.length &&
-				( ! window.wcAdminFeatures[ 'wc-pay-promotion' ] ||
-					! plugin.id.startsWith( 'woocommerce_payments' ) )
+				! plugin.id.startsWith( 'woocommerce_payments' )
 			);
 		} )
 		.map( ( plugin: Plugin ) => {
@@ -262,13 +256,14 @@ const PaymentRecommendations = () => {
 				<TrackedLink
 					message={ __(
 						// translators: {{Link}} is a placeholder for a html element.
-						'Visit the {{Link}}Official WooCommerce Marketplace{{/Link}} to find additional payment providers.',
+						'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find additional payment providers.',
 						'woocommerce'
 					) }
 					eventName="settings_payment_recommendations_visit_marketplace_click"
 					targetUrl={ getAdminLink(
 						'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
 					) }
+					linkType="wc-admin"
 				/>
 			</CardFooter>
 		</Card>

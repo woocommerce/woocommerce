@@ -41,6 +41,11 @@ describe( 'StatusBadge component', () => {
 		expect( getByText( 'Custom message' ) ).toBeInTheDocument();
 	} );
 
+	it( 'renders the correct message for not_supported status', () => {
+		const { getByText } = render( <StatusBadge status="not_supported" /> );
+		expect( getByText( 'Not supported' ) ).toBeInTheDocument();
+	} );
+
 	it( 'applies the correct class for success statuses', () => {
 		const { container } = render( <StatusBadge status="active" /> );
 		expect( container.firstChild ).toHaveClass(
@@ -50,6 +55,13 @@ describe( 'StatusBadge component', () => {
 
 	it( 'applies the correct class for warning statuses', () => {
 		const { container } = render( <StatusBadge status="needs_setup" /> );
+		expect( container.firstChild ).toHaveClass(
+			'woocommerce-status-badge--warning'
+		);
+	} );
+
+	it( 'applies the correct class for not_supported status', () => {
+		const { container } = render( <StatusBadge status="not_supported" /> );
 		expect( container.firstChild ).toHaveClass(
 			'woocommerce-status-badge--warning'
 		);

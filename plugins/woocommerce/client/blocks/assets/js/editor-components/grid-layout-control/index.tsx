@@ -56,6 +56,8 @@ const GridLayoutControl = ( {
 	return (
 		<>
 			<RangeControl
+				__next40pxDefaultSize
+				__nextHasNoMarginBottom
 				label={ __( 'Columns', 'woocommerce' ) }
 				value={ columns }
 				onChange={ ( value: number ) => {
@@ -68,6 +70,8 @@ const GridLayoutControl = ( {
 				max={ maxColumns }
 			/>
 			<RangeControl
+				__next40pxDefaultSize
+				__nextHasNoMarginBottom
 				label={ __( 'Rows', 'woocommerce' ) }
 				value={ rows }
 				onChange={ ( value: number ) => {
@@ -80,6 +84,7 @@ const GridLayoutControl = ( {
 				max={ maxRows }
 			/>
 			<ToggleControl
+				__nextHasNoMarginBottom
 				label={ __(
 					'Align the last block to the bottom',
 					'woocommerce'

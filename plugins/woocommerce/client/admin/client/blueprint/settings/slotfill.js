@@ -205,7 +205,10 @@ const Blueprint = () => {
 				</Notice>
 			) }
 			{ blueprintStepGroups.map( ( group, index ) => (
-				<div key={ index } className="blueprint-settings-export-group">
+				<div
+					key={ index }
+					className="blueprint-settings-export-group wc-settings-prevent-change-event"
+				>
 					<Icon
 						icon={ icons[ group.icon ] ?? icons.settings }
 						alt={ sprintf(

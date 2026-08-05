@@ -28,6 +28,7 @@ class Init {
 	use UseWPFunctions;
 
 	const INSTALLED_WP_ORG_PLUGINS_TRANSIENT = 'woocommerce_blueprint_installed_wp_org_plugins';
+	const INSTALLED_WP_ORG_THEMES_TRANSIENT  = 'woocommerce_blueprint_installed_wp_org_themes';
 	/**
 	 * Array of initialized exporters.
 	 *
@@ -53,6 +54,10 @@ class Init {
 
 		add_action( 'upgrader_process_complete', array( $this, 'clear_installed_wp_org_plugins_transient' ), 10, 2 );
 		add_action( 'deleted_plugin', array( $this, 'clear_installed_wp_org_plugins_transient' ), 10, 2 );
+
+		add_action( 'upgrader_process_complete', array( $this, 'clear_installed_wp_org_themes_transient' ), 10, 2 );
+		add_action( 'switch_theme', array( $this, 'clear_installed_wp_org_themes_transient' ) );
+		add_action( 'deleted_theme', array( $this, 'clear_installed_wp_org_themes_transient' ) );
 	}
 
 	/**
@@ -145,12 +150,19 @@ class Init {
 	}
 
 	/**
+	 * Clear the installed WordPress.org themes transient.
+	 */
+	public function clear_installed_wp_org_themes_transient() {
+		delete_transient( self::INSTALLED_WP_ORG_THEMES_TRANSIENT );
+	}
+
+	/**
 	 * Get themes for export group.
 	 *
 	 * @return array $themes
 	 */
 	public function get_themes_for_export_group() {
-		$themes       = $this->wp_get_themes();
+		$themes       = $this->get_installed_wp_org_themes();
 		$active_theme = $this->wp_get_theme();
 
 		$themes = array_map(
@@ -267,34 +279,40 @@ class Init {
 			$all_plugins[ $key ]['slug'] = $slug;
 		}
 
-		$api_response = $this->wp_plugins_api(
-			'plugin_information',
-			array(
-				'fields' => array(
-					'short_description' => false,
-					'sections'          => false,
-					'description'       => false,
-					'tested'            => false,
-					'requires'          => false,
-					'rating'            => false,
-					'ratings'           => false,
-					'downloaded'        => false,
-					'downloadlink'      => false,
-					'last_updated'      => false,
-					'added'             => false,
-					'tags'              => false,
-					'compatibility'     => false,
-					'homepage'          => false,
-					'versions'          => false,
-					'donate_link'       => false,
-					'reviews'           => false,
-					'banners'           => false,
-					'icons'             => false,
-					'active_installs'   => false,
-				),
-				'slugs'  => $plugin_slugs,
-			)
-		);
+		try {
+			$api_response = $this->wp_plugins_api(
+				'plugin_information',
+				array(
+					'fields' => array(
+						'short_description' => false,
+						'sections'          => false,
+						'description'       => false,
+						'tested'            => false,
+						'requires'          => false,
+						'rating'            => false,
+						'ratings'           => false,
+						'downloaded'        => false,
+						'downloadlink'      => false,
+						'last_updated'      => false,
+						'added'             => false,
+						'tags'              => false,
+						'compatibility'     => false,
+						'homepage'          => false,
+						'versions'          => false,
+						'donate_link'       => false,
+						'reviews'           => false,
+						'banners'           => false,
+						'icons'             => false,
+						'active_installs'   => false,
+					),
+					'slugs'  => $plugin_slugs,
+				)
+			);
+		} catch ( \Throwable $e ) {
+			// A third party filtering the plugins API result can throw. Don't let that take down the admin screen.
+			$this->log_api_failure( 'plugins_api', $e );
+			return $all_plugins;
+		}
 
 		// If API fails, return all plugins.
 		if ( is_wp_error( $api_response ) ) {
@@ -312,5 +330,95 @@ class Init {
 
 		set_transient( self::INSTALLED_WP_ORG_PLUGINS_TRANSIENT, $wp_org_plugins );
 		return $wp_org_plugins;
+	}
+
+	/**
+	 * Get all installed WordPress.org themes.
+	 *
+	 * @return array
+	 */
+	private function get_installed_wp_org_themes() {
+		// Try to get cached theme list.
+		$wp_org_themes = get_transient( self::INSTALLED_WP_ORG_THEMES_TRANSIENT );
+		if ( is_array( $wp_org_themes ) ) {
+			return $wp_org_themes;
+		}
+
+		// Get all installed themes.
+		$all_themes  = $this->wp_get_themes();
+		$theme_slugs = array();
+
+		// Build an array of installed theme slugs.
+		foreach ( $all_themes as $key => $theme ) {
+			if ( is_string( $key ) ) {
+				$theme_slugs[] = strtolower( $key );
+			}
+		}
+
+		try {
+			$api_response = $this->wp_themes_api(
+				'theme_information',
+				array(
+					'fields' => array(
+						'downloadlink'    => true,
+						'sections'        => false,
+						'description'     => false,
+						'rating'          => false,
+						'ratings'         => false,
+						'downloaded'      => false,
+						'last_updated'    => false,
+						'tags'            => false,
+						'homepage'        => false,
+						'screenshots'     => false,
+						'screenshot_url'  => false,
+						'parent'          => false,
+						'versions'        => false,
+						'extended_author' => false,
+					),
+					'slugs'  => $theme_slugs,
+				)
+			);
+		} catch ( \Throwable $e ) {
+			// A third party filtering the themes API result can throw. Don't let that take down the admin screen.
+			$this->log_api_failure( 'themes_api', $e );
+			return $all_themes;
+		}
+
+		// If the API fails, return all installed themes.
+		if ( is_wp_error( $api_response ) ) {
+			return $all_themes;
+		}
+
+		$wp_org_themes = array_filter(
+			$all_themes,
+			function ( $theme ) use ( $api_response ) {
+				$slug = $theme->get_stylesheet();
+				return isset( $api_response->{$slug}['download_link'] );
+			}
+		);
+
+		set_transient( self::INSTALLED_WP_ORG_THEMES_TRANSIENT, $wp_org_themes );
+		return $wp_org_themes;
+	}
+
+	/**
+	 * Log a WordPress.org API request that threw.
+	 *
+	 * @param string     $api The API that was called, for example "themes_api".
+	 * @param \Throwable $e   The thrown error.
+	 *
+	 * @return void
+	 */
+	private function log_api_failure( string $api, \Throwable $e ) {
+		wc_get_logger()->error(
+			sprintf(
+				'Blueprint: %1$s() threw "%2$s" in %3$s:%4$d. Falling back to the installed list.',
+				$api,
+				$e->getMessage(),
+				$e->getFile(),
+				$e->getLine()
+			),
+			array( 'source' => 'blueprint' )
+		);
 	}
 }

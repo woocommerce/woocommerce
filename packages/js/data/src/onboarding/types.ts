@@ -6,6 +6,8 @@ import { Plugin } from '../plugins/types';
 export type TaskType = {
 	actionLabel?: string;
 	actionUrl?: string;
+	imageUrl?: string;
+	imageAlt?: string;
 	content: string;
 	id: string;
 	parentId: string;
@@ -13,6 +15,8 @@ export type TaskType = {
 	isDismissable: boolean;
 	isDismissed: boolean;
 	isSnoozed: boolean;
+	isInProgress: boolean;
+	inProgressLabel: string;
 	isVisible: boolean;
 	isSnoozeable: boolean;
 	isDisabled: boolean;

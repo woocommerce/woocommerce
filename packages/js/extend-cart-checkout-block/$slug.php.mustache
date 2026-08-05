@@ -100,14 +100,14 @@ function {{slugPascalCase}}_register_custom_checkout_fields() {
 	 */
 	add_action(
 		'woocommerce_sanitize_additional_field',
-		function ( $value, $key, $group ) {
+		function ( $value, $key ) {
 			if ( '{{slug}}/custom-text-input' === $key ) {
 				return strtoupper( $value );
 			}
 			return $value;
 		},
 		10,
-		3
+		2
 	);
 
 	/**
@@ -115,13 +115,13 @@ function {{slugPascalCase}}_register_custom_checkout_fields() {
 	 */
 	add_action(
 		'woocommerce_blocks_validate_location_address_fields',
-		function ( \WP_Error $errors, $fields, $group ) {
-			if ( 'INVALID' === $fields['{{slug}}/custom-text-input'] ) {
+		function ( \WP_Error $errors, $fields ) {
+			if ( isset( $fields['{{slug}}/custom-text-input'] ) && 'INVALID' === $fields['{{slug}}/custom-text-input'] ) {
 				$errors->add( 'invalid_text_detected', 'Please ensure your custom text input is not "INVALID".' );
 			}
 		},
 		10,
-		3
+		2
 	);
 
 	woocommerce_register_additional_checkout_field(

@@ -22,7 +22,7 @@ Explore comprehensive guides and resources to build and enhance WooCommerce exte
 * [Designing a simple extension](/docs/extensions/getting-started-extensions/how-to-design-a-simple-extension)
 * [Extension development best practices](/docs/extensions/best-practices-extensions/extension-development-best-practices)
 
-Learn more about [extension development](/docs/category/getting-started)
+Learn more about [extension development](/docs/extensions/getting-started-extensions/)
 
 ---
 
@@ -52,9 +52,9 @@ Learn more about [contributing](/docs/contribution/contributing)
 
 ## Additional resources
 
-- [WooCommerce Official Website](https://woocommerce.com/)
-- [Woo Marketplace](https://woocommerce.com/marketplace)
-- All [WooCommerce Repositories on GitHub](https://woocommerce.github.io/)
+* [WooCommerce Official Website](https://woocommerce.com/)
+* [Woo Marketplace](https://woocommerce.com/marketplace)
+* All [WooCommerce Repositories on GitHub](https://woocommerce.github.io/)
 
 ---
 

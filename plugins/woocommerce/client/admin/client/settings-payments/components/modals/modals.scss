@@ -1,3 +1,7 @@
+/**
+ * This styles are imported into the main settings-payments.scss file directly.
+ * This is done to avoid build errors when importing the same file in multiple places.
+ */
 .components-modal__frame {
 	@media screen and (max-width: 782px) {
 		margin: auto;

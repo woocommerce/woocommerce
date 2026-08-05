@@ -78,8 +78,18 @@ class CheckoutFieldsFrontend {
 	 * @param WC_Order $order Order object.
 	 */
 	public function render_order_address_fields( $address_type, $order ) {
+		$fields = $this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'address', $address_type, 'view' );
+
+		$context = array(
+			'caller'       => 'CheckoutFieldsFrontend::render_order_address_fields',
+			'address_type' => $address_type,
+			'order'        => $order,
+		);
+
+		$fields = $this->checkout_fields_controller->filter_fields_for_order_confirmation( $fields, $context );
+
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo $this->render_additional_fields( $this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'address', $address_type, 'view' ) );
+		echo $this->render_additional_fields( $fields );
 	}
 
 	/**
@@ -92,6 +102,13 @@ class CheckoutFieldsFrontend {
 			$this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'contact', 'other', 'view' ),
 			$this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'order', 'other', 'view' ),
 		);
+
+		$context = array(
+			'caller' => 'CheckoutFieldsFrontend::render_order_other_fields',
+			'order'  => $order,
+		);
+
+		$fields = $this->checkout_fields_controller->filter_fields_for_order_confirmation( $fields, $context );
 
 		if ( ! $fields ) {
 			return;

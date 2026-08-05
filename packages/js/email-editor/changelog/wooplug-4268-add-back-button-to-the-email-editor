@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-This adds a back button to the WooCommerce Email Editor, allowing navigation back to the email listings page from the editor. The back button appears when the editor is in full-screen mode, which is now enforced by default.

@@ -30,6 +30,8 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import { LaunchYourStoreHubSidebar } from './components/launch-store-hub';
 import { PaymentsSidebar } from './components/payments-sidebar';
+import { LaunchStoreHubMobileHeader } from './components/mobile-header';
+import { PaymentsMobileHeader } from './components/payments-mobile-header';
 import type {
 	LaunchYourStoreComponentProps,
 	LaunchYourStoreQueryParams,
@@ -42,6 +44,7 @@ import {
 import { taskClickedAction, getLysTasklist } from './tasklist';
 import { fetchCongratsData } from '../main-content/pages/launch-store-success/services';
 import { getTimeFrame } from '~/utils';
+import { isWooPayments } from '~/settings-payments/utils';
 
 export type LYSAugmentedTaskListType = TaskListType & {
 	recentlyActionedTasks: string[];
@@ -63,6 +66,9 @@ export type SidebarMachineContext = {
 };
 export type SidebarComponentProps = LaunchYourStoreComponentProps & {
 	context: SidebarMachineContext;
+	onMobileClose?: () => void;
+	onToggle?: () => void;
+	isMobileSidebarOpen?: boolean;
 };
 export type SidebarMachineEvents =
 	| { type: 'EXTERNAL_URL_UPDATE' }
@@ -140,23 +146,21 @@ export const getWooPaymentsStatus = async () => {
 	}
 
 	// Check the gateway is installed
-	const paymentGateways: PaymentGateway[] = await resolveSelect(
-		paymentGatewaysStore
-	).getPaymentGateways();
+	const paymentGateways: PaymentGateway[] =
+		await resolveSelect( paymentGatewaysStore ).getPaymentGateways();
 	const enabledPaymentGateways = paymentGateways.filter(
 		( gateway ) => gateway.enabled
 	);
 	// Return true when WooPayments is the only enabled gateway.
 	return (
 		enabledPaymentGateways.length === 1 &&
-		enabledPaymentGateways[ 0 ].id === 'woocommerce_payments'
+		isWooPayments( enabledPaymentGateways[ 0 ].id )
 	);
 };
 
 export const getSiteCachedStatus = async () => {
-	const settings = await resolveSelect( settingsStore ).getSettings(
-		'wc_admin'
-	);
+	const settings =
+		await resolveSelect( settingsStore ).getSettings( 'wc_admin' );
 
 	// if store URL exists, check both storeUrl and siteUrl otherwise only check siteUrl
 	// we want to check both because there's a chance that caching is especially disabled for woocommerce pages, e.g WPEngine
@@ -213,8 +217,8 @@ const recordStoreLaunchAttempt = ( {
 			.filter( ( task ) => task.isComplete )
 			.map( ( task ) => task.id ) || [];
 
-	const tasks_completed_in_lys = completed.filter( ( task ) =>
-		context.tasklist?.recentlyActionedTasks.includes( task )
+	const tasks_completed_in_lys = completed.filter(
+		( task ) => context.tasklist?.recentlyActionedTasks.includes( task )
 	); // recently actioned tasks can include incomplete tasks
 
 	recordEvent( 'launch_your_store_hub_store_launch_attempted', {
@@ -463,6 +467,7 @@ export const sidebarMachine = setup( {
 					tags: 'sidebar-visible',
 					meta: {
 						component: LaunchYourStoreHubSidebar,
+						mobileHeader: LaunchStoreHubMobileHeader,
 					},
 					on: {
 						LAUNCH_STORE: {
@@ -482,6 +487,7 @@ export const sidebarMachine = setup( {
 					tags: 'sidebar-visible',
 					meta: {
 						component: LaunchYourStoreHubSidebar,
+						mobileHeader: LaunchStoreHubMobileHeader,
 					},
 					invoke: [
 						{
@@ -511,6 +517,7 @@ export const sidebarMachine = setup( {
 					tags: 'sidebar-visible',
 					meta: {
 						component: LaunchYourStoreHubSidebar,
+						mobileHeader: LaunchStoreHubMobileHeader,
 					},
 					invoke: {
 						src: 'getWooPaymentsStatus',
@@ -537,6 +544,7 @@ export const sidebarMachine = setup( {
 					tags: 'sidebar-visible',
 					meta: {
 						component: LaunchYourStoreHubSidebar,
+						mobileHeader: LaunchStoreHubMobileHeader,
 					},
 					always: [
 						{
@@ -552,6 +560,7 @@ export const sidebarMachine = setup( {
 					tags: 'sidebar-visible',
 					meta: {
 						component: LaunchYourStoreHubSidebar,
+						mobileHeader: LaunchStoreHubMobileHeader,
 					},
 					invoke: {
 						src: 'getTestOrderCount',
@@ -680,6 +689,7 @@ export const sidebarMachine = setup( {
 			id: 'payments',
 			meta: {
 				component: PaymentsSidebar,
+				mobileHeader: PaymentsMobileHeader,
 			},
 			entry: [
 				'showPaymentsContent',

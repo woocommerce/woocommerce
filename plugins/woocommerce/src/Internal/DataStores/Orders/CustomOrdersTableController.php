@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
 use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Caches\OrderCacheController;
+use Automattic\WooCommerce\Enums\FeaturePluginCompatibility;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
@@ -147,6 +148,7 @@ class CustomOrdersTableController {
 		add_filter( 'removable_query_args', array( $this, 'register_removable_query_arg' ) );
 		add_filter( 'get_edit_post_link', array( $this, 'maybe_rewrite_order_edit_link' ), 10, 2 );
 		add_action( 'before_woocommerce_init', array( $this, 'maybe_set_order_cache_group_as_non_persistent' ) );
+		add_filter( 'map_meta_cap', array( $this, 'maybe_translate_order_caps' ), 0, 4 );
 	}
 
 	/**
@@ -186,6 +188,37 @@ class CustomOrdersTableController {
 		$this->order_cache_controller      = $order_cache_controller;
 		$this->plugin_util                 = $plugin_util;
 		$this->db_util                     = $db_util;
+	}
+
+	/**
+	 * Translate capabilities for HPOS orders when sync is not active.
+	 *
+	 * Only activates when HPOS is the authoritative source and sync is off,
+	 * then lazily delegates to HposOrderCapabilityHelper for the actual
+	 * capability translation.
+	 *
+	 * @since 10.7.0
+	 *
+	 * @param string[] $caps    The resolved primitive capabilities.
+	 * @param string   $cap     The meta capability being checked.
+	 * @param int      $user_id The user ID.
+	 * @param array    $args    Additional arguments (object ID).
+	 * @return string[] Translated capabilities.
+	 */
+	public function maybe_translate_order_caps( $caps, $cap, $user_id, $args ) {
+		if ( ! $this->custom_orders_table_usage_is_enabled() ) {
+			return $caps;
+		}
+
+		if ( ! $this->data_synchronizer instanceof DataSynchronizer ) {
+			return $caps;
+		}
+
+		if ( $this->data_synchronizer->data_sync_is_enabled() ) {
+			return $caps;
+		}
+
+		return wc_get_container()->get( HposOrderCapabilityHelper::class )->translate_order_caps( $caps, $cap, $user_id, $args );
 	}
 
 	/**
@@ -463,8 +496,7 @@ class CustomOrdersTableController {
 			return 'no';
 		}
 
-		$sync_is_pending = $this->data_synchronizer->has_orders_pending_sync();
-		if ( $sync_is_pending && ! $this->changing_data_source_with_sync_pending_is_allowed() ) {
+		if ( ! $this->changing_data_source_with_sync_pending_is_allowed() && $this->data_synchronizer->has_orders_pending_sync() ) {
 			throw new \Exception( "The authoritative table for orders storage can't be changed while there are orders out of sync" );
 		}
 
@@ -577,13 +609,13 @@ class CustomOrdersTableController {
 	 */
 	public function add_feature_definition( $features_controller ) {
 		$definition = array(
-			'option_key'                          => self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
-			'is_experimental'                     => false,
-			'enabled_by_default'                  => false,
-			'order'                               => 50,
-			'setting'                             => $this->get_hpos_setting_for_feature(),
-			'plugins_are_incompatible_by_default' => true,
-			'additional_settings'                 => array(
+			'option_key'                   => self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
+			'is_experimental'              => false,
+			'enabled_by_default'           => false,
+			'order'                        => 50,
+			'setting'                      => $this->get_hpos_setting_for_feature(),
+			'default_plugin_compatibility' => FeaturePluginCompatibility::INCOMPATIBLE,
+			'additional_settings'          => array(
 				$this->get_hpos_setting_for_sync(),
 			),
 		);
@@ -708,7 +740,7 @@ class CustomOrdersTableController {
 					);
 
 					$sync_message[] = sprintf(
-						'<a href="%1$s" class="button button-link">%2$s</a>',
+						'<a href="%1$s" class="button-link">%2$s</a>',
 						esc_url( $stop_sync_url ),
 						__( 'Stop sync', 'woocommerce' )
 					);
@@ -731,7 +763,7 @@ class CustomOrdersTableController {
 				}
 
 				$sync_message[] = sprintf(
-					'<a href="%1$s" class="button button-link">%2$s</a>',
+					'<a href="%1$s" class="button-link">%2$s</a>',
 					esc_url( $sync_now_url ),
 					__( 'Sync orders now', 'woocommerce' )
 				);

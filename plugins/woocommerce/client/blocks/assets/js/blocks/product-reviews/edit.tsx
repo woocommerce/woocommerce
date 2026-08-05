@@ -1,14 +1,12 @@
 /**
  * External dependencies
  */
-
 import { SelectControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useQueryLoopProductContextValidation } from '@woocommerce/base-hooks';
 import {
 	InspectorControls,
 	useBlockProps,
-	// @ts-expect-error missing types.
 	useInnerBlocksProps,
 } from '@wordpress/block-editor';
 
@@ -25,7 +23,7 @@ const Edit = ( {
 	clientId,
 	context,
 }: ProductReviewsEditProps ) => {
-	const { tagName: TagName } = attributes;
+	const { tagName: TagName = 'div' } = attributes;
 	const blockProps = useBlockProps();
 	const innerBlocksProps = useInnerBlocksProps( blockProps, {
 		template: TEMPLATE,
@@ -44,7 +42,6 @@ const Edit = ( {
 
 	return (
 		<>
-			{ /* @ts-expect-error missing types */ }
 			<InspectorControls group="advanced">
 				<SelectControl
 					// @ts-expect-error missing types.

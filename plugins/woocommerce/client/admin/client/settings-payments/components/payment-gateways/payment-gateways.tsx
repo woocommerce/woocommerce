@@ -12,7 +12,7 @@ import {
 	woopaymentsOnboardingStore,
 } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
-import { useMemo, useRef, useState } from '@wordpress/element';
+import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import { Popover } from '@wordpress/components';
 import { Link } from '@woocommerce/components';
@@ -38,11 +38,13 @@ interface PaymentGatewaysProps {
 	 * @param provider      Extension provider.
 	 * @param onboardingUrl Extension onboarding URL (if available).
 	 * @param attachUrl     Extension attach URL (if available).
+	 * @param context       The context from which the plugin is set up (e.g. 'wc_settings_payments__main_suggestion').
 	 */
 	setUpPlugin: (
 		provider: PaymentsEntity,
 		onboardingUrl: string | null,
-		attachUrl: string | null
+		attachUrl: string | null,
+		context?: string
 	) => void;
 	acceptIncentive: ( id: string ) => void;
 	shouldHighlightIncentive: boolean;
@@ -129,6 +131,42 @@ export const PaymentGateways = ( {
 		setIsPopoverVisible( false );
 	};
 
+	const handleIndicatorKeyDown = ( event: React.KeyboardEvent ) => {
+		if ( event.key === 'Escape' && isPopoverVisible ) {
+			event.stopPropagation();
+			setIsPopoverVisible( false );
+			buttonRef.current?.focus();
+		} else if ( event.key === 'Enter' || event.key === ' ' ) {
+			// Only handle Enter/Space when the indicator button itself is focused,
+			// allowing links inside the popover to work normally.
+			if ( event.target !== buttonRef.current ) {
+				return;
+			}
+			event.preventDefault();
+			handleBusinessLocationIndicatorClick( event );
+		}
+	};
+
+	// Handle Escape key globally when popover is open (for portal focus)
+	useEffect( () => {
+		if ( ! isPopoverVisible ) {
+			return;
+		}
+
+		const handleGlobalKeyDown = ( event: KeyboardEvent ) => {
+			if ( event.key === 'Escape' ) {
+				event.stopPropagation();
+				setIsPopoverVisible( false );
+				buttonRef.current?.focus();
+			}
+		};
+
+		document.addEventListener( 'keydown', handleGlobalKeyDown );
+		return () => {
+			document.removeEventListener( 'keydown', handleGlobalKeyDown );
+		};
+	}, [ isPopoverVisible ] );
+
 	return (
 		<div className="settings-payment-gateways">
 			<div className="settings-payment-gateways__header">
@@ -149,7 +187,7 @@ export const PaymentGateways = ( {
 						options={ countryOptions }
 						onChange={ ( currentSelectedCountry: string ) => {
 							// Save selected country and refresh the store by invalidating getPaymentProviders.
-							apiFetch( {
+							void apiFetch( {
 								path:
 									WC_ADMIN_NAMESPACE +
 									'/settings/payments/country',
@@ -168,10 +206,11 @@ export const PaymentGateways = ( {
 									window.wcSettings.admin.woocommerce_payments_nox_profile.business_country_code =
 										currentSelectedCountry;
 								}
-								invalidateMainStore( 'getPaymentProviders', [
-									currentSelectedCountry,
-								] );
-								invalidateWooPaymentsOnboardingStore(
+								void invalidateMainStore(
+									'getPaymentProviders',
+									[ currentSelectedCountry ]
+								);
+								void invalidateWooPaymentsOnboardingStore(
 									'getOnboardingData',
 									[]
 								);
@@ -185,16 +224,7 @@ export const PaymentGateways = ( {
 							role="button"
 							ref={ buttonRef }
 							onClick={ handleBusinessLocationIndicatorClick }
-							onKeyDown={ ( event ) => {
-								if (
-									event.key === 'Enter' ||
-									event.key === ' '
-								) {
-									handleBusinessLocationIndicatorClick(
-										event
-									);
-								}
-							} }
+							onKeyDown={ handleIndicatorKeyDown }
 						>
 							<div className="settings-payment-gateways__header-select-container--indicator-icon">
 								<InfoOutline />

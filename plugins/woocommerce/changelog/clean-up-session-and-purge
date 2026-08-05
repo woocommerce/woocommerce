@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Automatically remove the session and cookie when the session becomes empty.

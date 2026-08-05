@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 9.8.0
+ * @version 11.1.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -27,14 +27,25 @@ if ( $email_improvements_enabled ) {
 
 do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text, $email );
 
-if ( $email_improvements_enabled ) {
-	/* translators: %1$s: Order ID. %2$s: Order date */
-	echo wp_kses_post( sprintf( esc_html__( 'Order #%1$s (%2$s)', 'woocommerce' ), $order->get_order_number(), wc_format_datetime( $order->get_date_created() ) ) ) . "\n";
-	echo "\n==========\n";
-} else {
-	/* translators: %1$s: Order ID. %2$s: Order date */
-	echo wp_kses_post( wc_strtoupper( sprintf( esc_html__( '[Order #%1$s] (%2$s)', 'woocommerce' ), $order->get_order_number(), wc_format_datetime( $order->get_date_created() ) ) ) ) . "\n";
+/**
+ * Filter whether to display the order number in the order details heading of emails.
+ *
+ * @since 10.8.0
+ * @param bool     $display Whether to display the order number. Default true.
+ * @param WC_Order $order   Order object.
+ * @param WC_Email $email   Email object.
+ */
+if ( (bool) apply_filters( 'woocommerce_email_display_order_number', true, $order, $email ) ) {
+	if ( $email_improvements_enabled ) {
+		/* translators: %1$s: Order ID. %2$s: Order date */
+		echo wp_kses_post( sprintf( esc_html__( 'Order #%1$s (%2$s)', 'woocommerce' ), $order->get_order_number(), wc_format_datetime( $order->get_date_created() ) ) ) . "\n";
+		echo "\n==========\n";
+	} else {
+		/* translators: %1$s: Order ID. %2$s: Order date */
+		echo wp_kses_post( wc_strtoupper( sprintf( esc_html__( '[Order #%1$s] (%2$s)', 'woocommerce' ), $order->get_order_number(), wc_format_datetime( $order->get_date_created() ) ) ) ) . "\n";
+	}
 }
+
 echo "\n" . wc_get_email_order_items( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	$order,
 	array(
@@ -53,6 +64,10 @@ $item_totals = $order->get_order_item_totals();
 if ( $item_totals ) {
 	foreach ( $item_totals as $total ) {
 		if ( $email_improvements_enabled ) {
+			// The shipping method name is already shown in the row header, so avoid duplicating it in the value cell.
+			if ( 'shipping' === ( $total['type'] ?? '' ) && isset( $total['meta'] ) && $total['value'] === $total['meta'] ) {
+				$total['value'] = __( 'Free!', 'woocommerce' );
+			}
 			$label = $total['label'];
 			if ( isset( $total['meta'] ) ) {
 				$label .= ' ' . $total['meta'];
@@ -68,9 +83,9 @@ if ( $item_totals ) {
 
 if ( $order->get_customer_note() ) {
 	if ( $email_improvements_enabled ) {
-		echo "\n" . esc_html__( 'Note:', 'woocommerce' ) . "\n" . wp_kses( wptexturize( $order->get_customer_note() ), array() ) . "\n";
+		echo "\n" . esc_html__( 'Note:', 'woocommerce' ) . "\n" . wp_kses( wc_wptexturize_order_note( $order->get_customer_note() ), array() ) . "\n";
 	} else {
-		echo esc_html__( 'Note:', 'woocommerce' ) . "\t " . wp_kses( wptexturize( $order->get_customer_note() ), array() ) . "\n";
+		echo esc_html__( 'Note:', 'woocommerce' ) . "\t " . wp_kses( wc_wptexturize_order_note( $order->get_customer_note() ), array() ) . "\n";
 	}
 }
 

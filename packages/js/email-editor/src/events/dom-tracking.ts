@@ -1,13 +1,12 @@
 /**
  * External dependencies
  */
-import { applyFilters } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import { recordEvent } from '.';
+import { recordEvent, isEventTrackingEnabled } from '.';
 
 let EVENTS_TO_TRACK = [];
 
@@ -36,11 +35,7 @@ function trackMatchingEvents( event: Event ) {
 }
 
 export function initDomTracking() {
-	const isEventTrackingEnabled = applyFilters(
-		'woocommerce_email_editor_events_tracking_enabled',
-		false
-	);
-	if ( ! isEventTrackingEnabled ) {
+	if ( ! isEventTrackingEnabled() ) {
 		return;
 	}
 
@@ -54,7 +49,12 @@ export function initDomTracking() {
 		// Header preview dropdown preview in new tab selected
 		{
 			track: 'header_preview_dropdown_preview_in_new_tab_selected',
-			selector: '.editor-preview-dropdown__button-external',
+			// WP 7.1 dropped the `.editor-preview-dropdown__button-external`
+			// class; the entry is now a menu item anchor whose window target is
+			// `wp-preview-<postId>`. Match both so the event keeps firing across
+			// supported WordPress versions.
+			selector:
+				'.editor-preview-dropdown__button-external, a[role="menuitem"][target^="wp-preview-"]',
 		},
 		// Header toggle block tools
 		{

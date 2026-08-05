@@ -85,8 +85,7 @@ class CheckoutExpressPaymentBlock extends AbstractInnerBlock {
 
 		try {
 			// Parse the post content to get the express payment attributes of the current page.
-			$blocks = parse_blocks( $post->post_content );
-			$attrs  = CartCheckoutUtils::find_express_checkout_attributes( $blocks, $cart_or_checkout );
+			$attrs = CartCheckoutUtils::find_express_checkout_attributes( $post->post_content, $cart_or_checkout );
 
 			if ( ! is_array( $attrs ) ) {
 				return;

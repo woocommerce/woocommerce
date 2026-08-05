@@ -18,11 +18,7 @@ import {
 	// @ts-ignore
 	BlockContextProvider,
 } from '@wordpress/block-editor';
-// eslint-disable-next-line @woocommerce/dependency-group
-import {
-	// @ts-expect-error Type definitions for this function are missing in Gutenberg
-	createBlocksFromInnerBlocksTemplate,
-} from '@wordpress/blocks';
+import { createBlocksFromInnerBlocksTemplate } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -41,12 +37,11 @@ const LayoutEditor = ( {
 	product,
 	clientId,
 }: LayoutEditorProps ) => {
-	const baseClassName =
-		'.wc-block-editor-single-product .wc-block-editor-layout';
+	const baseClassName = 'wc-block-editor-single-product';
 	const { replaceInnerBlocks } = useDispatch( 'core/block-editor' );
 
 	const resetInnerBlocks = useCallback( () => {
-		replaceInnerBlocks(
+		void replaceInnerBlocks(
 			clientId,
 			createBlocksFromInnerBlocksTemplate( DEFAULT_INNER_BLOCKS ),
 			false

@@ -11,7 +11,7 @@ import { createElement } from '@wordpress/element';
 import { rows, headers } from './index';
 
 export const Basic = () => (
-	<Card size={ null }>
+	<Card size="none">
 		<Table
 			caption="Revenue last week"
 			rows={ rows }
@@ -23,8 +23,7 @@ export const Basic = () => (
 
 export const NoDataCustomMessage = () => {
 	return (
-		/* @ts-expect-error: size must be one of small, medium, largel, xSmall, extraSmall. */
-		<Card size={ null }>
+		<Card size="none">
 			<Table
 				caption="Revenue last week"
 				rows={ [] }

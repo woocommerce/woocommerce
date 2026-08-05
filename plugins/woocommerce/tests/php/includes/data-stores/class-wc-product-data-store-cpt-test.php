@@ -299,6 +299,10 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		add_filter( 'woocommerce_load_product_cogs_value', fn( $value, $product ) => $value + $product->get_id(), 10, 2 );
 
+		// The save above populates the product object cache; flush so the re-read goes through the
+		// data store and applies the load filter registered after the save.
+		wp_cache_flush();
+
 		$product = wc_get_product( $product->get_id() );
 		$this->assertEquals( 12.34 + $product->get_id(), $product->get_cogs_value() );
 	}
@@ -335,5 +339,47 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$product->save();
 
 		$this->assertEquals( '12.34', get_post_meta( $product->get_id(), '_cogs_total_value', true ) );
+	}
+
+	/**
+	 * Test update_product_stock updates on the meta-entry.
+	 */
+	public function test_update_product_stock_meta_update(): void {
+		/** @var WC_Product_Data_Store_CPT $store */
+		$store = WC_Data_Store::load( 'product' );
+
+		$product = new WC_Product();
+		$product->save();
+		$product_id = $product->get_id();
+
+		$store->update_product_stock( $product_id, null, 'set' );
+		$this->assertSame( '0.000000', get_post_meta( $product_id, '_stock', true ) );
+		$store->update_product_stock( $product_id, 10, 'set' );
+		$this->assertSame( '10.000000', get_post_meta( $product_id, '_stock', true ) );
+		$store->update_product_stock( $product_id, 20.0, 'set' );
+		$this->assertSame( '20.000000', get_post_meta( $product_id, '_stock', true ) );
+		$store->update_product_stock( $product_id, 30.5, 'set' );
+		$this->assertSame( '30.000000', get_post_meta( $product_id, '_stock', true ) );
+	}
+
+	/**
+	 * Test update_product_sales updates on the meta-entry.
+	 */
+	public function test_update_product_sales_meta_update(): void {
+		/** @var WC_Product_Data_Store_CPT $store */
+		$store = WC_Data_Store::load( 'product' );
+
+		$product = new WC_Product();
+		$product->save();
+		$product_id = $product->get_id();
+
+		$store->update_product_sales( $product_id, null, 'set' );
+		$this->assertSame( '0.000000', get_post_meta( $product_id, 'total_sales', true ) );
+		$store->update_product_sales( $product_id, 10, 'set' );
+		$this->assertSame( '10.000000', get_post_meta( $product_id, 'total_sales', true ) );
+		$store->update_product_sales( $product_id, 20.0, 'set' );
+		$this->assertSame( '20.000000', get_post_meta( $product_id, 'total_sales', true ) );
+		$store->update_product_sales( $product_id, 30.5, 'set' );
+		$this->assertSame( '30.500000', get_post_meta( $product_id, 'total_sales', true ) );
 	}
 }

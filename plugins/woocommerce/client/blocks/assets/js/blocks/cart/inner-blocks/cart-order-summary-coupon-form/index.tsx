@@ -15,7 +15,8 @@ import metadata from './block.json';
 import { Edit, Save } from './edit';
 
 registerBlockType( 'woocommerce/cart-order-summary-coupon-form-block', {
-	...metadata,
+	apiVersion: metadata.apiVersion,
+	title: metadata.title,
 	icon: {
 		src: (
 			<Icon

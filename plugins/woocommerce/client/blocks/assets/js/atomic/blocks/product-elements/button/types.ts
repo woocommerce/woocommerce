@@ -1,3 +1,8 @@
+/**
+ * External dependencies
+ */
+import { ProductEntityResponse } from '@woocommerce/entities';
+
 interface WithClass {
 	className: string;
 }
@@ -15,6 +20,9 @@ export interface BlockAttributes {
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	'woocommerce/isDescendantOfAddToCartWithOptions'?: boolean | undefined;
 	blockClientId?: string;
+	product?: ProductEntityResponse | undefined;
+	isAdmin?: boolean | undefined;
+	collection?: string | undefined;
 }
 
 export interface AddToCartProductDetails {
@@ -43,6 +51,8 @@ export interface AddToCartButtonAttributes {
 		has_options: boolean;
 		is_purchasable: boolean;
 		is_in_stock: boolean;
+		button_text: string;
 	};
 	textAlign?: ( WithClass & WithStyle ) | undefined;
+	collection?: string | undefined;
 }

@@ -7,6 +7,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -353,7 +354,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 			$order->set_transaction_id( wc_clean( $posted['txn_id'] ) );
 		}
 		if ( ! empty( $posted['payment_status'] ) ) {
-			$order->update_meta_data( '_paypal_status', wc_clean( $posted['payment_status'] ) );
+			$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, wc_clean( $posted['payment_status'] ) );
 		}
 		$order->save();
 	}

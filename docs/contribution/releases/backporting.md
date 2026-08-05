@@ -1,45 +1,59 @@
 ---
-post_title: Backporting in WooCommerce
-sidebar_label: Backporting
+post_title: Cherry-picking in WooCommerce
+sidebar_label: Cherry-picking
+sidebar_position: 3
 ---
 
-# Backporting in WooCommerce
+# Cherry-picking in WooCommerce
 
-Backporting is the process of applying a change from `trunk` to an open release branch.  When a release branch is created, it is copied from the `trunk` branch at the time of code freeze.  Changes are applied to `trunk` and then backported to the release branch as needed.
+Cherry-picking is the process of applying changes between `trunk` and a release branch (in either direction). This page is the canonical reference for the cherry-pick mechanics used by both pre-release stabilization (beta, RC) and patch releases.
 
-## Requesting backports (Contributors)
+For the patch-release-specific process (when a patch is warranted, who creates the tracking issue, and how it ships), see the [Point Releases guide](/docs/contribution/releases/point-releases).
 
-### Cherry picking to a frozen release
+## Release Branch Lifecycle
 
-If you have a pull request that should be backported to a frozen release, you should target `trunk` as your base branch.  You can then request that the change is backported by adding the `cherry pick to frozen release` label to the pull request.  Make sure to add the `Milestone` of the version you're targetting to the PR.
+When a release branch is created, it is copied from `trunk` at the time of feature freeze. After creation:
 
-Note that adding this label does not guarantee that the change will be backported.  The change must be qualified for backporting.
+- The release branch no longer receives new feature updates.
+- Only critical changes are allowed.
+- Because we do not merge release branches back into `trunk`, any fix landed on a release branch must also be applied to `trunk` (and, when applicable, to the next frozen release branch).
 
-> If you're nearing the deadline for the final release, you may want to get in touch with the release lead directly to make them aware of the changes.
+### What "frozen release" means
 
-### Cherry picking to trunk
+A frozen release branch is the most recent `release/x.y` cut from `trunk` for the next upcoming version. While the previous release is still in maintenance, this branch is the one feature work has already moved on to. The `cherry pick to frozen release` label forward-ports a fix from the current maintenance branch to this branch so the same fix also ships in the next major version. Frozen releases only accept critical bug fixes, the same bar as any other release branch.
 
-On occassion, more urgent changes may occur where we need to target the release branch directly as our base branch.  When this happens, you should add the label `cherry pick to trunk` if this change is also meant to be included in `trunk`.
+## Qualifying Changes for Cherry-picking
 
-## Qualifying changes
+Changes qualify for cherry-picking only if they are:
 
-Changes are qualified for backporting if they are:
+- **Bug fixes** that affect the release.
+- **Performance improvements** that impact WooCommerce functionality.
+- **Time-sensitive features** that impact business goals.
+- **Contractually required features** for WooCommerce.
 
-- A bug fix.
-- A change that impacts the performance of WooCommerce.
-- A new feature that is time sensitive and impacts WooCommerce's business goals.
-- A new feature that is contractually required by WooCommerce.
+## Cherry-pick Workflows
 
-## Manually backporting pull requests (Release Lead)
+### Standard Workflow: `trunk` to Release Branch
 
-### Cherry picking to a frozen release
+**When to use:** Most cherry-pick scenarios, including the preferred path for patch release fixes.
 
-Before cutting a new RC, you should manually backport any PRs with the respective labels.
+1. **Target `trunk`** as the base branch.
+2. **Set the milestone** to the release series (e.g. `9.8.0`). WooCommerce milestones use the `.0` form for the whole `X.Y.x` series, so a fix targeting `X.Y.1` still uses milestone `X.Y.0`.
+3. **Get the PR reviewed and merged** into `trunk`.
+4. A cherry-pick PR against the release branch is opened automatically.
+5. **The author** (or whoever merged the original PR) reviews, tests against the release branch, and merges the cherry-pick PR. The cherry-pick PR shares the same milestone as the original fix and must land before the release is published.
 
-1. Check out the release branch `git checkout release/x.y`.
-2. Find all the [PRs labeled to be cherry picked](https://github.com/woocommerce/woocommerce/pulls?q=is%3Apr+label%3A%22cherry+pick+to+frozen+release%22) to the release branch.  Filter by the current release milestone (`X.Y.0`) to limit to PRs relevant to this release.
-3. Cherry-pick each PR (in chronological order) using `git cherry-pick [SHA]`.
-4. After cherry-picking all PRs, push to the release branch using `git push`.
-5. Remove the `cherry pick to frozen release` label and update the milestone to the current release for all cherry-picked PRs.
+For urgent fixes near release deadlines, reach out to the release lead in the `#woo-core-releases` Slack channel.
 
-The SHA for a pull request can be found in the pull request activity once the PR has been merged.
+### Alternative Workflow: Release Branch to `trunk`
+
+**When to use:** The fix doesn't apply cleanly to `trunk`, or the branches have diverged enough that landing on `release/x.y` first is simpler.
+
+1. **Target the release branch** (e.g. `release/9.8`) as the base branch.
+2. **Apply labels** for any branches that need the forward-port:
+    - `cherry pick to trunk` to forward-port to `trunk`.
+    - `cherry pick to frozen release` to forward-port to the next frozen release branch (see [frozen release definition above](#what-frozen-release-means)).
+3. **Include a changelog entry** and set the milestone to the release series (`X.Y.0`).
+4. **Get the PR reviewed and merged** into the release branch.
+5. The cherry-pick automation opens follow-up PRs against `trunk` and/or the frozen branch based on which labels are present.
+6. **The author** reviews and merges the follow-up PRs promptly. They share the same milestone as the original fix and must land before the release is published.

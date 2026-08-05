@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Update telemetry tracking to restore events removed by refactoring components

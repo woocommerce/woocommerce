@@ -1,0 +1,320 @@
+@import "@wordpress/dataviews/build-style/style.css";
+
+body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
+	background-color: var(--wpds-color-background-surface-neutral);
+
+	&.woocommerce-settings-ui-drill-down:has(.wc-settings-ui-shell__header) {
+		#wpbody {
+			margin-top: 0;
+		}
+
+		.woocommerce-layout__header {
+			display: none;
+		}
+	}
+
+	#mainform,
+	#wpcontent,
+	#wpbody-content,
+	.wrap.woocommerce {
+		background-color: var(--wpds-color-background-surface-neutral);
+	}
+
+	.woocommerce-layout__header {
+		background-color: var(--wpds-color-background-surface-neutral-strong);
+	}
+
+	#mainform {
+		padding: 0 48px 48px;
+	}
+
+	#mainform > .submit {
+		display: none;
+	}
+
+	.wc-settings-ui-shell {
+		background: transparent;
+		box-sizing: border-box;
+		color: var(--wpds-color-foreground-content-neutral);
+		font-size: var(--wpds-typography-font-size-md);
+		height: auto;
+		line-height: var(--wpds-typography-line-height-sm);
+		margin: 0 -48px;
+
+		&:has(.wc-settings-ui-shell__navigation) .wc-settings-ui-shell__header {
+			border-bottom: 0;
+		}
+	}
+
+	.wc-settings-ui-shell__header {
+		background: var(--wpds-color-background-surface-neutral-strong);
+		border-bottom: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
+		padding: 24px 48px;
+	}
+
+	.wc-settings-ui-shell__title {
+		font-size: 16px;
+		font-weight: var(--wpds-typography-font-weight-medium);
+		line-height: var(--wpds-typography-line-height-md);
+		margin: 0;
+	}
+
+	.wc-settings-ui-shell__header-row > .wc-settings-ui-shell__badge {
+		margin-inline-start: var(--wpds-dimension-gap-sm, 8px);
+	}
+
+	.wc-settings-ui-shell__header-actions {
+		flex: 0 0 auto;
+		margin-inline-start: auto;
+	}
+
+	.wc-settings-ui-shell__subtitle {
+		color: var(--wpds-color-foreground-content-neutral-weak);
+	}
+
+	// Carries #mainform so the margins beat extension styles targeting bare
+	// `nav` elements inside the settings form (WooPayments ships one).
+	#mainform .wc-settings-ui-shell__breadcrumbs {
+		font-size: 16px;
+		line-height: var(--wpds-typography-line-height-md);
+		margin: 0;
+	}
+
+	// The page title always follows the breadcrumbs, so every crumb gets a
+	// trailing separator.
+	.wc-settings-ui-shell__breadcrumb {
+		&::after {
+			color: var(--wpds-color-foreground-content-neutral-weak);
+			content: "/";
+			margin: 0 var(--wpds-dimension-gap-sm, 8px);
+		}
+
+		a {
+			color: var(--wpds-color-foreground-content-neutral);
+			text-decoration: underline;
+
+			&:focus,
+			&:hover {
+				color: var(--wpds-color-foreground-interactive-brand);
+			}
+		}
+	}
+
+	.wc-settings-ui-shell__navigation {
+		border-bottom: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
+		margin: 0;
+		width: 100%;
+	}
+
+	.wc-settings-ui-shell__tabs {
+		background: var(--wpds-color-background-surface-neutral-strong);
+		box-sizing: border-box;
+		display: flex;
+		margin: 0 !important;
+		overflow-x: auto;
+		padding: 0 48px;
+		width: 100%;
+	}
+
+	.wc-settings-ui-shell__tab {
+		align-items: center;
+		color: var(--wpds-color-foreground-interactive-neutral);
+		display: inline-flex;
+		font-size: var(--wpds-typography-font-size-md);
+		font-weight: var(--wpds-typography-font-weight-medium);
+		height: 48px;
+		line-height: var(--wpds-typography-line-height-sm);
+		padding: 0 var(--wpds-dimension-padding-lg);
+		position: relative;
+		text-decoration: none;
+		white-space: nowrap;
+
+		&:focus,
+		&:hover,
+		&:active {
+			box-shadow: none;
+			color: var(--wpds-color-foreground-interactive-brand);
+			outline: none;
+		}
+
+		&.is-active {
+			color: var(--wpds-color-foreground-interactive-neutral);
+
+			&::after {
+				background: var(--wpds-color-stroke-interactive-brand);
+				border-radius: 999px;
+				bottom: 0;
+				content: "";
+				height: 2px;
+				left: 0;
+				position: absolute;
+				right: 0;
+			}
+		}
+	}
+
+	.wc-settings-ui-shell__notice {
+		margin: 24px 48px 0;
+	}
+
+	.wc-settings-ui {
+		box-sizing: border-box;
+		margin: 32px auto 48px;
+		max-width: var(--wpds-dimension-surface-width-xl);
+	}
+
+	.wc-settings-ui__section-heading {
+		min-width: 0;
+	}
+
+	.wc-settings-ui__section-description {
+		color: var(--wpds-color-foreground-content-neutral-weak);
+		margin: 8px 0 0;
+
+		p {
+			margin: 0 0 8px;
+		}
+
+		p:last-child {
+			margin-bottom: 0;
+		}
+	}
+
+	.wc-settings-ui__section-actions {
+		flex: 0 0 auto;
+	}
+
+	.wc-settings-ui__field {
+		margin: 0;
+		width: 100%;
+	}
+
+	.wc-settings-ui__info {
+		background: var(--wpds-color-background-surface-neutral-weak);
+		border-radius: var(--wpds-border-radius-md);
+		padding: 16px;
+
+		strong {
+			display: block;
+			margin-bottom: 4px;
+		}
+
+		p {
+			margin: 0;
+		}
+	}
+
+	.wc-settings-ui__control.components-base-control {
+		margin-bottom: 0;
+		width: 100%;
+	}
+
+	.wc-settings-ui__control {
+		.components-base-control__field {
+			margin-bottom: 0;
+		}
+
+		.components-base-control__help {
+			color: var(--wpds-color-foreground-content-neutral-weak);
+			font-size: 13px;
+			line-height: 20px;
+			margin-top: 8px;
+		}
+	}
+
+	.wc-settings-ui__number-control {
+		position: relative;
+	}
+
+	// Owned input skin: deliberately not borrowing internal
+	// @wordpress/components classnames, which carry no compatibility
+	// guarantee. Values mirror the 40px TextControl input.
+	.wc-settings-ui__number-control-input {
+		appearance: textfield;
+		border: 1px solid #949494;
+		border-radius: 2px;
+		box-shadow: 0 0 0 transparent;
+		box-sizing: border-box;
+		font-family: inherit;
+		// Fonts smaller than 16px cause mobile Safari to zoom on focus.
+		font-size: 16px;
+		line-height: normal;
+		margin: 0;
+		min-height: 40px;
+		padding: 6px 12px;
+		// Keep typed values clear of the spin buttons.
+		padding-right: 64px;
+		transition: box-shadow 0.1s linear;
+		width: 100%;
+
+		@media (min-width: 600px) {
+			font-size: 13px;
+		}
+
+		&:focus {
+			border-color: var(--wp-admin-theme-color);
+			box-shadow: 0 0 0 0.5px var(--wp-admin-theme-color);
+			outline: 2px solid transparent;
+		}
+
+		&::-webkit-inner-spin-button,
+		&::-webkit-outer-spin-button {
+			appearance: none;
+			margin: 0;
+		}
+	}
+
+	.wc-settings-ui__number-control-spin-buttons {
+		display: flex;
+		position: absolute;
+		right: 6px;
+		top: 50%;
+		transform: translateY(-50%);
+	}
+
+	// Lifts the dialog above the shell's own stacking context; 100000 matches
+	// @wordpress/components modals.
+	.wc-settings-ui__unsaved-changes-portal {
+		position: relative;
+		z-index: 100000;
+	}
+
+	@media (max-width: 960px) {
+		#mainform {
+			padding: 0 24px 32px;
+		}
+
+		.wc-settings-ui-shell {
+			margin-left: -24px;
+			margin-right: -24px;
+		}
+
+		.wc-settings-ui-shell__header {
+			padding-left: 24px;
+			padding-right: 24px;
+		}
+
+		.wc-settings-ui-shell__tabs {
+			padding-left: 24px;
+			padding-right: 24px;
+		}
+
+		.wc-settings-ui-shell__notice {
+			margin-left: 24px;
+			margin-right: 24px;
+		}
+
+		.wc-settings-ui {
+			margin: 48px 24px 32px;
+			max-width: none;
+		}
+
+		.wc-settings-ui__section-header {
+			display: block;
+		}
+
+		.wc-settings-ui__section-actions {
+			margin-top: 16px;
+		}
+	}
+}

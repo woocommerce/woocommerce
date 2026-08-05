@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Centered content with image below
+ * Title: Centered Content with Image Below
  * Slug: woocommerce-blocks/centered-content-with-image-below
  * Categories: WooCommerce, Intro
  */

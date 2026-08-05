@@ -14,6 +14,7 @@ import type { JSONSchemaType } from 'ajv';
 export interface FieldProps {
 	id: string;
 	errorId: string;
+	name: string;
 	label: string;
 	autoCapitalize: string | undefined;
 	autoComplete: string | undefined;
@@ -30,9 +31,15 @@ export const createFieldProps = (
 ): FieldProps => ( {
 	id: `${ formId }-${ field?.key }`.replaceAll( '/', '-' ), // Replace all slashes with hyphens to avoid invalid HTML ID.
 	errorId: `${ fieldAddressType }_${ field?.key }`,
+	name: `${ fieldAddressType }_${ field?.key }`,
 	label: ( field?.required ? field?.label : field?.optionalLabel ) || '',
 	autoCapitalize: field?.autocapitalize,
-	autoComplete: field?.autocomplete,
+	// Prefix autocomplete value with section and address type per HTML spec.
+	// Format: section-<name> [shipping|billing] <autofill-field>
+	// e.g., 'address-level1' becomes 'section-billing billing address-level1'
+	autoComplete: field?.autocomplete
+		? `section-${ fieldAddressType } ${ fieldAddressType } ${ field.autocomplete }`
+		: undefined,
 	errorMessage: field?.errorMessage || '',
 	required: field?.required,
 	placeholder: field?.placeholder,

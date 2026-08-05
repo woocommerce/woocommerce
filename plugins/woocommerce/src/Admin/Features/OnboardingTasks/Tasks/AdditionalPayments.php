@@ -137,10 +137,15 @@ class AdditionalPayments extends Payments {
 	 */
 	private function get_payment_providers(): array {
 		try {
+			/**
+			 * The Payments Settings [page] service.
+			 *
+			 * @var SettingsPaymentsService $settings_payments_service
+			 */
 			$settings_payments_service = wc_get_container()->get( SettingsPaymentsService::class );
 
-			$providers = $settings_payments_service->get_payment_providers( $settings_payments_service->get_country() );
-		} catch ( \Exception $e ) {
+			$providers = $settings_payments_service->get_payment_providers( $settings_payments_service->get_country(), false );
+		} catch ( \Throwable $e ) {
 			// In case of any error, return an empty array.
 			$providers = array();
 		}

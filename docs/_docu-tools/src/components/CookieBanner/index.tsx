@@ -38,38 +38,12 @@ const COOKIE_OPTIONS = {
   secure: process.env.NODE_ENV === 'production',
 };
 
-// Initialize GTM with proper consent settings
-const initializeGTM = () => {
-  if (typeof window.gtag !== 'function') {
-    return;
-  }
-
-  // Set default consent state
-  window.gtag('consent', 'default', {
-    analytics_storage: 'denied' as const,
-    ad_storage: 'denied' as const,
-  });
-
-  // Initialize GTM
-  window.gtag('js', new Date());
-  window.gtag('config', 'GTM-WW2RLFD7');
-};
 
 // Helper function to create consent options
 const createConsentOptions = (buckets: CookieBuckets) => ({
   analytics_storage: buckets.analytics_storage ? 'granted' as const : 'denied' as const,
   ad_storage: buckets.ad_storage ? 'granted' as const : 'denied' as const,
 });
-
-const loadGTMScript = () => {
-  const script = document.createElement('script');
-  script.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-WW2RLFD7';
-  script.async = true;
-  script.onload = () => {
-    initializeGTM();
-  };
-  document.head.appendChild(script);
-};
 
 export const CookieBanner: React.FC = () => {
   const [preferences, setPreferences] = useState<CookiePreferences>(DEFAULT_PREFERENCES);
@@ -84,9 +58,6 @@ export const CookieBanner: React.FC = () => {
         setPreferences(decodedPreferences);
         if (decodedPreferences.ok) {
           setShowBanner(false);
-          if (decodedPreferences.buckets.analytics_storage || decodedPreferences.buckets.ad_storage) {
-            loadGTMScript();
-          }
           updateGtagConsent(decodedPreferences.buckets);
         } else {
           setShowBanner(true);
@@ -126,7 +97,6 @@ export const CookieBanner: React.FC = () => {
     };
     setPreferences(newPreferences);
     Cookies.set(COOKIE_NAME, encodeURIComponent(JSON.stringify(newPreferences)), COOKIE_OPTIONS);
-    loadGTMScript(); // Load GTM script after accepting all
     updateGtagConsent(newPreferences.buckets);
     setShowBanner(false);
   };
@@ -144,9 +114,6 @@ export const CookieBanner: React.FC = () => {
     
     Cookies.set(COOKIE_NAME, encodeURIComponent(JSON.stringify(newPreferences)), COOKIE_OPTIONS);
     
-    if (newPreferences.buckets.analytics_storage || newPreferences.buckets.ad_storage) {
-      loadGTMScript(); // Load GTM script if analytics or ads are enabled
-    }
     updateGtagConsent(newPreferences.buckets);
     setShowDetails(false);
     setShowBanner(false);

@@ -7,7 +7,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsRestController;
 use PHPUnit\Framework\MockObject\MockObject;
-use WC_REST_Unit_Test_Case;
+use WC_Unit_Test_Case;
 use WP_REST_Request;
 use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
@@ -19,7 +19,7 @@ use WC_Gateway_PayPal;
  *
  * @class PaymentsRestController
  */
-class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
+class PaymentsRestControllerTest extends WC_Unit_Test_Case {
 	/**
 	 * Endpoint.
 	 *
@@ -45,6 +45,13 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	protected $store_admin_id;
 
 	/**
+	 * REST server used by the controller tests.
+	 *
+	 * @var \WP_REST_Server
+	 */
+	protected $server;
+
+	/**
 	 * Set up test.
 	 */
 	public function setUp(): void {
@@ -57,7 +64,22 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->sut = new PaymentsRestController();
 		$this->sut->init( $this->mock_service );
-		$this->sut->register_routes( true );
+		$this->server = $this->create_rest_server_with_routes(
+			array(
+				function () {
+					$this->sut->register_routes( true );
+				},
+			),
+			true
+		);
+	}
+
+	/**
+	 * Tear down the REST server.
+	 */
+	public function tearDown(): void {
+		$this->clear_rest_server();
+		parent::tearDown();
 	}
 
 	/**
@@ -73,7 +95,7 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		add_filter( 'user_has_cap', $filter_callback );
 
 		// Act.
-		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
@@ -102,7 +124,7 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->mock_extension_suggestions_categories();
 
 		// Act.
-		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
@@ -190,7 +212,7 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		add_filter( 'user_has_cap', $filter_callback );
 
 		// Act.
-		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$request->set_param( 'location', 'US' );
 		$response = $this->server->dispatch( $request );
 
@@ -264,7 +286,7 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->mock_extension_suggestions_categories();
 
 		// Act.
-		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$request->set_param( 'location', 'US' );
 		$response = $this->server->dispatch( $request );
 
@@ -314,7 +336,7 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->mock_extension_suggestions_categories();
 
 		// Act.
-		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$request->set_param( 'location', 'US' );
 		$response = $this->server->dispatch( $request );
 
@@ -363,7 +385,7 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->mock_extension_suggestions_categories();
 
 		// Act.
-		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$request->set_param( 'location', 'US' );
 		$response = $this->server->dispatch( $request );
 
@@ -406,7 +428,7 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->mock_extension_suggestions_categories();
 
 		// Act.
-		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$request->set_param( 'location', 'US' );
 		$response = $this->server->dispatch( $request );
 
@@ -455,7 +477,7 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		update_option( 'woocommerce_default_country', 'LI' ); // Liechtenstein.
 
 		// Act.
-		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
@@ -488,7 +510,7 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_payment_providers_with_invalid_location() {
 		// Act.
-		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$request->set_param( 'location', 'U' );
 		$response = $this->server->dispatch( $request );
 
@@ -496,7 +518,7 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 400, $response->get_status() );
 
 		// Act.
-		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$request->set_param( 'location', '12' );
 		$response = $this->server->dispatch( $request );
 
@@ -504,7 +526,7 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 400, $response->get_status() );
 
 		// Act.
-		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$request->set_param( 'location', 'USA' );
 		$response = $this->server->dispatch( $request );
 
@@ -983,7 +1005,7 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 				'management'  => array(
 					'_links' => array(
 						'settings' => array(
-							'href' => 'http://localhost:8888/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bacs',
+							'href' => 'http://localhost:8888/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline/bacs',
 						),
 					),
 				),
@@ -1019,7 +1041,7 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 				'management'  => array(
 					'_links' => array(
 						'settings' => array(
-							'href' => 'http://localhost:8888/wp-admin/admin.php?page=wc-settings&tab=checkout&section=cheque',
+							'href' => 'http://localhost:8888/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline/cheque',
 						),
 					),
 				),
@@ -1055,7 +1077,7 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 				'management'  => array(
 					'_links' => array(
 						'settings' => array(
-							'href' => 'http://localhost:8888/wp-admin/admin.php?page=wc-settings&tab=checkout&section=cod',
+							'href' => 'http://localhost:8888/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline/cod',
 						),
 					),
 				),

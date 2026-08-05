@@ -9,6 +9,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -184,6 +185,97 @@ class WC_Meta_Box_Order_Data {
 	}
 
 	/**
+	 * Whether an order has no persisted shipping method.
+	 *
+	 * A shipping line is order-time fulfillment evidence that remains stable when a
+	 * merchant later changes the ordered catalog products. Orders that retain one,
+	 * including Store API local pickup orders, must keep showing shipping details.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return bool
+	 */
+	private static function order_has_no_shipping( $order ) {
+		return 0 === count( $order->get_shipping_methods() );
+	}
+
+	/**
+	 * Whether every resolvable product line on an order is currently virtual.
+	 *
+	 * This check is used only when no persisted shipping method provides historical
+	 * fulfillment evidence. It intentionally reflects current, filterable catalog
+	 * semantics, so product edits can change the summary for no-line orders. Empty
+	 * or unresolved product sets remain visible because suppressing their persisted
+	 * shipping details would be ambiguous.
+	 *
+	 * Reading live catalog state is a deliberate, bounded departure from PR #66488's
+	 * principle that suppression should rest on order-time evidence immune to later
+	 * catalog edits. This fallback runs only for orders with no persisted shipping line
+	 * (guaranteed by order_has_no_shipping() earlier in the gate's && chain), which is
+	 * exactly the population that carries no such order-time evidence, so the catalog
+	 * read is the only available signal and can never override a persisted shipping line.
+	 * The accepted tradeoff: reclassifying a product as virtual can later re-hide a
+	 * no-line order that genuinely shipped. That recurrence is display-only, admin-only,
+	 * filterable, and pinned as intended by
+	 * test_hides_shipping_details_after_physical_product_without_shipping_line_becomes_virtual().
+	 *
+	 * The aggregation and fallback here are deliberately local rather than reusing
+	 * WC_Order::needs_shipping() or the shipping-label helpers: needs_shipping()
+	 * short-circuits on the global shipping setting and, like those helpers, does not
+	 * default unresolved or product-less orders to the conservative "keep visible"
+	 * outcome this summary requires.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return bool
+	 */
+	private static function order_has_only_virtual_products( $order ) {
+		$items = $order->get_items();
+
+		if ( empty( $items ) ) {
+			return false;
+		}
+
+		foreach ( $items as $item ) {
+			if ( ! $item instanceof WC_Order_Item_Product ) {
+				return false;
+			}
+
+			$product = $item->get_product();
+
+			if ( ! $product instanceof WC_Product || $product->needs_shipping() ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Whether an order's shipping address is still the billing-derived copy.
+	 *
+	 * Store API checkout copies the billing address into the shipping address for
+	 * backwards compatibility when a purchase needs no fulfillment. There is no persisted
+	 * marker for that copy, so the shipping address is treated as billing-derived only
+	 * while every copied field still matches billing. Once a merchant or integration edits
+	 * the shipping fields to diverge, the values are explicit and must be shown.
+	 * Individual getters use the edit context instead of get_address() so view filters
+	 * cannot make distinct persisted values appear equal.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return bool
+	 */
+	private static function order_shipping_matches_billing( $order ) {
+		$copied_fields = array( 'first_name', 'last_name', 'company', 'address_1', 'address_2', 'city', 'state', 'postcode', 'country', 'phone' );
+
+		foreach ( $copied_fields as $field ) {
+			if ( $order->{"get_shipping_$field"}( 'edit' ) !== $order->{"get_billing_$field"}( 'edit' ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Output the metabox.
 	 *
 	 * @param WP_Post|WC_Order $post Post or order object.
@@ -213,70 +305,86 @@ class WC_Meta_Box_Order_Data {
 			<input name="post_title" type="hidden" value="<?php echo esc_attr( empty( $order->get_title() ) ? __( 'Order', 'woocommerce' ) : $order->get_title() ); ?>" />
 			<input name="post_status" type="hidden" value="<?php echo esc_attr( $order->get_status() ); ?>" />
 			<div id="order_data" class="panel woocommerce-order-data">
-				<h2 class="woocommerce-order-data__heading">
-					<?php
+				<div class="order_data_header">
+					<div class="order_data_header_column">
+						<h2 class="woocommerce-order-data__heading">
+							<?php
 
-					printf(
-						/* translators: 1: order type 2: order number */
-						esc_html__( '%1$s #%2$s details', 'woocommerce' ),
-						esc_html( $order_type_object->labels->singular_name ),
-						esc_html( $order->get_order_number() )
-					);
+							printf(
+								/* translators: 1: order type 2: order number */
+								esc_html__( '%1$s #%2$s', 'woocommerce' ),
+								esc_html( $order_type_object->labels->singular_name ),
+								esc_html( $order->get_order_number() )
+							);
 
-					?>
-				</h2>
-				<p class="woocommerce-order-data__meta order_number">
-					<?php
+							?>
+						</h2>
+						<p class="woocommerce-order-data__meta order_number">
+							<?php
 
-					$meta_list = array();
+							$meta_list = array();
 
-					if ( $payment_method && 'other' !== $payment_method ) {
-						$payment_method_string = sprintf(
-							/* translators: %s: payment method */
-							__( 'Payment via %s', 'woocommerce' ),
-							esc_html( isset( $payment_gateways[ $payment_method ] ) ? $payment_gateways[ $payment_method ]->get_title() : $payment_method )
-						);
+							if ( $payment_method && 'other' !== $payment_method ) {
+								$payment_method_string = sprintf(
+									/* translators: %s: payment method */
+									__( 'Payment via %s', 'woocommerce' ),
+									esc_html( isset( $payment_gateways[ $payment_method ] ) ? $payment_gateways[ $payment_method ]->get_title() : $payment_method )
+								);
 
-						$transaction_id = $order->get_transaction_id();
-						if ( $transaction_id ) {
+								$transaction_id = $order->get_transaction_id();
+								if ( $transaction_id ) {
 
-							$to_add = null;
-							if ( isset( $payment_gateways[ $payment_method ] ) ) {
-								$url = $payment_gateways[ $payment_method ]->get_transaction_url( $order );
-								if ( $url ) {
-									$to_add .= ' (<a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $transaction_id ) . '</a>)';
+									$to_add = null;
+									if ( isset( $payment_gateways[ $payment_method ] ) ) {
+										$url = $payment_gateways[ $payment_method ]->get_transaction_url( $order );
+										if ( $url ) {
+											$to_add .= ' (<a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $transaction_id ) . '</a>)';
+										}
+									}
+
+									$to_add                 = $to_add ?? ' (' . esc_html( $transaction_id ) . ')';
+									$payment_method_string .= $to_add;
 								}
+
+								$meta_list[] = $payment_method_string;
 							}
 
-							$to_add                 = $to_add ?? ' (' . esc_html( $transaction_id ) . ')';
-							$payment_method_string .= $to_add;
-						}
+							if ( $order->get_date_paid() ) {
+								$meta_list[] = sprintf(
+									/* translators: 1: date 2: time */
+									__( 'Paid on %1$s at %2$s', 'woocommerce' ),
+									wc_format_datetime( $order->get_date_paid() ),
+									wc_format_datetime( $order->get_date_paid(), get_option( 'time_format' ) )
+								);
+							}
 
-						$meta_list[] = $payment_method_string;
-					}
+							$ip_address = $order->get_customer_ip_address();
+							if ( $ip_address ) {
+								$meta_list[] = sprintf(
+									/* translators: %s: IP address */
+									__( 'Customer IP: %s', 'woocommerce' ),
+									'<span class="woocommerce-Order-customerIP">' . esc_html( $ip_address ) . '</span>'
+								);
+							}
 
-					if ( $order->get_date_paid() ) {
-						$meta_list[] = sprintf(
-							/* translators: 1: date 2: time */
-							__( 'Paid on %1$s @ %2$s', 'woocommerce' ),
-							wc_format_datetime( $order->get_date_paid() ),
-							wc_format_datetime( $order->get_date_paid(), get_option( 'time_format' ) )
-						);
-					}
+							echo wp_kses_post( implode( '. ', $meta_list ) );
 
-					$ip_address = $order->get_customer_ip_address();
-					if ( $ip_address ) {
-						$meta_list[] = sprintf(
-							/* translators: %s: IP address */
-							__( 'Customer IP: %s', 'woocommerce' ),
-							'<span class="woocommerce-Order-customerIP">' . esc_html( $ip_address ) . '</span>'
-						);
-					}
-
-					echo wp_kses_post( implode( '. ', $meta_list ) );
-
-					?>
-				</p>
+							?>
+						</p>
+					</div>
+					<div class="order_data_header_column">
+						<?php
+							/**
+							 * Hook allowing extenders to render custom content
+							 * besides the Order header.
+							 *
+							 * @param $order WC_Order The order object being displayed.
+							 * @since 9.9.0
+							 */
+							do_action( 'woocommerce_admin_order_data_header_right', $order );
+						?>
+					</div>
+				</div>
 				<?php
 					/**
 					 * Hook allowing extenders to render custom content
@@ -293,15 +401,15 @@ class WC_Meta_Box_Order_Data {
 					do_action( 'woocommerce_admin_order_data_after_payment_info', $order );
 				?>
 				<div class="order_data_column_container">
-					<div class="order_data_column">
+					<div class="order_data_column order_data_column_general">
 						<h3><?php esc_html_e( 'General', 'woocommerce' ); ?></h3>
 
 						<p class="form-field form-field-wide">
 							<?php
 							$order_date_created_localised = ! is_null( $order->get_date_created() ) ? $order->get_date_created()->getOffsetTimestamp() : '';
 							?>
-							<label for="order_date"><?php esc_html_e( 'Date created:', 'woocommerce' ); ?></label>
-							<input type="text" class="date-picker" name="order_date" maxlength="10" value="<?php echo esc_attr( date_i18n( 'Y-m-d', $order_date_created_localised ) ); ?>" pattern="<?php echo esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>" />@
+							<label for="order_date"><?php esc_html_e( 'Date created', 'woocommerce' ); ?></label>
+							<input type="text" class="date-picker" name="order_date" maxlength="10" value="<?php echo esc_attr( date_i18n( 'Y-m-d', $order_date_created_localised ) ); ?>" pattern="<?php echo esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>" />
 							&lrm;
 							<input type="number" class="hour" placeholder="<?php esc_attr_e( 'h', 'woocommerce' ); ?>" name="order_date_hour" min="0" max="23" step="1" value="<?php echo esc_attr( date_i18n( 'H', $order_date_created_localised ) ); ?>" pattern="([01]?[0-9]{1}|2[0-3]{1})" />:
 							<input type="number" class="minute" placeholder="<?php esc_attr_e( 'm', 'woocommerce' ); ?>" name="order_date_minute" min="0" max="59" step="1" value="<?php echo esc_attr( date_i18n( 'i', $order_date_created_localised ) ); ?>" pattern="[0-5]{1}[0-9]{1}" />
@@ -311,7 +419,7 @@ class WC_Meta_Box_Order_Data {
 						<p class="form-field form-field-wide wc-order-status">
 							<label for="order_status">
 								<?php
-								esc_html_e( 'Status:', 'woocommerce' );
+								esc_html_e( 'Status', 'woocommerce' );
 								if ( $order->needs_payment() ) {
 									printf(
 										'<a href="%s">%s</a>',
@@ -335,7 +443,7 @@ class WC_Meta_Box_Order_Data {
 							<!--email_off--> <!-- Disable CloudFlare email obfuscation -->
 							<label for="customer_user">
 								<?php
-								esc_html_e( 'Customer:', 'woocommerce' );
+								esc_html_e( 'Customer', 'woocommerce' );
 								if ( $order->get_user_id( 'edit' ) ) {
 									$args = array(
 										'post_status'    => 'all',
@@ -359,16 +467,23 @@ class WC_Meta_Box_Order_Data {
 							$user_string = '';
 							$user_id     = '';
 							if ( $order->get_user_id() ) {
-								$user_id  = absint( $order->get_user_id() );
-								$customer = new WC_Customer( $user_id );
-								/* translators: 1: user display name 2: user ID 3: user email */
-								$user_string = sprintf(
+								$user_id = absint( $order->get_user_id() );
+								$user    = Users::get_user_in_current_site( $user_id );
+
+								if ( ! is_wp_error( $user ) ) {
+									$customer = new WC_Customer( $user_id );
+									/* translators: 1: user display name 2: user ID 3: user email */
+									$user_string = sprintf(
 									/* translators: 1: customer name, 2 customer id, 3: customer email */
-									esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
-									$customer->get_first_name() . ' ' . $customer->get_last_name(),
-									$customer->get_id(),
-									$customer->get_email()
-								);
+										esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
+										$customer->get_first_name() . ' ' . $customer->get_last_name(),
+										$customer->get_id(),
+										$customer->get_email()
+									);
+								} else {
+									// print customer not available in the current site.
+									$user_string = esc_html__( '(Not available)', 'woocommerce' );
+								}
 							}
 							?>
 							<select class="wc-customer-search" id="customer_user" name="customer_user" data-placeholder="<?php esc_attr_e( 'Guest', 'woocommerce' ); ?>" data-allow_clear="true">
@@ -390,7 +505,7 @@ class WC_Meta_Box_Order_Data {
 						</p>
 						<?php do_action( 'woocommerce_admin_order_data_after_order_details', $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 					</div>
-					<div class="order_data_column">
+					<div class="order_data_column order_data_column_billing">
 						<h3>
 							<?php esc_html_e( 'Billing', 'woocommerce' ); ?>
 							<a href="#" class="edit_address"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
@@ -401,39 +516,50 @@ class WC_Meta_Box_Order_Data {
 						<div class="address">
 							<?php
 							// Display values.
-							if ( $order->get_formatted_billing_address() ) {
-								echo '<p>' . wp_kses( $order->get_formatted_billing_address(), array( 'br' => array() ) ) . '</p>';
+							$user = Users::get_user_in_current_site( $order->get_user_id() );
+
+							$details_not_available_message = __( 'Details are not available for this customer as this user does not exist in the current site.', 'woocommerce' );
+							// If the user is not a guest and is not a valid user in the current site, print details not available.
+							if ( $order->get_user_id() !== 0 && is_wp_error( $user ) ) {
+								echo '<p>' . esc_html( $details_not_available_message ) . '</p>';
 							} else {
-								echo '<p class="none_set"><strong>' . esc_html__( 'Address:', 'woocommerce' ) . '</strong> ' . esc_html__( 'No billing address set.', 'woocommerce' ) . '</p>';
-							}
-
-							$billing_fields = self::get_billing_fields( $order, 'view' );
-
-							foreach ( $billing_fields as $key => $field ) {
-								if ( isset( $field['show'] ) && false === $field['show'] ) {
-									continue;
-								}
-
-								$field_name = 'billing_' . $key;
-
-								if ( isset( $field['value'] ) ) {
-									$field_value = $field['value'];
-								} elseif ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
-									$field_value = $order->{"get_$field_name"}( 'edit' );
+								if ( $order->get_formatted_billing_address() ) {
+									echo '<p>' . wp_kses( $order->get_formatted_billing_address(), array( 'br' => array() ) ) . '</p>';
 								} else {
-									$field_value = $order->get_meta( '_' . $field_name );
+									echo '<p class="none_set">' . esc_html__( 'No billing address set.', 'woocommerce' ) . '</p>';
 								}
 
-								if ( 'billing_phone' === $field_name ) {
-									$field_value = wc_make_phone_clickable( $field_value );
-								} elseif ( 'billing_email' === $field_name ) {
-									$field_value = '<a href="' . esc_url( 'mailto:' . $field_value ) . '">' . $field_value . '</a>';
-								} else {
-									$field_value = make_clickable( esc_html( $field_value ) );
-								}
+								$billing_fields = self::get_billing_fields( $order, 'view' );
 
-								if ( $field_value || '0' === $field_value ) {
-									echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . wp_kses_post( $field_value ) . '</p>';
+								foreach ( $billing_fields as $key => $field ) {
+									if ( isset( $field['show'] ) && false === $field['show'] ) {
+										continue;
+									}
+
+									$field_name = 'billing_' . $key;
+
+									if ( isset( $field['value'] ) ) {
+										$field_value = $field['value'];
+									} elseif ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
+										$field_value = $order->{"get_$field_name"}( 'edit' );
+									} else {
+										$field_value = $order->get_meta( '_' . $field_name );
+									}
+
+									if ( 'billing_phone' === $field_name ) {
+										$field_value = wc_make_phone_clickable( $field_value );
+									} elseif ( 'billing_email' === $field_name ) {
+										$normalized_email = is_string( $field_value ) ? trim( $field_value ) : '';
+										$field_value      = '' === $normalized_email
+											? '<span class="none_set">' . esc_html__( 'No email address set.', 'woocommerce' ) . '</span>'
+											: '<a href="' . esc_url( 'mailto:' . $normalized_email ) . '">' . esc_html( $normalized_email ) . '</a>';
+									} else {
+										$field_value = make_clickable( esc_html( $field_value ) );
+									}
+
+									if ( $field_value || '0' === $field_value ) {
+										echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . wp_kses_post( $field_value ) . '</p>';
+									}
 								}
 							}
 							?>
@@ -454,7 +580,13 @@ class WC_Meta_Box_Order_Data {
 
 								$field_name = 'billing_' . $key;
 
-								if ( ! isset( $field['value'] ) ) {
+								// Check if the user is a valid user in the current site.
+								// If not, set the value to an empty string.
+								// This is to prevent the user from being able to view the billing address of a user that does not exist.
+								// If the user is not a guest and is not a valid user in the current site, print details not available.
+								if ( $order->get_user_id() !== 0 && is_wp_error( $user ) ) {
+									$field['value'] = '';
+								} elseif ( ! isset( $field['value'] ) ) {
 									if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
 										$field['value'] = $order->{"get_$field_name"}( 'edit' );
 									} else {
@@ -514,7 +646,7 @@ class WC_Meta_Box_Order_Data {
 						</div>
 						<?php do_action( 'woocommerce_admin_order_data_after_billing_address', $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 					</div>
-					<div class="order_data_column">
+					<div class="order_data_column order_data_column_shipping">
 						<h3>
 							<?php esc_html_e( 'Shipping', 'woocommerce' ); ?>
 							<a href="#" class="edit_address"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
@@ -526,42 +658,67 @@ class WC_Meta_Box_Order_Data {
 						<div class="address">
 							<?php
 							// Display values.
-							if ( $order->get_formatted_shipping_address() ) {
-								echo '<p>' . wp_kses( $order->get_formatted_shipping_address(), array( 'br' => array() ) ) . '</p>';
+							// If the user is not a guest and is not a valid user in the current site, print details not available.
+							if ( $order->get_user_id() !== 0 && is_wp_error( $user ) ) {
+								echo '<p>' . esc_html( $details_not_available_message ) . '</p>';
 							} else {
-								echo '<p class="none_set"><strong>' . esc_html__( 'Address:', 'woocommerce' ) . '</strong> ' . esc_html__( 'No shipping address set.', 'woocommerce' ) . '</p>';
-							}
+								$hide_core_shipping_details = 'store-api' === $order->get_created_via()
+									&& self::order_has_no_shipping( $order )
+									&& self::order_has_only_virtual_products( $order )
+									&& self::order_shipping_matches_billing( $order );
 
-							$shipping_fields = self::get_shipping_fields( $order, 'view' );
+								/**
+								 * Filters whether billing-derived shipping details are hidden in the order admin summary.
+								 *
+								 * @param bool     $hide_core_shipping_details Whether core shipping details are hidden.
+								 * @param WC_Order $order                      Order object.
+								 *
+								 * @since 11.1.0
+								 */
+								$hide_core_shipping_details = apply_filters( 'woocommerce_hide_order_admin_shipping_details', $hide_core_shipping_details, $order );
+								$shipping_address           = $hide_core_shipping_details ? '' : $order->get_formatted_shipping_address();
 
-							if ( ! empty( $shipping_fields ) ) {
-								foreach ( $shipping_fields as $key => $field ) {
-									if ( isset( $field['show'] ) && false === $field['show'] ) {
-										continue;
-									}
+								if ( $shipping_address ) {
+									echo '<p>' . wp_kses( $shipping_address, array( 'br' => array() ) ) . '</p>';
+								} else {
+									echo '<p class="none_set">' . esc_html__( 'No shipping address set.', 'woocommerce' ) . '</p>';
+								}
 
-									$field_name = 'shipping_' . $key;
+								$shipping_fields = self::get_shipping_fields( $order, 'view' );
 
-									if ( isset( $field['value'] ) ) {
-										$field_value = $field['value'];
-									} elseif ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
-										$field_value = $order->{"get_$field_name"}( 'edit' );
-									} else {
-										$field_value = $order->get_meta( '_' . $field_name );
-									}
+								if ( ! empty( $shipping_fields ) ) {
+									foreach ( $shipping_fields as $key => $field ) {
+										if ( $hide_core_shipping_details && 'phone' === $key && ! isset( $field['value'] ) ) {
+											continue;
+										}
 
-									if ( 'shipping_phone' === $field_name ) {
-										$field_value = wc_make_phone_clickable( $field_value );
-									}
+										if ( isset( $field['show'] ) && false === $field['show'] ) {
+											continue;
+										}
 
-									if ( $field_value || '0' === $field_value ) {
-										echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . wp_kses_post( $field_value ) . '</p>';
+										$field_name = 'shipping_' . $key;
+
+										if ( isset( $field['value'] ) ) {
+											$field_value = $field['value'];
+										} elseif ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
+											$field_value = $order->{"get_$field_name"}( 'edit' );
+										} else {
+											$field_value = $order->get_meta( '_' . $field_name );
+										}
+
+										if ( 'shipping_phone' === $field_name ) {
+											$field_value = wc_make_phone_clickable( $field_value );
+										}
+
+										if ( $field_value || '0' === $field_value ) {
+											echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . wp_kses_post( $field_value ) . '</p>';
+										}
 									}
 								}
-							}
 
-							if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' === get_option( 'woocommerce_enable_order_comments', 'yes' ) ) && $order->get_customer_note() ) { // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-								echo '<p class="order_note"><strong>' . esc_html( __( 'Customer provided note:', 'woocommerce' ) ) . '</strong> ' . wp_kses( nl2br( esc_html( $order->get_customer_note() ) ), array( 'br' => array() ) ) . '</p>';
+								if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' === get_option( 'woocommerce_enable_order_comments', 'yes' ) ) && $order->get_customer_note() ) { // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+									echo '<p class="order_note"><strong>' . esc_html( __( 'Customer provided note:', 'woocommerce' ) ) . '</strong> ' . wp_kses( nl2br( esc_html( wc_wptexturize_order_note( $order->get_customer_note() ) ) ), array( 'br' => array() ) ) . '</p>';
+								}
 							}
 							?>
 						</div>
@@ -581,7 +738,13 @@ class WC_Meta_Box_Order_Data {
 
 									$field_name = 'shipping_' . $key;
 
-									if ( ! isset( $field['value'] ) ) {
+									// Check if the user is a valid user in the current site.
+									// If not, set the value to an empty string.
+									// This is to prevent the user from being able to view the shipping address of a user that does not exist.
+									// If the user is not a guest and is not a valid user in the current site, print details not available.
+									if ( $order->get_user_id() !== 0 && is_wp_error( $user ) ) {
+										$field['value'] = '';
+									} elseif ( ! isset( $field['value'] ) ) {
 										if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
 											$field['value'] = $order->{"get_$field_name"}( 'edit' );
 										} else {
@@ -613,7 +776,7 @@ class WC_Meta_Box_Order_Data {
 							if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' === get_option( 'woocommerce_enable_order_comments', 'yes' ) ) ) :
 								?>
 								<p class="form-field form-field-wide">
-									<label for="customer_note"><?php esc_html_e( 'Customer provided note', 'woocommerce' ); ?>:</label>
+									<label for="excerpt"><?php esc_html_e( 'Customer provided note', 'woocommerce' ); ?>:</label>
 									<textarea rows="1" cols="40" name="customer_note" tabindex="6" id="excerpt" placeholder="<?php esc_attr_e( 'Customer notes about the order', 'woocommerce' ); ?>"><?php echo wp_kses( $order->get_customer_note(), array( 'br' => array() ) ); ?></textarea>
 								</p>
 							<?php endif; ?>
@@ -660,14 +823,24 @@ class WC_Meta_Box_Order_Data {
 
 		// Update customer.
 		$customer_id = isset( $_POST['customer_user'] ) ? absint( $_POST['customer_user'] ) : 0;
-		if ( $customer_id !== $order->get_customer_id() ) {
+
+		$selected_customer = Users::get_user_in_current_site( $customer_id );
+
+		// Only update the customer ID if it's a guest (0) or if it's a different customer that exists in the current site.
+		// If the customer doesn't exist in the current site (is_wp_error), we won't update the customer ID.
+		$is_valid_guest_or_new_customer = $customer_id !== $order->get_customer_id() && ( 0 === $customer_id || ! is_wp_error( $selected_customer ) );
+		if ( $is_valid_guest_or_new_customer ) {
 			$props['customer_id'] = $customer_id;
 		}
 
 		// Update billing fields.
 		$billing_fields = self::get_billing_fields( $order, 'edit' );
 
-		if ( ! empty( $billing_fields ) ) {
+		// Only update billing fields if the order is for a valid user in the current site.
+		// This is to prevent the user from being able to update the billing address of a user that does not exist in the current site.
+		$save_metadata_for_guest_user_or_a_valid_user = 0 === $customer_id || ! is_wp_error( $selected_customer );
+
+		if ( ! empty( $billing_fields ) && $save_metadata_for_guest_user_or_a_valid_user ) {
 			foreach ( $billing_fields as $key => $field ) {
 				if ( ! isset( $field['id'] ) ) {
 					$field['id'] = '_billing_' . $key;
@@ -693,7 +866,9 @@ class WC_Meta_Box_Order_Data {
 		// Update shipping fields.
 		$shipping_fields = self::get_shipping_fields( $order, 'edit' );
 
-		if ( ! empty( $shipping_fields ) ) {
+		// Only update shipping fields if the order is for a valid user in the current site.
+		// This is to prevent the user from being able to update the shipping address of a user that does not exist in the current site.
+		if ( ! empty( $shipping_fields ) && $save_metadata_for_guest_user_or_a_valid_user ) {
 			foreach ( $shipping_fields as $key => $field ) {
 				if ( ! isset( $field['id'] ) ) {
 					$field['id'] = '_shipping_' . $key;

@@ -1,0 +1,236 @@
+// Shared <QRDirectLoginCode /> styles. Imported by both the homescreen
+// mobile-app modal (`mobile-app-modal/style.scss`) and the standalone
+// wc-admin page (`mobile-app-login/style.scss`) so the QR / number-match /
+// approved / rejected layouts render identically on either surface.
+// Modal-only panels (success step, revoke confirmation) stay in the modal
+// stylesheet — they aren't rendered by the standalone page.
+
+// QR + meta column layout while the code is on screen (READY state only).
+// We avoid scoping these rules to `.woocommerce-qr-direct-login` itself so the LOADING /
+// EXPIRED / ERROR states keep their default stacked layout.
+.woocommerce-qr-direct-login.woocommerce-qr-direct-login--ready {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 24px;
+	flex-wrap: wrap;
+
+	.woocommerce-qr-direct-login__qr {
+		flex: 0 0 auto;
+		display: flex;
+	}
+
+	.woocommerce-qr-direct-login__meta {
+		flex: 1 1 auto;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 4px;
+		min-width: 0;
+	}
+
+	.woocommerce-qr-direct-login__timer {
+		margin: 0;
+		font-size: 14px;
+		line-height: 1.5;
+		color: $gray-900;
+	}
+}
+
+.woocommerce-qr-direct-login__error {
+	margin: 0 0 12px;
+	color: $alert-red;
+	font-size: 13px;
+	line-height: 1.4;
+}
+
+// Task 7 — number-matching approval step. Replaces the QR while in the
+// SCANNED state: the merchant taps the 3-digit tile that matches what the
+// mobile app is showing, server validates with hash_equals(), and the flow
+// either advances to APPROVED → CONSUMED or terminates at REJECTED.
+.woocommerce-qr-direct-login.woocommerce-qr-direct-login--number-match {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 12px;
+
+	.woocommerce-qr-direct-login__match-headline {
+		font-size: 14px;
+		font-weight: 600;
+		line-height: 1.5;
+		color: $gray-900;
+		margin: 0;
+	}
+
+	.woocommerce-qr-direct-login__match-description {
+		font-size: 13px;
+		line-height: 1.5;
+		color: $gray-700;
+		margin: 0 0 4px;
+	}
+
+	.woocommerce-qr-direct-login__number-tiles {
+		display: flex;
+		flex-direction: row;
+		gap: 12px;
+		// Tiles row centers under the heading. Both surfaces (modal + standalone)
+		// otherwise center every other element in this column, so a left-anchored
+		// row reads as a layout bug.
+		justify-content: center;
+		flex-wrap: wrap;
+	}
+
+	button.components-button.woocommerce-qr-direct-login__number-tile {
+		flex: 0 0 auto;
+		min-width: 92px;
+		height: 64px;
+		font-size: 24px;
+		font-weight: 600;
+		letter-spacing: 0;
+		color: $gray-900;
+		background: $studio-white;
+		border: 1px solid #c3c4c7;
+		border-radius: 6px;
+		padding: 0 16px;
+		justify-content: center;
+		// Each tile is its own click target — disable the secondary-button
+		// hover that ships in WP for visual cohesion.
+		&:hover:not(:disabled) {
+			background: #f6f7f7;
+			border-color: $gray-900;
+		}
+		&:focus:not(:disabled) {
+			border-color: #007cba;
+			box-shadow: 0 0 0 1px #007cba;
+			outline: 2px solid transparent;
+		}
+		&[disabled],
+		&:disabled {
+			opacity: 0.55;
+			cursor: not-allowed;
+		}
+	}
+
+	.woocommerce-qr-direct-login__match-countdown {
+		font-size: 13px;
+		line-height: 1.5;
+		color: $gray-700;
+		margin: 0;
+	}
+
+	// "I don't recognise this device" + outlined "Cancel login" button row.
+	// We pair an explanatory line with a real button rather than rendering a
+	// red underlined link. A bare link doesn't read as the "wrong device,
+	// terminate session" affordance the merchant needs at this point in the
+	// flow, and visually it competes with the three number tiles above.
+	.woocommerce-qr-direct-login__match-cancel-row {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: flex-start;
+		gap: 12px;
+		flex-wrap: wrap;
+	}
+
+	.woocommerce-qr-direct-login__match-cancel-text {
+		margin: 0;
+		font-size: 13px;
+		line-height: 1.5;
+		color: $gray-700;
+	}
+
+	button.components-button.woocommerce-qr-direct-login__match-cancel-button {
+		// Inline spinner + label. The Spinner component renders a small
+		// circle; this gap prevents it from kissing the "Cancelling…" text.
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+
+		// WP's default Spinner has a margin tuned for standalone use. Zero it
+		// so the flex `gap` is the single source of spacing inside the button.
+		.components-spinner {
+			margin: 0;
+		}
+	}
+}
+
+// APPROVED transitional state — small inline spinner + caption while the
+// mobile app finishes the exchange. Stays compact so the modal layout
+// doesn't jump between SCANNED and CONSUMED.
+.woocommerce-qr-direct-login.woocommerce-qr-direct-login--approved {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 12px;
+
+	p {
+		margin: 0;
+		font-size: 14px;
+		line-height: 1.5;
+		color: $gray-900;
+	}
+}
+
+// REJECTED terminal state. The "Sign-in denied" message and the Start over
+// button stack centered to match the rest of the column on both surfaces.
+.woocommerce-qr-direct-login.woocommerce-qr-direct-login--rejected {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 12px;
+	text-align: center;
+
+	p {
+		margin: 0;
+		font-size: 14px;
+		line-height: 1.5;
+		color: $gray-900;
+	}
+}
+
+// UNAVAILABLE state. Rendered when /qr-login-availability returns
+// `available: false` — typically because a security plugin or a custom
+// filter has disabled application passwords. Stacked column layout matches
+// the other terminal states (REJECTED, EXPIRED) for visual consistency.
+.woocommerce-qr-direct-login.woocommerce-qr-direct-login--unavailable {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 16px;
+
+	.woocommerce-qr-direct-login__unavailable-notice {
+		// The default Notice has a left margin from the WP admin chrome
+		// that doesn't fit inside the modal column, so strip it. The
+		// Notice also centers its body text by default; left-align to match
+		// the rest of the column.
+		margin: 0;
+		text-align: left;
+	}
+
+	.woocommerce-qr-direct-login__why {
+		font-size: 13px;
+		line-height: 1.5;
+		color: #50575e;
+
+		// The summary is the disclosure trigger, not a link — keep it as
+		// regular text colour so it doesn't masquerade as one. The native
+		// arrow marker is enough of an affordance.
+		summary {
+			cursor: pointer;
+			user-select: none;
+			padding: 4px 0;
+			color: #1d2327;
+			font-weight: 500;
+		}
+
+		ul {
+			margin: 8px 0 0 18px;
+			padding: 0;
+			list-style: disc;
+		}
+
+		li + li {
+			margin-top: 4px;
+		}
+	}
+}

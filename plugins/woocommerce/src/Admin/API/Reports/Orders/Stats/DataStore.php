@@ -9,18 +9,34 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
+use Automattic\WooCommerce\Enums\OrderItemType;
+use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Admin\API\Reports\StatsDataStoreTrait;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use stdClass;
+use WC_Order;
+use WC_Order_Refund;
+use Automattic\WooCommerce\Admin\Overrides\Order;
+use Automattic\WooCommerce\Admin\Overrides\OrderRefund;
 
 /**
  * API\Reports\Orders\Stats\DataStore.
  */
 class DataStore extends ReportsDataStore implements DataStoreInterface {
 	use StatsDataStoreTrait;
+
+	/**
+	 * Option name to store whether the wc_order_stats table has a column `fulfillment_status`
+	 *
+	 * @var string
+	 */
+	const OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS = 'woocommerce_order_stats_has_fulfillment_column';
 
 	/**
 	 * Table used to get the data.
@@ -97,14 +113,15 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected function assign_report_columns() {
 		$table_name = self::get_db_table_name();
 		// Avoid ambiguous columns in SQL query.
-		$refunds     = "ABS( SUM( CASE WHEN {$table_name}.net_total < 0 THEN {$table_name}.net_total ELSE 0 END ) )";
-		$gross_sales =
-			"( SUM({$table_name}.total_sales)" .
-			' + COALESCE( SUM(discount_amount), 0 )' . // SUM() all nulls gives null.
-			" - SUM({$table_name}.tax_total)" .
-			" - SUM({$table_name}.shipping_total)" .
-			" + {$refunds}" .
-			' ) as gross_sales';
+		// Identify refund rows by the sign of the whole row (net + tax + shipping), not net alone:
+		// when a prior partial refund already covered the net portion, an incremental full-refund
+		// row can have net_total = 0 while still carrying negative tax or shipping.
+		$refunds = "ABS( SUM( CASE WHEN ( {$table_name}.net_total + {$table_name}.tax_total + {$table_name}.shipping_total ) < 0 THEN {$table_name}.net_total + {$table_name}.tax_total + {$table_name}.shipping_total ELSE 0 END ) )";
+		if ( ! OrderUtil::uses_new_full_refund_data() ) {
+			$refunds = "ABS( SUM( CASE WHEN {$table_name}.net_total < 0 THEN {$table_name}.net_total ELSE 0 END ) )";
+		}
+		$gross_sale_sum = "{$table_name}.total_sales - {$table_name}.tax_total - {$table_name}.shipping_total";
+		$gross_sales    = "SUM( CASE WHEN {$table_name}.parent_id = 0 THEN {$gross_sale_sum} ELSE 0 END ) + COALESCE( SUM(discount_amount), 0 ) as gross_sales";
 
 		$this->report_columns = array(
 			'orders_count'        => "SUM( CASE WHEN {$table_name}.parent_id = 0 THEN 1 ELSE 0 END ) as orders_count",
@@ -117,8 +134,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'taxes'               => "SUM({$table_name}.tax_total) AS taxes",
 			'shipping'            => "SUM({$table_name}.shipping_total) AS shipping",
 			'net_revenue'         => "SUM({$table_name}.net_total) AS net_revenue",
-			'avg_items_per_order' => "SUM( {$table_name}.num_items_sold ) / SUM( CASE WHEN {$table_name}.parent_id = 0 THEN 1 ELSE 0 END ) AS avg_items_per_order",
-			'avg_order_value'     => "SUM( {$table_name}.net_total ) / SUM( CASE WHEN {$table_name}.parent_id = 0 THEN 1 ELSE 0 END ) AS avg_order_value",
+			'avg_items_per_order' => "SUM( CASE WHEN {$table_name}.parent_id = 0 THEN {$table_name}.num_items_sold ELSE 0 END ) / SUM( CASE WHEN {$table_name}.parent_id = 0 THEN 1 ELSE 0 END ) AS avg_items_per_order",
+			'avg_order_value'     => "SUM( CASE WHEN {$table_name}.parent_id = 0 THEN {$table_name}.net_total ELSE 0 END ) / SUM( CASE WHEN {$table_name}.parent_id = 0 THEN 1 ELSE 0 END ) AS avg_order_value",
 			'total_customers'     => "COUNT( DISTINCT( {$table_name}.customer_id ) ) as total_customers",
 		);
 	}
@@ -363,7 +380,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		// phpcs:ignore Generic.Commenting.Todo.TaskFound
-		// @todo Remove these assignements when refactoring segmenter classes to use query objects.
+		// @todo Remove these assignments when refactoring segmenter classes to use query objects.
 		$totals_query    = array(
 			'from_clause'       => $this->total_query->get_sql_clause( 'join' ),
 			'where_time_clause' => $where_time,
@@ -493,6 +510,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return -1;
 		}
 
+		/**
+		 * The order instance to be synchronized.
+		 *
+		 * @var false|Order|OrderRefund $order Order instance (Override classes registered via OrdersScheduler::init()).
+		 */
 		$order = wc_get_order( $post_id );
 		if ( ! $order ) {
 			return -1;
@@ -504,7 +526,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Update the database with stats data.
 	 *
-	 * @param WC_Order|WC_Order_Refund $order Order or refund to update row for.
+	 * @param Order|OrderRefund $order Order or refund to update row for.
 	 * @return int|bool Returns -1 if order won't be processed, or a boolean indicating processing success.
 	 */
 	public static function update( $order ) {
@@ -515,34 +537,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return -1;
 		}
 
-		/**
-		 * Filters order stats data.
-		 *
-		 * @param array $data Data written to order stats lookup table.
-		 * @param WC_Order $order  Order object.
-		 *
-		 * @since 4.0.0
-		 */
-		$data = apply_filters(
-			'woocommerce_analytics_update_order_stats_data',
-			array(
-				'order_id'           => $order->get_id(),
-				'parent_id'          => $order->get_parent_id(),
-				'date_created'       => $order->get_date_created()->date( 'Y-m-d H:i:s' ),
-				'date_paid'          => $order->get_date_paid() ? $order->get_date_paid()->date( 'Y-m-d H:i:s' ) : null,
-				'date_completed'     => $order->get_date_completed() ? $order->get_date_completed()->date( 'Y-m-d H:i:s' ) : null,
-				'date_created_gmt'   => gmdate( 'Y-m-d H:i:s', $order->get_date_created()->getTimestamp() ),
-				'num_items_sold'     => self::get_num_items_sold( $order ),
-				'total_sales'        => $order->get_total(),
-				'tax_total'          => $order->get_total_tax(),
-				'shipping_total'     => $order->get_shipping_total(),
-				'net_total'          => self::get_net_total( $order ),
-				'status'             => self::normalize_order_status( $order->get_status() ),
-				'customer_id'        => $order->get_report_customer_id(),
-				'returning_customer' => $order->is_returning_customer(),
-			),
-			$order
-		);
+		// Exclude test orders (e.g., WCPay test mode) from analytics stats.
+		// Defense-in-depth: also checked in OrdersScheduler::import(), but
+		// update() can be called directly outside of the import flow.
+		if ( OrdersScheduler::is_test_order( $order ) ) {
+			return -1;
+		}
 
 		$format = array(
 			'%d',
@@ -561,11 +561,75 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'%d',
 		);
 
+		$data = array(
+			'order_id'           => $order->get_id(),
+			'parent_id'          => $order->get_parent_id(),
+			'date_created'       => $order->get_date_created()->date( 'Y-m-d H:i:s' ),
+			'date_paid'          => $order->get_date_paid() ? $order->get_date_paid()->date( 'Y-m-d H:i:s' ) : null,
+			'date_completed'     => $order->get_date_completed() ? $order->get_date_completed()->date( 'Y-m-d H:i:s' ) : null,
+			'date_created_gmt'   => gmdate( 'Y-m-d H:i:s', $order->get_date_created()->getTimestamp() ),
+			'num_items_sold'     => self::get_num_items_sold( $order ),
+			'total_sales'        => $order->get_total(),
+			'tax_total'          => $order->get_total_tax(),
+			'shipping_total'     => $order->get_shipping_total(),
+			'net_total'          => self::get_net_total( $order ),
+			'status'             => self::normalize_order_status( $order->get_status() ),
+			'customer_id'        => $order->get_report_customer_id(),
+			'returning_customer' => $order->is_returning_customer(),
+		);
+
+		$order_fulfillment_status = '';
+		if ( FeaturesUtil::feature_is_enabled( 'fulfillments' ) && true === self::has_fulfillment_status_column() && $order instanceof WC_Order ) {
+			$order_fulfillment_status   = FulfillmentUtils::get_order_fulfillment_status( $order );
+			$data['fulfillment_status'] = ( 'no_fulfillments' !== $order_fulfillment_status ) ? $order_fulfillment_status : null;
+			$format[]                   = '%s';
+		}
+
+		/**
+		 * Filters order stats data.
+		 *
+		 * @param array $data Data written to order stats lookup table.
+		 * @param Order|OrderRefund $order  Order object.
+		 *
+		 * @since 4.0.0
+		 */
+		$data = apply_filters( 'woocommerce_analytics_update_order_stats_data', $data, $order );
+
 		if ( 'shop_order_refund' === $order->get_type() ) {
 			$parent_order = wc_get_order( $order->get_parent_id() );
-			if ( $parent_order ) {
+			// Refunds attach to the original order. Skip if the parent is another refund.
+			if ( $parent_order && ! $parent_order instanceof WC_Order_Refund ) {
 				$data['parent_id'] = $parent_order->get_id();
 				$data['status']    = self::normalize_order_status( $parent_order->get_status() );
+
+				$refund_type               = $order->get_meta( '_refund_type' );
+				$uses_new_full_refund_data = OrderUtil::uses_new_full_refund_data();
+				$use_parent_refund_amounts = $uses_new_full_refund_data && (
+					'full' === $refund_type
+					|| self::should_split_full_refund_using_parent_order( $order, $parent_order )
+				);
+				if ( $use_parent_refund_amounts ) {
+					// A full refund derives its amounts from the parent order so that net, tax
+					// and shipping each zero out — a lump-sum refund carries no line items of its
+					// own, so the parent is the only reliable source for that split.
+					$data['num_items_sold'] = -1 * self::get_num_items_sold( $parent_order );
+					$data['tax_total']      = -1 * $parent_order->get_total_tax();
+					$data['net_total']      = -1 * self::get_net_total( $parent_order );
+					$data['shipping_total'] = -1 * $parent_order->get_shipping_total();
+
+					// If earlier refunds already booked part of the order, subtract what they
+					// recorded so this row only captures the remaining, not-yet-refunded portion.
+					// With no prior refunds this loop is skipped, leaving the totals above intact.
+					foreach ( $parent_order->get_refunds() as $prior_refund ) {
+						if ( $prior_refund->get_id() === $order->get_id() ) {
+							continue;
+						}
+						$data['num_items_sold'] -= self::get_num_items_sold( $prior_refund );
+						$data['tax_total']      -= (float) $prior_refund->get_total_tax();
+						$data['net_total']      -= self::get_net_total( $prior_refund );
+						$data['shipping_total'] -= (float) $prior_refund->get_shipping_total();
+					}
+				}
 			}
 			/**
 			 * Set date_completed and date_paid the same as date_created to avoid problems
@@ -631,13 +695,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Get number of items sold among all orders.
 	 *
-	 * @param array $order WC_Order object.
+	 * @param WC_Order|WC_Order_Refund $order WC_Order or WC_Order_Refund object.
 	 * @return int
 	 */
 	protected static function get_num_items_sold( $order ) {
 		$num_items = 0;
 
-		$line_items = $order->get_items( 'line_item' );
+		$line_items = $order->get_items( OrderItemType::LINE_ITEM );
 		foreach ( $line_items as $line_item ) {
 			$num_items += $line_item->get_quantity();
 		}
@@ -648,7 +712,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Get the net amount from an order without shipping, tax, or refunds.
 	 *
-	 * @param array $order WC_Order object.
+	 * @param WC_Order|WC_Order_Refund $order WC_Order or WC_Order_Refund object.
 	 * @return float
 	 */
 	protected static function get_net_total( $order ) {
@@ -657,9 +721,85 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
+	 * Whether this refund is a single lump-sum refund for the full order (e.g. status set to refunded without line items).
+	 *
+	 * @param WC_Order_Refund|OrderRefund|Order $refund        Refund order.
+	 * @param WC_Order|Order                    $parent_order Parent order (not a refund).
+	 * @return bool
+	 */
+	protected static function should_split_full_refund_using_parent_order( $refund, $parent_order ) {
+		// The parent must be the original order, not another refund.
+		if ( ! $parent_order instanceof WC_Order || 'shop_order_refund' === $parent_order->get_type() ) {
+			return false;
+		}
+
+		if ( self::get_num_items_sold( $refund ) > 0 ) {
+			return false;
+		}
+
+		$parent_refunds = $parent_order->get_refunds();
+		if ( 1 !== count( $parent_refunds ) ) {
+			return false;
+		}
+
+		$refund_total = wc_format_decimal( abs( (float) $refund->get_total() ) );
+		$order_total  = wc_format_decimal( (float) $parent_order->get_total() );
+
+		return $refund_total === $order_total;
+	}
+
+	/**
+	 * Check if the wc_order_stats table has the fulfillment_status column.
+	 *
+	 * @return boolean
+	 */
+	public static function has_fulfillment_status_column() {
+		$column_status = get_option( self::OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS );
+
+		if ( ! empty( $column_status ) ) {
+			return 'yes' === $column_status;
+		}
+
+		global $wpdb;
+
+		$table_name = self::get_db_table_name();
+
+		// Check if the table exists.
+		$table_exists = $wpdb->get_var(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
+				'SHOW TABLES LIKE %s',
+				$table_name
+			)
+		);
+
+		// If table still does not exist, return false without setting the option to allow for table to be created with the column.
+		if ( ! $table_exists ) {
+			return false;
+		}
+
+		$column_exists = $wpdb->get_var(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
+				"SHOW COLUMNS FROM `{$table_name}` LIKE %s",
+				'fulfillment_status'
+			)
+		);
+
+		if ( ! empty( $column_exists ) ) {
+			update_option( self::OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS, 'yes', false );
+			return true;
+		}
+
+		// Update the option to indicate that the column does not exist.
+		update_option( self::OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS, 'no', false );
+		return false;
+	}
+
+	/**
 	 * Check to see if an order's customer has made previous orders or not
 	 *
-	 * @param array     $order WC_Order object.
+	 * @param WC_Order  $order WC_Order object.
 	 * @param int|false $customer_id Customer ID. Optional.
 	 * @return bool
 	 */
@@ -719,13 +859,40 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$wpdb->query(
 			$wpdb->prepare(
-				// phpcs:ignore Generic.Commenting.Todo.TaskFound
-				// TODO: use the %i placeholder to prepare the table name when available in the minimum required WordPress version.
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				"UPDATE {$orders_stats_table} SET returning_customer = CASE WHEN order_id = %d THEN false ELSE true END WHERE customer_id = %d",
+				'UPDATE %i SET returning_customer = CASE WHEN order_id = %d THEN false ELSE true END WHERE customer_id = %d',
+				$orders_stats_table,
 				$order_id,
 				$customer_id
 			)
 		);
+	}
+
+	/**
+	 * Add fulfillment_status column to wc_order_stats table.
+	 *
+	 * @return bool|string True on success, error message string on failure.
+	 */
+	public static function add_fulfillment_status_column() {
+		if ( self::has_fulfillment_status_column() ) {
+			return true;
+		}
+
+		global $wpdb;
+
+		$result = $wpdb->query(
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			"ALTER TABLE {$wpdb->prefix}wc_order_stats
+			ADD COLUMN fulfillment_status VARCHAR(50) DEFAULT NULL,
+			ADD INDEX fulfillment_status (fulfillment_status)"
+		);
+
+		if ( false === $result ) {
+			return $wpdb->last_error ? $wpdb->last_error : __( 'Unknown database error occurred while adding fulfillment_status column.', 'woocommerce' );
+		}
+
+		// Update the option to indicate that the column has been added.
+		update_option( self::OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS, 'yes', false );
+
+		return true;
 	}
 }

@@ -57,7 +57,9 @@ const Preview = ( {
 		/>
 		<span> { sku }</span>
 		<RichText
-			className="wc-block-components-product-sku__suffix"
+			className={ clsx( 'wc-block-components-product-sku__suffix', {
+				'has-content': !! suffix,
+			} ) }
 			tagName="span"
 			placeholder={ ' ' + __( 'Suffix', 'woocommerce' ) }
 			value={ suffix }

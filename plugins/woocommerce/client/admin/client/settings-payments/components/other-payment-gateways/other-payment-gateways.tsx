@@ -40,11 +40,13 @@ interface OtherPaymentGatewaysProps {
 	 * @param provider      Extension provider.
 	 * @param onboardingUrl Extension onboarding URL (if available).
 	 * @param attachUrl     Extension attach URL (if available).
+	 * @param context       The context from which the plugin is set up (e.g. 'wc_settings_payments__other_payment_options').
 	 */
 	setUpPlugin: (
 		provider: PaymentsEntity,
 		onboardingUrl: string | null,
-		attachUrl: string | null
+		attachUrl: string | null,
+		context?: string
 	) => void;
 	/**
 	 * Indicates whether the suggestions are still being fetched.
@@ -99,6 +101,23 @@ export const OtherPaymentGateways = ( {
 
 	const handleFocusOutsidePopover = () => {
 		setCategoryIdWithPopoverVisible( '' );
+	};
+
+	const handleInfoIconKeyDown = (
+		event: React.KeyboardEvent,
+		categoryId: string
+	) => {
+		if (
+			event.key === 'Escape' &&
+			categoryId === categoryIdWithPopoverVisible
+		) {
+			event.stopPropagation();
+			setCategoryIdWithPopoverVisible( '' );
+			buttonRefs.current[ categoryId ]?.focus();
+		} else if ( event.key === 'Enter' || event.key === ' ' ) {
+			event.preventDefault();
+			handleInfoIconClick( event, categoryId );
+		}
 	};
 
 	const handleSectionToggle = () => {
@@ -204,17 +223,12 @@ export const OtherPaymentGateways = ( {
 											category.id
 										)
 									}
-									onKeyDown={ ( event ) => {
-										if (
-											event.key === 'Enter' ||
-											event.key === ' '
-										) {
-											handleInfoIconClick(
-												event,
-												category.id
-											);
-										}
-									} }
+									onKeyDown={ ( event ) =>
+										handleInfoIconKeyDown(
+											event,
+											category.id
+										)
+									}
 									tabIndex={ 0 }
 									role="button"
 									ref={ ( el ) => {
@@ -238,8 +252,23 @@ export const OtherPaymentGateways = ( {
 											onFocusOutside={
 												handleFocusOutsidePopover
 											}
+											onKeyDown={ ( event ) =>
+												handleInfoIconKeyDown(
+													event,
+													category.id
+												)
+											}
 										>
-											<div className="components-popover__content-container">
+											{ /* eslint-disable-next-line jsx-a11y/no-static-element-interactions */ }
+											<div
+												className="components-popover__content-container"
+												onKeyDown={ ( event ) =>
+													handleInfoIconKeyDown(
+														event,
+														category.id
+													)
+												}
+											>
 												<p>
 													{ decodeEntities(
 														category.description
@@ -252,85 +281,109 @@ export const OtherPaymentGateways = ( {
 							</div>
 
 							<div className="other-payment-gateways__content__grid">
-								{ categorySuggestions.map( ( extension ) => (
-									<div
-										className="other-payment-gateways__content__grid-item"
-										key={ extension.id }
-									>
-										<img
-											className="other-payment-gateways__content__grid-item-image"
-											src={ extension.icon }
-											alt={
-												decodeEntities(
-													extension.title
-												) + ' logo'
-											}
-										/>
-										<div className="other-payment-gateways__content__grid-item__content">
-											<span className="other-payment-gateways__content__grid-item__content__title">
-												{ extension.title }
-												{ extension?._incentive && (
-													<IncentiveStatusBadge
-														incentive={
-															extension._incentive
+								{ categorySuggestions.map( ( extension ) => {
+									const isPluginAlreadyInstalled =
+										extension.plugin.status === 'installed';
+
+									// Is the button currently busy, either installing or activating the plugin?
+									const isCurrentlyBusy =
+										installingPlugin === extension.id;
+
+									// By default, the CTA is to install a plugin.
+									let ctaLabel = isCurrentlyBusy
+										? __< string >(
+												'Installing',
+												'woocommerce'
+										  )
+										: __< string >(
+												'Install',
+												'woocommerce'
+										  );
+
+									// If the plugin is already installed, the CTA is to activate it.
+									if ( isPluginAlreadyInstalled ) {
+										ctaLabel = isCurrentlyBusy
+											? __< string >(
+													'Activating',
+													'woocommerce'
+											  )
+											: __< string >(
+													'Activate',
+													'woocommerce'
+											  );
+									}
+
+									return (
+										<div
+											className="other-payment-gateways__content__grid-item"
+											key={ extension.id }
+										>
+											<img
+												className="other-payment-gateways__content__grid-item-image"
+												src={ extension.icon }
+												alt={
+													decodeEntities(
+														extension.title
+													) + ' logo'
+												}
+											/>
+											<div className="other-payment-gateways__content__grid-item__content">
+												<span className="other-payment-gateways__content__grid-item__content__title">
+													{ extension.title }
+													{ extension?._incentive && (
+														<IncentiveStatusBadge
+															incentive={
+																extension._incentive
+															}
+														/>
+													) }
+													{ /* All payment extension suggestions are official. */ }
+													<OfficialBadge
+														variant="expanded"
+														suggestionId={
+															extension.id
 														}
 													/>
-												) }
-												{ /* All payment extension suggestions are official. */ }
-												<OfficialBadge
-													variant="expanded"
-													suggestionId={
-														extension.id
-													}
-												/>
-											</span>
-											<span className="other-payment-gateways__content__grid-item__content__description">
-												{ decodeEntities(
-													extension.description
-												) }
-											</span>
-											<div className="other-payment-gateways__content__grid-item__content__actions">
-												<Button
-													variant="link"
-													onClick={ () =>
-														setUpPlugin(
-															extension,
-															null, // Suggested gateways won't have an onboarding URL.
-															// Only provide the attach link if not already installed.
-															extension.plugin
-																.status ===
-																'not_installed'
-																? extension
-																		._links
-																		?.attach
-																		?.href ??
-																		null
-																: null
-														)
-													}
-													isBusy={
-														installingPlugin ===
-														extension.id
-													}
-													disabled={
-														!! installingPlugin
-													}
-												>
-													{ installingPlugin ===
-													extension.id
-														? __(
-																'Installing',
-																'woocommerce'
-														  )
-														: __(
-																'Install',
-																'woocommerce'
-														  ) }
-												</Button>
+												</span>
+												<span className="other-payment-gateways__content__grid-item__content__description">
+													{ decodeEntities(
+														extension.description
+													) }
+												</span>
+												<div className="other-payment-gateways__content__grid-item__content__actions">
+													<Button
+														variant="link"
+														onClick={ () =>
+															setUpPlugin(
+																extension,
+																null, // Suggested gateways won't have an onboarding URL.
+																// Only provide the attach link if not already installed.
+																extension.plugin
+																	.status ===
+																	'not_installed'
+																	? extension
+																			._links
+																			?.attach
+																			?.href ??
+																			null
+																	: null,
+																'wc_settings_payments__other_payment_options'
+															)
+														}
+														isBusy={
+															isCurrentlyBusy
+														}
+														disabled={
+															!! installingPlugin
+														}
+													>
+														{ ctaLabel }
+													</Button>
+												</div>
 											</div>
 										</div>
-									</div>
-								) ) }
+									);
+								} ) }
 							</div>
 						</div>
 					);
@@ -351,29 +404,26 @@ export const OtherPaymentGateways = ( {
 				'other-payment-gateways' + ( isExpanded ? ' is-expanded' : '' )
 			}
 		>
-			<div
+			<button
 				className="other-payment-gateways__header"
 				onClick={ handleSectionToggle }
-				onKeyDown={ ( event ) => {
-					if ( event.key === 'Enter' || event.key === ' ' ) {
-						handleSectionToggle();
-					}
-				} }
-				role="button"
-				tabIndex={ 0 }
 				aria-expanded={ isExpanded }
+				type="button"
 			>
-				<div className="other-payment-gateways__header__title">
-					<span>
-						{ __( 'Other payment options', 'woocommerce' ) }
-					</span>
+				<span className="other-payment-gateways__header__title">
+					<span>{ __( 'More payment options', 'woocommerce' ) }</span>
 					{ ! isExpanded && <>{ collapsedImages }</> }
-				</div>
+				</span>
 				<Gridicon
 					className="other-payment-gateways__header__arrow"
 					icon={ isExpanded ? 'chevron-up' : 'chevron-down' }
 				/>
-			</div>
+				<span className="screen-reader-text">
+					{ isExpanded
+						? __( 'Collapse section', 'woocommerce' )
+						: __( 'Expand section', 'woocommerce' ) }
+				</span>
+			</button>
 			{ isExpanded && (
 				<div className="other-payment-gateways__content">
 					{ expandedContent }

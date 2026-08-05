@@ -28,7 +28,7 @@ class TemplateApiController {
 
 		return array(
 			'sender_settings' => array(
-				'from_name'    => get_option( 'woocommerce_email_from_name' ),
+				'from_name'    => get_option( 'woocommerce_email_from_name', get_bloginfo( 'name', 'display' ) ),
 				'from_address' => get_option( 'woocommerce_email_from_address' ),
 			),
 		);

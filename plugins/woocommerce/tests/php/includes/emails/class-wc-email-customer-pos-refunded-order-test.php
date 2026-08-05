@@ -422,4 +422,59 @@ class WC_Email_Customer_POS_Refunded_Order_Test extends \WC_Unit_Test_Case {
 		// And plain text email should not include refund & returns policy.
 		$this->assertStringNotContainsString( esc_html__( 'Refund & Returns Policy', 'woocommerce' ), $plain_text_content );
 	}
+
+	/**
+	 * @testdox trigger uses the specific refund_id when provided instead of picking from get_refunds.
+	 */
+	public function test_trigger_uses_specific_refund_id_when_provided() {
+		$order = OrderHelper::create_order();
+		$order->set_status( 'completed' );
+		$order->save();
+
+		// Create two refunds so the order has multiple.
+		$first_refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => '5.00',
+				'reason'   => 'First refund',
+			)
+		);
+		wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => '3.00',
+				'reason'   => 'Second refund',
+			)
+		);
+
+		$email = new WC_Email_Customer_POS_Refunded_Order();
+
+		// Trigger with the first refund's ID.
+		$email->trigger( $order->get_id(), $email->id, $first_refund->get_id() );
+
+		$this->assertSame( $first_refund->get_id(), $email->refund->get_id(), 'Should use the specific refund that triggered the email' );
+	}
+
+	/**
+	 * @testdox trigger sets refund to false when refund_id is not provided (REST API resend path).
+	 */
+	public function test_trigger_sets_refund_to_false_when_no_refund_id() {
+		$order = OrderHelper::create_order();
+		$order->set_status( 'completed' );
+		$order->save();
+
+		wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => '5.00',
+				'reason'   => 'First refund',
+			)
+		);
+
+		$email = new WC_Email_Customer_POS_Refunded_Order();
+
+		$email->trigger( $order->get_id(), $email->id );
+
+		$this->assertFalse( $email->refund, 'Refund should be false when no refund_id is provided' );
+	}
 }

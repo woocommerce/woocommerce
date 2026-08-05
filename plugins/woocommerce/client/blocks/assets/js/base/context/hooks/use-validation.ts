@@ -34,21 +34,26 @@ export const useValidation = (): ValidationData => {
 
 	const prefix = 'extensions-errors';
 
-	const { hasValidationErrors, getValidationErrorSelector } = useSelect(
+	const {
+		hasValidationErrors,
+		getValidationError,
+	}: {
+		hasValidationErrors: boolean;
+		getValidationError: (
+			validationErrorId: string
+		) => ValidationContextError;
+	} = useSelect(
 		( select ) => {
 			const store = select( validationStore );
 			return {
 				hasValidationErrors: store.hasValidationErrors(),
-				getValidationErrorSelector: store.getValidationError,
+				getValidationError: ( validationErrorId: string ) =>
+					store.getValidationError(
+						`${ prefix }-${ validationErrorId }`
+					),
 			};
 		},
-		[]
-	);
-
-	const getValidationError = useCallback(
-		( validationErrorId: string ) =>
-			getValidationErrorSelector( `${ prefix }-${ validationErrorId }` ),
-		[ getValidationErrorSelector, prefix ]
+		[ prefix ]
 	);
 
 	const clearValidationErrorCallback = useCallback(

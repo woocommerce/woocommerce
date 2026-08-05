@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 9.8.0
+ * @version 10.4.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -41,7 +41,12 @@ if ( ! empty( $order->get_billing_first_name() ) ) {
 </p>
 <p><?php esc_html_e( 'The following note has been added to your order:', 'woocommerce' ); ?></p>
 
-<blockquote><?php echo wpautop( wptexturize( make_clickable( $customer_note ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></blockquote>
+<blockquote>
+<?php
+$safe_note = wc_wptexturize_order_note( $customer_note );
+echo wpautop( make_clickable( $safe_note ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+?>
+</blockquote>
 
 <p><?php esc_html_e( 'As a reminder, here are your order details:', 'woocommerce' ); ?></p>
 <?php echo $email_improvements_enabled ? '</div>' : ''; ?>
@@ -71,7 +76,7 @@ do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_
  * Show user-defined additional content - this is set in each email's settings.
  */
 if ( $additional_content ) {
-	echo $email_improvements_enabled ? '<table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td class="email-additional-content">' : '';
+	echo $email_improvements_enabled ? '<table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation"><tr><td class="email-additional-content">' : '';
 	echo wp_kses_post( wpautop( wptexturize( $additional_content ) ) );
 	echo $email_improvements_enabled ? '</td></tr></table>' : '';
 }

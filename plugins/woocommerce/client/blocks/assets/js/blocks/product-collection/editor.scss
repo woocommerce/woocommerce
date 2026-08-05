@@ -153,6 +153,18 @@ $max-button-width: calc(100% / #{$max-button-columns});
 	}
 }
 
+.wp-block-woocommerce-product-collection {
+	.wc-block-next-previous-buttons {
+		pointer-events: none;
+
+		.wc-block-next-previous-buttons__button {
+			// Since blocks are overlaping here, we need to override the pointer-events: none.
+			// This is the way to make the block selectable in editor.
+			pointer-events: auto;
+		}
+	}
+}
+
 // Preview mode
 .wc-block-product-collection__preview-button {
 	position: absolute;
@@ -180,14 +192,29 @@ $max-button-width: calc(100% / #{$max-button-columns});
 }
 
 // Editor Product Picker
-.wc-blocks-product-collection__editor-product-picker {
-	.wc-blocks-product-collection__info-icon {
+.wc-block-editor-product-collection__product-picker {
+	.wc-block-editor-product-collection__info-icon {
 		fill: var(--wp--preset--color--luminous-vivid-orange, #e26f56);
 	}
 
 	.woocommerce-search-list__search {
 		margin: 0;
 	}
+
+	.wc-block-editor-product-collection__product-picker-info {
+		display: flex;
+		align-items: center;
+		gap: $gap-small;
+	}
+
+	.wc-block-editor-product-collection__product-picker-selection {
+		width: 100%;
+	}
+}
+
+// Editor Taxonomy Picker
+.wc-block-editor-product-collection__taxonomy-picker-selection {
+	width: 100%;
 }
 
 // Product to Show Radio Control
@@ -237,5 +264,13 @@ $max-button-width: calc(100% / #{$max-button-columns});
 	.woocommerce-search-list__search {
 		border: 0;
 		padding: 0;
+	}
+}
+
+.wc-block-editor-product-collection__carousel-warning {
+	margin-bottom: $gap-small;
+
+	.components-notice__content {
+		margin-right: 0;
 	}
 }

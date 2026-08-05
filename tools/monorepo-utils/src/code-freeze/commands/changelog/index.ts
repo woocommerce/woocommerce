@@ -9,7 +9,11 @@ import { execSync } from 'child_process';
  */
 import { Logger } from '../../../core/logger';
 import { cloneAuthenticatedRepo } from '../../../core/git';
-import { updateTrunkChangelog, updateReleaseBranchChangelogs } from './lib';
+import {
+	updateTrunkChangelog,
+	updateReleaseBranchChangelogs,
+	updateIntermediateBranches,
+} from './lib';
 import { Options } from './types';
 
 export const changelogCommand = new Command( 'changelog' )
@@ -34,7 +38,7 @@ export const changelogCommand = new Command( 'changelog' )
 		false
 	)
 	.option(
-		'-o, --override <override>',
+		'-t, --override <override>',
 		"Time Override: The time to use in checking whether the action should run (default: 'now').",
 		'now'
 	)
@@ -46,6 +50,10 @@ export const changelogCommand = new Command( 'changelog' )
 		'-a, --append-changelog',
 		'Append changelog to the existing one instead of replacing it.',
 		false
+	)
+	.option(
+		'-ga --github-actor <githubActor>',
+		'Github actor to use for the changelog.'
 	)
 	.requiredOption( '-v, --version <version>', 'Version to bump to' )
 	.action( async ( options: Options ) => {
@@ -78,7 +86,15 @@ export const changelogCommand = new Command( 'changelog' )
 			} );
 		}
 
-		const releaseBranch = branch || `release/${ version }`;
+		const releaseBranch =
+			branch || `release/${ version.replace( /\.\d+(-.*)?$/, '' ) }`;
+
+		// Collect PR info for summary output.
+		const createdPRs: Array< {
+			branch: string;
+			type: string;
+			number: number;
+		} > = [];
 
 		// Update the release branch.
 		const releaseBranchChanges = await updateReleaseBranchChangelogs(
@@ -87,11 +103,53 @@ export const changelogCommand = new Command( 'changelog' )
 			releaseBranch
 		);
 
+		if ( releaseBranchChanges.prNumber > 0 ) {
+			createdPRs.push( {
+				branch: releaseBranch,
+				type: 'changelog',
+				number: releaseBranchChanges.prNumber,
+			} );
+		}
+
 		// Update trunk.
-		await updateTrunkChangelog(
+		const trunkPrNumber = await updateTrunkChangelog(
 			options,
 			tmpRepoPath,
-			releaseBranch,
 			releaseBranchChanges
 		);
+
+		if ( trunkPrNumber > 0 ) {
+			createdPRs.push( {
+				branch: 'trunk',
+				type: 'delete-changefiles',
+				number: trunkPrNumber,
+			} );
+		}
+
+		const intermediatePrNumbers = await updateIntermediateBranches(
+			options,
+			tmpRepoPath,
+			releaseBranchChanges
+		);
+
+		if ( intermediatePrNumbers ) {
+			for ( const pr of intermediatePrNumbers ) {
+				if ( pr.number > 0 ) {
+					createdPRs.push( {
+						branch: pr.branch,
+						type: 'delete-changefiles',
+						number: pr.number,
+					} );
+				}
+			}
+		}
+
+		// Output summary of created PRs (tab-separated for easy parsing).
+		Logger.notice( '--- Created PRs Summary ---' );
+		for ( const pr of createdPRs ) {
+			process.stdout.write(
+				`https://github.com/${ owner }/${ name }/pull/${ pr.number }\t${ pr.branch }\t${ pr.type }\n`
+			);
+		}
+		Logger.notice( '--- End PRs Summary ---' );
 	} );

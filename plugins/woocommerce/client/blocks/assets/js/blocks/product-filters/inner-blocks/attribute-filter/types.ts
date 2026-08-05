@@ -8,6 +8,7 @@ import type { AttributeCount } from '@woocommerce/types';
  * Internal dependencies
  */
 import { sortOrders } from './constants';
+import metadata from './block.json';
 
 export type BlockAttributes = {
 	attributeId: number;
@@ -19,6 +20,11 @@ export type BlockAttributes = {
 	sortOrder: keyof typeof sortOrders;
 	hideEmpty: boolean;
 };
+
+export const DEFAULT_SORT_ORDER = metadata.attributes.sortOrder
+	.default as BlockAttributes[ 'sortOrder' ];
+export const DEFAULT_QUERY_TYPE = metadata.attributes.queryType
+	.default as BlockAttributes[ 'queryType' ];
 
 export interface EditProps extends BlockEditProps< BlockAttributes > {
 	debouncedSpeak: ( label: string ) => void;

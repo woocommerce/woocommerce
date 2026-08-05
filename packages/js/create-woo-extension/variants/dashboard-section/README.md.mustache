@@ -1,0 +1,58 @@
+# {{title}}
+
+{{#description}}
+{{description}}
+{{/description}}
+
+This is a WooCommerce extension that adds a custom section to the WooCommerce Analytics dashboard.
+
+## Development
+
+### Getting started
+
+1. `npm install` to install dependencies
+2. `npm start` to start the development server
+3. `npm run build` to build the production version
+
+### File Structure
+
+- `src/index.js` - Main JavaScript file that registers the dashboard section
+- `src/components/GlobalPrices.js` - Example chart component
+- `src/components/UpcomingEvents.js` - Example table component
+- `includes/Admin/Setup.php` - PHP class that handles script registration
+- `{{slug}}.php` - Main plugin file
+
+## Features
+
+- Adds a custom section to the WooCommerce dashboard
+- Demonstrates how to use the `woocommerce_dashboard_default_sections` filter
+- Shows example usage of WooCommerce components:
+  - `SectionHeader` with customizable menu
+  - `Chart` component for visualizations
+  - `TableCard` component for data tables
+- Includes section visibility controls and block toggling
+
+## Dashboard Section Structure
+
+A dashboard section consists of:
+- **Section header** with title and menu controls
+- **Dashboard items** - individual blocks that can be shown/hidden
+- **Components** - React components that render each dashboard item
+
+## Customization
+
+To customize this dashboard section for your needs:
+
+1. Update the dashboard items in `src/index.js`:
+   - Modify the `dashboardItems` array to add/remove blocks
+   - Update the `config` data to match your use case
+2. Create new components in `src/components/`:
+   - Use WooCommerce components like `Chart`, `TableCard`, `Card`
+   - Connect to your own data sources
+3. Customize the section appearance:
+   - Update the section title, icon, and key
+   - Modify visibility and block hiding behavior
+
+## Learn More
+
+For more information about WooCommerce dashboard customization, see the [WooCommerce documentation](https://woocommerce.com/document/woocommerce-analytics/).

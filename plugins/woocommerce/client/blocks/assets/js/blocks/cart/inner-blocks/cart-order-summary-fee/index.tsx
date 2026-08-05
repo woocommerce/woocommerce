@@ -12,7 +12,8 @@ import { Edit, Save } from './edit';
 import metadata from './block.json';
 
 registerBlockType( 'woocommerce/cart-order-summary-fee-block', {
-	...metadata,
+	apiVersion: metadata.apiVersion,
+	title: metadata.title,
 	icon: {
 		src: (
 			<Icon

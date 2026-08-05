@@ -8,8 +8,10 @@
  * @package WooCommerce\Classes\Products
  */
 
-use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
+use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -38,6 +40,16 @@ class WC_Product_Variable extends WC_Product {
 	 * @var array
 	 */
 	protected $variation_attributes = null;
+
+	/**
+	 * Variations prices.
+	 *
+	 * @var array<string,array<string,array<int,float>>>
+	 */
+	private array $variation_prices = array(
+		'for_display:0' => array(),
+		'for_display:1' => array(),
+	);
 
 	/**
 	 * Get internal type.
@@ -97,13 +109,19 @@ class WC_Product_Variable extends WC_Product {
 	 * @return array Array of RAW prices, regular prices, and sale prices with keys set to variation ID.
 	 */
 	public function get_variation_prices( $for_display = false ) {
+		/** @var array<string,array<int,float>> $prices */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 		$prices = $this->data_store->read_price_data( $this, $for_display );
-
-		foreach ( $prices as $price_key => $variation_prices ) {
-			$prices[ $price_key ] = $this->sort_variation_prices( $variation_prices );
+		if ( ! is_array( $prices ) ) {
+			return $prices;
 		}
 
-		return $prices;
+		// Performance note: loose != compares key/value pairs regardless of order, so a re-sort is only triggered when prices actually change.
+		$cache_key = $for_display ? 'for_display:1' : 'for_display:0';
+		if ( $this->variation_prices[ $cache_key ] != $prices ) { // phpcs:ignore Universal.Operators.StrictComparisons.LooseNotEqual
+			$this->variation_prices[ $cache_key ] = array_map( fn( $variation_prices ) => $this->sort_variation_prices( $variation_prices ), $prices );
+		}
+
+		return $this->variation_prices[ $cache_key ];
 	}
 
 	/**
@@ -154,7 +172,7 @@ class WC_Product_Variable extends WC_Product {
 	 * Note: Variable prices do not show suffixes like other product types. This
 	 * is due to some things like tax classes being set at variation level which
 	 * could differ from the parent price. The only way to show accurate prices
-	 * would be to load the variation and get it's price, which adds extra
+	 * would be to load the variation and get its price, which adds extra
 	 * overhead and still has edge cases where the values would be inaccurate.
 	 *
 	 * Additionally, ranges of prices no longer show 'striked out' sale prices
@@ -216,7 +234,7 @@ class WC_Product_Variable extends WC_Product {
 	 * This is lazy loaded as it's not used often and does require several queries.
 	 *
 	 * @param bool|string $visible_only Visible only.
-	 * @return array Children ids
+	 * @return int[] Children ids
 	 */
 	public function get_children( $visible_only = '' ) {
 		if ( is_bool( $visible_only ) ) {
@@ -240,7 +258,7 @@ class WC_Product_Variable extends WC_Product {
 	 * This is lazy loaded as it's not used often and does require several queries.
 	 *
 	 * @since 3.0.0
-	 * @return array Children ids
+	 * @return int[] Children ids
 	 */
 	public function get_visible_children() {
 		if ( null === $this->visible_children ) {
@@ -301,23 +319,40 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Get an array of available variations for the current product.
 	 *
-	 * @hint If the function gets updated, make sure to update has_available_variations too, as they share similar logic.
+	 * Important: The default 'array' return type is expensive for products with many variations.
+	 * It calls get_available_variation() for each variation, which processes HTML generation
+	 * (wc_get_stock_html, get_price_html), price calculations (wc_get_price_to_display),
+	 * image attachment lookups, and dimension/weight formatting - all passed through filters.
 	 *
-	 * @param string $return Optional. The format to return the results in. Can be 'array' to return an array of variation data or 'objects' for the product objects. Default 'array'.
+	 * Use 'objects' when you only need the WC_Product_Variation objects or a subset of the generated
+	 * output of ::get_available_variation(), avoiding unnecessary processing overhead.
 	 *
-	 * @return array[]|WC_Product_Variation[]
+	 * @since 2.4.0
+	 *
+	 * @param string $return Optional. The format to return the results in. Default 'array'.
+	 *                       - 'array': Returns fully processed variation data arrays. Each variation
+	 *                         is passed through get_available_variation() which generates HTML,
+	 *                         calculates display prices, and formats dimensions/weights. Use this
+	 *                         when you need the complete variation data for front-end display.
+	 *                       - 'objects': Returns WC_Product_Variation objects directly without
+	 *                         additional processing. Use this when you need to work with variation
+	 *                         objects and will call methods on them selectively.
+	 * @return array[]|WC_Product_Variation[] Array of variation data arrays or variation objects.
+	 *
+	 * @phpstan-param 'array'|'objects' $return
+	 * @phpstan-return ($return is 'array' ? array[] : WC_Product_Variation[])
 	 */
 	public function get_available_variations( $return = 'array' ) {
+		$variations              = array();
 		$variation_ids           = $this->get_children();
 		$hide_out_of_stock_items = ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) );
-		$available_variations    = array();
 
-		if ( is_callable( '_prime_post_caches' ) ) {
+		if ( ! empty( $variation_ids ) ) {
+			// Prime caches to reduce future queries.
 			_prime_post_caches( $variation_ids );
 		}
 
 		foreach ( $variation_ids as $variation_id ) {
-
 			$variation = wc_get_product( $variation_id );
 
 			// Hide out of stock variations if 'Hide out of stock items from the catalog' is checked.
@@ -338,94 +373,53 @@ class WC_Product_Variable extends WC_Product {
 				continue;
 			}
 
-			if ( 'array' === $return ) {
-				$available_variations[] = $this->get_available_variation( $variation );
-			} else {
-				$available_variations[] = $variation;
-			}
+			$variations[] = $variation;
 		}
 
-		if ( 'array' === $return ) {
-			$available_variations = array_values( array_filter( $available_variations ) );
+		if ( 'array' === $return && ! empty( $variations ) ) {
+			wc_get_container()->get( ProductUtil::class )->prime_image_caches( $variations );
+			$variations_data = array_values( array_filter( array_map( fn ( $variation ) => $this->get_available_variation( $variation ), $variations ) ) );
+
+			/** @var array[] $variations_data */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+			return $variations_data;
 		}
 
-		return $available_variations;
+		/** @var WC_Product_Variation[] $variations */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+		return $variations;
 	}
 
 	/**
-	 * Check if there are available variations for the current product.
+	 * Check if there are variations that can be purchased for the current product.
 	 *
 	 * @internal
-	 * @hint If the function gets updated, make sure to update get_available_variations too, as they share similar logic.
 	 *
-	 * @since  9.9.0
+	 * @since  10.0.0
 	 * @return bool
 	 */
-	public function has_available_variations() {
-		$variation_ids           = $this->get_children();
-		$hide_out_of_stock_items = ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) );
-
-		if ( is_callable( '_prime_post_caches' ) ) {
-			_prime_post_caches( $variation_ids );
-		}
-
-		foreach ( $variation_ids as $variation_id ) {
-
-			$variation = wc_get_product( $variation_id );
-
-			// Hide out of stock variations if 'Hide out of stock items from the catalog' is checked.
-			if ( ! $variation || ! $variation->exists() || ( $hide_out_of_stock_items && ! $variation->is_in_stock() ) ) {
-				continue;
-			}
-
-			/**
-			 * Filter 'woocommerce_hide_invisible_variations' to optionally hide invisible variations (disabled variations and variations with empty price).
-			 *
-			 * @since 2.6.8
-			 *
-			 * @param  bool                  $hide        Whether to hide invisible variations. Default true.
-			 * @param  int                   $product_id  The ID of the variation.
-			 * @param  WC_Product_Variation  $variation   The variation object.
-			 */
-			if ( apply_filters( 'woocommerce_hide_invisible_variations', true, $this->get_id(), $variation ) && ! $variation->variation_is_visible() ) {
-				continue;
-			}
-
-			// We found at least one available variation, so return true.
-			return true;
-		}
-
-		// There were either no variations, or they were hidden because of the "continues" above.
-		return false;
-	}
-
-	/**
-	 * Check if a given variation is currently available.
-	 *
-	 * @param WC_Product_Variation $variation Variation to check.
-	 *
-	 * @return bool True if the variation is available, false otherwise.
-	 */
-	private function variation_is_available( WC_Product_Variation $variation ) {
-		// Hide out of stock variations if 'Hide out of stock items from the catalog' is checked.
-		if ( ! $variation || ! $variation->exists() || ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $variation->is_in_stock() ) ) {
-			return false;
-		}
-
+	public function has_purchasable_variations() {
 		/**
-		 * Filter 'woocommerce_hide_invisible_variations' to optionally hide invisible variations (disabled variations and variations with empty price).
+		 * If you are evaluating performance, introducing a transient is not a viable solution.
 		 *
-		 * @since 2.6.8
-		 *
-		 * @param  bool                  $hide        Whether to hide invisible variations. Default true.
-		 * @param  int                   $product_id  The ID of the variation.
-		 * @param  WC_Product_Variation  $variation   The variation object.
+		 * - The transient improves the 95th percentile (P95) load time of the product page by approximately 10%, but does not affect the median.
+		 * - The transient breaks backward compatibility. The woocommerce_is_purchasable filter from \WC_Product::is_purchasable is used by
+		 *   extensions to control product purchasability based on user role, membership, geolocation, or login status.
 		 */
-		if ( apply_filters( 'woocommerce_hide_invisible_variations', true, $this->get_id(), $variation ) && ! $variation->variation_is_visible() ) {
-			return false;
+		$has_purchasable_variations = false;
+		$variation_ids              = $this->get_children();
+		if ( ! empty( $variation_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $variation_ids );
+
+			foreach ( $variation_ids as $variation_id ) {
+				$variation = wc_get_product( $variation_id );
+				if ( $variation && $variation->is_purchasable() && $variation->is_in_stock() ) {
+					$has_purchasable_variations = true;
+					break;
+				}
+			}
 		}
 
-		return true;
+		return $has_purchasable_variations;
 	}
 
 	/**
@@ -442,6 +436,45 @@ class WC_Product_Variable extends WC_Product {
 		if ( ! $variation instanceof WC_Product_Variation ) {
 			return false;
 		}
+
+		$variation_featured_id    = (int) $variation->get_image_id();
+		$variation_featured_valid = $variation_featured_id && wp_attachment_is_image( $variation_featured_id );
+		$parent_featured_id       = (int) $this->get_image_id();
+		$parent_featured_valid    = $parent_featured_id && wp_attachment_is_image( $parent_featured_id );
+
+		$variation_gallery_image_ids = array();
+		$variation_gallery_html      = '';
+
+		if ( VariationGalleryPackage::is_enabled() ) {
+			$variation_gallery_image_ids = array_values(
+				array_filter(
+					array_map( 'intval', $variation->get_gallery_image_ids() ),
+					'wp_attachment_is_image'
+				)
+			);
+		}
+
+		// Prefer variation-owned images over the parent fallback.
+		if ( $variation_featured_valid ) {
+			$selected_image_id = $variation_featured_id;
+		} elseif ( ! empty( $variation_gallery_image_ids ) ) {
+			$selected_image_id = $variation_gallery_image_ids[0];
+		} elseif ( $parent_featured_valid ) {
+			$selected_image_id = $parent_featured_id;
+		} else {
+			$selected_image_id = 0;
+		}
+
+		if ( ! empty( $variation_gallery_image_ids ) ) {
+			$gallery_html_ids = $variation_gallery_image_ids;
+
+			if ( $selected_image_id && ! in_array( $selected_image_id, $gallery_html_ids, true ) ) {
+				array_unshift( $gallery_html_ids, $selected_image_id );
+			}
+
+			$variation_gallery_html = wc_get_product_gallery_html( $this, $gallery_html_ids );
+		}
+
 		// See if prices should be shown for each variation after selection.
 		$show_variation_price = apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === '' || $this->get_variation_sale_price( 'min' ) !== $this->get_variation_sale_price( 'max' ) || $this->get_variation_regular_price( 'min' ) !== $this->get_variation_regular_price( 'max' ), $this, $variation );
 
@@ -455,8 +488,10 @@ class WC_Product_Variable extends WC_Product {
 				'dimensions_html'       => wc_format_dimensions( $variation->get_dimensions( false ) ),
 				'display_price'         => wc_get_price_to_display( $variation ),
 				'display_regular_price' => wc_get_price_to_display( $variation, array( 'price' => $variation->get_regular_price() ) ),
-				'image'                 => wc_get_product_attachment_props( $variation->get_image_id() ),
-				'image_id'              => $variation->get_image_id(),
+				'gallery_image_ids'     => $variation_gallery_image_ids,
+				'gallery_images_html'   => $variation_gallery_html,
+				'image'                 => wc_get_product_attachment_props( $selected_image_id ),
+				'image_id'              => $selected_image_id,
 				'is_downloadable'       => $variation->is_downloadable(),
 				'is_in_stock'           => $variation->is_in_stock(),
 				'is_purchasable'        => $variation->is_purchasable(),
@@ -685,7 +720,8 @@ class WC_Product_Variable extends WC_Product {
 			$data_store = WC_Data_Store::load( 'product-' . $product->get_type() );
 			$data_store->sync_price( $product );
 			$data_store->sync_stock_status( $product );
-			self::sync_attributes( $product ); // Legacy update of attributes.
+			self::sync_attributes( $product );
+			// Legacy update of attributes.
 
 			do_action( 'woocommerce_variable_product_sync_data', $product );
 

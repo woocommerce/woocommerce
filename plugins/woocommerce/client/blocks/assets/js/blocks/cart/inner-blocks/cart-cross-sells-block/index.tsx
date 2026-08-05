@@ -2,16 +2,42 @@
  * External dependencies
  */
 import { Icon, column } from '@wordpress/icons';
-import { registerBlockType } from '@wordpress/blocks';
+import {
+	registerBlockType,
+	createBlock,
+	createBlocksFromInnerBlocksTemplate,
+} from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
 import { Edit, Save } from './edit';
 import metadata from './block.json';
+import crossSells from '../../../product-collection/collections/cross-sells';
 
+export const createCrossSellsProductCollection = () => {
+	return createBlock(
+		'woocommerce/product-collection',
+		{
+			...crossSells.attributes,
+			displayLayout: {
+				...crossSells.attributes.displayLayout,
+				columns: 3,
+			},
+			query: {
+				...crossSells.attributes.query,
+				perPage: 3,
+			},
+			collection: 'woocommerce/product-collection/cross-sells',
+		},
+		createBlocksFromInnerBlocksTemplate( crossSells.innerBlocks )
+	);
+};
+
+// @ts-expect-error - blockName can be either string or object
 registerBlockType( 'woocommerce/cart-cross-sells-block', {
-	...metadata,
+	apiVersion: metadata.apiVersion,
+	title: metadata.title,
 	icon: {
 		src: (
 			<Icon
@@ -22,4 +48,13 @@ registerBlockType( 'woocommerce/cart-cross-sells-block', {
 	},
 	edit: Edit,
 	save: Save,
+	transforms: {
+		to: [
+			{
+				type: 'block',
+				blocks: [ 'woocommerce/product-collection' ],
+				transform: createCrossSellsProductCollection,
+			},
+		],
+	},
 } );

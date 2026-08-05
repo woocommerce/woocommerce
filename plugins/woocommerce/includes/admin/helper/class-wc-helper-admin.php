@@ -89,6 +89,7 @@ class WC_Helper_Admin {
 			'wooUpdateManagerInstallUrl' => WC_Woo_Update_Manager_Plugin::generate_install_url(),
 			'wooUpdateManagerPluginSlug' => WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_SLUG,
 			'dismissNoticeNonce'         => wp_create_nonce( 'dismiss_notice' ),
+			'trackingAllowed'            => 'yes' === get_option( 'woocommerce_allow_tracking' ),
 		);
 
 		// This data is only used in the `Extensions` screen, so only populate it there.
@@ -105,6 +106,7 @@ class WC_Helper_Admin {
 				$settings['wccomHelper']['subscription_missing_notice']  = PluginsHelper::get_missing_subscription_notice();
 				$settings['wccomHelper']['connection_url_notice']        = WC_Woo_Helper_Connection::get_connection_url_notice();
 				$settings['wccomHelper']['has_host_plan_orders']         = WC_Woo_Helper_Connection::has_host_plan_orders();
+				$settings['wccomHelper']['maybe_deleted_connection']     = WC_Woo_Helper_Connection::get_deleted_connection_notice();
 			} else {
 				$settings['wccomHelper']['disconnected_notice'] = PluginsHelper::get_wccom_disconnected_notice();
 			}

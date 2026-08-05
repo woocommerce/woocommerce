@@ -1,4 +1,3 @@
-<!-- DO NOT UPDATE THIS DOC DIRECTLY -->
 
 <!-- Use `npm run build:docs` to automatically build hook documentation -->
 
@@ -55,7 +54,7 @@ do_action( 'deprecated_function_run' )
 ### Source
 
 
-- [Domain/Bootstrap.php](../../../../../woocommerce/src/Blocks/Domain/Bootstrap.php)
+- [Domain/Bootstrap.php](../../../../../../../woocommerce/src/Blocks/Domain/Bootstrap.php)
 
 ---
 
@@ -89,7 +88,7 @@ This hook fires when an item is added to the cart. This is triggered from the St
 ### Source
 
 
-- [StoreApi/Utilities/CartController.php](../../../../../woocommerce/src/StoreApi/Utilities/CartController.php)
+- [StoreApi/Utilities/CartController.php](../../../../../../../woocommerce/src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -114,8 +113,8 @@ Called after rendering the main content for a product.
 ### Source
 
 
-- [BlockTypes/ClassicTemplate.php](../../../../../woocommerce/src/Blocks/BlockTypes/ClassicTemplate.php)
-- [BlockTypes/ClassicTemplate.php](../../../../../woocommerce/src/Blocks/BlockTypes/ClassicTemplate.php)
+- [BlockTypes/ClassicTemplate.php](../../../../../../../woocommerce/src/Blocks/BlockTypes/ClassicTemplate.php)
+- [BlockTypes/ClassicTemplate.php](../../../../../../../woocommerce/src/Blocks/BlockTypes/ClassicTemplate.php)
 
 ---
 
@@ -136,7 +135,7 @@ do_action( 'woocommerce_after_shop_loop' )
 ### Source
 
 
-- [BlockTypes/ClassicTemplate.php](../../../../../woocommerce/src/Blocks/BlockTypes/ClassicTemplate.php)
+- [BlockTypes/ClassicTemplate.php](../../../../../../../woocommerce/src/Blocks/BlockTypes/ClassicTemplate.php)
 
 ---
 
@@ -161,7 +160,7 @@ do_action( 'woocommerce_applied_coupon', string $coupon_code )
 ### Source
 
 
-- [StoreApi/Utilities/CartController.php](../../../../../woocommerce/src/StoreApi/Utilities/CartController.php)
+- [StoreApi/Utilities/CartController.php](../../../../../../../woocommerce/src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -183,7 +182,7 @@ do_action( 'woocommerce_archive_description' )
 ### Source
 
 
-- [BlockTypes/ClassicTemplate.php](../../../../../woocommerce/src/Blocks/BlockTypes/ClassicTemplate.php)
+- [BlockTypes/ClassicTemplate.php](../../../../../../../woocommerce/src/Blocks/BlockTypes/ClassicTemplate.php)
 
 ---
 
@@ -210,8 +209,8 @@ Called before rendering the main content for a product.
 ### Source
 
 
-- [BlockTypes/ClassicTemplate.php](../../../../../woocommerce/src/Blocks/BlockTypes/ClassicTemplate.php)
-- [BlockTypes/ClassicTemplate.php](../../../../../woocommerce/src/Blocks/BlockTypes/ClassicTemplate.php)
+- [BlockTypes/ClassicTemplate.php](../../../../../../../woocommerce/src/Blocks/BlockTypes/ClassicTemplate.php)
+- [BlockTypes/ClassicTemplate.php](../../../../../../../woocommerce/src/Blocks/BlockTypes/ClassicTemplate.php)
 
 ---
 
@@ -234,7 +233,7 @@ do_action( 'woocommerce_before_shop_loop' )
 ### Source
 
 
-- [BlockTypes/ClassicTemplate.php](../../../../../woocommerce/src/Blocks/BlockTypes/ClassicTemplate.php)
+- [BlockTypes/ClassicTemplate.php](../../../../../../../woocommerce/src/Blocks/BlockTypes/ClassicTemplate.php)
 
 ---
 
@@ -250,8 +249,8 @@ do_action( 'woocommerce_blocks_cart_enqueue_data' )
 ### Source
 
 
-- [BlockTypes/MiniCart.php](../../../../../woocommerce/src/Blocks/BlockTypes/MiniCart.php)
-- [BlockTypes/Cart.php](../../../../../woocommerce/src/Blocks/BlockTypes/Cart.php)
+- [BlockTypes/MiniCart.php](../../../../../../../woocommerce/src/Blocks/BlockTypes/MiniCart.php)
+- [BlockTypes/Cart.php](../../../../../../../woocommerce/src/Blocks/BlockTypes/Cart.php)
 
 ---
 
@@ -267,7 +266,7 @@ do_action( 'woocommerce_blocks_checkout_enqueue_data' )
 ### Source
 
 
-- [BlockTypes/Checkout.php](../../../../../woocommerce/src/Blocks/BlockTypes/Checkout.php)
+- [BlockTypes/Checkout.php](../../../../../../../woocommerce/src/Blocks/BlockTypes/Checkout.php)
 
 ---
 
@@ -283,7 +282,7 @@ do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_after' )
 ### Source
 
 
-- [BlockTypes/Cart.php](../../../../../woocommerce/src/Blocks/BlockTypes/Cart.php)
+- [BlockTypes/Cart.php](../../../../../../../woocommerce/src/Blocks/BlockTypes/Cart.php)
 
 ---
 
@@ -299,7 +298,7 @@ do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_before' )
 ### Source
 
 
-- [BlockTypes/Cart.php](../../../../../woocommerce/src/Blocks/BlockTypes/Cart.php)
+- [BlockTypes/Cart.php](../../../../../../../woocommerce/src/Blocks/BlockTypes/Cart.php)
 
 ---
 
@@ -315,7 +314,7 @@ do_action( 'woocommerce_blocks_enqueue_checkout_block_scripts_after' )
 ### Source
 
 
-- [BlockTypes/Checkout.php](../../../../../woocommerce/src/BLocks/BlockTypes/Checkout.php)
+- [BlockTypes/Checkout.php](../../../../../../../woocommerce/src/BLocks/BlockTypes/Checkout.php)
 
 ---
 
@@ -331,7 +330,7 @@ do_action( 'woocommerce_blocks_enqueue_checkout_block_scripts_before' )
 ### Source
 
 
-- [BlockTypes/Checkout.php](../../../../../woocommerce/src/Blocks/BlockTypes/Checkout.php)
+- [BlockTypes/Checkout.php](../../../../../../../woocommerce/src/Blocks/BlockTypes/Checkout.php)
 
 ---
 
@@ -351,7 +350,7 @@ This hook is intended to be used as a safe event hook for when the plugin has be
 ### Source
 
 
-- [Domain/Bootstrap.php](../../../../../woocommerce/src/Blocks/Domain/Bootstrap.php)
+- [Domain/Bootstrap.php](../../../../../../../woocommerce/src/Blocks/Domain/Bootstrap.php)
 
 ---
 
@@ -377,7 +376,7 @@ Runs before integrations are initialized allowing new integration to be register
 ### Source
 
 
-- [Integrations/IntegrationRegistry.php](../../../../../woocommerce/src/Blocks/Integrations/IntegrationRegistry.php)
+- [Integrations/IntegrationRegistry.php](../../../../../../../woocommerce/src/Blocks/Integrations/IntegrationRegistry.php)
 
 ---
 
@@ -403,7 +402,7 @@ Allow 3rd parties to validate cart items. This is a legacy hook from Woo core. T
 ### Source
 
 
-- [StoreApi/Utilities/CartController.php](../../../../../woocommerce/src/StoreApi/Utilities/CartController.php)
+- [StoreApi/Utilities/CartController.php](../../../../../../../woocommerce/src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -434,7 +433,7 @@ This hook fires after customer accounts are created and passes the customer data
 ### Source
 
 
-- [StoreApi/Routes/V1/Checkout.php](../../../../../woocommerce/src/StoreApi/Routes/V1/Checkout.php)
+- [StoreApi/Routes/V1/Checkout.php](../../../../../../../woocommerce/src/StoreApi/Routes/V1/Checkout.php)
 
 ---
 
@@ -455,7 +454,7 @@ do_action( 'woocommerce_no_products_found' )
 ### Source
 
 
-- [BlockTypes/ClassicTemplate.php](../../../../../woocommerce/src/Blocks/BlockTypes/ClassicTemplate.php)
+- [BlockTypes/ClassicTemplate.php](../../../../../../../woocommerce/src/Blocks/BlockTypes/ClassicTemplate.php)
 
 ---
 
@@ -486,7 +485,7 @@ This hook fires before customer accounts are created and passes the form data (u
 ### Source
 
 
-- [StoreApi/Routes/V1/Checkout.php](../../../../../woocommerce/src/StoreApi/Routes/V1/Checkout.php)
+- [StoreApi/Routes/V1/Checkout.php](../../../../../../../woocommerce/src/StoreApi/Routes/V1/Checkout.php)
 
 ---
 
@@ -502,7 +501,7 @@ do_action( 'woocommerce_shop_loop' )
 ### Source
 
 
-- [BlockTypes/ClassicTemplate.php](../../../../../woocommerce/src/Blocks/BlockTypes/ClassicTemplate.php)
+- [BlockTypes/ClassicTemplate.php](../../../../../../../woocommerce/src/Blocks/BlockTypes/ClassicTemplate.php)
 
 ---
 
@@ -547,7 +546,7 @@ add_action( 'woocommerce_store_api_cart_errors', 'my_function_callback', 10 );
 ### Source
 
 
-- [StoreApi/Utilities/CartController.php](../../../../../woocommerce/src/StoreApi/Utilities/CartController.php)
+- [StoreApi/Utilities/CartController.php](../../../../../../../woocommerce/src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -575,7 +574,7 @@ This allows extensions to perform addition actions after a shipping method has b
 ### Source
 
 
-- [StoreApi/Routes/V1/CartSelectShippingRate.php](../../../../../woocommerce/src/StoreApi/Routes/V1/CartSelectShippingRate.php)
+- [StoreApi/Routes/V1/CartSelectShippingRate.php](../../../../../../../woocommerce/src/StoreApi/Routes/V1/CartSelectShippingRate.php)
 
 ---
 
@@ -598,7 +597,7 @@ do_action( 'woocommerce_store_api_cart_update_customer_from_request', \WC_Custom
 ### Source
 
 
-- [StoreApi/Routes/V1/CartUpdateCustomer.php](../../../../../woocommerce/src/StoreApi/Routes/V1/CartUpdateCustomer.php)
+- [StoreApi/Routes/V1/CartUpdateCustomer.php](../../../../../../../woocommerce/src/StoreApi/Routes/V1/CartUpdateCustomer.php)
 
 ---
 
@@ -622,7 +621,7 @@ do_action( 'woocommerce_store_api_cart_update_order_from_request', \WC_Order $dr
 ### Source
 
 
-- [StoreApi/Routes/V1/AbstractCartRoute.php](../../../../../woocommerce/src/StoreApi/Routes/V1/AbstractCartRoute.php)
+- [StoreApi/Routes/V1/AbstractCartRoute.php](../../../../../../../woocommerce/src/StoreApi/Routes/V1/AbstractCartRoute.php)
 
 ---
 
@@ -671,8 +670,8 @@ add_action( 'woocommerce_blocks_checkout_order_processed', 'my_function_callback
 ### Source
 
 
-- [StoreApi/Routes/V1/CheckoutOrder.php](../../../../../woocommerce/src/StoreApi/Routes/V1/CheckoutOrder.php)
-- [StoreApi/Routes/V1/Checkout.php](../../../../../woocommerce/src/StoreApi/Routes/V1/Checkout.php)
+- [StoreApi/Routes/V1/CheckoutOrder.php](../../../../../../../woocommerce/src/StoreApi/Routes/V1/CheckoutOrder.php)
+- [StoreApi/Routes/V1/Checkout.php](../../../../../../../woocommerce/src/StoreApi/Routes/V1/Checkout.php)
 
 ---
 
@@ -695,8 +694,8 @@ do_action( 'woocommerce_store_api_checkout_update_customer_from_request', \WC_Cu
 ### Source
 
 
-- [StoreApi/Routes/V1/CheckoutOrder.php](../../../../../woocommerce/src/StoreApi/Routes/V1/CheckoutOrder.php)
-- [StoreApi/Routes/V1/Checkout.php](../../../../../woocommerce/src/StoreApi/Routes/V1/Checkout.php)
+- [StoreApi/Routes/V1/CheckoutOrder.php](../../../../../../../woocommerce/src/StoreApi/Routes/V1/CheckoutOrder.php)
+- [StoreApi/Routes/V1/Checkout.php](../../../../../../../woocommerce/src/StoreApi/Routes/V1/Checkout.php)
 
 ---
 
@@ -730,7 +729,7 @@ This hook gives extensions the chance to add or update metadata on the $order. T
 ### Source
 
 
-- [StoreApi/Routes/V1/Checkout.php](../../../../../woocommerce/src/StoreApi/Routes/V1/Checkout.php)
+- [StoreApi/Routes/V1/Checkout.php](../../../../../../../woocommerce/src/StoreApi/Routes/V1/Checkout.php)
 
 ---
 
@@ -752,7 +751,7 @@ do_action( 'woocommerce_store_api_rate_limit_exceeded', string $ip_address, stri
 ### Source
 
 
-- [StoreApi/Authentication.php](../../../../../woocommerce/src/StoreApi/Authentication.php)
+- [StoreApi/Authentication.php](../../../../../../../woocommerce/src/StoreApi/Authentication.php)
 
 ---
 
@@ -779,7 +778,7 @@ Fire action to validate add to cart. Functions hooking into this should throw an
 ### Source
 
 
-- [StoreApi/Utilities/CartController.php](../../../../../woocommerce/src/StoreApi/Utilities/CartController.php)
+- [StoreApi/Utilities/CartController.php](../../../../../../../woocommerce/src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -802,7 +801,7 @@ do_action( 'woocommerce_store_api_validate_cart_item', \WC_Product $product, arr
 ### Source
 
 
-- [StoreApi/Utilities/CartController.php](../../../../../woocommerce/src/StoreApi/Utilities/CartController.php)
+- [StoreApi/Utilities/CartController.php](../../../../../../../woocommerce/src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -818,7 +817,7 @@ do_action( 'woocommerce_{$product->get_type()}_add_to_cart' )
 ### Source
 
 
-- [BlockTypes/AddToCartForm.php](../../../../../woocommerce/src/Blocks/BlockTypes/AddToCartForm.php)
+- [BlockTypes/AddToCartForm.php](../../../../../../../woocommerce/src/Blocks/BlockTypes/AddToCartForm.php)
 
 ---
 
@@ -834,7 +833,7 @@ do_action( '{$hook}' )
 ### Source
 
 
-- [Templates/AbstractTemplateCompatibility.php](../../../../../woocommerce/src/Blocks/Templates/AbstractTemplateCompatibility.php)
+- [Templates/AbstractTemplateCompatibility.php](../../../../../../../woocommerce/src/Blocks/Templates/AbstractTemplateCompatibility.php)
 
 ---
 <!-- FEEDBACK -->

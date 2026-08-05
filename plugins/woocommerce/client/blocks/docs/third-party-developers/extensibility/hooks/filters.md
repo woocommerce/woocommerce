@@ -674,7 +674,7 @@ This hook allows to disable the compatibility layer for the blockified.
 
 | Argument | Type | Description |
 | -------- | ---- | ----------- |
-| 1 | \Automattic\WooCommerce\Blocks\Templates\boolean. |  |
+| 1 | \Automattic\WooCommerce\Blocks\Templates\boolean. | |
 
 ### Source
 
@@ -941,7 +941,7 @@ Automattic\WooCommerce\Blocks\Package::container()->get( Automattic\WooCommerce\
 Filters the shipping package name.
 
 ```php
-apply_filters( 'woocommerce_shipping_package_name', string $shipping_package_name, string $package_id, array $package )
+apply_filters( 'woocommerce_shipping_package_name', string $shipping_package_name, string $package_id, array $package, int $total_packages )
 ```
 
 
@@ -954,6 +954,7 @@ apply_filters( 'woocommerce_shipping_package_name', string $shipping_package_nam
 | $shipping_package_name | string | Shipping package name. |
 | $package_id | string | Shipping package ID. |
 | $package | array | Shipping package from WooCommerce. |
+| $total_packages | int | Total number of shipping packages. |
 
 ### Returns
 

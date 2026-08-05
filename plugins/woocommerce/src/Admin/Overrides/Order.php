@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+use Automattic\WooCommerce\Enums\OrderItemType;
 
 /**
  * WC_Order subclass.
@@ -61,11 +62,11 @@ class Order extends \WC_Order {
 	 */
 	public function get_line_item_data( $type ) {
 		$type_to_items = array(
-			'line_items'     => 'line_item',
-			'tax_lines'      => 'tax',
-			'shipping_lines' => 'shipping',
-			'fee_lines'      => 'fee',
-			'coupon_lines'   => 'coupon',
+			'line_items'     => OrderItemType::LINE_ITEM,
+			'tax_lines'      => OrderItemType::TAX,
+			'shipping_lines' => OrderItemType::SHIPPING,
+			'fee_lines'      => OrderItemType::FEE,
+			'coupon_lines'   => OrderItemType::COUPON,
 		);
 
 		if ( isset( $type_to_items[ $type ] ) ) {

@@ -197,8 +197,6 @@ class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Ca
 		$product = WC_Helper_Product::create_simple_product();
 		$order   = WC_Helper_Order::create_order( 1, $product );
 
-		global $theorder;
-		$theorder = $order;
 		return $order;
 	}
 
@@ -223,10 +221,19 @@ class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Ca
 	 * @param function $callback to wrap.
 	 */
 	private function with_order( $callback ) {
-		$order = $this->create_order();
+		// Back up global $theorder.
+		$theorder_backup = $GLOBALS['theorder'] ?? null;
 
-		$callback( $this );
+		$order               = $this->create_order();
+		$GLOBALS['theorder'] = $order;
 
-		$this->destroy_order( $order );
+		try {
+			$callback( $this );
+
+			$this->destroy_order( $order );
+		} finally {
+			// Restore $theorder to prior state.
+			$GLOBALS['theorder'] = $theorder_backup;
+		}
 	}
 }

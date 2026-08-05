@@ -34,6 +34,38 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Ensure that customer data is only set in the session if it is not the default customer data.
+	 */
+	public function test_customer_data_is_set_in_session_if_is_not_the_default_customer_data() {
+		$customer = new WC_Customer();
+		$customer->set_billing_email( 'email@woocommerce.com' );
+
+		$session_data = new WC_Customer_Data_Store_Session();
+		$session_data->save_to_session( $customer );
+
+		$customer_from_session = WC()->session->get( 'customer' );
+		$this->assertNotEmpty( $customer_from_session );
+		$this->assertEquals( 'email@woocommerce.com', $customer_from_session['email'] );
+	}
+
+	/**
+	 * Ensure that customer data is not set in the session if it is the default customer data.
+	 */
+	public function test_customer_data_is_not_set_in_session_if_is_the_default_customer_data() {
+		WC()->session->init();
+		WC()->session->set_customer_session_cookie( true );
+
+		$customer   = $this->get_default_customer();
+		$data_store = new WC_Customer_Data_Store_Session();
+		$data_store->save_to_session( $customer );
+		WC()->session->save_data();
+
+		$session_data = WC()->session->get_session_data();
+
+		$this->assertArrayNotHasKey( 'customer', $session_data );
+	}
+
+	/**
 	 * Customer objects with a mixture of billing and shipping addresses.
 	 *
 	 * Each inner dataset is organized as follows:
@@ -102,7 +134,7 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 		};
 
 		return array(
-			'has_billing_address_only' => array(
+			'has_billing_address_only'              => array(
 				$cust1_closure,
 				true,
 				true,
@@ -112,7 +144,7 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 				false,
 				false,
 			),
-			'separate_billing_state_same_country' => array(
+			'separate_billing_state_same_country'   => array(
 				$cust3_closure,
 				false,
 				true,
@@ -123,5 +155,78 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 				true,
 			),
 		);
+	}
+
+	/**
+	 * Get a customer with the default location.
+	 *
+	 * @return WC_Customer
+	 */
+	private function get_default_customer(): WC_Customer {
+		$location = wc_get_customer_default_location();
+
+		$customer = new WC_Customer();
+		$customer->set_shipping_country( $location['country'] );
+		$customer->set_shipping_state( $location['state'] );
+		$customer->set_billing_country( $location['country'] );
+		$customer->set_billing_state( $location['state'] );
+		return $customer;
+	}
+
+	/**
+	 * Ensure that empty string values can be persisted in customer session.
+	 */
+	public function test_empty_field_can_be_persisted_in_session() {
+		WC()->session->init();
+
+		$customer = new WC_Customer();
+		$customer->set_email( 'test@example.com' );
+		$customer->set_shipping_address_2( 'Apt 1' );
+		$customer->save();
+
+		// Session says address_2 is now empty (user cleared it).
+		WC()->session->set(
+			'customer',
+			array(
+				'id'                 => (string) $customer->get_id(),
+				'date_modified'      => (string) $customer->get_date_modified( 'edit' ),
+				'shipping_address_2' => '',
+			)
+		);
+
+		$data_store = new WC_Customer_Data_Store_Session();
+		$data_store->read( $customer );
+
+		$this->assertSame( '', $customer->get_shipping_address_2() );
+	}
+
+	/**
+	 * Ensure backslashes in customer fields survive a session save/read round-trip.
+	 *
+	 * Reproduces the Agentic Checkout flow where one request stores the address in the session and a
+	 * follow-up request reads it back: the session store must not wp_unslash() the data on read, or
+	 * real backslashes the buyer typed get stripped (session data is stored raw, never magic-quoted).
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/pull/65900
+	 */
+	public function test_backslashes_survive_session_round_trip() {
+		WC()->session->init();
+
+		$customer = new WC_Customer();
+		$customer->set_email( 'backslash@example.com' );
+		$customer->set_shipping_address_1( 'Apt 4\\B' );
+		$customer->set_shipping_city( 'C:\\Users' );
+		$customer->save();
+
+		$data_store = new WC_Customer_Data_Store_Session();
+		$data_store->save_to_session( $customer );
+
+		// Overwrite in memory, then read back from the session as the next request would.
+		$customer->set_shipping_address_1( 'overwritten' );
+		$customer->set_shipping_city( 'overwritten' );
+		$data_store->read( $customer );
+
+		$this->assertSame( 'Apt 4\\B', $customer->get_shipping_address_1(), 'Backslashes in the shipping address should survive the session round-trip.' );
+		$this->assertSame( 'C:\\Users', $customer->get_shipping_city(), 'Backslashes in the shipping city should survive the session round-trip.' );
 	}
 }

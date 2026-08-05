@@ -1,9 +1,9 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
-	"name": "woocommerce/blockified-product-reviews",
+	"name": "woocommerce/product-reviews",
 	"icon": "admin-comments",
-	"title": "Blockified Product Reviews",
+	"title": "Product Reviews",
 	"description": "Display a product's reviews",
 	"category": "woocommerce",
 	"textdomain": "woocommerce",
@@ -58,10 +58,5 @@
 		}
 	},
 	"usesContext": [ "postId", "postType" ],
-	"ancestor": [
-		"woocommerce/single-product",
-		"woocommerce/product-template",
-		"core/post-template"
-	],
-	"viewScriptModule": "woocommerce/blockified-product-reviews"
+	"viewScriptModule": "woocommerce/product-reviews"
 }

@@ -30,11 +30,6 @@ class Brands {
 		include_once WC_ABSPATH . 'includes/class-wc-brands-brand-settings-manager.php';
 		include_once WC_ABSPATH . 'includes/wc-brands-functions.php';
 
-		if ( wp_is_block_theme() ) {
-			include_once WC_ABSPATH . 'includes/blocks/class-wc-brands-block-templates.php';
-			include_once WC_ABSPATH . 'includes/blocks/class-wc-brands-block-template-utils-duplicated.php';
-		}
-
 		if ( is_admin() ) {
 			include_once WC_ABSPATH . 'includes/admin/class-wc-admin-brands.php';
 		}

@@ -1,0 +1,19 @@
+.woopayments_onboarding_modal_snackbar_wrapper {
+	position: fixed;
+	bottom: 24px;
+	left: 24px;
+	z-index: 1000;
+	opacity: 0;
+	transform: translateY(20px);
+	transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+
+	&.is-visible {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	&.is-exiting {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+}

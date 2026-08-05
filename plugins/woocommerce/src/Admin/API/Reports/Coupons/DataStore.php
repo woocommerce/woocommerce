@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use Automattic\WooCommerce\Enums\OrderItemType;
 
 /**
  * API\Reports\Coupons\DataStore.
@@ -329,7 +330,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			$coupons_query = $this->get_query_statement();
 		} else {
-			$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+			if ( in_array( $query_args['orderby'], array( 'amount', 'orders_count' ), true ) ) {
+				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) . ', coupon_id' );
+			} else {
+				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+			}
 			$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
 			$coupons_query = $this->subquery->get_query_statement();
 
@@ -401,7 +406,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			)
 		);
 		$existing_items     = array_flip( $existing_items );
-		$coupon_items       = $order->get_items( 'coupon' );
+		$coupon_items       = $order->get_items( OrderItemType::COUPON );
 		$coupon_items_count = count( $coupon_items );
 		$num_updated        = 0;
 		$num_deleted        = 0;
@@ -412,7 +417,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			if ( ! $coupon_id ) {
 				// Insert a unique, but obviously invalid ID for this deleted coupon.
-				$num_deleted++;
+				++$num_deleted;
 				$coupon_id = -1 * $num_deleted;
 			}
 

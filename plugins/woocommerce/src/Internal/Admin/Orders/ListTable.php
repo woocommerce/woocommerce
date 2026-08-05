@@ -24,6 +24,13 @@ class ListTable extends WP_List_Table {
 	private $order_type;
 
 	/**
+	 * Underlying WordPress post type. Used for checking permissions.
+	 *
+	 * @var WP_Post_Type|null
+	 */
+	private $wp_post_type;
+
+	/**
 	 * Request vars.
 	 *
 	 * @var array
@@ -98,7 +105,8 @@ class ListTable extends WP_List_Table {
 	 * @return void
 	 */
 	public function setup( $args = array() ): void {
-		$this->order_type = $args['order_type'] ?? 'shop_order';
+		$this->order_type   = $args['order_type'] ?? 'shop_order';
+		$this->wp_post_type = get_post_type_object( $this->order_type );
 
 		add_action( 'admin_notices', array( $this, 'bulk_action_notices' ) );
 		add_filter( "manage_{$this->screen->id}_columns", array( $this, 'get_columns' ), 0 );
@@ -246,12 +254,18 @@ class ListTable extends WP_List_Table {
 			$search_label .= '</span>';
 		}
 
+		// Add new.
+		$add_new_button = '';
+		if ( $post_type && current_user_can( $post_type->cap->publish_posts ) ) {
+			$add_new_button = "<a href='" . esc_url( $new_page_link ) . "' class='page-title-action'>{$add_new}</a>";
+		}
+
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo wp_kses_post(
 			"
 			<div class='wrap'>
 				<h1 class='wp-heading-inline'>{$title}</h1>
-				<a href='" . esc_url( $new_page_link ) . "' class='page-title-action'>{$add_new}</a>
+				{$add_new_button}
 				{$search_label}
 				<hr class='wp-header-end'>"
 		);
@@ -278,14 +292,14 @@ class ListTable extends WP_List_Table {
 	 */
 	public function render_blank_state(): void {
 		?>
-			<div class="woocommerce-BlankState">
+			<div class="woocommerce-BlankState woocommerce-BlankState--orders">
 
 				<h2 class="woocommerce-BlankState-message">
 					<?php esc_html_e( 'When you receive a new order, it will appear here.', 'woocommerce' ); ?>
 				</h2>
 
 				<div class="woocommerce-BlankState-buttons">
-					<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="https://woocommerce.com/document/managing-orders/?utm_source=blankslate&utm_medium=product&utm_content=ordersdoc&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Learn more about orders', 'woocommerce' ); ?></a>
+					<a class="woocommerce-BlankState-cta button button-secondary" target="_blank" rel="noopener noreferrer" href="https://woocommerce.com/document/managing-orders/?utm_source=blankslate&utm_medium=product&utm_content=ordersdoc&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Learn more about orders', 'woocommerce' ); ?></a>
 				</div>
 
 			<?php
@@ -308,6 +322,10 @@ class ListTable extends WP_List_Table {
 	 */
 	protected function get_bulk_actions() {
 		$selected_status = $this->order_query_args['status'] ?? false;
+
+		if ( ! current_user_can( $this->wp_post_type->cap->edit_others_posts ) ) {
+			return array();
+		}
 
 		if ( array( 'trash' ) === $selected_status ) {
 			$actions = array(
@@ -418,7 +436,7 @@ class ListTable extends WP_List_Table {
 		$order_query_args['paginate'] = true;
 
 		// Attempt to use cache if no additional query arguments are used.
-		if ( empty( array_diff( array_keys( $this->order_query_args ), array( 'limit', 'page', 'paginate', 'type', 'status', 'orderby', 'order' ) ) ) ) {
+		if ( empty( array_diff( array_keys( $order_query_args ), array( 'limit', 'page', 'paginate', 'type', 'status', 'orderby', 'order' ) ) ) ) {
 			$this->order_query_args['no_found_rows'] = true;
 			$order_query_args['no_found_rows']       = true;
 		}
@@ -559,11 +577,13 @@ class ListTable extends WP_List_Table {
 		if ( ! empty( $search_term ) ) {
 			$this->order_query_args['s'] = $search_term;
 			$this->has_filter            = true;
-		}
 
-		$filter = trim( sanitize_text_field( $this->request['search-filter'] ) );
-		if ( ! empty( $filter ) ) {
-			$this->order_query_args['search_filter'] = $filter;
+			// 'search_filter' is inert without a search term, but setting it (the form always submits the dropdown)
+			// would disqualify the request from the cached-count fast path in prepare_items() and force a COUNT.
+			$filter = trim( sanitize_text_field( $this->request['search-filter'] ) );
+			if ( ! empty( $filter ) ) {
+				$this->order_query_args['search_filter'] = $filter;
+			}
 		}
 	}
 
@@ -856,21 +876,20 @@ class ListTable extends WP_List_Table {
 	protected function get_months_filter_options(): array {
 		global $wpdb;
 
-		$orders_table   = esc_sql( OrdersTableDataStore::get_orders_table_name() );
+		$table_name     = OrdersTableDataStore::get_orders_table_name();
 		$min_max_months = $wpdb->get_row(
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is escaped above.
 			$wpdb->prepare(
-				"
-					SELECT MIN( t.date_created_gmt ) as min_date_gmt,
-					       MAX( t.date_created_gmt ) as max_date_gmt
-					FROM `{$orders_table}` t
-					WHERE type = %s
-					AND status != %s
-				",
+				"SELECT MIN(date_created_gmt) as min_date_gmt, MAX(date_created_gmt) as max_date_gmt
+				 FROM (
+					( SELECT date_created_gmt FROM %i WHERE type = %s AND status != 'trash' ORDER BY date_created_gmt DESC LIMIT 1 )
+					UNION ALL
+					( SELECT date_created_gmt FROM %i WHERE type = %s AND status != 'trash' ORDER BY date_created_gmt ASC LIMIT 1 )
+				 ) d",
+				$table_name,
 				$this->order_type,
-				OrderStatus::TRASH
+				$table_name,
+				$this->order_type
 			)
-			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		);
 
 		/**
@@ -1067,6 +1086,10 @@ class ListTable extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_cb( $item ) {
+		if ( ! $this->wp_post_type || ! current_user_can( $this->wp_post_type->cap->edit_post, $item->get_id() ) ) {
+			return;
+		}
+
 		ob_start();
 		?>
 		<input id="cb-select-<?php echo esc_attr( $item->get_id() ); ?>" type="checkbox" name="id[]" value="<?php echo esc_attr( $item->get_id() ); ?>" />
@@ -1393,7 +1416,7 @@ class ListTable extends WP_List_Table {
 	public function handle_bulk_actions() {
 		$action = $this->current_action();
 
-		if ( ! $action ) {
+		if ( ! $action || ! current_user_can( $this->wp_post_type->cap->edit_others_posts ) ) {
 			return;
 		}
 
@@ -1734,13 +1757,19 @@ class ListTable extends WP_List_Table {
 
 							<?php do_action( 'woocommerce_admin_order_preview_end' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 						</article>
+						<# if ( data.actions_html || data.is_editable ) { #>
 						<footer>
 							<div class="inner">
 								{{{ data.actions_html }}}
 
-								<a class="button button-primary button-large" aria-label="<?php esc_attr_e( 'Edit this order', 'woocommerce' ); ?>" href="<?php echo $order_edit_url_placeholder; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
+								<# if ( data.is_editable ) { #>
+								<div class="wc-backbone-modal-buttons">
+									<a class="button button-primary button-large" aria-label="<?php esc_attr_e( 'Edit this order', 'woocommerce' ); ?>" href="<?php echo $order_edit_url_placeholder; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
+								</div>
+								<# } #>
 							</div>
 						</footer>
+						<# } #>
 					</section>
 				</div>
 			</div>

@@ -1,7 +1,9 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Assets;
 
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 use Exception;
@@ -153,9 +155,7 @@ class AssetDataRegistry {
 			'terms'     => wc_terms_and_conditions_page_id(),
 		];
 
-		if ( is_callable( '_prime_post_caches' ) ) {
-			_prime_post_caches( array_values( $store_pages ), false, false );
-		}
+		_prime_post_caches( array_values( $store_pages ), false, false );
 
 		return array_map(
 			[ $this, 'format_page_resource' ],
@@ -253,8 +253,11 @@ class AssetDataRegistry {
 			);
 		}
 
+		$core_data                                 = $this->get_core_data();
+		$core_data['experimentalWcRestApiV4']      = Features::is_enabled( 'rest-api-v4' );
+		$core_data['experimentalCartSaveForLater'] = FeaturesUtil::feature_is_enabled( 'cart_save_for_later' );
 		// note this WILL wipe any data already registered to these keys because they are protected.
-		$this->data = array_replace_recursive( $settings, $this->get_core_data() );
+		$this->data = array_replace_recursive( $settings, $core_data );
 	}
 
 	/**
@@ -300,12 +303,15 @@ class AssetDataRegistry {
 	 * @param string  $key              The key used to reference the data being registered. This should use camelCase.
 	 * @param mixed   $data             If not a function, registered to the registry as is. If a function, then the
 	 *                                  callback is invoked right before output to the screen.
-	 * @param boolean $check_key_exists Deprecated. If set to true, duplicate data will be ignored if the key exists.
-	 *                                  If false, duplicate data will cause an exception.
+	 * @param boolean $check_key_exists Deprecated. Duplicate data will be ignored if the key exists.
 	 */
-	public function add( $key, $data, $check_key_exists = false ) {
-		if ( $check_key_exists ) {
-			wc_deprecated_argument( 'Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry::add()', '8.9', 'The $check_key_exists parameter is no longer used: all duplicate data will be ignored if the key exists by default' );
+	public function add( $key, $data, $check_key_exists = false ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- Deprecated parameter kept for backwards compatibility.
+		if ( 3 <= func_num_args() ) {
+			wc_deprecated_argument(
+				__METHOD__ . '()',
+				'8.9',
+				'The $check_key_exists parameter is no longer used: all duplicate data will be ignored if the key exists by default'
+			);
 		}
 
 		$this->add_data( $key, $data );
@@ -327,12 +333,19 @@ class AssetDataRegistry {
 	 *
 	 * @param string  $key  The key used to reference the data being registered.
 	 * @param string  $path REST API path to preload.
-	 * @param boolean $check_key_exists If set to true, duplicate data will be ignored if the key exists.
-	 *                                  If false, duplicate data will cause an exception.
+	 * @param boolean $check_key_exists Deprecated. Duplicate data will be ignored if the key exists.
 	 *
 	 * @throws InvalidArgumentException  Only throws when site is in debug mode. Always logs the error.
 	 */
-	public function hydrate_data_from_api_request( $key, $path, $check_key_exists = false ) {
+	public function hydrate_data_from_api_request( $key, $path, $check_key_exists = false ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- Deprecated parameter kept for backwards compatibility.
+		if ( 3 <= func_num_args() ) {
+			wc_deprecated_argument(
+				__METHOD__ . '()',
+				'8.9',
+				'The $check_key_exists parameter is no longer used: all duplicate data will be ignored if the key exists by default'
+			);
+		}
+
 		$this->add(
 			$key,
 			function () use ( $path ) {
@@ -341,8 +354,7 @@ class AssetDataRegistry {
 				}
 				$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( $path );
 				return $response['body'] ?? '';
-			},
-			$check_key_exists
+			}
 		);
 	}
 
@@ -387,7 +399,7 @@ class AssetDataRegistry {
 			$this->execute_lazy_data();
 
 			$data                          = rawurlencode( wp_json_encode( $this->data ) );
-			$wc_settings_script            = "var wcSettings = wcSettings || JSON.parse( decodeURIComponent( '" . esc_js( $data ) . "' ) );";
+			$wc_settings_script            = "var wcSettings = JSON.parse( decodeURIComponent( '" . esc_js( $data ) . "' ) );";
 			$preloaded_api_requests_script = '';
 
 			if ( count( $this->preloaded_api_requests ) > 0 ) {

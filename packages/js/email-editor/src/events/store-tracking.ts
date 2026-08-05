@@ -2,15 +2,13 @@
  * External dependencies
  */
 import { use, select } from '@wordpress/data';
-import { applyFilters } from '@wordpress/hooks';
 import { store as preferencesStore } from '@wordpress/preferences';
 import { store as editorStore } from '@wordpress/editor';
 import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { recordEvent } from '.';
-import { editorCurrentPostType, editorCurrentPostId } from '../store';
+import { recordEvent, isEventTrackingEnabled } from '.';
 
 /**
  * Handler functions for tracking individual events recorder by the listening to store actions.
@@ -19,12 +17,6 @@ const trackSetDeviceType = ( deviceType: string ) => {
 	recordEvent(
 		`header_preview_dropdown_${ deviceType.toLowerCase() }_selected`
 	);
-};
-
-const trackDeleteEntityRecord = ( _entity, type, id ) => {
-	if ( type === editorCurrentPostType && id === editorCurrentPostId ) {
-		recordEvent( 'trash_modal_move_to_trash_button_clicked' );
-	}
 };
 
 const trackSetPreference = ( scope, name, value ) => {
@@ -44,7 +36,6 @@ const trackSetPreference = ( scope, name, value ) => {
 };
 
 const trackBlockAndPatternInsertion = ( ...args ) => {
-	// @ts-expect-error - isInserterOpened is not in editor types
 	const inserterPanelOpened = select( editorStore ).isInserterOpened();
 	const insQuickInsertOpened = !! document.getElementsByClassName(
 		'block-editor-inserter__quick-inserter'
@@ -79,7 +70,6 @@ const trackBlockAndPatternInsertion = ( ...args ) => {
 };
 
 const trackSetRenderingMode = ( renderingMode: string ) => {
-	// @ts-expect-error - getRenderingMode is not in editor types
 	const currentRenderingMode = select( editorStore ).getRenderingMode();
 	if ( currentRenderingMode === renderingMode ) {
 		return;
@@ -106,9 +96,6 @@ const TRACKED_STORE_EVENTS = {
 		setDeviceType: trackSetDeviceType,
 		setRenderingMode: trackSetRenderingMode,
 	},
-	core: {
-		deleteEntityRecord: trackDeleteEntityRecord,
-	},
 	'core/block-editor': {
 		insertBlock: trackBlockAndPatternInsertion,
 		insertBlocks: trackBlockAndPatternInsertion,
@@ -126,12 +113,7 @@ const rewrittenActions = {};
 const originalActions = {};
 
 export const initStoreTracking = () => {
-	const isEventTrackingEnabled = applyFilters(
-		'woocommerce_email_editor_events_tracking_enabled',
-		false
-	);
-
-	if ( ! isEventTrackingEnabled ) {
+	if ( ! isEventTrackingEnabled() ) {
 		return;
 	}
 

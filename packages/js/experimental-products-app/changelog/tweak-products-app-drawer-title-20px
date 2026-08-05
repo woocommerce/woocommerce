@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Bump the experimental products app quick-edit drawer title to 20px so it matches the design-system Drawer header treatment.

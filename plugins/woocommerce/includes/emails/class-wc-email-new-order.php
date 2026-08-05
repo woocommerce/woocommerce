@@ -31,6 +31,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		public function __construct() {
 			$this->id             = 'new_order';
 			$this->title          = __( 'New order', 'woocommerce' );
+			$this->email_group    = 'orders';
 			$this->template_html  = 'emails/admin-new-order.php';
 			$this->template_plain = 'emails/plain/admin-new-order.php';
 			$this->placeholders   = array(
@@ -60,6 +61,10 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 
 			// Other settings.
 			$this->recipient = $this->get_option( 'recipient', get_option( 'admin_email' ) );
+
+			if ( $this->block_email_editor_enabled ) {
+				$this->description = __( 'Notifies admins when a new order has been placed.', 'woocommerce' );
+			}
 		}
 
 		/**
@@ -115,15 +120,14 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 			 * @param bool $allows Defaults to false.
 			 */
 			if ( $email_already_sent && ! apply_filters( 'woocommerce_new_order_email_allows_resend', false ) ) {
+				$this->restore_locale();
 				return;
 			}
 
-			if ( $this->is_enabled() && $this->get_recipient() ) {
-				$email_sent_successfully = $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
-				if ( $email_sent_successfully ) {
-					$order->update_meta_data( '_new_order_email_sent', 'true' );
-					$order->save();
-				}
+			$email_sent_successfully = $this->send_notification();
+			if ( $email_sent_successfully && $order instanceof WC_Order ) {
+				$order->update_meta_data( '_new_order_email_sent', 'true' );
+				$order->save();
 			}
 
 			$this->restore_locale();
@@ -258,6 +262,9 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 			if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
 				$this->form_fields['cc']  = $this->get_cc_field();
 				$this->form_fields['bcc'] = $this->get_bcc_field();
+			}
+			if ( $this->block_email_editor_enabled ) {
+				$this->form_fields['preheader'] = $this->get_preheader_field();
 			}
 		}
 

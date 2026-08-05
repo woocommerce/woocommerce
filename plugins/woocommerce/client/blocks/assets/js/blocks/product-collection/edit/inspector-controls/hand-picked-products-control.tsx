@@ -10,7 +10,6 @@ import { __ } from '@wordpress/i18n';
 import { blocksConfig } from '@woocommerce/block-settings';
 import {
 	FormTokenField,
-	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
@@ -65,10 +64,10 @@ function useProducts(
 				  }
 				: {
 						// For a small catalog we fetch all the products.
-						per_page: 0,
+						per_page: 100,
 				  },
 		};
-		getProducts( query ).then( ( results ) => {
+		void getProducts( query ).then( ( results ) => {
 			const newProductsMap = new Map();
 			( results as ProductResponseItem[] ).forEach( ( product ) => {
 				newProductsMap.set( product.id, product );
@@ -175,12 +174,13 @@ export const HandPickedProductsControlField = ( {
 
 	return (
 		<FormTokenField
+			__next40pxDefaultSize
+			__nextHasNoMarginBottom
 			displayTransform={ transformTokenIntoProductName }
 			label={ __( 'Hand-Picked', 'woocommerce' ) }
 			onChange={ onTokenChange }
 			onInputChange={ isLargeCatalog ? handleSearch : undefined }
 			suggestions={ suggestions }
-			// @ts-expect-error Using experimental features
 			__experimentalValidateInput={ ( value: string ) =>
 				productsMap.has( value )
 			}

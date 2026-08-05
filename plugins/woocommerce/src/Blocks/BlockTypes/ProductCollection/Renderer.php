@@ -33,6 +33,10 @@ class Renderer {
 	 * Constructor.
 	 */
 	public function __construct() {
+		if ( ! $this->should_handle_frontend_rendering() ) {
+			return;
+		}
+
 		// Interactivity API: Add navigation directives to the product collection block.
 		add_filter( 'render_block_woocommerce/product-collection', array( $this, 'handle_rendering' ), 10, 2 );
 
@@ -58,9 +62,16 @@ class Renderer {
 			1
 		);
 		add_filter( 'render_block_core/query-pagination', array( $this, 'add_navigation_link_directives' ), 10, 3 );
+		add_filter( 'render_block_context', array( $this, 'extend_context_for_inner_blocks' ), 11, 1 );
+	}
 
-		// Provide location context into block's context.
-		add_filter( 'render_block_context', array( $this, 'provide_location_context_for_inner_blocks' ), 11, 1 );
+	/**
+	 * Check if the renderer should add frontend-only interactivity hooks.
+	 *
+	 * @return bool
+	 */
+	private function should_handle_frontend_rendering() {
+		return ! is_admin() && ! \WC()->is_rest_api_request();
 	}
 
 	/**
@@ -129,7 +140,15 @@ class Renderer {
 
 			$collection                     = $block['attrs']['collection'] ?? '';
 			$is_enhanced_pagination_enabled = ! ( $block['attrs']['forcePageReload'] ?? false );
-			$context                        = array( 'notices' => array() );
+			$context                        = array(
+				'notices'                 => array(),
+				// Next/Previous Buttons block context.
+				'hideNextPreviousButtons' => false,
+				'isDisabledPrevious'      => true,
+				'isDisabledNext'          => false,
+				'ariaLabelPrevious'       => __( 'Previous products', 'woocommerce' ),
+				'ariaLabelNext'           => __( 'Next products', 'woocommerce' ),
+			);
 
 			if ( $collection ) {
 				$context['collection'] = $collection;
@@ -144,7 +163,7 @@ class Renderer {
 				if ( $is_enhanced_pagination_enabled && isset( $this->parsed_block ) ) {
 					$p->set_attribute(
 						'data-wp-router-region',
-						'wc-product-collection-' . $this->parsed_block['attrs']['queryId']
+						'wc-product-collection-' . ( $this->parsed_block['attrs']['queryId'] ?? '0' )
 					);
 				}
 			}
@@ -191,16 +210,14 @@ class Renderer {
 					class="wc-block-components-notice-banner"
 					data-wp-init="callbacks.scrollIntoView"
 					data-wp-class--is-error="state.isError"
-					data-wp-class--is-success ="state.isSuccess"
+					data-wp-class--is-success="state.isSuccess"
 					data-wp-class--is-info="state.isInfo"
 					data-wp-class--is-dismissible="context.notice.dismissible"
 					data-wp-bind--role="state.role"
+					data-wp-watch="callbacks.injectIcon"
 				>
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
-						<path data-wp-bind--d="state.iconPath"></path>
-					</svg>
 					<div class="wc-block-components-notice-banner__content">
-						<span data-wp-init="callbacks.renderNoticeContent"></span>
+						<span data-wp-init="callbacks.renderNoticeContent" aria-live="assertive" aria-atomic="true"></span>
 					</div>
 					<button
 						data-wp-bind--hidden="!context.notice.dismissible"
@@ -228,7 +245,7 @@ class Renderer {
 	protected function get_list_styles( $fixed_width ) {
 		$style = '';
 
-		if ( isset( $fixed_width ) ) {
+		if ( isset( $fixed_width ) && ! empty( $fixed_width ) ) {
 			$style .= sprintf( 'width:%s;', esc_attr( $fixed_width ) );
 			$style .= 'margin: 0 auto;';
 		}
@@ -253,7 +270,7 @@ class Renderer {
 	 */
 	private function handle_block_dimensions( $p, $block ) {
 		if ( isset( $block['attrs']['dimensions'] ) && isset( $block['attrs']['dimensions']['widthType'] ) ) {
-			if ( 'fixed' === $block['attrs']['dimensions']['widthType'] ) {
+			if ( 'fixed' === $block['attrs']['dimensions']['widthType'] && ! empty( $block['attrs']['dimensions']['fixedWidth'] ) ) {
 				$this->set_fixed_width_style( $p, $block['attrs']['dimensions']['fixedWidth'] );
 			}
 		}
@@ -329,12 +346,9 @@ class Renderer {
 	 *     }
 	 * }
 	 */
-	public function provide_location_context_for_inner_blocks( $context ) {
-		// Run only on frontend.
-		// This is needed to avoid SSR renders while in editor. @see https://github.com/woocommerce/woocommerce/issues/45181.
-		if ( is_admin() || \WC()->is_rest_api_request() ) {
-			return $context;
-		}
+	public function extend_context_for_inner_blocks( $context ) {
+		// Add iapi/provider to inner blocks so they can run this store's Interactivity API actions.
+		$context['iapi/provider'] = 'woocommerce/product-collection';
 
 		// Target only product collection's inner blocks that use the 'query' context.
 		if ( ! isset( $context['query'] ) || ! isset( $context['query']['isProductCollectionBlock'] ) || ! $context['query']['isProductCollectionBlock'] ) {

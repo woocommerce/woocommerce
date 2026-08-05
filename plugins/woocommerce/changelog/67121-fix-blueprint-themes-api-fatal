@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent the Blueprint settings screen from fataling when a third-party filter throws while WooCommerce requests plugin or theme metadata from WordPress.org.

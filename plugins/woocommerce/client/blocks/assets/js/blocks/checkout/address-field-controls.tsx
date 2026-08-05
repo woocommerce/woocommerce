@@ -52,6 +52,7 @@ export const AddressFieldControls = (): JSX.Element => {
 					) }
 				</p>
 				<ToggleControl
+					__nextHasNoMarginBottom
 					label={ __( 'Company', 'woocommerce' ) }
 					checked={ ! defaultFields.company.hidden }
 					onChange={ () => {
@@ -78,6 +79,7 @@ export const AddressFieldControls = (): JSX.Element => {
 					/>
 				) }
 				<ToggleControl
+					__nextHasNoMarginBottom
 					label={ __( 'Address line 2', 'woocommerce' ) }
 					checked={ ! defaultFields.address_2.hidden }
 					onChange={ () => {
@@ -104,6 +106,7 @@ export const AddressFieldControls = (): JSX.Element => {
 					/>
 				) }
 				<ToggleControl
+					__nextHasNoMarginBottom
 					label={ __( 'Phone', 'woocommerce' ) }
 					checked={ ! defaultFields.phone.hidden }
 					onChange={ () => {

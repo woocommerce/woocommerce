@@ -20,11 +20,10 @@
 		},
 		"spacing": {
 			"padding": true
-		}
+		},
+		"interactivity": true
 	},
-	"parent": [
-		"woocommerce/mini-cart-title-block"
-	],
+	"parent": [ "woocommerce/mini-cart-title-block" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

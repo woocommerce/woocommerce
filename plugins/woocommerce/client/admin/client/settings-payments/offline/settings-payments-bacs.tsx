@@ -3,23 +3,30 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
+import { Button } from '@wordpress/components';
+import { useState, useEffect, useMemo } from '@wordpress/element';
 import {
-	CheckboxControl,
-	TextControl,
-	TextareaControl,
-	Button,
-} from '@wordpress/components';
-import { useState, useEffect } from '@wordpress/element';
-import { paymentGatewaysStore, optionsStore } from '@woocommerce/data';
+	paymentGatewaysStore,
+	optionsStore,
+	paymentSettingsStore,
+} from '@woocommerce/data';
+import { DataForm } from '@wordpress/dataviews';
+import type { Field } from '@wordpress/dataviews';
 
 /**
  * Internal dependencies
  */
 import '../settings-payments-body.scss';
+import { Settings } from '~/settings-payments/components/settings';
 import { FieldPlaceholder } from '~/settings-payments/components/field-placeholder';
 import { BankAccountsList } from '~/settings-payments/components/bank-accounts-list';
 import { BankAccount } from '~/settings-payments/components/bank-accounts-list/types';
-import { Settings } from '~/settings-payments/components/settings';
+import {
+	CheckboxEdit,
+	TextEdit,
+	TextareaEdit,
+	type OfflineFormValues,
+} from './dataform-controls';
 
 /**
  * This page is used to manage the settings for the BACS (Direct bank transfer) payment gateway.
@@ -44,6 +51,9 @@ export const SettingsPaymentsBacs = () => {
 		[]
 	);
 
+	const { invalidateResolution, invalidateResolutionForStoreSelector } =
+		useDispatch( paymentSettingsStore );
+
 	const { accountsOption, isLoadingAccounts } = useSelect( ( select ) => {
 		const selectors = select( optionsStore );
 
@@ -57,9 +67,7 @@ export const SettingsPaymentsBacs = () => {
 		};
 	}, [] );
 
-	const [ formValues, setFormValues ] = useState<
-		Record< string, string | boolean | string[] >
-	>( {} );
+	const [ formValues, setFormValues ] = useState< OfflineFormValues >( {} );
 
 	const [ isSaving, setIsSaving ] = useState( false );
 	const [ hasChanges, setHasChanges ] = useState( false );
@@ -86,6 +94,48 @@ export const SettingsPaymentsBacs = () => {
 
 	const { updateOptions } = useDispatch( optionsStore );
 	const { updatePaymentGateway } = useDispatch( paymentGatewaysStore );
+
+	const fields: Field< OfflineFormValues >[] = useMemo(
+		() => [
+			{
+				id: 'enabled',
+				label: __( 'Enable direct bank transfers', 'woocommerce' ),
+				Edit: CheckboxEdit,
+			},
+			{
+				id: 'title',
+				label: __( 'Title', 'woocommerce' ),
+				description: __(
+					'Payment method name that the customer will see during checkout.',
+					'woocommerce'
+				),
+				placeholder: __(
+					'Direct bank transfer payments',
+					'woocommerce'
+				),
+				Edit: TextEdit,
+			},
+			{
+				id: 'description',
+				label: __( 'Description', 'woocommerce' ),
+				description: __(
+					'Payment method description that the customer will see during checkout.',
+					'woocommerce'
+				),
+				Edit: TextareaEdit,
+			},
+			{
+				id: 'instructions',
+				label: __( 'Instructions', 'woocommerce' ),
+				description: __(
+					'Instructions that will be added to the thank you page and emails.',
+					'woocommerce'
+				),
+				Edit: TextareaEdit,
+			},
+		],
+		[]
+	);
 
 	const saveSettings = async () => {
 		if ( ! bacsSettings ) {
@@ -127,6 +177,7 @@ export const SettingsPaymentsBacs = () => {
 					settings,
 				} ),
 			] );
+			setHasChanges( false );
 			createSuccessNotice(
 				__( 'Settings updated successfully', 'woocommerce' )
 			);
@@ -136,7 +187,10 @@ export const SettingsPaymentsBacs = () => {
 			);
 		} finally {
 			setIsSaving( false );
-			setHasChanges( false );
+			void invalidateResolution( 'getPaymentProviders', [] );
+			void invalidateResolutionForStoreSelector(
+				'getOfflinePaymentGateways'
+			);
 		}
 	};
 
@@ -146,7 +200,7 @@ export const SettingsPaymentsBacs = () => {
 				<Settings.Form
 					onSubmit={ ( e ) => {
 						e.preventDefault();
-						saveSettings();
+						void saveSettings();
 					} }
 				>
 					<Settings.Section
@@ -157,80 +211,30 @@ export const SettingsPaymentsBacs = () => {
 						) }
 					>
 						{ isLoading ? (
-							<FieldPlaceholder size="small" />
+							<>
+								<FieldPlaceholder size="small" />
+								<FieldPlaceholder size="medium" />
+								<FieldPlaceholder size="large" />
+								<FieldPlaceholder size="large" />
+							</>
 						) : (
-							<CheckboxControl
-								label={ __(
-									'Enable direct bank transfers',
-									'woocommerce'
-								) }
-								checked={ Boolean( formValues.enabled ) }
-								onChange={ ( checked ) => {
-									setFormValues( {
-										...formValues,
-										enabled: checked,
-									} );
-									setHasChanges( true );
+							<DataForm
+								data={ formValues }
+								fields={ fields }
+								form={ {
+									layout: { type: 'regular' },
+									fields: [
+										'enabled',
+										'title',
+										'description',
+										'instructions',
+									],
 								} }
-							/>
-						) }
-						{ isLoading ? (
-							<FieldPlaceholder size="medium" />
-						) : (
-							<TextControl
-								label={ __( 'Title', 'woocommerce' ) }
-								help={ __(
-									'Payment method name that the customer will see during checkout.',
-									'woocommerce'
-								) }
-								placeholder={ __(
-									'Direct bank transfer payments',
-									'woocommerce'
-								) }
-								value={ String( formValues.title ) }
-								onChange={ ( value ) => {
-									setFormValues( {
-										...formValues,
-										title: value,
-									} );
-									setHasChanges( true );
-								} }
-							/>
-						) }
-						{ isLoading ? (
-							<FieldPlaceholder size="large" />
-						) : (
-							<TextareaControl
-								label={ __( 'Description', 'woocommerce' ) }
-								help={ __(
-									'Payment method description that the customer will see during checkout.',
-									'woocommerce'
-								) }
-								value={ String( formValues.description ) }
-								onChange={ ( value ) => {
-									setFormValues( {
-										...formValues,
-										description: value,
-									} );
-									setHasChanges( true );
-								} }
-							/>
-						) }
-						{ isLoading ? (
-							<FieldPlaceholder size="large" />
-						) : (
-							<TextareaControl
-								label={ __( 'Instructions', 'woocommerce' ) }
-								help={ __(
-									'Instructions that will be added to the thank you page and emails.',
-									'woocommerce'
-								) }
-								value={ String( formValues.instructions ) }
-								onChange={ ( value ) => {
-									setFormValues( {
-										...formValues,
-										instructions: value,
-									} );
+								onChange={ ( edits: OfflineFormValues ) => {
+									setFormValues( ( values ) => ( {
+										...values,
+										...edits,
+									} ) );
 									setHasChanges( true );
 								} }
 							/>

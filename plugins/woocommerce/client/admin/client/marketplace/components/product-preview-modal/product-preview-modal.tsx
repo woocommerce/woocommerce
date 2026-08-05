@@ -16,10 +16,10 @@ import './product-preview-modal.scss';
 
 interface ProductPreviewModalProps {
 	productTitle: string;
-	productVendor: JSX.Element | string | null;
+	productVendor: React.JSX.Element | string | null;
 	productIcon: string;
 	productId: number;
-	triggerRef: React.RefObject< HTMLAnchorElement >;
+	triggerRef: React.RefObject< HTMLAnchorElement | null >;
 	onOpen?: () => void;
 	onClose?: ( closeType?: string ) => void;
 }
@@ -119,7 +119,7 @@ export default function ProductPreviewModal( {
 			}
 		};
 
-		loadPreview();
+		void loadPreview();
 		if ( onOpen ) {
 			onOpen();
 		}
@@ -155,7 +155,7 @@ export default function ProductPreviewModal( {
 			closeButtonLabel={ __( 'Close product preview', 'woocommerce' ) }
 			size="large"
 			focusOnMount="firstElement"
-			title={ __( 'Official WooCommerce Marketplace', 'woocommerce' ) }
+			title={ __( 'The WooCommerce Marketplace', 'woocommerce' ) }
 		>
 			{ productHeader }
 			<div className="woocommerce-marketplace__product-preview-modal__content">

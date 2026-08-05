@@ -42,6 +42,8 @@ class WC_Admin_Tests_API_Reports_Categories extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_register_routes() {
+		// This namespace may be lazy loaded, so we make a discovery request to trigger loading for this test.
+		$this->server->dispatch( new WP_REST_Request( 'GET', '/' ) );
 		$routes = $this->server->get_routes();
 
 		$this->assertArrayHasKey( $this->endpoint, $routes );
@@ -131,18 +133,19 @@ class WC_Admin_Tests_API_Reports_Categories extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 2, count( $reports ) );
 
-		$category_report = reset( $reports );
+		$reports_by_category = array_column( $reports, null, 'category_id' );
+		$this->assertArrayHasKey( $second_category_id, $reports_by_category );
+		$this->assertArrayHasKey( $uncategorized_term->term_id, $reports_by_category );
 
-		$this->assertEquals( $second_category_id, $category_report['category_id'] );
+		$category_report = $reports_by_category[ $second_category_id ];
 		$this->assertEquals( 0, $category_report['items_sold'] );
 		$this->assertEquals( 0, $category_report['orders_count'] );
 		$this->assertEquals( 0, $category_report['products_count'] );
 		$this->assertArrayHasKey( '_links', $category_report );
 		$this->assertArrayHasKey( 'category', $category_report['_links'] );
 
-		$category_report = next( $reports );
+		$category_report = $reports_by_category[ $uncategorized_term->term_id ];
 
-		$this->assertEquals( $uncategorized_term->term_id, $category_report['category_id'] );
 		$this->assertEquals( 4, $category_report['items_sold'] );
 		$this->assertEquals( 1, $category_report['orders_count'] );
 		$this->assertEquals( 1, $category_report['products_count'] );

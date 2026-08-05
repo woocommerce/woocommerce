@@ -13,7 +13,7 @@ final class PaymentGatewayFeature {
 	 *
 	 * @var string
 	 */
-	public const ADD_PAYMENT_METHODS = 'add_payment_methods';
+	public const ADD_PAYMENT_METHOD = 'add_payment_method';
 
 	/**
 	 * Payment gateway supports credit card form on saved method.
@@ -140,4 +140,9 @@ final class PaymentGatewayFeature {
 	 * @var string
 	 */
 	public const TOKENIZATION = 'tokenization';
+
+	/**
+	 * Agentic Commerce feature.
+	 */
+	public const AGENTIC_COMMERCE = 'agentic_commerce';
 }

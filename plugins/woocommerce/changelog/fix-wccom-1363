@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add proper error handling when WCCOM API is unavailable, don't crash the site.

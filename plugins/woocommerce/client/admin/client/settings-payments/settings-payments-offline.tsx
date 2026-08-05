@@ -26,8 +26,8 @@ export const SettingsPaymentsOffline = () => {
 	const { offlinePaymentGateways, isFetching } = useSelect( ( select ) => {
 		const paymentSettings = select( paymentSettingsStore );
 		return {
-			isFetching: paymentSettings.isFetching(),
 			offlinePaymentGateways: paymentSettings.getOfflinePaymentGateways(),
+			isFetching: paymentSettings.isFetching(),
 		};
 	}, [] );
 
@@ -59,14 +59,14 @@ export const SettingsPaymentsOffline = () => {
 			orderMap[ gateway.id ] = updatedOrderValues[ index ];
 		} );
 
-		updateProviderOrdering( orderMap );
+		void updateProviderOrdering( orderMap );
 
 		// Set the sorted providers to the state to give a real-time update.
 		setSortedOfflinePaymentGateways( sorted );
 	}
 
 	return (
-		<div className="settings-payments-offline__container">
+		<>
 			{ isFetching ? (
 				<ListPlaceholder rows={ 3 } />
 			) : (
@@ -77,7 +77,7 @@ export const SettingsPaymentsOffline = () => {
 					setGateways={ handleOrderingUpdate }
 				/>
 			) }
-		</div>
+		</>
 	);
 };
 

@@ -3,18 +3,14 @@
  */
 import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
-// eslint-disable-next-line @woocommerce/dependency-group
-import {
-	ErrorBoundary,
-	// @ts-expect-error Type for PluginDocumentSettingPanel is missing in @types/wordpress__editor
-	PluginDocumentSettingPanel,
-} from '@wordpress/editor';
+import { useMemo } from '@wordpress/element';
+import { createSlotFill } from '@wordpress/components';
+import { ErrorBoundary, PluginDocumentSettingPanel } from '@wordpress/editor';
 
 /**
  * Internal dependencies
  */
 import { RichTextWithButton } from '../personalization-tags/rich-text-with-button';
-import { TemplateSelection } from './template-selection';
 import {
 	recordEvent,
 	recordEventOnce,
@@ -27,28 +23,35 @@ const tracking = {
 	debouncedRecordEvent,
 };
 
-const SidebarExtensionComponent = applyFilters(
-	'woocommerce_email_editor_setting_sidebar_extension_component',
-	RichTextWithButton,
-	tracking
-) as () => JSX.Element;
+/**
+ * A slot fill for the email actions section of the email editor.
+ *
+ * This component is used to render the email actions section of the email editor.
+ */
+const { Fill: EmailActionsFill, Slot } = createSlotFill(
+	'WooCommerceEmailEditorPostSummarySection'
+);
 
-const EmailStatusComponent = applyFilters(
-	'woocommerce_email_editor_setting_sidebar_email_status_component',
-	() => null,
-	tracking
-) as () => JSX.Element;
+export { EmailActionsFill };
 
 export function SettingsPanel() {
+	const SidebarExtensionComponent = useMemo(
+		() =>
+			applyFilters(
+				'woocommerce_email_editor_setting_sidebar_extension_component',
+				RichTextWithButton,
+				tracking
+			) as () => JSX.Element,
+		[]
+	);
+
 	return (
 		<PluginDocumentSettingPanel
 			name="email-settings-panel"
-			title={ __( 'Settings', 'woocommerce' ) }
+			title={ __( 'Settings', __i18n_text_domain__ ) }
 			className="woocommerce-email-editor__settings-panel"
 		>
-			{ <EmailStatusComponent /> }
-			{ <TemplateSelection /> }
-			{ /* @ts-expect-error canCopyContent is missing in @types/wordpress__editor */ }
+			<Slot />
 			<ErrorBoundary canCopyContent>
 				{ <SidebarExtensionComponent /> }
 			</ErrorBoundary>

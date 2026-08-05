@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Respect the max qualtity limit of a product in the cart if the manage stock setting is enabled only

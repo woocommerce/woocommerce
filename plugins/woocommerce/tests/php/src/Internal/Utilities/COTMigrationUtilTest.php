@@ -24,6 +24,11 @@ class COTMigrationUtilTest extends \WC_Unit_Test_Case {
 	private $prev_cot_state;
 
 	/**
+	 * @var null|\WC_Order
+	 */
+	private $prev_theorder;
+
+	/**
 	 * Set-up subject under test.
 	 */
 	public function setUp(): void {
@@ -33,6 +38,7 @@ class COTMigrationUtilTest extends \WC_Unit_Test_Case {
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		$cot_controller       = wc_get_container()->get( CustomOrdersTableController::class );
 		$this->prev_cot_state = $cot_controller->custom_orders_table_usage_is_enabled();
+		$this->prev_theorder  = $GLOBALS['theorder'] ?? null;
 	}
 
 	/**
@@ -43,6 +49,7 @@ class COTMigrationUtilTest extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		OrderHelper::toggle_cot_feature_and_usage( $this->prev_cot_state );
 		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
+		$GLOBALS['theorder'] = $this->prev_theorder;
 		parent::tearDown();
 	}
 
@@ -63,6 +70,7 @@ class COTMigrationUtilTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_init_theorder_object() {
 		global $theorder;
+
 		$order1           = OrderHelper::create_order();
 		$order2           = OrderHelper::create_order();
 		$post_from_order2 = get_post( $order2->get_id() );
@@ -127,6 +135,67 @@ class COTMigrationUtilTest extends \WC_Unit_Test_Case {
 		$this->sut      = new COTMigrationUtil();
 		$this->sut->init( $cot_controller, $data_sync_mock );
 		$this->assertFalse( $this->sut->is_custom_order_tables_in_sync() );
+	}
+
+	/**
+	 * @testdox `custom_orders_table_data_sync_is_enabled` should return true when data sync is enabled.
+	 */
+	public function test_custom_orders_table_data_sync_is_enabled_is_true() {
+		$data_sync_mock = $this->getMockBuilder( DataSynchronizer::class )
+			->setMethods( array( 'data_sync_is_enabled' ) )
+			->getMock();
+
+		$data_sync_mock->method( 'data_sync_is_enabled' )->willReturn( true );
+
+		// This is needed to prevent "Call to private method Mock_DataSynchronizer_xxxx::process_added_option" errors.
+		remove_filter( 'updated_option', array( $data_sync_mock, 'process_updated_option' ), 999, 3 );
+		remove_filter( 'added_option', array( $data_sync_mock, 'process_added_option' ), 999, 2 );
+
+		$cot_controller = wc_get_container()->get( CustomOrdersTableController::class );
+		$this->sut      = new COTMigrationUtil();
+		$this->sut->init( $cot_controller, $data_sync_mock );
+		$this->assertTrue( $this->sut->custom_orders_table_data_sync_is_enabled() );
+	}
+
+	/**
+	 * @testdox `custom_orders_table_data_sync_is_enabled` should return false when data sync is disabled.
+	 */
+	public function test_custom_orders_table_data_sync_is_enabled_is_false() {
+		$data_sync_mock = $this->getMockBuilder( DataSynchronizer::class )
+			->setMethods( array( 'data_sync_is_enabled' ) )
+			->getMock();
+
+		$data_sync_mock->method( 'data_sync_is_enabled' )->willReturn( false );
+
+		// This is needed to prevent "Call to private method Mock_DataSynchronizer_xxxx::process_added_option" errors.
+		remove_filter( 'updated_option', array( $data_sync_mock, 'process_updated_option' ), 999, 3 );
+		remove_filter( 'added_option', array( $data_sync_mock, 'process_added_option' ), 999, 2 );
+
+		$cot_controller = wc_get_container()->get( CustomOrdersTableController::class );
+		$this->sut      = new COTMigrationUtil();
+		$this->sut->init( $cot_controller, $data_sync_mock );
+		$this->assertFalse( $this->sut->custom_orders_table_data_sync_is_enabled() );
+	}
+
+	/**
+	 * @testdox `custom_orders_table_data_sync_is_enabled` should not run the expensive pending-sync query.
+	 */
+	public function test_custom_orders_table_data_sync_is_enabled_does_not_query_pending_sync() {
+		$data_sync_mock = $this->getMockBuilder( DataSynchronizer::class )
+			->setMethods( array( 'has_orders_pending_sync', 'data_sync_is_enabled' ) )
+			->getMock();
+
+		$data_sync_mock->method( 'data_sync_is_enabled' )->willReturn( true );
+		$data_sync_mock->expects( $this->never() )->method( 'has_orders_pending_sync' );
+
+		// This is needed to prevent "Call to private method Mock_DataSynchronizer_xxxx::process_added_option" errors.
+		remove_filter( 'updated_option', array( $data_sync_mock, 'process_updated_option' ), 999, 3 );
+		remove_filter( 'added_option', array( $data_sync_mock, 'process_added_option' ), 999, 2 );
+
+		$cot_controller = wc_get_container()->get( CustomOrdersTableController::class );
+		$this->sut      = new COTMigrationUtil();
+		$this->sut->init( $cot_controller, $data_sync_mock );
+		$this->sut->custom_orders_table_data_sync_is_enabled();
 	}
 
 	/**

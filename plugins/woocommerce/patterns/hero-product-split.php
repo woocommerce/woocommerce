@@ -26,7 +26,7 @@ $hero_title = __( 'Keep dry with 50% off rain jackets', 'woocommerce' );
 			<div class="wp-block-buttons" style="margin-bottom:var(--wp--preset--spacing--40)">
 				<!-- wp:button -->
 				<div class="wp-block-button">
-					<a href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>" class="wp-block-button__link wp-element-button"><?php esc_html_e( 'Shop the sale', 'woocommerce' ); ?></a>
+					<a href="<?php echo esc_url( wc_get_page_permalink( 'shop' ) ); ?>" class="wp-block-button__link wp-element-button"><?php esc_html_e( 'Shop the sale', 'woocommerce' ); ?></a>
 				</div>
 				<!-- /wp:button -->
 			</div>

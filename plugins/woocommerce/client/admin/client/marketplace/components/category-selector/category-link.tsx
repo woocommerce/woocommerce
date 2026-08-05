@@ -9,7 +9,7 @@ import { navigateTo, getNewPath } from '@woocommerce/navigation';
  */
 import { Category } from './types';
 
-export default function CategoryLink( props: Category ): JSX.Element {
+export default function CategoryLink( props: Category ): React.JSX.Element {
 	function updateCategorySelection(
 		event: React.MouseEvent< HTMLButtonElement >
 	) {

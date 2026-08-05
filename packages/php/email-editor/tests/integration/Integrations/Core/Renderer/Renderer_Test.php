@@ -17,6 +17,17 @@ use WP_Post;
  * Integration test for Renderer class
  */
 class Renderer_Test extends \Email_Editor_Integration_Test_Case {
+
+	private const USED_CORE_BLOCKS = array(
+		'core/button',
+		'core/columns',
+		'core/column',
+		'core/heading',
+		'core/paragraph',
+		'core/list',
+		'core/list-item',
+	);
+
 	/**
 	 * Instance of Renderer
 	 *
@@ -30,8 +41,25 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->renderer = $this->di_container->get( Renderer::class );
+		$initializer    = $this->di_container->get( Initializer::class );
+
 		$this->di_container->get( Email_Editor::class )->initialize();
-		$this->di_container->get( Initializer::class )->initialize();
+		$initializer->initialize();
+
+		// Because we use a custom callback for rendering blocks, it is necessary to re-register blocks with this callback.
+		foreach ( self::USED_CORE_BLOCKS as $block ) {
+			$block_type = \WP_Block_Type_Registry::get_instance()->get_registered( $block );
+			$this->assertInstanceOf( \WP_Block_Type::class, $block_type );
+			$settings = array(
+				'title'    => $block_type->title,
+				'name'     => $block_type->name,
+				'category' => $block_type->category,
+				'supports' => $block_type->supports ?? array(),
+			);
+			\WP_Block_Type_Registry::get_instance()->unregister( $block );
+			$settings = $initializer->update_block_settings( $settings );
+			register_block_type( $block, $settings );
+		}
 	}
 
 	/**
@@ -49,11 +77,6 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$rendered    = $this->renderer->render( $email_post, 'Subject', '', 'en' );
 		$button_html = $this->extractBlockHtml( $rendered['html'], 'wp-block-button', 'td' );
 		$this->assertStringContainsString( 'color: #fff', $button_html );
-		$this->assertStringContainsString( 'padding-bottom: .7em;', $button_html );
-		$this->assertStringContainsString( 'padding-left: 1.4em;', $button_html );
-		$this->assertStringContainsString( 'padding-right: 1.4em;', $button_html );
-		$this->assertStringContainsString( 'padding-top: .7em;', $button_html );
-		$this->assertStringContainsString( 'background-color: #32373c', $button_html );
 	}
 
 	/**
@@ -187,7 +210,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	public function testItInlinesColumnsColors(): void {
 		$email_post_id = $this->factory->post->create(
 			array(
-				'post_content' => '<!-- wp:columns {"backgroundColor":"vivid-green-cyan", "textColor":"black"} -->
+				'post_content' => '<!-- wp:columns {"backgroundColor":"black", "textColor":"luminous-vivid-orange"} -->
         <div class="wp-block-columns has-black-background-color has-luminous-vivid-orange-color"><!-- wp:column --><!-- /wp:column --></div>
         <!-- /wp:columns -->',
 			)
@@ -207,7 +230,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	public function testItRendersTextVersion(): void {
 		$email_post_id = $this->factory->post->create(
 			array(
-				'post_content' => '<!-- wp:columns {"backgroundColor":"vivid-green-cyan", "textColor":"black"} -->
+				'post_content' => '<!-- wp:columns {"backgroundColor":"black", "textColor":"luminous-vivid-orange"} -->
         <div class="wp-block-columns has-black-background-color has-luminous-vivid-orange-color"><!-- wp:column --><!-- /wp:column --></div>
         <!-- /wp:columns -->',
 			)

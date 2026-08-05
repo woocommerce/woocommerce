@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Drop the wrapping quotes around the product name in the experimental products app delete confirmation modal.

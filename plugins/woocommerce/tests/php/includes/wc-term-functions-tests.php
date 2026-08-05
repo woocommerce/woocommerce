@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
- * Class WC_Stock_Functions_Tests.
+ * Class WC_Term_Functions_Tests.
  */
 class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 	/**
@@ -175,5 +175,48 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 		$this->assertTrue( $success );
 
 		remove_action( 'edited_term_taxonomy', $action_callback );
+	}
+
+	/**
+	 * @testdox Featured term ID matches current site.
+	 */
+	public function test_get_product_visibility_term_ids_includes_featured(): void {
+		$term_ids = wc_get_product_visibility_term_ids();
+
+		$this->assertIsArray( $term_ids );
+		$this->assertArrayHasKey( 'featured', $term_ids );
+
+		$featured_term = get_term_by( 'name', 'featured', 'product_visibility' );
+
+		$this->assertNotFalse( $featured_term );
+		$this->assertSame( (int) $featured_term->term_taxonomy_id, (int) $term_ids['featured'] );
+	}
+
+	/**
+	 * @testdox Featured filter returns only featured products.
+	 */
+	public function test_wc_get_products_featured_returns_featured_products(): void {
+		$featured_product = WC_Helper_Product::create_simple_product( true );
+		$featured_product->set_featured( true );
+		$featured_product->save();
+
+		$regular_product = WC_Helper_Product::create_simple_product( true );
+		$regular_product->set_featured( false );
+		$regular_product->save();
+
+		$featured_products = wc_get_products(
+			array(
+				'status'   => 'publish',
+				'limit'    => 50,
+				'featured' => true,
+			)
+		);
+
+		$featured_ids = array_map( fn( $product ) => $product->get_id(), $featured_products );
+
+		$this->assertSame( array( $featured_product->get_id() ), $featured_ids );
+
+		$featured_product->delete();
+		$regular_product->delete();
 	}
 }

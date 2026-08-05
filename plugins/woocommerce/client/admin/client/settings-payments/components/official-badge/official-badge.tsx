@@ -66,6 +66,17 @@ export const OfficialBadge = ( {
 		setPopoverVisible( false );
 	};
 
+	const handleKeyDown = ( event: React.KeyboardEvent ) => {
+		if ( event.key === 'Escape' && isPopoverVisible ) {
+			event.stopPropagation();
+			setPopoverVisible( false );
+			buttonRef.current?.focus();
+		} else if ( event.key === 'Enter' || event.key === ' ' ) {
+			event.preventDefault();
+			handleClick( event );
+		}
+	};
+
 	return (
 		<Pill className={ `woocommerce-official-extension-badge` }>
 			<span
@@ -74,11 +85,7 @@ export const OfficialBadge = ( {
 				role="button"
 				ref={ buttonRef }
 				onClick={ handleClick }
-				onKeyDown={ ( event: React.KeyboardEvent ) => {
-					if ( event.key === 'Enter' || event.key === ' ' ) {
-						handleClick( event );
-					}
-				} }
+				onKeyDown={ handleKeyDown }
 			>
 				<img
 					src={ WC_ASSET_URL + 'images/icons/official-extension.svg' }
@@ -100,8 +107,13 @@ export const OfficialBadge = ( {
 						noArrow={ true }
 						shift={ true }
 						onFocusOutside={ handleFocusOutside }
+						onKeyDown={ handleKeyDown }
 					>
-						<div className="components-popover__content-container">
+						{ /* eslint-disable-next-line jsx-a11y/no-static-element-interactions */ }
+						<div
+							className="components-popover__content-container"
+							onKeyDown={ handleKeyDown }
+						>
 							<p>
 								{ createInterpolateElement(
 									__(

@@ -1,0 +1,613 @@
+<?php
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders\MetaBoxes;
+
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+use Automattic\WooCommerce\Admin\Overrides\Order as AdminOrder;
+use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomerHistory;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\Utilities\OrderUtil;
+use WC_Helper_Order;
+use WC_Unit_Test_Case;
+
+/**
+ * Tests for the CustomerHistory class.
+ */
+class CustomerHistoryTest extends WC_Unit_Test_Case {
+
+	/**
+	 * The System Under Test.
+	 *
+	 * @var CustomerHistory
+	 */
+	private $sut;
+
+	/**
+	 * Whether HPOS should be restored after this test.
+	 *
+	 * @var bool
+	 */
+	private bool $restore_hpos_after_test = false;
+
+	/**
+	 * Previous HPOS state.
+	 *
+	 * @var bool
+	 */
+	private static bool $hpos_prev_state;
+
+	/**
+	 * Set up class fixtures.
+	 */
+	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+
+		self::$hpos_prev_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		OrderHelper::create_order_custom_table_if_not_exist();
+
+		if ( ! self::$hpos_prev_state ) {
+			OrderHelper::toggle_cot_feature_and_usage( true );
+		}
+	}
+
+	/**
+	 * Tear down class fixtures.
+	 */
+	public static function tearDownAfterClass(): void {
+		self::clear_hpos_orders();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() !== self::$hpos_prev_state ) {
+			OrderHelper::toggle_cot_feature_and_usage( self::$hpos_prev_state );
+		}
+
+		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+
+		parent::tearDownAfterClass();
+	}
+
+	/**
+	 * Set up test fixtures.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->sut = new CustomerHistory();
+	}
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		if ( $this->restore_hpos_after_test ) {
+			OrderHelper::toggle_cot_feature_and_usage( true );
+			$this->restore_hpos_after_test = false;
+		}
+
+		delete_option( 'woocommerce_excluded_report_order_statuses' );
+		remove_filter( 'woocommerce_order_class', array( AdminOrder::class, 'order_class_name' ) );
+		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		parent::tearDown();
+	}
+
+	/**
+	 * @testdox Should return correct count, total, and average for a registered customer with multiple orders (HPOS).
+	 */
+	public function test_registered_customer_with_multiple_orders(): void {
+		$customer_id = $this->factory->user->create();
+
+		$order1 = WC_Helper_Order::create_order( $customer_id );
+		$order1->set_status( 'completed' );
+		$order1->set_total( 100 );
+		$order1->save();
+
+		$order2 = WC_Helper_Order::create_order( $customer_id );
+		$order2->set_status( 'completed' );
+		$order2->set_total( 200 );
+		$order2->save();
+
+		ob_start();
+		$this->sut->output( $order1 );
+		$output = ob_get_clean();
+
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*2\s*</', $output, 'Should show 2 orders for the customer' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*300\.00/', $output, 'Should show total spend of 300' );
+		$this->assertMatchesRegularExpression( '/order-attribution-average-order-value">\s*.*150\.00/', $output, 'Should show average order value of 150' );
+	}
+
+	/**
+	 * @testdox Should fetch data correctly for a guest customer matched by billing email (HPOS).
+	 */
+	public function test_guest_customer_by_email(): void {
+		$email = 'guest-test@example.com';
+
+		$order1 = WC_Helper_Order::create_order( 0 );
+		$order1->set_billing_email( $email );
+		$order1->set_status( 'completed' );
+		$order1->set_total( 75 );
+		$order1->save();
+
+		$order2 = WC_Helper_Order::create_order( 0 );
+		$order2->set_billing_email( $email );
+		$order2->set_status( 'processing' );
+		$order2->set_total( 25 );
+		$order2->save();
+
+		ob_start();
+		$this->sut->output( $order1 );
+		$output = ob_get_clean();
+
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*2\s*</', $output, 'Should show 2 orders for the guest customer' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*100\.00/', $output, 'Should show total spend of 100' );
+		$this->assertMatchesRegularExpression( '/order-attribution-average-order-value">\s*.*50\.00/', $output, 'Should show average order value of 50' );
+	}
+
+	/**
+	 * @testdox Should not count orders with excluded statuses like pending, cancelled, and failed (HPOS).
+	 */
+	public function test_excluded_statuses_not_counted(): void {
+		$customer_id = $this->factory->user->create();
+
+		$order_good = WC_Helper_Order::create_order( $customer_id );
+		$order_good->set_status( 'completed' );
+		$order_good->set_total( 100 );
+		$order_good->save();
+
+		$order_cancelled = WC_Helper_Order::create_order( $customer_id );
+		$order_cancelled->set_status( 'cancelled' );
+		$order_cancelled->set_total( 50 );
+		$order_cancelled->save();
+
+		$order_failed = WC_Helper_Order::create_order( $customer_id );
+		$order_failed->set_status( 'failed' );
+		$order_failed->set_total( 30 );
+		$order_failed->save();
+
+		$order_pending = WC_Helper_Order::create_order( $customer_id );
+		$order_pending->set_status( 'pending' );
+		$order_pending->set_total( 20 );
+		$order_pending->save();
+
+		ob_start();
+		$this->sut->output( $order_good );
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'order-attribution-total-orders', $output );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*1\s*</', $output, 'Should only count the completed order' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*100\.00/', $output, 'Should only sum spend from the completed order' );
+	}
+
+	/**
+	 * @testdox Should return early without output for auto-draft orders.
+	 */
+	public function test_auto_draft_returns_early(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( 'auto-draft' );
+		$order->save();
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		$this->assertEmpty( $output, 'Should produce no output for auto-draft orders' );
+	}
+
+	/**
+	 * @testdox Should show zero data for guest order with no billing email (HPOS).
+	 */
+	public function test_guest_with_no_email_shows_zero(): void {
+		$order = WC_Helper_Order::create_order( 0 );
+		$order->set_billing_email( '' );
+		$order->set_status( 'completed' );
+		$order->set_total( 50 );
+		$order->save();
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*0\s*</', $output, 'Should show 0 orders for guest with no email' );
+	}
+
+	/**
+	 * @testdox Should show zero data when no matching orders exist for the customer (HPOS).
+	 */
+	public function test_no_matching_orders_shows_zero(): void {
+		$customer_id = $this->factory->user->create();
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( 'cancelled' );
+		$order->set_total( 100 );
+		$order->save();
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*0\s*</', $output, 'Should show 0 orders when all are excluded' );
+	}
+
+	/**
+	 * @testdox Should deduct partial refund from total spend (HPOS).
+	 */
+	public function test_partial_refund_deducted_from_total_spend(): void {
+		$customer_id = $this->factory->user->create();
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( 'completed' );
+		$order->set_total( 200 );
+		$order->save();
+
+		wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 50,
+				'reason'   => 'Partial refund test',
+			)
+		);
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*1\s*</', $output, 'Should still count 1 order after partial refund' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*150\.00/', $output, 'Should show net spend of 150 after 50 refund' );
+		$this->assertMatchesRegularExpression( '/order-attribution-average-order-value">\s*.*150\.00/', $output, 'Should show average of 150 after partial refund' );
+	}
+
+	/**
+	 * @testdox Should deduct full refund from total spend (HPOS).
+	 */
+	public function test_full_refund_deducted_from_total_spend(): void {
+		$customer_id = $this->factory->user->create();
+
+		$order1 = WC_Helper_Order::create_order( $customer_id );
+		$order1->set_status( 'completed' );
+		$order1->set_total( 100 );
+		$order1->save();
+
+		$order2 = WC_Helper_Order::create_order( $customer_id );
+		$order2->set_status( 'completed' );
+		$order2->set_total( 200 );
+		$order2->save();
+
+		wc_create_refund(
+			array(
+				'order_id' => $order1->get_id(),
+				'amount'   => 100,
+				'reason'   => 'Full refund test',
+			)
+		);
+
+		ob_start();
+		$this->sut->output( $order1 );
+		$output = ob_get_clean();
+
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*2\s*</', $output, 'Should still count 2 orders after full refund' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*200\.00/', $output, 'Should show net spend of 200 after full refund of first order' );
+		$this->assertMatchesRegularExpression( '/order-attribution-average-order-value">\s*.*100\.00/', $output, 'Should show average of 100 (200 net / 2 orders)' );
+	}
+
+	/**
+	 * @testdox Should deduct refund from guest order total spend (HPOS).
+	 */
+	public function test_guest_order_refund_deducted_from_total_spend(): void {
+		$email = 'guest-refund@example.com';
+
+		$order = WC_Helper_Order::create_order( 0 );
+		$order->set_billing_email( $email );
+		$order->set_status( 'completed' );
+		$order->set_total( 100 );
+		$order->save();
+
+		wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 30,
+				'reason'   => 'Guest partial refund test',
+			)
+		);
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*1\s*</', $output, 'Should still count 1 order after guest refund' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*70\.00/', $output, 'Should show net spend of 70 after 30 refund on guest order' );
+	}
+
+	/**
+	 * @testdox Should only count orders for the specific registered customer, not other customers (HPOS).
+	 */
+	public function test_registered_customer_isolation(): void {
+		$customer_a = $this->factory->user->create();
+		$customer_b = $this->factory->user->create();
+
+		$order_a = WC_Helper_Order::create_order( $customer_a );
+		$order_a->set_status( 'completed' );
+		$order_a->set_total( 100 );
+		$order_a->save();
+
+		$order_b1 = WC_Helper_Order::create_order( $customer_b );
+		$order_b1->set_status( 'completed' );
+		$order_b1->set_total( 200 );
+		$order_b1->save();
+
+		$order_b2 = WC_Helper_Order::create_order( $customer_b );
+		$order_b2->set_status( 'completed' );
+		$order_b2->set_total( 300 );
+		$order_b2->save();
+
+		ob_start();
+		$this->sut->output( $order_a );
+		$output_a = ob_get_clean();
+
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*1\s*</', $output_a, 'Customer A should see only their 1 order' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*100\.00/', $output_a, 'Customer A should see total spend of 100' );
+
+		ob_start();
+		$this->sut->output( $order_b1 );
+		$output_b = ob_get_clean();
+
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*2\s*</', $output_b, 'Customer B should see their 2 orders' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*500\.00/', $output_b, 'Customer B should see total spend of 500' );
+	}
+
+	/**
+	 * @testdox Should only count orders for the specific guest email, not other guest emails (HPOS).
+	 */
+	public function test_guest_customer_email_isolation(): void {
+		$email_a = 'guest-a@example.com';
+		$email_b = 'guest-b@example.com';
+
+		$order_a = WC_Helper_Order::create_order( 0 );
+		$order_a->set_billing_email( $email_a );
+		$order_a->set_status( 'completed' );
+		$order_a->set_total( 50 );
+		$order_a->save();
+
+		$order_b1 = WC_Helper_Order::create_order( 0 );
+		$order_b1->set_billing_email( $email_b );
+		$order_b1->set_status( 'completed' );
+		$order_b1->set_total( 75 );
+		$order_b1->save();
+
+		$order_b2 = WC_Helper_Order::create_order( 0 );
+		$order_b2->set_billing_email( $email_b );
+		$order_b2->set_status( 'completed' );
+		$order_b2->set_total( 125 );
+		$order_b2->save();
+
+		ob_start();
+		$this->sut->output( $order_a );
+		$output_a = ob_get_clean();
+
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*1\s*</', $output_a, 'Guest A should see only their 1 order' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*50\.00/', $output_a, 'Guest A should see total spend of 50' );
+
+		ob_start();
+		$this->sut->output( $order_b1 );
+		$output_b = ob_get_clean();
+
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*2\s*</', $output_b, 'Guest B should see their 2 orders' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*200\.00/', $output_b, 'Guest B should see total spend of 200' );
+	}
+
+	/**
+	 * @testdox Tooltip should list default excluded statuses (pending payment, failed, cancelled).
+	 */
+	public function test_tooltip_shows_default_excluded_statuses(): void {
+		$customer_id = $this->factory->user->create();
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'pending payment', $output, 'Tooltip should mention "pending payment"' );
+		$this->assertStringContainsString( 'failed', $output, 'Tooltip should mention "failed"' );
+		$this->assertStringContainsString( 'cancelled', $output, 'Tooltip should mention "cancelled"' );
+	}
+
+	/**
+	 * @testdox Tooltip should reflect custom excluded statuses option.
+	 */
+	public function test_tooltip_reflects_custom_option(): void {
+		update_option( 'woocommerce_excluded_report_order_statuses', array( 'cancelled' ) );
+
+		$customer_id = $this->factory->user->create();
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		delete_option( 'woocommerce_excluded_report_order_statuses' );
+
+		$this->assertStringContainsString( 'cancelled', $output, 'Tooltip should mention "cancelled"' );
+		$this->assertStringNotContainsString( 'pending payment', $output, 'Tooltip should not mention "pending payment"' );
+		$this->assertStringNotContainsString( 'failed', $output, 'Tooltip should not mention "failed"' );
+	}
+
+	/**
+	 * @testdox Tooltip should reflect statuses added via filter.
+	 */
+	public function test_tooltip_reflects_filter(): void {
+		$add_on_hold = function ( $statuses ) {
+			$statuses[] = 'on-hold';
+			return $statuses;
+		};
+		add_filter( 'woocommerce_analytics_excluded_order_statuses', $add_on_hold );
+
+		$customer_id = $this->factory->user->create();
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		remove_filter( 'woocommerce_analytics_excluded_order_statuses', $add_on_hold );
+
+		$this->assertStringContainsString( 'on hold', $output, 'Tooltip should mention "on hold"' );
+	}
+
+	/**
+	 * @testdox Tooltip should not display internal statuses like auto-draft, trash, or checkout-draft.
+	 */
+	public function test_tooltip_excludes_internal_statuses(): void {
+		$customer_id = $this->factory->user->create();
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		$this->assertStringNotContainsString( 'auto-draft', $output, 'Tooltip should not mention "auto-draft"' );
+		$this->assertStringNotContainsString( 'trash', $output, 'Tooltip should not mention "trash"' );
+	}
+
+	/**
+	 * @testdox Tooltip should not display checkout-draft even when it is added via filter.
+	 */
+	public function test_tooltip_excludes_checkout_draft_status(): void {
+		$add_checkout_draft = function ( $statuses ) {
+			$statuses[] = 'checkout-draft';
+			return $statuses;
+		};
+		add_filter( 'woocommerce_analytics_excluded_order_statuses', $add_checkout_draft );
+
+		$customer_id = $this->factory->user->create();
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		remove_filter( 'woocommerce_analytics_excluded_order_statuses', $add_checkout_draft );
+
+		$this->assertStringNotContainsString( 'draft', $output, 'Tooltip should not mention "draft" for checkout-draft status' );
+	}
+
+	/**
+	 * @testdox Tooltip should show generic message when all statuses are removed from exclusion.
+	 */
+	public function test_tooltip_shows_no_exclusion_message_when_all_statuses_removed(): void {
+		add_filter( 'woocommerce_analytics_excluded_order_statuses', '__return_empty_array' );
+
+		$customer_id = $this->factory->user->create();
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		remove_filter( 'woocommerce_analytics_excluded_order_statuses', '__return_empty_array' );
+
+		$this->assertStringContainsString( 'Total number of orders for this customer, including the current one.', $output, 'Tooltip should use the no-exclusions fallback string' );
+		$this->assertStringNotContainsString( 'excluding', $output, 'Tooltip should not mention "excluding"' );
+	}
+
+	/**
+	 * @testdox CPT fallback should render correct customer history from analytics tables.
+	 */
+	public function test_cpt_fallback_renders_with_analytics_data(): void {
+		$this->use_cpt_orders();
+
+		\WC_Helper_Reports::reset_stats_dbs();
+
+		// Register the Override\Order class so wc_get_order() returns an instance
+		// with get_report_customer_id(), which the CPT path requires.
+		\Automattic\WooCommerce\Admin\Overrides\Order::add_filters();
+
+		$customer_id = $this->factory->user->create();
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( 'completed' );
+		$order->set_total( 100 );
+		$order->save();
+
+		OrdersStatsDataStore::sync_order( $order->get_id() );
+
+		// Re-fetch with Override class so output() takes the CPT path.
+		$override_order = wc_get_order( $order->get_id() );
+
+		ob_start();
+		$this->sut->output( $override_order );
+		$output = ob_get_clean();
+
+		remove_filter( 'woocommerce_order_class', array( \Automattic\WooCommerce\Admin\Overrides\Order::class, 'order_class_name' ) );
+
+		$this->assertStringContainsString( 'order-attribution-total-orders', $output, 'Should render the metabox template' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*1\s*</', $output, 'Should show 1 order from analytics data' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*100\.00/', $output, 'Should show total spend of 100' );
+	}
+
+	/**
+	 * @testdox CPT fallback should render customer history from a base WC_Order without logging warnings.
+	 */
+	public function test_cpt_fallback_renders_with_base_order(): void {
+		$this->use_cpt_orders();
+
+		\WC_Helper_Reports::reset_stats_dbs();
+
+		$customer_id = $this->factory->user->create();
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( 'completed' );
+		$order->set_total( 100 );
+		$order->save();
+
+		OrdersStatsDataStore::update( new AdminOrder( $order->get_id() ) );
+
+		$logger = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
+		$logger->expects( $this->never() )->method( 'warning' );
+
+		$inject_logger = function () use ( $logger ) {
+			return $logger;
+		};
+		add_filter( 'woocommerce_logging_class', $inject_logger );
+
+		$this->assertInstanceOf( \WC_Order::class, $order, 'Test should pass a base order to the metabox' );
+		$this->assertNotInstanceOf( AdminOrder::class, $order, 'Test should not pass the admin override order to the metabox' );
+
+		ob_start();
+		try {
+			$this->sut->output( $order );
+			$output = ob_get_clean();
+		} finally {
+			remove_filter( 'woocommerce_logging_class', $inject_logger );
+		}
+
+		$this->assertStringContainsString( 'order-attribution-total-orders', $output, 'Should render the metabox template' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*1\s*</', $output, 'Should show 1 order from analytics data' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*100\.00/', $output, 'Should show total spend of 100' );
+	}
+
+	/**
+	 * Switches the order data store to CPT for fallback coverage.
+	 */
+	private function use_cpt_orders(): void {
+		$this->restore_hpos_after_test = true;
+		OrderHelper::toggle_cot_feature_and_usage( false );
+	}
+}

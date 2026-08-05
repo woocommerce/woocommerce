@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Registe
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer as Order_DataSynchronizer;
 use Automattic\WooCommerce\Utilities\{ LoggingUtil, OrderUtil, PluginUtil };
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 
 /**
@@ -203,6 +204,12 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 						'wp_cron'                   => array(
 							'description' => __( 'Are WordPress cron jobs enabled?', 'woocommerce' ),
 							'type'        => 'boolean',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'wp_environment_type'       => array(
+							'description' => __( 'The WordPress environment type.', 'woocommerce' ),
+							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
@@ -987,7 +994,9 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		}
 
 		// Operating system.
-		$server_architecture = sprintf( '%s %s %s', php_uname( 's' ), php_uname( 'r' ), php_uname( 'm' ) );
+		$server_architecture = function_exists( 'php_uname' )
+			? sprintf( '%s %s %s', php_uname( 's' ), php_uname( 'r' ), php_uname( 'm' ) )
+			: '';
 
 		$database_version = wc_get_server_database_version();
 		$log_directory    = LoggingUtil::get_log_directory( false );
@@ -1005,6 +1014,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'wp_memory_limit'           => $wp_memory_limit,
 			'wp_debug_mode'             => ( defined( 'WP_DEBUG' ) && WP_DEBUG ),
 			'wp_cron'                   => ! ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ),
+			'wp_environment_type'       => wp_get_environment_type(),
 			'language'                  => get_locale(),
 			'external_object_cache'     => wp_using_ext_object_cache(),
 			'server_info'               => isset( $_SERVER['SERVER_SOFTWARE'] ) ? wc_clean( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ) ) : '',
@@ -1346,24 +1356,31 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			$scan_files[] = 'taxonomy-product_cat.php';
 			$scan_files[] = 'taxonomy-product_tag.php';
 
-			foreach ( $scan_files as $file ) {
-				$located = apply_filters( 'wc_get_template', $file, $file, array(), WC()->template_path(), WC()->plugin_path() . '/templates/' );
+			$wc_templates_dir = WC()->plugin_path() . '/templates/';
 
-				if ( file_exists( $located ) ) {
-					$theme_file = $located;
-				} elseif ( file_exists( get_stylesheet_directory() . '/' . $file ) ) {
-					$theme_file = get_stylesheet_directory() . '/' . $file;
-				} elseif ( file_exists( get_stylesheet_directory() . '/' . WC()->template_path() . $file ) ) {
-					$theme_file = get_stylesheet_directory() . '/' . WC()->template_path() . $file;
-				} elseif ( file_exists( get_template_directory() . '/' . $file ) ) {
-					$theme_file = get_template_directory() . '/' . $file;
-				} elseif ( file_exists( get_template_directory() . '/' . WC()->template_path() . $file ) ) {
-					$theme_file = get_template_directory() . '/' . WC()->template_path() . $file;
-				} else {
-					$theme_file = false;
+			foreach ( $scan_files as $file ) {
+				$located = wc_locate_template( $file, WC()->template_path(), $wc_templates_dir );
+
+				/**
+				 * Allow 3rd party plugins to filter the template file location.
+				 *
+				 * @param string $located       The located template path.
+				 * @param string $file          The template file name.
+				 * @param array  $args          Template arguments.
+				 * @param string $template_path The template path.
+				 * @param string $default_path  The default path.
+				 *
+				 * @since 2.1.0
+				 */
+				$located = apply_filters( 'wc_get_template', $located, $file, array(), WC()->template_path(), $wc_templates_dir );
+
+				// Check if the template is overridden (located outside WC core templates dir).
+				$override_file = false;
+				if ( 0 !== strpos( $located, $wc_templates_dir ) && file_exists( $located ) ) {
+					$override_file = $located;
 				}
 
-				if ( ! empty( $theme_file ) ) {
+				if ( ! empty( $override_file ) ) {
 					$core_file = $file;
 
 					// Update *-product_<cat|tag> template name before searching in core.
@@ -1371,16 +1388,16 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 						$core_file = str_replace( '_', '-', $core_file );
 					}
 
-					$core_version  = WC_Admin_Status::get_file_version( WC()->plugin_path() . '/templates/' . $core_file );
-					$theme_version = WC_Admin_Status::get_file_version( $theme_file );
-					if ( $core_version && ( empty( $theme_version ) || version_compare( $theme_version, $core_version, '<' ) ) ) {
+					$core_version     = WC_Admin_Status::get_file_version( WC()->plugin_path() . '/templates/' . $core_file );
+					$override_version = WC_Admin_Status::get_file_version( $override_file );
+					if ( $core_version && '' !== $override_version && version_compare( $override_version, $core_version, '<' ) ) {
 						if ( ! $outdated_templates ) {
 							$outdated_templates = true;
 						}
 					}
 					$override_files[] = array(
-						'file'         => str_replace( WP_CONTENT_DIR . '/themes/', '', $theme_file ),
-						'version'      => $theme_version,
+						'file'         => str_replace( ABSPATH, '', $override_file ),
+						'version'      => $override_version,
 						'core_version' => $core_version,
 					);
 				}
@@ -1453,7 +1470,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 
 		// Return array of useful settings for debugging.
 		return array(
-			'api_enabled'                    => 'yes' === get_option( 'woocommerce_api_enabled' ),
+			'api_enabled'                    => WC()->legacy_rest_api_is_available(),
 			'force_ssl'                      => 'yes' === get_option( 'woocommerce_force_ssl_checkout' ),
 			'currency'                       => get_woocommerce_currency(),
 			'currency_symbol'                => get_woocommerce_currency_symbol(),
@@ -1464,8 +1481,8 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'geolocation_enabled'            => in_array(
 				get_option( 'woocommerce_default_customer_address' ),
 				array(
-					'geolocation_ajax',
-					'geolocation',
+					DefaultCustomerAddress::GEOLOCATION_AJAX,
+					DefaultCustomerAddress::GEOLOCATION,
 				),
 				true
 			),

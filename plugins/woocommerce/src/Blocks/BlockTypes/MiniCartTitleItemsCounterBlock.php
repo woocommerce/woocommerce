@@ -1,8 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Admin\Features\Features;
-
 /**
  * MiniCartTitleItemsCounterBlock class.
  */
@@ -17,39 +15,26 @@ class MiniCartTitleItemsCounterBlock extends AbstractInnerBlock {
 	/**
 	 * Render the block.
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content    Block content.
+	 * @param \WP_Block $block      Block instance.
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
-			return $this->render_experimental_iapi_title_label_block();
-		}
-		return $content;
-	}
-
-	/**
-	 * Render the interactivity API powered experimental title block.
-	 *
-	 * @return string Rendered block type output.
-	 */
-	protected function render_experimental_iapi_title_label_block() {
 		$cart            = $this->get_cart_instance();
 		$cart_item_count = $cart ? $cart->get_cart_contents_count() : 0;
-		// translators: %d number of items in the cart.
-		$cart_item_text = _n( '(%d item)', '(%d items)', $cart_item_count, 'woocommerce' );
 
-		// translators: item is an item in cart.
-		$singular = __( '(%d item)', 'woocommerce' );
-		// translators: items is items in a cart.
-		$plural = __( '(%d items)', 'woocommerce' );
+		// The following translation is a temporary workaround. It will be
+		// reverted to the previous form `(%d items)` as soon as the
+		// `@wordpress/i18n` package is available as a script module.
+
+		// translators: %d number of items in the cart.
+		$cart_item_text = __( '(items: %d)', 'woocommerce' );
 
 		wp_interactivity_config(
 			$this->get_full_block_name(),
 			array(
-				'singularItemsText' => $singular,
-				'pluralItemsText'   => $plural,
+				'itemsInCartTextTemplate' => $cart_item_text,
 			)
 		);
 
@@ -60,12 +45,19 @@ class MiniCartTitleItemsCounterBlock extends AbstractInnerBlock {
 			)
 		);
 
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'data-wp-text'        => 'state.itemsInCartText',
+				'data-wp-interactive' => 'woocommerce/mini-cart-title-items-counter-block',
+			)
+		);
+
 		ob_start();
 		?>
-		<span data-wp-text="state.itemsInCartText" data-wp-interactive="woocommerce/mini-cart-title-items-counter-block" class="wp-block-woocommerce-mini-cart-title-items-counter-block">
+		<span <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 		</span>
 		<?php
-		return ob_get_clean();
+		return (string) ob_get_clean();
 	}
 
 	/**

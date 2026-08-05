@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 5.2.0
+ * @version 11.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -31,7 +31,17 @@ defined( 'ABSPATH' ) || exit;
 		foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 			$_product = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
 
-			if ( $_product && $_product->exists() && $cart_item['quantity'] > 0 && apply_filters( 'woocommerce_checkout_cart_item_visible', true, $cart_item, $cart_item_key ) ) {
+			/**
+			 * Filter whether this cart item is visible in the checkout review order table.
+			 *
+			 * @since 2.1.0
+			 * @param bool   $visible       Whether the cart item is visible. Default true.
+			 * @param array  $cart_item     The cart item data.
+			 * @param string $cart_item_key The cart item key.
+			 */
+			$visible = apply_filters( 'woocommerce_checkout_cart_item_visible', true, $cart_item, $cart_item_key );
+
+			if ( $_product instanceof WC_Product && $_product->exists() && $cart_item['quantity'] > 0 && $visible ) {
 				?>
 				<tr class="<?php echo esc_attr( apply_filters( 'woocommerce_cart_item_class', 'cart_item', $cart_item, $cart_item_key ) ); ?>">
 					<td class="product-name">

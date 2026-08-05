@@ -8,7 +8,6 @@ const Save = () => {
 
 	return (
 		<div { ...blockProps }>
-			{ /* @ts-expect-error: `InnerBlocks.Content` is a component that is typed in WordPress core*/ }
 			<InnerBlocks.Content />
 		</div>
 	);

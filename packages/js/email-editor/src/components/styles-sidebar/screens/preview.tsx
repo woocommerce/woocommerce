@@ -16,6 +16,8 @@ import { storeName } from '../../../store';
 import { useEmailStyles } from '../../../hooks';
 import { getCompressedVariableValue } from '../../../style-variables';
 
+const EMPTY_ARRAY = [];
+
 const firstFrame = {
 	start: {
 		scale: 1,
@@ -77,68 +79,76 @@ export function Preview( {
 		[]
 	);
 	const paletteColors = useMemo(
-		() => colors.theme.concat( colors.default ),
+		() =>
+			( colors?.theme || EMPTY_ARRAY ).concat(
+				colors?.default || EMPTY_ARRAY
+			),
 		[ colors ]
 	);
 	const { styles } = useEmailStyles();
 
-	const {
-		backgroundColor,
-		headingColor,
-		textColorPaletteObject,
-		buttonBackgroundColorPaletteObject,
-	} = useMemo( () => {
-		const backgroundCol =
-			getCompressedVariableValue( styles?.color?.background ) || 'white';
-		const textCol =
-			getCompressedVariableValue( styles?.color?.text ) || 'black';
-		const headingCol =
-			getCompressedVariableValue( styles?.elements?.h1?.color?.text ) ||
-			textCol;
-		const linkColor =
-			getCompressedVariableValue( styles?.elements?.link?.color?.text ) ||
-			headingCol;
-		const buttonBackgroundCol =
-			getCompressedVariableValue(
-				styles?.elements?.button?.color?.background
-			) || linkColor;
+	const { backgroundColor, headingColor, highlightedColors } =
+		useMemo( () => {
+			const backgroundCol =
+				getCompressedVariableValue( styles?.color?.background ) ||
+				'white';
+			const textCol =
+				getCompressedVariableValue( styles?.color?.text ) || 'black';
+			const headingCol =
+				getCompressedVariableValue(
+					styles?.elements?.h1?.color?.text
+				) || textCol;
+			const linkColor =
+				getCompressedVariableValue(
+					styles?.elements?.link?.color?.text
+				) || headingCol;
+			const buttonBackgroundCol =
+				getCompressedVariableValue(
+					styles?.elements?.button?.color?.background
+				) || linkColor;
 
-		const textColorPaletteObj = paletteColors.find(
-			( { color } ) => color.toLowerCase() === textCol.toLowerCase()
-		);
-		const buttonBackgroundColorPaletteObj = paletteColors.find(
-			( { color } ) =>
-				color.toLowerCase() === buttonBackgroundCol.toLowerCase()
-		);
+			const textColorPaletteObj = paletteColors.find(
+				( { color } ) => color.toLowerCase() === textCol.toLowerCase()
+			);
+			const buttonBackgroundColorPaletteObj = paletteColors.find(
+				( { color } ) =>
+					color.toLowerCase() === buttonBackgroundCol.toLowerCase()
+			);
 
-		return {
-			backgroundColor: backgroundCol,
-			headingColor: headingCol,
-			buttonBackgroundColor: buttonBackgroundCol,
-			textColorPaletteObject: textColorPaletteObj,
-			buttonBackgroundColorPaletteObject: buttonBackgroundColorPaletteObj,
-		};
-	}, [ styles, paletteColors ] );
+			// We pick the colors for the highlighted colors the same way as the site editor
+			// https://github.com/WordPress/gutenberg/blob/7b3850b6a39ce45948f09efe750451c6323a4613/packages/edit-site/src/components/global-styles/hooks.js#L83-L95
+			const highlightedColorsObj = [
+				...( textColorPaletteObj
+					? [ textColorPaletteObj ]
+					: EMPTY_ARRAY ),
+				...( buttonBackgroundColorPaletteObj
+					? [ buttonBackgroundColorPaletteObj ]
+					: EMPTY_ARRAY ),
+				...paletteColors,
+			]
+				.filter(
+					( { color }, index, self ) =>
+						color.toLowerCase() !== backgroundCol.toLowerCase() &&
+						index ===
+							self.findIndex(
+								( item ) =>
+									item.color.toLowerCase() ===
+									color.toLowerCase() // remove duplicates
+							)
+				)
+				.slice( 0, 2 );
+
+			return {
+				backgroundColor: backgroundCol,
+				headingColor: headingCol,
+				highlightedColors: highlightedColorsObj,
+			};
+		}, [ styles, paletteColors ] );
 
 	const headingFontWeight =
 		styles?.elements?.heading?.typography?.fontWeight || 'inherit';
 	const headingFontFamily =
 		styles?.elements?.heading?.typography?.fontFamily || 'inherit';
-
-	// We pick the colors for the highlighted colors the same way as the site editor
-	// https://github.com/WordPress/gutenberg/blob/7b3850b6a39ce45948f09efe750451c6323a4613/packages/edit-site/src/components/global-styles/hooks.js#L83-L95
-	const highlightedColors = [
-		...( textColorPaletteObject ? [ textColorPaletteObject ] : [] ),
-		...( buttonBackgroundColorPaletteObject
-			? [ buttonBackgroundColorPaletteObject ]
-			: [] ),
-		...paletteColors,
-	]
-		.filter(
-			( { color } ) =>
-				color.toLowerCase() !== backgroundColor.toLowerCase()
-		)
-		.slice( 0, 2 );
 
 	const ratio = 1;
 	// When is set label, the preview animates the hover state and displays the label

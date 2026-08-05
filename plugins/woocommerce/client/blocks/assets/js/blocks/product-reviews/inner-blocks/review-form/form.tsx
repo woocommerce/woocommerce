@@ -74,13 +74,17 @@ const CommentsForm = ( {
 	const { updateProduct } = useDispatch( productsStore );
 	const product = useSelect(
 		( select ) => {
+			if ( ! postId ) {
+				return null;
+			}
 			return select( productsStore ).getProduct( Number( postId ) );
 		},
 		[ postId ]
 	);
 
 	const setReviewsAllowed = ( allowed: boolean ) => {
-		updateProduct( Number( postId ), {
+		if ( ! postId ) return;
+		void updateProduct( Number( postId ), {
 			reviews_allowed: allowed,
 		} );
 	};

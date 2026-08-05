@@ -75,6 +75,13 @@ class WC_WCCOM_Site_Installation_Step_Activate_Product implements WC_WCCOM_Site_
 			$filename = is_array( $plugins ) && ! empty( $plugins ) ? key( $plugins ) : '';
 		}
 
+		// Fallback: use installed_path from the move_product step.
+		if ( empty( $filename ) && ! empty( $this->state->get_installed_path() ) ) {
+			$filename = \WC_WCCOM_Site_Installer::get_wporg_plugin_main_file(
+				basename( $this->state->get_installed_path() )
+			);
+		}
+
 		if ( empty( $filename ) ) {
 			throw new Installer_Error( Installer_Error_Codes::UNKNOWN_FILENAME );
 		}
@@ -118,6 +125,11 @@ class WC_WCCOM_Site_Installation_Step_Activate_Product implements WC_WCCOM_Site_
 			);
 
 			$theme_slug = is_array( $themes ) && ! empty( $themes ) ? dirname( key( $themes ) ) : '';
+		}
+
+		// Fallback: use installed_path from the move_product step.
+		if ( empty( $theme_slug ) && ! empty( $this->state->get_installed_path() ) ) {
+			$theme_slug = basename( $this->state->get_installed_path() );
 		}
 
 		if ( empty( $theme_slug ) ) {

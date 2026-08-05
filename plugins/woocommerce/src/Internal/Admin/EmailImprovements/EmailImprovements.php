@@ -118,7 +118,8 @@ class EmailImprovements {
 		if ( self::is_email_customizer_enabled() ) {
 			return false;
 		}
-		return true;
+		// Temporarily paused roll-out to gather more feedback.
+		return false;
 	}
 
 	/**

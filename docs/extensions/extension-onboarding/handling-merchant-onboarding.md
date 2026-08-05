@@ -1,7 +1,7 @@
 ---
 post_title: How to implement merchant onboarding
 sidebar_label: Implement merchant onboarding
-
+sidebar_position: 1
 ---
 
 # How to implement merchant onboarding
@@ -15,6 +15,34 @@ Onboarding is a critical part of the merchant's user experience. It helps set th
 - Admin notes
 
 ---
+
+## Getting started
+
+We'll be using `@woocommerce/create-woo-extension` to scaffold a modern WordPress JavaScript environment for plugins. This tool creates a fully functional development environment for integrating with WooCommerce.
+
+In this example, we'll be using the `add-task` variant to create a basic onboarding extension that we can build upon.
+
+In your `wp-content/plugins` directory, run the following command to create your extension:
+
+```sh
+npx @wordpress/create-block -t @woocommerce/create-woo-extension --variant=add-task my-extension-name
+```
+
+Navigate to the newly created folder and start development:
+
+```sh
+cd my-extension-name
+npm run start
+```
+
+Optionally, you can use `wp-env` for a local WordPress environment:
+
+```sh
+npm -g i @wordpress/env
+wp-env start
+```
+
+Don't forget to head over to `/wp-admin/plugins.php` and activate your plugin.
 
 ## Using setup tasks
 

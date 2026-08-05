@@ -7,7 +7,7 @@
 		"package-release": "./bin/run"
 	},
 	"homepage": "https://github.com/woocommerce/woocommerce",
-	"license": "GPLv2",
+	"license": "GPL-2.0-or-later",
 	"main": "dist/index.js",
 	"repository": "woocommerce/woocommerce",
 	"files": [
@@ -18,7 +18,7 @@
 	],
 	"scripts": {
 		"build": "shx rm -rf dist && tsc --project tsconfig.json",
-		"lint": "eslint . --ext .ts --config .eslintrc",
+		"lint": "eslint .",
 		"prepack": "pnpm build && oclif manifest",
 		"postpack": "shx rm -f oclif.manifest.json",
 		"posttest": "pnpm lint"
@@ -31,14 +31,15 @@
 		"semver": "^7.5.4"
 	},
 	"devDependencies": {
-		"@types/node": "20.x.x",
+		"@types/node": "^24.1.0",
+		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"eslint": "^10.0.0",
 		"oclif": "^2.7.0",
 		"shx": "^0.3.4",
 		"ts-node": "^10.9.2",
 		"tslib": "^2.6.2",
-		"typescript": "5.7.x",
-		"wireit": "0.14.12"
+		"typescript": "5.7.x"
 	},
 	"oclif": {
 		"bin": "package-release",
@@ -56,7 +57,7 @@
 		}
 	},
 	"engines": {
-		"node": "^20.11.1"
+		"node": "^24.15.0"
 	},
 	"types": "dist/index.d.ts",
 	"config": {

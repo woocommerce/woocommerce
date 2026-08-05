@@ -11,12 +11,16 @@ import { useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import './modals.scss';
 import {
 	getWooPaymentsSetupLiveAccountLink,
 	recordPaymentsEvent,
 } from '~/settings-payments/utils';
 import { WC_ASSET_URL } from '~/utils/admin-settings';
+import {
+	wooPaymentsExtensionSlug,
+	wooPaymentsProviderId,
+	wooPaymentsSuggestionId,
+} from '~/settings-payments/constants';
 
 interface WooPaymentsReadyToTestModalProps {
 	/**
@@ -54,7 +58,9 @@ export const WooPaymentsPostSandboxAccountSetupModal = ( {
 	const handleActivatePayments = () => {
 		// Record the event when the user clicks on the "Activate Payments" button.
 		recordPaymentsEvent( 'switch_to_live_account_click', {
-			provider_id: 'woocommerce_payments',
+			provider_id: wooPaymentsProviderId,
+			suggestion_id: wooPaymentsSuggestionId,
+			provider_extension_slug: wooPaymentsExtensionSlug,
 		} );
 
 		setIsActivatingPayments( true );
@@ -69,7 +75,9 @@ export const WooPaymentsPostSandboxAccountSetupModal = ( {
 	const handleContinueStoreSetup = () => {
 		// Record the event when the user clicks on the "Continue Store Setup" button.
 		recordPaymentsEvent( 'continue_store_setup_click', {
-			provider_id: 'woocommerce_payments',
+			provider_id: wooPaymentsProviderId,
+			suggestion_id: wooPaymentsSuggestionId,
+			provider_extension_slug: wooPaymentsExtensionSlug,
 		} );
 
 		setIsContinuingStoreSetup( true );
@@ -101,7 +109,7 @@ export const WooPaymentsPostSandboxAccountSetupModal = ( {
 										components: {
 											link: (
 												<Link
-													href="https://woocommerce.com/document/woopayments/testing-and-troubleshooting/sandbox-mode/"
+													href="https://woocommerce.com/document/woopayments/testing-and-troubleshooting/test-accounts/"
 													target="_blank"
 													rel="noreferrer"
 													type="external"
@@ -119,7 +127,8 @@ export const WooPaymentsPostSandboxAccountSetupModal = ( {
 						<div className="woocommerce-woopayments-modal__content__item-flex">
 							<img
 								src={ WC_ASSET_URL + 'images/icons/store.svg' }
-								alt="store icon"
+								alt=""
+								role="presentation"
 							/>
 							<div className="woocommerce-woopayments-modal__content__item-flex__description">
 								<h3>
@@ -142,7 +151,8 @@ export const WooPaymentsPostSandboxAccountSetupModal = ( {
 									src={
 										WC_ASSET_URL + 'images/icons/dollar.svg'
 									}
-									alt="dollar icon"
+									alt=""
+									role="presentation"
 								/>
 								<div className="woocommerce-woopayments-modal__content__item-flex__description">
 									<h3>
