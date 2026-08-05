@@ -1990,7 +1990,18 @@ class WC_Helper {
 				throw new Exception( __( 'WooCommerce.com API returned an invalid response.', 'woocommerce' ), 422 );
 			}
 
-			$data = self::filter_valid_subscriptions( $data );
+			$subscription_count = count( $data );
+			$data               = self::filter_valid_subscriptions( $data );
+			$invalid_count      = $subscription_count - count( $data );
+			if ( 0 < $invalid_count ) {
+				self::log(
+					sprintf(
+						'Filtered %d malformed subscription entries from the WooCommerce.com API response.',
+						$invalid_count
+					),
+					'warning'
+				);
+			}
 			set_transient( $cache_key, $data, 3 * HOUR_IN_SECONDS );
 
 			// Remove notice after successful API call as it's no longer applicable.
