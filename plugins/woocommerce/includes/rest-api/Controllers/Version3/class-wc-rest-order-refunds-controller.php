@@ -36,7 +36,12 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 	/**
 	 * Register the routes for order refunds, including the refund preview route.
 	 *
+	 * The override is new in 11.1.0 even though the parent method is not, hence
+	 * the tag per the convention for public methods.
+	 *
 	 * @return void
+	 *
+	 * @since 11.1.0
 	 */
 	public function register_routes() {
 		parent::register_routes();
@@ -103,6 +108,8 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 			return $this->prefix_error_code( $preview );
 		}
 
+		$preview = $this->add_preview_additional_fields( $preview, $request );
+
 		/**
 		 * Filters the refund preview data before it is returned.
 		 *
@@ -115,6 +122,34 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 		$preview = apply_filters( 'woocommerce_rest_prepare_order_refund_preview', $preview, $order, $request );
 
 		return rest_ensure_response( $preview );
+	}
+
+	/**
+	 * Populate fields registered for the preview object type into a response.
+	 *
+	 * The stock add_additional_fields_to_object() resolves the object type from
+	 * this controller's item schema (`order_refund`), so it would populate the
+	 * wrong field set; the preview publishes its schema as
+	 * `order_refund_preview` and must populate the fields registered for that
+	 * type. Runs before the response filter so filters see the complete payload.
+	 *
+	 * @param array           $preview Preview response data.
+	 * @param WP_REST_Request $request The request.
+	 *
+	 * @return array
+	 */
+	private function add_preview_additional_fields( array $preview, $request ): array {
+		$additional_fields = $this->get_additional_fields( 'order_refund_preview' );
+
+		foreach ( $additional_fields as $field_name => $field_options ) {
+			if ( empty( $field_options['get_callback'] ) || ! is_callable( $field_options['get_callback'] ) ) {
+				continue;
+			}
+
+			$preview[ $field_name ] = call_user_func( $field_options['get_callback'], $preview, $field_name, $request, 'order_refund_preview' );
+		}
+
+		return $preview;
 	}
 
 	/**

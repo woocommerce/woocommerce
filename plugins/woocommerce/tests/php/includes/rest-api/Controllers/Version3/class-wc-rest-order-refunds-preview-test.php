@@ -64,6 +64,9 @@ class WC_REST_Order_Refunds_Preview_Test extends WC_REST_Unit_Test_Case {
 	public function tearDown(): void {
 		remove_all_filters( 'woocommerce_rest_prepare_order_refund_preview' );
 
+		global $wp_rest_additional_fields;
+		unset( $wp_rest_additional_fields['order_refund_preview'] );
+
 		parent::tearDown();
 	}
 
@@ -778,6 +781,45 @@ class WC_REST_Order_Refunds_Preview_Test extends WC_REST_Unit_Test_Case {
 		} finally {
 			remove_filter( 'wc_get_price_decimals', $three_decimals );
 		}
+	}
+
+	/**
+	 * @testdox A field registered for order_refund_preview is populated in the response and advertised in the schema.
+	 */
+	public function test_preview_registered_rest_field_in_response_and_schema(): void {
+		register_rest_field(
+			'order_refund_preview',
+			'registered_field',
+			array(
+				'get_callback' => function () {
+					return 'registered_value';
+				},
+				'schema'       => array(
+					'description' => 'Test field.',
+					'type'        => 'string',
+				),
+			)
+		);
+
+		$order   = $this->create_order_with_product( 10.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'quantity'     => 1,
+				),
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'registered_value', $response->get_data()['registered_field'] );
+
+		$options = new WP_REST_Request( 'OPTIONS', '/wc/v3/orders/' . $order->get_id() . '/refunds/preview' );
+		$schema  = $this->server->dispatch( $options )->get_data()['schema'];
+		$this->assertArrayHasKey( 'registered_field', $schema['properties'] );
 	}
 
 	/**
