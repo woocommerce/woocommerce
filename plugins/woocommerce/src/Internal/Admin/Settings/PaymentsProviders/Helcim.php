@@ -28,13 +28,7 @@ class Helcim extends PaymentGateway {
 	 */
 	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
-			$sandbox_mode = $this->is_helcim_in_sandbox_mode( $payment_gateway );
-			// Let null results bubble up to the parent class.
-			if ( null !== $sandbox_mode ) {
-				$token_key = $sandbox_mode ? 'sandbox_api_token' : 'live_api_token';
-
-				return '' !== trim( (string) $payment_gateway->get_option( $token_key, '' ) );
-			}
+			return ! wc_string_to_bool( $payment_gateway->needs_setup() );
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
