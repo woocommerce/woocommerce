@@ -4360,7 +4360,7 @@ class PaymentsExtensionSuggestions {
 				'icon'        => plugins_url( 'assets/images/onboarding/icons/mastercard.svg', WC_PLUGIN_FILE ),
 				'plugin'      => array(
 					'_type' => self::PLUGIN_TYPE_WPORG,
-					'slug'  => 'mastercard-merchant-cloud-for-woocommerce',
+					'slug'  => 'mastercard-merchant-cloud',
 				),
 				'links'       => array(
 					array(
@@ -4368,8 +4368,16 @@ class PaymentsExtensionSuggestions {
 						'url'   => 'https://woocommerce.com/products/mastercard-merchant-cloud/',
 					),
 					array(
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+						'url'   => 'https://developer.mastercard.com/terms-of-use',
+					),
+					array(
 						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://woocommerce.com/document/mastercard-merchant-cloud/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=mastercard-merchant-cloud',
 					),
 				),
 			),
