@@ -1269,8 +1269,12 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_update_line_item_with_zero_variation_id_and_current_sku_switches_to_parent(): void {
 		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
 
+		$parent->set_name( 'REST V3 parent product' );
+		$parent->set_tax_class( '' );
+		$parent->save();
 		$variation_sku = 'REST-V3-VARIATION-' . wp_generate_uuid4();
 		$variation->set_sku( $variation_sku );
+		$variation->set_tax_class( 'reduced-rate' );
 		$variation->save();
 
 		list( $order, $item_id ) = $this->create_order_with_variation_line_item( $variation );
@@ -1289,6 +1293,31 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$reloaded = new WC_Order_Item_Product( $item_id );
 		$this->assertSame( 0, $reloaded->get_variation_id(), 'An explicit zero variation ID should clear the existing variation.' );
 		$this->assertSame( $parent->get_id(), $reloaded->get_product_id(), 'The line item should retain the submitted parent product ID.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the parent product.' );
+		$this->assertSame( $parent->get_name(), $reloaded->get_name(), 'The line-item name should be synchronized with the parent product.' );
+		$this->assertSame( $parent->get_tax_class(), $reloaded->get_tax_class(), 'The line-item tax class should be synchronized with the parent product.' );
+	}
+
+	/**
+	 * @testdox PUT /orders with the parent product as variation_id does not restore the existing variation.
+	 */
+	public function test_update_line_item_with_parent_as_variation_id_does_not_restore_variation(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
+
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
+			array(
+				'id'           => $item_id,
+				'product_id'   => $parent->get_id(),
+				'variation_id' => $parent->get_id(),
+			)
+		);
+		$this->assertSame( 200, $response->get_status(), 'The update should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'A parent product ID should not be restored as a variation.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product_id(), 'The line item should retain the parent product ID.' );
 		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the parent product.' );
 	}
 

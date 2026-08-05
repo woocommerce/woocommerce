@@ -959,6 +959,10 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			&& array_key_exists( 'variation_id', $posted )
 			&& 0 === (int) $posted['variation_id'];
 
+		if ( $clear_variation_id && $product instanceof WC_Product_Variation ) {
+			$product = wc_get_product( $current_product_id );
+		}
+
 		if ( $product && $product !== $item->get_product() ) {
 			$item->set_product( $product );
 			if ( $restore_variation_id && $product_item ) {
