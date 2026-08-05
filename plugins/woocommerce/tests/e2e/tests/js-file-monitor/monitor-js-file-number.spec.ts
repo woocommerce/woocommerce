@@ -49,7 +49,8 @@ const pageGroups = [
 			{
 				name: 'Add new product',
 				url: 'wp-admin/post-new.php?post_type=product',
-				expectedCount: 150,
+				// WP 7.1 adds the wp-tooltip and wp-sync core scripts.
+				expectedCount: 152,
 			},
 			{
 				name: 'Analytics page',
@@ -76,10 +77,11 @@ for ( const group of pageGroups ) {
 				// networkidle is needed to ensure all JS files are loaded and avoid race conditions
 				// eslint-disable-next-line playwright/no-networkidle
 				await page.goto( url, { waitUntil: 'networkidle' } );
-				const javascriptFiles = await page.$$eval(
-					'script[src]',
-					( scripts ) => scripts.map( ( s ) => s.src )
-				);
+				const javascriptFiles = await page
+					.locator( 'script[src]' )
+					.evaluateAll( ( scripts ) =>
+						scripts.map( ( script ) => script.src )
+					);
 
 				expect
 					.soft(
