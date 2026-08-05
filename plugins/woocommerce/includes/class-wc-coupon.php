@@ -617,6 +617,15 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	public function set_amount( $amount ) {
 		$amount = wc_format_decimal( $amount );
 
+		// Remove leading zeros from numeric strings (e.g., "050" becomes "50")
+		// to ensure clean display of the coupon amount.
+		if ( '' !== $amount && is_string( $amount ) ) {
+			$amount = ltrim( $amount, '0' );
+			if ( '' === $amount || '.' === $amount[0] ) {
+				$amount = '0' . $amount;
+			}
+		}
+
 		if ( ! is_numeric( $amount ) ) {
 			$amount = 0;
 		}

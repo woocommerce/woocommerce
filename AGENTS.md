@@ -199,6 +199,10 @@ Do not add `default` values to block attributes in `block.json`.
 - Defaults can create subtle conflicts with `theme.json`, block supports, editor controls, deprecations, and migrations.
 - During implementation or review, flag any newly inserted `default` in `block.json`.
 
+### `block.json` Field Types
+
+Consult the [Gutenberg Block Metadata reference](https://developer.wordpress.org/block-editor/reference-guides/block-api/block-metadata/) as the source of truth for `block.json` field types. Several fields (`style`, `editorStyle`, `script`, `viewScript`) accept `string | string[]`, so code that reads them must handle both shapes — don't assume a string.
+
 ## Interactivity API Stores
 
 Most WooCommerce Interactivity API stores are **private by design**. Exception: the `woocommerce/product-filters` store is public for Product Filters inner-block extensibility.

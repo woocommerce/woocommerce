@@ -185,15 +185,17 @@ class ProductCollectionPage {
 		] );
 	}
 
-	async chooseCollectionInTemplate( collection?: Collections ) {
+	async locateCollectionButtonInEditor( collection?: Collections ) {
 		await this.editor.closeGlobalBlockInserter();
 
 		const buttonName = collection
 			? collectionToButtonNameMap[ collection ]
 			: collectionToButtonNameMap.productCatalog;
 
-		const inserterClass = await this.editor.canvas
-			.locator( SELECTORS.collectionPlaceholder )
+		const placeholderSelector = this.editor.canvas.locator(
+			SELECTORS.collectionPlaceholder
+		);
+		const inserterClass = await placeholderSelector
 			.locator(
 				'.wc-blocks-product-collection__collections-grid, .wc-blocks-product-collection__collections-dropdown'
 			)
@@ -204,22 +206,32 @@ class ProductCollectionPage {
 		);
 
 		if ( isDropdown ) {
-			await this.editor.canvas
+			await placeholderSelector
 				.getByRole( 'button', { name: 'Choose collection' } )
 				.click();
 
-			await this.editor.canvas
+			return this.admin.page
 				.locator(
 					'.wc-blocks-product-collection__collections-dropdown-content'
 				)
-				.getByRole( 'button', { name: buttonName, exact: true } )
-				.click();
-		} else {
-			await this.editor.canvas
-				.locator( SELECTORS.collectionPlaceholder )
-				.getByRole( 'button', { name: buttonName, exact: true } )
-				.click();
+				.getByRole( 'button', {
+					name: buttonName,
+					exact: true,
+				} );
 		}
+
+		return placeholderSelector.getByRole( 'button', {
+			name: buttonName,
+			exact: true,
+		} );
+	}
+
+	async chooseCollectionInTemplate( collection?: Collections ) {
+		const collectionButton = await this.locateCollectionButtonInEditor(
+			collection
+		);
+
+		await collectionButton.click();
 	}
 
 	async chooseProductInEditorProductPickerIfAvailable(
@@ -374,7 +386,7 @@ class ProductCollectionPage {
 	}
 
 	async insertProductCollection() {
-		await this.editor.insertBlock( { name: this.BLOCK_SLUG } );
+		await this.editor.insertBlockUsingGlobalInserter( this.BLOCK_NAME );
 	}
 
 	async goToTemplateAndInsertCollection(
@@ -667,7 +679,7 @@ class ProductCollectionPage {
 				await productAttributesContainer
 					.getByLabel( value )
 					.elementHandles()
-			 ).length !== 0;
+			).length !== 0;
 		if ( ! isAttributeValueVisible ) {
 			await productAttributesContainer
 				.locator( `li:has-text("${ attribute }")` )

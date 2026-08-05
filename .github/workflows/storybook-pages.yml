@@ -23,7 +23,7 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                  install: true
+                  install: '@woocommerce/storybook...'
 
             - name: Build Storybook
               run: pnpm --filter='@woocommerce/storybook' build
