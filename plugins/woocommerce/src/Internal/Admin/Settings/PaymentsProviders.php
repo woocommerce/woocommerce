@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\HelioPay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Klarna;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\KlarnaCheckout;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Komoju;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Mastercard;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\MercadoPago;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Mollie;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Monei;
@@ -145,6 +146,7 @@ class PaymentsProviders {
 		'gocardless'                  => GoCardless::class,
 		'kco'                         => KlarnaCheckout::class,
 		'visa_acceptance_solutions_*' => Visa::class,
+		'mastercard_merchant_cloud'   => Mastercard::class,
 		'eway'                        => Eway::class,
 		'dibs_easy'                   => NexiCheckout::class,
 	);
@@ -185,6 +187,7 @@ class PaymentsProviders {
 		ExtensionSuggestions::GOCARDLESS        => GoCardless::class,
 		ExtensionSuggestions::KLARNA_CHECKOUT   => KlarnaCheckout::class,
 		ExtensionSuggestions::VISA              => Visa::class,
+		ExtensionSuggestions::MASTERCARD        => Mastercard::class,
 		ExtensionSuggestions::EWAY              => Eway::class,
 		ExtensionSuggestions::NEXI_CHECKOUT     => NexiCheckout::class,
 	);
