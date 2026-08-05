@@ -7,7 +7,6 @@ import {
 	privateApis as editorPrivateApis,
 	store as editorStore,
 } from '@wordpress/editor';
-// eslint-disable-next-line @woocommerce/dependency-group
 import {
 	// @ts-expect-error privateApis is not in the DT types for @wordpress/block-editor.
 	privateApis as blockEditorPrivateApis,

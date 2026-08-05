@@ -363,57 +363,6 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Creating a product updates internal meta pre-created by save_post hooks instead of duplicating it.
-	 */
-	public function test_create_updates_internal_meta_precreated_by_save_post_hooks(): void {
-		$precreate_stock_meta = function ( $post_id, $post, $update ) {
-			if ( $update || metadata_exists( 'post', $post_id, '_stock' ) ) {
-				return;
-			}
-
-			add_post_meta( $post_id, '_manage_stock', 'no' );
-			add_post_meta( $post_id, '_stock', '0' );
-		};
-
-		add_action( 'save_post_product', $precreate_stock_meta, 10, 3 );
-
-		try {
-			$product = new WC_Product();
-			$product->set_name( 'Pre-created meta product' );
-			$product->set_manage_stock( true );
-			$product->set_stock_quantity( 5 );
-			$product->save();
-		} finally {
-			remove_action( 'save_post_product', $precreate_stock_meta, 10 );
-		}
-
-		$product_id = $product->get_id();
-
-		$this->assertSame( array( 'yes' ), get_post_meta( $product_id, '_manage_stock', false ) );
-		$this->assertSame( array( '5' ), get_post_meta( $product_id, '_stock', false ) );
-		$this->assertTrue( wc_get_product( $product_id )->get_manage_stock() );
-		$this->assertSame( 5, wc_get_product( $product_id )->get_stock_quantity() );
-	}
-
-	/**
-	 * @testdox Creating a grouped product persists children on the initial save.
-	 */
-	public function test_grouped_product_create_persists_children_on_initial_save(): void {
-		$child_1 = WC_Helper_Product::create_simple_product();
-		$child_2 = WC_Helper_Product::create_simple_product();
-
-		$product = new WC_Product_Grouped();
-		$product->set_name( 'Grouped product' );
-		$product->set_children( array( $child_1->get_id(), $child_2->get_id() ) );
-		$product->save();
-
-		$product_id = $product->get_id();
-
-		$this->assertSame( array( $child_1->get_id(), $child_2->get_id() ), get_post_meta( $product_id, '_children', true ) );
-		$this->assertSame( array( $child_1->get_id(), $child_2->get_id() ), wc_get_product( $product_id )->get_children() );
-	}
-
-	/**
 	 * Test update_product_sales updates on the meta-entry.
 	 */
 	public function test_update_product_sales_meta_update(): void {

@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix legacy `wc/v3/reports/sales` and the other legacy admin reports returning empty results on HPOS-authoritative sites with sync disabled by routing `WC_Admin_Report::get_order_report_data()` through the HPOS schema (`wc_orders` / `wc_orders_meta` / `wc_order_operational_data`).

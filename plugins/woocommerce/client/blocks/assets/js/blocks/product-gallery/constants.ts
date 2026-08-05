@@ -10,6 +10,7 @@ export const SELECTORS = {
 	galleryContainer: '.wp-block-woocommerce-product-gallery',
 	largeImageContainer: '.wc-block-product-gallery-large-image__container',
 	largeImageWrapper: '.wc-block-product-gallery-large-image__wrapper',
+	dialogContent: '.wc-block-product-gallery-dialog__content',
 	thumbnail: '.wc-block-product-gallery-thumbnails__thumbnail',
 	thumbnailsScrollable: '.wc-block-product-gallery-thumbnails__scrollable',
 	legacyVariationIdInput: 'input[name="variation_id"]',

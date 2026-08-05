@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\Utils;
 
 use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
+use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 use WP_UnitTestCase;
 
 /**
@@ -11,9 +12,10 @@ use WP_UnitTestCase;
  */
 class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 	/**
-	 * Reset variation gallery feature-flag option leaked by individual tests.
+	 * Reset feature-flag options leaked by individual tests.
 	 */
 	public function tearDown(): void {
+		delete_option( ProductMediaGallery::ENABLE_OPTION_NAME );
 		delete_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME );
 		parent::tearDown();
 	}
@@ -411,5 +413,200 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 		update_post_meta( $attachment_id, '_wp_attached_file', $attached_file );
 
 		return $attachment_id;
+	}
+
+	/**
+	 * Test get_product_gallery_media_data method with legacy gallery images and no featured image.
+	 *
+	 * @testdox Should preserve legacy gallery images when no featured image is set.
+	 */
+	public function test_get_product_gallery_media_data_preserves_legacy_gallery_without_featured_image() {
+		$product  = \WC_Helper_Product::create_simple_product();
+		$image_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'Gallery Image',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+
+		$product->set_image_id( 0 );
+		$product->set_gallery_image_ids( array( $image_id ) );
+		$product->save();
+
+		$media_data = ProductGalleryUtils::get_product_gallery_media_data( $product, 'woocommerce_thumbnail' );
+
+		$this->assertCount( 1, $media_data );
+		$this->assertSame( $image_id, $media_data[0]['id'] );
+		$this->assertSame( 'image', $media_data[0]['media_type'] );
+
+		$product->delete( true );
+		wp_delete_attachment( $image_id, true );
+	}
+
+	/**
+	 * Test get_product_gallery_media_data method with composed image and video items.
+	 *
+	 * @testdox Should include positioned video items in product gallery media data.
+	 */
+	public function test_get_product_gallery_media_data_supports_videos() {
+		update_option( ProductMediaGallery::ENABLE_OPTION_NAME, 'yes' );
+
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$image_id  = wp_insert_attachment(
+			array(
+				'post_title'     => 'Gallery Image',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$poster_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'Video Poster',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$video_id  = wp_insert_attachment(
+			array(
+				'post_title'     => 'Product Video',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'video/mp4',
+				'guid'           => 'https://example.com/product-video.mp4',
+			)
+		);
+
+		update_post_meta( $video_id, '_thumbnail_id', $poster_id );
+
+		$product->set_gallery_image_ids( array( $image_id ) );
+		$product->save();
+
+		ProductMediaGallery::set_stored_video_gallery_items(
+			$product,
+			array(
+				array(
+					'source_type' => 'attachment',
+					'id'          => $video_id,
+					'position'    => 0,
+				),
+			)
+		);
+
+		$media_data = ProductGalleryUtils::get_product_gallery_media_data( $product, 'woocommerce_thumbnail' );
+
+		$this->assertCount( 2, $media_data );
+		$this->assertSame( $video_id, $media_data[0]['id'] );
+		$this->assertSame( 'video', $media_data[0]['media_type'] );
+		$this->assertSame( $poster_id, $media_data[0]['poster_id'] );
+		$this->assertSame( 'https://example.com/product-video.mp4', $media_data[0]['video_src'] );
+		$this->assertSame( array(), $media_data[0]['settings'] );
+		$this->assertSame( $image_id, $media_data[1]['id'] );
+		$this->assertSame( 'image', $media_data[1]['media_type'] );
+
+		$product->delete( true );
+		wp_delete_attachment( $image_id, true );
+		wp_delete_attachment( $poster_id, true );
+		wp_delete_attachment( $video_id, true );
+	}
+
+	/**
+	 * Test get_product_gallery_media_data method with stored gallery videos.
+	 *
+	 * @testdox Should keep the featured image before positioned gallery videos.
+	 */
+	public function test_get_product_gallery_media_data_prepends_featured_image_to_gallery_only_media() {
+		update_option( ProductMediaGallery::ENABLE_OPTION_NAME, 'yes' );
+
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$featured_image_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'Featured Image',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$video_id          = wp_insert_attachment(
+			array(
+				'post_title'     => 'Product Video',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'video/mp4',
+				'guid'           => 'https://example.com/product-video.mp4',
+			)
+		);
+
+		$product->set_image_id( $featured_image_id );
+		ProductMediaGallery::set_stored_video_gallery_items(
+			$product,
+			array(
+				array(
+					'source_type' => 'attachment',
+					'id'          => $video_id,
+					'position'    => 0,
+					'poster_id'   => $featured_image_id,
+				),
+			)
+		);
+
+		$media_data = ProductGalleryUtils::get_product_gallery_media_data( $product, 'woocommerce_thumbnail' );
+
+		$this->assertCount( 2, $media_data );
+		$this->assertSame( $featured_image_id, $media_data[0]['id'] );
+		$this->assertSame( 'image', $media_data[0]['media_type'] );
+		$this->assertSame( $video_id, $media_data[1]['id'] );
+		$this->assertSame( 'video', $media_data[1]['media_type'] );
+
+		$product->delete( true );
+		wp_delete_attachment( $featured_image_id, true );
+		wp_delete_attachment( $video_id, true );
+	}
+
+	/**
+	 * Test get_product_gallery_media_count method with stored videos while the feature is disabled.
+	 *
+	 * @testdox Should ignore stored video media when product gallery videos are disabled.
+	 */
+	public function test_get_product_gallery_media_count_ignores_stored_videos_when_feature_disabled() {
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$featured_image_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'Featured Image',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$video_id          = wp_insert_attachment(
+			array(
+				'post_title'     => 'Product Video',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'video/mp4',
+				'guid'           => 'https://example.com/product-video.mp4',
+			)
+		);
+
+		$product->set_image_id( $featured_image_id );
+		ProductMediaGallery::set_stored_video_gallery_items(
+			$product,
+			array(
+				array(
+					'source_type' => 'attachment',
+					'id'          => $video_id,
+					'position'    => 0,
+				),
+			)
+		);
+
+		$media_data = ProductGalleryUtils::get_product_gallery_media_data( $product, 'woocommerce_thumbnail' );
+
+		$this->assertSame( 1, ProductGalleryUtils::get_product_gallery_media_count( $product ) );
+		$this->assertCount( 1, $media_data );
+		$this->assertSame( $featured_image_id, $media_data[0]['id'] );
+		$this->assertSame( 'image', $media_data[0]['media_type'] );
+
+		$product->delete( true );
+		wp_delete_attachment( $featured_image_id, true );
+		wp_delete_attachment( $video_id, true );
 	}
 }

@@ -20,6 +20,17 @@ export class Editor extends CoreEditor {
 		this.wpCoreVersion = wpCoreVersion;
 	}
 
+	/**
+	 * Returns a locator for Custom HTML block content in the Site Editor canvas.
+	 * WordPress 7.0 renders the content inside an additional iframe.
+	 * WordPress 6.9 and 7.1+ render it directly in the editor canvas.
+	 */
+	getCustomHtmlBlockContentLocator( content: string ) {
+		return this.wpCoreVersion === 7
+			? this.canvas.frameLocator( 'iframe' ).getByText( content )
+			: this.canvas.getByText( content );
+	}
+
 	async getBlockByName( name: string ) {
 		const blockSelector = `[data-type="${ name }"]`;
 		const canvasLocator = this.page
@@ -118,24 +129,20 @@ export class Editor extends CoreEditor {
 	 * Search for a template or template part in the Site Editor.
 	 */
 	async searchTemplate( { templateName }: { templateName: string } ) {
-		const templateCards = this.page.locator(
-			'.dataviews-view-grid .dataviews-view-grid__card'
-		);
-		const templatesBeforeSearch = await templateCards.count();
-
 		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
 
 		await expect(
 			this.page.getByRole( 'button', { name: 'Reset Search' } )
 		).toBeVisible();
 		await expect( this.page.getByLabel( 'No results' ) ).toBeHidden();
-
-		// Wait for the grid to update with fewer items than before.
-		// Using expect.poll() for a retrying assertion since toHaveCount
-		// requires an exact number.
-		await expect
-			.poll( () => templateCards.count(), { timeout: 5000 } )
-			.toBeLessThan( templatesBeforeSearch );
+		await expect(
+			this.page
+				.getByRole( 'button', {
+					name: templateName,
+					exact: true,
+				} )
+				.first()
+		).toBeVisible();
 	}
 
 	/**
@@ -262,14 +269,25 @@ export class Editor extends CoreEditor {
 			.getByRole( 'button', { name: 'Dismiss this notice' } )
 			.filter( { hasText: /(updated|published)\./ } );
 
-		const staleSaveNoticeCount = await saveNoticeDismissButton.count();
-		for ( let i = 0; i < staleSaveNoticeCount; i++ ) {
-			const staleSaveNotice = saveNoticeDismissButton.first();
-			if ( ! ( await staleSaveNotice.isVisible() ) ) {
-				break;
-			}
-			await staleSaveNotice.click();
+		// Dismiss any save notices left over from earlier saves. The success
+		// assertion at the end reuses this same locator, so a leftover notice
+		// must not survive into it — converge to zero instead of snapshotting
+		// the count once and breaking on the first invisible notice. The loop
+		// is bounded so a notice that regenerates or refuses to dismiss fails
+		// via the assertion below rather than spinning.
+		for (
+			let i = 0;
+			i < 10 && ( await saveNoticeDismissButton.first().isVisible() );
+			i++
+		) {
+			await saveNoticeDismissButton.first().click();
 		}
+		await expect( saveNoticeDismissButton ).toHaveCount( 0 );
+
+		// Wait for the top bar to render its primary action before the
+		// instantaneous pick below; otherwise an unrendered bar falls through
+		// to a Publish button that never exists in the site editor.
+		await expect( saveButton.or( publishButton ).first() ).toBeVisible();
 
 		const buttonToClick = ( await saveButton.isVisible() )
 			? saveButton

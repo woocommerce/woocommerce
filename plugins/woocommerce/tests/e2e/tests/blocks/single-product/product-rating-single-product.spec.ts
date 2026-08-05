@@ -1,16 +1,16 @@
 /**
  * External dependencies
  */
-import { Editor, test as base, expect } from '@woocommerce/e2e-utils';
-
-/**
- * Internal dependencies
- */
+import {
+	Editor,
+	test as base,
+	expect,
+	getPostIdBySlug,
+	wpCLI,
+} from '@woocommerce/e2e-utils';
 
 const blockData = {
-	name: 'Product',
 	slug: 'woocommerce/single-product',
-	product: 'Hoodie',
 	productSlug: 'hoodie',
 };
 
@@ -52,22 +52,12 @@ const test = base.extend< { blockUtils: BlockUtils } >( {
 
 test.describe( `${ blockData.slug } Block`, () => {
 	test( 'Product Rating block is not visible if ratings are disabled for product', async ( {
-		admin,
 		page,
 		blockUtils,
 	} ) => {
 		await test.step( `Disable reviews for ${ blockData.productSlug }`, async () => {
-			await page.goto( `/products/${ blockData.productSlug }` );
-			await page.click( 'text=Edit product' );
-			await page.getByRole( 'link', { name: 'Inventory' } ).click();
-			await page.getByRole( 'link', { name: 'Advanced' } ).click();
-			await page.waitForSelector( 'text=Enable reviews' );
-			await admin.page
-				.getByRole( 'checkbox', {
-					name: 'Enable reviews',
-				} )
-				.uncheck();
-			await page.getByRole( 'button', { name: 'Update' } ).click();
+			const productId = await getPostIdBySlug( blockData.productSlug );
+			await wpCLI( `post update ${ productId } --comment_status=closed` );
 		} );
 
 		await test.step( `Insert the block in a post and visit it`, async () => {
@@ -79,7 +69,7 @@ test.describe( `${ blockData.slug } Block`, () => {
 
 		await expect(
 			page.locator( '.wc-block-components-product-rating' )
-		).not.toBeVisible();
+		).toBeHidden();
 	} );
 
 	test( 'Product Rating block is not visible if ratings are disabled globally in the store', async ( {
@@ -108,6 +98,6 @@ test.describe( `${ blockData.slug } Block`, () => {
 
 		await expect(
 			page.locator( '.wc-block-components-product-rating' )
-		).not.toBeVisible();
+		).toBeHidden();
 	} );
 } );

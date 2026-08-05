@@ -628,7 +628,7 @@ function get_woocommerce_currency_symbols() {
 			'MKD' => '&#x434;&#x435;&#x43d;',
 			'MMK' => 'Ks',
 			'MNT' => '&#x20ae;',
-			'MOP' => 'P',
+			'MOP' => 'MOP&#36;',
 			'MRU' => 'UM',
 			'MUR' => '&#x20a8;',
 			'MVR' => '.&#x783;',
@@ -696,7 +696,8 @@ function get_woocommerce_currency_symbols() {
 			'XPF' => 'XPF',
 			'YER' => '&#xfdfc;',
 			'ZAR' => '&#82;',
-			'ZMW' => 'ZK',
+			// CLDR uses K for en-ZM and ZK for its narrow representation.
+			'ZMW' => 'K',
 		)
 	);
 

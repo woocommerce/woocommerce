@@ -321,4 +321,93 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		$actual_final_option_value = get_option( 'woocommerce_attribute_lookup_enabled' );
 		$this->assertEquals( $expected_final_option_value, $actual_final_option_value );
 	}
+
+	/**
+	 * @testdox The 'regenerate' tool callback runs without requiring a nonce (e.g. when invoked via the REST API).
+	 */
+	public function test_regenerate_tool_callback_runs_without_a_nonce() {
+		global $wpdb;
+
+		// Simulate a non-admin-page invocation (REST API / WP-CLI), where no 'debug_action' nonce is present.
+		unset( $_REQUEST['_wpnonce'] );
+
+		// Ensure the full-table path is exercised, not the admin product-selector branch.
+		unset( $_REQUEST['regenerate_product_attribute_lookup_data_product_id'] );
+
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+		$wpdb->query( 'DROP TABLE IF EXISTS ' . $this->lookup_table_name );
+		$wpdb->query( 'CREATE TABLE ' . $this->lookup_table_name . ' ( foo int );' );
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+
+		$sut   = $this->get_sut_for_existing_lookup_table();
+		$tools = $sut->add_initiate_regeneration_entry_to_tools_array( array() );
+
+		$message = $tools['regenerate_product_attributes_lookup_table']['callback']();
+
+		$this->assertStringContainsString( 'regenerating', $message, 'The regenerate tool must run without a nonce.' );
+	}
+
+	/**
+	 * @testdox The 'abort' tool callback runs without requiring a nonce (e.g. when invoked via the REST API).
+	 */
+	public function test_abort_tool_callback_runs_without_a_nonce() {
+		// Simulate a non-admin-page invocation (REST API / WP-CLI), where no 'debug_action' nonce is present.
+		unset( $_REQUEST['_wpnonce'] );
+
+		$sut = $this->get_sut_for_existing_lookup_table( true );
+
+		$tools = $sut->add_initiate_regeneration_entry_to_tools_array( array() );
+
+		$message = $tools['abort_product_attributes_lookup_table_regeneration']['callback']();
+
+		$this->assertStringContainsString( 'aborted', $message, 'The abort tool must run without a nonce.' );
+	}
+
+	/**
+	 * @testdox The 'resume' tool callback runs without requiring a nonce (e.g. when invoked via the REST API).
+	 */
+	public function test_resume_tool_callback_runs_without_a_nonce() {
+		// Simulate a non-admin-page invocation (REST API / WP-CLI), where no 'debug_action' nonce is present.
+		unset( $_REQUEST['_wpnonce'] );
+
+		$sut = $this->get_sut_for_existing_lookup_table( false, true );
+
+		$tools = $sut->add_initiate_regeneration_entry_to_tools_array( array() );
+
+		$message = $tools['resume_product_attributes_lookup_table_regeneration']['callback']();
+
+		$this->assertStringContainsString( 'resumed', $message, 'The resume tool must run without a nonce.' );
+	}
+
+	/**
+	 * Build a DataRegenerator whose data store reports that the lookup table exists, so that the
+	 * Status - Tools entries (and their callbacks) get registered. The real existence check relies
+	 * on SHOW TABLES, which doesn't list the temporary tables that PHPUnit creates.
+	 *
+	 * @param bool $regeneration_in_progress Whether to flag a regeneration as currently in progress.
+	 * @param bool $regeneration_aborted     Whether to flag the last regeneration as aborted.
+	 * @return DataRegenerator
+	 */
+	private function get_sut_for_existing_lookup_table( bool $regeneration_in_progress = false, bool $regeneration_aborted = false ): DataRegenerator {
+		// phpcs:disable Squiz.Commenting
+		$data_store = new class() extends LookupDataStore {
+			public function check_lookup_table_exists() {
+				return true;
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+		$container->replace( LookupDataStore::class, $data_store );
+
+		if ( $regeneration_in_progress ) {
+			$data_store->set_regeneration_in_progress_flag();
+		}
+		if ( $regeneration_aborted ) {
+			$data_store->set_regeneration_aborted_flag();
+		}
+
+		return $container->get( DataRegenerator::class );
+	}
 }

@@ -37,6 +37,8 @@ use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
+use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
@@ -2832,17 +2834,21 @@ function wc_update_860_remove_recommended_marketing_plugins_transient() {
  * @return void
  */
 function wc_update_870_prevent_listing_of_transient_files_directory() {
-	global $wp_filesystem;
-
 	$default_transient_files_dir = untrailingslashit( wp_upload_dir()['basedir'] ) . '/woocommerce_transient_files';
 	if ( ! is_dir( $default_transient_files_dir ) ) {
 		return;
 	}
 
-	require_once ABSPATH . 'wp-admin/includes/file.php';
-	\WP_Filesystem();
-	$wp_filesystem->put_contents( $default_transient_files_dir . '/.htaccess', 'deny from all' );
-	$wp_filesystem->put_contents( $default_transient_files_dir . '/index.html', '' );
+	// Use a direct filesystem: the transient files directory is inside wp-content/uploads and is
+	// web-server writable, so honoring FS_METHOD is unnecessary and breaks on FTP-without-credentials setups.
+	try {
+		$wp_filesystem = FilesystemUtil::get_wp_filesystem_direct();
+		$wp_filesystem->put_contents( $default_transient_files_dir . '/.htaccess', 'deny from all' );
+		$wp_filesystem->put_contents( $default_transient_files_dir . '/index.html', '' );
+	} catch ( \Exception $exception ) {
+		// Best-effort: the directory remains usable without the no-listing files, but log so the failure leaves a trace.
+		error_log( 'WooCommerce: wc_update_870 could not write transient files directory protection files: ' . $exception->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+	}
 }
 
 /**
@@ -3546,6 +3552,23 @@ function wc_update_1090_remove_task_list_reminder_bar_hidden_option() {
 }
 
 /**
+ * Remove the deprecated push_notifications feature option from the database.
+ *
+ * The push_notifications feature flag was deprecated in 10.9.2 and is now always enabled.
+ * The option is no longer needed as FeaturesUtil::feature_is_enabled('push_notifications')
+ * returns the deprecated_value directly without reading from the database. Removing it also
+ * clears the stale "no" value that wc_update_1050_enable_autoload_options() persisted for
+ * stores upgrading across the 10.5.0 boundary.
+ *
+ * @since 10.9.2
+ *
+ * @return void
+ */
+function wc_update_10902_remove_deprecated_push_notifications_option(): void {
+	delete_option( 'woocommerce_feature_push_notifications_enabled' );
+}
+
+/**
  * Set the stored value of the point_of_sale feature flag to enabled.
  *
  * The feature is deprecated as of 11.0.0 and always enabled in core, but the WooCommerce
@@ -3558,4 +3581,15 @@ function wc_update_1090_remove_task_list_reminder_bar_hidden_option() {
  */
 function wc_update_1100_enable_point_of_sale_feature() {
 	update_option( 'woocommerce_feature_point_of_sale_enabled', 'yes' );
+}
+
+/**
+ * Delete the cached dashboard out-of-stock product count.
+ *
+ * @since 11.1.0
+ *
+ * @return void
+ */
+function wc_update_1110_delete_dashboard_outofstock_count_transient() {
+	delete_transient( ProductUtil::OUTOFSTOCK_COUNT_TRANSIENT );
 }

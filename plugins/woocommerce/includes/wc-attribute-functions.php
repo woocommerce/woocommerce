@@ -145,6 +145,22 @@ function wc_attribute_taxonomy_name( $attribute_name ) {
 }
 
 /**
+ * Get the maximum byte length allowed for a product attribute slug.
+ *
+ * WordPress's register_taxonomy() rejects taxonomy names longer than 32 bytes
+ * (see wp-includes/taxonomy.php), and WooCommerce prefixes attribute slugs with
+ * 'pa_'. That leaves the slug itself a budget of 32 bytes minus the prefix length.
+ * The limit is measured in bytes, not characters: multibyte characters (Cyrillic,
+ * Chinese, etc.) consume 2-4 bytes each.
+ *
+ * @since 11.0.0
+ * @return int Maximum attribute slug length, in bytes.
+ */
+function wc_get_attribute_slug_max_byte_length() {
+	return 32 - strlen( 'pa_' );
+}
+
+/**
  * Get the attribute name used when storing values in post meta.
  *
  * @since 2.6.0
@@ -508,13 +524,24 @@ function wc_create_attribute( $args ) {
 	if ( empty( $args['slug'] ) ) {
 		$slug = wc_sanitize_taxonomy_name( $args['name'] );
 	} else {
-		$slug = preg_replace( '/^pa\_/', '', wc_sanitize_taxonomy_name( $args['slug'] ) );
+		$slug = (string) preg_replace( '/^pa\_/', '', wc_sanitize_taxonomy_name( $args['slug'] ) );
 	}
 
-	// Validate slug.
-	if ( strlen( $slug ) > 28 ) {
-		/* translators: %s: attribute slug */
-		return new WP_Error( 'invalid_product_attribute_slug_too_long', sprintf( __( 'Slug "%s" is too long (28 characters max). Shorten it, please.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
+	// Validate slug length against the byte budget left by WordPress's 32-byte taxonomy
+	// name limit once the 'pa_' prefix is accounted for (see wc_get_attribute_slug_max_byte_length()).
+	$slug_byte_length = strlen( $slug );
+	$max_byte_length  = wc_get_attribute_slug_max_byte_length();
+	if ( $slug_byte_length > $max_byte_length ) {
+		return new WP_Error(
+			'invalid_product_attribute_slug_too_long',
+			/* translators: %s: attribute slug */
+			sprintf( __( 'Slug "%s" is too long. Please use a shorter slug.', 'woocommerce' ), $slug ),
+			array(
+				'status'                 => 400,
+				'slug_byte_length'       => $slug_byte_length,
+				'slug_byte_length_limit' => $max_byte_length,
+			)
+		);
 	} elseif ( wc_check_if_attribute_name_is_reserved( $slug ) ) {
 		/* translators: %s: attribute slug */
 		return new WP_Error( 'invalid_product_attribute_slug_reserved_name', sprintf( __( 'Slug "%s" is not allowed because it is a reserved term. Change it, please.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );

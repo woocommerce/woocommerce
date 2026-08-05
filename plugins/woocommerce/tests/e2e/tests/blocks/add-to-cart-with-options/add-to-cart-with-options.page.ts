@@ -15,6 +15,30 @@ class AddToCartWithOptionsPage {
 	private editor: Editor;
 	BLOCK_SLUG = 'woocommerce/add-to-cart-with-options';
 	BLOCK_NAME = 'Add to Cart + Options (Beta)';
+	EDITOR_INNER_BLOCKS = {
+		simple: [
+			'Product Stock Indicator',
+			'Product Quantity (Beta)',
+			'Add to Cart Button',
+		],
+		external: [ 'Add to Cart Button' ],
+		variable: [
+			'Variation Selector (Beta)',
+			'Variation Selector: Attribute Name (Beta)',
+			'Variation Selector: Template (Beta)',
+			'Variation Description (Beta)',
+			'Product Stock Indicator',
+			'Product Quantity (Beta)',
+			'Add to Cart Button',
+		],
+		grouped: [
+			'Grouped Product Selector (Beta)',
+			'Grouped Product: Template (Beta)',
+			'Grouped Product: Item Selector (Beta)',
+			'Grouped Product: Item Label (Beta)',
+			'Product Price',
+		],
+	};
 
 	constructor( {
 		page,
@@ -56,11 +80,25 @@ class AddToCartWithOptionsPage {
 				state: 'hidden',
 			} );
 
-		await addToCartWithOptionsBlock
-			.locator( '.components-spinner' )
-			.waitFor( {
-				state: 'hidden',
-			} );
+		await expect(
+			addToCartWithOptionsBlock.locator( '.components-spinner' )
+		).toHaveCount( 0 );
+	}
+
+	async expectEditorInnerBlocks(
+		productType: 'simple' | 'external' | 'grouped' | 'variable'
+	) {
+		const blockNames = this.EDITOR_INNER_BLOCKS[ productType ];
+		const addToCartWithOptionsBlock = await this.editor.getBlockByName(
+			this.BLOCK_SLUG
+		);
+		for ( const blockName of blockNames ) {
+			await expect(
+				addToCartWithOptionsBlock
+					.getByLabel( `Block: ${ blockName }` )
+					.first()
+			).toBeVisible();
+		}
 	}
 
 	async insertParagraphInTemplatePart( content: string ) {
