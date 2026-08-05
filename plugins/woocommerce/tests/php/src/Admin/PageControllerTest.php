@@ -1260,9 +1260,6 @@ class PageControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertTrue( $result['is_registered_page'], 'A matching page should be reported through wc_admin_is_registered_page().' );
 		$this->assertIsArray( $current_page, 'A matching registered page should be detected.' );
-		if ( ! is_array( $current_page ) ) {
-			return;
-		}
 		$this->assertSame( $expected_page_id, $current_page['id'] );
 	}
 
