@@ -41,13 +41,6 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	protected $store_admin_id;
 
 	/**
-	 * The previous store currency value to restore in tearDown.
-	 *
-	 * @var string|null
-	 */
-	private $prev_currency;
-
-	/**
 	 * Set up test.
 	 */
 	public function setUp(): void {
@@ -55,9 +48,6 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 
 		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $this->store_admin_id );
-
-		// Save the current currency to restore in tearDown.
-		$this->prev_currency = get_option( 'woocommerce_currency', null );
 
 		$this->mock_extension_suggestions = $this->getMockBuilder( ExtensionSuggestions::class )
 			->disableOriginalConstructor()
@@ -80,11 +70,6 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		WC()->payment_gateways()->init();
 		if ( isset( $this->sut ) ) {
 			$this->sut->clear_cache();
-		}
-
-		// Restore the previous currency to prevent test leakage.
-		if ( null !== $this->prev_currency ) {
-			update_option( 'woocommerce_currency', $this->prev_currency );
 		}
 
 		parent::tearDown();
@@ -446,6 +431,25 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			PaymentsProviders\Stripe::class,
 			$provider,
 			'Should return Stripe provider for wildcard match'
+		);
+	}
+
+	/**
+	 * Test getting payment gateway provider instance returns the KOMOJU provider for a per-method wildcard match.
+	 */
+	public function test_get_payment_gateway_provider_instance_returns_komoju_provider_for_wildcard() {
+		// Arrange - komoju_* pattern matches komoju_konbini, and should return the Komoju provider,
+		// same as the exact 'komoju' gateway ID.
+		$gateway_id = 'komoju_konbini';
+
+		// Act.
+		$provider = $this->sut->get_payment_gateway_provider_instance( $gateway_id );
+
+		// Assert.
+		$this->assertInstanceOf(
+			PaymentsProviders\Komoju::class,
+			$provider,
+			'Should return Komoju provider for wildcard match'
 		);
 	}
 
@@ -865,7 +869,13 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		// Assert that the custom provider supplied details are returned.
 		$this->assertSame( 'mollie_wc_gateway_bogus', $gateway_details['id'] );
 		// This settings URL is provided by the custom provider.
-		$this->assertSame( admin_url( 'admin.php?page=wc-settings&tab=mollie_settings&section=mollie_payment_methods' ), $gateway_details['management']['_links']['settings']['href'] );
+		$this->assertSame(
+			add_query_arg(
+				array( 'from' => Payments::FROM_PAYMENTS_SETTINGS ),
+				admin_url( 'admin.php?page=wc-settings&tab=mollie_settings&section=mollie_payment_methods' )
+			),
+			$gateway_details['management']['_links']['settings']['href']
+		);
 		$this->assertTrue( $gateway_details['state']['test_mode'] ); // It should be in test mode because of the DB options. The custom provider logic handles this.
 
 		// Clean up.

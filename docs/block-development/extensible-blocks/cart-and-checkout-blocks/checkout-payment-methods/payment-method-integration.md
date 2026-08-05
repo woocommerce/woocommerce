@@ -259,7 +259,7 @@ registerPaymentMethod( {
 
 ## Props Fed to Payment Method Nodes
 
-A big part of the payment method integration is the interface that is exposed for payment methods to use via props when the node provided is cloned and rendered on block mount. While all the props are listed below, you can find more details about what the props reference, their types etc via the [typedefs described in this file](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/types/type-defs/payment-method-interface.ts).
+A big part of the payment method integration is the interface that is exposed for payment methods to use via props when the node provided is cloned and rendered on block mount. While all the props are listed below, you can find more details about what the props reference, their types etc via the [typedefs described in this file](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/packages/public-api/types/type-defs/payment-method-interface.ts).
 
 | Property | Type | Description |
 | --- | --- | --- |
