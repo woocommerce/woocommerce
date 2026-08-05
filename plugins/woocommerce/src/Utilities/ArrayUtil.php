@@ -367,4 +367,16 @@ class ArrayUtil {
 		}
 		return true;
 	}
+
+	/**
+	 * Get the unique truthy values of an array, reindexed.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param array $items The array to process.
+	 * @return array The unique truthy values, with sequential integer keys.
+	 */
+	public static function unique_truthy_values( array $items ): array {
+		return array_values( array_unique( array_filter( $items ) ) );
+	}
 }

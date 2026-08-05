@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Utilities;
 
@@ -450,5 +451,37 @@ class ArrayUtilTest extends \WC_Unit_Test_Case {
 
 		$actual = ArrayUtil::group_by_column( $data, 'type', true );
 		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * @testdox `unique_truthy_values` removes falsy values and duplicates, and reindexes the result.
+	 */
+	public function test_unique_truthy_values_filters_dedupes_and_reindexes() {
+		$input = array(
+			5  => 403,
+			7  => 0,
+			9  => 404,
+			11 => 403,
+			13 => null,
+			15 => '',
+			17 => false,
+			19 => 405,
+		);
+
+		$actual = ArrayUtil::unique_truthy_values( $input );
+
+		$this->assertEquals( array( 403, 404, 405 ), $actual );
+	}
+
+	/**
+	 * @testdox `unique_truthy_values` returns an empty array when all values are falsy or the input is empty.
+	 *
+	 * @testWith [[]]
+	 *           [[0, null, "", false]]
+	 *
+	 * @param array $input The input array to test.
+	 */
+	public function test_unique_truthy_values_returns_empty_array_when_nothing_survives( $input ) {
+		$this->assertEquals( array(), ArrayUtil::unique_truthy_values( $input ) );
 	}
 }
