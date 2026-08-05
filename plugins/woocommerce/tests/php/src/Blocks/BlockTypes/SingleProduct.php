@@ -147,4 +147,70 @@ class SingleProduct extends \WP_UnitTestCase {
 			$this->delete_product_with_gallery_attachments( $data );
 		}
 	}
+
+	/**
+	 * @testdox Password-protected products render the password form instead of product content.
+	 */
+	public function test_password_protected_product_renders_password_form() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_post_password( 'secret' );
+		$product->save();
+
+		try {
+			$markup = do_blocks(
+				sprintf(
+					'<!-- wp:woocommerce/single-product {"productId":%d} -->
+<div class="wp-block-woocommerce-single-product"><p>VISIBLE_PRODUCT_CONTENT</p></div>
+<!-- /wp:woocommerce/single-product -->',
+					$product->get_id()
+				)
+			);
+
+			$this->assertStringContainsString(
+				'This content is password-protected',
+				$markup,
+				'Password-protected products should render the password form.'
+			);
+			$this->assertStringNotContainsString(
+				'VISIBLE_PRODUCT_CONTENT',
+				$markup,
+				'Password-protected products should not render block content.'
+			);
+			$this->assertStringNotContainsString(
+				'?product=' . $product->get_slug(),
+				$markup,
+				'Password form should redirect to the current page instead of the product page.'
+			);
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+		}
+	}
+
+	/**
+	 * @testdox Draft products that are not viewable render no content.
+	 */
+	public function test_draft_product_renders_nothing() {
+		wp_set_current_user( 0 );
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'status' => 'draft' ) );
+
+		try {
+			$markup = do_blocks(
+				sprintf(
+					'<!-- wp:woocommerce/single-product {"productId":%d} -->
+<div class="wp-block-woocommerce-single-product"><p>VISIBLE_PRODUCT_CONTENT</p></div>
+<!-- /wp:woocommerce/single-product -->',
+					$product->get_id()
+				)
+			);
+
+			$this->assertSame(
+				'',
+				$markup,
+				'Draft products should not render any Single Product block output.'
+			);
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+		}
+	}
 }

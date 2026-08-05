@@ -187,6 +187,8 @@ final class ProductCountCacheServiceTest extends \WC_Unit_Test_Case {
 	 * @testdox Source status count is decremented correctly when only the source slot is warm and the destination slot is cold.
 	 */
 	public function test_count_decremented_when_only_source_status_is_cached(): void {
+		$this->markTestSkipped( 'Until persistent counters reactivated, skip this test.' );
+
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_status( ProductStatus::DRAFT );
 		$product->save();
@@ -211,6 +213,8 @@ final class ProductCountCacheServiceTest extends \WC_Unit_Test_Case {
 	 * @testdox Final status is not double-incremented when a plugin permanently changes product status during creation.
 	 */
 	public function test_count_not_double_incremented_on_new_product_with_mid_creation_status_change(): void {
+		$this->markTestSkipped( 'Until persistent counters reactivated, skip this test.' );
+
 		// Warm all status slots and record the publish count before the test.
 		$this->product_util->get_counts_for_type( 'product' );
 		$publish_before = $this->product_cache->get( 'product', array( ProductStatus::PUBLISH ) )[ ProductStatus::PUBLISH ];
@@ -242,6 +246,8 @@ final class ProductCountCacheServiceTest extends \WC_Unit_Test_Case {
 	 * @testdox Source status count is not corrupted when a plugin permanently changes product status during creation.
 	 */
 	public function test_source_count_not_corrupted_on_new_product_with_mid_creation_status_change(): void {
+		$this->markTestSkipped( 'Until persistent counters reactivated, skip this test.' );
+
 		// Warm all status slots and record both counts before the test.
 		$this->product_util->get_counts_for_type( 'product' );
 		$draft_before   = $this->product_cache->get( 'product', array( ProductStatus::DRAFT ) )[ ProductStatus::DRAFT ];
@@ -285,6 +291,8 @@ final class ProductCountCacheServiceTest extends \WC_Unit_Test_Case {
 	 * @testdox Cache is populated when it is cold and an external object cache is active.
 	 */
 	public function test_prime_cache_if_cold_when_cache_is_cold(): void {
+		$this->markTestSkipped( 'Until persistent counters reactivated, skip this test.' );
+
 		global $_wp_using_ext_object_cache;
 		$_before                    = $_wp_using_ext_object_cache;
 		$_wp_using_ext_object_cache = true; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
