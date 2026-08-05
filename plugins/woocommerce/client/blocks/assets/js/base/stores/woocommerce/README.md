@@ -5,7 +5,7 @@ This folder contains the Interactivity API (iAPI) stores that WooCommerce blocks
 Stores in this folder:
 
 -   [`woocommerce/products`](#woocommerceproducts-store) — server-populated cache of product and variation data in Store API format.
--   [`woocommerce/cart`](#woocommercecart-store) — cart state and actions (with mutation batching for performance). `addCartItem` resolves with a structured per-call outcome (`AddCartItemOutcome`) instead of `void` — see below.
+-   [`woocommerce/cart`](#woocommercecart-store) — cart state and actions (with mutation batching for performance). `addCartItem` resolves with a structured per-call outcome (`AddCartItemOutcome`) instead of `void`, and the store's cross-cutting side effects (sync event, legacy event, screen-reader announcement) fire exactly once per batch cycle, not once per request — see below.
 
 ---
 
@@ -237,7 +237,7 @@ For variable products, `findProduct` returns `null` when no variation matches th
 
 ## `woocommerce/cart` store
 
-The `woocommerce` Interactivity API store (`base/stores/woocommerce/cart.ts`) holds cart state and actions, with mutation batching for performance. This section only covers the `addCartItem` outcome contract below — it is not a write-up of the store's full state shape, its other actions, or the mutation batcher's internals.
+The `woocommerce` Interactivity API store (`base/stores/woocommerce/cart.ts`) holds cart state and actions, with mutation batching for performance. This section covers the `addCartItem` outcome contract and the once-per-cycle cross-cutting side effects below — it is not a write-up of the store's full state shape, its other actions, or the rest of the mutation batcher's internals.
 
 ### The `addCartItem` outcome contract
 
@@ -289,3 +289,27 @@ if ( ! outcome.success ) {
 **`removeCartItem` and `batchAddCartItems` do not share this contract.** Both remain typed `Promise<void>` and swallow their own errors the way `addCartItem` used to. Don't assume parity when touching either of them — extending this contract to other cart actions is a separate decision, not something the store does today.
 
 For a worked example, see `onClickMoveToCart` in `saved-for-later/frontend.ts` and `onClickAddToCart` in `wishlist/frontend.ts` — both read the outcome and gate a destructive list-removal on `outcome.success`.
+
+### Once-per-cycle cross-cutting side effects
+
+The store emits three cart-wide side effects whenever a mutation succeeds:
+
+-   the cross-store sync event (`wc-blocks_store_sync_required`, `detail.type: 'from_iAPI'`), which drives the legacy `@wordpress/data` cart store's `GET /wc/store/v1/cart` resync (notice suppression and per-line pending flags included);
+-   the legacy `wc-blocks_added_to_cart` event (payload `{ preserveCartData: true }`), consumed outside this store;
+-   the screen-reader "added to cart" announcement, made only when the store is configured with an `addedToCartText` message.
+
+These fire **exactly once per mutation batch cycle, not once per request**. When the mutation batcher (`mutation-batcher.ts`) coalesces several concurrent mutations — e.g. N concurrent `addCartItem` calls issued in the same tick — into one processing cycle and one `/wc/store/v1/batch` request, each of the three effects fires only once for that cycle, not once per coalesced request. Before this mechanism existed, each of the three effects was wired per request rather than per cycle, so N coalesced mutations produced N sync events (N redundant resync GETs), N legacy events, and N announcements; a single successful mutation still produces exactly one of each, unchanged.
+
+**Mechanism.** Every action that calls `sendCartRequest` attaches a per-request `meta: { quantityChanges, origin }` (type `CartMutationMeta`) describing that one mutation: `quantityChanges` is its contribution to the sync event's payload (`productsPendingAdd` / `cartItemsPendingQuantity` / `cartItemsPendingDelete`), and `origin` is `'add'` (set by `addCartItem` and `batchAddCartItems`, regardless of whether the mutation hit `add-item` or `update-item`) or `'remove'` (set by `removeCartItem`). The batcher carries `meta` through unchanged and, once a cycle settles — synchronously, after the cycle's server state is committed (or rolled back) and before the queue's `isProcessing` state clears — invokes the mutation queue's `onCycleSettled` config callback exactly once, with one `{ success, meta }` entry per request in the cycle. The `onCycleSettled` callback built into the queue passed to `createMutationQueue` inside `sendCartRequest` is the single place in `cart.ts` that emits the three effects; no action emits them itself.
+
+**Gates.** The callback applies three rules to the cycle's successful entries (`entry.success && entry.meta`):
+
+-   **No successful entry** (every mutation in the cycle failed) → nothing fires: no sync event, no legacy event, no announcement.
+-   **At least one successful entry, of any origin** → exactly one sync event, whose `quantityChanges` is the union of every successful entry's `quantityChanges` (via the module-level `mergeQuantityChanges` helper — duplicates collapsed, a key absent from every entry stays absent). A mixed cycle of successful adds and removes still fires only one sync event, carrying both the added product ids and the removed line keys.
+-   **At least one successful entry with `origin: 'add'`** → exactly one legacy event and one announcement, in addition to the sync event above (the legacy event dispatches before the sync event, preserving the existing relative order). A remove-only cycle — however many concurrent removals — still fires the sync event, but never the legacy event or the announcement.
+
+Per-item error notices and each action's own info-notice update (including its `removeOthers` behavior) are untouched by this mechanism — they remain per-action and per-item, raised from each action's own request handling, not collapsed into the once-per-cycle effects.
+
+**`batchAddCartItems`.** A single `batchAddCartItems` call is just a cycle whose requests all originate from one call, so it goes through the exact same `onCycleSettled` mechanism as `addCartItem`/`removeCartItem`: each item submits its own `meta` (all `origin: 'add'`), and the call still produces one sync event, one legacy event, and one announcement when at least one item succeeds. Its merged sync `quantityChanges` is the union of only the *successful* items' entries — a failed item contributes nothing, since it made no server change.
+
+**Stays internal.** This is purely store-side wiring: no new option, export, or event was added for consumers to orchestrate or suppress these effects. `addCartItem` and `batchAddCartItems` still expose only their existing `showCartUpdatesNotices` option, which does not touch these three effects, and the `woocommerce` store remains private — see the note at the top of this file.
