@@ -124,11 +124,13 @@ class OrderItemSchema extends ItemSchema {
 	 * @return array
 	 */
 	public function get_totals( $order_item ) {
+		$price_decimals = wc_get_price_decimals();
+
 		return [
-			'line_subtotal'     => $this->prepare_money_response( $order_item->get_subtotal(), wc_get_price_decimals() ),
-			'line_subtotal_tax' => $this->prepare_money_response( $order_item->get_subtotal_tax(), wc_get_price_decimals() ),
-			'line_total'        => $this->prepare_money_response( $order_item->get_total(), wc_get_price_decimals() ),
-			'line_total_tax'    => $this->prepare_money_response( $order_item->get_total_tax(), wc_get_price_decimals() ),
+			'line_subtotal'     => $this->prepare_money_response( $order_item->get_subtotal(), $price_decimals ),
+			'line_subtotal_tax' => $this->prepare_money_response( $order_item->get_subtotal_tax(), $price_decimals ),
+			'line_total'        => $this->prepare_money_response( $order_item->get_total(), $price_decimals ),
+			'line_total_tax'    => $this->prepare_money_response( $order_item->get_total_tax(), $price_decimals ),
 		];
 	}
 

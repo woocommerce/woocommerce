@@ -1,0 +1,42 @@
+// Frontend stylesheet for the Add to Wishlist button block. Mirrors the
+// link-button cue the cart's per-row Save-for-later button uses — a subtle
+// inline button that sits under the primary Add to Cart CTA.
+
+.wc-block-add-to-wishlist-button {
+	margin-top: 0.5em;
+
+	.wc-block-add-to-wishlist-button__toggle {
+		align-items: center;
+		background: none;
+		border: 0;
+		color: inherit;
+		cursor: pointer;
+		display: inline-flex;
+		font: inherit;
+		gap: 0.25em;
+		padding: 0;
+		text-decoration: none;
+
+		&:hover:not(:disabled) {
+			text-decoration: underline;
+		}
+
+		&:disabled {
+			cursor: default;
+			opacity: 0.5;
+		}
+	}
+
+	.wc-block-add-to-wishlist-button__icon {
+		display: inline-flex;
+
+		&[hidden] {
+			display: none;
+		}
+
+		svg {
+			height: 1.25em;
+			width: 1.25em;
+		}
+	}
+}

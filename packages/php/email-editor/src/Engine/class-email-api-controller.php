@@ -125,9 +125,26 @@ class Email_Api_Controller {
 	 * This endpoint follows WordPress REST API conventions by returning
 	 * the array directly instead of wrapping it in a response object.
 	 *
+	 * @param WP_REST_Request $request The REST request object.
 	 * @return WP_REST_Response
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 */
-	public function get_personalization_tags_collection(): WP_REST_Response {
+	public function get_personalization_tags_collection( WP_REST_Request $request ): WP_REST_Response {
+		$post_id = $request->get_param( 'post_id' );
+
+		// Allow extensions to extend or modify tags based on post context.
+		// This fires before getting tags so extensions can register additional tags.
+		$post_id = is_numeric( $post_id ) ? (int) $post_id : 0;
+		if ( $post_id > 0 ) {
+			/**
+			 * Fires before retrieving personalization tags, allowing extensions
+			 * to register or modify tags based on the post context.
+			 *
+			 * @param int $post_id The post ID for context-aware tag handling.
+			 */
+			do_action( 'woocommerce_email_editor_personalization_tags_for_post', $post_id );
+		}
+
 		$tags = $this->personalization_tags_registry->get_all();
 		return new WP_REST_Response(
 			array_values(

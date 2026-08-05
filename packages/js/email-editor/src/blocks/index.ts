@@ -20,6 +20,7 @@ import {
 	activatePersonalizationTagsReplacing,
 } from './core/rich-text';
 import { enhanceButtonsBlock } from './core/buttons';
+import { enhanceEmbedBlock } from './core/embed';
 import {
 	alterSupportConfiguration,
 	removeBlockStylesFromAllBlocks,
@@ -27,8 +28,9 @@ import {
 import { enhanceQuoteBlock } from './core/quote';
 import { filterSetUrlAttribute } from './core/block-edit';
 import { enhanceSocialLinksBlock } from './core/social-links';
-import { modifyMoveToTrashAction } from './core/move-to-trash';
 import { enhanceSiteLogoBlock } from './core/site-logo';
+import { enableFullWidthBlocks } from './core/full-width';
+import { enableProductImageAlignment } from './woocommerce/product-image';
 
 export { getAllowedBlockNames } from './utils';
 
@@ -46,13 +48,15 @@ export function initBlocks() {
 	disableColumnsLayoutAndEnhanceColumnsBlock();
 	disableGroupVariations();
 	enhanceButtonsBlock();
+	enhanceEmbedBlock();
 	enhancePostContentBlock();
 	enhanceQuoteBlock();
 	extendRichTextFormats();
 	activatePersonalizationTagsReplacing();
 	alterSupportConfiguration();
 	enhanceSocialLinksBlock();
-	modifyMoveToTrashAction();
 	enhanceSiteLogoBlock();
+	enableFullWidthBlocks();
+	enableProductImageAlignment();
 	removeBlockStylesFromAllBlocks();
 }

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixes an issue where Analytics > Categories would crash if a product category had a `parent` that no longer exists in the taxonomy tables due to manual deletion outside the admin UI.

@@ -64,9 +64,16 @@ export type RecommendedPaymentMethod = {
 	category?: 'primary' | 'secondary';
 	icon: string;
 	enabled: boolean;
+	required?: boolean;
 	extraTitle: string;
 	extraDescription: string;
 	extraIcon: string;
+	notice?: {
+		badge: string;
+		message: string;
+		link_text: string;
+		link_url: string;
+	};
 };
 
 export type PaymentsProviderOnboardingState = {

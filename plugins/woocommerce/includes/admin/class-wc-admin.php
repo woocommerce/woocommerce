@@ -152,12 +152,12 @@ class WC_Admin {
 			return;
 		}
 
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		// Nonced plugin install redirects.
 		if ( ! empty( $_GET['wc-install-plugin-redirect'] ) ) {
-			$plugin_slug = wc_clean( wp_unslash( $_GET['wc-install-plugin-redirect'] ) );
+			$plugin_slug    = is_string( $_GET['wc-install-plugin-redirect'] ) ? sanitize_text_field( wp_unslash( $_GET['wc-install-plugin-redirect'] ) ) : '';
+			$redirect_nonce = isset( $_GET['_wpnonce'] ) && is_string( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
 
-			if ( current_user_can( 'install_plugins' ) && in_array( $plugin_slug, array( 'woocommerce-gateway-stripe' ), true ) ) {
+			if ( wp_verify_nonce( $redirect_nonce, 'wc-install-plugin-redirect_' . $plugin_slug ) && current_user_can( 'install_plugins' ) && in_array( $plugin_slug, array( 'woocommerce-gateway-stripe' ), true ) ) {
 				$nonce = wp_create_nonce( 'install-plugin_' . $plugin_slug );
 				$url   = self_admin_url( 'update.php?action=install-plugin&plugin=' . $plugin_slug . '&_wpnonce=' . $nonce );
 			} else {
@@ -167,7 +167,6 @@ class WC_Admin {
 			wp_safe_redirect( $url );
 			exit;
 		}
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
@@ -409,22 +408,27 @@ class WC_Admin {
 	 * @return string
 	 */
 	public function include_admin_body_class( $classes ) {
-		if ( in_array( array( 'wc-wp-version-gte-53', 'wc-wp-version-gte-55' ), explode( ' ', $classes ), true ) ) {
+		$raw_version = get_bloginfo( 'version' );
+
+		if ( ! $raw_version ) {
 			return $classes;
 		}
 
-		$raw_version   = get_bloginfo( 'version' );
 		$version_parts = explode( '-', $raw_version );
 		$version       = count( $version_parts ) > 1 ? $version_parts[0] : $raw_version;
+		$class_list    = explode( ' ', $classes );
 
-		// Add WP 5.3+ compatibility class.
-		if ( $raw_version && version_compare( $version, '5.3', '>=' ) ) {
-			$classes .= ' wc-wp-version-gte-53';
-		}
+		// WP version compatibility classes.
+		$version_classes = array(
+			'5.3' => 'wc-wp-version-gte-53',
+			'5.5' => 'wc-wp-version-gte-55',
+			'7.0' => 'wc-wp-version-gte-70',
+		);
 
-		// Add WP 5.5+ compatibility class.
-		if ( $raw_version && version_compare( $version, '5.5', '>=' ) ) {
-			$classes .= ' wc-wp-version-gte-55';
+		foreach ( $version_classes as $min_version => $class_name ) {
+			if ( ! in_array( $class_name, $class_list, true ) && version_compare( $version, $min_version, '>=' ) ) {
+				$classes .= ' ' . $class_name;
+			}
 		}
 
 		return $classes;

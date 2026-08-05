@@ -45,7 +45,6 @@ export const withUpdateButtonAttributes =
 
 		const block: BlockInstance = useSelect(
 			( select ) => {
-				// @ts-expect-error getBlock is not typed.
 				return select( 'core/block-editor' ).getBlock( clientId );
 			},
 			[ clientId ]
@@ -85,7 +84,7 @@ export const withUpdateButtonAttributes =
 				url &&
 				permalink !== url
 			) {
-				updateBlockAttributes( buttonBlockId, {
+				void updateBlockAttributes( buttonBlockId, {
 					url: permalink,
 				} );
 				setDoUrlUpdate( false );

@@ -16,8 +16,8 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Fulfillments;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
-use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
-use Automattic\WooCommerce\Internal\Fulfillments\OrderFulfillmentsRestController;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\OrderFulfillmentsRestController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Fulfillments\Schema\FulfillmentSchema;
 use WP_Http;
@@ -329,7 +329,7 @@ class Controller extends AbstractController {
 						$ex->getMessage(),
 						array( 'status' => esc_attr( WP_Http::BAD_REQUEST ) )
 					);
-				} catch ( \Exception $e ) {
+				} catch ( \Throwable $e ) {
 					return new WP_Error(
 						'woocommerce_rest_fulfillment_invalid_id',
 						$e->getMessage(),
@@ -370,9 +370,10 @@ class Controller extends AbstractController {
 		}
 
 		// Check if the order exists, and if the current user is the owner of the order, and the request is a read request.
-		// We allow this because we need to render the order fulfillments on the customer's order details and order tracking pages.
-		// But they will be only able to view them, not edit.
-		if ( get_current_user_id() === $order->get_customer_id() && WP_REST_Server::READABLE === $request->get_method() ) {
+		// Guest order fulfillments are rendered server-side via templates, so they don't need REST API access.
+		// The get_current_user_id() > 0 check prevents unauthenticated users from accessing guest orders
+		// where both get_current_user_id() and get_customer_id() would return 0.
+		if ( get_current_user_id() > 0 && get_current_user_id() === $order->get_customer_id() && WP_REST_Server::READABLE === $request->get_method() ) {
 			return true;
 		}
 
@@ -436,7 +437,15 @@ class Controller extends AbstractController {
 	 * @return WP_REST_Response
 	 */
 	public function get_providers( WP_REST_Request $request ): WP_REST_Response {
-		$providers = \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils::get_shipping_providers_object();
+		$providers = array();
+		foreach ( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils::get_shipping_providers() as $provider ) {
+			$providers[ $provider->get_key() ] = array(
+				'label' => $provider->get_name(),
+				'icon'  => $provider->get_icon(),
+				'value' => $provider->get_key(),
+				'url'   => $provider->get_tracking_url( '__PLACEHOLDER__' ) ?? '',
+			);
+		}
 
 		/**
 		 * Filters the shipping providers response before it is returned.

@@ -6,14 +6,12 @@
  * @version 2.5.0
  */
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Internal\Admin\Orders\COTRedirectionController;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController as Custom_Orders_PageController;
 use Automattic\WooCommerce\Internal\Admin\Logging\PageController as LoggingPageController;
 use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\{ FileListTable, SearchListTable };
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -40,7 +38,6 @@ class WC_Admin_Menus {
 		// Add menus.
 		add_action( 'admin_menu', array( $this, 'menu_highlight' ) );
 		add_action( 'admin_menu', array( $this, 'menu_order_count' ) );
-		add_action( 'admin_menu', array( $this, 'maybe_add_new_product_management_experience' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ), 9 );
 		add_action( 'admin_menu', array( $this, 'orders_menu' ), 9 );
 		add_action( 'admin_menu', array( $this, 'reports_menu' ), 20 );
@@ -69,6 +66,9 @@ class WC_Admin_Menus {
 		// Add endpoints custom URLs in Appearance > Menus > Pages.
 		add_action( 'admin_head-nav-menus.php', array( $this, 'add_nav_menu_meta_boxes' ) );
 
+		// Ensure WC taxonomy meta boxes are visible by default on the first visit to Appearance > Menus.
+		add_action( 'load-nav-menus.php', array( $this, 'register_default_nav_menu_meta_boxes_filter' ), 9 );
+
 		// Admin bar menus.
 		if ( apply_filters( 'woocommerce_show_admin_bar_visit_store', true ) ) {
 			add_action( 'admin_bar_menu', array( $this, 'admin_bar_menus' ), 31 );
@@ -80,6 +80,8 @@ class WC_Admin_Menus {
 
 	/**
 	 * Add menu items.
+	 *
+	 * @return void
 	 */
 	public function admin_menu() {
 		global $menu, $admin_page_hooks;
@@ -101,6 +103,8 @@ class WC_Admin_Menus {
 
 	/**
 	 * Add menu item.
+	 *
+	 * @return void
 	 */
 	public function reports_menu() {
 		if ( self::can_view_woocommerce_menu_item() ) {
@@ -112,6 +116,8 @@ class WC_Admin_Menus {
 
 	/**
 	 * Add menu item.
+	 *
+	 * @return void
 	 */
 	public function settings_menu() {
 		$settings_page = add_submenu_page(
@@ -128,6 +134,8 @@ class WC_Admin_Menus {
 
 	/**
 	 * Check if the user can access the top-level WooCommerce item.
+	 *
+	 * @return bool
 	 */
 	public static function can_view_woocommerce_menu_item() {
 		return current_user_can( 'edit_others_shop_orders' );
@@ -135,6 +143,8 @@ class WC_Admin_Menus {
 
 	/**
 	 * Loads gateways and shipping methods into memory for use within settings.
+	 *
+	 * @return void
 	 */
 	public function settings_page_init() {
 		WC()->payment_gateways();
@@ -185,6 +195,8 @@ class WC_Admin_Menus {
 
 	/**
 	 * Add menu item.
+	 *
+	 * @return void
 	 */
 	public function status_menu() {
 		$status_page = add_submenu_page( 'woocommerce', __( 'WooCommerce status', 'woocommerce' ), __( 'Status', 'woocommerce' ), 'manage_woocommerce', 'wc-status', array( $this, 'status_page' ) );
@@ -205,6 +217,8 @@ class WC_Admin_Menus {
 	 * Addons menu item.
 	 *
 	 * @deprecated 10.5.0 The marketplace feature is now always enabled. Use the Extensions menu instead.
+	 *
+	 * @return void
 	 */
 	public function addons_menu() {
 		wc_deprecated_function( __METHOD__, '10.5.0' );
@@ -229,6 +243,8 @@ class WC_Admin_Menus {
 
 	/**
 	 * Highlights the correct top level admin menu item for post type add screens.
+	 *
+	 * @return void
 	 */
 	public function menu_highlight() {
 		global $parent_file, $submenu_file, $post_type;
@@ -250,6 +266,8 @@ class WC_Admin_Menus {
 
 	/**
 	 * Adds the order processing count to the menu.
+	 *
+	 * @return void
 	 */
 	public function menu_order_count() {
 		global $submenu;
@@ -324,6 +342,7 @@ class WC_Admin_Menus {
 	 * @param bool|int $status Screen option value. Default false to skip.
 	 * @param string   $option The option name.
 	 * @param int      $value  The number of rows to use.
+	 * @return bool|int
 	 */
 	public function set_screen_option( $status, $option, $value ) {
 		$screen_options = array(
@@ -343,6 +362,8 @@ class WC_Admin_Menus {
 
 	/**
 	 * Init the reports page.
+	 *
+	 * @return void
 	 */
 	public function reports_page() {
 		WC_Admin_Reports::output();
@@ -350,17 +371,17 @@ class WC_Admin_Menus {
 
 	/**
 	 * Init the settings page.
+	 *
+	 * @return void
 	 */
 	public function settings_page() {
-		if ( Features::is_enabled( 'settings' ) ) {
-			echo '<div id="wc-settings-page"/>';
-		} else {
-			WC_Admin_Settings::output();
-		}
+		WC_Admin_Settings::output();
 	}
 
 	/**
 	 * Init the attributes page.
+	 *
+	 * @return void
 	 */
 	public function attributes_page() {
 		WC_Admin_Attributes::output();
@@ -368,6 +389,8 @@ class WC_Admin_Menus {
 
 	/**
 	 * Init the status page.
+	 *
+	 * @return void
 	 */
 	public function status_page() {
 		WC_Admin_Status::output();
@@ -375,6 +398,8 @@ class WC_Admin_Menus {
 
 	/**
 	 * Init the addons page.
+	 *
+	 * @return void
 	 */
 	public function addons_page() {
 		WC_Admin_Addons::handle_legacy_marketplace_redirects();
@@ -397,13 +422,115 @@ class WC_Admin_Menus {
 	 * Add custom nav meta box.
 	 *
 	 * Adapted from http://www.johnmorrisonline.com/how-to-add-a-fully-functional-custom-meta-box-to-wordpress-navigation-menus/.
+	 *
+	 * @return void
 	 */
 	public function add_nav_menu_meta_boxes() {
 		add_meta_box( 'woocommerce_endpoints_nav_link', __( 'WooCommerce endpoints', 'woocommerce' ), array( $this, 'nav_menu_links' ), 'nav-menus', 'side', 'low' );
 	}
 
 	/**
+	 * Ensure the Product Categories, Product Tags, and Brands meta boxes
+	 * are visible by default on the Appearance > Menus screen.
+	 *
+	 * WordPress's wp_initial_nav_menu_meta_boxes() hides every box except page,
+	 * post, custom-links, and category on a user's first visit. We intercept
+	 * the empty user option and return a hidden list that excludes the WC
+	 * taxonomy boxes, so WP's existing-user guard short-circuits and leaves
+	 * them visible.
+	 *
+	 * The computed list is persisted to user meta on that first read, mirroring
+	 * core's wp_initial_nav_menu_meta_boxes(). This keeps the snapshot stable
+	 * across the multiple reads in a single page load and, crucially, across
+	 * later requests: boxes registered by plugins installed after the first
+	 * visit stay visible, matching vanilla WordPress instead of defaulting to
+	 * hidden on every recompute. As in core, only the current user's snapshot is
+	 * persisted, so reads on behalf of another user never overwrite that user's
+	 * own first-visit snapshot.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @return void
+	 */
+	public function register_default_nav_menu_meta_boxes_filter() {
+		add_filter( 'get_user_option_metaboxhidden_nav-menus', array( $this, 'filter_default_nav_menu_hidden_meta_boxes' ), 10, 3 );
+	}
+
+	/**
+	 * Filter the default hidden meta boxes for the Appearance > Menus screen.
+	 *
+	 * Only applies when the user has no saved preference for the nav-menus
+	 * screen. Returns a list of every registered nav-menus meta box except the
+	 * four core visible boxes, the "WooCommerce endpoints" box, and the WC
+	 * taxonomy boxes. Product Brands is visible only when its taxonomy exists.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param mixed   $result Value for the user's option, or false if not set.
+	 * @param string  $option Name of the option being retrieved.
+	 * @param WP_User $user   WP_User object of the user whose option is being retrieved.
+	 * @return mixed The filtered option value.
+	 */
+	public function filter_default_nav_menu_hidden_meta_boxes( $result, $option, $user ) {
+		global $wp_meta_boxes;
+
+		// Once a snapshot exists the option reads non-false, so this early return
+		// also makes the update_user_meta() call below idempotent: a re-entrant read
+		// bails here instead of persisting again.
+		if ( false !== $result ) {
+			return $result;
+		}
+
+		if ( ! $user || ! isset( $wp_meta_boxes['nav-menus'] ) || ! is_array( $wp_meta_boxes['nav-menus'] ) ) {
+			return $result;
+		}
+
+		$visible = array(
+			'add-post-type-page',
+			'add-post-type-post',
+			'add-custom-links',
+			'add-category',
+			'add-product_cat',
+			'add-product_tag',
+			'woocommerce_endpoints_nav_link',
+		);
+
+		if ( taxonomy_exists( 'product_brand' ) ) {
+			$visible[] = 'add-product_brand';
+		}
+
+		$hidden = array();
+		foreach ( $wp_meta_boxes['nav-menus'] as $priorities ) {
+			foreach ( (array) $priorities as $priority => $boxes ) {
+				foreach ( (array) $boxes as $box ) {
+					if ( isset( $box['id'] ) && ! in_array( $box['id'], $visible, true ) ) {
+						$hidden[] = $box['id'];
+					}
+				}
+			}
+		}
+
+		// Persist the snapshot, mirroring core's wp_initial_nav_menu_meta_boxes(),
+		// so later reads in this request and in future requests return this same
+		// list instead of recomputing it against a changed meta box registry.
+		//
+		// Like core, only the current user's snapshot is persisted. This filter
+		// runs for whichever user's option is being read, so a read performed on
+		// behalf of another user (user-switching or admin tooling) still receives
+		// the computed default below for display, but must not consume that user's
+		// durable first-visit snapshot from this request's meta box registry.
+		$current_user_id = get_current_user_id();
+		if ( $current_user_id && (int) $user->ID === $current_user_id ) {
+			update_user_meta( $current_user_id, 'metaboxhidden_nav-menus', $hidden );
+		}
+
+		return $hidden;
+	}
+
+	/**
 	 * Output menu links.
+	 *
+	 * @return void
 	 */
 	public function nav_menu_links() {
 		// Get items from account menu.
@@ -465,6 +592,7 @@ class WC_Admin_Menus {
 	 *
 	 * @since 2.4.0
 	 * @param WP_Admin_Bar $wp_admin_bar Admin bar instance.
+	 * @return void
 	 */
 	public function admin_bar_menus( $wp_admin_bar ) {
 		if ( ! is_admin() || ! is_admin_bar_showing() ) {
@@ -490,22 +618,6 @@ class WC_Admin_Menus {
 				'href'   => wc_get_page_permalink( 'shop' ),
 			)
 		);
-	}
-
-	/**
-	 * Maybe add new management product experience.
-	 */
-	public function maybe_add_new_product_management_experience() {
-		if ( FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
-			global $submenu;
-			if ( isset( $submenu['edit.php?post_type=product'][10] ) ) {
-				// Disable phpcs since we need to override submenu classes.
-				// Note that `phpcs:ignore WordPress.Variables.GlobalVariables.OverrideProhibited` does not work to disable this check.
-				// phpcs:disable
-				$submenu['edit.php?post_type=product'][10][2] = 'admin.php?page=wc-admin&path=/add-product';
-				// phps:enableWordPress.Variables.GlobalVariables.OverrideProhibited
-			}
-		}
 	}
 
 	/**
@@ -550,6 +662,7 @@ class WC_Admin_Menus {
 	 * @param int    $index The position of a submenu item in the submenu array.
 	 * @param string $parent_slug The parent slug.
 	 * @param array  $item The submenu item.
+	 * @return void
 	 */
 	public function hide_submenu_element( $index, $parent_slug, $item ) {
 		global $submenu;

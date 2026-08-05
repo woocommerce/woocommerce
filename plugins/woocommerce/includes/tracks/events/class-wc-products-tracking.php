@@ -237,7 +237,7 @@ class WC_Products_Tracking {
 							product_type_options_string: productTypeOptionsString,
 							purchase_note:			     $( '#_purchase_note' ).val().length ? 'yes' : 'no',
 							sale_price:				     $( '#_sale_price' ).val() ? 'yes' : 'no',
-							short_description:		     $( '#excerpt' ).val().length ? 'yes' : 'no',
+							short_description:		     $( '#excerpt' ).val() ? 'yes' : 'no',
 							stock_quantity_update:	     ( initialStockValue != currentStockValue ) ? 'Yes' : 'No',
 							tags:					     tagsText.length > 0 ? tagsText.split( ',' ).length : 0,
 							upsells:				     $( '#upsell_ids option' ).length ? 'Yes' : 'No',

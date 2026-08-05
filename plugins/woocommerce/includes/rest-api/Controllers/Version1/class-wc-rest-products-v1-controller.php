@@ -287,6 +287,11 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 		// Add gallery images.
 		$attachment_ids = array_merge( $attachment_ids, $product->get_gallery_image_ids() );
 
+		if ( ! empty( $attachment_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $attachment_ids );
+		}
+
 		// Build image data.
 		foreach ( $attachment_ids as $position => $attachment_id ) {
 			$attachment_post = get_post( $attachment_id );

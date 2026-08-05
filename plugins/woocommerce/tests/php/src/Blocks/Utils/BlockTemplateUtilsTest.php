@@ -319,6 +319,58 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test `get_block_templates_from_db`: workflow and properly handling input parameters.
+	 */
+	public function test_get_block_templates_from_db(): void {
+		$now   = time();
+		$theme = get_stylesheet();
+
+		$date       = gmdate( 'Y-m-d H:i:s', $now - 1 );
+		$attributes = array(
+			'post_name'     => 'slug-1',
+			'post_type'     => 'wp_template',
+			'post_title'    => 'title',
+			'post_status'   => 'publish',
+			'post_date'     => $date,
+			'post_date_gmt' => get_gmt_from_date( $date ),
+
+		);
+		$template_slug_1 = $this->createPost( $attributes, BlockTemplateUtils::PLUGIN_SLUG );
+
+		$date       = gmdate( 'Y-m-d H:i:s', $now );
+		$attributes = array(
+			'post_name'     => 'slug',
+			'post_type'     => 'wp_template',
+			'post_title'    => 'title',
+			'post_status'   => 'publish',
+			'post_date'     => $date,
+			'post_date_gmt' => get_gmt_from_date( $date ),
+
+		);
+		$template_slug = $this->createPost( $attributes, BlockTemplateUtils::PLUGIN_SLUG );
+
+		// Verify fetching all templates and caches population correctness.
+		$templates = BlockTemplateUtils::get_block_templates_from_db();
+		$this->assertSame( array( $template_slug->ID, $template_slug_1->ID ), wp_cache_get( 'wp_template-ids', 'woocommerce_blocks' )[ $theme ] ?? null );
+		$this->assertSame( array( 'slug', 'slug-1' ), array_column( $templates, 'slug' ) );
+
+		// Verify request-level cache hit handling correctness.
+		$templates = BlockTemplateUtils::get_block_templates_from_db( array( 'slug' ), 'wp_template' );
+		$this->assertSame( array( 'slug' ), array_column( $templates, 'slug' ) );
+
+		// Verify request-level cache miss handling correctness: no templates with specified slug.
+		$templates = BlockTemplateUtils::get_block_templates_from_db( array( 'oops' ), 'wp_template_part' );
+		$this->assertCount( 0, $templates );
+
+		// Verify request-level cache miss handling correctness: no templates with the specified type.
+		$templates = BlockTemplateUtils::get_block_templates_from_db( array( 'slug' ), 'wp_template_part' );
+		$this->assertSame( array(), wp_cache_get( 'wp_template_part-ids', 'woocommerce_blocks' )[ $theme ] ?? null );
+		$this->assertCount( 0, $templates );
+
+		wp_cache_delete_multiple( array( 'wp_template-ids', 'wp_template_part-ids' ), 'woocommerce_blocks' );
+	}
+
+	/**
 	 * Runs the migration that happen after a plugin update
 	 *
 	 * @return void
@@ -334,10 +386,13 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	 * @param array  $post Post data.
 	 * @param string $theme Theme name.
 	 *
-	 * @return WP_Post
+	 * @return \WP_Post
 	 */
 	private function createPost( $post, $theme ) {
-		$term = wp_insert_term( $theme, 'wp_theme' );
+		$term = get_term_by( 'slug', $theme, 'wp_theme', ARRAY_A );
+		if ( ! $term ) {
+			$term = wp_insert_term( $theme, 'wp_theme' );
+		}
 
 		$post_id = wp_insert_post( $post );
 		wp_set_post_terms( $post_id, array( $term['term_id'] ), 'wp_theme' );

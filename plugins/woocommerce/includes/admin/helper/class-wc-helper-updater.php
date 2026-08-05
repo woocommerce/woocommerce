@@ -108,6 +108,14 @@ class WC_Helper_Updater {
 				$item['requires_php'] = $data['requires_php'];
 			}
 
+			if ( isset( $data['tested'] ) ) {
+				$item['tested'] = $data['tested'];
+			}
+
+			if ( isset( $data['icons'] ) ) {
+				$item['icons'] = $data['icons'];
+			}
+
 			if ( $transient instanceof stdClass ) {
 				if ( version_compare( $plugin['Version'], $data['version'], '<' ) ) {
 					$transient->response[ $filename ] = (object) $item;
@@ -412,8 +420,10 @@ class WC_Helper_Updater {
 		$subscriptions = WC_Helper::get_subscriptions();
 
 		foreach ( $subscriptions as $subscription ) {
-			$payload[ $subscription['product_id'] ] = array(
-				'product_id' => $subscription['product_id'],
+			$product_id = (int) $subscription['product_id'];
+
+			$payload[ $product_id ] = array(
+				'product_id' => $product_id,
 				'file_id'    => '',
 			);
 		}
@@ -448,8 +458,10 @@ class WC_Helper_Updater {
 		$subscriptions = WC_Helper::get_subscriptions();
 
 		foreach ( $subscriptions as $subscription ) {
-			$payload[ $subscription['product_id'] ] = array(
-				'product_id' => $subscription['product_id'],
+			$product_id = (int) $subscription['product_id'];
+
+			$payload[ $product_id ] = array(
+				'product_id' => $product_id,
 				'file_id'    => '',
 			);
 		}

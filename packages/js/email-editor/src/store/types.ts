@@ -140,6 +140,7 @@ export type State = {
 		errorMessage?: string;
 	};
 	contentValidation?: ContentValidation;
+	templateSelected: boolean;
 };
 
 export type EmailTemplatePreview = Omit<
@@ -198,6 +199,10 @@ export type PostWithPermissions = Post & {
 		delete: boolean;
 		update: boolean;
 	};
+	source?: 'custom' | 'theme' | 'plugin';
+	origin?: string;
+	plugin?: string;
+	has_theme_file?: boolean;
 };
 
 export type EmailEditorConfig = {

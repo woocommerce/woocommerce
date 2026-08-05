@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\Emails;
 
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\CustomerStockNotificationEmail;
@@ -103,7 +104,7 @@ class EmailManager {
 	public function maybe_restore_customer_tax_location_data( $notification ) {
 
 		// No need if stores displaying price excluding tax.
-		if ( 'incl' !== get_option( 'woocommerce_tax_display_shop' ) ) {
+		if ( TaxDisplayMode::INCLUSIVE !== get_option( 'woocommerce_tax_display_shop' ) ) {
 			return;
 		}
 
@@ -280,8 +281,40 @@ class EmailManager {
 	 */
 	public function send_stock_notification_email( Notification $notification ) {
 		$emails = WC()->mailer()->get_emails();
-		if ( isset( $emails['WC_Email_Customer_Stock_Notification'] ) ) {
-			$emails['WC_Email_Customer_Stock_Notification']->trigger( $notification );
+		$email  = $emails['WC_Email_Customer_Stock_Notification'] ?? null;
+
+		if ( $email instanceof CustomerStockNotificationEmail ) {
+			$email->trigger( $notification );
+		}
+	}
+
+	/**
+	 * Send the double opt-in verification email for a stock notification.
+	 *
+	 * @param Notification $notification The notification object.
+	 * @return void
+	 */
+	public function send_verify_email( Notification $notification ) {
+		$emails = WC()->mailer()->get_emails();
+		$email  = $emails['WC_Email_Customer_Stock_Notification_Verify'] ?? null;
+
+		if ( $email instanceof CustomerStockNotificationVerifyEmail ) {
+			$email->trigger( $notification );
+		}
+	}
+
+	/**
+	 * Send the sign-up confirmation email for a stock notification.
+	 *
+	 * @param Notification $notification The notification object.
+	 * @return void
+	 */
+	public function send_verified_email( Notification $notification ) {
+		$emails = WC()->mailer()->get_emails();
+		$email  = $emails['WC_Email_Customer_Stock_Notification_Verified'] ?? null;
+
+		if ( $email instanceof CustomerStockNotificationVerifiedEmail ) {
+			$email->trigger( $notification );
 		}
 	}
 }

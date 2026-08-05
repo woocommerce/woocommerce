@@ -18,11 +18,7 @@ import {
 } from '@wordpress/element';
 import { WP_REST_API_Category } from 'wp-types';
 import { useStyleProps } from '@woocommerce/base-hooks';
-import {
-	InnerBlocks,
-	// @ts-expect-error BlockContextProvider is not exported from @wordpress/block-editor
-	BlockContextProvider,
-} from '@wordpress/block-editor';
+import { InnerBlocks, BlockContextProvider } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -86,7 +82,7 @@ interface FeaturedItemRequiredProps< T > {
 	attributes: (
 		| FeaturedCategoryRequiredAttributes
 		| FeaturedProductRequiredAttributes
-	 ) &
+	) &
 		EditorBlock< T >[ 'attributes' ] & {
 			// This is hardcoded because border and color are not yet included
 			// in Gutenberg's official types.
@@ -222,6 +218,8 @@ export const withFeaturedItem =
 
 		const renderInnerBlocks = () => {
 			if ( product ) {
+				const innerBlocksTemplate =
+					FEATURED_PRODUCT_DEFAULT_TEMPLATE( product );
 				return (
 					<BlockContextProvider
 						value={ { postId: product.id, postType: 'product' } }
@@ -232,9 +230,7 @@ export const withFeaturedItem =
 						>
 							<div className={ `${ className }__inner-blocks` }>
 								<InnerBlocks
-									template={ FEATURED_PRODUCT_DEFAULT_TEMPLATE(
-										product
-									) }
+									template={ innerBlocksTemplate }
 									templateLock={ false }
 								/>
 							</div>

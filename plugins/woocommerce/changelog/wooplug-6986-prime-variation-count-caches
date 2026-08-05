@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Prime post caches in structured data variation counting to avoid a database query per child variation.

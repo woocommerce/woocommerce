@@ -80,6 +80,16 @@ This command:
 - Identifies code style and potential issues
 - Does not modify files
 
+**Important:** The plugin-level `.eslintignore` excludes `client/blocks/`, so `lint:changes:branch:js` will not catch eslint or prettier issues in blocks code. For blocks changes, also run the blocks package lint:
+
+```bash
+# Check blocks JS/TS (includes prettier via eslint plugin)
+pnpm --filter=@woocommerce/block-library lint:js
+
+# Auto-fix blocks JS/TS issues
+pnpm --filter=@woocommerce/block-library lint:js-fix
+```
+
 For detailed JavaScript/TypeScript linting configuration and patterns, see `client/admin/CLAUDE.md`.
 
 ## Markdown Linting
@@ -198,6 +208,7 @@ Before committing your changes:
 - [ ] Run `pnpm run lint:changes:branch:php`
 - [ ] Run `pnpm run lint:php:fix` if issues found
 - [ ] Run `pnpm run lint:changes:branch:js` if you modified JS files
+- [ ] Run `pnpm --filter=@woocommerce/block-library lint:js-fix` if you modified blocks JS/TS files
 - [ ] Review all automatic fixes with `git diff`
 - [ ] Address any remaining issues that can't be auto-fixed
 - [ ] Run tests to ensure fixes didn't break functionality

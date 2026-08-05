@@ -245,6 +245,11 @@ abstract class AbstractRoute implements RouteInterface {
 	 */
 	public function prepare_item_for_response( $item, \WP_REST_Request $request ) {
 		$response = rest_ensure_response( $this->schema->get_item_response( $item ) );
+
+		if ( is_wp_error( $response ) ) {
+			return rest_convert_error_to_response( $response );
+		}
+
 		$response->add_links( $this->prepare_links( $item, $request ) );
 
 		return $response;

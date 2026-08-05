@@ -9,6 +9,12 @@
   src: url('/fonts/Inter-VariableFont_slnt,wght.woff2');
 }
 
+@font-face {
+  font-family: 'Proxima Vara';
+  src: url('https://developer.woocommerce.com/wp-content/uploads/sites/2/fonts/Proxima-Nova-Bold.otf') format('opentype');
+  font-display: swap;
+}
+
 /* You can override the default Infima variables here. */
 :root {
   --ifm-color-primary: #720eec; /* WooCommerce Purple 50 */
@@ -22,6 +28,13 @@
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
   --ifm-font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif,
     'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+  --ifm-heading-font-family: 'Proxima Vara', var(--ifm-font-family-base);
+}
+
+:root details{
+  --ifm-alert-border-color: var(--ifm-color-emphasis-100);
+  --ifm-alert-background-color: var(--ifm-color-emphasis-100);
+  --docusaurus-details-decoration-color: var(--ifm-color-primary-darkest);
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
@@ -77,4 +90,67 @@ html[class*=docs-doc-id-getting-started] .pagination-nav {
 /* Hide next pagination nav at end of Getting Started */
 html.docs-doc-id-getting-started\/version-control-deployment .pagination-nav .pagination-nav__link--next {
   display: none;
+}
+
+
+/* ===== FAQ Details/Summary Styling ===== */
+.markdown details summary {
+  font-weight: 700;
+}
+
+/* Hide the self-referencing Woo Marketplace card on the category index page */
+article .col:has(> a[href="/docs/woo-marketplace/"]) {
+  display: none !important;
+}
+
+/* Hide self-referencing Settings and config card on its own index page */
+article .col:has(> a[href="/docs/category/settings-and-config/"]),
+article .col:has(> a[href="/docs/extensions/settings-and-config/"]) {
+  display: none !important;
+}
+
+/* Apply Proxima Vara to all headings */
+h1, h2, h3, h4, h5, h6,
+.markdown h1, .markdown h2, .markdown h3, .markdown h4, .markdown h5, .markdown h6 {
+  font-family: var(--ifm-heading-font-family);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+/* GitHub-style ordered list with circled numbers */
+.markdown ol {
+  list-style: none;
+  counter-reset: item;
+  padding-left: 0;
+}
+
+.markdown ol > li {
+  counter-increment: item;
+  position: relative;
+  padding-left: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.markdown ol > li::before {
+  content: counter(item);
+  position: absolute;
+  left: 0;
+  top: 0.125rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #eaeef2;
+  color: #1f2328;
+  border-radius: 50%;
+  font-weight: 600;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* Dark mode colors for ordered list circles */
+html[data-theme='dark'] .markdown ol > li::before {
+  background-color: #343942;
+  color: #e6edf3;
 }

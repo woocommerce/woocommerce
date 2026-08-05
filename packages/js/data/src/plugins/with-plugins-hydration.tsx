@@ -10,8 +10,6 @@ import { createElement, useEffect } from '@wordpress/element';
  * Internal dependencies
  */
 import { STORE_NAME } from './constants';
-import * as selectors from './selectors';
-import { SelectFromMap, WPDataSelectors } from '../types';
 
 type PluginHydrationData = {
 	installedPlugins: string[];
@@ -24,25 +22,18 @@ export const withPluginsHydration = ( data: PluginHydrationData ) =>
 		React.ComponentType< Record< string, unknown > >
 	>(
 		( OriginalComponent ) => ( props ) => {
-			const shouldHydrate = useSelect(
-				(
-					select: (
-						key: typeof STORE_NAME
-					) => SelectFromMap< typeof selectors > & WPDataSelectors
-				) => {
-					if ( ! data ) {
-						return;
-					}
+			const shouldHydrate = useSelect( ( select ) => {
+				if ( ! data ) {
+					return;
+				}
 
-					const { isResolving, hasFinishedResolution } =
-						select( STORE_NAME );
-					return (
-						! isResolving( 'getActivePlugins', [] ) &&
-						! hasFinishedResolution( 'getActivePlugins', [] )
-					);
-				},
-				[]
-			);
+				const { isResolving, hasFinishedResolution } =
+					select( STORE_NAME );
+				return (
+					! isResolving( 'getActivePlugins', [] ) &&
+					! hasFinishedResolution( 'getActivePlugins', [] )
+				);
+			}, [] );
 
 			const {
 				startResolution,
@@ -56,19 +47,19 @@ export const withPluginsHydration = ( data: PluginHydrationData ) =>
 				if ( ! shouldHydrate ) {
 					return;
 				}
-				startResolution( 'getActivePlugins', [] );
-				startResolution( 'getInstalledPlugins', [] );
-				startResolution( 'isJetpackConnected', [] );
-				updateActivePlugins( data.activePlugins, true );
-				updateInstalledPlugins( data.installedPlugins, true );
-				updateIsJetpackConnected(
+				void startResolution( 'getActivePlugins', [] );
+				void startResolution( 'getInstalledPlugins', [] );
+				void startResolution( 'isJetpackConnected', [] );
+				void updateActivePlugins( data.activePlugins, true );
+				void updateInstalledPlugins( data.installedPlugins, true );
+				void updateIsJetpackConnected(
 					data.jetpackStatus && data.jetpackStatus.isActive
 						? true
 						: false
 				);
-				finishResolution( 'getActivePlugins', [] );
-				finishResolution( 'getInstalledPlugins', [] );
-				finishResolution( 'isJetpackConnected', [] );
+				void finishResolution( 'getActivePlugins', [] );
+				void finishResolution( 'getInstalledPlugins', [] );
+				void finishResolution( 'isJetpackConnected', [] );
 			}, [ shouldHydrate ] );
 
 			return <OriginalComponent { ...props } />;

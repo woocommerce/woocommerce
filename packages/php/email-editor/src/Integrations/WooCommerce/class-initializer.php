@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Abstract_Block_Renderer;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Fallback;
+use Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce\Renderer\Blocks\Coupon_Code;
 use Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce\Renderer\Blocks\Product_Button;
 use Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce\Renderer\Blocks\Product_Collection;
 use Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce\Renderer\Blocks\Product_Image;
@@ -50,6 +51,11 @@ class Initializer {
 		if ( in_array( $settings['name'], self::ALLOWED_BLOCK_TYPES, true ) ) {
 			$settings['supports']['email']     = true;
 			$settings['render_email_callback'] = array( $this, 'render_block' );
+		}
+
+		// Enable full-width alignment support for the product image block.
+		if ( 'woocommerce/product-image' === $settings['name'] ) {
+			$settings['supports']['align'] = array( 'full' );
 		}
 
 		return $settings;
@@ -98,6 +104,9 @@ class Initializer {
 				break;
 			case 'woocommerce/product-button':
 				$renderer = new Product_Button();
+				break;
+			case 'woocommerce/coupon-code':
+				$renderer = new Coupon_Code();
 				break;
 			default:
 				$renderer = new Fallback();

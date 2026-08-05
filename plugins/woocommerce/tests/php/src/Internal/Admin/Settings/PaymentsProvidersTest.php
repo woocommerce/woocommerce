@@ -41,13 +41,6 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	protected $store_admin_id;
 
 	/**
-	 * The previous store currency value to restore in tearDown.
-	 *
-	 * @var string|null
-	 */
-	private $prev_currency;
-
-	/**
 	 * Set up test.
 	 */
 	public function setUp(): void {
@@ -56,32 +49,27 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $this->store_admin_id );
 
-		// Save the current currency to restore in tearDown.
-		$this->prev_currency = get_option( 'woocommerce_currency', null );
-
 		$this->mock_extension_suggestions = $this->getMockBuilder( ExtensionSuggestions::class )
 			->disableOriginalConstructor()
 			->getMock();
 
 		$this->sut = new PaymentsProviders();
-		$this->sut->init( $this->mock_extension_suggestions, wc_get_container()->get( LegacyProxy::class ) );
+		$this->sut->init(
+			$this->mock_extension_suggestions,
+			wc_get_container()->get( LegacyProxy::class )
+		);
 	}
 
 	/**
 	 * Tear down test.
 	 */
 	public function tearDown(): void {
-		// Reset gateways/hooks and controller memo between tests.
+		// Reset gateways, hooks, and cached provider data between tests.
 		remove_all_actions( 'wc_payment_gateways_initialized' );
 		WC()->payment_gateways()->payment_gateways = array();
 		WC()->payment_gateways()->init();
 		if ( isset( $this->sut ) ) {
-			$this->sut->reset_memo();
-		}
-
-		// Restore the previous currency to prevent test leakage.
-		if ( null !== $this->prev_currency ) {
-			update_option( 'woocommerce_currency', $this->prev_currency );
+			$this->sut->clear_cache();
 		}
 
 		parent::tearDown();
@@ -447,6 +435,25 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test getting payment gateway provider instance returns the KOMOJU provider for a per-method wildcard match.
+	 */
+	public function test_get_payment_gateway_provider_instance_returns_komoju_provider_for_wildcard() {
+		// Arrange - komoju_* pattern matches komoju_konbini, and should return the Komoju provider,
+		// same as the exact 'komoju' gateway ID.
+		$gateway_id = 'komoju_konbini';
+
+		// Act.
+		$provider = $this->sut->get_payment_gateway_provider_instance( $gateway_id );
+
+		// Assert.
+		$this->assertInstanceOf(
+			PaymentsProviders\Komoju::class,
+			$provider,
+			'Should return Komoju provider for wildcard match'
+		);
+	}
+
+	/**
 	 * Test getting payment gateway provider instance returns generic provider when no mapping exists.
 	 */
 	public function test_get_payment_gateway_provider_instance_returns_generic_provider_when_no_mapping() {
@@ -778,6 +785,12 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 					'description' => 'WooPay express checkout',
 					'icon'        => '', // The icon with an invalid URL is ignored.
 					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
+					'notice'      => array(
+						'badge'     => '',
+						'message'   => '',
+						'link_text' => '',
+						'link_url'  => '',
+					),
 				),
 				array(
 					'id'          => 'card',
@@ -788,6 +801,12 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 					'description' => '<strong>Accepts</strong> <b>all major</b><em>credit</em> and <a href="#" target="_blank">debit cards</a>.',
 					'icon'        => 'https://example.com/card-icon.png',
 					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
+					'notice'      => array(
+						'badge'     => '',
+						'message'   => '',
+						'link_text' => '',
+						'link_url'  => '',
+					),
 				),
 				array(
 					'id'          => 'basic2',
@@ -798,6 +817,12 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 					'description' => '',
 					'icon'        => '',
 					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
+					'notice'      => array(
+						'badge'     => '',
+						'message'   => '',
+						'link_text' => '',
+						'link_url'  => '',
+					),
 				),
 				array(
 					'id'          => 'basic',
@@ -808,6 +833,12 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 					'description' => '',
 					'icon'        => '',
 					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_SECONDARY,
+					'notice'      => array(
+						'badge'     => '',
+						'message'   => '',
+						'link_text' => '',
+						'link_url'  => '',
+					),
 				),
 			),
 			$gateway_details['onboarding']['recommended_payment_methods']
@@ -838,7 +869,13 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		// Assert that the custom provider supplied details are returned.
 		$this->assertSame( 'mollie_wc_gateway_bogus', $gateway_details['id'] );
 		// This settings URL is provided by the custom provider.
-		$this->assertSame( admin_url( 'admin.php?page=wc-settings&tab=mollie_settings&section=mollie_payment_methods' ), $gateway_details['management']['_links']['settings']['href'] );
+		$this->assertSame(
+			add_query_arg(
+				array( 'from' => Payments::FROM_PAYMENTS_SETTINGS ),
+				admin_url( 'admin.php?page=wc-settings&tab=mollie_settings&section=mollie_payment_methods' )
+			),
+			$gateway_details['management']['_links']['settings']['href']
+		);
 		$this->assertTrue( $gateway_details['state']['test_mode'] ); // It should be in test mode because of the DB options. The custom provider logic handles this.
 
 		// Clean up.
@@ -938,6 +975,174 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( '_incentive', $gateway_details, 'Gateway details should have _incentive' );
 		$this->assertIsArray( $gateway_details['_incentive'], '_incentive should be an array' );
 		$this->assertSame( 'Special offer', $gateway_details['_incentive']['description'], 'Incentive description should match' );
+	}
+
+	/**
+	 * @testdox Gateway details are derived once with a neutral order and receive the requested order on every call.
+	 */
+	public function test_get_payment_gateway_details_is_cached(): void {
+		$fake_gateway = new FakePaymentGateway(
+			'fake-gateway-id',
+			array(
+				'plugin_slug' => 'fake-plugin-slug',
+				'plugin_file' => 'fake-plugin-slug/fake-plugin-file',
+			),
+		);
+
+		$provider = $this->createMock( PaymentGateway::class );
+		$provider
+			->expects( $this->once() )
+			->method( 'get_details' )
+			->with( $fake_gateway, 0, 'US' )
+			->willReturn(
+				array(
+					'id'     => 'fake-gateway-id',
+					'_order' => 0,
+					'title'  => 'Derived details',
+					'plugin' => array(
+						'slug' => 'fake-plugin-slug',
+					),
+				)
+			);
+		$this->set_payment_gateway_provider_instance( 'fake-gateway-id', $provider );
+
+		$this->mock_extension_suggestions
+			->expects( $this->once() )
+			->method( 'get_by_plugin_slug' )
+			->willReturn( null );
+
+		$first  = $this->sut->get_payment_gateway_details( $fake_gateway, 1, 'US' );
+		$second = $this->sut->get_payment_gateway_details( $fake_gateway, 5, 'US' );
+
+		$this->assertSame( 1, $first['_order'], 'The first call should use the requested order' );
+		$this->assertSame( 5, $second['_order'], 'Cached details should use the latest requested order' );
+		unset( $first['_order'], $second['_order'] );
+		$this->assertSame( $first, $second, 'Cached details should match the originally derived details' );
+	}
+
+	/**
+	 * @testdox Gateway details are cached separately for each user.
+	 */
+	public function test_get_payment_gateway_details_cache_per_user(): void {
+		$fake_gateway = new FakePaymentGateway(
+			'fake-gateway-id',
+			array(
+				'plugin_slug' => 'fake-plugin-slug',
+				'plugin_file' => 'fake-plugin-slug/fake-plugin-file',
+			),
+		);
+
+		$provider = $this->createMock( PaymentGateway::class );
+		$provider
+			->expects( $this->exactly( 2 ) )
+			->method( 'get_details' )
+			->willReturnCallback(
+				function ( $gateway, $order ) {
+					return array(
+						'id'     => $gateway->id,
+						'_order' => $order,
+						'title'  => (string) get_current_user_id(),
+						'plugin' => array(
+							'slug' => 'fake-plugin-slug',
+						),
+					);
+				}
+			);
+		$this->set_payment_gateway_provider_instance( 'fake-gateway-id', $provider );
+
+		$this->mock_extension_suggestions
+			->expects( $this->exactly( 2 ) )
+			->method( 'get_by_plugin_slug' )
+			->willReturn( null );
+
+		$first_user_details        = $this->sut->get_payment_gateway_details( $fake_gateway, 1, 'US' );
+		$first_user_cached_details = $this->sut->get_payment_gateway_details( $fake_gateway, 2, 'US' );
+
+		$second_user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $second_user_id );
+		$second_user_details        = $this->sut->get_payment_gateway_details( $fake_gateway, 3, 'US' );
+		$second_user_cached_details = $this->sut->get_payment_gateway_details( $fake_gateway, 4, 'US' );
+
+		$this->assertSame( (string) $this->store_admin_id, $first_user_details['title'] );
+		$this->assertSame( (string) $this->store_admin_id, $first_user_cached_details['title'] );
+		$this->assertSame( (string) $second_user_id, $second_user_details['title'] );
+		$this->assertSame( (string) $second_user_id, $second_user_cached_details['title'] );
+		$this->assertSame( 2, $first_user_cached_details['_order'] );
+		$this->assertSame( 4, $second_user_cached_details['_order'] );
+	}
+
+	/**
+	 * @testdox Gateway details are cached per country and recomputed after the cache is cleared.
+	 */
+	public function test_get_payment_gateway_details_cache_per_country_and_clear(): void {
+		$fake_gateway = new FakePaymentGateway(
+			'fake-gateway-id',
+			array(
+				'plugin_slug' => 'fake-plugin-slug',
+				'plugin_file' => 'fake-plugin-slug/fake-plugin-file',
+			),
+		);
+
+		$generation = 0;
+		$provider   = $this->createMock( PaymentGateway::class );
+		$provider
+			->expects( $this->exactly( 4 ) )
+			->method( 'get_details' )
+			->willReturnCallback(
+				function ( $gateway, $order, $country_code ) use ( &$generation ) {
+					$this->assertSame( 0, $order, 'Gateway details should always be derived with a neutral order' );
+					++$generation;
+					return array(
+						'id'     => $gateway->id,
+						'_order' => $order,
+						'title'  => $country_code . '-' . $generation,
+						'plugin' => array(
+							'slug' => 'fake-plugin-slug',
+						),
+					);
+				}
+			);
+		$this->set_payment_gateway_provider_instance( 'fake-gateway-id', $provider );
+
+		$this->mock_extension_suggestions
+			->expects( $this->exactly( 4 ) )
+			->method( 'get_by_plugin_slug' )
+			->willReturn( null );
+
+		$first_us = $this->sut->get_payment_gateway_details( $fake_gateway, 1, 'US' );
+		$first_de = $this->sut->get_payment_gateway_details( $fake_gateway, 2, 'DE' );
+		$this->sut->clear_cache();
+		$second_us = $this->sut->get_payment_gateway_details( $fake_gateway, 3, 'US' );
+		$this->setExpectedDeprecated( PaymentsProviders::class . '::reset_memo' );
+		$this->sut->reset_memo();
+		$third_us = $this->sut->get_payment_gateway_details( $fake_gateway, 4, 'US' );
+
+		$this->assertSame( 'US-1', $first_us['title'] );
+		$this->assertSame( 'DE-2', $first_de['title'] );
+		$this->assertSame( 'US-3', $second_us['title'] );
+		$this->assertSame( 'US-4', $third_us['title'] );
+		$this->assertSame( 1, $first_us['_order'] );
+		$this->assertSame( 2, $first_de['_order'] );
+		$this->assertSame( 3, $second_us['_order'] );
+		$this->assertSame( 4, $third_us['_order'] );
+	}
+
+	/**
+	 * @testdox clear_cache removes provider lists cached by the Payments service.
+	 */
+	public function test_clear_cache_removes_cached_provider_lists(): void {
+		wp_cache_set(
+			PaymentsProviders::PROVIDER_LISTS_REQUEST_CACHE_KEY,
+			array( 'US_display' => array( array( 'id' => 'stale-provider' ) ) ),
+			PaymentsProviders::PROVIDER_LISTS_REQUEST_CACHE_GROUP
+		);
+
+		$this->sut->clear_cache();
+
+		$this->assertFalse(
+			wp_cache_get( PaymentsProviders::PROVIDER_LISTS_REQUEST_CACHE_KEY, PaymentsProviders::PROVIDER_LISTS_REQUEST_CACHE_GROUP ),
+			'Provider lists derived from gateway data must not survive a providers cache clear.'
+		);
 	}
 
 	/**
@@ -1089,6 +1294,43 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		// And suggestion ID should be attached.
 		$this->assertArrayHasKey( '_suggestion_id', $gateway_details, 'Gateway details should have _suggestion_id' );
 		$this->assertSame( ExtensionSuggestions::PAYPAL_FULL_STACK, $gateway_details['_suggestion_id'], 'Suggestion ID should match' );
+	}
+
+	/**
+	 * Test that get_payment_gateway_details skips suggestion matching for offline payment methods.
+	 *
+	 * Offline PMs (BACS, COD, Cheque) don't have extension suggestions or incentives.
+	 * The suggestion lookup should be skipped entirely for them.
+	 */
+	public function test_get_payment_gateway_details_skips_suggestion_matching_for_offline_pms() {
+		// Arrange.
+		$fake_gateway = new FakePaymentGateway(
+			WC_Gateway_BACS::ID,
+			array(
+				'enabled'            => true,
+				'title'              => 'Direct bank transfer',
+				'method_title'       => 'Direct bank transfer',
+				'description'        => 'Make your payment directly into our bank account.',
+				'method_description' => 'Take payments in person via BACS.',
+				'plugin_slug'        => 'woocommerce',
+				'plugin_file'        => 'woocommerce/woocommerce.php',
+			),
+		);
+
+		// The suggestion service should never be called for offline PMs.
+		$this->mock_extension_suggestions
+			->expects( $this->never() )
+			->method( 'get_by_plugin_slug' );
+
+		// Act.
+		$gateway_details = $this->sut->get_payment_gateway_details( $fake_gateway, 0, 'US' );
+
+		// Assert that the gateway is correctly identified as an offline PM.
+		$this->assertSame( PaymentsProviders::TYPE_OFFLINE_PM, $gateway_details['_type'] );
+
+		// Assert that no suggestion-derived fields are present.
+		$this->assertArrayNotHasKey( '_suggestion_id', $gateway_details );
+		$this->assertArrayNotHasKey( '_incentive', $gateway_details );
 	}
 
 	/**
@@ -2817,7 +3059,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 
 		WC()->payment_gateways()->init();
 
-		$this->sut->reset_memo();
+		$this->sut->clear_cache();
 	}
 
 	/**
@@ -3062,15 +3304,16 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				array(
 					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 0,
 				),
+				// New gateways are placed above the offline group (default ordering).
 				array(
-					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
-					WC_Gateway_BACS::ID,
-					WC_Gateway_Cheque::ID,
-					WC_Gateway_COD::ID,
 					'gateway1',
 					'gateway2',
 					'gateway3_0',
 					'gateway3_1',
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					WC_Gateway_BACS::ID,
+					WC_Gateway_Cheque::ID,
+					WC_Gateway_COD::ID,
 				),
 				$gateways + $offline_payment_methods_gateways,
 				array(),
@@ -3080,17 +3323,18 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				array(
 					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 0,
 				),
+				// New gateways (and their suggestions) are placed above the offline group (default ordering).
 				array(
-					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
-					WC_Gateway_BACS::ID,
-					WC_Gateway_Cheque::ID,
-					WC_Gateway_COD::ID,
 					'_wc_pes_suggestion1',
 					'gateway1',
 					'gateway2',
 					'_wc_pes_suggestion3',
 					'gateway3_0',
 					'gateway3_1',
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					WC_Gateway_BACS::ID,
+					WC_Gateway_Cheque::ID,
+					WC_Gateway_COD::ID,
 				),
 				$gateways + $offline_payment_methods_gateways,
 				$suggestions,
@@ -5889,6 +6133,21 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Set a payment gateway provider instance for testing.
+	 *
+	 * @param string                 $gateway_id The gateway ID.
+	 * @param PaymentGateway         $provider   The provider instance.
+	 * @param PaymentsProviders|null $service    Optional service instance to update.
+	 */
+	private function set_payment_gateway_provider_instance( string $gateway_id, PaymentGateway $provider, ?PaymentsProviders $service = null ): void {
+		$service    = $service ?? $this->sut;
+		$reflection = new \ReflectionClass( $service );
+		$property   = $reflection->getProperty( 'instances' );
+		$property->setAccessible( true );
+		$property->setValue( $service, array( $gateway_id => $provider ) );
+	}
+
+	/**
 	 * Load the WC core PayPal gateway but not enable it.
 	 *
 	 * @return void
@@ -5907,8 +6166,8 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		WC()->payment_gateways()->payment_gateways = array();
 		WC()->payment_gateways()->init();
 
-		// Reset the controller memo to pick up the new gateway details.
-		$this->sut->reset_memo();
+		// Clear cached provider data to pick up the new gateway details.
+		$this->sut->clear_cache();
 	}
 
 	/**
@@ -5930,8 +6189,8 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		WC()->payment_gateways()->payment_gateways = array();
 		WC()->payment_gateways()->init();
 
-		// Reset the controller memo to pick up the new gateway details.
-		$this->sut->reset_memo();
+		// Clear cached provider data to pick up the new gateway details.
+		$this->sut->clear_cache();
 	}
 
 	/**
@@ -5941,6 +6200,362 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		delete_option( 'woocommerce_paypal_settings' );
 		delete_option( 'woocommerce_currency' );
 
-		$this->sut->reset_memo();
+		$this->sut->clear_cache();
+	}
+
+	/**
+	 * @dataProvider data_provider_is_offline_group_last
+	 *
+	 * @param array $order_map The order map to test.
+	 * @param bool  $expected  Whether the offline group should be considered last.
+	 */
+	public function test_is_offline_group_last( array $order_map, bool $expected ) {
+		$sut = $this->sut;
+
+		$this->assertSame( $expected, $sut->is_offline_group_last( $order_map ) );
+	}
+
+	/**
+	 * Data provider for test_is_offline_group_last.
+	 */
+	public function data_provider_is_offline_group_last(): array {
+		return array(
+			'empty order map'                       => array(
+				array(),
+				false,
+			),
+			'no offline group in map'               => array(
+				array(
+					'gateway1' => 0,
+					'gateway2' => 1,
+				),
+				false,
+			),
+			'offline group is last'                 => array(
+				array(
+					'gateway1'            => 0,
+					'gateway2'            => 1,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 2,
+					WC_Gateway_BACS::ID   => 3,
+					WC_Gateway_Cheque::ID => 4,
+					WC_Gateway_COD::ID    => 5,
+				),
+				true,
+			),
+			'offline group is last, no offline PMs' => array(
+				array(
+					'gateway1' => 0,
+					'gateway2' => 1,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 2,
+				),
+				true,
+			),
+			'gateway after offline group'           => array(
+				array(
+					'gateway1'            => 0,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 1,
+					WC_Gateway_BACS::ID   => 2,
+					WC_Gateway_Cheque::ID => 3,
+					WC_Gateway_COD::ID    => 4,
+					'gateway2'            => 5,
+				),
+				false,
+			),
+			'offline group at start'                => array(
+				array(
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 0,
+					WC_Gateway_BACS::ID   => 1,
+					WC_Gateway_Cheque::ID => 2,
+					WC_Gateway_COD::ID    => 3,
+					'gateway1'            => 4,
+				),
+				false,
+			),
+			'only offline group and offline PMs'    => array(
+				array(
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 0,
+					WC_Gateway_BACS::ID   => 1,
+					WC_Gateway_Cheque::ID => 2,
+				),
+				true,
+			),
+			'only offline group'                    => array(
+				array(
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 0,
+				),
+				true,
+			),
+			'suggestion after offline group'        => array(
+				array(
+					'gateway1'            => 0,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 1,
+					WC_Gateway_BACS::ID   => 2,
+					WC_Gateway_Cheque::ID => 3,
+					WC_Gateway_COD::ID    => 4,
+					PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'suggestion1' => 5,
+				),
+				true,
+			),
+		);
+	}
+
+	/**
+	 * @dataProvider data_provider_enhance_order_map_new_gateway_placement
+	 *
+	 * @param array    $gateway_ids     The gateway IDs to register.
+	 * @param array    $start_order_map The starting order map.
+	 * @param string[] $expected_order  The expected order of IDs after enhancement.
+	 */
+	public function test_enhance_order_map_new_gateway_placement(
+		array $gateway_ids,
+		array $start_order_map,
+		array $expected_order
+	) {
+		// Mock payment gateways — all gateways including the new one are registered.
+		$this->mock_payment_gateways(
+			array_combine(
+				$gateway_ids,
+				array_map(
+					function () {
+						return array( 'enabled' => true );
+					},
+					$gateway_ids
+				)
+			)
+		);
+		// No suggestions for any gateway.
+		$this->mock_extension_suggestions
+			->expects( $this->any() )
+			->method( 'get_by_plugin_slug' )
+			->willReturn( null );
+
+		$sut = $this->sut;
+
+		$result = $sut->enhance_order_map( $start_order_map );
+
+		// Extract the order — keys sorted by value.
+		$actual_order = array_keys( $result );
+		// Filter to only the IDs we care about for assertion clarity.
+		$actual_order = array_values( array_intersect( $actual_order, $expected_order ) );
+
+		$this->assertSame( $expected_order, $actual_order );
+	}
+
+	/**
+	 * Data provider for test_enhance_order_map_new_gateway_placement.
+	 */
+	public function data_provider_enhance_order_map_new_gateway_placement(): array {
+		return array(
+			'new gateway placed above offline group (default ordering)'    => array(
+				// gateway_ids: all registered gateways.
+				array( 'gateway1', 'stripe', 'bacs', 'cheque', 'cod' ),
+				// start_order_map: existing map WITHOUT the new gateway.
+				array(
+					'gateway1'            => 0,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 1,
+					WC_Gateway_BACS::ID   => 2,
+					WC_Gateway_Cheque::ID => 3,
+					WC_Gateway_COD::ID    => 4,
+				),
+				// expected_order: stripe should be above offline group.
+				array( 'gateway1', 'stripe', PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP, WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID ),
+			),
+			'new gateway placed at end (custom ordering — offline group not last)' => array(
+				array( 'gateway1', 'stripe', 'bacs', 'cheque', 'cod' ),
+				array(
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 0,
+					WC_Gateway_BACS::ID   => 1,
+					WC_Gateway_Cheque::ID => 2,
+					WC_Gateway_COD::ID    => 3,
+					'gateway1'            => 4,
+				),
+				// expected_order: stripe at the end since offline group is not last.
+				array( PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP, WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID, 'gateway1', 'stripe' ),
+			),
+			'multiple new gateways placed above offline group'            => array(
+				array( 'gateway1', 'stripe', 'paypal', 'bacs', 'cheque', 'cod' ),
+				array(
+					'gateway1'            => 0,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 1,
+					WC_Gateway_BACS::ID   => 2,
+					WC_Gateway_Cheque::ID => 3,
+					WC_Gateway_COD::ID    => 4,
+				),
+				// expected_order: both stripe and paypal should be above offline group.
+				array( 'gateway1', 'stripe', 'paypal', PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP, WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID ),
+			),
+			'new gateway placed at end (no offline group in map)'          => array(
+				array( 'gateway1', 'stripe' ),
+				array(
+					'gateway1' => 0,
+				),
+				// expected_order: stripe at the end since there is no offline group.
+				array( 'gateway1', 'stripe' ),
+			),
+		);
+	}
+
+	/**
+	 * @dataProvider data_provider_enhance_order_map_new_gateway_with_suggestion
+	 *
+	 * @param array    $gateway_ids     The gateway IDs to register.
+	 * @param array    $gateway_slugs   Map of gateway ID to plugin slug.
+	 * @param array    $suggestions     The suggestions list.
+	 * @param array    $start_order_map The starting order map.
+	 * @param string[] $expected_order  The expected order of IDs after enhancement.
+	 */
+	public function test_enhance_order_map_new_gateway_with_suggestion(
+		array $gateway_ids,
+		array $gateway_slugs,
+		array $suggestions,
+		array $start_order_map,
+		array $expected_order
+	) {
+		// Mock payment gateways with their plugin slugs.
+		$gateway_details = array();
+		foreach ( $gateway_ids as $id ) {
+			$gateway_details[ $id ] = array(
+				'enabled'     => true,
+				'plugin_slug' => $gateway_slugs[ $id ] ?? $id,
+			);
+		}
+		$this->mock_payment_gateways( $gateway_details );
+
+		// Mock getting suggestions by plugin slug.
+		$this->mock_extension_suggestions
+			->expects( $this->any() )
+			->method( 'get_by_plugin_slug' )
+			->willReturnCallback(
+				function ( $plugin_slug ) use ( $suggestions ) {
+					foreach ( $suggestions as $suggestion ) {
+						if ( $suggestion['plugin']['slug'] === $plugin_slug ) {
+							return $suggestion;
+						}
+					}
+					return null;
+				}
+			);
+		$sut = $this->sut;
+
+		$result = $sut->enhance_order_map( $start_order_map );
+
+		// Extract the order — keys sorted by value.
+		$actual_order = array_keys( $result );
+		// Filter to only the IDs we care about for assertion clarity.
+		$actual_order = array_values( array_intersect( $actual_order, $expected_order ) );
+
+		$this->assertSame( $expected_order, $actual_order );
+	}
+
+	/**
+	 * Data provider for test_enhance_order_map_new_gateway_with_suggestion.
+	 */
+	public function data_provider_enhance_order_map_new_gateway_with_suggestion(): array {
+		$preferred_paypal = array(
+			'id'        => 'paypal',
+			'_type'     => ExtensionSuggestions::TYPE_PSP,
+			'_priority' => 0,
+			'plugin'    => array( 'slug' => 'woocommerce-paypal-payments' ),
+		);
+
+		return array(
+			'preferred provider before offline PMs — the gateway takes its placeholder' => array(
+				// gateway_ids.
+				array( 'gateway1', 'ppcp-gateway', 'bacs', 'cheque', 'cod' ),
+				// gateway_slugs.
+				array(
+					'gateway1'     => 'plugin1',
+					'ppcp-gateway' => 'woocommerce-paypal-payments',
+					'bacs'         => 'woocommerce',
+					'cheque'       => 'woocommerce',
+					'cod'          => 'woocommerce',
+				),
+				// suggestions.
+				array( $preferred_paypal ),
+				// start_order_map: preferred provider is before offline PMs, gateway not yet present.
+				array(
+					'gateway1'            => 0,
+					PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'paypal' => 1,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 2,
+					WC_Gateway_BACS::ID   => 3,
+					WC_Gateway_Cheque::ID => 4,
+					WC_Gateway_COD::ID    => 5,
+				),
+				// expected_order: PayPal gateway takes the preferred provider's placeholder place, before offline PMs.
+				array(
+					'gateway1',
+					PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'paypal',
+					'ppcp-gateway',
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					WC_Gateway_BACS::ID,
+					WC_Gateway_Cheque::ID,
+					WC_Gateway_COD::ID,
+				),
+			),
+			'suggestion exists but placeholder absent — gateway placed via default logic' => array(
+				// gateway_ids.
+				array( 'gateway1', 'ppcp-gateway', 'bacs', 'cheque', 'cod' ),
+				// gateway_slugs.
+				array(
+					'gateway1'     => 'plugin1',
+					'ppcp-gateway' => 'woocommerce-paypal-payments',
+					'bacs'         => 'woocommerce',
+					'cheque'       => 'woocommerce',
+					'cod'          => 'woocommerce',
+				),
+				// suggestions.
+				array( $preferred_paypal ),
+				// start_order_map: NO placeholder for the suggestion — gateway falls through to default placement.
+				array(
+					'gateway1'            => 0,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 1,
+					WC_Gateway_BACS::ID   => 2,
+					WC_Gateway_Cheque::ID => 3,
+					WC_Gateway_COD::ID    => 4,
+				),
+				// expected_order: PayPal gateway placed above offline group (default behavior), not at a placeholder.
+				array(
+					'gateway1',
+					'ppcp-gateway',
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					WC_Gateway_BACS::ID,
+					WC_Gateway_Cheque::ID,
+					WC_Gateway_COD::ID,
+				),
+			),
+			'preferred provider after offline PMs — the gateway takes its placeholder' => array(
+				// gateway_ids.
+				array( 'gateway1', 'ppcp-gateway', 'bacs', 'cheque', 'cod' ),
+				// gateway_slugs.
+				array(
+					'gateway1'     => 'plugin1',
+					'ppcp-gateway' => 'woocommerce-paypal-payments',
+					'bacs'         => 'woocommerce',
+					'cheque'       => 'woocommerce',
+					'cod'          => 'woocommerce',
+				),
+				// suggestions.
+				array( $preferred_paypal ),
+				// start_order_map: preferred provider is after offline PMs (custom ordering).
+				array(
+					'gateway1'            => 0,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 1,
+					WC_Gateway_BACS::ID   => 2,
+					WC_Gateway_Cheque::ID => 3,
+					WC_Gateway_COD::ID    => 4,
+					PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'paypal' => 5,
+				),
+				// expected_order: PayPal gateway takes the preferred provider's placeholder place, after offline PMs.
+				array(
+					'gateway1',
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					WC_Gateway_BACS::ID,
+					WC_Gateway_Cheque::ID,
+					WC_Gateway_COD::ID,
+					PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'paypal',
+					'ppcp-gateway',
+				),
+			),
+		);
 	}
 }

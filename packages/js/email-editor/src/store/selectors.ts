@@ -11,6 +11,7 @@ import { serialize, parse, BlockInstance } from '@wordpress/blocks';
  * Internal dependencies
  */
 import { storeName, PERSONALIZATION_TAG_ENTITY } from './constants';
+import { getPersonalizationTagsQuery } from './personalization-tags-query';
 import {
 	State,
 	EmailTemplate,
@@ -33,8 +34,25 @@ function getContentFromEntity( entity ): string {
 	return '';
 }
 
-const patternsWithParsedBlocks = new WeakMap();
-function enhancePatternWithParsedBlocks( pattern ) {
+type PatternWithContent = {
+	content: string;
+	emailContent?: string;
+	categories?: string[];
+	[ key: string ]: unknown;
+};
+
+type EnhancedPattern = PatternWithContent & {
+	readonly blocks: BlockInstance[];
+	readonly emailBlocks: BlockInstance[] | null;
+};
+
+const patternsWithParsedBlocks = new WeakMap<
+	PatternWithContent,
+	EnhancedPattern
+>();
+function enhancePatternWithParsedBlocks(
+	pattern: PatternWithContent
+): EnhancedPattern {
 	let enhancedPattern = patternsWithParsedBlocks.get( pattern );
 	if ( ! enhancedPattern ) {
 		enhancedPattern = {
@@ -42,21 +60,46 @@ function enhancePatternWithParsedBlocks( pattern ) {
 			get blocks() {
 				return parse( pattern.content );
 			},
+			// emailContent is an optional property that integrations (e.g. MailPoet)
+			// may add to patterns via REST API filters. It contains dynamic blocks
+			// (e.g. product-collection) for editor insertion, while `content` holds
+			// static HTML for template picker previews.
+			get emailBlocks() {
+				return pattern.emailContent
+					? parse( pattern.emailContent )
+					: null;
+			},
 		};
 		patternsWithParsedBlocks.set( pattern, enhancedPattern );
 	}
 	return enhancedPattern;
 }
 
+// Caches the regularized record keyed on the source entity record so repeated
+// calls with the same (referentially stable) record return the same object.
+// `@wordpress/core-data` memoizes `getEntityRecord`, so without this cache the
+// spread below would produce a new object on every selector call. That breaks
+// the referential stability `useSelect` relies on and drives an infinite
+// re-render loop (React error #185) for users who lack `edit_theme_options`,
+// because the `context: 'view'` branch — unlike `getEditedEntityRecord` — is
+// not otherwise memoized.
+const regularizedRecordCache = new WeakMap< object, object >();
+
 function regularizedGetEntityRecord( template ) {
 	if ( ! template ) {
 		return null;
 	}
-	return {
+	const cached = regularizedRecordCache.get( template );
+	if ( cached ) {
+		return cached;
+	}
+	const regularized = {
 		...template,
 		title: template?.title?.raw || template?.title || '',
 		content: template?.content?.raw || template?.content || '',
 	};
+	regularizedRecordCache.set( template, regularized );
+	return regularized;
 }
 
 export const isFeatureActive = createRegistrySelector(
@@ -186,7 +229,6 @@ export const getBlockPatternsForEmailTemplate = createRegistrySelector(
 
 export const canUserEditTemplates = createRegistrySelector(
 	( select ) => () => {
-		// @ts-expect-error Selector is not typed
 		return select( coreDataStore ).canUser( 'create', {
 			kind: 'postType',
 			name: 'wp_template',
@@ -283,7 +325,6 @@ export const getCurrentTemplateContent = () => {
 export const canUserEditGlobalEmailStyles = createRegistrySelector(
 	( select ) => () => {
 		const postId = select( storeName ).getGlobalStylesPostId();
-		// @ts-expect-error Selector is not typed
 		const canEdit = select( coreDataStore ).canUser( 'update', {
 			kind: 'root',
 			name: 'globalStyles',
@@ -322,21 +363,34 @@ export const getGlobalEmailStylesPost = createRegistrySelector(
 /**
  * Retrieves the email templates.
  */
-export const getEmailTemplates = createRegistrySelector( ( select ) => () => {
+export const getEmailTemplates = createRegistrySelector( ( select ) => {
 	const postType = select( storeName ).getEmailPostType();
-	return (
-		select( coreDataStore )
-			.getEntityRecords( 'postType', 'wp_template', {
-				per_page: -1,
-				post_type: postType,
-				context: 'view',
-			} )
-			// We still need to filter the templates because, in some cases, the API also returns custom templates
-			// ignoring the post_type filter in the query
-			?.filter( ( template ) =>
-				// @ts-expect-error Missing property in type
-				template.post_types.includes( postType )
-			)
+
+	return createSelector(
+		() =>
+			select( coreDataStore )
+				.getEntityRecords( 'postType', 'wp_template', {
+					per_page: -1,
+					post_type: postType,
+					context: 'view',
+				} )
+				// We still need to filter the templates because, in some cases, the API also returns custom templates
+				// ignoring the post_type filter in the query
+				?.filter( ( template ) =>
+					// @ts-expect-error Missing property in type
+					template.post_types.includes( postType )
+				),
+		() => [
+			select( coreDataStore ).getEntityRecords(
+				'postType',
+				'wp_template',
+				{
+					per_page: -1,
+					post_type: postType,
+					context: 'view',
+				}
+			),
+		]
 	);
 } );
 
@@ -365,45 +419,81 @@ export function getPreviewState( state: State ): State[ 'preview' ] {
 	return state.preview;
 }
 
+const EMPTY_PERSONALIZATION_TAGS: PersonalizationTag[] = [];
+
 export const getPersonalizationTagsList = createRegistrySelector(
-	( select ) => () => {
-		const tags = ( select( coreDataStore ).getEntityRecords(
-			PERSONALIZATION_TAG_ENTITY.kind,
-			PERSONALIZATION_TAG_ENTITY.name,
-			{
-				context: 'view',
-				per_page: -1,
+	( select ) => {
+		// The block edit filter calls this selector once per block on every store
+		// change, so the filtered list is cached alongside the shared query object
+		// from `getPersonalizationTagsQuery`.
+		//
+		// `createRegistrySelector` resolves this factory once per registry, so the
+		// cache below is scoped to a registry rather than shared globally.
+		//
+		// Keying on `tags` identity is sound because `getQueriedItems` keeps a
+		// value-keyed cache (an `EquivalentKeyMap` per state), so it hands back the
+		// same records array until the entity state itself changes.
+		let listCache: {
+			tags: PersonalizationTag[];
+			postType: string;
+			templatePostTypes: string[] | undefined;
+			result: PersonalizationTag[];
+		} | null = null;
+
+		return () => {
+			const postId = select( storeName ).getEmailPostId();
+
+			const tags = ( select( coreDataStore ).getEntityRecords(
+				PERSONALIZATION_TAG_ENTITY.kind,
+				PERSONALIZATION_TAG_ENTITY.name,
+				getPersonalizationTagsQuery( postId )
+			) || EMPTY_PERSONALIZATION_TAGS ) as PersonalizationTag[];
+
+			const postType = select( storeName ).getEmailPostType();
+
+			if ( ! postType ) {
+				return tags;
 			}
-		) || [] ) as PersonalizationTag[];
 
-		const postType = select( storeName ).getEmailPostType();
+			// When postType is template, we filter tags by registered template postTypes.
+			const templatePostTypes =
+				postType === 'wp_template'
+					? select( storeName ).getCurrentTemplate()?.post_types
+					: undefined;
 
-		if ( ! postType ) {
-			return tags;
-		}
+			if (
+				listCache &&
+				listCache.tags === tags &&
+				listCache.postType === postType &&
+				listCache.templatePostTypes === templatePostTypes
+			) {
+				return listCache.result;
+			}
 
-		// When postType is template, we filter tags by registered template postTypes.
-		if ( postType === 'wp_template' ) {
-			const postTemplate = select( storeName ).getCurrentTemplate();
-			return tags.filter( ( tag ) => {
-				return (
+			const result = tags.filter( ( tag ) => {
+				if (
 					tag.postTypes === undefined ||
-					tag.postTypes.length === 0 ||
-					( Array.isArray( postTemplate.post_types ) &&
-						postTemplate.post_types.some( ( pt ) =>
-							tag.postTypes.includes( pt )
-						) )
-				);
-			} );
-		}
+					tag.postTypes.length === 0
+				) {
+					return true;
+				}
 
-		return tags.filter( ( tag ) => {
-			return (
-				tag.postTypes === undefined ||
-				tag.postTypes.length === 0 ||
-				tag.postTypes.includes( postType )
-			);
-		} );
+				if ( postType === 'wp_template' ) {
+					return (
+						Array.isArray( templatePostTypes ) &&
+						templatePostTypes.some( ( pt ) =>
+							tag.postTypes.includes( pt )
+						)
+					);
+				}
+
+				return tag.postTypes.includes( postType );
+			} );
+
+			listCache = { tags, postType, templatePostTypes, result };
+
+			return result;
+		};
 	}
 );
 
@@ -427,4 +517,8 @@ export function getContentValidation(
 	state: State
 ): State[ 'contentValidation' ] {
 	return state.contentValidation;
+}
+
+export function isTemplateSelected( state: State ): boolean {
+	return state.templateSelected;
 }

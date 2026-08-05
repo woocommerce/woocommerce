@@ -20,6 +20,11 @@ export function reducer( state: State, action ): State {
 				...state,
 				contentValidation: action.validation,
 			};
+		case 'SET_TEMPLATE_SELECTED':
+			return {
+				...state,
+				templateSelected: true,
+			};
 		case 'SET_EDITOR_SETTINGS':
 			return {
 				...state,

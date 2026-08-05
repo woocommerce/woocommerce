@@ -20,6 +20,11 @@ defined( 'ABSPATH' ) || exit;
 class RestAbilityFactory {
 
 	/**
+	 * Metadata key that marks REST-derived abilities for deprecated WooCommerce MCP exposure.
+	 */
+	public const EXPOSE_IN_DEPRECATED_MCP_META_KEY = 'expose_in_deprecated_woocommerce_mcp';
+
+	/**
 	 * Register abilities for a REST controller based on configuration.
 	 *
 	 * @param array $config Controller configuration containing controller class and abilities array.
@@ -67,6 +72,7 @@ class RestAbilityFactory {
 				'ability_class'       => RestAbility::class,
 				'meta'                => array(
 					'show_in_rest' => true,
+					self::EXPOSE_IN_DEPRECATED_MCP_META_KEY => true,
 				),
 			);
 
@@ -157,6 +163,41 @@ class RestAbilityFactory {
 	}
 
 	/**
+	 * Valid JSON Schema types.
+	 *
+	 * @var array
+	 */
+	private static $valid_types = array( 'string', 'number', 'integer', 'boolean', 'object', 'array', 'null' );
+
+	/**
+	 * Subset of {@see self::$valid_types} considered scalar for output relaxation.
+	 *
+	 * When a field is declared as one of these in the source REST schema, output
+	 * validation widens it to {@see self::OUTPUT_SCALAR_UNION}.
+	 */
+	private const SCALAR_TYPES = array( 'string', 'integer', 'number', 'boolean' );
+
+	/**
+	 * Union we emit on output for any field originally declared as a single scalar.
+	 *
+	 * Covers three failure modes seen in the wild on WooCommerce REST responses:
+	 * 1. The field may legitimately be unset / null (e.g. `low_stock_amount`).
+	 * 2. The declared scalar disagrees with the scalar actually returned (e.g.
+	 *    `shipping_class_id` declared `string`, returned as `int`).
+	 * 3. The declared scalar is returned as a non-scalar — most notably
+	 *    `meta_data[].display_value`, declared `string` but routinely an array
+	 *    when the underlying meta value is itself an array (variation
+	 *    attributes, serialized custom data, etc.).
+	 *
+	 * The union is effectively "any JSON type." That makes the type constraint
+	 * a no-op for declared scalars, but it remains explicit (so validators that
+	 * require a `type` key are still satisfied) and contained to the MCP output
+	 * schema path. The alternative is per-controller schema fixes scattered
+	 * across legacy REST code.
+	 */
+	private const OUTPUT_SCALAR_UNION = array( 'string', 'integer', 'number', 'boolean', 'array', 'object', 'null' );
+
+	/**
 	 * Sanitize WordPress REST args to valid JSON Schema format.
 	 *
 	 * Converts WordPress REST API argument arrays to JSON Schema by:
@@ -164,6 +205,9 @@ class RestAbilityFactory {
 	 * - Converting 'required' from boolean-per-field to array-of-names
 	 * - Removing WordPress-specific non-schema fields
 	 * - Preserving valid JSON Schema properties
+	 * - Converting invalid types (date-time, mixed, action) to valid JSON Schema
+	 * - Recursively sanitizing nested properties and items
+	 * - Deduplicating enum values
 	 *
 	 * @param array $args WordPress REST API arguments array.
 	 * @return array Valid JSON Schema object.
@@ -175,9 +219,9 @@ class RestAbilityFactory {
 		foreach ( $args as $key => $arg ) {
 			$property = array();
 
-			// Copy valid JSON Schema fields.
+			// Copy valid JSON Schema fields, normalizing types.
 			if ( isset( $arg['type'] ) ) {
-				$property['type'] = $arg['type'];
+				$property = self::normalize_type( $property, $arg['type'] );
 			}
 			if ( isset( $arg['description'] ) ) {
 				$property['description'] = $arg['description'];
@@ -186,10 +230,10 @@ class RestAbilityFactory {
 				$property['default'] = $arg['default'];
 			}
 			if ( isset( $arg['enum'] ) ) {
-				$property['enum'] = array_values( $arg['enum'] );
+				$property['enum'] = self::dedupe_enum( $arg['enum'] );
 			}
 			if ( isset( $arg['items'] ) ) {
-				$property['items'] = $arg['items'];
+				$property['items'] = self::sanitize_schema( $arg['items'] );
 			}
 			if ( isset( $arg['minimum'] ) ) {
 				$property['minimum'] = $arg['minimum'];
@@ -197,11 +241,11 @@ class RestAbilityFactory {
 			if ( isset( $arg['maximum'] ) ) {
 				$property['maximum'] = $arg['maximum'];
 			}
-			if ( isset( $arg['format'] ) ) {
+			if ( isset( $arg['format'] ) && ! isset( $property['format'] ) ) {
 				$property['format'] = $arg['format'];
 			}
 			if ( isset( $arg['properties'] ) ) {
-				$property['properties'] = $arg['properties'];
+				$property['properties'] = self::sanitize_schema_properties( $arg['properties'] );
 			}
 
 			// Convert readonly to readOnly (JSON Schema format).
@@ -230,6 +274,282 @@ class RestAbilityFactory {
 	}
 
 	/**
+	 * Recursively sanitize a JSON Schema node.
+	 *
+	 * Fixes invalid types, deduplicates enums, and recurses into
+	 * nested properties and items.
+	 *
+	 * @param array $schema A JSON Schema node.
+	 * @return array Sanitized schema node.
+	 */
+	private static function sanitize_schema( array $schema ): array {
+		if ( isset( $schema['type'] ) ) {
+			$schema = self::normalize_type( $schema, $schema['type'] );
+		}
+
+		if ( isset( $schema['enum'] ) ) {
+			$schema['enum'] = self::dedupe_enum( $schema['enum'] );
+		}
+
+		// Remove WordPress-style boolean 'required' — JSON Schema requires an array.
+		if ( isset( $schema['required'] ) && is_bool( $schema['required'] ) ) {
+			unset( $schema['required'] );
+		}
+
+		if ( isset( $schema['properties'] ) && is_array( $schema['properties'] ) ) {
+			// Collect required fields from nested boolean 'required' before sanitizing.
+			$required = array();
+			foreach ( $schema['properties'] as $key => $property ) {
+				if ( is_array( $property ) && isset( $property['required'] ) && true === $property['required'] ) {
+					$required[] = $key;
+				}
+			}
+			if ( ! empty( $required ) ) {
+				$schema['required'] = isset( $schema['required'] ) && is_array( $schema['required'] )
+					? array_values( array_unique( array_merge( $schema['required'], $required ) ) )
+					: $required;
+			}
+
+			$schema['properties'] = self::sanitize_schema_properties( $schema['properties'] );
+		}
+
+		if ( isset( $schema['items'] ) && is_array( $schema['items'] ) ) {
+			if ( isset( $schema['items'][0] ) ) {
+				// Tuple form: sanitize each positional entry.
+				foreach ( $schema['items'] as $index => $entry ) {
+					if ( is_array( $entry ) ) {
+						$schema['items'][ $index ] = self::sanitize_schema( $entry );
+					}
+				}
+			} else {
+				$schema['items'] = self::sanitize_schema( $schema['items'] );
+			}
+		}
+
+		return $schema;
+	}
+
+	/**
+	 * Sanitize a map of JSON Schema properties.
+	 *
+	 * @param array $properties Map of property name to schema.
+	 * @return array Sanitized properties map.
+	 */
+	private static function sanitize_schema_properties( array $properties ): array {
+		foreach ( $properties as $key => $property ) {
+			if ( is_array( $property ) ) {
+				$properties[ $key ] = self::sanitize_schema( $property );
+			}
+		}
+		return $properties;
+	}
+
+	/**
+	 * Normalize a schema type value.
+	 *
+	 * Handles both string types ('string', 'date-time', etc.) and
+	 * array types (['string', 'null']) used for nullable fields.
+	 *
+	 * @param array        $schema The schema node being built.
+	 * @param string|array $type   The type value to normalize.
+	 * @return array Schema with normalized type (or type removed if all invalid).
+	 */
+	private static function normalize_type( array $schema, $type ): array {
+		if ( is_string( $type ) ) {
+			if ( 'date-time' === $type ) {
+				$schema['type'] = 'string';
+				if ( ! isset( $schema['format'] ) ) {
+					$schema['format'] = 'date-time';
+				}
+			} elseif ( 'action' === $type ) {
+				$schema['type'] = 'object';
+			} elseif ( in_array( $type, self::$valid_types, true ) ) {
+				$schema['type'] = $type;
+			} else {
+				unset( $schema['type'] );
+			}
+			return $schema;
+		}
+
+		if ( is_array( $type ) ) {
+			$normalized = array();
+			foreach ( $type as $single ) {
+				if ( ! is_string( $single ) ) {
+					continue;
+				}
+				if ( 'date-time' === $single ) {
+					$single = 'string';
+					if ( ! isset( $schema['format'] ) ) {
+						$schema['format'] = 'date-time';
+					}
+				} elseif ( 'action' === $single ) {
+					$single = 'object';
+				} elseif ( ! in_array( $single, self::$valid_types, true ) ) {
+					continue;
+				}
+				$normalized[] = $single;
+			}
+			$normalized = array_values( array_unique( $normalized ) );
+			if ( empty( $normalized ) ) {
+				unset( $schema['type'] );
+			} elseif ( 1 === count( $normalized ) ) {
+				$schema['type'] = $normalized[0];
+			} else {
+				$schema['type'] = $normalized;
+			}
+			return $schema;
+		}
+
+		// Non-string, non-array type — remove it.
+		unset( $schema['type'] );
+		return $schema;
+	}
+
+	/**
+	 * Remove duplicate enum values while preserving order.
+	 *
+	 * Uses JSON encoding for fingerprinting to correctly handle
+	 * mixed scalar types (1 vs '1'), nulls, and complex values (arrays).
+	 *
+	 * @param array $values Enum values.
+	 * @return array Deduplicated enum values.
+	 */
+	private static function dedupe_enum( array $values ): array {
+		$seen   = array();
+		$unique = array();
+		foreach ( $values as $value ) {
+			$fingerprint = wp_json_encode( $value );
+			if ( isset( $seen[ $fingerprint ] ) ) {
+				continue;
+			}
+			$seen[ $fingerprint ] = true;
+			$unique[]             = $value;
+		}
+		return $unique;
+	}
+
+	/**
+	 * Recursively relax an output schema so it accepts the shapes WooCommerce REST
+	 * controllers actually return.
+	 *
+	 * Used on output schemas only — input schemas keep their tighter constraints so
+	 * MCP clients still get useful hints when formatting tool calls. Must run AFTER
+	 * {@see self::sanitize_schema()}, which converts the `date-time` pseudo-type to
+	 * `type: "string"` + `format: "date-time"` — this method then strips the format.
+	 *
+	 * Relaxations:
+	 *
+	 * 1. `format: "date-time"` and `format: "uri"` are stripped. WooCommerce REST
+	 *    date strings (e.g. `2025-11-24T16:31:43`) omit the timezone suffix RFC 3339
+	 *    requires, and `format: "uri"` fields routinely return empty strings.
+	 * 2. Any `type` whose declared members are all scalars and/or `null` is
+	 *    widened to {@see self::OUTPUT_SCALAR_UNION} — every JSON type plus
+	 *    `null`. Applies to single scalars (`string`, `integer`, `number`,
+	 *    `boolean`) and to pre-existing unions like `[integer, null]`. Fields
+	 *    that declare any compound type (`object`, `array`) are left alone.
+	 *    This is a deliberate accuracy tradeoff: many WooCommerce REST
+	 *    controllers declare types that disagree with what they actually return
+	 *    (e.g. `shipping_class_id` declared `string` but returned as `int`;
+	 *    `low_stock_amount` declared `[integer, null]` but returned as `""`
+	 *    when unset; `meta_data[].display_value` declared `string` but
+	 *    routinely an array for variation attributes and serialized custom
+	 *    meta). The alternative is per-controller schema fixes across legacy
+	 *    code. Skipped inside `anyOf` / `oneOf` / `allOf` branches: widening
+	 *    every branch breaks the "exactly one" rule for `oneOf`, and for
+	 *    `anyOf` / `allOf` the schema author was explicit about admissible
+	 *    shapes.
+	 *
+	 * Recurses into `properties`, `items` (single schema and tuple form),
+	 * `additionalProperties`, and the `anyOf` / `oneOf` / `allOf` combiners.
+	 *
+	 * @param array $schema           A JSON Schema node.
+	 * @param bool  $apply_null_union Whether to apply the scalar-to-nullable widening at this node.
+	 *                                False when recursing into combiner branches.
+	 * @return array Relaxed schema node.
+	 */
+	private static function relax_output_schema_for_wc_quirks( array $schema, bool $apply_null_union = true ): array {
+		if ( isset( $schema['format'] ) && in_array( $schema['format'], array( 'date-time', 'uri' ), true ) ) {
+			unset( $schema['format'] );
+		}
+
+		if ( $apply_null_union && isset( $schema['type'] ) && self::should_widen_to_output_union( $schema['type'] ) ) {
+			$schema['type'] = self::OUTPUT_SCALAR_UNION;
+		}
+
+		if ( isset( $schema['properties'] ) && is_array( $schema['properties'] ) ) {
+			foreach ( $schema['properties'] as $key => $property ) {
+				if ( is_array( $property ) ) {
+					$schema['properties'][ $key ] = self::relax_output_schema_for_wc_quirks( $property, $apply_null_union );
+				}
+			}
+		}
+
+		if ( isset( $schema['items'] ) && is_array( $schema['items'] ) ) {
+			if ( isset( $schema['items'][0] ) ) {
+				// Tuple form: each numerically-indexed entry validates the array element at that position.
+				foreach ( $schema['items'] as $index => $entry ) {
+					if ( is_array( $entry ) ) {
+						$schema['items'][ $index ] = self::relax_output_schema_for_wc_quirks( $entry, $apply_null_union );
+					}
+				}
+			} else {
+				$schema['items'] = self::relax_output_schema_for_wc_quirks( $schema['items'], $apply_null_union );
+			}
+		}
+
+		if ( isset( $schema['additionalProperties'] ) && is_array( $schema['additionalProperties'] ) ) {
+			$schema['additionalProperties'] = self::relax_output_schema_for_wc_quirks( $schema['additionalProperties'], $apply_null_union );
+		}
+
+		foreach ( array( 'anyOf', 'oneOf', 'allOf' ) as $combiner ) {
+			if ( isset( $schema[ $combiner ] ) && is_array( $schema[ $combiner ] ) ) {
+				foreach ( $schema[ $combiner ] as $index => $branch ) {
+					if ( is_array( $branch ) ) {
+						// Entering a combiner from anywhere disables null-union for the entire subtree.
+						$schema[ $combiner ][ $index ] = self::relax_output_schema_for_wc_quirks( $branch, false );
+					}
+				}
+			}
+		}
+
+		return $schema;
+	}
+
+	/**
+	 * Decide whether an output-schema `type` should be widened to the full union.
+	 *
+	 * Widens when the declared type is either a single scalar (`integer`, `string`, etc.)
+	 * or an array union whose members are all scalars and/or `null`. Leaves the
+	 * declaration alone if any compound type (`object`, `array`) appears, since the
+	 * schema author was explicit about admitting a structured value.
+	 *
+	 * Handles the WC quirk where fields declared as `[integer, null]`
+	 * (e.g. `low_stock_amount`) are returned as empty strings when unset, which
+	 * neither member of the declared union admits.
+	 *
+	 * @param mixed $type Schema `type` value (string, array, or other).
+	 * @return bool True if the type should be replaced with {@see self::OUTPUT_SCALAR_UNION}.
+	 */
+	private static function should_widen_to_output_union( $type ): bool {
+		if ( is_string( $type ) ) {
+			return in_array( $type, self::SCALAR_TYPES, true );
+		}
+
+		if ( ! is_array( $type ) || empty( $type ) ) {
+			return false;
+		}
+
+		$widenable = array_merge( self::SCALAR_TYPES, array( 'null' ) );
+		foreach ( $type as $member ) {
+			if ( ! is_string( $member ) || ! in_array( $member, $widenable, true ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Get output schema for operation.
 	 *
 	 * @param object $controller REST controller instance.
@@ -238,7 +558,8 @@ class RestAbilityFactory {
 	 */
 	private static function get_output_schema( $controller, string $operation ): array {
 		if ( method_exists( $controller, 'get_item_schema' ) ) {
-			$schema = $controller->get_item_schema();
+			$schema = self::sanitize_schema( $controller->get_item_schema() );
+			$schema = self::relax_output_schema_for_wc_quirks( $schema );
 
 			if ( 'list' === $operation ) {
 				// For list operations, return object wrapping array of items.

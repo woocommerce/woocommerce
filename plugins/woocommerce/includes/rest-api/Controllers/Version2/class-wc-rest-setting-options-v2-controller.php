@@ -228,6 +228,7 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 			}
 		}
 		if ( array() !== $prefetch ) {
+			// Prime caches to reduce future queries.
 			wp_prime_option_caches( $prefetch );
 		}
 	}

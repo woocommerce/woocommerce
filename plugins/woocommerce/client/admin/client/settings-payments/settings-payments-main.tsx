@@ -33,7 +33,6 @@ import {
 	isWooPayments,
 	getWooPaymentsFromProviders,
 	providersContainWooPaymentsNeedsSetup,
-	getWooPaymentsTestDriveAccountLink,
 	isIncentiveDismissedEarlierThanTimestamp,
 	isActionIncentive,
 	recordPaymentsEvent,
@@ -158,7 +157,7 @@ export const SettingsPaymentsMain = () => {
 	const dismissIncentive = useCallback(
 		( dismissHref: string, context: string, doNotTrack = false ) => {
 			// The dismissHref is the full URL to dismiss the incentive.
-			apiFetch( {
+			void apiFetch( {
 				url: dismissHref,
 				method: 'POST',
 				data: {
@@ -171,7 +170,7 @@ export const SettingsPaymentsMain = () => {
 	);
 
 	const acceptIncentive = useCallback( ( id: string ) => {
-		apiFetch( {
+		void apiFetch( {
 			path: `/wc-analytics/admin/notes/experimental-activate-promo/${ id }`,
 			method: 'POST',
 		} );
@@ -196,7 +195,7 @@ export const SettingsPaymentsMain = () => {
 			orderMap[ provider.id ] = updatedOrderValues[ index ];
 		} );
 
-		updateProviderOrdering( orderMap );
+		void updateProviderOrdering( orderMap );
 
 		// Set the sorted providers to the state to give a real-time update
 		setSortedProviders( sorted );
@@ -318,19 +317,13 @@ export const SettingsPaymentsMain = () => {
 
 			if ( paymentsEntity?.onboarding?._links?.preload?.href ) {
 				// We are not interested in the response; we just want to trigger the preload.
-				apiFetch( {
+				void apiFetch( {
 					url: paymentsEntity?.onboarding?._links?.preload.href,
 					method: 'POST',
 					data: {
 						location: businessCountry,
 					},
 				} );
-			}
-
-			// A fail-safe to ensure that the onboarding URL is set for WooPayments.
-			// Note: We should get rid of this sooner rather than later!
-			if ( ! onboardingUrl && isWooPayments( paymentsEntity.id ) ) {
-				onboardingUrl = getWooPaymentsTestDriveAccountLink();
 			}
 
 			setInstallingPlugin( paymentsEntity.id );
@@ -349,11 +342,11 @@ export const SettingsPaymentsMain = () => {
 			installAndActivatePlugins( [ paymentsEntity.plugin.slug ] )
 				.then( async ( response ) => {
 					if ( attachUrl ) {
-						attachPaymentExtensionSuggestion( attachUrl );
+						void attachPaymentExtensionSuggestion( attachUrl );
 					}
 
 					createNoticesFromResponse( response );
-					invalidateResolutionForStoreSelector(
+					void invalidateResolutionForStoreSelector(
 						'getPaymentProviders'
 					);
 
@@ -372,9 +365,10 @@ export const SettingsPaymentsMain = () => {
 					setInstallingPlugin( null );
 
 					// Wait for the state update and fetch the latest providers.
-					const updatedProviders = await resolveSelect(
-						paymentSettingsStore
-					).getPaymentProviders( businessCountry );
+					const updatedProviders =
+						await resolveSelect(
+							paymentSettingsStore
+						).getPaymentProviders( businessCountry );
 
 					// Find the matching provider in the updated list.
 					const updatedPaymentsEntity = updatedProviders.find(

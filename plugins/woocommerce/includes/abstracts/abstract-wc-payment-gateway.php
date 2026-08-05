@@ -38,6 +38,22 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	public $order_button_text;
 
 	/**
+	 * Whether the gateway provides a custom place order button.
+	 *
+	 * When true, the default "Place order" button will be hidden on page load
+	 * if this gateway is pre-selected. The gateway must register its custom
+	 * button via JavaScript using wc.customPlaceOrderButton.register().
+	 *
+	 * Note: This property is purely for UX (preventing flash of default button).
+	 * It does NOT affect security or functionality - the JS registration is what
+	 * actually enables the custom button.
+	 *
+	 * @since 10.6.0
+	 * @var bool
+	 */
+	public $has_custom_place_order_button = false;
+
+	/**
 	 * Yes or no based on whether the method is enabled.
 	 *
 	 * @var string
@@ -324,13 +340,17 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	/**
 	 * Check if the gateway is available for use.
 	 *
+	 * @since 10.7.0 Added early return when gateway is disabled.
 	 * @return bool
 	 */
 	public function is_available() {
-		$is_available = ( 'yes' === $this->enabled );
+		$is_available = 'yes' === $this->enabled;
 
-		if ( WC()->cart && 0 < $this->get_order_total() && 0 < $this->max_amount && $this->max_amount < $this->get_order_total() ) {
-			$is_available = false;
+		if ( $is_available && WC()->cart ) {
+			$order_total = $this->get_order_total();
+			if ( 0 < $order_total && 0 < $this->max_amount && $order_total > $this->max_amount ) {
+				$is_available = false;
+			}
 		}
 
 		return $is_available;

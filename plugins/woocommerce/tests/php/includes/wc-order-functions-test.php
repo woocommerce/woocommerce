@@ -7,6 +7,7 @@
 
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Utilities\Users;
 
 /**
  * Class WC_Order_Functions_Test
@@ -540,5 +541,28 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 			// All URLs should preserve their double hyphens.
 			$this->assertStringContainsString( '--', $result, "Edge case should preserve double hyphens: {$content}" );
 		}
+	}
+
+	/**
+	 * Test `wc_delete_shop_order_transients`: purging user metas depending on the order state.
+	 */
+	public function test_wc_delete_shop_order_transients_usermeta_purge(): void {
+		$customer    = WC_Helper_Customer::create_customer();
+		$customer_id = $customer->get_id();
+		$order       = WC_Helper_Order::create_order( $customer_id, null, array( 'status' => OrderStatus::COMPLETED ) );
+		$order_id    = $order->get_id();
+
+		// Verify the metas getting purged for order a state different from checkout draft.
+		Users::update_site_user_meta( $customer_id, 'wc_order_count', 123 );
+		Users::update_site_user_meta( $customer_id, 'wc_last_order', 456 );
+		Users::update_site_user_meta( $customer_id, 'wc_money_spent', 789 );
+		wc_delete_shop_order_transients( $order_id );
+		$this->assertSame( '', Users::get_site_user_meta( $customer_id, 'wc_order_count' ) );
+		$this->assertSame( '', Users::get_site_user_meta( $customer_id, 'wc_last_order' ) );
+		$this->assertSame( '', Users::get_site_user_meta( $customer_id, 'wc_money_spent' ) );
+
+		// Cleanup.
+		$order->delete();
+		$customer->delete();
 	}
 }

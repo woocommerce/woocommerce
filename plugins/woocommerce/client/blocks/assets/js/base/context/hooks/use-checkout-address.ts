@@ -8,7 +8,9 @@ import {
 	BillingAddress,
 	getSetting,
 } from '@woocommerce/settings';
-import { useCallback } from '@wordpress/element';
+import { useCallback, useMemo } from '@wordpress/element';
+import { emptyHiddenAddressFields } from '@woocommerce/base-utils';
+import { useShallowEqual } from '@woocommerce/base-hooks';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { checkoutStore } from '@woocommerce/block-data';
 
@@ -65,11 +67,23 @@ export const useCheckoutAddress = (): CheckoutAddress => {
 		setEditingShippingAddress,
 	} = useDispatch( checkoutStore );
 	const {
-		billingAddress,
+		billingAddress: rawBillingAddress,
 		setBillingAddress,
-		shippingAddress,
+		shippingAddress: rawShippingAddress,
 		setShippingAddress,
 	} = useCustomerData();
+
+	const stableBillingAddress = useShallowEqual( rawBillingAddress );
+	const stableShippingAddress = useShallowEqual( rawShippingAddress );
+
+	const billingAddress = useMemo(
+		() => emptyHiddenAddressFields( stableBillingAddress ),
+		[ stableBillingAddress ]
+	);
+	const shippingAddress = useMemo(
+		() => emptyHiddenAddressFields( stableShippingAddress ),
+		[ stableShippingAddress ]
+	);
 
 	const setEmail = useCallback(
 		( value: string ) =>

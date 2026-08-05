@@ -1,8 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
-use Automattic\WooCommerce\Internal\FraudProtection\CheckoutEventTracker;
-use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 
 /**
@@ -214,11 +212,6 @@ class CartUpdateCustomer extends AbstractCartRoute {
 		do_action( 'woocommerce_store_api_cart_update_customer_from_request', $customer, $request );
 
 		$customer->save();
-
-		$container = wc_get_container();
-		if ( $container->get( FraudProtectionController::class )->feature_is_enabled() ) {
-			$container->get( CheckoutEventTracker::class )->track_blocks_checkout_update();
-		}
 
 		$this->cart_controller->calculate_totals();
 

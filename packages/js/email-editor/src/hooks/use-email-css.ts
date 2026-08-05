@@ -21,11 +21,7 @@ export function useEmailCss() {
 	const { userTheme } = useUserTheme();
 	const { editorTheme, layout, deviceType, initialEditorSettingsStyles } =
 		useSelect( ( select ) => {
-			const {
-				getEditorSettings,
-				// @ts-expect-error getDeviceType is not in types.
-				getDeviceType,
-			} = select( editorStore );
+			const { getEditorSettings, getDeviceType } = select( editorStore );
 
 			const editorSettings = getEditorSettings();
 

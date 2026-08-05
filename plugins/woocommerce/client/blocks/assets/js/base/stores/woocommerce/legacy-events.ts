@@ -50,21 +50,16 @@ export const triggerAddedToCartEvent = ( {
 	} );
 };
 
-export const triggerRemovedFromCartEvent = (): void => {
-	dispatchEvent( 'wc-blocks_removed_from_cart', {
-		bubbles: true,
-		cancelable: true,
-	} );
-};
-
 export const translateJQueryEventToNative = (
 	// Name of the jQuery event to listen to.
 	jQueryEventName: string,
 	// Name of the native event to dispatch.
-	nativeEventName: string
+	nativeEventName: string,
+	// Whether the event bubbles.
+	bubbles = false
 ): ( () => void ) => {
 	const eventDispatcher = () => {
-		dispatchEvent( nativeEventName, {} );
+		dispatchEvent( nativeEventName, { bubbles } );
 	};
 
 	jQuery( document ).on( jQueryEventName, eventDispatcher );

@@ -14,7 +14,7 @@ import { store } from '@wordpress/interactivity';
 /**
  * Internal dependencies
  */
-import type { MiniCart } from '../mini-cart/iapi-frontend';
+import type { MiniCart } from '../mini-cart/frontend';
 
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';

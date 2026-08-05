@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Add support for relevant files to the RestApiCache trait

@@ -8,7 +8,8 @@ import { apiFetch } from '@wordpress/data-controls';
 /**
  * Internal dependencies
  */
-import { storeName } from './constants';
+import { storeName, PERSONALIZATION_TAG_ENTITY } from './constants';
+import { getPersonalizationTagsQuery } from './personalization-tags-query';
 import {
 	SendingPreviewStatus,
 	State,
@@ -33,18 +34,41 @@ export function updateSendPreviewEmail( toEmail: string ) {
 	} as const;
 }
 
-export function setEmailPost( postId: number | string, postType: string ) {
-	if ( ! postId || ! postType ) {
-		throw new Error(
-			'setEmailPost requires valid postId and postType parameters'
-		);
-	}
+export const setEmailPost =
+	( postId: number | string, postType: string ) =>
+	async ( { dispatch } ) => {
+		if ( ! postId || ! postType ) {
+			throw new Error(
+				'setEmailPost requires valid postId and postType parameters'
+			);
+		}
 
-	return {
-		type: 'SET_EMAIL_POST',
-		state: { postId, postType } as Partial< State >,
-	} as const;
-}
+		dispatch( {
+			type: 'SET_EMAIL_POST',
+			state: { postId, postType } as Partial< State >,
+		} );
+	};
+
+/**
+ * Invalidates the personalization tags cache to force a refetch.
+ * Call this when the tags need to be refreshed (e.g., after changing automation triggers).
+ */
+export const invalidatePersonalizationTagsCache =
+	() =>
+	async ( { registry } ) => {
+		// `invalidateResolution` matches resolver arguments structurally, so this
+		// has to be the same query the selector fetched with — hence the shared
+		// builder rather than a second literal.
+		const postId = registry.select( storeName ).getEmailPostId();
+
+		registry
+			.dispatch( coreDataStore )
+			.invalidateResolution( 'getEntityRecords', [
+				PERSONALIZATION_TAG_ENTITY.kind,
+				PERSONALIZATION_TAG_ENTITY.name,
+				getPersonalizationTagsQuery( postId ),
+			] );
+	};
 
 export function setEmailPostType( postType: string ) {
 	if ( ! postType ) {
@@ -70,6 +94,12 @@ export const setTemplateToPost =
 				template: templateSlug,
 			} );
 	};
+
+export function setTemplateSelected() {
+	return {
+		type: 'SET_TEMPLATE_SELECTED',
+	} as const;
+}
 
 export function* requestSendingNewsletterPreview( email: string ) {
 	// If preview is already sending do nothing

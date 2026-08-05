@@ -13,6 +13,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalizatio
 use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates;
 use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
 use WP_Post;
+use WP_REST_Request;
 use WP_Theme_JSON;
 
 /**
@@ -263,8 +264,15 @@ class Email_Editor {
 			array(
 				'methods'             => 'POST',
 				'callback'            => array( $this->email_api_controller, 'send_preview_email_data' ),
-				'permission_callback' => function () {
-					return current_user_can( 'edit_posts' );
+				'permission_callback' => function ( WP_REST_Request $request ) {
+					if ( ! current_user_can( 'edit_posts' ) ) {
+						return false;
+					}
+					$post_id = $request->get_param( 'postId' );
+					if ( ! is_numeric( $post_id ) || (int) $post_id <= 0 ) {
+						return false;
+					}
+					return current_user_can( 'edit_post', (int) $post_id );
 				},
 			)
 		);
@@ -288,6 +296,14 @@ class Email_Editor {
 				'permission_callback' => function () {
 					return current_user_can( 'edit_posts' );
 				},
+				'args'                => array(
+					'post_id' => array(
+						'description'       => __( 'The post ID for context-aware tag filtering.', 'woocommerce' ),
+						'type'              => 'integer',
+						'required'          => false,
+						'sanitize_callback' => 'absint',
+					),
+				),
 			)
 		);
 	}
@@ -353,6 +369,11 @@ class Email_Editor {
 		}
 
 		if ( ! $this->current_post_is_email_post_type( $post->post_type ) ) {
+			return $template;
+		}
+
+		// Anyone can see a published email. For other statuses the user must be able to read the post.
+		if ( ! is_post_publicly_viewable( $post ) && ! current_user_can( 'read_post', $post->ID ) ) {
 			return $template;
 		}
 

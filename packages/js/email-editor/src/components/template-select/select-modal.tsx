@@ -31,7 +31,7 @@ function getCategoriesFromTemplates(
 		patternCategories.map( ( cat ) => [ cat.name, cat.label ] )
 	);
 	// Add localized label for 'recent' category (used by email posts)
-	categoryLabels.set( 'recent', __( 'Recent', 'woocommerce' ) );
+	categoryLabels.set( 'recent', __( 'Recent', __i18n_text_domain__ ) );
 
 	const uniqueCategories = new Set< string >();
 	for ( const template of templates ) {
@@ -103,12 +103,18 @@ function SelectTemplateBody( {
 	}, [ displayCategories, selectedCategory ] );
 
 	return (
-		<div className="block-editor-block-patterns-explorer">
-			<TemplateCategoriesListSidebar
-				templateCategories={ displayCategories }
-				selectedCategory={ selectedCategory }
-				onClickCategory={ handleCategorySelection }
-			/>
+		<div
+			className={ `block-editor-block-patterns-explorer${
+				displayCategories.length === 0 ? ' no-sidebar' : ''
+			}` }
+		>
+			{ displayCategories.length > 0 && (
+				<TemplateCategoriesListSidebar
+					templateCategories={ displayCategories }
+					selectedCategory={ selectedCategory }
+					onClickCategory={ handleCategorySelection }
+				/>
+			) }
 
 			<TemplateList
 				templates={ templates }
@@ -173,8 +179,8 @@ export function SelectTemplateModal( {
 		<Modal
 			title={
 				templateSelectMode === 'new'
-					? __( 'Start with an email preset', 'woocommerce' )
-					: __( 'Select a template', 'woocommerce' )
+					? __( 'Start with an email preset', __i18n_text_domain__ )
+					: __( 'Select a template', __i18n_text_domain__ )
 			}
 			onRequestClose={ () => {
 				recordEvent( 'template_select_modal_closed', {
@@ -205,7 +211,7 @@ export function SelectTemplateModal( {
 						} }
 						isBusy={ ! hasTemplates }
 					>
-						{ __( 'Start from scratch', 'woocommerce' ) }
+						{ __( 'Start from scratch', __i18n_text_domain__ ) }
 					</Button>
 				</FlexItem>
 			</Flex>

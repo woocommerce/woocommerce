@@ -2,6 +2,79 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.1](https://www.npmjs.com/package/@woocommerce/email-editor/v/2.2.1) - 2026-07-30 
+
+-   Patch - Stop regenerating the global styles stylesheet and re-filtering personalization tags on every render, which made typing in the editor canvas sluggish. [#67031]
+
+## [2.2.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/2.2.0) - 2026-07-28 
+
+-   Patch - Fix crash when opening the typography styles panel in the email editor for elements without typography styles defined. [#65613]
+-   Patch - Memoize the regularized entity record so the global styles and template selectors return a stable reference, preventing an infinite re-render loop (React error #185) for users who lack the edit_theme_options capability. [#65684]
+-   Patch - Restore the "Preview in new tab" unsaved-changes guard and its telemetry event on WordPress 7.1, which dropped the editor-preview-dropdown__button-external class the code matched on. [#66736]
+-   Patch - Show full-width blocks as full width in the email editor canvas to match the rendered email. [#66235]
+-   Patch - Add void to intentionally-unawaited promises for the new no-floating-promises lint rule [#66795]
+-   Patch - Declare webpack as a devDependency so the bundle build works without relying on hoisted packages. [#64861]
+-   Patch - Move the CommonJS build to prepack so day-to-day development only builds the ESM output. [#64876]
+-   Patch - Move TypeScript type-checking from the build to a new `lint:lang:types` script. Builds now emit types and JS without type-checking. [#65168]
+-   Patch - Replaced wireit + tsc package build pipeline with a per-package esbuild script. [#65210]
+-   Patch - Update the e2e test path in the writing-e2e-tests doc after the core e2e directory rename. [#65844]
+-   Minor - Enable the embed block for supported video providers in the email editor and improve embed rendering in emails. [#66968]
+
+## [2.1.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/2.1.0) - 2026-05-15 
+
+-   Minor - Add a canvas affordance for editing the email template from email content mode. [#64703]
+
+## [2.0.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/2.0.0) - 2026-04-29 
+
+-   Minor - Add full-width alignment support for product image block [#63839]
+-   Minor - Improve build time for email-editor by using webpack filesystem cache. [#64082]
+-   Minor - Let consumers replace the `__i18n_text_domain__` identifier at bundle time (e.g. via `webpack.DefinePlugin`) so translation strings extract and translate under the consumer's own text domain. Falls back to `'woocommerce'` at runtime when the identifier isn't substituted, preserving the package's pre-1.11 behaviour. [#64356]
+-   Major [ **BREAKING CHANGE** ] - Remove block-editor, editor, and core-data augmentation blocks from wordpress-modules.ts (now covered by native types). Remove unused @ts-expect-error directives for newly exported symbols. [#64114]
+-   Major [ **BREAKING CHANGE** ] - Update `@wordpress/*` dependencies to wp-6.8 minimum. Remove `@types/wordpress__editor` and `@types/wordpress__media-utils` (native types at wp-6.8). [#64114]
+-   Patch - Monorepo: refresh DependencyExtractionWebpackPlugin for compatibility with filesystem cache, admin build cleanup. [#64111]
+
+## [1.10.1](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.10.1) - 2026-04-06 
+
+-   Patch - Disable Real-time Collaboration in the email editor [#63770]
+-   Patch - Fix template-select modal not appearing on WordPress 7.0 due to hasEdits() returning true on fresh posts [#64026]
+-   Patch - Fix useSelect instability warning for notices in the email editor [#63943]
+-   Patch - Replaced patched `@wordpress/data` types with opt-in internal package types. [#63483]
+
+## [1.10.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.10.0) - 2026-03-18 
+
+-   Minor - Add `woocommerce_email_editor_send_button_disabled` filter to allow overriding the send button disabled state [#63722]
+
+## [1.9.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.9.0) - 2026-03-12 
+
+-   Minor - Add emailBlocks getter to pattern enhancement for inserting dynamic email content blocks [#63612]
+-   Minor - Export registerEntityAction, unregisterEntityAction and PostWithPermissions from the email editor package public API. [#63558]
+
+## [1.8.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.8.0) - 2026-03-02 
+
+-   Minor - Removed custom RichText package, which was needed for WordPress < 6.8 [#63289]
+-   Minor - Rework snackbar notices by using the `EditorSnackbars` component from `@wordpress/editor` to render notices, removing the `email-editor` context snackbar notices renderer, and adding a `disableSnackbarNotices` setting to the email editor component [#63451]
+
+## [1.7.1](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.7.1) - 2026-02-20 
+
+-   Patch - Export EditTemplateModal and SelectTemplateModal from the email editor package for extensibility. [#63374]
+
+## [1.7.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.7.0) - 2026-02-17 
+
+-   Patch - Add memoization for the getEmailTemplates selector [#63200]
+-   Patch - Fix blank modal when using swap template action in email editor [#63229]
+-   Patch - Add `customSavePanel` prop to the Email Editor component and pass it down to the Gutenberg Editor component [#63323]
+-   Minor - Add EmailActionsFill allowing extenders to add custom email actions to the sidebar [#63269]
+-   Minor - Move TemplateSelection to EmailActionsFill slot and export TemplateSelection component for extensibility [#63277]
+
+## [1.6.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.6.0) - 2026-02-04 
+
+-   Minor - Ensure reset template action for email templates [#62984]
+-   Minor - Add post_id context support and cache invalidation for personalization tags [#63103]
+
+## [1.5.2](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.5.2) - 2026-01-29 
+
+-   Patch - Fix infinite loop when selecting a template in the email design selector modal [#63000]
+
 ## [1.5.1](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.5.1) - 2026-01-16 
 
 -   Patch - Fix buttons block layout controls initialization [#62708]

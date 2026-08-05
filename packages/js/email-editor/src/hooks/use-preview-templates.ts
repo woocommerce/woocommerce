@@ -154,7 +154,8 @@ export function usePreviewTemplates(
 						slug: template.slug,
 						// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 						previewContentParsed: parsedTemplate,
-						emailParsed: contentPattern.blocks,
+						emailParsed:
+							contentPattern.emailBlocks ?? contentPattern.blocks,
 						template,
 						category: contentPattern.categories?.[ 0 ],
 						type: template.type,

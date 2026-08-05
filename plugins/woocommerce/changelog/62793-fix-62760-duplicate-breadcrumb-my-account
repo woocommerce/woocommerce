@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix duplicate breadcrumb entries on My Account endpoint pages when using the Breadcrumb block in global templates.

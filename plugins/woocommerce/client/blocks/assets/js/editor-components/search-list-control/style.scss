@@ -80,13 +80,12 @@
 	}
 
 	ul {
+		display: flex;
+		flex-wrap: wrap;
+		gap: $gap-smallest;
 		list-style: none;
 		margin: 0;
 		padding: 0;
-
-		li {
-			float: left;
-		}
 	}
 }
 
@@ -212,6 +211,10 @@
 			margin: 0;
 		}
 
+		> label:has(.woocommerce-search-list__item-label) {
+			display: contents;
+		}
+		
 		.woocommerce-search-list__item-label {
 			display: flex;
 			flex: 1;

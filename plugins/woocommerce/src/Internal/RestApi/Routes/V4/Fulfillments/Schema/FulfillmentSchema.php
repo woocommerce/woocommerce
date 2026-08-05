@@ -11,7 +11,7 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Fulfillments\Schema;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractSchema;
 use WP_REST_Request;
 
@@ -134,6 +134,7 @@ class FulfillmentSchema extends AbstractSchema {
 	 * @return array The item response.
 	 */
 	public function get_item_response( $fulfillment, WP_REST_Request $request, array $include_fields = array() ): array {
+		$date_updated = $fulfillment->get_date_updated();
 		$date_deleted = $fulfillment->get_date_deleted();
 
 		return array(
@@ -142,9 +143,45 @@ class FulfillmentSchema extends AbstractSchema {
 			'entity_id'    => (string) $fulfillment->get_entity_id(),
 			'status'       => $fulfillment->get_status(),
 			'is_fulfilled' => $fulfillment->get_is_fulfilled(),
-			'date_updated' => wc_rest_prepare_date_response( $fulfillment->get_date_updated() ),
-			'date_deleted' => $date_deleted ? wc_rest_prepare_date_response( $date_deleted ) : null,
-			'meta_data'    => $fulfillment->get_meta_data(),
+			'date_updated' => $this->format_utc_iso8601( $date_updated ),
+			'date_deleted' => $this->format_utc_iso8601( $date_deleted ),
+			'meta_data'    => $this->prepare_meta_data_for_response( $fulfillment->get_raw_meta_data() ),
 		);
+	}
+
+	/**
+	 * Format a UTC 'Y-m-d H:i:s' string as ISO 8601 with explicit 'Z' suffix.
+	 *
+	 * @since 10.8.0
+	 * @param string|null $date UTC datetime string.
+	 * @return string|null
+	 */
+	private function format_utc_iso8601( ?string $date ): ?string {
+		if ( null === $date || '' === $date ) {
+			return null;
+		}
+		$formatted = wc_rest_prepare_date_response( $date );
+		return null === $formatted ? null : $formatted . 'Z';
+	}
+
+	/**
+	 * Format `_date_fulfilled` entries in a meta data array as ISO 8601 with 'Z'
+	 * suffix so V4 clients see the same UTC contract as V3 instead of the raw
+	 * 'Y-m-d H:i:s' storage form. Other entries pass through unchanged.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param array<int, mixed> $meta_data Raw meta data array.
+	 * @return array<int, mixed>
+	 */
+	private function prepare_meta_data_for_response( array $meta_data ): array {
+		foreach ( $meta_data as &$meta ) {
+			if ( is_array( $meta ) && isset( $meta['key'], $meta['value'] ) && '_date_fulfilled' === $meta['key'] && is_string( $meta['value'] ) ) {
+				$meta['value'] = $this->format_utc_iso8601( $meta['value'] );
+			}
+		}
+		unset( $meta );
+
+		return $meta_data;
 	}
 }

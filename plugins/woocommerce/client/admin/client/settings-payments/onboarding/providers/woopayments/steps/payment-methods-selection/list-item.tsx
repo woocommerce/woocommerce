@@ -5,6 +5,7 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { type RecommendedPaymentMethod } from '@woocommerce/data';
 import { ToggleControl } from '@wordpress/components';
 import { useRef } from '@wordpress/element';
+import { Notice } from '@wordpress/ui';
 
 /**
  * Internal dependencies
@@ -103,6 +104,14 @@ export const PaymentMethodListItem = ( {
 						<div className="woocommerce-list__item-text">
 							<span className="woocommerce-list__item-title">
 								{ method.title }
+								{ method.notice?.badge && (
+									<span
+										className="woocommerce-list__item-notice-badge"
+										data-testid="payment-method-notice-badge"
+									>
+										{ method.notice.badge }
+									</span>
+								) }
 							</span>
 							<span
 								className="woocommerce-list__item-content"
@@ -127,6 +136,14 @@ export const PaymentMethodListItem = ( {
 							<div className="woocommerce-list__item-text">
 								<span className="woocommerce-list__item-title">
 									{ method.title }
+									{ method.notice?.badge && (
+										<span
+											className="woocommerce-list__item-notice-badge"
+											data-testid="payment-method-notice-badge"
+										>
+											{ method.notice.badge }
+										</span>
+									) }
 								</span>
 								<span
 									className="woocommerce-list__item-content"
@@ -174,8 +191,6 @@ export const PaymentMethodListItem = ( {
 								} );
 							} }
 							disabled={
-								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-								// @ts-ignore disabled prop exists
 								( method.required ?? false ) || isLoading
 							}
 							label=""
@@ -183,6 +198,34 @@ export const PaymentMethodListItem = ( {
 					</div>
 				</div>
 			</div>
+			{ method.notice?.message &&
+				( paymentMethodsState[ method.id ] ?? false ) && (
+					<Notice.Root
+						className="woocommerce-list__item-notice-info"
+						data-testid="payment-method-notice-info"
+						intent="info"
+						spokenMessage={ decodeEntities(
+							method.notice.message
+						) }
+					>
+						<Notice.Description>
+							{ decodeEntities( method.notice.message ) }
+						</Notice.Description>
+						{ method.notice.link_url && method.notice.link_text && (
+							<Notice.Actions>
+								<Notice.ActionLink
+									href={ method.notice.link_url }
+									openInNewTab
+									rel="noopener noreferrer"
+								>
+									{ decodeEntities(
+										method.notice.link_text
+									) }
+								</Notice.ActionLink>
+							</Notice.Actions>
+						) }
+					</Notice.Root>
+				) }
 		</div>
 	);
 };

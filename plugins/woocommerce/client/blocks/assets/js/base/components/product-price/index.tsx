@@ -144,6 +144,7 @@ const SalePrice = ( {
 							regularPriceClassName
 						) }
 						style={ regularPriceStyle }
+						translate="no"
 					>
 						{ value }
 					</del>
@@ -163,6 +164,7 @@ const SalePrice = ( {
 							priceClassName
 						) }
 						style={ priceStyle }
+						translate="no"
 					>
 						{ value }
 					</ins>
@@ -237,14 +239,9 @@ export interface ProductPriceProps {
 	 */
 	regularPriceStyle?: React.CSSProperties | undefined;
 	/**
-	 * Custom margin to apply to the price wrapper.
+	 * Custom styles to apply to the price wrapper.
 	 */
-	style?:
-		| Pick<
-				React.CSSProperties,
-				'marginTop' | 'marginRight' | 'marginBottom' | 'marginLeft'
-		  >
-		| undefined;
+	style?: React.CSSProperties | undefined;
 }
 
 const ProductPrice = ( {

@@ -297,7 +297,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			echo '</form>';
 
 			$handle = 'wc-widget-dropdown-layered-nav-' . $taxonomy_filter_name;
-			wp_register_script( $handle, '', array( 'jquery' ), WC_VERSION, array( 'in_footer' => true ) );
+			wp_register_script( $handle, '', array( 'jquery', 'selectWoo' ), WC_VERSION, array( 'in_footer' => true ) );
 			wp_enqueue_script( $handle );
 			wp_add_inline_script(
 				$handle,
@@ -306,13 +306,13 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 					jQuery( '.dropdown_layered_nav_" . esc_js( $taxonomy_filter_name ) . "' ).on( 'change', function() {
 						var slug = jQuery( this ).val();
 						jQuery( ':input[name=\"filter_" . esc_js( $taxonomy_filter_name ) . "\"]' ).val( slug );
-	
+
 						// Submit form on change if standard dropdown.
 						if ( ! jQuery( this ).attr( 'multiple' ) ) {
 							jQuery( this ).closest( 'form' ).trigger( 'submit' );
 						}
 					});
-	
+
 					// Use Select2 enhancement if possible
 					if ( jQuery().selectWoo ) {
 						var wc_layered_nav_select = function() {

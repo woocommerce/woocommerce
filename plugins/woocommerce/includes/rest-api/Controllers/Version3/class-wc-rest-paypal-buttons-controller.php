@@ -13,7 +13,10 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
+use Automattic\WooCommerce\Gateways\PayPal\Request as PayPalRequest;
 
+// Require the deprecated classes for backward compatibility.
+// This will be removed in 11.0.0.
 if ( ! class_exists( 'WC_Gateway_Paypal_Constants' ) ) {
 	require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-constants.php';
 }
@@ -21,7 +24,6 @@ if ( ! class_exists( 'WC_Gateway_Paypal_Constants' ) ) {
 if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
 	require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
 }
-
 
 /**
  * REST API PayPal buttons controller class.
@@ -114,14 +116,14 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 		}
 
 		$payment_source = isset( $data['payment_source'] ) ? sanitize_text_field( $data['payment_source'] ) : '';
-		if ( empty( $payment_source ) || ! in_array( $payment_source, WC_Gateway_Paypal_Constants::SUPPORTED_PAYMENT_SOURCES, true ) ) {
+		if ( empty( $payment_source ) || ! in_array( $payment_source, PayPalConstants::SUPPORTED_PAYMENT_SOURCES, true ) ) {
 			return new WP_REST_Response( array( 'error' => 'Missing/Invalid payment source: ' . esc_html( $payment_source ) ), 400 );
 		}
 
 		$order_id = $data['order_id'];
 		$order    = wc_get_order( $order_id );
 
-		if ( ! $order ) {
+		if ( ! $order || ! ( $order instanceof \WC_Order ) ) {
 			return new WP_REST_Response( array( 'error' => 'Order not found' ), 404 );
 		}
 
@@ -140,7 +142,7 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 		$order->set_payment_method( $gateway->id );
 		$order->save();
 
-		$paypal_request = new WC_Gateway_Paypal_Request( $gateway );
+		$paypal_request = new PayPalRequest( $gateway );
 		$paypal_order   = $paypal_request->create_paypal_order(
 			$order,
 			$payment_source,
@@ -184,7 +186,7 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 		}
 
 		$order = wc_get_order( $order_id );
-		if ( ! $order ) {
+		if ( ! $order || ! ( $order instanceof \WC_Order ) ) {
 			return new WP_REST_Response( array( 'error' => 'Order not found' ), 404 );
 		}
 

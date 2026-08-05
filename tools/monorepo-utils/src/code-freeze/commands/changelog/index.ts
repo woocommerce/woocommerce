@@ -89,6 +89,13 @@ export const changelogCommand = new Command( 'changelog' )
 		const releaseBranch =
 			branch || `release/${ version.replace( /\.\d+(-.*)?$/, '' ) }`;
 
+		// Collect PR info for summary output.
+		const createdPRs: Array< {
+			branch: string;
+			type: string;
+			number: number;
+		} > = [];
+
 		// Update the release branch.
 		const releaseBranchChanges = await updateReleaseBranchChangelogs(
 			options,
@@ -96,16 +103,53 @@ export const changelogCommand = new Command( 'changelog' )
 			releaseBranch
 		);
 
+		if ( releaseBranchChanges.prNumber > 0 ) {
+			createdPRs.push( {
+				branch: releaseBranch,
+				type: 'changelog',
+				number: releaseBranchChanges.prNumber,
+			} );
+		}
+
 		// Update trunk.
-		await updateTrunkChangelog(
+		const trunkPrNumber = await updateTrunkChangelog(
 			options,
 			tmpRepoPath,
 			releaseBranchChanges
 		);
 
-		await updateIntermediateBranches(
+		if ( trunkPrNumber > 0 ) {
+			createdPRs.push( {
+				branch: 'trunk',
+				type: 'delete-changefiles',
+				number: trunkPrNumber,
+			} );
+		}
+
+		const intermediatePrNumbers = await updateIntermediateBranches(
 			options,
 			tmpRepoPath,
 			releaseBranchChanges
 		);
+
+		if ( intermediatePrNumbers ) {
+			for ( const pr of intermediatePrNumbers ) {
+				if ( pr.number > 0 ) {
+					createdPRs.push( {
+						branch: pr.branch,
+						type: 'delete-changefiles',
+						number: pr.number,
+					} );
+				}
+			}
+		}
+
+		// Output summary of created PRs (tab-separated for easy parsing).
+		Logger.notice( '--- Created PRs Summary ---' );
+		for ( const pr of createdPRs ) {
+			process.stdout.write(
+				`https://github.com/${ owner }/${ name }/pull/${ pr.number }\t${ pr.branch }\t${ pr.type }\n`
+			);
+		}
+		Logger.notice( '--- End PRs Summary ---' );
 	} );

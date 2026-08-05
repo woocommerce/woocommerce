@@ -23,6 +23,9 @@ const getPluginData = async (
 ): Promise< string | void > => {
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
+		unsafe: {
+			allowUnsafeHooksPath: true,
+		},
 		config: [ 'core.hooksPath=/dev/null' ],
 	} );
 	await git.checkout( [ hashOrBranch ] );

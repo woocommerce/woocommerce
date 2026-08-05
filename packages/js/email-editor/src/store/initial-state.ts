@@ -21,5 +21,6 @@ export function getInitialState(): State {
 			sendingPreviewStatus: null,
 		},
 		contentValidation: undefined,
+		templateSelected: false,
 	};
 }

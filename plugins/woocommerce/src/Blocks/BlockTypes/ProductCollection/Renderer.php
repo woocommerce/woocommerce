@@ -49,6 +49,10 @@ class Renderer {
 	 * Constructor.
 	 */
 	public function __construct() {
+		if ( ! $this->should_handle_frontend_rendering() ) {
+			return;
+		}
+
 		// Interactivity API: Add navigation directives to the product collection block.
 		add_filter( 'render_block_woocommerce/product-collection', array( $this, 'handle_rendering' ), 10, 2 );
 
@@ -75,6 +79,15 @@ class Renderer {
 		);
 		add_filter( 'render_block_core/query-pagination', array( $this, 'add_navigation_link_directives' ), 10, 3 );
 		add_filter( 'render_block_context', array( $this, 'extend_context_for_inner_blocks' ), 11, 2 );
+	}
+
+	/**
+	 * Check if the renderer should add frontend-only interactivity hooks.
+	 *
+	 * @return bool
+	 */
+	private function should_handle_frontend_rendering() {
+		return ! is_admin() && ! \WC()->is_rest_api_request();
 	}
 
 	/**
@@ -208,7 +221,7 @@ class Renderer {
 				if ( $is_enhanced_pagination_enabled && isset( $this->parsed_block ) ) {
 					$p->set_attribute(
 						'data-wp-router-region',
-						'wc-product-collection-' . $this->parsed_block['attrs']['queryId']
+						'wc-product-collection-' . ( $this->parsed_block['attrs']['queryId'] ?? '0' )
 					);
 				}
 
@@ -325,7 +338,7 @@ class Renderer {
 	 */
 	private function handle_block_dimensions( $p, $block ) {
 		if ( isset( $block['attrs']['dimensions'] ) && isset( $block['attrs']['dimensions']['widthType'] ) ) {
-			if ( 'fixed' === $block['attrs']['dimensions']['widthType'] ) {
+			if ( 'fixed' === $block['attrs']['dimensions']['widthType'] && ! empty( $block['attrs']['dimensions']['fixedWidth'] ) ) {
 				$this->set_fixed_width_style( $p, $block['attrs']['dimensions']['fixedWidth'] );
 			}
 		}
@@ -391,7 +404,8 @@ class Renderer {
 	 *   'sourceData' => array( 'productId' => 123 ),
 	 * )
 	 *
-	 * @param array $context  The block context.
+	 * @param array $context      The block context.
+	 * @param array $parsed_block The parsed block being rendered, used to detect the Product Collection block itself.
 	 * @return array $context {
 	 *     The block context including the product collection location context.
 	 *
@@ -402,12 +416,6 @@ class Renderer {
 	 * }
 	 */
 	public function extend_context_for_inner_blocks( $context, $parsed_block = array() ) {
-		// Run only on frontend.
-		// This is needed to avoid SSR renders while in editor. @see https://github.com/woocommerce/woocommerce/issues/45181.
-		if ( is_admin() || \WC()->is_rest_api_request() ) {
-			return $context;
-		}
-
 		// Add iapi/provider to inner blocks so they can run this store's Interactivity API actions.
 		$context['iapi/provider'] = 'woocommerce/product-collection';
 

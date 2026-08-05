@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fix image alignment by adding alignment to the inner cell when rendered.  Fix image border alignment by adding a border wrapper.

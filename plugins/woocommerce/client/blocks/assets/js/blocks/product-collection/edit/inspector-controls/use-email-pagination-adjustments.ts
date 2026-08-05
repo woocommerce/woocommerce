@@ -33,9 +33,9 @@ const useEmailPaginationAdjustments = (
 
 	const { productCollectionBlock } = useSelect(
 		( select ) => ( {
-			productCollectionBlock:
-				// @ts-expect-error getBlock is not typed.
-				select( blockEditorStore ).getBlock( clientId ) as Block | null,
+			productCollectionBlock: select( blockEditorStore ).getBlock(
+				clientId
+			) as Block | null,
 		} ),
 		[ clientId ]
 	);
@@ -64,7 +64,7 @@ const useEmailPaginationAdjustments = (
 			paginationBlocks.forEach( ( paginationBlock: Block ) => {
 				if ( paginationBlock && paginationBlock.clientId ) {
 					try {
-						actions.removeBlock( paginationBlock.clientId );
+						void actions.removeBlock( paginationBlock.clientId );
 					} catch ( error ) {
 						// Silently handle cases where block might already be removed
 						// or in an inconsistent state during block editor operations

@@ -38,11 +38,12 @@ class TransactionalEmailPersonalizer {
 	 *
 	 * @param string    $content The content to personalize.
 	 * @param \WC_Email $email The WooCommerce email object.
+	 * @param string    $rendering_context The rendering context of the content — Personalizer::RENDERING_CONTEXT_HTML or Personalizer::RENDERING_CONTEXT_TEXT.
 	 * @return string The personalized content.
 	 */
-	public function personalize_transactional_content( string $content, \WC_Email $email ): string {
+	public function personalize_transactional_content( string $content, \WC_Email $email, string $rendering_context = Personalizer::RENDERING_CONTEXT_HTML ): string {
 		$this->configure_context_by_email( $email );
-		return $this->personalizer->personalize_content( $content );
+		return $this->personalizer->personalize_content( $content, $rendering_context );
 	}
 
 	/**
@@ -67,20 +68,6 @@ class TransactionalEmailPersonalizer {
 	public function prepare_context_data( array $previous_context, \WC_Email $email ): array {
 		$context = $previous_context;
 
-		/**
-		 * Filters the context data for email personalization.
-		 *
-		 * @since 10.5.0
-		 * @param array     $context Previous version of context data.
-		 * @param \WC_Email $email The WooCommerce email object.
-		 * @return array Context data for personalization
-		 */
-		$context = apply_filters( 'woocommerce_email_editor_integration_personalizer_context_data', $context, $email );
-
-		if ( ! is_array( $context ) ) {
-			$context = $previous_context;
-		}
-
 		$context['recipient_email'] = $email->get_recipient();
 		$context['order']           = $email->object instanceof \WC_Order ? $email->object : null;
 		// For emails of type new_user or reset_password we want to set user directly from the object.
@@ -92,6 +79,25 @@ class TransactionalEmailPersonalizer {
 			$context['wp_user'] = null;
 		}
 		$context['wc_email'] = $email;
+
+		$core_context = $context;
+
+		/**
+		 * Filters the context data for email personalization.
+		 *
+		 * This filter fires after core defaults are set, allowing extensions
+		 * to override values like wp_user for custom email types (e.g., WooCommerce Bookings).
+		 *
+		 * @since 10.5.0
+		 * @param array     $context Context data including core defaults.
+		 * @param \WC_Email $email The WooCommerce email object.
+		 * @return array Context data for personalization
+		 */
+		$context = apply_filters( 'woocommerce_email_editor_integration_personalizer_context_data', $context, $email );
+
+		if ( ! is_array( $context ) ) {
+			$context = $core_context;
+		}
 
 		return $context;
 	}

@@ -49,7 +49,7 @@ const defaultUseStoreCartValue = {
 jest.mock( '@wordpress/data', () => {
 	return {
 		__esModule: true,
-		...jest.requireActual( 'wordpress-data-wp-6-7' ),
+		...jest.requireActual( '@wordpress/data' ),
 	};
 } );
 

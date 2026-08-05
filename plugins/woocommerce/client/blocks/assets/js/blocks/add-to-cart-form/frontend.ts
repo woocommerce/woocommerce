@@ -4,13 +4,17 @@
 import { store } from '@wordpress/interactivity';
 import { HTMLElementEvent } from '@woocommerce/types';
 
+// Stores are locked to prevent 3PD usage until the API is stable.
+const universalLock =
+	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
 const getInputElementFromEvent = (
 	event: HTMLElementEvent< HTMLButtonElement >
 ) => {
 	const target = event.target as HTMLButtonElement;
 
 	const inputElement = target.parentElement?.querySelector(
-		'.input-text.qty.text'
+		'.wc-block-components-quantity-selector__input'
 	) as HTMLInputElement | null | undefined;
 
 	return inputElement;
@@ -23,10 +27,10 @@ const getInputData = ( event: HTMLElementEvent< HTMLButtonElement > ) => {
 		return;
 	}
 
-	const parsedValue = parseInt( inputElement.value, 10 );
-	const parsedMinValue = parseInt( inputElement.min, 10 );
-	const parsedMaxValue = parseInt( inputElement.max, 10 );
-	const parsedStep = parseInt( inputElement.step, 10 );
+	const parsedValue = parseFloat( inputElement.value );
+	const parsedMinValue = parseFloat( inputElement.min );
+	const parsedMaxValue = parseFloat( inputElement.max );
+	const parsedStep = parseFloat( inputElement.step );
 
 	const currentValue = isNaN( parsedValue ) ? 0 : parsedValue;
 	const minValue = isNaN( parsedMinValue ) ? 1 : parsedMinValue;
@@ -40,6 +44,19 @@ const getInputData = ( event: HTMLElementEvent< HTMLButtonElement > ) => {
 		step,
 		inputElement,
 	};
+};
+
+const roundDecimals = (
+	value: number,
+	min: number,
+	max: number,
+	step: number
+): string => {
+	const stepDecimals = ( step.toString().split( '.' )[ 1 ] || '' ).length;
+	const minDecimals = ( min.toString().split( '.' )[ 1 ] || '' ).length;
+	const maxDecimals = ( max.toString().split( '.' )[ 1 ] || '' ).length;
+	const decimals = Math.max( stepDecimals, minDecimals, maxDecimals );
+	return value.toFixed( decimals );
 };
 
 /**
@@ -60,34 +77,63 @@ const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 	inputElement.dispatchEvent( event );
 };
 
-store( 'woocommerce/add-to-cart-form', {
-	state: {},
-	actions: {
-		addQuantity: ( event: HTMLElementEvent< HTMLButtonElement > ) => {
-			const inputData = getInputData( event );
-			if ( ! inputData ) {
-				return;
-			}
-			const { currentValue, maxValue, step, inputElement } = inputData;
-			const newValue = currentValue + step;
-
-			if ( maxValue === undefined || newValue <= maxValue ) {
-				inputElement.value = newValue.toString();
-				dispatchChangeEvent( inputElement );
-			}
+// Note: this store is also used by the Add to Cart + Options block when
+// rendering third party product types that don't use block template parts.
+store(
+	'woocommerce/add-to-cart-form',
+	{
+		state: {
+			get allowsIncrease() {
+				return true;
+			},
+			get allowsDecrease() {
+				return true;
+			},
 		},
-		removeQuantity: ( event: HTMLElementEvent< HTMLButtonElement > ) => {
-			const inputData = getInputData( event );
-			if ( ! inputData ) {
-				return;
-			}
-			const { currentValue, minValue, step, inputElement } = inputData;
-			const newValue = currentValue - step;
+		actions: {
+			increaseQuantity: (
+				event: HTMLElementEvent< HTMLButtonElement >
+			) => {
+				const inputData = getInputData( event );
+				if ( ! inputData ) {
+					return;
+				}
+				const { currentValue, minValue, maxValue, step, inputElement } =
+					inputData;
+				const newValue = currentValue + step;
 
-			if ( newValue >= minValue ) {
-				inputElement.value = newValue.toString();
-				dispatchChangeEvent( inputElement );
-			}
+				if ( maxValue === undefined || newValue <= maxValue ) {
+					inputElement.value = roundDecimals(
+						newValue,
+						minValue,
+						maxValue ?? Infinity,
+						step
+					);
+					dispatchChangeEvent( inputElement );
+				}
+			},
+			decreaseQuantity: (
+				event: HTMLElementEvent< HTMLButtonElement >
+			) => {
+				const inputData = getInputData( event );
+				if ( ! inputData ) {
+					return;
+				}
+				const { currentValue, minValue, maxValue, step, inputElement } =
+					inputData;
+				const newValue = currentValue - step;
+
+				if ( newValue >= minValue ) {
+					inputElement.value = roundDecimals(
+						newValue,
+						minValue,
+						maxValue ?? Infinity,
+						step
+					);
+					dispatchChangeEvent( inputElement );
+				}
+			},
 		},
 	},
-} );
+	{ lock: universalLock }
+);

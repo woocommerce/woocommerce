@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { Button, Icon } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
 import React, { ReactNode, useState } from 'react';
 
 /**
@@ -25,17 +26,46 @@ export default function FulfillmentCard( {
 	const [ isOpen, setIsOpen ] = useState( initialState === 'expanded' );
 	const hasChildren = React.Children.toArray( children ).length > 0;
 
+	const handleToggle = () => setIsOpen( ! isOpen );
+	const handleKeyUp = ( e: React.KeyboardEvent ) => {
+		if ( e.key === 'Enter' || e.key === ' ' ) {
+			e.preventDefault();
+			handleToggle();
+		}
+	};
+
 	return (
 		<div
 			className={ `woocommerce-fulfillment-card woocommerce-fulfillment-card__size-${ size }` }
 		>
-			<div className="woocommerce-fulfillment-card__header">
+			<div
+				className={ [
+					'woocommerce-fulfillment-card__header',
+					isCollapsable
+						? 'woocommerce-fulfillment-card__header--clickable'
+						: '',
+				].join( ' ' ) }
+				{ ...( isCollapsable
+					? {
+							onClick: handleToggle,
+							onKeyUp: handleKeyUp,
+							role: 'button',
+							tabIndex: 0,
+					  }
+					: {} ) }
+			>
 				{ header }
 				{ isCollapsable && (
 					<Button
 						__next40pxDefaultSize
 						size="small"
 						onClick={ () => setIsOpen( ! isOpen ) }
+						aria-label={
+							isOpen
+								? __( 'Collapse section', 'woocommerce' )
+								: __( 'Expand section', 'woocommerce' )
+						}
+						aria-expanded={ isOpen }
 					>
 						<Icon
 							icon={

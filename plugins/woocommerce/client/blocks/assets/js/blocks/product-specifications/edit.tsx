@@ -6,12 +6,24 @@ import { __ } from '@wordpress/i18n';
 import { useQueryLoopProductContextValidation } from '@woocommerce/base-hooks';
 import { useSelect } from '@wordpress/data';
 import { optionsStore, Product, productsStore } from '@woocommerce/data';
-import { PanelBody, ToggleControl } from '@wordpress/components';
+import {
+	ToggleControl,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanel as ToolsPanel,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanelItem as ToolsPanelItem,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import { ProductSpecificationsEditProps } from './types';
+
+const DEFAULT_ATTRIBUTES = {
+	showWeight: true,
+	showDimensions: true,
+	showAttributes: true,
+};
 
 const getFormattedDimensions = (
 	dimensions: Product[ 'dimensions' ],
@@ -180,33 +192,79 @@ const Edit = ( {
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={ __( 'Display Settings', 'woocommerce' ) }>
-					<ToggleControl
+				<ToolsPanel
+					label={ __( 'Display Settings', 'woocommerce' ) }
+					resetAll={ () => {
+						setAttributes( DEFAULT_ATTRIBUTES );
+					} }
+				>
+					<ToolsPanelItem
 						label={ __( 'Show Weight', 'woocommerce' ) }
-						checked={ showWeight }
-						onChange={ () =>
-							setAttributes( { showWeight: ! showWeight } )
+						hasValue={ () =>
+							showWeight !== DEFAULT_ATTRIBUTES.showWeight
 						}
-					/>
-					<ToggleControl
+						onDeselect={ () =>
+							setAttributes( {
+								showWeight: DEFAULT_ATTRIBUTES.showWeight,
+							} )
+						}
+						isShownByDefault
+					>
+						<ToggleControl
+							label={ __( 'Show Weight', 'woocommerce' ) }
+							checked={ showWeight }
+							onChange={ () =>
+								setAttributes( { showWeight: ! showWeight } )
+							}
+						/>
+					</ToolsPanelItem>
+					<ToolsPanelItem
 						label={ __( 'Show Dimensions', 'woocommerce' ) }
-						checked={ showDimensions }
-						onChange={ () =>
+						hasValue={ () =>
+							showDimensions !== DEFAULT_ATTRIBUTES.showDimensions
+						}
+						onDeselect={ () =>
 							setAttributes( {
-								showDimensions: ! showDimensions,
+								showDimensions:
+									DEFAULT_ATTRIBUTES.showDimensions,
 							} )
 						}
-					/>
-					<ToggleControl
+						isShownByDefault
+					>
+						<ToggleControl
+							label={ __( 'Show Dimensions', 'woocommerce' ) }
+							checked={ showDimensions }
+							onChange={ () =>
+								setAttributes( {
+									showDimensions: ! showDimensions,
+								} )
+							}
+						/>
+					</ToolsPanelItem>
+					<ToolsPanelItem
 						label={ __( 'Show Attributes', 'woocommerce' ) }
-						checked={ showAttributes }
-						onChange={ () =>
+						hasValue={ () =>
+							showAttributes !== DEFAULT_ATTRIBUTES.showAttributes
+						}
+						onDeselect={ () =>
 							setAttributes( {
-								showAttributes: ! showAttributes,
+								showAttributes:
+									DEFAULT_ATTRIBUTES.showAttributes,
 							} )
 						}
-					/>
-				</PanelBody>
+						isShownByDefault
+					>
+						<ToggleControl
+							label={ __( 'Show Attributes', 'woocommerce' ) }
+							checked={ showAttributes }
+							onChange={ () =>
+								setAttributes( {
+									showAttributes: ! showAttributes,
+								} )
+							}
+						/>
+					</ToolsPanelItem>
+				</ToolsPanel>
 			</InspectorControls>
 			<figure { ...blockProps }>
 				<table>

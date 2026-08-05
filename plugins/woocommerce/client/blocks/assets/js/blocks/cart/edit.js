@@ -16,6 +16,7 @@ import { SlotFillProvider } from '@woocommerce/blocks-checkout';
 import { useEffect, useRef } from '@wordpress/element';
 import { getQueryArg } from '@wordpress/url';
 import { dispatch, select } from '@wordpress/data';
+import { usePreviewMode } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -41,14 +42,15 @@ const ALLOWED_BLOCKS = [
 ];
 
 export const Edit = ( { clientId, className, attributes, setAttributes } ) => {
-	const { hasDarkControls, currentView, isPreview = false } = attributes;
+	const { hasDarkControls, currentView } = attributes;
+	const isPreviewMode = usePreviewMode();
 	const defaultTemplate = [
 		[ 'woocommerce/filled-cart-block', {}, [] ],
 		[ 'woocommerce/empty-cart-block', {}, [] ],
 	];
 	const blockProps = useBlockPropsWithLocking( {
 		className: clsx( className, 'wp-block-woocommerce-cart', {
-			'is-editor-preview': isPreview,
+			'is-editor-preview': isPreviewMode,
 		} ),
 	} );
 
@@ -88,7 +90,6 @@ export const Edit = ( { clientId, className, attributes, setAttributes } ) => {
 				<EditorProvider
 					previewData={ { previewCart } }
 					currentView={ currentView }
-					isPreview={ !! isPreview }
 				>
 					<CartBlockContext.Provider
 						value={ {

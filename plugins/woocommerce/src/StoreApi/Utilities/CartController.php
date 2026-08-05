@@ -10,8 +10,6 @@ use Automattic\WooCommerce\StoreApi\Exceptions\OutOfStockException;
 use Automattic\WooCommerce\StoreApi\Exceptions\PartialOutOfStockException;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Exceptions\TooManyInCartException;
-use Automattic\WooCommerce\Internal\FraudProtection\CartEventTracker;
-use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 use Automattic\WooCommerce\StoreApi\Utilities\ArrayUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\StoreApi\Utilities\NoticeHandler;
@@ -224,12 +222,6 @@ class CartController {
 			$request['variation'],
 			$request['cart_item_data']
 		);
-
-		// Track cart event for fraud protection.
-		if ( $product instanceof \WC_Product && wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
-			wc_get_container()->get( CartEventTracker::class )
-				->track_cart_item_added( $cart_id, $this->get_product_id( $product ), (int) $request_quantity, $this->get_variation_id( $product ) );
-		}
 
 		return $cart_id;
 	}
@@ -700,13 +692,6 @@ class CartController {
 			);
 		}
 
-		if ( $product->is_sold_individually() && $cart_item['quantity'] > 1 ) {
-			throw new TooManyInCartException(
-				'woocommerce_rest_product_too_many_in_cart',
-				$product->get_name()
-			);
-		}
-
 		if ( ! $product->is_in_stock() ) {
 			throw new OutOfStockException(
 				'woocommerce_rest_product_out_of_stock',
@@ -714,11 +699,17 @@ class CartController {
 			);
 		}
 
-		if ( $product->managing_stock() && ! $product->backorders_allowed() ) {
-			$qty_remaining = $this->get_remaining_stock_for_product( $product );
-			$qty_in_cart   = $this->get_product_quantity_in_cart( $product );
+		if ( $cart_item['quantity'] > 1 && $product->is_sold_individually() ) {
+			throw new TooManyInCartException(
+				'woocommerce_rest_product_too_many_in_cart',
+				$product->get_name()
+			);
+		}
 
-			if ( $qty_remaining < $qty_in_cart ) {
+		if ( $product->managing_stock() && ! $product->backorders_allowed() ) {
+			$stock_remaining = $this->get_remaining_stock_for_product( $product );
+			$sold_out        = $stock_remaining <= 0;
+			if ( $sold_out || $stock_remaining < $this->get_product_quantity_in_cart( $product ) ) {
 				throw new PartialOutOfStockException(
 					'woocommerce_rest_product_partially_out_of_stock',
 					$product->get_name()
@@ -1100,7 +1091,7 @@ class CartController {
 		$product_quantities = $cart->get_cart_item_quantities();
 		$product_id         = $product->get_stock_managed_by_id();
 
-		return isset( $product_quantities[ $product_id ] ) ? $product_quantities[ $product_id ] : 0;
+		return $product_quantities[ $product_id ] ?? 0;
 	}
 
 	/**
@@ -1110,8 +1101,7 @@ class CartController {
 	 * @return int
 	 */
 	protected function get_remaining_stock_for_product( $product ) {
-		$reserve_stock = new ReserveStock();
-		$qty_reserved  = $reserve_stock->get_reserved_stock( $product, $this->get_draft_order_id() );
+		$qty_reserved = ( new ReserveStock() )->get_reserved_stock( $product, $this->get_draft_order_id() );
 
 		return $product->get_stock_quantity() - $qty_reserved;
 	}

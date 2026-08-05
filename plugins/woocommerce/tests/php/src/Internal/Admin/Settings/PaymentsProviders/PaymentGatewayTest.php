@@ -186,6 +186,12 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 							'description' => 'WooPay express checkout',
 							'icon'        => '', // The icon with an invalid URL is ignored.
 							'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
+							'notice'      => array(
+								'badge'     => '',
+								'message'   => '',
+								'link_text' => '',
+								'link_url'  => '',
+							),
 						),
 						array(
 							'id'          => 'card',
@@ -196,6 +202,12 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 							'description' => '<strong>Accepts</strong> <b>all major</b><em>credit</em> and <a href="#" target="_blank">debit cards</a>.',
 							'icon'        => 'https://example.com/card-icon.png',
 							'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
+							'notice'      => array(
+								'badge'     => '',
+								'message'   => '',
+								'link_text' => '',
+								'link_url'  => '',
+							),
 						),
 						array(
 							'id'          => 'basic2',
@@ -206,6 +218,12 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 							'description' => '',
 							'icon'        => '',
 							'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
+							'notice'      => array(
+								'badge'     => '',
+								'message'   => '',
+								'link_text' => '',
+								'link_url'  => '',
+							),
 						),
 						array(
 							'id'          => 'basic',
@@ -216,6 +234,12 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 							'description' => '',
 							'icon'        => '',
 							'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_SECONDARY,
+							'notice'      => array(
+								'badge'     => '',
+								'message'   => '',
+								'link_text' => '',
+								'link_url'  => '',
+							),
 						),
 					),
 				),
@@ -1898,6 +1922,12 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 					'description' => 'WooPay express checkout',
 					'icon'        => 'https://example.com/icon.png',
 					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_SECONDARY,
+					'notice'      => array(
+						'badge'     => '',
+						'message'   => '',
+						'link_text' => '',
+						'link_url'  => '',
+					),
 				),
 				array(
 					'id'          => 'card',
@@ -1908,6 +1938,12 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 					'description' => 'Accepts all major credit and debit cards.',
 					'icon'        => 'https://example.com/card-icon.png',
 					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
+					'notice'      => array(
+						'badge'     => '',
+						'message'   => '',
+						'link_text' => '',
+						'link_url'  => '',
+					),
 				),
 			),
 			$this->sut->get_recommended_payment_methods( $fake_gateway )
@@ -1962,6 +1998,12 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
 					// No icon.
 					'icon'        => '',
+					'notice'      => array(
+						'badge'     => '',
+						'message'   => '',
+						'link_text' => '',
+						'link_url'  => '',
+					),
 				),
 			),
 			$this->sut->get_recommended_payment_methods( $fake_gateway )
@@ -1978,6 +2020,102 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 			array(),
 			$this->sut->get_recommended_payment_methods( $fake_gateway )
 		);
+	}
+
+	/**
+	 * Test that recommended payment methods with a notice are standardized correctly.
+	 */
+	public function test_get_recommended_payment_methods_with_notice() {
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'recommended_payment_methods' => array(
+					array(
+						'id'      => 'p24',
+						'title'   => 'Przelewy24',
+						'enabled' => false,
+						'notice'  => array(
+							'badge'     => 'Additional verification required',
+							'message'   => 'Przelewy24 has strict requirements.',
+							'link_text' => 'Review requirements',
+							'link_url'  => 'https://woocommerce.com/document/woopayments/payment-methods/local-payment-methods/#p24-additional-requirements',
+						),
+					),
+				),
+			)
+		);
+
+		$result = $this->sut->get_recommended_payment_methods( $fake_gateway );
+
+		$this->assertCount( 1, $result );
+		$this->assertArrayHasKey( 'notice', $result[0] );
+		$this->assertSame( 'Additional verification required', $result[0]['notice']['badge'] );
+		$this->assertSame( 'Przelewy24 has strict requirements.', $result[0]['notice']['message'] );
+		$this->assertSame( 'Review requirements', $result[0]['notice']['link_text'] );
+		$this->assertSame(
+			'https://woocommerce.com/document/woopayments/payment-methods/local-payment-methods/#p24-additional-requirements',
+			$result[0]['notice']['link_url']
+		);
+	}
+
+	/**
+	 * Test that recommended payment methods without a notice have an empty notice.
+	 */
+	public function test_get_recommended_payment_methods_without_notice() {
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'recommended_payment_methods' => array(
+					array(
+						'id'    => 'card',
+						'title' => 'Card',
+					),
+				),
+			)
+		);
+
+		$result = $this->sut->get_recommended_payment_methods( $fake_gateway );
+
+		$this->assertCount( 1, $result );
+		$this->assertArrayHasKey( 'notice', $result[0] );
+		$this->assertSame( '', $result[0]['notice']['badge'] );
+		$this->assertSame( '', $result[0]['notice']['message'] );
+		$this->assertSame( '', $result[0]['notice']['link_text'] );
+		$this->assertSame( '', $result[0]['notice']['link_url'] );
+	}
+
+	/**
+	 * Test that notice fields are sanitized (HTML stripped from text, URL sanitized).
+	 */
+	public function test_get_recommended_payment_methods_notice_sanitization() {
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'recommended_payment_methods' => array(
+					array(
+						'id'     => 'p24',
+						'title'  => 'Przelewy24',
+						'notice' => array(
+							'badge'     => '<script>alert("xss")</script>Badge text',
+							'message'   => '<b>Bold</b> message with <script>xss</script>',
+							'link_text' => '<em>Link</em> text',
+							'link_url'  => 'javascript:alert(1)',
+						),
+					),
+				),
+			)
+		);
+
+		$result = $this->sut->get_recommended_payment_methods( $fake_gateway );
+
+		$this->assertCount( 1, $result );
+		// All text fields use sanitize_text_field() which calls wp_strip_all_tags()
+		// which removes all HTML tags and their content for script tags.
+		$this->assertSame( 'Badge text', $result[0]['notice']['badge'] );
+		$this->assertSame( 'Link text', $result[0]['notice']['link_text'] );
+		$this->assertSame( 'Bold message with', $result[0]['notice']['message'] );
+		// javascript: URLs should be sanitized away by wc_is_valid_url().
+		$this->assertSame( '', $result[0]['notice']['link_url'] );
 	}
 
 	/**
@@ -2539,6 +2677,177 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 			'single character'   => array( 'U' ),
 			'numeric'            => array( '12' ),
 			'mixed alphanumeric' => array( 'U1' ),
+		);
+	}
+
+	/**
+	 * @testdox Every state probe degrades to a boolean when the gateway throws from it.
+	 *
+	 * The class infers gateway state by calling methods that third-party gateways are
+	 * free to implement however they like, so any of them can throw. Each probe is
+	 * wrapped in a try/catch for that reason; this asserts the wrapping actually holds.
+	 *
+	 * @dataProvider data_provider_throwables_from_gateway
+	 *
+	 * @param \Throwable $to_throw The throwable the gateway raises from every probe.
+	 */
+	public function test_state_probes_survive_a_throwing_gateway( \Throwable $to_throw ) {
+		// Arrange.
+		$fake_gateway = new class( 'throwing_gateway', array() ) extends FakePaymentGateway {
+			/**
+			 * The throwable to raise.
+			 *
+			 * @var \Throwable
+			 */
+			public $to_throw;
+
+			// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Squiz.Commenting.FunctionComment.MissingParamTag
+			public function get_option( $key, $empty_value = null ) {
+				throw $this->to_throw;
+			}
+
+			public function needs_setup() {
+				throw $this->to_throw;
+			}
+
+			public function is_test_mode() {
+				throw $this->to_throw;
+			}
+
+			public function is_dev_mode() {
+				throw $this->to_throw;
+			}
+
+			public function is_account_connected() {
+				throw $this->to_throw;
+			}
+
+			public function is_onboarding_started() {
+				throw $this->to_throw;
+			}
+
+			public function is_onboarding_completed() {
+				throw $this->to_throw;
+			}
+
+			public function is_in_test_mode_onboarding() {
+				throw $this->to_throw;
+			}
+			// phpcs:enable Squiz.Commenting.FunctionComment.Missing, Squiz.Commenting.FunctionComment.MissingParamTag
+		};
+
+		$fake_gateway->to_throw = $to_throw;
+
+		// Act & Assert - nothing escapes, and every probe still answers with a boolean.
+		$this->assertIsBool( $this->sut->needs_setup( $fake_gateway ), 'needs_setup() should not let the throwable escape' );
+		$this->assertIsBool( $this->sut->is_in_test_mode( $fake_gateway ), 'is_in_test_mode() should not let the throwable escape' );
+		$this->assertIsBool( $this->sut->is_in_dev_mode( $fake_gateway ), 'is_in_dev_mode() should not let the throwable escape' );
+		$this->assertIsBool( $this->sut->is_account_connected( $fake_gateway ), 'is_account_connected() should not let the throwable escape' );
+		$this->assertIsBool( $this->sut->is_onboarding_started( $fake_gateway ), 'is_onboarding_started() should not let the throwable escape' );
+		$this->assertIsBool( $this->sut->is_onboarding_completed( $fake_gateway ), 'is_onboarding_completed() should not let the throwable escape' );
+		$this->assertIsBool( $this->sut->is_in_test_mode_onboarding( $fake_gateway ), 'is_in_test_mode_onboarding() should not let the throwable escape' );
+	}
+
+	/**
+	 * Data provider for throwables a gateway might raise from a state probe.
+	 *
+	 * Errors are included alongside exceptions because the catch blocks target
+	 * Throwable, and a gateway with a mismatched signature raises an Error rather
+	 * than an Exception.
+	 *
+	 * @return array Test cases with throwables.
+	 */
+	public function data_provider_throwables_from_gateway(): array {
+		return array(
+			'exception'            => array( new \RuntimeException( 'bogus runtime failure' ) ),
+			'error'                => array( new \Error( 'bogus error' ) ),
+			'type error'           => array( new \TypeError( 'bogus type error' ) ),
+			'argument count error' => array( new \ArgumentCountError( 'bogus argument count error' ) ),
+		);
+	}
+
+	/**
+	 * @testdox A throwing state probe is logged for debugging rather than swallowed silently.
+	 */
+	public function test_throwing_state_probe_is_logged() {
+		// Arrange.
+		$fake_logger = $this->create_fake_logger();
+
+		add_filter(
+			'woocommerce_logging_class',
+			function () use ( $fake_logger ) {
+				return $fake_logger;
+			}
+		);
+
+		$fake_gateway = new class( 'throwing_gateway', array() ) extends FakePaymentGateway {
+			// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Squiz.Commenting.FunctionComment.MissingParamTag
+			public function is_account_connected() {
+				throw new \RuntimeException( 'bogus account connected failure' );
+			}
+			// phpcs:enable Squiz.Commenting.FunctionComment.Missing, Squiz.Commenting.FunctionComment.MissingParamTag
+		};
+
+		// Act.
+		$this->sut->is_account_connected( $fake_gateway );
+
+		// Assert.
+		$this->assertNotEmpty( $fake_logger->debug_calls, 'A swallowed throwable should still be logged at debug level' );
+
+		$debug_call = $fake_logger->debug_calls[0];
+		$this->assertArrayHasKey( 'source', $debug_call['context'] );
+		$this->assertEquals( 'settings-payments', $debug_call['context']['source'] );
+		$this->assertArrayHasKey( 'gateway', $debug_call['context'] );
+		$this->assertEquals( 'throwing_gateway', $debug_call['context']['gateway'] );
+		$this->assertArrayHasKey( 'exception', $debug_call['context'] );
+
+		// Clean up.
+		remove_all_filters( 'woocommerce_logging_class' );
+	}
+
+	/**
+	 * @testdox Test mode detection returns false when get_option() returns a non-scalar.
+	 *
+	 * The gateway settings array is stored data, so a malformed entry can hand back a type
+	 * the option probes do not expect. The gateway is mocked with only get_option() defined
+	 * so the earlier method and property probes are skipped and the option path is the one
+	 * under test.
+	 *
+	 * @dataProvider data_provider_non_scalar_option_values
+	 *
+	 * @param mixed $value The value the gateway returns from get_option().
+	 */
+	public function test_is_in_test_mode_returns_false_for_non_scalar_option_values( $value ) {
+		// Arrange.
+		$gateway = $this->getMockBuilder( 'WC_Payment_Gateway' )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_option' ) )
+			->getMock();
+
+		$gateway->id = 'junk_option_gateway';
+
+		$gateway->expects( $this->atLeastOnce() )
+			->method( 'get_option' )
+			->willReturn( $value );
+
+		// Act.
+		$result = $this->sut->is_in_test_mode( $gateway );
+
+		// Assert - an unusable value must not be read as an enabled test mode.
+		$this->assertFalse( $result );
+	}
+
+	/**
+	 * Data provider for non-scalar values a gateway might return from get_option().
+	 *
+	 * @return array Test cases with non-scalar option values.
+	 */
+	public function data_provider_non_scalar_option_values(): array {
+		return array(
+			'array'        => array( array( 'unexpected' => 'array' ) ),
+			'nested array' => array( array( array( 'deep' ) ) ),
+			'object'       => array( new stdClass() ),
+			'null'         => array( null ),
 		);
 	}
 }

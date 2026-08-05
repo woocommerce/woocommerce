@@ -35,23 +35,15 @@ const ProductDetails = ( {
 		return null;
 	}
 
-	details = details.filter( ( detail ) => ! detail.hidden );
+	const filteredDetails = details.filter( ( detail ) => ! detail.hidden );
 
-	if ( details.length === 0 ) {
+	if ( filteredDetails.length === 0 ) {
 		return null;
 	}
 
-	let ParentTag = 'ul' as keyof JSX.IntrinsicElements;
-	let ChildTag = 'li' as keyof JSX.IntrinsicElements;
-
-	if ( details.length === 1 ) {
-		ParentTag = 'div';
-		ChildTag = 'div';
-	}
-
 	return (
-		<ParentTag className="wc-block-components-product-details">
-			{ details.map( ( detail ) => {
+		<div className="wc-block-components-product-details">
+			{ filteredDetails.map( ( detail, index ) => {
 				// Support both `key` and `name` props
 				const name = detail?.key || detail.name || '';
 				// Strip HTML tags from name for CSS class generation
@@ -67,8 +59,10 @@ const ProductDetails = ( {
 						  ) }`
 						: '' );
 
+				const isLast = index === filteredDetails.length - 1;
+
 				return (
-					<ChildTag
+					<span
 						key={ name + ( detail.display || detail.value ) }
 						className={ className }
 					>
@@ -98,10 +92,11 @@ const ProductDetails = ( {
 								),
 							} }
 						/>
-					</ChildTag>
+						{ ! isLast && <span aria-hidden="true"> / </span> }
+					</span>
 				);
 			} ) }
-		</ParentTag>
+		</div>
 	);
 };
 

@@ -104,6 +104,12 @@ export const providersStub: PaymentsProvider[] = [
 					extraDescription: 'Extra description.',
 					extraIcon:
 						'http://localhost:8082/wp-content/plugins/woocommerce/assets/images/onboarding/extra-icon.svg',
+					notice: {
+						badge: '',
+						message: '',
+						link_text: '',
+						link_url: '',
+					},
 				},
 				{
 					id: 'woopay',
@@ -116,6 +122,12 @@ export const providersStub: PaymentsProvider[] = [
 					extraDescription: 'Extra description.',
 					extraIcon:
 						'http://localhost:8082/wp-content/plugins/woocommerce/assets/images/onboarding/extra-icon.svg',
+					notice: {
+						badge: '',
+						message: '',
+						link_text: '',
+						link_url: '',
+					},
 				},
 			],
 			type: 'native_in_context',

@@ -109,4 +109,36 @@ class WC_Product_Variation_Test extends WC_Unit_Test_Case {
 		$this->variation->set_cogs_value( $defined_value );
 		$this->assertEquals( $expected_value, $this->variation->get_cogs_total_value() );
 	}
+
+	/**
+	 * Ensure get_permalink() handles non-array variation data without fataling.
+	 *
+	 * @testdox get_permalink() returns a URL without fataling when $item_object['variation'] is a string rather than the expected variation-attributes array.
+	 */
+	public function test_get_permalink_handles_non_array_variation_value() {
+		$url = $this->variation->get_permalink( array( 'variation' => 'some-string-value' ) );
+
+		$this->assertIsString( $url );
+		$this->assertNotEmpty( $url );
+	}
+
+	/**
+	 * @testdox A variation's viewability follows its parent's status.
+	 */
+	public function test_is_viewable_variation_follows_parent_status() {
+		wp_set_current_user( 0 );
+		$this->assertTrue( $this->variation->is_viewable(), 'A variation of a published parent is viewable when logged out.' );
+		$this->assertTrue( $this->variation->is_publicly_viewable(), 'A variation of a published parent is publicly viewable.' );
+
+		$this->parent_product->set_status( 'draft' );
+		$this->parent_product->save();
+
+		wp_set_current_user( 0 );
+		$this->assertFalse( $this->variation->is_viewable(), 'A variation whose parent is a draft is not viewable when logged out.' );
+
+		$admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin );
+		$this->assertTrue( $this->variation->is_viewable(), 'A variation whose parent is a draft is viewable by admins.' );
+		$this->assertFalse( $this->variation->is_publicly_viewable(), 'A variation whose parent is a draft is never publicly viewable.' );
+	}
 }

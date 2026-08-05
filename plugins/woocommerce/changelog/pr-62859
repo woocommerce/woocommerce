@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Add missing relevant hooks info for products and currencies REST API endpoints caching

@@ -33,13 +33,13 @@
 
 			&:hover,
 			&.active {
-				background-color: #0073aa;
+				background-color: var(--wp-admin-theme-color, #0073aa);
 				color: #fff;
 			}
 
 			&:focus {
 				outline: none;
-				background-color: #0073aa;
+				background-color: var(--wp-admin-theme-color, #0073aa);
 				color: #fff;
 			}
 		}

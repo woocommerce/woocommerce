@@ -43,7 +43,7 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import DownloadIcon from './download-icon';
-import { extendTableData } from './utils';
+import { extendTableData, getExportQuery } from './utils';
 import './style.scss';
 
 const TABLE_FILTER = 'woocommerce_admin_report_table';
@@ -191,7 +191,8 @@ const ReportTable = ( props ) => {
 	};
 
 	const onClickDownload = () => {
-		const { createNotice, startExport, title } = props;
+		const { createNotice, startExport, title, filters, advancedFilters } =
+			props;
 		const params = Object.assign( {}, query );
 		const { data, totalResults } = items;
 		let downloadType = 'browser';
@@ -211,7 +212,10 @@ const ReportTable = ( props ) => {
 			);
 		} else {
 			downloadType = 'email';
-			startExport( endpoint, reportQuery )
+			startExport(
+				endpoint,
+				getExportQuery( reportQuery, query, filters, advancedFilters )
+			)
 				.then( () =>
 					createNotice(
 						'success',

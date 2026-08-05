@@ -57,7 +57,7 @@ jobs:
     steps:
       - name: Validate PR and get merge commit
         id: check-pr
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const prNumber = parseInt('${{ inputs.pr_number }}', 10);
@@ -102,7 +102,7 @@ jobs:
       - name: Verify target branch and cherry-pick branch
         id: verify-branches
         if: steps.check-pr.outcome == 'success'
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const targetBranch = '${{ inputs.target_branch }}';
@@ -222,9 +222,10 @@ jobs:
       cherry_pick_pr_number: ${{ steps.aggregate-status.outputs.cherry_pick_pr_number }}
     steps:
       - name: Checkout target branch
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: ${{ inputs.target_branch }}
+          token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Create and perform cherry-pick
         id: cherry-pick
@@ -248,10 +249,32 @@ jobs:
 
           # Attempt cherry-pick with explicit conflict handling
           if git cherry-pick -m1 "$MERGE_COMMIT_SHA"; then
-            # Success case
+            # Check if only changelog files were changed (code already exists in target branch)
+            CHANGED_FILES=$(git diff --name-only HEAD~1)
+            NON_CHANGELOG_FILES=$(echo "$CHANGED_FILES" | grep -vE "^(plugins|packages)/.*/changelog/" || true)
+
+            if [[ -z "$NON_CHANGELOG_FILES" ]]; then
+              echo "status=skipped" >> $GITHUB_OUTPUT
+              echo "error_message=Cherry-pick skipped: only changelog files changed, code already exists in '$TARGET_BRANCH'." >> $GITHUB_OUTPUT
+              exit 0
+            fi
+
+            # Success case with real changes
             echo "has_conflicts=false" >> $GITHUB_OUTPUT
             echo "Cherry-pick completed successfully"
           else
+            # Cherry-pick failed - determine the reason
+
+            # Case 1: Empty cherry-pick - changes already exist in target branch.
+            # Git leaves the repo mid cherry-pick (CHERRY_PICK_HEAD exists) with nothing staged.
+            if [[ -f .git/CHERRY_PICK_HEAD ]] && [[ -z "$(git diff --cached --name-only)" ]]; then
+              echo "status=skipped" >> $GITHUB_OUTPUT
+              echo "error_message=Cherry-pick skipped: changes from PR #$PR_NUMBER already exist in '$TARGET_BRANCH'." >> $GITHUB_OUTPUT
+              git cherry-pick --abort 2>/dev/null || true
+              exit 0
+            fi
+
+            # Case 2: Real conflicts
             # Capture conflicted files with their status codes and build JSON array using jq
             CONFLICT_JSON=$(git status --porcelain | grep -E "^(DD|AU|UD|UA|DU|AA|UU)" | jq -R -n -c '
               [inputs | {status: .[0:2], file: .[3:]}]
@@ -299,7 +322,8 @@ jobs:
 
       - name: Create cherry-pick pull request
         id: create-pr
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        if: steps.cherry-pick.outputs.status != 'skipped'
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
           CONFLICT_STATUS: ${{ steps.cherry-pick.outputs.conflict_status }}
         with:
@@ -319,7 +343,9 @@ jobs:
               });
 
               // Create PR body
-              let prBody = `This PR is a cherry-pick of #${prNumber} to \`${targetBranch}\`.\n\n`;
+              const sourceBranch = originalPr.base.ref;
+              let prBody = `<!-- cherry-pick-source-branch: ${sourceBranch} -->\n`;
+              prBody += `This PR is a cherry-pick of #${prNumber} to \`${targetBranch}\`.\n\n`;
 
               if (hasConflicts) {
                 prBody += `> [!WARNING]\n`;
@@ -331,13 +357,13 @@ jobs:
                 const conflicts = JSON.parse(process.env.CONFLICT_STATUS || '[]');
                 // Map status codes to human-readable descriptions
                 const conflictTypeMap = {
-                  'DD': 'deleted by both',
-                  'UA': 'added by cherry-pick, does not exist in target branch',
-                  'UD': 'deleted by cherry-pick, modified in target branch',
-                  'AU': 'modified by cherry-pick, added in target branch',
-                  'DU': 'modified by cherry-pick, deleted in target branch',
-                  'AA': 'added by both with different content',
-                  'UU': 'modified by both'
+                  'DD': `deleted in both this backport and \`${targetBranch}\``,
+                  'UA': `new file in this backport, does not exist in \`${targetBranch}\``,
+                  'UD': `deleted in this backport, modified in \`${targetBranch}\``,
+                  'AU': `modified in this backport, added in \`${targetBranch}\``,
+                  'DU': `modified in this backport, deleted in \`${targetBranch}\``,
+                  'AA': `added in both this backport and \`${targetBranch}\` with different content`,
+                  'UU': `modified in both this backport and \`${targetBranch}\``
                 };
                 prBody += `>\n`; // Empty blockquote line for spacing
                 prBody += `> **Conflicted Files:**\n`;
@@ -365,12 +391,24 @@ jobs:
                 body: prBody
               });
               
-              await github.rest.pulls.requestReviewers({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: newPr.number,
-                reviewers: [context.actor, originalPr.user.login]
-              });
+              core.setOutput('pr_number', newPr.number.toString());
+              core.setOutput('original_author', originalPr.user?.login || '');
+              core.setOutput('original_merger', originalPr.merged_by?.login || '');
+              core.info(`Created PR #${newPr.number}: ${newPr.html_url}`);
+
+              // Request reviewers separately so an outside collaborator doesn't fail PR creation.
+              for (const reviewer of [context.actor, originalPr.user?.login].filter(Boolean)) {
+                try {
+                  await github.rest.pulls.requestReviewers({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    pull_number: newPr.number,
+                    reviewers: [reviewer]
+                  });
+                } catch (error) {
+                  core.warning(`Failed to request review from ${reviewer}: ${error.message}`);
+                }
+              }
 
               // Add label if there are conflicts
               if (hasConflicts) {
@@ -387,12 +425,6 @@ jobs:
                 }
               }
 
-              core.setOutput('pr_number', newPr.number.toString());
-              core.setOutput('original_author', originalPr.user?.login || '');
-              core.setOutput('original_merger', originalPr.merged_by?.login || '');
-
-              core.info(`Created PR #${newPr.number}: ${newPr.html_url}`);
-
             } catch (error) {
               core.setOutput('error_message', `Failed to create PR: ${error.message}`);
               core.setFailed(`Failed to create PR: ${error.message}`);
@@ -400,7 +432,7 @@ jobs:
 
       - name: Assign PR
         if: steps.create-pr.outcome == 'success'
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
@@ -432,7 +464,11 @@ jobs:
         id: aggregate-status
         if: always()
         run: |
-          if [[ "${{ steps.cherry-pick.outcome }}" == "failure" ]]; then
+          if [[ "${{ steps.cherry-pick.outputs.status }}" == "skipped" ]]; then
+            echo "status=skipped" >> $GITHUB_OUTPUT
+            echo "error_message=${{ steps.cherry-pick.outputs.error_message }}" >> $GITHUB_OUTPUT
+            echo "cherry_pick_pr_number=" >> $GITHUB_OUTPUT
+          elif [[ "${{ steps.cherry-pick.outcome }}" == "failure" ]]; then
             # Use the detailed error message from cherry-pick step
             error_msg="${{ steps.cherry-pick.outputs.error_message }}"
             if [[ -z "$error_msg" ]]; then
@@ -474,6 +510,10 @@ jobs:
           elif [[ "$verify_status" != "success" ]]; then
             echo "status=failed" >> $GITHUB_OUTPUT
             echo "error_message=${{ needs.verify.outputs.error_message }}" >> $GITHUB_OUTPUT
+            echo "cherry_pick_pr_number=" >> $GITHUB_OUTPUT
+          elif [[ "$cherry_status" == "skipped" ]]; then
+            echo "status=skipped" >> $GITHUB_OUTPUT
+            echo "error_message=${{ needs.cherry-pick.outputs.error_message }}" >> $GITHUB_OUTPUT
             echo "cherry_pick_pr_number=" >> $GITHUB_OUTPUT
           elif [[ "$cherry_status" != "success" ]]; then
             echo "status=failed" >> $GITHUB_OUTPUT

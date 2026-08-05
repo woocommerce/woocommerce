@@ -23,11 +23,23 @@ class WC_Orders_Tracking_Test extends \WC_Unit_Test_Case {
 	private $prev_hpos_enabled;
 
 	/**
+	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 *
+	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::setup_cot_tables();
+	}
+
+	/**
 	 * Set up test
 	 *
 	 * @return void
 	 */
 	public function setUp(): void {
+		parent::setUp();
+		$this->clear_tracks_events();
+
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-orders-tracking.php';
 		update_option( 'woocommerce_allow_tracking', 'yes' );
 
@@ -40,11 +52,14 @@ class WC_Orders_Tracking_Test extends \WC_Unit_Test_Case {
 
 		$orders_tracking = new WC_Orders_Tracking();
 		$orders_tracking->init();
-		parent::setUp();
 
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		$this->prev_hpos_enabled = \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
-		$this->setup_cot();
+
+		// Keep the permanent HPOS tables outside the per-test transaction.
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+		$this->toggle_cot_feature_and_usage( true );
 	}
 
 	/**
@@ -143,18 +158,12 @@ class WC_Orders_Tracking_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Returns an object mocking what we need from `\WP_Screen`.
+	 * Returns a WP_Screen instance for use in tests.
 	 *
-	 * @return object
+	 * @return \WP_Screen
 	 */
 	private function get_screen_mock() {
-		$screen_mock = $this->getMockBuilder( stdClass::class )->setMethods( array( 'in_admin', 'add_option' ) )->getMock();
-		$screen_mock->method( 'in_admin' )->willReturn( true );
-		foreach ( array( 'id', 'base', 'action', 'post_type' ) as $key ) {
-			$screen_mock->{$key} = '';
-		}
-
-		return $screen_mock;
+		return \WP_Screen::get( '' );
 	}
 
 	/**

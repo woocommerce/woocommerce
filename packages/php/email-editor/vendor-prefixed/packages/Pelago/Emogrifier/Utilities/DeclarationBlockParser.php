@@ -20,6 +20,17 @@ final class DeclarationBlockParser
     private static $cache = [];
 
     /**
+     * Clears the static declaration block cache.
+     *
+     * This should be called between processing separate HTML documents to prevent
+     * unbounded memory growth in long-running processes.
+     */
+    public static function clearCache(): void
+    {
+        self::$cache = [];
+    }
+
+    /**
      * CSS custom properties (variables) have case-sensitive names, so their case must be preserved.
      * Standard CSS properties have case-insensitive names, which are converted to lowercase.
      *

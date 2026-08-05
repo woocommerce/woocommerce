@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import numberFormatter from 'locutus/php/strings/number_format';
+import { number_format as numberFormatter } from 'locutus/php/strings/number_format';
 
 /**
  * Number formatting configuration object

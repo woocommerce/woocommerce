@@ -12,8 +12,6 @@ import deprecated from '@wordpress/deprecated';
  */
 import { STORE_NAME } from './constants';
 import { MenuItem } from './types';
-import { SelectFromMap, WPDataSelectors } from '../types';
-import * as selectors from './selectors';
 
 /**
  * Higher-order component used to hydrate navigation data.
@@ -28,25 +26,18 @@ export const withNavigationHydration = ( data: { menuItems: MenuItem[] } ) =>
 	>(
 		( OriginalComponent ) => ( props ) => {
 			deprecated( 'withNavigationHydration', {} );
-			const shouldHydrate = useSelect(
-				(
-					select: (
-						key: typeof STORE_NAME
-					) => SelectFromMap< typeof selectors > & WPDataSelectors
-				) => {
-					if ( ! data ) {
-						return;
-					}
+			const shouldHydrate = useSelect( ( select ) => {
+				if ( ! data ) {
+					return;
+				}
 
-					const { isResolving, hasFinishedResolution } =
-						select( STORE_NAME );
-					return (
-						! isResolving( 'getMenuItems' ) &&
-						! hasFinishedResolution( 'getMenuItems' )
-					);
-				},
-				[]
-			);
+				const { isResolving, hasFinishedResolution } =
+					select( STORE_NAME );
+				return (
+					! isResolving( 'getMenuItems' ) &&
+					! hasFinishedResolution( 'getMenuItems' )
+				);
+			}, [] );
 
 			const { startResolution, finishResolution, setMenuItems } =
 				useDispatch( STORE_NAME );
@@ -55,9 +46,9 @@ export const withNavigationHydration = ( data: { menuItems: MenuItem[] } ) =>
 				if ( ! shouldHydrate ) {
 					return;
 				}
-				startResolution( 'getMenuItems', [] );
-				setMenuItems( data.menuItems );
-				finishResolution( 'getMenuItems', [] );
+				void startResolution( 'getMenuItems', [] );
+				void setMenuItems( data.menuItems );
+				void finishResolution( 'getMenuItems', [] );
 			}, [ shouldHydrate ] );
 
 			return <OriginalComponent { ...props } />;

@@ -250,6 +250,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		global $wpdb;
 		$product_names = array();
 
+		if ( $query_args['extended_info'] ) {
+			self::prime_object_caches( array_column( $products_data, 'product_id' ) );
+		}
+
 		foreach ( $products_data as $key => $product_data ) {
 			$extended_info = new \ArrayObject();
 			if ( $query_args['extended_info'] ) {
@@ -444,7 +448,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Create or update an entry in the wc_admin_order_product_lookup table for an order.
+	 * Create or update an entry in the wc_order_product_lookup table for an order.
 	 *
 	 * @since 3.5.0
 	 * @param int $order_id Order ID.

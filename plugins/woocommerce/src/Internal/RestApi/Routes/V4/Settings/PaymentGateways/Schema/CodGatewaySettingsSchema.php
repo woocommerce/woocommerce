@@ -12,31 +12,85 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\PaymentGate
 defined( 'ABSPATH' ) || exit;
 
 use WC_Data_Store;
+use WC_Payment_Gateway;
 use WC_Shipping_Zone;
 
 /**
  * CodGatewaySettingsSchema class.
  *
- * Extends AbstractPaymentGatewaySettingsSchema for Cash on Delivery payment gateway.
- *
- * Note: The COD gateway has enable_for_methods and enable_for_virtual fields
- * which are standard fields stored in gateway settings.
+ * Extends AbstractPaymentGatewaySettingsSchema for Cash on Delivery payment gateway
+ * with design-aligned field labels and descriptions.
  */
 class CodGatewaySettingsSchema extends AbstractPaymentGatewaySettingsSchema {
 
 	/**
-	 * Get options for specific COD gateway fields.
+	 * Cached shipping method options.
 	 *
-	 * @param string $field_id Field ID.
-	 * @return array Field options.
+	 * @var ?array
 	 */
-	protected function get_field_options( string $field_id ): array {
-		switch ( $field_id ) {
-			case 'enable_for_methods':
-				return $this->load_shipping_method_options();
-			default:
-				return array();
-		}
+	private ?array $shipping_method_options = null;
+
+	/**
+	 * Get custom groups for the COD gateway.
+	 *
+	 * Provides design-aligned labels and descriptions for the cash on delivery
+	 * settings form fields. Derives fields from the gateway's form_fields
+	 * to preserve any extension-injected settings.
+	 *
+	 * @param WC_Payment_Gateway $gateway Gateway instance.
+	 * @return array Custom group structure.
+	 */
+	protected function get_custom_groups_for_gateway( WC_Payment_Gateway $gateway ): array {
+		// Design-aligned overrides for core fields.
+		$core_field_overrides = array(
+			'enabled'            => array(
+				'label' => __( 'Enable/Disable', 'woocommerce' ),
+				'type'  => 'checkbox',
+				'desc'  => __( 'Enable Cash on delivery at checkout', 'woocommerce' ),
+			),
+			'title'              => array(
+				'label' => __( 'Checkout label', 'woocommerce' ),
+				'type'  => 'text',
+				'desc'  => __( 'Shown to customers on the payment methods list at checkout.', 'woocommerce' ),
+			),
+			'description'        => array(
+				'label' => __( 'Checkout instructions', 'woocommerce' ),
+				'type'  => 'text',
+				'desc'  => __( 'Shown below the checkout label.', 'woocommerce' ),
+			),
+			'order'              => array(
+				'label' => __( 'Order', 'woocommerce' ),
+				'type'  => 'number',
+				'desc'  => __( 'Determines the display order of payment gateways during checkout.', 'woocommerce' ),
+			),
+			'instructions'       => array(
+				'label' => __( 'Order confirmation instructions', 'woocommerce' ),
+				'type'  => 'text',
+				'desc'  => __( 'Shown on the order confirmation page and in order emails.', 'woocommerce' ),
+			),
+			'enable_for_methods' => array(
+				'label'   => __( 'Available for shipping methods', 'woocommerce' ),
+				'type'    => 'multiselect',
+				'desc'    => __( 'Choose which shipping methods support Cash on delivery.', 'woocommerce' ),
+				'options' => $this->load_shipping_method_options(),
+			),
+			'enable_for_virtual' => array(
+				'label' => __( 'Accept for virtual orders', 'woocommerce' ),
+				'type'  => 'checkbox',
+				'desc'  => __( 'Accept COD if the order is virtual', 'woocommerce' ),
+			),
+		);
+
+		$fields = $this->build_fields_from_form_fields( $gateway, $core_field_overrides );
+
+		$group = array(
+			'title'       => __( 'Cash on delivery settings', 'woocommerce' ),
+			'description' => __( 'Manage how Cash on delivery appears at checkout and in order emails.', 'woocommerce' ),
+			'order'       => 1,
+			'fields'      => $fields,
+		);
+
+		return array( 'settings' => $group );
 	}
 
 	/**
@@ -45,9 +99,17 @@ class CodGatewaySettingsSchema extends AbstractPaymentGatewaySettingsSchema {
 	 * This method replicates the logic from WC_Gateway_COD::load_shipping_method_options()
 	 * to provide shipping method options for the REST API without relying on the gateway class.
 	 *
+	 * Unlike the original, the is_accessing_settings() guard is intentionally omitted:
+	 * the REST API endpoint always needs options populated, and the instance-level cache
+	 * prevents redundant computation within a single request.
+	 *
 	 * @return array Nested array of shipping method options.
 	 */
 	private function load_shipping_method_options(): array {
+		if ( null !== $this->shipping_method_options ) {
+			return $this->shipping_method_options;
+		}
+
 		$data_store = WC_Data_Store::load( 'shipping-zone' );
 		$raw_zones  = $data_store->get_zones();
 		$zones      = array();
@@ -88,6 +150,8 @@ class CodGatewaySettingsSchema extends AbstractPaymentGatewaySettingsSchema {
 				}
 			}
 		}
+
+		$this->shipping_method_options = $options;
 
 		return $options;
 	}

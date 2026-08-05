@@ -525,7 +525,20 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 
 		// Get the count.
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$count = $wpdb->get_var( implode( ' ', $term_query ) );
+		$count = absint( $wpdb->get_var( implode( ' ', $term_query ) ) );
+
+		$term_id = absint( $term_id );
+
+		/**
+		 * Filter the product count for a term before it is saved.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param int          $count    The product count for the term.
+		 * @param int          $term_id  The term ID.
+		 * @param WP_Taxonomy $taxonomy The taxonomy object.
+		 */
+		$count = apply_filters( 'woocommerce_term_recount_product_count', $count, $term_id, $taxonomy );
 
 		// Update the count.
 		update_term_meta( $term_id, 'product_count_' . $taxonomy->name, absint( $count ) );
@@ -667,14 +680,15 @@ function wc_get_product_visibility_term_ids() {
 		return array();
 	}
 
-	static $term_ids = array();
+	static $term_ids_by_blog = array();
 
-	// The static variable doesn't work well with unit tests.
-	if ( count( $term_ids ) > 0 && ! class_exists( 'WC_Unit_Tests_Bootstrap' ) ) {
-		return $term_ids;
+	$blog_id = get_current_blog_id();
+
+	if ( isset( $term_ids_by_blog[ $blog_id ] ) && ! class_exists( 'WC_Unit_Tests_Bootstrap' ) ) {
+		return $term_ids_by_blog[ $blog_id ];
 	}
 
-	$term_ids = array_map(
+	$term_ids_by_blog[ $blog_id ] = array_map(
 		'absint',
 		wp_parse_args(
 			wp_list_pluck(
@@ -701,7 +715,7 @@ function wc_get_product_visibility_term_ids() {
 		)
 	);
 
-	return $term_ids;
+	return $term_ids_by_blog[ $blog_id ];
 }
 
 /**

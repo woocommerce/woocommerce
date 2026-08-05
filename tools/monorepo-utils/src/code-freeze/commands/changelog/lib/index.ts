@@ -5,7 +5,7 @@ import simpleGit from 'simple-git';
 import { execSync } from 'child_process';
 import { readFile, writeFile } from 'fs/promises';
 import path from 'path';
-import { readFileSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 
 /**
  * Internal dependencies
@@ -188,6 +188,9 @@ export const updateReleaseBranchChangelogs = async (
 
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
+		unsafe: {
+			allowUnsafeHooksPath: true,
+		},
 		config: [ 'core.hooksPath=/dev/null' ],
 	} );
 
@@ -233,7 +236,7 @@ export const updateReleaseBranchChangelogs = async (
 			);
 			deletionCommitHash = (
 				await git.raw( [ 'rev-parse', 'HEAD' ] )
-			 ).trim();
+			).trim();
 			Logger.notice( `git deletion hash: ${ deletionCommitHash }` );
 		} else {
 			Logger.notice(
@@ -273,9 +276,10 @@ export const updateReleaseBranchChangelogs = async (
 			};
 		}
 		Logger.notice( `Creating PR for ${ branch }` );
-		const warningMessage = noEntriesWritten
-			? '> [!CAUTION]\n> No entries were written to the changelog. You will be required to manually add a changelog entry before releasing.\n\n'
-			: '';
+		const warningMessage =
+			noEntriesWritten && ! options.appendChangelog
+				? '> [!CAUTION]\n> No entries were written to the changelog. You will be required to manually add a changelog entry before releasing.\n\n'
+				: '';
 		const pullRequest = await createPullRequest( {
 			owner,
 			name,
@@ -283,7 +287,7 @@ export const updateReleaseBranchChangelogs = async (
 			body: `${ warningMessage }This pull request was automatically generated to prepare the changelog for ${ version }`,
 			head: branch,
 			base: releaseBranch,
-			reviewers: [ githubActor ],
+			reviewers: githubActor ? [ githubActor ] : [],
 		} );
 		Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
 
@@ -349,6 +353,9 @@ export const updateBranchChangelog = async (
 	Logger.notice( `Deleting changelogs from trunk ${ tmpRepoPath }` );
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
+		unsafe: {
+			allowUnsafeHooksPath: true,
+		},
 		config: [ 'core.hooksPath=/dev/null' ],
 	} );
 
@@ -375,20 +382,50 @@ export const updateBranchChangelog = async (
 			milestone = `${ m[ 1 ] }.0`;
 		}
 
-		try {
-			await git.raw( [ 'cherry-pick', deletionCommitHash ] );
-		} catch ( e ) {
-			if (
-				e.message.includes( 'nothing to commit, working tree clean' )
-			) {
-				Logger.notice(
-					'Cherry-pick resulted in no changes, continuing without error.'
-				);
-				// No need to skip, just continue
-			} else {
-				throw e; // Re-throw if it's a different error
-			}
+		// Delete by name instead of cherry-picking deletionCommitHash: cherry-pick conflicts
+		// if a file's content drifted independently on this branch (e.g. a formatting pass).
+		const changelogFiles = (
+			await git.raw( [
+				'diff-tree',
+				'--no-commit-id',
+				'--name-only',
+				'-z',
+				'-r',
+				'--diff-filter=D',
+				deletionCommitHash,
+			] )
+		)
+			.split( '\0' )
+			.map( ( file ) => file.trim() )
+			.filter( Boolean );
+
+		const filesToDelete = changelogFiles.filter( ( file ) =>
+			existsSync( path.join( tmpRepoPath, file ) )
+		);
+
+		const missingFiles = changelogFiles.filter(
+			( file ) => ! filesToDelete.includes( file )
+		);
+
+		if ( missingFiles.length > 0 ) {
+			Logger.warn(
+				`${
+					missingFiles.length
+				} of the ${ version } changelog files were not found on ${ releaseBranch } by name (possibly renamed or already removed): ${ missingFiles.join(
+					', '
+				) }`
+			);
 		}
+
+		if ( filesToDelete.length === 0 ) {
+			Logger.notice(
+				`None of the ${ version } changelog files exist on ${ releaseBranch }, skipping.`
+			);
+			return -1;
+		}
+
+		await git.rm( filesToDelete );
+		await git.commit( `Delete changelog files from ${ version } release` );
 
 		await git.push( 'origin', branch, [ '--force' ] );
 		Logger.notice( `Creating PR for ${ branch }` );
@@ -401,7 +438,7 @@ export const updateBranchChangelog = async (
 			}`,
 			head: branch,
 			base: releaseBranch,
-			reviewers: [ githubActor ],
+			reviewers: githubActor ? [ githubActor ] : [],
 		} );
 		Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
 
@@ -474,6 +511,9 @@ async function getTrunkWooCommerceVersion(
 ): Promise< string | null > {
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
+		unsafe: {
+			allowUnsafeHooksPath: true,
+		},
 		config: [ 'core.hooksPath=/dev/null' ],
 	} );
 
@@ -558,20 +598,23 @@ function getTargetBranches(
  * @param {Object} releaseBranchChanges                    update data from updateReleaseBranchChangelogs
  * @param {Object} releaseBranchChanges.deletionCommitHash commit from the changelog deletions in updateReleaseBranchChangelogs
  * @param {Object} releaseBranchChanges.prNumber           pr number created in updateReleaseBranchChangelogs
+ * @return {Promise<Array<{ branch: string; number: number }>>} Array of created PRs with branch and number
  */
 export const updateIntermediateBranches = async (
 	options: Options,
 	tmpRepoPath: string,
 	releaseBranchChanges: { deletionCommitHash: string; prNumber: number }
-): Promise< void > => {
+): Promise< Array< { branch: string; number: number } > > => {
 	Logger.notice(
 		`Starting intermediate branches update for version ${ options.version }`
 	);
 
+	const createdPRs: Array< { branch: string; number: number } > = [];
+
 	const trunkVersion = await getTrunkWooCommerceVersion( tmpRepoPath );
 	if ( ! trunkVersion ) {
 		Logger.error( 'Could not determine WooCommerce trunk version.' );
-		return;
+		return createdPRs;
 	}
 
 	const targetBranches = getTargetBranches( options.version, trunkVersion );
@@ -581,16 +624,21 @@ export const updateIntermediateBranches = async (
 
 	for ( const targetBranch of targetBranches ) {
 		try {
-			await updateBranchChangelog(
+			const prNumber = await updateBranchChangelog(
 				options,
 				tmpRepoPath,
 				targetBranch,
 				releaseBranchChanges
 			);
+			if ( prNumber && prNumber > 0 ) {
+				createdPRs.push( { branch: targetBranch, number: prNumber } );
+			}
 		} catch ( error ) {
 			Logger.error(
 				`Failed to update ${ targetBranch }: ${ error.message }`
 			);
 		}
 	}
+
+	return createdPRs;
 };

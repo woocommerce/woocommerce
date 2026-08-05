@@ -1,5 +1,4 @@
 // Reference: https://github.com/WordPress/gutenberg/blob/v16.4.0/packages/edit-site/src/components/site-hub/index.js
-/* eslint-disable @woocommerce/dependency-group */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /**
  * External dependencies
@@ -38,7 +37,6 @@ export const SiteHub = forwardRef<
 	}
 >( ( { isTransparent, ...restProps }, ref ) => {
 	const { siteTitle } = useSelect( ( select ) => {
-		// @ts-expect-error No types for this exist yet.
 		const { getSite } = select( coreStore );
 
 		return {
@@ -117,7 +115,7 @@ export const SiteHub = forwardRef<
 									delay: 0.1,
 								} }
 							>
-								{ decodeEntities( siteTitle ) }
+								{ decodeEntities( siteTitle ?? '' ) }
 							</motion.div>
 						</AnimatePresence>
 					) }

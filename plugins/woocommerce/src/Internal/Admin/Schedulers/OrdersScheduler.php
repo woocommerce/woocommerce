@@ -16,7 +16,6 @@ use Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataS
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
-use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * OrdersScheduler Class.
@@ -61,6 +60,16 @@ class OrdersScheduler extends ImportScheduler {
 	const SCHEDULED_IMPORT_OPTION = 'woocommerce_analytics_scheduled_import';
 
 	/**
+	 * Legacy option name before the rename in 10.5.0.
+	 *
+	 * Used as a fallback during upgrades before the migration routine runs.
+	 * The old option stored inverted semantics: 'yes' = immediate, 'no' = scheduled.
+	 *
+	 * @var string
+	 */
+	const LEGACY_IMMEDIATE_IMPORT_OPTION = 'woocommerce_analytics_immediate_import';
+
+	/**
 	 * Default value for the scheduled import option.
 	 *
 	 * @var string
@@ -73,6 +82,35 @@ class OrdersScheduler extends ImportScheduler {
 	 * @var string
 	 */
 	const PROCESS_PENDING_ORDERS_BATCH_ACTION = 'process_pending_batch';
+
+	/**
+	 * Option name for storing order IDs that failed analytics import.
+	 *
+	 * The skip-and-advance behavior in process_pending_batch() means a failing
+	 * order is excluded from analytics. The IDs are persisted here so the
+	 * "Import historical data" UI can surface them and offer a targeted retry.
+	 *
+	 * Shape: array( 'ids' => int[], 'overflow' => int ). 'overflow' counts IDs
+	 * dropped because the list reached FAILED_ORDER_IMPORTS_CAP.
+	 *
+	 * Updates to this option are best-effort, not atomic: a concurrent
+	 * read-modify-write (e.g. the batch processor recording a failure while a
+	 * retry request prunes an ID) can lose one of the writes. This is accepted
+	 * because the list is advisory and self-healing — a stale ID is cleared on
+	 * the order's next successful import, and every failure is also logged to
+	 * the 'wc-analytics-order-import' source. If stronger guarantees are ever
+	 * needed, store each failed ID as its own row instead.
+	 *
+	 * @var string
+	 */
+	const FAILED_ORDER_IMPORTS_OPTION = 'woocommerce_admin_analytics_failed_order_imports';
+
+	/**
+	 * Maximum number of failed order IDs to store.
+	 *
+	 * @var int
+	 */
+	const FAILED_ORDER_IMPORTS_CAP = 1000;
 
 	/**
 	 * Attach order lookup update hooks.
@@ -95,12 +133,10 @@ class OrdersScheduler extends ImportScheduler {
 			add_action( 'woocommerce_schedule_import', array( __CLASS__, 'possibly_schedule_import' ) );
 		}
 
-		if ( Features::is_enabled( 'analytics-scheduled-import' ) ) {
-			// Watch for changes to the scheduled import option.
-			add_action( 'add_option_' . self::SCHEDULED_IMPORT_OPTION, array( __CLASS__, 'handle_scheduled_import_option_added' ), 10, 2 );
-			add_action( 'update_option_' . self::SCHEDULED_IMPORT_OPTION, array( __CLASS__, 'handle_scheduled_import_option_change' ), 10, 2 );
-			add_action( 'delete_option', array( __CLASS__, 'handle_scheduled_import_option_before_delete' ), 10, 1 );
-		}
+		// Watch for changes to the scheduled import option.
+		add_action( 'add_option_' . self::SCHEDULED_IMPORT_OPTION, array( __CLASS__, 'handle_scheduled_import_option_added' ), 10, 2 );
+		add_action( 'update_option_' . self::SCHEDULED_IMPORT_OPTION, array( __CLASS__, 'handle_scheduled_import_option_change' ), 10, 2 );
+		add_action( 'delete_option', array( __CLASS__, 'handle_scheduled_import_option_before_delete' ), 10, 1 );
 
 		OrdersStatsDataStore::init();
 		CouponsDataStore::init();
@@ -346,6 +382,15 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			return;
 		}
 
+		// Skip test orders (e.g., WCPay test mode) from analytics.
+		if ( self::is_test_order( $order ) ) {
+			wc_get_logger()->debug(
+				sprintf( 'Skipping test order #%d from analytics import.', $order_id ),
+				array( 'source' => 'wc-analytics-order-import' )
+			);
+			return;
+		}
+
 		$results = array(
 			OrdersStatsDataStore::sync_order( $order_id ),
 			ProductsDataStore::sync_order_products( $order_id ),
@@ -363,6 +408,9 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		}
 
 		ReportsCache::invalidate();
+
+		// A successful import means the order is no longer missing from analytics.
+		self::clear_failed_order_import( $order_id );
 
 		/**
 		 * Fires after an order or refund has been imported into Analytics lookup tables
@@ -522,6 +570,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			return;
 		}
 
+		$orders_count    = count( $orders );
 		$processed_count = 0;
 		foreach ( $orders as $order ) {
 			try {
@@ -530,15 +579,15 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 
 				// Advance cursor after each successful import. Since orders are sorted by
 				// date ASC, id ASC, we can simply overwrite with the current order's values.
-				// If an error occurs, we break and save the last successful position.
 				$cursor_date = $order->date_updated_gmt;
 				$cursor_id   = $order->id;
-			} catch ( \Exception $e ) {
-				$logger->error(
-					sprintf( 'Failed to import order %d: %s', $order->id, $e->getMessage() ),
-					$context
-				);
-				break;
+			} catch ( \Throwable $e ) {
+				// Log the failure and advance the cursor past the failing order so that
+				// it is skipped on the next run rather than blocking the entire pipeline.
+				static::log_import_error( $order->id, $e, $context );
+				static::record_failed_order_import( $order->id );
+				$cursor_date = $order->date_updated_gmt;
+				$cursor_id   = $order->id;
 			}
 		}
 
@@ -549,8 +598,9 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		$elapsed_time = microtime( true ) - $start_time;
 		$logger->info(
 			sprintf(
-				'Batch import completed. Processed: %d orders in %.2f seconds. Cursor: %s (ID: %d)',
+				'Batch import completed. Processed: %d/%d orders in %.2f seconds. Cursor: %s (ID: %d)',
 				$processed_count,
+				$orders_count,
 				$elapsed_time,
 				$cursor_date,
 				$cursor_id
@@ -558,9 +608,10 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			$context
 		);
 
-		// If we got a full batch, there might be more orders to process.
-		// Schedule immediate next batch.
-		if ( $processed_count === $batch_size ) {
+		// If we fetched a full batch, there might be more orders to process.
+		// Use the fetched count rather than successful count so that skipped
+		// failing orders do not suppress scheduling of the next batch.
+		if ( $orders_count === $batch_size ) {
 			$logger->info( 'Full batch processed, scheduling next batch', $context );
 			self::schedule_action(
 				'process_pending_batch',
@@ -685,6 +736,161 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	}
 
 	/**
+	 * Check if an order is a test order that should be excluded from analytics.
+	 *
+	 * For refunds, the parent order is checked instead, since refunds do not
+	 * carry the test mode metadata directly.
+	 *
+	 * @param \WC_Abstract_Order $order Order object.
+	 * @return bool
+	 *
+	 * @since 10.7.0
+	 */
+	public static function is_test_order( $order ) {
+		if ( ! $order instanceof \WC_Abstract_Order ) {
+			return false;
+		}
+
+		// For refunds, check the parent order.
+		$check_order = $order;
+		if ( 'shop_order_refund' === $order->get_type() ) {
+			$check_order = wc_get_order( $order->get_parent_id() );
+			if ( ! $check_order instanceof \WC_Abstract_Order ) {
+				return false;
+			}
+		}
+
+		$is_test = 'test' === $check_order->get_meta( '_wcpay_mode' );
+
+		/**
+		 * Filter whether an order is a test order excluded from analytics.
+		 *
+		 * Use this filter to customize test order detection beyond the default
+		 * WCPay test mode check, e.g., to exclude orders from other payment
+		 * gateways' test/sandbox modes.
+		 *
+		 * @param bool               $is_test Whether the order is a test order.
+		 * @param \WC_Abstract_Order $order   The order being checked (for refunds, this is the parent order).
+		 *
+		 * @since 10.7.0
+		 */
+		return apply_filters( 'woocommerce_analytics_is_test_order', $is_test, $check_order );
+	}
+
+	/**
+	 * Get the recorded failed order imports.
+	 *
+	 * @internal
+	 * @since 11.0.0
+	 * @return array Array with 'ids' (int[]) and 'overflow' (int) keys.
+	 */
+	public static function get_failed_order_imports(): array {
+		$value = get_option( self::FAILED_ORDER_IMPORTS_OPTION, array() );
+		if ( ! is_array( $value ) ) {
+			$value = array();
+		}
+
+		return array(
+			'ids'      => isset( $value['ids'] ) && is_array( $value['ids'] ) ? array_map( 'absint', $value['ids'] ) : array(),
+			'overflow' => isset( $value['overflow'] ) ? absint( $value['overflow'] ) : 0,
+		);
+	}
+
+	/**
+	 * Record an order ID that failed analytics import.
+	 *
+	 * Deduplicates IDs. When the list exceeds FAILED_ORDER_IMPORTS_CAP, the
+	 * oldest ID is dropped and the overflow counter is incremented.
+	 *
+	 * @internal
+	 * @since 11.0.0
+	 * @param int $order_id Order or refund ID that failed to import.
+	 * @return void
+	 */
+	public static function record_failed_order_import( $order_id ): void {
+		$order_id = absint( $order_id );
+		if ( ! $order_id ) {
+			return;
+		}
+
+		$failed = self::get_failed_order_imports();
+		if ( in_array( $order_id, $failed['ids'], true ) ) {
+			return;
+		}
+
+		$failed['ids'][] = $order_id;
+		$ids_count       = count( $failed['ids'] );
+		while ( $ids_count > self::FAILED_ORDER_IMPORTS_CAP ) {
+			array_shift( $failed['ids'] );
+			++$failed['overflow'];
+			--$ids_count;
+		}
+
+		update_option( self::FAILED_ORDER_IMPORTS_OPTION, $failed, false );
+	}
+
+	/**
+	 * Remove an order ID from the failed imports list.
+	 *
+	 * Called after a successful import so the list always reflects orders
+	 * that have not been imported since their last failure.
+	 *
+	 * @internal
+	 * @since 11.0.0
+	 * @param int $order_id Order or refund ID to remove.
+	 * @return void
+	 */
+	public static function clear_failed_order_import( $order_id ): void {
+		$order_id = absint( $order_id );
+		if ( ! $order_id ) {
+			return;
+		}
+
+		$failed = self::get_failed_order_imports();
+		$index  = array_search( $order_id, $failed['ids'], true );
+
+		if ( false === $index ) {
+			return;
+		}
+
+		unset( $failed['ids'][ $index ] );
+		$failed['ids'] = array_values( $failed['ids'] );
+
+		if ( empty( $failed['ids'] ) && 0 === $failed['overflow'] ) {
+			delete_option( self::FAILED_ORDER_IMPORTS_OPTION );
+			return;
+		}
+
+		update_option( self::FAILED_ORDER_IMPORTS_OPTION, $failed, false );
+	}
+
+	/**
+	 * Reset the failed order imports overflow counter.
+	 *
+	 * Called when a full (non-windowed) historical import starts, since that
+	 * import covers the orders whose IDs were dropped from the list. Windowed
+	 * imports must not reset the counter.
+	 *
+	 * @internal
+	 * @since 11.0.0
+	 * @return void
+	 */
+	public static function reset_failed_order_imports_overflow(): void {
+		$failed = self::get_failed_order_imports();
+		if ( 0 === $failed['overflow'] ) {
+			return;
+		}
+
+		$failed['overflow'] = 0;
+		if ( empty( $failed['ids'] ) ) {
+			delete_option( self::FAILED_ORDER_IMPORTS_OPTION );
+			return;
+		}
+
+		update_option( self::FAILED_ORDER_IMPORTS_OPTION, $failed, false );
+	}
+
+	/**
 	 * Delete a batch of orders.
 	 *
 	 * @internal
@@ -709,18 +915,29 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	/**
 	 * Check whether scheduled import is enabled.
 	 *
-	 * When the "analytics-scheduled-import" feature is disabled, only immediate
-	 * import is supported (returns false). When enabled, checks the option value.
+	 * Checks the scheduled import option value.
 	 *
 	 * @internal
+	 * @since 10.5.0 Introduced as a private method.
+	 * @since 11.0.0 Made public.
 	 * @return bool
 	 */
-	private static function is_scheduled_import_enabled(): bool {
-		if ( ! Features::is_enabled( 'analytics-scheduled-import' ) ) {
-			// If the feature is disabled, only immediate import is supported.
-			return false;
+	public static function is_scheduled_import_enabled(): bool {
+		$value = get_option( self::SCHEDULED_IMPORT_OPTION, false );
+
+		if ( false !== $value ) {
+			return 'yes' === $value;
 		}
 
-		return 'yes' === get_option( self::SCHEDULED_IMPORT_OPTION, self::SCHEDULED_IMPORT_OPTION_DEFAULT_VALUE );
+		// Fall back to the legacy option (pre-10.5.0) which used inverted semantics:
+		// 'yes' meant immediate import (= not scheduled), 'no' meant scheduled.
+		$legacy_value = get_option( self::LEGACY_IMMEDIATE_IMPORT_OPTION, false );
+
+		if ( false !== $legacy_value ) {
+			return 'no' === $legacy_value;
+		}
+
+		// Neither option exists — use the default (not scheduled).
+		return false;
 	}
 }

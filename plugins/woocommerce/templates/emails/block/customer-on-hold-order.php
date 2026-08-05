@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Block
- * @version 10.5.0
+ * @version 11.1.0
  */
 
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
@@ -24,7 +24,7 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <!-- wp:heading -->
-<h2 class="wp-block-heading"> <?php echo esc_html__( 'Thank you for your order', 'woocommerce' ); ?> </h2>
+<h2 class="wp-block-heading"> <?php echo esc_html__( 'Your order is on hold', 'woocommerce' ); ?> </h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
@@ -35,19 +35,19 @@ defined( 'ABSPATH' ) || exit;
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p> <?php echo esc_html__( 'We’ve received your order and it’s currently on hold until we can confirm your payment has been processed.', 'woocommerce' ); ?> </p>
+<p> <?php echo esc_html__( 'Thanks for your order. We’ve received it, and it’s currently on hold while we complete the next required step, such as confirming, clearing, or finalizing payment.', 'woocommerce' ); ?> </p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p> <?php echo esc_html__( 'Here’s a reminder of what you’ve ordered:', 'woocommerce' ); ?> </p>
+<p> <?php echo esc_html__( 'We’ll send another update when your order moves forward. Here’s a summary of your order:', 'woocommerce' ); ?> </p>
 <!-- /wp:paragraph -->
 
 <!-- wp:woocommerce/email-content {"lock":{"move":false,"remove":true}} -->
 <div class="wp-block-woocommerce-email-content"> <?php echo esc_html( BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER ); ?> </div>
 <!-- /wp:woocommerce/email-content -->
 
-<!-- wp:paragraph -->
-<p><?php
+<!-- wp:paragraph {"align":"center"} -->
+<p class="has-text-align-center"><?php
 /* translators: %s: Store admin email */
 	printf( esc_html__( 'Thanks again! If you need any help with your order, please contact us at %s.', 'woocommerce' ), '<!--[woocommerce/store-email]-->' );
 ?></p>
