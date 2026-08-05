@@ -225,7 +225,9 @@ const LinkedProductControl = ( {
 		 * Linked control is only useful for collection which uses product, cart or order reference.
 		 */
 		( hasProductReference || hasCartReference || hasOrderReference );
-	if ( ! showLinkedProductControl ) return null;
+	if ( ! showLinkedProductControl ) {
+		return null;
+	}
 
 	const radioControlHelp =
 		radioControlState === PRODUCT_REFERENCE_TYPE.CURRENT_PRODUCT
