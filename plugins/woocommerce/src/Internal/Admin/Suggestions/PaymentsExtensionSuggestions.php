@@ -321,7 +321,11 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'AD' => array(
-			self::MONEI,
+			self::MONEI         => array(
+				'_append' => array(
+					'tags' => array( self::TAG_PREFERRED ),
+				),
+			),
 			self::PAYPAL_WALLET => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
@@ -592,6 +596,7 @@ class PaymentsExtensionSuggestions {
 			self::MOLLIE,
 			self::VISA,
 			self::VIVA_WALLET,
+			self::PAYTRAIL,
 			self::GOCARDLESS      => array(
 				'_merge_on_type' => array(
 					'links' => array(
@@ -616,7 +621,6 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
-			self::PAYTRAIL,
 			self::PAYPAL_WALLET,
 			self::KLARNA          => array(
 				'_merge_on_type' => array(
@@ -1584,7 +1588,9 @@ class PaymentsExtensionSuggestions {
 		),
 		'GY' => array(
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
 			self::VISA,
+			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'HT' => array(
@@ -2057,6 +2063,7 @@ class PaymentsExtensionSuggestions {
 			self::PAYPAL_FULL_STACK,
 			self::PAYONEER,
 			self::VISA,
+			self::AIRWALLEX,
 			self::PAYPAL_WALLET,
 		),
 		'MV' => array(
@@ -2246,6 +2253,7 @@ class PaymentsExtensionSuggestions {
 				),
 			),
 			self::PAYPAL_FULL_STACK,
+			self::AIRWALLEX,
 			self::PAYPAL_WALLET,
 		),
 		'TW' => array(
@@ -2587,6 +2595,13 @@ class PaymentsExtensionSuggestions {
 			),
 			self::PAYPAL_FULL_STACK,
 			self::PAYPAL_WALLET,
+		),
+		'YT' => array(
+			self::VISA => array(
+				'_append' => array(
+					'tags' => array( self::TAG_PREFERRED ),
+				),
+			),
 		),
 		'MA' => array(
 			self::PAYONEER => array(
