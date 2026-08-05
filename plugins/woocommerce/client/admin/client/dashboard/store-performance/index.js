@@ -26,7 +26,9 @@ import './style.scss';
 import { getIndicatorData, getIndicatorValues } from './utils';
 import { getAdminSetting } from '~/utils/admin-settings';
 
-const { performanceIndicators: indicators } = getAdminSetting(
+// The binding default also covers a present dataEndpoints object that is
+// missing this key, e.g. when the server-side preload was skipped.
+const { performanceIndicators: indicators = [] } = getAdminSetting(
 	'dataEndpoints',
 	{
 		performanceIndicators: [],
