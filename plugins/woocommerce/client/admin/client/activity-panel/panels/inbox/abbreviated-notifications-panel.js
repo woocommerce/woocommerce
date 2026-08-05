@@ -131,13 +131,8 @@ const ActivityCountNotifications = ( { isSetupTaskListHidden } ) => {
 
 export const AbbreviatedNotificationsPanel = ( { thingsToDoNextCount } ) => {
 	const { currentUserCan } = useUser();
-	const { isSetupTaskListHidden, isExtendedTaskListHidden } = useSelect(
-		() => ( {
-			isSetupTaskListHidden: ! isTaskListVisible( 'setup' ),
-			isExtendedTaskListHidden: ! isTaskListVisible( 'extended' ),
-		} ),
-		[]
-	);
+	const isSetupTaskListHidden = ! isTaskListVisible( 'setup' );
+	const isExtendedTaskListHidden = ! isTaskListVisible( 'extended' );
 	const isWCAdminPage = isWCAdmin();
 
 	return (

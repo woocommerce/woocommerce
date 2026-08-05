@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import apiFetch from '@wordpress/api-fetch';
 import { useUser } from '@woocommerce/data';
@@ -162,13 +162,11 @@ describe( 'FailedOrdersNotice', () => {
 
 		render( <FailedOrdersNotice /> );
 
-		const button = await screen.findByRole( 'button', {
-			name: 'Retry failed imports',
-		} );
-		await act( async () => {
-			button.click();
-			await Promise.resolve();
-		} );
+		await userEvent.click(
+			await screen.findByRole( 'button', {
+				name: 'Retry failed imports',
+			} )
+		);
 
 		await waitFor( () =>
 			expect( mockedApiFetch ).toHaveBeenCalledWith( {
@@ -206,13 +204,11 @@ describe( 'FailedOrdersNotice', () => {
 
 		render( <FailedOrdersNotice /> );
 
-		const button = await screen.findByRole( 'button', {
-			name: 'Retry failed imports',
-		} );
-		await act( async () => {
-			button.click();
-			await Promise.resolve();
-		} );
+		await userEvent.click(
+			await screen.findByRole( 'button', {
+				name: 'Retry failed imports',
+			} )
+		);
 
 		await waitFor( () =>
 			expect( mockCreateNotice ).toHaveBeenCalledWith(
@@ -238,13 +234,11 @@ describe( 'FailedOrdersNotice', () => {
 
 		render( <FailedOrdersNotice /> );
 
-		const button = await screen.findByRole( 'button', {
-			name: 'Retry failed imports',
-		} );
-		await act( async () => {
-			button.click();
-			await Promise.resolve();
-		} );
+		await userEvent.click(
+			await screen.findByRole( 'button', {
+				name: 'Retry failed imports',
+			} )
+		);
 
 		await waitFor( () =>
 			expect( mockCreateNotice ).toHaveBeenCalledWith(
@@ -280,15 +274,13 @@ describe( 'FailedOrdersNotice', () => {
 
 		expect( button ).toBeDisabled();
 
-		await act( async () => {
-			resolveRetry( {
-				success: true,
-				message: 'Re-import scheduled for 3 orders.',
-				retried_count: 3,
-				pruned_count: 0,
-				already_scheduled_count: 0,
-				error_count: 0,
-			} );
+		resolveRetry( {
+			success: true,
+			message: 'Re-import scheduled for 3 orders.',
+			retried_count: 3,
+			pruned_count: 0,
+			already_scheduled_count: 0,
+			error_count: 0,
 		} );
 
 		await waitFor( () => expect( button ).not.toBeDisabled() );
