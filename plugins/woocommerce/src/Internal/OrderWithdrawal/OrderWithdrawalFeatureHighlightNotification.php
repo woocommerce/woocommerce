@@ -113,7 +113,7 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 			)
 		);
 		$note->set_content_data( (object) array() );
-		$note->set_type( Note::E_WC_ADMIN_NOTE_MARKETING );
+		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
