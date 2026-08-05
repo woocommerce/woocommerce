@@ -629,6 +629,13 @@ class PageControllerTest extends WC_Unit_Test_Case {
 			'both sides without leading slash'           => array( 'route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=route-params%2Fsample' ),
 			// Case folding must not reach across distinct characters: `é` is not `e`.
 			'non-ascii segment without diacritic'        => array( '/route-café/:itemId', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-cafe%2F42' ),
+			// React Router compiles routes with JavaScript's plain `i` flag, whose case folding is
+			// narrower than PCRE's Unicode folding. These pairs fold under PCRE `iu` but not in
+			// JavaScript; all four verified against React Router 6.3 matchPath() directly.
+			'long s does not fold to s'                  => array( '/route-orders/:itemId', '/wp-admin/admin.php?page=wc-admin&path=' . rawurlencode( "/route-order\u{17F}/42" ) ),
+			'kelvin sign does not fold to k'             => array( '/route-k/:itemId', '/wp-admin/admin.php?page=wc-admin&path=' . rawurlencode( "/route-\u{212A}/42" ) ),
+			'capital sharp s does not fold to sharp s'   => array( '/route-straße/:itemId', '/wp-admin/admin.php?page=wc-admin&path=' . rawurlencode( "/route-stra\u{1E9E}e/42" ) ),
+			'astral case pair does not fold'             => array( "/route-\u{10400}/:itemId", '/wp-admin/admin.php?page=wc-admin&path=' . rawurlencode( "/route-\u{10428}/42" ) ),
 			// A malformed UTF-8 request path falls back to byte-wise matching rather than failing.
 			'malformed utf-8 request path'               => array( '/route-café/:itemId', "/wp-admin/admin.php?page=wc-admin&path=%2Froute-caf\xE9%2F42" ),
 		);

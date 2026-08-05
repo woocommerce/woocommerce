@@ -252,7 +252,25 @@ class PageController {
 			return false;
 		}
 
-		$route_pattern      = $registered_parts['path'];
+		$route_pattern = $registered_parts['path'];
+		$current_path  = $current_parts['path'];
+
+		// React Router 6.3 compiles route regexes with JavaScript's plain `i` flag (no `u`), whose
+		// case folding is narrower than PCRE's Unicode folding: `É` reaches `é`, but `ſ` does not
+		// reach `s`, nor the Kelvin sign `k`. Canonicalizing both sides the way JavaScript does and
+		// matching case-sensitively reproduces those semantics exactly. Without mbstring, PCRE's
+		// `iu` is the closest approximation (it over-matches only such exotic case pairs); malformed
+		// UTF-8 would make `preg_match()` fail outright, which would silently read as an unrecognized
+		// page, so it falls back to the byte-wise `i` comparison used before instead.
+		$is_utf8   = 1 === preg_match( '//u', $route_pattern ) && 1 === preg_match( '//u', $current_path );
+		$modifiers = $is_utf8 ? 'iu' : 'i';
+
+		if ( $is_utf8 && function_exists( 'mb_strtoupper' ) && function_exists( 'mb_ord' ) && function_exists( 'mb_strlen' ) ) {
+			$route_pattern = $this->canonicalize_path_for_route_match( $route_pattern );
+			$current_path  = $this->canonicalize_path_for_route_match( $current_path );
+			$modifiers     = '';
+		}
+
 		$has_terminal_splat = 1 === preg_match( '#/\*$#', $route_pattern );
 
 		if ( $has_terminal_splat ) {
@@ -277,26 +295,61 @@ class PageController {
 
 		// `D` keeps the `$` anchor strict (no trailing-newline allowance) without relying on the
 		// upstream esc_url_raw() sanitization to have stripped newlines from the request path.
-		return 1 === preg_match( '#^' . $route_regex . '/*$#D' . $this->get_route_regex_modifiers( $route_regex, $current_parts['path'] ), $current_parts['path'] );
+		return 1 === preg_match( '#^' . $route_regex . '/*$#D' . $modifiers, $current_path );
 	}
 
 	/**
-	 * Get the modifiers to compile a route regex with.
+	 * Canonicalize a path the way JavaScript canonicalizes case-insensitive regex input.
 	 *
-	 * React Router compares paths case-insensitively with JavaScript's Unicode-aware casing, so
-	 * `/CAFÉ/42` reaches a route registered as `/café/:id`. PCRE only folds non-ASCII case in UTF-8
-	 * mode, which is why `u` is added whenever both sides are valid UTF-8. It is withheld otherwise:
-	 * `preg_match()` fails outright on malformed UTF-8, and a failed match would silently read as an
-	 * unrecognized page rather than falling back to the byte-wise comparison used before.
+	 * Emulates ECMA-262 Canonicalize for a RegExp with the `i` flag and without the `u` flag —
+	 * what React Router compiles routes with. Each character maps to its uppercase form, except:
 	 *
-	 * @param string $route_regex Compiled route regex source.
-	 * @param string $current_path Current request app path.
+	 * - A multi-character uppercase mapping never folds (`ß` stays `ß` rather than becoming `SS`).
+	 * - A non-ASCII character whose uppercase form is ASCII never folds (`ſ` stays `ſ`, not `S`).
+	 * - Supplementary-plane characters never fold: JavaScript canonicalizes UTF-16 code units, and
+	 *   a surrogate half has no case mapping.
+	 *
+	 * Matching two canonicalized paths case-sensitively therefore folds case exactly where
+	 * JavaScript's `i` flag does, and nowhere else.
+	 *
+	 * @param string $path Valid UTF-8 app path.
 	 * @return string
 	 */
-	private function get_route_regex_modifiers( $route_regex, $current_path ) {
-		$is_utf8 = 1 === preg_match( '//u', $route_regex ) && 1 === preg_match( '//u', $current_path );
+	private function canonicalize_path_for_route_match( $path ) {
+		// ASCII-only paths (the common case) canonicalize to plain uppercase.
+		if ( 1 !== preg_match( '/[\x80-\xFF]/', $path ) ) {
+			return strtoupper( $path );
+		}
 
-		return $is_utf8 ? 'iu' : 'i';
+		$chars = preg_split( '//u', $path, -1, PREG_SPLIT_NO_EMPTY );
+
+		// Unreachable for the valid UTF-8 the caller guarantees; an unchanged path merely
+		// falls back to case-sensitive matching rather than corrupting the comparison.
+		if ( false === $chars ) {
+			return $path;
+		}
+
+		$canonical = '';
+
+		foreach ( $chars as $char ) {
+			$code_point = mb_ord( $char, 'UTF-8' );
+
+			if ( $code_point >= 0x10000 ) {
+				$canonical .= $char;
+				continue;
+			}
+
+			$upper = mb_strtoupper( $char, 'UTF-8' );
+
+			if ( 1 !== mb_strlen( $upper, 'UTF-8' ) ) {
+				$canonical .= $char;
+				continue;
+			}
+
+			$canonical .= ( $code_point >= 0x80 && mb_ord( $upper, 'UTF-8' ) < 0x80 ) ? $char : $upper;
+		}
+
+		return $canonical;
 	}
 
 	/**
