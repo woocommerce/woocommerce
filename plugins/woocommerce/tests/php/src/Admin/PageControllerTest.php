@@ -569,6 +569,9 @@ class PageControllerTest extends WC_Unit_Test_Case {
 			// `/foo/x` and `/foo`; verified against React Router 6.3 matchPath().
 			'wildcard after redundant slashes'      => array( '/route-wildcard//*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard%2Ftheme' ),
 			'wildcard base after redundant slashes' => array( '/route-wildcard//*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard' ),
+			// JavaScript's line-terminator exclusion applies to `.` only, not `[^/]+`, so a
+			// parameter segment accepts U+2028; verified against React Router 6.3 matchPath().
+			'line separator inside a parameter'     => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=' . rawurlencode( "/route-params/x\u{2028}y" ) ),
 			'wildcard base trailing slash'          => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard%2F' ),
 			'wildcard descendant path'              => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard%2Ftheme%2Falpha' ),
 			'parameter and wildcard base'           => array( '/route-patterns/:itemId/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123' ),
@@ -640,6 +643,10 @@ class PageControllerTest extends WC_Unit_Test_Case {
 			'kelvin sign does not fold to k'             => array( '/route-k/:itemId', '/wp-admin/admin.php?page=wc-admin&path=' . rawurlencode( "/route-\u{212A}/42" ) ),
 			'capital sharp s does not fold to sharp s'   => array( '/route-straße/:itemId', '/wp-admin/admin.php?page=wc-admin&path=' . rawurlencode( "/route-stra\u{1E9E}e/42" ) ),
 			'astral case pair does not fold'             => array( "/route-\u{10400}/:itemId", '/wp-admin/admin.php?page=wc-admin&path=' . rawurlencode( "/route-\u{10428}/42" ) ),
+			// JavaScript's `.` excludes the line terminators U+2028/U+2029, so a splat rejects them
+			// while a parameter segment does not; verified against React Router 6.3 matchPath().
+			'line separator under a splat'               => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=' . rawurlencode( "/route-wildcard/x\u{2028}y" ) ),
+			'paragraph separator under a splat'          => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=' . rawurlencode( "/route-wildcard/x\u{2029}y" ) ),
 			// An all-slash splat remainder keeps a root slash: `//*` renders `//x`, not `/x`;
 			// verified against React Router 6.3 matchPath().
 			'all-slash splat requires its slashes'       => array( '//*', '/wp-admin/admin.php?page=wc-admin&path=%2Fx' ),

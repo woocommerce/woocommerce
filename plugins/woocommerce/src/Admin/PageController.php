@@ -305,7 +305,15 @@ class PageController {
 
 		if ( $has_terminal_splat ) {
 			// A supported terminal `/*` matches both the base route and any descendants.
-			$route_regex .= '(?:/.*)?';
+			// JavaScript's `.` excludes the line terminators `\r`, `\n`, U+2028, and U+2029, which
+			// PCRE's does not, so the splat excludes them explicitly — as characters in the `u`
+			// branch, as byte sequences otherwise. `\r`/`\n` cannot reach here (esc_url_raw() strips
+			// them) but are excluded for the same self-containment as the `D` modifier. Parameter
+			// segments deliberately keep matching them: JavaScript's `[^/]+` is unaffected by the
+			// line-terminator exclusion, and React Router matches such paths.
+			$route_regex .= 'iu' === $modifiers
+				? '(?:/[^\r\n\x{2028}\x{2029}]*)?'
+				: '(?:/(?:(?!\xE2\x80[\xA8\xA9])[^\r\n])*)?';
 		}
 
 		// `D` keeps the `$` anchor strict (no trailing-newline allowance) without relying on the
