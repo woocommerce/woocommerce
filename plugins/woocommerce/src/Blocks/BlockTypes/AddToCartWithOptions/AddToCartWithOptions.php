@@ -553,7 +553,9 @@ class AddToCartWithOptions extends AbstractBlock {
 			$form_attributes         = '';
 			$legacy_mode             = 'yes' === $cart_redirect_after_add || $this->has_form_elements( $hooks_before ) || $this->has_form_elements( $hooks_after );
 			if ( $legacy_mode ) {
-				$action_url = home_url( add_query_arg( null, null ) );
+				global $wp;
+
+				$action_url = home_url( add_query_arg( $_GET, $wp->request ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 				// If an extension is hooking into the form or we need to redirect to the cart,
 				// we fall back to a regular HTML form.

@@ -194,9 +194,11 @@ class SingleProduct extends AbstractBlock {
 		$product_id = $product->get_id();
 
 		if ( post_password_required( $product_id ) ) {
+			global $wp;
+
 			$password_form = get_the_password_form( $product_id );
 			$html          = new \WP_HTML_Tag_Processor( $password_form );
-			$current_url   = home_url( add_query_arg( null, null ) );
+			$current_url   = home_url( add_query_arg( $_GET, $wp->request ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 			while ( $html->next_tag( array( 'tag_name' => 'input' ) ) ) {
 				if ( 'redirect_to' !== $html->get_attribute( 'name' ) ) {
