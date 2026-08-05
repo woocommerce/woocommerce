@@ -144,7 +144,7 @@ class Authentication {
 	/**
 	 * Gets the cart token from the request header.
 	 *
-	 * @param \WP_REST_Request $request The REST request instance. Unused; kept for subclasses.
+	 * @param \WP_REST_Request $request Deprecated since 11.1.0. Unused; kept for subclasses.
 	 * @return string
 	 */
 	protected function get_cart_token( \WP_REST_Request $request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Signature kept for backwards compatibility.
