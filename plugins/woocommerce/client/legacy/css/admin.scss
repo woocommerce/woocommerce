@@ -3223,7 +3223,7 @@ body.woocommerce_page_wc-orders {
 			border-top: 1px solid #f5f5f5;
 		}
 
-		tbody tr:hover:not(.status-trash):not(.no-link) td {
+		tbody tr:hover:not(.status-trash):not(.no-link) > :not(.check-column) {
 			cursor: pointer;
 		}
 
@@ -3554,7 +3554,7 @@ body.woocommerce_page_wc-orders {
 			width: 100%;
 		}
 
-		td.column-order_number {
+		.column-order_number {
 			.toggle-row {
 				height: 20px;
 			}
@@ -3574,7 +3574,7 @@ body.woocommerce_page_wc-orders {
 		}
 
 		tr:not(.is-expanded) {
-			td.column-order_number {
+			.column-order_number {
 				vertical-align: top;
 
 				a.order-view {
