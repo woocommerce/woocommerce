@@ -227,9 +227,8 @@ class ProductCollectionPage {
 	}
 
 	async chooseCollectionInTemplate( collection?: Collections ) {
-		const collectionButton = await this.locateCollectionButtonInEditor(
-			collection
-		);
+		const collectionButton =
+			await this.locateCollectionButtonInEditor( collection );
 
 		await collectionButton.click();
 	}
