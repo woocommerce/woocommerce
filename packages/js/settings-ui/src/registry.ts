@@ -183,6 +183,43 @@ export const resolveFieldComponent = (
 	context: SettingsFieldContext
 ): SettingsFieldComponent | undefined => {
 	const componentName = field.component;
+	const component = componentName
+		? findInMatchingRegistrations(
+				context,
+				( registration ) => registration.components?.[ componentName ]
+		  )
+		: undefined;
+
+	const resolvedComponent =
+		component ??
+		findInMatchingRegistrations(
+			context,
+			( registration ) => registration.fieldOverrides?.[ field.id ]
+		) ??
+		findInMatchingRegistrations(
+			context,
+			( registration ) => registration.typeRenderers?.[ field.type ]
+		);
+
+	if ( resolvedComponent ) {
+		return resolvedComponent;
+	}
+
+	if ( field.component ) {
+		warn( `Component "${ field.component }" is not registered.`, {
+			field,
+			context,
+		} );
+	}
+
+	return undefined;
+};
+
+export const resolveFieldComponentForRendering = (
+	field: SettingsUIField,
+	context: SettingsFieldContext
+): SettingsFieldComponent | undefined => {
+	const componentName = field.component;
 	if ( componentName ) {
 		const component = findInMatchingRegistrations(
 			context,
@@ -198,21 +235,7 @@ export const resolveFieldComponent = (
 		return component;
 	}
 
-	const resolvedComponent =
-		findInMatchingRegistrations(
-			context,
-			( registration ) => registration.fieldOverrides?.[ field.id ]
-		) ??
-		findInMatchingRegistrations(
-			context,
-			( registration ) => registration.typeRenderers?.[ field.type ]
-		);
-
-	if ( resolvedComponent ) {
-		return resolvedComponent;
-	}
-
-	return undefined;
+	return resolveFieldComponent( field, context );
 };
 
 export const resolveFieldVisibilityPredicate = (

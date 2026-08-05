@@ -954,7 +954,7 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 		$invalid_badge['shell']['badges']                    = array(
 			array(
 				'label'  => 'Beta',
-				'intent' => 'purple',
+				'intent' => array( 'invalid' ),
 			),
 		);
 		$invalid_action                                      = $valid;
@@ -988,7 +988,7 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 			'saving info field'           => array( $invalid_info, 'Field "acme_field" of type "info" must use the "none" save adapter.' ),
 			'malformed shell navigation'  => array( $invalid_shell, 'Shell navigation item 0 href must be a string.' ),
 			'malformed breadcrumb'        => array( $invalid_breadcrumb, 'Shell breadcrumb 0 label must be a string.' ),
-			'invalid badge intent'        => array( $invalid_badge, 'Shell badge 0 intent "purple" is not supported.' ),
+			'invalid badge intent'        => array( $invalid_badge, 'Shell badge 0 intent must be a string.' ),
 			'empty group action id'       => array( $invalid_action, 'Group "main" action 0 id must be a non-empty string.' ),
 			'custom save without handler' => array( $invalid_page_save, 'Schema custom save strategy must define a non-empty handler.' ),
 			'empty navigation component'  => array( $invalid_navigation_component, 'Shell navigationComponent must be a non-empty string.' ),
@@ -1018,7 +1018,7 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 			'badges'              => array(
 				array(
 					'label'  => 'Beta',
-					'intent' => 'info',
+					'intent' => 'extension-defined-intent',
 				),
 			),
 			'navigation'          => array(

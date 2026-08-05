@@ -410,8 +410,11 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		public function output() {
 			global $current_section;
 
-			$section = is_string( $current_section ) ? $current_section : '';
-			$context = $this->get_settings_ui_request_context( $section );
+			$section                     = is_string( $current_section ) ? $current_section : '';
+			$context                     = $this->get_settings_ui_request_context( $section );
+			$hide_save_button_overridden = false;
+			$hide_save_button_existed    = array_key_exists( 'hide_save_button', $GLOBALS );
+			$previous_hide_save_button   = $hide_save_button_existed ? $GLOBALS['hide_save_button'] : null;
 
 			try {
 				if ( $context && $context->is_rendering_enabled() ) {
@@ -425,17 +428,21 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 
 						$this->log_settings_ui_fallback( $settings_ui_page, $section, $schema_failure_reason );
 					} else {
-						$context->get_script_handles();
+						$mount_id = 'wc_settings_ui_' . sanitize_html_class( $this->id ) . '_' . sanitize_html_class( '' === $section ? 'default' : $section );
+						$page_id  = $context->get_page_id();
+
+						$context->enqueue_script_handles();
 
 						if ( $context->has_script_handles_failed() ) {
 							$this->log_settings_ui_fallback( $settings_ui_page, $section, $context->get_script_handles_failure_reason() );
 						} else {
 							$GLOBALS['hide_save_button'] = true;
+							$hide_save_button_overridden = true;
 
 							printf(
 								'<div id="%1$s" data-wc-settings-ui="1" data-wc-settings-page="%2$s" data-wc-settings-section="%3$s"></div>',
-								esc_attr( 'wc_settings_ui_' . sanitize_html_class( $this->id ) . '_' . sanitize_html_class( '' === $section ? 'default' : $section ) ),
-								esc_attr( $context->get_page_id() ),
+								esc_attr( $mount_id ),
+								esc_attr( $page_id ),
 								esc_attr( $section )
 							);
 							return;
@@ -444,7 +451,28 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 				}
 			} catch ( \Throwable $e ) {
 				// A stale or unavailable Settings UI class must keep the classic renderer usable during updates.
-				$context = null;
+				if ( $hide_save_button_overridden ) {
+					if ( $hide_save_button_existed ) {
+						$GLOBALS['hide_save_button'] = $previous_hide_save_button;
+					} else {
+						unset( $GLOBALS['hide_save_button'] );
+					}
+				}
+
+				wc_get_logger()->debug(
+					sprintf(
+						'Settings UI rendering failed for page "%1$s" section "%2$s": %3$s: %4$s',
+						$this->id,
+						'' === $section ? 'default' : $section,
+						get_class( $e ),
+						$e->getMessage()
+					),
+					array( 'source' => 'settings-ui' )
+				);
+
+				if ( $e instanceof \Exception ) {
+					wc_caught_exception( $e, __METHOD__ );
+				}
 			}
 
 			// We can't use "get_settings_for_section" here

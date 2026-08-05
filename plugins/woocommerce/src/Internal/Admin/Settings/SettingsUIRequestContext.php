@@ -84,6 +84,13 @@ class SettingsUIRequestContext {
 	private array $script_handles = array();
 
 	/**
+	 * Whether script handle registrations have been checked.
+	 *
+	 * @var bool
+	 */
+	private bool $script_handle_registrations_checked = false;
+
+	/**
 	 * Whether script handle resolution failed.
 	 *
 	 * @var bool
@@ -323,14 +330,55 @@ class SettingsUIRequestContext {
 	}
 
 	/**
+	 * Validate and enqueue extension script handles for this context.
+	 *
+	 * Handle names are collected separately so extensions can register their
+	 * scripts after WooCommerce builds the settings embed dependency list.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @return string[] Enqueued script handles, or an empty array on failure.
+	 */
+	public function enqueue_script_handles(): array {
+		$this->validate_script_handle_registrations();
+
+		if ( $this->script_handles_failed ) {
+			return array();
+		}
+
+		try {
+			foreach ( $this->script_handles as $script_handle ) {
+				wp_enqueue_script( $script_handle );
+
+				if ( ! wp_script_is( $script_handle, 'enqueued' ) ) {
+					$this->record_script_handles_failure(
+						new \RuntimeException(
+							sprintf(
+								/* translators: %s: script handle. */
+								__( 'Settings UI script handle "%s" could not be enqueued.', 'woocommerce' ),
+								sanitize_text_field( $script_handle )
+							)
+						),
+						__METHOD__
+					);
+					return array();
+				}
+			}
+		} catch ( \Throwable $e ) {
+			$this->record_script_handles_failure( $e, __METHOD__ );
+			return array();
+		}
+
+		return $this->script_handles;
+	}
+
+	/**
 	 * Whether script handle resolution failed.
 	 *
 	 * @return bool
 	 */
 	public function has_script_handles_failed(): bool {
-		if ( ! $this->script_handles_resolved ) {
-			$this->resolve_script_handles();
-		}
+		$this->validate_script_handle_registrations();
 
 		return $this->script_handles_failed;
 	}
@@ -341,9 +389,7 @@ class SettingsUIRequestContext {
 	 * @return string
 	 */
 	public function get_script_handles_failure_reason(): string {
-		if ( ! $this->script_handles_resolved ) {
-			$this->resolve_script_handles();
-		}
+		$this->validate_script_handle_registrations();
 
 		return '' !== $this->script_handles_failure_reason
 			? $this->script_handles_failure_reason
@@ -495,29 +541,20 @@ class SettingsUIRequestContext {
 		}
 
 		try {
-			$this->script_handles = self::validate_and_enqueue_script_handles( $this->settings_ui_page->get_script_handles( $this->section ) );
+			$this->script_handles = self::validate_script_handles( $this->settings_ui_page->get_script_handles( $this->section ) );
 		} catch ( \Throwable $e ) {
-			$this->script_handles_failed = true;
-
-			self::log_resolution_failure( 'Settings UI script handles', $this->get_page_id(), $this->section, $e, __METHOD__ );
-
-			$this->script_handles_failure_reason = sprintf(
-				/* translators: %s: failure reason. */
-				__( 'Settings UI script handles could not be resolved: %s', 'woocommerce' ),
-				self::sanitize_failure_reason( $e )
-			);
+			$this->record_script_handles_failure( $e, __METHOD__ );
 		}
 	}
 
 	/**
-	 * Validate and enqueue extension script handles.
+	 * Validate extension script handle declarations.
 	 *
 	 * @param array $script_handles Declared script handles.
 	 * @return string[] Validated script handles.
 	 * @throws \InvalidArgumentException When a handle is not a non-empty string.
-	 * @throws \RuntimeException When a handle is not registered or cannot be enqueued.
 	 */
-	private static function validate_and_enqueue_script_handles( array $script_handles ): array {
+	private static function validate_script_handles( array $script_handles ): array {
 		// Exception messages are cached diagnostics rather than HTML output. Dynamic
 		// handles are sanitized before the exception crosses this boundary.
 		// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
@@ -525,35 +562,65 @@ class SettingsUIRequestContext {
 			if ( ! is_string( $script_handle ) || '' === trim( $script_handle ) ) {
 				throw new \InvalidArgumentException( __( 'Settings UI script handles must be non-empty strings.', 'woocommerce' ) );
 			}
-
-			if ( ! wp_script_is( $script_handle, 'registered' ) ) {
-				throw new \RuntimeException(
-					sprintf(
-						/* translators: %s: script handle. */
-						__( 'Settings UI script handle "%s" is not registered.', 'woocommerce' ),
-						sanitize_text_field( $script_handle )
-					)
-				);
-			}
-		}
-
-		$script_handles = array_values( array_unique( $script_handles ) );
-		foreach ( $script_handles as $script_handle ) {
-			wp_enqueue_script( $script_handle );
-
-			if ( ! wp_script_is( $script_handle, 'enqueued' ) ) {
-				throw new \RuntimeException(
-					sprintf(
-						/* translators: %s: script handle. */
-						__( 'Settings UI script handle "%s" could not be enqueued.', 'woocommerce' ),
-						sanitize_text_field( $script_handle )
-					)
-				);
-			}
 		}
 		// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 
-		return $script_handles;
+		return array_values( array_unique( $script_handles ) );
+	}
+
+	/**
+	 * Validate extension script handle registrations.
+	 */
+	private function validate_script_handle_registrations(): void {
+		if ( ! $this->script_handles_resolved ) {
+			$this->resolve_script_handles();
+		}
+
+		if ( $this->script_handle_registrations_checked || $this->script_handles_failed ) {
+			return;
+		}
+
+		$this->script_handle_registrations_checked = true;
+
+		try {
+			foreach ( $this->script_handles as $script_handle ) {
+				if ( wp_script_is( $script_handle, 'registered' ) ) {
+					continue;
+				}
+
+				$this->record_script_handles_failure(
+					new \RuntimeException(
+						sprintf(
+							/* translators: %s: script handle. */
+							__( 'Settings UI script handle "%s" is not registered.', 'woocommerce' ),
+							sanitize_text_field( $script_handle )
+						)
+					),
+					__METHOD__
+				);
+				return;
+			}
+		} catch ( \Throwable $e ) {
+			$this->record_script_handles_failure( $e, __METHOD__ );
+		}
+	}
+
+	/**
+	 * Cache and report a script handle failure.
+	 *
+	 * @param \Throwable $e Resolution failure.
+	 * @param string     $caller Calling method, for exception tracking.
+	 */
+	private function record_script_handles_failure( \Throwable $e, string $caller ): void {
+		$this->script_handles_failed = true;
+
+		self::log_resolution_failure( 'Settings UI script handles', $this->settings_page->get_id(), $this->section, $e, $caller );
+
+		$this->script_handles_failure_reason = sprintf(
+			/* translators: %s: failure reason. */
+			__( 'Settings UI script handles could not be resolved: %s', 'woocommerce' ),
+			self::sanitize_failure_reason( $e )
+		);
 	}
 
 	/**

@@ -127,6 +127,8 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		wp_deregister_script( 'settings-ui-counting-handle' );
 		wp_dequeue_script( 'settings-ui-registered-handle' );
 		wp_deregister_script( 'settings-ui-registered-handle' );
+		wp_dequeue_script( 'settings-ui-late-registered-handle' );
+		wp_deregister_script( 'settings-ui-late-registered-handle' );
 		delete_option( 'woocommerce_settings_ui_flag_test' );
 		SettingsUIRequestContext::reset();
 
@@ -411,6 +413,61 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		$this->assertTrue( wp_script_is( 'settings-ui-registered-handle', 'enqueued' ) );
 		$this->assertStringContainsString( 'data-wc-settings-ui="1"', $output );
 		$this->assertTrue( $GLOBALS['hide_save_button'] );
+	}
+
+	/**
+	 * @testdox Should allow extensions to register declared script handles after WooCommerce collects dependencies.
+	 */
+	public function test_script_handle_registered_at_later_hook_priority_is_enqueued_before_mount(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+
+		global $current_section;
+		$current_section = '';
+		$page            = $this->get_settings_ui_test_page_with_script_handles( array( 'settings-ui-late-registered-handle' ) );
+		$context         = SettingsUIRequestContext::for_settings_page( $page, '' );
+
+		// WooCommerce collects dependencies at priority 15; extensions may register them later in the same hook.
+		$this->assertSame( array( 'settings-ui-late-registered-handle' ), $context->get_script_handles() );
+		wp_register_script( 'settings-ui-late-registered-handle', false, array(), '1.0.0', true );
+
+		ob_start();
+		$page->output();
+		$output = ob_get_clean();
+
+		$this->assertTrue( wp_script_is( 'settings-ui-late-registered-handle', 'enqueued' ) );
+		$this->assertStringContainsString( 'data-wc-settings-ui="1"', $output );
+		$this->assertFalse( $context->has_script_handles_failed() );
+	}
+
+	/**
+	 * @testdox Should preserve the classic Save button and report a mount preparation exception.
+	 */
+	public function test_mount_preparation_exception_preserves_classic_save_button_and_is_reported(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+
+		$caught   = array();
+		$listener = static function ( $exception ) use ( &$caught ): void {
+			$caught[] = $exception;
+		};
+		add_action( 'woocommerce_caught_exception', $listener );
+
+		global $current_section, $current_tab;
+		$current_section = '';
+		$current_tab     = 'settings_ui_flag_test';
+		$page            = $this->get_settings_ui_test_page_with_script_handles( array(), true );
+
+		try {
+			$output = $this->render_settings_view( $page );
+		} finally {
+			remove_action( 'woocommerce_caught_exception', $listener );
+		}
+
+		$this->assertStringContainsString( 'name="woocommerce_settings_ui_flag_test"', $output );
+		$this->assertStringContainsString( 'class="woocommerce-save-button', $output );
+		$this->assertStringNotContainsString( 'data-wc-settings-ui="1"', $output );
+		$this->assertArrayNotHasKey( 'hide_save_button', $GLOBALS );
+		$this->assertCount( 1, $caught );
+		$this->assertSame( 'Unable to resolve the Settings UI page id.', $caught[0]->getMessage() );
 	}
 
 	/**
@@ -1225,10 +1282,11 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	 * Build a settings page declaring extension script handles.
 	 *
 	 * @param array $script_handles Script handles.
+	 * @param bool  $fail_page_id Whether the adapter should fail to provide its page id.
 	 * @return \WC_Settings_Page
 	 */
-	private function get_settings_ui_test_page_with_script_handles( array $script_handles ): \WC_Settings_Page {
-		return new class( $script_handles ) extends \WC_Settings_Page {
+	private function get_settings_ui_test_page_with_script_handles( array $script_handles, bool $fail_page_id = false ): \WC_Settings_Page {
+		return new class( $script_handles, $fail_page_id ) extends \WC_Settings_Page {
 			/**
 			 * Extension script handles.
 			 *
@@ -1237,14 +1295,23 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 			private array $script_handles;
 
 			/**
+			 * Whether the adapter should fail to provide its page id.
+			 *
+			 * @var bool
+			 */
+			private bool $fail_page_id;
+
+			/**
 			 * Constructor.
 			 *
 			 * @param array $script_handles Script handles.
+			 * @param bool  $fail_page_id Whether the adapter should fail to provide its page id.
 			 */
-			public function __construct( array $script_handles ) {
+			public function __construct( array $script_handles, bool $fail_page_id ) {
 				$this->id             = 'settings_ui_flag_test';
 				$this->label          = 'Settings UI flag test';
 				$this->script_handles = $script_handles;
+				$this->fail_page_id   = $fail_page_id;
 			}
 
 			/**
@@ -1253,7 +1320,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 			 * @return \Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface|null
 			 */
 			public function get_settings_ui_page(): ?\Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface {
-				return new class( $this, $this->script_handles ) extends \Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter {
+				return new class( $this, $this->script_handles, $this->fail_page_id ) extends \Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter {
 					/**
 					 * Extension script handles.
 					 *
@@ -1262,14 +1329,36 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 					private array $script_handles;
 
 					/**
+					 * Whether the adapter should fail to provide its page id.
+					 *
+					 * @var bool
+					 */
+					private bool $fail_page_id;
+
+					/**
 					 * Constructor.
 					 *
 					 * @param \WC_Settings_Page $settings_page Settings page.
 					 * @param array             $script_handles Script handles.
+					 * @param bool              $fail_page_id Whether the adapter should fail to provide its page id.
 					 */
-					public function __construct( \WC_Settings_Page $settings_page, array $script_handles ) {
+					public function __construct( \WC_Settings_Page $settings_page, array $script_handles, bool $fail_page_id ) {
 						parent::__construct( $settings_page );
 						$this->script_handles = $script_handles;
+						$this->fail_page_id   = $fail_page_id;
+					}
+
+					/**
+					 * Get the page id.
+					 *
+					 * @return string
+					 */
+					public function get_page_id(): string {
+						if ( $this->fail_page_id ) {
+							throw new \RuntimeException( 'Unable to resolve the Settings UI page id.' );
+						}
+
+						return parent::get_page_id();
 					}
 
 					/**

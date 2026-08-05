@@ -911,8 +911,8 @@ class SettingsUISchema {
 				throw self::invalid_schema( sprintf( 'Shell badge %d label must be a string.', $index ) );
 			}
 
-			if ( isset( $badge['intent'] ) && ! in_array( $badge['intent'], array( 'default', 'info', 'success', 'warning', 'error' ), true ) ) {
-				throw self::invalid_schema( sprintf( 'Shell badge %d intent "%s" is not supported.', $index, is_scalar( $badge['intent'] ) ? (string) $badge['intent'] : gettype( $badge['intent'] ) ) );
+			if ( isset( $badge['intent'] ) && ! is_string( $badge['intent'] ) ) {
+				throw self::invalid_schema( sprintf( 'Shell badge %d intent must be a string.', $index ) );
 			}
 		}
 	}
