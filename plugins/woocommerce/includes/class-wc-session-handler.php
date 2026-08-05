@@ -321,7 +321,7 @@ class WC_Session_Handler extends WC_Session {
 	 * Verify a hash produced by self::hash().
 	 *
 	 * Hashes produced by the previous `wp_fast_hash()` implementation are still accepted so that guest sessions
-	 * created before this change are not invalidated. That fallback can be removed once those cookies have expired.
+	 * created before this change are not invalidated. That fallback can be removed in 11.1.0 forward after those cookies have expired.
 	 *
 	 * @param string $message Message to verify.
 	 * @param string $hash Hash to verify.
