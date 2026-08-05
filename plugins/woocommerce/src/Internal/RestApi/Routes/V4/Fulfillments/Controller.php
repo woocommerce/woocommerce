@@ -366,8 +366,6 @@ class Controller extends AbstractController {
 	 *
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 * @return Fulfillment|WP_Error The requested fulfillment, or an error if it does not exist or does not belong to an order.
-	 *
-	 * @since 11.1.0
 	 */
 	private function resolve_fulfillment_from_url( WP_REST_Request $request ) {
 		$url_params     = $request->get_url_params();
@@ -422,8 +420,6 @@ class Controller extends AbstractController {
 	 *
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 * @return void
-	 *
-	 * @since 11.1.0
 	 */
 	private function pin_request_to_fulfillment( WP_REST_Request $request, Fulfillment $fulfillment ): void {
 		$request->set_param( 'fulfillment_id', $fulfillment->get_id() );
@@ -436,8 +432,6 @@ class Controller extends AbstractController {
 	 * @param WP_Error $error The error to convert.
 	 *
 	 * @return WP_REST_Response
-	 *
-	 * @since 11.1.0
 	 */
 	private function error_response_from_wp_error( WP_Error $error ): WP_REST_Response {
 		$error_data = $error->get_error_data();
