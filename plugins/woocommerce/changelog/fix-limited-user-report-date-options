@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop resolving the protected date-type and report date tour options for users without WooCommerce admin access.
