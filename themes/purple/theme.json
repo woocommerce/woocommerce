@@ -747,11 +747,6 @@
 		},
 		{
 			"area": "uncategorized",
-			"name": "mini-cart",
-			"title": "Mini Cart"
-		},
-		{
-			"area": "uncategorized",
 			"name": "simple-product-add-to-cart-with-options",
 			"title": "Simple Product Add to Cart with Options"
 		},
