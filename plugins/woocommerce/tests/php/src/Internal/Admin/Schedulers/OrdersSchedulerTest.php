@@ -613,6 +613,94 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Untrashing syncs the restored status even when action scheduling runs synchronously.
+	 *
+	 * Regression test: woocommerce_untrash_order fires before the restored status is
+	 * persisted, so scheduling the import from it recorded wc-trash whenever
+	 * schedule_action() fell back to running the import inline. Nothing corrected the
+	 * row afterwards, because the HPOS data store suppresses woocommerce_update_order
+	 * for trash transitions, leaving the restored order permanently missing from
+	 * Analytics. The import is driven off the post-save status transition instead.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/44371
+	 */
+	public function test_untrash_syncs_restored_status_when_action_scheduling_is_synchronous(): void {
+		global $wpdb;
+
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'Only HPOS fires the untrash hook before persisting; the CPT path is covered via untrashed_post.' );
+		}
+
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
+
+		// Force schedule_action() down its synchronous fallback, as it behaves when the
+		// Action Scheduler tables are unavailable or scheduling has been disabled.
+		add_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+
+		$read_status = static function ( $id ) use ( $wpdb ) {
+			return $wpdb->get_var(
+				$wpdb->prepare( "SELECT status FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $id )
+			);
+		};
+
+		try {
+			$order = \WC_Helper_Order::create_order();
+			$order->set_status( 'completed' );
+			$order->save();
+			$order_id = $order->get_id();
+			OrdersScheduler::import( $order_id );
+
+			// Trash. woocommerce_trash_order fires after the status is persisted, so the
+			// synchronous import records it correctly without any queue run.
+			$order->delete( false );
+			$this->assertSame( 'wc-trash', $read_status( $order_id ), 'Trashing should sync wc-trash synchronously.' );
+
+			// Restore. Note delete() cleared the in-memory ID, so reload first.
+			$order = wc_get_order( $order_id );
+			$order->get_data_store()->untrash_order( $order );
+
+			// Deliberately no queue run: the import already ran inline, and it must have
+			// seen the restored status rather than the trashed one.
+			$this->assertSame(
+				'wc-completed',
+				$read_status( $order_id ),
+				'Untrashing should sync the restored status, not wc-trash, on the synchronous path.'
+			);
+		} finally {
+			remove_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+		}
+	}
+
+	/**
+	 * @testdox maybe_schedule_import_on_untrash ignores transitions that are not restores.
+	 */
+	public function test_maybe_schedule_import_on_untrash_ignores_non_trash_transitions(): void {
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
+
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'completed' );
+		$order->save();
+
+		$this->clear_scheduled_import( $order->get_id() );
+
+		OrdersScheduler::maybe_schedule_import_on_untrash( $order->get_id(), 'pending' );
+
+		$this->assertFalse(
+			$this->is_import_scheduled( $order->get_id() ),
+			'A transition that does not come from trash should not schedule an import.'
+		);
+
+		OrdersScheduler::maybe_schedule_import_on_untrash( $order->get_id(), 'trash' );
+
+		$this->assertTrue(
+			$this->is_import_scheduled( $order->get_id() ),
+			'A transition out of trash should schedule an import.'
+		);
+
+		$this->clear_scheduled_import( $order->get_id() );
+	}
+
+	/**
 	 * @testdox maybe_schedule_import_on_post_trash_change is a no-op when HPOS is the authoritative store.
 	 *
 	 * When HPOS is active the woocommerce_trash_order/woocommerce_untrash_order hooks
@@ -899,5 +987,31 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	private function is_batch_processor_scheduled(): bool {
 		$action_hook = OrdersScheduler::get_action( 'process_pending_batch' );
 		return function_exists( 'as_has_scheduled_action' ) ? as_has_scheduled_action( $action_hook, array(), OrdersScheduler::$group ) : (bool) as_next_scheduled_action( $action_hook, array(), OrdersScheduler::$group );
+	}
+
+	/**
+	 * Clear any scheduled single-order import actions for an order.
+	 *
+	 * @param int $order_id Order ID.
+	 * @return void
+	 */
+	private function clear_scheduled_import( int $order_id ): void {
+		$action_hook = OrdersScheduler::get_action( 'import' );
+		if ( function_exists( 'as_unschedule_all_actions' ) ) {
+			as_unschedule_all_actions( $action_hook, array( $order_id ), OrdersScheduler::$group );
+		}
+	}
+
+	/**
+	 * Check whether a single-order import action is scheduled for an order.
+	 *
+	 * @param int $order_id Order ID.
+	 * @return bool
+	 */
+	private function is_import_scheduled( int $order_id ): bool {
+		$action_hook = OrdersScheduler::get_action( 'import' );
+		return function_exists( 'as_has_scheduled_action' )
+			? as_has_scheduled_action( $action_hook, array( $order_id ), OrdersScheduler::$group )
+			: (bool) as_next_scheduled_action( $action_hook, array( $order_id ), OrdersScheduler::$group );
 	}
 }
