@@ -49,53 +49,45 @@ class HelcimTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should report account connected when a sandbox API token is set in sandbox mode.
+	 * @testdox Should report account connected when the gateway does not need setup.
 	 */
-	public function test_is_account_connected_true_when_sandbox_token_set(): void {
+	public function test_is_account_connected_true_when_gateway_does_not_need_setup(): void {
 		$fake_gateway = new FakePaymentGateway(
 			'helcimjs',
 			array(
-				'settings' => array(
+				'settings'    => array(
+					'environment'       => 'live',
+					'renamed_api_token' => 'bogus_live_token',
+				),
+				'needs_setup' => false,
+			),
+		);
+
+		$this->assertTrue(
+			$this->sut->is_account_connected( $fake_gateway ),
+			'The gateway setup requirement should be authoritative when its token option keys change.'
+		);
+	}
+
+	/**
+	 * @testdox Should report account not connected when the gateway needs setup.
+	 */
+	public function test_is_account_connected_false_when_gateway_needs_setup(): void {
+		$fake_gateway = new FakePaymentGateway(
+			'helcimjs',
+			array(
+				'settings'    => array(
 					'environment'       => 'sandbox',
-					'sandbox_api_token' => 'bogus_sandbox_token',
+					'sandbox_api_token' => 'stale_or_irrelevant_token',
 				),
+				'needs_setup' => true,
 			),
 		);
 
-		$this->assertTrue( $this->sut->is_account_connected( $fake_gateway ) );
-	}
-
-	/**
-	 * @testdox Should report account not connected when no sandbox API token is set in sandbox mode.
-	 */
-	public function test_is_account_connected_false_when_sandbox_token_missing(): void {
-		$fake_gateway = new FakePaymentGateway(
-			'helcimjs',
-			array(
-				'settings' => array(
-					'environment' => 'sandbox',
-				),
-			),
+		$this->assertFalse(
+			$this->sut->is_account_connected( $fake_gateway ),
+			'The gateway setup requirement should take precedence over assumed token option keys.'
 		);
-
-		$this->assertFalse( $this->sut->is_account_connected( $fake_gateway ) );
-	}
-
-	/**
-	 * @testdox Should report account connected when a live API token is set in live mode.
-	 */
-	public function test_is_account_connected_true_when_live_token_set(): void {
-		$fake_gateway = new FakePaymentGateway(
-			'helcimjs',
-			array(
-				'settings' => array(
-					'environment'    => 'live',
-					'live_api_token' => 'bogus_live_token',
-				),
-			),
-		);
-
-		$this->assertTrue( $this->sut->is_account_connected( $fake_gateway ) );
 	}
 
 	/**
@@ -131,43 +123,52 @@ class HelcimTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should fall back to the generic account-connected heuristic when the environment option is entirely absent.
+	 * @testdox Should report a legacy gateway connected when it has no custom setup requirement.
 	 */
-	public function test_is_account_connected_falls_back_when_environment_option_missing(): void {
-		// Simulates a pre-v5 Helcim install: same gateway id, but no 'environment'
-		// option was ever registered, so it's absent from both settings and form_fields.
+	public function test_is_account_connected_true_for_legacy_gateway_without_custom_setup_requirement(): void {
 		$fake_gateway = new FakePaymentGateway(
 			'helcimjs',
 			array(
-				'settings'          => array(
+				'settings'    => array(
 					'legacy_api_token' => 'real_legacy_live_token',
 				),
-				'account_connected' => true,
+				'needs_setup' => false,
 			),
 		);
 
-		$this->assertTrue( $this->sut->is_account_connected( $fake_gateway ) );
+		$this->assertTrue(
+			$this->sut->is_account_connected( $fake_gateway ),
+			'Legacy gateways should retain the generic fail-open connected state.'
+		);
 	}
 
 	/**
-	 * @testdox Should fall back to the generic account-connected heuristic for an unrecognized environment value.
+	 * @testdox Should fall back to the generic account-connected heuristic when the setup check fails.
 	 */
-	public function test_is_account_connected_falls_back_for_unrecognized_environment(): void {
-		// account_connected is true here (not false) so the assertion can't pass
-		// by coincidence: an incorrectly-sandbox or incorrectly-live read would
-		// look up an absent token option and return false either way, while only
-		// a correct null (unrecognized -> defer to parent) read reaches this true.
-		$fake_gateway = new FakePaymentGateway(
+	public function test_is_account_connected_falls_back_when_setup_check_fails(): void {
+		$fake_gateway = new class(
 			'helcimjs',
 			array(
 				'settings'          => array(
-					'environment' => 'staging',
+					'environment' => 'live',
 				),
 				'account_connected' => true,
 			),
-		);
+		) extends FakePaymentGateway {
+			/**
+			 * Simulate a gateway setup check failure.
+			 *
+			 * @throws \RuntimeException Always.
+			 */
+			public function needs_setup() {
+				throw new \RuntimeException( 'Failed to check the gateway setup.' );
+			}
+		};
 
-		$this->assertTrue( $this->sut->is_account_connected( $fake_gateway ) );
+		$this->assertTrue(
+			$this->sut->is_account_connected( $fake_gateway ),
+			'Setup check failures should use the generic account-connected heuristic.'
+		);
 	}
 
 	/**
