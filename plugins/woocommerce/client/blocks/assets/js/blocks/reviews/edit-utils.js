@@ -328,6 +328,14 @@ export const getSharedReviewListControls = (
 				>
 					<NumberControl
 						__next40pxDefaultSize
+						__unstableStateReducer={ ( state ) =>
+							Object.is( Number( state.value ), -0 )
+								? {
+										...state,
+										value: String( defaultOffset ),
+								  }
+								: state
+						}
 						label={ __( 'Offset', 'woocommerce' ) }
 						help={ __(
 							'Number of reviews to skip',
