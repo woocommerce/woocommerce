@@ -64,15 +64,16 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 	 * Add the note if the store is eligible and it has never been created before.
 	 */
 	public function possibly_add_note(): void {
-		if ( ! $this->is_applicable() ) {
-			return;
-		}
-
 		try {
-			if (
-				$this->has_note_been_created() ||
-				! add_option( self::CREATED_OPTION, 'yes', '', false )
-			) {
+			if ( $this->has_note_been_created() ) {
+				return;
+			}
+
+			if ( ! $this->is_applicable() ) {
+				return;
+			}
+
+			if ( ! add_option( self::CREATED_OPTION, 'yes', '', false ) ) {
 				return;
 			}
 
