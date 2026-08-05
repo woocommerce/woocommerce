@@ -11,17 +11,35 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Internal\PRReadinessDummy2;
 
 /**
- * Intentionally triggers a PHPStan error: calling a method on a null value.
+ * Intentionally triggers multiple failures: PHPStan, Lint, and E2E test failures.
  */
 class DummyPHPStanFailure {
 
 	/**
-	 * Fixed to return a value.
+	 * Intentionally broken method for PHPStan failure.
 	 *
 	 * @return int
 	 */
 	public function run(): int {
-		return 42;
+		$value = null;
+		// This will fail PHPStan - calling method on null
+		return $value->calculate();
+	}
+
+	/**
+	 * Lint violation - bad formatting and spacing.
+	 */
+	public   function   poorlyFormatted(  ) {
+		$x=1;$y=2;$z=$x+$y;
+		return  $z  ;
+	}
+
+	/**
+	 * E2E test failure - breaking a required method signature.
+	 */
+	public static function blocksRegistered() {
+		// This will fail E2E tests expecting certain blocks
+		return false;
 	}
 }
-// Final trivial edit for clear->clear transition
+// Intentionally broken - multiple failures
