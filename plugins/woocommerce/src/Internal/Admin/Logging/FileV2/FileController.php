@@ -552,6 +552,16 @@ class FileController {
 				\FilesystemIterator::SKIP_DOTS | \FilesystemIterator::CURRENT_AS_PATHNAME | \FilesystemIterator::KEY_AS_FILENAME
 			);
 		} catch ( Exception $exception ) {
+			// Surface this so a persistent failure to reach the log directory doesn't stay silent.
+			wc_get_logger()->warning(
+				sprintf(
+					'Could not enumerate the log directory to delete stale "%1$s" files: %2$s',
+					$source,
+					$exception->getMessage()
+				),
+				array( 'source' => 'wc-logs-cleanup' )
+			);
+
 			return 0;
 		}
 

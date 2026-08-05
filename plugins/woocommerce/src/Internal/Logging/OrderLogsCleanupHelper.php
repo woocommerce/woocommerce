@@ -126,7 +126,7 @@ class OrderLogsCleanupHelper {
 		// order, so it's only worth doing when the bulk sweep isn't deleting the files.
 		$deleted = $files_swept_in_bulk
 			? $this->delete_debug_log_meta_entries( array_keys( $dangling_orders ) )
-			: $this->clear_logs_and_delete_meta( $dangling_orders );
+			: $this->clear_logs_and_delete_meta_entries( $dangling_orders );
 
 		return $deleted && self::MAX_ORDERS_PER_RUN === count( $dangling_orders );
 	}
@@ -185,9 +185,23 @@ class OrderLogsCleanupHelper {
 	 *
 	 * @param array $items Associative array of order ID => log source name.
 	 *
+	 * @return void
+	 */
+	public function clear_logs_and_delete_meta( array $items ): void {
+		$this->clear_logs_and_delete_meta_entries( $items );
+	}
+
+	/**
+	 * Clear debug log files and delete associated order meta for the given items, reporting whether anything
+	 * was deleted.
+	 *
+	 * This backs the public clear_logs_and_delete_meta(), whose `void` return type is kept for compatibility.
+	 *
+	 * @param array $items Associative array of order ID => log source name.
+	 *
 	 * @return bool True if any meta entries were deleted.
 	 */
-	public function clear_logs_and_delete_meta( array $items ): bool {
+	private function clear_logs_and_delete_meta_entries( array $items ): bool {
 		if ( empty( $items ) ) {
 			return false;
 		}
@@ -296,6 +310,18 @@ class OrderLogsCleanupHelper {
 			if ( is_int( $result ) && $result > 0 ) {
 				$deleted = true;
 			}
+		}
+
+		if ( ! $deleted ) {
+			// These IDs came from a query that just matched them on `_debug_log_source`, so deleting nothing
+			// means either another process got there first or the writes are failing. Worth surfacing either way.
+			wc_get_logger()->warning(
+				sprintf(
+					'Expected to delete debug log meta for %d order(s), but no rows were removed.',
+					count( $order_ids )
+				),
+				array( 'source' => 'wc-logs-cleanup' )
+			);
 		}
 
 		return $deleted;
