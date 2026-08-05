@@ -40,9 +40,6 @@ test.describe( 'Settings UI feature flag', { tag: [ tags.NOT_E2E ] }, () => {
 		const url = getBaseURL( baseURL );
 
 		await wpCLI(
-			'ln -sfn /var/www/html/wp-content/plugins/woocommerce/tests/e2e/test-plugins/settings-ui-component-registration /var/www/html/wp-content/plugins/settings-ui-component-registration'
-		);
-		await wpCLI(
 			'wp plugin activate settings-ui-component-registration --skip-plugins'
 		);
 		await setFeatureFlag( request, url, 'settings-ui', true );
@@ -54,9 +51,6 @@ test.describe( 'Settings UI feature flag', { tag: [ tags.NOT_E2E ] }, () => {
 		await resetFeatureFlags( request, url );
 		await wpCLI(
 			'wp plugin deactivate settings-ui-component-registration --skip-plugins'
-		);
-		await wpCLI(
-			'unlink /var/www/html/wp-content/plugins/settings-ui-component-registration'
 		);
 	} );
 
