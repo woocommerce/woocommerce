@@ -13,6 +13,8 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalInputControl as InputControl,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalNumberControl as NumberControl,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
@@ -324,18 +326,29 @@ export const getSharedReviewListControls = (
 					}
 					isShownByDefault
 				>
-					<InputControl
+					<NumberControl
 						__next40pxDefaultSize
 						label={ __( 'Offset', 'woocommerce' ) }
 						help={ __(
 							'Number of reviews to skip',
 							'woocommerce'
 						) }
-						value={ String( attributes.offset ?? defaultOffset ) }
-						onChange={ ( value ) =>
-							setAttributes( { offset: Number( value ) } )
-						}
-						type="number"
+						value={ attributes.offset ?? defaultOffset }
+						onChange={ ( value ) => {
+							if ( value === '' ) {
+								return;
+							}
+
+							const offset = Number( value );
+							if (
+								! Number.isInteger( offset ) ||
+								offset < defaultOffset
+							) {
+								return;
+							}
+
+							setAttributes( { offset } );
+						} }
 						min={ defaultOffset }
 						step={ 1 }
 					/>
