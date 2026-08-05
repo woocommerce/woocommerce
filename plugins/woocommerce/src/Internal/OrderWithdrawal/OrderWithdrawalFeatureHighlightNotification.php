@@ -7,7 +7,7 @@ use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\DataStore as NotesDataStore;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
-use Throwable;
+use Exception;
 
 /**
  * Adds an inbox notification about the order withdrawal feature for eligible stores.
@@ -77,7 +77,7 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 			}
 
 			$this->get_note()->save();
-		} catch ( Throwable $exception ) {
+		} catch ( Exception $exception ) {
 			delete_option( self::CREATED_OPTION );
 			wc_get_logger()->error(
 				'Unable to create the order withdrawal inbox notification.',
