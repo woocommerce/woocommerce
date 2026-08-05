@@ -144,9 +144,7 @@ grep -B2 "'type'.*=>.*'object'" *.php | grep -A2 "'items'"
 
 **POST /wc-admin/settings/payments/providers:**
 
-Note the method. Despite being a read operation, this route is registered with
-`WP_REST_Server::CREATABLE`, so it accepts **POST only** — a `GET` returns
-`rest_no_route` (404) even though the route is listed in the namespace index.
+Note the method. Despite being a read operation, this route is registered with `WP_REST_Server::CREATABLE` (to avoid browser caching), so it accepts **POST only** — a `GET` returns `rest_no_route` (404) even though the route is listed in the namespace index.
 
 ```json
 {
