@@ -149,13 +149,12 @@ class OrderWithdrawalFeatureHighlightNotificationTest extends WC_Unit_Test_Case 
 		update_option( self::ALLOWED_COUNTRIES_OPTION, 'specific' );
 		update_option( self::SPECIFIC_COUNTRIES_OPTION, array( 'US' ) );
 
-		$reflection = new \ReflectionClass( $this->sut );
-		$method     = $reflection->getMethod( 'store_sells_to_eu_or_all_countries' );
-		$method->setAccessible( true );
+		$this->sut->possibly_add_note();
 
-		$this->assertFalse(
-			$method->invoke( $this->sut ),
-			'A store that only sells to the US should not match the EU-or-all-countries check.'
+		$this->assertCount(
+			0,
+			$this->get_notification_note_ids(),
+			'A store that only sells to the US should not receive the notification.'
 		);
 	}
 
