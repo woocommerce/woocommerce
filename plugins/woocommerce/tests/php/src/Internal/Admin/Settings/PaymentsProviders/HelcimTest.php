@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProx
 use Automattic\WooCommerce\Testing\Tools\TestingContainer;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
 use PHPUnit\Framework\MockObject\MockObject;
+use WC_Payment_Gateway;
 use WC_Unit_Test_Case;
 
 /**
@@ -123,22 +124,15 @@ class HelcimTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should report a legacy gateway connected when it has no custom setup requirement.
+	 * @testdox Should report a legacy gateway connected when it inherits the default setup requirement.
 	 */
-	public function test_is_account_connected_true_for_legacy_gateway_without_custom_setup_requirement(): void {
-		$fake_gateway = new FakePaymentGateway(
-			'helcimjs',
-			array(
-				'settings'    => array(
-					'legacy_api_token' => 'real_legacy_live_token',
-				),
-				'needs_setup' => false,
-			),
-		);
+	public function test_is_account_connected_true_for_legacy_gateway_with_default_setup_requirement(): void {
+		$legacy_gateway     = new class() extends WC_Payment_Gateway {};
+		$legacy_gateway->id = 'helcimjs';
 
 		$this->assertTrue(
-			$this->sut->is_account_connected( $fake_gateway ),
-			'Legacy gateways should retain the generic fail-open connected state.'
+			$this->sut->is_account_connected( $legacy_gateway ),
+			'Legacy gateways inheriting the default setup requirement should retain the connected state.'
 		);
 	}
 
@@ -152,7 +146,7 @@ class HelcimTest extends WC_Unit_Test_Case {
 				'settings'          => array(
 					'environment' => 'live',
 				),
-				'account_connected' => true,
+				'account_connected' => false,
 			),
 		) extends FakePaymentGateway {
 			/**
@@ -165,9 +159,9 @@ class HelcimTest extends WC_Unit_Test_Case {
 			}
 		};
 
-		$this->assertTrue(
+		$this->assertFalse(
 			$this->sut->is_account_connected( $fake_gateway ),
-			'Setup check failures should use the generic account-connected heuristic.'
+			'Setup check failures should return the generic account-connected heuristic result.'
 		);
 	}
 
