@@ -57952,18 +57952,6 @@ parameters:
 			path: src/Internal/Admin/Orders/ListTable.php
 
 		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\Admin\\Orders\\ListTable\:\:\$wp_post_type \(Automattic\\WooCommerce\\Internal\\Admin\\Orders\\WP_Post_Type\|null\) does not accept WP_Post_Type\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/Admin/Orders/ListTable.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\Admin\\Orders\\ListTable\:\:\$wp_post_type has unknown class Automattic\\WooCommerce\\Internal\\Admin\\Orders\\WP_Post_Type as its type\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/Admin/Orders/ListTable.php
-
-		-
 			message: '#^Property WP_Screen\:\:\$id \(string\) in isset\(\) is not nullable\.$#'
 			identifier: isset.property
 			count: 1
