@@ -393,10 +393,11 @@ class PageController {
 					$parent      = $this->pages[ $parent_id ];
 					$parent_path = $parent['path'] ?? null;
 
-					// Once the current page resolved through route-pattern matching, a patterned ancestor
-					// is not linkable either: the link would point at the literal `:param`/`*` template.
-					$parent_is_linkable = ! $this->current_page_is_route_pattern_match ||
-						( is_string( $parent_path ) && ! $this->registered_path_has_route_pattern( $parent_path ) );
+					// A non-string filtered path is never linkable. Once the current page resolved through
+					// route-pattern matching, a patterned ancestor is not linkable either: the link would
+					// point at the literal `:param`/`*` template.
+					$parent_is_linkable = is_string( $parent_path ) &&
+						( ! $this->current_page_is_route_pattern_match || ! $this->registered_path_has_route_pattern( $parent_path ) );
 
 					if ( $parent_is_linkable ) {
 						if ( 0 === strpos( $parent_path, self::PAGE_ROOT ) ) {

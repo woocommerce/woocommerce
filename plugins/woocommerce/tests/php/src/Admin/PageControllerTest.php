@@ -952,7 +952,7 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Fallback-selected pages use text for parents with invalid filtered paths.
 	 *
-	 * @dataProvider data_provider_test_route_pattern_fallback_with_invalid_parent_path
+	 * @dataProvider data_provider_invalid_filtered_parent_paths
 	 *
 	 * @param mixed $invalid_path Invalid filtered parent path.
 	 */
@@ -1015,11 +1015,78 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Exact-match pages use text for parents with invalid filtered paths.
+	 *
+	 * @dataProvider data_provider_invalid_filtered_parent_paths
+	 *
+	 * @param mixed $invalid_path Invalid filtered parent path.
+	 */
+	public function test_exact_match_uses_text_for_invalid_parent_path( $invalid_path ): void {
+		// A pattern-free child path resolved through the exact-match loop keeps
+		// `current_page_is_route_pattern_match` false, exercising the other linkability branch.
+		$result = $this->get_publicly_registered_page_result_for_request(
+			'/wp-admin/admin.php?page=wc-admin&path=%2Fbreadcrumb%2Fstatic',
+			function () use ( $invalid_path ) {
+				wc_admin_register_page(
+					array(
+						'id'     => 'invalid-path-parent',
+						'parent' => 'woocommerce',
+						'title'  => 'Invalid path parent',
+						'path'   => '/breadcrumb-parent',
+					)
+				);
+				wc_admin_register_page(
+					array(
+						'id'     => 'invalid-path-child',
+						'parent' => 'invalid-path-parent',
+						'title'  => 'Child page',
+						'path'   => '/breadcrumb/static',
+					)
+				);
+
+				$filter = function ( $options ) use ( $invalid_path ) {
+					if ( 'invalid-path-parent' === ( $options['id'] ?? null ) ) {
+						$options['path'] = $invalid_path;
+					}
+
+					return $options;
+				};
+
+				add_filter( 'woocommerce_navigation_connect_page_options', $filter );
+
+				try {
+					wc_admin_connect_page(
+						array(
+							'id'      => 'invalid-path-parent',
+							'parent'  => 'woocommerce',
+							'title'   => 'Invalid path parent',
+							'path'    => '/breadcrumb-parent',
+							'js_page' => true,
+						)
+					);
+				} finally {
+					remove_filter( 'woocommerce_navigation_connect_page_options', $filter );
+				}
+			},
+			true
+		);
+
+		$this->assertSame(
+			array(
+				array( 'admin.php?page=' . PageController::PAGE_ROOT, 'WooCommerce' ),
+				'Invalid path parent',
+				'Child page',
+			),
+			$result['breadcrumbs']
+		);
+	}
+
+	/**
 	 * Data provider for invalid filtered parent paths.
 	 *
 	 * @return array[]
 	 */
-	public static function data_provider_test_route_pattern_fallback_with_invalid_parent_path(): array {
+	public static function data_provider_invalid_filtered_parent_paths(): array {
 		return array(
 			'array path' => array( array( 'invalid' ) ),
 			'null path'  => array( null ),
