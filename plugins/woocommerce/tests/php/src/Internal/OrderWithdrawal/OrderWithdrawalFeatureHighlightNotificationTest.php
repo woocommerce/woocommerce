@@ -123,7 +123,7 @@ class OrderWithdrawalFeatureHighlightNotificationTest extends WC_Unit_Test_Case 
 	 * @param string[] $excluded_countries Excluded countries.
 	 * @param bool     $expected           Expected applicability.
 	 */
-	public function test_is_applicable_checks_country_settings(
+	public function test_possibly_add_note_checks_country_settings(
 		string $allowed_countries,
 		array $specific_countries,
 		array $excluded_countries,
@@ -133,15 +133,17 @@ class OrderWithdrawalFeatureHighlightNotificationTest extends WC_Unit_Test_Case 
 		update_option( self::SPECIFIC_COUNTRIES_OPTION, $specific_countries );
 		update_option( self::ALL_EXCEPT_COUNTRIES_OPTION, $excluded_countries );
 
-		$this->assertSame(
-			$expected,
-			$this->sut->is_applicable(),
+		$this->sut->possibly_add_note();
+
+		$this->assertCount(
+			$expected ? 1 : 0,
+			$this->get_notification_note_ids(),
 			'Applicability should match the configured selling countries.'
 		);
 	}
 
 	/**
-	 * Data provider for {@see test_is_applicable_checks_country_settings()}.
+	 * Data provider for {@see test_possibly_add_note_checks_country_settings()}.
 	 *
 	 * @return array<string,array{0:string,1:string[],2:string[],3:bool}>
 	 */

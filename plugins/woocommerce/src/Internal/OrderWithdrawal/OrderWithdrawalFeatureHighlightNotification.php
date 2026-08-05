@@ -44,6 +44,11 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 	/**
 	 * Add the note when the store is changed from coming soon to live.
 	 *
+	 * This is called when the `woocommerce_coming_soon` option is updated. It checks if the store has gone live and if so, it calls the `possibly_add_note` method to add the note.
+	 *
+	 * @internal
+	 * @since 11.1.0
+	 *
 	 * @param mixed $old_value Previous option value.
 	 * @param mixed $value     New option value.
 	 */
@@ -87,7 +92,7 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 	/**
 	 * Whether the notification is relevant for the current store settings.
 	 */
-	public function is_applicable(): bool {
+	private function is_applicable(): bool {
 		return 'no' === get_option( self::COMING_SOON_OPTION, 'yes' )
 			&& $this->store_sells_to_eu_or_all_countries();
 	}
@@ -95,7 +100,7 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 	/**
 	 * Get the inbox note.
 	 */
-	public function get_note(): Note {
+	private function get_note(): Note {
 		$note = new Note();
 
 		$note->set_title(
