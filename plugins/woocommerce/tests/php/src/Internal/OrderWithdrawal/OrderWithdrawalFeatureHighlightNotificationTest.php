@@ -143,6 +143,23 @@ class OrderWithdrawalFeatureHighlightNotificationTest extends WC_Unit_Test_Case 
 	}
 
 	/**
+	 * @testdox Should identify stores that only sell to the US as not selling to EU countries.
+	 */
+	public function test_store_sells_to_eu_or_all_countries_returns_false_for_us_only_store(): void {
+		update_option( self::ALLOWED_COUNTRIES_OPTION, 'specific' );
+		update_option( self::SPECIFIC_COUNTRIES_OPTION, array( 'US' ) );
+
+		$reflection = new \ReflectionClass( $this->sut );
+		$method     = $reflection->getMethod( 'store_sells_to_eu_or_all_countries' );
+		$method->setAccessible( true );
+
+		$this->assertFalse(
+			$method->invoke( $this->sut ),
+			'A store that only sells to the US should not match the EU-or-all-countries check.'
+		);
+	}
+
+	/**
 	 * Data provider for {@see test_possibly_add_note_checks_country_settings()}.
 	 *
 	 * @return array<string,array{0:string,1:string[],2:string[],3:bool}>
