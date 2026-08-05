@@ -960,46 +960,7 @@ class PageControllerTest extends WC_Unit_Test_Case {
 		$result = $this->get_publicly_registered_page_result_for_request(
 			'/wp-admin/admin.php?page=wc-admin&path=%2Fbreadcrumb%2F123',
 			function () use ( $invalid_path ) {
-				wc_admin_register_page(
-					array(
-						'id'     => 'invalid-path-parent',
-						'parent' => 'woocommerce',
-						'title'  => 'Invalid path parent',
-						'path'   => '/breadcrumb-parent',
-					)
-				);
-				wc_admin_register_page(
-					array(
-						'id'     => 'invalid-path-child',
-						'parent' => 'invalid-path-parent',
-						'title'  => 'Child page',
-						'path'   => '/breadcrumb/:itemId',
-					)
-				);
-
-				$filter = function ( $options ) use ( $invalid_path ) {
-					if ( 'invalid-path-parent' === ( $options['id'] ?? null ) ) {
-						$options['path'] = $invalid_path;
-					}
-
-					return $options;
-				};
-
-				add_filter( 'woocommerce_navigation_connect_page_options', $filter );
-
-				try {
-					wc_admin_connect_page(
-						array(
-							'id'      => 'invalid-path-parent',
-							'parent'  => 'woocommerce',
-							'title'   => 'Invalid path parent',
-							'path'    => '/breadcrumb-parent',
-							'js_page' => true,
-						)
-					);
-				} finally {
-					remove_filter( 'woocommerce_navigation_connect_page_options', $filter );
-				}
+				$this->register_invalid_path_parent_and_child( $invalid_path, '/breadcrumb/:itemId' );
 			},
 			true
 		);
@@ -1027,46 +988,7 @@ class PageControllerTest extends WC_Unit_Test_Case {
 		$result = $this->get_publicly_registered_page_result_for_request(
 			'/wp-admin/admin.php?page=wc-admin&path=%2Fbreadcrumb%2Fstatic',
 			function () use ( $invalid_path ) {
-				wc_admin_register_page(
-					array(
-						'id'     => 'invalid-path-parent',
-						'parent' => 'woocommerce',
-						'title'  => 'Invalid path parent',
-						'path'   => '/breadcrumb-parent',
-					)
-				);
-				wc_admin_register_page(
-					array(
-						'id'     => 'invalid-path-child',
-						'parent' => 'invalid-path-parent',
-						'title'  => 'Child page',
-						'path'   => '/breadcrumb/static',
-					)
-				);
-
-				$filter = function ( $options ) use ( $invalid_path ) {
-					if ( 'invalid-path-parent' === ( $options['id'] ?? null ) ) {
-						$options['path'] = $invalid_path;
-					}
-
-					return $options;
-				};
-
-				add_filter( 'woocommerce_navigation_connect_page_options', $filter );
-
-				try {
-					wc_admin_connect_page(
-						array(
-							'id'      => 'invalid-path-parent',
-							'parent'  => 'woocommerce',
-							'title'   => 'Invalid path parent',
-							'path'    => '/breadcrumb-parent',
-							'js_page' => true,
-						)
-					);
-				} finally {
-					remove_filter( 'woocommerce_navigation_connect_page_options', $filter );
-				}
+				$this->register_invalid_path_parent_and_child( $invalid_path, '/breadcrumb/static' );
 			},
 			true
 		);
@@ -1125,6 +1047,58 @@ class PageControllerTest extends WC_Unit_Test_Case {
 			'array path' => array( array( 'invalid' ) ),
 			'null path'  => array( null ),
 		);
+	}
+
+	/**
+	 * Registers a parent page whose path a filter replaces with an invalid value, and a child page.
+	 *
+	 * The parent is first registered with a valid path so the menu item exists, then re-connected
+	 * through the page options filter to overwrite its stored path with the invalid value.
+	 *
+	 * @param mixed  $invalid_path Invalid filtered parent path.
+	 * @param string $child_path   Child page path.
+	 */
+	private function register_invalid_path_parent_and_child( $invalid_path, string $child_path ): void {
+		wc_admin_register_page(
+			array(
+				'id'     => 'invalid-path-parent',
+				'parent' => 'woocommerce',
+				'title'  => 'Invalid path parent',
+				'path'   => '/breadcrumb-parent',
+			)
+		);
+		wc_admin_register_page(
+			array(
+				'id'     => 'invalid-path-child',
+				'parent' => 'invalid-path-parent',
+				'title'  => 'Child page',
+				'path'   => $child_path,
+			)
+		);
+
+		$filter = function ( $options ) use ( $invalid_path ) {
+			if ( 'invalid-path-parent' === ( $options['id'] ?? null ) ) {
+				$options['path'] = $invalid_path;
+			}
+
+			return $options;
+		};
+
+		add_filter( 'woocommerce_navigation_connect_page_options', $filter );
+
+		try {
+			wc_admin_connect_page(
+				array(
+					'id'      => 'invalid-path-parent',
+					'parent'  => 'woocommerce',
+					'title'   => 'Invalid path parent',
+					'path'    => '/breadcrumb-parent',
+					'js_page' => true,
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_navigation_connect_page_options', $filter );
+		}
 	}
 
 	/**
