@@ -37,8 +37,6 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 	 * Register the routes for order refunds, including the refund preview route.
 	 *
 	 * @return void
-	 *
-	 * @since 11.1.0
 	 */
 	public function register_routes() {
 		parent::register_routes();
@@ -192,7 +190,9 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 		$schema          = wc_get_container()->get( RefundPreviewSchema::class )->get_item_schema();
 		$schema['title'] = 'order_refund_preview';
 
-		return $schema;
+		// Like the sibling v3 schema getters: fields registered via
+		// register_rest_field() must appear in the published schema.
+		return $this->add_additional_fields_schema( $schema );
 	}
 
 	/**
@@ -202,9 +202,14 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 	 * line_item_id key naming) so clients can send the same payload to both
 	 * API versions.
 	 *
-	 * @return array
+	 * Note the two deliberate differences from this controller's create
+	 * endpoint: the preview keys lines by `line_item_id` where the create
+	 * uses `id`, and the preview's `refund_total` is tax-inclusive where the
+	 * create's classic `refund_total` is net with taxes supplied separately
+	 * via `refund_tax` (the compute_totals create shares the preview's
+	 * tax-inclusive semantics).
 	 *
-	 * @since 11.1.0
+	 * @return array
 	 */
 	private function get_preview_line_items_arg_schema() {
 		return array(
