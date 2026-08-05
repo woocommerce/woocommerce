@@ -2806,37 +2806,35 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test mode detection degrades to a boolean when get_option() returns a non-scalar.
+	 * @testdox Test mode detection returns false when get_option() returns a non-scalar.
 	 *
-	 * The gateway settings array is stored data, so a malformed entry can return a type
-	 * the option probes do not expect. A non-scalar must not raise a conversion warning
-	 * or be coerced into a meaningful value.
+	 * The gateway settings array is stored data, so a malformed entry can hand back a type
+	 * the option probes do not expect. The gateway is mocked with only get_option() defined
+	 * so the earlier method and property probes are skipped and the option path is the one
+	 * under test.
 	 *
 	 * @dataProvider data_provider_non_scalar_option_values
 	 *
 	 * @param mixed $value The value the gateway returns from get_option().
 	 */
-	public function test_is_in_test_mode_survives_non_scalar_option_values( $value ) {
+	public function test_is_in_test_mode_returns_false_for_non_scalar_option_values( $value ) {
 		// Arrange.
-		$fake_gateway = new class( 'junk_option_gateway', array() ) extends FakePaymentGateway {
-			/**
-			 * The value to return.
-			 *
-			 * @var mixed
-			 */
-			public $value;
+		$gateway = $this->getMockBuilder( 'WC_Payment_Gateway' )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_option' ) )
+			->getMock();
 
-			// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Squiz.Commenting.FunctionComment.MissingParamTag
-			public function get_option( $key, $empty_value = null ) {
-				return $this->value;
-			}
-			// phpcs:enable Squiz.Commenting.FunctionComment.Missing, Squiz.Commenting.FunctionComment.MissingParamTag
-		};
+		$gateway->id = 'junk_option_gateway';
 
-		$fake_gateway->value = $value;
+		$gateway->expects( $this->atLeastOnce() )
+			->method( 'get_option' )
+			->willReturn( $value );
 
-		// Act & Assert.
-		$this->assertIsBool( $this->sut->is_in_test_mode( $fake_gateway ) );
+		// Act.
+		$result = $this->sut->is_in_test_mode( $gateway );
+
+		// Assert - an unusable value must not be read as an enabled test mode.
+		$this->assertFalse( $result );
 	}
 
 	/**
