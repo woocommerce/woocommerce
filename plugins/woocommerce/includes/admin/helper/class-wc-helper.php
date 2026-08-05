@@ -1910,16 +1910,11 @@ class WC_Helper {
 				}
 
 				$product_id = $subscription['product_id'] ?? null;
-				// Enforce an integer or digit-only string before validating its range.
-				if ( ! is_int( $product_id ) && ( ! is_string( $product_id ) || ! ctype_digit( $product_id ) ) ) {
-					return false;
-				}
-
-				if ( false === filter_var( $product_id, FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) ) ) {
-					return false;
-				}
-
-				return is_array( $subscription['connections'] ?? null );
+				return (
+					is_int( $product_id )
+					|| ( is_string( $product_id ) && ctype_digit( $product_id ) )
+				) && 0 < (int) $product_id
+					&& is_array( $subscription['connections'] ?? null );
 			}
 		);
 	}

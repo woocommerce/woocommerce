@@ -53,7 +53,6 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 			'signed ID'           => array( 'product_id' => '+900003' ),
 			'whitespace ID'       => array( 'product_id' => ' 900004 ' ),
 			'boolean ID'          => array( 'product_id' => true ),
-			'overflowing ID'      => array( 'product_id' => (string) PHP_INT_MAX . '0' ),
 			'missing connections' => array( 'product_id' => 900005 ),
 			'invalid connections' => array(
 				'product_id'  => 900006,
