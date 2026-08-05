@@ -676,9 +676,14 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		try {
 			$controller->register();
 
+			$this->assertNotFalse( has_action( 'init', array( $controller, 'maybe_register_feature_highlight_notification' ) ), 'The controller should defer feature highlight notification registration until init.' );
+
+			$controller->maybe_register_feature_highlight_notification();
+
 			$this->assertFalse( has_action( 'update_option_woocommerce_coming_soon', array( $notification, 'maybe_add_note_when_store_goes_live' ) ), 'The feature highlight notification should not listen for coming-soon changes when the feature is enabled.' );
 			$this->assertFalse( has_action( 'wc_admin_daily', array( $notification, 'possibly_add_note' ) ), 'The feature highlight notification should not run daily when the feature is enabled.' );
 		} finally {
+			remove_action( 'init', array( $controller, 'maybe_register_feature_highlight_notification' ), 10 );
 			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $controller, 'maybe_flush_rewrite_rules' ), 10 );
 			remove_filter( 'woocommerce_get_query_vars', array( $controller, 'add_query_var' ), 10 );
 			remove_filter( 'woocommerce_endpoint_order-withdrawal_title', array( $controller, 'get_endpoint_title' ), 10 );
