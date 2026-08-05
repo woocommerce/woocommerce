@@ -320,7 +320,7 @@ class WC_REST_Order_Refunds_Preview_Test extends WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertEquals( 422, $response->get_status() );
-		$this->assertEquals( 'quantity_exceeds_refundable', $response->get_data()['code'] );
+		$this->assertEquals( 'woocommerce_rest_quantity_exceeds_refundable', $response->get_data()['code'] );
 	}
 
 	/**
@@ -350,7 +350,7 @@ class WC_REST_Order_Refunds_Preview_Test extends WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertEquals( 422, $response->get_status() );
-		$this->assertEquals( 'preview_exceeds_max_refundable', $response->get_data()['code'] );
+		$this->assertEquals( 'woocommerce_rest_preview_exceeds_max_refundable', $response->get_data()['code'] );
 	}
 
 	/**
@@ -384,7 +384,7 @@ class WC_REST_Order_Refunds_Preview_Test extends WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertEquals( 422, $response->get_status() );
-		$this->assertEquals( 'order_not_refundable', $response->get_data()['code'] );
+		$this->assertEquals( 'woocommerce_rest_order_not_refundable', $response->get_data()['code'] );
 	}
 
 	/**
@@ -418,7 +418,7 @@ class WC_REST_Order_Refunds_Preview_Test extends WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertEquals( 422, $response->get_status() );
-		$this->assertEquals( 'line_item_already_refunded', $response->get_data()['code'] );
+		$this->assertEquals( 'woocommerce_rest_line_item_already_refunded', $response->get_data()['code'] );
 	}
 
 	/**
@@ -455,7 +455,7 @@ class WC_REST_Order_Refunds_Preview_Test extends WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertEquals( 400, $response->get_status() );
-		$this->assertEquals( 'duplicate_line_item', $response->get_data()['code'] );
+		$this->assertEquals( 'woocommerce_rest_duplicate_line_item', $response->get_data()['code'] );
 	}
 
 	/**
@@ -476,7 +476,7 @@ class WC_REST_Order_Refunds_Preview_Test extends WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertEquals( 400, $response->get_status() );
-		$this->assertEquals( 'line_item_not_found', $response->get_data()['code'] );
+		$this->assertEquals( 'woocommerce_rest_line_item_not_found', $response->get_data()['code'] );
 	}
 
 	/**
@@ -497,7 +497,7 @@ class WC_REST_Order_Refunds_Preview_Test extends WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertEquals( 400, $response->get_status() );
-		$this->assertEquals( 'invalid_refund_total', $response->get_data()['code'] );
+		$this->assertEquals( 'woocommerce_rest_invalid_refund_total', $response->get_data()['code'] );
 	}
 
 	/**
@@ -539,7 +539,7 @@ class WC_REST_Order_Refunds_Preview_Test extends WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertEquals( 400, $response->get_status() );
-		$this->assertEquals( 'missing_quantity_or_refund_total', $response->get_data()['code'] );
+		$this->assertEquals( 'woocommerce_rest_missing_quantity_or_refund_total', $response->get_data()['code'] );
 	}
 
 	/**
