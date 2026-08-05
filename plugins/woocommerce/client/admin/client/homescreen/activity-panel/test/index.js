@@ -163,4 +163,43 @@ describe( 'ActivityPanel', () => {
 
 		expect( getActivityPanelCounts ).toHaveBeenCalledTimes( expectedCalls );
 	} );
+
+	it( 'requests only order data for an order manager without manage_woocommerce', () => {
+		const getActivityPanelCounts = jest.fn().mockReturnValue( {} );
+		const getOrdersTotalCount = jest.fn().mockReturnValue( 1 );
+		const getProductsTotalCount = jest.fn().mockReturnValue( 0 );
+		const select = jest.fn( ( store ) => {
+			if ( store === activityPanelStore ) {
+				return { getActivityPanelCounts };
+			}
+
+			if ( store === ordersStore ) {
+				return {
+					getOrdersTotalCount,
+					hasFinishedResolution: jest.fn().mockReturnValue( true ),
+				};
+			}
+
+			if ( store === productsStore ) {
+				return {
+					getProductsTotalCount,
+					hasFinishedResolution: jest.fn().mockReturnValue( true ),
+				};
+			}
+
+			return {};
+		} );
+
+		useUser.mockReturnValue( {
+			currentUserCan: ( capability ) =>
+				capability === 'read_private_shop_orders',
+		} );
+		useSelect.mockImplementation( ( mapSelect ) => mapSelect( select ) );
+
+		render( <ActivityPanel /> );
+
+		expect( getOrdersTotalCount ).toHaveBeenCalled();
+		expect( getActivityPanelCounts ).not.toHaveBeenCalled();
+		expect( getProductsTotalCount ).not.toHaveBeenCalled();
+	} );
 } );

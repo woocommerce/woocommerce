@@ -12,6 +12,7 @@ import StockPanel from './stock';
 import ReviewsPanel from './reviews';
 
 export function getAllPanels( {
+	countsEnabled = true,
 	lowStockProductsCount,
 	unapprovedReviewsCount,
 	unreadOrdersCount,
@@ -47,7 +48,12 @@ export function getAllPanels( {
 					}
 				>
 					<OrdersPanel
-						unreadOrdersCount={ unreadOrdersCount }
+						// Without the counts endpoint a null count would keep
+						// the panel in its loading state forever; zero lets
+						// the orders list resolve on its own.
+						unreadOrdersCount={
+							countsEnabled ? unreadOrdersCount : 0
+						}
 						orderStatuses={ orderStatuses }
 					/>
 				</ErrorBoundary>
