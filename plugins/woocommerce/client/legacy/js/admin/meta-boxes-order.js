@@ -1,34 +1,5 @@
 // eslint-disable-next-line max-len
-/*global woocommerce_admin_meta_boxes, woocommerce_admin, accounting, woocommerce_admin_meta_boxes_order, wcSetClipboard, wcClearClipboard, wc_enhanced_select_params, module */
-
-/**
- * Get the shipping method title to use after a method selection changes.
- *
- * @param {Object} args               Shipping title data.
- * @param {string} args.currentTitle  Current shipping title.
- * @param {string} args.defaultTitle  Default shipping title.
- * @param {string} args.previousTitle Previously selected method title.
- * @param {string} args.methodValue   Selected shipping method value.
- * @param {string} args.methodTitle   Selected shipping method title.
- * @return {string} The shipping title to use.
- */
-function getShippingMethodTitle( args ) {
-	if (
-		args.currentTitle
-		&& args.currentTitle !== args.defaultTitle
-		&& args.currentTitle !== args.previousTitle
-	) {
-		return args.currentTitle;
-	}
-
-	return args.methodValue && 'other' !== args.methodValue
-		? args.methodTitle
-		: args.defaultTitle;
-}
-
-if ( typeof module !== 'undefined' && module.exports ) {
-	module.exports = { getShippingMethodTitle };
-}
+/*global woocommerce_admin_meta_boxes, woocommerce_admin, accounting, woocommerce_admin_meta_boxes_order, wcSetClipboard, wcClearClipboard, wc_enhanced_select_params */
 
 jQuery( function ( $ ) {
 
@@ -416,13 +387,17 @@ jQuery( function ( $ ) {
 			} ).text();
 			var currentTitle  = $name.val();
 			var defaultTitle  = $name.data( 'default-shipping-title' );
-			var nextTitle     = getShippingMethodTitle( {
-				currentTitle: currentTitle,
-				defaultTitle: defaultTitle,
-				previousTitle: previousTitle,
-				methodValue: $select.val(),
-				methodTitle: title
-			} );
+			var nextTitle     = defaultTitle;
+
+			if (
+				currentTitle
+				&& currentTitle !== defaultTitle
+				&& currentTitle !== previousTitle
+			) {
+				nextTitle = currentTitle;
+			} else if ( $select.val() && 'other' !== $select.val() ) {
+				nextTitle = title;
+			}
 
 			$select.data( 'selected-title', title );
 

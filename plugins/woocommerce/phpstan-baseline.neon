@@ -13111,12 +13111,6 @@ parameters:
 			path: includes/class-wc-order.php
 
 		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: includes/class-wc-payment-gateways.php
-
-		-
 			message: '#^Cannot call method set_current\(\) on class\-string\|object\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -14161,12 +14155,6 @@ parameters:
 			path: includes/class-wc-regenerate-images.php
 
 		-
-			message: '#^Cannot use array destructuring on array\<int\|string, int\|string\>\|false\.$#'
-			identifier: offsetAccess.nonArray
-			count: 1
-			path: includes/class-wc-regenerate-images.php
-
-		-
 			message: '#^Function remove_action invoked with 4 parameters, 2\-3 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -14193,36 +14181,6 @@ parameters:
 		-
 			message: '#^Method WC_Regenerate_Images\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-regenerate-images.php
-
-		-
-			message: '#^Method WC_Regenerate_Images\:\:maybe_resize_image\(\) should return array but returns string\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/class-wc-regenerate-images.php
-
-		-
-			message: '#^Method WC_Regenerate_Images\:\:resize_and_return_image\(\) should return string but returns array\.$#'
-			identifier: return.type
-			count: 3
-			path: includes/class-wc-regenerate-images.php
-
-		-
-			message: '#^Method WC_Regenerate_Images\:\:resize_and_return_image\(\) should return string but returns array\<int, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/class-wc-regenerate-images.php
-
-		-
-			message: '#^Method WC_Regenerate_Images\:\:resize_and_return_image\(\) should return string but returns array\|string\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/class-wc-regenerate-images.php
-
-		-
-			message: '#^Method WC_Regenerate_Images\:\:unfiltered_image_downsize\(\) should return string but returns list\<bool\|int\|string\>\|false\.$#'
-			identifier: return.type
 			count: 1
 			path: includes/class-wc-regenerate-images.php
 
@@ -58990,21 +58948,9 @@ parameters:
 			path: src/Internal/Admin/Settings.php
 
 		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: src/Internal/Admin/Settings/Payments.php
-
-		-
 			message: '#^Access to an undefined property WooCommerce\:\:\$payment_gateways\.$#'
 			identifier: property.notFound
 			count: 1
-			path: src/Internal/Admin/Settings/PaymentsController.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
 			path: src/Internal/Admin/Settings/PaymentsController.php
 
 		-
@@ -59074,90 +59020,6 @@ parameters:
 			path: src/Internal/Admin/Settings/PaymentsProviders.php
 
 		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/Affirm.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/AfterpayClearpay.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/Airwallex.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/AmazonPay.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/Antom.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/Eway.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/GoCardless.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/HelioPay.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/Klarna.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/KlarnaCheckout.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/MercadoPago.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/Mollie.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/Monei.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/NexiCheckout.php
-
-		-
 			message: '#^Access to constant SANDBOX on an unknown class WooCommerce\\PayPalCommerce\\Onboarding\\Environment\.$#'
 			identifier: class.notFound
 			count: 1
@@ -59168,30 +59030,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: src/Internal/Admin/Settings/PaymentsProviders/PayPal.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/PayPal.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/PayUIndia.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/Payfast.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 16
-			path: src/Internal/Admin/Settings/PaymentsProviders/PaymentGateway.php
 
 		-
 			message: '#^Call to function is_callable\(\) with array\{WC_Payment_Gateway, ''get_connection_url''\} will always evaluate to true\.$#'
@@ -59288,66 +59126,6 @@ parameters:
 			identifier: nullCoalesce.property
 			count: 1
 			path: src/Internal/Admin/Settings/PaymentsProviders/PaymentGateway.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/Paymob.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/Payoneer.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/Paystack.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/Paytrail.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/Razorpay.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 3
-			path: src/Internal/Admin/Settings/PaymentsProviders/Stripe.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/Tilopay.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/Visa.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/Vivacom.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 5
-			path: src/Internal/Admin/Settings/PaymentsProviders/WooPayments.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Settings\\PaymentsProviders\\WooPayments\\WooPaymentsController\:\:register\(\) has no return type specified\.$#'
@@ -60878,12 +60656,6 @@ parameters:
 			identifier: class.notFound
 			count: 4
 			path: src/Internal/CLI/Migrator/Runner.php
-
-		-
-			message: '#^Cannot call method call_function\(\) on Automattic\\WooCommerce\\Proxies\\LegacyProxy\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Caches/VersionStringGenerator.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Caches\\VersionStringGenerator\:\:init\(\) has no return type specified\.$#'
@@ -62620,12 +62392,6 @@ parameters:
 			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:set_site_transient\(\)\.$#'
 			identifier: staticMethod.notFound
 			count: 1
-			path: src/Internal/Logging/RemoteLogger.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 5
 			path: src/Internal/Logging/RemoteLogger.php
 
 		-
