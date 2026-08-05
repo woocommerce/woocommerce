@@ -232,7 +232,7 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @testdox Updating with the parent product as variation_id does not restore the existing variation.
 	 */
 	public function test_update_line_item_with_parent_as_variation_id_does_not_restore_variation(): void {
-		list( $parent, $variation, $order, $item ) = $this->create_order_with_variation_line_item();
+		list( $parent, , $order, $item ) = $this->create_order_with_variation_line_item();
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v1/orders/' . $order->get_id() );
 		$request->set_body_params(
