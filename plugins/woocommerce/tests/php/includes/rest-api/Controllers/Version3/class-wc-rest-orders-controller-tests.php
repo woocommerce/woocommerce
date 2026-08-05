@@ -870,47 +870,34 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Updating an order ignores response-only line item meta display fields.
+	 * @testdox A line item read back from an order whose product was deleted can be sent straight back in an update.
 	 */
-	public function test_order_update_ignores_line_item_meta_display_fields(): void {
+	public function test_order_update_accepts_round_tripped_line_item_for_deleted_product(): void {
 		$order      = WC_Helper_Order::create_order();
 		$line_items = $order->get_items( 'line_item' );
 		$line_item  = reset( $line_items );
-		$meta_value = array(
-			array(
-				'guid'      => 'https://example.com/wp-content/uploads/custom-image.jpg',
-				'file_type' => 'image/jpeg',
-				'file_name' => 'custom-image.jpg',
-				'title'     => 'custom-image',
-				'key'       => 'custom-image-key',
-			),
-		);
-		$meta_key   = '_file_upload_data';
 
-		$line_item->add_meta_data( $meta_key, $meta_value, true );
-		$line_item->save();
+		wp_delete_post( $line_item->get_product_id(), true );
 
-		$line_item_meta = $line_item->get_meta_data();
-		$line_item_meta = reset( $line_item_meta );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() ) );
+		$this->assertEquals( 200, $response->get_status() );
 
-		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() );
-		$request->set_body_params(
-			array(
-				'status'     => OrderStatus::PROCESSING,
-				'line_items' => array(
-					array(
-						'id'        => $line_item->get_id(),
-						'meta_data' => array(
-							array(
-								'id'            => $line_item_meta->id,
-								'key'           => $meta_key,
-								'value'         => $meta_value,
-								'display_key'   => $meta_key,
-								'display_value' => $meta_value,
-							),
-						),
-					),
-				),
+		/*
+		 * With the product gone, the controller reports these as null. The schema has to
+		 * allow that, or the response cannot be sent back to the update endpoint.
+		 */
+		$line_item_data = $response->get_data()['line_items'][0];
+		$this->assertNull( $line_item_data['sku'] );
+		$this->assertNull( $line_item_data['global_unique_id'] );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'status'     => OrderStatus::PROCESSING,
+					'line_items' => array( $line_item_data ),
+				)
 			)
 		);
 
@@ -918,12 +905,18 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
 
-		$order      = wc_get_order( $order->get_id() );
-		$line_items = $order->get_items( 'line_item' );
-		$line_item  = reset( $line_items );
-
+		$order = wc_get_order( $order->get_id() );
 		$this->assertEquals( OrderStatus::PROCESSING, $order->get_status() );
-		$this->assertEquals( $meta_value, $line_item->get_meta( $meta_key ) );
+	}
+
+	/**
+	 * @testdox The order schema allows a null line item sku and global_unique_id.
+	 */
+	public function test_line_item_product_identifier_schema_allows_null(): void {
+		$line_item_properties = $this->endpoint->get_item_schema()['properties']['line_items']['items']['properties'];
+
+		$this->assertEquals( array( 'string', 'null' ), $line_item_properties['sku']['type'] );
+		$this->assertEquals( array( 'string', 'null' ), $line_item_properties['global_unique_id']['type'] );
 	}
 
 	/**

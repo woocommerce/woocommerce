@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ignore response-only line item meta display fields in order REST API requests.
