@@ -27,6 +27,14 @@ class PageController {
 	const PAGE_ROOT = 'wc-admin';
 
 	/**
+	 * Regex fragment matching a route parameter name (the part after `:` in `:paramName`).
+	 *
+	 * Single source of truth for the accepted parameter charset: the matcher's segment
+	 * rewrite, the specificity scorer, and the route pattern detector must all agree on it.
+	 */
+	private const ROUTE_PARAM_NAME_PATTERN = '[A-Za-z0-9_]+';
+
+	/**
 	 * Singleton instance of self.
 	 *
 	 * @var PageController
@@ -260,7 +268,7 @@ class PageController {
 		// `\\:` targets the escaped colon, and `(?=/|$)` requires the parameter name to end the segment.
 		// Falling back to the quoted pattern on a PCRE failure keeps `:itemId` literal, which matches
 		// nothing it should not, rather than leaving an empty pattern that matches everything.
-		$route_regex = preg_replace( '#(^|/)\\\\:[A-Za-z0-9_]+(?=/|$)#', '$1[^/]+', $route_regex ) ?? $route_regex;
+		$route_regex = preg_replace( '#(^|/)\\\\:' . self::ROUTE_PARAM_NAME_PATTERN . '(?=/|$)#', '$1[^/]+', $route_regex ) ?? $route_regex;
 
 		if ( $has_terminal_splat ) {
 			// A supported terminal `/*` matches both the base route and any descendants.
@@ -347,7 +355,7 @@ class PageController {
 
 			if ( '' === $segment ) {
 				++$score;
-			} elseif ( 1 === preg_match( '#^:[A-Za-z0-9_]+$#', $segment ) ) {
+			} elseif ( 1 === preg_match( '#^:' . self::ROUTE_PARAM_NAME_PATTERN . '$#', $segment ) ) {
 				$score += 3;
 			} else {
 				$score += 10;
