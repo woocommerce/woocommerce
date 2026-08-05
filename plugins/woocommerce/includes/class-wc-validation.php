@@ -143,6 +143,9 @@ class WC_Validation {
 			case 'LI':
 				$valid = (bool) preg_match( '/^(94[8-9][0-9])$/', $postcode );
 				break;
+			case 'LV':
+				$valid = (bool) preg_match( '/^(LV-)?[1-9][0-9]{3}$/i', $postcode );
+				break;
 			default:
 				$valid = true;
 				break;
