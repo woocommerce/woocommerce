@@ -264,7 +264,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 		// 123.5 to 123 would target a different line or tax bucket than requested.
 		if ( isset( $line_item['line_item_id'] ) && ! is_int( $line_item['line_item_id'] ) ) {
 			if ( ! is_numeric( $line_item['line_item_id'] ) || (float) (int) $line_item['line_item_id'] !== (float) $line_item['line_item_id'] ) {
-				return new WP_Error( 'invalid_line_item', __( 'Line item id must be an integer.', 'woocommerce' ), array( 'status' => 400 ) );
+				return new WP_Error( 'woocommerce_rest_invalid_line_item', __( 'Line item id must be an integer.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 			$line_item['line_item_id'] = (int) $line_item['line_item_id'];
 		}
@@ -272,26 +272,26 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 		if ( isset( $line_item['quantity'] ) ) {
 			$quantity = $line_item['quantity'];
 			if ( ! is_numeric( $quantity ) || (float) (int) $quantity !== (float) $quantity ) {
-				return new WP_Error( 'invalid_quantity', __( 'Quantity must be a whole number.', 'woocommerce' ), array( 'status' => 400 ) );
+				return new WP_Error( 'woocommerce_rest_invalid_quantity', __( 'Quantity must be a whole number.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 			$line_item['quantity'] = (int) $quantity;
 		}
 
 		if ( isset( $line_item['refund_total'] ) ) {
 			if ( ! is_numeric( $line_item['refund_total'] ) ) {
-				return new WP_Error( 'invalid_refund_total', __( 'refund_total must be a number.', 'woocommerce' ), array( 'status' => 400 ) );
+				return new WP_Error( 'woocommerce_rest_invalid_refund_total', __( 'refund_total must be a number.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 			$line_item['refund_total'] = (float) $line_item['refund_total'];
 		}
 
 		if ( isset( $line_item['refund_tax'] ) ) {
 			if ( ! is_array( $line_item['refund_tax'] ) ) {
-				return new WP_Error( 'invalid_line_item', __( 'refund_tax must be an array of objects with id and refund_total.', 'woocommerce' ), array( 'status' => 400 ) );
+				return new WP_Error( 'woocommerce_rest_invalid_line_item', __( 'refund_tax must be an array of objects with id and refund_total.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 			foreach ( $line_item['refund_tax'] as $index => $tax ) {
 				if ( ! is_array( $tax ) || ! isset( $tax['id'], $tax['refund_total'] ) || ! is_numeric( $tax['id'] ) || ! is_numeric( $tax['refund_total'] )
 					|| (float) (int) $tax['id'] !== (float) $tax['id'] ) {
-					return new WP_Error( 'invalid_line_item', __( 'refund_tax entries must be objects with an integer id and a numeric refund_total.', 'woocommerce' ), array( 'status' => 400 ) );
+					return new WP_Error( 'woocommerce_rest_invalid_line_item', __( 'refund_tax entries must be objects with an integer id and a numeric refund_total.', 'woocommerce' ), array( 'status' => 400 ) );
 				}
 				$line_item['refund_tax'][ $index ] = array(
 					'id'           => (int) $tax['id'],
@@ -442,7 +442,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 		$line_items = array();
 		foreach ( (array) ( $request['line_items'] ?? array() ) as $line_item ) {
 			if ( ! is_array( $line_item ) ) {
-				return new WP_Error( 'invalid_line_item', __( 'Each line item must be an object.', 'woocommerce' ), array( 'status' => 400 ) );
+				return new WP_Error( 'woocommerce_rest_invalid_line_item', __( 'Each line item must be an object.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 
 			if ( isset( $line_item['id'] ) && ! isset( $line_item['line_item_id'] ) ) {
@@ -472,7 +472,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 				array( 'source' => 'wc-rest-refunds' )
 			);
 			return new WP_Error(
-				'invalid_refund_request',
+				'woocommerce_rest_invalid_refund_request',
 				__( 'The refund could not be created due to an unexpected error.', 'woocommerce' ),
 				array( 'status' => 500 )
 			);
@@ -480,9 +480,11 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 
 		// The WP_Error already carries its HTTP status (400/422) in the error data,
 		// so create and preview return the same code for the same invalid input.
+		// The shared engine emits unprefixed codes; they are prefixed at this v3
+		// boundary like every other error the endpoint returns.
 		$validation_error = $this->data_utils()->validate_line_items( $line_items, $order );
 		if ( is_wp_error( $validation_error ) ) {
-			return $validation_error;
+			return $this->prefix_error_code( $validation_error );
 		}
 
 		// Convert line items to internal format. refund_total is tax-inclusive when no
@@ -501,14 +503,14 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 		$refund_amount = $has_amount ? $request['amount'] : $calculated_total;
 
 		if ( (float) $refund_amount <= 0 ) {
-			return new WP_Error( 'invalid_refund_amount', __( 'Refund total must be greater than zero.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_refund_amount', __( 'Refund total must be greater than zero.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		// Prevent under-refunding: amount cannot be less than the calculated line items
 		// total. Over-refunding is allowed for goodwill/compensation scenarios.
 		if ( $has_amount && $calculated_total > 0 && NumberUtil::round( (float) $refund_amount, wc_get_price_decimals() ) < NumberUtil::round( $calculated_total, wc_get_price_decimals() ) ) {
 			return new WP_Error(
-				'invalid_refund_amount',
+				'woocommerce_rest_invalid_refund_amount',
 				sprintf(
 					/* translators: %1$s: refund amount, %2$s: calculated total from line items */
 					__( 'Refund amount (%1$s) cannot be less than the total of line items (%2$s).', 'woocommerce' ),
@@ -525,7 +527,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 		$remaining_refundable = (float) $order->get_remaining_refund_amount();
 		if ( NumberUtil::round( (float) $refund_amount, wc_get_price_decimals() ) > NumberUtil::round( $remaining_refundable, wc_get_price_decimals() ) ) {
 			return new WP_Error(
-				'refund_exceeds_remaining',
+				'woocommerce_rest_refund_exceeds_remaining',
 				sprintf(
 					/* translators: %1$s: requested refund amount, %2$s: remaining refundable amount */
 					__( 'Refund amount (%1$s) exceeds the remaining refundable amount (%2$s).', 'woocommerce' ),
@@ -555,11 +557,11 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 		);
 
 		if ( is_wp_error( $refund ) ) {
-			return new WP_Error( 'cannot_create_refund', $refund->get_error_message(), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_cannot_create_refund', $refund->get_error_message(), array( 'status' => 400 ) );
 		}
 
 		if ( ! $refund ) {
-			return new WP_Error( 'cannot_create_refund', __( 'Cannot create order refund.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_cannot_create_refund', __( 'Cannot create order refund.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		if ( ! empty( $request['meta_data'] ) ) {
