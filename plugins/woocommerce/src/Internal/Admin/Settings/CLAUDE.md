@@ -142,7 +142,9 @@ grep -B2 "'type'.*=>.*'object'" *.php | grep -A2 "'items'"
 
 ## Response Structure Reference
 
-**GET /wc-admin/settings/payments/providers:**
+**POST /wc-admin/settings/payments/providers:**
+
+Note the method. Despite being a read operation, this route is registered with `WP_REST_Server::CREATABLE` (to avoid browser caching), so it accepts **POST only** — a `GET` returns `rest_no_route` (404) even though the route is listed in the namespace index.
 
 ```json
 {
@@ -175,6 +177,25 @@ array(
     ),
 )
 ```
+
+## Routes and Methods
+
+`PaymentsRestController::register_routes()` registers no readable routes — every
+route below is write-method only. `CREATABLE` is POST; `EDITABLE` is POST, PUT,
+PATCH.
+
+| Route (under `/wc-admin/settings/payments`) | Registered as | Accepts | Callback |
+| --- | --- | --- | --- |
+| `/country` | `EDITABLE` | POST, PUT, PATCH | `set_country()` |
+| `/providers` | `CREATABLE` | **POST only** | `get_providers()` |
+| `/providers/order` | `EDITABLE` | POST, PUT, PATCH | `update_providers_order()` |
+| `/suggestion/<id>/attach` | `EDITABLE` | POST, PUT, PATCH | `attach_payment_extension_suggestion()` |
+| `/suggestion/<id>/hide` | `EDITABLE` | POST, PUT, PATCH | `hide_payment_extension_suggestion()` |
+| `/suggestion/<id>/incentive/<id>/dismiss` | `EDITABLE` | POST, PUT, PATCH | `dismiss_payment_extension_suggestion_incentive()` |
+
+When probing these by hand, remember the namespace index at
+`?rest_route=/wc-admin` lists a route regardless of its methods — a `GET`
+against `/providers` still 404s with `rest_no_route`.
 
 ## Key Classes
 

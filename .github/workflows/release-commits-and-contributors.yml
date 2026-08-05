@@ -182,6 +182,7 @@ jobs:
         with:
           name: contributors-release-${{ needs.extract-versions.outputs.current_version }}
           path: ${{ steps.generate-contributors-list.outputs.filepath }}
+          retention-days: 30
 
       - name: Output artifact URL
         id: output-artifact-url
