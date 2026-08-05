@@ -102,11 +102,12 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 		$validation_error = $this->data_utils()->validate_preview_line_items( $line_items, $order );
 
 		// The WP_Error already carries its HTTP status in the error data; returning
-		// it directly lets the REST server respond with that status. Error codes are
-		// intentionally identical to the wc/v4 preview endpoint (unprefixed) so
-		// clients can share error handling across both API versions.
+		// it directly lets the REST server respond with that status. The shared
+		// validation engine emits unprefixed codes (the wc/v4 convention); they are
+		// prefixed here at the v3 boundary so this endpoint follows the
+		// `woocommerce_rest_*` convention of the rest of the v3 surface.
 		if ( is_wp_error( $validation_error ) ) {
-			return $validation_error;
+			return $this->prefix_error_code( $validation_error );
 		}
 
 		try {
@@ -121,7 +122,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 				array( 'source' => 'wc-rest-refunds' )
 			);
 			return new WP_Error(
-				'invalid_preview_request',
+				'woocommerce_rest_invalid_preview_request',
 				__( 'The refund preview could not be generated due to an unexpected error.', 'woocommerce' ),
 				array( 'status' => 500 )
 			);
@@ -131,7 +132,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 				array( 'source' => 'wc-rest-refunds' )
 			);
 			return new WP_Error(
-				'unexpected_preview_error',
+				'woocommerce_rest_unexpected_preview_error',
 				__( 'An unexpected error occurred while generating the refund preview.', 'woocommerce' ),
 				array( 'status' => 500 )
 			);
@@ -142,7 +143,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 		// preview successfully and then fail at create time.
 		if ( (float) $preview['total'] <= 0 ) {
 			return new WP_Error(
-				'invalid_refund_amount',
+				'woocommerce_rest_invalid_refund_amount',
 				__( 'Refund total must be greater than zero.', 'woocommerce' ),
 				array( 'status' => 400 )
 			);
@@ -155,7 +156,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 		$preview_total_with_tax = abs( (float) $preview['total'] );
 		if ( $preview_total_with_tax > (float) $preview['max_refundable'] ) {
 			return new WP_Error(
-				'preview_exceeds_max_refundable',
+				'woocommerce_rest_preview_exceeds_max_refundable',
 				sprintf(
 					/* translators: 1: requested preview total including tax, 2: remaining refundable */
 					__( 'Requested refund preview (%1$s) exceeds the remaining refundable amount (%2$s).', 'woocommerce' ),
@@ -313,6 +314,28 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 	 */
 	private function data_utils(): DataUtils {
 		return wc_get_container()->get( DataUtils::class );
+	}
+
+	/**
+	 * Prefix a shared-engine error code with `woocommerce_rest_`.
+	 *
+	 * DataUtils emits unprefixed codes (the wc/v4 convention). The wc/v3 surface
+	 * uses `woocommerce_rest_*`, so errors crossing into a v3 response are
+	 * renamed at this boundary. Codes that already carry the prefix pass through
+	 * unchanged, and the message and data (including the HTTP status) are kept.
+	 *
+	 * @param WP_Error $error The error whose code should be prefixed.
+	 *
+	 * @return WP_Error
+	 */
+	private function prefix_error_code( WP_Error $error ): WP_Error {
+		$code = (string) $error->get_error_code();
+
+		if ( str_starts_with( $code, 'woocommerce_rest_' ) ) {
+			return $error;
+		}
+
+		return new WP_Error( 'woocommerce_rest_' . $code, $error->get_error_message(), $error->get_error_data() );
 	}
 
 	/**
