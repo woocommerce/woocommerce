@@ -324,11 +324,13 @@ class PageController {
 	 * @return bool
 	 */
 	private function registered_path_has_route_pattern( $registered_path ) {
-		$path_parts = $this->split_registered_page_path( $registered_path );
+		// Normalizing keeps this consistent with the matcher: a slash-less registered path (for
+		// example a bare `*`) resolves against the app root there, so it must read as patterned here.
+		$path_parts = $this->split_normalized_registered_page_path( $registered_path );
 
-		// The first alternative recognizes a complete `:param` segment at the path start or after a slash.
-		// The second recognizes only a splat that occupies the terminal segment.
-		return 1 === preg_match( '#(?:(?:^|/):[A-Za-z0-9_]+(?=/|$)|/\*$)#', $path_parts['path'] );
+		// The first alternative recognizes a complete `:param` segment (normalization guarantees the
+		// leading slash). The second recognizes only a splat that occupies the terminal segment.
+		return 1 === preg_match( '#(?:/:' . self::ROUTE_PARAM_NAME_PATTERN . '(?=/|$)|/\*$)#', $path_parts['path'] );
 	}
 
 	/**

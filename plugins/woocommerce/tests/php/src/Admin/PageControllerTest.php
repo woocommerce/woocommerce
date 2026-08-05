@@ -1082,6 +1082,40 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Bare `*` paths resolve as route patterns with unlinked breadcrumbs.
+	 */
+	public function test_bare_wildcard_path_is_treated_as_route_pattern(): void {
+		// React Router treats a bare `*` route as a match-everything splat resolved against the app
+		// root, and the matcher normalizes it the same way. The pattern detector must agree, so the
+		// breadcrumb does not link the literal `*` template.
+		$result = $this->get_publicly_registered_page_result_for_request(
+			'/wp-admin/admin.php?page=wc-admin&path=%2Fbreadcrumb%2Fanything',
+			function () {
+				wc_admin_register_page(
+					array(
+						'id'     => 'bare-wildcard-page',
+						'parent' => 'woocommerce',
+						'title'  => array( 'Parent crumb', 'Current crumb' ),
+						'path'   => '*',
+					)
+				);
+			},
+			true
+		);
+
+		$this->assertIsArray( $result['current_page'] );
+		$this->assertSame( 'bare-wildcard-page', $result['current_page']['id'] );
+		$this->assertSame(
+			array(
+				array( 'admin.php?page=' . PageController::PAGE_ROOT, 'WooCommerce' ),
+				'Parent crumb',
+				'Current crumb',
+			),
+			$result['breadcrumbs']
+		);
+	}
+
+	/**
 	 * Data provider for invalid filtered parent paths.
 	 *
 	 * @return array[]
