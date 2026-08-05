@@ -479,6 +479,22 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Search with a three-group OR term should apply the status filter to the middle group.
+	 */
+	public function test_search_products_or_term_applies_status_filter_to_middle_group(): void {
+		$alpha = $this->create_search_test_product( 'Searchable alpha widget' );
+		$draft = $this->create_search_test_product( 'Searchable gamma widget', 'draft' );
+		$beta  = $this->create_search_test_product( 'Searchable beta widget' );
+
+		$data_store = WC_Data_Store::load( 'product' );
+		$results    = $data_store->search_products( 'Searchable alpha widget or Searchable gamma widget or Searchable beta widget', '', false, false );
+
+		$this->assertNotContains( $draft->get_id(), $results, 'Draft product matched by the middle OR group should not be returned when searching published only' );
+		$this->assertContains( $alpha->get_id(), $results, 'Published product matched by the first OR group should be returned' );
+		$this->assertContains( $beta->get_id(), $results, 'Published product matched by the last OR group should be returned' );
+	}
+
+	/**
 	 * @testdox Search with an OR term without extra filters should return matches from every OR group.
 	 */
 	public function test_search_products_or_term_returns_all_groups(): void {
