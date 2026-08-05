@@ -70,10 +70,7 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 		add_action( 'woocommerce_before_delete_order', array( $this->form_processor, 'delete_order_withdrawal_inbox_note_for_order' ), 10, 1 );
 		add_action( 'before_delete_post', array( $this->form_processor, 'delete_order_withdrawal_inbox_note_for_order' ), 10, 1 );
 		add_action( 'woocommerce_privacy_remove_order_personal_data', array( $this->form_processor, 'delete_order_withdrawal_inbox_note_for_order' ), 10, 1 );
-
-		if ( ! $this->is_enabled() ) {
-			$this->feature_highlight_notification->register();
-		}
+		add_action( 'init', array( $this, 'maybe_register_feature_highlight_notification' ), 10, 0 );
 	}
 
 	/**
@@ -108,6 +105,17 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 	public function maybe_flush_rewrite_rules( string $feature_id ): void {
 		if ( self::FEATURE_ID === $feature_id ) {
 			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
+		}
+	}
+
+	/**
+	 * Register the order withdrawal feature highlight notification if the feature is not enabled.
+	 *
+	 * @since 11.1.0
+	 */
+	public function maybe_register_feature_highlight_notification(): void {
+		if ( ! $this->is_enabled() ) {
+			$this->feature_highlight_notification->register();
 		}
 	}
 
