@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve third party attachment metadata keys when regenerating product images.
