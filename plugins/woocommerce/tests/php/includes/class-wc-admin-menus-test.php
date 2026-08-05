@@ -208,6 +208,7 @@ class WC_Admin_Menus_Test extends WC_Unit_Test_Case {
 	public function test_filter_keeps_endpoints_box_visible_after_late_registration() {
 		$GLOBALS['wp_meta_boxes'] = $this->get_nav_meta_boxes();  // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$user_id                  = $this->factory->user->create();
+		wp_set_current_user( $user_id );
 
 		$menus = new WC_Admin_Menus();
 		$menus->register_default_nav_menu_meta_boxes_filter();
@@ -240,6 +241,7 @@ class WC_Admin_Menus_Test extends WC_Unit_Test_Case {
 	public function test_filter_keeps_late_registered_third_party_box_out_of_snapshot() {
 		$GLOBALS['wp_meta_boxes'] = $this->get_nav_meta_boxes();  // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$user_id                  = $this->factory->user->create();
+		wp_set_current_user( $user_id );
 
 		$menus = new WC_Admin_Menus();
 		$menus->register_default_nav_menu_meta_boxes_filter();
@@ -267,6 +269,7 @@ class WC_Admin_Menus_Test extends WC_Unit_Test_Case {
 	public function test_filter_persists_hidden_snapshot_on_first_visit() {
 		$GLOBALS['wp_meta_boxes'] = $this->get_nav_meta_boxes();  // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$user_id                  = $this->factory->user->create();
+		wp_set_current_user( $user_id );
 
 		$menus = new WC_Admin_Menus();
 		$menus->register_default_nav_menu_meta_boxes_filter();
@@ -289,6 +292,7 @@ class WC_Admin_Menus_Test extends WC_Unit_Test_Case {
 	public function test_snapshot_persists_so_later_registered_third_party_box_stays_visible() {
 		$GLOBALS['wp_meta_boxes'] = $this->get_nav_meta_boxes();  // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$user_id                  = $this->factory->user->create();
+		wp_set_current_user( $user_id );
 
 		// First request: user visits the nav-menus screen for the first time.
 		$first_visit = new WC_Admin_Menus();
@@ -312,5 +316,34 @@ class WC_Admin_Menus_Test extends WC_Unit_Test_Case {
 
 		$this->assertIsArray( $hidden );
 		$this->assertNotContains( 'add-later-plugin-box', $hidden );
+	}
+
+	/**
+	 * A read performed on behalf of another user (e.g. user-switching or admin
+	 * tooling) during the nav-menus request must not persist a snapshot for that
+	 * user. Core's wp_initial_nav_menu_meta_boxes() only writes for the current
+	 * user, so the other user's genuine first-visit snapshot stays intact and
+	 * self-healing. The computed default is still returned for display.
+	 */
+	public function test_filter_does_not_persist_snapshot_for_a_non_current_user() {
+		$GLOBALS['wp_meta_boxes'] = $this->get_nav_meta_boxes();  // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$current_user_id          = $this->factory->user->create();
+		$other_user_id            = $this->factory->user->create();
+		wp_set_current_user( $current_user_id );
+
+		$menus = new WC_Admin_Menus();
+		$menus->register_default_nav_menu_meta_boxes_filter();
+
+		// The current user reads another user's option (the pathological path).
+		$hidden = get_user_option( 'metaboxhidden_nav-menus', $other_user_id );
+
+		// The computed default is still returned for display...
+		$this->assertIsArray( $hidden );
+		$this->assertContains( 'add-post-type-news', $hidden );
+
+		// ...but nothing is persisted for either user, so the other user's genuine
+		// first-visit snapshot is never consumed by this request.
+		$this->assertSame( '', get_user_meta( $other_user_id, 'metaboxhidden_nav-menus', true ) );
+		$this->assertSame( '', get_user_meta( $current_user_id, 'metaboxhidden_nav-menus', true ) );
 	}
 }
