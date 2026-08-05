@@ -75,7 +75,6 @@ test.describe( 'Merchant → Mini Cart', () => {
 			);
 
 			await expect( filledMiniCart ).toBeVisible();
-			// Only the active view is visible, but both must render in the editor.
 			await expect( emptyMiniCart ).toBeAttached();
 		} );
 	} );
