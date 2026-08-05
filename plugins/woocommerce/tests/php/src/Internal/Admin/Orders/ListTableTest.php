@@ -14,6 +14,11 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
 class ListTableTest extends \WC_Unit_Test_Case {
 
 	/**
+	 * Message of the exception used to trap the terminal redirect in handle_bulk_actions().
+	 */
+	private const REDIRECT_SENTINEL = 'woocommerce_list_table_test_redirected';
+
+	/**
 	 * @var ListTable
 	 */
 	private $sut;
@@ -478,6 +483,46 @@ class ListTableTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox handle_bulk_actions() skips IDs that are not orders of this list table's type.
+	 */
+	public function test_handle_bulk_actions_trash_skips_non_order_ids(): void {
+		$order   = \WC_Helper_Order::create_order();
+		$post_id = wp_insert_post(
+			array(
+				'post_title'  => 'Not an order',
+				'post_type'   => 'post',
+				'post_status' => 'publish',
+			)
+		);
+
+		// An administrator can delete the post above, so only the order type check can filter it out.
+		$this->login_as_role( 'administrator' );
+
+		$inject_post_id = static function ( $ids ) use ( $post_id ) {
+			$ids[] = $post_id;
+
+			return $ids;
+		};
+		add_filter( 'woocommerce_bulk_action_ids', $inject_post_id );
+
+		$_REQUEST['action']   = 'trash';
+		$_REQUEST['id']       = array( $order->get_id() );
+		$_REQUEST['_wpnonce'] = wp_create_nonce( 'bulk-orders' );
+
+		try {
+			$this->invoke_handle_bulk_actions();
+		} finally {
+			remove_filter( 'woocommerce_bulk_action_ids', $inject_post_id );
+			unset( $_REQUEST['action'], $_REQUEST['id'], $_REQUEST['_wpnonce'] );
+		}
+
+		$this->assertSame( 'trash', wc_get_order( $order->get_id() )->get_status(), 'Orders in the selection should still be trashed' );
+		$this->assertSame( 'publish', get_post_status( $post_id ), 'IDs that are not orders should be left untouched' );
+
+		wp_delete_post( $post_id, true );
+	}
+
+	/**
 	 * Invoke the protected handle_bulk_actions() method, trapping its terminal redirect.
 	 *
 	 * handle_bulk_actions() ends in wp_safe_redirect()/exit; the wp_redirect filter below converts
@@ -491,15 +536,17 @@ class ListTableTest extends \WC_Unit_Test_Case {
 		$set_post_type->call( $this->sut );
 
 		$throw_on_redirect = static function () {
-			throw new \RuntimeException( 'redirected' );
+			throw new \RuntimeException( esc_html( self::REDIRECT_SENTINEL ) );
 		};
 		add_filter( 'wp_redirect', $throw_on_redirect );
 
 		try {
 			$this->sut->handle_bulk_actions();
 		} catch ( \RuntimeException $e ) {
-			// Expected when the handler reaches its terminal redirect.
-			unset( $e );
+			// Only the sentinel below is expected; anything else is a real failure.
+			if ( self::REDIRECT_SENTINEL !== $e->getMessage() ) {
+				throw $e;
+			}
 		} finally {
 			remove_filter( 'wp_redirect', $throw_on_redirect );
 		}

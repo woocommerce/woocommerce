@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Caches\OrderCountCache;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
 use WP_List_Table;
+use WP_Post_Type;
 use WP_Screen;
 
 /**
@@ -323,7 +324,7 @@ class ListTable extends WP_List_Table {
 	protected function get_bulk_actions() {
 		$selected_status = $this->order_query_args['status'] ?? false;
 
-		if ( ! current_user_can( $this->wp_post_type->cap->edit_others_posts ) ) {
+		if ( ! $this->wp_post_type || ! current_user_can( $this->wp_post_type->cap->edit_others_posts ) ) {
 			return array();
 		}
 
@@ -370,9 +371,7 @@ class ListTable extends WP_List_Table {
 	 * @return bool
 	 */
 	private function current_user_can_delete_orders(): bool {
-		$post_type = get_post_type_object( $this->order_type );
-
-		return $post_type && current_user_can( $post_type->cap->delete_posts );
+		return $this->wp_post_type && current_user_can( $this->wp_post_type->cap->delete_posts );
 	}
 
 	/**
@@ -830,8 +829,7 @@ class ListTable extends WP_List_Table {
 
 		// Emptying the trash permanently deletes orders, so it requires both the "edit others" and the
 		// order delete capabilities.
-		$post_type       = get_post_type_object( $this->order_type );
-		$can_empty_trash = $post_type && current_user_can( $post_type->cap->edit_others_posts ) && $this->current_user_can_delete_orders();
+		$can_empty_trash = $this->wp_post_type && current_user_can( $this->wp_post_type->cap->edit_others_posts ) && $this->current_user_can_delete_orders();
 		if ( $this->is_trash && $this->has_items() && $can_empty_trash ) {
 			submit_button( __( 'Empty Trash', 'woocommerce' ), 'apply', 'delete_all', false );
 		}
@@ -1446,7 +1444,7 @@ class ListTable extends WP_List_Table {
 	public function handle_bulk_actions() {
 		$action = $this->current_action();
 
-		if ( ! $action || ! current_user_can( $this->wp_post_type->cap->edit_others_posts ) ) {
+		if ( ! $action || ! $this->wp_post_type || ! current_user_can( $this->wp_post_type->cap->edit_others_posts ) ) {
 			return;
 		}
 
@@ -1631,6 +1629,9 @@ class ListTable extends WP_List_Table {
 	/**
 	 * Handles bulk trashing of orders.
 	 *
+	 * IDs that do not resolve to an order of this list table's type are skipped: the
+	 * `woocommerce_bulk_action_ids` filter can introduce arbitrary IDs into the list.
+	 *
 	 * @param int[] $ids Order IDs to be trashed.
 	 * @param bool  $force_delete When set, the order will be completed deleted. Otherwise, it will be trashed.
 	 *
@@ -1641,10 +1642,15 @@ class ListTable extends WP_List_Table {
 
 		foreach ( $ids as $id ) {
 			$order = wc_get_order( $id );
+
+			if ( ! $order instanceof WC_Order || $order->get_type() !== $this->order_type ) {
+				continue;
+			}
+
 			$order->delete( $force_delete );
 			$updated_order = wc_get_order( $id );
 
-			if ( ( $force_delete && false === $updated_order ) || ( ! $force_delete && $updated_order->get_status() === 'trash' ) ) {
+			if ( $force_delete ? false === $updated_order : ( $updated_order && $updated_order->get_status() === 'trash' ) ) {
 				++$changed;
 			}
 		}
