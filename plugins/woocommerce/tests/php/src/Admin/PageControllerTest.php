@@ -785,6 +785,46 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Redundant slashes do not inflate route specificity.
+	 *
+	 * @dataProvider data_provider_test_registered_page_redundant_slashes_do_not_inflate_specificity
+	 *
+	 * @param array $pages Pages to register, in registration order.
+	 */
+	public function test_registered_page_redundant_slashes_do_not_inflate_specificity( array $pages ): void {
+		// React Router ranks the collapsed joinPaths() form of a route, so `/route-params/:id`
+		// outranks `/route-params/:id//*`; scoring the declared form would count the redundant
+		// empty segment and invert that. Verified against React Router 6.3 matchRoutes() in both
+		// registration orders.
+		$this->assert_registered_page_for_request(
+			'route-param-page',
+			'/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Ftail',
+			$pages
+		);
+	}
+
+	/**
+	 * Data provider for redundant-slash specificity registrations.
+	 *
+	 * @return array[]
+	 */
+	public static function data_provider_test_registered_page_redundant_slashes_do_not_inflate_specificity(): array {
+		$splat_page = array(
+			'id'   => 'route-splat-page',
+			'path' => '/route-params/:id//*',
+		);
+		$param_page = array(
+			'id'   => 'route-param-page',
+			'path' => '/route-params/:id',
+		);
+
+		return array(
+			'splat registered first' => array( array( $splat_page, $param_page ) ),
+			'splat registered last'  => array( array( $param_page, $splat_page ) ),
+		);
+	}
+
+	/**
 	 * @testdox More specific registered route patterns win over wildcard patterns.
 	 */
 	public function test_registered_page_specific_route_pattern_takes_precedence_over_wildcard(): void {

@@ -423,6 +423,11 @@ class PageController {
 	 * @return int
 	 */
 	private function get_registered_path_score( $app_path ) {
+		// React Router ranks the joinPaths() form of a route, which collapses repeated slashes,
+		// while matching still uses the declared form. Scoring the declared form would count each
+		// redundant empty segment, ranking `/:id//*` above `/:id` where React Router ranks it below.
+		$app_path = preg_replace( '#//+#', '/', $app_path ) ?? $app_path;
+
 		$segments = explode( '/', $app_path );
 		$score    = count( $segments );
 
