@@ -96,8 +96,19 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 				array( 'product_id' => '+900003' ),
 				array( 'product_id' => ' 900004 ' ),
 				array( 'product_id' => true ),
-				array( 'product_id' => 123 ),
-				array( 'product_id' => '456' ),
+				array( 'product_id' => 900005 ),
+				array(
+					'product_id'  => 900006,
+					'connections' => 'corrupted',
+				),
+				array(
+					'product_id'  => 123,
+					'connections' => array(),
+				),
+				array(
+					'product_id'  => '456',
+					'connections' => array(),
+				),
 			),
 			HOUR_IN_SECONDS
 		);
@@ -115,11 +126,16 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 			array( 123, 456 ),
 			array_values(
 				array_intersect(
-					array( 123, 456, 900000, 900001, 900002, 900003, 900004 ),
+					array( 123, 456, 900000, 900001, 900002, 900003, 900004, 900005, 900006 ),
 					array_keys( $this->mocked_request_products )
 				)
 			),
 			'Only valid test subscription IDs should be included in the request'
+		);
+		$this->assertSame(
+			456,
+			$this->mocked_request_products[456]['product_id'],
+			'String subscription IDs should be normalized to integers in the update request'
 		);
 	}
 

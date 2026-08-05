@@ -420,10 +420,7 @@ class WC_Helper_Updater {
 		$subscriptions = WC_Helper::get_subscriptions();
 
 		foreach ( $subscriptions as $subscription ) {
-			$product_id = filter_var( $subscription['product_id'] ?? null, FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) );
-			if ( false === $product_id ) {
-				continue;
-			}
+			$product_id = (int) $subscription['product_id'];
 
 			$payload[ $product_id ] = array(
 				'product_id' => $product_id,
@@ -461,10 +458,7 @@ class WC_Helper_Updater {
 		$subscriptions = WC_Helper::get_subscriptions();
 
 		foreach ( $subscriptions as $subscription ) {
-			$product_id = filter_var( $subscription['product_id'] ?? null, FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) );
-			if ( false === $product_id ) {
-				continue;
-			}
+			$product_id = (int) $subscription['product_id'];
 
 			$payload[ $product_id ] = array(
 				'product_id' => $product_id,

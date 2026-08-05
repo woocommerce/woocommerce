@@ -1915,7 +1915,11 @@ class WC_Helper {
 					return false;
 				}
 
-				return false !== filter_var( $product_id, FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) );
+				if ( false === filter_var( $product_id, FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) ) ) {
+					return false;
+				}
+
+				return is_array( $subscription['connections'] ?? null );
 			}
 		);
 	}

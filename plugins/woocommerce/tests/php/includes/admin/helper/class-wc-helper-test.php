@@ -40,26 +40,33 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	 */
 	private function get_mixed_subscription_data(): array {
 		return array(
-			'scalar'            => 'corrupted',
-			'missing ID'        => array( 'product_key' => 'missing-id' ),
-			'array ID'          => array( 'product_id' => array( 456 ) ),
-			'zero ID'           => array( 'product_id' => 0 ),
-			'negative ID'       => array( 'product_id' => -10 ),
-			'float ID'          => array( 'product_id' => 900001.9 ),
-			'decimal string ID' => array( 'product_id' => '900002.9' ),
-			'scientific ID'     => array( 'product_id' => '9e5' ),
-			'signed ID'         => array( 'product_id' => '+900003' ),
-			'whitespace ID'     => array( 'product_id' => ' 900004 ' ),
-			'boolean ID'        => array( 'product_id' => true ),
-			'overflowing ID'    => array( 'product_id' => (string) PHP_INT_MAX . '0' ),
-			'valid integer ID'  => array(
+			'scalar'              => 'corrupted',
+			'missing ID'          => array( 'product_key' => 'missing-id' ),
+			'array ID'            => array( 'product_id' => array( 456 ) ),
+			'zero ID'             => array( 'product_id' => 0 ),
+			'negative ID'         => array( 'product_id' => -10 ),
+			'float ID'            => array( 'product_id' => 900001.9 ),
+			'decimal string ID'   => array( 'product_id' => '900002.9' ),
+			'scientific ID'       => array( 'product_id' => '9e5' ),
+			'signed ID'           => array( 'product_id' => '+900003' ),
+			'whitespace ID'       => array( 'product_id' => ' 900004 ' ),
+			'boolean ID'          => array( 'product_id' => true ),
+			'overflowing ID'      => array( 'product_id' => (string) PHP_INT_MAX . '0' ),
+			'missing connections' => array( 'product_id' => 900005 ),
+			'invalid connections' => array(
+				'product_id'  => 900006,
+				'connections' => 'corrupted',
+			),
+			'valid integer ID'    => array(
 				'product_id'  => 123,
 				'product_key' => 'integer-key',
+				'connections' => array( 789 ),
 				'metadata'    => array( 'preserved' => true ),
 			),
-			'valid string ID'   => array(
+			'valid string ID'     => array(
 				'product_id'  => '456',
 				'product_key' => 'string-key',
+				'connections' => array(),
 			),
 		);
 	}
@@ -111,6 +118,7 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 			array(
 				'product_id'  => 123,
 				'product_key' => 'test_key',
+				'connections' => array(),
 			),
 		);
 		set_transient( '_woocommerce_helper_subscriptions', $valid_data, HOUR_IN_SECONDS );
@@ -273,6 +281,11 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 				'corrupted',
 				array( 'product_key' => 'missing-id' ),
 				array( 'product_id' => array( 456 ) ),
+				array( 'product_id' => 900005 ),
+				array(
+					'product_id'  => 900006,
+					'connections' => 'corrupted',
+				),
 			),
 			HOUR_IN_SECONDS
 		);
@@ -360,6 +373,7 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		$subscriptions = array(
 			array(
 				'product_id'            => 123,
+				'connections'           => array(),
 				'included_in_host_plan' => true,
 			),
 		);
@@ -377,6 +391,7 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		$subscriptions = array(
 			array(
 				'product_id'            => 123,
+				'connections'           => array(),
 				'included_in_host_plan' => false,
 			),
 		);
