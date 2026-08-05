@@ -262,23 +262,76 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox delete_refund is a no-op when no stats row exists for the refund.
+	 * @testdox delete_refund still runs the cleanup cascade when no stats row exists.
 	 *
-	 * On the CPT and HPOS-with-sync paths the delete_post hook has already
-	 * cleaned up by the time woocommerce_delete_order_refund fires, so the
-	 * handler must not fire the delete-stats cascade a second time.
+	 * Analytics imports are not atomic, so a refund can have product, coupon or tax
+	 * lookup rows without a stats row. Gating the cascade on the stats row would
+	 * orphan those rows permanently, so it runs regardless, with a customer ID of 0.
 	 */
-	public function test_delete_refund_is_noop_when_no_stats_row_exists(): void {
-		$fired    = 0;
-		$callback = function () use ( &$fired ) {
+	public function test_delete_refund_runs_cascade_when_no_stats_row_exists(): void {
+		$fired         = 0;
+		$seen_ids      = array();
+		$seen_customer = null;
+		$callback      = function ( $order_id, $customer_id ) use ( &$fired, &$seen_ids, &$seen_customer ) {
 			++$fired;
+			$seen_ids[]    = $order_id;
+			$seen_customer = $customer_id;
 		};
-		add_action( 'woocommerce_analytics_delete_order_stats', $callback );
+		add_action( 'woocommerce_analytics_delete_order_stats', $callback, 10, 2 );
 
 		OrdersStatsDataStore::delete_refund( 987654321 );
 
-		remove_action( 'woocommerce_analytics_delete_order_stats', $callback );
+		remove_action( 'woocommerce_analytics_delete_order_stats', $callback, 10 );
 
-		$this->assertSame( 0, $fired, 'delete_refund should not fire the delete-stats cascade when no row exists.' );
+		$this->assertSame( 1, $fired, 'delete_refund should fire the delete-stats cascade even when no stats row exists.' );
+		$this->assertSame( array( 987654321 ), $seen_ids, 'The cascade should carry the refund ID.' );
+		$this->assertSame( 0, $seen_customer, 'A missing stats row should yield customer ID 0.' );
+	}
+
+	/**
+	 * @testdox delete_refund removes orphaned product lookup rows left by a partial import.
+	 *
+	 * OrdersScheduler::import() syncs the stats row and the product lookup rows in
+	 * separate, non-transactional steps, so the lookup rows can outlive a failed
+	 * stats sync. Deleting the refund must still clear them.
+	 */
+	public function test_delete_refund_removes_orphaned_lookup_rows_without_stats_row(): void {
+		global $wpdb;
+
+		$refund_id = 987654322;
+
+		// Simulate a partial import: product lookup row present, stats row absent.
+		$wpdb->insert(
+			$wpdb->prefix . 'wc_order_product_lookup',
+			array(
+				'order_item_id'         => 987654322,
+				'order_id'              => $refund_id,
+				'product_id'            => 1,
+				'variation_id'          => 0,
+				'customer_id'           => 0,
+				'date_created'          => '2026-01-01 00:00:00',
+				'product_qty'           => -1,
+				'product_net_revenue'   => -10,
+				'product_gross_revenue' => -10,
+			)
+		);
+
+		$lookup_rows = static function ( $id ) use ( $wpdb ) {
+			return (int) $wpdb->get_var(
+				$wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_product_lookup WHERE order_id = %d", $id )
+			);
+		};
+		$stats_rows  = static function ( $id ) use ( $wpdb ) {
+			return (int) $wpdb->get_var(
+				$wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $id )
+			);
+		};
+
+		$this->assertSame( 1, $lookup_rows( $refund_id ), 'Fixture should leave a product lookup row.' );
+		$this->assertSame( 0, $stats_rows( $refund_id ), 'Fixture should leave no stats row.' );
+
+		OrdersStatsDataStore::delete_refund( $refund_id );
+
+		$this->assertSame( 0, $lookup_rows( $refund_id ), 'Deleting a refund should clear orphaned product lookup rows.' );
 	}
 }

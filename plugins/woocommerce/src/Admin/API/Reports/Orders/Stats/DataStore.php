@@ -694,9 +694,15 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * The woocommerce_delete_order_refund hook fires after the refund has been
 	 * deleted, so delete_order() cannot be reused here: its OrderUtil::is_order()
 	 * guard and wc_get_order() call both require the record to still exist. The
-	 * customer ID is read from the stats row itself instead, and the cleanup is
-	 * skipped entirely when no row exists (e.g. the CPT delete_post path already
-	 * removed it, or the refund was never imported).
+	 * customer ID is read from the stats row itself instead.
+	 *
+	 * The cascade runs even when the refund has no stats row. Imports are not
+	 * atomic — OrdersScheduler::import() syncs the stats, product, coupon, tax and
+	 * customer lookups in sequence without a transaction — so a partial import can
+	 * leave auxiliary lookup rows behind without a stats row. Skipping the cascade
+	 * in that state would orphan them permanently. The listeners delete by ID and
+	 * are idempotent, so the CPT delete_post path (which already cleaned the rows
+	 * up) just re-runs a no-op.
 	 *
 	 * @internal
 	 * @since 11.1.0
@@ -707,11 +713,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$refund_id  = (int) $refund_id;
 		$table_name = self::get_db_table_name();
 
+		// A missing row yields customer ID 0, on which the customer cleanup no-ops.
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$row = $wpdb->get_row( $wpdb->prepare( "SELECT customer_id FROM {$table_name} WHERE order_id = %d", $refund_id ) );
-		if ( null === $row ) {
-			return;
-		}
+		$customer_id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT customer_id FROM {$table_name} WHERE order_id = %d", $refund_id ) );
 
 		$wpdb->delete( $table_name, array( 'order_id' => $refund_id ) );
 
@@ -723,7 +727,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		 *
 		 * @since 4.0.0
 		 */
-		do_action( 'woocommerce_analytics_delete_order_stats', $refund_id, absint( $row->customer_id ) );
+		do_action( 'woocommerce_analytics_delete_order_stats', $refund_id, absint( $customer_id ) );
 
 		ReportsCache::invalidate();
 	}
