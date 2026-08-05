@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 
 /**
@@ -19,8 +20,11 @@ jest.mock( '../../../utils/icons', () => ( {
 	TruckIcon: () => <span data-testid="truck-icon" />,
 } ) );
 
+// Provide explicit stubs for the @wordpress/components imports used by the
+// SUT. Spreading `jest.requireActual( '@wordpress/components' )` crashes
+// against wp-6.8's circular import between the barrel and
+// custom-select-control-v2.
 jest.mock( '@wordpress/components', () => ( {
-	...jest.requireActual( '@wordpress/components' ),
 	ComboboxControl: ( { value, onChange, options } ) => (
 		<div data-testid="combobox-control">
 			<select
@@ -34,6 +38,18 @@ jest.mock( '@wordpress/components', () => ( {
 				) ) }
 			</select>
 		</div>
+	),
+	TextControl: React.forwardRef(
+		( { value, onChange, placeholder, onKeyDown }, ref ) => (
+			<input
+				ref={ ref }
+				type="text"
+				value={ value }
+				placeholder={ placeholder }
+				onChange={ ( e ) => onChange( e.target.value ) }
+				onKeyDown={ onKeyDown }
+			/>
+		)
 	),
 } ) );
 

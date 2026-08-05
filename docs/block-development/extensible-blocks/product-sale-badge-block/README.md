@@ -12,22 +12,22 @@ The On-Sale Badge block displays a "Sale" badge on products that are on sale.
 
 ## `woocommerce_sale_badge_text`
 
-### Description <!-- omit in toc -->
+### Description {/* omit in toc */}
 
 The `woocommerce_sale_badge_text` filter allows customization of the sale badge text based on product context.
 
-### Parameters <!-- omit in toc -->
+### Parameters {/* omit in toc */}
 
 -   _$sale_text_ `string` (default: `'Sale'`) - The sale badge text.
 -   _$product_ `WC_Product` - The product object.
 
-### Returns <!-- omit in toc -->
+### Returns {/* omit in toc */}
 
 -   `string` - The filtered sale badge text.
 
-### Code examples <!-- omit in toc -->
+### Code examples {/* omit in toc */}
 
-#### Basic example <!-- omit in toc -->
+#### Basic example {/* omit in toc */}
 
 ```php
 add_filter( 'woocommerce_sale_badge_text', 'custom_sale_badge_text', 10, 2 );
@@ -37,7 +37,7 @@ function custom_sale_badge_text( $sale_text, $product ) {
 }
 ```
 
-#### Product-specific customization <!-- omit in toc -->
+#### Product-specific customization {/* omit in toc */}
 
 ```php
 add_filter( 'woocommerce_sale_badge_text', 'custom_sale_badge_by_product_type', 10, 2 );
@@ -55,7 +55,7 @@ function custom_sale_badge_by_product_type( $sale_text, $product ) {
 }
 ```
 
-#### Discount percentage <!-- omit in toc -->
+#### Discount percentage {/* omit in toc */}
 
 ```php
 add_filter( 'woocommerce_sale_badge_text', 'show_discount_percentage_badge', 10, 2 );

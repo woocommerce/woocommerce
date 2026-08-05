@@ -7,7 +7,6 @@ namespace Automattic\WooCommerce\Tests\Internal\ProductAttributesLookup;
 
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
-use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Testing\Tools\FakeQueue;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
@@ -45,6 +44,8 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
 
+		self::$attributes = array();
+
 		for ( $i = 1; $i <= 3; $i++ ) {
 			$taxonomy_id   = wc_create_attribute(
 				array(
@@ -70,12 +71,12 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	 * Runs after all the tests.
 	 */
 	public static function tearDownAfterClass(): void {
-		parent::tearDownAfterClass();
-
 		foreach ( self::$attributes as $attribute ) {
 			wc_delete_attribute( $attribute['id'] );
 			unregister_taxonomy( $attribute['name'] );
 		}
+
+		parent::tearDownAfterClass();
 	}
 
 	/**
@@ -87,7 +88,8 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		parent::setUp();
 
 		$this->lookup_table_name = $wpdb->prefix . 'wc_product_attributes_lookup';
-		$this->sut               = new LookupDataStore();
+		delete_option( 'woocommerce_attribute_lookup_optimized_updates' );
+		$this->sut = new LookupDataStore();
 
 		$this->reset_legacy_proxy_mocks();
 		$this->register_legacy_proxy_class_mocks(
@@ -96,16 +98,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$this->get_instance_of( DataRegenerator::class )->truncate_lookup_table();
-	}
-
-	/**
-	 * Runs after each test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-
-		delete_option( 'woocommerce_attribute_lookup_optimized_updates' );
+		$this->empty_lookup_table();
 	}
 
 	/**
@@ -804,6 +797,56 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The shared fixture helper updates the lookup table synchronously without scheduling an action.
+	 */
+	public function test_direct_fixture_helper_updates_lookup_table_without_scheduling(): void {
+		$attribute = self::$attributes[0];
+		$product   = new \WC_Product_Simple();
+		$product->set_stock_status( ProductStockStatus::IN_STOCK );
+		$this->set_product_attributes(
+			$product,
+			array(
+				$attribute['name'] => array(
+					'id'      => $attribute['id'],
+					'options' => array( $attribute['term_ids'][0] ),
+				),
+			)
+		);
+
+		self::with_direct_product_attribute_lookup_updates(
+			static function () use ( $product ) {
+				$product->save();
+			}
+		);
+
+		$this->assertCount( 1, $this->get_lookup_table_data() );
+		$this->assertCount( 0, WC()->get_instance_of( \WC_Queue::class )->get_methods_called() );
+	}
+
+	/**
+	 * @testdox The shared fixture helper preserves nested direct-update scopes and restores the option afterward.
+	 */
+	public function test_direct_fixture_helper_restores_nested_update_mode(): void {
+		update_option( 'woocommerce_attribute_lookup_direct_updates', 'no' );
+
+		self::with_direct_product_attribute_lookup_updates(
+			function () {
+				$this->assertSame( 'yes', get_option( 'woocommerce_attribute_lookup_direct_updates' ) );
+
+				self::with_direct_product_attribute_lookup_updates(
+					function () {
+						$this->assertSame( 'yes', get_option( 'woocommerce_attribute_lookup_direct_updates' ) );
+					}
+				);
+
+				$this->assertSame( 'yes', get_option( 'woocommerce_attribute_lookup_direct_updates' ) );
+			}
+		);
+
+		$this->assertSame( 'no', get_option( 'woocommerce_attribute_lookup_direct_updates' ) );
+	}
+
+	/**
 	 * Data provider for on_product_changed tests with direct update option set.
 	 *
 	 * @return array[]
@@ -897,10 +940,10 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		$another_product_id = $product_id + 100;
 
 		// The product creation will have populated the table, but we want to start clean.
-		$this->get_instance_of( DataRegenerator::class )->truncate_lookup_table();
+		$this->empty_lookup_table();
 
 		$this->insert_lookup_table_data( $another_product_id, $another_product_id, $another_attribute['name'], $another_attribute['term_ids'][0], false, true );
-		if ( 'creation' !== $expected_action && 'deletion' !== $expected_action ) {
+		if ( 'creation' !== $expected_action ) {
 			$this->insert_lookup_table_data( $product_id, $product_id, $attribute['name'], $attribute['term_ids'][0], false, false );
 		}
 
@@ -995,10 +1038,10 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		$another_product_id = $variation_id + 100;
 
 		// The product creation will have populated the table, but we want to start clean.
-		$this->get_instance_of( DataRegenerator::class )->truncate_lookup_table();
+		$this->empty_lookup_table();
 
 		$this->insert_lookup_table_data( $another_product_id, $another_product_id, $another_attribute['name'], $another_attribute['term_ids'][0], false, true );
-		if ( 'creation' !== $expected_action && 'deletion' !== $expected_action ) {
+		if ( 'creation' !== $expected_action ) {
 			$this->insert_lookup_table_data( $product_id, $product_id, $non_variation_attribute['name'], $non_variation_attribute['term_ids'][0], false, false );
 			$this->insert_lookup_table_data( $variation_id, $product_id, $variation_attribute['name'], $variation_attribute['term_ids'][0], true, false );
 		}
@@ -1104,10 +1147,10 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		$another_product_id = $variation_id + 100;
 
 		// The product creation will have populated the table, but we want to start clean.
-		$this->get_instance_of( DataRegenerator::class )->truncate_lookup_table();
+		$this->empty_lookup_table();
 
 		$this->insert_lookup_table_data( $another_product_id, $another_product_id, $another_attribute['name'], $another_attribute['term_ids'][0], false, true );
-		if ( 'creation' !== $expected_action && 'deletion' !== $expected_action ) {
+		if ( 'creation' !== $expected_action ) {
 			$this->insert_lookup_table_data( $variation_id, $product_id, $variation_attribute['name'], $variation_attribute['term_ids'][0], true, false );
 		}
 
@@ -1226,6 +1269,15 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 
 		$queue = WC()->get_instance_of( \WC_Queue::class );
 		$queue->clear_methods_called();
+	}
+
+	/**
+	 * Empty the lookup table inside the current test transaction.
+	 */
+	private function empty_lookup_table(): void {
+		global $wpdb;
+
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_product_attributes_lookup" );
 	}
 
 	/**

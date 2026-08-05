@@ -25,6 +25,11 @@ class CouponCode extends AbstractBlock {
 	protected $block_name = 'coupon-code';
 
 	/**
+	 * Placeholder displayed in the editor and in non-email rendering for auto-generated coupons.
+	 */
+	const COUPON_CODE_PLACEHOLDER = 'XXXX-XXXXXX-XXXX';
+
+	/**
 	 * Default styles for the coupon code element.
 	 */
 	private const DEFAULT_STYLES = array(
@@ -42,27 +47,25 @@ class CouponCode extends AbstractBlock {
 	);
 
 	/**
-	 * Get the editor script handle for this block type.
-	 *
-	 * @param string|null $key Data to get. Valid keys: "handle", "path", "dependencies".
-	 * @return array|string|null
-	 */
-	protected function get_block_type_editor_script( $key = null ) {
-		$script = array(
-			'handle'       => 'wc-' . $this->block_name . '-block',
-			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name ),
-			'dependencies' => array( 'wc-blocks' ),
-		);
-		return null === $key ? $script : ( $script[ $key ] ?? null );
-	}
-
-	/**
 	 * Get the frontend style handle for this block type.
 	 *
 	 * @return null
 	 */
 	protected function get_block_type_style() {
 		return null;
+	}
+
+	/**
+	 * Expose coupon types to the editor JS via AssetDataRegistry.
+	 *
+	 * @param array $attributes Block attributes.
+	 */
+	protected function enqueue_data( array $attributes = array() ): void {
+		parent::enqueue_data( $attributes );
+
+		if ( ! $this->asset_data_registry->exists( 'couponTypes' ) && function_exists( 'wc_get_coupon_types' ) ) {
+			$this->asset_data_registry->add( 'couponTypes', wc_get_coupon_types() );
+		}
 	}
 
 	/**
@@ -76,7 +79,13 @@ class CouponCode extends AbstractBlock {
 	protected function render( $attributes, $content, $block ) {
 		$parsed_block = $block instanceof WP_Block ? $block->parsed_block : array();
 		$attributes   = $this->get_block_attributes( $parsed_block, $attributes );
-		$coupon_code  = $this->get_coupon_code( $attributes );
+		$source       = $attributes['source'] ?? 'createNew';
+
+		if ( 'createNew' === $source ) {
+			$coupon_code = self::COUPON_CODE_PLACEHOLDER;
+		} else {
+			$coupon_code = $this->get_coupon_code( $attributes );
+		}
 
 		if ( empty( $coupon_code ) ) {
 			return '';

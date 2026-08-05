@@ -1416,3 +1416,16 @@ function get_woocommerce_api_url( $path ) {
 
 	return $url;
 }
+
+/**
+ * Legacy REST API detection.
+ *
+ * This option used to be used to detect if the Legacy REST API was enabled, but the functionality was moved into a separate extension and deprecated.
+ * The extension itself toggles this option between `yes` and `no` depending on whether the extension is active or not, but since this is the only
+ * way to enable or disable the legacy API now, all we actually need to do is detect if the extension is active.
+ *
+ * @return string 'yes' or 'no'.
+ */
+add_filter( 'pre_option_woocommerce_api_enabled', function() {
+	return WC()->legacy_rest_api_is_available() ? 'yes' : 'no';
+} );

@@ -106,7 +106,6 @@ const TaxonomyPicker = ( props: TaxonomyPickerProps ) => {
 	const handleTermChange = ( termIds: number[] ) => {
 		setQueryAttribute( props, {
 			taxQuery: {
-				...attributes.query?.taxQuery,
 				[ taxonomySlug ]: termIds,
 			},
 		} );
@@ -160,7 +159,6 @@ const TaxonomyPicker = ( props: TaxonomyPickerProps ) => {
 		<div { ...blockProps }>
 			<Placeholder
 				icon={
-					// @ts-expect-error Icon types are incomplete
 					<Icon
 						icon={ getIconForCollection( attributes.collection ) }
 						className="block-editor-block-icon"

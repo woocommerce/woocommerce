@@ -122,7 +122,7 @@ class DraftOrders {
 		return [
 			'label'                     => _x( 'Draft', 'Order status', 'woocommerce' ),
 			'public'                    => false,
-			'exclude_from_search'       => false,
+			'exclude_from_search'       => true,
 			'show_in_admin_all_list'    => false,
 			'show_in_admin_status_list' => true,
 			/* translators: %s: number of orders */

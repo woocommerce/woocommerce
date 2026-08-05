@@ -1,5 +1,44 @@
+// Standard visually-hidden pattern — keeps the element in the layout tree
+// (so jQuery delegated handlers still fire on it) but moves it off-screen
+// and clips its rendered area to nothing. Used twice in this file for the
+// activity-panel tab title spans and the wp-admin meta-toggle wraps.
+@mixin visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	border: 0;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+// Hide ONLY the two standard wp-admin meta-toggle wraps (Screen Options +
+// Help) that we proxy via the floating header's gear / ? icons. Applied via
+// the server-rendered body class so the hide is immediate — no flash before
+// React mounts. The parent #screen-meta-links container is left alone so
+// third-party .screen-meta-toggle siblings remain visible. Visually-hidden
+// (not display:none) keeps the elements in the layout tree so wp-admin's
+// jQuery delegated click handlers still fire when we proxy .click().
+.woocommerce-admin-page {
+	#screen-options-link-wrap,
+	#contextual-help-link-wrap {
+		@include visually-hidden;
+	}
+}
+
 .woocommerce-layout__header {
-	background: $studio-white;
+	// Background matches the wp-admin body grey so the bar reads as
+	// infrastructure rather than content. Needs to be explicit (not inherited)
+	// because `position: fixed` lets page content scroll behind the bar — a
+	// transparent background would show that content through. Bottom border
+	// anchors the bar visually against the page below. Settings-page tweaks
+	// (drop the border so the bar reads as one strip with the tab nav)
+	// live in the legacy admin.scss alongside the rest of that page's overrides.
+	background: $wp-admin-background;
+	border-bottom: $header-border-width solid $wp-admin-border;
 	box-sizing: border-box;
 	padding: 0;
 	position: fixed;
@@ -36,16 +75,180 @@
 	.woocommerce-layout__header-heading {
 		display: flex;
 		align-items: center;
-		padding: 0 0 0 $fallback-gutter-large;
-		padding: 0 0 0 $gutter-large;
+		// $gap-large (24px from @wordpress/base-styles) — matches the
+		// future-state design and the `--wp-admin-grid-unit-30` token
+		// proposed in https://core.trac.wordpress.org/ticket/65085.
+		// Previously $gutter-large (40px-ish, via var(--large-gap)),
+		// which left the floating-header h1 indented further than the
+		// Settings tab nav below it.
+		padding: 0 0 0 $gap-large;
 		height: $header-height;
-		background: $studio-white;
-		font-weight: 600;
-		font-size: 14px;
+		background: transparent;
+		// 15px to align with the direction WP Core is heading for admin
+		// chrome headings (see WordPress/gutenberg#76709 for the
+		// in-progress unified admin header discussion). It's also the
+		// shared "lg" step between two parallel WP token systems:
+		// `--wpds-typography-font-size-lg: 15px` in Gutenberg's
+		// design-tokens.css, and `--wp-admin-font-size-l: 15px` in the
+		// admin tokens proposal at
+		// https://core.trac.wordpress.org/ticket/65085.
+		// Weight 500 (medium) instead of the previous 600 (semibold) —
+		// aligns with `--wpds-typography-font-weight-medium`. The old
+		// 14px + 600 combo was bolding to compensate for being small;
+		// 15px + 500 reads quieter while still clearly title-y.
+		// TODO: replace these literals with CSS custom properties once
+		// WP Core exposes admin design tokens at `:root`. Tracked in
+		// the Trac ticket above. Hardcoded for now because the proposed
+		// variable names (`--wp-admin-*` vs `--wpds-*`) aren't finalised
+		// yet.
+		font-size: 15px;
+		font-weight: 500;
+		// $gray-900 (#1e1e1e) from @wordpress/base-styles — Gutenberg's
+		// standard dark-text colour. Previously this rule had no explicit
+		// colour so Home picked up whatever default <Text> inherits,
+		// Settings overrode with `#070707` (custom near-black, not a
+		// token), and Payments overrode with `$gray-900`. Setting it
+		// once on the shared rule lets Settings + Payments drop their
+		// duplicates so all three pages render the same.
+		color: $gray-900;
 
 		&.woocommerce-layout__header-left-align {
 			flex: 1 auto;
 		}
+	}
+
+	// Spacer that takes up the title's flex space when no h1 renders
+	// (embedded post-type screens), so right-side items stay pinned right.
+	.woocommerce-layout__header-spacer {
+		flex: 1 auto;
+	}
+
+	// Screen Options + Help icon buttons — visually mirror the
+	// activity-panel-tab pattern so bell / list / megaphone / gear / ? all
+	// look identical regardless of which subsystem renders them, including
+	// the blue ::before underline on the active tab.
+	.woocommerce-layout__header-meta-icon {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		position: relative;
+		border: none;
+		outline: none;
+		cursor: pointer;
+		background-color: transparent;
+		height: $header-height;
+		// wp-admin admin-bar items use ~0 8px horizontal padding each side;
+		// match it for a tight, infrastructure-y spacing. $grid-unit-10
+		// (8px from @wordpress/base-styles) instead of a literal so the
+		// value tracks the WP spacing scale automatically.
+		min-width: 0;
+		padding: 0 $grid-unit-10;
+		// $gray-900 across all states (default, hover, active) — the blue
+		// underline alone signals active, matching Gutenberg's icon tab group.
+		color: $gray-900;
+
+		&::before {
+			background-color: var(--wp-admin-theme-color);
+			bottom: 0;
+			content: "";
+			height: 0;
+			opacity: 0;
+			transition-property: height, opacity;
+			transition-duration: 300ms;
+			transition-timing-function: cubic-bezier(0.42, 0, 0.58, 1);
+			left: 0;
+			position: absolute;
+			right: 0;
+		}
+
+		&.is-active {
+			box-shadow: none;
+
+			&::before {
+				// 2px to match Gutenberg's TabPanel + Woo's own
+				// nav-tab-active indicator on Settings.
+				height: 2px;
+				opacity: 1;
+			}
+		}
+
+		&:hover,
+		&.components-button:not(:disabled):not([aria-disabled="true"]):hover {
+			box-shadow: none;
+			background-color: transparent;
+			// Override Button's default theme-blue hover — Gutenberg's own
+			// icon tab groups keep the same dark-grey across all states.
+			color: $gray-900;
+		}
+
+		// Suppress the inset focus shadow on mouse-click focus (it conflicts
+		// with the blue underline). Keyboard-only focus still shows a ring
+		// via :focus-visible, preserving accessibility.
+		&:focus,
+		&.components-button:not(:disabled):not([aria-disabled="true"]):focus {
+			box-shadow: none;
+		}
+		&:focus-visible,
+		&.components-button:not(:disabled):not([aria-disabled="true"]):focus-visible {
+			box-shadow: inset -1px -1px 0 $gray-700,
+				inset 1px 1px 0 $gray-700;
+		}
+
+		svg {
+			fill: currentColor;
+		}
+	}
+
+	// Chrome-only treatment: bar collapses to 32px on pages without a title.
+	// Hard height + max-height + overflow:hidden so the wrapper can't be pushed
+	// taller by any naturally-sized child (Finish setup widget, plugin fills, etc.).
+	// Inner activity-panel and meta-icon items also collapse so they fit cleanly.
+	&.is-chrome-only {
+		.woocommerce-layout__header-wrapper {
+			height: $adminbar-height;
+			min-height: $adminbar-height;
+			max-height: $adminbar-height;
+			overflow: hidden;
+		}
+
+		.woocommerce-layout__activity-panel-tabs,
+		.woocommerce-layout__activity-panel-tab,
+		.woocommerce-layout__header-meta-icon {
+			height: $adminbar-height;
+			min-height: $adminbar-height;
+			max-height: $adminbar-height;
+		}
+	}
+}
+
+// CSS-level safety net for the chrome-only treatment. When wp-admin
+// renders its own `<h1 class="wp-heading-inline">` (Edit Order / Edit
+// Product / Add Product / Products list / Orders list / etc.), apply
+// the same hide-title + collapse-to-adminbar-height treatment as the
+// JS-set `.is-chrome-only` class above — but as soon as the browser
+// parses the DOM, before React has had a chance to set the class.
+// This kills the brief flash of the floating-header h1 that
+// previously appeared between first paint and React state commit.
+// `:has()` is in every browser we support (Chrome 105+, Safari 15.4+,
+// Firefox 121+). Older browsers fall through to the JS-driven class
+// path above and still work — they just get the small flash.
+body:has(.wrap > h1.wp-heading-inline) {
+	.woocommerce-layout__header-heading {
+		display: none;
+	}
+	.woocommerce-layout__header-wrapper {
+		height: $adminbar-height;
+		min-height: $adminbar-height;
+		max-height: $adminbar-height;
+		overflow: hidden;
+	}
+	.woocommerce-layout__activity-panel-tabs,
+	.woocommerce-layout__activity-panel-tab,
+	.woocommerce-layout__header-meta-icon {
+		height: $adminbar-height;
+		min-height: $adminbar-height;
+		max-height: $adminbar-height;
 	}
 }
 

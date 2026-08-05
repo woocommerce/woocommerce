@@ -4,7 +4,14 @@
  * class WC_REST_Coupons_Controller_Tests.
  * Coupons Controller tests for V3 REST API.
  */
+
+use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
+
+/**
+ * Coupons Controller tests for V3 REST API.
+ */
 class WC_REST_Coupons_Controller_Tests extends WC_REST_Unit_Test_Case {
+	use MetaDataAssertionTrait;
 
 
 
@@ -319,5 +326,22 @@ class WC_REST_Coupons_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$coupon = new WC_Coupon( $data['id'] );
 		$this->assertEquals( 'draft', $coupon->get_status() );
+	}
+
+	/**
+	 * @testdox Updating a coupon with incomplete meta_data entries does not cause errors.
+	 */
+	public function test_update_meta_data_with_incomplete_entries(): void {
+		wp_set_current_user( $this->user );
+		$coupon = \WC_Helper_Coupon::create_coupon();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/coupons/' . $coupon->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'meta_data' => $this->get_incomplete_meta_data_input() ) ) );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$this->assert_incomplete_meta_data_handled_correctly( new \WC_Coupon( $coupon->get_id() ) );
 	}
 }

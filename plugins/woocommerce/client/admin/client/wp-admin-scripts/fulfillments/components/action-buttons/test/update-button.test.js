@@ -56,6 +56,10 @@ describe( 'UpdateButton component', () => {
 					},
 				],
 			},
+			notifyCustomer: true,
+			setNotifyCustomer: jest.fn(),
+			customerNote: '',
+			setCustomerNote: jest.fn(),
 		} );
 	} );
 
@@ -95,6 +99,8 @@ describe( 'UpdateButton component', () => {
 			order: { id: 123 },
 			fulfillment: mockFulfillment,
 			notifyCustomer: true,
+			customerNote: 'Test note',
+			setCustomerNote: jest.fn(),
 		} );
 
 		render( <UpdateButton setError={ setError } /> );
@@ -104,7 +110,51 @@ describe( 'UpdateButton component', () => {
 			expect( mockUpdateFulfillment ).toHaveBeenCalledWith(
 				123,
 				mockFulfillment,
-				true
+				true,
+				'Test note'
+			);
+		} );
+	} );
+
+	it( 'should pass empty customer note when notifyCustomer is false', async () => {
+		const mockUpdateFulfillment = jest.fn( () => Promise.resolve() );
+		useDispatch.mockReturnValue( {
+			updateFulfillment: mockUpdateFulfillment,
+		} );
+
+		const mockFulfillment = {
+			id: 456,
+			meta_data: [
+				{
+					id: 1,
+					key: '_items',
+					value: [
+						{
+							id: 1,
+							name: 'Item 1',
+							quantity: 2,
+						},
+					],
+				},
+			],
+		};
+		useFulfillmentContext.mockReturnValue( {
+			order: { id: 123 },
+			fulfillment: mockFulfillment,
+			notifyCustomer: false,
+			customerNote: 'This note should not be sent',
+			setCustomerNote: jest.fn(),
+		} );
+
+		render( <UpdateButton setError={ setError } /> );
+		fireEvent.click( screen.getByText( 'Update' ) );
+
+		await waitFor( () => {
+			expect( mockUpdateFulfillment ).toHaveBeenCalledWith(
+				123,
+				mockFulfillment,
+				false,
+				''
 			);
 		} );
 	} );
@@ -118,6 +168,8 @@ describe( 'UpdateButton component', () => {
 		useFulfillmentContext.mockReturnValue( {
 			order: { id: 123 },
 			fulfillment: undefined,
+			customerNote: '',
+			setCustomerNote: jest.fn(),
 		} );
 
 		render( <UpdateButton setError={ setError } /> );

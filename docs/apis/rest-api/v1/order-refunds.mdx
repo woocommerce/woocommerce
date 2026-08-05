@@ -1,0 +1,459 @@
+---
+sidebar_position: 8
+sidebar_label: 'Order refunds'
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Refunds
+The refunds API allows you to create, view, and delete individual refunds.
+
+## Refund properties
+|   Attribute    |    Type   |                                               Description                                                |
+|----------------|-----------|----------------------------------------------------------------------------------------------------------|
+| `id`           | integer   | Unique identifier for the resource. `READ-ONLY`                            |
+| `date_created` | date-time | The date the order refund was created, in the site's timezone. `READ-ONLY` |
+| `amount`       | string    | Refund amount. `REQUIRED`                                                  |
+| `reason`       | string    | Reason for refund.                                                                                       |
+| `line_items`   | array     | Line items data. See [Refunds Line Items properties](#refund-line-item-properties).                    |
+
+### Refund line item properties
+|   Attribute    |   Type  |                                          Description                                           |
+|----------------|---------|------------------------------------------------------------------------------------------------|
+| `id`           | integer | Item ID. `READ-ONLY`                                             |
+| `name`         | string  | Product name. `READ-ONLY`                                        |
+| `sku`          | string  | Product SKU. `READ-ONLY`                                         |
+| `product_id`   | integer | Product ID.                                                                                    |
+| `variation_id` | integer | Variation ID, if applicable.                                                                   |
+| `quantity`     | integer | Quantity ordered.                                                                              |
+| `tax_class`    | string  | Tax class of product. `READ-ONLY`                                |
+| `price`        | string  | Product price. `READ-ONLY`                                       |
+| `subtotal`     | string  | Line subtotal (before discounts).                                                              |
+| `subtotal_tax` | string  | Line subtotal tax (before discounts).                                                          |
+| `total`        | string  | Line total (after discounts).                                                                  |
+| `total_tax`    | string  | Line total tax (after discounts).                                                              |
+| `taxes`        | array   | Line total tax with `id`, `total` and `subtotal`. `READ-ONLY`    |
+| `meta`         | array   | Line item meta data with `key`, `label` and `value`. `READ-ONLY` |
+
+## Create a refund
+This API helps you to create a new refund for an order.
+
+```http
+POST /wp-json/wc/v1/orders/<id>/refunds
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl -X POST https://example.com/wp-json/wc/v1/orders/116/refunds \
+	-u consumer_key:consumer_secret \
+	-H "Content-Type: application/json" \
+	-d '{
+  "amount": "10"
+}'
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+const data = {
+  amount: "10"
+};
+
+WooCommerce.post("orders/116/refunds", data)
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.log(error.response.data);
+  });
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php
+$data = [
+    'amount' => '10'
+];
+
+print_r($woocommerce->post('orders/116/refunds', $data));
+?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+data = {
+    "amount": "10"
+}
+
+print(wcapi.post("orders/116/refunds", data).json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+data = {
+  amount: "10"
+}
+
+woocommerce.post("orders/116/refunds", data).parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+{
+  "id": 150,
+  "date_created": "2016-05-30T17:28:05",
+  "amount": "10.00",
+  "reason": "",
+  "line_items": [],
+  "_links": {
+    "self": [
+      {
+        "href": "https://example.com/wp-json/wc/v1/orders/116/refunds/150"
+      }
+    ],
+    "collection": [
+      {
+        "href": "https://example.com/wp-json/wc/v1/orders/116/refunds"
+      }
+    ],
+    "up": [
+      {
+        "href": "https://example.com/wp-json/wc/v1/orders/116"
+      }
+    ]
+  }
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Retrieve a refund
+This API lets you retrieve and view a specific refund from an order.
+
+```http
+GET /wp-json/wc/v1/orders/<id>/refunds/<refund_id>
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl https://example.com/wp-json/wc/v1/orders/116/refunds/150 \
+	-u consumer_key:consumer_secret
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+WooCommerce.get("orders/116/refunds/150")
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.log(error.response.data);
+  });
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php print_r($woocommerce->get('orders/116/refunds/150')); ?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+print(wcapi.get("orders/116/refunds/150").json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+woocommerce.get("orders/116/refunds/150").parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+{
+  "id": 150,
+  "date_created": "2016-05-30T17:28:05",
+  "amount": "10.00",
+  "reason": "",
+  "line_items": [],
+  "_links": {
+    "self": [
+      {
+        "href": "https://example.com/wp-json/wc/v1/orders/116/refunds/150"
+      }
+    ],
+    "collection": [
+      {
+        "href": "https://example.com/wp-json/wc/v1/orders/116/refunds"
+      }
+    ],
+    "up": [
+      {
+        "href": "https://example.com/wp-json/wc/v1/orders/116"
+      }
+    ]
+  }
+}
+```
+
+  </TabItem>
+</Tabs>
+
+#### Available parameters
+| Parameter |  Type  |                    Description                    |
+|-----------|--------|---------------------------------------------------|
+| `dp`      | string | Number of decimal points to use in each resource. |
+
+## List all refunds
+This API helps you to view all the refunds from an order.
+
+```http
+GET /wp-json/wc/v1/orders/<id>/refunds
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl https://example.com/wp-json/wc/v1/orders/116/refunds \
+	-u consumer_key:consumer_secret
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+WooCommerce.get("orders/116/refunds")
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.log(error.response.data);
+  });
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php print_r($woocommerce->get('orders/116/refunds')); ?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+print(wcapi.get("orders/116/refunds").json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+woocommerce.get("orders/116/refunds").parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+[
+  {
+    "id": 151,
+    "date_created": "2016-05-30T17:31:48",
+    "amount": "2.00",
+    "reason": "",
+    "line_items": [
+      {
+        "id": 11,
+        "name": "Woo Single #2",
+        "sku": "12345",
+        "product_id": 99,
+        "variation_id": 0,
+        "quantity": -1,
+        "tax_class": "",
+        "price": "-2.00",
+        "subtotal": "-2.00",
+        "subtotal_tax": "0.00",
+        "total": "-2.00",
+        "total_tax": "0.00",
+        "taxes": [],
+        "meta": []
+      }
+    ],
+    "_links": {
+      "self": [
+        {
+          "href": "https://example.com/wp-json/wc/v1/orders/116/refunds/151"
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://example.com/wp-json/wc/v1/orders/116/refunds"
+        }
+      ],
+      "up": [
+        {
+          "href": "https://example.com/wp-json/wc/v1/orders/116"
+        }
+      ]
+    }
+  },
+  {
+    "id": 150,
+    "date_created": "2016-05-30T17:28:05",
+    "amount": "10.00",
+    "reason": "",
+    "line_items": [],
+    "_links": {
+      "self": [
+        {
+          "href": "https://example.com/wp-json/wc/v1/orders/116/refunds/150"
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://example.com/wp-json/wc/v1/orders/116/refunds"
+        }
+      ],
+      "up": [
+        {
+          "href": "https://example.com/wp-json/wc/v1/orders/116"
+        }
+      ]
+    }
+  }
+]
+```
+
+  </TabItem>
+</Tabs>
+
+#### Available parameters
+| Parameter       |   Type  |                                                  Description                                                  |
+|-----------------|---------|---------------------------------------------------------------------------------------------------------------|
+| `context`       | string  | Scope under which the request is made; determines fields present in response. Options: `view` and `edit`.     |
+| `page`          | integer | Current page of the collection.                                                                               |
+| `per_page`      | integer | Maximum number of items to be returned in result set.                                                         |
+| `search`        | string  | Limit results to those matching a string.                                                                     |
+| `after`         | string  | Limit response to resources published after a given ISO8601 compliant date.                                   |
+| `before`        | string  | Limit response to resources published before a given ISO8601 compliant date.                                  |
+| `dates_are_gmt` | boolean | Interpret `after` and `before` as UTC dates when `true`.                                                      |
+| `exclude`       | string  | Ensure result set excludes specific ids.                                                                      |
+| `include`       | string  | Limit result set to specific ids.                                                                             |
+| `offset`        | integer | Offset the result set by a specific number of items.                                                          |
+| `order`         | string  | Order sort attribute ascending or descending. Default is `asc`. Options: `asc` and `desc`.                    |
+| `orderby`       | string  | Sort collection by object attribute. Default is `date`, Options: `date`, `id`, `include`, `title` and `slug`. |
+| `dp`            | string  | Number of decimal points to use in each resource.                                                             |
+
+## Delete a refund
+This API helps you delete an order refund.
+
+```http
+DELETE /wp-json/wc/v1/orders/<id>/refunds/<refund_id>
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl -X DELETE https://example.com/wp-json/wc/v1/orders/116/refunds/150?force=true \
+	-u consumer_key:consumer_secret
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+WooCommerce.delete("orders/116/refunds/150", {
+  force: true
+})
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.log(error.response.data);
+  });
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php print_r($woocommerce->delete('orders/116/refunds/150', ['force' => true])); ?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+print(wcapi.delete("orders/116/refunds/150", params={"force": True}).json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+woocommerce.delete("orders/116/refunds/150", force: true).parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+{
+  "id": 150,
+  "date_created": "2016-05-30T17:28:05",
+  "amount": "10.00",
+  "reason": "",
+  "line_items": [],
+  "_links": {
+    "self": [
+      {
+        "href": "https://example.com/wp-json/wc/v1/orders/116/refunds/150"
+      }
+    ],
+    "collection": [
+      {
+        "href": "https://example.com/wp-json/wc/v1/orders/116/refunds"
+      }
+    ],
+    "up": [
+      {
+        "href": "https://example.com/wp-json/wc/v1/orders/116"
+      }
+    ]
+  }
+}
+```
+
+  </TabItem>
+</Tabs>
+
+#### Available parameters
+| Parameter |  Type  |                          Description                          |
+|-----------|--------|---------------------------------------------------------------|
+| `force`   | string | Required to be `true`, as resource does not support trashing. |

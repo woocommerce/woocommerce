@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Utilities\MetaDataUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
 // phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Legacy class name, can't change without breaking backward compat.
@@ -214,7 +215,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 */
 	protected function get_order_item_data( $item ) {
 		$data           = $item->get_data();
-		$format_decimal = array( 'subtotal', 'subtotal_tax', 'total', 'total_tax', 'tax_total', 'shipping_tax_total' );
+		$format_decimal = array( 'subtotal', 'subtotal_tax', 'total', 'total_tax', 'tax_total', 'shipping_tax_total', 'discount', 'discount_tax' );
 
 		// Format decimal values.
 		foreach ( $format_decimal as $key ) {
@@ -328,7 +329,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			'display_value' => $meta_item->value, // Default to original value, in case a formatted value is not available.
 		);
 
-		if ( array_key_exists( $meta_item->id, $formatted_meta_data ) ) {
+		if ( $meta_item->id && array_key_exists( $meta_item->id, $formatted_meta_data ) ) {
 			$formatted_meta_item = $formatted_meta_data[ $meta_item->id ];
 
 			$result['display_key']   = wc_clean( $formatted_meta_item->display_key );
@@ -696,6 +697,25 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	}
 
 	/**
+	 * Update a single order.
+	 *
+	 * Rejects IDs whose underlying type isn't shop_order (e.g. shop_subscription) to avoid
+	 * silently converting them on save. Mirrors the upfront type check already performed by
+	 * WC_REST_Orders_V1_Controller::update_item().
+	 *
+	 * @param WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function update_item( $request ) {
+		$id = (int) $request['id'];
+		if ( empty( $id ) || OrderUtil::get_order_type( $id ) !== $this->post_type ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		return parent::update_item( $request );
+	}
+
+	/**
 	 * Prepare a single order for create or update.
 	 *
 	 * @param  WP_REST_Request $request Request object.
@@ -905,14 +925,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @param array         $posted Request data.
 	 */
 	protected function maybe_set_item_meta_data( $item, $posted ) {
-		if ( ! empty( $posted['meta_data'] ) && is_array( $posted['meta_data'] ) ) {
-			foreach ( $posted['meta_data'] as $meta ) {
-				if ( isset( $meta['key'] ) ) {
-					$value = isset( $meta['value'] ) ? $meta['value'] : null;
-					$item->update_meta_data( $meta['key'], $value, isset( $meta['id'] ) ? $meta['id'] : '' );
-				}
-			}
-		}
+		MetaDataUtil::update( $posted['meta_data'] ?? null, $item );
 	}
 
 	/**
@@ -1467,7 +1480,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 							),
 							'value' => array(
 								'description' => __( 'Meta value.', 'woocommerce' ),
-								'type'        => 'mixed',
+								'type'        => array( 'null', 'object', 'string', 'number', 'boolean', 'integer', 'array' ),
 								'context'     => array( 'view', 'edit' ),
 							),
 						),
@@ -1493,7 +1506,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 							),
 							'parent_name'      => array(
 								'description' => __( 'Parent product name if the product is a variation.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => array( 'string', 'null' ),
 								'context'     => array( 'view', 'edit' ),
 							),
 							'product_id'       => array(
@@ -1584,18 +1597,20 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 										),
 										'value'         => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
-											'type'        => 'mixed',
+											'type'        => array( 'null', 'object', 'string', 'number', 'boolean', 'integer', 'array' ),
 											'context'     => array( 'view', 'edit' ),
 										),
 										'display_key'   => array(
 											'description' => __( 'Meta key for UI display.', 'woocommerce' ),
 											'type'        => 'string',
 											'context'     => array( 'view', 'edit' ),
+											'readonly'    => true,
 										),
 										'display_value' => array(
-											'description' => __( 'Meta value for UI display.', 'woocommerce' ),
-											'type'        => 'string',
+											'description' => __( 'Meta value for UI display. May be a string or, when mirroring a complex meta value, an array or object.', 'woocommerce' ),
+											'type'        => array( 'null', 'object', 'string', 'number', 'boolean', 'integer', 'array' ),
 											'context'     => array( 'view', 'edit' ),
+											'readonly'    => true,
 										),
 									),
 								),
@@ -1710,7 +1725,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 										),
 										'value' => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
-											'type'        => 'mixed',
+											'type'        => array( 'null', 'object', 'string', 'number', 'boolean', 'integer', 'array' ),
 											'context'     => array( 'view', 'edit' ),
 										),
 									),
@@ -1801,7 +1816,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 										),
 										'value' => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
-											'type'        => 'mixed',
+											'type'        => array( 'null', 'object', 'string', 'number', 'boolean', 'integer', 'array' ),
 											'context'     => array( 'view', 'edit' ),
 										),
 									),
@@ -1899,7 +1914,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 										),
 										'value' => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
-											'type'        => 'mixed',
+											'type'        => array( 'null', 'object', 'string', 'number', 'boolean', 'integer', 'array' ),
 											'context'     => array( 'view', 'edit' ),
 										),
 									),
@@ -1975,7 +1990,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 										),
 										'value' => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
-											'type'        => 'mixed',
+											'type'        => array( 'null', 'object', 'string', 'number', 'boolean', 'integer', 'array' ),
 											'context'     => array( 'view', 'edit' ),
 										),
 									),

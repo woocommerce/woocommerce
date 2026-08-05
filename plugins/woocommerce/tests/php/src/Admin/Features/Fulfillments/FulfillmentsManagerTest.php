@@ -136,34 +136,26 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that the initial shipping providers can be extended.
+	 * Test that the initial shipping providers can be extended with an AbstractShippingProvider instance.
 	 */
 	public function test_extend_initial_shipping_providers() {
-		// Extend the shipping providers.
-		add_filter(
-			'woocommerce_fulfillment_shipping_providers',
-			function ( $providers ) {
-				$providers['custom_provider'] = array(
-					'label' => __( 'Custom Provider', 'woocommerce' ),
-					'icon'  => 'custom-icon',
-					'value' => 'custom_provider',
-				);
-				return $providers;
-			}
-		);
+		$mock_provider = new ShippingProviderMock();
 
-		/**
-		 * Filter to get initial shipping providers.
-		 *
-		 * @since 10.1.0
-		 */
-		$shipping_providers = apply_filters( 'woocommerce_fulfillment_shipping_providers', array() );
+		// Extend the shipping providers with an AbstractShippingProvider instance.
+		$filter = function ( $providers ) use ( $mock_provider ) {
+			$providers[] = $mock_provider;
+			return $providers;
+		};
+		add_filter( 'woocommerce_fulfillment_shipping_providers', $filter );
 
-		// Check if the custom provider is included.
-		$this->assertArrayHasKey( 'custom_provider', $shipping_providers );
-		$this->assertIsArray( $shipping_providers['custom_provider'] );
-		$this->assertArrayHasKey( 'label', $shipping_providers['custom_provider'] );
-		$this->assertEquals( __( 'Custom Provider', 'woocommerce' ), $shipping_providers['custom_provider']['label'] );
+		$shipping_providers = \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils::get_shipping_providers();
+
+		remove_filter( 'woocommerce_fulfillment_shipping_providers', $filter );
+
+		// Check if the mock provider is included, keyed by its key.
+		$this->assertArrayHasKey( $mock_provider->get_key(), $shipping_providers );
+		$this->assertInstanceOf( ShippingProviderMock::class, $shipping_providers[ $mock_provider->get_key() ] );
+		$this->assertEquals( 'Mock Shipping Provider', $shipping_providers[ $mock_provider->get_key() ]->get_name() );
 	}
 
 	/**

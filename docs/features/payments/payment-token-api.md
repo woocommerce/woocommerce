@@ -1,7 +1,7 @@
 ---
 post_title: WooCommerce Payment Token API
 sidebar_label: Payment Token API
-
+sidebar_position: 3
 ---
 
 # WooCommerce Payment Token API

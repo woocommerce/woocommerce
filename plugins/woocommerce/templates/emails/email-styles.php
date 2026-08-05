@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.8.0
+ * @version 11.0.0
  */
 
 use Automattic\WooCommerce\Internal\Email\EmailFont;
@@ -167,6 +167,7 @@ body {
 
 #template_header_image img {
 	width: <?php echo esc_attr( $logo_image_width ); ?>px;
+	margin-<?php echo is_rtl() ? 'left' : 'right'; ?>: 0;
 }
 
 .email-logo-text {
@@ -273,7 +274,7 @@ body {
 #body_content .order-item-data td {
 	border: 0 !important;
 	padding: 0 !important;
-	vertical-align: top;
+	vertical-align: middle;
 }
 
 #body_content .email-order-details .order-totals td,
@@ -385,6 +386,14 @@ body {
 .order-item-data {
 	color: <?php echo esc_attr( $text ); ?>;
 	font-family: <?php echo $safe_font_family; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>;
+}
+
+.order-item-data {
+	width: 100%;
+}
+
+.order-item-data h3 {
+	margin: 0;
 }
 
 .link {

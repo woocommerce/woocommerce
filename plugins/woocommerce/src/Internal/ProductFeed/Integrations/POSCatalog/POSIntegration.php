@@ -12,6 +12,7 @@ namespace Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog;
 use Automattic\WooCommerce\Container;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\FeedInterface;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\FeedValidatorInterface;
+use Automattic\WooCommerce\Internal\ProductFeed\Feed\ResumableFeedInterface;
 use Automattic\WooCommerce\Internal\ProductFeed\Integrations\IntegrationInterface;
 use Automattic\WooCommerce\Internal\ProductFeed\Storage\JsonFileFeed;
 
@@ -102,8 +103,15 @@ class POSIntegration implements IntegrationInterface {
 
 	/**
 	 * {@inheritdoc}
+	 *
+	 * POS catalog feeds are generated in chunks across multiple processes, so this returns a feed that
+	 * supports the resumable lifecycle. Narrowing the return type (a covariant override of the base
+	 * {@see FeedInterface} contract) guarantees that at the language level for callers such as
+	 * {@see AsyncGenerator}, instead of relying on a PHPDoc hint or a runtime check.
+	 *
+	 * @return ResumableFeedInterface
 	 */
-	public function create_feed(): FeedInterface {
+	public function create_feed(): ResumableFeedInterface {
 		return new JsonFileFeed( 'pos-catalog-feed' );
 	}
 

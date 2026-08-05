@@ -7,6 +7,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Utilities\NumberUtil;
@@ -222,17 +223,17 @@ class WC_Order extends WC_Abstract_Order {
 		$tax_string      = '';
 
 		// Tax for inclusive prices.
-		if ( wc_tax_enabled() && 'incl' === $tax_display ) {
+		if ( wc_tax_enabled() && TaxDisplayMode::INCLUSIVE === $tax_display ) {
 			$tax_string_array = array();
 			$tax_totals       = $this->get_tax_totals();
 
 			if ( 'itemized' === get_option( 'woocommerce_tax_total_display' ) ) {
 				foreach ( $tax_totals as $code => $tax ) {
-					$tax_amount         = ( $total_refunded && $display_refunded ) ? wc_price( WC_Tax::round( $tax->amount - $this->get_total_tax_refunded_by_rate_id( $tax->rate_id ) ), array( 'currency' => $this->get_currency() ) ) : $tax->formatted_amount;
+					$tax_amount         = ( $total_refunded && $display_refunded ) ? wc_price( WC_Tax::round( (float) $tax->amount - (float) $this->get_total_tax_refunded_by_rate_id( $tax->rate_id ) ), array( 'currency' => $this->get_currency() ) ) : $tax->formatted_amount;
 					$tax_string_array[] = sprintf( '%s %s', $tax_amount, $tax->label );
 				}
 			} elseif ( ! empty( $tax_totals ) ) {
-				$tax_amount         = ( $total_refunded && $display_refunded ) ? $this->get_total_tax() - $this->get_total_tax_refunded() : $this->get_total_tax();
+				$tax_amount         = ( $total_refunded && $display_refunded ) ? (float) $this->get_total_tax() - (float) $this->get_total_tax_refunded() : $this->get_total_tax();
 				$tax_string_array[] = sprintf( '%s %s', wc_price( $tax_amount, array( 'currency' => $this->get_currency() ) ), WC()->countries->tax_or_vat() );
 			}
 
@@ -243,7 +244,7 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		if ( $total_refunded && $display_refunded ) {
-			$formatted_total = '<del aria-hidden="true">' . wp_strip_all_tags( $formatted_total ) . '</del> <ins>' . wc_price( $order_total - $total_refunded, array( 'currency' => $this->get_currency() ) ) . $tax_string . '</ins>';
+			$formatted_total = '<del aria-hidden="true">' . wp_strip_all_tags( $formatted_total ) . '</del> <ins>' . wc_price( (float) $order_total - (float) $total_refunded, array( 'currency' => $this->get_currency() ) ) . $tax_string . '</ins>';
 		} else {
 			$formatted_total .= $tax_string;
 		}
@@ -2205,18 +2206,36 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return WC_Order_Refund[]
 	 */
 	public function get_refunds() {
-		$cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $this->get_id();
-		$refunds   = wp_cache_get( $cache_key, $this->cache_group );
+		$cache_key  = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refund_ids' . $this->get_id();
+		$refund_ids = wp_cache_get( $cache_key, $this->cache_group );
 
-		if ( false === $refunds ) {
-			$refunds = wc_get_orders(
+		if ( false === $refund_ids ) {
+			$refunds    = (array) wc_get_orders(
 				array(
 					'type'   => 'shop_order_refund',
 					'parent' => $this->get_id(),
 					'limit'  => -1,
 				)
 			);
-			wp_cache_set( $cache_key, $refunds, $this->cache_group );
+			$refund_ids = array();
+			foreach ( $refunds as $refund ) {
+				if ( $refund instanceof WC_Order_Refund ) {
+					$refund_ids[] = $refund->get_id();
+				}
+			}
+			wp_cache_set( $cache_key, $refund_ids, $this->cache_group );
+		} else {
+			$refunds = ! empty( $refund_ids )
+				? wc_get_orders(
+					array(
+						'type'          => 'shop_order_refund',
+						'post__in'      => $refund_ids,
+						'orderby'       => 'post__in',
+						'limit'         => -1,
+						'no_found_rows' => true,
+					)
+				)
+				: array();
 		}
 
 		$this->refunds = array();
@@ -2472,7 +2491,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_remaining_refund_amount() {
-		return wc_format_decimal( $this->get_total() - $this->get_total_refunded(), wc_get_price_decimals() );
+		return wc_format_decimal( (float) $this->get_total() - (float) $this->get_total_refunded(), wc_get_price_decimals() );
 	}
 
 	/**
@@ -2481,7 +2500,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return int
 	 */
 	public function get_remaining_refund_items() {
-		return absint( $this->get_item_count() - $this->get_item_count_refunded() );
+		return absint( (int) $this->get_item_count() - (int) $this->get_item_count_refunded() );
 	}
 
 	/**

@@ -168,7 +168,7 @@ class NotificationsProcessor {
 			$cycle_state = $this->cycle_state_service->get_or_initialize_cycle_state( $product_id );
 			$product     = $this->parse_product( $product_id );
 		} catch ( \Throwable $e ) {
-			$product_id = (int) $product_id ?? 0;
+			$product_id = (int) $product_id;
 			$this->logger->error(
 				sprintf( 'Background process for product %s terminated. Reason: %s', $product_id, $e->getMessage() ),
 				array(

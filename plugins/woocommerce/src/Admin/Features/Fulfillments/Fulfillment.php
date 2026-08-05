@@ -284,56 +284,124 @@ class Fulfillment extends \WC_Data {
 	}
 
 	/**
-	 * Get the date updated.
+	 * Get the date updated, as a UTC 'Y-m-d H:i:s' string.
 	 *
-	 * @return string|null Date updated.
+	 * @return string|null Date updated in UTC.
 	 */
 	public function get_date_updated(): ?string {
 		return $this->get_prop( 'date_updated' );
 	}
 
 	/**
-	 * Set the date updated.
+	 * Set the date updated. Input is normalized to UTC before storage.
+	 *
+	 * Bare MySQL-format strings are interpreted as site-local time (matching
+	 * the convention of current_time('mysql')). Strings with an explicit
+	 * timezone designator (Z, +00:00, UTC) are respected.
+	 *
+	 * @since 10.1.0
+	 * @since 10.8.0 Input is normalized to UTC before storage.
 	 *
 	 * @param string|null $date_updated Date updated.
 	 */
 	public function set_date_updated( ?string $date_updated ): void {
-		$this->set_prop( 'date_updated', $date_updated );
+		$this->set_prop( 'date_updated', $this->normalize_date_to_utc( $date_updated ) );
 	}
 
 	/**
-	 * Get the date the fulfillment was fulfilled.
+	 * Get the date the fulfillment was fulfilled, as a UTC 'Y-m-d H:i:s' string.
 	 */
 	public function get_date_fulfilled(): ?string {
 		return $this->meta_exists( '_date_fulfilled' ) ? $this->get_meta( '_date_fulfilled', true ) : null;
 	}
 
 	/**
-	 * Set the date the fulfillment was fulfilled.
+	 * Set the date the fulfillment was fulfilled. Input is normalized to UTC.
 	 *
-	 * @param string $date_fulfilled Date fulfilled.
+	 * @since 10.1.0
+	 * @since 10.8.0 Input is normalized to UTC before storage.
+	 *
+	 * @param string $date_fulfilled Date fulfilled. See set_date_updated() for accepted formats.
 	 */
 	public function set_date_fulfilled( string $date_fulfilled ): void {
-		$this->add_meta_data( '_date_fulfilled', $date_fulfilled, true );
+		$normalized = $this->normalize_date_to_utc( $date_fulfilled );
+		if ( null !== $normalized ) {
+			$this->add_meta_data( '_date_fulfilled', $normalized, true );
+		}
 	}
 
 	/**
-	 * Get the date deleted.
+	 * Get the date deleted, as a UTC 'Y-m-d H:i:s' string.
 	 *
-	 * @return string|null Date deleted.
+	 * @return string|null Date deleted in UTC.
 	 */
 	public function get_date_deleted(): ?string {
 		return $this->get_prop( 'date_deleted' );
 	}
 
 	/**
-	 * Set the date deleted.
+	 * Set the date deleted. Input is normalized to UTC.
 	 *
-	 * @param string|null $date_deleted Date deleted.
+	 * @since 10.1.0
+	 * @since 10.8.0 Input is normalized to UTC before storage.
+	 *
+	 * @param string|null $date_deleted Date deleted. See set_date_updated() for accepted formats.
 	 * @return void
 	 */
 	public function set_date_deleted( ?string $date_deleted ): void {
-		$this->set_prop( 'date_deleted', $date_deleted );
+		$this->set_prop( 'date_deleted', $this->normalize_date_to_utc( $date_deleted ) );
+	}
+
+	/**
+	 * Normalize a date input to a UTC 'Y-m-d H:i:s' string.
+	 *
+	 * Bare MySQL-format strings are interpreted as site-local time (matching
+	 * the convention of current_time('mysql')). Strings that include an
+	 * explicit timezone designator (Z, numeric offset, or named zone) are
+	 * respected as-is.
+	 *
+	 * @since 10.8.0
+	 * @param string|null $date Date input.
+	 * @return string|null UTC datetime string, or null for empty/invalid input.
+	 */
+	private function normalize_date_to_utc( ?string $date ): ?string {
+		$date = null === $date ? null : trim( $date );
+		if ( null === $date || '' === $date ) {
+			return null;
+		}
+		try {
+			// The second DateTimeZone is used only when the string has no explicit zone.
+			$datetime = new \DateTime( $date, wp_timezone() );
+			// DateTime silently normalizes invalid calendar dates (e.g. Feb 30 -> Mar 2);
+			// reject those so callers don't persist a different date than the user supplied.
+			$parse_errors = \DateTime::getLastErrors();
+			if ( false !== $parse_errors && ( $parse_errors['warning_count'] > 0 || $parse_errors['error_count'] > 0 ) ) {
+				return null;
+			}
+			$datetime->setTimezone( new \DateTimeZone( 'UTC' ) );
+			return $datetime->format( 'Y-m-d H:i:s' );
+		} catch ( \Exception $e ) {
+			return null;
+		}
+	}
+
+	/**
+	 * Set props from a raw storage row, skipping setter-level normalization.
+	 *
+	 * DB values are already stored in UTC, so they must not be re-normalized
+	 * by set_date_*() setters (which would treat them as site-local input).
+	 *
+	 * @internal For use by the fulfillment data store only.
+	 * @since 10.8.0
+	 * @param array<string, mixed> $props Prop values keyed by prop name.
+	 * @return void
+	 */
+	public function set_props_from_storage( array $props ): void {
+		foreach ( $props as $key => $value ) {
+			if ( array_key_exists( $key, $this->data ) ) {
+				$this->set_prop( $key, $value );
+			}
+		}
 	}
 
 	/**

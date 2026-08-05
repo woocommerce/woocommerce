@@ -19,11 +19,6 @@ jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
 } ) );
 
-// Enable the feature flag before mocking config.
-window.wcAdminFeatures = {
-	'analytics-scheduled-import': true,
-};
-
 jest.mock( '../config', () => ( {
 	config: {
 		woocommerce_analytics_scheduled_import: {
@@ -71,17 +66,11 @@ describe( 'Settings - Import Mode Modal', () => {
 				[ SCHEDULED_IMPORT_SETTING_NAME ]: 'yes',
 			},
 		} );
-
-		// Mock window.wcAdminFeatures.
-		window.wcAdminFeatures = {
-			'analytics-scheduled-import': true,
-		};
 	} );
 
 	afterEach( () => {
 		delete window.wcAdminFeatures;
 	} );
-
 	it( 'renders import mode radio control', () => {
 		render( <Settings createNotice={ jest.fn() } query={ {} } /> );
 

@@ -5,6 +5,8 @@
  * @package WooCommerce\Classes
  */
 
+use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
+use Automattic\WooCommerce\Enums\TaxBasedOn;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -473,7 +475,7 @@ class WC_Tax {
 
 		if ( ! empty( $customer ) ) {
 			$location = $customer->get_taxable_address();
-		} elseif ( wc_prices_include_tax() || 'base' === get_option( 'woocommerce_default_customer_address' ) || 'base' === get_option( 'woocommerce_tax_based_on' ) ) {
+		} elseif ( wc_prices_include_tax() || DefaultCustomerAddress::BASE === get_option( 'woocommerce_default_customer_address' ) || TaxBasedOn::BASE === get_option( 'woocommerce_tax_based_on' ) ) {
 			$location = array(
 				WC()->countries->get_base_country(),
 				WC()->countries->get_base_state(),
@@ -700,8 +702,8 @@ class WC_Tax {
 		global $wpdb;
 
 		if ( is_object( $key_or_rate ) ) {
-			$key      = $key_or_rate->tax_rate_id;
-			$compound = $key_or_rate->tax_rate_compound;
+			$key      = (int) $key_or_rate->tax_rate_id;
+			$compound = (bool) $key_or_rate->tax_rate_compound;
 		} else {
 			$key      = $key_or_rate;
 			$compound = (bool) $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate_compound FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) );
@@ -720,7 +722,7 @@ class WC_Tax {
 		global $wpdb;
 
 		if ( is_object( $key_or_rate ) ) {
-			$key       = $key_or_rate->tax_rate_id;
+			$key       = (int) $key_or_rate->tax_rate_id;
 			$rate_name = $key_or_rate->tax_rate_name;
 		} else {
 			$key       = $key_or_rate;
@@ -742,7 +744,7 @@ class WC_Tax {
 	 */
 	public static function get_rate_percent( $key_or_rate ) {
 		$rate_percent_value = self::get_rate_percent_value( $key_or_rate );
-		$tax_rate_id        = is_object( $key_or_rate ) ? $key_or_rate->tax_rate_id : $key_or_rate;
+		$tax_rate_id        = is_object( $key_or_rate ) ? (int) $key_or_rate->tax_rate_id : $key_or_rate;
 		return apply_filters( 'woocommerce_rate_percent', $rate_percent_value . '%', $tax_rate_id );
 	}
 
@@ -776,7 +778,7 @@ class WC_Tax {
 		global $wpdb;
 
 		if ( is_object( $key_or_rate ) ) {
-			$key  = $key_or_rate->tax_rate_id;
+			$key  = (int) $key_or_rate->tax_rate_id;
 			$rate = $key_or_rate;
 		} else {
 			$key  = $key_or_rate;

@@ -45,6 +45,8 @@ class PaymentsExtensionSuggestions {
 	const CLEARPAY          = 'clearpay';
 	const KLARNA            = 'klarna';
 	const KLARNA_CHECKOUT   = 'klarna_checkout';
+	const HELCIM            = 'helcim';
+	const KOMOJU            = 'komoju';
 	const HELIOPAY          = 'heliopay';
 	const MONEI             = 'monei';
 	const COINBASE          = 'coinbase';
@@ -178,6 +180,7 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
+			self::HELCIM,
 			self::PAYPAL_WALLET,
 			self::AFFIRM,
 			self::AFTERPAY,
@@ -214,6 +217,7 @@ class PaymentsExtensionSuggestions {
 			self::SQUARE, // Use the default details.
 			self::VISA,
 			self::AIRWALLEX,
+			self::HELCIM,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 			self::AFFIRM,
@@ -265,6 +269,7 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
+			self::GOCARDLESS,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 			self::AFFIRM          => array(
@@ -1331,12 +1336,26 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'AR' => array(
-			self::VISA => array(
-				'_append' => array(
+			self::MERCADO_PAGO => array(
+				'_append'        => array(
 					'tags' => array( self::TAG_PREFERRED ),
+				),
+				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
+					'links' => array(
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+							'url'   => 'https://www.mercadopago.com.ar/costs-section',
+						),
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+							'url'   => 'https://www.mercadopago.com.ar/ayuda/terminos-y-politicas_194',
+						),
+					),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1387,9 +1406,24 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'BR' => array(
-			self::STRIPE => array(
+			self::STRIPE       => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
+				),
+			),
+			self::MERCADO_PAGO => array(
+				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
+					'links' => array(
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+							'url'   => 'https://www.mercadopago.com.br/costs-section',
+						),
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+							'url'   => 'https://www.mercadopago.com.br/ajuda/termos-e-politicas_194',
+						),
+					),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
@@ -1410,22 +1444,50 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'CL' => array(
-			self::VISA => array(
-				'_append' => array(
+			self::MERCADO_PAGO => array(
+				'_append'        => array(
 					'tags' => array( self::TAG_PREFERRED ),
+				),
+				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
+					'links' => array(
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+							'url'   => 'https://www.mercadopago.cl/costs-section',
+						),
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+							'url'   => 'https://www.mercadopago.cl/ayuda/terminos-y-politicas_194',
+						),
+					),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'CO' => array(
-			self::VISA => array(
-				'_append' => array(
+			self::MERCADO_PAGO => array(
+				'_append'        => array(
 					'tags' => array( self::TAG_PREFERRED ),
+				),
+				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
+					'links' => array(
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+							'url'   => 'https://www.mercadopago.com.co/costs-section',
+						),
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+							'url'   => 'https://www.mercadopago.com.co/ayuda/terminos-y-politicas_194',
+						),
+					),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1558,15 +1620,30 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'MX' => array(
-			self::STRIPE => array(
+			self::STRIPE       => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
+				),
+			),
+			self::MERCADO_PAGO => array(
+				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
+					'links' => array(
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+							'url'   => 'https://www.mercadopago.com.mx/costs-section',
+						),
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+							'url'   => 'https://www.mercadopago.com.mx/ayuda/terminos-y-politicas_194',
+						),
+					),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
 			self::VISA,
 			self::PAYPAL_WALLET,
-			self::KLARNA => array(
+			self::KLARNA       => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -1612,12 +1689,26 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'PE' => array(
-			self::VISA => array(
-				'_append' => array(
+			self::MERCADO_PAGO => array(
+				'_append'        => array(
 					'tags' => array( self::TAG_PREFERRED ),
+				),
+				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
+					'links' => array(
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+							'url'   => 'https://www.mercadopago.com.pe/costs-section',
+						),
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+							'url'   => 'https://www.mercadopago.com.pe/ayuda/terminos-y-politicas_194',
+						),
+					),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1695,12 +1786,26 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'UY' => array(
-			self::VISA => array(
-				'_append' => array(
+			self::MERCADO_PAGO => array(
+				'_append'        => array(
 					'tags' => array( self::TAG_PREFERRED ),
+				),
+				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
+					'links' => array(
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+							'url'   => 'https://www.mercadopago.com.uy/costs-section',
+						),
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+							'url'   => 'https://www.mercadopago.com.uy/ayuda/terminos-y-politicas_194',
+						),
+					),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1917,6 +2022,8 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
+			self::KOMOJU,
+			self::AIRWALLEX,
 			self::VISA,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
@@ -4039,6 +4146,70 @@ class PaymentsExtensionSuggestions {
 					array(
 						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=klarna-checkout',
+					),
+				),
+			),
+			self::HELCIM            => array(
+				'_type'       => self::TYPE_PSP,
+				'title'       => esc_html__( 'Helcim', 'woocommerce' ),
+				'description' => esc_html__( 'Accept credit cards and Google Pay directly on your store with zero monthly fees. Save up to 25% using Helcim’s transparent interchange-plus pricing.', 'woocommerce' ),
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/helcim.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'helcim-commerce-for-woocommerce',
+				),
+				'links'       => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+						'url'   => 'https://www.helcim.com/pricing/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+						'url'   => 'https://woocommerce.com/products/helcim-commerce-for-woocommerce/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+						'url'   => 'https://legal.helcim.com/terms-of-service/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://woocommerce.com/document/helcim-commerce-for-woocommerce/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=helcim-commerce-for-woocommerce',
+					),
+				),
+			),
+			self::KOMOJU            => array(
+				'_type'       => self::TYPE_PSP,
+				'title'       => esc_html__( 'KOMOJU Payments', 'woocommerce' ),
+				'description' => esc_html__( 'Easily add popular Japanese payment methods like konbini, PayPay, and more with KOMOJU’s secure extension to optimize checkout.', 'woocommerce' ),
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/komoju.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'komoju-japanese-payments',
+				),
+				'links'       => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+						'url'   => 'https://en.komoju.com/pricing/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+						'url'   => 'https://woocommerce.com/products/komoju-japanese-payments/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+						'url'   => 'https://toc.komoju.com/toc/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://woocommerce.com/document/komoju-japanese-payments/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=komoju-japanese-payments',
 					),
 				),
 			),

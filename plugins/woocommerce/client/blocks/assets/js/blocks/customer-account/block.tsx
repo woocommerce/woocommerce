@@ -31,9 +31,15 @@ const AccountIcon = ( {
 	displayStyle: DisplayStyle;
 	iconClass: string;
 } ) => {
-	return displayStyle === DisplayStyle.TEXT_ONLY ? null : (
-		<Icon className={ iconClass } icon={ icons[ iconStyle ] } size={ 18 } />
-	);
+	return displayStyle !== DisplayStyle.TEXT_ONLY ? (
+		<div className="wc-block-customer-account__visual">
+			<Icon
+				className={ iconClass }
+				icon={ icons[ iconStyle ] }
+				size={ 18 }
+			/>
+		</div>
+	) : null;
 };
 
 const Label = ( { displayStyle }: { displayStyle: DisplayStyle } ) => {
@@ -67,6 +73,34 @@ export const CustomerAccountBlock = ( {
 			  }
 			: {};
 
+	const content = (
+		<>
+			<AccountIcon
+				iconStyle={ iconStyle }
+				displayStyle={ displayStyle }
+				iconClass={ iconClass }
+			/>
+			<Label displayStyle={ displayStyle } />
+		</>
+	);
+
+	if ( hasDropdownNavigation ) {
+		return (
+			<button
+				type="button"
+				className="wc-block-customer-account__toggle"
+				{ ...ariaAttributes }
+			>
+				{ content }
+				<Icon
+					className="wc-block-customer-account__caret"
+					icon={ caret }
+					size={ 10 }
+				/>
+			</button>
+		);
+	}
+
 	return (
 		<a
 			className="wc-block-customer-account__link"
@@ -76,19 +110,7 @@ export const CustomerAccountBlock = ( {
 			) }
 			{ ...ariaAttributes }
 		>
-			<AccountIcon
-				iconStyle={ iconStyle }
-				displayStyle={ displayStyle }
-				iconClass={ iconClass }
-			/>
-			<Label displayStyle={ displayStyle } />
-			{ hasDropdownNavigation && (
-				<Icon
-					className="wc-block-customer-account__caret"
-					icon={ caret }
-					size={ 10 }
-				/>
-			) }
+			{ content }
 		</a>
 	);
 };

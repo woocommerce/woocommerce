@@ -185,6 +185,97 @@ class WC_Meta_Box_Order_Data {
 	}
 
 	/**
+	 * Whether an order has no persisted shipping method.
+	 *
+	 * A shipping line is order-time fulfillment evidence that remains stable when a
+	 * merchant later changes the ordered catalog products. Orders that retain one,
+	 * including Store API local pickup orders, must keep showing shipping details.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return bool
+	 */
+	private static function order_has_no_shipping( $order ) {
+		return 0 === count( $order->get_shipping_methods() );
+	}
+
+	/**
+	 * Whether every resolvable product line on an order is currently virtual.
+	 *
+	 * This check is used only when no persisted shipping method provides historical
+	 * fulfillment evidence. It intentionally reflects current, filterable catalog
+	 * semantics, so product edits can change the summary for no-line orders. Empty
+	 * or unresolved product sets remain visible because suppressing their persisted
+	 * shipping details would be ambiguous.
+	 *
+	 * Reading live catalog state is a deliberate, bounded departure from PR #66488's
+	 * principle that suppression should rest on order-time evidence immune to later
+	 * catalog edits. This fallback runs only for orders with no persisted shipping line
+	 * (guaranteed by order_has_no_shipping() earlier in the gate's && chain), which is
+	 * exactly the population that carries no such order-time evidence, so the catalog
+	 * read is the only available signal and can never override a persisted shipping line.
+	 * The accepted tradeoff: reclassifying a product as virtual can later re-hide a
+	 * no-line order that genuinely shipped. That recurrence is display-only, admin-only,
+	 * filterable, and pinned as intended by
+	 * test_hides_shipping_details_after_physical_product_without_shipping_line_becomes_virtual().
+	 *
+	 * The aggregation and fallback here are deliberately local rather than reusing
+	 * WC_Order::needs_shipping() or the shipping-label helpers: needs_shipping()
+	 * short-circuits on the global shipping setting and, like those helpers, does not
+	 * default unresolved or product-less orders to the conservative "keep visible"
+	 * outcome this summary requires.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return bool
+	 */
+	private static function order_has_only_virtual_products( $order ) {
+		$items = $order->get_items();
+
+		if ( empty( $items ) ) {
+			return false;
+		}
+
+		foreach ( $items as $item ) {
+			if ( ! $item instanceof WC_Order_Item_Product ) {
+				return false;
+			}
+
+			$product = $item->get_product();
+
+			if ( ! $product instanceof WC_Product || $product->needs_shipping() ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Whether an order's shipping address is still the billing-derived copy.
+	 *
+	 * Store API checkout copies the billing address into the shipping address for
+	 * backwards compatibility when a purchase needs no fulfillment. There is no persisted
+	 * marker for that copy, so the shipping address is treated as billing-derived only
+	 * while every copied field still matches billing. Once a merchant or integration edits
+	 * the shipping fields to diverge, the values are explicit and must be shown.
+	 * Individual getters use the edit context instead of get_address() so view filters
+	 * cannot make distinct persisted values appear equal.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return bool
+	 */
+	private static function order_shipping_matches_billing( $order ) {
+		$copied_fields = array( 'first_name', 'last_name', 'company', 'address_1', 'address_2', 'city', 'state', 'postcode', 'country', 'phone' );
+
+		foreach ( $copied_fields as $field ) {
+			if ( $order->{"get_shipping_$field"}( 'edit' ) !== $order->{"get_billing_$field"}( 'edit' ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Output the metabox.
 	 *
 	 * @param WP_Post|WC_Order $post Post or order object.
@@ -221,7 +312,7 @@ class WC_Meta_Box_Order_Data {
 
 							printf(
 								/* translators: 1: order type 2: order number */
-								esc_html__( '%1$s #%2$s details', 'woocommerce' ),
+								esc_html__( '%1$s #%2$s', 'woocommerce' ),
 								esc_html( $order_type_object->labels->singular_name ),
 								esc_html( $order->get_order_number() )
 							);
@@ -261,7 +352,7 @@ class WC_Meta_Box_Order_Data {
 							if ( $order->get_date_paid() ) {
 								$meta_list[] = sprintf(
 									/* translators: 1: date 2: time */
-									__( 'Paid on %1$s @ %2$s', 'woocommerce' ),
+									__( 'Paid on %1$s at %2$s', 'woocommerce' ),
 									wc_format_datetime( $order->get_date_paid() ),
 									wc_format_datetime( $order->get_date_paid(), get_option( 'time_format' ) )
 								);
@@ -310,15 +401,15 @@ class WC_Meta_Box_Order_Data {
 					do_action( 'woocommerce_admin_order_data_after_payment_info', $order );
 				?>
 				<div class="order_data_column_container">
-					<div class="order_data_column">
+					<div class="order_data_column order_data_column_general">
 						<h3><?php esc_html_e( 'General', 'woocommerce' ); ?></h3>
 
 						<p class="form-field form-field-wide">
 							<?php
 							$order_date_created_localised = ! is_null( $order->get_date_created() ) ? $order->get_date_created()->getOffsetTimestamp() : '';
 							?>
-							<label for="order_date"><?php esc_html_e( 'Date created:', 'woocommerce' ); ?></label>
-							<input type="text" class="date-picker" name="order_date" maxlength="10" value="<?php echo esc_attr( date_i18n( 'Y-m-d', $order_date_created_localised ) ); ?>" pattern="<?php echo esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>" />@
+							<label for="order_date"><?php esc_html_e( 'Date created', 'woocommerce' ); ?></label>
+							<input type="text" class="date-picker" name="order_date" maxlength="10" value="<?php echo esc_attr( date_i18n( 'Y-m-d', $order_date_created_localised ) ); ?>" pattern="<?php echo esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>" />
 							&lrm;
 							<input type="number" class="hour" placeholder="<?php esc_attr_e( 'h', 'woocommerce' ); ?>" name="order_date_hour" min="0" max="23" step="1" value="<?php echo esc_attr( date_i18n( 'H', $order_date_created_localised ) ); ?>" pattern="([01]?[0-9]{1}|2[0-3]{1})" />:
 							<input type="number" class="minute" placeholder="<?php esc_attr_e( 'm', 'woocommerce' ); ?>" name="order_date_minute" min="0" max="59" step="1" value="<?php echo esc_attr( date_i18n( 'i', $order_date_created_localised ) ); ?>" pattern="[0-5]{1}[0-9]{1}" />
@@ -328,7 +419,7 @@ class WC_Meta_Box_Order_Data {
 						<p class="form-field form-field-wide wc-order-status">
 							<label for="order_status">
 								<?php
-								esc_html_e( 'Status:', 'woocommerce' );
+								esc_html_e( 'Status', 'woocommerce' );
 								if ( $order->needs_payment() ) {
 									printf(
 										'<a href="%s">%s</a>',
@@ -352,7 +443,7 @@ class WC_Meta_Box_Order_Data {
 							<!--email_off--> <!-- Disable CloudFlare email obfuscation -->
 							<label for="customer_user">
 								<?php
-								esc_html_e( 'Customer:', 'woocommerce' );
+								esc_html_e( 'Customer', 'woocommerce' );
 								if ( $order->get_user_id( 'edit' ) ) {
 									$args = array(
 										'post_status'    => 'all',
@@ -414,7 +505,7 @@ class WC_Meta_Box_Order_Data {
 						</p>
 						<?php do_action( 'woocommerce_admin_order_data_after_order_details', $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 					</div>
-					<div class="order_data_column">
+					<div class="order_data_column order_data_column_billing">
 						<h3>
 							<?php esc_html_e( 'Billing', 'woocommerce' ); ?>
 							<a href="#" class="edit_address"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
@@ -435,7 +526,7 @@ class WC_Meta_Box_Order_Data {
 								if ( $order->get_formatted_billing_address() ) {
 									echo '<p>' . wp_kses( $order->get_formatted_billing_address(), array( 'br' => array() ) ) . '</p>';
 								} else {
-									echo '<p class="none_set"><strong>' . esc_html__( 'Address:', 'woocommerce' ) . '</strong> ' . esc_html__( 'No billing address set.', 'woocommerce' ) . '</p>';
+									echo '<p class="none_set">' . esc_html__( 'No billing address set.', 'woocommerce' ) . '</p>';
 								}
 
 								$billing_fields = self::get_billing_fields( $order, 'view' );
@@ -458,7 +549,10 @@ class WC_Meta_Box_Order_Data {
 									if ( 'billing_phone' === $field_name ) {
 										$field_value = wc_make_phone_clickable( $field_value );
 									} elseif ( 'billing_email' === $field_name ) {
-										$field_value = '<a href="' . esc_url( 'mailto:' . $field_value ) . '">' . $field_value . '</a>';
+										$normalized_email = is_string( $field_value ) ? trim( $field_value ) : '';
+										$field_value      = '' === $normalized_email
+											? '<span class="none_set">' . esc_html__( 'No email address set.', 'woocommerce' ) . '</span>'
+											: '<a href="' . esc_url( 'mailto:' . $normalized_email ) . '">' . esc_html( $normalized_email ) . '</a>';
 									} else {
 										$field_value = make_clickable( esc_html( $field_value ) );
 									}
@@ -552,7 +646,7 @@ class WC_Meta_Box_Order_Data {
 						</div>
 						<?php do_action( 'woocommerce_admin_order_data_after_billing_address', $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 					</div>
-					<div class="order_data_column">
+					<div class="order_data_column order_data_column_shipping">
 						<h3>
 							<?php esc_html_e( 'Shipping', 'woocommerce' ); ?>
 							<a href="#" class="edit_address"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
@@ -568,16 +662,36 @@ class WC_Meta_Box_Order_Data {
 							if ( $order->get_user_id() !== 0 && is_wp_error( $user ) ) {
 								echo '<p>' . esc_html( $details_not_available_message ) . '</p>';
 							} else {
-								if ( $order->get_formatted_shipping_address() ) {
-									echo '<p>' . wp_kses( $order->get_formatted_shipping_address(), array( 'br' => array() ) ) . '</p>';
+								$hide_core_shipping_details = 'store-api' === $order->get_created_via()
+									&& self::order_has_no_shipping( $order )
+									&& self::order_has_only_virtual_products( $order )
+									&& self::order_shipping_matches_billing( $order );
+
+								/**
+								 * Filters whether billing-derived shipping details are hidden in the order admin summary.
+								 *
+								 * @param bool     $hide_core_shipping_details Whether core shipping details are hidden.
+								 * @param WC_Order $order                      Order object.
+								 *
+								 * @since 11.1.0
+								 */
+								$hide_core_shipping_details = apply_filters( 'woocommerce_hide_order_admin_shipping_details', $hide_core_shipping_details, $order );
+								$shipping_address           = $hide_core_shipping_details ? '' : $order->get_formatted_shipping_address();
+
+								if ( $shipping_address ) {
+									echo '<p>' . wp_kses( $shipping_address, array( 'br' => array() ) ) . '</p>';
 								} else {
-									echo '<p class="none_set"><strong>' . esc_html__( 'Address:', 'woocommerce' ) . '</strong> ' . esc_html__( 'No shipping address set.', 'woocommerce' ) . '</p>';
+									echo '<p class="none_set">' . esc_html__( 'No shipping address set.', 'woocommerce' ) . '</p>';
 								}
 
 								$shipping_fields = self::get_shipping_fields( $order, 'view' );
 
 								if ( ! empty( $shipping_fields ) ) {
 									foreach ( $shipping_fields as $key => $field ) {
+										if ( $hide_core_shipping_details && 'phone' === $key && ! isset( $field['value'] ) ) {
+											continue;
+										}
+
 										if ( isset( $field['show'] ) && false === $field['show'] ) {
 											continue;
 										}
@@ -662,7 +776,7 @@ class WC_Meta_Box_Order_Data {
 							if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' === get_option( 'woocommerce_enable_order_comments', 'yes' ) ) ) :
 								?>
 								<p class="form-field form-field-wide">
-									<label for="customer_note"><?php esc_html_e( 'Customer provided note', 'woocommerce' ); ?>:</label>
+									<label for="excerpt"><?php esc_html_e( 'Customer provided note', 'woocommerce' ); ?>:</label>
 									<textarea rows="1" cols="40" name="customer_note" tabindex="6" id="excerpt" placeholder="<?php esc_attr_e( 'Customer notes about the order', 'woocommerce' ); ?>"><?php echo wp_kses( $order->get_customer_note(), array( 'br' => array() ) ); ?></textarea>
 								</p>
 							<?php endif; ?>

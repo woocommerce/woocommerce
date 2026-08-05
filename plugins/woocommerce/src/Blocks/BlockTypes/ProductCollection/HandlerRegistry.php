@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection;
 
-use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\OrderItemType;
 use InvalidArgumentException;
 
@@ -199,7 +198,7 @@ class HandlerRegistry {
 					);
 				}
 
-				$products = array_map( 'wc_get_product', $product_reference );
+				$products = array_filter( array_map( 'wc_get_product', $product_reference ) );
 
 				if ( empty( $products ) ) {
 					return array(
@@ -282,13 +281,6 @@ class HandlerRegistry {
 					);
 				}
 
-				$product_ids = array_map(
-					function ( $product ) {
-						return $product->get_id();
-					},
-					$products
-				);
-
 				$all_cross_sells = array_reduce(
 					$products,
 					function ( $acc, $product ) {
@@ -303,7 +295,7 @@ class HandlerRegistry {
 				// Remove duplicates and product references. We don't want to display
 				// what's already in cart.
 				$unique_cross_sells = array_unique( $all_cross_sells );
-				$cross_sells        = array_diff( $unique_cross_sells, $product_ids );
+				$cross_sells        = array_diff( $unique_cross_sells, $product_reference );
 
 				return array(
 					'post__in' => empty( $cross_sells ) ? array( -1 ) : $cross_sells,
@@ -385,11 +377,11 @@ class HandlerRegistry {
 				return array( 'post__in' => $cart_product_ids );
 			},
 			function ( $collection_args, $query ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-				$collection_args['cartProductIds'] = $this->get_cart_product_ids( $collection_args, null );
+				$collection_args['cartProductIds'] = $this->get_cart_product_ids( null );
 				return $collection_args;
 			},
 			function ( $collection_args, $query, $request ) {
-				$collection_args['cartProductIds'] = $this->get_cart_product_ids( $collection_args, $request );
+				$collection_args['cartProductIds'] = $this->get_cart_product_ids( $request );
 				return $collection_args;
 			}
 		);
@@ -469,13 +461,10 @@ class HandlerRegistry {
 	 * Get cart product IDs from various sources.
 	 * Handles loading cart products from location context or request params.
 	 *
-	 * @param array                 $collection_args Collection arguments with location context.
-	 * @param \WP_REST_Request|null $request         Optional REST request for editor context.
+	 * @param \WP_REST_Request|null $request Optional REST request for editor context.
 	 * @return array<int> The product IDs from the cart. Returns recent products for preview in editor context only.
 	 */
-	private function get_cart_product_ids( $collection_args, $request = null ) {
-		$location = $collection_args['productCollectionLocation'] ?? array();
-
+	private function get_cart_product_ids( $request = null ) {
 		if ( $request ) {
 			// In editor context (REST request), show sample products for preview. Only emails to the customer show live data.
 			$recent_product_ids = wc_get_products(
@@ -488,14 +477,6 @@ class HandlerRegistry {
 				)
 			);
 			return ! empty( $recent_product_ids ) ? $recent_product_ids : array();
-		}
-
-		if ( isset( $location['type'] ) && 'cart' === $location['type'] ) {
-			$user_id    = isset( $location['sourceData']['userId'] ) ? absint( $location['sourceData']['userId'] ) : null;
-			$user_email = isset( $location['sourceData']['userEmail'] ) ? sanitize_email( $location['sourceData']['userEmail'] ) : null;
-			if ( $user_id || $user_email ) {
-				return CartCheckoutUtils::get_cart_product_ids_for_user( $user_id, $user_email );
-			}
 		}
 
 		// In frontend/email context, return empty array when no cart is found.

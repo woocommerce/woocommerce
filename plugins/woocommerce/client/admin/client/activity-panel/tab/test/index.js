@@ -25,7 +25,7 @@ const renderTab = () =>
 
 describe( 'ActivityPanel Tab', () => {
 	it( 'displays a title and unread status based on props', () => {
-		const { getByText } = render(
+		const { getByRole, getByText } = render(
 			<Tab
 				icon={ null }
 				title={ 'Hello World' }
@@ -38,7 +38,12 @@ describe( 'ActivityPanel Tab', () => {
 			/>
 		);
 
-		expect( getByText( 'Hello World' ) ).not.toBeNull();
+		// Title is exposed as the button's accessible name (aria-label) so
+		// screen readers announce it, even though icon-only tabs no longer
+		// render the title text visually.
+		expect(
+			getByRole( 'tab', { name: 'Hello World' } )
+		).toBeInTheDocument();
 		expect( getByText( 'unread activity' ) ).not.toBeNull();
 	} );
 

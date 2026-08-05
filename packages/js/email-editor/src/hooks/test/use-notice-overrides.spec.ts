@@ -1,4 +1,3 @@
-/* eslint-disable @woocommerce/dependency-group -- mocks must be imported first */
 /**
  * External dependencies
  */
@@ -19,18 +18,20 @@ jest.mock( '@wordpress/data', () => {
 		jest.requireActual< typeof import('@wordpress/data') >(
 			'@wordpress/data'
 		);
-	return {
-		...actual,
-		use: jest.fn(
-			(
-				plugin: ( registry: {
-					select: ( namespace: string ) => unknown;
-				} ) => { select: ( namespace: string ) => unknown }
-			) => {
-				capturedPlugin = plugin;
-			}
-		),
-	};
+
+	return Object.create( actual, {
+		use: {
+			value: jest.fn(
+				(
+					plugin: ( registry: {
+						select: ( namespace: string ) => unknown;
+					} ) => { select: ( namespace: string ) => unknown }
+				) => {
+					capturedPlugin = plugin;
+				}
+			),
+		},
+	} );
 } );
 
 jest.mock( '@wordpress/notices', () => ( {

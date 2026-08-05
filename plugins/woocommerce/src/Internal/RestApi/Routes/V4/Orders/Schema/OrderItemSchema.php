@@ -124,6 +124,12 @@ class OrderItemSchema extends AbstractLineItemSchema {
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
+			'can_be_refunded' => array(
+				'description' => __( 'Whether the line item can be refunded. True when the item has a product and its ordered quantity has not been fully refunded.', 'woocommerce' ),
+				'type'        => 'boolean',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'readonly'    => true,
+			),
 		);
 
 		if ( $this->cogs_is_enabled() ) {
@@ -167,6 +173,7 @@ class OrderItemSchema extends AbstractLineItemSchema {
 	public function get_item_response( $order_item, WP_REST_Request $request, array $include_fields = array() ): array {
 		$dp              = is_null( $request['num_decimals'] ) ? wc_get_price_decimals() : absint( $request['num_decimals'] );
 		$quantity_amount = (float) $order_item->get_quantity();
+		$currency        = $order_item->get_order()->get_currency();
 		$data            = array(
 			'id'              => $order_item->get_id(),
 			'name'            => $order_item->get_name(),
@@ -182,8 +189,8 @@ class OrderItemSchema extends AbstractLineItemSchema {
 			'total_tax'       => wc_format_decimal( $order_item->get_total_tax(), $dp ),
 			'taxes'           => $this->prepare_taxes( $order_item, $request ),
 			'meta_data'       => $this->prepare_meta_data( $order_item ),
-			'currency'        => $order_item->get_order()->get_currency(),
-			'currency_symbol' => html_entity_decode( get_woocommerce_currency_symbol( $order_item->get_order()->get_currency() ), ENT_QUOTES ),
+			'currency'        => $currency,
+			'currency_symbol' => html_entity_decode( get_woocommerce_currency_symbol( $currency ), ENT_QUOTES ),
 		);
 
 		// Add COGS data.

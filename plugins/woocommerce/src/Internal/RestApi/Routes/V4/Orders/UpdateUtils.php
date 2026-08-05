@@ -17,6 +17,7 @@ use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Automattic\WooCommerce\Utilities\MetaDataUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use WC_REST_Exception;
@@ -147,9 +148,7 @@ class UpdateUtils {
 	 * @param array    $meta_data Posted data.
 	 */
 	protected function update_meta_data( WC_Order $order, array $meta_data ) {
-		foreach ( $meta_data as $meta ) {
-			$order->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
-		}
+		MetaDataUtil::update( $meta_data, $order );
 	}
 
 	/**

@@ -51,7 +51,7 @@ class Social_Links extends Abstract_Block_Renderer {
 		return str_replace(
 			'{social_links_content}',
 			$content,
-			$this->get_block_wrapper( $block_content, $parsed_block )
+			$this->get_block_wrapper( $block_content, $parsed_block, $rendering_context )
 		);
 	}
 
@@ -212,12 +212,13 @@ class Social_Links extends Abstract_Block_Renderer {
 	/**
 	 * Gets the block wrapper.
 	 *
-	 * @param string $block_content The block content.
-	 * @param array  $parsed_block The parsed block.
+	 * @param string            $block_content The block content.
+	 * @param array             $parsed_block The parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string The block wrapper HTML.
 	 */
-	private function get_block_wrapper( $block_content, $parsed_block ) {
-		$content = $this->adjust_block_content( $block_content, $parsed_block );
+	private function get_block_wrapper( $block_content, $parsed_block, Rendering_Context $rendering_context ) {
+		$content = $this->adjust_block_content( $block_content, $parsed_block, $rendering_context );
 
 		$table_styles    = $content['table_styles'];
 		$classes         = $content['classes'];
@@ -250,17 +251,17 @@ class Social_Links extends Abstract_Block_Renderer {
 	 * Adjusts the block content.
 	 * Returns css classes and styles compatible with email clients.
 	 *
-	 * @param string $block_content The block content.
-	 * @param array  $parsed_block The parsed block.
+	 * @param string            $block_content The block content.
+	 * @param array             $parsed_block The parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return array The adjusted block content.
 	 */
-	private function adjust_block_content( $block_content, $parsed_block ) {
+	private function adjust_block_content( $block_content, $parsed_block, Rendering_Context $rendering_context ) {
 		$block_content    = $this->adjust_style_attribute( $block_content );
 		$block_attributes = wp_parse_args(
 			$parsed_block['attrs'] ?? array(),
 			array(
-				'textAlign' => 'left',
-				'style'     => array(),
+				'style' => array(),
 			)
 		);
 		$html             = new \WP_HTML_Tag_Processor( $block_content );
@@ -293,11 +294,11 @@ class Social_Links extends Abstract_Block_Renderer {
 			'word-break'     => 'break-word',
 		);
 
-		$styles['text-align'] = 'left';
+		$styles['text-align'] = $rendering_context->get_default_text_align();
 		if ( ! empty( $parsed_block['attrs']['textAlign'] ) ) { // in this case, textAlign needs to be one of 'left', 'center', 'right'.
-			$styles['text-align'] = $parsed_block['attrs']['textAlign'];
-		} elseif ( in_array( $parsed_block['attrs']['align'] ?? null, array( 'left', 'center', 'right' ), true ) ) {
-			$styles['text-align'] = $parsed_block['attrs']['align'];
+			$styles['text-align'] = $rendering_context->resolve_text_align( $parsed_block['attrs']['textAlign'] );
+		} elseif ( null !== $rendering_context->sanitize_text_align( $parsed_block['attrs']['align'] ?? null ) ) {
+			$styles['text-align'] = $rendering_context->resolve_text_align( $parsed_block['attrs']['align'] );
 		}
 
 		$compiled_styles = $this->compile_css( $block_styles['declarations'], $styles );

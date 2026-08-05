@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Services;
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewReviewNotification;
+use Automattic\WooCommerce\Internal\PushNotifications\Notifications\StockNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
 use WC_Unit_Test_Case;
 
@@ -132,6 +133,39 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should call the dispatcher when dispatching pending notifications.
+	 */
+	public function test_dispatch_all_calls_dispatcher(): void {
+		$dispatcher = $this->createMock( InternalNotificationDispatcher::class );
+		$dispatcher->expects( $this->once() )
+			->method( 'dispatch' );
+
+		$store = new PendingNotificationStore();
+		$store->init( $dispatcher );
+		$store->register();
+		$store->add( $this->create_order_mock( 1 ) );
+
+		$store->dispatch_all();
+
+		remove_action( 'shutdown', array( $store, 'dispatch_all' ) );
+	}
+
+	/**
+	 * @testdox Should not call the dispatcher when there are no pending notifications.
+	 */
+	public function test_dispatch_all_does_not_call_dispatcher_when_empty(): void {
+		$dispatcher = $this->createMock( InternalNotificationDispatcher::class );
+		$dispatcher->expects( $this->never() )
+			->method( 'dispatch' );
+
+		$store = new PendingNotificationStore();
+		$store->init( $dispatcher );
+		$store->register();
+
+		$store->dispatch_all();
+	}
+
+	/**
 	 * @testdox Should return all pending notifications via get_all.
 	 */
 	public function test_get_all_returns_pending_notifications(): void {
@@ -169,5 +203,39 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 			->setConstructorArgs( array( $resource_id ) )
 			->onlyMethods( array( 'to_payload', 'has_meta', 'write_meta' ) )
 			->getMock();
+	}
+
+	/**
+	 * Creates a mock StockNotification that avoids database calls.
+	 *
+	 * @param int    $resource_id The resource ID.
+	 * @param string $event_type  The stock event type.
+	 * @return StockNotification
+	 */
+	private function create_stock_mock( int $resource_id, string $event_type ): StockNotification {
+		return $this->getMockBuilder( StockNotification::class )
+			->setConstructorArgs( array( $resource_id, $event_type ) )
+			->onlyMethods( array( 'to_payload', 'has_meta', 'write_meta' ) )
+			->getMock();
+	}
+
+	/**
+	 * @testdox Should store different stock event types for the same product separately.
+	 */
+	public function test_add_allows_different_stock_event_types_for_same_product(): void {
+		$this->store->add( $this->create_stock_mock( 42, StockNotification::EVENT_LOW_STOCK ) );
+		$this->store->add( $this->create_stock_mock( 42, StockNotification::EVENT_OUT_OF_STOCK ) );
+
+		$this->assertSame( 2, $this->store->count() );
+	}
+
+	/**
+	 * @testdox Should deduplicate the same stock event type for the same product.
+	 */
+	public function test_add_deduplicates_same_stock_event_type_and_product(): void {
+		$this->store->add( $this->create_stock_mock( 42, StockNotification::EVENT_LOW_STOCK ) );
+		$this->store->add( $this->create_stock_mock( 42, StockNotification::EVENT_LOW_STOCK ) );
+
+		$this->assertSame( 1, $this->store->count() );
 	}
 }

@@ -11,7 +11,7 @@ import Rating from './index';
 type ReviewRatingProps = {
 	/**
 	 * A review object containing a `rating`.
-	 * See https://woocommerce.github.io/woocommerce-rest-api-docs/#retrieve-product-reviews.
+	 * See https://developer.woocommerce.com/docs/apis/rest-api/v3/product-reviews/#retrieve-a-product-review .
 	 */
 	review: {
 		rating?: number;

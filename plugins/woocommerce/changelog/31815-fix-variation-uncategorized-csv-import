@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent product variations imported via CSV from inheriting the default "Uncategorized" product category.

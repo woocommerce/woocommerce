@@ -58,6 +58,50 @@ class WCTransactionalEmailPostsManager {
 	}
 
 	/**
+	 * Build an `email_id => WC_Email` lookup from the list returned by
+	 * `WC_Emails::get_emails()`, which keys entries by class name rather than
+	 * by email ID.
+	 *
+	 * @return array<string, \WC_Email> Registered emails keyed by their `id` property.
+	 *
+	 * @since 10.8.0
+	 */
+	public function get_emails_by_id(): array {
+		/**
+		 * Registered emails keyed by class name.
+		 *
+		 * @var array<string, \WC_Email>
+		 */
+		$all_emails = \WC_Emails::instance()->get_emails();
+
+		$indexed = array();
+		foreach ( $all_emails as $email ) {
+			if ( $email instanceof \WC_Email && ! empty( $email->id ) ) {
+				$indexed[ $email->id ] = $email;
+			}
+		}
+
+		return $indexed;
+	}
+
+	/**
+	 * Look up a single registered `WC_Email` instance by its ID.
+	 *
+	 * @param string $email_id The email ID to look up (`WC_Email->id`).
+	 * @return \WC_Email|null The matching instance, or null if no email with
+	 *                        that ID is registered.
+	 *
+	 * @since 10.8.0
+	 */
+	public function get_email_by_id( string $email_id ): ?\WC_Email {
+		if ( '' === $email_id ) {
+			return null;
+		}
+
+		return $this->get_emails_by_id()[ $email_id ] ?? null;
+	}
+
+	/**
 	 * Retrieves the email post by its type.
 	 *
 	 * Type here refers to the email type, e.g. 'customer_new_account' from the WC_Email->id property.

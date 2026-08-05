@@ -55,34 +55,6 @@ class SingleProductTemplate extends AbstractTemplate {
 			$compatibility_layer = new SingleProductTemplateCompatibility();
 			$compatibility_layer->init();
 
-			$valid_slugs         = array( self::SLUG );
-			$single_product_slug = 'product' === $post->post_type && $post->post_name ? 'single-product-' . $post->post_name : '';
-			if ( $single_product_slug ) {
-				$valid_slugs[] = 'single-product-' . $post->post_name;
-			}
-			$templates = get_block_templates( array( 'slug__in' => $valid_slugs ) );
-
-			if ( count( $templates ) === 0 ) {
-				return;
-			}
-
-			// Use the first template by default.
-			$template = reset( $templates );
-
-			// Check if there is a template matching the slug `single-product-{post_name}`.
-			if ( count( $valid_slugs ) > 1 && count( $templates ) > 1 ) {
-				foreach ( $templates as $t ) {
-					if ( $single_product_slug === $t->slug ) {
-						$template = $t;
-						break;
-					}
-				}
-			}
-
-			if ( isset( $template ) && BlockTemplateUtils::template_has_legacy_template_block( $template ) ) {
-				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
-			}
-
 			$product = wc_get_product( $post->ID );
 			if ( $product ) {
 				$consent = 'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
@@ -91,54 +63,14 @@ class SingleProductTemplate extends AbstractTemplate {
 				// state closures can resolve it during server-side rendering.
 				ProductsStore::load_product( $consent, $product->get_id() );
 
-				// Keep the existing product-data store hydrated so current
-				// consumers (add-to-cart-with-options, variation-selector)
-				// continue to work. This will be removed when consumers are
-				// migrated to product-context.
+				// Set the current product context. The derived state
+				// closures (mainProductInContext, productVariationInContext, productInContext)
+				// are registered by ProductsStore::register_state().
 				wp_interactivity_state(
-					'woocommerce/product-data',
+					'woocommerce/products',
 					array(
-						'templateState' => array(
-							'productId'   => $product->get_id(),
-							'variationId' => null,
-						),
-					)
-				);
-
-				// Register the product-context store state. The derived state
-				// closures (product, selectedVariation) mirror the JS getters
-				// so that directives referencing state.product resolve during
-				// SSR. If more call sites need to register these closures,
-				// consider extracting them into a shared helper.
-				wp_interactivity_state(
-					'woocommerce/product-context',
-					array(
-						'productId'         => $product->get_id(),
-						'variationId'       => null,
-						'product'           => function () {
-							$context    = wp_interactivity_get_context();
-							$state      = wp_interactivity_state( 'woocommerce/product-context' );
-							$product_id = ! empty( $context ) ? $context['productId'] : ( $state['productId'] ?? null );
-
-							if ( ! $product_id ) {
-								return null;
-							}
-
-							$products_state = wp_interactivity_state( 'woocommerce/products' );
-							return $products_state['products'][ $product_id ] ?? null;
-						},
-						'selectedVariation' => function () {
-							$context      = wp_interactivity_get_context();
-							$state        = wp_interactivity_state( 'woocommerce/product-context' );
-							$variation_id = ! empty( $context ) ? $context['variationId'] : ( $state['variationId'] ?? null );
-
-							if ( ! $variation_id ) {
-								return null;
-							}
-
-							$products_state = wp_interactivity_state( 'woocommerce/products' );
-							return $products_state['productVariations'][ $variation_id ] ?? null;
-						},
+						'productId'   => $product->get_id(),
+						'variationId' => null,
 					)
 				);
 			}

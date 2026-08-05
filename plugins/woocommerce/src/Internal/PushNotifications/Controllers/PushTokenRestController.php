@@ -6,16 +6,17 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\Jetpack\Connection\Rest_Authentication;
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
+use Automattic\WooCommerce\Internal\PushNotifications\Traits\AuthorizesPushNotificationRequests;
+use Automattic\WooCommerce\Internal\PushNotifications\Traits\ConvertsExceptionsToWpError;
 use Automattic\WooCommerce\Internal\PushNotifications\Validators\PushTokenValidator;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
-use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
 use WC_Data_Exception;
-use WC_Logger;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -29,6 +30,9 @@ use WP_Http;
  * @since 10.6.0
  */
 class PushTokenRestController extends RestApiControllerBase {
+	use AuthorizesPushNotificationRequests;
+	use ConvertsExceptionsToWpError;
+
 	/**
 	 * The root namespace for the JSON REST API endpoints.
 	 *
@@ -44,14 +48,18 @@ class PushTokenRestController extends RestApiControllerBase {
 	protected string $rest_base = 'push-tokens';
 
 	/**
-	 * Get the WooCommerce REST API namespace for the class.
+	 * Class identifier used by `woocommerce_rest_api_get_rest_namespaces`.
+	 *
+	 * Intentionally distinct from the URL `$route_namespace` — the filter keys
+	 * one class per value here, so sharing the value with sibling controllers
+	 * in the same module would overwrite them.
 	 *
 	 * @since 10.6.0
 	 *
 	 * @return string
 	 */
 	protected function get_rest_api_namespace(): string {
-		return $this->route_namespace;
+		return 'wc-push-notifications-push-tokens';
 	}
 
 	/**
@@ -63,32 +71,103 @@ class PushTokenRestController extends RestApiControllerBase {
 	 */
 	public function register_routes(): void {
 		register_rest_route(
-			$this->get_rest_api_namespace(),
+			$this->route_namespace,
 			$this->rest_base,
 			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'index' ),
+					'permission_callback' => array( $this, 'authorize_as_from_wpcom' ),
+					'args'                => array(
+						'page'     => array(
+							'description'       => __( 'Current page of the collection.', 'woocommerce' ),
+							'type'              => 'integer',
+							'default'           => 1,
+							'minimum'           => 1,
+							'sanitize_callback' => 'absint',
+							'validate_callback' => 'rest_validate_request_arg',
+						),
+						'per_page' => array(
+							'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
+							'type'              => 'integer',
+							'default'           => 10,
+							'minimum'           => 1,
+							'maximum'           => 100,
+							'sanitize_callback' => 'absint',
+							'validate_callback' => 'rest_validate_request_arg',
+						),
+					),
+				),
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'create' ),
 					'args'                => $this->get_args( 'create' ),
-					'permission_callback' => array( $this, 'authorize' ),
+					'permission_callback' => array( $this, 'authorize_as_authenticated' ),
 					'schema'              => array( $this, 'get_schema' ),
 				),
 			)
 		);
 
 		register_rest_route(
-			$this->get_rest_api_namespace(),
+			$this->route_namespace,
 			$this->rest_base . '/(?P<id>[\d]+)',
 			array(
 				array(
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'delete' ),
 					'args'                => $this->get_args( 'delete' ),
-					'permission_callback' => array( $this, 'authorize' ),
+					'permission_callback' => array( $this, 'authorize_as_authenticated' ),
 					'schema'              => array( $this, 'get_schema' ),
 				),
 			)
 		);
+	}
+
+	/**
+	 * Returns all push tokens for roles that can receive push notifications,
+	 * formatted for the WPCOM push notifications endpoint.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function index( WP_REST_Request $request ) {
+		$page     = (int) $request->get_param( 'page' );
+		$per_page = (int) $request->get_param( 'per_page' );
+
+		try {
+			/**
+			 * Paginated result from get_tokens_for_roles.
+			 *
+			 * @var array{tokens: PushToken[], total: int, total_pages: int} $result
+			 */
+			$result = wc_get_container()
+				->get( PushTokensDataStore::class )
+				->get_tokens_for_roles(
+					PushNotifications::ROLES_WITH_PUSH_NOTIFICATIONS_ENABLED,
+					$page,
+					$per_page
+				);
+		} catch ( Exception $e ) {
+			return $this->convert_exception_to_wp_error( $e );
+		}
+
+		$response = new WP_REST_Response(
+			array(
+				'tokens' => array_map(
+					fn ( $token ) => $token->to_wpcom_format(),
+					$result['tokens']
+				),
+			),
+			WP_Http::OK
+		);
+
+		$response->header( 'X-WP-Total', (string) $result['total'] );
+		$response->header( 'X-WP-TotalPages', (string) $result['total_pages'] );
+
+		return $response;
 	}
 
 	/**
@@ -217,74 +296,31 @@ class PushTokenRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Checks user is authorized to access this endpoint.
+	 * Validates that the request is signed with a Jetpack blog token,
+	 * ensuring only WPCOM can access this endpoint.
 	 *
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 * @return bool|WP_Error
 	 */
-	public function authorize( WP_REST_Request $request ) {
-		if ( ! get_current_user_id() ) {
-			return new WP_Error(
-				'woocommerce_rest_cannot_view',
-				__( 'Sorry, you are not allowed to do that.', 'woocommerce' ),
-				array( 'status' => rest_authorization_required_code() )
-			);
-		}
-
+	public function authorize_as_from_wpcom( WP_REST_Request $request ) {
 		if ( ! wc_get_container()->get( PushNotifications::class )->should_be_enabled() ) {
 			return false;
 		}
 
-		$has_valid_role = array_reduce(
-			PushNotifications::ROLES_WITH_PUSH_NOTIFICATIONS_ENABLED,
-			fn ( $carry, $role ) => $this->check_permission( $request, $role ) === true ? true : $carry,
-			false
-		);
-
-		if ( ! $has_valid_role ) {
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * Converts an exception to an instance of WP_Error.
-	 *
-	 * @since 10.6.0
-	 *
-	 * @param Exception $e The exception to convert.
-	 * @return WP_Error
-	 */
-	private function convert_exception_to_wp_error( Exception $e ): WP_Error {
-		/**
-		 * If the exception is `WC_Data_Exception`, and doesn't represent an
-		 * internal server error (which may contain internal details that should
-		 * be obscured) then format it as a `WP_Error`.
-		 */
 		if (
-			$e instanceof WC_Data_Exception
-			&& $e->getCode() !== WP_Http::INTERNAL_SERVER_ERROR
+			class_exists( Rest_Authentication::class )
+			&& Rest_Authentication::is_signed_with_blog_token()
 		) {
-			return new WP_Error(
-				$e->getErrorCode(),
-				$e->getMessage(),
-				$e->getErrorData()
-			);
+			return true;
 		}
-
-		wc_get_container()
-			->get( LegacyProxy::class )
-			->call_function( 'wc_get_logger' )
-			->error( (string) $e->getMessage(), array( 'source' => PushNotifications::FEATURE_NAME ) );
 
 		return new WP_Error(
-			'woocommerce_internal_error',
-			'Internal server error',
-			array( 'status' => WP_Http::INTERNAL_SERVER_ERROR )
+			'woocommerce_rest_cannot_view',
+			__( 'Sorry, you are not allowed to do that.', 'woocommerce' ),
+			array( 'status' => rest_authorization_required_code() )
 		);
 	}
 

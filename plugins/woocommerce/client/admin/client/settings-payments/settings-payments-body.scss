@@ -4,9 +4,21 @@ html {
 	font-family: $font-sf-pro-display;
 }
 
-body.woocommerce-settings-payments-tab {
-	#mainform,
-	#wpcontent {
+// Payments tab keeps its main content panel white while letting the tab
+// strip above it sit on the wp-admin body grey, matching every other
+// Settings tab. Target the strip and the form explicitly rather than
+// changing #wpbody-content — that container's background is set by the
+// parent body.woocommerce_page_wc-settings rule in legacy admin.scss,
+// and the bg-color isn't doing structural work inside it, just
+// determining what shows through the (transparent) .nav-tab-wrapper.
+// Doubled-up body class on the outer selector is intentional: same
+// flat specificity as the legacy rule, so the doubled class wins it
+// regardless of load order.
+body.woocommerce_page_wc-settings.woocommerce-settings-payments-tab {
+	.nav-tab-wrapper {
+		background-color: #f0f0f1;
+	}
+	#mainform {
 		background-color: #fff;
 	}
 }

@@ -16,7 +16,7 @@ These workflows run automatically on a daily schedule.
 
 | Workflow | Schedule | What it does | When it acts |
 | -------- | -------- | ------------ | ------------ |
-| [Release: Assignment](https://github.com/woocommerce/woocommerce/blob/trunk/.github/workflows/release-assignment.yml) | Daily at 18:00 UTC | Checks the [release calendar](https://developer.woocommerce.com/release-calendar/), assigns the release lead, and creates the parent tracking issue with sub-issues for each release in the cycle. Calls *Create Tracking Issue* for each sub-issue. | ~8 weeks before feature freeze. |
+| [Release: Assignment](https://github.com/woocommerce/woocommerce/blob/trunk/.github/workflows/release-assignment.yml) | Daily at 18:00 UTC | Checks the [release calendar](https://developer.woocommerce.com/release-calendar/), assigns the release lead, and creates the parent tracking issue along with the four standard sub-issues for the cycle: `beta.1`, `beta.2`, `rc.1`, and the final `.0` release. Calls *Create Tracking Issue* for each sub-issue. Tracking issues for patch releases, extra RCs, or extra betas are **not** created by this workflow; see the note below the "Tracking and analysis" table. | ~8 weeks before feature freeze. |
 | [Release: Enforce Feature Freeze](https://github.com/woocommerce/woocommerce/blob/trunk/.github/workflows/release-code-freeze.yml) | Daily at 18:00 UTC | Checks the [release calendar](https://developer.woocommerce.com/release-calendar/) and creates the release branch from `trunk`, bumps `trunk` to the next dev version, publishes a dev release, cleans up old milestones, and sends Slack notifications. Calls *Bump version number* and *Build ZIP file*. | On the feature freeze date. |
 | [Release: Feature highlight notification](https://github.com/woocommerce/woocommerce/blob/trunk/.github/workflows/release-feature-highlights-notification.yml) | Daily at 09:00 UTC | Checks the [release calendar](https://developer.woocommerce.com/release-calendar/) and sends a Slack reminder to teams about the upcoming feature freeze deadline. | ~1 week before feature freeze. |
 | [Release: Open Issue Warning](https://github.com/woocommerce/woocommerce/blob/trunk/.github/workflows/release-open-issue-warning.yml) | Daily at 18:00 UTC | Checks the [release calendar](https://developer.woocommerce.com/release-calendar/) and looks for open items in release milestones, sending a Slack notification listing them with assignees. | Within 72 hours of a release date. |
@@ -48,7 +48,6 @@ These workflows are triggered automatically by GitHub events such as pull reques
 | -------- | ------- | ------------ |
 | [Release: Release events proxy](https://github.com/woocommerce/woocommerce/blob/trunk/.github/workflows/release-release-events-proxy.yml) | Release published or prereleased | Delegates to [`release-new-release-published`](https://github.com/woocommerce/woocommerce/blob/trunk/.github/workflows/release-new-release-published.yml) to run post-release actions: sends Slack notifications, updates the global changelog for stable releases, and calls *Generate Number of Commits and Contributors* for beta releases. |
 | [Release checks run](https://github.com/woocommerce/woocommerce/blob/trunk/.github/workflows/tests-on-release.yml) | Release published or edited | Runs the CI test suite against published releases. Also runs nightly on a schedule. |
-| ~~[Release: CFE and PRR issue validation](https://github.com/woocommerce/woocommerce/blob/trunk/.github/workflows/release-cfe-prr-issue-validation.yml)~~ | Issue labeled with `code freeze exception`, `point release request`, `Approved`, or `Rejected` | ~~Validates Code Freeze Exception and Point Release Request issues, applies labels and milestones to the associated PR, and sends Slack notifications.~~ Being deprecated. |
 
 ## Manual workflows
 
@@ -71,3 +70,13 @@ These workflows are triggered by the release lead during the release process. Th
 | [Release: Create Tracking Issue](https://github.com/woocommerce/woocommerce/blob/trunk/.github/workflows/release-create-tracking-issue.yml) | Creates a Linear tracking issue for a specific release version using the templates in `.linear/`. |
 | [Release: Generate Number of Commits and Contributors](https://github.com/woocommerce/woocommerce/blob/trunk/.github/workflows/release-commits-and-contributors.yml) | Generates release statistics (commit count, contributors list) and sends a Slack notification. |
 | [Release: analyze trends (CFEs and PRRs)](https://github.com/woocommerce/woocommerce/blob/trunk/.github/workflows/release-trends-analysis.yml) | Creates GitHub issues requesting AI analysis of Code Freeze Exceptions and Point Release Requests for a milestone. |
+
+:::note
+Tracking issues for **patch releases, extra RCs, and extra betas** are not created automatically by `Release: Assignment`. Run [`Release: Create Tracking Issue`](https://github.com/woocommerce/woocommerce/blob/trunk/.github/workflows/release-create-tracking-issue.yml) manually for those. See the [Point Releases](/docs/contribution/releases/point-releases) and [Troubleshooting](/docs/contribution/releases/troubleshooting) guides for context on when each is needed.
+:::
+
+## Deprecated
+
+| Workflow | What it did |
+| -------- | ----------- |
+| [Release: CFE and PRR issue validation](https://github.com/woocommerce/woocommerce/blob/trunk/.github/workflows/release-cfe-prr-issue-validation.yml) | Validated Code Freeze Exception and Point Release Request issues, applied labels and milestones to the associated PR, and sent Slack notifications. The PRR/CFE process is no longer part of the standard flow; see the [Point Releases guide](/docs/contribution/releases/point-releases) for current practice. |

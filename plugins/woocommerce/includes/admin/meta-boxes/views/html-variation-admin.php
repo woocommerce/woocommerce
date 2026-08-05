@@ -71,11 +71,23 @@ defined( 'ABSPATH' ) || exit;
 	<div class="woocommerce_variable_attributes wc-metabox-content" style="display: none;">
 		<div class="data">
 			<div class="form-flex-box">
-				<p class="form-row upload_image">
+				<div class="form-row upload_image">
 					<a href="#" class="upload_image_button tips <?php echo $variation_object->get_image_id( 'edit' ) ? 'remove' : ''; ?>" data-tip="<?php echo $variation_object->get_image_id( 'edit' ) ? esc_attr__( 'Remove this image', 'woocommerce' ) : esc_attr__( 'Upload an image', 'woocommerce' ); ?>" rel="<?php echo esc_attr( $variation_id ); ?>">
 						<img src="<?php echo $variation_object->get_image_id( 'edit' ) ? esc_url( wp_get_attachment_thumb_url( $variation_object->get_image_id( 'edit' ) ) ) : esc_url( wc_placeholder_img_src() ); ?>" /><input type="hidden" name="upload_image_id[<?php echo esc_attr( $loop ); ?>]" class="upload_image_id" value="<?php echo esc_attr( $variation_object->get_image_id( 'edit' ) ); ?>" />
 					</a>
-				</p>
+					<?php
+					/**
+					 * Variation upload image action.
+					 *
+					 * @since 10.8.0
+					 *
+					 * @param int     $loop           Position in the loop.
+					 * @param array   $variation_data Variation data.
+					 * @param WP_Post $variation      Post data.
+					 */
+					do_action( 'woocommerce_variation_after_upload_image', $loop, $variation_data, $variation );
+					?>
+				</div>
 				<div class="form-row form-row-last">
 				<?php
 				if ( wc_product_sku_enabled() ) {
@@ -136,10 +148,20 @@ defined( 'ABSPATH' ) || exit;
 
 			<div class="variable_pricing">
 				<?php
+
+				$tax_label = '';
+				if ( wc_tax_enabled() ) {
+					$tax_text  = wc_prices_include_tax()
+						? __( 'incl. tax', 'woocommerce' )
+						: __( 'ex. tax', 'woocommerce' );
+					$tax_label = ' (' . $tax_text . ')';
+				}
+
 				$label = sprintf(
-					/* translators: %s: currency symbol */
-					__( 'Regular price (%s)', 'woocommerce' ),
-					get_woocommerce_currency_symbol()
+					/* translators: 1: currency symbol, 2: tax label (prefixed with space if present) */
+					__( 'Regular price (%1$s%2$s)', 'woocommerce' ),
+					get_woocommerce_currency_symbol(),
+					$tax_label ? ' ' . $tax_label : ''
 				);
 
 				woocommerce_wp_text_input(
@@ -155,9 +177,10 @@ defined( 'ABSPATH' ) || exit;
 				);
 
 				$label = sprintf(
-					/* translators: %s: currency symbol */
-					__( 'Sale price (%s)', 'woocommerce' ),
-					get_woocommerce_currency_symbol()
+					/* translators: 1: currency symbol, 2: tax label (prefixed with space if present) */
+					__( 'Sale price (%1$s%2$s)', 'woocommerce' ),
+					get_woocommerce_currency_symbol(),
+					$tax_label ? ' ' . $tax_label : ''
 				);
 
 				woocommerce_wp_text_input(
