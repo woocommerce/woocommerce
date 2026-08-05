@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make cart-referencing Product Collections (cross-sells, upsells) work inside the Interactivity API Mini-Cart: the Mini-Cart overlay provides a generic product reference context that the Product Collection consumes, and collections refresh from settled, cache-busted prefetches when the cart changes.
