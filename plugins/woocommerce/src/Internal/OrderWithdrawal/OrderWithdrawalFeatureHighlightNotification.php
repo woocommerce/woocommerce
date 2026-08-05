@@ -19,12 +19,9 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 	public const NOTE_NAME      = 'wc-admin-order-withdrawal-feature';
 	public const CREATED_OPTION = 'woocommerce_order_withdrawal_inbox_notification_created';
 
-	private const ALLOWED_COUNTRIES_OPTION          = 'woocommerce_allowed_countries';
-	private const ALL_EXCEPT_COUNTRIES_OPTION       = 'woocommerce_all_except_countries';
-	private const SPECIFIC_ALLOWED_COUNTRIES_OPTION = 'woocommerce_specific_allowed_countries';
-	private const COMING_SOON_OPTION                = 'woocommerce_coming_soon';
-	private const FEATURES_SETTINGS_URL             = 'admin.php?page=wc-settings&tab=advanced&section=features';
-	private const DOCUMENTATION_URL                 = 'https://woocommerce.com/';
+	private const COMING_SOON_OPTION    = 'woocommerce_coming_soon';
+	private const FEATURES_SETTINGS_URL = 'admin.php?page=wc-settings&tab=advanced&section=features';
+	private const DOCUMENTATION_URL     = 'https://woocommerce.com/';
 
 	/**
 	 * Register hooks.
@@ -160,55 +157,20 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 	}
 
 	/**
-	 * Whether the store sells to at least one EU country, or sells to all countries.
+	 * Whether the store sells to at least one EU country.
 	 */
 	private function store_sells_to_eu_or_all_countries(): bool {
-		$allowed_countries = get_option( self::ALLOWED_COUNTRIES_OPTION, 'all' );
-
-		if (
-			! is_string( $allowed_countries ) ||
-			'all' === $allowed_countries ||
-			'' === $allowed_countries
-		) {
-			return true;
-		}
-
 		$woocommerce = function_exists( 'WC' ) ? WC() : null;
 
 		if ( ! $woocommerce || ! $woocommerce->countries instanceof \WC_Countries ) {
 			return false;
 		}
 
-		$eu_countries = $woocommerce->countries->get_european_union_countries();
-
-		if ( 'specific' === $allowed_countries ) {
-			$specific_countries = $this->get_country_codes_option( self::SPECIFIC_ALLOWED_COUNTRIES_OPTION );
-
-			return ! empty( array_intersect( $eu_countries, $specific_countries ) );
-		}
-
-		if ( 'all_except' === $allowed_countries ) {
-			$excluded_countries = $this->get_country_codes_option( self::ALL_EXCEPT_COUNTRIES_OPTION );
-
-			return ! empty( array_diff( $eu_countries, $excluded_countries ) );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Get country codes stored in a country-list option.
-	 *
-	 * @param string $option Option name.
-	 * @return string[]
-	 */
-	private function get_country_codes_option( string $option ): array {
-		$countries = get_option( $option, array() );
-
-		if ( ! is_array( $countries ) ) {
-			return array();
-		}
-
-		return array_values( array_filter( array_map( 'strval', $countries ) ) );
+		return ! empty(
+			array_intersect(
+				$woocommerce->countries->get_european_union_countries(),
+				array_keys( $woocommerce->countries->get_allowed_countries() )
+			)
+		);
 	}
 }
