@@ -2422,11 +2422,7 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'EG' => array(
-			self::MASTERCARD => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
+			self::MASTERCARD,
 			self::PAYMOB,
 			self::PAYPAL_FULL_STACK,
 			self::VISA,
@@ -2624,11 +2620,7 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'NG' => array(
-			self::MASTERCARD => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
+			self::MASTERCARD,
 			self::PAYSTACK,
 			self::VISA,
 		),
@@ -2695,11 +2687,7 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'ZA' => array(
-			self::MASTERCARD => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
+			self::MASTERCARD,
 			self::PAYSTACK,
 			self::PAYPAL_FULL_STACK,
 			self::PAYFAST,
@@ -2779,11 +2767,7 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'BH' => array(
-			self::MASTERCARD => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
+			self::MASTERCARD,
 			self::PAYPAL_FULL_STACK,
 			self::VISA,
 			self::PAYPAL_WALLET,
@@ -2820,11 +2804,7 @@ class PaymentsExtensionSuggestions {
 			self::VISA,
 		),
 		'JO' => array(
-			self::MASTERCARD => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
+			self::MASTERCARD,
 			self::PAYPAL_FULL_STACK,
 			self::VISA,
 			self::NGENIUS,
@@ -2839,11 +2819,7 @@ class PaymentsExtensionSuggestions {
 			self::PAYPAL_FULL_STACK,
 		),
 		'KW' => array(
-			self::MASTERCARD => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
+			self::MASTERCARD,
 			self::PAYPAL_FULL_STACK,
 			self::VISA,
 			self::PAYPAL_WALLET,
@@ -2873,11 +2849,7 @@ class PaymentsExtensionSuggestions {
 			self::PAYPAL_WALLET,
 		),
 		'PK' => array(
-			self::MASTERCARD => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
+			self::MASTERCARD,
 			self::PAYONEER,
 			self::PAYMOB,
 			self::VISA,
@@ -2890,21 +2862,13 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'QA' => array(
-			self::MASTERCARD => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
+			self::MASTERCARD,
 			self::PAYPAL_FULL_STACK,
 			self::VISA,
 			self::PAYPAL_WALLET,
 		),
 		'SA' => array(
-			self::MASTERCARD => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
+			self::MASTERCARD,
 			self::PAYMOB,
 			self::PAYPAL_FULL_STACK,
 			self::VISA,
@@ -2936,7 +2900,11 @@ class PaymentsExtensionSuggestions {
 			self::WOOPAYMENTS,
 			self::PAYPAL_FULL_STACK,
 			self::STRIPE,
-			self::MASTERCARD,
+			self::MASTERCARD => array(
+				'_remove' => array(
+					'tags' => array( self::TAG_PREFERRED ),
+				),
+			),
 			self::PAYONEER,
 			self::PAYMOB,
 			self::VISA,
@@ -4380,6 +4348,7 @@ class PaymentsExtensionSuggestions {
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=mastercard-merchant-cloud',
 					),
 				),
+				'tags'        => array( self::TAG_PREFERRED ),
 			),
 			self::MYPOS             => array(
 				'_type'  => self::TYPE_PSP,
