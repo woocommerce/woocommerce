@@ -308,34 +308,36 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * Hash a value using wp_fast_hash (from WP 6.8 onwards).
-	 *
-	 * This method can be removed when the minimum version supported is 6.8.
+	 * Hash a value for the session cookie integrity tag.
 	 *
 	 * @param string $message Value to hash.
 	 * @return string Hashed value.
 	 */
 	private function hash( string $message ) {
-		if ( function_exists( 'wp_fast_hash' ) ) {
-			return wp_fast_hash( $message );
-		}
 		return hash_hmac( 'md5', $message, wp_hash( $message ) );
 	}
 
 	/**
-	 * Verify a hash using wp_verify_fast_hash (from WP 6.8 onwards).
+	 * Verify a hash produced by self::hash().
 	 *
-	 * This method can be removed when the minimum version supported is 6.8.
+	 * Hashes produced by the previous `wp_fast_hash()` implementation are still accepted so that guest sessions
+	 * created before this change are not invalidated. That fallback can be removed in 11.1.0 forward after those cookies have expired.
 	 *
 	 * @param string $message Message to verify.
 	 * @param string $hash Hash to verify.
 	 * @return bool Whether the hash is valid.
 	 */
 	private function verify_hash( string $message, string $hash ) {
-		if ( function_exists( 'wp_verify_fast_hash' ) ) {
+		if ( hash_equals( $this->hash( $message ), $hash ) ) {
+			return true;
+		}
+
+		// `wp_fast_hash()` prefixes its output with `$generic$`, so only those cookies take the legacy path.
+		if ( function_exists( 'wp_verify_fast_hash' ) && str_starts_with( $hash, '$generic$' ) ) {
 			return wp_verify_fast_hash( $message, $hash );
 		}
-		return hash_equals( hash_hmac( 'md5', $message, wp_hash( $message ) ), $hash );
+
+		return false;
 	}
 
 	/**
