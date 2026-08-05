@@ -23,7 +23,7 @@ find ./docs -name "*.md" ! -path "./docs/examples*"  ! -path "./docs/internal-de
   update_footer $filename
 done
 
-find ./packages/checkout -name "*.md"|while read filename; do
+find ./packages/public-api/blocks-checkout -name "*.md"|while read filename; do
   update_footer $filename
 done
 
