@@ -91,6 +91,37 @@ class HelcimTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should query the gateway setup requirement once.
+	 */
+	public function test_needs_setup_queries_gateway_once(): void {
+		$fake_gateway = new class( 'helcimjs', array( 'needs_setup' => false ) ) extends FakePaymentGateway {
+			/**
+			 * Number of setup checks.
+			 *
+			 * @var int
+			 */
+			public int $needs_setup_calls = 0;
+
+			/**
+			 * Count and return the configured setup requirement.
+			 *
+			 * @return bool
+			 */
+			public function needs_setup() {
+				++$this->needs_setup_calls;
+				return parent::needs_setup();
+			}
+		};
+
+		$this->assertFalse( $this->sut->needs_setup( $fake_gateway ) );
+		$this->assertSame(
+			1,
+			$fake_gateway->needs_setup_calls,
+			'The provider should not re-enter account connectivity after the gateway gives a definitive setup result.'
+		);
+	}
+
+	/**
 	 * @testdox Should be in test mode when the environment is sandbox.
 	 */
 	public function test_is_in_test_mode_true_in_sandbox(): void {

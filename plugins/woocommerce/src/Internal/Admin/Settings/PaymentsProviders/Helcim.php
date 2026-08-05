@@ -19,20 +19,21 @@ defined( 'ABSPATH' ) || exit;
 class Helcim extends PaymentGateway {
 
 	/**
-	 * Check if the payment gateway has a payments processor account connected.
+	 * Check if the payment gateway needs setup.
+	 *
+	 * Overrides the parent fallback to avoid re-entering account connectivity.
 	 *
 	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
 	 *
-	 * @return bool True if the payment gateway account is connected, false otherwise.
-	 *              If the payment gateway does not provide the information, it will return true.
+	 * @return bool True if the payment gateway needs setup, false otherwise.
 	 */
-	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
+	public function needs_setup( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
-			return ! wc_string_to_bool( $payment_gateway->needs_setup() );
+			return wc_string_to_bool( $payment_gateway->needs_setup() );
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
-				'Failed to determine if gateway has an account connected: ' . $e->getMessage(),
+				'Failed to determine if gateway needs setup: ' . $e->getMessage(),
 				array(
 					'gateway'   => $payment_gateway->id,
 					'source'    => 'settings-payments',
@@ -41,7 +42,19 @@ class Helcim extends PaymentGateway {
 			);
 		}
 
-		return parent::is_account_connected( $payment_gateway );
+		return ! parent::is_account_connected( $payment_gateway );
+	}
+
+	/**
+	 * Check if the payment gateway has a payments processor account connected.
+	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 *
+	 * @return bool True if the payment gateway account is connected, false otherwise.
+	 *              If the payment gateway does not provide the information, it will return true.
+	 */
+	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
+		return ! $this->needs_setup( $payment_gateway );
 	}
 
 	/**
