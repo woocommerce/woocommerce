@@ -16,7 +16,28 @@ interface Brand {
 	thumbnailFileName: string;
 }
 
+const productBrandsPageUrl =
+	'wp-admin/edit-tags.php?taxonomy=product_brand&post_type=product';
+
 test.use( { storageState: ADMIN_STATE_PATH } );
+
+test( 'Product brands page uses qualified labels', async ( { page } ) => {
+	await page.goto( productBrandsPageUrl );
+
+	await expect(
+		page.getByRole( 'heading', {
+			name: 'Product brands',
+			exact: true,
+			level: 1,
+		} )
+	).toBeVisible();
+	await expect( page ).toHaveTitle( /^Product brands/ );
+	await expect(
+		page
+			.locator( '#menu-posts-product' )
+			.getByRole( 'link', { name: 'Brands', exact: true } )
+	).toBeVisible();
+} );
 
 test( 'Merchant can add brands', async ( { page } ) => {
 	/**
@@ -26,9 +47,7 @@ test( 'Merchant can add brands', async ( { page } ) => {
 	 * This is to workaround the hover menu for now.
 	 */
 	const goToBrandsPage = async () => {
-		await page.goto(
-			'wp-admin/edit-tags.php?taxonomy=product_brand&post_type=product'
-		);
+		await page.goto( productBrandsPageUrl );
 
 		// Wait for the Brands page to load.
 		// This is needed so that checking for existing brands would work.
