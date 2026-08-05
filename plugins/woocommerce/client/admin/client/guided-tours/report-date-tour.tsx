@@ -3,7 +3,7 @@
  */
 import { TourKit, TourKitTypes } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
-import { optionsStore } from '@woocommerce/data';
+import { optionsStore, useUser } from '@woocommerce/data';
 import {
 	createElement,
 	createInterpolateElement,
@@ -19,13 +19,15 @@ import './report-date-tour.scss';
 
 const DATE_TYPE_OPTION = 'woocommerce_date_type';
 
-export const ReportDateTour = ( {
-	optionName,
-	headingText,
-}: {
+type ReportDateTourProps = {
 	optionName: string;
 	headingText: string;
-} ) => {
+};
+
+const ReportDateTourContent = ( {
+	optionName,
+	headingText,
+}: ReportDateTourProps ) => {
 	const [ isDismissed, setIsDismissed ] = useState( false );
 	const { updateOptions } = useDispatch( optionsStore );
 
@@ -104,4 +106,19 @@ export const ReportDateTour = ( {
 	};
 
 	return <TourKit config={ config } />;
+};
+
+export const ReportDateTour = ( props: ReportDateTourProps ) => {
+	const { currentUserCan } = useUser();
+	// Match the options endpoint permission before resolving the protected
+	// date-type and tour-dismissal options.
+	const canAccessOptions =
+		currentUserCan( 'manage_woocommerce' ) ||
+		currentUserCan( 'edit_others_shop_orders' );
+
+	if ( ! canAccessOptions ) {
+		return null;
+	}
+
+	return <ReportDateTourContent { ...props } />;
 };
