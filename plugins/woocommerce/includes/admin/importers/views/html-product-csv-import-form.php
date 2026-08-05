@@ -79,17 +79,30 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<td><input type="checkbox" id="woocommerce-importer-map-preferences" name="map_preferences" value="1" /></td>
 				</tr>
 				<tr class="woocommerce-importer-advanced hidden">
-					<th><label><?php esc_html_e( 'Character encoding of the file', 'woocommerce' ); ?></label><br/></th>
-					<td><select id="woocommerce-importer-character-encoding" name="character_encoding">
-							<option value="" selected><?php esc_html_e( 'Autodetect', 'woocommerce' ); ?></option>
-							<?php
-							$encodings = mb_list_encodings();
-							sort( $encodings, SORT_NATURAL );
-							foreach ( $encodings as $encoding ) {
-								echo '<option>' . esc_html( $encoding ) . '</option>';
-							}
+					<th><label for="woocommerce-importer-character-encoding"><?php esc_html_e( 'Character encoding of the file', 'woocommerce' ); ?></label><br/></th>
+					<td>
+						<?php
+						if ( function_exists( 'mb_list_encodings' ) ) {
 							?>
-						</select>
+							<select id="woocommerce-importer-character-encoding" name="character_encoding">
+								<option value="" selected><?php esc_html_e( 'Autodetect', 'woocommerce' ); ?></option>
+								<?php
+								$encodings = mb_list_encodings();
+								sort( $encodings, SORT_NATURAL );
+								foreach ( $encodings as $encoding ) {
+									echo '<option>' . esc_html( $encoding ) . '</option>';
+								}
+								?>
+							</select>
+							<?php
+						} else {
+							?>
+							<div class="notice notice-warning inline">
+								<p><?php esc_html_e( 'Your server does not support the mbstring PHP extension, so the file will be treated as UTF-8. Characters in other encodings may be removed.', 'woocommerce' ); ?></p>
+							</div>
+							<?php
+						}
+						?>
 					</td>
 				</tr>
 			</tbody>

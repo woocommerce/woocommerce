@@ -1573,7 +1573,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		WC()->payment_gateways()->payment_gateways = array();
 		WC()->payment_gateways()->init();
 
-		$this->providers_service->reset_memo();
+		$this->providers_service->clear_cache();
 	}
 
 	/**
@@ -1588,7 +1588,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		WC()->payment_gateways()->init();
 
 		if ( isset( $this->providers_service ) ) {
-			$this->providers_service->reset_memo();
+			$this->providers_service->clear_cache();
 		}
 	}
 

@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { render, screen } from '@testing-library/react';
+import { speak } from '@wordpress/a11y';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -23,24 +24,35 @@ jest.mock( '~/components/tracked-link/tracked-link', () => ( {
 		</span>
 	),
 } ) );
-jest.mock( '../../settings-recommendations/dismissable-list', () => ( {
-	DismissableList: ( {
-		children,
-		isDismissed,
-	}: {
-		children: React.ReactNode;
-		isDismissed?: boolean;
-	} ) => (
-		<div
-			data-dismissed={ String( Boolean( isDismissed ) ) }
-			data-testid="dismissable-list"
-		>
-			{ ! isDismissed && children }
-		</div>
-	),
-	DismissableListHeading: ( { children }: { children: React.ReactNode } ) =>
-		children,
-} ) );
+jest.mock( '../../settings-recommendations/dismissable-list', () => {
+	const { DismissableList } = jest.requireActual(
+		'../../settings-recommendations/dismissable-list'
+	);
+
+	return {
+		DismissableList: ( {
+			children,
+			isDismissed,
+		}: {
+			children: React.ReactNode;
+			isDismissed?: boolean;
+		} ) => (
+			<div
+				data-dismissed={ String( Boolean( isDismissed ) ) }
+				data-testid="dismissable-list"
+			>
+				<DismissableList isDismissed={ isDismissed }>
+					{ children }
+				</DismissableList>
+			</div>
+		),
+		DismissableListHeading: ( {
+			children,
+		}: {
+			children: React.ReactNode;
+		} ) => children,
+	};
+} );
 jest.mock( '~/guided-tours/shipping-tour', () => ( {
 	ShippingTour: ( {
 		showShippingRecommendationsStep,
@@ -65,6 +77,9 @@ jest.mock( '../../lib/notices', () => ( {
 } ) );
 jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
+} ) );
+jest.mock( '@wordpress/a11y', () => ( {
+	speak: jest.fn(),
 } ) );
 
 const defaultSelectReturn = {
@@ -97,6 +112,7 @@ describe( 'ShippingRecommendations', () => {
 			activatePlugins: () => Promise.resolve(),
 		} );
 		( recordEvent as jest.Mock ).mockClear();
+		( speak as jest.Mock ).mockClear();
 	} );
 
 	it( 'renders recommendations and the shipping tour recommendations step', () => {
@@ -190,6 +206,46 @@ describe( 'ShippingRecommendations', () => {
 		);
 	} );
 
+	it( 'keeps the dismissal wrapper mounted to restore focus and announce the change', () => {
+		let dismissOption = 'no';
+		mockSelect( {
+			getOption: ( option: string ) =>
+				option === SHIPPING_RECOMMENDATIONS_DISMISS_OPTION
+					? dismissOption
+					: undefined,
+		} );
+
+		const { rerender } = render( <ShippingRecommendations /> );
+		const dismissalWrapper = document.querySelector(
+			'.woocommerce-dismissable-list__wrapper'
+		);
+
+		expect( dismissalWrapper ).toBeInTheDocument();
+		expect( screen.getByTestId( 'dismissable-list' ) ).toHaveAttribute(
+			'data-dismissed',
+			'false'
+		);
+
+		dismissOption = 'yes';
+		rerender( <ShippingRecommendations /> );
+
+		expect(
+			document.querySelector( '.woocommerce-dismissable-list__wrapper' )
+		).toBe( dismissalWrapper );
+		expect( screen.getByTestId( 'dismissable-list' ) ).toHaveAttribute(
+			'data-dismissed',
+			'true'
+		);
+		expect( speak ).toHaveBeenCalledWith(
+			'Recommendation hidden.',
+			'assertive'
+		);
+		expect( dismissalWrapper ).toHaveFocus();
+		expect(
+			screen.getByText( 'the WooCommerce Marketplace' )
+		).toBeInTheDocument();
+	} );
+
 	it( 'does not render recommendations before the product profile resolves', () => {
 		mockSelect( {
 			hasFinishedResolution: ( selector: string ) =>
@@ -231,9 +287,11 @@ describe( 'ShippingRecommendations', () => {
 		expect(
 			screen.queryByText( 'the WooCommerce Marketplace' )
 		).toBeInTheDocument();
-		expect(
-			screen.queryByTestId( 'dismissable-list' )
-		).not.toBeInTheDocument();
+		expect( screen.getByTestId( 'dismissable-list' ) ).toHaveAttribute(
+			'data-dismissed',
+			'true'
+		);
+		expect( speak ).not.toHaveBeenCalled();
 		expect( screen.getByTestId( 'shipping-tour' ) ).toHaveAttribute(
 			'data-show-recommendations-step',
 			'false'
