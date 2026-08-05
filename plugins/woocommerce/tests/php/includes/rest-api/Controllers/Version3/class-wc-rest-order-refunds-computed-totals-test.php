@@ -261,7 +261,7 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 		);
 
 		$this->assertEquals( 400, $response->get_status() );
-		$this->assertEquals( 'duplicate_tax_id', $response->get_data()['code'] );
+		$this->assertEquals( 'woocommerce_rest_duplicate_tax_id', $response->get_data()['code'] );
 		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds(), 'A refund with inconsistent tax accounting must never be created.' );
 	}
 
@@ -341,7 +341,7 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 		);
 
 		$this->assertEquals( 422, $response->get_status() );
-		$this->assertEquals( 'quantity_exceeds_refundable', $response->get_data()['code'] );
+		$this->assertEquals( 'woocommerce_rest_quantity_exceeds_refundable', $response->get_data()['code'] );
 	}
 
 	/**
@@ -365,7 +365,7 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 		);
 
 		$this->assertEquals( 422, $response->get_status() );
-		$this->assertEquals( 'refund_total_exceeds_line', $response->get_data()['code'] );
+		$this->assertEquals( 'woocommerce_rest_refund_total_exceeds_line', $response->get_data()['code'] );
 	}
 
 	/**
@@ -391,7 +391,7 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 		);
 
 		$this->assertEquals( 422, $response->get_status() );
-		$this->assertEquals( 'order_not_refundable', $response->get_data()['code'] );
+		$this->assertEquals( 'woocommerce_rest_order_not_refundable', $response->get_data()['code'] );
 	}
 
 	/**
@@ -416,7 +416,7 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 		);
 
 		$this->assertEquals( 400, $response->get_status() );
-		$this->assertEquals( 'invalid_refund_amount', $response->get_data()['code'] );
+		$this->assertEquals( 'woocommerce_rest_invalid_refund_amount', $response->get_data()['code'] );
 	}
 
 	/**
@@ -434,7 +434,7 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 		);
 
 		$this->assertEquals( 422, $response->get_status() );
-		$this->assertEquals( 'refund_exceeds_remaining', $response->get_data()['code'] );
+		$this->assertEquals( 'woocommerce_rest_refund_exceeds_remaining', $response->get_data()['code'] );
 	}
 
 	/**
@@ -459,7 +459,7 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 		);
 
 		$this->assertEquals( 400, $response->get_status() );
-		$this->assertEquals( 'invalid_refund_amount', $response->get_data()['code'] );
+		$this->assertEquals( 'woocommerce_rest_invalid_refund_amount', $response->get_data()['code'] );
 		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds(), 'No refund may be created for an explicit zero amount.' );
 	}
 
@@ -701,7 +701,7 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 		);
 
 		$this->assertEquals( 400, $response->get_status() );
-		$this->assertEquals( 'invalid_refund_total', $response->get_data()['code'] );
+		$this->assertEquals( 'woocommerce_rest_invalid_refund_total', $response->get_data()['code'] );
 		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
 	}
 
@@ -726,7 +726,7 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 		);
 
 		$this->assertEquals( 400, $response->get_status() );
-		$this->assertEquals( 'invalid_quantity', $response->get_data()['code'] );
+		$this->assertEquals( 'woocommerce_rest_invalid_quantity', $response->get_data()['code'] );
 	}
 
 	/**
@@ -750,7 +750,7 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 		);
 
 		$this->assertEquals( 400, $response->get_status() );
-		$this->assertEquals( 'invalid_quantity', $response->get_data()['code'] );
+		$this->assertEquals( 'woocommerce_rest_invalid_quantity', $response->get_data()['code'] );
 	}
 
 	/**
@@ -799,7 +799,7 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 		);
 
 		$this->assertEquals( 400, $response->get_status() );
-		$this->assertEquals( 'invalid_line_item', $response->get_data()['code'] );
+		$this->assertEquals( 'woocommerce_rest_invalid_line_item', $response->get_data()['code'] );
 	}
 
 	/**
@@ -829,7 +829,7 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 		);
 
 		$this->assertEquals( 400, $response->get_status() );
-		$this->assertEquals( 'invalid_line_item', $response->get_data()['code'] );
+		$this->assertEquals( 'woocommerce_rest_invalid_line_item', $response->get_data()['code'] );
 	}
 
 	/**
@@ -852,7 +852,7 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 		);
 
 		$this->assertEquals( 400, $response->get_status() );
-		$this->assertEquals( 'invalid_line_item', $response->get_data()['code'] );
+		$this->assertEquals( 'woocommerce_rest_invalid_line_item', $response->get_data()['code'] );
 	}
 
 	/**
@@ -876,7 +876,7 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 		);
 
 		$this->assertEquals( 400, $response->get_status() );
-		$this->assertEquals( 'invalid_line_item', $response->get_data()['code'] );
+		$this->assertEquals( 'woocommerce_rest_invalid_line_item', $response->get_data()['code'] );
 		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds(), 'A fractional id must never be truncated into a refund of a different line.' );
 	}
 
@@ -908,7 +908,7 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 		);
 
 		$this->assertEquals( 400, $response->get_status() );
-		$this->assertEquals( 'invalid_line_item', $response->get_data()['code'] );
+		$this->assertEquals( 'woocommerce_rest_invalid_line_item', $response->get_data()['code'] );
 		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
 	}
 
@@ -927,7 +927,7 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 		);
 
 		$this->assertEquals( 400, $response->get_status() );
-		$this->assertEquals( 'invalid_line_item', $response->get_data()['code'] );
+		$this->assertEquals( 'woocommerce_rest_invalid_line_item', $response->get_data()['code'] );
 	}
 
 	/**
