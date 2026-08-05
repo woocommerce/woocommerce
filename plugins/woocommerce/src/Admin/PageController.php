@@ -267,7 +267,9 @@ class PageController {
 			$route_regex .= '(?:/.*)?';
 		}
 
-		return 1 === preg_match( '#^' . $route_regex . '/*$#' . $this->get_route_regex_modifiers( $route_regex, $current_parts['path'] ), $current_parts['path'] );
+		// `D` keeps the `$` anchor strict (no trailing-newline allowance) without relying on the
+		// upstream esc_url_raw() sanitization to have stripped newlines from the request path.
+		return 1 === preg_match( '#^' . $route_regex . '/*$#D' . $this->get_route_regex_modifiers( $route_regex, $current_parts['path'] ), $current_parts['path'] );
 	}
 
 	/**
