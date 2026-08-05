@@ -12,6 +12,7 @@ use WC_Unit_Test_Case;
  * Tests for the marketplace suggestions gating of remote inbox notifications.
  *
  * @covers \Automattic\WooCommerce\Internal\Admin\RemoteInboxNotifications
+ * @covers \Automattic\WooCommerce\Internal\Admin\Events::is_remote_inbox_notifications_enabled
  */
 class RemoteInboxNotificationsTest extends WC_Unit_Test_Case {
 
@@ -22,7 +23,11 @@ class RemoteInboxNotificationsTest extends WC_Unit_Test_Case {
 		parent::setUp();
 
 		// The engine is initialized by the plugin bootstrap; detach its hooks so
-		// each test observes initialization from scratch.
+		// each test observes initialization from scratch. No manual restore is
+		// needed: parent::tearDown() puts the full wp_filter map back to the
+		// snapshot WP_UnitTestCase_Base::_backup_hooks() took before the first
+		// test, which reattaches these hooks and discards any callbacks that
+		// RemoteInboxNotificationsEngine::init() registered during the test.
 		$this->detach_engine_hooks();
 	}
 
@@ -57,8 +62,6 @@ class RemoteInboxNotificationsTest extends WC_Unit_Test_Case {
 	 * Events::is_remote_inbox_notifications_enabled() duplicates the option check the feature
 	 * loader performs; running both gates against the same provider pins them to the same behavior.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\Events::is_remote_inbox_notifications_enabled
-	 *
 	 * @param string|null $option_value   Marketplace suggestions option value, or null when absent.
 	 * @param bool        $expected_value Expected gate value.
 	 */
@@ -83,6 +86,7 @@ class RemoteInboxNotificationsTest extends WC_Unit_Test_Case {
 			'option enabled'   => array( 'yes', true ),
 			'option disabled'  => array( 'no', false ),
 			'unexpected value' => array( 'invalid', false ),
+			'truthy non-yes'   => array( '1', false ),
 		);
 	}
 
@@ -151,6 +155,6 @@ class RemoteInboxNotificationsTest extends WC_Unit_Test_Case {
 		$method = new \ReflectionMethod( Events::class, 'is_remote_inbox_notifications_enabled' );
 		$method->setAccessible( true );
 
-		return (bool) $method->invoke( Events::instance() );
+		return $method->invoke( Events::instance() );
 	}
 }
