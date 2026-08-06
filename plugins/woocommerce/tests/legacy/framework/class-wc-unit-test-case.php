@@ -148,6 +148,35 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	}
 
 	/**
+	 * Tear down test case.
+	 *
+	 * The cart contents and the queued notices live on the WC() singleton, which neither
+	 * the per-test database rollback nor the hook restore resets, so clear them here or
+	 * they leak into every later test in the process.
+	 *
+	 * @since 11.1.0
+	 */
+	public function tearDown(): void {
+		try {
+			// Emptying the cart writes to the session via the woocommerce_cart_emptied
+			// callbacks, so only do it when both singletons are present — tests may
+			// legitimately null them out.
+			if ( isset( WC()->cart, WC()->session ) ) {
+				WC()->cart->empty_cart();
+			}
+
+			if ( isset( WC()->session ) ) {
+				wc_clear_notices();
+			}
+		} finally {
+			// The parent teardown must always run: it rolls back the database
+			// transaction and restores the hooks. Skipping it would poison every
+			// test that runs after this one.
+			parent::tearDown();
+		}
+	}
+
+	/**
 	 * Fire rest_api_init with only the provided callbacks attached.
 	 *
 	 * The global rest_api_init hook is stashed, replaced with a fresh hook
