@@ -18,7 +18,6 @@ use Automattic\WooCommerce\StoreApi\Utilities\Pagination;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundPreviewSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundSchema;
 use Automattic\WooCommerce\Utilities\MetaDataUtil;
-use Automattic\WooCommerce\Utilities\NumberUtil;
 use WP_Http;
 use WP_Error;
 use WC_Order;
@@ -349,104 +348,37 @@ class Controller extends AbstractController {
 			return $this->get_route_error_by_code( self::INVALID_ID );
 		}
 
-		// Fill in refund_total for any line items that omit it. The simplified
-		// request form sends only {line_item_id, quantity}; the backend derives
-		// the tax-inclusive total from the order's unit price × quantity.
-		// Scoped try: compute_line_item_refund_total throws InvalidArgumentException
-		// on quantity < 1, but fill_missing_refund_totals pre-checks that condition,
-		// so this branch is defensive against a future invariant break only.
-		try {
-			$line_items = $this->data_utils->fill_missing_refund_totals( $request['line_items'] ?? array(), $order );
-		} catch ( \InvalidArgumentException $e ) {
-			wc_get_logger()->error(
-				sprintf(
-					'Refund creation invariant violation on order %d (%s): %s',
-					$order->get_id(),
-					get_class( $e ),
-					$e->getMessage()
-				),
-				array( 'source' => 'wc-v4-refunds' )
-			);
-			return $this->get_route_error_response(
-				'invalid_refund_request',
-				__( 'The refund could not be created due to an unexpected error.', 'woocommerce' ),
-				WP_Http::INTERNAL_SERVER_ERROR
-			);
+		// The shared engine runs the whole creation preparation: fill missing
+		// refund totals, validate against the order's refund history, convert to
+		// the internal wc_create_refund() format, resolve the amount, and apply
+		// the aggregate guards. Shared with the wc/v3 compute_totals path so a
+		// fix lands once.
+		$prepared = $this->data_utils->prepare_refund_creation_or_error(
+			$order,
+			$request['line_items'] ?? array(),
+			$request->has_param( 'total' ),
+			$request['total'],
+			'wc-v4-refunds'
+		);
+
+		if ( is_wp_error( $prepared ) ) {
+			// Preserve any status carried on the WP_Error so create and preview
+			// return the same HTTP code for the same invalid input (e.g. 422 for
+			// over-refund / non-refundable order). Falls back to 400 otherwise.
+			$error_data = $prepared->get_error_data();
+			$status     = is_array( $error_data ) && isset( $error_data['status'] ) ? (int) $error_data['status'] : WP_Http::BAD_REQUEST;
+			return $this->get_route_error_response_from_object( $prepared, $status );
 		}
 
-		// Mirror the augmented array back onto the request so the 'created' hook
-		// and any other downstream readers of $request['line_items'] see
-		// normalised data with refund_total populated.
-		$request->set_param( 'line_items', $line_items );
+		// Mirror the filled schema-format array back onto the request so the
+		// 'created' hook and any other downstream readers of
+		// $request['line_items'] see normalised data with refund_total populated.
+		$request->set_param( 'line_items', $prepared['schema_line_items'] );
+
+		$line_item_data = $prepared['line_items'];
+		$refund_amount  = $prepared['amount'];
 
 		try {
-			// Validate request line_items before proceeding against the order being refunded.
-			$validation_error = $this->data_utils->validate_line_items( $line_items, $order );
-
-			if ( is_wp_error( $validation_error ) ) {
-				// Preserve any status carried on the WP_Error so create and preview
-				// return the same HTTP code for the same invalid input (e.g. 422 for
-				// over-refund / non-refundable order). Falls back to 400 otherwise.
-				$error_data = $validation_error->get_error_data();
-				$status     = is_array( $error_data ) && isset( $error_data['status'] ) ? (int) $error_data['status'] : WP_Http::BAD_REQUEST;
-				return $this->get_route_error_response_from_object( $validation_error, $status );
-			}
-
-			// Convert line items to internal format. refund_total is tax-inclusive when no
-			// explicit refund_tax is supplied (auto-computed values, or client values) — the
-			// converter splits the tax portion out via the line's stored total/tax ratio
-			// (DataUtils::split_inclusive_by_stored_ratio(), the same method the preview uses).
-			// When the client supplies an explicit refund_tax breakdown, refund_total is the
-			// tax-exclusive subtotal and the tax is added on top (core Woo semantics). Either
-			// way calculate_refund_amount sums refund_total + refund_tax to the gross line
-			// amount, so mixing the two forms across line items is well-defined.
-			$line_item_data   = $this->data_utils->convert_line_items_to_internal_format( $line_items, $order );
-			$calculated_total = ! empty( $line_items ) ? $this->data_utils->calculate_refund_amount( $line_items ) : 0;
-
-			// has_param() distinguishes an omitted total from an explicitly supplied one —
-			// the schema declares no default, so the param exists only when the client sent
-			// it. An explicit zero (including string forms like "0.00", which are truthy)
-			// must be rejected rather than silently falling back to the calculated amount:
-			// a request meaning "refund nothing" must never refund the full computed total.
-			$has_total     = $request->has_param( 'total' );
-			$refund_amount = $has_total ? $request['total'] : $calculated_total;
-
-			if ( (float) $refund_amount <= 0 ) {
-				return $this->get_route_error_response( 'invalid_refund_amount', __( 'Refund total must be greater than zero.', 'woocommerce' ) );
-			}
-
-			// Prevent under-refunding: total cannot be less than calculated line items total.
-			// Over-refunding is allowed for goodwill/compensation scenarios.
-			if ( $has_total && $calculated_total > 0 && NumberUtil::round( (float) $refund_amount, wc_get_price_decimals() ) < NumberUtil::round( $calculated_total, wc_get_price_decimals() ) ) {
-				return $this->get_route_error_response(
-					'invalid_refund_amount',
-					sprintf(
-						/* translators: %1$s: refund amount, %2$s: calculated total from line items */
-						__( 'Refund amount (%1$s) cannot be less than the total of line items (%2$s).', 'woocommerce' ),
-						wc_format_decimal( $refund_amount, wc_get_price_decimals() ),
-						wc_format_decimal( $calculated_total, wc_get_price_decimals() )
-					)
-				);
-			}
-
-			// Over-refunding line items is allowed (goodwill), but the amount can never
-			// exceed the order's remaining refundable amount. Reject up-front with a clear
-			// 422 rather than relying on wc_create_refund's generic failure, mirroring the
-			// preview endpoint's preview_exceeds_max_refundable guard.
-			$remaining_refundable = (float) $order->get_remaining_refund_amount();
-			if ( NumberUtil::round( (float) $refund_amount, wc_get_price_decimals() ) > NumberUtil::round( $remaining_refundable, wc_get_price_decimals() ) ) {
-				return $this->get_route_error_response(
-					'refund_exceeds_remaining',
-					sprintf(
-						/* translators: %1$s: requested refund amount, %2$s: remaining refundable amount */
-						__( 'Refund amount (%1$s) exceeds the remaining refundable amount (%2$s).', 'woocommerce' ),
-						wc_format_decimal( $refund_amount, wc_get_price_decimals() ),
-						wc_format_decimal( $remaining_refundable, wc_get_price_decimals() )
-					),
-					WP_Http::UNPROCESSABLE_ENTITY
-				);
-			}
-
 			$refund = wc_create_refund(
 				array(
 					'order_id'       => $order->get_id(),
