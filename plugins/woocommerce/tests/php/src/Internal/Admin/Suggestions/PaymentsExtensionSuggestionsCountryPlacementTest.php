@@ -119,24 +119,26 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 	}
 
 	/**
-	 * Tear down.
+	 * Restore the in-process state this class leaks into the next one.
 	 *
-	 * Only in-process state needs resetting: the gateway singleton and the
-	 * provider caches outlive the transaction rollback, so they must be rebuilt
-	 * from the restored options once the rollback has run.
+	 * The gateway singleton and the provider caches outlive the per-test
+	 * transaction, so they have to be rebuilt — but once, after the class, not
+	 * after every test. setUp() rebuilds both anyway, so a per-test rebuild is
+	 * thrown away 367 times out of 368.
+	 *
+	 * This is also the only place the rebuild is correct. tear_down() rolls the
+	 * transaction back but does not flush the object cache, so a rebuild there
+	 * reads the option values the test just wrote and hands the next class a
+	 * PayPal gateway still marked enabled. tear_down_after_class() flushes the
+	 * cache before this runs, so init() sees what is actually in the database.
 	 */
-	public function tearDown(): void {
-		parent::tearDown();
+	public static function tearDownAfterClass(): void {
+		parent::tearDownAfterClass();
 
 		WC()->payment_gateways()->payment_gateways = array();
 		WC()->payment_gateways()->init();
 
-		// tearDown() still runs when setUp() throws, and $sut is typed with no
-		// default, so reading it unguarded would raise a second error on top of
-		// the real one.
-		if ( isset( $this->sut ) ) {
-			$this->sut->clear_cache();
-		}
+		wc_get_container()->get( PaymentsProviders::class )->clear_cache();
 	}
 
 	/**
