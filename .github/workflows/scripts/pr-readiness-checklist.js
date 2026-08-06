@@ -212,7 +212,7 @@ function buildCommentBody({ tasks, previousState, authorLogin, stickyCommentUrl 
         lines.push(
             ...tasks
                 .filter((task) => task.status === 'fail')
-                .flatMap((task) => {
+                .flatMap((task, index) => {
                     const jobLinks =
                         task.jobUrls && task.jobUrls.length > 0
                             ? ' ' +
@@ -228,7 +228,13 @@ function buildCommentBody({ tasks, previousState, authorLogin, stickyCommentUrl 
                     // Remediation text (and any non-CI link it carries, e.g. a
                     // guide) goes on its own indented line, kept separate from
                     // the CI job links on the status line above.
-                    return [statusLine, `- ${task.remediation}`];
+                    const block = [statusLine, `- ${task.remediation}`];
+                    // The remediation line opens a Markdown list, and a status
+                    // line following it without a blank line in between is
+                    // lazy continuation - it gets absorbed into that list item
+                    // rather than starting its own block. Separating the
+                    // blocks keeps each failure standing on its own.
+                    return index === 0 ? block : ['', ...block];
                 })
         );
     }

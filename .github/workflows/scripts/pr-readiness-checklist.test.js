@@ -362,6 +362,37 @@ test('buildCommentBody: a failing task with multiple job urls numbers each link'
     );
 });
 
+test('buildCommentBody: consecutive failing tasks are separated by a blank line', () => {
+    const { body } = buildCommentBody({
+        tasks: [
+            {
+                label: 'Lint',
+                status: 'fail',
+                remediation: 'See annotations.',
+                jobUrls: ['https://example.com/job/1'],
+            },
+            {
+                label: 'PHPStan',
+                status: 'fail',
+                remediation: 'See annotations.',
+                jobUrls: ['https://example.com/job/2'],
+            },
+        ],
+        previousState: 'clear',
+        authorLogin: 'octocat',
+    });
+
+    // Without the blank line, Markdown lazy continuation folds the second
+    // task's status line into the first task's remediation list item, so the
+    // two failures render as one. Assert on the exact adjacency rather than
+    // mere substring presence, which stays true even when it renders wrong.
+    assert.ok(
+        body.includes(
+            '- See annotations.\n\n🔴 PHPStan [Job](https://example.com/job/2)'
+        )
+    );
+});
+
 test('buildCommentBody: passing tasks are not shown in failing state', () => {
     const { body } = buildCommentBody({
         tasks: [
