@@ -101,12 +101,33 @@
 				height: 28px;
 				cursor: pointer;
 				padding-top: 8px;
-				margin-left: auto;
+				// This 1px is the gap the divider is drawn into. It belongs to
+				// the indicator so that it disappears along with it when the
+				// business location matches the store's country.
+				margin-left: 1px;
 				border-radius: 2px;
+				position: relative;
 
+				// Drawn into that gap rather than as a border inside either box.
+				// A border would sit inside this element, pushing the icon
+				// off-centre and leaving the focus ring 1px closer to the
+				// divider than to the other three sides.
+				&::before {
+					content: "";
+					position: absolute;
+					left: -1px;
+					top: 50%;
+					transform: translateY(-50%);
+					width: 1px;
+					height: 20px;
+					background-color: $gray-200;
+				}
+
+				// Matches the select segment's inset so both rings sit clear of
+				// the container border and the divider between them.
 				&:focus {
-					outline: 1.5px solid var(--wp-admin-theme-color, #007cba);
-					outline-offset: -1.5px;
+					outline: 2px solid var(--wp-admin-theme-color, #007cba);
+					outline-offset: -4px;
 				}
 
 				&:focus:not(:focus-visible) {
@@ -114,14 +135,14 @@
 				}
 
 				&:focus-visible {
-					outline: 1.5px solid var(--wp-admin-theme-color, #007cba);
-					outline-offset: -1.5px;
+					outline: 2px solid var(--wp-admin-theme-color, #007cba);
+					outline-offset: -4px;
 				}
 
 				&-icon {
-					border-left: 1px solid $gray-200;
 					height: 20px;
-					padding: 0 5px;
+					// Wide enough that the inset ring clears the icon.
+					padding: 0 8px;
 
 					svg {
 						fill: $alert-yellow;
@@ -158,14 +179,38 @@
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
-			width: 100%;
 			background: none;
 			border: none;
-			padding: 0;
+			// Nested corners follow inner = outer - gap. The card is 4px and the
+			// ring clears it by more than that, so the ring wants to be square;
+			// 0 here is as close as it gets, since the ring's own radius is this
+			// value plus the 2px offset. Anything larger reads rounder than the
+			// card that contains it.
+			border-radius: 0;
 			cursor: pointer;
 			text-align: left;
 
+			// A ring's corner radius is border-radius + outline-offset, so the
+			// offset cannot be used to buy clearance without also rounding the
+			// ring past the 4px every other control on this screen uses.
+			// Grow the box with padding instead and cancel it with a matching
+			// negative margin, which leaves the title and chevron in place.
+			// $grid-unit-10 of clearance fits inside the card's padding at every
+			// breakpoint, so it needs no responsive override.
+			width: calc(100% + 2 * #{$grid-unit-10});
+			margin: -$grid-unit-10;
+			padding: $grid-unit-10;
+
 			&:focus {
+				outline: 2px solid var(--wp-admin-theme-color, #007cba);
+				outline-offset: 2px;
+			}
+
+			&:focus:not(:focus-visible) {
+				outline: none;
+			}
+
+			&:focus-visible {
 				outline: 2px solid var(--wp-admin-theme-color, #007cba);
 				outline-offset: 2px;
 			}
@@ -220,7 +265,9 @@
 
 		&.is-expanded {
 			.other-payment-gateways__header {
-				margin-bottom: $grid-unit-40;
+				// The header's $grid-unit-10 of padding contributes the rest, so
+				// the content still sits $grid-unit-40 below the title.
+				margin-bottom: $grid-unit-30;
 			}
 		}
 
@@ -384,7 +431,10 @@
 
 		@media screen and (max-width: $break-medium) {
 			margin: 32px $gap 0 $gap;
-			padding: $gap-smaller $gap;
+			// One step down from the desktop $grid-unit-30, and uniform: the
+			// former $gap-smaller left the title crowded against the top border
+			// while the sides kept a full $gap.
+			padding: $gap;
 		}
 	}
 
@@ -468,6 +518,21 @@
 		align-items: center;
 		gap: 2px;
 		padding: 2px 4px 2px 2px;
+		border-radius: 2px;
+
+		&:focus {
+			outline: 2px solid var(--wp-admin-theme-color, #007cba);
+			outline-offset: 2px;
+		}
+
+		&:focus:not(:focus-visible) {
+			outline: none;
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--wp-admin-theme-color, #007cba);
+			outline-offset: 2px;
+		}
 
 		> img {
 			height: 16px;
