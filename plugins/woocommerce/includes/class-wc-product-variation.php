@@ -509,13 +509,14 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 	/**
 	 * Set attributes. Unlike the parent product which uses terms, variations are assigned
-	 * specific attributes using name-value pairs. Taxonomy attribute values are converted
-	 * to term slugs when a matching term exists.
+	 * specific attributes using name-value pairs. WP_Term values for product attribute
+	 * taxonomies are stored as term slugs.
 	 *
-	 * @param array<string, string> $raw_attributes Array of raw attributes.
+	 * @param array $raw_attributes Array of raw attributes.
+	 * @throws WC_Data_Exception When a WP_Term does not match a product attribute taxonomy.
 	 *
 	 * @since 3.0.0
-	 * @since 11.1.0 Taxonomy attribute values are normalized to term slugs.
+	 * @since 11.1.0 WP_Term values are supported for product attribute taxonomies.
 	 */
 	public function set_attributes( $raw_attributes ) {
 		$raw_attributes = (array) $raw_attributes;
@@ -527,16 +528,20 @@ class WC_Product_Variation extends WC_Product_Simple {
 				$key = substr( $key, 10 );
 			}
 
-			if ( is_string( $value ) && '' !== $value && taxonomy_exists( $key ) ) {
-				$term = get_term_by( 'slug', $value, $key );
-
-				if ( ! $term ) {
-					$term = get_term_by( 'name', $value, $key );
+			if ( $value instanceof WP_Term ) {
+				if ( $key !== $value->taxonomy || ! taxonomy_is_product_attribute( $key ) ) {
+					$this->error(
+						'product_invalid_attribute_term',
+						sprintf(
+							/* translators: 1: Term name, 2: Product attribute taxonomy name. */
+							__( 'The term "%1$s" is not valid for the "%2$s" product attribute.', 'woocommerce' ),
+							$value->name,
+							$key
+						)
+					);
 				}
 
-				if ( $term && ! is_wp_error( $term ) ) {
-					$value = $term->slug;
-				}
+				$value = $value->slug;
 			}
 
 			$attributes[ $key ] = $value;

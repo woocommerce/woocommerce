@@ -123,22 +123,24 @@ class WC_Product_Variation_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A taxonomy attribute term name is normalized to its slug and persisted as such.
+	 * @testdox A product attribute term object is stored as its slug without querying terms.
 	 */
-	public function test_set_attributes_normalizes_taxonomy_term_name_to_slug(): void {
+	public function test_set_attributes_accepts_product_attribute_term(): void {
 		$term_data = wp_insert_term( '7½', 'pa_size' );
 		$this->assertNotWPError( $term_data, 'The test term should be created.' );
 
 		$term = get_term( $term_data['term_id'], 'pa_size' );
 		$this->assertInstanceOf( WP_Term::class, $term, 'The created term should be available.' );
 
-		$this->variation->set_attributes( array( 'pa_size' => $term->name ) );
+		$queries_before = get_num_queries();
+		$this->variation->set_attributes( array( 'pa_size' => $term ) );
 
 		$this->assertSame(
 			array( 'pa_size' => $term->slug ),
 			$this->variation->get_attributes(),
 			'The in-memory attribute should use the term slug.'
 		);
+		$this->assertSame( $queries_before, get_num_queries(), 'Setting attributes should not query terms.' );
 
 		$this->variation->save();
 
@@ -154,6 +156,35 @@ class WC_Product_Variation_Test extends WC_Unit_Test_Case {
 			$reloaded_variation->get_attributes()['pa_size'],
 			'The reloaded variation should contain the term slug.'
 		);
+	}
+
+	/**
+	 * @testdox A term from a non-product taxonomy is rejected as a variation attribute value.
+	 */
+	public function test_set_attributes_rejects_non_product_attribute_term(): void {
+		$term_data = wp_insert_term( 'Custom display', 'category' );
+		$this->assertNotWPError( $term_data, 'The test category should be created.' );
+
+		$term = get_term( $term_data['term_id'], 'category' );
+		$this->assertInstanceOf( WP_Term::class, $term, 'The created term should be available.' );
+
+		$this->expectException( WC_Data_Exception::class );
+		$this->expectExceptionMessage( 'The term "Custom display" is not valid for the "category" product attribute.' );
+
+		$this->variation->set_attributes( array( 'category' => $term ) );
+	}
+
+	/**
+	 * @testdox A product attribute term is rejected when its taxonomy does not match the attribute key.
+	 */
+	public function test_set_attributes_rejects_term_for_different_product_attribute(): void {
+		$term = get_term_by( 'slug', 'small', 'pa_size' );
+		$this->assertInstanceOf( WP_Term::class, $term, 'The size term should be available.' );
+
+		$this->expectException( WC_Data_Exception::class );
+		$this->expectExceptionMessage( 'The term "small" is not valid for the "pa_colour" product attribute.' );
+
+		$this->variation->set_attributes( array( 'pa_colour' => $term ) );
 	}
 
 	/**
