@@ -12,7 +12,7 @@
 
 - Preserve auto-width groups; left, center, and right alignment; explicit widths and gaps; RTL behavior; overflow wrapping; and Outlook conditional markup.
 - Do not change PHP signatures, hooks, filters, stored data, width computation, or the wrapping layout.
-- Follow WordPress Coding Standards and the existing camelCase test naming used by `Flex_Layout_Renderer_Test`.
+- Follow WordPress Coding Standards, including snake_case test method names and `@testdox` descriptions for new tests.
 - Use red-green TDD and verify the new assertion fails for the missing vertical alignment before changing production code.
 
 ---
@@ -35,9 +35,11 @@ Add this method after `testItRendersInnerBlocks()`:
 
 ```php
 /**
- * Test that the single-row wrapper does not leave baseline spacing below its content.
+ * Test the single-row wrapper's vertical alignment.
+ *
+ * @testdox Should top-align the single-row wrapper to avoid baseline spacing below its content.
  */
-public function testItTopAlignsTheSingleRowWrapper(): void {
+public function test_it_top_aligns_the_single_row_wrapper(): void {
 	$parsed_block = array(
 		'innerBlocks' => array(
 			array(
@@ -50,7 +52,11 @@ public function testItTopAlignsTheSingleRowWrapper(): void {
 
 	$output = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->rendering_context );
 
-	$this->assertStringContainsString( 'style="display:inline-block;vertical-align:top"', $output );
+	$this->assertStringContainsString(
+		'style="display:inline-block;vertical-align:top"',
+		$output,
+		'The inline wrapper table should opt out of baseline alignment.'
+	);
 }
 ```
 
@@ -59,7 +65,7 @@ public function testItTopAlignsTheSingleRowWrapper(): void {
 Run:
 
 ```bash
-pnpm --filter=@woocommerce/email-editor-config test:integration -- --filter testItTopAlignsTheSingleRowWrapper
+pnpm --filter=@woocommerce/email-editor-config test:integration -- --filter test_it_top_aligns_the_single_row_wrapper
 ```
 
 Expected: FAIL because the generated table contains `style="display:inline-block"` without `vertical-align:top`.
@@ -79,7 +85,7 @@ Do not change `render_wrapping_layout()`.
 Run:
 
 ```bash
-pnpm --filter=@woocommerce/email-editor-config test:integration -- --filter testItTopAlignsTheSingleRowWrapper
+pnpm --filter=@woocommerce/email-editor-config test:integration -- --filter test_it_top_aligns_the_single_row_wrapper
 ```
 
 Expected: PASS.
