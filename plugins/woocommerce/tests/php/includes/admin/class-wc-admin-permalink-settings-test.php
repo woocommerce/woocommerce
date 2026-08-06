@@ -302,6 +302,64 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should initialize missing permalink defaults without using an uninitialized WooCommerce instance.
+	 */
+	public function test_missing_permalink_defaults_do_not_use_uninitialized_woocommerce(): void {
+		$user_id = self::factory()->user->create(
+			array(
+				'role'   => 'administrator',
+				'locale' => 'fr_FR',
+			)
+		);
+		wp_set_current_user( $user_id );
+		delete_option( 'woocommerce_permalinks' );
+
+		$accessor_only_woocommerce = new class() {
+			/**
+			 * Number of textdomain reloads.
+			 *
+			 * @var int
+			 */
+			public $load_plugin_textdomain_calls = 0;
+
+			/**
+			 * Record a textdomain reload.
+			 */
+			public function load_plugin_textdomain(): void {
+				++$this->load_plugin_textdomain_calls;
+			}
+		};
+
+		$instance_property = new ReflectionProperty( WooCommerce::class, '_instance' );
+		$instance_property->setAccessible( true );
+		$original_instance         = $instance_property->getValue();
+		$woocommerce_global_is_set = array_key_exists( 'woocommerce', $GLOBALS );
+		$original_woocommerce      = $GLOBALS['woocommerce'] ?? null;
+		$translate_permalink_slugs = $this->get_french_permalink_slug_filter();
+
+		$instance_property->setValue( null, $accessor_only_woocommerce );
+		unset( $GLOBALS['woocommerce'] );
+		add_filter( 'gettext_with_context', $translate_permalink_slugs, 10, 4 );
+
+		try {
+			$permalinks = wc_get_permalink_structure();
+		} finally {
+			remove_filter( 'gettext_with_context', $translate_permalink_slugs, 10 );
+			$instance_property->setValue( null, $original_instance );
+
+			if ( $woocommerce_global_is_set ) {
+				$GLOBALS['woocommerce'] = $original_woocommerce;
+			} else {
+				unset( $GLOBALS['woocommerce'] );
+			}
+		}
+
+		$this->assertSame( 'product', $permalinks['product_base'], 'The returned product base should still use the site locale.' );
+		$this->assertSame( 'fr_FR', determine_locale(), 'The admin request locale should be restored.' );
+		$this->assertSame( 0, $accessor_only_woocommerce->load_plugin_textdomain_calls, 'The function should not fall back to the WooCommerce accessor.' );
+	}
+
+	/**
 	 * @testdox Should initialize missing permalink defaults in the site locale when get_locale() is filtered.
 	 */
 	public function test_missing_permalink_defaults_use_site_locale_when_get_locale_is_filtered(): void {

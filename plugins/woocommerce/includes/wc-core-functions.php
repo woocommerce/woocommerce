@@ -2143,6 +2143,7 @@ function wc_get_permalink_structure() {
 	$saved_permalinks               = (array) get_option( 'woocommerce_permalinks', array() );
 	$localized_defaults_are_missing = empty( $saved_permalinks['product_base'] ) || empty( $saved_permalinks['category_base'] ) || empty( $saved_permalinks['tag_base'] );
 	$locale_was_switched            = false;
+	$reload_woocommerce_textdomain  = null;
 
 	try {
 		if ( $localized_defaults_are_missing ) {
@@ -2167,8 +2168,14 @@ function wc_get_permalink_structure() {
 				$locale_was_switched = switch_to_locale( $site_locale );
 
 				if ( $locale_was_switched ) {
-					add_filter( 'plugin_locale', 'get_locale' );
-					WC()->load_plugin_textdomain();
+					$woocommerce                      = $GLOBALS['woocommerce'] ?? null;
+					$woocommerce_textdomain_candidate = array( $woocommerce, 'load_plugin_textdomain' );
+
+					if ( is_callable( $woocommerce_textdomain_candidate ) ) {
+						$reload_woocommerce_textdomain = Closure::fromCallable( $woocommerce_textdomain_candidate );
+						add_filter( 'plugin_locale', 'get_locale' );
+						$reload_woocommerce_textdomain();
+					}
 				}
 			}
 		}
@@ -2185,7 +2192,12 @@ function wc_get_permalink_structure() {
 		);
 	} finally {
 		if ( $locale_was_switched ) {
-			wc_restore_locale();
+			restore_previous_locale();
+
+			if ( null !== $reload_woocommerce_textdomain ) {
+				remove_filter( 'plugin_locale', 'get_locale' );
+				$reload_woocommerce_textdomain();
+			}
 		}
 	}
 
