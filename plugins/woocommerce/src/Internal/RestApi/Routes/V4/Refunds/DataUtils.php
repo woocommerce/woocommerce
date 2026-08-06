@@ -1226,6 +1226,144 @@ class DataUtils {
 	}
 
 	/**
+	 * Run the full refund preview pipeline for one request.
+	 *
+	 * Normalizes the caller-supplied refund_total values, validates the line
+	 * items, builds the preview, and applies the two aggregate guards (a
+	 * non-positive total, and a total exceeding the order's remaining
+	 * refundable amount). Shared by the wc/v3 and wc/v4 preview endpoints so
+	 * a fix lands once; error codes are emitted unprefixed and each caller
+	 * applies its own surface convention (wc/v3 prefixes with
+	 * `woocommerce_rest_`, wc/v4 wraps in its error envelope).
+	 *
+	 * @param WC_Order $order      The order the preview is computed for.
+	 * @param array    $line_items Line items in schema format (line_item_id keyed).
+	 * @param string   $log_source Log source for invariant violations, per caller.
+	 * @return array|WP_Error Preview data, or WP_Error carrying its HTTP status in the error data.
+	 *
+	 * @since 11.1.0
+	 */
+	public function compute_refund_preview_or_error( WC_Order $order, array $line_items, string $log_source ) {
+		// Round caller-supplied refund_total values once, up front, so validation and
+		// the computed preview use the same precision the create flow stores. Reused
+		// for both validate and build below.
+		$line_items = $this->normalize_refund_totals( $line_items );
+
+		$validation_error = $this->validate_preview_line_items( $line_items, $order );
+
+		if ( is_wp_error( $validation_error ) ) {
+			return $validation_error;
+		}
+
+		try {
+			$preview = $this->build_refund_preview( $order, $line_items );
+		} catch ( \InvalidArgumentException $e ) {
+			// validate_preview_line_items above should have caught any bad input.
+			// If build_refund_preview still throws InvalidArgumentException, treat
+			// it as a server-side invariant violation, log for observability, and
+			// return a generic message (do not leak internal IDs to clients).
+			wc_get_logger()->error(
+				sprintf( 'Refund preview invariant violation on order %d: %s', $order->get_id(), $e->getMessage() ),
+				array( 'source' => $log_source )
+			);
+			return new WP_Error(
+				'invalid_preview_request',
+				__( 'The refund preview could not be generated due to an unexpected error.', 'woocommerce' ),
+				array( 'status' => WP_Http::INTERNAL_SERVER_ERROR )
+			);
+		} catch ( \Throwable $e ) {
+			wc_get_logger()->error(
+				sprintf( 'Refund preview unexpected error on order %d: %s', $order->get_id(), $e->getMessage() ),
+				array( 'source' => $log_source )
+			);
+			return new WP_Error(
+				'unexpected_preview_error',
+				__( 'An unexpected error occurred while generating the refund preview.', 'woocommerce' ),
+				array( 'status' => WP_Http::INTERNAL_SERVER_ERROR )
+			);
+		}
+
+		// Reject a non-positive aggregate total up front. A refund of only a negative
+		// discount line, or a product plus discount that nets to zero, would otherwise
+		// preview successfully and then fail at create time.
+		if ( (float) $preview['total'] <= 0 ) {
+			return new WP_Error(
+				'invalid_refund_amount',
+				__( 'Refund total must be greater than zero.', 'woocommerce' ),
+				array( 'status' => WP_Http::BAD_REQUEST )
+			);
+		}
+
+		// Final guard: even when per-line validation passes, the aggregate
+		// preview total can still exceed the order's remaining refundable
+		// amount (e.g. an amount-only partial refund applied previously).
+		// `total` is already tax-inclusive; compare directly against max_refundable.
+		$preview_total_with_tax = abs( (float) $preview['total'] );
+		if ( $preview_total_with_tax > (float) $preview['max_refundable'] ) {
+			return new WP_Error(
+				'preview_exceeds_max_refundable',
+				sprintf(
+					/* translators: 1: requested preview total including tax, 2: remaining refundable */
+					__( 'Requested refund preview (%1$s) exceeds the remaining refundable amount (%2$s).', 'woocommerce' ),
+					wc_format_decimal( $preview_total_with_tax, wc_get_price_decimals() ),
+					$preview['max_refundable']
+				),
+				array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
+			);
+		}
+
+		return $preview;
+	}
+
+	/**
+	 * Get the REST argument schema for a preview request's line_items parameter.
+	 *
+	 * Shared by the wc/v3 and wc/v4 preview endpoints so the accepted payload
+	 * cannot drift between versions.
+	 *
+	 * @return array
+	 *
+	 * @since 11.1.0
+	 */
+	public function get_preview_line_items_arg_schema(): array {
+		return array(
+			'description'       => __( 'Line items to include in the refund preview.', 'woocommerce' ),
+			'type'              => 'array',
+			'required'          => true,
+			'minItems'          => 1,
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'type'                 => 'object',
+				'required'             => array( 'line_item_id' ),
+				'additionalProperties' => false,
+				'properties'           => array(
+					'line_item_id' => array(
+						'description' => __( 'ID of the original order line item.', 'woocommerce' ),
+						'type'        => 'integer',
+						'minimum'     => 1,
+					),
+					'quantity'     => array(
+						'description' => __( 'Quantity to refund. Required when refund_total is omitted.', 'woocommerce' ),
+						'type'        => 'integer',
+						'minimum'     => 1,
+					),
+					'refund_total' => array(
+						// No `minimum` here on purpose: validate_preview_line_items() owns
+						// the sign rule and returns the actionable `invalid_refund_total`
+						// code. A refund_total must be non-zero and match the line's sign —
+						// negative is valid for a discount/credit line, positive for a normal
+						// line; zero and wrong-sign values are rejected. A schema `minimum`
+						// would wrongly forbid the negative form, and a generic
+						// `rest_invalid_param` is less useful to clients.
+						'description' => __( 'Tax-inclusive amount to refund for this line item. Must be non-zero and match the line\'s sign (negative for discount or credit lines, positive otherwise). Required when quantity is omitted.', 'woocommerce' ),
+						'type'        => array( 'number', 'null' ),
+					),
+				),
+			),
+		);
+	}
+
+	/**
 	 * Pre-compute refund data for all line items in an order.
 	 *
 	 * Loads refunds once and builds lookup maps for refunded quantities and totals per item ID,
