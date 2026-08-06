@@ -240,6 +240,20 @@ a.wc-block-components-product-name:hover {
 	box-shadow: none;
 }
 
+/* WooCommerce strips the group border's top or bottom edge when the
+ * first or last option is the selected one, expecting the ring to draw
+ * that edge; with the ring gone, restore the sides and their margin
+ * nudges so the box stays fully outlined. */
+.wc-block-components-radio-control--highlight-checked.wc-block-components-radio-control--highlight-checked.wc-block-components-radio-control--highlight-checked--first-selected::after {
+	border-top: 1px solid var(--wp--preset--color--theme-6);
+	margin-top: 0;
+}
+
+.wc-block-components-radio-control--highlight-checked.wc-block-components-radio-control--highlight-checked.wc-block-components-radio-control--highlight-checked--last-selected::after {
+	border-bottom: 1px solid var(--wp--preset--color--theme-6);
+	margin-bottom: 0;
+}
+
 /* The boxes around these components are WooCommerce ::after overlays and
  * component borders drawn at 20% ink (or a hardcoded gray), a shade
  * darker than the theme-6 field borders beside them; align them all. */
