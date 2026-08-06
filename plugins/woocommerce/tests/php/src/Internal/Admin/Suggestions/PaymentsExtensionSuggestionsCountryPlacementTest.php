@@ -365,7 +365,9 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 	 * @param array  $expected The expected section map.
 	 */
 	public function test_country_baseline_placement( string $country, array $expected ): void {
-		$projected = $this->project_sections( $this->sut->get_extension_suggestions( $country ), $country );
+		$result    = $this->sut->get_extension_suggestions( $country );
+		$projected = $this->project_sections( $result, $country );
+		$this->assert_no_preferred_tag_in_other( $result, $country );
 		$this->assert_valid_section_map( $expected, $country, 'fixture' );
 		$this->assert_valid_section_map( $projected, $country, 'code projection' );
 
@@ -410,8 +412,10 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 		);
 		$this->sut->clear_cache();
 
-		$projected            = $this->project_sections( $this->sut->get_extension_suggestions( $country ), $country );
+		$result               = $this->sut->get_extension_suggestions( $country );
+		$projected            = $this->project_sections( $result, $country );
 		$derived              = $expected;
+		$this->assert_no_preferred_tag_in_other( $result, $country );
 		$derived['other_psp'] = array_values(
 			array_filter(
 				$expected['other_psp'],
@@ -483,21 +487,34 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 				"For $country, the Other suggestion '{$suggestion['id']}' has category '$category', which maps to no fixture section. An uncategorised suggestion would silently vanish from the contract."
 			);
 
-			// A suggestion that reaches Other lost the race for its preferred slot,
-			// so the tag it lost with must not still be on it: the tag is part of the
-			// REST payload, and the fixture records IDs only, so nothing else here
-			// would notice. Countries that surface a preferred-by-default extension
-			// in Other strip the tag with a '_remove' override.
+			$projected[ self::CATEGORY_TO_SECTION[ $category ] ][] = $suggestion['id'];
+		}
+
+		return $projected;
+	}
+
+	/**
+	 * Assert that nothing in the Other list kept the tag it lost its slot with.
+	 *
+	 * The tag is part of the REST payload and the fixture records IDs only, so
+	 * nothing else here would notice. Countries that surface a preferred-by-default
+	 * extension in Other strip the tag with a '_remove' override.
+	 *
+	 * This holds only while nothing is hidden. A hidden preferred suggestion skips
+	 * the slot assignment entirely and reaches Other with its tags untouched, so
+	 * tests that hide a suggestion must not call this.
+	 *
+	 * @param array  $result  The service result.
+	 * @param string $country The country code, for failure messages.
+	 */
+	private function assert_no_preferred_tag_in_other( array $result, string $country ): void {
+		foreach ( $result['other'] as $suggestion ) {
 			$this->assertNotContains(
 				PaymentsExtensionSuggestions::TAG_PREFERRED,
 				$suggestion['tags'] ?? array(),
 				"For $country, the Other suggestion '{$suggestion['id']}' still carries the preferred tag even though another provider filled its preferred slot. Strip it with a '_remove' override on the country entry."
 			);
-
-			$projected[ self::CATEGORY_TO_SECTION[ $category ] ][] = $suggestion['id'];
 		}
-
-		return $projected;
 	}
 
 	/**
