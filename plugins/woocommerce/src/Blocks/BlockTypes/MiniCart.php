@@ -491,6 +491,24 @@ class MiniCart extends AbstractBlock {
 	 * @return string The processed template contents.
 	 */
 	protected function process_template_contents( $template_contents ) {
+		$blocks             = parse_blocks( $template_contents );
+		$template_blocks    = array_values(
+			array_filter(
+				$blocks,
+				static function ( $block ) {
+					return ! empty( $block['blockName'] ) || '' !== trim( $block['innerHTML'] );
+				}
+			)
+		);
+		$template_block     = 1 === count( $template_blocks ) ? $template_blocks[0] : null;
+		$is_pattern_wrapper = $template_block && 'core/pattern' === $template_block['blockName'];
+
+		// Resolve the pattern wrapper so the compatibility processing can inspect
+		// the actual block markup before removing legacy Mini Cart divs.
+		if ( $is_pattern_wrapper ) {
+			$template_contents = serialize_blocks( resolve_pattern_blocks( $blocks ) );
+		}
+
 		$p               = new \WP_HTML_Tag_Processor( $template_contents );
 		$is_old_template = $p->next_tag(
 			array(

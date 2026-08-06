@@ -236,6 +236,58 @@ class MiniCart extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should avoid duplicate wrappers when rendering a pattern-backed Mini Cart template.
+	 */
+	public function test_process_template_contents_with_pattern_backed_template(): void {
+		$pattern_name = 'woocommerce-tests/mini-cart-template-part';
+		register_block_pattern(
+			$pattern_name,
+			array(
+				'title'   => 'Mini Cart template part',
+				'content' => $this->current_template_with_user_edits,
+			)
+		);
+
+		try {
+			$processed_template = $this->mock->call_process_template_contents(
+				'<!-- wp:pattern {"slug":"' . $pattern_name . '"} /-->'
+			);
+			$rendered_template  = do_blocks( $processed_template );
+
+			foreach ( MiniCartBlock::MINI_CART_TEMPLATE_BLOCKS as $block_name ) {
+				$class_name = 'wp-block-' . str_replace( '/', '-', $block_name );
+				if ( false === strpos( $this->current_template_with_user_edits, $class_name ) ) {
+					continue;
+				}
+
+				$p             = new \WP_HTML_Tag_Processor( $rendered_template );
+				$wrapper_count = 0;
+				while (
+					$p->next_tag(
+						array(
+							'class_name' => $class_name,
+						)
+					)
+				) {
+					++$wrapper_count;
+				}
+
+				$this->assertSame(
+					1,
+					$wrapper_count,
+					"The rendered template should contain exactly one wrapper with class {$class_name}."
+				);
+			}
+
+			$this->assertStringContainsString( 'wp-block-group', $rendered_template );
+			$this->assertStringContainsString( 'wp-image-block', $rendered_template );
+			$this->assertStringContainsString( 'wp-block-separator', $rendered_template );
+		} finally {
+			unregister_block_pattern( $pattern_name );
+		}
+	}
+
+	/**
 	 * Checks that process_template_contents removes the wrapper divs from the
 	 * current template with user edits, but preserves the user edits.
 	 *
