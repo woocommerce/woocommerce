@@ -3223,7 +3223,7 @@ body.woocommerce_page_wc-orders {
 			border-top: 1px solid #f5f5f5;
 		}
 
-		tbody tr:hover:not(.status-trash):not(.no-link) td {
+		tbody tr:hover:not(.status-trash):not(.no-link) > :not(.check-column) {
 			cursor: pointer;
 		}
 
@@ -3554,7 +3554,7 @@ body.woocommerce_page_wc-orders {
 			width: 100%;
 		}
 
-		td.column-order_number {
+		.column-order_number {
 			.toggle-row {
 				height: 20px;
 			}
@@ -3574,7 +3574,7 @@ body.woocommerce_page_wc-orders {
 		}
 
 		tr:not(.is-expanded) {
-			td.column-order_number {
+			.column-order_number {
 				vertical-align: top;
 
 				a.order-view {
@@ -3616,6 +3616,15 @@ body.woocommerce_page_wc-orders {
 					}
 				}
 			}
+		}
+
+		// Hide the small-screen date/status copies when the corresponding column is hidden via Screen Options.
+		&:has( thead th.column-order_date.hidden ) .order_date.small-screen-only {
+			display: none;
+		}
+
+		&:has( thead th.column-order_status.hidden ) .order_status.small-screen-only {
+			display: none;
 		}
 
 	}
@@ -7297,7 +7306,7 @@ img.ui-datepicker-trigger {
 								margin: 0 10px 0 0;
 								background: transparent;
 								border: 0;
-								color: #777;
+								color: $wp-admin-text-gray;
 								text-align: center;
 								box-shadow: none;
 
@@ -7947,8 +7956,8 @@ table.bar_chart {
 				overflow: visible;
 			}
 
-			.is-expanded .toggle-row {
-				top: -28px;
+			.is-expanded:has(td.column-thumb:not(.hidden)) .toggle-row {
+				top: -30px;
 			}
 		}
 	}
@@ -8040,6 +8049,17 @@ table.bar_chart {
 
 	.select2-container {
 		width: 100% !important;
+	}
+
+	// Reserve room for the clear (x) and chevron icons; .select2-container keeps this rule above the later global 24px padding.
+	.select2-container .select2-selection--single {
+		.select2-selection__rendered {
+			padding-right: 40px;
+		}
+
+		.select2-selection__clear {
+			margin-right: 18px;
+		}
 	}
 }
 

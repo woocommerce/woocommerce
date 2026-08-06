@@ -151,9 +151,22 @@ class Endpoint {
 			return;
 		}
 
-		// No managed page anywhere. The permanent `woocommerce_create_pages`
-		// filter (registered in `init()`) makes the call inject our entry.
-		\WC_Install::create_pages();
+		// No managed page anywhere. Scope this internal repair to our own page
+		// so merchants' intentional choices for other WC pages are not repaired.
+		$create_review_order_page_only = static function ( $pages ) {
+			if ( ! is_array( $pages ) ) {
+				return $pages;
+			}
+
+			return array_intersect_key( $pages, array( self::PAGE_KEY => true ) );
+		};
+
+		add_filter( 'woocommerce_create_pages', $create_review_order_page_only, PHP_INT_MAX );
+		try {
+			\WC_Install::create_pages();
+		} finally {
+			remove_filter( 'woocommerce_create_pages', $create_review_order_page_only, PHP_INT_MAX );
+		}
 
 		// Defer the rewrite flush to wp_loaded; rewrite_rule fires later on init.
 		update_option( 'woocommerce_review_order_flush_rewrite_pending', 'yes' );
@@ -163,8 +176,9 @@ class Endpoint {
 	 * Append the Review Order page to any caller of
 	 * `WC_Install::create_pages()` — keeps Status → Tools' "Create default
 	 * pages" repair path and any third-party callers seeded with our page
-	 * whenever the feature is on, without having to call create_pages()
-	 * with a one-off filter in `maybe_create_host_page()`.
+	 * whenever the feature is on. `maybe_create_host_page()` relies on this
+	 * injection too, layering its own scoping filter on top so its internal
+	 * repair creates only this page.
 	 *
 	 * @since 10.8.0
 	 *

@@ -17,9 +17,13 @@ const selector = `
 const getProps = ( el: HTMLElement ) => {
 	const showOrderby = el.dataset.showOrderby === 'true';
 	const showLoadMore = el.dataset.showLoadMore === 'true';
+	const isFilteredReviewsBlock =
+		el.classList.contains( 'wp-block-woocommerce-reviews-by-product' ) ||
+		el.classList.contains( 'wp-block-woocommerce-reviews-by-category' );
 
 	return {
 		attributes: {
+			isFilteredReviewsBlock,
 			showOrderby,
 			showLoadMore,
 			showReviewDate: el.classList.contains( 'has-date' ),

@@ -98,7 +98,6 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 
 		// Use regular calculation unless the fee is negative.
 		if ( 0 <= $total ) {
-			unset( $calculate_tax_for['prices_include_tax'] );
 			return parent::calculate_taxes( $calculate_tax_for );
 		}
 
@@ -117,7 +116,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 					$cart_discount_proportion       = $total * $proportion;
 					$calculate_tax_for['tax_class'] = $tax_class;
 					$tax_rates                      = WC_Tax::find_rates( $calculate_tax_for );
-					$discount_taxes                 = wc_array_merge_recursive_numeric( $discount_taxes, WC_Tax::calc_tax( $cart_discount_proportion, $tax_rates, ! empty( $calculate_tax_for['prices_include_tax'] ) ) );
+					$discount_taxes                 = wc_array_merge_recursive_numeric( $discount_taxes, WC_Tax::calc_tax( $cart_discount_proportion, $tax_rates ) );
 				}
 			}
 			$this->set_taxes( array( 'total' => $discount_taxes ) );
