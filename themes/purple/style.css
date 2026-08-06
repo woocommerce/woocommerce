@@ -217,6 +217,8 @@ a.wc-block-components-product-name:hover {
 .wc-block-components-express-payment--checkout .wc-block-components-express-payment__title-container.wc-block-components-express-payment__title-container::before,
 .wc-block-components-express-payment--checkout .wc-block-components-express-payment__title-container.wc-block-components-express-payment__title-container::after,
 .wc-block-components-express-payment--checkout .wc-block-components-express-payment__content.wc-block-components-express-payment__content,
+.wc-block-checkout__payment-method .wc-block-components-radio-control-accordion-option.wc-block-components-radio-control-accordion-option:first-child::after,
+.wc-block-checkout__payment-method .wc-block-components-radio-control-accordion-option.wc-block-components-radio-control-accordion-option:last-child::after,
 .wc-block-components-radio-control--highlight-checked.wc-block-components-radio-control--highlight-checked::after,
 .wc-block-components-radio-control--highlight-checked .wc-block-components-radio-control-accordion-option--checked-option-highlighted.wc-block-components-radio-control-accordion-option--checked-option-highlighted,
 .wc-block-components-radio-control--highlight-checked label.wc-block-components-radio-control__option--checked-option-highlighted.wc-block-components-radio-control__option--checked-option-highlighted,
@@ -226,6 +228,16 @@ a.wc-block-components-product-name:hover {
 .wc-block-components-quantity-selector > .wc-block-components-quantity-selector__button--minus.wc-block-components-quantity-selector__button--minus,
 .wc-block-components-quantity-selector > .wc-block-components-quantity-selector__button--plus.wc-block-components-quantity-selector__button--plus {
 	border-radius: 0;
+}
+
+/* WooCommerce draws the selected shipping/payment option ring with an
+ * inset box-shadow in currentColor, which reads as a heavy ink border
+ * next to the theme-6 field borders. Recolor it rather than replacing
+ * it with a border: the shadow layers over the group's own 1px outline
+ * and keeps the layout from shifting when the selection moves. */
+.wc-block-components-radio-control--highlight-checked .wc-block-components-radio-control-accordion-option--checked-option-highlighted.wc-block-components-radio-control-accordion-option--checked-option-highlighted,
+.wc-block-components-radio-control--highlight-checked label.wc-block-components-radio-control__option--checked-option-highlighted.wc-block-components-radio-control__option--checked-option-highlighted {
+	box-shadow: inset 0 0 0 1.5px var(--wp--preset--color--theme-6);
 }
 
 /* ==========================================================================
