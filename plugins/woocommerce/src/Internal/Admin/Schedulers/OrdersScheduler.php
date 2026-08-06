@@ -133,19 +133,8 @@ class OrdersScheduler extends ImportScheduler {
 			add_action( 'woocommerce_refund_created', array( __CLASS__, 'possibly_schedule_import' ) );
 			add_action( 'woocommerce_schedule_import', array( __CLASS__, 'possibly_schedule_import' ) );
 
-			// Trash and untrash bypass woocommerce_update_order, so schedule imports for
-			// them here. In scheduled mode the batch cursor picks them up instead (the
-			// get_orders_since_* queries do not exclude trashed orders).
-			//
-			// Each store has exactly one of these signals routed to it, because the CPT
-			// data store emits both: its delete() calls wp_trash_post() and then fires
-			// woocommerce_trash_order, and its untrash_order() calls wp_untrash_post()
-			// and then saves a status transition. The Woo-side hooks are handled for
-			// HPOS, the post-side hooks for CPT.
-			//
-			// woocommerce_trash_order fires after the trashed status is persisted, but
-			// woocommerce_untrash_order fires before it, so untrash is driven off the
-			// status transition instead. See maybe_schedule_import_on_untrash().
+			// Trash and untrash bypass woocommerce_update_order. CPT emits both the Woo
+			// and the post hooks for one operation, so each handler takes a single store.
 			add_action( 'woocommerce_trash_order', array( __CLASS__, 'maybe_schedule_import_on_trash' ) );
 			add_action( 'woocommerce_order_status_changed', array( __CLASS__, 'maybe_schedule_import_on_untrash' ), 10, 2 );
 			add_action( 'trashed_post', array( __CLASS__, 'maybe_schedule_import_on_post_trash_change' ) );
@@ -410,19 +399,10 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			return;
 		}
 
-		// Skip a trashed record that Analytics does not already hold. Importing it now
-		// would create a wc_customer_lookup row through Order::get_report_customer_id(),
-		// and because the order stays in the trash nothing ever removes that row again —
-		// the customer shows up in Analytics > Customers with no countable orders.
-		// Records imported before being trashed already have a stats row, so their
-		// trashed status still syncs, and a restored order imports normally once its
-		// status is no longer trash.
-		//
-		// A missing stats row does not strictly prove the record was never imported: a
-		// failed sync can leave customer or lookup rows behind without one. Skipping is
-		// still correct there, because import() only ever creates and updates rows, so
-		// running it would not clean that remnant up either — it would just add a
-		// wc-trash stats row that every report already filters out.
+		// Skip trashed records Analytics does not already hold: importing one creates a
+		// wc_customer_lookup row via Order::get_report_customer_id() that nothing removes
+		// while the order stays trashed. Records trashed after being imported keep their
+		// stats row, so their status still syncs.
 		if ( OrderStatus::TRASH === $order->get_status() && ! self::has_order_stats_row( $order_id ) ) {
 			return;
 		}
@@ -461,9 +441,6 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	/**
 	 * Check whether an order or refund already has a row in the order stats table.
 	 *
-	 * Used to tell a record that Analytics has already imported from one it has never
-	 * seen, which decides whether a trashed record is worth importing at all.
-	 *
 	 * @param int $order_id Order or refund ID.
 	 * @return bool
 	 */
@@ -479,11 +456,8 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	/**
 	 * Schedule an analytics import when a CPT-based order is trashed or untrashed.
 	 *
-	 * The admin UI trashes and restores CPT orders via wp_trash_post()/wp_untrash_post(),
-	 * which never fire the woocommerce_trash_order hook or a status transition. When HPOS
-	 * is the authoritative store those signals fire directly, so this is skipped to avoid
-	 * a redundant import. Non-order posts fall out of the is_order() guard inside
-	 * possibly_schedule_import().
+	 * The CPT admin UI trashes via wp_trash_post(), which fires no Woo-side signal.
+	 * HPOS has its own handlers, so it is skipped here to avoid a duplicate import.
 	 *
 	 * @internal
 	 * @since 11.1.0
@@ -500,9 +474,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	/**
 	 * Schedule an analytics import when an HPOS order is trashed.
 	 *
-	 * The CPT data store fires woocommerce_trash_order in addition to trashing the
-	 * post, so acting on both signals would schedule the same import twice. CPT is
-	 * covered by trashed_post via maybe_schedule_import_on_post_trash_change().
+	 * CPT fires this hook too, on top of trashed_post, so it is handled there instead.
 	 *
 	 * @internal
 	 * @since 11.1.0
@@ -517,20 +489,12 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	}
 
 	/**
-	 * Schedule an analytics import when an order is restored from the trash.
+	 * Driven off the status transition rather than woocommerce_untrash_order, which
+	 * fires before the restored status is saved — so an import running synchronously
+	 * would record wc-trash, and nothing corrects it because the data store suppresses
+	 * woocommerce_update_order for trash transitions.
 	 *
-	 * The woocommerce_untrash_order hook fires *before* the restored status is persisted,
-	 * so scheduling from it records the still-trashed status whenever schedule_action()
-	 * falls back to running the import synchronously (Action Scheduler tables missing,
-	 * or scheduling disabled via woocommerce_analytics_disable_action_scheduling). The
-	 * order data store also suppresses woocommerce_update_order for trash transitions,
-	 * so nothing corrects the row afterwards. The status transition fires after the
-	 * order has been saved, which is accurate in both the scheduled and synchronous
-	 * paths.
-	 *
-	 * Restricted to HPOS: the CPT data store restores the post before saving the same
-	 * transition, so CPT would otherwise schedule the import twice. CPT is covered by
-	 * untrashed_post via maybe_schedule_import_on_post_trash_change().
+	 * CPT reaches this via its own save, so it is handled by untrashed_post instead.
 	 *
 	 * @internal
 	 * @since 11.1.0

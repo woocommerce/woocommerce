@@ -264,9 +264,8 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox delete_refund still runs the cleanup cascade when no stats row exists.
 	 *
-	 * Analytics imports are not atomic, so a refund can have product, coupon or tax
-	 * lookup rows without a stats row. Gating the cascade on the stats row would
-	 * orphan those rows permanently, so it runs regardless, with a customer ID of 0.
+	 * Imports are not atomic, so lookup rows can outlive the stats row. Gating on it
+	 * would orphan them, so the cascade runs regardless, with a customer ID of 0.
 	 */
 	public function test_delete_refund_runs_cascade_when_no_stats_row_exists(): void {
 		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
@@ -295,9 +294,8 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox delete_refund removes orphaned product lookup rows left by a partial import.
 	 *
-	 * OrdersScheduler::import() syncs the stats row and the product lookup rows in
-	 * separate, non-transactional steps, so the lookup rows can outlive a failed
-	 * stats sync. Deleting the refund must still clear them.
+	 * Stats and product lookups sync in separate, non-transactional steps, so the
+	 * lookup rows can outlive a failed stats sync.
 	 */
 	public function test_delete_refund_removes_orphaned_lookup_rows_without_stats_row(): void {
 		global $wpdb;
@@ -346,11 +344,9 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Deleting a CPT refund fires the analytics delete cascade exactly once.
 	 *
-	 * WC_Order_Refund_Data_Store_CPT::delete() calls wp_delete_post() — firing
-	 * delete_post, and with it delete_order() and the whole cascade — before firing
-	 * woocommerce_delete_order_refund. delete_refund() must therefore stand down
-	 * under CPT, or third-party listeners on the public cascade hook would see two
-	 * events for one deletion.
+	 * The CPT store deletes the post — running the cascade via delete_post — before
+	 * firing woocommerce_delete_order_refund, so delete_refund() must stand down or
+	 * listeners see two events for one deletion.
 	 */
 	public function test_deleting_cpt_refund_fires_delete_cascade_once(): void {
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
@@ -400,9 +396,8 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Deleting a CPT refund clears orphaned lookup rows left by a partial import.
 	 *
-	 * This is what makes the HPOS gate on delete_refund() safe: delete_order(), which
-	 * runs from delete_post under CPT, has no stats-row guard, so it removes the
-	 * auxiliary lookup rows whether or not a stats row survived the import.
+	 * This is what makes the HPOS gate safe: delete_order() has no stats-row guard, so
+	 * it clears the lookup rows whether or not a stats row survived.
 	 */
 	public function test_deleting_cpt_refund_clears_orphaned_lookup_rows(): void {
 		global $wpdb;

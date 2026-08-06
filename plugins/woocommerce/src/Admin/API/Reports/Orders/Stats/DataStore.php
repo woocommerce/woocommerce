@@ -691,26 +691,17 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Deletes the refund stats when a refund is deleted.
 	 *
-	 * The woocommerce_delete_order_refund hook fires after the refund has been
-	 * deleted, so delete_order() cannot be reused here: its OrderUtil::is_order()
-	 * guard and wc_get_order() call both require the record to still exist. The
-	 * customer ID is read from the stats row itself instead.
+	 * This hook fires after the refund is gone, so delete_order() cannot be reused —
+	 * its is_order() guard and wc_get_order() call both need the record. The customer
+	 * ID comes from the stats row instead.
 	 *
-	 * Only runs when HPOS is the authoritative store. Under CPT the refund's post is
-	 * deleted first, so delete_post has already run delete_order() and with it the
-	 * whole cascade; running again here would fire the public
-	 * woocommerce_analytics_delete_order_stats hook, and its per-table sub-hooks, a
-	 * second time for one deletion. Under HPOS-with-sync the reverse is true: the
-	 * HPOS record is gone before the backup post, so delete_order()'s
-	 * OrderUtil::is_order() guard short-circuits and this is the only cleanup that
-	 * runs.
+	 * HPOS only. CPT deletes the post first, so delete_post has already run the whole
+	 * cascade; repeating it here would fire the public hooks twice for one deletion.
+	 * Under HPOS-with-sync the HPOS record goes first, so delete_order() short-circuits
+	 * and this is the only cleanup that runs.
 	 *
-	 * The cascade runs even when the refund has no stats row. Imports are not
-	 * atomic — OrdersScheduler::import() syncs the stats, product, coupon, tax and
-	 * customer lookups in sequence without a transaction — so a partial import can
-	 * leave auxiliary lookup rows behind without a stats row. Skipping the cascade
-	 * in that state would orphan them permanently. delete_order() cleans those rows
-	 * unconditionally too, which is why the CPT path loses nothing by returning early.
+	 * The cascade runs even without a stats row: imports are not atomic, so lookup rows
+	 * can outlive one, and skipping would orphan them.
 	 *
 	 * @internal
 	 * @since 11.1.0

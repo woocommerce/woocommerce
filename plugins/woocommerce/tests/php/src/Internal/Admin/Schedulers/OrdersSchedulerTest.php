@@ -615,12 +615,9 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Untrashing syncs the restored status even when action scheduling runs synchronously.
 	 *
-	 * Regression test: woocommerce_untrash_order fires before the restored status is
-	 * persisted, so scheduling the import from it recorded wc-trash whenever
-	 * schedule_action() fell back to running the import inline. Nothing corrected the
-	 * row afterwards, because the HPOS data store suppresses woocommerce_update_order
-	 * for trash transitions, leaving the restored order permanently missing from
-	 * Analytics. The import is driven off the post-save status transition instead.
+	 * woocommerce_untrash_order fires before the restored status is saved, so an inline
+	 * import recorded wc-trash — and nothing corrected it, since the data store
+	 * suppresses woocommerce_update_order for trash transitions.
 	 *
 	 * @see https://github.com/woocommerce/woocommerce/issues/44371
 	 */
@@ -633,8 +630,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 
 		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
 
-		// Force schedule_action() down its synchronous fallback, as it behaves when the
-		// Action Scheduler tables are unavailable or scheduling has been disabled.
+		// Force schedule_action() down its synchronous fallback.
 		add_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
 
 		$read_status = static function ( $id ) use ( $wpdb ) {
@@ -707,12 +703,8 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Under CPT, trashing and restoring each schedule exactly one import.
 	 *
-	 * The CPT data store emits both signals for a single operation: delete() calls
-	 * wp_trash_post() and then fires woocommerce_trash_order, and untrash_order()
-	 * calls wp_untrash_post() and then saves the status transition. Only the
-	 * post-side hook may act under CPT, or the same import is scheduled twice and
-	 * the public woocommerce_order_scheduler_after_import_order hook fires twice for
-	 * one transition.
+	 * CPT emits both the post hook and the Woo-side signal per operation, so acting on
+	 * both would import twice and fire the public post-import hook twice.
 	 */
 	public function test_cpt_trash_and_untrash_each_schedule_a_single_import(): void {
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
@@ -721,10 +713,8 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 
 		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
 
-		// Run inline so each scheduled import is observable. This has to be in place
-		// before the fixture is built: otherwise saving the order queues a real Action
-		// Scheduler job, and has_existing_jobs() would then suppress the very imports
-		// this test counts.
+		// Run inline so each import is observable. Must precede the fixture: otherwise
+		// saving queues a real action and has_existing_jobs() suppresses what we count.
 		add_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
 
 		$order = \WC_Helper_Order::create_order();
@@ -864,13 +854,10 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox A trashed order that was never imported does not create an analytics customer.
 	 *
-	 * The batch cursor no longer excludes trashed orders, so an order created and
-	 * trashed between two batch runs reaches import() for the first time while
-	 * trashed. import() writes the stats row through Order::get_report_customer_id(),
-	 * which creates a wc_customer_lookup row as a side effect. The trashed order is
-	 * excluded from every report that joins wc_order_stats, but Analytics > Customers
-	 * counts the lookup table directly, so the customer would linger forever with no
-	 * countable orders.
+	 * An order created and trashed between batch runs reaches import() for the first
+	 * time while trashed, and the stats sync creates a wc_customer_lookup row as a side
+	 * effect. Reports join wc_order_stats and hide the order, but Analytics > Customers
+	 * counts the lookup table directly, so the customer would linger with no orders.
 	 *
 	 * @see https://github.com/woocommerce/woocommerce/pull/64157
 	 */
@@ -912,10 +899,8 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Trashing a partially imported order does not add an analytics customer.
 	 *
-	 * A failed sync can leave customer and lookup rows behind without a stats row, so a
-	 * missing stats row does not prove the record was never imported. Skipping the
-	 * import is still correct in that state: import() only creates and updates rows, so
-	 * running it would not clean the remnant up either.
+	 * A missing stats row does not prove the record was never imported. Skipping is
+	 * still right: import() only creates and updates, so it would not clear the remnant.
 	 */
 	public function test_trashing_partially_imported_order_adds_no_customer(): void {
 		global $wpdb;
