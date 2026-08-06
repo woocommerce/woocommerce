@@ -95,6 +95,7 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertInstanceOf( WP_Error::class, $response );
 		$this->assertSame( 'woocommerce_rest_authentication_error', $response->get_error_code() );
 		$this->assertStringContainsString( 'HTTPS is required', $response->get_error_message() );
+		$this->assertSame( 401, $response->get_error_data()['status'] );
 
 		remove_filter( 'is_ssl', '__return_false' );
 		unset( $_SERVER['REQUEST_URI'], $_GET['consumer_key'], $_GET['consumer_secret'], $_SERVER['HTTPS'] );
@@ -117,6 +118,7 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertInstanceOf( WP_Error::class, $response );
 		$this->assertSame( 'woocommerce_rest_authentication_error', $response->get_error_code() );
 		$this->assertStringContainsString( 'HTTPS is required', $response->get_error_message() );
+		$this->assertSame( 401, $response->get_error_data()['status'] );
 
 		remove_filter( 'is_ssl', '__return_false' );
 		unset( $_SERVER['REQUEST_URI'], $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'], $_SERVER['HTTPS'] );
@@ -139,6 +141,7 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertInstanceOf( WP_Error::class, $response );
 		$this->assertSame( 'woocommerce_rest_authentication_error', $response->get_error_code() );
 		$this->assertSame( 'Consumer key is invalid.', $response->get_error_message() );
+		$this->assertSame( 401, $response->get_error_data()['status'] );
 
 		remove_filter( 'is_ssl', '__return_true' );
 		unset( $_SERVER['REQUEST_URI'], $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'], $_SERVER['HTTPS'] );
