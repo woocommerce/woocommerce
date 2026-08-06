@@ -343,6 +343,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$this->assertTrue( $this->order_has_note_containing( $target_order, self::ORDER_NOTE_WITHDRAWAL_REQUESTED ), 'The intended order should receive a withdrawal note.' );
 			$this->assertFalse( $this->order_has_note_containing( $different_order, 'Order withdrawal requested' ), 'The order with a different order number should not receive a withdrawal note.' );
 			$this->assert_order_withdrawal_requested( $target_order );
+			$this->assert_order_withdrawal_not_requested( $different_order );
 		} finally {
 			remove_filter( 'woocommerce_order_number', $filter, 10 );
 			$capture['remove']();
@@ -1082,6 +1083,18 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 
 		$this->assertInstanceOf( WC_Order::class, $updated_order, 'The order should still exist.' );
 		$this->assertSame( 'yes', $updated_order->get_meta( self::ORDER_WITHDRAWAL_REQUESTED_META_KEY, true, 'edit' ), 'The matched order should be flagged as having a withdrawal request.' );
+	}
+
+	/**
+	 * Assert that an order has not been flagged as having a withdrawal request.
+	 *
+	 * @param WC_Order $order Order.
+	 */
+	private function assert_order_withdrawal_not_requested( WC_Order $order ): void {
+		$updated_order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $updated_order, 'The order should still exist.' );
+		$this->assertNotSame( 'yes', $updated_order->get_meta( self::ORDER_WITHDRAWAL_REQUESTED_META_KEY, true, 'edit' ), 'The unmatched order should not be flagged as having a withdrawal request.' );
 	}
 
 	/**
