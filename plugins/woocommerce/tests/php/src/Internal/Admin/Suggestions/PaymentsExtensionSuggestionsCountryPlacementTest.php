@@ -1,7 +1,7 @@
 <?php
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings;
+namespace Automattic\WooCommerce\Tests\Internal\Admin\Suggestions;
 
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
@@ -17,7 +17,7 @@ use WC_Unit_Test_Case;
  *
  * @class PaymentsProviders
  */
-class PaymentsCountryPlacementTest extends WC_Unit_Test_Case {
+class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case {
 
 	/**
 	 * Fixture section keys, in the tracking sheet's row order.
@@ -643,7 +643,7 @@ class PaymentsCountryPlacementTest extends WC_Unit_Test_Case {
 		$lines[] = '';
 		$lines[] = $this->render_fixture_entry( $country, $projected, $expected['primary_offline'] ?? null );
 		$lines[] = '';
-		$lines[] = 'Then run: pnpm --filter=@woocommerce/plugin-woocommerce lint:php:fix -- tests/php/src/Internal/Admin/Settings/fixtures/country-placements.php';
+		$lines[] = 'Then run: pnpm --filter=@woocommerce/plugin-woocommerce lint:php:fix -- tests/php/src/Internal/Admin/Suggestions/fixtures/expected-country-placements.php';
 
 		return implode( "\n", $lines );
 	}
@@ -735,6 +735,6 @@ class PaymentsCountryPlacementTest extends WC_Unit_Test_Case {
 	 * @return array<string, array> Country code to expected section map.
 	 */
 	private static function load_fixture(): array {
-		return require __DIR__ . '/fixtures/country-placements.php';
+		return require __DIR__ . '/fixtures/expected-country-placements.php';
 	}
 }
