@@ -510,13 +510,20 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Set attributes. Unlike the parent product which uses terms, variations are assigned
 	 * specific attributes using name-value pairs. Taxonomy attribute values must use term
-	 * slugs, which can be URL-encoded and differ from the term name (for example, a term
-	 * named "7½" can have the slug "7%c2%bd").
+	 * slugs, which can be URL-encoded and differ from the term name.
+	 *
+	 * For example, a variation with a global "Size" attribute whose term name is "7½"
+	 * should be configured using the "7%c2%bd" term slug:
+	 *
+	 * $variation->set_attributes(
+	 *     array(
+	 *         'pa_size' => '7%c2%bd',
+	 *     )
+	 * );
 	 *
 	 * @param array $raw_attributes Array of raw attributes.
 	 *
 	 * @since 3.0.0
-	 * @since 11.1.0 Clarified that taxonomy attribute values must use term slugs.
 	 */
 	public function set_attributes( $raw_attributes ) {
 		$raw_attributes = (array) $raw_attributes;
