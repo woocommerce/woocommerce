@@ -2140,17 +2140,54 @@ function wc_list_pluck( $list, $callback_or_field, $index_key = null ) {
  * @return array
  */
 function wc_get_permalink_structure() {
-	$saved_permalinks = (array) get_option( 'woocommerce_permalinks', array() );
-	$permalinks       = wp_parse_args(
-		array_filter( $saved_permalinks ),
-		array(
-			'product_base'           => _x( 'product', 'slug', 'woocommerce' ),
-			'category_base'          => _x( 'product-category', 'slug', 'woocommerce' ),
-			'tag_base'               => _x( 'product-tag', 'slug', 'woocommerce' ),
-			'attribute_base'         => '',
-			'use_verbose_page_rules' => false,
-		)
-	);
+	$saved_permalinks               = (array) get_option( 'woocommerce_permalinks', array() );
+	$localized_defaults_are_missing = empty( $saved_permalinks['product_base'] ) || empty( $saved_permalinks['category_base'] ) || empty( $saved_permalinks['tag_base'] );
+	$locale_was_switched            = false;
+
+	try {
+		if ( $localized_defaults_are_missing ) {
+			if ( is_multisite() && wp_installing() ) {
+				$site_locale = get_site_option( 'WPLANG' );
+			} else {
+				$site_locale = get_option( 'WPLANG' );
+
+				if ( false === $site_locale && is_multisite() ) {
+					$site_locale = get_site_option( 'WPLANG' );
+				}
+			}
+
+			if ( false === $site_locale ) {
+				$site_locale = defined( 'WPLANG' ) ? WPLANG : ( $GLOBALS['wp_local_package'] ?? '' );
+			}
+
+			$site_locale = empty( $site_locale ) ? 'en_US' : $site_locale;
+
+			// get_locale() may reflect a temporary locale switch or a different blog's cached locale.
+			if ( determine_locale() !== $site_locale && function_exists( 'switch_to_locale' ) ) {
+				$locale_was_switched = switch_to_locale( $site_locale );
+
+				if ( $locale_was_switched ) {
+					add_filter( 'plugin_locale', 'get_locale' );
+					WC()->load_plugin_textdomain();
+				}
+			}
+		}
+
+		$permalinks = wp_parse_args(
+			array_filter( $saved_permalinks ),
+			array(
+				'product_base'           => _x( 'product', 'slug', 'woocommerce' ),
+				'category_base'          => _x( 'product-category', 'slug', 'woocommerce' ),
+				'tag_base'               => _x( 'product-tag', 'slug', 'woocommerce' ),
+				'attribute_base'         => '',
+				'use_verbose_page_rules' => false,
+			)
+		);
+	} finally {
+		if ( $locale_was_switched ) {
+			wc_restore_locale();
+		}
+	}
 
 	if ( $saved_permalinks !== $permalinks ) {
 		update_option( 'woocommerce_permalinks', $permalinks );
