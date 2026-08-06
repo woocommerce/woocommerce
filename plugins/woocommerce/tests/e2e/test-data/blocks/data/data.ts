@@ -65,8 +65,8 @@ const hoodieReviews = [
 	{
 		name: `${ customer.first_name } ${ customer.last_name }`,
 		email: customer.email,
-		review: 'Worst ever!',
-		rating: 1,
+		review: "It's ok.",
+		rating: 3,
 	},
 	{
 		name: `${ customer.first_name } ${ customer.last_name }`,
