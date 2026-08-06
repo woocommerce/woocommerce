@@ -126,7 +126,7 @@ a.wc-block-components-product-name:hover {
 }
 
 /* ==========================================================================
-   WooCommerce — Checkout
+   WooCommerce — Cart & Checkout
    ========================================================================== */
 
 /* Styles for WooCommerce blocks that can't be styled via the editor yet. */
@@ -156,6 +156,13 @@ a.wc-block-components-product-name:hover {
 	border-radius: 0;
 }
 
+/* Cart scope covers the shipping calculator fields, which reuse the same
+ * components as the checkout form. */
+.wp-block-woocommerce-cart .wc-block-components-text-input:not(.has-error) input,
+.wp-block-woocommerce-cart .wc-block-components-textarea:not(.has-error),
+.wp-block-woocommerce-cart .wc-blocks-components-select:not(.has-error) .wc-blocks-components-select__select,
+.wp-block-woocommerce-cart .wc-blocks-components-select:not(.has-error) .wc-blocks-components-select__container,
+.wp-block-woocommerce-cart .wc-block-components-checkbox__input[type="checkbox"],
 .wp-block-woocommerce-checkout .wc-block-components-text-input:not(.has-error) input,
 .wp-block-woocommerce-checkout .wc-block-components-textarea:not(.has-error),
 .wp-block-woocommerce-checkout .wc-blocks-components-select:not(.has-error) .wc-blocks-components-select__select,
@@ -165,6 +172,9 @@ a.wc-block-components-product-name:hover {
 	border-radius: 0;
 }
 
+.wp-block-woocommerce-cart .wc-block-components-text-input:not(.has-error) input:focus,
+.wp-block-woocommerce-cart .wc-block-components-textarea:not(.has-error):focus,
+.wp-block-woocommerce-cart .wc-blocks-components-select:not(.has-error) .wc-blocks-components-select__select:focus,
 .wp-block-woocommerce-checkout .wc-block-components-text-input:not(.has-error) input:focus,
 .wp-block-woocommerce-checkout .wc-block-components-textarea:not(.has-error):focus,
 .wp-block-woocommerce-checkout .wc-blocks-components-select:not(.has-error) .wc-blocks-components-select__select:focus {
@@ -187,6 +197,21 @@ a.wc-block-components-product-name:hover {
  * read --wc-form-border-radius and need no override. */
 .wc-gift-cards-text-input input {
 	border-color: var(--wp--preset--color--theme-6);
+	border-radius: 0;
+}
+
+/* Square the remaining cart/checkout components WooCommerce rounds with
+ * hardcoded 4px values (no variable, no editor UI). Doubled classes beat
+ * WooCommerce's specificity ties regardless of stylesheet order. Radio
+ * inputs keep their 50% radius; circular radios are intentional. */
+.wc-block-components-radio-control--highlight-checked.wc-block-components-radio-control--highlight-checked::after,
+.wc-block-components-radio-control--highlight-checked .wc-block-components-radio-control-accordion-option--checked-option-highlighted.wc-block-components-radio-control-accordion-option--checked-option-highlighted,
+.wc-block-components-radio-control--highlight-checked label.wc-block-components-radio-control__option--checked-option-highlighted.wc-block-components-radio-control__option--checked-option-highlighted,
+.wc-block-components-address-card.wc-block-components-address-card,
+.wc-block-components-local-pickup-select--multiple.wc-block-components-local-pickup-select--multiple,
+.wc-block-components-address-autocomplete-suggestions.wc-block-components-address-autocomplete-suggestions,
+.wc-block-components-quantity-selector > .wc-block-components-quantity-selector__button--minus.wc-block-components-quantity-selector__button--minus,
+.wc-block-components-quantity-selector > .wc-block-components-quantity-selector__button--plus.wc-block-components-quantity-selector__button--plus {
 	border-radius: 0;
 }
 
