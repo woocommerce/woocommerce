@@ -696,7 +696,8 @@ function get_woocommerce_currency_symbols() {
 			'XPF' => 'XPF',
 			'YER' => '&#xfdfc;',
 			'ZAR' => '&#82;',
-			'ZMW' => 'ZK',
+			// CLDR uses K for en-ZM and ZK for its narrow representation.
+			'ZMW' => 'K',
 		)
 	);
 

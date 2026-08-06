@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormProcessor;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormState;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormView;
+use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFeatureHighlightNotification;
 use WC_Order;
 use WC_Rate_Limiter;
 use WC_Unit_Test_Case;
@@ -642,7 +643,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	 */
 	public function test_controller_registers_order_deletion_cleanup_hooks(): void {
 		$controller = new OrderWithdrawalController();
-		$controller->init( $this->sut, new OrderWithdrawalFormView() );
+		$controller->init( $this->sut, new OrderWithdrawalFormView(), new OrderWithdrawalFeatureHighlightNotification() );
 
 		try {
 			$controller->register();
@@ -650,6 +651,39 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$this->assertNotFalse( has_action( 'woocommerce_before_delete_order', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ) );
 			$this->assertNotFalse( has_action( 'before_delete_post', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ) );
 		} finally {
+			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $controller, 'maybe_flush_rewrite_rules' ), 10 );
+			remove_filter( 'woocommerce_get_query_vars', array( $controller, 'add_query_var' ), 10 );
+			remove_filter( 'woocommerce_endpoint_order-withdrawal_title', array( $controller, 'get_endpoint_title' ), 10 );
+			remove_filter( 'woocommerce_settings_pages', array( $controller, 'add_endpoint_setting' ), 10 );
+			remove_action( 'woocommerce_account_order-withdrawal_endpoint', array( $controller, 'render_view' ), 10 );
+			remove_action( 'woocommerce_before_delete_order', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10 );
+			remove_action( 'before_delete_post', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10 );
+			remove_action( 'woocommerce_privacy_remove_order_personal_data', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10 );
+		}
+	}
+
+	/**
+	 * @testdox Should skip the feature highlight notification hooks when order withdrawal is enabled.
+	 */
+	public function test_controller_skips_feature_highlight_notification_hooks_when_feature_is_enabled(): void {
+		$this->enable_feature();
+
+		$controller   = new OrderWithdrawalController();
+		$notification = new OrderWithdrawalFeatureHighlightNotification();
+
+		$controller->init( $this->sut, new OrderWithdrawalFormView(), $notification );
+
+		try {
+			$controller->register();
+
+			$this->assertNotFalse( has_action( 'init', array( $controller, 'maybe_register_feature_highlight_notification' ) ), 'The controller should defer feature highlight notification registration until init.' );
+
+			$controller->maybe_register_feature_highlight_notification();
+
+			$this->assertFalse( has_action( 'update_option_woocommerce_coming_soon', array( $notification, 'maybe_add_note_when_store_goes_live' ) ), 'The feature highlight notification should not listen for coming-soon changes when the feature is enabled.' );
+			$this->assertFalse( has_action( 'wc_admin_daily', array( $notification, 'possibly_add_note' ) ), 'The feature highlight notification should not run daily when the feature is enabled.' );
+		} finally {
+			remove_action( 'init', array( $controller, 'maybe_register_feature_highlight_notification' ), 10 );
 			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $controller, 'maybe_flush_rewrite_rules' ), 10 );
 			remove_filter( 'woocommerce_get_query_vars', array( $controller, 'add_query_var' ), 10 );
 			remove_filter( 'woocommerce_endpoint_order-withdrawal_title', array( $controller, 'get_endpoint_title' ), 10 );
@@ -1092,6 +1126,13 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	 */
 	private function disable_feature(): void {
 		update_option( self::FEATURE_OPTION, 'no' );
+	}
+
+	/**
+	 * Enable the order withdrawal feature.
+	 */
+	private function enable_feature(): void {
+		update_option( self::FEATURE_OPTION, 'yes' );
 	}
 
 	/**
