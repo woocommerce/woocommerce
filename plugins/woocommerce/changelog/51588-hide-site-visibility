@@ -1,4 +1,4 @@
 Significance: minor
 Type: enhancement
 
-Hide the site visibility badge by default for live stores and add a filter to control its display.
+Add a setting to hide the Live badge in the admin bar.

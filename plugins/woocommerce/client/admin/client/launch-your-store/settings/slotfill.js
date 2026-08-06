@@ -99,7 +99,16 @@ const SiteVisibility = () => {
 				initValues.siteVisibilityBadge ===
 					currentValues.siteVisibilityBadge;
 		}
-	}, [ comingSoon, storePagesOnly, privateLink, siteVisibilityBadge ] );
+	}, [
+		comingSoon,
+		storePagesOnly,
+		privateLink,
+		siteVisibilityBadge,
+		setting.woocommerce_coming_soon,
+		setting.woocommerce_store_pages_only,
+		setting.woocommerce_private_link,
+		setting.woocommerce_feature_site_visibility_badge_enabled,
+	] );
 
 	const copyLink = __( 'Copy link', 'woocommerce' );
 	const copied = __( 'Copied!', 'woocommerce' );
@@ -315,26 +324,25 @@ const SiteVisibility = () => {
 						'woocommerce'
 					) }
 				</p>
-			</div>
-			<div className="site-visibility-settings-slotfill-section">
-				<div className="site-visibility-settings-slotfill-section-content site-visibility-settings-slotfill-section-visibility-badge">
+				<div className="site-visibility-settings-slotfill-section-content">
 					<ToggleControl
 						__nextHasNoMarginBottom
 						label={
 							<>
 								{ __(
-									'Display site visibility badge in admin bar',
+									'Display the “Live” badge in admin bar',
 									'woocommerce'
 								) }
 								<p>
 									{ __(
-										'Show the site visibility status badge in the WordPress admin bar.',
+										'Show the “Live” status badge in the WordPress admin bar.',
 										'woocommerce'
 									) }
 								</p>
 							</>
 						}
 						checked={ siteVisibilityBadge === 'yes' }
+						disabled={ comingSoon === 'yes' }
 						onChange={ ( enabled ) => {
 							setSiteVisibilityBadge( enabled ? 'yes' : 'no' );
 							recordEvent( 'site_visibility_badge_toggle', {
