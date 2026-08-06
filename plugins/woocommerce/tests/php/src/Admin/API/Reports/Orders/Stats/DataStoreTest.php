@@ -269,6 +269,10 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	 * orphan those rows permanently, so it runs regardless, with a customer ID of 0.
 	 */
 	public function test_delete_refund_runs_cascade_when_no_stats_row_exists(): void {
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'delete_refund() only runs when HPOS is authoritative; CPT is cleaned via delete_post.' );
+		}
+
 		$fired         = 0;
 		$seen_ids      = array();
 		$seen_customer = null;
@@ -297,6 +301,10 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	 */
 	public function test_delete_refund_removes_orphaned_lookup_rows_without_stats_row(): void {
 		global $wpdb;
+
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'delete_refund() only runs when HPOS is authoritative; the CPT equivalent is covered below.' );
+		}
 
 		$refund_id = 987654322;
 
@@ -333,5 +341,117 @@ class DataStoreTest extends WC_Unit_Test_Case {
 		OrdersStatsDataStore::delete_refund( $refund_id );
 
 		$this->assertSame( 0, $lookup_rows( $refund_id ), 'Deleting a refund should clear orphaned product lookup rows.' );
+	}
+
+	/**
+	 * @testdox Deleting a CPT refund fires the analytics delete cascade exactly once.
+	 *
+	 * WC_Order_Refund_Data_Store_CPT::delete() calls wp_delete_post() — firing
+	 * delete_post, and with it delete_order() and the whole cascade — before firing
+	 * woocommerce_delete_order_refund. delete_refund() must therefore stand down
+	 * under CPT, or third-party listeners on the public cascade hook would see two
+	 * events for one deletion.
+	 */
+	public function test_deleting_cpt_refund_fires_delete_cascade_once(): void {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'Test requires CPT to be the authoritative store.' );
+		}
+
+		$order = WC_Helper_Order::create_order();
+		$order->update_status( 'completed' );
+		$order_id = $order->get_id();
+
+		$items  = array_values( $order->get_items() );
+		$refund = wc_create_refund(
+			array(
+				'order_id'   => $order_id,
+				'amount'     => 10,
+				'line_items' => array(
+					$items[0]->get_id() => array(
+						'qty'          => 1,
+						'refund_total' => 10,
+					),
+				),
+			)
+		);
+		$this->assertNotInstanceOf( WP_Error::class, $refund );
+		$refund_id = $refund->get_id();
+
+		OrdersScheduler::import( $order_id );
+		OrdersScheduler::import( $refund_id );
+
+		$fired    = 0;
+		$callback = function ( $deleted_id ) use ( &$fired, $refund_id ) {
+			if ( (int) $deleted_id === $refund_id ) {
+				++$fired;
+			}
+		};
+		add_action( 'woocommerce_analytics_delete_order_stats', $callback );
+
+		$refund->delete( true );
+
+		remove_action( 'woocommerce_analytics_delete_order_stats', $callback );
+
+		$this->assertSame( 1, $fired, 'The delete cascade should fire exactly once per CPT refund deletion.' );
+
+		WC_Helper_Order::delete_order( $order_id );
+	}
+
+	/**
+	 * @testdox Deleting a CPT refund clears orphaned lookup rows left by a partial import.
+	 *
+	 * This is what makes the HPOS gate on delete_refund() safe: delete_order(), which
+	 * runs from delete_post under CPT, has no stats-row guard, so it removes the
+	 * auxiliary lookup rows whether or not a stats row survived the import.
+	 */
+	public function test_deleting_cpt_refund_clears_orphaned_lookup_rows(): void {
+		global $wpdb;
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'Test requires CPT to be the authoritative store.' );
+		}
+
+		$order = WC_Helper_Order::create_order();
+		$order->update_status( 'completed' );
+		$order_id = $order->get_id();
+
+		$items  = array_values( $order->get_items() );
+		$refund = wc_create_refund(
+			array(
+				'order_id'   => $order_id,
+				'amount'     => 10,
+				'line_items' => array(
+					$items[0]->get_id() => array(
+						'qty'          => 1,
+						'refund_total' => 10,
+					),
+				),
+			)
+		);
+		$this->assertNotInstanceOf( WP_Error::class, $refund );
+		$refund_id = $refund->get_id();
+
+		OrdersScheduler::import( $order_id );
+		OrdersScheduler::import( $refund_id );
+
+		// Simulate a partial import: drop the stats row but leave the lookup rows.
+		$wpdb->delete( $wpdb->prefix . 'wc_order_stats', array( 'order_id' => $refund_id ) );
+
+		$lookup_rows = static function ( $id ) use ( $wpdb ) {
+			return (int) $wpdb->get_var(
+				$wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_product_lookup WHERE order_id = %d", $id )
+			);
+		};
+		$this->assertGreaterThan( 0, $lookup_rows( $refund_id ), 'Fixture should leave orphaned product lookup rows.' );
+
+		$refund->delete( true );
+
+		$this->assertSame(
+			0,
+			$lookup_rows( $refund_id ),
+			'delete_post -> delete_order() should clear orphaned lookup rows under CPT, so gating delete_refund() to HPOS loses nothing.'
+		);
+
+		WC_Helper_Order::delete_order( $order_id );
 	}
 }

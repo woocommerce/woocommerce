@@ -696,13 +696,21 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * guard and wc_get_order() call both require the record to still exist. The
 	 * customer ID is read from the stats row itself instead.
 	 *
+	 * Only runs when HPOS is the authoritative store. Under CPT the refund's post is
+	 * deleted first, so delete_post has already run delete_order() and with it the
+	 * whole cascade; running again here would fire the public
+	 * woocommerce_analytics_delete_order_stats hook, and its per-table sub-hooks, a
+	 * second time for one deletion. Under HPOS-with-sync the reverse is true: the
+	 * HPOS record is gone before the backup post, so delete_order()'s
+	 * OrderUtil::is_order() guard short-circuits and this is the only cleanup that
+	 * runs.
+	 *
 	 * The cascade runs even when the refund has no stats row. Imports are not
 	 * atomic — OrdersScheduler::import() syncs the stats, product, coupon, tax and
 	 * customer lookups in sequence without a transaction — so a partial import can
 	 * leave auxiliary lookup rows behind without a stats row. Skipping the cascade
-	 * in that state would orphan them permanently. The listeners delete by ID and
-	 * are idempotent, so the CPT delete_post path (which already cleaned the rows
-	 * up) just re-runs a no-op.
+	 * in that state would orphan them permanently. delete_order() cleans those rows
+	 * unconditionally too, which is why the CPT path loses nothing by returning early.
 	 *
 	 * @internal
 	 * @since 11.1.0
@@ -710,6 +718,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	public static function delete_refund( $refund_id ): void {
 		global $wpdb;
+
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			return;
+		}
+
 		$refund_id  = (int) $refund_id;
 		$table_name = self::get_db_table_name();
 
