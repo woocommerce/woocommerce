@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Make the classic cart shipping calculator link respond to the Space key when used as a button.
+Improve keyboard and screen reader accessibility for button-like links in the classic cart.

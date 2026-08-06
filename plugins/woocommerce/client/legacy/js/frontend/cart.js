@@ -234,6 +234,21 @@ jQuery( function ( $ ) {
 	};
 
 	/**
+	 * Handle when pressing the Space key on a link with the button role.
+	 *
+	 * @param {Object} event The jQuery event.
+	 */
+	var on_keydown_button = function ( event ) {
+		if ( event.key === ' ' ) {
+			event.preventDefault();
+
+			if ( ! event.originalEvent || ! event.originalEvent.repeat ) {
+				$( event.currentTarget ).trigger( 'click' );
+			}
+		}
+	};
+
+	/**
 	 * Object to handle AJAX calls for cart shipping changes.
 	 */
 	var cart_shipping = {
@@ -243,8 +258,6 @@ jQuery( function ( $ ) {
 		init: function ( cart ) {
 			this.cart = cart;
 			this.toggle_shipping = this.toggle_shipping.bind( this );
-			this.toggle_shipping_on_keydown =
-				this.toggle_shipping_on_keydown.bind( this );
 			this.shipping_method_selected =
 				this.shipping_method_selected.bind( this );
 			this.shipping_calculator_submit =
@@ -258,7 +271,7 @@ jQuery( function ( $ ) {
 			$( document ).on(
 				'keydown',
 				'.shipping-calculator-button',
-				this.toggle_shipping_on_keydown
+				on_keydown_button
 			);
 			$( document ).on(
 				'change',
@@ -295,23 +308,6 @@ jQuery( function ( $ ) {
 			);
 			$( document.body ).trigger( 'country_to_state_changed' ); // Trigger select2 to load.
 			return false;
-		},
-
-		/**
-		 * Handle when pressing the Space key on the shipping calculator link.
-		 * This is necessary because the link has the role="button" attribute
-		 * and needs to act like a button.
-		 *
-		 * @param {Object} event The jQuery event.
-		 */
-		toggle_shipping_on_keydown: function ( event ) {
-			if ( event.key === ' ' ) {
-				event.preventDefault();
-
-				if ( ! event.originalEvent || ! event.originalEvent.repeat ) {
-					$( event.currentTarget ).trigger( 'click' );
-				}
-			}
 		},
 
 		/**
@@ -438,7 +434,7 @@ jQuery( function ( $ ) {
 			$( document ).on(
 				'keydown',
 				'a.woocommerce-remove-coupon',
-				this.on_keydown_remove_coupon
+				on_keydown_button
 			);
 			$( document ).on(
 				'click',
@@ -448,7 +444,7 @@ jQuery( function ( $ ) {
 			$( document ).on(
 				'keydown',
 				'.woocommerce-cart-form .product-remove > a',
-				this.on_keydown_remove_item
+				on_keydown_button
 			);
 			$( document ).on(
 				'click',
@@ -706,20 +702,6 @@ jQuery( function ( $ ) {
 		},
 
 		/**
-		 * Handle when pressing the Space key on the remove coupon link.
-		 * This is necessary because the link got the role="button" attribute
-		 * and needs to act like a button.
-		 *
-		 * @param {Object} evt The JQuery event
-		 */
-		on_keydown_remove_coupon: function ( evt ) {
-			if ( evt.key === ' ' ) {
-				evt.preventDefault();
-				$( evt.currentTarget ).trigger( 'click' );
-			}
-		},
-
-		/**
 		 * Handle when the coupon input loses focus.
 		 *
 		 * @param {Object} evt The JQuery event
@@ -795,20 +777,6 @@ jQuery( function ( $ ) {
 					$( document.body ).trigger( 'item_removed_from_classic_cart');
 				},
 			} );
-		},
-
-		/**
-		 * Handle when pressing the Space key on the remove item link.
-		 * This is necessary because the link got the role="button" attribute
-		 * and needs to act like a button.
-		 *
-		 * @param {Object} evt The JQuery event
-		 */
-		on_keydown_remove_item: function ( event ) {
-			if ( event.key === ' ' ) {
-				event.preventDefault();
-				$( event.currentTarget ).trigger( 'click' );
-			}
 		},
 
 		/**
