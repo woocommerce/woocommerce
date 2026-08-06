@@ -48,8 +48,9 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 
 	.wc-settings-ui-shell__header {
 		background: var(--wpds-color-background-surface-neutral-strong);
-		border-bottom: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
-		padding: 24px 48px;
+		border-bottom: var(--wpds-border-width-xs) solid
+			var(--wpds-color-stroke-surface-neutral-weak);
+		padding: var(--wpds-dimension-padding-2xl) 48px;
 	}
 
 	.wc-settings-ui-shell__title {
@@ -60,7 +61,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	}
 
 	.wc-settings-ui-shell__header-row > .wc-settings-ui-shell__badge {
-		margin-inline-start: var(--wpds-dimension-gap-sm, 8px);
+		margin-inline-start: var(--wpds-dimension-gap-sm);
 	}
 
 	.wc-settings-ui-shell__header-actions {
@@ -86,7 +87,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		&::after {
 			color: var(--wpds-color-foreground-content-neutral-weak);
 			content: "/";
-			margin: 0 var(--wpds-dimension-gap-sm, 8px);
+			margin: 0 var(--wpds-dimension-gap-sm);
 		}
 
 		a {
@@ -101,7 +102,8 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	}
 
 	.wc-settings-ui-shell__navigation {
-		border-bottom: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
+		border-bottom: var(--wpds-border-width-xs) solid
+			var(--wpds-color-stroke-surface-neutral-weak);
 		margin: 0;
 		width: 100%;
 	}
@@ -145,7 +147,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 				border-radius: 999px;
 				bottom: 0;
 				content: "";
-				height: 2px;
+				height: var(--wpds-border-width-sm);
 				left: 0;
 				position: absolute;
 				right: 0;
@@ -154,12 +156,12 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	}
 
 	.wc-settings-ui-shell__notice {
-		margin: 24px 48px 0;
+		margin: var(--wpds-dimension-gap-xl) 48px 0;
 	}
 
 	.wc-settings-ui {
 		box-sizing: border-box;
-		margin: 32px auto 48px;
+		margin: var(--wpds-dimension-gap-2xl) auto 48px;
 		max-width: var(--wpds-dimension-surface-width-xl);
 	}
 
@@ -169,10 +171,10 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 
 	.wc-settings-ui__section-description {
 		color: var(--wpds-color-foreground-content-neutral-weak);
-		margin: 8px 0 0;
+		margin: var(--wpds-dimension-gap-sm) 0 0;
 
 		p {
-			margin: 0 0 8px;
+			margin: 0 0 var(--wpds-dimension-gap-sm);
 		}
 
 		p:last-child {
@@ -192,11 +194,11 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	.wc-settings-ui__info {
 		background: var(--wpds-color-background-surface-neutral-weak);
 		border-radius: var(--wpds-border-radius-md);
-		padding: 16px;
+		padding: var(--wpds-dimension-padding-lg);
 
 		strong {
 			display: block;
-			margin-bottom: 4px;
+			margin-bottom: var(--wpds-dimension-gap-xs);
 		}
 
 		p {
@@ -216,9 +218,9 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 
 		.components-base-control__help {
 			color: var(--wpds-color-foreground-content-neutral-weak);
-			font-size: 13px;
-			line-height: 20px;
-			margin-top: 8px;
+			font-size: var(--wpds-typography-font-size-md);
+			line-height: var(--wpds-typography-line-height-sm);
+			margin-top: var(--wpds-dimension-gap-sm);
 		}
 	}
 
@@ -228,11 +230,12 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 
 	// Owned input skin: deliberately not borrowing internal
 	// @wordpress/components classnames, which carry no compatibility
-	// guarantee. Values mirror the 40px TextControl input.
+	// guarantee. Values mirror the default-size TextControl input.
 	.wc-settings-ui__number-control-input {
 		appearance: textfield;
-		border: 1px solid #949494;
-		border-radius: 2px;
+		border: var(--wpds-border-width-xs) solid
+			var(--wpds-color-stroke-interactive-neutral);
+		border-radius: var(--wpds-border-radius-sm);
 		box-shadow: 0 0 0 transparent;
 		box-sizing: border-box;
 		font-family: inherit;
@@ -240,21 +243,21 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		font-size: 16px;
 		line-height: normal;
 		margin: 0;
-		min-height: 40px;
-		padding: 6px 12px;
+		min-height: var(--wpds-dimension-size-lg);
+		padding: 6px var(--wpds-dimension-padding-md);
 		// Keep typed values clear of the spin buttons.
 		padding-right: 64px;
 		transition: box-shadow 0.1s linear;
 		width: 100%;
 
 		@media (min-width: 600px) {
-			font-size: 13px;
+			font-size: var(--wpds-typography-font-size-md);
 		}
 
 		&:focus {
-			border-color: var(--wp-admin-theme-color);
-			box-shadow: 0 0 0 0.5px var(--wp-admin-theme-color);
-			outline: 2px solid transparent;
+			border-color: var(--wpds-color-stroke-focus);
+			box-shadow: 0 0 0 0.5px var(--wpds-color-stroke-focus);
+			outline: var(--wpds-border-width-sm) solid transparent;
 		}
 
 		&::-webkit-inner-spin-button,
@@ -281,31 +284,33 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 
 	@media (max-width: 960px) {
 		#mainform {
-			padding: 0 24px 32px;
+			padding: 0 var(--wpds-dimension-padding-2xl)
+				var(--wpds-dimension-padding-3xl);
 		}
 
 		.wc-settings-ui-shell {
-			margin-left: -24px;
-			margin-right: -24px;
+			margin-left: calc(var(--wpds-dimension-gap-xl) * -1);
+			margin-right: calc(var(--wpds-dimension-gap-xl) * -1);
 		}
 
 		.wc-settings-ui-shell__header {
-			padding-left: 24px;
-			padding-right: 24px;
+			padding-left: var(--wpds-dimension-padding-2xl);
+			padding-right: var(--wpds-dimension-padding-2xl);
 		}
 
 		.wc-settings-ui-shell__tabs {
-			padding-left: 24px;
-			padding-right: 24px;
+			padding-left: var(--wpds-dimension-padding-2xl);
+			padding-right: var(--wpds-dimension-padding-2xl);
 		}
 
 		.wc-settings-ui-shell__notice {
-			margin-left: 24px;
-			margin-right: 24px;
+			margin-left: var(--wpds-dimension-gap-xl);
+			margin-right: var(--wpds-dimension-gap-xl);
 		}
 
 		.wc-settings-ui {
-			margin: 48px 24px 32px;
+			margin: 48px var(--wpds-dimension-gap-xl)
+				var(--wpds-dimension-gap-2xl);
 			max-width: none;
 		}
 
@@ -314,7 +319,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		}
 
 		.wc-settings-ui__section-actions {
-			margin-top: 16px;
+			margin-top: var(--wpds-dimension-gap-lg);
 		}
 	}
 }
