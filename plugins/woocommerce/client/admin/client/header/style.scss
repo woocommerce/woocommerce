@@ -179,8 +179,11 @@
 			box-shadow: none;
 		}
 		&:focus-visible,
-		&.components-button:not(:disabled):not([aria-disabled="true"]):focus-visible {
-			box-shadow: inset -1px -1px 0 $gray-700,
+		&.components-button:not(:disabled):not(
+				[aria-disabled="true"]
+			):focus-visible {
+			box-shadow:
+				inset -1px -1px 0 $gray-700,
 				inset 1px 1px 0 $gray-700;
 		}
 
@@ -227,6 +230,10 @@
 body:has(.wrap > h1.wp-heading-inline) {
 	.woocommerce-layout__header {
 		--woocommerce-admin-header-height: #{$adminbar-height};
+
+		#wpbody {
+			margin-top: $adminbar-height;
+		}
 	}
 
 	.woocommerce-layout__header-heading {
