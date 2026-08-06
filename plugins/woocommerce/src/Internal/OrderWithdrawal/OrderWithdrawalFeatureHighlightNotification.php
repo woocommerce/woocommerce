@@ -21,7 +21,7 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 
 	private const COMING_SOON_OPTION    = 'woocommerce_coming_soon';
 	private const FEATURES_SETTINGS_URL = 'admin.php?page=wc-settings&tab=advanced&section=features';
-	private const DOCUMENTATION_URL     = 'https://woocommerce.com/';
+	private const DOCUMENTATION_URL     = 'https://woocommerce.com/document/customer-order-withdrawal/';
 
 	/**
 	 * Register hooks.
