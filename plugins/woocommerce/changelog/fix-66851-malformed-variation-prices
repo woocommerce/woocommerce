@@ -1,5 +1,3 @@
 Significance: minor
 Type: fix
 Comment: Add guard against malformed data from woocommerce_variation_prices filter
-
-Add deprecation warning when woocommerce_variation_prices filter returns malformed data in WC_Product_Variable_Data_Store_CPT::read_price_data, using the existing validate_prices_data() for validation.
