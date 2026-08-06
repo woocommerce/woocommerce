@@ -102,7 +102,6 @@ class WC_Admin_Permalink_Settings {
 
 		$shop_page_id = wc_get_page_id( 'shop' );
 		$base_slug    = urldecode( ( $shop_page_id > 0 && get_post( $shop_page_id ) ) ? get_page_uri( $shop_page_id ) : _x( 'shop', 'default-slug', 'woocommerce' ) );
-		$product_base = _x( 'product', 'default-slug', 'woocommerce' );
 
 		$structures = array(
 			0 => '',
@@ -119,14 +118,22 @@ class WC_Admin_Permalink_Settings {
 		$structures_for_comparison = array_map( 'wc_sanitize_permalink', $structures );
 
 		wc_switch_to_site_locale();
-		$structures_for_comparison[0] = wc_sanitize_permalink( _x( 'product', 'slug', 'woocommerce' ) );
+		$default_product_base         = wc_sanitize_permalink( _x( 'product', 'slug', 'woocommerce' ) );
+		$structures_for_comparison[0] = $default_product_base;
 		wc_restore_locale();
+
+		$default_product_structure   = trailingslashit( '/' . ltrim( $default_product_base, '/' ) );
+		$product_permalink_structure = $this->permalinks['product_base'] ? trailingslashit( $this->permalinks['product_base'] ) : '';
+
+		if ( $default_product_base === $this->permalinks['product_base'] ) {
+			$product_permalink_structure = $default_product_structure;
+		}
 		?>
 		<table class="form-table wc-permalink-structure">
 			<tbody>
 				<tr>
-					<th><label><input name="product_permalink" type="radio" value="<?php echo esc_attr( $structures[0] ); ?>" class="wctog" <?php checked( $structures_for_comparison[0], $this->permalinks['product_base'] ); ?> /> <?php esc_html_e( 'Default', 'woocommerce' ); ?></label></th>
-					<td><code class="default-example"><?php echo esc_html( home_url() ); ?>/?product=sample-product</code> <code class="non-default-example"><?php echo esc_html( home_url() ); ?>/<?php echo esc_html( $product_base ); ?>/sample-product/</code></td>
+					<th><label><input name="product_permalink" type="radio" value="<?php echo esc_attr( $structures[0] ); ?>" data-permalink-structure="<?php echo esc_attr( $default_product_structure ); ?>" class="wctog" <?php checked( $structures_for_comparison[0], $this->permalinks['product_base'] ); ?> /> <?php esc_html_e( 'Default', 'woocommerce' ); ?></label></th>
+					<td><code class="default-example"><?php echo esc_html( home_url() ); ?>/?product=sample-product</code> <code class="non-default-example"><?php echo esc_html( home_url() ); ?>/<?php echo esc_html( $default_product_base ); ?>/sample-product/</code></td>
 				</tr>
 				<?php if ( $shop_page_id ) : ?>
 					<tr>
@@ -142,7 +149,7 @@ class WC_Admin_Permalink_Settings {
 					<th><label><input name="product_permalink" id="woocommerce_custom_selection" type="radio" value="custom" class="tog" <?php checked( in_array( $this->permalinks['product_base'], $structures_for_comparison, true ), false ); ?> />
 						<?php esc_html_e( 'Custom base', 'woocommerce' ); ?></label></th>
 					<td>
-						<input name="product_permalink_structure" id="woocommerce_permalink_structure" type="text" value="<?php echo esc_attr( $this->permalinks['product_base'] ? trailingslashit( $this->permalinks['product_base'] ) : '' ); ?>" class="regular-text code"> <span class="description"><?php esc_html_e( 'Enter a custom base to use. A base must be set or WordPress will use default instead.', 'woocommerce' ); ?></span>
+						<input name="product_permalink_structure" id="woocommerce_permalink_structure" type="text" value="<?php echo esc_attr( $product_permalink_structure ); ?>" class="regular-text code"> <span class="description"><?php esc_html_e( 'Enter a custom base to use. A base must be set or WordPress will use default instead.', 'woocommerce' ); ?></span>
 					</td>
 				</tr>
 			</tbody>
@@ -151,7 +158,8 @@ class WC_Admin_Permalink_Settings {
 		<script type="text/javascript">
 			jQuery( function() {
 				jQuery('input.wctog').on( 'change', function() {
-					jQuery('#woocommerce_permalink_structure').val( jQuery( this ).val() );
+					var permalinkStructure = jQuery( this ).attr( 'data-permalink-structure' );
+					jQuery('#woocommerce_permalink_structure').val( undefined === permalinkStructure ? jQuery( this ).val() : permalinkStructure );
 				});
 				jQuery('.permalink-structure input').on( 'change', function() {
 					jQuery('.wc-permalink-structure').find('code.non-default-example, code.default-example').hide();

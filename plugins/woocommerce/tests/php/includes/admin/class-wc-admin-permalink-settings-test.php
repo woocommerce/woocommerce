@@ -74,7 +74,7 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	 */
 	private function get_french_permalink_slug_filter(): Closure {
 		return static function ( string $translation, string $text, string $context, string $domain ): string {
-			if ( 'woocommerce' !== $domain || 'slug' !== $context || 'fr_FR' !== determine_locale() ) {
+			if ( 'woocommerce' !== $domain || ! in_array( $context, array( 'slug', 'default-slug' ), true ) || 'fr_FR' !== determine_locale() ) {
 				return $translation;
 			}
 
@@ -214,6 +214,57 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'product', get_option( 'woocommerce_permalinks' )['product_base'], 'Default base should be stored in the site locale.' );
 		$this->assert_only_radio_checked( $html, 'default' );
+	}
+
+	/**
+	 * @testdox Should expose the site-locale Default structure without changing its submitted value.
+	 */
+	public function test_default_structure_exposes_site_locale_value_for_custom_input(): void {
+		$this->ensure_shop_page();
+		$user_id = self::factory()->user->create(
+			array(
+				'role'   => 'administrator',
+				'locale' => 'fr_FR',
+			)
+		);
+		wp_set_current_user( $user_id );
+
+		$translate_permalink_slugs = $this->get_french_permalink_slug_filter();
+
+		$this->assertSame( 'en_US', get_locale(), 'The site locale should remain English.' );
+		$this->assertSame( 'fr_FR', determine_locale(), 'The admin request should use the current user locale.' );
+
+		add_filter( 'gettext_with_context', $translate_permalink_slugs, 10, 4 );
+		try {
+			$html = $this->save_and_render( '' );
+		} finally {
+			remove_filter( 'gettext_with_context', $translate_permalink_slugs, 10 );
+		}
+
+		$this->assertSame( 'product', get_option( 'woocommerce_permalinks' )['product_base'], 'The legacy Default base should remain stored without slashes.' );
+
+		$document       = new DOMDocument();
+		$previous_state = libxml_use_internal_errors( true );
+		$loaded         = $document->loadHTML( $html );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous_state );
+
+		$this->assertTrue( $loaded, 'The permalink settings output should be valid enough for DOM parsing.' );
+
+		$xpath         = new DOMXPath( $document );
+		$default_radio = $xpath->query( '(//input[@name="product_permalink"])[1]' )->item( 0 );
+		$custom_input  = $xpath->query( '//input[@id="woocommerce_permalink_structure"]' )->item( 0 );
+		$preview       = $xpath->query( '//code[contains(concat(" ", normalize-space(@class), " "), " non-default-example ")]' )->item( 0 );
+
+		$this->assertInstanceOf( DOMElement::class, $default_radio );
+		$this->assertInstanceOf( DOMElement::class, $custom_input );
+		$this->assertInstanceOf( DOMElement::class, $preview );
+		$this->assertSame( '', $default_radio->getAttribute( 'value' ), 'The legacy Default radio value must remain empty.' );
+		$this->assertSame( '/product/', $default_radio->getAttribute( 'data-permalink-structure' ) );
+		$this->assertSame( '/product/', $custom_input->getAttribute( 'value' ) );
+		$preview_text = $preview->textContent; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- DOM API property.
+		$this->assertStringContainsString( '/product/sample-product/', $preview_text );
+		$this->assertStringNotContainsString( '/produit/sample-product/', $preview_text );
 	}
 
 	/**

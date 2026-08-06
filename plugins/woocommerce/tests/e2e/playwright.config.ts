@@ -168,6 +168,8 @@ const serialRunSpecs = [
 	// Mutate global WooCommerce settings (store address/currency/country, tax)
 	// that other workers' cart/checkout/storefront specs depend on.
 	'**/tests/settings/settings-general.spec.ts',
+	// Saves and restores the global product permalink structure.
+	'**/tests/settings/product-permalinks.spec.ts',
 	'**/tests/settings/settings-tax.spec.ts',
 	// Unchecks and saves `woocommerce_enable_reviews`, flipping that global option
 	// to `no` mid-run (restored only in afterAll). While off, the front-end Reviews
