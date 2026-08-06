@@ -417,6 +417,10 @@ a.wc-block-components-product-name:hover {
 	padding-block: 0;
 	padding-inline: 0 calc(1.5em + 10px);
 	vertical-align: middle;
+
+	&:dir(rtl) {
+		background-position: left center;
+	}
 }
 
 /* The custom styling strips the border and browser outline, so keyboard
@@ -698,7 +702,7 @@ a.wc-block-components-product-name:hover {
    ========================================================================== */
 
 .wp-block-woocommerce-cart-order-summary-heading-block textarea {
-	padding-left: 0;
+	padding-inline-start: 0;
 }
 
 .wc-block-cart-item__quantity {
@@ -750,8 +754,7 @@ a.wc-block-components-product-name:hover {
 			&::after {
 				content: "";
 				position: absolute;
-				left: 0;
-				right: 0;
+				inset-inline: 0;
 				top: 100%;
 				height: var(--purple-nav-dropdown-offset, 31.5px);
 				background: transparent;
@@ -761,14 +764,13 @@ a.wc-block-components-product-name:hover {
 
 			& > .wp-block-navigation__submenu-container {
 				top: calc(100% + var(--purple-nav-dropdown-offset, 31.5px));
-				left: -1.25rem;
+				inset-inline-start: -1.25rem;
 				z-index: 3;
 
 				&::after {
 					content: "";
 					position: absolute;
-					left: 0;
-					right: 0;
+					inset-inline: 0;
 					bottom: 100%;
 					height: var(--purple-nav-dropdown-offset, 31.5px);
 					background: transparent;
@@ -784,7 +786,7 @@ a.wc-block-components-product-name:hover {
 			}
 
 			& .wp-block-navigation__submenu-icon {
-				margin-right: 1.25rem;
+				margin-inline-end: 1.25rem;
 			}
 
 			& .wp-block-navigation-item:hover,
@@ -803,18 +805,16 @@ a.wc-block-components-product-name:hover {
 @media (max-width: 599px) {
 	:root .wp-block-navigation .wp-block-navigation__responsive-container.is-menu-open:not(.disable-default-overlay) {
 		/* Full-bleed overlay; horizontal indent lives on the links. */
-		padding-left: 0;
-		padding-right: 0;
+		padding-inline: 0;
 
 		/* Close button only — not the menu rows. */
 		& .wp-block-navigation__responsive-container-close {
 			top: 1.25rem;
-			right: 1.25rem;
+			inset-inline-end: 1.25rem;
 		}
 
 		& .wp-block-navigation__responsive-container-content {
-			padding-left: 0;
-			padding-right: 0;
+			padding-inline: 0;
 			align-items: stretch;
 
 			& .wp-block-navigation__container,
@@ -849,21 +849,26 @@ a.wc-block-components-product-name:hover {
 
 			/* Top-level horizontal inset. */
 			& > .wp-block-navigation__container > .wp-block-navigation-item > .wp-block-navigation-item__content {
-				padding-left: 1.25rem;
-				padding-right: 1.25rem;
+				padding-inline: 1.25rem;
 			}
 
 			/* Submenu link indent by nesting depth (30px / 60px / 80px). */
 			& .has-child .wp-block-navigation__submenu-container > .wp-block-navigation-item > .wp-block-navigation-item__content {
-				padding: 0.625rem 1.25rem 0.625rem 1.875rem;
+				padding-block: 0.625rem;
+				padding-inline-start: 1.875rem;
+				padding-inline-end: 1.25rem;
 			}
 
 			& .wp-block-navigation__submenu-container .wp-block-navigation__submenu-container > .wp-block-navigation-item > .wp-block-navigation-item__content {
-				padding: 0.625rem 1.25rem 0.625rem 3.75rem;
+				padding-block: 0.625rem;
+				padding-inline-start: 3.75rem;
+				padding-inline-end: 1.25rem;
 			}
 
 			& .wp-block-navigation__submenu-container .wp-block-navigation__submenu-container .wp-block-navigation__submenu-container > .wp-block-navigation-item > .wp-block-navigation-item__content {
-				padding: 0.625rem 1.25rem 0.625rem 5rem;
+				padding-block: 0.625rem;
+				padding-inline-start: 5rem;
+				padding-inline-end: 1.25rem;
 			}
 
 			/* Parent rows: label + chevron grid; submenu collapses below. */
@@ -899,7 +904,7 @@ a.wc-block-components-product-name:hover {
 					width: 24px;
 					height: 24px;
 					margin: 0;
-					padding-right: 1.25rem;
+					padding-inline-end: 1.25rem;
 					box-sizing: content-box;
 
 					& svg {
@@ -909,6 +914,10 @@ a.wc-block-components-product-name:hover {
 						stroke: currentColor;
 						transform: rotate(-90deg);
 						transition: transform 0.1s ease;
+					}
+
+					&:dir(rtl) svg {
+						transform: rotate(90deg);
 					}
 				}
 
