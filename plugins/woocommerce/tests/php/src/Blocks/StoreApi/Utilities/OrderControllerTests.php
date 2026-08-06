@@ -163,15 +163,7 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 		$order       = WC_Helper_Order::create_order();
 		$coupon      = CouponHelper::create_coupon( 'fake-coupon', 'publish', array( 'customer_email' => 'random-email@example.com' ) );
 		$coupon_item = new \WC_Order_Item_Coupon();
-		$coupon_item->set_props(
-			array(
-				'code'         => $coupon->get_code(),
-				'discount'     => 0,
-				'discount_tax' => 0,
-				'order_id'     => $order->get_id(),
-			)
-		);
-		$coupon_item->save();
+		$coupon_item->set_code( $coupon->get_code() );
 		$order->add_item( $coupon_item );
 		$order->save();
 		$this->assertEquals( array( 'fake-coupon' ), $order->get_coupon_codes() );
@@ -195,15 +187,7 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 		$order       = WC_Helper_Order::create_order();
 		$coupon      = CouponHelper::create_coupon( 'fake-coupon', 'publish', array( 'customer_email' => 'random-email@example.com' ) );
 		$coupon_item = new \WC_Order_Item_Coupon();
-		$coupon_item->set_props(
-			array(
-				'code'         => $coupon->get_code(),
-				'discount'     => 0,
-				'discount_tax' => 0,
-				'order_id'     => $order->get_id(),
-			)
-		);
-		$coupon_item->save();
+		$coupon_item->set_code( $coupon->get_code() );
 		$order->add_item( $coupon_item );
 		$order->save();
 		$this->assertEquals( array( 'fake-coupon' ), $order->get_coupon_codes() );
