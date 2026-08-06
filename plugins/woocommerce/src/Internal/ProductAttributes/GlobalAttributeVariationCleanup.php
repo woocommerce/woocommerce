@@ -10,11 +10,12 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\ProductAttributes;
 
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Internal\Caches\ProductCache;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use WC_Product_Variation;
 
 /**
- * Trashes variations whose only attribute is a deleted global product attribute.
+ * Removes deleted global product attributes from variations and trashes variations left without attributes.
  *
  * @internal
  *
@@ -33,9 +34,30 @@ class GlobalAttributeVariationCleanup implements RegisterHooksInterface {
 	private const DEFAULT_BATCH_SIZE = 50;
 
 	/**
+	 * Product object cache.
+	 *
+	 * @var ProductCache
+	 */
+	private ProductCache $product_cache;
+
+	/**
+	 * Initialize dependencies.
+	 *
+	 * @internal
+	 *
+	 * @param ProductCache $product_cache Product object cache.
+	 * @return void
+	 */
+	final public function init( ProductCache $product_cache ): void {
+		$this->product_cache = $product_cache;
+	}
+
+	/**
 	 * Register hooks.
 	 *
 	 * @return void
+	 *
+	 * @since 11.1.0
 	 */
 	public function register(): void {
 		add_action( 'woocommerce_attribute_deleted', array( $this, 'handle_woocommerce_attribute_deleted' ), 5, 3 );
@@ -63,7 +85,7 @@ class GlobalAttributeVariationCleanup implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Trash one batch of variations whose only attribute is the deleted global attribute.
+	 * Clean up one batch of variations that use the deleted global attribute.
 	 *
 	 * @internal
 	 *
@@ -91,9 +113,9 @@ class GlobalAttributeVariationCleanup implements RegisterHooksInterface {
 		}
 
 		/**
-		 * Filters the number of variations trashed per deleted global attribute cleanup batch.
+		 * Filters the number of variations processed per deleted global attribute cleanup batch.
 		 *
-		 * @param int    $batch_size Number of variations to trash. Default 50.
+		 * @param int    $batch_size Number of variations to process. Default 50.
 		 * @param string $taxonomy   Deleted attribute taxonomy name.
 		 *
 		 * @since 11.1.0
@@ -112,21 +134,12 @@ class GlobalAttributeVariationCleanup implements RegisterHooksInterface {
 				WHERE variations.post_type = 'product_variation'
 					AND variations.post_status <> %s
 					AND variations.ID > %d
-					AND NOT EXISTS (
-						SELECT 1
-						FROM {$wpdb->postmeta} other_attribute
-						WHERE other_attribute.post_id = variations.ID
-							AND other_attribute.meta_key LIKE %s
-							AND other_attribute.meta_key <> %s
-					)
 				GROUP BY variations.ID
 				ORDER BY variations.ID ASC
 				LIMIT %d",
 				$attribute_meta_key,
 				ProductStatus::TRASH,
 				$last_processed_id,
-				$wpdb->esc_like( 'attribute_' ) . '%',
-				$attribute_meta_key,
 				$batch_size + 1
 			)
 		);
@@ -141,15 +154,37 @@ class GlobalAttributeVariationCleanup implements RegisterHooksInterface {
 			return;
 		}
 
-		_prime_post_caches( $variation_ids, false, true );
-
+		$cleaned_variation_ids = array();
 		foreach ( $variation_ids as $variation_id ) {
 			$variation = wc_get_product( $variation_id );
 			if ( ! $variation instanceof WC_Product_Variation || ProductStatus::TRASH === $variation->get_status( 'edit' ) ) {
 				continue;
 			}
 
-			$variation->delete();
+			if ( ! delete_post_meta( $variation_id, $attribute_meta_key ) ) {
+				continue;
+			}
+
+			$this->product_cache->remove( $variation_id );
+			$cleaned_variation_ids[] = $variation_id;
+		}
+
+		foreach ( $cleaned_variation_ids as $variation_id ) {
+			$variation = wc_get_product( $variation_id );
+			if ( ! $variation instanceof WC_Product_Variation || ProductStatus::TRASH === $variation->get_status( 'edit' ) ) {
+				continue;
+			}
+
+			$attribute_meta_keys = array_filter(
+				array_keys( get_post_meta( $variation_id ) ),
+				static fn( $meta_key ) => is_string( $meta_key ) && 0 === strpos( $meta_key, 'attribute_' )
+			);
+
+			if ( empty( $attribute_meta_keys ) ) {
+				$variation->delete();
+			} else {
+				$variation->save();
+			}
 		}
 
 		if ( $has_more ) {

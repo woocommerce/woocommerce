@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Trash variations that only use a deleted global product attribute in background batches.
+Remove deleted global product attributes from variations and trash variations left without attributes in background batches.

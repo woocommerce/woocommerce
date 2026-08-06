@@ -24,7 +24,7 @@ class GlobalAttributeVariationCleanupTest extends WC_Unit_Test_Case {
 	private const CLEANUP_ACTION = 'wc_cleanup_variations_for_deleted_attribute';
 
 	/**
-	 * The system under test.
+	 * The System Under Test.
 	 *
 	 * @var GlobalAttributeVariationCleanup
 	 */
@@ -49,7 +49,7 @@ class GlobalAttributeVariationCleanupTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Deleting a global attribute should asynchronously trash variations that use only that attribute.
+	 * @testdox Deleting a global attribute should remove it from variations and asynchronously trash variations left without attributes.
 	 */
 	public function test_deleting_global_attribute_schedules_cleanup_for_variations_using_only_that_attribute(): void {
 		$product               = WC_Helper_Product::create_variation_product();
@@ -85,17 +85,52 @@ class GlobalAttributeVariationCleanupTest extends WC_Unit_Test_Case {
 				'A continuation action should be scheduled when another matching variation remains'
 			);
 
+			remove_filter( 'woocommerce_cleanup_variations_for_deleted_attribute_batch_size', $batch_size_one );
 			$this->sut->handle_wc_cleanup_variations_for_deleted_attribute( 'pa_size', $variation_ids[0] );
 
 			$this->assertSame( 'trash', get_post_status( $variation_ids[1] ), 'The second single-attribute variation should be trashed in the next batch' );
 			foreach ( array_slice( $variation_ids, 2 ) as $variation_id ) {
 				$this->assertSame( 'publish', get_post_status( $variation_id ), 'Variations with other attributes should remain published' );
+				$this->assertFalse( metadata_exists( 'post', $variation_id, 'attribute_pa_size' ), 'The deleted attribute metadata should be removed from preserved variations' );
 			}
 			$this->assertSame( array_slice( $variation_ids, 0, 2 ), $trashed_variation_ids, 'Variation trash lifecycle hooks should fire for each cleaned-up variation' );
 		} finally {
 			remove_action( 'woocommerce_trash_product_variation', $record_trashed_variation );
 			remove_filter( 'woocommerce_cleanup_variations_for_deleted_attribute_batch_size', $batch_size_one );
 		}
+	}
+
+	/**
+	 * @testdox Overlapping cleanup jobs should trash a variation after all of its global attributes are deleted.
+	 */
+	public function test_overlapping_cleanup_jobs_remove_each_deleted_attribute_before_trashing_variation(): void {
+		$product   = WC_Helper_Product::create_variation_product();
+		$variation = WC_Helper_Product::create_product_variation_object(
+			$product->get_id(),
+			'DUMMY SKU VARIABLE SIZE AND COLOUR',
+			20,
+			array(
+				'pa_size'   => 'huge',
+				'pa_colour' => 'red',
+			)
+		);
+
+		$size_attribute_id   = wc_attribute_taxonomy_id_by_name( 'pa_size' );
+		$colour_attribute_id = wc_attribute_taxonomy_id_by_name( 'pa_colour' );
+
+		$this->assertTrue( wc_delete_attribute( $size_attribute_id ), 'The size global attribute should be deleted' );
+		$this->assertTrue( wc_delete_attribute( $colour_attribute_id ), 'The colour global attribute should be deleted before size cleanup runs' );
+
+		$this->sut->handle_wc_cleanup_variations_for_deleted_attribute( 'pa_size', 0 );
+
+		$this->assertSame( 'publish', get_post_status( $variation->get_id() ), 'The variation should remain published while its colour metadata exists' );
+		$this->assertFalse( metadata_exists( 'post', $variation->get_id(), 'attribute_pa_size' ), 'The size metadata should be removed by size cleanup' );
+		$this->assertTrue( metadata_exists( 'post', $variation->get_id(), 'attribute_pa_colour' ), 'The colour metadata should remain until colour cleanup runs' );
+
+		$this->sut->handle_wc_cleanup_variations_for_deleted_attribute( 'pa_colour', 0 );
+
+		$this->assertSame( 'trash', get_post_status( $variation->get_id() ), 'The variation should be trashed after its last deleted attribute is removed' );
+		$this->assertFalse( metadata_exists( 'post', $variation->get_id(), 'attribute_pa_colour' ), 'The colour metadata should be removed before the variation is trashed' );
 	}
 
 	/**
