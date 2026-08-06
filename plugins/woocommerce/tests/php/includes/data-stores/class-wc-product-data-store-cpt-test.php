@@ -151,6 +151,29 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Search with an OR term including variations should apply the type and status filters to every OR group.
+	 */
+	public function test_search_products_or_term_applies_filters_with_variations(): void {
+		$plain = $this->create_search_test_product( 'Searchable alpha product' );
+
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Searchable beta product' );
+		$parent->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $parent->get_id() );
+		$variation->set_regular_price( '10' );
+		$variation->set_downloadable( true );
+		$variation->save();
+
+		$data_store = WC_Data_Store::load( 'product' );
+		$results    = $data_store->search_products( 'Searchable alpha product or Searchable beta product', 'downloadable', true, false );
+
+		$this->assertNotContains( $plain->get_id(), $results, 'Non-downloadable product matched by the first OR group should not be returned for a downloadable variations search' );
+		$this->assertContains( $variation->get_id(), $results, 'Downloadable variation matched by the second OR group should be returned' );
+	}
+
+	/**
 	 * @testdox Search with an OR term should apply the post type constraint to every OR group.
 	 */
 	public function test_search_products_or_term_applies_post_type(): void {
@@ -162,6 +185,8 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 				'post_title'  => 'Searchable beta product page',
 			)
 		);
+
+		$this->assertGreaterThan( 0, $page_id, 'Page fixture should have been created' );
 
 		$data_store = WC_Data_Store::load( 'product' );
 		$results    = $data_store->search_products( 'Searchable alpha product or Searchable beta product page', '', false, true );
