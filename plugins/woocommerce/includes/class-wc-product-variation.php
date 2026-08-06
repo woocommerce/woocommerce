@@ -509,9 +509,13 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 	/**
 	 * Set attributes. Unlike the parent product which uses terms, variations are assigned
-	 * specific attributes using name value pairs.
+	 * specific attributes using name-value pairs. Taxonomy attribute values are converted
+	 * to term slugs when a matching term exists.
 	 *
-	 * @param array $raw_attributes array of raw attributes.
+	 * @param array<string, string> $raw_attributes Array of raw attributes.
+	 *
+	 * @since 3.0.0
+	 * @since 11.1.0 Taxonomy attribute values are normalized to term slugs.
 	 */
 	public function set_attributes( $raw_attributes ) {
 		$raw_attributes = (array) $raw_attributes;
@@ -522,6 +526,19 @@ class WC_Product_Variation extends WC_Product_Simple {
 			if ( 0 === strpos( $key, 'attribute_' ) ) {
 				$key = substr( $key, 10 );
 			}
+
+			if ( is_string( $value ) && '' !== $value && taxonomy_exists( $key ) ) {
+				$term = get_term_by( 'slug', $value, $key );
+
+				if ( ! $term ) {
+					$term = get_term_by( 'name', $value, $key );
+				}
+
+				if ( $term && ! is_wp_error( $term ) ) {
+					$value = $term->slug;
+				}
+			}
+
 			$attributes[ $key ] = $value;
 		}
 		$this->set_prop( 'attributes', $attributes );

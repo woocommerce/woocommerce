@@ -123,6 +123,40 @@ class WC_Product_Variation_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A taxonomy attribute term name is normalized to its slug and persisted as such.
+	 */
+	public function test_set_attributes_normalizes_taxonomy_term_name_to_slug(): void {
+		$term_data = wp_insert_term( '7½', 'pa_size' );
+		$this->assertNotWPError( $term_data, 'The test term should be created.' );
+
+		$term = get_term( $term_data['term_id'], 'pa_size' );
+		$this->assertInstanceOf( WP_Term::class, $term, 'The created term should be available.' );
+
+		$this->variation->set_attributes( array( 'pa_size' => $term->name ) );
+
+		$this->assertSame(
+			array( 'pa_size' => $term->slug ),
+			$this->variation->get_attributes(),
+			'The in-memory attribute should use the term slug.'
+		);
+
+		$this->variation->save();
+
+		$this->assertSame(
+			$term->slug,
+			get_post_meta( $this->variation->get_id(), 'attribute_pa_size', true ),
+			'The variation attribute post meta should contain the term slug.'
+		);
+
+		$reloaded_variation = new WC_Product_Variation( $this->variation->get_id() );
+		$this->assertSame(
+			$term->slug,
+			$reloaded_variation->get_attributes()['pa_size'],
+			'The reloaded variation should contain the term slug.'
+		);
+	}
+
+	/**
 	 * @testdox A variation's viewability follows its parent's status.
 	 */
 	public function test_is_viewable_variation_follows_parent_status() {
