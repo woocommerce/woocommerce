@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Analytics: initialize the Date type selector in Analytics settings with the effective date_paid default instead of rendering blank when the option was never saved.
