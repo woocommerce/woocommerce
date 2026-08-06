@@ -7,6 +7,11 @@
 #
 # Example:
 # ./lint-branch.sh base-branch
+#
+# When WC_LINT_CHECKSTYLE_FILE is set and PHPCS finds problems, the findings are also
+# written to that path as a checkstyle report, for a workflow step to feed to cs2pr,
+# which turns them into inline annotations on 'Files changed'. See the
+# 'Lint: PHP inline annotations' step in .github/workflows/ci.yml.
 
 baseBranch=${1:-"origin/trunk"}
 
@@ -23,6 +28,17 @@ fi
 status=0
 
 composer exec phpcs-changed -- -s --git --git-base $baseBranch $changedFiles || status=1
+
+# The readable report above is the log people dig into; this re-runs the same check
+# only to render the same findings as checkstyle for cs2pr (phpcs-changed can only
+# emit one format per run). Guarded on failure so green runs never pay for it. phpcs
+# names files relative to this directory, but GitHub resolves annotation paths from
+# the repository root, so prefix them on the way through.
+if [[ -n $WC_LINT_CHECKSTYLE_FILE && $status -eq 1 ]]; then
+    prefix=$(git rev-parse --show-prefix)
+    composer exec phpcs-changed -- --git --git-base $baseBranch --report=checkstyle $changedFiles |
+        sed "s|<file name=\"|<file name=\"${prefix}|g" > "$WC_LINT_CHECKSTYLE_FILE"
+fi
 
 # Also verify that no new PHP functions are added.
 php ./bin/check-new-functions.php HEAD "$baseBranch" || status=1

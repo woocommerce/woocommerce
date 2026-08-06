@@ -153,44 +153,44 @@ jobs:
           php-version:  ${{ ( ( matrix.projectName == '@woocommerce/plugin-woocommerce' && '7.4' ) || 'false' ) }}
 
       - name: 'Lint'
+        id: 'lint'
+        # On PHPCS failure, lint-branch.sh also writes the findings to this path as a
+        # checkstyle report, so the steps below can surface them as inline annotations
+        # on 'Files changed' while this step's log keeps the full readable output.
+        env:
+          WC_LINT_CHECKSTYLE_FILE: '${{ runner.temp }}/phpcs-checkstyle.xml'
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
-      # Surfaces the PHPCS findings inline on 'Files changed' instead of leaving them
-      # in the raw CI log. Runs on every non-draft PR; community contributors gain the
-      # most, since they're least likely to be set up to run our linters locally.
+      # Gate on the Lint step's own outcome (not job-level failure()) so these steps
+      # react only to a lint failure, never to an unrelated step failing. always() is
+      # still required: after a failure GitHub skips later steps unless told otherwise.
       - name: 'Install cs2pr'
-        if: ${{ failure() && matrix.projectName == '@woocommerce/plugin-woocommerce' && github.event.pull_request.draft == false }}
+        if: ${{ always() && steps.lint.outcome == 'failure' && matrix.projectName == '@woocommerce/plugin-woocommerce' }}
         uses: 'shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240' # 2.37.2
         with:
           php-version: '7.4'
           coverage: 'none'
           tools: 'cs2pr'
 
-      - name: 'Lint: PHP checkstyle annotations'
-        if: ${{ failure() && matrix.projectName == '@woocommerce/plugin-woocommerce' && github.event.pull_request.draft == false }}
-        working-directory: 'plugins/woocommerce'
-        # Re-runs the same PHP diff the 'Lint' step above already checked, only to get
-        # its output in checkstyle format for cs2pr. The pass/fail verdict already
-        # happened in 'Lint' -- this step can only add inline annotations, never change it.
+      - name: 'Lint: PHP inline annotations'
+        if: ${{ always() && steps.lint.outcome == 'failure' && matrix.projectName == '@woocommerce/plugin-woocommerce' }}
+        # If the report file exists and isn't empty, feed it to cs2pr; if the file is
+        # missing (no PHP files changed) -- or cs2pr exits non-zero, which it does
+        # whenever the report contains errors -- just say so and finish green: the
+        # Lint step already set the verdict, and a second red step would be noise.
+        # The totals are stated first because GitHub renders roughly the first 10
+        # error and 10 warning annotations per step; past that, findings exist only
+        # in this log, and a capped diff view shouldn't read as the full list.
         run: |
-          baseBranch="origin/trunk"
-          # -z plus mapfile keeps one path per argument; a space or glob character in a
-          # filename would otherwise split into several bogus arguments.
-          mapfile -d '' changedFiles < <(
-            git diff "$(git merge-base HEAD "$baseBranch")" --relative --name-only -z --diff-filter=d -- '*.php'
-          )
-          if (( ${#changedFiles[@]} == 0 )); then
-            echo 'No changed PHP files detected; skipping checkstyle annotations.'
-            exit 0
+          report="${{ runner.temp }}/phpcs-checkstyle.xml"
+          if [[ -s $report ]]; then
+            errors=$(grep -c 'severity="error"' "$report" || true)
+            warnings=$(grep -c 'severity="warning"' "$report" || true)
+            echo "PHPCS reported ${errors} error(s) and ${warnings} warning(s). GitHub may render only the first ~10 of each inline; the full readable report is in the Lint step's log."
+            cs2pr "$report" || true
+          else
+            echo 'No checkstyle report to annotate.'
           fi
-          composer exec phpcs-changed -- --git --git-base "$baseBranch" --report=checkstyle "${changedFiles[@]}" > checkstyle.xml || true
-          # phpcs reports paths relative to this working directory, but GitHub resolves
-          # annotation paths from the repo root -- without this they never attach to the diff.
-          sed -i 's|<file name="|<file name="plugins/woocommerce/|g' checkstyle.xml
-          # cs2pr exits non-zero whenever the report contains errors. The job has already
-          # failed at 'Lint' by this point, so that adds nothing except a second red step
-          # and a stray "exit code 1" annotation pointing at this workflow file.
-          cs2pr checkstyle.xml || true
 
   woocommerce-plugin-build-artifact:
     name: "Build WooCommerce plugin artifact${{ needs.project-jobs.outputs.shared-plugin-build-has-required-consumers != 'true' && ' (optional)' || '' }}"
