@@ -37,11 +37,21 @@ Set the parent wrapper's line height or font size to zero.
 
 This can suppress inline baseline space but risks affecting inherited typography and is therefore not recommended.
 
+## Existing patterns
+
+The selected approach follows existing email-renderer patterns:
+
+- The wrapping path in the same flex renderer pairs `display:inline-block` with `vertical-align:top` for its items.
+- WooCommerce's email styles explicitly vertically align inline-block images.
+- The audio block renderer explicitly vertically aligns an inline-block link.
+
+The alternatives also have known trade-offs in this codebase. The image renderer uses `font-size:0` to suppress whitespace, but it must restore the font size for captions. The gallery renderer intentionally avoids `align` on its wrapper table because left and right table alignment can take the table out of normal flow and interfere with following content.
+
 ## Design
 
 Add a regression assertion for the single-row layout before changing production code. The test will require the wrapper table to opt out of baseline alignment without changing the intentionally wrapping layout.
 
-Implement the smallest style change on the single-row wrapper table. Do not modify the button renderer, wrapping layout, width computation, conditional Outlook markup, or public APIs.
+Add `vertical-align:top` to the single-row wrapper table while retaining `display:inline-block`. Do not modify the button renderer, wrapping layout, width computation, conditional Outlook markup, or public APIs.
 
 If the targeted test proves that vertical alignment does not express the required output cleanly, stop and reassess the table-alignment approach instead of combining multiple CSS changes.
 
