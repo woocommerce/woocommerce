@@ -97,10 +97,26 @@ class WC_REST_Authentication {
 
 		if ( is_ssl() ) {
 			$user_id = $this->perform_basic_authentication();
-		}
 
-		if ( $user_id ) {
-			return $user_id;
+			if ( $user_id ) {
+				return $user_id;
+			}
+		} else {
+			// Check if client attempted Basic Auth without SSL.
+			$has_basic_auth = ( ! empty( $_GET['consumer_key'] ) && ! empty( $_GET['consumer_secret'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				|| ( ! empty( $_SERVER['PHP_AUTH_USER'] ) && ! empty( $_SERVER['PHP_AUTH_PW'] ) );
+
+			if ( $has_basic_auth ) {
+				$this->set_error(
+					new WP_Error(
+						'woocommerce_rest_authentication_error',
+						__( 'HTTPS is required for API key authentication. Please use an HTTPS connection, or use OAuth 1.0a authentication for non-SSL requests.', 'woocommerce' ),
+						array( 'status' => 401 )
+					)
+				);
+
+				return false;
+			}
 		}
 
 		return $this->perform_oauth_authentication();
@@ -204,6 +220,14 @@ class WC_REST_Authentication {
 		// Get user data.
 		$this->user = $this->get_user_data_by_consumer_key( $consumer_key );
 		if ( empty( $this->user ) ) {
+			$this->set_error(
+				new WP_Error(
+					'woocommerce_rest_authentication_error',
+					__( 'Consumer key is invalid.', 'woocommerce' ),
+					array( 'status' => 401 )
+				)
+			);
+
 			return false;
 		}
 
