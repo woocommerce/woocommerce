@@ -237,7 +237,7 @@ a.wc-block-components-product-name:hover {
  * and keeps the layout from shifting when the selection moves. */
 .wc-block-components-radio-control--highlight-checked .wc-block-components-radio-control-accordion-option--checked-option-highlighted.wc-block-components-radio-control-accordion-option--checked-option-highlighted,
 .wc-block-components-radio-control--highlight-checked label.wc-block-components-radio-control__option--checked-option-highlighted.wc-block-components-radio-control__option--checked-option-highlighted {
-	box-shadow: inset 0 0 0 1.5px var(--wp--preset--color--theme-6);
+	box-shadow: inset 0 0 0 1px var(--wp--preset--color--theme-6);
 }
 
 /* ==========================================================================
