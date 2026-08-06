@@ -349,6 +349,15 @@ class FeaturesController {
 				'deprecated_since'             => '10.5.0',
 				'deprecated_value'             => true,
 			),
+			'order_withdrawal'                     => array(
+				'name'                         => __( 'Order withdrawal', 'woocommerce' ),
+				'description'                  => __( 'Enable the public order withdrawal feature for customer requests.', 'woocommerce' ),
+				'learn_more_url'               => 'https://woocommerce.com/document/customer-order-withdrawal/',
+				'enabled_by_default'           => false,
+				'disable_ui'                   => false,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'is_experimental'              => false,
+			),
 			// Marked as a legacy feature to avoid compatibility checks, which aren't really relevant to this feature.
 			// https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959.
 			'order_attribution'                    => array(
@@ -456,14 +465,6 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'enabled_by_default'           => false,
-				'is_experimental'              => false,
-			),
-			'order_withdrawal'                     => array(
-				'name'                         => __( 'Order withdrawal', 'woocommerce' ),
-				'description'                  => __( 'Enable the public order withdrawal feature for customer requests.', 'woocommerce' ),
-				'enabled_by_default'           => false,
-				'disable_ui'                   => false,
-				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => false,
 			),
 			'abandoned_cart_recovery'              => array(
