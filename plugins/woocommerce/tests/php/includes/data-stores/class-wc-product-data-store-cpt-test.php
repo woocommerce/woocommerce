@@ -76,6 +76,131 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Create a simple product with the given name and status, for OR-term search tests.
+	 *
+	 * @param string $name   Product name.
+	 * @param string $status Post status.
+	 * @return WC_Product_Simple The saved product.
+	 */
+	private function create_search_test_product( string $name, string $status = 'publish' ): WC_Product_Simple {
+		$product = new WC_Product_Simple();
+		$product->set_name( $name );
+		$product->set_status( $status );
+		$product->set_regular_price( '10' );
+		$product->save();
+
+		return $product;
+	}
+
+	/**
+	 * @testdox Search with an OR term should apply the exclude list to every OR group.
+	 */
+	public function test_search_products_or_term_applies_exclude(): void {
+		$alpha = $this->create_search_test_product( 'Searchable alpha product' );
+		$beta  = $this->create_search_test_product( 'Searchable beta product' );
+
+		$data_store = WC_Data_Store::load( 'product' );
+		$results    = $data_store->search_products( 'Searchable alpha product or Searchable beta product', '', false, true, null, null, array( $alpha->get_id() ) );
+
+		$this->assertNotContains( $alpha->get_id(), $results, 'Excluded product matched by the first OR group should not be returned' );
+		$this->assertContains( $beta->get_id(), $results, 'Non-excluded product should still be returned' );
+	}
+
+	/**
+	 * @testdox Search with an OR term should apply the include list to every OR group.
+	 */
+	public function test_search_products_or_term_applies_include(): void {
+		$alpha = $this->create_search_test_product( 'Searchable alpha product' );
+		$beta  = $this->create_search_test_product( 'Searchable beta product' );
+
+		$data_store = WC_Data_Store::load( 'product' );
+		$results    = $data_store->search_products( 'Searchable alpha product or Searchable beta product', '', false, true, null, array( $beta->get_id() ) );
+
+		$this->assertNotContains( $alpha->get_id(), $results, 'Product outside the include list matched by the first OR group should not be returned' );
+		$this->assertContains( $beta->get_id(), $results, 'Included product should be returned' );
+	}
+
+	/**
+	 * @testdox Search with an OR term should apply the status filter to every OR group.
+	 */
+	public function test_search_products_or_term_applies_status_filter(): void {
+		$draft = $this->create_search_test_product( 'Searchable gamma product', 'draft' );
+		$beta  = $this->create_search_test_product( 'Searchable beta product' );
+
+		$data_store = WC_Data_Store::load( 'product' );
+		$results    = $data_store->search_products( 'Searchable gamma product or Searchable beta product', '', false, false );
+
+		$this->assertNotContains( $draft->get_id(), $results, 'Draft product matched by the first OR group should not be returned when searching published only' );
+		$this->assertContains( $beta->get_id(), $results, 'Published product should be returned' );
+	}
+
+	/**
+	 * @testdox Search with an OR term should apply the product type filter to every OR group.
+	 */
+	public function test_search_products_or_term_applies_type_filter(): void {
+		$plain        = $this->create_search_test_product( 'Searchable alpha product' );
+		$downloadable = $this->create_search_test_product( 'Searchable beta product' );
+		$downloadable->set_downloadable( true );
+		$downloadable->save();
+
+		$data_store = WC_Data_Store::load( 'product' );
+		$results    = $data_store->search_products( 'Searchable alpha product or Searchable beta product', 'downloadable', false, true );
+
+		$this->assertNotContains( $plain->get_id(), $results, 'Non-downloadable product matched by the first OR group should not be returned for a downloadable search' );
+		$this->assertContains( $downloadable->get_id(), $results, 'Downloadable product should be returned' );
+	}
+
+	/**
+	 * @testdox Search with an OR term should apply the post type constraint to every OR group.
+	 */
+	public function test_search_products_or_term_applies_post_type(): void {
+		$alpha   = $this->create_search_test_product( 'Searchable alpha product' );
+		$page_id = wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Searchable beta product page',
+			)
+		);
+
+		$data_store = WC_Data_Store::load( 'product' );
+		$results    = $data_store->search_products( 'Searchable alpha product or Searchable beta product page', '', false, true );
+
+		$this->assertNotContains( $page_id, $results, 'A page matched by the last OR group should not be returned from a product search' );
+		$this->assertContains( $alpha->get_id(), $results, 'Product matched by the first OR group should be returned' );
+	}
+
+	/**
+	 * @testdox Search with a three-group OR term should apply the status filter to the middle group.
+	 */
+	public function test_search_products_or_term_applies_status_filter_to_middle_group(): void {
+		$alpha = $this->create_search_test_product( 'Searchable alpha product' );
+		$draft = $this->create_search_test_product( 'Searchable gamma product', 'draft' );
+		$beta  = $this->create_search_test_product( 'Searchable beta product' );
+
+		$data_store = WC_Data_Store::load( 'product' );
+		$results    = $data_store->search_products( 'Searchable alpha product or Searchable gamma product or Searchable beta product', '', false, false );
+
+		$this->assertNotContains( $draft->get_id(), $results, 'Draft product matched by the middle OR group should not be returned when searching published only' );
+		$this->assertContains( $alpha->get_id(), $results, 'Published product matched by the first OR group should be returned' );
+		$this->assertContains( $beta->get_id(), $results, 'Published product matched by the last OR group should be returned' );
+	}
+
+	/**
+	 * @testdox Search with an OR term without extra filters should return matches from every OR group.
+	 */
+	public function test_search_products_or_term_returns_all_groups(): void {
+		$alpha = $this->create_search_test_product( 'Searchable alpha product' );
+		$beta  = $this->create_search_test_product( 'Searchable beta product' );
+
+		$data_store = WC_Data_Store::load( 'product' );
+		$results    = $data_store->search_products( 'Searchable alpha product or Searchable beta product', '', false, true );
+
+		$this->assertContains( $alpha->get_id(), $results, 'Product matched by the first OR group should be returned' );
+		$this->assertContains( $beta->get_id(), $results, 'Product matched by the second OR group should be returned' );
+	}
+
+	/**
 	 * Ensure product rating counts are calculated correctly.
 	 *
 	 * @return void
@@ -381,130 +506,5 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertSame( '20.000000', get_post_meta( $product_id, 'total_sales', true ) );
 		$store->update_product_sales( $product_id, 30.5, 'set' );
 		$this->assertSame( '30.500000', get_post_meta( $product_id, 'total_sales', true ) );
-	}
-
-	/**
-	 * Create a simple product with the given name and status, for OR-term search tests.
-	 *
-	 * @param string $name   Product name.
-	 * @param string $status Post status.
-	 * @return WC_Product_Simple The saved product.
-	 */
-	private function create_search_test_product( string $name, string $status = 'publish' ): WC_Product_Simple {
-		$product = new WC_Product_Simple();
-		$product->set_name( $name );
-		$product->set_status( $status );
-		$product->set_regular_price( '10' );
-		$product->save();
-
-		return $product;
-	}
-
-	/**
-	 * @testdox Search with an OR term should apply the exclude list to every OR group.
-	 */
-	public function test_search_products_or_term_applies_exclude(): void {
-		$alpha = $this->create_search_test_product( 'Searchable alpha widget' );
-		$beta  = $this->create_search_test_product( 'Searchable beta widget' );
-
-		$data_store = WC_Data_Store::load( 'product' );
-		$results    = $data_store->search_products( 'Searchable alpha widget or Searchable beta widget', '', false, true, null, null, array( $alpha->get_id() ) );
-
-		$this->assertNotContains( $alpha->get_id(), $results, 'Excluded product matched by the first OR group should not be returned' );
-		$this->assertContains( $beta->get_id(), $results, 'Non-excluded product should still be returned' );
-	}
-
-	/**
-	 * @testdox Search with an OR term should apply the include list to every OR group.
-	 */
-	public function test_search_products_or_term_applies_include(): void {
-		$alpha = $this->create_search_test_product( 'Searchable alpha widget' );
-		$beta  = $this->create_search_test_product( 'Searchable beta widget' );
-
-		$data_store = WC_Data_Store::load( 'product' );
-		$results    = $data_store->search_products( 'Searchable alpha widget or Searchable beta widget', '', false, true, null, array( $beta->get_id() ) );
-
-		$this->assertNotContains( $alpha->get_id(), $results, 'Product outside the include list matched by the first OR group should not be returned' );
-		$this->assertContains( $beta->get_id(), $results, 'Included product should be returned' );
-	}
-
-	/**
-	 * @testdox Search with an OR term should apply the status filter to every OR group.
-	 */
-	public function test_search_products_or_term_applies_status_filter(): void {
-		$draft = $this->create_search_test_product( 'Searchable gamma widget', 'draft' );
-		$beta  = $this->create_search_test_product( 'Searchable beta widget' );
-
-		$data_store = WC_Data_Store::load( 'product' );
-		$results    = $data_store->search_products( 'Searchable gamma widget or Searchable beta widget', '', false, false );
-
-		$this->assertNotContains( $draft->get_id(), $results, 'Draft product matched by the first OR group should not be returned when searching published only' );
-		$this->assertContains( $beta->get_id(), $results, 'Published product should be returned' );
-	}
-
-	/**
-	 * @testdox Search with an OR term should apply the product type filter to every OR group.
-	 */
-	public function test_search_products_or_term_applies_type_filter(): void {
-		$plain        = $this->create_search_test_product( 'Searchable alpha widget' );
-		$downloadable = $this->create_search_test_product( 'Searchable beta widget' );
-		$downloadable->set_downloadable( true );
-		$downloadable->save();
-
-		$data_store = WC_Data_Store::load( 'product' );
-		$results    = $data_store->search_products( 'Searchable alpha widget or Searchable beta widget', 'downloadable', false, true );
-
-		$this->assertNotContains( $plain->get_id(), $results, 'Non-downloadable product matched by the first OR group should not be returned for a downloadable search' );
-		$this->assertContains( $downloadable->get_id(), $results, 'Downloadable product should be returned' );
-	}
-
-	/**
-	 * @testdox Search with an OR term should apply the post type constraint to every OR group.
-	 */
-	public function test_search_products_or_term_applies_post_type(): void {
-		$alpha   = $this->create_search_test_product( 'Searchable alpha widget' );
-		$page_id = wp_insert_post(
-			array(
-				'post_type'   => 'page',
-				'post_status' => 'publish',
-				'post_title'  => 'Searchable beta widget page',
-			)
-		);
-
-		$data_store = WC_Data_Store::load( 'product' );
-		$results    = $data_store->search_products( 'Searchable alpha widget or Searchable beta widget page', '', false, true );
-
-		$this->assertNotContains( $page_id, $results, 'A page matched by the last OR group should not be returned from a product search' );
-		$this->assertContains( $alpha->get_id(), $results, 'Product matched by the first OR group should be returned' );
-	}
-
-	/**
-	 * @testdox Search with a three-group OR term should apply the status filter to the middle group.
-	 */
-	public function test_search_products_or_term_applies_status_filter_to_middle_group(): void {
-		$alpha = $this->create_search_test_product( 'Searchable alpha widget' );
-		$draft = $this->create_search_test_product( 'Searchable gamma widget', 'draft' );
-		$beta  = $this->create_search_test_product( 'Searchable beta widget' );
-
-		$data_store = WC_Data_Store::load( 'product' );
-		$results    = $data_store->search_products( 'Searchable alpha widget or Searchable gamma widget or Searchable beta widget', '', false, false );
-
-		$this->assertNotContains( $draft->get_id(), $results, 'Draft product matched by the middle OR group should not be returned when searching published only' );
-		$this->assertContains( $alpha->get_id(), $results, 'Published product matched by the first OR group should be returned' );
-		$this->assertContains( $beta->get_id(), $results, 'Published product matched by the last OR group should be returned' );
-	}
-
-	/**
-	 * @testdox Search with an OR term without extra filters should return matches from every OR group.
-	 */
-	public function test_search_products_or_term_returns_all_groups(): void {
-		$alpha = $this->create_search_test_product( 'Searchable alpha widget' );
-		$beta  = $this->create_search_test_product( 'Searchable beta widget' );
-
-		$data_store = WC_Data_Store::load( 'product' );
-		$results    = $data_store->search_products( 'Searchable alpha widget or Searchable beta widget', '', false, true );
-
-		$this->assertContains( $alpha->get_id(), $results, 'Product matched by the first OR group should be returned' );
-		$this->assertContains( $beta->get_id(), $results, 'Product matched by the second OR group should be returned' );
 	}
 }
