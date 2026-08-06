@@ -675,6 +675,10 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	 * @testdox maybe_schedule_import_on_untrash ignores transitions that are not restores.
 	 */
 	public function test_maybe_schedule_import_on_untrash_ignores_non_trash_transitions(): void {
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'The status-transition listener is HPOS-only; CPT restores are covered by untrashed_post.' );
+		}
+
 		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
 
 		$order = \WC_Helper_Order::create_order();
@@ -698,6 +702,100 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		);
 
 		$this->clear_scheduled_import( $order->get_id() );
+	}
+
+	/**
+	 * @testdox Under CPT, trashing and restoring each schedule exactly one import.
+	 *
+	 * The CPT data store emits both signals for a single operation: delete() calls
+	 * wp_trash_post() and then fires woocommerce_trash_order, and untrash_order()
+	 * calls wp_untrash_post() and then saves the status transition. Only the
+	 * post-side hook may act under CPT, or the same import is scheduled twice and
+	 * the public woocommerce_order_scheduler_after_import_order hook fires twice for
+	 * one transition.
+	 */
+	public function test_cpt_trash_and_untrash_each_schedule_a_single_import(): void {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'Test requires CPT to be the authoritative store.' );
+		}
+
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
+
+		// Run inline so each scheduled import is observable. This has to be in place
+		// before the fixture is built: otherwise saving the order queues a real Action
+		// Scheduler job, and has_existing_jobs() would then suppress the very imports
+		// this test counts.
+		add_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'completed' );
+		$order->save();
+		$order_id = $order->get_id();
+		OrdersScheduler::import( $order_id );
+
+		$imports  = 0;
+		$callback = function ( $imported_id ) use ( &$imports, $order_id ) {
+			if ( (int) $imported_id === $order_id ) {
+				++$imports;
+			}
+		};
+		add_action( 'woocommerce_order_scheduler_after_import_order', $callback );
+
+		try {
+			$order->delete( false );
+			$this->assertSame( 1, $imports, 'Trashing a CPT order should schedule exactly one import.' );
+
+			$imports = 0;
+			wp_untrash_post( $order_id );
+			$this->assertSame( 1, $imports, 'Restoring a CPT order should schedule exactly one import.' );
+		} finally {
+			remove_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+			remove_action( 'woocommerce_order_scheduler_after_import_order', $callback );
+		}
+	}
+
+	/**
+	 * @testdox Under CPT, restoring syncs the status even when scheduling runs synchronously.
+	 *
+	 * Companion to the HPOS synchronous-untrash test: once the status-transition
+	 * listener is HPOS-only, CPT restores depend entirely on untrashed_post, which
+	 * fires after wp_untrash_post() has persisted the restored status.
+	 */
+	public function test_cpt_untrash_syncs_restored_status_when_scheduling_is_synchronous(): void {
+		global $wpdb;
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'Test requires CPT to be the authoritative store.' );
+		}
+
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
+		add_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+
+		$read_status = static function ( $id ) use ( $wpdb ) {
+			return $wpdb->get_var(
+				$wpdb->prepare( "SELECT status FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $id )
+			);
+		};
+
+		try {
+			$order = \WC_Helper_Order::create_order();
+			$order->set_status( 'completed' );
+			$order->save();
+			$order_id = $order->get_id();
+			OrdersScheduler::import( $order_id );
+
+			$order->delete( false );
+			$this->assertSame( 'wc-trash', $read_status( $order_id ), 'Trashing should sync wc-trash synchronously under CPT.' );
+
+			wp_untrash_post( $order_id );
+			$this->assertSame(
+				'wc-completed',
+				$read_status( $order_id ),
+				'Restoring should sync the restored status under CPT on the synchronous path.'
+			);
+		} finally {
+			remove_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+		}
 	}
 
 	/**

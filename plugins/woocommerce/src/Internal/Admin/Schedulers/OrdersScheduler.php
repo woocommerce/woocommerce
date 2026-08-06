@@ -136,14 +136,18 @@ class OrdersScheduler extends ImportScheduler {
 			// Trash and untrash bypass woocommerce_update_order, so schedule imports for
 			// them here. In scheduled mode the batch cursor picks them up instead (the
 			// get_orders_since_* queries do not exclude trashed orders).
+			//
+			// Each store has exactly one of these signals routed to it, because the CPT
+			// data store emits both: its delete() calls wp_trash_post() and then fires
+			// woocommerce_trash_order, and its untrash_order() calls wp_untrash_post()
+			// and then saves a status transition. The Woo-side hooks are handled for
+			// HPOS, the post-side hooks for CPT.
+			//
 			// woocommerce_trash_order fires after the trashed status is persisted, but
 			// woocommerce_untrash_order fires before it, so untrash is driven off the
 			// status transition instead. See maybe_schedule_import_on_untrash().
-			add_action( 'woocommerce_trash_order', array( __CLASS__, 'possibly_schedule_import' ) );
+			add_action( 'woocommerce_trash_order', array( __CLASS__, 'maybe_schedule_import_on_trash' ) );
 			add_action( 'woocommerce_order_status_changed', array( __CLASS__, 'maybe_schedule_import_on_untrash' ), 10, 2 );
-
-			// CPT-based stores are trashed/untrashed via wp_trash_post()/wp_untrash_post()
-			// in the admin UI, which never fire the woocommerce_(un)trash_order hooks.
 			add_action( 'trashed_post', array( __CLASS__, 'maybe_schedule_import_on_post_trash_change' ) );
 			add_action( 'untrashed_post', array( __CLASS__, 'maybe_schedule_import_on_post_trash_change' ) );
 		}
@@ -487,6 +491,25 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	}
 
 	/**
+	 * Schedule an analytics import when an HPOS order is trashed.
+	 *
+	 * The CPT data store fires woocommerce_trash_order in addition to trashing the
+	 * post, so acting on both signals would schedule the same import twice. CPT is
+	 * covered by trashed_post via maybe_schedule_import_on_post_trash_change().
+	 *
+	 * @internal
+	 * @since 11.1.0
+	 * @param int $order_id Order ID.
+	 */
+	public static function maybe_schedule_import_on_trash( $order_id ): void {
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			return;
+		}
+
+		self::possibly_schedule_import( $order_id );
+	}
+
+	/**
 	 * Schedule an analytics import when an order is restored from the trash.
 	 *
 	 * The woocommerce_untrash_order hook fires *before* the restored status is persisted,
@@ -498,13 +521,21 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * order has been saved, which is accurate in both the scheduled and synchronous
 	 * paths.
 	 *
+	 * Restricted to HPOS: the CPT data store restores the post before saving the same
+	 * transition, so CPT would otherwise schedule the import twice. CPT is covered by
+	 * untrashed_post via maybe_schedule_import_on_post_trash_change().
+	 *
 	 * @internal
 	 * @since 11.1.0
 	 * @param int    $order_id    Order ID.
 	 * @param string $from_status Status the order transitioned from.
 	 */
 	public static function maybe_schedule_import_on_untrash( $order_id, $from_status ): void {
-		if ( 'trash' !== $from_status ) {
+		if ( OrderStatus::TRASH !== $from_status ) {
+			return;
+		}
+
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			return;
 		}
 
