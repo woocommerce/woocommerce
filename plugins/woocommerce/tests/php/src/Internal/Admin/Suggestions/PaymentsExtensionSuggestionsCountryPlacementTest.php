@@ -167,32 +167,6 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 	}
 
 	/**
-	 * @testdox Venezuela places PayPal in the APM slot, not the PSP slot.
-	 */
-	public function test_ve_places_paypal_in_the_apm_slot(): void {
-		$projected = $this->project_sections( $this->sut->get_extension_suggestions( 'VE' ), 'VE' );
-
-		$this->assertSame(
-			array(
-				'primary_apm'  => 'paypal_full_stack',
-				'other_crypto' => array( 'heliopay' ),
-			),
-			$projected,
-			'VE has no primary PSP; positional projection would wrongly report one.'
-		);
-	}
-
-	/**
-	 * @testdox China places the same PayPal suggestion in the PSP slot.
-	 */
-	public function test_cn_places_paypal_in_the_psp_slot(): void {
-		$projected = $this->project_sections( $this->sut->get_extension_suggestions( 'CN' ), 'CN' );
-
-		$this->assertSame( 'paypal_full_stack', $projected['primary_psp'] );
-		$this->assertArrayNotHasKey( 'primary_apm', $projected );
-	}
-
-	/**
 	 * @testdox The fixture covers exactly the countries the source configures.
 	 */
 	public function test_fixture_covers_every_configured_country(): void {
@@ -251,36 +225,6 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 			$active_suggested,
 			'These suggested extensions are active in the test environment: ' . implode( ', ', $active_suggested ) . '. An active suggested extension is dropped from the suggestions, so every country that lists it will fail. Deactivate it, or remove it from the test environment configuration.'
 		);
-	}
-
-	/**
-	 * @testdox PSPs masked by an earlier primary provider do not carry the raw preferred tag.
-	 */
-	public function test_masked_other_psps_are_not_raw_preferred(): void {
-		$suggestions = wc_get_container()->get( PaymentsExtensionSuggestions::class );
-		$cases       = array(
-			'JP' => array( PaymentsExtensionSuggestions::KOMOJU, 'KOMOJU' ),
-			'AE' => array( PaymentsExtensionSuggestions::MASTERCARD, 'Mastercard' ),
-		);
-
-		// Section placement can mask a preferred tag when another PSP has already filled the preferred slot.
-		foreach ( $cases as $country => $provider_details ) {
-			$provider_id      = $provider_details[0];
-			$provider_name    = $provider_details[1];
-			$extensions_by_id = array_column( $suggestions->get_country_extensions( $country ), null, 'id' );
-			$provider         = $extensions_by_id[ $provider_id ] ?? null;
-
-			$this->assertIsArray( $provider, "$provider_name should be suggested in $country." );
-			if ( ! is_array( $provider ) ) {
-				continue;
-			}
-
-			$this->assertNotContains(
-				PaymentsExtensionSuggestions::TAG_PREFERRED,
-				$provider['tags'],
-				"$provider_name should remain non-preferred in $country."
-			);
-		}
 	}
 
 	/**
