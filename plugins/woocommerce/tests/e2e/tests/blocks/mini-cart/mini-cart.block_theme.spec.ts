@@ -1021,12 +1021,20 @@ test.describe( `${ blockData.name } Block (variation attributes)`, () => {
 		// no-op (the disabled state is class-based, which Playwright's
 		// actionability checks ignore). Wait for the variation to be registered
 		// (a positive, non-zero variation id) before clicking.
+		// That is necessary but not sufficient: the script sets `variation_id`
+		// synchronously and only drops the `disabled` class ~300ms later, from a
+		// setTimeout, so wait for the button to be enabled as well. Clicking in
+		// that window hits the guard that raises a window.alert Playwright
+		// silently dismisses, and the form never submits.
 		await expect( page.locator( 'input.variation_id' ) ).toHaveValue(
 			/^[1-9][0-9]*$/
 		);
-		await page
-			.getByRole( 'button', { name: 'Add to cart', exact: true } )
-			.click();
+		const addToCartButton = page.getByRole( 'button', {
+			name: 'Add to cart',
+			exact: true,
+		} );
+		await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
+		await addToCartButton.click();
 
 		// Wait for a definitive "added to cart" confirmation before navigating
 		// to the shop. The single-product Add to cart is a form submission; if
