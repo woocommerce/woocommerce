@@ -56,6 +56,18 @@ textarea {
 	border-color: var(--wp--preset--color--theme-6);
 }
 
+/* WooCommerce's classic form fields (.form-row .input-text, selects,
+ * select2) and extensions rendering the same markup (e.g. Gift Cards)
+ * read these tokens; WooCommerce defines them 4px/gray on :root. The
+ * cart/checkout block components hardcode their values instead and are
+ * squared selector by selector in the sections below. On body rather
+ * than :root so this wins the tie against WooCommerce's own :root
+ * definition regardless of stylesheet order. */
+body {
+	--wc-form-border-color: var(--wp--preset--color--theme-6);
+	--wc-form-border-radius: 0;
+}
+
 /* ==========================================================================
    Table block
    ========================================================================== */
@@ -170,16 +182,19 @@ a.wc-block-components-product-name:hover {
 	border-radius: 0;
 }
 
+/* The Gift Cards extension's cart/checkout panel ships its own text input
+ * component with a hardcoded 4px radius; its classic product-page fields
+ * read --wc-form-border-radius and need no override. */
+.wc-gift-cards-text-input input {
+	border-color: var(--wp--preset--color--theme-6);
+	border-radius: 0;
+}
+
 /* ==========================================================================
    WooCommerce — My Account
    ========================================================================== */
 
 /* My Account — classic shortcode UI; https://github.com/woocommerce/woocommerce/issues/59391 */
-.woocommerce-account {
-	--wc-form-border-color: var(--wp--preset--color--theme-6);
-	--wc-form-border-radius: 0;
-}
-
 .woocommerce-account .entry-content > .woocommerce {
 	padding-top: var(--wp--preset--spacing--70);
 	padding-bottom: var(--wp--preset--spacing--90);
