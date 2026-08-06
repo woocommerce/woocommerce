@@ -181,7 +181,17 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 	private function get_preview_fields_for_response( $request ): array {
 		$schema     = $this->get_public_preview_schema();
 		$properties = isset( $schema['properties'] ) && is_array( $schema['properties'] ) ? $schema['properties'] : array();
-		$fields     = array_map( 'strval', array_keys( $properties ) );
+
+		// For back-compat, include any registered field with an empty schema, as
+		// core's get_fields_for_response() does: without a schema the field never
+		// reaches the published properties, but its callback must still run.
+		foreach ( $this->get_additional_fields( 'order_refund_preview' ) as $field_name => $field_options ) {
+			if ( is_null( $field_options['schema'] ) ) {
+				$properties[ $field_name ] = $field_options;
+			}
+		}
+
+		$fields = array_map( 'strval', array_keys( $properties ) );
 
 		if ( ! isset( $request['_fields'] ) || empty( $request['_fields'] ) ) {
 			return $fields;
