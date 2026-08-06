@@ -500,8 +500,7 @@ class MiniCart extends AbstractBlock {
 				}
 			)
 		);
-		$template_block     = 1 === count( $template_blocks ) ? $template_blocks[0] : null;
-		$is_pattern_wrapper = $template_block && 'core/pattern' === $template_block['blockName'];
+		$is_pattern_wrapper = 1 === count( $template_blocks ) && 'core/pattern' === $template_blocks[0]['blockName'];
 
 		// Resolve the pattern wrapper so the compatibility processing can inspect
 		// the actual block markup before removing legacy Mini Cart divs.
