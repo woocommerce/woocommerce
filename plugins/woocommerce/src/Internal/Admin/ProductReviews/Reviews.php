@@ -615,7 +615,7 @@ class Reviews {
 		$value = (int) $value;
 
 		if ( $value < 1 || $value > 999 ) {
-			return $screen_option;
+			return false;
 		}
 
 		return $value;
