@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Normalize product variation taxonomy attribute names to term slugs.
+Accept term objects when setting product variation taxonomy attributes.
