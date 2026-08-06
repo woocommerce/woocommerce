@@ -71,7 +71,7 @@ $drawer-animation-duration: 0.3s;
 	max-width: 100%;
 }
 
-.rtl .wc-block-components-drawer {
+.wc-block-components-drawer:dir(rtl) {
 	transform: translateX(min(100%, var(--drawer-width)));
 }
 
@@ -86,9 +86,8 @@ $drawer-animation-duration: 0.3s;
 	animation-name: slidein;
 }
 
-.rtl
-	.wc-block-components-drawer__screen-overlay--with-slide-in
-	.wc-block-components-drawer {
+.wc-block-components-drawer__screen-overlay--with-slide-in
+	.wc-block-components-drawer:dir(rtl) {
 	animation-name: rtlslidein;
 }
 
