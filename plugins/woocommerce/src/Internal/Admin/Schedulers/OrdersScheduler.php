@@ -410,12 +410,19 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			return;
 		}
 
-		// Skip a trashed record that was never imported. Importing it now would create a
-		// wc_customer_lookup row through Order::get_report_customer_id(), and because the
-		// order stays in the trash nothing ever removes that row again — the customer
-		// shows up in Analytics > Customers with no countable orders. Records imported
-		// before being trashed already have a stats row, so their trashed status still
-		// syncs, and a restored order imports normally once its status is no longer trash.
+		// Skip a trashed record that Analytics does not already hold. Importing it now
+		// would create a wc_customer_lookup row through Order::get_report_customer_id(),
+		// and because the order stays in the trash nothing ever removes that row again —
+		// the customer shows up in Analytics > Customers with no countable orders.
+		// Records imported before being trashed already have a stats row, so their
+		// trashed status still syncs, and a restored order imports normally once its
+		// status is no longer trash.
+		//
+		// A missing stats row does not strictly prove the record was never imported: a
+		// failed sync can leave customer or lookup rows behind without one. Skipping is
+		// still correct there, because import() only ever creates and updates rows, so
+		// running it would not clean that remnant up either — it would just add a
+		// wc-trash stats row that every report already filters out.
 		if ( OrderStatus::TRASH === $order->get_status() && ! self::has_order_stats_row( $order_id ) ) {
 			return;
 		}

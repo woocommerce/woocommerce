@@ -910,6 +910,50 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Trashing a partially imported order does not add an analytics customer.
+	 *
+	 * A failed sync can leave customer and lookup rows behind without a stats row, so a
+	 * missing stats row does not prove the record was never imported. Skipping the
+	 * import is still correct in that state: import() only creates and updates rows, so
+	 * running it would not clean the remnant up either.
+	 */
+	public function test_trashing_partially_imported_order_adds_no_customer(): void {
+		global $wpdb;
+
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
+
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'completed' );
+		$order->set_billing_email( 'partial-64157@example.com' );
+		$order->save();
+		$order_id = $order->get_id();
+
+		// Import fully, then simulate a partial import by dropping only the stats row.
+		OrdersScheduler::import( $order_id );
+		$wpdb->delete( $wpdb->prefix . 'wc_order_stats', array( 'order_id' => $order_id ) );
+
+		$customers_before = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_customer_lookup" );
+
+		$new_customer_fired = 0;
+		$callback           = function () use ( &$new_customer_fired ) {
+			++$new_customer_fired;
+		};
+		add_action( 'woocommerce_analytics_new_customer', $callback );
+
+		$order->delete( false );
+		OrdersScheduler::import( $order_id );
+
+		remove_action( 'woocommerce_analytics_new_customer', $callback );
+
+		$this->assertSame( 0, $new_customer_fired, 'Trashing a partially imported order should not create another analytics customer.' );
+		$this->assertSame(
+			$customers_before,
+			(int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_customer_lookup" ),
+			'The customer lookup table should be unchanged.'
+		);
+	}
+
+	/**
 	 * @testdox A trashed order that was never imported is imported normally once restored.
 	 */
 	public function test_never_imported_trashed_order_imports_after_restore(): void {
