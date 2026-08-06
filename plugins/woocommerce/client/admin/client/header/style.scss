@@ -234,6 +234,10 @@
 // Firefox 121+). Older browsers fall through to the JS-driven class
 // path above and still work — they just get the small flash.
 body:has(.wrap > h1.wp-heading-inline) {
+	#wpbody {
+		margin-top: $adminbar-height;
+	}
+
 	.woocommerce-layout__header-heading {
 		display: none;
 	}

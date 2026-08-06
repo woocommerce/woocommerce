@@ -1,18 +1,10 @@
-# Monorepo CI and package managers manifests.
-/.github/ @nerrad
-**/composer.json @nerrad
-**/package.json @nerrad
+# Monorepo CI.
+/.github/ @adimoldovan
 
 # Monorepo tooling folders.
-/bin/ @nerrad
-/tools/ @nerrad
-/packages/js/eslint-plugin/ @nerrad
-/packages/js/dependency-extraction-webpack-plugin/ @nerrad
-/packages/js/e2e-utils-playwright/ @nerrad
+/packages/js/e2e-utils-playwright/ @adimoldovan
 
 # Files in root of repository
-/.* @nerrad
-/*.* @nerrad
 /changelog.txt
 /pnpm-lock.yaml
 
