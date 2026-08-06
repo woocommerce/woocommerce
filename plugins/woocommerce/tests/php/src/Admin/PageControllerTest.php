@@ -698,53 +698,33 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Registered pages with invalid filtered paths do not match or throw.
 	 *
-	 * @dataProvider data_provider_test_registered_page_with_invalid_filtered_path_does_not_match
+	 * @dataProvider data_provider_invalid_filtered_paths
 	 *
 	 * @param mixed $invalid_path Invalid filtered path.
 	 */
 	public function test_registered_page_with_invalid_filtered_path_does_not_match( $invalid_path ): void {
-		$filter = function ( $options ) use ( $invalid_path ) {
-			if ( 'invalid-filtered-path-page' === ( $options['id'] ?? null ) ) {
-				$options['path'] = $invalid_path;
+		$result = $this->with_filtered_page_path(
+			'invalid-filtered-path-page',
+			$invalid_path,
+			function () {
+				return $this->get_publicly_registered_page_result_for_request(
+					'/wp-admin/admin.php?page=wc-admin&path=%2Funrelated',
+					function () {
+						wc_admin_register_page(
+							array(
+								'id'     => 'invalid-filtered-path-page',
+								'parent' => 'woocommerce',
+								'title'  => 'Invalid filtered path page',
+								'path'   => '/invalid-filtered-path',
+							)
+						);
+					}
+				);
 			}
-
-			return $options;
-		};
-
-		add_filter( 'woocommerce_navigation_connect_page_options', $filter );
-
-		try {
-			$result = $this->get_publicly_registered_page_result_for_request(
-				'/wp-admin/admin.php?page=wc-admin&path=%2Funrelated',
-				function () {
-					wc_admin_register_page(
-						array(
-							'id'     => 'invalid-filtered-path-page',
-							'parent' => 'woocommerce',
-							'title'  => 'Invalid filtered path page',
-							'path'   => '/invalid-filtered-path',
-						)
-					);
-				}
-			);
-		} finally {
-			remove_filter( 'woocommerce_navigation_connect_page_options', $filter );
-		}
+		);
 
 		$this->assertFalse( $result['current_page'] );
 		$this->assertFalse( $result['is_registered_page'] );
-	}
-
-	/**
-	 * Data provider for invalid filtered registered-page paths.
-	 *
-	 * @return array[]
-	 */
-	public static function data_provider_test_registered_page_with_invalid_filtered_path_does_not_match(): array {
-		return array(
-			'array path' => array( array( 'invalid' ) ),
-			'null path'  => array( null ),
-		);
 	}
 
 	/**
@@ -891,14 +871,7 @@ class PageControllerTest extends WC_Unit_Test_Case {
 		$result = $this->get_publicly_registered_page_result_for_request(
 			'/wp-admin/admin.php?page=wc-admin&path=%2Fbreadcrumb%2F123',
 			function () {
-				wc_admin_register_page(
-					array(
-						'id'     => 'route-pattern-breadcrumb-page',
-						'parent' => 'woocommerce',
-						'title'  => array( 'Parent crumb', 'Current crumb' ),
-						'path'   => '/breadcrumb/:itemId',
-					)
-				);
+				$this->register_breadcrumb_page( 'route-pattern-breadcrumb-page', '/breadcrumb/:itemId' );
 			},
 			true
 		);
@@ -920,14 +893,7 @@ class PageControllerTest extends WC_Unit_Test_Case {
 		$result = $this->get_publicly_registered_page_result_for_request(
 			'/wp-admin/admin.php?page=wc-admin&path=%2Fbreadcrumb%2F%3AitemId',
 			function () {
-				wc_admin_register_page(
-					array(
-						'id'     => 'exact-route-pattern-breadcrumb-page',
-						'parent' => 'woocommerce',
-						'title'  => array( 'Parent crumb', 'Current crumb' ),
-						'path'   => '/breadcrumb/:itemId',
-					)
-				);
+				$this->register_breadcrumb_page( 'exact-route-pattern-breadcrumb-page', '/breadcrumb/:itemId' );
 			},
 			true
 		);
@@ -1013,7 +979,7 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Fallback-selected pages use text for parents with invalid filtered paths.
 	 *
-	 * @dataProvider data_provider_invalid_filtered_parent_paths
+	 * @dataProvider data_provider_invalid_filtered_paths
 	 *
 	 * @param mixed $invalid_path Invalid filtered parent path.
 	 */
@@ -1039,7 +1005,7 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Exact-match pages use text for parents with invalid filtered paths.
 	 *
-	 * @dataProvider data_provider_invalid_filtered_parent_paths
+	 * @dataProvider data_provider_invalid_filtered_paths
 	 *
 	 * @param mixed $invalid_path Invalid filtered parent path.
 	 */
@@ -1074,14 +1040,7 @@ class PageControllerTest extends WC_Unit_Test_Case {
 		$result = $this->get_publicly_registered_page_result_for_request(
 			'/wp-admin/admin.php?page=wc-admin&path=%2Fbreadcrumb%2Fanything',
 			function () {
-				wc_admin_register_page(
-					array(
-						'id'     => 'bare-wildcard-page',
-						'parent' => 'woocommerce',
-						'title'  => array( 'Parent crumb', 'Current crumb' ),
-						'path'   => '*',
-					)
-				);
+				$this->register_breadcrumb_page( 'bare-wildcard-page', '*' );
 			},
 			true
 		);
@@ -1099,11 +1058,11 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Data provider for invalid filtered parent paths.
+	 * Data provider for invalid filtered registered-page paths.
 	 *
 	 * @return array[]
 	 */
-	public static function data_provider_invalid_filtered_parent_paths(): array {
+	public static function data_provider_invalid_filtered_paths(): array {
 		return array(
 			'array path' => array( array( 'invalid' ) ),
 			'null path'  => array( null ),
@@ -1137,9 +1096,35 @@ class PageControllerTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$filter = function ( $options ) use ( $invalid_path ) {
-			if ( 'invalid-path-parent' === ( $options['id'] ?? null ) ) {
-				$options['path'] = $invalid_path;
+		$this->with_filtered_page_path(
+			'invalid-path-parent',
+			$invalid_path,
+			function () {
+				wc_admin_connect_page(
+					array(
+						'id'      => 'invalid-path-parent',
+						'parent'  => 'woocommerce',
+						'title'   => 'Invalid path parent',
+						'path'    => '/breadcrumb-parent',
+						'js_page' => true,
+					)
+				);
+			}
+		);
+	}
+
+	/**
+	 * Runs a callback with a page options filter that overrides one registered page's path.
+	 *
+	 * @param string   $page_id  Id of the page whose path the filter overrides.
+	 * @param mixed    $path     Replacement path.
+	 * @param callable $callback Callback to run while the filter is installed.
+	 * @return mixed Callback result.
+	 */
+	private function with_filtered_page_path( string $page_id, $path, callable $callback ) {
+		$filter = function ( $options ) use ( $page_id, $path ) {
+			if ( ( $options['id'] ?? null ) === $page_id ) {
+				$options['path'] = $path;
 			}
 
 			return $options;
@@ -1148,18 +1133,27 @@ class PageControllerTest extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_navigation_connect_page_options', $filter );
 
 		try {
-			wc_admin_connect_page(
-				array(
-					'id'      => 'invalid-path-parent',
-					'parent'  => 'woocommerce',
-					'title'   => 'Invalid path parent',
-					'path'    => '/breadcrumb-parent',
-					'js_page' => true,
-				)
-			);
+			return $callback();
 		} finally {
 			remove_filter( 'woocommerce_navigation_connect_page_options', $filter );
 		}
+	}
+
+	/**
+	 * Registers a single top-level page with a two-piece breadcrumb title.
+	 *
+	 * @param string $id   Page id.
+	 * @param string $path Page path.
+	 */
+	private function register_breadcrumb_page( string $id, string $path ): void {
+		wc_admin_register_page(
+			array(
+				'id'     => $id,
+				'parent' => 'woocommerce',
+				'title'  => array( 'Parent crumb', 'Current crumb' ),
+				'path'   => $path,
+			)
+		);
 	}
 
 	/**
