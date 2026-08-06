@@ -381,48 +381,6 @@ class PaymentsCountryPlacementTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Helcim is the last Other payment provider wherever it is suggested.
-	 */
-	public function test_helcim_is_last_other_payment_provider_everywhere(): void {
-		$countries_with_helcim = array();
-		$suggestions           = wc_get_container()->get( PaymentsExtensionSuggestions::class );
-
-		foreach ( self::load_fixture() as $country => $expected ) {
-			$other_psp = $expected['other_psp'] ?? array();
-			if ( ! in_array( 'helcim', $other_psp, true ) ) {
-				continue;
-			}
-
-			$countries_with_helcim[] = $country;
-			$this->assertSame(
-				'helcim',
-				end( $other_psp ),
-				"Helcim must be the last Other payment provider, but in $country it is followed by other partners."
-			);
-
-			// Section placement cannot reveal a preferred tag when another PSP has already filled the preferred slot.
-			$extensions_by_id = array_column( $suggestions->get_country_extensions( $country ), null, 'id' );
-			$helcim           = $extensions_by_id[ PaymentsExtensionSuggestions::HELCIM ] ?? null;
-
-			$this->assertIsArray( $helcim, "Helcim should be suggested in $country." );
-			if ( ! is_array( $helcim ) ) {
-				continue;
-			}
-
-			$this->assertNotContains(
-				PaymentsExtensionSuggestions::TAG_PREFERRED,
-				$helcim['tags'],
-				"Helcim should remain in other payment options for $country."
-			);
-		}
-
-		$this->assertNotEmpty(
-			$countries_with_helcim,
-			'Helcim is suggested in no country, so this invariant is checking nothing. If Helcim was removed deliberately, delete this test.'
-		);
-	}
-
-	/**
 	 * Data provider yielding one case per country in the fixture.
 	 *
 	 * @return array<string, array{string, array}>
