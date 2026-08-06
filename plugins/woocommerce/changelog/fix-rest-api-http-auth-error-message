@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Return a clear "HTTPS is required" error when REST API authentication is attempted over HTTP with API keys, instead of falling through to a misleading permissions error.
