@@ -134,3 +134,9 @@ Select if this PR needs a generated summary for release notes:
 
 An AI will analyze your PR and post a draft comment for you to review and edit.
 </details>
+
+### Use of AI Tools
+
+<!--
+You are free to use artificial intelligence (AI) tooling to contribute, but you must disclose what tooling you are using and to what extent a pull request has been authored by AI. It is your responsibility to review and take responsibility for what AI generates. See the WordPress AI Guidelines: <https://make.wordpress.org/ai/handbook/ai-guidelines/>.
+-->

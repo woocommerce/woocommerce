@@ -27,6 +27,13 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	);
 
 	/**
+	 * Products sent in the mocked update-check request.
+	 *
+	 * @var array|null
+	 */
+	private $mocked_request_products;
+
+	/**
 	 * Set up before each test.
 	 */
 	public function setUp(): void {
@@ -50,6 +57,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	private function cleanup_transients() {
 		delete_transient( '_woocommerce_helper_updates' );
 		delete_transient( '_woocommerce_helper_updates_count' );
+		delete_transient( '_woocommerce_helper_subscriptions' );
 	}
 
 	/**
@@ -64,6 +72,83 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		$method->setAccessible( true );
 
 		return $method->invoke( null, $payload );
+	}
+
+	/**
+	 * @testdox Update-data entry points skip malformed subscription records.
+	 *
+	 * @dataProvider malformed_subscription_entry_points
+	 *
+	 * @param string $entry_point Updater method to test.
+	 */
+	public function test_update_data_entry_points_skip_malformed_subscriptions( string $entry_point ): void {
+		set_transient(
+			'_woocommerce_helper_subscriptions',
+			array(
+				'corrupted',
+				array( 'product_key' => 'missing-id' ),
+				array( 'product_id' => array( 456 ) ),
+				array( 'product_id' => 0 ),
+				array( 'product_id' => -10 ),
+				array( 'product_id' => 900001.9 ),
+				array( 'product_id' => '900002.9' ),
+				array( 'product_id' => '9e5' ),
+				array( 'product_id' => '+900003' ),
+				array( 'product_id' => ' 900004 ' ),
+				array( 'product_id' => true ),
+				array( 'product_id' => 900005 ),
+				array(
+					'product_id'  => 900006,
+					'connections' => 'corrupted',
+				),
+				array(
+					'product_id'  => 123,
+					'connections' => array(),
+				),
+				array(
+					'product_id'  => '456',
+					'connections' => array(),
+				),
+			),
+			HOUR_IN_SECONDS
+		);
+		add_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ), 10, 3 );
+
+		try {
+			$result = call_user_func( array( WC_Helper_Updater::class, $entry_point ) );
+		} finally {
+			remove_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ) );
+		}
+
+		$this->assertSame( $this->mocked_updates, $result, 'Malformed subscriptions should not interrupt the update check' );
+		$this->assertIsArray( $this->mocked_request_products, 'The valid subscription should trigger an update-check request' );
+		$this->assertSame(
+			array( 123, 456 ),
+			array_values(
+				array_intersect(
+					array( 123, 456, 900000, 900001, 900002, 900003, 900004, 900005, 900006 ),
+					array_keys( $this->mocked_request_products )
+				)
+			),
+			'Only valid test subscription IDs should be included in the request'
+		);
+		$this->assertSame(
+			456,
+			$this->mocked_request_products[456]['product_id'],
+			'String subscription IDs should be normalized to integers in the update request'
+		);
+	}
+
+	/**
+	 * Data provider for subscription update entry points.
+	 *
+	 * @return array
+	 */
+	public function malformed_subscription_entry_points() {
+		return array(
+			'available extension downloads' => array( 'get_available_extensions_downloads_data' ),
+			'all extension updates'         => array( 'get_update_data' ),
+		);
 	}
 
 	/**
@@ -447,6 +532,9 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		if ( strpos( $url, 'woocommerce.com' ) === false && strpos( $url, 'api.woocommerce.com' ) === false ) {
 			return $preempt;
 		}
+
+		$request_body                  = json_decode( $args['body'] ?? '', true );
+		$this->mocked_request_products = $request_body['products'] ?? null;
 
 		return array(
 			'response' => array(
