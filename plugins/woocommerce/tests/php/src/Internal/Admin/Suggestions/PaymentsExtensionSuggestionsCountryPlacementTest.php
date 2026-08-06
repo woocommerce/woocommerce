@@ -478,6 +478,17 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 				"For $country, the Other suggestion '{$suggestion['id']}' has category '$category', which maps to no fixture section. An uncategorised suggestion would silently vanish from the contract."
 			);
 
+			// A suggestion that reaches Other lost the race for its preferred slot,
+			// so the tag it lost with must not still be on it: the tag is part of the
+			// REST payload, and the fixture records IDs only, so nothing else here
+			// would notice. Countries that surface a preferred-by-default extension
+			// in Other strip the tag with a '_remove' override.
+			$this->assertNotContains(
+				PaymentsExtensionSuggestions::TAG_PREFERRED,
+				$suggestion['tags'] ?? array(),
+				"For $country, the Other suggestion '{$suggestion['id']}' still carries the preferred tag even though another provider filled its preferred slot. Strip it with a '_remove' override on the country entry."
+			);
+
 			$projected[ self::CATEGORY_TO_SECTION[ $category ] ][] = $suggestion['id'];
 		}
 
