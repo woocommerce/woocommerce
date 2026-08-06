@@ -190,11 +190,19 @@ class PageController {
 			return;
 		}
 
+		// Validating and canonicalizing the request path does not depend on the registered page, and
+		// canonicalizing a multibyte path walks it code point by code point, so both happen once here
+		// rather than once per registered page. A null canonical path means the matcher cannot
+		// canonicalize this request: either the path is not valid UTF-8, or mbstring is unavailable.
+		$current_path_parts['is_utf8']        = 1 === preg_match( '//u', $current_path_parts['path'] );
+		$can_canonicalize                     = $current_path_parts['is_utf8'] && function_exists( 'mb_strtoupper' ) && function_exists( 'mb_ord' ) && function_exists( 'mb_strlen' );
+		$current_path_parts['canonical_path'] = $can_canonicalize ? $this->canonicalize_path_for_route_match( $current_path_parts['path'] ) : null;
+
 		$matching_page  = false;
 		$matching_score = null;
 
 		foreach ( $this->pages as $page ) {
-			if ( empty( $page['js_page'] ) || ! isset( $page['path'] ) || ! is_string( $page['path'] ) ) {
+			if ( empty( $page['js_page'] ) || ! is_string( $page['path'] ?? null ) ) {
 				continue;
 			}
 
@@ -225,14 +233,15 @@ class PageController {
 	 * leading slash matches no React route and must not be recognized here either.
 	 *
 	 * @param string $registered_path Registered page path.
-	 * @return array
+	 * @return array Root and app path pieces, plus a `matches_everything` flag for the bare-splat routes.
 	 */
 	private function split_normalized_registered_page_path( $registered_path ) {
 		$path_parts = $this->split_registered_page_path( $registered_path );
 
-		// React Router checks its bare-splat special case against the declared path before any
-		// normalization, so the matcher needs the pre-normalization app path as well.
-		$path_parts['declared_path'] = $path_parts['path'];
+		// React Router special-cases the routes declared exactly `*` or `/*` to match everything under
+		// the app root, and checks that against the declared path before any normalization — so `//*`
+		// is not one. Deciding it here keeps the pre-normalization form from having to travel further.
+		$path_parts['matches_everything'] = in_array( $path_parts['path'], array( '*', '/*' ), true );
 
 		if ( '' !== $path_parts['path'] ) {
 			$path_parts['path'] = '/' . ltrim( $path_parts['path'], '/' );
@@ -244,11 +253,13 @@ class PageController {
 	/**
 	 * Whether a registered path matches the current request path.
 	 *
-	 * Both paths arrive pre-split so the current request path is only parsed once per request,
-	 * rather than once per registered page. The caller guarantees a non-empty current app path.
+	 * The current request path arrives pre-split, pre-validated and pre-canonicalized so that the
+	 * per-request share of the work is not repeated for every registered page. The caller guarantees
+	 * a non-empty current app path.
 	 *
-	 * @param array $registered_parts Registered page path, as returned by split_registered_page_path().
-	 * @param array $current_parts Current request path, as returned by split_registered_page_path().
+	 * @param array $registered_parts Registered page path, as returned by split_normalized_registered_page_path().
+	 * @param array $current_parts    Current request path, as returned by split_registered_page_path(), plus the
+	 *                                `is_utf8` and `canonical_path` keys determine_current_page() adds.
 	 * @return bool
 	 */
 	private function registered_path_matches_current_path( $registered_parts, $current_parts ) {
@@ -256,8 +267,9 @@ class PageController {
 			return false;
 		}
 
-		$route_pattern = $registered_parts['path'];
-		$current_path  = $current_parts['path'];
+		$route_pattern      = $registered_parts['path'];
+		$current_path       = $current_parts['path'];
+		$has_terminal_splat = str_ends_with( $route_pattern, '/*' );
 
 		// React Router 6.3 compiles route regexes with JavaScript's plain `i` flag (no `u`), whose
 		// case folding is narrower than PCRE's Unicode folding: `É` reaches `é`, but `ſ` does not
@@ -266,20 +278,18 @@ class PageController {
 		// `iu` is the closest approximation (it over-matches only such exotic case pairs); malformed
 		// UTF-8 would make `preg_match()` fail outright, which would silently read as an unrecognized
 		// page, so it falls back to the byte-wise `i` comparison used before instead.
-		$is_utf8   = 1 === preg_match( '//u', $route_pattern ) && 1 === preg_match( '//u', $current_path );
-		$modifiers = $is_utf8 ? 'iu' : 'i';
+		$is_utf8      = $current_parts['is_utf8'] && 1 === preg_match( '//u', $route_pattern );
+		$canonicalize = $is_utf8 && null !== $current_parts['canonical_path'];
 
-		if ( $is_utf8 && function_exists( 'mb_strtoupper' ) && function_exists( 'mb_ord' ) && function_exists( 'mb_strlen' ) ) {
+		if ( $canonicalize ) {
 			$route_pattern = $this->canonicalize_path_for_route_match( $route_pattern );
-			$current_path  = $this->canonicalize_path_for_route_match( $current_path );
-			$modifiers     = '';
+			$current_path  = $current_parts['canonical_path'];
 		}
 
-		$has_terminal_splat = 1 === preg_match( '#/\*$#', $route_pattern );
+		$modifiers = $canonicalize ? '' : ( $is_utf8 ? 'iu' : 'i' );
 
-		if ( in_array( $registered_parts['declared_path'] ?? $route_pattern, array( '*', '/*' ), true ) ) {
-			// React Router special-cases the routes declared exactly `*` or `/*` — checked before
-			// normalization, so `//*` is not one — to match everything under the app root.
+		if ( $registered_parts['matches_everything'] ) {
+			// A route declared exactly `*` or `/*` matches everything under the app root.
 			$route_pattern = '';
 		} elseif ( $has_terminal_splat ) {
 			// React Router strips all trailing slashes together with the `*`, so `/foo//*` matches
@@ -311,7 +321,7 @@ class PageController {
 			// them) but are excluded for the same self-containment as the `D` modifier. Parameter
 			// segments deliberately keep matching them: JavaScript's `[^/]+` is unaffected by the
 			// line-terminator exclusion, and React Router matches such paths.
-			$route_regex .= 'iu' === $modifiers
+			$route_regex .= str_contains( $modifiers, 'u' )
 				? '(?:/[^\r\n\x{2028}\x{2029}]*)?'
 				: '(?:/(?:(?!\xE2\x80[\xA8\xA9])[^\r\n])*)?';
 		}
@@ -404,9 +414,11 @@ class PageController {
 		// example a bare `*`) resolves against the app root there, so it must read as patterned here.
 		$path_parts = $this->split_normalized_registered_page_path( $registered_path );
 
-		// The first alternative recognizes a complete `:param` segment (normalization guarantees the
-		// leading slash). The second recognizes only a splat that occupies the terminal segment.
-		return 1 === preg_match( '#(?:/:' . self::ROUTE_PARAM_NAME_PATTERN . '(?=/|$)|/\*$)#', $path_parts['path'] );
+		// A splat counts only when it occupies the terminal segment, spelled exactly as the matcher
+		// spells it. The regex recognizes a complete `:param` segment, for which normalization
+		// guarantees the leading slash.
+		return str_ends_with( $path_parts['path'], '/*' )
+			|| 1 === preg_match( '#/:' . self::ROUTE_PARAM_NAME_PATTERN . '(?=/|$)#', $path_parts['path'] );
 	}
 
 	/**
