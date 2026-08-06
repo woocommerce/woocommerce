@@ -43,6 +43,11 @@ class PaymentsCountryPlacementTest extends WC_Unit_Test_Case {
 	);
 
 	/**
+	 * Full Stack markets where PayPal Wallet is deliberately unavailable.
+	 */
+	private const PAYPAL_WALLET_UNAVAILABLE_COUNTRIES = array( 'CN', 'GE', 'KZ' );
+
+	/**
 	 * System under test.
 	 *
 	 * @var PaymentsProviders
@@ -279,9 +284,13 @@ class PaymentsCountryPlacementTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox PayPal Wallet remains available in GB when PayPal Full Stack is hidden.
+	 * @testdox PayPal Wallet remains available when PayPal Full Stack is hidden.
+	 *
+	 * @dataProvider data_provider_paypal_wallet_fallback_countries
+	 *
+	 * @param string $country The country code.
 	 */
-	public function test_paypal_wallet_remains_available_when_full_stack_is_hidden(): void {
+	public function test_paypal_wallet_remains_available_when_full_stack_is_hidden( string $country ): void {
 		update_user_meta(
 			$this->store_admin_id,
 			Payments::PAYMENTS_NOX_PROFILE_KEY,
@@ -296,16 +305,79 @@ class PaymentsCountryPlacementTest extends WC_Unit_Test_Case {
 		);
 		$this->sut->clear_cache();
 
-		$projected = $this->project_sections( $this->sut->get_extension_suggestions( 'GB' ), 'GB' );
+		$projected = $this->project_sections( $this->sut->get_extension_suggestions( $country ), $country );
 
 		$this->assertContains(
 			PaymentsExtensionSuggestions::PAYPAL_WALLET,
 			$projected['other_express_checkout'] ?? array(),
-			'PayPal Wallet must remain available as an Other express checkout fallback in GB when PayPal Full Stack is hidden.'
+			"PayPal Wallet must remain available as an Other express checkout fallback in $country when PayPal Full Stack is hidden."
 		);
+	}
 
-		delete_user_meta( $this->store_admin_id, Payments::PAYMENTS_NOX_PROFILE_KEY );
-		$this->sut->clear_cache();
+	/**
+	 * Data provider yielding fixture countries that expect Full Stack and support Wallet fallback.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function data_provider_paypal_wallet_fallback_countries(): array {
+		$cases = array();
+		foreach ( self::load_fixture() as $country => $expected ) {
+			if ( in_array( $country, self::PAYPAL_WALLET_UNAVAILABLE_COUNTRIES, true ) ) {
+				continue;
+			}
+
+			if ( self::fixture_contains_suggestion( $expected, PaymentsExtensionSuggestions::PAYPAL_FULL_STACK ) ) {
+				$cases[ $country ] = array( $country );
+			}
+		}
+
+		return $cases;
+	}
+
+	/**
+	 * @testdox The fixture defines countries that expect PayPal Full Stack.
+	 */
+	public function test_paypal_wallet_fallback_country_provider_is_not_empty(): void {
+		$this->assertNotEmpty(
+			$this->data_provider_paypal_wallet_fallback_countries(),
+			'The PayPal Wallet fallback contract is checking nothing because no fixture country expects PayPal Full Stack.'
+		);
+	}
+
+	/**
+	 * @testdox Raw PayPal Wallet exclusions match the explicit unavailable countries.
+	 */
+	public function test_paypal_wallet_unavailable_countries_match_raw_catalog(): void {
+		$suggestions                  = wc_get_container()->get( PaymentsExtensionSuggestions::class );
+		$actual_unavailable_countries = array();
+
+		foreach ( self::load_fixture() as $country => $expected ) {
+			if ( ! self::fixture_contains_suggestion( $expected, PaymentsExtensionSuggestions::PAYPAL_FULL_STACK ) ) {
+				continue;
+			}
+
+			$raw_ids = array_column( $suggestions->get_country_extensions( $country ), 'id' );
+			if ( ! in_array( PaymentsExtensionSuggestions::PAYPAL_WALLET, $raw_ids, true ) ) {
+				$actual_unavailable_countries[] = $country;
+			}
+		}
+
+		$expected_unavailable_countries = self::PAYPAL_WALLET_UNAVAILABLE_COUNTRIES;
+		sort( $expected_unavailable_countries );
+		sort( $actual_unavailable_countries );
+
+		$no_longer_unavailable = array_diff( $expected_unavailable_countries, $actual_unavailable_countries );
+		$newly_unavailable     = array_diff( $actual_unavailable_countries, $expected_unavailable_countries );
+		$no_longer_message     = empty( $no_longer_unavailable ) ? '(none)' : implode( ', ', $no_longer_unavailable );
+		$newly_message         = empty( $newly_unavailable ) ? '(none)' : implode( ', ', $newly_unavailable );
+
+		$this->assertSame(
+			$expected_unavailable_countries,
+			$actual_unavailable_countries,
+			'Raw PayPal Wallet availability does not match PAYPAL_WALLET_UNAVAILABLE_COUNTRIES. '
+			. "Countries where Wallet is now available: $no_longer_message. "
+			. "Countries newly missing Wallet: $newly_message."
+		);
 	}
 
 	/**
@@ -678,6 +750,25 @@ class PaymentsCountryPlacementTest extends WC_Unit_Test_Case {
 		);
 
 		return "'$escaped'";
+	}
+
+	/**
+	 * Whether a fixture section map contains a suggestion ID.
+	 *
+	 * @param array  $sections      The fixture section map.
+	 * @param string $suggestion_id The suggestion ID.
+	 *
+	 * @return bool
+	 */
+	private static function fixture_contains_suggestion( array $sections, string $suggestion_id ): bool {
+		foreach ( $sections as $section ) {
+			$section_ids = is_array( $section ) ? $section : array( $section );
+			if ( in_array( $suggestion_id, $section_ids, true ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
