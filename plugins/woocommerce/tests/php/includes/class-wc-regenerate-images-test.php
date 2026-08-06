@@ -14,6 +14,13 @@ class WC_Regenerate_Images_Test extends WC_Unit_Test_Case {
 	private $attachment_id = 0;
 
 	/**
+	 * Metadata filter callback added by a test, removed on teardown.
+	 *
+	 * @var callable|null
+	 */
+	private $metadata_filter = null;
+
+	/**
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
@@ -22,7 +29,10 @@ class WC_Regenerate_Images_Test extends WC_Unit_Test_Case {
 			$this->attachment_id = 0;
 		}
 
-		remove_all_filters( 'wp_get_attachment_metadata' );
+		if ( $this->metadata_filter ) {
+			remove_filter( 'wp_get_attachment_metadata', $this->metadata_filter );
+			$this->metadata_filter = null;
+		}
 
 		parent::tearDown();
 	}
@@ -71,16 +81,14 @@ class WC_Regenerate_Images_Test extends WC_Unit_Test_Case {
 		wp_update_attachment_metadata( $this->attachment_id, $metadata );
 
 		// A co-installed plugin hides its own key from readers.
-		add_filter(
-			'wp_get_attachment_metadata',
-			function ( $data ) {
-				if ( is_array( $data ) ) {
-					unset( $data['test_api_meta'] );
-				}
-
-				return $data;
+		$this->metadata_filter = function ( $data ) {
+			if ( is_array( $data ) ) {
+				unset( $data['test_api_meta'] );
 			}
-		);
+
+			return $data;
+		};
+		add_filter( 'wp_get_attachment_metadata', $this->metadata_filter );
 
 		// Full size dimensions, which is what image_downsize() returns when the size is missing.
 		$image = array( wp_get_attachment_url( $this->attachment_id ), 900, 300, false );
