@@ -131,7 +131,12 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 		WC()->payment_gateways()->payment_gateways = array();
 		WC()->payment_gateways()->init();
 
-		$this->sut->clear_cache();
+		// tearDown() still runs when setUp() throws, and $sut is typed with no
+		// default, so reading it unguarded would raise a second error on top of
+		// the real one.
+		if ( isset( $this->sut ) ) {
+			$this->sut->clear_cache();
+		}
 	}
 
 	/**
