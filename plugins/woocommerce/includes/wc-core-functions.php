@@ -2164,6 +2164,17 @@ function wc_get_permalink_structure() {
 
 			$site_locale = empty( $site_locale ) ? 'en_US' : $site_locale;
 
+			/*
+			 * Honor persistent `locale` filters (WPML/Polylang-style) so this resolution matches
+			 * get_locale() — and therefore the locale the Permalinks screen's save and render
+			 * paths use via wc_switch_to_site_locale(). Skip the filter while a temporary locale
+			 * switch is active: the locale switcher hijacks the same filter, and a temporary
+			 * switch (user-locale emails, cross-blog loops) must not leak into the stored defaults.
+			 */
+			if ( ! ( isset( $GLOBALS['wp_locale_switcher'] ) && is_locale_switched() ) ) {
+				$site_locale = apply_filters( 'locale', $site_locale ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- WP core filter, applied to mirror get_locale().
+			}
+
 			// get_locale() may reflect a temporary locale switch or a different blog's cached locale.
 			if ( determine_locale() !== $site_locale && function_exists( 'switch_to_locale' ) ) {
 				$locale_was_switched = switch_to_locale( $site_locale );
