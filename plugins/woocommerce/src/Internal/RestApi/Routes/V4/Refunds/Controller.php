@@ -187,41 +187,9 @@ class Controller extends AbstractController {
 							'minimum'           => 1,
 							'validate_callback' => 'rest_validate_request_arg',
 						),
-						'line_items' => array(
-							'description'       => __( 'Line items to include in the refund preview.', 'woocommerce' ),
-							'type'              => 'array',
-							'required'          => true,
-							'minItems'          => 1,
-							'validate_callback' => 'rest_validate_request_arg',
-							'items'             => array(
-								'type'                 => 'object',
-								'required'             => array( 'line_item_id' ),
-								'additionalProperties' => false,
-								'properties'           => array(
-									'line_item_id' => array(
-										'description' => __( 'ID of the original order line item.', 'woocommerce' ),
-										'type'        => 'integer',
-										'minimum'     => 1,
-									),
-									'quantity'     => array(
-										'description' => __( 'Quantity to refund. Required when refund_total is omitted.', 'woocommerce' ),
-										'type'        => 'integer',
-										'minimum'     => 1,
-									),
-									'refund_total' => array(
-										// No `minimum` here on purpose: validate_preview_line_items() owns
-										// the sign rule and returns the actionable `invalid_refund_total`
-										// code. A refund_total must be non-zero and match the line's sign —
-										// negative is valid for a discount/credit line, positive for a normal
-										// line; zero and wrong-sign values are rejected. A schema `minimum`
-										// would wrongly forbid the negative form, and a generic
-										// `rest_invalid_param` is less useful to clients.
-										'description' => __( 'Tax-inclusive amount to refund for this line item. Must be non-zero and match the line\'s sign (negative for discount or credit lines, positive otherwise). Required when quantity is omitted.', 'woocommerce' ),
-										'type'        => array( 'number', 'null' ),
-									),
-								),
-							),
-						),
+						// Shared with the wc/v3 preview endpoint so the accepted
+						// payload cannot drift between API versions.
+						'line_items' => $this->data_utils->get_preview_line_items_arg_schema(),
 					),
 				),
 				'schema' => array( $this, 'get_public_preview_schema' ),
@@ -544,76 +512,16 @@ class Controller extends AbstractController {
 			return $this->get_route_error_by_code( self::INVALID_ID );
 		}
 
-		// Round caller-supplied refund_total values once, up front, so validation and
-		// the computed preview use the same precision the create flow stores. Reused
-		// for both validate and build below.
-		$line_items = $this->data_utils->normalize_refund_totals( $request['line_items'] );
+		// The shared engine runs the whole pipeline: normalize, validate, build,
+		// and the aggregate guards. Its WP_Errors carry their HTTP status in the
+		// error data; wrap them in this controller's error envelope, as the
+		// validation branch always has.
+		$preview = $this->data_utils->compute_refund_preview_or_error( $order, $request['line_items'], 'wc-v4-refunds' );
 
-		$validation_error = $this->data_utils->validate_preview_line_items( $line_items, $order );
-
-		if ( is_wp_error( $validation_error ) ) {
-			$error_data = $validation_error->get_error_data();
+		if ( is_wp_error( $preview ) ) {
+			$error_data = $preview->get_error_data();
 			$status     = is_array( $error_data ) && isset( $error_data['status'] ) ? (int) $error_data['status'] : WP_Http::BAD_REQUEST;
-			return $this->get_route_error_response_from_object( $validation_error, $status );
-		}
-
-		try {
-			$preview = $this->data_utils->build_refund_preview( $order, $line_items );
-		} catch ( \InvalidArgumentException $e ) {
-			// validate_preview_line_items above should have caught any bad input.
-			// If build_refund_preview still throws InvalidArgumentException, treat
-			// it as a server-side invariant violation, log for observability, and
-			// return a generic message (do not leak internal IDs to clients).
-			wc_get_logger()->error(
-				sprintf( 'Refund preview invariant violation on order %d: %s', $order->get_id(), $e->getMessage() ),
-				array( 'source' => 'wc-v4-refunds' )
-			);
-			return $this->get_route_error_response(
-				'invalid_preview_request',
-				__( 'The refund preview could not be generated due to an unexpected error.', 'woocommerce' ),
-				WP_Http::INTERNAL_SERVER_ERROR
-			);
-		} catch ( \Throwable $e ) {
-			wc_get_logger()->error(
-				sprintf( 'Refund preview unexpected error on order %d: %s', $order->get_id(), $e->getMessage() ),
-				array( 'source' => 'wc-v4-refunds' )
-			);
-			return $this->get_route_error_response(
-				'unexpected_preview_error',
-				__( 'An unexpected error occurred while generating the refund preview.', 'woocommerce' ),
-				WP_Http::INTERNAL_SERVER_ERROR
-			);
-		}
-
-		// Reject a non-positive aggregate total up front, mirroring create_item()'s
-		// `0 > $refund_amount || ! $refund_amount` guard. A refund of only a negative
-		// discount line, or a product plus discount that nets to zero, would otherwise
-		// preview successfully and then fail at create with 'invalid_refund_amount'.
-		if ( (float) $preview['total'] <= 0 ) {
-			return $this->get_route_error_response(
-				'invalid_refund_amount',
-				__( 'Refund total must be greater than zero.', 'woocommerce' )
-			);
-		}
-
-		// Final guard: even when per-line validation passes, the aggregate
-		// preview total can still exceed the order's remaining refundable
-		// amount (e.g. an amount-only partial refund applied previously).
-		// Reject up-front so the eventual create call doesn't fail with the
-		// generic 'cannot_create_refund' error from wc_create_refund.
-		// `total` is already tax-inclusive; compare directly against max_refundable.
-		$preview_total_with_tax = abs( (float) $preview['total'] );
-		if ( $preview_total_with_tax > (float) $preview['max_refundable'] ) {
-			return $this->get_route_error_response(
-				'preview_exceeds_max_refundable',
-				sprintf(
-					/* translators: 1: requested preview total including tax, 2: remaining refundable */
-					__( 'Requested refund preview (%1$s) exceeds the remaining refundable amount (%2$s).', 'woocommerce' ),
-					wc_format_decimal( $preview_total_with_tax, wc_get_price_decimals() ),
-					$preview['max_refundable']
-				),
-				WP_Http::UNPROCESSABLE_ENTITY
-			);
+			return $this->get_route_error_response_from_object( $preview, $status );
 		}
 
 		return rest_ensure_response( $preview );

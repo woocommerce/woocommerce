@@ -64,6 +64,9 @@ class WC_REST_Order_Refunds_Preview_Test extends WC_REST_Unit_Test_Case {
 	public function tearDown(): void {
 		remove_all_filters( 'woocommerce_rest_prepare_order_refund_preview' );
 
+		global $wp_rest_additional_fields;
+		unset( $wp_rest_additional_fields['order_refund_preview'] );
+
 		parent::tearDown();
 	}
 
@@ -781,6 +784,122 @@ class WC_REST_Order_Refunds_Preview_Test extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A field registered for order_refund_preview is populated in the response and advertised in the schema.
+	 */
+	public function test_preview_registered_rest_field_in_response_and_schema(): void {
+		register_rest_field(
+			'order_refund_preview',
+			'registered_field',
+			array(
+				'get_callback' => function () {
+					return 'registered_value';
+				},
+				'schema'       => array(
+					'description' => 'Test field.',
+					'type'        => 'string',
+				),
+			)
+		);
+
+		$order   = $this->create_order_with_product( 10.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'quantity'     => 1,
+				),
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'registered_value', $response->get_data()['registered_field'] );
+
+		$options = new WP_REST_Request( 'OPTIONS', '/wc/v3/orders/' . $order->get_id() . '/refunds/preview' );
+		$schema  = $this->server->dispatch( $options )->get_data()['schema'];
+		$this->assertArrayHasKey( 'registered_field', $schema['properties'] );
+	}
+
+	/**
+	 * @testdox A registered field without a schema is still populated, matching core back-compat.
+	 */
+	public function test_preview_schema_less_registered_field_is_populated(): void {
+		register_rest_field(
+			'order_refund_preview',
+			'schema_less_field',
+			array(
+				'get_callback' => function () {
+					return 'schema_less_value';
+				},
+			)
+		);
+
+		$order   = $this->create_order_with_product( 10.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'quantity'     => 1,
+				),
+			)
+		);
+
+		// Core deliberately includes fields registered without a schema; a
+		// schema-derived allowlist alone would silently drop them.
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'schema_less_value', $response->get_data()['schema_less_field'] );
+	}
+
+	/**
+	 * @testdox A registered field's callback does not run when _fields excludes it.
+	 */
+	public function test_preview_registered_field_callback_skipped_when_not_requested(): void {
+		$executed = false;
+		register_rest_field(
+			'order_refund_preview',
+			'expensive_field',
+			array(
+				'get_callback' => function () use ( &$executed ) {
+					$executed = true;
+					return 'expensive_value';
+				},
+				'schema'       => array(
+					'description' => 'Test field.',
+					'type'        => 'string',
+				),
+			)
+		);
+
+		$order   = $this->create_order_with_product( 10.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/refunds/preview' );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'line_item_id' => $item_id,
+						'quantity'     => 1,
+					),
+				),
+			)
+		);
+		$request->set_param( '_fields', 'total' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertFalse( $executed, 'The excluded field callback must not execute.' );
+		$data = rest_filter_response_fields( $response, $this->server, $request )->get_data();
+		$this->assertArrayNotHasKey( 'expensive_field', $data );
+		$this->assertArrayHasKey( 'total', $data );
+	}
+
+	/**
 	 * @testdox The woocommerce_rest_prepare_order_refund_preview filter can mutate the response.
 	 */
 	public function test_preview_filter_can_mutate_response(): void {
@@ -823,6 +942,114 @@ class WC_REST_Order_Refunds_Preview_Test extends WC_REST_Unit_Test_Case {
 		foreach ( array( 'breakdown', 'subtotal', 'tax', 'total', 'max_refundable' ) as $property ) {
 			$this->assertArrayHasKey( $property, $data['schema']['properties'], "Schema should declare the {$property} property." );
 		}
+	}
+
+	/**
+	 * @testdox A negative refund_total is accepted for a discount line when the aggregate stays positive.
+	 */
+	public function test_preview_negative_refund_total_on_discount_line(): void {
+		$order = $this->create_order_with_product_and_discount( 50.00, 1, -10.00 );
+
+		$product_item_id  = $this->get_first_line_item_id( $order );
+		$discount_item_id = 0;
+		foreach ( $order->get_items( 'fee' ) as $item ) {
+			$discount_item_id = $item->get_id();
+		}
+		$this->assertGreaterThan( 0, $discount_item_id, 'Order should carry a discount fee line.' );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $product_item_id,
+					'quantity'     => 1,
+				),
+				array(
+					'line_item_id' => $discount_item_id,
+					'refund_total' => -10.00,
+				),
+			)
+		);
+
+		// The discount line's negative amount nets against the product: 50 - 10 = 40.
+		// A discount-only preview would be rejected by the aggregate guard by design;
+		// this pairing is where the per-line sign rule and that guard interact.
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( '40.00', $data['total'] );
+	}
+
+	/**
+	 * @testdox An unknown key inside a line item is rejected by the argument schema.
+	 */
+	public function test_preview_unknown_line_item_key_rejected(): void {
+		$order   = $this->create_order_with_product( 10.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'quantity'     => 1,
+					'unexpected'   => 'value',
+				),
+			)
+		);
+
+		// additionalProperties => false: clients relying on strict payloads (the
+		// mobile apps send exactly the declared keys) get an explicit rejection
+		// rather than silently ignored input.
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'rest_invalid_param', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox GET on the preview route is rejected; only POST is registered.
+	 */
+	public function test_preview_get_method_rejected(): void {
+		$order = $this->create_order_with_product( 10.00, 1 );
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() . '/refunds/preview' );
+		$response = $this->server->dispatch( $request );
+
+		// WP answers a wrong method on this route with `rest_no_route` — the same
+		// code clients use as the "endpoint missing" signal, so a client mistakenly
+		// issuing GET would look like an ineligible store rather than a client bug.
+		$this->assertEquals( 404, $response->get_status() );
+		$this->assertEquals( 'rest_no_route', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox max_refundable reflects the remaining refundable amount after a prior partial refund.
+	 */
+	public function test_preview_max_refundable_value_after_partial_refund(): void {
+		$order   = $this->create_order_with_product( 50.00, 2 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 30.00,
+				'reason'   => 'Partial refund',
+			)
+		);
+		$this->assertNotWPError( $refund );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'quantity'     => 1,
+				),
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( '50.00', $data['total'] );
+		$this->assertEquals( '70.00', $data['max_refundable'] );
 	}
 
 	/**
@@ -937,6 +1164,39 @@ class WC_REST_Order_Refunds_Preview_Test extends WC_REST_Unit_Test_Case {
 		$fee->save();
 		$order->add_item( $fee );
 		$order->set_total( $total );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * Create a completed order with a product line and a negative (discount) fee line.
+	 *
+	 * @param float $unit_price Product unit price.
+	 * @param int   $quantity   Product quantity.
+	 * @param float $discount   Negative fee total representing the discount.
+	 * @return WC_Order
+	 */
+	private function create_order_with_product_and_discount( float $unit_price, int $quantity, float $discount ): WC_Order {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( $unit_price );
+		$product->save();
+
+		$order = wc_create_order();
+		$order->add_product( $product, $quantity );
+
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'  => 'Discount',
+				'total' => $discount,
+			)
+		);
+		$fee->save();
+		$order->add_item( $fee );
+
+		$order->calculate_totals();
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
