@@ -36,73 +36,80 @@ const PUBLISHED_PRODUCTS_QUERY_PARAMS = {
 	_fields: [ 'id' ],
 };
 
-const ActivityPanelContent = ( { canManageWooCommerce } ) => {
+const ActivityPanelContent = ( {
+	canManageWooCommerce,
+	canViewOrders,
+	canViewProducts,
+} ) => {
 	const panelsData = useSelect(
 		( select ) => {
-			const {
-				getOrdersTotalCount,
-				hasFinishedResolution: hasFinishedOrdersResolution,
-			} = select( ordersStore );
-			const totalOrderCount = getOrdersTotalCount(
-				ORDERS_QUERY_PARAMS,
-				0
-			);
-			const orderStatuses = getOrderStatuses( select );
-			const reviewsEnabled = getAdminSetting( 'reviewsEnabled', 'no' );
-			const manageStock = getAdminSetting( 'manageStock', 'no' );
-			const loadingOrderCount = ! hasFinishedOrdersResolution(
-				'getOrdersTotalCount',
-				[ ORDERS_QUERY_PARAMS, 0 ]
-			);
-
-			const ordersOnlyData = {
+			// Each lookup runs only with the capability its endpoint checks:
+			// the wc/v3 orders and products counts need the respective
+			// read_private_* capability and the Activity Panel counts need
+			// manage_woocommerce, so a role holding any subset of them never
+			// triggers a 403.
+			const data = {
 				countsEnabled: canManageWooCommerce,
-				loadingOrderAndProductCount: loadingOrderCount,
+				loadingOrderAndProductCount: false,
 				lowStockProductsCount: null,
 				unapprovedReviewsCount: null,
 				unreadOrdersCount: null,
-				manageStock,
+				manageStock: getAdminSetting( 'manageStock', 'no' ),
 				isTaskListHidden: ! isTaskListVisible( 'setup' ),
 				publishedProductCount: 0,
-				reviewsEnabled,
-				totalOrderCount,
-				orderStatuses,
+				reviewsEnabled: getAdminSetting( 'reviewsEnabled', 'no' ),
+				totalOrderCount: 0,
+				orderStatuses: getOrderStatuses( select ),
 			};
 
-			// The counts endpoint needs manage_woocommerce and the products
-			// count needs product read permissions; order managers without
-			// them still get the orders panel, driven by data they can query.
-			if ( ! canManageWooCommerce ) {
-				return ordersOnlyData;
+			if ( canViewOrders ) {
+				const {
+					getOrdersTotalCount,
+					hasFinishedResolution: hasFinishedOrdersResolution,
+				} = select( ordersStore );
+				data.totalOrderCount = getOrdersTotalCount(
+					ORDERS_QUERY_PARAMS,
+					0
+				);
+				data.loadingOrderAndProductCount =
+					data.loadingOrderAndProductCount ||
+					! hasFinishedOrdersResolution( 'getOrdersTotalCount', [
+						ORDERS_QUERY_PARAMS,
+						0,
+					] );
 			}
 
-			const {
-				getProductsTotalCount,
-				hasFinishedResolution: hasFinishedProductsResolution,
-			} = select( productsStore );
-			const counts =
-				select( activityPanelStore ).getActivityPanelCounts();
-
-			return {
-				...ordersOnlyData,
-				loadingOrderAndProductCount:
-					loadingOrderCount ||
+			if ( canViewProducts ) {
+				const {
+					getProductsTotalCount,
+					hasFinishedResolution: hasFinishedProductsResolution,
+				} = select( productsStore );
+				data.publishedProductCount = getProductsTotalCount(
+					PUBLISHED_PRODUCTS_QUERY_PARAMS,
+					0
+				);
+				data.loadingOrderAndProductCount =
+					data.loadingOrderAndProductCount ||
 					! hasFinishedProductsResolution( 'getProductsTotalCount', [
 						PUBLISHED_PRODUCTS_QUERY_PARAMS,
 						0,
-					] ),
-				lowStockProductsCount:
-					counts?.products_low_in_stock_count ?? null,
-				unapprovedReviewsCount:
-					counts?.reviews_to_moderate_count ?? null,
-				unreadOrdersCount: counts?.orders_to_fulfill_count ?? null,
-				publishedProductCount: getProductsTotalCount(
-					PUBLISHED_PRODUCTS_QUERY_PARAMS,
-					0
-				),
-			};
+					] );
+			}
+
+			if ( canManageWooCommerce ) {
+				const counts =
+					select( activityPanelStore ).getActivityPanelCounts();
+				data.unreadOrdersCount =
+					counts?.orders_to_fulfill_count ?? null;
+				data.lowStockProductsCount =
+					counts?.products_low_in_stock_count ?? null;
+				data.unapprovedReviewsCount =
+					counts?.reviews_to_moderate_count ?? null;
+			}
+
+			return data;
 		},
-		[ canManageWooCommerce ]
+		[ canManageWooCommerce, canViewOrders, canViewProducts ]
 	);
 
 	const panels = panelsData.loadingOrderAndProductCount
@@ -209,15 +216,19 @@ const ActivityPanelContent = ( { canManageWooCommerce } ) => {
 export const ActivityPanel = () => {
 	const { currentUserCan } = useUser();
 	const canManageWooCommerce = currentUserCan( 'manage_woocommerce' );
-	// read_private_shop_orders mirrors the orders list permission the panel's
-	// queries need; without either capability every request would return 403.
 	const canViewOrders = currentUserCan( 'read_private_shop_orders' );
 
+	// Every panel requires the order count, so without manage_woocommerce or
+	// order read access nothing could ever render.
 	if ( ! canManageWooCommerce && ! canViewOrders ) {
 		return null;
 	}
 
 	return (
-		<ActivityPanelContent canManageWooCommerce={ canManageWooCommerce } />
+		<ActivityPanelContent
+			canManageWooCommerce={ canManageWooCommerce }
+			canViewOrders={ canViewOrders }
+			canViewProducts={ currentUserCan( 'read_private_products' ) }
+		/>
 	);
 };

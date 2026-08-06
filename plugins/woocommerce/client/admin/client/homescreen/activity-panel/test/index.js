@@ -107,12 +107,12 @@ describe( 'ActivityPanel', () => {
 		expect( screen.queryByText( 'custom-panel-2' ) ).toBeNull();
 	} );
 
-	it( 'should record activity_panel_open Tracks event when panel is opened', () => {
+	it( 'should record activity_panel_open Tracks event when panel is opened', async () => {
 		useSelect.mockReturnValue( {
 			isTaskListHidden: false,
 		} );
 		const { getByText } = render( <ActivityPanel /> );
-		userEvent.click( getByText( 'custom-panel-2' ) );
+		await userEvent.click( getByText( 'custom-panel-2' ) );
 		expect( recordEvent ).toHaveBeenCalledWith( 'activity_panel_open', {
 			tab: 'custom-panel-2',
 		} );
@@ -164,42 +164,99 @@ describe( 'ActivityPanel', () => {
 		expect( getActivityPanelCounts ).toHaveBeenCalledTimes( expectedCalls );
 	} );
 
-	it( 'requests only order data for an order manager without manage_woocommerce', () => {
-		const getActivityPanelCounts = jest.fn().mockReturnValue( {} );
-		const getOrdersTotalCount = jest.fn().mockReturnValue( 1 );
-		const getProductsTotalCount = jest.fn().mockReturnValue( 0 );
-		const select = jest.fn( ( store ) => {
-			if ( store === activityPanelStore ) {
-				return { getActivityPanelCounts };
-			}
+	it.each( [
+		{
+			description: 'an order manager only requests the orders count',
+			capabilities: [ 'read_private_shop_orders' ],
+			expectedCountsCalls: 0,
+			expectsOrders: true,
+			expectsProducts: false,
+		},
+		{
+			description: 'a manage-only role only requests the panel counts',
+			capabilities: [ 'manage_woocommerce' ],
+			expectedCountsCalls: 1,
+			expectsOrders: false,
+			expectsProducts: false,
+		},
+		{
+			description:
+				'an order manager with product access skips only the counts',
+			capabilities: [
+				'read_private_shop_orders',
+				'read_private_products',
+			],
+			expectedCountsCalls: 0,
+			expectsOrders: true,
+			expectsProducts: true,
+		},
+		{
+			description: 'a full merchant role requests everything',
+			capabilities: [
+				'manage_woocommerce',
+				'read_private_shop_orders',
+				'read_private_products',
+			],
+			expectedCountsCalls: 1,
+			expectsOrders: true,
+			expectsProducts: true,
+		},
+	] )(
+		'$description',
+		( {
+			capabilities,
+			expectedCountsCalls,
+			expectsOrders,
+			expectsProducts,
+		} ) => {
+			const getActivityPanelCounts = jest.fn().mockReturnValue( {} );
+			const getOrdersTotalCount = jest.fn().mockReturnValue( 1 );
+			const getProductsTotalCount = jest.fn().mockReturnValue( 0 );
+			const select = jest.fn( ( store ) => {
+				if ( store === activityPanelStore ) {
+					return { getActivityPanelCounts };
+				}
 
-			if ( store === ordersStore ) {
-				return {
-					getOrdersTotalCount,
-					hasFinishedResolution: jest.fn().mockReturnValue( true ),
-				};
-			}
+				if ( store === ordersStore ) {
+					return {
+						getOrdersTotalCount,
+						hasFinishedResolution: jest
+							.fn()
+							.mockReturnValue( true ),
+					};
+				}
 
-			if ( store === productsStore ) {
-				return {
-					getProductsTotalCount,
-					hasFinishedResolution: jest.fn().mockReturnValue( true ),
-				};
-			}
+				if ( store === productsStore ) {
+					return {
+						getProductsTotalCount,
+						hasFinishedResolution: jest
+							.fn()
+							.mockReturnValue( true ),
+					};
+				}
 
-			return {};
-		} );
+				return {};
+			} );
 
-		useUser.mockReturnValue( {
-			currentUserCan: ( capability ) =>
-				capability === 'read_private_shop_orders',
-		} );
-		useSelect.mockImplementation( ( mapSelect ) => mapSelect( select ) );
+			useUser.mockReturnValue( {
+				currentUserCan: ( capability ) =>
+					capabilities.includes( capability ),
+			} );
+			useSelect.mockImplementation( ( mapSelect ) =>
+				mapSelect( select )
+			);
 
-		render( <ActivityPanel /> );
+			render( <ActivityPanel /> );
 
-		expect( getOrdersTotalCount ).toHaveBeenCalled();
-		expect( getActivityPanelCounts ).not.toHaveBeenCalled();
-		expect( getProductsTotalCount ).not.toHaveBeenCalled();
-	} );
+			expect( getActivityPanelCounts ).toHaveBeenCalledTimes(
+				expectedCountsCalls
+			);
+			expect( getOrdersTotalCount.mock.calls.length > 0 ).toBe(
+				expectsOrders
+			);
+			expect( getProductsTotalCount.mock.calls.length > 0 ).toBe(
+				expectsProducts
+			);
+		}
+	);
 } );
