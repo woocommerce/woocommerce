@@ -2,6 +2,8 @@
 
 const {
     MARKER_PREFIX,
+    CI_WORKFLOW_NAME,
+    ciHasProducedResults,
     classifyCheckRuns,
     computeOverallState,
     parsePreviousState,
@@ -23,6 +25,21 @@ async function findExistingComment(github, context, prNumber) {
                 comment.body.includes(MARKER_PREFIX)
         ) || null
     );
+}
+
+// Look up the CI workflow run for this SHA, so the all-clear path can be
+// gated on evidence that CI actually ran rather than on check-run absence.
+// Returns undefined when no CI run exists yet, which is itself the answer.
+async function findCiRun(github, context, headSha) {
+    const runs = await github.paginate(github.rest.actions.listWorkflowRunsForRepo, {
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        head_sha: headSha,
+        per_page: 100,
+    });
+
+    // Newest first, so a re-run supersedes the run it replaced.
+    return runs.find((run) => run.name === CI_WORKFLOW_NAME);
 }
 
 async function resolvePullRequest(github, context) {
@@ -117,6 +134,35 @@ module.exports = async ({ github, context, core }) => {
             `Some checks for #${pr.number} are still in progress; deferring instead of reporting a premature all-clear.`
         );
         return;
+    }
+
+    // A clear checklist built entirely from checks that never ran is not an
+    // all-clear, it is an empty one - and the two are indistinguishable from
+    // check-run data alone (see ciHasProducedResults). Confirm CI actually
+    // produced results for this SHA before saying everything passed. Only the
+    // clear path is gated: a failure already found is actionable now and is
+    // still reported immediately, even while sibling jobs are running.
+    if (overallState === 'clear') {
+        let ciRun;
+        try {
+            ciRun = await findCiRun(github, context, pr.head.sha);
+        } catch (error) {
+            core.warning(
+                `Failed to look up CI runs for ${pr.head.sha}: ${error.message}`
+            );
+            return;
+        }
+
+        if (!ciHasProducedResults(ciRun)) {
+            core.info(
+                `CI has not produced results for #${pr.number} yet (${
+                    ciRun
+                        ? `status=${ciRun.status}, conclusion=${ciRun.conclusion}`
+                        : 'no CI run for this SHA'
+                }); deferring instead of reporting an all-clear on checks that never ran.`
+            );
+            return;
+        }
     }
 
     if (existingComment && previousState === 'clear' && overallState === 'clear') {

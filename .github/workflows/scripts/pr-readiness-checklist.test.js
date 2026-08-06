@@ -2,6 +2,7 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 
 const {
+    ciHasProducedResults,
     classifyCheckRuns,
     computeOverallState,
     parsePreviousState,
@@ -241,6 +242,49 @@ test('parsePreviousState: returns null for a comment with no marker', () => {
 test('parsePreviousState: returns null for a missing comment', () => {
     assert.equal(parsePreviousState(undefined), null);
     assert.equal(parsePreviousState(null), null);
+});
+
+test('ciHasProducedResults: no CI run for the SHA is not evidence of passing', () => {
+    assert.equal(ciHasProducedResults(undefined), false);
+});
+
+test('ciHasProducedResults: CI awaiting maintainer approval has run nothing', () => {
+    // A first-time contributor's fork PR. `CI` is created but held, and
+    // produces no check runs at all, so the classifier sees only the fast
+    // pull_request_target milestone check and looks clear.
+    assert.equal(
+        ciHasProducedResults({
+            status: 'completed',
+            conclusion: 'action_required',
+        }),
+        false
+    );
+});
+
+test('ciHasProducedResults: in-progress CI has not created all its check runs yet', () => {
+    // Jobs behind `needs:` create their check runs only as they start, so
+    // mid-run the checklist can be empty and clear-looking.
+    assert.equal(
+        ciHasProducedResults({ status: 'in_progress', conclusion: null }),
+        false
+    );
+});
+
+test('ciHasProducedResults: queued CI has not created its check runs yet', () => {
+    assert.equal(ciHasProducedResults({ status: 'queued', conclusion: null }), false);
+});
+
+test('ciHasProducedResults: a completed CI run is real evidence', () => {
+    assert.equal(
+        ciHasProducedResults({ status: 'completed', conclusion: 'success' }),
+        true
+    );
+    // A failing CI run still counts as evidence: its check runs exist, so the
+    // classifier can see them and will report the failures on their own.
+    assert.equal(
+        ciHasProducedResults({ status: 'completed', conclusion: 'failure' }),
+        true
+    );
 });
 
 test('buildCommentBody: first-ever comment with failures mentions the author, no separate ping', () => {

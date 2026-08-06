@@ -58,6 +58,38 @@ const TASKS = [
 
 const MAX_JOB_LINKS_PER_TASK = 2;
 
+// The workflow that produces most of the checks above. Reporting an all-clear
+// without it having run is the difference between "everything passed" and
+// "nothing ran yet".
+const CI_WORKFLOW_NAME = 'CI';
+
+// Whether the CI workflow actually produced results for a SHA, given its
+// workflow run (or undefined if none exists yet).
+//
+// `classifyCheckRuns` cannot answer this, because check-run *absence* is
+// ambiguous: a check run that has not been created yet, one belonging to a
+// workflow skipped by path filters, and one from a workflow sitting at
+// `action_required` awaiting maintainer approval all look identical - each
+// simply leaves no entry, and so is treated as "not applicable" rather than
+// "not decided". On a first-time contributor's fork PR, `CI` is held at
+// `action_required` and creates no check runs at all, so the classifier sees
+// only the fast `pull_request_target` milestone check and concludes that
+// everything passes, on a PR where nothing has run. That is exactly the
+// population this bot exists to serve, so the all-clear path needs positive
+// evidence rather than an inference drawn from absence.
+//
+// `status === 'completed'` matters as much as the conclusion: mid-run, CI's
+// jobs create their check runs only as they start, so an in-progress CI can
+// still leave a clear-looking, entirely empty checklist a minute after the
+// PR is opened.
+function ciHasProducedResults(ciRun) {
+    return (
+        Boolean(ciRun) &&
+        ciRun.status === 'completed' &&
+        ciRun.conclusion !== 'action_required'
+    );
+}
+
 // Returns { tasks, hasPending }. `tasks` holds only decided (pass/fail)
 // tasks - a task with zero matching runs ("not applicable") and a task
 // still in_progress ("not decided yet") both leave no entry in `tasks`,
@@ -258,6 +290,8 @@ function buildCommentBody({ tasks, previousState, authorLogin, stickyCommentUrl 
 module.exports = {
     MARKER_PREFIX,
     TASKS,
+    CI_WORKFLOW_NAME,
+    ciHasProducedResults,
     classifyCheckRuns,
     computeOverallState,
     parsePreviousState,
