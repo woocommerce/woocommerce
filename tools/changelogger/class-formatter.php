@@ -27,8 +27,10 @@ class Formatter extends KeepAChangelogParser {
 	use PluginTrait;
 
 	/**
-	 * Marker appended after the significance of a major change. Written by format() and stripped by
-	 * parse(), so both sides must share this definition for a changelog to survive a round trip.
+	 * Marker appended after the significance of a major change. format() regenerates it from the
+	 * significance on every write, so it is never read back: parse() discards whatever bracketed
+	 * decoration sits in that slot, including hand-written variants of the marker. Subentry rows are
+	 * exempt, since their text is content verbatim.
 	 *
 	 * @var string
 	 */
@@ -193,9 +195,14 @@ class Formatter extends KeepAChangelogParser {
 					if ( 0 === strpos( $row, $this->bullet ) ) {
 						$row = substr( $row, strlen( $this->bullet ) );
 					}
-					// Drop the marker that format() appends after a major significance, otherwise it lands in the
+					// Drop any bracketed decoration following the significance, otherwise it lands in the
 					// significance segment below and the entry is re-emitted with no significance at all.
-					$row = preg_replace( '/^(major)\s*' . preg_quote( self::BREAKING_CHANGE_MARKER, '/' ) . '/i', '$1', $row );
+					// format() derives the breaking-change marker from the significance rather than preserving
+					// it, so matching brackets loosely instead of that exact marker keeps a hand-edited
+					// changelog parseable when its emphasis or spacing differs.
+					if ( ! $is_subentry ) {
+						$row = preg_replace( '/^(patch|minor|major)\s*\[[^\]]*\]/i', '$1', $row );
+					}
 
 					// Limit the split so that content containing " - " is not truncated at its own separator.
 					$row_segments = explode( ' - ', $row, 2 );
