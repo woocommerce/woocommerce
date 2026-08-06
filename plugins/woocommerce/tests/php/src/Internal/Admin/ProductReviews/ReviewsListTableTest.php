@@ -1914,7 +1914,9 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 			// ...and so does the Screen Options input, which WordPress core renders by applying the same
 			// `edit_product_reviews_per_page` filter. Both run through the bridge, so they can never diverge.
-			$this->assertSame( 45, (int) apply_filters( Reviews::PER_PAGE_USER_OPTION_KEY, 20 ) );
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks -- Mirrors the filter WordPress core applies when rendering the Screen Options input; not a WooCommerce-owned hook to document.
+			$input_per_page = (int) apply_filters( Reviews::PER_PAGE_USER_OPTION_KEY, 20 );
+			$this->assertSame( 45, $input_per_page );
 		} finally {
 			// Remove the test filter in `finally` so a failed assertion cannot leak it into subsequent tests.
 			remove_filter( 'edit_comments_per_page', $legacy );
