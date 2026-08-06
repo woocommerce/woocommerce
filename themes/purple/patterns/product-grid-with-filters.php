@@ -74,7 +74,7 @@
 
 <!-- wp:accordion-item {"style":{"border":{"bottom":{"color":"var:preset|color|theme-6","width":"1px"},"top":{},"right":{},"left":{}}}} -->
 <div class="wp-block-accordion-item" style="border-bottom-color:var(--wp--preset--color--theme-6);border-bottom-width:1px"><!-- wp:accordion-heading {"level":4,"style":{"spacing":{"padding":{"top":"var:preset|spacing|10","bottom":"var:preset|spacing|10"}}}} -->
-<h4 class="wp-block-accordion-heading has-icon has-icon-right"><button type="button" class="wp-block-accordion-heading__toggle" style="padding-top:var(--wp--preset--spacing--10);padding-bottom:var(--wp--preset--spacing--10)"><span class="wp-block-accordion-heading__toggle-title"><?php esc_html_e( 'Color', 'purple' );?></span><span class="wp-block-accordion-heading__toggle-icon" aria-hidden="true">+</span></button></h4>
+<h4 class="wp-block-accordion-heading has-icon has-icon-right"><button type="button" class="wp-block-accordion-heading__toggle" style="padding-top:var(--wp--preset--spacing--10);padding-bottom:var(--wp--preset--spacing--10)"><span class="wp-block-accordion-heading__toggle-title"><?php esc_html_e( 'Attribute filter', 'purple' );?></span><span class="wp-block-accordion-heading__toggle-icon" aria-hidden="true">+</span></button></h4>
 <!-- /wp:accordion-heading -->
 
 <!-- wp:accordion-panel {"style":{"spacing":{"blockGap":"0"}}} -->
