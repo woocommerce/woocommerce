@@ -166,10 +166,18 @@ const TRANSITION_MESSAGES = {
 // but the body always carries an author-anchored line so a reader dropping
 // into the comment mid-thread (or an edit notification, however rare)
 // still has that context - the checklist is never shown bare.
+//
+// `clear->clear` is deliberately absent, and this is the one entry whose
+// absence is load-bearing rather than cosmetic: the orchestrator returns
+// before calling buildCommentBody on that transition (see the
+// `previousState === 'clear' && overallState === 'clear'` guard in
+// manage-pr-readiness-comment.js), so an entry here could never reach a
+// comment. If that guard is ever relaxed, add the message back at the same
+// time - every transition that reaches this point must resolve to an intro
+// line, and there is no fallback.
 const SILENT_STATUS_MESSAGES = {
     'failing->failing': (authorLogin) =>
         `Hi @${authorLogin}, here's the current status — a few things still need attention:`,
-    'clear->clear': (authorLogin) => `Your readiness checks are still all passing — no new blockers here.`,
 };
 
 // GitHub only sends a mention notification when a comment is *created*,
@@ -182,9 +190,10 @@ const SILENT_STATUS_MESSAGES = {
 // `none->failing` and `none->clear` are deliberately absent: those are the
 // sticky comment's own first-ever creation, which already notifies on its
 // own - a second comment right after would just be a redundant duplicate.
-// `failing->clear` and `clear->clear` are ordinary/successful re-runs, not
-// something that needs to interrupt the author. `failing->failing` is a
-// repeated failure, already covered by "no re-ping while still failing".
+// `failing->clear` is an ordinary successful re-run, not something that
+// needs to interrupt the author. `failing->failing` is a repeated failure,
+// already covered by "no re-ping while still failing". `clear->clear` never
+// reaches this function at all (see SILENT_STATUS_MESSAGES above).
 const PING_MESSAGES = {
     'clear->failing': (authorLogin, stickyCommentUrl) =>
         `@${authorLogin}, the readiness checklist now has failures — see [the checklist above](${stickyCommentUrl}).`,

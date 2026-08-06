@@ -310,17 +310,21 @@ test('buildCommentBody: fixed from failing to clear mentions the author, no ping
     assert.equal(pingBody, null);
 });
 
-test('buildCommentBody: still clear does not re-mention, no ping, keeps header and author line', () => {
-    const { body, mentioned, pingBody } = buildCommentBody({
-        tasks: [{ label: 'Lint', status: 'pass', remediation: 'n/a' }],
-        previousState: 'clear',
-        authorLogin: 'octocat',
-    });
-
-    assert.equal(mentioned, false);
-    assert.ok(body.includes('## PR Readiness Checks'));
-    assert.ok(body.includes('Your readiness checks are still all passing'));
-    assert.equal(pingBody, null);
+test('buildCommentBody: clear->clear has no message, because the orchestrator never gets here', () => {
+    // The orchestrator returns before calling buildCommentBody when a clear
+    // PR stays clear, so any message defined for that transition would be
+    // unreachable. Assert the absence rather than deleting the case
+    // outright: a message re-added here would look reasonable in review and
+    // silently never render.
+    assert.throws(
+        () =>
+            buildCommentBody({
+                tasks: [{ label: 'Lint', status: 'pass', remediation: 'n/a' }],
+                previousState: 'clear',
+                authorLogin: 'octocat',
+            }),
+        TypeError
+    );
 });
 
 test('buildCommentBody: a failing task with one job url renders a single Job link on the status line, remediation on its own line', () => {
