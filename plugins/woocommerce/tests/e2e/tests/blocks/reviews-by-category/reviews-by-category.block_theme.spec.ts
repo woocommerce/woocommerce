@@ -6,15 +6,15 @@ import { expect, test } from '@woocommerce/e2e-utils';
 /**
  * Internal dependencies
  */
-import { allReviews, hoodieReviews } from '../../../test-data/blocks/data/data';
+import { hoodieReviews } from '../../../test-data/blocks/data/data';
 
-const latestReview = allReviews[ allReviews.length - 1 ];
+const latestReview = hoodieReviews[ hoodieReviews.length - 1 ];
 
-const highestRating = [ ...allReviews ].sort(
+const highestRating = [ ...hoodieReviews ].sort(
 	( a, b ) => b.rating - a.rating
 )[ 0 ];
 
-const lowestRating = [ ...allReviews ].sort(
+const lowestRating = [ ...hoodieReviews ].sort(
 	( a, b ) => a.rating - b.rating
 )[ 0 ];
 
@@ -24,12 +24,7 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 	test.beforeEach( async ( { admin, editor } ) => {
 		await admin.createNewPost();
 		await editor.insertBlock( { name: BLOCK_NAME } );
-	} );
 
-	test( 'block can be inserted and it successfully renders a review in the editor and the frontend', async ( {
-		page,
-		editor,
-	} ) => {
 		const blockLocator = await editor.getBlockByName( BLOCK_NAME );
 		const categoryCheckbox = blockLocator.getByRole( 'checkbox', {
 			name: 'Clothing',
@@ -37,11 +32,14 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 		} );
 		await categoryCheckbox.check();
 		await expect( categoryCheckbox ).toBeChecked();
-		const doneButton = blockLocator.getByRole( 'button', {
-			name: 'Done',
-		} );
-		await doneButton.click();
 
+		await blockLocator.getByRole( 'button', { name: 'Done' } ).click();
+	} );
+
+	test( 'block can be inserted and it successfully renders a review in the editor and the frontend', async ( {
+		page,
+		editor,
+	} ) => {
 		await expect(
 			editor.canvas.getByText( hoodieReviews[ 0 ].review )
 		).toBeVisible();
