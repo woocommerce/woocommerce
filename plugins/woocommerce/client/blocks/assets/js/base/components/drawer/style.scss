@@ -65,7 +65,6 @@ $drawer-animation-duration: 0.3s;
 	height: 100%;
 	inset-inline-start: 100%;
 	position: fixed;
-	inset-inline-end: 0;
 	top: 0;
 	transform: translateX(max(-100%, var(--neg-drawer-width)));
 	width: var(--drawer-width);
@@ -116,7 +115,7 @@ $drawer-animation-duration: 0.3s;
 	color: inherit !important;
 	position: absolute !important;
 	top: $gap-small;
-	right: $gap-small;
+	inset-inline-end: $gap-small;
 	opacity: 0.6;
 	z-index: 2;
 	// Increase clickable area.
