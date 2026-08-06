@@ -53686,18 +53686,6 @@ parameters:
 			path: src/Blocks/Domain/Services/Hydration.php
 
 		-
-			message: '#^Default value of the parameter \#1 \$path \(string\) of method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\Hydration\:\:get_rest_api_response_data\(\) is incompatible with type array\.$#'
-			identifier: parameter.defaultValue
-			count: 1
-			path: src/Blocks/Domain/Services/Hydration.php
-
-		-
-			message: '#^Invalid array key type array\.$#'
-			identifier: offsetAccess.invalidOffset
-			count: 1
-			path: src/Blocks/Domain/Services/Hydration.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\Hydration\:\:cache_store_notices\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -53724,30 +53712,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\Hydration\:\:restore_nonce_check\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/Domain/Services/Hydration.php
-
-		-
-			message: '#^Parameter \#1 \$haystack of function str_starts_with expects string\|null, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/Domain/Services/Hydration.php
-
-		-
-			message: '#^Parameter \#1 \$path of method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\Hydration\:\:match_route_to_handler\(\) expects string, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/Domain/Services/Hydration.php
-
-		-
-			message: '#^Parameter \#2 \$path of function rest_preload_api_request expects string, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/Domain/Services/Hydration.php
-
-		-
-			message: '#^Parameter \#2 \$path of method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\Hydration\:\:get_response_from_controller\(\) expects string, array given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/Domain/Services/Hydration.php
 
