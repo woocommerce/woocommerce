@@ -25,6 +25,11 @@ export type MarketplaceContextType = {
 	) => void;
 	iamSettings: {
 		product_previews?: 'modal' | 'none';
+		quality_badge?: {
+			enabled?: boolean;
+			label?: string;
+			tooltip?: string;
+		};
 	};
 };
 

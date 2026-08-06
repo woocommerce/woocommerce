@@ -1,0 +1,54 @@
+@import "../../stylesheets/_variables.scss";
+
+.woocommerce-marketplace {
+	// Chip on product cards. Sits on its own row at the bottom of the card
+	// footer, below the price, to avoid crowding the title on narrow cards.
+	&__quality-badge {
+		width: 100%;
+
+		&__chip {
+			align-items: center;
+			background: $studio-gray-0;
+			border-radius: $grid-unit-05;
+			color: $gray-900;
+			display: inline-flex;
+			font-size: 12px;
+			font-weight: 500;
+			gap: $grid-unit-05;
+			line-height: 20px;
+			padding: 0 $grid-unit-10 0 $grid-unit-05;
+			/* Punch through the "whole card clickable" trick so the tooltip works: */
+			position: relative;
+		}
+	}
+
+	&__quality-badge-icon {
+		flex-shrink: 0;
+	}
+
+	// "Show only <badge>" toggle in the listing sub-header.
+	&__quality-badge-filter {
+		align-items: center;
+		border: 1px solid $gray-300;
+		border-radius: $grid-unit-05;
+		display: flex;
+		flex-shrink: 0;
+		gap: $grid-unit-10;
+		padding: $grid-unit-05 $grid-unit-15;
+
+		label {
+			cursor: pointer;
+			white-space: nowrap;
+		}
+
+		&__info {
+			align-items: center;
+			background: none;
+			border: 0;
+			color: $gray-700;
+			cursor: pointer;
+			display: flex;
+			padding: 0;
+		}
+	}
+}

@@ -66,7 +66,8 @@
 			.woocommerce-marketplace__product-card__description,
 			.woocommerce-marketplace__product-card__add-to-store,
 			.woocommerce-marketplace__product-card__rating,
-			.woocommerce-marketplace__product-card__price {
+			.woocommerce-marketplace__product-card__price,
+			.woocommerce-marketplace__quality-badge {
 				display: none;
 			}
 
@@ -86,8 +87,12 @@
 
 		&__footer {
 			display: flex;
+			/* The quality badge, when present, wraps onto its own row below the price: */
+			flex-wrap: wrap;
 			justify-content: space-between;
 			align-items: center;
+			row-gap: $grid-unit-10;
+			min-height: 36px;
 		}
 
 		&:hover {
@@ -98,7 +103,7 @@
 			display: grid;
 			gap: $medium-gap;
 			height: 100%;
-			grid-template-rows: auto 1fr 36px;
+			grid-template-rows: auto 1fr auto;
 		}
 
 		&__header {
