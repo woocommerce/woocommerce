@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add e2e assertion that the WordPress 7.1 responsive styles option is not offered in the email editor
