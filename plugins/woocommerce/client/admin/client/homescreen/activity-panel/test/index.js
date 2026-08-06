@@ -181,13 +181,21 @@ describe( 'ActivityPanel', () => {
 		},
 		{
 			description:
-				'an order manager with product access skips only the counts',
+				'an order manager with product read access still skips products, whose panels need the counts',
 			capabilities: [
 				'read_private_shop_orders',
 				'read_private_products',
 			],
 			expectedCountsCalls: 0,
 			expectsOrders: true,
+			expectsProducts: false,
+		},
+		{
+			description:
+				'a manage role with product read access requests counts and products',
+			capabilities: [ 'manage_woocommerce', 'read_private_products' ],
+			expectedCountsCalls: 1,
+			expectsOrders: false,
 			expectsProducts: true,
 		},
 		{

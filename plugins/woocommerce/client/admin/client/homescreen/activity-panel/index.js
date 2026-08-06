@@ -47,7 +47,11 @@ const ActivityPanelContent = ( {
 			// the wc/v3 orders and products counts need the respective
 			// read_private_* capability and the Activity Panel counts need
 			// manage_woocommerce, so a role holding any subset of them never
-			// triggers a 403.
+			// triggers a 403. The products count additionally requires
+			// manage_woocommerce because its only consumers, the Stock and
+			// Reviews panels, need the counts endpoint and product edit
+			// access to work; mounting them read-only would offer an Update
+			// stock action that can only fail.
 			const data = {
 				countsEnabled: canManageWooCommerce,
 				loadingOrderAndProductCount: false,
@@ -79,7 +83,7 @@ const ActivityPanelContent = ( {
 					] );
 			}
 
-			if ( canViewProducts ) {
+			if ( canManageWooCommerce && canViewProducts ) {
 				const {
 					getProductsTotalCount,
 					hasFinishedResolution: hasFinishedProductsResolution,
