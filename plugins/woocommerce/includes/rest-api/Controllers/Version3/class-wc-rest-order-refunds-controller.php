@@ -102,7 +102,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 		// error data and use unprefixed codes (the engine is convention neutral);
 		// they are prefixed here at the v3 boundary so this endpoint follows the
 		// `woocommerce_rest_*` convention of the rest of the v3 surface.
-		$preview = $this->data_utils()->compute_refund_preview_or_error( $order, $request['line_items'], 'wc-rest-refunds' );
+		$preview = $this->get_data_utils()->compute_refund_preview_or_error( $order, $request['line_items'], 'wc-rest-refunds' );
 
 		if ( is_wp_error( $preview ) ) {
 			return $this->prefix_error_code( $preview );
@@ -251,40 +251,46 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 	 * @return array
 	 */
 	private function get_preview_line_items_arg_schema() {
-		return $this->data_utils()->get_preview_line_items_arg_schema();
+		return $this->get_data_utils()->get_preview_line_items_arg_schema();
 	}
 
 	/**
-	 * Validate and normalize the scalar types of one compute_totals line item.
+	 * Normalize one compute_totals line item to the shared engine's shape.
 	 *
-	 * The REST schema cannot validate the line_items subtree (the property is
-	 * readonly for backward compatibility), so without this check malformed
-	 * values such as an array refund_total would reach the calculation engine
-	 * and fail with a TypeError instead of a 400 response. Uses the same error
-	 * codes as the engine's own validation, and casts numeric strings to their
-	 * proper types.
+	 * Maps the create endpoint's public `id` key to the engine's `line_item_id`
+	 * and validates/normalizes the scalar types. The REST schema cannot validate
+	 * the line_items subtree (the property is readonly for backward
+	 * compatibility), so without this check malformed values such as an array
+	 * refund_total would reach the calculation engine and fail with a TypeError
+	 * instead of a 400 response. Uses the same error codes as the engine's own
+	 * validation, and casts numeric strings to their proper types.
 	 *
-	 * @param array $line_item Line item in schema format (line_item_id keys).
+	 * @param array $line_item Line item in the public request shape (id keys).
 	 * @return array|WP_Error The normalized line item, or WP_Error on an invalid type.
 	 *
 	 * @since 11.1.0
 	 */
-	private function normalize_line_item_types( array $line_item ) {
-		// IDs must be whole numbers: silently truncating a fractional id such as
-		// 123.5 to 123 would target a different line or tax bucket than requested.
-		if ( isset( $line_item['line_item_id'] ) && ! is_int( $line_item['line_item_id'] ) ) {
-			if ( ! is_numeric( $line_item['line_item_id'] ) || (float) (int) $line_item['line_item_id'] !== (float) $line_item['line_item_id'] ) {
+	private function normalize_line_item( array $line_item ) {
+		if ( isset( $line_item['id'] ) && ! isset( $line_item['line_item_id'] ) ) {
+			$line_item['line_item_id'] = $line_item['id'];
+			unset( $line_item['id'] );
+		}
+
+		// IDs must be whole numbers (rest_is_integer): silently truncating a
+		// fractional id such as 123.5 to 123 would target a different line or
+		// tax bucket than requested.
+		if ( isset( $line_item['line_item_id'] ) ) {
+			if ( ! rest_is_integer( $line_item['line_item_id'] ) ) {
 				return new WP_Error( 'woocommerce_rest_invalid_line_item', __( 'Line item id must be an integer.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 			$line_item['line_item_id'] = (int) $line_item['line_item_id'];
 		}
 
 		if ( isset( $line_item['quantity'] ) ) {
-			$quantity = $line_item['quantity'];
-			if ( ! is_numeric( $quantity ) || (float) (int) $quantity !== (float) $quantity ) {
+			if ( ! rest_is_integer( $line_item['quantity'] ) ) {
 				return new WP_Error( 'woocommerce_rest_invalid_quantity', __( 'Quantity must be a whole number.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
-			$line_item['quantity'] = (int) $quantity;
+			$line_item['quantity'] = (int) $line_item['quantity'];
 		}
 
 		if ( isset( $line_item['refund_total'] ) ) {
@@ -299,8 +305,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 				return new WP_Error( 'woocommerce_rest_invalid_line_item', __( 'refund_tax must be an array of objects with id and refund_total.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 			foreach ( $line_item['refund_tax'] as $index => $tax ) {
-				if ( ! is_array( $tax ) || ! isset( $tax['id'], $tax['refund_total'] ) || ! is_numeric( $tax['id'] ) || ! is_numeric( $tax['refund_total'] )
-					|| (float) (int) $tax['id'] !== (float) $tax['id'] ) {
+				if ( ! is_array( $tax ) || ! isset( $tax['id'], $tax['refund_total'] ) || ! rest_is_integer( $tax['id'] ) || ! is_numeric( $tax['refund_total'] ) ) {
 					return new WP_Error( 'woocommerce_rest_invalid_line_item', __( 'refund_tax entries must be objects with an integer id and a numeric refund_total.', 'woocommerce' ), array( 'status' => 400 ) );
 				}
 				$line_item['refund_tax'][ $index ] = array(
@@ -322,7 +327,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 	 *
 	 * @return DataUtils
 	 */
-	private function data_utils(): DataUtils {
+	private function get_data_utils(): DataUtils {
 		return wc_get_container()->get( DataUtils::class );
 	}
 
@@ -424,9 +429,9 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 	 * (computed from quantity at the order's stored unit price, tax-inclusive,
 	 * clamped to the remaining refundable amount), input is validated against the
 	 * order's refund history, and the refund amount is derived from the line items
-	 * unless an explicit amount override is supplied. Error codes are intentionally
-	 * identical to the wc/v4 creation endpoint (unprefixed) so clients can share
-	 * error handling across both API versions.
+	 * unless an explicit amount override is supplied. Validation follows the same
+	 * rules as the wc/v4 creation endpoint; error codes are prefixed with
+	 * `woocommerce_rest_` at this v3 boundary like the rest of the v3 surface.
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_Error|WC_Data The created refund, or WP_Error object on failure.
@@ -444,23 +449,17 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 			return new WP_Error( 'woocommerce_rest_invalid_order_id', __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		// Map the v3 public line-item shape ({id, quantity, refund_total, refund_tax})
-		// to the schema format the shared calculation engine consumes ({line_item_id,
-		// quantity, refund_total, refund_tax}), and strictly validate value types:
-		// the REST layer cannot do it because the line_items schema property is
-		// readonly for backward compatibility, so its args are not registered.
+		// Normalize each line to the engine's schema shape and validate value
+		// types here: the REST layer cannot, because the line_items schema
+		// property is readonly for backward compatibility, so its args are not
+		// registered.
 		$line_items = array();
 		foreach ( (array) ( $request['line_items'] ?? array() ) as $line_item ) {
 			if ( ! is_array( $line_item ) ) {
 				return new WP_Error( 'woocommerce_rest_invalid_line_item', __( 'Each line item must be an object.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 
-			if ( isset( $line_item['id'] ) && ! isset( $line_item['line_item_id'] ) ) {
-				$line_item['line_item_id'] = $line_item['id'];
-				unset( $line_item['id'] );
-			}
-
-			$line_item = $this->normalize_line_item_types( $line_item );
+			$line_item = $this->normalize_line_item( $line_item );
 			if ( is_wp_error( $line_item ) ) {
 				return $line_item;
 			}
@@ -475,7 +474,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 		// quantity < 1, but fill_missing_refund_totals pre-checks that condition,
 		// so this branch is defensive against a future invariant break only.
 		try {
-			$line_items = $this->data_utils()->fill_missing_refund_totals( $line_items, $order );
+			$line_items = $this->get_data_utils()->fill_missing_refund_totals( $line_items, $order );
 		} catch ( InvalidArgumentException $e ) {
 			wc_get_logger()->error(
 				sprintf( 'Refund creation invariant violation on order %d (%s): %s', $order->get_id(), get_class( $e ), $e->getMessage() ),
@@ -492,7 +491,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 		// so create and preview return the same code for the same invalid input.
 		// The shared engine emits unprefixed codes; they are prefixed at this v3
 		// boundary like every other error the endpoint returns.
-		$validation_error = $this->data_utils()->validate_line_items( $line_items, $order );
+		$validation_error = $this->get_data_utils()->validate_line_items( $line_items, $order );
 		if ( is_wp_error( $validation_error ) ) {
 			return $this->prefix_error_code( $validation_error );
 		}
@@ -502,8 +501,8 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 		// converter splits the tax portion out via the line's stored total/tax ratio.
 		// When the client supplies an explicit refund_tax breakdown, refund_total is the
 		// tax-exclusive subtotal and the tax is added on top (core Woo semantics).
-		$line_item_data   = $this->data_utils()->convert_line_items_to_internal_format( $line_items, $order );
-		$calculated_total = ! empty( $line_items ) ? $this->data_utils()->calculate_refund_amount( $line_items ) : 0;
+		$line_item_data   = $this->get_data_utils()->convert_line_items_to_internal_format( $line_items, $order );
+		$calculated_total = ! empty( $line_items ) ? $this->get_data_utils()->calculate_refund_amount( $line_items ) : 0;
 
 		// has_param() distinguishes an omitted amount from an explicitly supplied one.
 		// An explicit zero (including string forms like "0.00", which are truthy) must
@@ -566,12 +565,14 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 			)
 		);
 
+		// Same code and status as the legacy path above so a wc_create_refund
+		// failure looks identical to clients regardless of the compute_totals flag.
 		if ( is_wp_error( $refund ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create_refund', $refund->get_error_message(), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_cannot_create_order_refund', $refund->get_error_message(), array( 'status' => 500 ) );
 		}
 
 		if ( ! $refund ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create_refund', __( 'Cannot create order refund.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_cannot_create_order_refund', __( 'Cannot create order refund, please try again.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		if ( ! empty( $request['meta_data'] ) ) {
@@ -635,9 +636,10 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 		$schema = parent::get_item_schema();
 
 		$schema['properties']['line_items']['items']['properties']['refund_total'] = array(
-			'description' => __( 'Amount to refund for this line item. Tax-exclusive, with taxes supplied separately via refund_tax — except when compute_totals is true and refund_tax is omitted, in which case it is tax-inclusive. When compute_totals is true it may be omitted (or null) to have the server compute it from quantity.', 'woocommerce' ),
-			'type'        => array( 'number', 'null' ),
+			'description' => __( 'Amount that will be refunded for this line item (excluding taxes).', 'woocommerce' ),
+			'type'        => 'number',
 			'context'     => array( 'edit' ),
+			'readonly'    => true,
 		);
 
 		$schema['properties']['line_items']['items']['properties']['taxes']['items']['properties']['refund_total'] = array(
@@ -655,7 +657,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 		);
 
 		$schema['properties']['compute_totals'] = array(
-			'description' => __( 'When true, line items may omit refund_total and the server computes per-line refund amounts from quantities (tax-inclusive, using the order\'s stored unit prices and taxes, clamped to each line\'s remaining refundable amount), validating the request against the order\'s refund history. In this mode a refund_total supplied without refund_tax is treated as tax-inclusive, and amount (when provided) must be at least the computed line total and no more than the order\'s remaining refundable amount. Defaults to false, which preserves the pre-existing behavior of this endpoint.', 'woocommerce' ),
+			'description' => __( 'When true, the server computes per-line refund amounts from quantities using the order\'s stored prices and taxes, validating the request against the order\'s refund history. Defaults to false, which preserves the pre-existing behavior of this endpoint.', 'woocommerce' ),
 			'type'        => 'boolean',
 			'context'     => array( 'edit' ),
 			'default'     => false,

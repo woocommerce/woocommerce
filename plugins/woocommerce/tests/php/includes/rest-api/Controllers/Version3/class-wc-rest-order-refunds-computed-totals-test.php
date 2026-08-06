@@ -931,6 +931,144 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
+	 * @testdox Repeating the same line item id in one compute_totals request is rejected.
+	 */
+	public function test_duplicate_line_item_ids_rejected(): void {
+		$order   = $this->create_order_with_product( 10.00, 4 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'compute_totals' => true,
+				'line_items'     => array(
+					array(
+						'id'       => $item_id,
+						'quantity' => 1,
+					),
+					array(
+						'id'       => $item_id,
+						'quantity' => 1,
+					),
+				),
+			)
+		);
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_duplicate_line_item', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox A compute_totals request against a nonexistent order id, or a refund id used as the order id, returns a 404.
+	 */
+	public function test_invalid_order_ids_return_404(): void {
+		$body = array(
+			'compute_totals' => true,
+			'line_items'     => array(),
+		);
+
+		$response = $this->do_create_request( 999999999, $body );
+		$this->assertEquals( 404, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_invalid_order_id', $response->get_data()['code'] );
+
+		// A refund id resolves through wc_get_order to a WC_Order_Refund, which
+		// must be rejected the same way as a missing order.
+		$order  = $this->create_order_with_product( 10.00, 1 );
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 5.00,
+			)
+		);
+		$this->assertNotWPError( $refund );
+
+		$response = $this->do_create_request( $refund->get_id(), $body );
+		$this->assertEquals( 404, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_invalid_order_id', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox The pre_insert filter receives internal-format line items and the resolved amount, matching the legacy path's request shape.
+	 */
+	public function test_pre_insert_filter_receives_internal_format(): void {
+		$order   = $this->create_order_with_product( 25.00, 2 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$captured = null;
+		$capture  = function ( $refund, $request, $creating ) use ( &$captured ) {
+			$captured = array(
+				'line_items' => $request['line_items'],
+				'amount'     => $request['amount'],
+				'creating'   => $creating,
+			);
+			return $refund;
+		};
+		add_filter( 'woocommerce_rest_pre_insert_shop_order_refund_object', $capture, 10, 3 );
+
+		try {
+			$response = $this->do_create_request(
+				$order->get_id(),
+				array(
+					'compute_totals' => true,
+					'line_items'     => array(
+						array(
+							'id'       => $item_id,
+							'quantity' => 1,
+						),
+					),
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_rest_pre_insert_shop_order_refund_object', $capture );
+		}
+
+		$this->assertEquals( 201, $response->get_status() );
+		$this->assertNotNull( $captured, 'The pre_insert filter should run for compute_totals requests.' );
+		$this->assertTrue( $captured['creating'] );
+		$this->assertSame( '25', $captured['amount'], 'The resolved amount should be mirrored onto the request.' );
+		$this->assertSame( array( $item_id ), array_keys( $captured['line_items'] ), 'line_items should be keyed by item id (internal format).' );
+		$this->assertSame( 1, $captured['line_items'][ $item_id ]['qty'] );
+		$this->assertEquals( 25.00, $captured['line_items'][ $item_id ]['refund_total'] );
+	}
+
+	/**
+	 * @testdox A wc_create_refund failure returns the same error code and status with and without compute_totals.
+	 */
+	public function test_create_failure_code_and_status_match_legacy(): void {
+		$order   = $this->create_order_with_product( 10.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$fail = function () {
+			throw new Exception( 'Simulated create failure.' );
+		};
+		add_action( 'woocommerce_create_refund', $fail );
+
+		try {
+			$computed = $this->do_create_request(
+				$order->get_id(),
+				array(
+					'compute_totals' => true,
+					'line_items'     => array(
+						array(
+							'id'       => $item_id,
+							'quantity' => 1,
+						),
+					),
+				)
+			);
+
+			$legacy = $this->do_create_request( $order->get_id(), array( 'amount' => '5.00' ) );
+		} finally {
+			remove_action( 'woocommerce_create_refund', $fail );
+		}
+
+		$this->assertEquals( 500, $computed->get_status() );
+		$this->assertEquals( 'woocommerce_rest_cannot_create_order_refund', $computed->get_data()['code'] );
+		$this->assertEquals( $legacy->get_status(), $computed->get_status(), 'Both paths should fail with the same HTTP status.' );
+		$this->assertEquals( $legacy->get_data()['code'], $computed->get_data()['code'], 'Both paths should fail with the same error code.' );
+	}
+
+	/**
 	 * Create a completed order with a single product line item.
 	 *
 	 * @param float $unit_price Unit price.
