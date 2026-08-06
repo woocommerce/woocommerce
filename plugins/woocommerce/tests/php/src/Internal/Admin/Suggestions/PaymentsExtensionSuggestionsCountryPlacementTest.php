@@ -146,8 +146,7 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 	public static function tearDownAfterClass(): void {
 		parent::tearDownAfterClass();
 
-		WC()->payment_gateways()->payment_gateways = array();
-		WC()->payment_gateways()->init();
+		self::reload_payment_gateways();
 
 		wc_get_container()->get( PaymentsProviders::class )->clear_cache();
 	}
@@ -425,9 +424,9 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 		);
 		$this->sut->clear_cache();
 
-		$result               = $this->sut->get_extension_suggestions( $country );
-		$projected            = $this->project_sections( $result, $country );
-		$derived              = $expected;
+		$result    = $this->sut->get_extension_suggestions( $country );
+		$projected = $this->project_sections( $result, $country );
+		$derived   = $expected;
 		$this->assert_no_preferred_tag_in_other( $result, $country );
 		$derived['other_psp'] = array_values(
 			array_filter(

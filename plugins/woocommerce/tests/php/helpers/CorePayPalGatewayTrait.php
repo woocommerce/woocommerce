@@ -69,13 +69,21 @@ trait CorePayPalGatewayTrait {
 		// Make sure the store currency is supported by the gateway.
 		update_option( 'woocommerce_currency', 'USD' );
 
-		// WC_Payment_Gateways::init() adds to the loaded list rather than replacing
-		// it, so the list has to be emptied first for a gateway that is no longer
-		// loadable to actually disappear.
-		WC()->payment_gateways()->payment_gateways = array();
-		WC()->payment_gateways()->init();
+		self::reload_payment_gateways();
 
 		// Clear cached provider data to pick up the new gateway details.
 		$this->get_payments_providers_service()->clear_cache();
+	}
+
+	/**
+	 * Rebuild the loaded payment gateways from the current options.
+	 *
+	 * WC_Payment_Gateways::init() adds to the loaded list rather than replacing
+	 * it, so the list has to be emptied first for a gateway that is no longer
+	 * loadable to actually disappear.
+	 */
+	protected static function reload_payment_gateways(): void {
+		WC()->payment_gateways()->payment_gateways = array();
+		WC()->payment_gateways()->init();
 	}
 }

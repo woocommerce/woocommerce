@@ -1958,8 +1958,7 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		// Hook into the payment gateways initialization to mock the gateways.
 		add_action( 'wc_payment_gateways_initialized', $this->gateways_mock_ref, 100 );
 		// Reinitialize the WC gateways.
-		WC()->payment_gateways()->payment_gateways = array();
-		WC()->payment_gateways()->init();
+		self::reload_payment_gateways();
 
 		$this->providers_service->clear_cache();
 
@@ -2062,11 +2061,10 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 			remove_action( 'wc_payment_gateways_initialized', $this->gateways_mock_ref, 100 );
 		}
 		// Reinitialize the WC gateways.
-		WC()->payment_gateways()->payment_gateways = array();
 		if ( isset( $this->providers_service ) ) {
 			$this->load_core_paypal_pg();
 		} else {
-			WC()->payment_gateways()->init();
+			self::reload_payment_gateways();
 		}
 	}
 

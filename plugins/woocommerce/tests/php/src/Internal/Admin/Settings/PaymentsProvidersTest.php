@@ -68,8 +68,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		// Reset gateways, hooks, and cached provider data between tests.
 		remove_all_actions( 'wc_payment_gateways_initialized' );
-		WC()->payment_gateways()->payment_gateways = array();
-		WC()->payment_gateways()->init();
+		self::reload_payment_gateways();
 		if ( isset( $this->sut ) ) {
 			$this->sut->clear_cache();
 		}
