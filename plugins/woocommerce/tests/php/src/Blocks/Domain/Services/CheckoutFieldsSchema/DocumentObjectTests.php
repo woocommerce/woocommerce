@@ -120,9 +120,13 @@ class DocumentObjectTests extends \WC_Unit_Test_Case {
 	 * Tear down the test environment.
 	 */
 	public function tearDown(): void {
-		// The cart lives on the WC singleton, which the rollback does not touch, so empty it
-		// before handing back to the parent.
+		// The cart, the notice queue, and the CheckoutFields registry all live on singletons
+		// that neither the database rollback nor the hook restore touches, so reset them
+		// unconditionally before handing back to the parent.
 		wc_empty_cart();
+		wc_clear_notices();
+		$this->additional_fields_controller->deregister_checkout_field( 'namespace/contact_field' );
+		$this->additional_fields_controller->deregister_checkout_field( 'namespace/order_field' );
 
 		parent::tearDown();
 	}
@@ -288,9 +292,6 @@ class DocumentObjectTests extends \WC_Unit_Test_Case {
 				'namespace/order_field' => 'Order field',
 			]
 		);
-
-		$this->additional_fields_controller->deregister_checkout_field( 'namespace/contact_field' );
-		$this->additional_fields_controller->deregister_checkout_field( 'namespace/order_field' );
 	}
 
 	/**
