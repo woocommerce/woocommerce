@@ -22,11 +22,7 @@ class Reviews {
 	/**
 	 * User option key that stores the number of reviews to display per page on the Product Reviews screen.
 	 *
-	 * This is defined here — rather than on {@see ReviewsListTable} — deliberately. `ReviewsListTable` extends the
-	 * admin-only `WP_List_Table` class, which is not loaded outside of admin screen requests (for example during the
-	 * PHPUnit bootstrap). Referencing a `ReviewsListTable` constant from this always-instantiated class' constructor
-	 * would autoload `ReviewsListTable` and fatal with "Class WP_List_Table not found". Keeping the key on this class
-	 * lets the constructor build the `set_screen_option_*` hook name without touching the list table.
+	 * Kept here to avoid autoloading the admin-only {@see ReviewsListTable} outside admin requests.
 	 *
 	 * @since 11.1.0
 	 *
@@ -64,9 +60,6 @@ class Reviews {
 		add_action( 'admin_notices', array( $this, 'display_notices' ) );
 
 		add_filter( 'set_screen_option_' . self::PER_PAGE_USER_OPTION_KEY, array( $this, 'set_reviews_per_page_option' ), 10, 3 );
-
-		// Bridge the legacy `edit_comments_per_page` filter onto the dedicated per-page filter, so both the reviews
-		// list and the Screen Options input stay in sync (WordPress core runs the same filter for each).
 		add_filter( self::PER_PAGE_USER_OPTION_KEY, array( $this, 'apply_legacy_reviews_per_page_filter' ) );
 	}
 
@@ -585,10 +578,6 @@ class Reviews {
 	/**
 	 * Registers the screen options for the Reviews page.
 	 *
-	 * This adds the "Number of reviews per page" control to the Screen Options tab. The value is stored in the
-	 * dedicated {@see Reviews::PER_PAGE_USER_OPTION_KEY} user option, which {@see ReviewsListTable::get_per_page()}
-	 * reads when preparing the list.
-	 *
 	 * @since 11.1.0
 	 *
 	 * @return void
@@ -607,13 +596,7 @@ class Reviews {
 	}
 
 	/**
-	 * Saves the "number of reviews per page" screen option.
-	 *
-	 * Because this is a custom screen-option key, WordPress core does not apply the `1`–`999` bounds it enforces for
-	 * standard per-page options in {@see set_screen_options()}. We reapply those bounds here so a crafted (but
-	 * nonce-authenticated) request cannot persist an out-of-range value that would later be passed to
-	 * {@see get_comments()} as the query size. Out-of-range values are rejected (the incoming status is returned
-	 * unchanged, so nothing is saved), matching core's behaviour.
+	 * Saves the reviews per-page screen option within WordPress's standard `1`–`999` bounds.
 	 *
 	 * @since 11.1.0
 	 *
@@ -639,12 +622,7 @@ class Reviews {
 	}
 
 	/**
-	 * Bridges the legacy `edit_comments_per_page` filter onto the dedicated reviews per-page filter.
-	 *
-	 * The reviews list historically took its page size from core's `edit_comments_per_page` filter. Re-applying it
-	 * through {@see Reviews::PER_PAGE_USER_OPTION_KEY} keeps existing integrations working and — since core runs that
-	 * same filter when rendering the Screen Options input — keeps the list and the input in agreement. It is applied
-	 * last (and not re-bounded), so it keeps precedence, which is the backward-compatibility case being preserved.
+	 * Applies the legacy `edit_comments_per_page` filter to the dedicated reviews per-page value.
 	 *
 	 * @since 11.1.0
 	 *
@@ -654,9 +632,7 @@ class Reviews {
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
 	public function apply_legacy_reviews_per_page_filter( $per_page ): int {
-		// Re-applies WordPress core's own `edit_comments_per_page` filter for backward compatibility. It is a core
-		// hook, not a WooCommerce-owned one, so it is not documented as a WooCommerce hook here.
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Core hook retained for compatibility.
 		return (int) apply_filters( 'edit_comments_per_page', $per_page );
 	}
 

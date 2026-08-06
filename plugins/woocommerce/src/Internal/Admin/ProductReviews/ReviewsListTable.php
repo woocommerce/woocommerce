@@ -121,10 +121,6 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Returns the number of items to show per page.
 	 *
-	 * Reads the dedicated {@see Reviews::PER_PAGE_USER_OPTION_KEY} option. The legacy `edit_comments_per_page`
-	 * backward-compatibility filter is bridged onto that option's filter in {@see Reviews}, so the value returned
-	 * here matches what the Screen Options input renders (WordPress core runs the same filter for both).
-	 *
 	 * @return int Customized per-page value if available, or 20 as the default.
 	 */
 	protected function get_per_page() : int {

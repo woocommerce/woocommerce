@@ -1886,7 +1886,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox `get_per_page` and the Screen Options input both reflect the legacy `edit_comments_per_page` filter, so they never diverge.
+	 * @testdox `get_per_page` and the Screen Options input use the legacy `edit_comments_per_page` value.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_per_page()
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::apply_legacy_reviews_per_page_filter()
@@ -1894,9 +1894,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_get_per_page_bridges_legacy_comments_filter() {
-		// Instantiating Reviews registers the bridge that re-applies `edit_comments_per_page` onto the dedicated
-		// `edit_product_reviews_per_page` filter.
+	public function test_get_per_page_bridges_legacy_comments_filter(): void {
 		wc_get_container()->get( Reviews::class );
 
 		$list_table = $this->get_reviews_list_table();
@@ -1909,16 +1907,12 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		add_filter( 'edit_comments_per_page', $legacy );
 
 		try {
-			// The list reflects the legacy filter (it keeps precedence)...
 			$this->assertSame( 45, $method->invoke( $list_table ) );
 
-			// ...and so does the Screen Options input, which WordPress core renders by applying the same
-			// `edit_product_reviews_per_page` filter. Both run through the bridge, so they can never diverge.
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks -- Mirrors the filter WordPress core applies when rendering the Screen Options input; not a WooCommerce-owned hook to document.
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks -- Mirrors WordPress's Screen Options filter.
 			$input_per_page = (int) apply_filters( Reviews::PER_PAGE_USER_OPTION_KEY, 20 );
 			$this->assertSame( 45, $input_per_page );
 		} finally {
-			// Remove the test filter in `finally` so a failed assertion cannot leak it into subsequent tests.
 			remove_filter( 'edit_comments_per_page', $legacy );
 		}
 	}
