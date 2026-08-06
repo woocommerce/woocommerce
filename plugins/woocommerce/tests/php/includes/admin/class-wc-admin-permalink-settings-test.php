@@ -27,6 +27,14 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		wp_set_current_user( 0 );
+		$this->reset_permalink_post_data();
+		parent::tearDown();
+	}
+
+	/**
+	 * Remove every permalink field this test class writes to $_POST.
+	 */
+	private function reset_permalink_post_data(): void {
 		unset(
 			$_POST['permalink_structure'],
 			$_POST['wc-permalinks-nonce'],
@@ -36,7 +44,6 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 			$_POST['product_permalink'],
 			$_POST['product_permalink_structure']
 		);
-		parent::tearDown();
 	}
 
 	/**
@@ -117,17 +124,18 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 		// First request: the save-time instance persists the new structure and is discarded.
 		new WC_Admin_Permalink_Settings();
 
-		unset(
-			$_POST['permalink_structure'],
-			$_POST['wc-permalinks-nonce'],
-			$_POST['woocommerce_product_category_slug'],
-			$_POST['woocommerce_product_tag_slug'],
-			$_POST['woocommerce_product_attribute_slug'],
-			$_POST['product_permalink'],
-			$_POST['product_permalink_structure']
-		);
+		$this->reset_permalink_post_data();
 
 		// Second request (post-redirect): a fresh instance reads back the now-persisted value.
+		return $this->render_settings();
+	}
+
+	/**
+	 * Render the permalink settings section HTML from a fresh instance.
+	 *
+	 * @return string Rendered settings HTML.
+	 */
+	private function render_settings(): string {
 		$sut = new WC_Admin_Permalink_Settings();
 
 		ob_start();
@@ -142,12 +150,12 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Assert that exactly one of the four product permalink radios is checked, and that it's the expected one.
+	 * Parse rendered settings HTML into an XPath query object.
 	 *
-	 * @param string $html        Rendered settings HTML.
-	 * @param string $expected_id Either 'default', 'shop_base', 'shop_base_category', or 'custom'.
+	 * @param string $html Rendered settings HTML.
+	 * @return DOMXPath Query object for the parsed document.
 	 */
-	private function assert_only_radio_checked( string $html, string $expected_id ): void {
+	private function get_xpath( string $html ): DOMXPath {
 		$document       = new DOMDocument();
 		$previous_state = libxml_use_internal_errors( true );
 		$loaded         = $document->loadHTML( $html );
@@ -156,7 +164,17 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 
 		$this->assertTrue( $loaded, 'The permalink settings output should be valid enough for DOM parsing.' );
 
-		$xpath  = new DOMXPath( $document );
+		return new DOMXPath( $document );
+	}
+
+	/**
+	 * Assert that exactly one of the four product permalink radios is checked, and that it's the expected one.
+	 *
+	 * @param string $html        Rendered settings HTML.
+	 * @param string $expected_id Either 'default', 'shop_base', 'shop_base_category', or 'custom'.
+	 */
+	private function assert_only_radio_checked( string $html, string $expected_id ): void {
+		$xpath  = $this->get_xpath( $html );
 		$radios = $xpath->query( '//input[@name="product_permalink"]' );
 
 		$this->assertSame( 4, $radios->length, 'Expected exactly 4 product_permalink radios in the rendered markup.' );
@@ -243,15 +261,7 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'product', get_option( 'woocommerce_permalinks' )['product_base'], 'The legacy Default base should remain stored without slashes.' );
 
-		$document       = new DOMDocument();
-		$previous_state = libxml_use_internal_errors( true );
-		$loaded         = $document->loadHTML( $html );
-		libxml_clear_errors();
-		libxml_use_internal_errors( $previous_state );
-
-		$this->assertTrue( $loaded, 'The permalink settings output should be valid enough for DOM parsing.' );
-
-		$xpath         = new DOMXPath( $document );
+		$xpath         = $this->get_xpath( $html );
 		$default_radio = $xpath->query( '(//input[@name="product_permalink"])[1]' )->item( 0 );
 		$custom_input  = $xpath->query( '//input[@id="woocommerce_permalink_structure"]' )->item( 0 );
 		$preview       = $xpath->query( '//code[contains(concat(" ", normalize-space(@class), " "), " non-default-example ")]' )->item( 0 );
@@ -422,7 +432,7 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 		$this->skipWithoutMultisite();
 
 		$original_locale = $GLOBALS['locale'] ?? null;
-		$subsite_id      = $this->factory->blog->create();
+		$subsite_id      = self::factory()->blog->create();
 		$user_id         = self::factory()->user->create(
 			array(
 				'role'   => 'administrator',
