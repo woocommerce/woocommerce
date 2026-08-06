@@ -51,6 +51,17 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 	private const PAYPAL_WALLET_UNAVAILABLE_COUNTRIES = array( 'CN', 'GE', 'KZ' );
 
 	/**
+	 * Preferred suggestion type to fixture primary slot.
+	 *
+	 * The preferred APM slot takes express checkouts too, so both types map to it.
+	 */
+	private const TYPE_TO_PRIMARY_SLOT = array(
+		PaymentsExtensionSuggestions::TYPE_PSP => 'primary_psp',
+		PaymentsExtensionSuggestions::TYPE_APM => 'primary_apm',
+		PaymentsExtensionSuggestions::TYPE_EXPRESS_CHECKOUT => 'primary_apm',
+	);
+
+	/**
 	 * The loaded placement fixture.
 	 *
 	 * Memoised because `require` returns a value, so `require_once` cannot be used
@@ -455,17 +466,11 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 		foreach ( $result['preferred'] as $suggestion ) {
 			$tags = $suggestion['tags'] ?? array();
 
-			if ( in_array( PaymentsExtensionSuggestions::TAG_PREFERRED_OFFLINE, $tags, true ) ) {
-				$slot = 'primary_offline';
-			} elseif ( PaymentsExtensionSuggestions::TYPE_PSP === $suggestion['_type'] ) {
-				$slot = 'primary_psp';
-			} elseif ( in_array(
-				$suggestion['_type'],
-				array( PaymentsExtensionSuggestions::TYPE_APM, PaymentsExtensionSuggestions::TYPE_EXPRESS_CHECKOUT ),
-				true
-			) ) {
-				$slot = 'primary_apm';
-			} else {
+			$slot = in_array( PaymentsExtensionSuggestions::TAG_PREFERRED_OFFLINE, $tags, true )
+				? 'primary_offline'
+				: ( self::TYPE_TO_PRIMARY_SLOT[ $suggestion['_type'] ] ?? null );
+
+			if ( null === $slot ) {
 				$this->fail(
 					"For $country, the preferred suggestion '{$suggestion['id']}' has type '{$suggestion['_type']}', which maps to no fixture slot."
 				);
