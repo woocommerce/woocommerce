@@ -508,6 +508,39 @@ class ControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The delegate feeds the whole request body into Fulfillment::set_props(), where entity_type
+	 * and entity_id are settable. Both are pinned to the stored fulfillment so an update cannot
+	 * move it to another order or leave it with an entity type that resolves to nothing.
+	 */
+	public function test_update_fulfillment_ignores_body_entity_fields() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$other_order = WC_Helper_Order::create_order( self::$customer_user_id );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/fulfillments/' . $this->test_fulfillment->get_id() );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				$this->get_test_fulfillment_data(
+					array(
+						'entity_id'   => (string) $other_order->get_id(),
+						'entity_type' => 'Not\\An\\Entity',
+					)
+				)
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+
+		$stored = new Fulfillment( $this->test_fulfillment->get_id() );
+		$this->assertSame( WC_Order::class, $stored->get_entity_type() );
+		$this->assertSame( (string) $this->test_order->get_id(), $stored->get_entity_id() );
+
+		WC_Helper_Order::delete_order( $other_order->get_id() );
+	}
+
+	/**
 	 * The same query string argument must not redirect a write either: a delete addressed at one
 	 * fulfillment must not remove the one named in the query string.
 	 */

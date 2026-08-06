@@ -415,6 +415,11 @@ class Controller extends AbstractController {
 	 * to every parameter source that already holds the key, so a spoofed query string value is
 	 * replaced rather than left in place at a higher priority.
 	 *
+	 * entity_type and entity_id are pinned for the same reason. The delegate's update handler
+	 * feeds the whole JSON body into Fulfillment::set_props(), and both are settable props, so a
+	 * request body could otherwise reassign the fulfillment to another entity or set an entity
+	 * type that no longer resolves.
+	 *
 	 * @param WP_REST_Request $request     The request being delegated.
 	 * @param Fulfillment     $fulfillment The fulfillment the request was authorized against.
 	 *
@@ -424,6 +429,8 @@ class Controller extends AbstractController {
 	private function pin_request_to_fulfillment( WP_REST_Request $request, Fulfillment $fulfillment ): void {
 		$request->set_param( 'fulfillment_id', $fulfillment->get_id() );
 		$request->set_param( 'order_id', (int) $fulfillment->get_entity_id() );
+		$request->set_param( 'entity_type', $fulfillment->get_entity_type() );
+		$request->set_param( 'entity_id', (string) $fulfillment->get_entity_id() );
 	}
 
 	/**
