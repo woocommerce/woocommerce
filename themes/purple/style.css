@@ -230,14 +230,14 @@ a.wc-block-components-product-name:hover {
 	border-radius: 0;
 }
 
-/* WooCommerce draws the selected shipping/payment option ring with an
- * inset box-shadow in currentColor, which reads as a heavy ink border
- * next to the theme-6 field borders. Recolor it rather than replacing
- * it with a border: the shadow layers over the group's own 1px outline
- * and keeps the layout from shifting when the selection moves. */
+/* WooCommerce rings the selected shipping/payment option with an inset
+ * box-shadow. Theme-6 carries 20% alpha in every palette, so any ring
+ * painted with it composites over the group's own border (same color)
+ * and darkens the shared pixels. Drop the ring; the group border is the
+ * outline and the filled radio dot carries the selected state. */
 .wc-block-components-radio-control--highlight-checked .wc-block-components-radio-control-accordion-option--checked-option-highlighted.wc-block-components-radio-control-accordion-option--checked-option-highlighted,
 .wc-block-components-radio-control--highlight-checked label.wc-block-components-radio-control__option--checked-option-highlighted.wc-block-components-radio-control__option--checked-option-highlighted {
-	box-shadow: inset 0 0 0 1px var(--wp--preset--color--theme-6);
+	box-shadow: none;
 }
 
 /* The boxes around these components are WooCommerce ::after overlays and
