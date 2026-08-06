@@ -79,6 +79,9 @@ function Editor( {
 			...settings,
 			allowedBlockTypes: getAllowedBlockNames(),
 			isPreviewMode: isPreview,
+			// WordPress 7.1 responsive styles produce media-query-based styles
+			// that the email renderer cannot inline, so keep the feature off.
+			responsiveEditingEnabled: false,
 		} ),
 		[ settings, isPreview ]
 	);
