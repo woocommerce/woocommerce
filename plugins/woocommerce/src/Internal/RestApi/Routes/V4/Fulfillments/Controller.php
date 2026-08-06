@@ -66,6 +66,20 @@ class Controller extends AbstractController {
 	private $requested_fulfillment = null;
 
 	/**
+	 * The request the fulfillment above was resolved for.
+	 *
+	 * The controller is a shared instance, so more than one request can run through it in a
+	 * single process. Tying the resolved fulfillment to its request keeps the reuse inside that
+	 * request, where nothing has written to the row yet, instead of handing a later request a
+	 * copy the delegate has since updated or deleted.
+	 *
+	 * @var WP_REST_Request|null
+	 *
+	 * @phpstan-var WP_REST_Request<array<string, mixed>>|null
+	 */
+	private $requested_fulfillment_request = null;
+
+	/**
 	 * Initialize the controller.
 	 *
 	 * @param FulfillmentSchema               $item_schema                   Fulfillment schema class.
@@ -379,7 +393,9 @@ class Controller extends AbstractController {
 			);
 		}
 
-		if ( $this->requested_fulfillment instanceof Fulfillment && $this->requested_fulfillment->get_id() === $fulfillment_id ) {
+		if ( $this->requested_fulfillment_request === $request
+			&& $this->requested_fulfillment instanceof Fulfillment
+			&& $this->requested_fulfillment->get_id() === $fulfillment_id ) {
 			return $this->requested_fulfillment;
 		}
 
@@ -402,7 +418,8 @@ class Controller extends AbstractController {
 			);
 		}
 
-		$this->requested_fulfillment = $fulfillment;
+		$this->requested_fulfillment         = $fulfillment;
+		$this->requested_fulfillment_request = $request;
 
 		return $fulfillment;
 	}
