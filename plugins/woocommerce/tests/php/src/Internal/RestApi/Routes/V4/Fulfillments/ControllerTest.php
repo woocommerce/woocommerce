@@ -544,6 +544,62 @@ class ControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The same query string argument must not redirect an update: a PUT addressed at one
+	 * fulfillment must not write to the one named in the query string.
+	 */
+	public function test_update_fulfillment_ignores_query_fulfillment_id() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$target = FulfillmentsHelper::create_fulfillment(
+			array( 'entity_id' => $this->test_order->get_id() )
+		);
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/fulfillments/' . $target->get_id() );
+		$request->set_param( 'fulfillment_id', $this->test_fulfillment->get_id() );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( wp_json_encode( $this->get_test_fulfillment_data() ) );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $target->get_id(), $response->get_data()['id'] );
+
+		// The fulfillment named in the query string keeps its original status.
+		$bystander = new Fulfillment( $this->test_fulfillment->get_id() );
+		$this->assertSame( 'unfulfilled', $bystander->get_status() );
+	}
+
+	/**
+	 * A JSON request body is the highest priority source in
+	 * WP_REST_Request::get_parameter_order(), so it outranks both the query string and the URL
+	 * placeholder. A fulfillment_id in the body must not move the request off the addressed
+	 * fulfillment either.
+	 */
+	public function test_update_fulfillment_ignores_body_fulfillment_id() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$target = FulfillmentsHelper::create_fulfillment(
+			array( 'entity_id' => $this->test_order->get_id() )
+		);
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/fulfillments/' . $target->get_id() );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				$this->get_test_fulfillment_data(
+					array( 'fulfillment_id' => $this->test_fulfillment->get_id() )
+				)
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $target->get_id(), $response->get_data()['id'] );
+
+		$bystander = new Fulfillment( $this->test_fulfillment->get_id() );
+		$this->assertSame( 'unfulfilled', $bystander->get_status() );
+	}
+
+	/**
 	 * The delegate feeds the whole request body into Fulfillment::set_props(), where entity_type
 	 * and entity_id are settable. Both are pinned to the stored fulfillment so an update cannot
 	 * move it to another order or leave it with an entity type that resolves to nothing.
@@ -574,6 +630,52 @@ class ControllerTest extends WC_Unit_Test_Case {
 		$this->assertSame( (string) $this->test_order->get_id(), $stored->get_entity_id() );
 
 		WC_Helper_Order::delete_order( $other_order->get_id() );
+	}
+
+	/**
+	 * Fulfillments can be attached to entities other than orders. The single-item routes only
+	 * serve order fulfillments, so anything else is rejected before the order lookup rather than
+	 * authorized against an order ID that means nothing in that entity's namespace.
+	 */
+	public function test_permission_check_rejects_non_order_fulfillment() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$foreign_fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type' => 'Some\\Other\\Entity',
+				'entity_id'   => (string) $this->test_order->get_id(),
+			)
+		);
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/' . $foreign_fulfillment->get_id() );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_invalid_entity_type', $response->get_data()['code'] );
+	}
+
+	/**
+	 * Deleting an order normally takes its fulfillments with it, but a row can still point at an
+	 * order that is no longer there. With no order to authorize against, the request is refused
+	 * rather than falling through to the handler.
+	 */
+	public function test_permission_check_fulfillment_whose_order_is_missing() {
+		wp_set_current_user( self::$admin_user_id );
+
+		// Delete first, so the fulfillment is created against an ID that is already gone.
+		$doomed_order     = WC_Helper_Order::create_order( self::$customer_user_id );
+		$missing_order_id = $doomed_order->get_id();
+		WC_Helper_Order::delete_order( $missing_order_id );
+
+		$orphan = FulfillmentsHelper::create_fulfillment(
+			array( 'entity_id' => (string) $missing_order_id )
+		);
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/' . $orphan->get_id() );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 404, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_order_invalid_id', $response->get_data()['code'] );
 	}
 
 	/**
