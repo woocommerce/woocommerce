@@ -11,6 +11,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use Automattic\WooCommerce\Internal\Utilities\SiteLocale;
+
 if ( class_exists( 'WC_Admin_Permalink_Settings', false ) ) {
 	return new WC_Admin_Permalink_Settings();
 }
@@ -111,16 +113,22 @@ class WC_Admin_Permalink_Settings {
 
 		/*
 		 * Must match what settings_save() actually stores: wc_sanitize_permalink() strips the
-		 * trailing slash, and the Default structure is stored as the site locale's translation
-		 * (settings_save() switches locale before computing it). Otherwise the matching radio
-		 * never stays checked after a save. See https://github.com/woocommerce/woocommerce/issues/29050.
+		 * trailing slash, and the Default structure is stored as the deterministic site-locale
+		 * translation — the same one wc_get_permalink_structure() persists when it initializes
+		 * missing defaults. Otherwise the matching radio never stays checked after a save.
+		 * See https://github.com/woocommerce/woocommerce/issues/29050.
 		 */
 		$structures_for_comparison = array_map( 'wc_sanitize_permalink', $structures );
 
-		wc_switch_to_site_locale();
-		$default_product_base         = wc_sanitize_permalink( _x( 'product', 'slug', 'woocommerce' ) );
+		$default_product_base = wc_sanitize_permalink(
+			SiteLocale::run(
+				static function () {
+					return _x( 'product', 'slug', 'woocommerce' );
+				}
+			)
+		);
+
 		$structures_for_comparison[0] = $default_product_base;
-		wc_restore_locale();
 
 		$default_product_structure   = trailingslashit( '/' . ltrim( $default_product_base, '/' ) );
 		$product_permalink_structure = $this->permalinks['product_base'] ? trailingslashit( $this->permalinks['product_base'] ) : '';
@@ -213,7 +221,13 @@ class WC_Admin_Permalink_Settings {
 					$product_base = '/' . _x( 'product', 'slug', 'woocommerce' ) . $product_base;
 				}
 			} elseif ( empty( $product_base ) ) {
-				$product_base = _x( 'product', 'slug', 'woocommerce' );
+				// The stored Default base must be the deterministic site-locale slug, matching
+				// what wc_get_permalink_structure() initializes and what settings() compares against.
+				$product_base = SiteLocale::run(
+					static function () {
+						return _x( 'product', 'slug', 'woocommerce' );
+					}
+				);
 			}
 
 			$permalinks['product_base'] = wc_sanitize_permalink( $product_base );

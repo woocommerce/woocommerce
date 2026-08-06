@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Internal\Logging\OrderLogsCleanupHelper;
+use Automattic\WooCommerce\Internal\Utilities\SiteLocale;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -2143,56 +2144,9 @@ function wc_list_pluck( $list, $callback_or_field, $index_key = null ) {
 function wc_get_permalink_structure() {
 	$saved_permalinks               = (array) get_option( 'woocommerce_permalinks', array() );
 	$localized_defaults_are_missing = empty( $saved_permalinks['product_base'] ) || empty( $saved_permalinks['category_base'] ) || empty( $saved_permalinks['tag_base'] );
-	$locale_was_switched            = false;
-	$reload_woocommerce_textdomain  = null;
 
-	try {
-		if ( $localized_defaults_are_missing ) {
-			if ( is_multisite() && wp_installing() ) {
-				$site_locale = get_site_option( 'WPLANG' );
-			} else {
-				$site_locale = get_option( 'WPLANG' );
-
-				if ( false === $site_locale && is_multisite() ) {
-					$site_locale = get_site_option( 'WPLANG' );
-				}
-			}
-
-			if ( false === $site_locale ) {
-				$site_locale = defined( 'WPLANG' ) ? WPLANG : ( $GLOBALS['wp_local_package'] ?? '' );
-			}
-
-			$site_locale = empty( $site_locale ) ? 'en_US' : $site_locale;
-
-			/*
-			 * Honor persistent `locale` filters (WPML/Polylang-style) so this resolution matches
-			 * get_locale() — and therefore the locale the Permalinks screen's save and render
-			 * paths use via wc_switch_to_site_locale(). Skip the filter while a temporary locale
-			 * switch is active: the locale switcher hijacks the same filter, and a temporary
-			 * switch (user-locale emails, cross-blog loops) must not leak into the stored defaults.
-			 */
-			if ( ! ( isset( $GLOBALS['wp_locale_switcher'] ) && is_locale_switched() ) ) {
-				$site_locale = apply_filters( 'locale', $site_locale ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- WP core filter, applied to mirror get_locale().
-			}
-
-			// get_locale() may reflect a temporary locale switch or a different blog's cached locale.
-			if ( determine_locale() !== $site_locale && function_exists( 'switch_to_locale' ) ) {
-				$locale_was_switched = switch_to_locale( $site_locale );
-
-				if ( $locale_was_switched ) {
-					$woocommerce                      = $GLOBALS['woocommerce'] ?? null;
-					$woocommerce_textdomain_candidate = array( $woocommerce, 'load_plugin_textdomain' );
-
-					if ( is_callable( $woocommerce_textdomain_candidate ) ) {
-						$reload_woocommerce_textdomain = Closure::fromCallable( $woocommerce_textdomain_candidate );
-						add_filter( 'plugin_locale', 'get_locale' );
-						$reload_woocommerce_textdomain();
-					}
-				}
-			}
-		}
-
-		$permalinks = wp_parse_args(
+	$compute_permalinks = static function () use ( $saved_permalinks ) {
+		return wp_parse_args(
 			array_filter( $saved_permalinks ),
 			array(
 				'product_base'           => _x( 'product', 'slug', 'woocommerce' ),
@@ -2202,16 +2156,15 @@ function wc_get_permalink_structure() {
 				'use_verbose_page_rules' => false,
 			)
 		);
-	} finally {
-		if ( $locale_was_switched ) {
-			restore_previous_locale();
+	};
 
-			if ( null !== $reload_woocommerce_textdomain ) {
-				remove_filter( 'plugin_locale', 'get_locale' );
-				$reload_woocommerce_textdomain();
-			}
-		}
-	}
+	/*
+	 * Missing defaults are persisted site-wide below, so they must resolve in the site's
+	 * deterministic locale rather than the current request's locale — this function runs on
+	 * every front-end request, and on multilingual sites the request locale is whatever
+	 * language the current visitor happens to browse in.
+	 */
+	$permalinks = $localized_defaults_are_missing ? SiteLocale::run( $compute_permalinks ) : $compute_permalinks();
 
 	if ( $saved_permalinks !== $permalinks ) {
 		update_option( 'woocommerce_permalinks', $permalinks );

@@ -9,6 +9,13 @@ declare( strict_types = 1 );
 class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 
 	/**
+	 * Cleanup callbacks registered by test helpers, run in tearDown() even when assertions fail.
+	 *
+	 * @var Closure[]
+	 */
+	private $registered_cleanups = array();
+
+	/**
 	 * Set up the admin context and load the class under test.
 	 */
 	public function setUp(): void {
@@ -26,6 +33,11 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	 * tearDown(), so option state always reverts to its pre-test baseline automatically.
 	 */
 	public function tearDown(): void {
+		foreach ( array_reverse( $this->registered_cleanups ) as $cleanup ) {
+			$cleanup();
+		}
+		$this->registered_cleanups = array();
+
 		wp_set_current_user( 0 );
 		$this->reset_permalink_post_data();
 		parent::tearDown();
@@ -100,11 +112,11 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	 *
 	 * The test environment ships no language packs and WP_Locale_Switcher captures the available
 	 * languages at bootstrap, so a real switch to any non-en_US locale silently fails without this.
+	 * Restoration is registered for tearDown(), so it runs even when an assertion fails mid-test.
 	 *
 	 * @param string $locale Locale to mark as switchable.
-	 * @return Closure Callback that restores the original available-languages list.
 	 */
-	private function add_switchable_locale( string $locale ): Closure {
+	private function add_switchable_locale( string $locale ): void {
 		global $wp_locale_switcher;
 
 		$property = new ReflectionProperty( WP_Locale_Switcher::class, 'available_languages' );
@@ -112,7 +124,7 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 		$original_languages = $property->getValue( $wp_locale_switcher );
 		$property->setValue( $wp_locale_switcher, array_merge( $original_languages, array( $locale ) ) );
 
-		return static function () use ( $property, $wp_locale_switcher, $original_languages ): void {
+		$this->registered_cleanups[] = static function () use ( $property, $wp_locale_switcher, $original_languages ): void {
 			$property->setValue( $wp_locale_switcher, $original_languages );
 		};
 	}
@@ -301,11 +313,12 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 
 	/**
 	 * The initialization path (first call to wc_get_permalink_structure(), e.g. from a front-end
-	 * request) and the render-time checked-state comparison must resolve the same site locale on
-	 * installs where a plugin filters `locale` (WPML/Polylang-style). If they diverge, the
-	 * Default radio falls back to Custom for stores that never explicitly saved permalinks.
+	 * request), the save path, and the render-time checked-state comparison must all resolve the
+	 * same deterministic site locale on multilingual installs that filter `locale` per visitor.
+	 * If any of them diverges, the Default radio falls back to Custom for stores that never
+	 * explicitly saved permalinks.
 	 *
-	 * @testdox Should keep "Default" checked on filtered-locale installs that never saved permalinks.
+	 * @testdox Should keep "Default" checked on visitor-locale-filtered installs that never saved permalinks.
 	 */
 	public function test_default_structure_stays_checked_on_filtered_locale_installs_without_saved_permalinks(): void {
 		$this->ensure_shop_page();
@@ -326,7 +339,30 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 			remove_filter( 'locale', $filter_locale, 5 );
 		}
 
-		$this->assertSame( 'produit', get_option( 'woocommerce_permalinks' )['product_base'], 'The initialized Default base should use the filtered site locale.' );
+		$this->assertSame( 'product', get_option( 'woocommerce_permalinks' )['product_base'], 'The initialized Default base should use the deterministic site locale, not the visitor language.' );
+		$this->assert_only_radio_checked( $html, 'default' );
+	}
+
+	/**
+	 * @testdox Should store the deterministic site-locale Default base when saving under a visitor locale filter.
+	 */
+	public function test_default_structure_save_is_deterministic_under_a_visitor_locale_filter(): void {
+		$this->ensure_shop_page();
+		$this->add_switchable_locale( 'fr_FR' );
+
+		$filter_locale             = static fn(): string => 'fr_FR';
+		$translate_permalink_slugs = $this->get_french_permalink_slug_filter();
+
+		add_filter( 'locale', $filter_locale, 5 );
+		add_filter( 'gettext_with_context', $translate_permalink_slugs, 10, 4 );
+		try {
+			$html = $this->save_and_render( '' );
+		} finally {
+			remove_filter( 'gettext_with_context', $translate_permalink_slugs, 10 );
+			remove_filter( 'locale', $filter_locale, 5 );
+		}
+
+		$this->assertSame( 'product', get_option( 'woocommerce_permalinks' )['product_base'], 'Saving Default must store the site-locale base regardless of the request language.' );
 		$this->assert_only_radio_checked( $html, 'default' );
 	}
 
@@ -423,25 +459,16 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * A persistent `locale` filter (WPML/Polylang-style) redefines what the site locale is, for
-	 * get_locale() and therefore for the Permalinks screen's save and render paths. The
-	 * initialization path must resolve the same locale, or the stored defaults diverge from the
-	 * screen's checked-state comparison. The user locale differs from the filtered locale here to
-	 * prove the filter — not the requesting user's locale — is what wins.
+	 * Multilingual plugins (WPML/Polylang-style) filter `locale` per visitor, to whatever
+	 * language the current request is browsing in. Since the initialized defaults are persisted
+	 * site-wide and this can run on any front-end request, the first visitor's language must not
+	 * decide the store's permalink bases: initialization stays pinned to the deterministic site
+	 * locale from the stored settings.
 	 *
-	 * @testdox Should initialize missing permalink defaults in the filtered site locale when a plugin filters `locale`.
+	 * @testdox Should ignore a per-visitor `locale` filter when initializing missing permalink defaults.
 	 */
-	public function test_missing_permalink_defaults_honor_a_persistent_locale_filter(): void {
-		$user_id = self::factory()->user->create(
-			array(
-				'role'   => 'administrator',
-				'locale' => 'de_DE',
-			)
-		);
-		wp_set_current_user( $user_id );
-
+	public function test_missing_permalink_defaults_ignore_the_visitor_locale_filter(): void {
 		delete_option( 'woocommerce_permalinks' );
-		$restore_languages         = $this->add_switchable_locale( 'fr_FR' );
 		$filter_locale             = static fn(): string => 'fr_FR';
 		$translate_permalink_slugs = $this->get_french_permalink_slug_filter();
 
@@ -452,25 +479,22 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 		} finally {
 			remove_filter( 'gettext_with_context', $translate_permalink_slugs, 10 );
 			remove_filter( 'locale', $filter_locale, 5 );
-			$restore_languages();
 		}
 
-		$this->assertSame( 'produit', $permalinks['product_base'], 'The product base should use the filtered site locale, matching what the settings screen resolves.' );
-		$this->assertSame( 'produit', get_option( 'woocommerce_permalinks' )['product_base'], 'The stored product base should use the filtered site locale.' );
-		$this->assertSame( 'de_DE', determine_locale(), 'The admin request locale should be restored.' );
+		$this->assertSame( 'product', $permalinks['product_base'], 'The visitor language filter must not decide the stored defaults.' );
+		$this->assertSame( 'product', get_option( 'woocommerce_permalinks' )['product_base'], 'The stored product base should use the deterministic site locale.' );
 	}
 
 	/**
-	 * While a temporary locale switch is active (user-locale emails, cross-blog loops), the
-	 * locale switcher hijacks the `locale` filter, so honoring it would leak the temporary
-	 * locale into the stored defaults. The raw site locale must win in that context.
+	 * Temporary locale switches (user-locale emails, cross-blog loops) must not leak into the
+	 * stored defaults either, and the switch itself must survive the initialization untouched.
 	 *
-	 * @testdox Should ignore the `locale` filter while a temporary locale switch is active.
+	 * @testdox Should ignore an active temporary locale switch when initializing missing permalink defaults.
 	 */
-	public function test_missing_permalink_defaults_ignore_locale_filters_during_a_temporary_switch(): void {
+	public function test_missing_permalink_defaults_ignore_a_temporary_locale_switch(): void {
 		global $wp_locale_switcher;
 
-		$restore_languages = $this->add_switchable_locale( 'fr_FR' );
+		$this->add_switchable_locale( 'fr_FR' );
 
 		$this->assertTrue( switch_to_locale( 'fr_FR' ), 'The test should establish a temporary switch away from the site locale.' );
 		delete_option( 'woocommerce_permalinks' );
@@ -486,7 +510,38 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 		} finally {
 			remove_filter( 'gettext_with_context', $translate_permalink_slugs, 10 );
 			restore_previous_locale();
-			$restore_languages();
+		}
+	}
+
+	/**
+	 * The combination of a per-visitor `locale` filter and an active temporary switch is exactly
+	 * where nondeterminism would creep in — neither may decide what gets persisted.
+	 *
+	 * @testdox Should ignore both a visitor locale filter and an active temporary switch together.
+	 */
+	public function test_missing_permalink_defaults_ignore_filter_and_temporary_switch_combined(): void {
+		global $wp_locale_switcher;
+
+		$this->add_switchable_locale( 'fr_FR' );
+
+		$filter_locale = static fn(): string => 'de_DE';
+		add_filter( 'locale', $filter_locale, 5 );
+
+		$this->assertTrue( switch_to_locale( 'fr_FR' ), 'The test should establish a temporary switch away from the site locale.' );
+		delete_option( 'woocommerce_permalinks' );
+
+		$translate_permalink_slugs = $this->get_french_permalink_slug_filter();
+
+		add_filter( 'gettext_with_context', $translate_permalink_slugs, 10, 4 );
+		try {
+			$permalinks = wc_get_permalink_structure();
+
+			$this->assertSame( 'product', $permalinks['product_base'], 'Neither the locale filter nor the temporary switch may leak into the stored defaults.' );
+			$this->assertSame( 'fr_FR', $wp_locale_switcher->get_switched_locale(), 'The temporary switch should remain on the stack.' );
+		} finally {
+			remove_filter( 'gettext_with_context', $translate_permalink_slugs, 10 );
+			restore_previous_locale();
+			remove_filter( 'locale', $filter_locale, 5 );
 		}
 	}
 
