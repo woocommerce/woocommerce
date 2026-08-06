@@ -15,7 +15,16 @@ class ComingSoonAdminBarBadge {
 	 * @return bool
 	 */
 	private function is_badge_enabled(): bool {
-		return 'yes' === get_option( 'woocommerce_feature_site_visibility_badge_enabled', 'yes' );
+		$enabled = 'yes' === get_option( 'woocommerce_feature_site_visibility_badge_enabled', 'yes' ) && 'yes' === get_option( 'woocommerce_coming_soon' );
+
+		/**
+		 * Controls whether the site visibility badge is displayed in the admin bar.
+		 *
+		 * @param bool $enabled Whether the badge should be displayed.
+		 *
+		 * @since 11.1.0
+		 */
+		return (bool) apply_filters( 'woocommerce_should_display_site_visibility_badge', $enabled );
 	}
 
 	/**
