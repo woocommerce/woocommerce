@@ -48,16 +48,6 @@ class QuantityLimitsTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Disable float support and restore integer support.
-	 */
-	private function disable_float_support() {
-		// Remove all existing filters first.
-		remove_all_filters( 'woocommerce_stock_amount' );
-		// Add only intval.
-		add_filter( 'woocommerce_stock_amount', 'intval' );
-	}
-
-	/**
 	 * Test quantity limits with float support enabled.
 	 */
 	public function test_quantity_limits_with_classic_filters() {
