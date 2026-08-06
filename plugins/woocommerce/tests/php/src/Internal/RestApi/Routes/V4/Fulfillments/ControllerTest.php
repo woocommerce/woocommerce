@@ -463,7 +463,7 @@ class ControllerTest extends WC_Unit_Test_Case {
 		$request->set_param( 'order_id', $attacker_order->get_id() );
 		$response = rest_get_server()->dispatch( $request );
 
-		$this->assertSame( 403, $response->get_status() );
+		$this->assertSame( 404, $response->get_status() );
 		$data = $response->get_data();
 		$this->assertArrayHasKey( 'code', $data );
 		$this->assertArrayNotHasKey( 'id', $data );
@@ -471,10 +471,46 @@ class ControllerTest extends WC_Unit_Test_Case {
 		// Without the spoofed order_id the non-owner is likewise rejected.
 		$control_request  = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/' . $this->test_fulfillment->get_id() );
 		$control_response = rest_get_server()->dispatch( $control_request );
-		$this->assertSame( 403, $control_response->get_status() );
+		$this->assertSame( 404, $control_response->get_status() );
 
 		WC_Helper_Order::delete_order( $attacker_order->get_id() );
 		wp_delete_user( $attacker_user_id );
+	}
+
+	/**
+	 * A fulfillment the caller cannot read must be indistinguishable from one that does not
+	 * exist, otherwise the status code alone tells an attacker which IDs are real.
+	 */
+	public function test_permission_check_unreadable_fulfillment_is_reported_as_not_found() {
+		$attacker_user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $attacker_user_id );
+
+		$existing_request  = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/' . $this->test_fulfillment->get_id() );
+		$existing_response = rest_get_server()->dispatch( $existing_request );
+
+		$missing_request  = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/99999' );
+		$missing_response = rest_get_server()->dispatch( $missing_request );
+
+		$this->assertSame( $missing_response->get_status(), $existing_response->get_status() );
+		$this->assertSame( $missing_response->get_data()['code'], $existing_response->get_data()['code'] );
+		$this->assertSame( 'woocommerce_rest_fulfillment_invalid_id', $existing_response->get_data()['code'] );
+
+		wp_delete_user( $attacker_user_id );
+	}
+
+	/**
+	 * The masking above must not swallow the real reason when the caller can read the order:
+	 * an owner refused a write needs to know the write was refused, not that their own
+	 * fulfillment disappeared.
+	 */
+	public function test_permission_check_owner_write_refusal_is_not_masked_as_not_found() {
+		wp_set_current_user( self::$customer_user_id );
+
+		$request  = new WP_REST_Request( 'DELETE', '/wc/v4/fulfillments/' . $this->test_fulfillment->get_id() );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 403, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_api_v4_fulfillments_cannot_delete', $response->get_data()['code'] );
 	}
 
 	/**

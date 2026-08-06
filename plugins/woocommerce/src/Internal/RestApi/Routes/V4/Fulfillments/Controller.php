@@ -339,6 +339,9 @@ class Controller extends AbstractController {
 	 * fulfillment_id route placeholder, so it always matches the order the handler acts on. Any
 	 * request-supplied order_id is ignored.
 	 *
+	 * A caller who cannot read that order is answered as if the fulfillment did not exist, so the
+	 * route cannot be used to tell an ID that exists from one that does not.
+	 *
 	 * @param WP_REST_Request $request The request for which the permission is checked.
 	 *
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
@@ -362,7 +365,21 @@ class Controller extends AbstractController {
 			);
 		}
 
-		return $this->check_order_access( $order, $request );
+		$access = $this->check_order_access( $order, $request );
+
+		// Callers who can read the order keep the real answer: the owner of an order needs to see
+		// that a write was refused rather than that the fulfillment vanished. Anonymous callers
+		// keep the 401 so they can retry with credentials. Everyone else is told the fulfillment
+		// does not exist, because reporting a refusal would confirm that this ID does.
+		if ( true === $access || 0 === get_current_user_id() || $this->user_can_read_order( $order ) ) {
+			return $access;
+		}
+
+		return new WP_Error(
+			'woocommerce_rest_fulfillment_invalid_id',
+			esc_html__( 'Invalid fulfillment ID.', 'woocommerce' ),
+			array( 'status' => WP_Http::NOT_FOUND )
+		);
 	}
 
 	/**
@@ -502,11 +519,8 @@ class Controller extends AbstractController {
 			return true;
 		}
 
-		// Check if the current user is the owner of the order, and the request is a read request.
-		// Guest order fulfillments are rendered server-side via templates, so they don't need REST API access.
-		// The get_current_user_id() > 0 check prevents unauthenticated users from accessing guest orders
-		// where both get_current_user_id() and get_customer_id() would return 0.
-		if ( get_current_user_id() > 0 && get_current_user_id() === $order->get_customer_id() && WP_REST_Server::READABLE === $request->get_method() ) {
+		// The order's own customer gets read access only.
+		if ( WP_REST_Server::READABLE === $request->get_method() && $this->user_can_read_order( $order ) ) {
 			return true;
 		}
 
@@ -518,6 +532,24 @@ class Controller extends AbstractController {
 		}
 
 		return $error_information;
+	}
+
+	/**
+	 * Check whether the current user may read the given order.
+	 *
+	 * @param WC_Order $order The order to check.
+	 *
+	 * @return bool True if the current user manages WooCommerce or owns the order.
+	 */
+	private function user_can_read_order( WC_Order $order ): bool {
+		if ( current_user_can( 'manage_woocommerce' ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown
+			return true;
+		}
+
+		// Guest order fulfillments are rendered server-side via templates, so they don't need REST API access.
+		// The get_current_user_id() > 0 check prevents unauthenticated users from accessing guest orders
+		// where both get_current_user_id() and get_customer_id() would return 0.
+		return get_current_user_id() > 0 && get_current_user_id() === $order->get_customer_id();
 	}
 
 	/**
