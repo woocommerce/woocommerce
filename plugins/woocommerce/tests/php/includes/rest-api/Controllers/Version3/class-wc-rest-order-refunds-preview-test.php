@@ -823,6 +823,39 @@ class WC_REST_Order_Refunds_Preview_Test extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A registered field without a schema is still populated, matching core back-compat.
+	 */
+	public function test_preview_schema_less_registered_field_is_populated(): void {
+		register_rest_field(
+			'order_refund_preview',
+			'schema_less_field',
+			array(
+				'get_callback' => function () {
+					return 'schema_less_value';
+				},
+			)
+		);
+
+		$order   = $this->create_order_with_product( 10.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'quantity'     => 1,
+				),
+			)
+		);
+
+		// Core deliberately includes fields registered without a schema; a
+		// schema-derived allowlist alone would silently drop them.
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'schema_less_value', $response->get_data()['schema_less_field'] );
+	}
+
+	/**
 	 * @testdox A registered field's callback does not run when _fields excludes it.
 	 */
 	public function test_preview_registered_field_callback_skipped_when_not_requested(): void {
