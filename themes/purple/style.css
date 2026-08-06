@@ -200,10 +200,23 @@ a.wc-block-components-product-name:hover {
 	border-radius: 0;
 }
 
+/* WooCommerce Payments hardcodes a 5px radius and gray border on the
+ * WooPay save-details phone input; match the other checkout fields. */
+.woopay-save-new-user-container .save-details-form.form-row .phone-input.phone-input {
+	border-color: var(--wp--preset--color--theme-6);
+	border-radius: 0;
+}
+
 /* Square the remaining cart/checkout components WooCommerce rounds with
  * hardcoded 4px values (no variable, no editor UI). Doubled classes beat
  * WooCommerce's specificity ties regardless of stylesheet order. Radio
- * inputs keep their 50% radius; circular radios are intentional. */
+ * inputs keep their 50% radius; circular radios are intentional. The
+ * express payment box outline is drawn in three pieces: two title-row
+ * pseudo-elements hold its top corners and the content box its bottom
+ * ones; the branded express buttons keep their own rounding. */
+.wc-block-components-express-payment--checkout .wc-block-components-express-payment__title-container.wc-block-components-express-payment__title-container::before,
+.wc-block-components-express-payment--checkout .wc-block-components-express-payment__title-container.wc-block-components-express-payment__title-container::after,
+.wc-block-components-express-payment--checkout .wc-block-components-express-payment__content.wc-block-components-express-payment__content,
 .wc-block-components-radio-control--highlight-checked.wc-block-components-radio-control--highlight-checked::after,
 .wc-block-components-radio-control--highlight-checked .wc-block-components-radio-control-accordion-option--checked-option-highlighted.wc-block-components-radio-control-accordion-option--checked-option-highlighted,
 .wc-block-components-radio-control--highlight-checked label.wc-block-components-radio-control__option--checked-option-highlighted.wc-block-components-radio-control__option--checked-option-highlighted,
