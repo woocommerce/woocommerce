@@ -26,6 +26,7 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	 * tearDown(), so option state always reverts to its pre-test baseline automatically.
 	 */
 	public function tearDown(): void {
+		wp_set_current_user( 0 );
 		unset(
 			$_POST['permalink_structure'],
 			$_POST['wc-permalinks-nonce'],
@@ -159,8 +160,44 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	 * @testdox Should keep "Default" checked after saving the default structure.
 	 */
 	public function test_default_structure_stays_checked_after_save(): void {
+		$this->ensure_shop_page();
 		$html = $this->save_and_render( '' );
 
+		$this->assert_only_radio_checked( $html, 'default' );
+	}
+
+	/**
+	 * @testdox Should keep "Default" checked when the user and site locales differ.
+	 */
+	public function test_default_structure_stays_checked_when_user_and_site_locales_differ(): void {
+		$this->ensure_shop_page();
+		$user_id = self::factory()->user->create(
+			array(
+				'role'   => 'administrator',
+				'locale' => 'fr_FR',
+			)
+		);
+		wp_set_current_user( $user_id );
+
+		$translate_product_slug = static function ( string $translation, string $text, string $context, string $domain ): string {
+			if ( 'woocommerce' === $domain && 'product' === $text && 'slug' === $context && 'fr_FR' === determine_locale() ) {
+				return 'produit';
+			}
+
+			return $translation;
+		};
+
+		$this->assertSame( 'en_US', get_locale(), 'The site locale should remain English.' );
+		$this->assertSame( 'fr_FR', determine_locale(), 'The admin request should use the current user locale.' );
+
+		add_filter( 'gettext_with_context', $translate_product_slug, 10, 4 );
+		try {
+			$html = $this->save_and_render( '' );
+		} finally {
+			remove_filter( 'gettext_with_context', $translate_product_slug, 10 );
+		}
+
+		$this->assertSame( 'product', get_option( 'woocommerce_permalinks' )['product_base'], 'Default base should be stored in the site locale.' );
 		$this->assert_only_radio_checked( $html, 'default' );
 	}
 
@@ -190,6 +227,7 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	 * @testdox Should keep "Custom base" checked after saving a genuinely custom structure.
 	 */
 	public function test_custom_structure_stays_checked_after_save(): void {
+		$this->ensure_shop_page();
 		$html = $this->save_and_render( 'custom', 'widgets' );
 
 		$this->assert_only_radio_checked( $html, 'custom' );

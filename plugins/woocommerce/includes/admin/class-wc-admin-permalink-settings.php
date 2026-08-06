@@ -116,12 +116,10 @@ class WC_Admin_Permalink_Settings {
 		 * (settings_save() switches locale before computing it). Otherwise the matching radio
 		 * never stays checked after a save. See https://github.com/woocommerce/woocommerce/issues/29050.
 		 */
+		$structures_for_comparison = array_map( 'wc_sanitize_permalink', $structures );
+
 		wc_switch_to_site_locale();
-		$structures_for_comparison = array(
-			0 => wc_sanitize_permalink( _x( 'product', 'slug', 'woocommerce' ) ),
-			1 => wc_sanitize_permalink( $structures[1] ),
-			2 => wc_sanitize_permalink( $structures[2] ),
-		);
+		$structures_for_comparison[0] = wc_sanitize_permalink( _x( 'product', 'slug', 'woocommerce' ) );
 		wc_restore_locale();
 		?>
 		<table class="form-table wc-permalink-structure">
