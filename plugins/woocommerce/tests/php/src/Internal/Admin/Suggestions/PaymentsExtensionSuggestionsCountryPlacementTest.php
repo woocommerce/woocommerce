@@ -9,6 +9,8 @@ use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions;
+use Automattic\WooCommerce\Internal\Utilities\ArrayUtil;
+use Automattic\WooCommerce\RestApi\UnitTests\CorePayPalGatewayTrait;
 use ReflectionClass;
 use WC_Unit_Test_Case;
 
@@ -18,6 +20,7 @@ use WC_Unit_Test_Case;
  * @class PaymentsProviders
  */
 class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case {
+	use CorePayPalGatewayTrait;
 
 	/**
 	 * Fixture section keys, in the tracking sheet's row order.
@@ -48,11 +51,28 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 	private const PAYPAL_WALLET_UNAVAILABLE_COUNTRIES = array( 'CN', 'GE', 'KZ' );
 
 	/**
+	 * The loaded placement fixture.
+	 *
+	 * Memoised because `require` returns a value, so `require_once` cannot be used
+	 * and every call would otherwise re-parse the file.
+	 *
+	 * @var array<string, array>|null
+	 */
+	private static ?array $fixture = null;
+
+	/**
 	 * System under test.
 	 *
 	 * @var PaymentsProviders
 	 */
 	protected PaymentsProviders $sut;
+
+	/**
+	 * The raw suggestion catalog, for the tests that read it directly.
+	 *
+	 * @var PaymentsExtensionSuggestions
+	 */
+	protected PaymentsExtensionSuggestions $suggestions;
 
 	/**
 	 * The ID of the store admin user.
@@ -62,32 +82,14 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 	protected int $store_admin_id;
 
 	/**
-	 * The store currency before the test changed it.
-	 *
-	 * @var string
-	 */
-	protected string $original_currency;
-
-	/**
-	 * Whether the PayPal settings option existed before the test changed it.
-	 *
-	 * @var bool
-	 */
-	protected bool $original_paypal_settings_existed;
-
-	/**
-	 * The PayPal settings before the test changed them.
-	 *
-	 * @var mixed
-	 */
-	protected $original_paypal_settings;
-
-	/**
 	 * Set up the baseline store state.
 	 *
 	 * Baseline means: an admin who may install plugins, an enabled ecommerce
 	 * gateway so Express/BNPL/Crypto suggestions are not suppressed, the
 	 * online-equivalent profiler state, nothing hidden, and no saved order.
+	 *
+	 * Everything written here lands inside the per-test transaction that
+	 * WP_UnitTestCase opens, so no option or user meta needs restoring by hand.
 	 */
 	public function setUp(): void {
 		parent::setUp();
@@ -95,53 +97,41 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $this->store_admin_id );
 
-		$this->original_currency = (string) get_option( 'woocommerce_currency' );
-		$missing_option          = new \stdClass();
-
-		$this->original_paypal_settings         = get_option( 'woocommerce_paypal_settings', $missing_option );
-		$this->original_paypal_settings_existed = $missing_option !== $this->original_paypal_settings;
-
-		// Enable the WC core PayPal gateway to satisfy the enabled-ecommerce-gateway
-		// rule. Core PayPal is not a suggested extension, so it does not suppress the
-		// PayPal suggestions.
-		update_option(
-			'woocommerce_paypal_settings',
-			array(
-				'_should_load' => 'yes',
-				'enabled'      => 'yes',
-			)
-		);
-		update_option( 'woocommerce_currency', 'USD' );
-		WC()->payment_gateways()->payment_gateways = array();
-		WC()->payment_gateways()->init();
-
 		// The online-equivalent profiler state.
 		delete_option( OnboardingProfile::DATA_OPTION );
 
-		$this->sut = wc_get_container()->get( PaymentsProviders::class );
-		$this->sut->clear_cache();
+		$this->suggestions = wc_get_container()->get( PaymentsExtensionSuggestions::class );
+		$this->sut         = wc_get_container()->get( PaymentsProviders::class );
+
+		// Satisfy the enabled-ecommerce-gateway rule, which otherwise suppresses the
+		// Express/BNPL/Crypto suggestions. Core PayPal is not a suggested extension,
+		// so it does not suppress the PayPal suggestions. This also clears the cache.
+		$this->enable_core_paypal_pg();
+	}
+
+	/**
+	 * The payment providers service the core PayPal gateway helpers must invalidate.
+	 *
+	 * @return PaymentsProviders
+	 */
+	protected function get_payments_providers_service(): PaymentsProviders {
+		return $this->sut;
 	}
 
 	/**
 	 * Tear down.
+	 *
+	 * Only in-process state needs resetting: the gateway singleton and the
+	 * provider caches outlive the transaction rollback, so they must be rebuilt
+	 * from the restored options once the rollback has run.
 	 */
 	public function tearDown(): void {
-		if ( $this->original_paypal_settings_existed ) {
-			update_option( 'woocommerce_paypal_settings', $this->original_paypal_settings );
-		} else {
-			delete_option( 'woocommerce_paypal_settings' );
-		}
+		parent::tearDown();
 
-		update_option( 'woocommerce_currency', $this->original_currency );
 		WC()->payment_gateways()->payment_gateways = array();
 		WC()->payment_gateways()->init();
 
-		delete_option( OnboardingProfile::DATA_OPTION );
-		delete_user_meta( $this->store_admin_id, 'woocommerce_payments_nox_profile' );
-
 		$this->sut->clear_cache();
-
-		parent::tearDown();
 	}
 
 	/**
@@ -170,12 +160,11 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 	 * @testdox The fixture covers exactly the countries the source configures.
 	 */
 	public function test_fixture_covers_every_configured_country(): void {
-		$service    = wc_get_container()->get( PaymentsExtensionSuggestions::class );
 		$reflection = new ReflectionClass( PaymentsExtensionSuggestions::class );
 		$property   = $reflection->getProperty( 'country_extensions' );
 		$property->setAccessible( true );
 
-		$configured = array_keys( $property->getValue( $service ) );
+		$configured = array_keys( $property->getValue( $this->suggestions ) );
 		$fixtured   = array_keys( self::load_fixture() );
 		sort( $configured );
 		sort( $fixtured );
@@ -199,10 +188,9 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 	 * @testdox No suggested extension is active in the test environment.
 	 */
 	public function test_no_suggested_extension_is_active(): void {
-		$suggestions     = wc_get_container()->get( PaymentsExtensionSuggestions::class );
 		$suggested_slugs = array();
 		foreach ( array_keys( self::load_fixture() ) as $country ) {
-			foreach ( $suggestions->get_country_extensions( $country ) as $extension ) {
+			foreach ( $this->suggestions->get_country_extensions( $country ) as $extension ) {
 				$slug = $extension['plugin']['slug'] ?? '';
 				if ( '' !== $slug ) {
 					$suggested_slugs[ $slug ] = true;
@@ -292,7 +280,6 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 	 * @testdox Raw PayPal Wallet exclusions match the explicit unavailable countries.
 	 */
 	public function test_paypal_wallet_unavailable_countries_match_raw_catalog(): void {
-		$suggestions                  = wc_get_container()->get( PaymentsExtensionSuggestions::class );
 		$actual_unavailable_countries = array();
 
 		foreach ( self::load_fixture() as $country => $expected ) {
@@ -300,7 +287,7 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 				continue;
 			}
 
-			$raw_ids = array_column( $suggestions->get_country_extensions( $country ), 'id' );
+			$raw_ids = array_column( $this->suggestions->get_country_extensions( $country ), 'id' );
 			if ( ! in_array( PaymentsExtensionSuggestions::PAYPAL_WALLET, $raw_ids, true ) ) {
 				$actual_unavailable_countries[] = $country;
 			}
@@ -339,6 +326,32 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 	}
 
 	/**
+	 * Data provider yielding only the fixture countries that declare an offline provider.
+	 *
+	 * @return array<string, array{string, array}>
+	 */
+	public function data_provider_offline_country_placements(): array {
+		$cases = array();
+		foreach ( self::load_fixture() as $country => $expected ) {
+			if ( array_key_exists( 'primary_offline', $expected ) ) {
+				$cases[ $country ] = array( $country, $expected );
+			}
+		}
+
+		return $cases;
+	}
+
+	/**
+	 * @testdox The fixture defines countries that declare an offline provider.
+	 */
+	public function test_offline_country_provider_is_not_empty(): void {
+		$this->assertNotEmpty(
+			$this->data_provider_offline_country_placements(),
+			'The offline promotion contract is checking nothing because no fixture country declares an offline provider.'
+		);
+	}
+
+	/**
 	 * @testdox Each country's baseline placement matches the fixture.
 	 *
 	 * @dataProvider data_provider_country_placements
@@ -354,9 +367,6 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 		// The offline slot is filled only in the offline profiler state, so it is
 		// not part of the baseline expectation. Assert it is genuinely empty here
 		// and check the promotion separately.
-		$baseline_expected = $expected;
-		unset( $baseline_expected['primary_offline'] );
-
 		$this->assertArrayNotHasKey(
 			'primary_offline',
 			$projected,
@@ -364,7 +374,7 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 		);
 
 		$this->assertSame(
-			$this->normalise( $baseline_expected ),
+			$this->normalise( self::baseline_of( $expected ) ),
 			$this->normalise( $projected ),
 			$this->describe_mismatch( $country, $expected, $projected )
 		);
@@ -373,19 +383,12 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 	/**
 	 * @testdox Countries with an offline provider promote it in the offline state.
 	 *
-	 * @dataProvider data_provider_country_placements
+	 * @dataProvider data_provider_offline_country_placements
 	 *
 	 * @param string $country  The country code.
 	 * @param array  $expected The expected section map.
 	 */
 	public function test_country_offline_placement( string $country, array $expected ): void {
-		$this->assert_valid_section_map( $expected, $country, 'fixture baseline' );
-
-		if ( ! array_key_exists( 'primary_offline', $expected ) ) {
-			$this->assertTrue( true, "No offline provider declared for $country." );
-			return;
-		}
-
 		$offline_id = $expected['primary_offline'];
 		$this->assertContains(
 			$offline_id,
@@ -420,9 +423,6 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 			$this->normalise( $projected ),
 			"Offline placement for $country does not match the expectation derived from its fixture entry. Fix the baseline entry first — the offline view is derived from it by moving '$offline_id' out of other_psp."
 		);
-
-		delete_option( OnboardingProfile::DATA_OPTION );
-		$this->sut->clear_cache();
 	}
 
 	/**
@@ -511,7 +511,7 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 
 			$is_non_empty_list = is_array( $value )
 				&& array() !== $value
-				&& array_keys( $value ) === range( 0, count( $value ) - 1 );
+				&& ArrayUtil::array_is_list( $value );
 
 			$this->assertTrue(
 				$is_non_empty_list,
@@ -563,8 +563,7 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 			'(If many countries fail at once, check test_no_suggested_extension_is_active first.)',
 			'',
 		);
-		$baseline_expected = $expected;
-		unset( $baseline_expected['primary_offline'] );
+		$baseline_expected = self::baseline_of( $expected );
 
 		foreach ( self::SECTION_KEYS as $key ) {
 			$want = $baseline_expected[ $key ] ?? null;
@@ -655,6 +654,22 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 	}
 
 	/**
+	 * The baseline view of a fixture entry.
+	 *
+	 * The offline slot is filled only in the offline profiler state, so it is not
+	 * part of what the baseline comparison expects.
+	 *
+	 * @param array $sections The fixture section map.
+	 *
+	 * @return array The same map without the offline slot.
+	 */
+	private static function baseline_of( array $sections ): array {
+		unset( $sections['primary_offline'] );
+
+		return $sections;
+	}
+
+	/**
 	 * Whether a fixture section map contains a suggestion ID.
 	 *
 	 * @param array  $sections      The fixture section map.
@@ -679,6 +694,10 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 	 * @return array<string, array> Country code to expected section map.
 	 */
 	private static function load_fixture(): array {
-		return require __DIR__ . '/fixtures/expected-country-placements.php';
+		if ( null === self::$fixture ) {
+			self::$fixture = require __DIR__ . '/fixtures/expected-country-placements.php';
+		}
+
+		return self::$fixture;
 	}
 }
