@@ -35,14 +35,8 @@ test.describe( 'Product permalink settings', () => {
 		expect( originalCheckedIndex ).toBeGreaterThanOrEqual( 0 );
 
 		try {
-			const defaultRadio = page.getByRole( 'radio', {
-				name: 'Default',
-				exact: true,
-			} );
-			const shopBaseRadio = page.getByRole( 'radio', {
-				name: 'Shop base',
-				exact: true,
-			} );
+			const defaultRadio = productPermalinkRadios.nth( 0 );
+			const shopBaseRadio = productPermalinkRadios.nth( 1 );
 			const defaultRow = page
 				.getByRole( 'row' )
 				.filter( { has: defaultRadio } );
@@ -53,6 +47,8 @@ test.describe( 'Product permalink settings', () => {
 						.textContent()
 				)?.trim() ?? ''
 			);
+			// Strip the site and sample-product paths from the preview so the test derives
+			// the canonical `/base/` without hardcoding a translated product slug.
 			const sitePath = new URL( baseURL ).pathname.replace( /\/$/, '' );
 			const expectedDefaultBase = defaultPreview.pathname
 				.slice( sitePath.length )
