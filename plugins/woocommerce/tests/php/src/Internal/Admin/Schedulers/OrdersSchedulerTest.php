@@ -764,6 +764,92 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A trashed order that was never imported does not create an analytics customer.
+	 *
+	 * The batch cursor no longer excludes trashed orders, so an order created and
+	 * trashed between two batch runs reaches import() for the first time while
+	 * trashed. import() writes the stats row through Order::get_report_customer_id(),
+	 * which creates a wc_customer_lookup row as a side effect. The trashed order is
+	 * excluded from every report that joins wc_order_stats, but Analytics > Customers
+	 * counts the lookup table directly, so the customer would linger forever with no
+	 * countable orders.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/pull/64157
+	 */
+	public function test_never_imported_trashed_order_does_not_create_customer(): void {
+		global $wpdb;
+
+		// Scheduled import mode is set in setUp().
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'completed' );
+		$order->set_billing_email( 'ghost-64157@example.com' );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$customers_before = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_customer_lookup" );
+
+		$new_customer_fired = 0;
+		$callback           = function () use ( &$new_customer_fired ) {
+			++$new_customer_fired;
+		};
+		add_action( 'woocommerce_analytics_new_customer', $callback );
+
+		// Trash without ever importing, then let the batch pick it up.
+		$order->delete( false );
+		OrdersScheduler::process_pending_batch( '2020-01-01 00:00:00', 0 );
+
+		remove_action( 'woocommerce_analytics_new_customer', $callback );
+
+		$customers_after = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_customer_lookup" );
+
+		$this->assertSame( 0, $new_customer_fired, 'Importing a never-imported trashed order should not create an analytics customer.' );
+		$this->assertSame( $customers_before, $customers_after, 'The customer lookup table should be unchanged.' );
+		$this->assertSame(
+			0,
+			(int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $order_id ) ),
+			'A never-imported trashed order should not gain a stats row.'
+		);
+	}
+
+	/**
+	 * @testdox A trashed order that was never imported is imported normally once restored.
+	 */
+	public function test_never_imported_trashed_order_imports_after_restore(): void {
+		global $wpdb;
+
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
+
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'completed' );
+		$order->save();
+		$order_id = $order->get_id();
+
+		// Trash without importing; the skip guard should leave no stats row.
+		$order->delete( false );
+		OrdersScheduler::import( $order_id );
+		$this->assertSame(
+			0,
+			(int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $order_id ) ),
+			'The trashed, never-imported order should have been skipped.'
+		);
+
+		// Restore it: the status is no longer trash, so it imports as usual.
+		$order = wc_get_order( $order_id );
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$order->get_data_store()->untrash_order( $order );
+		} else {
+			wp_untrash_post( $order_id );
+		}
+		OrdersScheduler::import( $order_id );
+
+		$this->assertSame(
+			'wc-completed',
+			$wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $order_id ) ),
+			'A restored order should import normally.'
+		);
+	}
+
+	/**
 	 * @testdox get_failed_order_imports normalizes malformed or legacy option values.
 	 */
 	public function test_get_failed_order_imports_normalizes_malformed_option(): void {

@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrderDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
@@ -405,6 +406,16 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			return;
 		}
 
+		// Skip a trashed record that was never imported. Importing it now would create a
+		// wc_customer_lookup row through Order::get_report_customer_id(), and because the
+		// order stays in the trash nothing ever removes that row again — the customer
+		// shows up in Analytics > Customers with no countable orders. Records imported
+		// before being trashed already have a stats row, so their trashed status still
+		// syncs, and a restored order imports normally once its status is no longer trash.
+		if ( OrderStatus::TRASH === $order->get_status() && ! self::has_order_stats_row( $order_id ) ) {
+			return;
+		}
+
 		$results = array(
 			OrdersStatsDataStore::sync_order( $order_id ),
 			ProductsDataStore::sync_order_products( $order_id ),
@@ -434,6 +445,24 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		 * @param int $order_id Order or refund ID.
 		 */
 		do_action( 'woocommerce_order_scheduler_after_import_order', $order_id );
+	}
+
+	/**
+	 * Check whether an order or refund already has a row in the order stats table.
+	 *
+	 * Used to tell a record that Analytics has already imported from one it has never
+	 * seen, which decides whether a trashed record is worth importing at all.
+	 *
+	 * @param int $order_id Order or refund ID.
+	 * @return bool
+	 */
+	private static function has_order_stats_row( $order_id ): bool {
+		global $wpdb;
+
+		$table_name = OrdersStatsDataStore::get_db_table_name();
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return (bool) $wpdb->get_var( $wpdb->prepare( "SELECT order_id FROM {$table_name} WHERE order_id = %d LIMIT 1", $order_id ) );
 	}
 
 	/**
