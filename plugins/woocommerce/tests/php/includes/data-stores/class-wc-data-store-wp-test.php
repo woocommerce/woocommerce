@@ -6,6 +6,77 @@
 final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 
 	/**
+	 * Timestamp of 2026-07-20 00:00:00 -04:00, in America/New_York.
+	 */
+	private const NY_JUL_20_MIDNIGHT = 1784520000;
+
+	/**
+	 * Timestamp of 2026-07-21 00:00:00 -04:00, in America/New_York.
+	 */
+	private const NY_JUL_21_MIDNIGHT = 1784606400;
+
+	/**
+	 * Timestamp of 2026-07-26 00:00:00 -04:00, in America/New_York.
+	 */
+	private const NY_JUL_26_MIDNIGHT = 1785038400;
+
+	/**
+	 * Timestamp of 2026-11-01 00:00:00 -04:00, the last day of DST in America/New_York.
+	 */
+	private const NY_NOV_01_MIDNIGHT = 1793505600;
+
+	/**
+	 * Timestamp of 2026-11-02 00:00:00 -05:00, 25 hours after the start of 2026-11-01.
+	 */
+	private const NY_NOV_02_MIDNIGHT = 1793595600;
+
+	/**
+	 * Timestamp of 2026-03-08 00:00:00 -05:00, the day DST starts in America/New_York.
+	 */
+	private const NY_MAR_08_MIDNIGHT = 1772946000;
+
+	/**
+	 * Timestamp of 2026-03-09 00:00:00 -04:00, 23 hours after the start of 2026-03-08.
+	 */
+	private const NY_MAR_09_MIDNIGHT = 1773028800;
+
+	/**
+	 * Timestamp of the first instant of 2026-04-24 in Africa/Cairo. DST starts at 00:00 that day,
+	 * so local midnight never happens and the day starts at 01:00:00 +03:00 instead.
+	 */
+	private const CAIRO_APR_24_START = 1776981600;
+
+	/**
+	 * Timestamp of 2026-04-25 00:00:00 +03:00, 23 hours after the start of 2026-04-24.
+	 */
+	private const CAIRO_APR_25_MIDNIGHT = 1777064400;
+
+	/**
+	 * The System Under Test.
+	 *
+	 * @var WC_Data_Store_WP
+	 */
+	private $sut;
+
+	/**
+	 * Set up test fixtures.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->sut = new WC_Data_Store_WP();
+	}
+
+	/**
+	 * Restore the default timezone settings.
+	 */
+	public function tearDown(): void {
+		update_option( 'timezone_string', '' );
+		update_option( 'gmt_offset', 0 );
+
+		parent::tearDown();
+	}
+
+	/**
 	 * @return array
 	 */
 	public function provider_update_or_delete_post_meta(): array {
@@ -46,5 +117,173 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 		$this->assertSame( $expected_stored, get_post_meta( $product_id, '_sku', true ) );
 
 		$product->delete();
+	}
+
+	/**
+	 * Day-precision meta date boundaries per operator, for a site in America/New_York.
+	 *
+	 * The bounds are half-open, so a day is matched in full and exactly once. For a range the
+	 * upper bound is the midnight *after* the final day, so that the whole final day is covered.
+	 *
+	 * @return array
+	 */
+	public function day_precision_meta_boundary_provider(): array {
+		return array(
+			'equals'                 => array(
+				'2026-07-20',
+				array(
+					array(
+						'value'   => self::NY_JUL_20_MIDNIGHT,
+						'compare' => '>=',
+					),
+					array(
+						'value'   => self::NY_JUL_21_MIDNIGHT,
+						'compare' => '<',
+					),
+				),
+			),
+			'greater than'           => array(
+				'>2026-07-20',
+				array(
+					array(
+						'value'   => self::NY_JUL_21_MIDNIGHT,
+						'compare' => '>=',
+					),
+				),
+			),
+			'greater than or equals' => array(
+				'>=2026-07-20',
+				array(
+					array(
+						'value'   => self::NY_JUL_20_MIDNIGHT,
+						'compare' => '>=',
+					),
+				),
+			),
+			'less than'              => array(
+				'<2026-07-20',
+				array(
+					array(
+						'value'   => self::NY_JUL_20_MIDNIGHT,
+						'compare' => '<',
+					),
+				),
+			),
+			'less than or equals'    => array(
+				'<=2026-07-20',
+				array(
+					array(
+						'value'   => self::NY_JUL_21_MIDNIGHT,
+						'compare' => '<',
+					),
+				),
+			),
+			'range'                  => array(
+				'2026-07-20...2026-07-25',
+				array(
+					array(
+						'value'   => self::NY_JUL_20_MIDNIGHT,
+						'compare' => '>=',
+					),
+					array(
+						'value'   => self::NY_JUL_26_MIDNIGHT,
+						'compare' => '<',
+					),
+				),
+			),
+		);
+	}
+
+	/**
+	 * @testdox Day-precision meta date queries should anchor on the site's local midnight for every operator.
+	 *
+	 * @dataProvider day_precision_meta_boundary_provider
+	 *
+	 * @param string $query_var The date query var.
+	 * @param array  $expected  Expected value/compare pairs, in order.
+	 */
+	public function test_day_precision_meta_boundaries_use_site_timezone( string $query_var, array $expected ): void {
+		update_option( 'timezone_string', 'America/New_York' );
+
+		$result = $this->sut->parse_date_for_wp_query( $query_var, '_date_paid' );
+
+		$this->assertCount(
+			count( $expected ),
+			$result['meta_query'],
+			'Wrong number of meta query clauses for ' . $query_var
+		);
+
+		foreach ( $expected as $index => $clause ) {
+			$this->assertSame(
+				$clause['value'],
+				$result['meta_query'][ $index ]['value'],
+				"Wrong boundary timestamp in clause {$index} for {$query_var}"
+			);
+			$this->assertSame(
+				$clause['compare'],
+				$result['meta_query'][ $index ]['compare'],
+				"Wrong comparison operator in clause {$index} for {$query_var}"
+			);
+		}
+	}
+
+	/**
+	 * @testdox Day-precision meta date queries should anchor on local midnight on sites using a manual UTC offset.
+	 */
+	public function test_day_precision_meta_boundaries_use_manual_utc_offset(): void {
+		update_option( 'timezone_string', '' );
+		update_option( 'gmt_offset', -4 );
+
+		$result = $this->sut->parse_date_for_wp_query( '2026-07-20', '_date_paid' );
+
+		$this->assertSame( self::NY_JUL_20_MIDNIGHT, $result['meta_query'][0]['value'], 'Start should be local midnight, not UTC midnight' );
+		$this->assertSame( self::NY_JUL_21_MIDNIGHT, $result['meta_query'][1]['value'], 'End should be the next local midnight' );
+	}
+
+	/**
+	 * Days whose local length is not 24 hours.
+	 *
+	 * @return array
+	 */
+	public function dst_transition_provider(): array {
+		return array(
+			'DST ends, 25-hour day'               => array(
+				'America/New_York',
+				'2026-11-01',
+				self::NY_NOV_01_MIDNIGHT,
+				self::NY_NOV_02_MIDNIGHT,
+			),
+			'DST starts, 23-hour day'             => array(
+				'America/New_York',
+				'2026-03-08',
+				self::NY_MAR_08_MIDNIGHT,
+				self::NY_MAR_09_MIDNIGHT,
+			),
+			'DST starts at midnight, 23-hour day' => array(
+				'Africa/Cairo',
+				'2026-04-24',
+				self::CAIRO_APR_24_START,
+				self::CAIRO_APR_25_MIDNIGHT,
+			),
+		);
+	}
+
+	/**
+	 * @testdox Day-precision meta date queries should span the real length of a day across DST transitions.
+	 *
+	 * @dataProvider dst_transition_provider
+	 *
+	 * @param string $timezone       Site timezone.
+	 * @param string $date           The queried day.
+	 * @param int    $expected_start Expected start-of-day timestamp.
+	 * @param int    $expected_end   Expected next-midnight timestamp.
+	 */
+	public function test_day_precision_meta_boundaries_follow_dst_transitions( string $timezone, string $date, int $expected_start, int $expected_end ): void {
+		update_option( 'timezone_string', $timezone );
+
+		$result = $this->sut->parse_date_for_wp_query( $date, '_date_paid' );
+
+		$this->assertSame( $expected_start, $result['meta_query'][0]['value'], "Wrong start of day for {$date} in {$timezone}" );
+		$this->assertSame( $expected_end, $result['meta_query'][1]['value'], "Wrong end of day for {$date} in {$timezone}" );
 	}
 }

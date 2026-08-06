@@ -442,15 +442,42 @@ class WC_Data_Store_WP {
 		// Meta dates are stored as timestamps in the db.
 		// Check against beginning/end-of-day timestamps when using 'day' precision.
 		if ( 'day' === $precision ) {
-			$start_timestamp = strtotime( gmdate( 'm/d/Y 00:00:00', $dates[0]->getTimestamp() ) );
-			$end_timestamp   = '...' !== $operator ? ( $start_timestamp + DAY_IN_SECONDS ) : strtotime( gmdate( 'm/d/Y 00:00:00', $dates[1]->getTimestamp() ) );
+			/*
+			 * The meta values are UTC timestamps, while a YYYY-MM-DD query var names a day in the site's
+			 * timezone, so both boundaries have to be anchored on local midnight. Building them from the
+			 * local calendar date keeps that anchor even when the local day starts on a different UTC date.
+			 */
+			$timezone = wp_timezone();
+			$start    = new DateTime( $dates[0]->date( 'Y-m-d' ) . ' 00:00:00', $timezone );
+			$end      = '...' === $operator
+				? new DateTime( $dates[1]->date( 'Y-m-d' ) . ' 00:00:00', $timezone )
+				: clone $start;
+
+			/*
+			 * Derive the upper bound from the next local midnight rather than adding a fixed 86400 seconds,
+			 * so the range follows the real length of the day across a DST transition (a local day can be 23
+			 * or 25 hours). '+1 day' is not equivalent: it carries over the start time, which is not midnight
+			 * on days where DST begins at 00:00 and the constructor above had to shift the start forward.
+			 */
+			$end->modify( 'tomorrow' );
+
+			$start_timestamp = $start->getTimestamp();
+			$end_timestamp   = $end->getTimestamp();
+
+			// The bounds are half-open (>= start, < end) so that a day is matched in full and exactly once.
 			switch ( $operator ) {
 				case '>':
+					$wp_query_args['meta_query'][] = array(
+						'key'     => $key,
+						'value'   => $end_timestamp,
+						'compare' => '>=',
+					);
+					break;
 				case '<=':
 					$wp_query_args['meta_query'][] = array(
 						'key'     => $key,
 						'value'   => $end_timestamp,
-						'compare' => $operator,
+						'compare' => '<',
 					);
 					break;
 				case '<':
@@ -470,7 +497,7 @@ class WC_Data_Store_WP {
 					$wp_query_args['meta_query'][] = array(
 						'key'     => $key,
 						'value'   => $end_timestamp,
-						'compare' => '<=',
+						'compare' => '<',
 					);
 			}
 		} elseif ( '...' !== $operator ) {
