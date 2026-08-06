@@ -344,6 +344,7 @@ class WC_Install {
 		),
 		'11.1.0'   => array(
 			'wc_update_1110_delete_dashboard_outofstock_count_transient',
+			'wc_update_1110_flush_product_count_cache',
 		),
 	);
 
