@@ -69,6 +69,25 @@
 		.components-form-toggle {
 			margin-left: $grid-unit-20;
 		}
+
+		/* On mobile the filter sits above the category dropdown; mirror the
+		   dropdown's select-like sizing and never exceed the viewport. */
+		@media screen and (max-width: $break-medium) {
+			border-color: $gray-600;
+			height: auto;
+			min-width: 0;
+			padding: $grid-unit-15 $grid-unit-10;
+
+			label {
+				min-width: 0;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+
+			.components-form-toggle {
+				margin-left: auto;
+			}
+		}
 	}
 
 	// Shared explanation popover (card chip + filter info button).
