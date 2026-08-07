@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests\Cart.
  */
 
+use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 
@@ -903,6 +904,109 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		// Clean up.
 		$order->delete( true );
+	}
+
+	/**
+	 * Set up a stock-managed product with exactly one unit, held by a separate unpaid order.
+	 *
+	 * Mirrors the state an abandoned checkout leaves behind: the last unit is reserved by an
+	 * order that belongs to the shopper's own session.
+	 *
+	 * @return array{0: WC_Product, 1: WC_Order} The product and the order holding its stock.
+	 */
+	private function create_last_unit_product_held_by_order(): array {
+		update_option( 'woocommerce_manage_stock', 'yes' );
+		update_option( 'woocommerce_hold_stock_minutes', 60 );
+		// ReserveStock is only enabled once the reserved-stock table has shipped (schema >= 430).
+		update_option( 'woocommerce_schema_version', 430 );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 1 );
+		$product->set_backorders( 'no' );
+		$product->set_stock_status( 'instock' );
+		$product->save();
+
+		$holding_order = WC_Helper_Order::create_order();
+		$holding_order->remove_order_items();
+		$holding_order->add_product( wc_get_product( $product->get_id() ), 1 );
+		$holding_order->set_status( OrderStatus::PENDING );
+		$holding_order->save();
+
+		( new ReserveStock() )->reserve_stock_for_order( $holding_order, 60 );
+
+		// Sanity check: the separate order really holds the only unit.
+		$this->assertEquals( 1, wc_get_held_stock_quantity( wc_get_product( $product->get_id() ), 0 ) );
+
+		return array( $product, $holding_order );
+	}
+
+	/**
+	 * @testdox check_cart_item_stock does not block the shopper when their own hold is tracked by store_api_draft_order and order_awaiting_payment is boolean false (Cause A: payment_complete() writes false, not unset).
+	 */
+	public function test_check_cart_item_stock_not_blocked_by_own_hold_when_awaiting_payment_is_false() {
+		list( $product, $holding_order ) = $this->create_last_unit_product_held_by_order();
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// The draft pointer correctly identifies the shopper's own holding order...
+		WC()->session->set( 'store_api_draft_order', $holding_order->get_id() );
+		// ...but a completed payment earlier in the session left this as boolean false rather than unsetting it.
+		WC()->session->set( 'order_awaiting_payment', false );
+
+		$this->assertTrue(
+			WC()->cart->check_cart_item_stock(),
+			'A boolean-false order_awaiting_payment must fall through to the store_api_draft_order pointer, not skip it.'
+		);
+	}
+
+	/**
+	 * @testdox check_cart_item_stock does not block the shopper when only store_api_draft_order identifies their own hold (baseline fallback, no order_awaiting_payment set).
+	 */
+	public function test_check_cart_item_stock_not_blocked_by_own_hold_via_draft_fallback() {
+		list( $product, $holding_order ) = $this->create_last_unit_product_held_by_order();
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		WC()->session->set( 'store_api_draft_order', $holding_order->get_id() );
+		WC()->session->set( 'order_awaiting_payment', null );
+
+		$this->assertTrue( WC()->cart->check_cart_item_stock() );
+	}
+
+	/**
+	 * @testdox check_cart_item_stock uses order_awaiting_payment to exclude the shopper's own hold when it holds a real order id.
+	 */
+	public function test_check_cart_item_stock_uses_order_awaiting_payment_when_set() {
+		list( $product, $holding_order ) = $this->create_last_unit_product_held_by_order();
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		WC()->session->set( 'store_api_draft_order', 0 );
+		WC()->session->set( 'order_awaiting_payment', $holding_order->get_id() );
+
+		$this->assertTrue( WC()->cart->check_cart_item_stock() );
+	}
+
+	/**
+	 * @testdox check_cart_item_stock still blocks when a live hold is NOT identified as the shopper's own (oversell safety: the fix must not relax holds it cannot attribute to this session).
+	 */
+	public function test_check_cart_item_stock_blocks_when_hold_is_not_the_shoppers_own() {
+		list( $product ) = $this->create_last_unit_product_held_by_order();
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Session points at neither the holding order nor any awaiting order.
+		WC()->session->set( 'store_api_draft_order', 0 );
+		WC()->session->set( 'order_awaiting_payment', false );
+
+		$result = WC()->cart->check_cart_item_stock();
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertContains( 'out-of-stock', $result->get_error_codes() );
 	}
 
 	/**

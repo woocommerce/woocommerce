@@ -879,9 +879,11 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return bool|WP_Error
 	 */
 	public function check_cart_item_stock() {
-		$error                    = new WP_Error();
-		$product_qty_in_cart      = $this->get_cart_item_quantities();
-		$current_session_order_id = isset( WC()->session->order_awaiting_payment ) ? absint( WC()->session->order_awaiting_payment ) : absint( WC()->session->get( 'store_api_draft_order', 0 ) );
+		$error               = new WP_Error();
+		$product_qty_in_cart = $this->get_cart_item_quantities();
+		// Read via get() rather than the magic property: WC_Session::__isset() returns true for a stored `false` (written by payment_complete()/cancel_order()), which would otherwise skip the store_api_draft_order fallback. Treat any falsy awaiting value as "no order".
+		$order_awaiting_payment   = absint( WC()->session->get( 'order_awaiting_payment' ) );
+		$current_session_order_id = $order_awaiting_payment ? $order_awaiting_payment : absint( WC()->session->get( 'store_api_draft_order', 0 ) );
 
 		foreach ( $this->get_cart() as $values ) {
 			$product = $values['data'];
@@ -1708,8 +1710,9 @@ class WC_Cart extends WC_Legacy_Cart {
 						'state'     => $this->get_customer()->get_shipping_state(),
 						'postcode'  => $this->get_customer()->get_shipping_postcode(),
 						'city'      => $this->get_customer()->get_shipping_city(),
-						'address'   => $this->get_customer()->get_shipping_address(), // This is an alias of address_1, provided for backwards compatibility.
-						'address_1' => $this->get_customer()->get_shipping_address_1(),
+						'address'   => $this->get_customer()->get_shipping_address(),
+						// This is an alias of address_1, provided for backwards compatibility.
+														'address_1' => $this->get_customer()->get_shipping_address_1(),
 						'address_2' => $this->get_customer()->get_shipping_address_2(),
 					),
 					'cart_subtotal'   => $this->get_displayed_subtotal(),
