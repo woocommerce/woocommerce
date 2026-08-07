@@ -900,18 +900,25 @@ class WC_REST_Order_Refunds_Preview_Test extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The woocommerce_rest_prepare_order_refund_preview filter can mutate the response.
+	 * @testdox The woocommerce_rest_prepare_order_refund_preview filter receives the response object and can mutate it.
 	 */
 	public function test_preview_filter_can_mutate_response(): void {
 		$order   = $this->create_order_with_product( 10.00, 1 );
 		$item_id = $this->get_first_line_item_id( $order );
 
+		$received_order = null;
 		add_filter(
 			'woocommerce_rest_prepare_order_refund_preview',
-			function ( $preview ) {
-				$preview['custom_field'] = 'custom_value';
-				return $preview;
-			}
+			function ( $response, $filter_order ) use ( &$received_order ) {
+				$this->assertInstanceOf( WP_REST_Response::class, $response, 'The filter should receive the response object, per the woocommerce_rest_prepare_* family contract.' );
+				$received_order          = $filter_order;
+				$data                    = $response->get_data();
+				$data['custom_field']    = 'custom_value';
+				$response->set_data( $data );
+				return $response;
+			},
+			10,
+			2
 		);
 
 		$response = $this->do_preview_request(
@@ -926,6 +933,29 @@ class WC_REST_Order_Refunds_Preview_Test extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'custom_value', $response->get_data()['custom_field'] );
+		$this->assertInstanceOf( WC_Order::class, $received_order );
+		$this->assertEquals( $order->get_id(), $received_order->get_id() );
+	}
+
+	/**
+	 * @testdox Numeric strings in the preview payload are sanitized to their schema types before computation.
+	 */
+	public function test_preview_numeric_strings_are_sanitized(): void {
+		$order   = $this->create_order_with_product( 25.00, 2 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => (string) $item_id,
+					'quantity'     => '2',
+				),
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( '50.00', $response->get_data()['total'] );
 	}
 
 	/**

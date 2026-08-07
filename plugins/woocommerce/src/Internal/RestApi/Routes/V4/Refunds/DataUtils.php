@@ -1452,6 +1452,10 @@ class DataUtils {
 			'required'          => true,
 			'minItems'          => 1,
 			'validate_callback' => 'rest_validate_request_arg',
+			// Hand-registered args get no default sanitizer; this coerces validated
+			// values to their schema types (numeric strings become numbers) like the
+			// args generated from an item schema.
+			'sanitize_callback' => 'rest_sanitize_request_arg',
 			'items'             => array(
 				'type'                 => 'object',
 				'required'             => array( 'line_item_id' ),

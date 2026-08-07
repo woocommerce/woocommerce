@@ -109,18 +109,22 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 
 		$preview = $this->add_preview_additional_fields( $preview, $request );
 
+		$response = rest_ensure_response( $preview );
+
 		/**
-		 * Filters the refund preview data before it is returned.
+		 * Filters the refund preview response before it is returned, following the
+		 * `woocommerce_rest_prepare_*` family contract. The preview is advisory:
+		 * the create path re-validates independently, so filtered values cannot
+		 * bypass the creation guards.
 		 *
-		 * @param array           $preview Preview data (breakdown, subtotal, tax, total, max_refundable).
-		 * @param WC_Order        $order   The order the refund preview was computed for.
-		 * @param WP_REST_Request $request The request.
+		 * @param WP_REST_Response $response The preview response. Its data carries
+		 *                                   breakdown, subtotal, tax, total, max_refundable.
+		 * @param WC_Order         $order    The order the refund preview was computed for.
+		 * @param WP_REST_Request  $request  The request.
 		 *
 		 * @since 11.1.0
 		 */
-		$preview = apply_filters( 'woocommerce_rest_prepare_order_refund_preview', $preview, $order, $request );
-
-		return rest_ensure_response( $preview );
+		return apply_filters( 'woocommerce_rest_prepare_order_refund_preview', $response, $order, $request );
 	}
 
 	/**
