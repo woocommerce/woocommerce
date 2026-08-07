@@ -547,14 +547,16 @@
 
 		h1 {
 			// This heading renders outside the floating header, so the shared
-			// header typography doesn't reach it — restate it to match the other
-			// settings headers. padding-top trims wp-admin's default h1 padding
-			// so the title centers against the back button. The gap to the
-			// chevron now lives inside the button, which sits within this
-			// heading.
+			// header typography doesn't reach it. It occupies the slot the main
+			// screen gives "Payment providers", so it takes that heading's
+			// scale — the floating header's lighter 15px/500 left this h1
+			// smaller than the section headings and list rows beneath it.
+			// padding-top trims wp-admin's default h1 padding so the title
+			// centers against the back button. The gap to the chevron now lives
+			// inside the button, which sits within this heading.
 			padding-top: 4px;
-			font-size: 15px;
-			font-weight: 500;
+			font-size: 16px;
+			font-weight: 600;
 			color: $gray-900;
 
 			.woocommerce-settings-payments-header__title {
