@@ -53,6 +53,12 @@
 			justify-content: space-between;
 			padding: $gap-smaller 48px $gap-large;
 			align-items: center;
+			// Every header on this screen closes itself off with this line,
+			// rather than leaving it to whatever renders below. What renders
+			// below varies — the provider list, or the skeleton while they
+			// load — and each drawing its own top border is how the line ended
+			// up doubled in one state and missing in another.
+			border-bottom: 1px solid $gray-200;
 
 			@media screen and (max-width: $break-xlarge) {
 				padding: $gap-smaller $gap-large $gap-large;
@@ -535,6 +541,9 @@
 		display: flex;
 		padding: 8px 48px 24px;
 		align-items: center;
+		// Same ownership as the main screen's header: the line belongs to the
+		// header, on both the methods list and an individual method's page.
+		border-bottom: 1px solid $gray-200;
 
 		h1 {
 			// This heading renders outside the floating header, so the shared
@@ -552,13 +561,5 @@
 				line-height: 24px;
 			}
 		}
-	}
-
-	// Individual method pages nest their header inside
-	// .settings-payment-gateways; the list page does not. The list already
-	// draws this line as the border-top of its .woocommerce-list, so scoping it
-	// here matches the two levels without doubling up on the list.
-	.settings-payment-gateways .settings-payments-offline__header {
-		border-bottom: 1px solid $gray-200;
 	}
 }

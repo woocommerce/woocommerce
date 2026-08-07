@@ -3,6 +3,12 @@
 	border-bottom: none; // This way we avoid a double border between items.
 	padding: 0 48px;
 
+	// The header above draws the line that closes it off, so the first row
+	// would stack a second one directly on top of it.
+	&:first-child {
+		border-top: none;
+	}
+
 	// Add back the bottom border for the last item.
 	&:nth-last-child(1 of .woocommerce-item__payment-gateway-placeholder) {
 		border-bottom: 1px solid $gray-200;

@@ -1,5 +1,6 @@
 .woocommerce-list {
-	border-top: 1px solid $gray-200;
+	// No border-top: the header above closes itself off with its own
+	// border-bottom, in every loading state.
 
 	.woocommerce-list__item {
 		padding: 0 48px;
