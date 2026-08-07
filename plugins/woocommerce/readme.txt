@@ -4,7 +4,7 @@ Tags: online store, ecommerce, shop, shopping cart, sell online
 Requires at least: 6.9
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 10.9.4
+Stable tag: 11.0.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 11.0.0-rc.3 2026-07-30 =
+= 11.0.0 2026-08-04 =
 
 **WooCommerce**
 
@@ -234,7 +234,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Fix silent backslash corruption in Agentic Checkout buyer/address fields and Store API checkout field validation. Calling wp_unslash() on JSON request body data that is never magic-quoted was stripping real backslashes typed by the buyer. [#65900](https://github.com/woocommerce/woocommerce/pull/65900)
 * Fix - Fix silent backslash corruption in Store API (block checkout) address fields. Calling wp_unslash() on JSON body data that is never magic-quoted was stripping real backslashes from address_1, address_2, and other address fields. [#65643](https://github.com/woocommerce/woocommerce/pull/65643)
 * Fix - Fix SKU duplication corrupting hyphenated SKUs. Duplicating a product with SKU `SKU-123` now correctly produces `SKU-123-1` instead of `SKU-124`. [#65423](https://github.com/woocommerce/woocommerce/pull/65423)
-* Fix - Fix strategy mismatch between legacy alias scripts and their real counterparts. Scripts with legacy handles now use blocking strategy consistently, since WordPress discards loading strategies on alias scripts (src=false) since 6.3. [#64431](https://github.com/woocommerce/woocommerce/pull/64431)
 * Fix - Fix tax country code autocomplete to not be based on full country name [#65879](https://github.com/woocommerce/woocommerce/pull/65879)
 * Fix - Fix tax state code autocomplete: allow searching by state code and scope suggestions to the selected country [#65882](https://github.com/woocommerce/woocommerce/pull/65882)
 * Fix - Fix the daily log cleanup so it deletes all expired log files, not just the first 20. [#66073](https://github.com/woocommerce/woocommerce/pull/66073)
@@ -320,6 +319,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Temporary deactivate persistent product status counters and rollback to WordPress API usage. [#67094](https://github.com/woocommerce/woocommerce/pull/67094)
 * Fix - Add no-op WC_REST_Layout_Templates_Controller and WC_REST_Products_Catalog_Controller stubs so an in-place update from 10.9.x does not fatal when the 10.9 controller list instantiates a class whose file has already been swapped away. [#67138](https://github.com/woocommerce/woocommerce/pull/67138)
 * Fix - Revert the fixed end-prices order calculation changes from PR #63744, which caused tax-inclusive stores using the woocommerce_adjust_non_base_location_prices filter to charge the net amount on block/Store API checkout [#67161](https://github.com/woocommerce/woocommerce/pull/67161)
+* Fix - Revert the legacy script blocking change (#64431) that broke the classic cart and checkout on sites loading a second jQuery instance. [#67363](https://github.com/woocommerce/woocommerce/pull/67363)
 * Add - Add a "Send checkout recovery email" action to the order actions dropdown so merchants can manually send the Checkout Recovery email for pending or checkout-draft orders past the 1-hour abandonment threshold. [#65136](https://github.com/woocommerce/woocommerce/pull/65136)
 * Add - Add a contextual Marketplace recommendation card to the WooCommerce Orders screen, shown to eligible stores based on locally-evaluated promotion rules. [#65970](https://github.com/woocommerce/woocommerce/pull/65970)
 * Add - Add a native Settings UI page provider path for registered settings sections. [#65975](https://github.com/woocommerce/woocommerce/pull/65975)
