@@ -75,6 +75,8 @@ const emailType: EmailType = {
 	email_key: 'wc_email_new_order',
 	email_class_name: 'WC_Email_New_Order',
 	post_id: '123',
+	file_template_preview_url:
+		'https://example.test/wp-admin/?preview_woo_block_email=true&email_id=new_order&_wpnonce=abc',
 	recipients: {
 		to: 'admin@example.com',
 		cc: '',
@@ -182,8 +184,8 @@ describe( 'ListView', () => {
 		expect( getAction( 'recreate-email-post' ) ).toBeUndefined();
 	} );
 
-	describe( 'preview action eligibility', () => {
-		it( 'is eligible only for published posts', () => {
+	describe( 'preview action', () => {
+		it( 'is eligible for published posts and for rows with a file-template preview URL', () => {
 			render( <ListView emailTypes={ [ emailType ] } /> );
 			const isEligible = getAction( 'preview' )?.isEligible;
 
@@ -192,13 +194,78 @@ describe( 'ListView', () => {
 			).toBe( true );
 			expect(
 				isEligible?.( { ...emailType, postStatus: 'draft' } )
-			).toBe( false );
-			expect(
-				isEligible?.( { ...emailType, postStatus: 'auto-draft' } )
-			).toBe( false );
+			).toBe( true );
 			expect(
 				isEligible?.( { ...emailType, post_id: '', postStatus: null } )
+			).toBe( true );
+			// Emails not registered for the block editor have no preview URL
+			// and no published post — no preview.
+			expect(
+				isEligible?.( {
+					...emailType,
+					post_id: '',
+					postStatus: null,
+					file_template_preview_url: null,
+				} )
 			).toBe( false );
+			// A published row needs a resolved permalink; without one (and
+			// without a file-template URL) there is nothing to open.
+			expect(
+				isEligible?.( {
+					...emailType,
+					postStatus: 'publish',
+					link: 'https://example.test/?woo_email=new-order',
+					file_template_preview_url: null,
+				} )
+			).toBe( true );
+			expect(
+				isEligible?.( {
+					...emailType,
+					postStatus: 'publish',
+					link: '',
+					file_template_preview_url: null,
+				} )
+			).toBe( false );
+			expect(
+				isEligible?.( {
+					...emailType,
+					postStatus: 'draft',
+					file_template_preview_url: null,
+				} )
+			).toBe( false );
+		} );
+
+		it( 'opens the permalink for published posts and the file-template preview otherwise', () => {
+			const windowOpenSpy = jest
+				.spyOn( window, 'open' )
+				.mockImplementation( () => null );
+			render( <ListView emailTypes={ [ emailType ] } /> );
+			const callback = getAction( 'preview' )?.callback;
+
+			callback?.( [
+				{
+					...emailType,
+					postStatus: 'publish',
+					link: 'https://example.test/?woo_email=new-order',
+				},
+			] );
+			expect( windowOpenSpy ).toHaveBeenLastCalledWith(
+				'https://example.test/?woo_email=new-order'
+			);
+
+			// An unpublished draft is not what customers receive — preview the
+			// file template instead.
+			callback?.( [ { ...emailType, postStatus: 'draft' } ] );
+			expect( windowOpenSpy ).toHaveBeenLastCalledWith(
+				emailType.file_template_preview_url
+			);
+
+			callback?.( [ { ...emailType, post_id: '', postStatus: null } ] );
+			expect( windowOpenSpy ).toHaveBeenLastCalledWith(
+				emailType.file_template_preview_url
+			);
+
+			windowOpenSpy.mockRestore();
 		} );
 	} );
 

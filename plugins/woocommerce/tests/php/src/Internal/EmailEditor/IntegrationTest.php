@@ -353,6 +353,76 @@ class IntegrationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Preview HTML for an email type renders the file template with the preview context applied.
+	 */
+	public function test_render_preview_html_for_email_type_returns_full_document(): void {
+		$this->bootstrap_email_editor();
+		$this->skip_if_unsupported_environment();
+
+		$preview = $this->sut->render_preview_html_for_email_type( 'customer_processing_order' );
+
+		$this->assertNotSame( '', $preview['subject'] );
+		$this->assertStringContainsString( 'is now being processed', $preview['html'], 'The preview must contain the file template content' );
+		$this->assertStringContainsString( 'All Rights Reserved', $preview['html'], 'The preview must be rendered through the email template chrome' );
+		$this->assertStringNotContainsString( 'WOO_CONTENT', $preview['html'], 'The Woo content placeholder must be replaced with preview content' );
+	}
+
+	/**
+	 * @testdox Preview HTML rendering throws for an unregistered email type.
+	 */
+	public function test_render_preview_html_for_unknown_email_type_throws(): void {
+		$this->expectException( \InvalidArgumentException::class );
+
+		$this->sut->render_preview_html_for_email_type( 'this_type_is_not_registered' );
+	}
+
+	/**
+	 * @testdox The preview page dies on a missing or invalid nonce.
+	 */
+	public function test_preview_page_requires_valid_nonce(): void {
+		$_GET['preview_woo_block_email'] = 'true';
+		$_GET['email_id']                = 'customer_processing_order';
+
+		$this->expectException( \WPDieException::class );
+
+		$this->sut->render_block_email_preview_page();
+	}
+
+	/**
+	 * @testdox The preview page dies for users without manage_woocommerce.
+	 */
+	public function test_preview_page_requires_manage_woocommerce(): void {
+		$subscriber_id = $this->factory()->user->create( array( 'role' => 'subscriber' ) );
+		wp_set_current_user( $subscriber_id );
+
+		$_GET['preview_woo_block_email'] = 'true';
+		$_GET['email_id']                = 'customer_processing_order';
+		$_REQUEST['_wpnonce']            = wp_create_nonce( 'preview-woo-block-email' );
+
+		$this->expectException( \WPDieException::class );
+		$this->expectExceptionMessage( 'permission' );
+
+		$this->sut->render_block_email_preview_page();
+	}
+
+	/**
+	 * @testdox The preview page dies for an unregistered email type.
+	 */
+	public function test_preview_page_dies_for_unknown_email_type(): void {
+		$admin_id = $this->factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+
+		$_GET['preview_woo_block_email'] = 'true';
+		$_GET['email_id']                = 'this_type_is_not_registered';
+		$_REQUEST['_wpnonce']            = wp_create_nonce( 'preview-woo-block-email' );
+
+		$this->expectException( \WPDieException::class );
+		$this->expectExceptionMessage( 'cannot be previewed' );
+
+		$this->sut->render_block_email_preview_page();
+	}
+
+	/**
 	 * Initialize the email editor package so block templates resolve during rendering.
 	 */
 	private function bootstrap_email_editor(): void {

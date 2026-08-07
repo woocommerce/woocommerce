@@ -167,6 +167,8 @@ class Integration {
 		// Priority 10 runs before the package's post-based handler (11).
 		add_filter( 'woocommerce_email_editor_send_preview_email', array( $this, 'send_preview_email_for_email_type' ), 10, 1 );
 		add_filter( 'woocommerce_email_editor_send_preview_email_without_post_permission', array( $this, 'authorize_postless_send_preview' ), 10, 2 );
+		// Listing Preview page for emails rendering from the file template.
+		add_action( 'admin_init', array( $this, 'render_block_email_preview_page' ) );
 		add_action( 'rest_api_init', array( $this->email_api_controller, 'register_routes' ) );
 		add_action( 'transition_post_status', array( $this, 'save_email_mapping_on_publish' ), 10, 3 );
 		// Priority 11 ensures the email editor's `init` bootstrap (default priority 10)
@@ -477,6 +479,25 @@ class Integration {
 			throw new \InvalidArgumentException( 'Invalid email address' );
 		}
 
+		$preview = $this->render_preview_html_for_email_type( $email_type );
+
+		$send_preview = Email_Editor_Container::container()->get( Send_Preview_Email::class );
+
+		return $send_preview->send_email( $recipient, $preview['subject'], $preview['html'] );
+	}
+
+	/**
+	 * Render the file-template preview of an email type — the content customers
+	 * receive while the email has no published post — with the preview order
+	 * context applied and personalization tags resolved.
+	 *
+	 * Shared by the postless send-test handler and the listing Preview page.
+	 *
+	 * @param string $email_type The email type identifier (e.g. `customer_processing_order`).
+	 * @return array{subject: string, html: string} The preview subject and full HTML document.
+	 * @throws \InvalidArgumentException When the email type is invalid or has no template content.
+	 */
+	public function render_preview_html_for_email_type( string $email_type ): array {
 		$email = WCTransactionalEmailPostsManager::get_instance()->get_email_by_id( $email_type );
 		if ( ! $email instanceof \WC_Email || ! in_array( $email_type, WCTransactionalEmails::get_transactional_emails(), true ) ) {
 			throw new \InvalidArgumentException( 'Unknown email type' );
@@ -515,7 +536,43 @@ class Integration {
 			$this->sending_preview_for_email_type = '';
 		}
 
-		return $send_preview->send_email( $recipient, $subject, $html );
+		return array(
+			'subject' => $subject,
+			'html'    => $html,
+		);
+	}
+
+	/**
+	 * Render the listing Preview page for an email without a published post.
+	 *
+	 * Mirrors the `preview_woocommerce_mail` admin page pattern: a nonce-gated
+	 * query-param handler that echoes the full preview HTML document. Used by
+	 * the settings listing's Preview action for emails whose rendering source
+	 * is the file template (no post, or an unpublished draft).
+	 */
+	public function render_block_email_preview_page(): void {
+		if ( ! isset( $_GET['preview_woo_block_email'] ) ) {
+			return;
+		}
+
+		// Verifies the `_wpnonce` query arg that `wp_nonce_url()` appended to
+		// the listing payload's preview URL; dies when missing or invalid.
+		check_admin_referer( 'preview-woo-block-email' );
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_die( esc_html__( 'You do not have permission to preview emails.', 'woocommerce' ) );
+		}
+
+		$email_type = isset( $_GET['email_id'] ) ? sanitize_text_field( wp_unslash( $_GET['email_id'] ) ) : '';
+
+		try {
+			$preview = $this->render_preview_html_for_email_type( $email_type );
+		} catch ( \InvalidArgumentException $e ) {
+			wp_die( esc_html__( 'This email cannot be previewed.', 'woocommerce' ) );
+		}
+
+		echo $preview['html']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Full HTML document produced by the email renderer; escaping would break it.
+		exit;
 	}
 
 	/**

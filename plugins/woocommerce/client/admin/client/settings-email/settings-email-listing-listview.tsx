@@ -229,15 +229,27 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 				label: __( 'Preview', 'woocommerce' ),
 				icon: <Icon icon={ external } />,
 				supportsBulk: false,
+				// A published post previews through its permalink (the saved
+				// content customers receive). Any other state — no post, or an
+				// unpublished draft — previews the file template via the admin
+				// preview page, matching what customers receive until the
+				// email is saved.
 				callback: ( items: EmailType[] ) => {
-					window.open( items[ 0 ].link );
+					const email = items[ 0 ];
+					const isPublished =
+						!! email.post_id && email.postStatus === 'publish';
+					const previewUrl = isPublished
+						? email.link
+						: email.file_template_preview_url;
+					if ( previewUrl ) {
+						window.open( previewUrl );
+					}
 				},
-				// The permalink only renders saved content, so previewing is
-				// limited to published posts (unpublished drafts are not what
-				// customers receive; emails without a post render from the
-				// file template and have no permalink).
 				isEligible: ( item: EmailType ) =>
-					!! item.post_id && item.postStatus === 'publish',
+					( !! item.post_id &&
+						item.postStatus === 'publish' &&
+						!! item.link ) ||
+					!! item.file_template_preview_url,
 				isPrimary: true,
 			},
 			{
