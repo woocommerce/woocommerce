@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent extra top spacing on block-based single product templates
