@@ -1981,9 +1981,6 @@ class WC_Helper {
 
 			set_transient( $cache_key, $data, 3 * HOUR_IN_SECONDS );
 
-			// A successful response clears any prior rate-limit backoff.
-			WC_Helper_API_Backoff::clear( WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS );
-
 			// Remove notice after successful API call as it's no longer applicable.
 			self::remove_api_error_notice();
 			return $data;

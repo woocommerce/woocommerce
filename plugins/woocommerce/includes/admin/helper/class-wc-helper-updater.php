@@ -715,9 +715,6 @@ class WC_Helper_Updater {
 			}
 		} else {
 			$data['products'] = json_decode( wp_remote_retrieve_body( $request ), true );
-
-			// A successful response clears any prior rate-limit backoff.
-			WC_Helper_API_Backoff::clear( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK );
 		}
 
 		set_transient( $cache_key, $data, 12 * HOUR_IN_SECONDS );
