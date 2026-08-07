@@ -52,7 +52,7 @@ class Hydration {
 	 * Hydrates the asset data registry with data from the API. Disables notices and nonces so requests contain valid
 	 * data that is not polluted by the current session.
 	 *
-	 * @param array $path API paths to hydrate e.g. '/wc/store/v1/cart'.
+	 * @param string $path API path to hydrate e.g. '/wc/store/v1/cart'.
 	 * @return array Response data.
 	 */
 	public function get_rest_api_response_data( $path = '' ) {
