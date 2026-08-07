@@ -22,6 +22,9 @@
 	&-count {
 		width: 38px;
 		height: 24px;
+		// Carries the same 2px as the bordered logos so the badge matches their
+		// 40x26 footprint, and gives the hover border something to paint on.
+		border: 1px solid transparent;
 		background-color: rgba($gray-700, 0.10);
 		color: $gray-900;
 		text-align: center;
