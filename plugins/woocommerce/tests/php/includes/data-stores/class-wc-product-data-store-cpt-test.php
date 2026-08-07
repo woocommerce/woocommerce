@@ -226,6 +226,49 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Excluded variable products should not be re-added to search results by their matching variations.
+	 */
+	public function test_search_products_excludes_variable_products_with_matching_variations() {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Excludable variable widget' );
+		$parent->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $parent->get_id() );
+		$variation->save();
+
+		$data_store = WC_Data_Store::load( 'product' );
+
+		$results = $data_store->search_products( 'Excludable variable', '', true, true );
+		$this->assertContains( $parent->get_id(), $results );
+		$this->assertContains( $variation->get_id(), $results );
+
+		$results = $data_store->search_products( 'Excludable variable', '', true, true, null, null, array( $parent->get_id() ) );
+		$this->assertNotContains( $parent->get_id(), $results, 'An excluded parent must not be re-added through its matching variations' );
+
+		$results = $data_store->search_products( 'Excludable variable', '', true, true, null, null, array( $variation->get_id() ) );
+		$this->assertNotContains( $variation->get_id(), $results, 'An excluded variation must not be returned' );
+		$this->assertContains( $parent->get_id(), $results, 'Excluding a variation must not exclude its parent' );
+	}
+
+	/**
+	 * @testdox Excluded products should not be re-added to search results when the search term is their numeric ID.
+	 */
+	public function test_search_products_excludes_numeric_term_matches() {
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Numeric term widget' );
+		$product->save();
+
+		$data_store = WC_Data_Store::load( 'product' );
+
+		$results = $data_store->search_products( (string) $product->get_id(), '', false, true );
+		$this->assertContains( $product->get_id(), $results );
+
+		$results = $data_store->search_products( (string) $product->get_id(), '', false, true, null, null, array( $product->get_id() ) );
+		$this->assertNotContains( $product->get_id(), $results, 'An excluded product must not be re-added by the numeric term match' );
+	}
+
+	/**
 	 * Ensure product rating counts are calculated correctly.
 	 *
 	 * @return void
