@@ -78,6 +78,10 @@ plugins/woocommerce/
 
 - Prefer vanilla JavaScript/TypeScript over jQuery for new or modified code. Keep existing jQuery when a rewrite is out of scope.
 
+**CSS:**
+
+- Prefer logical CSS properties that work well in LTR and RTL languages like `margin-inline-start`, or `inset-inline-end`, instead of physical properties like `margin-left` or `right`.
+
 ## Development Workflow
 
 1. Make code changes

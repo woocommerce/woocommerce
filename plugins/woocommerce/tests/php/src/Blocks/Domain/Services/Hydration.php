@@ -4,12 +4,11 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\Domain\Services;
 
 use Automattic\WooCommerce\Blocks\Package;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 /**
  * Test \Automattic\WooCommerce\Blocks\Domain\Services\Hydration class.
  */
-class Hydration extends TestCase {
+class Hydration extends \WC_Unit_Test_Case {
 
 	/**
 	 * System under test.
@@ -24,6 +23,20 @@ class Hydration extends TestCase {
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut = Package::container()->get( \Automattic\WooCommerce\Blocks\Domain\Services\Hydration::class );
+	}
+
+	/**
+	 * Restore the global cart.
+	 *
+	 * Loading a Store API cart route sets `cart_context` to 'store-api' on the WC cart
+	 * singleton and never puts it back. Neither the database rollback nor the hook restore
+	 * covers that, and production code branches on it, so reset it here.
+	 */
+	public function tearDown(): void {
+		WC()->cart->empty_cart();
+		WC()->cart->cart_context = 'shortcode';
+
+		parent::tearDown();
 	}
 
 
