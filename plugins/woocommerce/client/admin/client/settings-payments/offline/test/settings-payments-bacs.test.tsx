@@ -158,6 +158,23 @@ describe( 'SettingsPaymentsBacs', () => {
 			).toHaveAttribute( 'data-default-country', 'US' );
 		} );
 
+		it( 'ignores locations that are not strings', () => {
+			setWcSettings( {
+				woocommerce_payments_nox_profile: {
+					business_country_code: { country: 'TN' },
+				},
+				preloadSettings: {
+					general: { woocommerce_default_country: true },
+				},
+			} );
+
+			render( <SettingsPaymentsBacs /> );
+
+			expect(
+				screen.getByTestId( 'bank-accounts-list' )
+			).toHaveAttribute( 'data-default-country', 'US' );
+		} );
+
 		it( 'falls back to US when the store knows no location at all', () => {
 			setWcSettings( {} );
 
