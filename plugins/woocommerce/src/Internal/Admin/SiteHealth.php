@@ -371,7 +371,7 @@ class SiteHealth {
 				),
 				'fail'  => array(
 					'label'       => __( 'WooCommerce approved download directory rules are not enforced', 'woocommerce' ),
-					'description' => __( 'Enable approved download directory rules to restrict downloadable product files to locations approved by a site administrator.', 'woocommerce' ),
+					'description' => __( 'Enable approved download directory rules to control which local and remote locations can be used for downloadable product files. This reduces the risk of exposing unintended files or connecting to unapproved remote locations.', 'woocommerce' ),
 					'actions'     => array(
 						array(
 							'url'   => admin_url( 'admin.php?page=wc-settings&tab=products&section=download_urls' ),
