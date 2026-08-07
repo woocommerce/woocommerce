@@ -90,6 +90,35 @@ class SynchronizeTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Scheduled task detection uses scalar queue statuses supported by the queue interface.
+	 */
+	public function test_scheduled_task_detection_uses_scalar_statuses(): void {
+		$searched_statuses = array();
+		$queue             = $this->createMock( WC_Queue_Interface::class );
+		$queue->method( 'search' )
+			->willReturnCallback(
+				function ( array $args, string $return_format ) use ( &$searched_statuses ): array {
+					$searched_statuses[] = $args['status'];
+					$this->assertSame( 'ids', $return_format );
+
+					return ActionScheduler_Store::STATUS_RUNNING === $args['status'] ? array( 123 ) : array();
+				}
+			);
+
+		$sut            = new Synchronize();
+		$queue_property = new \ReflectionProperty( $sut, 'queue' );
+		$queue_property->setAccessible( true );
+		$queue_property->setValue( $sut, $queue );
+
+		$this->assertFalse( $sut->start(), 'A running synchronization task should prevent another synchronization from starting.' );
+		$this->assertSame(
+			array( ActionScheduler_Store::STATUS_PENDING, ActionScheduler_Store::STATUS_RUNNING ),
+			$searched_statuses,
+			'Scheduled task detection should query each status as a scalar value.'
+		);
+	}
+
+	/**
 	 * @testdox Verify expected logging and clean-up take place during and following synchronization of download directories.
 	 */
 	public function test_sync_process(): void {

@@ -140,17 +140,22 @@ class Synchronize {
 	 * Indicates whether a synchronization task is pending or running.
 	 */
 	private function has_scheduled_task(): bool {
-		return ! empty(
-			$this->queue->search(
+		foreach ( array( ActionScheduler_Store::STATUS_PENDING, ActionScheduler_Store::STATUS_RUNNING ) as $status ) {
+			$scheduled_tasks = $this->queue->search(
 				array(
 					'hook'     => self::SYNC_TASK,
-					'status'   => array( ActionScheduler_Store::STATUS_PENDING, ActionScheduler_Store::STATUS_RUNNING ),
+					'status'   => $status,
 					'per_page' => 1,
-					'orderby'  => 'none',
 				),
 				'ids'
-			)
-		);
+			);
+
+			if ( ! empty( $scheduled_tasks ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
