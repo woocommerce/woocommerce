@@ -283,33 +283,35 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	}
 
 	@media (max-width: 960px) {
+		--wc-settings-ui-shell-gutter: var(--wpds-dimension-padding-2xl);
+
 		#mainform {
-			padding: 0 var(--wpds-dimension-padding-2xl)
+			padding: 0 var(--wc-settings-ui-shell-gutter)
 				var(--wpds-dimension-padding-3xl);
 		}
 
 		.wc-settings-ui-shell {
-			margin-left: calc(var(--wpds-dimension-gap-xl) * -1);
-			margin-right: calc(var(--wpds-dimension-gap-xl) * -1);
+			margin-left: calc(var(--wc-settings-ui-shell-gutter) * -1);
+			margin-right: calc(var(--wc-settings-ui-shell-gutter) * -1);
 		}
 
 		.wc-settings-ui-shell__header {
-			padding-left: var(--wpds-dimension-padding-2xl);
-			padding-right: var(--wpds-dimension-padding-2xl);
+			padding-left: var(--wc-settings-ui-shell-gutter);
+			padding-right: var(--wc-settings-ui-shell-gutter);
 		}
 
 		.wc-settings-ui-shell__tabs {
-			padding-left: var(--wpds-dimension-padding-2xl);
-			padding-right: var(--wpds-dimension-padding-2xl);
+			padding-left: var(--wc-settings-ui-shell-gutter);
+			padding-right: var(--wc-settings-ui-shell-gutter);
 		}
 
 		.wc-settings-ui-shell__notice {
-			margin-left: var(--wpds-dimension-gap-xl);
-			margin-right: var(--wpds-dimension-gap-xl);
+			margin-left: var(--wc-settings-ui-shell-gutter);
+			margin-right: var(--wc-settings-ui-shell-gutter);
 		}
 
 		.wc-settings-ui {
-			margin: 48px var(--wpds-dimension-gap-xl)
+			margin: 48px var(--wc-settings-ui-shell-gutter)
 				var(--wpds-dimension-gap-2xl);
 			max-width: none;
 		}
