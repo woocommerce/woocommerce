@@ -80,7 +80,7 @@ plugins/woocommerce/
 
 **CSS:**
 
-- Prefer logical CSS properties that work well in LTR and RTL languages like `margin-inline`, `padding-block`, or `inset-inline-start`, instead of physical properties like `margin-left` or `right`.
+- Prefer logical CSS properties that work well in LTR and RTL languages like `margin-inline-start`, or `inset-inline-end`, instead of physical properties like `margin-left` or `right`.
 
 ## Development Workflow
 

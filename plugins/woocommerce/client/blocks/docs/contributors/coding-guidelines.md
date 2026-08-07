@@ -68,7 +68,7 @@ Naming is not strictly tied to the DOM so it **doesn’t matter how many nested 
 
 ## RTL Styles
 
-Prefer logical CSS properties that work well in LTR and RTL languages like `margin-inline`, `padding-block`, or `inset-inline-start`, instead of physical properties like `margin-left` or `right`.
+Prefer logical CSS properties that work well in LTR and RTL languages like `margin-inline-start`, or `inset-inline-end`, instead of physical properties like `margin-left` or `right`.
 
 Even though Blocks uses the internal `WebpackRTLPlugin` exported from `@woocommerce/internal-build/style-build` to generate specific CSS files for RTL languages, these might not be used if Gutenberg inlines the styles, so it shouldn't be trusted.
 
