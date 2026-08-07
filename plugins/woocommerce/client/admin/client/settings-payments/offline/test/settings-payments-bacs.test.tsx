@@ -235,7 +235,7 @@ describe( 'SettingsPaymentsBacs', () => {
 		} );
 	} );
 
-	it( 'supports keyboard navigation through the form fields', () => {
+	it( 'supports keyboard navigation through the form fields', async () => {
 		render( <SettingsPaymentsBacs /> );
 
 		// Make a change first so the Save button is enabled (and tabbable).
@@ -243,17 +243,17 @@ describe( 'SettingsPaymentsBacs', () => {
 			target: { value: 'Edited title' },
 		} );
 
-		userEvent.tab();
+		await userEvent.tab();
 		expect(
 			screen.getByLabelText( 'Enable direct bank transfers' )
 		).toHaveFocus();
-		userEvent.tab();
+		await userEvent.tab();
 		expect( screen.getByLabelText( 'Title' ) ).toHaveFocus();
-		userEvent.tab();
+		await userEvent.tab();
 		expect( screen.getByLabelText( 'Description' ) ).toHaveFocus();
-		userEvent.tab();
+		await userEvent.tab();
 		expect( screen.getByLabelText( 'Instructions' ) ).toHaveFocus();
-		userEvent.tab();
+		await userEvent.tab();
 		expect(
 			screen.getByRole( 'button', { name: 'Save changes' } )
 		).toHaveFocus();
