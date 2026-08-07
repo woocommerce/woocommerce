@@ -524,8 +524,32 @@
 				}
 			},
 			"woocommerce/catalog-sorting": {
+				"css": "& select { font-size: var(--wp--preset--font-size--medium) !important; }",
 				"typography": {
 					"fontSize": "var(--wp--preset--font-size--medium)"
+				},
+				"elements": {
+					"select": {
+						"color": {
+							"background": "transparent",
+							"text": "var(--wp--preset--color--theme-2)"
+						},
+						"border": {
+							"color": "transparent",
+							"width": "0px",
+							"style": "solid"
+						},
+						"typography": {
+							"fontWeight": "300",
+							"fontFamily": "inherit"
+						},
+						"spacing": {
+							"padding": {
+							"left": "0",
+							"right": "var(--wp--preset--spacing--10)"
+							}
+						}
+					}
 				}
 			},
 			"woocommerce/product-rating": {
