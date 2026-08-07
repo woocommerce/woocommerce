@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Replace deprecated jQuery .focus() shorthand with .trigger( 'focus' ) / .on( 'focus' ) across legacy JS files.

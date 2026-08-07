@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fire the cart store's cross-store sync event, legacy added-to-cart event, and screen-reader announcement once per mutation batch cycle instead of once per request, removing the redundant resync requests and duplicate events/announcements produced when several cart mutations are coalesced into one cycle.

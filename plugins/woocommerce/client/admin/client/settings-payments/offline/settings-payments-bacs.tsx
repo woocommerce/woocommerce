@@ -187,8 +187,10 @@ export const SettingsPaymentsBacs = () => {
 			);
 		} finally {
 			setIsSaving( false );
-			invalidateResolution( 'getPaymentProviders', [] );
-			invalidateResolutionForStoreSelector( 'getOfflinePaymentGateways' );
+			void invalidateResolution( 'getPaymentProviders', [] );
+			void invalidateResolutionForStoreSelector(
+				'getOfflinePaymentGateways'
+			);
 		}
 	};
 
@@ -198,7 +200,7 @@ export const SettingsPaymentsBacs = () => {
 				<Settings.Form
 					onSubmit={ ( e ) => {
 						e.preventDefault();
-						saveSettings();
+						void saveSettings();
 					} }
 				>
 					<Settings.Section

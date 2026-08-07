@@ -1901,6 +1901,30 @@ class WC_Helper {
 	}
 
 	/**
+	 * Filter malformed entries from subscription data.
+	 *
+	 * @param array $subscriptions Subscription entries.
+	 * @return array
+	 */
+	private static function filter_valid_subscriptions( $subscriptions ) {
+		return array_filter(
+			$subscriptions,
+			static function ( $subscription ) {
+				if ( ! is_array( $subscription ) ) {
+					return false;
+				}
+
+				$product_id = $subscription['product_id'] ?? null;
+				return (
+					is_int( $product_id )
+					|| ( is_string( $product_id ) && ctype_digit( $product_id ) )
+				) && 0 < (int) $product_id
+					&& is_array( $subscription['connections'] ?? null );
+			}
+		);
+	}
+
+	/**
 	 * Get the connected user's subscriptions.
 	 *
 	 * @return array
@@ -1912,7 +1936,7 @@ class WC_Helper {
 		$data      = get_transient( $cache_key );
 		if ( false !== $data ) {
 			if ( is_array( $data ) ) {
-				return $data;
+				return self::filter_valid_subscriptions( $data );
 			}
 			// Cached data is corrupted, delete and fetch fresh.
 			delete_transient( $cache_key );
@@ -1979,6 +2003,18 @@ class WC_Helper {
 				throw new Exception( __( 'WooCommerce.com API returned an invalid response.', 'woocommerce' ), 422 );
 			}
 
+			$subscription_count = count( $data );
+			$data               = self::filter_valid_subscriptions( $data );
+			$invalid_count      = $subscription_count - count( $data );
+			if ( 0 < $invalid_count ) {
+				self::log(
+					sprintf(
+						'Filtered %d malformed subscription entries from the WooCommerce.com API response.',
+						$invalid_count
+					),
+					'warning'
+				);
+			}
 			set_transient( $cache_key, $data, 3 * HOUR_IN_SECONDS );
 
 			// A successful response clears any prior rate-limit backoff.

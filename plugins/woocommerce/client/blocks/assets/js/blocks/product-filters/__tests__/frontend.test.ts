@@ -1,3 +1,7 @@
+/*
+ * @jest-environment-options {"url": "https://example.com/shop/"}
+ */
+
 /**
  * Internal dependencies
  */
@@ -6,6 +10,11 @@ import type { ProductFiltersStore } from '../frontend';
 const mockGetContext = jest.fn();
 const mockGetServerContext = jest.fn();
 const mockGetConfig = jest.fn();
+const mockReload = jest.fn();
+
+jest.mock( '../../../utils/navigation', () => ( {
+	reload: mockReload,
+} ) );
 
 let mockRegisteredStore: {
 	state: ProductFiltersStore[ 'state' ];
@@ -39,17 +48,25 @@ jest.mock(
 	{ virtual: true }
 );
 
+// Captured before any test navigates, so each test starts from the env URL.
+const initialUrl = window.location.href;
+
 describe( 'product filters interactivity store', () => {
 	beforeEach( () => {
 		jest.resetModules();
 		mockGetContext.mockReset();
 		mockGetServerContext.mockReset();
 		mockGetConfig.mockReset();
+		mockReload.mockReset();
 		mockRegisteredStore = null;
 
 		jest.isolateModules( () => {
 			require( '../frontend' );
 		} );
+	} );
+
+	afterEach( () => {
+		window.history.replaceState( {}, '', initialUrl );
 	} );
 
 	it( 'ignores invalid selectable item payloads', () => {
@@ -194,19 +211,11 @@ describe( 'product filters interactivity store', () => {
 					);
 				}
 
-				const originalLocation = window.location;
-
-				const locationMock = {
-					href: 'https://example.com/shop/?existing=1',
-				};
-
-				delete ( window as unknown as Record< string, unknown > )
-					.location;
-				Object.defineProperty( window, 'location', {
-					value: locationMock,
-					writable: true,
-					configurable: true,
-				} );
+				window.history.replaceState(
+					{},
+					'',
+					'https://example.com/shop/?existing=1'
+				);
 
 				const canonicalUrl = 'https://example.com/shop/';
 
@@ -274,34 +283,17 @@ describe( 'product filters interactivity store', () => {
 					);
 				} finally {
 					consoleWarnSpy.mockRestore();
-
-					Object.defineProperty( window, 'location', {
-						value: originalLocation,
-						writable: true,
-						configurable: true,
-					} );
 				}
 			} );
 		}
 	);
 
-	it( 'calls window.location.assign instead of router when forcePageReload is true', () => {
+	it( 'triggers a full-page reload instead of router when forcePageReload is true', () => {
 		if ( ! mockRegisteredStore ) {
 			throw new Error( 'Product filters store was not registered.' );
 		}
 
-		const originalLocation = window.location;
-		const assignMock = jest.fn();
-
-		delete ( window as unknown as Record< string, unknown > ).location;
-		Object.defineProperty( window, 'location', {
-			value: {
-				href: 'https://example.com/shop/',
-				assign: assignMock,
-			},
-			writable: true,
-			configurable: true,
-		} );
+		window.history.replaceState( {}, '', 'https://example.com/shop/' );
 
 		const canonicalUrl = 'https://example.com/shop/';
 
@@ -335,24 +327,16 @@ describe( 'product filters interactivity store', () => {
 			get: () => ( { color: 'blue' } ),
 		} );
 
-		try {
-			const iterator = mockRegisteredStore.actions.navigate();
+		const iterator = mockRegisteredStore.actions.navigate();
 
-			// forcePageReload exits early before yielding the router import
-			const result = iterator.next();
-			expect( result.done ).toBe( true );
+		// forcePageReload exits early before yielding the router import
+		const result = iterator.next();
+		expect( result.done ).toBe( true );
 
-			expect( assignMock ).toHaveBeenCalledTimes( 1 );
-			expect( assignMock ).toHaveBeenCalledWith(
-				'https://example.com/shop/?color=blue'
-			);
-		} finally {
-			Object.defineProperty( window, 'location', {
-				value: originalLocation,
-				writable: true,
-				configurable: true,
-			} );
-		}
+		expect( mockReload ).toHaveBeenCalledTimes( 1 );
+		expect( mockReload ).toHaveBeenCalledWith(
+			'https://example.com/shop/?color=blue'
+		);
 	} );
 
 	describe( 'forcePageReload context resolution', () => {
@@ -367,18 +351,7 @@ describe( 'product filters interactivity store', () => {
 				throw new Error( 'Product filters store was not registered.' );
 			}
 
-			const originalLocation = window.location;
-			const assignMock = jest.fn();
-
-			delete ( window as unknown as Record< string, unknown > ).location;
-			Object.defineProperty( window, 'location', {
-				value: {
-					href: 'https://example.com/shop/',
-					assign: assignMock,
-				},
-				writable: true,
-				configurable: true,
-			} );
+			window.history.replaceState( {}, '', 'https://example.com/shop/' );
 
 			const context = {
 				isOverlayOpened: false,
@@ -416,87 +389,55 @@ describe( 'product filters interactivity store', () => {
 
 			return {
 				store: mockRegisteredStore,
-				assignMock,
-				cleanup: () => {
-					Object.defineProperty( window, 'location', {
-						value: originalLocation,
-						writable: true,
-						configurable: true,
-					} );
-				},
 			};
 		};
 
 		it( 'reloads when context.forcePageReload is true (descendant case, no config)', () => {
-			const {
-				store: registeredStore,
-				assignMock,
-				cleanup,
-			} = setupNavigate( {
+			const { store: registeredStore } = setupNavigate( {
 				contextForcePageReload: true,
 				configForcePageReload: undefined,
 			} );
 
-			try {
-				const iterator = registeredStore.actions.navigate();
-				const result = iterator.next();
+			const iterator = registeredStore.actions.navigate();
+			const result = iterator.next();
 
-				expect( result.done ).toBe( true );
-				expect( assignMock ).toHaveBeenCalledWith(
-					'https://example.com/shop/?color=blue'
-				);
-			} finally {
-				cleanup();
-			}
+			expect( result.done ).toBe( true );
+			expect( mockReload ).toHaveBeenCalledWith(
+				'https://example.com/shop/?color=blue'
+			);
 		} );
 
 		it( 'context.forcePageReload=true overrides config.forcePageReload=false', () => {
-			const {
-				store: registeredStore,
-				assignMock,
-				cleanup,
-			} = setupNavigate( {
+			const { store: registeredStore } = setupNavigate( {
 				contextForcePageReload: true,
 				configForcePageReload: false,
 			} );
 
-			try {
-				const iterator = registeredStore.actions.navigate();
-				const result = iterator.next();
+			const iterator = registeredStore.actions.navigate();
+			const result = iterator.next();
 
-				expect( result.done ).toBe( true );
-				expect( assignMock ).toHaveBeenCalledTimes( 1 );
-			} finally {
-				cleanup();
-			}
+			expect( result.done ).toBe( true );
+			expect( mockReload ).toHaveBeenCalledTimes( 1 );
 		} );
 
 		it( 'context.forcePageReload=false overrides config.forcePageReload=true (uses router)', () => {
-			const {
-				store: registeredStore,
-				assignMock,
-				cleanup,
-			} = setupNavigate( {
+			const { store: registeredStore } = setupNavigate( {
 				contextForcePageReload: false,
 				configForcePageReload: true,
 			} );
 
 			const routerNavigate = jest.fn();
 
-			try {
-				const iterator = registeredStore.actions.navigate();
-				const firstYield = iterator.next();
+			const iterator = registeredStore.actions.navigate();
+			const firstYield = iterator.next();
 
-				expect( firstYield.done ).toBe( false );
-				iterator.next( {
-					actions: { navigate: routerNavigate },
-				} );
+			expect( firstYield.done ).toBe( false );
+			iterator.next( {
+				actions: { navigate: routerNavigate },
+			} );
 
-				expect( assignMock ).not.toHaveBeenCalled();
-				expect( routerNavigate ).toHaveBeenCalledTimes( 1 );
-			} finally {
-				cleanup();
-			}
+			expect( mockReload ).not.toHaveBeenCalled();
+			expect( routerNavigate ).toHaveBeenCalledTimes( 1 );
 		} );
 	} );
 } );

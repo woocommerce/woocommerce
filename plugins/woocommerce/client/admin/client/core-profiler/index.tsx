@@ -409,7 +409,7 @@ const updateTrackingOption = fromPromise(
 		} );
 
 		const trackingValue = input.optInDataSharing ? 'yes' : 'no';
-		dispatch( settingOptionsStore ).saveSetting(
+		void dispatch( settingOptionsStore ).saveSetting(
 			'advanced',
 			'woocommerce_allow_tracking',
 			trackingValue
@@ -543,7 +543,7 @@ const preFetchGetPlugins = fromPromise( async () =>
 );
 
 const getPlugins = fromPromise( async () => {
-	dispatch( onboardingStore ).invalidateResolutionForStoreSelector(
+	void dispatch( onboardingStore ).invalidateResolutionForStoreSelector(
 		'getFreeExtensions'
 	);
 	const extensionsBundles =
@@ -586,7 +586,7 @@ const updateQueryStep = ( _: unknown, params: { step: CoreProfilerStep } ) => {
 
 const updateProfilerCompletedSteps = fromPromise(
 	async ( { input }: { input: { step: CoreProfilerStep } } ) => {
-		dispatch( onboardingStore ).updateCoreProfilerStep( input.step );
+		void dispatch( onboardingStore ).updateCoreProfilerStep( input.step );
 	}
 );
 
@@ -1462,11 +1462,13 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					} ),
 					invoke: {
 						src: fromPromise( () => {
-							dispatch( onboardingStore ).updateProfileItems( {
-								is_plugins_page_skipped: true,
-								skipped: false,
-								completed: true,
-							} );
+							void dispatch( onboardingStore ).updateProfileItems(
+								{
+									is_plugins_page_skipped: true,
+									skipped: false,
+									completed: true,
+								}
+							);
 							return promiseDelay( 3000 );
 						} ),
 						onDone: [ { actions: [ 'redirectToWooHome' ] } ],

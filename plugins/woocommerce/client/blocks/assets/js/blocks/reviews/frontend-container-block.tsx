@@ -93,9 +93,13 @@ class FrontendContainerBlock extends Component<
 
 	render() {
 		const { attributes } = this.props;
-		const { categoryIds, productId } = attributes;
+		const { categoryIds, productId, isFilteredReviewsBlock } = attributes;
 		const { reviewsToDisplay } = this.state;
 		const { order, orderby } = getSortArgs( this.state.orderby );
+
+		if ( isFilteredReviewsBlock && ! categoryIds && ! productId ) {
+			return null;
+		}
 
 		return (
 			// @ts-expect-error - TODO: Refactor WrappedComponent
