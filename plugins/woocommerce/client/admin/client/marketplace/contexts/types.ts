@@ -29,6 +29,7 @@ export type MarketplaceContextType = {
 			enabled?: boolean;
 			label?: string;
 			tooltip?: string;
+			docs_url?: string;
 		};
 	};
 };

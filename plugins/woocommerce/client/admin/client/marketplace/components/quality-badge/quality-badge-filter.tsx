@@ -2,8 +2,12 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { createInterpolateElement, useContext } from '@wordpress/element';
-import { FormToggle, Icon, Tooltip } from '@wordpress/components';
+import {
+	createInterpolateElement,
+	useContext,
+	useState,
+} from '@wordpress/element';
+import { FormToggle, Icon, Popover } from '@wordpress/components';
 import { info } from '@wordpress/icons';
 import { useInstanceId } from '@wordpress/compose';
 import { recordEvent } from '@woocommerce/tracks';
@@ -15,6 +19,76 @@ import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
 import './quality-badge.scss';
 import { QualityBadgeIcon } from './quality-badge';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
+
+/**
+ * Info button next to the filter label. Opens a popover with the badge
+ * explanation and, when the API provides a docs URL, a "Learn more" link.
+ * A popover (not a tooltip) so the link stays reachable by pointer and
+ * keyboard.
+ */
+function QualityBadgeInfo( props: {
+	label: string;
+	tooltip: string;
+	docsUrl?: string;
+} ) {
+	const [ isOpen, setIsOpen ] = useState( false );
+	const [ anchor, setAnchor ] = useState< HTMLButtonElement | null >( null );
+
+	return (
+		<>
+			<button
+				ref={ setAnchor }
+				type="button"
+				className="woocommerce-marketplace__quality-badge-filter__info"
+				aria-expanded={ isOpen }
+				aria-label={ sprintf(
+					// translators: %s: name of the quality badge, supplied by the WooCommerce.com API (e.g. "Excellence Verified").
+					__( 'About %s', 'woocommerce' ),
+					props.label
+				) }
+				onClick={ () => setIsOpen( ! isOpen ) }
+			>
+				<Icon icon={ info } size={ 16 } />
+			</button>
+			{ isOpen && (
+				<Popover
+					className="woocommerce-marketplace__quality-badge-filter__popover"
+					anchor={ anchor }
+					placement="bottom"
+					focusOnMount="firstElement"
+					onClose={ () => {
+						setIsOpen( false );
+						anchor?.focus();
+					} }
+				>
+					<p>{ props.tooltip }</p>
+					{ props.docsUrl && (
+						<a
+							href={ props.docsUrl }
+							target="_blank"
+							rel="noreferrer"
+							aria-label={ sprintf(
+								// translators: %s: name of the quality badge, supplied by the WooCommerce.com API (e.g. "Excellence Verified").
+								__(
+									'Learn more about the %s badge',
+									'woocommerce'
+								),
+								props.label
+							) }
+							onClick={ () =>
+								recordEvent(
+									'marketplace_quality_badge_learn_more_clicked'
+								)
+							}
+						>
+							{ __( 'Learn more', 'woocommerce' ) }
+						</a>
+					) }
+				</Popover>
+			) }
+		</>
+	);
+}
 
 /**
  * "Show only <badge>" toggle for product listings. Renders nothing unless the
@@ -67,19 +141,11 @@ export default function QualityBadgeFilter() {
 				) }
 			</label>
 			{ badge.tooltip && (
-				<Tooltip text={ badge.tooltip }>
-					<button
-						type="button"
-						className="woocommerce-marketplace__quality-badge-filter__info"
-						aria-label={ sprintf(
-							// translators: %s: name of the quality badge, supplied by the WooCommerce.com API (e.g. "Excellence Verified").
-							__( 'About %s', 'woocommerce' ),
-							badge.label
-						) }
-					>
-						<Icon icon={ info } size={ 16 } />
-					</button>
-				</Tooltip>
+				<QualityBadgeInfo
+					label={ badge.label }
+					tooltip={ badge.tooltip }
+					docsUrl={ badge.docs_url }
+				/>
 			) }
 			<FormToggle
 				id={ toggleId }

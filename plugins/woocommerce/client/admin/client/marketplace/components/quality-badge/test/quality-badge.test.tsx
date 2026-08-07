@@ -156,4 +156,37 @@ describe( 'QualityBadgeFilter', () => {
 			screen.getByLabelText( 'Show only Excellence Verified' )
 		).toBeChecked();
 	} );
+
+	it( 'shows the tooltip copy in a popover without a link when no docs URL is set', () => {
+		renderWithContext( <QualityBadgeFilter />, contextWithBadge );
+
+		fireEvent.click( screen.getByLabelText( 'About Excellence Verified' ) );
+
+		expect(
+			screen.getByText( 'Verified against WooCommerce standards.' )
+		).toBeInTheDocument();
+		expect( screen.queryByText( 'Learn more' ) ).not.toBeInTheDocument();
+	} );
+
+	it( 'shows a "Learn more" link in the popover when the API sends a docs URL', () => {
+		const context = {
+			iamSettings: {
+				quality_badge: {
+					...contextWithBadge.iamSettings.quality_badge,
+					docs_url: 'https://woocommerce.com/document/excellence/',
+				},
+			},
+		} as MarketplaceContextType;
+
+		renderWithContext( <QualityBadgeFilter />, context );
+
+		fireEvent.click( screen.getByLabelText( 'About Excellence Verified' ) );
+
+		expect(
+			screen.getByText( 'Learn more' ).closest( 'a' )
+		).toHaveAttribute(
+			'href',
+			'https://woocommerce.com/document/excellence/'
+		);
+	} );
 } );
