@@ -928,6 +928,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		MetaDataUtil::update( $posted['meta_data'] ?? null, $item );
 	}
 
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- This method also throws WC_REST_Exception indirectly through get_product_id().
 	/**
 	 * Create or update a line item.
 	 *
@@ -935,6 +936,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @param string $action 'create' to add line item or 'update' to update it.
 	 * @param object $item Passed when updating an item. Null during creation.
 	 * @return WC_Order_Item_Product
+	 * @throws WC_Data_Exception Invalid product data.
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_line_items( $posted, $action = 'create', $item = null ) {
@@ -966,7 +968,18 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		if ( $product && $product !== $item->get_product() ) {
 			$item->set_product( $product );
 			if ( $restore_variation_id && $product_item ) {
-				$product_item->set_variation_id( $current_variation_id );
+				try {
+					$product_item->set_variation_id( $current_variation_id );
+				} catch ( WC_Data_Exception $e ) {
+					if (
+						array_key_exists( 'variation_id', $posted )
+						|| 'order_item_product_invalid_variation_id' !== $e->getErrorCode()
+						|| 'product_variation' === get_post_type( $current_variation_id )
+					) {
+						throw $e;
+					}
+					// The stored variation ID no longer identifies a variation. Keep set_product()'s parent demotion.
+				}
 			}
 
 			if ( 'create' === $action ) {
@@ -985,6 +998,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 		return $item;
 	}
+
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
 	 * Create or update an order shipping method.
