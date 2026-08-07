@@ -764,7 +764,8 @@ const productGallery = {
 			} );
 
 			const teardownJQuery = subscribeLegacyJQueryFormVariations( $form, {
-				onVariationFound: () => syncFormVariationGallery(),
+				onVariationFound: ( imageIds, featuredImageId ) =>
+					actions.setImageData( imageIds, featuredImageId ),
 				onVariationReset: () => actions.resetImageData(),
 			} );
 

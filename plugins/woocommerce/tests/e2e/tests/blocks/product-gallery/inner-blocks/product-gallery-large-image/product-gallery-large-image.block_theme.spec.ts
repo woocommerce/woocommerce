@@ -199,6 +199,16 @@ test.describe( `${ blockData.name }`, () => {
 			const variationImageId = await pageObject.getViewerImageId();
 			expect( variationImageId ).not.toEqual( featuredImageId );
 		} ).toPass( { timeout: 5_000 } );
+		const firstVariationImageId = await pageObject.getViewerImageId();
+
+		// Selecting another variation switches directly to its image instead
+		// of retaining the previously selected variation's image.
+		await colorSelect.selectOption( 'Blue' );
+
+		await expect( async () => {
+			const nextVariationImageId = await pageObject.getViewerImageId();
+			expect( nextVariationImageId ).not.toEqual( firstVariationImageId );
+		} ).toPass( { timeout: 5_000 } );
 
 		// Clear: gallery returns to the parent's featured image.
 		await colorSelect.selectOption( '' );
