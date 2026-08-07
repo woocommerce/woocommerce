@@ -168,12 +168,11 @@ class Bootstrap {
 	}
 
 	/**
-	 * Register WooCommerce block types on demand so a block in a rendered description is not empty.
+	 * Register WooCommerce block types on demand when a description containing one is rendered.
 	 *
-	 * Callback for the woocommerce_short_description filter (see the add_filter call in init()). Registers the
-	 * block set once per request, and only when the content contains a WooCommerce block that is not registered
-	 * yet — the registry check runs before the content scan so later fires short-circuit. Returns the content
-	 * unchanged.
+	 * Eager block registration is skipped on non-rendering requests (Store API, REST, AJAX, webhooks), but
+	 * product and variation descriptions still run through do_blocks there, so a WooCommerce block in a
+	 * description would render empty. Hooked to woocommerce_short_description just before do_blocks.
 	 *
 	 * @since 11.1.0
 	 *
@@ -181,23 +180,14 @@ class Bootstrap {
 	 * @return string The unchanged content.
 	 */
 	public function maybe_register_blocks_from_content( $content ) {
-		if ( is_string( $content ) && ! $this->woocommerce_blocks_registered() && false !== strpos( $content, '<!-- wp:woocommerce/' ) ) {
-			$this->container->get( BlockTypesController::class )->register_blocks();
+		if ( is_string( $content ) && false !== strpos( $content, '<!-- wp:woocommerce/' ) ) {
+			$block_types_controller = $this->container->get( BlockTypesController::class );
+			if ( ! $block_types_controller->register_blocks_has_run() ) {
+				$block_types_controller->register_blocks();
+			}
 		}
 
 		return $content;
-	}
-
-	/**
-	 * Whether WooCommerce block types are already registered this request.
-	 *
-	 * The woocommerce/product-price block is registered unconditionally by register_blocks(), so its presence in
-	 * the registry is a reliable proxy for whether the whole set has been registered.
-	 *
-	 * @return bool True if WooCommerce block types are registered.
-	 */
-	private function woocommerce_blocks_registered() {
-		return \WP_Block_Type_Registry::get_instance()->is_registered( 'woocommerce/product-price' );
 	}
 
 	/**

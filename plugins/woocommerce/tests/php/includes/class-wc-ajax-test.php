@@ -843,6 +843,10 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			}
 		}
 
+		// The on-demand registration asks the shared BlockTypesController whether register_blocks() already ran
+		// this request; the test bootstrap ran it once for the whole PHPUnit process, so clear the flag too.
+		$this->set_register_blocks_has_run_flag( false );
+
 		// A foundational block register_blocks() always registers (not gated behind a theme/feature flag).
 		$sample = 'woocommerce/product-price';
 		$this->assertNotEmpty( $snapshot, 'The test bootstrap should have registered WooCommerce blocks to snapshot.' );
@@ -900,7 +904,24 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			foreach ( $snapshot as $block_type ) {
 				$registry->register( $block_type );
 			}
+			$this->set_register_blocks_has_run_flag( true );
 		}
+	}
+
+	/**
+	 * Set the private registration flag on the shared BlockTypesController instance.
+	 *
+	 * The flag records whether register_blocks() ran in the current request, and Bootstrap's on-demand block
+	 * registration consults it. Tests that simulate a request whose eager registration was skipped must clear
+	 * it alongside unregistering the block types, and restore it afterwards.
+	 *
+	 * @param bool $has_run The flag value to set.
+	 */
+	private function set_register_blocks_has_run_flag( bool $has_run ): void {
+		$controller = \Automattic\WooCommerce\Blocks\Package::container()->get( \Automattic\WooCommerce\Blocks\BlockTypesController::class );
+		$property   = new \ReflectionProperty( \Automattic\WooCommerce\Blocks\BlockTypesController::class, 'register_blocks_has_run' );
+		$property->setAccessible( true );
+		$property->setValue( $controller, $has_run );
 	}
 
 	/**

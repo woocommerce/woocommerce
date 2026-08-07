@@ -3,6 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\Domain;
 
+use Automattic\WooCommerce\Blocks\BlockTypesController;
+use Automattic\WooCommerce\Blocks\Package;
 use WC_Unit_Test_Case;
 use WP_Block_Type_Registry;
 
@@ -33,8 +35,8 @@ class BootstrapTest extends WC_Unit_Test_Case {
 	private array $registered_woo_blocks = array();
 
 	/**
-	 * Snapshot and unregister the WooCommerce blocks so each test starts from a state that mirrors a fresh
-	 * request whose eager block registration was skipped.
+	 * Snapshot and unregister the WooCommerce blocks, and clear the BlockTypesController registration flag, so
+	 * each test starts from a state that mirrors a fresh request whose eager block registration was skipped.
 	 */
 	public function setUp(): void {
 		parent::setUp();
@@ -46,10 +48,13 @@ class BootstrapTest extends WC_Unit_Test_Case {
 				$registry->unregister( $name );
 			}
 		}
+
+		$this->set_register_blocks_has_run_flag( false );
 	}
 
 	/**
-	 * Restore the exact set of WooCommerce blocks that was registered before the test ran.
+	 * Restore the exact set of WooCommerce blocks that was registered before the test ran, and mark them as
+	 * registered again on the shared BlockTypesController so later tests see a consistent state.
 	 */
 	public function tearDown(): void {
 		$registry = WP_Block_Type_Registry::get_instance();
@@ -63,7 +68,25 @@ class BootstrapTest extends WC_Unit_Test_Case {
 		}
 		$this->registered_woo_blocks = array();
 
+		$this->set_register_blocks_has_run_flag( true );
+
 		parent::tearDown();
+	}
+
+	/**
+	 * Set the private registration flag on the shared BlockTypesController instance.
+	 *
+	 * The flag records whether register_blocks() ran in the current request. The test bootstrap registers the
+	 * blocks once for the whole PHPUnit process, so simulating a request whose eager registration was skipped
+	 * requires clearing the flag alongside unregistering the block types.
+	 *
+	 * @param bool $has_run The flag value to set.
+	 */
+	private function set_register_blocks_has_run_flag( bool $has_run ): void {
+		$controller = Package::container()->get( BlockTypesController::class );
+		$property   = new \ReflectionProperty( BlockTypesController::class, 'register_blocks_has_run' );
+		$property->setAccessible( true );
+		$property->setValue( $controller, $has_run );
 	}
 
 	/**
@@ -182,10 +205,12 @@ class BootstrapTest extends WC_Unit_Test_Case {
 	public function test_short_description_filter_skips_registration_when_blocks_already_registered(): void {
 		$registry = WP_Block_Type_Registry::get_instance();
 
-		// Restore the blocks so the request looks like a normal one whose eager registration already ran.
+		// Restore the blocks and the controller flag so the request looks like a normal one whose eager
+		// registration already ran.
 		foreach ( $this->registered_woo_blocks as $block_type ) {
 			$registry->register( $block_type );
 		}
+		$this->set_register_blocks_has_run_flag( true );
 		$this->assertTrue( $registry->is_registered( self::SAMPLE_BLOCK ), 'Blocks should be registered before the filter runs.' );
 
 		// Firing the filter must not call register_blocks() again — doing so would re-register already-registered
