@@ -226,6 +226,107 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Excluded variable products should not be re-added to search results by their matching variations.
+	 */
+	public function test_search_products_excludes_variable_products_with_matching_variations(): void {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Excludable variable product' );
+		$parent->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $parent->get_id() );
+		$variation->save();
+
+		$data_store = WC_Data_Store::load( 'product' );
+
+		$results = $data_store->search_products( 'Excludable variable', '', true, true );
+		$this->assertContains( $parent->get_id(), $results );
+		$this->assertContains( $variation->get_id(), $results );
+
+		$results = $data_store->search_products( 'Excludable variable', '', true, true, null, null, array( $parent->get_id() ) );
+		$this->assertNotContains( $parent->get_id(), $results, 'An excluded parent must not be re-added through its matching variations' );
+		$this->assertContains( $variation->get_id(), $results, 'Excluding a parent must not exclude its variations' );
+
+		$results = $data_store->search_products( 'Excludable variable', '', true, true, null, null, array( $variation->get_id() ) );
+		$this->assertNotContains( $variation->get_id(), $results, 'An excluded variation must not be returned' );
+		$this->assertContains( $parent->get_id(), $results, 'Excluding a variation must not exclude its parent' );
+	}
+
+	/**
+	 * @testdox Excluded products should not be re-added to search results when the search term is their numeric ID.
+	 */
+	public function test_search_products_excludes_numeric_term_matches() {
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Numeric term widget' );
+		$product->save();
+
+		$data_store = WC_Data_Store::load( 'product' );
+
+		$results = $data_store->search_products( (string) $product->get_id(), '', false, true );
+		$this->assertContains( $product->get_id(), $results );
+
+		$results = $data_store->search_products( (string) $product->get_id(), '', false, true, null, null, array( $product->get_id() ) );
+		$this->assertNotContains( $product->get_id(), $results, 'An excluded product must not be re-added by the numeric term match' );
+	}
+
+	/**
+	 * A numeric term appends both the searched ID and its parent, so the parent needs its own
+	 * exclusion check. Searching a variation by ID is the case that exercises it, since a
+	 * top-level product has no parent to re-add.
+	 *
+	 * @testdox Excluded parents should not be re-added when the search term is a variation's numeric ID.
+	 */
+	public function test_search_products_excludes_parent_for_numeric_variation_term() {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Numeric parent widget' );
+		$parent->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $parent->get_id() );
+		$variation->save();
+
+		$data_store = WC_Data_Store::load( 'product' );
+
+		$results = $data_store->search_products( (string) $variation->get_id(), '', true, true );
+		$this->assertContains( $variation->get_id(), $results );
+		$this->assertContains( $parent->get_id(), $results, 'A numeric variation term should surface its parent' );
+
+		$results = $data_store->search_products( (string) $variation->get_id(), '', true, true, null, null, array( $parent->get_id() ) );
+		$this->assertNotContains( $parent->get_id(), $results, 'An excluded parent must not be re-added by a numeric variation term' );
+		$this->assertContains( $variation->get_id(), $results, 'Excluding the parent must not drop the searched variation' );
+	}
+
+	/**
+	 * absint() maps any non-numeric exclude value to 0, and 0 is the post_parent every top-level
+	 * product carries. Zeros are filtered out of the exclusion list so that such input stays the
+	 * no-op it has always been, rather than matching every top-level row.
+	 *
+	 * @testdox Exclude values that normalise to zero should leave search results untouched.
+	 */
+	public function test_search_products_ignores_zero_exclude_values() {
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Zero exclude widget' );
+		$product->save();
+
+		$data_store = WC_Data_Store::load( 'product' );
+
+		$baseline = $data_store->search_products( 'Zero exclude', '', true, true );
+		$this->assertContains( $product->get_id(), $baseline );
+
+		$zero_like = array(
+			'integer zero'      => 0,
+			'string zero'       => '0',
+			'non-numeric value' => 'abc',
+			'empty string'      => '',
+		);
+
+		foreach ( $zero_like as $label => $value ) {
+			$results = $data_store->search_products( 'Zero exclude', '', true, true, null, null, array( $value ) );
+			$this->assertEqualSets( $baseline, $results, "An exclude list holding a {$label} must not change the results" );
+		}
+	}
+
+	/**
 	 * Ensure product rating counts are calculated correctly.
 	 *
 	 * @return void
