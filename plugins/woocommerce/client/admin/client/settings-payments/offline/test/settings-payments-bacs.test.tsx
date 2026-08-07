@@ -175,6 +175,25 @@ describe( 'SettingsPaymentsBacs', () => {
 			).toHaveAttribute( 'data-default-country', 'US' );
 		} );
 
+		it( 'falls through an unusable business location to the store', () => {
+			setWcSettings( {
+				woocommerce_payments_nox_profile: {
+					business_country_code: { country: 'TN' },
+				},
+				preloadSettings: {
+					// Deliberately not US, so this cannot be confused with
+					// the last-resort fallback at the end of the chain.
+					general: { woocommerce_default_country: 'GB' },
+				},
+			} );
+
+			render( <SettingsPaymentsBacs /> );
+
+			expect(
+				screen.getByTestId( 'bank-accounts-list' )
+			).toHaveAttribute( 'data-default-country', 'GB' );
+		} );
+
 		it( 'falls back to US when the store knows no location at all', () => {
 			setWcSettings( {} );
 
