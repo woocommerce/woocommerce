@@ -99,16 +99,18 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::add_screen_options()
 	 *
 	 * @return void
+	 * @throws ReflectionException If the property is not found.
 	 */
 	public function test_load_reviews_screen_registers_per_page_option(): void {
 		global $current_screen;
 
-		$previous_screen = $current_screen;
+		$previous_screen     = $current_screen;
+		$reviews             = wc_get_container()->get( Reviews::class );
+		$list_table_property = ( new ReflectionClass( $reviews ) )->getProperty( 'reviews_list_table' );
+		$previous_list_table = $list_table_property->getValue( $reviews );
 
 		try {
 			set_current_screen( 'product_page_product-reviews' );
-
-			$reviews = wc_get_container()->get( Reviews::class );
 
 			// Exercise the production wiring: registration must happen through `load_reviews_screen()`, so that
 			// dropping the `add_screen_options()` call from it would fail this test.
@@ -122,6 +124,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 			$this->assertArrayHasKey( 'default', $option );
 			$this->assertSame( 20, $option['default'] );
 		} finally {
+			$list_table_property->setValue( $reviews, $previous_list_table );
 			$current_screen = $previous_screen; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 	}
