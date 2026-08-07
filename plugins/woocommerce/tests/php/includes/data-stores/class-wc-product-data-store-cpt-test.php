@@ -245,6 +245,7 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$results = $data_store->search_products( 'Excludable variable', '', true, true, null, null, array( $parent->get_id() ) );
 		$this->assertNotContains( $parent->get_id(), $results, 'An excluded parent must not be re-added through its matching variations' );
+		$this->assertContains( $variation->get_id(), $results, 'Excluding a parent must not exclude its variations' );
 
 		$results = $data_store->search_products( 'Excludable variable', '', true, true, null, null, array( $variation->get_id() ) );
 		$this->assertNotContains( $variation->get_id(), $results, 'An excluded variation must not be returned' );
