@@ -71,6 +71,11 @@
 				display: none;
 			}
 
+			/* Nearly all footer content is hidden here; collapse unless "Installed" shows. */
+			.woocommerce-marketplace__product-card__footer {
+				min-height: 0;
+			}
+
 			.woocommerce-marketplace__product-card__content {
 				display: block;
 			}
@@ -302,6 +307,8 @@
 			}
 			.woocommerce-marketplace__product-card__footer {
 				padding: 0 $large-gap;
+				/* Theme footers were always content-height; 36px is the extension-card row. */
+				min-height: 0;
 			}
 			.woocommerce-marketplace__product-card__price {
 				margin-right: $medium-gap;
