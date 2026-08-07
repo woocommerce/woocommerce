@@ -167,6 +167,45 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Applying a coupon to an order without a customer concept does not fail.
+	 */
+	public function test_apply_coupon_without_get_customer_id_method(): void {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'price' => 10 ) );
+		$coupon  = WC_Helper_Coupon::create_coupon();
+
+		// phpcs:disable Squiz.Commenting.FunctionComment.Missing -- Test fixture methods are self-explanatory.
+		$order = new class() extends WC_Abstract_Order {
+			public function get_billing_email() {
+				return '';
+			}
+
+			public function recalculate_coupons() {
+				return true;
+			}
+
+			public function save() {
+				return 0;
+			}
+
+			protected function get_tax_location( $args = array() ) {
+				return array(
+					'country'  => '',
+					'state'    => '',
+					'postcode' => '',
+					'city'     => '',
+				);
+			}
+		};
+		// phpcs:enable Squiz.Commenting.FunctionComment.Missing
+
+		$order->add_product( $product );
+
+		$result = $order->apply_coupon( $coupon );
+
+		$this->assertTrue( $result, 'Orders without a customer concept should accept valid coupons.' );
+	}
+
+	/**
 	 * @testdox 'add_product' passes the order supplied in '$args' to 'wc_get_price_excluding_tax', and uses the obtained price as total and subtotal for the line item.
 	 */
 	public function test_add_product_passes_order_to_wc_get_price_excluding_tax() {
