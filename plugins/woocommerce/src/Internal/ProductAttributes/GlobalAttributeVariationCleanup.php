@@ -60,7 +60,8 @@ class GlobalAttributeVariationCleanup implements RegisterHooksInterface {
 	 * @since 11.1.0
 	 */
 	public function register(): void {
-		add_action( 'woocommerce_attribute_deleted', array( $this, 'handle_woocommerce_attribute_deleted' ), 5, 3 );
+		// Priority 50 to make sure this runs after WooCommerce attribute migrations.
+		add_action( 'woocommerce_attribute_deleted', array( $this, 'handle_woocommerce_attribute_deleted' ), 10, 3 );
 		add_action( self::CLEANUP_ACTION, array( $this, 'handle_wc_cleanup_variations_for_deleted_attribute' ), 10, 2 );
 	}
 
@@ -75,9 +76,7 @@ class GlobalAttributeVariationCleanup implements RegisterHooksInterface {
 	 * @return void
 	 */
 	public function handle_woocommerce_attribute_deleted( $attribute_id, $name, $taxonomy ): void {
-		unset( $attribute_id, $name );
-
-		if ( ! is_string( $taxonomy ) || 'pa_' !== substr( $taxonomy, 0, 3 ) ) {
+		if ( ! taxonomy_is_product_attribute( $taxonomy ) ) {
 			return;
 		}
 
@@ -96,7 +95,7 @@ class GlobalAttributeVariationCleanup implements RegisterHooksInterface {
 	public function handle_wc_cleanup_variations_for_deleted_attribute( $taxonomy, $last_processed_id = 0 ): void {
 		global $wpdb;
 
-		if ( ! is_string( $taxonomy ) || 'pa_' !== substr( $taxonomy, 0, 3 ) ) {
+		if ( ! taxonomy_is_product_attribute( $taxonomy ) ) {
 			return;
 		}
 
@@ -145,36 +144,45 @@ class GlobalAttributeVariationCleanup implements RegisterHooksInterface {
 		);
 
 		$variation_ids = array_map( 'absint', $variation_ids );
-		$has_more      = count( $variation_ids ) > $batch_size;
-		if ( $has_more ) {
-			array_pop( $variation_ids );
-		}
-
 		if ( empty( $variation_ids ) ) {
 			return;
 		}
 
-		$cleaned_variation_ids = array();
+		$has_more = count( $variation_ids ) > $batch_size;
+		if ( $has_more ) {
+			array_pop( $variation_ids );
+		}
+
 		foreach ( $variation_ids as $variation_id ) {
 			$variation = wc_get_product( $variation_id );
-			if ( ! $variation instanceof WC_Product_Variation || ProductStatus::TRASH === $variation->get_status( 'edit' ) ) {
+			if ( ! $variation instanceof WC_Product_Variation || ProductStatus::TRASH === $variation->get_status() ) {
 				continue;
 			}
 
 			if ( ! delete_post_meta( $variation_id, $attribute_meta_key ) ) {
+				wc_get_logger()->warning(
+					sprintf(
+						'Failed to delete meta key %s for variation ID %d',
+						$attribute_meta_key,
+						$variation_id
+					),
+					array(
+						'source'   => 'global-attribute-variation-cleanup',
+						'taxonomy' => $taxonomy,
+					)
+				);
 				continue;
 			}
 
 			$this->product_cache->remove( $variation_id );
-			$cleaned_variation_ids[] = $variation_id;
-		}
 
-		foreach ( $cleaned_variation_ids as $variation_id ) {
+			// Reload the variation to reflect the direct metadata change.
 			$variation = wc_get_product( $variation_id );
-			if ( ! $variation instanceof WC_Product_Variation || ProductStatus::TRASH === $variation->get_status( 'edit' ) ) {
+			if ( ! $variation instanceof WC_Product_Variation || ProductStatus::TRASH === $variation->get_status() ) {
 				continue;
 			}
 
+			// Check whether the variation has additional attributes and trash it if none remain.
 			$attribute_meta_keys = array_filter(
 				array_keys( get_post_meta( $variation_id ) ),
 				static fn( $meta_key ) => is_string( $meta_key ) && 0 === strpos( $meta_key, 'attribute_' )
@@ -183,12 +191,13 @@ class GlobalAttributeVariationCleanup implements RegisterHooksInterface {
 			if ( empty( $attribute_meta_keys ) ) {
 				$variation->delete();
 			} else {
+				// Refresh the variation title and attribute summary after removing the attribute meta.
 				$variation->save();
 			}
 		}
 
 		if ( $has_more ) {
-			$this->schedule_cleanup( $taxonomy, end( $variation_ids ) );
+			$this->schedule_cleanup( $taxonomy, (int) end( $variation_ids ) );
 		}
 	}
 
@@ -212,7 +221,7 @@ class GlobalAttributeVariationCleanup implements RegisterHooksInterface {
 		wc_get_logger()->warning(
 			'Action Scheduler unavailable for deleted global attribute variation cleanup.',
 			array(
-				'source'   => 'woocommerce-variations',
+				'source'   => 'global-attribute-variation-cleanup',
 				'taxonomy' => $taxonomy,
 			)
 		);
