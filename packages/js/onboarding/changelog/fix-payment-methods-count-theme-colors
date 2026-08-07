@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make the payment methods "+N" badge follow the admin colour scheme on hover, and match its focus ring width to the surrounding controls.
