@@ -140,6 +140,33 @@ describe( 'SettingsPaymentsBacs', () => {
 				screen.getByTestId( 'bank-accounts-list' )
 			).toHaveAttribute( 'data-default-country', 'US' );
 		} );
+
+		it( 'ignores locations that are stored empty', () => {
+			setWcSettings( {
+				woocommerce_payments_nox_profile: {
+					business_country_code: '',
+				},
+				preloadSettings: {
+					general: { woocommerce_default_country: '' },
+				},
+			} );
+
+			render( <SettingsPaymentsBacs /> );
+
+			expect(
+				screen.getByTestId( 'bank-accounts-list' )
+			).toHaveAttribute( 'data-default-country', 'US' );
+		} );
+
+		it( 'falls back to US when the store knows no location at all', () => {
+			setWcSettings( {} );
+
+			render( <SettingsPaymentsBacs /> );
+
+			expect(
+				screen.getByTestId( 'bank-accounts-list' )
+			).toHaveAttribute( 'data-default-country', 'US' );
+		} );
 	} );
 
 	it( 'renders placeholders while loading', () => {
