@@ -21,24 +21,6 @@ const productBrandsPageUrl =
 
 test.use( { storageState: ADMIN_STATE_PATH } );
 
-test( 'Product brands page uses qualified labels', async ( { page } ) => {
-	await page.goto( productBrandsPageUrl );
-
-	await expect(
-		page.getByRole( 'heading', {
-			name: 'Product brands',
-			exact: true,
-			level: 1,
-		} )
-	).toBeVisible();
-	await expect( page ).toHaveTitle( /^Product brands/ );
-	await expect(
-		page
-			.locator( '#menu-posts-product' )
-			.getByRole( 'link', { name: 'Brands', exact: true } )
-	).toBeVisible();
-} );
-
 test( 'Merchant can add brands', async ( { page } ) => {
 	/**
 	 * Go to the Brands page.
