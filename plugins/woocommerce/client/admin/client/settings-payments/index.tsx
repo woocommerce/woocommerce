@@ -251,10 +251,7 @@ export const SettingsPaymentsOfflineWrapper = () => {
 export const SettingsPaymentsWooPaymentsWrapper = () => {
 	return (
 		<>
-			<Header
-				title={ __( 'Settings', 'woocommerce' ) }
-				context={ 'wc_settings_payments__woopayments' }
-			/>
+			<Header title={ __( 'Settings', 'woocommerce' ) } />
 			<Suspense
 				fallback={
 					<div>
@@ -296,10 +293,7 @@ export const SettingsPaymentsChequeWrapper = () =>
 export const SettingsPaymentsMainWrapper = () => {
 	return (
 		<>
-			<Header
-				title={ __( 'Settings', 'woocommerce' ) }
-				context={ 'wc_settings_payments__main' }
-			/>
+			<Header title={ __( 'Settings', 'woocommerce' ) } />
 			<HistoryRouter history={ getHistory() }>
 				<Routes>
 					<Route
