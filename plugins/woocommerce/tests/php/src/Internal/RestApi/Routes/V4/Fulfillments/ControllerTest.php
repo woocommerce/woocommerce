@@ -633,6 +633,43 @@ class ControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * id is a settable prop too, and it decides which row save() writes to. Left unpinned, an id
+	 * in the request body would make the update land on that row instead, overwriting it with the
+	 * addressed fulfillment's values.
+	 */
+	public function test_update_fulfillment_ignores_body_id() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$other_order = WC_Helper_Order::create_order( self::$customer_user_id );
+		$bystander   = FulfillmentsHelper::create_fulfillment(
+			array( 'entity_id' => (string) $other_order->get_id() )
+		);
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/fulfillments/' . $this->test_fulfillment->get_id() );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				$this->get_test_fulfillment_data(
+					array(
+						'id'     => $bystander->get_id(),
+						'status' => 'fulfilled',
+					)
+				)
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $this->test_fulfillment->get_id(), $response->get_data()['id'] );
+
+		$stored = new Fulfillment( $bystander->get_id() );
+		$this->assertSame( 'unfulfilled', $stored->get_status() );
+		$this->assertSame( (string) $other_order->get_id(), $stored->get_entity_id() );
+
+		WC_Helper_Order::delete_order( $other_order->get_id() );
+	}
+
+	/**
 	 * Fulfillments can be attached to entities other than orders. The single-item routes only
 	 * serve order fulfillments, so anything else is rejected before the order lookup rather than
 	 * authorized against an order ID that means nothing in that entity's namespace.

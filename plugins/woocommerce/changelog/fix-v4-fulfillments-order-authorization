@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Authorize the experimental wc/v4 single fulfillment endpoints against the fulfillment named in the route, so neither an order_id nor a fulfillment_id supplied by the caller can point the request at another order's fulfillment.
+Authorize the experimental wc/v4 single fulfillment endpoints against the fulfillment named in the route, so no caller-supplied order_id, fulfillment_id or id can point the request at another order's fulfillment.
