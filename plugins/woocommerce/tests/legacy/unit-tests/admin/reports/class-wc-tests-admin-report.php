@@ -18,17 +18,9 @@ class WC_Tests_Admin_Report extends WC_Unit_Test_Case {
 	 *
 	 */
 	public static function setUpBeforeClass(): void {
-		include_once WC_Unit_Tests_Bootstrap::instance()->plugin_dir . '/includes/admin/reports/class-wc-admin-report.php';
-	}
+		parent::setUpBeforeClass();
 
-	/**
-	 * Set up the test.
-	 */
-	public function setUp(): void {
-		parent::setUp();
-		if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$this->markTestSkipped( 'This test is not compatible with the custom orders table.' );
-		}
+		include_once WC_Unit_Tests_Bootstrap::instance()->plugin_dir . '/includes/admin/reports/class-wc-admin-report.php';
 	}
 
 	/**

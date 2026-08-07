@@ -268,7 +268,7 @@ jobs:
             // Find open PRs with milestone matching the next release version.
             try {
               const { data: prs } = await github.rest.search.issuesAndPullRequests( {
-                q: `repo:${context.repo.owner}/${context.repo.repo} is:pr is:open milestone:"${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }}"`,
+                q: `repo:${context.repo.owner}/${context.repo.repo} is:pr is:open draft:false milestone:"${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }}"`,
                 sort: 'created',
                 order: 'desc',
                 per_page: 11
