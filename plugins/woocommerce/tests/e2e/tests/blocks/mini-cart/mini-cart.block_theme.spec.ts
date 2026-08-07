@@ -244,15 +244,18 @@ test.describe( `${ blockData.name } Block`, () => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
+		const miniCartDialog = page.getByRole( 'dialog' );
 
 		await expect( page.getByText( 'Subtotal' ) ).toBeVisible();
 
 		await expect(
-			page.getByRole( 'link', { name: 'View cart' } )
+			miniCartDialog.getByRole( 'link', { name: 'View cart' } )
 		).toBeVisible();
 
 		await expect(
-			page.getByRole( 'link', { name: 'Proceed to checkout' } )
+			miniCartDialog.getByRole( 'link', {
+				name: 'Proceed to checkout',
+			} )
 		).toBeVisible();
 	} );
 
@@ -327,7 +330,10 @@ test.describe( `${ blockData.name } Block`, () => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
-		await page.getByRole( 'link', { name: 'View cart' } ).click();
+		await page
+			.getByRole( 'dialog' )
+			.getByRole( 'link', { name: 'View cart' } )
+			.click();
 		await expect( page ).toHaveURL( /\/cart\/?$/ );
 	} );
 
@@ -339,7 +345,10 @@ test.describe( `${ blockData.name } Block`, () => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
-		await page.getByRole( 'link', { name: 'Proceed to checkout' } ).click();
+		await page
+			.getByRole( 'dialog' )
+			.getByRole( 'link', { name: 'Proceed to checkout' } )
+			.click();
 		await expect( page ).toHaveURL( /\/checkout\/?$/ );
 	} );
 
