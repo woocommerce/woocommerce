@@ -702,7 +702,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 				try {
 					$item->set_variation_id( $current_variation_id );
 				} catch ( WC_Data_Exception $e ) {
-					if ( array_key_exists( 'variation_id', $posted ) || 'order_item_product_invalid_variation_id' !== $e->getErrorCode() ) {
+					if ( 'order_item_product_invalid_variation_id' !== $e->getErrorCode() ) {
 						throw $e;
 					}
 					// The stored variation ID no longer identifies a variation. Keep set_product()'s parent demotion.

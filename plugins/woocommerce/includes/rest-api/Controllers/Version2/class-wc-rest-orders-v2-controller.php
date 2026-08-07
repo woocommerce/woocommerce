@@ -972,8 +972,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					$product_item->set_variation_id( $current_variation_id );
 				} catch ( WC_Data_Exception $e ) {
 					if (
-						array_key_exists( 'variation_id', $posted )
-						|| 'order_item_product_invalid_variation_id' !== $e->getErrorCode()
+						'order_item_product_invalid_variation_id' !== $e->getErrorCode()
 						|| 'product_variation' === get_post_type( $current_variation_id )
 					) {
 						throw $e;
