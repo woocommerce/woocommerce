@@ -76,6 +76,8 @@ class GlobalAttributeVariationCleanupTest extends WC_Unit_Test_Case {
 				'Deleting the global attribute should schedule variation cleanup'
 			);
 
+			// Deleted taxonomies are not registered when Action Scheduler runs in a later request.
+			unregister_taxonomy( 'pa_size' );
 			$this->sut->handle_wc_cleanup_variations_for_deleted_attribute( 'pa_size', 0 );
 
 			$this->assertSame( 'trash', get_post_status( $variation_ids[0] ), 'The first single-attribute variation should be trashed in the first batch' );

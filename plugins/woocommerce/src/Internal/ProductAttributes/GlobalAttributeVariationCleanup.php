@@ -60,7 +60,6 @@ class GlobalAttributeVariationCleanup implements RegisterHooksInterface {
 	 * @since 11.1.0
 	 */
 	public function register(): void {
-		// Priority 50 to make sure this runs after WooCommerce attribute migrations.
 		add_action( 'woocommerce_attribute_deleted', array( $this, 'handle_woocommerce_attribute_deleted' ), 10, 3 );
 		add_action( self::CLEANUP_ACTION, array( $this, 'handle_wc_cleanup_variations_for_deleted_attribute' ), 10, 2 );
 	}
@@ -76,7 +75,7 @@ class GlobalAttributeVariationCleanup implements RegisterHooksInterface {
 	 * @return void
 	 */
 	public function handle_woocommerce_attribute_deleted( $attribute_id, $name, $taxonomy ): void {
-		if ( ! taxonomy_is_product_attribute( $taxonomy ) ) {
+		if ( ! self::is_global_attribute_taxonomy( $taxonomy ) ) {
 			return;
 		}
 
@@ -95,7 +94,7 @@ class GlobalAttributeVariationCleanup implements RegisterHooksInterface {
 	public function handle_wc_cleanup_variations_for_deleted_attribute( $taxonomy, $last_processed_id = 0 ): void {
 		global $wpdb;
 
-		if ( ! taxonomy_is_product_attribute( $taxonomy ) ) {
+		if ( ! self::is_global_attribute_taxonomy( $taxonomy ) ) {
 			return;
 		}
 
@@ -199,6 +198,19 @@ class GlobalAttributeVariationCleanup implements RegisterHooksInterface {
 		if ( $has_more ) {
 			$this->schedule_cleanup( $taxonomy, (int) end( $variation_ids ) );
 		}
+	}
+
+	/**
+	 * Check whether a value could identify a global product attribute taxonomy.
+	 *
+	 * Deleted taxonomies are no longer registered when the asynchronous cleanup runs,
+	 * so taxonomy_is_product_attribute() cannot be used for this validation.
+	 *
+	 * @param mixed $taxonomy Potential taxonomy name.
+	 * @return bool
+	 */
+	private static function is_global_attribute_taxonomy( $taxonomy ): bool {
+		return is_string( $taxonomy ) && 3 < strlen( $taxonomy ) && 0 === strpos( $taxonomy, 'pa_' );
 	}
 
 	/**
