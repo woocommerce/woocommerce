@@ -20,10 +20,10 @@ import {
 } from '../components/constants';
 
 // Create storage utils with 24h expiration
-const iamSettingsStorage = createStorageUtils(
-	'wc_iam_settings',
-	24 * 60 * 60
-);
+const iamSettingsStorage = createStorageUtils< {
+	locale: string | null | undefined;
+	settings: MarketplaceContextType[ 'iamSettings' ];
+} >( 'wc_iam_settings', 24 * 60 * 60 );
 
 export const MarketplaceContext = createContext< MarketplaceContextType >( {
 	isLoading: false,
