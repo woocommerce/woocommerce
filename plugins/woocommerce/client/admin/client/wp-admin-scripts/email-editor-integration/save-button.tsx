@@ -3,15 +3,114 @@
  */
 import { Button } from '@wordpress/components';
 import { useSelect, useDispatch, select as dataSelect } from '@wordpress/data';
+import { useEffect, useRef } from '@wordpress/element';
 import { addFilter } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 import { store as editorStore } from '@wordpress/editor';
 import { store as coreDataStore } from '@wordpress/core-data';
+import {
+	useShortcut,
+	store as keyboardShortcutsStore,
+	type ShortcutKeyCombination,
+} from '@wordpress/keyboard-shortcuts';
 
 /**
  * Internal dependencies
  */
 import { NAME_SPACE } from './constants';
+
+const SAVE_SHORTCUT_NAME = 'woocommerce/email-editor/save';
+
+/**
+ * Take over the editor's save shortcut (Cmd/Ctrl+S) while the custom Save
+ * button is mounted, so the shortcut publishes exactly like the button.
+ *
+ * Core's handler saves a draft without publishing — with the publish step
+ * hidden behind the custom button, that leaves content invisible to sending.
+ * Every handler registered for a shortcut fires on a key match, so adding a
+ * second one would double-save; instead `core/editor/save` is unregistered
+ * (its handler stops matching) and the key combination is re-registered
+ * under an own name. Unmounting restores core's registration for the
+ * published-post phase, where the stock save flow takes over again.
+ *
+ * @param onSave     Save handler shared with the button.
+ * @param isDisabled Whether saving is currently disabled.
+ */
+function useSaveShortcutTakeover( onSave: () => void, isDisabled: boolean ) {
+	const coreShortcut = useSelect(
+		( select ) => ( {
+			keyCombination: select(
+				keyboardShortcutsStore
+			).getShortcutKeyCombination(
+				'core/editor/save'
+			) as ShortcutKeyCombination | null,
+			description: select(
+				keyboardShortcutsStore
+			).getShortcutDescription( 'core/editor/save' ) as
+				| string
+				| undefined,
+		} ),
+		[]
+	);
+	const { registerShortcut, unregisterShortcut } = useDispatch(
+		keyboardShortcutsStore
+	);
+	const stashedShortcut = useRef< {
+		keyCombination: ShortcutKeyCombination;
+		description: string | undefined;
+	} | null >( null );
+
+	// Driven by the store, not mount order: EditorKeyboardShortcutsRegister
+	// registers `core/editor/save` in its own mount effect, so a plain mount
+	// effect here could run earlier and unregister nothing. Re-runs whenever
+	// core's registration reappears while the button stays mounted, so the
+	// takeover cannot be undone by a re-registration.
+	useEffect( () => {
+		if ( ! coreShortcut.keyCombination ) {
+			return;
+		}
+		if ( ! stashedShortcut.current ) {
+			stashedShortcut.current = {
+				keyCombination: coreShortcut.keyCombination,
+				description: coreShortcut.description,
+			};
+		}
+		void unregisterShortcut( 'core/editor/save' );
+		void registerShortcut( {
+			name: SAVE_SHORTCUT_NAME,
+			category: 'global',
+			description: __( 'Save your changes.', 'woocommerce' ),
+			keyCombination: coreShortcut.keyCombination,
+		} );
+	}, [ coreShortcut, registerShortcut, unregisterShortcut ] );
+
+	useEffect( () => {
+		return () => {
+			if ( ! stashedShortcut.current ) {
+				return;
+			}
+			void unregisterShortcut( SAVE_SHORTCUT_NAME );
+			void registerShortcut( {
+				name: 'core/editor/save',
+				category: 'global',
+				description: stashedShortcut.current.description,
+				keyCombination: stashedShortcut.current.keyCombination,
+			} );
+			stashedShortcut.current = null;
+		};
+	}, [ registerShortcut, unregisterShortcut ] );
+
+	useShortcut(
+		SAVE_SHORTCUT_NAME,
+		( event: { preventDefault: () => void } ) => {
+			event.preventDefault();
+			if ( isDisabled ) {
+				return;
+			}
+			onSave();
+		}
+	);
+}
 
 /**
  * Replacement for the editor's Publish/Save button.
@@ -78,6 +177,8 @@ export function SaveButton() {
 				);
 			} );
 	};
+
+	useSaveShortcutTakeover( onClick, isDisabled );
 
 	return (
 		<Button
