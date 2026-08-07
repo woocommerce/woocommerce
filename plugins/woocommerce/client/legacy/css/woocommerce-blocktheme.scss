@@ -18,6 +18,13 @@
 	}
 }
 
+// Keep the compatibility wrapper layout-neutral. WordPress applies the root
+// block gap to every direct child of `.wp-site-blocks`.
+:where(body.single-product .wp-site-blocks) >
+	.woocommerce:where(.product) {
+	margin-block-start: 0;
+}
+
 .clear {
 	clear: both;
 }
