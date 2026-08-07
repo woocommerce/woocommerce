@@ -530,11 +530,12 @@
 		align-items: center;
 
 		h1 {
-			padding-left: $gap-smaller * 2;
 			// This heading renders outside the floating header, so the shared
 			// header typography doesn't reach it — restate it to match the other
 			// settings headers. padding-top trims wp-admin's default h1 padding
-			// so the title centers against the back button.
+			// so the title centers against the back button. The gap to the
+			// chevron now lives inside the button, which sits within this
+			// heading.
 			padding-top: 4px;
 			font-size: 15px;
 			font-weight: 500;

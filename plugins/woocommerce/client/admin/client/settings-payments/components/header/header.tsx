@@ -86,11 +86,7 @@ export const Header = ( {
 				<>
 					{ backLink && (
 						<WooHeaderNavigationItem>
-							<BackButton
-								href={ backLink }
-								title={ title }
-								from={ context }
-							/>
+							<BackButton href={ backLink } from={ context } />
 						</WooHeaderNavigationItem>
 					) }
 					<WooHeaderPageTitle>
