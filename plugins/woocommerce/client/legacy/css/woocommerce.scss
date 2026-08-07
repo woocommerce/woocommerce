@@ -2004,6 +2004,7 @@ p.demo_store,
 
 		.shipping-calculator-button::after {
 			@include iconafter("\e019");
+			content: "\e019" / "";
 		}
 
 		.shipping-calculator-form {
