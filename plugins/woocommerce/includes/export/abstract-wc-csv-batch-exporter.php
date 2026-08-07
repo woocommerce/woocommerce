@@ -135,7 +135,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 				sprintf(
 					/* translators: %s is file path. */
 					__( 'Unable to create or write to %s during CSV export. Please check file permissions.', 'woocommerce' ),
-					esc_html( $this->get_file_path() )
+					$this->get_file_path()
 				),
 				$log_context
 			);
@@ -150,7 +150,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 		 * @see   https://www.php.net/manual/en/function.fopen.php
 		 * @since 6.8.0
 		 *
-		 * @param string $fopen_mode, either (r, r+, w, w+, a, a+, x, x+, c, c+, e). Defaults to "a" (append, write-only) for broad stream-wrapper compatibility.
+		 * @param string $fopen_mode One of (r, r+, w, w+, a, a+, x, x+, c, c+), optionally followed by flags such as "b", "t" or "e". Defaults to "a" (append, write-only) for broad stream-wrapper compatibility.
 		 */
 		$fopen_mode = apply_filters( 'woocommerce_csv_exporter_fopen_mode', 'a' );
 		$fp         = fopen( $this->get_file_path(), $fopen_mode );
@@ -173,11 +173,17 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 				);
 			}
 		} else {
+			// fopen() raises a warning when it fails, so the last PHP error usually explains why (permissions, an
+			// invalid mode, or a stream wrapper that doesn't support the requested mode).
+			$last_error = error_get_last();
+
 			wc_get_logger()->error(
 				sprintf(
-					/* translators: %s: file path */
-					__( 'Unable to open file for writing: %s', 'woocommerce' ),
-					$this->get_file_path()
+					/* translators: 1: file path, 2: fopen mode, 3: last PHP error message */
+					__( 'Unable to open file for writing: %1$s (mode: %2$s). Last PHP error: %3$s', 'woocommerce' ),
+					$this->get_file_path(),
+					$fopen_mode,
+					isset( $last_error['message'] ) ? $last_error['message'] : 'n/a'
 				),
 				$log_context
 			);
