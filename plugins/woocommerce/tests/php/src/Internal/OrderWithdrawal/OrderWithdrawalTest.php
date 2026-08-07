@@ -305,24 +305,21 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not match an order that shares the email but has a different billing name.
+	 * @testdox Should match an order by the submitted order number when multiple orders share the email.
 	 */
-	public function test_process_current_request_matches_only_order_with_same_email_and_billing_name(): void {
-		$target_order         = $this->create_order_for_form_data();
-		$different_name_order = $this->create_order_for_form_data(
-			array(
-				OrderWithdrawalFormProcessor::FIELD_FIRST_NAME => 'Janet',
-				OrderWithdrawalFormProcessor::FIELD_LAST_NAME  => 'Smith',
-			)
-		);
-		$custom_order_number  = 'CUSTOM-1001';
-		$capture              = $this->capture_wp_mail();
-		$filter               = static function ( $order_number, $filtered_order ) use ( $target_order, $different_name_order, $custom_order_number ) {
-			if (
-				$filtered_order instanceof WC_Order
-				&& in_array( $filtered_order->get_id(), array( $target_order->get_id(), $different_name_order->get_id() ), true )
-			) {
-				return $custom_order_number;
+	public function test_process_current_request_matches_same_email_order_by_order_number(): void {
+		$target_order        = $this->create_order_for_form_data();
+		$different_order     = $this->create_order_for_form_data();
+		$target_order_number = 'CUSTOM-1001';
+		$other_order_number  = 'CUSTOM-2002';
+		$capture             = $this->capture_wp_mail();
+		$filter              = static function ( $order_number, $filtered_order ) use ( $target_order, $different_order, $target_order_number, $other_order_number ) {
+			if ( $filtered_order instanceof WC_Order && $target_order->get_id() === $filtered_order->get_id() ) {
+				return $target_order_number;
+			}
+
+			if ( $filtered_order instanceof WC_Order && $different_order->get_id() === $filtered_order->get_id() ) {
+				return $other_order_number;
 			}
 
 			return $order_number;
@@ -333,7 +330,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		try {
 			$this->prepare_post_request(
 				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
-				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => $custom_order_number )
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => $target_order_number )
 			);
 
 			$state          = $this->sut->process_current_request();
@@ -342,12 +339,44 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$this->assertSame( 'confirmation', $state->screen, 'Matching submissions should reach the confirmation screen.' );
 			$this->assertCount( 2, $capture['captures'], 'The customer and merchant emails should both be sent.' );
 			$this->assertStringContainsString( str_replace( '&', '&amp;', $target_order->get_edit_order_url() ), (string) $merchant_email['message'], 'The merchant email should link to the intended order.' );
-			$this->assertStringNotContainsString( str_replace( '&', '&amp;', $different_name_order->get_edit_order_url() ), (string) $merchant_email['message'], 'The merchant email should not link to the order with a different billing name.' );
+			$this->assertStringNotContainsString( str_replace( '&', '&amp;', $different_order->get_edit_order_url() ), (string) $merchant_email['message'], 'The merchant email should not link to the order with a different order number.' );
 			$this->assertTrue( $this->order_has_note_containing( $target_order, self::ORDER_NOTE_WITHDRAWAL_REQUESTED ), 'The intended order should receive a withdrawal note.' );
-			$this->assertFalse( $this->order_has_note_containing( $different_name_order, 'Order withdrawal requested' ), 'The order with a different billing name should not receive a withdrawal note.' );
+			$this->assertFalse( $this->order_has_note_containing( $different_order, 'Order withdrawal requested' ), 'The order with a different order number should not receive a withdrawal note.' );
 			$this->assert_order_withdrawal_requested( $target_order );
+			$this->assert_order_withdrawal_not_requested( $different_order );
 		} finally {
 			remove_filter( 'woocommerce_order_number', $filter, 10 );
+			$capture['remove']();
+		}
+	}
+
+	/**
+	 * @testdox Should match an order with the correct email and order number even when the billing name differs.
+	 */
+	public function test_process_current_request_matches_order_with_different_billing_name(): void {
+		$order   = $this->create_order_for_form_data(
+			array(
+				OrderWithdrawalFormProcessor::FIELD_FIRST_NAME => 'Janet',
+				OrderWithdrawalFormProcessor::FIELD_LAST_NAME  => 'Smith',
+			)
+		);
+		$capture = $this->capture_wp_mail();
+
+		try {
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => (string) $order->get_id() )
+			);
+
+			$state          = $this->sut->process_current_request();
+			$merchant_email = $this->get_captured_mail_to( (string) get_option( 'admin_email' ), $capture['captures'] );
+
+			$this->assertSame( 'confirmation', $state->screen, 'Matching submissions should reach the confirmation screen.' );
+			$this->assertCount( 2, $capture['captures'], 'The customer and merchant emails should both be sent.' );
+			$this->assertStringContainsString( str_replace( '&', '&amp;', $order->get_edit_order_url() ), (string) $merchant_email['message'], 'The merchant email should link to the matched order.' );
+			$this->assertTrue( $this->order_has_note_containing( $order, self::ORDER_NOTE_WITHDRAWAL_REQUESTED ), 'The order should receive a withdrawal note even when the billing name differs.' );
+			$this->assert_order_withdrawal_requested( $order );
+		} finally {
 			$capture['remove']();
 		}
 	}
@@ -1054,6 +1083,18 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 
 		$this->assertInstanceOf( WC_Order::class, $updated_order, 'The order should still exist.' );
 		$this->assertSame( 'yes', $updated_order->get_meta( self::ORDER_WITHDRAWAL_REQUESTED_META_KEY, true, 'edit' ), 'The matched order should be flagged as having a withdrawal request.' );
+	}
+
+	/**
+	 * Assert that an order has not been flagged as having a withdrawal request.
+	 *
+	 * @param WC_Order $order Order.
+	 */
+	private function assert_order_withdrawal_not_requested( WC_Order $order ): void {
+		$updated_order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $updated_order, 'The order should still exist.' );
+		$this->assertNotSame( 'yes', $updated_order->get_meta( self::ORDER_WITHDRAWAL_REQUESTED_META_KEY, true, 'edit' ), 'The unmatched order should not be flagged as having a withdrawal request.' );
 	}
 
 	/**
