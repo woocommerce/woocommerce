@@ -522,7 +522,7 @@
 
 		&:focus {
 			outline: 2px solid var(--wp-admin-theme-color, #007cba);
-			outline-offset: 2px;
+			outline-offset: 0;
 		}
 
 		&:focus:not(:focus-visible) {
@@ -531,7 +531,7 @@
 
 		&:focus-visible {
 			outline: 2px solid var(--wp-admin-theme-color, #007cba);
-			outline-offset: 2px;
+			outline-offset: 0;
 		}
 
 		> img {
