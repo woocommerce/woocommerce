@@ -1985,12 +1985,15 @@ class WC_Helper {
 
 			$code = wp_remote_retrieve_response_code( $request );
 			if ( 200 !== $code ) {
-				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
-
-				// Respect server-side rate limiting: on a 429, record the reset
-				// window so we hold off on further subscriptions calls until then.
+				// Respect server-side rate limiting: on a 429, record the reset window
+				// so we hold off on further subscriptions calls until then, and leave
+				// the cache alone. Caching an empty list here would outlive a shorter
+				// reset window and keep the site on an empty subscription list after
+				// WooCommerce.com already allows a retry. The backoff is the gate.
 				if ( 429 === (int) $code ) {
 					WC_Helper_API_Backoff::record_from_response( WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS, $request );
+				} else {
+					set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
 				}
 
 				throw new Exception( self::get_message_for_response_code( $code ), $code );

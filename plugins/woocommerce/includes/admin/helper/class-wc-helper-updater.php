@@ -642,6 +642,21 @@ class WC_Helper_Updater {
 	}
 
 	/**
+	 * Extract the products from a cached update-check payload.
+	 *
+	 * Used on the paths that serve the previous cache rather than a fresh
+	 * response — while rate limited, and on the rate-limited response itself.
+	 *
+	 * @param mixed $data The data retrieved from the transient, of any shape.
+	 * @return array The cached products, or an empty array when there are none.
+	 */
+	private static function get_cached_products( $data ) {
+		return ( is_array( $data ) && isset( $data['products'] ) && is_array( $data['products'] ) )
+			? $data['products']
+			: array();
+	}
+
+	/**
 	 * Run an update check API call.
 	 *
 	 * The call is cached based on the payload (product ids, file ids). If
@@ -671,10 +686,10 @@ class WC_Helper_Updater {
 		// "Refresh" button bypasses and clears it. Return the last cached
 		// products, if any, rather than an empty set.
 		if ( WC_Helper_API_Backoff::is_rate_limited( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK ) ) {
-			return ( is_array( $data ) && isset( $data['products'] ) && is_array( $data['products'] ) )
-				? $data['products']
-				: array();
+			return self::get_cached_products( $data );
 		}
+
+		$cached_data = $data;
 
 		$data = array(
 			'hash'     => $hash,
@@ -712,10 +727,15 @@ class WC_Helper_Updater {
 		if ( 200 !== $response_code ) {
 			$data['errors'][] = 'http-error';
 
-			// Respect server-side rate limiting: on a 429, record the reset
-			// window so we hold off on further update-check calls until then.
+			// Respect server-side rate limiting: on a 429, record the reset window so
+			// we hold off on further update-check calls until then, and return the
+			// previously cached products without touching the cache. Caching this
+			// empty result for 12 hours would outlive the reset window, and it would
+			// discard the very products the backoff branch above serves while we wait.
 			if ( 429 === $response_code && is_array( $request ) ) {
 				WC_Helper_API_Backoff::record_from_response( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK, $request );
+
+				return self::get_cached_products( $cached_data );
 			}
 		} else {
 			$data['products'] = json_decode( wp_remote_retrieve_body( $request ), true );
