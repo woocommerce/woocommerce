@@ -1258,18 +1258,18 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			if ( $update_existing && ( isset( $parsed_data['id'] ) || isset( $parsed_data['sku'] ) ) && ! $id_exists && ! $sku_exists ) {
 				$create_variation = false;
 
-				if ( ProductType::VARIATION === ( $parsed_data['type'] ?? '' ) ) {
-					$create_variation = $this->can_create_variation( $parsed_data );
-
+				if ( ProductType::VARIATION === ( $parsed_data['type'] ?? '' ) && $this->can_create_variation( $parsed_data ) ) {
 					/**
 					 * Filters whether a new variation should be created for an existing variable product when updating existing products.
+					 *
+					 * Only fires for variation rows that passed validation, so it can veto the creation but not force it.
 					 *
 					 * @since 11.1.0
 					 *
 					 * @param bool  $create_variation Whether to create the new variation instead of skipping the row.
 					 * @param array $parsed_data      Parsed row data.
 					 */
-					$create_variation = apply_filters( 'woocommerce_product_import_create_variation_of_existing_product', $create_variation, $parsed_data );
+					$create_variation = apply_filters( 'woocommerce_product_import_create_variation_of_existing_product', true, $parsed_data );
 				}
 
 				if ( ! $create_variation ) {

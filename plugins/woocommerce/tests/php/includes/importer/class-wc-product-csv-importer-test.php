@@ -245,7 +245,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test that new variations are not created for a trashed parent product when updating existing products.
+	 * @testdox Test that new variations are not created for a trashed parent product when updating existing products, even if the filter tries to force them.
 	 */
 	public function test_import_skips_new_variations_of_trashed_parents_26256() {
 		$product = new WC_Product_Variable();
@@ -253,6 +253,8 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$product->set_sku( 'IMPORT-26256-PARENT' );
 		$product->save();
 		wp_trash_post( $product->get_id() );
+
+		add_filter( 'woocommerce_product_import_create_variation_of_existing_product', '__return_true' );
 
 		$csv_file = trailingslashit( get_temp_dir() ) . 'import-26256-trashed-parent.csv';
 		file_put_contents( $csv_file, "Type,SKU,Name,Parent\nvariation,IMPORT-26256-L,Import 26256 Tee - L,IMPORT-26256-PARENT\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
@@ -271,6 +273,8 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$data     = $importer->import();
 		wp_delete_file( $csv_file );
 
+		remove_filter( 'woocommerce_product_import_create_variation_of_existing_product', '__return_true' );
+
 		$this->assertEmpty( $data['imported_variations'], 'Expected 0 imported variations, got ' . count( $data['imported_variations'] ) );
 		$this->assertCount( 1, $data['skipped'], 'Expected 1 skipped product, got ' . count( $data['skipped'] ) );
 		$this->assertFalse( wc_get_product_id_by_sku( 'IMPORT-26256-L' ) > 0, 'Expected no variation to be created for a trashed parent' );
@@ -279,7 +283,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test that a variation row whose ID belongs to an existing post of another type is skipped when updating existing products.
+	 * @testdox Test that a variation row whose ID belongs to an existing post of another type is skipped when updating existing products, even if the filter tries to force it.
 	 */
 	public function test_import_skips_new_variations_with_a_foreign_post_id_26256() {
 		$attribute = new WC_Product_Attribute();
@@ -301,6 +305,8 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 			)
 		);
 
+		add_filter( 'woocommerce_product_import_create_variation_of_existing_product', '__return_true' );
+
 		$csv_file = trailingslashit( get_temp_dir() ) . 'import-26256-foreign-id.csv';
 		file_put_contents( $csv_file, "ID,Type,SKU,Name,Parent\n{$page_id},variation,IMPORT-26256-L,Import 26256 Tee - L,IMPORT-26256-PARENT\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
 
@@ -318,6 +324,8 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$importer = new WC_Product_CSV_Importer( $csv_file, $args );
 		$data     = $importer->import();
 		wp_delete_file( $csv_file );
+
+		remove_filter( 'woocommerce_product_import_create_variation_of_existing_product', '__return_true' );
 
 		$this->assertEmpty( $data['imported_variations'], 'Expected 0 imported variations, got ' . count( $data['imported_variations'] ) );
 		$this->assertCount( 1, $data['skipped'], 'Expected 1 skipped product, got ' . count( $data['skipped'] ) );
