@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Importer.
  */
 
+declare( strict_types=1 );
+
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 
