@@ -188,7 +188,19 @@ class GlobalAttributeVariationCleanup implements RegisterHooksInterface {
 			);
 
 			if ( empty( $attribute_meta_keys ) ) {
-				$variation->delete();
+				if ( ! $variation->delete() ) {
+					wc_get_logger()->warning(
+						sprintf(
+							'Failed to trash variation ID %d after deleting meta key %s',
+							$variation_id,
+							$attribute_meta_key
+						),
+						array(
+							'source'   => 'global-attribute-variation-cleanup',
+							'taxonomy' => $taxonomy,
+						)
+					);
+				}
 			} else {
 				// Refresh the variation title and attribute summary after removing the attribute meta.
 				$variation->save();

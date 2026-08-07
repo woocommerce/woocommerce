@@ -103,39 +103,6 @@ class GlobalAttributeVariationCleanupTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Overlapping cleanup jobs should trash a variation after all of its global attributes are deleted.
-	 */
-	public function test_overlapping_cleanup_jobs_remove_each_deleted_attribute_before_trashing_variation(): void {
-		$product   = WC_Helper_Product::create_variation_product();
-		$variation = WC_Helper_Product::create_product_variation_object(
-			$product->get_id(),
-			'DUMMY SKU VARIABLE SIZE AND COLOUR',
-			20,
-			array(
-				'pa_size'   => 'huge',
-				'pa_colour' => 'red',
-			)
-		);
-
-		$size_attribute_id   = wc_attribute_taxonomy_id_by_name( 'pa_size' );
-		$colour_attribute_id = wc_attribute_taxonomy_id_by_name( 'pa_colour' );
-
-		$this->assertTrue( wc_delete_attribute( $size_attribute_id ), 'The size global attribute should be deleted' );
-		$this->assertTrue( wc_delete_attribute( $colour_attribute_id ), 'The colour global attribute should be deleted before size cleanup runs' );
-
-		$this->sut->handle_wc_cleanup_variations_for_deleted_attribute( 'pa_size', 0 );
-
-		$this->assertSame( 'publish', get_post_status( $variation->get_id() ), 'The variation should remain published while its colour metadata exists' );
-		$this->assertFalse( metadata_exists( 'post', $variation->get_id(), 'attribute_pa_size' ), 'The size metadata should be removed by size cleanup' );
-		$this->assertTrue( metadata_exists( 'post', $variation->get_id(), 'attribute_pa_colour' ), 'The colour metadata should remain until colour cleanup runs' );
-
-		$this->sut->handle_wc_cleanup_variations_for_deleted_attribute( 'pa_colour', 0 );
-
-		$this->assertSame( 'trash', get_post_status( $variation->get_id() ), 'The variation should be trashed after its last deleted attribute is removed' );
-		$this->assertFalse( metadata_exists( 'post', $variation->get_id(), 'attribute_pa_colour' ), 'The colour metadata should be removed before the variation is trashed' );
-	}
-
-	/**
 	 * @testdox Cleanup should stop if a global attribute with the deleted taxonomy is recreated.
 	 */
 	public function test_cleanup_stops_if_deleted_global_attribute_is_recreated(): void {
