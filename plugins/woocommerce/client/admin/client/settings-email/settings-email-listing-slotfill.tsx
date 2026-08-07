@@ -45,6 +45,8 @@ export type EmailType = {
 	email_key: string;
 	email_class_name: string;
 	post_id: string;
+	/** Null for emails not registered for the block editor. */
+	file_template_preview_url: string | null;
 	recipients: Recipients;
 	enabled: boolean;
 	manual: boolean;
