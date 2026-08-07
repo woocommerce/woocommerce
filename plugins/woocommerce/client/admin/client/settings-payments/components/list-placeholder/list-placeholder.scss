@@ -9,6 +9,13 @@
 		border-top: none;
 	}
 
+	// @woocommerce/components' List draws the separator over this one in the
+	// lighter $gray-100, which would leave the skeleton's lines a shade off
+	// from the ones the loaded list settles on.
+	.woocommerce-list > &:not(:first-child) {
+		border-top-color: $gray-200;
+	}
+
 	// Add back the bottom border for the last item.
 	&:nth-last-child(1 of .woocommerce-item__payment-gateway-placeholder) {
 		border-bottom: 1px solid $gray-200;
