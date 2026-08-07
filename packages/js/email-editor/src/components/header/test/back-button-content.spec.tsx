@@ -30,6 +30,8 @@ jest.mock( '@wordpress/components', () => ( {
 jest.mock( '@wordpress/icons', () => ( {
 	Icon: () => <span>Icon</span>,
 	arrowLeft: 'arrowLeft',
+	chevronLeft: 'chevronLeft',
+	chevronRight: 'chevronRight',
 	wordpress: 'wordpress',
 } ) );
 
@@ -44,6 +46,21 @@ const mockUrls = {
 	back: 'https://example.com/back',
 	listings: 'https://example.com/listings',
 	send: 'https://example.com/send',
+};
+
+// Renders the component inside the editor header's back button slot with the
+// given width. jsdom has no layout, so getBoundingClientRect is stubbed.
+const renderInSlot = ( slotWidth: number ) => {
+	jest.spyOn(
+		HTMLElement.prototype,
+		'getBoundingClientRect'
+	).mockReturnValue( { width: slotWidth } as DOMRect );
+
+	return render(
+		<div className="editor-header__back-button">
+			<BackButtonContent />
+		</div>
+	);
 };
 
 describe( 'BackButtonContent', () => {
@@ -65,6 +82,10 @@ describe( 'BackButtonContent', () => {
 				return {};
 			} )
 		);
+	} );
+
+	afterEach( () => {
+		jest.restoreAllMocks();
 	} );
 
 	it( 'should render the back button', () => {
@@ -90,6 +111,27 @@ describe( 'BackButtonContent', () => {
 		// Verify button has onClick handler (we don't actually click to avoid navigation error)
 		expect( button ).toBeInTheDocument();
 		expect( button.onclick ).not.toBeNull();
+	} );
+
+	it( 'should render the fullscreen-style button in a wide slot (WordPress ≤ 7.0 header)', () => {
+		const { container } = renderInSlot( 64 );
+		expect(
+			container.querySelector(
+				'.woocommerce-email-editor__view-mode-toggle'
+			)
+		).toBeInTheDocument();
+	} );
+
+	it( 'should render the compact button in a narrow slot (WordPress 7.1+ header)', () => {
+		const { container, getByRole } = renderInSlot( 32 );
+		expect(
+			container.querySelector(
+				'.woocommerce-email-editor__view-mode-toggle'
+			)
+		).not.toBeInTheDocument();
+		expect(
+			getByRole( 'button', { name: 'Close editor' } )
+		).toBeInTheDocument();
 	} );
 
 	it( 'should apply woocommerce_email_editor_close_content filter to render custom component', () => {
