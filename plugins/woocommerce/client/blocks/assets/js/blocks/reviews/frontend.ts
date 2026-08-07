@@ -23,9 +23,14 @@ const getProps = ( el: HTMLElement ) => {
 			? parsedOffset
 			: 0;
 
+	const isFilteredReviewsBlock =
+		el.classList.contains( 'wp-block-woocommerce-reviews-by-product' ) ||
+		el.classList.contains( 'wp-block-woocommerce-reviews-by-category' );
+
 	return {
 		attributes: {
 			offset,
+			isFilteredReviewsBlock,
 			showOrderby,
 			showLoadMore,
 			showReviewDate: el.classList.contains( 'has-date' ),
