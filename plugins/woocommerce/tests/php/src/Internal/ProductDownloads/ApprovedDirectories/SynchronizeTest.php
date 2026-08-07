@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\ProductDownloads\ApprovedDirectories;
 
+use ActionScheduler_Store;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use WC_Admin_Notices;
@@ -142,23 +143,33 @@ class SynchronizeTest extends WC_Unit_Test_Case {
 	 */
 	public function test_cancellation_during_active_batch_does_not_mark_sync_complete(): void {
 		$cancelled           = false;
-		$cancel_during_batch = function () use ( &$cancelled ): void {
+		$restart_result      = null;
+		$cancel_during_batch = function () use ( &$cancelled, &$restart_result ): void {
 			if ( ! $cancelled ) {
 				$cancelled = true;
 				$this->sut->cancel();
+				$restart_result = $this->sut->start();
 			}
 		};
 
 		$this->sut->start();
+		$store           = ActionScheduler_Store::instance();
+		$claim           = $store->stake_claim( 1, null, array( Synchronize::SYNC_TASK ) );
+		$claimed_actions = $claim->get_actions();
+		$this->assertCount( 1, $claimed_actions, 'The synchronization action should be marked as running for the test.' );
+		$store->log_execution( $claimed_actions[0] );
 		add_action( 'update_option_' . Synchronize::SYNC_TASK_PAGE, $cancel_during_batch, 10, 0 );
 
 		try {
 			$this->sut->run();
 		} finally {
 			remove_action( 'update_option_' . Synchronize::SYNC_TASK_PAGE, $cancel_during_batch, 10 );
+			$store->mark_complete( $claimed_actions[0] );
+			$store->release_claim( $claim );
 		}
 
 		$this->assertTrue( $cancelled, 'The test should cancel synchronization while a batch is active.' );
+		$this->assertFalse( $restart_result, 'A new synchronization should not start before the cancelled active batch returns.' );
 		$this->assertFalse( $this->sut->in_progress(), 'An active batch should clean up synchronization state after cancellation.' );
 		$this->assertFalse(
 			WC_Admin_Notices::has_notice( 'download_directories_sync_complete' ),
@@ -168,5 +179,6 @@ class SynchronizeTest extends WC_Unit_Test_Case {
 			wc_get_container()->get( LegacyProxy::class )->get_instance_of( WC_Queue_Interface::class )->get_next( Synchronize::SYNC_TASK ),
 			'An active batch should not schedule more synchronization work after cancellation.'
 		);
+		$this->assertTrue( $this->sut->start(), 'A new synchronization should start after the cancelled active batch has returned.' );
 	}
 }

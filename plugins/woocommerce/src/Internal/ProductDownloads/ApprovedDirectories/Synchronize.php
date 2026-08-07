@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories;
 
+use ActionScheduler_Store;
 use Exception;
 use Automattic\WooCommerce\Internal\Utilities\URL;
 use WC_Admin_Notices;
@@ -123,7 +124,7 @@ class Synchronize {
 	 * @return bool
 	 */
 	public function start(): bool {
-		if ( null !== $this->queue->get_next( self::SYNC_TASK ) ) {
+		if ( $this->has_scheduled_task() ) {
 			wc_get_logger()->log( 'warning', __( 'Synchronization of approved product download directories is already in progress.', 'woocommerce' ) );
 			return false;
 		}
@@ -133,6 +134,23 @@ class Synchronize {
 		$this->queue->schedule_single( time(), self::SYNC_TASK, array(), self::SYNC_TASK_GROUP );
 		wc_get_logger()->log( 'info', __( 'Approved Download Directories sync: new scan scheduled.', 'woocommerce' ) );
 		return true;
+	}
+
+	/**
+	 * Indicates whether a synchronization task is pending or running.
+	 */
+	private function has_scheduled_task(): bool {
+		return ! empty(
+			$this->queue->search(
+				array(
+					'hook'     => self::SYNC_TASK,
+					'status'   => array( ActionScheduler_Store::STATUS_PENDING, ActionScheduler_Store::STATUS_RUNNING ),
+					'per_page' => 1,
+					'orderby'  => 'none',
+				),
+				'ids'
+			)
+		);
 	}
 
 	/**
