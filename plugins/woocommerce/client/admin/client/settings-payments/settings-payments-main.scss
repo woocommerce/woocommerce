@@ -553,4 +553,12 @@
 			}
 		}
 	}
+
+	// Individual method pages nest their header inside
+	// .settings-payment-gateways; the list page does not. The list already
+	// draws this line as the border-top of its .woocommerce-list, so scoping it
+	// here matches the two levels without doubling up on the list.
+	.settings-payment-gateways .settings-payments-offline__header {
+		border-bottom: 1px solid $gray-200;
+	}
 }
