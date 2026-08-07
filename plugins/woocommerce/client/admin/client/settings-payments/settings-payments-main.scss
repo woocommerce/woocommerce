@@ -306,6 +306,21 @@
 				&__icon-container {
 					height: 16px;
 					cursor: pointer;
+					border-radius: 2px;
+
+					&:focus {
+						outline: 2px solid var(--wp-admin-theme-color, #007cba);
+						outline-offset: 0;
+					}
+
+					&:focus:not(:focus-visible) {
+						outline: none;
+					}
+
+					&:focus-visible {
+						outline: 2px solid var(--wp-admin-theme-color, #007cba);
+						outline-offset: 0;
+					}
 				}
 
 				&__icon {
