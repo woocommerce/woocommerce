@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent coupon application from calling get_customer_id on order types without a customer concept.
