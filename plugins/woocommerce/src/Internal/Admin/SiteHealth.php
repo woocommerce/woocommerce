@@ -10,9 +10,9 @@ namespace Automattic\WooCommerce\Internal\Admin;
 use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
-use WC_Admin_Notices;
 use WC_Admin_Status;
 use WC_Helper_Updater;
 use WC_Install;
@@ -364,26 +364,18 @@ class SiteHealth {
 			'woocommerce_approved_download_directories_sync' => array(
 				'label' => __( 'WooCommerce approved download directories', 'woocommerce' ),
 				'badge' => 'security',
-				'check' => fn() => ! WC_Admin_Notices::has_notice( 'download_directories_sync_complete' ),
+				'check' => fn() => Download_Directories::MODE_ENABLED === wc_get_container()->get( Download_Directories::class )->get_mode(),
 				'good'  => array(
-					'label'       => __( 'WooCommerce approved download directories do not require review', 'woocommerce' ),
-					'description' => __( 'There is no completed approved download directories sync waiting for review.', 'woocommerce' ),
+					'label'       => __( 'WooCommerce approved download directory rules are enforced', 'woocommerce' ),
+					'description' => __( 'Downloadable product files are restricted to approved directories.', 'woocommerce' ),
 				),
 				'fail'  => array(
-					'label'       => __( 'WooCommerce approved download directories need review', 'woocommerce' ),
-					'description' => __( 'The approved product download directories list was updated. Review it to confirm downloadable product files remain protected.', 'woocommerce' ),
+					'label'       => __( 'WooCommerce approved download directory rules are not enforced', 'woocommerce' ),
+					'description' => __( 'Enable approved download directory rules to restrict downloadable product files to locations approved by a site administrator.', 'woocommerce' ),
 					'actions'     => array(
 						array(
 							'url'   => admin_url( 'admin.php?page=wc-settings&tab=products&section=download_urls' ),
-							'label' => __( 'Review approved directories', 'woocommerce' ),
-						),
-						array(
-							'url'   => wp_nonce_url(
-								add_query_arg( 'wc-hide-notice', 'download_directories_sync_complete', admin_url( 'site-health.php' ) ),
-								'woocommerce_hide_notices_nonce',
-								'_wc_notice_nonce'
-							),
-							'label' => __( 'Mark as reviewed', 'woocommerce' ),
+							'label' => __( 'Review approved directory rules', 'woocommerce' ),
 						),
 						array(
 							'url'     => 'https://woocommerce.com/document/approved-download-directories',

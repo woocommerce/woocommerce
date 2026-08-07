@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Admin;
 
 use Automattic\WooCommerce\Internal\Admin\SiteHealth;
+use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use WC_Unit_Test_Case;
 use WP_Error;
 
@@ -25,6 +26,7 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 		parent::setUp();
 		$this->sut = new SiteHealth();
 		delete_transient( '_woocommerce_upload_directory_status' );
+		delete_option( 'wc_downloads_approved_directories_mode' );
 	}
 
 	/**
@@ -32,7 +34,31 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		delete_transient( '_woocommerce_upload_directory_status' );
+		delete_option( 'wc_downloads_approved_directories_mode' );
 		parent::tearDown();
+	}
+
+	/**
+	 * @testdox Approved download directories check is good when rules are enforced.
+	 */
+	public function test_approved_download_directories_check_is_good_when_rules_are_enforced(): void {
+		wc_get_container()->get( Download_Directories::class )->set_mode( Download_Directories::MODE_ENABLED );
+
+		$result = $this->sut->run_test( 'woocommerce_approved_download_directories_sync' );
+
+		$this->assertSame( 'good', $result['status'], 'Enabled approved directory rules should pass the Site Health check.' );
+		$this->assertSame( 'WooCommerce approved download directory rules are enforced', $result['label'], 'The result should report that approved directory rules are enforced.' );
+	}
+
+	/**
+	 * @testdox Approved download directories check recommends enabling rules when they are not enforced.
+	 */
+	public function test_approved_download_directories_check_recommends_enabling_rules_when_not_enforced(): void {
+		$result = $this->sut->run_test( 'woocommerce_approved_download_directories_sync' );
+
+		$this->assertSame( 'recommended', $result['status'], 'Disabled approved directory rules should require attention in Site Health.' );
+		$this->assertSame( 'WooCommerce approved download directory rules are not enforced', $result['label'], 'The result should report that approved directory rules are not enforced.' );
+		$this->assertStringContainsString( 'section=download_urls', $result['actions'], 'The result should link to the approved directory settings.' );
 	}
 
 	/**
