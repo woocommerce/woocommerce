@@ -62,8 +62,20 @@ function useCloseAction() {
 	return () => {
 		recordEvent( 'header_close_button_clicked' );
 		const defaultAction = () => {
-			if ( urls.back ) {
-				window.location.href = urls.back;
+			if ( ! urls.back ) {
+				return;
+			}
+			try {
+				// Resolve against the full current URL so relative paths
+				// keep the same meaning as a direct location assignment.
+				const backUrl = new URL( urls.back, window.location.href );
+				// Only navigate to web URLs so schemes like javascript:
+				// cannot reach window.location.
+				if ( [ 'http:', 'https:' ].includes( backUrl.protocol ) ) {
+					window.location.href = backUrl.href;
+				}
+			} catch {
+				// Do not navigate to an invalid URL.
 			}
 		};
 		const action = applyFilters(

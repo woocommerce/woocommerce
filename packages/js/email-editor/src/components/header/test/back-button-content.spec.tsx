@@ -7,6 +7,7 @@ import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { useSelect } from '@wordpress/data';
 import { applyFilters } from '@wordpress/hooks';
+import { isRTL } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -15,8 +16,8 @@ import { BackButtonContent } from '../back-button-content';
 import { storeName } from '../../../store';
 
 jest.mock( '@wordpress/components', () => ( {
-	Button: ( { children, label, onClick } ) => (
-		<button aria-label={ label } onClick={ onClick }>
+	Button: ( { children, label, onClick, icon } ) => (
+		<button aria-label={ label } onClick={ onClick } data-icon={ icon }>
 			{ children }
 		</button>
 	),
@@ -131,7 +132,15 @@ describe( 'BackButtonContent', () => {
 		).not.toBeInTheDocument();
 		expect(
 			getByRole( 'button', { name: 'Close editor' } )
-		).toBeInTheDocument();
+		).toHaveAttribute( 'data-icon', 'chevronLeft' );
+	} );
+
+	it( 'should render the right chevron in a narrow slot in RTL', () => {
+		( isRTL as jest.Mock ).mockReturnValueOnce( true );
+		const { getByRole } = renderInSlot( 32 );
+		expect(
+			getByRole( 'button', { name: 'Close editor' } )
+		).toHaveAttribute( 'data-icon', 'chevronRight' );
 	} );
 
 	it( 'should apply woocommerce_email_editor_close_content filter to render custom component', () => {
