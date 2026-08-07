@@ -14,7 +14,7 @@
 	min-width: 0;
 	// The chevron glyph sits $gap-smaller inside its own 24px box, so the same
 	// amount after the label keeps the focus ring visually even around both.
-	padding-right: $gap-smaller;
+	padding-inline-end: $gap-smaller;
 	gap: $gap-smaller * 2;
 	color: inherit;
 	font: inherit;
