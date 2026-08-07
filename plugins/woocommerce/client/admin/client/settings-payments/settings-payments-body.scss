@@ -21,6 +21,14 @@ body.woocommerce_page_wc-settings.woocommerce-settings-payments-tab {
 	#mainform {
 		background-color: #fff;
 	}
+	// #mainform is only as tall as its content, while #wpcontent is held to
+	// the viewport height, so on a tall window the body grey shows below the
+	// panel. Other tabs leave #mainform grey, so the seam only appears here.
+	// The tab strip above sets its own grey and the page header is fixed with
+	// its own, so neither depends on what shows through from here.
+	#wpcontent {
+		background-color: #fff;
+	}
 }
 
 .settings-payments-offline__container {
