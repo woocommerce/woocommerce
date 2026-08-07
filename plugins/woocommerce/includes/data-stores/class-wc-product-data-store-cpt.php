@@ -2074,7 +2074,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$search_where .= ' AND posts.ID IN(' . implode( ',', array_map( 'absint', $include ) ) . ') ';
 		}
 
-		$exclude_ids = ! empty( $exclude ) && is_array( $exclude ) ? array_map( 'absint', $exclude ) : array();
+		$exclude_ids = ! empty( $exclude ) && is_array( $exclude ) ? array_filter( array_map( 'absint', $exclude ) ) : array();
 
 		if ( $exclude_ids ) {
 			$search_where .= ' AND posts.ID NOT IN(' . implode( ',', $exclude_ids ) . ') ';

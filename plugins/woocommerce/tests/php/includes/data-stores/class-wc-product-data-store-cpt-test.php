@@ -297,6 +297,36 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * absint() maps any non-numeric exclude value to 0, and 0 is the post_parent every top-level
+	 * product carries. Zeros are filtered out of the exclusion list so that such input stays the
+	 * no-op it has always been, rather than matching every top-level row.
+	 *
+	 * @testdox Exclude values that normalise to zero should leave search results untouched.
+	 */
+	public function test_search_products_ignores_zero_exclude_values() {
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Zero exclude widget' );
+		$product->save();
+
+		$data_store = WC_Data_Store::load( 'product' );
+
+		$baseline = $data_store->search_products( 'Zero exclude', '', true, true );
+		$this->assertContains( $product->get_id(), $baseline );
+
+		$zero_like = array(
+			'integer zero'      => 0,
+			'string zero'       => '0',
+			'non-numeric value' => 'abc',
+			'empty string'      => '',
+		);
+
+		foreach ( $zero_like as $label => $value ) {
+			$results = $data_store->search_products( 'Zero exclude', '', true, true, null, null, array( $value ) );
+			$this->assertEqualSets( $baseline, $results, "An exclude list holding a {$label} must not change the results" );
+		}
+	}
+
+	/**
 	 * Ensure product rating counts are calculated correctly.
 	 *
 	 * @return void
