@@ -107,6 +107,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 		$previous_screen     = $current_screen;
 		$reviews             = wc_get_container()->get( Reviews::class );
 		$list_table_property = ( new ReflectionClass( $reviews ) )->getProperty( 'reviews_list_table' );
+		$list_table_property->setAccessible( true );
 		$previous_list_table = $list_table_property->getValue( $reviews );
 
 		try {
