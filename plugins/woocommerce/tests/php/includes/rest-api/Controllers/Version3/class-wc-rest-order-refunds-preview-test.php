@@ -911,9 +911,9 @@ class WC_REST_Order_Refunds_Preview_Test extends WC_REST_Unit_Test_Case {
 			'woocommerce_rest_prepare_order_refund_preview',
 			function ( $response, $filter_order ) use ( &$received_order ) {
 				$this->assertInstanceOf( WP_REST_Response::class, $response, 'The filter should receive the response object, per the woocommerce_rest_prepare_* family contract.' );
-				$received_order          = $filter_order;
-				$data                    = $response->get_data();
-				$data['custom_field']    = 'custom_value';
+				$received_order       = $filter_order;
+				$data                 = $response->get_data();
+				$data['custom_field'] = 'custom_value';
 				$response->set_data( $data );
 				return $response;
 			},
