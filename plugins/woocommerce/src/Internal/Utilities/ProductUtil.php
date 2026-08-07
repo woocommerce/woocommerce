@@ -158,13 +158,13 @@ class ProductUtil {
 		if ( null === $count_per_status ) {
 			// Defensive perimeter: dirty product data (running/crushed product data import/migration/mocking utilities).
 			// We passed on adding wc_doing_it_wrong as it'll add assymetric friction to already running customers fleet.
-			// We passed on 'set_multiple' in favour of 'set' to isolate PHP silently coercing numeric-string array keys to integers.
+			// Enforce strict typing to prevent PHP from silently casting numeric-string array keys to integers, and to normalize inconsistent types from WordPress APIs.
 			$count_per_status = (array) wp_count_posts( $post_type ) + array_fill_keys( array_keys( get_post_stati() ), 0 );
 			foreach ( $count_per_status as $status => $count ) {
 				$product_count_cache->set( $post_type, (string) $status, (int) $count );
 			}
 		}
 
-		return $count_per_status;
+		return array_map( 'intval', $count_per_status );
 	}
 }
