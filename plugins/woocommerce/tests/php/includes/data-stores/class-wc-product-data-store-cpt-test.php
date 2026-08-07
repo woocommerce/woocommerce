@@ -228,7 +228,7 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Excluded variable products should not be re-added to search results by their matching variations.
 	 */
-	public function test_search_products_excludes_variable_products_with_matching_variations() {
+	public function test_search_products_excludes_variable_products_with_matching_variations(): void {
 		$parent = new WC_Product_Variable();
 		$parent->set_name( 'Excludable variable product' );
 		$parent->save();
