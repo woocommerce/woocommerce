@@ -71,6 +71,9 @@
 			font-size: 16px;
 			font-weight: 600;
 			line-height: 24px;
+			// Without this it inherits wp-admin's body grey, which is lighter
+			// than every other heading on the screen.
+			color: $gray-900;
 		}
 
 		&__header-select-container {
@@ -177,6 +180,10 @@
 				font-weight: 600;
 				line-height: 24px;
 				align-items: center;
+				// The header is a bare <button>, so without this the title
+				// falls to the browser's black rather than the heading colour
+				// used elsewhere on the screen.
+				color: $gray-900;
 
 				&-image {
 					width: $icon-size;
