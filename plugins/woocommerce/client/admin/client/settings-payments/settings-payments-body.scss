@@ -35,6 +35,9 @@ body.woocommerce_page_wc-settings.woocommerce-settings-payments-tab {
 	margin: 0 -30px;
 
 	.settings-layout {
-		margin: 0 48px 0;
+		// The horizontal 48px lines the form up with the header above it. The
+		// top, plus the section heading's own leading, puts the first line of
+		// the form roughly where it sat before the header was reworked.
+		margin: $gap 48px 0;
 	}
 }
