@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use WC_Admin_Notices;
 use WC_Admin_Status;
 use WC_Helper_Updater;
 use WC_Install;
@@ -362,6 +363,38 @@ class SiteHealth {
 				),
 			),
 			'woocommerce_approved_download_directories_sync' => array(
+				'label' => __( 'WooCommerce approved download directories', 'woocommerce' ),
+				'badge' => 'security',
+				'check' => fn() => ! WC_Admin_Notices::has_notice( 'download_directories_sync_complete' ),
+				'good'  => array(
+					'label'       => __( 'WooCommerce approved download directories do not require review', 'woocommerce' ),
+					'description' => __( 'There is no completed approved download directory synchronization waiting for review.', 'woocommerce' ),
+				),
+				'fail'  => array(
+					'label'       => __( 'WooCommerce approved download directories need review', 'woocommerce' ),
+					'description' => __( 'Approved product download directory synchronization has completed. Review the list to confirm downloadable product files remain protected.', 'woocommerce' ),
+					'actions'     => array(
+						array(
+							'url'   => admin_url( 'admin.php?page=wc-settings&tab=products&section=download_urls' ),
+							'label' => __( 'Review approved directories', 'woocommerce' ),
+						),
+						array(
+							'url'   => wp_nonce_url(
+								add_query_arg( 'wc-hide-notice', 'download_directories_sync_complete', admin_url( 'site-health.php' ) ),
+								'woocommerce_hide_notices_nonce',
+								'_wc_notice_nonce'
+							),
+							'label' => __( 'Mark as reviewed', 'woocommerce' ),
+						),
+						array(
+							'url'     => 'https://woocommerce.com/document/approved-download-directories',
+							'label'   => __( 'Learn more about approved directories', 'woocommerce' ),
+							'new_tab' => true,
+						),
+					),
+				),
+			),
+			'woocommerce_approved_download_directories_enforcement' => array(
 				'label' => __( 'WooCommerce approved download directories', 'woocommerce' ),
 				'badge' => 'security',
 				'check' => fn() => Download_Directories::MODE_ENABLED === wc_get_container()->get( Download_Directories::class )->get_mode(),
