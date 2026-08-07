@@ -4,6 +4,13 @@
 /* This is imported here to avoid build errors when importing the same file in multiple places. */
 @import "./components/modals/modals.scss";
 
+// Every Payments screen lays its header title out on a row this tall — the
+// height of the business location control, which is the tallest thing any of
+// these headers carries. Stated once and applied to each header, so the title
+// and the divider below it land in the same place on all of them and nothing
+// shifts when moving between screens.
+$payments-header-row-height: 38px;
+
 /* These keyframes and spinner style are copied from the Stripe Spinner component https://docs.stripe.com/stripe-apps/components/spinner?app-sdk-version=8  */
 @keyframes SpinnerAnimationShow {
 	0% {
@@ -53,6 +60,12 @@
 			justify-content: space-between;
 			padding: $gap-smaller 48px $gap-large;
 			align-items: center;
+			// Every header on this screen closes itself off with this line,
+			// rather than leaving it to whatever renders below. What renders
+			// below varies — the provider list, or the skeleton while they
+			// load — and each drawing its own top border is how the line ended
+			// up doubled in one state and missing in another.
+			border-bottom: 1px solid $gray-200;
 
 			@media screen and (max-width: $break-xlarge) {
 				padding: $gap-smaller $gap-large $gap-large;
@@ -68,9 +81,15 @@
 		}
 
 		&__header-title {
+			display: flex;
+			align-items: center;
+			min-height: $payments-header-row-height;
 			font-size: 16px;
 			font-weight: 600;
 			line-height: 24px;
+			// Without this it inherits wp-admin's body grey, which is lighter
+			// than every other heading on the screen.
+			color: $gray-900;
 		}
 
 		&__header-select-container {
@@ -222,6 +241,10 @@
 				font-weight: 600;
 				line-height: 24px;
 				align-items: center;
+				// The header is a bare <button>, so without this the title
+				// falls to the browser's black rather than the heading colour
+				// used elsewhere on the screen.
+				color: $gray-900;
 
 				&-image {
 					width: $icon-size;
@@ -608,16 +631,30 @@
 		display: flex;
 		padding: 8px 48px 24px;
 		align-items: center;
+		// Same ownership as the main screen's header: the line belongs to the
+		// header, on both the methods list and an individual method's page.
+		border-bottom: 1px solid $gray-200;
 
 		h1 {
-			padding-left: $gap-smaller * 2;
 			// This heading renders outside the floating header, so the shared
-			// header typography doesn't reach it — restate it to match the other
-			// settings headers. padding-top trims wp-admin's default h1 padding
-			// so the title centers against the back button.
-			padding-top: 4px;
-			font-size: 15px;
-			font-weight: 500;
+			// header typography doesn't reach it. It occupies the slot the main
+			// screen gives "Payment providers", so it takes that heading's
+			// scale — the floating header's lighter 15px/500 left this h1
+			// smaller than the section headings and list rows beneath it.
+			// The gap to the chevron lives inside the back button, which sits
+			// within this heading.
+			// Laying the title out as a centred flex row, rather than letting
+			// it sit on a text baseline, is what keeps it level with the main
+			// screen's title: the back button is an inline-flex box, so a
+			// baseline would leave the descender gap below it in the heading's
+			// height. Zeroing the padding drops wp-admin's own h1 padding,
+			// which the row height now covers.
+			display: flex;
+			align-items: center;
+			min-height: $payments-header-row-height;
+			padding: 0;
+			font-size: 16px;
+			font-weight: 600;
 			color: $gray-900;
 
 			.woocommerce-settings-payments-header__title {
