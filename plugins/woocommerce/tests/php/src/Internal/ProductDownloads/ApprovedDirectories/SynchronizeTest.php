@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\ProductDownloads\ApprovedDirecto
 
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use WC_Admin_Notices;
 use WC_Queue_Interface;
 use WC_Unit_Test_Case;
 
@@ -23,6 +24,15 @@ class SynchronizeTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut = wc_get_container()->get( Synchronize::class );
+		WC_Admin_Notices::remove_notice( 'download_directories_sync_complete', true );
+	}
+
+	/**
+	 * Clean up after each test.
+	 */
+	public function tearDown(): void {
+		WC_Admin_Notices::remove_notice( 'download_directories_sync_complete', true );
+		parent::tearDown();
 	}
 
 	/**
@@ -34,7 +44,7 @@ class SynchronizeTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Ensure basic controls to start and stop synchronization behave as expected.
+	 * @testdox Ensure basic controls to start and cancel synchronization behave as expected.
 	 */
 	public function test_basic_synchronization_controls() {
 		$this->sut->start();
@@ -48,15 +58,18 @@ class SynchronizeTest extends WC_Unit_Test_Case {
 			'If a download directory synchronization process is already in progress, additional concurrent sync processes cannot be created.'
 		);
 
+		$this->sut->cancel();
 		$this->assertFalse(
-			$this->sut->start(),
-			'Synchronization process can be cancelled before it completes.'
+			$this->sut->in_progress(),
+			'Synchronization can be cancelled before it completes.'
 		);
-
-		$this->sut->stop();
 		$this->assertNull(
 			wc_get_container()->get( LegacyProxy::class )->get_instance_of( WC_Queue_Interface::class )->get_next( Synchronize::SYNC_TASK ),
 			'Once synchronization has been cancelled, any related scheduled actions will also have been cleaned up.'
+		);
+		$this->assertFalse(
+			WC_Admin_Notices::has_notice( 'download_directories_sync_complete' ),
+			'Cancelling synchronization should not create a completed synchronization review notice.'
 		);
 	}
 
@@ -86,6 +99,26 @@ class SynchronizeTest extends WC_Unit_Test_Case {
 			'Approved Download Directories sync: scan is complete!',
 			$logged_messages,
 			'We expect that completion of the synchronization process will have been recorded in the log.'
+		);
+
+		$this->assertTrue(
+			WC_Admin_Notices::has_notice( 'download_directories_sync_complete' ),
+			'Completed synchronization should create a persistent review notice.'
+		);
+	}
+
+	/**
+	 * @testdox Cancelling synchronization preserves a review notice that was already pending.
+	 */
+	public function test_cancellation_preserves_pending_review_notice() {
+		WC_Admin_Notices::add_notice( 'download_directories_sync_complete', true );
+
+		$this->sut->start();
+		$this->sut->cancel();
+
+		$this->assertTrue(
+			WC_Admin_Notices::has_notice( 'download_directories_sync_complete' ),
+			'Cancelling a later synchronization should not clear an existing pending review state.'
 		);
 	}
 }

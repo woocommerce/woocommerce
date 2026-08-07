@@ -368,11 +368,11 @@ class SiteHealth {
 				'check' => fn() => ! WC_Admin_Notices::has_notice( 'download_directories_sync_complete' ),
 				'good'  => array(
 					'label'       => __( 'WooCommerce approved download directories do not require review', 'woocommerce' ),
-					'description' => __( 'There is no completed approved download directories sync waiting for review.', 'woocommerce' ),
+					'description' => __( 'There is no completed approved download directory synchronization waiting for review.', 'woocommerce' ),
 				),
 				'fail'  => array(
 					'label'       => __( 'WooCommerce approved download directories need review', 'woocommerce' ),
-					'description' => __( 'The approved product download directories list was updated. Review it to confirm downloadable product files remain protected.', 'woocommerce' ),
+					'description' => __( 'Approved product download directory synchronization has completed. Review the list to confirm downloadable product files remain protected.', 'woocommerce' ),
 					'actions'     => array(
 						array(
 							'url'   => admin_url( 'admin.php?page=wc-settings&tab=products&section=download_urls' ),

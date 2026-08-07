@@ -158,10 +158,29 @@ class Synchronize {
 	}
 
 	/**
-	 * Stops/cancels the current synchronization task.
+	 * Completes the current synchronization task and marks its results for review.
+	 *
+	 * The persistent notice is also the acknowledgement state used by Site Health. Existing
+	 * sites can therefore keep a pending review across requests and WooCommerce updates.
 	 */
 	public function stop() {
 		WC_Admin_Notices::add_notice( 'download_directories_sync_complete', true );
+		$this->clean_up();
+	}
+
+	/**
+	 * Cancels the current synchronization task without marking its results for review.
+	 *
+	 * @since 11.1.0
+	 */
+	public function cancel(): void {
+		$this->clean_up();
+	}
+
+	/**
+	 * Cleans up synchronization state and scheduled actions.
+	 */
+	private function clean_up(): void {
 		delete_option( self::SYNC_TASK_PAGE );
 		delete_option( self::SYNC_TASK_PROGRESS );
 		$this->queue->cancel( self::SYNC_TASK );
