@@ -94,7 +94,7 @@ const OfflinePaymentGatewayWrapper = ( {
 							<BackButton
 								href={ getNewPath( {}, '/offline' ) }
 								tooltipText={ __(
-									'Return to payments settings',
+									'Return to offline payment methods',
 									'woocommerce'
 								) }
 								isRoute={ true }
