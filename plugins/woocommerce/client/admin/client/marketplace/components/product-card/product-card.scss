@@ -409,6 +409,8 @@
 			.woocommerce-marketplace__product-card__footer {
 				flex-wrap: wrap;
 				gap: 4px;
+				/* Compact footers hug their content; 36px is the regular-card row height. */
+				min-height: 0;
 			}
 
 			.woocommerce-marketplace__product-card__details {
