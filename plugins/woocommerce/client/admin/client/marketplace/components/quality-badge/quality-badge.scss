@@ -29,16 +29,23 @@
 	// "Show only <badge>" toggle in the listing sub-header.
 	&__quality-badge-filter {
 		align-items: center;
-		border: 1px solid $gray-300;
-		border-radius: $grid-unit-05;
+		border: 1px solid $studio-gray-5;
+		border-radius: 2px;
 		display: flex;
 		flex-shrink: 0;
-		gap: $grid-unit-10;
-		padding: $grid-unit-05 $grid-unit-15;
+		height: 40px;
+		padding: 0 $grid-unit-15;
 
 		label {
 			cursor: pointer;
+			font-size: 12px;
+			line-height: 16px;
+			margin: 0 $grid-unit-05 0 $grid-unit-10;
 			white-space: nowrap;
+		}
+
+		&__name {
+			font-weight: 500;
 		}
 
 		&__info {
@@ -49,6 +56,10 @@
 			cursor: pointer;
 			display: flex;
 			padding: 0;
+		}
+
+		.components-form-toggle {
+			margin-left: $grid-unit-20;
 		}
 	}
 }

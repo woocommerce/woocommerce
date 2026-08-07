@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useContext } from '@wordpress/element';
+import { createInterpolateElement, useContext } from '@wordpress/element';
 import { FormToggle, Icon, Tooltip } from '@wordpress/components';
 import { info } from '@wordpress/icons';
 import { useInstanceId } from '@wordpress/compose';
@@ -48,12 +48,22 @@ export default function QualityBadgeFilter() {
 
 	return (
 		<div className="woocommerce-marketplace__quality-badge-filter">
-			<QualityBadgeIcon size={ 20 } />
+			<QualityBadgeIcon size={ 18 } />
 			<label htmlFor={ toggleId }>
-				{ sprintf(
-					// translators: %s: name of the quality badge, supplied by the WooCommerce.com API (e.g. "Excellence Verified").
-					__( 'Show only %s', 'woocommerce' ),
-					badge.label
+				{ createInterpolateElement(
+					sprintf(
+						// translators: %s: name of the quality badge, supplied by the WooCommerce.com API (e.g. "Excellence Verified").
+						__(
+							'Show only <badgeName>%s</badgeName>',
+							'woocommerce'
+						),
+						badge.label
+					),
+					{
+						badgeName: (
+							<span className="woocommerce-marketplace__quality-badge-filter__name" />
+						),
+					}
 				) }
 			</label>
 			{ badge.tooltip && (
