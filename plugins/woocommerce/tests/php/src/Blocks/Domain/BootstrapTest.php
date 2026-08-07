@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\Domain;
 
 use Automattic\WooCommerce\Blocks\BlockTypesController;
-use Automattic\WooCommerce\Blocks\Package;
 use WC_Unit_Test_Case;
 use WP_Block_Type_Registry;
 
@@ -74,19 +73,19 @@ class BootstrapTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Set the private registration flag on the shared BlockTypesController instance.
+	 * Set the static registration flag on BlockTypesController.
 	 *
 	 * The flag records whether register_blocks() ran in the current request. The test bootstrap registers the
 	 * blocks once for the whole PHPUnit process, so simulating a request whose eager registration was skipped
-	 * requires clearing the flag alongside unregistering the block types.
+	 * requires clearing the flag alongside unregistering the block types. It is static (see the property
+	 * docblock), so this sets it on the class, not on any one container instance.
 	 *
 	 * @param bool $has_run The flag value to set.
 	 */
 	private function set_register_blocks_has_run_flag( bool $has_run ): void {
-		$controller = Package::container()->get( BlockTypesController::class );
-		$property   = new \ReflectionProperty( BlockTypesController::class, 'register_blocks_has_run' );
+		$property = new \ReflectionProperty( BlockTypesController::class, 'register_blocks_has_run' );
 		$property->setAccessible( true );
-		$property->setValue( $controller, $has_run );
+		$property->setValue( null, $has_run );
 	}
 
 	/**

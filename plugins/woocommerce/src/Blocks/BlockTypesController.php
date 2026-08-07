@@ -43,12 +43,14 @@ final class BlockTypesController {
 	/**
 	 * Whether register_blocks() has run in this request.
 	 *
-	 * Only tracks the AbstractBlock-based block types registered by register_blocks(); blocks registered
-	 * through other paths are not reflected here.
+	 * Static because it mirrors the WordPress block-type registry, which is a process-global singleton: once
+	 * any controller has registered the blocks they are registered for the whole request, regardless of which
+	 * container instance owns the controller. Only tracks the AbstractBlock-based block types registered by
+	 * register_blocks(); blocks registered through other paths are not reflected here.
 	 *
 	 * @var bool
 	 */
-	private $register_blocks_has_run = false;
+	private static $register_blocks_has_run = false;
 
 	/**
 	 * Constructor.
@@ -122,7 +124,7 @@ final class BlockTypesController {
 	public function register_blocks() {
 		// Set before registering rather than after: it guards against re-entry through the on-demand
 		// registration in Bootstrap, and a registration failure must not be retried on later filter fires.
-		$this->register_blocks_has_run = true;
+		self::$register_blocks_has_run = true;
 		$this->register_block_metadata();
 		$block_types = $this->get_block_types();
 
@@ -146,7 +148,7 @@ final class BlockTypesController {
 	 * @return bool True if register_blocks() has already run.
 	 */
 	public function register_blocks_has_run() {
-		return $this->register_blocks_has_run;
+		return self::$register_blocks_has_run;
 	}
 
 	/**

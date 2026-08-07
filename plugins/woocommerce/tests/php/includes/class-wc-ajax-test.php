@@ -909,19 +909,19 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
-	 * Set the private registration flag on the shared BlockTypesController instance.
+	 * Set the static registration flag on BlockTypesController.
 	 *
 	 * The flag records whether register_blocks() ran in the current request, and Bootstrap's on-demand block
 	 * registration consults it. Tests that simulate a request whose eager registration was skipped must clear
-	 * it alongside unregistering the block types, and restore it afterwards.
+	 * it alongside unregistering the block types, and restore it afterwards. It is static, so this sets it on
+	 * the class, not on any one container instance.
 	 *
 	 * @param bool $has_run The flag value to set.
 	 */
 	private function set_register_blocks_has_run_flag( bool $has_run ): void {
-		$controller = \Automattic\WooCommerce\Blocks\Package::container()->get( \Automattic\WooCommerce\Blocks\BlockTypesController::class );
-		$property   = new \ReflectionProperty( \Automattic\WooCommerce\Blocks\BlockTypesController::class, 'register_blocks_has_run' );
+		$property = new \ReflectionProperty( \Automattic\WooCommerce\Blocks\BlockTypesController::class, 'register_blocks_has_run' );
 		$property->setAccessible( true );
-		$property->setValue( $controller, $has_run );
+		$property->setValue( null, $has_run );
 	}
 
 	/**
