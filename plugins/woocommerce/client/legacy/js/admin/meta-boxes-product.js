@@ -161,6 +161,9 @@ jQuery( function ( $ ) {
 			} else if ( 'grouped' === select_val ) {
 				$( 'input#_downloadable' ).prop( 'checked', false );
 				$( 'input#_virtual' ).prop( 'checked', false );
+				$( '[name="_stock_status"]' )
+					.val( [ 'instock' ] )
+					.trigger( 'change' );
 			} else if ( 'external' === select_val ) {
 				$( 'input#_downloadable' ).prop( 'checked', false );
 				$( 'input#_virtual' ).prop( 'checked', false );
