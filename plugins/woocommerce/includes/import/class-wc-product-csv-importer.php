@@ -1183,7 +1183,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 		$parent = wc_get_product( $parsed_data['parent_id'] );
 
-		if ( ! $parent ) {
+		if ( ! $parent || ! $parent->is_type( ProductType::VARIABLE ) ) {
 			return false;
 		}
 

@@ -283,6 +283,43 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test that variation rows are skipped when the parent is not a variable product, even if the filter tries to force them.
+	 */
+	public function test_import_skips_new_variations_of_non_variable_parents_26256() {
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Import 26256 Simple' );
+		$product->set_sku( 'IMPORT-26256-PARENT' );
+		$product->save();
+
+		add_filter( 'woocommerce_product_import_create_variation_of_existing_product', '__return_true' );
+
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-26256-simple-parent.csv';
+		file_put_contents( $csv_file, "Type,SKU,Name,Parent\nvariation,IMPORT-26256-L,Import 26256 Simple - L,IMPORT-26256-PARENT\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$args     = array(
+			'parse'           => true,
+			'update_existing' => true,
+			'mapping'         => array(
+				'Type'   => 'type',
+				'SKU'    => 'sku',
+				'Name'   => 'name',
+				'Parent' => 'parent_id',
+			),
+		);
+		$importer = new WC_Product_CSV_Importer( $csv_file, $args );
+		$data     = $importer->import();
+		wp_delete_file( $csv_file );
+
+		remove_filter( 'woocommerce_product_import_create_variation_of_existing_product', '__return_true' );
+
+		$this->assertEmpty( $data['imported_variations'], 'Expected 0 imported variations, got ' . count( $data['imported_variations'] ) );
+		$this->assertCount( 1, $data['skipped'], 'Expected 1 skipped product, got ' . count( $data['skipped'] ) );
+		$this->assertFalse( wc_get_product_id_by_sku( 'IMPORT-26256-L' ) > 0, 'Expected no variation to be created for a non-variable parent' );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
 	 * @testdox Test that a variation row whose ID belongs to an existing post of another type is skipped when updating existing products, even if the filter tries to force it.
 	 */
 	public function test_import_skips_new_variations_with_a_foreign_post_id_26256() {
