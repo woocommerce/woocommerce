@@ -5,10 +5,11 @@
  * @package WooCommerce\Classes
  */
 
-use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
+use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\CallbackUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -135,10 +136,19 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			$product_id = $product->get_id();
 			wp_prime_option_caches(
 				array(
+					// Transients from \WC_Product_Variable_Data_Store_CPT class.
 					'_transient_wc_var_prices_' . $product_id,
 					'_transient_timeout_wc_var_prices_' . $product_id,
 					'_transient_wc_product_children_' . $product_id,
 					'_transient_timeout_wc_product_children_' . $product_id,
+					// Transients from \WC_Product_Variable class.
+					'_transient_wc_child_has_weight_' . $product_id,
+					'_transient_timeout_wc_child_has_weight_' . $product_id,
+					'_transient_wc_child_has_dimensions_' . $product_id,
+					'_transient_timeout_wc_child_has_dimensions_' . $product_id,
+					// Transients from \wc_get_related_products function.
+					'_transient_wc_related_' . $product_id,
+					'_transient_timeout_wc_related_' . $product_id,
 				)
 			);
 		}
@@ -637,11 +647,13 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		 * Filters whether to use the legacy callback serialization algorithm.
 		 *
 		 * By default, WooCommerce will use the legacy algorithm to get the callback signatures
-		 * for variation price hash calculation. This algorithm serializes the entire callback
-		 * array as it comes from $wp_filter, which means that for callbacks that are class methods
-		 * the entire object will be serialized, including the current values of the class variables.
-		 * This implies that a change in these variables will change the price hash,
-		 * even if they do not affect the price calculation.
+		 * for variation price hash calculation. That algorithm includes the callback array as it
+		 * comes from $wp_filter in the hashed data, which is then JSON encoded. For callbacks that
+		 * are class methods, JSON encoding captures the object's PUBLIC property values only;
+		 * private and protected properties are not captured. Note that dynamically created
+		 * properties are public, and that a class implementing JsonSerializable controls what is
+		 * captured through its jsonSerialize() method. A change in any captured value will change
+		 * the price hash, even if it does not affect the price calculation.
 		 *
 		 * This filter allows using CallbackUtil instead, which generates a more stable signature
 		 * that does not depend on the internal state of objects, but only on the method names and
@@ -1017,8 +1029,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			}
 		}
 
-		delete_transient( 'wc_product_children_' . $product_id );
-		delete_transient( 'wc_var_prices_' . $product_id );
+		wc_get_container()->get( ProductUtil::class )->delete_product_specific_transients_for_products( array( $product_id ) );
 	}
 
 	/**
@@ -1045,8 +1056,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			}
 		}
 
-		delete_transient( 'wc_product_children_' . $product_id );
-		delete_transient( 'wc_var_prices_' . $product_id );
+		wc_get_container()->get( ProductUtil::class )->delete_product_specific_transients_for_products( array( $product_id ) );
 	}
 
 	/**

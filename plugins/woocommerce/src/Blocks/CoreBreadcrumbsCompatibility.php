@@ -9,30 +9,6 @@ namespace Automattic\WooCommerce\Blocks;
  * @internal
  */
 final class CoreBreadcrumbsCompatibility {
-
-	/**
-	 * Whether the compatibility hooks have been initialized.
-	 *
-	 * @var bool
-	 */
-	private $is_initialized = false;
-
-	/**
-	 * Initialize Core Breadcrumbs compatibility hooks.
-	 *
-	 * @internal
-	 */
-	public function init(): void {
-		if ( $this->is_initialized ) {
-			return;
-		}
-
-		add_filter( 'block_core_breadcrumbs_post_type_settings', array( $this, 'set_product_breadcrumbs_preferred_taxonomy' ), 10, 3 );
-		add_filter( 'block_core_breadcrumbs_items', array( $this, 'apply_woocommerce_breadcrumb_filters' ), 10, 1 );
-
-		$this->is_initialized = true;
-	}
-
 	/*
 	 * Compatibility methods.
 	 */

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent WC_Abstract_Order::add_item() from silently overwriting an unsaved item when items are removed and re-added before save() (count()-based temporary key collision).

@@ -66,7 +66,7 @@ function Editor( {
 
 	const { setEmailPost } = useDispatch( storeName );
 	useEffect( () => {
-		setEmailPost( postId, postType );
+		void setEmailPost( postId, postType );
 		setIsInitialized( true );
 	}, [ postId, postType, setEmailPost ] );
 
@@ -79,6 +79,9 @@ function Editor( {
 			...settings,
 			allowedBlockTypes: getAllowedBlockNames(),
 			isPreviewMode: isPreview,
+			// WordPress 7.1 responsive styles produce media-query-based styles
+			// that the email renderer cannot inline, so keep the feature off.
+			responsiveEditingEnabled: false,
 		} ),
 		[ settings, isPreview ]
 	);
@@ -161,7 +164,7 @@ export function initialize( elementId: string ) {
 
 	// Set configuration to store from window object for backward compatibility
 	const editorConfig = getEditorConfigFromWindow();
-	dispatch( storeName ).setEditorConfig( editorConfig );
+	void dispatch( storeName ).setEditorConfig( editorConfig );
 
 	const root = createRoot( container );
 	root.render(
@@ -195,14 +198,14 @@ export function ExperimentalEmailEditor( {
 		const editorConfig = config || getEditorConfigFromWindow();
 		onInit();
 
-		dispatch( storeName ).setEditorConfig( editorConfig );
+		void dispatch( storeName ).setEditorConfig( editorConfig );
 		setIsInitialized( true );
 		// Cleanup global editor settings
 		return () => {
 			try {
 				cleanupConfigurationChanges();
 			} finally {
-				dispatch( editorStore ).updateEditorSettings(
+				void dispatch( editorStore ).updateEditorSettings(
 					backupEditorSettings
 				);
 			}

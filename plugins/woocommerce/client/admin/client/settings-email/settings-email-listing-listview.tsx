@@ -235,7 +235,7 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 				isEligible: ( item: EmailType ) =>
 					item.status === 'enabled' || item.status === 'disabled',
 				callback: ( items: EmailType[] ) => {
-					updateEmailEnabledStatus(
+					void updateEmailEnabledStatus(
 						items[ 0 ].id,
 						! items[ 0 ].enabled
 					);
