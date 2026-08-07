@@ -31,13 +31,18 @@ composer exec phpcs-changed -- -s --git --git-base $baseBranch $changedFiles || 
 
 # The readable report above is the log people dig into; this re-runs the same check
 # only to render the same findings as checkstyle for cs2pr (phpcs-changed can only
-# emit one format per run). Guarded on failure so green runs never pay for it. phpcs
-# names files relative to this directory, but GitHub resolves annotation paths from
-# the repository root, so prefix them on the way through.
+# emit one format per run). Guarded on failure so green runs never pay for it.
+#
+# GitHub resolves annotation paths from the repository root, so every path needs this
+# directory's prefix or the annotation silently never attaches to the diff. phpcs-changed
+# reports the git path (already prefixed) when it resolves a file through git, but a
+# path relative to this directory when it falls back to plain phpcs, so strip the prefix
+# before adding it: that lands on the right path either way.
 if [[ -n $WC_LINT_CHECKSTYLE_FILE && $status -eq 1 ]]; then
     prefix=$(git rev-parse --show-prefix)
     composer exec phpcs-changed -- --git --git-base $baseBranch --report=checkstyle $changedFiles |
-        sed "s|<file name=\"|<file name=\"${prefix}|g" > "$WC_LINT_CHECKSTYLE_FILE"
+        sed -e "s|<file name=\"${prefix}|<file name=\"|g" \
+            -e "s|<file name=\"|<file name=\"${prefix}|g" > "$WC_LINT_CHECKSTYLE_FILE"
 fi
 
 # Also verify that no new PHP functions are added.
