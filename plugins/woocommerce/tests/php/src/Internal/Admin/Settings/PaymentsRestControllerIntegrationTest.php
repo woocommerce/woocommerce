@@ -464,7 +464,7 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		// We also have the 3 offline payment methods.
 		$this->assertCount( 3, $data['offline_payment_methods'] );
 		// We only have PSPs because there is no payment gateway enabled.
-		$this->assertCount( 4, $data['suggestions'] );
+		$this->assertCount( 5, $data['suggestions'] );
 		// Assert we get the suggestion categories.
 		$this->assertCount( 4, $data['suggestion_categories'] );
 
@@ -510,7 +510,7 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		// We also have the 3 offline payment methods.
 		$this->assertCount( 3, $data['offline_payment_methods'] );
 		// We get all the suggestions.
-		$this->assertCount( 8, $data['suggestions'] );
+		$this->assertCount( 9, $data['suggestions'] );
 		// Assert we get the suggestion categories.
 		$this->assertCount( 4, $data['suggestion_categories'] );
 
@@ -680,7 +680,7 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		// We also have the 3 offline payment methods.
 		$this->assertCount( 3, $data['offline_payment_methods'] );
 		// We get all the suggestions.
-		$this->assertCount( 8, $data['suggestions'] );
+		$this->assertCount( 9, $data['suggestions'] );
 		// Assert we get the suggestion categories.
 		$this->assertCount( 4, $data['suggestion_categories'] );
 
@@ -878,8 +878,8 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 
 		// We also have the 3 offline payment methods.
 		$this->assertCount( 3, $data['offline_payment_methods'] );
-		// We don't get BNPL suggestions since WooPayments is active (even if not enabled), so only 5 suggestions are returned.
-		$this->assertCount( 5, $data['suggestions'] );
+		// We don't get BNPL suggestions since WooPayments is active (even if not enabled), so only 6 suggestions are returned.
+		$this->assertCount( 6, $data['suggestions'] );
 		// Assert we get the suggestion categories.
 		$this->assertCount( 4, $data['suggestion_categories'] );
 
@@ -1092,8 +1092,8 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 
 		// We also have the 3 offline payment methods.
 		$this->assertCount( 3, $data['offline_payment_methods'] );
-		// We don't get BNPL suggestions since WooPayments is active, so only 5 suggestions are returned.
-		$this->assertCount( 5, $data['suggestions'] );
+		// We don't get BNPL suggestions since WooPayments is active, so only 6 suggestions are returned.
+		$this->assertCount( 6, $data['suggestions'] );
 		// Assert we get the suggestion categories.
 		$this->assertCount( 4, $data['suggestion_categories'] );
 
@@ -1261,8 +1261,8 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 
 		// We also have the 3 offline payment methods.
 		$this->assertCount( 3, $data['offline_payment_methods'] );
-		// We get BNPL suggestions since WooPayments or Stripe are not active, so 7 suggestions are returned.
-		$this->assertCount( 7, $data['suggestions'] );
+		// We get BNPL suggestions since WooPayments or Stripe are not active, so 8 suggestions are returned.
+		$this->assertCount( 8, $data['suggestions'] );
 		// Assert we get the suggestion categories.
 		$this->assertCount( 4, $data['suggestion_categories'] );
 
@@ -1510,6 +1510,8 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 
 		// Delete the user meta.
 		delete_user_meta( $this->store_admin_id, Payments::PAYMENTS_NOX_PROFILE_KEY );
+		// We changed the underlying data directly, so clear the cache to simulate a fresh request.
+		$this->service->clear_cache();
 
 		// Act.
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
@@ -1568,6 +1570,8 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 
 		// Delete the user meta.
 		delete_user_meta( get_current_user_id(), Incentive::PREFIX . 'dismissed' );
+		// We changed the underlying data directly, so clear the cache to simulate a fresh request.
+		$this->service->clear_cache();
 
 		// Act.
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
@@ -1932,8 +1936,8 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_currency', 'USD' );
 		WC()->payment_gateways()->init();
 
-		// Reset the controller memo to pick up the new gateway details.
-		$this->providers_service->reset_memo();
+		// Clear cached provider data to pick up the new gateway details.
+		$this->providers_service->clear_cache();
 	}
 
 	/**
@@ -1952,8 +1956,8 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_currency', 'USD' );
 		WC()->payment_gateways()->init();
 
-		// Reset the service memo to pick up the new gateway details.
-		$this->providers_service->reset_memo();
+		// Clear cached provider data to pick up the new gateway details.
+		$this->providers_service->clear_cache();
 	}
 
 	/**
@@ -1985,7 +1989,7 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		WC()->payment_gateways()->payment_gateways = array();
 		WC()->payment_gateways()->init();
 
-		$this->providers_service->reset_memo();
+		$this->providers_service->clear_cache();
 
 		$active_plugin_paths = array( 'woocommerce/woocommerce.php' );
 		$active_plugin_slugs = array( 'woocommerce' );

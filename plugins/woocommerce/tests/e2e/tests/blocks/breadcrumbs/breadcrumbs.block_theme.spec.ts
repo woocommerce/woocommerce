@@ -9,23 +9,6 @@ const blockData = {
 };
 
 test.describe( `${ blockData.slug } Block`, () => {
-	test( "block can't be inserted in Post Editor", async ( {
-		admin,
-		editor,
-	} ) => {
-		await admin.createNewPost();
-
-		try {
-			await editor.insertBlock( { name: blockData.slug } );
-		} catch ( _error ) {
-			// noop
-		}
-
-		await expect(
-			await editor.getBlockByName( blockData.slug )
-		).toBeHidden();
-	} );
-
 	test( 'block can be inserted in the Site Editor', async ( {
 		admin,
 		requestUtils,

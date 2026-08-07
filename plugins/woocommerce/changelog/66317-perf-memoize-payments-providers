@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Cache payment provider lists and gateway details in a shared request cache so the dashboard setup widget, onboarding task list, and Payments settings do not repeat expensive provider checks.

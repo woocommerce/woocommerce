@@ -420,8 +420,10 @@ class WC_Helper_Updater {
 		$subscriptions = WC_Helper::get_subscriptions();
 
 		foreach ( $subscriptions as $subscription ) {
-			$payload[ $subscription['product_id'] ] = array(
-				'product_id' => $subscription['product_id'],
+			$product_id = (int) $subscription['product_id'];
+
+			$payload[ $product_id ] = array(
+				'product_id' => $product_id,
 				'file_id'    => '',
 			);
 		}
@@ -456,8 +458,10 @@ class WC_Helper_Updater {
 		$subscriptions = WC_Helper::get_subscriptions();
 
 		foreach ( $subscriptions as $subscription ) {
-			$payload[ $subscription['product_id'] ] = array(
-				'product_id' => $subscription['product_id'],
+			$product_id = (int) $subscription['product_id'];
+
+			$payload[ $product_id ] = array(
+				'product_id' => $product_id,
 				'file_id'    => '',
 			);
 		}

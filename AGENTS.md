@@ -173,6 +173,12 @@ WordPress exposes more contracts than class and function signatures. The followi
 
 **Hooks and filters are public contracts.** Every `do_action` and `apply_filters` call is an interface that third-party callbacks depend on. Removing a hook, renaming it, or removing/reordering its arguments breaks every attached callback. Changing *when* or *whether* a hook fires can break consumers that depend on its timing. Additive is the safe path: append new arguments at the end, never remove or reorder existing ones. To retire a hook, fire it through `do_action_deprecated()` / `apply_filters_deprecated()` for a deprecation window instead of deleting it.
 
+**Never trust data that flows through hooks.** Keep hook callback parameters untyped and validate or coerce the value before passing it to strictly typed code, since any callback can receive a value another one produced. And when firing a filter, validate the final return value before using it, since any callback in the chain can return the wrong thing.
+
+**Overridable classes are contracts too, including which internal methods get called.** Extensions subclass WooCommerce data stores and handler classes and override individual methods. Adding a fast path or skip that avoids calling an overridable method silently disables those overrides even though no signature changed: the extension's code simply stops running. When optimizing such a class, ensure overridable methods are still invoked on every code path, or treat the change as breaking and test against extensions known to override it.
+
+**Registered script and style handles are public contracts.** Third-party code enqueues WooCommerce handles and lists them as dependencies, including handles that were only ever registered incidentally. Renaming a handle breaks those consumers. To rename with a compatibility window, register the legacy handle as an alias that depends on the new handle (the same pattern WordPress core uses for `jquery` → `jquery-core`); do not register the same file under both handles, or pages with mixed consumers will load it twice.
+
 **Do not assume global state.** Code can run in admin, REST, CLI, cron, webhook, and front-end contexts, and not all of them set the globals a front-end request does (`$post`, `$wp_query`, an initialized session or cart). A newly introduced read of a global, or of `WC()->…` state, in a path reachable outside a standard request is a fatal or a silent misbehavior in the contexts that do not set it. Guard the exact dependency explicitly: use `function_exists`/`class_exists` for symbols, `isset` for variables, `did_action` for lifecycle state, and verify that `WC()` and the required component are initialized before dereferencing `WC()->…`.
 
 **Do not assume single-site.** Multisite changes where data lives: site-scoped vs network-scoped options (`get_option` vs `get_site_option`), per-site tables, user roles and capabilities, and upload paths all differ. A change that reads or writes site state must state in its PR whether it behaves correctly under multisite — and if it was not tested there, say so explicitly.
@@ -187,6 +193,13 @@ WordPress exposes more contracts than class and function signatures. The followi
 4. State the impact in the PR description: what changed, who could consume it, and why it is safe or what the deprecation path is.
 5. If you cannot establish the impact, stop and flag it to the user as needing review.
 
+## Database Migrations
+
+Database migrations live in `WC_Install::$db_updates`; read that class for the current mechanics before adding one. Two invariants have broken real releases when violated:
+
+- Migration keys are one-shot: sites that updated past a key never re-run it. A migration added after a prerelease of the same version has shipped needs a new suffixed key (see existing examples in `$db_updates`), and a key must never be ahead of the version it ships in.
+- Feature flag defaults are persisted, so changing `enabled_by_default` alone doesn't change behavior on existing sites; ship a migration or remove the flag.
+
 ## Block Development
 
 ### `block.json` Attribute Defaults
@@ -198,6 +211,10 @@ Do not add `default` values to block attributes in `block.json`.
 - Default attribute values can be indistinguishable from missing attributes when parsed, especially when the default value is not serialized into saved block markup.
 - Defaults can create subtle conflicts with `theme.json`, block supports, editor controls, deprecations, and migrations.
 - During implementation or review, flag any newly inserted `default` in `block.json`.
+
+### `block.json` Field Types
+
+Consult the [Gutenberg Block Metadata reference](https://developer.wordpress.org/block-editor/reference-guides/block-api/block-metadata/) as the source of truth for `block.json` field types. Several fields (`style`, `editorStyle`, `script`, `viewScript`) accept `string | string[]`, so code that reads them must handle both shapes — don't assume a string.
 
 ## Interactivity API Stores
 
