@@ -14,6 +14,11 @@ use WC_Unit_Test_Case;
  */
 class SynchronizeTest extends WC_Unit_Test_Case {
 	/**
+	 * Option used to mark a synchronization as cancelled.
+	 */
+	private const SYNC_TASK_CANCELLED = 'wc_product_download_dir_sync_cancelled';
+
+	/**
 	 * @var Synchronize
 	 */
 	private $sut;
@@ -24,6 +29,7 @@ class SynchronizeTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut = wc_get_container()->get( Synchronize::class );
+		delete_option( self::SYNC_TASK_CANCELLED );
 		WC_Admin_Notices::remove_notice( 'download_directories_sync_complete', true );
 	}
 
@@ -31,6 +37,8 @@ class SynchronizeTest extends WC_Unit_Test_Case {
 	 * Clean up after each test.
 	 */
 	public function tearDown(): void {
+		$this->sut->cancel();
+		delete_option( self::SYNC_TASK_CANCELLED );
 		WC_Admin_Notices::remove_notice( 'download_directories_sync_complete', true );
 		parent::tearDown();
 	}
@@ -46,7 +54,7 @@ class SynchronizeTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Ensure basic controls to start and cancel synchronization behave as expected.
 	 */
-	public function test_basic_synchronization_controls() {
+	public function test_basic_synchronization_controls(): void {
 		$this->sut->start();
 		$this->assertTrue(
 			$this->sut->in_progress(),
@@ -71,12 +79,19 @@ class SynchronizeTest extends WC_Unit_Test_Case {
 			WC_Admin_Notices::has_notice( 'download_directories_sync_complete' ),
 			'Cancelling synchronization should not create a completed synchronization review notice.'
 		);
+
+		$this->assertTrue( $this->sut->start(), 'A new synchronization should be able to start after cancellation.' );
+		$this->sut->run();
+		$this->assertTrue(
+			WC_Admin_Notices::has_notice( 'download_directories_sync_complete' ),
+			'A new synchronization should complete normally after a previous synchronization was cancelled.'
+		);
 	}
 
 	/**
 	 * @testdox Verify expected logging and clean-up take place during and following synchronization of download directories.
 	 */
-	public function test_sync_process() {
+	public function test_sync_process(): void {
 		$logged_messages = array();
 
 		$log_watcher = function ( string $logged_message ) use ( &$logged_messages ) {
@@ -110,7 +125,7 @@ class SynchronizeTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Cancelling synchronization preserves a review notice that was already pending.
 	 */
-	public function test_cancellation_preserves_pending_review_notice() {
+	public function test_cancellation_preserves_pending_review_notice(): void {
 		WC_Admin_Notices::add_notice( 'download_directories_sync_complete', true );
 
 		$this->sut->start();
@@ -119,6 +134,39 @@ class SynchronizeTest extends WC_Unit_Test_Case {
 		$this->assertTrue(
 			WC_Admin_Notices::has_notice( 'download_directories_sync_complete' ),
 			'Cancelling a later synchronization should not clear an existing pending review state.'
+		);
+	}
+
+	/**
+	 * @testdox Cancelling an active batch does not mark synchronization as complete.
+	 */
+	public function test_cancellation_during_active_batch_does_not_mark_sync_complete(): void {
+		$cancelled           = false;
+		$cancel_during_batch = function () use ( &$cancelled ): void {
+			if ( ! $cancelled ) {
+				$cancelled = true;
+				$this->sut->cancel();
+			}
+		};
+
+		$this->sut->start();
+		add_action( 'update_option_' . Synchronize::SYNC_TASK_PAGE, $cancel_during_batch, 10, 0 );
+
+		try {
+			$this->sut->run();
+		} finally {
+			remove_action( 'update_option_' . Synchronize::SYNC_TASK_PAGE, $cancel_during_batch, 10 );
+		}
+
+		$this->assertTrue( $cancelled, 'The test should cancel synchronization while a batch is active.' );
+		$this->assertFalse( $this->sut->in_progress(), 'An active batch should clean up synchronization state after cancellation.' );
+		$this->assertFalse(
+			WC_Admin_Notices::has_notice( 'download_directories_sync_complete' ),
+			'An active batch should not create a completion notice after cancellation.'
+		);
+		$this->assertNull(
+			wc_get_container()->get( LegacyProxy::class )->get_instance_of( WC_Queue_Interface::class )->get_next( Synchronize::SYNC_TASK ),
+			'An active batch should not schedule more synchronization work after cancellation.'
 		);
 	}
 }

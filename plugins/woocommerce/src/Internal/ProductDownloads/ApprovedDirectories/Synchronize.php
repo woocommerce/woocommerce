@@ -37,6 +37,11 @@ class Synchronize {
 	public const SYNC_TASK_PROGRESS = 'wc_product_download_dir_sync_progress';
 
 	/**
+	 * Used to prevent an active synchronization task from continuing after cancellation.
+	 */
+	private const SYNC_TASK_CANCELLED = 'wc_product_download_dir_sync_cancelled';
+
+	/**
 	 * Number of downloadable products to be processed in each atomic sync task.
 	 */
 	public const SYNC_TASK_BATCH_SIZE = 20;
@@ -123,6 +128,7 @@ class Synchronize {
 			return false;
 		}
 
+		delete_option( self::SYNC_TASK_CANCELLED );
 		update_option( self::SYNC_TASK_PAGE, 1 );
 		$this->queue->schedule_single( time(), self::SYNC_TASK, array(), self::SYNC_TASK_GROUP );
 		wc_get_logger()->log( 'info', __( 'Approved Download Directories sync: new scan scheduled.', 'woocommerce' ) );
@@ -133,10 +139,20 @@ class Synchronize {
 	 * Runs the synchronization task.
 	 */
 	public function run() {
+		if ( $this->is_cancelled() ) {
+			$this->clean_up();
+			return;
+		}
+
 		$products = $this->get_next_set_of_downloadable_products();
 
 		foreach ( $products as $product ) {
 			$this->process_product( $product );
+		}
+
+		if ( $this->is_cancelled() ) {
+			$this->clean_up();
+			return;
 		}
 
 		// Detect if we have reached the end of the task.
@@ -164,6 +180,11 @@ class Synchronize {
 	 * sites can therefore keep a pending review across requests and WooCommerce updates.
 	 */
 	public function stop() {
+		if ( $this->is_cancelled() ) {
+			$this->clean_up();
+			return;
+		}
+
 		WC_Admin_Notices::add_notice( 'download_directories_sync_complete', true );
 		$this->clean_up();
 	}
@@ -174,7 +195,17 @@ class Synchronize {
 	 * @since 11.1.0
 	 */
 	public function cancel(): void {
+		update_option( self::SYNC_TASK_CANCELLED, true );
 		$this->clean_up();
+	}
+
+	/**
+	 * Indicates whether the current synchronization was cancelled.
+	 *
+	 * @phpstan-impure
+	 */
+	private function is_cancelled(): bool {
+		return (bool) get_option( self::SYNC_TASK_CANCELLED, false );
 	}
 
 	/**
