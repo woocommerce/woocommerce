@@ -32,9 +32,19 @@ import {
  * This page is used to manage the settings for the BACS (Direct bank transfer) payment gateway.
  */
 export const SettingsPaymentsBacs = () => {
-	const storeCountryCode =
-		window.wcSettings?.admin?.preloadSettings?.general
-			?.woocommerce_default_country || 'US';
+	// The Payments settings header lets the merchant set a business location
+	// independently of the store address, and keeps this global in sync when
+	// they change it. Start a new account there, since it is the more recent
+	// statement of where they bank. The store's base country is the fallback;
+	// its stored form can carry a state suffix ('US:CA'), which matches neither
+	// the country field's options nor the routing-number rules.
+	const defaultAccountCountry =
+		window.wcSettings?.admin?.woocommerce_payments_nox_profile
+			?.business_country_code ||
+		(
+			window.wcSettings?.admin?.preloadSettings?.general
+				?.woocommerce_default_country || 'US'
+		).split( ':' )[ 0 ];
 
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( 'core/notices' );
@@ -257,7 +267,7 @@ export const SettingsPaymentsBacs = () => {
 									setAccounts( bankAccounts );
 									setHasChanges( true );
 								} }
-								defaultCountry={ storeCountryCode }
+								defaultCountry={ defaultAccountCountry }
 							/>
 						) }
 					</Settings.Section>

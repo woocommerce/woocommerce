@@ -17,7 +17,12 @@ jest.mock( '@wordpress/data', () => ( {
 } ) );
 
 jest.mock( '~/settings-payments/components/bank-accounts-list', () => ( {
-	BankAccountsList: () => <div data-testid="bank-accounts-list" />,
+	BankAccountsList: ( { defaultCountry }: { defaultCountry: string } ) => (
+		<div
+			data-testid="bank-accounts-list"
+			data-default-country={ defaultCountry }
+		/>
+	),
 } ) );
 
 const bacsSettings = {
@@ -88,6 +93,53 @@ describe( 'SettingsPaymentsBacs', () => {
 		expect(
 			screen.getByTestId( 'bank-accounts-list' )
 		).toBeInTheDocument();
+	} );
+
+	describe( 'country a new bank account starts in', () => {
+		const setWcSettings = ( admin: unknown ) => {
+			Object.defineProperty( window, 'wcSettings', {
+				value: { admin },
+				writable: true,
+			} );
+		};
+
+		afterEach( () => {
+			Object.defineProperty( window, 'wcSettings', {
+				value: undefined,
+				writable: true,
+			} );
+		} );
+
+		it( 'uses the business location set on the Payments settings screen', () => {
+			setWcSettings( {
+				woocommerce_payments_nox_profile: {
+					business_country_code: 'TN',
+				},
+				preloadSettings: {
+					general: { woocommerce_default_country: 'US:CA' },
+				},
+			} );
+
+			render( <SettingsPaymentsBacs /> );
+
+			expect(
+				screen.getByTestId( 'bank-accounts-list' )
+			).toHaveAttribute( 'data-default-country', 'TN' );
+		} );
+
+		it( "falls back to the store's base country, without its state suffix", () => {
+			setWcSettings( {
+				preloadSettings: {
+					general: { woocommerce_default_country: 'US:CA' },
+				},
+			} );
+
+			render( <SettingsPaymentsBacs /> );
+
+			expect(
+				screen.getByTestId( 'bank-accounts-list' )
+			).toHaveAttribute( 'data-default-country', 'US' );
+		} );
 	} );
 
 	it( 'renders placeholders while loading', () => {
