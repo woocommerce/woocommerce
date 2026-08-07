@@ -437,61 +437,91 @@ class Html_Processing_Helper {
 			return $caption_html;
 		}
 
-		// Remove dangerous content: script, style, and other executable elements.
-		$result = preg_replace( '/<(script|style|iframe|object|embed|form|input|button)\b[^>]*>.*?<\/\1>/is', '', $caption_html );
-		if ( null === $result ) {
-			$caption_html = '';
-		} else {
-			$caption_html = $result;
+		/*
+		 * Remove executable elements together with their content. The allow-list
+		 * pass below keeps the text of the tags it strips, which would turn a
+		 * script body into visible caption text.
+		 *
+		 * One pattern per element rather than a single alternation that backreferences
+		 * the opening name: with the closing tag spelled out as a literal, PCRE can
+		 * reject a caption that never closes the element outright, instead of scanning
+		 * to the end of the caption once for every opening tag it finds.
+		 */
+		foreach ( array( 'script', 'style', 'iframe', 'object', 'embed', 'form', 'input', 'button' ) as $tag ) {
+			$result = preg_replace( '/<' . $tag . '\b[^>]*>.*?<\/' . $tag . '>/is', '', $caption_html );
+			// A caption long enough to exhaust PCRE's limits keeps whatever the pass
+			// managed to remove. wp_kses() below still drops the element itself, so
+			// only the text that was inside it is left behind.
+			if ( null !== $result ) {
+				$caption_html = $result;
+			}
 		}
 
-		// Use a more conservative approach - only validate attributes, don't modify tags.
-		$allowed_tags = array( 'strong', 'em', 'a', 'mark', 'kbd', 's', 'sub', 'sup', 'span', 'br' );
+		/*
+		 * Reduce the markup to the allowed elements and attributes.
+		 *
+		 * wp_kses() rebuilds each tag it keeps from the allow-list rather than
+		 * passing the authored text through, which is what makes malformed markup
+		 * safe here. A ">" inside an attribute value still ends the tag span early,
+		 * but the allowed tag that falls out of that split is re-emitted with only
+		 * its allowed attributes. A tag left without a closing ">" cannot survive as
+		 * markup either, though which way it goes depends on what is attached to the
+		 * pre_kses hook: core escapes it to text there, and without that callback
+		 * kses drops the tag or supplies the missing ">" itself.
+		 */
+		$caption_html = wp_kses( $caption_html, self::get_allowed_caption_html(), array( 'http', 'https', 'mailto', 'tel' ) );
 
+		/*
+		 * Narrow the attribute values that survived: protocol allow-list on href,
+		 * safe CSS properties on style, rel and target normalization. Every
+		 * remaining tag is allowed, so every attribute on it is validated.
+		 */
 		$html = new \WP_HTML_Tag_Processor( $caption_html );
-
-		// First pass: Process attributes for allowed tags only.
 		while ( $html->next_tag() ) {
-			$tag_name = $html->get_tag();
-
-			// Skip processing for disallowed tags.
-			if ( ! in_array( $tag_name, $allowed_tags, true ) ) {
-				continue;
-			}
-
-			// Only process attributes for allowed tags.
 			$attributes = $html->get_attribute_names_with_prefix( '' );
 			if ( is_array( $attributes ) ) {
 				foreach ( $attributes as $attr_name ) {
-					// Validate and sanitize each attribute individually.
 					self::validate_caption_attribute( $html, $attr_name );
 				}
 			}
 		}
 
-		// Second pass: Remove disallowed tags using a simple regex approach.
-		$final_html = $html->get_updated_html();
+		return $html->get_updated_html();
+	}
 
-		// Create a regex pattern to match disallowed tags.
-		$allowed_tags_pattern = implode( '|', array_map( 'preg_quote', $allowed_tags ) );
+	/**
+	 * Elements and attributes allowed in captions, in wp_kses() format.
+	 *
+	 * Attribute values are narrowed further by validate_caption_attribute().
+	 *
+	 * @return array<string, array<string, bool>> Allowed HTML for wp_kses().
+	 */
+	private static function get_allowed_caption_html(): array {
+		$common_attributes = array(
+			'class'  => true,
+			'style'  => true,
+			'data-*' => true,
+		);
 
-		// Remove disallowed opening and closing tags, keeping only their content.
-		$result = preg_replace( '/<(?!(?:' . $allowed_tags_pattern . ')\b)[^>]*>(.*?)<\/(?!(?:' . $allowed_tags_pattern . ')\b)[^>]*>/s', '$1', $final_html );
-		if ( null === $result ) {
-			$final_html = '';
-		} else {
-			$final_html = $result;
-		}
-
-		// Remove disallowed self-closing tags.
-		$result = preg_replace( '/<(?!(?:' . $allowed_tags_pattern . ')\b)[^>]*\/>/s', '', $final_html );
-		if ( null === $result ) {
-			$final_html = '';
-		} else {
-			$final_html = $result;
-		}
-
-		return $final_html;
+		return array(
+			'a'      => array_merge(
+				$common_attributes,
+				array(
+					'href'   => true,
+					'target' => true,
+					'rel'    => true,
+				)
+			),
+			'br'     => $common_attributes,
+			'em'     => $common_attributes,
+			'kbd'    => $common_attributes,
+			'mark'   => $common_attributes,
+			's'      => $common_attributes,
+			'span'   => $common_attributes,
+			'strong' => $common_attributes,
+			'sub'    => $common_attributes,
+			'sup'    => $common_attributes,
+		);
 	}
 
 	/**

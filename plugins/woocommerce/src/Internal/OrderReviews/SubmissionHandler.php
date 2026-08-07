@@ -344,8 +344,16 @@ class SubmissionHandler {
 						'value' => (string) $order->get_id(),
 					),
 					array(
-						'key'   => ItemEligibility::VARIATION_META_KEY,
-						'value' => (string) $variation_id,
+						'relation' => 'OR',
+						array(
+							'key'   => ItemEligibility::VARIATION_META_KEY,
+							'value' => (string) $variation_id,
+						),
+						array(
+							// Pre-10.9.0 reviews have no VARIATION_META_KEY row at all.
+							'key'     => ItemEligibility::VARIATION_META_KEY,
+							'compare' => 'NOT EXISTS',
+						),
 					),
 				),
 			)

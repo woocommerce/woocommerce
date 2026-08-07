@@ -2067,7 +2067,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		if ( ! empty( $search_queries ) ) {
-			$search_where = ' AND (' . implode( ') OR (', $search_queries ) . ') ';
+			$search_where = ' AND ((' . implode( ') OR (', $search_queries ) . ')) ';
 		}
 
 		if ( ! empty( $include ) && is_array( $include ) ) {
