@@ -9,16 +9,24 @@
 		&__chip {
 			align-items: center;
 			background: $studio-gray-0;
+			border: 0;
 			border-radius: $grid-unit-05;
 			color: $gray-900;
+			cursor: pointer;
 			display: inline-flex;
+			font-family: inherit;
 			font-size: 12px;
 			font-weight: 500;
 			gap: $grid-unit-05;
 			line-height: 20px;
 			padding: 0 $grid-unit-10 0 $grid-unit-05;
-			/* Punch through the "whole card clickable" trick so the tooltip works: */
+			/* Punch through the "whole card clickable" trick so the popover opens: */
 			position: relative;
+		}
+
+		/* The tooltip-less variant is an inert label, not a control: */
+		span#{&}__chip {
+			cursor: default;
 		}
 	}
 
@@ -58,20 +66,21 @@
 			padding: 0;
 		}
 
-		&__popover .components-popover__content {
-			font-size: 12px;
-			line-height: 16px;
-			max-width: 260px;
-			padding: $grid-unit-15;
-			width: max-content;
-
-			p {
-				margin: 0 0 $grid-unit-05;
-			}
-		}
-
 		.components-form-toggle {
 			margin-left: $grid-unit-20;
+		}
+	}
+
+	// Shared explanation popover (card chip + filter info button).
+	&__quality-badge-popover .components-popover__content {
+		font-size: 12px;
+		line-height: 16px;
+		max-width: 260px;
+		padding: $grid-unit-15;
+		width: max-content;
+
+		p {
+			margin: 0 0 $grid-unit-05;
 		}
 	}
 }

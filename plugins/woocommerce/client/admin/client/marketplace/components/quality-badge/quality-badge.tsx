@@ -1,8 +1,10 @@
 /**
  * External dependencies
  */
-import { useContext } from '@wordpress/element';
-import { Tooltip } from '@wordpress/components';
+import { __, sprintf } from '@wordpress/i18n';
+import { useContext, useState } from '@wordpress/element';
+import { Popover } from '@wordpress/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -38,12 +40,63 @@ export function QualityBadgeIcon( { size = 12 }: { size?: number } ) {
 }
 
 /**
+ * Popover with the badge explanation and, when the WooCommerce.com API
+ * provides a docs URL, a "Learn more" link. Shared by the card chip and the
+ * filter's info button; a popover (not a tooltip) so the link stays reachable
+ * by pointer and keyboard.
+ */
+export function QualityBadgePopover( props: {
+	label: string;
+	tooltip: string;
+	docsUrl?: string;
+	anchor: Element | null;
+	source: 'product_card' | 'filter';
+	onClose: () => void;
+} ) {
+	return (
+		<Popover
+			className="woocommerce-marketplace__quality-badge-popover"
+			anchor={ props.anchor }
+			placement="bottom"
+			focusOnMount="firstElement"
+			onClose={ props.onClose }
+		>
+			<p>{ props.tooltip }</p>
+			{ props.docsUrl && (
+				<a
+					href={ props.docsUrl }
+					target="_blank"
+					rel="noreferrer"
+					aria-label={ sprintf(
+						// translators: %s: name of the quality badge, supplied by the WooCommerce.com API (e.g. "Excellence Verified").
+						__( 'Learn more about the %s badge', 'woocommerce' ),
+						props.label
+					) }
+					onClick={ () =>
+						recordEvent(
+							'marketplace_quality_badge_learn_more_clicked',
+							{ source: props.source }
+						)
+					}
+				>
+					{ __( 'Learn more', 'woocommerce' ) }
+				</a>
+			) }
+		</Popover>
+	);
+}
+
+/**
  * Quality badge chip shown on product cards. Whether it renders and with what
  * copy is fully driven by the WooCommerce.com API: the per-product flag comes
- * with the product data, the label/tooltip from the IAM settings endpoint.
+ * with the product data, the label/tooltip/docs URL from the IAM settings
+ * endpoint. Clicking the chip opens the explanation popover.
  */
 export default function QualityBadge( props: { product: Product } ) {
 	const { iamSettings } = useContext( MarketplaceContext );
+	const [ isOpen, setIsOpen ] = useState( false );
+	const [ anchor, setAnchor ] = useState< HTMLButtonElement | null >( null );
+
 	const badge = iamSettings?.quality_badge;
 
 	if (
@@ -54,23 +107,47 @@ export default function QualityBadge( props: { product: Product } ) {
 		return null;
 	}
 
-	const chip = (
-		<span
-			className="woocommerce-marketplace__quality-badge__chip"
-			// Focusable only when there is a tooltip to reveal.
-			tabIndex={ badge.tooltip ? 0 : undefined }
-		>
+	const chipContent = (
+		<>
 			<QualityBadgeIcon />
 			{ badge.label }
-		</span>
+		</>
 	);
+
+	// Without explanation copy the chip is a plain, inert label.
+	if ( ! badge.tooltip ) {
+		return (
+			<div className="woocommerce-marketplace__quality-badge">
+				<span className="woocommerce-marketplace__quality-badge__chip">
+					{ chipContent }
+				</span>
+			</div>
+		);
+	}
 
 	return (
 		<div className="woocommerce-marketplace__quality-badge">
-			{ badge.tooltip ? (
-				<Tooltip text={ badge.tooltip }>{ chip }</Tooltip>
-			) : (
-				chip
+			<button
+				ref={ setAnchor }
+				type="button"
+				className="woocommerce-marketplace__quality-badge__chip"
+				aria-expanded={ isOpen }
+				onClick={ () => setIsOpen( ! isOpen ) }
+			>
+				{ chipContent }
+			</button>
+			{ isOpen && (
+				<QualityBadgePopover
+					label={ badge.label }
+					tooltip={ badge.tooltip }
+					docsUrl={ badge.docs_url }
+					anchor={ anchor }
+					source="product_card"
+					onClose={ () => {
+						setIsOpen( false );
+						anchor?.focus();
+					} }
+				/>
 			) }
 		</div>
 	);

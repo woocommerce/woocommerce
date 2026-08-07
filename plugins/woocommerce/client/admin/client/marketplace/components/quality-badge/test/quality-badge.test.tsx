@@ -117,6 +117,60 @@ describe( 'QualityBadge', () => {
 
 		expect( container ).toBeEmptyDOMElement();
 	} );
+
+	it( 'opens a popover with the explanation when the chip is clicked', () => {
+		renderWithContext(
+			<QualityBadge product={ product } />,
+			contextWithBadge
+		);
+
+		fireEvent.click( screen.getByText( 'Excellence Verified' ) );
+
+		expect(
+			screen.getByText( 'Verified against WooCommerce standards.' )
+		).toBeInTheDocument();
+		expect( screen.queryByText( 'Learn more' ) ).not.toBeInTheDocument();
+	} );
+
+	it( 'links to the docs from the chip popover when the API sends a docs URL', () => {
+		const context = {
+			iamSettings: {
+				quality_badge: {
+					...contextWithBadge.iamSettings.quality_badge,
+					docs_url: 'https://woocommerce.com/document/excellence/',
+				},
+			},
+		} as MarketplaceContextType;
+
+		renderWithContext( <QualityBadge product={ product } />, context );
+
+		fireEvent.click( screen.getByText( 'Excellence Verified' ) );
+
+		expect(
+			screen.getByText( 'Learn more' ).closest( 'a' )
+		).toHaveAttribute(
+			'href',
+			'https://woocommerce.com/document/excellence/'
+		);
+	} );
+
+	it( 'renders an inert chip when there is no tooltip copy', () => {
+		const context = {
+			iamSettings: {
+				quality_badge: {
+					enabled: true,
+					label: 'Excellence Verified',
+					tooltip: '',
+				},
+			},
+		} as MarketplaceContextType;
+
+		renderWithContext( <QualityBadge product={ product } />, context );
+
+		expect(
+			screen.getByText( 'Excellence Verified' ).closest( 'button' )
+		).toBeNull();
+	} );
 } );
 
 describe( 'QualityBadgeFilter', () => {

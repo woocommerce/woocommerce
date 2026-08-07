@@ -7,7 +7,7 @@ import {
 	useContext,
 	useState,
 } from '@wordpress/element';
-import { FormToggle, Icon, Popover } from '@wordpress/components';
+import { FormToggle, Icon } from '@wordpress/components';
 import { info } from '@wordpress/icons';
 import { useInstanceId } from '@wordpress/compose';
 import { recordEvent } from '@woocommerce/tracks';
@@ -17,14 +17,12 @@ import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import './quality-badge.scss';
-import { QualityBadgeIcon } from './quality-badge';
+import { QualityBadgeIcon, QualityBadgePopover } from './quality-badge';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 
 /**
- * Info button next to the filter label. Opens a popover with the badge
- * explanation and, when the API provides a docs URL, a "Learn more" link.
- * A popover (not a tooltip) so the link stays reachable by pointer and
- * keyboard.
+ * Info button next to the filter label; opens the shared badge explanation
+ * popover.
  */
 function QualityBadgeInfo( props: {
 	label: string;
@@ -51,40 +49,17 @@ function QualityBadgeInfo( props: {
 				<Icon icon={ info } size={ 16 } />
 			</button>
 			{ isOpen && (
-				<Popover
-					className="woocommerce-marketplace__quality-badge-filter__popover"
+				<QualityBadgePopover
+					label={ props.label }
+					tooltip={ props.tooltip }
+					docsUrl={ props.docsUrl }
 					anchor={ anchor }
-					placement="bottom"
-					focusOnMount="firstElement"
+					source="filter"
 					onClose={ () => {
 						setIsOpen( false );
 						anchor?.focus();
 					} }
-				>
-					<p>{ props.tooltip }</p>
-					{ props.docsUrl && (
-						<a
-							href={ props.docsUrl }
-							target="_blank"
-							rel="noreferrer"
-							aria-label={ sprintf(
-								// translators: %s: name of the quality badge, supplied by the WooCommerce.com API (e.g. "Excellence Verified").
-								__(
-									'Learn more about the %s badge',
-									'woocommerce'
-								),
-								props.label
-							) }
-							onClick={ () =>
-								recordEvent(
-									'marketplace_quality_badge_learn_more_clicked'
-								)
-							}
-						>
-							{ __( 'Learn more', 'woocommerce' ) }
-						</a>
-					) }
-				</Popover>
+				/>
 			) }
 		</>
 	);
