@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix grouped products retaining an out-of-stock status after conversion from another product type.
