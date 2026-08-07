@@ -270,6 +270,33 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A numeric term appends both the searched ID and its parent, so the parent needs its own
+	 * exclusion check. Searching a variation by ID is the case that exercises it, since a
+	 * top-level product has no parent to re-add.
+	 *
+	 * @testdox Excluded parents should not be re-added when the search term is a variation's numeric ID.
+	 */
+	public function test_search_products_excludes_parent_for_numeric_variation_term() {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Numeric parent widget' );
+		$parent->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $parent->get_id() );
+		$variation->save();
+
+		$data_store = WC_Data_Store::load( 'product' );
+
+		$results = $data_store->search_products( (string) $variation->get_id(), '', true, true );
+		$this->assertContains( $variation->get_id(), $results );
+		$this->assertContains( $parent->get_id(), $results, 'A numeric variation term should surface its parent' );
+
+		$results = $data_store->search_products( (string) $variation->get_id(), '', true, true, null, null, array( $parent->get_id() ) );
+		$this->assertNotContains( $parent->get_id(), $results, 'An excluded parent must not be re-added by a numeric variation term' );
+		$this->assertContains( $variation->get_id(), $results, 'Excluding the parent must not drop the searched variation' );
+	}
+
+	/**
 	 * Ensure product rating counts are calculated correctly.
 	 *
 	 * @return void
