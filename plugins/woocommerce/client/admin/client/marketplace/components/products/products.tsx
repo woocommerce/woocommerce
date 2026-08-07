@@ -78,11 +78,7 @@ export default function Products( props: ProductsProps ) {
 	// renders nothing unless the WooCommerce.com API has the badge enabled.
 	const showQualityBadgeFilter = props.type === ProductType.extension;
 	const hasNoResults = ! isLoading && products.length === 0;
-	// NoResults renders its own category selector, so the sub-header only
-	// carries the badge filter toggle in the empty state.
-	const showCategorySelector = Boolean(
-		props.categorySelector && ! hasNoResults
-	);
+	const showCategorySelector = Boolean( props.categorySelector );
 
 	// The sub-header stays mounted across the loading/empty/loaded states so
 	// the filter toggle keeps keyboard focus while toggling triggers a refetch.
@@ -124,7 +120,11 @@ export default function Products( props: ProductsProps ) {
 				<ProductLoader hasTitle={ false } type={ props.type } />
 			) }
 			{ hasNoResults && (
-				<NoResults type={ noResultsType } showHeading={ false } />
+				<NoResults
+					type={ noResultsType }
+					showHeading={ false }
+					showCategorySelector={ ! showCategorySelector }
+				/>
 			) }
 			{ ! isLoading && ! hasNoResults && (
 				<ProductListContent
