@@ -286,6 +286,27 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The Default radio keeps posting an empty value, so the payload stays byte-identical to what
+	 * every earlier version submitted; the resolved structure moves to a data attribute that only
+	 * the Custom-base field reads.
+	 *
+	 * @testdox Should expose the Default structure without changing the value it submits.
+	 */
+	public function test_default_radio_exposes_its_structure_without_changing_its_value(): void {
+		$this->ensure_shop_page();
+
+		$xpath         = $this->get_xpath( $this->save_and_render( '' ) );
+		$default_radio = $xpath->query( '(//input[@name="product_permalink"])[1]' )->item( 0 );
+		$custom_input  = $xpath->query( '//input[@id="woocommerce_permalink_structure"]' )->item( 0 );
+
+		$this->assertInstanceOf( DOMElement::class, $default_radio );
+		$this->assertInstanceOf( DOMElement::class, $custom_input );
+		$this->assertSame( '', $default_radio->getAttribute( 'value' ), 'The Default radio value must remain empty.' );
+		$this->assertSame( '/product/', $default_radio->getAttribute( 'data-permalink-structure' ) );
+		$this->assertSame( '/product/', $custom_input->getAttribute( 'value' ) );
+	}
+
+	/**
 	 * @testdox Should keep "Shop base" checked when the Shop page is nested under a parent.
 	 */
 	public function test_shop_base_stays_checked_for_a_nested_shop_page(): void {
