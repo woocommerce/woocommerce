@@ -171,6 +171,8 @@ const serialRunSpecs = [
 	// Mutate global WooCommerce settings (store address/currency/country, tax)
 	// that other workers' cart/checkout/storefront specs depend on.
 	'**/tests/settings/settings-general.spec.ts',
+	// Saves and restores the global product permalink structure.
+	'**/tests/settings/product-permalinks.spec.ts',
 	'**/tests/settings/settings-tax.spec.ts',
 	// Toggles the global `settings-ui` feature flag and resets all e2e feature flags
 	// in afterAll.
