@@ -33,6 +33,17 @@ describe( 'resolveAspectRatio', () => {
 		).toBe( '4/3' );
 	} );
 
+	it( 'falls back to store aspect ratio when no block override is set and imageSizing is cropped', () => {
+		expect(
+			resolveAspectRatio(
+				undefined,
+				undefined,
+				'4/3',
+				ImageSizing.CROPPED
+			)
+		).toBe( '4/3' );
+	} );
+
 	it( 'returns undefined when store aspect ratio is null (uncropped)', () => {
 		expect(
 			resolveAspectRatio(

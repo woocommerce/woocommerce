@@ -25,7 +25,6 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 	 */
 	public function table_provider(): array {
 		return array(
-			array( SchemaInstaller::TABLE_PLAN_GROUPS ),
 			array( SchemaInstaller::TABLE_PLANS ),
 			array( SchemaInstaller::TABLE_CONTRACTS ),
 			array( SchemaInstaller::TABLE_CONTRACT_ITEMS ),

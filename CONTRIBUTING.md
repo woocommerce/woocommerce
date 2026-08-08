@@ -86,7 +86,7 @@ pnpm test:unit:env:watch
 # E2E tests (requires Docker)
 cd plugins/woocommerce
 # Start the E2E environment
-pnpm env:test
+pnpm env:e2e
 # Run Playwright E2E tests
 pnpm test:e2e
 

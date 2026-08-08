@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix a fatal error on `/wp-admin/widgets.php` and other admin surfaces when a WooCommerce product block is registered to render in a widget area and a WooCommerce session becomes active during the request.

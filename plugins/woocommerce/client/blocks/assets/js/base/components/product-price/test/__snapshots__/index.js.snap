@@ -1,61 +1,65 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ProductPrice should apply the format if one is provided 1`] = `
-<span
-  className="price wc-block-components-product-price"
->
-  pre price 
+<div>
   <span
-    className="screen-reader-text"
+    class="price wc-block-components-product-price"
   >
-    Previous price:
+    pre price 
+    <span
+      class="screen-reader-text"
+    >
+      Previous price:
+    </span>
+    <del
+      class="wc-block-components-product-price__regular"
+      translate="no"
+    >
+      £1.00
+    </del>
+    <span
+      class="screen-reader-text"
+    >
+      Discounted price:
+    </span>
+    <ins
+      class="wc-block-components-product-price__value is-discounted"
+      translate="no"
+    >
+      £0.50
+    </ins>
+     Test format
   </span>
-  <del
-    className="wc-block-components-product-price__regular"
-    translate="no"
-  >
-    £1.00
-  </del>
-  <span
-    className="screen-reader-text"
-  >
-    Discounted price:
-  </span>
-  <ins
-    className="wc-block-components-product-price__value is-discounted"
-    translate="no"
-  >
-    £0.50
-  </ins>
-   Test format
-</span>
+</div>
 `;
 
 exports[`ProductPrice should use default price if no format is provided 1`] = `
-<span
-  className="price wc-block-components-product-price"
->
+<div>
   <span
-    className="screen-reader-text"
+    class="price wc-block-components-product-price"
   >
-    Previous price:
+    <span
+      class="screen-reader-text"
+    >
+      Previous price:
+    </span>
+    <del
+      class="wc-block-components-product-price__regular"
+      translate="no"
+    >
+      £1.00
+    </del>
+    <span
+      class="screen-reader-text"
+    >
+      Discounted price:
+    </span>
+    <ins
+      class="wc-block-components-product-price__value is-discounted"
+      translate="no"
+    >
+      £0.50
+    </ins>
   </span>
-  <del
-    className="wc-block-components-product-price__regular"
-    translate="no"
-  >
-    £1.00
-  </del>
-  <span
-    className="screen-reader-text"
-  >
-    Discounted price:
-  </span>
-  <ins
-    className="wc-block-components-product-price__value is-discounted"
-    translate="no"
-  >
-    £0.50
-  </ins>
-</span>
+</div>
 `;

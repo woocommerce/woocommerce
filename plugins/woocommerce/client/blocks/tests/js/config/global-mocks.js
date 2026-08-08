@@ -390,6 +390,6 @@ jest.mock( 'client-zip', () => ( {
  * store may be registered in the test environment without an actual editor
  * context. Individual tests can override this mock if needed.
  */
-jest.mock( '../../../assets/js/data/utils/is-editor', () => ( {
+jest.mock( '@woocommerce/block-data/utils/is-editor', () => ( {
 	isEditor: jest.fn().mockReturnValue( false ),
 } ) );

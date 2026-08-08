@@ -6,6 +6,8 @@ import { ProductQueryContext } from '@woocommerce/blocks/product-query/types';
 export enum ImageSizing {
 	SINGLE = 'single',
 	THUMBNAIL = 'thumbnail',
+	// Deprecated synonym for THUMBNAIL.
+	CROPPED = 'cropped',
 }
 
 export type AspectRatioStyle = {

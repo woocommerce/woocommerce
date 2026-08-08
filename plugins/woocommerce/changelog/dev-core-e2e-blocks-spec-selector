@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Stop Core E2E jobs from running for changes limited to Blocks-owned E2E specs.

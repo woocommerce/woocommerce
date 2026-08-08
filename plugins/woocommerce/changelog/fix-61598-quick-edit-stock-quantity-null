@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix quick edit saving empty stock quantity as null instead of 0 when manage stock is enabled.

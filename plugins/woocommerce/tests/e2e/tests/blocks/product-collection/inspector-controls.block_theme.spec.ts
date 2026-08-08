@@ -190,7 +190,7 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock();
 
-		await pageObject.addFilter( 'Show Brands' );
+		await pageObject.addFilter( 'Show Product Brands' );
 		await pageObject.checkTaxonomyTerm( 'brands', 'WooCommerce' );
 		await expect( pageObject.productTitles ).toHaveText( [
 			'Album',
@@ -578,13 +578,14 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 
 			// Disable the option in the first Product Catalog
 			await editor.selectBlocks( productCollection.first() );
+			await expect( defaultQueryType ).toBeChecked();
 			await customQueryType.click();
+			await expect( customQueryType ).toBeChecked();
 
 			// Third Product Catalog
 			// Option should be visible & ENABLED by default
 			await pageObject.insertProductCollection();
 			await pageObject.chooseCollectionInTemplate( 'productCatalog' );
-			await editor.selectBlocks( productCollection.last() );
 
 			await expect( defaultQueryType ).toBeChecked();
 			await expect( customQueryType ).not.toBeChecked();

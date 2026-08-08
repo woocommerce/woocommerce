@@ -72,6 +72,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		'_thumbnail_id',
 		'_file_paths',
 		'_product_image_gallery',
+		'_wc_video_gallery',
 		'_product_version',
 		'_wp_old_slug',
 		'_edit_last',
@@ -2066,15 +2067,17 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		if ( ! empty( $search_queries ) ) {
-			$search_where = ' AND (' . implode( ') OR (', $search_queries ) . ') ';
+			$search_where = ' AND ((' . implode( ') OR (', $search_queries ) . ')) ';
 		}
 
 		if ( ! empty( $include ) && is_array( $include ) ) {
 			$search_where .= ' AND posts.ID IN(' . implode( ',', array_map( 'absint', $include ) ) . ') ';
 		}
 
-		if ( ! empty( $exclude ) && is_array( $exclude ) ) {
-			$search_where .= ' AND posts.ID NOT IN(' . implode( ',', array_map( 'absint', $exclude ) ) . ') ';
+		$exclude_ids = ! empty( $exclude ) && is_array( $exclude ) ? array_filter( array_map( 'absint', $exclude ) ) : array();
+
+		if ( $exclude_ids ) {
+			$search_where .= ' AND posts.ID NOT IN(' . implode( ',', $exclude_ids ) . ') ';
 		}
 
 		if ( 'virtual' === $type ) {
@@ -2091,10 +2094,18 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$limit_query = $wpdb->prepare( ' LIMIT %d ', $limit );
 		}
 
+		// A matching variation contributes its parent ID, so excluded parents are discarded here
+		// rather than reintroduced alongside the variation.
+		$parent_id_select = 'posts.post_parent as parent_id';
+
+		if ( $exclude_ids ) {
+			$parent_id_select = 'CASE WHEN posts.post_parent IN(' . implode( ',', $exclude_ids ) . ') THEN NULL ELSE posts.post_parent END as parent_id';
+		}
+
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 		$search_results = $wpdb->get_results(
 			// phpcs:disable
-			"SELECT DISTINCT posts.ID as product_id, posts.post_parent as parent_id FROM {$wpdb->posts} posts
+			"SELECT DISTINCT posts.ID as product_id, {$parent_id_select} FROM {$wpdb->posts} posts
 			 LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON posts.ID = wc_product_meta_lookup.product_id
 			 $join_query
 			WHERE posts.post_type IN ('" . implode( "','", $post_types ) . "')
@@ -2113,13 +2124,21 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$post_id   = absint( $term );
 			$post_type = get_post_type( $post_id );
 
-			if ( 'product_variation' === $post_type && $include_variations ) {
-				$product_ids[] = $post_id;
-			} elseif ( 'product' === $post_type ) {
-				$product_ids[] = $post_id;
+			// A numeric term bypasses the query above, so the exclusion is applied to both the
+			// searched ID and its parent before either is appended.
+			if ( ! in_array( $post_id, $exclude_ids, true ) ) {
+				if ( 'product_variation' === $post_type && $include_variations ) {
+					$product_ids[] = $post_id;
+				} elseif ( 'product' === $post_type ) {
+					$product_ids[] = $post_id;
+				}
 			}
 
-			$product_ids[] = wp_get_post_parent_id( $post_id );
+			$parent_id = absint( wp_get_post_parent_id( $post_id ) );
+
+			if ( ! in_array( $parent_id, $exclude_ids, true ) ) {
+				$product_ids[] = $parent_id;
+			}
 		}
 
 		return wp_parse_id_list( $product_ids );

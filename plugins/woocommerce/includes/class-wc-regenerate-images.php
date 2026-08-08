@@ -333,7 +333,13 @@ class WC_Regenerate_Images {
 	 * @return array|false An array of the filename, thumbnail width, and thumbnail height, or false on failure to resize such as the thumbnail being larger than the fullsize image.
 	 */
 	private static function get_image( $fullsizepath, $thumbnail_width, $thumbnail_height, $crop ) {
-		list( $fullsize_width, $fullsize_height ) = getimagesize( $fullsizepath );
+		$imagesize = wp_getimagesize( $fullsizepath );
+
+		if ( false === $imagesize ) {
+			return false;
+		}
+
+		list( $fullsize_width, $fullsize_height ) = $imagesize;
 
 		$dimensions = image_resize_dimensions( $fullsize_width, $fullsize_height, $thumbnail_width, $thumbnail_height, $crop );
 		$editor     = wp_get_image_editor( $fullsizepath );
@@ -364,7 +370,7 @@ class WC_Regenerate_Images {
 	 * @param array  $image Original Image.
 	 * @param string $size Size to return for new URL.
 	 * @param bool   $icon If icon or not.
-	 * @return string
+	 * @return array
 	 */
 	private static function resize_and_return_image( $attachment_id, $image, $size, $icon ) {
 		if ( ! self::is_regeneratable( $attachment_id ) ) {
@@ -374,6 +380,18 @@ class WC_Regenerate_Images {
 		$fullsizepath = get_attached_file( $attachment_id );
 
 		if ( false === $fullsizepath || is_wp_error( $fullsizepath ) || ! file_exists( $fullsizepath ) ) {
+			return $image;
+		}
+
+		// Files without a supporting image editor (e.g. SVGs) can never be resized, so don't attempt it on every request.
+		// The file-derived mime type is checked first, since the editor loads the file and the recorded type can be stale.
+		$mime_type = wp_check_filetype( $fullsizepath )['type'];
+
+		if ( ! $mime_type ) {
+			$mime_type = get_post_mime_type( $attachment_id );
+		}
+
+		if ( ! $mime_type || ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
 			return $image;
 		}
 
@@ -442,7 +460,7 @@ class WC_Regenerate_Images {
 	 *
 	 * @param int    $attachment_id Attachment ID.
 	 * @param string $size Size to downsize to.
-	 * @return string New image URL.
+	 * @return array|false Image data array as returned by image_downsize(), or false on failure.
 	 */
 	private static function unfiltered_image_downsize( $attachment_id, $size ) {
 		remove_action( 'image_get_intermediate_size', array( __CLASS__, 'filter_image_get_intermediate_size' ), 10, 3 );

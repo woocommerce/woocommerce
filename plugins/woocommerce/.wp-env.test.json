@@ -2,16 +2,12 @@
 	"core": "https://wordpress.org/wordpress-latest.zip",
 	"phpVersion": "8.1",
 	"testsEnvironment": false,
-	"port": 8086,
-	"plugins": [
-		".",
-		"./tests/e2e/test-plugins/wc-email-template-sync-test-helper",
-		"https://downloads.wordpress.org/plugin/akismet.zip",
-		"https://github.com/WP-API/Basic-Auth/archive/master.zip",
-		"https://downloads.wordpress.org/plugin/wp-mail-logging.zip",
-		"https://downloads.wordpress.org/plugin/wordpress-importer.0.8.zip"
+	"port": 8186,
+	"plugins": [ "." ],
+	"themes": [
+		"https://downloads.wordpress.org/theme/storefront.zip",
+		"https://downloads.wordpress.org/theme/twentytwentytwo.zip"
 	],
-	"themes": [],
 	"config": {
 		"JETPACK_AUTOLOAD_DEV": true,
 		"WP_DEBUG": false,
@@ -22,26 +18,7 @@
 		"ALTERNATE_WP_CRON": false
 	},
 	"lifecycleScripts": {
-		"afterStart": "./tests/e2e/bin/test-env-setup.sh",
-		"afterClean": "./tests/e2e/bin/test-env-setup.sh"
-	},
-	"mappings": {
-		"wp-content/plugins/e2e-test-helpers": "./tests/e2e/bin",
-		"test-data/images/": "./tests/e2e/test-data/images/",
-		"wp-content/themes/emptytheme": "./tests/e2e/themes/blocks/emptytheme",
-		"wp-content/themes/theme-with-woo-templates": "./tests/e2e/themes/blocks/theme-with-woo-templates",
-		"wp-content/themes/storefront-child__block-notices-filter": "./tests/e2e/themes/blocks/storefront-child__block-notices-filter",
-		"wp-content/themes/storefront-child__block-notices-template": "./tests/e2e/themes/blocks/storefront-child__block-notices-template",
-		"wp-content/themes/storefront-child__classic-notices-template": "./tests/e2e/themes/blocks/storefront-child__classic-notices-template",
-		"wp-content/themes/storefront-child__with-block-template-part": "./tests/e2e/themes/blocks/storefront-child__with-block-template-part",
-		"wp-content/themes/storefront-child__with-block-template-part-support": "./tests/e2e/themes/blocks/storefront-child__with-block-template-part-support",
-		"wp-content/themes/twentytwentyfour-child__block-notices-filter": "./tests/e2e/themes/blocks/twentytwentyfour-child__block-notices-filter",
-		"wp-content/themes/twentytwentyfour-child__block-notices-template": "./tests/e2e/themes/blocks/twentytwentyfour-child__block-notices-template",
-		"wp-content/themes/twentytwentyfour-child__classic-notices-template": "./tests/e2e/themes/blocks/twentytwentyfour-child__classic-notices-template",
-		"wp-content/themes/twentytwentyfour": "https://downloads.wordpress.org/theme/twentytwentyfour.latest-stable.zip",
-		"wp-content/plugins/woocommerce/blocks-bin": "./client/blocks/bin",
-		"wp-content/plugins/woocommerce/blocks-bin/playwright": "./tests/e2e/bin/blocks",
-		"wp-content/plugins/woocommerce-blocks-test-plugins": "./tests/e2e/test-plugins/blocks",
-		"wp-content/plugins/woocommerce/i18n/languages": "./i18n/languages"
+		"afterStart": "./tests/php/bin/test-env-setup.sh",
+		"afterClean": "./tests/php/bin/test-env-setup.sh"
 	}
 }

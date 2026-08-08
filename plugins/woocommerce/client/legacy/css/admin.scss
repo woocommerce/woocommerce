@@ -3223,7 +3223,7 @@ body.woocommerce_page_wc-orders {
 			border-top: 1px solid #f5f5f5;
 		}
 
-		tbody tr:hover:not(.status-trash):not(.no-link) td {
+		tbody tr:hover:not(.status-trash):not(.no-link) > :not(.check-column) {
 			cursor: pointer;
 		}
 
@@ -3554,7 +3554,7 @@ body.woocommerce_page_wc-orders {
 			width: 100%;
 		}
 
-		td.column-order_number {
+		.column-order_number {
 			.toggle-row {
 				height: 20px;
 			}
@@ -3574,7 +3574,7 @@ body.woocommerce_page_wc-orders {
 		}
 
 		tr:not(.is-expanded) {
-			td.column-order_number {
+			.column-order_number {
 				vertical-align: top;
 
 				a.order-view {
@@ -3616,6 +3616,15 @@ body.woocommerce_page_wc-orders {
 					}
 				}
 			}
+		}
+
+		// Hide the small-screen date/status copies when the corresponding column is hidden via Screen Options.
+		&:has( thead th.column-order_date.hidden ) .order_date.small-screen-only {
+			display: none;
+		}
+
+		&:has( thead th.column-order_status.hidden ) .order_status.small-screen-only {
+			display: none;
 		}
 
 	}
@@ -4000,6 +4009,13 @@ mark.notice {
 	background: #fff;
 	color: $red;
 	margin: 0 0 0 10px;
+}
+
+// Mirrors the WP core rule for #lost-connection-notice.
+#wc-lost-connection-notice .spinner {
+	visibility: visible;
+	float: left;
+	margin: 0 5px 0 0;
 }
 
 a.export_rates,
@@ -5344,7 +5360,8 @@ img.help_tip {
 			padding-right: 24px;
 		}
 
-		th label {
+		th label,
+		th .wc-settings-radio-title {
 			position: relative;
 			display: block;
 
@@ -5557,7 +5574,8 @@ img.help_tip {
 				}
 			}
 
-			th label {
+			th label,
+			th .wc-settings-radio-title {
 				img.help_tip,
 				.woocommerce-help-tip {
 					margin: -7px -24px 0 0;
@@ -5683,6 +5701,30 @@ img.help_tip {
 					width: 100%;
 					height: auto;
 					display: block;
+				}
+
+				.woocommerce-product-gallery__video-preview {
+					display: block;
+					width: 100%;
+					aspect-ratio: 1;
+					object-fit: cover;
+					background: $gray-100;
+				}
+
+				&.video::before {
+					@include icon_dashicons("\f522");
+
+					left: 50%;
+					top: 50%;
+					transform: translate(-50%, -50%);
+					z-index: 1;
+					width: auto;
+					height: auto;
+					color: $contentbg;
+					font-size: 1.4em;
+					line-height: 1;
+					text-shadow: 0 0 0.25em rgba(0, 0, 0, 0.8);
+					pointer-events: none;
 				}
 			}
 
@@ -7264,7 +7306,7 @@ img.ui-datepicker-trigger {
 								margin: 0 10px 0 0;
 								background: transparent;
 								border: 0;
-								color: #777;
+								color: $wp-admin-text-gray;
 								text-align: center;
 								box-shadow: none;
 
@@ -7672,6 +7714,16 @@ table.bar_chart {
 		font-size: 13px;
 		font-weight: 400;
 		max-width: 500px;
+
+		// Sizes icon-font glyphs supplied by extension blank states to
+		// match the core mask icons below.
+		&::before {
+			display: block;
+			font-size: 32px;
+			line-height: 1;
+			margin: 0 auto 12px;
+			color: $gray-400;
+		}
 	}
 
 	.woocommerce-BlankState-buttons {
@@ -7904,8 +7956,8 @@ table.bar_chart {
 				overflow: visible;
 			}
 
-			.is-expanded .toggle-row {
-				top: -28px;
+			.is-expanded:has(td.column-thumb:not(.hidden)) .toggle-row {
+				top: -30px;
 			}
 		}
 	}
@@ -7997,6 +8049,17 @@ table.bar_chart {
 
 	.select2-container {
 		width: 100% !important;
+	}
+
+	// Reserve room for the clear (x) and chevron icons; .select2-container keeps this rule above the later global 24px padding.
+	.select2-container .select2-selection--single {
+		.select2-selection__rendered {
+			padding-right: 40px;
+		}
+
+		.select2-selection__clear {
+			margin-right: 18px;
+		}
 	}
 }
 
