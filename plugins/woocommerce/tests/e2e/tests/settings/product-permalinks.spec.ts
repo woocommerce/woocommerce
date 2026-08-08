@@ -24,15 +24,15 @@ test.describe( 'Product permalink settings', () => {
 		const saveChanges = page.getByRole( 'button', {
 			name: 'Save Changes',
 		} );
-		const saveAndWaitForSubmit = () =>
-			Promise.all( [
-				page.waitForResponse(
-					( response ) =>
-						response.request().method() === 'POST' &&
-						response.url().includes( 'options-permalink.php' )
-				),
-				saveChanges.click(),
-			] );
+		// WordPress processes the POST and redirects back, so the assertions after a save have to
+		// run against the reloaded document. Waiting on the POST response alone would let them
+		// resolve against the pre-submit DOM, which still shows whatever was just checked — the
+		// reload this test exists to verify would never be observed.
+		const saveAndReload = async () => {
+			const reloaded = page.waitForEvent( 'load' );
+			await saveChanges.click();
+			await reloaded;
+		};
 
 		await expect( productPermalinkRadios ).toHaveCount( 4 );
 
@@ -48,6 +48,7 @@ test.describe( 'Product permalink settings', () => {
 		try {
 			const defaultRadio = productPermalinkRadios.nth( 0 );
 			const shopBaseRadio = productPermalinkRadios.nth( 1 );
+			const shopCategoryRadio = productPermalinkRadios.nth( 2 );
 			const defaultRow = page
 				.getByRole( 'row' )
 				.filter( { has: defaultRadio } );
@@ -71,26 +72,34 @@ test.describe( 'Product permalink settings', () => {
 
 			// A non-empty, slash-delimited path such as `/product/`.
 			expect( expectedDefaultBase ).toMatch( /^\/.+\/$/ );
+
+			// Establish Default as the starting point rather than assuming the store already uses
+			// it — the preceding assertion about the Custom field only holds from a known state.
+			await defaultRadio.check();
+			await saveAndReload();
+			await expect( defaultRadio ).toBeChecked();
 			await expect( customBase ).toHaveValue( expectedDefaultBase );
 
-			// Shop base posts its structure verbatim; Default posts an empty value and relies on
-			// the data attribute. Both have to survive a save, and issue #29050 reported all of
-			// them reverting to Custom base.
-			const shopBaseStructure = await shopBaseRadio.inputValue();
+			// Shop base and Shop base with category post their structure verbatim; Default posts an
+			// empty value and relies on the data attribute. Issue #29050 reported all three
+			// reverting to Custom base, so each one round-trips through a real save here.
+			for ( const radio of [ shopBaseRadio, shopCategoryRadio ] ) {
+				const structure = await radio.inputValue();
 
-			await shopBaseRadio.check();
-			await expect( customBase ).toHaveValue( shopBaseStructure );
+				await radio.check();
+				await expect( customBase ).toHaveValue( structure );
 
-			await saveAndWaitForSubmit();
+				await saveAndReload();
 
-			await expect( shopBaseRadio ).toBeChecked();
-			await expect( customBase ).toHaveValue( shopBaseStructure );
+				await expect( radio ).toBeChecked();
+				await expect( customBase ).toHaveValue( structure );
+			}
 
 			await defaultRadio.check();
 			await expect( defaultRadio ).toHaveValue( '' );
 			await expect( customBase ).toHaveValue( expectedDefaultBase );
 
-			await saveAndWaitForSubmit();
+			await saveAndReload();
 
 			await expect( defaultRadio ).toBeChecked();
 			await expect( defaultRadio ).toHaveValue( '' );
@@ -103,7 +112,7 @@ test.describe( 'Product permalink settings', () => {
 				await customBase.fill( originalCustomBase );
 			}
 
-			await saveAndWaitForSubmit();
+			await saveAndReload();
 		}
 	} );
 } );
