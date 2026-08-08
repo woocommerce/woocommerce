@@ -109,6 +109,11 @@ class WC_Admin_Permalink_Settings {
 		 * wc_get_page_id() is resolved here too because settings_save() resolves it inside its own
 		 * window, and the woocommerce_get_shop_page_id filter multilingual plugins attach to can
 		 * return a different page per locale.
+		 *
+		 * This aligns the two paths for a product_base that is already persisted. It cannot align
+		 * one that is not: wc_get_permalink_structure() initializes a missing default in the
+		 * request locale, outside any window, before this screen ever renders. That is pre-existing
+		 * behavior, tracked separately.
 		 */
 		wc_switch_to_site_locale();
 		$shop_page_id         = wc_get_page_id( 'shop' );
@@ -229,9 +234,12 @@ class WC_Admin_Permalink_Settings {
 			$permalinks['attribute_base'] = wc_sanitize_permalink( wp_unslash( $_POST['woocommerce_product_attribute_slug'] ) );
 
 			/*
-			 * Generate product base. Both fields post a scalar; anything else is coerced to the
-			 * empty string, which the Default branch below resolves. Unguarded, an array reaches
-			 * trim() and wc_sanitize_permalink(), which both expect a string.
+			 * Generate product base. The form only ever posts scalars for these two fields, but
+			 * nothing enforces that, and unguarded an array reaches trim() and
+			 * wc_sanitize_permalink(), which both expect a string. Each field falls back
+			 * differently: a non-scalar product_permalink becomes the empty string and is resolved
+			 * by the Default branch further down, while a non-scalar product_permalink_structure is
+			 * treated as an absent field and resolved to '/' inside the custom branch.
 			 */
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized on the next line.
 			$posted_product_base = isset( $_POST['product_permalink'] ) && is_scalar( $_POST['product_permalink'] ) ? wp_unslash( $_POST['product_permalink'] ) : '';
@@ -252,8 +260,8 @@ class WC_Admin_Permalink_Settings {
 				}
 			} elseif ( empty( $product_base ) ) {
 				// The Default radio posts an empty value; store the translated slug settings()
-				// compares against. Both resolve inside a wc_switch_to_site_locale() window, so
-				// they agree by construction.
+				// compares against. Both resolve inside a wc_switch_to_site_locale() window, so a
+				// stored base always agrees with what the screen compares it to.
 				$product_base = _x( 'product', 'slug', 'woocommerce' );
 			}
 
