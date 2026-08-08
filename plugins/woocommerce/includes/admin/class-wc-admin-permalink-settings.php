@@ -100,15 +100,18 @@ class WC_Admin_Permalink_Settings {
 		/* translators: %s: Home URL */
 		echo wp_kses_post( wpautop( sprintf( __( 'If you like, you may enter custom structures for your product URLs here. For example, using <code>shop</code> would make your product links like <code>%sshop/sample-product/</code>. This setting affects product URLs only, not things such as product categories.', 'woocommerce' ), esc_url( home_url( '/' ) ) ) ) );
 
-		$shop_page_id = wc_get_page_id( 'shop' );
-
 		/*
-		 * Resolve the translated slugs inside the same window settings_save() opens, so the
-		 * values compared below are the values a save would store. Without it, an administrator
-		 * whose profile language differs from the site language stores one translation and
-		 * compares against another, and no radio ever matches.
+		 * Resolve the Shop page and the translated slugs inside the same window settings_save()
+		 * opens, so the values compared below are the values a save would store. Without it, an
+		 * administrator whose profile language differs from the site language stores one
+		 * translation and compares against another, and no radio ever matches.
+		 *
+		 * wc_get_page_id() is resolved here too because settings_save() resolves it inside its own
+		 * window, and the woocommerce_get_shop_page_id filter multilingual plugins attach to can
+		 * return a different page per locale.
 		 */
 		wc_switch_to_site_locale();
+		$shop_page_id         = wc_get_page_id( 'shop' );
 		$base_slug            = urldecode( ( $shop_page_id > 0 && get_post( $shop_page_id ) ) ? get_page_uri( $shop_page_id ) : _x( 'shop', 'default-slug', 'woocommerce' ) );
 		$default_product_base = wc_sanitize_permalink( _x( 'product', 'slug', 'woocommerce' ) );
 		wc_restore_locale();
