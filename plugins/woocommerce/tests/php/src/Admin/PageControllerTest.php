@@ -533,6 +533,792 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Registered page route patterns match supported current requests.
+	 *
+	 * @dataProvider data_provider_test_registered_page_route_pattern_matches_current_request
+	 *
+	 * @param string $registered_path Registered route pattern.
+	 * @param string $request_uri      Current request URI.
+	 */
+	public function test_registered_page_route_pattern_matches_current_request( string $registered_path, string $request_uri ): void {
+		$this->assert_registered_page_for_request(
+			'route-pattern-page',
+			$request_uri,
+			array(
+				array(
+					'id'   => 'route-pattern-page',
+					'path' => $registered_path,
+				),
+			)
+		);
+	}
+
+	/**
+	 * Data provider for supported route pattern matches.
+	 *
+	 * @return array[]
+	 */
+	public static function data_provider_test_registered_page_route_pattern_matches_current_request(): array {
+		return array(
+			'path parameter'                        => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample' ),
+			'case-insensitive static path'          => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2FROUTE-PARAMS%2Fsample' ),
+			'trailing slash in pattern'             => array( '/route-params/:itemName/', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample' ),
+			'repeated request slashes'              => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample%2F%2F' ),
+			'wildcard base path'                    => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard' ),
+			// React Router strips all trailing slashes together with the `*`, so `/foo//*` renders
+			// `/foo/x` and `/foo`; verified against React Router 6.3 matchPath().
+			'wildcard after redundant slashes'      => array( '/route-wildcard//*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard%2Ftheme' ),
+			'wildcard base after redundant slashes' => array( '/route-wildcard//*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard' ),
+			// JavaScript's line-terminator exclusion applies to `.` only, not `[^/]+`, so a
+			// parameter segment accepts U+2028; verified against React Router 6.3 matchPath().
+			'line separator inside a parameter'     => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=' . rawurlencode( "/route-params/x\u{2028}y" ) ),
+			'wildcard base trailing slash'          => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard%2F' ),
+			'wildcard descendant path'              => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard%2Ftheme%2Falpha' ),
+			'parameter and wildcard base'           => array( '/route-patterns/:itemId/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123' ),
+			'parameter and wildcard child'          => array( '/route-patterns/:itemId/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fdetails' ),
+			'parameter and wildcard nested'         => array( '/route-patterns/:itemId/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fdetails%2Fedit' ),
+			// React Router resolves a leading-slash-less registered route against the app root, so
+			// these render at `/route-params/sample` on the client and must be recognized here too.
+			'parameter without leading slash'       => array( 'route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample' ),
+			'static path without leading slash'     => array( 'route-params', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params' ),
+			'wildcard without leading slash'        => array( 'route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard%2Ftheme' ),
+			// React Router compares with JavaScript's Unicode-aware casing, so a non-ASCII segment
+			// reaches its route whatever case the request uses.
+			'non-ascii segment'                     => array( '/route-café/:itemId', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-caf%C3%A9%2F42' ),
+			'non-ascii segment upper-cased'         => array( '/route-café/:itemId', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-CAF%C3%89%2F42' ),
+			'non-ascii segment in request only'     => array( '/route-CAFÉ/:itemId', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-caf%C3%A9%2F42' ),
+		);
+	}
+
+	/**
+	 * @testdox Registered page route patterns reject unsupported or unrelated current requests.
+	 *
+	 * @dataProvider data_provider_test_registered_page_route_pattern_does_not_match_current_request
+	 *
+	 * @param string $registered_path Registered route pattern.
+	 * @param string $request_uri      Current request URI.
+	 */
+	public function test_registered_page_route_pattern_does_not_match_current_request( string $registered_path, string $request_uri ): void {
+		$result = $this->get_registered_page_result_for_request(
+			$request_uri,
+			array(
+				array(
+					'id'   => 'route-pattern-page',
+					'path' => $registered_path,
+				),
+			)
+		);
+
+		$this->assertFalse( $result['current_page'] );
+		$this->assertFalse( $result['is_registered_page'] );
+	}
+
+	/**
+	 * Data provider for unsupported or unrelated route pattern requests.
+	 *
+	 * @return array[]
+	 */
+	public static function data_provider_test_registered_page_route_pattern_does_not_match_current_request(): array {
+		return array(
+			'parameter with extra segment'               => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample%2Fdetails' ),
+			'partial parameter segment'                  => array( '/route-patterns/:itemId/prefix-:suffix', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fprefix-value' ),
+			'non-terminal wildcard'                      => array( '/route-patterns/:itemId/*/details', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fone%2Fdetails' ),
+			'parameter and wildcard missing parameter'   => array( '/route-patterns/:itemId/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns' ),
+			'static wildcard followed by trailing slash' => array( '/route-patterns/*/', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fdetails' ),
+			'wildcard followed by trailing slash'        => array( '/route-patterns/:itemId/*/', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fdetails' ),
+			'parameter and wildcard different root'      => array( '/route-patterns/:itemId/*', '/wp-admin/admin.php?page=other-page-root&path=%2Froute-patterns%2F123%2Fdetails' ),
+			'different page root'                        => array( '/route-params/:itemName', '/wp-admin/admin.php?page=other-page-root&path=%2Froute-params%2Fsample' ),
+			'wc-admin request without app path'          => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin' ),
+			'unrelated admin request'                    => array( '/route-params/:itemName', '/wp-admin/edit.php?post_type=product' ),
+			// The admin history passes `?path=` through verbatim, so a request without a leading slash
+			// matches no React route. Normalizing the registered side must not make PHP recognize it.
+			'request without leading slash'              => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=route-params%2Fsample' ),
+			'both sides without leading slash'           => array( 'route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=route-params%2Fsample' ),
+			// Case folding must not reach across distinct characters: `é` is not `e`.
+			'non-ascii segment without diacritic'        => array( '/route-café/:itemId', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-cafe%2F42' ),
+			// React Router compiles routes with JavaScript's plain `i` flag, whose case folding is
+			// narrower than PCRE's Unicode folding. These pairs fold under PCRE `iu` but not in
+			// JavaScript; all four verified against React Router 6.3 matchPath() directly.
+			'long s does not fold to s'                  => array( '/route-orders/:itemId', '/wp-admin/admin.php?page=wc-admin&path=' . rawurlencode( "/route-order\u{17F}/42" ) ),
+			'kelvin sign does not fold to k'             => array( '/route-k/:itemId', '/wp-admin/admin.php?page=wc-admin&path=' . rawurlencode( "/route-\u{212A}/42" ) ),
+			'capital sharp s does not fold to sharp s'   => array( '/route-straße/:itemId', '/wp-admin/admin.php?page=wc-admin&path=' . rawurlencode( "/route-stra\u{1E9E}e/42" ) ),
+			'astral case pair does not fold'             => array( "/route-\u{10400}/:itemId", '/wp-admin/admin.php?page=wc-admin&path=' . rawurlencode( "/route-\u{10428}/42" ) ),
+			// JavaScript's `.` excludes the line terminators U+2028/U+2029, so a splat rejects them
+			// while a parameter segment does not; verified against React Router 6.3 matchPath().
+			'line separator under a splat'               => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=' . rawurlencode( "/route-wildcard/x\u{2028}y" ) ),
+			'paragraph separator under a splat'          => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=' . rawurlencode( "/route-wildcard/x\u{2029}y" ) ),
+			// An all-slash splat remainder keeps a root slash: `//*` renders `//x`, not `/x`;
+			// verified against React Router 6.3 matchPath().
+			'all-slash splat requires its slashes'       => array( '//*', '/wp-admin/admin.php?page=wc-admin&path=%2Fx' ),
+			// A malformed UTF-8 request path falls back to byte-wise matching rather than failing.
+			'malformed utf-8 request path'               => array( '/route-café/:itemId', "/wp-admin/admin.php?page=wc-admin&path=%2Froute-caf\xE9%2F42" ),
+		);
+	}
+
+	/**
+	 * @testdox Malformed UTF-8 registered paths still match byte-identical requests.
+	 */
+	public function test_registered_page_malformed_utf8_path_matches_byte_identical_request(): void {
+		// Adding the `u` modifier unconditionally would make preg_match() fail here, which would read
+		// as an unrecognized page. The matcher falls back to the byte-wise comparison instead.
+		$this->assert_registered_page_for_request(
+			'route-malformed-page',
+			"/wp-admin/admin.php?page=wc-admin&path=%2Froute-caf\xE9%2F42",
+			array(
+				array(
+					'id'   => 'route-malformed-page',
+					'path' => "/route-caf\xE9/:itemId",
+				),
+			)
+		);
+	}
+
+	/**
+	 * @testdox Registered route patterns score the same with or without a leading slash.
+	 */
+	public function test_registered_page_leading_slash_does_not_affect_route_pattern_specificity(): void {
+		// Both registrations render the same client route, so neither may outrank the other on
+		// specificity alone; the earlier registration wins the tie.
+		$this->assert_registered_page_for_request(
+			'route-slashless-page',
+			'/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123',
+			array(
+				array(
+					'id'   => 'route-slashless-page',
+					'path' => 'route-patterns/:itemId',
+				),
+				array(
+					'id'   => 'route-slashed-page',
+					'path' => '/route-patterns/:itemId',
+				),
+			)
+		);
+	}
+
+	/**
+	 * @testdox Registered pages with invalid filtered paths do not match or throw.
+	 *
+	 * @dataProvider data_provider_invalid_filtered_paths
+	 *
+	 * @param mixed $invalid_path Invalid filtered path.
+	 */
+	public function test_registered_page_with_invalid_filtered_path_does_not_match( $invalid_path ): void {
+		$result = $this->with_filtered_page_path(
+			'invalid-filtered-path-page',
+			$invalid_path,
+			function () {
+				return $this->get_publicly_registered_page_result_for_request(
+					'/wp-admin/admin.php?page=wc-admin&path=%2Funrelated',
+					function () {
+						wc_admin_register_page(
+							array(
+								'id'     => 'invalid-filtered-path-page',
+								'parent' => 'woocommerce',
+								'title'  => 'Invalid filtered path page',
+								'path'   => '/invalid-filtered-path',
+							)
+						);
+					}
+				);
+			}
+		);
+
+		$this->assertFalse( $result['current_page'] );
+		$this->assertFalse( $result['is_registered_page'] );
+	}
+
+	/**
+	 * @testdox Exact registered pages win over earlier route patterns.
+	 *
+	 * @dataProvider data_provider_test_registered_page_exact_path_takes_precedence_over_route_pattern
+	 *
+	 * @param string $request_uri Current request URI.
+	 */
+	public function test_registered_page_exact_path_takes_precedence_over_route_pattern( string $request_uri ): void {
+		$this->assert_registered_page_for_request(
+			'route-exact-page',
+			$request_uri,
+			array(
+				array(
+					'id'   => 'route-param-page',
+					'path' => '/route-patterns/:itemId',
+				),
+				array(
+					'id'   => 'route-exact-page',
+					'path' => '/route-patterns/settings',
+				),
+			)
+		);
+	}
+
+	/**
+	 * Data provider for static route precedence requests.
+	 *
+	 * @return array[]
+	 */
+	public static function data_provider_test_registered_page_exact_path_takes_precedence_over_route_pattern(): array {
+		return array(
+			'exact request'            => array( '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2Fsettings' ),
+			'case-normalized request'  => array( '/wp-admin/admin.php?page=wc-admin&path=%2FROUTE-PATTERNS%2Fsettings' ),
+			'slash-normalized request' => array( '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2Fsettings%2F%2F' ),
+		);
+	}
+
+	/**
+	 * @testdox Redundant slashes do not inflate route specificity.
+	 *
+	 * @dataProvider data_provider_test_registered_page_redundant_slashes_do_not_inflate_specificity
+	 *
+	 * @param array $pages Pages to register, in registration order.
+	 */
+	public function test_registered_page_redundant_slashes_do_not_inflate_specificity( array $pages ): void {
+		// React Router ranks the collapsed joinPaths() form of a route, so `/route-params/:id`
+		// outranks `/route-params/:id//*`; scoring the declared form would count the redundant
+		// empty segment and invert that. Verified against React Router 6.3 matchRoutes() in both
+		// registration orders.
+		$this->assert_registered_page_for_request(
+			'route-param-page',
+			'/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Ftail',
+			$pages
+		);
+	}
+
+	/**
+	 * Data provider for redundant-slash specificity registrations.
+	 *
+	 * @return array[]
+	 */
+	public static function data_provider_test_registered_page_redundant_slashes_do_not_inflate_specificity(): array {
+		$splat_page = array(
+			'id'   => 'route-splat-page',
+			'path' => '/route-params/:id//*',
+		);
+		$param_page = array(
+			'id'   => 'route-param-page',
+			'path' => '/route-params/:id',
+		);
+
+		return array(
+			'splat registered first' => array( array( $splat_page, $param_page ) ),
+			'splat registered last'  => array( array( $param_page, $splat_page ) ),
+		);
+	}
+
+	/**
+	 * @testdox More specific registered route patterns win over wildcard patterns.
+	 */
+	public function test_registered_page_specific_route_pattern_takes_precedence_over_wildcard(): void {
+		$this->assert_registered_page_for_request(
+			'route-details-page',
+			'/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fdetails',
+			array(
+				array(
+					'id'   => 'route-wildcard-page',
+					'path' => '/route-patterns/*',
+				),
+				array(
+					'id'   => 'route-details-page',
+					'path' => '/route-patterns/:itemId/details',
+				),
+			)
+		);
+	}
+
+	/**
+	 * @testdox Trailing-slash routes use React Router specificity.
+	 */
+	public function test_registered_page_trailing_slash_route_uses_react_router_specificity(): void {
+		$this->assert_registered_page_for_request(
+			'route-trailing-slash-page',
+			'/wp-admin/admin.php?page=wc-admin&path=%2Froute-order%2F%2F',
+			array(
+				array(
+					'id'   => 'route-without-trailing-slash-page',
+					'path' => '/route-order',
+				),
+				array(
+					'id'   => 'route-trailing-slash-page',
+					'path' => '/route-order/',
+				),
+			)
+		);
+	}
+
+	/**
+	 * @testdox Equal specificity registered route patterns use registration order.
+	 */
+	public function test_registered_page_equal_specificity_route_patterns_use_registration_order(): void {
+		$this->assert_registered_page_for_request(
+			'route-earlier-param-page',
+			'/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123',
+			array(
+				array(
+					'id'   => 'route-earlier-param-page',
+					'path' => '/route-patterns/:earlierId',
+				),
+				array(
+					'id'   => 'route-later-param-page',
+					'path' => '/route-patterns/:laterId',
+				),
+			)
+		);
+	}
+
+	/**
+	 * @testdox Fallback-selected route patterns do not create linked current-page breadcrumbs.
+	 */
+	public function test_route_pattern_fallback_uses_text_for_current_page_breadcrumbs(): void {
+		$result = $this->get_publicly_registered_page_result_for_request(
+			'/wp-admin/admin.php?page=wc-admin&path=%2Fbreadcrumb%2F123',
+			function () {
+				$this->register_breadcrumb_page( 'route-pattern-breadcrumb-page', '/breadcrumb/:itemId' );
+			},
+			true
+		);
+
+		$this->assertSame(
+			array(
+				array( 'admin.php?page=' . PageController::PAGE_ROOT, 'WooCommerce' ),
+				'Parent crumb',
+				'Current crumb',
+			),
+			$result['breadcrumbs']
+		);
+	}
+
+	/**
+	 * @testdox Exact route-template requests retain trunk's linked current-page breadcrumb.
+	 */
+	public function test_exact_route_pattern_request_retains_linked_current_page_breadcrumb(): void {
+		$result = $this->get_publicly_registered_page_result_for_request(
+			'/wp-admin/admin.php?page=wc-admin&path=%2Fbreadcrumb%2F%3AitemId',
+			function () {
+				$this->register_breadcrumb_page( 'exact-route-pattern-breadcrumb-page', '/breadcrumb/:itemId' );
+			},
+			true
+		);
+
+		$this->assertSame(
+			array(
+				array( 'admin.php?page=' . PageController::PAGE_ROOT, 'WooCommerce' ),
+				array( 'wc-admin&path=/breadcrumb/:itemId', 'Parent crumb' ),
+				'Current crumb',
+			),
+			$result['breadcrumbs']
+		);
+	}
+
+	/**
+	 * @testdox Fallback-selected pages do not create linked route-pattern parent breadcrumbs.
+	 */
+	public function test_route_pattern_fallback_uses_text_for_patterned_parent_breadcrumb(): void {
+		$result = $this->get_publicly_registered_page_result_for_request(
+			'/wp-admin/admin.php?page=wc-admin&path=%2Fbreadcrumb%2Fsettings%2F123',
+			function () {
+				$this->register_patterned_parent_and_child( '/breadcrumb/:section/:itemId' );
+			},
+			true
+		);
+
+		$this->assertSame(
+			array(
+				array( 'admin.php?page=' . PageController::PAGE_ROOT, 'WooCommerce' ),
+				'Pattern parent',
+				'Child page',
+			),
+			$result['breadcrumbs']
+		);
+	}
+
+	/**
+	 * @testdox Exact child requests retain trunk's linked route-pattern parent breadcrumb.
+	 */
+	public function test_exact_child_request_retains_linked_patterned_parent_breadcrumb(): void {
+		$result = $this->get_publicly_registered_page_result_for_request(
+			'/wp-admin/admin.php?page=wc-admin&path=%2Fbreadcrumb%2Fstatic',
+			function () {
+				$this->register_patterned_parent_and_child( '/breadcrumb/static' );
+			},
+			true
+		);
+
+		$this->assertSame(
+			array(
+				array( 'admin.php?page=' . PageController::PAGE_ROOT, 'WooCommerce' ),
+				array( 'admin.php?page=wc-admin&path=/breadcrumb/:section', 'Pattern parent' ),
+				'Child page',
+			),
+			$result['breadcrumbs']
+		);
+	}
+
+	/**
+	 * @testdox Fallback-selected pattern-free paths retain trunk's linked parent breadcrumb.
+	 */
+	public function test_fallback_selected_pattern_free_path_retains_linked_patterned_parent_breadcrumb(): void {
+		// The trailing slash makes this miss the exact-match loop and resolve through the fallback
+		// matcher, but `/breadcrumb/static` carries no route pattern, so breadcrumbs stay trunk-identical.
+		$result = $this->get_publicly_registered_page_result_for_request(
+			'/wp-admin/admin.php?page=wc-admin&path=%2Fbreadcrumb%2Fstatic%2F',
+			function () {
+				$this->register_patterned_parent_and_child( '/breadcrumb/static' );
+			},
+			true
+		);
+
+		$this->assertSame(
+			array(
+				array( 'admin.php?page=' . PageController::PAGE_ROOT, 'WooCommerce' ),
+				array( 'admin.php?page=wc-admin&path=/breadcrumb/:section', 'Pattern parent' ),
+				'Child page',
+			),
+			$result['breadcrumbs']
+		);
+	}
+
+	/**
+	 * @testdox Fallback-selected pages use text for parents with invalid filtered paths.
+	 *
+	 * @dataProvider data_provider_invalid_filtered_paths
+	 *
+	 * @param mixed $invalid_path Invalid filtered parent path.
+	 */
+	public function test_route_pattern_fallback_uses_text_for_invalid_parent_path( $invalid_path ): void {
+		$result = $this->get_publicly_registered_page_result_for_request(
+			'/wp-admin/admin.php?page=wc-admin&path=%2Fbreadcrumb%2F123',
+			function () use ( $invalid_path ) {
+				$this->register_invalid_path_parent_and_child( $invalid_path, '/breadcrumb/:itemId' );
+			},
+			true
+		);
+
+		$this->assertSame(
+			array(
+				array( 'admin.php?page=' . PageController::PAGE_ROOT, 'WooCommerce' ),
+				'Invalid path parent',
+				'Child page',
+			),
+			$result['breadcrumbs']
+		);
+	}
+
+	/**
+	 * @testdox Exact-match pages use text for parents with invalid filtered paths.
+	 *
+	 * @dataProvider data_provider_invalid_filtered_paths
+	 *
+	 * @param mixed $invalid_path Invalid filtered parent path.
+	 */
+	public function test_exact_match_uses_text_for_invalid_parent_path( $invalid_path ): void {
+		// A pattern-free child path resolved through the exact-match loop keeps
+		// `current_page_is_route_pattern_match` false, exercising the other linkability branch.
+		$result = $this->get_publicly_registered_page_result_for_request(
+			'/wp-admin/admin.php?page=wc-admin&path=%2Fbreadcrumb%2Fstatic',
+			function () use ( $invalid_path ) {
+				$this->register_invalid_path_parent_and_child( $invalid_path, '/breadcrumb/static' );
+			},
+			true
+		);
+
+		$this->assertSame(
+			array(
+				array( 'admin.php?page=' . PageController::PAGE_ROOT, 'WooCommerce' ),
+				'Invalid path parent',
+				'Child page',
+			),
+			$result['breadcrumbs']
+		);
+	}
+
+	/**
+	 * @testdox Bare `*` paths resolve as route patterns with unlinked breadcrumbs.
+	 */
+	public function test_bare_wildcard_path_is_treated_as_route_pattern(): void {
+		// React Router treats a bare `*` route as a match-everything splat resolved against the app
+		// root, and the matcher normalizes it the same way. The pattern detector must agree, so the
+		// breadcrumb does not link the literal `*` template.
+		$result = $this->get_publicly_registered_page_result_for_request(
+			'/wp-admin/admin.php?page=wc-admin&path=%2Fbreadcrumb%2Fanything',
+			function () {
+				$this->register_breadcrumb_page( 'bare-wildcard-page', '*' );
+			},
+			true
+		);
+
+		$this->assertIsArray( $result['current_page'] );
+		$this->assertSame( 'bare-wildcard-page', $result['current_page']['id'] );
+		$this->assertSame(
+			array(
+				array( 'admin.php?page=' . PageController::PAGE_ROOT, 'WooCommerce' ),
+				'Parent crumb',
+				'Current crumb',
+			),
+			$result['breadcrumbs']
+		);
+	}
+
+	/**
+	 * Data provider for invalid filtered registered-page paths.
+	 *
+	 * @return array[]
+	 */
+	public static function data_provider_invalid_filtered_paths(): array {
+		return array(
+			'array path' => array( array( 'invalid' ) ),
+			'null path'  => array( null ),
+		);
+	}
+
+	/**
+	 * Registers a parent page whose path a filter replaces with an invalid value, and a child page.
+	 *
+	 * The parent is first registered with a valid path so the menu item exists, then re-connected
+	 * through the page options filter to overwrite its stored path with the invalid value.
+	 *
+	 * @param mixed  $invalid_path Invalid filtered parent path.
+	 * @param string $child_path   Child page path.
+	 */
+	private function register_invalid_path_parent_and_child( $invalid_path, string $child_path ): void {
+		wc_admin_register_page(
+			array(
+				'id'     => 'invalid-path-parent',
+				'parent' => 'woocommerce',
+				'title'  => 'Invalid path parent',
+				'path'   => '/breadcrumb-parent',
+			)
+		);
+		wc_admin_register_page(
+			array(
+				'id'     => 'invalid-path-child',
+				'parent' => 'invalid-path-parent',
+				'title'  => 'Child page',
+				'path'   => $child_path,
+			)
+		);
+
+		$this->with_filtered_page_path(
+			'invalid-path-parent',
+			$invalid_path,
+			function () {
+				wc_admin_connect_page(
+					array(
+						'id'      => 'invalid-path-parent',
+						'parent'  => 'woocommerce',
+						'title'   => 'Invalid path parent',
+						'path'    => '/breadcrumb-parent',
+						'js_page' => true,
+					)
+				);
+			}
+		);
+	}
+
+	/**
+	 * Runs a callback with a page options filter that overrides one registered page's path.
+	 *
+	 * @param string   $page_id  Id of the page whose path the filter overrides.
+	 * @param mixed    $path     Replacement path.
+	 * @param callable $callback Callback to run while the filter is installed.
+	 * @return mixed Callback result.
+	 */
+	private function with_filtered_page_path( string $page_id, $path, callable $callback ) {
+		$filter = function ( $options ) use ( $page_id, $path ) {
+			if ( ( $options['id'] ?? null ) === $page_id ) {
+				$options['path'] = $path;
+			}
+
+			return $options;
+		};
+
+		add_filter( 'woocommerce_navigation_connect_page_options', $filter );
+
+		try {
+			return $callback();
+		} finally {
+			remove_filter( 'woocommerce_navigation_connect_page_options', $filter );
+		}
+	}
+
+	/**
+	 * Registers a single top-level page with a two-piece breadcrumb title.
+	 *
+	 * @param string $id   Page id.
+	 * @param string $path Page path.
+	 */
+	private function register_breadcrumb_page( string $id, string $path ): void {
+		wc_admin_register_page(
+			array(
+				'id'     => $id,
+				'parent' => 'woocommerce',
+				'title'  => array( 'Parent crumb', 'Current crumb' ),
+				'path'   => $path,
+			)
+		);
+	}
+
+	/**
+	 * Registers a patterned parent and a child page.
+	 *
+	 * @param string $child_path Child page path.
+	 */
+	private function register_patterned_parent_and_child( string $child_path ): void {
+		wc_admin_register_page(
+			array(
+				'id'     => 'patterned-breadcrumb-parent',
+				'parent' => 'woocommerce',
+				'title'  => 'Pattern parent',
+				'path'   => '/breadcrumb/:section',
+			)
+		);
+		wc_admin_register_page(
+			array(
+				'id'     => 'patterned-breadcrumb-child',
+				'parent' => 'patterned-breadcrumb-parent',
+				'title'  => 'Child page',
+				'path'   => $child_path,
+			)
+		);
+	}
+
+	/**
+	 * Gets the PageController result for a simulated admin request.
+	 *
+	 * @param string $request_uri Request URI.
+	 * @param array  $pages       Pages to register.
+	 * @return array{current_page: array|bool, is_registered_page: bool}
+	 */
+	private function get_registered_page_result_for_request( string $request_uri, array $pages ): array {
+		$registered_pages = array();
+
+		foreach ( $pages as $page ) {
+			$registered_pages[ $page['id'] ] = array(
+				'id'      => $page['id'],
+				'path'    => PageController::PAGE_ROOT . '&path=' . $page['path'],
+				'js_page' => true,
+			);
+		}
+
+		return $this->run_with_page_controller_request_state(
+			$request_uri,
+			$registered_pages,
+			function () {
+				$this->sut->determine_current_page();
+
+				return array(
+					'current_page'       => $this->sut->get_current_page(),
+					'is_registered_page' => wc_admin_is_registered_page(),
+				);
+			}
+		);
+	}
+
+	/**
+	 * Gets the PageController result after registering pages through the public API.
+	 *
+	 * @param string   $request_uri   Request URI.
+	 * @param callable $register_pages Page registration callback.
+	 * @param bool     $get_breadcrumbs Whether to include generated breadcrumbs.
+	 * @return array{current_page: array|bool, is_registered_page: bool, breadcrumbs: array|null}
+	 */
+	private function get_publicly_registered_page_result_for_request( string $request_uri, callable $register_pages, bool $get_breadcrumbs = false ): array {
+		$menu_global_names     = array( 'menu', 'submenu', '_wp_submenu_nopriv', '_registered_pages', '_parent_pages', '_wp_real_parent_file' );
+		$original_menu_globals = array();
+
+		foreach ( $menu_global_names as $global_name ) {
+			$original_menu_globals[ $global_name ] = array(
+				'exists' => array_key_exists( $global_name, $GLOBALS ),
+				'value'  => $GLOBALS[ $global_name ] ?? null,
+			);
+		}
+
+		try {
+			return $this->run_with_page_controller_request_state(
+				$request_uri,
+				array(),
+				function () use ( $register_pages, $get_breadcrumbs ) {
+					$register_pages();
+					$this->sut->determine_current_page();
+
+					return array(
+						'current_page'       => $this->sut->get_current_page(),
+						'is_registered_page' => wc_admin_is_registered_page(),
+						'breadcrumbs'        => $get_breadcrumbs ? wc_admin_get_breadcrumbs() : null,
+					);
+				}
+			);
+		} finally {
+			foreach ( $original_menu_globals as $global_name => $global_state ) {
+				if ( $global_state['exists'] ) {
+					$GLOBALS[ $global_name ] = $global_state['value'];
+				} else {
+					unset( $GLOBALS[ $global_name ] );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Runs a callback with isolated PageController state for a request.
+	 *
+	 * @template T of array
+	 * @param string   $request_uri Request URI.
+	 * @param array    $pages       Initial registered pages.
+	 * @param callable $callback    Callback to run with the isolated state.
+	 * @phpstan-param callable(): T $callback
+	 * @return array Callback result.
+	 * @phpstan-return T
+	 */
+	private function run_with_page_controller_request_state( string $request_uri, array $pages, callable $callback ): array {
+		$reflection            = new \ReflectionClass( $this->sut );
+		$pages_property        = $reflection->getProperty( 'pages' );
+		$current_page_property = $reflection->getProperty( 'current_page' );
+		$route_match_property  = $reflection->getProperty( 'current_page_is_route_pattern_match' );
+		$pages_property->setAccessible( true );
+		$current_page_property->setAccessible( true );
+		$route_match_property->setAccessible( true );
+
+		$original_pages        = $pages_property->getValue( $this->sut );
+		$original_current_page = $current_page_property->getValue( $this->sut );
+		$original_route_match  = $route_match_property->getValue( $this->sut );
+		$original_request_uri  = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request URI.
+
+		try {
+			$pages_property->setValue( $this->sut, $pages );
+			$current_page_property->setValue( $this->sut, null );
+			$route_match_property->setValue( $this->sut, false );
+			$_SERVER['REQUEST_URI'] = $request_uri;
+
+			return $callback();
+		} finally {
+			$pages_property->setValue( $this->sut, $original_pages );
+			$current_page_property->setValue( $this->sut, $original_current_page );
+			$route_match_property->setValue( $this->sut, $original_route_match );
+
+			if ( null === $original_request_uri ) {
+				unset( $_SERVER['REQUEST_URI'] );
+			} else {
+				$_SERVER['REQUEST_URI'] = $original_request_uri;
+			}
+		}
+	}
+
+	/**
+	 * Asserts that a simulated request matches the expected registered page.
+	 *
+	 * @param string $expected_page_id Expected page ID.
+	 * @param string $request_uri      Request URI.
+	 * @param array  $pages            Pages to register.
+	 */
+	private function assert_registered_page_for_request( string $expected_page_id, string $request_uri, array $pages ): void {
+		$result       = $this->get_registered_page_result_for_request( $request_uri, $pages );
+		$current_page = $result['current_page'];
+
+		$this->assertTrue( $result['is_registered_page'], 'A matching page should be reported through wc_admin_is_registered_page().' );
+		$this->assertIsArray( $current_page, 'A matching registered page should be detected.' );
+		$this->assertSame( $expected_page_id, $current_page['id'] );
+	}
+
+	/**
 	 * Returns an object mocking what we need from \WP_Screen.
 	 *
 	 * @return object

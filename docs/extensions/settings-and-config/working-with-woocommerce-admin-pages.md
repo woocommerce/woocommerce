@@ -58,12 +58,18 @@ To register a React-powered page, use the [`wc_admin_register_page()`](https://w
 -   `id` (**required**) - This identifies the page with the controller.
 -   `parent` (_optional_) - This denotes the page as a child of `parent` (using the parent's ID) and is used for generating breadcrumbs.
 -   `title` (**required**) - This corresponds to the page's title and is used to build breadcrumbs. You can supply a String or an Array of breadcrumb pieces here.
--   `path` (**required**) - This is the page's path (relative to `#wc-admin`). It is used for identifying this page and for linking breadcrumb pieces when this page is a parent.
+-   `path` (**required**) - This is the page's path (relative to `#wc-admin`). It is used for identifying this page and for linking breadcrumb pieces when this page is a parent. Supports static paths, complete `:paramName` path segments, and a terminal `/*` wildcard for recognizing matching React routes.
 -   `capability` (_optional_) - User capability needed to access this page. The default value is `manage_options`.
 -   `icon` (_optional_) - Use this to apply a Dashicons helper class or base64-encoded SVG. Include the entire dashicon class name, ie `dashicons-*`. Note that this won't be included in WooCommerce Admin Navigation.
 -   `position` (_optional_) - Menu item position for parent pages. See: [`add_menu_page()`](https://developer.wordpress.org/reference/functions/add_menu_page/).
 
 Registering a React-powered page is similar to connecting a PHP page, but with some key differences. Registering pages will automatically create WordPress menu items for them, with the appropriate hierarchy based on the value of `parent`.
+
+Route templates recognize direct loads for matching React routes registered with `woocommerce_admin_pages_list`. Named parameters must occupy a complete path segment, and a wildcard is recognized only when `/*` ends the path. A path registered without a leading slash is normalized to one for matching, because React Router resolves such a route against the app root and renders it at `/your-path`. Request paths are matched as they arrive: a `path` query argument without a leading slash matches no React route, so it is not recognized here either.
+
+Always register paths with a leading slash. Only route matching normalizes it: the registered path becomes the WordPress menu slug verbatim, so registering `reports` produces the menu URL `?path=reports`, and React Router cannot match a path that does not start with a slash. Registering `/reports` keeps the menu item, breadcrumb links, and direct loads consistent.
+
+Route templates are matching patterns, not URL templates. `PageController` does not interpolate request values when it registers the corresponding WordPress menu item, so WordPress receives the literal route template as the menu slug (for example, `wc-admin&path=/orders/:orderId`). Treat route templates as direct-load recognition paths, and use static paths for merchant-facing navigation. When a page is selected through fallback route matching, its own breadcrumb label is unlinked rather than pointing to the literal template; static ancestor breadcrumbs can still link normally.
 
 ### Example: Adding a new WooCommerce Admin page
 
