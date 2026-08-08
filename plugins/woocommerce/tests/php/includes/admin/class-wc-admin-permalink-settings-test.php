@@ -319,4 +319,27 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 		$this->assert_only_radio_checked( $html, 'shop_base' );
 	}
 
+	/**
+	 * Both permalink fields are free-form request input; an array reaching trim() or
+	 * wc_sanitize_permalink() is a fatal, since both are declared to take a string.
+	 *
+	 * @testdox Should fall back to the Default base when the posted permalink fields are not scalar.
+	 */
+	public function test_non_scalar_posted_fields_fall_back_to_the_default_base(): void {
+		$this->ensure_shop_page();
+
+		$_POST['permalink_structure']                = '';
+		$_POST['wc-permalinks-nonce']                = wp_create_nonce( 'wc-permalinks' );
+		$_POST['woocommerce_product_category_slug']  = 'product-category';
+		$_POST['woocommerce_product_tag_slug']       = 'product-tag';
+		$_POST['woocommerce_product_attribute_slug'] = '';
+		$_POST['product_permalink']                  = array( 'custom' );
+		$_POST['product_permalink_structure']        = array( 'widgets' );
+
+		new WC_Admin_Permalink_Settings();
+		$this->reset_permalink_post_data();
+
+		$this->assertSame( 'product', get_option( 'woocommerce_permalinks' )['product_base'] );
+		$this->assert_only_radio_checked( $this->render_settings(), 'default' );
+	}
 }

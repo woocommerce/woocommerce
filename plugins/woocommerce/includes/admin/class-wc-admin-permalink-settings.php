@@ -210,12 +210,20 @@ class WC_Admin_Permalink_Settings {
 			$permalinks['tag_base']       = wc_sanitize_permalink( wp_unslash( $_POST['woocommerce_product_tag_slug'] ) );
 			$permalinks['attribute_base'] = wc_sanitize_permalink( wp_unslash( $_POST['woocommerce_product_attribute_slug'] ) );
 
-			// Generate product base.
-			$product_base = isset( $_POST['product_permalink'] ) ? wc_clean( wp_unslash( $_POST['product_permalink'] ) ) : '';
+			/*
+			 * Generate product base. Both fields post a scalar; anything else is coerced to the
+			 * empty string, which the Default branch below resolves. Unguarded, an array reaches
+			 * trim() and wc_sanitize_permalink(), which both expect a string.
+			 */
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized on the next line.
+			$posted_product_base = isset( $_POST['product_permalink'] ) && is_scalar( $_POST['product_permalink'] ) ? wp_unslash( $_POST['product_permalink'] ) : '';
+			$product_base        = sanitize_text_field( (string) $posted_product_base );
 
 			if ( 'custom' === $product_base ) {
-				if ( isset( $_POST['product_permalink_structure'] ) ) {
-					$product_base = preg_replace( '#/+#', '/', '/' . str_replace( '#', '', trim( wp_unslash( $_POST['product_permalink_structure'] ) ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce is verified; permalink tokens require domain-specific cleaning.
+				if ( isset( $_POST['product_permalink_structure'] ) && is_scalar( $_POST['product_permalink_structure'] ) ) {
+					// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized by wc_sanitize_permalink() below.
+					$posted_structure = trim( (string) wp_unslash( $_POST['product_permalink_structure'] ) );
+					$product_base     = (string) preg_replace( '#/+#', '/', '/' . str_replace( '#', '', $posted_structure ) );
 				} else {
 					$product_base = '/';
 				}
