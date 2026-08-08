@@ -7,11 +7,14 @@
 
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
+use Automattic\WooCommerce\RestApi\UnitTests\StockReservationOptionsTrait;
 
 /**
  * Class WC_Stock_Functions_Tests.
  */
 class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
+	use StockReservationOptionsTrait;
+
 	/**
 	 * Product reused by independent stock transitions within one test method.
 	 *
@@ -81,47 +84,6 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 		$order->set_status( $status );
 		$order->save();
 		return $order;
-	}
-
-	/**
-	 * Run a callback with stock reservation enabled and the configured hold duration.
-	 *
-	 * @param string   $hold_stock_minutes Configured hold stock duration.
-	 * @param callable $callback Callback to run.
-	 * @return mixed
-	 */
-	private function with_stock_reservation_options( $hold_stock_minutes, $callback ) {
-		$option_names         = array(
-			'woocommerce_hold_stock_minutes',
-			'woocommerce_manage_stock',
-			'woocommerce_schema_version',
-		);
-		$missing_option_value = new stdClass();
-		$original_options     = array();
-
-		foreach ( $option_names as $option_name ) {
-			$option_value                     = get_option( $option_name, $missing_option_value );
-			$original_options[ $option_name ] = array(
-				'exists' => $missing_option_value !== $option_value,
-				'value'  => $option_value,
-			);
-		}
-
-		update_option( 'woocommerce_hold_stock_minutes', $hold_stock_minutes );
-		update_option( 'woocommerce_manage_stock', 'yes' );
-		update_option( 'woocommerce_schema_version', 430 );
-
-		try {
-			return $callback();
-		} finally {
-			foreach ( $original_options as $option_name => $option_data ) {
-				if ( $option_data['exists'] ) {
-					update_option( $option_name, $option_data['value'] );
-				} else {
-					delete_option( $option_name );
-				}
-			}
-		}
 	}
 
 	/**
@@ -358,7 +320,6 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 	 */
 	public function test_reserve_stock_for_order_defaults_to_60_minutes() {
 		$minutes = $this->with_stock_reservation_options(
-			'15',
 			function () {
 				$order         = wc_create_order();
 				$reserve_stock = new ReserveStock();
@@ -368,7 +329,8 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 						$reserve_stock->reserve_stock_for_order( $order );
 					}
 				);
-			}
+			},
+			'15'
 		);
 
 		$this->assertSame(
@@ -383,7 +345,6 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 	 */
 	public function test_wc_reserve_stock_for_order_passes_configured_checkout_hold_duration() {
 		$minutes = $this->with_stock_reservation_options(
-			'15',
 			function () {
 				$order = wc_create_order();
 
@@ -392,7 +353,8 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 						wc_reserve_stock_for_order( $order );
 					}
 				);
-			}
+			},
+			'15'
 		);
 
 		$this->assertSame(
