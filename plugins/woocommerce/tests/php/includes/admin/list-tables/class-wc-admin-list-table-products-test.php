@@ -133,6 +133,69 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product title ranking does not invoke WordPress search filters.
+	 */
+	public function test_product_search_ranking_does_not_invoke_core_search_filters(): void {
+		list( , , $search_phrase ) = $this->create_search_products();
+		$filter_calls              = 0;
+
+		$record_filter_call = static function ( $search_columns ) use ( &$filter_calls ) {
+			++$filter_calls;
+			return $search_columns;
+		};
+		add_filter( 'post_search_columns', $record_filter_call );
+
+		try {
+			$this->get_search_results( $search_phrase );
+		} finally {
+			remove_filter( 'post_search_columns', $record_filter_call );
+		}
+
+		$this->assertSame( 0, $filter_calls, 'Title ranking should parse terms without invoking core search filters.' );
+	}
+
+	/**
+	 * @testdox Product title ranking uses the same translated stopwords as product inclusion.
+	 */
+	public function test_product_search_uses_woocommerce_stopwords_for_title_ranking(): void {
+		$token       = wp_generate_password( 8, false );
+		$search_term = 'Night the ' . $token;
+
+		$translate_stopwords = static function ( $translation, $text, $context, $domain ) {
+			$source = 'about,an,are,as,at,be,by,com,for,from,how,in,is,it,of,on,or,that,the,this,to,was,what,when,where,who,will,with,www';
+			if ( $source !== $text || 'Comma-separated list of search stopwords in your language' !== $context ) {
+				return $translation;
+			}
+
+			return 'woocommerce' === $domain ? 'the' : 'about';
+		};
+		add_filter( 'gettext_with_context', $translate_stopwords, 10, 4 );
+
+		try {
+			$title_match = WC_Helper_Product::create_simple_product();
+			$title_match->set_name( 'Night ' . $token );
+			$title_match->set_date_created( '2024-01-01 00:00:00' );
+			$title_match->save();
+
+			$content_match = WC_Helper_Product::create_simple_product();
+			$content_match->set_name( 'Archive translated notes' );
+			$content_match->set_description( $search_term );
+			$content_match->set_date_created( '2024-01-02 00:00:00' );
+			$content_match->save();
+
+			$results = $this->get_search_results( $search_term );
+		} finally {
+			remove_filter( 'gettext_with_context', $translate_stopwords, 10 );
+		}
+
+		$this->assertSame(
+			array( $title_match->get_id(), $content_match->get_id() ),
+			$results,
+			'Title ranking should discard the same translated stopwords as the broad product search.'
+		);
+	}
+
+	/**
 	 * @testdox Product searches retain broad content, SKU, GTIN, and variation matches after title matches.
 	 */
 	public function test_product_search_retains_broad_matches_after_title_matches(): void {
@@ -221,6 +284,106 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 			),
 			$this->get_search_results( $search_term ),
 			'Title relevance should add buckets without replacing the existing date order inside each bucket.'
+		);
+	}
+
+	/**
+	 * @testdox Product searches distinguish core status-view ordering from explicit modified-date sorting.
+	 * @dataProvider core_status_ordering_provider
+	 *
+	 * @param string $post_status     Product status.
+	 * @param string $order           Status-view order.
+	 * @param bool   $explicit_order  Whether the order came from an explicit request.
+	 */
+	public function test_product_search_handles_status_view_ordering( string $post_status, string $order, bool $explicit_order ): void {
+		$search_term = 'Lantern ' . wp_generate_password( 8, false );
+
+		$create_product = static function ( string $name, string $description, string $modified ) use ( $post_status ): WC_Product {
+			global $wpdb;
+
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_name( $name );
+			$product->set_description( $description );
+			$product->set_status( $post_status );
+			$product->save();
+
+			// wp_insert_post() overwrites modified timestamps with the current time.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->update(
+				$wpdb->posts,
+				array(
+					'post_modified'     => $modified,
+					'post_modified_gmt' => $modified,
+				),
+				array( 'ID' => $product->get_id() )
+			);
+			clean_post_cache( $product->get_id() );
+
+			return $product;
+		};
+
+		$title_older   = $create_product( 'Alpha ' . $search_term, '', '2024-01-01 00:00:00' );
+		$content_older = $create_product( 'Bravo catalog notes', $search_term, '2024-01-02 00:00:00' );
+		$content_newer = $create_product( 'Yankee catalog notes', $search_term, '2024-01-03 00:00:00' );
+		$title_newer   = $create_product( 'Zulu ' . $search_term, '', '2024-01-04 00:00:00' );
+
+		if ( $explicit_order ) {
+			$expected = 'ASC' === $order
+				? array( $title_older->get_id(), $content_older->get_id(), $content_newer->get_id(), $title_newer->get_id() )
+				: array( $title_newer->get_id(), $content_newer->get_id(), $content_older->get_id(), $title_older->get_id() );
+		} else {
+			$expected = 'ASC' === $order
+				? array( $title_older->get_id(), $title_newer->get_id(), $content_older->get_id(), $content_newer->get_id() )
+				: array( $title_newer->get_id(), $title_older->get_id(), $content_newer->get_id(), $content_older->get_id() );
+		}
+
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Preserve the exact test-global state around this request simulation.
+		$had_orderby      = array_key_exists( 'orderby', $_GET );
+		$previous_orderby = $had_orderby ? $_GET['orderby'] : null;
+		// phpcs:enable
+		if ( $explicit_order ) {
+			$_GET['orderby'] = 'modified';
+		} else {
+			unset( $_GET['orderby'] );
+		}
+
+		try {
+			$results = $this->get_search_results(
+				$search_term,
+				array(
+					'post_status' => $post_status,
+					'orderby'     => 'modified',
+					'order'       => $order,
+				)
+			);
+		} finally {
+			if ( $had_orderby ) {
+				$_GET['orderby'] = $previous_orderby;
+			} else {
+				unset( $_GET['orderby'] );
+			}
+		}
+
+		$this->assertSame(
+			$expected,
+			$results,
+			$explicit_order
+				? 'Explicit modified-date sorting should take precedence over search relevance.'
+				: 'Core status-view ordering should remain the tiebreak within title and content relevance groups.'
+		);
+	}
+
+	/**
+	 * Core status-view ordering for title-priority coverage.
+	 *
+	 * @return array<string, array{string, string, bool}>
+	 */
+	public function core_status_ordering_provider(): array {
+		return array(
+			'drafts use core modified descending'       => array( 'draft', 'DESC', false ),
+			'pending uses core modified ascending'      => array( 'pending', 'ASC', false ),
+			'drafts keep explicit modified descending'  => array( 'draft', 'DESC', true ),
+			'pending keeps explicit modified ascending' => array( 'pending', 'ASC', true ),
 		);
 	}
 

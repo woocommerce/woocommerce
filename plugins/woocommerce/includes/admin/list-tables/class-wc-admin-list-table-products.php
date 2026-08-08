@@ -639,8 +639,10 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			$ids                          = $data_store->search_products( $search_term, '', true, true );
 			$query_vars['post__in']       = array_merge( $ids, array( 0 ) );
 			$query_vars['product_search'] = true;
-			if ( empty( $query_vars['orderby'] ) ) {
-				$query_vars['product_search_term'] = $search_term;
+			$default_search_order         = $this->get_default_search_order( $query_vars );
+			if ( null !== $default_search_order ) {
+				$query_vars['product_search_term']          = $search_term;
+				$query_vars['product_search_default_order'] = $default_search_order;
 			}
 			unset( $query_vars['s'] );
 		}
@@ -668,13 +670,30 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return string
 	 */
 	public function order_search_results( $orderby, $query ) {
-		$search_term = $query->get( 'product_search_term' );
-		if ( ! $query->get( 'product_search' ) || $query->get( 'orderby' ) || ! is_string( $search_term ) || '' === $search_term ) {
+		$search_term          = $query->get( 'product_search_term' );
+		$default_search_order = $query->get( 'product_search_default_order' );
+		if ( ! $query->get( 'product_search' ) || ! is_string( $search_term ) || '' === $search_term ) {
 			return $orderby;
 		}
 
 		global $wpdb;
-		if ( "{$wpdb->posts}.post_date DESC" !== $orderby ) {
+		if ( 'date' === $default_search_order ) {
+			if ( $query->get( 'orderby' ) || "{$wpdb->posts}.post_date DESC" !== $orderby ) {
+				return $orderby;
+			}
+		} elseif ( 'modified' === $default_search_order ) {
+			$post_status = $query->get( 'post_status' );
+			$order       = $query->get( 'order' );
+			if (
+				'modified' !== $query->get( 'orderby' )
+				|| ! is_string( $post_status )
+				|| ! is_string( $order )
+				|| ( ! ( 'draft' === $post_status && 'DESC' === $order ) && ! ( 'pending' === $post_status && 'ASC' === $order ) )
+				|| "{$wpdb->posts}.post_modified {$order}" !== $orderby
+			) {
+				return $orderby;
+			}
+		} else {
 			return $orderby;
 		}
 
@@ -699,33 +718,121 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		}
 
 		if ( $title_match_groups ) {
-			$orderby = 'CASE WHEN (' . implode( ' OR ', $title_match_groups ) . ") THEN 0 ELSE 1 END, {$wpdb->posts}.post_date DESC";
+			$orderby = 'CASE WHEN (' . implode( ' OR ', $title_match_groups ) . ') THEN 0 ELSE 1 END, ' . $orderby;
 		}
 
 		return $orderby;
 	}
 
 	/**
-	 * Parse a product search group using WordPress search-term rules.
+	 * Get the default ordering mode for a product search.
+	 *
+	 * @param array $query_vars Query variables.
+	 * @return string|null
+	 */
+	private function get_default_search_order( $query_vars ) {
+		$orderby = $query_vars['orderby'] ?? '';
+		if ( ! is_string( $orderby ) ) {
+			return null;
+		}
+
+		if ( '' === $orderby ) {
+			return 'date';
+		}
+
+		// Draft and Pending views receive modified ordering from wp_edit_posts_query() only when no orderby was requested.
+		if ( isset( $_GET['orderby'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only presence check distinguishes explicit sorting from the core default.
+			return null;
+		}
+
+		$post_status = $query_vars['post_status'] ?? '';
+		$order       = $query_vars['order'] ?? '';
+		if ( 'modified' !== strtolower( $orderby ) || ! is_string( $post_status ) || ! is_string( $order ) ) {
+			return null;
+		}
+
+		$order = $order ? strtoupper( $order ) : 'DESC';
+		if ( ( 'draft' === $post_status && 'DESC' === $order ) || ( 'pending' === $post_status && 'ASC' === $order ) ) {
+			return 'modified';
+		}
+
+		return null;
+	}
+
+	/**
+	 * Parse a product search group using WooCommerce search-term rules.
 	 *
 	 * @param string $search_group Search group without OR separators.
 	 * @return string[]
 	 */
 	private function parse_search_terms( $search_group ) {
-		$search_query = new class( array( 's' => wp_slash( $search_group ) ) ) extends WP_Query {
-			/**
-			 * Parse terms without running a query.
-			 *
-			 * @param array $query Query variables.
-			 */
-			public function __construct( $query = array() ) {
-				$this->query_vars = $query;
-				$this->parse_search( $this->query_vars );
-			}
-		};
+		if ( ! preg_match_all( '/".*?("|$)|((?<=[\t ",+])|^)[^\t ",+]+/', $search_group, $matches ) ) {
+			return array( $search_group );
+		}
 
-		$search_terms = $search_query->query_vars['search_terms'] ?? array();
-		return is_array( $search_terms ) ? $search_terms : array();
+		$search_terms = $this->get_valid_search_terms( $matches[0] );
+		$count        = count( $search_terms );
+
+		return 9 < $count || 0 === $count ? array( $search_group ) : $search_terms;
+	}
+
+	/**
+	 * Remove unsuitable product search terms.
+	 *
+	 * @param string[] $terms Search terms.
+	 * @return string[]
+	 */
+	private function get_valid_search_terms( $terms ) {
+		$valid_terms = array();
+		$stopwords   = $this->get_search_stopwords();
+
+		foreach ( $terms as $term ) {
+			// Keep before/after spaces when term is for exact match, otherwise trim quotes and spaces.
+			if ( preg_match( '/^".+"$/', $term ) ) {
+				$term = trim( $term, "\"'" );
+			} else {
+				$term = trim( $term, "\"' " );
+			}
+
+			// Avoid single A-Z and single dashes.
+			if ( empty( $term ) || ( 1 === strlen( $term ) && preg_match( '/^[a-z\-]$/i', $term ) ) ) {
+				continue;
+			}
+
+			if ( in_array( wc_strtolower( $term ), $stopwords, true ) ) {
+				continue;
+			}
+
+			$valid_terms[] = $term;
+		}
+
+		return $valid_terms;
+	}
+
+	/**
+	 * Retrieve stopwords used when parsing product search terms.
+	 *
+	 * @return string[]
+	 */
+	private function get_search_stopwords() {
+		// Translators: This is a comma-separated list of very common words that should be excluded from a search, like a, an, and the. These are usually called "stopwords". You should not simply translate these individual words into your language. Instead, look for and provide commonly accepted stopwords in your language.
+		$stopwords = array_map(
+			'wc_strtolower',
+			array_map(
+				'trim',
+				explode(
+					',',
+					_x(
+						'about,an,are,as,at,be,by,com,for,from,how,in,is,it,of,on,or,that,the,this,to,was,what,when,where,who,will,with,www',
+						'Comma-separated list of search stopwords in your language',
+						'woocommerce'
+					)
+				)
+			)
+		);
+
+		/** This filter is documented in wp-includes/class-wp-query.php. */
+		return apply_filters( 'wp_search_stopwords', $stopwords ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment -- The hook is documented by WordPress.
 	}
 
 	/**
