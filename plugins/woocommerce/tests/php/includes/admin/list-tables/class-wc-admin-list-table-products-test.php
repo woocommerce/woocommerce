@@ -87,6 +87,184 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product searches prioritize titles that match parsed search terms.
+	 * @dataProvider parsed_search_term_provider
+	 *
+	 * @param string $title_format  Product title format.
+	 * @param string $search_format Search term format.
+	 */
+	public function test_product_search_prioritizes_titles_matching_parsed_terms( string $title_format, string $search_format ): void {
+		$token        = wp_generate_password( 8, false );
+		$product_name = sprintf( $title_format, $token );
+		$search_term  = sprintf( $search_format, $token );
+
+		$title_match = WC_Helper_Product::create_simple_product();
+		$title_match->set_name( $product_name );
+		$title_match->save();
+
+		$content_match = WC_Helper_Product::create_simple_product();
+		$content_match->set_name( 'Archive Lamp Notes ' . wp_generate_password( 8, false ) );
+		$content_match->set_description( $product_name );
+		$content_match->save();
+
+		$results = $this->get_search_results( $search_term );
+
+		$this->assertSame(
+			array( $title_match->get_id(), $content_match->get_id() ),
+			$results,
+			'Products whose titles match every parsed search term should be listed before content-only matches.'
+		);
+	}
+
+	/**
+	 * Parsed search terms for title-priority coverage.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function parsed_search_term_provider(): array {
+		return array(
+			'multiple quoted phrases' => array( 'Night Light %1$s Warm Glow', '"Night Light %1$s" "Warm Glow"' ),
+			'single-quoted terms'     => array( 'Night Light %1$s', "'Night Light %1\$s'" ),
+			'comma-separated terms'   => array( 'Night Light %1$s', 'Night,Light,%1$s' ),
+			'plus-separated terms'    => array( 'Night Light %1$s', 'Night+Light+%1$s' ),
+			'ignored stopword'        => array( 'Night Light %1$s', 'Night the Light %1$s' ),
+			'title punctuation'       => array( 'Night-Light %1$s', 'Night Light %1$s' ),
+		);
+	}
+
+	/**
+	 * @testdox Product searches retain broad content, SKU, GTIN, and variation matches after title matches.
+	 */
+	public function test_product_search_retains_broad_matches_after_title_matches(): void {
+		$search_term = (string) wp_rand( 10000000, 99999999 );
+
+		$title_match = WC_Helper_Product::create_simple_product();
+		$title_match->set_name( 'Night Light ' . $search_term );
+		$title_match->save();
+
+		$content_match = WC_Helper_Product::create_simple_product();
+		$content_match->set_name( 'Archive Content Match' );
+		$content_match->set_description( $search_term );
+		$content_match->save();
+
+		$gtin_match = WC_Helper_Product::create_simple_product();
+		$gtin_match->set_name( 'Catalog GTIN Match' );
+		$gtin_match->set_global_unique_id( '111' . $search_term . '11' );
+		$gtin_match->save();
+
+		$sku_match = WC_Helper_Product::create_simple_product();
+		$sku_match->set_name( 'Catalog SKU Match' );
+		$sku_match->set_sku( 'sku-' . $search_term );
+		$sku_match->save();
+
+		$variable_match = new WC_Product_Variable();
+		$variable_match->set_name( 'Variation Match' );
+		$variable_match->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $variable_match->get_id() );
+		$variation->set_regular_price( '10' );
+		$variation->set_sku( 'variation-' . $search_term );
+		$variation->save();
+
+		$results = $this->get_search_results( $search_term );
+
+		$this->assertSame( $title_match->get_id(), $results[0], 'The title match should be ranked first.' );
+
+		$expected_broad_matches = array(
+			$content_match->get_id(),
+			$gtin_match->get_id(),
+			$sku_match->get_id(),
+			$variable_match->get_id(),
+		);
+		$actual_broad_matches   = array_slice( $results, 1 );
+		sort( $expected_broad_matches );
+		sort( $actual_broad_matches );
+
+		$this->assertSame( $expected_broad_matches, $actual_broad_matches, 'Broad product matches should remain available after title-priority ranking.' );
+	}
+
+	/**
+	 * @testdox Product searches preserve default date ordering within relevance groups.
+	 */
+	public function test_product_search_preserves_date_order_within_relevance_groups(): void {
+		$search_term = 'Lantern ' . wp_generate_password( 8, false );
+
+		$title_older = WC_Helper_Product::create_simple_product();
+		$title_older->set_name( 'Alpha ' . $search_term );
+		$title_older->set_date_created( '2024-01-01 00:00:00' );
+		$title_older->save();
+
+		$title_newer = WC_Helper_Product::create_simple_product();
+		$title_newer->set_name( 'Zulu ' . $search_term );
+		$title_newer->set_date_created( '2024-01-04 00:00:00' );
+		$title_newer->save();
+
+		$content_older = WC_Helper_Product::create_simple_product();
+		$content_older->set_name( 'Bravo catalog notes' );
+		$content_older->set_description( $search_term );
+		$content_older->set_date_created( '2024-01-02 00:00:00' );
+		$content_older->save();
+
+		$content_newer = WC_Helper_Product::create_simple_product();
+		$content_newer->set_name( 'Yankee catalog notes' );
+		$content_newer->set_description( $search_term );
+		$content_newer->set_date_created( '2024-01-03 00:00:00' );
+		$content_newer->save();
+
+		$this->assertSame(
+			array(
+				$title_newer->get_id(),
+				$title_older->get_id(),
+				$content_newer->get_id(),
+				$content_older->get_id(),
+			),
+			$this->get_search_results( $search_term ),
+			'Title relevance should add buckets without replacing the existing date order inside each bucket.'
+		);
+	}
+
+	/**
+	 * @testdox Product searches prioritize titles containing a literal backslash.
+	 */
+	public function test_product_search_prioritizes_title_matches_with_literal_backslashes(): void {
+		$search_term = 'Back\\Slash ' . wp_generate_password( 8, false );
+
+		$title_match = WC_Helper_Product::create_simple_product();
+		$title_match->set_name( $search_term );
+		$title_match->save();
+
+		$content_match = WC_Helper_Product::create_simple_product();
+		$content_match->set_name( 'Archive backslash notes' );
+		$content_match->set_description( $search_term );
+		$content_match->save();
+
+		// Preserve the literal backslash as WordPress expects slashed post data.
+		wp_update_post(
+			wp_slash(
+				array(
+					'ID'         => $title_match->get_id(),
+					'post_title' => $search_term,
+				)
+			)
+		);
+		wp_update_post(
+			wp_slash(
+				array(
+					'ID'           => $content_match->get_id(),
+					'post_content' => $search_term,
+				)
+			)
+		);
+
+		$this->assertSame(
+			array( $title_match->get_id(), $content_match->get_id() ),
+			$this->get_search_results( wp_slash( $search_term ) ),
+			'A request-unslashed literal backslash should survive the ranking parser.'
+		);
+	}
+
+	/**
 	 * @testdox Product searches keep explicit admin sorting choices.
 	 */
 	public function test_product_search_keeps_explicit_orderby(): void {
@@ -107,15 +285,69 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product searches keep orderby values added during pre_get_posts.
+	 */
+	public function test_product_search_keeps_late_explicit_orderby(): void {
+		list( $title_match, $content_match, $search_phrase ) = $this->create_search_products();
+
+		$set_title_order = static function ( WP_Query $query ): void {
+			if ( $query->get( 'product_search' ) ) {
+				$query->set( 'orderby', 'title' );
+				$query->set( 'order', 'ASC' );
+			}
+		};
+		add_action( 'pre_get_posts', $set_title_order );
+
+		try {
+			$results = $this->get_search_results( $search_phrase );
+		} finally {
+			remove_action( 'pre_get_posts', $set_title_order );
+		}
+
+		$this->assertSame(
+			array( $content_match->get_id(), $title_match->get_id() ),
+			$results,
+			'An explicit orderby added after request parsing should take precedence over search relevance.'
+		);
+	}
+
+	/**
+	 * @testdox Product searches honor later posts_orderby filters.
+	 */
+	public function test_product_search_keeps_later_posts_orderby_filter(): void {
+		list( $title_match, $content_match, $search_phrase ) = $this->create_search_products();
+
+		$set_title_order = static function ( $orderby, WP_Query $query ) {
+			global $wpdb;
+
+			return $query->get( 'product_search' ) ? "{$wpdb->posts}.post_title ASC" : $orderby;
+		};
+		add_filter( 'posts_orderby', $set_title_order, 20, 2 );
+
+		try {
+			$results = $this->get_search_results( $search_phrase );
+		} finally {
+			remove_filter( 'posts_orderby', $set_title_order, 20 );
+		}
+
+		$this->assertSame(
+			array( $content_match->get_id(), $title_match->get_id() ),
+			$results,
+			'A later posts_orderby filter should take precedence over search relevance.'
+		);
+	}
+
+	/**
 	 * Search terms for title-priority coverage.
 	 *
 	 * @return array<string, array<string>>
 	 */
 	public function search_term_provider(): array {
 		return array(
-			'plain search'  => array( '%s' ),
-			'quoted phrase' => array( '"%s"' ),
-			'OR groups'     => array( '%s OR Missing Lantern' ),
+			'plain search'   => array( '%s' ),
+			'quoted phrase'  => array( '"%s"' ),
+			'first OR group' => array( '%s OR Missing Lantern' ),
+			'later OR group' => array( 'Missing Lantern OR %s' ),
 		);
 	}
 

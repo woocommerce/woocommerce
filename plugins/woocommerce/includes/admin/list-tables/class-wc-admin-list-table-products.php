@@ -59,6 +59,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		add_filter( 'views_edit-product', array( $this, 'product_views' ) );
 		add_filter( 'get_search_query', array( $this, 'search_label' ) );
 		add_filter( 'posts_clauses', array( $this, 'posts_clauses' ), 10, 2 );
+		add_filter( 'posts_orderby', array( $this, 'order_search_results' ), 10, 2 );
 
 		// Use hooks to prime various caches and improve products page performance.
 		// Until persistent counters reactivated, disable callback for load-edit.php action.
@@ -648,41 +649,83 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	}
 
 	/**
-	 * Prioritize title matches in unsorted product searches.
+	 * Undocumented function
 	 *
 	 * @param array    $args  Array of SELECT statement pieces (from, where, etc).
 	 * @param WP_Query $query WP_Query instance.
 	 * @return array
 	 */
 	public function posts_clauses( $args, $query ) {
+
+		return $args;
+	}
+
+	/**
+	 * Prioritize title matches in unsorted product searches.
+	 *
+	 * @param string   $orderby ORDER BY clause.
+	 * @param WP_Query $query   WP_Query instance.
+	 * @return string
+	 */
+	public function order_search_results( $orderby, $query ) {
 		$search_term = $query->get( 'product_search_term' );
-		if ( ! $query->get( 'product_search' ) || ! is_string( $search_term ) || '' === $search_term ) {
-			return $args;
+		if ( ! $query->get( 'product_search' ) || $query->get( 'orderby' ) || ! is_string( $search_term ) || '' === $search_term ) {
+			return $orderby;
 		}
 
 		global $wpdb;
-
-		$title_match_queries = array();
-		$search_terms        = preg_split( '/\s+or\s+/i', $search_term );
-		if ( ! $search_terms ) {
-			return $args;
+		if ( "{$wpdb->posts}.post_date DESC" !== $orderby ) {
+			return $orderby;
 		}
 
-		foreach ( $search_terms as $term ) {
-			$term = trim( $term, "\"' " );
-			if ( '' !== $term ) {
+		$title_match_groups = array();
+		$search_groups      = preg_split( '/\s+or\s+/i', $search_term );
+		if ( ! $search_groups ) {
+			return $orderby;
+		}
+
+		foreach ( $search_groups as $search_group ) {
+			$title_match_queries = array();
+			foreach ( $this->parse_search_terms( $search_group ) as $title_search_term ) {
 				$title_match_queries[] = $wpdb->prepare(
 					"{$wpdb->posts}.post_title LIKE %s",
-					'%' . $wpdb->esc_like( $term ) . '%'
+					'%' . $wpdb->esc_like( $title_search_term ) . '%'
 				);
+			}
+
+			if ( $title_match_queries ) {
+				$title_match_groups[] = '(' . implode( ' AND ', $title_match_queries ) . ')';
 			}
 		}
 
-		if ( $title_match_queries ) {
-			$args['orderby'] = 'CASE WHEN (' . implode( ' OR ', $title_match_queries ) . ") THEN 0 ELSE 1 END, {$wpdb->posts}.post_title ASC";
+		if ( $title_match_groups ) {
+			$orderby = 'CASE WHEN (' . implode( ' OR ', $title_match_groups ) . ") THEN 0 ELSE 1 END, {$wpdb->posts}.post_date DESC";
 		}
 
-		return $args;
+		return $orderby;
+	}
+
+	/**
+	 * Parse a product search group using WordPress search-term rules.
+	 *
+	 * @param string $search_group Search group without OR separators.
+	 * @return string[]
+	 */
+	private function parse_search_terms( $search_group ) {
+		$search_query = new class( array( 's' => wp_slash( $search_group ) ) ) extends WP_Query {
+			/**
+			 * Parse terms without running a query.
+			 *
+			 * @param array $query Query variables.
+			 */
+			public function __construct( $query = array() ) {
+				$this->query_vars = $query;
+				$this->parse_search( $this->query_vars );
+			}
+		};
+
+		$search_terms = $search_query->query_vars['search_terms'] ?? array();
+		return is_array( $search_terms ) ? $search_terms : array();
 	}
 
 	/**
