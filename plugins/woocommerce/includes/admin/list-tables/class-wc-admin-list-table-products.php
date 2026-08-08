@@ -7,6 +7,7 @@
  */
 
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 
@@ -60,7 +61,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		add_filter( 'posts_clauses', array( $this, 'posts_clauses' ), 10, 2 );
 
 		// Use hooks to prime various caches and improve products page performance.
-		add_action( 'load-edit.php', array( $this, 'prime_status_counts_cache' ) );
+		// Until persistent counters reactivated, disable callback for load-edit.php action.
 		add_filter( 'the_posts', array( $this, 'prime_thumbnail_caches' ), 10, 2 );
 
 		$cogs_controller              = wc_get_container()->get( CostOfGoodsSoldController::class );
@@ -263,6 +264,19 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				'<div class="cogs_value">' . esc_html( $this->object->get_cogs_value() ?? '0' ) . '</div>' :
 				'';
 
+		/**
+		 * Product represented by the current list-table row.
+		 * Narrow the inherited object type without adding a PHPStan baseline entry.
+		 * In future we should correct the type of $this->object.
+		 *
+		 * @var WC_Product $product
+		 */
+		$product        = $this->object;
+		$sale_date_from = $product->get_date_on_sale_from( 'edit' );
+		$sale_date_to   = $product->get_date_on_sale_to( 'edit' );
+		$sale_date_from = $sale_date_from ? date_i18n( 'Y-m-d', $sale_date_from->getOffsetTimestamp() ) : '';
+		$sale_date_to   = $sale_date_to ? date_i18n( 'Y-m-d', $sale_date_to->getOffsetTimestamp() ) : '';
+
 		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- the COGS value is already escaped.
 		/* Custom inline data for woocommerce. */
 		echo '
@@ -272,6 +286,8 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				<div class="global_unique_id">' . esc_html( $this->object->get_global_unique_id() ) . '</div>
 				<div class="regular_price">' . esc_html( $this->object->get_regular_price() ) . '</div>
 				<div class="sale_price">' . esc_html( $this->object->get_sale_price() ) . '</div>
+				<div class="sale_price_dates_from">' . esc_html( $sale_date_from ) . '</div>
+				<div class="sale_price_dates_to">' . esc_html( $sale_date_to ) . '</div>
 				<div class="weight">' . esc_html( $this->object->get_weight() ) . '</div>
 				<div class="length">' . esc_html( $this->object->get_length() ) . '</div>
 				<div class="width">' . esc_html( $this->object->get_width() ) . '</div>
@@ -821,8 +837,40 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	public function filter_stock_status_post_clauses( $args ) {
 		global $wpdb;
 		if ( ! empty( $_GET['stock_status'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
-			$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.stock_status=%s ', wc_clean( wp_unslash( $_GET['stock_status'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$stock_status = wc_clean( wp_unslash( $_GET['stock_status'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+			if ( ProductStockStatus::OUT_OF_STOCK === $stock_status ) {
+				// Only published variations qualify their parent for this discoverability filter.
+				// Other statuses retain normal aggregate-parent behavior.
+				$args['where'] .= $wpdb->prepare(
+					" AND {$wpdb->posts}.ID IN (
+						SELECT stock_status_products.product_id
+						FROM (
+							SELECT DISTINCT CAST(
+								CASE
+									WHEN stock_status_posts.post_type = 'product_variation' THEN stock_status_posts.post_parent
+									ELSE stock_status_lookup.product_id
+								END AS UNSIGNED
+							) AS product_id
+							FROM {$wpdb->wc_product_meta_lookup} stock_status_lookup
+							INNER JOIN {$wpdb->posts} stock_status_posts
+								ON stock_status_posts.ID = stock_status_lookup.product_id
+							WHERE stock_status_lookup.stock_status = %s
+								AND (
+									stock_status_posts.post_type = 'product'
+									OR (
+										stock_status_posts.post_type = 'product_variation'
+										AND stock_status_posts.post_status = 'publish'
+									)
+								)
+						) stock_status_products
+					) ",
+					$stock_status
+				);
+			} else {
+				$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
+				$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.stock_status=%s ', $stock_status );
+			}
 		}
 		return $args;
 	}

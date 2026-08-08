@@ -36,12 +36,11 @@ export function getFulfillmentItems(
 }
 
 export async function refreshOrderFulfillmentStatus( orderId: number ) {
-	dispatch( FulfillmentStore ).invalidateResolution( 'getOrder', [
+	void dispatch( FulfillmentStore ).invalidateResolution( 'getOrder', [
 		orderId,
 	] );
-	const order: Order | null = await resolveSelect(
-		FulfillmentStore
-	).getOrder( orderId );
+	const order: Order | null =
+		await resolveSelect( FulfillmentStore ).getOrder( orderId );
 	if ( order ) {
 		const order_status =
 			( order.meta_data.find(

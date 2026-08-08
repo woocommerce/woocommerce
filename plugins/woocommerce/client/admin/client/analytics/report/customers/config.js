@@ -172,9 +172,10 @@ export const advancedFilters = applyFilters(
 					component: 'Search',
 					type: 'countries',
 					getLabels: async ( value ) => {
-						const countries = await resolveSelect(
-							COUNTRIES_STORE_NAME
-						).getCountries();
+						const countries =
+							await resolveSelect(
+								COUNTRIES_STORE_NAME
+							).getCountries();
 
 						const allLabels = countries.map( ( country ) => ( {
 							key: country.code,

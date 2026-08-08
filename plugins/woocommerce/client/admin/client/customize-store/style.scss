@@ -202,7 +202,7 @@
 
 		.woocommerce-banner-visual {
 			position: absolute;
-			right: 0;
+			inset-inline-end: 0;
 			top: 50%;
 			transform: translateY(-50%);
 			display: flex;
@@ -262,7 +262,7 @@
 				ul {
 					flex: 1 1 50%;
 					list-style: disc;
-					padding-left: 1rem;
+					padding-inline-start: 1rem;
 
 					li {
 						margin-bottom: 0;

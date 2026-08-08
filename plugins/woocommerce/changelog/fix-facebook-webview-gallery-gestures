@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent classic product image gallery swipes from closing the Facebook in-app browser.

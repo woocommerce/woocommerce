@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix the daily log cleanup so it deletes all expired log files, not just the first 20.

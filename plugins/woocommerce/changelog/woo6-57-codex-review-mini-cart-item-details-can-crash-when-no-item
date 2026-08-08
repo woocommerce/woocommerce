@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Mini-Cart: prevent a stray trailing separator after hidden or malformed item data entries and harden item data rendering so it no longer depends on the Interactivity API swallowing an error when an item has no item data.

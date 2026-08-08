@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Migrate Blocks e2e non-module assets (themes, test plugins, test data, lint rules) into the Core e2e suite under a blocks/ namespace; test-only, no changes to shipped code.
