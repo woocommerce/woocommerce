@@ -307,6 +307,32 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The Custom base field is the next tab stop after the radio group, and focusing it selects
+	 * Custom base — so a Tab keystroke is enough to post the field's prefilled Default structure
+	 * through the custom branch. That branch prepends a slash, storing `/product` where the
+	 * Default radio stores `product`. Both describe the same structure, so the screen has to keep
+	 * reporting Default rather than a Custom base the merchant never typed.
+	 *
+	 * @testdox Should keep "Default" checked when its own structure is saved through the Custom base field.
+	 */
+	public function test_default_structure_saved_as_a_custom_base_stays_checked(): void {
+		$this->ensure_shop_page();
+
+		$xpath        = $this->get_xpath( $this->render_settings() );
+		$custom_input = $xpath->query( '//input[@id="woocommerce_permalink_structure"]' )->item( 0 );
+		$this->assertInstanceOf( DOMElement::class, $custom_input );
+
+		$html = $this->save_and_render( 'custom', $custom_input->getAttribute( 'value' ) );
+
+		$this->assertSame( '/product', get_option( 'woocommerce_permalinks' )['product_base'], 'The custom branch stores the slash-prefixed form.' );
+		$this->assert_only_radio_checked( $html, 'default' );
+
+		// Saving Default from there rewrites the stored value to its bare form.
+		$this->assert_only_radio_checked( $this->save_and_render( '' ), 'default' );
+		$this->assertSame( 'product', get_option( 'woocommerce_permalinks' )['product_base'] );
+	}
+
+	/**
 	 * @testdox Should keep "Shop base" checked when the Shop page is nested under a parent.
 	 */
 	public function test_shop_base_stays_checked_for_a_nested_shop_page(): void {

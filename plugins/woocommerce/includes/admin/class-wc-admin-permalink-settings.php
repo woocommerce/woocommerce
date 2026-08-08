@@ -135,32 +135,47 @@ class WC_Admin_Permalink_Settings {
 			2 => wc_sanitize_permalink( $structures[2] ),
 		);
 
+		$stored_product_base       = $this->permalinks['product_base'];
 		$default_product_structure = trailingslashit( '/' . ltrim( $default_product_base, '/' ) );
 
-		if ( $default_product_base === $this->permalinks['product_base'] ) {
-			$product_permalink_structure = $default_product_structure;
-		} else {
-			$product_permalink_structure = $this->permalinks['product_base'] ? trailingslashit( $this->permalinks['product_base'] ) : '';
+		// The index of the predefined structure the stored base corresponds to, or false for a custom one.
+		$selected_structure = array_search( $stored_product_base, $structures_for_comparison, true );
+
+		/*
+		 * The Custom base field is the next tab stop after the radio group, and focusing it selects
+		 * Custom base. Saving from there posts the field's prefilled value through the custom
+		 * branch, which always prepends a slash, so Default comes back as `/product` where the
+		 * Default radio stores a bare `product`. Both describe the same structure -- WordPress
+		 * strips leading slashes when it builds the rewrite rules -- so report the choice the
+		 * merchant made rather than a Custom base they never typed. Saving Default again rewrites
+		 * the stored value to its bare form.
+		 */
+		if ( false === $selected_structure && untrailingslashit( $default_product_structure ) === $stored_product_base ) {
+			$selected_structure = 0;
 		}
+
+		$product_permalink_structure = 0 === $selected_structure
+			? $default_product_structure
+			: ( $stored_product_base ? trailingslashit( $stored_product_base ) : '' );
 		?>
 		<table class="form-table wc-permalink-structure">
 			<tbody>
 				<tr>
-					<th><label><input name="product_permalink" type="radio" value="<?php echo esc_attr( $structures[0] ); ?>" data-permalink-structure="<?php echo esc_attr( $default_product_structure ); ?>" class="wctog" <?php checked( $structures_for_comparison[0], $this->permalinks['product_base'] ); ?> /> <?php esc_html_e( 'Default', 'woocommerce' ); ?></label></th>
+					<th><label><input name="product_permalink" type="radio" value="<?php echo esc_attr( $structures[0] ); ?>" data-permalink-structure="<?php echo esc_attr( $default_product_structure ); ?>" class="wctog" <?php checked( 0 === $selected_structure ); ?> /> <?php esc_html_e( 'Default', 'woocommerce' ); ?></label></th>
 					<td><code class="default-example"><?php echo esc_html( home_url() ); ?>/?product=sample-product</code> <code class="non-default-example"><?php echo esc_html( home_url() ); ?>/<?php echo esc_html( $default_product_base ); ?>/sample-product/</code></td>
 				</tr>
 				<?php if ( $shop_page_id ) : ?>
 					<tr>
-						<th><label><input name="product_permalink" type="radio" value="<?php echo esc_attr( $structures[1] ); ?>" data-permalink-structure="<?php echo esc_attr( $structures[1] ); ?>" class="wctog" <?php checked( $structures_for_comparison[1], $this->permalinks['product_base'] ); ?> /> <?php esc_html_e( 'Shop base', 'woocommerce' ); ?></label></th>
+						<th><label><input name="product_permalink" type="radio" value="<?php echo esc_attr( $structures[1] ); ?>" data-permalink-structure="<?php echo esc_attr( $structures[1] ); ?>" class="wctog" <?php checked( 1 === $selected_structure ); ?> /> <?php esc_html_e( 'Shop base', 'woocommerce' ); ?></label></th>
 						<td><code><?php echo esc_html( home_url() ); ?>/<?php echo esc_html( $base_slug ); ?>/sample-product/</code></td>
 					</tr>
 					<tr>
-						<th><label><input name="product_permalink" type="radio" value="<?php echo esc_attr( $structures[2] ); ?>" data-permalink-structure="<?php echo esc_attr( $structures[2] ); ?>" class="wctog" <?php checked( $structures_for_comparison[2], $this->permalinks['product_base'] ); ?> /> <?php esc_html_e( 'Shop base with category', 'woocommerce' ); ?></label></th>
+						<th><label><input name="product_permalink" type="radio" value="<?php echo esc_attr( $structures[2] ); ?>" data-permalink-structure="<?php echo esc_attr( $structures[2] ); ?>" class="wctog" <?php checked( 2 === $selected_structure ); ?> /> <?php esc_html_e( 'Shop base with category', 'woocommerce' ); ?></label></th>
 						<td><code><?php echo esc_html( home_url() ); ?>/<?php echo esc_html( $base_slug ); ?>/product-category/sample-product/</code></td>
 					</tr>
 				<?php endif; ?>
 				<tr>
-					<th><label><input name="product_permalink" id="woocommerce_custom_selection" type="radio" value="custom" class="tog" <?php checked( in_array( $this->permalinks['product_base'], $structures_for_comparison, true ), false ); ?> />
+					<th><label><input name="product_permalink" id="woocommerce_custom_selection" type="radio" value="custom" class="tog" <?php checked( false === $selected_structure ); ?> />
 						<?php esc_html_e( 'Custom base', 'woocommerce' ); ?></label></th>
 					<td>
 						<input name="product_permalink_structure" id="woocommerce_permalink_structure" type="text" value="<?php echo esc_attr( $product_permalink_structure ); ?>" class="regular-text code"> <span class="description"><?php esc_html_e( 'Enter a custom base to use. A base must be set or WordPress will use default instead.', 'woocommerce' ); ?></span>
