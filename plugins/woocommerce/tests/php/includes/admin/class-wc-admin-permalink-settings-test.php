@@ -102,6 +102,48 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Translate the product slug to French, but only for requests running in fr_FR.
+	 *
+	 * Lets a test tell the two locales apart: the site-locale value stays `product`, so any
+	 * `produit` that reaches the stored option or the comparison came from the request locale.
+	 * Removal runs from the cleanup registry, so call sites need no try/finally unwinding.
+	 */
+	private function activate_french_product_slug_translation(): void {
+		$translate_product_slug = static function ( string $translation, string $text, string $context, string $domain ): string {
+			if ( 'woocommerce' === $domain && 'slug' === $context && 'product' === $text && 'fr_FR' === determine_locale() ) {
+				return 'produit';
+			}
+
+			return $translation;
+		};
+
+		add_filter( 'gettext_with_context', $translate_product_slug, 10, 4 );
+		$this->registered_cleanups[] = static function () use ( $translate_product_slug ): void {
+			remove_filter( 'gettext_with_context', $translate_product_slug, 10 );
+		};
+	}
+
+	/**
+	 * Simulate an admin request whose user locale (fr_FR) diverges from the en_US site locale.
+	 *
+	 * This is the divergence the fix closes: WordPress resolves admin translations in the current
+	 * user's language, while both the save path and the checked-state comparison must resolve the
+	 * persisted slug in the site's language.
+	 */
+	private function set_up_french_admin_user(): void {
+		$user_id = self::factory()->user->create(
+			array(
+				'role'   => 'administrator',
+				'locale' => 'fr_FR',
+			)
+		);
+		wp_set_current_user( $user_id );
+
+		$this->assertSame( 'en_US', get_locale(), 'The site locale should remain English.' );
+		$this->assertSame( 'fr_FR', determine_locale(), 'The admin request should use the current user locale.' );
+	}
+
+	/**
 	 * Save a product permalink choice through the real save path and render the settings HTML.
 	 *
 	 * WordPress's own Permalinks page redirects after processing the POST (see
@@ -223,6 +265,24 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame( $expected_stored, get_option( 'woocommerce_permalinks' )['product_base'], 'The stored product base must not change.' );
 		$this->assert_only_radio_checked( $html, $choice );
+	}
+
+	/**
+	 * settings_save() resolves the Default slug in the site locale; settings() has to compare
+	 * against the same locale, or an administrator browsing the admin in their own language saves
+	 * one translation and is shown the comparison against another.
+	 *
+	 * @testdox Should keep "Default" checked when the user and site locales differ.
+	 */
+	public function test_default_structure_stays_checked_when_user_and_site_locales_differ(): void {
+		$this->ensure_shop_page();
+		$this->set_up_french_admin_user();
+		$this->activate_french_product_slug_translation();
+
+		$html = $this->save_and_render( '' );
+
+		$this->assertSame( 'product', get_option( 'woocommerce_permalinks' )['product_base'], 'The Default base should be stored in the site locale.' );
+		$this->assert_only_radio_checked( $html, 'default' );
 	}
 
 	/**

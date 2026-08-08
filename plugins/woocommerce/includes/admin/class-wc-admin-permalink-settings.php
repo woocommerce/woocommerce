@@ -101,15 +101,23 @@ class WC_Admin_Permalink_Settings {
 		echo wp_kses_post( wpautop( sprintf( __( 'If you like, you may enter custom structures for your product URLs here. For example, using <code>shop</code> would make your product links like <code>%sshop/sample-product/</code>. This setting affects product URLs only, not things such as product categories.', 'woocommerce' ), esc_url( home_url( '/' ) ) ) ) );
 
 		$shop_page_id = wc_get_page_id( 'shop' );
-		$base_slug    = urldecode( ( $shop_page_id > 0 && get_post( $shop_page_id ) ) ? get_page_uri( $shop_page_id ) : _x( 'shop', 'default-slug', 'woocommerce' ) );
+
+		/*
+		 * Resolve the translated slugs inside the same window settings_save() opens, so the
+		 * values compared below are the values a save would store. Without it, an administrator
+		 * whose profile language differs from the site language stores one translation and
+		 * compares against another, and no radio ever matches.
+		 */
+		wc_switch_to_site_locale();
+		$base_slug            = urldecode( ( $shop_page_id > 0 && get_post( $shop_page_id ) ) ? get_page_uri( $shop_page_id ) : _x( 'shop', 'default-slug', 'woocommerce' ) );
+		$default_product_base = wc_sanitize_permalink( _x( 'product', 'slug', 'woocommerce' ) );
+		wc_restore_locale();
 
 		$structures = array(
 			0 => '',
 			1 => '/' . trailingslashit( $base_slug ),
 			2 => '/' . trailingslashit( $base_slug ) . trailingslashit( '%product_cat%' ),
 		);
-
-		$default_product_base = wc_sanitize_permalink( _x( 'product', 'slug', 'woocommerce' ) );
 
 		/*
 		 * Must match what settings_save() stores rather than what the radios post:
@@ -207,6 +215,9 @@ class WC_Admin_Permalink_Settings {
 					$product_base = '/' . _x( 'product', 'slug', 'woocommerce' ) . $product_base;
 				}
 			} elseif ( empty( $product_base ) ) {
+				// The Default radio posts an empty value; store the translated slug settings()
+				// compares against. Both resolve inside a wc_switch_to_site_locale() window, so
+				// they agree by construction.
 				$product_base = _x( 'product', 'slug', 'woocommerce' );
 			}
 
