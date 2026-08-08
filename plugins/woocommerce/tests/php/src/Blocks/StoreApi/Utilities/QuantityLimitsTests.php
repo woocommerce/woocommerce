@@ -3,6 +3,9 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Utilities;
 
+use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
+use Automattic\WooCommerce\Enums\OrderInternalStatus;
+use Automattic\WooCommerce\RestApi\UnitTests\StockReservationOptionsTrait;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
 
@@ -10,6 +13,8 @@ use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
  * QuantityLimitsTests class.
  */
 class QuantityLimitsTests extends \WC_Unit_Test_Case {
+	use StockReservationOptionsTrait;
+
 	/**
 	 * @var string
 	 */
@@ -141,6 +146,53 @@ class QuantityLimitsTests extends \WC_Unit_Test_Case {
 		$limits          = $quantity_limits->get_add_to_cart_limits( $product );
 
 		$this->assertEquals( 10, $limits['maximum'], 'When stock management is enabled and backorders are not allowed, maximum quantity should be 10' );
+	}
+
+	/**
+	 * Test that reserved stock constrains the limit at every reservation level, including a full one.
+	 */
+	public function test_quantity_limit_when_stock_is_reserved() {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Test Product',
+				'regular_price' => 10,
+			)
+		);
+
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 5 );
+		$product->set_backorders( 'no' );
+		$product->save();
+
+		$this->with_stock_reservation_options(
+			function () use ( $product ) {
+				$this->reserve_stock( $product, 3 );
+
+				$limits = ( new QuantityLimits() )->get_add_to_cart_limits( $product );
+				$this->assertEquals( 2, $limits['maximum'], 'With 3 of 5 reserved, maximum quantity should be the 2 that remain' );
+
+				$this->reserve_stock( $product, 2 );
+
+				$limits = ( new QuantityLimits() )->get_add_to_cart_limits( $product );
+				$this->assertEquals( 1, $limits['maximum'], 'With all 5 reserved, maximum quantity should fall back to the minimum instead of the unreserved stock quantity' );
+			}
+		);
+	}
+
+	/**
+	 * Reserve stock for a product through a pending order, the way checkout does.
+	 *
+	 * @param \WC_Product $product Product to reserve.
+	 * @param int         $quantity Quantity to reserve.
+	 */
+	private function reserve_stock( \WC_Product $product, int $quantity ) {
+		$order = wc_create_order();
+		$order->add_product( $product, $quantity );
+		$order->set_status( OrderInternalStatus::PENDING );
+		$order->save();
+
+		( new ReserveStock() )->reserve_stock_for_order( $order );
 	}
 
 	/**

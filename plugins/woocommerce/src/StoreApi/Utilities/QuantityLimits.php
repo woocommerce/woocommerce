@@ -208,7 +208,11 @@ final class QuantityLimits {
 			$limits[] = $this->get_remaining_stock( $product );
 		}
 
-		return $this->filter_numeric_value( min( array_filter( $limits ) ), 'limit', $product, $cart_item );
+		// Remaining stock of 0 is a valid limit, so only unknown (null) stock levels are discarded.
+		// Filtering by truthiness would drop that 0 and leave the purchase limit unconstrained.
+		$limits = array_filter( $limits, static fn( $limit ) => ! is_null( $limit ) );
+
+		return $this->filter_numeric_value( min( $limits ), 'limit', $product, $cart_item );
 	}
 
 	/**
