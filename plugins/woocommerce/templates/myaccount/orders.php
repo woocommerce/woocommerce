@@ -102,7 +102,8 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 								 * Filters the default My Account orders table column content.
 								 *
 								 * The dynamic portion of the hook name, `$column_id`, refers to the
-								 * order table column ID.
+								 * order table column ID. Default content is escaped before this filter
+								 * runs, and callbacks should return safe, escaped HTML.
 								 *
 								 * @since 11.1.0
 								 *
@@ -110,7 +111,7 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 								 * @param WC_Order $order          Current order object.
 								 * @param string   $column_id      Current column ID.
 								 */
-								echo apply_filters( 'woocommerce_account_orders_column_content_' . $column_id, $column_content, $order, $column_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+								echo apply_filters( 'woocommerce_account_orders_column_content_' . $column_id, $column_content, $order, $column_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Default content is escaped above; filter callbacks should return safe HTML.
 								?>
 							<?php endif; ?>
 

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Remove unnecessary font-weight override on the mini-cart quantity badge and use a theme-resolvable color for the count text in the checkout order summary item badge.

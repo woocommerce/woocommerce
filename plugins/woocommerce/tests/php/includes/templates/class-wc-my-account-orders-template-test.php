@@ -11,12 +11,36 @@ declare( strict_types = 1 );
 class WC_My_Account_Orders_Template_Test extends WC_Unit_Test_Case {
 
 	/**
+	 * Hooks registered by the current test.
+	 *
+	 * @var array<int, array{type: 'filter'|'action', hook_name: string, callback: callable, priority: int}>
+	 */
+	private array $registered_hooks = array();
+
+	/**
+	 * Tear down the test.
+	 */
+	public function tearDown(): void {
+		foreach ( $this->registered_hooks as $hook ) {
+			if ( 'filter' === $hook['type'] ) {
+				remove_filter( $hook['hook_name'], $hook['callback'], $hook['priority'] );
+			} else {
+				remove_action( $hook['hook_name'], $hook['callback'], $hook['priority'] );
+			}
+		}
+
+		$this->registered_hooks = array();
+
+		parent::tearDown();
+	}
+
+	/**
 	 * @testdox Default order status output can be changed by composable filters.
 	 */
 	public function test_order_status_column_filters_compose_with_default_output(): void {
 		$order = $this->create_order_with_status( 'processing' );
 
-		add_filter(
+		$this->add_test_filter(
 			'woocommerce_account_orders_column_content_order-status',
 			static function ( string $column_content ): string {
 				return $column_content . '<span class="first-filter">First filter</span>';
@@ -24,7 +48,7 @@ class WC_My_Account_Orders_Template_Test extends WC_Unit_Test_Case {
 			10,
 			1
 		);
-		add_filter(
+		$this->add_test_filter(
 			'woocommerce_account_orders_column_content_order-status',
 			static function ( string $column_content ): string {
 				return $column_content . '<span class="second-filter">Second filter</span>';
@@ -48,14 +72,14 @@ class WC_My_Account_Orders_Template_Test extends WC_Unit_Test_Case {
 		$order        = $this->create_order_with_status( 'processing' );
 		$filter_calls = 0;
 
-		add_filter(
+		$this->add_test_filter(
 			'woocommerce_account_orders_column_content_order-status',
 			static function () use ( &$filter_calls ): string {
 				++$filter_calls;
 				return '<span class="filtered-status">Filtered status</span>';
 			}
 		);
-		add_action(
+		$this->add_test_action(
 			'woocommerce_my_account_my_orders_column_order-status',
 			static function (): void {
 				echo '<span class="legacy-status">Legacy status</span>';
@@ -83,7 +107,7 @@ class WC_My_Account_Orders_Template_Test extends WC_Unit_Test_Case {
 		$filtered_order     = null;
 		$filtered_column_id = null;
 
-		add_filter(
+		$this->add_test_filter(
 			'woocommerce_account_orders_column_content_' . $column_id,
 			static function ( string $content, WC_Order $current_order, string $current_column_id ) use ( &$filtered_content, &$filtered_order, &$filtered_column_id ): string {
 				$filtered_content   = $content;
@@ -100,7 +124,7 @@ class WC_My_Account_Orders_Template_Test extends WC_Unit_Test_Case {
 		$this->assertIsString( $filtered_content, 'The column content filter should run.' );
 		$this->assertStringContainsString( $default_content, $filtered_content, 'The filter should receive the existing default column HTML.' );
 		$this->assertInstanceOf( WC_Order::class, $filtered_order, 'The filter should receive an order object.' );
-		$this->assertSame( $order->get_id(), $filtered_order->get_id(), 'The filter should receive the current order.' );
+		$this->assertSame( $order->get_id(), $filtered_order instanceof WC_Order ? $filtered_order->get_id() : null, 'The filter should receive the current order.' );
 		$this->assertSame( $column_id, $filtered_column_id, 'The filter should receive the current column ID.' );
 		$this->assertStringContainsString( 'Filtered column', $html, 'The filtered column HTML should render.' );
 	}
@@ -112,20 +136,20 @@ class WC_My_Account_Orders_Template_Test extends WC_Unit_Test_Case {
 		$order               = $this->create_order_with_status( 'processing' );
 		$legacy_action_calls = 0;
 
-		add_filter(
+		$this->add_test_filter(
 			'woocommerce_account_orders_columns',
 			static function ( array $columns ): array {
 				$columns['order-type'] = 'Order type';
 				return $columns;
 			}
 		);
-		add_action(
+		$this->add_test_action(
 			'woocommerce_account_orders_column_order-type',
 			static function () use ( &$legacy_action_calls ): void {
 				++$legacy_action_calls;
 			}
 		);
-		add_filter(
+		$this->add_test_filter(
 			'woocommerce_account_orders_column_content_order-type',
 			static function (): string {
 				return '<span class="filtered-order-type">Filtered order type</span>';
@@ -160,11 +184,48 @@ class WC_My_Account_Orders_Template_Test extends WC_Unit_Test_Case {
 	 * @return WC_Order
 	 */
 	private function create_order_with_status( string $status ): WC_Order {
-		$order = WC_Helper_Order::create_order();
-		$order->set_status( $status );
-		$order->save();
+		$order = wc_create_order( array( 'status' => $status ) );
+		if ( is_wp_error( $order ) ) {
+			throw new RuntimeException( 'Could not create an order for the template test.' );
+		}
 
 		return $order;
+	}
+
+	/**
+	 * Register a filter that will be removed during tear down.
+	 *
+	 * @param string   $hook_name     Filter name.
+	 * @param callable $callback      Filter callback.
+	 * @param int      $priority      Filter priority.
+	 * @param int      $accepted_args Number of accepted arguments.
+	 */
+	private function add_test_filter( string $hook_name, callable $callback, int $priority = 10, int $accepted_args = 1 ): void {
+		add_filter( $hook_name, $callback, $priority, $accepted_args );
+		$this->registered_hooks[] = array(
+			'type'      => 'filter',
+			'hook_name' => $hook_name,
+			'callback'  => $callback,
+			'priority'  => $priority,
+		);
+	}
+
+	/**
+	 * Register an action that will be removed during tear down.
+	 *
+	 * @param string   $hook_name     Action name.
+	 * @param callable $callback      Action callback.
+	 * @param int      $priority      Action priority.
+	 * @param int      $accepted_args Number of accepted arguments.
+	 */
+	private function add_test_action( string $hook_name, callable $callback, int $priority = 10, int $accepted_args = 1 ): void {
+		add_action( $hook_name, $callback, $priority, $accepted_args );
+		$this->registered_hooks[] = array(
+			'type'      => 'action',
+			'hook_name' => $hook_name,
+			'callback'  => $callback,
+			'priority'  => $priority,
+		);
 	}
 
 	/**

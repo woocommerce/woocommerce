@@ -109,7 +109,9 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	 */
 	public function generate_file() {
 		if ( 1 === $this->get_page() ) {
-			@unlink( $this->get_file_path() ); // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_unlink, Generic.PHP.NoSilencedErrors.Discouraged,
+			if ( file_exists( $this->get_file_path() ) ) {
+				wp_delete_file( $this->get_file_path() );
+			}
 
 			// We need to initialize the file here.
 			$this->get_file();
@@ -126,33 +128,65 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	 */
 	protected function write_csv_data( $data ) {
 
+		$log_context = array( 'source' => 'wc-csv-exporter' );
+
 		if ( ! file_exists( $this->get_file_path() ) || ! is_writeable( $this->get_file_path() ) ) {
 			wc_get_logger()->error(
 				sprintf(
 					/* translators: %s is file path. */
 					__( 'Unable to create or write to %s during CSV export. Please check file permissions.', 'woocommerce' ),
-					esc_html( $this->get_file_path() )
-				)
+					$this->get_file_path()
+				),
+				$log_context
 			);
 			return false;
 		}
 
 		/**
 		 * Filters the mode parameter which specifies the type of access you require to the stream (used during file
-		 * writing for CSV exports). Defaults to 'a+' (which supports both reading and writing, and places the file
-		 * pointer at the end of the file).
+		 * writing for CSV exports). Defaults to 'a' (append, write-only, placing the file pointer at the end of the
+		 * file), which is all CSV export needs and is supported by the widest range of stream wrappers.
 		 *
 		 * @see   https://www.php.net/manual/en/function.fopen.php
 		 * @since 6.8.0
 		 *
-		 * @param string $fopen_mode, either (r, r+, w, w+, a, a+, x, x+, c, c+, e)
+		 * @param string $fopen_mode One of (r, r+, w, w+, a, a+, x, x+, c, c+), optionally followed by flags such as "b", "t" or "e". Defaults to "a" (append, write-only) for broad stream-wrapper compatibility.
 		 */
-		$fopen_mode = apply_filters( 'woocommerce_csv_exporter_fopen_mode', 'a+' );
+		$fopen_mode = apply_filters( 'woocommerce_csv_exporter_fopen_mode', 'a' );
 		$fp         = fopen( $this->get_file_path(), $fopen_mode );
 
 		if ( $fp ) {
-			fwrite( $fp, $data );
-			fclose( $fp );
+			// WP_Filesystem has no streaming write API, so it would mean rewriting the whole export on every batch.
+			$bytes_written = fwrite( $fp, $data ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
+
+			// Append-mode stream wrappers may buffer locally and only transfer the data on close, so closing can fail too.
+			$closed = fclose( $fp ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+
+			if ( false === $bytes_written || strlen( $data ) !== $bytes_written || ! $closed ) {
+				wc_get_logger()->error(
+					sprintf(
+						/* translators: %s: file path */
+						__( 'Failed to write CSV export data to %s. The exported file may be incomplete.', 'woocommerce' ),
+						$this->get_file_path()
+					),
+					$log_context
+				);
+			}
+		} else {
+			// fopen() raises a warning when it fails, so the last PHP error usually explains why (permissions, an
+			// invalid mode, or a stream wrapper that doesn't support the requested mode).
+			$last_error = error_get_last();
+
+			wc_get_logger()->error(
+				sprintf(
+					/* translators: 1: file path, 2: fopen mode, 3: last PHP error message */
+					__( 'Unable to open file for writing: %1$s (mode: %2$s). Last PHP error: %3$s', 'woocommerce' ),
+					$this->get_file_path(),
+					$fopen_mode,
+					isset( $last_error['message'] ) ? $last_error['message'] : 'n/a'
+				),
+				$log_context
+			);
 		}
 
 		// Add all columns when finished.

@@ -17,7 +17,7 @@ Point releases are patch releases that address specific issues in an already-shi
 Changes appropriate for a point release are:
 
 - **Critical bug fixes** affecting store functionality (checkout, orders, payments, product visibility).
-- **Security patches** for urgent vulnerabilities.
+- **Security patches** for urgent vulnerabilities ([which versions receive them](/docs/contribution/releases/security-support)).
 - **Severe performance regressions** introduced by the shipped release.
 - **Compliance fixes** required for regulatory or legal reasons.
 - **Compatibility fixes** for WordPress, theme, or plugin conflicts that are breaking stores.

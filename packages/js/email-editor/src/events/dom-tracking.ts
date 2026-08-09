@@ -49,7 +49,12 @@ export function initDomTracking() {
 		// Header preview dropdown preview in new tab selected
 		{
 			track: 'header_preview_dropdown_preview_in_new_tab_selected',
-			selector: '.editor-preview-dropdown__button-external',
+			// WP 7.1 dropped the `.editor-preview-dropdown__button-external`
+			// class; the entry is now a menu item anchor whose window target is
+			// `wp-preview-<postId>`. Match both so the event keeps firing across
+			// supported WordPress versions.
+			selector:
+				'.editor-preview-dropdown__button-external, a[role="menuitem"][target^="wp-preview-"]',
 		},
 		// Header toggle block tools
 		{
