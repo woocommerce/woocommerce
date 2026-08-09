@@ -66,6 +66,28 @@ class WC_My_Account_Orders_Template_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Non-string filtered column content falls back to default output.
+	 */
+	public function test_non_string_filtered_column_content_falls_back_to_default_output(): void {
+		$order            = $this->create_order_with_status( 'processing' );
+		$filtered_content = null;
+
+		$this->add_test_filter(
+			'woocommerce_account_orders_column_content_order-status',
+			static function () use ( &$filtered_content ) {
+				return $filtered_content;
+			}
+		);
+
+		foreach ( array( array( 'invalid' ), new WP_Error( 'invalid' ) ) as $filtered_content ) {
+			$html = $this->render_orders_template( $order );
+
+			$this->assertStringContainsString( 'Processing', $html, 'Invalid filtered content should fall back to default output.' );
+			$this->assertSame( 1, substr_count( $html, 'Processing' ), 'Default output should render once after fallback.' );
+		}
+	}
+
+	/**
 	 * @testdox Legacy order status column action still replaces the full cell.
 	 */
 	public function test_legacy_order_status_column_action_still_replaces_default_output(): void {
