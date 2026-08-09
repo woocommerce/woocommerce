@@ -232,6 +232,95 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox add_to_cart_action() does not redirect when error notices exist, unless the woocommerce_add_to_cart_should_redirect filter overrides it.
+	 *
+	 * @covers WC_Form_Handler::add_to_cart_action()
+	 */
+	public function test_add_to_cart_action_respects_error_notices_and_should_redirect_filter(): void {
+		update_option( 'woocommerce_cart_redirect_after_add', 'yes' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		$_REQUEST['add-to-cart'] = $product->get_id();
+		$_REQUEST['quantity']    = 1;
+		$_POST['quantity']       = 1;
+
+		// Simulate a stale error notice from a previous request (see #37164).
+		wc_add_notice( 'An unrelated error.', 'error' );
+
+		// Default behavior: the stale error notice blocks the redirect, but the product is added.
+		WC_Form_Handler::add_to_cart_action( false );
+
+		$this->assertTrue( wc_notice_count( 'error' ) > 0, 'The error notice should still be present.' );
+		$this->assertCount( 1, WC()->cart->get_cart(), 'The product should still be added to the cart.' );
+
+		// The filter should allow forcing the redirect even when error notices exist.
+		WC()->cart->empty_cart();
+		wc_clear_notices();
+
+		$_REQUEST['add-to-cart'] = $product->get_id();
+		wc_add_notice( 'Another unrelated error.', 'error' );
+
+		add_filter(
+			'woocommerce_add_to_cart_should_redirect',
+			static function ( $_should_redirect, $_product ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+				return true;
+			},
+			10,
+			2
+		);
+
+		try {
+			WC_Form_Handler::add_to_cart_action( false );
+			$this->fail( 'Expected add_to_cart_action() to redirect when the filter forces it.' );
+		} catch ( RuntimeException $e ) {
+			$this->assertSame( wc_get_cart_url(), $e->getMessage(), 'The redirect should target the cart URL.' );
+		}
+
+		remove_all_filters( 'woocommerce_add_to_cart_should_redirect' );
+		update_option( 'woocommerce_cart_redirect_after_add', 'no' );
+
+		unset( $_REQUEST['add-to-cart'], $_REQUEST['quantity'], $_POST['quantity'] );
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox add_to_cart_action() does not redirect when the woocommerce_add_to_cart_should_redirect filter returns false, even when redirect is enabled.
+	 *
+	 * @covers WC_Form_Handler::add_to_cart_action()
+	 */
+	public function test_add_to_cart_action_filter_can_prevent_redirect(): void {
+		update_option( 'woocommerce_cart_redirect_after_add', 'yes' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		$_REQUEST['add-to-cart'] = $product->get_id();
+		$_REQUEST['quantity']    = 1;
+		$_POST['quantity']       = 1;
+
+		add_filter(
+			'woocommerce_add_to_cart_should_redirect',
+			static function ( $_should_redirect, $_product ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+				return false;
+			},
+			10,
+			2
+		);
+
+		WC_Form_Handler::add_to_cart_action( false );
+
+		$this->assertCount( 1, WC()->cart->get_cart(), 'The product should still be added to the cart.' );
+
+		remove_all_filters( 'woocommerce_add_to_cart_should_redirect' );
+		update_option( 'woocommerce_cart_redirect_after_add', 'no' );
+
+		unset( $_REQUEST['add-to-cart'], $_REQUEST['quantity'], $_POST['quantity'] );
+		$product->delete( true );
+	}
+
+	/**
 	 * Prepares request globals for the account details handler.
 	 *
 	 * @param array<string,string> $fields Account detail fields.

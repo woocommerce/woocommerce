@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add `woocommerce_add_to_cart_should_redirect` filter so the add-to-cart redirect decision can be overridden when error notices exist.

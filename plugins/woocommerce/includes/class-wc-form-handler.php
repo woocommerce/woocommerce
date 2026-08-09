@@ -941,27 +941,52 @@ class WC_Form_Handler {
 		}
 
 		// If we added the product to the cart we can now optionally do a redirect.
-		if ( $was_added_to_cart && 0 === wc_notice_count( 'error' ) ) {
-			$quantity = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-
+		if ( $was_added_to_cart ) {
 			/**
-			 * Fires when an item is added to the cart from a user request.
+			 * Filters whether to redirect after a product is added to the cart.
 			 *
-			 * @param int       $product_id Product ID.
-			 * @param int|float $quantity   Quantity added to the cart.
+			 * By default the redirect is skipped when there are error notices, but
+			 * those notices may be unrelated to the current add-to-cart request
+			 * (for example, stale session notices from a previous request). This
+			 * filter lets developers override that decision.
 			 *
-			 * @since 10.6.0
+			 * @since 11.1.0
+			 *
+			 * @param bool        $should_redirect Whether to redirect after the product is added to the cart.
+			 * @param WC_Product  $adding_to_cart  Product being added to the cart.
 			 */
-			do_action( 'internal_woocommerce_cart_item_added_from_user_request', $product_id, $quantity );
+			$should_redirect = apply_filters( 'woocommerce_add_to_cart_should_redirect', 0 === wc_notice_count( 'error' ), $adding_to_cart );
 
-			$url = apply_filters( 'woocommerce_add_to_cart_redirect', $url, $adding_to_cart );
+			if ( $should_redirect ) {
+				$quantity = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
-			if ( $url ) {
-				wp_safe_redirect( $url );
-				exit;
-			} elseif ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
-				wp_safe_redirect( wc_get_cart_url() );
-				exit;
+				/**
+				 * Fires when an item is added to the cart from a user request.
+				 *
+				 * @param int       $product_id Product ID.
+				 * @param int|float $quantity   Quantity added to the cart.
+				 *
+				 * @since 10.6.0
+				 */
+				do_action( 'internal_woocommerce_cart_item_added_from_user_request', $product_id, $quantity );
+
+				/**
+				 * Filters the add to cart redirect URL.
+				 *
+				 * @since 2.3.0
+				 *
+				 * @param string     $url            Redirect URL.
+				 * @param WC_Product $adding_to_cart Product being added to the cart.
+				 */
+				$url = apply_filters( 'woocommerce_add_to_cart_redirect', $url, $adding_to_cart );
+
+				if ( $url ) {
+					wp_safe_redirect( $url );
+					exit;
+				} elseif ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
+					wp_safe_redirect( wc_get_cart_url() );
+					exit;
+				}
 			}
 		}
 	}
