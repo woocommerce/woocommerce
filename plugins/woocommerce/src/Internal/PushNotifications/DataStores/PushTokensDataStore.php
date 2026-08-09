@@ -318,6 +318,11 @@ class PushTokensDataStore {
 	 * flat array (cached per-request). When $page and $per_page are
 	 * provided, returns a paginated result with total counts.
 	 *
+	 * The eligible-user lookup is restricted to users that actually own
+	 * push tokens, so the role check runs against a handful of IDs instead
+	 * of scanning every user's capabilities meta, which does not scale on
+	 * sites with very large user tables.
+	 *
 	 * @param string[] $roles    The roles to query tokens for.
 	 * @param int|null $page     Optional page number (1-based).
 	 * @param int|null $per_page Optional number of tokens per page.
@@ -345,10 +350,22 @@ class PushTokensDataStore {
 			return $this->tokens_by_roles_cache[ $cache_key ];
 		}
 
-		$user_ids = get_users(
+		global $wpdb;
+
+		// Exactly this SQL to leverage the wp_posts type_status_author index; low token cardinality keeps it fast at any store size.
+		$users_with_tokens = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT DISTINCT post_author FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'private'",
+				PushToken::POST_TYPE
+			)
+		);
+
+		// An empty include must short-circuit: WP_User_Query would ignore it and scan all users by role.
+		$user_ids = empty( $users_with_tokens ) ? array() : get_users(
 			array(
 				'role__in' => $roles,
 				'fields'   => 'ID',
+				'include'  => $users_with_tokens,
 			)
 		);
 
@@ -386,7 +403,7 @@ class PushTokensDataStore {
 			return $this->tokens_by_roles_cache[ $cache_key ];
 		}
 
-		update_meta_cache( 'post', $post_ids );
+		_prime_post_caches( $post_ids, false, true );
 
 		$tokens = array();
 

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix TypeError: string - string in get_formatted_order_total() on PHP 8.3 with refunded orders

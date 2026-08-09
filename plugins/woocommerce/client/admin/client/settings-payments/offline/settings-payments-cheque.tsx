@@ -124,7 +124,9 @@ export const SettingsPaymentsCheque = () => {
 		} )
 			.then( () => {
 				setHasChanges( false );
-				invalidateResolutionForStoreSelector( 'getPaymentGateway' );
+				void invalidateResolutionForStoreSelector(
+					'getPaymentGateway'
+				);
 				createSuccessNotice(
 					__( 'Settings updated successfully', 'woocommerce' )
 				);
@@ -136,8 +138,8 @@ export const SettingsPaymentsCheque = () => {
 			} )
 			.finally( () => {
 				setIsSaving( false );
-				invalidateResolution( 'getPaymentProviders', [] );
-				invalidateResolutionForPaymentSettings(
+				void invalidateResolution( 'getPaymentProviders', [] );
+				void invalidateResolutionForPaymentSettings(
 					'getOfflinePaymentGateways'
 				);
 			} );

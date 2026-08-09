@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Replaced wireit + tsc package build pipeline with a per-package esbuild script.
