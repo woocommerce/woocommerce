@@ -877,7 +877,11 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$line_items = $order->get_items( 'line_item' );
 		$line_item  = reset( $line_items );
 
-		wp_delete_post( $line_item->get_product_id(), true );
+		/* Resolve the product first so a helper change cannot point this deletion at an unrelated record. */
+		$product = $line_item->get_product();
+		$this->assertInstanceOf( WC_Product::class, $product );
+
+		wp_delete_post( $product->get_id(), true );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() ) );
 		$this->assertEquals( 200, $response->get_status() );
@@ -917,6 +921,10 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( array( 'string', 'null' ), $line_item_properties['sku']['type'] );
 		$this->assertEquals( array( 'string', 'null' ), $line_item_properties['global_unique_id']['type'] );
+
+		/* Widening the type must not make either field writable. */
+		$this->assertTrue( $line_item_properties['sku']['readonly'] );
+		$this->assertTrue( $line_item_properties['global_unique_id']['readonly'] );
 	}
 
 	/**
