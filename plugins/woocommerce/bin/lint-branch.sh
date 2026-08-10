@@ -39,9 +39,9 @@ composer exec phpcs-changed -- -s --git --git-base $baseBranch $changedFiles || 
 #
 # GitHub resolves annotation paths from the repository root, so every path needs this
 # directory's prefix or the annotation silently never attaches to the diff. phpcs-changed
-# reports the git path (already prefixed) when it resolves a file through git, but a
-# path relative to this directory when it falls back to plain phpcs, so strip the prefix
-# before adding it: that lands on the right path either way.
+# echoes back the paths it was given, which are --relative to this directory; stripping
+# the prefix before adding it is a no-op today, but keeps this correct even if upstream
+# ever starts reporting repository-rooted paths.
 if [[ -n $WC_LINT_CHECKSTYLE_FILE && $phpcsStatus -eq 1 ]]; then
     prefix=$(git rev-parse --show-prefix)
     composer exec phpcs-changed -- --git --git-base $baseBranch --report=checkstyle $changedFiles |
