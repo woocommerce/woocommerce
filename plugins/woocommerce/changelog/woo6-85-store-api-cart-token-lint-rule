@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add a PHP_CodeSniffer rule requiring the Store API cart token to be read through CartTokenUtils::get_request_cart_token().

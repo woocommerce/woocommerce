@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Store API: Always resolve the cart token from a consistent place.
