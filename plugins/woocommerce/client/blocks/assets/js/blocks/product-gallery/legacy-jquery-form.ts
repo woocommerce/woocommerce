@@ -26,8 +26,8 @@ import type {
 	LegacyVariationPayload,
 } from './types';
 
-/** A WP attachment ID that's safe to use as a gallery slot. */
-const isValidImageId = ( id: unknown ): id is number =>
+/** A positive integer ID from the variation event payload. */
+const isValidId = ( id: unknown ): id is number =>
 	typeof id === 'number' && Number.isInteger( id ) && id > 0;
 
 /**
@@ -49,8 +49,8 @@ export const subscribeLegacyJQueryFormVariations = (
 	const handleFound = withScope(
 		( _event?: unknown, variation?: LegacyVariationPayload ) => {
 			if (
-				isValidImageId( variation?.variation_id ) ||
-				isValidImageId( variation?.image_id )
+				isValidId( variation?.variation_id ) ||
+				isValidId( variation?.image_id )
 			) {
 				handlers.onVariationFound(
 					variation?.variation_id,
