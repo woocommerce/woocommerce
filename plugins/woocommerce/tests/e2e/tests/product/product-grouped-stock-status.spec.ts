@@ -68,5 +68,22 @@ for ( const productType of [ 'grouped', 'external' ] ) {
 		expect( response.data.type ).toBe( productType );
 		expect( response.data.manage_stock ).toBe( false );
 		expect( response.data.stock_status ).toBe( 'instock' );
+
+		const productSearch = encodeURIComponent(
+			managedOutOfStockProduct.name
+		);
+		await page.goto(
+			`wp-admin/edit.php?post_type=product&stock_status=instock&s=${ productSearch }`
+		);
+		await expect(
+			page.locator( `#post-${ managedOutOfStockProduct.id }` )
+		).toBeVisible();
+
+		await page.goto(
+			`wp-admin/edit.php?post_type=product&stock_status=outofstock&s=${ productSearch }`
+		);
+		await expect(
+			page.locator( `#post-${ managedOutOfStockProduct.id }` )
+		).toHaveCount( 0 );
 	} );
 }
