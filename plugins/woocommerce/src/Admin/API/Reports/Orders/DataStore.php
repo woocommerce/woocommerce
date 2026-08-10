@@ -27,6 +27,34 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	const ORDERS_STATUSES_ALL_CACHE_KEY = 'woocommerce_analytics_orders_statuses_all';
 
 	/**
+	 * Alias of the order stats table joined to resolve the customer type of refund rows.
+	 */
+	const CUSTOMER_TYPE_PARENT_ALIAS = 'customer_type_parent_stats';
+
+	/**
+	 * Columns of the order stats table that can be ordered by, and so need to be qualified with the
+	 * table name to stay unambiguous once other tables are joined.
+	 *
+	 * @var string[]
+	 */
+	const ORDER_STATS_COLUMNS = array(
+		'order_id',
+		'parent_id',
+		'date_created',
+		'date_created_gmt',
+		'date_paid',
+		'date_completed',
+		'status',
+		'customer_id',
+		'net_total',
+		'total_sales',
+		'tax_total',
+		'shipping_total',
+		'num_items_sold',
+		'returning_customer',
+	);
+
+	/**
 	 * Dynamically sets the date column name based on configuration
 	 *
 	 * @override ReportsDataStore::__construct()
@@ -99,6 +127,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	protected function assign_report_columns() {
 		$table_name = self::get_db_table_name();
+		// Refunds are stored with a NULL returning_customer, so fall back to the value of the
+		// refunded (parent) order. See add_customer_type_join().
+		$returning_customer = 'COALESCE( ' . $table_name . '.returning_customer, ' . self::CUSTOMER_TYPE_PARENT_ALIAS . '.returning_customer )';
 		// Avoid ambiguous columns in SQL query.
 		$this->report_columns = array(
 			'order_id'         => "DISTINCT {$table_name}.order_id",
@@ -112,8 +143,33 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'net_total'        => "{$table_name}.net_total",
 			'total_sales'      => "{$table_name}.total_sales",
 			'num_items_sold'   => "{$table_name}.num_items_sold",
-			'customer_type'    => "(CASE WHEN {$table_name}.returning_customer = 0 THEN 'new' ELSE 'returning' END) as customer_type",
+			'customer_type'    => "(CASE WHEN {$returning_customer} = 0 THEN 'new' ELSE 'returning' END) as customer_type",
 		);
+	}
+
+	/**
+	 * Adds the JOIN required to resolve the customer type of refund rows, which is read from the
+	 * refunded (parent) order.
+	 *
+	 * The JOIN is only added when the customer type is actually needed, so that reports that do not
+	 * select or filter by it are not charged for it.
+	 *
+	 * @param array $query_args Query arguments supplied by the user.
+	 * @return void
+	 */
+	protected function add_customer_type_join( $query_args ) {
+		$table_name = self::get_db_table_name();
+		$alias      = self::CUSTOMER_TYPE_PARENT_ALIAS;
+
+		$is_selected = ! isset( $query_args['fields'] ) ||
+			! is_array( $query_args['fields'] ) ||
+			in_array( 'customer_type', $query_args['fields'], true );
+
+		if ( empty( $query_args['customer_type'] ) && ! $is_selected ) {
+			return;
+		}
+
+		$this->subquery->add_sql_clause( 'join', "LEFT JOIN {$table_name} {$alias} ON {$table_name}.parent_id = {$alias}.order_id" );
 	}
 
 	/**
@@ -154,9 +210,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$where_subquery[] = "{$order_stats_lookup_table}.order_id NOT IN ({$excluded_orders})";
 		}
 
+		$this->add_customer_type_join( $query_args );
+
 		if ( $query_args['customer_type'] ) {
 			$returning_customer = 'returning' === $query_args['customer_type'] ? 1 : 0;
-			$where_subquery[]   = "{$order_stats_lookup_table}.returning_customer = {$returning_customer}";
+			$parent_alias       = self::CUSTOMER_TYPE_PARENT_ALIAS;
+			$where_subquery[]   = "COALESCE( {$order_stats_lookup_table}.returning_customer, {$parent_alias}.returning_customer ) = {$returning_customer}";
 		}
 
 		$refund_subquery = $this->get_refund_subquery( $query_args );
@@ -353,8 +412,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return string
 	 */
 	protected function normalize_order_by( $order_by ) {
+		$table_name = self::get_db_table_name();
+
 		if ( 'date' === $order_by ) {
-			return $this->date_column_name;
+			return "{$table_name}.{$this->date_column_name}";
+		}
+
+		// Columns of the order stats table are qualified, as the report can join other tables that
+		// share column names with it, including a second copy of the order stats table itself.
+		if ( in_array( $order_by, self::ORDER_STATS_COLUMNS, true ) ) {
+			return "{$table_name}.{$order_by}";
 		}
 
 		return $order_by;
