@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Store API: improve coupon handling for order payments.
