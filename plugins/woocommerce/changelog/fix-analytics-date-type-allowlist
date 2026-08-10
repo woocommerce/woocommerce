@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Validate the Analytics order date type option against known columns.
