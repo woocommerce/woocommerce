@@ -111,10 +111,19 @@ class ProductFilters extends AbstractBlock {
 			'forcePageReload' => isset( $block->context['forcePageReload'] ) ? (bool) $block->context['forcePageReload'] : null,
 		);
 
-		$show_filter_drawer = ! isset( $attributes['showFilterDrawer'] ) || false !== $attributes['showFilterDrawer'];
+		$overlay_on_desktop = isset( $attributes['overlayOnDesktop'] ) && true === $attributes['overlayOnDesktop'];
+		$show_filter_drawer = $overlay_on_desktop || ! isset( $attributes['showFilterDrawer'] ) || false !== $attributes['showFilterDrawer'];
+		$desktop_position   = isset( $attributes['desktopOverlayPosition'] ) && 'right' === $attributes['desktopOverlayPosition'] ? 'right' : 'left';
+		$has_overlay        = $show_filter_drawer;
 		$wrapper_classes    = array( 'wc-block-product-filters' );
 		if ( ! $show_filter_drawer ) {
 			$wrapper_classes[] = 'is-filter-drawer-disabled';
+		}
+		if ( $overlay_on_desktop ) {
+			$wrapper_classes[] = 'has-desktop-overlay';
+			if ( 'right' === $desktop_position ) {
+				$wrapper_classes[] = 'is-desktop-overlay-right';
+			}
 		}
 
 		$wrapper_attributes = array(
@@ -126,13 +135,13 @@ class ProductFilters extends AbstractBlock {
 			'style'                         => $this->get_css_variables( $attributes ),
 		);
 
-		if ( $show_filter_drawer ) {
+		if ( $has_overlay ) {
 			$wrapper_attributes['data-wp-watch--scrolling']         = 'callbacks.scrollLimit';
 			$wrapper_attributes['data-wp-on--keyup']                = 'actions.closeOverlayOnEscape';
 			$wrapper_attributes['data-wp-class--is-overlay-opened'] = 'context.isOverlayOpened';
 		}
 
-		// TODO: Remove this conditional once the fix is released in WP. https://github.com/woocommerce/gutenberg/pull/4.
+		// Remove this conditional once the fix is released in WP. https://github.com/woocommerce/gutenberg/pull/4.
 		if ( ! isset( $block->context['productCollectionLocation'] ) ) {
 			$wrapper_attributes['data-wp-router-region'] = $this->generate_navigation_id( $block );
 		}
@@ -140,7 +149,7 @@ class ProductFilters extends AbstractBlock {
 		ob_start();
 		?>
 		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-			<?php if ( $show_filter_drawer ) : ?>
+			<?php if ( $has_overlay ) : ?>
 				<button
 					type="button"
 					class="wc-block-product-filters__open-overlay"
@@ -150,7 +159,7 @@ class ProductFilters extends AbstractBlock {
 					<span><?php echo esc_html__( 'Filter products', 'woocommerce' ); ?></span>
 				</button>
 				<div class="wc-block-product-filters__overlay">
-					<div class="wc-block-product-filters__overlay-wrapper">
+					<div class="wc-block-product-filters__overlay-wrapper" data-wp-on--click="actions.closeOverlayOnBackdrop">
 						<div
 							class="wc-block-product-filters__overlay-dialog"
 							role="dialog"

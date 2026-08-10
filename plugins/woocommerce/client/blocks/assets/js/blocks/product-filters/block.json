@@ -43,6 +43,13 @@
 		"showFilterDrawer": {
 			"type": "boolean",
 			"default": true
+		},
+		"overlayOnDesktop": {
+			"type": "boolean"
+		},
+		"desktopOverlayPosition": {
+			"type": "string",
+			"enum": [ "left", "right" ]
 		}
 	},
 	"example": {

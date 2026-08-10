@@ -116,8 +116,8 @@
 	}
 
 	@include breakpoint(">600px") {
-		&,
-		&.is-overlay-opened {
+		&:not(.has-desktop-overlay),
+		&.is-overlay-opened:not(.has-desktop-overlay) {
 			display: flex;
 
 			.wc-block-product-filters__overlay-header,
@@ -135,6 +135,7 @@
 				transition: none;
 				flex-grow: 1;
 			}
+
 			.wc-block-product-filters__overlay-wrapper {
 				width: auto;
 				height: auto;
@@ -155,6 +156,32 @@
 				flex-grow: 1;
 				background: inherit;
 				color: inherit;
+			}
+		}
+
+		&.has-desktop-overlay {
+			.wc-block-product-filters__overlay-dialog {
+				/*rtl:ignore*/
+				inset: 0 auto 0 0;
+				width: 480px;
+				max-width: 100%;
+				--wc-product-filters-closed-translate-x: -100%;
+				transform: translateX(
+					var(--wc-product-filters-closed-translate-x)
+				);
+			}
+
+			&.is-desktop-overlay-right
+				.wc-block-product-filters__overlay-dialog {
+				/*rtl:ignore*/
+				inset: 0 0 0 auto;
+				--wc-product-filters-closed-translate-x: 100%;
+			}
+
+			&.is-overlay-opened {
+				.wc-block-product-filters__overlay-dialog {
+					transform: translateX(0);
+				}
 			}
 		}
 	}
