@@ -18,6 +18,13 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
    Utilities
    ========================================================================== */
 
+/* Add a transition state for buttons. */
+.wp-element-button {
+	transition: border, background-color, color, box-shadow, opacity, filter;
+	transition-duration: 0.15s;
+	transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
 /* Outline buttons default to the ink color via this custom property
  * (see the outline variation css in theme.json). Inside section styles
  * and covers the local text color already accounts for the surface, so
