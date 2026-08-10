@@ -13,6 +13,7 @@
 			"background": "var(--wp--preset--color--theme-4)",
 			"text": "var(--wp--preset--color--theme-1)"
 		},
+		"css": "--wp--custom--outline-button-color: currentColor;",
 		"blocks": {
 			"core/separator": {
 				"color": {

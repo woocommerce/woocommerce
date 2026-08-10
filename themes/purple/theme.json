@@ -264,6 +264,7 @@
 				}
 			},
 			"core/cover": {
+				"css": "--wp--custom--outline-button-color: currentColor;",
 				"elements": {
 					"heading": {
 						"color": {
