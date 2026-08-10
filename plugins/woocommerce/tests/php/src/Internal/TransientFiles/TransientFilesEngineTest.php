@@ -273,6 +273,68 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_transient_files_directory keeps the scheme of stream wrapper uploads directories (S3-Uploads, VIP).
+	 */
+	public function test_get_transient_files_directory_preserves_stream_wrapper_scheme() {
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wp_upload_dir' => fn() => array( 'basedir' => 's3://bucket/uploads' ),
+				'is_dir'        => fn() => true,
+				// realpath can't resolve stream wrapper paths, it always returns false for them.
+				'realpath'      => fn() => false,
+			)
+		);
+
+		$result = $this->sut->get_transient_files_directory();
+
+		$this->assertEquals( 's3://bucket/uploads/woocommerce_transient_files', $result );
+	}
+
+	/**
+	 * @testdox get_transient_files_directory throws if a stream wrapper directory supplied via hook doesn't exist.
+	 */
+	public function test_get_transient_files_directory_throws_if_stream_wrapper_directory_does_not_exist() {
+		add_filter( 'woocommerce_transient_files_directory', fn() => 's3://bucket/custom-dir' );
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wp_upload_dir' => fn() => array( 'basedir' => 's3://bucket/uploads' ),
+				'is_dir'        => fn() => false,
+			)
+		);
+
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( "The base transient files directory doesn't exist: s3://bucket/custom-dir" );
+
+		try {
+			$this->sut->get_transient_files_directory();
+		} finally {
+			remove_all_filters( 'woocommerce_transient_files_directory' );
+		}
+	}
+
+	/**
+	 * @testdox create_transient_file builds the file path inside the uploads directory on stream wrapper uploads directories.
+	 */
+	public function test_create_transient_file_builds_path_inside_stream_wrapper_uploads_directory() {
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wp_upload_dir' => fn() => array( 'basedir' => 's3://bucket/uploads' ),
+				'is_dir'        => fn( $directory ) => 's3://bucket/uploads/woocommerce_transient_files' === $directory,
+				'wp_mkdir_p'    => fn() => false,
+				'realpath'      => fn() => false,
+				'gmdate'        => fn( $format, $date = null ) =>
+					is_null( $date ) && 'Y-m-d' === $format ? '2023-12-01' : gmdate( $format, $date ),
+			)
+		);
+
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( "Can't create directory: s3://bucket/uploads/woocommerce_transient_files/2023-12-02" );
+
+		$this->sut->create_transient_file( 'foobar', '2023-12-02' );
+	}
+
+	/**
 	 * @testdox get_transient_file_path returns null for a file that doesn't exist, including wrongly formatted names.
 	 *
 	 * @testWith [""]

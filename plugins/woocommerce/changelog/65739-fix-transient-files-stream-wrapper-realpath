@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep the transient files directory working on sites whose uploads directory is a stream wrapper path, such as S3-Uploads and WordPress VIP installs.

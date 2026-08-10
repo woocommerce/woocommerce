@@ -39,6 +39,11 @@ class TransientFilesEngine implements RegisterHooksInterface {
 	private const CLEANUP_ACTION_GROUP = 'wc_batch_processes';
 
 	/**
+	 * Regular expression matching a path that starts with a URL scheme, e.g. "s3://bucket/uploads".
+	 */
+	private const URL_SCHEME_REGEX = '#^[a-z][a-z0-9+.\-]*://#i';
+
+	/**
 	 * The instance of LegacyProxy to use.
 	 *
 	 * @var LegacyProxy
@@ -101,8 +106,8 @@ class TransientFilesEngine implements RegisterHooksInterface {
 		 */
 		$transient_files_directory = apply_filters( 'woocommerce_transient_files_directory', $default_transient_files_directory );
 
-		$realpathed_transient_files_directory = $this->legacy_proxy->call_function( 'realpath', $transient_files_directory );
-		if ( false === $realpathed_transient_files_directory ) {
+		$resolved_transient_files_directory = $this->resolve_directory_if_it_exists( $transient_files_directory );
+		if ( false === $resolved_transient_files_directory ) {
 			if ( $transient_files_directory === $default_transient_files_directory ) {
 				if ( ! $this->legacy_proxy->call_function( 'wp_mkdir_p', $transient_files_directory ) ) {
 					throw new Exception( "Can't create directory: $transient_files_directory" );
@@ -114,13 +119,35 @@ class TransientFilesEngine implements RegisterHooksInterface {
 				$wp_filesystem->put_contents( $transient_files_directory . '/.htaccess', 'deny from all' );
 				$wp_filesystem->put_contents( $transient_files_directory . '/index.html', '' );
 
-				$realpathed_transient_files_directory = $this->legacy_proxy->call_function( 'realpath', $transient_files_directory );
+				$resolved_transient_files_directory = $this->resolve_directory_if_it_exists( $transient_files_directory );
+				if ( false === $resolved_transient_files_directory ) {
+					throw new Exception( esc_html( "The directory was created but can't be resolved: $transient_files_directory" ) );
+				}
 			} else {
 				throw new Exception( "The base transient files directory doesn't exist: $transient_files_directory" );
 			}
 		}
 
-		return untrailingslashit( $realpathed_transient_files_directory );
+		return untrailingslashit( $resolved_transient_files_directory );
+	}
+
+	/**
+	 * Get the canonical path of a directory, if the directory exists.
+	 *
+	 * Paths handled by a stream wrapper can't be resolved with realpath, which returns false for them and would
+	 * turn a perfectly valid directory into an empty string. Sites that store uploads through a stream wrapper
+	 * (the S3-Uploads plugin and WordPress VIP, where wp_upload_dir returns something like "s3://bucket/uploads")
+	 * hit that case, so for scheme-prefixed paths the path is kept verbatim and only its existence is verified.
+	 *
+	 * @param string $directory The directory to resolve.
+	 * @return string|false The canonical path of the directory, or false if the directory doesn't exist.
+	 */
+	private function resolve_directory_if_it_exists( string $directory ) {
+		if ( 1 === preg_match( self::URL_SCHEME_REGEX, $directory ) ) {
+			return $this->legacy_proxy->call_function( 'is_dir', $directory ) ? $directory : false;
+		}
+
+		return $this->legacy_proxy->call_function( 'realpath', $directory );
 	}
 
 	/**
