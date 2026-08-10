@@ -88,6 +88,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 	 * (e.g. orderby) must be validated against the schema of the report being
 	 * exported the same way the non-export report route validates them.
 	 *
+	 * @since 11.0.1
 	 * @param  mixed                                  $value   The report_args value.
 	 * @param  \WP_REST_Request<array<string, mixed>> $request The request.
 	 * @param  string                                 $param   The parameter name.

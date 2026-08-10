@@ -167,7 +167,7 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	/**
 	 * Get the report type to report controller class map.
 	 *
-	 * @since 11.1.0
+	 * @since 11.0.1
 	 * @return array Report type to report controller class map.
 	 */
 	private static function get_report_controller_map() {
@@ -197,7 +197,7 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	/**
 	 * Get a REST controller instance for a given report type, or false if unknown.
 	 *
-	 * @since 11.1.0
+	 * @since 11.0.1
 	 * @param string $report_type Report type. E.g. 'orders'.
 	 * @return \WC_REST_Reports_Controller|false
 	 */
