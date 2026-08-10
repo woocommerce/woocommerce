@@ -38,7 +38,7 @@ The first three are measured by the Quality Insights Toolkit (QIT). Here's what 
 
 For the full list of managed tests and what each one checks, see the [QIT documentation](https://qit.woo.com/docs/), specifically the Managed Tests and Test Packages sections.
 
-The fourth factor, Merchant-approved, looks at a strong average customer rating, backed by enough reviews to reflect real use. This is the part no code change can fix. It rewards products that merchants trust over time.
+The fourth factor, Merchant-approved, has two parts and a product needs both: a strong average customer rating, and enough reviews to reflect real use. This is the part no code change can fix. It rewards products that merchants trust over time.
 
 The exact thresholds are calibrated at launch and will evolve as the program grows. The Vendor Dashboard shows each product's QIT checklist and current badge state, so it's the place to check technical progress: Vendor **Dashboard** > **Products**.
 
@@ -46,7 +46,9 @@ The exact thresholds are calibrated at launch and will evolve as the program gro
 
 Most products already meet several of the requirements, so there's no starting from scratch. Products that fall short are usually close, and a few targeted fixes get there.
 
-**Start with validation**. It's the most common blocker and one of the easiest to fix. Validation checks plugin metadata: license headers, version requirements, and the HPOS compatibility declaration. These are small, well-defined changes that don't touch product logic.
+**Start with validation**. It's the most common blocker and one of the easiest to fix. Validation checks plugin metadata: license headers and version requirements. These are small, well-defined changes that don't touch product logic.
+
+**Declare HPOS compatibility honestly.** Validation also checks the HPOS compatibility declaration, and this one is not a metadata edit. If a product handles orders, declare compatibility only once the order code supports HPOS. The declaration tells merchants what the product does, so setting it to true without the support behind it hides the warning WooCommerce would otherwise show them. Test order flows with HPOS enabled first — QIT accepts `--optional_features=hpos` — then declare. The [HPOS recipe book](/docs/features/orders/high-performance-order-storage/recipe-book/) covers what to check.
 
 **Add a test package.** The check confirms that a product's own end-to-end suite runs and passes. The value goes beyond the badge: a real suite catches regressions before they reach merchants and makes it safer to ship updates as WordPress and WooCommerce evolve. A suite that genuinely exercises the product is worth far more than a placeholder.
 
@@ -77,7 +79,7 @@ Exact dates and the steps for each stage will follow in vendor comms ahead of la
 <details>
 <summary>How many products will have the badge at launch?</summary>
 
-Only a differentiated share of products will qualify at launch. Many are only a few targeted fixes away, so that number is expected to grow as vendors make improvements.
+Only a limited share of products will qualify at launch. Many are only a few targeted fixes away, so that number is expected to grow as vendors make improvements.
 
 </details>
 
