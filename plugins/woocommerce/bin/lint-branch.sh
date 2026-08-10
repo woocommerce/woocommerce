@@ -27,7 +27,11 @@ fi
 # so a failure in one check is never masked by a later one passing.
 status=0
 
-composer exec phpcs-changed -- -s --git --git-base $baseBranch $changedFiles || status=1
+# phpcs gets its own status besides the shared accumulator: the checkstyle report
+# below must be tied to phpcs itself failing, not to any other check that sets status.
+phpcsStatus=0
+composer exec phpcs-changed -- -s --git --git-base $baseBranch $changedFiles || phpcsStatus=1
+[[ $phpcsStatus -eq 1 ]] && status=1
 
 # The readable report above is the log people dig into; this re-runs the same check
 # only to render the same findings as checkstyle for cs2pr (phpcs-changed can only
@@ -38,7 +42,7 @@ composer exec phpcs-changed -- -s --git --git-base $baseBranch $changedFiles || 
 # reports the git path (already prefixed) when it resolves a file through git, but a
 # path relative to this directory when it falls back to plain phpcs, so strip the prefix
 # before adding it: that lands on the right path either way.
-if [[ -n $WC_LINT_CHECKSTYLE_FILE && $status -eq 1 ]]; then
+if [[ -n $WC_LINT_CHECKSTYLE_FILE && $phpcsStatus -eq 1 ]]; then
     prefix=$(git rev-parse --show-prefix)
     composer exec phpcs-changed -- --git --git-base $baseBranch --report=checkstyle $changedFiles |
         sed -e "s|<file name=\"${prefix}|<file name=\"|g" \
