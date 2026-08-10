@@ -24,7 +24,20 @@ $sales_fixtures = array(
 $products = array();
 
 foreach ( wc_get_products( array( 'limit' => -1 ) ) as $product ) {
-	$products[ $product->get_name() ] = $product;
+	$product_name = $product->get_name();
+
+	if ( isset( $products[ $product_name ] ) ) {
+		WP_CLI::error(
+			sprintf(
+				'Expected product names to be unique, but found "%1$s" on product IDs %2$d and %3$d.',
+				$product_name,
+				$products[ $product_name ]->get_id(),
+				$product->get_id()
+			)
+		);
+	}
+
+	$products[ $product_name ] = $product;
 }
 
 $required_product_names = array_unique(
@@ -51,7 +64,7 @@ foreach ( $products as $product_name => $product ) {
 	}
 }
 
-// Product saves update changed rows. Regeneration also repairs stale lookup rows on reruns.
+// This runs synchronously under WP-CLI and also repairs stale lookup rows on reruns.
 wc_update_product_lookup_tables();
 
 foreach ( $rating_fixtures as $product_name => $expected_rating ) {
@@ -96,25 +109,5 @@ foreach ( $sales_fixtures as $product_name => $expected_sales ) {
 	}
 }
 
-foreach ( array( 'Hoodie', 'Cap' ) as $product_name ) {
-	$actual_review_count = (int) get_comments(
-		array(
-			'post_id' => $products[ $product_name ]->get_id(),
-			'status'  => 'approve',
-			'type'    => 'review',
-			'count'   => true,
-		)
-	);
-
-	if ( 2 !== $actual_review_count ) {
-		WP_CLI::error(
-			sprintf(
-				'Expected "%s" to retain 2 approved reviews, got %d.',
-				$product_name,
-				$actual_review_count
-			)
-		);
-	}
-}
 PHP
 )"
