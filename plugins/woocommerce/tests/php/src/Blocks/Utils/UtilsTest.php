@@ -150,4 +150,33 @@ class UtilsTest extends WC_Unit_Test_Case {
 			array( '/wp-content', '/wp-includes/x.js', false ),
 		);
 	}
+
+	/**
+	 * @testdox get_current_page_url() builds the URL from $wp->request and preserves raw query encoding.
+	 */
+	public function test_get_current_page_url_preserves_encoded_query_string(): void {
+		global $wp, $wp_rewrite;
+
+		$original_request            = $wp->request ?? null;
+		$original_query_string       = $_SERVER['QUERY_STRING'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+		$original_use_trailing_slash = $wp_rewrite->use_trailing_slashes;
+
+		$wp_rewrite->use_trailing_slashes = true;
+		$wp->request                      = 'product/hoodie';
+		$_SERVER['QUERY_STRING']          = 'label=Black%20%26%20White';
+
+		$url = Utils::get_current_page_url();
+
+		$this->assertStringContainsString( '/product/hoodie/', $url );
+		$this->assertStringContainsString( 'label=Black%20%26%20White', $url );
+		$this->assertStringNotContainsString( 'label=Black%20&%20White', $url );
+
+		$wp->request                      = $original_request;
+		$wp_rewrite->use_trailing_slashes = $original_use_trailing_slash;
+		if ( null === $original_query_string ) {
+			unset( $_SERVER['QUERY_STRING'] );
+		} else {
+			$_SERVER['QUERY_STRING'] = $original_query_string;
+		}
+	}
 }

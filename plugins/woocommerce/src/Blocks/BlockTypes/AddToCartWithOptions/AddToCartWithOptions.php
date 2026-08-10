@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Blocks\Utils\Utils as BlocksUtils;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController;
@@ -553,9 +554,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			$form_attributes         = '';
 			$legacy_mode             = 'yes' === $cart_redirect_after_add || $this->has_form_elements( $hooks_before ) || $this->has_form_elements( $hooks_after );
 			if ( $legacy_mode ) {
-				global $wp;
-
-				$action_url = home_url( add_query_arg( wp_unslash( $_GET ), $wp->request ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				$action_url = BlocksUtils::get_current_page_url();
 
 				// If an extension is hooking into the form or we need to redirect to the cart,
 				// we fall back to a regular HTML form.

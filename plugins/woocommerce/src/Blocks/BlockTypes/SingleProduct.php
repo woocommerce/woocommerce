@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\ProductDataUtils;
+use Automattic\WooCommerce\Blocks\Utils\Utils as BlocksUtils;
 use Automattic\WooCommerce\Enums\ProductType;
 
 /**
@@ -194,11 +195,9 @@ class SingleProduct extends AbstractBlock {
 		$product_id = $product->get_id();
 
 		if ( post_password_required( $product_id ) ) {
-			global $wp;
-
 			$password_form = get_the_password_form( $product_id );
 			$html          = new \WP_HTML_Tag_Processor( $password_form );
-			$current_url   = home_url( add_query_arg( wp_unslash( $_GET ), $wp->request ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$current_url   = BlocksUtils::get_current_page_url();
 
 			while ( $html->next_tag( array( 'tag_name' => 'input' ) ) ) {
 				if ( 'redirect_to' !== $html->get_attribute( 'name' ) ) {
