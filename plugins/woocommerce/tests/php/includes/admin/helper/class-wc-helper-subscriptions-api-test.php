@@ -69,6 +69,7 @@ class WC_Helper_Subscriptions_API_Test extends \WC_Unit_Test_Case {
 					'product_key'  => $product_key,
 					'product_type' => 'theme',
 					'zip_slug'     => self::INACTIVE_THEME_SLUG,
+					'connections'  => array(),
 				),
 			),
 			HOUR_IN_SECONDS
@@ -91,6 +92,7 @@ class WC_Helper_Subscriptions_API_Test extends \WC_Unit_Test_Case {
 					'product_key'  => $product_key,
 					'product_type' => 'plugin',
 					'zip_slug'     => self::INACTIVE_PLUGIN_SLUG,
+					'connections'  => array(),
 				),
 			),
 			HOUR_IN_SECONDS
@@ -223,6 +225,7 @@ class WC_Helper_Subscriptions_API_Test extends \WC_Unit_Test_Case {
 					'product_key'  => $product_key,
 					'product_type' => 'unknown',
 					'zip_slug'     => self::INACTIVE_PLUGIN_SLUG,
+					'connections'  => array(),
 				),
 			),
 			HOUR_IN_SECONDS
