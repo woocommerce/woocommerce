@@ -70,8 +70,6 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 		$_SERVER['REQUEST_URI'] = '/wp-json/wc/v3/products';
 		$this->assertEquals( WC()->is_rest_api_request(), true );
 	}
-<<<<<<< HEAD
-=======
 
 	/**
 	 * @testdox Should detect a REST API request that uses plain permalinks (?rest_route=).
@@ -168,20 +166,13 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Settings registration is hooked to both admin_init and rest_api_init to support direct PHP and REST consumption.
-	 */
-	public function test_register_wp_admin_settings_hooked_to_admin_init_and_rest_api_init(): void {
-		$this->assertSame( 10, has_action( 'admin_init', array( WC(), 'register_wp_admin_settings' ) ) );
-		$this->assertSame( 10, has_action( 'rest_api_init', array( WC(), 'register_wp_admin_settings' ) ) );
-	}
-
-	/**
 	 * @testdox Should load WooCommerce includes in post editor load actions.
 	 */
 	public function test_loads_woocommerce_includes_for_post_editor_load_actions(): void {
 		$this->assertSame(
 			10,
 			has_action( 'load-post.php', array( WC(), 'includes' ) ),
+
 			'Existing post editor requests should invoke WooCommerce includes before block rendering.'
 		);
 		$this->assertSame(
@@ -217,5 +208,12 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 			'New post editor load action should load frontend includes such as wc-notice-functions.php.'
 		);
 	}
->>>>>>> fca84aa428 ([Fix] "Your business location does not match your store location" warning on Payments setting page (#67494))
+
+	/**
+	 * @testdox Settings registration is hooked to both admin_init and rest_api_init to support direct PHP and REST consumption.
+	 */
+	public function test_register_wp_admin_settings_hooked_to_admin_init_and_rest_api_init(): void {
+		$this->assertSame( 10, has_action( 'admin_init', array( WC(), 'register_wp_admin_settings' ) ) );
+		$this->assertSame( 10, has_action( 'rest_api_init', array( WC(), 'register_wp_admin_settings' ) ) );
+	}
 }
