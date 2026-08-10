@@ -287,16 +287,6 @@ claude mcp add \
   -- npx -y @automattic/mcp-wordpress-remote@latest
 ```
 
-You can test the endpoint directly with `curl`:
-
-```bash
-curl --request POST \
-  --user 'your-username:your-application-password' \
-  --header 'Content-Type: application/json' \
-  --data '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' \
-  https://yourstore.com/wp-json/mcp/mcp-adapter-default-server
-```
-
 **Troubleshooting**: For common setup issues with npx versions or SSL in local environments, see the [mcp-wordpress-remote troubleshooting guide](https://github.com/Automattic/mcp-wordpress-remote/blob/trunk/Docs/troubleshooting.md).
 
 ## Extending MCP Capabilities
