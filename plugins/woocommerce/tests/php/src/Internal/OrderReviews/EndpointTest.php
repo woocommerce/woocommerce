@@ -221,6 +221,44 @@ class EndpointTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox render_shortcode() only renders on the managed page with a matching order key.
+	 */
+	public function test_render_shortcode_requires_managed_page_and_key(): void {
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$page_id       = (int) wc_get_page_id( Endpoint::PAGE_KEY );
+		$other_page_id = (int) wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Some other page',
+			)
+		);
+
+		global $wp, $wp_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture.
+		$wp             = new \stdClass();
+		$wp->query_vars = array( Endpoint::QUERY_VAR => (string) $order->get_id() );
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture.
+		$wp_query          = new WP_Query();
+		$wp_query->is_page = true;
+
+		$wp_query->queried_object = get_post( $page_id );
+		$_GET                     = array( 'key' => 'wc_order_definitelywrong' );
+		$this->assertSame( '', $this->endpoint->render_shortcode(), 'Wrong key on the managed page.' );
+
+		$wp_query->queried_object = get_post( $other_page_id );
+		$_GET                     = array( 'key' => $order->get_order_key() );
+		$this->assertSame( '', $this->endpoint->render_shortcode(), 'Correct key off the managed page.' );
+
+		$wp_query->queried_object = get_post( $page_id );
+		$html                     = $this->endpoint->render_shortcode();
+		$this->assertStringContainsString( 'Order #' . $order->get_order_number(), $html, 'Correct key on the managed page.' );
+	}
+
+	/**
 	 * @testdox The woocommerce_review_order_eligible_statuses filter widens the eligible set.
 	 */
 	public function test_eligible_statuses_filter_widens_set(): void {

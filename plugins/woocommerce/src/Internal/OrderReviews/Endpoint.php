@@ -510,23 +510,27 @@ class Endpoint {
 	 * Render the Review Order page body for the WC-managed page.
 	 *
 	 * Called by `the_content` on the page that hosts `[woocommerce_review_order]`.
-	 * Returns an empty string when the request did not arrive through the
-	 * tokenised rewrite, so a logged-in admin previewing the page directly
-	 * sees nothing rather than a partial form.
+	 * Confirms the current page and order key before rendering.
 	 *
 	 * @return string
 	 */
 	public function render_shortcode(): string {
 		global $wp;
 
+		$page_id = (int) wc_get_page_id( self::PAGE_KEY );
+		if ( $page_id <= 0 || ! is_page( $page_id ) ) {
+			return '';
+		}
+
 		if ( ! isset( $wp->query_vars[ self::QUERY_VAR ] ) ) {
 			return '';
 		}
 
-		$order_id = absint( $wp->query_vars[ self::QUERY_VAR ] );
-		$order    = $order_id ? wc_get_order( $order_id ) : false;
-		if ( ! $order instanceof WC_Order ) {
-			// gate_request() will already have 404'd; this is defensive.
+		$order_id  = absint( $wp->query_vars[ self::QUERY_VAR ] );
+		$order_key = $this->read_order_key();
+		$order     = $order_id ? wc_get_order( $order_id ) : false;
+
+		if ( ! $this->is_authorised( $order, $order_key ) ) {
 			return '';
 		}
 
