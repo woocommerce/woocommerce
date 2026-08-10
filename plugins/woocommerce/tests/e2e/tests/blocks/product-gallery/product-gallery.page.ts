@@ -41,7 +41,7 @@ export class ProductGalleryPage {
 		} );
 	}
 
-	async addAddToCartWithOptionsBlock() {
+	async addClassicAddToCartFormBlock() {
 		await this.editor.insertBlock( {
 			name: 'woocommerce/add-to-cart-form',
 		} );
@@ -210,7 +210,7 @@ export class ProductGalleryPage {
 		return this.editor.getBlockByName( blockName );
 	}
 
-	async getAddToCartWithOptionsBlock( {
+	async getClassicAddToCartFormBlock( {
 		page,
 	}: {
 		page: 'frontend' | 'editor';

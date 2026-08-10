@@ -168,7 +168,7 @@ test.describe( `${ blockData.name }`, () => {
 		pageObject,
 	} ) => {
 		await pageObject.addProductGalleryBlock( { cleanContent: true } );
-		await pageObject.addAddToCartWithOptionsBlock();
+		await pageObject.addClassicAddToCartFormBlock();
 
 		const viewerBlock = await pageObject.getViewerBlock( {
 			page: 'editor',
@@ -185,7 +185,7 @@ test.describe( `${ blockData.name }`, () => {
 		const featuredImageId = await pageObject.getViewerImageId();
 		expect( featuredImageId ).not.toBeNull();
 
-		const cartForm = await pageObject.getAddToCartWithOptionsBlock( {
+		const cartForm = await pageObject.getClassicAddToCartFormBlock( {
 			page: 'frontend',
 		} );
 		const colorSelect = cartForm.getByLabel( 'Color' );
@@ -199,16 +199,6 @@ test.describe( `${ blockData.name }`, () => {
 			const variationImageId = await pageObject.getViewerImageId();
 			expect( variationImageId ).not.toEqual( featuredImageId );
 		} ).toPass( { timeout: 5_000 } );
-		const firstVariationImageId = await pageObject.getViewerImageId();
-
-		// Selecting another variation switches directly to its image instead
-		// of retaining the previously selected variation's image.
-		await colorSelect.selectOption( 'Blue' );
-
-		await expect( async () => {
-			const nextVariationImageId = await pageObject.getViewerImageId();
-			expect( nextVariationImageId ).not.toEqual( firstVariationImageId );
-		} ).toPass( { timeout: 5_000 } );
 
 		// Clear: gallery returns to the parent's featured image.
 		await colorSelect.selectOption( '' );
@@ -216,6 +206,50 @@ test.describe( `${ blockData.name }`, () => {
 		await expect( async () => {
 			const afterClearImageId = await pageObject.getViewerImageId();
 			expect( afterClearImageId ).toEqual( featuredImageId );
+		} ).toPass( { timeout: 5_000 } );
+	} );
+
+	test( 'Variable product gallery: classic Add to Cart Form switches directly between variations', async ( {
+		page,
+		editor,
+		pageObject,
+	} ) => {
+		await pageObject.addProductGalleryBlock( { cleanContent: true } );
+		await pageObject.addClassicAddToCartFormBlock();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( blockData.productPage );
+		const featuredImageId = await pageObject.getViewerImageId();
+		expect( featuredImageId ).not.toBeNull();
+
+		const addToCartForm = await pageObject.getClassicAddToCartFormBlock( {
+			page: 'frontend',
+		} );
+		await expect(
+			addToCartForm.locator( 'form.variations_form' )
+		).toBeVisible();
+
+		const colorSelect = addToCartForm.getByLabel( 'Color' );
+		const logoSelect = addToCartForm.getByLabel( 'Logo' );
+
+		await colorSelect.selectOption( 'Blue' );
+		await logoSelect.selectOption( 'Yes' );
+
+		await expect( async () => {
+			const variationImageId = await pageObject.getViewerImageId();
+			expect( variationImageId ).not.toEqual( featuredImageId );
+		} ).toPass( { timeout: 5_000 } );
+
+		const firstVariationImageId = await pageObject.getViewerImageId();
+
+		await logoSelect.selectOption( 'No' );
+
+		await expect( async () => {
+			const nextVariationImageId = await pageObject.getViewerImageId();
+			expect( nextVariationImageId ).not.toEqual( firstVariationImageId );
 		} ).toPass( { timeout: 5_000 } );
 	} );
 
