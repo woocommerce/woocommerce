@@ -428,9 +428,12 @@ class ListTableTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox handle_bulk_actions() blocks trashing for a role that has delete_others but not the base delete capability.
+	 * Orders have no meaningful author, so per-order checks resolve to delete_others_shop_orders.
+	 * The bulk gate uses the same capability, which means delete_others alone is enough.
+	 *
+	 * @testdox handle_bulk_actions() trashes orders for a role that has delete_others but not the base delete capability.
 	 */
-	public function test_handle_bulk_actions_trash_blocked_without_base_delete_capability(): void {
+	public function test_handle_bulk_actions_trash_allowed_with_delete_others_capability(): void {
 		$order = \WC_Helper_Order::create_order();
 
 		$this->login_as_user_with_caps(
@@ -451,7 +454,34 @@ class ListTableTest extends \WC_Unit_Test_Case {
 
 		unset( $_REQUEST['action'], $_REQUEST['id'], $_REQUEST['_wpnonce'] );
 
-		$this->assertNotSame( 'trash', wc_get_order( $order->get_id() )->get_status(), 'Removing delete_shop_orders should block deletion even when delete_others_shop_orders remains' );
+		$this->assertSame( 'trash', wc_get_order( $order->get_id() )->get_status(), 'delete_others_shop_orders should be sufficient to trash orders' );
+	}
+
+	/**
+	 * @testdox handle_bulk_actions() blocks trashing for a role that has the base delete capability but not delete_others.
+	 */
+	public function test_handle_bulk_actions_trash_blocked_without_delete_others_capability(): void {
+		$order = \WC_Helper_Order::create_order();
+
+		$this->login_as_user_with_caps(
+			'orders_editor_base_delete_only',
+			array(
+				'read'                    => true,
+				'edit_shop_orders'        => true,
+				'edit_others_shop_orders' => true,
+				'delete_shop_orders'      => true,
+			)
+		);
+
+		$_REQUEST['action']   = 'trash';
+		$_REQUEST['id']       = array( $order->get_id() );
+		$_REQUEST['_wpnonce'] = wp_create_nonce( 'bulk-orders' );
+
+		$this->invoke_handle_bulk_actions();
+
+		unset( $_REQUEST['action'], $_REQUEST['id'], $_REQUEST['_wpnonce'] );
+
+		$this->assertNotSame( 'trash', wc_get_order( $order->get_id() )->get_status(), 'Removing delete_others_shop_orders should block deletion even when delete_shop_orders remains' );
 	}
 
 	/**

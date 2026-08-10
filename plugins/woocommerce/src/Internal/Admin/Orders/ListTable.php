@@ -328,9 +328,7 @@ class ListTable extends WP_List_Table {
 			return array();
 		}
 
-		// Trashing and deleting orders is gated behind the order delete capabilities, mirroring how
-		// WP_List_Table handles the shop_order CPT. This lets roles drop delete_shop_orders to remove
-		// the option entirely (see https://github.com/woocommerce/woocommerce/issues/39289).
+		// Hide the destructive actions from roles that cannot delete orders.
 		$can_delete_orders = $this->current_user_can_delete_orders();
 
 		if ( array( 'trash' ) === $selected_status ) {
@@ -364,14 +362,16 @@ class ListTable extends WP_List_Table {
 	/**
 	 * Whether the current user can delete orders of this list table's type.
 	 *
-	 * Checks the order post type's `delete_posts` primitive capability (such as
-	 * `delete_shop_orders`), mirroring how WP_List_Table gates the trash and delete
-	 * bulk actions for the shop_order CPT.
+	 * Checks the `delete_others_posts` primitive (such as `delete_others_shop_orders`)
+	 * because that is what per-order `delete_post` checks resolve to: orders have no
+	 * meaningful author, so HposOrderCapabilityHelper treats them as belonging to
+	 * someone else for every user but ID 1
+	 * (see https://github.com/woocommerce/woocommerce/issues/39289).
 	 *
 	 * @return bool
 	 */
 	private function current_user_can_delete_orders(): bool {
-		return $this->wp_post_type && current_user_can( $this->wp_post_type->cap->delete_posts );
+		return $this->wp_post_type && current_user_can( $this->wp_post_type->cap->delete_others_posts );
 	}
 
 	/**
@@ -827,8 +827,7 @@ class ListTable extends WP_List_Table {
 			}
 		}
 
-		// Emptying the trash permanently deletes orders, so it requires both the "edit others" and the
-		// order delete capabilities.
+		// Emptying the trash permanently deletes orders, so it needs the delete capability too.
 		$can_empty_trash = $this->wp_post_type && current_user_can( $this->wp_post_type->cap->edit_others_posts ) && $this->current_user_can_delete_orders();
 		if ( $this->is_trash && $this->has_items() && $can_empty_trash ) {
 			submit_button( __( 'Empty Trash', 'woocommerce' ), 'apply', 'delete_all', false );
@@ -1448,12 +1447,10 @@ class ListTable extends WP_List_Table {
 			return;
 		}
 
-		// Trashing or deleting orders requires the order delete capability, regardless of how the
-		// request was assembled. Enforcing it here (before the nonce check, with no side effects)
-		// means a role without delete_shop_orders cannot delete through the bulk UI, the Empty Trash
-		// button, the single-order meta box link, or a crafted request, and is not affected by how
-		// the per-order delete_post meta capability resolves across HPOS sync modes
-		// (see https://github.com/woocommerce/woocommerce/issues/39289).
+		/*
+		 * Checked here, before the nonce check and with no side effects, so the capability applies
+		 * however the request was assembled: the bulk UI, the Empty Trash button, or a crafted POST.
+		 */
 		$is_empty_trash = ( 'delete_all' === $action );
 		if ( in_array( $action, array( 'trash', 'delete', 'delete_all' ), true ) && ! $this->current_user_can_delete_orders() ) {
 			return;
@@ -1492,10 +1489,10 @@ class ListTable extends WP_List_Table {
 			'order'
 		);
 
-		// Trashing or permanently deleting selected orders requires the per-order delete capability,
-		// consistent with the order actions meta box and WP core. Empty Trash is a primitive bulk
-		// operation gated above, so it is excluded here to avoid loading every trashed order
-		// (see https://github.com/woocommerce/woocommerce/issues/39289).
+		/*
+		 * Per-order checks, consistent with the order actions meta box and WP core. Empty Trash is
+		 * excluded because it is gated above and would otherwise load every trashed order.
+		 */
 		if ( ! $is_empty_trash && in_array( $action, array( 'trash', 'delete' ), true ) ) {
 			$ids = array_values(
 				array_filter(
