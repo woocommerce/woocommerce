@@ -195,7 +195,7 @@ class ProductSummary extends AbstractBlock {
 		$post_id = $block->context['postId'] ?? '';
 		$product = wc_get_product( $post_id );
 
-		if ( ! $product ) {
+		if ( ! $product || post_password_required( $product->get_id() ) ) {
 			return '';
 		}
 

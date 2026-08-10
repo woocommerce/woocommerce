@@ -64,7 +64,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		add_filter( 'posts_orderby', array( $this, 'order_search_results' ), 9999, 2 );
 
 		// Use hooks to prime various caches and improve products page performance.
-		// Until persistent counters reactivated, disable callback for load-edit.php action.
+		add_action( 'load-edit.php', array( $this, 'prime_status_counts_cache' ) );
 		add_filter( 'the_posts', array( $this, 'prime_thumbnail_caches' ), 10, 2 );
 
 		$cogs_controller              = wc_get_container()->get( CostOfGoodsSoldController::class );

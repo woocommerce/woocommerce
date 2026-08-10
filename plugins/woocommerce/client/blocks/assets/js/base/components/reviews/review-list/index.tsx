@@ -40,9 +40,9 @@ const ReviewList = ( {
 			{ reviews.length === 0 ? (
 				<ReviewListItem attributes={ attrs } />
 			) : (
-				reviews.map( ( review, i ) => (
+				reviews.map( ( review ) => (
 					<ReviewListItem
-						key={ review.id || i }
+						key={ review.id }
 						attributes={ attrs }
 						review={ review }
 					/>
