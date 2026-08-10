@@ -694,6 +694,46 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
+	 * Nested Cart-Token should be ignored in a batch request.
+	 */
+	public function test_batch_sub_request_cart_token_does_not_waive_nonce() {
+		$token = CartTokenUtils::get_cart_token( (string) wc()->session->get_customer_id() );
+
+		// Preserve globals.
+		$old_server = $_SERVER;
+
+		try {
+			$_SERVER['REQUEST_URI'] = '/' . rest_get_url_prefix() . '/wc/store/v1/batch';
+			unset( $_SERVER['HTTP_CART_TOKEN'] );
+
+			$request = new \WP_REST_Request( 'POST', '/wc/store/v1/batch' );
+			$request->set_header( 'Content-Type', 'application/json' );
+			$request->set_body(
+				wp_json_encode(
+					array(
+						'requests' => array(
+							array(
+								'method'  => 'POST',
+								'path'    => '/wc/store/v1/cart/update-customer',
+								'headers' => array( 'Cart-Token' => $token ),
+								'body'    => array( 'billing_address' => array( 'first_name' => 'Nonce-free' ) ),
+							),
+						),
+					)
+				)
+			);
+
+			$response = rest_get_server()->dispatch( $request );
+			$data     = $response->get_data();
+
+			$this->assertSame( 401, $data['responses'][0]['status'] ?? null, 'A sub-request token must not waive the nonce check.' );
+		} finally {
+			// Restore globals.
+			$_SERVER = $old_server;
+		}
+	}
+
+	/**
 	 * Test that cart GET endpoint sends Cache-Control headers.
 	 */
 	public function test_cart_get_endpoint_cache_control_headers() {
