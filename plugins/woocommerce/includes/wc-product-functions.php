@@ -2230,7 +2230,7 @@ function wc_product_attach_featured_image( $attachment_id, $product = null, $sav
 		$product    = wc_get_product( $product_id );
 	}
 
-	if ( ! $product ) {
+	if ( ! $product || ! current_user_can( 'edit_product', $product->get_id() ) ) {
 		return;
 	}
 

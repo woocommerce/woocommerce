@@ -1192,4 +1192,45 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 
 		return implode( "\n", (array) $before_data );
 	}
+
+	/**
+	 * @testdox Does not attach a featured image via SKU match when the current user cannot edit the product.
+	 */
+	public function test_wc_product_attach_featured_image_requires_edit_product_capability(): void {
+		update_option( 'woocommerce_product_match_featured_image_by_sku', 'yes' );
+
+		$sku     = 'TEST-SKU-ATTACH-' . wp_generate_password( 8, false );
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sku( $sku );
+		$product->set_image_id( '' );
+		$product->save();
+
+		$attachment_id = wp_insert_attachment(
+			array(
+				'post_title'     => $sku,
+				'post_status'    => 'inherit',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+
+		$subscriber_id = self::factory()->user->create( array( 'role' => 'author' ) );
+
+		try {
+			wp_set_current_user( $subscriber_id );
+
+			wc_product_attach_featured_image( $attachment_id );
+
+			$product = wc_get_product( $product->get_id() );
+			$this->assertEmpty(
+				$product->get_image_id(),
+				'Featured image should not be attached when the user lacks edit_product capability'
+			);
+		} finally {
+			wp_set_current_user( 0 );
+			wp_delete_attachment( $attachment_id, true );
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_user( $subscriber_id );
+			delete_option( 'woocommerce_product_match_featured_image_by_sku' );
+		}
+	}
 }
