@@ -423,9 +423,10 @@ The demo plugin creates a `woocommerce-demo/store-info` ability that retrieves s
 
 ## Authentication Failures
 
-- Confirm API key format: `consumer_key:consumer_secret`
-- Verify API key permissions match operation requirements
-- Ensure HTTPS is used or explicitly allowed for development
+- Confirm `WP_API_USERNAME` matches the WordPress user that created the Application Password
+- Confirm `WP_API_PASSWORD` contains an active Application Password, not the user's account password or a WooCommerce REST API key
+- Verify the WordPress user has the capabilities required by the ability
+- Ensure HTTPS is used for remote HTTP connections
 
 ## Ability Not Found
 
