@@ -61,7 +61,6 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 		);
 	}
 
-
 	/**
 	 * Check if a given request has access to install themes.
 	 *
