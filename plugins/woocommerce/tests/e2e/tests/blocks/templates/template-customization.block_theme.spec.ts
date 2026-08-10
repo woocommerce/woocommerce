@@ -21,6 +21,11 @@ test.describe( 'Template customization', () => {
 			testData.templateType === 'wp_template'
 				? 'template'
 				: 'template part';
+		const templateOrigin =
+			testData.templateType === 'wp_template'
+				? BLOCK_THEME_SLUG
+				: 'woocommerce/woocommerce';
+		const templateId = `${ templateOrigin }//${ testData.templatePath }`;
 
 		test( `"${ testData.templateName }" template can be modified and reverted`, async ( {
 			admin,
@@ -41,12 +46,8 @@ test.describe( 'Template customization', () => {
 					templateName: testData.templateName,
 				} );
 			} else {
-				const templateSlug =
-					testData.templateType === 'wp_template'
-						? BLOCK_THEME_SLUG
-						: 'woocommerce/woocommerce';
 				await admin.visitSiteEditor( {
-					postId: `${ templateSlug }//${ testData.templatePath }`,
+					postId: templateId,
 					postType: testData.templateType,
 					canvas: 'edit',
 				} );
@@ -80,12 +81,10 @@ test.describe( 'Template customization', () => {
 			await expect( page.getByText( userText ).first() ).toBeVisible();
 
 			// Verify the edition can be reverted.
-			await admin.visitSiteEditor( {
-				postType: testData.templateType,
-			} );
-			await editor.revertTemplate( {
-				templateName: testData.templateName,
-			} );
+			await requestUtils.revertTemplate(
+				testData.templateType,
+				templateId
+			);
 			await testData.visitPage( {
 				admin,
 				editor,
@@ -97,37 +96,22 @@ test.describe( 'Template customization', () => {
 		} );
 
 		if ( testData.fallbackTemplate ) {
-			test( `"${ testData.templateName }" template defaults to the "${ testData.fallbackTemplate.templateName }" template`, async ( {
+			const fallbackTemplate = testData.fallbackTemplate;
+
+			test( `"${ testData.templateName }" template defaults to the "${ fallbackTemplate.templateName }" template`, async ( {
 				admin,
 				frontendUtils,
 				requestUtils,
 				editor,
 				page,
 			} ) => {
-				const templateSlug =
-					testData.templateType === 'wp_template'
-						? BLOCK_THEME_SLUG
-						: 'woocommerce/woocommerce';
-				// Edit fallback template and verify changes are visible.
-				await admin.visitSiteEditor( {
-					postId: `${ templateSlug }//${ testData.fallbackTemplate?.templatePath }`,
-					postType: testData.templateType,
-					canvas: 'edit',
-				} );
-
-				await editor.canvas
-					.locator( 'body' )
-					.waitFor( { timeout: 20000 } );
-
-				await editor.insertBlock( {
-					name: 'core/paragraph',
-					attributes: {
-						content: fallbackTemplateUserText,
-					},
-				} );
-				await editor.saveSiteEditorEntities( {
-					isOnlyCurrentEntityDirty: true,
-				} );
+				// Customize the fallback template and verify changes are visible.
+				const fallbackTemplateId = `${ templateOrigin }//${ fallbackTemplate.templatePath }`;
+				await requestUtils.updateTemplateContent(
+					testData.templateType,
+					fallbackTemplateId,
+					`<!-- wp:paragraph --><p>${ fallbackTemplateUserText }</p><!-- /wp:paragraph -->`
+				);
 				await testData.visitPage( {
 					admin,
 					editor,
@@ -140,13 +124,10 @@ test.describe( 'Template customization', () => {
 				).toBeVisible();
 
 				// Verify the edition can be reverted.
-				await admin.visitSiteEditor( {
-					postType: testData.templateType,
-				} );
-
-				await editor.revertTemplate( {
-					templateName: testData.fallbackTemplate?.templateName || '',
-				} );
+				await requestUtils.revertTemplate(
+					testData.templateType,
+					fallbackTemplateId
+				);
 
 				await testData.visitPage( {
 					admin,
@@ -198,11 +179,11 @@ test.describe( 'Template customization', () => {
 
 			await requestUtils.activateTheme( BLOCK_THEME_WITH_TEMPLATES_SLUG );
 
-			// Edit the theme template. The theme template is not
-			// directly available from the UI, because the customized
-			// one takes priority, so we go directly to its URL.
+			// Edit the theme template. The theme template is not directly
+			// available from the UI because the customized one takes priority.
+			const themeTemplateId = `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`;
 			await admin.visitSiteEditor( {
-				postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`,
+				postId: themeTemplateId,
 				postType: testData.templateType,
 				canvas: 'edit',
 			} );
@@ -231,17 +212,13 @@ test.describe( 'Template customization', () => {
 			).toBeHidden();
 
 			// Revert edition and verify the user-modified WC template is used.
-			// Note: we need to revert it from the admin (instead of calling
-			// `deleteAllTemplates()`). This way, we verify there are no
-			// duplicate templates with the same name.
+			// Revert the exact template rather than selecting it by its display
+			// name, which can be shared by templates from different origins.
 			// See: https://github.com/woocommerce/woocommerce/issues/42220
-			await admin.visitSiteEditor( {
-				postType: testData.templateType,
-			} );
-
-			await editor.revertTemplate( {
-				templateName: testData.templateName,
-			} );
+			await requestUtils.revertTemplate(
+				testData.templateType,
+				themeTemplateId
+			);
 
 			await testData.visitPage( {
 				admin,
