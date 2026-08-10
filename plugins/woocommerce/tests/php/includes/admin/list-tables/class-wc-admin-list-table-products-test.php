@@ -133,25 +133,41 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Product title ranking does not invoke WordPress search filters.
+	 * @testdox Product title ranking prepends a relevance clause only for default search ordering.
 	 */
-	public function test_product_search_ranking_does_not_invoke_core_search_filters(): void {
+	public function test_product_search_ranking_controls_the_orderby_clause(): void {
 		list( , , $search_phrase ) = $this->create_search_products();
-		$filter_calls              = 0;
 
-		$record_filter_call = static function ( $search_columns ) use ( &$filter_calls ) {
-			++$filter_calls;
-			return $search_columns;
+		$captured_orderby = null;
+		$capture_orderby  = static function ( $orderby ) use ( &$captured_orderby ) {
+			$captured_orderby = $orderby;
+			return $orderby;
 		};
-		add_filter( 'post_search_columns', $record_filter_call );
+		add_filter( 'posts_orderby', $capture_orderby, PHP_INT_MAX );
 
 		try {
 			$this->get_search_results( $search_phrase );
-		} finally {
-			remove_filter( 'post_search_columns', $record_filter_call );
-		}
+			$this->assertStringContainsString( 'CASE WHEN', (string) $captured_orderby, 'A default-ordered search should rank title matches first.' );
+			$this->assertStringContainsString( 'post_title LIKE', (string) $captured_orderby, 'The relevance clause should match against product titles.' );
 
-		$this->assertSame( 0, $filter_calls, 'Title ranking should parse terms without invoking core search filters.' );
+			$captured_orderby = null;
+			$this->get_search_results(
+				$search_phrase,
+				array(
+					'orderby' => 'title',
+					'order'   => 'ASC',
+				)
+			);
+			$this->assertStringNotContainsString( 'CASE WHEN', (string) $captured_orderby, 'An explicitly sorted search should keep the requested ordering untouched.' );
+
+			// A stopword-only term falls back to ranking by the whole group, mirroring search_products().
+			// The captured clause still carries wpdb placeholder-escape hashes around LIKE wildcards.
+			$captured_orderby = null;
+			$this->get_search_results( 'the' );
+			$this->assertMatchesRegularExpression( "/CASE WHEN.+post_title LIKE '\\S*the\\S*'/", (string) $captured_orderby, 'A stopword-only search should rank by the raw search group.' );
+		} finally {
+			remove_filter( 'posts_orderby', $capture_orderby, PHP_INT_MAX );
+		}
 	}
 
 	/**
