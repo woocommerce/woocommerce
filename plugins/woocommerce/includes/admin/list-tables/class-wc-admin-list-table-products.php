@@ -667,6 +667,8 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	/**
 	 * Prioritize title matches in unsorted product searches.
 	 *
+	 * @since 11.1.0
+	 *
 	 * @param string   $orderby ORDER BY clause.
 	 * @param WP_Query $query   WP_Query instance.
 	 * @return string
