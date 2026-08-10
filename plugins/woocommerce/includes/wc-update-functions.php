@@ -30,6 +30,7 @@ use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailPostsCleanup;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncBackfill;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
@@ -3592,4 +3593,17 @@ function wc_update_1100_enable_point_of_sale_feature() {
  */
 function wc_update_1110_delete_dashboard_outofstock_count_transient() {
 	delete_transient( ProductUtil::OUTOFSTOCK_COUNT_TRANSIENT );
+}
+
+/**
+ * Delete never-customized block email posts so those emails render from the
+ * file templates again (picking up template updates and the current site
+ * locale). Customized posts are kept untouched. See WOOPLUG-6171.
+ *
+ * @since 11.1.0
+ *
+ * @return bool Always false (one-shot migration).
+ */
+function wc_update_1110_cleanup_block_email_posts(): bool {
+	return WCEmailPostsCleanup::run();
 }

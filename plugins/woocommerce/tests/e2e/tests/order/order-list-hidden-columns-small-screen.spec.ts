@@ -45,13 +45,11 @@ test.describe(
 			await page.goto( 'wp-admin/admin.php?page=wc-orders' );
 
 			const dateCopy = page
-				.locator(
-					'td.column-order_number .order_date.small-screen-only'
-				)
+				.locator( '.column-order_number .order_date.small-screen-only' )
 				.first();
 			const statusCopy = page
 				.locator(
-					'td.column-order_number .order_status.small-screen-only'
+					'.column-order_number .order_status.small-screen-only'
 				)
 				.first();
 

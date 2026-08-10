@@ -5,6 +5,7 @@ import {
 	ValidatedTextInput,
 	type ValidatedTextInputHandle,
 } from '@woocommerce/blocks-components';
+import type { ValidatedTextInputProps } from '@woocommerce/blocks-components/text-input/types';
 import type {
 	AddressAutocompleteResult,
 	ServerAddressAutocompleteProvider,
@@ -18,7 +19,6 @@ import { useCheckoutAddress } from '@woocommerce/base-context';
 /**
  * Internal dependencies
  */
-import { ValidatedTextInputProps } from '../../../../../../packages/components/text-input/types';
 import './style.scss';
 import { Suggestions } from './suggestions';
 import { useUpdatePreferredAutocompleteProvider } from '../../../hooks/use-update-preferred-autocomplete-provider';
