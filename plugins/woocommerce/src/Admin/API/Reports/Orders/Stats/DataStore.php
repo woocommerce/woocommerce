@@ -101,7 +101,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @override ReportsDataStore::__construct()
 	 */
 	public function __construct() {
-		$this->date_column_name = get_option( 'woocommerce_date_type', 'date_paid' );
+		$this->date_column_name = $this->sanitize_date_column_name( get_option( 'woocommerce_date_type' ), 'date_paid' );
 		parent::__construct();
 	}
 
@@ -339,7 +339,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$table_name = self::get_db_table_name();
 
 		if ( isset( $query_args['date_type'] ) ) {
-			$this->date_column_name = $query_args['date_type'];
+			$this->date_column_name = $this->sanitize_date_column_name( $query_args['date_type'] );
 		}
 
 		$this->initialize_queries();
