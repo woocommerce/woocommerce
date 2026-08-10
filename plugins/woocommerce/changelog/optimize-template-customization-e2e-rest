@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Speed up block template customization end-to-end tests using REST API setup and cleanup.
