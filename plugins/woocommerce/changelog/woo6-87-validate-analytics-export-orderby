@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Validate Analytics report export arguments orderby against the target report's schema.
