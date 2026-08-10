@@ -5,9 +5,9 @@ import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { Fragment, useEffect, useRef, useState } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { withDispatch } from '@wordpress/data';
+import { useDispatch, withDispatch } from '@wordpress/data';
 import { SectionHeader, ScrollTo } from '@woocommerce/components';
-import { useSettings } from '@woocommerce/data';
+import { reportsStore, useSettings } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -20,6 +20,8 @@ import HistoricalData from './historical-data';
 import { ImportModeConfirmationModal } from './import-mode-confirmation-modal';
 
 const Settings = ( { createNotice, query } ) => {
+	const { invalidateResolutionForStoreSelector } =
+		useDispatch( reportsStore );
 	const {
 		settingsError,
 		isRequesting,
@@ -57,6 +59,8 @@ const Settings = ( { createNotice, query } ) => {
 		}
 		if ( ! isRequesting && hasSaved.current ) {
 			if ( ! settingsError ) {
+				invalidateResolutionForStoreSelector( 'getReportItems' );
+				invalidateResolutionForStoreSelector( 'getReportStats' );
 				createNotice(
 					'success',
 					__(
@@ -75,7 +79,12 @@ const Settings = ( { createNotice, query } ) => {
 			}
 			hasSaved.current = false;
 		}
-	}, [ isRequesting, settingsError, createNotice ] );
+	}, [
+		isRequesting,
+		settingsError,
+		createNotice,
+		invalidateResolutionForStoreSelector,
+	] );
 
 	const resetDefaults = () => {
 		if (
