@@ -137,6 +137,11 @@ jobs:
       max-parallel: 4
       matrix:
         include: ${{ fromJSON( needs.project-jobs.outputs.lint-jobs ) }}
+    env:
+      # On PHPCS failure, lint-branch.sh writes the findings to this path as a
+      # checkstyle report, so the steps after 'Lint' can surface them as inline
+      # annotations on 'Files changed' while the Lint log keeps the readable output.
+      WC_LINT_CHECKSTYLE_FILE: '${{ runner.temp }}/phpcs-checkstyle.xml'
     steps:
       - uses: 'actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0' # v7.0.0
         name: 'Checkout'
@@ -154,18 +159,24 @@ jobs:
 
       - name: 'Lint'
         id: 'lint'
-        # On PHPCS failure, lint-branch.sh also writes the findings to this path as a
-        # checkstyle report, so the steps below can surface them as inline annotations
-        # on 'Files changed' while this step's log keeps the full readable output.
-        env:
-          WC_LINT_CHECKSTYLE_FILE: '${{ runner.temp }}/phpcs-checkstyle.xml'
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
-      # Gate on the Lint step's own outcome (not job-level failure()) so these steps
-      # react only to a lint failure, never to an unrelated step failing. always() is
-      # still required: after a failure GitHub skips later steps unless told otherwise.
+      # The report file only exists when PHPCS itself failed, so its presence gates
+      # the annotation steps below: a JS-only lint failure (or any other project's
+      # failure) never creates it, and everything after this step is skipped.
+      # Gate on the Lint step's own outcome (not job-level failure()) so this reacts
+      # only to a lint failure; !cancelled() is still required because after a
+      # failure GitHub skips later steps unless told otherwise.
+      - name: 'Lint: check for PHPCS report'
+        id: 'phpcs-report'
+        if: ${{ !cancelled() && steps.lint.outcome == 'failure' }}
+        run: |
+          if [[ -s "$WC_LINT_CHECKSTYLE_FILE" ]]; then
+            echo 'found=true' >> "$GITHUB_OUTPUT"
+          fi
+
       - name: 'Install cs2pr'
-        if: ${{ always() && steps.lint.outcome == 'failure' && matrix.projectName == '@woocommerce/plugin-woocommerce' }}
+        if: ${{ !cancelled() && steps.phpcs-report.outputs.found == 'true' }}
         uses: 'shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240' # 2.37.2
         with:
           php-version: '7.4'
@@ -173,24 +184,17 @@ jobs:
           tools: 'cs2pr'
 
       - name: 'Lint: PHP inline annotations'
-        if: ${{ always() && steps.lint.outcome == 'failure' && matrix.projectName == '@woocommerce/plugin-woocommerce' }}
-        # If the report file exists and isn't empty, feed it to cs2pr; if the file is
-        # missing (no PHP files changed) -- or cs2pr exits non-zero, which it does
-        # whenever the report contains errors -- just say so and finish green: the
-        # Lint step already set the verdict, and a second red step would be noise.
-        # The totals are stated first because GitHub renders roughly the first 10
-        # error and 10 warning annotations per step; past that, findings exist only
-        # in this log, and a capped diff view shouldn't read as the full list.
+        if: ${{ !cancelled() && steps.phpcs-report.outputs.found == 'true' }}
+        # cs2pr exits non-zero whenever the report contains errors; finish green
+        # regardless: the Lint step already set the verdict, and a second red step
+        # would be noise. The totals are stated first because GitHub renders roughly
+        # the first 10 error and 10 warning annotations per step; past that, findings
+        # exist only in this log, and a capped diff view shouldn't read as the full list.
         run: |
-          report="${{ runner.temp }}/phpcs-checkstyle.xml"
-          if [[ -s $report ]]; then
-            errors=$(grep -c 'severity="error"' "$report" || true)
-            warnings=$(grep -c 'severity="warning"' "$report" || true)
-            echo "PHPCS reported ${errors} error(s) and ${warnings} warning(s). GitHub may render only the first ~10 of each inline; the full readable report is in the Lint step's log."
-            cs2pr "$report" || true
-          else
-            echo 'No checkstyle report to annotate.'
-          fi
+          errors=$(grep -c 'severity="error"' "$WC_LINT_CHECKSTYLE_FILE" || true)
+          warnings=$(grep -c 'severity="warning"' "$WC_LINT_CHECKSTYLE_FILE" || true)
+          echo "PHPCS reported ${errors} error(s) and ${warnings} warning(s). GitHub may render only the first ~10 of each inline; the full readable report is in the Lint step's log."
+          cs2pr "$WC_LINT_CHECKSTYLE_FILE" || true
 
   woocommerce-plugin-build-artifact:
     name: "Build WooCommerce plugin artifact${{ needs.project-jobs.outputs.shared-plugin-build-has-required-consumers != 'true' && ' (optional)' || '' }}"
