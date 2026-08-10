@@ -319,6 +319,9 @@
 					}
 				}
 			},
+			"core/group": {
+				"css": "&.woocommerce.product { margin-block-start: 0; }"
+			},
 			"core/navigation": {
 				"color": {
 					"text": "var(--wp--preset--color--theme-2)"
