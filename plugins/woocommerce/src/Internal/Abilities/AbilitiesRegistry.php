@@ -18,18 +18,14 @@ defined( 'ABSPATH' ) || exit;
 class AbilitiesRegistry {
 
 	/**
-	 * Initialize the registry.
-	 */
-	public function __construct() {
-		$this->init_abilities();
-	}
-
-	/**
 	 * Initialize all WooCommerce abilities.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @internal
 	 */
-	private function init_abilities(): void {
-		AbilitiesCategories::init();
-		AbilitiesRestBridge::init();
+	final public function init(): void {
+		AbilitiesLoader::init();
 	}
 
 	/**

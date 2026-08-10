@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\Api;
 
+use Automattic\WooCommerce\Api\Infrastructure\Main;
+
 /**
  * Deferred-registration helper for GraphQL endpoints declared via
  * {@see Main::register_graphql_endpoint()}.

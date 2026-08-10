@@ -2,6 +2,8 @@
 /**
  * Admin View: Edit Webhooks
  *
+ * @var WC_Webhook $webhook Webhook object.
+ *
  * @package WooCommerce\Admin\Webhooks\Views
  */
 
@@ -146,13 +148,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 								?>
 							</option>
 						<?php endforeach; ?>
-						<?php
-						$legacy_api_option_name =
-							WC()->legacy_rest_api_is_available() ?
-							__( 'Legacy API v3 (deprecated)', 'woocommerce' ) :
-							__( 'Legacy API v3 (⚠️ NOT AVAILABLE)', 'woocommerce' );
-						?>
-						<option value="legacy_v3" <?php selected( 'legacy_v3', $webhook->get_api_version(), true ); ?>><?php echo esc_html( $legacy_api_option_name ); ?></option>
+						<?php if ( WC()->legacy_rest_api_is_available() ) : ?>
+							<option value="legacy_v3" <?php selected( 'legacy_v3', $webhook->get_api_version(), true ); ?>>
+								<?php esc_html_e( 'Legacy API v3 (deprecated)', 'woocommerce' ); ?>
+							</option>
+						<?php elseif ( ! in_array( $webhook->get_api_version(), wc_get_webhook_rest_api_versions(), true ) ) : ?>
+							<option value="<?php echo esc_attr( $webhook->get_api_version() ); ?>" selected="selected">
+								<?php
+									/* translators: %s: unsupported api version identifier e.g. legacy_v3 */
+									echo esc_html( sprintf( __( '%s (unsupported)', 'woocommerce' ), $webhook->get_api_version() ) );
+								?>
+							</option>
+						<?php endif; ?>
 					</select>
 				</td>
 			</tr>
@@ -218,7 +225,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								'delete-webhook'
 							);
 							?>
-							<a style="color: #a00; text-decoration: none; margin-left: 10px;" href="<?php echo esc_url( $delete_url ); ?>"><?php esc_html_e( 'Delete permanently', 'woocommerce' ); ?></a>
+							<a style="color: var(--wc-destructive, #cc1818); text-decoration: none; margin-left: 10px;" href="<?php echo esc_url( $delete_url ); ?>"><?php esc_html_e( 'Delete permanently', 'woocommerce' ); ?></a>
 						<?php endif; ?>
 					</p>
 				</td>

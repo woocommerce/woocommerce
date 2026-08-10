@@ -1,7 +1,5 @@
 {
 	"name": "@automattic/woocommerce-analytics",
-	"version": "0.16.3",
-	"private": true,
 	"description": "WooCommerce Analytics package to track frontend events",
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/php/woocommerce-analytics",
 	"bugs": {
@@ -17,6 +15,7 @@
 	"scripts": {
 		"build": "pnpm run clean && webpack",
 		"build:composer-package": "bash tasks/build-package.sh",
+		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"build-production": "NODE_ENV=production BABEL_ENV=production pnpm run build",
 		"clean": "rm -rf build/",
 		"test": "jest --passWithNoTests",

@@ -31,10 +31,18 @@ class WC_Admin_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 	protected $endpoint = '/wc-admin/onboarding/tasks';
 
 	/**
+	 * Attachment IDs created by the current test.
+	 *
+	 * @var int[]
+	 */
+	private $created_attachment_ids = array();
+
+	/**
 	 * Setup test data. Called before every test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		add_action( 'add_attachment', array( $this, 'track_created_attachment' ) );
 
 		$this->user = $this->factory->user->create(
 			array(
@@ -58,10 +66,25 @@ class WC_Admin_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 	 * Tear down.
 	 */
 	public function tearDown(): void {
+		remove_action( 'add_attachment', array( $this, 'track_created_attachment' ) );
+		foreach ( array_unique( $this->created_attachment_ids ) as $attachment_id ) {
+			wp_delete_attachment( $attachment_id, true );
+		}
+		$this->created_attachment_ids = array();
+
 		parent::tearDown();
 		$this->cleanup_test_product_attributes();
 		TaskLists::clear_lists();
 		TaskLists::init_default_lists();
+	}
+
+	/**
+	 * Track an attachment created by the current test.
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 */
+	public function track_created_attachment( $attachment_id ): void {
+		$this->created_attachment_ids[] = (int) $attachment_id;
 	}
 
 	/**
@@ -106,6 +129,13 @@ class WC_Admin_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 			10,
 			3
 		);
+		add_filter(
+			'woocommerce_product_csv_importer_args',
+			function ( $args ) {
+				$args['lines'] = 2;
+				return $args;
+			}
+		);
 
 		$request  = new WP_REST_Request( 'POST', $this->endpoint . '/import_sample_products' );
 		$response = $this->server->dispatch( $request );
@@ -116,15 +146,14 @@ class WC_Admin_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'failed', $data );
 		$this->assertEquals( 0, count( $data['failed'] ) );
 		$this->assertArrayHasKey( 'imported', $data );
+		$this->assertCount( 2, $data['imported'] );
 		$this->assertArrayHasKey( 'skipped', $data );
-		// There might be previous products present.
-		if ( 0 === count( $data['skipped'] ) ) {
-			$this->assertGreaterThan( 1, count( $data['imported'] ) );
-		}
+		$this->assertCount( 0, $data['skipped'] );
 		$this->assertArrayHasKey( 'updated', $data );
 		$this->assertEquals( 0, count( $data['updated'] ) );
 
 		remove_all_filters( 'pre_http_request' );
+		remove_all_filters( 'woocommerce_product_csv_importer_args' );
 	}
 
 	/**

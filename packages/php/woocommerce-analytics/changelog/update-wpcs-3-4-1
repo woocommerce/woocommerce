@@ -1,0 +1,4 @@
+Significance: patch
+Type: security
+
+Update wp-coding-standards/wpcs to 3.4.1 (security release).

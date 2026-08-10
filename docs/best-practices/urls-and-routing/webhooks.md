@@ -1,6 +1,7 @@
 ---
 post_title: Working with webhooks in WooCommerce
 sidebar_label: Using webhooks
+description: A guide to working with webhooks in WooCommerce, including creating, editing, deleting, and logging webhook events for integration with third-party services.
 ---
 
 # Working with webhooks in WooCommerce

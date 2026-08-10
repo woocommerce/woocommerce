@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Lower the specificity of the payment method label image styles so payment methods can override them for their own imagery (e.g. logos rendered in a popover) without needing !important.

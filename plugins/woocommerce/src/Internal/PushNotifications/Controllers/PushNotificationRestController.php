@@ -115,7 +115,7 @@ class PushNotificationRestController {
 	 * @since 10.7.0
 	 */
 	public function authorize( WP_REST_Request $request ) {
-		$header = $request->get_header( 'authorization' );
+		$header = trim( (string) $request->get_header( 'authorization' ) );
 
 		if ( empty( $header ) ) {
 			return new WP_Error(
@@ -125,7 +125,7 @@ class PushNotificationRestController {
 			);
 		}
 
-		$token = (string) preg_replace( '/^\s*Bearer\s+/i', '', $header );
+		$token = strncasecmp( $header, 'Bearer ', 7 ) === 0 ? substr( $header, 7 ) : $header;
 
 		if ( ! JsonWebToken::validate( $token, wp_salt( 'auth' ) ) ) {
 			return new WP_Error(

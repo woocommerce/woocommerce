@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Replace the Upsells field in the grouped product quick-edit form with a Grouped products chip-select field that searches products and shows each child with its thumbnail.

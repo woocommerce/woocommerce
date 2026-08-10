@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix a typo in the `site_not_connected` installer error code (previously emitted as `site_not_connnected`). WooCommerce.com continues to accept both spellings, so existing sites are unaffected.

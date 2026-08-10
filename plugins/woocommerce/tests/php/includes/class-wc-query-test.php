@@ -71,6 +71,7 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 		$query->get_posts();
 
 		$this->assertTrue( defined( 'SHOP_IS_ON_FRONT' ) && SHOP_IS_ON_FRONT );
+		$this->assert_shop_page_queried_object( $query, $shop_page_id );
 
 		// Reset main query, options and delete the page we created.
 		$wp_the_query = $previous_wp_the_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -78,6 +79,58 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 		update_option( 'show_on_front', $default_show_on_front );
 		update_option( 'page_on_front', $default_page_on_front );
 		wp_delete_post( $shop_page_id, true );
+	}
+
+	/**
+	 * @testdox Product archive queries set queried_object to the Shop page.
+	 */
+	public function test_shop_page_sets_queried_object_on_product_archive(): void {
+		$shop_page_id         = wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Shop',
+			)
+		);
+		$default_shop_page_id = get_option( 'woocommerce_shop_page_id' );
+		update_option( 'woocommerce_shop_page_id', $shop_page_id );
+
+		$query                       = new WP_Query(
+			array(
+				'post_type' => 'product',
+			)
+		);
+		$query->is_post_type_archive = true;
+		$query->is_archive           = true;
+		$query->is_tax               = false;
+		$query->is_home              = false;
+
+		global $wp_the_query, $wp_query;
+		$previous_wp_the_query = $wp_the_query;
+		$previous_wp_query     = $wp_query;
+		$wp_the_query          = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp_query              = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$query->get_posts();
+
+		$this->assert_shop_page_queried_object( $query, $shop_page_id );
+
+		$wp_the_query = $previous_wp_the_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp_query     = $previous_wp_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		update_option( 'woocommerce_shop_page_id', $default_shop_page_id );
+		wp_delete_post( $shop_page_id, true );
+	}
+
+	/**
+	 * Assert that a query's queried object matches the configured Shop page.
+	 *
+	 * @param WP_Query $query        The query to inspect.
+	 * @param int      $shop_page_id The expected Shop page ID.
+	 */
+	private function assert_shop_page_queried_object( WP_Query $query, int $shop_page_id ): void {
+		$this->assertInstanceOf( WP_Post::class, $query->queried_object, 'queried_object should be a WP_Post instance.' );
+		$this->assertSame( $shop_page_id, $query->queried_object->ID, 'queried_object ID should match the Shop page ID.' );
+		$this->assertSame( $shop_page_id, $query->queried_object_id, 'queried_object_id should match the Shop page ID.' );
 	}
 
 	/**

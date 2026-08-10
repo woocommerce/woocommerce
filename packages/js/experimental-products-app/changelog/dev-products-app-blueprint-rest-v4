@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Enable the REST v4 feature flag in the experimental products app blueprint.

@@ -7,6 +7,7 @@
 
 declare( strict_types=1 );
 
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use PHPUnit\Framework\MockObject\Matcher\InvokedRecorder;
 
 /**
@@ -128,10 +129,38 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 			'wc_create_attribute should return a numeric id on success.'
 		);
 
-		$ids[] = wc_create_attribute( array( 'name' => str_repeat( 'n', 28 ) ) );
+		// This 29-byte ASCII slug exercises the exact upper boundary (pa_ + 29 = 32 bytes).
+		// The multibyte cases below can't land on 29 bytes exactly — Cyrillic is 2 bytes/char
+		// (so 28 or 30) and these CJK characters are 3 bytes/char (27 or 30) — so they cover
+		// the closest reachable values just under and just over the limit.
+		$ids[] = wc_create_attribute( array( 'name' => str_repeat( 'n', 29 ) ) );
 		$this->assertIsInt(
 			end( $ids ),
-			'Attribute creation should succeed when its slug is 28 characters long.'
+			'Attribute creation should succeed when its 29-byte slug fits in the 32-byte taxonomy limit (with the "pa_" prefix).'
+		);
+
+		// 14-char Cyrillic slug = 28 bytes; with 'pa_' prefix = 31 bytes (within the 32-byte WP taxonomy limit).
+		$ids[] = wc_create_attribute(
+			array(
+				'slug' => 'абвгдежзиклмно',
+				'name' => 'OK Cyrillic',
+			)
+		);
+		$this->assertIsInt(
+			end( $ids ),
+			'Attribute creation should succeed for a 14-character Cyrillic slug (28 bytes).'
+		);
+
+		// 9-char Chinese slug = 27 bytes; with 'pa_' prefix = 30 bytes (within the limit).
+		$ids[] = wc_create_attribute(
+			array(
+				'slug' => '尺寸大小颜色品牌型',
+				'name' => 'OK Chinese',
+			)
+		);
+		$this->assertIsInt(
+			end( $ids ),
+			'Attribute creation should succeed for a 9-character Chinese slug (27 bytes).'
 		);
 
 		$err = wc_create_attribute( array() );
@@ -141,11 +170,37 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 			'Attributes should not be allowed to be created without specifying a name.'
 		);
 
-		$err = wc_create_attribute( array( 'name' => str_repeat( 'n', 29 ) ) );
+		$err = wc_create_attribute( array( 'name' => str_repeat( 'n', 30 ) ) );
 		$this->assertEquals(
 			'invalid_product_attribute_slug_too_long',
 			$err->get_error_code(),
-			'Attribute slugs should not be allowed to be over 28 characters long.'
+			'Attribute slugs whose prefixed taxonomy name (pa_<slug>) exceeds 32 bytes should be rejected.'
+		);
+
+		// 15-char Cyrillic slug = 30 bytes; with 'pa_' prefix = 33 bytes — must be rejected.
+		$err = wc_create_attribute(
+			array(
+				'slug' => 'абвгдежзиклмноп',
+				'name' => 'Too long Cyrillic',
+			)
+		);
+		$this->assertEquals(
+			'invalid_product_attribute_slug_too_long',
+			$err->get_error_code(),
+			'A 15-character Cyrillic slug (30 bytes) should be rejected because pa_<slug> exceeds 32 bytes.'
+		);
+
+		// 10-char Chinese slug = 30 bytes; with 'pa_' prefix = 33 bytes — must be rejected.
+		$err = wc_create_attribute(
+			array(
+				'slug' => '尺寸大小颜色品牌型号',
+				'name' => 'Too long Chinese',
+			)
+		);
+		$this->assertEquals(
+			'invalid_product_attribute_slug_too_long',
+			$err->get_error_code(),
+			'A 10-character Chinese slug (30 bytes) should be rejected because pa_<slug> exceeds 32 bytes.'
 		);
 
 		$err = wc_create_attribute( array( 'name' => 'Cat' ) );
@@ -226,15 +281,15 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 		$original_theme = wp_get_theme()->get_stylesheet();
 		$attribute_id   = null;
 
-		$enable_visual_attribute_feature = function ( $features ) {
-			$features[] = 'wc-visual-attribute';
-			return array_unique( $features );
-		};
-
-		add_filter( 'woocommerce_admin_features', $enable_visual_attribute_feature );
 		try {
 			switch_theme( 'twentytwentyfour' );
 
+			delete_option( 'woocommerce_feature_wc_visual_attribute_enabled' );
+			$this->assertArrayNotHasKey( 'wc-visual', wc_get_attribute_types(), 'The visual attribute type should require the feature setting.' );
+			$this->assertTrue(
+				wc_get_container()->get( \Automattic\WooCommerce\Internal\Features\FeaturesController::class )->change_feature_enable( 'wc-visual-attribute', true ),
+				'The visual attribute feature should be toggled on.'
+			);
 			$this->assertArrayHasKey( 'wc-visual', wc_get_attribute_types(), 'The visual attribute type should be available in block themes.' );
 
 			$attribute_id = wc_create_attribute(
@@ -260,11 +315,41 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 				wc_delete_attribute( $attribute_id );
 			}
 
-			remove_filter( 'woocommerce_admin_features', $enable_visual_attribute_feature );
+			delete_option( 'woocommerce_feature_wc_visual_attribute_enabled' );
 			switch_theme( $original_theme );
 		}//end try
 	}
 
+	/**
+	 * Test visual attribute feature setting visibility.
+	 *
+	 * @testdox Should show the `wc-visual` feature setting only for block themes.
+	 */
+	public function test_wc_visual_attribute_feature_setting_visibility() {
+		$original_theme = wp_get_theme()->get_stylesheet();
+
+		try {
+			switch_theme( 'twentytwentyfour' );
+
+			$features = FeaturesUtil::get_features( true );
+			$this->assertArrayHasKey( 'wc-visual-attribute', $features, 'The visual attribute feature should exist.' );
+			$this->assertFalse( $features['wc-visual-attribute']['disable_ui'], 'The visual attribute feature setting should be visible for block themes.' );
+
+			switch_theme( 'storefront' );
+
+			$features = FeaturesUtil::get_features( true );
+			$this->assertArrayHasKey( 'wc-visual-attribute', $features, 'The visual attribute feature should exist.' );
+			$this->assertTrue( $features['wc-visual-attribute']['disable_ui'], 'The visual attribute feature setting should be hidden for classic themes.' );
+		} finally {
+			switch_theme( $original_theme );
+		}
+	}
+
+	/**
+	 * Data provider for test_wc_get_attribute_taxonomy_slug().
+	 *
+	 * @return array
+	 */
 	public function get_attribute_names_and_slugs() {
 		return array(
 			array( 'Dash Me', 'dash-me' ),

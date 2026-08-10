@@ -7,7 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\OrderReviews;
 
-use Automattic\WooCommerce\Internal\RegisterHooksInterface;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use WC_Email_Customer_Review_Request;
 use WC_Order;
 
@@ -19,11 +19,15 @@ use WC_Order;
  * configured in the email's settings. Cancels the pending action when the
  * order is later refunded, cancelled, trashed or deleted.
  *
+ * The container auto-calls `init()` after instantiation, which is where
+ * the WordPress hooks are registered. Resolution is driven by the
+ * `OrderReviews` wrapper that lists this class as an `init()` argument.
+ *
  * @internal Just for internal use.
  *
  * @since 10.8.0
  */
-class Scheduler implements RegisterHooksInterface {
+class Scheduler {
 
 	/**
 	 * Action Scheduler hook fired when the configured delay elapses. The
@@ -45,13 +49,67 @@ class Scheduler implements RegisterHooksInterface {
 
 	/**
 	 * Register hooks and filters.
+	 *
+	 * Auto-called by the WC dependency container after instantiation.
+	 *
+	 * @internal
 	 */
-	public function register(): void {
+	final public function init(): void {
 		add_action( 'woocommerce_order_status_completed', array( $this, 'handle_woocommerce_order_status_completed' ), 10, 1 );
-		add_action( 'woocommerce_order_status_cancelled', array( $this, 'handle_cancellation' ), 10, 1 );
-		add_action( 'woocommerce_order_status_refunded', array( $this, 'handle_cancellation' ), 10, 1 );
+		// Catch every transition out of `completed` (cancelled, refunded,
+		// processing, on-hold, pending, failed, custom statuses…) so the
+		// pending email is unscheduled regardless of which status the order
+		// moves to.
+		add_action( 'woocommerce_order_status_changed', array( $this, 'handle_status_changed' ), 10, 3 );
 		add_action( 'woocommerce_trash_order', array( $this, 'handle_cancellation' ), 10, 1 );
 		add_action( 'woocommerce_before_delete_order', array( $this, 'handle_cancellation' ), 10, 1 );
+	}
+
+	/**
+	 * Unschedule the pending review-request email whenever the order leaves
+	 * the eligible state. `woocommerce_order_status_changed` fires for every
+	 * transition, so a single listener covers cancelled / refunded /
+	 * processing / on-hold / pending / failed / custom statuses in one place.
+	 *
+	 * Eligibility is read from the same `woocommerce_review_order_eligible_statuses`
+	 * filter the trigger uses, so a site that widens the filter (e.g. to also
+	 * accept `processing`) keeps the email queued through transitions inside
+	 * its expanded eligible set.
+	 *
+	 * @internal
+	 *
+	 * @param int    $order_id   Order ID.
+	 * @param string $old_status Previous status (sans `wc-` prefix).
+	 * @param string $new_status New status (sans `wc-` prefix).
+	 */
+	public function handle_status_changed( int $order_id, string $old_status, string $new_status ): void {
+		$order = wc_get_order( $order_id );
+
+		/**
+		 * Filter the order statuses that are eligible to receive the review-request email.
+		 *
+		 * Same hook the email's `trigger()` consults at send time; documented on
+		 * `WC_Email_Customer_Review_Request::is_order_eligible_for_send()`.
+		 *
+		 * @since 10.8.0
+		 *
+		 * @param string[]      $eligible_statuses Default: `[ 'completed' ]`.
+		 * @param WC_Order|null $order             Order being inspected, or null if it could not be loaded.
+		 */
+		$eligible_statuses = (array) apply_filters(
+			'woocommerce_review_order_eligible_statuses',
+			array( OrderStatus::COMPLETED ),
+			$order instanceof WC_Order ? $order : null
+		);
+
+		$was_eligible = in_array( $old_status, $eligible_statuses, true );
+		$is_eligible  = in_array( $new_status, $eligible_statuses, true );
+
+		if ( ! $was_eligible || $is_eligible ) {
+			return;
+		}
+
+		$this->handle_cancellation( $order_id );
 	}
 
 	/**
@@ -96,6 +154,15 @@ class Scheduler implements RegisterHooksInterface {
 			return;
 		}
 
+		// Don't queue an email whose link would land on the empty-state page:
+		// every product on the order has reviews disabled (per-product or
+		// site-wide via `woocommerce_enable_reviews`), or every reviewable
+		// item already has a review tied to this order.
+		if ( ! ItemEligibility::has_actionable_items( $order ) ) {
+			$this->log_skip( $order_id, 'no reviewable items' );
+			return;
+		}
+
 		$when = time() + $email->get_delay_seconds();
 		as_schedule_single_action( $when, self::ACTION_HOOK, array( $order_id ) );
 
@@ -104,13 +171,13 @@ class Scheduler implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Cancel any pending review-request action when the order leaves the
-	 * eligible state.
+	 * Cancel any pending review-request action and clear the scheduled-at meta.
 	 *
-	 * Hooked into `woocommerce_order_status_cancelled`,
-	 * `woocommerce_order_status_refunded`, `woocommerce_trash_order` and
-	 * `woocommerce_before_delete_order` so full refunds, cancellations, trashes
-	 * and deletions all clean up the pending job.
+	 * Hooked directly into `woocommerce_trash_order` and
+	 * `woocommerce_before_delete_order` for the trash/delete lifecycle events,
+	 * and called from `handle_status_changed()` for every status transition
+	 * out of an eligible status (cancelled, refunded, processing, on-hold,
+	 * pending, failed, custom statuses…).
 	 *
 	 * @internal
 	 *

@@ -174,20 +174,45 @@ class WCEmailTemplateAutoApplier {
 				return $updated;
 			}
 
+			// Read back the persisted post_content. The `content_save_pre` filter
+			// chain can mutate `$canonical` between the in-memory string and what
+			// lands in the DB, so both the returned `content` field and the
+			// stamped source hash must reflect what the database actually holds.
+			// See the same note in `WCEmailTemplateSelectiveApplier::apply_selectively()`.
+			$saved_post = get_post( $post_id );
+			$saved_body = $saved_post instanceof \WP_Post ? (string) $saved_post->post_content : $canonical;
+			$canonical  = $saved_body;
+
 			if ( null !== $sync_config ) {
 				$source_hash = sha1( $canonical );
 				$synced_at   = gmdate( 'Y-m-d H:i:s' );
-				$status      = WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC;
 				$version     = (string) $sync_config['version'];
 
 				update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, $version );
 				update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, $source_hash );
 				update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, $synced_at );
-				update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, $status );
-			}
+				update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, $canonical );
+
+				// Status comes from the classifier so all writers stay consistent.
+				// In this path we always write canonical, so the classifier returns
+				// IN_SYNC, but going through the same helper as the selective applier
+				// avoids drift if a future partial-apply path is added here.
+				$status = WCEmailTemplateDivergenceDetector::reclassify( $post_id );
+			}//end if
 		} finally {
 			self::$is_auto_applying = false;
 		}//end try
+
+		// Fire `_update_applied` for the auto-applier path. Static extensions:
+		// the auto-applier only acts on `core_updated_uncustomized` posts, so
+		// `had_customizations` is always false and `auto_resolved` is always true.
+		// Gate on `$require_uncustomized`: this method is also reused by the
+		// reset endpoint (with `require_uncustomized = false`) — the reset
+		// surface is not in RSM-145's event taxonomy and must not be tagged
+		// as `applied_from='auto'`.
+		if ( $require_uncustomized ) {
+			WCEmailTemplateSyncTracker::record_auto_applied( $post_id );
+		}
 
 		return array(
 			'content'     => $canonical,

@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Schedule the Review request email via Action Scheduler so it fires automatically a configurable number of days after an order is completed, and cancel the pending send when the order is cancelled, refunded, trashed or deleted.

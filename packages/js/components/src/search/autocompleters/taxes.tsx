@@ -19,7 +19,7 @@ const completer: AutoCompleter = {
 	options( search ) {
 		const query = search
 			? {
-					code: search,
+					search,
 					per_page: 10,
 			  }
 			: {};

@@ -77,7 +77,101 @@ class Quote_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test it renders every child block when the quote contains multiple paragraphs
+	 * that have already been wrapped by the email editor's per-block renderer.
+	 */
+	public function testItRendersAllChildBlocksWhenQuoteContainsMultipleParagraphs(): void {
+		// Mirrors the shape of $block_content received by Quote::render_content in
+		// production: each child paragraph has already gone through the email editor's
+		// render_block filter, which wraps it in a table + .email-block-layout div.
+		$block_content = <<<'HTML'
+<blockquote class="wp-block-quote">
+<table align="left" width="100%" style=""><tr><td><div class="email-block-layout" style=""><p>FIRST_CHILD_MARKER</p></div></td></tr></table>
+<table align="left" width="100%" style=""><tr><td><div class="email-block-layout" style=""><p>SECOND_CHILD_MARKER</p></div></td></tr></table>
+<table align="left" width="100%" style=""><tr><td><div class="email-block-layout" style=""><p>THIRD_CHILD_MARKER</p></div></td></tr></table>
+</blockquote>
+HTML;
+
+		$parsed_quote = array(
+			'blockName'    => 'core/quote',
+			'attrs'        => array(),
+			'innerBlocks'  => array(
+				array(
+					'blockName'    => 'core/paragraph',
+					'attrs'        => array(),
+					'innerBlocks'  => array(),
+					'innerHTML'    => '<p>FIRST_CHILD_MARKER</p>',
+					'innerContent' => array( '<p>FIRST_CHILD_MARKER</p>' ),
+				),
+				array(
+					'blockName'    => 'core/paragraph',
+					'attrs'        => array(),
+					'innerBlocks'  => array(),
+					'innerHTML'    => '<p>SECOND_CHILD_MARKER</p>',
+					'innerContent' => array( '<p>SECOND_CHILD_MARKER</p>' ),
+				),
+				array(
+					'blockName'    => 'core/paragraph',
+					'attrs'        => array(),
+					'innerBlocks'  => array(),
+					'innerHTML'    => '<p>THIRD_CHILD_MARKER</p>',
+					'innerContent' => array( '<p>THIRD_CHILD_MARKER</p>' ),
+				),
+			),
+			'innerHTML'    => '<blockquote class="wp-block-quote"></blockquote>',
+			'innerContent' => array(
+				'<blockquote class="wp-block-quote">',
+				null,
+				null,
+				null,
+				'</blockquote>',
+			),
+		);
+
+		$rendered = $this->quote_renderer->render( $block_content, $parsed_quote, $this->rendering_context );
+
+		$this->assertStringContainsString( 'FIRST_CHILD_MARKER', $rendered );
+		$this->assertStringContainsString( 'SECOND_CHILD_MARKER', $rendered );
+		$this->assertStringContainsString( 'THIRD_CHILD_MARKER', $rendered );
+
+		// The visual quote indent comes from the wrapping email-block-quote table;
+		// the inner <blockquote> must be stripped to avoid a quote-within-a-quote.
+		$this->assertStringNotContainsString( '<blockquote', $rendered );
+	}
+
+	/**
+	 * Test it renders the citation exactly once when the quote contains a <cite>.
+	 *
+	 * The <cite> is rendered as a separate styled citation block; it must also be
+	 * removed from the inline quote content so it does not appear twice.
+	 */
+	public function testItRendersCitationOnlyOnce(): void {
+		$block_content = '<blockquote class="wp-block-quote"><p>Quote body</p><cite>UNIQUE_CITATION_TOKEN</cite></blockquote>';
+
+		$parsed_quote                = $this->parsed_quote;
+		$parsed_quote['innerBlocks'] = array(
+			array(
+				'blockName'    => 'core/paragraph',
+				'attrs'        => array(),
+				'innerBlocks'  => array(),
+				'innerHTML'    => '<p>Quote body</p>',
+				'innerContent' => array( '<p>Quote body</p>' ),
+			),
+		);
+
+		$rendered = $this->quote_renderer->render( $block_content, $parsed_quote, $this->rendering_context );
+
+		$this->assertStringContainsString( 'UNIQUE_CITATION_TOKEN', $rendered );
+		$this->assertSame( 1, substr_count( $rendered, 'UNIQUE_CITATION_TOKEN' ), 'citation text appears more than once in rendered output' );
+		$this->assertStringContainsString( 'email-block-quote-citation', $rendered );
+	}
+
+	/**
 	 * Test it moves default quote border to the right in RTL.
+	 *
+	 * The visual quote indent is provided by the email-block-quote table; the
+	 * inner <blockquote> tag is stripped (see get_quote_content) so that the
+	 * RTL right-side border on the table is the only border the recipient sees.
 	 */
 	public function testItUsesRightDefaultBorderInRtl(): void {
 		$theme_controller = $this->di_container->get( Theme_Controller::class );
@@ -88,9 +182,7 @@ class Quote_Test extends \Email_Editor_Integration_Test_Case {
 
 		$this->assertStringContainsString( 'border-width:0 1px 0 0;', $rendered );
 		$this->assertStringContainsString( 'border-style:solid;', $rendered );
-		$this->assertStringContainsString( 'border-left-style:none;', $rendered );
-		$this->assertStringContainsString( 'border-left-width:0;', $rendered );
-		$this->assertStringContainsString( 'border-right-style:solid;', $rendered );
+		$this->assertStringNotContainsString( '<blockquote', $rendered );
 	}
 
 	/**

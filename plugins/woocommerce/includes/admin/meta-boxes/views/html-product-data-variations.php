@@ -5,10 +5,23 @@
  * @package WooCommerce\Admin\Metaboxes\Views
  */
 
+use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Admin\Features\ProductVariationsClassicRedesign;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
+}
+
+if ( Features::exists( ProductVariationsClassicRedesign::FEATURE_ID ) ) {
+	?>
+	<div id="variable_product_options" class="panel wc-metaboxes-wrapper hidden">
+		<div id="variable_product_options_inner">
+			<div id="<?php echo esc_attr( ProductVariationsClassicRedesign::ROOT_ID ); ?>"></div>
+		</div>
+	</div>
+	<?php
+	return;
 }
 
 $add_attributes_img_url = WC_ADMIN_IMAGES_FOLDER_URL . '/icons/info.svg';

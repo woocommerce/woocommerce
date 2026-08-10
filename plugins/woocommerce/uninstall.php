@@ -86,12 +86,99 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	// Tables.
 	WC_Install::drop_tables();
 
+	/*
+	 * Action Scheduler is a shared library that other active plugins may also use, so its tables are
+	 * kept by default. They are only dropped when the site owner additionally sets the
+	 * WC_REMOVE_ACTION_SCHEDULER constant to true in wp-config.php, confirming that no other plugin
+	 * relies on Action Scheduler (otherwise that plugin would lose its scheduled actions).
+	 */
+	if ( defined( 'WC_REMOVE_ACTION_SCHEDULER' ) && true === WC_REMOVE_ACTION_SCHEDULER ) {
+		foreach ( WC_Install::get_action_scheduler_tables() as $as_table ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$wpdb->query( "DROP TABLE IF EXISTS {$as_table}" );
+		}
+	}
+
+	// Placeholder image: delete the attachment post, its meta and the file.
+	WC_Install::delete_placeholder_image();
+
 	// Delete options.
 	$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE 'woocommerce\_%';" );
 	$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE 'widget\_woocommerce\_%';" );
 
-	// Delete usermeta.
-	$wpdb->query( "DELETE FROM $wpdb->usermeta WHERE meta_key LIKE 'woocommerce\_%';" );
+	/*
+	 * Delete user meta created by WooCommerce.
+	 *
+	 * The woocommerce_ and _woocommerce_ prefixes are uniquely namespaced, so a LIKE wildcard is safe.
+	 * The wc_ / _wc_ namespace is only two characters: a blanket wc_% / _wc_% wildcard would also delete
+	 * other plugins' user meta and, critically, WordPress core's own role/capability meta (the
+	 * {prefix}capabilities and {prefix}user_level keys) on any site whose database table prefix is "wc_",
+	 * which would strip every user's roles and could lock the site out. We therefore match only
+	 * WooCommerce's own known wc_ / _wc_ user meta keys (the wc_admin_ legacy prefix; the _wc_egg_
+	 * easter-egg meta; the per-site customer lookup, push notification preferences, shopper-list, and
+	 * email-verification meta, whose keys are suffixed with the site's table prefix; and the exact
+	 * wc_last_active and wc_marketplace_suggestions_dismissed_suggestions keys) rather than a blanket
+	 * wildcard.
+	 *
+	 * The push-notification-preferences, shopper-list, and email-verification prefixes below mirror,
+	 * respectively, NotificationPreferencesDataStore::META_KEY, ShopperList::META_KEY_PREFIX, and
+	 * EmailVerificationService::VERIFIED_META / ::KEY_META. This script runs before PSR-4 autoloading is
+	 * available, so those constants cannot be referenced directly here; keep the literals below in sync if
+	 * the constants ever change.
+	 *
+	 * Note: wp_usermeta is shared across a multisite network while this uninstall runs per site, so the
+	 * matching meta is removed network-wide, consistent with the woocommerce_ option/meta cleanup above.
+	 */
+	$wpdb->query(
+		"DELETE FROM $wpdb->usermeta WHERE
+			meta_key LIKE 'woocommerce\_%'
+			OR meta_key LIKE '\_woocommerce\_%'
+			OR meta_key LIKE 'wc\_admin\_%'
+			OR meta_key LIKE '\_wc\_egg\_%'
+			OR meta_key LIKE '\_wc\_shopper\_list\_%'
+			OR meta_key LIKE '\_wc\_email\_verified\_%'
+			OR meta_key LIKE '\_wc\_email\_verification\_%'
+			OR meta_key LIKE 'wc\_last\_order\_%'
+			OR meta_key LIKE 'wc\_order\_count\_%'
+			OR meta_key LIKE 'wc\_money\_spent\_%'
+			OR meta_key LIKE 'wc\_push\_notification\_preferences\_%'
+			OR meta_key IN ( 'wc_last_active', 'wc_marketplace_suggestions_dismissed_suggestions' );"
+	);
+
+	/*
+	 * Remove direct POS capabilities (woocommerce_pos_*) granted per user via WP_User::add_cap().
+	 *
+	 * Unlike the woocommerce_pos_preset meta removed above, these caps live inside the serialized
+	 * {prefix}capabilities meta row rather than a woocommerce_ meta key, so the sweep above can't reach
+	 * them. Left behind, a reinstall would silently restore POS access because has_pos_access() keys off
+	 * these caps. The row also stores the user's role, so strip only the woocommerce_pos_ caps per user
+	 * via remove_cap() rather than deleting the row.
+	 *
+	 * Users are matched by the woocommerce_pos_ cap prefix — the same {prefix}capabilities LIKE that
+	 * WP_User_Query's capability__in (used by Capabilities::pos_staff_user_query_args()) is built on —
+	 * so no fixed cap list is duplicated here; the PSR-4 Capabilities class is not autoloadable during
+	 * uninstall. The per-user strip is prefix-based for the same reason.
+	 */
+	$pos_staff_ids = get_users(
+		array(
+			'fields'     => 'ID',
+			'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- one-off uninstall cleanup, not a runtime query.
+				array(
+					'key'     => $wpdb->prefix . 'capabilities',
+					'value'   => 'woocommerce_pos_',
+					'compare' => 'LIKE',
+				),
+			),
+		)
+	);
+	foreach ( $pos_staff_ids as $pos_staff_id ) {
+		$pos_staff_user = new WP_User( (int) $pos_staff_id );
+		foreach ( array_keys( $pos_staff_user->caps ) as $pos_capability ) {
+			if ( 0 === strpos( (string) $pos_capability, 'woocommerce_pos_' ) ) {
+				$pos_staff_user->remove_cap( (string) $pos_capability );
+			}
+		}
+	}
 
 	// Delete our data from the post and post meta tables, and remove any additional tables we created.
 	$wpdb->query( "DELETE FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation', 'shop_coupon', 'shop_order', 'shop_order_refund' );" );
@@ -103,7 +190,7 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	// Delete terms if > WP 4.2 (term splitting was added in 4.2).
 	if ( version_compare( $wp_version, '4.2', '>=' ) ) {
 		// Delete term taxonomies.
-		foreach ( array( 'product_cat', 'product_tag', 'product_shipping_class', 'product_type' ) as $_taxonomy ) {
+		foreach ( array( 'product_cat', 'product_tag', 'product_shipping_class', 'product_type', 'product_visibility' ) as $_taxonomy ) {
 			$wpdb->delete(
 				$wpdb->term_taxonomy,
 				array(

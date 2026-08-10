@@ -214,7 +214,7 @@ const getTrashEmailPostAction = () => {
 													items.length
 											  );
 									}
-									createSuccessNotice( successMessage, {
+									void createSuccessNotice( successMessage, {
 										type: 'snackbar',
 										id: 'trash-email-post-action',
 									} );
@@ -240,7 +240,8 @@ const getTrashEmailPostAction = () => {
 										}
 										// If we were trying to permanently delete multiple posts
 									} else {
-										const errorMessages = new Set();
+										const errorMessages =
+											new Set< string >();
 										const failedPromises =
 											promiseResult.filter(
 												( { status } ) =>
@@ -288,7 +289,7 @@ const getTrashEmailPostAction = () => {
 											errorMessage,
 										}
 									);
-									createErrorNotice( errorMessage, {
+									void createErrorNotice( errorMessage, {
 										type: 'snackbar',
 									} );
 								}

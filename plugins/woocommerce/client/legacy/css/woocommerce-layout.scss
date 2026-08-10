@@ -57,6 +57,10 @@
 		div.images {
 			float: left;
 			width: 48%;
+
+			&.woocommerce-product-gallery .flex-viewport {
+				touch-action: pan-y pinch-zoom;
+			}
 		}
 
 		div.thumbnails {
