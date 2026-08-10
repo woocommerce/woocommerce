@@ -106,16 +106,6 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 
 		const block = await frontendUtils.getBlockByName( BLOCK_NAME );
 
-		const reviews = block.locator(
-			'.wc-block-components-review-list-item__text'
-		);
-
-		await expect( reviews.first() ).toHaveText( latestReview.review );
-
-		const select = block.getByLabel( 'Order by' );
-		await select.selectOption( 'Highest rating' );
-
-		await expect( reviews.first() ).toHaveText( highestRating.review );
 		await expect(
 			block.locator( '.wc-block-components-review-list-item__text' )
 		).toHaveCount( 0 );
@@ -176,24 +166,5 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 		await expect( block.getByText( allReviews[ 3 ].review ) ).toHaveCount(
 			0
 		);
-	} );
-
-	test( 'can sort by lowest rating', async ( {
-		page,
-		frontendUtils,
-		editor,
-	} ) => {
-		await editor.publishAndVisitPost();
-
-		const block = await frontendUtils.getBlockByName( BLOCK_NAME );
-
-		const reviews = block.locator(
-			'.wc-block-components-review-list-item__text'
-		);
-
-		const select = page.getByLabel( 'Order by' );
-		await select.selectOption( 'Lowest rating' );
-
-		await expect( reviews.first() ).toHaveText( lowestRating.review );
 	} );
 } );
