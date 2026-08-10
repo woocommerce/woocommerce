@@ -1117,11 +1117,11 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 		}
 
 		if ( 'all' === $query_args['refunds'] ) {
-			$sql_query['where_clause'] .= 'parent_id != 0';
+			$sql_query['where_clause'] .= "{$table_name}.parent_id != 0";
 		}
 
 		if ( 'none' === $query_args['refunds'] ) {
-			$sql_query['where_clause'] .= 'parent_id = 0';
+			$sql_query['where_clause'] .= "{$table_name}.parent_id = 0";
 		}
 
 		if ( 'full' === $query_args['refunds'] || 'partial' === $query_args['refunds'] ) {
