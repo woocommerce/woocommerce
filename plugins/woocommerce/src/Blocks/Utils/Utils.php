@@ -59,7 +59,8 @@ class Utils {
 	public static function get_current_page_url() {
 		global $wp;
 
-		$url = home_url( user_trailingslashit( $wp->request ) );
+		$request_path = is_object( $wp ) && isset( $wp->request ) && is_string( $wp->request ) ? $wp->request : '';
+		$url          = home_url( user_trailingslashit( $request_path ) );
 
 		if ( ! empty( $_SERVER['QUERY_STRING'] ) ) {
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Preserving the raw query string encoding.
