@@ -41,12 +41,6 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
    Forms
    ========================================================================== */
 
-/* Default border color for text inputs and textareas across all forms. */
-input:where([type="text"], [type="email"], [type="url"], [type="tel"], [type="number"], [type="password"], [type="search"]),
-textarea {
-	border-color: var(--wp--preset--color--theme-6);
-}
-
 /* WooCommerce's classic form fields (.form-row .input-text, selects,
  * select2) and extensions rendering the same markup (e.g. Gift Cards)
  * read these tokens; WooCommerce defines them 4px/gray on :root. The

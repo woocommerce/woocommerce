@@ -730,6 +730,11 @@
 				"typography": {
 					"textDecoration": "underline"
 				}
+			},
+			"textInput": {
+				"border": {
+					"color": "var(--wp--preset--color--theme-6)"
+				}
 			}
 		},
 		"spacing": {
