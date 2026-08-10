@@ -209,7 +209,7 @@ test.describe( `${ blockData.name }`, () => {
 		} ).toPass( { timeout: 5_000 } );
 	} );
 
-	test( 'Variable product gallery: classic Add to Cart Form switches directly between variations', async ( {
+	test( 'Variable product gallery: classic Add to Cart Form preserves the parent gallery between variations', async ( {
 		page,
 		editor,
 		pageObject,
@@ -224,6 +224,9 @@ test.describe( `${ blockData.name }`, () => {
 		await page.goto( blockData.productPage );
 		const featuredImageId = await pageObject.getViewerImageId();
 		expect( featuredImageId ).not.toBeNull();
+		const parentImageIds = await pageObject.getVisibleViewerImageIds();
+		const parentGalleryImageIds = parentImageIds.slice( 1 );
+		expect( parentGalleryImageIds.length ).toBeGreaterThan( 0 );
 
 		const addToCartForm = await pageObject.getClassicAddToCartFormBlock( {
 			page: 'frontend',
@@ -244,12 +247,44 @@ test.describe( `${ blockData.name }`, () => {
 		} ).toPass( { timeout: 5_000 } );
 
 		const firstVariationImageId = await pageObject.getViewerImageId();
+		const firstVariationImageIds = Array.from(
+			new Set( [ firstVariationImageId, ...parentGalleryImageIds ] )
+		);
+		await expect( async () => {
+			const variationImageIds =
+				await pageObject.getVisibleViewerImageIds();
+			const thumbnailImageIds =
+				await pageObject.getVisibleThumbnailImageIds();
+			const activeThumbnailImageId =
+				await pageObject.getActiveThumbnailImageId();
+
+			expect( variationImageIds ).toEqual( firstVariationImageIds );
+			expect( thumbnailImageIds ).toEqual( firstVariationImageIds );
+			expect( activeThumbnailImageId ).toEqual( firstVariationImageId );
+		} ).toPass( { timeout: 5_000 } );
 
 		await logoSelect.selectOption( 'No' );
 
 		await expect( async () => {
 			const nextVariationImageId = await pageObject.getViewerImageId();
 			expect( nextVariationImageId ).not.toEqual( firstVariationImageId );
+		} ).toPass( { timeout: 5_000 } );
+
+		const nextVariationImageId = await pageObject.getViewerImageId();
+		const nextVariationImageIds = Array.from(
+			new Set( [ nextVariationImageId, ...parentGalleryImageIds ] )
+		);
+		await expect( async () => {
+			const variationImageIds =
+				await pageObject.getVisibleViewerImageIds();
+			const thumbnailImageIds =
+				await pageObject.getVisibleThumbnailImageIds();
+			const activeThumbnailImageId =
+				await pageObject.getActiveThumbnailImageId();
+
+			expect( variationImageIds ).toEqual( nextVariationImageIds );
+			expect( thumbnailImageIds ).toEqual( nextVariationImageIds );
+			expect( activeThumbnailImageId ).toEqual( nextVariationImageId );
 		} ).toPass( { timeout: 5_000 } );
 	} );
 
