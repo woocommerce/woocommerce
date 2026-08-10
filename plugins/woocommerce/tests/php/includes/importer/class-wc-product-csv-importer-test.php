@@ -322,6 +322,56 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test that variation rows without a SKU are skipped when updating existing products, since re-importing them would duplicate the variation.
+	 */
+	public function test_import_skips_new_variations_without_a_sku_26256() {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'S', 'M' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import 26256 Tee' );
+		$product->set_sku( 'IMPORT-26256-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		add_filter( 'woocommerce_product_import_create_variation_of_existing_product', '__return_true' );
+
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-26256-no-sku.csv';
+		file_put_contents( $csv_file, "ID,Type,SKU,Name,Parent\n,variation,,Import 26256 Tee - L,IMPORT-26256-PARENT\n999999999,variation,,Import 26256 Tee - M,IMPORT-26256-PARENT\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$args     = array(
+			'parse'           => true,
+			'update_existing' => true,
+			'mapping'         => array(
+				'ID'     => 'id',
+				'Type'   => 'type',
+				'SKU'    => 'sku',
+				'Name'   => 'name',
+				'Parent' => 'parent_id',
+			),
+		);
+		$importer = new WC_Product_CSV_Importer( $csv_file, $args );
+		$data     = $importer->import();
+		wp_delete_file( $csv_file );
+
+		remove_filter( 'woocommerce_product_import_create_variation_of_existing_product', '__return_true' );
+
+		$this->assertEmpty( $data['imported_variations'], 'Expected 0 imported variations, got ' . count( $data['imported_variations'] ) );
+		$this->assertCount( 2, $data['skipped'], 'Expected 2 skipped products, got ' . count( $data['skipped'] ) );
+		$variations = wc_get_products(
+			array(
+				'type'   => ProductType::VARIATION,
+				'parent' => $product->get_id(),
+			)
+		);
+		$this->assertCount( 0, $variations, 'Expected no variations to be created for rows without a SKU' );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
 	 * @testdox Test that a variation row whose ID belongs to an existing post of another type is skipped when updating existing products, even if the filter tries to force it.
 	 */
 	public function test_import_skips_new_variations_with_a_foreign_post_id_26256() {

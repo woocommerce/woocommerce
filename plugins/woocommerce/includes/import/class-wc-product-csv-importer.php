@@ -1177,6 +1177,12 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return false;
 		}
 
+		// A CSV ID cannot be assigned to a new variation, so without a SKU the created variation
+		// could never be matched again and every re-import would duplicate it.
+		if ( empty( $parsed_data['sku'] ) ) {
+			return false;
+		}
+
 		if ( empty( $parsed_data['parent_id'] ) ) {
 			return false;
 		}
