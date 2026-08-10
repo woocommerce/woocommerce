@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent long unbreakable words in paragraph, heading, and site title blocks from expanding the wrapping table and breaking the rendered email layout.
