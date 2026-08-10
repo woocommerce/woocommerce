@@ -9,12 +9,11 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 /**
  * OrderControllerTests class.
  */
-class OrderControllerTests extends TestCase {
+class OrderControllerTests extends \WC_Unit_Test_Case {
 	/**
 	 * Whether the checkout phone field option existed before the test.
 	 *
@@ -72,6 +71,10 @@ class OrderControllerTests extends TestCase {
 	 */
 	public function tearDown(): void {
 		try {
+			// The cart lives on the WC singleton, which the database rollback does not touch,
+			// so empty it or the products some tests add leak into every later test.
+			WC()->cart->empty_cart();
+
 			WC()->countries->locale = null;
 			$this->sut              = null;
 
@@ -157,9 +160,11 @@ class OrderControllerTests extends TestCase {
 		$this->expectExceptionCode( 409 );
 		$this->expectExceptionMessage( '"fake-coupon" was removed from the cart. Please enter a valid email at checkout to use coupon code &quot;fake-coupon&quot;.' );
 
-		$order  = WC_Helper_Order::create_order();
-		$coupon = CouponHelper::create_coupon( 'fake-coupon', 'publish', array( 'customer_email' => 'random-email@example.com' ) );
-		$order->add_coupon( $coupon->get_code() );
+		$order       = WC_Helper_Order::create_order();
+		$coupon      = CouponHelper::create_coupon( 'fake-coupon', 'publish', array( 'customer_email' => 'random-email@example.com' ) );
+		$coupon_item = new \WC_Order_Item_Coupon();
+		$coupon_item->set_code( $coupon->get_code() );
+		$order->add_item( $coupon_item );
 		$order->save();
 		$this->assertEquals( array( 'fake-coupon' ), $order->get_coupon_codes() );
 
@@ -179,9 +184,11 @@ class OrderControllerTests extends TestCase {
 		$this->expectExceptionCode( 409 );
 		$this->expectExceptionMessage( '"fake-coupon" was removed from the order. Please enter a valid email at checkout to use coupon code &quot;fake-coupon&quot;.' );
 
-		$order  = WC_Helper_Order::create_order();
-		$coupon = CouponHelper::create_coupon( 'fake-coupon', 'publish', array( 'customer_email' => 'random-email@example.com' ) );
-		$order->add_coupon( $coupon->get_code() );
+		$order       = WC_Helper_Order::create_order();
+		$coupon      = CouponHelper::create_coupon( 'fake-coupon', 'publish', array( 'customer_email' => 'random-email@example.com' ) );
+		$coupon_item = new \WC_Order_Item_Coupon();
+		$coupon_item->set_code( $coupon->get_code() );
+		$order->add_item( $coupon_item );
 		$order->save();
 		$this->assertEquals( array( 'fake-coupon' ), $order->get_coupon_codes() );
 
@@ -241,7 +248,16 @@ class OrderControllerTests extends TestCase {
 		$order->set_shipping_country( 'Invalid' );
 		$order->save();
 
-		// There is no need to update the cart here, we just check the order.
+		// validate_addresses() inspects the selected shipping rates from the global cart's
+		// packages even for existing orders, so the cart must contain the shippable product
+		// for the shipping country check to run.
+		/** @var \WC_Order_Item_Product $item */
+		$array = $order->get_items();
+		$item  = reset( $array );
+		$this->assertInstanceOf( \WC_Order_Item_Product::class, $item );
+
+		WC()->cart->add_to_cart( $item->get_product()->get_id() );
+
 		$this->sut->validate_existing_order_before_payment( $order );
 	}
 
