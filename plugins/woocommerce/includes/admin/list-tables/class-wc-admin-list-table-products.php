@@ -59,7 +59,9 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		add_filter( 'views_edit-product', array( $this, 'product_views' ) );
 		add_filter( 'get_search_query', array( $this, 'search_label' ) );
 		add_filter( 'posts_clauses', array( $this, 'posts_clauses' ), 10, 2 );
-		add_filter( 'posts_orderby', array( $this, 'order_search_results' ), 10, 2 );
+		// Registered late so earlier posts_orderby callbacks see the unmodified core clause; any
+		// ordering they change makes order_search_results() skip ranking and defer to them.
+		add_filter( 'posts_orderby', array( $this, 'order_search_results' ), 9999, 2 );
 
 		// Use hooks to prime various caches and improve products page performance.
 		// Until persistent counters reactivated, disable callback for load-edit.php action.

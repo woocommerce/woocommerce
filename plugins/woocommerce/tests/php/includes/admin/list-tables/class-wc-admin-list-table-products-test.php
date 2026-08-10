@@ -517,6 +517,37 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product search ranking leaves the core default clause visible to other posts_orderby filters.
+	 */
+	public function test_product_search_ranking_preserves_clause_for_other_posts_orderby_filters(): void {
+		global $wpdb;
+
+		list( $title_match, $content_match, $search_phrase ) = $this->create_search_products();
+
+		$guard_fired = 0;
+		$guard       = static function ( $orderby ) use ( &$guard_fired, $wpdb ) {
+			if ( "{$wpdb->posts}.post_date DESC" === $orderby ) {
+				++$guard_fired;
+			}
+			return $orderby;
+		};
+		add_filter( 'posts_orderby', $guard, 20 );
+
+		try {
+			$results = $this->get_search_results( $search_phrase );
+		} finally {
+			remove_filter( 'posts_orderby', $guard, 20 );
+		}
+
+		$this->assertGreaterThan( 0, $guard_fired, 'A later posts_orderby filter that matches on the core default clause should still see it unmodified.' );
+		$this->assertSame(
+			array( $title_match->get_id(), $content_match->get_id() ),
+			$results,
+			'Title ranking should still apply when other filters leave the clause unchanged.'
+		);
+	}
+
+	/**
 	 * Search terms for title-priority coverage.
 	 *
 	 * @return array<string, array<string>>
