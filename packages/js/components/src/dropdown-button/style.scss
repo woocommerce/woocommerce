@@ -21,7 +21,10 @@
 
 	&.is-open {
 		&::after {
-			transform: translateX(12px) translateY(2px) rotate(180deg);
+			// scaleY instead of rotate(180deg): the glyph is horizontally
+			// symmetric, and a purely vertical flip needs no translateX
+			// compensation, which rtlcss would flip the wrong way in RTL.
+			transform: translateY(2px) scaleY(-1);
 		}
 	}
 
