@@ -179,15 +179,14 @@ test.describe( 'Template customization', () => {
 
 			await requestUtils.activateTheme( BLOCK_THEME_WITH_TEMPLATES_SLUG );
 
-			// Edit the theme template. The theme template is not directly
-			// available from the UI because the customized one takes priority.
-			const themeTemplateId = `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`;
+			// Edit the theme template. The theme template is not
+			// directly available from the UI, because the customized
+			// one takes priority, so we go directly to its URL.
 			await admin.visitSiteEditor( {
-				postId: themeTemplateId,
+				postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`,
 				postType: testData.templateType,
 				canvas: 'edit',
 			} );
-
 			await editor.canvas.locator( 'body' ).waitFor( { timeout: 20000 } );
 
 			await editor.insertBlock( {
@@ -217,7 +216,7 @@ test.describe( 'Template customization', () => {
 			// See: https://github.com/woocommerce/woocommerce/issues/42220
 			await requestUtils.revertTemplate(
 				testData.templateType,
-				themeTemplateId
+				`${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`
 			);
 
 			await testData.visitPage( {

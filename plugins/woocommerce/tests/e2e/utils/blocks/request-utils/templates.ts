@@ -98,6 +98,9 @@ export async function revertTemplate(
 ) {
 	const restPath = getTemplateRestPath( templateType, templateId );
 	const template = await this.getTemplate( templateType, templateId );
+
+	// User-created templates have no underlying theme or plugin template to
+	// restore, so remove the custom template instead of resetting its source.
 	if ( template.origin === null ) {
 		await this.rest( {
 			method: 'DELETE',
