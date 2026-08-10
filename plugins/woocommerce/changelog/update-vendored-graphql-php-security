@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update the vendored webonyx/graphql-php to 15.32.3, which adds a default parser recursion limit of 256 and caps field-overlap validation at 100,000 comparisons.
