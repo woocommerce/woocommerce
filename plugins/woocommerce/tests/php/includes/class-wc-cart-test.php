@@ -280,6 +280,303 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Cart item product names include selected Any variation attributes.
+	 *
+	 * @dataProvider selected_any_variation_name_provider
+	 *
+	 * @param string                $product_name      Product name.
+	 * @param array<string, string> $stored_attributes Stored variation attributes.
+	 * @param string                $expected_name     Expected contextual cart item name.
+	 */
+	public function test_cart_item_product_name_includes_selected_any_variation_attributes( string $product_name, array $stored_attributes, string $expected_name ): void {
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes( $product_name, $stored_attributes );
+		$option_filter_calls         = 0;
+		$option_filter               = function ( $value ) use ( &$option_filter_calls ) {
+			++$option_filter_calls;
+
+			return 'Filtered ' . $value;
+		};
+		add_filter( 'woocommerce_variation_option_name', $option_filter );
+
+		try {
+			list( , $cart_item ) = $this->add_variation_to_cart( $product, $variation );
+			$name                = WC()->cart->get_item_product_name( $cart_item );
+
+			$this->assertSame( $expected_name, $name );
+			$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true, $name ) ) );
+			$this->assertSame( 0, $option_filter_calls );
+		} finally {
+			remove_filter( 'woocommerce_variation_option_name', $option_filter );
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * Provides stored variation attribute shapes for contextual name cases.
+	 *
+	 * @return array<string, array{string, array<string, string>, string}>
+	 */
+	public static function selected_any_variation_name_provider(): array {
+		return array(
+			'one fixed, one Any' => array(
+				'Cart Any Product',
+				array(
+					'pa_size'   => 'huge',
+					'pa_number' => '',
+				),
+				'Cart Any Product - huge, 1',
+			),
+			'all Any'            => array(
+				'shirt',
+				array(
+					'pa_size'   => '',
+					'pa_number' => '',
+				),
+				'shirt - huge, 1',
+			),
+		);
+	}
+
+	/**
+	 * @testdox Cart item product names honor swapped product objects and non-variation items.
+	 */
+	public function test_cart_item_product_name_honors_swapped_products_and_non_variations(): void {
+		$simple = WC_Helper_Product::create_simple_product();
+
+		try {
+			$cart_item = array(
+				'data'      => $simple,
+				'variation' => array(),
+			);
+
+			$this->assertSame( $simple->get_name(), WC()->cart->get_item_product_name( $cart_item ) );
+
+			$swapped = WC_Helper_Product::create_simple_product();
+			$swapped->set_name( 'Swapped Display Product' );
+
+			$this->assertSame( 'Swapped Display Product', WC()->cart->get_item_product_name( $cart_item, $swapped ) );
+			$this->assertSame( '', WC()->cart->get_item_product_name( array() ) );
+		} finally {
+			$simple->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox Cart item names preserve filtered custom Any attribute labels without duplicate metadata.
+	 */
+	public function test_cart_item_name_preserves_filtered_custom_any_attribute_labels(): void {
+		$variation = new WC_Product_Variation();
+		$variation->set_name( 'Custom Any Product' );
+		$variation->set_attributes( array( 'finish' => '' ) );
+
+		$filter_option_name = function ( $value, $term, $attribute_name ) {
+			unset( $term );
+
+			return 'pa_attribute_finish' === $attribute_name && 'gloss' === $value ? 'Polished' : $value;
+		};
+		add_filter( 'woocommerce_variation_option_name', $filter_option_name, 10, 3 );
+
+		$cart_item = array(
+			'data'      => $variation,
+			'variation' => array( 'attribute_finish' => 'gloss' ),
+		);
+
+		try {
+			$rendered_name = WC()->cart->get_item_product_name( $cart_item );
+
+			$this->assertSame( 'Custom Any Product - Polished', $rendered_name );
+			$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true, $rendered_name ) ) );
+
+			$cart_item['variation']['attribute_finish'] = 'Black & White';
+			$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true, 'Custom Any Product - Black &amp; White' ) ) );
+
+			$variation->set_name( 'Custom Any Product - Black & White' );
+			$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true, false ) ) );
+		} finally {
+			remove_filter( 'woocommerce_variation_option_name', $filter_option_name, 10 );
+		}
+	}
+
+	/**
+	 * @testdox Two-argument cart item formatting preserves selected Any variation metadata.
+	 */
+	public function test_formatted_cart_item_data_preserves_selected_any_value_when_product_name_is_omitted(): void {
+		$variation = new WC_Product_Variation();
+		$variation->set_name( 'Legacy Any Product' );
+		$variation->set_attributes( array( 'finish' => '' ) );
+		$option_filter_calls    = 0;
+		$option_filter          = function () use ( &$option_filter_calls ) {
+			++$option_filter_calls;
+
+			return 'Filtered ' . $option_filter_calls;
+		};
+		$attribute_filter_calls = 0;
+		$attribute_filter       = function ( $is_in_name ) use ( &$attribute_filter_calls ) {
+			++$attribute_filter_calls;
+
+			return $is_in_name;
+		};
+		add_filter( 'woocommerce_variation_option_name', $option_filter );
+		add_filter( 'woocommerce_is_attribute_in_product_name', $attribute_filter );
+
+		$cart_item = array(
+			'data'      => $variation,
+			'variation' => array( 'attribute_finish' => 'Black%20White' ),
+		);
+
+		try {
+			$this->assertSame( 'finish: Filtered 1', trim( wc_get_formatted_cart_item_data( $cart_item, true ) ) );
+			$this->assertSame( 1, $option_filter_calls );
+			$this->assertSame( 1, $attribute_filter_calls );
+		} finally {
+			remove_filter( 'woocommerce_variation_option_name', $option_filter );
+			remove_filter( 'woocommerce_is_attribute_in_product_name', $attribute_filter );
+		}
+	}
+
+	/**
+	 * @testdox Cart item formatting omits custom Any metadata when filtered display values cannot be rendered.
+	 * @dataProvider unrenderable_variation_option_label_provider
+	 *
+	 * @param mixed $filtered_value Filtered variation option label.
+	 */
+	public function test_formatted_cart_item_data_omits_unrenderable_custom_any_metadata( $filtered_value ): void {
+		$variation = new WC_Product_Variation();
+		$variation->set_name( 'Unrenderable Any Product' );
+		$variation->set_attributes( array( 'finish' => '' ) );
+
+		$option_filter = static function () use ( $filtered_value ) {
+			return $filtered_value;
+		};
+		add_filter( 'woocommerce_variation_option_name', $option_filter );
+		add_filter( 'woocommerce_product_variation_title_include_attributes', '__return_false' );
+
+		$cart_item = array(
+			'data'      => $variation,
+			'variation' => array( 'attribute_finish' => 'gloss' ),
+		);
+
+		try {
+			$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true ) ) );
+		} finally {
+			remove_filter( 'woocommerce_variation_option_name', $option_filter );
+			remove_filter( 'woocommerce_product_variation_title_include_attributes', '__return_false' );
+		}
+	}
+
+	/**
+	 * Provides filtered variation option labels that cannot be rendered.
+	 *
+	 * @return array<string, array{mixed}>
+	 */
+	public static function unrenderable_variation_option_label_provider(): array {
+		return array(
+			'false'            => array( false ),
+			'non-scalar array' => array( array( 'unexpected' ) ),
+		);
+	}
+
+	/**
+	 * @testdox Cart item formatting decodes taxonomy term entities when checking the rendered product name for duplicate metadata.
+	 */
+	public function test_formatted_cart_item_data_decodes_taxonomy_term_entities_for_name_comparison(): void {
+		$taxonomy = 'pa_encoded_finish';
+		$term     = false;
+
+		register_taxonomy( $taxonomy, array( 'product' ) );
+
+		try {
+			$term = wp_insert_term( 'Black & White', $taxonomy, array( 'slug' => 'black-white' ) );
+			$this->assertNotWPError( $term );
+
+			$variation = new WC_Product_Variation();
+			$variation->set_name( 'Encoded Any Product' );
+			$variation->set_attributes( array( $taxonomy => '' ) );
+
+			$cart_item = array(
+				'data'      => $variation,
+				'variation' => array( 'attribute_' . $taxonomy => 'black-white' ),
+			);
+
+			$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true, 'Encoded Any Product - Black & White' ) ) );
+		} finally {
+			if ( is_array( $term ) ) {
+				wp_delete_term( $term['term_id'], $taxonomy );
+			}
+
+			unregister_taxonomy( $taxonomy );
+		}
+	}
+
+	/**
+	 * @testdox Cart item metadata keeps its existing taxonomy option display behavior for fixed attributes.
+	 */
+	public function test_formatted_cart_item_data_does_not_apply_taxonomy_option_filter_to_fixed_attributes(): void {
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Cart Filtered Fixed Product',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '1',
+			)
+		);
+
+		$number_option_filter = function ( $value, $term, $attribute_name ) {
+			unset( $term );
+
+			return 'pa_number' === $attribute_name && '1' === $value ? 'One' : $value;
+		};
+		add_filter( 'woocommerce_variation_option_name', $number_option_filter, 10, 3 );
+
+		try {
+			list( , $cart_item ) = $this->add_variation_to_cart( $product, $variation );
+			$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true ) ) );
+		} finally {
+			remove_filter( 'woocommerce_variation_option_name', $number_option_filter, 10 );
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox Cart item metadata dedup keys on the template-provided name regardless of name filters.
+	 */
+	public function test_formatted_cart_item_data_dedupes_against_the_provided_name_regardless_of_name_filters(): void {
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Cart Replaced Name Product',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '',
+			)
+		);
+
+		$replace_name = function () {
+			return 'Custom cart label';
+		};
+		add_filter( 'woocommerce_cart_item_name', $replace_name, 20 );
+
+		try {
+			list( $cart_item_key, $cart_item ) = $this->add_variation_to_cart( $product, $variation );
+
+			$name = WC()->cart->get_item_product_name( $cart_item );
+			/**
+			 * This filter is documented in woocommerce/templates/cart/cart.php.
+			 *
+			 * @since 2.1.0
+			 */
+			$rendered_name = apply_filters( 'woocommerce_cart_item_name', $name, $cart_item, (string) $cart_item_key );
+
+			$this->assertSame( 'Custom cart label', $rendered_name );
+			$this->assertSame( 'Cart Replaced Name Product - huge, 1', $name );
+			$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true, $name ) ), 'Dedup must key on the template-provided name, not on name-filter output.' );
+		} finally {
+			remove_filter( 'woocommerce_cart_item_name', $replace_name, 20 );
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
 	 * @testdox should throw a notice to the cart if using variation_id
 	 * that doesn't belong to specified variable product.
 	 */
@@ -1693,5 +1990,50 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		$product->delete( true );
 		$coupon->delete( true );
+	}
+
+	/**
+	 * @testdox The mini-cart template renders selected Any values in the name exactly once.
+	 */
+	public function test_mini_cart_template_renders_selected_any_values_once(): void {
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Mini Cart Any Product',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '',
+			)
+		);
+
+		try {
+			$this->add_variation_to_cart( $product, $variation );
+
+			ob_start();
+			woocommerce_mini_cart();
+			$html = ob_get_clean();
+
+			$this->assertStringContainsString( 'Mini Cart Any Product - huge, 1', $html, 'The merged name must render.' );
+			$this->assertStringNotContainsString( '<dl class="variation"', $html, 'No variation meta list must render for values already in the name.' );
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * Adds a variation to the cart, asserting success.
+	 *
+	 * @param WC_Product $product    Variable product.
+	 * @param WC_Product $variation  Variation to add.
+	 * @param array      $attributes Selected variation attributes.
+	 * @return array The cart item key and cart item: array( string, array ).
+	 */
+	private function add_variation_to_cart( $product, $variation, array $attributes = array(
+		'attribute_pa_size'   => 'huge',
+		'attribute_pa_number' => '1',
+	) ): array {
+		$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $variation->get_id(), $attributes );
+		$this->assertNotFalse( $cart_item_key, 'The variation should be added to the cart.' );
+
+		return array( (string) $cart_item_key, WC()->cart->get_cart_item( (string) $cart_item_key ) );
 	}
 }

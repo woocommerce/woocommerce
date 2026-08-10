@@ -4509,16 +4509,22 @@ function wc_get_theme_slug_for_templates() {
  * Gets and formats a list of cart item data + variations for display on the frontend.
  *
  * @since 3.3.0
- * @param array $cart_item Cart item object.
- * @param bool  $flat Should the data be returned flat or in a list.
+ * @since 11.1.0 Added the `$product_name` parameter.
+ * @param array       $cart_item   Cart item object.
+ * @param bool        $flat        Should the data be returned flat or in a list.
+ * @param string|null $product_name Product name displayed for the cart item, used to avoid
+ *                                  duplicating variation attributes. Defaults to the stored product name.
  * @return string
  */
-function wc_get_formatted_cart_item_data( $cart_item, $flat = false ) {
+function wc_get_formatted_cart_item_data( $cart_item, $flat = false, $product_name = null ) {
 	$item_data = array();
 
 	// Variation values are shown only if they are not found in the title as of 3.0.
 	// This is because variation titles display the attributes.
 	if ( $cart_item['data']->is_type( ProductType::VARIATION ) && is_array( $cart_item['variation'] ) ) {
+		$product_name = is_string( $product_name ) ? $product_name : $cart_item['data']->get_name();
+		$product_name = wp_specialchars_decode( wp_strip_all_tags( $product_name ), ENT_QUOTES );
+
 		foreach ( $cart_item['variation'] as $name => $value ) {
 			$taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', urldecode( $name ) ) );
 
@@ -4535,8 +4541,13 @@ function wc_get_formatted_cart_item_data( $cart_item, $flat = false ) {
 				$label = wc_attribute_label( str_replace( 'attribute_', '', $name ), $cart_item['data'] );
 			}
 
-			// Check the nicename against the title.
-			if ( '' === $value || wc_is_attribute_in_product_name( $value, $cart_item['data']->get_name() ) ) {
+			if ( ! is_scalar( $value ) || '' === (string) $value ) {
+				continue;
+			}
+			$value = (string) $value;
+
+			// Check the display value against the title.
+			if ( wc_is_attribute_in_product_name( wp_specialchars_decode( $value, ENT_QUOTES ), $product_name ) ) {
 				continue;
 			}
 
