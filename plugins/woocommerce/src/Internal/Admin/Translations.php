@@ -307,8 +307,23 @@ class Translations {
 
 		$locale         = determine_locale();
 		$cache_filename = $this->get_combined_translation_filename( $domain, $locale );
+		$cache_path     = WP_LANG_DIR . '/plugins/' . $cache_filename;
 
-		return WP_LANG_DIR . '/plugins/' . $cache_filename;
+		// The combined file is only generated on language pack updates and plugin
+		// activation, so it can be missing (e.g. the locale was switched while the
+		// language packs were already on disk). Rebuild it on demand from the
+		// chunk translation files.
+		if ( ! is_readable( $cache_path ) ) {
+			$this->generate_translation_strings();
+		}
+
+		// If the file still could not be generated, fall back to the original
+		// path so the app's own translation file loads instead of none at all.
+		if ( ! is_readable( $cache_path ) ) {
+			return $file;
+		}
+
+		return $cache_path;
 	}
 
 	/**
