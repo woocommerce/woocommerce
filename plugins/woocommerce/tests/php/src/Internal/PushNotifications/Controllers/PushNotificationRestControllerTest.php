@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Controllers;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushNotificationRestController;
+use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
 use Automattic\WooCommerce\StoreApi\Utilities\JsonWebToken;
 use WC_Unit_Test_Case;
 use WP_REST_Request;
@@ -157,6 +158,66 @@ class PushNotificationRestControllerTest extends WC_Unit_Test_Case {
 		$result = $this->sut->authorize( $request );
 
 		$this->assertTrue( $result );
+	}
+
+	/**
+	 * @testdox Should accept a valid JWT supplied via the token query parameter when the header is absent.
+	 */
+	public function test_authorize_accepts_valid_jwt_via_query_param(): void {
+		$body  = '{"notifications":[]}';
+		$token = JsonWebToken::create(
+			array(
+				'iss'       => get_site_url(),
+				'exp'       => time() + 30,
+				'body_hash' => hash( 'sha256', $body ),
+			),
+			wp_salt( 'auth' )
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/send' );
+		$request->set_param( InternalNotificationDispatcher::TOKEN_QUERY_PARAM, $token );
+		$request->set_body( $body );
+
+		$result = $this->sut->authorize( $request );
+
+		$this->assertTrue( $result );
+	}
+
+	/**
+	 * @testdox Should reject an invalid JWT supplied via the token query parameter.
+	 */
+	public function test_authorize_rejects_invalid_jwt_via_query_param(): void {
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/send' );
+		$request->set_param( InternalNotificationDispatcher::TOKEN_QUERY_PARAM, 'invalid.token.here' );
+		$request->set_body( '{}' );
+
+		$result = $this->sut->authorize( $request );
+
+		$this->assertWPError( $result );
+	}
+
+	/**
+	 * @testdox Should prefer the Authorization header over the token query parameter.
+	 */
+	public function test_authorize_prefers_header_over_query_param(): void {
+		$body        = '{"notifications":[]}';
+		$valid_token = JsonWebToken::create(
+			array(
+				'iss'       => get_site_url(),
+				'exp'       => time() + 30,
+				'body_hash' => hash( 'sha256', $body ),
+			),
+			wp_salt( 'auth' )
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/send' );
+		$request->set_header( 'Authorization', 'Bearer invalid.token.here' );
+		$request->set_param( InternalNotificationDispatcher::TOKEN_QUERY_PARAM, $valid_token );
+		$request->set_body( $body );
+
+		$result = $this->sut->authorize( $request );
+
+		$this->assertWPError( $result );
 	}
 
 	/**
