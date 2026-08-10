@@ -41,6 +41,11 @@ class TranslationsTest extends WC_Unit_Test_Case {
 		$this->sut      = Translations::get_instance();
 		$this->lang_dir = WP_LANG_DIR . '/plugins/';
 
+		// The singleton keeps its once-per-request regeneration guard across tests.
+		$guard = new \ReflectionProperty( Translations::class, 'regeneration_attempted' );
+		$guard->setAccessible( true );
+		$guard->setValue( $this->sut, false );
+
 		wp_mkdir_p( $this->lang_dir );
 
 		add_filter( 'pre_determine_locale', array( $this, 'force_de_locale' ) );

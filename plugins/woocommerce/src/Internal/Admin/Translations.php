@@ -28,6 +28,14 @@ class Translations {
 	private static $plugin_domain = 'woocommerce';
 
 	/**
+	 * Whether an on-demand regeneration of the combined translation file has
+	 * already been attempted during this request.
+	 *
+	 * @var bool
+	 */
+	private $regeneration_attempted = false;
+
+	/**
 	 * Get class instance.
 	 */
 	public static function get_instance() {
@@ -312,8 +320,11 @@ class Translations {
 		// The combined file is only generated on language pack updates and plugin
 		// activation, so it can be missing (e.g. the locale was switched while the
 		// language packs were already on disk). Rebuild it on demand from the
-		// chunk translation files.
-		if ( ! is_readable( $cache_path ) ) {
+		// chunk translation files. The filter can run several times per request,
+		// so when generation is impossible (no chunk files, non-direct filesystem)
+		// attempt it only once instead of repeating the failed filesystem work.
+		if ( ! is_readable( $cache_path ) && ! $this->regeneration_attempted ) {
+			$this->regeneration_attempted = true;
 			$this->generate_translation_strings();
 		}
 
