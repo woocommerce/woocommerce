@@ -188,7 +188,7 @@ The WooCommerce-specific `/wp-json/woocommerce/mcp` endpoint is deprecated and s
 
 ## Connecting to the MCP Server
 
-Choose a connection method based on where the WordPress site is running. For a detailed overview and application-specific instructions, see [Connecting AI applications](https://developer.wordpress.org/news/2026/02/from-abilities-to-ai-agents-introducing-the-wordpress-mcp-adapter/#connecting-ai-applications) and the [mcp-adaptor repository](https://github.com/wordpress/mcp-adapter).
+Choose a connection method based on where the WordPress site is running. For a detailed overview and application-specific instructions, see [Connecting AI applications](https://developer.wordpress.org/news/2026/02/from-abilities-to-ai-agents-introducing-the-wordpress-mcp-adapter/#connecting-ai-applications) and the [wordpress/mcp-adaptor repository](https://github.com/wordpress/mcp-adapter).
 
 ### Local Sites Using STDIO
 
