@@ -12,9 +12,11 @@ import { getFakeProduct } from '../../utils/data';
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
-	outOfStockProduct: async ( { restApi }, fixtureUse ) => {
+	managedOutOfStockProduct: async ( { restApi }, fixtureUse ) => {
 		const response = await restApi.post( `${ WC_API_PATH }/products`, {
 			...getFakeProduct(),
+			manage_stock: true,
+			stock_quantity: 0,
 			stock_status: 'outofstock',
 		} );
 
@@ -27,39 +29,44 @@ const test = baseTest.extend( {
 	},
 } );
 
-test( 'resets stock status when converting a product to grouped', async ( {
-	page,
-	restApi,
-	outOfStockProduct,
-} ) => {
-	await page.goto(
-		`wp-admin/post.php?post=${ outOfStockProduct.id }&action=edit`
-	);
+for ( const productType of [ 'grouped', 'external' ] ) {
+	test( `resets stock settings when converting a product to ${ productType }`, async ( {
+		page,
+		restApi,
+		managedOutOfStockProduct,
+	} ) => {
+		await page.goto(
+			`wp-admin/post.php?post=${ managedOutOfStockProduct.id }&action=edit`
+		);
 
-	await expect(
-		page.locator( 'input[name="_stock_status"][value="outofstock"]' )
-	).toBeChecked();
+		await expect( page.locator( 'input#_manage_stock' ) ).toBeChecked();
+		await expect(
+			page.locator( 'input[name="_stock_status"][value="outofstock"]' )
+		).toBeChecked();
 
-	await page.locator( '#product-type' ).selectOption( 'grouped' );
+		await page.locator( '#product-type' ).selectOption( productType );
 
-	await expect(
-		page.locator( 'input[name="_stock_status"][value="instock"]' )
-	).toBeChecked();
+		await expect( page.locator( 'input#_manage_stock' ) ).not.toBeChecked();
+		await expect(
+			page.locator( 'input[name="_stock_status"][value="instock"]' )
+		).toBeChecked();
 
-	await page
-		.locator( '#publishing-action' )
-		.getByRole( 'button', { name: 'Update' } )
-		.click();
-	await expect(
-		page
-			.locator( 'div.notice-success > p' )
-			.filter( { hasText: 'Product updated' } )
-	).toBeVisible();
+		await page
+			.locator( '#publishing-action' )
+			.getByRole( 'button', { name: 'Update' } )
+			.click();
+		await expect(
+			page
+				.locator( 'div.notice-success > p' )
+				.filter( { hasText: 'Product updated' } )
+		).toBeVisible();
 
-	const response = await restApi.get(
-		`${ WC_API_PATH }/products/${ outOfStockProduct.id }`
-	);
+		const response = await restApi.get(
+			`${ WC_API_PATH }/products/${ managedOutOfStockProduct.id }`
+		);
 
-	expect( response.data.type ).toBe( 'grouped' );
-	expect( response.data.stock_status ).toBe( 'instock' );
-} );
+		expect( response.data.type ).toBe( productType );
+		expect( response.data.manage_stock ).toBe( false );
+		expect( response.data.stock_status ).toBe( 'instock' );
+	} );
+}
