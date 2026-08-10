@@ -172,19 +172,19 @@ class WC_REST_Product_Categories_Controller_Test extends WC_REST_Unit_Test_Case 
 		$product->set_stock_status( 'outofstock' );
 		$product->save();
 
-		// Now should have count of 0.
+		// REST API should still show count of 1 (full count for admins, visibility not applied).
 		$response = $this->make_categories_request();
 		$data     = $response->get_data();
 
 		// Find our test category in the response.
 		$test_category_data = $this->find_category_in_response( $data, $category['term_id'] );
 		$this->assertNotNull( $test_category_data, 'Test category should be found in response' );
-		$this->assertEquals( 0, $test_category_data['count'], 'Category should have count of 0 when product is out of stock and hidden' );
+		$this->assertEquals( 1, $test_category_data['count'], 'REST API should show full count of 1 for admins even when product is hidden' );
 
-		// Category specific request should have count of 1.
+		// Category specific request should have count of 1 (REST API shows full count for admins).
 		$response = $this->make_categories_request( $category['term_id'] );
 		$data     = $response->get_data();
-		$this->assertEquals( 1, $data['count'], 'Category should have count of 1 when product is out of stock and hidden' );
+		$this->assertEquals( 1, $data['count'], 'REST API should show full count of 1 for admins even when product is hidden' );
 
 		// Reset the setting.
 		update_option( 'woocommerce_hide_out_of_stock_items', 'no' );

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Respect stock visibility and product visibility when counting term products in Store API.
