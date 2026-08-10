@@ -66,9 +66,11 @@ class WC_My_Account_Orders_Template_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Non-string filtered column content falls back to default output.
+	 * @testdox Non-stringable filtered column content falls back to default output with a doing-it-wrong notice.
 	 */
 	public function test_non_string_filtered_column_content_falls_back_to_default_output(): void {
+		$this->setExpectedIncorrectUsage( 'woocommerce_account_orders_column_content_order-status' );
+
 		$order            = $this->create_order_with_status( 'processing' );
 		$filtered_content = null;
 
@@ -79,7 +81,7 @@ class WC_My_Account_Orders_Template_Test extends WC_Unit_Test_Case {
 			}
 		);
 
-		foreach ( array( array( 'invalid' ), new WP_Error( 'invalid' ) ) as $filtered_content ) {
+		foreach ( array( array( 'invalid' ), new WP_Error( 'invalid' ), null, false ) as $filtered_content ) {
 			$html = $this->render_orders_template( $order );
 
 			$this->assertStringContainsString( 'Processing', $html, 'Invalid filtered content should fall back to default output.' );
@@ -88,17 +90,52 @@ class WC_My_Account_Orders_Template_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Legacy order status column action still replaces the full cell.
+	 * @testdox Numeric and stringable filtered column content is coerced to a string.
 	 */
-	public function test_legacy_order_status_column_action_still_replaces_default_output(): void {
-		$order        = $this->create_order_with_status( 'processing' );
-		$filter_calls = 0;
+	public function test_numeric_and_stringable_filtered_column_content_is_coerced(): void {
+		$order      = $this->create_order_with_status( 'processing' );
+		$stringable = new class() {
+			/**
+			 * Render as string.
+			 *
+			 * @return string
+			 */
+			public function __toString(): string {
+				return '<span class="stringable-status">Stringable status</span>';
+			}
+		};
+
+		$filtered_content = null;
+		$this->add_test_filter(
+			'woocommerce_account_orders_column_content_order-status',
+			static function () use ( &$filtered_content ) {
+				return $filtered_content;
+			}
+		);
+
+		foreach ( array( 42, 4.5, $stringable ) as $filtered_content ) {
+			$html = $this->render_orders_template( $order );
+
+			$expected = is_object( $filtered_content ) ? 'Stringable status' : (string) $filtered_content;
+			$this->assertStringContainsString( $expected, $html, 'Stringable filtered content should be coerced and rendered.' );
+			$this->assertStringNotContainsString( 'Processing', $html, 'Coerced filtered content should replace the default output.' );
+		}
+	}
+
+	/**
+	 * @testdox Content filters compose with legacy column action output.
+	 */
+	public function test_content_filters_compose_with_legacy_action_output(): void {
+		$order            = $this->create_order_with_status( 'processing' );
+		$filter_calls     = 0;
+		$received_content = null;
 
 		$this->add_test_filter(
 			'woocommerce_account_orders_column_content_order-status',
-			static function () use ( &$filter_calls ): string {
+			static function ( string $column_content ) use ( &$filter_calls, &$received_content ): string {
 				++$filter_calls;
-				return '<span class="filtered-status">Filtered status</span>';
+				$received_content = $column_content;
+				return $column_content . '<span class="filtered-status">Filtered status</span>';
 			}
 		);
 		$this->add_test_action(
@@ -111,9 +148,10 @@ class WC_My_Account_Orders_Template_Test extends WC_Unit_Test_Case {
 		$html = $this->render_orders_template( $order );
 
 		$this->assertStringContainsString( 'Legacy status', $html, 'Existing action callbacks should still render.' );
-		$this->assertSame( 0, $filter_calls, 'Default-content filters should not run when a legacy action replaces the cell.' );
 		$this->assertStringNotContainsString( 'Processing', $html, 'Existing action callbacks should still suppress default output.' );
-		$this->assertStringNotContainsString( 'Filtered status', $html, 'New filters should not run when legacy action replacement is active.' );
+		$this->assertSame( 1, $filter_calls, 'Content filters should run when a legacy action replaces the default content.' );
+		$this->assertStringContainsString( 'legacy-status', (string) $received_content, 'Content filters should receive the legacy action output.' );
+		$this->assertStringContainsString( 'Filtered status', $html, 'Content filters should compose over legacy action output.' );
 	}
 
 	/**
@@ -145,6 +183,7 @@ class WC_My_Account_Orders_Template_Test extends WC_Unit_Test_Case {
 
 		$this->assertIsString( $filtered_content, 'The column content filter should run.' );
 		$this->assertStringContainsString( $default_content, $filtered_content, 'The filter should receive the existing default column HTML.' );
+		$this->assertSame( trim( $filtered_content ), $filtered_content, 'The filter should receive content without surrounding template whitespace.' );
 		$this->assertInstanceOf( WC_Order::class, $filtered_order, 'The filter should receive an order object.' );
 		$this->assertSame( $order->get_id(), $filtered_order instanceof WC_Order ? $filtered_order->get_id() : null, 'The filter should receive the current order.' );
 		$this->assertSame( $column_id, $filtered_column_id, 'The filter should receive the current column ID.' );
@@ -182,6 +221,45 @@ class WC_My_Account_Orders_Template_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame( 0, $legacy_action_calls, 'A content filter should not invoke callbacks registered on the existing action-style hook name.' );
 		$this->assertStringContainsString( 'Filtered order type', $html, 'A custom column should render content from its filter.' );
+	}
+
+	/**
+	 * @testdox A custom column without default content exposes an empty string to filters.
+	 */
+	public function test_custom_column_content_filter_receives_empty_string(): void {
+		$order            = $this->create_order_with_status( 'processing' );
+		$received_content = null;
+
+		$this->add_test_filter(
+			'woocommerce_account_orders_columns',
+			static function ( array $columns ): array {
+				$columns['order-custom'] = 'Custom';
+				return $columns;
+			}
+		);
+		$this->add_test_filter(
+			'woocommerce_account_orders_column_content_order-custom',
+			static function ( string $column_content ) use ( &$received_content ): string {
+				$received_content = $column_content;
+				return $column_content;
+			}
+		);
+
+		$this->render_orders_template( $order );
+
+		$this->assertSame( '', $received_content, 'A custom column with no default renderer should expose an empty string, not template whitespace.' );
+	}
+
+	/**
+	 * @testdox Rows whose order cannot be resolved are skipped while valid rows render.
+	 */
+	public function test_rows_with_unresolvable_orders_are_skipped(): void {
+		$order = $this->create_order_with_status( 'processing' );
+
+		$html = $this->render_orders_template( $order, array( PHP_INT_MAX, $order->get_id() ) );
+
+		$this->assertStringContainsString( 'View order number ' . $order->get_order_number(), $html, 'The valid order row should render.' );
+		$this->assertSame( 1, substr_count( $html, '<tr class="woocommerce-orders-table__row' ), 'The unresolvable order row should be skipped.' );
 	}
 
 	/**
@@ -251,19 +329,22 @@ class WC_My_Account_Orders_Template_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Render the active My Account orders template for one order.
+	 * Render the active My Account orders template.
 	 *
-	 * @param WC_Order $order Order object.
+	 * @param WC_Order        $order     Order object.
+	 * @param array<int>|null $order_ids Order IDs to render. Defaults to the given order's ID.
 	 * @return string
 	 */
-	private function render_orders_template( WC_Order $order ): string {
+	private function render_orders_template( WC_Order $order, ?array $order_ids = null ): string {
+		$order_ids = $order_ids ?? array( $order->get_id() );
+
 		return wc_get_template_html(
 			'myaccount/orders.php',
 			array(
 				'current_page'    => 1,
 				'customer_orders' => (object) array(
-					'orders'        => array( $order->get_id() ),
-					'total'         => 1,
+					'orders'        => $order_ids,
+					'total'         => count( $order_ids ),
 					'max_num_pages' => 1,
 				),
 				'has_orders'      => true,

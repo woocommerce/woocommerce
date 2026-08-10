@@ -51,70 +51,88 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 							<td class="woocommerce-orders-table__cell woocommerce-orders-table__cell-<?php echo esc_attr( $column_id ); ?>" data-title="<?php echo esc_attr( $column_name ); ?>">
 						<?php endif; ?>
 
+							<?php ob_start(); ?>
+
 							<?php if ( has_action( 'woocommerce_my_account_my_orders_column_' . $column_id ) ) : ?>
 								<?php do_action( 'woocommerce_my_account_my_orders_column_' . $column_id, $order ); ?>
 
-							<?php else : ?>
-								<?php ob_start(); ?>
+							<?php elseif ( $is_order_number ) : ?>
+								<?php /* translators: %s: the order number, usually accompanied by a leading # */ ?>
+								<a href="<?php echo esc_url( $order->get_view_order_url() ); ?>" aria-label="<?php echo esc_attr( sprintf( __( 'View order number %s', 'woocommerce' ), $order->get_order_number() ) ); ?>">
+									<?php echo esc_html( _x( '#', 'hash before order number', 'woocommerce' ) . $order->get_order_number() ); ?>
+								</a>
 
-								<?php if ( $is_order_number ) : ?>
-									<?php /* translators: %s: the order number, usually accompanied by a leading # */ ?>
-									<a href="<?php echo esc_url( $order->get_view_order_url() ); ?>" aria-label="<?php echo esc_attr( sprintf( __( 'View order number %s', 'woocommerce' ), $order->get_order_number() ) ); ?>">
-										<?php echo esc_html( _x( '#', 'hash before order number', 'woocommerce' ) . $order->get_order_number() ); ?>
-									</a>
+							<?php elseif ( 'order-date' === $column_id ) : ?>
+								<time datetime="<?php echo esc_attr( $order->get_date_created()->date( 'c' ) ); ?>"><?php echo esc_html( wc_format_datetime( $order->get_date_created() ) ); ?></time>
 
-								<?php elseif ( 'order-date' === $column_id ) : ?>
-									<time datetime="<?php echo esc_attr( $order->get_date_created()->date( 'c' ) ); ?>"><?php echo esc_html( wc_format_datetime( $order->get_date_created() ) ); ?></time>
+							<?php elseif ( 'order-status' === $column_id ) : ?>
+								<?php echo esc_html( wc_get_order_status_name( $order->get_status() ) ); ?>
 
-								<?php elseif ( 'order-status' === $column_id ) : ?>
-									<?php echo esc_html( wc_get_order_status_name( $order->get_status() ) ); ?>
-
-								<?php elseif ( 'order-total' === $column_id ) : ?>
-									<?php
-									/* translators: 1: formatted order total 2: total order items */
-									echo wp_kses_post( sprintf( _n( '%1$s for %2$s item', '%1$s for %2$s items', $item_count, 'woocommerce' ), $order->get_formatted_order_total(), $item_count ) );
-									?>
-
-								<?php elseif ( 'order-actions' === $column_id ) : ?>
-									<?php
-									$actions = wc_get_account_orders_actions( $order );
-
-									if ( ! empty( $actions ) ) {
-										foreach ( $actions as $key => $action ) { // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-											if ( empty( $action['aria-label'] ) ) {
-												// Generate the aria-label based on the action name.
-												/* translators: %1$s Action name, %2$s Order number. */
-												$action_aria_label = sprintf( __( '%1$s order number %2$s', 'woocommerce' ), $action['name'], $order->get_order_number() );
-											} else {
-												$action_aria_label = $action['aria-label'];
-											}
-											echo '<a href="' . esc_url( $action['url'] ) . '" class="woocommerce-button' . esc_attr( $wp_button_class ) . ' button ' . sanitize_html_class( $key ) . '" aria-label="' . esc_attr( $action_aria_label ) . '">' . esc_html( $action['name'] ) . '</a>';
-											unset( $action_aria_label );
-										}
-									}
-									?>
-								<?php endif; ?>
-
+							<?php elseif ( 'order-total' === $column_id ) : ?>
 								<?php
-								$column_content = (string) ob_get_clean();
+								/* translators: 1: formatted order total 2: total order items */
+								echo wp_kses_post( sprintf( _n( '%1$s for %2$s item', '%1$s for %2$s items', $item_count, 'woocommerce' ), $order->get_formatted_order_total(), $item_count ) );
+								?>
 
-								/**
-								 * Filters the default My Account orders table column content.
-								 *
-								 * The dynamic portion of the hook name, `$column_id`, refers to the
-								 * order table column ID. Default content is escaped before this filter
-								 * runs, and callbacks should return safe, escaped HTML.
-								 *
-								 * @since 11.1.0
-								 *
-								 * @param string   $column_content Default column HTML.
-								 * @param WC_Order $order          Current order object.
-								 * @param string   $column_id      Current column ID.
-								 */
-								$filtered_column_content = apply_filters( 'woocommerce_account_orders_column_content_' . $column_id, $column_content, $order, $column_id );
-								echo is_string( $filtered_column_content ) ? $filtered_column_content : $column_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Default content is escaped above; filter callbacks should return safe HTML.
+							<?php elseif ( 'order-actions' === $column_id ) : ?>
+								<?php
+								$actions = wc_get_account_orders_actions( $order );
+
+								if ( ! empty( $actions ) ) {
+									foreach ( $actions as $key => $action ) { // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+										if ( empty( $action['aria-label'] ) ) {
+											// Generate the aria-label based on the action name.
+											/* translators: %1$s Action name, %2$s Order number. */
+											$action_aria_label = sprintf( __( '%1$s order number %2$s', 'woocommerce' ), $action['name'], $order->get_order_number() );
+										} else {
+											$action_aria_label = $action['aria-label'];
+										}
+										echo '<a href="' . esc_url( $action['url'] ) . '" class="woocommerce-button' . esc_attr( $wp_button_class ) . ' button ' . sanitize_html_class( $key ) . '" aria-label="' . esc_attr( $action_aria_label ) . '">' . esc_html( $action['name'] ) . '</a>';
+										unset( $action_aria_label );
+									}
+								}
 								?>
 							<?php endif; ?>
+
+							<?php
+							$column_content = trim( (string) ob_get_clean() );
+
+							/**
+							 * Filters the content of a My Account orders table column.
+							 *
+							 * The dynamic portion of the hook name, `$column_id`, refers to the
+							 * order table column ID. The filter receives the full cell content:
+							 * the default column HTML or, when callbacks are registered on the
+							 * `woocommerce_my_account_my_orders_column_{$column_id}` action, the
+							 * output of those callbacks. Default content is escaped before this
+							 * filter runs, and callbacks should return safe, escaped HTML.
+							 *
+							 * This filter runs from the `myaccount/orders.php` template, so it is
+							 * not available on sites where a theme overrides the template with a
+							 * copy predating version 11.1.0.
+							 *
+							 * @param string   $column_content Current column cell HTML.
+							 * @param WC_Order $order          Current order object.
+							 * @param string   $column_id      Current column ID.
+							 *
+							 * @since 11.1.0
+							 */
+							$filtered_column_content = apply_filters( 'woocommerce_account_orders_column_content_' . $column_id, $column_content, $order, $column_id );
+
+							if ( is_string( $filtered_column_content ) ) {
+								$column_content = $filtered_column_content;
+							} elseif ( is_int( $filtered_column_content ) || is_float( $filtered_column_content ) || ( is_object( $filtered_column_content ) && method_exists( $filtered_column_content, '__toString' ) ) ) {
+								$column_content = (string) $filtered_column_content;
+							} else {
+								wc_doing_it_wrong(
+									'woocommerce_account_orders_column_content_' . $column_id,
+									__( 'Filter callbacks must return a string (or stringable value) of safe, escaped HTML. Return an empty string to render an empty cell. The unfiltered column content was used instead.', 'woocommerce' ),
+									'11.1.0'
+								);
+							}
+
+							echo $column_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Contains escaped default content or action hook output; filter callbacks must return safe HTML.
+							?>
 
 						<?php if ( $is_order_number ) : ?>
 							</th>
