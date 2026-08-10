@@ -766,6 +766,9 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return string[]
 	 */
 	private function parse_search_terms( $search_group ) {
+		// Mirrors WP_Query::parse_search_terms(): each match is either a double-quoted phrase (closed by
+		// a quote or the end of the string) or a run of characters delimited by tab, space, double quote,
+		// comma, or plus. The `u` modifier is intentionally omitted for parity with WordPress core.
 		if ( ! preg_match_all( '/".*?("|$)|((?<=[\t ",+])|^)[^\t ",+]+/', $search_group, $matches ) ) {
 			return array( $search_group );
 		}
