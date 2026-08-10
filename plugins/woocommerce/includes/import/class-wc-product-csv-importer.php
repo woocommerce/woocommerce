@@ -1171,9 +1171,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @return bool
 	 */
 	protected function can_create_variation( $parsed_data ) {
-		// Reusing the row's ID would convert an existing post of another type into a variation.
-		$id = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0;
-		if ( $id && get_post( $id ) ) {
+		// A row ID cannot be honored when creating a new variation: reusing an existing
+		// post's ID would corrupt that post, and a nonexistent ID cannot be assigned.
+		if ( ! empty( $parsed_data['id'] ) ) {
 			return false;
 		}
 

@@ -425,6 +425,52 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test that a variation row whose ID does not belong to any post is skipped when updating existing products, even if the filter tries to force it.
+	 */
+	public function test_import_skips_new_variations_with_a_nonexistent_post_id_26256() {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'S', 'M' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import 26256 Tee' );
+		$product->set_sku( 'IMPORT-26256-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$nonexistent_id = $product->get_id() + 1000;
+
+		add_filter( 'woocommerce_product_import_create_variation_of_existing_product', '__return_true' );
+
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-26256-nonexistent-id.csv';
+		file_put_contents( $csv_file, "ID,Type,SKU,Name,Parent\n{$nonexistent_id},variation,IMPORT-26256-L,Import 26256 Tee - L,IMPORT-26256-PARENT\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$args     = array(
+			'parse'           => true,
+			'update_existing' => true,
+			'mapping'         => array(
+				'ID'     => 'id',
+				'Type'   => 'type',
+				'SKU'    => 'sku',
+				'Name'   => 'name',
+				'Parent' => 'parent_id',
+			),
+		);
+		$importer = new WC_Product_CSV_Importer( $csv_file, $args );
+		$data     = $importer->import();
+		wp_delete_file( $csv_file );
+
+		remove_filter( 'woocommerce_product_import_create_variation_of_existing_product', '__return_true' );
+
+		$this->assertEmpty( $data['imported_variations'], 'Expected 0 imported variations, got ' . count( $data['imported_variations'] ) );
+		$this->assertCount( 1, $data['skipped'], 'Expected 1 skipped product, got ' . count( $data['skipped'] ) );
+		$this->assertFalse( wc_get_product_id_by_sku( 'IMPORT-26256-L' ) > 0, 'Expected no variation to be created for a row with a nonexistent ID' );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
 	 * @testdox Test that the filter enabling variation creation cannot cause non-variation rows to be imported when updating existing products.
 	 */
 	public function test_import_filter_does_not_create_non_variation_rows_26256() {
