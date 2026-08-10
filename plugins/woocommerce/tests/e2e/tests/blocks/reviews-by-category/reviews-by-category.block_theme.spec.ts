@@ -6,7 +6,7 @@ import { expect, test } from '@woocommerce/e2e-utils';
 /**
  * Internal dependencies
  */
-import { hoodieReviews } from '../../../test-data/blocks/data/data';
+import { hoodieReviews, allReviews } from '../../../test-data/blocks/data/data';
 
 const latestReview = hoodieReviews[ hoodieReviews.length - 1 ];
 
@@ -113,9 +113,12 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 
 	test( 'can skip reviews with an offset and load subsequent reviews', async ( {
 		page,
+		admin,
 		frontendUtils,
 		editor,
 	} ) => {
+		await admin.createNewPost();
+		await editor.insertBlock( { name: BLOCK_NAME } );
 		const blockLocator = await editor.getBlockByName( BLOCK_NAME );
 		await blockLocator
 			.getByRole( 'checkbox', {
@@ -138,33 +141,36 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 		} );
 		await sidebarSettings
 			.getByRole( 'spinbutton', { name: 'Number of reviews' } )
-			.fill( '1' );
+			.fill( '10' );
 		await sidebarSettings
 			.getByRole( 'spinbutton', { name: 'Offset' } )
 			.fill( '1' );
 
 		await expect(
+			editor.canvas.getByText( allReviews[ 0 ].review )
+		).toBeVisible();
+		await expect(
+			editor.canvas.getByText( allReviews[ 1 ].review )
+		).toBeVisible();
+		await expect(
 			editor.canvas.getByText( allReviews[ 2 ].review )
 		).toBeVisible();
 		await expect(
 			editor.canvas.getByText( allReviews[ 3 ].review )
-		).toHaveCount( 0 );
+		).toBeVisible();
+
+		await expect(
+			editor.canvas.getByText( allReviews[ 4 ].review )
+		).toBeHidden();
 
 		await editor.publishAndVisitPost();
 
 		const block = await frontendUtils.getBlockByName( BLOCK_NAME );
-		const reviews = block.locator(
-			'.wc-block-components-review-list-item__text'
-		);
 
-		await expect( reviews ).toHaveCount( 1 );
-		await expect( reviews.first() ).toHaveText( allReviews[ 2 ].review );
-
-		await page.getByRole( 'button', { name: 'Load more reviews' } ).click();
-
-		await expect( reviews ).toHaveCount( 3 );
-		await expect( block.getByText( allReviews[ 3 ].review ) ).toHaveCount(
-			0
-		);
+		await expect( block.getByText( allReviews[ 0 ].review ) ).toBeVisible();
+		await expect( block.getByText( allReviews[ 1 ].review ) ).toBeVisible();
+		await expect( block.getByText( allReviews[ 2 ].review ) ).toBeVisible();
+		await expect( block.getByText( allReviews[ 3 ].review ) ).toBeVisible();
+		await expect( block.getByText( allReviews[ 4 ].review ) ).toBeHidden();
 	} );
 } );
