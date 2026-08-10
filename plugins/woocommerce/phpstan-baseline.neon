@@ -71425,18 +71425,6 @@ parameters:
 			path: src/StoreApi/Utilities/QuantityLimits.php
 
 		-
-			message: '#^Parameter \#1 \$value of method Automattic\\WooCommerce\\StoreApi\\Utilities\\QuantityLimits\:\:filter_numeric_value\(\) expects float\|int, float\|int\<min, \-1\>\|int\<1, max\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/StoreApi/Utilities/QuantityLimits.php
-
-		-
-			message: '#^Parameter \#1 \.\.\.\$arg1 of function min expects non\-empty\-array, array\{0\?\: float\|int\<1, max\>, 1\?\: float\|int\<min, \-1\>\|int\<1, max\>\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/StoreApi/Utilities/QuantityLimits.php
-
-		-
 			message: '#^Access to an undefined property object\:\:\$limit\.$#'
 			identifier: property.notFound
 			count: 2
