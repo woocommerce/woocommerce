@@ -40,6 +40,20 @@ export function QualityBadgeIcon( { size = 12 }: { size?: number } ) {
 }
 
 /**
+ * The docs URL comes from the WooCommerce.com API, which sanitizes it
+ * server-side; accept only absolute https URLs anyway before rendering it
+ * as a link target.
+ */
+function getSafeDocsUrl( value?: string ): string | undefined {
+	try {
+		const url = new URL( value ?? '' );
+		return url.protocol === 'https:' ? url.href : undefined;
+	} catch {
+		return undefined;
+	}
+}
+
+/**
  * Popover with the badge explanation and, when the WooCommerce.com API
  * provides a docs URL, a "Learn more" link. Shared by the card chip and the
  * filter's info button; a popover (not a tooltip) so the link stays reachable
@@ -53,6 +67,8 @@ export function QualityBadgePopover( props: {
 	source: 'product_card' | 'filter';
 	onClose: () => void;
 } ) {
+	const docsUrl = getSafeDocsUrl( props.docsUrl );
+
 	return (
 		<Popover
 			className="woocommerce-marketplace__quality-badge-popover"
@@ -62,9 +78,9 @@ export function QualityBadgePopover( props: {
 			onClose={ props.onClose }
 		>
 			<p>{ props.tooltip }</p>
-			{ props.docsUrl && (
+			{ docsUrl && (
 				<a
-					href={ props.docsUrl }
+					href={ docsUrl }
 					target="_blank"
 					rel="noreferrer"
 					aria-label={ sprintf(

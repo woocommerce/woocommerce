@@ -154,6 +154,26 @@ describe( 'QualityBadge', () => {
 		);
 	} );
 
+	it( 'drops non-https docs URLs from the popover', () => {
+		const context = {
+			iamSettings: {
+				quality_badge: {
+					...contextWithBadge.iamSettings.quality_badge,
+					docs_url: 'javascript:alert(1)',
+				},
+			},
+		} as MarketplaceContextType;
+
+		renderWithContext( <QualityBadge product={ product } />, context );
+
+		fireEvent.click( screen.getByText( 'Excellence Verified' ) );
+
+		expect(
+			screen.getByText( 'Verified against WooCommerce standards.' )
+		).toBeInTheDocument();
+		expect( screen.queryByText( 'Learn more' ) ).not.toBeInTheDocument();
+	} );
+
 	it( 'renders an inert chip when there is no tooltip copy', () => {
 		const context = {
 			iamSettings: {
