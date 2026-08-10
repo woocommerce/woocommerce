@@ -5,6 +5,8 @@ namespace Automattic\WooCommerce\Internal\Admin\Logging\FileV2;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Logging\Settings;
+use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
+use Exception;
 use PclZip;
 use WC_Cache_Helper;
 use WP_Error;
@@ -114,22 +116,16 @@ class FileController {
 			$time = time();
 		}
 
-		$file_id = File::generate_file_id( $source, null, $time );
-		$file    = $this->get_file_by_id( $file_id );
+		$path = Settings::get_log_directory() . $this->generate_filename( $source, $time );
+		$file = new File( $path );
 
-		if ( $file instanceof File && $file->get_file_size() >= $this->get_file_size_limit() ) {
-			$rotated = $this->rotate_file( $file->get_file_id() );
-
-			if ( $rotated ) {
-				$file = null;
-			} else {
+		$size = $file->get_file_size();
+		if ( false !== $size && $size >= $this->get_file_size_limit() ) {
+			if ( ! $this->rotate_file( $file ) ) {
 				return false;
 			}
-		}
 
-		if ( ! $file instanceof File ) {
-			$new_path = Settings::get_log_directory() . $this->generate_filename( $source, $time );
-			$file     = new File( $new_path );
+			$file = new File( $path );
 		}
 
 		return $file->write( $text );
@@ -153,16 +149,12 @@ class FileController {
 	/**
 	 * Get all the rotations of a file and increment them, so that they overwrite the previous file with that rotation.
 	 *
-	 * @param string $file_id A file ID (file basename without the hash).
+	 * @param File $file The un-rotated ("current") iteration of the file to rotate.
 	 *
 	 * @return bool True if the file and all its rotations were successfully rotated.
 	 */
-	private function rotate_file( $file_id ): bool {
-		$rotations = $this->get_file_rotations( $file_id );
-
-		if ( is_wp_error( $rotations ) || ! isset( $rotations['current'] ) ) {
-			return false;
-		}
+	private function rotate_file( File $file ): bool {
+		$rotations = $this->get_rotation_siblings( $file );
 
 		$max_rotation_marker = self::MAX_FILE_ROTATIONS - 1;
 
@@ -176,7 +168,7 @@ class FileController {
 				$results[] = $rotations[ $i ]->rotate();
 			}
 		}
-		$results[] = $rotations['current']->rotate();
+		$results[] = $file->rotate();
 
 		return ! in_array( false, $results, true );
 	}
@@ -382,24 +374,42 @@ class FileController {
 			return $file;
 		}
 
-		$current   = array();
-		$rotations = array();
-
-		$source  = $file->get_source();
-		$created = 0;
-		if ( $file->has_standard_filename() ) {
-			$created = $file->get_created_timestamp();
-		}
+		$current = array();
 
 		if ( is_null( $file->get_rotation() ) ) {
 			$current['current'] = $file;
 		} else {
-			$current_file_id = File::generate_file_id( $source, null, $created );
+			$current_file_id = File::generate_file_id( $file->get_source(), null, $this->get_filename_timestamp( $file ) );
 			$result          = $this->get_file_by_id( $current_file_id );
 			if ( ! is_wp_error( $result ) ) {
 				$current['current'] = $result;
 			}
 		}
+
+		return array_merge( $current, $this->get_rotation_siblings( $file ) );
+	}
+
+	/**
+	 * Get the creation timestamp encoded in a file's name, or 0 if it doesn't use the standard format.
+	 *
+	 * @param File $file The file to get the timestamp from.
+	 *
+	 * @return int
+	 */
+	private function get_filename_timestamp( File $file ): int {
+		return $file->has_standard_filename() ? $file->get_created_timestamp() : 0;
+	}
+
+	/**
+	 * Get File instances for the existing rotations of a file.
+	 *
+	 * @param File $file Any iteration of a file, from which the source and creation date are taken.
+	 *
+	 * @return File[] An associative array where the rotation integer of the file is the key, sorted by rotation.
+	 */
+	private function get_rotation_siblings( File $file ): array {
+		$source  = $file->get_source();
+		$created = $this->get_filename_timestamp( $file );
 
 		$rotations_pattern = sprintf(
 			'.[%s]',
@@ -414,6 +424,8 @@ class FileController {
 		$rotation_pattern = Settings::get_log_directory() . $source . $rotations_pattern . $created_pattern . '*.log';
 		$rotation_paths   = glob( $rotation_pattern );
 		$rotation_files   = $this->convert_paths_to_objects( $rotation_paths );
+
+		$rotations = array();
 		foreach ( $rotation_files as $rotation_file ) {
 			if ( $rotation_file->is_readable() ) {
 				$rotations[ $rotation_file->get_rotation() ] = $rotation_file;
@@ -422,7 +434,7 @@ class FileController {
 
 		ksort( $rotations );
 
-		return array_merge( $current, $rotations );
+		return $rotations;
 	}
 
 	/**
@@ -485,6 +497,74 @@ class FileController {
 
 			if ( true === $result ) {
 				$deleted ++;
+			}
+		}
+
+		if ( $deleted > 0 ) {
+			$this->invalidate_cache();
+		}
+
+		return $deleted;
+	}
+
+	/**
+	 * Delete files of a given source that were last modified before a given time.
+	 *
+	 * Files are enumerated lazily and are neither sorted nor turned into File instances, so this
+	 * stays cheap on directories holding a large number of files, unlike get_files().
+	 *
+	 * @param string $source          Match files whose name begins with this source.
+	 * @param int    $modified_before Only delete files modified before this Unix timestamp.
+	 * @param int    $limit           The maximum number of files to delete.
+	 *
+	 * @return int The number of files that were deleted.
+	 */
+	public function delete_stale_files( string $source, int $modified_before, int $limit ): int {
+		if ( '' === $source || $limit < 1 ) {
+			return 0;
+		}
+
+		try {
+			$filesystem = FilesystemUtil::get_wp_filesystem_direct();
+			$iterator   = new \FilesystemIterator(
+				Settings::get_log_directory(),
+				\FilesystemIterator::SKIP_DOTS | \FilesystemIterator::CURRENT_AS_PATHNAME | \FilesystemIterator::KEY_AS_FILENAME
+			);
+		} catch ( Exception $exception ) {
+			// Surface this so a persistent failure to reach the log directory doesn't stay silent.
+			wc_get_logger()->warning(
+				sprintf(
+					'Could not enumerate the log directory to delete stale "%1$s" files: %2$s',
+					$source,
+					$exception->getMessage()
+				),
+				array( 'source' => 'wc-logs-cleanup' )
+			);
+
+			return 0;
+		}
+
+		$deleted = 0;
+
+		foreach ( $iterator as $basename => $path ) {
+			if ( ! str_starts_with( (string) $basename, $source ) || ! str_ends_with( (string) $basename, '.log' ) ) {
+				continue;
+			}
+
+			$path = (string) $path;
+
+			$modified = $filesystem->mtime( $path );
+
+			if ( false === $modified || $modified >= $modified_before ) {
+				continue;
+			}
+
+			if ( $filesystem->delete( $path, false, 'f' ) ) {
+				++$deleted;
+			}
+
+			if ( $deleted >= $limit ) {
+				break;
 			}
 		}
 
