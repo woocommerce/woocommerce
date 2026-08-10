@@ -161,7 +161,9 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 			$this->assertStringNotContainsString( 'CASE WHEN', (string) $captured_orderby, 'An explicitly sorted search should keep the requested ordering untouched.' );
 
 			// A stopword-only term falls back to ranking by the whole group, mirroring search_products().
-			// The captured clause still carries wpdb placeholder-escape hashes around LIKE wildcards.
+			// The pattern requires a CASE WHEN ranking clause followed by a post_title LIKE predicate whose
+			// quoted operand contains the raw term. \S* absorbs the LIKE wildcards on both sides of the term,
+			// because at the posts_orderby stage they are still dynamic wpdb placeholder-escape hashes, not %.
 			$captured_orderby = null;
 			$this->get_search_results( 'the' );
 			$this->assertMatchesRegularExpression( "/CASE WHEN.+post_title LIKE '\\S*the\\S*'/", (string) $captured_orderby, 'A stopword-only search should rank by the raw search group.' );
