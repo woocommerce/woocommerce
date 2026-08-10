@@ -274,7 +274,15 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 	 * @since 11.1.0
 	 */
 	private function normalize_line_item( array $line_item ) {
-		if ( isset( $line_item['id'] ) && ! isset( $line_item['line_item_id'] ) ) {
+		// The create endpoint documents `id`; the shared engine and the preview
+		// endpoint key lines by `line_item_id`, and either form is accepted here.
+		// A payload carrying both is rejected: silently preferring one could
+		// refund and restock a different line than the client intended.
+		if ( isset( $line_item['id'], $line_item['line_item_id'] ) ) {
+			return new WP_Error( 'woocommerce_rest_invalid_line_item', __( 'Specify the line item with either id or line_item_id, not both.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		if ( isset( $line_item['id'] ) ) {
 			$line_item['line_item_id'] = $line_item['id'];
 			unset( $line_item['id'] );
 		}

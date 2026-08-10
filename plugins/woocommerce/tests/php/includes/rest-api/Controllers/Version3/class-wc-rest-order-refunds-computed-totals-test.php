@@ -1069,6 +1069,56 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
+	 * @testdox A line item carrying both id and line_item_id is rejected as ambiguous.
+	 */
+	public function test_conflicting_line_identifiers_rejected(): void {
+		$order   = $this->create_order_with_product( 10.00, 2 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'compute_totals' => true,
+				'line_items'     => array(
+					array(
+						'id'           => $item_id,
+						'line_item_id' => $item_id + 1,
+						'quantity'     => 1,
+					),
+				),
+			)
+		);
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_invalid_line_item', $response->get_data()['code'] );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds(), 'No refund should be created from an ambiguous line identifier.' );
+	}
+
+	/**
+	 * @testdox A line item keyed by line_item_id alone is accepted, matching the preview payload shape.
+	 */
+	public function test_line_item_id_key_accepted(): void {
+		$order   = $this->create_order_with_product( 25.00, 2 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'compute_totals' => true,
+				'line_items'     => array(
+					array(
+						'line_item_id' => $item_id,
+						'quantity'     => 1,
+					),
+				),
+			)
+		);
+
+		$this->assertEquals( 201, $response->get_status() );
+		$this->assertEquals( '25.00', $response->get_data()['amount'] );
+	}
+
+	/**
 	 * Create a completed order with a single product line item.
 	 *
 	 * @param float $unit_price Unit price.

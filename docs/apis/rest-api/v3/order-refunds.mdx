@@ -429,7 +429,6 @@ curl -X POST https://example.com/wp-json/wc/v3/orders/723/refunds/preview \
 | `line_item_id` | integer | The ID of the line item in the order. Note that the preview keys lines by `line_item_id` where the create endpoint uses `id`. |
 | `quantity`     | integer | The number of units to preview. Shipping and fee lines must use a quantity of 1.                                     |
 | `refund_total` | number  | Optional explicit tax-inclusive amount for this line.                                                                |
-| `refund_tax`   | array   | Optional explicit tax refunds. See [Refund tax parameters](#refund-tax-parameters)                                     |
 
 #### Preview response properties
 
