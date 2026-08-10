@@ -806,6 +806,10 @@ p.demo_store,
 							font-size: 0.83em;
 						}
 					}
+
+					.comment_container > .comment-text:only-child {
+						margin-inline-start: 0;
+					}
 				}
 
 				ul.children {
