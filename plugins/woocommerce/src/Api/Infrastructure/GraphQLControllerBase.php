@@ -20,6 +20,7 @@ use Automattic\WooCommerce\Vendor\GraphQL\Language\AST\OperationDefinitionNode;
 use Automattic\WooCommerce\Vendor\GraphQL\Language\AST\SelectionSetNode;
 use Automattic\WooCommerce\Vendor\GraphQL\Validator\DocumentValidator;
 use Automattic\WooCommerce\Vendor\GraphQL\Validator\Rules\DisableIntrospection;
+use Automattic\WooCommerce\Vendor\GraphQL\Validator\Rules\OverlappingFieldsCanBeMerged;
 
 /**
  * Handles incoming GraphQL requests over the WooCommerce REST API.
@@ -416,8 +417,24 @@ abstract class GraphQLControllerBase {
 		// 6. Build validation rules.
 		// A single complexity-rule instance is kept so its computed score can
 		// be surfaced in the debug extensions after execution.
-		$complexity_rule    = new QueryComplexityRule( self::get_max_query_complexity() );
-		$validation_rules   = array_values( DocumentValidator::allRules() );
+		$complexity_rule  = new QueryComplexityRule( self::get_max_query_complexity() );
+		$validation_rules = array_values( DocumentValidator::allRules() );
+
+		// graphql-php 15.32.2 added a 100,000 field-comparison cap to
+		// OverlappingFieldsCanBeMerged. Past that cap the rule does not stop
+		// traversing: it returns a freshly allocated conflict for every
+		// remaining pair, so a query with many aliased fields that differ only
+		// in argument order allocates O(n^2) conflicts and exhausts memory.
+		// That is a harder failure than the quadratic-time behaviour the cap
+		// was meant to bound, so the cap is disabled here and query size is
+		// bounded by the depth and complexity rules below instead.
+		foreach ( $validation_rules as $index => $rule ) {
+			if ( $rule instanceof OverlappingFieldsCanBeMerged ) {
+				$validation_rules[ $index ] = new OverlappingFieldsCanBeMerged( PHP_INT_MAX );
+				break;
+			}
+		}
+
 		$validation_rules[] = new QueryDepthRule( self::get_max_query_depth() );
 		$validation_rules[] = $complexity_rule;
 		if ( ! $this->is_introspection_allowed( $principal, $request ) ) {
