@@ -151,8 +151,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * Adds the JOIN required to resolve the customer type of refund rows, which is read from the
 	 * refunded (parent) order.
 	 *
-	 * The JOIN is only added when the customer type is actually needed, so that reports that do not
-	 * select or filter by it are not charged for it.
+	 * The JOIN is only added when the customer type column is selected, so that reports that do not
+	 * ask for it are not charged for it.
 	 *
 	 * @param array $query_args Query arguments supplied by the user.
 	 * @return void
@@ -165,7 +165,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			! is_array( $query_args['fields'] ) ||
 			in_array( 'customer_type', $query_args['fields'], true );
 
-		if ( empty( $query_args['customer_type'] ) && ! $is_selected ) {
+		if ( ! $is_selected ) {
 			return;
 		}
 
@@ -214,8 +214,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		if ( $query_args['customer_type'] ) {
 			$returning_customer = 'returning' === $query_args['customer_type'] ? 1 : 0;
-			$parent_alias       = self::CUSTOMER_TYPE_PARENT_ALIAS;
-			$where_subquery[]   = "COALESCE( {$order_stats_lookup_table}.returning_customer, {$parent_alias}.returning_customer ) = {$returning_customer}";
+			$where_subquery[]   = "{$order_stats_lookup_table}.returning_customer = {$returning_customer}";
 		}
 
 		$refund_subquery = $this->get_refund_subquery( $query_args );
