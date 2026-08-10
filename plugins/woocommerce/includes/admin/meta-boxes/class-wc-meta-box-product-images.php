@@ -169,6 +169,7 @@ class WC_Meta_Box_Product_Images {
 		if ( ! $videos_enabled ) {
 			$product->set_gallery_image_ids( $attachment_ids );
 			$product->save();
+			self::attach_gallery_images( $attachment_ids, $product );
 			return;
 		}
 
@@ -184,11 +185,25 @@ class WC_Meta_Box_Product_Images {
 
 		$product->set_gallery_image_ids( $attachment_ids );
 		$product->save();
+		self::attach_gallery_images( $attachment_ids, $product );
 
 		ProductMediaGallery::set_stored_video_gallery_items(
 			$product,
 			ProductMediaGallery::get_positioned_video_gallery_items_from_media_gallery( $media_gallery )
 		);
+	}
+
+	/**
+	 * Attach gallery images to the first product they are uploaded to.
+	 *
+	 * @param array<int|string> $attachment_ids Gallery attachment IDs.
+	 * @param WC_Product        $product        Product instance.
+	 * @return void
+	 */
+	private static function attach_gallery_images( $attachment_ids, $product ) {
+		foreach ( $attachment_ids as $attachment_id ) {
+			wc_product_attach_image( (int) $attachment_id, $product );
+		}
 	}
 
 	/**

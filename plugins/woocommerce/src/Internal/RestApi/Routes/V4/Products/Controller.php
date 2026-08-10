@@ -977,6 +977,8 @@ class Controller extends WC_REST_Products_V2_Controller {
 					wc_product_attach_featured_image( $attachment_id, $product, false );
 				} else {
 					$gallery[] = $attachment_id;
+					// @phpstan-ignore-next-line argument.type -- $product resolves to a phantom namespace-local WC_Product without a use import.
+					wc_product_attach_image( $attachment_id, $product );
 				}
 
 				// Set the image alt if present.

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Attach product gallery images to their product so they show as "Uploaded to" the product in the Media Library, matching the featured image behavior. Shared images keep their existing parent.
