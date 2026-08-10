@@ -832,7 +832,11 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		);
 
 		/** This filter is documented in wp-includes/class-wp-query.php. */
-		return apply_filters( 'wp_search_stopwords', $stopwords ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment -- The hook is documented by WordPress.
+		$filtered_stopwords = apply_filters( 'wp_search_stopwords', $stopwords ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment -- The hook is documented by WordPress.
+
+		// A filter callback can return anything; keep only strings so the strict in_array()
+		// comparison in get_valid_search_terms() stays safe on PHP 8.
+		return is_array( $filtered_stopwords ) ? array_filter( $filtered_stopwords, 'is_string' ) : $stopwords;
 	}
 
 	/**
