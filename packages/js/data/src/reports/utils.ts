@@ -12,6 +12,7 @@ import {
 	flattenFilters,
 	getActiveFiltersFromQuery,
 	getQueryFromActiveFilters,
+	getSearchWords,
 } from '@woocommerce/navigation';
 import deprecated from '@wordpress/deprecated';
 import { select as WPSelect } from '@wordpress/data';
@@ -160,6 +161,28 @@ export function getQueryFromConfig(
 	};
 }
 
+// Item types whose report endpoints resolve a `search` argument themselves. For every other
+// type the client has to turn the search into a list of matching item IDs first and pass
+// those as the limit-by parameter, which caps the report at one page of search results.
+const serverSideSearchItemTypes = [ 'products' ];
+
+/**
+ * Whether a report request can pass its search term straight to the API.
+ *
+ * Only true when the search subject is the single thing the request is limited by. A request
+ * limited by more than one property (the Categories report limits its product requests by both
+ * `products` and `categories`) still needs the resolved ID list to express the other limits.
+ *
+ * @param {Array} limitProperties Properties used to limit the results.
+ * @return {boolean} True when the search can be resolved server-side.
+ */
+export function usesServerSideSearch( limitProperties: string[] ) {
+	return (
+		limitProperties.length === 1 &&
+		includes( serverSideSearchItemTypes, limitProperties[ 0 ] )
+	);
+}
+
 /**
  * Add filters and advanced filters values to a query object.
  *
@@ -185,6 +208,11 @@ export function getFilterQuery(
 	} = options;
 	if ( query.search ) {
 		const limitProperties = limitBy || [ endpoint ];
+
+		if ( usesServerSideSearch( limitProperties ) ) {
+			return { search: getSearchWords( query ) };
+		}
+
 		return limitProperties.reduce< Record< string, string > >(
 			( result, limitProperty ) => {
 				result[ limitProperty ] = query[ limitProperty ];

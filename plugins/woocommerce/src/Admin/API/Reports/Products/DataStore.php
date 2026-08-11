@@ -9,6 +9,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use Automattic\WooCommerce\Admin\API\Reports\ProductSearchQuery;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -198,12 +199,18 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$this->get_limit_sql_params( $query_args );
 		$this->add_order_by_sql_params( $query_args );
 
-		$included_products = $this->get_included_products( $query_args );
-		if ( $included_products ) {
+		$search_subquery = $this->get_product_search_subquery( $query_args );
+		if ( $search_subquery ) {
 			$this->add_from_sql_params( $query_args, 'outer', 'default_results.product_id' );
-			$this->subquery->add_sql_clause( 'where', "AND {$order_product_lookup_table}.product_id IN ({$included_products})" );
+			$this->subquery->add_sql_clause( 'where', "AND {$order_product_lookup_table}.product_id IN ({$search_subquery})" );
 		} else {
-			$this->add_from_sql_params( $query_args, 'inner', "{$order_product_lookup_table}.product_id" );
+			$included_products = $this->get_included_products( $query_args );
+			if ( $included_products ) {
+				$this->add_from_sql_params( $query_args, 'outer', 'default_results.product_id' );
+				$this->subquery->add_sql_clause( 'where', "AND {$order_product_lookup_table}.product_id IN ({$included_products})" );
+			} else {
+				$this->add_from_sql_params( $query_args, 'inner', "{$order_product_lookup_table}.product_id" );
+			}
 		}
 
 		$included_variations = $this->get_included_variations( $query_args );
@@ -216,6 +223,26 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}wc_order_stats ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id" );
 			$this->subquery->add_sql_clause( 'where', "AND ( {$order_status_filter} )" );
 		}
+	}
+
+	/**
+	 * Returns a SELECT statement resolving the `search` query argument to product IDs.
+	 *
+	 * The search is intersected with the products the other filters resolve to, so it
+	 * narrows `categories` and `products` rather than replacing them.
+	 *
+	 * @param array $query_args Query arguments supplied by the user.
+	 * @return string SQL statement, or an empty string when no search was requested.
+	 */
+	protected function get_product_search_subquery( $query_args ) {
+		if ( empty( $query_args['search'] ) ) {
+			return '';
+		}
+
+		return ProductSearchQuery::get_ids_subquery(
+			$query_args['search'],
+			$this->get_included_products_array( $query_args )
+		);
 	}
 
 	/**
@@ -340,6 +367,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$defaults                      = parent::get_default_query_vars();
 		$defaults['category_includes'] = array();
 		$defaults['product_includes']  = array();
+		$defaults['search']            = array();
 		$defaults['extended_info']     = false;
 
 		return $defaults;
@@ -370,14 +398,24 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		);
 
 		$selections        = $this->selected_columns( $query_args );
-		$included_products = $this->get_included_products_array( $query_args );
+		$search_subquery   = $this->get_product_search_subquery( $query_args );
+		$included_products = $search_subquery ? array() : $this->get_included_products_array( $query_args );
 		$params            = $this->get_limit_params( $query_args );
 		$this->add_sql_query_params( $query_args );
 
-		if ( count( $included_products ) > 0 ) {
-			$filtered_products = array_diff( $included_products, array( '-1' ) );
-			$total_results     = count( $filtered_products );
-			$total_pages       = (int) ceil( $total_results / $params['per_page'] );
+		if ( $search_subquery || count( $included_products ) > 0 ) {
+			if ( $search_subquery ) {
+				// The set of matching products is only known to the database, so count it there too.
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $search_subquery is built from prepared fragments.
+				$total_results = (int) $wpdb->get_var( "SELECT COUNT(*) FROM ( {$search_subquery} ) AS search_results" );
+				$ids_table     = $search_subquery;
+			} else {
+				$filtered_products = array_diff( $included_products, array( '-1' ) );
+				$total_results     = count( $filtered_products );
+				$ids_table         = $this->get_ids_table( $included_products, 'product_id' );
+			}
+
+			$total_pages = (int) ceil( $total_results / $params['per_page'] );
 
 			if ( 'date' === $query_args['orderby'] ) {
 				$selections .= ", {$table_name}.date_created";
@@ -385,7 +423,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			$fields          = $this->get_fields( $query_args );
 			$join_selections = $this->format_join_selections( $fields, array( 'product_id' ) );
-			$ids_table       = $this->get_ids_table( $included_products, 'product_id' );
 
 			$this->subquery->clear_sql_clause( 'select' );
 			$this->subquery->add_sql_clause( 'select', $selections );

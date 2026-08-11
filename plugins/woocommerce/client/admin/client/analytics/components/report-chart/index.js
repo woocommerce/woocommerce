@@ -14,6 +14,7 @@ import {
 	getTooltipValueFormat,
 	settingsStore,
 	reportsStore,
+	usesServerSideSearch,
 } from '@woocommerce/data';
 import {
 	getAllowedIntervalsForQuery,
@@ -362,7 +363,11 @@ export default compose(
 			( item ) => query[ item ] && query[ item ].length
 		);
 
-		if ( query.search && ! hasLimitByParam ) {
+		if (
+			query.search &&
+			! hasLimitByParam &&
+			! usesServerSideSearch( limitBy )
+		) {
 			return {
 				...newProps,
 				emptySearchResults: true,

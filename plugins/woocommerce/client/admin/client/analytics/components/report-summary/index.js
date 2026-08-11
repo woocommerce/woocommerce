@@ -14,7 +14,11 @@ import {
 	SummaryNumber,
 } from '@woocommerce/components';
 import { calculateDelta, formatValue } from '@woocommerce/number';
-import { getSummaryNumbers, settingsStore } from '@woocommerce/data';
+import {
+	getSummaryNumbers,
+	settingsStore,
+	usesServerSideSearch,
+} from '@woocommerce/data';
 import { getDateParamsFromQuery } from '@woocommerce/date';
 import { recordEvent } from '@woocommerce/tracks';
 import { CurrencyContext } from '@woocommerce/currency';
@@ -213,7 +217,11 @@ export default compose(
 			( item ) => query[ item ] && query[ item ].length
 		);
 
-		if ( query.search && ! hasLimitByParam ) {
+		if (
+			query.search &&
+			! hasLimitByParam &&
+			! usesServerSideSearch( limitBy )
+		) {
 			return {
 				emptySearchResults: true,
 			};

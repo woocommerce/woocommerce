@@ -7,7 +7,11 @@ import { withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
 import { find } from 'lodash';
 import { getQuery, getSearchWords } from '@woocommerce/navigation';
-import { searchItemsByString, itemsStore } from '@woocommerce/data';
+import {
+	searchItemsByString,
+	itemsStore,
+	usesServerSideSearch,
+} from '@woocommerce/data';
 import { AnalyticsError } from '@woocommerce/components';
 import {
 	CurrencyContext,
@@ -126,7 +130,15 @@ export default compose(
 		}
 
 		const report = getReportParam( props );
-		const searchWords = getSearchWords( query );
+
+		// Every request on the Products Report is limited by products alone, so the report
+		// endpoints resolve the search themselves and there is nothing to hydrate. Other
+		// reports still need the search turned into a list of matching IDs. The Categories
+		// Report is one of them: its single category view limits by category as well.
+		if ( usesServerSideSearch( [ report ] ) ) {
+			return {};
+		}
+
 		// Single category view in Categories Report uses the products endpoint, so search must also.
 		const mappedReport =
 			report === 'categories' && query.filter === 'single_category'
@@ -138,7 +150,7 @@ export default compose(
 		const itemsResult = searchItemsByString(
 			itemsSelector,
 			mappedReport,
-			searchWords,
+			getSearchWords( query ),
 			{
 				per_page: 100,
 			}

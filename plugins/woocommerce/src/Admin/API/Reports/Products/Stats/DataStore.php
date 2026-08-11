@@ -83,9 +83,14 @@ class DataStore extends ProductsDataStore implements DataStoreInterface {
 		$products_from_clause       = '';
 		$order_product_lookup_table = self::get_db_table_name();
 
-		$included_products = $this->get_included_products( $query_args );
-		if ( $included_products ) {
-			$products_where_clause .= " AND {$order_product_lookup_table}.product_id IN ({$included_products})";
+		$search_subquery = $this->get_product_search_subquery( $query_args );
+		if ( $search_subquery ) {
+			$products_where_clause .= " AND {$order_product_lookup_table}.product_id IN ({$search_subquery})";
+		} else {
+			$included_products = $this->get_included_products( $query_args );
+			if ( $included_products ) {
+				$products_where_clause .= " AND {$order_product_lookup_table}.product_id IN ({$included_products})";
+			}
 		}
 
 		$included_variations = $this->get_included_variations( $query_args );

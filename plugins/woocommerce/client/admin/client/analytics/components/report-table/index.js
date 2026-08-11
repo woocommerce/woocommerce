@@ -36,6 +36,7 @@ import {
 	reportsStore,
 	useUserPreferences,
 	QUERY_DEFAULTS,
+	usesServerSideSearch,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -72,6 +73,7 @@ const ReportTable = ( props ) => {
 		compareBy,
 		compareParam = 'filter',
 		searchBy,
+		limitProperties,
 		labels = {},
 		...tableProps
 	} = props;
@@ -577,6 +579,7 @@ export default compose(
 			getSummary,
 			isRequesting,
 			itemIdField,
+			limitProperties,
 			query,
 			tableData,
 			tableQuery,
@@ -586,12 +589,19 @@ export default compose(
 			extendedItemsStoreName,
 		} = props;
 
+		const limitBy = limitProperties || [ endpoint ];
+
 		const extendedStoreSelector = extendedItemsStoreName
 			? select( extendedItemsStoreName )
 			: null;
 
+		const hasLimitByParam = limitBy.some(
+			( item ) => query[ item ] && query[ item ].length
+		);
 		const noSearchResultsFound =
-			query.search && ! ( query[ endpoint ] && query[ endpoint ].length );
+			query.search &&
+			! hasLimitByParam &&
+			! usesServerSideSearch( limitBy );
 		if ( isRequesting || noSearchResultsFound ) {
 			return EMPTY_OBJECT;
 		}
@@ -609,6 +619,7 @@ export default compose(
 					selector: reportStoreSelector,
 					dataType: 'primary',
 					query,
+					limitBy,
 					filters,
 					advancedFilters,
 					defaultDateRange,
@@ -621,6 +632,7 @@ export default compose(
 				endpoint,
 				query,
 				selector: reportStoreSelector,
+				limitBy,
 				tableQuery,
 				filters,
 				advancedFilters,

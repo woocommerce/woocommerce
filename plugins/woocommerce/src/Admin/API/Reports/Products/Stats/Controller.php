@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 use Automattic\WooCommerce\Admin\API\Reports\GenericStatsController;
+use Automattic\WooCommerce\Admin\API\Reports\ProductSearchQuery;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -235,6 +236,15 @@ class Controller extends GenericStatsController {
 			'validate_callback' => 'rest_validate_request_arg',
 			'items'             => array(
 				'type' => 'integer',
+			),
+		);
+		$params['search']          = array(
+			'description'       => __( 'Limit result to products whose name or SKU matches any of the given terms.', 'woocommerce' ),
+			'type'              => 'array',
+			'sanitize_callback' => array( ProductSearchQuery::class, 'parse_terms' ),
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'type' => 'string',
 			),
 		);
 		$params['segmentby']       = array(
