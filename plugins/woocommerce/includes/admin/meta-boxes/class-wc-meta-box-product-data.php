@@ -473,10 +473,16 @@ class WC_Meta_Box_Product_Data {
 	 * @param WC_Product $product External product object.
 	 */
 	private static function persist_external_product_stock_data( WC_Product $product ): void {
+		$was_out_of_stock = has_term( ProductStockStatus::OUT_OF_STOCK, 'product_visibility', $product->get_id() );
+
 		update_post_meta( $product->get_id(), '_manage_stock', 'no' );
 		update_post_meta( $product->get_id(), '_stock_status', ProductStockStatus::IN_STOCK );
 		update_post_meta( $product->get_id(), '_backorders', 'no' );
-		wp_remove_object_terms( $product->get_id(), ProductStockStatus::OUT_OF_STOCK, 'product_visibility' );
+		$removed_out_of_stock = wp_remove_object_terms( $product->get_id(), ProductStockStatus::OUT_OF_STOCK, 'product_visibility' );
+
+		if ( $was_out_of_stock && ! is_wp_error( $removed_out_of_stock ) && 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+			_wc_recount_terms_by_product( $product->get_id() );
+		}
 
 		/**
 		 * Product data store.
