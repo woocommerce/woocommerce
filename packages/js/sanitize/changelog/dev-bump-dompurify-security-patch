@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update the dompurify dependency to a version that resolves reported security advisories.
