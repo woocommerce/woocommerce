@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7a6afec806289ea14cef6c4f425151de",
+    "content-hash": "fea8cee5a54322fb06559c14bf64d347",
     "packages": [
         {
             "name": "automattic/block-delimiter",
@@ -1070,16 +1070,16 @@
         },
         {
             "name": "woocommerce/action-scheduler",
-            "version": "4.0.0",
+            "version": "4.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/action-scheduler.git",
-                "reference": "7321e865436e125a997de5ad95bdc8821c5a53e3"
+                "reference": "40a3df93a251590c58717b91b1049a13410e2ac4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/7321e865436e125a997de5ad95bdc8821c5a53e3",
-                "reference": "7321e865436e125a997de5ad95bdc8821c5a53e3",
+                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/40a3df93a251590c58717b91b1049a13410e2ac4",
+                "reference": "40a3df93a251590c58717b91b1049a13410e2ac4",
                 "shasum": ""
             },
             "require": {
@@ -1087,16 +1087,20 @@
             },
             "require-dev": {
                 "phpunit/phpunit": "^8.5",
-                "woocommerce/woocommerce-sniffs": "0.1.0",
+                "sirbrillig/phpcs-changed": "^2.11",
+                "woocommerce/woocommerce-sniffs": "^1.0.1",
                 "wp-cli/wp-cli": "~2.5.0",
                 "yoast/phpunit-polyfills": "^2.0"
             },
             "type": "wordpress-plugin",
             "extra": {
                 "scripts-description": {
+                    "lint": "Run phpcs against PHP files with unstaged changes",
                     "test": "Run unit tests",
                     "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
-                    "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
+                    "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier",
+                    "lint-branch": "Run phpcs against PHP files changed on the current branch compared to its base branch",
+                    "lint-staged": "Run phpcs against PHP files with staged changes"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -1107,9 +1111,9 @@
             "homepage": "https://actionscheduler.org/",
             "support": {
                 "issues": "https://github.com/woocommerce/action-scheduler/issues",
-                "source": "https://github.com/woocommerce/action-scheduler/tree/4.0.0"
+                "source": "https://github.com/woocommerce/action-scheduler/tree/4.1.0"
             },
-            "time": "2026-06-16T15:01:01+00:00"
+            "time": "2026-08-05T21:19:48+00:00"
         },
         {
             "name": "woocommerce/blueprint",
