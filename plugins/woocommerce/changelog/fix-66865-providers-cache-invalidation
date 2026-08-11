@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Clear cached payment provider lists when the payment providers service cache is cleared.

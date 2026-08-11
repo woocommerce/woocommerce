@@ -1140,16 +1140,22 @@ class WCEmailTemplateAutoApplierTest extends \WC_Unit_Test_Case {
 	 * @return int The generated post ID.
 	 */
 	private function generate_stamped_post( string $email_id ): int {
-		$this->register_fixture_email( $email_id );
+		$email = $this->register_fixture_email( $email_id );
 
 		$generator = new WCTransactionalEmailPostsGenerator();
-		$generator->init_default_transactional_emails();
-		$this->posts_manager->delete_email_template( $email_id );
+		$post_id   = $generator->create_draft( $email );
 
-		$post_id = $generator->generate_email_template_if_not_exists( $email_id );
-
-		$this->assertIsInt( $post_id );
 		$this->assertGreaterThan( 0, $post_id );
+
+		wp_update_post(
+			array(
+				'ID'          => $post_id,
+				'post_status' => 'publish',
+			)
+		);
+		// Integration's transition_post_status hook is not registered in the
+		// unit-test bootstrap, so write the email_type => post_id mapping explicitly.
+		$this->posts_manager->save_email_template_post_id( $email_id, $post_id );
 
 		return $post_id;
 	}

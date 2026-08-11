@@ -5,9 +5,6 @@
 }
 
 .woocommerce-coming-soon-default {
-	// This is default font family when no font family is selected. Users can override this in the block settings.
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-		Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 	min-width: 320px;
 	// Set the background color to the coming soon color since some themes may have a different background color.
 	--cover--color-background: var(--woocommerce-coming-soon-color);
@@ -67,4 +64,17 @@
 		/* Set ratio to 1:1 so height is always equal to width for the preview. */
 		aspect-ratio: 1 / 1;
 	}
+}
+
+.woocommerce-coming-soon-header-logo-title {
+	min-width: 0;
+}
+
+.woocommerce-coming-soon-header-login {
+	flex-shrink: 0;
+	min-width: 0;
+}
+
+.woocommerce-coming-soon-header-logo-title .wp-block-site-title {
+	font-size: clamp(var(--wp--preset--font-size--medium), 3.5vw, var(--wp--preset--font-size--x-large));
 }

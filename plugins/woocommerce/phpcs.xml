@@ -17,6 +17,8 @@
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 	<exclude-pattern>lib/</exclude-pattern>
 	<exclude-pattern>php-stubs/</exclude-pattern>
+	<!-- Custom PHPCS sniffs: must follow the PHP_CodeSniffer API naming, not WordPress'. -->
+	<exclude-pattern>bin/phpcs/</exclude-pattern>
 	<!-- GraphQL test fixtures used only by unit tests. -->
 	<exclude-pattern>tests/php/src/Internal/Api/Fixtures/</exclude-pattern>
 	<!-- Fixture PHP files used in e2e tests. -->
@@ -51,6 +53,13 @@
 	<rule ref="tests/Tools/phpcs/WooCommerceInternal/Sniffs/DB/IdentifierPlaceholderSniff.php">
 		<include-pattern>src/</include-pattern>
 		<include-pattern>includes/</include-pattern>
+  </rule>  
+    
+	<!-- The cart token selects which customer session loads; it must be read from one place only. -->
+	<rule ref="./bin/phpcs/WooCommerceStoreApi/Sniffs/StoreApi/CartTokenSourceSniff.php">
+		<!-- The canonical accessor, and tests that simulate raw request headers. -->
+		<exclude-pattern>src/StoreApi/Utilities/CartTokenUtils.php</exclude-pattern>
+		<exclude-pattern>tests/</exclude-pattern>
 	</rule>
 
 	<rule ref="WooCommerce.Functions.InternalInjectionMethod">

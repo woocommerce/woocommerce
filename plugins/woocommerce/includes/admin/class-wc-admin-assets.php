@@ -519,7 +519,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 			// Products.
 			if ( in_array( $screen_id, array( 'edit-product' ) ) ) {
-				wp_enqueue_script( 'woocommerce_quick-edit', WC()->plugin_url() . '/assets/js/admin/quick-edit' . $suffix . '.js', array( 'jquery', 'woocommerce_admin' ), $version );
+				wp_enqueue_script( 'jquery-ui-datepicker' );
+				wp_enqueue_script( 'woocommerce_quick-edit', WC()->plugin_url() . '/assets/js/admin/quick-edit' . $suffix . '.js', array( 'jquery', 'woocommerce_admin' ), $version, false );
 
 				$params = array(
 					'strings' => array(
