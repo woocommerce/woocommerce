@@ -214,6 +214,60 @@ describe( 'StoreNoticesContainer', () => {
 		} );
 	} );
 
+	it( 'Renders a single notice with the same list markup as multiple notices', async () => {
+		dispatch( noticesStore ).createErrorNotice( 'Single list error', {
+			id: 'single-list-error',
+			context: 'test-context',
+		} );
+		const { container, rerender } = render(
+			<StoreNoticesContainer context="test-context" />
+		);
+		const singleList = container.querySelectorAll(
+			'.wc-block-components-notice-banner__list'
+		);
+		expect( singleList ).toHaveLength( 1 );
+		expect( singleList[ 0 ].getAttribute( 'role' ) ).toBe( 'list' );
+		expect( singleList[ 0 ].querySelectorAll( 'li' ) ).toHaveLength( 1 );
+		expect(
+			screen.getAllByText(
+				/Please fix the following error before continuing/i
+			).length
+		).toBeGreaterThan( 0 );
+
+		await act( () =>
+			dispatch( noticesStore ).createErrorNotice( 'Second list error', {
+				id: 'second-list-error',
+				context: 'test-context',
+			} )
+		);
+		rerender( <StoreNoticesContainer context="test-context" /> );
+
+		const multipleList = container.querySelectorAll(
+			'.wc-block-components-notice-banner__list'
+		);
+		expect( multipleList ).toHaveLength( 1 );
+		expect( multipleList[ 0 ].querySelectorAll( 'li' ) ).toHaveLength( 2 );
+		expect(
+			screen.getAllByText(
+				/Please fix the following errors before continuing/i
+			).length
+		).toBeGreaterThan( 0 );
+
+		// Clean up notices.
+		await act( () =>
+			dispatch( noticesStore ).removeNotice(
+				'single-list-error',
+				'test-context'
+			)
+		);
+		await act( () =>
+			dispatch( noticesStore ).removeNotice(
+				'second-list-error',
+				'test-context'
+			)
+		);
+	} );
+
 	it( 'Combine same notices from several contexts', async () => {
 		dispatch( noticesStore ).createErrorNotice( 'Custom generic error', {
 			id: 'custom-subcontext-test-error',
