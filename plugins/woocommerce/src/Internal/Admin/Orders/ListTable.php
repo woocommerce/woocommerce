@@ -504,25 +504,43 @@ class ListTable extends WP_List_Table {
 	}
 
 	/**
-	 * Implements date (month-based) filtering.
+	 * Implements date filtering.
+	 *
+	 * The 'm' query arg is accepted at month (YYYYMM) or day (YYYYMMDD) granularity. The date field being filtered
+	 * defaults to 'date_created' and can be changed via the 'order_date_type' query arg, which is how Analytics
+	 * reports link to orders paid or completed on a given day.
 	 */
 	private function set_date_args() {
-		$year_month = sanitize_text_field( wp_unslash( $_GET['m'] ?? '' ) );
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$date_value = sanitize_text_field( wp_unslash( $_GET['m'] ?? '' ) );
 
-		if ( empty( $year_month ) || ! preg_match( '/^[0-9]{6}$/', $year_month ) ) {
+		if ( empty( $date_value ) || ! preg_match( '/^([0-9]{4})([0-9]{2})([0-9]{2})?$/', $date_value, $matches ) ) {
 			return;
 		}
 
-		$year  = (int) substr( $year_month, 0, 4 );
-		$month = (int) substr( $year_month, 4, 2 );
+		$year  = (int) $matches[1];
+		$month = (int) $matches[2];
+		$day   = isset( $matches[3] ) ? (int) $matches[3] : null;
 
-		if ( $month < 0 || $month > 12 ) {
+		if ( ! checkdate( $month, $day ?? 1, $year ) ) {
 			return;
 		}
 
-		$last_day_of_month                      = date_create( "$year-$month" )->format( 'Y-m-t' );
-		$this->order_query_args['date_created'] = "$year-$month-01..." . $last_day_of_month;
-		$this->has_filter                       = true;
+		$date_type = sanitize_text_field( wp_unslash( $_GET['order_date_type'] ?? '' ) );
+		if ( ! in_array( $date_type, array( 'date_created', 'date_paid', 'date_completed' ), true ) ) {
+			$date_type = 'date_created';
+		}
+
+		if ( is_null( $day ) ) {
+			$date_start = sprintf( '%04d-%02d-01', $year, $month );
+			$date_end   = date_create( $date_start )->format( 'Y-m-t' );
+		} else {
+			$date_start = sprintf( '%04d-%02d-%02d', $year, $month, $day );
+			$date_end   = $date_start;
+		}
+
+		$this->order_query_args[ $date_type ] = "$date_start...$date_end";
+		$this->has_filter                     = true;
 	}
 
 	/**
