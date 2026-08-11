@@ -293,6 +293,10 @@ class Translations {
 
 		$access_type = get_filesystem_method();
 		if ( 'direct' === $access_type ) {
+			// Skip the combine work when the file could never be saved anyway.
+			if ( ! wp_is_writable( $lang_dir ) ) {
+				return;
+			}
 			\WP_Filesystem();
 			$this->build_and_save_translations( $lang_dir, self::$plugin_domain, $locale );
 		} else {
