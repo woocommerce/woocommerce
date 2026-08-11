@@ -245,6 +245,58 @@ class BootstrapTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The wc/v3 product response carries the rendered output of a description block, not empty markup.
+	 */
+	public function test_products_rest_response_contains_rendered_block_output(): void {
+		// The accordion renders complete markup server-side with no post or cart context, so it works in a
+		// REST request; blocks like mini-cart or product-price render empty there regardless of registration
+		// and cannot show the difference. Same block the manual testing instructions use.
+		$markup = <<<'HTML'
+<!-- wp:woocommerce/accordion-group -->
+<div class="wp-block-woocommerce-accordion-group"><!-- wp:woocommerce/accordion-item -->
+<div class="wp-block-woocommerce-accordion-item"><!-- wp:woocommerce/accordion-header -->
+<h3 class="wp-block-woocommerce-accordion-header accordion-item__heading"><button class="accordion-item__toggle"><span>Care instructions</span><span class="accordion-item__toggle-icon" style="width:1.2em;height:1.2em"></span></button></h3>
+<!-- /wp:woocommerce/accordion-header -->
+
+<!-- wp:woocommerce/accordion-panel -->
+<div class="wp-block-woocommerce-accordion-panel"><div class="accordion-content__wrapper"><!-- wp:paragraph -->
+<p>Machine wash cold, tumble dry low.</p>
+<!-- /wp:paragraph --></div></div>
+<!-- /wp:woocommerce/accordion-panel --></div>
+<!-- /wp:woocommerce/accordion-item --></div>
+<!-- /wp:woocommerce/accordion-group -->
+HTML;
+
+		$product = new \WC_Product_Simple();
+		$product->set_short_description( $markup );
+		$product->save();
+
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		$response = rest_do_request( new \WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() ) );
+
+		$this->assertSame( 200, $response->get_status(), 'The products REST request should succeed.' );
+
+		$short_description = $response->get_data()['short_description'] ?? '';
+		$this->assertStringContainsString(
+			'data-wp-interactive="woocommerce/accordion"',
+			$short_description,
+			'The short description should contain the accordion markup processed by its render callback.'
+		);
+		$this->assertStringContainsString(
+			'Machine wash cold, tumble dry low.',
+			$short_description,
+			'The short description should contain the accordion panel content.'
+		);
+		$this->assertStringNotContainsString(
+			'<!-- wp:',
+			$short_description,
+			'The serialized block comments should have been consumed by do_blocks.'
+		);
+
+		$product->delete( true );
+	}
+
+	/**
 	 * @testdox Fetching the cart through the Store API registers block types on demand for an item's description.
 	 */
 	public function test_store_api_cart_request_registers_block_types_on_demand(): void {
