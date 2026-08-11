@@ -1019,10 +1019,10 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	/**
 	 * Generates a virtual table given a list of IDs.
 	 *
-	 * @param array $ids          Array of IDs.
-	 * @param array $id_field     Name of the ID field.
-	 * @param array $other_values Other values that must be contained in the virtual table.
-	 * @return array
+	 * @param array  $ids          Array of IDs.
+	 * @param string $id_field     Name of the ID field.
+	 * @param array  $other_values Other values that must be contained in the virtual table.
+	 * @return string
 	 */
 	protected function get_ids_table( $ids, $id_field, $other_values = array() ) {
 		global $wpdb;
