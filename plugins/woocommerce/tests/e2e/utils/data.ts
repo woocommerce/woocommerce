@@ -79,12 +79,6 @@ function getFakeTermName() {
 	) }`;
 }
 
-export function getFakeBrand() {
-	return {
-		name: `Brand ${ getFakeTermName() }`,
-	};
-}
-
 // A unique product tag name, so parallel workers don't share global terms.
 export function getFakeTag() {
 	return {
