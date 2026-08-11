@@ -1735,7 +1735,10 @@ function wc_get_price_to_display( $product, $args = array() ) {
  * @param string $sep (default: ', ').
  * @param string $before (default: '').
  * @param string $after (default: '').
- * @param string $orderby Optional ordering mode. Supports 'name' and 'breadcrumb'. Default empty string preserves WordPress term-list order.
+ * @param string $orderby Optional ordering mode. Use 'name' to naturally order assigned terms by name, or
+ *                        'breadcrumb' to order assigned terms by ancestry path, comparing category order,
+ *                        natural name, and term ID at each level. Default empty string preserves WordPress
+ *                        term-list order.
  * @return string|false|WP_Error
  */
 function wc_get_product_category_list( $product_id, $sep = ', ', $before = '', $after = '', $orderby = '' ) {
