@@ -96,6 +96,7 @@ class WC_Validation_Test extends \WC_Unit_Test_Case {
 			array( false, '10500', 'LV' ),
 			array( false, 'ZZ-1050', 'LV' ),
 			array( false, 'LV-ABCD', 'LV' ),
+			array( false, "LV-1050\n", 'LV' ),
 		);
 
 		return array_merge( $cz, $se, $li, $lv );
