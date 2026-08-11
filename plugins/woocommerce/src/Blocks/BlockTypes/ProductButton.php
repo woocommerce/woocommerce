@@ -165,10 +165,15 @@ class ProductButton extends AbstractBlock {
 		);
 
 		if ( 'a' === $html_element ) {
-			$attributes = array(
-				'href' => esc_url( $product->add_to_cart_url() ),
-				'rel'  => 'nofollow',
+			$add_to_cart_url = $product->add_to_cart_url();
+			$attributes      = array(
+				'href' => esc_url( $add_to_cart_url ),
+				'rel'  => '',
 			);
+
+			if ( $product->get_permalink() !== $add_to_cart_url ) {
+				$attributes['rel'] = 'nofollow';
+			}
 
 			if ( $product->is_type( ProductType::EXTERNAL ) ) {
 				$attributes['target'] = '_blank';
@@ -291,7 +296,7 @@ class ProductButton extends AbstractBlock {
 				'{context_directives}'     => $context_directives,
 				'{button_styles}'          => esc_attr( $styles_and_classes['styles'] ),
 				'{attributes}'             => isset( $args['attributes'] ) ? wc_implode_html_attributes( $args['attributes'] ) : '',
-				'{add_to_cart_text}'       => $is_ajax_button ? '' : $add_to_cart_text,
+				'{add_to_cart_text}'       => $is_ajax_button ? '' : esc_html( $add_to_cart_text ),
 				'{div_directives}'         => $is_ajax_button ? $div_directives : '',
 				'{button_directives}'      => $is_ajax_button ? $button_directives : $anchor_directive,
 				'{span_button_directives}' => $is_ajax_button ? $span_button_directives : '',

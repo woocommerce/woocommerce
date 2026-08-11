@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Only enqueue the block notice styles (wc-blocks-style) on classic themes when block notices are actually in use.

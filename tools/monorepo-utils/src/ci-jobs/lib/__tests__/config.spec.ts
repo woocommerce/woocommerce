@@ -149,6 +149,32 @@ describe( 'Config', () => {
 			} );
 		} );
 
+		it( 'should support extglob negation in changes patterns', () => {
+			const parsed = parseCIConfig( {
+				name: 'foo',
+				config: {
+					ci: {
+						tests: [
+							{
+								name: 'default',
+								changes: 'foo/{*,!(bar)/**}',
+								command: 'foo',
+							},
+						],
+					},
+				},
+			} );
+
+			// changes[ 0 ] is the implicit `package.json` glob.
+			const changes = parsed.jobs[ 0 ].changes[ 1 ];
+
+			expect( changes.test( 'foo/file.ts' ) ).toBe( true );
+			expect( changes.test( 'foo/baz/file.ts' ) ).toBe( true );
+			expect( changes.test( 'foo/baz/deep/file.ts' ) ).toBe( true );
+			expect( changes.test( 'foo/bar/file.ts' ) ).toBe( false );
+			expect( changes.test( 'foo/bar/deep/file.ts' ) ).toBe( false );
+		} );
+
 		it( 'should parse test config with environment', () => {
 			const parsed = parseCIConfig( {
 				name: 'foo',

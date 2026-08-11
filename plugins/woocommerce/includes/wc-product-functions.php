@@ -444,8 +444,15 @@ function wc_placeholder_img_src( $size = 'woocommerce_thumbnail' ) {
  * @return string
  */
 function wc_placeholder_img( $size = 'woocommerce_thumbnail', $attr = '' ) {
-	$dimensions        = wc_get_image_size( $size );
-	$placeholder_image = get_option( 'woocommerce_placeholder_image', 0 );
+	$dimensions           = wc_get_image_size( $size );
+	$placeholder_image    = get_option( 'woocommerce_placeholder_image', 0 );
+	$use_attachment_image = wp_attachment_is_image( $placeholder_image );
+	$image                = null;
+
+	if ( $use_attachment_image && has_filter( 'woocommerce_placeholder_img_src' ) ) {
+		$image                = wc_placeholder_img_src( $size );
+		$use_attachment_image = wp_get_attachment_image_url( $placeholder_image, $size ) === $image;
+	}
 
 	$default_attr = array(
 		'class' => 'woocommerce-placeholder wp-post-image',
@@ -454,7 +461,7 @@ function wc_placeholder_img( $size = 'woocommerce_thumbnail', $attr = '' ) {
 
 	$attr = wp_parse_args( $attr, $default_attr );
 
-	if ( wp_attachment_is_image( $placeholder_image ) ) {
+	if ( $use_attachment_image ) {
 		$image_html = wp_get_attachment_image(
 			$placeholder_image,
 			$size,
@@ -462,7 +469,8 @@ function wc_placeholder_img( $size = 'woocommerce_thumbnail', $attr = '' ) {
 			$attr
 		);
 	} else {
-		$image      = wc_placeholder_img_src( $size );
+		// A changed source cannot use the attachment's srcset, as the browser could select it instead.
+		$image      = $image ?? wc_placeholder_img_src( $size );
 		$hwstring   = image_hwstring( $dimensions['width'], $dimensions['height'] );
 		$attributes = array();
 
@@ -473,7 +481,18 @@ function wc_placeholder_img( $size = 'woocommerce_thumbnail', $attr = '' ) {
 		$image_html = '<img src="' . esc_url( $image ) . '" ' . $hwstring . implode( ' ', $attributes ) . '/>';
 	}
 
-	return apply_filters( 'woocommerce_placeholder_img', $image_html, $size, $dimensions );
+	/**
+	 * Filters the placeholder image HTML.
+	 *
+	 * @param string $image_html The placeholder image HTML.
+	 * @param string $size       Image size.
+	 * @param array  $dimensions Image width and height.
+	 * @param array  $attr       Attributes for the image markup.
+	 *
+	 * @since 2.0.0
+	 * @since 11.1.0 Added the `$attr` parameter.
+	 */
+	return apply_filters( 'woocommerce_placeholder_img', $image_html, $size, $dimensions, $attr );
 }
 
 /**
@@ -1817,9 +1836,9 @@ function wc_get_product_category_list( $product_id, $sep = ', ', $before = '', $
 			$path            = array();
 			$current_term_id = $term->term_id;
 
-			while ( $current_term_id && ! isset( $path[ $current_term_id ] ) ) {
+			while ( $current_term_id && isset( $term_parents[ $current_term_id ] ) && ! isset( $path[ $current_term_id ] ) ) {
 				$path[ $current_term_id ] = $current_term_id;
-				$current_term_id          = $term_parents[ $current_term_id ] ?? 0;
+				$current_term_id          = $term_parents[ $current_term_id ];
 			}
 
 			$term_paths[ $term->term_id ] = array_reverse( array_values( $path ) );
@@ -1880,6 +1899,14 @@ function wc_get_product_category_list( $product_id, $sep = ', ', $before = '', $
 	 * @param string[] $links An array of term links.
 	 */
 	$term_links = apply_filters( 'term_links-product_cat', $links ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
+
+	if ( is_wp_error( $term_links ) ) {
+		return $term_links;
+	}
+
+	if ( ! is_array( $term_links ) ) {
+		return false;
+	}
 
 	return $before . implode( $sep, $term_links ) . $after;
 }
@@ -2406,7 +2433,7 @@ function wc_product_attach_featured_image( $attachment_id, $product = null, $sav
 		$product    = wc_get_product( $product_id );
 	}
 
-	if ( ! $product ) {
+	if ( ! $product || ! current_user_can( 'edit_product', $product->get_id() ) ) {
 		return;
 	}
 

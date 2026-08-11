@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+NOX onboarding: keep reporting the test account step as completed after it was skipped forward, so merchants are not routed back into it when the platform fell back to an account that requires verification.

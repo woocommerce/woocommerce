@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Stop re-sending customer order email notifications when restoring orders from the trash.

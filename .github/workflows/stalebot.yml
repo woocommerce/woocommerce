@@ -18,7 +18,7 @@ jobs:
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         steps:
             - name: Process stale issues and PRs
-              uses: actions/stale@v9.0.0
+              uses: actions/stale@5f858e3efba33a5ca4407a664cc011ad407f2008 # v10.1.0
               with:
                   repo-token: ${{ secrets.GITHUB_TOKEN }}
                   stale-issue-message: "As a part of this repository's maintenance, this issue is being marked as stale due to inactivity. Please feel free to comment on it in case we missed something.\n\n###### After 7 days with no activity this issue will be automatically closed."
