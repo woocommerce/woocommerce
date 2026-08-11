@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Guard the fake WC Calypso Bridge functions declared in tests, collect the LegacyProxy get_global test that was never running, and reset the REST server global the Store API controller tests replace.

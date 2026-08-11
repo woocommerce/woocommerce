@@ -701,6 +701,32 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test that a malformed caption cannot be completed by the wrapper markup.
+	 *
+	 * The renderer appends "</div>" after the sanitized caption, which a browser
+	 * consumes as part of any tag the caption leaves open. The sanitized caption
+	 * therefore has to be complete markup on its own, so that the wrapper cannot
+	 * turn a fragment into a live element in the browser-rendered editor preview.
+	 */
+	public function test_malformed_caption_does_not_survive_into_output(): void {
+		$parsed_embed = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'url'              => 'https://example.com/some-content',
+				'providerNameSlug' => 'unsupported',
+			),
+			'innerHTML' => '<figure class="wp-block-embed"><div class="wp-block-embed__wrapper">https://example.com/some-content</div><figcaption class="wp-element-caption">caption<img src=x onerror="alert(1)"</figcaption></figure>',
+		);
+
+		$rendered = $this->embed_renderer->render( $parsed_embed['innerHTML'], $parsed_embed, $this->rendering_context );
+
+		// The caption text is wrapped and appended, and the <img> is gone however
+		// the sanitizer disposed of it, so the trailing "</div>" completes nothing.
+		$this->assertStringContainsString( '<div style="text-align: center; margin-top: 8px;">caption', $rendered );
+		$this->assertStringNotContainsString( '<img', $rendered );
+	}
+
+	/**
 	 * Test that VideoPress embed is detected and renders as video player, including handling URLs with query parameters.
 	 */
 	public function test_renders_videopress_embed(): void {

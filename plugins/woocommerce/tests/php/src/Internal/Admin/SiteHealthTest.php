@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Admin;
 
 use Automattic\WooCommerce\Internal\Admin\SiteHealth;
+use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
+use WC_Admin_Notices;
 use WC_Unit_Test_Case;
 use WP_Error;
 
@@ -25,6 +27,8 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 		parent::setUp();
 		$this->sut = new SiteHealth();
 		delete_transient( '_woocommerce_upload_directory_status' );
+		delete_option( 'wc_downloads_approved_directories_mode' );
+		WC_Admin_Notices::remove_notice( 'download_directories_sync_complete', true );
 	}
 
 	/**
@@ -32,7 +36,60 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		delete_transient( '_woocommerce_upload_directory_status' );
+		delete_option( 'wc_downloads_approved_directories_mode' );
+		WC_Admin_Notices::remove_notice( 'download_directories_sync_complete', true );
 		parent::tearDown();
+	}
+
+	/**
+	 * @testdox Approved download directories check is good when rules are enforced.
+	 */
+	public function test_approved_download_directories_check_is_good_when_rules_are_enforced(): void {
+		wc_get_container()->get( Download_Directories::class )->set_mode( Download_Directories::MODE_ENABLED );
+
+		$result = $this->sut->run_test( 'woocommerce_approved_download_directories_enforcement' );
+
+		$this->assertSame( 'good', $result['status'], 'Enabled approved directory rules should pass the Site Health check.' );
+		$this->assertSame( 'WooCommerce approved download directory rules are enforced', $result['label'], 'The result should report that approved directory rules are enforced.' );
+	}
+
+	/**
+	 * @testdox Approved download directories check recommends enabling rules when they are not enforced.
+	 */
+	public function test_approved_download_directories_check_recommends_enabling_rules_when_not_enforced(): void {
+		$result = $this->sut->run_test( 'woocommerce_approved_download_directories_enforcement' );
+
+		$this->assertSame( 'recommended', $result['status'], 'Disabled approved directory rules should require attention in Site Health.' );
+		$this->assertSame( 'WooCommerce approved download directory rules are not enforced', $result['label'], 'The result should report that approved directory rules are not enforced.' );
+		$this->assertSame( '<p>Enable approved download directory rules to control which local and remote locations can be used for downloadable product files. This reduces the risk of exposing unintended files or connecting to unapproved remote locations.</p>', $result['description'], 'The result should explain why approved directory rules should be enabled.' );
+		$this->assertStringContainsString( 'section=download_urls', $result['actions'], 'The result should link to the approved directory settings.' );
+	}
+
+	/**
+	 * @testdox Approved download directories check recommends review after synchronization when rules are enforced.
+	 */
+	public function test_approved_download_directories_check_recommends_review_after_synchronization(): void {
+		wc_get_container()->get( Download_Directories::class )->set_mode( Download_Directories::MODE_ENABLED );
+		WC_Admin_Notices::add_notice( 'download_directories_sync_complete', true );
+
+		$result = $this->sut->run_test( 'woocommerce_approved_download_directories_sync' );
+
+		$this->assertSame( 'recommended', $result['status'], 'A completed synchronization should require review even when approved directory rules are enforced.' );
+		$this->assertSame( 'WooCommerce approved download directories need review', $result['label'], 'The result should prompt the merchant to review synchronized directories.' );
+		$this->assertSame( '<p>Approved product download directory synchronization has completed. Review the list to confirm downloadable product files remain protected.</p>', $result['description'], 'The result should describe synchronization completion without claiming that new directories were found.' );
+		$this->assertStringContainsString( 'section=download_urls', $result['actions'], 'The result should link to the approved directory settings.' );
+		$this->assertStringContainsString( 'wc-hide-notice=download_directories_sync_complete', $result['actions'], 'The result should let the merchant mark the synchronization as reviewed.' );
+	}
+
+	/**
+	 * @testdox Approved download directories check is good when no synchronization is waiting for review.
+	 */
+	public function test_approved_download_directories_check_is_good_without_completed_synchronization(): void {
+		$result = $this->sut->run_test( 'woocommerce_approved_download_directories_sync' );
+
+		$this->assertSame( 'good', $result['status'], 'No completed synchronization should require review.' );
+		$this->assertSame( 'WooCommerce approved download directories do not require review', $result['label'], 'The result should confirm that synchronized directories do not require review.' );
+		$this->assertSame( '<p>There is no completed approved download directory synchronization waiting for review.</p>', $result['description'], 'The result should confirm that no synchronization review is pending.' );
 	}
 
 	/**
