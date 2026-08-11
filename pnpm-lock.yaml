@@ -222,8 +222,8 @@ importers:
         specifier: next
         version: 8.43.1-next.v.202604091042.0
       lodash:
-        specifier: ^4.17.21
-        version: 4.17.21
+        specifier: ^4.18.1
+        version: 4.18.1
       wp-textdomain:
         specifier: 1.0.1
         version: 1.0.1
@@ -542,8 +542,8 @@ importers:
         specifier: ^3.4.2
         version: 3.4.2(react@18.3.1)
       lodash:
-        specifier: ^4.17.0
-        version: 4.17.21
+        specifier: ^4.18.1
+        version: 4.18.1
       memoize-one:
         specifier: ^6.0.0
         version: 6.0.0
@@ -1068,8 +1068,8 @@ importers:
         specifier: ^3.2.0
         version: 3.2.0(date-fns@4.1.0)
       lodash:
-        specifier: ^4.17.0
-        version: 4.17.21
+        specifier: ^4.18.1
+        version: 4.18.1
       moment:
         specifier: ^2.29.4
         version: 2.30.1
@@ -1317,8 +1317,8 @@ importers:
         specifier: ^4.3.1
         version: 4.3.1
       lodash:
-        specifier: ^4.17.21
-        version: 4.17.21
+        specifier: ^4.18.1
+        version: 4.18.1
       react:
         specifier: 18.3.x
         version: 18.3.1
@@ -1774,8 +1774,8 @@ importers:
         specifier: catalog:wp-min
         version: 4.33.1
       cookie:
-        specifier: ^0.4.2
-        version: 0.4.2
+        specifier: ^0.7.0
+        version: 0.7.2
       qs:
         specifier: ^6.11.2
         version: 6.15.1
@@ -2056,8 +2056,8 @@ importers:
         specifier: ^5.3.0
         version: 5.3.0
       lodash:
-        specifier: ^4.17.0
-        version: 4.17.21
+        specifier: ^4.18.1
+        version: 4.18.1
       qs:
         specifier: ^6.11.2
         version: 6.15.1
@@ -2132,8 +2132,8 @@ importers:
         specifier: catalog:wp-min
         version: 5.33.1(react@18.3.1)
       lodash:
-        specifier: ^4.17.0
-        version: 4.17.21
+        specifier: ^4.18.1
+        version: 4.18.1
     devDependencies:
       '@babel/core':
         specifier: 7.29.7
@@ -2720,8 +2720,8 @@ importers:
         specifier: 9.8.6
         version: 9.8.6
       axios:
-        specifier: ^0.24.0
-        version: 0.24.0
+        specifier: ^0.33.0
+        version: 0.33.0
       config:
         specifier: 3.3.7
         version: 3.3.7
@@ -3099,8 +3099,8 @@ importers:
         specifier: ^5.3.0
         version: 5.3.0
       lodash:
-        specifier: ^4.17.21
-        version: 4.17.21
+        specifier: ^4.18.1
+        version: 4.18.1
       memize:
         specifier: ^1.1.0
         version: 1.1.0
@@ -3881,8 +3881,8 @@ importers:
         specifier: 13.2.0
         version: 13.2.0(enquirer@2.4.1)
       lodash:
-        specifier: 4.17.21
-        version: 4.17.21
+        specifier: 4.18.1
+        version: 4.18.1
       markdown-it:
         specifier: 13.0.1
         version: 13.0.1
@@ -12540,8 +12540,8 @@ packages:
     resolution: {integrity: sha512-zBQouZixDTbo3jMGqHKyePxYxr1e5W8UdTmBQ7sNtaA9M2bE32daxxPLS/jojhKOHxQ7LWwPjfiwf/fhaJWzlg==}
     engines: {node: '>=4'}
 
-  axios@0.24.0:
-    resolution: {integrity: sha512-Q6cWsys88HoPgAaFAVUb0WpPk0O8iTeisR9IMqy9G8AbO4NlpVknrnQS03zzF9PGAWgO3cgletO3VjV/P7VztA==, tarball: https://registry.npmjs.org/axios/-/axios-0.24.0.tgz}
+  axios@0.33.0:
+    resolution: {integrity: sha512-juz19g7B3UWT9r3+tgRFQf2Bdy6IKDVroiyuVOUrkILVKHpqHL++K1l8ybvfdEP9B/VE72vk8vllbnedVCm/og==, tarball: https://registry.npmjs.org/axios/-/axios-0.33.0.tgz}
 
   axios@1.19.0:
     resolution: {integrity: sha512-ht/iuYZXEjFxLH/Hkezgd7m6JKlHHXEUSneaDz8uZe1Gj5QZtCnpyDsckvAiEnT89OEbCLmnte4R4sn7P0EKFw==, tarball: https://registry.npmjs.org/axios/-/axios-1.19.0.tgz}
@@ -13578,10 +13578,6 @@ packages:
 
   cookie-signature@1.0.7:
     resolution: {integrity: sha512-NXdYc3dLr47pBkpUCHtKSwIOQXLVn8dZEuywboCOJY/osA0wFSLlSawr3KN8qXJEyX66FcONTH8EIlVuK0yyFA==}
-
-  cookie@0.4.2:
-    resolution: {integrity: sha512-aSWTXFzaKWkvHO1Ny/s+ePFpvKsPnjc551iI41v3ny/ow6tBG5Vd+FuqGNhh1LxOmVzOlGUriIlOaokOvhaStA==, tarball: https://registry.npmjs.org/cookie/-/cookie-0.4.2.tgz}
-    engines: {node: '>= 0.6'}
 
   cookie@0.7.2:
     resolution: {integrity: sha512-yki5XnKuf750l50uGTllt6kKILY4nQ1eNIQatoXEByZ5dWgnKqbnqmTrBE5B4N7lrMJKQ2ytWMiTO2o0v6Ew/w==, tarball: https://registry.npmjs.org/cookie/-/cookie-0.7.2.tgz}
@@ -23422,7 +23418,7 @@ snapshots:
       debug: 4.4.3(supports-color@9.4.0)
       gridicons: 3.4.2(react@18.3.1)
       i18n-calypso: 7.4.0(@types/react@18.3.28)(react@18.3.1)
-      lodash: 4.17.21
+      lodash: 4.18.1
       prop-types: 15.8.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -23466,7 +23462,7 @@ snapshots:
       debug: 4.4.3(supports-color@9.4.0)
       gridicons: 3.4.2(react@18.3.1)
       i18n-calypso: 7.4.0(@types/react@18.3.28)(react@18.3.1)
-      lodash: 4.17.21
+      lodash: 4.18.1
       prop-types: 15.8.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -23609,7 +23605,7 @@ snapshots:
       debug: 4.4.3(supports-color@9.4.0)
       gensync: 1.0.0-beta.2
       json5: 2.2.3
-      lodash: 4.17.21
+      lodash: 4.18.1
       resolve: 1.22.12
       semver: 5.7.2
       source-map: 0.5.7
@@ -25474,7 +25470,7 @@ snapshots:
       '@aivenio/tsc-output-parser': 2.1.1
       checkstyle-formatter: 1.1.0
       get-stdin: 8.0.0
-      lodash: 4.17.21
+      lodash: 4.18.1
       yargs: 16.2.0
 
   '@base-ui/react@1.4.1(@date-fns/tz@1.4.1)(@types/react@18.3.28)(date-fns@3.6.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
@@ -28675,7 +28671,7 @@ snapshots:
       '@storybook/theming': 7.5.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/types': 7.5.2
       axe-core: 4.11.3
-      lodash: 4.17.21
+      lodash: 4.18.1
       react-resize-detector: 7.1.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     optionalDependencies:
       react: 18.3.1
@@ -28701,7 +28697,7 @@ snapshots:
       core-js: 3.49.0
       fast-deep-equal: 3.1.3
       global: 4.4.0
-      lodash: 4.17.21
+      lodash: 4.18.1
       polished: 4.3.1
       prop-types: 15.8.1
       react-inspector: 5.1.1(react@18.3.1)
@@ -28725,7 +28721,7 @@ snapshots:
       '@storybook/theming': 7.5.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/types': 7.5.2
       dequal: 2.0.3
-      lodash: 4.17.21
+      lodash: 4.18.1
       polished: 4.3.1
       prop-types: 15.8.1
       react-inspector: 6.0.2(react@18.3.1)
@@ -28789,7 +28785,7 @@ snapshots:
       '@storybook/preview-api': 7.5.2
       '@storybook/theming': 7.5.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/types': 7.5.2
-      lodash: 4.17.21
+      lodash: 4.18.1
       ts-dedent: 2.2.0
     optionalDependencies:
       react: 18.3.1
@@ -28803,7 +28799,7 @@ snapshots:
   '@storybook/addon-controls@7.6.19(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(encoding@0.1.13)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@storybook/blocks': 7.6.19(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(encoding@0.1.13)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      lodash: 4.17.21
+      lodash: 4.18.1
       ts-dedent: 2.2.0
     transitivePeerDependencies:
       - '@types/react'
@@ -29075,7 +29071,7 @@ snapshots:
       core-js: 3.49.0
       fast-deep-equal: 3.1.3
       global: 4.4.0
-      lodash: 4.17.21
+      lodash: 4.18.1
       memoizerific: 1.11.3
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -29109,7 +29105,7 @@ snapshots:
       '@types/lodash': 4.17.24
       color-convert: 2.0.1
       dequal: 2.0.3
-      lodash: 4.17.21
+      lodash: 4.18.1
       markdown-to-jsx: 7.7.17(react@18.3.1)
       memoizerific: 1.11.3
       polished: 4.3.1
@@ -29142,7 +29138,7 @@ snapshots:
       '@types/lodash': 4.17.24
       color-convert: 2.0.1
       dequal: 2.0.3
-      lodash: 4.17.21
+      lodash: 4.18.1
       markdown-to-jsx: 7.7.17(react@18.3.1)
       memoizerific: 1.11.3
       polished: 4.3.1
@@ -29475,7 +29471,7 @@ snapshots:
       core-js: 3.49.0
       fast-deep-equal: 3.1.3
       global: 4.4.0
-      lodash: 4.17.21
+      lodash: 4.18.1
       memoizerific: 1.11.3
       qs: 6.15.1
       react: 18.3.1
@@ -29521,7 +29517,7 @@ snapshots:
       cross-spawn: 7.0.6
       globby: 11.1.0
       jscodeshift: 0.15.2(@babel/preset-env@7.29.7(@babel/core@7.29.7))
-      lodash: 4.17.21
+      lodash: 4.18.1
       prettier: 2.8.8
       recast: 0.23.11
     transitivePeerDependencies:
@@ -29592,7 +29588,7 @@ snapshots:
       ansi-to-html: 0.6.15
       core-js: 3.49.0
       global: 4.4.0
-      lodash: 4.17.21
+      lodash: 4.18.1
       qs: 6.15.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -29620,7 +29616,7 @@ snapshots:
       ansi-to-html: 0.6.15
       core-js: 3.49.0
       global: 4.4.0
-      lodash: 4.17.21
+      lodash: 4.18.1
       qs: 6.15.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -29811,7 +29807,7 @@ snapshots:
       global: 4.4.0
       globby: 11.1.0
       ip: 2.0.1
-      lodash: 4.17.21
+      lodash: 4.18.1
       node-fetch: 2.7.0(encoding@0.1.13)
       open: 8.4.2
       pretty-hrtime: 1.0.3
@@ -29872,7 +29868,7 @@ snapshots:
       fs-extra: 11.1.1
       globby: 11.1.0
       ip: 2.0.1
-      lodash: 4.17.21
+      lodash: 4.18.1
       open: 8.4.2
       pretty-hrtime: 1.0.3
       prompts: 2.4.2
@@ -29986,7 +29982,7 @@ snapshots:
 
   '@storybook/csf@0.0.2--canary.4566f4d.1':
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.18.1
 
   '@storybook/csf@0.1.13':
     dependencies:
@@ -30001,7 +29997,7 @@ snapshots:
       '@storybook/store': 6.5.17-alpha.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       core-js: 3.49.0
       doctrine: 3.0.0
-      lodash: 4.17.21
+      lodash: 4.18.1
       regenerator-runtime: 0.13.11
     transitivePeerDependencies:
       - react
@@ -30015,7 +30011,7 @@ snapshots:
       '@storybook/types': 7.5.2
       '@types/doctrine': 0.0.3
       doctrine: 3.0.0
-      lodash: 4.17.21
+      lodash: 4.18.1
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -30028,7 +30024,7 @@ snapshots:
       '@types/doctrine': 0.0.3
       assert: 2.1.0
       doctrine: 3.0.0
-      lodash: 4.17.21
+      lodash: 4.18.1
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -30046,7 +30042,7 @@ snapshots:
       '@storybook/theming': 7.5.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/types': 7.5.2
       dequal: 2.0.3
-      lodash: 4.17.21
+      lodash: 4.18.1
       memoizerific: 1.11.3
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -30066,7 +30062,7 @@ snapshots:
       '@storybook/theming': 7.6.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/types': 7.6.19
       dequal: 2.0.3
-      lodash: 4.17.21
+      lodash: 4.18.1
       memoizerific: 1.11.3
       store2: 2.14.4
       telejson: 7.2.0
@@ -30137,7 +30133,7 @@ snapshots:
       '@types/lodash': 4.17.24
       js-string-escape: 1.0.1
       loader-utils: 2.0.4
-      lodash: 4.17.21
+      lodash: 4.18.1
       prettier: 2.3.0
       ts-dedent: 2.2.0
     transitivePeerDependencies:
@@ -30268,7 +30264,7 @@ snapshots:
       '@storybook/types': 7.5.2
       '@types/qs': 6.15.0
       dequal: 2.0.3
-      lodash: 4.17.21
+      lodash: 4.18.1
       memoizerific: 1.11.3
       qs: 6.15.1
       synchronous-promise: 2.0.17
@@ -30285,7 +30281,7 @@ snapshots:
       '@storybook/types': 7.6.19
       '@types/qs': 6.15.0
       dequal: 2.0.3
-      lodash: 4.17.21
+      lodash: 4.18.1
       memoizerific: 1.11.3
       qs: 6.15.1
       synchronous-promise: 2.0.17
@@ -30302,7 +30298,7 @@ snapshots:
       '@storybook/types': 7.6.24
       '@types/qs': 6.15.0
       dequal: 2.0.3
-      lodash: 4.17.21
+      lodash: 4.18.1
       memoizerific: 1.11.3
       qs: 6.15.1
       synchronous-promise: 2.0.17
@@ -30320,7 +30316,7 @@ snapshots:
       ansi-to-html: 0.6.15
       core-js: 3.49.0
       global: 4.4.0
-      lodash: 4.17.21
+      lodash: 4.18.1
       qs: 6.15.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -30484,7 +30480,7 @@ snapshots:
       fs-extra: 9.1.0
       global: 4.4.0
       html-tags: 3.3.1
-      lodash: 4.17.21
+      lodash: 4.18.1
       prop-types: 15.8.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -30546,7 +30542,7 @@ snapshots:
       acorn-walk: 7.2.0
       escodegen: 2.1.0
       html-tags: 3.3.1
-      lodash: 4.17.21
+      lodash: 4.18.1
       prop-types: 15.8.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -30577,7 +30573,7 @@ snapshots:
       acorn-walk: 7.2.0
       escodegen: 2.1.0
       html-tags: 3.3.1
-      lodash: 4.17.21
+      lodash: 4.18.1
       prop-types: 15.8.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -30625,7 +30621,7 @@ snapshots:
       '@storybook/csf': 0.1.13
       '@storybook/types': 7.5.2
       estraverse: 5.3.0
-      lodash: 4.17.21
+      lodash: 4.18.1
       prettier: 2.8.8
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -30635,7 +30631,7 @@ snapshots:
       '@storybook/csf': 0.1.13
       '@storybook/types': 7.6.19
       estraverse: 5.3.0
-      lodash: 4.17.21
+      lodash: 4.18.1
       prettier: 2.8.8
 
   '@storybook/store@6.5.17-alpha.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
@@ -30647,7 +30643,7 @@ snapshots:
       core-js: 3.49.0
       fast-deep-equal: 3.1.3
       global: 4.4.0
-      lodash: 4.17.21
+      lodash: 4.18.1
       memoizerific: 1.11.3
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -31026,7 +31022,7 @@ snapshots:
       chalk: 3.0.0
       css.escape: 1.5.1
       dom-accessibility-api: 0.6.3
-      lodash: 4.17.21
+      lodash: 4.18.1
       redent: 3.0.0
     optionalDependencies:
       '@jest/globals': 29.7.0
@@ -33106,7 +33102,7 @@ snapshots:
       downshift: 6.1.12(react@18.3.1)
       gradient-parser: 0.1.5
       highlight-words-core: 1.2.3
-      lodash: 4.17.21
+      lodash: 4.18.1
       memize: 1.1.0
       moment: 2.30.1
       re-resizable: 6.11.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -33897,7 +33893,7 @@ snapshots:
       '@wordpress/keycodes': 3.58.0
       '@wordpress/priority-queue': 2.58.0
       clipboard: 2.0.11
-      lodash: 4.17.21
+      lodash: 4.18.1
       mousetrap: 1.6.5
       react-resize-aware: 3.1.1(react@18.3.1)
       use-memo-one: 1.1.3(react@18.3.1)
@@ -34441,7 +34437,7 @@ snapshots:
       '@wordpress/redux-routine': 4.58.0(redux@4.2.1)
       equivalent-key-map: 0.2.2
       is-promise: 4.0.0
-      lodash: 4.17.21
+      lodash: 4.18.1
       memize: 1.1.0
       redux: 4.2.1
       turbo-combine-reducers: 1.0.2
@@ -35120,7 +35116,7 @@ snapshots:
       '@types/react': 18.3.28
       '@types/react-dom': 16.9.25(@types/react@18.3.28)
       '@wordpress/escape-html': 2.58.0
-      lodash: 4.17.21
+      lodash: 4.18.1
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
 
@@ -36743,7 +36739,7 @@ snapshots:
       '@wordpress/is-shallow-equal': 4.58.0
       '@wordpress/keycodes': 3.58.0
       classnames: 2.5.1
-      lodash: 4.17.21
+      lodash: 4.18.1
       memize: 1.1.0
       rememo: 3.0.0
     transitivePeerDependencies:
@@ -38734,7 +38730,7 @@ snapshots:
 
   async@2.6.4:
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.18.1
 
   async@3.1.1: {}
 
@@ -38807,9 +38803,11 @@ snapshots:
 
   axe-core@4.11.3: {}
 
-  axios@0.24.0:
+  axios@0.33.0:
     dependencies:
       follow-redirects: 1.16.0(debug@4.4.3)
+      form-data: 4.0.6
+      proxy-from-env: 1.1.0
     transitivePeerDependencies:
       - debug
 
@@ -38975,7 +38973,7 @@ snapshots:
   babel-plugin-react-docgen@4.2.1:
     dependencies:
       ast-types: 0.14.2
-      lodash: 4.17.21
+      lodash: 4.18.1
       react-docgen: 5.4.3
     transitivePeerDependencies:
       - supports-color
@@ -40040,7 +40038,7 @@ snapshots:
     dependencies:
       chalk: 4.1.2
       date-fns: 2.30.0
-      lodash: 4.17.21
+      lodash: 4.18.1
       rxjs: 7.8.2
       shell-quote: 1.10.0
       spawn-command: 0.0.2
@@ -40112,8 +40110,6 @@ snapshots:
   cookie-es@3.1.1: {}
 
   cookie-signature@1.0.7: {}
-
-  cookie@0.4.2: {}
 
   cookie@0.7.2: {}
 
@@ -42923,7 +42919,7 @@ snapshots:
 
   graphlib@2.1.8:
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.18.1
 
   graphql-tag@2.12.6(graphql@16.13.2):
     dependencies:
@@ -43361,7 +43357,7 @@ snapshots:
       '@types/webpack': 4.41.40
       html-minifier-terser: 5.1.1
       loader-utils: 1.4.2
-      lodash: 4.17.21
+      lodash: 4.18.1
       pretty-error: 2.1.2
       tapable: 1.1.3
       util.promisify: 1.0.0
@@ -43371,7 +43367,7 @@ snapshots:
     dependencies:
       '@types/html-minifier-terser': 6.1.0
       html-minifier-terser: 6.1.0
-      lodash: 4.17.21
+      lodash: 4.18.1
       pretty-error: 4.0.0
       tapable: 2.3.3
     optionalDependencies:
@@ -43381,7 +43377,7 @@ snapshots:
     dependencies:
       '@types/html-minifier-terser': 6.1.0
       html-minifier-terser: 6.1.0
-      lodash: 4.17.21
+      lodash: 4.18.1
       pretty-error: 4.0.0
       tapable: 2.3.3
     optionalDependencies:
@@ -43662,7 +43658,7 @@ snapshots:
       cli-width: 3.0.0
       external-editor: 3.1.0
       figures: 3.2.0
-      lodash: 4.17.21
+      lodash: 4.18.1
       mute-stream: 0.0.8
       run-async: 2.4.1
       rxjs: 6.6.7
@@ -43678,7 +43674,7 @@ snapshots:
       cli-cursor: 3.1.0
       cli-width: 3.0.0
       figures: 3.2.0
-      lodash: 4.17.21
+      lodash: 4.18.1
       mute-stream: 0.0.8
       ora: 5.4.1
       run-async: 2.4.1
@@ -45706,7 +45702,7 @@ snapshots:
       change-case: 2.3.1
       hjson: 1.8.4
       js-yaml: 3.5.3
-      lodash: 4.17.21
+      lodash: 4.18.1
       therror: 0.2.0
       yargs: 4.8.1
 
@@ -46583,7 +46579,7 @@ snapshots:
       find-yarn-workspace-root: 2.0.0
       fs-extra: 8.1.0
       github-slugger: 1.5.0
-      lodash: 4.17.21
+      lodash: 4.18.1
       normalize-package-data: 3.0.3
       qqjs: 0.3.11
       semver: 7.7.4
@@ -47712,12 +47708,12 @@ snapshots:
 
   pretty-error@2.1.2:
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.18.1
       renderkid: 2.0.7
 
   pretty-error@4.0.0:
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.18.1
       renderkid: 3.0.0
 
   pretty-format@27.5.1:
@@ -48078,7 +48074,7 @@ snapshots:
       airbnb-prop-types: 2.16.0(react@18.3.1)
       consolidated-events: 2.0.2
       is-touch-device: 1.0.1
-      lodash: 4.17.21
+      lodash: 4.18.1
       moment: 2.30.1
       object.assign: 4.1.7
       object.values: 1.2.1
@@ -48101,7 +48097,7 @@ snapshots:
       consolidated-events: 2.0.2
       enzyme-shallow-equal: 1.0.7
       is-touch-device: 1.0.1
-      lodash: 4.17.21
+      lodash: 4.18.1
       moment: 2.30.1
       object.assign: 4.1.7
       object.values: 1.2.1
@@ -48339,7 +48335,7 @@ snapshots:
 
   react-resize-detector@7.1.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.18.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
@@ -48800,7 +48796,7 @@ snapshots:
       css-select: 4.3.0
       dom-converter: 0.2.0
       htmlparser2: 6.1.0
-      lodash: 4.17.21
+      lodash: 4.18.1
       strip-ansi: 3.0.1
 
   renderkid@3.0.0:
@@ -48808,7 +48804,7 @@ snapshots:
       css-select: 4.3.0
       dom-converter: 0.2.0
       htmlparser2: 6.1.0
-      lodash: 4.17.21
+      lodash: 4.18.1
       strip-ansi: 6.0.1
 
   repeat-element@1.1.4: {}
@@ -48829,7 +48825,7 @@ snapshots:
 
   request-promise-core@1.1.4(request@2.88.2):
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.18.1
       request: 2.88.2
 
   request-promise@4.2.6(request@2.88.2):
@@ -50424,7 +50420,7 @@ snapshots:
       is-regex: 1.2.1
       is-symbol: 1.1.1
       isobject: 4.0.0
-      lodash: 4.17.21
+      lodash: 4.18.1
       memoizerific: 1.11.3
 
   telejson@7.2.0:
@@ -51369,7 +51365,7 @@ snapshots:
     dependencies:
       axios: 1.19.0
       joi: 18.2.3
-      lodash: 4.17.21
+      lodash: 4.18.1
       minimist: 1.2.8
       rxjs: 7.8.2
     transitivePeerDependencies:
@@ -52378,7 +52374,7 @@ snapshots:
       inquirer: 8.2.7(@types/node@24.12.2)
       is-scoped: 2.1.0
       isbinaryfile: 4.0.10
-      lodash: 4.17.21
+      lodash: 4.18.1
       log-symbols: 4.1.0
       mem-fs: 2.3.0
       mem-fs-editor: 9.7.0(mem-fs@2.3.0)
@@ -52408,7 +52404,7 @@ snapshots:
       debug: 4.4.3(supports-color@9.4.0)
       execa: 5.1.1
       github-username: 6.0.0(encoding@0.1.13)
-      lodash: 4.17.21
+      lodash: 4.18.1
       mem-fs-editor: 9.7.0(mem-fs@2.3.0)
       minimist: 1.2.8
       pacote: 15.2.0
