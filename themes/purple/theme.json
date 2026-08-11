@@ -524,7 +524,7 @@
 				}
 			},
 			"woocommerce/catalog-sorting": {
-				"css": "& select { font-size: var(--wp--preset--font-size--medium) !important; }",
+				"css": "& select { font-size: var(--wp--preset--font-size--medium) !important; field-sizing: content; }",
 				"typography": {
 					"fontSize": "var(--wp--preset--font-size--medium)"
 				},
