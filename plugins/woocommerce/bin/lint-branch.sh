@@ -8,7 +8,7 @@
 # Example:
 # ./lint-branch.sh base-branch
 #
-# When WC_LINT_CHECKSTYLE_FILE is set and PHPCS finds problems, the findings are also
+# When WC_PHPCS_CHECKSTYLE_FILE is set and PHPCS finds problems, the findings are also
 # written to that path as a checkstyle report, for a workflow step to feed to cs2pr,
 # which turns them into inline annotations on 'Files changed'. See the
 # 'Lint: PHP inline annotations' step in .github/workflows/ci.yml.
@@ -42,11 +42,11 @@ composer exec phpcs-changed -- -s --git --git-base $baseBranch $changedFiles || 
 # echoes back the paths it was given, which are --relative to this directory; stripping
 # the prefix before adding it is a no-op today, but keeps this correct even if upstream
 # ever starts reporting repository-rooted paths.
-if [[ -n $WC_LINT_CHECKSTYLE_FILE && $phpcsStatus -eq 1 ]]; then
+if [[ -n $WC_PHPCS_CHECKSTYLE_FILE && $phpcsStatus -eq 1 ]]; then
     prefix=$(git rev-parse --show-prefix)
     composer exec phpcs-changed -- --git --git-base $baseBranch --report=checkstyle $changedFiles |
         sed -e "s|<file name=\"${prefix}|<file name=\"|g" \
-            -e "s|<file name=\"|<file name=\"${prefix}|g" > "$WC_LINT_CHECKSTYLE_FILE"
+            -e "s|<file name=\"|<file name=\"${prefix}|g" > "$WC_PHPCS_CHECKSTYLE_FILE"
 fi
 
 # Also verify that no new PHP functions are added.

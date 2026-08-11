@@ -157,8 +157,11 @@ jobs:
       # annotations on 'Files changed' while the Lint log keeps the readable output.
       # Set via GITHUB_ENV because the runner context isn't available in job-level
       # env; RUNNER_TEMP exists as a plain variable once a step is running.
+      # The file's presence is what gates the annotation steps, so it must mean
+      # exactly "phpcs failed": if another linter ever emits a checkstyle report,
+      # it needs its own variable and file, never this one.
       - name: 'Set the PHPCS report path'
-        run: echo "WC_LINT_CHECKSTYLE_FILE=$RUNNER_TEMP/phpcs-checkstyle.xml" >> "$GITHUB_ENV"
+        run: echo "WC_PHPCS_CHECKSTYLE_FILE=$RUNNER_TEMP/phpcs-checkstyle.xml" >> "$GITHUB_ENV"
 
       - name: 'Lint'
         id: 'lint'
@@ -174,7 +177,7 @@ jobs:
         id: 'phpcs-report'
         if: ${{ !cancelled() && steps.lint.outcome == 'failure' }}
         run: |
-          if [[ -s "$WC_LINT_CHECKSTYLE_FILE" ]]; then
+          if [[ -s "$WC_PHPCS_CHECKSTYLE_FILE" ]]; then
             echo 'found=true' >> "$GITHUB_OUTPUT"
           fi
 
@@ -194,10 +197,10 @@ jobs:
         # the first 10 error and 10 warning annotations per step; past that, findings
         # exist only in this log, and a capped diff view shouldn't read as the full list.
         run: |
-          errors=$(grep -c 'severity="error"' "$WC_LINT_CHECKSTYLE_FILE" || true)
-          warnings=$(grep -c 'severity="warning"' "$WC_LINT_CHECKSTYLE_FILE" || true)
+          errors=$(grep -c 'severity="error"' "$WC_PHPCS_CHECKSTYLE_FILE" || true)
+          warnings=$(grep -c 'severity="warning"' "$WC_PHPCS_CHECKSTYLE_FILE" || true)
           echo "PHPCS reported ${errors} error(s) and ${warnings} warning(s). GitHub may render only the first ~10 of each inline; the full readable report is in the Lint step's log."
-          cs2pr "$WC_LINT_CHECKSTYLE_FILE" || true
+          cs2pr "$WC_PHPCS_CHECKSTYLE_FILE" || true
 
   woocommerce-plugin-build-artifact:
     name: "Build WooCommerce plugin artifact${{ needs.project-jobs.outputs.shared-plugin-build-has-required-consumers != 'true' && ' (optional)' || '' }}"
