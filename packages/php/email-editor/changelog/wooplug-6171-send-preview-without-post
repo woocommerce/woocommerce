@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Allow integrations to authorize and handle send-preview requests without a backing post
