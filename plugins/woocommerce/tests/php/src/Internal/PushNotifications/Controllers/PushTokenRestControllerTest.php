@@ -1704,6 +1704,50 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return the last send time for a sent token and null for an unsent one.
+	 */
+	public function test_index_returns_token_last_send_time(): void {
+		$this->mock_jetpack_connection_manager_is_connected();
+		wc_get_container()->get( PushNotifications::class )->on_init();
+
+		$data_store = wc_get_container()->get( PushTokensDataStore::class );
+
+		$sent = $data_store->create(
+			array(
+				'user_id'       => $this->user_id,
+				'token'         => 'last-send-sent-token',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'last-send-sent-uuid',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+			)
+		);
+
+		$data_store->create(
+			array(
+				'user_id'       => $this->user_id,
+				'token'         => 'last-send-unsent-token',
+				'platform'      => PushToken::PLATFORM_ANDROID,
+				'device_uuid'   => 'last-send-unsent-uuid',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_ANDROID,
+				'device_locale' => 'en_US',
+			)
+		);
+
+		$data_store->record_last_send( array( $sent ) );
+
+		$request = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'page', 1 );
+		$request->set_param( 'per_page', 100 );
+
+		$by_token = array_column( ( new PushTokenRestController() )->index( $request )->get_data()['tokens'], null, 'token' );
+
+		$this->assertArrayHasKey( 'last_send_at_gmt', $by_token['last-send-unsent-token'] );
+		$this->assertNull( $by_token['last-send-unsent-token']['last_send_at_gmt'] );
+		$this->assertNotNull( $by_token['last-send-sent-token']['last_send_at_gmt'] );
+	}
+
+	/**
 	 * @testdox Should return empty tokens array from the tokens endpoint when no tokens exist.
 	 */
 	public function test_index_returns_empty_when_no_tokens(): void {

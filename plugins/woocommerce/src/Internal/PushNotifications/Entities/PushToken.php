@@ -181,6 +181,13 @@ class PushToken {
 	private ?string $last_confirmed_at_gmt = null;
 
 	/**
+	 * The date the token was last sent to WPCOM, as an RFC3339 string in UTC (offset `+00:00`).
+	 *
+	 * @var string|null
+	 */
+	private ?string $last_send_at_gmt = null;
+
+	/**
 	 * Creates a new PushToken instance with the given data.
 	 *
 	 * @param array $data Optional array with keys: id, user_id, token, device_uuid, platform, origin.
@@ -227,6 +234,10 @@ class PushToken {
 
 		if ( array_key_exists( 'last_confirmed_at_gmt', $data ) ) {
 			$this->set_last_confirmed_at_gmt( null === $data['last_confirmed_at_gmt'] ? null : (string) $data['last_confirmed_at_gmt'] );
+		}
+
+		if ( array_key_exists( 'last_send_at_gmt', $data ) ) {
+			$this->set_last_send_at_gmt( null === $data['last_send_at_gmt'] ? null : (string) $data['last_send_at_gmt'] );
 		}
 	}
 
@@ -439,6 +450,20 @@ class PushToken {
 	}
 
 	/**
+	 * Sets the date this token was last sent to WPCOM.
+	 *
+	 * See {@see self::set_created_at_gmt()} for why this bypasses validation.
+	 *
+	 * @param string|null $last_send_at_gmt A GMT `Y-m-d H:i:s` datetime, or null if never sent.
+	 * @return void
+	 *
+	 * @since 11.2.0
+	 */
+	public function set_last_send_at_gmt( ?string $last_send_at_gmt ): void {
+		$this->last_send_at_gmt = $this->validate_gmt_datetime( $last_send_at_gmt );
+	}
+
+	/**
 	 * Returns a GMT datetime as `Y-m-d H:i:s`, or null if it is not one.
 	 *
 	 * @param string|null $datetime The GMT datetime string.
@@ -592,6 +617,22 @@ class PushToken {
 	}
 
 	/**
+	 * Gets the date this token was last sent to WPCOM, as an RFC3339 string in
+	 * UTC, or null if it has never been sent.
+	 *
+	 * This records that WPCOM accepted a payload containing the token. It is
+	 * not a delivery receipt: what happens between WPCOM and the device is
+	 * downstream of anything this plugin can observe.
+	 *
+	 * @return string|null
+	 *
+	 * @since 11.2.0
+	 */
+	public function get_last_send_at_gmt(): ?string {
+		return $this->last_send_at_gmt;
+	}
+
+	/**
 	 * Returns this token formatted for the WPCOM push notifications endpoint.
 	 *
 	 * @return array{user_id: int|null, token: string|null, origin: string|null, device_locale: string|null}
@@ -617,7 +658,7 @@ class PushToken {
 	 * Metadata is cast to an object so that an empty value encodes as `{}` rather
 	 * than `[]`, matching the `object` type the schema declares for it.
 	 *
-	 * @return array{user_id: int|null, token: string|null, origin: string|null, device_locale: string|null, id: int|null, device_uuid: string|null, platform: string|null, metadata: stdClass, created_at_gmt: string|null, last_confirmed_at_gmt: string|null}
+	 * @return array{user_id: int|null, token: string|null, origin: string|null, device_locale: string|null, id: int|null, device_uuid: string|null, platform: string|null, metadata: stdClass, created_at_gmt: string|null, last_confirmed_at_gmt: string|null, last_send_at_gmt: string|null}
 	 *
 	 * @since 11.2.0
 	 */
@@ -631,6 +672,7 @@ class PushToken {
 				'metadata'              => (object) ( $this->metadata ?? array() ),
 				'created_at_gmt'        => $this->to_rest_datetime( $this->created_at_gmt ),
 				'last_confirmed_at_gmt' => $this->to_rest_datetime( $this->last_confirmed_at_gmt ),
+				'last_send_at_gmt'      => $this->to_rest_datetime( $this->last_send_at_gmt ),
 			)
 		);
 	}
