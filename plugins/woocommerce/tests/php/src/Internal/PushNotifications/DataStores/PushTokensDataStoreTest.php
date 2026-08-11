@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\DataStores;
 
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
+use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushTokenResolution;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenInvalidDataException;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
 use WC_Unit_Test_Case;
@@ -727,6 +728,75 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$this->assertCount( 1, $tokens );
 		$this->assertInstanceOf( PushToken::class, $tokens[0] );
 		$this->assertSame( $admin_id, $tokens[0]->get_user_id() );
+	}
+
+	/**
+	 * @testdox Should report when no push token records are registered.
+	 */
+	public function test_resolve_tokens_for_roles_reports_no_registered_tokens(): void {
+		$data_store = new PushTokensDataStore();
+
+		$resolution = $data_store->resolve_tokens_for_roles( array( 'administrator' ) );
+
+		$this->assertSame( array(), $resolution->get_tokens() );
+		$this->assertSame( PushTokenResolution::OUTCOME_NO_REGISTERED_TOKENS, $resolution->get_outcome() );
+		$this->assertSame(
+			array(
+				'resolution_outcome'           => PushTokenResolution::OUTCOME_NO_REGISTERED_TOKENS,
+				'registered_token_owner_count' => 0,
+				'eligible_user_count'          => 0,
+				'resolved_token_count'         => 0,
+			),
+			$resolution->get_diagnostics()
+		);
+	}
+
+	/**
+	 * @testdox Should report when registered token owners do not match the eligible roles.
+	 */
+	public function test_resolve_tokens_for_roles_reports_no_eligible_users(): void {
+		$subscriber_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$data_store    = new PushTokensDataStore();
+
+		$this->create_push_token_for_user( $data_store, $subscriber_id );
+
+		$resolution = $data_store->resolve_tokens_for_roles( array( 'administrator' ) );
+
+		$this->assertSame( array(), $resolution->get_tokens() );
+		$this->assertSame( PushTokenResolution::OUTCOME_NO_ELIGIBLE_USERS, $resolution->get_outcome() );
+		$this->assertSame(
+			array(
+				'resolution_outcome'           => PushTokenResolution::OUTCOME_NO_ELIGIBLE_USERS,
+				'registered_token_owner_count' => 1,
+				'eligible_user_count'          => 0,
+				'resolved_token_count'         => 0,
+			),
+			$resolution->get_diagnostics()
+		);
+	}
+
+	/**
+	 * @testdox Should report counts for successfully resolved token recipients.
+	 */
+	public function test_resolve_tokens_for_roles_reports_resolved_counts(): void {
+		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+
+		$this->create_push_token_for_user( $data_store, $admin_id );
+
+		$resolution = $data_store->resolve_tokens_for_roles( array( 'administrator' ) );
+
+		$this->assertCount( 1, $resolution->get_tokens() );
+		$this->assertSame( PushTokenResolution::OUTCOME_RESOLVED, $resolution->get_outcome() );
+		$this->assertSame(
+			array(
+				'resolution_outcome'           => PushTokenResolution::OUTCOME_RESOLVED,
+				'registered_token_owner_count' => 1,
+				'eligible_user_count'          => 1,
+				'resolved_token_count'         => 1,
+			),
+			$resolution->get_diagnostics()
+		);
 	}
 
 	/**

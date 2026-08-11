@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\DataStores;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
+use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushTokenResolution;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenInvalidDataException;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
 use Exception;
@@ -24,13 +25,13 @@ use WP_Query;
  */
 class PushTokensDataStore {
 	/**
-	 * In-memory cache for get_tokens_for_roles() results, keyed by the
+	 * In-memory cache for role-based token resolution, keyed by the
 	 * comma-joined role list (with optional pagination suffix). Avoids
 	 * repeated DB queries within the same PHP request.
 	 *
-	 * @var array<string, PushToken[]|array{tokens: PushToken[], total: int, total_pages: int}>
+	 * @var array<string, array{tokens: PushToken[], total: int, total_pages: int, resolution_outcome: string, registered_token_owner_count: int, eligible_user_count: int}>
 	 */
-	private array $tokens_by_roles_cache = array();
+	private array $token_resolution_cache = array();
 
 	const SUPPORTED_META = array(
 		'origin',
@@ -331,23 +332,66 @@ class PushTokensDataStore {
 	 * @since 10.7.0
 	 */
 	public function get_tokens_for_roles( array $roles, ?int $page = null, ?int $per_page = null ) {
+		$paginate   = null !== $page && null !== $per_page;
+		$resolution = $this->query_tokens_for_roles( $roles, $page, $per_page );
+
+		return $paginate
+			? array(
+				'tokens'      => $resolution['tokens'],
+				'total'       => $resolution['total'],
+				'total_pages' => $resolution['total_pages'],
+			)
+			: $resolution['tokens'];
+	}
+
+	/**
+	 * Resolves push tokens and returns structured diagnostics for each resolution stage.
+	 *
+	 * @param string[] $roles The roles to query tokens for.
+	 * @return PushTokenResolution The resolved tokens and non-sensitive diagnostics.
+	 *
+	 * @since 11.1.0
+	 */
+	public function resolve_tokens_for_roles( array $roles ): PushTokenResolution {
+		$resolution = $this->query_tokens_for_roles( $roles );
+
+		return new PushTokenResolution(
+			$resolution['tokens'],
+			$resolution['resolution_outcome'],
+			$resolution['registered_token_owner_count'],
+			$resolution['eligible_user_count']
+		);
+	}
+
+	/**
+	 * Queries tokens and captures diagnostics for each recipient resolution stage.
+	 *
+	 * @param string[] $roles    The roles to query tokens for.
+	 * @param int|null $page     Optional page number (1-based).
+	 * @param int|null $per_page Optional number of tokens per page.
+	 * @return array{tokens: PushToken[], total: int, total_pages: int, resolution_outcome: string, registered_token_owner_count: int, eligible_user_count: int}
+	 */
+	private function query_tokens_for_roles( array $roles, ?int $page = null, ?int $per_page = null ): array {
 		$paginate  = null !== $page && null !== $per_page;
 		$cache_key = $paginate ? implode( ',', $roles ) . ":$page:$per_page" : implode( ',', $roles );
 
-		$empty_result = $paginate
-			? array(
-				'tokens'      => array(),
-				'total'       => 0,
-				'total_pages' => 0,
-			)
-			: array();
+		$result = array(
+			'tokens'                       => array(),
+			'total'                        => 0,
+			'total_pages'                  => 0,
+			'resolution_outcome'           => empty( $roles )
+				? PushTokenResolution::OUTCOME_NO_ROLES
+				: PushTokenResolution::OUTCOME_NO_REGISTERED_TOKENS,
+			'registered_token_owner_count' => 0,
+			'eligible_user_count'          => 0,
+		);
 
 		if ( empty( $roles ) ) {
-			return $empty_result;
+			return $result;
 		}
 
-		if ( isset( $this->tokens_by_roles_cache[ $cache_key ] ) ) {
-			return $this->tokens_by_roles_cache[ $cache_key ];
+		if ( isset( $this->token_resolution_cache[ $cache_key ] ) ) {
+			return $this->token_resolution_cache[ $cache_key ];
 		}
 
 		global $wpdb;
@@ -360,18 +404,27 @@ class PushTokensDataStore {
 			)
 		);
 
+		$result['registered_token_owner_count'] = count( $users_with_tokens );
+
+		if ( empty( $users_with_tokens ) ) {
+			$this->token_resolution_cache[ $cache_key ] = $result;
+			return $this->token_resolution_cache[ $cache_key ];
+		}
+
 		// An empty include must short-circuit: WP_User_Query would ignore it and scan all users by role.
-		$user_ids = empty( $users_with_tokens ) ? array() : get_users(
+		$user_ids                      = get_users(
 			array(
 				'role__in' => $roles,
 				'fields'   => 'ID',
 				'include'  => $users_with_tokens,
 			)
 		);
+		$result['eligible_user_count'] = count( $user_ids );
 
 		if ( empty( $user_ids ) ) {
-			$this->tokens_by_roles_cache[ $cache_key ] = $empty_result;
-			return $this->tokens_by_roles_cache[ $cache_key ];
+			$result['resolution_outcome']               = PushTokenResolution::OUTCOME_NO_ELIGIBLE_USERS;
+			$this->token_resolution_cache[ $cache_key ] = $result;
+			return $this->token_resolution_cache[ $cache_key ];
 		}
 
 		$query_args = array(
@@ -399,8 +452,9 @@ class PushTokensDataStore {
 		$post_ids = $query->posts;
 
 		if ( empty( $post_ids ) ) {
-			$this->tokens_by_roles_cache[ $cache_key ] = $empty_result;
-			return $this->tokens_by_roles_cache[ $cache_key ];
+			$result['resolution_outcome']               = PushTokenResolution::OUTCOME_NO_VALID_TOKENS;
+			$this->token_resolution_cache[ $cache_key ] = $result;
+			return $this->token_resolution_cache[ $cache_key ];
 		}
 
 		_prime_post_caches( $post_ids, false, true );
@@ -421,16 +475,14 @@ class PushTokensDataStore {
 			}
 		}
 
-		$result = $paginate
-			? array(
-				'tokens'      => $tokens,
-				'total'       => (int) $query->found_posts,
-				'total_pages' => (int) $query->max_num_pages,
-			)
-			: $tokens;
-
-		$this->tokens_by_roles_cache[ $cache_key ] = $result;
-		return $result;
+		$result['tokens']                           = $tokens;
+		$result['total']                            = $paginate ? (int) $query->found_posts : count( $tokens );
+		$result['total_pages']                      = $paginate ? (int) $query->max_num_pages : (int) ! empty( $tokens );
+		$result['resolution_outcome']               = empty( $tokens )
+			? PushTokenResolution::OUTCOME_NO_VALID_TOKENS
+			: PushTokenResolution::OUTCOME_RESOLVED;
+		$this->token_resolution_cache[ $cache_key ] = $result;
+		return $this->token_resolution_cache[ $cache_key ];
 	}
 
 	/**
