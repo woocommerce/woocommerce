@@ -147,9 +147,9 @@ class BootstrapTest extends WC_Unit_Test_Case {
 	 */
 	public function block_markup_whitespace_variants(): array {
 		return array(
-			'extra spaces after opener' => array( '<!--  wp:woocommerce/product-price /-->' ),
-			'newline after opener'      => array( "<!--\nwp:woocommerce/product-price /-->" ),
-			'tab after opener'          => array( "<!--\twp:woocommerce/product-price /-->" ),
+			'extra spaces after opener' => array( '<!--  wp:woocommerce/accordion-group /-->' ),
+			'newline after opener'      => array( "<!--\nwp:woocommerce/accordion-group /-->" ),
+			'tab after opener'          => array( "<!--\twp:woocommerce/accordion-group /-->" ),
 		);
 	}
 
@@ -162,13 +162,13 @@ class BootstrapTest extends WC_Unit_Test_Case {
 	public function test_short_description_filter_detects_blocks_regardless_of_whitespace( string $markup ): void {
 		$registry = WP_Block_Type_Registry::get_instance();
 
-		$this->assertFalse( $registry->is_registered( self::SAMPLE_BLOCK ), 'WooCommerce blocks should start unregistered for this test.' );
+		$this->assertFalse( $registry->is_registered( 'woocommerce/accordion-group' ), 'WooCommerce blocks should start unregistered for this test.' );
 
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Firing an existing core filter to exercise its callbacks, not declaring a new hook.
 		apply_filters( 'woocommerce_short_description', $markup );
 
 		$this->assertTrue(
-			$registry->is_registered( self::SAMPLE_BLOCK ),
+			$registry->is_registered( 'woocommerce/accordion-group' ),
 			'Detection should accept any whitespace the block parser accepts after the comment opener.'
 		);
 	}
