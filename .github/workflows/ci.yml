@@ -137,11 +137,6 @@ jobs:
       max-parallel: 4
       matrix:
         include: ${{ fromJSON( needs.project-jobs.outputs.lint-jobs ) }}
-    env:
-      # On PHPCS failure, lint-branch.sh writes the findings to this path as a
-      # checkstyle report, so the steps after 'Lint' can surface them as inline
-      # annotations on 'Files changed' while the Lint log keeps the readable output.
-      WC_LINT_CHECKSTYLE_FILE: '${{ runner.temp }}/phpcs-checkstyle.xml'
     steps:
       - uses: 'actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0' # v7.0.0
         name: 'Checkout'
@@ -156,6 +151,14 @@ jobs:
           install: '${{ matrix.projectName }}...'
           pull-package-deps: '${{ matrix.projectName }}'
           php-version:  ${{ ( ( matrix.projectName == '@woocommerce/plugin-woocommerce' && '7.4' ) || 'false' ) }}
+
+      # On PHPCS failure, lint-branch.sh writes the findings to this path as a
+      # checkstyle report, so the steps after 'Lint' can surface them as inline
+      # annotations on 'Files changed' while the Lint log keeps the readable output.
+      # Set via GITHUB_ENV because the runner context isn't available in job-level
+      # env; RUNNER_TEMP exists as a plain variable once a step is running.
+      - name: 'Set the PHPCS report path'
+        run: echo "WC_LINT_CHECKSTYLE_FILE=$RUNNER_TEMP/phpcs-checkstyle.xml" >> "$GITHUB_ENV"
 
       - name: 'Lint'
         id: 'lint'
