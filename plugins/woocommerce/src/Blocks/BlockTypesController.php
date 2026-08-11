@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Blocks\BlockTypes\Cart;
 use Automattic\WooCommerce\Blocks\BlockTypes\Checkout;
 use Automattic\WooCommerce\Blocks\BlockTypes\MiniCartContents;
+use Automattic\WooCommerce\Internal\Features\BlockEditorUnifiedAssets;
 use Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController;
 
 /**
@@ -74,6 +75,7 @@ final class BlockTypesController {
 		add_filter( 'render_block', array( $this, 'add_data_attributes' ), 10, 2 );
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
 		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
+		add_filter( 'block_type_metadata_settings', array( $this, 'use_single_block_editor_style' ), 10, 2 );
 		add_filter( 'register_block_type_args', array( $this, 'enqueue_block_style_for_classic_themes' ), 10, 2 );
 		add_filter( 'block_core_breadcrumbs_post_type_settings', array( $this, 'set_product_breadcrumbs_preferred_taxonomy' ), 10, 3 );
 		add_filter( 'block_core_breadcrumbs_items', array( $this, 'apply_woocommerce_breadcrumb_filters' ), 10, 1 );
@@ -616,112 +618,85 @@ final class BlockTypesController {
 	}
 
 	/**
-	 * Set the preferred taxonomy and term for the breadcrumbs block on the product post type.
+	 * Use one shared editor stylesheet for WooCommerce blocks.
 	 *
-	 * This method mimics the behavior of WC_Breadcrumb::add_crumbs_single() to ensure
-	 * consistent breadcrumb term selection between WooCommerce's legacy breadcrumbs
-	 * and the Core breadcrumbs block.
-	 *
-	 * @param array  $settings The settings for the breadcrumbs block.
-	 * @param string $post_type The post type.
-	 * @param int    $post_id The current post ID.
-	 * @return array The settings for the breadcrumbs block.
+	 * WordPress loads `style` handles in both the frontend and editor. WooCommerce
+	 * keeps those per-block handles for frontend performance, but removes them in
+	 * admin so the block editor loads the combined stylesheet only.
 	 *
 	 * @internal
+	 *
+	 * @param array $settings Block settings.
+	 * @param array $metadata Block metadata.
+	 *
+	 * @return array Block settings.
 	 */
-	public function set_product_breadcrumbs_preferred_taxonomy( $settings, $post_type, $post_id = 0 ) {
-		if ( ! is_array( $settings ) || 'product' !== $post_type ) {
+	public function use_single_block_editor_style( $settings, $metadata ) {
+		if (
+			! BlockEditorUnifiedAssets::is_enabled() ||
+			! is_admin() ||
+			! $this->is_woocommerce_block_metadata( $metadata ) ) {
 			return $settings;
 		}
 
-		$settings['taxonomy'] = 'product_cat';
-
-		// If we have a post ID, determine the specific term using WooCommerce's logic.
-		if ( ! empty( $post_id ) ) {
-			$terms = wc_get_product_terms(
-				$post_id,
-				'product_cat',
-				/**
-				 * Filters the arguments used to fetch product terms for breadcrumbs.
-				 *
-				 * @since 9.5.0
-				 *
-				 * @param array $args Array of arguments for `wc_get_product_terms()`.
-				 */
-				apply_filters(
-					'woocommerce_breadcrumb_product_terms_args',
-					array(
-						'orderby' => 'parent',
-						'order'   => 'DESC',
-					)
-				)
-			);
-
-			if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
-				/**
-				 * Filters the main term used in product breadcrumbs.
-				 *
-				 * @since 9.5.0
-				 *
-				 * @param \WP_Term   $main_term The main term to be used in breadcrumbs.
-				 * @param \WP_Term[] $terms     Array of all product category terms.
-				 */
-				$main_term = apply_filters( 'woocommerce_breadcrumb_main_term', $terms[0], $terms );
-
-				if ( $main_term instanceof \WP_Term ) {
-					$settings['term'] = $main_term->slug;
-				}
-			}
-		}
+		$settings['style_handles']        = array();
+		$settings['style']                = array();
+		$settings['editor_style_handles'] = array( 'wc-block-library-style' );
+		$settings['editor_style']         = array( 'wc-block-library-style' );
 
 		return $settings;
 	}
 
 	/**
-	 * Apply WooCommerce breadcrumb filters to Core breadcrumbs block items.
+	 * Check whether block metadata belongs to a block bundled with WooCommerce.
 	 *
-	 * This bridges the Core breadcrumbs block with WooCommerce's legacy breadcrumb filters,
-	 * ensuring backward compatibility for sites that have customized breadcrumbs using
-	 * the `woocommerce_get_breadcrumb` filter.
+	 * @param array $metadata Block metadata.
+	 *
+	 * @return bool Whether the metadata file is in the WooCommerce blocks directory.
+	 */
+	private function is_woocommerce_block_metadata( $metadata ) {
+		static $blocks_path = null;
+
+		if ( null === $blocks_path ) {
+			$resolved_path = realpath( WC_ABSPATH . 'assets/client/blocks' );
+			$blocks_path   = false === $resolved_path
+				? ''
+				: trailingslashit( wp_normalize_path( $resolved_path ) );
+		}
+
+		if ( '' === $blocks_path || empty( $metadata['file'] ) ) {
+			return false;
+		}
+
+		return str_starts_with(
+			wp_normalize_path( $metadata['file'] ),
+			$blocks_path
+		);
+	}
+
+	/**
+	 * Set the preferred taxonomy and term for the breadcrumbs block on the product post type.
+	 *
+	 * @internal
+	 *
+	 * @param array  $settings The settings for the breadcrumbs block.
+	 * @param string $post_type The post type.
+	 * @param int    $post_id The current post ID.
+	 * @return array The settings for the breadcrumbs block.
+	 */
+	public function set_product_breadcrumbs_preferred_taxonomy( $settings, $post_type, $post_id = 0 ) {
+		return Package::container()->get( CoreBreadcrumbsCompatibility::class )->set_product_breadcrumbs_preferred_taxonomy( $settings, $post_type, $post_id );
+	}
+
+	/**
+	 * Apply WooCommerce compatibility behavior to Core breadcrumb items.
+	 *
+	 * @internal
 	 *
 	 * @param array $items Array of breadcrumb items from Core.
 	 * @return array Modified breadcrumb items.
-	 *
-	 * @internal
 	 */
 	public function apply_woocommerce_breadcrumb_filters( $items ) {
-		// Convert Core format to WooCommerce format.
-		// Core: array( 'url' => '...', 'label' => '...' )
-		// Woo: array( 'label', 'url' ).
-		$wc_crumbs = array_map(
-			function ( $item ) {
-				return array(
-					$item['label'] ?? '',
-					$item['url'] ?? '',
-				);
-			},
-			$items
-		);
-
-		/**
-		 * Filters the breadcrumb trail array.
-		 *
-		 * @since 2.3.0
-		 *
-		 * @param array         $crumbs The breadcrumb trail.
-		 * @param \WC_Breadcrumb|null $breadcrumb The breadcrumb object (null when called from Core block).
-		 */
-		$wc_crumbs = apply_filters( 'woocommerce_get_breadcrumb', $wc_crumbs, null );
-
-		// Convert back to Core format.
-		return array_map(
-			function ( $crumb ) {
-				return array(
-					'label' => $crumb[0] ?? '',
-					'url'   => $crumb[1] ?? '',
-				);
-			},
-			$wc_crumbs
-		);
+		return Package::container()->get( CoreBreadcrumbsCompatibility::class )->apply_woocommerce_breadcrumb_filters( $items );
 	}
 }

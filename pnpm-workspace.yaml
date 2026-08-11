@@ -76,7 +76,6 @@ packages:
     - 'plugins/woocommerce/client/admin'
     - 'plugins/woocommerce/client/blocks'
     - 'plugins/woocommerce/client/legacy'
-    - 'plugins/woocommerce/client/blocks/bin/eslint-plugin-woocommerce'
     - 'tools/monorepo-merge'
     - 'tools/code-analyzer'
     - 'tools/compare-perf'
@@ -86,17 +85,6 @@ packages:
     - 'tools/release-posts'
     - 'tools/storybook'
     - 'tools/monorepo-utils'
-
-# Hoisting: restore pnpm 9 defaults that pnpm 10 removed.
-# pnpm 10 emptied public-hoist-pattern (was ['*eslint*', '*prettier*']).
-# Also hoist react/react-dom so phantom deps in @wordpress/* packages resolve
-# (e.g. @wordpress/dataviews imports react-dom/client without declaring it).
-publicHoistPattern:
-    - '*eslint*'
-    - '*prettier*'
-    - 'react'
-    - 'react-dom'
-    - '@use-gesture/react'
 
 # Quality of life tweaks (migrated from .npmrc)
 childConcurrency: 8        # 5 by default

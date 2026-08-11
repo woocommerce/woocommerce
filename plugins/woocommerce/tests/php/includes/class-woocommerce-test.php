@@ -74,6 +74,26 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should detect a REST API request that uses plain permalinks (?rest_route=).
+	 */
+	public function test_is_rest_api_request_returns_true_for_plain_permalinks(): void {
+		$_SERVER['REQUEST_URI'] = '/index.php?rest_route=/wc/v3/products';
+		$_GET['rest_route']     = '/wc/v3/products';
+
+		$this->assertTrue( WC()->is_rest_api_request(), 'A ?rest_route= request should be detected as a REST API request.' );
+	}
+
+	/**
+	 * @testdox Should not detect a request with an empty rest_route parameter as a REST API request.
+	 */
+	public function test_is_rest_api_request_returns_false_for_empty_rest_route(): void {
+		$_SERVER['REQUEST_URI'] = '/index.php?rest_route=';
+		$_GET['rest_route']     = '';
+
+		$this->assertFalse( WC()->is_rest_api_request(), 'An empty rest_route parameter should not be detected as a REST API request.' );
+	}
+
+	/**
 	 * Restore the request globals after each test.
 	 */
 	public function tearDown(): void {
@@ -145,6 +165,14 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 		$_GET['rest_route']     = '//wc/store/v1/cart';
 
 		$this->assertTrue( WC()->is_store_api_request(), 'A ?rest_route=//wc/store/ request with repeated leading slashes should be detected as Store API.' );
+	}
+
+	/**
+	 * @testdox Settings registration is hooked to both admin_init and rest_api_init to support direct PHP and REST consumption.
+	 */
+	public function test_register_wp_admin_settings_hooked_to_admin_init_and_rest_api_init(): void {
+		$this->assertSame( 10, has_action( 'admin_init', array( WC(), 'register_wp_admin_settings' ) ) );
+		$this->assertSame( 10, has_action( 'rest_api_init', array( WC(), 'register_wp_admin_settings' ) ) );
 	}
 
 	/**

@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Utilities\NumberUtil;
+use Automattic\WooCommerce\Utilities\TimeUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -450,28 +451,56 @@ class WC_Admin_Post_Types {
 		$product->set_featured( isset( $request_data['_featured'] ) );
 
 		if ( $product->is_type( ProductType::SIMPLE ) || $product->is_type( ProductType::EXTERNAL ) ) {
-			$old_regular_price = $product->get_regular_price( 'edit' );
-			$old_sale_price    = $product->get_sale_price( 'edit' );
 
 			if ( isset( $request_data['_regular_price'] ) ) {
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-				$new_regular_price = ( '' === $request_data['_regular_price'] ) ? '' : wc_format_decimal( $request_data['_regular_price'] );
-				$product->set_regular_price( $new_regular_price );
+				$regular_price = ( '' === $request_data['_regular_price'] ) ? '' : wc_format_decimal( $request_data['_regular_price'] );
+				$product->set_regular_price( $regular_price );
 			}
 
 			if ( isset( $request_data['_sale_price'] ) ) {
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-				$new_sale_price = ( '' === $request_data['_sale_price'] ) ? '' : wc_format_decimal( $request_data['_sale_price'] );
-				$product->set_sale_price( $new_sale_price );
+				$sale_price = ( '' === $request_data['_sale_price'] ) ? '' : wc_format_decimal( $request_data['_sale_price'] );
+				$product->set_sale_price( $sale_price );
 			}
 
-			$regular_price = $product->get_regular_price( 'edit' );
-			$sale_price    = $product->get_sale_price( 'edit' );
-			$price_changed = $regular_price !== $old_regular_price || $sale_price !== $old_sale_price;
+			// Parse valid dates using the full product editor's site-timezone behavior.
+			$submitted_sale_date_from = $request_data['_sale_price_dates_from'] ?? null;
+			if ( is_string( $submitted_sale_date_from ) ) {
+				/**
+				 * Submitted sale start date.
+				 *
+				 * @var string $date_on_sale_from
+				 */
+				$date_on_sale_from = wp_unslash( $submitted_sale_date_from );
 
-			if ( $price_changed && ( '' === $sale_price || $sale_price >= $regular_price ) ) {
-				$product->set_date_on_sale_to( '' );
-				$product->set_date_on_sale_from( '' );
+				if ( '' === $date_on_sale_from ) {
+					$product->set_date_on_sale_from( '' );
+				} elseif ( TimeUtil::is_valid_date( $date_on_sale_from, 'Y-m-d' ) ) {
+					$timestamp = strtotime( $date_on_sale_from );
+					if ( false !== $timestamp ) {
+						$product->set_date_on_sale_from( date( 'Y-m-d 00:00:00', $timestamp ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+					}
+				}
+			}
+
+			$submitted_sale_date_to = $request_data['_sale_price_dates_to'] ?? null;
+			if ( is_string( $submitted_sale_date_to ) ) {
+				/**
+				 * Submitted sale end date.
+				 *
+				 * @var string $date_on_sale_to
+				 */
+				$date_on_sale_to = wp_unslash( $submitted_sale_date_to );
+
+				if ( '' === $date_on_sale_to ) {
+					$product->set_date_on_sale_to( '' );
+				} elseif ( TimeUtil::is_valid_date( $date_on_sale_to, 'Y-m-d' ) ) {
+					$timestamp = strtotime( $date_on_sale_to );
+					if ( false !== $timestamp ) {
+						$product->set_date_on_sale_to( date( 'Y-m-d 23:59:59', $timestamp ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+					}
+				}
 			}
 		}
 

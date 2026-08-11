@@ -1,6 +1,8 @@
 const { join } = require( 'path' );
 
 const defaultDependencies = [
+	'@wordpress/components',
+	'@wordpress/element',
 	'@wordpress/hooks',
 	'@wordpress/i18n',
 	'@woocommerce/components',
@@ -17,6 +19,20 @@ const defaultDevDependencies = {
 	'@woocommerce/eslint-plugin': '^4.0.0',
 	'@wordpress/prettier-config': 'latest',
 	'@wordpress/scripts': 'latest',
+	/*
+	 * Without this, `@wordpress/prettier-config`'s `prettier: >=3` peer hoists plain
+	 * prettier over wp-prettier. Pinned to match `@woocommerce/eslint-plugin`.
+	 */
+	prettier: 'npm:wp-prettier@3.0.3',
+};
+
+/*
+ * Stopgap: `i18n-calypso@7.4.1` (via `@woocommerce/components`) ships a Yarn-only
+ * `patch:` spec that breaks `npm install`. Pin to 8.1.0 (latest, without the
+ * spec) until the upstream range stops resolving to 7.4.1.
+ */
+const overrides = {
+	'i18n-calypso': '8.1.0',
 };
 
 module.exports = {
@@ -25,7 +41,10 @@ module.exports = {
 	defaultValues: {
 		npmDependencies: defaultDependencies,
 		npmDevDependencies: Object.keys( defaultDevDependencies ),
-		customPackageJSON: { devDependencies: defaultDevDependencies },
+		customPackageJSON: {
+			devDependencies: defaultDevDependencies,
+			overrides,
+		},
 		namespace: 'extension',
 		license: 'GPL-3.0+',
 		customScripts: {

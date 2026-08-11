@@ -34,6 +34,7 @@ export class Admin extends CoreAdmin {
 		const closeWelcomeGuide = this.page
 			.getByRole( 'dialog', { name: 'Welcome to block Widgets' } )
 			.getByRole( 'button', { name: 'Close' } );
+
 		// The welcome guide only shows when it hasn't been dismissed before, so
 		// wait for it briefly and close it only when it actually appears.
 		const guideAppeared = await closeWelcomeGuide

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve touch handling for interactive content nested inside FlexSlider galleries.

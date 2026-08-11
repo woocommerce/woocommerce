@@ -42,6 +42,16 @@ class WC_Product_Variable extends WC_Product {
 	protected $variation_attributes = null;
 
 	/**
+	 * Variations prices.
+	 *
+	 * @var array<string,array<string,array<int,float>>>
+	 */
+	private array $variation_prices = array(
+		'for_display:0' => array(),
+		'for_display:1' => array(),
+	);
+
+	/**
 	 * Get internal type.
 	 *
 	 * @return string
@@ -99,13 +109,19 @@ class WC_Product_Variable extends WC_Product {
 	 * @return array Array of RAW prices, regular prices, and sale prices with keys set to variation ID.
 	 */
 	public function get_variation_prices( $for_display = false ) {
+		/** @var array<string,array<int,float>> $prices */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 		$prices = $this->data_store->read_price_data( $this, $for_display );
-
-		foreach ( $prices as $price_key => $variation_prices ) {
-			$prices[ $price_key ] = $this->sort_variation_prices( $variation_prices );
+		if ( ! is_array( $prices ) ) {
+			return $prices;
 		}
 
-		return $prices;
+		// Performance note: loose != compares key/value pairs regardless of order, so a re-sort is only triggered when prices actually change.
+		$cache_key = $for_display ? 'for_display:1' : 'for_display:0';
+		if ( $this->variation_prices[ $cache_key ] != $prices ) { // phpcs:ignore Universal.Operators.StrictComparisons.LooseNotEqual
+			$this->variation_prices[ $cache_key ] = array_map( fn( $variation_prices ) => $this->sort_variation_prices( $variation_prices ), $prices );
+		}
+
+		return $this->variation_prices[ $cache_key ];
 	}
 
 	/**
@@ -381,27 +397,29 @@ class WC_Product_Variable extends WC_Product {
 	 * @return bool
 	 */
 	public function has_purchasable_variations() {
-		$variation_ids = $this->get_children();
-
+		/**
+		 * If you are evaluating performance, introducing a transient is not a viable solution.
+		 *
+		 * - The transient improves the 95th percentile (P95) load time of the product page by approximately 10%, but does not affect the median.
+		 * - The transient breaks backward compatibility. The woocommerce_is_purchasable filter from \WC_Product::is_purchasable is used by
+		 *   extensions to control product purchasability based on user role, membership, geolocation, or login status.
+		 */
+		$has_purchasable_variations = false;
+		$variation_ids              = $this->get_children();
 		if ( ! empty( $variation_ids ) ) {
 			// Prime caches to reduce future queries.
 			_prime_post_caches( $variation_ids );
-		}
 
-		foreach ( $variation_ids as $variation_id ) {
-
-			$variation = wc_get_product( $variation_id );
-
-			if ( ! $variation || ! $variation->is_purchasable() || ! $variation->is_in_stock() ) {
-				continue;
+			foreach ( $variation_ids as $variation_id ) {
+				$variation = wc_get_product( $variation_id );
+				if ( $variation && $variation->is_purchasable() && $variation->is_in_stock() ) {
+					$has_purchasable_variations = true;
+					break;
+				}
 			}
-
-			// We found at least one available variation, so return true.
-			return true;
 		}
 
-		// There were either no variations, or they were hidden because of the "continues" above.
-		return false;
+		return $has_purchasable_variations;
 	}
 
 	/**

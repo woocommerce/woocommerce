@@ -49,7 +49,7 @@ const pageGroups = [
 			{
 				name: 'Add new product',
 				url: 'wp-admin/post-new.php?post_type=product',
-				expectedCount: 150,
+				expectedCount: 151,
 			},
 			{
 				name: 'Analytics page',
