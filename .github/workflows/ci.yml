@@ -190,14 +190,20 @@ jobs:
         # would be noise. The totals are stated first because GitHub renders roughly
         # the first 10 error and 10 warning annotations per step; past that, findings
         # exist only in this log, and a capped diff view shouldn't read as the full list.
+        # The XML check guards against the report holding composer chatter or a partial
+        # write instead of checkstyle: cs2pr would fail to parse it, and the || true
+        # would turn that into a silently empty step.
         run: |
-          if [[ -s "$WC_PHPCS_CHECKSTYLE_FILE" ]]; then
+          if [[ ! -s "$WC_PHPCS_CHECKSTYLE_FILE" ]]; then
+            echo 'No PHPCS checkstyle report to annotate.'
+          elif ! head -n1 "$WC_PHPCS_CHECKSTYLE_FILE" | grep -q '<?xml'; then
+            echo 'The PHPCS report exists but does not look like checkstyle XML; skipping annotations. First lines:'
+            head -n5 "$WC_PHPCS_CHECKSTYLE_FILE"
+          else
             errors=$(grep -c 'severity="error"' "$WC_PHPCS_CHECKSTYLE_FILE" || true)
             warnings=$(grep -c 'severity="warning"' "$WC_PHPCS_CHECKSTYLE_FILE" || true)
             echo "PHPCS reported ${errors} error(s) and ${warnings} warning(s). GitHub may render only the first ~10 of each inline; the full readable report is in the Lint step's log."
             cs2pr "$WC_PHPCS_CHECKSTYLE_FILE" || true
-          else
-            echo 'No PHPCS checkstyle report to annotate.'
           fi
 
   woocommerce-plugin-build-artifact:

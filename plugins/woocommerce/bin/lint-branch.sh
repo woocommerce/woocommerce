@@ -37,7 +37,7 @@ cacheArgs=()
 # below must be tied to phpcs itself failing, not to any other check that sets status.
 phpcsStatus=0
 composer exec phpcs-changed -- -s --git --git-base $baseBranch "${cacheArgs[@]}" $changedFiles || phpcsStatus=1
-[[ $phpcsStatus -eq 1 ]] && status=1
+status=$phpcsStatus
 
 # The readable report above is the log people dig into; this re-runs the same check
 # only to render the same findings as checkstyle for cs2pr (phpcs-changed can only
