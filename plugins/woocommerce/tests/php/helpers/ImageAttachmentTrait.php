@@ -58,4 +58,56 @@ trait ImageAttachmentTrait {
 
 		wp_update_attachment_metadata( $attachment_id, array_merge( $metadata, $custom_keys ) );
 	}
+
+	/**
+	 * Delete a generated size, both the file and its metadata entry.
+	 *
+	 * @param int    $attachment_id Attachment to strip the size from.
+	 * @param string $size          Size name.
+	 * @return string Path of the deleted file.
+	 */
+	private function delete_attachment_size( int $attachment_id, string $size ): string {
+		$metadata = wp_get_attachment_metadata( $attachment_id, true );
+		$path     = $this->get_attachment_size_path( $attachment_id, $metadata, $size );
+
+		wp_delete_file( $path );
+
+		unset( $metadata['sizes'][ $size ] );
+		wp_update_attachment_metadata( $attachment_id, $metadata );
+
+		return $path;
+	}
+
+	/**
+	 * Assert that a size exists as a real image file of the dimensions its metadata records.
+	 *
+	 * @param int    $attachment_id Attachment to check.
+	 * @param string $size          Size name.
+	 */
+	private function assert_size_exists( int $attachment_id, string $size ): void {
+		$metadata = wp_get_attachment_metadata( $attachment_id, true );
+
+		$this->assertArrayHasKey( $size, $metadata['sizes'], "The $size size should be recorded in the metadata" );
+
+		$path = $this->get_attachment_size_path( $attachment_id, $metadata, $size );
+
+		$this->assertFileExists( $path, "The $size file should be on disk" );
+
+		$dimensions = getimagesize( $path );
+
+		$this->assertSame( (int) $metadata['sizes'][ $size ]['width'], $dimensions[0], "The $size file should be as wide as its metadata records" );
+		$this->assertSame( (int) $metadata['sizes'][ $size ]['height'], $dimensions[1], "The $size file should be as tall as its metadata records" );
+	}
+
+	/**
+	 * Absolute path of a generated size.
+	 *
+	 * @param int    $attachment_id Attachment the size belongs to.
+	 * @param array  $metadata      Stored attachment metadata.
+	 * @param string $size          Size name.
+	 * @return string
+	 */
+	private function get_attachment_size_path( int $attachment_id, array $metadata, string $size ): string {
+		return trailingslashit( dirname( get_attached_file( $attachment_id ) ) ) . $metadata['sizes'][ $size ]['file'];
+	}
 }

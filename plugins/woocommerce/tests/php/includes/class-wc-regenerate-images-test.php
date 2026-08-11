@@ -50,9 +50,26 @@ class WC_Regenerate_Images_Test extends WC_Unit_Test_Case {
 		};
 		add_filter( 'wp_get_attachment_metadata', $this->metadata_filter );
 
+		$this->assertArrayNotHasKey( 'test_api_meta', wp_get_attachment_metadata( $attachment_id ), 'The filter should hide the key from readers' );
+		$this->assertArrayHasKey( 'test_api_meta', wp_get_attachment_metadata( $attachment_id, true ), 'The stored value should keep the key' );
+
+		$thumbnail = $this->delete_attachment_size( $attachment_id, 'woocommerce_thumbnail' );
+
+		$this->assertFileDoesNotExist( $thumbnail, 'The size should be missing before regeneration runs' );
+
 		// Full size dimensions, which is what image_downsize() returns when the size is missing.
-		$image = array( wp_get_attachment_url( $attachment_id ), 900, 300, false );
-		WC_Regenerate_Images::maybe_resize_image( $image, $attachment_id, 'woocommerce_thumbnail', false );
+		$image    = array( wp_get_attachment_url( $attachment_id ), 900, 300, false );
+		$returned = WC_Regenerate_Images::maybe_resize_image( $image, $attachment_id, 'woocommerce_thumbnail', false );
+
+		$target = wc_get_image_size( 'woocommerce_thumbnail' );
+
+		$this->assertSame(
+			array( (int) $target['width'], (int) $target['height'] ),
+			array( $returned[1], $returned[2] ),
+			'The resized image should be returned, not the original'
+		);
+
+		$this->assert_size_exists( $attachment_id, 'woocommerce_thumbnail' );
 
 		$stored = get_post_meta( $attachment_id, '_wp_attachment_metadata', true );
 

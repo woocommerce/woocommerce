@@ -48,9 +48,15 @@ class WC_Regenerate_Images_Request_Test extends WC_Unit_Test_Case {
 			)
 		);
 
+		$thumbnail = $this->delete_attachment_size( $attachment_id, 'woocommerce_thumbnail' );
+
+		$this->assertFileDoesNotExist( $thumbnail, 'The size should be missing before regeneration runs' );
+
 		$task = new ReflectionMethod( WC_Regenerate_Images_Request::class, 'task' );
 		$task->setAccessible( true );
 		$task->invoke( $this->sut, array( 'attachment_id' => $attachment_id ) );
+
+		$this->assert_size_exists( $attachment_id, 'woocommerce_thumbnail' );
 
 		$stored = get_post_meta( $attachment_id, '_wp_attachment_metadata', true );
 
