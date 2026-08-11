@@ -279,18 +279,16 @@ class CustomerSchema extends AbstractSchema {
 
 		// Only compute fields that will actually be returned. When $include_fields is empty the full
 		// response is requested, so everything is computed (default behavior, byte-identical output).
-		// When a sparse _fields subset is requested, skip the expensive aggregates and lookups that the
-		// caller did not ask for, instead of computing them and discarding them after array_intersect_key.
+		// When a sparse _fields subset is requested, skip the per-customer aggregates and the avatar
+		// lookup the caller did not ask for, instead of computing them and discarding them after
+		// array_intersect_key.
 		$is_field_included = static function ( string $field ) use ( $include_fields ) {
 			return empty( $include_fields ) || in_array( $field, $include_fields, true );
 		};
 
 		// Normalize last active timestamp - treat empty string, '0', 0, or false as null.
-		$last_active = null;
-		if ( $is_field_included( 'last_active' ) || $is_field_included( 'last_active_gmt' ) ) {
-			$last_active = $item->get_meta( 'wc_last_active' );
-			$last_active = empty( $last_active ) ? null : $last_active;
-		}
+		$last_active = $item->get_meta( 'wc_last_active' );
+		$last_active = empty( $last_active ) ? null : $last_active;
 
 		$formatted_data = array(
 			'id'                 => $item->get_id(),
