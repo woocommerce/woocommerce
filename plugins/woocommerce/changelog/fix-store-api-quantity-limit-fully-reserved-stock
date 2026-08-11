@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Store API: stop discarding a remaining stock of 0 when calculating quantity limits, so a product whose whole stock is reserved by pending orders no longer advertises its unreserved stock quantity as the maximum.
