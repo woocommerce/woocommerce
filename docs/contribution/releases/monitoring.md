@@ -18,6 +18,14 @@ Check newly created threads on the [WordPress.org Forums](https://wordpress.org/
 
 Watch the [Newest Created Issues](https://github.com/woocommerce/woocommerce/issues?q=is%3Aissue%20state%3Aopen%20sort%3Acreated-desc) and verify that none are critical.
 
+## Extension Fatal-Error Alerts
+
+Every Woo-owned extension has a Grafana fatal-error alert on WP Cloud, backed by the internal *Woo\* Fatals on WP Cloud* dashboard. Alerts post to the owning team's channel and to `#woo-core-releases-notifications`. Watch that channel during the monitoring window.
+
+When an alert fires, open the linked dashboard panel to see how many sites are affected, then reply on the alert to ping the owning team - triage is theirs. If the fatal traces back to the release, treat it as a candidate critical issue (see below).
+
+Fatals from old extension versions right after a release usually mean sites updated WooCommerce without updating the extension. Check the affected versions before calling it a regression.
+
 ## Handling Critical Issues
 
 If monitoring uncovers a bug that **cannot wait** for the next scheduled release, plan a point release. Before doing so, confirm that the issue:
