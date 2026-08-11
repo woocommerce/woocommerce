@@ -155,6 +155,7 @@ class CheckoutSessionsUpdate extends AbstractCartRoute {
 		// This allows the session will be loaded later without any further intervention.
 		if ( true === $this->has_cart_token ) {
 			$request->set_header( 'Cart-Token', $session_id );
+			// phpcs:ignore WooCommerceStoreApi.StoreApi.CartTokenSource.ServerSuperglobalWrite -- $session_id was validated above; this keeps the consumed token in sync with the validated one.
 			$_SERVER['HTTP_CART_TOKEN'] = $session_id;
 		}
 
