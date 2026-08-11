@@ -185,6 +185,24 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Invalidating the 'coupons' cache group should still reach the lookup entries.
+	 */
+	public function test_invalidating_the_coupons_cache_group_busts_the_lookup_cache(): void {
+		$code   = 'cache-bust-group';
+		$coupon = WC_Helper_Coupon::create_coupon( $code );
+
+		wc_get_coupon_id_by_code( $code );
+		$cache_key = $this->sut->get_cache_key( $code );
+		$this->assertNotFalse( wp_cache_get( $cache_key, $this->sut->get_cache_group() ), 'The coupon code lookup cache should be primed while the coupon is published' );
+
+		\WC_Cache_Helper::invalidate_cache_group( 'coupons' );
+
+		$this->assertNotSame( $cache_key, $this->sut->get_cache_key( $code ), "Rotating the 'coupons' group prefix should strand the lookup keys built under it" );
+
+		$coupon->delete( true );
+	}
+
+	/**
 	 * @testdox Should keep the coupon code lookup cache when a published coupon is updated and stays published.
 	 */
 	public function test_updating_a_published_coupon_keeps_the_lookup_cache(): void {

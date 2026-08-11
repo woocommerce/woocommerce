@@ -8,9 +8,12 @@ namespace Automattic\WooCommerce\Internal\Caches;
  * Invalidation handler for the coupon code to coupon id lookup cache.
  *
  * The wc_get_coupon_id_by_code() function caches the ids of the published coupons matching a
- * given code. The entries live in the 'coupons' object cache group, but their keys are built
- * with a dedicated 'coupon_code_lookups' prefix namespace so they can be invalidated on their
- * own, without flushing the meta cache shared by every WC_Coupon in the same group.
+ * given code. The entries live in the 'coupons' object cache group, and their keys nest a
+ * dedicated 'coupon_code_lookups' prefix namespace inside the group prefix. Rotating the inner
+ * namespace invalidates every lookup entry at once without flushing the meta cache shared by
+ * every WC_Coupon in the same group, while rotating the outer 'coupons' group prefix (what
+ * WC_Cache_Helper::invalidate_cache_group( 'coupons' ) does) keeps working as it did before
+ * this class existed. Same nesting as WC_Data::generate_meta_cache_key().
  *
  * Known limitations:
  *
@@ -57,9 +60,18 @@ class CouponCodeLookupInvalidator {
 	}
 
 	/**
+	 * Get the object cache group the lookup entries are stored in.
+	 *
+	 * @return string The cache group.
+	 */
+	public function get_cache_group(): string {
+		return self::CACHE_GROUP;
+	}
+
+	/**
 	 * Get the object cache key holding the ids of the published coupons with the given code.
 	 *
-	 * The key must be used with the CACHE_GROUP cache group.
+	 * The key must be used with the cache group returned by get_cache_group().
 	 *
 	 * @param string $code Coupon code.
 	 * @return string The cache key.
@@ -67,7 +79,11 @@ class CouponCodeLookupInvalidator {
 	public function get_cache_key( string $code ): string {
 		// Coupon code allows spaces, which doesn't work well with some cache engines (e.g. memcached), hence the hashing.
 		$hashed_code = md5( wc_strtolower( $code ) );
-		return \WC_Cache_Helper::get_cache_prefix( self::LOOKUP_CACHE_NAMESPACE ) . 'coupon_id_from_code_' . $hashed_code;
+
+		// The group prefix is nested so a 'coupons' group invalidation still reaches the lookup entries.
+		return \WC_Cache_Helper::get_cache_prefix( self::CACHE_GROUP )
+			. \WC_Cache_Helper::get_cache_prefix( self::LOOKUP_CACHE_NAMESPACE )
+			. 'coupon_id_from_code_' . $hashed_code;
 	}
 
 	/**

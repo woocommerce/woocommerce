@@ -113,15 +113,17 @@ function wc_get_coupon_id_by_code( $code, $exclude = 0 ) {
 		return 0;
 	}
 
-	$data_store = WC_Data_Store::load( 'coupon' );
-	$cache_key  = wc_get_container()->get( CouponCodeLookupInvalidator::class )->get_cache_key( $code );
+	$data_store  = WC_Data_Store::load( 'coupon' );
+	$invalidator = wc_get_container()->get( CouponCodeLookupInvalidator::class );
+	$cache_key   = $invalidator->get_cache_key( $code );
+	$cache_group = $invalidator->get_cache_group();
 
-	$ids = wp_cache_get( $cache_key, 'coupons' );
+	$ids = wp_cache_get( $cache_key, $cache_group );
 
 	if ( false === $ids ) {
 		$ids = $data_store->get_ids_by_code( $code );
 		if ( $ids ) {
-			wp_cache_set( $cache_key, $ids, 'coupons' );
+			wp_cache_set( $cache_key, $ids, $cache_group );
 		}
 	}
 
