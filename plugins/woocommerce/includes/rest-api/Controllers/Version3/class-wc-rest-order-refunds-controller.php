@@ -349,6 +349,8 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 	 * uses `woocommerce_rest_*`, so errors crossing into a v3 response are
 	 * renamed at this boundary. Codes that already carry the prefix pass through
 	 * unchanged, and the message and data (including the HTTP status) are kept.
+	 * An engine error whose data carries no HTTP status is backfilled with 400,
+	 * the same default the wc/v4 envelope applies, so it is not served as a 500.
 	 *
 	 * @param WP_Error $error The error whose code should be prefixed.
 	 *
@@ -361,7 +363,15 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 			return $error;
 		}
 
-		return new WP_Error( 'woocommerce_rest_' . $code, $error->get_error_message(), $error->get_error_data() );
+		$data = $error->get_error_data();
+		if ( ! is_array( $data ) ) {
+			$data = array();
+		}
+		if ( ! isset( $data['status'] ) ) {
+			$data['status'] = 400;
+		}
+
+		return new WP_Error( 'woocommerce_rest_' . $code, $error->get_error_message(), $data );
 	}
 
 	/**
