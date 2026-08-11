@@ -89,24 +89,35 @@ class BootstrapTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Bootstrap hooks on-demand block-type registration to woocommerce_short_description at priority 8.
+	 * @testdox Bootstrap hooks on-demand block-type registration to woocommerce_short_description before do_blocks.
 	 */
-	public function test_short_description_filter_is_hooked_at_priority_8(): void {
+	public function test_short_description_registration_is_hooked_before_do_blocks(): void {
 		global $wp_filter;
 
 		$this->assertArrayHasKey( 'woocommerce_short_description', $wp_filter, 'The filter should have registered callbacks.' );
 
-		$method_names = array();
-		foreach ( $wp_filter['woocommerce_short_description']->callbacks[8] ?? array() as $callback ) {
-			if ( is_array( $callback['function'] ) && is_object( $callback['function'][0] ?? null ) ) {
-				$method_names[] = $callback['function'][1];
+		$do_blocks_priority = has_filter( 'woocommerce_short_description', 'do_blocks' );
+		$this->assertNotFalse( $do_blocks_priority, 'do_blocks should be hooked to woocommerce_short_description.' );
+
+		$registration_priority = false;
+		foreach ( $wp_filter['woocommerce_short_description']->callbacks as $priority => $callbacks ) {
+			foreach ( $callbacks as $callback ) {
+				if (
+					is_array( $callback['function'] )
+					&& is_object( $callback['function'][0] ?? null )
+					&& 'maybe_register_blocks_from_content' === ( $callback['function'][1] ?? '' )
+				) {
+					$registration_priority = $priority;
+					break 2;
+				}
 			}
 		}
 
-		$this->assertContains(
-			'maybe_register_blocks_from_content',
-			$method_names,
-			'Bootstrap should hook on-demand block registration at priority 8, before do_blocks at priority 9.'
+		$this->assertNotFalse( $registration_priority, 'Bootstrap should hook on-demand block registration to woocommerce_short_description.' );
+		$this->assertLessThan(
+			$do_blocks_priority,
+			$registration_priority,
+			'On-demand block registration must run at an earlier priority than do_blocks, or description blocks render empty.'
 		);
 	}
 
