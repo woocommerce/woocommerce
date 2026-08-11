@@ -421,7 +421,9 @@
 			}
 
 			.woocommerce-marketplace__product-card__details {
-				align-items: center;
+				/* Top-align the icon with the title, like regular cards, so it
+				   sits identically whether or not the badge row is present. */
+				align-items: flex-start;
 			}
 
 			.woocommerce-marketplace__product-card__link {
