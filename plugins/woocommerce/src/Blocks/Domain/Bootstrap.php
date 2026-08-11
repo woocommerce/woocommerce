@@ -174,13 +174,16 @@ class Bootstrap {
 	 * product and variation descriptions still run through do_blocks there, so a WooCommerce block in a
 	 * description would render empty. Hooked to woocommerce_short_description just before do_blocks.
 	 *
+	 * The detection mirrors the whitespace tolerance of the block parser grammar (`<!--\s+wp:`), so formatting
+	 * variants like extra spaces or a newline after the comment opener are still recognised.
+	 *
 	 * @since 11.1.0
 	 *
 	 * @param string $content The description content passed through the filter.
 	 * @return string The unchanged content.
 	 */
 	public function maybe_register_blocks_from_content( $content ) {
-		if ( is_string( $content ) && false !== strpos( $content, '<!-- wp:woocommerce/' ) ) {
+		if ( is_string( $content ) && preg_match( '/<!--\s+wp:woocommerce\//', $content ) ) {
 			$block_types_controller = $this->container->get( BlockTypesController::class );
 			if ( ! $block_types_controller->register_blocks_has_run() ) {
 				$block_types_controller->register_blocks();

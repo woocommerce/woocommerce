@@ -129,6 +129,40 @@ class BootstrapTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Block markup variants the block parser accepts: its grammar allows any run of whitespace after the
+	 * comment opener (`<!--\s+wp:`), so the detection must tolerate the same formatting.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function block_markup_whitespace_variants(): array {
+		return array(
+			'extra spaces after opener' => array( '<!--  wp:woocommerce/product-price /-->' ),
+			'newline after opener'      => array( "<!--\nwp:woocommerce/product-price /-->" ),
+			'tab after opener'          => array( "<!--\twp:woocommerce/product-price /-->" ),
+		);
+	}
+
+	/**
+	 * @testdox Detection tolerates the whitespace variants the block parser accepts.
+	 * @dataProvider block_markup_whitespace_variants
+	 *
+	 * @param string $markup Block markup with non-canonical whitespace.
+	 */
+	public function test_short_description_filter_detects_blocks_regardless_of_whitespace( string $markup ): void {
+		$registry = WP_Block_Type_Registry::get_instance();
+
+		$this->assertFalse( $registry->is_registered( self::SAMPLE_BLOCK ), 'WooCommerce blocks should start unregistered for this test.' );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Firing an existing core filter to exercise its callbacks, not declaring a new hook.
+		apply_filters( 'woocommerce_short_description', $markup );
+
+		$this->assertTrue(
+			$registry->is_registered( self::SAMPLE_BLOCK ),
+			'Detection should accept any whitespace the block parser accepts after the comment opener.'
+		);
+	}
+
+	/**
 	 * @testdox Filtering a description without WooCommerce block markup does not register block types.
 	 */
 	public function test_short_description_filter_skips_registration_for_plain_content(): void {
@@ -143,6 +177,16 @@ class BootstrapTest extends WC_Unit_Test_Case {
 		$this->assertFalse(
 			$registry->is_registered( self::SAMPLE_BLOCK ),
 			'A description without WooCommerce block markup should stay on the fast path and register nothing.'
+		);
+
+		// Without whitespace after the comment opener this is not a block per the parser grammar (`<!--\s+wp:`),
+		// so do_blocks would leave it untouched and registration would be wasted.
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Firing an existing core filter to exercise its callbacks, not declaring a new hook.
+		apply_filters( 'woocommerce_short_description', '<!--wp:woocommerce/product-price /-->' );
+
+		$this->assertFalse(
+			$registry->is_registered( self::SAMPLE_BLOCK ),
+			'Markup the block parser does not recognise as a block should not trigger registration.'
 		);
 	}
 
