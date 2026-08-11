@@ -1,10 +1,12 @@
 <?php
 declare( strict_types=1 );
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Customers\Controller as CustomersController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Customers\CustomerSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Customers\CollectionQuery;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Customers\UpdateUtils;
+use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 
 /**
@@ -187,6 +189,61 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				'user_registered' => gmdate( 'Y-m-d H:i:s', time() - $seconds_ago ),
 			)
 		);
+	}
+
+	/**
+	 * Create a paid order totalling $50 for a customer, so the customer's order aggregates have
+	 * non-zero values. The status has to be a paid one for total_spent to count it.
+	 *
+	 * @param int $customer_id Customer ID.
+	 * @return WC_Order
+	 */
+	private function create_paid_order_for_customer( int $customer_id ): WC_Order {
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * Drop the cached order count and money spent user meta so the next read has to recompute them
+	 * from the orders table.
+	 *
+	 * @param int $customer_id Customer ID.
+	 */
+	private function clear_customer_aggregate_caches( int $customer_id ): void {
+		Users::delete_site_user_meta( $customer_id, 'wc_order_count' );
+		Users::delete_site_user_meta( $customer_id, 'wc_money_spent' );
+	}
+
+	/**
+	 * Count the per-customer COUNT/SUM order aggregate queries — the ones backing orders_count and
+	 * total_spent — executed while the given callback runs. Matches both the HPOS and the posts
+	 * table variants of those queries.
+	 *
+	 * @param callable $callback Code to run while counting.
+	 * @return int Number of aggregate queries executed.
+	 */
+	private function count_customer_aggregate_queries( callable $callback ): int {
+		$count = 0;
+		$spy   = function ( $query ) use ( &$count ) {
+			$is_aggregate = 1 === preg_match( '/^\s*SELECT\s+(COUNT|SUM)\s*\(/i', $query );
+			$is_customer  = false !== strpos( $query, 'customer_id' ) || false !== strpos( $query, '_customer_user' );
+			if ( $is_aggregate && $is_customer ) {
+				++$count;
+			}
+			return $query;
+		};
+
+		add_filter( 'query', $spy );
+		try {
+			$callback();
+		} finally {
+			remove_filter( 'query', $spy );
+		}
+
+		return $count;
 	}
 
 	/**
@@ -460,10 +517,13 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test a default request (no _fields) includes all aggregate fields with computed values.
+	 * Test a default request (no _fields) includes the aggregate fields with their real values.
 	 */
 	public function test_default_request_includes_aggregate_fields(): void {
-		$customer    = $this->create_test_customer();
+		$customer = $this->create_test_customer();
+		$this->create_paid_order_for_customer( $customer->get_id() );
+		$this->clear_customer_aggregate_caches( $customer->get_id() );
+
 		$last_active = time() - HOUR_IN_SECONDS;
 		update_user_meta( $customer->get_id(), 'wc_last_active', (string) $last_active );
 
@@ -473,11 +533,8 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$response_data = $response->get_data();
 
-		$this->assertArrayHasKey( 'orders_count', $response_data );
-		$this->assertArrayHasKey( 'total_spent', $response_data );
-		$this->assertArrayHasKey( 'avatar_url', $response_data );
-		$this->assertEquals( 0, $response_data['orders_count'] );
-		$this->assertEquals( 0.0, (float) $response_data['total_spent'] );
+		$this->assertSame( 1, $response_data['orders_count'] );
+		$this->assertSame( '50.00', $response_data['total_spent'] );
 		$this->assertNotEmpty( $response_data['avatar_url'] );
 		$this->assertSame( gmdate( 'Y-m-d\TH:i:s', $last_active ), $response_data['last_active_gmt'] );
 		$this->assertNotNull( $response_data['last_active'] );
@@ -508,50 +565,51 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertArrayHasKey( 'id', $response_data );
 		$this->assertArrayHasKey( 'email', $response_data );
-		foreach ( array( 'orders_count', 'total_spent', 'avatar_url', 'last_active', 'last_active_gmt' ) as $field ) {
+		foreach ( array( 'orders_count', 'total_spent', 'avatar_url' ) as $field ) {
 			$this->assertArrayNotHasKey( $field, $response_data, "Response must not contain unrequested field: {$field}" );
 		}
 		$this->assertSame( 0, $avatar_lookups, 'avatar_url must not be computed when it is not requested via _fields' );
 	}
 
 	/**
-	 * Test requesting last_active and last_active_gmt via _fields runs the wc_last_active meta
-	 * normalization while other aggregates stay omitted.
+	 * Test a sparse _fields request that excludes orders_count and total_spent does not run the
+	 * per-customer COUNT/SUM queries backing them, while a request that asks for them still does.
 	 */
-	public function test_fields_parameter_requesting_last_active_runs_meta_normalization(): void {
-		$active_customer = $this->create_test_customer();
-		$last_active     = time() - HOUR_IN_SECONDS;
-		update_user_meta( $active_customer->get_id(), 'wc_last_active', (string) $last_active );
+	public function test_fields_parameter_excluding_aggregates_skips_aggregate_queries(): void {
+		$customer = $this->create_test_customer();
+		$this->create_paid_order_for_customer( $customer->get_id() );
 
-		$request = new WP_REST_Request( 'GET', '/wc/v4/customers/' . $active_customer->get_id() );
-		$request->set_param( '_fields', 'id,last_active,last_active_gmt' );
-		$response = $this->server->dispatch( $request );
+		// A cold aggregate cache is the case this optimization targets: with the cache warm the
+		// COUNT/SUM never runs anyway and the test could not tell the gate apart from a no-op.
+		$this->clear_customer_aggregate_caches( $customer->get_id() );
 
-		$this->assertEquals( 200, $response->get_status() );
-		$response_data = $response->get_data();
-
-		$this->assertSame( gmdate( 'Y-m-d\TH:i:s', $last_active ), $response_data['last_active_gmt'] );
-		$this->assertNotNull( $response_data['last_active'] );
-		$this->assertArrayNotHasKey( 'orders_count', $response_data );
-		$this->assertArrayNotHasKey( 'avatar_url', $response_data );
-
-		// Empty meta must still normalize to null when the fields are requested.
-		$inactive_customer = $this->create_test_customer(
-			array(
-				'email'    => 'inactive@example.com',
-				'username' => 'inactivedoe',
-			)
+		$sparse_request = new WP_REST_Request( 'GET', '/wc/v4/customers/' . $customer->get_id() );
+		$sparse_request->set_param( '_fields', 'id,email' );
+		$sparse_queries = $this->count_customer_aggregate_queries(
+			function () use ( $sparse_request ) {
+				$this->assertEquals( 200, $this->server->dispatch( $sparse_request )->get_status() );
+			}
 		);
-		update_user_meta( $inactive_customer->get_id(), 'wc_last_active', '' );
 
-		$request = new WP_REST_Request( 'GET', '/wc/v4/customers/' . $inactive_customer->get_id() );
-		$request->set_param( '_fields', 'last_active,last_active_gmt' );
-		$response = $this->server->dispatch( $request );
+		$this->assertSame( 0, $sparse_queries, 'orders_count/total_spent must not run their COUNT/SUM queries when not requested via _fields' );
+
+		// The sparse request left the cache cold, so the same request asking for the fields must
+		// now run them. This guards the assertion above against silently matching nothing.
+		$full_request = new WP_REST_Request( 'GET', '/wc/v4/customers/' . $customer->get_id() );
+		$full_request->set_param( '_fields', 'id,orders_count,total_spent' );
+		$response     = null;
+		$full_queries = $this->count_customer_aggregate_queries(
+			function () use ( $full_request, &$response ) {
+				$response = $this->server->dispatch( $full_request );
+			}
+		);
 
 		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( 2, $full_queries, 'orders_count and total_spent must each run their aggregate query when requested via _fields' );
+
 		$response_data = $response->get_data();
-		$this->assertNull( $response_data['last_active'] );
-		$this->assertNull( $response_data['last_active_gmt'] );
+		$this->assertSame( 1, $response_data['orders_count'] );
+		$this->assertSame( '50.00', $response_data['total_spent'] );
 	}
 
 	/**
