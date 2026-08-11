@@ -1086,9 +1086,9 @@
 		}
 	},
 	"devDependencies": {
-		"@babel/cli": "7.25.7",
-		"@babel/core": "7.25.7",
-		"@babel/preset-env": "7.25.7",
+		"@babel/cli": "7.29.7",
+		"@babel/core": "7.29.7",
+		"@babel/preset-env": "7.29.7",
 		"@faker-js/faker": "^9.3.0",
 		"@playwright/test": "^1.61.1",
 		"@typescript-eslint/eslint-plugin": "^8.63.0",

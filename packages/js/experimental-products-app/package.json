@@ -80,8 +80,8 @@
 		"react-dom": "18.3.x"
 	},
 	"devDependencies": {
-		"@babel/core": "7.25.7",
-		"@babel/runtime": "7.25.7",
+		"@babel/core": "7.29.7",
+		"@babel/runtime": "7.29.7",
 		"@testing-library/dom": "^10.4.x",
 		"@testing-library/jest-dom": "^6.x.x",
 		"@testing-library/react": "^16.x.x",
