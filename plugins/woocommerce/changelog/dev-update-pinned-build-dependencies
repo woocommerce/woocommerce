@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update pinned build and test dependencies (Babel, webpack, postcss, axios, lodash, cookie) to versions that resolve reported security advisories.
