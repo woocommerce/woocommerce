@@ -328,4 +328,177 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 		$this->assertEquals( 1, $data->total );
 		$this->assertEquals( $order_2->get_id(), $data->data[0]['order_id'] );
 	}
+
+	/**
+	 * Creates a completed order for a guest customer, using a billing email that is not attached to
+	 * any registered user.
+	 *
+	 * @param WC_Product $product Product to add to the order.
+	 * @param string     $email   Billing email used to identify the guest customer.
+	 * @return WC_Order
+	 */
+	private function create_guest_order( $product, $email ) {
+		$order = WC_Helper_Order::create_order( 0, $product );
+		$order->set_billing_email( $email );
+		$order->set_total( 25 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * Returns the customer type of every row in the report, keyed by order ID.
+	 *
+	 * @param WC_Order $order Order used to derive the reporting time frame.
+	 * @param array    $args  Extra query arguments.
+	 * @return array
+	 */
+	private function get_customer_types_by_order_id( $order, $args = array() ) {
+		$data_store = new OrdersDataStore();
+		$data       = $data_store->get_data(
+			array_merge(
+				array(
+					'after'  => gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() ),
+					'before' => gmdate( 'Y-m-d H:59:59', $order->get_date_created()->getOffsetTimestamp() ),
+				),
+				$args
+			)
+		);
+
+		return wp_list_pluck( $data->data, 'customer_type', 'order_id' );
+	}
+
+	/**
+	 * @testdox Should report a refund of a customer's first order as a new customer.
+	 *
+	 * Refunds are stored without a customer type of their own, so they should report the customer
+	 * type of the order they refund instead of always being reported as returning.
+	 *
+	 * See: https://github.com/woocommerce/woocommerce/issues/33410.
+	 */
+	public function test_refund_of_first_order_is_reported_as_new_customer() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$simple_product = new WC_Product_Simple();
+		$simple_product->set_name( 'Simple Product' );
+		$simple_product->set_regular_price( 25 );
+		$simple_product->save();
+
+		$order = $this->create_guest_order( $simple_product, 'guest-33410@example.org' );
+
+		$refund = wc_create_refund(
+			array(
+				'amount'   => 25,
+				'order_id' => $order->get_id(),
+			)
+		);
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$customer_types = $this->get_customer_types_by_order_id( $order );
+
+		$this->assertEquals( 'new', $customer_types[ $order->get_id() ], 'A guest customer\'s first order should be reported as new' );
+		$this->assertEquals( 'new', $customer_types[ $refund->get_id() ], 'A refund should be reported with the customer type of the refunded order' );
+	}
+
+	/**
+	 * @testdox Should report a refund of a returning customer's order as a returning customer.
+	 */
+	public function test_refund_of_later_order_is_reported_as_returning_customer() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$simple_product = new WC_Product_Simple();
+		$simple_product->set_name( 'Simple Product' );
+		$simple_product->set_regular_price( 25 );
+		$simple_product->save();
+
+		$first_order  = $this->create_guest_order( $simple_product, 'guest-33410-returning@example.org' );
+		$second_order = $this->create_guest_order( $simple_product, 'guest-33410-returning@example.org' );
+
+		$refund = wc_create_refund(
+			array(
+				'amount'   => 25,
+				'order_id' => $second_order->get_id(),
+			)
+		);
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$customer_types = $this->get_customer_types_by_order_id( $first_order );
+
+		$this->assertEquals( 'new', $customer_types[ $first_order->get_id() ], 'The first order should be reported as new' );
+		$this->assertEquals( 'returning', $customer_types[ $second_order->get_id() ], 'The second order should be reported as returning' );
+		$this->assertEquals( 'returning', $customer_types[ $refund->get_id() ], 'A refund should be reported with the customer type of the refunded order' );
+	}
+
+	/**
+	 * The customer type filter still matches orders only, so that the report table keeps agreeing
+	 * with the totals from the orders stats endpoint, which excludes refunds from that filter too.
+	 *
+	 * @testdox Should match only orders, not their refunds, when filtering by customer type.
+	 */
+	public function test_customer_type_filter_matches_orders_only() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$simple_product = new WC_Product_Simple();
+		$simple_product->set_name( 'Simple Product' );
+		$simple_product->set_regular_price( 25 );
+		$simple_product->save();
+
+		$order = $this->create_guest_order( $simple_product, 'guest-33410-filter@example.org' );
+
+		wc_create_refund(
+			array(
+				'amount'   => 25,
+				'order_id' => $order->get_id(),
+			)
+		);
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$new_customer_rows = $this->get_customer_types_by_order_id( $order, array( 'customer_type' => 'new' ) );
+
+		$this->assertEqualSets(
+			array( $order->get_id() ),
+			array_keys( $new_customer_rows ),
+			'Filtering by new customers should return the order without its refund'
+		);
+
+		$returning_customer_rows = $this->get_customer_types_by_order_id( $order, array( 'customer_type' => 'returning' ) );
+
+		$this->assertEmpty( $returning_customer_rows, 'Filtering by returning customers should not return the order or its refund' );
+	}
+
+	/**
+	 * @testdox Should report the customer type of refunds when filtering by refunds.
+	 */
+	public function test_refunds_filter_returns_refunds_with_their_customer_type() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$simple_product = new WC_Product_Simple();
+		$simple_product->set_name( 'Simple Product' );
+		$simple_product->set_regular_price( 25 );
+		$simple_product->save();
+
+		$order = $this->create_guest_order( $simple_product, 'guest-33410-refunds@example.org' );
+
+		$refund = wc_create_refund(
+			array(
+				'amount'   => 25,
+				'order_id' => $order->get_id(),
+			)
+		);
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$refund_rows = $this->get_customer_types_by_order_id( $order, array( 'refunds' => 'all' ) );
+
+		$this->assertEqualSets( array( $refund->get_id() ), array_keys( $refund_rows ), 'Filtering by refunds should return the refund only' );
+		$this->assertEquals( 'new', $refund_rows[ $refund->get_id() ], 'A refund should be reported with the customer type of the refunded order' );
+
+		$order_rows = $this->get_customer_types_by_order_id( $order, array( 'refunds' => 'none' ) );
+
+		$this->assertEqualSets( array( $order->get_id() ), array_keys( $order_rows ), 'Excluding refunds should return the order only' );
+	}
 }
