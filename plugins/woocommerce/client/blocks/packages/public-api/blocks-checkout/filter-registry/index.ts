@@ -48,7 +48,6 @@ export const registerCheckoutFilters = (
 	 */
 	if ( Object.keys( filters ).includes( 'couponName' ) ) {
 		deprecated( 'couponName', {
-			since: '5.6.0',
 			alternative: 'coupons',
 			link: 'https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/bb921d21f42e21f38df2b1c87b48e07aa4cb0538/docs/extensibility/available-filters.md#coupons',
 		} );

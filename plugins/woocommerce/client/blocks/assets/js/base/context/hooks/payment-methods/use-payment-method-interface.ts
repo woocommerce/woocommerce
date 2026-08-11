@@ -173,7 +173,6 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 			deprecated(
 				'setExpressPaymentError should only be used by Express Payment Methods (using the provided onError handler).',
 				{
-					since: '5.6.0',
 					alternative: '',
 					link: 'https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4228',
 				}

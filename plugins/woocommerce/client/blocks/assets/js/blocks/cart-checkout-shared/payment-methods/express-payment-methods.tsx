@@ -140,7 +140,6 @@ const ExpressPaymentMethods = () => {
 			deprecated(
 				'Express Payment Methods should use the provided onError handler instead.',
 				{
-					since: '5.6.0',
 					alternative: 'onError',
 					link: 'https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4228',
 				}

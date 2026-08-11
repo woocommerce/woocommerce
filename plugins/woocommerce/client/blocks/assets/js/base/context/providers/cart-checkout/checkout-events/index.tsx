@@ -239,7 +239,6 @@ export const CheckoutEventsProvider = ( {
 	const onCheckoutBeforeProcessing = useMemo( () => {
 		return function ( ...args: Parameters< typeof onCheckoutValidation > ) {
 			deprecated( 'onCheckoutBeforeProcessing', {
-				since: '5.4.0',
 				alternative: 'onCheckoutValidation',
 			} );
 			return onCheckoutValidation( ...args );
