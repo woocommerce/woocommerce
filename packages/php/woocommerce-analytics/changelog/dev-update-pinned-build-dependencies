@@ -1,0 +1,4 @@
+Significance: patch
+Type: changed
+
+Update pinned build dependencies to versions that resolve reported security advisories.
