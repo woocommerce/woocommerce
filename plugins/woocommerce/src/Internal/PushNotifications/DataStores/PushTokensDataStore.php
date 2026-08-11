@@ -33,6 +33,15 @@ class PushTokensDataStore {
 	 */
 	private array $tokens_by_roles_cache = array();
 
+	/**
+	 * Meta key holding the GMT datetime of the last successful send to WPCOM.
+	 *
+	 * Deliberately absent from `build_meta_array_from_token()`: it is written
+	 * only by `record_last_send()`, so an unrelated token update (e.g. the app
+	 * re-registering with a new locale) cannot clobber it.
+	 */
+	const LAST_SEND_AT_META_KEY = 'last_send_at_gmt';
+
 	const SUPPORTED_META = array(
 		'origin',
 		'device_uuid',
@@ -40,6 +49,7 @@ class PushTokensDataStore {
 		'platform',
 		'device_locale',
 		'metadata',
+		self::LAST_SEND_AT_META_KEY,
 	);
 
 	/**
@@ -130,6 +140,7 @@ class PushTokensDataStore {
 		 */
 		$push_token->set_device_locale( $meta['device_locale'] ?? PushToken::DEFAULT_DEVICE_LOCALE );
 		$push_token->set_metadata( $meta['metadata'] ?? array() );
+		$push_token->set_last_send_at_gmt( $meta[ self::LAST_SEND_AT_META_KEY ] ?? null );
 
 		/**
 		 * Both timestamps come from the post record rather than meta, because
@@ -313,6 +324,7 @@ class PushTokensDataStore {
 						 */
 						'device_locale' => $meta['device_locale'] ?? PushToken::DEFAULT_DEVICE_LOCALE,
 						'metadata'      => $meta['metadata'] ?? array(),
+						'last_send_at_gmt'  => $meta[ self::LAST_SEND_AT_META_KEY ] ?? null,
 					)
 				);
 			}
@@ -442,6 +454,101 @@ class PushTokensDataStore {
 
 		$this->tokens_by_roles_cache[ $cache_key ] = $result;
 		return $result;
+	}
+
+	/**
+	 * Records that the given tokens were successfully sent to WPCOM.
+	 *
+	 * Written as two fixed queries — a delete followed by a single multi-row
+	 * insert — rather than one `update_post_meta()` call per token. A store
+	 * with a dozen registered devices would otherwise cost dozens of round
+	 * trips on the send path, which grows with the number of devices rather
+	 * than staying constant.
+	 *
+	 * Failure is swallowed: not knowing when a token was last used is a
+	 * diagnostic gap, and must never turn a delivered notification into a
+	 * failed one.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param PushToken[] $push_tokens The tokens WPCOM accepted.
+	 * @return void
+	 */
+	public function record_last_send( array $push_tokens ): void {
+		global $wpdb;
+
+		$post_ids = array_values(
+			array_filter(
+				array_map(
+					fn ( PushToken $push_token ) => $push_token->get_id(),
+					$push_tokens
+				)
+			)
+		);
+
+		if ( empty( $post_ids ) ) {
+			return;
+		}
+
+		$timestamp = gmdate( 'Y-m-d H:i:s' );
+
+		/**
+		 * Both statements interpolate a placeholder list whose length depends on
+		 * the number of tokens. The interpolated strings are built here from
+		 * literals only — never from token data — and every value still travels
+		 * through `$wpdb->prepare()`, which is why the sniffs are suppressed
+		 * below rather than the queries being restructured.
+		 */
+		$id_placeholders  = implode( ', ', array_fill( 0, count( $post_ids ), '%d' ) );
+		$row_placeholders = implode( ', ', array_fill( 0, count( $post_ids ), '( %d, %s, %s )' ) );
+
+		$insert_args = array();
+
+		foreach ( $post_ids as $post_id ) {
+			$insert_args[] = $post_id;
+			$insert_args[] = self::LAST_SEND_AT_META_KEY;
+			$insert_args[] = $timestamp;
+		}
+
+		try {
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN ( $id_placeholders )",
+					array_merge( array( self::LAST_SEND_AT_META_KEY ), $post_ids )
+				)
+			);
+
+			$inserted = $wpdb->query(
+				$wpdb->prepare(
+					"INSERT INTO {$wpdb->postmeta} ( post_id, meta_key, meta_value ) VALUES $row_placeholders",
+					$insert_args
+				)
+			);
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
+			// The rows were written behind the meta API's back, so the cached
+			// meta for these posts is now stale and must be dropped.
+			wp_cache_delete_multiple( $post_ids, 'post_meta' );
+
+			if ( false === $inserted ) {
+				wc_get_logger()->warning(
+					'Failed to record last send time for push tokens.',
+					array(
+						'token_ids' => $post_ids,
+						'error'     => $wpdb->last_error,
+					)
+				);
+			}
+		} catch ( Exception $e ) {
+			wc_get_logger()->warning(
+				'Failed to record last send time for push tokens.',
+				array(
+					'token_ids' => $post_ids,
+					'error'     => $e->getMessage(),
+				)
+			);
+		}//end try
 	}
 
 	/**

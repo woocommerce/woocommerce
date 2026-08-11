@@ -1004,6 +1004,114 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Tests a token has no last send time until it has actually been sent.
+	 */
+	public function test_last_send_at_is_null_for_a_token_that_has_never_been_sent() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$this->assertNull( $data_store->read( $push_token->get_id() )->get_last_send_at_gmt() );
+	}
+
+	/**
+	 * @testdox Tests recording a send stamps every supplied token with the same time.
+	 */
+	public function test_record_last_send_stamps_all_supplied_tokens() {
+		$data_store = new PushTokensDataStore();
+		$first      = $this->create_test_push_token();
+		$second     = $this->create_test_push_token();
+
+		$data_store->record_last_send( array( $first, $second ) );
+
+		$first_send_at  = $data_store->read( $first->get_id() )->get_last_send_at_gmt();
+		$second_send_at = $data_store->read( $second->get_id() )->get_last_send_at_gmt();
+
+		$this->assertNotNull( $first_send_at );
+		$this->assertSame( $first_send_at, $second_send_at );
+	}
+
+	/**
+	 * @testdox Tests recording a send twice replaces the stamp rather than accumulating rows.
+	 *
+	 * The batched write bypasses the meta API, so it has to leave exactly one
+	 * row per token behind — a duplicate would make `get_post_meta( …, true )`
+	 * return an arbitrary one of them.
+	 */
+	public function test_record_last_send_replaces_the_previous_stamp() {
+		global $wpdb;
+
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$data_store->record_last_send( array( $push_token ) );
+		$data_store->record_last_send( array( $push_token ) );
+
+		$row_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s",
+				$push_token->get_id(),
+				PushTokensDataStore::LAST_SEND_AT_META_KEY
+			)
+		);
+
+		$this->assertSame( 1, $row_count );
+	}
+
+	/**
+	 * @testdox Tests recording a send leaves the rest of the token record untouched.
+	 */
+	public function test_record_last_send_does_not_disturb_other_token_data() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$data_store->record_last_send( array( $push_token ) );
+		$read = $data_store->read( $push_token->get_id() );
+
+		$this->assertSame( $push_token->get_token(), $read->get_token() );
+		$this->assertSame( $push_token->get_device_uuid(), $read->get_device_uuid() );
+		$this->assertSame( $push_token->get_device_locale(), $read->get_device_locale() );
+		$this->assertSame( $push_token->get_metadata(), $read->get_metadata() );
+	}
+
+	/**
+	 * @testdox Tests updating a token preserves its last send time.
+	 *
+	 * The app re-registers a device whenever its locale or metadata changes,
+	 * which must not wipe the send history that update path knows nothing about.
+	 */
+	public function test_updating_a_token_preserves_its_last_send_time() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$data_store->record_last_send( array( $push_token ) );
+		$recorded = $data_store->read( $push_token->get_id() )->get_last_send_at_gmt();
+
+		$push_token->set_device_locale( 'fr_FR' );
+		$data_store->update( $push_token );
+
+		$this->assertSame( $recorded, $data_store->read( $push_token->get_id() )->get_last_send_at_gmt() );
+	}
+
+	/**
+	 * @testdox Tests recording a send with no tokens is a no-op.
+	 */
+	public function test_record_last_send_ignores_an_empty_token_list() {
+		global $wpdb;
+
+		$data_store = new PushTokensDataStore();
+		$data_store->record_last_send( array() );
+
+		$row_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = %s",
+				PushTokensDataStore::LAST_SEND_AT_META_KEY
+			)
+		);
+
+		$this->assertSame( 0, $row_count );
+	}
+
+	/**
 	 * Creates a test push token and saves it to the database.
 	 *
 	 * @return PushToken The created push token object.

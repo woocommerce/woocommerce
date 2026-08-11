@@ -1023,4 +1023,17 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$this->assertNull( $rest_format['device_uuid'] );
 		$this->assertNull( $rest_format['platform'] );
 	}
+
+	/**
+	 * @testdox Tests the last send time defaults to null and is exposed in RFC3339 form.
+	 */
+	public function test_it_exposes_the_last_send_time() {
+		$this->assertNull( ( new PushToken() )->get_last_send_at_gmt() );
+
+		$push_token = new PushToken( array( 'last_send_at_gmt' => '2026-08-11 16:00:00' ) );
+
+		$this->assertSame( '2026-08-11T16:00:00+00:00', $push_token->get_last_send_at_gmt() );
+		$this->assertSame( '2026-08-11T16:00:00+00:00', $push_token->to_rest_format()['last_send_at_gmt'] );
+		$this->assertArrayNotHasKey( 'last_send_at_gmt', $push_token->to_wpcom_format() );
+	}
 }
