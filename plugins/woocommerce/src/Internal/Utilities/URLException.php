@@ -9,4 +9,4 @@ use Exception;
  */
 class URLException extends Exception {}
 
-$smoke_modified=1+2;
+$smoke_modified=1 + 2;
