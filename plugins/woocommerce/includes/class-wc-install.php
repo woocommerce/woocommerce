@@ -350,6 +350,9 @@ class WC_Install {
 		'11.1.0-1' => array(
 			'wc_update_11101_remove_deprecated_variation_gallery_option',
 		),
+		'11.1.0-2' => array(
+			'wc_update_11102_cleanup_abandoned_cart_recovery_auto_send',
+		),
 	);
 
 	/**

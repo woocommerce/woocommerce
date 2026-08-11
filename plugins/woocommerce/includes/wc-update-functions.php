@@ -3636,3 +3636,36 @@ function wc_update_1110_flush_product_count_cache() {
 		( new \Automattic\WooCommerce\Caches\ProductCountCache() )->flush( 'product' );
 	}
 }
+
+/**
+ * Clean up the state left behind by the removed abandoned cart recovery auto-send.
+ *
+ * Sites that ran 11.0.x with the experimental `abandoned_cart_recovery` feature and
+ * "Send automatically" enabled can have queued `woocommerce_send_abandoned_cart_recovery_notification`
+ * actions and `_abandoned_cart_recovery_scheduled_at` order meta. Nothing listens to
+ * that hook or reads that meta any more, so cancel the queued actions and drop the
+ * meta rather than leaving dead scheduled actions in the store.
+ *
+ * The `_abandoned_cart_recovery_email_sent_at` meta is deliberately kept: the
+ * manual-send flow still writes and reads it.
+ *
+ * @since 11.1.0
+ *
+ * @return void
+ */
+function wc_update_11102_cleanup_abandoned_cart_recovery_auto_send() {
+	global $wpdb;
+
+	if ( function_exists( 'as_unschedule_all_actions' ) ) {
+		as_unschedule_all_actions( 'woocommerce_send_abandoned_cart_recovery_notification' );
+	}
+
+	$meta_key = '_abandoned_cart_recovery_scheduled_at';
+
+	$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => $meta_key ), array( '%s' ) );
+
+	$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
+	if ( $data_synchronizer->get_table_exists() ) {
+		$wpdb->delete( OrdersTableDataStore::get_meta_table_name(), array( 'meta_key' => $meta_key ), array( '%s' ) );
+	}
+}

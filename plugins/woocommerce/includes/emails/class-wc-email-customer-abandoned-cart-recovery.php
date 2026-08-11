@@ -19,12 +19,10 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 	 * Customer Abandoned Cart Recovery email.
 	 *
 	 * A transactional email that prompts the customer to complete a checkout they
-	 * left pending. The send is scheduled via Action Scheduler two hours after
-	 * the pending order is created, gated on the merchant's `automated` setting.
-	 * Merchants can also trigger the email manually from the order edit page.
+	 * left pending. Merchants trigger the email manually from the order edit page.
 	 *
 	 * @class    WC_Email_Customer_Abandoned_Cart_Recovery
-	 * @version  11.0.0
+	 * @version  11.1.0
 	 * @package  WooCommerce\Classes\Emails
 	 */
 	class WC_Email_Customer_Abandoned_Cart_Recovery extends WC_Email {
@@ -50,7 +48,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		/**
 		 * Order meta key recording the timestamp of the most recent send.
 		 *
-		 * Written by `trigger()` after a successful dispatch (manual or automated) of the abandoned cart recovery email.
+		 * Written by `trigger()` after a successful dispatch of the abandoned cart recovery email.
 		 */
 		public const META_KEY_SENT_AT = '_abandoned_cart_recovery_email_sent_at';
 
@@ -73,10 +71,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		 *                     the customer is mid-flow. May have no billing email yet,
 		 *                     in which case `trigger()` no-ops.
 		 *
-		 * Covers block checkout as well as classic. The automated scheduler is
-		 * scoped to `pending`.
-		 *
-		 * @see \Automattic\WooCommerce\Internal\AbandonedCartRecovery\Scheduler::get_eligible_statuses()
+		 * Covers block checkout as well as classic.
 		 *
 		 * @var string[]
 		 */
@@ -91,18 +86,6 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		 * the checkout on their own before merchants can nudge them.
 		 */
 		public const ABANDONMENT_THRESHOLD_SECONDS = HOUR_IN_SECONDS;
-
-		/**
-		 * Delay between order creation and the automated recovery send.
-		 *
-		 * Deliberately longer than `ABANDONMENT_THRESHOLD_SECONDS` so the auto-send
-		 * never races the customer's own checkout retry. The shorter eligibility
-		 * threshold still gates manual sends from the order edit page so merchants
-		 * have an earlier window to intervene.
-		 *
-		 * @since 11.0.0
-		 */
-		public const AUTO_SEND_DELAY_SECONDS = 2 * HOUR_IN_SECONDS;
 
 		/**
 		 * Constructor.
@@ -125,15 +108,13 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 			parent::__construct();
 
 			// Must be after parent's constructor which sets `email_improvements_enabled` property.
-			$this->description = __( 'Win back shoppers who almost bought. Automatically email customers who didn\'t finish checking out, with a one-click link back to their order.', 'woocommerce' );
+			$this->description = __( 'Win back shoppers who almost bought. Email customers who didn\'t finish checking out, with a one-click link back to their order.', 'woocommerce' );
 		}
 
 		/**
 		 * Trigger the sending of this email.
 		 *
-		 * Called by `Scheduler::handle_scheduled_send()` after Action Scheduler dispatches
-		 * `woocommerce_send_abandoned_cart_recovery_notification`, and directly by the
-		 * manual-send action on the order edit page.
+		 * Called by the manual-send action on the order edit page.
 		 *
 		 * @since 11.0.0
 		 *
@@ -179,8 +160,8 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 				$dispatched = (bool) $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 
 				// Only record the send timestamp when the dispatch actually succeeded.
-				// Subsequent invocations (duplicate AS firings, post-manual auto fires)
-				// short-circuit on this meta before reaching `send()` again.
+				// Subsequent invocations short-circuit on this meta before reaching
+				// `send()` again, so an order is never emailed twice.
 				if ( $dispatched ) {
 					$this->object->update_meta_data( self::META_KEY_SENT_AT, (string) time() );
 					$this->object->save_meta_data();
@@ -266,20 +247,13 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 			/**
 			 * Filter the order statuses that are eligible to receive the abandoned cart recovery email.
 			 *
-			 * The filter is applied at two points in the order lifecycle, which pass different
-			 * defaults because they cover different statuses:
-			 *
-			 * - At send time (here), the default is `pending` and `checkout-draft`, covering
-			 *   abandonment from both the classic and the block checkout, used in manual email trigger path
-			 *   from the order edit page.
-			 * - When the automated send is scheduled, the default is `pending` only.
-			 *   Store API orders are generally created in `checkout-draft`, which is not supported
-			 *   yet for automatic scheduled email.
-			 *   {@see \Automattic\WooCommerce\Internal\AbandonedCartRecovery\Scheduler::get_eligible_statuses()}
+			 * Defaults to `pending` and `checkout-draft`, covering abandonment from both the
+			 * classic and the block checkout. Integrations or merchants who want recovery to
+			 * be offered for other states (e.g. `failed`) can widen the list here.
 			 *
 			 * @since 11.0.0
 			 *
-			 * @param string[]      $eligible_statuses Default: `pending` and `checkout-draft` at manual send time, `pending` when scheduling.
+			 * @param string[]      $eligible_statuses Default: `pending` and `checkout-draft`.
 			 * @param WC_Order|null $order             Order being inspected, or null if it could not be loaded.
 			 */
 			$eligible_statuses = (array) apply_filters(
@@ -389,20 +363,6 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		}
 
 		/**
-		 * Whether the merchant has opted into automated scheduling.
-		 *
-		 * When false, the email is only dispatched via the manual-send action on the
-		 * order edit page. The Action Scheduler integration consults this before
-		 * scheduling a send.
-		 *
-		 * @since 11.0.0
-		 * @return bool
-		 */
-		public function is_automated(): bool {
-			return 'yes' === $this->get_option( 'automated', 'no' );
-		}
-
-		/**
 		 * Currently-active known recovery handlers, keyed by plugin file path with the display name as value.
 		 *
 		 * @since 11.0.0
@@ -427,8 +387,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		 * which `trigger()` checks via `is_enabled()`. This method is the additional gate
 		 * partner plugins (AutomateWoo, MailPoet, etc.) can hook into to short-circuit
 		 * the send without touching the merchant's saved settings. Static so the
-		 * manual-send handler and the scheduler can call it without instantiating
-		 * the email class.
+		 * manual-send handler can call it without instantiating the email class.
 		 *
 		 * @since 11.0.0
 		 *
@@ -500,9 +459,9 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		/**
 		 * Whether the given email has opted out of checkout recovery emails.
 		 *
-		 * Static so the gate can be reused from the trigger-side check, the
-		 * dropdown gate, and any future auto-send scheduler — without each
-		 * caller needing to thread the repository through.
+		 * Static so the gate can be reused from the trigger-side check and the
+		 * dropdown gate without each caller needing to thread the repository
+		 * through.
 		 *
 		 * @since  11.0.0
 		 *
@@ -590,9 +549,6 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 
 		/**
 		 * Initialise settings form fields.
-		 *
-		 * Adds an `automated` field on top of the standard WC_Email fields so merchants
-		 * can choose between scheduled automatic sends and manual-only dispatch.
 		 */
 		public function init_form_fields(): void {
 			$placeholder_text = sprintf(
@@ -619,14 +575,6 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 					'description' => $enabled_description,
 					'default'     => $enabled_default,
 					'desc_tip'    => '' !== $enabled_description,
-				),
-				'automated'          => array(
-					'title'       => __( 'Send automatically', 'woocommerce' ),
-					'type'        => 'checkbox',
-					'label'       => __( 'Schedule the recovery email to send 2 hours after a checkout is abandoned', 'woocommerce' ),
-					'description' => __( 'When disabled, the email is only sent when you trigger it manually from the order edit page.', 'woocommerce' ),
-					'default'     => 'no',
-					'desc_tip'    => true,
 				),
 				'subject'            => array(
 					'title'       => __( 'Subject', 'woocommerce' ),

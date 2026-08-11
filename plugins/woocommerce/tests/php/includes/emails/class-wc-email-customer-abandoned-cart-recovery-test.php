@@ -69,8 +69,6 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 			$this->admin_user_id = 0;
 		}
 
-		remove_all_actions( 'woocommerce_send_abandoned_cart_recovery_notification' );
-
 		parent::tearDown();
 	}
 
@@ -130,37 +128,21 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 	}
 
 	/**
-	 * @testdox Settings form exposes enabled + automated as checkboxes with the chosen defaults (enabled=yes, automated=no). No separate suppress toggle — handler detection drives the enabled default instead.
+	 * @testdox Settings form exposes enabled as a checkbox defaulting to yes, and no automated-send toggle — the email is manual-send only. No separate suppress toggle either; handler detection drives the enabled default instead.
 	 */
-	public function test_form_fields_expose_enabled_and_automated(): void {
+	public function test_form_fields_expose_enabled(): void {
 		$this->sut->init_form_fields();
 
 		$this->assertArrayHasKey( 'enabled', $this->sut->form_fields );
-		$this->assertArrayHasKey( 'automated', $this->sut->form_fields );
 		$this->assertArrayHasKey( 'subject', $this->sut->form_fields );
 		$this->assertArrayHasKey( 'heading', $this->sut->form_fields );
 		$this->assertArrayHasKey( 'additional_content', $this->sut->form_fields );
 
+		$this->assertArrayNotHasKey( 'automated', $this->sut->form_fields, 'Automated-send toggle should not be offered: there is no scheduler behind it.' );
 		$this->assertArrayNotHasKey( 'suppressed', $this->sut->form_fields, 'Suppress toggle should be consolidated into the enabled default.' );
 
 		$this->assertSame( 'yes', $this->sut->form_fields['enabled']['default'] );
 		$this->assertSame( 'checkbox', $this->sut->form_fields['enabled']['type'] );
-
-		$this->assertSame( 'no', $this->sut->form_fields['automated']['default'] );
-		$this->assertSame( 'checkbox', $this->sut->form_fields['automated']['type'] );
-	}
-
-	/**
-	 * @testdox is_automated() reflects the saved option and defaults to off when unset.
-	 */
-	public function test_is_automated_reads_option(): void {
-		$this->assertFalse( $this->sut->is_automated() );
-
-		$this->sut->update_option( 'automated', 'yes' );
-		$this->assertTrue( $this->sut->is_automated() );
-
-		$this->sut->update_option( 'automated', 'no' );
-		$this->assertFalse( $this->sut->is_automated() );
 	}
 
 	/**
