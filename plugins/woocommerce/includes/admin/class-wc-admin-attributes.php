@@ -406,9 +406,50 @@ class WC_Admin_Attributes {
 	 * Shows the interface for adding new attributes.
 	 */
 	public static function add_attribute() {
+		$search_query         = isset( $_GET['s'] ) && is_string( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$attribute_taxonomies = wc_get_attribute_taxonomies();
+		$has_attributes       = ! empty( $attribute_taxonomies );
+
+		if ( '' !== $search_query ) {
+			$attribute_taxonomies = array_filter(
+				$attribute_taxonomies,
+				static function ( $attribute_taxonomy ) use ( $search_query ) {
+					return false !== stripos( $attribute_taxonomy->attribute_label, $search_query ) || false !== stripos( $attribute_taxonomy->attribute_name, $search_query );
+				}
+			);
+		}
+
 		?>
 		<div class="wrap woocommerce">
-			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
+			<h1 class="wp-heading-inline"><?php echo esc_html( get_admin_page_title() ); ?></h1>
+
+			<?php if ( '' !== $search_query ) : ?>
+				<span class="subtitle">
+					<?php
+					echo wp_kses_post(
+						sprintf(
+							/* translators: %s: Search query. */
+							__( 'Search results for: %s', 'woocommerce' ),
+							'<strong>' . esc_html( $search_query ) . '</strong>'
+						)
+					);
+					?>
+				</span>
+			<?php endif; ?>
+
+			<hr class="wp-header-end" />
+
+			<?php if ( $has_attributes || '' !== $search_query ) : ?>
+				<form class="search-form wp-clearfix" method="get">
+					<input type="hidden" name="post_type" value="product" />
+					<input type="hidden" name="page" value="product_attributes" />
+					<p class="search-box">
+						<label class="screen-reader-text" for="attribute-search-input"><?php esc_html_e( 'Search attributes', 'woocommerce' ); ?>:</label>
+						<input type="search" id="attribute-search-input" name="s" value="<?php echo esc_attr( $search_query ); ?>" />
+						<?php submit_button( __( 'Search attributes', 'woocommerce' ), '', '', false, array( 'id' => 'search-submit' ) ); ?>
+					</p>
+				</form>
+			<?php endif; ?>
 
 			<br class="clear" />
 			<div id="col-container">
@@ -428,7 +469,6 @@ class WC_Admin_Attributes {
 							</thead>
 							<tbody>
 								<?php
-								$attribute_taxonomies = wc_get_attribute_taxonomies();
 								if ( $attribute_taxonomies ) {
 									/**
 									 * Filters the maximum number of terms that will be displayed for each taxonomy in the Attributes page.
@@ -540,7 +580,15 @@ class WC_Admin_Attributes {
 									$column_count = wc_has_custom_attribute_types() ? '5' : '4';
 									?>
 										<tr>
-											<td colspan="<?php echo esc_attr( $column_count ); ?>"><?php esc_html_e( 'No attributes currently exist.', 'woocommerce' ); ?></td>
+											<td colspan="<?php echo esc_attr( $column_count ); ?>">
+												<?php
+												if ( '' !== $search_query ) {
+													esc_html_e( 'No attributes found.', 'woocommerce' );
+												} else {
+													esc_html_e( 'No attributes currently exist.', 'woocommerce' );
+												}
+												?>
+											</td>
 										</tr>
 										<?php
 								}//end if
