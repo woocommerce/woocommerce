@@ -170,6 +170,32 @@ class TranslationsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should replace an existing combined file when rebuilding.
+	 */
+	public function test_replaces_existing_combined_file_on_rebuild(): void {
+		$combined = $this->lang_dir . 'woocommerce-de_DE-' . WC_ADMIN_APP . '.json';
+		file_put_contents( $combined, '{"stale":true}' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		$this->create_chunk_json(
+			'cccccccccccccccccccccccccccccccc',
+			WC_ADMIN_DIST_JS_FOLDER . 'chunks/analytics-report-products.js',
+			array( 'Compare Products' => array( 'Produkte vergleichen' ) )
+		);
+
+		if ( ! function_exists( 'get_filesystem_method' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+		\WP_Filesystem();
+		$build = new \ReflectionMethod( Translations::class, 'build_and_save_translations' );
+		$build->setAccessible( true );
+		$build->invoke( $this->sut, $this->lang_dir, 'woocommerce', 'de_DE' );
+
+		$data = json_decode( file_get_contents( $combined ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$this->assertArrayNotHasKey( 'stale', $data, 'The stale combined file should be replaced' );
+		$this->assertSame( array( 'Produkte vergleichen' ), $data['locale_data']['messages']['Compare Products'], 'The replacement should contain the rebuilt translations' );
+		$this->assertSame( array(), glob( $this->lang_dir . '*.tmp' ), 'No temporary files should be left behind after replacing the combined file' );
+	}
+
+	/**
 	 * @testdox Should fall back to the original file when nothing can be rebuilt.
 	 */
 	public function test_falls_back_to_original_file_when_rebuild_not_possible(): void {

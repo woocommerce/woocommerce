@@ -245,8 +245,7 @@ class Translations {
 		$cache_filename          = $this->get_combined_translation_filename( $plugin_domain, $locale );
 		$chunk_translations_json = wp_json_encode( $translations_from_chunks );
 
-		// Write to a temporary file first and move it into place, so that requests
-		// reading the file concurrently never observe a partially written one.
+		// Publish via a temp file so readers never observe a partial write.
 		$temp_path  = $language_dir . $cache_filename . '.' . wp_generate_password( 12, false ) . '.tmp';
 		$cache_path = $language_dir . $cache_filename;
 
@@ -255,10 +254,16 @@ class Translations {
 			return;
 		}
 
-		// Overwrite only when refreshing an existing file (e.g. after a language
-		// pack update). A fresh publish uses a non-overwriting move, so when
-		// concurrent requests race to fill a missing file the losers fail the
-		// move and leave the winner's published file untouched.
+		// Not WP_Filesystem_Direct::move(): it deletes the destination before renaming.
+		if ( 'direct' === get_filesystem_method() ) {
+			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.rename_rename -- Atomic replace; failure handled below.
+			if ( ! @rename( $temp_path, $cache_path ) ) {
+				$wp_filesystem->delete( $temp_path );
+			}
+			return;
+		}
+
+		// Remote filesystems: overwrite only when refreshing an existing file.
 		$overwrite = $wp_filesystem->exists( $cache_path );
 		if ( ! $wp_filesystem->move( $temp_path, $cache_path, $overwrite ) ) {
 			$wp_filesystem->delete( $temp_path );
@@ -333,19 +338,13 @@ class Translations {
 		$cache_filename = $this->get_combined_translation_filename( $domain, $locale );
 		$cache_path     = WP_LANG_DIR . '/plugins/' . $cache_filename;
 
-		// The combined file is only generated on language pack updates and plugin
-		// activation, so it can be missing (e.g. the locale was switched while the
-		// language packs were already on disk). Rebuild it on demand from the
-		// chunk translation files. The filter can run several times per request,
-		// so when generation is impossible (no chunk files, non-direct filesystem)
-		// attempt it only once instead of repeating the failed filesystem work.
+		// Rebuild the combined file on demand, since it is only generated on language pack updates and plugin activation.
 		if ( ! is_readable( $cache_path ) && ! $this->regeneration_attempted ) {
 			$this->regeneration_attempted = true;
 			$this->generate_translation_strings();
 		}
 
-		// If the file still could not be generated, fall back to the original
-		// path so the app's own translation file loads instead of none at all.
+		// Fall back so the app's own translation file still loads.
 		if ( ! is_readable( $cache_path ) ) {
 			return $file;
 		}
