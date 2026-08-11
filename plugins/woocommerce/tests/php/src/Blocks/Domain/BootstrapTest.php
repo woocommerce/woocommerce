@@ -163,6 +163,25 @@ class BootstrapTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A description referencing a synced pattern registers block types defensively.
+	 */
+	public function test_short_description_filter_registers_block_types_for_synced_pattern_reference(): void {
+		$registry = WP_Block_Type_Registry::get_instance();
+
+		$this->assertFalse( $registry->is_registered( self::SAMPLE_BLOCK ), 'WooCommerce blocks should start unregistered for this test.' );
+
+		// The referenced pattern's content cannot be inspected without fetching it, so a wp:block reference
+		// must register the block types in case the pattern contains a WooCommerce block at any depth.
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Firing an existing core filter to exercise its callbacks, not declaring a new hook.
+		apply_filters( 'woocommerce_short_description', '<!-- wp:block {"ref":129} /-->' );
+
+		$this->assertTrue(
+			$registry->is_registered( self::SAMPLE_BLOCK ),
+			'A synced pattern reference should register block types, since the pattern may contain WooCommerce blocks.'
+		);
+	}
+
+	/**
 	 * @testdox Filtering a description without WooCommerce block markup does not register block types.
 	 */
 	public function test_short_description_filter_skips_registration_for_plain_content(): void {
