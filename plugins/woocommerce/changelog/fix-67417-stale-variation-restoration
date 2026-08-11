@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Prevent REST order updates from failing when a line item's variation is deleted.
+Prevent REST order updates from failing when a line item's variation is deleted during the update.
