@@ -304,7 +304,7 @@ class MiniCart extends AbstractBlock {
 			$wrapper_styles           = $classes_styles['styles'];
 			// Pre-render the template part so nested blocks enqueue their assets before the overlay is printed in wp_footer.
 			$template_part_contents           = $this->get_template_part_contents( false );
-			$template_part_contents           = do_blocks( $this->process_template_contents( $template_part_contents ) );
+			$template_part_contents           = $this->render_template_part_contents( $template_part_contents );
 			$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
 			$display_cart_price_including_tax = get_option( 'woocommerce_tax_display_cart' ) === TaxDisplayMode::INCLUSIVE;
 			$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
@@ -445,7 +445,7 @@ class MiniCart extends AbstractBlock {
 	 */
 	public function render_mini_cart_overlay() {
 		$template_part_contents = $this->get_template_part_contents( false );
-		$template_part_contents = do_blocks( $this->process_template_contents( $template_part_contents ) );
+		$template_part_contents = $this->render_template_part_contents( $template_part_contents );
 		ob_start();
 		?>
 		<div
@@ -480,6 +480,36 @@ class MiniCart extends AbstractBlock {
 	}
 
 	/**
+	 * Render Mini-Cart template contents while removing legacy saved wrappers.
+	 *
+	 * @param string $template_contents The template contents to render.
+	 * @return string The rendered template contents.
+	 */
+	private function render_template_part_contents( $template_contents ) {
+		$process_legacy_wrappers = function ( $parsed_block ) {
+			$block_name = $parsed_block['blockName'] ?? null;
+			if ( ! in_array( $block_name, self::MINI_CART_TEMPLATE_BLOCKS, true ) ) {
+				return $parsed_block;
+			}
+
+			$wrapper_class = 'wp-block-' . str_replace( '/', '-', $block_name );
+			if ( false === strpos( $parsed_block['innerHTML'] ?? '', $wrapper_class ) ) {
+				return $parsed_block;
+			}
+
+			$processed_blocks = parse_blocks( $this->process_template_contents( serialize_block( $parsed_block ) ) );
+			return $processed_blocks[0] ?? $parsed_block;
+		};
+
+		add_filter( 'render_block_data', $process_legacy_wrappers, 10 );
+		try {
+			return do_blocks( $template_contents );
+		} finally {
+			remove_filter( 'render_block_data', $process_legacy_wrappers, 10 );
+		}
+	}
+
+	/**
 	 * Process template contents to remove unwanted div wrappers.
 	 *
 	 * The old Mini Cart template had extra divs nested within the block tags
@@ -491,18 +521,6 @@ class MiniCart extends AbstractBlock {
 	 * @return string The processed template contents.
 	 */
 	protected function process_template_contents( $template_contents ) {
-		$p               = new \WP_HTML_Tag_Processor( $template_contents );
-		$is_old_template = $p->next_tag(
-			array(
-				'tag_name'   => 'div',
-				'class_name' => 'wp-block-woocommerce-mini-cart-contents',
-			)
-		);
-
-		if ( ! $is_old_template ) {
-			return $template_contents;
-		}
-
 		$output                   = '';
 		$was_at                   = 0;
 		$is_mini_cart_block_stack = array( false );
