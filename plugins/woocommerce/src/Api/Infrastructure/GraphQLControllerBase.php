@@ -423,14 +423,19 @@ abstract class GraphQLControllerBase {
 		// graphql-php 15.32.2 added a 100,000 field-comparison cap to
 		// OverlappingFieldsCanBeMerged. Past that cap the rule does not stop
 		// traversing: it returns a freshly allocated conflict for every
-		// remaining pair, so a query with many aliased fields that differ only
-		// in argument order allocates O(n^2) conflicts and exhausts memory.
-		// That is a harder failure than the quadratic-time behaviour the cap
-		// was meant to bound, so the cap is disabled here and query size is
-		// bounded by the depth and complexity rules below instead.
+		// remaining pair, so a query with many fields sharing one response name
+		// allocates O(n^2) conflicts and exhausts memory. The depth and
+		// complexity rules below cannot bound that — DocumentValidator runs
+		// every rule in a single parallel traversal and both of those report
+		// only after it finishes — so the cap is kept and made memory-safe by
+		// {@see BoundedOverlappingFieldsCanBeMerged} instead.
+		//
+		// Only the stock rule is swapped: a subclass here means an extension
+		// registered its own via DocumentValidator::addRule(), and replacing it
+		// would silently drop that customization.
 		foreach ( $validation_rules as $index => $rule ) {
-			if ( $rule instanceof OverlappingFieldsCanBeMerged ) {
-				$validation_rules[ $index ] = new OverlappingFieldsCanBeMerged( PHP_INT_MAX );
+			if ( OverlappingFieldsCanBeMerged::class === get_class( $rule ) ) {
+				$validation_rules[ $index ] = new BoundedOverlappingFieldsCanBeMerged();
 				break;
 			}
 		}
