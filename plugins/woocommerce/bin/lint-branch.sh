@@ -15,10 +15,16 @@
 
 baseBranch=${1:-"origin/trunk"}
 
-changedFiles=$(git diff $(git merge-base HEAD $baseBranch) --relative --name-only --diff-filter=d -- '*.php')
+# -z plus the read loop keeps one path per argument: a filename with a space or a
+# glob character would otherwise split into several bogus arguments. (mapfile is
+# not an option; macOS ships bash 3.2, which doesn't have it.)
+changedFiles=()
+while IFS= read -r -d '' file; do
+    changedFiles+=("$file")
+done < <(git diff -z "$(git merge-base HEAD "$baseBranch")" --relative --name-only --diff-filter=d -- '*.php')
 
 # Only complete this if changed files are detected.
-if [[ -z $changedFiles ]]; then
+if [[ ${#changedFiles[@]} -eq 0 ]]; then
     echo "No changed files detected."
     exit 0
 fi
@@ -36,7 +42,7 @@ cacheArgs=()
 # phpcs gets its own status besides the shared accumulator: the checkstyle report
 # below must be tied to phpcs itself failing, not to any other check that sets status.
 phpcsStatus=0
-composer exec phpcs-changed -- -s --git --git-base $baseBranch "${cacheArgs[@]}" $changedFiles || phpcsStatus=1
+composer exec phpcs-changed -- -s --git --git-base $baseBranch "${cacheArgs[@]}" "${changedFiles[@]}" || phpcsStatus=1
 status=$phpcsStatus
 
 # The readable report above is the log people dig into; this re-runs the same check
@@ -52,7 +58,7 @@ status=$phpcsStatus
 # adding it normalizes both forms to a single prefix.
 if [[ -n $WC_PHPCS_CHECKSTYLE_FILE && $phpcsStatus -eq 1 ]]; then
     prefix=$(git rev-parse --show-prefix)
-    composer exec phpcs-changed -- --git --git-base $baseBranch --report=checkstyle "${cacheArgs[@]}" $changedFiles |
+    composer exec phpcs-changed -- --git --git-base $baseBranch --report=checkstyle "${cacheArgs[@]}" "${changedFiles[@]}" |
         sed -e "s|<file name=\"${prefix}|<file name=\"|g" \
             -e "s|<file name=\"|<file name=\"${prefix}|g" > "$WC_PHPCS_CHECKSTYLE_FILE"
 fi
