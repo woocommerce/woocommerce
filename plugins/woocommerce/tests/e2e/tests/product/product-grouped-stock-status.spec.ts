@@ -9,7 +9,11 @@ import { type ApiClient, WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
  */
 import { test as baseTest, expect } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { getFakeCategory, getFakeProduct } from '../../utils/data';
+import {
+	getFakeBrand,
+	getFakeCategory,
+	getFakeProduct,
+} from '../../utils/data';
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
@@ -118,17 +122,41 @@ test( 'resets external product stock settings and keeps it visible when out-of-s
 			getFakeCategory( { extraRandomTerm: true } )
 		)
 		.then( ( response ) => response.data );
+	const parentBrand = await restApi
+		.post( `${ WC_API_PATH }/products/brands`, getFakeBrand() )
+		.then( ( response ) => response.data );
+	const childBrand = await restApi
+		.post( `${ WC_API_PATH }/products/brands`, {
+			...getFakeBrand(),
+			parent: parentBrand.id,
+		} )
+		.then( ( response ) => response.data );
 	const categoryEndpoint = `${ WC_API_PATH }/products/categories?include=${ category.id }&hide_empty=false`;
+	const parentBrandEndpoint = `${ WC_API_PATH }/products/brands?include=${ parentBrand.id }&hide_empty=false`;
+	const childBrandEndpoint = `${ WC_API_PATH }/products/brands?include=${ childBrand.id }&hide_empty=false`;
 
 	try {
 		await restApi.put( hideOutOfStockSettingEndpoint, { value: 'yes' } );
 		await restApi.put(
 			`${ WC_API_PATH }/products/${ managedOutOfStockProduct.id }`,
-			{ categories: [ { id: category.id } ] }
+			{
+				categories: [ { id: category.id } ],
+				brands: [ { id: childBrand.id } ],
+			}
 		);
 
-		const categoryBeforeConversion = await restApi.get( categoryEndpoint );
+		const [
+			categoryBeforeConversion,
+			parentBrandBeforeConversion,
+			childBrandBeforeConversion,
+		] = await Promise.all( [
+			restApi.get( categoryEndpoint ),
+			restApi.get( parentBrandEndpoint ),
+			restApi.get( childBrandEndpoint ),
+		] );
 		expect( categoryBeforeConversion.data[ 0 ].count ).toBe( 0 );
+		expect( parentBrandBeforeConversion.data[ 0 ].count ).toBe( 0 );
+		expect( childBrandBeforeConversion.data[ 0 ].count ).toBe( 0 );
 
 		await page.goto( `shop/?s=${ productSearch }` );
 		await expect(
@@ -162,12 +190,30 @@ test( 'resets external product stock settings and keeps it visible when out-of-s
 			} )
 		).toBeVisible();
 
-		const categoryAfterConversion = await restApi.get( categoryEndpoint );
+		const [
+			categoryAfterConversion,
+			parentBrandAfterConversion,
+			childBrandAfterConversion,
+		] = await Promise.all( [
+			restApi.get( categoryEndpoint ),
+			restApi.get( parentBrandEndpoint ),
+			restApi.get( childBrandEndpoint ),
+		] );
 		expect( categoryAfterConversion.data[ 0 ].count ).toBe( 1 );
+		expect( parentBrandAfterConversion.data[ 0 ].count ).toBe( 1 );
+		expect( childBrandAfterConversion.data[ 0 ].count ).toBe( 1 );
 	} finally {
 		await restApi.put( hideOutOfStockSettingEndpoint, {
 			value: hideOutOfStockSetting.data.value,
 		} );
+		await restApi.delete(
+			`${ WC_API_PATH }/products/brands/${ childBrand.id }`,
+			{ force: true }
+		);
+		await restApi.delete(
+			`${ WC_API_PATH }/products/brands/${ parentBrand.id }`,
+			{ force: true }
+		);
 		await restApi.delete(
 			`${ WC_API_PATH }/products/categories/${ category.id }`,
 			{ force: true }
