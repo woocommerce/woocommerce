@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Temporary deactivate persistent product status counters and rollback to WordPress API usage.

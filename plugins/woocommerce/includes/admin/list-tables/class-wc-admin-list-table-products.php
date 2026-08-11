@@ -7,6 +7,7 @@
  */
 
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 
@@ -60,7 +61,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		add_filter( 'posts_clauses', array( $this, 'posts_clauses' ), 10, 2 );
 
 		// Use hooks to prime various caches and improve products page performance.
-		// Until persistent counters reactivated, disable callback for load-edit.php action.
+		add_action( 'load-edit.php', array( $this, 'prime_status_counts_cache' ) );
 		add_filter( 'the_posts', array( $this, 'prime_thumbnail_caches' ), 10, 2 );
 
 		$cogs_controller              = wc_get_container()->get( CostOfGoodsSoldController::class );
@@ -806,8 +807,40 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	public function filter_stock_status_post_clauses( $args ) {
 		global $wpdb;
 		if ( ! empty( $_GET['stock_status'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
-			$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.stock_status=%s ', wc_clean( wp_unslash( $_GET['stock_status'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$stock_status = wc_clean( wp_unslash( $_GET['stock_status'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+			if ( ProductStockStatus::OUT_OF_STOCK === $stock_status ) {
+				// Only published variations qualify their parent for this discoverability filter.
+				// Other statuses retain normal aggregate-parent behavior.
+				$args['where'] .= $wpdb->prepare(
+					" AND {$wpdb->posts}.ID IN (
+						SELECT stock_status_products.product_id
+						FROM (
+							SELECT DISTINCT CAST(
+								CASE
+									WHEN stock_status_posts.post_type = 'product_variation' THEN stock_status_posts.post_parent
+									ELSE stock_status_lookup.product_id
+								END AS UNSIGNED
+							) AS product_id
+							FROM {$wpdb->wc_product_meta_lookup} stock_status_lookup
+							INNER JOIN {$wpdb->posts} stock_status_posts
+								ON stock_status_posts.ID = stock_status_lookup.product_id
+							WHERE stock_status_lookup.stock_status = %s
+								AND (
+									stock_status_posts.post_type = 'product'
+									OR (
+										stock_status_posts.post_type = 'product_variation'
+										AND stock_status_posts.post_status = 'publish'
+									)
+								)
+						) stock_status_products
+					) ",
+					$stock_status
+				);
+			} else {
+				$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
+				$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.stock_status=%s ', $stock_status );
+			}
 		}
 		return $args;
 	}

@@ -136,6 +136,7 @@ final class AssetsController {
 			array( 'wc-blocks-middleware', 'wc-entities' ),
 			true
 		);
+
 		$this->register_deprecated_script_handles();
 	}
 
@@ -143,15 +144,47 @@ final class AssetsController {
 	 * Register deprecated script handles for backward compatibility.
 	 */
 	private function register_deprecated_script_handles(): void {
-		wp_register_script( 'wc-blocks-vendors', false, array(), $this->api->wc_version, true );
-		wp_register_script( 'wc-blocks', false, array( 'wc-blocks-vendors' ), $this->api->wc_version, true );
-
-		$this->add_deprecated_script_handle_warnings(
-			array(
-				'wc-blocks-vendors',
-				'wc-blocks',
-			)
+		$script_dependencies = array(
+			'wc-blocks-vendors' => array(),
+			'wc-blocks'         => array( 'wc-blocks-vendors', 'wc-block-library' ),
 		);
+
+		if ( is_admin() ) {
+			// Discovering legacy block assets requires expensive filesystem checks, so only run this in admin requests.
+			$build_path  = WC_ABSPATH . 'assets/client/blocks/';
+			$asset_files = glob( $build_path . '*.asset.php' );
+
+			foreach ( false === $asset_files ? array() : $asset_files as $asset_file ) {
+				$script_name = basename( $asset_file, '.asset.php' );
+
+				if (
+					in_array( $script_name, array( 'wc-block-library', 'wc-blocks' ), true ) ||
+					! file_exists( $build_path . $script_name . '.js' )
+				) {
+					continue;
+				}
+
+				// The file comes from WooCommerce's generated assets directory, not user input.
+				// nosemgrep audit.php.lang.security.file.inclusion-arg.
+				$asset_data = require $asset_file;
+
+				if (
+					! is_array( $asset_data ) ||
+					! in_array( 'wp-blocks', (array) ( $asset_data['dependencies'] ?? array() ), true )
+				) {
+					continue;
+				}
+
+				$legacy_handle                         = 'wc-' . $script_name . '-block';
+				$script_dependencies[ $legacy_handle ] = array( 'wc-blocks' );
+			}
+		}
+
+		foreach ( $script_dependencies as $handle => $dependencies ) {
+			wp_register_script( $handle, false, $dependencies, $this->api->wc_version, true );
+		}
+
+		$this->add_deprecated_script_handle_warnings( array_keys( $script_dependencies ) );
 	}
 
 	/**
@@ -163,7 +196,7 @@ final class AssetsController {
 		foreach ( $handles as $handle ) {
 			$message = wp_json_encode(
 				sprintf(
-					'[WooCommerce] The "%s" script handle is deprecated and kept for backward compatibility only. See the enqueueable packages documentation for the supported WooCommerce Blocks package handles: https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/client/blocks/docs/internal-developers/enqueueable-packages',
+					'[WooCommerce] The "%s" script handle is a deprecated compatibility placeholder and does not load a script. See the enqueueable packages documentation: https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/client/blocks/docs/internal-developers/enqueueable-packages',
 					$handle
 				)
 			);

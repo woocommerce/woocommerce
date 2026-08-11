@@ -2,6 +2,11 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.15.1](https://github.com/woocommerce/email-editor/releases/tag/2.15.1) - 2026-07-30 
+
+-   Patch - Ensure block captions keep only the allowed formatting tags and attributes, including when the authored caption markup is malformed. [#67079]
+-   Patch - Update wp-coding-standards/wpcs to 3.4.1 (security release). [#67034]
+
 ## [2.15.0](https://github.com/woocommerce/email-editor/releases/tag/2.15.0) - 2026-07-28 
 
 -   Minor - Enable the embed block for supported video providers in the email editor and improve embed rendering in emails. [#66968]
