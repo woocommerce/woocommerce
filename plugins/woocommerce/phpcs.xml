@@ -53,7 +53,7 @@
 	<rule ref="tests/Tools/phpcs/WooCommerceInternal/Sniffs/DB/IdentifierPlaceholderSniff.php">
 		<include-pattern>src/</include-pattern>
 		<include-pattern>includes/</include-pattern>
-  </rule>  
+    </rule>  
     
 	<!-- The cart token selects which customer session loads; it must be read from one place only. -->
 	<rule ref="./bin/phpcs/WooCommerceStoreApi/Sniffs/StoreApi/CartTokenSourceSniff.php">
