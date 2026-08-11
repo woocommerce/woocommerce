@@ -165,6 +165,9 @@ const serialRunSpecs = [
 	// Imports a fixed-content CSV (fixed SKUs/names) and asserts the imported rows
 	// on the store-wide product list — collides with concurrently created products.
 	'**/tests/product/product-import-csv.spec.ts',
+	// Toggles the global out-of-stock catalog visibility setting while verifying
+	// that converted external products remain visible on the storefront.
+	'**/tests/product/product-grouped-stock-status.spec.ts',
 	// Mutate global WooCommerce settings (store address/currency/country, tax)
 	// that other workers' cart/checkout/storefront specs depend on.
 	'**/tests/settings/settings-general.spec.ts',
