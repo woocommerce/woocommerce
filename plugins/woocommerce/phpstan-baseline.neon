@@ -30310,12 +30310,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-refunds-controller.php
 
 		-
-			message: '#^Method WC_REST_Refunds_Controller\:\:register_routes\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-refunds-controller.php
-
-		-
 			message: '#^PHPDoc tag @extends has invalid value \(WC_REST_Order_Refunds_Controller\)\: Unexpected token "\\n ", expected ''\<'' at offset 127 on line 5$#'
 			identifier: phpDoc.parseError
 			count: 1
