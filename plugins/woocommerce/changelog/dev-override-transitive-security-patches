@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Pin vulnerable transitive dependencies to their patched versions via pnpm overrides.
