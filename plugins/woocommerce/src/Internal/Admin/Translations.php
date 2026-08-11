@@ -255,7 +255,12 @@ class Translations {
 			return;
 		}
 
-		if ( ! $wp_filesystem->move( $temp_path, $cache_path, true ) ) {
+		// Overwrite only when refreshing an existing file (e.g. after a language
+		// pack update). A fresh publish uses a non-overwriting move, so when
+		// concurrent requests race to fill a missing file the losers fail the
+		// move and leave the winner's published file untouched.
+		$overwrite = $wp_filesystem->exists( $cache_path );
+		if ( ! $wp_filesystem->move( $temp_path, $cache_path, $overwrite ) ) {
 			$wp_filesystem->delete( $temp_path );
 		}
 	}
