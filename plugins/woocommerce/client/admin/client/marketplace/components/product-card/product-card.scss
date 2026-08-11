@@ -426,6 +426,12 @@
 				align-items: flex-start;
 			}
 
+			.woocommerce-marketplace__product-card__meta {
+				/* Optical compensation: the title's negative focus-ring margin
+				   would otherwise pin the text to the icon's top edge. */
+				margin-top: $grid-unit-05;
+			}
+
 			.woocommerce-marketplace__product-card__link {
 				white-space: nowrap;
 				overflow: hidden;
