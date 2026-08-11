@@ -199,7 +199,7 @@
 		"moment": "^2.29.4",
 		"moment-timezone": "^0.5.43",
 		"node-watch": "^0.7.4",
-		"postcss": "8.4.x",
+		"postcss": "^8.5.26",
 		"postcss-color-function": "^4.1.0",
 		"postcss-loader": "4.3.x",
 		"prettier": "npm:wp-prettier@3.0.3",

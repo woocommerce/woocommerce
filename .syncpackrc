@@ -552,7 +552,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "8.4.x"
+			"pinVersion": "^8.5.26"
 		},
 		{
 			"dependencies": [

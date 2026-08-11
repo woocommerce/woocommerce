@@ -201,7 +201,7 @@
 		"mini-css-extract-plugin": "2.9.x",
 		"msw": "2.10.4",
 		"playwright-ctrf-json-reporter": "0.0.27",
-		"postcss": "8.4.x",
+		"postcss": "^8.5.26",
 		"postcss-color-function": "4.1.0",
 		"postcss-loader": "4.3.x",
 		"prettier": "npm:wp-prettier@3.0.3",
