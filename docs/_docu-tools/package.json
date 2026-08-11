@@ -51,5 +51,35 @@
   },
   "engines": {
     "node": ">=18.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "@babel/core": "^7.29.6",
+      "@babel/plugin-transform-modules-systemjs": "^7.29.4",
+      "body-parser": "^1.20.6",
+      "brace-expansion": "^1.1.18",
+      "fast-uri": "^3.1.5",
+      "follow-redirects": "^1.16.0",
+      "glob@11": "^11.1.0",
+      "http-proxy-middleware": "^2.0.10",
+      "joi": "^17.13.4",
+      "js-yaml": "^3.15.1",
+      "js-yaml@4": "4.3.1",
+      "launch-editor": "^2.14.1",
+      "lodash": "^4.18.0",
+      "mdast-util-to-hast": "^13.2.1",
+      "minimatch@10": "10.2.6",
+      "nanoid": "^3.3.17",
+      "path-to-regexp": "^0.1.13",
+      "picomatch": "^2.3.2",
+      "postcss": "^8.5.23",
+      "serialize-javascript": "^7.1.0",
+      "shell-quote": "^1.9.0",
+      "svgo": "^3.3.4",
+      "webpack": "^5.104.1",
+      "websocket-driver": "^0.7.5",
+      "ws@7": "^7.5.11",
+      "ws@8": "^8.21.0"
+    }
   }
 }
