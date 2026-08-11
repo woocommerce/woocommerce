@@ -191,7 +191,7 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'GD' => 5,
 			'GP' => 4,
 			'GT' => 5,
-			'GY' => 3,
+			'GY' => 5,
 			'HN' => 5,
 			'JM' => 5,
 			'MQ' => 4,
@@ -219,14 +219,14 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'IN' => 7,
 			'ID' => 4,
 			'JP' => 9,
-			'MY' => 5,
+			'MY' => 6,
 			'NC' => 3,
 			'NZ' => 9,
 			'PW' => 3,
 			'PH' => 4,
 			'SG' => 7,
 			'LK' => 2,
-			'KR' => 3,
+			'KR' => 4,
 			'TH' => 5,
 			'VN' => 4,
 			'DZ' => 3,
@@ -242,7 +242,7 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'KM' => 1,
 			'CG' => 1,
 			'CI' => 1,
-			'EG' => 4,
+			'EG' => 5,
 			'CD' => 1,
 			'DJ' => 1,
 			'GQ' => 1,
@@ -263,11 +263,12 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'ML' => 1,
 			'MR' => 1,
 			'MU' => 3,
+			'YT' => 1,
 			'MA' => 4,
 			'MZ' => 3,
 			'NA' => 1,
 			'NE' => 1,
-			'NG' => 2,
+			'NG' => 3,
 			'RE' => 3,
 			'RW' => 1,
 			'ST' => 1,
@@ -275,7 +276,7 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'SC' => 3,
 			'SL' => 1,
 			'SO' => 1,
-			'ZA' => 5,
+			'ZA' => 6,
 			'SS' => 1,
 			'TZ' => 1,
 			'TG' => 1,
@@ -284,17 +285,17 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'EH' => 1,
 			'ZM' => 1,
 			'ZW' => 1,
-			'BH' => 3,
+			'BH' => 4,
 			'IQ' => 1,
 			'IL' => 2,
-			'JO' => 4,
-			'KW' => 3,
+			'JO' => 5,
+			'KW' => 4,
 			'LB' => 1,
 			'OM' => 4,
-			'PK' => 3,
-			'QA' => 3,
-			'SA' => 5,
-			'AE' => 8,
+			'PK' => 4,
+			'QA' => 4,
+			'SA' => 6,
+			'AE' => 9,
 			'YE' => 1,
 			'AD' => 3,
 			'AF' => 1,
@@ -584,7 +585,7 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'GD' => 5,
 			'GP' => 4,
 			'GT' => 5,
-			'GY' => 3,
+			'GY' => 5,
 			'HN' => 5,
 			'JM' => 5,
 			'MQ' => 4,
@@ -612,14 +613,14 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'IN' => 7,
 			'ID' => 4,
 			'JP' => 9,
-			'MY' => 5,
+			'MY' => 6,
 			'NC' => 3,
 			'NZ' => 9,
 			'PW' => 3,
 			'PH' => 4,
 			'SG' => 7,
 			'LK' => 2,
-			'KR' => 3,
+			'KR' => 4,
 			'TH' => 5,
 			'VN' => 4,
 			'DZ' => 3,
@@ -635,7 +636,7 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'KM' => 1,
 			'CG' => 1,
 			'CI' => 1,
-			'EG' => 4,
+			'EG' => 5,
 			'CD' => 1,
 			'DJ' => 1,
 			'GQ' => 1,
@@ -656,11 +657,12 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'ML' => 1,
 			'MR' => 1,
 			'MU' => 3,
+			'YT' => 1,
 			'MA' => 4,
 			'MZ' => 3,
 			'NA' => 1,
 			'NE' => 1,
-			'NG' => 2,
+			'NG' => 3,
 			'RE' => 3,
 			'RW' => 1,
 			'ST' => 1,
@@ -668,7 +670,7 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'SC' => 3,
 			'SL' => 1,
 			'SO' => 1,
-			'ZA' => 5,
+			'ZA' => 6,
 			'SS' => 1,
 			'TZ' => 1,
 			'TG' => 1,
@@ -677,17 +679,17 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'EH' => 1,
 			'ZM' => 1,
 			'ZW' => 1,
-			'BH' => 3,
+			'BH' => 4,
 			'IQ' => 1,
 			'IL' => 2,
-			'JO' => 4,
-			'KW' => 3,
+			'JO' => 5,
+			'KW' => 4,
 			'LB' => 1,
 			'OM' => 4,
-			'PK' => 3,
-			'QA' => 3,
-			'SA' => 5,
-			'AE' => 8,
+			'PK' => 4,
+			'QA' => 4,
+			'SA' => 6,
+			'AE' => 9,
 			'YE' => 1,
 			'AD' => 3,
 			'AF' => 1,
@@ -1132,6 +1134,103 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 		return array(
 			'Canada'        => array( 'CA' ),
 			'United States' => array( 'US' ),
+		);
+	}
+
+	/**
+	 * @testdox Mastercard is the first, preferred PSP suggestion in $country_code.
+	 *
+	 * Guards the suggestion definition's default TAG_PREFERRED: the tag is declared once
+	 * on the definition rather than appended per country, so a regression there would be
+	 * invisible to the count-only assertions.
+	 *
+	 * @dataProvider data_provider_mastercard_preferred_countries
+	 *
+	 * @param string $country_code ISO 3166-1 alpha-2 country code.
+	 */
+	public function test_mastercard_is_first_and_preferred_in_supported_countries( string $country_code ): void {
+		$extensions       = $this->sut->get_country_extensions( $country_code );
+		$extensions_by_id = array_column( $extensions, null, 'id' );
+		$psp_ids          = array_column(
+			array_filter(
+				$extensions,
+				static fn( array $extension ): bool => PaymentsExtensionSuggestions::TYPE_PSP === $extension['_type']
+			),
+			'id'
+		);
+		$mastercard       = $extensions_by_id[ PaymentsExtensionSuggestions::MASTERCARD ] ?? null;
+
+		$this->assertIsArray( $mastercard, "Mastercard should be suggested in {$country_code}." );
+		if ( ! is_array( $mastercard ) ) {
+			return;
+		}
+
+		$this->assertSame(
+			PaymentsExtensionSuggestions::MASTERCARD,
+			reset( $psp_ids ),
+			"Mastercard should be the first PSP suggestion in {$country_code}."
+		);
+
+		$this->assertContains(
+			PaymentsExtensionSuggestions::TAG_PREFERRED,
+			$mastercard['tags'],
+			"Mastercard should be a preferred suggestion in {$country_code}."
+		);
+	}
+
+	/**
+	 * Data provider for the countries where Mastercard is a preferred suggestion.
+	 *
+	 * @return array Test cases with country codes.
+	 */
+	public function data_provider_mastercard_preferred_countries(): array {
+		return array(
+			'Egypt'        => array( 'EG' ),
+			'Nigeria'      => array( 'NG' ),
+			'South Africa' => array( 'ZA' ),
+			'Bahrain'      => array( 'BH' ),
+			'Jordan'       => array( 'JO' ),
+			'Kuwait'       => array( 'KW' ),
+			'Pakistan'     => array( 'PK' ),
+			'Qatar'        => array( 'QA' ),
+			'Saudi Arabia' => array( 'SA' ),
+		);
+	}
+
+	/**
+	 * @testdox Mastercard is suggested but not preferred in the UAE.
+	 *
+	 * The UAE is the one market where Mastercard is deliberately not preferred, expressed
+	 * as a `_remove` of the definition's default tag. Without this the exclusion could be
+	 * dropped without any test noticing.
+	 */
+	public function test_mastercard_is_not_preferred_in_ae(): void {
+		$extensions       = $this->sut->get_country_extensions( 'AE' );
+		$extensions_by_id = array_column( $extensions, null, 'id' );
+		$psp_ids          = array_column(
+			array_filter(
+				$extensions,
+				static fn( array $extension ): bool => PaymentsExtensionSuggestions::TYPE_PSP === $extension['_type']
+			),
+			'id'
+		);
+		$mastercard       = $extensions_by_id[ PaymentsExtensionSuggestions::MASTERCARD ] ?? null;
+
+		$this->assertIsArray( $mastercard, 'Mastercard should still be suggested in the UAE.' );
+		if ( ! is_array( $mastercard ) ) {
+			return;
+		}
+
+		$this->assertNotContains(
+			PaymentsExtensionSuggestions::TAG_PREFERRED,
+			$mastercard['tags'],
+			'Mastercard should remain in other payment options for the UAE.'
+		);
+
+		$this->assertNotSame(
+			PaymentsExtensionSuggestions::MASTERCARD,
+			reset( $psp_ids ),
+			'Mastercard should not lead the UAE PSP suggestions.'
 		);
 	}
 
