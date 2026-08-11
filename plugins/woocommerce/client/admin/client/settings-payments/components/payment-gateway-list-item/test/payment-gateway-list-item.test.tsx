@@ -31,13 +31,15 @@ jest.mock( '~/lib/sanitize-html', () => ( {
 jest.mock( '~/settings-payments/components/status-badge', () => ( {
 	StatusBadge: ( {
 		status,
+		message,
 		popoverContent,
 	}: {
 		status: string;
+		message?: string;
 		popoverContent?: React.ReactNode;
 	} ) => (
 		<div data-testid="status-badge" data-status={ status }>
-			StatusBadge-{ status }
+			{ message || `StatusBadge-${ status }` }
 			{ popoverContent && (
 				<div data-testid="status-badge-popover">{ popoverContent }</div>
 			) }
@@ -112,6 +114,13 @@ jest.mock( '@wordpress/components', () => ( {
 	Tooltip: ( { children }: { children: React.ReactNode } ) => (
 		<div>{ children }</div>
 	),
+	ExternalLink: ( {
+		href,
+		children,
+	}: {
+		href: string;
+		children: React.ReactNode;
+	} ) => <a href={ href }>{ children }</a>,
 } ) );
 
 jest.mock( '~/utils/admin-settings', () => ( {
@@ -620,6 +629,154 @@ describe( 'PaymentGatewayListItem', () => {
 
 			const statusBadge = getByTestId( 'status-badge' );
 			expect( statusBadge ).toHaveAttribute( 'data-status', 'inactive' );
+		} );
+	} );
+
+	describe( 'Checkout Block Incompatibility Badge', () => {
+		const enabledGatewayState = {
+			enabled: true,
+			account_connected: true,
+			needs_setup: false,
+			test_mode: false,
+			dev_mode: false,
+		};
+
+		const onboardedGateway = {
+			state: {
+				supported: true,
+				started: true,
+				completed: true,
+				test_mode: false,
+			},
+			messages: {},
+			_links: {
+				onboard: { href: '/onboard' },
+				reset: { href: '/reset' },
+			},
+			recommended_payment_methods: [],
+			type: 'standard',
+		};
+
+		const setIncompatibleGatewayIds = ( ids: string[] ) => {
+			window.wcSettings.admin.woocommerce_payments_checkout_block_compatibility =
+				{
+					incompatible_gateway_ids: ids,
+				};
+		};
+
+		afterEach( () => {
+			delete window.wcSettings.admin
+				.woocommerce_payments_checkout_block_compatibility;
+		} );
+
+		it( 'shows the badge when an enabled gateway is incompatible', () => {
+			setIncompatibleGatewayIds( [ 'test-gateway' ] );
+			const gateway = createMockGateway( {
+				state: enabledGatewayState,
+				onboarding: onboardedGateway,
+			} );
+			const { getByText, getAllByTestId } = render(
+				<PaymentGatewayListItem
+					gateway={ gateway }
+					{ ...defaultProps }
+				/>
+			);
+
+			expect(
+				getByText( 'Incompatible with block-based checkout' )
+			).toBeInTheDocument();
+			expect(
+				getAllByTestId( 'status-badge' ).map( ( badge ) =>
+					badge.getAttribute( 'data-status' )
+				)
+			).toEqual( [ 'active', 'not_supported' ] );
+		} );
+
+		it( 'explains the incompatibility in the badge popover', () => {
+			setIncompatibleGatewayIds( [ 'test-gateway' ] );
+			const gateway = createMockGateway( {
+				state: enabledGatewayState,
+			} );
+			const { getByTestId } = render(
+				<PaymentGatewayListItem
+					gateway={ gateway }
+					{ ...defaultProps }
+				/>
+			);
+
+			expect( getByTestId( 'status-badge-popover' ) ).toHaveTextContent(
+				'Customers won’t see this payment provider at checkout.'
+			);
+		} );
+
+		it( 'links to the incompatible extensions documentation from the popover', () => {
+			setIncompatibleGatewayIds( [ 'test-gateway' ] );
+			const gateway = createMockGateway( {
+				state: enabledGatewayState,
+			} );
+			const { getByRole } = render(
+				<PaymentGatewayListItem
+					gateway={ gateway }
+					{ ...defaultProps }
+				/>
+			);
+
+			expect(
+				getByRole( 'link', { name: 'Learn more' } )
+			).toHaveAttribute(
+				'href',
+				'https://woocommerce.com/document/woocommerce-store-editing/customizing-cart-and-checkout/#incompatible-extensions/'
+			);
+		} );
+
+		it( 'does not show the badge when the gateway is not incompatible', () => {
+			setIncompatibleGatewayIds( [ 'another-gateway' ] );
+			const gateway = createMockGateway( {
+				state: enabledGatewayState,
+			} );
+			const { queryByText } = render(
+				<PaymentGatewayListItem
+					gateway={ gateway }
+					{ ...defaultProps }
+				/>
+			);
+
+			expect(
+				queryByText( 'Incompatible with block-based checkout' )
+			).not.toBeInTheDocument();
+		} );
+
+		it( 'does not show the badge when the incompatible gateway is disabled', () => {
+			setIncompatibleGatewayIds( [ 'test-gateway' ] );
+			const gateway = createMockGateway( {
+				state: { ...enabledGatewayState, enabled: false },
+			} );
+			const { queryByText } = render(
+				<PaymentGatewayListItem
+					gateway={ gateway }
+					{ ...defaultProps }
+				/>
+			);
+
+			expect(
+				queryByText( 'Incompatible with block-based checkout' )
+			).not.toBeInTheDocument();
+		} );
+
+		it( 'does not show the badge when no compatibility data is preloaded', () => {
+			const gateway = createMockGateway( {
+				state: enabledGatewayState,
+			} );
+			const { queryByText } = render(
+				<PaymentGatewayListItem
+					gateway={ gateway }
+					{ ...defaultProps }
+				/>
+			);
+
+			expect(
+				queryByText( 'Incompatible with block-based checkout' )
+			).not.toBeInTheDocument();
 		} );
 	} );
 
