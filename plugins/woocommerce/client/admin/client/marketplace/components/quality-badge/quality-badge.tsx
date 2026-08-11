@@ -2,8 +2,9 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useContext, useState } from '@wordpress/element';
+import { useContext, useEffect, useState } from '@wordpress/element';
 import { Popover } from '@wordpress/components';
+import { speak } from '@wordpress/a11y';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -68,13 +69,23 @@ export function QualityBadgePopover( props: {
 	onClose: () => void;
 } ) {
 	const docsUrl = getSafeDocsUrl( props.docsUrl );
+	const { tooltip } = props;
+
+	// Screen readers do not announce the popover content on their own.
+	useEffect( () => {
+		speak( tooltip );
+	}, [ tooltip ] );
 
 	return (
 		<Popover
 			className="woocommerce-marketplace__quality-badge-popover"
 			anchor={ props.anchor }
 			placement="bottom"
-			focusOnMount="firstElement"
+			// Focus the link when there is one; without it, focus stays on the
+			// trigger and the content is announced via speak() above.
+			focusOnMount={ docsUrl ? 'firstElement' : false }
+			// Keep the popover in the page tab order; tabbing out closes it.
+			constrainTabbing={ false }
 			onClose={ props.onClose }
 		>
 			<p>{ props.tooltip }</p>
@@ -149,6 +160,12 @@ export default function QualityBadge( props: { product: Product } ) {
 				className="woocommerce-marketplace__quality-badge__chip"
 				aria-expanded={ isOpen }
 				onClick={ () => setIsOpen( ! isOpen ) }
+				onKeyDown={ ( event ) => {
+					// Focus stays on the trigger when the popover has no link.
+					if ( event.key === 'Escape' && isOpen ) {
+						setIsOpen( false );
+					}
+				} }
 			>
 				{ chipContent }
 			</button>

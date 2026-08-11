@@ -45,6 +45,12 @@ function QualityBadgeInfo( props: {
 					props.label
 				) }
 				onClick={ () => setIsOpen( ! isOpen ) }
+				onKeyDown={ ( event ) => {
+					// Focus stays on the trigger when the popover has no link.
+					if ( event.key === 'Escape' && isOpen ) {
+						setIsOpen( false );
+					}
+				} }
 			>
 				<Icon icon={ info } size={ 16 } />
 			</button>

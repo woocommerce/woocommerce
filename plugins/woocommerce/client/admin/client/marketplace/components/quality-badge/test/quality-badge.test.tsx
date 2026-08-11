@@ -14,9 +14,14 @@ jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
 } ) );
 
+jest.mock( '@wordpress/a11y', () => ( {
+	speak: jest.fn(),
+} ) );
+
 /**
  * Internal dependencies
  */
+import { speak } from '@wordpress/a11y';
 import { navigateTo, useQuery } from '@woocommerce/navigation';
 import QualityBadge from '../quality-badge';
 import QualityBadgeFilter from '../quality-badge-filter';
@@ -172,6 +177,38 @@ describe( 'QualityBadge', () => {
 			screen.getByText( 'Verified against WooCommerce standards.' )
 		).toBeInTheDocument();
 		expect( screen.queryByText( 'Learn more' ) ).not.toBeInTheDocument();
+	} );
+
+	it( 'announces the explanation when the popover opens', () => {
+		renderWithContext(
+			<QualityBadge product={ product } />,
+			contextWithBadge
+		);
+
+		fireEvent.click( screen.getByText( 'Excellence Verified' ) );
+
+		expect( speak ).toHaveBeenCalledWith(
+			'Verified against WooCommerce standards.'
+		);
+	} );
+
+	it( 'closes with Escape while focus is on the chip', () => {
+		renderWithContext(
+			<QualityBadge product={ product } />,
+			contextWithBadge
+		);
+
+		const chip = screen.getByText( 'Excellence Verified' );
+		fireEvent.click( chip );
+		expect(
+			screen.getByText( 'Verified against WooCommerce standards.' )
+		).toBeInTheDocument();
+
+		fireEvent.keyDown( chip, { key: 'Escape' } );
+
+		expect(
+			screen.queryByText( 'Verified against WooCommerce standards.' )
+		).not.toBeInTheDocument();
 	} );
 
 	it( 'renders an inert chip when there is no tooltip copy', () => {
