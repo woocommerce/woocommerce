@@ -115,7 +115,7 @@
 		"sass-loader": "10.5.x",
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x",
-		"webpack": "5.97.x",
+		"webpack": "5.109.x",
 		"webpack-cli": "5.1.x"
 	},
 	"peerDependencies": {

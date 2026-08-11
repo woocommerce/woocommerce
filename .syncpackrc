@@ -212,7 +212,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "5.97.x"
+			"pinVersion": "5.109.x"
 		},
 		{
 			"dependencies": [

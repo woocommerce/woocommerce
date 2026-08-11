@@ -221,7 +221,7 @@
 		"stylelint-scss": "^6.4.0",
 		"typescript": "5.7.x",
 		"utility-types": "3.10.0",
-		"webpack": "5.97.x",
+		"webpack": "5.109.x",
 		"webpack-bundle-analyzer": "4.9.x",
 		"webpack-cli": "5.1.x",
 		"wp-types": "3.63.0"

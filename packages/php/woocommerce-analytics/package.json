@@ -42,7 +42,7 @@
 		"babel-loader": "9.2.x",
 		"jest": "29.5.x",
 		"typescript": "5.7.x",
-		"webpack": "5.97.x",
+		"webpack": "5.109.x",
 		"webpack-cli": "5.1.x"
 	},
 	"config": {

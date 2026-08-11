@@ -187,7 +187,7 @@
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x",
 		"uuid": "^9.0.1",
-		"webpack": "5.97.x",
+		"webpack": "5.109.x",
 		"webpack-cli": "5.1.x"
 	},
 	"config": {

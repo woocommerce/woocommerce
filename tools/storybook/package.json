@@ -55,6 +55,6 @@
 		"react-dom": "18.3.x",
 		"storybook": "7.6.19",
 		"typescript": "5.7.x",
-		"webpack": "5.97.x"
+		"webpack": "5.109.x"
 	}
 }
