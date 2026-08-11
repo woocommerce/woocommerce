@@ -151,15 +151,19 @@ jobs:
           install: '${{ matrix.projectName }}...'
           pull-package-deps: '${{ matrix.projectName }}'
           php-version:  ${{ ( ( matrix.projectName == '@woocommerce/plugin-woocommerce' && '7.4' ) || 'false' ) }}
+          # cs2pr turns the PHPCS checkstyle report into inline annotations in the
+          # 'Lint: PHP inline annotations' step; installed here alongside PHP (and
+          # only where PHP installs) rather than in a second setup-php invocation.
+          php-tools: 'cs2pr'
 
       # On PHPCS failure, lint-branch.sh writes the findings to this path as a
-      # checkstyle report, so the steps after 'Lint' can surface them as inline
-      # annotations on 'Files changed' while the Lint log keeps the readable output.
-      # Set via GITHUB_ENV because the runner context isn't available in job-level
-      # env; RUNNER_TEMP exists as a plain variable once a step is running.
-      # The file's presence is what gates the annotation steps, so it must mean
-      # exactly "phpcs failed": if another linter ever emits a checkstyle report,
-      # it needs its own variable and file, never this one.
+      # checkstyle report, so the annotation step after 'Lint' can surface them as
+      # inline annotations on 'Files changed' while the Lint log keeps the readable
+      # output. Set via GITHUB_ENV because the runner context isn't available in
+      # job-level env; RUNNER_TEMP exists as a plain variable once a step is running.
+      # The file's presence is what triggers the annotation, so it must mean exactly
+      # "phpcs failed": if another linter ever emits a checkstyle report, it needs
+      # its own variable and file, never this one.
       - name: 'Set the PHPCS report path'
         run: echo "WC_PHPCS_CHECKSTYLE_FILE=$RUNNER_TEMP/phpcs-checkstyle.xml" >> "$GITHUB_ENV"
 
@@ -167,40 +171,27 @@ jobs:
         id: 'lint'
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
-      # The report file only exists when PHPCS itself failed, so its presence gates
-      # the annotation steps below: a JS-only lint failure (or any other project's
-      # failure) never creates it, and everything after this step is skipped.
-      # Gate on the Lint step's own outcome (not job-level failure()) so this reacts
-      # only to a lint failure; !cancelled() is still required because after a
-      # failure GitHub skips later steps unless told otherwise.
-      - name: 'Lint: check for PHPCS report'
-        id: 'phpcs-report'
-        if: ${{ !cancelled() && steps.lint.outcome == 'failure' }}
-        run: |
-          if [[ -s "$WC_PHPCS_CHECKSTYLE_FILE" ]]; then
-            echo 'found=true' >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: 'Install cs2pr'
-        if: ${{ !cancelled() && steps.phpcs-report.outputs.found == 'true' }}
-        uses: 'shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240' # 2.37.2
-        with:
-          php-version: '7.4'
-          coverage: 'none'
-          tools: 'cs2pr'
-
+      # Gate on the Lint step's own outcome (not job-level failure()) so this step
+      # reacts only to a lint failure, never to an unrelated step failing;
+      # !cancelled() is required because after a failure GitHub skips later steps
+      # unless told otherwise. The report only exists when PHPCS itself failed, so
+      # a JS-only failure (or another project's) takes the empty branch.
       - name: 'Lint: PHP inline annotations'
-        if: ${{ !cancelled() && steps.phpcs-report.outputs.found == 'true' }}
+        if: ${{ !cancelled() && steps.lint.outcome == 'failure' }}
         # cs2pr exits non-zero whenever the report contains errors; finish green
         # regardless: the Lint step already set the verdict, and a second red step
         # would be noise. The totals are stated first because GitHub renders roughly
         # the first 10 error and 10 warning annotations per step; past that, findings
         # exist only in this log, and a capped diff view shouldn't read as the full list.
         run: |
-          errors=$(grep -c 'severity="error"' "$WC_PHPCS_CHECKSTYLE_FILE" || true)
-          warnings=$(grep -c 'severity="warning"' "$WC_PHPCS_CHECKSTYLE_FILE" || true)
-          echo "PHPCS reported ${errors} error(s) and ${warnings} warning(s). GitHub may render only the first ~10 of each inline; the full readable report is in the Lint step's log."
-          cs2pr "$WC_PHPCS_CHECKSTYLE_FILE" || true
+          if [[ -s "$WC_PHPCS_CHECKSTYLE_FILE" ]]; then
+            errors=$(grep -c 'severity="error"' "$WC_PHPCS_CHECKSTYLE_FILE" || true)
+            warnings=$(grep -c 'severity="warning"' "$WC_PHPCS_CHECKSTYLE_FILE" || true)
+            echo "PHPCS reported ${errors} error(s) and ${warnings} warning(s). GitHub may render only the first ~10 of each inline; the full readable report is in the Lint step's log."
+            cs2pr "$WC_PHPCS_CHECKSTYLE_FILE" || true
+          else
+            echo 'No PHPCS checkstyle report to annotate.'
+          fi
 
   woocommerce-plugin-build-artifact:
     name: "Build WooCommerce plugin artifact${{ needs.project-jobs.outputs.shared-plugin-build-has-required-consumers != 'true' && ' (optional)' || '' }}"
