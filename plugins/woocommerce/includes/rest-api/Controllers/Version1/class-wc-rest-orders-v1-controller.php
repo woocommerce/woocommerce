@@ -706,6 +706,9 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 						throw $e;
 					}
 					// The stored variation ID no longer identifies a variation. Keep set_product()'s parent demotion.
+					// Unlike v2, no get_post_type() recheck is needed: $item is always a base WC_Order_Item_Product
+					// (never a woocommerce_get_order_item_classname subclass), whose setter throws this code only
+					// when the post is not a product_variation.
 				}
 			}
 

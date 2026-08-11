@@ -269,6 +269,7 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$reloaded = new WC_Order_Item_Product( $item->get_id() );
 		$this->assertSame( 0, $reloaded->get_variation_id(), 'The deleted variation should not be restored.' );
 		$this->assertSame( $parent->get_id(), $reloaded->get_product_id(), 'The line item should retain the parent product ID.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the parent product.' );
 	}
 
 	/**

@@ -11,7 +11,6 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
-
 /**
  * class WC_REST_Orders_Controller_Tests.
  * Orders Controller tests for V3 REST API.
