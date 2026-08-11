@@ -15,7 +15,9 @@
 			no-repeat right 0 top 55%;
 		position: absolute;
 		right: 14px;
-		width: 32px;
+		// Match the glyph width so the mask anchor can't skew the arrow's
+		// edge distance when rtlcss mirrors the box but not the mask.
+		width: 20px;
 		height: 48px;
 	}
 
