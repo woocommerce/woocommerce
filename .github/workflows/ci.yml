@@ -165,8 +165,9 @@ jobs:
       # On PHPCS failure, lint-branch.sh writes the findings to this path as a
       # checkstyle report, so the annotation step after 'Lint' can surface them as
       # inline annotations on 'Files changed' while the Lint log keeps the readable
-      # output. Set via GITHUB_ENV because the runner context isn't available in
-      # job-level env; RUNNER_TEMP exists as a plain variable once a step is running.
+      # output. Set via GITHUB_ENV so the path is defined exactly once: the runner
+      # context isn't available in job-level env, and step-level env (where runner
+      # IS available) would have to repeat the path on every step that needs it.
       # The file's presence is what triggers the annotation, so it must mean exactly
       # "phpcs failed": if another linter ever emits a checkstyle report, it needs
       # its own variable and file, never this one.
