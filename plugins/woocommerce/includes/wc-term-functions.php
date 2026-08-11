@@ -629,6 +629,47 @@ function wc_change_term_counts( $terms, $taxonomies ) {
 add_filter( 'get_terms', 'wc_change_term_counts', 10, 2 );
 
 /**
+ * Overrides the original term count for a single product category/tag/brand term with the
+ * product count that takes catalog visibility into account, so get_term() matches get_terms().
+ *
+ * @since 11.1.0
+ *
+ * @param WP_Term $term     Term object.
+ * @param string  $taxonomy Taxonomy slug.
+ * @return WP_Term
+ */
+function wc_change_term_count( $term, $taxonomy ) {
+	if ( is_admin() || wp_doing_ajax() || ! $term instanceof WP_Term ) {
+		return $term;
+	}
+
+	/**
+	 * Filter which product taxonomies should have their term counts overridden to take catalog visibility into account.
+	 *
+	 * Evaluated on every call (not cached) so context changes such as switch_to_blog() are reflected,
+	 * mirroring the plural wc_change_term_counts() which does not cache either.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param array $valid_taxonomies List of taxonomy slugs.
+	 */
+	$valid_taxonomies = (array) apply_filters( 'woocommerce_change_term_counts', array( 'product_cat', 'product_tag', 'product_brand' ) );
+
+	if ( ! in_array( $taxonomy, $valid_taxonomies, true ) ) {
+		return $term;
+	}
+
+	// Read the count directly from term meta rather than the wc_term_counts transient. The
+	// transient amortizes a read+write across many terms in wc_change_term_counts(), but here
+	// there is a single term, so a direct read is as cheap and avoids a per-call transient write.
+	$count       = get_term_meta( $term->term_id, 'product_count_' . $taxonomy, true );
+	$term->count = '' !== $count ? absint( $count ) : 0;
+
+	return $term;
+}
+add_filter( 'get_term', 'wc_change_term_count', 10, 2 );
+
+/**
  * Return products in a given term, and cache value.
  *
  * To keep in sync, product_count will be cleared on "set_object_terms".
