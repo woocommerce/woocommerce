@@ -28,6 +28,9 @@ jobs:
                   # Check out the base branch, never the pull request head. The job
                   # holds a write token, so it must not run code from the PR.
                   ref: ${{ github.event.pull_request.base.sha }}
+                  # Keep the token out of the local git config. No later step runs
+                  # git, so nothing here needs it.
+                  persist-credentials: false
 
             - name: Setup Node
               uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
