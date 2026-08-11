@@ -204,12 +204,14 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	/**
 	 * Checks if the request has a valid cart token.
 	 *
-	 * @param \WP_REST_Request $request Request object.
+	 * Reads the outer HTTP header, not `$request` one, to avoid conflicting cart tokens on a batch request.
+	 *
+	 * @param \WP_REST_Request $request Request object. Unused here; kept for subclasses.
 	 * @return bool
 	 */
 	protected function has_cart_token( \WP_REST_Request $request ) {
 		if ( is_null( $this->has_cart_token ) ) {
-			$this->has_cart_token = CartTokenUtils::validate_cart_token( $request->get_header( 'Cart-Token' ) ?? '' );
+			$this->has_cart_token = CartTokenUtils::validate_cart_token( CartTokenUtils::get_request_cart_token() );
 		}
 		return $this->has_cart_token;
 	}
