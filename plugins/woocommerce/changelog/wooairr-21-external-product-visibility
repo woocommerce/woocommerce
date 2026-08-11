@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep external products visible in the catalog after converting them from an out-of-stock product.
