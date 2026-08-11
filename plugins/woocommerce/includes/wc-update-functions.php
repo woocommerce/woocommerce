@@ -3607,3 +3607,16 @@ function wc_update_1110_delete_dashboard_outofstock_count_transient() {
 function wc_update_1110_cleanup_block_email_posts(): bool {
 	return WCEmailPostsCleanup::run();
 }
+
+/**
+ * Flush the persistent product count cache to purge potentially drifted counter values from v11.0-RC1.
+ *
+ * @since 11.1.0
+ *
+ * @return void
+ */
+function wc_update_1110_flush_product_count_cache() {
+	if ( class_exists( \Automattic\WooCommerce\Caches\ProductCountCache::class ) ) {
+		( new \Automattic\WooCommerce\Caches\ProductCountCache() )->flush( 'product' );
+	}
+}
