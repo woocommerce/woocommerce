@@ -725,7 +725,7 @@ describe( 'PaymentGatewayListItem', () => {
 				getByRole( 'link', { name: 'Learn more' } )
 			).toHaveAttribute(
 				'href',
-				'https://woocommerce.com/document/woocommerce-store-editing/customizing-cart-and-checkout/#incompatible-extensions/'
+				'https://woocommerce.com/document/woocommerce-store-editing/customizing-cart-and-checkout/#incompatible-extensions'
 			);
 		} );
 
