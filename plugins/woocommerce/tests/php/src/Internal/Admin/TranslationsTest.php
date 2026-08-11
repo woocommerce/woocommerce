@@ -166,6 +166,7 @@ class TranslationsTest extends WC_Unit_Test_Case {
 		$messages = json_decode( file_get_contents( $combined ), true )['locale_data']['messages']; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$this->assertSame( array( 'Produkte vergleichen' ), $messages['Compare Products'], 'Chunk translations should be merged into the combined file' );
 		$this->assertSame( array( 'Anzeigen' ), $messages['Show'], 'App translations should be merged into the combined file' );
+		$this->assertSame( array(), glob( $this->lang_dir . '*.tmp' ), 'No temporary files should be left behind after the combined file is published' );
 	}
 
 	/**

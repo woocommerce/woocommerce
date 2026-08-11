@@ -245,8 +245,19 @@ class Translations {
 		$cache_filename          = $this->get_combined_translation_filename( $plugin_domain, $locale );
 		$chunk_translations_json = wp_json_encode( $translations_from_chunks );
 
-		// Cache combined translations strings to a file.
-		$wp_filesystem->put_contents( $language_dir . $cache_filename, $chunk_translations_json );
+		// Write to a temporary file first and move it into place, so that requests
+		// reading the file concurrently never observe a partially written one.
+		$temp_path  = $language_dir . $cache_filename . '.' . wp_generate_password( 12, false ) . '.tmp';
+		$cache_path = $language_dir . $cache_filename;
+
+		if ( ! $wp_filesystem->put_contents( $temp_path, $chunk_translations_json ) ) {
+			$wp_filesystem->delete( $temp_path );
+			return;
+		}
+
+		if ( ! $wp_filesystem->move( $temp_path, $cache_path, true ) ) {
+			$wp_filesystem->delete( $temp_path );
+		}
 	}
 
 	/**
