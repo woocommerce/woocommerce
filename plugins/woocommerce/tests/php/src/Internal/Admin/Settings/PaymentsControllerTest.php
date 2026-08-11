@@ -3,6 +3,9 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings;
 
+use Automattic\WooCommerce\Blocks\Package as BlocksPackage;
+use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
+use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsController;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
 use WC_Unit_Test_Case;
@@ -32,6 +35,13 @@ class PaymentsControllerTest extends WC_Unit_Test_Case {
 	 * @var callable|null
 	 */
 	private $gateways_filter_callback = null;
+
+	/**
+	 * The names of the Checkout block payment method integrations registered by the test.
+	 *
+	 * @var string[]
+	 */
+	private $registered_integration_names = array();
 
 	/**
 	 * Set up test fixtures.
@@ -67,6 +77,13 @@ class PaymentsControllerTest extends WC_Unit_Test_Case {
 		}
 		WC()->payment_gateways()->init();
 
+		foreach ( $this->registered_integration_names as $name ) {
+			if ( $this->get_payment_method_registry()->is_registered( $name ) ) {
+				$this->get_payment_method_registry()->unregister( $name );
+			}
+		}
+		$this->registered_integration_names = array();
+
 		parent::tearDown();
 	}
 
@@ -75,6 +92,7 @@ class PaymentsControllerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_preload_settings_lists_gateways_without_a_checkout_block_integration(): void {
 		$this->register_fake_gateway();
+		$this->register_fake_block_payment_integration( 'other-fake-gateway-id' );
 
 		$settings = $this->sut->preload_settings();
 
@@ -89,12 +107,15 @@ class PaymentsControllerTest extends WC_Unit_Test_Case {
 	 * @testdox Should not list gateways that have a Checkout block payment method integration.
 	 */
 	public function test_preload_settings_skips_gateways_with_a_checkout_block_integration(): void {
+		$this->register_fake_gateway();
+		$this->register_fake_block_payment_integration( 'fake-gateway-id' );
+
 		$settings = $this->sut->preload_settings();
 
 		$this->assertNotContains(
-			'cod',
+			'fake-gateway-id',
 			$settings['woocommerce_payments_checkout_block_compatibility']['incompatible_gateway_ids'],
-			'Cash on delivery has a Checkout block integration, so it should not be reported as incompatible'
+			'A gateway with a Checkout block integration should not be reported as incompatible'
 		);
 	}
 
@@ -103,6 +124,7 @@ class PaymentsControllerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_preload_settings_lists_incompatible_gateways_that_are_disabled(): void {
 		$this->register_fake_gateway( 'no' );
+		$this->register_fake_block_payment_integration( 'other-fake-gateway-id' );
 
 		$settings = $this->sut->preload_settings();
 
@@ -166,5 +188,40 @@ class PaymentsControllerTest extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_payment_gateways', $this->gateways_filter_callback );
 
 		WC()->payment_gateways()->init();
+	}
+
+	/**
+	 * Register a minimal Checkout block payment method integration.
+	 *
+	 * @param string $name The integration name, matching the gateway ID it stands for.
+	 */
+	private function register_fake_block_payment_integration( string $name ): void {
+		$integration = new class( $name ) extends AbstractPaymentMethodType {
+			/**
+			 * Constructor.
+			 *
+			 * @param string $name The integration name.
+			 */
+			public function __construct( string $name ) {
+				$this->name = $name;
+			}
+
+			/**
+			 * Initializes the payment method type.
+			 */
+			public function initialize() {}
+		};
+
+		$this->get_payment_method_registry()->register( $integration );
+		$this->registered_integration_names[] = $name;
+	}
+
+	/**
+	 * Get the Checkout block payment method registry.
+	 *
+	 * @return PaymentMethodRegistry
+	 */
+	private function get_payment_method_registry(): PaymentMethodRegistry {
+		return BlocksPackage::container()->get( PaymentMethodRegistry::class );
 	}
 }
