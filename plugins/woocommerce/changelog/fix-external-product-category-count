@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Refresh category and tag counts when converting an out-of-stock product to an external product.
