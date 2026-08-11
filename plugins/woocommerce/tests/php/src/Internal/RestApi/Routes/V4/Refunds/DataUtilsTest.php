@@ -650,6 +650,59 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox validate_line_items rejects duplicate tax IDs within a line's refund_tax.
+	 */
+	public function test_validate_line_items_rejects_duplicate_tax_ids(): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		// $100 net + $10 tax (rate VAT) = $110 line total.
+		$order = $this->create_order_with_taxes( array( $tax_rate_id ), 100.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$items = $order->get_items( 'line_item' );
+		$item  = reset( $items );
+
+		// Both validation and the amount calculation sum every entry, but the internal
+		// conversion keys taxes by ID, so a duplicate would silently drop one entry and
+		// store less than the refund amount. It must be rejected instead.
+		$result = $this->data_utils->validate_line_items(
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'refund_total' => 50.00,
+					'refund_tax'   => array(
+						array(
+							'id'           => $tax_rate_id,
+							'refund_total' => 5.00,
+						),
+						array(
+							'id'           => $tax_rate_id,
+							'refund_total' => 5.00,
+						),
+					),
+				),
+			),
+			$order
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $result, 'Duplicate tax IDs within a line must be rejected.' );
+		$this->assertEquals( 'duplicate_tax_id', $result->get_error_code() );
+	}
+
+	/**
 	 * Build a completed order with a positive product line and a discount fee that carries a
 	 * negative stored tax bucket, for the negative-tax refund_tax cap tests.
 	 *

@@ -21,7 +21,7 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 
 	private const COMING_SOON_OPTION    = 'woocommerce_coming_soon';
 	private const FEATURES_SETTINGS_URL = 'admin.php?page=wc-settings&tab=advanced&section=features';
-	private const DOCUMENTATION_URL     = 'https://woocommerce.com/';
+	private const DOCUMENTATION_URL     = 'https://woocommerce.com/document/customer-order-withdrawal/';
 
 	/**
 	 * Register hooks.
@@ -106,7 +106,7 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 		);
 		$note->set_content(
 			__(
-				'Stores selling to EU countries may need to offer customers a way to withdraw from qualifying orders. WooCommerce includes an order withdrawal feature you can enable.',
+				'Stores selling to EU countries may need to offer customers a way to withdraw from qualifying orders. Review how to enable the order withdrawal feature in the Advanced settings.',
 				'woocommerce'
 			)
 		);
@@ -116,7 +116,7 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'review-feature-settings',
-			__( 'Review feature settings', 'woocommerce' ),
+			__( 'Get started', 'woocommerce' ),
 			admin_url( self::FEATURES_SETTINGS_URL ),
 			Note::E_WC_ADMIN_NOTE_ACTIONED,
 			true
