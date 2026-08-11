@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent filtered review blocks from showing all reviews when no category or product is selected.
