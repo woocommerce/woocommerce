@@ -27,24 +27,32 @@ fi
 # so a failure in one check is never masked by a later one passing.
 status=0
 
+# Cache phpcs output only in CI, where the checkstyle render below re-runs the same
+# check: with the cache primed by the first run, the re-run is mostly cache reads.
+# Local runs stay cache-free, so no .phpcs-changed-cache file is left behind.
+cacheArgs=()
+[[ -n $WC_PHPCS_CHECKSTYLE_FILE ]] && cacheArgs=('--cache')
+
 # phpcs gets its own status besides the shared accumulator: the checkstyle report
 # below must be tied to phpcs itself failing, not to any other check that sets status.
 phpcsStatus=0
-composer exec phpcs-changed -- -s --git --git-base $baseBranch $changedFiles || phpcsStatus=1
+composer exec phpcs-changed -- -s --git --git-base $baseBranch "${cacheArgs[@]}" $changedFiles || phpcsStatus=1
 [[ $phpcsStatus -eq 1 ]] && status=1
 
 # The readable report above is the log people dig into; this re-runs the same check
 # only to render the same findings as checkstyle for cs2pr (phpcs-changed can only
 # emit one format per run). Guarded on failure so green runs never pay for it.
 #
-# GitHub resolves annotation paths from the repository root, so every path needs this
-# directory's prefix or the annotation silently never attaches to the diff. phpcs-changed
-# echoes back the paths it was given, which are --relative to this directory; stripping
-# the prefix before adding it is a no-op today, but keeps this correct even if upstream
-# ever starts reporting repository-rooted paths.
+# GitHub resolves annotation paths from the repository root, so every path must carry
+# this directory's prefix exactly once or the annotation silently never attaches to
+# the diff. phpcs-changed names findings two ways (verified in v2.12.0, incl. locally
+# with a planted violation): for modified files, getNewMessages() renames them to the
+# `git diff --no-prefix` header path, which is repository-rooted; for new files there
+# is no diff, so the cwd-relative CLI path survives. Stripping the prefix before
+# adding it normalizes both forms to a single prefix.
 if [[ -n $WC_PHPCS_CHECKSTYLE_FILE && $phpcsStatus -eq 1 ]]; then
     prefix=$(git rev-parse --show-prefix)
-    composer exec phpcs-changed -- --git --git-base $baseBranch --report=checkstyle $changedFiles |
+    composer exec phpcs-changed -- --git --git-base $baseBranch --report=checkstyle "${cacheArgs[@]}" $changedFiles |
         sed -e "s|<file name=\"${prefix}|<file name=\"|g" \
             -e "s|<file name=\"|<file name=\"${prefix}|g" > "$WC_PHPCS_CHECKSTYLE_FILE"
 fi
