@@ -212,7 +212,14 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		$coupon->apply_changes();
 		delete_transient( 'rest_api_coupons_type_count' );
 
-		// The `coupon_id_from_code` entry in the object cache must not exist when the coupon is not published, otherwise the coupon will remain available for use.
+		/*
+		 * The `coupon_id_from_code` entry in the object cache must not exist when the coupon is not
+		 * published, otherwise the coupon will remain available for use.
+		 *
+		 * This is not made redundant by CouponCodeLookupInvalidator's `transition_post_status` listener:
+		 * the `doing_action( 'save_post' )` branch above writes the status with $wpdb directly, so no
+		 * transition fires and this is the only invalidation on that path.
+		 */
 		if ( 'publish' !== $coupon->get_status() ) {
 			wc_get_container()->get( CouponCodeLookupInvalidator::class )->invalidate( $coupon->get_code() );
 		}
