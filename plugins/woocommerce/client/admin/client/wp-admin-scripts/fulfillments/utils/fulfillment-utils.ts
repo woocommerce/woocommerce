@@ -36,7 +36,7 @@ export function getFulfillmentItems(
 }
 
 export async function refreshOrderFulfillmentStatus( orderId: number ) {
-	dispatch( FulfillmentStore ).invalidateResolution( 'getOrder', [
+	void dispatch( FulfillmentStore ).invalidateResolution( 'getOrder', [
 		orderId,
 	] );
 	const order: Order | null =

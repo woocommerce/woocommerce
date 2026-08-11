@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent inline button wrapper tables from leaving extra baseline space below buttons in rendered block emails.

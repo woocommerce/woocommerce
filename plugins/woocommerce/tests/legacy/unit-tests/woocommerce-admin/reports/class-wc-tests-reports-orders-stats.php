@@ -20,10 +20,12 @@ use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
  */
 class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 	/**
-	 * Don't cache report data during these tests.
+	 * Set the database version and clear the fulfillment-status column flag for this class.
 	 */
 	public static function setUpBeforeClass(): void {
-		add_filter( 'woocommerce_analytics_report_should_use_cache', '__return_false' );
+		// Must come first: the parent reconnects `$wpdb`, which discards anything this
+		// method has written but not committed.
+		parent::setUpBeforeClass();
 
 		$db_version = strstr( WC()->version, '-', true );
 		$db_version = $db_version ? $db_version : WC()->version;
@@ -33,10 +35,19 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Restore cache for other tests.
+	 * Don't cache report data during these tests.
+	 *
+	 * This has to be registered per test, and after `parent::setUp()`. WordPress snapshots the
+	 * hook globals once per process and restores that snapshot after every test, so a filter
+	 * added from `setUpBeforeClass` is dropped once the first test finishes — leaving the rest
+	 * of the class running with report caching enabled, which is what these tests set out to avoid.
+	 * Registering it after the snapshot also means the restore removes it, so no class-level
+	 * teardown is needed to keep it away from other tests.
 	 */
-	public static function tearDownAfterClass(): void {
-		remove_filter( 'woocommerce_analytics_report_should_use_cache', '__return_false' );
+	public function setUp(): void {
+		parent::setUp();
+
+		add_filter( 'woocommerce_analytics_report_should_use_cache', '__return_false' );
 	}
 
 	/**

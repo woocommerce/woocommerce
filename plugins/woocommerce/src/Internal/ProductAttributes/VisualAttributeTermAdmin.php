@@ -314,7 +314,7 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 	public function enqueue_visual_attribute_script(): void {
 		$screen = get_current_screen();
 
-		if ( ! $screen ) {
+		if ( ! $screen || ! is_string( $screen->id ) ) {
 			return;
 		}
 

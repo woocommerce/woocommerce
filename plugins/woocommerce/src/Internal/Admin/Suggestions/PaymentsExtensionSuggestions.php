@@ -45,6 +45,8 @@ class PaymentsExtensionSuggestions {
 	const CLEARPAY          = 'clearpay';
 	const KLARNA            = 'klarna';
 	const KLARNA_CHECKOUT   = 'klarna_checkout';
+	const HELCIM            = 'helcim';
+	const KOMOJU            = 'komoju';
 	const HELIOPAY          = 'heliopay';
 	const MONEI             = 'monei';
 	const COINBASE          = 'coinbase';
@@ -62,6 +64,7 @@ class PaymentsExtensionSuggestions {
 	const PAYPAL_BRAINTREE  = 'paypal_braintree';
 	const VISA              = 'visa_as';
 	const NGENIUS           = 'ngenius';
+	const MASTERCARD        = 'mastercard';
 	const EVERGREEN         = 'evergreen';
 	const MYPOS             = 'mypos';
 
@@ -177,6 +180,7 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
+			self::HELCIM,
 			self::PAYPAL_WALLET,
 			self::AFFIRM,
 			self::AFTERPAY,
@@ -213,6 +217,7 @@ class PaymentsExtensionSuggestions {
 			self::SQUARE, // Use the default details.
 			self::VISA,
 			self::AIRWALLEX,
+			self::HELCIM,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 			self::AFFIRM,
@@ -264,6 +269,7 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
+			self::GOCARDLESS,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 			self::AFFIRM          => array(
@@ -316,7 +322,11 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'AD' => array(
-			self::MONEI,
+			self::MONEI         => array(
+				'_append' => array(
+					'tags' => array( self::TAG_PREFERRED ),
+				),
+			),
 			self::PAYPAL_WALLET => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
@@ -587,6 +597,7 @@ class PaymentsExtensionSuggestions {
 			self::MOLLIE,
 			self::VISA,
 			self::VIVA_WALLET,
+			self::PAYTRAIL,
 			self::GOCARDLESS      => array(
 				'_merge_on_type' => array(
 					'links' => array(
@@ -611,7 +622,6 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
-			self::PAYTRAIL,
 			self::PAYPAL_WALLET,
 			self::KLARNA          => array(
 				'_merge_on_type' => array(
@@ -1579,7 +1589,9 @@ class PaymentsExtensionSuggestions {
 		),
 		'GY' => array(
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
 			self::VISA,
+			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'HT' => array(
@@ -2016,6 +2028,8 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
+			self::KOMOJU,
+			self::AIRWALLEX,
 			self::VISA,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
@@ -2050,6 +2064,7 @@ class PaymentsExtensionSuggestions {
 			self::PAYPAL_FULL_STACK,
 			self::PAYONEER,
 			self::VISA,
+			self::AIRWALLEX,
 			self::PAYPAL_WALLET,
 		),
 		'MV' => array(
@@ -2239,6 +2254,7 @@ class PaymentsExtensionSuggestions {
 				),
 			),
 			self::PAYPAL_FULL_STACK,
+			self::AIRWALLEX,
 			self::PAYPAL_WALLET,
 		),
 		'TW' => array(
@@ -2414,11 +2430,8 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'EG' => array(
-			self::PAYMOB => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
+			self::MASTERCARD,
+			self::PAYMOB,
 			self::PAYPAL_FULL_STACK,
 			self::VISA,
 			self::PAYPAL_WALLET,
@@ -2581,6 +2594,13 @@ class PaymentsExtensionSuggestions {
 			self::PAYPAL_FULL_STACK,
 			self::PAYPAL_WALLET,
 		),
+		'YT' => array(
+			self::VISA => array(
+				'_append' => array(
+					'tags' => array( self::TAG_PREFERRED ),
+				),
+			),
+		),
 		'MA' => array(
 			self::PAYONEER => array(
 				'_append' => array(
@@ -2615,11 +2635,8 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'NG' => array(
-			self::PAYSTACK => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
+			self::MASTERCARD,
+			self::PAYSTACK,
 			self::VISA,
 		),
 		'RE' => array(
@@ -2685,11 +2702,8 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'ZA' => array(
-			self::PAYSTACK => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
+			self::MASTERCARD,
+			self::PAYSTACK,
 			self::PAYPAL_FULL_STACK,
 			self::PAYFAST,
 			self::VISA,
@@ -2768,12 +2782,9 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'BH' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
+			self::MASTERCARD,
 			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 		),
 		'BT' => array(
@@ -2808,12 +2819,9 @@ class PaymentsExtensionSuggestions {
 			self::VISA,
 		),
 		'JO' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
+			self::MASTERCARD,
 			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::NGENIUS,
 			self::PAYPAL_WALLET,
 		),
@@ -2826,12 +2834,9 @@ class PaymentsExtensionSuggestions {
 			self::PAYPAL_FULL_STACK,
 		),
 		'KW' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
+			self::MASTERCARD,
 			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 		),
 		'KG' => array(
@@ -2859,11 +2864,8 @@ class PaymentsExtensionSuggestions {
 			self::PAYPAL_WALLET,
 		),
 		'PK' => array(
-			self::PAYONEER => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
+			self::MASTERCARD,
+			self::PAYONEER,
 			self::PAYMOB,
 			self::VISA,
 		),
@@ -2875,20 +2877,14 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'QA' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
+			self::MASTERCARD,
 			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 		),
 		'SA' => array(
-			self::PAYMOB => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
+			self::MASTERCARD,
+			self::PAYMOB,
 			self::PAYPAL_FULL_STACK,
 			self::VISA,
 			self::NGENIUS,
@@ -2919,6 +2915,11 @@ class PaymentsExtensionSuggestions {
 			self::WOOPAYMENTS,
 			self::PAYPAL_FULL_STACK,
 			self::STRIPE,
+			self::MASTERCARD => array(
+				'_remove' => array(
+					'tags' => array( self::TAG_PREFERRED ),
+				),
+			),
 			self::PAYONEER,
 			self::PAYMOB,
 			self::VISA,
@@ -4131,6 +4132,70 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
+			self::HELCIM            => array(
+				'_type'       => self::TYPE_PSP,
+				'title'       => esc_html__( 'Helcim', 'woocommerce' ),
+				'description' => esc_html__( 'Accept credit cards and Google Pay directly on your store with zero monthly fees. Save up to 25% using Helcim’s transparent interchange-plus pricing.', 'woocommerce' ),
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/helcim.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'helcim-commerce-for-woocommerce',
+				),
+				'links'       => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+						'url'   => 'https://www.helcim.com/pricing/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+						'url'   => 'https://woocommerce.com/products/helcim-commerce-for-woocommerce/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+						'url'   => 'https://legal.helcim.com/terms-of-service/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://woocommerce.com/document/helcim-commerce-for-woocommerce/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=helcim-commerce-for-woocommerce',
+					),
+				),
+			),
+			self::KOMOJU            => array(
+				'_type'       => self::TYPE_PSP,
+				'title'       => esc_html__( 'KOMOJU Payments', 'woocommerce' ),
+				'description' => esc_html__( 'Easily add popular Japanese payment methods like konbini, PayPay, and more with KOMOJU’s secure extension to optimize checkout.', 'woocommerce' ),
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/komoju.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'komoju-japanese-payments',
+				),
+				'links'       => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+						'url'   => 'https://en.komoju.com/pricing/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+						'url'   => 'https://woocommerce.com/products/komoju-japanese-payments/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+						'url'   => 'https://toc.komoju.com/toc/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://woocommerce.com/document/komoju-japanese-payments/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=komoju-japanese-payments',
+					),
+				),
+			),
 			self::HELIOPAY          => array(
 				'_type'       => self::TYPE_CRYPTO,
 				'title'       => esc_html__( 'Helio Pay', 'woocommerce' ),
@@ -4270,6 +4335,35 @@ class PaymentsExtensionSuggestions {
 						'url'   => 'https://woocommerce.com/document/ngenius/',
 					),
 				),
+			),
+			self::MASTERCARD        => array(
+				'_type'       => self::TYPE_PSP,
+				'title'       => esc_html__( 'Mastercard Merchant Cloud', 'woocommerce' ),
+				'description' => esc_html__( 'A seamless checkout with 35+ payment methods for global needs. Enjoy built-in security and simple integration for a smooth experience.', 'woocommerce' ),
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/mastercard.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'mastercard-merchant-cloud',
+				),
+				'links'       => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+						'url'   => 'https://woocommerce.com/products/mastercard-merchant-cloud/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+						'url'   => 'https://developer.mastercard.com/terms-of-use',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://woocommerce.com/document/mastercard-merchant-cloud/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=mastercard-merchant-cloud',
+					),
+				),
+				'tags'        => array( self::TAG_PREFERRED ),
 			),
 			self::MYPOS             => array(
 				'_type'  => self::TYPE_PSP,

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent invalid object cache values from crashing the version string generator.

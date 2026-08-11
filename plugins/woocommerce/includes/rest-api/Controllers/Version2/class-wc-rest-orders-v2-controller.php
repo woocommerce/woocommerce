@@ -215,7 +215,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 */
 	protected function get_order_item_data( $item ) {
 		$data           = $item->get_data();
-		$format_decimal = array( 'subtotal', 'subtotal_tax', 'total', 'total_tax', 'tax_total', 'shipping_tax_total' );
+		$format_decimal = array( 'subtotal', 'subtotal_tax', 'total', 'total_tax', 'tax_total', 'shipping_tax_total', 'discount', 'discount_tax' );
 
 		// Format decimal values.
 		foreach ( $format_decimal as $key ) {
@@ -938,11 +938,36 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_line_items( $posted, $action = 'create', $item = null ) {
-		$item    = is_null( $item ) ? new WC_Order_Item_Product( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
-		$product = wc_get_product( $this->get_product_id( $posted, $action ) );
+		$item                 = is_null( $item ) ? new WC_Order_Item_Product( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
+		$product              = wc_get_product( $this->get_product_id( $posted, $action ) );
+		$product_item         = $item instanceof WC_Order_Item_Product ? $item : null;
+		$current_product_id   = $product_item ? (int) $product_item->get_product_id( 'edit' ) : 0;
+		$current_variation_id = $product_item ? (int) $product_item->get_variation_id( 'edit' ) : 0;
+		// set_product() clears a variation when given its parent. REST partial updates restore it only
+		// when the posted parent and SKU-resolved product still identify the current item.
+		// An explicit variation_id of 0 still demotes the item.
+		$same_product_update  = 'update' === $action
+			&& array_key_exists( 'product_id', $posted )
+			&& $product instanceof WC_Product
+			&& (int) $posted['product_id'] === $current_product_id
+			&& in_array( $product->get_id(), array( $current_product_id, $current_variation_id ), true );
+		$restore_variation_id = $same_product_update
+			&& $current_variation_id
+			&& ( ! array_key_exists( 'variation_id', $posted ) || (int) $posted['variation_id'] === $current_variation_id );
+		$clear_variation_id   = $same_product_update
+			&& $current_variation_id
+			&& array_key_exists( 'variation_id', $posted )
+			&& 0 === (int) $posted['variation_id'];
+
+		if ( $clear_variation_id && $product instanceof WC_Product_Variation ) {
+			$product = wc_get_product( $current_product_id );
+		}
 
 		if ( $product && $product !== $item->get_product() ) {
 			$item->set_product( $product );
+			if ( $restore_variation_id && $product_item ) {
+				$product_item->set_variation_id( $current_variation_id );
+			}
 
 			if ( 'create' === $action ) {
 				$quantity = isset( $posted['quantity'] ) ? $posted['quantity'] : 1;
@@ -950,6 +975,9 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 				$item->set_total( $total );
 				$item->set_subtotal( $total );
 			}
+		}
+		if ( $clear_variation_id && $product_item ) {
+			$product_item->set_variation_id( 0 );
 		}
 
 		$this->maybe_set_item_props( $item, array( 'name', 'quantity', 'total', 'subtotal', 'tax_class' ), $posted );

@@ -481,7 +481,18 @@ function wc_placeholder_img( $size = 'woocommerce_thumbnail', $attr = '' ) {
 		$image_html = '<img src="' . esc_url( $image ) . '" ' . $hwstring . implode( ' ', $attributes ) . '/>';
 	}
 
-	return apply_filters( 'woocommerce_placeholder_img', $image_html, $size, $dimensions );
+	/**
+	 * Filters the placeholder image HTML.
+	 *
+	 * @param string $image_html The placeholder image HTML.
+	 * @param string $size       Image size.
+	 * @param array  $dimensions Image width and height.
+	 * @param array  $attr       Attributes for the image markup.
+	 *
+	 * @since 2.0.0
+	 * @since 11.1.0 Added the `$attr` parameter.
+	 */
+	return apply_filters( 'woocommerce_placeholder_img', $image_html, $size, $dimensions, $attr );
 }
 
 /**
@@ -2250,7 +2261,7 @@ function wc_product_attach_featured_image( $attachment_id, $product = null, $sav
 		$product    = wc_get_product( $product_id );
 	}
 
-	if ( ! $product ) {
+	if ( ! $product || ! current_user_can( 'edit_product', $product->get_id() ) ) {
 		return;
 	}
 

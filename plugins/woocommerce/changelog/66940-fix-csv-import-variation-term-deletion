@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve category and tag terms attached to existing variations when re-importing them via CSV with "update existing" enabled, instead of unconditionally deleting them on every variation row.
