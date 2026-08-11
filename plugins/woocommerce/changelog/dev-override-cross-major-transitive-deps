@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Pin transitive dependencies whose security fix crosses a major version, and cover the docs tooling lockfile.
