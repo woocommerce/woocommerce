@@ -78,7 +78,7 @@ class WC_Embed {
 		if ( self::is_embedded_product() ) {
 			echo '<p><span class="wc-embed-price">' . $_product->get_price_html() . '</span></p>'; // WPCS: XSS ok.
 
-			if ( ! empty( $post->post_excerpt ) ) {
+			if ( ! post_password_required( $post ) && ! empty( $post->post_excerpt ) ) {
 				ob_start();
 				woocommerce_template_single_excerpt();
 				$excerpt = ob_get_clean();
