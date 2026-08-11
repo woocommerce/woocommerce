@@ -211,6 +211,47 @@ describe( 'QualityBadge', () => {
 		).not.toBeInTheDocument();
 	} );
 
+	it( 'closes on Tab from the docs link and returns focus to the trigger', () => {
+		const context = {
+			iamSettings: {
+				quality_badge: {
+					...contextWithBadge.iamSettings.quality_badge,
+					docs_url: 'https://woocommerce.com/document/excellence/',
+				},
+			},
+		} as MarketplaceContextType;
+
+		renderWithContext( <QualityBadge product={ product } />, context );
+
+		const chip = screen.getByText( 'Excellence Verified' );
+		fireEvent.click( chip );
+
+		fireEvent.keyDown( screen.getByText( 'Learn more' ), { key: 'Tab' } );
+
+		expect(
+			screen.queryByText( 'Verified against WooCommerce standards.' )
+		).not.toBeInTheDocument();
+		expect( chip.closest( 'button' ) ).toHaveFocus();
+	} );
+
+	it( 'closes when focus moves outside the popover and its trigger', () => {
+		renderWithContext(
+			<QualityBadge product={ product } />,
+			contextWithBadge
+		);
+
+		fireEvent.click( screen.getByText( 'Excellence Verified' ) );
+		expect(
+			screen.getByText( 'Verified against WooCommerce standards.' )
+		).toBeInTheDocument();
+
+		fireEvent.focusIn( document.body );
+
+		expect(
+			screen.queryByText( 'Verified against WooCommerce standards.' )
+		).not.toBeInTheDocument();
+	} );
+
 	it( 'renders an inert chip when there is no tooltip copy', () => {
 		const context = {
 			iamSettings: {

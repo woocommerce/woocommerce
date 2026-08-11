@@ -69,12 +69,35 @@ export function QualityBadgePopover( props: {
 	onClose: () => void;
 } ) {
 	const docsUrl = getSafeDocsUrl( props.docsUrl );
-	const { tooltip } = props;
+	const { tooltip, anchor, onClose } = props;
 
 	// Screen readers do not announce the popover content on their own.
 	useEffect( () => {
 		speak( tooltip );
 	}, [ tooltip ] );
+
+	// Close when focus lands outside the popover and its trigger, without
+	// pulling focus back, so tabbing away flows naturally. The Popover's own
+	// focus-outside detection does not cover this: without a link, focus
+	// never enters the popover at all.
+	useEffect( () => {
+		const onFocusin = ( event: FocusEvent ) => {
+			const target = event.target as Element | null;
+			if (
+				! target ||
+				target.closest(
+					'.woocommerce-marketplace__quality-badge-popover'
+				) ||
+				anchor?.contains( target )
+			) {
+				return;
+			}
+			onClose();
+		};
+
+		document.addEventListener( 'focusin', onFocusin );
+		return () => document.removeEventListener( 'focusin', onFocusin );
+	}, [ anchor, onClose ] );
 
 	return (
 		<Popover
@@ -84,9 +107,10 @@ export function QualityBadgePopover( props: {
 			// Focus the link when there is one; without it, focus stays on the
 			// trigger and the content is announced via speak() above.
 			focusOnMount={ docsUrl ? 'firstElement' : false }
-			// Keep the popover in the page tab order; tabbing out closes it.
+			// Keep the popover in the page tab order; tabbing out closes it
+			// via the focusin listener above.
 			constrainTabbing={ false }
-			onClose={ props.onClose }
+			onClose={ onClose }
 		>
 			<p>{ props.tooltip }</p>
 			{ docsUrl && (
@@ -105,6 +129,16 @@ export function QualityBadgePopover( props: {
 							{ source: props.source }
 						)
 					}
+					onKeyDown={ ( event ) => {
+						// Escape returns focus to the trigger. Tab would leave
+						// through the portal to the end of the document, so
+						// hand focus back to the trigger and let the browser
+						// continue the tab order from there.
+						if ( event.key === 'Escape' || event.key === 'Tab' ) {
+							onClose();
+							( anchor as HTMLElement | null )?.focus();
+						}
+					} }
 				>
 					{ __( 'Learn more', 'woocommerce' ) }
 				</a>
@@ -176,10 +210,7 @@ export default function QualityBadge( props: { product: Product } ) {
 					docsUrl={ badge.docs_url }
 					anchor={ anchor }
 					source="product_card"
-					onClose={ () => {
-						setIsOpen( false );
-						anchor?.focus();
-					} }
+					onClose={ () => setIsOpen( false ) }
 				/>
 			) }
 		</div>

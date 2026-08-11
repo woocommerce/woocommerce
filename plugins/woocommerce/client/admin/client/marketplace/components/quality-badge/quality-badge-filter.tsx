@@ -61,10 +61,7 @@ function QualityBadgeInfo( props: {
 					docsUrl={ props.docsUrl }
 					anchor={ anchor }
 					source="filter"
-					onClose={ () => {
-						setIsOpen( false );
-						anchor?.focus();
-					} }
+					onClose={ () => setIsOpen( false ) }
 				/>
 			) }
 		</>
