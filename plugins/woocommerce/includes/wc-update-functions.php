@@ -3638,34 +3638,67 @@ function wc_update_1110_flush_product_count_cache() {
 }
 
 /**
- * Clean up the state left behind by the removed abandoned cart recovery auto-send.
+ * Clean up the state left behind by the removed abandoned cart recovery feature.
  *
- * Sites that ran 11.0.x with the experimental `abandoned_cart_recovery` feature and
- * "Send automatically" enabled can have queued `woocommerce_send_abandoned_cart_recovery_notification`
- * actions and `_abandoned_cart_recovery_scheduled_at` order meta. Nothing listens to
- * that hook or reads that meta any more, so cancel the queued actions and drop the
- * meta rather than leaving dead scheduled actions in the store.
+ * The feature shipped in 11.0.x behind the experimental, default-off
+ * `abandoned_cart_recovery` flag and has now been removed in full: the email, its
+ * settings, the manual-send order action, the settings-page recommendations, and the
+ * email-unsubscribe endpoint and table. Sites that opted in can be left holding
+ * queued Action Scheduler sends, order meta, options and unsubscribe rows that no
+ * remaining code reads, so clear them here rather than orphaning them.
  *
- * The `_abandoned_cart_recovery_email_sent_at` meta is deliberately kept: the
- * manual-send flow still writes and reads it.
+ * Names are hardcoded rather than referenced through the classes that used to own
+ * them, because those classes no longer exist.
  *
  * @since 11.1.0
  *
  * @return void
  */
-function wc_update_11102_cleanup_abandoned_cart_recovery_auto_send() {
+function wc_update_11102_remove_abandoned_cart_recovery() {
 	global $wpdb;
 
+	// Cancel queued automated sends. Nothing listens to the hook any more, so a
+	// due action would run as an inert no-op, but leaving it queued keeps dead
+	// rows in the Action Scheduler store until then.
 	if ( function_exists( 'as_unschedule_all_actions' ) ) {
 		as_unschedule_all_actions( 'woocommerce_send_abandoned_cart_recovery_notification' );
 	}
 
-	$meta_key = '_abandoned_cart_recovery_scheduled_at';
-
-	$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => $meta_key ), array( '%s' ) );
+	// Order meta: the scheduled-send timestamp and the sent-at dedup marker.
+	$meta_keys = array( '_abandoned_cart_recovery_scheduled_at', '_abandoned_cart_recovery_email_sent_at' );
 
 	$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
-	if ( $data_synchronizer->get_table_exists() ) {
-		$wpdb->delete( OrdersTableDataStore::get_meta_table_name(), array( 'meta_key' => $meta_key ), array( '%s' ) );
+	$hpos_meta_table   = $data_synchronizer->get_table_exists() ? OrdersTableDataStore::get_meta_table_name() : '';
+
+	foreach ( $meta_keys as $meta_key ) {
+		$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => $meta_key ), array( '%s' ) );
+
+		if ( '' !== $hpos_meta_table ) {
+			$wpdb->delete( $hpos_meta_table, array( 'meta_key' => $meta_key ), array( '%s' ) );
+		}
 	}
+
+	// The email editor lazily creates a `woo_email` post per email type and maps it
+	// through this option. With the email gone the post is unreachable, so drop both.
+	$email_post_id_option = 'woocommerce_email_templates_customer_abandoned_cart_recovery_post_id';
+	$email_post_id        = (int) get_option( $email_post_id_option, 0 );
+	if ( $email_post_id > 0 ) {
+		$email_post = get_post( $email_post_id );
+		if ( $email_post && 'woo_email' === $email_post->post_type ) {
+			wp_delete_post( $email_post_id, true );
+		}
+	}
+
+	delete_option( $email_post_id_option );
+	delete_option( 'woocommerce_feature_abandoned_cart_recovery_enabled' );
+	delete_option( 'woocommerce_customer_abandoned_cart_recovery_settings' );
+	delete_option( 'woocommerce_abandoned_cart_recovery_recommendations_hidden' );
+	delete_transient( 'wc_abandoned_cart_recovery_enabled_notice' );
+
+	// The unsubscribes table only ever held opt-outs for this email, and the GDPR
+	// eraser that covered it is gone too, so drop it rather than leave hashed
+	// recipient addresses behind with no erasure path.
+	$unsubscribes_table = $wpdb->prefix . 'wc_email_unsubscribes';
+	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name built from the wpdb prefix.
+	$wpdb->query( "DROP TABLE IF EXISTS {$unsubscribes_table}" );
 }

@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Remove the automated send for the abandoned cart recovery email. The email is now only sent when a merchant triggers it from the order edit page, the "Send automatically" setting is gone, and queued sends left over from the previous behavior are cancelled on update.
