@@ -140,8 +140,8 @@ export const PaymentEventsProvider = ( {
 	const onPaymentProcessing = useMemo( () => {
 		return function ( ...args: Parameters< typeof onPaymentSetup > ) {
 			deprecated( 'onPaymentProcessing', {
+				since: '7.6.0',
 				alternative: 'onPaymentSetup',
-				plugin: 'WooCommerce Blocks',
 			} );
 			return onPaymentSetup( ...args );
 		};
