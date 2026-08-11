@@ -12,6 +12,20 @@ namespace Automattic\WooCommerce\Internal\Caches;
  * with a dedicated 'coupon_code_lookups' prefix namespace so they can be invalidated on their
  * own, without flushing the meta cache shared by every WC_Coupon in the same group.
  *
+ * Known limitations:
+ *
+ * - Both hook listeners key off a transition across the `publish` boundary, because the core
+ *   coupon data store only resolves published coupons. A custom data store registered through
+ *   the `woocommerce_data_stores` filter that resolves further statuses would need its own
+ *   invalidation for transitions between two non-publish statuses.
+ * - Renaming the code of a coupon that stays published crosses no boundary, so the old code
+ *   keeps resolving to the coupon until the cache entry expires or the coupon is unpublished.
+ *   This is pre-existing behaviour, not something this class introduced.
+ * - wc_get_coupon_id_by_code() hashes the caller's raw input while `post_title` holds the
+ *   sanitized code, so for codes with kses-escapable characters the two are different keys.
+ *   Entering publish only invalidates the sanitized one; leaving publish rotates the whole
+ *   namespace and therefore covers both.
+ *
  * @since 11.1.0
  */
 class CouponCodeLookupInvalidator {
@@ -84,10 +98,18 @@ class CouponCodeLookupInvalidator {
 	}
 
 	/**
-	 * Rotate the lookup namespace when a coupon crosses the publish boundary.
+	 * Invalidate the lookup cache when a coupon crosses the publish boundary.
 	 *
 	 * Only transitions into or out of `publish` can change which ids a code resolves to, so
-	 * other status changes (e.g. draft to pending) are ignored to avoid needless cache churn.
+	 * other status changes (e.g. draft to pending) are ignored. The two directions need
+	 * different breadth:
+	 *
+	 * - Leaving publish rotates the namespace, because the coupon may have been cached under
+	 *   more than one representation of its code and every one of them has to go.
+	 * - Entering publish only invalidates that one code. Nothing else can start or stop
+	 *   resolving because of it, and rotating here would flush the whole store's lookup cache
+	 *   on every coupon creation: wp_insert_post() reports `new` as the old status, so a
+	 *   brand-new published coupon takes this branch too.
 	 *
 	 * @internal
 	 *
@@ -97,21 +119,23 @@ class CouponCodeLookupInvalidator {
 	 * @return void
 	 */
 	public function handle_transition_post_status( $new_status, $old_status, $post ): void {
-		if ( ! $post instanceof \WP_Post ) {
+		if ( ! $post instanceof \WP_Post || 'shop_coupon' !== $post->post_type || $new_status === $old_status ) {
 			return;
 		}
 
-		if (
-			'shop_coupon' === $post->post_type
-			&& $new_status !== $old_status
-			&& ( 'publish' === $new_status || 'publish' === $old_status )
-		) {
+		if ( 'publish' === $old_status ) {
 			$this->invalidate_lookup_namespace();
+		} elseif ( 'publish' === $new_status ) {
+			$this->invalidate( $post->post_title );
 		}
 	}
 
 	/**
-	 * Rotate the lookup namespace when a coupon post is deleted.
+	 * Rotate the lookup namespace when a published coupon post is deleted.
+	 *
+	 * Deleting a coupon in any other status cannot strand a lookup entry, since only published
+	 * coupons are ever cached. Skipping those keeps the scheduled auto-draft and trash cleanups
+	 * from rotating the namespace once per coupon they remove.
 	 *
 	 * @internal
 	 *
@@ -120,7 +144,7 @@ class CouponCodeLookupInvalidator {
 	 * @return void
 	 */
 	public function handle_deleted_post( $post_id, $post ): void {
-		if ( $post instanceof \WP_Post && 'shop_coupon' === $post->post_type ) {
+		if ( $post instanceof \WP_Post && 'shop_coupon' === $post->post_type && 'publish' === $post->post_status ) {
 			$this->invalidate_lookup_namespace();
 		}
 	}

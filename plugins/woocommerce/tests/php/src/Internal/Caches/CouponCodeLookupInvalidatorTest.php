@@ -88,6 +88,103 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Data provider for the statuses a deleted coupon can be in without ever having been cached.
+	 *
+	 * @return array
+	 */
+	public function never_cacheable_coupon_status_data() {
+		return array(
+			'draft'      => array( 'draft' ),
+			'auto-draft' => array( 'auto-draft' ),
+			'pending'    => array( 'pending' ),
+			'private'    => array( 'private' ),
+			'trash'      => array( 'trash' ),
+		);
+	}
+
+	/**
+	 * @testdox Should keep the coupon code lookup cache when a coupon in another status is deleted.
+	 * @dataProvider never_cacheable_coupon_status_data
+	 *
+	 * @param string $status The status of the coupon being deleted.
+	 */
+	public function test_deleting_a_non_published_coupon_keeps_the_lookup_cache( string $status ): void {
+		$code   = 'cache-keep-delete-' . $status;
+		$coupon = WC_Helper_Coupon::create_coupon( $code );
+
+		wc_get_coupon_id_by_code( $code );
+		$cache_key = $this->sut->get_cache_key( $code );
+		$this->assertNotFalse( wp_cache_get( $cache_key, 'coupons' ), 'The coupon code lookup cache should be primed while the coupon is published' );
+
+		$doomed_id = wp_insert_post(
+			array(
+				'post_type'   => 'shop_coupon',
+				'post_title'  => 'cache-keep-doomed-' . $status,
+				'post_status' => $status,
+			)
+		);
+		wp_delete_post( $doomed_id, true );
+
+		$this->assertSame( $cache_key, $this->sut->get_cache_key( $code ), "Deleting a {$status} coupon should not rotate the lookup namespace" );
+		$this->assertNotFalse( wp_cache_get( $cache_key, 'coupons' ), "Deleting a {$status} coupon should not flush an unrelated lookup entry" );
+
+		$coupon->delete( true );
+	}
+
+	/**
+	 * @testdox Should keep the coupon code lookup cache of other coupons when a new coupon is published.
+	 */
+	public function test_publishing_a_coupon_keeps_the_lookup_cache_of_other_coupons(): void {
+		$code   = 'cache-keep-on-create';
+		$coupon = WC_Helper_Coupon::create_coupon( $code );
+
+		wc_get_coupon_id_by_code( $code );
+		$cache_key = $this->sut->get_cache_key( $code );
+		$this->assertNotFalse( wp_cache_get( $cache_key, 'coupons' ), 'The coupon code lookup cache should be primed while the coupon is published' );
+
+		$other = WC_Helper_Coupon::create_coupon( 'cache-keep-on-create-other' );
+
+		$this->assertSame( $cache_key, $this->sut->get_cache_key( $code ), 'Publishing a coupon should not rotate the lookup namespace' );
+		$this->assertNotFalse( wp_cache_get( $cache_key, 'coupons' ), "Publishing a coupon should not flush another coupon's lookup entry" );
+
+		$other->delete( true );
+		$coupon->delete( true );
+	}
+
+	/**
+	 * @testdox Should invalidate the lookup cache of a code when a newer coupon is published under it.
+	 */
+	public function test_publishing_a_duplicate_code_busts_the_lookup_cache_of_that_code(): void {
+		$code = 'cache-bust-duplicate';
+
+		// Backdated so the "newest wins" ordering of get_ids_by_code() is deterministic.
+		$older_id = wp_insert_post(
+			array(
+				'post_type'     => 'shop_coupon',
+				'post_title'    => $code,
+				'post_status'   => 'publish',
+				'post_date'     => gmdate( 'Y-m-d H:i:s', strtotime( current_time( 'mysql' ) ) - HOUR_IN_SECONDS ),
+				'post_date_gmt' => gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ),
+			)
+		);
+
+		$this->assertSame( $older_id, wc_get_coupon_id_by_code( $code ), 'The older coupon should resolve while it is the only one' );
+
+		$newer_id = wp_insert_post(
+			array(
+				'post_type'   => 'shop_coupon',
+				'post_title'  => $code,
+				'post_status' => 'publish',
+			)
+		);
+
+		$this->assertSame( $newer_id, wc_get_coupon_id_by_code( $code ), 'The newest coupon published under a duplicated code should win the lookup' );
+
+		wp_delete_post( $newer_id, true );
+		wp_delete_post( $older_id, true );
+	}
+
+	/**
 	 * @testdox Should keep the coupon code lookup cache when a published coupon is updated and stays published.
 	 */
 	public function test_updating_a_published_coupon_keeps_the_lookup_cache(): void {
