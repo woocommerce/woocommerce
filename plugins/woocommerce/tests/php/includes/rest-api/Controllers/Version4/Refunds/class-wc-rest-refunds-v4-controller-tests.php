@@ -3660,6 +3660,55 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Duplicate tax IDs within a line return 400 duplicate_tax_id and create no refund.
+	 */
+	public function test_refunds_create_rejects_duplicate_tax_ids(): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		// $100 net + $10 tax = $110 line total.
+		list( $order, $item ) = $this->create_order_with_exact_line( 1, 100.00, 100.00, 110.00, array( $tax_rate_id => 10.00 ) );
+
+		// Validation and the amount calculation sum both entries (gross 60), but the
+		// internal conversion keys taxes by ID, so one entry would silently overwrite
+		// the other and store only 55. The request must be rejected instead.
+		$response = $this->dispatch_refund_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'refund_total' => 50.00,
+					'refund_tax'   => array(
+						array(
+							'id'           => $tax_rate_id,
+							'refund_total' => 5.00,
+						),
+						array(
+							'id'           => $tax_rate_id,
+							'refund_total' => 5.00,
+						),
+					),
+				),
+			)
+		);
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'duplicate_tax_id', $response->get_data()['code'] );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds(), 'A refund with inconsistent tax accounting must never be created.' );
+	}
+
+	/**
 	 * @testdox Simplified form rejects a second refund of already-fully-refunded fee and shipping lines.
 	 */
 	public function test_refunds_create_simplified_form_rejects_already_refunded_fee_and_shipping(): void {

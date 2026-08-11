@@ -3513,7 +3513,7 @@ parameters:
 		-
 			message: '#^Cannot access offset ''local'' on non\-empty\-array\|true\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
+			count: 1
 			path: includes/admin/helper/class-wc-helper-subscriptions-api.php
 
 		-
@@ -30306,12 +30306,6 @@ parameters:
 		-
 			message: '#^Method WC_REST_Refunds_Controller\:\:prepare_objects_query\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-refunds-controller.php
-
-		-
-			message: '#^Method WC_REST_Refunds_Controller\:\:register_routes\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-refunds-controller.php
 
@@ -68215,12 +68209,6 @@ parameters:
 			path: src/StoreApi/Authentication.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Authentication\:\:get_cart_token\(\) should return string but returns array\|string\.$#'
-			identifier: return.type
-			count: 1
-			path: src/StoreApi/Authentication.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Authentication\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -70575,12 +70563,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\SessionHandler\:\:init_session_from_token\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/StoreApi/SessionHandler.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\StoreApi\\SessionHandler\:\:\$token \(string\) does not accept array\|string\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: src/StoreApi/SessionHandler.php
 
