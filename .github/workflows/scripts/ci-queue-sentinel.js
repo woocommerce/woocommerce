@@ -23,7 +23,8 @@ const API_BASE = 'https://api.github.com';
 // platform incidents would otherwise waste API budget or fake a weeks-old
 // queue age. The in_progress window exceeds any real run lifetime, so an
 // alive run is never dropped. Exceeding a probe bound marks the probe
-// incomplete, which suppresses switch-OFF (see decide()).
+// incomplete, which suppresses switch-OFF (see decide()); an over-bound burst
+// can also delay a switch-ON by one tick, self-healing as the window rotates.
 const PROBE_QUEUED_RUN_MAX_AGE_MIN = 120;
 const PROBE_IN_PROGRESS_RUN_MAX_AGE_MIN = 480;
 const MAX_QUEUED_RUNS_TO_PROBE = 30;
