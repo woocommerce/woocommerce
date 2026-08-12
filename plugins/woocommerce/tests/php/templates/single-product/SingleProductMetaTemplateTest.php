@@ -12,73 +12,153 @@ use WC_Unit_Test_Case;
 class SingleProductMetaTemplateTest extends WC_Unit_Test_Case {
 
 	/**
+	 * Whether the global product was set before the test.
+	 *
+	 * @var bool
+	 */
+	private bool $had_previous_product;
+
+	/**
+	 * The global product value from before the test.
+	 *
+	 * @var mixed
+	 */
+	private $previous_product;
+
+	/**
+	 * Product used by the test.
+	 *
+	 * @var \WC_Product
+	 */
+	private $test_product;
+
+	/**
+	 * Category names used by the test.
+	 *
+	 * @var array<string, string>
+	 */
+	private array $category_names = array();
+
+	/**
+	 * Category IDs used by the test.
+	 *
+	 * @var array<string, int>
+	 */
+	private array $category_ids = array();
+
+	/**
+	 * Set up the product category fixture.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		$this->had_previous_product = array_key_exists( 'product', $GLOBALS );
+		$this->previous_product     = $GLOBALS['product'] ?? null;
+
+		$suffix               = wp_unique_id();
+		$this->category_names = array(
+			'root' => 'Template Root ' . $suffix,
+			'mid'  => 'Template Mid ' . $suffix,
+			'leaf' => 'Template Leaf ' . $suffix,
+		);
+		$root                 = wp_insert_term( $this->category_names['root'], 'product_cat' );
+		$mid                  = wp_insert_term( $this->category_names['mid'], 'product_cat', array( 'parent' => $root['term_id'] ) );
+		$leaf                 = wp_insert_term( $this->category_names['leaf'], 'product_cat', array( 'parent' => $mid['term_id'] ) );
+		$this->category_ids   = array(
+			'root' => $root['term_id'],
+			'mid'  => $mid['term_id'],
+			'leaf' => $leaf['term_id'],
+		);
+		$this->test_product   = WC_Helper_Product::create_simple_product();
+
+		wp_set_object_terms(
+			$this->test_product->get_id(),
+			array( $this->category_ids['leaf'], $this->category_ids['root'], $this->category_ids['mid'] ),
+			'product_cat'
+		);
+		$GLOBALS['product'] = wc_get_product( $this->test_product->get_id() );
+	}
+
+	/**
+	 * Tear down the product category fixture.
+	 */
+	public function tearDown(): void {
+		WC_Helper_Product::delete_product( $this->test_product->get_id() );
+
+		foreach ( array_reverse( $this->category_ids ) as $category_id ) {
+			wp_delete_term( $category_id, 'product_cat' );
+		}
+
+		if ( $this->had_previous_product ) {
+			$GLOBALS['product'] = $this->previous_product;
+		} else {
+			unset( $GLOBALS['product'] );
+		}
+
+		parent::tearDown();
+	}
+
+	/**
 	 * @testdox Single product meta renders assigned categories in breadcrumb order.
 	 */
 	public function test_single_product_meta_renders_categories_in_breadcrumb_order(): void {
-		$had_previous_product = array_key_exists( 'product', $GLOBALS );
-		$previous_product     = $GLOBALS['product'] ?? null;
-		$suffix               = wp_unique_id();
-		$root_name            = 'Template Root ' . $suffix;
-		$mid_name             = 'Template Mid ' . $suffix;
-		$leaf_name            = 'Template Leaf ' . $suffix;
-		$root                 = wp_insert_term( $root_name, 'product_cat' );
-		$mid                  = wp_insert_term( $mid_name, 'product_cat', array( 'parent' => $root['term_id'] ) );
-		$leaf                 = wp_insert_term( $leaf_name, 'product_cat', array( 'parent' => $mid['term_id'] ) );
-		$test_product         = WC_Helper_Product::create_simple_product();
-		$terms_filter         = null;
-		$orderby_filter       = null;
+		$content  = preg_replace( '/\s+/', ' ', wp_strip_all_tags( wc_get_template_html( 'single-product/meta.php' ) ) );
+		$expected = implode(
+			', ',
+			array( $this->category_names['root'], $this->category_names['mid'], $this->category_names['leaf'] )
+		);
+
+		$this->assertMatchesRegularExpression(
+			'/Categor(?:y|ies): ' . preg_quote( $expected, '/' ) . '/',
+			$content,
+			'Single product meta should render product categories in root-to-leaf order.'
+		);
+	}
+
+	/**
+	 * @testdox Single product meta honors the filtered category ordering mode.
+	 */
+	public function test_single_product_meta_honors_filtered_category_order(): void {
+		$orderby_filter = static function () {
+			return 'name';
+		};
+		add_filter( 'woocommerce_product_meta_category_orderby', $orderby_filter );
 
 		try {
-			wp_set_object_terms( $test_product->get_id(), array( $leaf['term_id'], $root['term_id'], $mid['term_id'] ), 'product_cat' );
-			$GLOBALS['product'] = wc_get_product( $test_product->get_id() );
-
-			$content = preg_replace( '/\s+/', ' ', wp_strip_all_tags( wc_get_template_html( 'single-product/meta.php' ) ) );
-
-			$this->assertMatchesRegularExpression(
-				'/Categor(?:y|ies): ' . preg_quote( "{$root_name}, {$mid_name}, {$leaf_name}", '/' ) . '/',
-				$content,
-				'Single product meta should render product categories in root-to-leaf order.'
+			$content  = preg_replace( '/\s+/', ' ', wp_strip_all_tags( wc_get_template_html( 'single-product/meta.php' ) ) );
+			$expected = implode(
+				', ',
+				array( $this->category_names['leaf'], $this->category_names['mid'], $this->category_names['root'] )
 			);
 
-			$orderby_filter = static function () {
-				return 'name';
-			};
-			add_filter( 'woocommerce_product_meta_category_orderby', $orderby_filter );
-
-			$content = preg_replace( '/\s+/', ' ', wp_strip_all_tags( wc_get_template_html( 'single-product/meta.php' ) ) );
-
 			$this->assertMatchesRegularExpression(
-				'/Categor(?:y|ies): ' . preg_quote( "{$leaf_name}, {$mid_name}, {$root_name}", '/' ) . '/',
+				'/Categor(?:y|ies): ' . preg_quote( $expected, '/' ) . '/',
 				$content,
 				'Single product meta should honor the filtered product category ordering mode.'
 			);
-
-			remove_filter( 'woocommerce_product_meta_category_orderby', $orderby_filter );
-			$orderby_filter = null;
-
-			$terms_filter = static function ( $terms, $post_id, $taxonomy ) use ( $test_product ) {
-				return $test_product->get_id() === $post_id && 'product_cat' === $taxonomy ? new \WP_Error( 'category-list-error' ) : $terms;
-			};
-			add_filter( 'get_the_terms', $terms_filter, 10, 3 );
-
-			$this->assertStringNotContainsString( 'class="posted_in"', wc_get_template_html( 'single-product/meta.php' ) );
 		} finally {
-			if ( null !== $orderby_filter ) {
-				remove_filter( 'woocommerce_product_meta_category_orderby', $orderby_filter );
-			}
-			if ( null !== $terms_filter ) {
-				remove_filter( 'get_the_terms', $terms_filter, 10 );
-			}
-			WC_Helper_Product::delete_product( $test_product->get_id() );
-			wp_delete_term( $leaf['term_id'], 'product_cat' );
-			wp_delete_term( $mid['term_id'], 'product_cat' );
-			wp_delete_term( $root['term_id'], 'product_cat' );
+			remove_filter( 'woocommerce_product_meta_category_orderby', $orderby_filter );
+		}
+	}
 
-			if ( $had_previous_product ) {
-				$GLOBALS['product'] = $previous_product;
-			} else {
-				unset( $GLOBALS['product'] );
-			}
+	/**
+	 * @testdox Single product meta omits category markup when category loading fails.
+	 */
+	public function test_single_product_meta_omits_categories_when_term_loading_fails(): void {
+		$product_id   = $this->test_product->get_id();
+		$terms_filter = static function ( $terms, $post_id, $taxonomy ) use ( $product_id ) {
+			return $product_id === $post_id && 'product_cat' === $taxonomy ? new \WP_Error( 'category-list-error' ) : $terms;
+		};
+		add_filter( 'get_the_terms', $terms_filter, 10, 3 );
+
+		try {
+			$this->assertStringNotContainsString(
+				'class="posted_in"',
+				wc_get_template_html( 'single-product/meta.php' ),
+				'Single product meta should suppress category markup when term loading fails.'
+			);
+		} finally {
+			remove_filter( 'get_the_terms', $terms_filter, 10 );
 		}
 	}
 }

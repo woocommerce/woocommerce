@@ -1176,6 +1176,7 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 				wp_cache_delete( $ancestor_id, 'term_meta' );
 			}
 
+			// Match ancestor term IDs in captured SQL. Word boundaries avoid partial matches within larger numeric IDs.
 			$ancestor_id_pattern   = '/\b(?:' . implode( '|', $ancestor_ids ) . ')\b/';
 			$ancestor_term_queries = 0;
 			$ancestor_meta_queries = 0;
