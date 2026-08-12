@@ -4,14 +4,13 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests;
 
 /**
- * Tests that WC_Unit_Test_Case::tearDown() clears the WC() singleton state that neither the
- * per-test database rollback nor the hook restore covers.
+ * Tests that WC_Unit_Test_Case clears the WC() singleton state that neither the per-test
+ * database rollback nor the hook restore covers.
  *
- * The two tests below are a pair: the first dirties every piece of state the teardown is
- * responsible for, the second asserts none of it survived. They rely on running in declaration
- * order, which is PHPUnit's default and is not overridden anywhere in this repo. A dependency
- * annotation is deliberately not used: a failing dependency makes the dependent test skip rather
- * than fail, which would hide the very regression this pair exists to catch.
+ * This drives clear_wc_singleton_state() directly rather than dirtying state in one test and
+ * asserting it is gone in the next. A pair like that only holds under declaration order: run
+ * the suite with --order-by=random or reverse and the assertion half runs first, passes
+ * against state nothing has dirtied yet, and stops covering anything without ever going red.
  */
 class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 
@@ -21,12 +20,9 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 	private const LEAKED_LOCALE_LABEL = 'Leaked postcode label';
 
 	/**
-	 * Dirty every piece of state the teardown is responsible for.
-	 *
-	 * The assertions here guard the fixture itself, so a failure in this test means the setup
-	 * stopped dirtying the state rather than the teardown stopping cleaning it.
+	 * Every piece of singleton state the teardown is responsible for is cleared.
 	 */
-	public function test_singleton_state_is_dirtied(): void {
+	public function test_clear_wc_singleton_state_clears_what_survives_the_parent_teardown(): void {
 		add_filter(
 			'woocommerce_get_country_locale',
 			function ( $locale ) {
@@ -47,23 +43,20 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 
 		wc_add_notice( 'Teardown coverage notice.' );
 		$this->assertSame( 1, wc_notice_count(), 'The notice should be queued.' );
-	}
 
-	/**
-	 * Assert none of that state reached this test.
-	 */
-	public function test_singleton_state_does_not_leak_into_the_next_test(): void {
+		// What tearDown() runs before handing off to the parent.
+		$this->clear_wc_singleton_state();
+
+		// The parent teardown restores the hooks straight afterwards, which is what leaves a
+		// filtered locale stranded in the cache. Drop the filter here to reproduce that order.
+		remove_all_filters( 'woocommerce_get_country_locale' );
+
 		$this->assertTrue( WC()->cart->is_empty(), 'The cart should have been emptied.' );
 		$this->assertSame( 'shortcode', WC()->cart->cart_context, 'The cart context should be back to shortcode.' );
 		$this->assertSame( 0, wc_notice_count(), 'The notice queue should have been cleared.' );
-
-		// The hook restore drops the filter, but it does not drop the value the filter produced,
-		// so the cached locale is what this asserts on.
-		$this->assertFalse( has_filter( 'woocommerce_get_country_locale' ), 'The hook restore should have dropped the filter.' );
-		$locale = WC()->countries->get_country_locale();
 		$this->assertNotSame(
 			self::LEAKED_LOCALE_LABEL,
-			$locale['GB']['postcode']['label'] ?? null,
+			WC()->countries->get_country_locale()['GB']['postcode']['label'] ?? null,
 			'The filtered locale should not still be cached.'
 		);
 	}

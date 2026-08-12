@@ -159,35 +159,47 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 */
 	public function tearDown(): void {
 		try {
-			if ( isset( WC()->cart ) ) {
-				// Emptying the cart writes to the session via the woocommerce_cart_emptied
-				// callbacks, so only do it when that singleton is present too — tests may
-				// legitimately null it out.
-				if ( isset( WC()->session ) ) {
-					WC()->cart->empty_cart();
-				}
-
-				// Loading a Store API cart route sets this to 'store-api' and never puts it
-				// back, and production code branches on it.
-				WC()->cart->cart_context = 'shortcode';
-			}
-
-			if ( isset( WC()->session ) ) {
-				wc_clear_notices();
-			}
-
-			if ( isset( WC()->countries ) ) {
-				// The locale is cached on first read. A test that reads it while a
-				// woocommerce_get_country_locale filter is attached leaves the filtered
-				// value behind, because the hook restore removes the filter but not the
-				// cache it produced.
-				WC()->countries->locale = array();
-			}
+			$this->clear_wc_singleton_state();
 		} finally {
 			// The parent teardown must always run: it rolls back the database
 			// transaction and restores the hooks. Skipping it would poison every
 			// test that runs after this one.
 			parent::tearDown();
+		}
+	}
+
+	/**
+	 * Clear the WC() singleton state that survives the parent teardown.
+	 *
+	 * Kept separate from tearDown() so it can be asserted directly, without a test having to
+	 * depend on running after another one.
+	 *
+	 * @since 11.1.0
+	 */
+	protected function clear_wc_singleton_state(): void {
+		if ( isset( WC()->cart ) ) {
+			// Emptying the cart writes to the session via the woocommerce_cart_emptied
+			// callbacks, so only do it when that singleton is present too — tests may
+			// legitimately null it out.
+			if ( isset( WC()->session ) ) {
+				WC()->cart->empty_cart();
+			}
+
+			// Loading a Store API cart route sets this to 'store-api' and never puts it
+			// back, and production code branches on it.
+			WC()->cart->cart_context = 'shortcode';
+		}
+
+		if ( isset( WC()->session ) ) {
+			wc_clear_notices();
+		}
+
+		if ( isset( WC()->countries ) ) {
+			// The locale is cached on first read. A test that reads it while a
+			// woocommerce_get_country_locale filter is attached leaves the filtered
+			// value behind, because the hook restore removes the filter but not the
+			// cache it produced.
+			WC()->countries->locale = array();
 		}
 	}
 
