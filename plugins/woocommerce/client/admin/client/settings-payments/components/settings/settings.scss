@@ -1,3 +1,9 @@
+// Space above the first line of a section, applied to both columns so the
+// details heading and the first control start on the same line. Declared once
+// so the two cannot drift apart — previously the heading took wp-admin's
+// default h2 margin and the controls carried a hand-tuned counter-nudge.
+$settings-section-leading: $gap;
+
 .settings-layout {
 	margin: 48px 12px 0;
 	display: flex;
@@ -48,6 +54,9 @@
 		h2 {
 			font-size: 16px;
 			line-height: 24px;
+			// Stated rather than inherited from wp-admin, so the controls
+			// column has a fixed value to align against.
+			margin-top: $settings-section-leading;
 		}
 
 		p {
@@ -76,8 +85,13 @@
 	}
 
 	&__controls {
-		margin-top: 6px;	// Ensure visual alignment.
+		margin-top: $settings-section-leading;
 		flex: 1 1 auto;
+
+		// The columns stack here, so there is no heading to align against.
+		@include breakpoint( "<782px" ) {
+			margin-top: 0;
+		}
 	}
 
 	.form-field:not(:first-child) {
@@ -85,16 +99,14 @@
 	}
 }
 
+// These controls used to carry their own 32px bottom margins, from before the
+// forms moved to DataForm. DataForm spaces its fields with a gap, so those
+// margins stacked on top of it and every field ended up 48px apart. The gap is
+// now the only thing setting that rhythm.
 .components-base-control {
-	margin-bottom: 32px;
-
 	+ .components-base-control__help {
 		margin-top: 0;
 		margin-bottom: 0;
-	}
-
-	&__help {
-		margin-bottom: 32px;
 	}
 }
 
@@ -115,7 +127,10 @@
 	}
 
 	&__help {
+		// Matches the 8px that Gutenberg's own help text sits below its field.
+		// No bottom margin, for the same reason as the base control above: the
+		// DataForm gap already separates this field from the next.
 		margin-top: calc(8px);
-		margin-bottom: 32px;
+		margin-bottom: 0;
 	}
 }

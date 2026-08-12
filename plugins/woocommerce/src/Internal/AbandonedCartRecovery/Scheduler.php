@@ -20,9 +20,10 @@ use WC_Order;
  * after `WC_Email_Customer_Abandoned_Cart_Recovery::AUTO_SEND_DELAY_SECONDS`.
  * The pending action is cancelled when the order transitions out of the
  * eligible-status set or is trashed/deleted, so a customer who completes
- * checkout before the delay elapses never receives the nudge. Eligibility
- * comes from the same `woocommerce_abandoned_cart_recovery_eligible_statuses`
- * filter the send/manual paths use.
+ * checkout before the delay elapses never receives the nudge. Eligibility runs
+ * through the same `woocommerce_abandoned_cart_recovery_eligible_statuses`
+ * filter the send/manual paths use, with a default scoped to `pending` —
+ * {@see get_eligible_statuses()}.
  *
  * Per-order idempotency is enforced two ways: a scheduled-at meta key blocks
  * re-scheduling for the same order, and the trigger-time send gate refuses to
@@ -62,6 +63,9 @@ class Scheduler {
 	 * Order-creation origins (`created_via`) eligible for an automated send:
 	 * the classic checkout and the block (Store API) checkout.
 	 *
+	 * Store API orders are generally created in `checkout-draft`, which is not scheduled
+	 * yet. `store-api` is listed here for future block checkout support.
+	 *
 	 * @var string[]
 	 */
 	private const ELIGIBLE_CREATED_VIA = array( 'checkout', 'store-api' );
@@ -77,9 +81,9 @@ class Scheduler {
 		add_action( 'woocommerce_new_order', array( $this, 'handle_new_order' ), 10, 2 );
 		// Catch every transition out of the eligible set so the pending send
 		// is unscheduled regardless of which status the order moves to.
-		add_action( 'woocommerce_order_status_changed', array( $this, 'handle_status_changed' ), 10, 3 );
+		add_action( 'woocommerce_order_status_changed', array( $this, 'handle_status_changed' ), 10, 4 );
 		add_action( 'woocommerce_trash_order', array( $this, 'handle_cancellation' ), 10, 1 );
-		add_action( 'woocommerce_before_delete_order', array( $this, 'handle_cancellation' ), 10, 1 );
+		add_action( 'woocommerce_before_delete_order', array( $this, 'handle_cancellation' ), 10, 2 );
 		add_action( self::ACTION_HOOK, array( $this, 'handle_scheduled_send' ), 10, 1 );
 	}
 
@@ -147,12 +151,15 @@ class Scheduler {
 	 *
 	 * @internal
 	 *
-	 * @param int    $order_id   Order ID.
-	 * @param string $old_status Previous status (sans `wc-` prefix).
-	 * @param string $new_status New status (sans `wc-` prefix).
+	 * @param int           $order_id   Order ID.
+	 * @param string        $old_status Previous status (sans `wc-` prefix).
+	 * @param string        $new_status New status (sans `wc-` prefix).
+	 * @param WC_Order|null $order      Order passed by the hook; looked up when absent.
 	 */
-	public function handle_status_changed( int $order_id, string $old_status, string $new_status ): void {
-		$order = wc_get_order( $order_id );
+	public function handle_status_changed( int $order_id, string $old_status, string $new_status, $order = null ): void {
+		if ( ! $order instanceof WC_Order ) {
+			$order = wc_get_order( $order_id );
+		}
 		if ( ! $order instanceof WC_Order ) {
 			return;
 		}
@@ -166,7 +173,7 @@ class Scheduler {
 			return;
 		}
 
-		$this->handle_cancellation( $order_id );
+		$this->handle_cancellation( $order_id, $order );
 	}
 
 	/**
@@ -179,15 +186,19 @@ class Scheduler {
 	 *
 	 * @internal
 	 *
-	 * @param int $order_id The affected order ID.
+	 * @param int           $order_id The affected order ID.
+	 * @param WC_Order|null $order    Order passed by the caller or hook; looked up when absent, as
+	 *                                some hooks don't supply the order.
 	 */
-	public function handle_cancellation( int $order_id ): void {
+	public function handle_cancellation( int $order_id, $order = null ): void {
 		// Always attempt to unschedule, even when the order or meta is missing,
 		// so an out-of-sync meta value cannot leave a stray scheduled send.
 		// `as_unschedule_action()` is a no-op when no matching action exists.
 		as_unschedule_action( self::ACTION_HOOK, array( $order_id ) );
 
-		$order = wc_get_order( $order_id );
+		if ( ! $order instanceof WC_Order ) {
+			$order = wc_get_order( $order_id );
+		}
 		if ( $order instanceof WC_Order && '' !== (string) $order->get_meta( self::SCHEDULED_META_KEY ) ) {
 			$order->delete_meta_data( self::SCHEDULED_META_KEY );
 			$order->save_meta_data();
@@ -234,20 +245,17 @@ class Scheduler {
 	}
 
 	/**
-	 * Order statuses eligible for a recovery send, shared with the send-time
-	 * gate in `WC_Email_Customer_Abandoned_Cart_Recovery::is_order_eligible_for_recovery()`.
+	 * Order statuses that can be scheduled for an automated send. Defaults to `pending`, which is
+	 * where classic checkout leaves an abandoned order at creation time.
 	 *
 	 * @param WC_Order|null $order Order being inspected, or null if it could not be loaded.
 	 * @return string[]
 	 */
 	private function get_eligible_statuses( ?WC_Order $order ): array {
 		/**
-		 * Filter the order statuses that are eligible to receive the abandoned cart recovery email.
+		 * This filter is documented in includes/emails/class-wc-email-customer-abandoned-cart-recovery.php
 		 *
 		 * @since 11.0.0
-		 *
-		 * @param string[]      $eligible_statuses Default: `pending`.
-		 * @param WC_Order|null $order             Order being inspected, or null if it could not be loaded.
 		 */
 		return (array) apply_filters(
 			'woocommerce_abandoned_cart_recovery_eligible_statuses',

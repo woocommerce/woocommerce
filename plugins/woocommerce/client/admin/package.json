@@ -95,6 +95,7 @@
 		"@wordpress/i18n": "catalog:wp-min",
 		"@wordpress/icons": "catalog:wp-bundled",
 		"@wordpress/interface": "catalog:wp-bundled",
+		"@wordpress/keyboard-shortcuts": "catalog:wp-min",
 		"@wordpress/keycodes": "catalog:wp-min",
 		"@wordpress/media-utils": "catalog:wp-min",
 		"@wordpress/notices": "catalog:wp-min",
