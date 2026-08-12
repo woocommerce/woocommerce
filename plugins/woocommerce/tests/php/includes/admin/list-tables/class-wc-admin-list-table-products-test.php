@@ -100,11 +100,13 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 
 		$title_match = WC_Helper_Product::create_simple_product();
 		$title_match->set_name( $product_name );
+		$title_match->set_date_created( '2024-01-01 00:00:00' );
 		$title_match->save();
 
 		$content_match = WC_Helper_Product::create_simple_product();
 		$content_match->set_name( 'Archive Lamp Notes ' . wp_generate_password( 8, false ) );
 		$content_match->set_description( $product_name );
+		$content_match->set_date_created( '2024-01-02 00:00:00' );
 		$content_match->save();
 
 		$results = $this->get_search_results( $search_term );
@@ -413,11 +415,13 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 
 		$title_match = WC_Helper_Product::create_simple_product();
 		$title_match->set_name( $search_term );
+		$title_match->set_date_created( '2024-01-01 00:00:00' );
 		$title_match->save();
 
 		$content_match = WC_Helper_Product::create_simple_product();
 		$content_match->set_name( 'Archive backslash notes' );
 		$content_match->set_description( $search_term );
+		$content_match->set_date_created( '2024-01-02 00:00:00' );
 		$content_match->save();
 
 		// Preserve the literal backslash as WordPress expects slashed post data.
@@ -645,13 +649,18 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	private function create_search_products(): array {
 		$search_phrase = 'Night Light ' . wp_generate_password( 8, false );
 
+		// Dates are explicit and the content-only match is the newer one, so date ordering alone puts it
+		// first. Without that, both fixtures share a timestamp and the expected order can fall out of an
+		// unspecified tie-break instead of the ranking clause under test.
 		$title_match = WC_Helper_Product::create_simple_product();
 		$title_match->set_name( $search_phrase );
+		$title_match->set_date_created( '2024-01-01 00:00:00' );
 		$title_match->save();
 
 		$content_match = WC_Helper_Product::create_simple_product();
 		$content_match->set_name( 'Archive Lamp Notes ' . wp_generate_password( 8, false ) );
 		$content_match->set_description( $search_phrase );
+		$content_match->set_date_created( '2024-01-02 00:00:00' );
 		$content_match->save();
 
 		return array( $title_match, $content_match, $search_phrase );
