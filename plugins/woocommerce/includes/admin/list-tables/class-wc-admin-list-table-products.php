@@ -701,15 +701,31 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			return $orderby;
 		}
 
+		$case_clause = $this->build_title_match_case_clause( $search_term );
+
+		return '' === $case_clause ? $orderby : $case_clause . ', ' . $orderby;
+	}
+
+	/**
+	 * Build the relevance expression that ranks title matches ahead of the remaining search results.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param string $search_term Search term the product matcher already ran against.
+	 * @return string CASE expression, or an empty string when the term yields no title predicates.
+	 */
+	private function build_title_match_case_clause( $search_term ) {
+		global $wpdb;
+
 		// Group the term exactly as search_products() does, so ranking and matching always agree on
 		// what an OR group is: the keyword has to appear space-delimited, which \s+or\s+ alone does
 		// not require because \s also matches bytes wc_clean() leaves in place.
-		$title_match_groups = array();
-		$search_groups      = stristr( $search_term, ' or ' ) ? preg_split( '/\s+or\s+/i', $search_term ) : array( $search_term );
+		$search_groups = stristr( $search_term, ' or ' ) ? preg_split( '/\s+or\s+/i', $search_term ) : array( $search_term );
 		if ( ! $search_groups ) {
-			return $orderby;
+			return '';
 		}
 
+		$title_match_groups = array();
 		foreach ( $search_groups as $search_group ) {
 			$title_match_queries = array();
 			foreach ( $this->parse_search_terms( $search_group ) as $title_search_term ) {
@@ -724,11 +740,11 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			}
 		}
 
-		if ( $title_match_groups ) {
-			$orderby = 'CASE WHEN (' . implode( ' OR ', $title_match_groups ) . ') THEN 0 ELSE 1 END, ' . $orderby;
+		if ( ! $title_match_groups ) {
+			return '';
 		}
 
-		return $orderby;
+		return 'CASE WHEN (' . implode( ' OR ', $title_match_groups ) . ') THEN 0 ELSE 1 END';
 	}
 
 	/**
