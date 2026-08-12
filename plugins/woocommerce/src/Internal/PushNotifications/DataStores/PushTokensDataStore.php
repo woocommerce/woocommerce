@@ -332,20 +332,20 @@ class PushTokensDataStore {
 			) {
 				return new PushToken(
 					array(
-						'id'            => $post_id,
-						'user_id'       => $user_id,
-						'token'         => $meta['token'],
-						'device_uuid'   => $meta['device_uuid'] ?? null,
-						'platform'      => $meta['platform'],
-						'origin'        => $meta['origin'],
+						'id'               => $post_id,
+						'user_id'          => $user_id,
+						'token'            => $meta['token'],
+						'device_uuid'      => $meta['device_uuid'] ?? null,
+						'platform'         => $meta['platform'],
+						'origin'           => $meta['origin'],
 						/**
 						 * These meta items were added after the ability to store
 						 * tokens, so may not be available for older tokens. Use
 						 * sensible defaults.
 						 */
-						'device_locale' => $meta['device_locale'] ?? PushToken::DEFAULT_DEVICE_LOCALE,
-						'metadata'      => $meta['metadata'] ?? array(),
-						'last_send_at_gmt'  => $meta[ self::LAST_SEND_AT_META_KEY ] ?? null,
+						'device_locale'    => $meta['device_locale'] ?? PushToken::DEFAULT_DEVICE_LOCALE,
+						'metadata'         => $meta['metadata'] ?? array(),
+						'last_send_at_gmt' => $meta[ self::LAST_SEND_AT_META_KEY ] ?? null,
 					)
 				);
 			}
@@ -509,13 +509,20 @@ class PushTokensDataStore {
 		}
 
 		add_action( 'shutdown', array( $this, 'flush_last_send' ) );
+
+		// The safety net and retry jobs run under an Action Scheduler queue
+		// runner, which is routinely killed on a time limit. Shutdown functions
+		// do not run on a kill, so flush after each action as well.
+		add_action( 'action_scheduler_after_execute', array( $this, 'flush_last_send' ) );
+
 		$this->last_send_flush_registered = true;
 	}
 
 	/**
 	 * Writes the buffered last-send stamps.
 	 *
-	 * Runs on shutdown, and is safe to call directly to force the write early.
+	 * Runs on shutdown and after each Action Scheduler action, and is safe to
+	 * call directly to force the write early.
 	 *
 	 * Failure is swallowed: not knowing when a token was last used is a
 	 * diagnostic gap, and must never turn a delivered notification into a
@@ -526,6 +533,10 @@ class PushTokensDataStore {
 	 * @return void
 	 */
 	public function flush_last_send(): void {
+		// Lets a later `record_last_send()` re-assert both hooks. They stay
+		// registered either way, and `add_action()` is idempotent here.
+		$this->last_send_flush_registered = false;
+
 		if ( empty( $this->pending_last_send ) ) {
 			return;
 		}
@@ -561,8 +572,6 @@ class PushTokensDataStore {
 	 * `(post_id, meta_key)`, so the rows to update have to be identified first
 	 * either way.
 	 *
-	 * @since 11.2.0
-	 *
 	 * @param array<int, string> $chunk Map of token post ID to GMT datetime.
 	 * @return void
 	 */
@@ -589,11 +598,25 @@ class PushTokensDataStore {
 			)
 		);
 
+		// `get_col()` returns an empty array when the query fails as well as
+		// when nothing matched, and reading that as "no rows exist" would
+		// insert duplicates `wp_postmeta` has no unique key to prevent.
+		if ( '' !== $wpdb->last_error ) {
+			wc_get_logger()->warning(
+				'Could not read existing push token send stamps, skipping chunk.',
+				array(
+					'token_ids' => $post_ids,
+					'error'     => $wpdb->last_error,
+				)
+			);
+
+			return;
+		}
+
 		$existing = array_map( 'intval', (array) $existing );
 
-		// Tokens sent at the same moment share an UPDATE. Within one request
-		// that is usually every token, so this is one query in the common case,
-		// but grouping keeps each token's own send time exact when a request
+		// Tokens sent at the same moment share an UPDATE, so this is usually
+		// one query, without giving a token another's send time when a request
 		// spans a second boundary.
 		$by_timestamp = array();
 
@@ -648,8 +671,6 @@ class PushTokensDataStore {
 
 	/**
 	 * Runs a prepared statement, logging rather than throwing when it fails.
-	 *
-	 * @since 11.2.0
 	 *
 	 * @param string $query    The prepared SQL.
 	 * @param int[]  $post_ids The token post IDs the statement covers, for the log context.
