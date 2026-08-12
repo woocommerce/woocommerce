@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
  * One session is in flight per user at a time: creating a new session deletes any
  * prior one for the same user via a user-scoped index transient.
  *
- * @since 10.9.0
+ * @since 11.1.0
  */
 final class ImportSession {
 
@@ -92,7 +92,7 @@ final class ImportSession {
 	/**
 	 * Create a fresh import session for a user, replacing any existing one.
 	 *
-	 * @since 10.9.0
+	 * @since 11.1.0
 	 *
 	 * @param int                $user_id   User ID.
 	 * @param string             $file      Absolute path to the staged CSV file.
@@ -144,6 +144,8 @@ final class ImportSession {
 	/**
 	 * Whether the session payload is stored, so chunk progress can be recorded against it.
 	 *
+	 * @since 11.1.0
+	 *
 	 * @return bool
 	 */
 	public function persisted(): bool {
@@ -171,7 +173,7 @@ final class ImportSession {
 		 * the matching session transient still exists. The default handler is
 		 * {@see ImportSession::cleanup_abandoned_file()}.
 		 *
-		 * @since 10.9.0
+		 * @since 11.1.0
 		 *
 		 * @param int    $user_id User who owned the session.
 		 * @param string $token   Session token.
@@ -191,7 +193,7 @@ final class ImportSession {
 	 * Only deletes the file when the matching session transient has expired; if the user is
 	 * still mid-import the action becomes a no-op.
 	 *
-	 * @since 10.9.0
+	 * @since 11.1.0
 	 *
 	 * @param int    $user_id User the session belongs to.
 	 * @param string $token   Session token.
@@ -221,7 +223,7 @@ final class ImportSession {
 	/**
 	 * Load whichever session is currently active for a user, if any.
 	 *
-	 * @since 10.9.0
+	 * @since 11.1.0
 	 *
 	 * @param int $user_id User ID.
 	 * @return self|null
@@ -237,7 +239,7 @@ final class ImportSession {
 	/**
 	 * Load an existing session belonging to a user.
 	 *
-	 * @since 10.9.0
+	 * @since 11.1.0
 	 *
 	 * @param int    $user_id User ID.
 	 * @param string $token   Token previously returned by ::create()->token().
@@ -257,12 +259,12 @@ final class ImportSession {
 	/**
 	 * Delete the session and its index pointer.
 	 *
-	 * @since 10.9.0
+	 * @since 11.1.0
 	 */
 	public function delete(): void {
 		delete_transient( self::PREFIX . $this->user_id . '_' . $this->token );
 
-		// Only clear the index pointer if it still points at this session — a newer session may have replaced it.
+		// Only clear the index pointer if it still points at this session; a newer session may have replaced it.
 		$current = get_transient( self::INDEX_PREFIX . $this->user_id );
 		if ( $current === $this->token ) {
 			delete_transient( self::INDEX_PREFIX . $this->user_id );
@@ -280,6 +282,8 @@ final class ImportSession {
 	/**
 	 * Session token.
 	 *
+	 * @since 11.1.0
+	 *
 	 * @return string
 	 */
 	public function token(): string {
@@ -288,6 +292,8 @@ final class ImportSession {
 
 	/**
 	 * Absolute path to the staged CSV file.
+	 *
+	 * @since 11.1.0
 	 *
 	 * @return string
 	 */
@@ -298,7 +304,7 @@ final class ImportSession {
 	/**
 	 * Size of the staged CSV when the session was created, in bytes.
 	 *
-	 * @since 10.9.0
+	 * @since 11.1.0
 	 *
 	 * @return int
 	 */
@@ -309,7 +315,7 @@ final class ImportSession {
 	/**
 	 * Modification time of the staged CSV when the session was created.
 	 *
-	 * @since 10.9.0
+	 * @since 11.1.0
 	 *
 	 * @return int Unix timestamp; 0 when unknown.
 	 */
@@ -320,6 +326,8 @@ final class ImportSession {
 	/**
 	 * Hash of the first bytes of the staged CSV when the session was created.
 	 *
+	 * @since 11.1.0
+	 *
 	 * @return string Hash string; empty when the file could not be read.
 	 */
 	public function file_head_hash(): string {
@@ -329,6 +337,8 @@ final class ImportSession {
 	/**
 	 * Hash the first 4 KB of a file, closing the size and mtime blind spot in
 	 * the staged-file integrity check.
+	 *
+	 * @since 11.1.0
 	 *
 	 * @param string $file Absolute file path.
 	 * @return string Hash string; empty when the file could not be read.
@@ -352,6 +362,8 @@ final class ImportSession {
 	/**
 	 * Effective CSV delimiter for this session.
 	 *
+	 * @since 11.1.0
+	 *
 	 * @return string
 	 */
 	public function delimiter(): string {
@@ -362,6 +374,8 @@ final class ImportSession {
 	/**
 	 * Header row as parsed at prepare time.
 	 *
+	 * @since 11.1.0
+	 *
 	 * @return array<int, string>
 	 */
 	public function headers(): array {
@@ -370,6 +384,8 @@ final class ImportSession {
 
 	/**
 	 * Total number of CSV records after the header.
+	 *
+	 * @since 11.1.0
 	 *
 	 * @return int
 	 */
@@ -380,6 +396,8 @@ final class ImportSession {
 	/**
 	 * Cumulative processed-row count.
 	 *
+	 * @since 11.1.0
+	 *
 	 * @return int
 	 */
 	public function processed(): int {
@@ -388,6 +406,8 @@ final class ImportSession {
 
 	/**
 	 * Whether customer notifications should fire for chunks of this session.
+	 *
+	 * @since 11.1.0
 	 *
 	 * @return bool
 	 */
@@ -398,6 +418,8 @@ final class ImportSession {
 	/**
 	 * Whether existing fulfillments should be updated on tracking-number match.
 	 *
+	 * @since 11.1.0
+	 *
 	 * @return bool
 	 */
 	public function update_existing(): bool {
@@ -407,7 +429,7 @@ final class ImportSession {
 	/**
 	 * Byte offset in the CSV reached by the most recent chunk.
 	 *
-	 * @since 10.9.0
+	 * @since 11.1.0
 	 *
 	 * @return int
 	 */
@@ -419,10 +441,10 @@ final class ImportSession {
 	 * Advance processed, merge counts, and persist dedupe/byte-offset state.
 	 *
 	 * Per-row results are streamed back in the chunk REST response instead of accumulating
-	 * inside the session transient — otherwise a long import would persist every row result
+	 * inside the session transient; otherwise a long import would persist every row result
 	 * to the transient on every chunk and blow past max_allowed_packet on the final write.
 	 *
-	 * @since 10.9.0
+	 * @since 11.1.0
 	 *
 	 * @param int                                                                    $processed_after End-of-chunk processed count (offset + rows consumed by the chunk).
 	 * @param array{created:int, updated:int, skipped:int, failed:int, notified:int} $counts          Per-chunk counts.
@@ -456,6 +478,8 @@ final class ImportSession {
 	/**
 	 * Cumulative counts across processed chunks.
 	 *
+	 * @since 11.1.0
+	 *
 	 * @return array{created:int, updated:int, skipped:int, failed:int, notified:int}
 	 */
 	public function counts(): array {
@@ -475,6 +499,8 @@ final class ImportSession {
 	 * Rows are not part of the persisted session; the wizard accumulates them from each chunk's
 	 * REST response and rebuilds the summary client-side.
 	 *
+	 * @since 11.1.0
+	 *
 	 * @return array<string, mixed>
 	 */
 	public function summary(): array {
@@ -483,6 +509,8 @@ final class ImportSession {
 
 	/**
 	 * Cross-chunk dedupe state.
+	 *
+	 * @since 11.1.0
 	 *
 	 * @return array<string, true>
 	 */
@@ -493,6 +521,8 @@ final class ImportSession {
 
 	/**
 	 * Owning user ID.
+	 *
+	 * @since 11.1.0
 	 *
 	 * @return int
 	 */
