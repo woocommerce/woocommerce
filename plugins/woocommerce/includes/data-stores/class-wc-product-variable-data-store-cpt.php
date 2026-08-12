@@ -923,9 +923,12 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 
 		$product_id = $product->get_id();
 
-		delete_post_meta( $product_id, '_price' );
-		delete_post_meta( $product_id, '_sale_price' );
-		delete_post_meta( $product_id, '_regular_price' );
+		// Performance note: prefilter with metadata_exists, to avoid unnecessary meta cache invalidations and SQLs.
+		$price_metas = array_filter(
+			array( '_price', '_sale_price', '_regular_price' ),
+			static fn( $meta_key ) => metadata_exists( 'post', $product_id, $meta_key )
+		);
+		array_walk( $price_metas, static fn( $meta_key ) => delete_post_meta( $product_id, $meta_key ) );
 
 		if ( $prices ) {
 			sort( $prices, SORT_NUMERIC );
