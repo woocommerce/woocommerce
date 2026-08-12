@@ -41800,12 +41800,6 @@ parameters:
 			path: src/Admin/API/Reports/DataStore.php
 
 		-
-			message: '#^Part \$id_field \(array\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 1
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
 			message: '#^Property Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:\$subquery \(Automattic\\WooCommerce\\Admin\\API\\Reports\\SqlQuery\) in isset\(\) is not nullable\.$#'
 			identifier: isset.property
 			count: 3
