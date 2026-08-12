@@ -229,8 +229,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Returns the condition restricting the report to a set of products.
 	 *
-	 * A `search` argument resolves to a subquery, the `categories` and `products` filters to an
-	 * ID list. Both are rendered here, so callers never handle either form.
+	 * A `search` argument resolves to a subquery, the `categories` and `products` filters to an ID list.
 	 *
 	 * @since 11.1.0
 	 *
@@ -251,9 +250,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 	/**
 	 * Returns a SELECT statement resolving the `search` query argument to product IDs.
-	 *
-	 * The search is intersected with the products the other filters resolve to, so it narrows
-	 * `categories` and `products` rather than replacing them.
 	 *
 	 * @since 11.1.0
 	 *

@@ -12,9 +12,6 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Builds the SQL that resolves a free-text product search to product IDs.
  *
- * The matching rules mirror `Automattic\WooCommerce\Admin\API\Products`, which backs the
- * Analytics search box, so both agree on what a term matches.
- *
  * @internal
  */
 class ProductSearchQuery {
