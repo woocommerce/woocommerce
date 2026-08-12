@@ -82,6 +82,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 						),
 					),
 				),
+				'schema' => fn() => $this->get_schema_for_prepare(),
 			)
 		);
 
@@ -145,8 +146,117 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 						),
 					),
 				),
+				'schema' => fn() => $this->get_schema_for_run(),
 			)
 		);
+	}
+
+	/**
+	 * Get the response schema for the prepare endpoint.
+	 *
+	 * @return array
+	 */
+	private function get_schema_for_prepare(): array {
+		$schema               = $this->get_base_schema();
+		$schema['title']      = __( 'Prepare fulfillments import response.', 'woocommerce' );
+		$schema['properties'] = array(
+			'token'            => array(
+				'type'        => 'string',
+				'description' => __( 'Import session token to pass to the run endpoint.', 'woocommerce' ),
+			),
+			'headers'          => array(
+				'type'        => 'array',
+				'items'       => array( 'type' => 'string' ),
+				'description' => __( 'Header row of the staged CSV.', 'woocommerce' ),
+			),
+			'sample'           => array(
+				'type'        => 'array',
+				'items'       => array( 'type' => 'string' ),
+				'description' => __( 'First non-blank data row, for the mapping preview.', 'woocommerce' ),
+			),
+			'total'            => array(
+				'type'        => 'integer',
+				'description' => __( 'Number of CSV records after the header.', 'woocommerce' ),
+			),
+			'detected_mapping' => array(
+				'type'                 => 'object',
+				'additionalProperties' => array( 'type' => 'string' ),
+				'description'          => __( 'Auto-detected column mapping, keyed by CSV column index.', 'woocommerce' ),
+			),
+			'delimiter'        => array(
+				'type'        => 'string',
+				'description' => __( 'Effective CSV delimiter.', 'woocommerce' ),
+			),
+		);
+		return $schema;
+	}
+
+	/**
+	 * Get the response schema for the run endpoint.
+	 *
+	 * @return array
+	 */
+	private function get_schema_for_run(): array {
+		$counts_schema = array(
+			'type'       => 'object',
+			'properties' => array(
+				'created'  => array( 'type' => 'integer' ),
+				'updated'  => array( 'type' => 'integer' ),
+				'skipped'  => array( 'type' => 'integer' ),
+				'failed'   => array( 'type' => 'integer' ),
+				'notified' => array( 'type' => 'integer' ),
+			),
+		);
+
+		$schema               = $this->get_base_schema();
+		$schema['title']      = __( 'Run fulfillments import chunk response.', 'woocommerce' );
+		$schema['properties'] = array(
+			'processed' => array(
+				'type'        => 'integer',
+				'description' => __( 'Cumulative number of processed rows.', 'woocommerce' ),
+			),
+			'total'     => array(
+				'type'        => 'integer',
+				'description' => __( 'Total number of CSV records.', 'woocommerce' ),
+			),
+			'done'      => array(
+				'type'        => 'boolean',
+				'description' => __( 'Whether the import is complete.', 'woocommerce' ),
+			),
+			'counts'    => $counts_schema,
+			'rows'      => array(
+				'type'        => 'array',
+				'description' => __( 'Per-row results for this chunk.', 'woocommerce' ),
+				'items'       => array(
+					'type'       => 'object',
+					'properties' => array(
+						'row'            => array( 'type' => 'integer' ),
+						'status'         => array( 'type' => 'string' ),
+						'message'        => array( 'type' => 'string' ),
+						'order_id'       => array( 'type' => 'integer' ),
+						'fulfillment_id' => array( 'type' => 'integer' ),
+						'notified'       => array( 'type' => 'boolean' ),
+					),
+				),
+			),
+			'errors'    => array(
+				'type'        => 'array',
+				'description' => __( 'Failed rows for this chunk.', 'woocommerce' ),
+				'items'       => array(
+					'type'       => 'object',
+					'properties' => array(
+						'row'     => array( 'type' => 'integer' ),
+						'code'    => array( 'type' => 'string' ),
+						'message' => array( 'type' => 'string' ),
+					),
+				),
+			),
+			'summary'   => array_merge(
+				$counts_schema,
+				array( 'description' => __( 'Final summary, present on the last chunk only.', 'woocommerce' ) )
+			),
+		);
+		return $schema;
 	}
 
 	/**
