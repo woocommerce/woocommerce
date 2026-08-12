@@ -40,8 +40,12 @@ class SearchFilter extends Component {
 		if ( filter.value.length && ! isEqual( prevFilter, filter ) ) {
 			const { selected } = this.state;
 			const selectedIds = selected.map( ( item ) => String( item.key ) );
-			const filterIds = filter.value
-				.split( ',' )
+			const filterIds = []
+				.concat(
+					typeof filter.value === 'string'
+						? filter.value.split( ',' )
+						: filter.value
+				)
 				.filter( Boolean )
 				.map( String );
 			const haveIdsChanged =
@@ -188,7 +192,7 @@ SearchFilter.propTypes = {
 	filter: PropTypes.shape( {
 		key: PropTypes.string,
 		rule: PropTypes.string,
-		value: PropTypes.string,
+		value: PropTypes.oneOfType( [ PropTypes.string, PropTypes.array ] ),
 	} ).isRequired,
 	/**
 	 * Function to be called on update.

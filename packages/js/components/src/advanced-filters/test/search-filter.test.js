@@ -153,4 +153,31 @@ describe( 'SearchFilter', () => {
 			{ key: 60, label: '#60' },
 		] );
 	} );
+
+	test( 'does not reload labels when an array filter value matches the selection', () => {
+		const getLabels = jest.fn();
+		const ref = createRef();
+		const props = {
+			config: getConfig( getLabels ),
+			filter: { key: 'order', rule: 'includes', value: '' },
+			onFilterChange: jest.fn(),
+			query: {},
+		};
+		const { rerender } = render(
+			<SearchFilter ref={ ref } { ...props } />
+		);
+
+		act( () => {
+			ref.current.onSearchChange( [ { key: 60, label: '#60' } ] );
+		} );
+		rerender(
+			<SearchFilter
+				ref={ ref }
+				{ ...props }
+				filter={ { ...props.filter, value: [ 60 ] } }
+			/>
+		);
+
+		expect( getLabels ).not.toHaveBeenCalled();
+	} );
 } );
