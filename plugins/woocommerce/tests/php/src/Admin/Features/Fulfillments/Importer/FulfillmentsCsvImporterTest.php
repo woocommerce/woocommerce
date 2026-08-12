@@ -792,6 +792,27 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Rows with a non-http tracking URL fail instead of storing the value.
+	 */
+	public function test_tracking_url_with_disallowed_scheme_fails_row(): void {
+		$order = $this->make_order();
+		$csv   = "order_number,tracking_number,shipment_provider,tracking_url\n"
+			. "{$order->get_id()},TRK-XSS,ups,javascript:alert(1)\n";
+		$file  = $this->make_csv( $csv );
+
+		$sut     = new FulfillmentsCsvImporter( $file );
+		$summary = $sut->run();
+
+		$this->assertSame( 0, $summary['created'] );
+		$this->assertSame( 1, $summary['failed'] );
+		$this->assertSame( 'invalid_tracking_url', $summary['rows'][0]['code'] );
+
+		/** @var FulfillmentsDataStore $store */
+		$store = WC_Data_Store::load( 'order-fulfillment' );
+		$this->assertCount( 0, $store->read_fulfillments( WC_Order::class, (string) $order->get_id() ) );
+	}
+
+	/**
 	 * @testdox import_chunk reports eof only when the file is exhausted.
 	 */
 	public function test_import_chunk_signals_eof_only_at_end_of_file(): void {

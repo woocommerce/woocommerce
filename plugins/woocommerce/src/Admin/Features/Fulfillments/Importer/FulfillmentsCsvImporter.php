@@ -652,6 +652,15 @@ class FulfillmentsCsvImporter {
 			return $this->fail( $row_number, 'missing_provider', __( 'Missing carrier/provider.', 'woocommerce' ) );
 		}
 
+		// The stored URL is rendered as a clickable link in the admin, and CSV files
+		// typically come from third parties, so only accept http(s) URLs.
+		if ( '' !== $tracking_url ) {
+			$tracking_url = esc_url_raw( $tracking_url, array( 'http', 'https' ) );
+			if ( '' === $tracking_url ) {
+				return $this->fail( $row_number, 'invalid_tracking_url', __( 'Tracking URL must be a valid http or https URL.', 'woocommerce' ) );
+			}
+		}
+
 		$order = $this->resolve_order( $order_number );
 		if ( ! $order instanceof WC_Order ) {
 			return $this->fail(
