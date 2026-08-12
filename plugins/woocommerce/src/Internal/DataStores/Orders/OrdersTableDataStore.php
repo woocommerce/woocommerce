@@ -1121,7 +1121,9 @@ WHERE
 	 */
 	protected function get_refund_orders_join_clause( int $order_id ): string {
 		global $wpdb;
-		return $wpdb->prepare( '%i AS refunds ON ( refunds.type = %s AND refunds.parent_order_id = %d )', self::get_orders_table_name(), 'shop_order_refund', $order_id );
+		$orders_table = self::get_orders_table_name();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
+		return $wpdb->prepare( "{$orders_table} AS refunds ON ( refunds.type = %s AND refunds.parent_order_id = %d )", 'shop_order_refund', $order_id );
 	}
 
 	/**
@@ -1486,18 +1488,33 @@ WHERE
 
 		/*
 		 * Defensive last-resort guard. The meta data should always arrive as an array of meta-row
-		 * objects, but a corrupt persistent object cache entry can surface as a scalar, an object,
-		 * or a well-formed array whose elements are not meta rows. Any of these would otherwise
-		 * fatal downstream (array_filter()/array_diff() on a non-array, or $meta->meta_key on a
-		 * non-object element). Drop anything that is not a usable meta row so the order still
-		 * loads, and when corruption is detected invalidate the cached entry so the next read
-		 * self-heals from the database.
+		 * objects, but a corrupt persistent object cache entry can surface as a scalar, an object, a
+		 * well-formed array whose elements are not meta rows, or an array of objects that are missing
+		 * required columns. Any of these would otherwise fatal or silently load wrong values
+		 * downstream (array_filter()/array_diff() on a non-array, $meta->meta_key on a non-object
+		 * element, or a real key hydrated with a null value from a partial row).
+		 *
+		 * A row is usable when it carries meta_key and meta_value - the fields init_meta_data() reads
+		 * as data. meta_id is intentionally NOT required here: unlike OrdersTableDataStoreMeta::
+		 * is_valid_cached_meta(), which validates raw database rows at the HPOS 'orders_meta'
+		 * boundary (those always have a meta_id), this guard also runs against the post-filter output
+		 * that WC_Data::read_meta_data() caches and re-validates on a cache hit. That output can
+		 * legitimately include virtual rows injected by extensions via the
+		 * woocommerce_data_store_wp_post_read_meta filter (orders use the 'post' meta type), which
+		 * carry meta_key and meta_value but no meta_id (init_meta_data() reads such a row's id as 0).
+		 * Requiring meta_id would reclassify those legitimate rows as corrupt and churn the cache -
+		 * purging it and re-logging on every read - so we only treat a missing meta_key or meta_value
+		 * as corruption. Drop
+		 * anything that is not a usable meta row so the order still loads, and when corruption is
+		 * detected invalidate the cached entries so the next read self-heals from the database.
 		 */
 		$is_corrupt = false;
 		if ( is_array( $raw_meta_data ) ) {
 			$valid_meta_data = array_filter(
 				$raw_meta_data,
-				static fn( $meta ) => is_object( $meta ) && property_exists( $meta, 'meta_key' )
+				static fn( $meta ) => is_object( $meta )
+					&& property_exists( $meta, 'meta_key' )
+					&& property_exists( $meta, 'meta_value' )
 			);
 			$is_corrupt      = count( $valid_meta_data ) !== count( $raw_meta_data );
 			$raw_meta_data   = $valid_meta_data;
@@ -1514,7 +1531,25 @@ WHERE
 				),
 				array( 'source' => 'hpos-data-cache' )
 			);
+
+			/*
+			 * Invalidate every cache the corrupt value could have come from so the next read
+			 * self-heals from the database. The HPOS meta cache (orders_meta group) is primed by
+			 * init_order_record(), while WC_Data::read_meta_data() reads the object's own legacy
+			 * meta cache (the 'orders' group for orders) and, on a cache hit, skips re-caching -
+			 * so without clearing that group the corrupt entry would persist across reads.
+			 */
 			$this->data_store_meta->clear_cached_data( array( $object->get_id() ) );
+
+			/*
+			 * delete_meta_cache() is defined on WC_Data, so $object always has it in a consistent
+			 * deploy. The guard only covers the brief window during a plugin upgrade where this
+			 * (newer) class can be loaded before an opcode-cached, older abstract-wc-data.php gains
+			 * the method, which would otherwise fatal on an undefined method.
+			 */
+			if ( is_callable( array( $object, 'delete_meta_cache' ) ) ) {
+				$object->delete_meta_cache();
+			}
 		}
 
 		$filtered_meta_data = parent::filter_raw_meta_data( $object, $raw_meta_data );
@@ -3356,9 +3391,10 @@ FROM $order_meta_table
 	 */
 	protected function get_refund_orders_batch_join_clause( array $order_ids ): string {
 		global $wpdb;
-		$id_list = implode( ', ', array_map( 'absint', $order_ids ) );
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above.
-		return $wpdb->prepare( "%i AS refunds ON ( refunds.type = %s AND refunds.parent_order_id IN ( $id_list ) )", self::get_orders_table_name(), 'shop_order_refund' );
+		$id_list      = implode( ', ', array_map( 'absint', $order_ids ) );
+		$orders_table = self::get_orders_table_name();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above; trusted table name.
+		return $wpdb->prepare( "{$orders_table} AS refunds ON ( refunds.type = %s AND refunds.parent_order_id IN ( $id_list ) )", 'shop_order_refund' );
 	}
 
 	/**
@@ -3384,17 +3420,15 @@ FROM $order_meta_table
 	protected function get_batch_refund_totals( array $order_ids ): array {
 		global $wpdb;
 
-		$id_list = implode( ', ', array_map( 'absint', $order_ids ) );
+		$id_list      = implode( ', ', array_map( 'absint', $order_ids ) );
+		$orders_table = self::get_orders_table_name();
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above; trusted table name.
 		$refund_totals = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT parent_order_id AS order_id, SUM( total_amount ) AS total
-				FROM %i
+			"SELECT parent_order_id AS order_id, SUM( total_amount ) AS total
+				FROM {$orders_table}
 				WHERE type = 'shop_order_refund' AND parent_order_id IN ( $id_list )
-				GROUP BY parent_order_id",
-				self::get_orders_table_name()
-			)
+				GROUP BY parent_order_id"
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 

@@ -215,7 +215,7 @@ export const QRLoginNumberMatchStep = ( {
 						);
 						// Empty string is treated by the server as a non-matching
 						// pick — same one-strike rejection path as a wrong tap.
-						handleChoose( '' );
+						void handleChoose( '' );
 					} }
 				>
 					{ inFlight && pendingChoice === '' ? (

@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Fix the inert lodash `orderBy` restricted-import entry in the Blocks ESLint config, which was spelled `orderby` and never matched. Tooling only; no runtime change.

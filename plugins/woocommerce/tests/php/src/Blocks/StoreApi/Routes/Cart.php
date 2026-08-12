@@ -19,6 +19,79 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
  */
 class Cart extends ControllerTestCase {
 
+	/**
+	 * Product IDs shared by the class.
+	 *
+	 * @var int[]
+	 */
+	private static $product_ids = array();
+
+	/**
+	 * Coupon ID shared by the class.
+	 *
+	 * @var int
+	 */
+	private static $coupon_id;
+
+	/**
+	 * Create immutable catalog rows shared by all test methods.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		$fixtures = new FixtureData();
+		$products = self::create_class_fixture_products(
+			array(
+				array(
+					'name'          => 'Test Product 1',
+					'stock_status'  => ProductStockStatus::IN_STOCK,
+					'regular_price' => 10,
+					'weight'        => 10,
+				),
+				array(
+					'name'          => 'Test Product 2',
+					'stock_status'  => ProductStockStatus::IN_STOCK,
+					'regular_price' => 10,
+					'weight'        => 10,
+				),
+				array(
+					'name'          => 'Test Product 3',
+					'stock_status'  => ProductStockStatus::IN_STOCK,
+					'regular_price' => 10,
+					'weight'        => 10,
+				),
+				array(
+					'name'          => 'Test Product 4',
+					'stock_status'  => ProductStockStatus::IN_STOCK,
+					'regular_price' => 10,
+					'weight'        => 10,
+					'virtual'       => true,
+				),
+			),
+		);
+
+		$products[0]->set_cross_sell_ids( array( $products[2]->get_id() ) );
+		$products[0]->save();
+
+		self::$product_ids = array_map( fn( $product ) => $product->get_id(), $products );
+		self::$coupon_id   = $fixtures->get_coupon(
+			array(
+				'code'          => 'test_coupon',
+				'discount_type' => 'fixed_cart',
+				'amount'        => 1,
+			)
+		)->get_id();
+	}
+
+	/**
+	 * Delete class products through WooCommerce data stores.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		try {
+			self::delete_class_fixture_products( self::$product_ids );
+		} finally {
+			$coupon = new \WC_Coupon( self::$coupon_id );
+			$coupon->delete( true );
+		}
+	}
 
 	/**
 	 * Setup test product data. Called before every test.
@@ -29,56 +102,12 @@ class Cart extends ControllerTestCase {
 		$fixtures = new FixtureData();
 		$fixtures->shipping_add_flat_rate();
 
-		$this->products = array(
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 1',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 2',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 3',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 4',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-					'virtual'       => true,
-				)
-			),
-		);
-
-		// Add product #3 as a cross-sell for product #1.
-		$this->products[0]->set_cross_sell_ids( array( $this->products[2]->get_id() ) );
-		$this->products[0]->save();
-
-		$this->coupon = $fixtures->get_coupon(
-			array(
-				'code'          => 'test_coupon',
-				'discount_type' => 'fixed_cart',
-				'amount'        => 1,
-			)
-		);
+		$this->products = array_map( 'wc_get_product', self::$product_ids );
+		$this->coupon   = new \WC_Coupon( self::$coupon_id );
 
 		wc_empty_cart();
 		$this->reset_customer_state();
+		wc()->session->set( 'wc_notices', null );
 		$this->keys   = array();
 		$this->keys[] = wc()->cart->add_to_cart( $this->products[0]->get_id(), 2 );
 		$this->keys[] = wc()->cart->add_to_cart( $this->products[1]->get_id() );
@@ -95,16 +124,26 @@ class Cart extends ControllerTestCase {
 	 * Resets customer state and remove any existing data from previous tests.
 	 */
 	private function reset_customer_state() {
-		wc()->customer->set_billing_country( 'US' );
-		wc()->customer->set_shipping_country( 'US' );
-		wc()->customer->set_billing_state( '' );
-		wc()->customer->set_shipping_state( '' );
-		wc()->customer->set_billing_postcode( '' );
-		wc()->customer->set_shipping_postcode( '' );
-		wc()->customer->set_shipping_city( '' );
-		wc()->customer->set_billing_city( '' );
-		wc()->customer->set_shipping_address_1( '' );
+		wc()->customer->set_billing_first_name( '' );
+		wc()->customer->set_billing_last_name( '' );
+		wc()->customer->set_billing_company( '' );
 		wc()->customer->set_billing_address_1( '' );
+		wc()->customer->set_billing_address_2( '' );
+		wc()->customer->set_billing_city( '' );
+		wc()->customer->set_billing_state( '' );
+		wc()->customer->set_billing_postcode( '' );
+		wc()->customer->set_billing_country( 'US' );
+		wc()->customer->set_billing_email( '' );
+		wc()->customer->set_billing_phone( '' );
+		wc()->customer->set_shipping_first_name( '' );
+		wc()->customer->set_shipping_last_name( '' );
+		wc()->customer->set_shipping_company( '' );
+		wc()->customer->set_shipping_address_1( '' );
+		wc()->customer->set_shipping_address_2( '' );
+		wc()->customer->set_shipping_city( '' );
+		wc()->customer->set_shipping_state( '' );
+		wc()->customer->set_shipping_postcode( '' );
+		wc()->customer->set_shipping_country( 'US' );
 	}
 
 	/**
@@ -687,6 +726,46 @@ class Cart extends ControllerTestCase {
 
 			// Should return the default handler for non-Store API routes.
 			$this->assertSame( 'WC_Session_Handler', $result );
+		} finally {
+			// Restore globals.
+			$_SERVER = $old_server;
+		}
+	}
+
+	/**
+	 * Nested Cart-Token should be ignored in a batch request.
+	 */
+	public function test_batch_sub_request_cart_token_does_not_waive_nonce() {
+		$token = CartTokenUtils::get_cart_token( (string) wc()->session->get_customer_id() );
+
+		// Preserve globals.
+		$old_server = $_SERVER;
+
+		try {
+			$_SERVER['REQUEST_URI'] = '/' . rest_get_url_prefix() . '/wc/store/v1/batch';
+			unset( $_SERVER['HTTP_CART_TOKEN'] );
+
+			$request = new \WP_REST_Request( 'POST', '/wc/store/v1/batch' );
+			$request->set_header( 'Content-Type', 'application/json' );
+			$request->set_body(
+				wp_json_encode(
+					array(
+						'requests' => array(
+							array(
+								'method'  => 'POST',
+								'path'    => '/wc/store/v1/cart/update-customer',
+								'headers' => array( 'Cart-Token' => $token ),
+								'body'    => array( 'billing_address' => array( 'first_name' => 'Nonce-free' ) ),
+							),
+						),
+					)
+				)
+			);
+
+			$response = rest_get_server()->dispatch( $request );
+			$data     = $response->get_data();
+
+			$this->assertSame( 401, $data['responses'][0]['status'] ?? null, 'A sub-request token must not waive the nonce check.' );
 		} finally {
 			// Restore globals.
 			$_SERVER = $old_server;

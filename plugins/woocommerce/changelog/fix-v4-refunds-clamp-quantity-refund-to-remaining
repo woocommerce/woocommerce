@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Cap quantity-form v4 refund amounts to the line's remaining refundable amount so sequential partial refunds can always refund the remaining items instead of failing on rounding drift.

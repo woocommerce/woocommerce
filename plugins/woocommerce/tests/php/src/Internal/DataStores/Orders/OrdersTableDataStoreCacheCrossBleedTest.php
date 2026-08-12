@@ -634,6 +634,214 @@ class OrdersTableDataStoreCacheCrossBleedTest extends \HposTestCase {
 	}
 
 	/**
+	 * @testdox A corrupt legacy ('orders' group) meta cache entry is invalidated so the next read_meta_data() self-heals from the database.
+	 */
+	public function test_corrupt_legacy_meta_cache_entry_is_invalidated_and_self_heals(): void {
+		$fake_logger = $this->create_fake_logger();
+		add_filter(
+			'woocommerce_logging_class',
+			function () use ( $fake_logger ) {
+				return $fake_logger;
+			}
+		);
+
+		// Rebuild the data store so its injected logger (captured in init() via wc_get_logger())
+		// is the fake logger added above, and orders created below use this instance.
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+		$container->get( OrdersTableDataStore::class );
+
+		$order = new WC_Order();
+		$order->add_meta_data( 'custom_meta_key', 'custom_value', true );
+		$order->save();
+		$order_id = $order->get_id();
+
+		// Reload a fresh order object so its meta cache key reflects current cache prefixes.
+		$order = wc_get_order( $order_id );
+
+		/*
+		 * Poison the legacy meta cache group that WC_Data::read_meta_data() reads
+		 * (WC_Abstract_Order::$cache_group = 'orders') with a well-formed array whose elements are
+		 * not meta rows. This passes the top-level is_array() check in read_meta_data(), so the
+		 * corruption guard in filter_raw_meta_data() - not the HPOS 'orders_meta' boundary - is the
+		 * layer that must invalidate it.
+		 */
+		$cache_key = $order->get_meta_cache_key();
+		wp_cache_set( $cache_key, array( 'not-a-meta-row' ), 'orders' );
+		$this->assertIsArray( wp_cache_get( $cache_key, 'orders' ), 'Sanity: the legacy meta cache entry should be primed.' );
+
+		// Force the legacy read path directly (init_order_record() primes meta_data, so the normal
+		// wc_get_order() flow does not re-enter read_meta_data()).
+		$order->read_meta_data();
+
+		$this->assert_hpos_cache_warning_logged( $fake_logger, 'Discarded malformed meta data' );
+
+		// The corrupt legacy entry must have been invalidated - otherwise read_meta_data() would keep
+		// loading it (it skips re-caching on a cache hit) and re-log on every read.
+		$this->assertFalse(
+			wp_cache_get( $cache_key, 'orders' ),
+			'The corrupt legacy meta cache entry should be invalidated so the next read re-reads from the database.'
+		);
+
+		// The next read misses the cache, re-reads from the database, and recovers the real value.
+		$order->read_meta_data();
+		$this->assertSame(
+			'custom_value',
+			$order->get_meta( 'custom_meta_key' ),
+			'Meta should self-heal from the database after the corrupt legacy cache entry is invalidated.'
+		);
+
+		// The self-healed read must not re-log: the warning fires once, not on every read.
+		$this->assertSame(
+			1,
+			$this->count_hpos_cache_warnings( $fake_logger, 'Discarded malformed meta data' ),
+			'The corruption warning should fire once and stop once the cache self-heals.'
+		);
+
+		remove_all_filters( 'woocommerce_logging_class' );
+	}
+
+	/**
+	 * @testdox A legacy meta cache array containing an incomplete meta row (missing meta_value) is treated as corrupt, invalidated, and self-heals.
+	 */
+	public function test_incomplete_legacy_meta_row_is_invalidated_and_self_heals(): void {
+		$fake_logger = $this->create_fake_logger();
+		add_filter(
+			'woocommerce_logging_class',
+			function () use ( $fake_logger ) {
+				return $fake_logger;
+			}
+		);
+
+		// Rebuild the data store so its injected logger (captured in init() via wc_get_logger())
+		// is the fake logger added above, and orders created below use this instance.
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+		$container->get( OrdersTableDataStore::class );
+
+		$order = new WC_Order();
+		$order->add_meta_data( 'custom_meta_key', 'custom_value', true );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$order = wc_get_order( $order_id );
+
+		/*
+		 * Poison the legacy 'orders' meta cache with an object row that has meta_key but is missing
+		 * meta_value. This is a valid array of objects with meta_key, so a meta_key-only shape check
+		 * would accept it and hydrate the real key with a null value. The completeness check
+		 * (meta_key + meta_value) must treat the missing value as corrupt and self-heal instead.
+		 */
+		$cache_key = $order->get_meta_cache_key();
+		wp_cache_set( $cache_key, array( (object) array( 'meta_key' => 'custom_meta_key' ) ), 'orders' ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+
+		$order->read_meta_data();
+
+		$this->assert_hpos_cache_warning_logged( $fake_logger, 'Discarded malformed meta data' );
+		$this->assertFalse(
+			wp_cache_get( $cache_key, 'orders' ),
+			'The incomplete legacy meta cache entry should be invalidated so the next read re-reads from the database.'
+		);
+
+		$order->read_meta_data();
+		$this->assertSame(
+			'custom_value',
+			$order->get_meta( 'custom_meta_key' ),
+			'The incomplete row should be discarded and the real value re-read from the database, not loaded as null.'
+		);
+
+		remove_all_filters( 'woocommerce_logging_class' );
+	}
+
+	/**
+	 * @testdox A virtual meta row injected via the read-meta filter (meta_key/meta_value, no meta_id) is not treated as corrupt and does not churn the legacy meta cache.
+	 */
+	public function test_filter_injected_virtual_meta_is_not_treated_as_corrupt(): void {
+		$fake_logger = $this->create_fake_logger();
+		add_filter(
+			'woocommerce_logging_class',
+			function () use ( $fake_logger ) {
+				return $fake_logger;
+			}
+		);
+
+		// Rebuild the data store so its injected logger (captured in init() via wc_get_logger())
+		// is the fake logger added above, and orders created below use this instance.
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+		$container->get( OrdersTableDataStore::class );
+
+		$order = new WC_Order();
+		$order->add_meta_data( 'custom_meta_key', 'custom_value', true );
+		$order->save();
+		$order_id = $order->get_id();
+
+		// Reload a fresh order object so its meta cache key reflects current cache prefixes.
+		$order = wc_get_order( $order_id );
+
+		/*
+		 * Simulate an extension that appends a virtual meta row on read. The row carries meta_key and
+		 * meta_value but no meta_id - a shape the guard must accept, not flag as corrupt.
+		 */
+		$read_meta_filter = function ( $meta_data ) {
+			$virtual             = new \stdClass();
+			$virtual->meta_key   = '_virtual_meta';
+			$virtual->meta_value = 'virtual_value';
+			$meta_data[]         = $virtual;
+			return $meta_data;
+		};
+		add_filter( 'woocommerce_data_store_wp_post_read_meta', $read_meta_filter );
+
+		// Make sure the legacy meta cache starts empty so the first read is a cache miss.
+		$cache_key = $order->get_meta_cache_key();
+		wp_cache_delete( $cache_key, 'orders' );
+
+		// First read: cache miss. Caches the post-filter output (including the injected virtual row)
+		// in the legacy 'orders' group and hydrates the object's meta data.
+		$order->read_meta_data();
+		$this->assertSame( 'virtual_value', $order->get_meta( '_virtual_meta' ), 'The injected virtual meta should load without a meta_id.' );
+		$this->assertIsArray( wp_cache_get( $cache_key, 'orders' ), 'The legacy meta cache should be primed after the first read.' );
+
+		// Second read: cache hit. The guard re-validates the cached post-filter data, which now
+		// includes the injected virtual row. It must not be reclassified as corrupt.
+		$order->read_meta_data();
+
+		$this->assertSame(
+			0,
+			$this->count_hpos_cache_warnings( $fake_logger, 'Discarded malformed meta data' ),
+			'A filter-injected virtual meta row must not trigger the corruption guard.'
+		);
+		$this->assertIsArray(
+			wp_cache_get( $cache_key, 'orders' ),
+			'The legacy meta cache must stay warm - the guard should not purge it for a filter-injected virtual row.'
+		);
+		$this->assertSame( 'virtual_value', $order->get_meta( '_virtual_meta' ), 'The injected virtual meta should still resolve after a cache hit.' );
+		$this->assertSame( 'custom_value', $order->get_meta( 'custom_meta_key' ), 'The real database meta should be unaffected.' );
+
+		remove_filter( 'woocommerce_data_store_wp_post_read_meta', $read_meta_filter );
+		remove_all_filters( 'woocommerce_logging_class' );
+	}
+
+	/**
+	 * Count warnings with the "hpos-data-cache" source containing the given message fragment.
+	 *
+	 * @param object $fake_logger The fake logger capturing log calls.
+	 * @param string $needle      A substring expected in the warning message.
+	 *
+	 * @return int Number of matching warnings.
+	 */
+	private function count_hpos_cache_warnings( object $fake_logger, string $needle ): int {
+		$count = 0;
+		foreach ( $fake_logger->warning_calls as $call ) {
+			if ( 'hpos-data-cache' === ( $call['context']['source'] ?? '' ) && false !== strpos( $call['message'], $needle ) ) {
+				++$count;
+			}
+		}
+
+		return $count;
+	}
+
+	/**
 	 * Assert that a warning with the "hpos-data-cache" source and the given message fragment was logged.
 	 *
 	 * @param object $fake_logger The fake logger capturing log calls.
