@@ -250,6 +250,20 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'Customer', $roles_by_user_id[ $customer->get_id() ], 'Registered customers should report their role' );
 		$this->assertEquals( 'Editor, Shop manager', $roles_by_user_id[ $editor_id ], 'Users with multiple roles should report all of them' );
 		$this->assertSame( '', $roles_by_user_id[0], 'Guest customers should report an empty role' );
+
+		$controller     = new \Automattic\WooCommerce\Admin\API\Reports\Customers\Controller();
+		$export_columns = $controller->get_export_columns();
+		$this->assertArrayHasKey( 'role', $export_columns, 'CSV export should include a role column' );
+		$this->assertEquals( 'Role', $export_columns['role'] );
+
+		$export_roles_by_user_id = array();
+		foreach ( $reports as $report ) {
+			$export_item = $controller->prepare_item_for_export( $report );
+			$export_roles_by_user_id[ (int) $report['user_id'] ] = $export_item['role'];
+		}
+
+		$this->assertEquals( 'Editor, Shop manager', $export_roles_by_user_id[ $editor_id ], 'CSV export should carry the role value' );
+		$this->assertSame( '', $export_roles_by_user_id[0], 'CSV export should leave the role empty for guests' );
 	}
 
 	/**
