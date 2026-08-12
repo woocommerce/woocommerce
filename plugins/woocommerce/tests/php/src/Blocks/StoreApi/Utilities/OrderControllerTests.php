@@ -50,17 +50,6 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tear down after test.
-	 */
-	public function tearDown(): void {
-		// The cached locale lives on the WC()->countries singleton, which the parent
-		// teardown does not reset.
-		WC()->countries->locale = null;
-
-		parent::tearDown();
-	}
-
-	/**
 	 * test_validate_existing_order_before_payment_valid_data.
 	 */
 	public function test_validate_existing_order_before_payment_valid_data() {

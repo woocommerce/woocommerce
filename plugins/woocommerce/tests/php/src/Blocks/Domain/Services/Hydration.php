@@ -26,20 +26,6 @@ class Hydration extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Restore the global cart context.
-	 *
-	 * Loading a Store API cart route sets `cart_context` to 'store-api' on the WC cart
-	 * singleton and never puts it back. Neither the database rollback nor the hook restore
-	 * covers that, and production code branches on it, so reset it here.
-	 */
-	public function tearDown(): void {
-		WC()->cart->cart_context = 'shortcode';
-
-		parent::tearDown();
-	}
-
-
-	/**
 	 * @testDox REST API response is returned without loading entire REST server.
 	 */
 	public function test_rest_api_response_data_from_store_api() {
