@@ -122,7 +122,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 						'mapping' => array(
 							'type'                 => 'object',
 							'required'             => true,
-							'description'          => __( 'CSV column index (stringified) → canonical column key.', 'woocommerce' ),
+							'description'          => __( 'Map of CSV column index (stringified) to canonical column key.', 'woocommerce' ),
 							'additionalProperties' => array(
 								'type' => 'string',
 								'enum' => array(
@@ -264,6 +264,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	 *
 	 * @since 11.1.0
 	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 * @param WP_REST_Request $request The request for which the permission is checked.
 	 * @return bool|WP_Error True when allowed; WP_Error otherwise.
 	 */
@@ -276,6 +277,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	 *
 	 * @since 11.1.0
 	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 * @param WP_REST_Request $request The incoming multipart request.
 	 * @return array|WP_Error
 	 */
@@ -323,9 +325,9 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		$session = ImportSession::create(
 			$user_id,
 			$file_path,
-			(string) $parsed['delimiter'],
-			(array) $parsed['headers'],
-			(int) $parsed['total'],
+			(string) ( $parsed['delimiter'] ?? ',' ),
+			(array) ( $parsed['headers'] ?? array() ),
+			(int) ( $parsed['total'] ?? 0 ),
 			$notify,
 			$update
 		);
@@ -344,11 +346,11 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 
 		return array(
 			'token'            => $session->token(),
-			'headers'          => $parsed['headers'],
-			'sample'           => $parsed['sample'],
-			'total'            => $parsed['total'],
-			'detected_mapping' => $this->mapping_for_response( (array) $parsed['detected_mapping'] ),
-			'delimiter'        => $parsed['delimiter'],
+			'headers'          => $parsed['headers'] ?? array(),
+			'sample'           => $parsed['sample'] ?? array(),
+			'total'            => $parsed['total'] ?? 0,
+			'detected_mapping' => $this->mapping_for_response( (array) ( $parsed['detected_mapping'] ?? array() ) ),
+			'delimiter'        => $parsed['delimiter'] ?? ',',
 		);
 	}
 
@@ -357,6 +359,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	 *
 	 * @since 11.1.0
 	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 * @param WP_REST_Request $request The incoming JSON request.
 	 * @return array|WP_Error
 	 */
@@ -408,6 +411,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	/**
 	 * Process one chunk while holding the per-session lock.
 	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 * @param WP_REST_Request $request The incoming JSON request.
 	 * @param int             $user_id Current user ID.
 	 * @param string          $token   Session token.
@@ -611,6 +615,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	/**
 	 * Validate the multipart file, hand it to CSVUploadHelper, and return the staged absolute path.
 	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 * @param WP_REST_Request $request Incoming request carrying the multipart upload.
 	 * @return string|WP_Error
 	 *
@@ -745,7 +750,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	 * Stringify mapping keys so JSON-encoded CSV column indexes round-trip back to the client.
 	 *
 	 * @param array<int, string> $mapping CSV column index => canonical key.
-	 * @return array<string, string>
+	 * @return array<int|string, string> Stringified keys; PHP canonicalizes numeric strings back to int.
 	 */
 	private function mapping_for_response( array $mapping ): array {
 		$out = array();

@@ -49,8 +49,9 @@ class FulfillmentsCsvImporter {
 
 	/**
 	 * Per-run cache of resolved orders, keyed by the raw order number string from the CSV.
+	 * Numeric keys appear when PHP canonicalizes numeric strings.
 	 *
-	 * @var array<string, WC_Order|null>
+	 * @var array<int|string, WC_Order|null>
 	 */
 	private array $order_cache = array();
 
@@ -135,7 +136,7 @@ class FulfillmentsCsvImporter {
 	 *     skipped: int,
 	 *     failed:  int,
 	 *     notified: int,
-	 *     rows:    array<int, array{row:int, status:string, message:string, code?:string, order_id?:int, fulfillment_id?:int}>
+	 *     rows:    array<int, array<string, mixed>>
 	 * }
 	 */
 	public function run(): array {
@@ -288,7 +289,7 @@ class FulfillmentsCsvImporter {
 			$total  = 0;
 			while ( true ) {
 				$row = fgetcsv( $handle, 0, $effective_delimiter, $this->options['enclosure'], '' );
-				if ( false === $row ) {
+				if ( false === $row || null === $row ) {
 					break;
 				}
 				++$total;
@@ -457,7 +458,7 @@ class FulfillmentsCsvImporter {
 					$row_number = 1;
 					for ( $i = 0; $i < $offset; $i++ ) {
 						$row = fgetcsv( $handle, 0, $delimiter, $this->options['enclosure'], '' );
-						if ( false === $row ) {
+						if ( false === $row || null === $row ) {
 							$position = ftell( $handle );
 							return array(
 								'counts'              => $counts,
@@ -478,7 +479,7 @@ class FulfillmentsCsvImporter {
 				$batch       = array();
 				while ( $consumed < $limit ) {
 					$row = fgetcsv( $handle, 0, $delimiter, $this->options['enclosure'], '' );
-					if ( false === $row ) {
+					if ( false === $row || null === $row ) {
 						$reached_eof = true;
 						break;
 					}
@@ -639,12 +640,12 @@ class FulfillmentsCsvImporter {
 	/**
 	 * Process a single CSV row.
 	 *
-	 * @param array<int, string>  $row                  Raw CSV row.
-	 * @param array<string, int>  $header_map           Map of canonical column key => CSV column index.
-	 * @param int                 $row_number           1-based row number (header is row 1).
-	 * @param array<string, true> $seen_tracking_pairs  Reference to in-file dedupe tracker.
+	 * @param array<int, string|null> $row              Raw CSV row.
+	 * @param array<string, int>      $header_map           Map of canonical column key => CSV column index.
+	 * @param int                     $row_number           1-based row number (header is row 1).
+	 * @param array<string, true>     $seen_tracking_pairs  Reference to in-file dedupe tracker.
 	 *
-	 * @return array{row:int, status:string, message:string, code?:string, order_id?:int, fulfillment_id?:int, notified?:bool}
+	 * @return array<string, mixed>
 	 */
 	private function process_row( array $row, array $header_map, int $row_number, array &$seen_tracking_pairs ): array {
 		$order_number    = $this->get_field( $row, $header_map, self::COL_ORDER_NUMBER );
@@ -768,7 +769,7 @@ class FulfillmentsCsvImporter {
 					'csv_importer',
 					$existing->get_id(),
 					$previous_status,
-					is_array( $changed_fields ) ? $changed_fields : array(),
+					$changed_fields,
 					$this->options['notify_customer']
 				);
 
@@ -860,7 +861,7 @@ class FulfillmentsCsvImporter {
 	/**
 	 * Map normalized header values to column indexes.
 	 *
-	 * @param array<int, string> $header Raw header row.
+	 * @param array<int, string|null> $header Raw header row.
 	 * @return array<string, int> Map of canonical key => column index.
 	 */
 	private function build_header_map( array $header ): array {
@@ -910,9 +911,9 @@ class FulfillmentsCsvImporter {
 	/**
 	 * Read a normalized field value from a CSV row.
 	 *
-	 * @param array<int, string> $row        CSV row.
-	 * @param array<string, int> $header_map Header map.
-	 * @param string             $column     Canonical column key.
+	 * @param array<int, string|null> $row   CSV row.
+	 * @param array<string, int>      $header_map Header map.
+	 * @param string                  $column     Canonical column key.
 	 * @return string Trimmed string value (empty string when missing).
 	 */
 	private function get_field( array $row, array $header_map, string $column ): string {
@@ -927,8 +928,7 @@ class FulfillmentsCsvImporter {
 		if ( null === $value ) {
 			return '';
 		}
-		$value = is_scalar( $value ) ? (string) $value : '';
-		return trim( wp_check_invalid_utf8( $value ) );
+		return trim( wp_check_invalid_utf8( (string) $value ) );
 	}
 
 	/**
@@ -978,8 +978,8 @@ class FulfillmentsCsvImporter {
 	 * REST callers build a fresh importer per chunk, so without this priming step each
 	 * row would issue its own wc_get_order() call before the in-memory cache fills up.
 	 *
-	 * @param array<int, array{row_number:int, row:array<int, string>, blank:bool}> $batch      The chunk's raw rows.
-	 * @param array<string, int>                                                    $header_map Canonical column => CSV column index.
+	 * @param array<int, array{row_number:int, row:array<int, string|null>, blank:bool}> $batch The chunk's raw rows.
+	 * @param array<string, int>                                                         $header_map Canonical column => CSV column index.
 	 */
 	private function prime_chunk_caches( array $batch, array $header_map ): void {
 		if ( ! isset( $header_map[ self::COL_ORDER_NUMBER ] ) || empty( $batch ) ) {
@@ -1296,7 +1296,7 @@ class FulfillmentsCsvImporter {
 	/**
 	 * Whether a parsed CSV row is effectively blank.
 	 *
-	 * @param array<int, string>|null $row Row to test.
+	 * @param array<int, string|null>|null $row Row to test.
 	 * @return bool
 	 */
 	private function is_blank_row( ?array $row ): bool {
