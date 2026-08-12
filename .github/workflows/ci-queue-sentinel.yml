@@ -42,13 +42,18 @@ jobs:
       - uses: 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' # v7.0.1
         name: 'Checkout'
         with:
-          sparse-checkout: '.github/workflows/scripts'
+          sparse-checkout: |
+              ./tools/monorepo-utils
+              .github/workflows
           persist-credentials: false
 
       - uses: 'actions/setup-node@820762786026740c76f36085b0efc47a31fe5020' # v7.0.0
         name: 'Setup Node'
         with:
           node-version-file: '.nvmrc'
+
+      - name: 'Setup PNPM'
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
 
       - name: 'Evaluate queue and toggle CI_QUEUE_OVERFLOW'
         env:
@@ -64,12 +69,8 @@ jobs:
 
       - name: 'Notify Slack on failure'
         if: ${{ failure() }}
-        uses: 'archive/github-actions-slack@c643e5093620d65506466f2c9b317d5d29a5e517' # v2.10.1
-        with:
-          slack-bot-user-oauth-access-token: ${{ secrets.E2E_SLACK_TOKEN }}
-          slack-channel: ${{ secrets.TEST_REPORTS_SLACK_CHANNEL }}
-          slack-text: |
-            :warning: CI Queue Sentinel failed — the CI_QUEUE_OVERFLOW switch may be stranded in its last state.
-            <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>
-          slack-optional-unfurl_links: false
-          slack-optional-unfurl_media: false
+        env:
+          SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
+          SLACK_CHANNELS: ${{ secrets.DAILY_CHECKS_CHANNEL }}
+        run: |
+          pnpm utils slack ":warning: CI Queue Sentinel failed — the CI_QUEUE_OVERFLOW switch may be stranded in its last state.\n<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID|View workflow run>"
