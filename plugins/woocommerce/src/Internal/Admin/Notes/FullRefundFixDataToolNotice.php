@@ -20,6 +20,7 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
 /**
  * FullRefundFixDataToolNotice
  *
+ * @internal
  * @since 11.2.0
  */
 class FullRefundFixDataToolNotice {

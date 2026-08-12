@@ -209,7 +209,7 @@ class Analytics {
 	 *
 	 * @return bool
 	 */
-	public static function should_show_refund_fix_tool(): bool {
+	private static function should_show_refund_fix_tool(): bool {
 		return ! OrderUtil::uses_new_full_refund_data()
 			|| 'yes' === get_option( 'woocommerce_analytics_show_old_refund_data_tool' );
 	}
