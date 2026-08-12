@@ -75,9 +75,10 @@ const ghJson = async ( url, options ) => {
 };
 
 const fetchActiveRuns = async () => {
-	// Only queued/in_progress runs can hold jobs competing for runner slots;
-	// waiting/pending/requested runs are gated on approvals, concurrency, or
-	// pre-processing — not runner capacity — so they are deliberately ignored.
+	// Only queued/in_progress runs can hold jobs competing for runner slots.
+	// Other non-final states (waiting/pending/requested/action_required) are
+	// gated on approvals, concurrency, or pre-processing — their jobs are not
+	// yet dispatchable, so those runs are deliberately ignored.
 	const byId = new Map();
 	let complete = true;
 	const nowMs = Date.now();
