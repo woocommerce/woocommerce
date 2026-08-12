@@ -906,10 +906,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		global $wpdb;
 		$orders_stats_table = self::get_db_table_name();
 
+		// Refund rows share the customer ID of their parent order but are stored with a NULL
+		// returning_customer, which the orders report relies on to fall back to the refunded
+		// order's value. Keep them NULL by only updating rows that carry their own flag.
 		$wpdb->query(
 			$wpdb->prepare(
-				'UPDATE %i SET returning_customer = CASE WHEN order_id = %d THEN false ELSE true END WHERE customer_id = %d',
-				$orders_stats_table,
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
+				"UPDATE {$orders_stats_table} SET returning_customer = CASE WHEN order_id = %d THEN false ELSE true END WHERE customer_id = %d AND returning_customer IS NOT NULL",
 				$order_id,
 				$customer_id
 			)
