@@ -206,10 +206,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$this->get_limit_sql_params( $query_args );
 		$this->add_order_by_sql_params( $query_args );
 
-		$included_products = $this->get_product_id_restriction( $query_args );
-		if ( $included_products ) {
+		$product_id_filter = $this->get_product_id_filter( $query_args );
+		if ( $product_id_filter ) {
 			$this->add_from_sql_params( $query_args, 'outer', 'default_results.product_id' );
-			$this->subquery->add_sql_clause( 'where', "AND {$order_product_lookup_table}.product_id IN ({$included_products})" );
+			$this->subquery->add_sql_clause( 'where', "AND {$product_id_filter}" );
 		} else {
 			$this->add_from_sql_params( $query_args, 'inner', "{$order_product_lookup_table}.product_id" );
 		}
@@ -227,28 +227,33 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Returns the set of product IDs the report should be restricted to, as SQL.
+	 * Returns the condition restricting the report to a set of products.
 	 *
-	 * A `search` argument resolves to a subquery, so the matching products stay in the
-	 * database instead of travelling through the request as an ID list. Without one, the
-	 * IDs the `categories` and `products` filters resolve to are used directly.
+	 * A `search` argument resolves to a subquery, the `categories` and `products` filters to an
+	 * ID list. Both are rendered here, so callers never handle either form.
 	 *
 	 * @since 11.1.0
 	 *
 	 * @param array $query_args Query arguments supplied by the user.
-	 * @return string Comma separated ID list or a SELECT statement, empty when unrestricted.
+	 * @return string SQL condition, or an empty string when the report is not restricted.
 	 */
-	protected function get_product_id_restriction( $query_args ) {
+	protected function get_product_id_filter( $query_args ) {
+		$column          = self::get_db_table_name() . '.product_id';
 		$search_subquery = $this->get_product_search_subquery( $query_args );
+		if ( $search_subquery ) {
+			return "{$column} IN ( {$search_subquery} )";
+		}
 
-		return $search_subquery ? $search_subquery : $this->get_included_products( $query_args );
+		$included_products = $this->get_included_products( $query_args );
+
+		return $included_products ? "{$column} IN ( {$included_products} )" : '';
 	}
 
 	/**
 	 * Returns a SELECT statement resolving the `search` query argument to product IDs.
 	 *
-	 * The search is intersected with the products the other filters resolve to, so it
-	 * narrows `categories` and `products` rather than replacing them.
+	 * The search is intersected with the products the other filters resolve to, so it narrows
+	 * `categories` and `products` rather than replacing them.
 	 *
 	 * @since 11.1.0
 	 *
@@ -269,10 +274,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return $this->search_subqueries[ $cache_key ];
 		}
 
-		$subquery = ProductSearchQuery::get_ids_subquery(
-			$query_args['search'],
-			$this->get_included_products_array( $query_args )
-		);
+		$included_products = (string) $this->get_included_products( $query_args );
+		$restrict_to_ids   = '' === $included_products
+			? array()
+			: array_map( 'intval', explode( ',', $included_products ) );
+
+		$subquery = ProductSearchQuery::get_ids_subquery( $query_args['search'], $restrict_to_ids );
 
 		if ( null !== $cache_key ) {
 			$this->search_subqueries[ $cache_key ] = $subquery;

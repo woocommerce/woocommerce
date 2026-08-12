@@ -12,13 +12,8 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Builds the SQL that resolves a free-text product search to product IDs.
  *
- * Analytics reports that accept a `search` argument use this to filter by matching
- * product IDs inside a single SQL statement, instead of having the client resolve
- * the search to an ID list first and pass it back as a `products` argument.
- *
- * The matching rules mirror `Automattic\WooCommerce\Admin\API\Products`, which is what
- * the Analytics search box queries for its autocomplete suggestions, so both surfaces
- * agree on what a term matches.
+ * The matching rules mirror `Automattic\WooCommerce\Admin\API\Products`, which backs the
+ * Analytics search box, so both agree on what a term matches.
  *
  * @internal
  */
@@ -27,14 +22,14 @@ class ProductSearchQuery {
 	/**
 	 * Normalizes the `search` REST argument into a list of terms.
 	 *
-	 * Accepts either a list of terms or a single comma separated string. Splitting on commas
-	 * alone matters here: the default array coercion WordPress applies to a string argument
-	 * (`wp_parse_list()`) also splits on whitespace, which would break multi-word terms.
+	 * @since 11.1.0
 	 *
-	 * @param string|string[] $value Raw argument value.
+	 * @param string|string[] $value Raw argument value, a list of terms or a comma separated string.
 	 * @return string[] Search terms.
 	 */
 	public static function parse_terms( $value ) {
+		// Split on commas only. The array coercion WordPress applies to a string argument
+		// (`wp_parse_list()`) also splits on whitespace, which would break multi-word terms.
 		$terms = is_array( $value ) ? $value : explode( ',', (string) $value );
 
 		return array_values(
@@ -50,10 +45,12 @@ class ProductSearchQuery {
 	/**
 	 * Returns a SELECT statement resolving the given search terms to product IDs.
 	 *
-	 * The statement yields a single `product_id` column and is meant to be embedded as a
-	 * derived table or as the right-hand side of an `IN (...)` clause.
+	 * The statement yields a single `product_id` column, for use as a derived table or as the
+	 * right-hand side of an `IN (...)` clause.
 	 *
-	 * @param string[] $terms          Search terms. A product matches if it matches any term.
+	 * @since 11.1.0
+	 *
+	 * @param string[] $terms           Search terms. A product matches if it matches any term.
 	 * @param int[]    $restrict_to_ids Optional. Product IDs to intersect the results with.
 	 * @return string SQL statement, or an empty string when there is nothing to search for.
 	 */
