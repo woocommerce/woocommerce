@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:ignore Generic.PHP.RequireStrictTypes.MissingDeclaration -- Existing methods rely on scalar coercion.
 namespace Automattic\WooCommerce\Blocks\Utils;
 
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -62,9 +62,9 @@ class Utils {
 		$request_path = is_object( $wp ) && isset( $wp->request ) && is_string( $wp->request ) ? $wp->request : '';
 		$url          = home_url( user_trailingslashit( $request_path ) );
 
-		if ( ! empty( $_SERVER['QUERY_STRING'] ) ) {
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Preserving the raw query string encoding.
-			$url = add_query_arg( wp_unslash( $_SERVER['QUERY_STRING'] ), '', $url );
+		if ( isset( $_SERVER['QUERY_STRING'] ) && is_string( $_SERVER['QUERY_STRING'] ) && '' !== $_SERVER['QUERY_STRING'] ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Preserving the raw query string encoding and delimiters.
+			$url .= '?' . wp_unslash( $_SERVER['QUERY_STRING'] );
 		}
 
 		return $url;
