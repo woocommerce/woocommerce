@@ -13,7 +13,13 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Maintains WooCommerce-specific term counts after taxonomy changes.
+ * Maintains WooCommerce-specific product term counts after taxonomy changes.
+ *
+ * WooCommerce excludes some products from category, tag, and brand counts based on
+ * product visibility. WordPress does not automatically refresh those custom counts
+ * when visibility relationships are removed directly, so this service detects
+ * count-affecting relationship deletions and delegates to WooCommerce's existing
+ * recount logic.
  *
  * @since 11.1.0
  *
