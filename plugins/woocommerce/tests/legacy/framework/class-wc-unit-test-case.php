@@ -150,23 +150,38 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	/**
 	 * Tear down test case.
 	 *
-	 * The cart contents and the queued notices live on the WC() singleton, which neither
-	 * the per-test database rollback nor the hook restore resets, so clear them here or
-	 * they leak into every later test in the process.
+	 * The cart contents, the cart context, the queued notices, and the cached country
+	 * locale all live on the WC() singletons, which neither the per-test database
+	 * rollback nor the hook restore resets, so clear them here or they leak into every
+	 * later test in the process.
 	 *
 	 * @since 11.1.0
 	 */
 	public function tearDown(): void {
 		try {
-			// Emptying the cart writes to the session via the woocommerce_cart_emptied
-			// callbacks, so only do it when both singletons are present — tests may
-			// legitimately null them out.
-			if ( isset( WC()->cart, WC()->session ) ) {
-				WC()->cart->empty_cart();
+			if ( isset( WC()->cart ) ) {
+				// Emptying the cart writes to the session via the woocommerce_cart_emptied
+				// callbacks, so only do it when that singleton is present too — tests may
+				// legitimately null it out.
+				if ( isset( WC()->session ) ) {
+					WC()->cart->empty_cart();
+				}
+
+				// Loading a Store API cart route sets this to 'store-api' and never puts it
+				// back, and production code branches on it.
+				WC()->cart->cart_context = 'shortcode';
 			}
 
 			if ( isset( WC()->session ) ) {
 				wc_clear_notices();
+			}
+
+			if ( isset( WC()->countries ) ) {
+				// The locale is cached on first read. A test that reads it while a
+				// woocommerce_get_country_locale filter is attached leaves the filtered
+				// value behind, because the hook restore removes the filter but not the
+				// cache it produced.
+				WC()->countries->locale = array();
 			}
 		} finally {
 			// The parent teardown must always run: it rolls back the database
