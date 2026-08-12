@@ -122,6 +122,71 @@ class WC_Admin_Tests_API_Reports_Products_Stats extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that the `search` param narrows the totals to the matching products.
+	 */
+	public function test_get_reports_search_param() {
+		WC_Helper_Reports::reset_stats_dbs();
+		wp_set_current_user( $this->user );
+
+		$time = time();
+
+		foreach ( array( 'Kingston Widget', 'Unrelated Thing' ) as $name ) {
+			$product = new WC_Product_Simple();
+			$product->set_name( $name );
+			$product->set_regular_price( 25 );
+			$product->save();
+
+			$order = WC_Helper_Order::create_order( 1, $product );
+			$order->set_status( OrderStatus::COMPLETED );
+			// $25 x 4.
+			$order->set_total( 100 );
+			$order->save();
+		}
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'before'   => gmdate( 'Y-m-d 23:59:59', $time ),
+				'after'    => gmdate( 'Y-m-d 00:00:00', $time ),
+				'interval' => 'day',
+				'search'   => 'Kingston',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals(
+			array(
+				'items_sold'       => 4,
+				'net_revenue'      => 100.0,
+				'orders_count'     => 1,
+				'products_count'   => 1,
+				'variations_count' => 1,
+				'segments'         => array(),
+			),
+			$reports['totals'],
+			'Only the products matching the search should be aggregated'
+		);
+	}
+
+	/**
+	 * Test that the `search` collection param is registered.
+	 */
+	public function test_search_collection_param_is_registered() {
+		wp_set_current_user( $this->user );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'OPTIONS', $this->endpoint ) );
+		$args     = $response->get_data()['endpoints'][0]['args'];
+
+		$this->assertArrayHasKey( 'search', $args );
+		$this->assertEquals( 'array', $args['search']['type'] );
+	}
+
+	/**
 	 * Test getting reports without valid permissions.
 	 *
 	 * @since 3.5.0

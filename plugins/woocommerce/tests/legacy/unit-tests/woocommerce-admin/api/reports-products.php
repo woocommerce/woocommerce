@@ -145,6 +145,205 @@ class WC_Admin_Tests_API_Reports_Products extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test getting reports with the `search` param.
+	 */
+	public function test_get_reports_search_param() {
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$sold_match   = $this->create_product( 'Kingston Widget' );
+		$unsold_match = $this->create_product( 'Kingston Gadget' );
+		$sold_other   = $this->create_product( 'Unrelated Thing' );
+
+		$this->create_completed_order( $sold_match );
+		$this->create_completed_order( $sold_other );
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$response = $this->dispatch_report( array( 'search' => 'Kingston' ) );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 2, count( $reports ) );
+
+		$reports_by_id = array_column( $reports, null, 'product_id' );
+
+		$this->assertArrayHasKey( $sold_match->get_id(), $reports_by_id, 'A matching product with sales should be reported' );
+		$this->assertArrayHasKey( $unsold_match->get_id(), $reports_by_id, 'A matching product without sales should be reported' );
+		$this->assertArrayNotHasKey( $sold_other->get_id(), $reports_by_id, 'A product that does not match the search should be left out' );
+
+		$this->assertEquals( 4, $reports_by_id[ $sold_match->get_id() ]['items_sold'] );
+		$this->assertEquals( 1, $reports_by_id[ $sold_match->get_id() ]['orders_count'] );
+		$this->assertSame( 0, $reports_by_id[ $unsold_match->get_id() ]['items_sold'] );
+	}
+
+	/**
+	 * Test that the `search` param is not capped at the first 100 matching products.
+	 *
+	 * The client used to resolve the search itself and pass at most 100 product IDs back as
+	 * the `products` param, so any match past that was missing from the report.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/50786
+	 */
+	public function test_get_reports_search_param_is_not_capped_at_100_products() {
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// These only need to match the search, so the full product CRUD would be wasted work.
+		for ( $i = 0; $i < 104; $i++ ) {
+			wp_insert_post(
+				array(
+					'post_title'  => sprintf( 'Kingston Widget %03d', $i ),
+					'post_type'   => 'product',
+					'post_status' => 'publish',
+				)
+			);
+		}
+
+		$sold = $this->create_product( 'Kingston Widget 999' );
+		$this->create_completed_order( $sold );
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$response = $this->dispatch_report(
+			array(
+				'search'   => 'Kingston',
+				'per_page' => 100,
+				'orderby'  => 'items_sold',
+				'order'    => 'desc',
+			)
+		);
+		$reports  = $response->get_data();
+		$headers  = $response->get_headers();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 105, $headers['X-WP-Total'], 'Every matching product should be counted' );
+		$this->assertEquals( 2, $headers['X-WP-TotalPages'] );
+		$this->assertCount( 100, $reports );
+
+		$top_seller = reset( $reports );
+		$this->assertEquals( $sold->get_id(), $top_seller['product_id'], 'The only product with sales should sort first' );
+		$this->assertEquals( 4, $top_seller['items_sold'] );
+
+		$second_page = $this->dispatch_report(
+			array(
+				'search'   => 'Kingston',
+				'per_page' => 100,
+				'page'     => 2,
+			)
+		);
+
+		$this->assertEquals( 200, $second_page->get_status() );
+		$this->assertCount( 5, $second_page->get_data() );
+	}
+
+	/**
+	 * Test getting reports with a `search` param that matches by SKU.
+	 */
+	public function test_get_reports_search_param_matches_sku() {
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$match    = $this->create_product( 'Unrelated Thing', 'KINGSTON-1' );
+		$no_match = $this->create_product( 'Another Thing', 'OTHER-1' );
+
+		$this->create_completed_order( $match );
+		$this->create_completed_order( $no_match );
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$reports = $this->dispatch_report( array( 'search' => 'KINGSTON-1' ) )->get_data();
+
+		$this->assertEquals( 1, count( $reports ) );
+		$this->assertEquals( $match->get_id(), $reports[0]['product_id'] );
+	}
+
+	/**
+	 * Test that a multi word `search` term is treated as a single term.
+	 *
+	 * The default array coercion WordPress applies to a string argument also splits on
+	 * whitespace, which would turn one multi word search into several single word searches.
+	 */
+	public function test_get_reports_search_param_keeps_multi_word_terms_intact() {
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$match    = $this->create_product( 'Blue Widget' );
+		$no_match = $this->create_product( 'Blue Gadget' );
+
+		$this->create_completed_order( $match );
+		$this->create_completed_order( $no_match );
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$reports = $this->dispatch_report( array( 'search' => 'Blue Widget' ) )->get_data();
+
+		$this->assertEquals( 1, count( $reports ) );
+		$this->assertEquals( $match->get_id(), $reports[0]['product_id'] );
+	}
+
+	/**
+	 * Test that the `search` param narrows the `products` param rather than replacing it.
+	 */
+	public function test_get_reports_search_param_intersects_with_products_param() {
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$in_both       = $this->create_product( 'Kingston Widget' );
+		$search_only   = $this->create_product( 'Kingston Gadget' );
+		$products_only = $this->create_product( 'Unrelated Thing' );
+
+		$this->create_completed_order( $in_both );
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$reports = $this->dispatch_report(
+			array(
+				'search'   => 'Kingston',
+				'products' => $in_both->get_id() . ',' . $products_only->get_id(),
+			)
+		)->get_data();
+
+		$reported_ids = array_column( $reports, 'product_id' );
+
+		$this->assertEquals( array( $in_both->get_id() ), $reported_ids );
+		$this->assertNotContains( $search_only->get_id(), $reported_ids );
+		$this->assertNotContains( $products_only->get_id(), $reported_ids );
+	}
+
+	/**
+	 * Test getting reports with a `search` param that matches nothing.
+	 */
+	public function test_get_reports_search_param_without_matches() {
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$product = $this->create_product( 'Kingston Widget' );
+		$this->create_completed_order( $product );
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$response = $this->dispatch_report( array( 'search' => 'nothing matches this' ) );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( array(), $response->get_data() );
+		$this->assertEquals( 0, $response->get_headers()['X-WP-Total'] );
+	}
+
+	/**
+	 * Test that the `search` collection param is registered.
+	 */
+	public function test_search_collection_param_is_registered() {
+		wp_set_current_user( $this->user );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'OPTIONS', $this->endpoint ) );
+		$args     = $response->get_data()['endpoints'][0]['args'];
+
+		$this->assertArrayHasKey( 'search', $args );
+		$this->assertEquals( 'array', $args['search']['type'] );
+	}
+
+	/**
 	 * Test getting reports without valid permissions.
 	 *
 	 * @since 3.5.0
@@ -174,5 +373,55 @@ class WC_Admin_Tests_API_Reports_Products extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'net_revenue', $properties );
 		$this->assertArrayHasKey( 'orders_count', $properties );
 		$this->assertArrayHasKey( 'extended_info', $properties );
+	}
+
+	/**
+	 * Creates a simple product.
+	 *
+	 * @param string $name Product name.
+	 * @param string $sku  Optional. Product SKU.
+	 * @return WC_Product_Simple
+	 */
+	private function create_product( $name, $sku = '' ) {
+		$product = new WC_Product_Simple();
+		$product->set_name( $name );
+		$product->set_regular_price( 25 );
+
+		if ( '' !== $sku ) {
+			$product->set_sku( $sku );
+		}
+
+		$product->save();
+
+		return $product;
+	}
+
+	/**
+	 * Creates a completed order containing four units of the given product.
+	 *
+	 * @param WC_Product $product Product to order.
+	 * @return WC_Order
+	 */
+	private function create_completed_order( $product ) {
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->set_status( OrderStatus::COMPLETED );
+		// $25 x 4.
+		$order->set_total( 100 );
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * Dispatches a request to the reports endpoint.
+	 *
+	 * @param array $query_params Query parameters.
+	 * @return WP_REST_Response
+	 */
+	private function dispatch_report( $query_params ) {
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params( $query_params );
+
+		return $this->server->dispatch( $request );
 	}
 }
