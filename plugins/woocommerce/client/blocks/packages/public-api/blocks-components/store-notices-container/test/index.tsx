@@ -3,7 +3,7 @@
  */
 import { store as noticesStore } from '@wordpress/notices';
 import { dispatch, select } from '@wordpress/data';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -263,6 +263,76 @@ describe( 'StoreNoticesContainer', () => {
 		await act( () =>
 			dispatch( noticesStore ).removeNotice(
 				'second-list-error',
+				'test-context'
+			)
+		);
+	} );
+
+	it( 'Renders a non-dismissible notice with the same list markup, without a summary', async () => {
+		dispatch( noticesStore ).createErrorNotice(
+			'Non-dismissible list error',
+			{
+				id: 'non-dismissible-list-error',
+				context: 'test-context',
+				isDismissible: false,
+			}
+		);
+		const { container } = render(
+			<StoreNoticesContainer context="test-context" />
+		);
+
+		const lists = within( container ).getAllByRole( 'list' );
+		expect( lists ).toHaveLength( 1 );
+		expect( within( lists[ 0 ] ).getAllByRole( 'listitem' ) ).toHaveLength(
+			1
+		);
+		expect( lists[ 0 ] ).toHaveClass(
+			'wc-block-components-notice-banner__list'
+		);
+		// Each non-dismissible notice is its own banner, so it carries no summary.
+		expect(
+			container.querySelector(
+				'.wc-block-components-notice-banner__summary'
+			)
+		).toBeNull();
+
+		// Clean up notices.
+		await act( () =>
+			dispatch( noticesStore ).removeNotice(
+				'non-dismissible-list-error',
+				'test-context'
+			)
+		);
+	} );
+
+	it( 'Renders non-error notices with the same list markup, without a summary', async () => {
+		dispatch( noticesStore ).createSuccessNotice( 'Coupon applied', {
+			id: 'success-list-notice',
+			context: 'test-context',
+		} );
+		const { container } = render(
+			<StoreNoticesContainer context="test-context" />
+		);
+
+		const lists = within( container ).getAllByRole( 'list' );
+		expect( lists ).toHaveLength( 1 );
+		expect( within( lists[ 0 ] ).getAllByRole( 'listitem' ) ).toHaveLength(
+			1
+		);
+		expect( lists[ 0 ] ).toHaveClass(
+			'wc-block-components-notice-banner__list'
+		);
+		// The summary is only rendered for the error status.
+		expect(
+			container.querySelector(
+				'.wc-block-components-notice-banner__summary'
+			)
+		).toBeNull();
+
+		// Clean up notices.
+		await act( () =>
+			dispatch( noticesStore ).removeNotice(
+				'success-list-notice',
 				'test-context'
 			)
 		);
