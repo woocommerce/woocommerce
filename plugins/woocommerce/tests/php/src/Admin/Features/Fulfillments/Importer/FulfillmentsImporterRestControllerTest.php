@@ -456,4 +456,117 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 		$this->assertNotNull( $reloaded, 'The session must survive an aborted chunk so the client can retry' );
 		$this->assertFileExists( $file, 'The staged CSV must not be deleted on an aborted chunk' );
 	}
+
+	/**
+	 * Build a run request for a session with the standard three-column mapping.
+	 *
+	 * @param string $token  Session token.
+	 * @param int    $offset Chunk offset.
+	 * @param int    $limit  Chunk limit.
+	 * @return WP_REST_Request
+	 */
+	private function make_run_request( string $token, int $offset, int $limit ): WP_REST_Request {
+		$request = new WP_REST_Request( 'POST', '/wc/v3/fulfillments/import/run' );
+		$request->set_param( 'token', $token );
+		$request->set_param( 'offset', $offset );
+		$request->set_param( 'limit', $limit );
+		$request->set_param(
+			'mapping',
+			array(
+				'0' => FulfillmentsCsvImporter::COL_ORDER_NUMBER,
+				'1' => FulfillmentsCsvImporter::COL_TRACKING_NUMBER,
+				'2' => FulfillmentsCsvImporter::COL_PROVIDER,
+			)
+		);
+		return $request;
+	}
+
+	/**
+	 * @testdox Retrying an already-processed offset returns progress without importing the rows again.
+	 */
+	public function test_run_is_idempotent_for_replayed_offsets(): void {
+		$o1  = OrderHelper::create_order();
+		$o2  = OrderHelper::create_order();
+		$csv = "order_number,tracking_number,shipment_provider\n"
+			. "{$o1->get_id()},RPL-1,ups\n"
+			. "{$o2->get_id()},RPL-2,ups\n";
+
+		$file    = $this->make_csv( $csv );
+		$session = $this->open_session_for( $file );
+		$token   = $session->token();
+
+		$first = $this->invoke( 'handle_run', $this->make_run_request( $token, 0, 1 ) );
+		$this->assertIsArray( $first );
+		$this->assertSame( 1, $first['processed'] );
+		$this->assertSame( 1, $first['counts']['created'] );
+
+		// Same offset again, as a client retry would send it after a lost response.
+		$replay = $this->invoke( 'handle_run', $this->make_run_request( $token, 0, 1 ) );
+		$this->assertIsArray( $replay );
+		$this->assertSame( 1, $replay['processed'] );
+		$this->assertSame( 1, $replay['counts']['created'], 'A replayed chunk must not import rows again' );
+		$this->assertSame( array(), $replay['rows'] );
+
+		$store = \WC_Data_Store::load( 'order-fulfillment' );
+		$this->assertCount(
+			1,
+			$store->read_fulfillments( \WC_Order::class, (string) $o1->get_id() ),
+			'The replayed chunk must not create a duplicate fulfillment'
+		);
+
+		$final = $this->invoke( 'handle_run', $this->make_run_request( $token, 1, 5 ) );
+		$this->assertIsArray( $final );
+		$this->assertTrue( $final['done'] );
+		$this->assertSame( 2, $final['counts']['created'] );
+	}
+
+	/**
+	 * @testdox A concurrent run for the same session token is rejected with a 409.
+	 */
+	public function test_run_rejects_concurrent_chunk_for_same_token(): void {
+		$order = OrderHelper::create_order();
+		$csv   = "order_number,tracking_number,shipment_provider\n{$order->get_id()},LCK-1,ups\n";
+		$file  = $this->make_csv( $csv );
+
+		$session  = $this->open_session_for( $file );
+		$token    = $session->token();
+		$lock_key = 'wc_fulfillment_import_lock_' . get_current_user_id() . '_' . $token;
+
+		add_option( $lock_key, (string) time(), '', false );
+		try {
+			$response = $this->invoke( 'handle_run', $this->make_run_request( $token, 0, 5 ) );
+		} finally {
+			delete_option( $lock_key );
+		}
+
+		$this->assertInstanceOf( \WP_Error::class, $response );
+		$this->assertSame( 'woocommerce_fulfillments_import_chunk_in_progress', $response->get_error_code() );
+
+		$store = \WC_Data_Store::load( 'order-fulfillment' );
+		$this->assertCount( 0, $store->read_fulfillments( \WC_Order::class, (string) $order->get_id() ) );
+	}
+
+	/**
+	 * @testdox A stale run lock is taken over instead of wedging the import.
+	 */
+	public function test_run_takes_over_stale_lock(): void {
+		$order = OrderHelper::create_order();
+		$csv   = "order_number,tracking_number,shipment_provider\n{$order->get_id()},STL-1,ups\n";
+		$file  = $this->make_csv( $csv );
+
+		$session  = $this->open_session_for( $file );
+		$token    = $session->token();
+		$lock_key = 'wc_fulfillment_import_lock_' . get_current_user_id() . '_' . $token;
+
+		add_option( $lock_key, (string) ( time() - 2 * MINUTE_IN_SECONDS ), '', false );
+		try {
+			$response = $this->invoke( 'handle_run', $this->make_run_request( $token, 0, 5 ) );
+		} finally {
+			delete_option( $lock_key );
+		}
+
+		$this->assertIsArray( $response, 'A lock older than the takeover threshold must not block the chunk' );
+		$this->assertTrue( $response['done'] );
+		$this->assertSame( 1, $response['counts']['created'] );
+	}
 }

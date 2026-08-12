@@ -309,6 +309,56 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		$user_id = get_current_user_id();
 		$token   = (string) $request->get_param( 'token' );
 
+		// Serialize chunk processing per session. Two concurrent runs would read the same
+		// byte offset and import the same rows twice, duplicating fulfillments and emails.
+		$lock_key = 'wc_fulfillment_import_lock_' . $user_id . '_' . $token;
+		if ( ! $this->acquire_run_lock( $lock_key ) ) {
+			return new WP_Error(
+				'woocommerce_fulfillments_import_chunk_in_progress',
+				__( 'Another chunk of this import is still being processed. Please retry in a moment.', 'woocommerce' ),
+				array( 'status' => WP_Http::CONFLICT )
+			);
+		}
+
+		try {
+			return $this->handle_run_locked( $request, $user_id, $token );
+		} finally {
+			delete_option( $lock_key );
+		}
+	}
+
+	/**
+	 * Acquire the per-session run lock.
+	 *
+	 * Uses add_option() as an atomic take; a stale lock older than the takeover
+	 * threshold is claimed so a fatally interrupted chunk cannot wedge the import.
+	 *
+	 * @param string $lock_key Option name used as the lock.
+	 * @return bool Whether the lock was acquired.
+	 */
+	private function acquire_run_lock( string $lock_key ): bool {
+		if ( add_option( $lock_key, (string) time(), '', false ) ) {
+			return true;
+		}
+
+		$held_since = (int) get_option( $lock_key );
+		if ( $held_since > 0 && ( time() - $held_since ) < MINUTE_IN_SECONDS ) {
+			return false;
+		}
+
+		update_option( $lock_key, (string) time(), false );
+		return true;
+	}
+
+	/**
+	 * Process one chunk while holding the per-session lock.
+	 *
+	 * @param WP_REST_Request $request The incoming JSON request.
+	 * @param int             $user_id Current user ID.
+	 * @param string          $token   Session token.
+	 * @return array|WP_Error
+	 */
+	private function handle_run_locked( WP_REST_Request $request, int $user_id, string $token ) {
 		$session = ImportSession::load( $user_id, $token );
 		if ( ! $session instanceof ImportSession ) {
 			return new WP_Error(
@@ -358,6 +408,13 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 				),
 				array( 'status' => WP_Http::BAD_REQUEST )
 			);
+		}
+
+		// Idempotency guard: a client retry can arrive after the server already processed
+		// and persisted this chunk (for example when only the response was lost). Rows at
+		// this offset must not be imported twice, so return the recorded progress instead.
+		if ( $offset < $session->processed() ) {
+			return $this->build_run_response( $session, array(), array() );
 		}
 
 		$options_param   = (array) $request->get_param( 'options' );
@@ -417,17 +474,30 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 
 		$session->record_chunk( $processed_after, $counts, $seen, $next_byte );
 
+		return $this->build_run_response( $session, $rows_for_ui, $errors_for_ui, ! empty( $chunk_result['eof'] ) );
+	}
+
+	/**
+	 * Build the chunk response from the session's recorded progress, finalizing when done.
+	 *
+	 * @param ImportSession                    $session Session after the chunk was recorded.
+	 * @param array<int, array<string, mixed>> $rows    Row results for this response.
+	 * @param array<int, array<string, mixed>> $errors  Failed-row entries for this response.
+	 * @param bool                             $eof     Whether the importer reached end of file.
+	 * @return array
+	 */
+	private function build_run_response( ImportSession $session, array $rows, array $errors, bool $eof = false ): array {
 		$processed = $session->processed();
 		$total     = $session->total();
-		$done      = $processed >= $total || ! empty( $chunk_result['eof'] );
+		$done      = $processed >= $total || $eof;
 
 		$response = array(
 			'processed' => $processed,
 			'total'     => $total,
 			'done'      => $done,
 			'counts'    => $session->counts(),
-			'rows'      => $rows_for_ui,
-			'errors'    => $errors_for_ui,
+			'rows'      => $rows,
+			'errors'    => $errors,
 		);
 
 		if ( $done ) {
