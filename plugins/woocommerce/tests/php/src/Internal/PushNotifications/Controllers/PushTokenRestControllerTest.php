@@ -1735,6 +1735,7 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 		);
 
 		$data_store->record_last_send( array( $sent ) );
+		$data_store->flush_last_send();
 
 		$request = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
 		$request->set_param( 'page', 1 );
