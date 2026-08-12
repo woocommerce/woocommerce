@@ -82,12 +82,12 @@ class WC_Brands {
 	/**
 	 * Recount the brands after the stock amount changes.
 	 *
-	 * @deprecated 11.1.0 Use wc_recount_after_stock_change() instead.
+	 * @deprecated 11.2.0 Use wc_recount_after_stock_change() instead.
 	 *
 	 * @param int $product_id Product ID.
 	 */
 	public function recount_after_stock_change( $product_id ) {
-		wc_deprecated_function( __METHOD__, '11.1.0', 'wc_recount_after_stock_change()' );
+		wc_deprecated_function( __METHOD__, '11.2.0', 'wc_recount_after_stock_change()' );
 
 		if ( 'yes' !== get_option( 'woocommerce_hide_out_of_stock_items' ) || empty( $product_id ) ) {
 			return;
@@ -122,10 +122,10 @@ class WC_Brands {
 	/**
 	 * Recount all brands.
 	 *
-	 * @deprecated 11.1.0 Use wc_recount_all_terms() instead.
+	 * @deprecated 11.2.0 Use wc_recount_all_terms() instead.
 	 */
 	public function recount_all_brands() {
-		wc_deprecated_function( __METHOD__, '11.1.0', 'wc_recount_all_terms()' );
+		wc_deprecated_function( __METHOD__, '11.2.0', 'wc_recount_all_terms()' );
 
 		$product_brands = get_terms(
 			array(
