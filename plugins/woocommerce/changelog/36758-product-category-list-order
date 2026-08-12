@@ -1,4 +1,4 @@
-Significance: patch
-Type: tweak
+Significance: minor
+Type: add
 
 Add breadcrumb ordering support to product category list output.
