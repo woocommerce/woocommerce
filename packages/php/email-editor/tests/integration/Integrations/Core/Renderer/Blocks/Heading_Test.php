@@ -214,6 +214,29 @@ class Heading_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * The background is removed however the declaration is spelled.
+	 *
+	 * CSS property names are case-insensitive and a colon may be surrounded by whitespace, so
+	 * `BACKGROUND-COLOR : x` is the same declaration as `background-color:x`. The editor's style
+	 * engine only ever emits the lowercase, unspaced form, but block markup is hand-editable.
+	 */
+	public function testItRemovesBackgroundColorRegardlessOfDeclarationSpelling(): void {
+		$content                        = '<h1 class="wp-block-heading" style="BACKGROUND-COLOR : #c284426b;color:#ff0000;">This is Heading 1</h1>';
+		$parsed_heading                 = $this->parsed_heading;
+		$parsed_heading['innerHTML']    = $content;
+		$parsed_heading['innerContent'] = array( $content );
+
+		$rendered = $this->heading_renderer->render( $content, $parsed_heading, $this->rendering_context );
+
+		$html = new \WP_HTML_Tag_Processor( $rendered );
+		$this->assertTrue( $html->next_tag( array( 'tag_name' => 'h1' ) ) );
+		$heading_style = (string) $html->get_attribute( 'style' );
+
+		$this->assertStringNotContainsStringIgnoringCase( 'background-color', $heading_style );
+		$this->assertStringContainsString( 'color:#ff0000', $heading_style );
+	}
+
+	/**
 	 * Test it uses inherited color from email_attrs when no color is specified
 	 */
 	public function testItUsesInheritedColorFromEmailAttrs(): void {

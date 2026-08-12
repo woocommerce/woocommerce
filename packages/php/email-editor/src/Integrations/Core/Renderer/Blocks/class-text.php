@@ -128,8 +128,10 @@ class Text extends Abstract_Block_Renderer {
 			// attribute loses it, the same way padding, margin, and border above already behave.
 			// The lookbehind keeps the match anchored to the start of a property name, so a longer
 			// property that merely ends in "background-color" (a custom property, say) is not cut in
-			// half, which would leave its prefix fused to the following declaration.
-			$element_style = (string) preg_replace( '/(?<![a-z-])background-color:[^;]+;?/', '', $element_style );
+			// half, which would leave its prefix fused to the following declaration. Property names
+			// are case-insensitive in CSS and a colon may be surrounded by whitespace, so both are
+			// matched — unlike the class names above, which the CSS inliner matches case-sensitively.
+			$element_style = (string) preg_replace( '/(?<![a-z-])background-color\s*:\s*[^;]+;?/i', '', $element_style );
 
 			// We define the font-size on the wrapper element, but we need to keep font-size definition here
 			// to prevent CSS Inliner from adding a default value and overriding the value set by user, which is on the wrapper element.
