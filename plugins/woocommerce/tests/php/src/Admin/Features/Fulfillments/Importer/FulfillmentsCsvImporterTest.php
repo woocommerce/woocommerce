@@ -524,6 +524,27 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( 1, $summary['created'] );
 		$this->assertSame( 0, $summary['failed'] );
+
+		/** @var FulfillmentsDataStore $store */
+		$store        = WC_Data_Store::load( 'order-fulfillment' );
+		$fulfillments = $store->read_fulfillments( WC_Order::class, (string) $order->get_id() );
+		$this->assertCount( 1, $fulfillments );
+		$this->assertSame(
+			array(
+				array(
+					'item_id' => (int) $first_item->get_id(),
+					'qty'     => 1,
+				),
+			),
+			array_map(
+				static fn( $item ) => array(
+					'item_id' => (int) $item['item_id'],
+					'qty'     => (int) $item['qty'],
+				),
+				$fulfillments[0]->get_items()
+			),
+			'The SKU entry must resolve to exactly the matching order item with the requested quantity'
+		);
 	}
 
 	/**
@@ -583,6 +604,109 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 1, $summary['created'] );
 		// The second row either updates (default) or is skipped, but must not create.
 		$this->assertSame( 0, $summary['failed'] );
+	}
+
+	/**
+	 * @testdox A stored fulfillment is matched case-insensitively by a later import.
+	 */
+	public function test_case_insensitive_match_updates_stored_fulfillment(): void {
+		$order = $this->make_order();
+
+		$first = ( new FulfillmentsCsvImporter(
+			$this->make_csv( "order_number,tracking_number,shipment_provider\n{$order->get_id()},TRK-STORED,ups\n" )
+		) )->run();
+		$this->assertSame( 1, $first['created'] );
+
+		// A separate import run, so the match must come from the store, not the in-file dedupe.
+		$second = ( new FulfillmentsCsvImporter(
+			$this->make_csv( "order_number,tracking_number,shipment_provider\n{$order->get_id()},trk-stored,fedex\n" )
+		) )->run();
+
+		$this->assertSame( 1, $second['updated'], 'The lowercase spelling must update the stored fulfillment' );
+		$this->assertSame( 0, $second['created'] );
+
+		/** @var FulfillmentsDataStore $store */
+		$store = WC_Data_Store::load( 'order-fulfillment' );
+		$this->assertCount( 1, $store->read_fulfillments( WC_Order::class, (string) $order->get_id() ) );
+	}
+
+	/**
+	 * @testdox Quoted fields with embedded delimiters and newlines survive chunked reads.
+	 */
+	public function test_quoted_fields_with_embedded_delimiters_and_newlines(): void {
+		$o1 = $this->make_order();
+		$o2 = $this->make_order();
+
+		$csv = "order_number,tracking_number,shipment_provider\n"
+			. "{$o1->get_id()},\"QTD,1\",\"ups\nground\"\n"
+			. "{$o2->get_id()},QTD-2,\"fedex, express\"\n";
+		$file = $this->make_csv( $csv );
+
+		$mapping = array(
+			0 => FulfillmentsCsvImporter::COL_ORDER_NUMBER,
+			1 => FulfillmentsCsvImporter::COL_TRACKING_NUMBER,
+			2 => FulfillmentsCsvImporter::COL_PROVIDER,
+		);
+
+		$sut = new FulfillmentsCsvImporter( $file );
+
+		$first = $sut->import_chunk( 0, 1, $mapping );
+		$this->assertSame( 1, $first['counts']['created'] );
+		$this->assertFalse( $first['eof'] );
+
+		$second = $sut->import_chunk( 1, 1, $mapping, array( 'byte_offset' => $first['byte_offset'] ) );
+		$this->assertSame( 1, $second['counts']['created'], 'The byte offset must land on the record boundary after a multi-line quoted cell' );
+
+		/** @var FulfillmentsDataStore $store */
+		$store = WC_Data_Store::load( 'order-fulfillment' );
+
+		$first_stored = $store->read_fulfillments( WC_Order::class, (string) $o1->get_id() );
+		$this->assertCount( 1, $first_stored );
+		$this->assertSame( 'QTD,1', $first_stored[0]->get_tracking_number() );
+		$this->assertSame( "ups\nground", $first_stored[0]->get_shipment_provider() );
+
+		$second_stored = $store->read_fulfillments( WC_Order::class, (string) $o2->get_id() );
+		$this->assertCount( 1, $second_stored );
+		$this->assertSame( 'fedex, express', $second_stored[0]->get_shipment_provider() );
+	}
+
+	/**
+	 * @testdox A header-only CSV imports zero rows without failing.
+	 */
+	public function test_header_only_csv_yields_empty_summary(): void {
+		$file = $this->make_csv( "order_number,tracking_number,shipment_provider\n" );
+
+		$summary = ( new FulfillmentsCsvImporter( $file ) )->run();
+
+		$this->assertSame( 0, $summary['created'] );
+		$this->assertSame( 0, $summary['updated'] );
+		$this->assertSame( 0, $summary['skipped'] );
+		$this->assertSame( 0, $summary['failed'] );
+		$this->assertSame( array(), $summary['rows'] );
+	}
+
+	/**
+	 * @testdox resolve_chunk_size clamps the filtered value into the valid range.
+	 */
+	public function test_resolve_chunk_size_clamps_filtered_values(): void {
+		$forced_value = 0;
+		$filter       = function () use ( &$forced_value ) {
+			return $forced_value;
+		};
+		add_filter( 'woocommerce_fulfillments_csv_importer_chunk_size', $filter );
+
+		try {
+			$forced_value = 0;
+			$this->assertSame( FulfillmentsCsvImporter::DEFAULT_CHUNK_SIZE, FulfillmentsCsvImporter::resolve_chunk_size(), 'Non-positive filter values must fall back to the default' );
+
+			$forced_value = 5000;
+			$this->assertSame( FulfillmentsCsvImporter::MAX_CHUNK_SIZE, FulfillmentsCsvImporter::resolve_chunk_size(), 'The filtered value must be capped at the hard ceiling' );
+
+			$forced_value = 50;
+			$this->assertSame( 50, FulfillmentsCsvImporter::resolve_chunk_size() );
+		} finally {
+			remove_filter( 'woocommerce_fulfillments_csv_importer_chunk_size', $filter );
+		}
 	}
 
 	/**

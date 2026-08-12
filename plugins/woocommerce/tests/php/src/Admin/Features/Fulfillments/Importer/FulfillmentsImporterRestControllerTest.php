@@ -381,7 +381,7 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 
 		$result = $method->invoke( $controller, new WP_REST_Request( 'POST', '/wc/v3/fulfillments/import/run' ) );
 
-		$this->assertNotSame( true, $result );
+		$this->assertInstanceOf( \WP_Error::class, $result );
 
 		wp_delete_user( (int) $subscriber );
 	}
@@ -573,6 +573,197 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 
 		$store = \WC_Data_Store::load( 'order-fulfillment' );
 		$this->assertCount( 0, $store->read_fulfillments( \WC_Order::class, (string) $order->get_id() ) );
+	}
+
+	/**
+	 * Dispatch a run request through the REST server so routes, arg schema, and
+	 * permission callbacks are exercised, not just the handler.
+	 *
+	 * @param array<string, mixed> $params Body params.
+	 * @return \WP_REST_Response
+	 */
+	private function dispatch_run( array $params ): \WP_REST_Response {
+		$request = new WP_REST_Request( 'POST', '/wc/v3/fulfillments/import/run' );
+		$request->set_body_params( $params );
+		return rest_do_request( $request );
+	}
+
+	/**
+	 * @testdox The run route processes a chunk end to end when dispatched through the REST server.
+	 */
+	public function test_rest_run_route_end_to_end(): void {
+		$order = OrderHelper::create_order();
+		$csv   = "order_number,tracking_number,shipment_provider\n{$order->get_id()},REST-1,ups\n";
+		$file  = $this->make_csv( $csv );
+
+		$session = $this->open_session_for( $file );
+
+		$response = $this->dispatch_run(
+			array(
+				'token'   => $session->token(),
+				'offset'  => 0,
+				'limit'   => 5,
+				'mapping' => array(
+					'0' => FulfillmentsCsvImporter::COL_ORDER_NUMBER,
+					'1' => FulfillmentsCsvImporter::COL_TRACKING_NUMBER,
+					'2' => FulfillmentsCsvImporter::COL_PROVIDER,
+				),
+			)
+		);
+
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertTrue( $data['done'] );
+		$this->assertSame( 1, $data['counts']['created'] );
+	}
+
+	/**
+	 * @testdox The run route rejects a malformed token via its validate callback.
+	 */
+	public function test_rest_run_route_rejects_malformed_token(): void {
+		$response = $this->dispatch_run(
+			array(
+				'token'   => 'not-a-token!',
+				'mapping' => array( '0' => FulfillmentsCsvImporter::COL_ORDER_NUMBER ),
+			)
+		);
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox The run route rejects a limit above the schema maximum.
+	 */
+	public function test_rest_run_route_rejects_out_of_range_limit(): void {
+		$response = $this->dispatch_run(
+			array(
+				'token'   => str_repeat( 'a', 32 ),
+				'limit'   => FulfillmentsCsvImporter::MAX_CHUNK_SIZE + 1,
+				'mapping' => array( '0' => FulfillmentsCsvImporter::COL_ORDER_NUMBER ),
+			)
+		);
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox The run route refuses users without manage_woocommerce when dispatched through the REST server.
+	 */
+	public function test_rest_run_route_requires_capability(): void {
+		$subscriber = wp_insert_user(
+			array(
+				'user_login' => 'fulfill_rest_sub_' . wp_generate_password( 6, false ),
+				'user_pass'  => wp_generate_password( 12, false ),
+				'role'       => 'subscriber',
+			)
+		);
+		$this->assertIsInt( $subscriber );
+		wp_set_current_user( (int) $subscriber );
+
+		try {
+			$response = $this->dispatch_run(
+				array(
+					'token'   => str_repeat( 'a', 32 ),
+					'mapping' => array( '0' => FulfillmentsCsvImporter::COL_ORDER_NUMBER ),
+				)
+			);
+			$this->assertGreaterThanOrEqual( 401, $response->get_status() );
+			$this->assertLessThanOrEqual( 403, $response->get_status() );
+		} finally {
+			wp_set_current_user( (int) self::$admin_id );
+			wp_delete_user( (int) $subscriber );
+		}
+	}
+
+	/**
+	 * @testdox The prepare route rejects a request without a file when dispatched through the REST server.
+	 */
+	public function test_rest_prepare_route_rejects_missing_file(): void {
+		$request = new WP_REST_Request( 'POST', '/wc/v3/fulfillments/import/prepare' );
+		$request->set_body_params( array( 'delimiter' => ',' ) );
+
+		$response = rest_do_request( $request );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_fulfillments_import_no_file', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Duplicate order and tracking pairs are skipped across chunk boundaries.
+	 */
+	public function test_run_deduplicates_pairs_across_chunks(): void {
+		$order = OrderHelper::create_order();
+		$csv   = "order_number,tracking_number,shipment_provider\n"
+			. "{$order->get_id()},XCHUNK-1,ups\n"
+			. "{$order->get_id()},XCHUNK-1,fedex\n";
+		$file  = $this->make_csv( $csv );
+
+		$session = $this->open_session_for( $file );
+		$token   = $session->token();
+
+		$first = $this->invoke( 'handle_run', $this->make_run_request( $token, 0, 1 ) );
+		$this->assertIsArray( $first );
+		$this->assertSame( 1, $first['counts']['created'] );
+
+		$second = $this->invoke( 'handle_run', $this->make_run_request( $token, 1, 1 ) );
+		$this->assertIsArray( $second );
+		$this->assertSame( 1, $second['counts']['skipped'], 'The repeated pair in the second chunk must be skipped via persisted dedupe state' );
+		$this->assertSame( 1, $second['counts']['created'] );
+
+		$store = \WC_Data_Store::load( 'order-fulfillment' );
+		$this->assertCount( 1, $store->read_fulfillments( \WC_Order::class, (string) $order->get_id() ) );
+	}
+
+	/**
+	 * @testdox handle_run rejects a session whose staged file was deleted.
+	 */
+	public function test_run_rejects_when_staged_file_was_deleted(): void {
+		$order = OrderHelper::create_order();
+		$csv   = "order_number,tracking_number,shipment_provider\n{$order->get_id()},DEL-1,ups\n";
+		$file  = $this->make_csv( $csv );
+
+		$session = $this->open_session_for( $file );
+		wp_delete_file( $file );
+
+		$response = $this->invoke( 'handle_run', $this->make_run_request( $session->token(), 0, 5 ) );
+
+		$this->assertInstanceOf( \WP_Error::class, $response );
+		$this->assertSame( 'woocommerce_fulfillments_import_file_changed', $response->get_error_code() );
+	}
+
+	/**
+	 * @testdox handle_prepare rejects uploads above the filtered size limit.
+	 */
+	public function test_prepare_rejects_file_above_size_limit(): void {
+		$limit_filter = static function () {
+			return 10;
+		};
+		add_filter( 'import_upload_size_limit', $limit_filter );
+
+		try {
+			$request = new WP_REST_Request( 'POST', '/wc/v3/fulfillments/import/prepare' );
+			$request->set_param( 'delimiter', ',' );
+			$request->set_file_params(
+				array(
+					'file' => array(
+						'name'     => 'big.csv',
+						'type'     => 'text/csv',
+						'tmp_name' => '/tmp/does-not-matter.csv',
+						'error'    => 0,
+						'size'     => 1000,
+					),
+				)
+			);
+
+			$response = $this->invoke( 'handle_prepare', $request );
+		} finally {
+			remove_filter( 'import_upload_size_limit', $limit_filter );
+		}
+
+		$this->assertInstanceOf( \WP_Error::class, $response );
+		$this->assertSame( 'woocommerce_fulfillments_import_file_too_large', $response->get_error_code() );
 	}
 
 	/**
