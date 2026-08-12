@@ -1,3 +1,4 @@
 Significance: minor
 Type: fix
-Comment: Add guard against malformed data from woocommerce_variation_prices filter
+
+Add guard against malformed data from woocommerce_variation_prices filter
