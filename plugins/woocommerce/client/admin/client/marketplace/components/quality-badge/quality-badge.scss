@@ -1,0 +1,105 @@
+@import "../../stylesheets/_variables.scss";
+
+.woocommerce-marketplace {
+	// Chip on product cards. Sits on its own row at the bottom of the card
+	// footer, below the price, to avoid crowding the title on narrow cards.
+	&__quality-badge {
+		width: 100%;
+
+		&__chip {
+			align-items: center;
+			background: $studio-gray-0;
+			border: 0;
+			border-radius: $grid-unit-05;
+			color: $gray-900;
+			cursor: pointer;
+			display: inline-flex;
+			font-family: inherit;
+			font-size: 12px;
+			font-weight: 500;
+			gap: $grid-unit-05;
+			line-height: 20px;
+			padding: 0 $grid-unit-10 0 $grid-unit-05;
+			/* Punch through the "whole card clickable" trick so the popover opens: */
+			position: relative;
+		}
+
+		/* The tooltip-less variant is an inert label, not a control: */
+		span#{&}__chip {
+			cursor: default;
+		}
+	}
+
+	&__quality-badge-icon {
+		flex-shrink: 0;
+	}
+
+	// "Show only <badge>" toggle in the listing sub-header.
+	&__quality-badge-filter {
+		align-items: center;
+		border: 1px solid $studio-gray-5;
+		border-radius: 2px;
+		display: flex;
+		flex-shrink: 0;
+		height: 40px;
+		padding: 0 $grid-unit-15;
+
+		label {
+			cursor: pointer;
+			font-size: 12px;
+			line-height: 16px;
+			margin: 0 $grid-unit-05 0 $grid-unit-10;
+			white-space: nowrap;
+		}
+
+		&__name {
+			font-weight: 500;
+		}
+
+		&__info {
+			align-items: center;
+			background: none;
+			border: 0;
+			color: $gray-700;
+			cursor: pointer;
+			display: flex;
+			padding: 0;
+		}
+
+		.components-form-toggle {
+			margin-left: $grid-unit-20;
+		}
+
+		/* On mobile the filter sits above the category dropdown; mirror the
+		   dropdown's select-like sizing and never exceed the viewport. */
+		@media screen and (max-width: $break-medium) {
+			border-color: $gray-600;
+			height: auto;
+			min-width: 0;
+			padding: $grid-unit-15 $grid-unit-10;
+
+			label {
+				min-width: 0;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+
+			.components-form-toggle {
+				margin-left: auto;
+			}
+		}
+	}
+
+	// Shared explanation popover (card chip + filter info button).
+	&__quality-badge-popover .components-popover__content {
+		font-size: 12px;
+		line-height: 16px;
+		max-width: 260px;
+		padding: $grid-unit-15;
+		width: max-content;
+
+		p {
+			margin: 0 0 $grid-unit-05;
+		}
+	}
+}
