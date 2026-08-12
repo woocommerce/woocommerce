@@ -24,7 +24,7 @@ Every Woo-owned extension has a Grafana fatal-error alert on WP Cloud, backed by
 
 When an alert fires, open the linked dashboard panel to see how many sites are affected, then reply on the alert to ping the owning team - triage is theirs. If the fatal traces back to the release, treat it as a candidate critical issue (see below).
 
-Fatals from old extension versions right after a release usually mean sites updated WooCommerce without updating the extension. Check the affected versions before calling it a regression.
+An old extension version can point to a compatibility issue, but it does not prove the release caused the fatal. Compare the affected WooCommerce and extension versions before calling it a non-regression.
 
 ## Handling Critical Issues
 
