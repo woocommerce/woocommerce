@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * The actual import is handled by FulfillmentsImporterRestController.
  *
- * @since 10.9.0
+ * @since 11.1.0
  */
 class FulfillmentsCsvImporterController {
 
@@ -35,7 +35,7 @@ class FulfillmentsCsvImporterController {
 	/**
 	 * Register hooks. Called by FulfillmentsController when the feature is enabled.
 	 *
-	 * @since 10.9.0
+	 * @since 11.1.0
 	 */
 	public function register(): void {
 		// The React script (`fulfillments-importer`) injects the "Import fulfillments" trigger
@@ -49,19 +49,19 @@ class FulfillmentsCsvImporterController {
 	/**
 	 * Render the React mount slot once per page load on the orders list.
 	 *
-	 * @since 10.9.0
+	 * @since 11.1.0
 	 */
 	public function render_modal_slot(): void {
 		if ( ! $this->should_render_importer() ) {
 			return;
 		}
-		echo '<div id="' . esc_attr( 'wc_fulfillments_importer_panel_container' ) . '"></div>';
+		echo '<div id="wc_fulfillments_importer_panel_container"></div>';
 	}
 
 	/**
 	 * Register and enqueue the React script and style on the orders list screen.
 	 *
-	 * @since 10.9.0
+	 * @since 11.1.0
 	 */
 	public function enqueue_assets(): void {
 		if ( $this->assets_enqueued ) {
@@ -71,9 +71,7 @@ class FulfillmentsCsvImporterController {
 			return;
 		}
 
-		// The importer's CSS is bundled into the fulfillments stylesheet (see
-		// client/wp-admin-scripts/fulfillments/style.scss) which FulfillmentsRenderer
-		// already enqueues on this screen, so we only register the script here.
+		WCAdminAssets::register_style( 'fulfillments-importer', 'style', array( 'wp-components' ) );
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'fulfillments-importer', true );
 
 		wp_localize_script(
@@ -95,7 +93,7 @@ class FulfillmentsCsvImporterController {
 	 * Mirrors the guard used by {@see FulfillmentsRenderer::should_render_fulfillment_drawer()}:
 	 * admin orders-list only, with the manage_woocommerce capability.
 	 *
-	 * @since 10.9.0
+	 * @since 11.1.0
 	 *
 	 * @return bool
 	 */

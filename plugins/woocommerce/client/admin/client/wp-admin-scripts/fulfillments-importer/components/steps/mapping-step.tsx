@@ -16,9 +16,9 @@ import {
 import type { StepComponentProps } from './types';
 
 const CANONICAL_LABELS: Record< CanonicalColumnKey, string > = {
-	order_number: __( 'Order number *', 'woocommerce' ),
-	tracking_number: __( 'Tracking number *', 'woocommerce' ),
-	shipment_provider: __( 'Carrier / provider *', 'woocommerce' ),
+	order_number: __( 'Order number (required)', 'woocommerce' ),
+	tracking_number: __( 'Tracking number (required)', 'woocommerce' ),
+	shipment_provider: __( 'Carrier / provider (required)', 'woocommerce' ),
 	tracking_url: __( 'Tracking URL', 'woocommerce' ),
 	items: __( 'Items', 'woocommerce' ),
 	'': __( 'Do not import', 'woocommerce' ),
