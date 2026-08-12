@@ -41182,12 +41182,6 @@ parameters:
 			path: src/Admin/API/Reports/Customers/Controller.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\Controller\:\:prepare_item_for_export\(\) should return array but returns object\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/Customers/Controller.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\Controller\:\:prepare_item_for_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
