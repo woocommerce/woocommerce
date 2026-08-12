@@ -234,6 +234,7 @@ class FulfillmentsCsvImporter {
 			);
 		}
 
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Streaming a staged local CSV; WP_Filesystem has no line reader.
 		$handle = fopen( $this->file, 'rb' );
 		if ( false === $handle ) {
 			return array(
@@ -293,6 +294,7 @@ class FulfillmentsCsvImporter {
 				'delimiter'        => $effective_delimiter,
 			);
 		} finally {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closing the handle opened above.
 			fclose( $handle );
 		}
 	}
@@ -302,10 +304,10 @@ class FulfillmentsCsvImporter {
 	 *
 	 * @since 10.9.0
 	 *
-	 * @param int                $offset  0-based row offset to start at (header is implicitly skipped).
-	 * @param int                $limit   Maximum number of CSV records to consume from the slice.
-	 * @param array<int, string> $mapping CSV column index => canonical column key. Unmapped columns
-	 *                                    may be omitted or set to "".
+	 * @param int                  $offset  0-based row offset to start at (header is implicitly skipped).
+	 * @param int                  $limit   Maximum number of CSV records to consume from the slice.
+	 * @param array<int, string>   $mapping CSV column index => canonical column key. Unmapped columns
+	 *                                      may be omitted or set to "".
 	 * @param array<string, mixed> $options {
 	 *     Per-chunk overrides; fall back to constructor options when omitted.
 	 *
@@ -322,7 +324,9 @@ class FulfillmentsCsvImporter {
 	 *     rows: array<int, array<string, mixed>>,
 	 *     seen_tracking_pairs: array<string, true>,
 	 *     byte_offset: int,
-	 *     consumed: int
+	 *     consumed: int,
+	 *     eof: bool,
+	 *     aborted: bool
 	 * }
 	 */
 	public function import_chunk( int $offset, int $limit, array $mapping, array $options = array() ): array {
@@ -363,6 +367,8 @@ class FulfillmentsCsvImporter {
 					'seen_tracking_pairs' => $seen_tracking_pairs,
 					'byte_offset'         => $byte_offset_in,
 					'consumed'            => 0,
+					'eof'                 => false,
+					'aborted'             => false,
 				);
 			}
 
@@ -375,9 +381,12 @@ class FulfillmentsCsvImporter {
 					'seen_tracking_pairs' => $seen_tracking_pairs,
 					'byte_offset'         => $byte_offset_in,
 					'consumed'            => 0,
+					'eof'                 => false,
+					'aborted'             => true,
 				);
 			}
 
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Streaming a staged local CSV; WP_Filesystem has no line reader.
 			$handle = fopen( $this->file, 'rb' );
 			if ( false === $handle ) {
 				$rows[] = $this->fail( 0, 'file_open_failed', __( 'Could not open file.', 'woocommerce' ) );
@@ -388,16 +397,18 @@ class FulfillmentsCsvImporter {
 					'seen_tracking_pairs' => $seen_tracking_pairs,
 					'byte_offset'         => $byte_offset_in,
 					'consumed'            => 0,
+					'eof'                 => false,
+					'aborted'             => true,
 				);
 			}
 
 			$byte_offset_out = $byte_offset_in;
 
 			try {
-				$header_map  = self::mapping_to_header_map( $mapping );
-				$missing     = self::find_missing_required_columns( $header_map );
-				$row_number  = $offset + 1;
-				$resumed     = false;
+				$header_map = self::mapping_to_header_map( $mapping );
+				$missing    = self::find_missing_required_columns( $header_map );
+				$row_number = $offset + 1;
+				$resumed    = false;
 
 				if ( $byte_offset_in > 0 && 0 === fseek( $handle, $byte_offset_in ) ) {
 					// Resuming from a prior chunk: header and earlier rows are already past.
@@ -415,6 +426,8 @@ class FulfillmentsCsvImporter {
 							'seen_tracking_pairs' => $seen_tracking_pairs,
 							'byte_offset'         => $byte_offset_in,
 							'consumed'            => 0,
+							'eof'                 => false,
+							'aborted'             => true,
 						);
 					}
 				}
@@ -436,6 +449,8 @@ class FulfillmentsCsvImporter {
 						'seen_tracking_pairs' => $seen_tracking_pairs,
 						'byte_offset'         => $byte_offset_in,
 						'consumed'            => 0,
+						'eof'                 => false,
+						'aborted'             => true,
 					);
 				}
 
@@ -452,17 +467,21 @@ class FulfillmentsCsvImporter {
 								'seen_tracking_pairs' => $seen_tracking_pairs,
 								'byte_offset'         => false === $position ? $byte_offset_in : (int) $position,
 								'consumed'            => 0,
+								'eof'                 => true,
+								'aborted'             => false,
 							);
 						}
 						++$row_number;
 					}
 				}
 
-				$consumed = 0;
-				$batch    = array();
+				$consumed    = 0;
+				$reached_eof = false;
+				$batch       = array();
 				while ( $consumed < $limit ) {
 					$row = fgetcsv( $handle, 0, $delimiter, $this->options['enclosure'], '' );
 					if ( false === $row ) {
+						$reached_eof = true;
 						break;
 					}
 					++$row_number;
@@ -515,6 +534,7 @@ class FulfillmentsCsvImporter {
 					$byte_offset_out = (int) $position;
 				}
 			} finally {
+				// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closing the handle opened above.
 				fclose( $handle );
 			}
 
@@ -524,6 +544,8 @@ class FulfillmentsCsvImporter {
 				'seen_tracking_pairs' => $seen_tracking_pairs,
 				'byte_offset'         => $byte_offset_out,
 				'consumed'            => $consumed,
+				'eof'                 => $reached_eof,
+				'aborted'             => false,
 			);
 		} finally {
 			$this->options = $prev_options;
@@ -573,6 +595,7 @@ class FulfillmentsCsvImporter {
 	 * @param resource $handle Open file handle positioned at byte 0.
 	 */
 	private function strip_bom( $handle ): void {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread -- Reading 3 bytes from an already-open handle.
 		$bom = fread( $handle, 3 );
 		if ( "\xEF\xBB\xBF" !== $bom ) {
 			rewind( $handle );
@@ -605,10 +628,10 @@ class FulfillmentsCsvImporter {
 	/**
 	 * Process a single CSV row.
 	 *
-	 * @param array<int, string>             $row                  Raw CSV row.
-	 * @param array<string, int>             $header_map           Map of canonical column key => CSV column index.
-	 * @param int                            $row_number           1-based row number (header is row 1).
-	 * @param array<string, true>            $seen_tracking_pairs  Reference to in-file dedupe tracker.
+	 * @param array<int, string>  $row                  Raw CSV row.
+	 * @param array<string, int>  $header_map           Map of canonical column key => CSV column index.
+	 * @param int                 $row_number           1-based row number (header is row 1).
+	 * @param array<string, true> $seen_tracking_pairs  Reference to in-file dedupe tracker.
 	 *
 	 * @return array{row:int, status:string, message:string, code?:string, order_id?:int, fulfillment_id?:int, notified?:bool}
 	 */
@@ -701,11 +724,19 @@ class FulfillmentsCsvImporter {
 				$notified = false;
 				if ( $this->options['notify_customer'] ) {
 					if ( ! $previous_state ) {
-						/** This hook is documented in OrderFulfillmentsRestController.php. */
+						/**
+						 * This action is documented in OrderFulfillmentsRestController.php.
+						 *
+						 * @since 10.1.0
+						 */
 						do_action( 'woocommerce_fulfillment_created_notification', $order->get_id(), $existing, $order );
 						FulfillmentsTracker::track_fulfillment_notification_sent( 'fulfillment_created', $existing->get_id(), $order->get_id() );
 					} else {
-						/** This hook is documented in OrderFulfillmentsRestController.php. */
+						/**
+						 * This action is documented in OrderFulfillmentsRestController.php.
+						 *
+						 * @since 10.1.0
+						 */
 						do_action( 'woocommerce_fulfillment_updated_notification', $order->get_id(), $existing, $order, '' );
 						FulfillmentsTracker::track_fulfillment_notification_sent( 'fulfillment_updated', $existing->get_id(), $order->get_id() );
 					}
@@ -745,7 +776,11 @@ class FulfillmentsCsvImporter {
 
 			$notified = false;
 			if ( $this->options['notify_customer'] && $fulfillment->get_is_fulfilled() ) {
-				/** This hook is documented in OrderFulfillmentsRestController.php. */
+				/**
+				 * This action is documented in OrderFulfillmentsRestController.php.
+				 *
+				 * @since 10.1.0
+				 */
 				do_action( 'woocommerce_fulfillment_created_notification', $order->get_id(), $fulfillment, $order );
 				FulfillmentsTracker::track_fulfillment_notification_sent( 'fulfillment_created', $fulfillment->get_id(), $order->get_id() );
 				$notified = true;
@@ -1040,6 +1075,8 @@ class FulfillmentsCsvImporter {
 	 *
 	 * @param int $order_id Order ID.
 	 * @return array<int, Fulfillment>
+	 *
+	 * @throws \RuntimeException When the fulfillments data store cannot be read.
 	 */
 	private function get_order_fulfillments( int $order_id ): array {
 		if ( isset( $this->fulfillments_cache[ $order_id ] ) ) {
@@ -1047,7 +1084,11 @@ class FulfillmentsCsvImporter {
 		}
 
 		try {
-			/** @var FulfillmentsDataStore $store */
+			/**
+			 * Data store for order fulfillments.
+			 *
+			 * @var FulfillmentsDataStore $store
+			 */
 			$store        = WC_Data_Store::load( 'order-fulfillment' );
 			$fulfillments = $store->read_fulfillments( WC_Order::class, (string) $order_id );
 		} catch ( \Throwable $e ) {
@@ -1127,10 +1168,12 @@ class FulfillmentsCsvImporter {
 				$qty = $parts[2];
 				if ( ! isset( $by_sku[ $sku ] ) ) {
 					throw new \Exception(
-						sprintf(
-							/* translators: %s: SKU value from CSV. */
-							__( 'SKU "%s" not found on the order.', 'woocommerce' ),
-							$parts[1]
+						esc_html(
+							sprintf(
+								/* translators: %s: SKU value from CSV. */
+								__( 'SKU %s was not found on the order.', 'woocommerce' ),
+								$parts[1]
+							)
 						)
 					);
 				}
@@ -1146,10 +1189,12 @@ class FulfillmentsCsvImporter {
 				$qty     = $parts[1];
 				if ( ! ctype_digit( $item_id ) || ! isset( $by_id[ (int) $item_id ] ) ) {
 					throw new \Exception(
-						sprintf(
-							/* translators: %s: order item ID from CSV. */
-							__( 'Item ID "%s" is not part of this order.', 'woocommerce' ),
-							(string) $item_id
+						esc_html(
+							sprintf(
+								/* translators: %s: order item ID from CSV. */
+								__( 'Item ID %s is not part of this order.', 'woocommerce' ),
+								(string) $item_id
+							)
 						)
 					);
 				}
@@ -1161,10 +1206,12 @@ class FulfillmentsCsvImporter {
 			}
 
 			throw new \Exception(
-				sprintf(
-					/* translators: %s: items value from CSV. */
-					__( 'Invalid items entry: "%s".', 'woocommerce' ),
-					$entry
+				esc_html(
+					sprintf(
+						/* translators: %s: items value from CSV. */
+						__( 'Invalid items entry: %s.', 'woocommerce' ),
+						$entry
+					)
 				)
 			);
 		}
@@ -1175,18 +1222,20 @@ class FulfillmentsCsvImporter {
 			$qty_input  = $entry['qty'];
 
 			// Require an integer-valued positive quantity. Reject fractional values rather than silently truncating.
-			if ( ! is_numeric( $qty_input ) || (float) $qty_input <= 0 || (float) $qty_input !== (float) (int) $qty_input ) {
-				throw new \Exception( __( 'Item quantity must be a positive integer.', 'woocommerce' ) );
+			if ( ! is_numeric( $qty_input ) || 0 >= (float) $qty_input || 0.0 !== fmod( (float) $qty_input, 1.0 ) ) {
+				throw new \Exception( esc_html__( 'Item quantity must be a positive integer.', 'woocommerce' ) );
 			}
-			$qty           = (int) $qty_input;
-			$ordered_qty   = method_exists( $order_item, 'get_quantity' ) ? (int) $order_item->get_quantity() : 0;
+			$qty         = (int) $qty_input;
+			$ordered_qty = method_exists( $order_item, 'get_quantity' ) ? (int) $order_item->get_quantity() : 0;
 			if ( $ordered_qty > 0 && $qty > $ordered_qty ) {
 				throw new \Exception(
-					sprintf(
-						/* translators: 1: requested quantity, 2: ordered quantity. */
-						__( 'Item quantity %1$d exceeds the ordered quantity %2$d.', 'woocommerce' ),
-						$qty,
-						$ordered_qty
+					esc_html(
+						sprintf(
+							/* translators: 1: requested quantity, 2: ordered quantity. */
+							__( 'Item quantity %1$d exceeds the ordered quantity %2$d.', 'woocommerce' ),
+							$qty,
+							$ordered_qty
+						)
 					)
 				);
 			}

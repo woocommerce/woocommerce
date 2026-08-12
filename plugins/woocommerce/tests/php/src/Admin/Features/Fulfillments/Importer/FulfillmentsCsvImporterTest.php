@@ -63,7 +63,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		foreach ( $this->temp_files as $path ) {
 			if ( file_exists( $path ) ) {
-				unlink( $path );
+				wp_delete_file( $path );
 			}
 		}
 		$this->temp_files = array();
@@ -78,7 +78,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	 */
 	private function make_csv( string $content ): string {
 		$path = wp_tempnam( 'wc-fulfillments-import-' );
-		file_put_contents( $path, $content );
+		file_put_contents( $path, $content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture write.
 		$this->temp_files[] = $path;
 		return $path;
 	}
@@ -546,8 +546,8 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		add_action( 'woocommerce_fulfillment_created_notification', $on_created );
 
 		try {
-			$csv2 = "order_number,tracking_number,shipment_provider\n{$order->get_id()},UPDN-1,fedex\n";
-			$sut  = new FulfillmentsCsvImporter(
+			$csv2    = "order_number,tracking_number,shipment_provider\n{$order->get_id()},UPDN-1,fedex\n";
+			$sut     = new FulfillmentsCsvImporter(
 				$this->make_csv( $csv2 ),
 				array( 'notify_customer' => true )
 			);
@@ -681,7 +681,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$o3 = $this->make_order();
 		$o4 = $this->make_order();
 
-		$csv = "order_number,tracking_number,shipment_provider\n"
+		$csv  = "order_number,tracking_number,shipment_provider\n"
 			. "{$o1->get_id()},T-1,ups\n"
 			. "{$o2->get_id()},T-2,ups\n"
 			. "{$o3->get_id()},T-3,ups\n"
@@ -791,4 +791,59 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$this->assertCount( count( $one_shot['rows'] ), $rows );
 	}
 
+	/**
+	 * @testdox import_chunk reports eof only when the file is exhausted.
+	 */
+	public function test_import_chunk_signals_eof_only_at_end_of_file(): void {
+		$o1 = $this->make_order();
+		$o2 = $this->make_order();
+		$o3 = $this->make_order();
+
+		$csv  = "order_number,tracking_number,shipment_provider\n"
+			. "{$o1->get_id()},E-1,ups\n"
+			. "{$o2->get_id()},E-2,ups\n"
+			. "{$o3->get_id()},E-3,ups\n";
+		$file = $this->make_csv( $csv );
+
+		$mapping = array(
+			0 => FulfillmentsCsvImporter::COL_ORDER_NUMBER,
+			1 => FulfillmentsCsvImporter::COL_TRACKING_NUMBER,
+			2 => FulfillmentsCsvImporter::COL_PROVIDER,
+		);
+
+		$sut = new FulfillmentsCsvImporter( $file );
+
+		$first = $sut->import_chunk( 0, 2, $mapping );
+		$this->assertFalse( $first['eof'], 'A chunk that fills its limit must not report eof' );
+		$this->assertFalse( $first['aborted'] );
+		$this->assertSame( 2, $first['consumed'] );
+
+		$second = $sut->import_chunk( 2, 2, $mapping, array( 'byte_offset' => $first['byte_offset'] ) );
+		$this->assertTrue( $second['eof'], 'The chunk that drains the file must report eof' );
+		$this->assertFalse( $second['aborted'] );
+		$this->assertSame( 1, $second['consumed'] );
+	}
+
+	/**
+	 * @testdox import_chunk aborts instead of reporting eof when the file cannot be read.
+	 */
+	public function test_import_chunk_aborts_when_file_missing(): void {
+		$sut = new FulfillmentsCsvImporter( '/path/that/does/not/exist.csv' );
+
+		$result = $sut->import_chunk(
+			0,
+			10,
+			array(
+				0 => FulfillmentsCsvImporter::COL_ORDER_NUMBER,
+				1 => FulfillmentsCsvImporter::COL_TRACKING_NUMBER,
+				2 => FulfillmentsCsvImporter::COL_PROVIDER,
+			)
+		);
+
+		$this->assertTrue( $result['aborted'], 'An unreadable file must abort the chunk' );
+		$this->assertFalse( $result['eof'] );
+		$this->assertSame( 0, $result['consumed'] );
+		$this->assertSame( 1, $result['counts']['failed'] );
+		$this->assertSame( 'file_not_readable', $result['rows'][0]['code'] );
+	}
 }
