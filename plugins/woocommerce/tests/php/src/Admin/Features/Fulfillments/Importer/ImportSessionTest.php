@@ -114,7 +114,10 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 				'failed'   => 0,
 				'notified' => 1,
 			),
-			array( '100|abc' => true, '200|xyz' => true ),
+			array(
+				'100|abc' => true,
+				'200|xyz' => true,
+			),
 			5678
 		);
 
@@ -123,7 +126,10 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 20, $reloaded->processed() );
 		$this->assertSame( 5678, $reloaded->byte_offset() );
 		$this->assertSame(
-			array( '100|abc' => true, '200|xyz' => true ),
+			array(
+				'100|abc' => true,
+				'200|xyz' => true,
+			),
 			$reloaded->seen_tracking_pairs()
 		);
 		$counts = $reloaded->counts();
@@ -177,7 +183,7 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 	public function test_cleanup_abandoned_file_deletes_when_session_is_gone(): void {
 		$upload_dir = wp_upload_dir();
 		$file       = trailingslashit( $upload_dir['basedir'] ) . 'wc-fulfillments-import-' . wp_generate_uuid4() . '.csv';
-		file_put_contents( $file, "a,b,c\n" );
+		file_put_contents( $file, "a,b,c\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture write.
 
 		// Fake an abandoned session: no transient is set for token "ghost".
 		ImportSession::cleanup_abandoned_file( 71, 'ghost', $file );
@@ -191,9 +197,9 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 	public function test_cleanup_abandoned_file_skips_live_session(): void {
 		$upload_dir = wp_upload_dir();
 		$file       = trailingslashit( $upload_dir['basedir'] ) . 'wc-fulfillments-import-' . wp_generate_uuid4() . '.csv';
-		file_put_contents( $file, "a,b,c\n" );
+		file_put_contents( $file, "a,b,c\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture write.
 
-		$session = ImportSession::create(
+		$session          = ImportSession::create(
 			81,
 			$file,
 			',',
@@ -208,8 +214,7 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 
 		$this->assertFileExists( $file );
 
-		// Test-only cleanup.
-		@unlink( $file );
+		wp_delete_file( $file );
 	}
 
 	/**
@@ -217,12 +222,12 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_cleanup_abandoned_file_refuses_paths_outside_uploads(): void {
 		$file = '/tmp/wc-fulfillments-not-in-uploads-' . wp_generate_uuid4() . '.csv';
-		file_put_contents( $file, "a,b,c\n" );
+		file_put_contents( $file, "a,b,c\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture write outside uploads on purpose.
 
 		ImportSession::cleanup_abandoned_file( 91, 'no-such-token', $file );
 
 		$this->assertFileExists( $file );
-		@unlink( $file );
+		wp_delete_file( $file );
 	}
 
 	/**
@@ -232,7 +237,8 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 		$session = $this->make_session( 33 );
 		$token   = $session->token();
 		$session->delete();
-		$this->sessions = array(); // Avoid double-delete in tearDown.
+		$this->sessions = array();
+		// Avoid double-delete in tearDown.
 
 		$this->assertNull( ImportSession::load( 33, $token ) );
 	}
@@ -241,7 +247,7 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 	 * @testdox Creating a second session for the same user invalidates the first.
 	 */
 	public function test_create_replaces_prior_session_for_same_user(): void {
-		$first  = $this->make_session( 44 );
+		$first       = $this->make_session( 44 );
 		$first_token = $first->token();
 
 		$second = $this->make_session( 44 );

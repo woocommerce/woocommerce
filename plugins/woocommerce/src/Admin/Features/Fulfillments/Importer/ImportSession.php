@@ -72,9 +72,9 @@ final class ImportSession {
 	/**
 	 * Constructor.
 	 *
-	 * @param int                   $user_id User who owns the session.
-	 * @param string                $token   Opaque session token.
-	 * @param array<string, mixed>  $data    Stored payload (see ::create()).
+	 * @param int                  $user_id User who owns the session.
+	 * @param string               $token   Opaque session token.
+	 * @param array<string, mixed> $data    Stored payload (see ::create()).
 	 */
 	private function __construct( int $user_id, string $token, array $data ) {
 		$this->user_id = $user_id;
@@ -125,7 +125,7 @@ final class ImportSession {
 			),
 		);
 
-		$stored = set_transient( self::PREFIX . $user_id . '_' . $token, $data, self::TTL );
+		$stored  = set_transient( self::PREFIX . $user_id . '_' . $token, $data, self::TTL );
 		$indexed = set_transient( self::INDEX_PREFIX . $user_id, $token, self::TTL );
 		if ( ! $stored || ! $indexed ) {
 			wc_get_logger()->error(
