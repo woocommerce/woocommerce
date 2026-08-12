@@ -239,6 +239,13 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 		$push_notifications = new PushNotifications();
 		$push_notifications->on_init();
 
+		// The status controller registers on rest_api_init rather than during
+		// on_init, so a front-end request does not resolve it for nothing. WooCommerce
+		// applies the namespaces filter on rest_api_init at priority 10, and the
+		// controller registers at priority 0, so it is always in place in time.
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Triggering a WordPress core hook, not defining one.
+		do_action( 'rest_api_init' );
+
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Triggering an existing filter from RestApiControllerBase, not defining one.
 		$namespaces = apply_filters( 'woocommerce_rest_api_get_rest_namespaces', array( 'wc/v3' => array() ) );
 		$registered = array_values( $namespaces['wc/v3'] );

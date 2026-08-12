@@ -152,15 +152,15 @@ This library will be in the `src/Internal` directory and is not intended to be u
 - **Get driver status:**
     - Endpoint: `GET /wp-json/wc-push-notifications/status`
     - Auth: user-identifying token
-    - Returns the installed notification drivers, each with `connected` (its underlying connection is present), `enabled` (the driver itself isn't disabled), and `available` (`connected && enabled`, i.e. usable now) flags, plus the currently `active-driver`. The `jetpack-sync` driver is listed only when the Jetpack Sync package is installed; the `remote-push-notification-proxy` driver ships with core and is always listed. Stays reachable even when push notifications are disabled, so clients can read the driver state and fall back to Jetpack Sync when the proxy isn't available.
+    - Returns the installed notification drivers, each with `connected` (its underlying connection is present), `enabled` (the driver itself isn't disabled), and `available` (`connected && enabled`, i.e. configured and usable, which is not a statement about delivery) flags, plus the currently `active_driver`. The `jetpack-sync` driver is listed only when the Jetpack Sync package is installed; the `remote-push-notification-proxy` driver ships with core and is always listed. Stays reachable even when push notifications are disabled, so clients can read the driver state and fall back to Jetpack Sync when the proxy isn't available.
 
     ```json
     {
-        "installed-drivers": {
+        "installed_drivers": {
             "jetpack-sync": { "connected": true, "enabled": true, "available": true },
             "remote-push-notification-proxy": { "connected": true, "enabled": true, "available": true }
         },
-        "active-driver": "remote-push-notification-proxy"
+        "active_driver": "remote-push-notification-proxy"
     }
     ```
 

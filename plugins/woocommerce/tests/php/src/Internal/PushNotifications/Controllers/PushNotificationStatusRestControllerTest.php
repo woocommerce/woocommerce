@@ -146,13 +146,13 @@ class PushNotificationStatusRestControllerTest extends WC_Unit_Test_Case {
 		$this->assertSame( WP_Http::OK, $response->get_status() );
 
 		$data = $response->get_data();
-		$this->assertArrayHasKey( 'installed-drivers', $data );
+		$this->assertArrayHasKey( 'installed_drivers', $data );
 
-		$proxy = $data['installed-drivers'][ DriverAvailabilityService::DRIVER_REMOTE_PROXY ];
+		$proxy = $data['installed_drivers'][ DriverAvailabilityService::DRIVER_REMOTE_PROXY ];
 		$this->assertTrue( $proxy['connected'] );
 		$this->assertTrue( $proxy['enabled'] );
 		$this->assertTrue( $proxy['available'] );
-		$this->assertSame( DriverAvailabilityService::DRIVER_REMOTE_PROXY, $data['active-driver'] );
+		$this->assertSame( DriverAvailabilityService::DRIVER_REMOTE_PROXY, $data['active_driver'] );
 	}
 
 	/**
@@ -172,11 +172,11 @@ class PushNotificationStatusRestControllerTest extends WC_Unit_Test_Case {
 		$this->assertSame( WP_Http::OK, $response->get_status() );
 
 		$data  = $response->get_data();
-		$proxy = $data['installed-drivers'][ DriverAvailabilityService::DRIVER_REMOTE_PROXY ];
+		$proxy = $data['installed_drivers'][ DriverAvailabilityService::DRIVER_REMOTE_PROXY ];
 		$this->assertTrue( $proxy['connected'] );
 		$this->assertFalse( $proxy['enabled'] );
 		$this->assertFalse( $proxy['available'] );
-		$this->assertNull( $data['active-driver'] );
+		$this->assertNull( $data['active_driver'] );
 	}
 
 	/**
@@ -193,11 +193,11 @@ class PushNotificationStatusRestControllerTest extends WC_Unit_Test_Case {
 		$this->assertSame( WP_Http::OK, $response->get_status() );
 
 		$data  = $response->get_data();
-		$proxy = $data['installed-drivers'][ DriverAvailabilityService::DRIVER_REMOTE_PROXY ];
+		$proxy = $data['installed_drivers'][ DriverAvailabilityService::DRIVER_REMOTE_PROXY ];
 		$this->assertFalse( $proxy['connected'] );
 		$this->assertTrue( $proxy['enabled'] );
 		$this->assertFalse( $proxy['available'] );
-		$this->assertNull( $data['active-driver'] );
+		$this->assertNull( $data['active_driver'] );
 	}
 
 	/**
@@ -223,5 +223,27 @@ class PushNotificationStatusRestControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertContains( PushNotificationStatusRestController::class, $registered_classes );
 		$this->assertContains( PushTokenRestController::class, $registered_classes );
+	}
+	/**
+	 * The schema has to be a sibling of the endpoint array rather than a key within
+	 * it: WP_REST_Server promotes only non-numeric top-level keys into its route
+	 * options and reads the schema exclusively from there, so misplacing it drops
+	 * the schema silently with every other test still passing.
+	 *
+	 * @testdox The route exposes its schema, so OPTIONS and the help context return it.
+	 */
+	public function test_route_exposes_its_schema() {
+		$server = rest_get_server();
+		$data   = $server->get_data_for_route( '/wc-push-notifications/status', $server->get_routes()['/wc-push-notifications/status'], 'help' );
+
+		$this->assertArrayHasKey( 'schema', $data, 'The schema was not promoted into the route options.' );
+		$this->assertSame( 'push_notification_status', $data['schema']['title'] );
+		$this->assertArrayHasKey( 'installed_drivers', $data['schema']['properties'] );
+		$this->assertArrayHasKey( 'active_driver', $data['schema']['properties'] );
+
+		$driver_flags = $data['schema']['properties']['installed_drivers']['additionalProperties']['properties'];
+		$this->assertSame( array( 'boolean', 'null' ), $driver_flags['connected']['type'], 'connected must allow null for an undetermined check.' );
+		$this->assertSame( array( 'boolean', 'null' ), $driver_flags['enabled']['type'], 'enabled must allow null for an undetermined check.' );
+		$this->assertSame( 'boolean', $driver_flags['available']['type'], 'available is strictly boolean.' );
 	}
 }

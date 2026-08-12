@@ -20,8 +20,13 @@ use WP_REST_Server;
  * are installed, connected, and available, and which one is enabled.
  *
  * Stays reachable even when push notifications are disabled, so clients (e.g.
- * the mobile apps) can discover the driver state and fall back to Jetpack Sync
- * when the remote proxy isn't available.
+ * the mobile apps) can discover which drivers are installed and configured, and
+ * know to fall back to Jetpack Sync when the remote proxy is not set up on this
+ * store.
+ *
+ * Reports configuration state only. A driver reported as available is installed
+ * and connected; whether a given notification is delivered promptly is a separate
+ * concern, covered by delivery logging rather than by this endpoint.
  *
  * @since 11.1.0
  */
@@ -94,7 +99,69 @@ class PushNotificationStatusRestController extends RestApiControllerBase {
 					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'get_status' ),
 					'permission_callback' => array( $this, 'authorize_as_authenticated_ignoring_enablement' ),
 				),
+				// A sibling of the endpoint array, not a key inside it. WP_REST_Server
+				// promotes only non-numeric top-level keys into its route options, and
+				// reads the schema exclusively from there, so nesting this one level
+				// deeper drops it silently.
+				'schema' => array( $this, 'get_schema' ),
 			)
+		);
+	}
+
+	/**
+	 * The schema for the status response.
+	 *
+	 * `installed_drivers` is keyed by driver identifier, so its shape is
+	 * described with `additionalProperties` rather than named properties.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function get_schema(): array {
+		$driver_flags = array(
+			'type'       => 'object',
+			'properties' => array(
+				'connected' => array(
+					'description' => __( "Whether the driver's underlying connection is present. Null when the check could not be performed.", 'woocommerce' ),
+					'type'        => array( 'boolean', 'null' ),
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'enabled'   => array(
+					'description' => __( 'Whether the driver itself is switched on. Null when the check could not be performed.', 'woocommerce' ),
+					'type'        => array( 'boolean', 'null' ),
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'available' => array(
+					'description' => __( 'Whether the driver is definitively both connected and enabled. An undetermined flag makes the driver unavailable.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+			),
+		);
+
+		return array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'push_notification_status',
+			'type'       => 'object',
+			'properties' => array(
+				'installed_drivers' => array(
+					'description'          => __( 'The installed notification drivers, keyed by driver identifier.', 'woocommerce' ),
+					'type'                 => 'object',
+					'context'              => array( 'view' ),
+					'readonly'             => true,
+					'additionalProperties' => $driver_flags,
+				),
+				'active_driver'     => array(
+					'description' => __( 'The driver currently used to deliver notifications, or null when none are available.', 'woocommerce' ),
+					'type'        => array( 'string', 'null' ),
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+			),
 		);
 	}
 
