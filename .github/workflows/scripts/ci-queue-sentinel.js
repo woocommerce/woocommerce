@@ -221,9 +221,18 @@ const summarize = ( lines ) => {
 };
 
 const main = async () => {
-	const { runs, complete: runsComplete, dropped } = await fetchActiveRuns();
-	const { queued: queuedJobs, complete: jobsComplete } = await fetchQueuedJobs( runs );
-	const probeComplete = runsComplete && jobsComplete;
+	// Forced modes skip the probe: a manual override must succeed even when
+	// the queue API is failing, and needs no queue data to decide.
+	const forced = MODE === 'on' || MODE === 'off';
+	let runs = [], queuedJobs = [], probeComplete = true, dropped = 0;
+	if ( ! forced ) {
+		const runsResult = await fetchActiveRuns();
+		const jobsResult = await fetchQueuedJobs( runsResult.runs );
+		runs = runsResult.runs;
+		queuedJobs = jobsResult.queued;
+		probeComplete = runsResult.complete && jobsResult.complete;
+		dropped = runsResult.dropped;
+	}
 	// Measure ages after the probe; retries can stretch it by minutes.
 	const nowMs = Date.now();
 	const oldestAgeMin = queuedJobs.length
@@ -257,9 +266,11 @@ const main = async () => {
 	summarize( [
 		'### CI Queue Sentinel',
 		`- Mode: \`${ MODE }\``,
-		`- Active runs probed: ${ probed } of ${ runs.length }${ dropped ? ` (${ dropped } dropped by age window)` : '' }${ probeComplete ? '' : ' (probe truncated — switch-off suppressed)' }`,
-		`- Queued jobs found: ${ queuedJobs.length }`,
-		`- Oldest queued job age: ${ oldestAgeMin === null ? 'n/a (queue clear)' : `${ oldestAgeMin.toFixed( 1 ) } min` } (threshold ${ QUEUE_AGE_THRESHOLD_MIN } min)`,
+		...( forced ? [ '- Probe skipped (forced mode)' ] : [
+			`- Active runs probed: ${ probed } of ${ runs.length }${ dropped ? ` (${ dropped } dropped by age window)` : '' }${ probeComplete ? '' : ' (probe truncated — switch-off suppressed)' }`,
+			`- Queued jobs found: ${ queuedJobs.length }`,
+			`- Oldest queued job age: ${ oldestAgeMin === null ? 'n/a (queue clear)' : `${ oldestAgeMin.toFixed( 1 ) } min` } (threshold ${ QUEUE_AGE_THRESHOLD_MIN } min)`,
+		] ),
 		`- ${ VARIABLE_NAME }: \`${ rawValue }\` -> \`${ value }\`${ value === rawValue ? ' (no change)' : '' }`,
 	] );
 };
