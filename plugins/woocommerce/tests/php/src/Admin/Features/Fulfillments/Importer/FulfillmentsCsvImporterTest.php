@@ -637,7 +637,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$o1 = $this->make_order();
 		$o2 = $this->make_order();
 
-		$csv = "order_number,tracking_number,shipment_provider\n"
+		$csv  = "order_number,tracking_number,shipment_provider\n"
 			. "{$o1->get_id()},\"QTD,1\",\"ups\nground\"\n"
 			. "{$o2->get_id()},QTD-2,\"fedex, express\"\n";
 		$file = $this->make_csv( $csv );

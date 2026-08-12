@@ -533,8 +533,8 @@ final class ImportSession {
 	/**
 	 * Persist the current payload back to its transient.
 	 *
-	 * set_transient() returns false when the stored value is unchanged, so both writes
-	 * compare first; otherwise every no-op chunk would be reported as a lost write.
+	 * The set_transient() call returns false when the stored value is unchanged, so both
+	 * writes compare first; otherwise every no-op chunk would be reported as a lost write.
 	 *
 	 * @return bool Whether the payload is stored.
 	 */

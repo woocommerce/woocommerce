@@ -1310,5 +1310,4 @@ class FulfillmentsCsvImporter {
 		}
 		return true;
 	}
-
 }
