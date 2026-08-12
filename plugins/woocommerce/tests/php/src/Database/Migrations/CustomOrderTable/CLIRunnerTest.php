@@ -11,8 +11,8 @@ use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\CLIRunner;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\LegacyDataHandler;
-use Automattic\WooCommerce\Internal\DataStores\Orders\PostsToOrdersMigrationController;
-use WP_CLI;
+use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
+use Automattic\WooCommerce\Tests\Internal\CLI\Migrator\Mocks\MockWPCLI;
 
 /**
  * Class CLIRunnerTest.
@@ -20,39 +20,21 @@ use WP_CLI;
 class CLIRunnerTest extends \WC_Unit_Test_Case {
 
 	/**
-	 * Captured log messages.
-	 *
-	 * @var string[]
-	 */
-	private $logs = array();
-
-	/**
-	 * Set up the test: register static mocks for WP_CLI so we can capture log output.
+	 * Reset log capture state before each test so messages from prior tests
+	 * do not leak. The test environment aliases WP_CLI to MockWPCLI (see
+	 * Mocks/MockWPCLI.php), whose static log() accumulates into
+	 * MockWPCLI::$all_log_messages.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->logs = array();
-		$this->register_legacy_proxy_static_mocks(
-			array(
-				WP_CLI::class => array(
-					'log'     => function ( $message ) {
-						$this->logs[] = (string) $message;
-					},
-					'success' => function ( $message ) {
-						$this->logs[] = (string) $message;
-					},
-					'warning' => function ( $message ) {
-						$this->logs[] = (string) $message;
-					},
-				),
-			)
-		);
+		MockWPCLI::$all_log_messages = array();
 	}
 
 	/**
-	 * Clean up: reset container replacements so the LegacyDataHandler mock
-	 * registered in build_runner() does not leak into later tests in the run.
+	 * Reset container replacements so the LegacyDataHandler mock installed by
+	 * build_runner() does not leak from this test into the next one. The
+	 * MockWPCLI log-capture state resets naturally in setUp().
 	 */
 	public function tearDown(): void {
 		$this->reset_container_replacements();
@@ -98,11 +80,11 @@ class CLIRunnerTest extends \WC_Unit_Test_Case {
 		$runner = $this->build_runner( true, true, 0, true );
 		$runner->status( array(), array() );
 
-		$this->assertCount( 4, $this->logs );
-		$this->assertSame( 'HPOS enabled?: yes', $this->logs[0] );
-		$this->assertSame( 'Compatibility mode enabled?: yes', $this->logs[1] );
-		$this->assertSame( 'Unsynced orders: 0', $this->logs[2] );
-		$this->assertSame( 'Orders subject to cleanup: 0', $this->logs[3] );
+		$this->assertCount( 4, MockWPCLI::$all_log_messages );
+		$this->assertSame( 'HPOS enabled?: yes', MockWPCLI::$all_log_messages[0] );
+		$this->assertSame( 'Compatibility mode enabled?: yes', MockWPCLI::$all_log_messages[1] );
+		$this->assertSame( 'Unsynced orders: 0', MockWPCLI::$all_log_messages[2] );
+		$this->assertSame( 'Orders subject to cleanup: 0', MockWPCLI::$all_log_messages[3] );
 	}
 
 	/**
@@ -112,11 +94,11 @@ class CLIRunnerTest extends \WC_Unit_Test_Case {
 		$runner = $this->build_runner( false, true, 17, false );
 		$runner->status( array(), array() );
 
-		$this->assertCount( 4, $this->logs );
-		$this->assertSame( 'HPOS enabled?: no', $this->logs[0] );
-		$this->assertSame( 'Compatibility mode enabled?: yes', $this->logs[1] );
-		$this->assertSame( 'Unsynced orders: 17', $this->logs[2] );
-		$this->assertSame( 'Orders subject to cleanup: 0', $this->logs[3] );
+		$this->assertCount( 4, MockWPCLI::$all_log_messages );
+		$this->assertSame( 'HPOS enabled?: no', MockWPCLI::$all_log_messages[0] );
+		$this->assertSame( 'Compatibility mode enabled?: yes', MockWPCLI::$all_log_messages[1] );
+		$this->assertSame( 'Unsynced orders: 17', MockWPCLI::$all_log_messages[2] );
+		$this->assertSame( 'Orders subject to cleanup: 0', MockWPCLI::$all_log_messages[3] );
 	}
 
 	/**
@@ -180,7 +162,7 @@ class CLIRunnerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Capture the output of a callback (used for the JSON path which echoes directly).
+	 * Capture the single-line JSON output of a callback which echoes directly.
 	 *
 	 * @param callable $callback The code to execute.
 	 * @return string The captured output.
@@ -198,7 +180,8 @@ class CLIRunnerTest extends \WC_Unit_Test_Case {
 		$runner = $this->build_runner( true, true, 0, true, 99 );
 		$runner->status( array(), array() );
 
-		$this->assertSame( 'Orders subject to cleanup: 0', $this->logs[3] );
+		$this->assertCount( 4, MockWPCLI::$all_log_messages );
+		$this->assertSame( 'Orders subject to cleanup: 0', MockWPCLI::$all_log_messages[3] );
 	}
 
 	/**
@@ -208,7 +191,8 @@ class CLIRunnerTest extends \WC_Unit_Test_Case {
 		$runner = $this->build_runner( true, false, 0, false, 99 );
 		$runner->status( array(), array() );
 
-		$this->assertSame( 'Orders subject to cleanup: 0', $this->logs[3] );
+		$this->assertCount( 4, MockWPCLI::$all_log_messages );
+		$this->assertSame( 'Orders subject to cleanup: 0', MockWPCLI::$all_log_messages[3] );
 	}
 
 	/**
@@ -218,6 +202,7 @@ class CLIRunnerTest extends \WC_Unit_Test_Case {
 		$runner = $this->build_runner( true, false, 0, true, 42 );
 		$runner->status( array(), array() );
 
-		$this->assertSame( 'Orders subject to cleanup: 42', $this->logs[3] );
+		$this->assertCount( 4, MockWPCLI::$all_log_messages );
+		$this->assertSame( 'Orders subject to cleanup: 42', MockWPCLI::$all_log_messages[3] );
 	}
 }
