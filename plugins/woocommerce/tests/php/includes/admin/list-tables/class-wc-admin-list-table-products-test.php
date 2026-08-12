@@ -141,11 +141,11 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 		list( , , $search_phrase ) = $this->create_search_products();
 
 		$captured_orderby = null;
-		$capture_orderby  = static function ( $orderby ) use ( &$captured_orderby ) {
-			$captured_orderby = $orderby;
-			return $orderby;
+		$capture_orderby  = static function ( $clauses ) use ( &$captured_orderby ) {
+			$captured_orderby = is_array( $clauses ) && isset( $clauses['orderby'] ) ? $clauses['orderby'] : null;
+			return $clauses;
 		};
-		add_filter( 'posts_orderby', $capture_orderby, PHP_INT_MAX );
+		add_filter( 'posts_clauses', $capture_orderby, PHP_INT_MAX );
 
 		try {
 			$this->get_search_results( $search_phrase );
@@ -165,12 +165,12 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 			// A stopword-only term falls back to ranking by the whole group, mirroring search_products().
 			// The pattern requires a CASE WHEN ranking clause followed by a post_title LIKE predicate whose
 			// quoted operand contains the raw term. \S* absorbs the LIKE wildcards on both sides of the term,
-			// because at the posts_orderby stage they are still dynamic wpdb placeholder-escape hashes, not %.
+			// because at the posts_clauses stage they are still dynamic wpdb placeholder-escape hashes, not %.
 			$captured_orderby = null;
 			$this->get_search_results( 'the' );
 			$this->assertMatchesRegularExpression( "/CASE WHEN.+post_title LIKE '\\S*the\\S*'/", (string) $captured_orderby, 'A stopword-only search should rank by the raw search group.' );
 		} finally {
-			remove_filter( 'posts_orderby', $capture_orderby, PHP_INT_MAX );
+			remove_filter( 'posts_clauses', $capture_orderby, PHP_INT_MAX );
 		}
 	}
 
@@ -523,13 +523,47 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Product search ranking leaves the core default clause visible to other posts_orderby filters.
+	 * @testdox Product searches defer to ordering an earlier posts_clauses filter already set.
+	 */
+	public function test_product_search_defers_to_earlier_posts_clauses_ordering(): void {
+		list( $title_match, $content_match, $search_phrase ) = $this->create_search_products();
+
+		// Appending is the realistic shape: a plugin adding a tiebreak rather than replacing the clause.
+		// Ranking runs after every posts_clauses priority below its own, so it must stand down here too.
+		$append_tiebreak = static function ( $clauses, $query ) {
+			global $wpdb;
+
+			if ( is_array( $clauses ) && isset( $clauses['orderby'] ) && $query->get( 'product_search' ) ) {
+				$clauses['orderby'] = "{$wpdb->posts}.post_title ASC, " . $clauses['orderby'];
+			}
+
+			return $clauses;
+		};
+		add_filter( 'posts_clauses', $append_tiebreak, 20, 2 );
+
+		try {
+			$results = $this->get_search_results( $search_phrase );
+		} finally {
+			remove_filter( 'posts_clauses', $append_tiebreak, 20 );
+		}
+
+		$this->assertSame(
+			array( $content_match->get_id(), $title_match->get_id() ),
+			$results,
+			'Ordering set by an earlier posts_clauses filter should take precedence over search relevance.'
+		);
+	}
+
+	/**
+	 * @testdox Product search ranking leaves the core default clause visible to every posts_orderby filter.
 	 */
 	public function test_product_search_ranking_preserves_clause_for_other_posts_orderby_filters(): void {
 		global $wpdb;
 
 		list( $title_match, $content_match, $search_phrase ) = $this->create_search_products();
 
+		// PHP_INT_MAX because ranking runs on posts_clauses: no posts_orderby priority, however late,
+		// should ever observe the relevance clause.
 		$guard_fired = 0;
 		$guard       = static function ( $orderby ) use ( &$guard_fired, $wpdb ) {
 			if ( "{$wpdb->posts}.post_date DESC" === $orderby ) {
@@ -537,15 +571,15 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 			}
 			return $orderby;
 		};
-		add_filter( 'posts_orderby', $guard, 20 );
+		add_filter( 'posts_orderby', $guard, PHP_INT_MAX );
 
 		try {
 			$results = $this->get_search_results( $search_phrase );
 		} finally {
-			remove_filter( 'posts_orderby', $guard, 20 );
+			remove_filter( 'posts_orderby', $guard, PHP_INT_MAX );
 		}
 
-		$this->assertGreaterThan( 0, $guard_fired, 'A later posts_orderby filter that matches on the core default clause should still see it unmodified.' );
+		$this->assertGreaterThan( 0, $guard_fired, 'A posts_orderby filter at any priority that matches on the core default clause should still see it unmodified.' );
 		$this->assertSame(
 			array( $title_match->get_id(), $content_match->get_id() ),
 			$results,
@@ -665,6 +699,7 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 
 		return array( $title_match, $content_match, $search_phrase );
 	}
+
 
 	/**
 	 * Run a Products list search.

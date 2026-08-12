@@ -59,9 +59,11 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		add_filter( 'views_edit-product', array( $this, 'product_views' ) );
 		add_filter( 'get_search_query', array( $this, 'search_label' ) );
 		add_filter( 'posts_clauses', array( $this, 'posts_clauses' ), 10, 2 );
-		// Registered late so earlier posts_orderby callbacks see the unmodified core clause; any
-		// ordering they change makes order_search_results() skip ranking and defer to them.
-		add_filter( 'posts_orderby', array( $this, 'order_search_results' ), 9999, 2 );
+		// Ranking runs on posts_clauses, which core applies after every posts_orderby priority, so no
+		// posts_orderby callback ever sees the relevance clause. The late priority leaves earlier
+		// posts_clauses callbacks the same unmodified view; ordering any of them set makes
+		// order_search_results() skip ranking and defer to them.
+		add_filter( 'posts_clauses', array( $this, 'order_search_results' ), 9999, 2 );
 
 		// Use hooks to prime various caches and improve products page performance.
 		add_action( 'load-edit.php', array( $this, 'prime_status_counts_cache' ) );
@@ -667,23 +669,33 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	/**
 	 * Prioritize title matches in unsorted product searches.
 	 *
+	 * Runs on posts_clauses rather than posts_orderby so that every posts_orderby callback, at any
+	 * priority, still observes the ORDER BY clause core generated. Ordering set by any of them, or by
+	 * an earlier posts_clauses callback, makes this defer instead of ranking.
+	 *
 	 * @since 11.1.0
 	 *
-	 * @param string   $orderby ORDER BY clause.
+	 * @param array    $clauses Array of SELECT statement pieces (from, where, orderby, etc).
 	 * @param WP_Query $query   WP_Query instance.
-	 * @return string
+	 * @return array
 	 */
-	public function order_search_results( $orderby, $query ) {
+	public function order_search_results( $clauses, $query ) {
+		// Another callback produced this array, so confirm the piece being read is still a string clause.
+		if ( ! is_array( $clauses ) || ! isset( $clauses['orderby'] ) || ! is_string( $clauses['orderby'] ) ) {
+			return $clauses;
+		}
+
+		$orderby              = $clauses['orderby'];
 		$search_term          = $query->get( 'product_search_term' );
 		$default_search_order = $query->get( 'product_search_default_order' );
 		if ( ! $query->get( 'product_search' ) || ! is_string( $search_term ) || '' === $search_term ) {
-			return $orderby;
+			return $clauses;
 		}
 
 		global $wpdb;
 		if ( 'date' === $default_search_order ) {
 			if ( $query->get( 'orderby' ) || "{$wpdb->posts}.post_date DESC" !== $orderby ) {
-				return $orderby;
+				return $clauses;
 			}
 		} elseif ( 'modified' === $default_search_order ) {
 			$post_status = $query->get( 'post_status' );
@@ -695,15 +707,20 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				|| ( ! ( 'draft' === $post_status && 'DESC' === $order ) && ! ( 'pending' === $post_status && 'ASC' === $order ) )
 				|| "{$wpdb->posts}.post_modified {$order}" !== $orderby
 			) {
-				return $orderby;
+				return $clauses;
 			}
 		} else {
-			return $orderby;
+			return $clauses;
 		}
 
 		$case_clause = $this->build_title_match_case_clause( $search_term );
+		if ( '' === $case_clause ) {
+			return $clauses;
+		}
 
-		return '' === $case_clause ? $orderby : $case_clause . ', ' . $orderby;
+		$clauses['orderby'] = $case_clause . ', ' . $orderby;
+
+		return $clauses;
 	}
 
 	/**
