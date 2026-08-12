@@ -292,7 +292,8 @@ class ReceiptRenderingEngineTest extends \WC_Unit_Test_Case {
 		$rendered = $this->render_receipt( $order );
 
 		$this->assertStringContainsString( '<td>Discount</td>', $rendered );
-		$this->assertStringContainsString( wc_price( -6, array( 'currency' => $order->get_currency() ) ), $rendered );
+		$expected_amount = wp_kses_post( wc_price( -6, array( 'currency' => $order->get_currency() ) ) );
+		$this->assertStringContainsString( $expected_amount, $rendered );
 	}
 
 	/**
