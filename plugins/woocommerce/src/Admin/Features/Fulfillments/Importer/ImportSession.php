@@ -115,6 +115,7 @@ final class ImportSession {
 			'file'                => $file,
 			'file_size'           => file_exists( $file ) ? (int) filesize( $file ) : 0,
 			'file_mtime'          => file_exists( $file ) ? (int) filemtime( $file ) : 0,
+			'file_head_hash'      => self::hash_file_head( $file ),
 			'delimiter'           => $delimiter,
 			'headers'             => array_values( array_map( 'strval', $headers ) ),
 			'total'               => max( 0, $total ),
@@ -338,6 +339,38 @@ final class ImportSession {
 	 */
 	public function file_mtime(): int {
 		return (int) ( $this->data['file_mtime'] ?? 0 );
+	}
+
+	/**
+	 * Hash of the first bytes of the staged CSV when the session was created.
+	 *
+	 * @return string Hash string; empty when the file could not be read.
+	 */
+	public function file_head_hash(): string {
+		return (string) ( $this->data['file_head_hash'] ?? '' );
+	}
+
+	/**
+	 * Hash the first 4 KB of a file, closing the size and mtime blind spot in
+	 * the staged-file integrity check.
+	 *
+	 * @param string $file Absolute file path.
+	 * @return string Hash string; empty when the file could not be read.
+	 */
+	public static function hash_file_head( string $file ): string {
+		if ( '' === $file || ! is_readable( $file ) ) {
+			return '';
+		}
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Reading a staged local file head for integrity hashing.
+		$handle = fopen( $file, 'rb' );
+		if ( false === $handle ) {
+			return '';
+		}
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread -- See above.
+		$head = fread( $handle, 4096 );
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- See above.
+		fclose( $handle );
+		return false === $head ? '' : md5( $head );
 	}
 
 	/**

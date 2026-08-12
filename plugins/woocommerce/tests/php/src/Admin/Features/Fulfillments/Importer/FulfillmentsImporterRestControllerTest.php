@@ -114,7 +114,10 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 	 * @return string
 	 */
 	private function make_csv( string $content ): string {
-		$path = wp_tempnam( 'wc-fulfillments-rest-' );
+		// Stage inside the uploads directory, like CSVUploadHelper does in production,
+		// so the controller's staged-path containment checks hold in tests.
+		$upload_dir = wp_upload_dir();
+		$path       = trailingslashit( $upload_dir['basedir'] ) . 'wc-fulfillments-rest-' . wp_generate_uuid4() . '.csv';
 		file_put_contents( $path, $content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture write.
 		$this->temp_files[] = $path;
 		return $path;
@@ -412,6 +415,7 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 
 		$this->assertInstanceOf( \WP_Error::class, $response );
 		$this->assertSame( 'woocommerce_fulfillments_import_file_changed', $response->get_error_code() );
+		$this->assertFileDoesNotExist( $file, 'The stale staged file must be cleaned up with the session' );
 	}
 
 	/**

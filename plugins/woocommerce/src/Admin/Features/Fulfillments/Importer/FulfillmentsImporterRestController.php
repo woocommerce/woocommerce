@@ -179,7 +179,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		$prior = ImportSession::active_for_user( $user_id );
 		if ( $prior instanceof ImportSession ) {
 			$prior_file = $prior->file();
-			if ( '' !== $prior_file && file_exists( $prior_file ) ) {
+			if ( '' !== $prior_file && file_exists( $prior_file ) && $this->is_valid_staged_path( $prior_file ) ) {
 				wp_delete_file( $prior_file );
 			}
 			$prior->delete();
@@ -318,13 +318,31 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		// Bypass the PHP stat cache so a just-modified file cannot present stale metadata.
 		$session_file = $session->file();
 		clearstatcache( true, $session_file );
+		$file_missing = '' === $session_file || ! file_exists( $session_file );
+
+		// The path comes from persisted transient state, so refuse anything outside the
+		// allowed upload locations, mirroring the abandoned-file cleanup. Unreadable files
+		// are left for the chunk abort path, which is retriable and keeps the session.
+		$file_invalid = ! $file_missing
+			&& is_readable( $session_file )
+			&& ! $this->is_valid_staged_path( $session_file );
+
 		$expected_size  = $session->file_size();
 		$expected_mtime = $session->file_mtime();
-		$current_size   = file_exists( $session_file ) ? (int) filesize( $session_file ) : 0;
-		$current_mtime  = file_exists( $session_file ) ? (int) filemtime( $session_file ) : 0;
+		$expected_hash  = $session->file_head_hash();
+		$current_size   = $file_missing ? 0 : (int) filesize( $session_file );
+		$current_mtime  = $file_missing ? 0 : (int) filemtime( $session_file );
+		$current_hash   = $file_missing ? '' : ImportSession::hash_file_head( $session_file );
 		$size_changed   = $expected_size > 0 && $expected_size !== $current_size;
 		$mtime_changed  = $expected_mtime > 0 && $expected_mtime !== $current_mtime;
-		if ( ! file_exists( $session_file ) || $size_changed || $mtime_changed ) {
+		$hash_changed   = '' !== $expected_hash && '' !== $current_hash && $expected_hash !== $current_hash;
+
+		if ( $file_missing || $file_invalid || $size_changed || $mtime_changed || $hash_changed ) {
+			// The session's scheduled cleanup is unscheduled on delete, so remove the
+			// stale staged file now or nothing ever will.
+			if ( ! $file_missing && ! $file_invalid && $this->is_valid_staged_path( $session_file ) ) {
+				wp_delete_file( $session_file );
+			}
 			$session->delete();
 			return new WP_Error(
 				'woocommerce_fulfillments_import_file_changed',
@@ -464,7 +482,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			$summary = $session->summary();
 			$file    = $session->file();
 			$session->delete();
-			if ( '' !== $file && file_exists( $file ) ) {
+			if ( '' !== $file && file_exists( $file ) && $this->is_valid_staged_path( $file ) ) {
 				wp_delete_file( $file );
 			}
 
@@ -575,6 +593,21 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		}
 
 		return $file_path;
+	}
+
+	/**
+	 * Whether a persisted staged-file path resolves inside an allowed upload location.
+	 *
+	 * @param string $path Absolute path from session state.
+	 * @return bool
+	 */
+	private function is_valid_staged_path( string $path ): bool {
+		try {
+			FilesystemUtil::validate_upload_file_path( $path );
+			return true;
+		} catch ( \Exception $e ) {
+			return false;
+		}
 	}
 
 	/**
