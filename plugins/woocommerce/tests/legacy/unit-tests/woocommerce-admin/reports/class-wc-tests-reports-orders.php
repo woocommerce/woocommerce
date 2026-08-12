@@ -501,4 +501,48 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 
 		$this->assertEqualSets( array( $order->get_id() ), array_keys( $order_rows ), 'Excluding refunds should return the order only' );
 	}
+
+	/**
+	 * Recalculating a customer's first order runs an UPDATE across all of the customer's stats
+	 * rows, which must not overwrite the NULL returning_customer of refund rows — the report
+	 * relies on that NULL to fall back to the refunded order's customer type.
+	 *
+	 * @testdox Should keep reporting a refund with the refunded order's customer type after the customer's first order is recalculated.
+	 */
+	public function test_refund_keeps_customer_type_after_first_order_recalculation() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$simple_product = new WC_Product_Simple();
+		$simple_product->set_name( 'Simple Product' );
+		$simple_product->set_regular_price( 25 );
+		$simple_product->save();
+
+		$first_order  = $this->create_guest_order( $simple_product, 'guest-33410-recalc@example.org' );
+		$second_order = $this->create_guest_order( $simple_product, 'guest-33410-recalc@example.org' );
+
+		$refund = wc_create_refund(
+			array(
+				'amount'   => 25,
+				'order_id' => $second_order->get_id(),
+			)
+		);
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		// Cancelling the first order makes the second order the customer's first order,
+		// triggering the returning_customer recalculation across the customer's rows.
+		$first_order->set_status( OrderStatus::CANCELLED );
+		$first_order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$customer_types = $this->get_customer_types_by_order_id( $second_order );
+
+		$this->assertEquals( 'new', $customer_types[ $second_order->get_id() ], 'The second order should be reported as new once the first order is cancelled' );
+		$this->assertEquals( 'new', $customer_types[ $refund->get_id() ], 'A refund should keep reporting the customer type of the refunded order after the recalculation' );
+
+		$returning_customer_rows = $this->get_customer_types_by_order_id( $second_order, array( 'customer_type' => 'returning' ) );
+
+		$this->assertEmpty( $returning_customer_rows, 'Filtering by returning customers should not match the refund after the recalculation' );
+	}
 }
