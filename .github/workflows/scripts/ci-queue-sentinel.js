@@ -134,23 +134,38 @@ const fetchJobsForRun = async ( runId ) => {
 	return jobs;
 };
 
+// Only jobs targeting hosted runner labels (runs-on: ubuntu-*) compete for the
+// shared standard pool the sentinel protects. Jobs routed to a runner group
+// (Woo Core Dedicated CI, WooCommerce Release Checks) have an empty labels
+// array and wait on that group's own capacity — counting them would let the
+// switch trip on group backlogs, or hold itself ON via the very e2e jobs it
+// routed to the dedicated group.
+const isHostedPoolJob = ( job ) =>
+	( job.labels || [] ).some( ( label ) => label.toLowerCase().startsWith( 'ubuntu-' ) );
+
 const fetchQueuedJobs = async ( runs ) => {
 	const allQueued = runs.filter( ( run ) => run.status === 'queued' );
 	const allInProgress = runs.filter( ( run ) => run.status !== 'queued' );
 	const queuedRuns = allQueued.slice( 0, MAX_QUEUED_RUNS_TO_PROBE );
 	const inProgressRuns = allInProgress.slice( 0, MAX_IN_PROGRESS_RUNS_TO_PROBE );
 	const queued = [];
+	let ignoredPools = 0;
 	for ( const run of [ ...queuedRuns, ...inProgressRuns ] ) {
 		const jobs = await fetchJobsForRun( run.id );
 		for ( const job of jobs ) {
-			if ( job.status === 'queued' ) {
+			if ( job.status !== 'queued' ) {
+				continue;
+			}
+			if ( isHostedPoolJob( job ) ) {
 				queued.push( job );
+			} else {
+				ignoredPools++;
 			}
 		}
 	}
 	const complete = allQueued.length <= MAX_QUEUED_RUNS_TO_PROBE &&
 		allInProgress.length <= MAX_IN_PROGRESS_RUNS_TO_PROBE;
-	return { queued, complete };
+	return { queued, complete, ignoredPools };
 };
 
 const fetchVariable = async () => {
@@ -226,7 +241,7 @@ const main = async () => {
 	// Forced modes skip the probe: a manual override must succeed even when
 	// the queue API is failing, and needs no queue data to decide.
 	const forced = MODE === 'on' || MODE === 'off';
-	let runs = [], queuedJobs = [], probeComplete = true, dropped = 0;
+	let runs = [], queuedJobs = [], probeComplete = true, dropped = 0, ignoredPools = 0;
 	if ( ! forced ) {
 		const runsResult = await fetchActiveRuns();
 		const jobsResult = await fetchQueuedJobs( runsResult.runs );
@@ -234,6 +249,7 @@ const main = async () => {
 		queuedJobs = jobsResult.queued;
 		probeComplete = runsResult.complete && jobsResult.complete;
 		dropped = runsResult.dropped;
+		ignoredPools = jobsResult.ignoredPools;
 	}
 	// Measure ages after the probe; retries can stretch it by minutes.
 	const nowMs = Date.now();
@@ -270,7 +286,7 @@ const main = async () => {
 		`- Mode: \`${ MODE }\``,
 		...( forced ? [ '- Probe skipped (forced mode)' ] : [
 			`- Active runs probed: ${ probed } of ${ runs.length }${ dropped ? ` (${ dropped } dropped by age window)` : '' }${ probeComplete ? '' : ' (probe truncated — switch-off suppressed)' }`,
-			`- Queued jobs found: ${ queuedJobs.length }`,
+			`- Queued jobs found: ${ queuedJobs.length } (hosted pool${ ignoredPools ? `; ${ ignoredPools } in runner groups ignored` : '' })`,
 			`- Oldest queued job age: ${ oldestAgeMin === null ? 'n/a (queue clear)' : `${ oldestAgeMin.toFixed( 1 ) } min` } (threshold ${ QUEUE_AGE_THRESHOLD_MIN } min)`,
 		] ),
 		`- ${ VARIABLE_NAME }: \`${ rawValue }\` -> \`${ value }\`${ value === rawValue ? ' (no change)' : '' }`,
