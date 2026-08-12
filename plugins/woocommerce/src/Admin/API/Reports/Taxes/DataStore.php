@@ -76,7 +76,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @override ReportsDataStore::__construct()
 	 */
 	public function __construct() {
-		$this->date_column_name = get_option( 'woocommerce_date_type', 'date_paid' );
+		$this->date_column_name = $this->sanitize_date_column_name( get_option( 'woocommerce_date_type' ), 'date_paid' );
 		parent::__construct();
 	}
 
@@ -124,9 +124,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * Fills FROM clause of SQL request based on user supplied parameters.
 	 *
 	 * @param array  $query_args          Query arguments supplied by the user.
-	 * @param string $order_status_filter Order status subquery. Unused; the wc_order_stats join is now always added.
+	 * @param string $order_status_filter Order status subquery. Retained for signature compatibility; the wc_order_stats join is now always added.
 	 */
-	protected function add_from_sql_params( $query_args, $order_status_filter = '' ) {
+	protected function add_from_sql_params( $query_args, $order_status_filter ) {
 		global $wpdb;
 		$table_name = self::get_db_table_name();
 
