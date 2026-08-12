@@ -4,7 +4,6 @@
 import apiFetch from '@wordpress/api-fetch';
 import { __, sprintf } from '@wordpress/i18n';
 import { dispatch } from '@wordpress/data';
-import type { Options } from 'wordpress__notices';
 import { store as coreNoticesStore } from '@wordpress/notices';
 import { Icon } from '@wordpress/components';
 
@@ -28,7 +27,7 @@ import {
 	SearchAPIJSONType,
 	SearchAPIProductType,
 } from '../components/product-list/types';
-import { NoticeStatus } from '../contexts/types';
+import { NoticeOptions, NoticeStatus } from '../contexts/types';
 import { noticeStore } from '../contexts/notice-store';
 
 interface ProductGroup {
@@ -80,6 +79,7 @@ async function apiFetchWithCache( params: object ): Promise< object > {
 // Wrapper around fetch() that caches results in memory
 async function fetchJsonWithCache(
 	url: string,
+	headers: Record< string, string > = {},
 	abortSignal?: AbortSignal
 ): Promise< object > {
 	// Attempt to fetch from cache:
@@ -91,7 +91,7 @@ async function fetchJsonWithCache(
 
 	// Failing that, fetch from net:
 	return new Promise( ( resolve, reject ) => {
-		fetch( url, { signal: abortSignal } )
+		fetch( url, { signal: abortSignal, headers } )
 			.then( ( response ) => {
 				if ( ! response.ok ) {
 					throw new Error( response.statusText );
@@ -134,9 +134,15 @@ async function fetchSearchResults(
 		'?' +
 		params.toString();
 
+	const headers = {
+		'X-VIP-Go-Segmentation': wccomSettings.isConnected
+			? 'connected'
+			: 'no-connection',
+	};
+
 	// Fetch data from WCCOM API
 	return new Promise( ( resolve, reject ) => {
-		fetchJsonWithCache( url, abortSignal )
+		fetchJsonWithCache( url, headers, abortSignal )
 			.then( ( json ) => {
 				/**
 				 * Product card component expects a Product type.
@@ -170,6 +176,7 @@ async function fetchSearchResults(
 							billingPeriodInterval:
 								product.billing_period_interval,
 							currency: product.currency,
+							hasQualityBadge: product.has_quality_badge ?? false,
 						};
 					}
 				);
@@ -443,10 +450,10 @@ function addNotice(
 	productKey: string,
 	message: string,
 	status?: NoticeStatus,
-	options?: Partial< Options >
+	options?: Partial< NoticeOptions >
 ) {
 	if ( status === NoticeStatus.Error ) {
-		dispatch( noticeStore ).addNotice(
+		void dispatch( noticeStore ).addNotice(
 			productKey,
 			message,
 			status,
@@ -460,12 +467,15 @@ function addNotice(
 			};
 		}
 
-		dispatch( coreNoticesStore ).createSuccessNotice( message, options );
+		void dispatch( coreNoticesStore ).createSuccessNotice(
+			message,
+			options
+		);
 	}
 }
 
 const removeNotice = ( productKey: string ) => {
-	dispatch( noticeStore ).removeNotice( productKey );
+	void dispatch( noticeStore ).removeNotice( productKey );
 };
 
 const subscriptionToProduct = ( subscription: Subscription ): Product => {

@@ -82,6 +82,15 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	public $legacy_package_key;
 
 	/**
+	 * The order object is set using set_order. This property was introduced to reduce the number
+	 * of wc_get_order calls when working with this class in core and extension workflows.
+	 * Stored as a WeakReference to avoid circular reference memory retention in batch/CLI workflows.
+	 *
+	 * @var null|\WeakReference<\WC_Order>
+	 */
+	private $order;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param int|object|array $item ID to load from the DB, or WC_Order_Item object.
@@ -191,10 +200,12 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	/**
 	 * Get parent order object.
 	 *
+	 * @since 10.9.0 returns the same order instance associated with the item; previously, a new instance was created on each call.
 	 * @return WC_Order
 	 */
 	public function get_order() {
-		return wc_get_order( $this->get_order_id() );
+		$order = $this->order ? $this->order->get() : null;
+		return $order ?? wc_get_order( $this->get_order_id() );
 	}
 
 	/*
@@ -209,7 +220,31 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @param int $value Order ID.
 	 */
 	public function set_order_id( $value ) {
-		$this->set_prop( 'order_id', absint( $value ) );
+		$order_id = absint( $value );
+		$this->set_prop( 'order_id', $order_id );
+
+		$order = $this->order ? $this->order->get() : null;
+		if ( null !== $order && $order->get_id() !== $order_id ) {
+			$this->order = null;
+		}
+	}
+
+	/**
+	 * Aggregate and set properties based on passed in order object.
+	 *
+	 * @since 10.9.0
+	 * @param WC_Abstract_Order $order Order instance.
+	 * @return void
+	 */
+	public function set_order( $order ) {
+		if ( ! ( $order instanceof \WC_Abstract_Order ) ) {
+			$this->error( 'order_item_invalid_order', __( 'Invalid order', 'woocommerce' ) );
+		}
+		$this->set_order_id( $order->get_id() );
+		// Don't inject the refund object: get_order() declares a WC_Order return type; WC_Order_Refund would violate that contract.
+		if ( $order instanceof \WC_Order ) {
+			$this->order = \WeakReference::create( $order );
+		}
 	}
 
 	/**
@@ -630,5 +665,81 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		 * @since 9.9.0
 		 */
 		return apply_filters( 'woocommerce_order_item_cogs_per_item_tooltip', $tooltip_text, $cost_per_item, $formatted_cost_per_item, $this );
+	}
+
+	/**
+	 * Returns the refunded Cost of Goods Sold value in html format.
+	 *
+	 * @param float         $refunded_cost The refunded value.
+	 * @param array|null    $wc_price_arg Arguments to be passed to wc_price, defaults to an array containing only the currency symbol.
+	 * @param WC_Order|null $order Order that contains this line item, if null, get_order will be invoked.
+	 *
+	 * @return string
+	 */
+	public function get_cogs_refund_value_html( float $refunded_cost, ?array $wc_price_arg = null, ?WC_Order $order = null ): string {
+		if ( ! $this->cogs_is_enabled( __METHOD__ ) || ! $this->has_cogs() ) {
+			return '';
+		}
+
+		if ( $refunded_cost > 0 ) {
+			$refunded_cost = -$refunded_cost;
+		}
+		$order ??= $this->get_order();
+		$html    = $refunded_cost ? '<small class="refunded">' . wc_price( $refunded_cost, $wc_price_arg ?? array( 'currency' => $order->get_currency() ) ) . '</small>' : '';
+
+		/**
+		 * Filter to customize the refunded Cost of Goods Sold (COGS) value HTML for a given order item.
+		 *
+		 * @since 10.3.0
+		 *
+		 * @param string $refunded_html The formatted refunded COGS HTML.
+		 * @param float  $refunded_cost The refunded cost value (always zero or a negative number).
+		 * @param WC_Order_Item $item   The order item object.
+		 * @param WC_Order $order       The order object.
+		 */
+		return apply_filters( 'woocommerce_order_item_cogs_refunded_html', $html, $refunded_cost, $this, $order );
+	}
+
+	/**
+	 * Convert a legacy scalar tax value to array format.
+	 *
+	 * Legacy orders may have tax data stored as floats/strings
+	 * instead of arrays keyed by tax rate ID. This method attempts to infer the
+	 * appropriate tax rate ID from the order context.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @param float|string   $value The legacy scalar tax value.
+	 * @param WC_Order|false $order The order object, or false/null if unavailable.
+	 * @return array Tax data as array, keyed by tax rate ID (or 0 if unknown).
+	 */
+	protected function convert_legacy_tax_value_to_array( $value, $order = null ) {
+		$rate_id = 0;
+
+		// Try to infer tax rate ID from order context.
+		$tax_items = $order ? $order->get_taxes() : array();
+		if ( ! empty( $tax_items ) ) {
+			// Use the first tax rate ID from the order as a best-effort match.
+			$first_tax_item = reset( $tax_items );
+			if ( $first_tax_item ) {
+				$rate_id = $first_tax_item->get_rate_id();
+			}
+		}
+
+		$converted = array( $rate_id => $value );
+
+		/**
+		 * Filter the converted legacy tax value.
+		 *
+		 * Allows plugins to customize how legacy scalar tax values are converted
+		 * to the expected array format.
+		 *
+		 * @since 10.5.0
+		 *
+		 * @param array        $converted The converted tax data array.
+		 * @param float|string $value     The original legacy scalar value.
+		 * @param WC_Order_Item $item     The order item being processed.
+		 */
+		return apply_filters( 'woocommerce_order_item_legacy_tax_conversion', $converted, $value, $this );
 	}
 }

@@ -9,6 +9,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -34,9 +35,12 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		);
 		$suffix                   = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 		$version                  = Constants::get_constant( 'WC_VERSION' );
-		wp_register_script( 'accounting', WC()->plugin_url() . '/assets/js/accounting/accounting' . $suffix . '.js', array( 'jquery' ), '0.4.2', true );
+		wp_register_script( 'wc-accounting', WC()->plugin_url() . '/assets/js/accounting/accounting' . $suffix . '.js', array( 'jquery' ), '0.4.2', true );
+		// This script is deprecated, but we need to register it for backwards compatibility.
+		// This can be removed in WooCommerce 10.5.0.
+		wp_register_script( 'accounting', false, array( 'wc-accounting' ), '0.4.2', true );
 		wp_register_script( 'wc-jquery-ui-touchpunch', WC()->plugin_url() . '/assets/js/jquery-ui-touch-punch/jquery-ui-touch-punch' . $suffix . '.js', array( 'jquery-ui-slider' ), $version, true );
-		wp_register_script( 'wc-price-slider', WC()->plugin_url() . '/assets/js/frontend/price-slider' . $suffix . '.js', array( 'jquery-ui-slider', 'wc-jquery-ui-touchpunch', 'accounting' ), $version, true );
+		wp_register_script( 'wc-price-slider', WC()->plugin_url() . '/assets/js/frontend/price-slider' . $suffix . '.js', array( 'jquery-ui-slider', 'wc-jquery-ui-touchpunch', 'wc-accounting' ), $version, true );
 		wp_localize_script(
 			'wc-price-slider',
 			'woocommerce_price_slider_params',
@@ -94,7 +98,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		// Check to see if we should add taxes to the prices if store are excl tax but display incl.
 		$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
 
-		if ( wc_tax_enabled() && ! wc_prices_include_tax() && 'incl' === $tax_display_mode ) {
+		if ( wc_tax_enabled() && ! wc_prices_include_tax() && TaxDisplayMode::INCLUSIVE === $tax_display_mode ) {
 			$tax_class = apply_filters( 'woocommerce_price_filter_widget_tax_class', '' ); // Uses standard tax class.
 			$tax_rates = WC_Tax::get_rates( $tax_class );
 

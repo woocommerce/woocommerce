@@ -41,12 +41,25 @@ class ProductReviewForm extends AbstractBlock {
 			return '';
 		}
 
-		if ( get_option( 'woocommerce_review_rating_verification_required' ) !== 'no' && ! wc_customer_bought_product( '', get_current_user_id(), $product->get_id() ) ) {
-			return '<p class="woocommerce-verification-required">' . esc_html__( 'Only logged in customers who have purchased this product may leave a review.', 'woocommerce' ) . '</p>';
+		if ( get_option( 'woocommerce_review_rating_verification_required' ) !== 'no' ) {
+			$is_user_logged_in   = is_user_logged_in();
+			$product_has_reviews = $product->get_review_count() > 0;
+			$no_reviews_message  = $product_has_reviews ? '' : esc_html__( 'There are no reviews yet.', 'woocommerce' ) . ' ';
+
+			if ( ! $is_user_logged_in ) {
+				$account_page_url = wc_get_page_permalink( 'myaccount' );
+				// translators: %1$s is the opening link tag, %2$s is the closing link tag.
+				$login_message = $account_page_url ? sprintf( esc_html__( '%1$sLog in%2$s', 'woocommerce' ), ' <a href="' . esc_url( $account_page_url ) . '">', '</a>' ) : '';
+				return '<p class="woocommerce-verification-required">' . $no_reviews_message . esc_html__( 'Only logged in customers who have purchased this product may leave a review.', 'woocommerce' ) . $login_message . '</p>';
+			}
+
+			if ( ! wc_customer_bought_product( '', get_current_user_id(), $product->get_id() ) ) {
+				return '<p class="woocommerce-verification-required">' . $no_reviews_message . esc_html__( 'Only customers who have purchased this product may leave a review.', 'woocommerce' ) . '</p>';
+			}
 		}
 
-		$interactivy_state  = [];
-		$interactivy_config = [
+		$interactivity_state  = [];
+		$interactivity_config = [
 			'reviewRatingEnabled' => wc_review_ratings_enabled(),
 		];
 
@@ -66,7 +79,7 @@ class ProductReviewForm extends AbstractBlock {
 		$commenter    = wp_get_current_commenter();
 		$comment_form = [
 			/* translators: %s is product title */
-			'title_reply'         => have_comments() ? esc_html__( 'Add a review', 'woocommerce' ) : sprintf( esc_html__( 'Be the first to review &ldquo;%s&rdquo;', 'woocommerce' ), get_the_title() ),
+			'title_reply'         => $product->get_review_count() > 0 ? esc_html__( 'Add a review', 'woocommerce' ) : sprintf( esc_html__( 'Be the first to review &ldquo;%s&rdquo;', 'woocommerce' ), esc_html( get_the_title( $block->context['postId'] ) ) ),
 			/* translators: %s is product title */
 			'title_reply_to'      => esc_html__( 'Leave a Reply to %s', 'woocommerce' ),
 			'title_reply_before'  => '<span id="reply-title" class="comment-reply-title" role="heading" aria-level="3">',
@@ -117,12 +130,12 @@ class ProductReviewForm extends AbstractBlock {
 		}
 
 		if ( wc_review_ratings_enabled() ) {
-			$interactivy_state['selectedStar']            = '';
-			$interactivy_state['hoveredStar']             = '0';
-			$interactivy_state['ratingError']             = '';
-			$interactivy_state['hasRatingError']          = false;
-			$interactivy_config['i18nRequiredRatingText'] = esc_attr__( 'Please select a rating', 'woocommerce' );
-			$interactivy_config['reviewRatingRequired']   = wc_review_ratings_required();
+			$interactivity_state['selectedStar']            = '';
+			$interactivity_state['hoveredStar']             = '0';
+			$interactivity_state['ratingError']             = '';
+			$interactivity_state['hasRatingError']          = false;
+			$interactivity_config['i18nRequiredRatingText'] = esc_attr__( 'Please select a rating', 'woocommerce' );
+			$interactivity_config['reviewRatingRequired']   = wc_review_ratings_required();
 
 			$comment_form['comment_field'] = '<div class="comment-form-rating"><label for="rating-selector" id="comment-form-rating-label">' .
 				esc_html__( 'Your rating', 'woocommerce' ) . ( wc_review_ratings_required() ? '&nbsp;<span class="required">*</span>' : '' ) .
@@ -166,11 +179,11 @@ class ProductReviewForm extends AbstractBlock {
 			$p->set_attribute( 'data-wp-on--submit', 'actions.handleSubmit' );
 		}
 
-		if ( ! empty( $interactivy_state ) ) {
-			wp_interactivity_state( 'woocommerce/product-reviews', $interactivy_state );
+		if ( ! empty( $interactivity_state ) ) {
+			wp_interactivity_state( 'woocommerce/product-reviews', $interactivity_state );
 		}
-		if ( ! empty( $interactivy_config ) ) {
-			wp_interactivity_config( 'woocommerce/product-reviews', $interactivy_config );
+		if ( ! empty( $interactivity_config ) ) {
+			wp_interactivity_config( 'woocommerce/product-reviews', $interactivity_config );
 		}
 
 		return $p->get_updated_html();

@@ -26,16 +26,9 @@ class Group extends Abstract_Block_Renderer {
 	 * @return string
 	 */
 	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
-		$content      = '';
-		$inner_blocks = $parsed_block['innerBlocks'] ?? array();
-
-		foreach ( $inner_blocks as $block ) {
-			$content .= render_block( $block );
-		}
-
 		return str_replace(
 			'{group_content}',
-			$content,
+			$this->get_inner_content( $block_content ),
 			$this->get_block_wrapper( $block_content, $parsed_block, $rendering_context )
 		);
 	}
@@ -65,7 +58,6 @@ class Group extends Abstract_Block_Renderer {
 			$table_styles,
 			array_filter(
 				array(
-					'padding'         => $block_attributes['style']['spacing']['margin'] ?? null,
 					'border-collapse' => 'separate',
 					'background-size' => $table_styles['background-size'] ?? 'cover',
 				)
@@ -73,7 +65,13 @@ class Group extends Abstract_Block_Renderer {
 		);
 
 		// Padding properties need to be added to the table cell.
+		// When suppress-horizontal-padding is set, the container's horizontal
+		// padding has been distributed per-block by the Spacing_Preprocessor.
+		// Only vertical padding is kept on the group's own CSS output.
 		$cell_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'padding' ) );
+		if ( ! empty( $parsed_block['email_attrs']['suppress-horizontal-padding'] ) ) {
+			$cell_styles = $this->remove_horizontal_padding( $cell_styles );
+		}
 
 		$table_attrs = array(
 			'class' => 'email-block-group ' . $original_classname,
@@ -88,5 +86,29 @@ class Group extends Abstract_Block_Renderer {
 		);
 
 		return Table_Wrapper_Helper::render_table_wrapper( '{group_content}', $table_attrs, $cell_attrs );
+	}
+
+	/**
+	 * Remove horizontal padding properties from compiled cell styles.
+	 *
+	 * Used when suppress-horizontal-padding is set to prevent the group
+	 * from applying its own horizontal padding (which has been distributed
+	 * per-block by the Spacing_Preprocessor).
+	 *
+	 * @param array $cell_styles The compiled cell styles from Styles_Helper::get_block_styles().
+	 * @return array Styles with horizontal padding removed.
+	 */
+	private function remove_horizontal_padding( array $cell_styles ): array {
+		if ( ! isset( $cell_styles['declarations'] ) || ! is_array( $cell_styles['declarations'] ) ) {
+			return $cell_styles;
+		}
+
+		unset(
+			$cell_styles['declarations']['padding-left'],
+			$cell_styles['declarations']['padding-right']
+		);
+
+		// Rebuild CSS string from remaining declarations.
+		return Styles_Helper::extend_block_styles( $cell_styles, array() );
 	}
 }

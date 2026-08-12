@@ -7,6 +7,9 @@ namespace Automattic\WooCommerce\Internal\CLI\Migrator\Interfaces;
 /**
  * Defines the contract for classes responsible for retrieving
  * data (like products or orders) from a source platform API.
+ *
+ * Implementations should accept platform credentials via constructor:
+ * public function __construct(array $credentials)
  */
 interface PlatformFetcherInterface {
 

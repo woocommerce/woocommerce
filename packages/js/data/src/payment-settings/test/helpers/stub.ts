@@ -78,13 +78,18 @@ export const providersStub: PaymentsProvider[] = [
 		},
 		onboarding: {
 			state: {
+				supported: true,
 				started: false,
 				completed: false,
 				test_mode: true,
 			},
+			messages: {},
 			_links: {
 				onboard: {
 					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-admin&path=/payments/onboarding',
+				},
+				reset: {
+					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-admin&path=/payments/reset',
 				},
 			},
 			recommended_payment_methods: [
@@ -99,6 +104,12 @@ export const providersStub: PaymentsProvider[] = [
 					extraDescription: 'Extra description.',
 					extraIcon:
 						'http://localhost:8082/wp-content/plugins/woocommerce/assets/images/onboarding/extra-icon.svg',
+					notice: {
+						badge: '',
+						message: '',
+						link_text: '',
+						link_url: '',
+					},
 				},
 				{
 					id: 'woopay',
@@ -111,8 +122,15 @@ export const providersStub: PaymentsProvider[] = [
 					extraDescription: 'Extra description.',
 					extraIcon:
 						'http://localhost:8082/wp-content/plugins/woocommerce/assets/images/onboarding/extra-icon.svg',
+					notice: {
+						badge: '',
+						message: '',
+						link_text: '',
+						link_url: '',
+					},
 				},
 			],
+			type: 'native_in_context',
 		},
 		image: 'http://localhost:8082/wp-content/plugins/woocommerce/assets/images/onboarding/woopayments.svg',
 		icon: 'http://localhost:8082/wp-content/plugins/woocommerce/assets/images/onboarding/woopayments.svg',
@@ -189,6 +207,7 @@ export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 		},
 		onboarding: {
 			state: {
+				supported: true,
 				started: true,
 				completed: true,
 				test_mode: false,
@@ -232,6 +251,7 @@ export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 		},
 		onboarding: {
 			state: {
+				supported: true,
 				started: true,
 				completed: true,
 				test_mode: false,
@@ -275,6 +295,7 @@ export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 		},
 		onboarding: {
 			state: {
+				supported: true,
 				started: true,
 				completed: true,
 				test_mode: false,

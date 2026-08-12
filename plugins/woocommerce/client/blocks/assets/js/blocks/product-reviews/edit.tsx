@@ -7,7 +7,6 @@ import { useQueryLoopProductContextValidation } from '@woocommerce/base-hooks';
 import {
 	InspectorControls,
 	useBlockProps,
-	// @ts-expect-error missing types.
 	useInnerBlocksProps,
 } from '@wordpress/block-editor';
 
@@ -43,7 +42,6 @@ const Edit = ( {
 
 	return (
 		<>
-			{ /* @ts-expect-error missing types */ }
 			<InspectorControls group="advanced">
 				<SelectControl
 					// @ts-expect-error missing types.

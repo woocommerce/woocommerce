@@ -29,6 +29,17 @@ class Container {
 	protected array $instances = array();
 
 	/**
+	 * Prevents deserialization of this class to avoid callback replacement attacks.
+	 *
+	 * @param array $data The serialized data.
+	 * @return void
+	 * @throws \Exception Always throws an exception to prevent deserialization.
+	 */
+	public function __unserialize( array $data ): void {
+		throw new \Exception( 'Deserialization of Container is not allowed for security reasons.' );
+	}
+
+	/**
 	 * The method for registering a new service.
 	 *
 	 * @param string   $name     The name of the service.

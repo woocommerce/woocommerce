@@ -1,3 +1,3 @@
 jest.mock( '@wordpress/hooks', () => ( {
-	applyFilters: ( _hook: string, value: string ) => value,
+	applyFilters: jest.fn( ( _hook: string, value: unknown ) => value ),
 } ) );

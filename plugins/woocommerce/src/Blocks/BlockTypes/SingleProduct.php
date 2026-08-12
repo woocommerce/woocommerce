@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\ProductDataUtils;
+use Automattic\WooCommerce\Enums\ProductType;
 
 /**
  * SingleProduct class.
@@ -132,10 +133,20 @@ class SingleProduct extends AbstractBlock {
 	 */
 	protected function replace_post_for_single_product_inner_block( $block, &$context ) {
 		if ( $this->single_product_inner_blocks_names ) {
-			$block_name = end( $this->single_product_inner_blocks_names );
+			// Find the block index in $this->single_product_inner_blocks_names
+			// starting from the end.
+			$block_index_reversed = array_search( $block['blockName'], array_reverse( $this->single_product_inner_blocks_names ), true );
 
-			if ( $block_name === $block['blockName'] ) {
-				array_pop( $this->single_product_inner_blocks_names );
+			if ( false !== $block_index_reversed ) {
+				$block_index = count( $this->single_product_inner_blocks_names ) - (int) $block_index_reversed - 1;
+
+				$block_name = $block['blockName'];
+
+				// Remove all blocks after the current one. In some cases, like
+				// in the Product Gallery block, inner blocks are rendered
+				// directly by the parent block, so we need to skip them.
+				$this->single_product_inner_blocks_names = array_slice( $this->single_product_inner_blocks_names, 0, $block_index );
+
 				/**
 				 * This is a temporary fix to ensure the Post Title and Excerpt blocks work as expected
 				 * until Gutenberg versions 15.2 and 15.6 are included in the core of WordPress.
@@ -173,16 +184,40 @@ class SingleProduct extends AbstractBlock {
 	protected function render( $attributes, $content, $block ) {
 		$product = wc_get_product( $block->context['postId'] );
 
-		if ( ! $product instanceof \WC_Product ) {
+		if (
+			! $product instanceof \WC_Product ||
+			! $product->is_viewable()
+		) {
 			return '';
 		}
 
-		if ( ! $product->is_type( 'variable' ) ) {
-			return parent::render( $attributes, $content, $block );
+		$product_id = $product->get_id();
+
+		if ( post_password_required( $product_id ) ) {
+			$password_form = get_the_password_form( $product_id );
+			$html          = new \WP_HTML_Tag_Processor( $password_form );
+			$current_url   = home_url( add_query_arg( null, null ) );
+
+			while ( $html->next_tag( array( 'tag_name' => 'input' ) ) ) {
+				if ( 'redirect_to' !== $html->get_attribute( 'name' ) ) {
+					continue;
+				}
+
+				$html->set_attribute( 'value', $current_url );
+				break;
+			}
+
+			return $html->get_updated_html();
 		}
 
+		// Load product into the shared products store.
+		wc_interactivity_api_load_product(
+			'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce',
+			$product_id
+		);
+
 		$interactivity_context = array(
-			'productId'   => $product->get_id(),
+			'productId'   => $product_id,
 			'variationId' => null,
 		);
 
@@ -190,7 +225,7 @@ class SingleProduct extends AbstractBlock {
 
 		if ( $html->next_tag( array( 'tag_name' => 'div' ) ) ) {
 			$html->set_attribute( 'data-wp-interactive', $this->get_full_block_name() );
-			$html->set_attribute( 'data-wp-context', wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
+			$html->set_attribute( 'data-wp-context', 'woocommerce/products::' . wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
 		}
 
 		$updated_html = $html->get_updated_html();

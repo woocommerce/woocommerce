@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a value-less bogo pricing-policy type that grants a free unit of the same line item on in-scope cycles, materialized on renewal orders.

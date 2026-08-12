@@ -5,6 +5,7 @@ declare global {
 		label: string;
 		icon: string | null;
 		value: string;
+		url: string;
 	}
 
 	interface FulfillmentStatusProps {
@@ -19,7 +20,10 @@ declare global {
 			providers: Record< string, ShipmentProvider >;
 			currency_symbols: Record< string, string >;
 			fulfillment_statuses: Record< string, FulfillmentStatusProps >;
-			order_fulfillment_statuses: Record< string, FulfillmentStatusProps >;
+			order_fulfillment_statuses: Record<
+				string,
+				FulfillmentStatusProps
+			>;
 		};
 	}
 }

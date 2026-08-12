@@ -45,19 +45,21 @@ export const Edit = ( {
 		postId?: string;
 	};
 } ) => {
-	const { thumbnailSize, aspectRatio } = attributes;
+	const { thumbnailSize, aspectRatio, activeThumbnailStyle } = attributes;
 
 	const { product } = useProduct( context.postId );
+	const productImages = product?.images || [];
+	const hasOneOrNoImages = productImages.length <= 1;
+	const noProductContext = ! Boolean( context.postId && product?.id );
 
 	const productThumbnails =
-		product && product.images && product.images.length > 0
-			? prepareProductImages( product.images )
+		productImages.length > 0
+			? prepareProductImages( productImages )
 			: Array( MAX_THUMBNAILS ).fill( {
 					src: PLACEHOLDER_IMG_SRC,
 					alt: '',
 			  } );
-
-	const renderThumbnails = productThumbnails.length > 1;
+	const renderThumbnails = noProductContext || ! hasOneOrNoImages;
 
 	const scrollableRef = useRef< HTMLDivElement >( null );
 	const [ overflowState, setOverflowState ] = useState( {
@@ -66,6 +68,10 @@ export const Edit = ( {
 	} );
 
 	useEffect( () => {
+		if ( ! renderThumbnails ) {
+			return;
+		}
+
 		const scrollableElement = scrollableRef.current;
 		if ( ! scrollableElement ) {
 			return;
@@ -86,15 +92,19 @@ export const Edit = ( {
 		return () => {
 			resizeObserver.disconnect();
 		};
-	}, [ thumbnailSize ] );
+	}, [ renderThumbnails, thumbnailSize ] );
 
 	const thumbnailSizeValue = Number( thumbnailSize.replace( '%', '' ) );
-	const className = clsx( 'wc-block-product-gallery-thumbnails', {
-		'wc-block-product-gallery-thumbnails--overflow-right':
-			overflowState.right,
-		'wc-block-product-gallery-thumbnails--overflow-bottom':
-			overflowState.bottom,
-	} );
+	const className = clsx(
+		'wc-block-product-gallery-thumbnails',
+		`wc-block-product-gallery-thumbnails--active-${ activeThumbnailStyle }`,
+		{
+			'wc-block-product-gallery-thumbnails--overflow-right':
+				overflowState.right,
+			'wc-block-product-gallery-thumbnails--overflow-bottom':
+				overflowState.bottom,
+		}
+	);
 	const blockProps = useBlockProps( {
 		className,
 		style: {

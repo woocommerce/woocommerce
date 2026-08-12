@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.1.0
+ * @version 11.0.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -62,6 +62,10 @@ foreach ( $items as $item_id => $item ) :
 					<?php
 					// Show title/image etc.
 					if ( $show_image ) {
+						$image_dimensions = wc_get_image_size( $image_size );
+						$image_width      = is_array( $image_dimensions ) && isset( $image_dimensions['width'] ) ? absint( $image_dimensions['width'] ) : 48;
+						$thumbnail_width  = $image_width + 24;
+
 						/**
 						 * Email Order Item Thumbnail hook.
 						 *
@@ -69,7 +73,7 @@ foreach ( $items as $item_id => $item ) :
 						 * @param WC_Order_Item_Product $item  The item being displayed.
 						 * @since 2.1.0
 						 */
-						echo '<td>' . wp_kses_post( apply_filters( 'woocommerce_order_item_thumbnail', $image, $item->item ) ) . '</td>';
+						echo '<td class="email-order-item-thumbnail" style="width: ' . esc_attr( $thumbnail_width ) . 'px;">' . wp_kses_post( apply_filters( 'woocommerce_order_item_thumbnail', $image, $item->item ) ) . '</td>';
 					}
 					?>
 					<td>
@@ -145,7 +149,6 @@ foreach ( $items as $item_id => $item ) :
 		</td>
 		<td class="td font-family text-align-<?php echo esc_attr( $price_text_align ); ?>" style="vertical-align:middle;">
 			<?php
-			echo '&times;';
 			$qty         = $item->qty;
 			$qty_display = esc_html( $qty );
 			/**
@@ -153,7 +156,10 @@ foreach ( $items as $item_id => $item ) :
 			 *
 			 * @since 2.4.0
 			 */
-			echo wp_kses_post( apply_filters( 'woocommerce_email_order_item_quantity', $qty_display, $item->item ) );
+			$quantity = apply_filters( 'woocommerce_email_order_item_quantity', $qty_display, $item->item );
+			if ( '' !== $quantity ) {
+				echo '&times;' . wp_kses_post( $quantity );
+			}
 			?>
 		</td>
 		<td class="td font-family text-align-<?php echo esc_attr( $price_text_align ); ?>" style="vertical-align:middle;">

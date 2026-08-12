@@ -95,7 +95,7 @@ describe( 'Activity Panel', () => {
 	it( 'should render inbox tab on embedded pages', () => {
 		render( <ActivityPanel isEmbedded query={ {} } /> );
 
-		expect( screen.getByText( 'Activity' ) ).toBeDefined();
+		expect( screen.getByRole( 'tab', { name: 'Activity' } ) ).toBeDefined();
 	} );
 
 	it( 'should render inbox tab if not on home screen', () => {
@@ -103,19 +103,21 @@ describe( 'Activity Panel', () => {
 			<ActivityPanel query={ { page: 'wc-admin', path: '/customers' } } />
 		);
 
-		expect( screen.getByText( 'Activity' ) ).toBeDefined();
+		expect( screen.getByRole( 'tab', { name: 'Activity' } ) ).toBeDefined();
 	} );
 
 	it( 'should not render inbox tab on home screen', () => {
 		render( <ActivityPanel query={ { page: 'wc-admin' } } /> );
 
-		expect( screen.queryByText( 'Inbox' ) ).toBeNull();
+		expect( screen.queryByRole( 'tab', { name: 'Inbox' } ) ).toBeNull();
 	} );
 
 	it( 'should render preview store tab on home screen', () => {
 		render( <ActivityPanel query={ { page: 'wc-admin' } } /> );
 
-		expect( screen.getByText( 'Preview store' ) ).toBeDefined();
+		expect(
+			screen.getByRole( 'tab', { name: 'Preview store' } )
+		).toBeDefined();
 	} );
 
 	it( 'should not render help tab if not on home screen', () => {
@@ -167,7 +169,7 @@ describe( 'Activity Panel', () => {
 		);
 
 		// Expect that "Help" tab is absent.
-		expect( screen.queryByText( 'Help' ) ).toBeNull();
+		expect( screen.queryByRole( 'tab', { name: 'Help' } ) ).toBeNull();
 	} );
 
 	it( 'should render display options if on home screen', () => {
@@ -183,7 +185,7 @@ describe( 'Activity Panel', () => {
 	} );
 
 	it( 'should only render the finish setup link when TaskList is not complete', () => {
-		const { queryByText, rerender } = render(
+		const { queryByRole, rerender } = render(
 			<ActivityPanel
 				query={ {
 					task: 'products',
@@ -191,7 +193,7 @@ describe( 'Activity Panel', () => {
 			/>
 		);
 
-		expect( queryByText( 'Finish setup' ) ).toBeDefined();
+		expect( queryByRole( 'tab', { name: 'Finish setup' } ) ).toBeDefined();
 
 		useSelect.mockImplementation( () => ( {
 			requestingTaskListOptions: false,
@@ -207,11 +209,11 @@ describe( 'Activity Panel', () => {
 			/>
 		);
 
-		expect( queryByText( 'Finish setup' ) ).toBeNull();
+		expect( queryByRole( 'tab', { name: 'Finish setup' } ) ).toBeNull();
 	} );
 
 	it( 'should not render the finish setup link when on the home screen and TaskList is not complete', () => {
-		const { queryByText } = render(
+		const { queryByRole } = render(
 			<ActivityPanel
 				query={ {
 					page: 'wc-admin',
@@ -220,15 +222,17 @@ describe( 'Activity Panel', () => {
 			/>
 		);
 
-		expect( queryByText( 'Finish setup' ) ).toBeNull();
+		expect( queryByRole( 'tab', { name: 'Finish setup' } ) ).toBeNull();
 	} );
 
 	it( 'should render the finish setup link when on embedded pages and TaskList is not complete', () => {
-		const { getByText } = render(
+		const { getByRole } = render(
 			<ActivityPanel isEmbedded query={ {} } />
 		);
 
-		expect( getByText( 'Finish setup' ) ).toBeInTheDocument();
+		expect(
+			getByRole( 'tab', { name: 'Finish setup' } )
+		).toBeInTheDocument();
 	} );
 
 	it( 'should not render the finish setup link when a user does not have capabilities', () => {
@@ -236,7 +240,7 @@ describe( 'Activity Panel', () => {
 			currentUserCan: () => false,
 		} ) );
 
-		const { queryByText } = render(
+		const { queryByRole } = render(
 			<ActivityPanel
 				query={ {
 					task: 'products',
@@ -244,7 +248,7 @@ describe( 'Activity Panel', () => {
 			/>
 		);
 
-		expect( queryByText( 'Finish setup' ) ).toBeDefined();
+		expect( queryByRole( 'tab', { name: 'Finish setup' } ) ).toBeDefined();
 	} );
 
 	describe( 'panel', () => {

@@ -7,6 +7,8 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
+use Automattic\WooCommerce\Internal\Utilities\OrderItemMetaUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -77,7 +79,7 @@ function wc_get_page_screen_id( $for ) {
 
 	if ( in_array( $for, wc_get_order_types( 'admin-menu' ), true ) ) {
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$screen_id = 'woocommerce_page_wc-orders' . ( 'shop_order' === $for ? '' : '--' . $for );
+			$screen_id = ( \WC_Admin_Menus::can_view_woocommerce_menu_item() ? 'woocommerce_page_wc-orders' : 'admin_page_wc-orders' ) . ( 'shop_order' === $for ? '' : '--' . $for );
 		} else {
 			$screen_id = $for;
 		}
@@ -182,7 +184,7 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 function woocommerce_admin_fields( $options ) {
 
 	if ( ! class_exists( 'WC_Admin_Settings', false ) ) {
-		include dirname( __FILE__ ) . '/class-wc-admin-settings.php';
+		include __DIR__ . '/class-wc-admin-settings.php';
 	}
 
 	WC_Admin_Settings::output_fields( $options );
@@ -197,7 +199,7 @@ function woocommerce_admin_fields( $options ) {
 function woocommerce_update_options( $options, $data = null ) {
 
 	if ( ! class_exists( 'WC_Admin_Settings', false ) ) {
-		include dirname( __FILE__ ) . '/class-wc-admin-settings.php';
+		include __DIR__ . '/class-wc-admin-settings.php';
 	}
 
 	WC_Admin_Settings::save_fields( $options, $data );
@@ -213,7 +215,7 @@ function woocommerce_update_options( $options, $data = null ) {
 function woocommerce_settings_get_option( $option_name, $default = '' ) {
 
 	if ( ! class_exists( 'WC_Admin_Settings', false ) ) {
-		include dirname( __FILE__ ) . '/class-wc-admin-settings.php';
+		include __DIR__ . '/class-wc-admin-settings.php';
 	}
 
 	return WC_Admin_Settings::get_option( $option_name, $default );
@@ -361,9 +363,16 @@ function wc_save_order_items( $order_id, $items ) {
 			}
 
 			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
+				$reserved_meta_keys = OrderItemMetaUtil::get_reserved_keys( $item );
+
 				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
 					$meta_key   = substr( wp_unslash( $meta_key ), 0, 255 );
 					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? wp_unslash( $items['meta_value'][ $item_id ][ $meta_id ] ) : '';
+
+					// Skip reserved keys, which cannot be added or edited as custom meta.
+					if ( in_array( $meta_key, $reserved_meta_keys, true ) ) {
+						continue;
+					}
 
 					if ( '' === $meta_key && '' === $meta_value ) {
 						if ( ! strstr( $meta_id, 'new-' ) ) {
@@ -395,12 +404,13 @@ function wc_save_order_items( $order_id, $items ) {
 
 	// Shipping Rows.
 	if ( isset( $items['shipping_method_id'] ) ) {
-		$data_keys = array(
+		$data_keys        = array(
 			'shipping_method'       => null,
 			'shipping_method_title' => null,
 			'shipping_cost'         => 0,
 			'shipping_taxes'        => array(),
 		);
+		$shipping_methods = null;
 
 		foreach ( $items['shipping_method_id'] as $item_id ) {
 			$item = WC_Order_Factory::get_order_item( absint( $item_id ) );
@@ -415,6 +425,22 @@ function wc_save_order_items( $order_id, $items ) {
 				$item_data[ $key ] = isset( $items[ $key ][ $item_id ] ) ? wc_clean( wp_unslash( $items[ $key ][ $item_id ] ) ) : $default;
 			}
 
+			$item_data['shipping_method']       = is_string( $item_data['shipping_method'] ) ? $item_data['shipping_method'] : '';
+			$item_data['shipping_method_title'] = is_string( $item_data['shipping_method_title'] ) ? $item_data['shipping_method_title'] : '';
+
+			if (
+				! empty( $item_data['shipping_method'] ) &&
+				'' === $item_data['shipping_method_title']
+			) {
+				if ( null === $shipping_methods ) {
+					$shipping_methods = WC()->shipping() ? WC()->shipping()->load_shipping_methods() : array();
+				}
+
+				if ( isset( $shipping_methods[ $item_data['shipping_method'] ] ) ) {
+					$item_data['shipping_method_title'] = $shipping_methods[ $item_data['shipping_method'] ]->get_method_title();
+				}
+			}
+
 			$item->set_props(
 				array(
 					'method_id'    => $item_data['shipping_method'],
@@ -427,8 +453,15 @@ function wc_save_order_items( $order_id, $items ) {
 			);
 
 			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
+				$reserved_meta_keys = OrderItemMetaUtil::get_reserved_keys( $item );
+
 				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
 					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? wp_unslash( $items['meta_value'][ $item_id ][ $meta_id ] ) : '';
+
+					// Skip reserved keys, which cannot be added or edited as custom meta.
+					if ( in_array( $meta_key, $reserved_meta_keys, true ) ) {
+						continue;
+					}
 
 					if ( '' === $meta_key && '' === $meta_value ) {
 						if ( ! strstr( $meta_id, 'new-' ) ) {
@@ -450,18 +483,10 @@ function wc_save_order_items( $order_id, $items ) {
 
 	if ( ! empty( $qty_change_order_notes ) ) {
 		/* translators: %s item name. */
-		$order->add_order_note( sprintf( __( 'Adjusted stock: %s', 'woocommerce' ), implode( ', ', $qty_change_order_notes ) ), false, true );
+		$order->add_order_note( sprintf( __( 'Adjusted stock: %s', 'woocommerce' ), implode( ', ', $qty_change_order_notes ) ), false, true, array( 'note_group' => OrderNoteGroup::PRODUCT_STOCK ) );
 	}
 
 	$order->update_taxes();
-
-	// Only recalculate when a coupon is applied.
-	// This allows manual discounts to be preserved when order items are saved.
-	$order_coupons = $order->get_coupons();
-	if ( ! empty( $order_coupons ) ) {
-		$order->recalculate_coupons();
-	}
-
 	$order->calculate_totals( false );
 
 	// Inform other plugins that the items have been saved.

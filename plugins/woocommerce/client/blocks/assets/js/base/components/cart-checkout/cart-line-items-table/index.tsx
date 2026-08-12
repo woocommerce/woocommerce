@@ -41,15 +41,19 @@ const CartLineItemsTable = ( {
 	}, [ lineItems ] );
 
 	const onRemoveRow = ( nextItemKey: string | null ) => () => {
-		if (
-			rowRefs?.current &&
-			nextItemKey &&
-			rowRefs.current[ nextItemKey ].current instanceof HTMLElement
-		) {
-			( rowRefs.current[ nextItemKey ].current as HTMLElement ).focus();
-		} else if ( tableRef.current instanceof HTMLElement ) {
-			tableRef.current.focus();
-		}
+		requestAnimationFrame( () => {
+			if (
+				rowRefs?.current &&
+				nextItemKey &&
+				rowRefs.current[ nextItemKey ].current instanceof HTMLElement
+			) {
+				(
+					rowRefs.current[ nextItemKey ].current as HTMLElement
+				 ).focus();
+			} else if ( tableRef.current instanceof HTMLElement ) {
+				tableRef.current.focus();
+			}
+		} );
 	};
 
 	const products = (
@@ -88,13 +92,26 @@ const CartLineItemsTable = ( {
 			</caption>
 			<thead>
 				<tr className="wc-block-cart-items__header">
-					<th className="wc-block-cart-items__header-image">
+					{ /* Decorative image column, hidden from screen readers (see cart-line-item-row.tsx). */ }
+					<th
+						scope="col"
+						aria-hidden="true"
+						className="wc-block-cart-items__header-image"
+					>
 						<span>{ __( 'Product', 'woocommerce' ) }</span>
 					</th>
-					<th className="wc-block-cart-items__header-product">
-						<span>{ __( 'Details', 'woocommerce' ) }</span>
+					<th
+						scope="col"
+						className="wc-block-cart-items__header-product"
+					>
+						<span className="screen-reader-text">
+							{ __( 'Details', 'woocommerce' ) }
+						</span>
 					</th>
-					<th className="wc-block-cart-items__header-total">
+					<th
+						scope="col"
+						className="wc-block-cart-items__header-total"
+					>
 						<span>{ __( 'Total', 'woocommerce' ) }</span>
 					</th>
 				</tr>

@@ -65,6 +65,7 @@ function HistoricalDataPeriodSelector( {
 		<div className="woocommerce-settings-historical-data__columns">
 			<div className="woocommerce-settings-historical-data__column">
 				<SelectControl
+					__next40pxDefaultSize
 					label={ __( 'Import historical data', 'woocommerce' ) }
 					value={ value.label }
 					disabled={ disabled }

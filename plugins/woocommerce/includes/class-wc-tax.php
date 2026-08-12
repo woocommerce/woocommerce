@@ -5,6 +5,8 @@
  * @package WooCommerce\Classes
  */
 
+use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
+use Automattic\WooCommerce\Enums\TaxBasedOn;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -82,7 +84,20 @@ class WC_Tax {
 	 * @return array
 	 */
 	public static function calc_shipping_tax( $price, $rates ) {
-		$taxes = self::calc_exclusive_tax( $price, $rates );
+		/**
+		 * Filter to control if shipping prices include tax.
+		 *
+		 * @since 10.6.0
+		 * @param bool $shipping_prices_include_tax True if shipping cost is gross (includes tax), false if net. Default false.
+		 */
+		$shipping_prices_include_tax = wc_string_to_bool( apply_filters( 'woocommerce_shipping_prices_include_tax', false ) );
+
+		if ( $shipping_prices_include_tax ) {
+			$taxes = self::calc_inclusive_tax( $price, $rates );
+		} else {
+			$taxes = self::calc_exclusive_tax( $price, $rates );
+		}
+
 		return apply_filters( 'woocommerce_calc_shipping_tax', $taxes, $price, $rates );
 	}
 
@@ -460,7 +475,7 @@ class WC_Tax {
 
 		if ( ! empty( $customer ) ) {
 			$location = $customer->get_taxable_address();
-		} elseif ( wc_prices_include_tax() || 'base' === get_option( 'woocommerce_default_customer_address' ) || 'base' === get_option( 'woocommerce_tax_based_on' ) ) {
+		} elseif ( wc_prices_include_tax() || DefaultCustomerAddress::BASE === get_option( 'woocommerce_default_customer_address' ) || TaxBasedOn::BASE === get_option( 'woocommerce_tax_based_on' ) ) {
 			$location = array(
 				WC()->countries->get_base_country(),
 				WC()->countries->get_base_state(),
@@ -585,6 +600,28 @@ class WC_Tax {
 		}
 
 		$location = self::get_tax_location( $tax_class, $customer );
+		$cart     = WC()->cart ?? null;
+
+		/**
+		 * Filters the shipping tax class before calculating tax rates.
+		 *
+		 * This filter allows plugins to modify or replace the shipping tax class
+		 * that will be used to calculate shipping tax rates. It fires after core
+		 * logic determines the tax class but before rates are looked up.
+		 *
+		 * @since 10.5.0
+		 *
+		 * @param string|null      $tax_class The tax class determined by core logic. Can be null, empty string (standard), or a tax class slug.
+		 * @param WC_Cart|null     $cart      The cart object containing all cart items, or null if not available.
+		 * @param WC_Customer|null $customer  The customer object, or null if not available.
+		 * @param array            $location  The tax location array [country, state, postcode, city].
+		 */
+		$tax_class = apply_filters( 'woocommerce_shipping_tax_class', $tax_class, $cart, $customer, $location );
+
+		// If filter returned null, treat as no taxable items.
+		if ( is_null( $tax_class ) ) {
+			return array();
+		}
 
 		// Check for a valid location.
 		if ( 4 !== count( $location ) ) {
@@ -665,8 +702,8 @@ class WC_Tax {
 		global $wpdb;
 
 		if ( is_object( $key_or_rate ) ) {
-			$key      = $key_or_rate->tax_rate_id;
-			$compound = $key_or_rate->tax_rate_compound;
+			$key      = (int) $key_or_rate->tax_rate_id;
+			$compound = (bool) $key_or_rate->tax_rate_compound;
 		} else {
 			$key      = $key_or_rate;
 			$compound = (bool) $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate_compound FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) );
@@ -685,7 +722,7 @@ class WC_Tax {
 		global $wpdb;
 
 		if ( is_object( $key_or_rate ) ) {
-			$key       = $key_or_rate->tax_rate_id;
+			$key       = (int) $key_or_rate->tax_rate_id;
 			$rate_name = $key_or_rate->tax_rate_name;
 		} else {
 			$key       = $key_or_rate;
@@ -707,7 +744,7 @@ class WC_Tax {
 	 */
 	public static function get_rate_percent( $key_or_rate ) {
 		$rate_percent_value = self::get_rate_percent_value( $key_or_rate );
-		$tax_rate_id        = is_object( $key_or_rate ) ? $key_or_rate->tax_rate_id : $key_or_rate;
+		$tax_rate_id        = is_object( $key_or_rate ) ? (int) $key_or_rate->tax_rate_id : $key_or_rate;
 		return apply_filters( 'woocommerce_rate_percent', $rate_percent_value . '%', $tax_rate_id );
 	}
 
@@ -741,7 +778,7 @@ class WC_Tax {
 		global $wpdb;
 
 		if ( is_object( $key_or_rate ) ) {
-			$key  = $key_or_rate->tax_rate_id;
+			$key  = (int) $key_or_rate->tax_rate_id;
 			$rate = $key_or_rate;
 		} else {
 			$key  = $key_or_rate;

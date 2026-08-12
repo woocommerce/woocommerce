@@ -33,6 +33,7 @@ export const Edit = ( {
 				<InspectorControls>
 					<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
 						<ToggleControl
+							__nextHasNoMarginBottom
 							label={ __(
 								'Disable product descriptions',
 								'woocommerce'

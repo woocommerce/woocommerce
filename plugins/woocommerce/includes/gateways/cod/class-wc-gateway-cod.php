@@ -7,6 +7,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Admin\Settings\Utils as SettingsUtils;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -148,9 +149,14 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	/**
 	 * Check If The Gateway Is Available For Use.
 	 *
+	 * @since 10.7.0 Added early return when gateway is disabled.
 	 * @return bool
 	 */
 	public function is_available() {
+		if ( 'yes' !== $this->enabled ) {
+			return false;
+		}
+
 		$is_virtual       = true;
 		$shipping_methods = array();
 
@@ -320,8 +326,10 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 			$order->payment_complete();
 		}
 
-		// Remove cart.
-		WC()->cart->empty_cart();
+		// Remove cart if it still matches the order being processed.
+		if ( $order instanceof WC_Order && WC()->cart && $order->has_cart_hash( WC()->cart->get_cart_hash() ) ) {
+			WC()->cart->empty_cart();
+		}
 
 		// Return thankyou redirect.
 		return array(
@@ -371,9 +379,28 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	/**
 	 * Get the settings URL for the gateway.
 	 *
-	 * @return string
+	 * @return string The settings page URL for the gateway.
 	 */
 	public function get_settings_url() {
-		return admin_url( 'admin.php?page=wc-settings&tab=checkout&path=/offline/cod' );
+		// Search for a WC_Settings_Payment_Gateways instance in the settings pages.
+		$payments_settings_page = null;
+		foreach ( WC_Admin_Settings::get_settings_pages() as $settings_page ) {
+			if ( $settings_page instanceof WC_Settings_Payment_Gateways ) {
+				$payments_settings_page = $settings_page;
+				break;
+			}
+		}
+		// If no instance found, return the default settings URL (the Reactified page).
+		if ( empty( $payments_settings_page ) ) {
+			return SettingsUtils::wc_payments_settings_url( '/' . WC_Settings_Payment_Gateways::OFFLINE_SECTION_NAME . '/' . $this->id );
+		}
+
+		$should_use_react_settings_page = $payments_settings_page->should_render_react_section( WC_Settings_Payment_Gateways::COD_SECTION_NAME );
+
+		// We must not include both the path and the section query parameter, as this can cause weird behavior.
+		return SettingsUtils::wc_payments_settings_url(
+			$should_use_react_settings_page ? '/' . WC_Settings_Payment_Gateways::OFFLINE_SECTION_NAME . '/' . $this->id : null,
+			$should_use_react_settings_page ? array() : array( 'section' => $this->id )
+		);
 	}
 }

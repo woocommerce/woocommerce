@@ -29,7 +29,7 @@ A default maximum of 25 requests can be made within a 10-second time frame. Thes
 
 ## Methods restricted by Rate Limiting
 
-`POST`, `PUT`, `PATCH`, and `DELETE`
+Only `POST` requests are rate limited. Requests using the `X-HTTP-Method-Override` header (such as `PUT`, `PATCH` requests sent via `wp.apiFetch`) are excluded from rate limiting.
 
 ## Rate Limiting options filter
 

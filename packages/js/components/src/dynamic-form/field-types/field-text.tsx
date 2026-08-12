@@ -6,7 +6,7 @@ import { createElement } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { TextControl } from '../../index';
+import TextControl from '../../text-control';
 import { ControlProps } from '../types';
 
 export const TextField = ( {

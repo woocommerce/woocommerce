@@ -50,18 +50,28 @@ export const PaymentGatewayListItem = ( {
 	const incentive = hasIncentive( gateway ) ? gateway._incentive : null;
 
 	const gatewayHasRecommendedPaymentMethods =
-		( gateway.onboarding.recommended_payment_methods ?? [] ).length > 0;
+		( gateway.onboarding?.recommended_payment_methods ?? [] ).length > 0;
+
+	// Default to onboarding supported to avoid blocking the user, but only when onboarding exists.
+	const isOnboardingSupported = gateway.onboarding
+		? gateway.onboarding.state?.supported ?? true
+		: true;
 
 	// If the account is not connected or the onboarding is not started, or not completed then the gateway needs onboarding.
 	const gatewayNeedsOnboarding =
 		! gateway.state.account_connected ||
 		( gateway.state.account_connected &&
-			! gateway.onboarding.state.started ) ||
+			! gateway.onboarding?.state?.started ) ||
 		( gateway.state.account_connected &&
-			gateway.onboarding.state.started &&
-			! gateway.onboarding.state.completed );
+			gateway.onboarding?.state?.started &&
+			! gateway.onboarding?.state?.completed );
 
 	const determineGatewayStatus = () => {
+		// If the gateway needs onboarding and is not supported, show the not_supported status.
+		if ( gatewayNeedsOnboarding && ! isOnboardingSupported ) {
+			return 'not_supported';
+		}
+
 		// If the gateway needs onboarding then it also needs setup.
 		// If the gateway is not enabled but needs setup, it should be considered as needing setup.
 		if (
@@ -79,7 +89,7 @@ export const PaymentGatewayListItem = ( {
 			if ( gateway.state.account_connected ) {
 				// The test account status badge supersedes the test mode badge since, obviously,
 				// a test account is always in test mode payments.
-				if ( gateway.onboarding.state.test_mode ) {
+				if ( gateway.onboarding?.state?.test_mode ) {
 					return 'test_account';
 				}
 
@@ -93,6 +103,18 @@ export const PaymentGatewayListItem = ( {
 		}
 
 		return 'inactive';
+	};
+
+	const determineGatewayStatusMessage = () => {
+		// If the gateway needs onboarding and is not supported, show the not_supported message.
+		if ( gatewayNeedsOnboarding && ! isOnboardingSupported ) {
+			const msg = gateway.onboarding?.messages?.not_supported;
+			if ( msg ) {
+				return <p>{ msg }</p>;
+			}
+		}
+
+		return undefined;
 	};
 
 	return (
@@ -126,7 +148,10 @@ export const PaymentGatewayListItem = ( {
 						{ incentive ? (
 							<IncentiveStatusBadge incentive={ incentive } />
 						) : (
-							<StatusBadge status={ determineGatewayStatus() } />
+							<StatusBadge
+								status={ determineGatewayStatus() }
+								popoverContent={ determineGatewayStatusMessage() }
+							/>
 						) }
 						{ /* If the gateway has a matching suggestion, it is an official extension. */ }
 						{ gateway._suggestion_id && (
@@ -210,6 +235,12 @@ export const PaymentGatewayListItem = ( {
 							/>
 						) }
 
+						{ /*
+						 * CompleteSetupButton with conditional props based on onboarding support.
+						 * When not supported, we use minimal props and disabled state to prevent
+						 * inadvertent onboarding actions. Sensitive props (onboardingType, incentive,
+						 * acceptIncentive) are only spread when onboarding is supported.
+						 */ }
 						{ gatewayNeedsOnboarding && (
 							<CompleteSetupButton
 								gatewayProvider={ gateway }
@@ -217,18 +248,36 @@ export const PaymentGatewayListItem = ( {
 									gateway.management._links.settings.href
 								}
 								onboardingHref={
-									gateway.onboarding._links.onboard.href
+									isOnboardingSupported && gateway.onboarding
+										? gateway.onboarding._links?.onboard
+												?.href || '#'
+										: '#'
 								}
 								gatewayHasRecommendedPaymentMethods={
-									gatewayHasRecommendedPaymentMethods
+									isOnboardingSupported
+										? gatewayHasRecommendedPaymentMethods
+										: false
 								}
 								installingPlugin={ installingPlugin }
 								setOnboardingModalOpen={
-									setIsOnboardingModalOpen
+									isOnboardingSupported
+										? setIsOnboardingModalOpen
+										: () => {}
 								}
-								onboardingType={ gateway.onboarding.type }
-								incentive={ incentive }
-								acceptIncentive={ acceptIncentive }
+								disabled={ ! isOnboardingSupported }
+								ariaLabel={
+									! isOnboardingSupported
+										? gateway.onboarding?.messages
+												?.not_supported
+										: undefined
+								}
+								{ ...( isOnboardingSupported &&
+									gateway.onboarding && {
+										onboardingType:
+											gateway.onboarding?.type,
+										incentive,
+										acceptIncentive,
+									} ) }
 							/>
 						) }
 
@@ -236,8 +285,8 @@ export const PaymentGatewayListItem = ( {
 							// There is no actual switch-to-live in dev mode.
 							! gateway.state.dev_mode &&
 							gateway.state.account_connected &&
-							gateway.onboarding.state.completed &&
-							gateway.onboarding.state.test_mode && (
+							gateway.onboarding?.state?.completed &&
+							gateway.onboarding?.state?.test_mode && (
 								<ActivatePaymentsButton
 									acceptIncentive={ acceptIncentive }
 									installingPlugin={ installingPlugin }
@@ -257,8 +306,8 @@ export const PaymentGatewayListItem = ( {
 							// There are no live payments in dev mode or test accounts, so no point in reactivating them.
 							! gateway.state.dev_mode &&
 							gateway.state.account_connected &&
-							gateway.onboarding.state.completed &&
-							! gateway.onboarding.state.test_mode &&
+							gateway.onboarding?.state?.completed &&
+							! gateway.onboarding?.state?.test_mode &&
 							gateway.state.test_mode && (
 								<ReactivateLivePaymentsButton
 									settingsHref={
@@ -272,7 +321,7 @@ export const PaymentGatewayListItem = ( {
 					<div className="woocommerce-list__item-after__actions">
 						<EllipsisMenu
 							label={ __(
-								'Payment Provider Options',
+								'Payment provider options',
 								'woocommerce'
 							) }
 							provider={ gateway }

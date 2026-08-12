@@ -75,6 +75,40 @@ add_filter( 'woocommerce_email_editor_site_style_sync_enabled', function( $enabl
 });
 ```
 
+### `woocommerce_email_editor_site_theme`
+
+Filter the site theme data used for email style sync.
+
+This filter allows overriding the site theme used when syncing global styles for the email editor. Useful for environments where theme data is not directly accessible (e.g., wp.com Atomic and Jetpack sites).
+
+```php
+/**
+ * Filter the site theme data used for email style sync.
+ *
+ * @since 2.3.0
+ * @param WP_Theme_JSON $site_theme The site theme data.
+ * @return WP_Theme_JSON Modified site theme data.
+ */
+apply_filters( 'woocommerce_email_editor_site_theme', $site_theme );
+```
+
+**Example Usage:**
+
+```php
+// Override the site theme with custom theme data for environments
+// where theme data is not directly accessible
+add_filter( 'woocommerce_email_editor_site_theme', function( $site_theme ) {
+    // Fetch theme data from an external source
+    $custom_theme_data = get_custom_theme_data();
+
+    if ( $custom_theme_data ) {
+        return new WP_Theme_JSON( $custom_theme_data, 'custom' );
+    }
+
+    return $site_theme;
+});
+```
+
 ## Advanced Customization Examples
 
 ### Custom Font Mapping

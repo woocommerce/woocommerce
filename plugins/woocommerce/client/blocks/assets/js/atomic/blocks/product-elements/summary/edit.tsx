@@ -8,13 +8,12 @@ import {
 	InspectorControls,
 	RichText,
 } from '@wordpress/block-editor';
+import { useProduct } from '@woocommerce/entities';
 import {
 	RangeControl,
 	ToggleControl,
-	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanel as ToolsPanel,
-	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
@@ -133,7 +132,7 @@ const LinkToDescription = ( {
 	return (
 		<p>
 			<RichText
-				identifier="linkToDescrption"
+				identifier="linkToDescription"
 				className="wc-block-components-product-summary__more-link"
 				tagName="a"
 				aria-label={ __( '“Read more” link text', 'woocommerce' ) }
@@ -186,9 +185,11 @@ const Edit = ( {
 		]
 	);
 
+	const { product } = useProduct( context.postId );
+
 	return (
 		<div { ...blockProps }>
-			<Block { ...attributes } />
+			<Block isAdmin={ true } { ...attributes } product={ product } />
 			<InspectorControls>
 				<ToolsPanel
 					label={ __( 'Settings', 'woocommerce' ) }

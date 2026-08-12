@@ -17,8 +17,6 @@
 	/* stylelint-enable */
 	top: 0;
 	left: 0;
-	height: 60px;
-	width: 60px;
 	z-index: 100;
 
 	.components-button {
@@ -54,8 +52,8 @@
 	position: absolute;
 	top: 0;
 	left: 0;
-	width: 60px;
-	height: 60px;
+	width: 64px;
+	height: 64px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -89,4 +87,9 @@
 		bottom: 0;
 		left: 0;
 	}
+}
+
+// Hide core's Styles sidebar controls
+.components-button[aria-controls="edit-site:global-styles"] {
+	display: none !important;
 }

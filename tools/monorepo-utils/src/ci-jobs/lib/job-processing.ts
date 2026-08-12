@@ -13,6 +13,14 @@ import { ProjectNode } from './project-graph';
 import { TestEnvVars, parseTestEnvConfig } from './test-environment';
 
 /**
+ * Projects whose contents define every consumer's effective ESLint rule set.
+ */
+const SHARED_ESLINT_PROJECTS = [
+	'@woocommerce/eslint-plugin',
+	'@woocommerce/eslint-config',
+];
+
+/**
  * A linting job.
  */
 interface LintJob {
@@ -52,6 +60,7 @@ interface TestJob {
 	shardNumber: number;
 	optional: boolean;
 	testType: string;
+	usesSharedPluginBuild?: boolean;
 	report: TestJobReport;
 }
 
@@ -101,8 +110,15 @@ export function getShardedJobs(
 	let createdJobs = [];
 	const shards = jobConfig.shardingArguments.length;
 
-	if ( shards <= 1 ) {
+	if ( shards === 0 ) {
 		createdJobs.push( job );
+	} else if ( shards === 1 ) {
+		// A single sharding argument is not a shard split: apply the argument
+		// but keep it as one job, without an "N/M" suffix on the name.
+		createdJobs.push( {
+			...job,
+			command: `${ job.command } ${ jobConfig.shardingArguments[ 0 ] }`,
+		} );
 	} else {
 		createdJobs = Array( shards )
 			.fill( null )
@@ -230,6 +246,10 @@ async function createTestJob(
 		testType: config.testType,
 	};
 
+	if ( config.usesSharedPluginBuild ) {
+		createdJob.usesSharedPluginBuild = true;
+	}
+
 	// We want to make sure that we're including the configuration for
 	// any test environment that the job will need in order to run.
 	if ( config.testEnv ) {
@@ -341,6 +361,17 @@ async function createJobsForProject(
 
 		switch ( jobConfig.type ) {
 			case JobType.Lint: {
+				// Changing the shared ESLint config changes every consumer's
+				// effective rule set while touching none of their own files, so
+				// their lint jobs would not otherwise be triggered.
+				if (
+					dependenciesWithChanges.some( ( dependency ) =>
+						SHARED_ESLINT_PROJECTS.includes( dependency )
+					)
+				) {
+					projectChanges = true;
+				}
+
 				const created = createLintJob(
 					node.name,
 					node.path,

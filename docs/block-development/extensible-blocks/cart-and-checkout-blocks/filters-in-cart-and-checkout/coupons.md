@@ -78,7 +78,7 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Parameters 
 
--   _value_ `boolean` (default: `true`) - Weather to show the apply coupon notice.
+-   _value_ `boolean` (default: `true`) - Whether to show the apply coupon notice.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 -   _args_ `object` - The arguments object with the following keys:
     -   _context_ `string` (allowed values: `wc/cart` and `wc/checkout`) - The context of the coupon notice.
@@ -86,7 +86,7 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Returns 
 
--   `boolean` - Weather to show the apply coupon notice.
+-   `boolean` - Whether to show the apply coupon notice.
 
 ### Code examples 
 
@@ -136,7 +136,7 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Parameters 
 
--   _value_ `boolean` (default: `true`) - Weather to show the remove coupon notice.
+-   _value_ `boolean` (default: `true`) - Whether to show the remove coupon notice.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 -   _args_ `object` - The arguments object with the following keys:
     -   _context_ `string` (allowed values: `wc/cart` and `wc/checkout`) - The context of the coupon notice.
@@ -144,7 +144,7 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Returns 
 
--   `boolean` - Weather to show the apply coupon notice.
+-   `boolean` - Whether to show the remove coupon notice.
 
 ### Code examples 
 

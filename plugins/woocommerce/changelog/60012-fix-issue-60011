@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixed coupon amount validation when creating/updating a coupon via the REST API.

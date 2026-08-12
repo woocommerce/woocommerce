@@ -3,15 +3,18 @@
  */
 import { __ } from '@wordpress/i18n';
 import { InspectorControls } from '@wordpress/block-editor';
+import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
+import { Icon, commentContent } from '@wordpress/icons';
 import {
 	Button,
-	PanelBody,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanel as ToolsPanel,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanelItem as ToolsPanelItem,
 	Placeholder,
 	ToggleControl,
 	withSpokenMessages,
 } from '@wordpress/components';
-import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
-import { Icon, commentContent } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -43,38 +46,87 @@ const ReviewsByCategoryEditor = ( {
 	const getInspectorControls = () => {
 		return (
 			<InspectorControls key="inspector">
-				<PanelBody
-					title={ __( 'Category', 'woocommerce' ) }
-					initialOpen={ false }
+				<ToolsPanel
+					label={ __( 'Content', 'woocommerce' ) }
+					resetAll={ () =>
+						setAttributes( {
+							showProductName: true,
+							showReviewRating: true,
+							showReviewerName: true,
+							showReviewImage: true,
+							showReviewDate: true,
+							showReviewContent: true,
+							imageType: 'reviewer',
+						} )
+					}
 				>
-					<ProductCategoryControl
-						selected={ attributes.categoryIds }
-						onChange={ ( value = [] ) => {
-							const ids = value.map( ( { id } ) => id );
-							setAttributes( { categoryIds: ids } );
-						} }
-						isCompact={ true }
-						showReviewCount={ true }
-					/>
-				</PanelBody>
-				<PanelBody title={ __( 'Content', 'woocommerce' ) }>
-					<ToggleControl
+					<ToolsPanelItem
+						hasValue={ () => ! attributes.showProductName }
 						label={ __( 'Product name', 'woocommerce' ) }
-						checked={ attributes.showProductName }
-						onChange={ () =>
-							setAttributes( {
-								showProductName: ! attributes.showProductName,
-							} )
+						onDeselect={ () =>
+							setAttributes( { showProductName: true } )
 						}
-					/>
+						isShownByDefault
+					>
+						<ToggleControl
+							__nextHasNoMarginBottom
+							label={ __( 'Product name', 'woocommerce' ) }
+							checked={ attributes.showProductName }
+							onChange={ () =>
+								setAttributes( {
+									showProductName:
+										! attributes.showProductName,
+								} )
+							}
+						/>
+					</ToolsPanelItem>
 					{ getSharedReviewContentControls(
 						attributes,
 						setAttributes
 					) }
-				</PanelBody>
-				<PanelBody title={ __( 'List Settings', 'woocommerce' ) }>
-					{ getSharedReviewListControls( attributes, setAttributes ) }
-				</PanelBody>
+				</ToolsPanel>
+				<ToolsPanel
+					label={ __( 'List Settings', 'woocommerce' ) }
+					resetAll={ () =>
+						setAttributes( {
+							showOrderby: true,
+							orderby: 'most-recent',
+							reviewsOnPageLoad: 10,
+							offset: 0,
+							showLoadMore: true,
+							reviewsOnLoadMore: 10,
+						} )
+					}
+				>
+					{ getSharedReviewListControls( attributes, setAttributes, {
+						showOffset: true,
+					} ) }
+				</ToolsPanel>
+				<ToolsPanel
+					label={ __( 'Category', 'woocommerce' ) }
+					resetAll={ () => setAttributes( { categoryIds: [] } ) }
+				>
+					<ToolsPanelItem
+						hasValue={ () =>
+							( attributes.categoryIds || [] ).length > 0
+						}
+						label={ __( 'Category', 'woocommerce' ) }
+						onDeselect={ () =>
+							setAttributes( { categoryIds: [] } )
+						}
+						isShownByDefault
+					>
+						<ProductCategoryControl
+							selected={ attributes.categoryIds }
+							onChange={ ( value = [] ) => {
+								const ids = value.map( ( { id } ) => id );
+								setAttributes( { categoryIds: ids } );
+							} }
+							isCompact={ true }
+							showReviewCount={ true }
+						/>
+					</ToolsPanelItem>
+				</ToolsPanel>
 			</InspectorControls>
 		);
 	};
@@ -122,7 +174,7 @@ const ReviewsByCategoryEditor = ( {
 		);
 	};
 
-	if ( ! categoryIds || editMode ) {
+	if ( ! categoryIds || categoryIds.length === 0 || editMode ) {
 		return renderEditMode();
 	}
 

@@ -3,11 +3,11 @@
  */
 import { apiFetch } from '@wordpress/data-controls';
 import { addQueryArgs } from '@wordpress/url';
-import { DispatchFromMap } from '@automattic/data-stores';
 
 /**
  * Internal dependencies
  */
+import { DispatchFromMap } from '../types';
 import { NAMESPACE } from '../constants';
 import TYPES from './action-types';
 import { Note, NoteQuery } from './types';

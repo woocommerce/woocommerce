@@ -408,14 +408,14 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		$this->report_data->refunded_orders = array_merge( $this->report_data->partial_refunds, $this->report_data->full_refunds );
 
 		foreach ( $this->report_data->refunded_orders as $key => $value ) {
-			$this->report_data->total_tax_refunded          += floatval( $value->total_tax < 0 ? $value->total_tax * -1 : $value->total_tax );
+			$this->report_data->total_tax_refunded          += abs( (float) $value->total_tax );
 			$this->report_data->total_refunds               += floatval( $value->total_refund );
-			$this->report_data->total_shipping_tax_refunded += floatval( $value->total_shipping_tax < 0 ? $value->total_shipping_tax * -1 : $value->total_shipping_tax );
-			$this->report_data->total_shipping_refunded     += floatval( $value->total_shipping < 0 ? $value->total_shipping * -1 : $value->total_shipping );
+			$this->report_data->total_shipping_tax_refunded += abs( (float) $value->total_shipping_tax );
+			$this->report_data->total_shipping_refunded     += abs( (float) $value->total_shipping );
 
 			// Only applies to partial.
 			if ( isset( $value->order_item_count ) ) {
-				$this->report_data->refunded_order_items += floatval( $value->order_item_count < 0 ? $value->order_item_count * -1 : $value->order_item_count );
+				$this->report_data->refunded_order_items += abs( (int) $value->order_item_count );
 			}
 		}
 

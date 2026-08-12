@@ -1,7 +1,7 @@
 <?php
+declare( strict_types=1 );
 namespace Automattic\WooCommerce\Blocks;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Blocks\Templates\AbstractTemplate;
 use Automattic\WooCommerce\Blocks\Templates\AbstractTemplatePart;
@@ -58,9 +58,7 @@ class BlockTemplatesRegistry {
 		} else {
 			$templates = array();
 		}
-		if ( Features::is_enabled( 'launch-your-store' ) ) {
-			$templates[ ComingSoonTemplate::SLUG ] = new ComingSoonTemplate();
-		}
+		$templates[ ComingSoonTemplate::SLUG ] = new ComingSoonTemplate();
 		if ( BlockTemplateUtils::supports_block_templates( 'wp_template_part' ) ) {
 			$template_parts = array(
 				MiniCartTemplate::SLUG       => new MiniCartTemplate(),
@@ -87,12 +85,33 @@ class BlockTemplatesRegistry {
 		} else {
 			$template_parts = array();
 		}
-		$this->templates = array_merge( $templates, $template_parts );
 
 		// Init all templates.
-		foreach ( $this->templates as $template ) {
+		foreach ( $templates as $template ) {
 			$template->init();
+
+			// Taxonomy templates are registered automatically by WordPress and
+			// are made available through the Add Template menu.
+			if ( ! $template->is_taxonomy_template ) {
+				$directory          = BlockTemplateUtils::get_templates_directory( 'wp_template' );
+				$template_file_path = $directory . '/' . $template::SLUG . '.html';
+				register_block_template(
+					'woocommerce//' . $template::SLUG,
+					array(
+						'title'       => $template->get_template_title(),
+						'description' => $template->get_template_description(),
+						// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+						'content'     => file_get_contents( $template_file_path ),
+					)
+				);
+			}
 		}
+
+		foreach ( $template_parts as $template_part ) {
+			$template_part->init();
+		}
+
+		$this->templates = array_merge( $templates, $template_parts );
 	}
 
 	/**

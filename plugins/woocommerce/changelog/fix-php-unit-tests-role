@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix PHPUnit test failure in WC_Tracks role properties test by ensuring roles are recreated after uninstallation test

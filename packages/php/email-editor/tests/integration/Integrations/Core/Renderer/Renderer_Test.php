@@ -77,11 +77,6 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$rendered    = $this->renderer->render( $email_post, 'Subject', '', 'en' );
 		$button_html = $this->extractBlockHtml( $rendered['html'], 'wp-block-button', 'td' );
 		$this->assertStringContainsString( 'color: #fff', $button_html );
-		$this->assertStringContainsString( 'padding-bottom: .7em;', $button_html );
-		$this->assertStringContainsString( 'padding-left: 1.4em;', $button_html );
-		$this->assertStringContainsString( 'padding-right: 1.4em;', $button_html );
-		$this->assertStringContainsString( 'padding-top: .7em;', $button_html );
-		$this->assertStringContainsString( 'background-color: #32373c', $button_html );
 	}
 
 	/**

@@ -14,14 +14,14 @@ import {
 } from '@woocommerce/base-context';
 import { SlotFillProvider } from '@woocommerce/blocks-checkout';
 import { StoreNoticesContainer } from '@woocommerce/blocks-components';
+import { reloadPage } from '@woocommerce/blocks/checkout/utils';
 
 /**
  * Internal dependencies
  */
 import { CartBlockContext } from './context';
+import { IncompatibleExtensionsFrontendNotice } from '../cart-checkout-shared/incompatible-extensions-notice';
 import './style.scss';
-
-const reloadPage = () => void window.location.reload( true );
 
 const Cart = ( { children, attributes = {} } ) => {
 	const { hasDarkControls } = attributes;
@@ -80,6 +80,7 @@ const Block = ( { attributes, children, scrollToTop } ) => (
 		showErrorMessage={ CURRENT_USER_IS_ADMIN }
 	>
 		<StoreNoticesContainer context={ noticeContexts.CART } />
+		<IncompatibleExtensionsFrontendNotice block="woocommerce/cart" />
 		<SlotFillProvider>
 			<CartProvider>
 				<CartEventsProvider>

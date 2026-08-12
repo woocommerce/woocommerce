@@ -18,9 +18,13 @@ export default {
 		),
 	limitedTimeOffer: __( 'Limited time offer', 'woocommerce' ),
 	TosAndPp: createInterpolateElement(
-		__(
-			'By using WooPayments you agree to our <a1>Terms of Service</a2> and acknowledge that you have read our <a2>Privacy Policy</a2>. Discount will be applied to payments processed via WooPayments upon completion of installation, setup, and connection. ',
-			'woocommerce'
+		sprintf(
+			/* translators: 1: Payment provider name (e.g., WooPayments) */
+			__(
+				'By using %1$s you agree to our <a1>Terms of Service</a1> and acknowledge that you have read our <a2>Privacy Policy</a2>. Discount will be applied to payments processed via %1$s upon completion of installation, setup, and connection. ',
+				'woocommerce'
+			),
+			'WooPayments'
 		),
 		{
 			a1: (
@@ -42,9 +46,13 @@ export default {
 		}
 	),
 	TosAndPpWooPay: createInterpolateElement(
-		__(
-			'By using WooPayments you agree to our <a1>Terms of Service</a2> (including WooPay <a3>merchant terms</a3>) and acknowledge that you have read our <a2>Privacy Policy</a2>. Discount will be applied to payments processed via WooPayments upon completion of installation, setup, and connection. ',
-			'woocommerce'
+		sprintf(
+			/* translators: 1: Payment provider name (e.g., WooPayments) */
+			__(
+				'By using %1$s you agree to our <a1>Terms of Service</a1> (including WooPay <a3>merchant terms</a3>) and acknowledge that you have read our <a2>Privacy Policy</a2>. Discount will be applied to payments processed via %1$s upon completion of installation, setup, and connection. ',
+				'woocommerce'
+			),
+			'WooPayments'
 		),
 		{
 			a1: (
@@ -86,17 +94,29 @@ export default {
 				),
 			}
 		),
-	paymentOptions: __(
-		'WooPayments is pre-integrated with all popular payment options',
-		'woocommerce'
+	paymentOptions: sprintf(
+		/* translators: %s: Payment provider name (e.g., WooPayments) */
+		__(
+			'%s is pre-integrated with all popular payment options',
+			'woocommerce'
+		),
+		'WooPayments'
 	),
 	andMore: __( '& more', 'woocommerce' ),
 	learnMore: __( 'Learn more', 'woocommerce' ),
 	survey: {
-		title: __( 'No thanks, I don’t want WooPayments', 'woocommerce' ),
-		intro: __(
-			'Note that the extension hasn’t been installed. This will simply dismiss our limited time offer. Please take a moment to tell us why you’d like to dismiss the WooPayments offer.',
-			'woocommerce'
+		title: sprintf(
+			/* translators: %s: Payment provider name (e.g., WooPayments) */
+			__( 'No thanks, I don’t want %s', 'woocommerce' ),
+			'WooPayments'
+		),
+		intro: sprintf(
+			/* translators: %s: Payment provider name (e.g., WooPayments) */
+			__(
+				'Note that the extension hasn’t been installed. This will simply dismiss our limited time offer. Please take a moment to tell us why you’d like to dismiss the %s offer.',
+				'woocommerce'
+			),
+			'WooPayments'
 		),
 		question: __(
 			'Why would you like to dismiss the new payments experience?',
@@ -110,9 +130,10 @@ export default {
 			'I don’t want to install another plugin',
 			'woocommerce'
 		),
-		moreInfoLabel: __(
-			'I need more information about WooPayments',
-			'woocommerce'
+		moreInfoLabel: sprintf(
+			/* translators: %s: Payment provider name (e.g., WooPayments) */
+			__( 'I need more information about %s', 'woocommerce' ),
+			'WooPayments'
 		),
 		anotherTimeLabel: __(
 			'I’m open to installing it another time',
@@ -123,7 +144,11 @@ export default {
 			'woocommerce'
 		),
 		commentsLabel: __( 'Comments (Optional)', 'woocommerce' ),
-		cancelButton: __( 'Just dismiss WooPayments', 'woocommerce' ),
+		cancelButton: sprintf(
+			/* translators: %s: Payment provider name (e.g., WooPayments) */
+			__( 'Just dismiss %s', 'woocommerce' ),
+			'WooPayments'
+		),
 		submitButton: __( 'Dismiss and send feedback', 'woocommerce' ),
 	},
 	faq: {
@@ -138,43 +163,60 @@ export default {
 		seeMore: __( 'See more', 'woocommerce' ),
 		paypal: {
 			title: __( 'PayPal Payments', 'woocommerce' ),
-			description: __(
-				'Enable PayPal Payments alongside WooPayments. Give your customers another way to pay safely and conveniently via PayPal, PayLater, and Venmo.',
-				'woocommerce'
+			description: sprintf(
+				/* translators: %s: Payment provider name (e.g., WooPayments) */
+				__(
+					'Enable PayPal Payments alongside %s. Give your customers another way to pay safely and conveniently via PayPal, PayLater, and Venmo.',
+					'woocommerce'
+				),
+				'WooPayments'
 			),
 		},
 		amazonpay: {
 			title: __( 'Amazon Pay', 'woocommerce' ),
-			description: __(
-				'Enable Amazon Pay alongside WooPayments and give buyers the ability to pay via Amazon Pay. Transactions take place via Amazon embedded widgets, so the buyer never leaves your site.',
-				'woocommerce'
+			description: sprintf(
+				/* translators: %s: Payment provider name (e.g., WooPayments) */
+				__(
+					'Enable Amazon Pay alongside %s and give buyers the ability to pay via Amazon Pay. Transactions take place via Amazon embedded widgets, so the buyer never leaves your site.',
+					'woocommerce'
+				),
+				'WooPayments'
 			),
 		},
 		klarna: {
 			title: __( 'Klarna', 'woocommerce' ),
-			description: __(
-				'Enable Klarna alongside WooPayments. With Klarna Payments buyers can choose the payment installment option they want, Pay Now, Pay Later, or Slice It. No credit card numbers, no passwords, no worries.',
-				'woocommerce'
+			description: sprintf(
+				/* translators: %s: Payment provider name (e.g., WooPayments) */
+				__(
+					'Enable Klarna alongside %s. With Klarna Payments buyers can choose the payment installment option they want, Pay Now, Pay Later, or Slice It. No credit card numbers, no passwords, no worries.',
+					'woocommerce'
+				),
+				'WooPayments'
 			),
 		},
 		affirm: {
 			title: __( 'Affirm', 'woocommerce' ),
-			description: __(
-				'Enable Affirm alongside WooPayments and give buyers the ability to pick the payment option that works for them and their budget — from 4 interest-free payments every 2 weeks to monthly installments.',
-				'woocommerce'
+			description: sprintf(
+				/* translators: %s: Payment provider name (e.g., WooPayments) */
+				__(
+					'Enable Affirm alongside %s and give buyers the ability to pick the payment option that works for them and their budget — from 4 interest-free payments every 2 weeks to monthly installments.',
+					'woocommerce'
+				),
+				'WooPayments'
 			),
 		},
 		installText: ( extensionsString: string ) => {
 			const extensionsNumber = extensionsString.split( ', ' ).length;
 			return createInterpolateElement(
 				sprintf(
-					/* translators: %s = names of the installed extensions */
+					/* translators: 1: Payment provider name (e.g., WooPayments), 2: names of the installed extensions */
 					_n(
-						'Installing <strong>WooPayments</strong> will automatically activate <strong>%s</strong> extension in your store.',
-						'Installing <strong>WooPayments</strong> will automatically activate <strong>%s</strong> extensions in your store.',
+						'Installing <strong>%1$s</strong> will automatically activate <strong>%2$s</strong> extension in your store.',
+						'Installing <strong>%1$s</strong> will automatically activate <strong>%2$s</strong> extensions in your store.',
 						extensionsNumber,
 						'woocommerce'
 					),
+					'WooPayments',
 					extensionsString
 				),
 				{

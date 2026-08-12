@@ -80,7 +80,7 @@ export const PaymentExtensionSuggestionListItem = ( {
 	const incentive = hasIncentive( suggestion ) ? suggestion._incentive : null;
 
 	// Determine the CTA button label based on the extension state.
-	let ctaButtonLabel = __( 'Install', 'woocommerce' );
+	let ctaButtonLabel = __< string >( 'Install', 'woocommerce' );
 	if ( pluginInstalled ) {
 		ctaButtonLabel = __( 'Enable', 'woocommerce' );
 	} else if ( installingPlugin === suggestion.id ) {

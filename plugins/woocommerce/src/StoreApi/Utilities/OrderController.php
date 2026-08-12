@@ -2,16 +2,15 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
-use Exception;
-use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Internal\Customers\SearchService as CustomerSearchService;
+use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
+use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
 use Automattic\WooCommerce\Utilities\ShippingUtil;
-use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
-use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
-use Automattic\WooCommerce\StoreApi\Utilities\ArrayUtils;
-use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Exception;
 
 /**
  * OrderController class.
@@ -51,12 +50,14 @@ class OrderController {
 
 		add_filter( 'woocommerce_default_order_status', array( $this, 'default_order_status' ) );
 
-		$order = new \WC_Order();
-		$order->set_status( 'checkout-draft' );
-		$order->set_created_via( 'store-api' );
-		$this->update_order_from_cart( $order );
-
-		remove_filter( 'woocommerce_default_order_status', array( $this, 'default_order_status' ) );
+		try {
+			$order = new \WC_Order();
+			$order->set_status( 'checkout-draft' );
+			$order->set_created_via( 'store-api' );
+			$this->update_order_from_cart( $order );
+		} finally {
+			remove_filter( 'woocommerce_default_order_status', array( $this, 'default_order_status' ) );
+		}
 
 		return $order;
 	}
@@ -68,41 +69,10 @@ class OrderController {
 	 * @param boolean   $update_totals Whether to update totals or not.
 	 */
 	public function update_order_from_cart( \WC_Order $order, $update_totals = true ) {
-		/**
-		 * This filter ensures that local pickup locations are still used for order taxes by forcing the address used to
-		 * calculate tax for an order to match the current address of the customer.
-		 *
-		 * -    The method `$customer->get_taxable_address()` runs the filter `woocommerce_customer_taxable_address`.
-		 * -    While we have a session, our `ShippingController::filter_taxable_address` function uses this hook to set
-		 *      the customer address to the pickup location address if local pickup is the chosen method.
-		 *
-		 * Without this code in place, `$customer->get_taxable_address()` is not used when order taxes are calculated,
-		 * resulting in the wrong taxes being applied with local pickup.
-		 *
-		 * The alternative would be to instead use `woocommerce_order_get_tax_location` to return the pickup location
-		 * address directly, however since we have the customer filter in place we don't need to duplicate effort.
-		 *
-		 * @see \WC_Abstract_Order::get_tax_location()
-		 */
-		add_filter(
-			'woocommerce_order_get_tax_location',
-			function ( $location ) {
-
-				if ( ! is_null( wc()->customer ) ) {
-
-					$taxable_address = wc()->customer->get_taxable_address();
-
-					$location = array(
-						'country'  => $taxable_address[0],
-						'state'    => $taxable_address[1],
-						'postcode' => $taxable_address[2],
-						'city'     => $taxable_address[3],
-					);
-				}
-
-				return $location;
-			}
-		);
+		// Tax location for local pickup orders is handled by ShippingController::filter_order_tax_location(), which
+		// hooks woocommerce_order_get_tax_location once and derives the pickup location address from the order's own
+		// shipping line item. This avoids registering a per-call (and unremovable) closure on every sync.
+		// See \WC_Abstract_Order::get_tax_location().
 
 		// Ensure cart is current.
 		if ( $update_totals ) {
@@ -128,8 +98,9 @@ class OrderController {
 	 * @param \WC_Order $order Order object.
 	 */
 	public function sync_customer_data_with_order( \WC_Order $order ) {
-		if ( $order->get_customer_id() ) {
-			$customer = new \WC_Customer( $order->get_customer_id() );
+		$customer_id = $order->get_customer_id();
+		if ( $customer_id ) {
+			$customer = new \WC_Customer( $customer_id );
 			$customer->set_props(
 				array(
 					'billing_first_name'  => $order->get_billing_first_name(),
@@ -155,9 +126,7 @@ class OrderController {
 					'shipping_phone'      => $order->get_shipping_phone(),
 				)
 			);
-
 			$this->additional_fields_controller->sync_customer_additional_fields_with_order( $order, $customer );
-
 			$customer->save();
 		}
 	}
@@ -203,6 +172,18 @@ class OrderController {
 
 		// Perform custom validations.
 		$this->perform_custom_order_validation( $order );
+	}
+
+	/**
+	 * Validate an existing order's address data before the order is updated from the request.
+	 *
+	 * Runs before any request data is persisted so a rejected address cannot mutate the order.
+	 *
+	 * @throws RouteException Exception if invalid data is detected.
+	 * @param \WC_Order $order Order object.
+	 */
+	public function validate_existing_order_before_update( \WC_Order $order ): void {
+		$this->validate_addresses( $order, $order->needs_shipping() );
 	}
 
 	/**
@@ -260,6 +241,10 @@ class OrderController {
 		$validators    = array( 'validate_coupon_email_restriction', 'validate_coupon_usage_limit' );
 		$coupon_errors = array();
 
+		if ( $use_order_data ) {
+			$validators[] = 'validate_coupon_global_usage_limit';
+		}
+
 		foreach ( $coupons as $coupon ) {
 			try {
 				array_walk(
@@ -279,8 +264,18 @@ class OrderController {
 			if ( $use_order_data ) {
 				$error_code = 'woocommerce_rest_order_coupon_errors';
 
-				foreach ( $coupon_errors as $coupon_code => $message ) {
-					$order->remove_coupon( $coupon_code );
+				if ( $order->get_recorded_coupon_usage_counts() ) {
+					foreach ( $coupon_errors as $coupon_code => $message ) {
+						$order->remove_coupon( $coupon_code );
+					}
+				} else {
+					// Remove directly. `remove_coupon()` would decrement `usage_count` this order never recorded.
+					foreach ( $order->get_items( 'coupon' ) as $item_id => $coupon_item ) {
+						if ( $coupon_item instanceof \WC_Order_Item_Coupon && isset( $coupon_errors[ $coupon_item->get_code() ] ) ) {
+							$order->remove_item( $item_id );
+						}
+					}
+					$order->recalculate_coupons();
 				}
 
 				// Recalculate totals.
@@ -386,12 +381,14 @@ class OrderController {
 
 			// If only local pickup is selected, we don't need to validate the shipping country.
 			if ( ! $selected_shipping_rates_are_all_local_pickup && ! $this->validate_allowed_country( $shipping_country, (array) wc()->countries->get_shipping_countries() ) ) {
+				$countries             = WC()->countries->get_countries();
+				$shipping_country_name = $countries[ $shipping_country ] ?? $shipping_country;
 				throw new RouteException(
 					'woocommerce_rest_invalid_address_country',
 					sprintf(
-						/* translators: %s country code. */
+						/* translators: %s country name. */
 						esc_html__( 'Sorry, we do not ship orders to the provided country (%s)', 'woocommerce' ),
-						esc_html( $shipping_country )
+						esc_html( $shipping_country_name )
 					),
 					400,
 					array(
@@ -402,12 +399,14 @@ class OrderController {
 		}
 
 		if ( ! $this->validate_allowed_country( $billing_country, (array) wc()->countries->get_allowed_countries() ) ) {
+			$countries            = WC()->countries->get_countries();
+			$billing_country_name = $countries[ $billing_country ] ?? $billing_country;
 			throw new RouteException(
 				'woocommerce_rest_invalid_address_country',
 				sprintf(
-					/* translators: %s country code. */
+					/* translators: %s country name. */
 					esc_html__( 'Sorry, we do not allow orders from the provided country (%s)', 'woocommerce' ),
-					esc_html( $billing_country )
+					esc_html( $billing_country_name )
 				),
 				400,
 				array(
@@ -523,10 +522,35 @@ class OrderController {
 	 */
 	protected function validate_coupon_email_restriction( \WC_Coupon $coupon, \WC_Order $order ) {
 		$restrictions = $coupon->get_email_restrictions();
-		// Email is forced lowercase like in validate_coupon_allowed_emails.
-		$billing_email = strtolower( $order->get_billing_email() );
 
-		if ( ! empty( $restrictions ) && $billing_email && ! DiscountsUtil::is_coupon_emails_allowed( array( $billing_email ), $restrictions ) ) {
+		if ( empty( $restrictions ) ) {
+			return;
+		}
+
+		$check_emails = array();
+
+		// Check the logged-in user's email.
+		$current_user = wp_get_current_user();
+		if ( $current_user->exists() ) {
+			$user_email = trim( sanitize_email( $current_user->user_email ) );
+			if ( ! empty( $user_email ) ) {
+				$check_emails[] = strtolower( $user_email );
+			}
+		}
+
+		// Also check the billing email from the order.
+		$billing_email = $order->get_billing_email();
+		if ( ! empty( $billing_email ) ) {
+			$billing_email = trim( sanitize_email( $billing_email ) );
+			if ( ! empty( $billing_email ) ) {
+				$check_emails[] = strtolower( $billing_email );
+			}
+		}
+
+		// Remove duplicates and empty values.
+		$check_emails = array_unique( array_filter( $check_emails ) );
+
+		if ( ! empty( $check_emails ) && ! DiscountsUtil::is_coupon_emails_allowed( $check_emails, $restrictions ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			throw new Exception( $coupon->get_coupon_error( \WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED ) );
 		}
@@ -559,10 +583,8 @@ class OrderController {
 			);
 		} else {
 			// Otherwise we check if the email doesn't belong to an existing user.
-			$customer_data_store = \WC_Data_Store::load( 'customer' );
-
 			// This will get us any user ids for the given billing email.
-			$user_ids = $customer_data_store->get_user_ids_for_billing_email( array( $order->get_billing_email() ) );
+			$user_ids = wc_get_container()->get( CustomerSearchService::class )->find_user_ids_by_billing_email_for_coupons_usage_lookup( array( $order->get_billing_email() ) );
 
 			// Convert all found user ids to a list of email addresses.
 			$user_emails = array_map( array( $this, 'get_email_from_user_id' ), $user_ids );
@@ -587,6 +609,34 @@ class OrderController {
 		}
 
 		if ( $usage_count >= $coupon_usage_limit ) {
+			throw new Exception( $coupon->get_coupon_error( \WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED ) );
+		}
+	}
+
+	/**
+	 * Check the coupon's global usage limit against the order.
+	 *
+	 * Skipped once the order has recorded its own usage, so it is not counted against itself.
+	 *
+	 * @throws Exception Exception if the global usage limit has been reached.
+	 * @param \WC_Coupon $coupon Coupon object applied to the order.
+	 * @param \WC_Order  $order Order object.
+	 */
+	protected function validate_coupon_global_usage_limit( \WC_Coupon $coupon, \WC_Order $order ): void {
+		$usage_limit = $coupon->get_usage_limit();
+
+		if ( ! $usage_limit || $order->get_recorded_coupon_usage_counts() ) {
+			return;
+		}
+
+		// Include tentative holds, matching WC_Discounts::validate_coupon_usage_limit().
+		$data_store      = $coupon->get_data_store();
+		$tentative_usage = is_callable( array( $data_store, 'get_tentative_usage_count' ) )
+			? (int) $data_store->get_tentative_usage_count( $coupon->get_id() )
+			: 0;
+
+		if ( $coupon->get_usage_count() + $tentative_usage >= $usage_limit ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			throw new Exception( $coupon->get_coupon_error( \WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED ) );
 		}
 	}
@@ -785,31 +835,31 @@ class OrderController {
 
 		if ( $order->get_cart_hash() !== $cart_hashes['line_items'] ) {
 			$order->set_cart_hash( $cart_hashes['line_items'] );
-			$order->remove_order_items( 'line_item' );
+			$order->remove_order_items( OrderItemType::LINE_ITEM );
 			wc()->checkout->create_order_line_items( $order, $cart );
 		}
 
 		if ( $order->get_meta( '_shipping_hash' ) !== $cart_hashes['shipping'] ) {
 			$order->update_meta_data( '_shipping_hash', $cart_hashes['shipping'] );
-			$order->remove_order_items( 'shipping' );
+			$order->remove_order_items( OrderItemType::SHIPPING );
 			wc()->checkout->create_order_shipping_lines( $order, wc()->session->get( 'chosen_shipping_methods' ), wc()->shipping()->get_packages() );
 		}
 
 		if ( $order->get_meta( '_coupons_hash' ) !== $cart_hashes['coupons'] ) {
-			$order->remove_order_items( 'coupon' );
+			$order->remove_order_items( OrderItemType::COUPON );
 			$order->update_meta_data( '_coupons_hash', $cart_hashes['coupons'] );
 			wc()->checkout->create_order_coupon_lines( $order, $cart );
 		}
 
 		if ( $order->get_meta( '_fees_hash' ) !== $cart_hashes['fees'] ) {
 			$order->update_meta_data( '_fees_hash', $cart_hashes['fees'] );
-			$order->remove_order_items( 'fee' );
+			$order->remove_order_items( OrderItemType::FEE );
 			wc()->checkout->create_order_fee_lines( $order, $cart );
 		}
 
 		if ( $order->get_meta( '_taxes_hash' ) !== $cart_hashes['taxes'] ) {
 			$order->update_meta_data( '_taxes_hash', $cart_hashes['taxes'] );
-			$order->remove_order_items( 'tax' );
+			$order->remove_order_items( OrderItemType::TAX );
 			wc()->checkout->create_order_tax_lines( $order, $cart );
 		}
 	}

@@ -24,8 +24,8 @@ import type { BlockAttributes } from './types';
 type Props = BlockAttributes &
 	HTMLAttributes< HTMLDivElement > & {
 		isAdmin: boolean;
-		product: ProductResponseItem | ProductEntityResponse;
-		isExperimentalWcRestApiEnabled: boolean;
+		isExperimentalWcRestApiV4Enabled: boolean;
+		product: ProductResponseItem | ProductEntityResponse | undefined;
 	};
 
 interface PriceProps {
@@ -54,13 +54,13 @@ interface PriceProps {
  * @param fallback    The fallback value if priceString is null/undefined (defaults to "0")
  * @return The price converted to minor units as a string (e.g., "1299")
  */
-const convertAdminPriceToStoreApiFormat = (
+export const convertAdminPriceToStoreApiFormat = (
 	priceString: string | null | undefined,
 	currency: Currency,
 	fallback = '0'
 ) => {
 	const multiplier = 10 ** currency.minorUnit;
-	return (
+	return Math.round(
 		Number.parseFloat( priceString ?? fallback ) * multiplier
 	).toString();
 };
@@ -72,17 +72,16 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		isDescendentOfSingleProductTemplate,
 		isAdmin,
 		product: productData,
-		isExperimentalWcRestApiEnabled,
+		isExperimentalWcRestApiV4Enabled,
 	} = props;
 
-	const styleProps = useStyleProps( props );
 	const { parentName, parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext(
 		/**
 		 * This block can depend on the core-data package only when the experimental WC Rest API feature flag is enabled because
 		 * it depends on experimental fields: https://github.com/woocommerce/woocommerce/pull/60101
 		 */
-		isExperimentalWcRestApiEnabled
+		isExperimentalWcRestApiV4Enabled
 			? {
 					isAdmin,
 					product: productData,
@@ -96,26 +95,50 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		parentName ===
 		'woocommerce/add-to-cart-with-options-grouped-product-item';
 
-	const showPricePreview =
-		isDescendentOfSingleProductTemplate &&
-		! isDescendentOfAddToCartGroupedProductSelectorBlock;
+	const styleProps = useStyleProps( props );
+	const {
+		margin,
+		marginTop,
+		marginRight,
+		marginBottom,
+		marginLeft,
+		...priceStyle
+	} = styleProps.style;
+	const blockMarginStyle = {
+		margin,
+		marginTop,
+		marginRight,
+		marginBottom,
+		marginLeft,
+	};
 
-	const wrapperClassName = clsx(
-		'wc-block-components-product-price',
-		className,
-		styleProps.className,
-		{
-			[ `${ parentClassName }__product-price` ]: parentClassName,
-		}
+	const showPricePreview =
+		( isDescendentOfSingleProductTemplate &&
+			! isDescendentOfAddToCartGroupedProductSelectorBlock ) ||
+		! product;
+
+	const blockClassName = clsx(
+		'wp-block-woocommerce-product-price',
+		className
 	);
+	const wrapperClassName = clsx( styleProps.className, {
+		[ `${ parentClassName }__product-price` ]: parentClassName,
+	} );
 
 	if ( ! product?.id && ! isDescendentOfSingleProductTemplate ) {
 		const productPriceComponent = (
-			<ProductPrice align={ textAlign } className={ wrapperClassName } />
+			<ProductPrice
+				align={ textAlign }
+				className={ wrapperClassName }
+				style={ priceStyle }
+			/>
 		);
 		if ( isDescendentOfAllProductsBlock ) {
 			return (
-				<div className="wp-block-woocommerce-product-price">
+				<div
+					className={ blockClassName }
+					style={ isAdmin ? undefined : blockMarginStyle }
+				>
 					{ productPriceComponent }
 				</div>
 			);
@@ -128,7 +151,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		? getCurrencyFromPriceResponse()
 		: getCurrencyFromPriceResponse( prices );
 
-	if ( isExperimentalWcRestApiEnabled ) {
+	if ( isExperimentalWcRestApiV4Enabled ) {
 		prices = {
 			price: convertAdminPriceToStoreApiFormat(
 				product?.price,
@@ -152,15 +175,14 @@ export const Block = ( props: Props ): JSX.Element | null => {
 				: {} ),
 			currency_minor_unit: SITE_CURRENCY.minorUnit,
 			price_range:
-				product?.__experimental_max_price &&
-				product?.__experimental_min_price
+				product?.max_price && product?.min_price
 					? {
 							min_amount: convertAdminPriceToStoreApiFormat(
-								product.__experimental_min_price,
+								product.min_price,
 								currency
 							),
 							max_amount: convertAdminPriceToStoreApiFormat(
-								product.__experimental_max_price,
+								product.max_price,
 								currency
 							),
 					  }
@@ -179,9 +201,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		<ProductPrice
 			align={ textAlign }
 			className={ wrapperClassName }
-			style={ styleProps.style }
-			regularPriceStyle={ styleProps.style }
-			priceStyle={ styleProps.style }
+			style={ priceStyle }
 			priceClassName={ priceClassName }
 			currency={ currency }
 			price={ showPricePreview ? pricePreview : prices.price }
@@ -200,7 +220,10 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	);
 	if ( isDescendentOfAllProductsBlock ) {
 		return (
-			<div className="wp-block-woocommerce-product-price">
+			<div
+				className={ blockClassName }
+				style={ isAdmin ? undefined : blockMarginStyle }
+			>
 				{ productPriceComponent }
 			</div>
 		);

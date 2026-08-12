@@ -6,13 +6,11 @@
  * @package WooCommerce Tests
  */
 
-use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Internal\Admin\FeaturePlugin;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\BypassFinalsHack;
-use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\TestingContainer;
 
 /**
@@ -90,6 +88,8 @@ class WC_Unit_Tests_Bootstrap {
 		// load the WP testing environment.
 		require_once $this->wp_tests_dir . '/includes/bootstrap.php';
 
+		$this->maybe_announce_skipped_graphql_tests();
+
 		// Ensure theme install tests use direct filesystem method.
 		if ( ! defined( 'FS_METHOD' ) ) {
 			define( 'FS_METHOD', 'direct' );
@@ -101,9 +101,7 @@ class WC_Unit_Tests_Bootstrap {
 		// re-initialize dependency injection, this needs to be the last operation after everything else is in place.
 		$this->initialize_dependency_injection();
 
-		if ( getenv( 'HPOS' ) ) {
-			$this->initialize_hpos();
-		}
+		$this->maybe_initialize_hpos();
 
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions, WordPress.PHP.DiscouragedPHPFunctions
 		error_reporting( error_reporting() & ~E_DEPRECATED );
@@ -172,14 +170,52 @@ class WC_Unit_Tests_Bootstrap {
 	}
 
 	/**
-	 * Initialize HPOS if tests need to run in HPOS context.
+	 * Configure the order datastore based on the DISABLE_HPOS environment variable.
 	 *
 	 * @return void
 	 */
-	private function initialize_hpos() {
-		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::delete_order_custom_tables();
-		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order_custom_table_if_not_exist();
-		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot_feature_and_usage( true );
+	private function maybe_initialize_hpos() {
+		$disable_hpos = ! empty( getenv( 'DISABLE_HPOS' ) );
+		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot_feature_and_usage( ! $disable_hpos );
+	}
+
+	/**
+	 * Echo a "Not running GraphQL …" message when an explicit `--testsuite`
+	 * filter is given that omits `wc-phpunit-graphql`, mirroring the "Not
+	 * running ajax tests" line printed by WP's own bootstrap for the `ajax`,
+	 * `ms-files` and `external-http` groups.
+	 *
+	 * The GraphQL suite is kept separate because it requires PHP 8.1+, so
+	 * PHP 7.4 / 8.0 CI jobs point `--testsuite` at the legacy + main suites
+	 * only. A default run (no `--testsuite` filter) runs the full suite list,
+	 * which includes the GraphQL suite, so there is nothing to announce. The
+	 * `--testsuite` value may be a comma-joined suite list, hence the substring
+	 * match rather than an exact comparison.
+	 */
+	private function maybe_announce_skipped_graphql_tests() {
+		$argv = isset( $GLOBALS['argv'] ) && is_array( $GLOBALS['argv'] ) ? $GLOBALS['argv'] : array();
+
+		$has_testsuite_filter = false;
+		$running_graphql      = false;
+		foreach ( $argv as $arg ) {
+			if ( ! is_string( $arg ) ) {
+				continue;
+			}
+			if ( false !== strpos( $arg, '--testsuite' ) ) {
+				$has_testsuite_filter = true;
+			}
+			if ( false !== strpos( $arg, 'wc-phpunit-graphql' ) ) {
+				$running_graphql = true;
+			}
+		}
+
+		// Without an explicit --testsuite filter the default suite list runs,
+		// which already includes the GraphQL suite: nothing is skipped.
+		if ( ! $has_testsuite_filter || $running_graphql ) {
+			return;
+		}
+
+		echo 'Not running GraphQL tests. To execute these, add wc-phpunit-graphql to --testsuite (a default run without --testsuite includes it).' . PHP_EOL;
 	}
 
 	/**
@@ -219,6 +255,13 @@ class WC_Unit_Tests_Bootstrap {
 	public function load_wc() {
 		define( 'WC_TAX_ROUNDING_MODE', 'auto' );
 		define( 'WC_USE_TRANSACTIONS', false );
+
+		// Default Back In Stock alpha to enabled during tests when no
+		// per-suite override has been set.
+		if ( ! defined( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
+			define( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
+		}
+
 		update_option( 'woocommerce_enable_coupons', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_onboarding_opt_in', 'yes' );
@@ -238,17 +281,20 @@ class WC_Unit_Tests_Bootstrap {
 		define( 'WC_REMOVE_ALL_DATA', true );
 		include $this->plugin_dir . '/uninstall.php';
 
-		if ( ! getenv( 'HPOS' ) ) {
-			add_filter( 'woocommerce_enable_hpos_by_default_for_new_shops', '__return_false' );
-		}
-
 		// Always load PayPal Standard for unit tests.
-		$paypal = class_exists( 'WC_Gateway_Paypal' ) ? new WC_Gateway_Paypal() : null;
+		$paypal = class_exists( 'WC_Gateway_Paypal' ) ? WC_Gateway_Paypal::get_instance() : null;
 		if ( $paypal ) {
 			$paypal->update_option( '_should_load', wc_bool_to_string( true ) );
 		}
 
 		WC_Install::install();
+
+		// Run the test suite with product object caching enabled (the new-install default).
+		// This ensures tests exercise the cache-on path and fail loudly if any code bypasses
+		// the product CRUD/cache interfaces (e.g. raw SQL or direct postmeta writes without
+		// invalidation). install_wc() runs on `setup_theme`, before `init`, so the option is
+		// set in time for ProductCacheController::on_init() to register its invalidation hooks.
+		update_option( 'woocommerce_feature_product_instance_caching_enabled', 'yes' );
 
 		// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.
 		if ( version_compare( $GLOBALS['wp_version'], '4.7', '<' ) ) {
@@ -280,7 +326,6 @@ class WC_Unit_Tests_Bootstrap {
 		// test cases.
 		require_once $this->tests_dir . '/includes/wp-http-testcase.php';
 		require_once $this->tests_dir . '/framework/class-wc-unit-test-case.php';
-		require_once $this->tests_dir . '/framework/class-wc-api-unit-test-case.php';
 		require_once $this->tests_dir . '/framework/class-wc-rest-unit-test-case.php';
 
 		// Helpers.
@@ -302,6 +347,9 @@ class WC_Unit_Tests_Bootstrap {
 		require_once $this->tests_dir . '/framework/traits/trait-wc-rest-api-complex-meta.php';
 		require_once dirname( $this->tests_dir ) . '/php/helpers/HPOSToggleTrait.php';
 		require_once dirname( $this->tests_dir ) . '/php/helpers/SerializingCacheTrait.php';
+		require_once dirname( $this->tests_dir ) . '/php/helpers/LoggerSpyTrait.php';
+		require_once dirname( $this->tests_dir ) . '/php/helpers/MetaDataAssertionTrait.php';
+		require_once dirname( $this->tests_dir ) . '/php/helpers/CorePayPalGatewayTrait.php';
 	}
 
 	/**

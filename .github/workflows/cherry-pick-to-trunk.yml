@@ -7,6 +7,7 @@ on:
       - 'release/*'
 
 env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
   GIT_COMMITTER_NAME: 'woocommercebot'
   GIT_COMMITTER_EMAIL: 'woocommercebot@users.noreply.github.com'
   GIT_AUTHOR_NAME: 'woocommercebot'
@@ -50,7 +51,7 @@ jobs:
     steps:
       - name: Check frozen release conditions
         id: check
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
           BASE_BRANCH: ${{ needs.prepare.outputs.base_branch }}
           PR_NUMBER: ${{ needs.prepare.outputs.pr_number }}
@@ -113,7 +114,7 @@ jobs:
       # We set the milestone of the new PR to the milestone of the source PR since they should all be merged in preparation for the same release.
       - name: Add milestone
         if: github.event.pull_request.milestone.number != null
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
@@ -126,7 +127,7 @@ jobs:
 
       - name: Comment on original PR about cherry-pick success
         if: always()
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
           CHERRY_PICK_PR_NUMBER: ${{ needs.cherry-pick.outputs.cherry_pick_pr_number }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -187,6 +188,28 @@ jobs:
             :info: *Cherry pick <${{ env.CHERRY_PICK_PR_URL }}|created> (${{ env.BASE_BRANCH }} → `trunk`)* Please ensure <${{ env.CHERRY_PICK_PR_URL }}|this cherry pick> is merged before releasing. Source PR: _<${{ env.SOURCE_PR_URL }}|#${{ env.SOURCE_PR_NUMBER }} - ${{ env.SOURCE_PR_TITLE }}>_.
             ${{ env.ADD_CP_TO_FROZEN_NAG == 'true' && format('\n\nNOTE: This PR might need to be cherry-picked to the frozen release ({0}).', env.NEXT_BRANCH) || '' }}
 
+  handle-skipped:
+    needs: [prepare, cherry-pick, frozen-release-check]
+    runs-on: ubuntu-latest
+    if: ${{ always() && needs.cherry-pick.outputs.status == 'skipped' }}
+    steps:
+      - name: Comment on original PR about skip
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        env:
+          ERROR_MESSAGE: ${{ needs.cherry-pick.outputs.error_message }}
+        with:
+          github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            let body = '⚠️ **Cherry-pick to `trunk` was skipped.**\n\n' +
+              '**Reason:** ' + process.env.ERROR_MESSAGE + '\n\n';
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: parseInt('${{ needs.prepare.outputs.pr_number }}'),
+              body
+            });
+
   handle-failures:
     needs: [prepare, cherry-pick, frozen-release-check]
     runs-on: ubuntu-latest
@@ -194,7 +217,7 @@ jobs:
     steps:
       - name: Add "cherry pick failed" label
         if: always()
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
@@ -207,7 +230,7 @@ jobs:
 
       - name: Comment on original PR
         if: always()
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
           ERROR_MESSAGE: ${{ needs.cherry-pick.outputs.error_message || 'Unknown error' }}
           GITHUB_RUN_ID: ${{ github.run_id }}

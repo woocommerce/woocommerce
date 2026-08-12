@@ -39,6 +39,12 @@
 	}
 }
 
+.block-editor-block-patterns-explorer.no-sidebar
+	.block-editor-block-patterns-explorer__list {
+	margin-left: 0;
+	padding-left: 2rem;
+}
+
 .email-editor-modal-footer {
 	background-color: #fff;
 	bottom: 0;

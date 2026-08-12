@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 
 /**
@@ -16,10 +17,14 @@ jest.mock( '../../../context/shipment-form-context', () => ( {
 
 jest.mock( '../../../utils/icons', () => ( {
 	SearchIcon: () => <span data-testid="search-icon" />,
+	TruckIcon: () => <span data-testid="truck-icon" />,
 } ) );
 
+// Provide explicit stubs for the @wordpress/components imports used by the
+// SUT. Spreading `jest.requireActual( '@wordpress/components' )` crashes
+// against wp-6.8's circular import between the barrel and
+// custom-select-control-v2.
 jest.mock( '@wordpress/components', () => ( {
-	...jest.requireActual( '@wordpress/components' ),
 	ComboboxControl: ( { value, onChange, options } ) => (
 		<div data-testid="combobox-control">
 			<select
@@ -34,22 +39,36 @@ jest.mock( '@wordpress/components', () => ( {
 			</select>
 		</div>
 	),
+	TextControl: React.forwardRef(
+		( { value, onChange, placeholder, onKeyDown }, ref ) => (
+			<input
+				ref={ ref }
+				type="text"
+				value={ value }
+				placeholder={ placeholder }
+				onChange={ ( e ) => onChange( e.target.value ) }
+				onKeyDown={ onKeyDown }
+			/>
+		)
+	),
 } ) );
 
+const createMockContext = () => ( {
+	trackingNumber: '',
+	setTrackingNumber: jest.fn(),
+	shipmentProvider: '',
+	setShipmentProvider: jest.fn(),
+	providerName: '',
+	setProviderName: jest.fn(),
+	trackingUrl: '',
+	setTrackingUrl: jest.fn(),
+} );
+
 describe( 'ShipmentManualEntryForm', () => {
-	const mockContext = {
-		trackingNumber: '',
-		setTrackingNumber: jest.fn(),
-		shipmentProvider: '',
-		setShipmentProvider: jest.fn(),
-		providerName: '',
-		setProviderName: jest.fn(),
-		trackingUrl: '',
-		setTrackingUrl: jest.fn(),
-	};
+	let mockContext;
 
 	beforeEach( () => {
-		jest.clearAllMocks();
+		mockContext = createMockContext();
 		useShipmentFormContext.mockReturnValue( mockContext );
 	} );
 
@@ -112,5 +131,58 @@ describe( 'ShipmentManualEntryForm', () => {
 		expect( mockContext.setTrackingUrl ).toHaveBeenCalledWith(
 			'http://example.com'
 		);
+	} );
+
+	it( 'updates tracking URL when provider changes without tracking number', () => {
+		render( <ShipmentManualEntryForm /> );
+		const combobox = screen.getByRole( 'combobox' );
+		fireEvent.change( combobox, { target: { value: 'ups' } } );
+		expect( mockContext.setTrackingUrl ).toHaveBeenCalledWith(
+			'https://www.ups.com/track?loc=en_US&tracknum='
+		);
+	} );
+
+	it( 'updates tracking URL with tracking number when provider changes', () => {
+		mockContext.trackingNumber = '123456789';
+		render( <ShipmentManualEntryForm /> );
+		const combobox = screen.getByRole( 'combobox' );
+		fireEvent.change( combobox, { target: { value: 'dhl' } } );
+		expect( mockContext.setTrackingUrl ).toHaveBeenCalledWith(
+			'https://www.dhl.com/en/express/tracking.html?AWB=123456789'
+		);
+	} );
+
+	it( 'sets empty tracking URL when provider does not exist in settings', () => {
+		mockContext.trackingNumber = '123456789';
+		render( <ShipmentManualEntryForm /> );
+		const combobox = screen.getByRole( 'combobox' );
+		fireEvent.change( combobox, { target: { value: 'unknown-provider' } } );
+		expect( mockContext.setTrackingUrl ).toHaveBeenCalledWith( '' );
+	} );
+
+	it( 'updates tracking URL when tracking number changes and provider is selected', () => {
+		mockContext.shipmentProvider = 'ups';
+		render( <ShipmentManualEntryForm /> );
+		const input = screen.getByPlaceholderText( 'Enter tracking number' );
+		fireEvent.change( input, { target: { value: 'NEWTRACK123' } } );
+		expect( mockContext.setTrackingUrl ).toHaveBeenCalledWith(
+			'https://www.ups.com/track?loc=en_US&tracknum=NEWTRACK123'
+		);
+	} );
+
+	it( 'does not update tracking URL when tracking number changes and provider is "other"', () => {
+		mockContext.shipmentProvider = 'other';
+		render( <ShipmentManualEntryForm /> );
+		const input = screen.getByPlaceholderText( 'Enter tracking number' );
+		fireEvent.change( input, { target: { value: 'NEWTRACK123' } } );
+		expect( mockContext.setTrackingUrl ).not.toHaveBeenCalled();
+	} );
+
+	it( 'does not update tracking URL when tracking number changes and no provider is selected', () => {
+		mockContext.shipmentProvider = '';
+		render( <ShipmentManualEntryForm /> );
+		const input = screen.getByPlaceholderText( 'Enter tracking number' );
+		fireEvent.change( input, { target: { value: 'NEWTRACK123' } } );
+		expect( mockContext.setTrackingUrl ).not.toHaveBeenCalled();
 	} );
 } );

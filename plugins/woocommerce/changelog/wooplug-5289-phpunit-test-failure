@@ -1,3 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Fix unit test failure by conditionally expecting delayed-account-creation setting on block themes

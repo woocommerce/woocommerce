@@ -139,6 +139,8 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 	 */
 	public function test_options_are_set() {
 		delete_transient( 'wc_installing' );
+		delete_option( 'wc_installing' );
+
 		WC_Install::install();
 
 		$options = array(
@@ -157,6 +159,8 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 	 */
 	public function test_woocommerce_admin_installed_action() {
 		delete_transient( 'wc_installing' );
+		delete_option( 'wc_installing' );
+
 		WC_Install::install();
 		$this->assertTrue( did_action( 'woocommerce_admin_installed' ) > 0 );
 	}
@@ -167,7 +171,17 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_woocommerce_updated_action() {
-		$versions     = array_keys( WC_Install::get_db_update_callbacks() );
+		// DB update keys may include a suffix (e.g. "10.8.0-1") used to schedule extra updates
+		// for an already-released version, so normalize each key to its X.Y.Z form and dedupe
+		// before picking the previous one — otherwise count-2 can land on a sibling of the
+		// latest version that is not actually older than the running code.
+		$normalized   = array_map(
+			static function ( $v ) {
+				return preg_replace( '/-.*$/', '', $v );
+			},
+			array_keys( WC_Install::get_db_update_callbacks() )
+		);
+		$versions     = array_values( array_unique( $normalized ) );
 		$prev_version = $versions[ count( $versions ) - 2 ];
 		update_option( 'woocommerce_version', $prev_version );
 		WC_Install::check_version();
@@ -192,11 +206,61 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test scheduled import is set as default for new installations.
+	 *
+	 * @return void
+	 */
+	public function test_enable_analytics_scheduled_import_for_new_installation() {
+		// Ensure the option doesn't exist before testing.
+		delete_option( 'woocommerce_analytics_scheduled_import' );
+
+		// Call the method to set the default.
+		WC_Install::enable_analytics_scheduled_import();
+
+		// Verify the option was set to 'yes'.
+		$this->assertEquals( 'yes', get_option( 'woocommerce_analytics_scheduled_import' ) );
+	}
+
+	/**
+	 * Test scheduled import option is not overwritten if already exists.
+	 *
+	 * @return void
+	 */
+	public function test_enable_analytics_scheduled_import_preserves_existing_value() {
+		// Set the option to 'no' to simulate an existing installation with the option already set.
+		update_option( 'woocommerce_analytics_scheduled_import', 'no' );
+
+		// Call the method which should not overwrite the existing value.
+		WC_Install::enable_analytics_scheduled_import();
+
+		// Verify the option remains 'no' (not overwritten).
+		$this->assertEquals( 'no', get_option( 'woocommerce_analytics_scheduled_import' ) );
+	}
+
+	/**
+	 * Test product object caching is enabled by default for new installations.
+	 *
+	 * @return void
+	 */
+	public function test_enable_product_instance_caching_for_new_installation() {
+		// Ensure the feature option doesn't exist before testing.
+		delete_option( 'woocommerce_feature_product_instance_caching_enabled' );
+
+		// Call the method to enable the feature for new installs.
+		WC_Install::enable_product_instance_caching_for_newly_installed();
+
+		// Verify the feature option was set to 'yes'.
+		$this->assertEquals( 'yes', get_option( 'woocommerce_feature_product_instance_caching_enabled' ) );
+	}
+
+	/**
 	 * Test migrate_options();
 	 * @return void
 	 */
 	public function test_migrate_options() {
 		delete_transient( 'wc_installing' );
+		delete_option( 'wc_installing' );
+
 		WC_Install::install();
 		$this->assertTrue( defined( 'WC_ADMIN_MIGRATING_OPTIONS' ) );
 		$migrated_options = array(

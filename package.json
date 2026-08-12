@@ -3,9 +3,9 @@
 	"title": "WooCommerce Monorepo",
 	"description": "Monorepo for the WooCommerce ecosystem",
 	"homepage": "https://woocommerce.com/",
-	"packageManager": "pnpm@9.15.0",
+	"packageManager": "pnpm@10.33.0",
 	"engines": {
-		"node": "^20.11.1"
+		"node": "^24.15.0"
 	},
 	"private": true,
 	"repository": {
@@ -22,23 +22,33 @@
 		"test": "pnpm -r test",
 		"lint": "pnpm -r lint",
 		"cherry-pick": "node ./tools/cherry-pick/bin/run",
-		"clean": "rimraf -g '**/node_modules' '**/.wireit' 'packages/*/*/vendor' 'plugins/*/vendor' && pnpm store prune",
-		"clean:build": "rimraf -g 'packages/js/*/build' 'packages/js/*/build-*' 'packages/js/*/dist' 'plugins/*/build' 'plugins/woocommerce/client/*/build' && git clean --force -d -X --quiet ./plugins/woocommerce/assets",
+		"clean": "rimraf -g '**/node_modules' 'packages/*/*/vendor' 'plugins/*/vendor' && pnpm store prune",
+		"clean:build": "rimraf -g '**/node_modules/.cache' '**/*.tsbuildinfo' 'packages/js/*/build' 'packages/js/*/build-*' 'packages/js/*/dist' 'plugins/*/build' 'plugins/woocommerce/client/*/build' && git clean --force -d -X --quiet ./plugins/woocommerce/assets",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "husky",
 		"run-canonical-extensions-tests": "bash bin/run-canonical-extensions-tests.sh",
 		"sync-dependencies": "pnpm exec syncpack -- fix-mismatches",
-		"utils": "./tools/monorepo-utils/bin/run"
+		"utils": "./tools/monorepo-utils/bin/run",
+		"wc:build": "pnpm --filter='@woocommerce/plugin-woocommerce' build",
+		"wc:build:admin": "pnpm --filter='@woocommerce/plugin-woocommerce' build:admin",
+		"wc:build:blocks": "pnpm --filter='@woocommerce/plugin-woocommerce' build:blocks",
+		"wc:build:classic-assets": "pnpm --filter='@woocommerce/plugin-woocommerce' build:classic-assets",
+		"wc:env": "pnpm --filter='@woocommerce/plugin-woocommerce' env:dev",
+		"wc:env:restart": "pnpm --filter='@woocommerce/plugin-woocommerce' env:restart",
+		"wc:env:stop": "pnpm --filter='@woocommerce/plugin-woocommerce' env:stop",
+		"wc:watch": "pnpm --filter='@woocommerce/plugin-woocommerce' watch:build",
+		"wc:watch:admin": "pnpm --filter='@woocommerce/plugin-woocommerce' watch:build:admin",
+		"wc:watch:blocks": "pnpm --filter='@woocommerce/plugin-woocommerce' watch:build:blocks",
+		"wc:watch:classic-assets": "pnpm --filter='@woocommerce/plugin-woocommerce' watch:build:classic-assets"
 	},
 	"devDependencies": {
 		"@babel/preset-env": "7.25.7",
 		"@babel/runtime": "7.25.7",
-		"@types/node": "20.x.x",
+		"@types/node": "^24.1.0",
+		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/monorepo-utils": "workspace:*",
-		"@wordpress/data": "wp-6.6",
-		"@wordpress/eslint-plugin": "14.7.0",
-		"@wordpress/prettier-config": "2.17.0",
+		"@wordpress/prettier-config": "4.49.0",
 		"babel-loader": "9.2.x",
 		"chalk": "^4.1.2",
 		"copy-webpack-plugin": "13.0.x",
@@ -46,13 +56,13 @@
 		"css-loader": "6.11.x",
 		"glob": "^10.3.10",
 		"husky": "^9.0.11",
-		"jest": "27.5.x",
+		"jest": "29.5.x",
 		"lint-staged": "^12.5.0",
 		"mkdirp": "^1.0.4",
 		"moment": "^2.29.4",
 		"node-stream-zip": "^1.15.0",
 		"postcss-loader": "4.3.x",
-		"prettier": "npm:wp-prettier@^2.8.5",
+		"prettier": "npm:wp-prettier@3.0.3",
 		"regenerator-runtime": "^0.13.11",
 		"request": "^2.88.2",
 		"rimraf": "5.0.5",
@@ -71,13 +81,14 @@
 	"pnpm": {
 		"overrides": {
 			"@types/react": "18.3.x",
-			"@wordpress/data": "wp-6.6",
-			"react-resize-aware": "3.1.1"
+			"@wordpress/data-controls>@wordpress/api-fetch": "catalog:wp-min",
+			"@wordpress/private-apis": "catalog:wp-min",
+			"react-resize-aware": "3.1.1",
+			"sass": "1.69.5"
 		},
 		"patchedDependencies": {
 			"@wordpress/edit-site@5.15.0": "bin/patches/@wordpress__edit-site@5.15.0.patch",
-			"@wordpress/env@10.17.0": "bin/patches/@wordpress__env@10.17.0.patch",
-			"@wordpress/data@10.0.2": "bin/patches/@wordpress__data@10.0.2.patch"
+			"@wordpress/e2e-test-utils-playwright@1.33.2": "bin/patches/@wordpress__e2e-test-utils-playwright@1.33.2.patch"
 		}
 	}
 }

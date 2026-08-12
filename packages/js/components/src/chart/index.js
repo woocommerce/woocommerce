@@ -18,7 +18,7 @@ import { interpolateViridis as d3InterpolateViridis } from 'd3-scale-chromatic';
 import memoize from 'memoize-one';
 import PropTypes from 'prop-types';
 import { withViewportMatch } from '@wordpress/viewport';
-import { sanitize } from 'dompurify';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 import { getIdsFromQuery, updateQueryString } from '@woocommerce/navigation';
 
 /**
@@ -140,7 +140,7 @@ class Chart extends Component {
 
 		const updatedKeys = Object.entries( uniqueKeys ).map(
 			( [ key, label ] ) => {
-				label = sanitize( label, { ALLOWED_TAGS: [] } );
+				label = sanitizeHTML( label, { tags: [] } );
 				return {
 					focus:
 						focusedKeys.length === 0 || focusedKeys.includes( key ),
@@ -249,6 +249,8 @@ class Chart extends Component {
 		return (
 			<div className="woocommerce-chart__interval-select">
 				<SelectControl
+					__next40pxDefaultSize
+					__nextHasNoMarginBottom
 					value={ interval }
 					options={ allowedIntervals.map( ( allowedInterval ) => ( {
 						value: allowedInterval,

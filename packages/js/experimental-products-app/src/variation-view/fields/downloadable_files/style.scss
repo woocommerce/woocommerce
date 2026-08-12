@@ -1,0 +1,56 @@
+.woocommerce-fields-field__download-limit,
+.woocommerce-fields-field__download-expiry {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.woocommerce-fields-downloadable-files {
+	display: flex;
+	flex-direction: column;
+
+	&__entry {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+
+	&__separator {
+		border: none;
+		border-top: 1px solid var(--wpds-color-stroke-surface-neutral-weak, #ddd);
+		margin: 24px 0 8px;
+	}
+
+	&__url-row,
+	&__name-row {
+		display: flex;
+		align-items: flex-end;
+		gap: var(--wpds-dimension-gap-lg, 16px);
+
+		// The TextControl wrapper takes all available space.
+		> *:first-child {
+			flex: 1;
+			min-width: 0;
+		}
+	}
+
+	&__choose-button.components-button {
+		flex-shrink: 0;
+		align-self: flex-end;
+	}
+
+	&__delete-button.components-button {
+		flex-shrink: 0;
+		align-self: flex-end;
+		width: 40px;
+		justify-content: center;
+		// Override the accent color so the secondary button uses black instead of blue.
+		--wp-components-color-accent: var(--wp-components-color-foreground, #1e1e1e);
+		--wp-components-color-accent-darker-10: #000;
+	}
+
+	&__add-button.components-button {
+		align-self: flex-start;
+		margin-top: 8px;
+	}
+}

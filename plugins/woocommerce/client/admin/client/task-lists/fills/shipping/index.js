@@ -39,7 +39,10 @@ import {
 } from './shipping-providers/partners';
 import { TermsOfService } from '~/task-lists/components/terms-of-service';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
-import { isFeatureEnabled } from '~/utils/features';
+
+export const hasInstallableSlug = ( shippingMethod ) =>
+	typeof shippingMethod?.slug === 'string' &&
+	shippingMethod.slug.trim().length > 0;
 
 export class Shipping extends Component {
 	constructor( props ) {
@@ -56,12 +59,9 @@ export class Shipping extends Component {
 		this.state = this.initialState;
 		this.completeStep = this.completeStep.bind( this );
 
-		this.shippingSmartDefaultsEnabled =
-			window.wcAdminFeatures &&
-			window.wcAdminFeatures[ 'shipping-smart-defaults' ];
-
 		this.storeLocationCompleted = false;
 		this.shippingPartners = props.shippingPartners;
+		this.impressionFired = false;
 
 		this.jetpackAuthRedirectUrl = getAdminLink( 'admin.php?page=wc-admin' );
 	}
@@ -133,6 +133,58 @@ export class Shipping extends Component {
 		this.setState( { isPending: false, shippingZones } );
 	}
 
+	getShippingPartnerTrackingProps() {
+		const { countryCode, shippingPartners = [] } = this.props;
+		const pluginSlugs = shippingPartners
+			.map( ( partner ) => partner.slug )
+			.filter(
+				( slug ) => typeof slug === 'string' && slug.trim().length > 0
+			)
+			.join( ',' );
+		return {
+			context: 'tasklist',
+			country: countryCode,
+			plugins: pluginSlugs,
+		};
+	}
+
+	recordInstallAndActivateEvents( selectedPlugin, success ) {
+		const trackingBase = {
+			...this.getShippingPartnerTrackingProps(),
+			selected_plugin: selectedPlugin,
+		};
+
+		if ( success ) {
+			recordEvent( 'shipping_partner_install', {
+				...trackingBase,
+				success: true,
+			} );
+			recordEvent( 'shipping_partner_activate', {
+				...trackingBase,
+				success: true,
+			} );
+		} else {
+			const { installedPlugins = [] } = this.props;
+			const wasInstalled = installedPlugins.includes( selectedPlugin );
+
+			if ( wasInstalled ) {
+				recordEvent( 'shipping_partner_install', {
+					...trackingBase,
+					success: true,
+				} );
+				recordEvent( 'shipping_partner_activate', {
+					...trackingBase,
+					success: false,
+				} );
+			} else {
+				recordEvent( 'shipping_partner_install', {
+					...trackingBase,
+					success: false,
+				} );
+			}
+		}
+	}
+
 	componentDidUpdate( prevProps, prevState ) {
 		const { countryCode, countryName, settings } = this.props;
 		const {
@@ -154,19 +206,29 @@ export class Shipping extends Component {
 			}
 		}
 
+		if (
+			step === 'label_printing' &&
+			prevState.step !== 'label_printing' &&
+			! this.impressionFired
+		) {
+			const { shippingPartners = [] } = this.props;
+			if ( shippingPartners.length > 0 ) {
+				recordEvent(
+					'shipping_partner_impression',
+					this.getShippingPartnerTrackingProps()
+				);
+				this.impressionFired = true;
+			}
+		}
+
 		const isCompleteAddress = Boolean(
 			storeAddress && defaultCountry && storePostCode
 		);
 
 		if ( step === 'store_location' && isCompleteAddress ) {
-			if (
-				this.shippingSmartDefaultsEnabled &&
-				! this.storeLocationCompleted
-			) {
+			if ( ! this.storeLocationCompleted ) {
 				this.completeStep();
 				this.storeLocationCompleted = true;
-			} else if ( ! this.shippingSmartDefaultsEnabled ) {
-				this.completeStep();
 			}
 		}
 	}
@@ -207,9 +269,11 @@ export class Shipping extends Component {
 		} = this.props;
 		const pluginsToPromote = shippingPartners;
 
-		const pluginsToActivate = pluginsToPromote.map( ( pluginToPromote ) => {
-			return pluginToPromote.slug;
-		} );
+		const pluginsToActivate = pluginsToPromote
+			.map( ( pluginToPromote ) => pluginToPromote.slug )
+			.filter(
+				( slug ) => typeof slug === 'string' && slug.trim().length > 0
+			);
 
 		const onShippingPluginInstalltionSkip = () => {
 			recordEvent( 'tasklist_shipping_label_printing', {
@@ -262,11 +326,7 @@ export class Shipping extends Component {
 							recordEvent( 'tasklist_shipping_set_location', {
 								country,
 							} );
-
-							// Don't need to trigger completeStep here as it's triggered by the address updates in the componentDidUpdate function.
-							if ( this.shippingSmartDefaultsEnabled ) {
-								this.completeStep();
-							}
+							this.completeStep();
 						} }
 					/>
 				),
@@ -352,11 +412,25 @@ export class Shipping extends Component {
 										plugins_to_activate: pluginsToActivate,
 									}
 								);
+								this.recordInstallAndActivateEvents(
+									pluginsToActivate[ 0 ],
+									true
+								);
 								this.completeStep();
 							} }
-							onError={ ( errors, response ) =>
-								createNoticesFromResponse( response )
-							}
+							onError={ ( errors, response ) => {
+								createNoticesFromResponse( response );
+								this.recordInstallAndActivateEvents(
+									pluginsToActivate[ 0 ],
+									false
+								);
+							} }
+							onClick={ () => {
+								recordEvent( 'shipping_partner_click', {
+									...this.getShippingPartnerTrackingProps(),
+									selected_plugin: pluginsToActivate[ 0 ],
+								} );
+							} }
 							onSkip={ () => {
 								recordEvent(
 									'tasklist_shipping_label_printing',
@@ -373,7 +447,7 @@ export class Shipping extends Component {
 						/>
 					</>
 				),
-				visible: pluginsToActivate.length,
+				visible: pluginsToPromote.length,
 			},
 
 			// Only needed for WooCommerce Shipping
@@ -398,240 +472,257 @@ export class Shipping extends Component {
 		];
 
 		// Override the step fields for the smart shipping defaults.
-		if ( this.shippingSmartDefaultsEnabled ) {
-			const shippingSmartDefaultsSteps = {
-				rates: {
-					label: __( 'Review your shipping options', 'woocommerce' ),
-					description: __(
-						'We recommend the following shipping options based on your location. You can manage your shipping options again at any time in WooCommerce Shipping settings.',
-						'woocommerce'
-					),
-					onClick:
-						this.state.step !== 'rates'
-							? () => {
-									this.setState( { step: 'rates' } );
-							  }
-							: undefined,
-					content: (
-						<ShippingRates
-							buttonText={ __(
-								'Save shipping options',
+		const shippingSmartDefaultsSteps = {
+			rates: {
+				label: __( 'Review your shipping options', 'woocommerce' ),
+				description: __(
+					'We recommend the following shipping options based on your location. You can manage your shipping options again at any time in WooCommerce Shipping settings.',
+					'woocommerce'
+				),
+				onClick:
+					this.state.step !== 'rates'
+						? () => {
+								this.setState( { step: 'rates' } );
+						  }
+						: undefined,
+				content: (
+					<ShippingRates
+						buttonText={ __(
+							'Save shipping options',
+							'woocommerce'
+						) }
+						shippingZones={ this.state.shippingZones }
+						onComplete={ () => {
+							const { id } = task;
+							optimisticallyCompleteTask( id );
+							invalidateResolutionForStoreSelector();
+							this.completeStep();
+						} }
+						createNotice={ createNotice }
+					/>
+				),
+			},
+			label_printing: {
+				label: __(
+					'Enable shipping label printing and discounted rates',
+					'woocommerce'
+				),
+				description:
+					pluginsToPromote.length === 1
+						? getSinglePluginDescription(
+								pluginsToPromote[ 0 ].name,
+								pluginsToPromote[ 0 ].learn_more_link
+						  )
+						: __(
+								'Save time and money by printing your shipping labels right from your computer with one of these shipping solutions.',
 								'woocommerce'
-							) }
-							shippingZones={ this.state.shippingZones }
-							onComplete={ () => {
-								const { id } = task;
-								optimisticallyCompleteTask( id );
-								invalidateResolutionForStoreSelector();
-								this.completeStep();
-							} }
-							createNotice={ createNotice }
-						/>
-					),
-				},
-				label_printing: {
-					label: __(
-						'Enable shipping label printing and discounted rates',
-						'woocommerce'
-					),
-					description:
-						pluginsToPromote.length === 1
-							? getSinglePluginDescription(
-									pluginsToPromote[ 0 ].name,
-									pluginsToPromote[ 0 ].learn_more_link
-							  )
-							: __(
-									'Save time and money by printing your shipping labels right from your computer with one of these shipping solutions.',
-									'woocommerce'
-							  ),
+						  ),
 
-					content: (
-						<>
-							{ pluginsToPromote.length === 1 ? (
-								<ShippingLayoutColumn
-									shippingMethod={ pluginsToPromote[ 0 ] }
-								/>
-							) : (
-								<div className="woocommerce-task-shipping-recommendation_plugins-install-container">
-									{ pluginsToPromote.map(
-										( shippingMethod ) => {
-											const pluginsForPartner = [
-												shippingMethod?.slug,
-												...( shippingMethod?.dependencies ??
-													[] ),
-											].filter(
-												( element ) =>
-													element !== undefined
-											); // remove undefineds
-											return (
-												<ShippingLayoutRow
-													shippingMethod={
-														shippingMethod
+				content: (
+					<>
+						{ pluginsToPromote.length === 1 ? (
+							<ShippingLayoutColumn
+								shippingMethod={ pluginsToPromote[ 0 ] }
+							/>
+						) : (
+							<div className="woocommerce-task-shipping-recommendation_plugins-install-container">
+								{ pluginsToPromote.map( ( shippingMethod ) => {
+									const pluginsForPartner = [
+										shippingMethod?.slug,
+										...( shippingMethod?.dependencies ??
+											[] ),
+									].filter(
+										( element ) => element !== undefined
+									); // remove undefineds
+									return (
+										<ShippingLayoutRow
+											shippingMethod={ shippingMethod }
+											key={ shippingMethod.name }
+										>
+											<div className="woocommerce-task-shipping-recommendations_plugins-buttons">
+												<Plugins
+													onComplete={ (
+														response
+													) => {
+														createNoticesFromResponse(
+															response
+														);
+														recordEvent(
+															'tasklist_shipping_label_printing',
+															{
+																install: true,
+																plugins_to_activate:
+																	pluginsForPartner,
+															}
+														);
+														this.recordInstallAndActivateEvents(
+															shippingMethod.slug,
+															true
+														);
+														invalidateResolutionForStoreSelector();
+														this.completeStep();
+													} }
+													onError={ (
+														errors,
+														response
+													) => {
+														createNoticesFromResponse(
+															response
+														);
+														this.recordInstallAndActivateEvents(
+															shippingMethod.slug,
+															false
+														);
+													} }
+													onClick={ () => {
+														recordEvent(
+															'shipping_partner_click',
+															{
+																...this.getShippingPartnerTrackingProps(),
+																selected_plugin:
+																	shippingMethod.slug,
+															}
+														);
+													} }
+													installText={ __(
+														'Install and enable',
+														'woocommerce'
+													) }
+													learnMoreLink={
+														shippingMethod.learn_more_link
 													}
-													key={ shippingMethod.name }
-												>
-													<div className="woocommerce-task-shipping-recommendations_plugins-buttons">
-														<Plugins
-															onComplete={ (
-																response
-															) => {
-																createNoticesFromResponse(
-																	response
-																);
-																recordEvent(
-																	'tasklist_shipping_label_printing',
-																	{
-																		install: true,
-																		plugins_to_activate:
-																			pluginsForPartner,
-																	}
-																);
-																invalidateResolutionForStoreSelector();
-																this.completeStep();
-															} }
-															onError={ (
-																errors,
-																response
-															) =>
-																createNoticesFromResponse(
-																	response
-																)
+													onLearnMore={ () => {
+														recordEvent(
+															'tasklist_shipping_label_printing_learn_more',
+															{
+																plugin: shippingMethod.slug,
 															}
-															installText={ __(
-																'Install and enable',
-																'woocommerce'
-															) }
-															learnMoreLink={
-																shippingMethod.learn_more_link
-															}
-															onLearnMore={ () => {
-																recordEvent(
-																	'tasklist_shipping_label_printing_learn_more',
-																	{
-																		plugin: shippingMethod.slug,
-																	}
-																);
-															} }
-															pluginSlugs={
-																pluginsForPartner
-															}
-															installButtonVariant={
-																'secondary'
-															}
-														/>
-													</div>
-												</ShippingLayoutRow>
-											);
-										}
-									) }
-								</div>
-							) }
-							{ pluginsToPromote.length === 1 &&
-								pluginsToPromote[ 0 ].slug === undefined && ( // if it doesn't have a slug we just show a download button
-									<a
-										href={
-											pluginsToPromote[ 0 ]
-												.learn_more_link
-										}
-										target="_blank"
-										rel="noreferrer"
-									>
-										<Button variant="primary">
-											{ __( 'Download', 'woocommerce' ) }
-										</Button>
-									</a>
-								) }
-							{ pluginsToPromote.length === 1 &&
-							pluginsToPromote[ 0 ].slug ? (
-								<>
-									{ ! isJetpackConnected &&
-										pluginsToPromote[ 0 ].slug ===
-											'woocommerce-services' && (
-											<TermsOfService
-												buttonText={ __(
-													'Install and enable',
-													'woocommerce'
-												) }
-											/>
-										) }
-									<Plugins
-										onComplete={ ( _plugins, response ) => {
-											createNoticesFromResponse(
-												response
-											);
-											recordEvent(
-												'tasklist_shipping_label_printing',
-												{
-													install: true,
-													plugins_to_activate:
-														pluginsToActivate,
-												}
-											);
-											invalidateResolutionForStoreSelector();
-											this.completeStep();
-										} }
-										onError={ ( errors, response ) =>
-											createNoticesFromResponse(
-												response
-											)
-										}
-										onSkip={
-											onShippingPluginInstalltionSkip
-										}
-										pluginSlugs={ pluginsToActivate }
-										installText={ __(
-											'Install and enable',
-											'woocommerce'
-										) }
-									/>
-								</>
-							) : (
-								<Button
-									isTertiary
-									onClick={ onShippingPluginInstalltionSkip }
-									className={ clsx(
-										'woocommerce-task-shipping-recommendations_skip-button',
-										pluginsToPromote.length === 2
-											? 'dual'
-											: ''
-									) }
+														);
+													} }
+													pluginSlugs={
+														pluginsForPartner
+													}
+													installButtonVariant={
+														'secondary'
+													}
+												/>
+											</div>
+										</ShippingLayoutRow>
+									);
+								} ) }
+							</div>
+						) }
+						{ pluginsToPromote.length === 1 &&
+							! hasInstallableSlug( pluginsToPromote[ 0 ] ) && ( // if it doesn't have a slug we just show a download button
+								<a
+									href={
+										pluginsToPromote[ 0 ].learn_more_link
+									}
+									target="_blank"
+									rel="noreferrer"
 								>
-									{ __( 'No Thanks', 'woocommerce' ) }
-								</Button>
+									<Button variant="primary">
+										{ __( 'Download', 'woocommerce' ) }
+									</Button>
+								</a>
 							) }
-						</>
-					),
-				},
-				store_location: {
-					label: __( 'Set your store location', 'woocommerce' ),
-					description: __(
-						'Add your store location to help us calculate shipping rates and the best shipping options for you. You can manage your store location again at any time in WooCommerce Settings General.',
-						'woocommerce'
-					),
-					onClick:
-						this.state.step !== 'store_location'
-							? () => {
-									this.setState( { step: 'store_location' } );
-							  }
-							: undefined,
-					buttonText: __( 'Save store location', 'woocommerce' ),
-				},
-			};
+						{ pluginsToPromote.length === 1 &&
+						hasInstallableSlug( pluginsToPromote[ 0 ] ) ? (
+							<>
+								{ ! isJetpackConnected &&
+									pluginsToPromote[ 0 ].slug ===
+										'woocommerce-services' && (
+										<TermsOfService
+											buttonText={ __(
+												'Install and enable',
+												'woocommerce'
+											) }
+										/>
+									) }
+								<Plugins
+									onComplete={ ( _plugins, response ) => {
+										createNoticesFromResponse( response );
+										recordEvent(
+											'tasklist_shipping_label_printing',
+											{
+												install: true,
+												plugins_to_activate:
+													pluginsToActivate,
+											}
+										);
+										this.recordInstallAndActivateEvents(
+											pluginsToPromote[ 0 ]?.slug,
+											true
+										);
+										invalidateResolutionForStoreSelector();
+										this.completeStep();
+									} }
+									onError={ ( errors, response ) => {
+										createNoticesFromResponse( response );
+										this.recordInstallAndActivateEvents(
+											pluginsToPromote[ 0 ]?.slug,
+											false
+										);
+									} }
+									onClick={ () => {
+										recordEvent( 'shipping_partner_click', {
+											...this.getShippingPartnerTrackingProps(),
+											selected_plugin:
+												pluginsToPromote[ 0 ]?.slug,
+										} );
+									} }
+									onSkip={ onShippingPluginInstalltionSkip }
+									pluginSlugs={ pluginsToActivate }
+									installText={ __(
+										'Install and enable',
+										'woocommerce'
+									) }
+								/>
+							</>
+						) : (
+							<Button
+								isTertiary
+								onClick={ onShippingPluginInstalltionSkip }
+								className={ clsx(
+									'woocommerce-task-shipping-recommendations_skip-button',
+									pluginsToPromote.length === 2 ? 'dual' : ''
+								) }
+							>
+								{ __( 'No Thanks', 'woocommerce' ) }
+							</Button>
+						) }
+					</>
+				),
+			},
+			store_location: {
+				label: __( 'Set your store location', 'woocommerce' ),
+				description: __(
+					'Add your store location to help us calculate shipping rates and the best shipping options for you. You can manage your store location again at any time in WooCommerce Settings General.',
+					'woocommerce'
+				),
+				onClick:
+					this.state.step !== 'store_location'
+						? () => {
+								this.setState( { step: 'store_location' } );
+						  }
+						: undefined,
+				buttonText: __( 'Save store location', 'woocommerce' ),
+			},
+		};
 
-			steps = steps.map( ( step ) => {
-				if ( shippingSmartDefaultsSteps.hasOwnProperty( step.key ) ) {
-					step = {
-						...step,
-						...shippingSmartDefaultsSteps[ step.key ],
-					};
-				}
-				// Empty description field if it's not the current step.
-				if ( step.key !== this.state.step ) {
-					step.description = '';
-				}
-				return step;
-			} );
-		}
+		steps = steps.map( ( step ) => {
+			if ( shippingSmartDefaultsSteps.hasOwnProperty( step.key ) ) {
+				step = {
+					...step,
+					...shippingSmartDefaultsSteps[ step.key ],
+				};
+			}
+			// Empty description field if it's not the current step.
+			if ( step.key !== this.state.step ) {
+				step.description = '';
+			}
+			return step;
+		} );
 		return filter( steps, ( step ) => step.visible );
 	}
 
@@ -666,18 +757,10 @@ export class Shipping extends Component {
 						'woocommerce'
 					) }
 					eventName="tasklist_shipping_visit_marketplace_click"
-					targetUrl={
-						isFeatureEnabled( 'marketplace' )
-							? getAdminLink(
-									'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment'
-							  )
-							: 'https://woocommerce.com/product-category/woocommerce-extensions/shipping-delivery-and-fulfillment/'
-					}
-					linkType={
-						isFeatureEnabled( 'marketplace' )
-							? 'wc-admin'
-							: 'external'
-					}
+					targetUrl={ getAdminLink(
+						'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment'
+					) }
+					linkType="wc-admin"
 				/>
 			</div>
 		);
@@ -688,7 +771,8 @@ const ShippingWrapper = compose(
 	withSelect( ( select ) => {
 		const { getSettings, isUpdateSettingsRequesting } =
 			select( settingsStore );
-		const { getActivePlugins, isJetpackConnected } = select( pluginsStore );
+		const { getActivePlugins, getInstalledPlugins, isJetpackConnected } =
+			select( pluginsStore );
 		const { getCountry } = select( COUNTRIES_STORE_NAME );
 
 		const { general: settings = {} } = getSettings( 'general' );
@@ -702,6 +786,7 @@ const ShippingWrapper = compose(
 		const country = countryCode ? getCountry( countryCode ) : null;
 		const countryName = country ? country.name : null;
 		const activePlugins = getActivePlugins();
+		const installedPlugins = getInstalledPlugins();
 
 		return {
 			countryCode,
@@ -709,6 +794,7 @@ const ShippingWrapper = compose(
 			isUpdateSettingsRequesting: isUpdateSettingsRequesting( 'general' ),
 			settings,
 			activePlugins,
+			installedPlugins,
 			isJetpackConnected: isJetpackConnected(),
 			shippingPartners,
 		};

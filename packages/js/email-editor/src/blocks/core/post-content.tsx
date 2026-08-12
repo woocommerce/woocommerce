@@ -1,20 +1,23 @@
 /**
  * External dependencies
  */
-import { addFilter } from '@wordpress/hooks';
-import { Block } from '@wordpress/blocks/index';
 import { __ } from '@wordpress/i18n';
 import { useBlockProps } from '@wordpress/block-editor';
+
+/**
+ * Internal dependencies
+ */
+import { updateBlockSettings } from '../../config-tools/block-config';
 
 function Placeholder( { layoutClassNames } ) {
 	const blockProps = useBlockProps( { className: layoutClassNames } );
 	return (
 		<div { ...blockProps }>
-			<p>{ __( 'This is the Content block.', 'woocommerce' ) }</p>
+			<p>{ __( 'This is the Content block.', __i18n_text_domain__ ) }</p>
 			<p>
 				{ __(
 					'It will display all the blocks in the email content, which might be only simple text paragraphs. You can enrich your message with images, incorporate data through tables, explore different layout designs with columns, or use any other block type.',
-					'woocommerce'
+					__i18n_text_domain__
 				) }
 			</p>
 		</div>
@@ -38,19 +41,10 @@ function PostContentEdit( OriginalEditComponent ) {
 }
 
 function enhancePostContentBlock() {
-	addFilter(
-		'blocks.registerBlockType',
-		'woocommerce-email-editor/change-post-content',
-		( settings: Block, name ) => {
-			if ( name === 'core/post-content' ) {
-				return {
-					...settings,
-					edit: PostContentEdit( settings.edit ),
-				};
-			}
-			return settings;
-		}
-	);
+	updateBlockSettings( 'core/post-content', ( current ) => ( {
+		...current,
+		edit: PostContentEdit( current.edit ),
+	} ) );
 }
 
 export { enhancePostContentBlock };

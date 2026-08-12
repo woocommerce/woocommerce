@@ -84,6 +84,11 @@ export const ActivatePaymentsButton = ( {
 
 		// If no URL to disable the test account is provided, we just point the user to the live account setup.
 		if ( ! disableTestAccountUrl ) {
+			if ( incentive ) {
+				acceptIncentive( incentive.promo_id );
+			}
+
+			setIsUpdating( false );
 			if ( onboardingType === 'native_in_context' ) {
 				// Open the onboarding modal.
 				recordPaymentsOnboardingEvent(
@@ -97,6 +102,8 @@ export const ActivatePaymentsButton = ( {
 			} else {
 				window.location.href = getWooPaymentsSetupLiveAccountLink();
 			}
+
+			return;
 		}
 
 		// Disable test account and redirect to the live account setup link.

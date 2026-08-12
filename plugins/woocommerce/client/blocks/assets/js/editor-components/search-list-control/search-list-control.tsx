@@ -23,7 +23,11 @@ import { useInstanceId } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import { getFilteredList, defaultMessages } from './utils';
+import {
+	getFilteredList,
+	defaultMessages,
+	isExpandedOrDescendantIsExpanded,
+} from './utils';
 import SearchListItem from './item';
 import Tag from '../tag';
 import type {
@@ -46,6 +50,9 @@ const ListItems = ( props: ListItemsProps ): JSX.Element | null => {
 		selected,
 		renderItem,
 		depth = 0,
+		loadMoreChildrenText,
+		onLoadMoreChildren,
+		totalChildren,
 		onSelect,
 		instanceId,
 		isSingle,
@@ -61,16 +68,18 @@ const ListItems = ( props: ListItemsProps ): JSX.Element | null => {
 	return (
 		<>
 			{ list.map( ( item ) => {
-				const isSelected =
-					item.children?.length && ! isSingle
-						? item.children.every( ( { id } ) =>
-								selected.find(
-									( selectedItem ) => selectedItem.id === id
-								)
-						  )
-						: !! selected.find( ( { id } ) => id === item.id );
-				const isExpanded =
-					item.children?.length && expandedPanelId === item.id;
+				const childrenCount = item.children?.length ?? 0;
+				const isSelected = !! selected.find(
+					( { id } ) => id === item.id
+				);
+				const isExpanded = isExpandedOrDescendantIsExpanded(
+					item,
+					expandedPanelId
+				);
+				const totalChildrenForItem = totalChildren?.[ item.id ];
+				const hasMoreChildren =
+					typeof totalChildrenForItem === 'number' &&
+					childrenCount < totalChildrenForItem;
 
 				return (
 					<Fragment key={ item.id }>
@@ -88,11 +97,32 @@ const ListItems = ( props: ListItemsProps ): JSX.Element | null => {
 							} ) }
 						</li>
 						{ isExpanded ? (
-							<ListItems
-								{ ...props }
-								list={ item.children as SearchListItemProps[] }
-								depth={ depth + 1 }
-							/>
+							<>
+								<ListItems
+									{ ...props }
+									list={
+										item.children as SearchListItemProps[]
+									}
+									depth={ depth + 1 }
+								/>
+								{ onLoadMoreChildren && hasMoreChildren ? (
+									<li>
+										<button
+											type="button"
+											className="woocommerce-search-list__item woocommerce-search-list__item-load-more"
+											onClick={ () =>
+												onLoadMoreChildren()
+											}
+										>
+											{ loadMoreChildrenText ||
+												__(
+													'Load more',
+													'woocommerce'
+												) }
+										</button>
+									</li>
+								) : null }
+							</>
 						) : null }
 					</Fragment>
 				);
@@ -156,7 +186,15 @@ const ListItemsContainer = < T extends object = object >( {
 	useExpandedPanelId,
 	...props
 }: SearchListItemsContainerProps< T > ) => {
-	const { messages, renderItem, selected, isSingle } = props;
+	const {
+		messages,
+		renderItem,
+		selected,
+		isSingle,
+		loadMoreChildrenText,
+		onLoadMoreChildren,
+		totalChildren,
+	} = props;
 	const renderItemCallback = renderItem || defaultRenderListItem;
 
 	if ( filteredList.length === 0 ) {
@@ -182,6 +220,9 @@ const ListItemsContainer = < T extends object = object >( {
 				list={ filteredList }
 				selected={ selected }
 				renderItem={ renderItemCallback }
+				loadMoreChildrenText={ loadMoreChildrenText }
+				onLoadMoreChildren={ onLoadMoreChildren }
+				totalChildren={ totalChildren }
 				onSelect={ onSelect }
 				instanceId={ instanceId }
 				isSingle={ isSingle }
@@ -213,7 +254,7 @@ export const SearchListControl = < T extends object = object >(
 	} = props;
 
 	const [ search, setSearch ] = useState( '' );
-	const useExpandedPanelId = useState< number >( -1 );
+	const useExpandedPanelId = useState< string | number | null >( null );
 	const instanceId = useInstanceId( SearchListControl );
 	const messages = useMemo(
 		() => ( { ...defaultMessages, ...customMessages } ),
@@ -303,6 +344,8 @@ export const SearchListControl = < T extends object = object >(
 			<div className="woocommerce-search-list__search">
 				{ type === 'text' ? (
 					<TextControl
+						__next40pxDefaultSize
+						__nextHasNoMarginBottom
 						label={ messages.search }
 						type="search"
 						value={ search }
@@ -310,6 +353,8 @@ export const SearchListControl = < T extends object = object >(
 					/>
 				) : (
 					<FormTokenField
+						__next40pxDefaultSize
+						__nextHasNoMarginBottom
 						disabled={ isLoading }
 						label={ messages.search }
 						onChange={ onRemoveToken }

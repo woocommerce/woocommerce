@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
  */
 import { filters, advancedFilters } from './config';
 import CustomersReportTable from './table';
-import ReportFilters from '../../components/report-filters';
+import { ReportHeader } from '../../components/report-header';
 
 export default class CustomersReport extends Component {
 	render() {
@@ -22,7 +22,7 @@ export default class CustomersReport extends Component {
 
 		return (
 			<Fragment>
-				<ReportFilters
+				<ReportHeader
 					query={ query }
 					path={ path }
 					filters={ filters }

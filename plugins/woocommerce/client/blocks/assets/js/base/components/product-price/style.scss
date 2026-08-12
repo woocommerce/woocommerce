@@ -20,17 +20,12 @@
 		display: none;
 	}
 
+	> :empty {
+		display: none;
+	}
+
 	.wc-block-all-products .wc-block-components-product-price {
 		margin-bottom: $gap-small;
-	}
-
-	.woocommerce-Price-salePrice {
-		margin-left: 0.5em;
-	}
-
-	.woocommerce-Price-bidi {
-		unicode-bidi: bidi-override;
-		direction: ltr;
 	}
 
 	ins {

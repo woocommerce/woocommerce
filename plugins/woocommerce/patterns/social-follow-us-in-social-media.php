@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Social: Follow us on social media
+ * Title: Social: Follow Us on Social Media
  * Slug: woocommerce-blocks/social-follow-us-in-social-media
  * Categories: WooCommerce, social-media
  */

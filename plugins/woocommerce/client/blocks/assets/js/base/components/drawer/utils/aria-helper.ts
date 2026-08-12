@@ -1,5 +1,8 @@
 /**
- * Copied from https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/modal/aria-helper.ts
+ * Based on https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/modal/aria-helper.ts
+ *
+ * Modified to support a custom `data-keep-visible` attribute,
+ * which prevents elements from being hidden from screen readers.
  */
 const LIVE_REGION_ARIA_ROLES = new Set( [
 	'alert',
@@ -13,11 +16,16 @@ let hiddenElements: Element[] = [],
 	isHidden = false;
 
 /**
- * Determines if the passed element should not be hidden from screen readers.
+ * Determines if the passed element should be hidden from screen readers.
  *
- * @param {HTMLElement} element The element that should be checked.
+ * An element will be hidden unless it is one of the following:
+ * - a <script> tag
+ * - has `aria-hidden`
+ * - has `aria-live`
+ * - has `data-keep-visible`
+ * - has a live region role (`alert`, `status`, `log`, `marquee`, or `timer`)
  *
- * @return {boolean} Whether the element should not be hidden from screen-readers.
+ * @return {boolean} Whether the element should be hidden from screen-readers.
  */
 export function elementShouldBeHidden( element: Element ) {
 	const role = element.getAttribute( 'role' );
@@ -25,6 +33,7 @@ export function elementShouldBeHidden( element: Element ) {
 		element.tagName === 'SCRIPT' ||
 		element.hasAttribute( 'aria-hidden' ) ||
 		element.hasAttribute( 'aria-live' ) ||
+		element.hasAttribute( 'data-keep-visible' ) ||
 		( role && LIVE_REGION_ARIA_ROLES.has( role ) )
 	);
 }

@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 /**
@@ -57,6 +58,16 @@ class FeaturedCategory extends FeaturedItem {
 	}
 
 	/**
+	 * Returns the featured category image attachment ID.
+	 *
+	 * @param \WP_Term $category Term object.
+	 * @return int
+	 */
+	protected function get_item_image_id( $category ) {
+		return (int) get_term_meta( $category->term_id, 'thumbnail_id', true );
+	}
+
+	/**
 	 * Returns the featured category image URL.
 	 *
 	 * @param \WP_Term $category Term object.
@@ -64,14 +75,13 @@ class FeaturedCategory extends FeaturedItem {
 	 * @return string
 	 */
 	protected function get_item_image( $category, $size = 'full' ) {
-		$image    = '';
-		$image_id = get_term_meta( $category->term_id, 'thumbnail_id', true );
+		$image_id = $this->get_item_image_id( $category );
 
 		if ( $image_id ) {
-			$image = wp_get_attachment_image_url( $image_id, $size );
+			return wp_get_attachment_image_url( $image_id, $size );
 		}
 
-		return $image;
+		return '';
 	}
 
 	/**
@@ -82,19 +92,28 @@ class FeaturedCategory extends FeaturedItem {
 	 * @return string
 	 */
 	protected function render_attributes( $category, $attributes ) {
-		$title = sprintf(
-			'<h2 class="wc-block-featured-category__title">%s</h2>',
-			wp_kses_post( $category->name )
-		);
+		$output = '';
 
-		$desc_str = sprintf(
-			'<div class="wc-block-featured-category__description">%s</div>',
-			wc_format_content( wp_kses_post( $category->description ) )
-		);
+		// Backwards compatibility: Only render legacy attributes if `editMode` exists as boolean value
+		// This allows us to distinguish between old and new version of the block (which accept inner blocks).
+		if ( array_key_exists( 'editMode', $attributes ) && is_bool( $attributes['editMode'] ) ) {
+			$legacy_title = sprintf(
+				'<h2 class="wc-block-featured-category__title">%s</h2>',
+				wp_kses_post( $category->name )
+			);
 
-		$output = $title;
-		if ( $attributes['showDesc'] ) {
-			$output .= $desc_str;
+			$output .= $legacy_title;
+
+			if (
+				! isset( $attributes['showDesc'] ) ||
+				( isset( $attributes['showDesc'] ) && false !== $attributes['showDesc'] )
+			) {
+				$desc_str = sprintf(
+					'<div class="wc-block-featured-category__description">%s</div>',
+					wc_format_content( wp_kses_post( $category->description ) )
+				);
+				$output  .= $desc_str;
+			}
 		}
 
 		return $output;

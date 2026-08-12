@@ -75,7 +75,7 @@ export const EllipsisMenuWrapper = ( {
 						canResetOnboarding={ canResetOnboarding }
 					/>
 				) }
-				focusOnMount={ true }
+				focusOnMount="firstElement"
 			/>
 			{ /* Modal for resetting WooPayments accounts */ }
 			<WooPaymentsResetAccountModal

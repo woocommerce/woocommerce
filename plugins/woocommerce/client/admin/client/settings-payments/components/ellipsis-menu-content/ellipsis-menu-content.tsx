@@ -108,7 +108,9 @@ export const EllipsisMenuContent = ( {
 						'woocommerce'
 					)
 				);
-				invalidateResolutionForStoreSelector( 'getPaymentProviders' );
+				void invalidateResolutionForStoreSelector(
+					'getPaymentProviders'
+				);
 				setIsDeactivating( false );
 				onToggle();
 			} )
@@ -154,7 +156,9 @@ export const EllipsisMenuContent = ( {
 			gatewayToggleNonce
 		)
 			.then( () => {
-				invalidateResolutionForStoreSelector( 'getPaymentProviders' );
+				void invalidateResolutionForStoreSelector(
+					'getPaymentProviders'
+				);
 				setIsDisabling( false );
 				onToggle();
 			} )
@@ -192,7 +196,9 @@ export const EllipsisMenuContent = ( {
 
 		hidePaymentExtensionSuggestion( suggestionHideUrl )
 			.then( () => {
-				invalidateResolutionForStoreSelector( 'getPaymentProviders' );
+				void invalidateResolutionForStoreSelector(
+					'getPaymentProviders'
+				);
 				setIsHidingSuggestion( false );
 				onToggle();
 			} )
@@ -324,8 +330,12 @@ export const EllipsisMenuContent = ( {
 							deactivateProviderExtension();
 						} }
 						isBusy={ isDeactivating }
-						// If the plugin file is not available, the button should be disabled.
-						disabled={ ! pluginFile || isDeactivating }
+						// If the plugin file is not available, or it's a bundled gateway, the button should be disabled.
+						disabled={
+							! pluginFile ||
+							pluginFile === 'woocommerce/woocommerce' ||
+							isDeactivating
+						}
 					>
 						{ __( 'Deactivate', 'woocommerce' ) }
 					</Button>

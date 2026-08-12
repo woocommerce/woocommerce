@@ -156,12 +156,14 @@ export interface ShippingLineMetaDatum {
 
 export interface Fulfillment {
 	id?: number;
-	fulfillment_id?: number;
 	entity_type: string;
 	entity_id: string;
 	status: string;
 	is_fulfilled: boolean;
-	date_updated?: Date;
+	// ISO 8601 UTC string with 'Z' suffix (e.g. "2026-04-20T17:00:00Z").
+	date_updated?: string | null;
+	// ISO 8601 UTC string with 'Z' suffix (e.g. "2026-04-20T17:00:00Z").
+	date_deleted?: string | null;
 	meta_data: MetaDatum[];
 }
 

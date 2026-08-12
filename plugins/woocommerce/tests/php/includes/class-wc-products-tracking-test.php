@@ -12,11 +12,13 @@ class WC_Products_Tracking_Test extends \WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function setUp(): void {
+		parent::setUp();
+		$this->clear_tracks_events();
+
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-products-tracking.php';
 		update_option( 'woocommerce_allow_tracking', 'yes' );
 		$products_tracking = new WC_Products_Tracking();
 		$products_tracking->init();
-		parent::setUp();
 	}
 
 	/**
@@ -117,5 +119,21 @@ class WC_Products_Tracking_Test extends \WC_Unit_Test_Case {
 		/* phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment */
 		do_action( 'load-edit.php' );
 		$this->assertRecordedTracksEvent( 'wcadmin_products_search' );
+	}
+
+	/**
+	 * Test if track_product_published is deferring the even publishing for imports.
+	 */
+	public function test_track_product_published_deferred_when_importing(): void {
+		$_POST['action'] = 'woocommerce_do_ajax_product_import';
+		$this->assertFalse( as_has_scheduled_action( WC_Products_Tracking::TRACK_PRODUCT_PUBLISHED_CALLBACK, null, 'woocommerce-tracks' ) );
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'New name' );
+		$product->set_status( ProductStatus::PUBLISH );
+		$product->save();
+
+		$this->assertTrue( as_has_scheduled_action( WC_Products_Tracking::TRACK_PRODUCT_PUBLISHED_CALLBACK, null, 'woocommerce-tracks' ) );
+		as_unschedule_all_actions( WC_Products_Tracking::TRACK_PRODUCT_PUBLISHED_CALLBACK, null, 'woocommerce-tracks' );
 	}
 }

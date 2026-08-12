@@ -66,8 +66,14 @@
 			.woocommerce-marketplace__product-card__description,
 			.woocommerce-marketplace__product-card__add-to-store,
 			.woocommerce-marketplace__product-card__rating,
-			.woocommerce-marketplace__product-card__price {
+			.woocommerce-marketplace__product-card__price,
+			.woocommerce-marketplace__quality-badge {
 				display: none;
+			}
+
+			/* Nearly all footer content is hidden here; collapse unless "Installed" shows. */
+			.woocommerce-marketplace__product-card__footer {
+				min-height: 0;
 			}
 
 			.woocommerce-marketplace__product-card__content {
@@ -86,8 +92,12 @@
 
 		&__footer {
 			display: flex;
+			/* The quality badge, when present, wraps onto its own row below the price: */
+			flex-wrap: wrap;
 			justify-content: space-between;
 			align-items: center;
+			row-gap: $grid-unit-10;
+			min-height: 36px;
 		}
 
 		&:hover {
@@ -98,7 +108,7 @@
 			display: grid;
 			gap: $medium-gap;
 			height: 100%;
-			grid-template-rows: auto 1fr 36px;
+			grid-template-rows: auto 1fr auto;
 		}
 
 		&__header {
@@ -129,6 +139,8 @@
 		}
 
 		&__title {
+			--woocommerce-marketplace-product-card-title-focus-width: var(--wp-admin-border-width-focus, 2px);
+
 			display: -webkit-box;
 			-webkit-box-orient: vertical;
 			-webkit-line-clamp: 2;
@@ -137,10 +149,19 @@
 			font-style: normal;
 			font-weight: 600;
 			line-height: $large-gap;
-			margin: -4px 0 0;
-			padding: 0;
+			margin:
+				calc(-4px - var(--woocommerce-marketplace-product-card-title-focus-width))
+				calc(-1 * var(--woocommerce-marketplace-product-card-title-focus-width))
+				calc(-1 * var(--woocommerce-marketplace-product-card-title-focus-width));
+			padding: var(--woocommerce-marketplace-product-card-title-focus-width);
+			max-width: 100%;
 			overflow: hidden;
 			text-overflow: ellipsis;
+			width: fit-content;
+
+			&:has(.woocommerce-marketplace__product-card__link:focus-visible) {
+				box-shadow: 0 0 0 var(--woocommerce-marketplace-product-card-title-focus-width) var(--wp-admin-theme-color, #2271b1);
+			}
 		}
 
 		&__link {
@@ -156,7 +177,7 @@
 			}
 
 			&:focus-visible {
-				box-shadow: 0 0 0 2px #2271b1;
+				box-shadow: none;
 			}
 
 			/* Use the ::after trick to make the whole card clickable: */
@@ -286,6 +307,8 @@
 			}
 			.woocommerce-marketplace__product-card__footer {
 				padding: 0 $large-gap;
+				/* Theme footers were always content-height; 36px is the extension-card row. */
+				min-height: 0;
 			}
 			.woocommerce-marketplace__product-card__price {
 				margin-right: $medium-gap;
@@ -393,10 +416,20 @@
 			.woocommerce-marketplace__product-card__footer {
 				flex-wrap: wrap;
 				gap: 4px;
+				/* Compact footers hug their content; 36px is the regular-card row height. */
+				min-height: 0;
 			}
 
 			.woocommerce-marketplace__product-card__details {
-				align-items: center;
+				/* Top-align the icon with the title, like regular cards, so it
+				   sits identically whether or not the badge row is present. */
+				align-items: flex-start;
+			}
+
+			.woocommerce-marketplace__product-card__meta {
+				/* Optical compensation: the title's negative focus-ring margin
+				   would otherwise pin the text to the icon's top edge. */
+				margin-top: $grid-unit-05;
 			}
 
 			.woocommerce-marketplace__product-card__link {
@@ -444,4 +477,3 @@
 		}
 	}
 }
-

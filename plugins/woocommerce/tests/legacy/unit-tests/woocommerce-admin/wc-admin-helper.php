@@ -33,7 +33,7 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 	 *
 	 * @var int
 	 */
-	private static $product_id;
+	private $product_id;
 
 	/**
 	 * Set up before class.
@@ -56,12 +56,6 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 		global $wp_rewrite;
 		$wp_rewrite->set_permalink_structure( '/%postname%/' );
 
-		// Create a product.
-		$product = WC_Helper_Product::create_simple_product();
-		$product->set_status( 'publish' );
-		$product->save();
-		self::$product_id = $product->get_id();
-
 		// Flush rewrite rules.
 		$wp_rewrite->init();
 		$wp_rewrite->flush_rules( true );
@@ -76,12 +70,82 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 		$wp_rewrite->set_permalink_structure( self::$original_permalink_structure );
 		update_option( 'woocommerce_permalinks', self::$original_wc_permalinks );
 
-		// Clean up product.
-		WC_Helper_Product::delete_product( self::$product_id );
-
 		// Flush rewrite rules one final time.
 		$wp_rewrite->flush_rules();
 		parent::tearDownAfterClass();
+	}
+
+	/**
+	 * Initialize environment for tests by creating a simple product.
+	 *
+	 * @return void
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$direct_update_mode = get_option( 'woocommerce_attribute_lookup_direct_updates' );
+		self::enable_direct_product_attribute_lookup_updates();
+		try {
+			// Create a product.
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_status( 'publish' );
+			$product->save();
+			$this->product_id = $product->get_id();
+		} finally {
+			self::disable_direct_product_attribute_lookup_updates();
+		}
+
+		$this->assertSame(
+			$direct_update_mode,
+			get_option( 'woocommerce_attribute_lookup_direct_updates' ),
+			'The direct attribute lookup update mode was not restored after fixture creation.'
+		);
+	}
+
+	/**
+	 * Clean up environment for tests by deleting the simple product.
+	 *
+	 * @return void
+	 */
+	public function tearDown(): void {
+		$direct_update_mode = get_option( 'woocommerce_attribute_lookup_direct_updates' );
+		try {
+			// Clean up product.
+			self::enable_direct_product_attribute_lookup_updates();
+			try {
+				WC_Helper_Product::delete_product( $this->product_id );
+			} finally {
+				self::disable_direct_product_attribute_lookup_updates();
+			}
+
+			$this->assertSame(
+				$direct_update_mode,
+				get_option( 'woocommerce_attribute_lookup_direct_updates' ),
+				'The direct attribute lookup update mode was not restored after fixture cleanup.'
+			);
+		} finally {
+			parent::tearDown();
+		}
+	}
+
+	/**
+	 * Test that the product fixture does not schedule an attribute lookup update.
+	 *
+	 * @testdox Product fixture does not schedule an attribute lookup update.
+	 */
+	public function test_product_fixture_does_not_schedule_attribute_lookup_update(): void {
+		$queue = WC()->get_instance_of( WC_Queue::class );
+
+		$this->assertEmpty(
+			$queue->search(
+				array(
+					'hook'   => 'woocommerce_run_product_attribute_lookup_update_callback',
+					'args'   => array( $this->product_id, \Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore::ACTION_INSERT ),
+					'status' => ActionScheduler_Store::STATUS_PENDING,
+				),
+				'ids'
+			),
+			"Product {$this->product_id} has a pending attribute lookup update."
+		);
 	}
 
 	/**
@@ -264,7 +328,7 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 			array( 'shop', get_permalink( wc_get_page_id( 'shop' ) ), true ),
 			array( 'checkout', get_permalink( wc_get_page_id( 'checkout' ) ), true ),
 			array( 'product archive', get_post_type_archive_link( 'product' ), true ),
-			array( 'product', get_permalink( self::$product_id ), true ),
+			array( 'product', get_permalink( $this->product_id ), true ),
 			// Should return true if a shop page contains a query param.
 			array( 'shop with query', get_permalink( wc_get_page_id( 'shop' ) ) . '?query=test', true ),
 			// Should non-store pages return false.

@@ -8,7 +8,6 @@ import { useSelect } from '@wordpress/data';
  */
 import { Campaign } from '~/marketing/types';
 import { STORE_KEY } from '~/marketing/data-multichannel/constants';
-import { Selectors } from '~/marketing/data-multichannel/selectors';
 import {
 	Campaign as APICampaign,
 	ApiFetchError,
@@ -35,9 +34,7 @@ export const useCampaigns = ( page = 1, perPage = 5 ): UseCampaignsType => {
 
 	return useSelect(
 		( select ) => {
-			const { hasFinishedResolution, getCampaigns } = select(
-				STORE_KEY
-			) as Selectors;
+			const { hasFinishedResolution, getCampaigns } = select( STORE_KEY );
 			const { campaignsPage, meta } = getCampaigns( page, perPage );
 
 			const convert = ( campaign: APICampaign ): Campaign => {

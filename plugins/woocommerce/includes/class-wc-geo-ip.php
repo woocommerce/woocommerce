@@ -365,6 +365,7 @@ class WC_Geo_IP {
 		'MF',
 		'BQ',
 		'SS',
+		'XK',
 		'O1',
 	);
 
@@ -893,6 +894,7 @@ class WC_Geo_IP {
 		'Saint Martin',
 		'Bonaire, Saint Eustatius and Saba',
 		'South Sudan',
+		'Kosovo',
 		'Other',
 	);
 

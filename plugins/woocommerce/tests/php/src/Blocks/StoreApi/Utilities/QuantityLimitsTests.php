@@ -5,12 +5,11 @@ namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Utilities;
 
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 /**
  * QuantityLimitsTests class.
  */
-class QuantityLimitsTests extends TestCase {
+class QuantityLimitsTests extends \WC_Unit_Test_Case {
 	/**
 	 * @var string
 	 */
@@ -20,8 +19,9 @@ class QuantityLimitsTests extends TestCase {
 	 * Set up test environment.
 	 */
 	public function setUp(): void {
-		$this->manage_stock = get_option( 'woocommerce_manage_stock' );
 		parent::setUp();
+
+		$this->manage_stock = get_option( 'woocommerce_manage_stock' );
 	}
 
 	/**
@@ -45,16 +45,6 @@ class QuantityLimitsTests extends TestCase {
 		remove_all_filters( 'woocommerce_stock_amount' );
 		// Add only floatval.
 		add_filter( 'woocommerce_stock_amount', 'floatval' );
-	}
-
-	/**
-	 * Disable float support and restore integer support.
-	 */
-	private function disable_float_support() {
-		// Remove all existing filters first.
-		remove_all_filters( 'woocommerce_stock_amount' );
-		// Add only intval.
-		add_filter( 'woocommerce_stock_amount', 'intval' );
 	}
 
 	/**
@@ -179,6 +169,60 @@ class QuantityLimitsTests extends TestCase {
 		$limits          = $quantity_limits->get_add_to_cart_limits( $product );
 
 		$this->assertEquals( 9999, $limits['maximum'], 'When stock management is disabled, maximum quantity should be 9999' );
+	}
+
+	/**
+	 * Test quantity limit when stock management is disabled but product has manage_stock enabled from when it was previously enabled.
+	 * This reproduces the Cart Block bug where products retain their stock quantity as max even when stock management is globally disabled.
+	 */
+	public function test_quantity_limit_when_stock_management_disabled_but_product_has_manage_stock_enabled() {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Test Product',
+				'regular_price' => 10,
+			)
+		);
+
+		// Step 1: Enable stock management globally and on product level.
+		update_option( 'woocommerce_manage_stock', 'yes' );
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 10 );
+		$product->set_backorders( 'no' );
+		$product->save();
+
+		// Verify that with stock management enabled, max is limited to stock quantity.
+		$quantity_limits     = new QuantityLimits();
+		$limits_when_enabled = $quantity_limits->get_add_to_cart_limits( $product );
+		$this->assertEquals( 10, $limits_when_enabled['maximum'], 'When stock management is enabled, maximum should be limited to stock quantity' );
+
+		// Step 2: Disable stock management globally but leave product-level manage_stock as true.
+		// This simulates the scenario from import or when stock management was previously enabled.
+		update_option( 'woocommerce_manage_stock', 'no' );
+
+		// The product still has manage_stock = true and stock_quantity = 10.
+		$product = wc_get_product( $product->get_id() );
+		$this->assertTrue( $product->get_manage_stock(), 'Product should still have manage_stock = true' );
+		$this->assertEquals( 10, $product->get_stock_quantity(), 'Product should still have stock quantity of 10' );
+
+		// Step 3: Test quantity limits - this should return 9999, not 10.
+		$quantity_limits      = new QuantityLimits();
+		$limits_when_disabled = $quantity_limits->get_add_to_cart_limits( $product );
+
+		/**
+		 * Filter the maximum quantity to allow extensions to override the default value for testing purposes.
+		 *
+		 * @since 6.8.0
+		 *
+		 * @param mixed $value The value being filtered.
+		 * @param \WC_Product $product The product object.
+		 * @param array|null $cart_item The cart item if the product exists in the cart, or null.
+		 * @return mixed
+		 */
+		$expected_max = apply_filters( 'woocommerce_store_api_product_quantity_maximum', 9999, $product );
+		$this->assertEquals( $expected_max, $limits_when_disabled['maximum'], 'When stock management is globally disabled, maximum should ignore product-level manage_stock/stock and use the default maximum' );
+		$this->assertEquals( 1, $limits_when_disabled['minimum'], 'Minimum should remain default when stock management is globally disabled' );
+		$this->assertEquals( 1, $limits_when_disabled['multiple_of'], 'Multiple-of should remain default when stock management is globally disabled' );
 	}
 
 	/**

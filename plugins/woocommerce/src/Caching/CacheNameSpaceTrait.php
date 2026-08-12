@@ -22,12 +22,43 @@ trait CacheNameSpaceTrait {
 	 */
 	public static function get_cache_prefix( $group ) {
 		// Get cache key - uses cache key wc_orders_cache_prefix to invalidate when needed.
-		$prefix = wp_cache_get( 'wc_' . $group . '_cache_prefix', $group );
+		$cache_key = 'wc_' . $group . '_cache_prefix';
+		$found     = false;
+		$prefix    = wp_cache_get( $cache_key, $group, false, $found );
 
-		if ( false === $prefix ) {
-			$prefix = microtime();
-			wp_cache_set( 'wc_' . $group . '_cache_prefix', $prefix, $group );
+		if ( self::is_valid_cache_prefix( $prefix ) ) {
+			return 'wc_cache_' . $prefix . '_';
 		}
+
+		if ( $found ) {
+			/**
+			 * Fires when WooCommerce detects an invalid cache prefix before replacing it.
+			 *
+			 * @since 10.8.0
+			 *
+			 * @param string $group  Cache group.
+			 * @param mixed  $prefix Invalid cached prefix value.
+			 */
+			do_action( 'woocommerce_invalid_cache_prefix_detected', $group, $prefix );
+		}
+
+		$prefix = self::generate_cache_prefix();
+
+		if ( ! $found ) {
+			// Use add on cold prefixes so concurrent requests converge on the first
+			// persisted value instead of writing competing cache namespaces.
+			if ( wp_cache_add( $cache_key, $prefix, $group ) ) {
+				return 'wc_cache_' . $prefix . '_';
+			}
+
+			$cached_prefix = wp_cache_get( $cache_key, $group );
+
+			if ( self::is_valid_cache_prefix( $cached_prefix ) ) {
+				return 'wc_cache_' . $cached_prefix . '_';
+			}
+		}
+
+		wp_cache_set( $cache_key, $prefix, $group );
 
 		return 'wc_cache_' . $prefix . '_';
 	}
@@ -46,10 +77,12 @@ trait CacheNameSpaceTrait {
 	 * Invalidate cache group.
 	 *
 	 * @param string $group Group of cache to clear.
+	 * @return bool True when the new prefix was persisted to the object cache,
+	 *              false otherwise.
 	 * @since 3.9.0
 	 */
 	public static function invalidate_cache_group( $group ) {
-		return wp_cache_set( 'wc_' . $group . '_cache_prefix', microtime(), $group );
+		return wp_cache_set( 'wc_' . $group . '_cache_prefix', self::generate_cache_prefix(), $group );
 	}
 
 	/**
@@ -62,5 +95,24 @@ trait CacheNameSpaceTrait {
 	 */
 	public static function get_prefixed_key( $key, $group ) {
 		return self::get_cache_prefix( $group ) . $key;
+	}
+
+	/**
+	 * Generate a cache-safe prefix value.
+	 *
+	 * @return string Cache prefix.
+	 */
+	private static function generate_cache_prefix() {
+		return str_replace( ' ', '_', microtime() ) . '_' . bin2hex( random_bytes( 8 ) );
+	}
+
+	/**
+	 * Check whether a cached prefix can be used as a cache-key namespace.
+	 *
+	 * @param mixed $prefix Cached prefix value.
+	 * @return bool True if the prefix is valid.
+	 */
+	private static function is_valid_cache_prefix( $prefix ) {
+		return is_string( $prefix ) && '' !== trim( $prefix );
 	}
 }

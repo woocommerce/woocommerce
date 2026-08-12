@@ -28,13 +28,22 @@ class Styles_Helper {
 	/**
 	 * Parse number value from a string.
 	 *
-	 * @param string $value String value with value and unit.
+	 * @param string|float|int $value String with value and unit or integer value.
 	 * @return float
 	 */
-	public static function parse_value( string $value ): float {
-		if ( preg_match( '/^\s*(-?\d+(?:\.\d+)?)/', $value, $m ) ) {
-			return (float) $m[1];
+	public static function parse_value( $value ): float {
+		// Handle numeric values.
+		if ( is_numeric( $value ) ) {
+			return (float) $value;
 		}
+
+		// Handle string values.
+		if ( is_string( $value ) ) {
+			if ( preg_match( '/^\s*(-?\d+(?:\.\d+)?)/', $value, $m ) ) {
+				return (float) $m[1];
+			}
+		}
+
 		return 0.0;
 	}
 
@@ -111,6 +120,32 @@ class Styles_Helper {
 	 * }
 	 */
 	public static function get_styles_from_block( array $block_styles, $skip_convert_vars = false ) {
+		$unsupported_props = array(
+			'margin' => array( 'spacing', 'margin' ),
+		);
+		$unsupported_props = apply_filters( 'woocommerce_email_editor_styles_unsupported_props', $unsupported_props );
+		foreach ( $unsupported_props as $path ) {
+			if ( ! is_array( $path ) || count( $path ) === 0 ) {
+				continue;
+			}
+
+			$pointer  = & $block_styles;
+			$last_key = array_pop( $path );
+
+			foreach ( $path as $segment ) {
+				if ( ! is_string( $segment ) && ! is_int( $segment ) ) {
+					continue 2;
+				}
+				if ( ! array_key_exists( $segment, $pointer ) || ! is_array( $pointer[ $segment ] ) ) {
+					continue 2;
+				}
+				$pointer = & $pointer[ $segment ];
+			}
+
+			if ( ( is_string( $last_key ) || is_int( $last_key ) ) && array_key_exists( $last_key, $pointer ) ) {
+				unset( $pointer[ $last_key ] );
+			}
+		}
 		return wp_parse_args(
 			wp_style_engine_get_styles( $block_styles, array( 'convert_vars_to_classnames' => $skip_convert_vars ) ),
 			self::$empty_block_styles

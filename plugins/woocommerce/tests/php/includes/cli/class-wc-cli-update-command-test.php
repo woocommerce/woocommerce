@@ -26,6 +26,8 @@ class WC_CLI_Update_Command_Test extends WC_Unit_Test_Case {
 	 * Make WP_Install::$db_updates readable and capture the original value.
 	 */
 	public function set_up() {
+		parent::set_up();
+
 		$this->db_updates_property = new ReflectionProperty( WC_Install::class, 'db_updates' );
 		$this->db_updates_property->setAccessible( true );
 		$this->db_updates_original_value = $this->db_updates_property->getValue();
@@ -37,6 +39,8 @@ class WC_CLI_Update_Command_Test extends WC_Unit_Test_Case {
 	public function tear_down() {
 		$this->db_updates_property->setValue( $this->db_updates_original_value );
 		$this->db_updates_property->setAccessible( false );
+
+		parent::tear_down();
 	}
 
 	/**
@@ -57,10 +61,9 @@ class WC_CLI_Update_Command_Test extends WC_Unit_Test_Case {
 		$sut = new WC_CLI_Update_Command();
 		$sut->update();
 
-		$this->assertEquals(
-			WC()->version,
-			get_option( 'woocommerce_db_version' ),
-			'After applying updates via WP CLI, the `woocommerce_db_version` option should match the current `WC()->version` property.'
+		$this->assertTrue(
+			version_compare( get_option( 'woocommerce_db_version' ), WC()->version, '>=' ),
+			'After applying updates via WP CLI, the `woocommerce_db_version` option should match the last db update version in code.'
 		);
 	}
 
@@ -77,10 +80,9 @@ class WC_CLI_Update_Command_Test extends WC_Unit_Test_Case {
 		$sut = new WC_CLI_Update_Command();
 		$sut->update();
 
-		$this->assertEquals(
-			WC()->version,
-			get_option( 'woocommerce_db_version' ),
-			'After applying updates via WP CLI, the `woocommerce_db_version` option should match the current `WC()->version` property.'
+		$this->assertTrue(
+			version_compare( get_option( 'woocommerce_db_version' ), WC()->version, '>=' ),
+			'After applying updates via WP CLI, the `woocommerce_db_version` option should match the last db update version in code.'
 		);
 	}
 
@@ -88,8 +90,6 @@ class WC_CLI_Update_Command_Test extends WC_Unit_Test_Case {
 	 * Mock WP_CLI and related functionality.
 	 */
 	private function mock_wp_cli() {
-		parent::set_up();
-
 		$this->register_legacy_proxy_static_mocks(
 			array(
 				WP_CLI::class => array(

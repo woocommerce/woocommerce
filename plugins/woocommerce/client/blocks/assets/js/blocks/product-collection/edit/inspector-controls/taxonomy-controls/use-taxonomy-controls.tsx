@@ -51,6 +51,15 @@ function useTaxonomyControls( {
 					: taxonomy.slug === 'product_tag'
 			);
 		}
+		if ( collection === CoreCollectionNames.BY_BRAND ) {
+			return taxonomies.filter( ( taxonomy ) =>
+				// If it's in filter panel, we want to show everything BUT the brand control.
+				// Otherwise, it's a collection specific filter and we want to show ONLY the brand control.
+				isFiltersPanel
+					? taxonomy.slug !== 'product_brand'
+					: taxonomy.slug === 'product_brand'
+			);
+		}
 
 		return isFiltersPanel ? taxonomies : [];
 	}, [ taxonomies, collection, isFiltersPanel ] );
@@ -58,7 +67,6 @@ function useTaxonomyControls( {
 	const createHandleChange = ( slug: string ) => ( newTermIds: number[] ) => {
 		setQueryAttribute( {
 			taxQuery: {
-				...taxQuery,
 				[ slug ]: newTermIds,
 			},
 		} );

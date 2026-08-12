@@ -1,14 +1,14 @@
 /**
- * External dependencies
+ * Internal dependencies
  */
-import { registerBlockVariation } from '@wordpress/blocks';
+import { registerBlockVariationForEmail } from '../../config-tools';
 
 /**
  * Register a custom variation for the site logo block
  * This variation is used to display the site logo in the email editor by automatically adding some preset options.
  */
 function registerCustomSiteLogoBlockVariation() {
-	registerBlockVariation( 'core/site-logo', {
+	registerBlockVariationForEmail( 'core/site-logo', {
 		name: 'site-logo-default',
 		title: 'Site Logo',
 		attributes: {

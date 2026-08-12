@@ -72,6 +72,7 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 				<p
 					className="wc-block-components-checkout-order-summary__title-text"
 					role="heading"
+					aria-level={ 2 }
 				>
 					{ __( 'Order summary', 'woocommerce' ) }
 				</p>

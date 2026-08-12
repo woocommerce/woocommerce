@@ -116,12 +116,19 @@ export const formatAddress = (
 		parsedAddress = parsedAddress.replace( token, value );
 	} );
 	const addressParts = parsedAddress
-		.replace( /^,\s|,\s$/g, '' )
-		.replace( /\n{2,}/, '\n' )
+		.trim()
+		.replace( /\n{2,}/g, '\n' )
 		.split( '\n' )
-		.filter( Boolean );
+		.map( ( part ) =>
+			part
+				.split( ', ' )
+				.map( ( segment ) => segment.trim() )
+				.filter( Boolean )
+				.join( ', ' )
+		)
+		.filter( ( part ) => part.length > 0 );
 
 	return { name: parsedName, address: addressParts };
 };
 
-export const reloadPage = (): void => void window.location.reload( true );
+export const reloadPage = (): void => void window.location.reload();

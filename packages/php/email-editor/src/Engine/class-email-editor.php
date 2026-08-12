@@ -13,6 +13,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalizatio
 use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates;
 use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
 use WP_Post;
+use WP_REST_Request;
 use WP_Theme_JSON;
 
 /**
@@ -105,8 +106,6 @@ class Email_Editor {
 		$this->logger->info( 'Initializing email editor' );
 		do_action( 'woocommerce_email_editor_initialized' );
 		add_filter( 'woocommerce_email_editor_rendering_theme_styles', array( $this, 'extend_email_theme_styles' ), 10, 2 );
-		// Initialize the assets manager.
-		$this->assets_manager->initialize();
 
 		$this->register_block_patterns();
 		$this->register_email_post_types();
@@ -116,6 +115,8 @@ class Email_Editor {
 		$is_editor_page = apply_filters( 'woocommerce_is_email_editor_page', false );
 		if ( $is_editor_page ) {
 			$this->extend_email_post_api();
+			// Initialize the assets manager.
+			$this->assets_manager->initialize();
 		}
 		add_action( 'rest_api_init', array( $this, 'register_email_editor_api_routes' ) );
 		add_filter( 'woocommerce_email_editor_send_preview_email', array( $this->send_preview_email, 'send_preview_email' ), 11, 1 ); // allow for other filter methods to take precedent.
@@ -263,8 +264,28 @@ class Email_Editor {
 			array(
 				'methods'             => 'POST',
 				'callback'            => array( $this->email_api_controller, 'send_preview_email_data' ),
-				'permission_callback' => function () {
-					return current_user_can( 'edit_posts' );
+				'permission_callback' => function ( WP_REST_Request $request ) {
+					if ( ! current_user_can( 'edit_posts' ) ) {
+						return false;
+					}
+					$post_id = $request->get_param( 'postId' );
+					if ( is_numeric( $post_id ) && (int) $post_id > 0 ) {
+						return current_user_can( 'edit_post', (int) $post_id );
+					}
+
+					/**
+					 * Filters whether a preview email may be sent for a request without a backing post.
+					 *
+					 * Defaults to false: postless requests are rejected unless an integration
+					 * that handles them (via the `woocommerce_email_editor_send_preview_email`
+					 * filter) explicitly authorizes the request.
+					 *
+					 * @param bool             $allowed Whether the postless request is authorized. Default false.
+					 * @param \WP_REST_Request $request The send-preview REST request.
+					 *
+					 * @since 2.16.0
+					 */
+					return (bool) apply_filters( 'woocommerce_email_editor_send_preview_email_without_post_permission', false, $request );
 				},
 			)
 		);
@@ -277,6 +298,25 @@ class Email_Editor {
 				'permission_callback' => function () {
 					return current_user_can( 'edit_posts' );
 				},
+			)
+		);
+		register_rest_route(
+			'woocommerce-email-editor/v1',
+			'/personalization_tags',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this->email_api_controller, 'get_personalization_tags_collection' ),
+				'permission_callback' => function () {
+					return current_user_can( 'edit_posts' );
+				},
+				'args'                => array(
+					'post_id' => array(
+						'description'       => __( 'The post ID for context-aware tag filtering.', 'woocommerce' ),
+						'type'              => 'integer',
+						'required'          => false,
+						'sanitize_callback' => 'absint',
+					),
+				),
 			)
 		);
 	}
@@ -342,6 +382,11 @@ class Email_Editor {
 		}
 
 		if ( ! $this->current_post_is_email_post_type( $post->post_type ) ) {
+			return $template;
+		}
+
+		// Anyone can see a published email. For other statuses the user must be able to read the post.
+		if ( ! is_post_publicly_viewable( $post ) && ! current_user_can( 'read_post', $post->ID ) ) {
 			return $template;
 		}
 

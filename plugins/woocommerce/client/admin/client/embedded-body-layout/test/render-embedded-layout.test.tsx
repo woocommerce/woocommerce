@@ -36,9 +36,6 @@ jest.mock( '../../layout', () => ( {
 jest.mock( '../', () => ( {
 	EmbeddedBodyLayout: jest.fn( () => null ),
 } ) );
-jest.mock( '@woocommerce/product-editor', () => ( {
-	isValidEmail: jest.fn(),
-} ) );
 
 describe( 'embedded-layout', () => {
 	let mockEmbeddedRoot: HTMLDivElement;

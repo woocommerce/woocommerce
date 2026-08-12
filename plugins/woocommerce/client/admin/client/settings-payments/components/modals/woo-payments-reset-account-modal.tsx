@@ -14,7 +14,6 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import './modals.scss';
 import { recordPaymentsEvent } from '~/settings-payments/utils';
 import {
 	wooPaymentsExtensionSlug,
@@ -78,6 +77,25 @@ export const WooPaymentsResetAccountModal = ( {
 	const handleResetAccount = () => {
 		setIsResettingAccount( true );
 
+		if ( ! resetUrl ) {
+			recordPaymentsEvent( 'provider_reset_onboarding_failed', {
+				provider_id: wooPaymentsProviderId,
+				suggestion_id: wooPaymentsSuggestionId,
+				provider_extension_slug: wooPaymentsExtensionSlug,
+				reason: 'missing_reset_url',
+			} );
+			createNotice(
+				'error',
+				__(
+					'Failed to reset: missing reset URL. Please refresh and try again.',
+					'woocommerce'
+				),
+				{ isDismissible: true }
+			);
+			setIsResettingAccount( false );
+			return;
+		}
+
 		apiFetch( {
 			url: resetUrl,
 			method: 'POST',
@@ -89,9 +107,9 @@ export const WooPaymentsResetAccountModal = ( {
 					provider_extension_slug: wooPaymentsExtensionSlug,
 				} );
 				// Refresh the providers store.
-				invalidatePaymentGateways( 'getPaymentProviders' );
+				void invalidatePaymentGateways( 'getPaymentProviders' );
 				// Refresh the WooPayments in-context onboarding store.
-				invalidateWooPaymentsOnboarding( 'getOnboardingData' );
+				void invalidateWooPaymentsOnboarding( 'getOnboardingData' );
 			} )
 			.catch( () => {
 				recordPaymentsEvent( 'provider_reset_onboarding_failed', {

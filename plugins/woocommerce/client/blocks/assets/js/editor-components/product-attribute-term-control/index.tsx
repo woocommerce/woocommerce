@@ -18,6 +18,7 @@ import {
 	SearchListItem as SearchListItemProps,
 } from '@woocommerce/editor-components/search-list-control/types';
 import { convertAttributeObjectToSearchItem } from '@woocommerce/utils';
+import type { AttributeObject, AttributeTerm } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -40,6 +41,26 @@ interface Props
 	 */
 	selected: { id: number }[];
 }
+
+/**
+ * Attribute rows use negative IDs so they do not collide with term IDs in the
+ * flat list consumed by SearchListControl (keys, expansion, buildTermsTree).
+ */
+const toAttributeListItem = (
+	attribute: AttributeObject
+): SearchListItemProps => ( {
+	...convertAttributeObjectToSearchItem( attribute ),
+	id: -attribute.id,
+	parent: 0,
+} );
+
+const toTermListItem = (
+	term: AttributeTerm,
+	attributeId: number
+): SearchListItemProps => ( {
+	...convertAttributeObjectToSearchItem( term ),
+	parent: -attributeId,
+} );
 
 const ProductAttributeTermControl = ( {
 	onChange,
@@ -73,6 +94,7 @@ const ProductAttributeTermControl = ( {
 					className={ clsx( classes ) }
 					item={ item }
 					isLoading={ isLoadingAttributes }
+					isSelectable={ false }
 					disabled={ item.count === 0 }
 					name={ `attributes-${ instanceId }` }
 					countLabel={ sprintf(
@@ -123,12 +145,12 @@ const ProductAttributeTermControl = ( {
 	};
 
 	const list = productsAttributes.reduce( ( acc, curr ) => {
-		const { terms, ...props } = curr;
+		const { terms, ...attribute } = curr;
 
 		return [
 			...acc,
-			convertAttributeObjectToSearchItem( props ),
-			...terms.map( convertAttributeObjectToSearchItem ),
+			toAttributeListItem( attribute ),
+			...terms.map( ( term ) => toTermListItem( term, attribute.id ) ),
 		];
 	}, [] as SearchListItemProps[] );
 

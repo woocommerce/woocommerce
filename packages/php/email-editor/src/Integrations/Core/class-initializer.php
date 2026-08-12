@@ -11,18 +11,27 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Layout\Flex_Layout_Renderer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Abstract_Block_Renderer;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Audio;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Button;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Buttons;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Column;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Columns;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Cover;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Embed;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Fallback;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Gallery;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Group;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Image;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\List_Block;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\List_Item;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Media_Text;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Post_Content;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Post_Template;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Quote;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Video;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Social_Link;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Social_Links;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Table;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Text;
 
 /**
@@ -30,13 +39,14 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Text;
  */
 class Initializer {
 	/**
-	 * List of supported blocks in the email editor.
+	 * List of supported WordPress core blocks in the email editor.
 	 */
 	const ALLOWED_BLOCK_TYPES = array(
 		'core/button',
 		'core/buttons',
 		'core/column',
 		'core/columns',
+		'core/embed',
 		'core/group',
 		'core/heading',
 		'core/image',
@@ -49,6 +59,25 @@ class Initializer {
 		'core/social-links',
 		'core/site-logo',
 		'core/site-title',
+		'core/table',
+	);
+
+	/**
+	 * List of blocks that only need rendering capabilities (not available in email editor).
+	 *
+	 * To add a new render-only block:
+	 * 1. Add the block name to this array
+	 * 2. Optionally create a specific renderer in the Renderer/Blocks directory
+	 * 3. Add the renderer case in the get_block_renderer method
+	 */
+	const RENDER_ONLY_BLOCK_TYPES = array(
+		'core/gallery',
+		'core/media-text',
+		'core/audio',
+		'core/cover',
+		'core/video',
+		'core/post-title',
+		'core/post-template',
 	);
 
 	/**
@@ -59,11 +88,31 @@ class Initializer {
 	private array $renderers = array();
 
 	/**
+	 * Whether hooks have already been registered.
+	 *
+	 * @var bool
+	 */
+	private bool $initialized = false;
+
+	/**
 	 * Initializes the core blocks renderers.
 	 */
 	public function initialize(): void {
+		if ( $this->initialized ) {
+			return;
+		}
+		$this->initialized = true;
+
 		add_filter( 'woocommerce_email_editor_theme_json', array( $this, 'adjust_theme_json' ), 10, 1 );
 		add_filter( 'safe_style_css', array( $this, 'allow_styles' ) );
+		add_action( 'woocommerce_email_editor_render_start', array( $this, 'reset_renderers' ) );
+	}
+
+	/**
+	 * Clear cached renderer instances so stateful renderers reset between emails.
+	 */
+	public function reset_renderers(): void {
+		$this->renderers = array();
 	}
 
 	/**
@@ -97,18 +146,30 @@ class Initializer {
 		$allowed_styles[] = 'mso-padding-alt';
 		$allowed_styles[] = 'mso-font-width';
 		$allowed_styles[] = 'mso-text-raise';
+		$allowed_styles[] = 'word-break';
 		return $allowed_styles;
 	}
 
 	/**
-	 * Set `supports.email = true` and configure render_email_callback for supported blocks.
+	 * Configure block settings for email editor support and rendering.
+	 *
+	 * This method handles three types of blocks:
+	 * 1. Editor-available blocks: Set supports.email = true and render_email_callback
+	 * 2. Render-only blocks: Only set render_email_callback (not available in editor)
+	 * 3. Special blocks: Custom handling (e.g., core/post-content stateless renderer)
 	 *
 	 * @param array $settings Block settings.
-	 * @return array
+	 * @return array Modified block settings.
 	 */
 	public function update_block_settings( array $settings ): array {
+		// Enable blocks in email editor and set rendering callback.
 		if ( in_array( $settings['name'], self::ALLOWED_BLOCK_TYPES, true ) ) {
 			$settings['supports']['email']     = true;
+			$settings['render_email_callback'] = array( $this, 'render_block' );
+		}
+
+		// Set rendering callback for render-only blocks (without enabling in editor).
+		if ( in_array( $settings['name'], self::RENDER_ONLY_BLOCK_TYPES, true ) ) {
 			$settings['render_email_callback'] = array( $this, 'render_block' );
 		}
 
@@ -147,6 +208,7 @@ class Initializer {
 			case 'core/heading':
 			case 'core/paragraph':
 			case 'core/site-title':
+			case 'core/post-title':
 				$renderer = new Text();
 				break;
 			case 'core/column':
@@ -181,6 +243,30 @@ class Initializer {
 				break;
 			case 'core/social-links':
 				$renderer = new Social_Links();
+				break;
+			case 'core/table':
+				$renderer = new Table();
+				break;
+			case 'core/gallery':
+				$renderer = new Gallery();
+				break;
+			case 'core/post-template':
+				$renderer = new Post_Template();
+				break;
+			case 'core/media-text':
+				$renderer = new Media_Text();
+				break;
+			case 'core/audio':
+				$renderer = new Audio();
+				break;
+			case 'core/embed':
+				$renderer = new Embed();
+				break;
+			case 'core/cover':
+				$renderer = new Cover();
+				break;
+			case 'core/video':
+				$renderer = new Video();
 				break;
 			default:
 				$renderer = new Fallback();
