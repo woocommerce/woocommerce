@@ -76,6 +76,10 @@ const dataViewsBundledDependencyRoots = [
 const dataViewsWpEntry = require.resolve( '@wordpress/dataviews/wp', {
 	paths: [ SETTINGS_UI_PACKAGE_DIR ],
 } );
+const settingsUIDataFormRuntimeEntry = path.resolve(
+	SETTINGS_UI_PACKAGE_DIR,
+	'src/dataform-runtime.ts'
+);
 
 // Admin writes directly to the plugin's `assets/client/admin/` so PHP can
 // enqueue without an intermediate copy step. The JS config and every composed
@@ -150,10 +154,13 @@ const getEntryPoints = () => {
 	wcAdminPackages.forEach( ( name ) => {
 		const source = resolvePackageSourceEntry( name );
 		const style = resolvePackageStyleEntry( name );
+		const privateRuntime =
+			name === 'settings-ui' ? settingsUIDataFormRuntimeEntry : null;
 		// Order matters: webpack uses the last item in an array entry as the
-		// chunk's export source. Stylesheet first so `src/index.ts`'s exports
-		// land on the `window.wc.<name>` global.
-		entryPoints[ name ] = style ? [ style, source ] : source;
+		// chunk's export source. Private runtime and stylesheet entries come
+		// first so only `src/index.ts` exports land on `window.wc.<name>`.
+		const entries = [ style, privateRuntime, source ].filter( Boolean );
+		entryPoints[ name ] = entries.length === 1 ? source : entries;
 	} );
 	wpAdminScripts.forEach( ( name ) => {
 		entryPoints[ name ] = `${ WP_ADMIN_SCRIPTS_DIR }/${ name }`;
@@ -218,10 +225,19 @@ const jsConfig = {
 		parser: styleConfig.parser,
 		rules: [
 			{
+				// The DataForm runtime is a private entry until WOOPRD-3596 imports
+				// it from the renderer. Keep it in production builds without
+				// re-exporting it through window.wc.settingsUi.
+				include: settingsUIDataFormRuntimeEntry,
+				sideEffects: true,
+			},
+			{
 				// DataViews' /wp build inlines WordPress packages but leaves their
 				// third-party imports external. Resolve those imports from the exact
 				// package graph bundled into this entry under pnpm's strict layout.
+				// Keep this private runtime even while no public package export uses it.
 				include: dataViewsWpEntry,
+				sideEffects: true,
 				resolve: {
 					modules: [
 						...dataViewsBundledDependencyRoots,

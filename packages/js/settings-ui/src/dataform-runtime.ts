@@ -2,8 +2,9 @@
  * The DataViews `/wp` export bundles the version-sensitive DataForm runtime
  * while leaving supported WordPress singleton dependencies external.
  *
- * Keep this facade intentionally narrow. Add exports only when Settings UI
- * consumes them, and never expose DataViews' private APIs from this package.
+ * This module is a private Settings UI runtime entry. Do not re-export it from
+ * the package index. WOOPRD-3596 can import it directly when the renderer starts
+ * to use DataForm.
  */
 import type { DataForm as DataFormType } from '@wordpress/dataviews';
 import { DataForm as DataFormRuntime } from '@wordpress/dataviews/wp';
