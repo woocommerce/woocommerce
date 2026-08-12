@@ -204,7 +204,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 				wp_delete_file( $file_path );
 			}
 			return new WP_Error(
-				'fulfillments_csv_parse_error',
+				'woocommerce_fulfillments_csv_parse_error',
 				(string) $parsed['error']['message'],
 				array( 'status' => WP_Http::BAD_REQUEST )
 			);
@@ -307,7 +307,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		$session = ImportSession::load( $user_id, $token );
 		if ( ! $session instanceof ImportSession ) {
 			return new WP_Error(
-				'fulfillments_import_token_invalid',
+				'woocommerce_fulfillments_import_token_invalid',
 				__( 'Import session is missing or has expired. Please re-upload the CSV.', 'woocommerce' ),
 				array( 'status' => WP_Http::BAD_REQUEST )
 			);
@@ -327,7 +327,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		if ( ! file_exists( $session_file ) || $size_changed || $mtime_changed ) {
 			$session->delete();
 			return new WP_Error(
-				'fulfillments_import_file_changed',
+				'woocommerce_fulfillments_import_file_changed',
 				__( 'The staged CSV was modified or removed. Please re-upload the file.', 'woocommerce' ),
 				array( 'status' => WP_Http::CONFLICT )
 			);
@@ -345,7 +345,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		$missing    = FulfillmentsCsvImporter::find_missing_required_columns( $header_map );
 		if ( ! empty( $missing ) ) {
 			return new WP_Error(
-				'fulfillments_import_mapping_invalid',
+				'woocommerce_fulfillments_import_mapping_invalid',
 				sprintf(
 					/* translators: %s: comma-separated list of missing column names. */
 					__( 'Mapping is missing required column(s): %s.', 'woocommerce' ),

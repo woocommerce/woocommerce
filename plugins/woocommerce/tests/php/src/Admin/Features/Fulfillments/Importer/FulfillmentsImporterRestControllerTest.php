@@ -170,7 +170,7 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 		$response = $this->invoke( 'handle_run', $request );
 
 		$this->assertInstanceOf( \WP_Error::class, $response );
-		$this->assertSame( 'fulfillments_import_token_invalid', $response->get_error_code() );
+		$this->assertSame( 'woocommerce_fulfillments_import_token_invalid', $response->get_error_code() );
 	}
 
 	/**
@@ -190,7 +190,7 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 		$response = $this->invoke( 'handle_run', $request );
 
 		$this->assertInstanceOf( \WP_Error::class, $response );
-		$this->assertSame( 'fulfillments_import_mapping_invalid', $response->get_error_code() );
+		$this->assertSame( 'woocommerce_fulfillments_import_mapping_invalid', $response->get_error_code() );
 	}
 
 	/**
@@ -259,7 +259,7 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 		$req3->set_param( 'mapping', $mapping );
 		$res3 = $this->invoke( 'handle_run', $req3 );
 		$this->assertInstanceOf( \WP_Error::class, $res3 );
-		$this->assertSame( 'fulfillments_import_token_invalid', $res3->get_error_code() );
+		$this->assertSame( 'woocommerce_fulfillments_import_token_invalid', $res3->get_error_code() );
 	}
 
 	/**
@@ -411,7 +411,7 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 		$response = $this->invoke( 'handle_run', $request );
 
 		$this->assertInstanceOf( \WP_Error::class, $response );
-		$this->assertSame( 'fulfillments_import_file_changed', $response->get_error_code() );
+		$this->assertSame( 'woocommerce_fulfillments_import_file_changed', $response->get_error_code() );
 	}
 
 	/**
