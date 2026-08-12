@@ -617,4 +617,68 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 			'A custom merchant placeholder attachment should not be deleted.'
 		);
 	}
+
+	/**
+	 * @testdox Should reference block patterns instead of baking translated empty cart strings into the Cart page content.
+	 */
+	public function test_cart_block_content_references_empty_cart_patterns(): void {
+		$method = new ReflectionMethod( WC_Install::class, 'get_cart_block_content' );
+		$method->setAccessible( true );
+		$content = $method->invoke( null );
+
+		$this->assertStringContainsString(
+			'<!-- wp:pattern {"slug":"woocommerce/cart-empty-message"} /-->',
+			$content,
+			'The empty cart title should be stored as a pattern reference so it is translated at render time.'
+		);
+		$this->assertStringContainsString(
+			'<!-- wp:pattern {"slug":"woocommerce/cart-new-in-store-message"} /-->',
+			$content,
+			'The "New in store" heading should be stored as a pattern reference so it is translated at render time.'
+		);
+		$this->assertStringNotContainsString(
+			'Your cart is currently empty!',
+			$content,
+			'The empty cart title must not be frozen into the page content in the install-time locale.'
+		);
+		$this->assertStringNotContainsString(
+			'New in store',
+			$content,
+			'The "New in store" heading must not be frozen into the page content in the install-time locale.'
+		);
+	}
+
+	/**
+	 * @testdox Should render the empty cart message patterns to the same markup the installer previously inlined.
+	 */
+	public function test_empty_cart_message_patterns_render_expected_markup(): void {
+		if ( ! WP_Block_Patterns_Registry::get_instance()->is_registered( 'woocommerce/cart-empty-message' ) ) {
+			do_action( 'wp_loaded' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Patterns are registered on wp_loaded, which the test bootstrap does not fire.
+		}
+
+		$rendered = do_blocks(
+			'<!-- wp:pattern {"slug":"woocommerce/cart-empty-message"} /--><!-- wp:pattern {"slug":"woocommerce/cart-new-in-store-message"} /-->'
+		);
+
+		$this->assertStringContainsString(
+			'Your cart is currently empty!',
+			$rendered,
+			'The cart-empty-message pattern should render the empty cart title.'
+		);
+		$this->assertStringContainsString(
+			'wc-block-cart__empty-cart__title',
+			$rendered,
+			'The rendered empty cart title should keep the markup the installer previously inlined.'
+		);
+		$this->assertStringContainsString(
+			'New in store',
+			$rendered,
+			'The cart-new-in-store-message pattern should render the "New in store" heading.'
+		);
+		$this->assertStringNotContainsString(
+			'Browse store',
+			$rendered,
+			'The cart-empty-message pattern should render only the title so the installed page keeps its current markup.'
+		);
+	}
 }
