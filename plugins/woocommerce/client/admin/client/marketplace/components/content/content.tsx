@@ -22,6 +22,7 @@ import Discover from '../discover/discover';
 import Products from '../products/products';
 import MySubscriptions from '../my-subscriptions/my-subscriptions';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
+import { isQualityBadgeFilterActive } from '../quality-badge/quality-badge-filter';
 import { fetchSearchResults, getProductType } from '../../utils/functions';
 import { SubscriptionsContextProvider } from '../../contexts/subscriptions-context';
 import { SearchResultsCountType } from '../../contexts/types';
@@ -54,6 +55,11 @@ export default function Content(): React.JSX.Element {
 	const { isLoading, setIsLoading, selectedTab, setSearchResultsCount } =
 		marketplaceContextValue;
 	const query = useQuery();
+	// The param counts only while the toggle that clears it can render.
+	const qualityBadgeFilterActive = isQualityBadgeFilterActive(
+		query,
+		marketplaceContextValue.iamSettings
+	);
 
 	const searchCompleteAnnouncement = ( count: number ): void => {
 		speak(
@@ -92,7 +98,7 @@ export default function Content(): React.JSX.Element {
 			params.append( 'term', query.term );
 		}
 
-		if ( query.quality_badge === '1' && query.tab === 'extensions' ) {
+		if ( qualityBadgeFilterActive && query.tab === 'extensions' ) {
 			params.append( 'quality_badge', '1' );
 		}
 
@@ -150,7 +156,7 @@ export default function Content(): React.JSX.Element {
 		query.category,
 		query.term,
 		query.tab,
-		query.quality_badge,
+		qualityBadgeFilterActive,
 		setIsLoadingMore,
 	] );
 
@@ -205,7 +211,7 @@ export default function Content(): React.JSX.Element {
 				params.append( 'term', query.term );
 			}
 
-			if ( query.quality_badge === '1' && query.tab === 'extensions' ) {
+			if ( qualityBadgeFilterActive && query.tab === 'extensions' ) {
 				params.append( 'quality_badge', '1' );
 			}
 
@@ -246,7 +252,7 @@ export default function Content(): React.JSX.Element {
 					// The badge filter only applies to the extensions results.
 					if (
 						category === 'extensions' &&
-						query.quality_badge === '1'
+						qualityBadgeFilterActive
 					) {
 						params.append( 'quality_badge', '1' );
 					}
@@ -342,7 +348,7 @@ export default function Content(): React.JSX.Element {
 		query.tab,
 		query.term,
 		query.category,
-		query.quality_badge,
+		qualityBadgeFilterActive,
 		setIsLoading,
 		setSearchResultsCount,
 		currentPage,
