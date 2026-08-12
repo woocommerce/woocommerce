@@ -1218,6 +1218,97 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Tests the Action Scheduler hook flushes buffered stamps.
+	 *
+	 * The safety net and retry paths run under a queue runner that can be killed
+	 * before shutdown, so the buffer is also flushed after each action. This
+	 * exists only for a path a hook creates, so nothing else would catch its
+	 * removal.
+	 */
+	public function test_the_action_scheduler_hook_flushes_buffered_stamps() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$data_store->record_last_send( array( $push_token ) );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Firing Action Scheduler's hook, not declaring one.
+		do_action( 'action_scheduler_after_execute', 1, null, '' );
+
+		$this->assertNotNull( $data_store->read( $push_token->get_id() )->get_last_send_at_gmt() );
+	}
+
+	/**
+	 * @testdox Tests a failed read of existing stamps does not insert duplicates.
+	 *
+	 * `wpdb::query()` returns false without setting `last_error` when the `query`
+	 * filter empties the statement, so a failed read must not be taken as "no
+	 * rows exist". `wp_postmeta` has no unique key to catch the duplicates that
+	 * would follow.
+	 */
+	public function test_a_failed_read_of_existing_stamps_does_not_insert_duplicates() {
+		global $wpdb;
+
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$data_store->record_last_send( array( $push_token ) );
+		$data_store->flush_last_send();
+
+		$empty_the_select = function ( $query ) {
+			return false !== strpos( $query, 'SELECT post_id' ) && false !== strpos( $query, 'last_send_at_gmt' )
+				? ''
+				: $query;
+		};
+
+		add_filter( 'query', $empty_the_select );
+		$data_store->record_last_send( array( $push_token ) );
+		$data_store->flush_last_send();
+		remove_filter( 'query', $empty_the_select );
+
+		$row_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s",
+				$push_token->get_id(),
+				PushTokensDataStore::LAST_SEND_AT_META_KEY
+			)
+		);
+
+		$this->assertSame( 1, $row_count );
+	}
+
+	/**
+	 * @testdox Tests an error raised while writing stamps does not escape the flush.
+	 *
+	 * The flush runs on `action_scheduler_after_execute`, which fires between an
+	 * action completing and being marked complete, so anything escaping here
+	 * records a delivered notification's action as failed. Errors do not extend
+	 * Exception, which is why the catch is on Throwable.
+	 */
+	public function test_an_error_while_writing_stamps_does_not_escape_the_flush() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$raise_an_error = function ( $query ) {
+			if ( false !== strpos( $query, 'last_send_at_gmt' ) ) {
+				throw new \Error( 'Raised for testing.' );
+			}
+
+			return $query;
+		};
+
+		add_filter( 'query', $raise_an_error );
+
+		try {
+			$data_store->record_last_send( array( $push_token ) );
+			$data_store->flush_last_send();
+		} finally {
+			remove_filter( 'query', $raise_an_error );
+		}
+
+		$this->assertNull( $data_store->read( $push_token->get_id() )->get_last_send_at_gmt() );
+	}
+
+	/**
 	 * @testdox Tests recording a send with no tokens is a no-op.
 	 */
 	public function test_record_last_send_ignores_an_empty_token_list() {
