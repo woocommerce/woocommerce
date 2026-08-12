@@ -70,6 +70,13 @@ final class ImportSession {
 	private array $data;
 
 	/**
+	 * Whether the last write of the payload transient succeeded.
+	 *
+	 * @var bool
+	 */
+	private bool $persisted = true;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param int                  $user_id User who owns the session.
@@ -125,23 +132,21 @@ final class ImportSession {
 			),
 		);
 
-		$stored  = set_transient( self::PREFIX . $user_id . '_' . $token, $data, self::TTL );
-		$indexed = set_transient( self::INDEX_PREFIX . $user_id, $token, self::TTL );
-		if ( ! $stored || ! $indexed ) {
-			wc_get_logger()->error(
-				sprintf(
-					'Fulfillments import session could not be persisted for user %d (payload=%s, index=%s).',
-					$user_id,
-					$stored ? 'ok' : 'failed',
-					$indexed ? 'ok' : 'failed'
-				),
-				array( 'source' => 'fulfillments-csv-importer' )
-			);
-		}
+		$session = new self( $user_id, $token, $data );
+		$session->persist();
 
 		self::schedule_cleanup( $user_id, $token, $file );
 
-		return new self( $user_id, $token, $data );
+		return $session;
+	}
+
+	/**
+	 * Whether the session payload is stored, so chunk progress can be recorded against it.
+	 *
+	 * @return bool
+	 */
+	public function persisted(): bool {
+		return $this->persisted;
 	}
 
 	/**
@@ -203,6 +208,10 @@ final class ImportSession {
 		try {
 			FilesystemUtil::validate_upload_file_path( $file );
 		} catch ( \Exception $e ) {
+			wc_get_logger()->warning(
+				sprintf( 'Refusing to clean up staged fulfillments import file outside the uploads directory: %s', $file ),
+				array( 'source' => 'fulfillments-csv-importer' )
+			);
 			return;
 		}
 		wp_delete_file( $file );
@@ -409,9 +418,10 @@ final class ImportSession {
 	 * @param int                                                                    $processed_after End-of-chunk processed count (offset + rows consumed by the chunk).
 	 * @param array{created:int, updated:int, skipped:int, failed:int, notified:int} $counts          Per-chunk counts.
 	 * @param array<string, true>                                                    $seen            Cross-chunk dedupe state to persist.
-	 * @param int                                                                    $byte_offset     Byte position the importer reached after this chunk, used to resume the next one without re-reading prior rows.
+	 * @param int                                                                    $byte_offset     Byte position reached after this chunk; the next chunk resumes here.
+	 * @return bool Whether the updated session state is stored.
 	 */
-	public function record_chunk( int $processed_after, array $counts, array $seen, int $byte_offset = 0 ): void {
+	public function record_chunk( int $processed_after, array $counts, array $seen, int $byte_offset = 0 ): bool {
 		$prev                    = (int) ( $this->data['processed'] ?? 0 );
 		$this->data['processed'] = min( $this->total(), max( $prev, max( 0, $processed_after ) ) );
 
@@ -431,7 +441,7 @@ final class ImportSession {
 			$this->data['byte_offset'] = $byte_offset;
 		}
 
-		$this->persist();
+		return $this->persist();
 	}
 
 	/**
@@ -483,22 +493,36 @@ final class ImportSession {
 
 	/**
 	 * Persist the current payload back to its transient.
+	 *
+	 * set_transient() returns false when the stored value is unchanged, so both writes
+	 * compare first; otherwise every no-op chunk would be reported as a lost write.
+	 *
+	 * @return bool Whether the payload is stored.
 	 */
-	private function persist(): void {
-		$stored = set_transient( self::PREFIX . $this->user_id . '_' . $this->token, $this->data, self::TTL );
-		// Keep the user-scoped index pointer alive too.
-		$indexed = set_transient( self::INDEX_PREFIX . $this->user_id, $this->token, self::TTL );
-		if ( ! $stored || ! $indexed ) {
+	private function persist(): bool {
+		$payload_key = self::PREFIX . $this->user_id . '_' . $this->token;
+
+		$stored = get_transient( $payload_key ) === $this->data;
+		if ( ! $stored ) {
+			$stored = set_transient( $payload_key, $this->data, self::TTL );
+		}
+
+		if ( get_transient( self::INDEX_PREFIX . $this->user_id ) !== $this->token ) {
+			set_transient( self::INDEX_PREFIX . $this->user_id, $this->token, self::TTL );
+		}
+
+		if ( ! $stored ) {
 			wc_get_logger()->error(
 				sprintf(
-					'Fulfillments import session %s could not be persisted (payload=%s, index=%s); progress for this chunk may be lost.',
-					$this->token,
-					$stored ? 'ok' : 'failed',
-					$indexed ? 'ok' : 'failed'
+					'Fulfillments import session %s could not be persisted; progress for this chunk may be lost.',
+					$this->token
 				),
 				array( 'source' => 'fulfillments-csv-importer' )
 			);
 		}
+
+		$this->persisted = (bool) $stored;
+		return $this->persisted;
 	}
 
 	/**

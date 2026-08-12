@@ -140,6 +140,28 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox record_chunk() reports success when the payload is unchanged, since set_transient returns false for identical values.
+	 */
+	public function test_record_chunk_with_identical_payload_still_reports_success(): void {
+		$session = $this->make_session( 22 );
+
+		$counts = array(
+			'created'  => 1,
+			'updated'  => 0,
+			'skipped'  => 0,
+			'failed'   => 0,
+			'notified' => 0,
+		);
+
+		$this->assertTrue( $session->record_chunk( 5, $counts, array( '1|a' => true ), 100 ) );
+		$this->assertTrue(
+			$session->record_chunk( 5, array(), array( '1|a' => true ), 100 ),
+			'An identical rewrite must not be reported as a persistence failure'
+		);
+		$this->assertTrue( $session->persisted() );
+	}
+
+	/**
 	 * @testdox record_chunk() never regresses processed below a previously stored value.
 	 */
 	public function test_record_chunk_never_goes_backwards_on_processed(): void {

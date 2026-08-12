@@ -287,6 +287,18 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			$update
 		);
 
+		if ( ! $session->persisted() ) {
+			$session->delete();
+			if ( file_exists( $file_path ) ) {
+				wp_delete_file( $file_path );
+			}
+			return new WP_Error(
+				'woocommerce_fulfillments_import_session_failed',
+				__( 'The import session could not be saved. Please try again.', 'woocommerce' ),
+				array( 'status' => WP_Http::INTERNAL_SERVER_ERROR )
+			);
+		}
+
 		return array(
 			'token'            => $session->token(),
 			'headers'          => $parsed['headers'],
@@ -472,7 +484,16 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		$rows_for_ui     = $this->prepare_rows_for_response( $rows );
 		$errors_for_ui   = $this->extract_errors_for_response( $rows );
 
-		$session->record_chunk( $processed_after, $counts, $seen, $next_byte );
+		// If progress cannot be stored the client must not advance: a later chunk would
+		// resume from a stale byte offset and import the same rows again. The rows of
+		// this chunk are already saved, so a retry updates them in place.
+		if ( ! $session->record_chunk( $processed_after, $counts, $seen, $next_byte ) ) {
+			return new WP_Error(
+				'woocommerce_fulfillments_import_progress_failed',
+				__( 'Import progress could not be saved. Please retry.', 'woocommerce' ),
+				array( 'status' => WP_Http::INTERNAL_SERVER_ERROR )
+			);
+		}
 
 		return $this->build_run_response( $session, $rows_for_ui, $errors_for_ui, ! empty( $chunk_result['eof'] ) );
 	}
