@@ -1742,9 +1742,7 @@ function wc_get_price_to_display( $product, $args = array() ) {
  * @return string|false|WP_Error
  */
 function wc_get_product_category_list( $product_id, $sep = ', ', $before = '', $after = '', $orderby = '' ) {
-	$orderby = is_string( $orderby ) ? sanitize_key( $orderby ) : '';
-
-	if ( '' === $orderby ) {
+	if ( ! in_array( $orderby, array( 'name', 'breadcrumb' ), true ) ) {
 		return get_the_term_list( $product_id, 'product_cat', $before, $sep, $after );
 	}
 
@@ -1821,7 +1819,7 @@ function wc_get_product_category_list( $product_id, $sep = ', ', $before = '', $
 			}
 		}
 
-		update_meta_cache( 'term', array_keys( $term_parents ) );
+		update_termmeta_cache( array_keys( $term_parents ) );
 
 		foreach ( array_diff( array_keys( $term_parents ), array_keys( $term_names ) ) as $ancestor_id ) {
 			$ancestor_term = get_term( $ancestor_id, 'product_cat' );
@@ -1832,7 +1830,7 @@ function wc_get_product_category_list( $product_id, $sep = ', ', $before = '', $
 		foreach ( array_keys( $term_parents ) as $term_id ) {
 			$term_order = get_term_meta( $term_id, 'order', true );
 
-			$term_orders[ $term_id ] = '' === $term_order ? 0 : (int) $term_order;
+			$term_orders[ $term_id ] = is_numeric( $term_order ) ? (int) $term_order : 0;
 		}
 
 		foreach ( $terms as $term ) {
@@ -1876,8 +1874,6 @@ function wc_get_product_category_list( $product_id, $sep = ', ', $before = '', $
 				return count( $a_path ) <=> count( $b_path );
 			}
 		);
-	} elseif ( ! in_array( $orderby, array( 'name', 'breadcrumb' ), true ) ) {
-		return get_the_term_list( $product_id, 'product_cat', $before, $sep, $after );
 	}
 
 	$links = array();

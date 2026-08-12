@@ -1054,24 +1054,60 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	 * @testdox Product category list preserves WordPress term-list order by default.
 	 */
 	public function test_wc_get_product_category_list_preserves_default_order(): void {
-		$suffix  = wp_unique_id();
-		$root    = wp_insert_term( 'Default Root ' . $suffix, 'product_cat' );
-		$child   = wp_insert_term( 'Default Child ' . $suffix, 'product_cat', array( 'parent' => $root['term_id'] ) );
-		$product = WC_Helper_Product::create_simple_product();
+		$suffix               = wp_unique_id();
+		$root                 = wp_insert_term( 'Default Root ' . $suffix, 'product_cat' );
+		$child                = wp_insert_term( 'Default Child ' . $suffix, 'product_cat', array( 'parent' => $root['term_id'] ) );
+		$product              = WC_Helper_Product::create_simple_product();
+		$get_the_terms_filter = null;
+		$sanitize_key_filter  = null;
 
 		try {
 			wp_set_object_terms( $product->get_id(), array( $root['term_id'], $child['term_id'] ), 'product_cat' );
 
-			$expected = get_the_term_list( $product->get_id(), 'product_cat', 'Before ', ' > ', ' After' );
-			$actual   = wc_get_product_category_list( $product->get_id(), ' > ', 'Before ', ' After' );
+			$expected            = get_the_term_list( $product->get_id(), 'product_cat', 'Before ', ' > ', ' After' );
+			$sanitize_key_calls  = 0;
+			$sanitize_key_filter = static function ( $sanitized_key, $key ) use ( &$sanitize_key_calls ) {
+				if ( '' === $key ) {
+					++$sanitize_key_calls;
+
+					return 'breadcrumb';
+				}
+
+				return $sanitized_key;
+			};
+			add_filter( 'sanitize_key', $sanitize_key_filter, 10, 2 );
+
+			$actual = wc_get_product_category_list( $product->get_id(), ' > ', 'Before ', ' After' );
+
+			remove_filter( 'sanitize_key', $sanitize_key_filter );
+			$sanitize_key_filter = null;
 
 			$this->assertSame( $expected, $actual, 'Default helper output should remain identical to WordPress term-list output.' );
+			$this->assertSame( 0, $sanitize_key_calls, 'Default helper calls should not introduce ordering-mode sanitization hooks.' );
+
+			$get_the_terms_calls  = 0;
+			$get_the_terms_filter = static function ( $terms, $post_id, $taxonomy ) use ( &$get_the_terms_calls, $product ) {
+				if ( $product->get_id() === $post_id && 'product_cat' === $taxonomy ) {
+					++$get_the_terms_calls;
+				}
+
+				return $terms;
+			};
+			add_filter( 'get_the_terms', $get_the_terms_filter, 10, 3 );
+
 			$this->assertSame(
 				$expected,
 				wc_get_product_category_list( $product->get_id(), ' > ', 'Before ', ' After', 'hierarchy' ),
 				'Unsupported ordering modes should fall back to WordPress term-list output.'
 			);
+			$this->assertSame( 1, $get_the_terms_calls, 'Unsupported ordering modes should invoke the WordPress term-list path only once.' );
 		} finally {
+			if ( null !== $sanitize_key_filter ) {
+				remove_filter( 'sanitize_key', $sanitize_key_filter );
+			}
+			if ( null !== $get_the_terms_filter ) {
+				remove_filter( 'get_the_terms', $get_the_terms_filter );
+			}
 			WC_Helper_Product::delete_product( $product->get_id() );
 			wp_delete_term( $child['term_id'], 'product_cat' );
 			wp_delete_term( $root['term_id'], 'product_cat' );
@@ -1178,6 +1214,125 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			wp_delete_term( $first_middle['term_id'], 'product_cat' );
 			wp_delete_term( $second_root['term_id'], 'product_cat' );
 			wp_delete_term( $first_root['term_id'], 'product_cat' );
+		}
+	}
+
+	/**
+	 * @testdox Product category list breadcrumb ordering honors filtered category order after priming term metadata.
+	 */
+	public function test_wc_get_product_category_list_breadcrumb_order_honors_filtered_category_order(): void {
+		$suffix                = wp_unique_id();
+		$filtered_first_name   = 'Filtered first ' . $suffix;
+		$filtered_second_name  = 'Filtered second ' . $suffix;
+		$filtered_first        = wp_insert_term( $filtered_first_name, 'product_cat' );
+		$filtered_second       = wp_insert_term( $filtered_second_name, 'product_cat' );
+		$product               = WC_Helper_Product::create_simple_product();
+		$metadata_cache_filter = static function () {
+			return true;
+		};
+		$term_metadata_filter  = static function ( $value, $object_id, $meta_key ) use ( $filtered_first, $filtered_second ) {
+			if ( 'order' !== $meta_key ) {
+				return $value;
+			}
+
+			if ( $filtered_first['term_id'] === $object_id ) {
+				return 1;
+			}
+
+			return $filtered_second['term_id'] === $object_id ? 2 : $value;
+		};
+
+		try {
+			update_term_meta( $filtered_first['term_id'], 'order', 2 );
+			update_term_meta( $filtered_second['term_id'], 'order', 1 );
+			wp_set_object_terms( $product->get_id(), array( $filtered_second['term_id'], $filtered_first['term_id'] ), 'product_cat' );
+			add_filter( 'get_term_metadata', $term_metadata_filter, 10, 3 );
+
+			$actual = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+
+			$this->assertSame( "{$filtered_first_name} > {$filtered_second_name}", $actual );
+
+			wp_cache_delete( $filtered_first['term_id'], 'term_meta' );
+			wp_cache_delete( $filtered_second['term_id'], 'term_meta' );
+			add_filter( 'update_term_metadata_cache', $metadata_cache_filter );
+
+			$actual = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+
+			$this->assertSame( "{$filtered_first_name} > {$filtered_second_name}", $actual, 'Filtered category order should remain authoritative when cache priming is short-circuited.' );
+		} finally {
+			remove_filter( 'update_term_metadata_cache', $metadata_cache_filter );
+			remove_filter( 'get_term_metadata', $term_metadata_filter );
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $filtered_second['term_id'], 'product_cat' );
+			wp_delete_term( $filtered_first['term_id'], 'product_cat' );
+		}
+	}
+
+	/**
+	 * @testdox Product category list breadcrumb ordering reflects category order updates after term metadata is primed.
+	 */
+	public function test_wc_get_product_category_list_breadcrumb_order_reflects_category_order_updates(): void {
+		$first_name  = 'Cache order first ' . wp_unique_id();
+		$second_name = 'Cache order second ' . wp_unique_id();
+		$first       = wp_insert_term( $first_name, 'product_cat' );
+		$second      = wp_insert_term( $second_name, 'product_cat' );
+		$product     = WC_Helper_Product::create_simple_product();
+
+		try {
+			update_term_meta( $first['term_id'], 'order', 1 );
+			update_term_meta( $second['term_id'], 'order', 2 );
+			wp_set_object_terms( $product->get_id(), array( $second['term_id'], $first['term_id'] ), 'product_cat' );
+
+			$initial = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+
+			update_term_meta( $first['term_id'], 'order', 2 );
+			update_term_meta( $second['term_id'], 'order', 1 );
+
+			$updated = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+
+			$this->assertSame( "{$first_name} > {$second_name}", $initial );
+			$this->assertSame( "{$second_name} > {$first_name}", $updated );
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $second['term_id'], 'product_cat' );
+			wp_delete_term( $first['term_id'], 'product_cat' );
+		}
+	}
+
+	/**
+	 * @testdox Product category list breadcrumb ordering treats invalid filtered category order as zero.
+	 */
+	public function test_wc_get_product_category_list_breadcrumb_order_handles_invalid_filtered_category_order(): void {
+		$suffix               = wp_unique_id();
+		$invalid_order_name   = 'Alpha invalid order ' . $suffix;
+		$zero_order_name      = 'Zulu zero order ' . $suffix;
+		$invalid_order        = wp_insert_term( $invalid_order_name, 'product_cat' );
+		$zero_order           = wp_insert_term( $zero_order_name, 'product_cat' );
+		$product              = WC_Helper_Product::create_simple_product();
+		$term_metadata_filter = static function ( $value, $object_id, $meta_key ) use ( $invalid_order, $zero_order ) {
+			if ( 'order' !== $meta_key ) {
+				return $value;
+			}
+
+			if ( $invalid_order['term_id'] === $object_id ) {
+				return new stdClass();
+			}
+
+			return $zero_order['term_id'] === $object_id ? 0 : $value;
+		};
+
+		try {
+			wp_set_object_terms( $product->get_id(), array( $zero_order['term_id'], $invalid_order['term_id'] ), 'product_cat' );
+			add_filter( 'get_term_metadata', $term_metadata_filter, 10, 3 );
+
+			$actual = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+
+			$this->assertSame( "{$invalid_order_name} > {$zero_order_name}", $actual );
+		} finally {
+			remove_filter( 'get_term_metadata', $term_metadata_filter );
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $zero_order['term_id'], 'product_cat' );
+			wp_delete_term( $invalid_order['term_id'], 'product_cat' );
 		}
 	}
 
