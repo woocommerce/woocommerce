@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\Caches\ProductTransientsDeferrer;
 use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
+use Automattic\WooCommerce\Internal\Products\SaleEventSchedulingDeferrer;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -803,8 +804,8 @@ function wc_maybe_schedule_product_sale_events( $product_id, $product = null ): 
  *
  * A single CRUD save writes _sale_price_dates_from and _sale_price_dates_to as separate
  * update_post_meta() calls, and bulk importers can touch the same product many times in
- * one request. Rather than rescheduling on every write, pending product IDs are queued
- * and processed once via {@see wc_flush_pending_sale_event_schedules()} on `shutdown`.
+ * one request. Rather than rescheduling on every write, product IDs are handed to
+ * {@see SaleEventSchedulingDeferrer}, which reschedules each of them once.
  *
  * @since 10.8.0
  * @param int|int[] $meta_id    Meta ID (or array of IDs for delete).
@@ -827,37 +828,11 @@ function wc_maybe_schedule_sale_events_on_meta_change( $meta_id, $object_id, $me
 		return;
 	}
 
-	if ( ! isset( $GLOBALS['wc_pending_sale_event_schedules'] ) ) {
-		$GLOBALS['wc_pending_sale_event_schedules'] = array();
-		add_action( 'shutdown', 'wc_flush_pending_sale_event_schedules', 1 );
-	}
-	$GLOBALS['wc_pending_sale_event_schedules'][ (int) $object_id ] = true;
+	wc_get_container()->get( SaleEventSchedulingDeferrer::class )->queue_product( (int) $object_id );
 }
 add_action( 'added_post_meta', 'wc_maybe_schedule_sale_events_on_meta_change', 10, 3 );
 add_action( 'updated_post_meta', 'wc_maybe_schedule_sale_events_on_meta_change', 10, 3 );
 add_action( 'deleted_post_meta', 'wc_maybe_schedule_sale_events_on_meta_change', 10, 3 );
-
-/**
- * Flush deferred sale event scheduling for products whose sale-date meta changed this request.
- *
- * Called automatically on `shutdown`. CLI importers and tests that need Action Scheduler
- * entries in place before the request ends may invoke this directly after their meta writes.
- *
- * @since 10.8.0
- * @return void
- */
-function wc_flush_pending_sale_event_schedules(): void {
-	if ( empty( $GLOBALS['wc_pending_sale_event_schedules'] ) ) {
-		return;
-	}
-
-	$pending = $GLOBALS['wc_pending_sale_event_schedules'];
-	unset( $GLOBALS['wc_pending_sale_event_schedules'] );
-
-	foreach ( array_keys( $pending ) as $product_id ) {
-		wc_maybe_schedule_product_sale_events( (int) $product_id );
-	}
-}
 
 /**
  * Function which handles the start and end of scheduled sales via cron.
