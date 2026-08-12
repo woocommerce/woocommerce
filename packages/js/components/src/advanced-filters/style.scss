@@ -242,6 +242,10 @@
 	.woocommerce-filters-advanced__attribute-field-separator {
 		padding: 0 6px;
 	}
+
+	.woocommerce-search.woocommerce-select-control .components-base-control .woocommerce-tag {
+		margin: 1px 4px 1px 0;
+	}
 }
 
 // Overrides woocommerce-admin-page globals

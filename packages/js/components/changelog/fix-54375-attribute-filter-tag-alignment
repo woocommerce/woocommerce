@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix vertical misalignment of the selected tag in the "Product attribute" advanced filter on Analytics > Variations and Analytics > Orders
