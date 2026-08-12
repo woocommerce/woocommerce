@@ -146,6 +146,29 @@ class Social_Links_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test it renders a gap between social link items in RTL.
+	 */
+	public function testItRendersRtlGapBetweenSocialLinkItems(): void {
+		$parsed_social_links                        = $this->parsed_social_links;
+		$parsed_social_links['attrs']['className']  = '';
+		$parsed_social_links['attrs']['showLabels'] = false;
+		$rtl_rendering_context                      = new Rendering_Context( $this->rendering_context->get_theme_json(), array( 'is_rtl' => true ) );
+
+		$rendered = $this->social_links_renderer->render( '', $parsed_social_links, $rtl_rendering_context );
+		$this->checkValidHTML( $rendered );
+		$this->assertSame(
+			1,
+			substr_count( $rendered, 'margin-right:16px;' ),
+			'Only the second social link should have a standard-client horizontal gap in RTL.'
+		);
+		$this->assertSame(
+			1,
+			substr_count( $rendered, 'padding-right:16px;' ),
+			'Only the second social link should have an Outlook horizontal gap in RTL.'
+		);
+	}
+
+	/**
 	 * Test it renders social links with different sizes
 	 */
 	public function testItRendersSocialLinksWithDifferentSizes(): void {
