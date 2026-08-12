@@ -34,12 +34,22 @@ global $product;
 	<?php endif; ?>
 
 	<?php
+	/**
+	 * Filters the ordering mode for product categories in the single product meta.
+	 *
+	 * @param string     $orderby Ordering mode passed to wc_get_product_category_list().
+	 * @param WC_Product $product Product object.
+	 *
+	 * @since 11.1.0
+	 */
+	$product_category_orderby = apply_filters( 'woocommerce_product_meta_category_orderby', 'breadcrumb', $product );
+
 	$product_category_list = wc_get_product_category_list(
 		$product->get_id(),
 		', ',
 		'<span class="posted_in">' . _n( 'Category:', 'Categories:', count( $product->get_category_ids() ), 'woocommerce' ) . ' ',
 		'</span>',
-		'breadcrumb'
+		is_string( $product_category_orderby ) ? $product_category_orderby : ''
 	);
 	echo is_string( $product_category_list ) ? $product_category_list : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	?>

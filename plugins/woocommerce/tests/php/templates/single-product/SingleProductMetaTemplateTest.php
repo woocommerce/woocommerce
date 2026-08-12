@@ -26,6 +26,7 @@ class SingleProductMetaTemplateTest extends WC_Unit_Test_Case {
 		$leaf                 = wp_insert_term( $leaf_name, 'product_cat', array( 'parent' => $mid['term_id'] ) );
 		$test_product         = WC_Helper_Product::create_simple_product();
 		$terms_filter         = null;
+		$orderby_filter       = null;
 
 		try {
 			wp_set_object_terms( $test_product->get_id(), array( $leaf['term_id'], $root['term_id'], $mid['term_id'] ), 'product_cat' );
@@ -39,6 +40,22 @@ class SingleProductMetaTemplateTest extends WC_Unit_Test_Case {
 				'Single product meta should render product categories in root-to-leaf order.'
 			);
 
+			$orderby_filter = static function () {
+				return 'name';
+			};
+			add_filter( 'woocommerce_product_meta_category_orderby', $orderby_filter );
+
+			$content = preg_replace( '/\s+/', ' ', wp_strip_all_tags( wc_get_template_html( 'single-product/meta.php' ) ) );
+
+			$this->assertMatchesRegularExpression(
+				'/Categor(?:y|ies): ' . preg_quote( "{$leaf_name}, {$mid_name}, {$root_name}", '/' ) . '/',
+				$content,
+				'Single product meta should honor the filtered product category ordering mode.'
+			);
+
+			remove_filter( 'woocommerce_product_meta_category_orderby', $orderby_filter );
+			$orderby_filter = null;
+
 			$terms_filter = static function ( $terms, $post_id, $taxonomy ) use ( $test_product ) {
 				return $test_product->get_id() === $post_id && 'product_cat' === $taxonomy ? new \WP_Error( 'category-list-error' ) : $terms;
 			};
@@ -46,6 +63,9 @@ class SingleProductMetaTemplateTest extends WC_Unit_Test_Case {
 
 			$this->assertStringNotContainsString( 'class="posted_in"', wc_get_template_html( 'single-product/meta.php' ) );
 		} finally {
+			if ( null !== $orderby_filter ) {
+				remove_filter( 'woocommerce_product_meta_category_orderby', $orderby_filter );
+			}
 			if ( null !== $terms_filter ) {
 				remove_filter( 'get_the_terms', $terms_filter, 10 );
 			}
