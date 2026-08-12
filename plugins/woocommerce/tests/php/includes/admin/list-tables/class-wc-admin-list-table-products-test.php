@@ -523,14 +523,13 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Product searches defer to ordering an earlier posts_clauses filter already set.
+	 * @testdox Product searches defer to a primary sort an earlier posts_clauses filter set.
 	 */
 	public function test_product_search_defers_to_earlier_posts_clauses_ordering(): void {
 		list( $title_match, $content_match, $search_phrase ) = $this->create_search_products();
 
-		// Appending is the realistic shape: a plugin adding a tiebreak rather than replacing the clause.
-		// Ranking runs after every posts_clauses priority below its own, so it must stand down here too.
-		$append_tiebreak = static function ( $clauses, $query ) {
+		// Prepending takes over the primary sort, so ranking has to stand down entirely.
+		$lead_with_title = static function ( $clauses, $query ) {
 			global $wpdb;
 
 			if ( is_array( $clauses ) && isset( $clauses['orderby'] ) && $query->get( 'product_search' ) ) {
@@ -539,18 +538,62 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 
 			return $clauses;
 		};
-		add_filter( 'posts_clauses', $append_tiebreak, 20, 2 );
+		add_filter( 'posts_clauses', $lead_with_title, 20, 2 );
 
 		try {
 			$results = $this->get_search_results( $search_phrase );
 		} finally {
-			remove_filter( 'posts_clauses', $append_tiebreak, 20 );
+			remove_filter( 'posts_clauses', $lead_with_title, 20 );
 		}
 
 		$this->assertSame(
 			array( $content_match->get_id(), $title_match->get_id() ),
 			$results,
-			'Ordering set by an earlier posts_clauses filter should take precedence over search relevance.'
+			'A primary sort set by an earlier posts_clauses filter should take precedence over search relevance.'
+		);
+	}
+
+	/**
+	 * @testdox Product searches still rank when an earlier posts_clauses filter only appends a tiebreak.
+	 */
+	public function test_product_search_ranks_when_earlier_posts_clauses_filter_appends_a_tiebreak(): void {
+		list( $title_match, $content_match, $search_phrase ) = $this->create_search_products();
+
+		// Appending leaves core's ordering in charge of the primary sort, so ranking still leads and the
+		// appended tiebreak survives after it. Reading the clause on posts_clauses must not turn a plugin
+		// adding a tiebreak into a plugin that silently disables relevance.
+		$append_tiebreak = static function ( $clauses, $query ) {
+			global $wpdb;
+
+			if ( is_array( $clauses ) && isset( $clauses['orderby'] ) && $query->get( 'product_search' ) ) {
+				$clauses['orderby'] .= ", {$wpdb->posts}.ID ASC";
+			}
+
+			return $clauses;
+		};
+		add_filter( 'posts_clauses', $append_tiebreak, 20, 2 );
+
+		$captured_orderby = null;
+		$capture          = static function ( $clauses ) use ( &$captured_orderby ) {
+			$captured_orderby = is_array( $clauses ) && isset( $clauses['orderby'] ) ? $clauses['orderby'] : null;
+			return $clauses;
+		};
+		add_filter( 'posts_clauses', $capture, PHP_INT_MAX );
+
+		try {
+			$results = $this->get_search_results( $search_phrase );
+		} finally {
+			remove_filter( 'posts_clauses', $append_tiebreak, 20 );
+			remove_filter( 'posts_clauses', $capture, PHP_INT_MAX );
+		}
+
+		global $wpdb;
+		$this->assertStringContainsString( 'CASE WHEN', (string) $captured_orderby, 'An appended tiebreak should not suppress the relevance clause.' );
+		$this->assertStringEndsWith( "{$wpdb->posts}.ID ASC", (string) $captured_orderby, "The appending filter's tiebreak should survive after the relevance clause." );
+		$this->assertSame(
+			array( $title_match->get_id(), $content_match->get_id() ),
+			$results,
+			'Title matches should still be listed first when an earlier filter only appends a tiebreak.'
 		);
 	}
 

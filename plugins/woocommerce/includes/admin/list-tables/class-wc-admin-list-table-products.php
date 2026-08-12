@@ -694,7 +694,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 
 		global $wpdb;
 		if ( 'date' === $default_search_order ) {
-			if ( $query->get( 'orderby' ) || "{$wpdb->posts}.post_date DESC" !== $orderby ) {
+			if ( $query->get( 'orderby' ) || ! $this->orderby_leads_with( $orderby, "{$wpdb->posts}.post_date DESC" ) ) {
 				return $clauses;
 			}
 		} elseif ( 'modified' === $default_search_order ) {
@@ -705,7 +705,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				|| ! is_string( $post_status )
 				|| ! is_string( $order )
 				|| ( ! ( 'draft' === $post_status && 'DESC' === $order ) && ! ( 'pending' === $post_status && 'ASC' === $order ) )
-				|| "{$wpdb->posts}.post_modified {$order}" !== $orderby
+				|| ! $this->orderby_leads_with( $orderby, "{$wpdb->posts}.post_modified {$order}" )
 			) {
 				return $clauses;
 			}
@@ -721,6 +721,24 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		$clauses['orderby'] = $case_clause . ', ' . $orderby;
 
 		return $clauses;
+	}
+
+	/**
+	 * Determine whether a clause still leads with the ordering core generated for this view.
+	 *
+	 * A third party that appends a tiebreak leaves core's ordering in charge of the primary sort, so
+	 * ranking can still lead. One that prepends or replaces has taken the primary sort over, and
+	 * ranking defers to it. Only a comma may follow the core clause, so a longer token that merely
+	 * starts the same way is not mistaken for it.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param string $orderby      Clause observed on the query.
+	 * @param string $core_orderby Clause core generated for this view.
+	 * @return bool
+	 */
+	private function orderby_leads_with( $orderby, $core_orderby ) {
+		return $orderby === $core_orderby || 0 === strpos( $orderby, $core_orderby . ',' );
 	}
 
 	/**
