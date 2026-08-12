@@ -45,10 +45,11 @@ concurrency:
 env:
   ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
   FORCE_COLOR: 1
-  # Paths that cannot change the behaviour of any code. Single source of truth for the two
-  # consumers below: `identify-jobs-to-run` derives the `needs-code-validation` filter from it,
-  # and `project-jobs` passes it to `ci-jobs` as `--ignore` globs. The gate runs picomatch and
-  # `ci-jobs` runs minimatch, so keep to syntax both agree on -- verified against this list.
+  # Paths that cannot change the behaviour of any code. `identify-jobs-to-run` derives the
+  # `needs-code-validation` filter from this list. The job-level `ignore` lists in each
+  # project's `config.ci` (see tools/monorepo-utils/src/ci-jobs/README.md) are a separate,
+  # deliberately decoupled layer; keep the glob syntax compatible between the two by
+  # convention (the gate runs picomatch, `ci-jobs` runs minimatch).
   #
   # `{,**/}` is required because `**/` needs at least one leading directory, so a `**/`-only
   # pattern silently misses repository-root files such as `AGENTS.md`.
@@ -147,14 +148,8 @@ jobs:
               githubEvent = 'release-checks';
             }
 
-            // Same list the `needs-code-validation` gate is built from. Quote each glob so the
-            // shell does not expand the braces before the tool sees them.
-            const ignoreArgs = JSON.parse( process.env.NON_CODE_PATHS )
-              .map( ( glob ) => `--ignore '${ glob }'` )
-              .join( ' ' );
-
             const child_process = require( 'node:child_process' );
-            child_process.execSync( `pnpm utils ci-jobs ${ prNumberFilter } --event ${ githubEvent } ${ ignoreArgs }` );
+            child_process.execSync( `pnpm utils ci-jobs ${ prNumberFilter } --event ${ githubEvent }` );
 
   project-lint-jobs:
     name: "Lint - ${{ matrix.projectName }} ${{ ( matrix.optional && ' (optional)' ) || '' }}"

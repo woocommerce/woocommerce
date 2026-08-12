@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { execSync } from 'node:child_process';
-import { makeRe } from 'minimatch';
 
 /**
  * Internal dependencies
@@ -53,31 +52,6 @@ function getProjectPaths( graph: ProjectNode ): { [ name: string ]: string } {
 }
 
 /**
- * Compiles the ignore globs into matchers.
- *
- * The globs use the same syntax and the same compiler as a job's `changes` config, so a pattern
- * that works in one works in the other.
- *
- * `dot` is on because `dorny/paths-filter` compiles its filters that way, and the same globs feed
- * both. Without it minimatch refuses to let a globstar descend into dot directories, so the
- * markdown pattern would skip `.ai/skills/foo/SKILL.md` here while the workflow gate ignored it --
- * the two layers would disagree on 66 files in this repo.
- *
- * @param {Array.<string>} ignoreGlobs The globs to compile.
- * @return {Array.<RegExp>} The compiled matchers.
- */
-function compileIgnoreGlobs( ignoreGlobs: string[] ): RegExp[] {
-	return ignoreGlobs.map( ( glob ) => {
-		const regex = makeRe( glob, { dot: true } );
-		if ( ! regex ) {
-			throw new Error( `"${ glob }" is an invalid ignore glob pattern.` );
-		}
-
-		return regex;
-	} );
-}
-
-/**
  * Checks the changed files and returns any that are relevant to the project.
  *
  * @param {string}         projectPath  The path to the project to get changed files for.
@@ -108,17 +82,15 @@ function getChangedFilesForProject(
 /**
  * Pulls all of the files that have changed in the project graph since the given git ref.
  *
- * @param {Object}         projectGraph The project graph to assign changes for.
- * @param {string}         baseRef      The git ref to compare against for changes.
- * @param {string}         prNumber     The PR number referencing the changes.
- * @param {Array.<string>} ignoreGlobs  Globs for files that should never mark a project as changed.
+ * @param {Object} projectGraph The project graph to assign changes for.
+ * @param {string} baseRef      The git ref to compare against for changes.
+ * @param {string} prNumber     The PR number referencing the changes.
  * @return {Object|true} A map of changed files keyed by the project name or true if all projects should be marked as changed.
  */
 export function getFileChanges(
 	projectGraph: ProjectNode,
 	baseRef: string,
-	prNumber: string,
-	ignoreGlobs: string[] = []
+	prNumber: string
 ): ProjectFileChanges | true {
 	// We're going to use git to figure out what files have changed.
 	let output = '';
@@ -136,24 +108,14 @@ export function getFileChanges(
 		return true;
 	}
 
-	const allChangedFilePaths = output.split( '\n' );
+	const changedFilePaths = output.split( '\n' );
 
 	// If the root lockfile has been changed we have no easy way
 	// of knowing which projects have been impacted. We want
 	// to re-run all jobs in all projects for safety.
-	if ( allChangedFilePaths.includes( 'pnpm-lock.yaml' ) ) {
+	if ( changedFilePaths.includes( 'pnpm-lock.yaml' ) ) {
 		return true;
 	}
-
-	// Drop ignored files before anything claims ownership of them. Ownership is directory-based,
-	// so an ignored file left in the list marks its project as changed, and `job-processing` then
-	// treats every dependent project as changed too -- running their test jobs regardless of those
-	// jobs' own `changes` globs. Filtering here covers all three ownership passes at once.
-	const ignoreMatchers = compileIgnoreGlobs( ignoreGlobs );
-	const changedFilePaths = allChangedFilePaths.filter(
-		( filePath ) =>
-			! ignoreMatchers.some( ( regex ) => regex.test( filePath ) )
-	);
 
 	const ownedFilePaths = [];
 
