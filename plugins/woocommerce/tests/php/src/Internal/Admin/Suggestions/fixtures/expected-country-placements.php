@@ -7,7 +7,7 @@
  * the sheet. Only a harness run against a fresh export can do that.
  *
  * Last verified against the sheet: 2026-08-05, using the regional CSV exports of
- * that date, via .agents/tools/payments-placement-audit/ (clone-local).
+ * that date and a clone-local audit harness.
  *
  * Sections mirror the sheet's rows. `primary_offline` describes the offline
  * profiler state; the baseline state leaves that slot empty and the test derives
