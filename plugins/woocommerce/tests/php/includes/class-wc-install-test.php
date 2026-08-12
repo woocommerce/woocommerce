@@ -652,9 +652,15 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	 * @testdox Should render the empty cart message patterns to the same markup the installer previously inlined.
 	 */
 	public function test_empty_cart_message_patterns_render_expected_markup(): void {
-		if ( ! WP_Block_Patterns_Registry::get_instance()->is_registered( 'woocommerce/cart-empty-message' ) ) {
-			do_action( 'wp_loaded' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Patterns are registered on wp_loaded, which the test bootstrap does not fire.
-		}
+		$registry = WP_Block_Patterns_Registry::get_instance();
+		$this->assertTrue(
+			$registry->is_registered( 'woocommerce/cart-empty-message' ),
+			'The cart-empty-message pattern must be registered during bootstrap; the installed Cart page renders nothing for it otherwise.'
+		);
+		$this->assertTrue(
+			$registry->is_registered( 'woocommerce/cart-new-in-store-message' ),
+			'The cart-new-in-store-message pattern must be registered during bootstrap; the installed Cart page renders nothing for it otherwise.'
+		);
 
 		$rendered = do_blocks(
 			'<!-- wp:pattern {"slug":"woocommerce/cart-empty-message"} /--><!-- wp:pattern {"slug":"woocommerce/cart-new-in-store-message"} /-->'
@@ -680,5 +686,28 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 			$rendered,
 			'The cart-empty-message pattern should render only the title so the installed page keeps its current markup.'
 		);
+	}
+
+	/**
+	 * @testdox Should register the patterns referenced by the installed Cart page content independently of the Cart block type.
+	 */
+	public function test_empty_cart_message_patterns_are_registered_unconditionally(): void {
+		$registry = WP_Block_Patterns_Registry::get_instance();
+		$slugs    = array( 'woocommerce/cart-empty-message', 'woocommerce/cart-new-in-store-message' );
+
+		foreach ( $slugs as $slug ) {
+			if ( $registry->is_registered( $slug ) ) {
+				unregister_block_pattern( $slug );
+			}
+		}
+
+		\Automattic\WooCommerce\Blocks\Package::container()->get( \Automattic\WooCommerce\Blocks\BlockTypesController::class )->register_block_patterns();
+
+		foreach ( $slugs as $slug ) {
+			$this->assertTrue(
+				$registry->is_registered( $slug ),
+				"BlockTypesController::register_block_patterns() should register {$slug}; the installed Cart page depends on it even when the Cart block type is filtered out."
+			);
+		}
 	}
 }
