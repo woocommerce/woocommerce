@@ -24,7 +24,7 @@ use WC_Logger_Interface;
  * `connected`, `enabled`, and `available` flags, and determines which driver is
  * active.
  *
- * @since 11.1.0
+ * @since 11.2.0
  */
 class DriverAvailabilityService {
 	/**
@@ -116,7 +116,7 @@ class DriverAvailabilityService {
 	 *
 	 * @return array{installed_drivers: array<string, array{connected: bool|null, enabled: bool|null, available: bool}>, active_driver: string|null}
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 */
 	public function get_status(): array {
 		$this->failed_checks = array();
@@ -184,7 +184,7 @@ class DriverAvailabilityService {
 	 *
 	 * @return bool
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 */
 	public function is_remote_proxy_available(): bool {
 		return $this->is_remote_proxy_enabled() && $this->has_blog_connection();
@@ -213,7 +213,7 @@ class DriverAvailabilityService {
 	 *
 	 * @return bool
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 */
 	protected function is_remote_proxy_enabled(): bool {
 		try {
@@ -267,7 +267,7 @@ class DriverAvailabilityService {
 	 *
 	 * @return bool
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 */
 	protected function is_jetpack_sync_installed(): bool {
 		return $this->class_is_present( self::JETPACK_PLUGIN_CLASS )
@@ -284,7 +284,7 @@ class DriverAvailabilityService {
 	 * @param string $class_name The fully qualified class name.
 	 * @return bool
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 */
 	protected function class_is_present( string $class_name ): bool {
 		return class_exists( $class_name );
@@ -302,7 +302,7 @@ class DriverAvailabilityService {
 	 *
 	 * @return bool
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 */
 	protected function is_jetpack_sync_enabled(): bool {
 		$is_sync_enabled = array( self::JETPACK_SYNC_SETTINGS_CLASS, 'is_sync_enabled' );
@@ -333,7 +333,7 @@ class DriverAvailabilityService {
 	 *
 	 * @return bool
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 */
 	protected function has_blog_connection(): bool {
 		return $this->query_jetpack_connection(
@@ -348,7 +348,7 @@ class DriverAvailabilityService {
 	 *
 	 * @return bool
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 */
 	protected function has_user_connection(): bool {
 		return $this->query_jetpack_connection(

@@ -28,7 +28,7 @@ use WP_REST_Server;
  * and connected; whether a given notification is delivered promptly is a separate
  * concern, covered by delivery logging rather than by this endpoint.
  *
- * @since 11.1.0
+ * @since 11.2.0
  */
 class PushNotificationStatusRestController extends RestApiControllerBase {
 	use AuthorizesPushNotificationRequests;
@@ -61,7 +61,7 @@ class PushNotificationStatusRestController extends RestApiControllerBase {
 	 *
 	 * @param DriverAvailabilityService $driver_availability_service The driver availability service.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 */
 	final public function init( DriverAvailabilityService $driver_availability_service ): void {
 		$this->driver_availability_service = $driver_availability_service;
@@ -74,7 +74,7 @@ class PushNotificationStatusRestController extends RestApiControllerBase {
 	 * one class per value here, so sharing the value with sibling controllers
 	 * in the same module would overwrite them.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @return string
 	 */
@@ -85,7 +85,7 @@ class PushNotificationStatusRestController extends RestApiControllerBase {
 	/**
 	 * Register the REST API endpoints handled by this controller.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @return void
 	 */
@@ -114,7 +114,7 @@ class PushNotificationStatusRestController extends RestApiControllerBase {
 	 * `installed_drivers` is keyed by driver identifier, so its shape is
 	 * described with `additionalProperties` rather than named properties.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @return array<string, mixed>
 	 */
@@ -168,7 +168,7 @@ class PushNotificationStatusRestController extends RestApiControllerBase {
 	/**
 	 * Return the installed push notification drivers and the enabled one.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @return WP_REST_Response|WP_Error
 	 */
