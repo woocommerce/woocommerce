@@ -121,7 +121,8 @@ class TransientFilesEngine implements RegisterHooksInterface {
 
 				$resolved_transient_files_directory = $this->resolve_directory_if_it_exists( $transient_files_directory );
 				if ( false === $resolved_transient_files_directory ) {
-					throw new Exception( esc_html( "The directory was created but can't be resolved: $transient_files_directory" ) );
+					// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Not rendered as output, and consistent with the other throws in this method.
+					throw new Exception( "The directory was created but can't be resolved: $transient_files_directory" );
 				}
 			} else {
 				throw new Exception( "The base transient files directory doesn't exist: $transient_files_directory" );
