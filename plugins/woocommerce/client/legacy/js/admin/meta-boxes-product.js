@@ -161,9 +161,21 @@ jQuery( function ( $ ) {
 			} else if ( 'grouped' === select_val ) {
 				$( 'input#_downloadable' ).prop( 'checked', false );
 				$( 'input#_virtual' ).prop( 'checked', false );
+				$( 'input#_manage_stock' )
+					.prop( 'checked', false )
+					.trigger( 'change' );
+				$( '[name="_stock_status"]' )
+					.val( [ 'instock' ] )
+					.trigger( 'change' );
 			} else if ( 'external' === select_val ) {
 				$( 'input#_downloadable' ).prop( 'checked', false );
 				$( 'input#_virtual' ).prop( 'checked', false );
+				$( 'input#_manage_stock' )
+					.prop( 'checked', false )
+					.trigger( 'change' );
+				$( '[name="_stock_status"]' )
+					.val( [ 'instock' ] )
+					.trigger( 'change' );
 			}
 
 			const cogs_field_tip = $( '._cogs_value_field' ).find(

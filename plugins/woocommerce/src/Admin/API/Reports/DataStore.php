@@ -99,6 +99,18 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	protected $date_column_name = 'date_created';
 
 	/**
+	 * Allow-list a date column name before it is interpolated into SQL.
+	 *
+	 * @param string $column   Requested date column name.
+	 * @param string $fallback Column to use when the requested one is not allowed.
+	 * @return string
+	 */
+	protected function sanitize_date_column_name( $column, $fallback = 'date_created' ) {
+		$allowed = array( 'date_created', 'date_created_gmt', 'date_paid', 'date_completed' );
+		return in_array( $column, $allowed, true ) ? $column : $fallback;
+	}
+
+	/**
 	 * Mapping columns to data type to return correct response types.
 	 *
 	 * @var array

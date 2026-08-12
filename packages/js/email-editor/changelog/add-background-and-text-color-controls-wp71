@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Restore text and background color controls in the styles sidebar on WordPress 7.1+ — text color moves to the typography panel and background color to a new Background screen, matching where WordPress 7.1 places them.

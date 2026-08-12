@@ -17,7 +17,12 @@ jest.mock( '@wordpress/data', () => ( {
 } ) );
 
 jest.mock( '~/settings-payments/components/bank-accounts-list', () => ( {
-	BankAccountsList: () => <div data-testid="bank-accounts-list" />,
+	BankAccountsList: ( { defaultCountry }: { defaultCountry: string } ) => (
+		<div
+			data-testid="bank-accounts-list"
+			data-default-country={ defaultCountry }
+		/>
+	),
 } ) );
 
 const bacsSettings = {
@@ -88,6 +93,116 @@ describe( 'SettingsPaymentsBacs', () => {
 		expect(
 			screen.getByTestId( 'bank-accounts-list' )
 		).toBeInTheDocument();
+	} );
+
+	describe( 'country a new bank account starts in', () => {
+		const setWcSettings = ( admin: unknown ) => {
+			Object.defineProperty( window, 'wcSettings', {
+				value: { admin },
+				writable: true,
+			} );
+		};
+
+		afterEach( () => {
+			Object.defineProperty( window, 'wcSettings', {
+				value: undefined,
+				writable: true,
+			} );
+		} );
+
+		it( 'uses the business location set on the Payments settings screen', () => {
+			setWcSettings( {
+				woocommerce_payments_nox_profile: {
+					business_country_code: 'TN',
+				},
+				preloadSettings: {
+					general: { woocommerce_default_country: 'US:CA' },
+				},
+			} );
+
+			render( <SettingsPaymentsBacs /> );
+
+			expect(
+				screen.getByTestId( 'bank-accounts-list' )
+			).toHaveAttribute( 'data-default-country', 'TN' );
+		} );
+
+		it( "falls back to the store's base country, without its state suffix", () => {
+			setWcSettings( {
+				preloadSettings: {
+					general: { woocommerce_default_country: 'US:CA' },
+				},
+			} );
+
+			render( <SettingsPaymentsBacs /> );
+
+			expect(
+				screen.getByTestId( 'bank-accounts-list' )
+			).toHaveAttribute( 'data-default-country', 'US' );
+		} );
+
+		it( 'ignores locations that are stored empty', () => {
+			setWcSettings( {
+				woocommerce_payments_nox_profile: {
+					business_country_code: '',
+				},
+				preloadSettings: {
+					general: { woocommerce_default_country: '' },
+				},
+			} );
+
+			render( <SettingsPaymentsBacs /> );
+
+			expect(
+				screen.getByTestId( 'bank-accounts-list' )
+			).toHaveAttribute( 'data-default-country', 'US' );
+		} );
+
+		it( 'ignores locations that are not strings', () => {
+			setWcSettings( {
+				woocommerce_payments_nox_profile: {
+					business_country_code: { country: 'TN' },
+				},
+				preloadSettings: {
+					general: { woocommerce_default_country: true },
+				},
+			} );
+
+			render( <SettingsPaymentsBacs /> );
+
+			expect(
+				screen.getByTestId( 'bank-accounts-list' )
+			).toHaveAttribute( 'data-default-country', 'US' );
+		} );
+
+		it( 'falls through an unusable business location to the store', () => {
+			setWcSettings( {
+				woocommerce_payments_nox_profile: {
+					business_country_code: { country: 'TN' },
+				},
+				preloadSettings: {
+					// Deliberately not US, so this cannot be confused with
+					// the last-resort fallback at the end of the chain.
+					general: { woocommerce_default_country: 'GB' },
+				},
+			} );
+
+			render( <SettingsPaymentsBacs /> );
+
+			expect(
+				screen.getByTestId( 'bank-accounts-list' )
+			).toHaveAttribute( 'data-default-country', 'GB' );
+		} );
+
+		it( 'falls back to US when the store knows no location at all', () => {
+			setWcSettings( {} );
+
+			render( <SettingsPaymentsBacs /> );
+
+			expect(
+				screen.getByTestId( 'bank-accounts-list' )
+			).toHaveAttribute( 'data-default-country', 'US' );
+		} );
 	} );
 
 	it( 'renders placeholders while loading', () => {
@@ -183,7 +298,7 @@ describe( 'SettingsPaymentsBacs', () => {
 		} );
 	} );
 
-	it( 'supports keyboard navigation through the form fields', () => {
+	it( 'supports keyboard navigation through the form fields', async () => {
 		render( <SettingsPaymentsBacs /> );
 
 		// Make a change first so the Save button is enabled (and tabbable).
@@ -191,17 +306,17 @@ describe( 'SettingsPaymentsBacs', () => {
 			target: { value: 'Edited title' },
 		} );
 
-		userEvent.tab();
+		await userEvent.tab();
 		expect(
 			screen.getByLabelText( 'Enable direct bank transfers' )
 		).toHaveFocus();
-		userEvent.tab();
+		await userEvent.tab();
 		expect( screen.getByLabelText( 'Title' ) ).toHaveFocus();
-		userEvent.tab();
+		await userEvent.tab();
 		expect( screen.getByLabelText( 'Description' ) ).toHaveFocus();
-		userEvent.tab();
+		await userEvent.tab();
 		expect( screen.getByLabelText( 'Instructions' ) ).toHaveFocus();
-		userEvent.tab();
+		await userEvent.tab();
 		expect(
 			screen.getByRole( 'button', { name: 'Save changes' } )
 		).toHaveFocus();

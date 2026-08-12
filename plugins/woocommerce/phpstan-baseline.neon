@@ -3513,7 +3513,7 @@ parameters:
 		-
 			message: '#^Cannot access offset ''local'' on non\-empty\-array\|true\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
+			count: 1
 			path: includes/admin/helper/class-wc-helper-subscriptions-api.php
 
 		-
@@ -30310,12 +30310,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-refunds-controller.php
 
 		-
-			message: '#^Method WC_REST_Refunds_Controller\:\:register_routes\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-refunds-controller.php
-
-		-
 			message: '#^PHPDoc tag @extends has invalid value \(WC_REST_Order_Refunds_Controller\)\: Unexpected token "\\n ", expected ''\<'' at offset 127 on line 5$#'
 			identifier: phpDoc.parseError
 			count: 1
@@ -55858,12 +55852,6 @@ parameters:
 			path: src/Internal/Admin/Emails/EmailListingRestController.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Emails\\EmailListingRestController\:\:initialize_template_generator\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Emails/EmailListingRestController.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Emails\\EmailListingRestController\:\:recreate_email_post\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -62137,30 +62125,6 @@ parameters:
 			path: src/Internal/EmailEditor/PersonalizationTags/StoreTagsProvider.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsGenerator\:\:generate_email_templates\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsGenerator.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsGenerator\:\:generate_initial_email_templates\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsGenerator.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsGenerator\:\:init_default_transactional_emails\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsGenerator.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsGenerator\:\:initialize\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsGenerator.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\:\:clear_caches\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -62204,12 +62168,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmails\:\:init\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmails.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmails\:\:init_email_templates\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmails.php
@@ -68251,12 +68209,6 @@ parameters:
 			path: src/StoreApi/Authentication.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Authentication\:\:get_cart_token\(\) should return string but returns array\|string\.$#'
-			identifier: return.type
-			count: 1
-			path: src/StoreApi/Authentication.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Authentication\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -69901,12 +69853,6 @@ parameters:
 			path: src/StoreApi/Schemas/ExtendSchema.php
 
 		-
-			message: '#^Parameter \#1 \$exception_object of function wc_caught_exception expects Exception, Throwable given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/StoreApi/Schemas/ExtendSchema.php
-
-		-
 			message: '#^Variable \$data might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -70617,12 +70563,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\SessionHandler\:\:init_session_from_token\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/StoreApi/SessionHandler.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\StoreApi\\SessionHandler\:\:\$token \(string\) does not accept array\|string\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: src/StoreApi/SessionHandler.php
 

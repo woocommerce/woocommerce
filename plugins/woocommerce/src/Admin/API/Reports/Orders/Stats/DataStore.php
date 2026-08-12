@@ -101,7 +101,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @override ReportsDataStore::__construct()
 	 */
 	public function __construct() {
-		$this->date_column_name = get_option( 'woocommerce_date_type', 'date_paid' );
+		$this->date_column_name = $this->sanitize_date_column_name( get_option( 'woocommerce_date_type' ), 'date_paid' );
 		parent::__construct();
 	}
 
@@ -146,6 +146,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	public static function init() {
 		add_action( 'woocommerce_before_delete_order', array( __CLASS__, 'delete_order' ) );
 		add_action( 'delete_post', array( __CLASS__, 'delete_order' ) );
+		add_action( 'woocommerce_delete_order_refund', array( __CLASS__, 'delete_refund' ) );
 	}
 
 	/**
@@ -342,7 +343,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$table_name = self::get_db_table_name();
 
 		if ( isset( $query_args['date_type'] ) ) {
-			$this->date_column_name = $query_args['date_type'];
+			$this->date_column_name = $this->sanitize_date_column_name( $query_args['date_type'] );
 		}
 
 		$this->initialize_queries();
@@ -687,6 +688,54 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		ReportsCache::invalidate();
 	}
 
+	/**
+	 * Deletes the refund stats when a refund is deleted.
+	 *
+	 * This hook fires after the refund is gone, so delete_order() cannot be reused —
+	 * its is_order() guard and wc_get_order() call both need the record. The customer
+	 * ID comes from the stats row instead.
+	 *
+	 * HPOS only. CPT deletes the post first, so delete_post has already run the whole
+	 * cascade; repeating it here would fire the public hooks twice for one deletion.
+	 * Under HPOS-with-sync the HPOS record goes first, so delete_order() short-circuits
+	 * and this is the only cleanup that runs.
+	 *
+	 * The cascade runs even without a stats row: imports are not atomic, so lookup rows
+	 * can outlive one, and skipping would orphan them.
+	 *
+	 * @internal
+	 * @since 11.1.0
+	 * @param int $refund_id Refund ID.
+	 */
+	public static function delete_refund( $refund_id ): void {
+		global $wpdb;
+
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			return;
+		}
+
+		$refund_id  = (int) $refund_id;
+		$table_name = self::get_db_table_name();
+
+		// A missing row yields customer ID 0, on which the customer cleanup no-ops.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$customer_id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT customer_id FROM {$table_name} WHERE order_id = %d", $refund_id ) );
+
+		$wpdb->delete( $table_name, array( 'order_id' => $refund_id ) );
+
+		/**
+		 * Fires when orders stats are deleted.
+		 *
+		 * @param int $order_id Order ID.
+		 * @param int $customer_id Customer ID.
+		 *
+		 * @since 4.0.0
+		 */
+		do_action( 'woocommerce_analytics_delete_order_stats', $refund_id, absint( $customer_id ) );
+
+		ReportsCache::invalidate();
+	}
+
 
 	/**
 	 * Calculation methods.
@@ -857,10 +906,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		global $wpdb;
 		$orders_stats_table = self::get_db_table_name();
 
+		// Refund rows share the customer ID of their parent order but are stored with a NULL
+		// returning_customer, which the orders report relies on to fall back to the refunded
+		// order's value. Keep them NULL by only updating rows that carry their own flag.
 		$wpdb->query(
 			$wpdb->prepare(
-				'UPDATE %i SET returning_customer = CASE WHEN order_id = %d THEN false ELSE true END WHERE customer_id = %d',
-				$orders_stats_table,
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
+				"UPDATE {$orders_stats_table} SET returning_customer = CASE WHEN order_id = %d THEN false ELSE true END WHERE customer_id = %d AND returning_customer IS NOT NULL",
 				$order_id,
 				$customer_id
 			)
