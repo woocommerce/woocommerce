@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Return early in Product block if product is not viewable

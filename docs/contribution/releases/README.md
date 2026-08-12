@@ -13,6 +13,7 @@ The WooCommerce release process is managed by a rotating release lead, paired wi
 * [Readiness and Go/No-Go](/docs/contribution/releases/readiness)
 * [Troubleshooting](/docs/contribution/releases/troubleshooting)
 * [Point Releases](/docs/contribution/releases/point-releases)
+* [Security Support](/docs/contribution/releases/security-support)
 * [Cherry-picking](/docs/contribution/releases/backporting)
 * [Pre-releases](/docs/contribution/releases/prereleases)
 * [Release Schedule](/docs/contribution/releases/schedule)

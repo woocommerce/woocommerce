@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Improve keyboard and screen reader accessibility for button-like links in the classic cart.
