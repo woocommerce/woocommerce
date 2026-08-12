@@ -1,11 +1,11 @@
 <?php
 /**
- * API\Reports\ProductSearchQuery class file.
+ * ProductSearchQuery class file.
  */
 
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Admin\API\Reports;
+namespace Automattic\WooCommerce\Internal\Admin\Reports;
 
 defined( 'ABSPATH' ) || exit;
 

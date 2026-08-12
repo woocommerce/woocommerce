@@ -11,7 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 use Automattic\WooCommerce\Admin\API\Reports\GenericStatsController;
-use Automattic\WooCommerce\Admin\API\Reports\ProductSearchQuery;
+use Automattic\WooCommerce\Internal\Admin\Reports\ProductSearchQuery;
 use WP_REST_Request;
 use WP_REST_Response;
 
