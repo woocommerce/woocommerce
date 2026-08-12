@@ -221,8 +221,6 @@ const UnsavedChangesModal = ( {
 				<Button
 					variant="primary"
 					type="button"
-					name="save"
-					value={ __( 'Save', 'woocommerce' ) }
 					isBusy={ isSaving }
 					disabled={ isSaving }
 					accessibleWhenDisabled
