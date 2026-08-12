@@ -74,10 +74,6 @@ class WC_Brands {
 		// Layered nav widget compatibility.
 		add_filter( 'woocommerce_layered_nav_term_html', array( $this, 'woocommerce_brands_update_layered_nav_link' ), 10, 4 );
 
-		// Filter the list of taxonomies overridden for the original term count.
-		add_action( 'woocommerce_product_set_stock_status', array( $this, 'recount_after_stock_change' ) );
-		add_action( 'woocommerce_update_options_products_inventory', array( $this, 'recount_all_brands' ) );
-
 		// Block theme integration.
 		add_filter( 'hooked_block_types', array( $this, 'hook_product_brand_block' ), 10, 4 );
 		add_filter( 'hooked_block_core/post-terms', array( $this, 'configure_product_brand_block' ), 10, 5 );
@@ -321,8 +317,12 @@ class WC_Brands {
 					'update_count_callback' => '_wc_term_recount',
 					'label'                 => __( 'Brands', 'woocommerce' ),
 					'labels'                => array(
-						'name'              => __( 'Brands', 'woocommerce' ),
+						'name'              => __( 'Product brands', 'woocommerce' ),
 						'singular_name'     => __( 'Brand', 'woocommerce' ),
+						// Non-contextual on purpose: keeps the pre-existing `Brands` msgid so existing
+						// translations and `gettext_woocommerce` customizations keep applying. Guarded by
+						// WC_Brands_Test::test_product_brand_menu_name_uses_non_contextual_brands_translation().
+						'menu_name'         => __( 'Brands', 'woocommerce' ),
 						'template_name'     => _x( 'Products by Brand', 'Template name', 'woocommerce' ),
 						'search_items'      => __( 'Search Brands', 'woocommerce' ),
 						'all_items'         => __( 'All Brands', 'woocommerce' ),

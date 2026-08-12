@@ -89,10 +89,12 @@ class WCAdminAssets {
 	public static function get_url( $file, $ext ) {
 		$suffix = '';
 
-		// Potentially enqueue minified JavaScript.
+		// Potentially enqueue minified JavaScript, but only if the minified file exists.
+		// Core builds do not ship minified JS files, so this also guards against the
+		// 'minified-js' feature being force-enabled (e.g. via WooCommerce Beta Tester).
 		if ( $ext === 'js' ) {
 			$script_debug = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG;
-			$suffix       = self::should_use_minified_js_file( $script_debug ) ? '.min' : '';
+			$suffix       = self::should_use_minified_js_file( $script_debug ) && is_readable( WC_ADMIN_ABSPATH . self::get_path( $ext ) . $file . '.min.' . $ext ) ? '.min' : '';
 		}
 
 		return plugins_url( self::get_path( $ext ) . $file . $suffix . '.' . $ext, WC_ADMIN_PLUGIN_FILE );
