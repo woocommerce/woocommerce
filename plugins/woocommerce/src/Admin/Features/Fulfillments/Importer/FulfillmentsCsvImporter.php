@@ -683,8 +683,9 @@ class FulfillmentsCsvImporter {
 			);
 		}
 
-		// In-file duplicate guard.
-		$dedupe_key = $order->get_id() . '|' . strtolower( $tracking_number );
+		// In-file duplicate guard. The set is persisted with the session on every chunk,
+		// so keys are hashed to a fixed short length instead of embedding raw values.
+		$dedupe_key = substr( md5( $order->get_id() . '|' . strtolower( $tracking_number ) ), 0, 20 );
 		if ( isset( $seen_tracking_pairs[ $dedupe_key ] ) ) {
 			return array(
 				'row'      => $row_number,
