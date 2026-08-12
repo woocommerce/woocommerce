@@ -17,6 +17,7 @@ import {
  * Internal dependencies
  */
 import { prepare } from '../../data/api';
+import { errorMessage } from '../../hooks/use-chunked-import';
 import type { StepComponentProps } from './types';
 
 function formatBytes( bytes: number ): string {
@@ -64,11 +65,9 @@ const UploadStep: React.FC< StepComponentProps > = ( {
 			} );
 			dispatch( { type: 'PREPARE_OK', payload: response } );
 		} catch ( error ) {
-			const message =
-				error instanceof Error
-					? error.message
-					: __( 'Upload failed.', 'woocommerce' );
-			dispatch( { type: 'ERROR', message } );
+			// apiFetch rejects with a plain object, so extract the server's
+			// actionable message instead of collapsing to a generic one.
+			dispatch( { type: 'ERROR', message: errorMessage( error ) } );
 		}
 	}, [
 		state.file,
@@ -111,6 +110,7 @@ const UploadStep: React.FC< StepComponentProps > = ( {
 			) : null }
 
 			<BaseControl
+				__nextHasNoMarginBottom
 				id="wc-fulfillments-importer-file"
 				label={ __( 'CSV file', 'woocommerce' ) }
 			>

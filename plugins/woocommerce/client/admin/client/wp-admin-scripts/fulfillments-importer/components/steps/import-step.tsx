@@ -37,7 +37,6 @@ const ImportStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 	runRef.current = run;
 	useEffect( () => {
 		void runRef.current();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );
 
 	const percent =
@@ -102,7 +101,15 @@ const ImportStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 			{ state.error ? (
 				<Notice status="error" isDismissible={ false }>
 					<p>{ state.error }</p>
-					<Button variant="secondary" onClick={ retry }>
+					<Button
+						variant="secondary"
+						onClick={ () => {
+							dispatch( { type: 'CLEAR_ERROR' } );
+							retry();
+						} }
+						isBusy={ isRunning }
+						disabled={ isRunning }
+					>
 						{ __( 'Retry', 'woocommerce' ) }
 					</Button>
 				</Notice>

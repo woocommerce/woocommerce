@@ -80,9 +80,25 @@ function errorStatus( error: unknown ): number | null {
 }
 
 /**
+ * Returns the REST error code of an apiFetch error if one is present.
+ */
+function errorCode( error: unknown ): string | null {
+	if (
+		error &&
+		typeof error === 'object' &&
+		'code' in error &&
+		typeof ( error as { code?: unknown } ).code === 'string'
+	) {
+		return ( error as { code: string } ).code;
+	}
+	return null;
+}
+
+/**
  * True for errors that are worth retrying: network failures (no status),
- * 408 Request Timeout, 429 Too Many Requests, and any 5xx.
- * 4xx responses other than 408/429 are caller errors and should not retry.
+ * 408 Request Timeout, 429 Too Many Requests, any 5xx, and the server's
+ * chunk-in-progress conflict, which resolves once the running chunk ends.
+ * Other 4xx responses are caller errors and should not retry.
  */
 function isRetriable( error: unknown ): boolean {
 	const status = errorStatus( error );
@@ -92,10 +108,21 @@ function isRetriable( error: unknown ): boolean {
 	if ( status === 408 || status === 429 ) {
 		return true;
 	}
+	if (
+		status === 409 &&
+		errorCode( error ) ===
+			'woocommerce_fulfillments_import_chunk_in_progress'
+	) {
+		return true;
+	}
 	return status >= 500;
 }
 
-function errorMessage( error: unknown ): string {
+/**
+ * Extracts a human-readable message from an Error or an apiFetch rejection,
+ * which is a plain `{ code, message, data }` object rather than an Error.
+ */
+export function errorMessage( error: unknown ): string {
 	if ( error instanceof Error ) {
 		return error.message;
 	}
@@ -107,7 +134,7 @@ function errorMessage( error: unknown ): string {
 	) {
 		return ( error as { message: string } ).message;
 	}
-	return 'Unknown error';
+	return __( 'Unknown error', 'woocommerce' );
 }
 
 /**
@@ -162,7 +189,7 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 
 		try {
 			// Loop until the server reports done OR we exceed the total (defensive).
-			// eslint-disable-next-line no-constant-condition
+
 			while ( true ) {
 				if ( signal.aborted ) {
 					return;
@@ -210,7 +237,10 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 				callbacksRef.current.onChunk?.( response );
 
 				// Always track server-reported progress so we never over-advance past unread rows.
-				if ( typeof response.processed === 'number' && response.processed >= 0 ) {
+				if (
+					typeof response.processed === 'number' &&
+					response.processed >= 0
+				) {
 					offsetRef.current = response.processed;
 				} else {
 					offsetRef.current += chunkSize;

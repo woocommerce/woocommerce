@@ -25,8 +25,7 @@ describe( 'Stepper', () => {
 	it( 'marks earlier steps as completed and later as upcoming', () => {
 		render( <Stepper currentStep="import" /> );
 
-		const completed =
-			document.querySelectorAll( '.is-completed' );
+		const completed = document.querySelectorAll( '.is-completed' );
 		expect( completed.length ).toBe( 2 ); // upload + mapping
 
 		const upcoming = document.querySelectorAll( '.is-upcoming' );

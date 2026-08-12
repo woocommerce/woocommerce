@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import type { Dispatch } from 'react';
+
+/**
  * Internal dependencies
  */
 import type {
@@ -8,6 +13,6 @@ import type {
 
 export interface StepComponentProps {
 	state: ImporterState;
-	dispatch: React.Dispatch< ImporterAction >;
+	dispatch: Dispatch< ImporterAction >;
 	onClose: () => void;
 }

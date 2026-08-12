@@ -95,14 +95,16 @@ describe( 'MappingStep', () => {
 		);
 
 		const reset = dispatched.find(
-			( a ) => a.type === 'RESET_MAPPING_TO_DETECTED'
+			(
+				a
+			): a is Extract<
+				ImporterAction,
+				{ type: 'RESET_MAPPING_TO_DETECTED' }
+			> => a.type === 'RESET_MAPPING_TO_DETECTED'
 		);
-		expect( reset ).toBeTruthy();
-		if ( reset && reset.type === 'RESET_MAPPING_TO_DETECTED' ) {
-			expect( reset.mapping[ 0 ] ).toBe( 'order_number' );
-			expect( reset.mapping[ 1 ] ).toBe( 'tracking_number' );
-			expect( reset.mapping[ 2 ] ).toBe( 'shipment_provider' );
-		}
+		expect( reset?.mapping[ 0 ] ).toBe( 'order_number' );
+		expect( reset?.mapping[ 1 ] ).toBe( 'tracking_number' );
+		expect( reset?.mapping[ 2 ] ).toBe( 'shipment_provider' );
 	} );
 
 	it( 'leaves ambiguous headers unmapped on auto-detect', () => {
@@ -124,14 +126,16 @@ describe( 'MappingStep', () => {
 		);
 
 		const reset = dispatched.find(
-			( a ) => a.type === 'RESET_MAPPING_TO_DETECTED'
+			(
+				a
+			): a is Extract<
+				ImporterAction,
+				{ type: 'RESET_MAPPING_TO_DETECTED' }
+			> => a.type === 'RESET_MAPPING_TO_DETECTED'
 		);
-		expect( reset ).toBeTruthy();
-		if ( reset && reset.type === 'RESET_MAPPING_TO_DETECTED' ) {
-			expect( reset.mapping[ 0 ] ).toBe( '' );
-			expect( reset.mapping[ 1 ] ).toBe( '' );
-			expect( reset.mapping[ 2 ] ).toBe( '' );
-		}
+		expect( reset?.mapping[ 0 ] ).toBe( '' );
+		expect( reset?.mapping[ 1 ] ).toBe( '' );
+		expect( reset?.mapping[ 2 ] ).toBe( '' );
 
 		const startButton = screen.getByRole( 'button', {
 			name: /start import/i,

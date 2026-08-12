@@ -4,15 +4,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
-jest.mock( '../steps/upload-step', () => () => (
-	<div>UPLOAD_STEP_STUB</div>
-) );
-jest.mock( '../steps/mapping-step', () => () => (
-	<div>MAPPING_STEP_STUB</div>
-) );
-jest.mock( '../steps/import-step', () => () => (
-	<div>IMPORT_STEP_STUB</div>
-) );
+jest.mock( '../steps/upload-step', () => () => <div>UPLOAD_STEP_STUB</div> );
+jest.mock( '../steps/mapping-step', () => () => <div>MAPPING_STEP_STUB</div> );
+jest.mock( '../steps/import-step', () => () => <div>IMPORT_STEP_STUB</div> );
 jest.mock( '../steps/done-step', () => () => <div>DONE_STEP_STUB</div> );
 
 /**
@@ -32,9 +26,7 @@ describe( 'FulfillmentsImporterModal shell', () => {
 		render(
 			<FulfillmentsImporterModal isOpen={ true } onClose={ () => {} } />
 		);
-		expect(
-			screen.getByText( 'UPLOAD_STEP_STUB' )
-		).toBeInTheDocument();
+		expect( screen.getByText( 'UPLOAD_STEP_STUB' ) ).toBeInTheDocument();
 	} );
 
 	it( 'exposes the stepper with upload as the current step on first open', () => {

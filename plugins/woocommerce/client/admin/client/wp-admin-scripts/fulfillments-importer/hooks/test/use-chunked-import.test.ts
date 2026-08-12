@@ -128,8 +128,7 @@ describe( 'useChunkedImport', () => {
 	} );
 
 	it( 'surfaces an error once retries are exhausted', async () => {
-		mockedRunChunk
-			.mockRejectedValue( new Error( 'persistent failure' ) );
+		mockedRunChunk.mockRejectedValue( new Error( 'persistent failure' ) );
 
 		const onError = jest.fn();
 
@@ -156,5 +155,71 @@ describe( 'useChunkedImport', () => {
 		// One initial attempt + two retries.
 		expect( mockedRunChunk ).toHaveBeenCalledTimes( 3 );
 		expect( onError ).toHaveBeenCalledWith( 'persistent failure' );
+	} );
+
+	it( 'fails immediately without retrying on a 4xx response', async () => {
+		mockedRunChunk.mockRejectedValue( {
+			code: 'woocommerce_fulfillments_import_mapping_invalid',
+			message: 'Mapping is missing required column(s).',
+			data: { status: 400 },
+		} );
+
+		const onError = jest.fn();
+
+		const { result } = renderHook( () =>
+			useChunkedImport( {
+				token: 'tok',
+				total: 2,
+				mapping: {},
+				notifyCustomer: false,
+				updateExisting: true,
+				chunkSize: 2,
+				onError,
+			} )
+		);
+
+		await act( async () => {
+			await result.current.run();
+		} );
+
+		expect( mockedRunChunk ).toHaveBeenCalledTimes( 1 );
+		expect( onError ).toHaveBeenCalledWith(
+			'Mapping is missing required column(s).'
+		);
+	} );
+
+	it( 'retries a 409 chunk-in-progress conflict until the lock clears', async () => {
+		mockedRunChunk
+			.mockRejectedValueOnce( {
+				code: 'woocommerce_fulfillments_import_chunk_in_progress',
+				message:
+					'Another chunk of this import is still being processed.',
+				data: { status: 409 },
+			} )
+			.mockResolvedValueOnce( buildResponse( 2, 2, true ) );
+
+		const onError = jest.fn();
+		const onFinish = jest.fn();
+
+		const { result } = renderHook( () =>
+			useChunkedImport( {
+				token: 'tok',
+				total: 2,
+				mapping: {},
+				notifyCustomer: false,
+				updateExisting: true,
+				chunkSize: 2,
+				onFinish,
+				onError,
+			} )
+		);
+
+		await act( async () => {
+			await result.current.run();
+		} );
+
+		expect( mockedRunChunk ).toHaveBeenCalledTimes( 2 );
+		expect( onError ).not.toHaveBeenCalled();
+		expect( onFinish ).toHaveBeenCalled();
 	} );
 } );

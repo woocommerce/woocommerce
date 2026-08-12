@@ -82,4 +82,43 @@ describe( 'UploadStep', () => {
 			).toBeTruthy();
 		} );
 	} );
+
+	it( 'surfaces the server error message from an apiFetch rejection', async () => {
+		const state = createInitialState();
+		state.file = new File( [ 'a,b,c\n1,2,3' ], 'a.csv', {
+			type: 'text/csv',
+		} );
+
+		// apiFetch rejects with a plain object, not an Error instance.
+		mockedPrepare.mockRejectedValue( {
+			code: 'woocommerce_fulfillments_import_file_too_large',
+			message:
+				'The uploaded file is larger than the allowed maximum of 8 MB.',
+			data: { status: 413 },
+		} );
+
+		const dispatched: ImporterAction[] = [];
+		const dispatch = jest.fn( ( action: ImporterAction ) =>
+			dispatched.push( action )
+		);
+
+		render(
+			<UploadStep
+				state={ state }
+				dispatch={ dispatch }
+				onClose={ jest.fn() }
+			/>
+		);
+
+		fireEvent.click( screen.getByRole( 'button', { name: /continue/i } ) );
+
+		await waitFor( () => {
+			const errorAction = dispatched.find(
+				( a ) => a.type === 'ERROR'
+			) as Extract< ImporterAction, { type: 'ERROR' } > | undefined;
+			expect( errorAction?.message ).toBe(
+				'The uploaded file is larger than the allowed maximum of 8 MB.'
+			);
+		} );
+	} );
 } );
