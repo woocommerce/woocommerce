@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Fixes #48583.
+
+Store the empty cart headings of the default Cart page as block pattern references so they are translated at render time instead of being frozen in the locale active at install time.
