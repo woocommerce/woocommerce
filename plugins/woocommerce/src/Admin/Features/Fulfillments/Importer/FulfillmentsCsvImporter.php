@@ -73,6 +73,12 @@ class FulfillmentsCsvImporter {
 	public const MAX_CHUNK_SIZE = 1000;
 
 	/**
+	 * Chunk ceiling when customer notifications are on. Each notified row sends mail
+	 * synchronously, so large chunks would run past typical execution time limits.
+	 */
+	public const NOTIFY_CHUNK_SIZE = 25;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 10.9.0
@@ -165,7 +171,10 @@ class FulfillmentsCsvImporter {
 			return $summary;
 		}
 
-		$chunk_size  = $this->get_chunk_size();
+		$chunk_size = $this->get_chunk_size();
+		if ( $this->options['notify_customer'] ) {
+			$chunk_size = min( $chunk_size, self::NOTIFY_CHUNK_SIZE );
+		}
 		$total       = (int) ( $parsed['total'] ?? 0 );
 		$delimiter   = (string) ( $parsed['delimiter'] ?? $this->options['delimiter'] );
 		$seen        = array();

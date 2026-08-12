@@ -482,6 +482,31 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox handle_run caps the chunk size when customer notifications are enabled.
+	 */
+	public function test_run_clamps_chunk_size_when_notifying(): void {
+		$csv = "order_number,tracking_number,shipment_provider\n";
+		for ( $i = 0; $i < FulfillmentsCsvImporter::NOTIFY_CHUNK_SIZE + 5; $i++ ) {
+			$csv .= sprintf( "99%06d,NTF-%d,ups\n", $i, $i );
+		}
+		$file    = $this->make_csv( $csv );
+		$session = $this->open_session_for( $file );
+
+		$request = $this->make_run_request( $session->token(), 0, FulfillmentsCsvImporter::MAX_CHUNK_SIZE );
+		$request->set_param( 'options', array( 'notify_customer' => true ) );
+
+		$response = $this->invoke( 'handle_run', $request );
+
+		$this->assertIsArray( $response );
+		$this->assertSame(
+			FulfillmentsCsvImporter::NOTIFY_CHUNK_SIZE,
+			$response['processed'],
+			'A notifying chunk must consume at most NOTIFY_CHUNK_SIZE rows per request'
+		);
+		$this->assertFalse( $response['done'] );
+	}
+
+	/**
 	 * @testdox Retrying an already-processed offset returns progress without importing the rows again.
 	 */
 	public function test_run_is_idempotent_for_replayed_offsets(): void {

@@ -433,6 +433,12 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		$notify_customer = array_key_exists( 'notify_customer', $options_param ) ? (bool) $options_param['notify_customer'] : $session->notify_customer();
 		$update_existing = array_key_exists( 'update_existing', $options_param ) ? (bool) $options_param['update_existing'] : $session->update_existing();
 
+		// Notified rows send mail synchronously, so cap the per-request row count to
+		// keep a chunk within typical execution time limits.
+		if ( $notify_customer ) {
+			$limit = min( $limit, FulfillmentsCsvImporter::NOTIFY_CHUNK_SIZE );
+		}
+
 		$importer = new FulfillmentsCsvImporter(
 			$session->file(),
 			array(
