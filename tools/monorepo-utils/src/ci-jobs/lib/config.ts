@@ -59,8 +59,10 @@ interface BaseJobConfig {
 	 * Changed files matching these patterns are invisible to this job: they do
 	 * not trigger it through its own changes and do not mark a dependency as
 	 * changed when deciding whether the job should run for a dependency change.
+	 * The parser always sets this; it is optional so that consumers treat a
+	 * missing value as an empty list.
 	 */
-	ignore: RegExp[];
+	ignore?: RegExp[];
 
 	/**
 	 * The command to run for the job.
