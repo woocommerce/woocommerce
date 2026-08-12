@@ -718,6 +718,9 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', $future_start ) );
 		$product->save();
 
+		// The save only queues the rescheduling, so run it before adding the second timestamp.
+		$this->flush_pending_sale_event_schedules();
+
 		$product = wc_get_product( $product->get_id() );
 		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', $future_start + 3600 ) );
 		wc_schedule_product_sale_events( $product );
