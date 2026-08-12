@@ -364,7 +364,7 @@ final class OrderWithdrawalFormProcessor {
 	}
 
 	/**
-	 * Get an order only when every submitted order-identifying field matches.
+	 * Get an order only when the submitted email and order number match.
 	 *
 	 * @param array<string,string> $data Form data.
 	 */
@@ -417,15 +417,13 @@ final class OrderWithdrawalFormProcessor {
 	}
 
 	/**
-	 * Whether a candidate order exactly matches the submitted identifying data.
+	 * Whether a candidate order matches the submitted email and order number.
 	 *
 	 * @param WC_Order             $order Candidate order.
 	 * @param array<string,string> $data  Form data.
 	 */
 	private function order_matches_form_data( WC_Order $order, array $data ): bool {
 		return $this->normalize_order_number( (string) $order->get_order_number() ) === $this->normalize_order_number( $data[ self::FIELD_ORDER_NUMBER ] )
-			&& $this->text_values_match( $order->get_billing_first_name( 'edit' ), $data[ self::FIELD_FIRST_NAME ] )
-			&& $this->text_values_match( $order->get_billing_last_name( 'edit' ), $data[ self::FIELD_LAST_NAME ] )
 			&& $this->text_values_match( $order->get_billing_email( 'edit' ), $data[ self::FIELD_EMAIL ] );
 	}
 

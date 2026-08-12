@@ -1230,7 +1230,7 @@ Display a product's description, attributes, and reviews
 
 - **Name:** woocommerce/product-details
 - **Category:** woocommerce
-- **Supports:** align (full, wide), interactivity (clientNavigation)
+- **Supports:** align (full, wide), color (background, ~~text~~), interactivity (clientNavigation), spacing (margin, padding)
 - **Attributes:** align, hideTabTitle
 
 ## Product Filters - woocommerce/product-filters

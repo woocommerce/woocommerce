@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Report whether approved download directory rules are enforced in Site Health.
