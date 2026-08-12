@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Render a block's background color once instead of twice, which made a translucent palette color appear darker than intended.
