@@ -91,7 +91,7 @@ const UploadStep: React.FC< StepComponentProps > = ( {
 			<h2>{ __( 'Upload a CSV file', 'woocommerce' ) }</h2>
 			<p>
 				{ __(
-					'Choose a CSV exported from your warehouse or 3PL. We support the common header aliases — you can adjust the mapping in the next step.',
+					'Choose a CSV exported from your warehouse or 3PL. We support the common header aliases, and you can adjust the mapping in the next step.',
 					'woocommerce'
 				) }
 			</p>

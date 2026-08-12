@@ -206,10 +206,10 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$csv   = "order_number,tracking_number,shipment_provider\n{$order->get_id()},TRACK-UP,ups\n";
 		$file  = $this->make_csv( $csv );
 
-		// First import — creates the fulfillment.
+		// First import creates the fulfillment.
 		( new FulfillmentsCsvImporter( $file ) )->run();
 
-		// Second import with the same tracking number — should update the existing record's provider.
+		// Second import with the same tracking number should update the existing record's provider.
 		$csv2  = "order_number,tracking_number,shipment_provider\n{$order->get_id()},TRACK-UP,fedex\n";
 		$file2 = $this->make_csv( $csv2 );
 

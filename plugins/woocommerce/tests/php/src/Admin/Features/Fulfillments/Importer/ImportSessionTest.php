@@ -77,7 +77,7 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox load() respects user scoping — another user cannot load someone else's session.
+	 * @testdox load() respects user scoping; another user cannot load someone else's session.
 	 */
 	public function test_load_is_user_scoped(): void {
 		$session = $this->make_session( 11 );

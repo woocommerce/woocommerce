@@ -30,7 +30,7 @@ describe( 'MappingStep', () => {
 		const state = buildStateWithHeaders( {
 			0: 'order_number',
 			1: 'tracking_number',
-			// 2 is intentionally unmapped — shipment_provider is required.
+			// 2 is intentionally unmapped; shipment_provider is required.
 		} );
 
 		render(
