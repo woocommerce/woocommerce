@@ -88,35 +88,7 @@ class WC_Brands {
 	 */
 	public function recount_after_stock_change( $product_id ) {
 		wc_deprecated_function( __METHOD__, '11.2.0', 'wc_recount_after_stock_change()' );
-
-		if ( 'yes' !== get_option( 'woocommerce_hide_out_of_stock_items' ) || empty( $product_id ) ) {
-			return;
-		}
-
-		$product_terms = get_the_terms( $product_id, 'product_brand' );
-
-		if ( ! $product_terms ) {
-			return;
-		}
-
-		if ( wp_defer_term_counting() ) {
-			// When deferring term counts, we're using the built in handling of `wp_update_term_count()` to deal with the deferring
-			// and, though, this will cause both the standard and stock based counts to be rerun, it is still more efficient
-			// in cases where deferred term counting was warranted.
-			$product_terms = get_the_terms( $product_id, 'product_brand' );
-			if ( is_array( $product_terms ) ) {
-				wp_update_term_count( array_column( $product_terms, 'term_taxonomy_id' ), 'product_brand' );
-			}
-			return;
-		}
-
-		$product_brands = array();
-
-		foreach ( $product_terms as $term ) {
-			$product_brands[ $term->term_id ] = $term->parent;
-		}
-
-		_wc_term_recount( $product_brands, get_taxonomy( 'product_brand' ), false, false );
+		wc_recount_after_stock_change( $product_id );
 	}
 
 	/**
@@ -126,15 +98,7 @@ class WC_Brands {
 	 */
 	public function recount_all_brands() {
 		wc_deprecated_function( __METHOD__, '11.2.0', 'wc_recount_all_terms()' );
-
-		$product_brands = get_terms(
-			array(
-				'taxonomy'   => 'product_brand',
-				'hide_empty' => false,
-				'fields'     => 'id=>parent',
-			)
-		);
-		_wc_term_recount( $product_brands, get_taxonomy( 'product_brand' ), true, false );
+		wc_recount_all_terms();
 	}
 
 	/**
