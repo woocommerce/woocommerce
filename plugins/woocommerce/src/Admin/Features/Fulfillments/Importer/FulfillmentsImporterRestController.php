@@ -23,11 +23,10 @@ defined( 'ABSPATH' ) || exit;
 /**
  * REST controller backing the Fulfillments CSV importer.
  *
- * Exposes three routes:
+ * Exposes two routes:
  *
- * - `POST /wc/v3/fulfillments/import`         — single-shot orchestrator that runs the whole import in one call.
- * - `POST /wc/v3/fulfillments/import/prepare` — uploads, parses headers, opens an ImportSession.
- * - `POST /wc/v3/fulfillments/import/run`     — processes one chunk against an existing session.
+ * - `POST /wc/v3/fulfillments/import/prepare` uploads the CSV, parses headers, opens an ImportSession.
+ * - `POST /wc/v3/fulfillments/import/run` processes one chunk against an existing session.
  *
  * @since 10.9.0
  */
@@ -58,30 +57,6 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	 * @since 10.9.0
 	 */
 	public function register_routes(): void {
-		register_rest_route(
-			$this->route_namespace,
-			$this->rest_base,
-			array(
-				array(
-					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => fn( WP_REST_Request $request ) => $this->run( $request, 'handle_import' ),
-					'permission_callback' => fn( WP_REST_Request $request ) => $this->check_permission_for_fulfillments_import( $request ),
-					'args'                => array(
-						'notify_customer' => array(
-							'type'        => 'boolean',
-							'default'     => false,
-							'description' => __( 'Whether to send shipment notification emails for imported fulfillments.', 'woocommerce' ),
-						),
-						'update_existing' => array(
-							'type'        => 'boolean',
-							'default'     => true,
-							'description' => __( 'When a fulfillment with the same tracking number already exists on the order, update it.', 'woocommerce' ),
-						),
-					),
-				),
-			)
-		);
-
 		register_rest_route(
 			$this->route_namespace,
 			$this->rest_base . '/prepare',
@@ -184,48 +159,6 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	 */
 	protected function check_permission_for_fulfillments_import( WP_REST_Request $request ) {
 		return $this->check_permission( $request, 'manage_woocommerce' );
-	}
-
-	/**
-	 * Single-shot orchestrator: stages the upload and runs the full import in one request.
-	 *
-	 * @since 10.9.0
-	 *
-	 * @param WP_REST_Request $request The incoming request.
-	 * @return array|WP_Error
-	 */
-	protected function handle_import( WP_REST_Request $request ) {
-		$file_path = $this->stage_uploaded_csv( $request );
-		if ( $file_path instanceof WP_Error ) {
-			return $file_path;
-		}
-
-		// FulfillmentsCsvImporter is constructed per-request with a file path and runtime options,
-		// so it is intentionally not container-managed.
-		$importer = new FulfillmentsCsvImporter(
-			$file_path,
-			array(
-				'notify_customer' => (bool) $request->get_param( 'notify_customer' ),
-				'update_existing' => (bool) $request->get_param( 'update_existing' ),
-			)
-		);
-
-		$summary = $importer->run();
-
-		if ( file_exists( $file_path ) ) {
-			wp_delete_file( $file_path );
-		}
-
-		/**
-		 * Fires after a bulk fulfillments CSV import completes.
-		 *
-		 * @since 10.9.0
-		 *
-		 * @param array $summary Importer summary (created/updated/skipped/failed/notified/rows).
-		 */
-		do_action( 'woocommerce_fulfillments_csv_import_completed', $summary );
-
-		return $summary;
 	}
 
 	/**

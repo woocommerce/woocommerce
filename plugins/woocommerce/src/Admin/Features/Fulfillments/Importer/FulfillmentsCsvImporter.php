@@ -584,8 +584,8 @@ class FulfillmentsCsvImporter {
 		/**
 		 * Filter the chunk size used when looping CSV rows through the importer.
 		 *
-		 * Used both by the legacy one-shot run() wrapper and by the wizard's per-chunk REST handler
-		 * to keep behavior consistent. The server enforces sane bounds regardless of what callers send.
+		 * Shared by the one-shot run() path and the wizard's per-chunk REST handler.
+		 * The server enforces sane bounds regardless of what callers send.
 		 *
 		 * @since 10.9.0
 		 *
