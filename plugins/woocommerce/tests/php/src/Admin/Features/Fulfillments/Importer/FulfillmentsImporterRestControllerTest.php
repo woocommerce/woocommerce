@@ -62,7 +62,7 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 			)
 		);
 		if ( is_wp_error( $result ) ) {
-			throw new \RuntimeException( 'Failed to create admin user: ' . $result->get_error_message() );
+			throw new \RuntimeException( 'Failed to create admin user: ' . esc_html( $result->get_error_message() ) );
 		}
 		self::$admin_id = (int) $result;
 	}
@@ -100,7 +100,7 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 		$this->sessions = array();
 		foreach ( $this->temp_files as $path ) {
 			if ( file_exists( $path ) ) {
-				unlink( $path );
+				wp_delete_file( $path );
 			}
 		}
 		$this->temp_files = array();
@@ -115,7 +115,7 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 	 */
 	private function make_csv( string $content ): string {
 		$path = wp_tempnam( 'wc-fulfillments-rest-' );
-		file_put_contents( $path, $content );
+		file_put_contents( $path, $content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture write.
 		$this->temp_files[] = $path;
 		return $path;
 	}
@@ -294,30 +294,45 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox handle_prepare stages an uploaded CSV and opens a session bound to the current user.
+	 * @testdox handle_prepare parses the staged CSV and opens a session bound to the current user.
 	 */
 	public function test_prepare_stages_csv_and_opens_session(): void {
 		$order = OrderHelper::create_order();
 		$csv   = "order_number,tracking_number,shipment_provider\n{$order->get_id()},TRK-1,ups\n";
 		$file  = $this->make_csv( $csv );
 
+		// is_uploaded_file() can never pass for files created inside a test process, so
+		// stub the staging seam and exercise everything handle_prepare does after it.
+		$controller         = new class() extends FulfillmentsImporterRestController {
+			/**
+			 * Path returned instead of staging a real upload.
+			 *
+			 * @var string
+			 */
+			public string $staged = '';
+
+			/**
+			 * Return the canned staged path.
+			 *
+			 * @param WP_REST_Request $request Unused.
+			 * @return string
+			 */
+			protected function stage_uploaded_csv( WP_REST_Request $request ) {
+				unset( $request );
+				return $this->staged;
+			}
+		};
+		$controller->staged = $file;
+
 		$request = new WP_REST_Request( 'POST', '/wc/v3/fulfillments/import/prepare' );
 		$request->set_param( 'delimiter', ',' );
 		$request->set_param( 'notify_customer', false );
 		$request->set_param( 'update_existing', true );
-		$request->set_file_params(
-			array(
-				'file' => array(
-					'name'     => 'fulfillments.csv',
-					'type'     => 'text/csv',
-					'tmp_name' => $file,
-					'error'    => 0,
-					'size'     => filesize( $file ),
-				),
-			)
-		);
 
-		$response = $this->invoke( 'handle_prepare', $request );
+		$reflection = new \ReflectionClass( $controller );
+		$handler    = $reflection->getMethod( 'handle_prepare' );
+		$handler->setAccessible( true );
+		$response = $handler->invoke( $controller, $request );
 
 		$this->assertIsArray( $response );
 		$this->assertArrayHasKey( 'token', $response );
@@ -379,8 +394,8 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 		$session = $this->open_session_for( $file );
 
 		// Mutate the staged file after the session was sealed.
-		file_put_contents( $file, $csv . "\n# trailing change\n" );
-		touch( $file, time() + 60 );
+		file_put_contents( $file, $csv . "\n# trailing change\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Deliberate fixture mutation.
+		touch( $file, time() + 60 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch -- Deliberate mtime change to trip the integrity guard.
 
 		$request = new WP_REST_Request( 'POST', '/wc/v3/fulfillments/import/run' );
 		$request->set_param( 'token', $session->token() );
@@ -397,5 +412,48 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 
 		$this->assertInstanceOf( \WP_Error::class, $response );
 		$this->assertSame( 'fulfillments_import_file_changed', $response->get_error_code() );
+	}
+
+	/**
+	 * @testdox handle_run keeps the session and staged file when a chunk aborts on an unreadable file.
+	 */
+	public function test_run_keeps_session_when_chunk_aborts(): void {
+		$order = OrderHelper::create_order();
+		$csv   = "order_number,tracking_number,shipment_provider\n{$order->get_id()},TRK-ABORT,ups\n";
+		$file  = $this->make_csv( $csv );
+
+		$session = $this->open_session_for( $file );
+
+		chmod( $file, 0200 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod -- Deliberately making the fixture unreadable.
+		if ( is_readable( $file ) ) {
+			chmod( $file, 0644 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod -- Restoring fixture permissions.
+			$this->markTestSkipped( 'Cannot make the staged file unreadable in this environment.' );
+		}
+
+		try {
+			$request = new WP_REST_Request( 'POST', '/wc/v3/fulfillments/import/run' );
+			$request->set_param( 'token', $session->token() );
+			$request->set_param( 'offset', 0 );
+			$request->set_param( 'limit', 10 );
+			$request->set_param(
+				'mapping',
+				array(
+					'0' => FulfillmentsCsvImporter::COL_ORDER_NUMBER,
+					'1' => FulfillmentsCsvImporter::COL_TRACKING_NUMBER,
+					'2' => FulfillmentsCsvImporter::COL_PROVIDER,
+				)
+			);
+
+			$response = $this->invoke( 'handle_run', $request );
+		} finally {
+			chmod( $file, 0644 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod -- Restoring fixture permissions.
+		}
+
+		$this->assertInstanceOf( \WP_Error::class, $response );
+		$this->assertSame( 'woocommerce_fulfillments_import_chunk_failed', $response->get_error_code() );
+
+		$reloaded = ImportSession::load( get_current_user_id(), $session->token() );
+		$this->assertNotNull( $reloaded, 'The session must survive an aborted chunk so the client can retry' );
+		$this->assertFileExists( $file, 'The staged CSV must not be deleted on an aborted chunk' );
 	}
 }

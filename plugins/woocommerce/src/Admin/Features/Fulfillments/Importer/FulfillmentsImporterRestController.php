@@ -320,13 +320,15 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 
 		// Confirm the staged file is still the one we measured at prepare-time. Otherwise a
 		// retained byte_offset would seek into the wrong bytes and silently import wrong rows.
-		$session_file       = $session->file();
-		$expected_size      = $session->file_size();
-		$expected_mtime     = $session->file_mtime();
-		$current_size       = file_exists( $session_file ) ? (int) filesize( $session_file ) : 0;
-		$current_mtime      = file_exists( $session_file ) ? (int) filemtime( $session_file ) : 0;
-		$size_changed       = $expected_size > 0 && $expected_size !== $current_size;
-		$mtime_changed      = $expected_mtime > 0 && $expected_mtime !== $current_mtime;
+		// Bypass the PHP stat cache so a just-modified file cannot present stale metadata.
+		$session_file = $session->file();
+		clearstatcache( true, $session_file );
+		$expected_size  = $session->file_size();
+		$expected_mtime = $session->file_mtime();
+		$current_size   = file_exists( $session_file ) ? (int) filesize( $session_file ) : 0;
+		$current_mtime  = file_exists( $session_file ) ? (int) filemtime( $session_file ) : 0;
+		$size_changed   = $expected_size > 0 && $expected_size !== $current_size;
+		$mtime_changed  = $expected_mtime > 0 && $expected_mtime !== $current_mtime;
 		if ( ! file_exists( $session_file ) || $size_changed || $mtime_changed ) {
 			$session->delete();
 			return new WP_Error(
@@ -384,6 +386,26 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			)
 		);
 
+		// A chunk-level abort (unreadable file, failed open) is not completion: keep the
+		// session and staged file so the client can retry the same chunk.
+		if ( ! empty( $chunk_result['aborted'] ) ) {
+			$first_row  = is_array( $chunk_result['rows'] ?? null ) ? reset( $chunk_result['rows'] ) : false;
+			$abort_code = is_array( $first_row ) ? (string) ( $first_row['code'] ?? 'chunk_failed' ) : 'chunk_failed';
+			$message    = is_array( $first_row ) && '' !== (string) ( $first_row['message'] ?? '' )
+				? (string) $first_row['message']
+				: __( 'The import chunk could not be processed. Please try again.', 'woocommerce' );
+			$retriable  = in_array( $abort_code, array( 'file_not_readable', 'file_open_failed' ), true );
+
+			return new WP_Error(
+				'woocommerce_fulfillments_import_chunk_failed',
+				$message,
+				array(
+					'status' => $retriable ? WP_Http::INTERNAL_SERVER_ERROR : WP_Http::BAD_REQUEST,
+					'code'   => $abort_code,
+				)
+			);
+		}
+
 		$counts          = (array) $chunk_result['counts'];
 		$rows            = (array) $chunk_result['rows'];
 		$seen            = (array) $chunk_result['seen_tracking_pairs'];
@@ -397,8 +419,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 
 		$processed = $session->processed();
 		$total     = $session->total();
-		// EOF reached when the importer returns fewer rows than the requested limit.
-		$done = $processed >= $total || $consumed < $limit;
+		$done      = $processed >= $total || ! empty( $chunk_result['eof'] );
 
 		$response = array(
 			'processed' => $processed,
@@ -417,7 +438,13 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 				wp_delete_file( $file );
 			}
 
-			/** This action is documented above. */
+			/**
+			 * Fires after a bulk fulfillments CSV import completes.
+			 *
+			 * @since 11.1.0
+			 *
+			 * @param array $summary Import summary counts.
+			 */
 			do_action( 'woocommerce_fulfillments_csv_import_completed', $summary );
 
 			$response['summary'] = $summary;
@@ -431,8 +458,10 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	 *
 	 * @param WP_REST_Request $request Incoming request carrying the multipart upload.
 	 * @return string|WP_Error
+	 *
+	 * @throws \Exception When staged-file validation fails; caught internally and returned as a WP_Error.
 	 */
-	private function stage_uploaded_csv( WP_REST_Request $request ) {
+	protected function stage_uploaded_csv( WP_REST_Request $request ) {
 		$files = $request->get_file_params();
 		if ( empty( $files['file'] ) ) {
 			FulfillmentsTracker::track_fulfillment_validation_error( 'import', 'woocommerce_fulfillments_import_no_file', 'csv_importer' );
@@ -443,6 +472,11 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			);
 		}
 
+		/**
+		 * This filter is documented in wp-admin/includes/import.php.
+		 *
+		 * @since 2.3.0
+		 */
 		$upload_limit = (int) apply_filters( 'import_upload_size_limit', wp_max_upload_size() );
 		$file_size    = isset( $files['file']['size'] ) ? (int) $files['file']['size'] : 0;
 		if ( $upload_limit > 0 && $file_size > $upload_limit ) {
@@ -462,7 +496,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		// that key and restore the superglobal in finally so the assignment cannot leak.
 		// The REST permission_callback handles authentication, hence the phpcs ignore below.
 		$_FILES['fulfillment_import_file'] = $files['file']; // phpcs:ignore WordPress.Security.NonceVerification.Missing
-		$file_path = '';
+		$file_path                         = '';
 		try {
 			try {
 				$csv_helper = wc_get_container()->get( CSVUploadHelper::class );
