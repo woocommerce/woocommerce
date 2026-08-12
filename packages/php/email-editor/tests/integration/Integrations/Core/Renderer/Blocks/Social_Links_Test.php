@@ -119,8 +119,30 @@ class Social_Links_Test extends \Email_Editor_Integration_Test_Case {
 
 		$rendered = $this->social_links_renderer->render( '', $parsed_social_links, $this->rendering_context );
 		$this->checkValidHTML( $rendered );
-		$this->assertStringContainsString( 'padding-left:17px;', $rendered );
-		$this->assertStringContainsString( 'padding-right:17px;', $rendered );
+		$this->assertStringContainsString( 'padding-left:0.667em;', $rendered );
+		$this->assertStringContainsString( 'padding-right:0.667em;', $rendered );
+	}
+
+	/**
+	 * Test it renders a gap between social link items.
+	 */
+	public function testItRendersGapBetweenSocialLinkItems(): void {
+		$parsed_social_links                        = $this->parsed_social_links;
+		$parsed_social_links['attrs']['className']  = '';
+		$parsed_social_links['attrs']['showLabels'] = false;
+
+		$rendered = $this->social_links_renderer->render( '', $parsed_social_links, $this->rendering_context );
+		$this->checkValidHTML( $rendered );
+		$this->assertSame(
+			1,
+			substr_count( $rendered, 'margin-left:16px;' ),
+			'Only the second social link should have a standard-client horizontal gap.'
+		);
+		$this->assertSame(
+			1,
+			substr_count( $rendered, 'padding-left:16px;' ),
+			'Only the second social link should have an Outlook horizontal gap.'
+		);
 	}
 
 	/**
