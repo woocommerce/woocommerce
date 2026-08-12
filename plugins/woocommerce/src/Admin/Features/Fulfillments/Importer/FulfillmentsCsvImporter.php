@@ -11,7 +11,6 @@ namespace Automattic\WooCommerce\Admin\Features\Fulfillments\Importer;
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
-use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsTracker;
 use WC_Data_Store;
 use WC_Order;
@@ -61,6 +60,13 @@ class FulfillmentsCsvImporter {
 	 * @var array<int, array<int, Fulfillment>>
 	 */
 	private array $fulfillments_cache = array();
+
+	/**
+	 * Validation-error codes seen since the last Tracks flush, with counts.
+	 *
+	 * @var array<string, int>
+	 */
+	private array $pending_validation_errors = array();
 
 	/**
 	 * Default chunk size when looping import_chunk() from run().
@@ -149,6 +155,7 @@ class FulfillmentsCsvImporter {
 		if ( isset( $parsed['error'] ) ) {
 			$summary['rows'][] = $this->fail( 0, (string) $parsed['error']['code'], (string) $parsed['error']['message'] );
 			++$summary['failed'];
+			$this->flush_validation_error_events();
 			return $summary;
 		}
 
@@ -168,6 +175,7 @@ class FulfillmentsCsvImporter {
 				)
 			);
 			++$summary['failed'];
+			$this->flush_validation_error_events();
 			return $summary;
 		}
 
@@ -176,7 +184,6 @@ class FulfillmentsCsvImporter {
 			$chunk_size = min( $chunk_size, self::NOTIFY_CHUNK_SIZE );
 		}
 		$total       = (int) ( $parsed['total'] ?? 0 );
-		$delimiter   = (string) ( $parsed['delimiter'] ?? $this->options['delimiter'] );
 		$seen        = array();
 		$offset      = 0;
 		$byte_offset = 0;
@@ -187,9 +194,6 @@ class FulfillmentsCsvImporter {
 				$chunk_size,
 				$mapping,
 				array(
-					'notify_customer'     => $this->options['notify_customer'],
-					'update_existing'     => $this->options['update_existing'],
-					'delimiter'           => $delimiter,
 					'seen_tracking_pairs' => $seen,
 					'byte_offset'         => $byte_offset,
 				)
@@ -318,15 +322,12 @@ class FulfillmentsCsvImporter {
 	 * @param array<int, string>   $mapping CSV column index => canonical column key. Unmapped columns
 	 *                                      may be omitted or set to "".
 	 * @param array<string, mixed> $options {
-	 *     Per-chunk overrides; fall back to constructor options when omitted.
+	 *     Chunk state; behavior options come from the constructor.
 	 *
-	 *     @type bool                   $notify_customer
-	 *     @type bool                   $update_existing
-	 *     @type string                 $delimiter
 	 *     @type array<string, true>    $seen_tracking_pairs Cross-chunk dedupe state; pass back in to subsequent calls.
-	 *     @type int                    $byte_offset         Optional byte position (from a prior chunk's `byte_offset` result) to
-	 *                                                       fseek to instead of forward-reading `$offset` rows. When > 0, the
-	 *                                                       header read is skipped — callers must have already validated mapping.
+	 *     @type int                    $byte_offset         Byte position from a prior chunk's result to fseek to instead
+	 *                                                       of forward-reading rows. When > 0 only the header-row read is
+	 *                                                       skipped; mapping is still validated.
 	 * }
 	 * @return array{
 	 *     counts: array{created:int, updated:int, skipped:int, failed:int, notified:int},
@@ -339,9 +340,7 @@ class FulfillmentsCsvImporter {
 	 * }
 	 */
 	public function import_chunk( int $offset, int $limit, array $mapping, array $options = array() ): array {
-		$delimiter = isset( $options['delimiter'] ) && '' !== $options['delimiter']
-			? self::normalize_delimiter( $options['delimiter'] )
-			: $this->options['delimiter'];
+		$delimiter = $this->options['delimiter'];
 
 		$seen_tracking_pairs = isset( $options['seen_tracking_pairs'] ) && is_array( $options['seen_tracking_pairs'] )
 			? $options['seen_tracking_pairs']
@@ -357,16 +356,6 @@ class FulfillmentsCsvImporter {
 			'notified' => 0,
 		);
 		$rows   = array();
-
-		// Apply per-chunk option overrides; restored in the outer finally.
-		$prev_options = $this->options;
-		if ( array_key_exists( 'notify_customer', $options ) ) {
-			$this->options['notify_customer'] = (bool) $options['notify_customer'];
-		}
-		if ( array_key_exists( 'update_existing', $options ) ) {
-			$this->options['update_existing'] = (bool) $options['update_existing'];
-		}
-		$this->options['delimiter'] = $delimiter;
 
 		try {
 			if ( $limit <= 0 ) {
@@ -557,8 +546,21 @@ class FulfillmentsCsvImporter {
 				'aborted'             => false,
 			);
 		} finally {
-			$this->options = $prev_options;
+			$this->flush_validation_error_events();
 		}
+	}
+
+	/**
+	 * Fire one validation-error Tracks event per distinct code seen since the last flush.
+	 *
+	 * A malformed file can fail thousands of rows in one chunk; per-row events would
+	 * flood Tracks with identical payloads.
+	 */
+	private function flush_validation_error_events(): void {
+		foreach ( array_keys( $this->pending_validation_errors ) as $code ) {
+			FulfillmentsTracker::track_fulfillment_validation_error( 'import', (string) $code, 'csv_importer' );
+		}
+		$this->pending_validation_errors = array();
 	}
 
 	/**
@@ -832,7 +834,7 @@ class FulfillmentsCsvImporter {
 	}
 
 	/**
-	 * Build a failed-row result and fire a validation_error tracker event.
+	 * Build a failed-row result and queue a validation-error event for the next flush.
 	 *
 	 * @param int      $row_number Row number.
 	 * @param string   $error_code Stable machine-readable code (surfaced to the UI and analytics).
@@ -841,7 +843,7 @@ class FulfillmentsCsvImporter {
 	 * @return array<string, mixed>
 	 */
 	private function fail( int $row_number, string $error_code, string $message, ?int $order_id = null ): array {
-		FulfillmentsTracker::track_fulfillment_validation_error( 'import', $error_code, 'csv_importer' );
+		$this->pending_validation_errors[ $error_code ] = ( $this->pending_validation_errors[ $error_code ] ?? 0 ) + 1;
 
 		$result = array(
 			'row'     => $row_number,
@@ -984,8 +986,7 @@ class FulfillmentsCsvImporter {
 			return;
 		}
 
-		$numeric_ids   = array();
-		$order_numbers = array();
+		$numeric_ids = array();
 		foreach ( $batch as $entry ) {
 			if ( $entry['blank'] ) {
 				continue;
@@ -994,7 +995,6 @@ class FulfillmentsCsvImporter {
 			if ( '' === $order_number || array_key_exists( $order_number, $this->order_cache ) ) {
 				continue;
 			}
-			$order_numbers[ $order_number ] = true;
 			if ( ctype_digit( $order_number ) ) {
 				$numeric_ids[] = (int) $order_number;
 			}
@@ -1311,23 +1311,4 @@ class FulfillmentsCsvImporter {
 		return true;
 	}
 
-	/**
-	 * Return the list of fulfillment status keys that are considered "fulfilled".
-	 *
-	 * Kept for completeness; the importer always creates fulfilled fulfillments.
-	 *
-	 * @since 10.9.0
-	 *
-	 * @return array<int, string>
-	 */
-	public static function get_fulfilled_status_keys(): array {
-		$statuses = FulfillmentUtils::get_fulfillment_statuses();
-		$keys     = array();
-		foreach ( $statuses as $key => $info ) {
-			if ( ! empty( $info['is_fulfilled'] ) ) {
-				$keys[] = (string) $key;
-			}
-		}
-		return $keys;
-	}
 }

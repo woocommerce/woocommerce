@@ -6,12 +6,7 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import type {
-	ColumnMapping,
-	ImporterSummary,
-	PrepareResponse,
-	RunChunkResponse,
-} from './types';
+import type { ColumnMapping, PrepareResponse, RunChunkResponse } from './types';
 
 const DEFAULT_BASE = '/wc/v3/fulfillments/import';
 
@@ -85,13 +80,4 @@ export async function runChunk( args: RunArgs ): Promise< RunChunkResponse > {
 		},
 		signal: args.signal,
 	} );
-}
-
-/**
- * Type guard for the optional summary attached to the final chunk's response.
- */
-export function isFinalChunk(
-	response: RunChunkResponse
-): response is RunChunkResponse & { summary: ImporterSummary } {
-	return response.done === true && !! response.summary;
 }

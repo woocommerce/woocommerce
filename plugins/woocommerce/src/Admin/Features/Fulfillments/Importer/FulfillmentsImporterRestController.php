@@ -404,9 +404,6 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			$limit,
 			$mapping,
 			array(
-				'notify_customer'     => $notify_customer,
-				'update_existing'     => $update_existing,
-				'delimiter'           => $session->delimiter(),
 				'seen_tracking_pairs' => $session->seen_tracking_pairs(),
 				'byte_offset'         => $session->byte_offset(),
 			)

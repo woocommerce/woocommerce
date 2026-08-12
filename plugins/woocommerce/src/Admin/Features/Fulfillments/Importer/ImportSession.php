@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Wraps the per-user transient that keeps state across the chunked CSV import workflow.
  *
- * One session is in flight per administrator at a time: creating a new session deletes any
+ * One session is in flight per user at a time: creating a new session deletes any
  * prior one for the same user via a user-scoped index transient.
  *
  * @since 10.9.0
@@ -167,8 +167,8 @@ final class ImportSession {
 		 * Fires (via Action Scheduler) after a fulfillments import session's TTL plus a small grace
 		 * window to clean up the staged CSV when the wizard never finishes the import.
 		 *
-		 * Listeners receive the session metadata and may short-circuit by checking whether the
-		 * matching session transient still exists. The default handler is
+		 * Listeners receive the session metadata and can bail out early by checking whether
+		 * the matching session transient still exists. The default handler is
 		 * {@see ImportSession::cleanup_abandoned_file()}.
 		 *
 		 * @since 10.9.0
@@ -275,30 +275,6 @@ final class ImportSession {
 				'woocommerce-fulfillments-importer'
 			);
 		}
-	}
-
-	/**
-	 * Update the cumulative processed-row count and persist.
-	 *
-	 * @since 10.9.0
-	 *
-	 * @param int $processed Cumulative processed-row count.
-	 */
-	public function update_processed( int $processed ): void {
-		$this->data['processed'] = max( 0, $processed );
-		$this->persist();
-	}
-
-	/**
-	 * Replace the cross-chunk dedupe state and persist.
-	 *
-	 * @since 10.9.0
-	 *
-	 * @param array<string, true> $seen Map of "<order_id>|<lowercase_tracking>" => true.
-	 */
-	public function update_seen_tracking_pairs( array $seen ): void {
-		$this->data['seen_tracking_pairs'] = $seen;
-		$this->persist();
 	}
 
 	/**
@@ -429,7 +405,7 @@ final class ImportSession {
 	}
 
 	/**
-	 * End-of-file byte offset reached by the most recent chunk.
+	 * Byte offset in the CSV reached by the most recent chunk.
 	 *
 	 * @since 10.9.0
 	 *
