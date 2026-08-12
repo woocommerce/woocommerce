@@ -8,6 +8,7 @@ import { useResizeObserver } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 import {
 	BlockInstance,
+	createBlock,
 	createBlocksFromInnerBlocksTemplate,
 	store as blocksStore,
 	BlockVariation,
@@ -55,30 +56,35 @@ export const applyCollection = (
 		return;
 	}
 
-	const defaultAttributes =
+	// `createBlock` merges the collection's attribute overrides with the
+	// block type's registered defaults, guaranteeing a clean, fully-populated
+	// attributes object. This matters because collection variations only
+	// declare the attributes they override (e.g. "By Category" doesn't
+	// declare a `query` key at all) — spreading `collection.attributes`
+	// directly onto `setAttributes` would leave any attribute the new
+	// collection doesn't mention (e.g. a previous collection's
+	// `query.woocommerceHandPickedProducts`) untouched instead of reset.
+	const newBlock =
 		collection.name === CoreCollectionNames.PRODUCT_CATALOG
-			? getDefaultProductCollection().attributes
-			: collection.attributes;
+			? getDefaultProductCollection()
+			: createBlock(
+					blockJson.name,
+					collection.attributes,
+					createBlocksFromInnerBlocksTemplate(
+						collection.innerBlocks
+					)
+			  );
 
-	// Update block attributes in-place so Yjs can diff and broadcast
-	// the change as a targeted attribute patch rather than a full
-	// block delete + insert (which breaks real-time collaboration).
+	// Update the block's attributes and inner blocks in place (instead of
+	// calling replaceBlock, which swaps in an entirely new block instance)
+	// so the change reads as a targeted patch rather than a full block
+	// delete + insert.
 	setAttributes( {
-		...defaultAttributes,
+		...newBlock.attributes,
 		collection: collectionName,
 	} as Partial< ProductCollectionAttributes > );
 
-	const innerBlockTemplate =
-		collection.name === CoreCollectionNames.PRODUCT_CATALOG
-			? getDefaultProductCollection().innerBlocks
-			: collection.innerBlocks;
-
-	if ( innerBlockTemplate ) {
-		replaceInnerBlocks(
-			clientId,
-			createBlocksFromInnerBlocksTemplate( innerBlockTemplate )
-		);
-	}
+	replaceInnerBlocks( clientId, newBlock.innerBlocks );
 };
 
 const CollectionButton = ( {

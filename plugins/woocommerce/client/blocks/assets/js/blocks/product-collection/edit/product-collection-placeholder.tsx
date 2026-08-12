@@ -25,7 +25,6 @@ const ProductCollectionPlaceholder = (
 	const blockProps = useBlockProps();
 	const { clientId, tracksLocation } = props;
 
-	// @ts-expect-error Type definitions for this function are missing
 	// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/actions.d.ts
 	const { replaceInnerBlocks } = useDispatch( blockEditorStore );
 
@@ -40,6 +39,8 @@ const ProductCollectionPlaceholder = (
 		applyCollection(
 			collectionName,
 			props.setAttributes,
+			// @ts-expect-error Type definitions for this function are missing
+			// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/actions.d.ts
 			replaceInnerBlocks,
 			clientId
 		);

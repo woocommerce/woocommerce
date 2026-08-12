@@ -25,7 +25,6 @@ const PatternSelectionModal = ( props: {
 		props;
 	const { collection } = attributes;
 	// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/actions.d.ts
-	// @ts-expect-error Type definitions for this function are missing
 	const { replaceInnerBlocks } = useDispatch( blockEditorStore );
 
 	const [ chosenCollection, selectCollectionName ] = useState( collection );
@@ -43,6 +42,8 @@ const PatternSelectionModal = ( props: {
 			applyCollection(
 				chosenCollection,
 				props.setAttributes,
+				// @ts-expect-error Type definitions for this function are missing
+				// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/actions.d.ts
 				replaceInnerBlocks,
 				clientId
 			);
