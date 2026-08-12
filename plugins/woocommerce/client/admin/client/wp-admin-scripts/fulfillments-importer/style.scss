@@ -11,21 +11,21 @@ $wp-admin-sidebar-width-collapsed: 36px;
 .woocommerce-fulfillment-importer-overlay {
 	&.components-modal__screen-overlay {
 		background-color: transparent;
-		top: $wp-admin-bar-height;
-		left: $wp-admin-sidebar-width;
-		right: 0;
-		bottom: 0;
+		inset-block-start: $wp-admin-bar-height;
+		inset-inline-start: $wp-admin-sidebar-width;
+		inset-inline-end: 0;
+		inset-block-end: 0;
 
 		@media screen and (max-width: 782px) {
-			top: $wp-admin-bar-height-mobile;
-			left: 0;
+			inset-block-start: $wp-admin-bar-height-mobile;
+			inset-inline-start: 0;
 		}
 
 		.folded & {
-			left: $wp-admin-sidebar-width-collapsed;
+			inset-inline-start: $wp-admin-sidebar-width-collapsed;
 
 			@media screen and (max-width: 782px) {
-				left: 0;
+				inset-inline-start: 0;
 			}
 		}
 	}
@@ -41,8 +41,8 @@ $wp-admin-sidebar-width-collapsed: 36px;
 		box-shadow: none;
 		background: $white;
 		margin: 0;
-		top: 0;
-		left: 0;
+		inset-block-start: 0;
+		inset-inline-start: 0;
 		transform: none;
 	}
 
@@ -170,7 +170,7 @@ $wp-admin-sidebar-width-collapsed: 36px;
 
 	th,
 	td {
-		text-align: left;
+		text-align: start;
 		padding: 8px 12px;
 		border-bottom: 1px solid $gray-100;
 		vertical-align: top;
