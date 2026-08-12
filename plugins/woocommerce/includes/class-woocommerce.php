@@ -1854,3 +1854,5 @@ final class WooCommerce {
 		}
 	}
 }
+
+// Temporary no-op comment: verifying CI_QUEUE_OVERFLOW e2e runner routing (DEVPROD-1148). Do not merge.
