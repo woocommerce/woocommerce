@@ -12,15 +12,15 @@ namespace Automattic\WooCommerce\Internal\Admin\Notes;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\NoteTraits;
-use Automattic\WooCommerce\Internal\Admin\Analytics;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * FullRefundFixDataToolNotice
  *
- * @since 11.0.0
+ * @since 11.2.0
  */
 class FullRefundFixDataToolNotice {
 	/**
@@ -39,11 +39,14 @@ class FullRefundFixDataToolNotice {
 	 * @return bool
 	 */
 	public static function is_applicable() {
-		if ( ! Features::is_enabled( 'analytics' ) ) {
+		if ( ! FeaturesUtil::feature_is_enabled( 'analytics' ) ) {
 			return false;
 		}
 
-		return Analytics::should_show_refund_fix_tool();
+		// The notice follows the underlying data state, not the tool-row
+		// visibility flag (`woocommerce_analytics_show_old_refund_data_tool`),
+		// so it auto-hides once the fix has been applied.
+		return ! OrderUtil::uses_new_full_refund_data();
 	}
 
 	/**
