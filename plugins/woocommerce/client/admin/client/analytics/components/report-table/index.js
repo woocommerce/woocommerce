@@ -36,7 +36,6 @@ import {
 	reportsStore,
 	useUserPreferences,
 	QUERY_DEFAULTS,
-	usesServerSideSearch,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -45,6 +44,7 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import DownloadIcon from './download-icon';
 import { extendTableData, getExportQuery } from './utils';
+import { hasEmptySearchResults } from '../utils';
 import './style.scss';
 
 const TABLE_FILTER = 'woocommerce_admin_report_table';
@@ -595,14 +595,7 @@ export default compose(
 			? select( extendedItemsStoreName )
 			: null;
 
-		const hasLimitByParam = limitBy.some(
-			( item ) => query[ item ] && query[ item ].length
-		);
-		const noSearchResultsFound =
-			query.search &&
-			! hasLimitByParam &&
-			! usesServerSideSearch( limitBy );
-		if ( isRequesting || noSearchResultsFound ) {
+		if ( isRequesting || hasEmptySearchResults( query, limitBy ) ) {
 			return EMPTY_OBJECT;
 		}
 

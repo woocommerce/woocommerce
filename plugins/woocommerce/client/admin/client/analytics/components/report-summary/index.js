@@ -14,11 +14,7 @@ import {
 	SummaryNumber,
 } from '@woocommerce/components';
 import { calculateDelta, formatValue } from '@woocommerce/number';
-import {
-	getSummaryNumbers,
-	settingsStore,
-	usesServerSideSearch,
-} from '@woocommerce/data';
+import { getSummaryNumbers, settingsStore } from '@woocommerce/data';
 import { getDateParamsFromQuery } from '@woocommerce/date';
 import { recordEvent } from '@woocommerce/tracks';
 import { CurrencyContext } from '@woocommerce/currency';
@@ -26,6 +22,7 @@ import { CurrencyContext } from '@woocommerce/currency';
 /**
  * Internal dependencies
  */
+import { hasEmptySearchResults } from '../utils';
 
 /**
  * Component to render summary numbers in reports.
@@ -213,15 +210,7 @@ export default compose(
 		} = props;
 		const limitBy = limitProperties || [ endpoint ];
 
-		const hasLimitByParam = limitBy.some(
-			( item ) => query[ item ] && query[ item ].length
-		);
-
-		if (
-			query.search &&
-			! hasLimitByParam &&
-			! usesServerSideSearch( limitBy )
-		) {
+		if ( hasEmptySearchResults( query, limitBy ) ) {
 			return {
 				emptySearchResults: true,
 			};

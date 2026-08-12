@@ -14,7 +14,6 @@ import {
 	getTooltipValueFormat,
 	settingsStore,
 	reportsStore,
-	usesServerSideSearch,
 } from '@woocommerce/data';
 import {
 	getAllowedIntervalsForQuery,
@@ -34,6 +33,7 @@ import {
 	createDateFormatter,
 	buildChartData,
 } from './utils';
+import { hasEmptySearchResults } from '../utils';
 
 /**
  * Component that renders the chart in reports.
@@ -359,15 +359,7 @@ export default compose(
 			return newProps;
 		}
 
-		const hasLimitByParam = limitBy.some(
-			( item ) => query[ item ] && query[ item ].length
-		);
-
-		if (
-			query.search &&
-			! hasLimitByParam &&
-			! usesServerSideSearch( limitBy )
-		) {
+		if ( hasEmptySearchResults( query, limitBy ) ) {
 			return {
 				...newProps,
 				emptySearchResults: true,
