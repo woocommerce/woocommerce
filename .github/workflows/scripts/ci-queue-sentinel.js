@@ -29,6 +29,10 @@ const PROBE_QUEUED_RUN_MAX_AGE_MIN = 120;
 const PROBE_IN_PROGRESS_RUN_MAX_AGE_MIN = 480;
 const MAX_QUEUED_RUNS_TO_PROBE = 30;
 const MAX_IN_PROGRESS_RUNS_TO_PROBE = 30;
+// Extra runs probed only when the switch is ON, the probed hosted queue looks
+// clear, and the probe was truncated: switch-off must be decided on proof, not
+// on the run count happening to fit the caps.
+const MAX_ESCALATION_RUNS_TO_PROBE = 60;
 const MAX_RUN_LIST_PAGES = 3;
 const MAX_FETCH_RETRIES = 2;
 
@@ -134,23 +138,49 @@ const fetchJobsForRun = async ( runId ) => {
 	return jobs;
 };
 
-const fetchQueuedJobs = async ( runs ) => {
-	const allQueued = runs.filter( ( run ) => run.status === 'queued' );
-	const allInProgress = runs.filter( ( run ) => run.status !== 'queued' );
-	const queuedRuns = allQueued.slice( 0, MAX_QUEUED_RUNS_TO_PROBE );
-	const inProgressRuns = allInProgress.slice( 0, MAX_IN_PROGRESS_RUNS_TO_PROBE );
+// Only jobs targeting hosted runner labels (runs-on: ubuntu-*) compete for the
+// shared standard pool the sentinel protects. Jobs routed to a runner group
+// (Woo Core Dedicated CI, WooCommerce Release Checks) have an empty labels
+// array and wait on that group's own capacity — counting them would let the
+// switch trip on group backlogs, or hold itself ON via the very e2e jobs it
+// routed to the dedicated group.
+const isHostedPoolJob = ( job ) =>
+	( job.labels || [] ).some( ( label ) => label.toLowerCase().startsWith( 'ubuntu-' ) );
+
+const collectQueuedJobs = async ( runList ) => {
 	const queued = [];
-	for ( const run of [ ...queuedRuns, ...inProgressRuns ] ) {
+	let ignoredPools = 0;
+	for ( const run of runList ) {
 		const jobs = await fetchJobsForRun( run.id );
 		for ( const job of jobs ) {
-			if ( job.status === 'queued' ) {
+			if ( job.status !== 'queued' ) {
+				continue;
+			}
+			if ( isHostedPoolJob( job ) ) {
 				queued.push( job );
+			} else {
+				ignoredPools++;
 			}
 		}
 	}
-	const complete = allQueued.length <= MAX_QUEUED_RUNS_TO_PROBE &&
-		allInProgress.length <= MAX_IN_PROGRESS_RUNS_TO_PROBE;
-	return { queued, complete };
+	return { queued, ignoredPools };
+};
+
+const fetchQueuedJobs = async ( runs ) => {
+	const allQueued = runs.filter( ( run ) => run.status === 'queued' );
+	const allInProgress = runs.filter( ( run ) => run.status !== 'queued' );
+	const probeList = [
+		...allQueued.slice( 0, MAX_QUEUED_RUNS_TO_PROBE ),
+		...allInProgress.slice( 0, MAX_IN_PROGRESS_RUNS_TO_PROBE ),
+	];
+	// Runs beyond the caps are returned unprobed so the switch-off path can
+	// escalate and probe them when it matters (see main()).
+	const remainder = [
+		...allQueued.slice( MAX_QUEUED_RUNS_TO_PROBE ),
+		...allInProgress.slice( MAX_IN_PROGRESS_RUNS_TO_PROBE ),
+	];
+	const { queued, ignoredPools } = await collectQueuedJobs( probeList );
+	return { queued, complete: remainder.length === 0, ignoredPools, remainder };
 };
 
 const fetchVariable = async () => {
@@ -226,20 +256,25 @@ const main = async () => {
 	// Forced modes skip the probe: a manual override must succeed even when
 	// the queue API is failing, and needs no queue data to decide.
 	const forced = MODE === 'on' || MODE === 'off';
-	let runs = [], queuedJobs = [], probeComplete = true, dropped = 0;
+	let runs = [], queuedJobs = [], dropped = 0, ignoredPools = 0, remainder = [];
+	let runsListComplete = true, probeComplete = true;
 	if ( ! forced ) {
 		const runsResult = await fetchActiveRuns();
 		const jobsResult = await fetchQueuedJobs( runsResult.runs );
 		runs = runsResult.runs;
 		queuedJobs = jobsResult.queued;
-		probeComplete = runsResult.complete && jobsResult.complete;
+		runsListComplete = runsResult.complete;
+		probeComplete = runsListComplete && jobsResult.complete;
 		dropped = runsResult.dropped;
+		ignoredPools = jobsResult.ignoredPools;
+		remainder = jobsResult.remainder;
 	}
 	// Measure ages after the probe; retries can stretch it by minutes.
-	const nowMs = Date.now();
-	const oldestAgeMin = queuedJobs.length
-		? Math.max( ...queuedJobs.map( ( job ) => ( nowMs - new Date( job.created_at ) ) / 60000 ) )
+	let nowMs = Date.now();
+	const oldestAge = ( jobs, refMs ) => jobs.length
+		? Math.max( ...jobs.map( ( job ) => ( refMs - new Date( job.created_at ) ) / 60000 ) )
 		: null;
+	let oldestAgeMin = oldestAge( queuedJobs, nowMs );
 
 	const variable = await fetchVariable();
 	// Anything but '1' counts as off; non-canonical values get rewritten.
@@ -247,14 +282,40 @@ const main = async () => {
 	const current = rawValue === '1' ? '1' : '0';
 	const updatedAtMs = variable ? new Date( variable.updated_at ).getTime() : 0;
 
+	const thresholdMin = Number( QUEUE_AGE_THRESHOLD_MIN );
+	const hysteresisMin = Number( HYSTERESIS_MIN );
+
+	// Escalation: a truncated probe suppresses switch-off, but when the switch
+	// is ON and the probed hosted queue looks healthy, that suppression may
+	// rest only on unprobed runs — probe them so the off decision is proven
+	// rather than dependent on the run count fitting the caps. Runs only in
+	// that narrow state, so normal ticks pay nothing extra.
+	let escalated = 0;
+	if (
+		! forced && ! probeComplete && current === '1' &&
+		! ( oldestAgeMin !== null && oldestAgeMin > thresholdMin ) &&
+		nowMs - updatedAtMs >= hysteresisMin * 60 * 1000 &&
+		remainder.length > 0 && remainder.length <= MAX_ESCALATION_RUNS_TO_PROBE
+	) {
+		const extra = await collectQueuedJobs( remainder );
+		queuedJobs = [ ...queuedJobs, ...extra.queued ];
+		ignoredPools += extra.ignoredPools;
+		escalated = remainder.length;
+		nowMs = Date.now();
+		oldestAgeMin = oldestAge( queuedJobs, nowMs );
+		// Every listed run is now probed; only run-list page truncation can
+		// still leave the probe incomplete.
+		probeComplete = runsListComplete;
+	}
+
 	const value = decide( {
 		oldestAgeMin,
 		current,
 		updatedAtMs,
 		nowMs,
 		mode: MODE,
-		thresholdMin: Number( QUEUE_AGE_THRESHOLD_MIN ),
-		hysteresisMin: Number( HYSTERESIS_MIN ),
+		thresholdMin,
+		hysteresisMin,
 		probeComplete,
 	} );
 
@@ -262,15 +323,15 @@ const main = async () => {
 		await writeVariable( value, !! variable );
 	}
 
-	const probed =
+	const probed = escalated +
 		Math.min( runs.filter( ( run ) => run.status === 'queued' ).length, MAX_QUEUED_RUNS_TO_PROBE ) +
 		Math.min( runs.filter( ( run ) => run.status !== 'queued' ).length, MAX_IN_PROGRESS_RUNS_TO_PROBE );
 	summarize( [
 		'### CI Queue Sentinel',
 		`- Mode: \`${ MODE }\``,
 		...( forced ? [ '- Probe skipped (forced mode)' ] : [
-			`- Active runs probed: ${ probed } of ${ runs.length }${ dropped ? ` (${ dropped } dropped by age window)` : '' }${ probeComplete ? '' : ' (probe truncated — switch-off suppressed)' }`,
-			`- Queued jobs found: ${ queuedJobs.length }`,
+			`- Active runs probed: ${ probed } of ${ runs.length }${ dropped ? ` (${ dropped } dropped by age window)` : '' }${ escalated ? ` (escalated: +${ escalated } runs to verify switch-off)` : '' }${ probeComplete ? '' : ' (probe truncated — switch-off suppressed)' }`,
+			`- Queued jobs found: ${ queuedJobs.length } (hosted pool${ ignoredPools ? `; ${ ignoredPools } in runner groups ignored` : '' })`,
 			`- Oldest queued job age: ${ oldestAgeMin === null ? 'n/a (queue clear)' : `${ oldestAgeMin.toFixed( 1 ) } min` } (threshold ${ QUEUE_AGE_THRESHOLD_MIN } min)`,
 		] ),
 		`- ${ VARIABLE_NAME }: \`${ rawValue }\` -> \`${ value }\`${ value === rawValue ? ' (no change)' : '' }`,
