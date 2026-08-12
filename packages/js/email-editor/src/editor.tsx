@@ -45,12 +45,14 @@ function Editor( {
 	isPreview = false,
 	contentRef = null,
 	customSavePanel,
+	customSaveButton,
 }: {
 	postId: number | string;
 	postType: string;
 	isPreview?: boolean;
 	contentRef?: React.Ref< HTMLDivElement > | null;
 	customSavePanel?: React.ReactElement;
+	customSaveButton?: React.ReactElement;
 } ) {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 	const { settings } = useSelect(
@@ -98,6 +100,7 @@ function Editor( {
 				settings={ editorSettings }
 				contentRef={ mergedContentRef }
 				customSavePanel={ customSavePanel }
+				customSaveButton={ customSaveButton }
 			/>
 		</StrictMode>
 	);
@@ -182,6 +185,7 @@ export function ExperimentalEmailEditor( {
 	contentRef = null,
 	config,
 	customSavePanel,
+	customSaveButton,
 }: {
 	postId: string;
 	postType: string;
@@ -189,6 +193,7 @@ export function ExperimentalEmailEditor( {
 	contentRef?: React.Ref< HTMLDivElement > | null;
 	config?: EmailEditorConfig;
 	customSavePanel?: React.ReactElement;
+	customSaveButton?: React.ReactElement;
 } ) {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 
@@ -228,6 +233,7 @@ export function ExperimentalEmailEditor( {
 			isPreview={ isPreview }
 			contentRef={ contentRef }
 			customSavePanel={ customSavePanel }
+			customSaveButton={ customSaveButton }
 		/>
 	);
 }
