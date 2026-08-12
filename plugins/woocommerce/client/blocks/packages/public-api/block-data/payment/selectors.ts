@@ -26,9 +26,8 @@ if ( getSetting( 'globalPaymentMethods' ) ) {
 
 export const isPaymentPristine = ( state: PaymentState ) => {
 	deprecated( 'isPaymentPristine', {
-		since: '9.6.0',
+		since: '7.5.0',
 		alternative: 'isPaymentIdle',
-		plugin: 'WooCommerce Blocks',
 		link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
 	} );
 
@@ -40,9 +39,8 @@ export const isPaymentIdle = ( state: PaymentState ) =>
 
 export const isPaymentStarted = ( state: PaymentState ) => {
 	deprecated( 'isPaymentStarted', {
-		since: '9.6.0',
+		since: '7.5.0',
 		alternative: 'isExpressPaymentStarted',
-		plugin: 'WooCommerce Blocks',
 		link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
 	} );
 	return state.status === PAYMENT_STATUS.EXPRESS_STARTED;
@@ -60,9 +58,8 @@ export const isPaymentReady = ( state: PaymentState ) =>
 
 export const isPaymentSuccess = ( state: PaymentState ) => {
 	deprecated( 'isPaymentSuccess', {
-		since: '9.6.0',
+		since: '7.5.0',
 		alternative: 'isPaymentReady',
-		plugin: 'WooCommerce Blocks',
 		link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
 	} );
 
@@ -74,8 +71,7 @@ export const hasPaymentError = ( state: PaymentState ) =>
 
 export const isPaymentFailed = ( state: PaymentState ) => {
 	deprecated( 'isPaymentFailed', {
-		since: '9.6.0',
-		plugin: 'WooCommerce Blocks',
+		since: '7.5.0',
 		link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
 	} );
 
@@ -187,18 +183,16 @@ export const expressPaymentMethodsInitialized = ( state: PaymentState ) => {
  */
 export const getCurrentStatus = ( state: PaymentState ) => {
 	deprecated( 'getCurrentStatus', {
-		since: '8.9.0',
+		since: '7.2.0',
 		alternative: 'isPaymentIdle, isPaymentProcessing, hasPaymentError',
-		plugin: 'WooCommerce Blocks',
 		link: 'https://github.com/woocommerce/woocommerce-blocks/pull/7666',
 	} );
 
 	return {
 		get isPristine() {
 			deprecated( 'isPristine', {
-				since: '9.6.0',
+				since: '7.5.0',
 				alternative: 'isIdle',
-				plugin: 'WooCommerce Blocks',
 			} );
 			return isPaymentIdle( state );
 		}, // isPristine is the same as isIdle.
@@ -207,8 +201,7 @@ export const getCurrentStatus = ( state: PaymentState ) => {
 		isProcessing: isPaymentProcessing( state ),
 		get isFinished() {
 			deprecated( 'isFinished', {
-				since: '9.6.0',
-				plugin: 'WooCommerce Blocks',
+				since: '7.5.0',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
 			} );
 			return hasPaymentError( state ) || isPaymentReady( state );
@@ -216,16 +209,14 @@ export const getCurrentStatus = ( state: PaymentState ) => {
 		hasError: hasPaymentError( state ),
 		get hasFailed() {
 			deprecated( 'hasFailed', {
-				since: '9.6.0',
-				plugin: 'WooCommerce Blocks',
+				since: '7.5.0',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
 			} );
 			return hasPaymentError( state );
 		},
 		get isSuccessful() {
 			deprecated( 'isSuccessful', {
-				since: '9.6.0',
-				plugin: 'WooCommerce Blocks',
+				since: '7.5.0',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
 			} );
 			return isPaymentReady( state );
