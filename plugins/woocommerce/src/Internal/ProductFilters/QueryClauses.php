@@ -11,7 +11,6 @@ use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\MainQueryClausesGenerator;
-use Automattic\WooCommerce\Internal\ProductFilters\CacheController;
 use WC_Tax;
 use WC_Cache_Helper;
 
@@ -359,33 +358,19 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 			}
 
 			if ( is_taxonomy_hierarchical( $taxonomy ) ) {
-				$expanded_term_ids = $term_ids;
+				// Expand chosen terms to include descendants. get_term_children()
+				// resolves from the precomputed {$taxonomy}_children option, so it
+				// adds no per-term query.
+				$descendant_sets = array( $term_ids );
 
 				foreach ( $term_ids as $term_id ) {
-					$cache_key = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ) . 'child_terms_' . $taxonomy . '_' . $term_id;
-					$children  = wp_cache_get( $cache_key );
-
-					if ( false === $children ) {
-						$children = get_terms(
-							array(
-								'taxonomy'   => $taxonomy,
-								'child_of'   => $term_id,
-								'fields'     => 'ids',
-								'hide_empty' => false,
-							)
-						);
-
-						if ( ! is_wp_error( $children ) ) {
-							wp_cache_set( $cache_key, $children, '', HOUR_IN_SECONDS );
-						} else {
-							$children = array();
-						}
+					$children = get_term_children( (int) $term_id, $taxonomy );
+					if ( ! is_wp_error( $children ) ) {
+						$descendant_sets[] = $children;
 					}
-
-					$expanded_term_ids = array_merge( $expanded_term_ids, $children );
 				}
 
-				$term_ids = array_unique( $expanded_term_ids );
+				$term_ids = array_unique( array_merge( ...$descendant_sets ) );
 			}
 
 			$term_ids_list = '(' . implode( ',', array_map( 'absint', $term_ids ) ) . ')';

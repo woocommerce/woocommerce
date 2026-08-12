@@ -14,7 +14,10 @@ import type {
 	RawShopperListItem,
 	Store as ShopperListsStore,
 } from '@woocommerce/stores/woocommerce/shopper-lists';
-import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
+import type {
+	AddCartItemOutcome,
+	Store as WooCommerce,
+} from '@woocommerce/stores/woocommerce/cart';
 import { sanitizeHTML } from '@woocommerce/sanitize';
 
 const universalLock =
@@ -106,7 +109,7 @@ const { state: shopperListsState, actions: shopperListsActions } =
 		{ lock: universalLock }
 	);
 
-const { state: cartState, actions: cartActions } = store< WooCommerce >(
+const { actions: cartActions } = store< WooCommerce >(
 	'woocommerce',
 	{},
 	{ lock: universalLock }
@@ -261,31 +264,21 @@ store< BlockStore >(
 				);
 				const isVariation = listItem.variation_id > 0;
 
-				// `cartActions.addCartItem` catches its own errors and
-				// surfaces them as store notices, so the yield resolves
-				// the same way on success and failure. Snapshot the
-				// matching line's quantity, run the add, then only remove
-				// from the saved list if it actually grew.
-				const lookup = {
-					id: listItem.id,
-					...( isVariation && { variation } ),
-				};
-				const beforeItem = cartState.findItemInCart( lookup );
-				const beforeQuantity = beforeItem?.quantity ?? 0;
-
 				pendingKeys[ listItem.key ] = true;
 				try {
-					yield cartActions.addCartItem( {
+					// `addCartItem` resolves an `AddCartItemOutcome` captured
+					// at the moment its own request settles (accepted or
+					// rejected), so `outcome.success` tells us directly
+					// whether to drop the source entry — no need to read or
+					// sum the cart ourselves.
+					const outcome = ( yield cartActions.addCartItem( {
 						id: listItem.id,
 						quantityToAdd: listItem.quantity,
 						type: isVariation ? 'variation' : 'simple',
 						...( isVariation && { variation } ),
-					} );
+					} ) ) as AddCartItemOutcome;
 
-					const afterItem = cartState.findItemInCart( lookup );
-					const afterQuantity = afterItem?.quantity ?? 0;
-
-					if ( afterQuantity <= beforeQuantity ) {
+					if ( ! outcome.success ) {
 						return;
 					}
 

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix silent backslash corruption in Agentic Checkout buyer/address fields and Store API checkout field validation. Calling wp_unslash() on JSON request body data that is never magic-quoted was stripping real backslashes typed by the buyer.

@@ -90,7 +90,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 */
 	private function adjust_character_encoding( $value ) {
 		$encoding = $this->params['character_encoding'];
-		return 'UTF-8' === $encoding ? $value : mb_convert_encoding( $value, 'UTF-8', $encoding );
+
+		// Skip conversion when the value is already UTF-8 or when mbstring is unavailable.
+		if ( 'UTF-8' === $encoding || ! function_exists( 'mb_convert_encoding' ) ) {
+			return $value;
+		}
+
+		return mb_convert_encoding( $value, 'UTF-8', $encoding );
 	}
 
 	/**
@@ -373,7 +379,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		// Remove the ' prepended to fields that start with - if needed.
 		$value = $this->unescape_data( $value );
 
-		return floatval( $value );
+		// Use wc_format_decimal() rather than floatval() so the store's decimal separator
+		// setting is respected (e.g. a comma-separated weight like "1,5"). This mirrors how
+		// price fields are parsed above and how the product setters normalize these values.
+		return (float) wc_format_decimal( $value );
 	}
 
 	/**
@@ -822,14 +831,20 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		);
 
 		/**
-		 * Match special column names.
+		 * Match special column names by prefix.
+		 *
+		 * These prefixes must stay in sync with the `starts_with()` checks in `expand_data()`,
+		 * which is what decides how the column is actually consumed. Matching anywhere in the
+		 * column name instead of at the start would apply a formatting callback to columns
+		 * `expand_data()` never treats as special.
 		 */
-		$regex_match_data_formatting = array(
-			'/attributes:value*/'    => array( $this, 'parse_comma_field' ),
-			'/attributes:visible*/'  => array( $this, 'parse_bool_field' ),
-			'/attributes:taxonomy*/' => array( $this, 'parse_bool_field' ),
-			'/downloads:url*/'       => array( $this, 'parse_download_file_field' ),
-			'/meta:*/'               => 'wp_kses_post', // Allow some HTML in meta fields.
+		$prefix_match_data_formatting = array(
+			'attributes:value'    => array( $this, 'parse_comma_field' ),
+			'attributes:visible'  => array( $this, 'parse_bool_field' ),
+			'attributes:taxonomy' => array( $this, 'parse_bool_field' ),
+			'downloads:url'       => array( $this, 'parse_download_file_field' ),
+			// Allow some HTML in meta fields.
+			'meta:'               => 'wp_kses_post',
 		);
 
 		$callbacks = array();
@@ -841,9 +856,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			if ( isset( $data_formatting[ $heading ] ) ) {
 				$callback = $data_formatting[ $heading ];
 			} else {
-				foreach ( $regex_match_data_formatting as $regex => $callback ) {
-					if ( preg_match( $regex, $heading ) ) {
-						$callback = $callback;
+				foreach ( $prefix_match_data_formatting as $prefix => $prefix_callback ) {
+					if ( $this->starts_with( $heading, $prefix ) ) {
+						$callback = $prefix_callback;
 						break;
 					}
 				}
@@ -881,9 +896,24 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		if ( isset( $data['images'] ) ) {
 			$images               = $data['images'];
 			$data['raw_image_id'] = array_shift( $images );
+			$gallery              = array_filter(
+				$images,
+				function ( $image ) {
+					return '' !== $image;
+				}
+			);
 
-			if ( ! empty( $images ) ) {
-				$data['raw_gallery_image_ids'] = $images;
+			// When any image value is provided, treat the remaining values as the full
+			// gallery. Setting the key even when no gallery images remain ensures that
+			// reducing the number of images in the CSV clears previously imported gallery
+			// images instead of leaving them in place, while a fully empty images cell
+			// (including one containing only separators) still leaves existing images
+			// untouched. Gating on the gallery values too keeps them imported when the
+			// featured-image slot is empty (e.g. a cell starting with a separator).
+			// See https://github.com/woocommerce/woocommerce/issues/34839
+			// and https://github.com/woocommerce/woocommerce/issues/66583.
+			if ( ! empty( $data['raw_image_id'] ) || ! empty( $gallery ) ) {
+				$data['raw_gallery_image_ids'] = $gallery;
 			}
 			unset( $data['images'] );
 		}
@@ -1133,6 +1163,41 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Whether a variation row that does not exist yet can be created under its parent product.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param array $parsed_data Parsed row data.
+	 * @return bool
+	 */
+	protected function can_create_variation( $parsed_data ) {
+		// A row ID cannot be honored when creating a new variation: reusing an existing
+		// post's ID would corrupt that post, and a nonexistent ID cannot be assigned.
+		if ( ! empty( $parsed_data['id'] ) ) {
+			return false;
+		}
+
+		// A CSV ID cannot be assigned to a new variation, so without a SKU the created variation
+		// could never be matched again and every re-import would duplicate it.
+		if ( empty( $parsed_data['sku'] ) ) {
+			return false;
+		}
+
+		if ( empty( $parsed_data['parent_id'] ) ) {
+			return false;
+		}
+
+		$parent = wc_get_product( $parsed_data['parent_id'] );
+
+		if ( ! $parent || ! $parent->is_type( ProductType::VARIABLE ) ) {
+			return false;
+		}
+
+		// A parent with the 'importing' status is a placeholder, meaning the parent does not exist either.
+		return ! in_array( $parent->get_status(), array( 'importing', ProductStatus::TRASH ), true );
+	}
+
+	/**
 	 * Process importer.
 	 *
 	 * Do not import products with IDs or SKUs that already exist if option
@@ -1197,16 +1262,34 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			}
 
 			if ( $update_existing && ( isset( $parsed_data['id'] ) || isset( $parsed_data['sku'] ) ) && ! $id_exists && ! $sku_exists ) {
-				$data['skipped'][] = new WP_Error(
-					'woocommerce_product_importer_error',
-					esc_html__( 'No matching product exists to update.', 'woocommerce' ),
-					array(
-						'id'  => $id,
-						'sku' => esc_attr( $sku ),
-						'row' => $this->get_row_id( $parsed_data ),
-					)
-				);
-				continue;
+				$create_variation = false;
+
+				if ( ProductType::VARIATION === ( $parsed_data['type'] ?? '' ) && $this->can_create_variation( $parsed_data ) ) {
+					/**
+					 * Filters whether a new variation should be created for an existing variable product when updating existing products.
+					 *
+					 * Only fires for variation rows that passed validation, so it can veto the creation but not force it.
+					 *
+					 * @since 11.1.0
+					 *
+					 * @param bool  $create_variation Whether to create the new variation instead of skipping the row.
+					 * @param array $parsed_data      Parsed row data.
+					 */
+					$create_variation = apply_filters( 'woocommerce_product_import_create_variation_of_existing_product', true, $parsed_data );
+				}
+
+				if ( ! $create_variation ) {
+					$data['skipped'][] = new WP_Error(
+						'woocommerce_product_importer_error',
+						esc_html__( 'No matching product exists to update.', 'woocommerce' ),
+						array(
+							'id'  => $id,
+							'sku' => esc_attr( $sku ),
+							'row' => $this->get_row_id( $parsed_data ),
+						)
+					);
+					continue;
+				}
 			}
 
 			$result = $this->process_item( $parsed_data );

@@ -28,8 +28,8 @@ import './abandoned-cart-recovery-recommendations.scss';
  *
  * Tracks which plugin slugs are currently being set up so item buttons can show
  * a busy state and be disabled while any install is in flight. Mirrors the
- * shipping recommendation hook (`shipping-recommendations.tsx#useInstallPlugin`)
- * with a narrower surface — we only need the combined install+activate path.
+ * shipping recommendation utilities, with a narrower surface — we only need
+ * the combined install+activate path here.
  */
 export const useInstallPlugin = () => {
 	const [ pluginsBeingSetup, setPluginsBeingSetup ] = useState<

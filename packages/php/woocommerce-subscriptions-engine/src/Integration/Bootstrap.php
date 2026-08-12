@@ -14,6 +14,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Integration;
 
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Rest\ContractsController;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Gateway\CapabilityRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalDispatcher;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalEngine;
@@ -52,6 +53,7 @@ final class Bootstrap {
 		// boot (not just activation) so the hooks can fire.
 		( new RenewalEngine() )->register_hooks();
 		PlansController::register_hooks();
+		ContractsController::register_hooks();
 		( new RenewalDispatcher() )->register_hooks();
 
 		// Deferred boot work, each on the most specific moment it needs: the schema install

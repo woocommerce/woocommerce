@@ -1125,7 +1125,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			}
 
 			if ( isset( $request['button_text'] ) ) {
-				$product->set_button_text( $request['button_text'] );
+				$product->set_button_text( sanitize_text_field( $request['button_text'] ) );
 			}
 		}
 

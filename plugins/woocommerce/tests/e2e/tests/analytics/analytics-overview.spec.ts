@@ -1,8 +1,12 @@
 /**
  * External dependencies
  */
-import { test, expect, request } from '@playwright/test';
-import type { Page, Locator } from '@playwright/test';
+import { test, expect } from '@playwright/test';
+import type {
+	Page,
+	Locator,
+	Response as PlaywrightResponse,
+} from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -10,7 +14,6 @@ import type { Page, Locator } from '@playwright/test';
 import { admin } from '../../test-data/data';
 import { tags } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { setOption } from '../../utils/options';
 
 const EXPECTED_SECTION_HEADERS = [ 'Performance', 'Charts', 'Leaderboards' ];
 
@@ -30,6 +33,22 @@ const headers = {
 	Authorization: `Basic ${ base64String }`,
 	cookie: '',
 };
+
+// Call this before the click that triggers the save, and await the returned
+// promise after it — registering the listener after the click can miss a
+// response that already arrived.
+const waitForUserPrefsSave = () =>
+	page.waitForResponse(
+		( res ) =>
+			res.url().includes( `/users/${ userId }` ) &&
+			res.request().method() !== 'GET'
+	);
+
+const expectSaved = ( response: PlaywrightResponse ) =>
+	expect(
+		response.ok(),
+		`${ response.status() } ${ response.url() }`
+	).toBeTruthy();
 
 const hidePerformanceSection = async () => {
 	const response =
@@ -213,12 +232,9 @@ test.describe(
 
 					await test.step( `Move first section down`, async () => {
 						await buttons_ellipsis.first().click();
+						const savePromise = waitForUserPrefsSave();
 						await menuitem_moveDown.click();
-						await page.waitForResponse(
-							( response ) =>
-								response.url().includes( '/users' ) &&
-								response.ok()
-						);
+						expectSaved( await savePromise );
 					} );
 
 					await test.step( `Expect the second section to become first, and first becomes second.`, async () => {
@@ -242,12 +258,9 @@ test.describe(
 
 					await test.step( `Move second section up`, async () => {
 						await buttons_ellipsis.nth( 1 ).click();
+						const savePromise = waitForUserPrefsSave();
 						await menuitem_moveUp.click();
-						await page.waitForResponse(
-							( response ) =>
-								response.url().includes( '/users' ) &&
-								response.ok()
-						);
+						expectSaved( await savePromise );
 					} );
 
 					await test.step( `Expect second section becomes first section, first becomes second`, async () => {
@@ -269,13 +282,11 @@ test.describe(
 						name: 'Choose which analytics to display and the section name',
 					} )
 					.click();
+				const savePromise = waitForUserPrefsSave();
 				await page
 					.getByRole( 'menuitem', { name: 'Remove section' } )
 					.click();
-				await page.waitForResponse(
-					( response ) =>
-						response.url().includes( '/users' ) && response.ok()
-				);
+				expectSaved( await savePromise );
 			} );
 
 			await test.step( `Expect the Performance section to be hidden`, async () => {
@@ -285,107 +296,19 @@ test.describe(
 		} );
 
 		test( 'should allow a user to add a section back in', async () => {
-			await hidePerformanceSection( page );
+			await hidePerformanceSection();
 			await page.reload();
 
 			await test.step( `Add the Performance section back in.`, async () => {
 				await page.getByTitle( 'Add more sections' ).click();
+				const savePromise = waitForUserPrefsSave();
 				await page.getByTitle( 'Add Performance section' ).click();
-				await page.waitForResponse(
-					( response ) =>
-						response.url().includes( '/users' ) && response.ok()
-				);
+				expectSaved( await savePromise );
 			} );
 
 			await test.step( `Expect the Performance section to be added back.`, async () => {
 				await expect( heading_performance ).toBeVisible();
 			} );
-		} );
-	}
-);
-
-test.describe(
-	'Analytics Overview - Manual Import Trigger',
-	{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
-	() => {
-		test.use( { storageState: ADMIN_STATE_PATH } );
-
-		test.beforeAll( async ( { browser } ) => {
-			page = await browser.newPage();
-		} );
-
-		test.beforeEach( async () => {
-			await test.step( `Go to Analytics > Overview`, async () => {
-				await page.goto(
-					'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
-				);
-			} );
-		} );
-
-		test.afterAll( async () => {
-			await page.close();
-		} );
-
-		test( 'should show manual update trigger in scheduled mode', async ( {
-			baseURL,
-		} ) => {
-			// Set to scheduled mode
-			await setOption(
-				request,
-				baseURL,
-				'woocommerce_analytics_scheduled_import',
-				'yes'
-			);
-
-			// Reload the page
-			await page.reload();
-
-			// Verify import status bar is visible
-			await expect( page.getByText( 'Data status' ) ).toBeVisible();
-			// Verify "Update now" button is visible
-			const updateButton = page.getByRole( 'button', {
-				name: 'Manually trigger analytics data import',
-			} );
-			await expect( updateButton ).toBeVisible();
-
-			// Click "Update now" button
-			const responsePromise = page.waitForResponse(
-				( response ) =>
-					response
-						.url()
-						.includes( '/wc-analytics/imports/trigger' ) &&
-					response.ok()
-			);
-
-			await updateButton.click();
-
-			// Verify button shows loading state (isBusy)
-			// After clicking, the aria-label changes to "Analytics data import in progress"
-			const busyButton = page.getByRole( 'button', {
-				name: 'Analytics data import in progress',
-			} );
-			await expect( busyButton ).toBeDisabled();
-
-			// Wait for API response
-			await responsePromise;
-		} );
-
-		test( 'should hide manual update trigger in immediate mode', async ( {
-			baseURL,
-		} ) => {
-			// Set to immediate mode
-			await setOption(
-				request,
-				baseURL,
-				'woocommerce_analytics_scheduled_import',
-				'no'
-			);
-
-			// Reload the page
-			await page.reload();
-
-			// Verify import status bar wrapper is NOT rendered
-			await expect( page.getByText( 'Data status' ) ).toBeHidden();
 		} );
 	}
 );

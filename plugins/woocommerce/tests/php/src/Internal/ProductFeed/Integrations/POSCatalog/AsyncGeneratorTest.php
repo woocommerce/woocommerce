@@ -715,9 +715,9 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 			fn() => new JsonFileFeed( 'pos-catalog-feed-test' )
 		);
 
-		// Simulate the original process: start a feed and keep its exclusive lock held (no flush/end).
+		// Simulate the original process: open a feed and keep its exclusive lock held (no flush/end).
 		$holder       = new JsonFileFeed( 'pos-catalog-feed-test' );
-		$identifier   = $holder->start();
+		$identifier   = $holder->open();
 		$partial_path = wp_upload_dir()['basedir'] . '/' . JsonFileFeed::UPLOAD_DIR . '/' . $identifier;
 		$this->assertTrue( file_exists( $partial_path ) );
 

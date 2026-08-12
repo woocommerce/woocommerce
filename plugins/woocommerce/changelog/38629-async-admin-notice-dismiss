@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Dismiss WooCommerce admin notices asynchronously instead of reloading the page. The query-string based dismissal is kept as a no-JS fallback.

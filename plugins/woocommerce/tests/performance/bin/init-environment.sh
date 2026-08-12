@@ -2,36 +2,41 @@
 
 echo "Initializing WooCommerce E2E"
 
-wp-env run tests-cli wp config set WP_HTTP_BLOCK_EXTERNAL false --raw --type=constant
+# Command prefix for running wp-cli against the single-container E2E environment
+# (started via `wp-env --config .wp-env.e2e.json`, whose container is `cli`).
+wp_cli="wp-env --config .wp-env.e2e.json run cli"
 
-wp-env run tests-cli wp plugin activate woocommerce
+$wp_cli wp config set WP_HTTP_BLOCK_EXTERNAL false --raw --type=constant
 
-wp-env run tests-cli wp user create customer customer@woocommercecoree2etestsuite.com --user_pass=password --role=subscriber --path=/var/www/html
+$wp_cli wp plugin activate woocommerce
+
+$wp_cli wp user create customer customer@woocommercecoree2etestsuite.com --user_pass=password --role=subscriber --path=/var/www/html
 
 # Installing and activating the WordPress Importer plugin to import sample products"
-wp-env run tests-cli wp plugin install wordpress-importer --activate
+$wp_cli wp plugin install wordpress-importer --activate
 
 # Adding basic WooCommerce settings"
-wp-env run tests-cli wp option set woocommerce_store_address 'Example Address Line 1'
-wp-env run tests-cli wp option set woocommerce_store_address_2 'Example Address Line 2'
-wp-env run tests-cli wp option set woocommerce_store_city 'Example City'
-wp-env run tests-cli wp option set woocommerce_default_country 'US:CA'
-wp-env run tests-cli wp option set woocommerce_store_postcode '94110'
-wp-env run tests-cli wp option set woocommerce_currency 'USD'
-wp-env run tests-cli wp option set woocommerce_product_type 'both'
-wp-env run tests-cli wp option set woocommerce_allow_tracking 'no'
-wp-env run tests-cli wp option set woocommerce_enable_checkout_login_reminder 'yes'
-wp-env run tests-cli wp option set --format=json woocommerce_cod_settings '{"enabled":"yes"}'
-wp-env run tests-cli wp option set woocommerce_coming_soon 'no'
+$wp_cli wp option set woocommerce_store_address 'Example Address Line 1'
+$wp_cli wp option set woocommerce_store_address_2 'Example Address Line 2'
+$wp_cli wp option set woocommerce_store_city 'Example City'
+$wp_cli wp option set woocommerce_default_country 'US:CA'
+$wp_cli wp option set woocommerce_store_postcode '94110'
+$wp_cli wp option set woocommerce_currency 'USD'
+$wp_cli wp option set woocommerce_product_type 'both'
+$wp_cli wp option set woocommerce_allow_tracking 'no'
+$wp_cli wp option set woocommerce_enable_checkout_login_reminder 'yes'
+$wp_cli wp option set --format=json woocommerce_cod_settings '{"enabled":"yes"}'
+$wp_cli wp option set woocommerce_coming_soon 'no'
 
 #  WooCommerce shop pages
-wp-env run tests-cli wp wc --user=admin tool run install_pages
+$wp_cli wp wc --user=admin tool run install_pages
 
 # Importing WooCommerce sample products"
-wp-env run tests-cli wp import wp-content/plugins/woocommerce/sample-data/sample_products.xml --authors=skip
+$wp_cli wp import wp-content/plugins/woocommerce/sample-data/sample_products.xml --authors=skip
 
-# install Storefront
-wp-env run tests-cli wp theme install storefront --activate
+# Activate Storefront (pre-provisioned via .wp-env.e2e.json themes[]; `theme install
+# --activate` would skip activation on the already-installed path).
+$wp_cli wp theme activate storefront || { echo "Error: failed to activate storefront." >&2; exit 1; }
 
 # Pin order storage to the legacy posts table (HPOS off) for deterministic runs.
 # These performance requests assert the classic post.php order-edit screens,
@@ -40,16 +45,21 @@ wp-env run tests-cli wp theme install storefront --activate
 # Health loopback to admin-ajax.php) while no orders exist yet, flipping order
 # storage mid-run and breaking those assertions. Force HPOS off and consume the
 # newly-installed flag so it cannot be re-enabled during the test run.
-wp-env run tests-cli wp option update woocommerce_custom_orders_table_enabled no
-wp-env run tests-cli wp option update woocommerce_newly_installed no
+$wp_cli wp option update woocommerce_custom_orders_table_enabled no
+$wp_cli wp option update woocommerce_newly_installed no
 
 # reduce the impact of background activities on the testing setup
-wp-env run tests-cli wp config set DISABLE_WP_CRON true --raw --type=constant
-wp-env run tests-cli wp config set WP_HTTP_BLOCK_EXTERNAL true --raw --type=constant
+$wp_cli wp config set DISABLE_WP_CRON true --raw --type=constant
+$wp_cli wp config set WP_HTTP_BLOCK_EXTERNAL true --raw --type=constant
 
 # Resolve container names once; fail loudly if wp-env is not running.
-_wp_container="$(docker ps --filter name=tests-wordpress --format '{{.Names}}' | head -1)"
-_db_container="$(docker ps --filter name=tests-mysql --format '{{.Names}}' | head -1)"
+# Scope to the E2E env's compose project ("...-woocommerce-e2e-<hash>"), which the
+# performance env runs on, so a co-running dev env ("...-woocommerce-<hash>") can't
+# be matched by mistake (both expose a "...-wordpress-1" container). Match the
+# "woocommerce-e2e-" prefix including its trailing dash: the hash is hex and "e2e" is
+# all hex digits, so a dev hash starting "e2e" is followed by more hex, never a dash.
+_wp_container="$(docker ps --filter name=woocommerce-e2e- --format '{{.Names}}' | grep -- '-wordpress-1$' | head -1)"
+_db_container="$(docker ps --filter name=woocommerce-e2e- --format '{{.Names}}' | grep -- '-mysql-1$' | head -1)"
 if [ -z "$_wp_container" ] || [ -z "$_db_container" ]; then
     echo "Error: wp-env containers not found. Run 'pnpm env:perf' first." >&2
     exit 1

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Normalize the Product Collection carousel header row by aligning the heading and navigation buttons, removing the heading's hardcoded spacing, and applying theme-aware colors to the navigation buttons.

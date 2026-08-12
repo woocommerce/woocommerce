@@ -8,7 +8,6 @@ use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Blocks\Package;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 use Opis\JsonSchema\{
 	Validator,
 	ValidationResult,
@@ -20,7 +19,7 @@ use WC_Customer;
 /**
  * DocumentObjectTests class.
  */
-class DocumentObjectTests extends TestCase {
+class DocumentObjectTests extends \WC_Unit_Test_Case {
 	/**
 	 * Trait to use for the test_additional_fields_schema test.
 	 *
@@ -121,8 +120,15 @@ class DocumentObjectTests extends TestCase {
 	 * Tear down the test environment.
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
+		// The cart, the notice queue, and the CheckoutFields registry all live on singletons
+		// that neither the database rollback nor the hook restore touches, so reset them
+		// unconditionally before handing back to the parent.
 		wc_empty_cart();
+		wc_clear_notices();
+		$this->additional_fields_controller->deregister_checkout_field( 'namespace/contact_field' );
+		$this->additional_fields_controller->deregister_checkout_field( 'namespace/order_field' );
+
+		parent::tearDown();
 	}
 	/**
 	 * test_default_document_schema.
@@ -286,9 +292,6 @@ class DocumentObjectTests extends TestCase {
 				'namespace/order_field' => 'Order field',
 			]
 		);
-
-		$this->additional_fields_controller->deregister_checkout_field( 'namespace/contact_field' );
-		$this->additional_fields_controller->deregister_checkout_field( 'namespace/order_field' );
 	}
 
 	/**

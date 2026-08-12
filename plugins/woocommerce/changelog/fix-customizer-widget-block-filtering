@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure unsupported WooCommerce blocks are hidden from the Customizer's widget inserter.
