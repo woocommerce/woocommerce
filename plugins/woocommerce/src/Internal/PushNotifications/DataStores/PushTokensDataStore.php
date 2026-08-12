@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenInvali
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Exception;
+use Throwable;
 use WC_Data_Exception;
 use WP_Http;
 use WP_Query;
@@ -550,7 +551,11 @@ class PushTokensDataStore {
 		foreach ( array_chunk( $pending, self::LAST_SEND_CHUNK_SIZE, true ) as $chunk ) {
 			try {
 				$this->write_last_send_chunk( $chunk );
-			} catch ( Exception $e ) {
+			} catch ( Throwable $e ) {
+				// Throwable, not Exception. `action_scheduler_after_execute`
+				// fires between the action running and `mark_complete()`, inside
+				// the runner's own Throwable catch, so an Error escaping here
+				// would record a delivered notification's action as failed.
 				wc_get_logger()->warning(
 					'Failed to record last send time for push tokens.',
 					array(
@@ -588,32 +593,44 @@ class PushTokensDataStore {
 		 * suppressed rather than the queries being restructured.
 		 */
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$existing = $wpdb->get_col(
-			$wpdb->prepare(
-				sprintf(
-					"SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = %%s AND post_id IN ( %s )",
-					implode( ', ', array_fill( 0, count( $post_ids ), '%d' ) )
-				),
-				array_merge( array( self::LAST_SEND_AT_META_KEY ), $post_ids )
-			)
+		$select = $wpdb->prepare(
+			sprintf(
+				"SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = %%s AND post_id IN ( %s )",
+				implode( ', ', array_fill( 0, count( $post_ids ), '%d' ) )
+			),
+			array_merge( array( self::LAST_SEND_AT_META_KEY ), $post_ids )
 		);
 
-		// `get_col()` returns an empty array when the query fails as well as
-		// when nothing matched, and reading that as "no rows exist" would
-		// insert duplicates `wp_postmeta` has no unique key to prevent.
-		if ( '' !== $wpdb->last_error ) {
-			wc_get_logger()->warning(
-				'Could not read existing push token send stamps, skipping chunk.',
-				array(
-					'token_ids' => $post_ids,
-					'error'     => $wpdb->last_error,
+		// `prepare()` returns null on a placeholder mismatch, and `get_col()`
+		// would then skip the query and read `last_result` from whatever ran
+		// before, so the check cannot wait until after the read.
+		if ( ! is_string( $select ) || '' === $select ) {
+			$this->warn_last_send_not_recorded( $post_ids, 'Could not build the query to read existing stamps, skipping chunk.' );
+
+			return;
+		}
+
+		// Run the statement rather than using `get_col()`, whose empty array
+		// means both "nothing matched" and "the read failed". Taking a failed
+		// read as "no rows exist" would insert duplicates that `wp_postmeta`
+		// has no unique key to prevent. `last_error` alone cannot be trusted
+		// either: `wpdb::query()` returns false before it clears the previous
+		// error when the `query` filter empties the statement.
+		$rows = $wpdb->query( $select );
+
+		if ( false === $rows ) {
+			$this->warn_last_send_not_recorded(
+				$post_ids,
+				sprintf(
+					'Could not read existing stamps, skipping chunk. %s',
+					'' !== $wpdb->last_error ? $wpdb->last_error : 'The query did not run.'
 				)
 			);
 
 			return;
 		}
 
-		$existing = array_map( 'intval', (array) $existing );
+		$existing = array_map( 'intval', wp_list_pluck( (array) $wpdb->last_result, 'post_id' ) );
 
 		// Tokens sent at the same moment share an UPDATE, so this is usually
 		// one query, without giving a token another's send time when a request
@@ -670,14 +687,37 @@ class PushTokensDataStore {
 	}
 
 	/**
-	 * Runs a prepared statement, logging rather than throwing when it fails.
+	 * Logs that last-send stamps could not be recorded.
 	 *
-	 * @param string $query    The prepared SQL.
-	 * @param int[]  $post_ids The token post IDs the statement covers, for the log context.
+	 * @param int[]  $post_ids The token post IDs affected.
+	 * @param string $error    What went wrong, and what was skipped as a result.
 	 * @return void
 	 */
-	private function query_or_warn( string $query, array $post_ids ): void {
+	private function warn_last_send_not_recorded( array $post_ids, string $error ): void {
+		wc_get_logger()->warning(
+			'Could not record last send time for push tokens.',
+			array(
+				'token_ids' => $post_ids,
+				'error'     => $error,
+			)
+		);
+	}
+
+	/**
+	 * Runs a prepared statement, logging rather than throwing when it fails.
+	 *
+	 * @param string|null $query    The prepared SQL, or null if `prepare()` failed.
+	 * @param int[]       $post_ids The token post IDs the statement covers, for the log context.
+	 * @return void
+	 */
+	private function query_or_warn( ?string $query, array $post_ids ): void {
 		global $wpdb;
+
+		if ( ! is_string( $query ) || '' === $query ) {
+			$this->warn_last_send_not_recorded( $post_ids, 'Could not build the query to write stamps.' );
+
+			return;
+		}
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		if ( false !== $wpdb->query( $query ) ) {
