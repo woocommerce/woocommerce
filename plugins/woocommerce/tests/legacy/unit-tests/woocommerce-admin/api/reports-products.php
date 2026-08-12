@@ -145,7 +145,7 @@ class WC_Admin_Tests_API_Reports_Products extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting reports with the `search` param.
+	 * @testdox Should only report the products matching the `search` param.
 	 */
 	public function test_get_reports_search_param() {
 		wp_set_current_user( $this->user );
@@ -178,7 +178,7 @@ class WC_Admin_Tests_API_Reports_Products extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that the `search` param is not capped at the first 100 matching products.
+	 * @testdox Should not cap the `search` param at the first 100 matching products.
 	 *
 	 * The client used to resolve the search itself and pass at most 100 product IDs back as
 	 * the `products` param, so any match past that was missing from the report.
@@ -238,7 +238,7 @@ class WC_Admin_Tests_API_Reports_Products extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting reports with a `search` param that matches by SKU.
+	 * @testdox Should match products by SKU as well as by title.
 	 */
 	public function test_get_reports_search_param_matches_sku() {
 		wp_set_current_user( $this->user );
@@ -259,7 +259,7 @@ class WC_Admin_Tests_API_Reports_Products extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that a multi word `search` term is treated as a single term.
+	 * @testdox Should treat a multi word `search` term as a single term.
 	 *
 	 * The default array coercion WordPress applies to a string argument also splits on
 	 * whitespace, which would turn one multi word search into several single word searches.
@@ -283,7 +283,7 @@ class WC_Admin_Tests_API_Reports_Products extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that the `search` param narrows the `products` param rather than replacing it.
+	 * @testdox Should narrow the `products` param with the `search` param rather than replace it.
 	 */
 	public function test_get_reports_search_param_intersects_with_products_param() {
 		wp_set_current_user( $this->user );
@@ -312,7 +312,7 @@ class WC_Admin_Tests_API_Reports_Products extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting reports with a `search` param that matches nothing.
+	 * @testdox Should return an empty report when the `search` param matches nothing.
 	 */
 	public function test_get_reports_search_param_without_matches() {
 		wp_set_current_user( $this->user );
@@ -331,7 +331,7 @@ class WC_Admin_Tests_API_Reports_Products extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that the `search` collection param is registered.
+	 * @testdox Should register the `search` collection param.
 	 */
 	public function test_search_collection_param_is_registered() {
 		wp_set_current_user( $this->user );

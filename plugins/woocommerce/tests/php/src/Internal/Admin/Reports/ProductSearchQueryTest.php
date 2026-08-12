@@ -241,7 +241,7 @@ class ProductSearchQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should treat LIKE wildcards in the search term as literal characters.
+	 * @testdox Should treat LIKE wildcards in the search term as literal characters when matching titles.
 	 *
 	 * @dataProvider like_wildcard_provider
 	 *
@@ -269,6 +269,23 @@ class ProductSearchQueryTest extends WC_Unit_Test_Case {
 			'percent sign' => array( '100%', '100% Cotton Shirt', '1000 Cotton Shirts' ),
 			'underscore'   => array( 'a_b', 'Model a_b', 'Model axb' ),
 		);
+	}
+
+	/**
+	 * @testdox Should compare the SKU against the raw term, LIKE wildcards included.
+	 *
+	 * Admin\API\Products passes the term to the SKU comparison unwrapped and unescaped, so a
+	 * wildcard there is a pattern rather than a literal. The report mirrors that deliberately:
+	 * escaping it here would make the report disagree with the search box on what a term matches.
+	 */
+	public function test_get_ids_subquery_does_not_escape_wildcards_in_the_sku_clause(): void {
+		$match    = $this->create_product( 'Unrelated Gadget', 'A-100' );
+		$no_match = $this->create_product( 'Another Gadget', 'B-200' );
+
+		$found = $this->run_subquery( ProductSearchQuery::get_ids_subquery( array( 'A-1%' ) ) );
+
+		$this->assertContains( $match, $found, 'The SKU clause should treat the term as a LIKE pattern, as the search box does' );
+		$this->assertNotContains( $no_match, $found );
 	}
 
 	/**

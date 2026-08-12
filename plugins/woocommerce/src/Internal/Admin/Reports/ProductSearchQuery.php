@@ -73,7 +73,9 @@ class ProductSearchQuery {
 		foreach ( $terms as $term ) {
 			$clause = $wpdb->prepare( 'posts.post_title LIKE %s', '%' . $wpdb->esc_like( $term ) . '%' );
 			if ( $sku_enabled ) {
-				// Matches Admin\API\Products, which compares the SKU against the unwrapped term.
+				// Matches Admin\API\Products, which compares the SKU against the term unwrapped and
+				// unescaped, so a LIKE wildcard in the term stays a wildcard here. Escaping it would
+				// make the report disagree with the search box on what the term matches.
 				$clause .= $wpdb->prepare( ' OR product_meta_lookup.sku LIKE %s', $term );
 			}
 

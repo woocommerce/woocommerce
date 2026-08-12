@@ -122,7 +122,7 @@ class WC_Admin_Tests_API_Reports_Products_Stats extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that the `search` param narrows the totals to the matching products.
+	 * @testdox Should narrow the totals to the products matching the `search` param.
 	 */
 	public function test_get_reports_search_param() {
 		WC_Helper_Reports::reset_stats_dbs();
@@ -174,7 +174,7 @@ class WC_Admin_Tests_API_Reports_Products_Stats extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that the `search` collection param is registered.
+	 * @testdox Should register the `search` collection param.
 	 */
 	public function test_search_collection_param_is_registered() {
 		wp_set_current_user( $this->user );
