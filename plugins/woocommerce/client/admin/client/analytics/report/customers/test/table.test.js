@@ -70,8 +70,8 @@ const baseCustomer = {
 	country: '',
 };
 
-// Country cell is the 9th column (0-indexed: 8) per getHeadersContent in table.js.
-const COUNTRY_COL = 8;
+// Country cell is the 10th column (0-indexed: 9) per getHeadersContent in table.js.
+const COUNTRY_COL = 9;
 
 function getCountryCell( customer ) {
 	captured.getRowsContent = null;
