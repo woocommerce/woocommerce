@@ -13,13 +13,14 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Maintains WooCommerce-specific product term counts after taxonomy changes.
+ * Coordinates WooCommerce-specific product term-count consistency.
  *
- * WooCommerce excludes some products from category, tag, and brand counts based on
- * product visibility. WordPress does not automatically refresh those custom counts
- * when visibility relationships are removed directly, so this service detects
- * count-affecting relationship deletions and delegates to WooCommerce's existing
- * recount logic.
+ * Product term counts can become stale when product visibility, stock state,
+ * inventory settings, product type, or taxonomy hierarchy changes. This service is
+ * the central integration point for incrementally consolidating the immediate and
+ * deferred recount triggers for those mutations. Existing WooCommerce term-count
+ * functions remain responsible for calculating and persisting category, tag, brand,
+ * and ancestor counts.
  *
  * @since 11.1.0
  *
