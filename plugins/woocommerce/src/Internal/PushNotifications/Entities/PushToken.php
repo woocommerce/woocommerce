@@ -662,7 +662,7 @@ class PushToken {
 
 	/**
 	 * Gets the date this token was last sent to WPCOM, as an RFC3339 string in
-	 * UTC, or null if it has never been sent.
+	 * UTC (offset `+00:00`), or null if it has never been sent.
 	 *
 	 * This records that WPCOM accepted a payload containing the token. It is
 	 * not a delivery receipt: what happens between WPCOM and the device is
