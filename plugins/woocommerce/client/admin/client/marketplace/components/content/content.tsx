@@ -36,7 +36,7 @@ import PluginInstallNotice from '../woo-update-manager-plugin/plugin-install-not
 import SubscriptionsExpiredExpiringNotice from '~/marketplace/components/my-subscriptions/subscriptions-expired-expiring-notice';
 import LoadMoreButton from '../load-more-button/load-more-button';
 
-export default function Content(): JSX.Element {
+export default function Content(): React.JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );
 	const [ allProducts, setAllProducts ] = useState< Product[] >( [] );
 	const [ filteredProducts, setFilteredProducts ] = useState< Product[] >(
@@ -90,6 +90,10 @@ export default function Content(): JSX.Element {
 
 		if ( query.term ) {
 			params.append( 'term', query.term );
+		}
+
+		if ( query.quality_badge === '1' && query.tab === 'extensions' ) {
+			params.append( 'quality_badge', '1' );
 		}
 
 		const wccomSettings = getAdminSetting( 'wccomHelper', false );
@@ -146,6 +150,7 @@ export default function Content(): JSX.Element {
 		query.category,
 		query.term,
 		query.tab,
+		query.quality_badge,
 		setIsLoadingMore,
 	] );
 
@@ -200,6 +205,10 @@ export default function Content(): JSX.Element {
 				params.append( 'term', query.term );
 			}
 
+			if ( query.quality_badge === '1' && query.tab === 'extensions' ) {
+				params.append( 'quality_badge', '1' );
+			}
+
 			const wccomSettings = getAdminSetting( 'wccomHelper', false );
 			if ( wccomSettings.storeCountry ) {
 				params.append( 'country', wccomSettings.storeCountry );
@@ -233,6 +242,13 @@ export default function Content(): JSX.Element {
 					}
 					if ( query.term ) {
 						params.append( 'term', query.term );
+					}
+					// The badge filter only applies to the extensions results.
+					if (
+						category === 'extensions' &&
+						query.quality_badge === '1'
+					) {
+						params.append( 'quality_badge', '1' );
 					}
 
 					const wccomSettings = getAdminSetting(
@@ -326,6 +342,7 @@ export default function Content(): JSX.Element {
 		query.tab,
 		query.term,
 		query.category,
+		query.quality_badge,
 		setIsLoading,
 		setSearchResultsCount,
 		currentPage,
@@ -368,11 +385,11 @@ export default function Content(): JSX.Element {
 		recordLegacyTabView( marketplaceViewProps );
 	}, [ query?.tab, query?.term, query?.section, query?.category ] );
 
-	// Reset current page when tab, term, or category changes
+	// Reset current page when tab, term, category or badge filter changes
 	useEffect( () => {
 		setCurrentPage( 1 );
 		setFirstNewProductId( 0 );
-	}, [ selectedTab, query?.category, query?.term ] );
+	}, [ selectedTab, query?.category, query?.term, query?.quality_badge ] );
 
 	// Maintain product focus for accessibility
 	useEffect( () => {
@@ -388,7 +405,7 @@ export default function Content(): JSX.Element {
 		}
 	}, [ firstNewProductId ] );
 
-	const renderContent = (): JSX.Element => {
+	const renderContent = (): React.JSX.Element => {
 		switch ( selectedTab ) {
 			case 'extensions':
 			case 'themes':

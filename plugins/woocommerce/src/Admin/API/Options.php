@@ -187,6 +187,7 @@ class Options extends \WC_REST_Data_Controller {
 			'woocommerce_settings_shipping_recommendations_hidden',
 			'woocommerce_task_list_dismissed_tasks',
 			'woocommerce_setting_payments_recommendations_hidden',
+			'woocommerce_abandoned_cart_recovery_recommendations_hidden',
 			'woocommerce_navigation_favorites_tooltip_hidden',
 			'woocommerce_admin_transient_notices_queue',
 			'woocommerce_task_list_hidden',

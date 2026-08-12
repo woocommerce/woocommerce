@@ -25,7 +25,7 @@ final class Dropdown extends AbstractBlock {
 	 */
 	private function get_option_text( array $item ): string {
 		if ( isset( $item['label'] ) && is_string( $item['label'] ) ) {
-			return wp_strip_all_tags( $item['label'] );
+			return $item['label'];
 		}
 		if ( ! empty( $item['ariaLabel'] ) && is_string( $item['ariaLabel'] ) ) {
 			return $item['ariaLabel'];
@@ -61,6 +61,7 @@ final class Dropdown extends AbstractBlock {
 			: wp_unique_id( 'wc-block-dropdown-' );
 
 		$wrapper_attributes = array(
+			'class'               => 'wc-block-dropdown',
 			'data-wp-interactive' => 'woocommerce/dropdown',
 			'data-wp-context'     => (string) wp_json_encode(
 				array(

@@ -10,7 +10,11 @@ import {
 	PanelRow,
 	__experimentalText as Text,
 } from '@wordpress/components';
-import { ordersStore, productsStore } from '@woocommerce/data';
+import {
+	activityPanelStore,
+	ordersStore,
+	productsStore,
+} from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect } from '@wordpress/element';
 import { snakeCase } from 'lodash';
@@ -19,13 +23,8 @@ import { snakeCase } from 'lodash';
  * Internal dependencies
  */
 import './style.scss';
-import {
-	getLowStockCount,
-	getOrderStatuses,
-	getUnreadOrders,
-} from './orders/utils';
+import { getOrderStatuses } from './orders/utils';
 import { getAllPanels } from './panels';
-import { getUnapprovedReviews } from './reviews/utils';
 import { getUrlParams } from '../../utils';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { isTaskListVisible } from '~/hooks/use-tasklists-state';
@@ -49,10 +48,13 @@ export const ActivityPanel = () => {
 		const totalOrderCount = getOrdersTotalCount( ORDERS_QUERY_PARAMS, 0 );
 		const orderStatuses = getOrderStatuses( select );
 		const reviewsEnabled = getAdminSetting( 'reviewsEnabled', 'no' );
-		const unreadOrdersCount = getUnreadOrders( select, orderStatuses );
 		const manageStock = getAdminSetting( 'manageStock', 'no' );
-		const lowStockProductsCount = getLowStockCount( select );
-		const unapprovedReviewsCount = getUnapprovedReviews( select );
+		const counts = select( activityPanelStore ).getActivityPanelCounts();
+		const unreadOrdersCount = counts?.orders_to_fulfill_count ?? null;
+		const lowStockProductsCount =
+			counts?.products_low_in_stock_count ?? null;
+		const unapprovedReviewsCount =
+			counts?.reviews_to_moderate_count ?? null;
 		const publishedProductCount = getProductsTotalCount(
 			PUBLISHED_PRODUCTS_QUERY_PARAMS,
 			0

@@ -13,7 +13,7 @@ import { StatusLevel } from '../../types';
 export default function StatusPopover( props: {
 	text: string;
 	level: StatusLevel;
-	explanation: string | JSX.Element;
+	explanation: string | React.JSX.Element;
 	explanationOnHover?: boolean;
 } ) {
 	const [ isHovered, setIsHovered ] = useState( false );

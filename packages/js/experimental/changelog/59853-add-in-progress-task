@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Adds an 'in progress' state to WooCommerce onboarding tasks, providing visual feedback when tasks are started but not completed. Initially implemented for the Payments setup task.

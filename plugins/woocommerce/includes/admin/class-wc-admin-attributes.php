@@ -10,6 +10,9 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\ProductAttributes\AttributeSlugLength;
+use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermAdmin;
+
 /**
  * WC_Admin_Attributes Class.
  */
@@ -115,6 +118,8 @@ class WC_Admin_Attributes {
 			return $id;
 		}
 
+		VisualAttributeTermAdmin::seed_visual_attribute_terms( $id );
+
 		return true;
 	}
 
@@ -157,6 +162,110 @@ class WC_Admin_Attributes {
 		check_admin_referer( 'woocommerce-delete-attribute_' . $attribute_id );
 
 		return wc_delete_attribute( $attribute_id );
+	}
+
+	/**
+	 * Build the slug field description shown to users (and served to search engines and
+	 * no-JavaScript clients as the static copy).
+	 *
+	 * States the authoritative byte limit alongside a character estimate tailored to the
+	 * script of the user's language, so users on non-Latin scripts get a meaningful
+	 * figure rather than a raw byte count they must translate into characters themselves.
+	 *
+	 * @return string
+	 */
+	private static function slug_field_description(): string {
+		return sprintf(
+			/* translators: 1: maximum slug length in bytes, 2: approximate maximum number of characters for the user's language. */
+			__( 'Unique slug/reference for the attribute. Limited to %1$d bytes — roughly %2$d characters in your language; non-ASCII characters use 2–4 bytes each.', 'woocommerce' ),
+			wc_get_attribute_slug_max_byte_length(),
+			AttributeSlugLength::get_character_estimate()
+		);
+	}
+
+	/**
+	 * Output an inline script that shows a live UTF-8 byte count next to the
+	 * slug input and visually warns when the value approaches or exceeds the
+	 * server-side byte limit.
+	 *
+	 * The HTML `maxlength` attribute counts characters, not bytes, so a
+	 * multibyte slug (e.g. Cyrillic, Chinese) can pass the browser's guard
+	 * and still be rejected by `register_taxonomy()`'s 32-byte name limit.
+	 * This counter closes that feedback gap before submission.
+	 *
+	 * When the live counter activates, it also swaps the server-rendered field
+	 * description for a leaner note: the counter now carries the concrete byte
+	 * numbers, so the locale-tailored character estimate becomes redundant.
+	 */
+	private static function slug_byte_counter_script(): void {
+		$max_bytes = wc_get_attribute_slug_max_byte_length();
+		/* translators: 1: current byte count, 2: maximum allowed bytes. */
+		$template = wp_json_encode( __( '%1$d / %2$d bytes', 'woocommerce' ), JSON_HEX_TAG | JSON_HEX_AMP );
+		if ( false === $template ) {
+			// Encoding the counter template failed (e.g. invalid UTF-8 in the translated
+			// string); skip the counter rather than emit broken inline JavaScript.
+			return;
+		}
+		// Leaner description for JS clients: the live counter below carries the concrete
+		// numbers, so the locale-tailored character estimate becomes redundant noise.
+		$js_description = wp_json_encode(
+			/* translators: %d: maximum slug length in bytes. */
+			sprintf( __( 'Unique slug/reference for the attribute. Non-ASCII characters use 2–4 bytes of the %d-byte limit.', 'woocommerce' ), $max_bytes ),
+			JSON_HEX_TAG | JSON_HEX_AMP
+		);
+		if ( false === $js_description ) {
+			// Keep the server-rendered description if encoding fails.
+			$js_description = 'null';
+		}
+		?>
+		<script type="text/javascript">
+			( function() {
+				var input = document.getElementById( 'attribute_name' );
+				if ( ! input || ! ( 'TextEncoder' in window ) ) {
+					return;
+				}
+				var wrapper = input.closest( 'td, .form-field' );
+				var description = wrapper ? wrapper.querySelector( 'p.description' ) : null;
+				if ( ! description ) {
+					return;
+				}
+				var maxBytes = <?php echo (int) $max_bytes; ?>;
+				var template = <?php echo $template; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode with JSON_HEX_TAG produces JS-safe output. ?>;
+				var jsDescription = <?php echo $js_description; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode with JSON_HEX_TAG produces JS-safe output; 'null' fallback is a literal. ?>;
+				var encoder = new TextEncoder();
+				var counter = document.createElement( 'span' );
+				counter.style.display = 'block';
+				counter.style.marginTop = '4px';
+				if ( jsDescription ) {
+					// Swap the verbose server-rendered guidance for the lean note now that
+					// the live counter provides the concrete byte feedback.
+					description.textContent = jsDescription;
+				}
+				description.appendChild( counter );
+				function update() {
+					var bytes = encoder.encode( input.value ).length;
+					if ( 0 === bytes ) {
+						counter.textContent = '';
+						counter.style.color = '';
+						return;
+					}
+					counter.textContent = template
+						.replace( '%1$d', bytes )
+						.replace( '%2$d', maxBytes );
+					if ( bytes > maxBytes ) {
+						counter.style.color = '#d63638';
+					} else if ( bytes >= maxBytes - 3 ) {
+						// Within one multibyte character (up to 3 bytes) of the limit.
+						counter.style.color = '#996800';
+					} else {
+						counter.style.color = '';
+					}
+				}
+				input.addEventListener( 'input', update );
+				update();
+			} )();
+		</script>
+		<?php
 	}
 
 	/**
@@ -215,8 +324,8 @@ class WC_Admin_Attributes {
 									<label for="attribute_name"><?php esc_html_e( 'Slug', 'woocommerce' ); ?></label>
 								</th>
 								<td>
-									<input name="attribute_name" id="attribute_name" type="text" value="<?php echo esc_attr( $att_name ); ?>" maxlength="28" />
-									<p class="description"><?php esc_html_e( 'Unique slug/reference for the attribute; must be no more than 28 characters.', 'woocommerce' ); ?></p>
+									<input name="attribute_name" id="attribute_name" type="text" value="<?php echo esc_attr( $att_name ); ?>" maxlength="29" />
+									<p class="description"><?php echo esc_html( self::slug_field_description() ); ?></p>
 								</td>
 							</tr>
 							<tr class="form-field form-required">
@@ -283,6 +392,7 @@ class WC_Admin_Attributes {
 					<p class="submit"><button type="submit" name="save_attribute" id="submit" class="button-primary" value="<?php esc_attr_e( 'Update', 'woocommerce' ); ?>"><?php esc_html_e( 'Update', 'woocommerce' ); ?></button></p>
 					<?php wp_nonce_field( 'woocommerce-save-attribute_' . $edit ); ?>
 				</form>
+				<?php self::slug_byte_counter_script(); ?>
 				<?php
 			}//end if
 			?>
@@ -330,12 +440,36 @@ class WC_Admin_Attributes {
 									 */
 									$max_terms_to_display = apply_filters( 'woocommerce_max_terms_displayed_in_attributes_page', 100 );
 									foreach ( $attribute_taxonomies as $tax ) :
+										$taxonomy = wc_attribute_taxonomy_name( $tax->attribute_name );
+										$actions  = array(
+											'edit'   => '<a href="' . esc_url( add_query_arg( 'edit', $tax->attribute_id, 'edit.php?post_type=product&amp;page=product_attributes' ) ) . '">' . esc_html__( 'Edit', 'woocommerce' ) . '</a>',
+											'delete' => '<a class="delete" href="' . esc_url( wp_nonce_url( add_query_arg( 'delete', $tax->attribute_id, 'edit.php?post_type=product&amp;page=product_attributes' ), 'woocommerce-delete-attribute_' . $tax->attribute_id ) ) . '">' . esc_html__( 'Delete', 'woocommerce' ) . '</a>',
+										);
+
+										/**
+										 * Filters the row actions for a global product attribute taxonomy on the Products > Attributes screen.
+										 *
+										 * The action values are HTML links. Default actions are escaped before this filter runs, and callbacks
+										 * should return safe, escaped HTML.
+										 *
+										 * @param array<string,string> $actions  Action link HTML keyed by action name.
+										 * @param object               $tax      Attribute taxonomy object.
+										 * @param string               $taxonomy Full taxonomy name, including the `pa_` prefix.
+										 *
+										 * @since 11.1.0
+										 */
+										$actions     = (array) apply_filters( 'woocommerce_attribute_taxonomy_row_actions', $actions, $tax, $taxonomy );
+										$row_actions = array();
+
+										foreach ( $actions as $action => $link ) {
+											$row_actions[] = '<span class="' . esc_attr( $action ) . '">' . $link . '</span>';
+										}
 										?>
 										<tr>
 												<td>
-													<strong><a href="edit-tags.php?taxonomy=<?php echo esc_attr( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product"><?php echo esc_html( $tax->attribute_label ); ?></a></strong>
+													<strong><a href="edit-tags.php?taxonomy=<?php echo esc_attr( $taxonomy ); ?>&amp;post_type=product"><?php echo esc_html( $tax->attribute_label ); ?></a></strong>
 
-													<div class="row-actions"><span class="edit"><a href="<?php echo esc_url( add_query_arg( 'edit', $tax->attribute_id, 'edit.php?post_type=product&amp;page=product_attributes' ) ); ?>"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a> | </span><span class="delete"><a class="delete" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'delete', $tax->attribute_id, 'edit.php?post_type=product&amp;page=product_attributes' ), 'woocommerce-delete-attribute_' . $tax->attribute_id ) ); ?>"><?php esc_html_e( 'Delete', 'woocommerce' ); ?></a></span></div>
+													<?php echo '<div class="row-actions">' . implode( ' | ', $row_actions ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Row action values are link HTML. Default values are escaped above; filtered callbacks should return safe HTML. ?>
 												</td>
 												<td><?php echo esc_html( $tax->attribute_name ); ?></td>
 												<?php if ( wc_has_custom_attribute_types() ) : ?>
@@ -361,8 +495,6 @@ class WC_Admin_Attributes {
 												</td>
 												<td class="attribute-terms">
 													<?php
-													$taxonomy = wc_attribute_taxonomy_name( $tax->attribute_name );
-
 													if ( taxonomy_exists( $taxonomy ) ) {
 														$total_count = (int) get_terms(
 															array(
@@ -399,7 +531,7 @@ class WC_Admin_Attributes {
 															echo '<span class="na">&ndash;</span><br />';
 													}//end if
 													?>
-													<br /><a href="edit-tags.php?taxonomy=<?php echo esc_attr( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product" class="configure-terms"><?php esc_html_e( 'Configure terms', 'woocommerce' ); ?></a>
+													<br /><a href="edit-tags.php?taxonomy=<?php echo esc_attr( $taxonomy ); ?>&amp;post_type=product" class="configure-terms"><?php esc_html_e( 'Configure terms', 'woocommerce' ); ?></a>
 												</td>
 											</tr>
 											<?php
@@ -433,8 +565,8 @@ class WC_Admin_Attributes {
 
 								<div class="form-field">
 									<label for="attribute_name"><?php esc_html_e( 'Slug', 'woocommerce' ); ?></label>
-									<input name="attribute_name" id="attribute_name" type="text" value="" maxlength="28" />
-									<p class="description"><?php esc_html_e( 'Unique slug/reference for the attribute; must be no more than 28 characters.', 'woocommerce' ); ?></p>
+									<input name="attribute_name" id="attribute_name" type="text" value="" maxlength="29" />
+									<p class="description"><?php echo esc_html( self::slug_field_description() ); ?></p>
 								</div>
 
 								<div class="form-field">
@@ -507,6 +639,7 @@ class WC_Admin_Attributes {
 
 			/* ]]> */
 			</script>
+			<?php self::slug_byte_counter_script(); ?>
 		</div>
 		<?php
 	}

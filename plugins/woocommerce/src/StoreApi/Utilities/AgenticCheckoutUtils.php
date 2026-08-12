@@ -168,26 +168,26 @@ class AgenticCheckoutUtils {
 	 */
 	public static function set_buyer_data( $buyer, $customer ) {
 		if ( isset( $buyer['first_name'] ) ) {
-			$first_name = wc_clean( wp_unslash( $buyer['first_name'] ) );
+			$first_name = wc_clean( $buyer['first_name'] );
 			$customer->set_billing_first_name( $first_name );
 			$customer->set_shipping_first_name( $first_name );
 		}
 
 		if ( isset( $buyer['last_name'] ) ) {
-			$last_name = wc_clean( wp_unslash( $buyer['last_name'] ) );
+			$last_name = wc_clean( $buyer['last_name'] );
 			$customer->set_billing_last_name( $last_name );
 			$customer->set_shipping_last_name( $last_name );
 		}
 
 		if ( isset( $buyer['email'] ) ) {
-			$email = sanitize_email( wp_unslash( $buyer['email'] ) );
+			$email = sanitize_email( $buyer['email'] );
 			if ( is_email( $email ) ) {
 				$customer->set_billing_email( $email );
 			}
 		}
 
 		if ( isset( $buyer['phone_number'] ) ) {
-			$phone = wc_clean( wp_unslash( $buyer['phone_number'] ) );
+			$phone = wc_clean( $buyer['phone_number'] );
 			$customer->set_billing_phone( $phone );
 		}
 
@@ -203,7 +203,7 @@ class AgenticCheckoutUtils {
 	public static function set_fulfillment_address( $address, $customer ) {
 		// Only parse and set name if provided and non-empty.
 		if ( ! empty( $address['name'] ) ) {
-			$name       = wc_clean( wp_unslash( $address['name'] ) );
+			$name       = wc_clean( $address['name'] );
 			$name_parts = explode( ' ', $name, 2 );
 			$first_name = $name_parts[0];
 			$last_name  = isset( $name_parts[1] ) ? $name_parts[1] : '';
@@ -218,12 +218,12 @@ class AgenticCheckoutUtils {
 		}
 
 		// Sanitize all address fields.
-		$line_one    = wc_clean( wp_unslash( $address['line_one'] ?? '' ) );
-		$line_two    = wc_clean( wp_unslash( $address['line_two'] ?? '' ) );
-		$city        = wc_clean( wp_unslash( $address['city'] ?? '' ) );
-		$state       = wc_clean( wp_unslash( $address['state'] ?? '' ) );
-		$postal_code = wc_clean( wp_unslash( $address['postal_code'] ?? '' ) );
-		$country     = wc_clean( wp_unslash( $address['country'] ?? '' ) );
+		$line_one    = wc_clean( $address['line_one'] ?? '' );
+		$line_two    = wc_clean( $address['line_two'] ?? '' );
+		$city        = wc_clean( $address['city'] ?? '' );
+		$state       = wc_clean( $address['state'] ?? '' );
+		$postal_code = wc_clean( $address['postal_code'] ?? '' );
+		$country     = wc_clean( $address['country'] ?? '' );
 
 		// Set shipping address fields.
 		$customer->set_shipping_address_1( $line_one );
@@ -279,7 +279,7 @@ class AgenticCheckoutUtils {
 	public static function set_billing_address( $address, $customer ) {
 		// Only parse and set name if provided and non-empty.
 		if ( ! empty( $address['name'] ) ) {
-			$name       = wc_clean( wp_unslash( $address['name'] ) );
+			$name       = wc_clean( $address['name'] );
 			$name_parts = explode( ' ', $name, 2 );
 			$first_name = $name_parts[0];
 			$last_name  = isset( $name_parts[1] ) ? $name_parts[1] : '';
@@ -290,12 +290,12 @@ class AgenticCheckoutUtils {
 		}
 
 		// Sanitize all address fields.
-		$line_one    = wc_clean( wp_unslash( $address['line_one'] ?? '' ) );
-		$line_two    = wc_clean( wp_unslash( $address['line_two'] ?? '' ) );
-		$city        = wc_clean( wp_unslash( $address['city'] ?? '' ) );
-		$state       = wc_clean( wp_unslash( $address['state'] ?? '' ) );
-		$postal_code = wc_clean( wp_unslash( $address['postal_code'] ?? '' ) );
-		$country     = wc_clean( wp_unslash( $address['country'] ?? '' ) );
+		$line_one    = wc_clean( $address['line_one'] ?? '' );
+		$line_two    = wc_clean( $address['line_two'] ?? '' );
+		$city        = wc_clean( $address['city'] ?? '' );
+		$state       = wc_clean( $address['state'] ?? '' );
+		$postal_code = wc_clean( $address['postal_code'] ?? '' );
+		$country     = wc_clean( $address['country'] ?? '' );
 
 		// Set billing address fields.
 		$customer->set_billing_address_1( $line_one );

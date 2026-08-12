@@ -856,6 +856,49 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that wc_format_phone_number() isn't affected by the woocommerce_validate_phone filter.
+	 *
+	 * The filter is country-aware and used for validation; formatting has no country context,
+	 * so it must not let the filter blank otherwise-formattable numbers.
+	 */
+	public function test_wc_format_phone_number_is_not_affected_by_validate_phone_filter() {
+		add_filter( 'woocommerce_validate_phone', '__return_false' );
+
+		try {
+			$this->assertEquals( '1-610-385-0000', wc_format_phone_number( '1.610.385.0000' ) );
+		} finally {
+			remove_filter( 'woocommerce_validate_phone', '__return_false' );
+		}
+	}
+
+	/**
+	 * Test that wc_format_phone_number() applies the woocommerce_format_phone_number filter.
+	 */
+	public function test_wc_format_phone_number_applies_format_filter() {
+		$received = array();
+
+		$callback = function ( $formatted, $original, $is_valid ) use ( &$received ) {
+			$received = array(
+				'formatted' => $formatted,
+				'original'  => $original,
+				'is_valid'  => $is_valid,
+			);
+			return 'filtered';
+		};
+
+		add_filter( 'woocommerce_format_phone_number', $callback, 10, 3 );
+
+		try {
+			$this->assertEquals( 'filtered', wc_format_phone_number( '1.610.385.0000' ) );
+			$this->assertEquals( '1-610-385-0000', $received['formatted'] );
+			$this->assertEquals( '1.610.385.0000', $received['original'] );
+			$this->assertTrue( $received['is_valid'] );
+		} finally {
+			remove_filter( 'woocommerce_format_phone_number', $callback, 10 );
+		}
+	}
+
+	/**
 	 * Test wc_sanitize_phone_number().
 	 *
 	 * @since 3.6.0

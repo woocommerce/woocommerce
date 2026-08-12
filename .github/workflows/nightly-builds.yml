@@ -4,6 +4,10 @@ on:
     - cron: '0 0 * * *' # Run at 12 AM UTC.
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 env:
   SOURCE_REF: trunk
   TARGET_REF: nightly
@@ -21,7 +25,7 @@ jobs:
       contents: write
     steps:
       - name: 'Update nightly tag commit ref'
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -39,7 +43,7 @@ jobs:
             });
 
       - name: 'Checkout ref'
-        uses: 'actions/checkout@v4'
+        uses: 'actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0' # v7.0.0
         with:
           ref: ${{ env.TARGET_REF }}
 
@@ -53,12 +57,30 @@ jobs:
         run: bash bin/build-zip.sh
 
       - name: 'Upload nightly build'
-        uses: 'WebFreak001/deploy-nightly@46ecbabd7fad70d3e7d2c97fe8cd54e7a52e215b' #v3.2.0
+        working-directory: plugins/woocommerce
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          asset_name="woocommerce-${SOURCE_REF}-nightly.zip"
+          cp woocommerce.zip "$asset_name"
+          gh release upload "$TARGET_REF" "$asset_name" --clobber --repo "$GITHUB_REPOSITORY"
+
+      - name: 'Update nightly release notes'
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ env.RELEASE_ID }}/assets{?name,label}
-          release_id: ${{ env.RELEASE_ID }}
-          asset_path: plugins/woocommerce/woocommerce.zip
-          asset_name: woocommerce-${{ env.SOURCE_REF }}-nightly.zip
-          asset_content_type: application/zip
-          max_releases: 1
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const sourceRef = process.env.SOURCE_REF;
+            const builtAt = new Date().toISOString().replace('T', ' ').replace(/\..+/, ' UTC');
+            const body = [
+              `Nightly build, regenerated every night from \`${ sourceRef }\`.`,
+              '',
+              `Last update: **${ builtAt }**`,
+            ].join('\n');
+
+            await github.rest.repos.updateRelease({
+              ...context.repo,
+              release_id: Number(process.env.RELEASE_ID),
+              body,
+              target_commitish: sourceRef,
+            });

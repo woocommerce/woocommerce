@@ -92,6 +92,10 @@ class Segmenter extends ReportsSegmenter {
 			$segmenting_limit = $limit_parts[0] . ',' . $orig_rowcount * count( $this->get_all_segments() );
 		}
 
+		// Note: datetime_anchor is discarded before segments reach the response (see
+		// ReportsSegmenter::reformat_intervals_segments), so it still anchors on
+		// wc_order_tax_lookup.date_created while the rest of the report buckets by the
+		// configured wc_order_stats date column. Harmless today; revisit if it is ever surfaced.
 		$intervals_segments = $wpdb->get_results(
 			"SELECT
 						MAX($table_name.date_created) AS datetime_anchor,

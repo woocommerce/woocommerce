@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Added `__nextHasNoMarginBottom` prop to various WordPress components and updated styling to support WordPress 6.7+ margin style changes.

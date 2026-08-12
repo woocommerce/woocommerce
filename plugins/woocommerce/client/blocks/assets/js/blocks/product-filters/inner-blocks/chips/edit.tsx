@@ -25,6 +25,10 @@ import {
 import { EditProps } from './types';
 import './editor.scss';
 import { getColorClasses, getColorVars } from './utils';
+import {
+	getVisualAttributeTermStyle,
+	isVisualAttributeTermEmpty,
+} from '../../../../base/utils/visual-attribute-terms';
 
 const Edit = ( props: EditProps ): JSX.Element => {
 	const colorGradientSettings = useMultipleOriginColorsAndGradients();
@@ -57,7 +61,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 	const { isLoading = false, items = [] } =
 		context?.[ 'woocommerce/selectableItems' ] ?? {};
 
-	const hasColorSwatches = items.some( ( item ) => 'color' in item );
+	const hasVisualSwatches = items.some( ( item ) => 'visual' in item );
 
 	const globalColors = getSetting< { background?: string; text?: string } >(
 		'globalStylesColors',
@@ -68,10 +72,11 @@ const Edit = ( props: EditProps ): JSX.Element => {
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filter-chips', {
 			'is-loading': isLoading,
-			'is-style-swatch': hasColorSwatches,
+			'is-style-swatch': hasVisualSwatches,
 			...getColorClasses( attributes ),
 		} ),
 		style: {
+			...colorVars,
 			'--wc-product-filter-chips-text':
 				colorVars[ '--wc-product-filter-chips-text' ] ||
 				globalColors.text ||
@@ -127,17 +132,14 @@ const Edit = ( props: EditProps ): JSX.Element => {
 												'wc-block-product-filter-chips__swatch',
 												{
 													'wc-block-product-filter-chips__swatch--no-color':
-														! item.color,
+														isVisualAttributeTermEmpty(
+															item.visual
+														),
 												}
 											) }
-											style={
-												item.color
-													? {
-															backgroundColor:
-																item.color,
-													  }
-													: undefined
-											}
+											style={ getVisualAttributeTermStyle(
+												item.visual
+											) }
 											aria-hidden="true"
 										/>
 										<span className="wc-block-product-filter-chips__text">
@@ -168,7 +170,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 					<ColorGradientSettingsDropdown
 						__experimentalIsRenderedInSidebar
 						settings={ [
-							...( ! hasColorSwatches
+							...( ! hasVisualSwatches
 								? [
 										{
 											label: __(
@@ -215,7 +217,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 									} );
 								},
 							},
-							...( ! hasColorSwatches
+							...( ! hasVisualSwatches
 								? [
 										{
 											label: __(
@@ -290,7 +292,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 									} );
 								},
 							},
-							...( ! hasColorSwatches
+							...( ! hasVisualSwatches
 								? [
 										{
 											label: __(

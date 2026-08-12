@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Monorepo: complete migration from `classnames` package to `clsx`.

@@ -1,7 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Internal\ComingSoon;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\BlockTemplatesController;
 use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
 use Automattic\WooCommerce\Blocks\Package as BlocksPackage;
@@ -134,11 +133,6 @@ class ComingSoonRequestHandler {
 			return true;
 		}
 
-		// Early exit if LYS feature is disabled.
-		if ( ! Features::is_enabled( 'launch-your-store' ) ) {
-			return false;
-		}
-
 		// Early exit if the user is logged in as administrator / shop manager.
 		if ( current_user_can( 'manage_woocommerce' ) ) {
 			return false;
@@ -190,10 +184,6 @@ class ComingSoonRequestHandler {
 	 * @return WP_Theme_JSON_Data The filtered theme json data.
 	 */
 	public function experimental_filter_theme_json_theme( $theme_json ) {
-		if ( ! Features::is_enabled( 'launch-your-store' ) ) {
-			return $theme_json;
-		}
-
 		$theme_data = $theme_json->get_data();
 		$font_data  = $theme_data['settings']['typography']['fontFamilies']['theme'] ?? array();
 
@@ -292,11 +282,6 @@ class ComingSoonRequestHandler {
 	public function enqueue_styles() {
 		// Early exit if the user is not logged in as administrator / shop manager.
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			return;
-		}
-
-		// Early exit if LYS feature is disabled.
-		if ( ! Features::is_enabled( 'launch-your-store' ) ) {
 			return;
 		}
 

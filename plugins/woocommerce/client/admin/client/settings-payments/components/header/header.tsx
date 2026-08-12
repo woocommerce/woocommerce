@@ -6,17 +6,12 @@ import {
 	registerPlugin,
 	getPlugins,
 } from '@wordpress/plugins';
-import {
-	WooHeaderNavigationItem,
-	WooHeaderPageTitle,
-	WooHeaderItem,
-} from '@woocommerce/admin-layout';
+import { WooHeaderPageTitle, WooHeaderItem } from '@woocommerce/admin-layout';
 import { Button } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
-import { BackButton } from '../buttons/back-button';
 import './header.scss';
 
 interface HeaderProps {
@@ -24,10 +19,6 @@ interface HeaderProps {
 	 * The title of the header.
 	 */
 	title: string;
-	/**
-	 * The link to go back to. If not provided, the back button will not be shown.
-	 */
-	backLink?: string;
 	/**
 	 * The description of the header.
 	 */
@@ -44,10 +35,6 @@ interface HeaderProps {
 	 * The callback function when the button is clicked.
 	 */
 	onButtonClick?: () => void;
-	/**
-	 * The context in which the header is used, e.g., 'wc_settings_payments'.
-	 */
-	context?: string;
 }
 
 const HEADER_PLUGIN_NAME = 'settings-payments-offline-header';
@@ -59,12 +46,10 @@ let hasRegisteredPlugins = false;
  */
 export const Header = ( {
 	title,
-	backLink,
 	description,
 	hasButton,
 	buttonLabel,
 	onButtonClick,
-	context = '',
 }: HeaderProps ) => {
 	if ( ! hasRegisteredPlugins ) {
 		/**
@@ -84,15 +69,6 @@ export const Header = ( {
 		registerPlugin( HEADER_PLUGIN_NAME, {
 			render: () => (
 				<>
-					{ backLink && (
-						<WooHeaderNavigationItem>
-							<BackButton
-								href={ backLink }
-								title={ title }
-								from={ context }
-							/>
-						</WooHeaderNavigationItem>
-					) }
 					<WooHeaderPageTitle>
 						<span className="woocommerce-settings-payments-header__title">
 							{ title }

@@ -1,0 +1,470 @@
+/**
+ * External dependencies
+ */
+import { act, render, screen } from '@testing-library/react';
+import { validationStore } from '@woocommerce/block-data';
+import { dispatch, select, useDispatch } from '@wordpress/data';
+import userEvent from '@testing-library/user-event';
+import { useState } from '@wordpress/element';
+/**
+ * Internal dependencies
+ */
+import ValidatedTextInput from '../validated-text-input';
+
+jest.mock( '@wordpress/data', () => ( {
+	__esModule: true,
+	...jest.requireActual( '@wordpress/data' ),
+	useDispatch: jest.fn(),
+} ) );
+
+const mockUseDispatch = useDispatch as jest.Mock;
+
+describe( 'ValidatedTextInput', () => {
+	beforeAll( () => {
+		mockUseDispatch.mockImplementation( ( args ) => {
+			return jest.requireActual( '@wordpress/data' ).useDispatch( args );
+		} );
+	} );
+
+	it( 'Removes related validation error on change', async () => {
+		const user = userEvent.setup();
+
+		render(
+			<ValidatedTextInput
+				instanceId={ '0' }
+				accept={ 'image/*' }
+				onChange={ () => void 0 }
+				value={ 'Test' }
+				id={ 'test-input' }
+				label={ 'Test Input' }
+			/>
+		);
+
+		await act( () =>
+			dispatch( validationStore ).setValidationErrors( {
+				'test-input': {
+					message: 'Error message',
+					hidden: false,
+				},
+			} )
+		);
+
+		await expect(
+			select( validationStore ).getValidationError( 'test-input' )
+		).not.toBe( undefined );
+
+		const textInputElement = await screen.getByLabelText( 'Test Input' );
+
+		await act( async () => {
+			await user.type( textInputElement, 'New value' );
+		} );
+
+		expect(
+			select( validationStore ).getValidationError( 'test-input' )
+		).toBe( undefined );
+	} );
+	it( 'Hides related validation error on change when id is not specified', async () => {
+		render(
+			<ValidatedTextInput
+				instanceId={ '1' }
+				accept={ 'image/*' }
+				onChange={ () => void 0 }
+				value={ 'Test' }
+				label={ 'Test Input' }
+			/>
+		);
+
+		await act( () =>
+			dispatch( validationStore ).setValidationErrors( {
+				'textinput-1': {
+					message: 'Error message',
+					hidden: false,
+				},
+			} )
+		);
+		await expect(
+			select( validationStore ).getValidationError( 'textinput-1' )
+		).not.toBe( undefined );
+		const textInputElement = await screen.getByLabelText( 'Test Input' );
+
+		await act( async () => {
+			await userEvent.type( textInputElement, 'New value' );
+		} );
+
+		await expect(
+			select( validationStore ).getValidationError( 'textinput-1' )
+		).toBe( undefined );
+	} );
+	it( 'Displays a passed error message', async () => {
+		render(
+			<ValidatedTextInput
+				instanceId={ '2' }
+				accept={ 'image/*' }
+				onChange={ () => void 0 }
+				value={ 'Test' }
+				label={ 'Test Input' }
+				errorMessage={ 'Custom error message' }
+			/>
+		);
+		await act( () =>
+			dispatch( validationStore ).setValidationErrors( {
+				'textinput-2': {
+					message: 'Error message in data store',
+					hidden: false,
+				},
+			} )
+		);
+		const customErrorMessageElement = await screen.getByText(
+			'Custom error message'
+		);
+		expect(
+			screen.queryByText( 'Error message in data store' )
+		).not.toBeInTheDocument();
+		await expect( customErrorMessageElement ).toBeInTheDocument();
+		expect( screen.getByRole( 'textbox' ) ).toHaveAccessibleErrorMessage(
+			'Custom error message'
+		);
+	} );
+	it( 'Displays an error message from the data store', async () => {
+		render(
+			<ValidatedTextInput
+				instanceId={ '3' }
+				accept={ 'image/*' }
+				onChange={ () => void 0 }
+				value={ 'Test' }
+				label={ 'Test Input' }
+			/>
+		);
+		await act( () =>
+			dispatch( validationStore ).setValidationErrors( {
+				'textinput-3': {
+					message: 'Error message 3',
+					hidden: false,
+				},
+			} )
+		);
+		const errorMessageElement = await screen.getByText( 'Error message 3' );
+		await expect( errorMessageElement ).toBeInTheDocument();
+		expect( screen.getByRole( 'textbox' ) ).toHaveAccessibleErrorMessage(
+			'Error message 3'
+		);
+	} );
+	it( 'References the error message provided by its props', async () => {
+		render(
+			<>
+				<ValidatedTextInput
+					instanceId={ '2' }
+					onChange={ () => void 0 }
+					value={ 'Test' }
+					label={ 'Test Input' }
+					errorMessage={ 'Custom error message' }
+					aria-errormessage={ 'custom-error-message-container' }
+				/>
+				<p id={ 'custom-error-message-container' }>
+					Completely separate error message
+				</p>
+			</>
+		);
+		await act( () =>
+			dispatch( validationStore ).setValidationErrors( {
+				'textinput-2': {
+					message: 'Error message in data store',
+					hidden: false,
+				},
+			} )
+		);
+
+		expect( screen.getByRole( 'textbox' ) ).toHaveAccessibleErrorMessage(
+			'Completely separate error message'
+		);
+	} );
+	it( 'Runs custom validation on the input', async () => {
+		const user = userEvent.setup();
+		const TestComponent = () => {
+			const [ inputValue, setInputValue ] = useState( 'Test' );
+			return (
+				<ValidatedTextInput
+					instanceId={ '4' }
+					id={ 'test-input' }
+					onChange={ ( value ) => setInputValue( value ) }
+					value={ inputValue }
+					label={ 'Test Input' }
+					customValidation={ ( inputObject ) => {
+						if ( inputObject.value !== 'Valid Value' ) {
+							inputObject.setCustomValidity(
+								'Please enter a valid test input'
+							);
+							return false;
+						}
+						return true;
+					} }
+				/>
+			);
+		};
+		render( <TestComponent /> );
+
+		const textInputElement = await screen.getByLabelText( 'Test Input' );
+		await act( async () => {
+			await user.type( textInputElement, 'Invalid Value' );
+		} );
+
+		await expect(
+			select( validationStore ).getValidationError( 'test-input' )
+				?.message
+		).toBe( 'Please enter a valid test input' );
+		await act( async () => {
+			await user.clear( textInputElement );
+			await user.type( textInputElement, 'Valid Value' );
+		} );
+
+		await expect( textInputElement.value ).toBe( 'Valid Value' );
+		await expect(
+			select( validationStore ).getValidationError( 'test-input' )
+		).toBe( undefined );
+	} );
+	it( 'Shows validation error for non-empty invalid input on blur', async () => {
+		const user = userEvent.setup();
+		const TestComponent = () => {
+			const [ inputValue, setInputValue ] = useState( '' );
+			return (
+				<ValidatedTextInput
+					instanceId={ '5' }
+					id={ 'test-input' }
+					onChange={ ( value ) => setInputValue( value ) }
+					value={ inputValue }
+					label={ 'Test Input' }
+					type="email"
+				/>
+			);
+		};
+		render( <TestComponent /> );
+		const textInputElement = await screen.getByLabelText( 'Test Input' );
+
+		await act( async () => {
+			await user.type( textInputElement, 'invalid-email' );
+			textInputElement.blur();
+		} );
+
+		// Non-empty invalid fields SHOULD show validation errors on blur
+		expect(
+			screen.queryByText( 'Please enter a valid test input' )
+		).toBeInTheDocument();
+	} );
+	it( 'Shows validation error for pattern mismatch on blur', async () => {
+		const user = userEvent.setup();
+		const TestComponent = () => {
+			const [ inputValue, setInputValue ] = useState( '' );
+			return (
+				<ValidatedTextInput
+					instanceId={ '6' }
+					id={ 'pattern-input' }
+					onChange={ ( value ) => setInputValue( value ) }
+					value={ inputValue }
+					label={ 'Pattern Input' }
+					pattern="^[A-Za-z]+$"
+				/>
+			);
+		};
+		render( <TestComponent /> );
+		const textInputElement = await screen.getByLabelText( 'Pattern Input' );
+
+		await act( async () => {
+			await user.type( textInputElement, '123456' );
+			textInputElement.blur();
+		} );
+
+		// Non-empty invalid fields (pattern mismatch) SHOULD show validation errors on blur
+		const validationError =
+			select( validationStore ).getValidationError( 'pattern-input' );
+		expect( validationError ).not.toBeUndefined();
+		expect( validationError?.hidden ).toBe( false );
+	} );
+	it( 'Shows a custom error message for an invalid required input after form submission', async () => {
+		const user = userEvent.setup();
+		const TestComponent = () => {
+			const [ inputValue, setInputValue ] = useState( '' );
+			return (
+				<ValidatedTextInput
+					instanceId={ '5' }
+					id={ 'test-input' }
+					onChange={ ( value ) => setInputValue( value ) }
+					value={ inputValue }
+					label={ 'Test Input' }
+					required={ true }
+				/>
+			);
+		};
+		render( <TestComponent /> );
+		const textInputElement = await screen.getByLabelText( 'Test Input' );
+
+		await act( async () => {
+			await user.type( textInputElement, 'test' );
+			await user.clear( textInputElement );
+			textInputElement.blur();
+		} );
+
+		// Empty fields don't show validation errors on blur - they stay hidden
+		// until form submission (showAllValidationErrors is called)
+		expect(
+			screen.queryByText( 'Please enter a valid test input' )
+		).not.toBeInTheDocument();
+
+		// Add whitespace only to verify this also doesn't trigger validation error on blur.
+		await act( async () => {
+			await user.type( textInputElement, ' ' );
+			textInputElement.blur();
+		} );
+
+		// Empty fields, even whitespace don't show validation errors on blur.
+		expect(
+			screen.queryByText( 'Please enter a valid test input' )
+		).not.toBeInTheDocument();
+
+		// Simulate form submission which reveals all hidden validation errors
+		await act( () =>
+			dispatch( validationStore ).showAllValidationErrors()
+		);
+
+		expect(
+			screen.queryByText( 'Please enter a valid test input' )
+		).toBeInTheDocument();
+
+		// After submission, blurring the empty field should NOT hide the error
+		await act( async () => {
+			await user.click( textInputElement );
+			textInputElement.blur();
+		} );
+
+		expect(
+			screen.queryByText( 'Please enter a valid test input' )
+		).toBeInTheDocument();
+	} );
+
+	describe( 'correctly validates on mount', () => {
+		it( 'validates when focusOnMount is true and validateOnMount is not set', async () => {
+			const setValidationErrors = jest.fn();
+			mockUseDispatch.mockImplementation(
+				( store: string | { name: string } ) => {
+					if ( store === validationStore ) {
+						return {
+							...jest
+								.requireActual( '@wordpress/data' )
+								.useDispatch( store ),
+							setValidationErrors,
+						};
+					}
+					return jest
+						.requireActual( '@wordpress/data' )
+						.useDispatch( store );
+				}
+			);
+
+			const TestComponent = () => {
+				const [ inputValue, setInputValue ] = useState( '' );
+				return (
+					<ValidatedTextInput
+						instanceId={ '6' }
+						id={ 'test-input' }
+						onChange={ ( value ) => setInputValue( value ) }
+						value={ inputValue }
+						label={ 'Test Input' }
+						required={ true }
+						focusOnMount={ true }
+					/>
+				);
+			};
+			await render( <TestComponent /> );
+			const textInputElement =
+				await screen.getByLabelText( 'Test Input' );
+			await expect( textInputElement ).toHaveFocus();
+			await expect( setValidationErrors ).toHaveBeenCalledWith( {
+				'test-input': {
+					message: 'Please enter a valid test input',
+					hidden: true,
+				},
+			} );
+		} );
+		it( 'validates when focusOnMount is false, regardless of validateOnMount value', async () => {
+			const setValidationErrors = jest.fn();
+			mockUseDispatch.mockImplementation(
+				( store: string | { name: string } ) => {
+					if ( store === validationStore ) {
+						return {
+							...jest
+								.requireActual( '@wordpress/data' )
+								.useDispatch( store ),
+							setValidationErrors,
+						};
+					}
+					return jest
+						.requireActual( '@wordpress/data' )
+						.useDispatch( store );
+				}
+			);
+
+			const TestComponent = ( { validateOnMount = false } ) => {
+				const [ inputValue, setInputValue ] = useState( '' );
+				return (
+					<ValidatedTextInput
+						instanceId={ '6' }
+						id={ 'test-input' }
+						onChange={ ( value ) => setInputValue( value ) }
+						value={ inputValue }
+						label={ 'Test Input' }
+						required={ true }
+						focusOnMount={ true }
+						validateOnMount={ validateOnMount }
+					/>
+				);
+			};
+			const { rerender } = await render( <TestComponent /> );
+			const textInputElement =
+				await screen.getByLabelText( 'Test Input' );
+			await expect( textInputElement ).toHaveFocus();
+			await expect( setValidationErrors ).not.toHaveBeenCalled();
+
+			await rerender( <TestComponent validateOnMount={ true } /> );
+			await expect( textInputElement ).toHaveFocus();
+			await expect( setValidationErrors ).not.toHaveBeenCalled();
+		} );
+		it( 'does not validate when validateOnMount is false and focusOnMount is true', async () => {
+			const setValidationErrors = jest.fn();
+			mockUseDispatch.mockImplementation(
+				( store: string | { name: string } ) => {
+					if ( store === validationStore ) {
+						return {
+							...jest
+								.requireActual( '@wordpress/data' )
+								.useDispatch( store ),
+							setValidationErrors,
+						};
+					}
+					return jest
+						.requireActual( '@wordpress/data' )
+						.useDispatch( store );
+				}
+			);
+
+			const TestComponent = () => {
+				const [ inputValue, setInputValue ] = useState( '' );
+				return (
+					<ValidatedTextInput
+						instanceId={ '6' }
+						id={ 'test-input' }
+						onChange={ ( value ) => setInputValue( value ) }
+						value={ inputValue }
+						label={ 'Test Input' }
+						required={ true }
+						focusOnMount={ true }
+						validateOnMount={ false }
+					/>
+				);
+			};
+			await render( <TestComponent /> );
+			const textInputElement =
+				await screen.getByLabelText( 'Test Input' );
+			await expect( textInputElement ).toHaveFocus();
+			await expect( setValidationErrors ).not.toHaveBeenCalled();
+		} );
+	} );
+} );

@@ -31,14 +31,18 @@ const transformModules = {
  */
 const mapWpModules = [
 	'@wordpress/private-apis',
+	'@wordpress/data',
 	'@wordpress/core-data',
 	'@wordpress/components',
 	'@wordpress/html-entities',
+	'@wordpress/notices',
 ];
 const wpModulesMapper = mapWpModules.reduce( ( acc, module ) => {
 	try {
 		// Excluding mappings for imports with suffixes like /build/index.js so that we can import the build/index.js file directly.
-		acc[ `^${ module }$` ] = require.resolve( module, { paths: [ process.cwd() ] } );
+		acc[ `^${ module }$` ] = require.resolve( module, {
+			paths: [ process.cwd() ],
+		} );
 	} catch ( error ) {
 		// If the module is not found, no need to add it to the mapper.
 	}
@@ -81,10 +85,7 @@ module.exports = {
 		),
 		'\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
 			path.resolve( __dirname, 'src/mocks/static' ),
-		'\\.(scss|css)$': path.resolve(
-			__dirname,
-			'src/mocks/style-mock.js'
-		),
+		'\\.(scss|css)$': path.resolve( __dirname, 'src/mocks/style-mock.js' ),
 		// Force some modules to resolve with the CJS entry point, because Jest does not support package.json.exports.
 		'lib0/webcrypto': require.resolve( 'lib0/webcrypto' ), // use the CJS entry point so that it uses the node:crypto API as jsdom doesn't have a crypto API
 		uuid: require.resolve( 'uuid' ),
@@ -127,16 +128,12 @@ module.exports = {
 			'(?:src|client|assets/js)/.*\\.[jt]sx?$': [
 				'ts-jest',
 				{
-					// A dedicated test tsconfig sidesteps per-package
-					// include/exclude/rootDir restrictions that block
-					// ts-jest from compiling cross-package source files
-					// (resolved via the @woocommerce/* moduleNameMapper).
-					// The compiler emits CJS so Jest's runtime can execute
-					// it; package builds keep their own tsconfigs for
-					// publishing.
-					tsconfig: require.resolve(
-						'@woocommerce/internal-ts-config/tsconfig-jest.json'
-					),
+					// Dedicated jest tsconfig flips jsx to the automatic
+					// runtime and emits CJS for jest's runtime. Sidesteps
+					// per-package include/exclude/rootDir restrictions that
+					// block ts-jest from compiling cross-package source
+					// files (resolved via the @woocommerce/* moduleNameMapper).
+					tsconfig: path.resolve( __dirname, 'tsconfig-jest.json' ),
 					diagnostics: false,
 				},
 			],

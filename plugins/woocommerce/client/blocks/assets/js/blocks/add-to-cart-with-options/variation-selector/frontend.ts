@@ -10,7 +10,7 @@ import {
 import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/products';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
-import type { ProductResponseItem } from '@woocommerce/types';
+import type { ProductResponseItem, SelectableItem } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -24,14 +24,14 @@ import type {
 	AddToCartWithOptionsStore,
 	Context as AddToCartWithOptionsStoreContext,
 } from '../frontend';
-import type { SelectableItem } from '../../../types/type-defs/selectable-items';
+import type { VisualAttributeTerm } from '../../../base/utils/visual-attribute-terms';
 
 type VariationOptionItem = {
 	id: string;
 	label: string;
 	value: string;
 	ariaLabel?: string;
-	color?: string;
+	visual?: VisualAttributeTerm;
 };
 
 type Context = AddToCartWithOptionsStoreContext & {
@@ -43,7 +43,7 @@ type Context = AddToCartWithOptionsStoreContext & {
 };
 
 type ToggleContext = Context & {
-	item?: SelectableItem;
+	item?: SelectableItem< { visual?: VisualAttributeTerm } >;
 };
 
 const universalLock =
@@ -182,12 +182,16 @@ export type VariableProductAddToCartWithOptionsStore =
 	AddToCartWithOptionsStore & {
 		state: {
 			selectedAttributes: SelectedAttributes[];
-			selectableItems: readonly SelectableItem[];
+			selectableItems: readonly SelectableItem< {
+				visual?: VisualAttributeTerm;
+			} >[];
 		};
 		actions: {
 			setAttribute: ( attribute: string, value: string ) => void;
 			removeAttribute: ( attribute: string ) => void;
-			toggle: ( item?: SelectableItem ) => void;
+			toggle: (
+				item?: SelectableItem< { visual?: VisualAttributeTerm } >
+			) => void;
 			autoselectAttributes: ( args: {
 				includedAttributes?: string[];
 				excludedAttributes?: string[];
@@ -212,7 +216,9 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				}
 				return context.selectedAttributes || [];
 			},
-			get selectableItems(): readonly SelectableItem[] {
+			get selectableItems(): readonly SelectableItem< {
+				visual?: VisualAttributeTerm;
+			} >[] {
 				const context = getContext< Context >();
 				if ( ! context ) {
 					return [];
@@ -249,7 +255,9 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						selected,
 						disabled,
 						hidden: hideInvalid && disabled,
-						...( row.color !== undefined && { color: row.color } ),
+						...( row.visual !== undefined && {
+							visual: row.visual,
+						} ),
 					};
 				} );
 			},
@@ -297,7 +305,11 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					selectedAttributes.splice( index, 1 );
 				}
 			},
-			toggle( itemArg?: SelectableItem | Event ) {
+			toggle(
+				itemArg?:
+					| SelectableItem< { visual?: VisualAttributeTerm } >
+					| Event
+			) {
 				const context = getContext< ToggleContext >();
 				const item =
 					itemArg && ! ( itemArg instanceof Event )
@@ -497,7 +509,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				}
 
 				// Let's not do anything if the user is typing in the input.
-				if ( ref === document.activeElement ) {
+				if ( ref === ref.ownerDocument.activeElement ) {
 					return;
 				}
 

@@ -2,7 +2,7 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"name": "woocommerce/product-filter-checkbox-list",
 	"title": "List",
-	"description": "Display a list of filter options.",
+	"description": "Display filter options as a list.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",

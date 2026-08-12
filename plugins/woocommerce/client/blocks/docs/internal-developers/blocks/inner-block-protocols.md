@@ -128,14 +128,17 @@ export type FilterItemFields = {
 	depth?: number;
 	menuOrder?: number;
 	attributeQueryType?: 'and' | 'or';
-	color?: string;
+	visual?: {
+		type: 'color' | 'image' | 'none';
+		value: string;
+	};
 };
 ```
 
 | Consumer | Optional fields read | Fallback |
 | --- | --- | --- |
-| `checkbox-list` | `count`, `color`, `depth`, `filterType === 'rating'` | Text label, no count, no swatch, no indent |
-| `chips` | `count`, `color` | Text label, no count, no swatch |
+| `checkbox-list` | `count`, `visual`, `depth`, `filterType === 'rating'` | Text label, no count, no swatch, no indent |
+| `chips` | `count`, `visual` | Text label, no count, no swatch |
 
 Checkbox-list and chips mirror parent items into child `state.items`, adding local `index` for show-more and setting `hidden` when an item should be hidden. Their templates bind overflow visibility with `context.item.hidden`.
 

@@ -69,10 +69,9 @@
 		flex-flow: row-reverse;
 	}
 
+	.wc-block-product-filters__content,
 	.wc-block-product-filters__overlay-content {
 		display: flex;
-		padding: 0 var(--wp--preset--spacing--40);
-		overflow-y: scroll;
 		flex-grow: 1;
 		flex-direction: column;
 		gap: var(
@@ -83,6 +82,11 @@
 		> *:first-child {
 			margin-top: 0;
 		}
+	}
+
+	.wc-block-product-filters__overlay-content {
+		padding: 0 var(--wp--preset--spacing--40);
+		overflow-y: scroll;
 	}
 
 	.wc-block-product-filters__overlay-footer {
@@ -107,10 +111,11 @@
 		}
 	}
 
+	&.is-filter-drawer-disabled {
+		display: flex;
+	}
+
 	@include breakpoint(">600px") {
-		// If we add "Always show" option in the future, we can support that behavior
-		// by adding a class to the wrapper and refer it here, like this:
-		// &:not(.always-show) {
 		&,
 		&.is-overlay-opened {
 			display: flex;
@@ -155,6 +160,7 @@
 	}
 
 	@include breakpoint("<600px") {
+		.wc-block-product-filters__content,
 		.wc-block-product-filters__overlay-content {
 			.wp-block-group {
 				display: block;

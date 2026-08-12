@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Render number fields with explicit +/- spin buttons (NumberSpinControl, composed from stable components) instead of the native browser spinner.

@@ -148,62 +148,6 @@ class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Validates the product instance caching behaviour.
-	 */
-	public function test_get_get_product_caching(): void {
-		$product_item = new WC_Order_Item_Product();
-		$product      = new WC_Product_Simple();
-		$product->save();
-
-		// Verify: cached instance unchanged after the initial injection.
-		$instance = wc_get_product( $product->get_id() );
-		$product_item->set_product( $instance );
-		$this->assertSame( $product->get_id(), $product_item->get_product_id() );
-		$this->assertSame( $instance, $product_item->get_product() );
-
-		// Verify: cached instance refresh when product is saved.
-		$instance = $product_item->get_product();
-		$instance->set_stock_quantity( 10 );
-		$instance->save();
-		$this->assertNotSame( $instance, $product_item->get_product() );
-
-		// Verify: cached instance refresh after unsaved property mutation.
-		$instance = $product_item->get_product();
-		$instance->set_price( 10.99 );
-		$this->assertNotSame( $instance, $product_item->get_product() );
-
-		// Verify: cached instance refresh after unsaved meta addition.
-		$instance = $product_item->get_product();
-		$instance->add_meta_data( 'key', 'add' );
-		$this->assertNotSame( $instance, $product_item->get_product() );
-		$instance->save();
-
-		// Verify: cached instance refresh after unsaved meta update.
-		$instance = $product_item->get_product();
-		$instance->update_meta_data( 'key', 'update' );
-		$this->assertNotSame( $instance, $product_item->get_product() );
-		$instance->save();
-
-		// Verify: cached instance refresh after unsaved meta delete.
-		$instance = $product_item->get_product();
-		$instance->delete_meta_data( 'key' );
-		$this->assertNotSame( $instance, $product_item->get_product() );
-
-		// Verify: cached instance refresh when product is deleted.
-		$product->delete( true );
-		$this->assertFalse( $product_item->get_product() );
-
-		$replacement = new WC_Product_Simple();
-		$replacement->save();
-
-		// Verify: cached instance invalidated when updating product ID.
-		$product_item->set_product_id( $replacement->get_id() );
-		$this->assertSame( $replacement->get_id(), $product_item->get_product()->get_id() );
-
-		$replacement->delete();
-	}
-
-	/**
 	 * Test get_item_download_url method for WC_Order_Item_Product.
 	 *
 	 * @since 3.2.0

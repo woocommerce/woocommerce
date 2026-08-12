@@ -22,6 +22,8 @@ const singletonWpModules = [
 	'@wordpress/html-entities',
 	'@wordpress/keyboard-shortcuts',
 	'@wordpress/patterns',
+	'@wordpress/rich-text',
+	'@wordpress/notices',
 ];
 
 const wpSingletonMapper = singletonWpModules.reduce( ( acc, mod ) => {
@@ -57,31 +59,50 @@ module.exports = {
 		'@woocommerce/atomic-blocks': 'assets/js/atomic/blocks',
 		'@woocommerce/atomic-utils': 'assets/js/atomic/utils',
 		'@woocommerce/icons': 'assets/js/icons',
-		'@woocommerce/settings': 'assets/js/settings/shared',
+		'^@woocommerce/settings/(.*)$': 'packages/public-api/settings/$1',
+		'^@woocommerce/settings$': 'packages/public-api/settings',
 		'@woocommerce/blocks/(.*)$': 'assets/js/blocks/$1',
 		'@woocommerce/block-settings': 'assets/js/settings/blocks',
 		'@woocommerce/editor-components(.*)$': 'assets/js/editor-components/$1',
-		'@woocommerce/blocks-registry': 'assets/js/blocks-registry',
-		'@woocommerce/blocks-checkout$': 'packages/checkout',
-		'@woocommerce/blocks-checkout-events': 'assets/js/events',
-		'@woocommerce/blocks-components': 'packages/components',
-		'@woocommerce/price-format': 'packages/prices',
+		'^@woocommerce/blocks-registry/(.*)$':
+			'packages/public-api/blocks-registry/$1',
+		'^@woocommerce/blocks-registry$': 'packages/public-api/blocks-registry',
+		'^@woocommerce/blocks-checkout/(.*)$':
+			'packages/public-api/blocks-checkout/$1',
+		'^@woocommerce/blocks-checkout$': 'packages/public-api/blocks-checkout',
+		'^@woocommerce/blocks-checkout-events/(.*)$':
+			'packages/public-api/blocks-checkout-events/$1',
+		'^@woocommerce/blocks-checkout-events$':
+			'packages/public-api/blocks-checkout-events',
+		'^@woocommerce/blocks-components/(.*)$':
+			'packages/public-api/blocks-components/$1',
+		'^@woocommerce/blocks-components$':
+			'packages/public-api/blocks-components',
+		'^@woocommerce/price-format/(.*)$':
+			'packages/public-api/price-format/$1',
+		'^@woocommerce/price-format$': 'packages/public-api/price-format',
 		'@woocommerce/block-hocs(.*)$': 'assets/js/hocs/$1',
 		'@woocommerce/base-components(.*)$': 'assets/js/base/components/$1',
 		'@woocommerce/base-context(.*)$': 'assets/js/base/context/$1',
 		'@woocommerce/base-hocs(.*)$': 'assets/js/base/hocs/$1',
 		'@woocommerce/base-hooks(.*)$': 'assets/js/base/hooks/$1',
 		'@woocommerce/base-utils(.*)$': 'assets/js/base/utils',
-		'@woocommerce/block-data': 'assets/js/data',
+		'^@woocommerce/block-data/(.*)$': 'packages/public-api/block-data/$1',
+		'^@woocommerce/block-data$': 'packages/public-api/block-data',
 		'@woocommerce/resource-previews': 'assets/js/previews',
-		'@woocommerce/shared-context': 'assets/js/shared/context',
-		'@woocommerce/shared-hocs': 'assets/js/shared/hocs',
+		'^@woocommerce/shared-context/(.*)$':
+			'packages/public-api/shared-context/$1',
+		'^@woocommerce/shared-context$': 'packages/public-api/shared-context',
+		'^@woocommerce/shared-hocs/(.*)$': 'packages/public-api/shared-hocs/$1',
+		'^@woocommerce/shared-hocs$': 'packages/public-api/shared-hocs',
 		'@woocommerce/blocks-test-utils/(.*)$': 'tests/utils/$1',
 		'@woocommerce/blocks-test-utils': 'tests/utils',
-		'@woocommerce/types': 'assets/js/types',
+		'^@woocommerce/types/(.*)$': 'packages/public-api/types/$1',
+		'^@woocommerce/types$': 'packages/public-api/types',
 		'@woocommerce/utils': 'assets/js/utils',
 		'@woocommerce/test-utils/msw': 'tests/js/config/msw-setup.js',
-		'@woocommerce/entities': 'assets/js/entities',
+		'^@woocommerce/entities/(.*)$': 'packages/internal/entities/$1',
+		'^@woocommerce/entities$': 'packages/internal/entities',
 		'@woocommerce/stores/(.*)$': 'assets/js/base/stores/$1',
 		'^react$': '<rootDir>/node_modules/react',
 		'^react-dom$': '<rootDir>/node_modules/react-dom',
@@ -89,8 +110,7 @@ module.exports = {
 		// subpath imports through source so tests don't depend on built
 		// artifacts. Must come after all blocks-internal aliases above and
 		// before the generic build-module rewrite so @woocommerce/* subpaths
-		// (e.g. @woocommerce/product-editor/build-module/utils/...) land on
-		// src/ instead of build/.
+		// land on src/ instead of build/.
 		'^@woocommerce/([^/]+)/(?:src|build|build-module|build-types)/(.+)$':
 			'<rootDir>/../../../../packages/js/$1/src/$2',
 		'^@woocommerce/([^/]+)/(.+)$':
