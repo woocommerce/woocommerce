@@ -139,6 +139,7 @@ class SearchFilter extends Component {
 
 		const screenReaderText = this.getScreenReaderText( filter, config );
 
+		/*eslint-disable jsx-a11y/no-noninteractive-tabindex*/
 		return (
 			<fieldset
 				className="woocommerce-filters-advanced__line-item"
@@ -164,6 +165,7 @@ class SearchFilter extends Component {
 				) }
 			</fieldset>
 		);
+		/*eslint-enable jsx-a11y/no-noninteractive-tabindex*/
 	}
 }
 
