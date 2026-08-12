@@ -71,12 +71,11 @@ class SingleProductMetaTemplateTest extends WC_Unit_Test_Case {
 		);
 		$this->test_product   = WC_Helper_Product::create_simple_product();
 
-		wp_set_object_terms(
-			$this->test_product->get_id(),
+		$this->test_product->set_category_ids(
 			array( $this->category_ids['leaf'], $this->category_ids['root'], $this->category_ids['mid'] ),
-			'product_cat'
 		);
-		$GLOBALS['product'] = wc_get_product( $this->test_product->get_id() );
+		$this->test_product->save();
+		$GLOBALS['product'] = $this->test_product;
 	}
 
 	/**
@@ -102,15 +101,14 @@ class SingleProductMetaTemplateTest extends WC_Unit_Test_Case {
 	 * @testdox Single product meta renders assigned categories in breadcrumb order.
 	 */
 	public function test_single_product_meta_renders_categories_in_breadcrumb_order(): void {
-		$content  = preg_replace( '/\s+/', ' ', wp_strip_all_tags( wc_get_template_html( 'single-product/meta.php' ) ) );
 		$expected = implode(
 			', ',
 			array( $this->category_names['root'], $this->category_names['mid'], $this->category_names['leaf'] )
 		);
 
-		$this->assertMatchesRegularExpression(
-			'/Categor(?:y|ies): ' . preg_quote( $expected, '/' ) . '/',
-			$content,
+		$this->assertStringContainsString(
+			'Categories: ' . $expected,
+			wp_strip_all_tags( wc_get_template_html( 'single-product/meta.php' ) ),
 			'Single product meta should render product categories in root-to-leaf order.'
 		);
 	}
@@ -125,15 +123,14 @@ class SingleProductMetaTemplateTest extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_product_meta_category_orderby', $orderby_filter );
 
 		try {
-			$content  = preg_replace( '/\s+/', ' ', wp_strip_all_tags( wc_get_template_html( 'single-product/meta.php' ) ) );
 			$expected = implode(
 				', ',
 				array( $this->category_names['leaf'], $this->category_names['mid'], $this->category_names['root'] )
 			);
 
-			$this->assertMatchesRegularExpression(
-				'/Categor(?:y|ies): ' . preg_quote( $expected, '/' ) . '/',
-				$content,
+			$this->assertStringContainsString(
+				'Categories: ' . $expected,
+				wp_strip_all_tags( wc_get_template_html( 'single-product/meta.php' ) ),
 				'Single product meta should honor the filtered product category ordering mode.'
 			);
 		} finally {
