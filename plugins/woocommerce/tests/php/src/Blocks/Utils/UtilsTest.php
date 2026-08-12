@@ -152,31 +152,83 @@ class UtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox get_current_page_url() builds the URL from $wp->request and preserves raw query encoding.
+	 * Get the current page URL after temporarily setting request state.
+	 *
+	 * @param string      $request_path The request path relative to home.
+	 * @param string|null $query_string The raw query string, or null to omit it.
+	 * @return string
 	 */
-	public function test_get_current_page_url_preserves_encoded_query_string(): void {
+	private function get_current_page_url_with_request_state( string $request_path, ?string $query_string ): string {
 		global $wp, $wp_rewrite;
 
-		$original_request            = $wp->request ?? null;
-		$original_query_string       = $_SERVER['QUERY_STRING'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-		$original_use_trailing_slash = $wp_rewrite->use_trailing_slashes;
+		$original_request              = $wp->request;
+		$original_query_string_exists  = array_key_exists( 'QUERY_STRING', $_SERVER ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$original_query_string         = $_SERVER['QUERY_STRING'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+		$original_use_trailing_slashes = $wp_rewrite->use_trailing_slashes;
 
-		$wp_rewrite->use_trailing_slashes = true;
-		$wp->request                      = 'product/hoodie';
-		$_SERVER['QUERY_STRING']          = 'label=Black%20%26%20White';
+		try {
+			$wp->request                      = $request_path;
+			$wp_rewrite->use_trailing_slashes = true;
 
-		$url = Utils::get_current_page_url();
+			if ( null === $query_string ) {
+				unset( $_SERVER['QUERY_STRING'] );
+			} else {
+				$_SERVER['QUERY_STRING'] = $query_string;
+			}
 
-		$this->assertStringContainsString( '/product/hoodie/', $url );
-		$this->assertStringContainsString( 'label=Black%20%26%20White', $url );
-		$this->assertStringNotContainsString( 'label=Black%20&%20White', $url );
+			return Utils::get_current_page_url();
+		} finally {
+			$wp->request                      = $original_request;
+			$wp_rewrite->use_trailing_slashes = $original_use_trailing_slashes;
 
-		$wp->request                      = $original_request;
-		$wp_rewrite->use_trailing_slashes = $original_use_trailing_slash;
-		if ( null === $original_query_string ) {
-			unset( $_SERVER['QUERY_STRING'] );
-		} else {
-			$_SERVER['QUERY_STRING'] = $original_query_string;
+			if ( $original_query_string_exists ) {
+				$_SERVER['QUERY_STRING'] = $original_query_string;
+			} else {
+				unset( $_SERVER['QUERY_STRING'] );
+			}
 		}
+	}
+
+	/**
+	 * @testdox get_current_page_url() preserves request URL components exactly.
+	 * @dataProvider provider_current_page_url_cases
+	 *
+	 * @param string      $request_path  The request path relative to home.
+	 * @param string|null $query_string  The raw query string, or null to omit it.
+	 * @param string      $expected_path The expected path relative to home.
+	 */
+	public function test_get_current_page_url( string $request_path, ?string $query_string, string $expected_path ): void {
+		$url = $this->get_current_page_url_with_request_state( $request_path, $query_string );
+
+		$this->assertSame(
+			untrailingslashit( home_url() ) . $expected_path,
+			$url,
+			'The current page URL should preserve all request components exactly.'
+		);
+	}
+
+	/**
+	 * Current page URL inputs and their exact expected paths.
+	 *
+	 * @return array<string, array{string, string|null, string}>
+	 */
+	public function provider_current_page_url_cases(): array {
+		return array(
+			'encoded label query'       => array(
+				'product/hoodie',
+				'label=Black%20%26%20White',
+				'/product/hoodie/?label=Black%20%26%20White',
+			),
+			'question mark query value' => array(
+				'search-results',
+				'search=?',
+				'/search-results/?search=?',
+			),
+			'lone zero query string'    => array(
+				'product/hoodie',
+				'0',
+				'/product/hoodie/?0',
+			),
+		);
 	}
 }
