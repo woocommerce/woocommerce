@@ -682,6 +682,40 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_version_and_type corrects a stale stored term when a filter makes $old_type match $new_type but the DB term differs.
+	 */
+	public function test_update_version_and_type_corrects_stale_term_under_filter(): void {
+		$store = new class() extends WC_Product_Data_Store_CPT {
+			public function update_version_and_type( &$product ): void { // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found, Squiz.Commenting.FunctionComment.Missing
+				parent::update_version_and_type( $product );
+			}
+		};
+
+		// Create a variable product — stored term is 'variable'.
+		$product = new WC_Product_Variable();
+		$product->save();
+		$product_id = $product->get_id();
+		$this->assertSame( 'variable', get_the_terms( $product_id, 'product_type' )[0]->slug );
+
+		// Filter makes old_type match new_type ('external'), but stored term is still 'variable' — must be corrected.
+		$external = new WC_Product_External( $product_id );
+		$filter   = static fn ( $override, $id ) => $id === $product_id ? 'external' : false;
+		add_filter( 'woocommerce_product_type_query', $filter, 10, 2 );
+
+		try {
+			$store->update_version_and_type( $external );
+		} finally {
+			remove_filter( 'woocommerce_product_type_query', $filter, 10 );
+		}
+
+		// The stored term must now be 'external', not the stale 'variable'.
+		$terms = get_the_terms( $product_id, 'product_type' );
+		$this->assertSame( 'external', $terms[0]->slug, 'Stored term should be corrected to match $new_type even when the filter masks the mismatch.' );
+
+		$product->delete( true );
+	}
+
+	/**
 	 * Test update_product_sales updates on the meta-entry.
 	 */
 	public function test_update_product_sales_meta_update(): void {

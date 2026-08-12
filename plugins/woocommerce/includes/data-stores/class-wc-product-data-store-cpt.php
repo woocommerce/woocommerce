@@ -704,7 +704,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * Note: WordPress `get_metadata` function returns an empty string when meta data does not exist.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @param WC_Data $product    The WP_Data object (product).
 	 * @param string  $meta_key   Meta key to update.
@@ -1161,7 +1161,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Make sure we store the product type and version (to track data changes).
 	 *
-	 * @since 11.1.0 Skips wp_set_object_terms() when the product type is unchanged to avoid unnecessary term cache invalidation.
+	 * @since 11.2.0 Skips wp_set_object_terms() when the stored product type term already matches to avoid unnecessary term cache invalidation.
 	 * @since 3.0.0
 	 *
 	 * @param WC_Product $product Product object.
@@ -1172,10 +1172,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$old_type          = \WC_Product_Factory::get_product_type( $product_id );
 		$new_type          = $product->get_type();
 		$stored_type_terms = get_the_terms( $product_id, 'product_type' );
-		$has_type_terms    = ! empty( $stored_type_terms ) && is_array( $stored_type_terms );
+		$stored_type_slug  = ! empty( $stored_type_terms ) && is_array( $stored_type_terms ) ? $stored_type_terms[0]->slug : null;
 
-		// Skip wp_set_object_terms() when the type is unchanged — it always clears the term cache even on no-op writes.
-		if ( ! $has_type_terms || $old_type !== $new_type ) {
+		// Skip wp_set_object_terms() when the stored term already matches — it always clears the term cache even on no-op writes.
+		if ( $stored_type_slug !== $new_type ) {
 			wp_set_object_terms( $product_id, $new_type, 'product_type' );
 		}
 

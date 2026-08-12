@@ -345,7 +345,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	/**
 	 * Make sure we store the product version (to track data changes).
 	 *
-	 * @since 11.1.0 Skips wp_set_object_terms() when the product type is unchanged to avoid unnecessary term cache invalidation.
+	 * @since 11.2.0 Skips wp_set_object_terms() when the product type is unchanged to avoid unnecessary term cache invalidation.
 	 * @since 3.0.0
 	 *
 	 * @param WC_Product $product Product object.
