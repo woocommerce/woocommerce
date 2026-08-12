@@ -701,8 +701,11 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			return $orderby;
 		}
 
+		// Group the term exactly as search_products() does, so ranking and matching always agree on
+		// what an OR group is: the keyword has to appear space-delimited, which \s+or\s+ alone does
+		// not require because \s also matches bytes wc_clean() leaves in place.
 		$title_match_groups = array();
-		$search_groups      = preg_split( '/\s+or\s+/i', $search_term );
+		$search_groups      = stristr( $search_term, ' or ' ) ? preg_split( '/\s+or\s+/i', $search_term ) : array( $search_term );
 		if ( ! $search_groups ) {
 			return $orderby;
 		}
