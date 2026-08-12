@@ -573,9 +573,23 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			 * @param bool       $for_display  Whether prices are being retrieved for display.
 			 */
 			$this->prices_array[ $price_hash ] = apply_filters( 'woocommerce_variation_prices', $transient_cached_prices_array[ $price_hash ], $product, $for_display );
+			if ( $this->prices_array[ $price_hash ] !== $transient_cached_prices_array[ $price_hash ] && ! $this->validate_prices_data( array( $price_hash => $this->prices_array[ $price_hash ] ), $transient_version ) ) {
+				wc_doing_it_wrong(
+					__METHOD__,
+					__( '`woocommerce_variation_prices` returned an unsupported data format. The value is currently used as-is but will be ignored in a future release. Ensure your callback returns the expected array structure.', 'woocommerce' ),
+					'11.1'
+				);
+			}
+
 			if ( null !== $opposite_price_hash && $opposite_price_hash !== $price_hash ) {
-				// phpcs:ignore WooCommerce.Commenting.CommentHooks
 				$this->prices_array[ $opposite_price_hash ] = apply_filters( 'woocommerce_variation_prices', $transient_cached_prices_array[ $opposite_price_hash ], $product, ! $for_display );
+				if ( $this->prices_array[ $opposite_price_hash ] !== $transient_cached_prices_array[ $opposite_price_hash ] && ! $this->validate_prices_data( array( $opposite_price_hash => $this->prices_array[ $opposite_price_hash ] ), $transient_version ) ) {
+					wc_doing_it_wrong(
+						__METHOD__,
+						__( '`woocommerce_variation_prices` returned an unsupported data format. The value is currently used as-is but will be ignored in a future release. Ensure your callback returns the expected array structure.', 'woocommerce' ),
+						'11.1'
+					);
+				}
 			}
 		}
 		return $this->prices_array[ $price_hash ];
