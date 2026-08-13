@@ -120,6 +120,7 @@ describe( 'ReviewsPanel', () => {
 					isRequesting={ false }
 					reviews={ [ REVIEW ] }
 					updateReview={ clickHandler }
+					clearReviewsCache={ jest.fn() }
 					createNotice={ () => {} }
 				/>
 			);
@@ -140,6 +141,7 @@ describe( 'ReviewsPanel', () => {
 					isRequesting={ false }
 					reviews={ [ REVIEW ] }
 					updateReview={ clickHandler }
+					clearReviewsCache={ jest.fn() }
 					createNotice={ () => {} }
 				/>
 			);
@@ -160,6 +162,7 @@ describe( 'ReviewsPanel', () => {
 					isRequesting={ false }
 					reviews={ [ REVIEW ] }
 					deleteReview={ clickHandler }
+					clearReviewsCache={ jest.fn() }
 					createNotice={ () => {} }
 				/>
 			);
