@@ -442,47 +442,6 @@ a.wc-block-components-product-name:hover {
 	text-transform: uppercase;
 }
 
-.wp-block-accordion-heading__toggle:hover .wp-block-accordion-heading__toggle-title {
-	text-decoration: none;
-}
-
-/* Closed accordion panels are server-rendered without [hidden] — the
- * Interactivity API only applies it after hydration — so they flash open on
- * load (and would animate shut with the transition below). Collapse them
- * from first paint via the server-rendered aria-expanded state. Scoped to
- * scripting: enabled so no-JS visitors keep the all-panels-open fallback. */
-@media (scripting: enabled) {
-	.wp-block-accordion-heading:has([aria-expanded="false"]) + .wp-block-accordion-panel {
-		height: 0;
-		overflow: visible clip;
-	}
-}
-
-/* Animate accordion panels open/closed. Pure CSS: interpolate-size lets
- * height transition to auto; allow-discrete + @starting-style animate
- * across the [hidden] display swap. Unsupported browsers snap as before. */
-@media not (prefers-reduced-motion) {
-	@supports (interpolate-size: allow-keywords) {
-		.wp-block-accordion-panel {
-			interpolate-size: allow-keywords;
-			height: auto;
-			overflow: visible clip;
-			transition:
-				height 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-				content-visibility 0.25s allow-discrete,
-				display 0.25s allow-discrete;
-
-			@starting-style {
-				height: 0;
-			}
-		}
-
-		.wp-block-accordion-panel[hidden] {
-			height: 0;
-		}
-	}
-}
-
 .wp-block-woocommerce-product-review-content p {
 	margin-top: var(--wp--preset--spacing--20);
 	margin-bottom: 0;
