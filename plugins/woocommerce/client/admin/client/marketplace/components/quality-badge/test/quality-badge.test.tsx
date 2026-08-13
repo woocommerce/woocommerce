@@ -24,7 +24,9 @@ jest.mock( '@wordpress/a11y', () => ( {
 import { speak } from '@wordpress/a11y';
 import { navigateTo, useQuery } from '@woocommerce/navigation';
 import QualityBadge from '../quality-badge';
-import QualityBadgeFilter from '../quality-badge-filter';
+import QualityBadgeFilter, {
+	isQualityBadgeFilterActive,
+} from '../quality-badge-filter';
 import { MarketplaceContext } from '../../../contexts/marketplace-context';
 import { MarketplaceContextType } from '../../../contexts/types';
 import { Product, ProductType } from '../../product-list/types';
@@ -268,6 +270,47 @@ describe( 'QualityBadge', () => {
 		expect(
 			screen.getByText( 'Excellence Verified' ).closest( 'button' )
 		).toBeNull();
+	} );
+} );
+
+describe( 'isQualityBadgeFilterActive', () => {
+	it( 'is active only when the param is set and the API has the badge enabled', () => {
+		expect(
+			isQualityBadgeFilterActive(
+				{ quality_badge: '1' },
+				contextWithBadge.iamSettings
+			)
+		).toBe( true );
+	} );
+
+	it( 'ignores a stale param when the badge is disabled', () => {
+		expect(
+			isQualityBadgeFilterActive(
+				{ quality_badge: '1' },
+				contextWithBadgeDisabled.iamSettings
+			)
+		).toBe( false );
+	} );
+
+	it( 'ignores a stale param when IAM settings are empty (failed fetch)', () => {
+		expect( isQualityBadgeFilterActive( { quality_badge: '1' }, {} ) ).toBe(
+			false
+		);
+	} );
+
+	it( 'ignores the param when the badge is enabled but has no label', () => {
+		expect(
+			isQualityBadgeFilterActive(
+				{ quality_badge: '1' },
+				{ quality_badge: { enabled: true, label: '', tooltip: '' } }
+			)
+		).toBe( false );
+	} );
+
+	it( 'is inactive without the param', () => {
+		expect(
+			isQualityBadgeFilterActive( {}, contextWithBadge.iamSettings )
+		).toBe( false );
 	} );
 } );
 
