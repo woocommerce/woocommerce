@@ -97,19 +97,43 @@ foreach ( $products as $product_name => $product ) {
 wc_update_product_lookup_tables();
 
 foreach ( $rating_fixtures as $product_name => $expected_rating ) {
-	$actual_rating = (float) get_post_meta(
-		$products[ $product_name ]->get_id(),
-		'_wc_average_rating',
-		true
+	$product_id = $products[ $product_name ]->get_id();
+
+	$actual_rating        = (float) get_post_meta( $product_id, '_wc_average_rating', true );
+	$actual_lookup_rating = (float) $wpdb->get_var(
+		$wpdb->prepare(
+			"SELECT average_rating FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d",
+			$product_id
+		)
 	);
 
-	if ( abs( $actual_rating - $expected_rating ) > 0.001 ) {
+	if (
+		abs( $actual_rating - $expected_rating ) > 0.001 ||
+		abs( $actual_lookup_rating - $expected_rating ) > 0.001
+	) {
 		WP_CLI::error(
 			sprintf(
-				'Expected "%s" average rating to be %s, got %s.',
+				'Expected "%s" average rating to be %s, got meta %s and lookup %s.',
 				$product_name,
 				$expected_rating,
-				$actual_rating
+				$actual_rating,
+				$actual_lookup_rating
+			)
+		);
+	}
+
+	// The sorting aggregate and the Rating Filter read different storage, so
+	// assert the visibility term rather than assuming the save propagated.
+	$expected_term = 'rated-' . min( 5, (int) round( $expected_rating ) );
+	$actual_terms  = wp_get_post_terms( $product_id, 'product_visibility', array( 'fields' => 'names' ) );
+
+	if ( is_wp_error( $actual_terms ) || ! in_array( $expected_term, $actual_terms, true ) ) {
+		WP_CLI::error(
+			sprintf(
+				'Expected "%s" to carry the "%s" product_visibility term, got [%s].',
+				$product_name,
+				$expected_term,
+				is_wp_error( $actual_terms ) ? $actual_terms->get_error_message() : implode( ', ', $actual_terms )
 			)
 		);
 	}
