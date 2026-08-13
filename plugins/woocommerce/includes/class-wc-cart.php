@@ -881,7 +881,11 @@ class WC_Cart extends WC_Legacy_Cart {
 	public function check_cart_item_stock() {
 		$error               = new WP_Error();
 		$product_qty_in_cart = $this->get_cart_item_quantities();
-		// Read via get() rather than the magic property: WC_Session::__isset() returns true for a stored `false` (written by payment_complete()/cancel_order()), which would otherwise skip the store_api_draft_order fallback. Treat any falsy awaiting value as "no order".
+		// Identify the shopper's own order so its stock hold is not counted against them.
+		// The classic checkout stores an order ID in `order_awaiting_payment`, but completing a
+		// payment or cancelling an unpaid order writes `false` there instead of unsetting it, so
+		// treat any falsy value as "no order" and fall back to the Store API draft order. Read the
+		// value with get(), because WC_Session::__isset() reports a stored `false` as set.
 		$order_awaiting_payment   = absint( WC()->session->get( 'order_awaiting_payment' ) );
 		$current_session_order_id = $order_awaiting_payment ? $order_awaiting_payment : absint( WC()->session->get( 'store_api_draft_order', 0 ) );
 
@@ -1710,9 +1714,8 @@ class WC_Cart extends WC_Legacy_Cart {
 						'state'     => $this->get_customer()->get_shipping_state(),
 						'postcode'  => $this->get_customer()->get_shipping_postcode(),
 						'city'      => $this->get_customer()->get_shipping_city(),
-						'address'   => $this->get_customer()->get_shipping_address(),
-						// This is an alias of address_1, provided for backwards compatibility.
-														'address_1' => $this->get_customer()->get_shipping_address_1(),
+						'address'   => $this->get_customer()->get_shipping_address(), // This is an alias of address_1, provided for backwards compatibility.
+						'address_1' => $this->get_customer()->get_shipping_address_1(),
 						'address_2' => $this->get_customer()->get_shipping_address_2(),
 					),
 					'cart_subtotal'   => $this->get_displayed_subtotal(),
