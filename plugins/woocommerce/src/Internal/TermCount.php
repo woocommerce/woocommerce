@@ -80,6 +80,7 @@ class TermCount {
 
 		$removed_tt_ids = $append ? array() : array_diff( $old_tt_ids, $new_tt_ids );
 
+		// When the removed term taxonomy IDs include any count-affecting visibility terms, the recount will be handled by handle_deleted_term_relationships().
 		if ( ! empty( array_intersect( $removed_tt_ids, $counting_tt_ids ) ) ) {
 			return;
 		}
