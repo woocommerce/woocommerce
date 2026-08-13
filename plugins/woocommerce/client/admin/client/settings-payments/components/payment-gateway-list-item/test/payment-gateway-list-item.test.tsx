@@ -683,7 +683,7 @@ describe( 'PaymentGatewayListItem', () => {
 			);
 
 			expect(
-				getByText( 'Incompatible with block-based checkout' )
+				getByText( 'Limited compatibility' )
 			).toBeInTheDocument();
 			expect(
 				getAllByTestId( 'status-badge' ).map( ( badge ) =>
@@ -705,7 +705,7 @@ describe( 'PaymentGatewayListItem', () => {
 			);
 
 			expect( getByTestId( 'status-badge-popover' ) ).toHaveTextContent(
-				'Customers won’t see this payment provider at checkout.'
+				'Customers might not see this provider at checkout.'
 			);
 		} );
 
@@ -742,7 +742,7 @@ describe( 'PaymentGatewayListItem', () => {
 			);
 
 			expect(
-				queryByText( 'Incompatible with block-based checkout' )
+				queryByText( 'Limited compatibility' )
 			).not.toBeInTheDocument();
 		} );
 
@@ -759,7 +759,7 @@ describe( 'PaymentGatewayListItem', () => {
 			);
 
 			expect(
-				queryByText( 'Incompatible with block-based checkout' )
+				queryByText( 'Limited compatibility' )
 			).not.toBeInTheDocument();
 		} );
 
@@ -775,7 +775,7 @@ describe( 'PaymentGatewayListItem', () => {
 			);
 
 			expect(
-				queryByText( 'Incompatible with block-based checkout' )
+				queryByText( 'Limited compatibility' )
 			).not.toBeInTheDocument();
 		} );
 	} );

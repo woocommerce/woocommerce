@@ -166,14 +166,14 @@ export const PaymentGatewayListItem = ( {
 							<StatusBadge
 								status="not_supported"
 								message={ __(
-									'Incompatible with block-based checkout',
+									'Limited compatibility',
 									'woocommerce'
 								) }
 								popoverContent={
 									<p>
 										{ createInterpolateElement(
 											__(
-												'Customers won’t see this payment provider at checkout. <a>Learn more</a>',
+												'Customers might not see this provider at checkout. <a>Learn more</a>',
 												'woocommerce'
 											),
 											{
