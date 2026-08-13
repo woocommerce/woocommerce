@@ -16,22 +16,15 @@ class CheckoutOrder extends AbstractCartRoute {
 	use CheckoutTrait;
 
 	/**
-	 * Destination fields shipping zones are matched on.
+	 * Address fields an order's pricing is matched on. Shipping zones use country, state and
+	 * postcode, tax rates also use city; city is compared for both so the checks stay consistent.
 	 *
 	 * @see \WC_Shipping_Zones::get_zone_matching_package()
-	 *
-	 * @var string[]
-	 */
-	private const ZONE_ADDRESS_FIELDS = [ 'country', 'state', 'postcode' ];
-
-	/**
-	 * Location fields tax rates are matched on.
-	 *
 	 * @see \WC_Tax::find_rates()
 	 *
 	 * @var string[]
 	 */
-	private const TAX_LOCATION_FIELDS = [ 'country', 'state', 'postcode', 'city' ];
+	private const PRICING_ADDRESS_FIELDS = [ 'country', 'state', 'postcode', 'city' ];
 
 	/**
 	 * The route identifier.
@@ -263,7 +256,7 @@ class CheckoutOrder extends AbstractCartRoute {
 	}
 
 	/**
-	 * Reads the destination shipping zones are matched against.
+	 * Reads the destination the order is priced to ship to.
 	 *
 	 * @return array
 	 */
@@ -272,6 +265,7 @@ class CheckoutOrder extends AbstractCartRoute {
 			'country'  => $this->order->get_shipping_country(),
 			'state'    => $this->order->get_shipping_state(),
 			'postcode' => $this->order->get_shipping_postcode(),
+			'city'     => $this->order->get_shipping_city(),
 		];
 	}
 
@@ -293,7 +287,7 @@ class CheckoutOrder extends AbstractCartRoute {
 
 		// needs_shipping() hydrates a product per line item, so let the free comparisons short-circuit it.
 		if ( '' !== $priced_destination['country']
-			&& $this->pricing_fields_differ( self::ZONE_ADDRESS_FIELDS, $priced_destination, $this->get_shipping_destination() )
+			&& $this->pricing_fields_differ( self::PRICING_ADDRESS_FIELDS, $priced_destination, $this->get_shipping_destination() )
 			&& $this->order->needs_shipping() ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_order_address_change_not_allowed',
@@ -305,7 +299,7 @@ class CheckoutOrder extends AbstractCartRoute {
 		// Resolved through the order so this follows whichever address actually prices it, including the
 		// shop base for local pickup and anything woocommerce_order_get_tax_location redirects it to.
 		// A store that collects no tax has no tax location to protect.
-		if ( wc_tax_enabled() && $this->pricing_fields_differ( self::TAX_LOCATION_FIELDS, $priced_tax_location, $this->order->get_taxable_location() ) ) {
+		if ( wc_tax_enabled() && $this->pricing_fields_differ( self::PRICING_ADDRESS_FIELDS, $priced_tax_location, $this->order->get_taxable_location() ) ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_order_address_change_not_allowed',
 				esc_html__( 'Sorry, the address on this order cannot be changed here because it would change the tax charged. Please contact us to update it.', 'woocommerce' ),

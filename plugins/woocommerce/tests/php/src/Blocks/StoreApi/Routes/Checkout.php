@@ -2008,13 +2008,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 			'phone'      => '',
 		);
 
-		$response = $this->dispatch_pay_for_order_request(
-			$order,
-			array(
-				'billing_address'  => array_merge( $invalid_address, array( 'email' => $order->get_billing_email() ) ),
-				'shipping_address' => $invalid_address,
-			)
-		);
+		$response = $this->dispatch_pay_for_order_request( $order, $invalid_address, $invalid_address );
 
 		$this->assertEquals( 400, $response->get_status() );
 		$this->assertEquals( 'woocommerce_rest_invalid_address_country', $response->get_data()['code'] );
@@ -2023,17 +2017,6 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$this->assertEquals( $original_billing_country, $stored_order->get_billing_country() );
 		$this->assertEquals( $original_shipping_country, $stored_order->get_shipping_country() );
 		$this->assertEquals( $original_total, $stored_order->get_total() );
-	}
-
-	/**
-	 * Returns the address the order already carries, so a test only states what it changes.
-	 *
-	 * @param \WC_Order $order     Order to read the address from.
-	 * @param array     $overrides Fields to override.
-	 * @return array
-	 */
-	private function get_pay_for_order_address( \WC_Order $order, array $overrides = array() ) {
-		return array_merge( $order->get_address( 'billing' ), $overrides );
 	}
 
 	/**
@@ -2053,14 +2036,16 @@ class Checkout extends \WP_Test_REST_TestCase {
 	/**
 	 * Dispatches a pay-for-order request as the guest the order belongs to.
 	 *
-	 * Both addresses and the payment method default to values the guard accepts, so a test body holds
-	 * only the change under test.
+	 * Both addresses default to the one the order already carries and the payment method to one the guard
+	 * accepts, so a test states only the fields it changes.
 	 *
-	 * @param \WC_Order $order Order being paid for.
-	 * @param array     $body  Body params to send, merged over the defaults.
+	 * @param \WC_Order $order    Order being paid for.
+	 * @param array     $billing  Billing fields to override.
+	 * @param array     $shipping Shipping fields to override.
 	 * @return \WP_REST_Response
 	 */
-	private function dispatch_pay_for_order_request( \WC_Order $order, array $body = array() ) {
+	private function dispatch_pay_for_order_request( \WC_Order $order, array $billing = array(), array $shipping = array() ) {
+		$address = $order->get_address( 'billing' );
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout/' . $order->get_id() );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_query_params(
@@ -2070,13 +2055,10 @@ class Checkout extends \WP_Test_REST_TestCase {
 			)
 		);
 		$request->set_body_params(
-			array_merge(
-				array(
-					'billing_address'  => $this->get_pay_for_order_address( $order ),
-					'shipping_address' => $this->get_pay_for_order_address( $order ),
-					'payment_method'   => WC_Gateway_BACS::ID,
-				),
-				$body
+			array(
+				'billing_address'  => array_merge( $address, $billing ),
+				'shipping_address' => array_merge( $address, $shipping ),
+				'payment_method'   => WC_Gateway_BACS::ID,
 			)
 		);
 
@@ -2115,13 +2097,12 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$order          = $this->create_pay_for_order_with_shipping_address();
 		$original_total = $order->get_total();
 
-		$response = $this->dispatch_pay_for_order_request(
-			$order,
-			array( 'shipping_address' => $this->get_pay_for_order_address( $order, $this->get_different_destination() ) )
-		);
+		$response = $this->dispatch_pay_for_order_request( $order, array(), $this->get_different_destination() );
 
 		$this->assertEquals( 400, $response->get_status() );
 		$this->assertEquals( 'woocommerce_rest_checkout_order_address_change_not_allowed', $response->get_data()['code'] );
+		// The message is what distinguishes the shipping zone check from the tax check below it.
+		$this->assertStringContainsString( 'would change the shipping cost', $response->get_data()['message'] );
 
 		$stored_order = wc_get_order( $order->get_id() );
 		$this->assertEquals( 'US', $stored_order->get_shipping_country(), 'A rejected request must not persist the address' );
@@ -2139,16 +2120,11 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$response = $this->dispatch_pay_for_order_request(
 			$order,
 			array(
-				'billing_address'  => $this->get_pay_for_order_address(
-					$order,
-					array(
-						'first_name' => 'Renamed',
-						'address_1'  => '9 Updated Street',
-						'phone'      => '555-99999',
-					)
-				),
-				'shipping_address' => $this->get_pay_for_order_address( $order, array( 'first_name' => 'Renamed' ) ),
-			)
+				'first_name' => 'Renamed',
+				'address_1'  => '9 Updated Street',
+				'phone'      => '555-99999',
+			),
+			array( 'first_name' => 'Renamed' )
 		);
 
 		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
@@ -2170,13 +2146,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$order->set_billing_address( array_fill_keys( array( 'city', 'state', 'postcode', 'country' ), '' ) );
 		$order->save();
 
-		$response = $this->dispatch_pay_for_order_request(
-			$order,
-			array(
-				'billing_address'  => $this->get_pay_for_order_address( $order, $this->get_different_destination() ),
-				'shipping_address' => $this->get_pay_for_order_address( $order, $this->get_different_destination() ),
-			)
-		);
+		$response = $this->dispatch_pay_for_order_request( $order, $this->get_different_destination(), $this->get_different_destination() );
 
 		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
 		$this->assertEquals( 'GB', wc_get_order( $order->get_id() )->get_shipping_country() );
@@ -2192,33 +2162,29 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$order = \WC_Helper_Order::create_order( 0 );
 		$this->assertEquals( '', $order->get_shipping_country() );
 
-		$response = $this->dispatch_pay_for_order_request(
-			$order,
-			array( 'shipping_address' => $this->get_pay_for_order_address( $order, $this->get_different_destination() ) )
-		);
+		$response = $this->dispatch_pay_for_order_request( $order, array(), $this->get_different_destination() );
 
 		$this->assertEquals( 400, $response->get_status() );
 		$this->assertEquals( 'woocommerce_rest_checkout_order_address_change_not_allowed', $response->get_data()['code'] );
+		// The shipping zone check is skipped here, so only the tax check can reject this.
+		$this->assertStringContainsString( 'would change the tax charged', $response->get_data()['message'] );
 		$this->assertEquals( '', wc_get_order( $order->get_id() )->get_shipping_country() );
 	}
 
 	/**
-	 * @testdox Existing order payment should reject filling in a destination field the order was priced without.
+	 * @testdox Existing order payment should reject a shipping city change even when tax is billing based.
 	 */
-	public function test_checkout_order_rejects_filling_in_an_empty_destination_field() {
-		$this->set_taxes_based_on( 'shipping' );
+	public function test_checkout_order_rejects_shipping_city_change() {
+		$this->set_taxes_based_on( 'billing' );
 
 		$order = $this->create_pay_for_order_with_shipping_address();
-		$order->set_shipping_postcode( '' );
-		$order->save();
 
-		$response = $this->dispatch_pay_for_order_request(
-			$order,
-			array( 'shipping_address' => $this->get_pay_for_order_address( $order, array( 'postcode' => '90210' ) ) )
-		);
+		// Billing prices the tax here, so the shipping zone check is the only one a shipping city can trip.
+		$response = $this->dispatch_pay_for_order_request( $order, array(), array( 'city' => 'Elsewhere' ) );
 
 		$this->assertEquals( 400, $response->get_status() );
 		$this->assertEquals( 'woocommerce_rest_checkout_order_address_change_not_allowed', $response->get_data()['code'] );
+		$this->assertStringContainsString( 'would change the shipping cost', $response->get_data()['message'] );
 	}
 
 	/**
@@ -2240,10 +2206,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$order->add_item( $pickup_method );
 		$order->save();
 
-		$response = $this->dispatch_pay_for_order_request(
-			$order,
-			array( 'billing_address' => $this->get_pay_for_order_address( $order, $this->get_different_destination() ) )
-		);
+		$response = $this->dispatch_pay_for_order_request( $order, $this->get_different_destination() );
 
 		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
 		$this->assertEquals( 'GB', wc_get_order( $order->get_id() )->get_billing_country() );
@@ -2263,13 +2226,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$order->save();
 		$original_total = $order->get_total();
 
-		$response = $this->dispatch_pay_for_order_request(
-			$order,
-			array(
-				'billing_address'  => $this->get_pay_for_order_address( $order, $this->get_different_destination() ),
-				'shipping_address' => $this->get_pay_for_order_address( $order, $this->get_different_destination() ),
-			)
-		);
+		$response = $this->dispatch_pay_for_order_request( $order, $this->get_different_destination(), $this->get_different_destination() );
 
 		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
 
@@ -2279,26 +2236,9 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * @testdox Existing order payment should allow a pricing field that only differs in case.
+	 * @testdox Existing order payment should allow pricing fields that normalize to the values the order is priced on.
 	 */
-	public function test_checkout_order_allows_pricing_field_that_differs_only_in_case() {
-		$this->set_taxes_based_on( 'billing' );
-
-		$order = $this->create_pay_for_order_with_shipping_address();
-
-		$response = $this->dispatch_pay_for_order_request(
-			$order,
-			// Tax rates are matched on an uppercased city, so this resolves to the same rate.
-			array( 'billing_address' => $this->get_pay_for_order_address( $order, array( 'city' => 'woocity' ) ) )
-		);
-
-		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
-	}
-
-	/**
-	 * @testdox Existing order payment should allow a state the order stores as a name and the request sends as a code.
-	 */
-	public function test_checkout_order_allows_state_stored_as_a_name() {
+	public function test_checkout_order_allows_pricing_fields_that_normalize_to_the_same_value() {
 		$this->set_taxes_based_on( 'billing' );
 
 		// Orders created outside the Store API (admin, import) can hold the state name rather than its code.
@@ -2308,7 +2248,12 @@ class Checkout extends \WP_Test_REST_TestCase {
 
 		$response = $this->dispatch_pay_for_order_request(
 			$order,
-			array( 'billing_address' => $this->get_pay_for_order_address( $order, array( 'state' => 'NY' ) ) )
+			// The zone and tax lookups uppercase the city and key the state on its code, so both of these
+			// resolve to what the order is already priced on.
+			array(
+				'city'  => 'woocity',
+				'state' => 'NY',
+			)
 		);
 
 		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
@@ -2322,13 +2267,12 @@ class Checkout extends \WP_Test_REST_TestCase {
 
 		$order = $this->create_pay_for_order_with_shipping_address();
 
-		$response = $this->dispatch_pay_for_order_request(
-			$order,
-			array( 'billing_address' => $this->get_pay_for_order_address( $order, $this->get_different_destination() ) )
-		);
+		$response = $this->dispatch_pay_for_order_request( $order, $this->get_different_destination() );
 
 		$this->assertEquals( 400, $response->get_status() );
 		$this->assertEquals( 'woocommerce_rest_checkout_order_address_change_not_allowed', $response->get_data()['code'] );
+		// Shipping is untouched, so only the tax check can reject this.
+		$this->assertStringContainsString( 'would change the tax charged', $response->get_data()['message'] );
 		$this->assertEquals( 'US', wc_get_order( $order->get_id() )->get_billing_country() );
 	}
 
@@ -2340,11 +2284,8 @@ class Checkout extends \WP_Test_REST_TestCase {
 
 		$order = $this->create_pay_for_order_with_shipping_address();
 
-		$response = $this->dispatch_pay_for_order_request(
-			$order,
-			// Billing does not price this order, so a new billing country is free to apply.
-			array( 'billing_address' => $this->get_pay_for_order_address( $order, $this->get_different_destination() ) )
-		);
+		// Billing does not price this order, so a new billing country is free to apply.
+		$response = $this->dispatch_pay_for_order_request( $order, $this->get_different_destination() );
 
 		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
 
