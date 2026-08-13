@@ -250,6 +250,8 @@ test.describe( `${ blockData.name }`, () => {
 		const firstVariationImageIds = Array.from(
 			new Set( [ firstVariationImageId, ...parentGalleryImageIds ] )
 		);
+		// Product Gallery blocks update reactively and may not be ready
+		// instantly hence expect().toPass with custom timeout since it's 0 by default.
 		await expect( async () => {
 			const variationImageIds =
 				await pageObject.getVisibleViewerImageIds();
@@ -265,6 +267,8 @@ test.describe( `${ blockData.name }`, () => {
 
 		await logoSelect.selectOption( 'No' );
 
+		// Product Gallery blocks update reactively and may not be ready
+		// instantly hence expect().toPass with custom timeout since it's 0 by default.
 		await expect( async () => {
 			const nextVariationImageId = await pageObject.getViewerImageId();
 			expect( nextVariationImageId ).not.toEqual( firstVariationImageId );
@@ -274,6 +278,8 @@ test.describe( `${ blockData.name }`, () => {
 		const nextVariationImageIds = Array.from(
 			new Set( [ nextVariationImageId, ...parentGalleryImageIds ] )
 		);
+		// Product Gallery blocks update reactively and may not be ready
+		// instantly hence expect().toPass with custom timeout since it's 0 by default.
 		await expect( async () => {
 			const variationImageIds =
 				await pageObject.getVisibleViewerImageIds();
