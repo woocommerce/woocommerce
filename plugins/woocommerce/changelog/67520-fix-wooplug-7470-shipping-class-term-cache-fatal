@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent a fatal error on add-to-cart when the product shipping class terms cannot be read, by clearing the cached terms and reading them again.

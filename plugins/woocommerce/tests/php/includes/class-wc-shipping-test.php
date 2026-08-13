@@ -405,4 +405,39 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 			),
 		);
 	}
+
+	/**
+	 * @testdox get_shipping_classes() recovers when a cached shipping class term is not a term object.
+	 */
+	public function test_get_shipping_classes_recovers_from_unusable_cached_term(): void {
+		$term    = wp_insert_term( 'Fragile', 'product_shipping_class' );
+		$term_id = $term['term_id'];
+
+		/*
+		 * What a persistent object cache hands back when a stored value no longer unserializes: the raw bytes
+		 * instead of the term object, truncated here the way a partial write leaves them. Left alone this reaches
+		 * WP_Term::__construct() and throws a TypeError, taking down every shipping calculation, and nothing
+		 * repairs the entry on its own.
+		 */
+		$unusable_value = 'O:7:"WP_Term":11:{s:7:"term_id";i:';
+		wp_cache_set( $term_id, $unusable_value, 'terms' );
+
+		$classes = $this->sut->get_shipping_classes();
+
+		$this->assertContains( 'Fragile', wp_list_pluck( $classes, 'name' ) );
+		$this->assertContainsOnlyInstancesOf( WP_Term::class, $classes );
+
+		/*
+		 * The cached value has to be gone, not just worked around. Every other reader of this taxonomy, such as
+		 * WC_Product::get_shipping_class(), goes through the same cache and would keep failing if it survived.
+		 */
+		$this->assertNotSame(
+			$unusable_value,
+			wp_cache_get( $term_id, 'terms' ),
+			'The unusable cached term should have been cleared, not left in place.'
+		);
+		$this->assertInstanceOf( WP_Term::class, get_term( $term_id ), 'Reading the term directly should work again.' );
+
+		wp_delete_term( $term_id, 'product_shipping_class' );
+	}
 }

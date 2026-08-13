@@ -234,16 +234,72 @@ class WC_Shipping {
 	 */
 	public function get_shipping_classes() {
 		if ( empty( $this->shipping_classes ) ) {
-			$classes                = get_terms(
-				'product_shipping_class',
-				array(
-					'hide_empty' => '0',
-					'orderby'    => 'name',
-				)
-			);
+			try {
+				$classes = $this->query_shipping_class_terms();
+			} catch ( TypeError $e ) {
+				/*
+				 * One way this happens is a cached term that is no longer a term object, for example when a
+				 * persistent object cache holds a value that no longer unserializes and the drop-in falls back to
+				 * the raw bytes. WP_Term::get_instance() only goes back to the database when the cached value is
+				 * falsy or belongs to another taxonomy, and WP_Term_Query::populate_terms() looks terms up without
+				 * naming one, so such a value reaches WP_Term::__construct() and throws. Nothing repairs it on its
+				 * own either, because _get_non_cached_ids() treats any non-false value as a cache hit.
+				 *
+				 * Shipping methods read these terms on every shipping calculation, so leaving this unhandled means
+				 * add-to-cart fails on every request. Clear the cached terms and read again, which recovers from
+				 * that case and is harmless otherwise. The cause is not necessarily the cache, so report what
+				 * happened rather than diagnosing it, and let the retry throw if the problem lies elsewhere.
+				 */
+				wc_get_logger()->warning(
+					'Could not read the product_shipping_class terms. Cleared the cached terms and retried. Original error: ' . $e->getMessage(),
+					array( 'source' => 'shipping' )
+				);
+
+				$this->clean_shipping_class_term_cache();
+
+				$classes = $this->query_shipping_class_terms();
+			}
+
 			$this->shipping_classes = ! is_wp_error( $classes ) ? $classes : array();
 		}
 		return apply_filters( 'woocommerce_get_shipping_classes', $this->shipping_classes );
+	}
+
+	/**
+	 * Read the shipping class terms.
+	 *
+	 * @return array|WP_Error
+	 */
+	private function query_shipping_class_terms() {
+		return get_terms(
+			'product_shipping_class',
+			array(
+				'hide_empty' => '0',
+				'orderby'    => 'name',
+			)
+		);
+	}
+
+	/**
+	 * Drop the cached shipping class terms.
+	 *
+	 * Reads the term IDs straight from the term_taxonomy table, so a cache holding unusable values is never
+	 * consulted to build the list. clean_term_cache() then deletes the individual `terms` entries and bumps the
+	 * terms `last_changed` value, which also invalidates any cached get_terms() results.
+	 *
+	 * @return void
+	 */
+	private function clean_shipping_class_term_cache() {
+		global $wpdb;
+
+		$term_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT term_id FROM {$wpdb->term_taxonomy} WHERE taxonomy = %s",
+				'product_shipping_class'
+			)
+		);
+
+		clean_term_cache( array_map( 'intval', $term_ids ), 'product_shipping_class' );
 	}
 
 	/**
