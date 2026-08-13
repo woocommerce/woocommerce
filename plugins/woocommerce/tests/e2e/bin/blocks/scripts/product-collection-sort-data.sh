@@ -21,6 +21,29 @@ $sales_fixtures = array(
 	'T-Shirt with Logo' => 1,
 );
 
+/**
+ * Build the smallest rating distribution whose mean is the requested average.
+ *
+ * Whole averages need a single bucket; half steps need the two buckets around
+ * them. Products carry a rating count alongside the average so their aggregate
+ * state stays reachable by a real store: an average with a zero count renders
+ * stars in loop and block contexts while the single product template hides
+ * them, which reads as a bug to the next spec that looks at it.
+ *
+ * @param float $rating Target average rating.
+ * @return array Rating counts keyed by star value.
+ */
+$rating_counts_for = static function ( $rating ) {
+	if ( $rating <= 0 ) {
+		return array();
+	}
+
+	$low  = (int) floor( $rating );
+	$high = (int) ceil( $rating );
+
+	return $low === $high ? array( $low => 1 ) : array( $low => 1, $high => 1 );
+};
+
 $products = array();
 
 foreach ( wc_get_products( array( 'limit' => -1 ) ) as $product ) {
@@ -52,16 +75,22 @@ foreach ( $required_product_names as $product_name ) {
 
 foreach ( $products as $product_name => $product ) {
 	$product->set_total_sales( $sales_fixtures[ $product_name ] ?? 0 );
-	$product->save();
 
 	// Cap is the existing one-star Rating Filter fixture. Leave its rating state intact.
 	if ( 'Cap' !== $product_name ) {
-		update_post_meta(
-			$product->get_id(),
-			'_wc_average_rating',
-			$rating_fixtures[ $product_name ] ?? 0
-		);
+		$target_rating = $rating_fixtures[ $product_name ] ?? 0;
+
+		// Write the rating as a product property rather than as post meta. Only a
+		// changed `average_rating` property makes the data store recompute the
+		// `rated-N` product_visibility terms that the Rating Filter matches on;
+		// a bare update_post_meta() call moves the sorting aggregate while
+		// leaving those terms behind, so the Rating Filter ends up offering
+		// options that its own results cannot satisfy.
+		$product->set_average_rating( $target_rating );
+		$product->set_rating_counts( $rating_counts_for( $target_rating ) );
 	}
+
+	$product->save();
 }
 
 // This runs synchronously under WP-CLI and also repairs stale lookup rows on reruns.
