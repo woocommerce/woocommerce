@@ -182,7 +182,8 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			// callbacks, so only do it when that singleton is present too — tests may
 			// legitimately null it out.
 			if ( isset( WC()->session ) ) {
-				WC()->cart->empty_cart();
+				// The parent teardown rolls back persistent cart database changes.
+				WC()->cart->empty_cart( false );
 			}
 
 			// Loading a Store API cart route sets this to 'store-api' and never puts it
