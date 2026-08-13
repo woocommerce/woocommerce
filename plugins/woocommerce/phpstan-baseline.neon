@@ -67807,18 +67807,6 @@ parameters:
 			path: src/Internal/TransientFiles/TransientFilesEngine.php
 
 		-
-			message: '#^Parameter \#1 \$input of function array_slice expects array, list\<string\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/TransientFiles/TransientFilesEngine.php
-
-		-
-			message: '#^Parameter \#1 \$var of function count expects array\|Countable, list\<string\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/TransientFiles/TransientFilesEngine.php
-
-		-
 			message: '#^Parameter \#2 \$timestamp of function gmdate expects int, int\|string given\.$#'
 			identifier: argument.type
 			count: 1
