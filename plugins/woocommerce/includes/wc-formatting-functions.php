@@ -420,6 +420,8 @@ function wc_clean( $var ) {
  *
  * @since 11.0.0 Behavior changed: invalid bytes are replaced with U+FFFD instead of
  *               returning an empty string. Wraps wp_scrub_utf8() instead of wp_check_invalid_utf8().
+ * @deprecated 11.0.0 Use wp_scrub_utf8() directly; this wrapper is kept for backward
+ *                    compatibility and still provides recursive array support.
  *
  * @param string|array $var Data to sanitize.
  * @return string|array
