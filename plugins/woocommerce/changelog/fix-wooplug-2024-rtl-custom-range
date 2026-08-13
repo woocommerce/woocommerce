@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Localize the Analytics date range calendar: override the PHP-style moment date formats WordPress injects (fixing literal 'F j, Y' in day aria-labels) and load localized weekday names for the calendar header.
