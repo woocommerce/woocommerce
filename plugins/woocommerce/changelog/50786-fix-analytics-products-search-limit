@@ -1,4 +1,4 @@
-Significance: patch
+Significance: minor
 Type: fix
 
 Show every matching product in the Analytics > Products report when a search matches more than 100 products. The products report endpoints now accept a `search` argument and resolve the search themselves.
