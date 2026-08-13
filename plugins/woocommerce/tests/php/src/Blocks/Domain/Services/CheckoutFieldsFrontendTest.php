@@ -9,12 +9,11 @@ use Automattic\WooCommerce\Blocks\Package;
 use Exception;
 use WC_Customer;
 use WP_Error;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 /**
  * Test \Automattic\WooCommerce\Blocks\Domain\Services\Hydration class.
  */
-class CheckoutFieldsFrontendTest extends TestCase {
+class CheckoutFieldsFrontendTest extends \WC_Unit_Test_Case {
 	/**
 	 * System under test.
 	 *
@@ -53,7 +52,7 @@ class CheckoutFieldsFrontendTest extends TestCase {
 	/**
 	 * Tear down.
 	 */
-	protected function tearDown(): void {
+	public function tearDown(): void {
 		remove_filter( 'woocommerce_add_notice', [ $this, 'capture_notice' ] );
 		remove_filter( 'woocommerce_add_error', [ $this, 'capture_error' ] );
 		remove_filter( 'woocommerce_add_success', [ $this, 'capture_success' ] );
@@ -62,6 +61,8 @@ class CheckoutFieldsFrontendTest extends TestCase {
 			__internal_woocommerce_blocks_deregister_checkout_field( $field_id );
 		}
 		$this->registered_fields = [];
+
+		parent::tearDown();
 	}
 
 	/**

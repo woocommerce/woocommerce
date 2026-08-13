@@ -2,19 +2,30 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/2.3.0) - 2026-08-12 
+
+-   Minor - Add optional customSaveButton prop to Editor/ExperimentalEmailEditor (threaded to the Gutenberg editor header, skipped in template mode) and extend the editor-save notice override to also match "Post published." and "Draft saved." for integrations whose save button publishes in the background. [#67025]
+-   Minor - Restore text and background color controls in the styles sidebar on WordPress 7.1+ — text color moves to the typography panel and background color to a new Background screen, matching where WordPress 7.1 places them. [#67467]
+-   Minor - Disable the WordPress 7.1 responsive styles feature in the email editor [#67444]
+-   Minor - Render the editor back button as a compact chevron on WordPress 7.1+ to match the redesigned header, keeping the fullscreen-style button on older versions [#67470]
+
+## [2.2.1](https://www.npmjs.com/package/@woocommerce/email-editor/v/2.2.1) - 2026-07-30 
+
+-   Patch - Stop regenerating the global styles stylesheet and re-filtering personalization tags on every render, which made typing in the editor canvas sluggish. [#67031]
+
 ## [2.2.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/2.2.0) - 2026-07-28 
 
 -   Patch - Fix crash when opening the typography styles panel in the email editor for elements without typography styles defined. [#65613]
 -   Patch - Memoize the regularized entity record so the global styles and template selectors return a stable reference, preventing an infinite re-render loop (React error #185) for users who lack the edit_theme_options capability. [#65684]
 -   Patch - Restore the "Preview in new tab" unsaved-changes guard and its telemetry event on WordPress 7.1, which dropped the editor-preview-dropdown__button-external class the code matched on. [#66736]
 -   Patch - Show full-width blocks as full width in the email editor canvas to match the rendered email. [#66235]
--   Minor - Enable the embed block for supported video providers in the email editor and improve embed rendering in emails. [#66968]
 -   Patch - Add void to intentionally-unawaited promises for the new no-floating-promises lint rule [#66795]
 -   Patch - Declare webpack as a devDependency so the bundle build works without relying on hoisted packages. [#64861]
 -   Patch - Move the CommonJS build to prepack so day-to-day development only builds the ESM output. [#64876]
 -   Patch - Move TypeScript type-checking from the build to a new `lint:lang:types` script. Builds now emit types and JS without type-checking. [#65168]
 -   Patch - Replaced wireit + tsc package build pipeline with a per-package esbuild script. [#65210]
 -   Patch - Update the e2e test path in the writing-e2e-tests doc after the core e2e directory rename. [#65844]
+-   Minor - Enable the embed block for supported video providers in the email editor and improve embed rendering in emails. [#66968]
 
 ## [2.1.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/2.1.0) - 2026-05-15 
 
