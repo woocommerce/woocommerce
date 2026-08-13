@@ -652,22 +652,26 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 11.1.0
 	 */
 	public function test_wc_price_currency_symbol_is_direction_isolated() {
-		$this->assertEquals(
-			'<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#x644;.&#x644;</span>15.00</bdi></span>',
-			wc_price( 15, array( 'currency' => 'LBP' ) )
+		$original_position = get_option( 'woocommerce_currency_pos' );
+		$symbol            = '<span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#x644;.&#x644;</span>';
+
+		$expected_by_position = array(
+			'left'        => $symbol . '15.00',
+			'right'       => '15.00' . $symbol,
+			'left_space'  => $symbol . '&nbsp;15.00',
+			'right_space' => '15.00&nbsp;' . $symbol,
 		);
 
-		// Symbol on the right (right_space format) must keep the isolation too.
-		$this->assertEquals(
-			'<span class="woocommerce-Price-amount amount"><bdi>15.00&nbsp;<span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#x644;.&#x644;</span></bdi></span>',
-			wc_price(
-				15,
-				array(
-					'currency'     => 'LBP',
-					'price_format' => '%2$s&nbsp;%1$s',
-				)
-			)
-		);
+		foreach ( $expected_by_position as $position => $expected_price ) {
+			update_option( 'woocommerce_currency_pos', $position );
+			$this->assertEquals(
+				'<span class="woocommerce-Price-amount amount"><bdi>' . $expected_price . '</bdi></span>',
+				wc_price( 15, array( 'currency' => 'LBP' ) ),
+				"Currency position '{$position}' should render the direction-isolated symbol on the configured side"
+			);
+		}
+
+		update_option( 'woocommerce_currency_pos', $original_position );
 	}
 
 	/**
