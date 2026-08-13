@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Removed unneeded chunkFilename setting from the webpack config
