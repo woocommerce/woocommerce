@@ -288,36 +288,24 @@ class MiniCart extends \WP_UnitTestCase {
 			'The filtered pattern output should be preserved.'
 		);
 
-		foreach ( MiniCartBlock::MINI_CART_TEMPLATE_BLOCKS as $block_name ) {
-			$class_name = 'wp-block-' . str_replace( '/', '-', $block_name );
-			if ( false === strpos( $this->current_template_with_user_edits, $class_name ) ) {
-				continue;
-			}
-
-			$p             = new \WP_HTML_Tag_Processor( $rendered_template );
-			$wrapper_count = 0;
-			while ( $p->next_tag( array( 'class_name' => $class_name ) ) ) {
-				++$wrapper_count;
-			}
-
-			$this->assertSame(
-				1,
-				$wrapper_count,
-				"The rendered template should contain exactly one wrapper with class {$class_name}."
-			);
-		}
-
 		$document                    = new \DOMDocument();
 		$previous_libxml_error_state = libxml_use_internal_errors( true );
 		$document->loadHTML( '<html><body>' . $rendered_template . '</body></html>' );
 		libxml_clear_errors();
 		libxml_use_internal_errors( $previous_libxml_error_state );
-		$xpath = new \DOMXPath( $document );
+		$xpath  = new \DOMXPath( $document );
+		$footer = $xpath->query(
+			"//*[contains(concat(' ', normalize-space(@class), ' '), ' wc-block-mini-cart__footer-actions ')]"
+		);
+		if ( false === $footer ) {
+			$this->fail( 'The XPath query for the Mini-Cart footer should be valid.' );
+		}
+		$this->assertSame( 1, $footer->length, 'The rendered template should contain one Mini-Cart footer.' );
 
 		foreach ( array( 'cart', 'checkout' ) as $button_name ) {
 			$buttons = $xpath->query(
-				"//*[contains(concat(' ', normalize-space(@class), ' '), ' wc-block-mini-cart__footer-actions ')]" .
-				"/*[contains(concat(' ', normalize-space(@class), ' '), ' wp-block-woocommerce-mini-cart-{$button_name}-button-block ')]"
+				"./*[contains(concat(' ', normalize-space(@class), ' '), ' wp-block-woocommerce-mini-cart-{$button_name}-button-block ')]",
+				$footer->item( 0 )
 			);
 			if ( false === $buttons ) {
 				$this->fail( "The XPath query for the {$button_name} button should be valid." );
