@@ -33,6 +33,18 @@ describe( 'usesServerSideSearch', () => {
 	it( 'should be false when nothing limits the report', () => {
 		expect( usesServerSideSearch( [] ) ).toBe( false );
 	} );
+
+	it( 'should be false when the limit properties are not a list', () => {
+		const limitProperties = ( value: unknown ) => value as string[];
+
+		expect( usesServerSideSearch( limitProperties( undefined ) ) ).toBe(
+			false
+		);
+		expect( usesServerSideSearch( limitProperties( null ) ) ).toBe( false );
+		expect( usesServerSideSearch( limitProperties( 'products' ) ) ).toBe(
+			false
+		);
+	} );
 } );
 
 describe( 'getFilterQuery', () => {

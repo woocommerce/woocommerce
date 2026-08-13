@@ -177,6 +177,10 @@ const serverSideSearchItemTypes = [ 'products' ];
  * @return {boolean} True when the search can be resolved server-side.
  */
 export function usesServerSideSearch( limitProperties: string[] ) {
+	if ( ! Array.isArray( limitProperties ) ) {
+		return false;
+	}
+
 	return (
 		limitProperties.length === 1 &&
 		includes( serverSideSearchItemTypes, limitProperties[ 0 ] )
