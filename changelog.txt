@@ -1,5 +1,30 @@
 == Changelog ==
 
+= 11.0.1 2026-08-10 =
+
+**WooCommerce**
+
+* Fix - Fixed admin settings initialization. [#67532](https://github.com/woocommerce/woocommerce/pull/67532)
+* Fix - Fix order list checkbox interactions and responsive layout with WordPress 7.1. [#67364](https://github.com/woocommerce/woocommerce/pull/67364)
+* Fix - Prevent password-protected products from exposing short descriptions before authentication. [#67557](https://github.com/woocommerce/woocommerce/pull/67557)
+* Fix - Sanitize the single dismissible store notice before rendering so entity-encoded HTML in Store API error messages (e.g. a product name) cannot execute script on the Cart and Checkout blocks. [#67476](https://github.com/woocommerce/woocommerce/pull/67476)
+* Fix - Store API: Always resolve the cart token from a consistent place. [#67550](https://github.com/woocommerce/woocommerce/pull/67550)
+* Fix - Store API: improve coupon handling for order payments. [#67549](https://github.com/woocommerce/woocommerce/pull/67549)
+* Fix - Tighten authorization checks on the Marketplace subscription activate endpoint. [#67567](https://github.com/woocommerce/woocommerce/pull/67567)
+* Fix - Tighten authorization checks on the review-order shortcode. [#67552](https://github.com/woocommerce/woocommerce/pull/67552)
+* Fix - Update product button label checks. [#67558](https://github.com/woocommerce/woocommerce/pull/67558)
+* Fix - Update product image SKU match checks [#67530](https://github.com/woocommerce/woocommerce/pull/67530)
+* Fix - Update session cookies hashing [#67408](https://github.com/woocommerce/woocommerce/pull/67408)
+* Fix - Update theme onboarding checks [#67533](https://github.com/woocommerce/woocommerce/pull/67533)
+* Fix - Validate Analytics report export arguments orderby against the target report's schema. [#67551](https://github.com/woocommerce/woocommerce/pull/67551)
+* Fix - Validate the Analytics order date type option against known columns. [#67554](https://github.com/woocommerce/woocommerce/pull/67554)
+* Add - Add a woocommerce_order_step_logging_enabled filter that allows disabling per-order place-order-debug logging without raising the site-wide logging level threshold. [#67410](https://github.com/woocommerce/woocommerce/pull/67410)
+* Dev - Accept the WordPress 7.1 list table check-column markup in the reviews list table row test. [#67517](https://github.com/woocommerce/woocommerce/pull/67517)
+* Dev - Add a PHP_CodeSniffer rule requiring the Store API cart token to be read through CartTokenUtils::get_request_cart_token(). [#67550](https://github.com/woocommerce/woocommerce/pull/67550)
+* Dev - Update the JS file count test for WordPress 7.1. [#67473](https://github.com/woocommerce/woocommerce/pull/67473)
+* Performance - Log writes no longer scan the whole wc-logs directory to locate their target file (the path is now constructed deterministically), and the daily place-order debug log cleanup now deletes a bounded batch per run and reschedules itself until the backlog is drained, instead of stopping at 100 files per day. [#67410](https://github.com/woocommerce/woocommerce/pull/67410)
+
+
 = 11.0.0 2026-08-04 =
 
 **WooCommerce**
