@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Formatters;
 
+use Automattic\WooCommerce\Enums\CurrencyPosition;
+
 /**
  * Currency Formatter.
  *
@@ -21,16 +23,16 @@ class CurrencyFormatter implements FormatterInterface {
 		$suffix   = '';
 
 		switch ( $position ) {
-			case 'left_space':
+			case CurrencyPosition::LEFT_SPACE:
 				$prefix = $symbol . ' ';
 				break;
-			case 'left':
+			case CurrencyPosition::LEFT:
 				$prefix = $symbol;
 				break;
-			case 'right_space':
+			case CurrencyPosition::RIGHT_SPACE:
 				$suffix = ' ' . $symbol;
 				break;
-			case 'right':
+			case CurrencyPosition::RIGHT:
 				$suffix = $symbol;
 				break;
 		}

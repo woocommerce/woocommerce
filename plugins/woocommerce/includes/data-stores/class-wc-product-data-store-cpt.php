@@ -72,6 +72,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		'_thumbnail_id',
 		'_file_paths',
 		'_product_image_gallery',
+		'_wc_video_gallery',
 		'_product_version',
 		'_wp_old_slug',
 		'_edit_last',
@@ -248,7 +249,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$post_object = get_post( $product->get_id() );
 			$product->set_status( $post_object->post_status );
 
-			$this->update_post_meta_internal( $product, true, true );
+			$this->update_post_meta( $product, true );
 			$this->update_terms( $product, true );
 			$this->update_visibility( $product, true );
 			$this->update_attributes( $product, true );
@@ -695,10 +696,36 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	}
 
 	/**
-	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
+	 * Update meta data in, or delete it from, the database.
 	 *
-	 * Subclasses that override this method to write custom product-type meta should also override
-	 * update_post_meta_internal() so those writes run during object creation.
+	 * Avoids storing meta when it's either an empty string or empty array.
+	 * Other empty values such as numeric 0 and null should still be stored.
+	 * Data-stores can force meta to exist using `must_exist_meta_keys`.
+	 *
+	 * Note: WordPress `get_metadata` function returns an empty string when meta data does not exist.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param WC_Data $product    The WP_Data object (product).
+	 * @param string  $meta_key   Meta key to update.
+	 * @param mixed   $meta_value Value to save.
+	 *
+	 * @return bool
+	 */
+	protected function update_or_delete_post_meta( $product, $meta_key, $meta_value ) {
+		// Performance note: overrides \WC_Data_Store_WP::update_or_delete_post_meta — adds metadata_exists() guard to skip DELETE when meta is absent.
+		$product_id = $product->get_id();
+		if ( in_array( $meta_value, array( array(), '' ), true ) && ! in_array( $meta_key, $this->must_exist_meta_keys, true ) ) {
+			$updated = metadata_exists( 'post', $product_id, $meta_key ) && delete_post_meta( $product_id, $meta_key );
+		} else {
+			$updated = update_post_meta( $product_id, $meta_key, $meta_value );
+		}
+
+		return (bool) $updated;
+	}
+
+	/**
+	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
 	 *
 	 * @param WC_Product $product Product object.
 	 * @param bool       $force Force update. Used during create.
@@ -706,22 +733,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @return void
 	 */
 	protected function update_post_meta( &$product, $force = false ) {
-		$this->update_post_meta_internal( $product, $force, false );
-	}
-
-	/**
-	 * Internal implementation of update_post_meta() that also knows whether the product is being created.
-	 *
-	 * Subclasses that override update_post_meta() to write custom product-type meta should also override
-	 * this method so those writes run during object creation.
-	 *
-	 * @param WC_Product $product Product object.
-	 * @param bool       $force Force update. Used during create.
-	 * @param bool       $creating Whether the product is being created.
-	 * @param array      $existing_meta_keys Existing meta keys map, maintained across calls during creation. Passed by reference.
-	 * @return void
-	 */
-	protected function update_post_meta_internal( &$product, $force, $creating, &$existing_meta_keys = null ) {
 		$meta_key_to_props = array(
 			'_sku'                   => 'sku',
 			'_global_unique_id'      => 'global_unique_id',
@@ -807,7 +818,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					break;
 			}
 
-			$updated = $this->update_or_delete_post_meta( $product, $meta_key, $value, $creating, $existing_meta_keys );
+			$updated = $this->update_or_delete_post_meta( $product, $meta_key, $value );
 
 			if ( $updated ) {
 				$this->updated_props[] = $prop;
@@ -829,7 +840,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$cogs_value = apply_filters( 'woocommerce_save_product_cogs_value', $cogs_value, $product );
 
 			if ( false !== $cogs_value ) {
-				$updated = $this->update_or_delete_post_meta( $product, '_cogs_total_value', is_null( $cogs_value ) ? '' : $cogs_value, $creating, $existing_meta_keys );
+				$updated = $this->update_or_delete_post_meta( $product, '_cogs_total_value', is_null( $cogs_value ) ? '' : $cogs_value );
 				if ( $updated ) {
 					$this->updated_props[] = 'cogs_value';
 				}
@@ -847,7 +858,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				if ( is_callable( array( $product, $function ) ) ) {
 					$value   = $product->{$function}( 'edit' );
 					$value   = is_string( $value ) ? wp_slash( $value ) : $value;
-					$updated = $this->update_or_delete_post_meta( $product, $meta_key, $value, $creating, $existing_meta_keys );
+					$updated = $this->update_or_delete_post_meta( $product, $meta_key, $value );
 
 					if ( $updated ) {
 						$this->updated_props[] = $key;
@@ -1150,16 +1161,25 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Make sure we store the product type and version (to track data changes).
 	 *
-	 * @param WC_Product $product Product object.
+	 * @since 11.2.0 Skips wp_set_object_terms() when the stored product type term already matches to avoid unnecessary term cache invalidation.
 	 * @since 3.0.0
+	 *
+	 * @param WC_Product $product Product object.
 	 * @return void
 	 */
 	protected function update_version_and_type( &$product ) {
-		$old_type = WC_Product_Factory::get_product_type( $product->get_id() );
-		$new_type = $product->get_type();
+		$product_id        = $product->get_id();
+		$old_type          = \WC_Product_Factory::get_product_type( $product_id );
+		$new_type          = $product->get_type();
+		$stored_type_terms = get_the_terms( $product_id, 'product_type' );
+		$stored_type_slug  = ! empty( $stored_type_terms ) && is_array( $stored_type_terms ) ? $stored_type_terms[0]->slug : null;
 
-		wp_set_object_terms( $product->get_id(), $new_type, 'product_type' );
-		update_post_meta( $product->get_id(), '_product_version', Constants::get_constant( 'WC_VERSION' ) );
+		// Skip wp_set_object_terms() when the stored term already matches — it always clears the term cache even on no-op writes.
+		if ( $stored_type_slug !== $new_type ) {
+			wp_set_object_terms( $product_id, $new_type, 'product_type' );
+		}
+
+		update_post_meta( $product_id, '_product_version', Constants::get_constant( 'WC_VERSION' ) );
 
 		// Action for the transition.
 		if ( $old_type !== $new_type ) {
@@ -2085,15 +2105,17 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		if ( ! empty( $search_queries ) ) {
-			$search_where = ' AND (' . implode( ') OR (', $search_queries ) . ') ';
+			$search_where = ' AND ((' . implode( ') OR (', $search_queries ) . ')) ';
 		}
 
 		if ( ! empty( $include ) && is_array( $include ) ) {
 			$search_where .= ' AND posts.ID IN(' . implode( ',', array_map( 'absint', $include ) ) . ') ';
 		}
 
-		if ( ! empty( $exclude ) && is_array( $exclude ) ) {
-			$search_where .= ' AND posts.ID NOT IN(' . implode( ',', array_map( 'absint', $exclude ) ) . ') ';
+		$exclude_ids = ! empty( $exclude ) && is_array( $exclude ) ? array_filter( array_map( 'absint', $exclude ) ) : array();
+
+		if ( $exclude_ids ) {
+			$search_where .= ' AND posts.ID NOT IN(' . implode( ',', $exclude_ids ) . ') ';
 		}
 
 		if ( 'virtual' === $type ) {
@@ -2110,10 +2132,18 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$limit_query = $wpdb->prepare( ' LIMIT %d ', $limit );
 		}
 
+		// A matching variation contributes its parent ID, so excluded parents are discarded here
+		// rather than reintroduced alongside the variation.
+		$parent_id_select = 'posts.post_parent as parent_id';
+
+		if ( $exclude_ids ) {
+			$parent_id_select = 'CASE WHEN posts.post_parent IN(' . implode( ',', $exclude_ids ) . ') THEN NULL ELSE posts.post_parent END as parent_id';
+		}
+
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 		$search_results = $wpdb->get_results(
 			// phpcs:disable
-			"SELECT DISTINCT posts.ID as product_id, posts.post_parent as parent_id FROM {$wpdb->posts} posts
+			"SELECT DISTINCT posts.ID as product_id, {$parent_id_select} FROM {$wpdb->posts} posts
 			 LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON posts.ID = wc_product_meta_lookup.product_id
 			 $join_query
 			WHERE posts.post_type IN ('" . implode( "','", $post_types ) . "')
@@ -2132,13 +2162,21 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$post_id   = absint( $term );
 			$post_type = get_post_type( $post_id );
 
-			if ( 'product_variation' === $post_type && $include_variations ) {
-				$product_ids[] = $post_id;
-			} elseif ( 'product' === $post_type ) {
-				$product_ids[] = $post_id;
+			// A numeric term bypasses the query above, so the exclusion is applied to both the
+			// searched ID and its parent before either is appended.
+			if ( ! in_array( $post_id, $exclude_ids, true ) ) {
+				if ( 'product_variation' === $post_type && $include_variations ) {
+					$product_ids[] = $post_id;
+				} elseif ( 'product' === $post_type ) {
+					$product_ids[] = $post_id;
+				}
 			}
 
-			$product_ids[] = wp_get_post_parent_id( $post_id );
+			$parent_id = absint( wp_get_post_parent_id( $post_id ) );
+
+			if ( ! in_array( $parent_id, $exclude_ids, true ) ) {
+				$product_ids[] = $parent_id;
+			}
 		}
 
 		return wp_parse_id_list( $product_ids );

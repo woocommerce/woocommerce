@@ -16,6 +16,19 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 	/**
+	 * Sets up the test fixture.
+	 */
+	public function set_up() {
+		parent::set_up();
+
+		// The WP AJAX test case removes these before the class runs, but mixed
+		// test sequences can re-add core admin hooks before individual tests.
+		remove_action( 'admin_init', '_maybe_update_core' );
+		remove_action( 'admin_init', '_maybe_update_plugins' );
+		remove_action( 'admin_init', '_maybe_update_themes' );
+	}
+
+	/**
 	 * Stock should not be reduced from AJAX when an item is added to an order.
 	 */
 	public function test_add_item_to_pending_payment_order() {
@@ -107,11 +120,18 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$_POST['permissions'] = 'read';
 		$_POST['description'] = $description;
 
+		$output_buffering_level = ob_get_level();
+
 		try {
 			$this->_handleAjax( 'woocommerce_update_api_key' );
 		} catch ( WPAjaxDieContinueException $e ) {
-			// wp_die() doesn't actually occur, so we need to clean up WC_AJAX::update_api_key's output buffer.
-			ob_end_clean();
+			unset( $e );
+		} finally {
+			// wp_die() doesn't actually occur, so clean up any output buffer
+			// WC_AJAX::update_api_key leaves open, keeping the level balanced.
+			while ( ob_get_level() > $output_buffering_level ) {
+				ob_end_clean();
+			}
 		}
 
 		$response = json_decode( $this->_last_response, true );
@@ -639,6 +659,272 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Adding a custom field renders a Delete button with a valid delete nonce.
+	 */
+	public function test_order_add_meta_delete_button_uses_name_value_nonce(): void {
+		$this->_setRole( 'administrator' );
+		$order = WC_Helper_Order::create_order();
+
+		$_POST['_ajax_nonce-add-meta'] = wp_create_nonce( 'add-meta' );
+		$_POST['order_id']             = $order->get_id();
+		$_POST['metakeyinput']         = 'my_test_key';
+		$_POST['metavalue']            = 'my_test_value';
+
+		$output_buffering_level = ob_get_level();
+
+		try {
+			// Note that _handleAjax makes use of output buffering, which the die
+			// handler usually cleans up; the finally block below closes only any
+			// buffer it leaves dangling so the buffer level stays balanced.
+			$this->_handleAjax( 'woocommerce_order_add_meta' );
+		} catch ( WPAjaxDieContinueException $e ) {
+			unset( $e );
+		} finally {
+			while ( ob_get_level() > $output_buffering_level ) {
+				ob_end_clean();
+			}
+		}
+
+		$this->assertStringContainsString(
+			'::_ajax_nonce=',
+			(string) $this->_last_response,
+			'Delete button should use the _ajax_nonce= token.'
+		);
+	}
+
+	/**
+	 * @testdox Refunding a 0% taxed line item via the AJAX handler preserves the 0-rate tax line on the refund order.
+	 */
+	public function test_refund_line_items_preserves_zero_rate_tax(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		$rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '0.0000',
+				'tax_rate_name'     => 'Zero Rate',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		$order = new WC_Order();
+		$order->add_product( $product, 1 );
+		$order->calculate_totals( true );
+		$order->save();
+
+		$item_id = array_keys( $order->get_items( 'line_item' ) )[0];
+
+		$this->_setRole( 'administrator' );
+
+		// The exact payload shape the admin refund form serializes: the tax
+		// amount arrives as a numeric 0 (accounting.unformat of an empty field).
+		$_POST['security']             = wp_create_nonce( 'order-item' );
+		$_POST['order_id']             = $order->get_id();
+		$_POST['refund_amount']        = $order->get_total();
+		$_POST['refunded_amount']      = '0';
+		$_POST['refund_reason']        = '';
+		$_POST['line_item_qtys']       = wp_json_encode( array( $item_id => 1 ) );
+		$_POST['line_item_totals']     = wp_json_encode( array( $item_id => $order->get_total() ) );
+		$_POST['line_item_tax_totals'] = wp_json_encode( array( $item_id => array( $rate_id => 0 ) ) );
+		$_POST['api_refund']           = 'false';
+
+		$response = $this->do_ajax( 'woocommerce_refund_line_items' );
+
+		$this->assertTrue( $response['success'] ?? false, 'The AJAX refund request should succeed.' );
+
+		$refunds = wc_get_order( $order->get_id() )->get_refunds();
+		$this->assertCount( 1, $refunds, 'One refund should be created for the order.' );
+
+		$refund_tax_items = $refunds[0]->get_items( 'tax' );
+		$this->assertCount( 1, $refund_tax_items, 'The 0% tax line must be carried over to the refund order.' );
+		$this->assertEquals(
+			$rate_id,
+			array_values( $refund_tax_items )[0]->get_rate_id(),
+			'The preserved tax line must reference the 0% rate.'
+		);
+
+		unset( $_POST['security'], $_POST['order_id'], $_POST['refund_amount'], $_POST['refunded_amount'], $_POST['refund_reason'], $_POST['line_item_qtys'], $_POST['line_item_totals'], $_POST['line_item_tax_totals'], $_POST['api_refund'] );
+		WC_Tax::_delete_tax_rate( $rate_id );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+	}
+
+	/**
+	 * @testdox An amount-only AJAX refund on a multi-item order creates no line items and keeps downloads of unrefunded products.
+	 */
+	public function test_refund_line_items_amount_only_skips_untouched_items(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$downloadable_product = WC_Helper_Product::create_simple_product();
+		$downloadable_product->set_downloadable( true );
+		$downloadable_product->save();
+
+		$order = new WC_Order();
+		$order->add_product( $product, 1 );
+		$order->add_product( $downloadable_product, 1 );
+		$order->calculate_totals();
+		$order->save();
+
+		$download = new WC_Customer_Download();
+		$download->set_user_id( 1 );
+		$download->set_order_id( $order->get_id() );
+		$download->set_product_id( $downloadable_product->get_id() );
+		$download->set_download_id( wp_generate_uuid4() );
+		$download->save();
+
+		$item_ids = array_keys( $order->get_items( 'line_item' ) );
+
+		$this->_setRole( 'administrator' );
+
+		// An amount-only refund: the form posts no qtys, but a 0 total and a 0
+		// tax amount for every row in the order (those inputs are not gated).
+		$totals     = array();
+		$tax_totals = array();
+		foreach ( $item_ids as $item_id ) {
+			$totals[ $item_id ]     = 0;
+			$tax_totals[ $item_id ] = array( 1 => 0 );
+		}
+
+		$_POST['security']             = wp_create_nonce( 'order-item' );
+		$_POST['order_id']             = $order->get_id();
+		$_POST['refund_amount']        = '5';
+		$_POST['refunded_amount']      = '0';
+		$_POST['refund_reason']        = '';
+		$_POST['line_item_qtys']       = wp_json_encode( array() );
+		$_POST['line_item_totals']     = wp_json_encode( $totals );
+		$_POST['line_item_tax_totals'] = wp_json_encode( $tax_totals );
+		$_POST['api_refund']           = 'false';
+
+		$response = $this->do_ajax( 'woocommerce_refund_line_items' );
+
+		$this->assertTrue( $response['success'] ?? false, 'The AJAX refund request should succeed.' );
+
+		$refunds = wc_get_order( $order->get_id() )->get_refunds();
+		$this->assertCount( 1, $refunds, 'One refund should be created for the order.' );
+		$this->assertCount( 0, $refunds[0]->get_items( 'line_item' ), 'Untouched items must not become refund line items.' );
+		$this->assertCount( 0, $refunds[0]->get_items( 'tax' ), 'Untouched items must not produce refund tax items.' );
+
+		$download_data_store = WC_Data_Store::load( 'customer-download' );
+		$remaining_downloads = $download_data_store->get_downloads(
+			array(
+				'order_id'   => $order->get_id(),
+				'product_id' => $downloadable_product->get_id(),
+			)
+		);
+		$this->assertCount( 1, $remaining_downloads, 'Download permissions for a product that was not refunded must be kept.' );
+
+		unset( $_POST['security'], $_POST['order_id'], $_POST['refund_amount'], $_POST['refunded_amount'], $_POST['refund_reason'], $_POST['line_item_qtys'], $_POST['line_item_totals'], $_POST['line_item_tax_totals'], $_POST['api_refund'] );
+	}
+
+	/**
+	 * The ?wc-ajax=get_variation endpoint renders the matched variation's description through
+	 * wc_format_content(), which fires the woocommerce_short_description filter. Eager block registration is
+	 * skipped on AJAX requests, so Bootstrap registers WooCommerce block types on demand there — otherwise a
+	 * block in a variation description would render empty. See Bootstrap::maybe_register_blocks_from_content.
+	 *
+	 * @testdox The get_variation AJAX endpoint registers WooCommerce block types on demand for a variation description block.
+	 */
+	public function test_get_variation_registers_block_types_on_demand_for_description(): void {
+		$registry = WP_Block_Type_Registry::get_instance();
+
+		// Snapshot and unregister WooCommerce blocks so this test mirrors a request whose eager registration
+		// was skipped; on-demand registration should then re-register them when the description is rendered.
+		$snapshot = array();
+		foreach ( $registry->get_all_registered() as $name => $block_type ) {
+			if ( 0 === strpos( $name, 'woocommerce/' ) ) {
+				$snapshot[ $name ] = $block_type;
+				$registry->unregister( $name );
+			}
+		}
+
+		// The on-demand registration asks the shared BlockTypesController whether register_blocks() already ran
+		// this request; the test bootstrap ran it once for the whole PHPUnit process, so clear the flag too.
+		$this->set_register_blocks_has_run_flag( false );
+
+		// A foundational block register_blocks() always registers (not gated behind a theme/feature flag).
+		$sample = 'woocommerce/product-price';
+		$this->assertNotEmpty( $snapshot, 'The test bootstrap should have registered WooCommerce blocks to snapshot.' );
+
+		$posted_keys = array();
+
+		try {
+			$product   = WC_Helper_Product::create_variation_product();
+			$children  = $product->get_children();
+			$variation = wc_get_product( $children[0] );
+			$variation->set_description( '<!-- wp:woocommerce/product-price /-->' );
+			$variation->save();
+
+			$_POST['product_id'] = $product->get_id();
+			$posted_keys[]       = 'product_id';
+			foreach ( $variation->get_attributes() as $attribute_name => $attribute_value ) {
+				$key           = 'attribute_' . $attribute_name;
+				$_POST[ $key ] = $attribute_value;
+				$posted_keys[] = $key;
+			}
+
+			$this->assertFalse( $registry->is_registered( $sample ), 'Blocks should start unregistered for this test.' );
+
+			$response = $this->do_ajax( 'woocommerce_get_variation' );
+
+			$this->assertIsArray( $response, 'The get_variation endpoint should return the matched variation.' );
+			$this->assertSame(
+				$variation->get_id(),
+				$response['variation_id'],
+				'The endpoint should match the variation carrying the block description.'
+			);
+			$this->assertTrue(
+				$registry->is_registered( $sample ),
+				'Hitting ?wc-ajax=get_variation should register block types on demand so a variation description block renders.'
+			);
+		} finally {
+			foreach ( $posted_keys as $key ) {
+				unset( $_POST[ $key ] );
+			}
+
+			// Delete the created posts so they do not leak into later tests. Guarded because
+			// create_variation_product() could throw before either is assigned.
+			if ( isset( $variation ) ) {
+				$variation->delete( true );
+			}
+			if ( isset( $product ) ) {
+				$product->delete( true );
+			}
+
+			foreach ( array_keys( $registry->get_all_registered() ) as $name ) {
+				if ( 0 === strpos( (string) $name, 'woocommerce/' ) ) {
+					$registry->unregister( $name );
+				}
+			}
+			foreach ( $snapshot as $block_type ) {
+				$registry->register( $block_type );
+			}
+			$this->set_register_blocks_has_run_flag( true );
+		}
+	}
+
+	/**
+	 * Set the static registration flag on BlockTypesController.
+	 *
+	 * The flag records whether register_blocks() ran in the current request, and Bootstrap's on-demand block
+	 * registration consults it. Tests that simulate a request whose eager registration was skipped must clear
+	 * it alongside unregistering the block types, and restore it afterwards. It is static, so this sets it on
+	 * the class, not on any one container instance.
+	 *
+	 * @param bool $has_run The flag value to set.
+	 */
+	private function set_register_blocks_has_run_flag( bool $has_run ): void {
+		$property = new \ReflectionProperty( \Automattic\WooCommerce\Blocks\BlockTypesController::class, 'register_blocks_has_run' );
+		$property->setAccessible( true );
+		$property->setValue( null, $has_run );
+	}
+
+	/**
 	 * Does the 'hard work' of triggering an ajax endpoint and capturing the response.
 	 *
 	 * @param string $ajax_action The action to be triggered.
@@ -649,13 +935,15 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$output_buffering_level = ob_get_level();
 
 		try {
-			// Note that _handleAjax makes use of output buffering...
+			// Note that _handleAjax makes use of output buffering, which the die
+			// handler usually cleans up; the finally block below closes only any
+			// buffer it leaves dangling so the buffer level stays balanced.
 			$this->_handleAjax( $ajax_action );
 		} catch ( Exception $e ) {
-			// ...However, if an exception is raised, it may not be able to clean-up,
-			// which can lead to PhpUnit emitting risky test warnings.
-			if ( ob_get_level() === $output_buffering_level + 1 ) {
-				ob_get_clean();
+			unset( $e );
+		} finally {
+			while ( ob_get_level() > $output_buffering_level ) {
+				ob_end_clean();
 			}
 		}
 

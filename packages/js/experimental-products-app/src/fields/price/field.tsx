@@ -123,7 +123,7 @@ export const fieldExtensions: Partial< Field< PriceFilterData > > = {
 				onChange( {
 					price: [ parseFloat( newValue || '' ), max ] as [
 						number | string,
-						number | string
+						number | string,
 					],
 				} );
 			},
@@ -135,7 +135,7 @@ export const fieldExtensions: Partial< Field< PriceFilterData > > = {
 				onChange( {
 					price: [ min, parseFloat( newValue || '' ) ] as [
 						number | string,
-						number | string
+						number | string,
 					],
 				} );
 			},

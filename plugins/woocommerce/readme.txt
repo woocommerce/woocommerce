@@ -4,7 +4,7 @@ Tags: online store, ecommerce, shop, shopping cart, sell online
 Requires at least: 6.9
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 10.9.1
+Stable tag: 11.0.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -128,7 +128,7 @@ Request new features and extensions and vote on existing suggestions on our offi
 
 = WooCommerce is awesome! Can I contribute? =
 
-Yes, you can! Join in on our [GitHub repository](https://github.com/woocommerce/woocommerce/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing) and follow the [development blog](https://woocommerce.wordpress.com/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing) to stay up-to-date with everything happening in the project.
+Yes, you can! Join in on our [GitHub repository](https://github.com/woocommerce/woocommerce/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing) and follow the [development blog](https://developer.woocommerce.com/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing) to stay up-to-date with everything happening in the project.
 
 = Where can I find REST API documentation? =
 
@@ -170,6 +170,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 11.0.0-dev 2026-XX-XX =
+= 11.1.0-dev 2026-XX-XX =
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).

@@ -26,7 +26,7 @@ namespace Automattic\WooCommerce\Internal\Email\Unsubscribes;
  *
  * @internal Just for internal use.
  *
- * @since 10.9.0
+ * @since 11.0.0
  */
 class Storage {
 

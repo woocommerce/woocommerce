@@ -14,9 +14,9 @@ use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrderDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
-use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * OrdersScheduler Class.
@@ -132,14 +132,19 @@ class OrdersScheduler extends ImportScheduler {
 			add_filter( 'woocommerce_create_order', array( __CLASS__, 'possibly_schedule_import' ) );
 			add_action( 'woocommerce_refund_created', array( __CLASS__, 'possibly_schedule_import' ) );
 			add_action( 'woocommerce_schedule_import', array( __CLASS__, 'possibly_schedule_import' ) );
+
+			// Trash and untrash bypass woocommerce_update_order. CPT emits both the Woo
+			// and the post hooks for one operation, so each handler takes a single store.
+			add_action( 'woocommerce_trash_order', array( __CLASS__, 'maybe_schedule_import_on_trash' ) );
+			add_action( 'woocommerce_order_status_changed', array( __CLASS__, 'maybe_schedule_import_on_untrash' ), 10, 2 );
+			add_action( 'trashed_post', array( __CLASS__, 'maybe_schedule_import_on_post_trash_change' ) );
+			add_action( 'untrashed_post', array( __CLASS__, 'maybe_schedule_import_on_post_trash_change' ) );
 		}
 
-		if ( Features::is_enabled( 'analytics-scheduled-import' ) ) {
-			// Watch for changes to the scheduled import option.
-			add_action( 'add_option_' . self::SCHEDULED_IMPORT_OPTION, array( __CLASS__, 'handle_scheduled_import_option_added' ), 10, 2 );
-			add_action( 'update_option_' . self::SCHEDULED_IMPORT_OPTION, array( __CLASS__, 'handle_scheduled_import_option_change' ), 10, 2 );
-			add_action( 'delete_option', array( __CLASS__, 'handle_scheduled_import_option_before_delete' ), 10, 1 );
-		}
+		// Watch for changes to the scheduled import option.
+		add_action( 'add_option_' . self::SCHEDULED_IMPORT_OPTION, array( __CLASS__, 'handle_scheduled_import_option_added' ), 10, 2 );
+		add_action( 'update_option_' . self::SCHEDULED_IMPORT_OPTION, array( __CLASS__, 'handle_scheduled_import_option_change' ), 10, 2 );
+		add_action( 'delete_option', array( __CLASS__, 'handle_scheduled_import_option_before_delete' ), 10, 1 );
 
 		OrdersStatsDataStore::init();
 		CouponsDataStore::init();
@@ -394,6 +399,14 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			return;
 		}
 
+		// Skip trashed records Analytics does not already hold: importing one creates a
+		// wc_customer_lookup row via Order::get_report_customer_id() that nothing removes
+		// while the order stays trashed. Records trashed after being imported keep their
+		// stats row, so their status still syncs.
+		if ( OrderStatus::TRASH === $order->get_status() && ! self::has_order_stats_row( $order_id ) ) {
+			return;
+		}
+
 		$results = array(
 			OrdersStatsDataStore::sync_order( $order_id ),
 			ProductsDataStore::sync_order_products( $order_id ),
@@ -423,6 +436,81 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		 * @param int $order_id Order or refund ID.
 		 */
 		do_action( 'woocommerce_order_scheduler_after_import_order', $order_id );
+	}
+
+	/**
+	 * Check whether an order or refund already has a row in the order stats table.
+	 *
+	 * @param int $order_id Order or refund ID.
+	 * @return bool
+	 */
+	private static function has_order_stats_row( $order_id ): bool {
+		global $wpdb;
+
+		$table_name = OrdersStatsDataStore::get_db_table_name();
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return (bool) $wpdb->get_var( $wpdb->prepare( "SELECT order_id FROM {$table_name} WHERE order_id = %d LIMIT 1", $order_id ) );
+	}
+
+	/**
+	 * Schedule an analytics import when a CPT-based order is trashed or untrashed.
+	 *
+	 * The CPT admin UI trashes via wp_trash_post(), which fires no Woo-side signal.
+	 * HPOS has its own handlers, so it is skipped here to avoid a duplicate import.
+	 *
+	 * @internal
+	 * @since 11.1.0
+	 * @param int $post_id Post ID.
+	 */
+	public static function maybe_schedule_import_on_post_trash_change( $post_id ): void {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			return;
+		}
+
+		self::possibly_schedule_import( $post_id );
+	}
+
+	/**
+	 * Schedule an analytics import when an HPOS order is trashed.
+	 *
+	 * CPT fires this hook too, on top of trashed_post, so it is handled there instead.
+	 *
+	 * @internal
+	 * @since 11.1.0
+	 * @param int $order_id Order ID.
+	 */
+	public static function maybe_schedule_import_on_trash( $order_id ): void {
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			return;
+		}
+
+		self::possibly_schedule_import( $order_id );
+	}
+
+	/**
+	 * Driven off the status transition rather than woocommerce_untrash_order, which
+	 * fires before the restored status is saved — so an import running synchronously
+	 * would record wc-trash, and nothing corrects it because the data store suppresses
+	 * woocommerce_update_order for trash transitions.
+	 *
+	 * CPT reaches this via its own save, so it is handled by untrashed_post instead.
+	 *
+	 * @internal
+	 * @since 11.1.0
+	 * @param int    $order_id    Order ID.
+	 * @param string $from_status Status the order transitioned from.
+	 */
+	public static function maybe_schedule_import_on_untrash( $order_id, $from_status ): void {
+		if ( OrderStatus::TRASH !== $from_status ) {
+			return;
+		}
+
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			return;
+		}
+
+		self::possibly_schedule_import( $order_id );
 	}
 
 	/**
@@ -687,7 +775,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 				"SELECT id, date_updated_gmt
 				FROM {$orders_table}
 				WHERE type IN ('shop_order', 'shop_order_refund')
-				AND status NOT IN ('wc-auto-draft', 'auto-draft', 'trash')
+				AND status NOT IN ('wc-auto-draft', 'auto-draft')
 				AND (
 					date_updated_gmt > %s
 					OR (date_updated_gmt = %s AND id > %d)
@@ -723,7 +811,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 				"SELECT ID as id, post_modified_gmt as date_updated_gmt
 				FROM {$wpdb->posts}
 				WHERE post_type IN ('shop_order', 'shop_order_refund')
-				AND post_status NOT IN ('wc-auto-draft', 'auto-draft', 'trash')
+				AND post_status NOT IN ('wc-auto-draft', 'auto-draft')
 				AND (
 					post_modified_gmt > %s
 					OR (post_modified_gmt = %s AND ID > %d)
@@ -918,8 +1006,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	/**
 	 * Check whether scheduled import is enabled.
 	 *
-	 * When the "analytics-scheduled-import" feature is disabled, only immediate
-	 * import is supported (returns false). When enabled, checks the option value.
+	 * Checks the scheduled import option value.
 	 *
 	 * @internal
 	 * @since 10.5.0 Introduced as a private method.
@@ -927,11 +1014,6 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * @return bool
 	 */
 	public static function is_scheduled_import_enabled(): bool {
-		if ( ! Features::is_enabled( 'analytics-scheduled-import' ) ) {
-			// If the feature is disabled, only immediate import is supported.
-			return false;
-		}
-
 		$value = get_option( self::SCHEDULED_IMPORT_OPTION, false );
 
 		if ( false !== $value ) {

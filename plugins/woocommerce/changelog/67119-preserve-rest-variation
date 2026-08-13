@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve variation IDs when partially updating order line items through the REST API.

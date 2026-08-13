@@ -2,8 +2,8 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button } from '@wordpress/components';
-import { EllipsisMenu } from '@woocommerce/components';
+import { DropdownMenu } from '@wordpress/components';
+import { moreVertical } from '@wordpress/icons';
 import { onboardingStore } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
 
@@ -14,19 +14,25 @@ export type TaskListMenuProps = {
 
 export const TaskListMenu = ( { id, hideTaskListText }: TaskListMenuProps ) => {
 	const { hideTaskList } = useDispatch( onboardingStore );
+	const label = __( 'Task list options', 'woocommerce' );
 
 	return (
 		<div className="woocommerce-card__menu woocommerce-card__header-item">
-			<EllipsisMenu
-				label={ __( 'Task List Options', 'woocommerce' ) }
-				renderContent={ () => (
-					<div className="woocommerce-task-card__section-controls">
-						<Button onClick={ () => hideTaskList( id ) }>
-							{ hideTaskListText ||
-								__( 'Hide this', 'woocommerce' ) }
-						</Button>
-					</div>
-				) }
+			<DropdownMenu
+				controls={ [
+					{
+						title:
+							hideTaskListText ||
+							__( 'Hide this', 'woocommerce' ),
+						onClick: () => hideTaskList( id ),
+					},
+				] }
+				icon={ moreVertical }
+				label={ label }
+				popoverProps={ { placement: 'bottom-end' } }
+				toggleProps={ {
+					className: 'woocommerce-ellipsis-menu__toggle',
+				} }
 			/>
 		</div>
 	);

@@ -3,8 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\ProductFeed\Feed;
 
-use WC_Helper_Product;
 use WC_Product;
+use WC_Product_Simple;
 use Automattic\WooCommerce\Internal\ProductFeed\Integrations\IntegrationInterface;
 use Automattic\WooCommerce\Internal\ProductFeed\Utils\MemoryManager;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\ProductLoader;
@@ -40,6 +40,19 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 		parent::tearDown();
 		remove_all_filters( 'woocommerce_product_feed_args' );
 		$this->test_container->reset_all_replacements();
+	}
+
+	/**
+	 * Create a product object without persisting data that the walker never reads.
+	 *
+	 * @param int $id Product ID.
+	 * @return WC_Product
+	 */
+	private function create_in_memory_product( int $id ): WC_Product {
+		$product = new WC_Product_Simple();
+		$product->set_id( $id );
+
+		return $product;
 	}
 
 	/**
@@ -100,7 +113,7 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 		for ( $i = 0; $i < $expected_iterations; $i++ ) {
 			$page = array();
 			for ( $j = 1; $j <= $batch_size && $generated_products++ < $number_of_products; $j++ ) {
-				$page[] = WC_Helper_Product::create_simple_product();
+				$page[] = $this->create_in_memory_product( $generated_products );
 			}
 
 			$loader_results[] = (object) array(
@@ -288,7 +301,7 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 		for ( $page = 1; $page <= $total_pages; $page++ ) {
 			$products = array();
 			for ( $i = 0; $i < $batch_size; $i++ ) {
-				$products[] = WC_Helper_Product::create_simple_product();
+				$products[] = $this->create_in_memory_product( ( ( $page - 1 ) * $batch_size ) + $i + 1 );
 			}
 			$pages[ $page ] = (object) array(
 				'products'      => $products,

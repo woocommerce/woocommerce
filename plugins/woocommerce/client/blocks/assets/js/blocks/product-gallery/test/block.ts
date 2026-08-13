@@ -203,8 +203,14 @@ describe( 'Product Gallery Block', () => {
 		expect( productImage ).toHaveAttribute( 'alt', 'Test 1' );
 	} );
 
-	it( 'should ensure thumbnail height matches viewer height with custom aspect ratio', async () => {
-		await setup( { aspectRatio: '16/9' } );
+	it( 'should expose custom product image ratios as large image CSS variables', async () => {
+		await setup( {
+			style: {
+				dimensions: {
+					aspectRatio: '3/5',
+				},
+			},
+		} );
 
 		// Get the viewer
 		const productImage = screen.getByTestId( 'product-image' );
@@ -215,21 +221,20 @@ describe( 'Product Gallery Block', () => {
 			'.wc-block-components-product-image'
 		);
 		expect( imageContainer ).toHaveClass(
-			'wc-block-components-product-image--aspect-ratio-16-9'
+			'wc-block-components-product-image--aspect-ratio-3-5'
 		);
+		const productGalleryBlock = screen.getByRole( 'document', {
+			name: /Block: Product Gallery/i,
+		} );
+		expect( productGalleryBlock ).toHaveStyle( {
+			'--wc-block-product-gallery-large-image-ratio-width': '3',
+			'--wc-block-product-gallery-large-image-ratio-height': '5',
+		} );
 
-		// Get the thumbnails block
 		const thumbnailsBlock = screen.getByRole( 'document', {
 			name: /Block: Thumbnails/i,
 		} );
 		expect( thumbnailsBlock ).toBeInTheDocument();
-
-		// Get the heights
-		const viewerHeight = productImage.getBoundingClientRect().height;
-		const thumbnailHeight = thumbnailsBlock.getBoundingClientRect().height;
-
-		// Check that the heights match
-		expect( thumbnailHeight ).toBe( viewerHeight );
 
 		// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
 		// opt out of without changing the visual output.

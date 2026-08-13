@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent invalid Quick Edit sale dates and unavailable datepicker scripts from corrupting product pricing schedules.

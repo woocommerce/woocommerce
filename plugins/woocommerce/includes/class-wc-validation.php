@@ -24,6 +24,25 @@ class WC_Validation {
 	}
 
 	/**
+	 * Checks whether a string has the basic shape of a phone number, i.e. it contains
+	 * only digits and characters commonly used in phone numbers (whitespace and the
+	 * "# _ - + / ( ) ." characters).
+	 *
+	 * Unlike `is_phone`, this method doesn't apply the `woocommerce_validate_phone` filter,
+	 * so its result always reflects the default validation rules regardless of any
+	 * merchant-defined validation policy. It's intended for contexts that need a
+	 * country-agnostic sanity check, such as phone number formatting.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param  string $phone Phone number to check.
+	 * @return bool
+	 */
+	public static function is_phone_format( $phone ): bool {
+		return '' === trim( preg_replace( '/[\s\#0-9_\-\+\/\(\)\.]/', '', (string) $phone ) );
+	}
+
+	/**
 	 * Validates a phone number using a regular expression.
 	 *
 	 * @param  string      $phone   Phone number to validate.
@@ -31,7 +50,7 @@ class WC_Validation {
 	 * @return bool
 	 */
 	public static function is_phone( $phone, $country = null ) {
-		$valid = 0 === strlen( trim( preg_replace( '/[\s\#0-9_\-\+\/\(\)\.]/', '', $phone ) ) );
+		$valid = self::is_phone_format( $phone );
 
 		/**
 		 * Filters whether a phone number is considered valid.
@@ -123,6 +142,9 @@ class WC_Validation {
 				break;
 			case 'LI':
 				$valid = (bool) preg_match( '/^(94[8-9][0-9])$/', $postcode );
+				break;
+			case 'LV':
+				$valid = (bool) preg_match( '/^(?:LV-)?[1-9][0-9]{3}\z/i', $postcode );
 				break;
 			default:
 				$valid = true;

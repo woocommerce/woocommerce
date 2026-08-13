@@ -12,6 +12,12 @@ use Automattic\WooCommerce\Enums\OrderInternalStatus;
  * Class WC_Stock_Functions_Tests.
  */
 class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
+	/**
+	 * Product reused by independent stock transitions within one test method.
+	 *
+	 * @var WC_Product|null
+	 */
+	private $stock_product;
 
 	/**
 	 * @var array List of statuses which reduces stock from inventory.
@@ -28,13 +34,13 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 	public $order_stock_restore_statuses = array(
 		OrderInternalStatus::CANCELLED,
 		OrderInternalStatus::PENDING,
+		OrderInternalStatus::FAILED,
 	);
 
 	/**
 	 * @var array List of statuses which have no impact on inventory.
 	 */
 	public $order_stock_no_effect_statuses = array(
-		OrderInternalStatus::FAILED,
 		OrderInternalStatus::REFUNDED,
 	);
 
@@ -44,6 +50,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 		WC()->cart->empty_cart();
+		$this->stock_product = null;
 	}
 
 	/**
@@ -52,13 +59,18 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 	 * @param string $status Status for the newly created order.
 	 */
 	private function create_order_from_cart_with_status( $status ) {
-		$product = WC_Helper_Product::create_simple_product(
-			true,
-			array(
-				'manage_stock'   => true,
-				'stock_quantity' => 10,
-			)
-		);
+		if ( ! $this->stock_product ) {
+			$this->stock_product = WC_Helper_Product::create_simple_product(
+				true,
+				array(
+					'manage_stock'   => true,
+					'stock_quantity' => 10,
+				)
+			);
+		} else {
+			wc_update_product_stock( $this->stock_product, 10, 'set' );
+		}
+		$product = $this->stock_product;
 		WC()->cart->empty_cart();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->cart->calculate_totals();
@@ -266,6 +278,68 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 				$this->transition_order_status_and_assert_stock_quantity( $order_status_from, $order_status_to, 10, 10 );
 			}
 		}
+	}
+
+	/**
+	 * An order that reduced stock while on-hold (e.g. an accepted-but-pending payment) and then fails
+	 * should have its stock restored and its stock-reduced flag cleared, mirroring cancel/pending.
+	 */
+	public function test_on_hold_to_failed_restores_stock_and_clears_reduced_flag() {
+		$order      = $this->create_order_from_cart_with_status( OrderInternalStatus::ON_HOLD );
+		$product_id = array_values( $order->get_items( 'line_item' ) )[0]->get_product_id();
+
+		$this->assertEquals( 9, wc_get_product( $product_id )->get_stock_quantity(), 'On-hold should reduce stock by the ordered quantity.' );
+		$this->assertTrue( (bool) $order->get_data_store()->get_stock_reduced( $order->get_id() ), 'The stock-reduced flag should be set while on-hold.' );
+
+		$order->set_status( OrderInternalStatus::FAILED );
+		$order->save();
+
+		$this->assertEquals( 10, wc_get_product( $product_id )->get_stock_quantity(), 'Failing an order that reduced stock should restore it.' );
+		$this->assertFalse( (bool) $order->get_data_store()->get_stock_reduced( $order->get_id() ), 'The stock-reduced flag should be cleared after the stock is restored.' );
+
+		$restore_notes = array_filter(
+			wc_get_order_notes( array( 'order_id' => $order->get_id() ) ),
+			function ( $note ) {
+				return false !== strpos( $note->content, 'Stock levels increased' );
+			}
+		);
+		$this->assertNotEmpty( $restore_notes, 'A "Stock levels increased" order note should be recorded when the stock is restored.' );
+	}
+
+	/**
+	 * A plain pending -> failed order (a payment declined before any stock was reduced) should be a
+	 * no-op: there is nothing to restore, so stock stays put.
+	 */
+	public function test_pending_to_failed_does_not_change_stock() {
+		$order      = $this->create_order_from_cart_with_status( OrderInternalStatus::PENDING );
+		$product_id = array_values( $order->get_items( 'line_item' ) )[0]->get_product_id();
+
+		$this->assertEquals( 10, wc_get_product( $product_id )->get_stock_quantity(), 'Pending should not reduce stock.' );
+
+		$order->set_status( OrderInternalStatus::FAILED );
+		$order->save();
+
+		$this->assertEquals( 10, wc_get_product( $product_id )->get_stock_quantity(), 'Failing an order that never reduced stock should not change stock.' );
+	}
+
+	/**
+	 * Admin-path safety check. A failed order is a dead end in the gateway flow, but an admin can
+	 * manually move it back to a paid status. Because the failure already restored the stock, doing
+	 * so must reduce stock exactly once, not twice.
+	 */
+	public function test_reactivating_a_failed_order_reduces_stock_only_once() {
+		$order      = $this->create_order_from_cart_with_status( OrderInternalStatus::ON_HOLD );
+		$product_id = array_values( $order->get_items( 'line_item' ) )[0]->get_product_id();
+
+		$order->set_status( OrderInternalStatus::FAILED );
+		$order->save();
+		$this->assertEquals( 10, wc_get_product( $product_id )->get_stock_quantity(), 'Failure should restore the reduced stock.' );
+
+		// Admin manually re-activates the order.
+		$order->set_status( OrderInternalStatus::PROCESSING );
+		$order->save();
+		$this->assertEquals( 9, wc_get_product( $product_id )->get_stock_quantity(), 'Re-activating the order should reduce stock exactly once.' );
+		$this->assertTrue( (bool) $order->get_data_store()->get_stock_reduced( $order->get_id() ), 'The stock-reduced flag should be set again after re-activation.' );
 	}
 
 	/**
