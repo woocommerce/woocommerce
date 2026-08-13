@@ -5,7 +5,6 @@
 
 # Repository infrastructure and developer tooling.
 '.github/**/*':
-    - adimoldovan
     - team: monorepo
 
 'docs/**/*':
@@ -21,14 +20,12 @@
     - team: monorepo
 
 'packages/js/e2e-utils-playwright/**/*':
-    - adimoldovan
     - team: monorepo
 
 'packages/php/{monorepo-plugin,remote-specs-validation}/**/*':
     - team: monorepo
 
 'plugins/woocommerce/tests/{Tools,bin,cli,e2e,metrics,performance}/**/*':
-    - adimoldovan
     - team: monorepo
 
 # Blocks, patterns, products, inventory, search, and storefront (Woo FSE / Kirigami).
@@ -522,5 +519,4 @@
 
 # Test harness internals are routed to the active test-infrastructure owner.
 'plugins/woocommerce/tests/{legacy/framework,legacy/data,php/bin,php/framework,php/helpers}/**/*':
-    - adimoldovan
     - team: monorepo
