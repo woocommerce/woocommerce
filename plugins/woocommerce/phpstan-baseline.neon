@@ -20281,12 +20281,6 @@ parameters:
 			path: includes/import/class-wc-product-csv-importer.php
 
 		-
-			message: '#^Parameter \#2 \$array of function array_map expects array, list\<string\|null\>\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/import/class-wc-product-csv-importer.php
-
-		-
 			message: '#^Parameter \#2 \$array of function array_map expects array, list\<string\|null\>\|null given\.$#'
 			identifier: argument.type
 			count: 1
