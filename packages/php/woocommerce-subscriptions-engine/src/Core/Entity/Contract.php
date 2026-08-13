@@ -28,6 +28,7 @@ use DomainException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\MoneyScale;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\InstrumentRef;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -39,14 +40,11 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Contract {
 
-	use ScalarCoercion;
-	use MoneyScale;
+	public const SCHEDULE_SOURCE_PRIMITIVE = 'primitive';
+	public const SCHEDULE_SOURCE_GATEWAY   = 'gateway';
 
-	const SCHEDULE_SOURCE_PRIMITIVE = 'primitive';
-	const SCHEDULE_SOURCE_GATEWAY   = 'gateway';
-
-	const ADDRESS_BILLING  = 'billing';
-	const ADDRESS_SHIPPING = 'shipping';
+	public const ADDRESS_BILLING  = 'billing';
+	public const ADDRESS_SHIPPING = 'shipping';
 
 	/**
 	 * Contract id, or null before it is persisted.
@@ -149,6 +147,16 @@ final class Contract {
 	private $items_snapshot_id;
 
 	/**
+	 * Optionally-hydrated frozen plan terms for `plan_snapshot_id` - the per-contract
+	 * billing cadence read off the snapshot, not the live plan. Populated by the
+	 * repository on the read paths that need it (the customer-portal reads); null on the
+	 * lean reads that do not. Not a stored column, so it is absent from `to_storage()`.
+	 *
+	 * @var PlanSnapshot|null
+	 */
+	private $plan_snapshot;
+
+	/**
 	 * Live billing total (the recurring amount), a decimal-safe string.
 	 *
 	 * @var string
@@ -239,32 +247,33 @@ final class Contract {
 	 * @param array<string, mixed> $data Raw attributes keyed by property name.
 	 */
 	private function __construct( array $data ) {
-		$this->id                   = self::coerce_nullable_int( $data['id'] ?? null );
-		$this->status               = self::coerce_string( $data['status'] ?? null, ContractStatus::ACTIVE );
-		$this->customer_id          = self::coerce_int( $data['customer_id'] ?? null );
-		$this->currency             = self::coerce_string( $data['currency'] ?? null );
-		$this->selling_plan_id      = self::coerce_int( $data['selling_plan_id'] ?? null );
-		$this->origin_order_id      = self::coerce_nullable_int( $data['origin_order_id'] ?? null );
-		$this->extension_slug       = self::coerce_nullable_string( $data['extension_slug'] ?? null );
-		$this->payment_method       = self::coerce_nullable_string( $data['payment_method'] ?? null );
-		$this->payment_method_title = self::coerce_nullable_string( $data['payment_method_title'] ?? null );
-		$this->payment_token_id     = self::coerce_nullable_int( $data['payment_token_id'] ?? null );
-		$this->start_gmt            = self::coerce_string( $data['start_gmt'] ?? null );
-		$this->next_payment_gmt     = self::coerce_nullable_string( $data['next_payment_gmt'] ?? null );
-		$this->plan_snapshot_id     = self::coerce_nullable_int( $data['plan_snapshot_id'] ?? null );
-		$this->items_snapshot_id    = self::coerce_nullable_int( $data['items_snapshot_id'] ?? null );
-		$this->billing_total        = self::normalize_money( $data['billing_total'] ?? '0' );
-		$this->discount_total       = self::normalize_money( $data['discount_total'] ?? '0' );
-		$this->shipping_total       = self::normalize_money( $data['shipping_total'] ?? '0' );
-		$this->tax_total            = self::normalize_money( $data['tax_total'] ?? '0' );
-		$this->last_payment_gmt     = self::coerce_nullable_string( $data['last_payment_gmt'] ?? null );
-		$this->last_attempt_gmt     = self::coerce_nullable_string( $data['last_attempt_gmt'] ?? null );
-		$this->trial_end_gmt        = self::coerce_nullable_string( $data['trial_end_gmt'] ?? null );
-		$this->end_gmt              = self::coerce_nullable_string( $data['end_gmt'] ?? null );
-		$this->schedule_source      = self::coerce_string( $data['schedule_source'] ?? null, self::SCHEDULE_SOURCE_PRIMITIVE );
+		$this->id                   = ScalarCoercion::coerce_nullable_int( $data['id'] ?? null );
+		$this->status               = ScalarCoercion::coerce_string( $data['status'] ?? null, ContractStatus::ACTIVE );
+		$this->customer_id          = ScalarCoercion::coerce_int( $data['customer_id'] ?? null );
+		$this->currency             = ScalarCoercion::coerce_string( $data['currency'] ?? null );
+		$this->selling_plan_id      = ScalarCoercion::coerce_int( $data['selling_plan_id'] ?? null );
+		$this->origin_order_id      = ScalarCoercion::coerce_nullable_int( $data['origin_order_id'] ?? null );
+		$this->extension_slug       = ScalarCoercion::coerce_nullable_string( $data['extension_slug'] ?? null );
+		$this->payment_method       = ScalarCoercion::coerce_nullable_string( $data['payment_method'] ?? null );
+		$this->payment_method_title = ScalarCoercion::coerce_nullable_string( $data['payment_method_title'] ?? null );
+		$this->payment_token_id     = ScalarCoercion::coerce_nullable_int( $data['payment_token_id'] ?? null );
+		$this->start_gmt            = ScalarCoercion::coerce_string( $data['start_gmt'] ?? null );
+		$this->next_payment_gmt     = ScalarCoercion::coerce_nullable_string( $data['next_payment_gmt'] ?? null );
+		$this->plan_snapshot_id     = ScalarCoercion::coerce_nullable_int( $data['plan_snapshot_id'] ?? null );
+		$this->items_snapshot_id    = ScalarCoercion::coerce_nullable_int( $data['items_snapshot_id'] ?? null );
+		$this->billing_total        = MoneyScale::normalize_money( $data['billing_total'] ?? '0' );
+		$this->discount_total       = MoneyScale::normalize_money( $data['discount_total'] ?? '0' );
+		$this->shipping_total       = MoneyScale::normalize_money( $data['shipping_total'] ?? '0' );
+		$this->tax_total            = MoneyScale::normalize_money( $data['tax_total'] ?? '0' );
+		$this->last_payment_gmt     = ScalarCoercion::coerce_nullable_string( $data['last_payment_gmt'] ?? null );
+		$this->last_attempt_gmt     = ScalarCoercion::coerce_nullable_string( $data['last_attempt_gmt'] ?? null );
+		$this->trial_end_gmt        = ScalarCoercion::coerce_nullable_string( $data['trial_end_gmt'] ?? null );
+		$this->end_gmt              = ScalarCoercion::coerce_nullable_string( $data['end_gmt'] ?? null );
+		$this->schedule_source      = ScalarCoercion::coerce_string( $data['schedule_source'] ?? null, self::SCHEDULE_SOURCE_PRIMITIVE );
 		$this->items                = self::coerce_item_rows( $data['items'] ?? null );
 		$this->addresses            = self::coerce_address_map( $data['addresses'] ?? null );
 		$this->meta                 = self::coerce_meta_map( $data['meta'] ?? null );
+		$this->plan_snapshot        = ( $data['plan_snapshot'] ?? null ) instanceof PlanSnapshot ? $data['plan_snapshot'] : null;
 	}
 
 	/**
@@ -293,13 +302,18 @@ final class Contract {
 	/**
 	 * Hydrate from stored rows.
 	 *
-	 * @param array<string, mixed>                $row       Contract row.
-	 * @param array<int, array<string, mixed>>    $items     Item rows.
-	 * @param array<string, array<string, mixed>> $addresses Address rows keyed by type.
-	 * @param array<string, string>               $meta      Meta as key => value.
+	 * The frozen plan terms ride second, ahead of the child rows: a contract without
+	 * its plan is pretty pointless, so the snapshot is hydrated on the same footing as
+	 * items / addresses / meta rather than through a separate mutation step.
+	 *
+	 * @param array<string, mixed>                $row           Contract row.
+	 * @param PlanSnapshot|null                   $plan_snapshot Frozen plan terms for the row's `plan_snapshot_id`, or null.
+	 * @param array<int, array<string, mixed>>    $items         Item rows.
+	 * @param array<string, array<string, mixed>> $addresses     Address rows keyed by type.
+	 * @param array<string, string>               $meta          Meta as key => value.
 	 */
-	public static function from_storage( array $row, array $items = array(), array $addresses = array(), array $meta = array() ): self {
-		return new self(
+	public static function from_storage( array $row, ?PlanSnapshot $plan_snapshot = null, array $items = array(), array $addresses = array(), array $meta = array() ): self {
+		$contract = new self(
 			array_merge(
 				$row,
 				array(
@@ -309,6 +323,12 @@ final class Contract {
 				)
 			)
 		);
+
+		if ( null !== $plan_snapshot ) {
+			$contract->set_plan_snapshot( $plan_snapshot );
+		}
+
+		return $contract;
 	}
 
 	/**
@@ -452,6 +472,24 @@ final class Contract {
 	}
 
 	/**
+	 * The frozen plan terms for `plan_snapshot_id`, when hydrated - the per-contract
+	 * billing cadence read off the snapshot rather than the live plan. Null when the
+	 * read path did not hydrate it, or the contract carries no plan snapshot.
+	 */
+	public function get_plan_snapshot(): ?PlanSnapshot {
+		return $this->plan_snapshot;
+	}
+
+	/**
+	 * Attach the frozen plan terms for `plan_snapshot_id` (repository hydration).
+	 *
+	 * @param PlanSnapshot $plan_snapshot The decoded plan snapshot.
+	 */
+	public function set_plan_snapshot( PlanSnapshot $plan_snapshot ): void {
+		$this->plan_snapshot = $plan_snapshot;
+	}
+
+	/**
 	 * Live billing total (decimal-safe string).
 	 */
 	public function get_billing_total(): string {
@@ -464,7 +502,7 @@ final class Contract {
 	 * @param string $billing_total Money value (decimal string or number).
 	 */
 	public function set_billing_total( string $billing_total ): void {
-		$this->billing_total = self::normalize_money( $billing_total );
+		$this->billing_total = MoneyScale::normalize_money( $billing_total );
 	}
 
 	/**
@@ -480,7 +518,7 @@ final class Contract {
 	 * @param string $discount_total Money value (decimal string or number).
 	 */
 	public function set_discount_total( string $discount_total ): void {
-		$this->discount_total = self::normalize_money( $discount_total );
+		$this->discount_total = MoneyScale::normalize_money( $discount_total );
 	}
 
 	/**
@@ -496,7 +534,7 @@ final class Contract {
 	 * @param string $shipping_total Money value (decimal string or number).
 	 */
 	public function set_shipping_total( string $shipping_total ): void {
-		$this->shipping_total = self::normalize_money( $shipping_total );
+		$this->shipping_total = MoneyScale::normalize_money( $shipping_total );
 	}
 
 	/**
@@ -512,7 +550,7 @@ final class Contract {
 	 * @param string $tax_total Money value (decimal string or number).
 	 */
 	public function set_tax_total( string $tax_total ): void {
-		$this->tax_total = self::normalize_money( $tax_total );
+		$this->tax_total = MoneyScale::normalize_money( $tax_total );
 	}
 
 	/**
@@ -710,7 +748,7 @@ final class Contract {
 
 		$map = array();
 		foreach ( $value as $key => $meta_value ) {
-			$map[ (string) $key ] = self::coerce_string( $meta_value );
+			$map[ (string) $key ] = ScalarCoercion::coerce_string( $meta_value );
 		}
 
 		return $map;

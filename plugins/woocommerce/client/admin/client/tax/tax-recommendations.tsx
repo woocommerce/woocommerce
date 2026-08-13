@@ -22,6 +22,8 @@ import {
 import { supportsWooCommerceTax } from '../task-lists/fills/tax/utils';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
 import { getCountryCode } from '~/dashboard/utils';
+import { getAdminSetting } from '~/utils/admin-settings';
+import { useEndpointDismiss } from '~/hooks/use-endpoint-dismiss';
 import './tax-recommendations.scss';
 
 const ANROK_LOGO_URL = 'https://ps.w.org/anrok-tax/assets/icon.svg';
@@ -207,49 +209,56 @@ const TaxRecommendationsList = ( {
 	children,
 }: {
 	children: React.ReactNode;
-} ) => (
-	<DismissableList
-		className="woocommerce-recommended-tax-extensions"
-		dismissOptionName="woocommerce_settings_tax_recommendations_hidden"
-	>
-		<DismissableListHeading>
-			<Text variant="title.small" as="p" size="20" lineHeight="28px">
-				{ __( 'Recommended tax solutions', 'woocommerce' ) }
-			</Text>
-			<Text
-				className="woocommerce-recommended-tax__header-heading"
-				variant="caption"
-				as="p"
-				size="12"
-				lineHeight="16px"
-			>
-				{ __(
-					'Explore tax extensions that can help automate calculations and compliance for your store.',
-					'woocommerce'
-				) }
-			</Text>
-		</DismissableListHeading>
-		<ul className="woocommerce-list">
-			{ Children.map( children, ( item ) => (
-				<li className="woocommerce-list__item">{ item }</li>
-			) ) }
-		</ul>
-		<CardFooter>
-			<TrackedLink
-				message={ __(
-					// translators: {{Link}} is a placeholder for a html element.
-					'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find more tax solutions.',
-					'woocommerce'
-				) }
-				targetUrl={ getAdminLink(
-					'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=operations'
-				) }
-				linkType="wc-admin"
-				eventName="settings_tax_recommendation_visit_marketplace_click"
-			/>
-		</CardFooter>
-	</DismissableList>
-);
+} ) => {
+	const { isDismissed, onDismiss } = useEndpointDismiss(
+		'/wc-admin/tax/recommendations/dismiss',
+		getAdminSetting( 'taxRecommendationsHidden', false )
+	);
+
+	return (
+		<DismissableList
+			className="woocommerce-recommended-tax-extensions"
+			isDismissed={ isDismissed }
+		>
+			<DismissableListHeading onDismiss={ onDismiss }>
+				<Text variant="title.small" as="p" size="20" lineHeight="28px">
+					{ __( 'Recommended tax solutions', 'woocommerce' ) }
+				</Text>
+				<Text
+					className="woocommerce-recommended-tax__header-heading"
+					variant="caption"
+					as="p"
+					size="12"
+					lineHeight="16px"
+				>
+					{ __(
+						'Explore tax extensions that can help automate calculations and compliance for your store.',
+						'woocommerce'
+					) }
+				</Text>
+			</DismissableListHeading>
+			<ul className="woocommerce-list">
+				{ Children.map( children, ( item ) => (
+					<li className="woocommerce-list__item">{ item }</li>
+				) ) }
+			</ul>
+			<CardFooter>
+				<TrackedLink
+					message={ __(
+						// translators: {{Link}} is a placeholder for a html element.
+						'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find more tax solutions.',
+						'woocommerce'
+					) }
+					targetUrl={ getAdminLink(
+						'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=operations'
+					) }
+					linkType="wc-admin"
+					eventName="settings_tax_recommendation_visit_marketplace_click"
+				/>
+			</CardFooter>
+		</DismissableList>
+	);
+};
 
 const getPluginSlugForAction = (
 	pluginSlugs: string[],

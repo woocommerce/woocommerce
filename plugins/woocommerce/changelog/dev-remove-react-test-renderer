@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Migrate unit tests from react-test-renderer to the @testing-library family and drop the react-test-renderer dependency.

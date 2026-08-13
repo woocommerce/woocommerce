@@ -52,6 +52,23 @@ p.demo_store,
 	top: 32px;
 }
 
+.woocommerce-product-gallery__photoswipe-video-wrapper {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+}
+
+.woocommerce-product-gallery__photoswipe-video {
+	display: block;
+	width: 100%;
+	height: 100%;
+	max-width: 100%;
+	max-height: 100%;
+	object-fit: contain;
+}
+
 /**
  * Utility classes
  */
@@ -190,6 +207,12 @@ p.demo_store,
 				outline-offset: -2px;
 			}
 
+			.woocommerce-product-gallery__video .wp-post-video {
+				display: block;
+				width: 100%;
+				height: auto;
+			}
+
 			.woocommerce-product-gallery__trigger {
 				@include woocommerce-product-gallery__trigger;
 			}
@@ -205,14 +228,52 @@ p.demo_store,
 					float: left;
 					margin: 0;
 					list-style: none;
+					position: relative;
 
-					img {
+					img,
+					.woocommerce-product-gallery__video-thumbnail-preview {
 						cursor: pointer;
 						opacity: 0.5;
 						margin: 0;
 
 						&.flex-active,
 						&:hover {
+							opacity: 1;
+						}
+					}
+
+					&.woocommerce-product-gallery__video-thumbnail {
+						&::before {
+							content: "\25B6";
+							position: absolute;
+							left: 50%;
+							top: 50%;
+							transform: translate(-50%, -50%);
+							z-index: 1;
+							color: $contentbg;
+							font-size: 1.4em;
+							text-shadow: 0 0 0.25em rgba(0, 0, 0, 0.8);
+							pointer-events: none;
+						}
+
+						img.woocommerce-product-gallery__video-thumbnail-placeholder,
+						img.woocommerce-product-gallery__video-thumbnail-placeholder.flex-active,
+						img.woocommerce-product-gallery__video-thumbnail-placeholder:hover {
+							opacity: 0;
+						}
+
+						.woocommerce-product-gallery__video-thumbnail-preview {
+							position: absolute;
+							inset: 0;
+							width: 100%;
+							height: 100%;
+							object-fit: cover;
+							pointer-events: none;
+						}
+
+						&:hover .woocommerce-product-gallery__video-thumbnail-preview,
+						.woocommerce-product-gallery__video-thumbnail-placeholder.flex-active
+							+ .woocommerce-product-gallery__video-thumbnail-preview {
 							opacity: 1;
 						}
 					}
@@ -1159,7 +1220,7 @@ p.demo_store,
 	form.login,
 	form.checkout_coupon,
 	form.register {
-		border: 1px solid darken($secondary, 10%);
+		border: 1px solid var(--wc-separator-color, color-mix(in srgb, currentColor 20%, transparent));
 		padding: 20px;
 		margin: 2em 0;
 		text-align: left;
@@ -1943,6 +2004,7 @@ p.demo_store,
 
 		.shipping-calculator-button::after {
 			@include iconafter("\e019");
+			content: "\e019" / "";
 		}
 
 		.shipping-calculator-form {
@@ -2255,6 +2317,140 @@ p.demo_store,
 	#terms {
 		outline: 2px solid var(--wc-red);
 		outline-offset: 2px;
+	}
+}
+
+/**
+ * Order withdrawal form
+ */
+.woocommerce-order-withdrawal-content {
+	max-width: 680px;
+
+	&__intro {
+		margin-bottom: 0.5em;
+	}
+
+	&__note,
+	&__field-description,
+	.description {
+		color: $subtext;
+		font-size: 0.875em;
+		line-height: 1.4;
+	}
+
+	&__field-description,
+	.description {
+		display: block;
+		margin-top: 0.25em;
+	}
+
+	&__field-error {
+		color: var(--wc-red);
+		display: block;
+		font-size: 0.875em;
+		margin: -0.25em 0 0.75em;
+	}
+
+	&__steps {
+		display: flex;
+		gap: 1em;
+		list-style: none;
+		margin: 2em 0;
+		padding: 0;
+		color: $subtext;
+		font-size: 0.875em;
+	}
+
+	&__step {
+		&:not(:last-child)::after {
+			content: "";
+			display: inline-block;
+			width: 0.25em;
+			height: 0.25em;
+			margin-left: 1em;
+			border-radius: 50%;
+			background: currentColor;
+			vertical-align: middle;
+		}
+
+		&--current {
+			color: inherit;
+			font-weight: 700;
+		}
+	}
+
+	&__radio-field {
+		clear: both;
+		border: 0;
+		margin: 0 0 6px;
+		padding: 3px;
+
+		legend {
+			line-height: 2;
+			padding: 0;
+		}
+
+		&.woocommerce-invalid legend {
+			color: var(--wc-red);
+		}
+	}
+
+	&__radio-label {
+		display: block;
+		line-height: 1.7;
+		margin: 0;
+	}
+
+	&__review {
+		margin: 2em 0;
+	}
+
+	&__review-row {
+		padding: 0.75em 0 0.8em;
+
+		&:not(:last-child) {
+			border-bottom: 1px solid $secondary;
+		}
+
+		dt,
+		dd {
+			margin: 0;
+			line-height: 1.4;
+		}
+
+		dt {
+			color: $subtext;
+			font-size: 0.875em;
+			margin-bottom: 0.25em;
+		}
+
+		dd {
+			font-size: 1em;
+		}
+	}
+
+	&__actions {
+		display: flex;
+		gap: 1em;
+		align-items: center;
+		flex-wrap: wrap;
+		margin-top: 2em;
+	}
+
+	&__button--secondary.button {
+		background: transparent;
+		border: 1px solid currentColor;
+		color: inherit;
+
+		&:hover,
+		&:focus {
+			background: transparent;
+			color: inherit;
+		}
+	}
+
+	.required {
+		visibility: visible;
 	}
 }
 

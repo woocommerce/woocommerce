@@ -124,7 +124,7 @@ export default function ProductItemTemplateEdit(
 				return;
 			}
 
-			resolveSelect( productsStore )
+			void resolveSelect( productsStore )
 				.getProducts( {
 					include: groupedProductIds,
 					per_page: groupedProductIds.length,
@@ -138,23 +138,23 @@ export default function ProductItemTemplateEdit(
 
 		if ( ! isLoading && product && productsLength === 0 ) {
 			if ( isProductResponseItem( product ) ) {
-				fetchChildProducts( product.grouped_products );
+				void fetchChildProducts( product.grouped_products );
 			} else {
 				// If not editing a specific product, we are editing a template.
 				// Fetch an existing grouped product so template can be edited.
-				resolveSelect( productsStore )
+				void resolveSelect( productsStore )
 					.getProducts( { type: 'grouped', per_page: 1 } )
 					.then( ( groupedProduct ) => {
 						if (
 							groupedProduct.length > 0 &&
 							groupedProduct[ 0 ]?.grouped_products?.length > 0
 						) {
-							fetchChildProducts(
+							void fetchChildProducts(
 								groupedProduct[ 0 ].grouped_products
 							);
 						} else {
 							// If there are no grouped products, query for any three other products.
-							resolveSelect( productsStore )
+							void resolveSelect( productsStore )
 								.getProducts( {
 									per_page: 3,
 									_fields: [ 'id' ],

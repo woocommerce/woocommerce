@@ -30,6 +30,18 @@ class WC_Post_Types {
 		add_filter( 'rest_api_allowed_post_types', array( __CLASS__, 'rest_api_allowed_post_types' ) );
 		add_action( 'woocommerce_after_register_post_type', array( __CLASS__, 'maybe_flush_rewrite_rules' ) );
 		add_action( 'woocommerce_flush_rewrite_rules', array( __CLASS__, 'flush_rewrite_rules' ) );
+		// Similar logic exists in flush_rewrite_rules_on_shop_page_save(), but REST saves need a queued flush.
+		add_action(
+			'save_post_page',
+			static function ( $post_id, $post, $update ) {
+				if ( ! $update ) {
+					return;
+				}
+				self::queue_rewrite_rules_on_shop_page_save( $post_id, $post );
+			},
+			10,
+			3
+		);
 		add_filter( 'gutenberg_can_edit_post_type', array( __CLASS__, 'gutenberg_can_edit_post_type' ), 10, 2 );
 		add_filter( 'use_block_editor_for_post_type', array( __CLASS__, 'gutenberg_can_edit_post_type' ), 10, 2 );
 	}
@@ -196,6 +208,7 @@ class WC_Post_Types {
 						'add_new_item'      => __( 'Add new shipping class', 'woocommerce' ),
 						'new_item_name'     => __( 'New shipping class Name', 'woocommerce' ),
 					),
+					'public'                => false,
 					'show_ui'               => false,
 					'show_in_quick_edit'    => false,
 					'show_in_nav_menus'     => false,
@@ -331,9 +344,11 @@ class WC_Post_Types {
 			$supports[] = 'comments';
 		}
 
-		$shop_page_id = wc_get_page_id( 'shop' );
+		$shop_page_id         = wc_get_page_id( 'shop' );
+		$theme_support        = wc_current_theme_supports_woocommerce_or_fse();
+		$active_theme_skipped = self::wp_cli_skips_active_theme();
 
-		if ( wc_current_theme_supports_woocommerce_or_fse() ) {
+		if ( self::should_register_product_archive( $theme_support, $active_theme_skipped ) ) {
 			$has_archive = $shop_page_id && get_post( $shop_page_id ) ? urldecode( get_page_uri( $shop_page_id ) ) : 'shop';
 		} else {
 			$has_archive = false;
@@ -343,7 +358,7 @@ class WC_Post_Types {
 		// Skip this check in WP-CLI and cron contexts: themes may not be loaded (e.g. --skip-themes),
 		// which would incorrectly record theme support as "no" and corrupt rewrite rules on the frontend.
 		if ( ! ( defined( 'WP_CLI' ) && WP_CLI ) && ! wp_doing_cron() ) {
-			$theme_support = wc_current_theme_supports_woocommerce_or_fse() ? 'yes' : 'no';
+			$theme_support = $theme_support ? 'yes' : 'no';
 			if ( get_option( 'current_theme_supports_woocommerce' ) !== $theme_support && update_option( 'current_theme_supports_woocommerce', $theme_support ) ) {
 				update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
 			}
@@ -529,6 +544,46 @@ class WC_Post_Types {
 	}
 
 	/**
+	 * Resolve theme support used to register the product archive.
+	 *
+	 * @param bool $theme_support        Whether the current request reports theme support.
+	 * @param bool $active_theme_skipped Whether WP-CLI skipped the active theme.
+	 * @return bool
+	 */
+	private static function should_register_product_archive( bool $theme_support, bool $active_theme_skipped ): bool {
+		if ( $theme_support || ! $active_theme_skipped ) {
+			return $theme_support;
+		}
+
+		return 'yes' === get_option( 'current_theme_supports_woocommerce' );
+	}
+
+	/**
+	 * Determine whether WP-CLI skipped the active theme.
+	 *
+	 * @return bool
+	 */
+	private static function wp_cli_skips_active_theme(): bool {
+		$get_wp_cli_config = array( 'WP_CLI', 'get_config' );
+
+		if ( ! ( defined( 'WP_CLI' ) && WP_CLI ) || ! is_callable( $get_wp_cli_config ) ) {
+			return false;
+		}
+
+		$skipped_themes = $get_wp_cli_config( 'skip-themes' );
+
+		if ( true === $skipped_themes ) {
+			return true;
+		}
+
+		if ( ! is_array( $skipped_themes ) ) {
+			$skipped_themes = explode( ',', (string) $skipped_themes );
+		}
+
+		return in_array( get_stylesheet(), $skipped_themes, true );
+	}
+
+	/**
 	 * Customize taxonomies update messages.
 	 *
 	 * @param array $messages The list of available messages.
@@ -676,6 +731,33 @@ class WC_Post_Types {
 		if ( 'yes' === get_option( 'woocommerce_queue_flush_rewrite_rules' ) ) {
 			update_option( 'woocommerce_queue_flush_rewrite_rules', 'no' );
 			self::flush_rewrite_rules();
+		}
+	}
+
+	/**
+	 * Queue rewrite rules to be flushed after the shop page (or its ancestors) gets saved.
+	 *
+	 * @param int          $post_id Post ID.
+	 * @param WP_Post|null $post    Post object.
+	 */
+	private static function queue_rewrite_rules_on_shop_page_save( $post_id, $post = null ): void {
+		$post_id = absint( $post_id );
+
+		if ( ! $post_id || wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
+			return;
+		}
+
+		$post_status = $post instanceof WP_Post ? $post->post_status : get_post_status( $post_id );
+
+		$shop_page_id = wc_get_page_id( 'shop' );
+
+		// Keep the existing behavior where a trashed shop page still serves the product archive at its previous URL.
+		if ( 0 >= $shop_page_id || 'trash' === $post_status ) {
+			return;
+		}
+
+		if ( $shop_page_id === $post_id || in_array( $post_id, get_post_ancestors( $shop_page_id ), true ) ) {
+			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
 		}
 	}
 

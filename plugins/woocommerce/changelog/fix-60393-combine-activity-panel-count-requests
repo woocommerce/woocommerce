@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Combine the Activity Panel's orders, reviews, and low stock count requests into a single wc-analytics/activity-panel/counts endpoint.

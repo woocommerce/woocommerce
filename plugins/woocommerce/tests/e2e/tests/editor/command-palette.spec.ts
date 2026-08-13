@@ -23,19 +23,29 @@ const clickOnCommandPaletteOption = async ( {
 		/Search (?:commands(?: and settings)?|for commands)/
 	);
 
-	// Playwright's browser reports a non-Apple platform even on macOS, so picking the combo from
-	// reports a non-Apple platform even on macOS, so picking the combo from
-	// `process.platform` would send Meta+K while WordPress listens for Ctrl+K and
-	// the palette would never open. Derive the modifier from the page instead.
-	const isApplePlatform = await page.evaluate( () =>
-		/Mac|iPhone|iPod|iPad/i.test(
-			(
-				navigator as Navigator & {
-					userAgentData?: { platform?: string };
-				}
-			 ).userAgentData?.platform || navigator.platform
-		)
-	);
+	// WordPress registers the command-palette shortcut via @wordpress/keycodes'
+	// `isAppleOS()`, which inspects `navigator.platform` only. In Playwright's
+	// Chromium on macOS these two disagree: `navigator.platform` is "MacIntel"
+	// (Apple → Cmd+K) while `navigator.userAgentData.platform` is "Windows".
+	// Deriving the modifier from `userAgentData` therefore sends Ctrl+K and the
+	// palette never opens. Reuse `isAppleOS()` so the test always matches whatever
+	// modifier WordPress actually registered (falling back to its logic if the
+	// keycodes package is unavailable).
+	const isApplePlatform = await page.evaluate( () => {
+		const isAppleOS = (
+			window as Window & {
+				wp?: { keycodes?: { isAppleOS?: () => boolean } };
+			}
+		 ).wp?.keycodes?.isAppleOS;
+		if ( typeof isAppleOS === 'function' ) {
+			return isAppleOS();
+		}
+		const { platform } = navigator;
+		return (
+			platform.indexOf( 'Mac' ) !== -1 ||
+			[ 'iPad', 'iPhone' ].includes( platform )
+		);
+	} );
 	const cmdKeyCombo = isApplePlatform ? 'Meta+k' : 'Control+k';
 
 	// Press `Ctrl`/`Cmd` + `K` to open the command palette.

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add postcode validation for Latvia, which previously accepted invalid values.

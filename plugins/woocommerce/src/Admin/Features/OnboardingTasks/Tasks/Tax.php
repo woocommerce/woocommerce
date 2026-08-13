@@ -62,6 +62,24 @@ class Tax extends Task {
 	}
 
 	/**
+	 * Contextual image URL.
+	 *
+	 * @return string
+	 */
+	public function get_image_url() {
+		return WC()->plugin_url() . '/assets/images/task_list/tax-illustration.svg';
+	}
+
+	/**
+	 * Alt text for the contextual image.
+	 *
+	 * @return string
+	 */
+	public function get_image_alt() {
+		return __( 'Tax illustration', 'woocommerce' );
+	}
+
+	/**
 	 * Title.
 	 *
 	 * @return string

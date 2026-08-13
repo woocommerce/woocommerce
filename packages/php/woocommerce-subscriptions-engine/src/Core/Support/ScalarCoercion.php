@@ -16,16 +16,26 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Scalar coercion helpers for hydration boundaries.
+ *
+ * @internal Engine implementation detail. Not part of the supported extension API.
  */
-trait ScalarCoercion {
+final class ScalarCoercion {
+
+	/**
+	 * Static helper only.
+	 *
+	 * @internal Engine implementation detail. Not part of the supported extension API.
+	 */
+	private function __construct() {}
 
 	/**
 	 * Coerce a value to a string, falling back to a default when it is not scalar.
 	 *
 	 * @param mixed  $value    The raw value.
 	 * @param string $fallback Returned when $value is not a scalar.
+	 * @internal Engine implementation detail. Not part of the supported extension API.
 	 */
-	private static function coerce_string( $value, string $fallback = '' ): string {
+	public static function coerce_string( $value, string $fallback = '' ): string {
 		return is_scalar( $value ) ? (string) $value : $fallback;
 	}
 
@@ -33,8 +43,9 @@ trait ScalarCoercion {
 	 * Coerce a value to a string, or null when it is not a scalar.
 	 *
 	 * @param mixed $value The raw value.
+	 * @internal Engine implementation detail. Not part of the supported extension API.
 	 */
-	private static function coerce_nullable_string( $value ): ?string {
+	public static function coerce_nullable_string( $value ): ?string {
 		return is_scalar( $value ) ? (string) $value : null;
 	}
 
@@ -45,8 +56,9 @@ trait ScalarCoercion {
 	 *
 	 * @param mixed $value    The raw value.
 	 * @param int   $fallback Returned when $value is not an integer.
+	 * @internal Engine implementation detail. Not part of the supported extension API.
 	 */
-	private static function coerce_int( $value, int $fallback = 0 ): int {
+	public static function coerce_int( $value, int $fallback = 0 ): int {
 		if ( is_int( $value ) ) {
 			return $value;
 		}
@@ -63,8 +75,9 @@ trait ScalarCoercion {
 	 * forms are rejected rather than truncated.
 	 *
 	 * @param mixed $value The raw value.
+	 * @internal Engine implementation detail. Not part of the supported extension API.
 	 */
-	private static function coerce_nullable_int( $value ): ?int {
+	public static function coerce_nullable_int( $value ): ?int {
 		if ( is_int( $value ) ) {
 			return $value;
 		}
@@ -81,8 +94,9 @@ trait ScalarCoercion {
 	 *
 	 * @param mixed $value    The raw value.
 	 * @param float $fallback Returned when $value is not numeric.
+	 * @internal Engine implementation detail. Not part of the supported extension API.
 	 */
-	private static function coerce_float( $value, float $fallback = 0.0 ): float {
+	public static function coerce_float( $value, float $fallback = 0.0 ): float {
 		return is_numeric( $value ) ? (float) $value : $fallback;
 	}
 }
