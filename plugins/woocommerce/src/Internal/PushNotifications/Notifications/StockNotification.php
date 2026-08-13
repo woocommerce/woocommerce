@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\PushNotifications\Notifications;
 
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use InvalidArgumentException;
 use WC_Product;
 
@@ -226,7 +227,7 @@ class StockNotification extends Notification {
 
 		return array(
 			'type'        => $this->get_type(),
-			'timestamp'   => gmdate( 'c' ),
+			'timestamp'   => $this->format_triggered_timestamp( (string) $product->get_meta( $this->meta_key( NotificationProcessor::TRIGGERED_META_KEY ) ) ),
 			'resource_id' => $this->get_resource_id(),
 			'title'       => $this->build_title( $product_name ),
 			'message'     => $this->build_message( $product_name, $site_title, $product ),
@@ -266,7 +267,7 @@ class StockNotification extends Notification {
 	 */
 	public function has_meta( string $key ): bool {
 		$product = WC()->call_function( 'wc_get_product', $this->get_resource_id() );
-		return $product instanceof WC_Product && $product->meta_exists( $key . '_' . $this->event_type );
+		return $product instanceof WC_Product && $product->meta_exists( $this->meta_key( $key ) );
 	}
 
 	/**
@@ -274,11 +275,23 @@ class StockNotification extends Notification {
 	 *
 	 * @param string $key The meta key.
 	 */
-	public function write_meta( string $key ): void {
+	public function read_meta( string $key ): string {
+		$product = WC()->call_function( 'wc_get_product', $this->get_resource_id() );
+
+		return $product instanceof WC_Product ? (string) $product->get_meta( $this->meta_key( $key ) ) : '';
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param string   $key       The meta key.
+	 * @param int|null $timestamp Unix timestamp to record. Defaults to the current time.
+	 */
+	public function write_meta( string $key, ?int $timestamp = null ): void {
 		$product = WC()->call_function( 'wc_get_product', $this->get_resource_id() );
 
 		if ( $product instanceof WC_Product ) {
-			$product->update_meta_data( $key . '_' . $this->event_type, (string) time() );
+			$product->update_meta_data( $this->meta_key( $key ), (string) ( $timestamp ?? time() ) );
 			$product->save_meta_data();
 		}
 	}
@@ -292,9 +305,25 @@ class StockNotification extends Notification {
 		$product = WC()->call_function( 'wc_get_product', $this->get_resource_id() );
 
 		if ( $product instanceof WC_Product ) {
-			$product->delete_meta_data( $key . '_' . $this->event_type );
+			$product->delete_meta_data( $this->meta_key( $key ) );
 			$product->save_meta_data();
 		}
+	}
+
+	/**
+	 * Scopes a bookkeeping meta key to this notification's stock event.
+	 *
+	 * The same product can have low_stock, out_of_stock and on_backorder
+	 * notifications in flight at once, so each event type needs its own
+	 * claimed, sent and triggered markers.
+	 *
+	 * @param string $key The unscoped meta key.
+	 * @return string
+	 *
+	 * @since 11.2.0
+	 */
+	private function meta_key( string $key ): string {
+		return $key . '_' . $this->event_type;
 	}
 
 	/**
