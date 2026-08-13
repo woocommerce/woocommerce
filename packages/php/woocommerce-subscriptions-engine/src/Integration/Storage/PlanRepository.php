@@ -24,7 +24,17 @@ final class PlanRepository {
 	 *
 	 * @var array<int, string>
 	 */
-	private const JSON_COLUMNS = array( 'options', 'billing_policy', 'delivery_policy', 'pricing_policy' );
+	private const JSON_COLUMNS = array( 'billing_policy', 'delivery_policy', 'pricing_policy' );
+
+	/**
+	 * Always-false WHERE clause: a filter arg that is present but empty or
+	 * invalid must match NOTHING, never fall open to matching everything
+	 * (the WP core / WooCommerce fail-closed posture, e.g. WP_Tax_Query and
+	 * the HPOS OrdersTableFieldQuery force_no_results clause).
+	 *
+	 * @var string
+	 */
+	private const MATCH_NOTHING = '0 = 1';
 
 	/**
 	 * Columns callers may sort by through query().
@@ -43,9 +53,13 @@ final class PlanRepository {
 	/**
 	 * Insert a new plan and stamp its id back onto the entity.
 	 *
+	 * `merchant_code` uniqueness is DB-enforced per extension (composite UNIQUE
+	 * with `extension_slug`, NULLs distinct): a duplicate code within one
+	 * extension fails the insert and surfaces as the RuntimeException.
+	 *
 	 * @param Plan $plan Plan to insert.
 	 * @return int The new plan id.
-	 * @throws \RuntimeException If the insert fails.
+	 * @throws \RuntimeException If the insert fails, including on a duplicate merchant_code.
 	 */
 	public function insert( Plan $plan ): int {
 		global $wpdb;
@@ -57,10 +71,8 @@ final class PlanRepository {
 		$inserted = $wpdb->insert(
 			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ),
 			array(
-				'group_id'         => $data['group_id'],
 				'name'             => $data['name'],
 				'description'      => $data['description'],
-				'options'          => wp_json_encode( $data['options'] ),
 				'billing_policy'   => wp_json_encode( $data['billing_policy'] ),
 				'delivery_policy'  => null !== $data['delivery_policy'] ? wp_json_encode( $data['delivery_policy'] ) : null,
 				'inventory_policy' => null,
@@ -68,6 +80,7 @@ final class PlanRepository {
 				'category'         => $data['category'],
 				'status'           => $data['status'],
 				'sort_order'       => $data['sort_order'],
+				'merchant_code'    => $data['merchant_code'],
 				'extension_slug'   => $data['extension_slug'],
 				'date_created_gmt' => $now,
 				'date_updated_gmt' => $now,
@@ -122,8 +135,13 @@ final class PlanRepository {
 	/**
 	 * Query plans.
 	 *
-	 * Supported args: limit, offset, search, status, extension_slug, orderby,
-	 * order. Results default to manual order, oldest id as a stable tiebreaker.
+	 * Supported args: limit, offset, search, status, extension_slugs, ids,
+	 * orderby, order. `extension_slugs` filters by owning extension: a list
+	 * of slugs (a single-slug list unfolds to an equality match) or
+	 * `array( 'any' )` to skip the scope. `ids` filters to plans whose id is
+	 * in the given int list; it composes with the other filters and is
+	 * honored by count(). Results default to manual order, oldest id as a
+	 * stable tiebreaker.
 	 *
 	 * @param array<string, mixed> $args Query args.
 	 * @return array<int, Plan>
@@ -193,6 +211,9 @@ final class PlanRepository {
 	/**
 	 * Persist changes to an existing plan.
 	 *
+	 * `merchant_code` is immutable post-create and intentionally not written here,
+	 * same as `id`.
+	 *
 	 * @param Plan $plan Plan to update. Must have an id.
 	 * @return bool True on success.
 	 * @throws \RuntimeException If the plan has no id.
@@ -213,7 +234,6 @@ final class PlanRepository {
 			array(
 				'name'             => $data['name'],
 				'description'      => $data['description'],
-				'options'          => wp_json_encode( $data['options'] ),
 				'billing_policy'   => wp_json_encode( $data['billing_policy'] ),
 				'delivery_policy'  => null !== $data['delivery_policy'] ? wp_json_encode( $data['delivery_policy'] ) : null,
 				'pricing_policy'   => null !== $data['pricing_policy'] ? wp_json_encode( $data['pricing_policy'] ) : null,
@@ -339,15 +359,6 @@ final class PlanRepository {
 			$params[]  = $status;
 		}
 
-		if ( array_key_exists( 'extension_slug', $args ) ) {
-			if ( self::is_valid_extension_slug( $args['extension_slug'] ) ) {
-				$clauses[] = 'extension_slug = %s';
-				$params[]  = $args['extension_slug'];
-			} else {
-				$clauses[] = '0 = 1';
-			}
-		}
-
 		if ( array_key_exists( 'extension_slugs', $args ) && null !== $args['extension_slugs'] ) {
 			$are_extension_slugs_valid = false;
 
@@ -368,14 +379,49 @@ final class PlanRepository {
 						$are_extension_slugs_valid = true;
 
 						$extension_slugs = array_values( $valid_slugs );
-						$clauses[]       = 'extension_slug IN (' . implode( ',', array_fill( 0, count( $extension_slugs ), '%s' ) ) . ')';
-						$params          = array_merge( $params, $extension_slugs );
+						if ( 1 === count( $extension_slugs ) ) {
+							$clauses[] = 'extension_slug = %s';
+							$params[]  = $extension_slugs[0];
+						} else {
+							$clauses[] = 'extension_slug IN (' . implode( ',', array_fill( 0, count( $extension_slugs ), '%s' ) ) . ')';
+							$params    = array_merge( $params, $extension_slugs );
+						}
 					}
 				}
 			}
 
 			if ( ! $are_extension_slugs_valid ) {
-				$clauses[] = '0 = 1';
+				$clauses[] = self::MATCH_NOTHING;
+			}
+		}
+
+		if ( array_key_exists( 'ids', $args ) && null !== $args['ids'] ) {
+			$are_ids_valid = false;
+
+			if ( is_array( $args['ids'] ) && array() !== $args['ids'] ) {
+				$ids       = array();
+				$all_valid = true;
+				foreach ( array_values( $args['ids'] ) as $possible_id ) {
+					$plan_id = ScalarCoercion::coerce_int( $possible_id );
+					if ( $plan_id <= 0 ) {
+						$all_valid = false;
+						break;
+					}
+					$ids[ $plan_id ] = $plan_id;
+				}
+
+				// Require all ids to be positive ints before running the query.
+				if ( $all_valid ) {
+					$are_ids_valid = true;
+
+					$ids       = array_values( $ids );
+					$clauses[] = 'id IN (' . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ')';
+					$params    = array_merge( $params, $ids );
+				}
+			}
+
+			if ( ! $are_ids_valid ) {
+				$clauses[] = self::MATCH_NOTHING;
 			}
 		}
 

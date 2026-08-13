@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow Shop Managers to save Local Pickup settings by adding a dedicated /wc/v3/pickup-locations REST route guarded by the manage_woocommerce capability, instead of posting to /wp/v2/settings which requires manage_options.

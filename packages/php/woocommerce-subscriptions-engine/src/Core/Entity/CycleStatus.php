@@ -4,10 +4,14 @@
  * Owns the valid statuses and allowed transitions so an invalid state cannot be
  * represented. Mirrors {@see ContractStatus}.
  *
- * Lifecycle: a cycle is born `pending`, settles to `billed` (terminal) or `failed`,
- * and any non-settled cycle can be `cancelled` (terminal). `failed` is deliberately
- * non-terminal so a later change can add a retry edge. Instance methods serve the
- * entity; the static string helpers operate on raw strings at the storage boundary.
+ * Lifecycle: a cycle is born `pending`; a charge submitted to a gateway that has not
+ * yet returned a terminal outcome (an async method awaiting confirmation) is
+ * `processing`; it settles to `billed` (terminal) or `failed`. A `failed` cycle can be
+ * retried back to `pending` (an admin-triggered re-attempt), and any non-settled cycle
+ * can be `cancelled` (terminal). The state is shared with the shipping chain, so
+ * `processing` names "submitted, awaiting a terminal outcome" without payment-specific wording.
+ * Instance methods serve the entity; the static string helpers operate on raw strings at
+ * the storage boundary.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Core\Entity
  */
@@ -28,10 +32,11 @@ defined( 'ABSPATH' ) || exit;
  */
 final class CycleStatus {
 
-	public const PENDING   = 'pending';
-	public const BILLED    = 'billed';
-	public const FAILED    = 'failed';
-	public const CANCELLED = 'cancelled';
+	public const PENDING    = 'pending';
+	public const PROCESSING = 'processing';
+	public const BILLED     = 'billed';
+	public const FAILED     = 'failed';
+	public const CANCELLED  = 'cancelled';
 
 	/**
 	 * The status string this value wraps.
@@ -70,6 +75,13 @@ final class CycleStatus {
 	 */
 	public static function pending(): self {
 		return new self( self::PENDING );
+	}
+
+	/**
+	 * The `processing` status (charge submitted, awaiting a terminal outcome; non-terminal).
+	 */
+	public static function processing(): self {
+		return new self( self::PROCESSING );
 	}
 
 	/**
@@ -138,6 +150,7 @@ final class CycleStatus {
 	public static function all(): array {
 		return array(
 			self::PENDING,
+			self::PROCESSING,
 			self::BILLED,
 			self::FAILED,
 			self::CANCELLED,
@@ -213,10 +226,11 @@ final class CycleStatus {
 	 */
 	private static function transitions(): array {
 		return array(
-			self::PENDING   => array( self::BILLED, self::FAILED, self::CANCELLED ),
-			self::BILLED    => array(),
-			self::FAILED    => array( self::CANCELLED ),
-			self::CANCELLED => array(),
+			self::PENDING    => array( self::PROCESSING, self::BILLED, self::FAILED, self::CANCELLED ),
+			self::PROCESSING => array( self::BILLED, self::FAILED, self::CANCELLED ),
+			self::BILLED     => array(),
+			self::FAILED     => array( self::PENDING, self::CANCELLED ),
+			self::CANCELLED  => array(),
 		);
 	}
 }

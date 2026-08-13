@@ -32,3 +32,5 @@ i18n/languages/woocommerce.pot
 
 # Environment files
 .wp-env.override.json
+.wp-env.test.override.json
+.wp-env.e2e.override.json

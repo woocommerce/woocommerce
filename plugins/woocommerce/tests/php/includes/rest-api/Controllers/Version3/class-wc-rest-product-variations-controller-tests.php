@@ -7,17 +7,42 @@ use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
 /**
  * Variations Controller tests for V3 REST API.
  */
-class WC_REST_Product_Variations_Controller_Tests extends WC_REST_Unit_Test_Case {
+class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
 	use MetaDataAssertionTrait;
+
+	/**
+	 * REST server used to dispatch variation requests.
+	 *
+	 * @var WP_REST_Server
+	 */
+	protected $server;
+
+	/**
+	 * Product variations controller registered on the test server.
+	 *
+	 * @var WC_REST_Product_Variations_Controller
+	 */
+	protected $controller;
+
+	/**
+	 * Administrator user ID.
+	 *
+	 * @var int
+	 */
+	protected $user;
 
 	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->endpoint = new WC_REST_Products_Controller();
-		$this->user     = $this->factory->user->create(
+		$this->controller = new WC_REST_Product_Variations_Controller();
+		$this->server     = $this->create_rest_server_with_routes(
+			array( array( $this->controller, 'register_routes' ) ),
+			true
+		);
+		$this->user       = $this->factory->user->create(
 			array(
 				'role' => 'administrator',
 			)
@@ -30,6 +55,8 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_REST_Unit_Test_Case
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
+		$this->clear_rest_server();
+		unset( $this->server, $this->controller );
 		$this->disable_cogs_feature();
 	}
 

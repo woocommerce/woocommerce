@@ -207,11 +207,13 @@ export const EnableGatewayButton = ( {
 				}
 
 				// If no redirect occurred, the data needs to be refreshed.
-				invalidateResolutionForStoreSelector( 'getPaymentProviders' );
+				void invalidateResolutionForStoreSelector(
+					'getPaymentProviders'
+				);
 
 				if ( isOffline ) {
 					// We need to invalidate both selectors since they share the same data source and resolver chain.
-					invalidateResolutionForStoreSelector(
+					void invalidateResolutionForStoreSelector(
 						'getOfflinePaymentGateways'
 					);
 				}

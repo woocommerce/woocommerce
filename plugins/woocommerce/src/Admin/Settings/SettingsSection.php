@@ -14,7 +14,19 @@ defined( 'ABSPATH' ) || exit;
  *
  * @since 10.9.0
  */
-abstract class SettingsSection implements SettingsSectionInterface {
+abstract class SettingsSection implements SettingsSectionInterface, SettingsSectionUIPageProviderInterface {
+
+	/**
+	 * Get the native Settings UI page for this registered section.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param \WC_Settings_Page $parent_page Parent settings page.
+	 * @return SettingsUIPageInterface|null
+	 */
+	public function get_settings_ui_page( \WC_Settings_Page $parent_page ): ?SettingsUIPageInterface {
+		return null;
+	}
 
 	/**
 	 * Get script handles that must be loaded before the settings UI app mounts.

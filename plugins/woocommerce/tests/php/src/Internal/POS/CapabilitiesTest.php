@@ -4,13 +4,16 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\POS;
 
 use Automattic\WooCommerce\Internal\POS\Capabilities;
+use Automattic\WooCommerce\Internal\POS\POSPreset;
+use Automattic\WooCommerce\Internal\Utilities\Users;
 use WC_Unit_Test_Case;
 
 /**
  * Unit tests for the POS access model (capability primitives).
  *
- * Covers the cap catalog and has_pos_access() — the single authorization signal.
- * The preset layer that assigns these caps is tested separately.
+ * Covers the cap catalog, has_pos_access() (the single authorization signal), and
+ * the preset layer (POSPreset, capabilities_for_preset / get_pos_preset /
+ * set_pos_preset / preset_label).
  */
 class CapabilitiesTest extends WC_Unit_Test_Case {
 
@@ -172,6 +175,254 @@ class CapabilitiesTest extends WC_Unit_Test_Case {
 			Capabilities::has_pos_access( $user_id ),
 			'POS access must survive a role overwrite — caps remain intact.'
 		);
+
+		wp_delete_user( $user_id );
+	}
+
+	/**
+	 * @testdox POSPreset::get_all returns the three presets in ascending order.
+	 */
+	public function test_pos_preset_get_all(): void {
+		$this->assertSame(
+			array(
+				POSPreset::CASHIER,
+				POSPreset::MANAGER,
+				POSPreset::ADMIN,
+			),
+			POSPreset::get_all()
+		);
+	}
+
+	/**
+	 * @return array<string, array<mixed>>
+	 */
+	public function provider_preset_caps(): array {
+		$cashier = array( Capabilities::CAP_PROCESS_SALES, Capabilities::CAP_VIEW_ORDERS, Capabilities::CAP_APPLY_COUPONS );
+		$manager = array_merge( $cashier, array( Capabilities::CAP_CREATE_COUPONS, Capabilities::CAP_ISSUE_REFUNDS, Capabilities::CAP_VIEW_SETTINGS ) );
+		$admin   = array_merge( $manager, array( Capabilities::CAP_EDIT_SETTINGS, Capabilities::CAP_MANAGE_STAFF, Capabilities::CAP_EXIT_POS ) );
+
+		return array(
+			'cashier' => array( POSPreset::CASHIER, $cashier ),
+			'manager' => array( POSPreset::MANAGER, $manager ),
+			'admin'   => array( POSPreset::ADMIN, $admin ),
+		);
+	}
+
+	/**
+	 * @testdox capabilities_for_preset returns exactly the documented cap bundle per preset.
+	 *
+	 * Asserts the full expected set (including caps inherited from lower tiers), so a
+	 * regression that drops a base cap or adds an unexpected one fails the test.
+	 *
+	 * @dataProvider provider_preset_caps
+	 *
+	 * @param string   $preset   Preset slug.
+	 * @param string[] $expected The exact caps the preset grants.
+	 */
+	public function test_capabilities_for_preset( string $preset, array $expected ): void {
+		$this->assertEqualsCanonicalizing(
+			$expected,
+			array_keys( Capabilities::capabilities_for_preset( $preset ) )
+		);
+	}
+
+	/**
+	 * @testdox capabilities_for_preset returns an empty bundle for an unknown preset.
+	 */
+	public function test_capabilities_for_unknown_preset_is_empty(): void {
+		$this->assertSame( array(), Capabilities::capabilities_for_preset( 'bogus' ) );
+	}
+
+	/**
+	 * @testdox preset_label returns a non-empty label per preset and empty for unknown.
+	 */
+	public function test_preset_label(): void {
+		$this->assertNotSame( '', Capabilities::preset_label( POSPreset::CASHIER ) );
+		$this->assertNotSame( '', Capabilities::preset_label( POSPreset::MANAGER ) );
+		$this->assertNotSame( '', Capabilities::preset_label( POSPreset::ADMIN ) );
+		$this->assertSame( '', Capabilities::preset_label( 'bogus' ) );
+	}
+
+	/**
+	 * @testdox pos_staff_user_query_args selects POS cap-holders and excludes others.
+	 *
+	 * Verifies the query matches the access definition (any woocommerce_pos_* cap), not the
+	 * preset meta: a cap-holder is returned and a fresh administrator is not.
+	 */
+	public function test_pos_staff_user_query_args_selects_cap_holders(): void {
+		$staff    = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+		$outsider = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		get_userdata( $staff )->add_cap( Capabilities::CAP_ISSUE_REFUNDS );
+
+		$results = ( new \WP_User_Query( Capabilities::pos_staff_user_query_args() ) )->get_results();
+		$ids     = wp_list_pluck( $results, 'ID' );
+
+		$this->assertContains( $staff, $ids, 'A user holding a woocommerce_pos_* cap should be selected.' );
+		$this->assertNotContains( $outsider, $ids, 'An administrator without any woocommerce_pos_* cap should not be selected.' );
+
+		wp_delete_user( $staff );
+		wp_delete_user( $outsider );
+	}
+
+	/**
+	 * @testdox get_pos_preset returns the assigned preset.
+	 */
+	public function test_get_pos_preset_returns_assigned_preset(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+		Capabilities::set_pos_preset( $user_id, POSPreset::MANAGER );
+
+		$this->assertSame( POSPreset::MANAGER, Capabilities::get_pos_preset( $user_id ) );
+
+		wp_delete_user( $user_id );
+	}
+
+	/**
+	 * @testdox get_pos_preset returns null when unset or when the meta is not an assignable preset.
+	 */
+	public function test_get_pos_preset_null_when_unset_or_invalid(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+
+		$this->assertNull( Capabilities::get_pos_preset( $user_id ) );
+
+		Users::update_site_user_meta( $user_id, Capabilities::POS_PRESET_META_KEY, 'bogus' );
+		$this->assertNull( Capabilities::get_pos_preset( $user_id ) );
+
+		wp_delete_user( $user_id );
+	}
+
+	/**
+	 * @testdox set_pos_preset grants the preset's woocommerce_pos_* caps as real WP capabilities.
+	 */
+	public function test_set_pos_preset_grants_preset_caps(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+
+		$this->assertTrue( Capabilities::set_pos_preset( $user_id, POSPreset::MANAGER ) );
+
+		$this->assertTrue( user_can( $user_id, Capabilities::CAP_PROCESS_SALES ) );
+		$this->assertTrue( user_can( $user_id, Capabilities::CAP_ISSUE_REFUNDS ) );
+		$this->assertFalse( user_can( $user_id, Capabilities::CAP_MANAGE_STAFF ) );
+
+		wp_delete_user( $user_id );
+	}
+
+	/**
+	 * @testdox Switching a preset from Manager to Cashier strips the manager-only caps.
+	 */
+	public function test_set_pos_preset_downgrade_strips_higher_caps(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+		Capabilities::set_pos_preset( $user_id, POSPreset::MANAGER );
+
+		Capabilities::set_pos_preset( $user_id, POSPreset::CASHIER );
+
+		$this->assertTrue( user_can( $user_id, Capabilities::CAP_PROCESS_SALES ) );
+		$this->assertFalse( user_can( $user_id, Capabilities::CAP_ISSUE_REFUNDS ) );
+
+		wp_delete_user( $user_id );
+	}
+
+	/**
+	 * @testdox Clearing a preset strips every woocommerce_pos_* cap and deletes the preset meta.
+	 */
+	public function test_set_pos_preset_clear_strips_caps_and_meta(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+		Capabilities::set_pos_preset( $user_id, POSPreset::ADMIN );
+
+		$this->assertTrue( Capabilities::set_pos_preset( $user_id, null ) );
+
+		foreach ( Capabilities::all_pos_capabilities() as $cap ) {
+			$this->assertFalse( user_can( $user_id, $cap ), "Cap {$cap} should be cleared." );
+		}
+		$this->assertNull( Capabilities::get_pos_preset( $user_id ) );
+
+		wp_delete_user( $user_id );
+	}
+
+	/**
+	 * @testdox Clearing a preset leaves the user's non-POS capabilities untouched.
+	 *
+	 * The strip loop iterates only all_pos_capabilities(), so a directly-granted cap
+	 * outside the woocommerce_pos_* set must survive a clear — guarding against a regression to a
+	 * blanket reset.
+	 */
+	public function test_set_pos_preset_clear_leaves_non_pos_caps_untouched(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+		$user    = get_userdata( $user_id );
+		$user->add_cap( 'edit_posts' );
+		Capabilities::set_pos_preset( $user_id, POSPreset::MANAGER );
+
+		Capabilities::set_pos_preset( $user_id, null );
+
+		$this->assertFalse( Capabilities::has_pos_access( $user_id ), 'POS caps should be cleared.' );
+		$this->assertTrue( user_can( $user_id, 'edit_posts' ), 'A non-POS cap held directly must survive a preset clear.' );
+
+		wp_delete_user( $user_id );
+	}
+
+	/**
+	 * @testdox set_pos_preset rejects an invalid preset without mutating existing caps.
+	 */
+	public function test_set_pos_preset_rejects_invalid_preset(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+		Capabilities::set_pos_preset( $user_id, POSPreset::MANAGER );
+
+		$this->assertFalse( Capabilities::set_pos_preset( $user_id, 'bogus' ) );
+
+		$this->assertTrue( user_can( $user_id, Capabilities::CAP_ISSUE_REFUNDS ) );
+		$this->assertSame( POSPreset::MANAGER, Capabilities::get_pos_preset( $user_id ) );
+
+		wp_delete_user( $user_id );
+	}
+
+	/**
+	 * @testdox set_pos_preset returns false for a non-existent user.
+	 */
+	public function test_set_pos_preset_rejects_unknown_user(): void {
+		$this->assertFalse( Capabilities::set_pos_preset( 0, POSPreset::CASHIER ) );
+		$this->assertFalse( Capabilities::set_pos_preset( 9999999, POSPreset::CASHIER ) );
+	}
+
+	/**
+	 * @testdox Granting or clearing a preset leaves the user's WP role untouched.
+	 */
+	public function test_set_pos_preset_leaves_role_untouched(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
+
+		Capabilities::set_pos_preset( $user_id, POSPreset::MANAGER );
+		$this->assertSame( array( 'shop_manager' ), get_userdata( $user_id )->roles );
+
+		Capabilities::set_pos_preset( $user_id, null );
+		$this->assertSame( array( 'shop_manager' ), get_userdata( $user_id )->roles );
+
+		wp_delete_user( $user_id );
+	}
+
+	/**
+	 * @testdox has_pos_access tracks set_pos_preset: true after assign, false after clear.
+	 */
+	public function test_has_pos_access_tracks_set_pos_preset(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+
+		Capabilities::set_pos_preset( $user_id, POSPreset::CASHIER );
+		$this->assertTrue( Capabilities::has_pos_access( $user_id ) );
+
+		Capabilities::set_pos_preset( $user_id, null );
+		$this->assertFalse( Capabilities::has_pos_access( $user_id ) );
+
+		wp_delete_user( $user_id );
+	}
+
+	/**
+	 * @testdox Preset meta without any woocommerce_pos_* cap does not grant POS access.
+	 *
+	 * The caps are the authorization signal, not the meta: a planted or partially
+	 * migrated preset meta value must not by itself confer access.
+	 */
+	public function test_has_pos_access_false_with_stale_preset_meta_only(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+
+		Users::update_site_user_meta( $user_id, Capabilities::POS_PRESET_META_KEY, POSPreset::CASHIER );
+
+		$this->assertFalse( Capabilities::has_pos_access( $user_id ) );
 
 		wp_delete_user( $user_id );
 	}

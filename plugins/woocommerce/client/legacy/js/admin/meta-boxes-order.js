@@ -1,5 +1,6 @@
 // eslint-disable-next-line max-len
 /*global woocommerce_admin_meta_boxes, woocommerce_admin, accounting, woocommerce_admin_meta_boxes_order, wcSetClipboard, wcClearClipboard, wc_enhanced_select_params */
+
 jQuery( function ( $ ) {
 
 	// Stand-in wcTracks.recordEvent in case tracks is not available (for any reason).
@@ -283,6 +284,7 @@ jQuery( function ( $ ) {
 				.on( 'click', 'button.calculate-action', this.recalculate )
 				.on( 'click', 'a.edit-order-item', this.edit_item )
 				.on( 'click', 'a.delete-order-item', this.delete_item )
+				.on( 'change', 'select.shipping_method', this.shipping_method_changed )
 
 				// Refunds
 				.on( 'click', '.delete_refund', this.refunds.delete_refund )
@@ -374,6 +376,34 @@ jQuery( function ( $ ) {
 		reloaded_items: function() {
 			wc_meta_boxes_order.init_tiptip();
 			wc_meta_boxes_order_items.stupidtable.init();
+		},
+
+		shipping_method_changed: function() {
+			var $select       = $( this );
+			var $name         = $select.closest( 'tr.shipping' ).find( 'input.shipping_method_name' );
+			var title         = $select.find( 'option:selected' ).text();
+			var previousTitle = $select.data( 'selected-title' ) || $select.find( 'option' ).filter( function() {
+				return this.defaultSelected;
+			} ).text();
+			var currentTitle  = $name.val();
+			var defaultTitle  = $name.data( 'default-shipping-title' );
+			var nextTitle     = defaultTitle;
+
+			if (
+				currentTitle
+				&& currentTitle !== defaultTitle
+				&& currentTitle !== previousTitle
+			) {
+				nextTitle = currentTitle;
+			} else if ( $select.val() && 'other' !== $select.val() ) {
+				nextTitle = title;
+			}
+
+			$select.data( 'selected-title', title );
+
+			if ( currentTitle !== nextTitle ) {
+				$name.val( nextTitle ).trigger( 'change' );
+			}
 		},
 
 		// When the qty is changed, increase or decrease costs
@@ -1518,9 +1548,26 @@ jQuery( function ( $ ) {
 			};
 
 			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
-
 				if ( response && -1 !== parseInt( response ) ) {
-					$( '.order_download_permissions .wc-metaboxes' ).append( response );
+					var existingDownloads = {};
+					var $newPermissions = $( response ).filter( '.wc-metabox' );
+
+					$( '.order_download_permissions .revoke_access' ).each( function() {
+						existingDownloads[ $( this ).attr( 'rel' ) ] = true;
+					} );
+
+					$newPermissions = $newPermissions.filter( function() {
+						var downloadKey = $( this ).find( '.revoke_access' ).attr( 'rel' );
+
+						if ( existingDownloads[ downloadKey ] ) {
+							return false;
+						}
+
+						existingDownloads[ downloadKey ] = true;
+						return true;
+					} );
+
+					$( '.order_download_permissions .wc-metaboxes' ).append( $newPermissions );
 				} else {
 					window.alert( woocommerce_admin_meta_boxes.i18n_download_permission_fail );
 				}

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix silent backslash corruption in Store API (block checkout) address fields. Calling wp_unslash() on JSON body data that is never magic-quoted was stripping real backslashes from address_1, address_2, and other address fields.

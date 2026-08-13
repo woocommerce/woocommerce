@@ -41,7 +41,7 @@ export class ProductGalleryPage {
 		} );
 	}
 
-	async addAddToCartWithOptionsBlock() {
+	async addClassicAddToCartFormBlock() {
 		await this.editor.insertBlock( {
 			name: 'woocommerce/add-to-cart-form',
 		} );
@@ -88,7 +88,7 @@ export class ProductGalleryPage {
 		if ( page === 'frontend' ) {
 			return (
 				await this.frontendUtils.getBlockByName( blockName )
-			 ).filter( {
+			).filter( {
 				has: this.page.locator( ':visible' ),
 			} );
 		}
@@ -145,13 +145,39 @@ export class ProductGalleryPage {
 			);
 
 			if ( isInContainerViewport ) {
-				const dataImageId = await imgHandle.getAttribute(
-					'data-image-id'
-				);
+				const dataImageId =
+					await imgHandle.getAttribute( 'data-image-id' );
 				return dataImageId ?? null;
 			}
 		}
 		return null;
+	}
+
+	async getVisibleViewerImageIds() {
+		const viewerBlockLocator = await this.getViewerBlock( {
+			page: 'frontend',
+		} );
+
+		return viewerBlockLocator
+			.locator(
+				'.wc-block-product-gallery-large-image__wrapper:not([hidden]) img[data-image-id]'
+			)
+			.evaluateAll( ( images ) =>
+				images
+					.map( ( image ) => ( {
+						id: image.getAttribute( 'data-image-id' ) || '',
+						order: Number.parseInt(
+							(
+								image.closest(
+									'.wc-block-product-gallery-large-image__wrapper'
+								) as HTMLElement
+							 )?.style.order || '0',
+							10
+						),
+					} ) )
+					.sort( ( first, second ) => first.order - second.order )
+					.map( ( image ) => image.id )
+			);
 	}
 
 	async getThumbnailsBlock( { page }: { page: 'frontend' | 'editor' } ) {
@@ -159,11 +185,50 @@ export class ProductGalleryPage {
 		if ( page === 'frontend' ) {
 			return (
 				await this.frontendUtils.getBlockByName( blockName )
-			 ).filter( {
+			).filter( {
 				has: this.page.locator( ':visible' ),
 			} );
 		}
 		return this.editor.getBlockByName( blockName );
+	}
+
+	async getVisibleThumbnailImageIds() {
+		const thumbnailsBlockLocator = await this.getThumbnailsBlock( {
+			page: 'frontend',
+		} );
+
+		return thumbnailsBlockLocator
+			.locator(
+				'.wc-block-product-gallery-thumbnails__thumbnail:not([hidden]) [data-image-id]'
+			)
+			.evaluateAll( ( thumbnails ) =>
+				thumbnails
+					.map( ( thumbnail ) => ( {
+						id: thumbnail.getAttribute( 'data-image-id' ) || '',
+						order: Number.parseInt(
+							(
+								thumbnail.closest(
+									'.wc-block-product-gallery-thumbnails__thumbnail'
+								) as HTMLElement
+							 )?.style.order || '0',
+							10
+						),
+					} ) )
+					.sort( ( first, second ) => first.order - second.order )
+					.map( ( thumbnail ) => thumbnail.id )
+			);
+	}
+
+	async getActiveThumbnailImageId() {
+		const thumbnailsBlockLocator = await this.getThumbnailsBlock( {
+			page: 'frontend',
+		} );
+
+		return thumbnailsBlockLocator
+			.locator(
+				'.wc-block-product-gallery-thumbnails__thumbnail__image--is-active[data-image-id]'
+			)
+			.getAttribute( 'data-image-id' );
 	}
 
 	async getNextPreviousButtonsBlock( {
@@ -176,7 +241,7 @@ export class ProductGalleryPage {
 		if ( page === 'frontend' ) {
 			return (
 				await this.frontendUtils.getBlockByName( blockName )
-			 ).filter( {
+			).filter( {
 				has: this.page.locator( ':visible' ),
 			} );
 		}
@@ -204,14 +269,14 @@ export class ProductGalleryPage {
 		if ( page === 'frontend' ) {
 			return (
 				await this.frontendUtils.getBlockByName( blockName )
-			 ).filter( {
+			).filter( {
 				has: this.page.locator( ':visible' ),
 			} );
 		}
 		return this.editor.getBlockByName( blockName );
 	}
 
-	async getAddToCartWithOptionsBlock( {
+	async getClassicAddToCartFormBlock( {
 		page,
 	}: {
 		page: 'frontend' | 'editor';
@@ -220,7 +285,7 @@ export class ProductGalleryPage {
 		if ( page === 'frontend' ) {
 			return (
 				await this.frontendUtils.getBlockByName( blockName )
-			 ).filter( {
+			).filter( {
 				has: this.page.locator( ':visible' ),
 			} );
 		}

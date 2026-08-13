@@ -1,0 +1,5 @@
+Significance: patch
+Type: dev
+Comment: Add tests about `valudAddedTaxIncluded` not being added to structured data when taxes are disabled
+
+

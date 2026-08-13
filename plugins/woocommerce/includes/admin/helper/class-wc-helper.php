@@ -137,6 +137,22 @@ class WC_Helper {
 	}
 
 	/**
+	 * Get the URL of the My Subscriptions screen used in admin notices.
+	 *
+	 * @return string
+	 */
+	private static function get_subscriptions_url() {
+		return add_query_arg(
+			array(
+				'page' => 'wc-admin',
+				'tab'  => 'my-subscriptions',
+				'path' => rawurlencode( '/extensions' ),
+			),
+			admin_url( 'admin.php' )
+		);
+	}
+
+	/**
 	 * Include supporting helper classes.
 	 *
 	 * @return void
@@ -1880,6 +1896,30 @@ class WC_Helper {
 	}
 
 	/**
+	 * Filter malformed entries from subscription data.
+	 *
+	 * @param array $subscriptions Subscription entries.
+	 * @return array
+	 */
+	private static function filter_valid_subscriptions( $subscriptions ) {
+		return array_filter(
+			$subscriptions,
+			static function ( $subscription ) {
+				if ( ! is_array( $subscription ) ) {
+					return false;
+				}
+
+				$product_id = $subscription['product_id'] ?? null;
+				return (
+					is_int( $product_id )
+					|| ( is_string( $product_id ) && ctype_digit( $product_id ) )
+				) && 0 < (int) $product_id
+					&& is_array( $subscription['connections'] ?? null );
+			}
+		);
+	}
+
+	/**
 	 * Get the connected user's subscriptions.
 	 *
 	 * @return array
@@ -1891,7 +1931,7 @@ class WC_Helper {
 		$data      = get_transient( $cache_key );
 		if ( false !== $data ) {
 			if ( is_array( $data ) ) {
-				return $data;
+				return self::filter_valid_subscriptions( $data );
 			}
 			// Cached data is corrupted, delete and fetch fresh.
 			delete_transient( $cache_key );
@@ -1945,6 +1985,18 @@ class WC_Helper {
 				throw new Exception( __( 'WooCommerce.com API returned an invalid response.', 'woocommerce' ), 422 );
 			}
 
+			$subscription_count = count( $data );
+			$data               = self::filter_valid_subscriptions( $data );
+			$invalid_count      = $subscription_count - count( $data );
+			if ( 0 < $invalid_count ) {
+				self::log(
+					sprintf(
+						'Filtered %d malformed subscription entries from the WooCommerce.com API response.',
+						$invalid_count
+					),
+					'warning'
+				);
+			}
 			set_transient( $cache_key, $data, 3 * HOUR_IN_SECONDS );
 
 			// Remove notice after successful API call as it's no longer applicable.
@@ -2523,7 +2575,7 @@ class WC_Helper {
 		return sprintf(
 			/* translators: %1$s: helper url, %2$d: number of extensions */
 			_n( 'Note: You currently have <a href="%1$s">%2$d paid extension</a> which should be updated first before updating WooCommerce.', 'Note: You currently have <a href="%1$s">%2$d paid extensions</a> which should be updated first before updating WooCommerce.', $available, 'woocommerce' ),
-			admin_url( 'admin.php?page=' . self::get_source_page() . ' &section=helper' ),
+			esc_url( self::get_subscriptions_url() ),
 			$available
 		);
 	}

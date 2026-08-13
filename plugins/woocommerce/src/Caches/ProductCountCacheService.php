@@ -63,7 +63,6 @@ class ProductCountCacheService {
 
 		// transition_post_status owns all mid-lifecycle status changes; woocommerce_new_product corrects for creation-time
 		// ephemeral transitions before the final status is committed; before_delete_post closes the lifecycle.
-		add_action( 'woocommerce_new_product', array( $this, 'update_on_new_product' ), 10, 2 );
 		add_action( 'transition_post_status', array( $this, 'update_on_product_status_changed' ), 10, 3 );
 		add_action( 'before_delete_post', array( $this, 'update_on_product_deleted' ), 10, 2 );
 	}
@@ -105,26 +104,16 @@ class ProductCountCacheService {
 	/**
 	 * Update the cache when a new product is created.
 	 *
+	 * @deprecated 11.1
+	 *
 	 * @param int        $product_id Product ID.
 	 * @param WC_Product $product    The product.
 	 * @return void
 	 */
 	public function update_on_new_product( int $product_id, WC_Product $product ): void {
-		// transition_post_status already counted this product — reverse any errant decrement from a cold step 1 and stop.
-		// In-memory status may diverge from DB after a mid-creation wp_update_post; do not increment here.
-		if ( isset( $this->product_statuses[ $product_id ] ) ) {
-			$this->maybe_restore_initial_status_count( $product_id );
-			unset( $this->products_in_creation[ $product_id ] );
-			return;
-		}
-
-		// Cache was cold throughout creation — transition_post_status never fired; use in-memory status as the sole count.
-		$product_status = $product->get_status();
-		if ( $this->product_count_cache->is_cached( 'product', $product_status ) ) {
-			$this->product_statuses[ $product_id ] = $product_status;
-			$this->product_count_cache->increment( 'product', $product_status );
-		}
-		unset( $this->products_in_creation[ $product_id ] );
+		// This was implemented to address a potential concurrency issue, but upon review, it was determined to be a false positive.
+		// - Specifically, cache warming by a concurrent request between transition_post_status and woocommerce_new_product was considered.
+		// - However, this scenario is a false positive because it occurs within the same PHP process, where hooks are executed sequentially.
 	}
 
 	/**
