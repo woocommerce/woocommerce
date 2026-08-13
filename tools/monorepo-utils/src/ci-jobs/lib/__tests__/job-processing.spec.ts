@@ -346,6 +346,63 @@ describe( 'Job Processing', () => {
 			} );
 		} );
 
+		it( 'should add configured test environment vars without starting an environment', async () => {
+			jest.mocked( parseTestEnvConfig ).mockResolvedValue( {
+				WP_VERSION: 'latest',
+			} );
+
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType: 'unit',
+								shardingArguments: [],
+								events: [],
+								name: 'JavaScript [WP packages latest]',
+								changes: [ /test.js$/ ],
+								command: 'test:js',
+								testEnv: {
+									config: {
+										wpVersion: 'latest',
+									},
+								},
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 1 );
+			expect( parseTestEnvConfig ).toHaveBeenCalledWith(
+				{
+					wpVersion: 'latest',
+				},
+				false
+			);
+			expect( jobs.test ).toContainEqual(
+				expect.objectContaining( {
+					name: 'JavaScript [WP packages latest]',
+					command: 'test:js',
+					testEnv: {
+						shouldCreate: false,
+						envVars: {
+							WP_VERSION: 'latest',
+						},
+					},
+				} )
+			);
+		} );
+
 		it( 'should replace vars in test command', async () => {
 			const testType = 'unit';
 			const jobs = await createJobsForChanges(

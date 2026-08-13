@@ -253,10 +253,16 @@ async function createTestJob(
 	// We want to make sure that we're including the configuration for
 	// any test environment that the job will need in order to run.
 	if ( config.testEnv ) {
+		const shouldCreateTestEnv = Boolean( config.testEnv.start );
 		createdJob.testEnv = {
-			shouldCreate: true,
-			envVars: await parseTestEnvConfig( config.testEnv.config ),
-			start: replaceCommandVars( config.testEnv.start, options ),
+			shouldCreate: shouldCreateTestEnv,
+			envVars: await parseTestEnvConfig(
+				config.testEnv.config,
+				shouldCreateTestEnv
+			),
+			start: config.testEnv.start
+				? replaceCommandVars( config.testEnv.start, options )
+				: undefined,
 		};
 	}
 
@@ -273,7 +279,10 @@ async function createTestJob(
 		return null;
 	}
 
-	if ( createdJob.testEnv.envVars.WP_VERSION ) {
+	if (
+		createdJob.testEnv.shouldCreate &&
+		createdJob.testEnv.envVars.WP_VERSION
+	) {
 		createdJob.name += ` [WP ${ createdJob.testEnv.envVars.WP_VERSION }]`;
 	}
 
@@ -419,7 +428,9 @@ async function createJobsForProject(
 
 				jobConfig.jobCreated = true;
 
-				newJobs.test.push( ...getShardedJobs( created, jobConfig ) );
+				const shardedJobs = getShardedJobs( created, jobConfig );
+
+				newJobs.test.push( ...shardedJobs );
 				break;
 			}
 		}

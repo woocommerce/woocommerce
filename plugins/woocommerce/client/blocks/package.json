@@ -129,6 +129,7 @@
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"@woocommerce/jest-wordpress-version-compat": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@wordpress/api-fetch": "catalog:wp-min",
 		"@wordpress/babel-preset-default": "next",
@@ -314,7 +315,7 @@
 			},
 			"tests": [
 				{
-					"name": "JavaScript",
+					"name": "JavaScript [WP packages latest]",
 					"command": "test:js",
 					"changes": [
 						"webpack.config.js",
@@ -328,7 +329,57 @@
 					"events": [
 						"pull_request",
 						"push"
-					]
+					],
+					"testEnv": {
+						"config": {
+							"wpVersion": "latest"
+						}
+					}
+				},
+				{
+					"name": "JavaScript [WP packages latest-1]",
+					"command": "test:js",
+					"changes": [
+						"webpack.config.js",
+						"babel.config.js",
+						"tsconfig.json",
+						"assets/**/*.{js,ts,tsx,scss}",
+						"packages/**/*.{js,ts,tsx,scss}",
+						"tests/js/**/*.{js,ts,tsx,scss,json}",
+						"tests/utils/**/.{js,ts,tsx,scss,json}"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					],
+					"testEnv": {
+						"config": {
+							"wpVersion": "latest-1"
+						}
+					}
+				},
+				{
+					"name": "JavaScript [Gutenberg packages]",
+					"command": "test:js",
+					"changes": [
+						"webpack.config.js",
+						"babel.config.js",
+						"tsconfig.json",
+						"assets/**/*.{js,ts,tsx,scss}",
+						"packages/**/*.{js,ts,tsx,scss}",
+						"tests/js/**/*.{js,ts,tsx,scss,json}",
+						"tests/utils/**/.{js,ts,tsx,scss,json}"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					],
+					"testEnv": {
+						"config": {
+							"wpVersion": "gutenberg"
+						}
+					},
+					"optional": true
 				}
 			]
 		}

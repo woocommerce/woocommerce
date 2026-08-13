@@ -113,7 +113,12 @@
 					"events": [
 						"pull_request",
 						"push"
-					]
+					],
+					"testEnv": {
+						"config": {
+							"wpVersion": "latest"
+						}
+					}
 				}
 			]
 		}

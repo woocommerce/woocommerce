@@ -67,6 +67,7 @@
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
+		"@woocommerce/jest-wordpress-version-compat": "workspace:*",
 		"babel-jest": "29.5.x",
 		"eslint": "^10.0.0",
 		"jest": "29.5.x",

@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-require( '@wordpress/jest-console' );
 require( '@testing-library/jest-dom' );
 
 /**

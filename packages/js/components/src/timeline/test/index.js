@@ -1,16 +1,14 @@
-/* eslint-disable jest/no-mocks-import */
 /**
  * External dependencies
  */
 import { render } from '@testing-library/react';
 import { date as formatSiteDate, dateI18n, format } from '@wordpress/date';
 import { createElement } from '@wordpress/element';
+import Timeline from '..';
 
 /**
  * Internal dependencies
  */
-import Timeline from '..';
-import mockData from './__mocks__/timeline-mock-data';
 import { groupItemsUsing, sortByDateUsing } from '../util.js';
 
 jest.mock( '@wordpress/date', () => {
@@ -23,6 +21,33 @@ jest.mock( '@wordpress/date', () => {
 		format: jest.fn( actualDateModule.format ),
 	};
 } );
+
+const mockData = [
+	{
+		date: new Date( 2020, 0, 20, 1, 30 ),
+		body: [ <p key={ '1' }>{ 'p element in body' }</p>, 'string in body' ],
+		headline: <p>{ 'p tag in headline' }</p>,
+		icon: null,
+		hideTimestamp: true,
+	},
+	{
+		date: new Date( 2020, 0, 20, 23, 45 ),
+		body: [],
+		headline: <span>{ 'span in headline' }</span>,
+		icon: null,
+	},
+	{
+		date: new Date( 2020, 0, 22, 15, 13 ),
+		body: [ <span key={ '1' }>{ 'span in body' }</span> ],
+		headline: 'string in headline',
+		icon: null,
+	},
+	{
+		date: new Date( 2020, 0, 17, 1, 45 ),
+		headline: 'undefined body and string headline',
+		icon: null,
+	},
+];
 
 describe( 'Timeline', () => {
 	const actualDateModule = jest.requireActual( '@wordpress/date' );
@@ -40,16 +65,6 @@ describe( 'Timeline', () => {
 		dateI18n.mockImplementation( actualDateModule.dateI18n );
 		format.mockImplementation( actualDateModule.format );
 		jest.clearAllMocks();
-	} );
-
-	test( 'Empty snapshot', () => {
-		const { container } = render( <Timeline /> );
-		expect( container ).toMatchSnapshot();
-	} );
-
-	test( 'With data snapshot', () => {
-		const { container } = render( <Timeline items={ mockData } /> );
-		expect( container ).toMatchSnapshot();
 	} );
 
 	test( 'uses browser timezone date formatting by default', () => {

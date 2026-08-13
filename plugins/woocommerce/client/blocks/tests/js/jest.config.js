@@ -1,6 +1,11 @@
 const path = require( 'path' );
+const {
+	withWordPressDependencyCompat,
+} = require( '@woocommerce/jest-wordpress-version-compat' );
 
 const rootDir = path.resolve( __dirname, '../../' );
+const missingWpVersionMessage =
+	'WP_VERSION is not set. This test run is using the installed @wordpress packages and may not rely on a validated WordPress package environment. Set WP_VERSION=latest, WP_VERSION=latest-1, or WP_VERSION=gutenberg to run WordPress package compatibility tests.';
 
 /**
  * WordPress packages that must resolve to a single instance across the test
@@ -26,16 +31,20 @@ const singletonWpModules = [
 	'@wordpress/notices',
 ];
 
-const wpSingletonMapper = singletonWpModules.reduce( ( acc, mod ) => {
-	try {
-		acc[ `^${ mod }$` ] = require.resolve( mod );
-	} catch ( e ) {
-		// Not a direct dep — skip.
-	}
-	return acc;
-}, {} );
+// Compatibility runs need every mapped WordPress package and its singleton
+// dependencies to come from the selected compatibility cache.
+const wpSingletonMapper = process.env.WP_VERSION
+	? {}
+	: singletonWpModules.reduce( ( acc, mod ) => {
+			try {
+				acc[ `^${ mod }$` ] = require.resolve( mod );
+			} catch ( e ) {
+				// Not a direct dep — skip.
+			}
+			return acc;
+	  }, {} );
 
-module.exports = {
+const config = {
 	rootDir,
 	collectCoverageFrom: [
 		'assets/js/**/*.js',
@@ -47,6 +56,7 @@ module.exports = {
 	moduleNameMapper: {
 		'\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2)$':
 			'<rootDir>/tests/js/config/file-mock.js',
+		'^client-zip$': '<rootDir>/tests/js/config/client-zip-mock.js',
 
 		// WordPress singleton modules — bare specifiers only; sub-path
 		// imports (e.g. @wordpress/data/build/foo) fall through to normal
@@ -104,8 +114,12 @@ module.exports = {
 		'^@woocommerce/entities/(.*)$': 'packages/internal/entities/$1',
 		'^@woocommerce/entities$': 'packages/internal/entities',
 		'@woocommerce/stores/(.*)$': 'assets/js/base/stores/$1',
-		'^react$': '<rootDir>/node_modules/react',
-		'^react-dom$': '<rootDir>/node_modules/react-dom',
+		...( process.env.WP_VERSION
+			? {}
+			: {
+					'^react$': '<rootDir>/node_modules/react',
+					'^react-dom$': '<rootDir>/node_modules/react-dom',
+			  } ),
 		// Catch-all for monorepo @woocommerce/* packages: route bare and
 		// subpath imports through source so tests don't depend on built
 		// artifacts. Must come after all blocks-internal aliases above and
@@ -144,3 +158,20 @@ module.exports = {
 	cacheDirectory: '<rootDir>/../../node_modules/.cache/jest',
 	testEnvironment: 'jest-fixed-jsdom',
 };
+
+// TODO: Migrate this custom Jest config to @woocommerce/internal-js-tests/jest-preset.js.
+if ( process.env.WP_VERSION ) {
+	module.exports = withWordPressDependencyCompat( config, {
+		cwd: rootDir,
+		wpVersion: process.env.WP_VERSION,
+	} );
+} else {
+	if ( process.env.CI ) {
+		throw new Error( missingWpVersionMessage );
+	}
+
+	// eslint-disable-next-line no-console
+	console.warn( missingWpVersionMessage );
+
+	module.exports = config;
+}

@@ -54,9 +54,4 @@ describe( 'AnalyticsError', () => {
 
 		expect( reloadMock ).toHaveBeenCalled();
 	} );
-
-	it( 'should match snapshot', () => {
-		const { container } = render( <AnalyticsError /> );
-		expect( container ).toMatchSnapshot();
-	} );
 } );

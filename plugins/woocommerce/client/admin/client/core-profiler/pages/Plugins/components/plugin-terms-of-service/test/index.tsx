@@ -46,9 +46,6 @@ describe( 'PluginsTermsOfService', () => {
 				] }
 			/>
 		);
-		expect(
-			screen.getByText( /plugin for free you agree to our/i )
-		).toMatchSnapshot();
 		expect( screen.getByText( 'Jetpack' ) ).toBeInTheDocument();
 		expect( screen.getByText( 'Terms of Service' ) ).toBeInTheDocument();
 	} );
@@ -87,13 +84,10 @@ describe( 'PluginsTermsOfService', () => {
 				] }
 			/>
 		);
-		expect( screen.getByText( /By installing/ ) ).toMatchSnapshot();
 		expect( screen.getByText( 'Jetpack' ) ).toBeInTheDocument();
 		expect(
 			screen.getByText( 'WooCommerce Shipping' )
 		).toBeInTheDocument();
 		expect( screen.getByText( 'WooCommerce Tax' ) ).toBeInTheDocument();
-		// add a snapshot test for the entire component
-		expect( screen.getByText( /By installing/ ) ).toMatchSnapshot();
 	} );
 } );

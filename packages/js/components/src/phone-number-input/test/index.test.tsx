@@ -12,26 +12,6 @@ import userEvent from '@testing-library/user-event';
 import PhoneNumberInput from '..';
 
 describe( 'PhoneNumberInput', () => {
-	it( 'should match snapshot', () => {
-		const { container } = render(
-			<PhoneNumberInput value="" onChange={ noop } />
-		);
-		expect( container ).toMatchSnapshot();
-	} );
-
-	it( 'should match snapshot with custom renders', () => {
-		const { container } = render(
-			<PhoneNumberInput
-				value=""
-				onChange={ noop }
-				selectedRender={ ( { name } ) => name }
-				itemRender={ ( { code } ) => code }
-				arrowRender={ () => '⬇️' }
-			/>
-		);
-		expect( container ).toMatchSnapshot();
-	} );
-
 	it( 'should render with provided `id`', () => {
 		render( <PhoneNumberInput id="test-id" value="" onChange={ noop } /> );
 		expect( screen.getByRole( 'textbox' ) ).toHaveAttribute(

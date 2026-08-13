@@ -20,6 +20,9 @@ const transformModules = {
 	'parsel-js': {
 		'.*\\.js$': 'babel-jest',
 	},
+	marked: {
+		'lib/marked\\.esm\\.js$': 'babel-jest',
+	},
 };
 
 /**
@@ -37,19 +40,23 @@ const mapWpModules = [
 	'@wordpress/html-entities',
 	'@wordpress/notices',
 ];
-const wpModulesMapper = mapWpModules.reduce( ( acc, module ) => {
-	try {
-		// Excluding mappings for imports with suffixes like /build/index.js so that we can import the build/index.js file directly.
-		acc[ `^${ module }$` ] = require.resolve( module, {
-			paths: [ process.cwd() ],
-		} );
-	} catch ( error ) {
-		// If the module is not found, no need to add it to the mapper.
-	}
-	return acc;
-}, {} );
+// Compatibility runs need every mapped WordPress package and its singleton
+// dependencies to come from the selected compatibility cache.
+const wpModulesMapper = process.env.WP_VERSION
+	? {}
+	: mapWpModules.reduce( ( acc, module ) => {
+			try {
+				// Excluding mappings for imports with suffixes like /build/index.js so that we can import the build/index.js file directly.
+				acc[ `^${ module }$` ] = require.resolve( module, {
+					paths: [ process.cwd() ],
+				} );
+			} catch ( error ) {
+				// If the module is not found, no need to add it to the mapper.
+			}
+			return acc;
+	  }, {} );
 
-module.exports = {
+const config = {
 	moduleNameMapper: {
 		tinymce: path.resolve( __dirname, 'src/mocks/tinymce' ),
 		'@woocommerce/settings': path.resolve(
@@ -147,3 +154,26 @@ module.exports = {
 		'../../../node_modules/.cache/jest'
 	),
 };
+
+const missingWpVersionMessage =
+	'WP_VERSION is not set. This test run is using the installed @wordpress packages and may not rely on a validated WordPress package environment. Set WP_VERSION=latest, WP_VERSION=latest-1, or WP_VERSION=gutenberg to run WordPress package compatibility tests.';
+
+if ( process.env.WP_VERSION ) {
+	const {
+		withWordPressDependencyCompat,
+	} = require( '@woocommerce/jest-wordpress-version-compat' );
+
+	module.exports = withWordPressDependencyCompat( config, {
+		cwd: process.cwd(),
+		wpVersion: process.env.WP_VERSION,
+	} );
+} else {
+	if ( process.env.CI ) {
+		throw new Error( missingWpVersionMessage );
+	}
+
+	// eslint-disable-next-line no-console
+	console.warn( missingWpVersionMessage );
+
+	module.exports = config;
+}
