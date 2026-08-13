@@ -90,6 +90,25 @@ class WC_My_Account_Orders_Template_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An empty filtered column content clears the default output instead of falling back to it.
+	 */
+	public function test_empty_filtered_column_content_clears_default_output(): void {
+		$order = $this->create_order_with_status( 'processing' );
+
+		$this->add_test_filter(
+			'woocommerce_account_orders_column_content_order-status',
+			static function (): string {
+				return '';
+			}
+		);
+
+		$html = $this->render_orders_template( $order );
+
+		$this->assertStringNotContainsString( 'Processing', $html, 'An empty string is valid content and should not fall back to the default output.' );
+		$this->assertStringContainsString( 'woocommerce-orders-table__cell-order-status', $html, 'The emptied column should still render its cell.' );
+	}
+
+	/**
 	 * @testdox Numeric and stringable filtered column content is coerced to a string.
 	 */
 	public function test_numeric_and_stringable_filtered_column_content_is_coerced(): void {
