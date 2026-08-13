@@ -8,7 +8,9 @@ use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotifi
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewReviewNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\StockNotification;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
+use WC_Helper_Order;
 use WC_Unit_Test_Case;
 
 /**
@@ -51,6 +53,92 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 		$this->store->add( $this->create_order_mock( 42 ) );
 
 		$this->assertSame( 1, $this->store->count() );
+	}
+
+	/**
+	 * Adding must not write to the resource. The write would otherwise land
+	 * inside the order-creation call stack, where an HPOS meta save can
+	 * escalate into a full order save before line items exist.
+	 *
+	 * @testdox Should not write to the resource when a notification is added.
+	 */
+	public function test_add_does_not_write_to_the_resource(): void {
+		$notification = $this->create_order_mock( 42 );
+		$notification->expects( $this->never() )
+			->method( 'write_meta' );
+
+		$this->store->add( $notification );
+	}
+
+	/**
+	 * Capturing the time is what makes the recorded value the moment the store
+	 * event fired rather than the moment of dispatch. Asserted on `add()` itself
+	 * because the write happens later, on shutdown.
+	 *
+	 * @testdox Should capture the trigger time when a notification is added.
+	 */
+	public function test_add_captures_the_trigger_time(): void {
+		$notification = $this->create_order_mock( 42 );
+
+		$this->assertNull( $notification->get_triggered_at() );
+
+		$this->store->add( $notification );
+
+		$this->assertEqualsWithDelta( time(), $notification->get_triggered_at(), 10 );
+	}
+
+	/**
+	 * @testdox Should record the trigger time on the resource when dispatching.
+	 */
+	public function test_dispatch_all_records_trigger_time(): void {
+		$order = WC_Helper_Order::create_order();
+
+		$this->store->add( new NewOrderNotification( $order->get_id() ) );
+		$this->store->dispatch_all();
+
+		$recorded = (int) wc_get_order( $order->get_id() )->get_meta( NotificationProcessor::TRIGGERED_META_KEY );
+
+		$this->assertEqualsWithDelta( time(), $recorded, 10 );
+	}
+
+	/**
+	 * The captured time is what gets persisted, so a request that spends time
+	 * between the store event and shutdown still records the earlier moment
+	 * rather than the moment of the write.
+	 *
+	 * @testdox Should record the time the event fired, not the time of dispatch.
+	 */
+	public function test_dispatch_all_records_the_captured_time_not_the_dispatch_time(): void {
+		$order        = WC_Helper_Order::create_order();
+		$notification = new NewOrderNotification( $order->get_id() );
+
+		$this->store->add( $notification );
+		$notification->set_triggered_at( time() - 300 );
+		$this->store->dispatch_all();
+
+		$recorded = (int) wc_get_order( $order->get_id() )->get_meta( NotificationProcessor::TRIGGERED_META_KEY );
+
+		$this->assertEqualsWithDelta( time() - 300, $recorded, 10 );
+	}
+
+	/**
+	 * A repeat trigger for an already-sent notification (e.g.
+	 * `woocommerce_low_stock` firing on every reduction below the threshold)
+	 * must not pay for a meta write that nothing will read.
+	 *
+	 * @testdox Should not record a trigger time for a notification already sent.
+	 */
+	public function test_dispatch_all_skips_notifications_already_sent(): void {
+		$order        = WC_Helper_Order::create_order();
+		$notification = new NewOrderNotification( $order->get_id() );
+		$notification->write_meta( NotificationProcessor::SENT_META_KEY );
+
+		$this->store->add( $notification );
+		$this->store->dispatch_all();
+
+		$recorded = wc_get_order( $order->get_id() )->get_meta( NotificationProcessor::TRIGGERED_META_KEY );
+
+		$this->assertSame( '', $recorded );
 	}
 
 	/**

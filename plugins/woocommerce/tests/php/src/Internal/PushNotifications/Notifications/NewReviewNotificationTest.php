@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Notifications;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewReviewNotification;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
@@ -295,6 +296,35 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 				)
 			)
 		);
+	}
+
+	/**
+	 * @testdox Should use the recorded trigger time for the payload timestamp.
+	 */
+	public function test_to_payload_timestamp_uses_recorded_trigger_time(): void {
+		$product      = WC_Helper_Product::create_simple_product();
+		$comment_id   = WC_Helper_Product::create_product_review( $product->get_id() );
+		$notification = new NewReviewNotification( $comment_id );
+		$triggered_at = time() - 300;
+
+		update_comment_meta( $comment_id, NotificationProcessor::TRIGGERED_META_KEY, (string) $triggered_at );
+
+		$payload = $notification->to_payload();
+
+		$this->assertSame( gmdate( 'c', $triggered_at ), $payload['timestamp'] );
+	}
+
+	/**
+	 * @testdox Should fall back to the current time when no trigger time is recorded.
+	 */
+	public function test_to_payload_timestamp_falls_back_to_current_time(): void {
+		$product      = WC_Helper_Product::create_simple_product();
+		$comment_id   = WC_Helper_Product::create_product_review( $product->get_id() );
+		$notification = new NewReviewNotification( $comment_id );
+
+		$payload = $notification->to_payload();
+
+		$this->assertEqualsWithDelta( time(), strtotime( $payload['timestamp'] ), 5 );
 	}
 
 	/**

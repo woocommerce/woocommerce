@@ -248,4 +248,37 @@ class NotificationRetryHandlerTest extends WC_Unit_Test_Case {
 
 		$this->assertLogged( 'error', 'Retry failed:', array( 'source' => PushNotifications::FEATURE_NAME ) );
 	}
+
+
+	/**
+	 * @testdox Should clear the claimed and triggered meta when retries are exhausted.
+	 */
+	public function test_schedule_clears_bookkeeping_meta_after_max_retries(): void {
+		$notification = new NewOrderNotification( $this->order_id );
+		$notification->write_meta( NotificationProcessor::CLAIMED_META_KEY );
+		$notification->write_meta( NotificationProcessor::TRIGGERED_META_KEY );
+
+		$this->sut->schedule( $notification, null, NotificationRetryHandler::MAX_RETRIES );
+
+		$order = wc_get_order( $this->order_id );
+
+		$this->assertSame( '', $order->get_meta( NotificationProcessor::CLAIMED_META_KEY ) );
+		$this->assertSame( '', $order->get_meta( NotificationProcessor::TRIGGERED_META_KEY ) );
+	}
+
+	/**
+	 * @testdox Should clear the claimed and triggered meta when the retry delay exceeds the cap.
+	 */
+	public function test_schedule_clears_bookkeeping_meta_when_delay_exceeds_max(): void {
+		$notification = new NewOrderNotification( $this->order_id );
+		$notification->write_meta( NotificationProcessor::CLAIMED_META_KEY );
+		$notification->write_meta( NotificationProcessor::TRIGGERED_META_KEY );
+
+		$this->sut->schedule( $notification, NotificationRetryHandler::MAX_RETRY_DELAY + 1, 0 );
+
+		$order = wc_get_order( $this->order_id );
+
+		$this->assertSame( '', $order->get_meta( NotificationProcessor::CLAIMED_META_KEY ) );
+		$this->assertSame( '', $order->get_meta( NotificationProcessor::TRIGGERED_META_KEY ) );
+	}
 }

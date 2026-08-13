@@ -100,6 +100,12 @@ class PendingNotificationStore {
 
 		$this->pending[ $key ] = $notification;
 
+		// Capture the trigger time now, but persist it on shutdown (see
+		// dispatch_all()). Writing here would land inside the order-creation
+		// call stack, where an HPOS meta save can escalate into a full
+		// $order->save() on an order whose line items have not been written yet.
+		$notification->set_triggered_at( time() );
+
 		$this->schedule_safety_net( $notification );
 
 		if ( ! $this->shutdown_registered ) {
@@ -141,8 +147,9 @@ class PendingNotificationStore {
 	/**
 	 * Dispatches all pending notifications via InternalNotificationDispatcher.
 	 *
-	 * Called on shutdown. Sends all pending notifications through the
-	 * InternalNotificationDispatcher, then clears the store.
+	 * Called on shutdown. Records each notification's trigger time, sends all
+	 * pending notifications through the InternalNotificationDispatcher, then
+	 * clears the store.
 	 *
 	 * @return void
 	 *
@@ -153,10 +160,44 @@ class PendingNotificationStore {
 			return;
 		}
 
+		$this->record_trigger_times();
+
 		$this->dispatcher->dispatch( array_values( $this->pending ) );
 
 		$this->enabled = false;
 		$this->pending = array();
+	}
+
+	/**
+	 * Persists each pending notification's trigger time to its resource.
+	 *
+	 * Runs on shutdown rather than at trigger time so the write stays out of
+	 * the order-creation call stack. WordPress fires `shutdown` on fatal errors
+	 * too, so the only requests that lose the value are those killed outright
+	 * (OOM, SIGKILL), the same requests the safety net exists for, and where
+	 * the payload falls back to the current time.
+	 *
+	 * Skips notifications already marked as sent. A repeat trigger for a
+	 * resource that has not been sent (e.g. `woocommerce_low_stock` firing on
+	 * every reduction below the threshold) still refreshes the time, and a
+	 * restock re-arms the notification by clearing the sent marker; see
+	 * {@see StockNotificationRecoveryHandler}.
+	 *
+	 * @return void
+	 *
+	 * @since 11.2.0
+	 */
+	private function record_trigger_times(): void {
+		foreach ( $this->pending as $notification ) {
+			if ( $notification->has_meta( NotificationProcessor::SENT_META_KEY ) ) {
+				continue;
+			}
+
+			$notification->write_meta(
+				NotificationProcessor::TRIGGERED_META_KEY,
+				$notification->get_triggered_at()
+			);
+		}
 	}
 
 	/**
