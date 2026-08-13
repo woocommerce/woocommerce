@@ -288,37 +288,22 @@ class MiniCart extends \WP_UnitTestCase {
 			'The filtered pattern output should be preserved.'
 		);
 
-		$document                    = new \DOMDocument();
-		$previous_libxml_error_state = libxml_use_internal_errors( true );
-		$document->loadHTML( '<html><body>' . $rendered_template . '</body></html>' );
-		libxml_clear_errors();
-		libxml_use_internal_errors( $previous_libxml_error_state );
-		$xpath  = new \DOMXPath( $document );
-		$footer = $xpath->query(
-			"//*[contains(concat(' ', normalize-space(@class), ' '), ' wc-block-mini-cart__footer-actions ')]"
+		$rendered_classes = array(
+			'footer'   => 'wc-block-mini-cart__footer-actions',
+			'cart'     => 'wp-block-woocommerce-mini-cart-cart-button-block',
+			'checkout' => 'wp-block-woocommerce-mini-cart-checkout-button-block',
 		);
-		if ( false === $footer ) {
-			$this->fail( 'The XPath query for the Mini-Cart footer should be valid.' );
-		}
-		$this->assertSame( 1, $footer->length, 'The rendered template should contain one Mini-Cart footer.' );
-
-		$button_classes = array(
-			'cart'     => 'wc-block-mini-cart__footer-cart',
-			'checkout' => 'wc-block-mini-cart__footer-checkout',
-		);
-		foreach ( $button_classes as $button_name => $button_class ) {
-			$buttons = $xpath->query(
-				"./*[contains(concat(' ', normalize-space(@class), ' '), ' {$button_class} ')]",
-				$footer->item( 0 )
-			);
-			if ( false === $buttons ) {
-				$this->fail( "The XPath query for the {$button_name} button should be valid." );
+		foreach ( $rendered_classes as $element_name => $class_name ) {
+			$p             = new \WP_HTML_Tag_Processor( $rendered_template );
+			$element_count = 0;
+			while ( $p->next_tag( array( 'class_name' => $class_name ) ) ) {
+				++$element_count;
 			}
 
 			$this->assertSame(
 				1,
-				$buttons->length,
-				"The {$button_name} button should be a direct child of the Mini-Cart footer actions."
+				$element_count,
+				"The rendered template should contain exactly one {$element_name}."
 			);
 		}
 	}
