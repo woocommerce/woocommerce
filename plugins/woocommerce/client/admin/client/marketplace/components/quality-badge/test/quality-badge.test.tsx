@@ -298,6 +298,15 @@ describe( 'isQualityBadgeFilterActive', () => {
 		);
 	} );
 
+	it( 'ignores the param when the badge is enabled but has no label', () => {
+		expect(
+			isQualityBadgeFilterActive(
+				{ quality_badge: '1' },
+				{ quality_badge: { enabled: true, label: '', tooltip: '' } }
+			)
+		).toBe( false );
+	} );
+
 	it( 'is inactive without the param', () => {
 		expect(
 			isQualityBadgeFilterActive( {}, contextWithBadge.iamSettings )

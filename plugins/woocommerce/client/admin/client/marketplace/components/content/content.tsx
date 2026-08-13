@@ -395,7 +395,12 @@ export default function Content(): React.JSX.Element {
 	useEffect( () => {
 		setCurrentPage( 1 );
 		setFirstNewProductId( 0 );
-	}, [ selectedTab, query?.category, query?.term, query?.quality_badge ] );
+	}, [
+		selectedTab,
+		query?.category,
+		query?.term,
+		qualityBadgeFilterActive,
+	] );
 
 	// Maintain product focus for accessibility
 	useEffect( () => {
