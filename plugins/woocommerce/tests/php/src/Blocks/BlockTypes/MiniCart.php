@@ -302,9 +302,13 @@ class MiniCart extends \WP_UnitTestCase {
 		}
 		$this->assertSame( 1, $footer->length, 'The rendered template should contain one Mini-Cart footer.' );
 
-		foreach ( array( 'cart', 'checkout' ) as $button_name ) {
+		$button_classes = array(
+			'cart'     => 'wc-block-mini-cart__footer-cart',
+			'checkout' => 'wc-block-mini-cart__footer-checkout',
+		);
+		foreach ( $button_classes as $button_name => $button_class ) {
 			$buttons = $xpath->query(
-				"./*[contains(concat(' ', normalize-space(@class), ' '), ' wp-block-woocommerce-mini-cart-{$button_name}-button-block ')]",
+				"./*[contains(concat(' ', normalize-space(@class), ' '), ' {$button_class} ')]",
 				$footer->item( 0 )
 			);
 			if ( false === $buttons ) {
