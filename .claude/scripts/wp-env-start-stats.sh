@@ -314,7 +314,7 @@ COLS=$(printf '%s\n' "$ROLLUPS" | awk -F'\t' '$1=="COLS"{$1=""; sub(/^\t/,""); p
 
 emit_table() {  # emit_table <group> <first-column-header> <limit|0>
   local g="$1" head="$2" limit="$3" line hdr sep
-  hdr="| $head | Retried | Recovered | Rate |"
+  hdr="| $head | Retried | Recovered | Recovery Rate |"
   sep="|---|---:|---:|---:|"
   local c
   for c in $COLS; do hdr="$hdr \`$c\` |"; sep="$sep---:|"; done
@@ -351,9 +351,9 @@ emit_table() {  # emit_table <group> <first-column-header> <limit|0>
   echo
   echo "### By reason"
   echo
-  echo "\`Share\` is that reason's slice of all retries; \`Rate\` is how often it recovered."
+  echo "\`Share\` is that reason's slice of all retries; \`Recovery Rate\` is how often it recovered."
   echo
-  echo "| \`reason=\` | Retried | Share | Recovered | Rate |"
+  echo "| \`reason=\` | Retried | Share | Recovered | Recovery Rate |"
   echo "|---|---:|---:|---:|---:|"
   awk -F'\t' '{t[$8]++; n++; if($7=="SAVED") s[$8]++}
     END{for(r in t) printf "| `%s` | %d | %.0f%% | %d | %.0f%% |\n",
