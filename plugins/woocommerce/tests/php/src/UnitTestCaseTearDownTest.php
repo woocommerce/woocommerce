@@ -23,12 +23,14 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 	 * Every piece of singleton state the teardown is responsible for is cleared.
 	 */
 	public function test_clear_wc_singleton_state_clears_what_survives_the_parent_teardown(): void {
+		$locale_filter = function ( $locale ) {
+			$locale['GB']['postcode']['label'] = self::LEAKED_LOCALE_LABEL;
+			return $locale;
+		};
+
 		add_filter(
 			'woocommerce_get_country_locale',
-			function ( $locale ) {
-				$locale['GB']['postcode']['label'] = self::LEAKED_LOCALE_LABEL;
-				return $locale;
-			}
+			$locale_filter
 		);
 
 		// Reading the locale under the filter is what caches the filtered value.
@@ -49,7 +51,7 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 
 		// The parent teardown restores the hooks straight afterwards, which is what leaves a
 		// filtered locale stranded in the cache. Drop the filter here to reproduce that order.
-		remove_all_filters( 'woocommerce_get_country_locale' );
+		remove_filter( 'woocommerce_get_country_locale', $locale_filter );
 
 		$this->assertTrue( WC()->cart->is_empty(), 'The cart should have been emptied.' );
 		$this->assertSame( 'shortcode', WC()->cart->cart_context, 'The cart context should be back to shortcode.' );
