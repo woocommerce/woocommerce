@@ -49,12 +49,12 @@ export const subscribeLegacyJQueryFormVariations = (
 	const handleFound = withScope(
 		( _event?: unknown, variation?: LegacyVariationPayload ) => {
 			if (
-				isValidId( variation?.variation_id ) ||
+				isValidId( variation?.variation_id ) &&
 				isValidId( variation?.image_id )
 			) {
 				handlers.onVariationFound(
-					variation?.variation_id,
-					variation?.image_id
+					variation.variation_id,
+					variation.image_id
 				);
 				return;
 			}
