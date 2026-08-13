@@ -57,8 +57,3 @@ Details worth knowing:
     `changelog/!(*.php)` are supported.
 -   When every project is forced to be changed — no base ref, or a lockfile change —
     `ignore` is not consulted and all jobs run.
-
-The `NON_CODE_PATHS` env in `.github/workflows/ci.yml` is a separate, workflow-level
-gate that skips CI entirely for PRs touching only non-code paths. Keep the glob syntax
-of the two layers compatible by convention: the gate runs picomatch, this tool runs
-minimatch.
