@@ -111,15 +111,8 @@ class ProductFilters extends AbstractBlock {
 			'forcePageReload' => isset( $block->context['forcePageReload'] ) ? (bool) $block->context['forcePageReload'] : null,
 		);
 
-		$overlay_mode = $attributes['overlayMode'] ?? null;
-		if ( ! in_array( $overlay_mode, array( 'off', 'mobile', 'all' ), true ) ) {
-			$overlay_mode = isset( $attributes['showFilterDrawer'] ) && false === $attributes['showFilterDrawer'] ? 'off' : 'mobile';
-			if ( isset( $attributes['overlayOnDesktop'] ) && true === $attributes['overlayOnDesktop'] ) {
-				$overlay_mode = 'all';
-			}
-		}
-		$overlay_on_desktop = 'all' === $overlay_mode;
-		$show_filter_drawer = 'off' !== $overlay_mode;
+		$overlay_on_desktop = isset( $attributes['overlayOnDesktop'] ) && true === $attributes['overlayOnDesktop'];
+		$show_filter_drawer = $overlay_on_desktop || ! isset( $attributes['showFilterDrawer'] ) || false !== $attributes['showFilterDrawer'];
 		$desktop_position   = isset( $attributes['desktopOverlayPosition'] ) && 'right' === $attributes['desktopOverlayPosition'] ? 'right' : 'left';
 		$has_overlay        = $show_filter_drawer;
 		$wrapper_classes    = array( 'wc-block-product-filters' );

@@ -53,9 +53,16 @@ const TEMPLATE: InnerBlockTemplate[] = [
 export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 	const { attributes, setAttributes } = props;
 	const { isPreview } = attributes;
-	const overlayMode = attributes.overlayMode || 'mobile';
-	const showFilterDrawer = overlayMode !== 'off';
-	const overlayOnDesktop = overlayMode === 'all';
+	const overlayOnDesktop = attributes.overlayOnDesktop === true;
+	const showFilterDrawer =
+		overlayOnDesktop || attributes.showFilterDrawer !== false;
+	let overlayMode = 'off';
+	if ( showFilterDrawer ) {
+		overlayMode = 'mobile';
+	}
+	if ( overlayOnDesktop ) {
+		overlayMode = 'all';
+	}
 	const desktopOverlayPosition =
 		attributes.desktopOverlayPosition === 'right' ? 'right' : 'left';
 	const hasOverlay = showFilterDrawer;
@@ -178,7 +185,10 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 								value === 'mobile' ||
 								value === 'all'
 							) {
-								setAttributes( { overlayMode: value } );
+								setAttributes( {
+									showFilterDrawer: value !== 'off',
+									overlayOnDesktop: value === 'all',
+								} );
 							}
 						} }
 					>

@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { fireEvent, render, screen } from '@testing-library/react';
-import { getBlockAttributes } from '@wordpress/blocks';
 import type { BlockEditProps } from '@wordpress/blocks';
 import type { ReactNode } from 'react';
 
@@ -10,7 +9,6 @@ import type { ReactNode } from 'react';
  * Internal dependencies
  */
 import { Edit } from '../edit';
-import { migrateOverlayAttributes } from '../deprecated';
 import { Save } from '../save';
 import type { BlockAttributes } from '../types';
 
@@ -42,24 +40,28 @@ describe( 'Product Filters editor and serialization', () => {
 	it.each( [
 		[
 			'off to mobile',
-			{ isPreview: false, overlayMode: 'off' as const },
+			{ isPreview: false, showFilterDrawer: false },
 			'Off',
 			'Mobile only',
-			{ overlayMode: 'mobile' },
+			{ showFilterDrawer: true, overlayOnDesktop: false },
 		],
 		[
 			'mobile to all devices',
-			{ isPreview: false, overlayMode: 'mobile' as const },
+			{ isPreview: false, showFilterDrawer: true },
 			'Mobile only',
 			'All devices',
-			{ overlayMode: 'all' },
+			{ showFilterDrawer: true, overlayOnDesktop: true },
 		],
 		[
-			'all devices to off',
-			{ isPreview: false, overlayMode: 'all' as const },
+			'conflicting desktop to off',
+			{
+				isPreview: false,
+				showFilterDrawer: false,
+				overlayOnDesktop: true,
+			},
 			'All devices',
 			'Off',
-			{ overlayMode: 'off' },
+			{ showFilterDrawer: false, overlayOnDesktop: false },
 		],
 	] )(
 		'writes the derived overlay mode: %s',
@@ -90,7 +92,8 @@ describe( 'Product Filters editor and serialization', () => {
 			<Edit
 				{ ...editProps( {
 					isPreview: false,
-					overlayMode: 'mobile',
+					showFilterDrawer: true,
+					overlayOnDesktop: false,
 					desktopOverlayPosition: 'right',
 				} ) }
 			/>
@@ -103,7 +106,8 @@ describe( 'Product Filters editor and serialization', () => {
 			<Edit
 				{ ...editProps( {
 					isPreview: false,
-					overlayMode: 'all',
+					showFilterDrawer: true,
+					overlayOnDesktop: true,
 					desktopOverlayPosition: 'right',
 				} ) }
 			/>
@@ -115,83 +119,32 @@ describe( 'Product Filters editor and serialization', () => {
 	it.each( [
 		[ { isPreview: false }, 'wc-block-product-filters' ],
 		[
-			{ isPreview: false, overlayMode: 'off' as const },
+			{ isPreview: false, showFilterDrawer: false },
 			'wc-block-product-filters is-filter-drawer-disabled',
 		],
 		[
 			{
 				isPreview: false,
-				overlayMode: 'all' as const,
+				showFilterDrawer: false,
+				overlayOnDesktop: true,
 				desktopOverlayPosition: 'right' as const,
 			},
 			'wc-block-product-filters has-desktop-overlay is-desktop-overlay-right',
 		],
-	] )( 'serializes overlay mode classes', ( attributes, className ) => {
+		[
+			{
+				isPreview: false,
+				showFilterDrawer: false,
+				overlayOnDesktop: 1,
+				desktopOverlayPosition: 'right' as const,
+			},
+			'wc-block-product-filters is-filter-drawer-disabled',
+		],
+	] )( 'keeps legacy save classes stable', ( attributes, className ) => {
 		const { container } = render(
 			<Save attributes={ attributes as BlockAttributes } />
 		);
 		expect( container.firstChild ).toHaveClass( ...className.split( ' ' ) );
 		expect( container.firstChild ).toHaveAttribute( 'class', className );
-	} );
-
-	it( 'documents parser behavior across the storage change', () => {
-		const booleanWithChangedType = getBlockAttributes(
-			{
-				attributes: {
-					showFilterDrawer: {
-						type: 'string',
-						enum: [ 'off', 'mobile', 'all' ],
-					},
-				},
-			} as never,
-			'',
-			{ showFilterDrawer: false }
-		);
-		const legacyMarkupInCurrentWoo = getBlockAttributes(
-			{
-				attributes: {
-					overlayMode: {
-						type: 'string',
-						enum: [ 'off', 'mobile', 'all' ],
-					},
-				},
-			} as never,
-			'',
-			{ showFilterDrawer: false }
-		);
-		const enumMarkupInOldWoo = getBlockAttributes(
-			{
-				attributes: {
-					showFilterDrawer: {
-						type: 'boolean',
-						default: true,
-					},
-				},
-			} as never,
-			'',
-			{ overlayMode: 'off' }
-		);
-
-		expect( booleanWithChangedType ).toEqual( {
-			showFilterDrawer: undefined,
-		} );
-		expect( legacyMarkupInCurrentWoo ).toEqual( {
-			overlayMode: undefined,
-		} );
-		expect( enumMarkupInOldWoo ).toEqual( { showFilterDrawer: true } );
-	} );
-
-	it.each( [
-		[ {}, 'mobile' ],
-		[ { showFilterDrawer: false }, 'off' ],
-		[ { showFilterDrawer: true }, 'mobile' ],
-		[ { showFilterDrawer: false, overlayOnDesktop: true }, 'all' ],
-	] )( 'migrates legacy overlay attributes: %#', ( legacy, overlayMode ) => {
-		expect(
-			migrateOverlayAttributes( {
-				isPreview: false,
-				...legacy,
-			} )
-		).toEqual( { isPreview: false, overlayMode } );
 	} );
 } );

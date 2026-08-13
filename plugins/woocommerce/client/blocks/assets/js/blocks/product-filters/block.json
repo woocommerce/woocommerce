@@ -40,9 +40,12 @@
 			"type": "boolean",
 			"default": false
 		},
-		"overlayMode": {
-			"type": "string",
-			"enum": [ "off", "mobile", "all" ]
+		"showFilterDrawer": {
+			"type": "boolean",
+			"default": true
+		},
+		"overlayOnDesktop": {
+			"type": "boolean"
 		},
 		"desktopOverlayPosition": {
 			"type": "string",

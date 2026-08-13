@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
-import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -25,59 +24,6 @@ function objectHasProp< P extends PropertyKey >(
 ): target is { [ K in P ]: unknown } {
 	return isObject( target ) && property in target;
 }
-
-type LegacyOverlayAttributes = BlockAttributes & {
-	showFilterDrawer?: boolean;
-	overlayOnDesktop?: boolean;
-};
-
-export function migrateOverlayAttributes( {
-	showFilterDrawer,
-	overlayOnDesktop,
-	...attributes
-}: LegacyOverlayAttributes ): BlockAttributes {
-	let overlayMode: BlockAttributes[ 'overlayMode' ] = 'mobile';
-	if ( showFilterDrawer === false ) {
-		overlayMode = 'off';
-	}
-	if ( overlayOnDesktop ) {
-		overlayMode = 'all';
-	}
-	return { ...attributes, overlayMode };
-}
-
-const legacyOverlay = {
-	attributes: {
-		showFilterDrawer: {
-			type: 'boolean' as const,
-			default: true,
-		},
-		overlayOnDesktop: {
-			type: 'boolean' as const,
-		},
-		desktopOverlayPosition: {
-			type: 'string' as const,
-			enum: [ 'left', 'right' ],
-		},
-	},
-	save( { attributes }: { attributes: LegacyOverlayAttributes } ) {
-		const overlayOnDesktop = attributes.overlayOnDesktop === true;
-		const showFilterDrawer =
-			overlayOnDesktop || attributes.showFilterDrawer !== false;
-		const blockProps = useBlockProps.save( {
-			className: clsx( 'wc-block-product-filters', {
-				'is-filter-drawer-disabled': ! showFilterDrawer,
-				'has-desktop-overlay': overlayOnDesktop,
-				'is-desktop-overlay-right':
-					overlayOnDesktop &&
-					attributes.desktopOverlayPosition === 'right',
-			} ),
-		} );
-		const innerBlocksProps = useInnerBlocksProps.save( blockProps );
-		return <div { ...innerBlocksProps } />;
-	},
-	migrate: migrateOverlayAttributes,
-};
 
 function getProductFiltersCssV1( attributes: BlockAttributes ) {
 	const colors = getColorsFromBlockSupports( attributes );
@@ -110,4 +56,4 @@ const v1 = {
 	},
 };
 
-export default [ legacyOverlay, v1 ];
+export default [ v1 ];
