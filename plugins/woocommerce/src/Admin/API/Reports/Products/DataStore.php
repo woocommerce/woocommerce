@@ -476,6 +476,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			);
 			$this->add_sql_clause( 'where', 'AND default_results.product_id != -1' );
 
+			// Products tied on the ordering column are left in whatever order the database
+			// returns them, which can differ between pages, so the same product shows up on
+			// two of them while another is never reached. Every product without sales ties on
+			// every column the report can order by, so a filtered report is mostly ties.
+			$order_by = $this->get_sql_clause( 'order_by' );
+			$this->clear_sql_clause( 'order_by' );
+			$this->add_sql_clause( 'order_by', "{$order_by}, default_results.product_id" );
+
 			$products_query = $this->get_query_statement();
 		} else {
 			$count_query      = "SELECT COUNT(*) FROM (

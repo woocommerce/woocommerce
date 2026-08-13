@@ -238,6 +238,77 @@ class WC_Admin_Tests_API_Reports_Products extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should order products tied on the sorting column by ID, so paging stays stable.
+	 *
+	 * A product without sales ties with every other one on every column the report can be
+	 * ordered by, and most matches of a broad search have no sales. A tie leaves the order up
+	 * to the database, which is free to resolve it differently for each page, so a product
+	 * comes back on two pages while another is never reached.
+	 */
+	public function test_get_reports_orders_products_tied_on_the_sorting_column_by_id() {
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// These only need to match the search, so the full product CRUD would be wasted work.
+		$without_sales = array();
+		for ( $i = 0; $i < 12; $i++ ) {
+			$without_sales[] = wp_insert_post(
+				array(
+					'post_title'  => sprintf( 'Kingston Widget %03d', $i ),
+					'post_type'   => 'product',
+					'post_status' => 'publish',
+				)
+			);
+		}
+
+		$with_sales = $this->create_product( 'Kingston Widget 999' );
+		$this->create_completed_order( $with_sales );
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		sort( $without_sales );
+
+		// The only product with sales leads, and the rest tie on every column being tested.
+		$expected = array_merge( array( $with_sales->get_id() ), $without_sales );
+
+		// Both filters resolve to the same set of products through the same code path.
+		$filters = array(
+			'search'   => array( 'search' => 'Kingston' ),
+			'products' => array( 'products' => implode( ',', $expected ) ),
+		);
+
+		foreach ( $filters as $filter_name => $filter ) {
+			foreach ( array( 'items_sold', 'net_revenue', 'date' ) as $orderby ) {
+				$paged_through = array();
+
+				for ( $page = 1; $page <= 3; $page++ ) {
+					$response = $this->dispatch_report(
+						array_merge(
+							$filter,
+							array(
+								'per_page' => 5,
+								'page'     => $page,
+								'orderby'  => $orderby,
+								'order'    => 'desc',
+							)
+						)
+					);
+
+					$this->assertEquals( 200, $response->get_status() );
+
+					$paged_through = array_merge( $paged_through, array_column( $response->get_data(), 'product_id' ) );
+				}
+
+				$this->assertEquals(
+					$expected,
+					$paged_through,
+					"Filtering by {$filter_name} and ordering by {$orderby} should page through every product once, ties in ID order"
+				);
+			}
+		}
+	}
+
+	/**
 	 * @testdox Should match products by SKU as well as by title.
 	 */
 	public function test_get_reports_search_param_matches_sku() {
