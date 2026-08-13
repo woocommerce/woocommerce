@@ -772,6 +772,11 @@
 			"title": "Header alternative"
 		},
 		{
+			"area": "navigation-overlay",
+			"name": "purple-navigation-overlay",
+			"title": "Purple navigation overlay"
+		},
+		{
 			"area": "footer",
 			"name": "footer",
 			"title": "Footer default"
