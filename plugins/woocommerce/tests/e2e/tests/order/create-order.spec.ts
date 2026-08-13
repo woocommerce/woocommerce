@@ -55,7 +55,6 @@ async function getOrderIdFromPage( page: Page ) {
 async function addProductToOrder( page: Page, product, quantity: number ) {
 	await page.getByRole( 'button', { name: 'Add item(s)' } ).click();
 	await page.getByRole( 'button', { name: 'Add product(s)' } ).click();
-	await page.getByText( 'Search for a product…' ).click();
 	await page.locator( 'span > .select2-search__field' ).fill( product.name );
 	await page.getByRole( 'option', { name: product.name } ).first().click();
 
@@ -600,13 +599,15 @@ test.describe(
 			await page.locator( 'button.add-order-item' ).click();
 
 			// search for each product to add
-			for ( const product of [
+			for ( const [ index, product ] of [
 				simpleProduct,
 				variableProduct,
 				groupedProduct,
 				externalProduct,
-			] ) {
-				await page.getByText( 'Search for a product…' ).click();
+			].entries() ) {
+				if ( index > 0 ) {
+					await page.getByText( 'Search for a product…' ).click();
+				}
 				await page
 					.locator( 'span > .select2-search__field' )
 					.fill( product.name );
