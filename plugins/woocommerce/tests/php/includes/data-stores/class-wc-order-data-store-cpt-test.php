@@ -1532,4 +1532,45 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			$this->assertGreaterThan( 0, $item->get_product_id(), 'Item should have a product ID from cached meta' );
 		}
 	}
+
+	/**
+	 * @testdox Reading an order does not fatal when a postmeta entry is malformed (e.g. a stdClass from a corrupted cache).
+	 */
+	public function test_reading_order_does_not_fatal_on_malformed_postmeta(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->set_currency( 'EUR' );
+		$order->save();
+		$order_id = $order->get_id();
+
+		wp_cache_flush();
+		wp_cache_set( $order_id, array( '_order_currency' => (object) array( 'corrupt' ) ), 'post_meta' );
+
+		$read_order = wc_get_order( $order_id );
+
+		$this->assertInstanceOf( WC_Order::class, $read_order, 'Order should hydrate without fataling on malformed postmeta' );
+		$this->assertEquals( get_woocommerce_currency(), $read_order->get_currency(), 'Malformed currency meta should fall back to the store currency' );
+	}
+
+	/**
+	 * @testdox Reading a refund does not fatal when a postmeta entry is malformed (e.g. a stdClass from a corrupted cache).
+	 */
+	public function test_reading_refund_does_not_fatal_on_malformed_postmeta(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->save();
+
+		$refund = new WC_Order_Refund();
+		$refund->set_parent_id( $order->get_id() );
+		$refund->set_amount( 10 );
+		$refund->set_reason( 'test' );
+		$refund->save();
+		$refund_id = $refund->get_id();
+
+		wp_cache_flush();
+		wp_cache_set( $refund_id, array( '_refund_amount' => (object) array( 'corrupt' ) ), 'post_meta' );
+
+		$read_refund = wc_get_order( $refund_id );
+
+		$this->assertInstanceOf( WC_Order_Refund::class, $read_refund, 'Refund should hydrate without fataling on malformed postmeta' );
+		$this->assertEquals( 0, $read_refund->get_amount(), 'Malformed refund amount meta should fall back to the default of zero' );
+	}
 }
