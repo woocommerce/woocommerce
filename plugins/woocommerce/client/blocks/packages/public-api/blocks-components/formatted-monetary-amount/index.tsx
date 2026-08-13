@@ -30,10 +30,31 @@ export interface FormattedMonetaryAmountProps
 	renderText?: ( value: string ) => JSX.Element;
 }
 
+// Matches characters from strong RTL scripts (Hebrew, Arabic, Syriac, Thaana,
+// NKo, and their presentation forms).
+const RTL_SCRIPT_REGEX = /[\u0591-\u08FF\uFB1D-\uFDFD\uFE70-\uFEFC]/;
+
+/**
+ * Wraps an RTL-script currency symbol in first-strong isolate characters
+ * (U+2068 FSI … U+2069 PDI) — the plain-text equivalent of `dir="auto"` — so
+ * the bidi algorithm cannot move it to the wrong side of the amount.
+ * Surrounding whitespace stays outside the isolate. LTR symbols are returned
+ * unchanged so rendered text is identical for LTR currencies.
+ */
+const isolateRtlSymbol = ( affix: string ): string => {
+	if ( ! RTL_SCRIPT_REGEX.test( affix ) ) {
+		return affix;
+	}
+	return affix.replace( /^(\s*)(.*?)(\s*)$/, '$1\u2068$2\u2069$3' );
+};
+
 /**
  * Formats currency data into the expected format for NumberFormat.
  */
-const currencyToNumberFormat = ( currency: Currency ) => {
+const currencyToNumberFormat = (
+	currency: Currency,
+	displayType: NumberFormatProps[ 'displayType' ]
+) => {
 	const { prefix, suffix, thousandSeparator, decimalSeparator } = currency;
 	// Decode HTML entities in separators
 	const decodedThousandSeparator = decodeHtmlEntities( thousandSeparator );
@@ -47,14 +68,24 @@ const currencyToNumberFormat = ( currency: Currency ) => {
 			'Thousand separator and decimal separator are the same. This may cause formatting issues.'
 		);
 	}
+
+	const decodedPrefix = decodeHtmlEntities( prefix );
+	const decodedSuffix = decodeHtmlEntities( suffix );
+	// Isolate characters are invisible control characters; they must not leak
+	// into editable input values, so only display text gets them.
+	const isDisplayText = displayType === 'text';
 	return {
 		thousandSeparator: hasDuplicateSeparator
 			? ''
 			: decodedThousandSeparator,
 		decimalSeparator: decodedDecimalSeparator,
 		fixedDecimalScale: true,
-		prefix: decodeHtmlEntities( prefix ),
-		suffix: decodeHtmlEntities( suffix ),
+		prefix: isDisplayText
+			? isolateRtlSymbol( decodedPrefix )
+			: decodedPrefix,
+		suffix: isDisplayText
+			? isolateRtlSymbol( decodedSuffix )
+			: decodedSuffix,
 		isNumericString: true,
 	};
 };
@@ -102,7 +133,7 @@ const FormattedMonetaryAmount = ( {
 	const decimalScale = props.decimalScale ?? currency?.minorUnit;
 	const numberFormatProps = {
 		...props,
-		...currencyToNumberFormat( currency ),
+		...currencyToNumberFormat( currency, displayType ),
 		decimalScale,
 		value: undefined,
 		currency: undefined,

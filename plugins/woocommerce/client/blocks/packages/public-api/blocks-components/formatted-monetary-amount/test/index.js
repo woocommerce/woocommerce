@@ -123,6 +123,87 @@ describe( 'FormattedMonetaryAmount', () => {
 		} );
 	} );
 
+	describe( 'RTL-script currency symbols', () => {
+		// Lebanese Pound (LBP) — an RTL-script symbol reordered by the bidi
+		// algorithm when composed into a plain-text string with the amount.
+		const FSI = '\u2068';
+		const PDI = '\u2069';
+		/** @type {import('@woocommerce/types').Currency} */
+		const lbpCurrency = {
+			code: 'LBP',
+			symbol: 'ل.ل',
+			thousandSeparator: ',',
+			decimalSeparator: '.',
+			minorUnit: 2,
+			prefix: '',
+			suffix: ' ل.ل',
+		};
+
+		test( 'wraps an RTL-script suffix in first-strong isolate characters', () => {
+			const { container } = render(
+				<FormattedMonetaryAmount
+					value="156345"
+					currency={ lbpCurrency }
+				/>
+			);
+
+			expect( container.textContent ).toBe(
+				`1,563.45 ${ FSI }ل.ل${ PDI }`
+			);
+		} );
+
+		test( 'wraps an RTL-script prefix in first-strong isolate characters', () => {
+			const { container } = render(
+				<FormattedMonetaryAmount
+					value="156345"
+					currency={ {
+						...lbpCurrency,
+						prefix: 'ل.ل ',
+						suffix: '',
+					} }
+				/>
+			);
+
+			expect( container.textContent ).toBe(
+				`${ FSI }ل.ل${ PDI } 1,563.45`
+			);
+		} );
+
+		test( 'does not add isolate characters to LTR currency symbols', () => {
+			const { container } = render(
+				<FormattedMonetaryAmount
+					value="156345"
+					currency={ {
+						code: 'EUR',
+						symbol: '€',
+						thousandSeparator: '.',
+						decimalSeparator: ',',
+						minorUnit: 2,
+						prefix: '',
+						suffix: ' €',
+					} }
+				/>
+			);
+
+			expect( container.textContent ).toBe( '1.563,45 €' );
+		} );
+
+		test( 'does not add isolate characters to editable input values', () => {
+			render(
+				<FormattedMonetaryAmount
+					displayType="input"
+					value="156345"
+					currency={ lbpCurrency }
+					onValueChange={ () => void 0 }
+				/>
+			);
+
+			expect( screen.getByRole( 'textbox' ) ).toHaveValue(
+				'1,563.45 ل.ل'
+			);
+		} );
+	} );
+
 	describe( 'supports different value types', () => {
 		test( 'should support numbers', () => {
 			render(
