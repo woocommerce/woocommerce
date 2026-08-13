@@ -52,7 +52,6 @@ function CustomersReportTable( {
 			{
 				label: __( 'Role', 'woocommerce' ),
 				key: 'role',
-				hiddenByDefault: true,
 			},
 			{
 				label: __( 'Last active', 'woocommerce' ),
