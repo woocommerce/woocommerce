@@ -1,0 +1,3 @@
+# Transient collector output. The report, the event log and the cursor are the durable
+# artefacts; this is just console noise from the last backfill.
+backfill.log
