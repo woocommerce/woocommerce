@@ -25,7 +25,10 @@ import {
 } from './types';
 
 class PluginError extends Error {
-	constructor( message: string, public data: unknown ) {
+	constructor(
+		message: string,
+		public data: unknown
+	) {
 		super( message );
 	}
 }

@@ -93,33 +93,29 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 		isDoingExpressPayment: paymentIsDoingExpressPayment,
 		get isPristine() {
 			deprecated( 'isPristine', {
-				since: '9.6.0',
+				since: '7.5.0',
 				alternative: 'isIdle',
-				plugin: 'WooCommerce Blocks',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
 			} );
 			return paymentIsIdle;
 		},
 		get isFinished() {
 			deprecated( 'isFinished', {
-				since: '9.6.0',
-				plugin: 'WooCommerce Blocks',
+				since: '7.5.0',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
 			} );
 			return paymentHasError || paymentIsReady;
 		},
 		get hasFailed() {
 			deprecated( 'hasFailed', {
-				since: '9.6.0',
-				plugin: 'WooCommerce Blocks',
+				since: '7.5.0',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
 			} );
 			return paymentHasError;
 		},
 		get isSuccessful() {
 			deprecated( 'isSuccessful', {
-				since: '9.6.0',
-				plugin: 'WooCommerce Blocks',
+				since: '7.5.0',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
 			} );
 			return paymentIsReady;
@@ -178,7 +174,6 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 				'setExpressPaymentError should only be used by Express Payment Methods (using the provided onError handler).',
 				{
 					alternative: '',
-					plugin: 'woocommerce-gutenberg-products-block',
 					link: 'https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4228',
 				}
 			);

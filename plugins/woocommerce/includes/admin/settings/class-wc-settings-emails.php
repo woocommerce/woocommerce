@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Internal\Email\EmailFont;
 use Automattic\WooCommerce\Internal\Email\EmailStyleSync;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\WooEmailTemplate;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmails;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncRegistry;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
@@ -595,10 +596,11 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			'https://wordpress.org/plugins/wp-mail-logging/',
 			'https://woocommerce.com/document/email-faq'
 		);
-		$email_post_manager   = WCTransactionalEmailPostsManager::get_instance();
-		$emails               = WC()->mailer()->get_emails();
-		$email_types          = array();
-		$post_id_for_template = null;
+		$email_post_manager     = WCTransactionalEmailPostsManager::get_instance();
+		$emails                 = WC()->mailer()->get_emails();
+		$email_types            = array();
+		$post_id_for_template   = null;
+		$block_editor_email_ids = WCTransactionalEmails::get_transactional_emails();
 		foreach ( $emails as $email_key => $email ) {
 			$post_id     = $email_post_manager->get_email_template_post_id( $email->id );
 			$sync_config = WCEmailTemplateSyncRegistry::get_email_sync_config( $email->id );
@@ -619,19 +621,25 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			$template_version = $post_id ? (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true ) : '';
 			$was_backfilled   = $post_id ? (bool) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::BACKFILLED_META_KEY, true ) : false;
 
+			$file_template_preview_url = in_array( $email->id, $block_editor_email_ids, true )
+				? wp_nonce_url( admin_url( '?preview_woo_block_email=true&email_id=' . $email->id ), 'preview-woo-block-email' )
+				: null;
+
 			$email_types[] = array(
-				'title'            => $email->get_title(),
-				'description'      => $email->get_description(),
-				'id'               => $email->id,
-				'email_key'        => strtolower( $email_key ),
-				'post_id'          => $post_id,
-				'enabled'          => $email->is_enabled(),
-				'manual'           => $email->is_manual(),
-				'current_version'  => '' !== $current_version ? $current_version : null,
-				'template_status'  => '' !== $template_status ? $template_status : null,
-				'template_version' => '' !== $template_version ? $template_version : null,
-				'was_backfilled'   => $was_backfilled,
-				'recipients'       => array(
+				'title'                     => $email->get_title(),
+				'description'               => $email->get_description(),
+				'id'                        => $email->id,
+				'email_key'                 => strtolower( $email_key ),
+				'email_class_name'          => get_class( $email ),
+				'post_id'                   => $post_id,
+				'file_template_preview_url' => $file_template_preview_url,
+				'enabled'                   => $email->is_enabled(),
+				'manual'                    => $email->is_manual(),
+				'current_version'           => '' !== $current_version ? $current_version : null,
+				'template_status'           => '' !== $template_status ? $template_status : null,
+				'template_version'          => '' !== $template_version ? $template_version : null,
+				'was_backfilled'            => $was_backfilled,
+				'recipients'                => array(
 					'to'  => $email->is_customer_email() ? __( 'Customers', 'woocommerce' ) : $email->get_recipient(),
 					'cc'  => $email->get_cc_recipient(),
 					'bcc' => $email->get_bcc_recipient(),
@@ -643,10 +651,13 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				$post_id_for_template = $post_id;
 			}
 		}
-		// Create URL for email editor template mode.
+		// The email editor's template mode opens through an email post's
+		// editor session, so the URL requires a post ID. When no post exists,
+		// the URL stays null and the client creates a post on demand, building
+		// the URL itself from the template ID passed below.
+		$email_template_id = get_stylesheet() . '//' . WooEmailTemplate::TEMPLATE_SLUG;
 		$edit_template_url = null;
 		if ( $post_id_for_template ) {
-			$email_template_id = get_stylesheet() . '//' . WooEmailTemplate::TEMPLATE_SLUG;
 			$edit_template_url = admin_url( 'post.php?post=' . $post_id_for_template . '&action=edit&template=' . $email_template_id );
 		}
 
@@ -655,6 +666,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			id="wc_settings_email_listing_slotfill" class="wc-settings-prevent-change-event woocommerce-email-listing-listview"
 			data-email-types="<?php echo esc_attr( wp_json_encode( $email_types ) ); ?>"
 			data-edit-template-url="<?php echo esc_attr( $edit_template_url ); ?>"
+			data-email-template-id="<?php echo esc_attr( $email_template_id ); ?>"
 		>
 			<div style="
 			display: flex;

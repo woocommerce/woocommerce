@@ -18,8 +18,6 @@ use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstall
  */
 class SchemaInstallerTest extends EngineIntegrationTestCase {
 
-	use ScalarCoercion;
-
 	/**
 	 * The baseline tables the installer owns, including the cycle tables.
 	 *
@@ -27,7 +25,6 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 	 */
 	public function table_provider(): array {
 		return array(
-			array( SchemaInstaller::TABLE_PLAN_GROUPS ),
 			array( SchemaInstaller::TABLE_PLANS ),
 			array( SchemaInstaller::TABLE_CONTRACTS ),
 			array( SchemaInstaller::TABLE_CONTRACT_ITEMS ),
@@ -56,14 +53,14 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 
 	public function test_version_option_is_set_after_install(): void {
 		$this->assertTrue( SchemaInstaller::is_current() );
-		$this->assertSame( SchemaInstaller::VERSION, get_option( SchemaInstaller::VERSION_OPTION ) );
+		$this->assertSame( SchemaInstaller::get_version(), SchemaInstaller::get_database_version() );
 	}
 
 	public function test_install_is_idempotent(): void {
 		// Running install again must not error or change the recorded version.
 		SchemaInstaller::install();
 
-		$this->assertSame( SchemaInstaller::VERSION, get_option( SchemaInstaller::VERSION_OPTION ) );
+		$this->assertSame( SchemaInstaller::get_version(), SchemaInstaller::get_database_version() );
 	}
 
 	public function test_unknown_table_identifier_throws(): void {
@@ -102,6 +99,20 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 		$column = $wpdb->get_var( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'extension_slug' ) );
 
 		$this->assertSame( 'extension_slug', $column );
+	}
+
+	public function test_plans_table_has_status_and_sort_order_columns(): void {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$status = $wpdb->get_var( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'status' ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$sort_order = $wpdb->get_var( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'sort_order' ) );
+
+		$this->assertSame( 'status', $status );
+		$this->assertSame( 'sort_order', $sort_order );
 	}
 
 	public function test_contracts_table_has_extension_slug_column(): void {
@@ -222,6 +233,21 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 		);
 	}
 
+	/**
+	 * @testdox The due_contract index keys the dispatcher scan as (status, next_payment_gmt).
+	 */
+	public function test_contracts_due_contract_index_keys_the_dispatcher_scan(): void {
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		// The dispatcher scans status=active AND next_payment_gmt <= now; the status-first
+		// column order is load-bearing for the index, so assert it exactly.
+		$this->assertContains( 'due_contract', $this->index_names( $table ) );
+		$this->assertSame(
+			array( 'status', 'next_payment_gmt' ),
+			$this->index_columns( $table, 'due_contract' )
+		);
+	}
+
 	public function test_cycles_table_has_expected_columns(): void {
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
 
@@ -241,10 +267,31 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 			'items_snapshot_id',
 			'order_id',
 			'extension_slug',
+			'claimed_until',
+			'retry_at',
 		);
 
 		foreach ( $columns as $column ) {
 			$this->assertTrue( $this->has_column( $table, $column ), "Expected cycles.{$column} column." );
+		}
+	}
+
+	/**
+	 * @testdox The cycle dispatcher columns (claimed_until lease, reserved retry_at) are nullable.
+	 */
+	public function test_cycles_table_dispatcher_columns_are_nullable(): void {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+
+		foreach ( array( 'claimed_until', 'retry_at' ) as $column ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$row = $wpdb->get_row( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", $column ), ARRAY_A );
+
+			$this->assertIsArray( $row, "Expected a cycles.{$column} column." );
+			$this->assertArrayHasKey( 'Null', $row );
+			$this->assertIsString( $row['Null'] );
+			$this->assertSame( 'YES', $row['Null'], "Expected cycles.{$column} to be NULLable." );
 		}
 	}
 
@@ -445,7 +492,7 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 		$names = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
 			if ( is_array( $row ) ) {
-				$names[] = self::coerce_string( $row['Key_name'] ?? null );
+				$names[] = ScalarCoercion::coerce_string( $row['Key_name'] ?? null );
 			}
 		}
 
@@ -469,8 +516,8 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 		usort(
 			$rows,
 			static function ( $a, $b ): int {
-				$a_seq = is_array( $a ) ? self::coerce_int( $a['Seq_in_index'] ?? null ) : 0;
-				$b_seq = is_array( $b ) ? self::coerce_int( $b['Seq_in_index'] ?? null ) : 0;
+				$a_seq = is_array( $a ) ? ScalarCoercion::coerce_int( $a['Seq_in_index'] ?? null ) : 0;
+				$b_seq = is_array( $b ) ? ScalarCoercion::coerce_int( $b['Seq_in_index'] ?? null ) : 0;
 
 				return $a_seq <=> $b_seq;
 			}
@@ -479,7 +526,7 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 		$columns = array();
 		foreach ( $rows as $row ) {
 			if ( is_array( $row ) ) {
-				$columns[] = self::coerce_string( $row['Column_name'] ?? null );
+				$columns[] = ScalarCoercion::coerce_string( $row['Column_name'] ?? null );
 			}
 		}
 
@@ -505,7 +552,7 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 
 		foreach ( $rows as $row ) {
 			// Non_unique = 0 marks a UNIQUE index.
-			if ( is_array( $row ) && '0' !== self::coerce_string( $row['Non_unique'] ?? null ) ) {
+			if ( is_array( $row ) && '0' !== ScalarCoercion::coerce_string( $row['Non_unique'] ?? null ) ) {
 				return false;
 			}
 		}

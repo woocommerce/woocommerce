@@ -3,8 +3,10 @@
  */
 import { createSlotFill, Button } from '@wordpress/components';
 import { registerPlugin } from '@wordpress/plugins';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
+import { dispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
+import { getAdminLink } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -12,6 +14,7 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { SETTINGS_SLOT_FILL_CONSTANT } from '~/settings/settings-slots';
 import { ListView } from './settings-email-listing-listview';
+import { recreateEmailPostRequest } from './settings-email-listing-data';
 import { shouldShowReviewUpdate } from './settings-email-listing-update-state';
 import { VIEWED_FROM_EMAIL_LIST } from '../wp-admin-scripts/email-editor-integration/tracks/build-shared-payload';
 
@@ -40,12 +43,22 @@ export type EmailType = {
 	description: string;
 	id: string;
 	email_key: string;
+	email_class_name: string;
 	post_id: string;
+	/** Null for emails not registered for the block editor. */
+	file_template_preview_url: string | null;
 	recipients: Recipients;
 	enabled: boolean;
 	manual: boolean;
 	link?: string;
 	status?: EmailStatus;
+	/**
+	 * Status of the backing `woo_email` post (`publish`, `draft`, `auto-draft`,
+	 * …), projected from the `wp/v2/woo_email` REST enrichment in
+	 * {@link useTransactionalEmails}. Null while unresolved or when no post
+	 * exists — with lazy post creation most emails have no post until edited.
+	 */
+	postStatus?: string | null;
 	templateStatus: TemplateStatus | null;
 	templateVersion: string | null;
 	/**
@@ -79,10 +92,81 @@ const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
  */
 const LIST_VIEWED_DEDUP_SESSION_KEY = 'wc_email_update_list_viewed';
 
+/**
+ * "Edit template" entry point. The template editor opens through an email
+ * post's editor session (`post.php?post=…&template=…`), so a post is always
+ * required. With an existing post the server-built URL is used directly;
+ * otherwise a post is created on click for `templateSessionEmailTypeId` —
+ * any email type works as the session host, the listing passes its first row.
+ */
+const EditTemplateButton = ( {
+	editTemplateUrl,
+	emailTemplateId,
+	templateSessionEmailTypeId,
+}: {
+	editTemplateUrl: string | null;
+	emailTemplateId: string | null;
+	templateSessionEmailTypeId: string | null;
+} ) => {
+	const [ isCreatingPost, setIsCreatingPost ] = useState( false );
+
+	if ( editTemplateUrl ) {
+		return (
+			<Button
+				variant="primary"
+				href={ editTemplateUrl }
+				className="woocommerce-email-listing-edit-template-button"
+			>
+				{ __( 'Edit template', 'woocommerce' ) }
+			</Button>
+		);
+	}
+
+	if ( ! emailTemplateId || ! templateSessionEmailTypeId ) {
+		return null;
+	}
+
+	const handleClick = async () => {
+		setIsCreatingPost( true );
+		const response = await recreateEmailPostRequest(
+			templateSessionEmailTypeId
+		);
+		const postId = parseInt( response?.post_id ?? '', 10 );
+		if ( Number.isInteger( postId ) && postId > 0 ) {
+			window.location.href = getAdminLink(
+				`post.php?post=${ postId }&action=edit&template=${ encodeURIComponent(
+					emailTemplateId
+				) }`
+			);
+			return;
+		}
+		setIsCreatingPost( false );
+		void dispatch( 'core/notices' ).createErrorNotice(
+			__(
+				'Could not prepare the email template for editing. Please try again.',
+				'woocommerce'
+			)
+		);
+	};
+
+	return (
+		<Button
+			variant="primary"
+			isBusy={ isCreatingPost }
+			disabled={ isCreatingPost }
+			onClick={ handleClick }
+			className="woocommerce-email-listing-edit-template-button"
+		>
+			{ __( 'Edit template', 'woocommerce' ) }
+		</Button>
+	);
+};
+
 export const EmailListingFill: React.FC< {
 	emailTypes: EmailType[];
 	editTemplateUrl: string | null;
-} > = ( { emailTypes, editTemplateUrl } ) => {
+	emailTemplateId: string | null;
+} > = ( { emailTypes, editTemplateUrl, emailTemplateId } ) => {
 	// Fire one aggregate `_list_viewed` per session covering the entire list.
 	// Tracking per-row creates one event per visible cell (~20+ on a default
 	// install) per page load with limited analytical lift over a single
@@ -130,15 +214,11 @@ export const EmailListingFill: React.FC< {
 						'woocommerce'
 					) }
 				</p>
-				{ editTemplateUrl && (
-					<Button
-						variant="primary"
-						href={ editTemplateUrl }
-						className="woocommerce-email-listing-edit-template-button"
-					>
-						{ __( 'Edit template', 'woocommerce' ) }
-					</Button>
-				) }
+				<EditTemplateButton
+					editTemplateUrl={ editTemplateUrl }
+					emailTemplateId={ emailTemplateId }
+					templateSessionEmailTypeId={ emailTypes[ 0 ]?.id ?? null }
+				/>
 			</div>
 			<ListView emailTypes={ emailTypes } />
 		</Fill>
@@ -195,6 +275,9 @@ export const registerSettingsEmailListingFill = () => {
 	const editTemplateUrl = slotElement.getAttribute(
 		'data-edit-template-url'
 	);
+	const emailTemplateId = slotElement.getAttribute(
+		'data-email-template-id'
+	);
 	let emailTypes: EmailType[] = [];
 	try {
 		const parsed = JSON.parse( emailTypesData || '' );
@@ -211,6 +294,7 @@ export const registerSettingsEmailListingFill = () => {
 			<EmailListingFill
 				emailTypes={ emailTypes }
 				editTemplateUrl={ editTemplateUrl }
+				emailTemplateId={ emailTemplateId }
 			/>
 		),
 	} );

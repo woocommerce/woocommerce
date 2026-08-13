@@ -1,11 +1,12 @@
 <?php
 /**
  * Builds and persists a {@see Contract} (plus its origin {@see Cycle}) from a paid
- * checkout order, and links order <-> contract in both directions. Does not schedule
- * the first renewal - the caller arms that separately via {@see RenewalEngine::schedule()}.
+ * checkout order, and links order <-> contract in both directions. Renewals need no
+ * arming beyond this: the contract's `next_payment_gmt` places it on the due index the
+ * batch dispatcher scans.
  *
- * Integration zone: WordPress-native. Reads a live `WC_Order`; the order never
- * crosses into Core - only the snapshot values pulled off it do.
+ * Reads a live `WC_Order`; the order never crosses into Core - only the snapshot
+ * values pulled off it do.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout
  */
@@ -34,8 +35,6 @@ defined( 'ABSPATH' ) || exit;
  * Order -> contract factory.
  */
 final class ContractFactory {
-
-	use ScalarCoercion;
 
 	/**
 	 * The repository the factory persists through.
@@ -95,10 +94,10 @@ final class ContractFactory {
 
 		// First renewal date: cycle 1's period end and the contract's next-bill cache.
 		$next_payment = isset( $overrides['next_payment_gmt'] )
-			? self::coerce_string( $overrides['next_payment_gmt'] )
+			? ScalarCoercion::coerce_string( $overrides['next_payment_gmt'] )
 			: $plan->get_billing_policy()->compute_first_renewal_from( $anchor )->format( 'Y-m-d H:i:s' );
 
-		$expected_total = isset( $overrides['billing_total'] ) ? self::coerce_string( $overrides['billing_total'] ) : (string) $order->get_total();
+		$expected_total = isset( $overrides['billing_total'] ) ? ScalarCoercion::coerce_string( $overrides['billing_total'] ) : (string) $order->get_total();
 		$currency       = $order->get_currency();
 
 		$contract_defaults = array(
@@ -169,15 +168,24 @@ final class ContractFactory {
 	/**
 	 * Build the typed plan snapshot for the origin cycle.
 	 *
+	 * The `pricing_policy` key freezes the discount rules the contract's cycles
+	 * bill under alongside the cadence; it is explicitly `null` when the plan has
+	 * none, so a reader can tell "no pricing policy at signup" apart from a
+	 * snapshot written before the key existed. The payload is schema-free, so the
+	 * additive key needs no format-version bump.
+	 *
 	 * @param Plan $plan The plan whose terms to snapshot.
 	 */
 	private function build_plan_snapshot( Plan $plan ): PlanSnapshot {
+		$pricing_policy = $plan->get_pricing_policy();
+
 		return PlanSnapshot::from_array(
 			array(
 				'selling_plan_id' => $plan->get_id(),
 				'name'            => $plan->get_name(),
 				'category'        => $plan->get_category(),
 				'billing_policy'  => $plan->get_billing_policy()->to_array(),
+				'pricing_policy'  => null !== $pricing_policy ? $pricing_policy->to_array() : null,
 			)
 		);
 	}

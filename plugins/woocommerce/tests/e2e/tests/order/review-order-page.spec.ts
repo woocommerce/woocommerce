@@ -49,8 +49,14 @@ test.describe(
 				'yes'
 			);
 
-			// First REST call after enabling the flag boots WP with init
-			// firing again; that's when the host page is created.
+			// Drop the stored host-page id so the next request re-adopts the
+			// canonical review-order page and reflushes its rewrite.
+			await deleteOption(
+				request,
+				baseURL || '',
+				'woocommerce_review_order_page_id'
+			);
+
 			const { data } = await restApi.get(
 				`${ WP_API_PATH }/pages?slug=review-order`,
 				{ data: { _fields: [ 'id', 'link' ] } }

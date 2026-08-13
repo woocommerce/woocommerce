@@ -1,0 +1,76 @@
+name: 'CI Queue Sentinel'
+
+# Toggles the CI_QUEUE_OVERFLOW repository variable when the Actions queue
+# backs up; ci.yml routes e2e jobs to the "Woo Core Dedicated CI" group while
+# it is set. Variables written here must only be consumed via `env:` or `${{ }}`
+# comparisons, never interpolated into `run:` blocks.
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "auto: evaluate the queue and decide; on/off: force the switch now (one-shot; the next scheduled run re-evaluates in auto mode)"
+        type: choice
+        options:
+          - 'auto'
+          - 'on'
+          - 'off'
+        default: 'auto'
+
+permissions: {}
+
+# One sentinel at a time; cron and manual dispatches must not race the variable.
+concurrency:
+  group: 'ci-queue-sentinel'
+  cancel-in-progress: false
+
+jobs:
+  evaluate:
+    name: 'Evaluate CI queue'
+    if: ${{ github.repository == 'woocommerce/woocommerce' }}
+    # Under the cron cadence, so a wedged run fails (and alerts) before the next tick.
+    timeout-minutes: 10
+    # Dedicated group: the sentinel must not queue behind the congestion it measures.
+    runs-on:
+      group: WooCommerce Release Checks
+    environment: 'ci-sentinel'
+    permissions:
+      contents: read # checkout
+      actions: read # queue probe
+    steps:
+      - uses: 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' # v7.0.1
+        name: 'Checkout'
+        with:
+          sparse-checkout: |
+              ./tools/monorepo-utils
+              .github/workflows
+          persist-credentials: false
+
+      - uses: 'actions/setup-node@820762786026740c76f36085b0efc47a31fe5020' # v7.0.0
+        name: 'Setup Node'
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: 'Setup PNPM'
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+
+      - name: 'Evaluate queue and toggle CI_QUEUE_OVERFLOW'
+        env:
+          REPOSITORY: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Fine-grained PAT, sole permission Variables: read/write. GITHUB_TOKEN
+          # cannot write repository variables.
+          SENTINEL_TOKEN: ${{ secrets.CI_SENTINEL_VARIABLES_TOKEN }}
+          MODE: ${{ inputs.mode || 'auto' }}
+          QUEUE_AGE_THRESHOLD_MIN: '5'
+          HYSTERESIS_MIN: '20'
+        run: node .github/workflows/scripts/ci-queue-sentinel.js
+
+      - name: 'Notify Slack on failure'
+        if: ${{ failure() }}
+        env:
+          SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
+          SLACK_CHANNELS: ${{ secrets.DAILY_CHECKS_CHANNEL }}
+        run: |
+          pnpm utils slack ":warning: CI Queue Sentinel failed — the CI_QUEUE_OVERFLOW switch may be stranded in its last state.\n<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID|View workflow run>"

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+NOX onboarding: automatically move to the next step and show a notice when the test account creation fails with a non-recoverable error, instead of a retry loop.

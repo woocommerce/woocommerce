@@ -149,13 +149,13 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
 					<ToggleControl
 						label={ __(
-							'Use drawer on small screens',
+							'Collapse filters on small screens',
 							'woocommerce'
 						) }
 						help={
 							showFilterDrawer
 								? __(
-										'Shoppers tap the button to open filters.',
+										'Shoppers tap a button to open filters.',
 										'woocommerce'
 								  )
 								: __(

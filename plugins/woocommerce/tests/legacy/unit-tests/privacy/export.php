@@ -29,32 +29,34 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->orders    = array();
+		$this->customers = array();
 
 		$customer1 = WC_Helper_Customer::create_customer( 'customer1', 'password', 'test1@test.com' );
 		$customer1->set_billing_email( 'customer1@test.com' );
 		$customer1->save();
 
+		$this->customers[] = $customer1;
+	}
+
+	/**
+	 * Create customers and orders needed only by the order exporter pagination test.
+	 */
+	private function create_order_export_fixtures(): void {
+		$customer1 = $this->customers[0];
 		$customer2 = WC_Helper_Customer::create_customer( 'customer2', 'password', 'test2@test.com' );
 		$customer2->set_billing_email( 'customer2@test.com' );
 		$customer2->save();
 
-		$this->customers[] = $customer1;
 		$this->customers[] = $customer2;
 
-		// Create a bunch of dummy orders for some users.
-		$this->orders[] = WC_Helper_Order::create_order( $customer1->get_id() );
-		$this->orders[] = WC_Helper_Order::create_order( $customer1->get_id() );
-		$this->orders[] = WC_Helper_Order::create_order( $customer1->get_id() );
-		$this->orders[] = WC_Helper_Order::create_order( $customer1->get_id() );
-		$this->orders[] = WC_Helper_Order::create_order( $customer1->get_id() );
-		$this->orders[] = WC_Helper_Order::create_order( $customer1->get_id() );
-		$this->orders[] = WC_Helper_Order::create_order( $customer1->get_id() );
-		$this->orders[] = WC_Helper_Order::create_order( $customer1->get_id() );
-		$this->orders[] = WC_Helper_Order::create_order( $customer1->get_id() );
-		$this->orders[] = WC_Helper_Order::create_order( $customer1->get_id() );
-		$this->orders[] = WC_Helper_Order::create_order( $customer1->get_id() );
-		$this->orders[] = WC_Helper_Order::create_order( $customer2->get_id() );
-		$this->orders[] = WC_Helper_Order::create_order( $customer2->get_id() );
+		for ( $index = 0; $index < 11; $index++ ) {
+			$this->orders[] = WC_Helper_Order::create_order( $customer1->get_id() );
+		}
+
+		for ( $index = 0; $index < 2; $index++ ) {
+			$this->orders[] = WC_Helper_Order::create_order( $customer2->get_id() );
+		}
 	}
 
 	/**
@@ -139,8 +141,12 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 	 * Test: Order data exporter.
 	 */
 	public function test_order_data_exporter() {
+		$this->create_order_export_fixtures();
+
 		$response = WC_Privacy_Exporters::order_data_exporter( 'test1@test.com', 1 );
 
+		$this->assertCount( 10, $response['data'] );
+		$this->assertFalse( $response['done'] );
 		$this->assertEquals( 'woocommerce_orders', $response['data'][0]['group_id'] );
 		$this->assertEquals( 'Orders', $response['data'][0]['group_label'] );
 		$this->assertStringContainsString( 'order-', $response['data'][0]['item_id'] );
@@ -149,6 +155,7 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 
 		// Next page should be orders.
 		$response = WC_Privacy_Exporters::order_data_exporter( 'test1@test.com', 2 );
+		$this->assertCount( 1, $response['data'] );
 		$this->assertTrue( $response['done'] );
 		$this->assertTrue( 8 === count( $response['data'][0]['data'] ), count( $response['data'][0]['data'] ) );
 	}

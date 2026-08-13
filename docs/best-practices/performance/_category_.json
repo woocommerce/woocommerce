@@ -1,4 +1,9 @@
 {
     "position": 2,
-    "label": "Performance"
+    "label": "Performance",
+    "link": {
+        "type": "generated-index",
+        "title": "Performance",
+        "slug": "/best-practices/performance"
+    }
 }

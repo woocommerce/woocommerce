@@ -34,13 +34,13 @@ final class GatewayCapabilities {
 	 * The most fundamental flag: an engine-scheduled contract on a gateway
 	 * lacking this capability would create renewals nobody runs.
 	 */
-	const RECURRING = 'recurring';
+	public const RECURRING = 'recurring';
 
 	/**
 	 * Customer can change the payment method on an active contract. All modern
 	 * gateways support this; the flag exists for the rare manual-only case.
 	 */
-	const PAYMENT_METHOD_CHANGE = 'payment_method_change';
+	public const PAYMENT_METHOD_CHANGE = 'payment_method_change';
 
 	/**
 	 * Gateway tolerates variable charge amounts (volume-tier upgrades, tax-rate
@@ -48,13 +48,13 @@ final class GatewayCapabilities {
 	 * amount-changing flows can refuse on an incapable gateway rather than
 	 * silently mis-charging.
 	 */
-	const AMOUNT_CHANGES = 'amount_changes';
+	public const AMOUNT_CHANGES = 'amount_changes';
 
 	/**
 	 * One customer can hold N active contracts. Default for modern gateways;
 	 * the flag exists for single-mandate gateways.
 	 */
-	const MULTIPLE_PER_CUSTOMER = 'multiple_per_customer';
+	public const MULTIPLE_PER_CUSTOMER = 'multiple_per_customer';
 
 	/**
 	 * Gateway schedules and fires renewals itself; the engine only tracks
@@ -62,7 +62,7 @@ final class GatewayCapabilities {
 	 * a gateway can declare this capability without every contract on it being
 	 * gateway-scheduled.
 	 */
-	const GATEWAY_SCHEDULED_RENEWALS = 'gateway_scheduled_renewals';
+	public const GATEWAY_SCHEDULED_RENEWALS = 'gateway_scheduled_renewals';
 
 	/**
 	 * In-memory declarations, keyed by gateway id => list of declared capability

@@ -35,7 +35,7 @@ const makeContext = (
 		onboardingProfile: {},
 		currentUserEmail: undefined,
 		...overrides,
-	} as CoreProfilerStateMachineContext );
+	} ) as CoreProfilerStateMachineContext;
 
 const shippingPlugins = [
 	{
