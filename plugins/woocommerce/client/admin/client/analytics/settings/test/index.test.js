@@ -3,7 +3,7 @@
  */
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { useDispatch } from '@wordpress/data';
-import { reportsStore, useSettings } from '@woocommerce/data';
+import { itemsStore, reportsStore, useSettings } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -60,7 +60,8 @@ describe( 'Settings - Import Mode Modal', () => {
 	const mockUpdateSettings = jest.fn();
 	const mockPersistSettings = jest.fn();
 	const mockUpdateAndPersistSettings = jest.fn();
-	const mockInvalidateResolutionForStoreSelector = jest.fn();
+	const mockInvalidateReportResolutions = jest.fn();
+	const mockInvalidateItemResolutions = jest.fn();
 	let settingsState;
 
 	beforeEach( () => {
@@ -78,10 +79,12 @@ describe( 'Settings - Import Mode Modal', () => {
 			},
 		};
 		useSettings.mockImplementation( () => settingsState );
-		useDispatch.mockReturnValue( {
+		useDispatch.mockImplementation( ( store ) => ( {
 			invalidateResolutionForStoreSelector:
-				mockInvalidateResolutionForStoreSelector,
-		} );
+				store === reportsStore
+					? mockInvalidateReportResolutions
+					: mockInvalidateItemResolutions,
+		} ) );
 		window.wpNavMenuUrlUpdate = jest.fn();
 	} );
 
@@ -221,26 +224,30 @@ describe( 'Settings - Import Mode Modal', () => {
 		);
 
 		expect( mockPersistSettings ).toHaveBeenCalled();
-		expect(
-			mockInvalidateResolutionForStoreSelector
-		).not.toHaveBeenCalled();
+		expect( mockInvalidateReportResolutions ).not.toHaveBeenCalled();
+		expect( mockInvalidateItemResolutions ).not.toHaveBeenCalled();
 
 		settingsState = { ...settingsState, isRequesting: true };
 		rerender( <Settings createNotice={ jest.fn() } query={ {} } /> );
-		expect(
-			mockInvalidateResolutionForStoreSelector
-		).not.toHaveBeenCalled();
+		expect( mockInvalidateReportResolutions ).not.toHaveBeenCalled();
+		expect( mockInvalidateItemResolutions ).not.toHaveBeenCalled();
 
 		settingsState = { ...settingsState, isRequesting: false };
 		rerender( <Settings createNotice={ jest.fn() } query={ {} } /> );
 
 		expect( useDispatch ).toHaveBeenCalledWith( reportsStore );
-		expect(
-			mockInvalidateResolutionForStoreSelector
-		).toHaveBeenNthCalledWith( 1, 'getReportItems' );
-		expect(
-			mockInvalidateResolutionForStoreSelector
-		).toHaveBeenNthCalledWith( 2, 'getReportStats' );
+		expect( useDispatch ).toHaveBeenCalledWith( itemsStore );
+		expect( mockInvalidateReportResolutions ).toHaveBeenNthCalledWith(
+			1,
+			'getReportItems'
+		);
+		expect( mockInvalidateReportResolutions ).toHaveBeenNthCalledWith(
+			2,
+			'getReportStats'
+		);
+		expect( mockInvalidateItemResolutions ).toHaveBeenCalledWith(
+			'getItems'
+		);
 	} );
 
 	it( 'does not invalidate report resolutions when saving fails', () => {
@@ -257,9 +264,8 @@ describe( 'Settings - Import Mode Modal', () => {
 		};
 		rerender( <Settings createNotice={ jest.fn() } query={ {} } /> );
 
-		expect(
-			mockInvalidateResolutionForStoreSelector
-		).not.toHaveBeenCalled();
+		expect( mockInvalidateReportResolutions ).not.toHaveBeenCalled();
+		expect( mockInvalidateItemResolutions ).not.toHaveBeenCalled();
 	} );
 
 	it( 'invalidates report resolutions after resetting defaults', () => {
@@ -278,20 +284,22 @@ describe( 'Settings - Import Mode Modal', () => {
 				[ SCHEDULED_IMPORT_SETTING_NAME ]: 'yes',
 			}
 		);
-		expect(
-			mockInvalidateResolutionForStoreSelector
-		).not.toHaveBeenCalled();
+		expect( mockInvalidateReportResolutions ).not.toHaveBeenCalled();
+		expect( mockInvalidateItemResolutions ).not.toHaveBeenCalled();
 
 		settingsState = { ...settingsState, isRequesting: true };
 		rerender( <Settings createNotice={ jest.fn() } query={ {} } /> );
 		settingsState = { ...settingsState, isRequesting: false };
 		rerender( <Settings createNotice={ jest.fn() } query={ {} } /> );
 
-		expect( mockInvalidateResolutionForStoreSelector ).toHaveBeenCalledWith(
+		expect( mockInvalidateReportResolutions ).toHaveBeenCalledWith(
 			'getReportItems'
 		);
-		expect( mockInvalidateResolutionForStoreSelector ).toHaveBeenCalledWith(
+		expect( mockInvalidateReportResolutions ).toHaveBeenCalledWith(
 			'getReportStats'
+		);
+		expect( mockInvalidateItemResolutions ).toHaveBeenCalledWith(
+			'getItems'
 		);
 	} );
 } );

@@ -7,7 +7,7 @@ import { Fragment, useEffect, useRef, useState } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { useDispatch, withDispatch } from '@wordpress/data';
 import { SectionHeader, ScrollTo } from '@woocommerce/components';
-import { reportsStore, useSettings } from '@woocommerce/data';
+import { itemsStore, reportsStore, useSettings } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -20,8 +20,11 @@ import HistoricalData from './historical-data';
 import { ImportModeConfirmationModal } from './import-mode-confirmation-modal';
 
 const Settings = ( { createNotice, query } ) => {
-	const { invalidateResolutionForStoreSelector } =
-		useDispatch( reportsStore );
+	const {
+		invalidateResolutionForStoreSelector: invalidateReportResolutions,
+	} = useDispatch( reportsStore );
+	const { invalidateResolutionForStoreSelector: invalidateItemResolutions } =
+		useDispatch( itemsStore );
 	const {
 		settingsError,
 		isRequesting,
@@ -59,8 +62,9 @@ const Settings = ( { createNotice, query } ) => {
 		}
 		if ( ! isRequesting && hasSaved.current ) {
 			if ( ! settingsError ) {
-				invalidateResolutionForStoreSelector( 'getReportItems' );
-				invalidateResolutionForStoreSelector( 'getReportStats' );
+				invalidateReportResolutions( 'getReportItems' );
+				invalidateReportResolutions( 'getReportStats' );
+				invalidateItemResolutions( 'getItems' );
 				createNotice(
 					'success',
 					__(
@@ -83,7 +87,8 @@ const Settings = ( { createNotice, query } ) => {
 		isRequesting,
 		settingsError,
 		createNotice,
-		invalidateResolutionForStoreSelector,
+		invalidateReportResolutions,
+		invalidateItemResolutions,
 	] );
 
 	const resetDefaults = () => {
