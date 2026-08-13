@@ -649,7 +649,7 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should render the empty cart message patterns to the same markup the installer previously inlined.
+	 * @testdox Should render the empty cart title, the Browse store link, and the New in store heading from the referenced patterns.
 	 */
 	public function test_empty_cart_message_patterns_render_expected_markup(): void {
 		$registry = WP_Block_Patterns_Registry::get_instance();
@@ -681,33 +681,10 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 			$rendered,
 			'The cart-new-in-store-message pattern should render the "New in store" heading.'
 		);
-		$this->assertStringNotContainsString(
+		$this->assertStringContainsString(
 			'Browse store',
 			$rendered,
-			'The cart-empty-message pattern should render only the title so the installed page keeps its current markup.'
+			'The cart-empty-message pattern should render the Browse store link that the default Cart page lost when it moved to installer-generated content in 8.3.0.'
 		);
-	}
-
-	/**
-	 * @testdox Should register the patterns referenced by the installed Cart page content independently of the Cart block type.
-	 */
-	public function test_empty_cart_message_patterns_are_registered_unconditionally(): void {
-		$registry = WP_Block_Patterns_Registry::get_instance();
-		$slugs    = array( 'woocommerce/cart-empty-message', 'woocommerce/cart-new-in-store-message' );
-
-		foreach ( $slugs as $slug ) {
-			if ( $registry->is_registered( $slug ) ) {
-				unregister_block_pattern( $slug );
-			}
-		}
-
-		\Automattic\WooCommerce\Blocks\Package::container()->get( \Automattic\WooCommerce\Blocks\BlockTypesController::class )->register_block_patterns();
-
-		foreach ( $slugs as $slug ) {
-			$this->assertTrue(
-				$registry->is_registered( $slug ),
-				"BlockTypesController::register_block_patterns() should register {$slug}; the installed Cart page depends on it even when the Cart block type is filtered out."
-			);
-		}
 	}
 }

@@ -68,7 +68,11 @@ class Cart extends AbstractBlock {
 	}
 
 	/**
-	 * Register block pattern for Empty Cart Message to make it translatable.
+	 * Register the Cart heading and cross-sells message block patterns.
+	 *
+	 * The empty cart and "New in store" patterns the default Cart page references are registered
+	 * in BlockTypesController::register_block_patterns() instead, so they resolve even when the
+	 * Cart block type is not registered.
 	 */
 	public function register_patterns() {
 		register_block_pattern(

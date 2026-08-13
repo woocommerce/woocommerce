@@ -93,4 +93,38 @@ class BlockTypesController extends WC_Unit_Test_Case {
 		$answer = $this->block_types_controller->block_should_have_data_attributes( 'child-of-woo/block-name' );
 		$this->assertTrue( $answer );
 	}
+
+	/**
+	 * @testdox register_block_patterns() registers the empty cart message patterns referenced by the installed Cart page.
+	 */
+	public function test_register_block_patterns_registers_installed_cart_page_patterns(): void {
+		$registry = \WP_Block_Patterns_Registry::get_instance();
+
+		// These patterns are referenced from the default Cart page content created at install
+		// (see WC_Install::get_cart_block_content()). They must be registered by the controller
+		// itself, which runs unconditionally, rather than by the Cart block type, which is only
+		// registered when the Cart block is enabled; otherwise the installed page renders nothing
+		// for the references.
+		$slugs = array( 'woocommerce/cart-empty-message', 'woocommerce/cart-new-in-store-message' );
+
+		foreach ( $slugs as $slug ) {
+			if ( $registry->is_registered( $slug ) ) {
+				unregister_block_pattern( $slug );
+			}
+		}
+
+		try {
+			$this->block_types_controller->register_block_patterns();
+
+			foreach ( $slugs as $slug ) {
+				$this->assertTrue(
+					$registry->is_registered( $slug ),
+					"BlockTypesController::register_block_patterns() should register {$slug}; the installed Cart page depends on it."
+				);
+			}
+		} finally {
+			// Restore the global registry state for later tests even if an assertion above failed.
+			$this->block_types_controller->register_block_patterns();
+		}
+	}
 }
