@@ -777,6 +777,11 @@
 			"title": "Purple navigation overlay"
 		},
 		{
+			"area": "navigation-overlay",
+			"name": "purple-navigation-overlay-alternative",
+			"title": "Purple navigation overlay alternative"
+		},
+		{
 			"area": "footer",
 			"name": "footer",
 			"title": "Footer default"
