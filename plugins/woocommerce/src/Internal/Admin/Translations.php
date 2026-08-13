@@ -28,6 +28,14 @@ class Translations {
 	private static $plugin_domain = 'woocommerce';
 
 	/**
+	 * Whether an on-demand regeneration of the combined translation file has
+	 * already been attempted during this request.
+	 *
+	 * @var bool
+	 */
+	private $regeneration_attempted = false;
+
+	/**
 	 * Get class instance.
 	 */
 	public static function get_instance() {
@@ -237,8 +245,29 @@ class Translations {
 		$cache_filename          = $this->get_combined_translation_filename( $plugin_domain, $locale );
 		$chunk_translations_json = wp_json_encode( $translations_from_chunks );
 
-		// Cache combined translations strings to a file.
-		$wp_filesystem->put_contents( $language_dir . $cache_filename, $chunk_translations_json );
+		// Publish via a temp file so readers never observe a partial write.
+		$temp_path  = $language_dir . $cache_filename . '.' . wp_generate_password( 12, false ) . '.tmp';
+		$cache_path = $language_dir . $cache_filename;
+
+		if ( ! $wp_filesystem->put_contents( $temp_path, $chunk_translations_json ) ) {
+			$wp_filesystem->delete( $temp_path );
+			return;
+		}
+
+		// Not WP_Filesystem_Direct::move(): it deletes the destination before renaming.
+		if ( 'direct' === get_filesystem_method() ) {
+			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.rename_rename -- Atomic replace; failure handled below.
+			if ( ! @rename( $temp_path, $cache_path ) ) {
+				$wp_filesystem->delete( $temp_path );
+			}
+			return;
+		}
+
+		// Remote filesystems: overwrite only when refreshing an existing file.
+		$overwrite = $wp_filesystem->exists( $cache_path );
+		if ( ! $wp_filesystem->move( $temp_path, $cache_path, $overwrite ) ) {
+			$wp_filesystem->delete( $temp_path );
+		}
 	}
 
 	/**
@@ -264,6 +293,10 @@ class Translations {
 
 		$access_type = get_filesystem_method();
 		if ( 'direct' === $access_type ) {
+			// Skip the combine work when the file could never be saved anyway.
+			if ( ! wp_is_writable( $lang_dir ) ) {
+				return;
+			}
 			\WP_Filesystem();
 			$this->build_and_save_translations( $lang_dir, self::$plugin_domain, $locale );
 		} else {
@@ -307,8 +340,20 @@ class Translations {
 
 		$locale         = determine_locale();
 		$cache_filename = $this->get_combined_translation_filename( $domain, $locale );
+		$cache_path     = WP_LANG_DIR . '/plugins/' . $cache_filename;
 
-		return WP_LANG_DIR . '/plugins/' . $cache_filename;
+		// Rebuild the combined file on demand, since it is only generated on language pack updates and plugin activation.
+		if ( ! is_readable( $cache_path ) && ! $this->regeneration_attempted ) {
+			$this->regeneration_attempted = true;
+			$this->generate_translation_strings();
+		}
+
+		// Fall back so the app's own translation file still loads.
+		if ( ! is_readable( $cache_path ) ) {
+			return $file;
+		}
+
+		return $cache_path;
 	}
 
 	/**

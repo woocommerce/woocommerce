@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep responsive Settings UI shell gutters synchronized with WPDS spacing tokens.

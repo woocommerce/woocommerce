@@ -2034,6 +2034,74 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Paying an existing order enforces the coupon's global usage limit.
+	 * @testWith ["route-global-limited", true, 409, false]
+	 *           ["route-global-ok", false, 200, true]
+	 *
+	 * @param string $code            Coupon code.
+	 * @param bool   $exhaust         Exhaust the coupon's global limit first.
+	 * @param int    $expected_status Expected HTTP status.
+	 * @param bool   $keeps_coupon    Whether the coupon should remain on the order.
+	 */
+	public function test_checkout_order_enforces_coupon_global_usage_limit( $code, $exhaust, $expected_status, $keeps_coupon ) {
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( $code );
+		$coupon->set_amount( 2 );
+		$coupon->set_usage_limit( 1 );
+		$coupon->save();
+		if ( $exhaust ) {
+			$coupon->increase_usage_count();
+		}
+
+		$order = \WC_Helper_Order::create_order( 0 );
+		$item  = new \WC_Order_Item_Coupon();
+		$item->set_code( $coupon->get_code() );
+		$order->add_item( $item );
+		$order->set_recorded_coupon_usage_counts( false );
+		$order->save();
+
+		$address = array(
+			'first_name' => 'Test',
+			'last_name'  => 'User',
+			'company'    => '',
+			'address_1'  => '123 Test St',
+			'address_2'  => '',
+			'city'       => 'Test City',
+			'state'      => 'CA',
+			'postcode'   => '90210',
+			'country'    => 'US',
+			'phone'      => '555-32123',
+		);
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout/' . $order->get_id() );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_query_params(
+			array(
+				'key'           => $order->get_order_key(),
+				'billing_email' => $order->get_billing_email(),
+			)
+		);
+		$request->set_body_params(
+			array(
+				'billing_address'  => array_merge( $address, array( 'email' => $order->get_billing_email() ) ),
+				'shipping_address' => $address,
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( $expected_status, $response->get_status(), wp_json_encode( $response->get_data() ) );
+
+		$codes = wc_get_order( $order->get_id() )->get_coupon_codes();
+		if ( $keeps_coupon ) {
+			$this->assertContains( $code, $codes );
+		} else {
+			$this->assertNotContains( $code, $codes );
+			$this->assertEquals( 'woocommerce_rest_order_coupon_errors', $response->get_data()['code'] );
+		}
+	}
+
+	/**
 	 * Helper method to register custom order status.
 	 *
 	 * @param string $status_name             Custom status name to register.

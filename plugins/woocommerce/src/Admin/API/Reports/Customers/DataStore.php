@@ -867,6 +867,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Retrieve the oldest orders made by a customer.
 	 *
+	 * Refunds share the customer of the order they refund, but they are not orders of that
+	 * customer and must not be returned here. They are the only rows written with a NULL
+	 * returning_customer, and they always carry the ID of the refunded order in parent_id;
+	 * both are required so that an order given a parent through set_parent_id() keeps
+	 * counting as one of the customer's orders.
+	 *
 	 * @param int $customer_id Customer ID.
 	 * @return array Orders.
 	 */
@@ -883,7 +889,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		return $wpdb->get_results(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				"SELECT order_id, date_created FROM {$orders_table} WHERE customer_id = %d {$excluded_statuses_condition} ORDER BY date_created, order_id ASC LIMIT 2",
+				"SELECT order_id, date_created FROM {$orders_table} WHERE customer_id = %d AND ( parent_id = 0 OR returning_customer IS NOT NULL ) {$excluded_statuses_condition} ORDER BY date_created, order_id ASC LIMIT 2",
 				$customer_id
 			)
 		);
