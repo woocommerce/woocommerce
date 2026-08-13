@@ -41,12 +41,21 @@ describe( 'hasEmptySearchResults', () => {
 		).toBe( true );
 	} );
 
-	it( 'returns false when any of several limit properties has a value', () => {
+	it( 'returns true when the searched property is empty but another one has a value', () => {
 		expect(
 			hasEmptySearchResults( { search: 'kingston', categories: '5' }, [
 				'products',
 				'categories',
 			] )
+		).toBe( true );
+	} );
+
+	it( 'returns false when every limit property has a value', () => {
+		expect(
+			hasEmptySearchResults(
+				{ search: 'kingston', products: '1,2', categories: '5' },
+				[ 'products', 'categories' ]
+			)
 		).toBe( false );
 	} );
 

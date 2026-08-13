@@ -18,5 +18,5 @@ export function hasEmptySearchResults( query, limitBy ) {
 		return false;
 	}
 
-	return ! limitBy.some( ( item ) => query[ item ] && query[ item ].length );
+	return ! limitBy.every( ( item ) => query[ item ] && query[ item ].length );
 }
