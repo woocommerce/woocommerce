@@ -633,11 +633,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				}
 			}
 			/**
-			 * Set date_completed and date_paid the same as date_created to avoid problems
-			 * when they are being used to sort the data, as refunds don't have them filled
-			*/
-			$data['date_completed'] = $data['date_created'];
-			$data['date_paid']      = $data['date_created'];
+			 * Refunds don't have date_completed and date_paid filled, so backfill each from
+			 * date_created for sorting — but only when the parent order has that date itself.
+			 * A refund of a never-paid order (e.g. a failed order manually set to "refunded")
+			 * moves no money; backfilling its dates would include the refund row in reports
+			 * filtered by that date while the parent row (NULL date) stays excluded, counting
+			 * a one-sided negative. Mirroring the parent keeps the pair excluded together.
+			 */
+			$parent_is_order        = $parent_order instanceof WC_Order;
+			$data['date_completed'] = $parent_is_order && ! $parent_order->get_date_completed() ? null : $data['date_created'];
+			$data['date_paid']      = $parent_is_order && ! $parent_order->get_date_paid() ? null : $data['date_created'];
 		}
 
 		// Update or add the information to the DB.
