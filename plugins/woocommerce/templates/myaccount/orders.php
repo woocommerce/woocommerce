@@ -114,7 +114,10 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 							 *
 							 * This filter runs from the `myaccount/orders.php` template, so it is
 							 * not available on sites where a theme overrides the template with a
-							 * copy predating version 11.1.0.
+							 * copy predating version 11.1.0. Registering the legacy action as well
+							 * is not a workaround for that: the action still suppresses the default
+							 * content and this filter then runs over the action's output, so
+							 * callbacks on both hooks emitting the same markup render it twice.
 							 *
 							 * @param string   $column_content Current column cell HTML.
 							 * @param WC_Order $order          Current order object.
