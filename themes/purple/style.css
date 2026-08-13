@@ -15,29 +15,6 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 */
 
 /* ==========================================================================
-   Utilities
-   ========================================================================== */
-
-/* Add a transition state for buttons. */
-.wp-element-button {
-	transition: border, background-color, color, box-shadow, opacity, filter;
-	transition-duration: 0.15s;
-	transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-/* Outline buttons default to the ink color via this custom property
- * (see the outline variation css in theme.json). Inside section styles
- * and covers the local text color already accounts for the surface, so
- * resolve to currentColor there and let the context decide. */
-.is-style-section-1,
-.is-style-section-2,
-.is-style-section-3,
-.wp-block-cover {
-	--wp--custom--outline-button-color: currentColor;
-}
-
-
-/* ==========================================================================
    Forms
    ========================================================================== */
 
@@ -51,19 +28,6 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 body {
 	--wc-form-border-color: var(--wp--preset--color--theme-6);
 	--wc-form-border-radius: 0;
-}
-
-/* ==========================================================================
-   Table block
-   ========================================================================== */
-
-.wp-block-table td,
-.wp-block-table th {
-	border-color: var(--wp--preset--color--theme-6);
-}
-
-.wp-block-table th {
-	font-weight: 600;
 }
 
 /* ==========================================================================
@@ -353,10 +317,6 @@ a.wc-block-components-product-name:hover {
    WooCommerce — Catalog
    ========================================================================== */
 
-/* Catalog sort order select — CSS customizable select (base-select).
- * Continues PR #82 exploration: https://github.com/woocommerce/woo-themes/pull/82
- * Closed/open styles from Figma Dropdown/Default (1:6531) and Dropdown/Open Links (37:1153).
- * Strip native chrome with appearance: none first; opt into base-select for the picker. */
 /* The block renders its own "Sort by" label beside the select; as inline
  * content the label sits on the baseline while the select is middle-aligned,
  * so their text drifts apart vertically. Center both in a flex row. */
