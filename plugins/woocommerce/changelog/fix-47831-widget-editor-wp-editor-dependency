@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent block initialization errors in the classic widget editor.
