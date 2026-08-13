@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 
-# This script deliberately does not `set -e`. Some steps below are not
-# idempotent: attributes.sh exits non-zero once the attributes it creates
-# already exist, which is every re-seed of an existing environment, since
-# `wp site empty` leaves attribute taxonomies in place. Under `set -e` the
-# seed would die there, before any product is imported. Guard steps
-# individually until those steps are made re-runnable.
+# test-env-setup.sh snapshots the database once this returns and restores it
+# before every test, so a step that fails silently here poisons the whole suite
+# rather than failing one spec. Every step must therefore be re-runnable, so
+# that a re-seed of an existing environment is not mistaken for a real failure.
+set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -22,9 +21,7 @@ bash "$script_dir/products.sh"
 find "$script_dir"/parallel/*.sh -maxdepth 1 -type f | xargs -P10 -n1 bash
 
 # Add deterministic ratings and sales data for product collection sorting.
-# Guarded because test-env-setup.sh snapshots the database once this returns, so
-# a half-seeded site would be restored before every test in the suite.
-bash "$script_dir/product-collection-sort-data.sh" || exit 1
+bash "$script_dir/product-collection-sort-data.sh"
 
 # Run rewrite script last to ensure all posts are created before running it.
 bash "$script_dir/rewrite.sh"
