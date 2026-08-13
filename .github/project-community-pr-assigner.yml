@@ -15,11 +15,9 @@
     - team: developer-advocacy
 
 'tools/**/*':
-    - gigitux
     - team: monorepo
 
 'packages/js/{create-woo-extension,dependency-extraction-webpack-plugin,eslint-plugin,internal-build,internal-js-tests}/**/*':
-    - gigitux
     - team: monorepo
 
 'packages/js/e2e-utils-playwright/**/*':
@@ -27,7 +25,6 @@
     - team: monorepo
 
 'packages/php/{monorepo-plugin,remote-specs-validation}/**/*':
-    - gigitux
     - team: monorepo
 
 'plugins/woocommerce/tests/{Tools,bin,cli,e2e,metrics,performance}/**/*':
@@ -521,8 +518,9 @@
     - team: woo-fse
 
 'plugins/woocommerce/tests/php/src/{AutoloaderTest.php,CLAUDE.md}':
-    - gigitux
+    - team: monorepo
 
 # Test harness internals are routed to the active test-infrastructure owner.
 'plugins/woocommerce/tests/{legacy/framework,legacy/data,php/bin,php/framework,php/helpers}/**/*':
     - adimoldovan
+    - team: monorepo
