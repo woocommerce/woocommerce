@@ -107,6 +107,11 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 							 * output of those callbacks. Default content is escaped before this
 							 * filter runs, and callbacks should return safe, escaped HTML.
 							 *
+							 * Callbacks that replace the content rather than append to it should
+							 * carry over the default markup's accessibility affordances: the order
+							 * number link's `aria-label`, the order action `aria-label`s, and the
+							 * order date `<time datetime>` attribute.
+							 *
 							 * This filter runs from the `myaccount/orders.php` template, so it is
 							 * not available on sites where a theme overrides the template with a
 							 * copy predating version 11.1.0.
