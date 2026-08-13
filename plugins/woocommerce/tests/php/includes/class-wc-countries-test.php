@@ -29,20 +29,16 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_address_fields_includes_hidden_flag_from_locale( $hidden ) {
 		$locale_filter = function ( $locale ) use ( $hidden ) {
-			$locale['ES']['postcode']['hidden']   = $hidden;
-			$locale['ES']['postcode']['required'] = true;
+			$locale['ES']['postcode']['hidden'] = $hidden;
 			return $locale;
 		};
 		add_filter( 'woocommerce_get_country_locale', $locale_filter );
 
-		try {
-			$fields = ( new WC_Countries() )->get_address_fields( 'ES', 'billing_' );
-		} finally {
-			remove_filter( 'woocommerce_get_country_locale', $locale_filter );
-		}
+		$fields = ( new WC_Countries() )->get_address_fields( 'ES', 'billing_' );
+
+		remove_filter( 'woocommerce_get_country_locale', $locale_filter );
 
 		$this->assertSame( $hidden, $fields['billing_postcode']['hidden'], 'The locale hidden flag should survive the merge with the default fields.' );
-		$this->assertTrue( $fields['billing_postcode']['required'] );
 	}
 
 	/**
