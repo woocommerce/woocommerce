@@ -587,9 +587,11 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		 * @param int    $limit Maximum number of order IDs to return. Use -1 for no limit.
 		 * @param string $term  Search term.
 		 */
-		$limit       = (int) apply_filters( 'woocommerce_order_search_limit', $default_limit, $term );
-		$limit       = -1 <= $limit ? $limit : $default_limit;
-		$query_limit = -1 < $limit ? $limit : PHP_INT_MAX;
+		$limit         = (int) apply_filters( 'woocommerce_order_search_limit', $default_limit, $term );
+		$limit         = -1 <= $limit ? $limit : $default_limit;
+		$query_limit    = -1 < $limit ? $limit : PHP_INT_MAX;
+		$order_types    = wc_get_order_types( 'view-orders' );
+		$order_statuses = array_keys( wc_get_order_statuses() );
 
 		/**
 		 * Searches on meta data can be slow - this lets you choose what fields to search.
@@ -617,28 +619,33 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$order_ids[] = absint( $term );
 		}
 
-		if ( ! empty( $search_fields ) ) {
-			$search_fields_placeholder = implode( ', ', array_fill( 0, count( $search_fields ), '%s' ) );
-			$order_ids                 = array_unique(
+		if ( ! empty( $search_fields ) && ! empty( $order_types ) && ! empty( $order_statuses ) ) {
+			$search_fields_placeholder  = implode( ', ', array_fill( 0, count( $search_fields ), '%s' ) );
+			$order_types_placeholder    = implode( ', ', array_fill( 0, count( $order_types ), '%s' ) );
+			$order_statuses_placeholder = implode( ', ', array_fill( 0, count( $order_statuses ), '%s' ) );
+			$order_ids                  = array_unique(
 				array_merge(
 					$order_ids,
 					$wpdb->get_col(
-						// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Search fields use generated placeholders.
+						// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Search fields, order types, and statuses use generated placeholders.
 						$wpdb->prepare(
 							"SELECT DISTINCT p1.post_id, p.post_date_gmt
 							FROM {$wpdb->postmeta} p1
 							INNER JOIN {$wpdb->posts} p ON p1.post_id = p.ID
 							WHERE p1.meta_value LIKE %s
 							AND p1.meta_key IN ($search_fields_placeholder)
+							AND p.post_type IN ($order_types_placeholder)
+							AND p.post_status IN ($order_statuses_placeholder)
 							ORDER BY p.post_date_gmt DESC, p1.post_id DESC
 							LIMIT %d",
 							...array_merge(
 								array( '%' . $wpdb->esc_like( wc_clean( $term ) ) . '%' ),
 								$search_fields,
+								$order_types,
+								$order_statuses,
 								array( $query_limit )
 							)
 						)
-						// phpcs:enable
 					),
 					$wpdb->get_col(
 						$wpdb->prepare(
@@ -646,10 +653,16 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 							FROM {$wpdb->prefix}woocommerce_order_items as order_items
 							INNER JOIN {$wpdb->posts} p ON order_items.order_id = p.ID
 							WHERE order_item_name LIKE %s
+							AND p.post_type IN ($order_types_placeholder)
+							AND p.post_status IN ($order_statuses_placeholder)
 							ORDER BY p.post_date_gmt DESC, order_items.order_id DESC
 							LIMIT %d",
-							'%' . $wpdb->esc_like( wc_clean( $term ) ) . '%',
-							$query_limit
+							...array_merge(
+								array( '%' . $wpdb->esc_like( wc_clean( $term ) ) . '%' ),
+								$order_types,
+								$order_statuses,
+								array( $query_limit )
+							)
 						)
 					),
 					$wpdb->get_col(
@@ -660,20 +673,29 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 							INNER JOIN {$wpdb->posts} p ON os.order_id = p.ID
 							WHERE (um.meta_key = 'billing_phone' OR um.meta_key = 'shipping_phone')
 							AND um.meta_value = %s
+							AND p.post_type IN ($order_types_placeholder)
+							AND p.post_status IN ($order_statuses_placeholder)
 							ORDER BY p.post_date_gmt DESC, os.order_id DESC
 							LIMIT %d",
-							wc_clean( $term ),
-							$query_limit
+							...array_merge(
+								array( wc_clean( $term ) ),
+								$order_types,
+								$order_statuses,
+								array( $query_limit )
+							)
 						)
 					)
 				)
 			);
+			// phpcs:enable
 		}
 
 		if ( 0 < $limit && ! empty( $order_ids ) ) {
 			$order_ids = (array) wc_get_orders(
 				array(
 					'limit'    => $limit,
+					'type'     => $order_types,
+					'status'   => $order_statuses,
 					'orderby'  => array(
 						'date' => 'DESC',
 						'ID'   => 'DESC',
