@@ -50,7 +50,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		'status'             => '',
 		'currency'           => '',
 		'version'            => '',
-		'prices_include_tax' => false,
+		'prices_include_tax' => null,
 		'date_created'       => null,
 		'date_modified'      => null,
 		'discount_total'     => 0,
@@ -444,7 +444,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return bool
 	 */
 	public function get_prices_include_tax( $context = 'view' ) {
-		return $this->get_prop( 'prices_include_tax', $context );
+		$value = $this->get_prop( 'prices_include_tax', $context );
+
+		if ( ! is_bool( $value ) ) {
+			$value = filter_var( get_option( 'woocommerce_prices_include_tax' ), FILTER_VALIDATE_BOOLEAN );
+		}
+
+		return $value;
 	}
 
 	/**

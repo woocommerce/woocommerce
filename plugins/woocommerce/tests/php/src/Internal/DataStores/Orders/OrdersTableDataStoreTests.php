@@ -2446,6 +2446,53 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testDox An order created without an explicit prices_include_tax value records the store setting.
+	 */
+	public function test_create_records_store_prices_include_tax_setting() {
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+
+		$order = new WC_Order();
+		$this->switch_data_store( $order, $this->sut );
+		$order->save();
+
+		wp_cache_flush();
+
+		$r_order = new WC_Order();
+		$r_order->set_id( $order->get_id() );
+		$this->switch_data_store( $r_order, $this->sut );
+		$this->sut->read( $r_order );
+
+		$this->assertTrue(
+			$r_order->get_prices_include_tax(),
+			'An order created on a tax inclusive store should be persisted as tax inclusive.'
+		);
+	}
+
+	/**
+	 * @testDox An explicitly set prices_include_tax value is persisted as given, not replaced by the store setting.
+	 */
+	public function test_create_keeps_explicit_prices_include_tax_value() {
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+
+		$order = new WC_Order();
+		$this->switch_data_store( $order, $this->sut );
+		$order->set_prices_include_tax( false );
+		$order->save();
+
+		wp_cache_flush();
+
+		$r_order = new WC_Order();
+		$r_order->set_id( $order->get_id() );
+		$this->switch_data_store( $r_order, $this->sut );
+		$this->sut->read( $r_order );
+
+		$this->assertFalse(
+			$r_order->get_prices_include_tax(),
+			'An order explicitly created as tax exclusive should stay tax exclusive on a tax inclusive store.'
+		);
+	}
+
+	/**
 	 * @testDox Test that inserting with strict SQL mode is also supported.
 	 */
 	public function test_order_create_with_strict_mode_and_null_values() {
