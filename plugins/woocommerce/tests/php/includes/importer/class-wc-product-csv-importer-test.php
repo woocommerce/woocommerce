@@ -472,6 +472,23 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Constructing the importer with a CSV file that cannot be opened should fail with a clear error.
+	 */
+	public function test_unopenable_csv_file_fails_with_clear_error() {
+		$this->expectException( WPDieException::class );
+		$this->expectExceptionMessage( 'Unable to open the CSV file, please try again with a new file.' );
+
+		// Silence the fopen() warning, which PHPUnit would otherwise convert into an error before wp_die() is reached.
+		set_error_handler( static fn() => true, E_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- test-scoped warning suppression, restored below.
+
+		try {
+			new WC_Product_CSV_Importer( __DIR__ . '/does-not-exist.csv' );
+		} finally {
+			restore_error_handler();
+		}
+	}
+
+	/**
 	 * @testdox adjust_character_encoding should convert values from the configured encoding to UTF-8 (issue #38541).
 	 * @dataProvider provider_adjust_character_encoding
 	 *
