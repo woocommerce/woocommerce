@@ -97,6 +97,16 @@ class WC_Validation_Test extends \WC_Unit_Test_Case {
 			array( false, 'ZZ-1050', 'LV' ),
 			array( false, 'LV-ABCD', 'LV' ),
 			array( false, "LV-1050\n", 'LV' ),
+			// The country prefix without a separator, as produced by wc_normalize_postcode().
+			array( true, 'LV1050', 'LV' ),
+			array( true, 'lv1050', 'LV' ),
+			array( false, 'LV0123', 'LV' ),
+			array( false, "LV1050\n", 'LV' ),
+			// A space is accepted as the prefix separator, but only a literal space.
+			array( true, 'LV 1050', 'LV' ),
+			array( true, 'lv 1050', 'LV' ),
+			array( false, "LV\n1050", 'LV' ),
+			array( false, "LV\t1050", 'LV' ),
 		);
 
 		return array_merge( $cz, $se, $li, $lv );
