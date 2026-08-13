@@ -1,8 +1,8 @@
 # Monorepo CI.
-/.github/ @adimoldovan
+/.github/ @adimoldovan @woocommerce/monorepo
 
 # Monorepo tooling folders.
-/packages/js/e2e-utils-playwright/ @adimoldovan
+/packages/js/e2e-utils-playwright/ @adimoldovan @woocommerce/monorepo
 
 # Files in root of repository
 /changelog.txt
