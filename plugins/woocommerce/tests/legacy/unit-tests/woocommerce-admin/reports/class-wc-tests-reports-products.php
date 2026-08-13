@@ -779,6 +779,93 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should report nothing when the category and product filters have no product in common.
+	 *
+	 * An empty intersection used to be indistinguishable from an absent product filter, so both
+	 * filters were dropped and the report covered every product instead of none.
+	 */
+	public function test_disjoint_category_and_product_filters() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$in_category = new WC_Product_Simple();
+		$in_category->set_name( 'In Category' );
+		$in_category->set_regular_price( 25 );
+		$in_category->save();
+
+		$outside = new WC_Product_Simple();
+		$outside->set_name( 'Outside Category' );
+		$outside->set_regular_price( 25 );
+		$outside->save();
+
+		$term = wp_insert_term( 'Filtered Category', 'product_cat' );
+		wp_set_object_terms( $in_category->get_id(), array( $term['term_id'] ), 'product_cat' );
+
+		foreach ( array( $in_category, $outside ) as $product ) {
+			$order = WC_Helper_Order::create_order( 1, $product );
+			$order->set_status( OrderStatus::COMPLETED );
+			$order->set_total( 100 );
+			$order->save();
+		}
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$data_store = new ProductsDataStore();
+		$args       = array(
+			'after'             => '2000-01-01 00:00:00',
+			'before'            => '2100-01-01 00:00:00',
+			'category_includes' => array( $term['term_id'] ),
+			'product_includes'  => array( $outside->get_id() ),
+		);
+
+		$data = $data_store->get_data( $args );
+
+		$this->assertEquals( 0, $data->total, 'A product filter that excludes every product in the category should report nothing' );
+		$this->assertSame( array(), $data->data );
+
+		// The same pair of filters still reports the product they do have in common.
+		$args['product_includes'] = array( $in_category->get_id() );
+
+		$data = $data_store->get_data( $args );
+
+		$this->assertEquals( 1, $data->total );
+		$this->assertEquals( $in_category->get_id(), $data->data[0]['product_id'] );
+	}
+
+	/**
+	 * @testdox Should report nothing when a product filter is combined with an empty category.
+	 */
+	public function test_product_filter_with_an_empty_category() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Uncategorized Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->set_total( 100 );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$term = wp_insert_term( 'Empty Category', 'product_cat' );
+
+		$data_store = new ProductsDataStore();
+		$data       = $data_store->get_data(
+			array(
+				'after'             => '2000-01-01 00:00:00',
+				'before'            => '2100-01-01 00:00:00',
+				'category_includes' => array( $term['term_id'] ),
+				'product_includes'  => array( $product->get_id() ),
+			)
+		);
+
+		$this->assertEquals( 0, $data->total, 'An empty category should keep forcing an empty set once a product filter is added' );
+		$this->assertSame( array(), $data->data );
+	}
+
+	/**
 	 * Tests the data stored in the wc_order_product_lookup table when a full refund is made.
 	 *
 	 * The full refunds here are the ones that change the order status to refunded.
