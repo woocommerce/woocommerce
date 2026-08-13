@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Exclude lump-sum refunds of never-paid orders from date_paid-based Revenue analytics so manually refunded failed orders no longer produce phantom returns, negative net sales and uncollected tax amounts.
