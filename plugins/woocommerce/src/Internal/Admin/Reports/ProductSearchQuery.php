@@ -84,9 +84,9 @@ class ProductSearchQuery {
 		$where_clauses[] = $wpdb->prepare( "posts.post_status IN ( {$status_list} )", $statuses );
 		$where_clauses[] = '( ' . implode( ' OR ', $term_clauses ) . ' )';
 
-		$restrict_to_ids = array_filter( array_map( 'intval', (array) $restrict_to_ids ) );
+		$restrict_to_ids = (array) $restrict_to_ids;
 		if ( ! empty( $restrict_to_ids ) ) {
-			$where_clauses[] = 'posts.ID IN ( ' . implode( ',', $restrict_to_ids ) . ' )';
+			$where_clauses[] = 'posts.ID IN ( ' . implode( ',', array_map( 'intval', $restrict_to_ids ) ) . ' )';
 		}
 
 		$join = $sku_enabled

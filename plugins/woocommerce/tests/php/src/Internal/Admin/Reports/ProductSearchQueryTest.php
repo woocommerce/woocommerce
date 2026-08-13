@@ -209,6 +209,17 @@ class ProductSearchQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should match nothing when every given product ID is unusable.
+	 */
+	public function test_get_ids_subquery_matches_nothing_when_restricted_to_unusable_ids(): void {
+		$this->create_product( 'Kingston Widget' );
+
+		$found = $this->run_subquery( ProductSearchQuery::get_ids_subquery( array( 'Kingston' ), array( 0 ) ) );
+
+		$this->assertSame( array(), $found );
+	}
+
+	/**
 	 * @testdox Should not match products in a status that is hidden from search.
 	 */
 	public function test_get_ids_subquery_excludes_products_hidden_from_search(): void {
