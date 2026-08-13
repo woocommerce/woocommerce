@@ -255,6 +255,7 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 
 		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*1\s*</', $output, 'Should only count the completed order' );
 		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*100\.00/', $output, 'Should only sum spend from the completed order' );
+		$this->assertMatchesRegularExpression( '/order-attribution-average-order-value">\s*.*100\.00/', $output, 'Should show average order value of 100' );
 	}
 
 	/**
@@ -269,6 +270,7 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 
 		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*2\s*</', $output, 'Should count both orders' );
 		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*150\.00/', $output, 'Should sum spend from both orders' );
+		$this->assertMatchesRegularExpression( '/order-attribution-average-order-value">\s*.*75\.00/', $output, 'Should show average order value of 75' );
 	}
 
 	/**
