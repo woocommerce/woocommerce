@@ -489,6 +489,23 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Importing an empty CSV file should yield empty keys and data instead of fataling.
+	 */
+	public function test_empty_csv_file_yields_empty_keys_and_data() {
+		$empty_csv = sys_get_temp_dir() . '/empty-import.csv';
+		file_put_contents( $empty_csv, '' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- test fixture.
+
+		try {
+			$importer = new WC_Product_CSV_Importer( $empty_csv );
+
+			$this->assertSame( array(), $importer->get_raw_keys(), 'An empty CSV file should produce no raw keys' );
+			$this->assertSame( array(), $importer->get_raw_data(), 'An empty CSV file should produce no raw data' );
+		} finally {
+			unlink( $empty_csv ); // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- test fixture.
+		}
+	}
+
+	/**
 	 * @testdox adjust_character_encoding should convert values from the configured encoding to UTF-8 (issue #38541).
 	 * @dataProvider provider_adjust_character_encoding
 	 *

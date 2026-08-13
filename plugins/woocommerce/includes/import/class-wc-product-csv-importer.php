@@ -113,7 +113,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			wp_die( esc_html__( 'Unable to open the CSV file, please try again with a new file.', 'woocommerce' ) );
 		}
 
-		$this->raw_keys = array_map( 'trim', fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ) ); // @codingStandardsIgnoreLine
+		$headers = fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ); // @codingStandardsIgnoreLine
+
+		// fgetcsv() returns false for an empty file; leave the keys empty so the empty-file error can be shown instead of fataling on array_map().
+		$this->raw_keys = is_array( $headers ) ? array_map( 'trim', $headers ) : array();
 
 		if ( ArrayUtil::is_truthy( $this->params, 'character_encoding' ) ) {
 			$this->raw_keys = array_map( array( $this, 'adjust_character_encoding' ), $this->raw_keys );
