@@ -278,11 +278,6 @@ class CheckoutOrder extends AbstractCartRoute {
 	/**
 	 * Rejects an address change that would alter what the order costs.
 	 *
-	 * This route pays for an order that is already priced and has no cart to re-quote shipping from, so a
-	 * request that moves the order into a different shipping zone, or onto different tax rates, is refused.
-	 * Every other field stays editable. Runs before anything is persisted, so a rejected request cannot
-	 * mutate the order.
-	 *
 	 * @throws RouteException When the order would have to be re-priced.
 	 *
 	 * @param array $priced_destination  Shipping destination the order is priced against.
