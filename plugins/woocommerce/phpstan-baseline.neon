@@ -9187,12 +9187,6 @@ parameters:
 			path: includes/class-wc-brands.php
 
 		-
-			message: '#^Argument of an invalid type array\<WP_Term\>\|WP_Error supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: includes/class-wc-brands.php
-
-		-
 			message: '#^Argument of an invalid type array\<int, WP_Term\>\|WP_Error supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 2
@@ -9403,19 +9397,7 @@ parameters:
 			path: includes/class-wc-brands.php
 
 		-
-			message: '#^Parameter \#1 \$terms of function _wc_term_recount expects array, array\<int, int\>\|WP_Error given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-brands.php
-
-		-
 			message: '#^Parameter \#2 \$str of function explode expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: includes/class-wc-brands.php
-
-		-
-			message: '#^Parameter \#2 \$taxonomy of function _wc_term_recount expects WP_Taxonomy, WP_Taxonomy\|false given\.$#'
 			identifier: argument.type
 			count: 2
 			path: includes/class-wc-brands.php
@@ -67802,18 +67784,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$fp of function fread expects resource, resource\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/TransientFiles/TransientFilesEngine.php
-
-		-
-			message: '#^Parameter \#1 \$input of function array_slice expects array, list\<string\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/TransientFiles/TransientFilesEngine.php
-
-		-
-			message: '#^Parameter \#1 \$var of function count expects array\|Countable, list\<string\>\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/TransientFiles/TransientFilesEngine.php
