@@ -107,6 +107,15 @@ class WC_Validation_Test extends \WC_Unit_Test_Case {
 			array( true, 'lv 1050', 'LV' ),
 			array( false, "LV\n1050", 'LV' ),
 			array( false, "LV\t1050", 'LV' ),
+			// At most one separator, and only a hyphen or a space.
+			array( false, 'LV--1050', 'LV' ),
+			array( false, 'LV  1050', 'LV' ),
+			array( false, 'LV_1050', 'LV' ),
+			// The bounds of the four digit range, and trailing characters.
+			array( true, '9999', 'LV' ),
+			array( false, '0999', 'LV' ),
+			array( false, 'LV-1050x', 'LV' ),
+			array( false, 'LV-1050 ', 'LV' ),
 		);
 
 		return array_merge( $cz, $se, $li, $lv );

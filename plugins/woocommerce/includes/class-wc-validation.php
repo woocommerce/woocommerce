@@ -144,6 +144,9 @@ class WC_Validation {
 				$valid = (bool) preg_match( '/^(94[8-9][0-9])$/', $postcode );
 				break;
 			case 'LV':
+				// An optional case-insensitive LV prefix, followed by at most one hyphen or
+				// space, then four digits that do not start with a zero. A literal space
+				// rather than \s, and \z rather than $, so newlines and tabs are rejected.
 				$valid = (bool) preg_match( '/^(?:LV[- ]?)?[1-9][0-9]{3}\z/i', $postcode );
 				break;
 			default:
