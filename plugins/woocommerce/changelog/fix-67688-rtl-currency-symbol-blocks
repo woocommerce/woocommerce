@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Honor the currency position setting for RTL-script currency symbols in block-rendered prices by wrapping them in first-strong isolate characters in FormattedMonetaryAmount.
