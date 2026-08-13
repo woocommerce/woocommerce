@@ -163,9 +163,8 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 			$this->assertStringNotContainsString( 'CASE WHEN', (string) $captured_orderby, 'An explicitly sorted search should keep the requested ordering untouched.' );
 
 			// A stopword-only term falls back to ranking by the whole group, mirroring search_products().
-			// The pattern requires a CASE WHEN ranking clause followed by a post_title LIKE predicate whose
-			// quoted operand contains the raw term. \S* absorbs the LIKE wildcards on both sides of the term,
-			// because at the posts_clauses stage they are still dynamic wpdb placeholder-escape hashes, not %.
+			// \S* absorbs the LIKE wildcards around the term: at the posts_clauses stage they are still
+			// dynamic wpdb placeholder-escape hashes, not %.
 			$captured_orderby = null;
 			$this->get_search_results( 'the' );
 			$this->assertMatchesRegularExpression( "/CASE WHEN.+post_title LIKE '\\S*the\\S*'/", (string) $captured_orderby, 'A stopword-only search should rank by the raw search group.' );
@@ -559,9 +558,8 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	public function test_product_search_ranks_when_earlier_posts_clauses_filter_appends_a_tiebreak(): void {
 		list( $title_match, $content_match, $search_phrase ) = $this->create_search_products();
 
-		// Appending leaves core's ordering in charge of the primary sort, so ranking still leads and the
-		// appended tiebreak survives after it. Reading the clause on posts_clauses must not turn a plugin
-		// adding a tiebreak into a plugin that silently disables relevance.
+		// Reading the clause on posts_clauses must not turn a plugin that adds a tiebreak into one that
+		// silently disables relevance: core still owns the primary sort, so ranking leads and this survives.
 		$append_tiebreak = static function ( $clauses, $query ) {
 			global $wpdb;
 
@@ -726,9 +724,9 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	private function create_search_products(): array {
 		$search_phrase = 'Night Light ' . wp_generate_password( 8, false );
 
-		// Dates are explicit and the content-only match is the newer one, so date ordering alone puts it
-		// first. Without that, both fixtures share a timestamp and the expected order can fall out of an
-		// unspecified tie-break instead of the ranking clause under test.
+		// The content-only match is deliberately the newer one, so date ordering alone puts it first and
+		// only ranking can restore the expected order. Undated fixtures tie, and the assertion then rides
+		// on an unspecified tie-break rather than the clause under test.
 		$title_match = WC_Helper_Product::create_simple_product();
 		$title_match->set_name( $search_phrase );
 		$title_match->set_date_created( '2024-01-01 00:00:00' );

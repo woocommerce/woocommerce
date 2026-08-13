@@ -59,11 +59,9 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		add_filter( 'views_edit-product', array( $this, 'product_views' ) );
 		add_filter( 'get_search_query', array( $this, 'search_label' ) );
 		add_filter( 'posts_clauses', array( $this, 'posts_clauses' ), 10, 2 );
-		// Ranking runs on posts_clauses, which core applies after every posts_orderby priority, so no
-		// posts_orderby callback ever sees the relevance clause. The late priority leaves earlier
-		// posts_clauses callbacks the same unmodified view. Whether order_search_results() then ranks
-		// depends on what those callbacks did: taking over the primary sort makes it defer, while
-		// appending a tiebreak leaves core's ordering in charge and ranking still leads.
+		// On posts_clauses, which core applies after every posts_orderby priority, so no posts_orderby
+		// callback sees the relevance clause. The late priority gives earlier posts_clauses callbacks
+		// that same unmodified view.
 		add_filter( 'posts_clauses', array( $this, 'order_search_results' ), 9999, 2 );
 
 		// Use hooks to prime various caches and improve products page performance.
@@ -671,12 +669,8 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * Prioritize title matches in unsorted product searches.
 	 *
 	 * Runs on posts_clauses rather than posts_orderby so that every posts_orderby callback, at any
-	 * priority, still observes the ORDER BY clause core generated.
-	 *
-	 * Reading the clause that late means it may already carry third-party ordering. A callback that
-	 * took over the primary sort — prepending to the clause or replacing it — is deferred to. One that
-	 * only appended a tiebreak left core's ordering in charge, so ranking still leads and that tiebreak
-	 * survives after it. See orderby_leads_with().
+	 * priority, still observes the ORDER BY clause core generated. Reading it that late means it may
+	 * already carry third-party ordering, so orderby_leads_with() decides whether ranking still leads.
 	 *
 	 * @since 11.1.0
 	 *
@@ -685,7 +679,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	public function order_search_results( $clauses, $query ) {
-		// Another callback produced this array, so confirm the piece being read is still a string clause.
+		// Another callback produced this array, so confirm the piece being read is still a clause.
 		if ( ! is_array( $clauses ) || ! isset( $clauses['orderby'] ) || ! is_string( $clauses['orderby'] ) ) {
 			return $clauses;
 		}
@@ -757,9 +751,8 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	private function build_title_match_case_clause( $search_term ) {
 		global $wpdb;
 
-		// Group the term exactly as search_products() does, so ranking and matching always agree on
-		// what an OR group is: the keyword has to appear space-delimited, which \s+or\s+ alone does
-		// not require because \s also matches bytes wc_clean() leaves in place.
+		// Group exactly as search_products() does, so ranking and matching agree on what an OR group is.
+		// \s+or\s+ alone would not: \s also matches \x0B and \x0C, which wc_clean() leaves in place.
 		$search_groups = stristr( $search_term, ' or ' ) ? preg_split( '/\s+or\s+/i', $search_term ) : array( $search_term );
 		if ( ! $search_groups ) {
 			return '';
@@ -845,6 +838,8 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	/**
 	 * Remove unsuitable product search terms.
 	 *
+	 * Mirrors WP_Query::get_search_terms(), including its stopword and single-character rules.
+	 *
 	 * @param string[] $terms Search terms.
 	 * @return string[]
 	 */
@@ -860,7 +855,6 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				$term = trim( $term, "\"' " );
 			}
 
-			// Avoid single A-Z and single dashes.
 			if ( empty( $term ) || ( 1 === strlen( $term ) && preg_match( '/^[a-z\-]$/i', $term ) ) ) {
 				continue;
 			}
@@ -900,8 +894,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		/** This filter is documented in wp-includes/class-wp-query.php. */
 		$filtered_stopwords = apply_filters( 'wp_search_stopwords', $stopwords ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment -- The hook is documented by WordPress.
 
-		// A filter callback can return anything; keep only strings so the strict in_array()
-		// comparison in get_valid_search_terms() stays safe on PHP 8.
+		// A callback can return anything; keep only strings so the strict in_array() below stays safe.
 		return is_array( $filtered_stopwords ) ? array_filter( $filtered_stopwords, 'is_string' ) : $stopwords;
 	}
 
