@@ -591,15 +591,15 @@ jobs:
           node-version-file: .nvmrc
 
       - name: 'Setup - syncpack'
-        run: npm install -g syncpack@^10.9.3
+        run: npm install -g syncpack@15.3.3
 
       - name: 'Validate - mismatches'
-        run: syncpack list-mismatches
+        run: syncpack lint
 
       - name: 'Validate - prompt mitigation on failed validation'
         if: failure()
         run: |
-          echo "Dependency version mismatch detected. This can usually be fixed automatically by updating the pinned version in \`.syncpackrc\` and then running: \`pnpm sync-dependencies\`"
+          echo "Dependency version mismatch detected. This can usually be fixed automatically by updating the dependency version in \`.syncpackrc\` or \`pnpm-workspace.yaml\`, then running: \`pnpm sync-dependencies\`"
           exit 1
 
   validate-changelog:
