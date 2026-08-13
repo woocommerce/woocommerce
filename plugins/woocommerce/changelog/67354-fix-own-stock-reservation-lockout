@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Harden the cart stock check so a boolean false stored in the order_awaiting_payment session value (e.g. after a customer cancels an unpaid order) no longer skips the store_api_draft_order fallback, which could otherwise cause a shopper to be blocked by their own held order.
+Fix a shopper being blocked in the checkout shortcode by a stock hold created by their own cancelled order.
