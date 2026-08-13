@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Notifications;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use WC_Helper_Order;
 use WC_Unit_Test_Case;
 
@@ -89,6 +90,34 @@ class NewOrderNotificationTest extends WC_Unit_Test_Case {
 		$notification = new NewOrderNotification( 999999 );
 
 		$this->assertNull( $notification->to_payload() );
+	}
+
+	/**
+	 * @testdox Should use the recorded trigger time for the payload timestamp.
+	 */
+	public function test_to_payload_timestamp_uses_recorded_trigger_time(): void {
+		$order        = WC_Helper_Order::create_order();
+		$notification = new NewOrderNotification( $order->get_id() );
+		$triggered_at = time() - 300;
+
+		$order->update_meta_data( NotificationProcessor::TRIGGERED_META_KEY, (string) $triggered_at );
+		$order->save_meta_data();
+
+		$payload = $notification->to_payload();
+
+		$this->assertSame( gmdate( 'c', $triggered_at ), $payload['timestamp'] );
+	}
+
+	/**
+	 * @testdox Should fall back to the current time when no trigger time is recorded.
+	 */
+	public function test_to_payload_timestamp_falls_back_to_current_time(): void {
+		$order        = WC_Helper_Order::create_order();
+		$notification = new NewOrderNotification( $order->get_id() );
+
+		$payload = $notification->to_payload();
+
+		$this->assertEqualsWithDelta( time(), strtotime( $payload['timestamp'] ), 5 );
 	}
 
 	/**
