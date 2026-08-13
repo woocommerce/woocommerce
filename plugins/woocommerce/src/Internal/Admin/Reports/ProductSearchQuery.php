@@ -13,6 +13,8 @@ defined( 'ABSPATH' ) || exit;
  * Builds the SQL that resolves a free-text product search to product IDs.
  *
  * @internal
+ *
+ * @since 11.2.0
  */
 class ProductSearchQuery {
 
@@ -33,7 +35,7 @@ class ProductSearchQuery {
 			array_filter(
 				array_map( 'sanitize_text_field', $terms ),
 				function ( $term ) {
-					return '' !== trim( $term );
+					return '' !== $term;
 				}
 			)
 		);

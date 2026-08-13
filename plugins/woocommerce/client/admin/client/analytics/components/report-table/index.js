@@ -541,6 +541,11 @@ ReportTable.propTypes = {
 		placeholder: PropTypes.string,
 	} ),
 	/**
+	 * Properties used to limit the results. It will be used in the API call to send the IDs.
+	 * Defaults to the `endpoint`.
+	 */
+	limitProperties: PropTypes.array,
+	/**
 	 * Primary data of that report. If it's not provided, it will be automatically
 	 * loaded via the provided `endpoint`.
 	 */

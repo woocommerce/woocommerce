@@ -98,6 +98,17 @@ class ProductSearchQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should trim each term.
+	 */
+	public function test_parse_terms_trims_each_term(): void {
+		$this->assertSame(
+			array( 'widget', 'blue gadget' ),
+			ProductSearchQuery::parse_terms( '  widget  ,  blue   gadget  ' ),
+			'sanitize_text_field() trims and collapses internal whitespace runs'
+		);
+	}
+
+	/**
 	 * @testdox Should return an empty statement when there is nothing to search for.
 	 */
 	public function test_get_ids_subquery_returns_an_empty_statement_when_there_is_nothing_to_search_for(): void {
