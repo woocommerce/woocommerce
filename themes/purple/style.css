@@ -442,6 +442,18 @@ a.wc-block-components-product-name:hover {
 	text-transform: uppercase;
 }
 
+/* Closed accordion panels are server-rendered without [hidden] (the
+ * Interactivity API only applies it after hydration), so they flash open
+ * on load. Collapse them from first paint via the server-rendered
+ * aria-expanded state. Scoped to scripting: enabled so no-JS visitors
+ * keep the all-panels-open fallback. */
+@media (scripting: enabled) {
+	.wp-block-accordion-heading:has([aria-expanded="false"]) + .wp-block-accordion-panel {
+		height: 0;
+		overflow: visible clip;
+	}
+}
+
 .wp-block-woocommerce-product-review-content p {
 	margin-top: var(--wp--preset--spacing--20);
 	margin-bottom: 0;
