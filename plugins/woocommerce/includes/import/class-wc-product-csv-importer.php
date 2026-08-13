@@ -155,6 +155,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 		$this->file_position = ftell( $handle );
 
+		fclose( $handle ); // @codingStandardsIgnoreLine.
+
 		if ( ! empty( $this->params['mapping'] ) ) {
 			$this->set_mapped_keys();
 		}
