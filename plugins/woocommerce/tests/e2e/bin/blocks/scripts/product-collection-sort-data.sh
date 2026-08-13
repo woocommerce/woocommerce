@@ -90,7 +90,11 @@ foreach ( $products as $product_name => $product ) {
 		$product->set_rating_counts( $rating_counts_for( $target_rating ) );
 	}
 
-	$product->save();
+	// Products the fixtures do not name already hold the values set above, so
+	// saving them writes nothing but a fresh post_modified stamp.
+	if ( $product->get_changes() ) {
+		$product->save();
+	}
 }
 
 // This runs synchronously under WP-CLI and also repairs stale lookup rows on reruns.
