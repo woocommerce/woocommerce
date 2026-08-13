@@ -268,6 +268,47 @@ describe( 'StoreNoticesContainer', () => {
 		);
 	} );
 
+	it( 'Exposes the notice id as data-id on each list item', async () => {
+		// The classic notice templates put the notice id on the li via
+		// wc_get_notice_data_attr(), and Store API errors use their error code as
+		// the notice id. Keep the same hook here so scripts and themes can target
+		// an individual notice.
+		dispatch( noticesStore ).createErrorNotice( 'First data-id error', {
+			id: 'woocommerce_rest_cart_coupon_error',
+			context: 'test-context',
+		} );
+		dispatch( noticesStore ).createErrorNotice( 'Second data-id error', {
+			id: 'woocommerce_rest_invalid_postcode',
+			context: 'test-context',
+		} );
+		const { container } = render(
+			<StoreNoticesContainer context="test-context" />
+		);
+
+		expect(
+			[ ...container.querySelectorAll( 'li' ) ].map( ( item ) =>
+				item.getAttribute( 'data-id' )
+			)
+		).toEqual( [
+			'woocommerce_rest_cart_coupon_error',
+			'woocommerce_rest_invalid_postcode',
+		] );
+
+		// Clean up notices.
+		await act( () =>
+			dispatch( noticesStore ).removeNotice(
+				'woocommerce_rest_cart_coupon_error',
+				'test-context'
+			)
+		);
+		await act( () =>
+			dispatch( noticesStore ).removeNotice(
+				'woocommerce_rest_invalid_postcode',
+				'test-context'
+			)
+		);
+	} );
+
 	it( 'Renders a non-dismissible notice with the same list markup, without a summary', async () => {
 		dispatch( noticesStore ).createErrorNotice(
 			'Non-dismissible list error',

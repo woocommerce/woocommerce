@@ -22,6 +22,12 @@ import StoreNotice from '../store-notice';
  *
  * `role="list"` is needed because the list markers are removed with CSS, which
  * strips the implicit list semantics in some browsers.
+ *
+ * `data-id` mirrors the classic notice templates, which expose the notice id on
+ * each `li` via `wc_get_notice_data_attr()`. Store API errors surface their
+ * error code as the notice id (e.g. `woocommerce_rest_cart_coupon_error`), so
+ * this gives themes and scripts the same per-notice hook the shortcode
+ * checkout has.
  */
 const StoreNoticeList = ( {
 	notices,
@@ -33,7 +39,7 @@ const StoreNoticeList = ( {
 	// eslint-disable-next-line jsx-a11y/no-redundant-roles
 	<ul className="wc-block-components-notice-banner__list" role="list">
 		{ notices.map( ( notice ) => (
-			<li key={ notice.id + '-' + notice.context }>
+			<li key={ notice.id + '-' + notice.context } data-id={ notice.id }>
 				<RawHTML>{ notice.content }</RawHTML>
 			</li>
 		) ) }
