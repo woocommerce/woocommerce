@@ -351,10 +351,13 @@ emit_table() {  # emit_table <group> <first-column-header> <limit|0>
   echo
   echo "### By reason"
   echo
-  echo "| \`reason=\` | Retried | Recovered | Rate |"
-  echo "|---|---:|---:|---:|"
-  awk -F'\t' '{t[$8]++; if($7=="SAVED") s[$8]++}
-    END{for(r in t) printf "| `%s` | %d | %d | %.0f%% |\n", r, t[r], s[r]+0, 100*(s[r]+0)/t[r]}' \
+  echo "\`Share\` is that reason's slice of all retries; \`Rate\` is how often it recovered."
+  echo
+  echo "| \`reason=\` | Retried | Share | Recovered | Rate |"
+  echo "|---|---:|---:|---:|---:|"
+  awk -F'\t' '{t[$8]++; n++; if($7=="SAVED") s[$8]++}
+    END{for(r in t) printf "| `%s` | %d | %.0f%% | %d | %.0f%% |\n",
+      r, t[r], (n ? 100*t[r]/n : 0), s[r]+0, 100*(s[r]+0)/t[r]}' \
     "$EVENTS" | sort -t'|' -k3 -rn
   echo
   echo "## By month"
@@ -373,22 +376,31 @@ emit_table() {  # emit_table <group> <first-column-header> <limit|0>
   echo
   emit_table day "Day" 30
   echo
-  echo "## Why the failures failed"
+  echo "## Types of failure"
   echo
-  echo "Cause read from the final attempt's log, not from the \`reason=\` tag."
+  echo "Cause is read from the final attempt's log, not from the \`reason=\` tag — the two"
+  echo "disagree often, and most \`unknown\` failures are a branch's own broken code rather"
+  echo "than infrastructure. One example per type, the most recent."
   echo
-  echo "| Cause | Jobs | Retryable |"
-  echo "|---|---:|---|"
-  awk -F'\t' '$7=="LOST"{c[$10]++} END{for(k in c) printf "%s\t%d\n", k, c[k]}' "$EVENTS" \
-    | sort -k2 -rn | while IFS=$'\t' read -r cause n; do
-        case "$cause" in
-          plugin-code|workspace-eacces)  note="no — the branch is broken" ;;
-          composer-installer)            note="no — BuildKit caches the bad layer" ;;
-          wordpress-org|packagist|dockerhub|dockerhub-ratelimit|docker-daemon|container-unhealthy|buildkit|docker-compose) note="yes" ;;
-          *)                             note="unclear" ;;
-        esac
-        printf '| `%s` | %d | %s |\n' "$cause" "$n" "$note"
-      done
+  echo "| Cause | Jobs | Share | Retryable | Latest | \`reason=\` | Branch | Job | Run |"
+  echo "|---|---:|---:|---|---|---|---|---|---|"
+  awk -F'\t' -v repo="$REPO" '
+    function retryable(c) {
+      if (c == "plugin-code" || c == "workspace-eacces") return "no — the branch is broken"
+      if (c == "composer-installer") return "no — BuildKit caches the bad layer"
+      if (c == "unclassified") return "unknown — add a pattern"
+      return "yes"
+    }
+    $7=="LOST" {
+      c[$10]++; lost++
+      # ISO-8601 timestamps compare correctly as strings, so the newest wins.
+      if ($2 > when[$10]) { when[$10]=$2; d[$10]=substr($2,1,10); rs[$10]=$8; br[$10]=$4; jb[$10]=$6; rn[$10]=$1 }
+    }
+    END {
+      for (k in c)
+        printf "%d\t| `%s` | %d | %.0f%% | %s | %s | `%s` | `%s` | %s | [%s](https://github.com/%s/actions/runs/%s) |\n",
+          c[k], k, c[k], (lost ? 100*c[k]/lost : 0), retryable(k), d[k], rs[k], br[k], jb[k], rn[k], repo, rn[k]
+    }' "$EVENTS" | sort -rn | cut -f2-
   echo
   echo "## Most recent failures"
   echo
