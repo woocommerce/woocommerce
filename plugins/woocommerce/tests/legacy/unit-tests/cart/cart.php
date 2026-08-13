@@ -18,7 +18,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 
-		WC()->cart->empty_cart();
 		WC()->customer->set_is_vat_exempt( false );
 	}
 

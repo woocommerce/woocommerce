@@ -444,8 +444,15 @@ function wc_placeholder_img_src( $size = 'woocommerce_thumbnail' ) {
  * @return string
  */
 function wc_placeholder_img( $size = 'woocommerce_thumbnail', $attr = '' ) {
-	$dimensions        = wc_get_image_size( $size );
-	$placeholder_image = get_option( 'woocommerce_placeholder_image', 0 );
+	$dimensions           = wc_get_image_size( $size );
+	$placeholder_image    = get_option( 'woocommerce_placeholder_image', 0 );
+	$use_attachment_image = wp_attachment_is_image( $placeholder_image );
+	$image                = null;
+
+	if ( $use_attachment_image && has_filter( 'woocommerce_placeholder_img_src' ) ) {
+		$image                = wc_placeholder_img_src( $size );
+		$use_attachment_image = wp_get_attachment_image_url( $placeholder_image, $size ) === $image;
+	}
 
 	$default_attr = array(
 		'class' => 'woocommerce-placeholder wp-post-image',
@@ -454,7 +461,7 @@ function wc_placeholder_img( $size = 'woocommerce_thumbnail', $attr = '' ) {
 
 	$attr = wp_parse_args( $attr, $default_attr );
 
-	if ( wp_attachment_is_image( $placeholder_image ) ) {
+	if ( $use_attachment_image ) {
 		$image_html = wp_get_attachment_image(
 			$placeholder_image,
 			$size,
@@ -462,7 +469,8 @@ function wc_placeholder_img( $size = 'woocommerce_thumbnail', $attr = '' ) {
 			$attr
 		);
 	} else {
-		$image      = wc_placeholder_img_src( $size );
+		// A changed source cannot use the attachment's srcset, as the browser could select it instead.
+		$image      = $image ?? wc_placeholder_img_src( $size );
 		$hwstring   = image_hwstring( $dimensions['width'], $dimensions['height'] );
 		$attributes = array();
 
@@ -473,7 +481,18 @@ function wc_placeholder_img( $size = 'woocommerce_thumbnail', $attr = '' ) {
 		$image_html = '<img src="' . esc_url( $image ) . '" ' . $hwstring . implode( ' ', $attributes ) . '/>';
 	}
 
-	return apply_filters( 'woocommerce_placeholder_img', $image_html, $size, $dimensions );
+	/**
+	 * Filters the placeholder image HTML.
+	 *
+	 * @param string $image_html The placeholder image HTML.
+	 * @param string $size       Image size.
+	 * @param array  $dimensions Image width and height.
+	 * @param array  $attr       Attributes for the image markup.
+	 *
+	 * @since 2.0.0
+	 * @since 11.1.0 Added the `$attr` parameter.
+	 */
+	return apply_filters( 'woocommerce_placeholder_img', $image_html, $size, $dimensions, $attr );
 }
 
 /**
@@ -1940,7 +1959,8 @@ function wc_update_product_lookup_tables_is_running() {
 function wc_update_product_lookup_tables() {
 	global $wpdb;
 
-	$is_cli = Constants::is_true( 'WP_CLI' );
+	$is_cli          = Constants::is_true( 'WP_CLI' );
+	$reviews_enabled = wc_reviews_enabled();
 
 	// Note that the table is not yet generated.
 	update_option( 'woocommerce_product_lookup_table_is_generating', true );
@@ -1974,6 +1994,10 @@ function wc_update_product_lookup_tables() {
 	);
 
 	foreach ( $columns as $index => $column ) {
+		if ( 'average_rating' === $column && ! $reviews_enabled ) {
+			continue;
+		}
+
 		if ( $is_cli ) {
 			wc_update_product_lookup_tables_column( $column );
 		} else {
@@ -1986,6 +2010,10 @@ function wc_update_product_lookup_tables() {
 				'wc_update_product_lookup_tables'
 			);
 		}
+	}
+
+	if ( ! $reviews_enabled ) {
+		return;
 	}
 
 	// Rating counts are serialised so they have to be unserialised before populating the lookup table.
@@ -2023,6 +2051,11 @@ function wc_update_product_lookup_tables_column( $column ) {
 	if ( empty( $column ) ) {
 		return;
 	}
+
+	if ( 'average_rating' === $column && ! wc_reviews_enabled() ) {
+		return;
+	}
+
 	global $wpdb;
 	switch ( $column ) {
 		case 'min_max_price':
@@ -2181,7 +2214,7 @@ function wc_update_product_lookup_tables_rating_count( $rows ) {
 function wc_update_product_lookup_tables_rating_count_batch( $offset = 0, $limit = 0 ) {
 	global $wpdb;
 
-	if ( ! $limit ) {
+	if ( ! $limit || ! wc_reviews_enabled() ) {
 		return;
 	}
 
@@ -2242,7 +2275,7 @@ function wc_product_attach_featured_image( $attachment_id, $product = null, $sav
 		$product    = wc_get_product( $product_id );
 	}
 
-	if ( ! $product ) {
+	if ( ! $product || ! current_user_can( 'edit_product', $product->get_id() ) ) {
 		return;
 	}
 

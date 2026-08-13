@@ -82,7 +82,7 @@ export const TaskListItem = ( {
 	const hasFills = Boolean( slot?.fills?.length );
 
 	const onDismiss = useCallback( () => {
-		dismissTask( id );
+		void dismissTask( id );
 		createNotice( 'success', __( 'Task dismissed', 'woocommerce' ), {
 			actions: [
 				{
@@ -94,7 +94,7 @@ export const TaskListItem = ( {
 	}, [ id ] );
 
 	const onSnooze = useCallback( () => {
-		snoozeTask( id );
+		void snoozeTask( id );
 		createNotice(
 			'success',
 			__( 'Task postponed until tomorrow', 'woocommerce' ),
@@ -124,7 +124,7 @@ export const TaskListItem = ( {
 		const trackedStartedTasks =
 			userPreferences.task_list_tracked_started_tasks || {};
 
-		visitedTask( id );
+		void visitedTask( id );
 		await userPreferences.updateUserPreferences( {
 			task_list_tracked_started_tasks: {
 				...( trackedStartedTasks || {} ),
@@ -169,11 +169,13 @@ export const TaskListItem = ( {
 				event?: React.MouseEvent | React.KeyboardEvent
 			) => {
 				trackTaskListClick?.();
-				trackClick().then( () => {
+				void trackClick().then( () => {
 					if ( ! isComplete ) {
 						// Invalidate the task list selector cache to force a re-fetch.
 						// This ensures the task completion status is up-to-date after visiting a task.
-						invalidateResolutionForStoreSelector( 'getTaskLists' );
+						void invalidateResolutionForStoreSelector(
+							'getTaskLists'
+						);
 					}
 				} );
 

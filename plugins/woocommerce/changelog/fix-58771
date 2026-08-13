@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure the toggle button in the product list table stays aligned on mobile view.

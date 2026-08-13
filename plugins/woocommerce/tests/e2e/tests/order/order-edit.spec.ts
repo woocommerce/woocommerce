@@ -31,7 +31,7 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 			} );
 		await restApi
 			.post( `${ WC_API_PATH }/orders`, {
-				status: 'processing',
+				status: 'pending',
 			} )
 			.then( ( response: { data: { id: number } } ) => {
 				secondOrderId = response.data.id;
@@ -43,7 +43,6 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 			.then( ( response: { data: { id: number } } ) => {
 				orderToCancel = response.data.id;
 			} );
-
 		await restApi
 			.post( `${ WC_API_PATH }/customers`, {
 				email: `${ username }@email.addr`,
@@ -374,6 +373,39 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 			await page.locator( 'li.select2-results__option' ).click();
 		} );
 
+		await test.step( 'Update the shipping method name', async () => {
+			await page.getByRole( 'button', { name: 'Add item(s)' } ).click();
+			await page.getByRole( 'button', { name: 'Add shipping' } ).click();
+
+			const shippingRow = page.locator( 'tr.shipping' ).last();
+			await expect( shippingRow ).toBeVisible();
+			await shippingRow
+				.getByRole( 'link', { name: 'Edit shipping' } )
+				.click();
+
+			const method = shippingRow.locator( 'select.shipping_method' );
+			const name = shippingRow.locator( 'input.shipping_method_name' );
+
+			await method.selectOption( 'free_shipping' );
+			await expect( name ).toHaveValue( 'Free shipping' );
+
+			await method.selectOption( '' );
+			await expect( name ).toHaveValue( 'Shipping' );
+
+			await method.selectOption( 'free_shipping' );
+			await expect( name ).toHaveValue( 'Free shipping' );
+			await method.selectOption( 'other' );
+			await expect( name ).toHaveValue( 'Shipping' );
+
+			await method.selectOption( 'free_shipping' );
+			await expect( name ).toHaveValue( 'Free shipping' );
+			await name.fill( 'Local courier' );
+			await method.selectOption( '' );
+			await expect( name ).toHaveValue( 'Local courier' );
+
+			await page.locator( 'button.save-action' ).click();
+		} );
+
 		await test.step( 'Load the billing address and then copy it to the shipping address', async () => {
 			// Click the load billing address button
 			await page
@@ -504,9 +536,8 @@ test.describe(
 		};
 
 		test.beforeAll( async () => {
-			( { source_url: downloadFile } = await getMediaBySlug(
-				'image-01'
-			) );
+			( { source_url: downloadFile } =
+				await getMediaBySlug( 'image-01' ) );
 
 			// Persist a Screen Options preference (an empty hidden-meta-boxes list) for the
 			// admin user (ID 1) so the box stays visible while the tests navigate between

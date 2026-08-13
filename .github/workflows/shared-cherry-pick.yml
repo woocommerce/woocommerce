@@ -391,12 +391,24 @@ jobs:
                 body: prBody
               });
               
-              await github.rest.pulls.requestReviewers({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: newPr.number,
-                reviewers: [context.actor, originalPr.user.login]
-              });
+              core.setOutput('pr_number', newPr.number.toString());
+              core.setOutput('original_author', originalPr.user?.login || '');
+              core.setOutput('original_merger', originalPr.merged_by?.login || '');
+              core.info(`Created PR #${newPr.number}: ${newPr.html_url}`);
+
+              // Request reviewers separately so an outside collaborator doesn't fail PR creation.
+              for (const reviewer of [context.actor, originalPr.user?.login].filter(Boolean)) {
+                try {
+                  await github.rest.pulls.requestReviewers({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    pull_number: newPr.number,
+                    reviewers: [reviewer]
+                  });
+                } catch (error) {
+                  core.warning(`Failed to request review from ${reviewer}: ${error.message}`);
+                }
+              }
 
               // Add label if there are conflicts
               if (hasConflicts) {
@@ -412,12 +424,6 @@ jobs:
                   core.warning(`Failed to add conflicts label: ${error.message}`);
                 }
               }
-
-              core.setOutput('pr_number', newPr.number.toString());
-              core.setOutput('original_author', originalPr.user?.login || '');
-              core.setOutput('original_merger', originalPr.merged_by?.login || '');
-
-              core.info(`Created PR #${newPr.number}: ${newPr.html_url}`);
 
             } catch (error) {
               core.setOutput('error_message', `Failed to create PR: ${error.message}`);

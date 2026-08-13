@@ -15,6 +15,19 @@ use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
  * Class WC_Stock_Functions_Tests.
  */
 class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
+	/**
+	 * The original product reviews setting.
+	 *
+	 * @var mixed
+	 */
+	private $original_reviews_setting;
+
+	/**
+	 * Whether the current test changed the product reviews setting.
+	 *
+	 * @var bool
+	 */
+	private $reviews_setting_changed = false;
 
 	/**
 	 * Reset the variation gallery feature-flag option after each test so
@@ -22,6 +35,18 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		delete_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME );
+
+		if ( $this->reviews_setting_changed ) {
+			delete_option( 'woocommerce_product_lookup_table_is_generating' );
+			as_unschedule_all_actions( '', array(), 'wc_update_product_lookup_tables' );
+
+			if ( null === $this->original_reviews_setting ) {
+				delete_option( 'woocommerce_enable_reviews' );
+			} else {
+				update_option( 'woocommerce_enable_reviews', $this->original_reviews_setting );
+			}
+		}
+
 		parent::tearDown();
 	}
 
@@ -224,7 +249,8 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		// Bypass product after save hook to prevent price change on save.
 		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 5 );
 
-		$this->assertEquals( 100, wc_get_product( $product->get_id() )->get_price() );
+		// The stored _price stays stale until the cron runs (the display heal makes get_price() correct sooner).
+		$this->assertEquals( 100, get_post_meta( $product->get_id(), '_price', true ) );
 
 		wc_scheduled_sales();
 
@@ -245,11 +271,270 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		// Bypass product after save hook to prevent price change on save.
 		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 5 );
 
-		$this->assertEquals( 50, wc_get_product( $product->get_id() )->get_price() );
+		// The stored _price stays stale until the cron runs (the display heal makes get_price() correct sooner).
+		$this->assertEquals( 50, get_post_meta( $product->get_id(), '_price', true ) );
 
 		wc_scheduled_sales();
 
 		$this->assertEquals( 100, wc_get_product( $product->get_id() )->get_price() );
+	}
+
+	/**
+	 * @testdox An ended scheduled sale displays the regular price before the AS event runs.
+	 */
+	public function test_scheduled_sale_active_price_heals_ended_sale_to_regular(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50 );
+		$product->set_sale_price( 20 );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ) );
+		$product->save();
+
+		// End time elapses without the AS event running, so _price stays stale.
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 5 );
+		clean_post_cache( $product->get_id() );
+
+		$reread = wc_get_product( $product->get_id() );
+		$this->assertEquals( 50, $reread->get_price(), 'An ended sale should display the regular price.' );
+		$this->assertEquals( 20, get_post_meta( $product->get_id(), '_price', true ), 'The stored _price stays stale until the AS event/cron runs.' );
+		$this->assertStringNotContainsString( '<del', $reread->get_price_html(), 'An ended sale should not render a strikethrough.' );
+	}
+
+	/**
+	 * @testdox A started scheduled sale displays the sale price before the AS event runs.
+	 */
+	public function test_scheduled_sale_active_price_heals_started_sale_to_sale_price(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50 );
+		$product->set_sale_price( 20 );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + 2 * HOUR_IN_SECONDS ) );
+		$product->save();
+
+		// Start time elapses without the AS event running, so _price stays at the regular price.
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 5 );
+		clean_post_cache( $product->get_id() );
+
+		$reread = wc_get_product( $product->get_id() );
+		$this->assertEquals( 20, $reread->get_price(), 'A started sale should display the sale price.' );
+		$this->assertStringContainsString( '<del', $reread->get_price_html(), 'A started sale should render a strikethrough.' );
+	}
+
+	/**
+	 * @testdox A started scheduled sale with no end date heals to the sale price.
+	 */
+	public function test_scheduled_sale_active_price_heals_started_sale_with_no_end_date(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50 );
+		$product->set_sale_price( 20 );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ) );
+		$product->save();
+
+		// Start time elapses without the AS event running, so _price stays at the regular price.
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 5 );
+		clean_post_cache( $product->get_id() );
+
+		$this->assertEquals( 20, wc_get_product( $product->get_id() )->get_price(), 'A started sale with only a start date should display the sale price.' );
+	}
+
+	/**
+	 * @testdox An ended scheduled sale with no start date heals to the regular price.
+	 */
+	public function test_scheduled_sale_active_price_heals_ended_sale_with_no_start_date(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50 );
+		$product->set_sale_price( 20 );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ) );
+		$product->save();
+
+		// End time elapses without the AS event running, so _price stays at the sale price.
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 5 );
+		clean_post_cache( $product->get_id() );
+
+		$this->assertEquals( 50, wc_get_product( $product->get_id() )->get_price(), 'An ended sale with only an end date should display the regular price.' );
+	}
+
+	/**
+	 * @testdox An active scheduled sale leaves the sale price unchanged.
+	 */
+	public function test_scheduled_sale_active_price_leaves_active_sale_unchanged(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50 );
+		$product->set_sale_price( 20 );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ) );
+		$product->save();
+
+		$this->assertEquals( 20, wc_get_product( $product->get_id() )->get_price(), 'An active sale should display the sale price.' );
+	}
+
+	/**
+	 * @testdox A future scheduled sale leaves the regular price unchanged.
+	 */
+	public function test_scheduled_sale_active_price_leaves_future_sale_unchanged(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50 );
+		$product->set_sale_price( 20 );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + 2 * HOUR_IN_SECONDS ) );
+		$product->save();
+
+		$this->assertEquals( 50, wc_get_product( $product->get_id() )->get_price(), 'A future sale should display the regular price.' );
+	}
+
+	/**
+	 * @testdox A custom active price unrelated to the sale or regular price is left untouched.
+	 */
+	public function test_scheduled_sale_active_price_leaves_custom_price_untouched(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50 );
+		$product->set_sale_price( 20 );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ) );
+		$product->save();
+
+		// A third party set a custom active price unrelated to the sale or regular price.
+		update_post_meta( $product->get_id(), '_price', 37 );
+		clean_post_cache( $product->get_id() );
+
+		$this->assertEquals( 37, wc_get_product( $product->get_id() )->get_price(), 'A custom price not equal to sale or regular is left untouched.' );
+	}
+
+	/**
+	 * @testdox A sale with no scheduled dates is never reconciled.
+	 */
+	public function test_scheduled_sale_active_price_ignores_unscheduled_sale(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50 );
+		$product->set_sale_price( 20 );
+		$product->save();
+
+		// Stored price disagrees with the on-sale state, but there is no schedule to drift against.
+		update_post_meta( $product->get_id(), '_price', 50 );
+		clean_post_cache( $product->get_id() );
+
+		$this->assertEquals( 50, wc_get_product( $product->get_id() )->get_price(), 'Without sale dates the reconciliation does not run.' );
+	}
+
+	/**
+	 * @testdox A price already changed by another plugin is not overridden.
+	 */
+	public function test_scheduled_sale_active_price_does_not_clobber_third_party_price(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50 );
+		$product->set_sale_price( 20 );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ) );
+		$product->save();
+
+		$product_id = $product->get_id();
+		// Membership-style plugin charges the regular price during an active sale.
+		$callback = function ( $price, $filtered_product ) use ( $product_id ) {
+			return ( $filtered_product instanceof WC_Product && $filtered_product->get_id() === $product_id ) ? '50' : $price;
+		};
+		add_filter( 'woocommerce_product_get_price', $callback, 50, 2 );
+
+		$this->assertEquals( 50, wc_get_product( $product_id )->get_price(), 'A deliberate third-party price is respected, not reverted to the sale price.' );
+
+		remove_filter( 'woocommerce_product_get_price', $callback, 50 );
+	}
+
+	/**
+	 * @testdox A third-party price wins over the heal even when the heal would otherwise fire.
+	 */
+	public function test_scheduled_sale_active_price_respects_third_party_price_during_started_gap(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50 );
+		$product->set_sale_price( 20 );
+		// Future sale, so the saved _price is the regular price (50).
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + 2 * HOUR_IN_SECONDS ) );
+		$product->save();
+
+		// Start time elapses without the AS event running: the sale is active but _price is
+		// still 50, so the heal would reconcile 50 -> 20 absent a third-party override.
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 5 );
+		clean_post_cache( $product->get_id() );
+
+		$product_id = $product->get_id();
+		// Third party sets a deliberate price that is neither the stored value nor the heal target.
+		$callback = function ( $price, $filtered_product ) use ( $product_id ) {
+			return ( $filtered_product instanceof WC_Product && $filtered_product->get_id() === $product_id ) ? '42' : $price;
+		};
+		add_filter( 'woocommerce_product_get_price', $callback, 50, 2 );
+
+		$this->assertEquals(
+			42,
+			wc_get_product( $product_id )->get_price(),
+			'The third-party price wins over the scheduled-sale heal (which would otherwise return 20).'
+		);
+
+		remove_filter( 'woocommerce_product_get_price', $callback, 50 );
+	}
+
+	/**
+	 * @testdox An external product reconciles like a simple product.
+	 */
+	public function test_scheduled_sale_active_price_heals_external_product(): void {
+		$product = new WC_Product_External();
+		$product->set_name( 'External sale product' );
+		$product->set_regular_price( 50 );
+		$product->set_sale_price( 20 );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ) );
+		$product->save();
+
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 5 );
+		clean_post_cache( $product->get_id() );
+
+		$this->assertEquals( 50, wc_get_product( $product->get_id() )->get_price(), 'External products reconcile like simple products.' );
+	}
+
+	/**
+	 * @testdox Variations self-heal at read time and need no reconciliation filter.
+	 */
+	public function test_scheduled_sale_variation_self_heals_on_read(): void {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Variation parent' );
+		$parent->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $parent->get_id() );
+		$variation->set_regular_price( '50' );
+		$variation->set_sale_price( '20' );
+		$variation->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) );
+		$variation->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ) );
+		$variation->save();
+
+		// The variation data store re-derives the price from is_on_sale() on every read, so a
+		// fresh read after the sale ends already reflects the regular price (no filter needed).
+		update_post_meta( $variation->get_id(), '_sale_price_dates_to', time() - 5 );
+		clean_post_cache( $variation->get_id() );
+
+		$this->assertEquals( 50, wc_get_product( $variation->get_id() )->get_price(), 'A freshly read variation reflects the ended sale without the reconciliation filter.' );
+	}
+
+	/**
+	 * @testdox An ended scheduled sale charges the regular price in the cart.
+	 */
+	public function test_scheduled_sale_active_price_charges_regular_in_cart_for_ended_sale(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50 );
+		$product->set_sale_price( 20 );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ) );
+		$product->save();
+
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 5 );
+		clean_post_cache( $product->get_id() );
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id() );
+		WC()->cart->calculate_totals();
+		$total = WC()->cart->get_cart_contents_total();
+		WC()->cart->empty_cart();
+
+		$this->assertEquals( 50, $total, 'The cart charges the regular price once the sale has ended.' );
 	}
 
 	/**
@@ -310,6 +595,130 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		);
 		$this->assertEquals( 0, (int) $lookup_after->onsale, 'Lookup table onsale flag should be updated after sale ends' );
 		$this->assertEquals( 100, (float) $lookup_after->min_price, 'Lookup table min_price should reflect regular price' );
+	}
+
+	/**
+	 * @testdox Product lookup table regeneration schedules review data updates only when reviews are enabled.
+	 * @testWith ["yes", true]
+	 *           ["no", false]
+	 *
+	 * @param string $reviews_setting       The product reviews setting.
+	 * @param bool   $expect_review_updates Whether review data updates should be scheduled.
+	 */
+	public function test_wc_update_product_lookup_tables_schedules_review_data_only_when_reviews_are_enabled( string $reviews_setting, bool $expect_review_updates ): void {
+		$this->set_reviews_setting_for_lookup_table_test( $reviews_setting );
+
+		wc_update_product_lookup_tables();
+
+		$average_rating_scheduled = as_has_scheduled_action(
+			'wc_update_product_lookup_tables_column',
+			array( 'column' => 'average_rating' ),
+			'wc_update_product_lookup_tables'
+		);
+		$rating_count_scheduled   = as_has_scheduled_action(
+			'wc_update_product_lookup_tables_rating_count_batch',
+			array(
+				'offset' => 0,
+				'limit'  => 50,
+			),
+			'wc_update_product_lookup_tables'
+		);
+
+		$this->assertSame( $expect_review_updates, (bool) $average_rating_scheduled, 'Average rating regeneration should follow the product reviews setting.' );
+		$this->assertSame( $expect_review_updates, (bool) $rating_count_scheduled, 'Rating count regeneration should follow the product reviews setting.' );
+		$this->assertTrue(
+			(bool) as_has_scheduled_action(
+				'wc_update_product_lookup_tables_column',
+				array( 'column' => 'min_max_price' ),
+				'wc_update_product_lookup_tables'
+			),
+			'Unrelated lookup table columns should still be scheduled.'
+		);
+	}
+
+	/**
+	 * @testdox Queued average rating updates do not run when reviews are disabled.
+	 * @testWith ["yes", 4.5]
+	 *           ["no", 1.0]
+	 *
+	 * @param string $reviews_setting The product reviews setting.
+	 * @param float  $expected_rating The expected lookup table rating.
+	 */
+	public function test_wc_update_product_lookup_tables_column_respects_reviews_setting( string $reviews_setting, float $expected_rating ): void {
+		global $wpdb;
+
+		$product = WC_Helper_Product::create_simple_product();
+		update_post_meta( $product->get_id(), '_wc_average_rating', '4.50' );
+		$wpdb->update(
+			$wpdb->wc_product_meta_lookup,
+			array( 'average_rating' => 1.0 ),
+			array( 'product_id' => $product->get_id() )
+		);
+		$this->set_reviews_setting_for_lookup_table_test( $reviews_setting );
+
+		wc_update_product_lookup_tables_column( 'average_rating' );
+
+		$actual_rating = (float) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT average_rating FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d",
+				$product->get_id()
+			)
+		);
+		$this->assertSame( $expected_rating, $actual_rating, 'Average rating lookup data should only update when reviews are enabled.' );
+	}
+
+	/**
+	 * @testdox Queued rating count batches do not run when reviews are disabled.
+	 * @testWith ["yes", 3, true]
+	 *           ["no", 1, false]
+	 *
+	 * @param string $reviews_setting  The product reviews setting.
+	 * @param int    $expected_count   The expected lookup table rating count.
+	 * @param bool   $expect_follow_up Whether another batch should be scheduled.
+	 */
+	public function test_wc_update_product_lookup_tables_rating_count_batch_respects_reviews_setting( string $reviews_setting, int $expected_count, bool $expect_follow_up ): void {
+		global $wpdb;
+
+		$product = WC_Helper_Product::create_simple_product();
+		update_post_meta( $product->get_id(), '_wc_rating_count', array( 5 => 3 ) );
+		$wpdb->update(
+			$wpdb->wc_product_meta_lookup,
+			array( 'rating_count' => 1 ),
+			array( 'product_id' => $product->get_id() )
+		);
+		$this->set_reviews_setting_for_lookup_table_test( $reviews_setting );
+
+		wc_update_product_lookup_tables_rating_count_batch( 0, 50 );
+
+		$actual_count        = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT rating_count FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d",
+				$product->get_id()
+			)
+		);
+		$follow_up_scheduled = as_has_scheduled_action(
+			'wc_update_product_lookup_tables_rating_count_batch',
+			array(
+				'offset' => 50,
+				'limit'  => 50,
+			),
+			'wc_update_product_lookup_tables'
+		);
+
+		$this->assertSame( $expected_count, $actual_count, 'Rating count lookup data should only update when reviews are enabled.' );
+		$this->assertSame( $expect_follow_up, (bool) $follow_up_scheduled, 'Follow-up rating count batches should only be scheduled when reviews are enabled.' );
+	}
+
+	/**
+	 * Set the product reviews option and reset lookup table actions for a test.
+	 *
+	 * @param string $reviews_setting The product reviews setting.
+	 */
+	private function set_reviews_setting_for_lookup_table_test( string $reviews_setting ): void {
+		$this->original_reviews_setting = get_option( 'woocommerce_enable_reviews', null );
+		$this->reviews_setting_changed  = true;
+		as_unschedule_all_actions( '', array(), 'wc_update_product_lookup_tables' );
+		update_option( 'woocommerce_enable_reviews', $reviews_setting );
 	}
 
 	/**
@@ -1195,5 +1604,46 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		WC_Helper_Product::delete_product( $product->get_id() );
 
 		return implode( "\n", (array) $before_data );
+	}
+
+	/**
+	 * @testdox Does not attach a featured image via SKU match when the current user cannot edit the product.
+	 */
+	public function test_wc_product_attach_featured_image_requires_edit_product_capability(): void {
+		update_option( 'woocommerce_product_match_featured_image_by_sku', 'yes' );
+
+		$sku     = 'TEST-SKU-ATTACH-' . wp_generate_password( 8, false );
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sku( $sku );
+		$product->set_image_id( '' );
+		$product->save();
+
+		$attachment_id = wp_insert_attachment(
+			array(
+				'post_title'     => $sku,
+				'post_status'    => 'inherit',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+
+		$subscriber_id = self::factory()->user->create( array( 'role' => 'author' ) );
+
+		try {
+			wp_set_current_user( $subscriber_id );
+
+			wc_product_attach_featured_image( $attachment_id );
+
+			$product = wc_get_product( $product->get_id() );
+			$this->assertEmpty(
+				$product->get_image_id(),
+				'Featured image should not be attached when the user lacks edit_product capability'
+			);
+		} finally {
+			wp_set_current_user( 0 );
+			wp_delete_attachment( $attachment_id, true );
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_user( $subscriber_id );
+			delete_option( 'woocommerce_product_match_featured_image_by_sku' );
+		}
 	}
 }

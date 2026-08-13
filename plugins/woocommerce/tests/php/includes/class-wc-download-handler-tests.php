@@ -408,6 +408,133 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox resolve_filename_from_response_headers() should tolerate a null filename, as produced by a broken `woocommerce_file_download_filename` filter callback, instead of throwing a TypeError.
+	 */
+	public function test_resolve_filename_tolerates_null_filename(): void {
+		$headers = array(
+			'HTTP/1.1 200 OK',
+			'Content-Disposition: attachment; filename="report.pdf"',
+		);
+		$this->setExpectedIncorrectUsage( 'WC_Download_Handler::resolve_filename_from_response_headers' );
+
+		$resolved = WC_Download_Handler::resolve_filename_from_response_headers( $headers, null, true );
+
+		$this->assertSame( 'report.pdf', $resolved, 'A null filename cannot be preserved, so the remote-announced filename should be used.' );
+	}
+
+	/**
+	 * @testdox resolve_filename_from_response_headers() should treat a non-scalar filename as empty instead of throwing a TypeError.
+	 */
+	public function test_resolve_filename_tolerates_non_scalar_filename(): void {
+		$incorrect_usage = array();
+		$listener        = function ( $function_name, $message, $version ) use ( &$incorrect_usage ) {
+			$incorrect_usage = array(
+				'function_name' => $function_name,
+				'message'       => $message,
+				'version'       => $version,
+			);
+		};
+		add_action( 'doing_it_wrong_run', $listener, 10, 3 );
+		add_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		$this->setExpectedIncorrectUsage( 'WC_Download_Handler::resolve_filename_from_response_headers' );
+
+		try {
+			$resolved = WC_Download_Handler::resolve_filename_from_response_headers( array( 'HTTP/1.1 200 OK' ), array( 'not-a-filename' ) );
+		} finally {
+			remove_action( 'doing_it_wrong_run', $listener, 10 );
+			remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		}
+
+		$this->assertSame( '', $resolved, 'A non-scalar filename with no usable response headers should resolve to an empty string.' );
+		$this->assertSame( 'WC_Download_Handler::resolve_filename_from_response_headers', $incorrect_usage['function_name'] );
+		$this->assertStringContainsString( 'woocommerce_file_download_filename filter should return a string; array returned.', $incorrect_usage['message'] );
+		$this->assertSame( '11.1.0', $incorrect_usage['version'] );
+	}
+
+	/**
+	 * @testdox resolve_filename_from_response_headers() should render a filename object that declares __toString(), as string concatenation always did.
+	 */
+	public function test_resolve_filename_renders_stringable_filename(): void {
+		$headers = array(
+			'HTTP/1.1 200 OK',
+			'Content-Disposition: attachment; filename="Quarterly Report.pdf"',
+		);
+
+		$filename = new class() {
+			/**
+			 * Render the filename.
+			 *
+			 * @return string
+			 */
+			public function __toString(): string {
+				return 'Seasons-Catalog';
+			}
+		};
+		$this->setExpectedIncorrectUsage( 'WC_Download_Handler::resolve_filename_from_response_headers' );
+
+		$resolved = WC_Download_Handler::resolve_filename_from_response_headers( $headers, $filename, true );
+
+		$this->assertSame( 'Seasons-Catalog.pdf', $resolved, 'A filename object declaring __toString() should be preserved and gain the remote extension, not be discarded.' );
+	}
+
+	/**
+	 * @testdox download_file_force() should carry a non-string filename from a woocommerce_file_download_filename callback through to the download headers instead of fataling.
+	 */
+	public function test_download_file_force_tolerates_non_string_filename_from_filter(): void {
+		// Mirrors the report in #66635: a callback that falls off the end and returns null.
+		$broken_filename_filter = function () {};
+
+		$reached_headers = false;
+		// download_headers() derives the content type from the resolved filename via
+		// get_allowed_mime_types(), so this fires once the filename is resolved but before any
+		// header() call. Throwing here unwinds download_file_force() ahead of its terminating
+		// exit(), which would otherwise take the PHPUnit process down with it.
+		//
+		// That ordering is what this test depends on: should download_headers() ever be reworked so
+		// that nothing hooks in ahead of the exit(), this test would take the test run down with it
+		// rather than fail. Keep the marker on the earliest hook that follows the filename being
+		// resolved.
+		$header_stage_marker = function () use ( &$reached_headers ) {
+			$reached_headers = true;
+			throw new RuntimeException( 'reached-download-headers' );
+		};
+
+		add_filter( 'woocommerce_file_download_filename', $broken_filename_filter );
+		add_filter( 'upload_mimes', $header_stage_marker );
+		$this->setExpectedIncorrectUsage( 'WC_Download_Handler::resolve_filename_from_response_headers' );
+
+		$ob_level = ob_get_level();
+
+		// Stand in for the remote host so the open succeeds and the filename actually reaches
+		// resolve_filename_from_response_headers(), which a real unreachable URL never would.
+		stream_wrapper_unregister( 'http' );
+		stream_wrapper_register( 'http', FakeRemoteStreamWrapper::class );
+
+		try {
+			// No $this->fail() for the no-throw case: PHPUnit's own AssertionFailedError descends
+			// from RuntimeException, so the catch below would swallow it. The assertion after this
+			// block covers that path instead.
+			WC_Download_Handler::download( 'http://example.test/uc', 0 );
+		} catch ( RuntimeException $e ) {
+			$this->assertSame( 'reached-download-headers', $e->getMessage(), 'Only the marker exception should escape; a TypeError here is the #66635 regression.' );
+		} finally {
+			stream_wrapper_restore( 'http' );
+
+			// download_headers() unwinds every output buffer, including the one PHPUnit wraps
+			// each test in, so restore the nesting level it expects to find on the way out.
+			while ( ob_get_level() < $ob_level ) {
+				ob_start();
+			}
+
+			// Remove only what this test added: `upload_mimes` is a shared WordPress hook.
+			remove_filter( 'woocommerce_file_download_filename', $broken_filename_filter );
+			remove_filter( 'upload_mimes', $header_stage_marker );
+		}
+
+		$this->assertTrue( $reached_headers, 'A null filename should flow through to the download headers instead of throwing a TypeError.' );
+	}
+
+	/**
 	 * @testdox download_file_force() should render an error page, not a download, when the remote file cannot be opened.
 	 */
 	public function test_download_file_force_shows_error_when_remote_file_cannot_be_opened(): void {
