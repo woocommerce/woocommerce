@@ -1754,7 +1754,7 @@ class WC_Countries {
 		if ( isset( $locale[ $country ] ) ) {
 			// wc_array_overlay() only copies keys that exist in the base array, so seed 'hidden' where the locale defines it.
 			foreach ( $locale[ $country ] as $field_key => $locale_field ) {
-				if ( isset( $fields[ $field_key ], $locale_field['hidden'] ) ) {
+				if ( isset( $fields[ $field_key ], $locale_field['hidden'] ) && is_array( $fields[ $field_key ] ) ) {
 					$fields[ $field_key ]['hidden'] = false;
 				}
 			}
