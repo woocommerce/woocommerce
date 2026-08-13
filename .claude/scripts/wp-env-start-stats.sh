@@ -359,6 +359,10 @@ emit_table() {  # emit_table <group> <first-column-header> <limit|0>
     END{for(r in t) printf "| `%s` | %d | %.0f%% | %d | %.0f%% |\n",
       r, t[r], (n ? 100*t[r]/n : 0), s[r]+0, 100*(s[r]+0)/t[r]}' \
     "$EVENTS" | sort -t'|' -k3 -rn
+  # Totals go out after the sort so the row always lands at the bottom.
+  awk -F'\t' '{n++; if($7=="SAVED") s++}
+    END{if(n) printf "| **All** | **%d** | **100%%** | **%d** | **%.0f%%** |\n", n, s+0, 100*(s+0)/n}' \
+    "$EVENTS"
   echo
   echo "## By month"
   echo
