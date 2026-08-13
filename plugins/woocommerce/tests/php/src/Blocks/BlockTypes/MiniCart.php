@@ -92,6 +92,19 @@ class MiniCart extends \WP_UnitTestCase {
 						<img class="wp-image-block" src="https://example.com/image.jpg" alt="Example Image" />
 					<!-- /wp:image -->
 				</div>
+				<!-- /wp:woocommerce/mini-cart-title-block -->
+
+				<!-- wp:woocommerce/mini-cart-footer-block -->
+				<div class="wp-block-woocommerce-mini-cart-footer-block">
+					<!-- wp:woocommerce/mini-cart-cart-button-block -->
+					<div class="wp-block-woocommerce-mini-cart-cart-button-block"></div>
+					<!-- /wp:woocommerce/mini-cart-cart-button-block -->
+
+					<!-- wp:woocommerce/mini-cart-checkout-button-block -->
+					<div class="wp-block-woocommerce-mini-cart-checkout-button-block"></div>
+					<!-- /wp:woocommerce/mini-cart-checkout-button-block -->
+				</div>
+				<!-- /wp:woocommerce/mini-cart-footer-block -->
 			</div>
 			<!-- /wp:woocommerce/filled-mini-cart-contents-block -->
 		</div>
@@ -236,9 +249,9 @@ class MiniCart extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Should avoid duplicate wrappers when rendering a pattern-backed Mini Cart template.
+	 * @testdox Should process legacy wrappers while preserving the pattern rendering lifecycle.
 	 */
-	public function test_process_template_contents_with_pattern_backed_template(): void {
+	public function test_render_pattern_backed_template(): void {
 		$pattern_name = 'woocommerce-tests/mini-cart-template-part';
 		register_block_pattern(
 			$pattern_name,
@@ -248,42 +261,73 @@ class MiniCart extends \WP_UnitTestCase {
 			)
 		);
 
+		$pattern_filter_calls = 0;
+		$pattern_filter       = static function ( $content ) use ( &$pattern_filter_calls ) {
+			++$pattern_filter_calls;
+			return $content . '<span data-pattern-filter-ran></span>';
+		};
+
+		add_filter( 'render_block_core/pattern', $pattern_filter, 10, 1 );
+
 		try {
-			$processed_template = $this->mock->call_process_template_contents(
+			$method = new \ReflectionMethod( MiniCartBlock::class, 'render_template_part_contents' );
+			$method->setAccessible( true );
+			$rendered_template = $method->invoke(
+				$this->mock,
 				'<!-- wp:pattern {"slug":"' . $pattern_name . '"} /-->'
 			);
-			$rendered_template  = do_blocks( $processed_template );
+		} finally {
+			remove_filter( 'render_block_core/pattern', $pattern_filter, 10 );
+			unregister_block_pattern( $pattern_name );
+		}
 
-			foreach ( MiniCartBlock::MINI_CART_TEMPLATE_BLOCKS as $block_name ) {
-				$class_name = 'wp-block-' . str_replace( '/', '-', $block_name );
-				if ( false === strpos( $this->current_template_with_user_edits, $class_name ) ) {
-					continue;
-				}
+		$this->assertSame( 1, $pattern_filter_calls, 'The core pattern render filter should run exactly once.' );
+		$this->assertStringContainsString(
+			'data-pattern-filter-ran',
+			$rendered_template,
+			'The filtered pattern output should be preserved.'
+		);
 
-				$p             = new \WP_HTML_Tag_Processor( $rendered_template );
-				$wrapper_count = 0;
-				while (
-					$p->next_tag(
-						array(
-							'class_name' => $class_name,
-						)
-					)
-				) {
-					++$wrapper_count;
-				}
-
-				$this->assertSame(
-					1,
-					$wrapper_count,
-					"The rendered template should contain exactly one wrapper with class {$class_name}."
-				);
+		foreach ( MiniCartBlock::MINI_CART_TEMPLATE_BLOCKS as $block_name ) {
+			$class_name = 'wp-block-' . str_replace( '/', '-', $block_name );
+			if ( false === strpos( $this->current_template_with_user_edits, $class_name ) ) {
+				continue;
 			}
 
-			$this->assertStringContainsString( 'wp-block-group', $rendered_template );
-			$this->assertStringContainsString( 'wp-image-block', $rendered_template );
-			$this->assertStringContainsString( 'wp-block-separator', $rendered_template );
-		} finally {
-			unregister_block_pattern( $pattern_name );
+			$p             = new \WP_HTML_Tag_Processor( $rendered_template );
+			$wrapper_count = 0;
+			while ( $p->next_tag( array( 'class_name' => $class_name ) ) ) {
+				++$wrapper_count;
+			}
+
+			$this->assertSame(
+				1,
+				$wrapper_count,
+				"The rendered template should contain exactly one wrapper with class {$class_name}."
+			);
+		}
+
+		$document                    = new \DOMDocument();
+		$previous_libxml_error_state = libxml_use_internal_errors( true );
+		$document->loadHTML( '<html><body>' . $rendered_template . '</body></html>' );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous_libxml_error_state );
+		$xpath = new \DOMXPath( $document );
+
+		foreach ( array( 'cart', 'checkout' ) as $button_name ) {
+			$buttons = $xpath->query(
+				"//*[contains(concat(' ', normalize-space(@class), ' '), ' wc-block-mini-cart__footer-actions ')]" .
+				"/*[contains(concat(' ', normalize-space(@class), ' '), ' wp-block-woocommerce-mini-cart-{$button_name}-button-block ')]"
+			);
+			if ( false === $buttons ) {
+				$this->fail( "The XPath query for the {$button_name} button should be valid." );
+			}
+
+			$this->assertSame(
+				1,
+				$buttons->length,
+				"The {$button_name} button should be a direct child of the Mini-Cart footer actions."
+			);
 		}
 	}
 
