@@ -11,8 +11,12 @@ import {
  * Internal dependencies
  */
 import { initRemoteLogging } from './lib/init-remote-logging';
+import { initDateLocale } from './lib/date-locale';
 // Initialize remote logging early to log any errors that occur during initialization.
 initRemoteLogging();
+// Replace the PHP-style moment date formats WordPress core injects with
+// moment-style formats and localized weekday names.
+initDateLocale();
 
 /**
  * Internal dependencies
