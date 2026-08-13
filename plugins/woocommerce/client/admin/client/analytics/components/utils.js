@@ -20,3 +20,25 @@ export function hasEmptySearchResults( query, limitBy ) {
 
 	return ! limitBy.every( ( item ) => query[ item ] && query[ item ].length );
 }
+
+/**
+ * Whether an empty report is better explained by the search than by the date range.
+ *
+ * A report that resolves the search server side gets the same empty response whether the term
+ * matched nothing or matched items with no data in the period, so the search is the closest
+ * explanation it has. A report that resolves the search itself knows which of the two it is.
+ *
+ * @param {Object} query   Current query object.
+ * @param {Array}  limitBy Properties used to limit the results.
+ * @return {boolean} True when an empty report should be attributed to the search.
+ */
+export function isEmptyDueToSearch( query, limitBy ) {
+	if ( ! query.search ) {
+		return false;
+	}
+
+	return (
+		usesServerSideSearch( limitBy ) ||
+		hasEmptySearchResults( query, limitBy )
+	);
+}

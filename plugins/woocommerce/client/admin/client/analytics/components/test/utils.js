@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { hasEmptySearchResults } from '../utils';
+import { hasEmptySearchResults, isEmptyDueToSearch } from '../utils';
 
 describe( 'hasEmptySearchResults', () => {
 	it( 'returns false when there is no search', () => {
@@ -65,5 +65,43 @@ describe( 'hasEmptySearchResults', () => {
 				'coupons',
 			] )
 		).toBe( true );
+	} );
+} );
+
+describe( 'isEmptyDueToSearch', () => {
+	it( 'returns false when there is no search', () => {
+		expect( isEmptyDueToSearch( {}, [ 'products' ] ) ).toBe( false );
+	} );
+
+	it( 'returns true for an endpoint that resolves the search itself', () => {
+		// The API answers the same way whether the term matched no product or matched
+		// products without sales in the period, so the search is the best explanation.
+		expect(
+			isEmptyDueToSearch( { search: 'kingston' }, [ 'products' ] )
+		).toBe( true );
+	} );
+
+	it( 'returns true when a client resolved search matched nothing', () => {
+		expect(
+			isEmptyDueToSearch( { search: 'kingston' }, [ 'coupons' ] )
+		).toBe( true );
+	} );
+
+	it( 'returns false when a client resolved search produced IDs', () => {
+		// The search matched, so an empty report is down to the date range.
+		expect(
+			isEmptyDueToSearch( { search: 'kingston', coupons: '1,2,3' }, [
+				'coupons',
+			] )
+		).toBe( false );
+	} );
+
+	it( 'returns false when every property of a multi property limit has a value', () => {
+		expect(
+			isEmptyDueToSearch(
+				{ search: 'kingston', products: '1,2', categories: '5' },
+				[ 'products', 'categories' ]
+			)
+		).toBe( false );
 	} );
 } );

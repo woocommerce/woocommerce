@@ -33,7 +33,7 @@ import {
 	createDateFormatter,
 	buildChartData,
 } from './utils';
-import { hasEmptySearchResults } from '../utils';
+import { hasEmptySearchResults, isEmptyDueToSearch } from '../utils';
 
 /**
  * Component that renders the chart in reports.
@@ -126,11 +126,12 @@ export class ReportChart extends Component {
 
 	renderChart( mode, isRequesting, chartData, legendTotals ) {
 		const {
-			emptySearchResults,
+			endpoint,
 			filterParam,
 			interactiveLegend,
 			itemsLabel,
 			legendPosition,
+			limitProperties,
 			path,
 			query,
 			selectedChart,
@@ -148,7 +149,10 @@ export class ReportChart extends Component {
 			primaryData.data.intervals.length,
 			{ type: 'php' }
 		);
-		const emptyMessage = emptySearchResults
+		const emptyMessage = isEmptyDueToSearch(
+			query,
+			limitProperties || [ endpoint ]
+		)
 			? __( 'No data for the current search', 'woocommerce' )
 			: __( 'No data for the selected date range', 'woocommerce' );
 		const { formatAmount, getCurrencyConfig } = this.context;
@@ -359,11 +363,9 @@ export default compose(
 			return newProps;
 		}
 
+		// Nothing matched, so skip the request and let the chart render its empty state.
 		if ( hasEmptySearchResults( query, limitBy ) ) {
-			return {
-				...newProps,
-				emptySearchResults: true,
-			};
+			return newProps;
 		}
 
 		const reportStoreSelector = select( reportsStore );
