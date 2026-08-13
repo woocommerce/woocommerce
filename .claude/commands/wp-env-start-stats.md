@@ -4,6 +4,8 @@ allowed-tools: Bash(.claude/scripts/wp-env-start-stats.sh:*), Read, Edit
 argument-hint: "[--report-only] [--since YYYY-MM-DD] [--max-days N] [--reset]"
 ---
 
+# wp-env start stats
+
 Update the wp-env start failure statistics.
 
 ## Run this
@@ -37,7 +39,7 @@ Do not paste the whole report back; link to the file and give the headline numbe
 
 Each job log carries the retry loop's own annotations:
 
-```
+```text
 ##[warning]wp-env-start-retry reason=<subsystem> attempt=N/3
 ##[error]wp-env start failed after 3 attempts (last reason=<subsystem>)
 ```

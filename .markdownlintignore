@@ -3,3 +3,4 @@ plugins/woocommerce/lib/classes/*
 plugins/woocommerce/lib/packages/*
 packages/php/email-editor/vendor-prefixed/*
 plugins/woocommerce/src/Internal/StockNotifications/CODERABBIT-TRIAGE-RAW.md
+.claude/ci-monitoring/*.md
