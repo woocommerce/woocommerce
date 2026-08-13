@@ -74,7 +74,7 @@ jobs:
               - '*.md'
               - '!(.github/**)/**/*.md'
             needs-syncpack-validation:
-              - '(.syncpackrc)|(pnpm-lock.yaml)'
+              - '(.syncpackrc)|(pnpm-lock.yaml)|(pnpm-workspace.yaml)'
 
   project-jobs:
     # Since this is a monorepo, not every pull request or change is going to impact every project.
