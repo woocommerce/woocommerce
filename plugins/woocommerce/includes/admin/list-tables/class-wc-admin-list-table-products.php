@@ -61,8 +61,9 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		add_filter( 'posts_clauses', array( $this, 'posts_clauses' ), 10, 2 );
 		// Ranking runs on posts_clauses, which core applies after every posts_orderby priority, so no
 		// posts_orderby callback ever sees the relevance clause. The late priority leaves earlier
-		// posts_clauses callbacks the same unmodified view; ordering any of them set makes
-		// order_search_results() skip ranking and defer to them.
+		// posts_clauses callbacks the same unmodified view. Whether order_search_results() then ranks
+		// depends on what those callbacks did: taking over the primary sort makes it defer, while
+		// appending a tiebreak leaves core's ordering in charge and ranking still leads.
 		add_filter( 'posts_clauses', array( $this, 'order_search_results' ), 9999, 2 );
 
 		// Use hooks to prime various caches and improve products page performance.
@@ -670,8 +671,12 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * Prioritize title matches in unsorted product searches.
 	 *
 	 * Runs on posts_clauses rather than posts_orderby so that every posts_orderby callback, at any
-	 * priority, still observes the ORDER BY clause core generated. Ordering set by any of them, or by
-	 * an earlier posts_clauses callback, makes this defer instead of ranking.
+	 * priority, still observes the ORDER BY clause core generated.
+	 *
+	 * Reading the clause that late means it may already carry third-party ordering. A callback that
+	 * took over the primary sort — prepending to the clause or replacing it — is deferred to. One that
+	 * only appended a tiebreak left core's ordering in charge, so ranking still leads and that tiebreak
+	 * survives after it. See orderby_leads_with().
 	 *
 	 * @since 11.1.0
 	 *
