@@ -148,7 +148,7 @@ const Marketing = ( { onComplete }: MarketingProps ) => {
 
 	const installAndActivate = ( slug: string ) => {
 		setCurrentPlugin( slug );
-		actionTask( 'marketing' );
+		void actionTask( 'marketing' );
 		installAndActivatePlugins( [ slug ] )
 			.then( ( response: unknown ) => {
 				recordEvent( 'tasklist_marketing_install', {
@@ -174,7 +174,7 @@ const Marketing = ( { onComplete }: MarketingProps ) => {
 	};
 
 	const onManage = () => {
-		actionTask( 'marketing' );
+		void actionTask( 'marketing' );
 	};
 
 	const trackPromoButtonClick = () => {
@@ -254,7 +254,7 @@ const Marketing = ( { onComplete }: MarketingProps ) => {
 					) }
 					text={ __(
 						'Discover hand-picked extensions to grow your business in' +
-							' the official WooCommerce marketplace.',
+							' the WooCommerce marketplace.',
 						'woocommerce'
 					) }
 					buttonHref={ getAdminLink(

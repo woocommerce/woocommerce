@@ -5,13 +5,76 @@ import { Post, useEntityRecords } from '@wordpress/core-data';
 import { useDispatch, select, subscribe } from '@wordpress/data';
 import { settingsStore } from '@woocommerce/data';
 import { useState, useCallback, useMemo } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
 // @ts-expect-error - We need to use this /wp see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-dataviews/#dataviews
-import { View } from '@wordpress/dataviews/wp'; // eslint-disable-line @woocommerce/dependency-group
+import { View } from '@wordpress/dataviews/wp';
 
 /**
  * Internal dependencies
  */
-import { EmailType, EmailStatus } from './settings-email-listing-slotfill';
+import {
+	EmailType,
+	EmailStatus,
+	TemplateStatus,
+} from './settings-email-listing-slotfill';
+import { shouldShowReviewUpdate } from './settings-email-listing-update-state';
+import { getAdminSetting } from '~/utils/admin-settings';
+
+/**
+ * Allowlist of valid template status values. Defined once at module scope so a
+ * future status addition only requires one update site.
+ */
+const VALID_TEMPLATE_STATUSES: readonly TemplateStatus[] = [
+	'in_sync',
+	'core_updated_uncustomized',
+	'core_updated_customized',
+] as const;
+
+type EmailListingRecreateEmailPostResponse = {
+	message: string;
+	post_id: string;
+};
+
+type WPError = {
+	message: string;
+	code: string;
+	data: {
+		status: number;
+	};
+};
+
+const emailListingNonce = () => {
+	return getAdminSetting( 'email_listing_nonce' );
+};
+
+/**
+ * Request creation of the post backing an email type (a draft with the
+ * file template content, or the existing post when one is already there).
+ * Standalone so surfaces outside the listing hook (e.g. the "Edit template"
+ * button) can lazily create a post before navigating to the editor.
+ */
+export const recreateEmailPostRequest = async (
+	emailId: string
+): Promise< EmailListingRecreateEmailPostResponse | null > => {
+	try {
+		const response: EmailListingRecreateEmailPostResponse = await apiFetch(
+			{
+				path: `wc-admin-email/settings/email/listing/recreate-email-post?nonce=${ emailListingNonce() }`,
+				method: 'POST',
+				data: { email_id: emailId },
+			}
+		);
+		return response;
+	} catch ( e ) {
+		const wpError = e as WPError;
+		// eslint-disable-next-line no-console
+		console.error(
+			'[WooCommerce Admin] Error recreating email post: ',
+			wpError
+		);
+		return null;
+	}
+};
 
 /**
  * Hook providing transactional emails enriched by woo_email post data for DataViews component.
@@ -31,11 +94,18 @@ export const useTransactionalEmails = (
 	}, [ emailTypesData ] );
 
 	const validPostIds = Array.from( postIdsMap.values() ).filter( Boolean );
-	const emailPosts = useEntityRecords( 'postType', 'woo_email', {
-		include: validPostIds.join( ',' ),
-		per_page: -1,
-		status: 'any',
-	} ) as { records: Post[] };
+	const emailPosts = useEntityRecords(
+		'postType',
+		'woo_email',
+		{
+			include: validPostIds.join( ',' ),
+			per_page: -1,
+			status: 'any',
+		},
+		// With lazy post creation most emails have no post; an empty `include`
+		// would fetch every woo_email post, so skip the request entirely.
+		{ enabled: validPostIds.length > 0 }
+	) as { records: Post[] };
 
 	const { updateAndPersistSettingsForGroup } = useDispatch( settingsStore );
 
@@ -50,10 +120,56 @@ export const useTransactionalEmails = (
 				if ( emailType.manual ) {
 					status = 'manual';
 				}
+
+				// RSM-140: project template-status and template-version meta auto-
+				// surfaced under `meta` in the wp/v2/woo_email REST response (the
+				// post type declares 'custom-fields' support). Read-only.
+				const meta = (
+					post as { meta?: Record< string, unknown > } | null
+				 )?.meta;
+				const rawStatus = meta?._wc_email_template_status;
+				const templateStatus: TemplateStatus | null =
+					typeof rawStatus === 'string' &&
+					( VALID_TEMPLATE_STATUSES as readonly string[] ).includes(
+						rawStatus
+					)
+						? ( rawStatus as TemplateStatus )
+						: null;
+
+				const rawVersion = meta?._wc_email_template_version;
+				const templateVersion: string | null =
+					typeof rawVersion === 'string' && rawVersion.length > 0
+						? rawVersion
+						: null;
+
+				const rawBackfilled = meta?._wc_email_backfilled;
+				const wasBackfilled =
+					rawBackfilled === true ||
+					rawBackfilled === '1' ||
+					rawBackfilled === 1;
+
+				// PHP serializes the registry's current version under
+				// `current_version` (snake) on the slotfill payload; project to
+				// `currentVersion` (camel) for the row's TS contract.
+				const rawCurrentVersion = (
+					emailType as unknown as { current_version?: string | null }
+				 ).current_version;
+				const currentVersion: string | null =
+					typeof rawCurrentVersion === 'string' &&
+					rawCurrentVersion.length > 0
+						? rawCurrentVersion
+						: null;
+
 				return {
 					...emailType,
 					link: post?.link || '',
+					postStatus:
+						( post as { status?: string } | null )?.status ?? null,
 					status: status as EmailStatus,
+					templateStatus,
+					templateVersion,
+					currentVersion,
+					wasBackfilled,
 				};
 			} ),
 		[ emailTypesData, emailPosts, postIdsMap ]
@@ -97,6 +213,70 @@ export const useTransactionalEmails = (
 		return statusFilter.value.includes( email.status );
 	} );
 
+	// Apply Recipient Filter.
+	filteredEmails = filteredEmails.filter( ( email ) => {
+		const recipientFilter = view.filters.find(
+			( filter: View.Filter ) => filter.field === 'recipients'
+		);
+
+		if ( ! recipientFilter || ! recipientFilter.value ) {
+			return true;
+		}
+
+		const selectedRecipients = recipientFilter.value as string[];
+
+		// Check for 'Customers' filter.
+		if (
+			selectedRecipients.includes( 'customer' ) &&
+			( ! email.recipients.to || email.recipients.to.length === 0 )
+		) {
+			return true;
+		}
+
+		// Check for specific email recipients.
+		const emailRecipients = [
+			...( email.recipients.to
+				? email.recipients.to
+						.split( ',' )
+						.map( ( r ) => r.trim() )
+						.filter( Boolean )
+				: [] ),
+			...( email.recipients.cc
+				? email.recipients.cc
+						.split( ',' )
+						.map( ( r ) => r.trim() )
+						.filter( Boolean )
+				: [] ),
+			...( email.recipients.bcc
+				? email.recipients.bcc
+						.split( ',' )
+						.map( ( r ) => r.trim() )
+						.filter( Boolean )
+				: [] ),
+		];
+
+		return selectedRecipients.some( ( filterRecipient ) =>
+			emailRecipients.includes( filterRecipient )
+		);
+	} );
+
+	// Apply Updates Filter (RSM-140)
+	filteredEmails = filteredEmails.filter( ( email ) => {
+		const updatesFilter = view.filters.find(
+			( filter: View.Filter ) => filter.field === 'updates'
+		);
+		if ( ! updatesFilter || ! updatesFilter.value ) {
+			return true;
+		}
+		const selected = Array.isArray( updatesFilter.value )
+			? ( updatesFilter.value as string[] )
+			: [ updatesFilter.value as string ];
+		const emailValue = shouldShowReviewUpdate( email )
+			? 'available'
+			: 'none';
+		return selected.includes( emailValue );
+	} );
+
 	// Apply pagination
 	const startIndex = ( view.page - 1 ) * view.perPage;
 	const endIndex = startIndex + view.perPage;
@@ -115,6 +295,24 @@ export const useTransactionalEmails = (
 		},
 		[ emailTypesData ]
 	);
+
+	const updateEmailPostIdInState = useCallback(
+		( emailId: string, value: string ) => {
+			if ( ! value ) {
+				return;
+			}
+			const updatedEmailTypesData = [ ...emailTypesData ];
+			const emailIndex = updatedEmailTypesData.findIndex(
+				( email ) => email.id === emailId
+			);
+			if ( emailIndex !== -1 ) {
+				updatedEmailTypesData[ emailIndex ].post_id = value;
+				setEmailTypesData( updatedEmailTypesData );
+			}
+		},
+		[ emailTypesData ]
+	);
+
 	const updateEmailEnabledStatus = useCallback(
 		async ( emailId: string, value: boolean ) => {
 			// Optimistic update of local state to update UI
@@ -150,9 +348,8 @@ export const useTransactionalEmails = (
 				}
 
 				// Now we can fetch the old settings and update the settings
-				const currentSettings = await select(
-					settingsStore
-				).getSettings( settingsGroup );
+				const currentSettings =
+					await select( settingsStore ).getSettings( settingsGroup );
 				const updatedSettings = { ...currentSettings } as {
 					[ key: string ]: { [ key: string ]: unknown };
 				};
@@ -172,9 +369,21 @@ export const useTransactionalEmails = (
 		[ emailTypesData, updateAndPersistSettingsForGroup ]
 	);
 
+	const recreateEmailPost = useCallback(
+		async (
+			emailId: string
+		): Promise< EmailListingRecreateEmailPostResponse | null > => {
+			const response = await recreateEmailPostRequest( emailId );
+			updateEmailPostIdInState( emailId, response?.post_id || '' );
+			return response;
+		},
+		[ updateEmailPostIdInState ]
+	);
+
 	return {
 		emails: renderedEmails,
 		total: filteredEmails.length,
 		updateEmailEnabledStatus,
+		recreateEmailPost,
 	};
 };

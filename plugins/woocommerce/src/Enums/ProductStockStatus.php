@@ -13,26 +13,42 @@ final class ProductStockStatus {
 	 *
 	 * @var string
 	 */
-	const IN_STOCK = 'instock';
+	public const IN_STOCK = 'instock';
 
 	/**
 	 * The product is out of stock.
 	 *
 	 * @var string
 	 */
-	const OUT_OF_STOCK = 'outofstock';
+	public const OUT_OF_STOCK = 'outofstock';
 
 	/**
 	 * The product is on backorder.
 	 *
 	 * @var string
 	 */
-	const ON_BACKORDER = 'onbackorder';
+	public const ON_BACKORDER = 'onbackorder';
 
 	/**
 	 * The product is low in stock.
 	 *
 	 * @var string
 	 */
-	const LOW_STOCK = 'lowstock';
+	public const LOW_STOCK = 'lowstock';
+
+	/**
+	 * Returns all product stock status values.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @return string[]
+	 */
+	public static function get_all(): array {
+		return array(
+			self::IN_STOCK,
+			self::OUT_OF_STOCK,
+			self::ON_BACKORDER,
+			self::LOW_STOCK,
+		);
+	}
 }

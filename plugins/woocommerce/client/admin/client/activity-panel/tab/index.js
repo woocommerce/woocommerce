@@ -21,6 +21,12 @@ export const Tab = ( {
 
 	const tabKey = `activity-panel-tab-${ name }`;
 
+	// Add aria-label when no title is provided but name exists.
+	const ariaLabel =
+		! title && name
+			? name.charAt( 0 ).toUpperCase() + name.slice( 1 )
+			: undefined;
+
 	return (
 		<Button
 			role="tab"
@@ -30,12 +36,13 @@ export const Tab = ( {
 			key={ tabKey }
 			id={ tabKey }
 			data-testid={ tabKey }
+			label={ title || ariaLabel }
+			showTooltip
 			onClick={ () => {
 				onTabClick( name );
 			} }
 		>
 			{ icon }
-			{ title }{ ' ' }
 			{ unread && (
 				<span className="screen-reader-text">
 					{ __( 'unread activity', 'woocommerce' ) }

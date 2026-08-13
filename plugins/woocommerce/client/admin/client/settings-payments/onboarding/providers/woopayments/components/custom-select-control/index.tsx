@@ -42,44 +42,6 @@ export interface ControlProps< ItemType > {
 }
 
 const itemToString = ( item: { name?: string } | null ) => item?.name || '';
-// This is needed so that in Windows, where
-// the menu does not necessarily open on
-// key up/down, you can still switch between
-// options with the menu closed.
-const stateReducer = (
-	{ selectedItem }: any, // eslint-disable-line @typescript-eslint/no-explicit-any
-	{ type, changes, props: { items } }: any // eslint-disable-line @typescript-eslint/no-explicit-any
-) => {
-	switch ( type ) {
-		case useSelect.stateChangeTypes.ToggleButtonKeyDownArrowDown:
-			// If we already have a selected item, try to select the next one,
-			// without circular navigation. Otherwise, select the first item.
-			return {
-				selectedItem:
-					items[
-						selectedItem
-							? Math.min(
-									items.indexOf( selectedItem ) + 1,
-									items.length - 1
-							  )
-							: 0
-					],
-			};
-		case useSelect.stateChangeTypes.ToggleButtonKeyDownArrowUp:
-			// If we already have a selected item, try to select the previous one,
-			// without circular navigation. Otherwise, select the last item.
-			return {
-				selectedItem:
-					items[
-						selectedItem
-							? Math.max( items.indexOf( selectedItem ) - 1, 0 )
-							: items.length - 1
-					],
-			};
-		default:
-			return changes;
-	}
-};
 
 function CustomSelectControl< ItemType extends Item >( {
 	name,
@@ -106,7 +68,6 @@ function CustomSelectControl< ItemType extends Item >( {
 		itemToString,
 		onSelectedItemChange,
 		selectedItem: value || ( {} as ItemType ),
-		stateReducer,
 	} );
 
 	const itemString = itemToString( selectedItem );
@@ -186,37 +147,42 @@ function CustomSelectControl< ItemType extends Item >( {
 					className="components-custom-select-control__button-icon"
 				/>
 			</Button>
-			{ /* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */ }
-			<ul { ...menuProps } onKeyDown={ onKeyDownHandler }>
-				{ isOpen &&
-					items.map( ( item, index ) => (
-						// eslint-disable-next-line react/jsx-key
-						<li
-							key={ item.key }
-							{ ...getItemProps( {
-								item,
-								index,
-								className: clsx(
-									item.className,
-									'components-custom-select-control__item',
-									{
-										'is-highlighted':
-											index === highlightedIndex,
-									}
-								),
-								style: item.style,
-							} ) }
-						>
-							{ children ? children( item ) : item.name }
-							{ item === selectedItem && (
-								<Icon
-									icon={ check }
-									className="components-custom-select-control__item-icon"
-								/>
-							) }
-						</li>
-					) ) }
-			</ul>
+			<div { ...menuProps }>
+				{ /* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */ }
+				<ul
+					className="components-custom-select-control__menu-container"
+					onKeyDown={ onKeyDownHandler }
+				>
+					{ isOpen &&
+						items.map( ( item, index ) => (
+							// eslint-disable-next-line react/jsx-key
+							<li
+								key={ item.key }
+								{ ...getItemProps( {
+									item,
+									index,
+									className: clsx(
+										item.className,
+										'components-custom-select-control__item',
+										{
+											'is-highlighted':
+												index === highlightedIndex,
+										}
+									),
+									style: item.style,
+								} ) }
+							>
+								{ children ? children( item ) : item.name }
+								{ item === selectedItem && (
+									<Icon
+										icon={ check }
+										className="components-custom-select-control__item-icon"
+									/>
+								) }
+							</li>
+						) ) }
+				</ul>
+			</div>
 		</div>
 	);
 }

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import {
 	createElement,
 	useCallback,
@@ -142,7 +142,7 @@ export const Sortable = ( {
 							'%s selected, use up and down arrow keys to reorder',
 							'woocommerce'
 						),
-						selectedLabel
+						selectedLabel ?? ''
 					),
 					'assertive'
 				);
@@ -159,7 +159,7 @@ export const Sortable = ( {
 						'%1$s dropped, position in list: %2$d of %3$d',
 						'woocommerce'
 					),
-					selectedLabel,
+					selectedLabel ?? '',
 					dropIndex + 1,
 					items.length
 				),
@@ -185,7 +185,7 @@ export const Sortable = ( {
 				sprintf(
 					/* translators: %1$s: Selected item label, %2$d: Current position in list, %3$d: List total length */
 					__( '%1$s, position in list: %2$d of %3$d', 'woocommerce' ),
-					selectedLabel,
+					selectedLabel ?? '',
 					previousDropIndex + 1,
 					items.length
 				),
@@ -205,7 +205,7 @@ export const Sortable = ( {
 				sprintf(
 					/* translators: %1$s: Selected item label, %2$d: Current position in list, %3$d: List total length */
 					__( '%1$s, position in list: %2$d of %3$d', 'woocommerce' ),
-					selectedLabel,
+					selectedLabel ?? '',
 					nextDropIndex + 1,
 					items.length
 				),
@@ -230,7 +230,7 @@ export const Sortable = ( {
 		<SortableContext.Provider value={ {} }>
 			<div
 				{ ...props }
-				className={ classnames( 'woocommerce-sortable', className, {
+				className={ clsx( 'woocommerce-sortable', className, {
 					'is-dragging': dragIndex !== null,
 					'is-horizontal': isHorizontal,
 				} ) }
@@ -248,7 +248,7 @@ export const Sortable = ( {
 						return child;
 					}
 
-					const itemClasses = classnames( child.props.className, {
+					const itemClasses = clsx( child.props.className, {
 						'is-dragging-over-after': isDraggingOverAfter(
 							index,
 							dragIndex,

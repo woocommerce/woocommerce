@@ -23,6 +23,17 @@ if [ $PROTECTED_BRANCH = $CURRENT_BRANCH ]; then
 	exit 1
 fi
 
+# Ensure the checks are running only when pushing a new branch or there are commits to push.
+matchingRemoteBranches=$(git ls-remote --heads origin refs/heads/$CURRENT_BRANCH)
+if [ -n "$matchingRemoteBranches" ]; then
+	commitsToPush=$(git log origin/$CURRENT_BRANCH..$CURRENT_BRANCH)
+	if [ -z "$commitsToPush" ]; then
+		echo 'pre-push: Everything up-to-date, skipping checks'
+		exit 0
+	fi
+fi
+
+git fetch origin trunk >/dev/null 2>&1
 changedFiles=$(git diff $(git merge-base HEAD origin/trunk) --relative --name-only --diff-filter=d -- '.syncpackrc' 'package.json' '*/package.json')
 if [ -n "$changedFiles" ]; then
 	echo -n 'pre-push: validating syncpack mismatches '
@@ -36,27 +47,6 @@ if [ -n "$changedFiles" ]; then
 	echo "[OK]"
 fi
 
-changedFiles=$(git diff $(git merge-base HEAD origin/trunk) --relative --name-only --diff-filter=d -- '*.php' '*.js' '*.jsx' '*.ts' '*.tsx')
-if [ -n "$changedFiles" ]; then
-	echo 'pre-push: linting changes (if unrelated linting occurs, please sync the branch with trunk)'
-	# This pre-push check aims to reduce CI load, hence we mimic CI matrix generation and pick linting jobs identical to CI environment.
-    ciJobs=$(CI=1 pnpm utils ci-jobs --base-ref origin/trunk --event 'pull_request' 2>&1)
-    lintingJobs=$(echo $ciJobs | sed 's/::set-output/\n::set-output/g' | grep '::set-output name=lint-jobs::' | sed 's/::set-output name=lint-jobs:://g')
-	# Slightly complicated trailing thru linting jobs provided in JSON-format.
-    iteration=1
-    iterations=$( echo $lintingJobs | jq length )
-    while read job; do
-		command=$(echo $job | jq --raw-output '( "pnpm --filter=" + .projectName + " " + .command )')
-		echo -n "-> Executing '$command' ($iteration of $iterations) "
-		start=$SECONDS
-		result=$($command 2>&1)
-		code=$?
-		duration=$(( SECONDS - start ))
-		if [ $code -ne 0 ]; then
-			echo "[ERR] (aborting, please run manually to troubleshoot)"
-			exit 1
-		fi
-		echo "($duration sec.) [OK]"
-		iteration=$(expr $iteration + 1)
-	done < <(echo $lintingJobs | jq --compact-output '.[]')
-fi
+# Once upon a time, we added linting here, aiming to reduce pressure on CI (failing lints required pushing new changes and rerunning CI).
+# It added rather more friction for day-to-day development. Hence, note for future reference: there have already been at least two failed iterations.
+# If you consider the next one, please find a more impactful automation task to look into or add extra 'x' in 'xx' to further count attempts.

@@ -15,6 +15,18 @@ namespace Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags;
  */
 class Personalization_Tag {
 	/**
+	 * Value type for tags whose callback returns an HTML fragment appropriate to the rendering
+	 * context it receives. The Personalizer inserts the value untouched — the callback owns escaping.
+	 */
+	public const VALUE_TYPE_HTML = 'html';
+
+	/**
+	 * Value type for tags whose callback always returns raw plain text. The Personalizer
+	 * escapes the value as needed for the rendering context (e.g. esc_html() in HTML content).
+	 */
+	public const VALUE_TYPE_TEXT = 'text';
+
+	/**
 	 * The name of the tag displayed in the UI.
 	 *
 	 * @var string
@@ -50,6 +62,18 @@ class Personalization_Tag {
 	 * @var string
 	 */
 	private string $value_to_insert;
+	/**
+	 * The list of supported post types.
+	 *
+	 * @var string[]
+	 */
+	private array $post_types;
+	/**
+	 * The type of value the callback returns — one of the VALUE_TYPE_* constants.
+	 *
+	 * @var string
+	 */
+	private string $value_type;
 
 	/**
 	 * Personalization_Tag constructor.
@@ -72,6 +96,8 @@ class Personalization_Tag {
 	 * @param callable    $callback The callback function which returns the value of the personalization tag.
 	 * @param array       $attributes The attributes which are used in the Personalization Tag UI.
 	 * @param string|null $value_to_insert The value that is inserted via the UI. When the value is null the token is generated based on $token attribute and $attributes.
+	 * @param string[]    $post_types The list of supported post types.
+	 * @param string      $value_type The type of value the callback returns — one of the VALUE_TYPE_* constants. Unknown values fall back to VALUE_TYPE_HTML.
 	 */
 	public function __construct(
 		string $name,
@@ -79,7 +105,9 @@ class Personalization_Tag {
 		string $category,
 		callable $callback,
 		array $attributes = array(),
-		?string $value_to_insert = null
+		?string $value_to_insert = null,
+		array $post_types = array(),
+		string $value_type = self::VALUE_TYPE_HTML
 	) {
 		$this->name = $name;
 		// Because Gutenberg does not wrap the token with square brackets, we need to add them here.
@@ -105,6 +133,19 @@ class Personalization_Tag {
 			}
 		}
 		$this->value_to_insert = $value_to_insert;
+		$this->post_types      = $post_types;
+		$this->value_type      = in_array( $value_type, array( self::VALUE_TYPE_HTML, self::VALUE_TYPE_TEXT ), true ) ? $value_type : self::VALUE_TYPE_HTML;
+	}
+
+	/**
+	 * Prevents deserialization of this class to avoid callback replacement attacks.
+	 *
+	 * @param array $data The serialized data.
+	 * @return void
+	 * @throws \Exception Always throws an exception to prevent deserialization.
+	 */
+	public function __unserialize( array $data ): void {
+		throw new \Exception( 'Deserialization of Personalization_Tag is not allowed for security reasons.' );
 	}
 
 	/**
@@ -150,6 +191,33 @@ class Personalization_Tag {
 	 */
 	public function get_value_to_insert(): string {
 		return $this->value_to_insert;
+	}
+
+	/**
+	 * Returns the list of supported post types.
+	 *
+	 * @return array|string[]
+	 */
+	public function get_post_types(): array {
+		return $this->post_types;
+	}
+
+	/**
+	 * Returns the type of value the callback returns — one of the VALUE_TYPE_* constants.
+	 *
+	 * @return string
+	 */
+	public function get_value_type(): string {
+		return $this->value_type;
+	}
+
+	/**
+	 * Returns the callback function of the personalization tag.
+	 *
+	 * @return callable
+	 */
+	public function get_callback(): callable {
+		return $this->callback;
 	}
 
 	/**

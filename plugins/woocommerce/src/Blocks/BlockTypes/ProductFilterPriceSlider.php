@@ -32,18 +32,18 @@ class ProductFilterPriceSlider extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( is_admin() || wp_doing_ajax() || empty( $block->context['filterData'] ) || empty( $block->context['filterData']['price'] ) ) {
+		if ( is_admin() || wp_doing_ajax() || empty( $block->context['woocommerce/rangeInput'] ) ) {
 			return '';
 		}
 
-		$price_data = $block->context['filterData']['price'];
-		$min_price  = $price_data['minPrice'];
-		$max_price  = $price_data['maxPrice'];
-		$min_range  = $price_data['minRange'];
-		$max_range  = $price_data['maxRange'];
+		$range_data = $block->context['woocommerce/rangeInput'];
+		$min_range  = $range_data['min'] ?? 0;
+		$max_range  = $range_data['max'] ?? 0;
+		$min_price  = $range_data['currentMin'] ?? $min_range;
+		$max_price  = $range_data['currentMax'] ?? $max_range;
 
 		if ( $min_range === $max_range ) {
-			return;
+			return '';
 		}
 
 		$classes = '';
@@ -84,24 +84,37 @@ class ProductFilterPriceSlider extends AbstractBlock {
 			)
 		);
 
+		/**
+		 * Accessibility: Assign the left input to a variable to conditionally
+		 * render it based on the inline input setting. We do this to have the
+		 * correct focus order of the input fields.
+		 */
+		ob_start();
+		?>
+		<div class="wc-block-product-filter-price-slider__left text">
+			<?php if ( $show_input_fields ) : ?>
+				<input
+					class="min"
+					type="text"
+					data-wp-bind--value="state.formattedMinPrice"
+					data-wp-on--focus="actions.selectInputContent"
+					data-wp-on--input="actions.debounceSetMinPrice"
+					aria-label="<?php esc_attr_e( 'Filter products by minimum price', 'woocommerce' ); ?>"
+				/>
+			<?php else : ?>
+				<span data-wp-text="state.formattedMinPrice"></span>
+			<?php endif; ?>
+		</div>
+		<?php
+		$left_input = ob_get_clean();
+
 		ob_start();
 		?>
 		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<div class="<?php echo esc_attr( $content_class ); ?>">
-				<div class="wc-block-product-filter-price-slider__left text">
-					<?php if ( $show_input_fields ) : ?>
-						<input
-							class="min"
-							type="text"
-							data-wp-bind--value="state.formattedMinPrice"
-							data-wp-on--focus="actions.selectInputContent"
-							data-wp-on--input="actions.debounceSetMinPrice"
-							aria-label="<?php esc_attr_e( 'Filter products by minimum price', 'woocommerce' ); ?>"
-						/>
-					<?php else : ?>
-						<span data-wp-text="state.formattedMinPrice"></span>
-					<?php endif; ?>
-				</div>
+				<?php if ( $inline_input ) : ?>
+					<?php echo $left_input; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php endif; ?>
 				<div
 					class="wc-block-product-filter-price-slider__range"
 					data-wp-bind--style="state.rangeStyle"
@@ -113,7 +126,7 @@ class ProductFilterPriceSlider extends AbstractBlock {
 						min="<?php echo esc_attr( $min_range ); ?>"
 						max="<?php echo esc_attr( $max_range ); ?>"
 						data-wp-bind--value="state.minPrice"
-						data-wp-on--input="actions.setMinPrice"
+						data-wp-on--input="actions.setMin"
 						data-wp-on--mouseup="actions.navigate"
 						data-wp-on--keyup="actions.navigate"
 						data-wp-on--touchend="actions.navigate"
@@ -125,13 +138,16 @@ class ProductFilterPriceSlider extends AbstractBlock {
 						min="<?php echo esc_attr( $min_range ); ?>"
 						max="<?php echo esc_attr( $max_range ); ?>"
 						data-wp-bind--value="state.maxPrice"
-						data-wp-on--input="actions.setMaxPrice"
+						data-wp-on--input="actions.setMax"
 						data-wp-on--mouseup="actions.navigate"
 						data-wp-on--keyup="actions.navigate"
 						data-wp-on--touchend="actions.navigate"
 						aria-label="<?php esc_attr_e( 'Filter products by maximum price', 'woocommerce' ); ?>"
 					/>
 				</div>
+				<?php if ( ! $inline_input ) : ?>
+					<?php echo $left_input; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php endif; ?>
 				<div class="wc-block-product-filter-price-slider__right text">
 					<?php if ( $show_input_fields ) : ?>
 						<input

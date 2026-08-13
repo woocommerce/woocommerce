@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { BACKSPACE, DOWN, UP } from '@wordpress/keycodes';
 import { createElement, Component, createRef } from '@wordpress/element';
 import { Icon, search } from '@wordpress/icons';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { isArray } from 'lodash';
 import {
 	RefObject,
@@ -348,7 +348,7 @@ class Control extends Component< Props, State > {
 			// for the benefit of sighted users.
 			/* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
 			<div
-				className={ classnames(
+				className={ clsx(
 					'components-base-control',
 					'woocommerce-select-control__control',
 					className,

@@ -58,14 +58,8 @@ button.pswp__button--zoom:hover {
 
   /* adjust for admin bar */
   .admin-bar .pswp {
-    height: calc(100% - 32px);
-    top: 32px;
-  }
-  @media screen and (max-width: 782px) {
-    .admin-bar .pswp {
-      height: calc(100% - 46px);
-      top: 46px;
-    }
+    height: calc(100% - var(--wp-admin--admin-bar--height, 0px));
+    top: var(--wp-admin--admin-bar--height, 0px);
   }
 
 /* style is added when JS option showHideOpacity is set to true */

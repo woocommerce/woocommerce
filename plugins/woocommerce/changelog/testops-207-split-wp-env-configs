@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Split the shared wp-env test config into a lean PHP-unit config (.wp-env.test.json) and a full E2E config (.wp-env.e2e.json) so the PHP-unit environment no longer provisions E2E-only plugins, themes, and setup.

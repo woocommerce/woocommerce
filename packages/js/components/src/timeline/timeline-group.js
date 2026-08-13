@@ -2,7 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { createElement } from '@wordpress/element';
 
 /**
@@ -16,11 +16,9 @@ const TimelineGroup = ( {
 	className = '',
 	orderBy = 'desc',
 	clockFormat,
+	timezone,
 } ) => {
-	const groupClassName = classnames(
-		'woocommerce-timeline-group',
-		className
-	);
+	const groupClassName = clsx( 'woocommerce-timeline-group', className );
 	const itemsToTimlineItem = ( item, itemIndex ) => {
 		const itemKey = group.title + '-' + itemIndex;
 		return (
@@ -28,6 +26,7 @@ const TimelineGroup = ( {
 				key={ itemKey }
 				item={ item }
 				clockFormat={ clockFormat }
+				timezone={ timezone }
 			/>
 		);
 	};
@@ -104,6 +103,10 @@ TimelineGroup.propTypes = {
 	 * The PHP clock format string used to format times, see php.net/date.
 	 */
 	clockFormat: PropTypes.string,
+	/**
+	 * Defines whether item dates should be displayed in the browser timezone or the WordPress site timezone.
+	 */
+	timezone: PropTypes.oneOf( [ 'browser', 'site' ] ),
 };
 
 export default TimelineGroup;

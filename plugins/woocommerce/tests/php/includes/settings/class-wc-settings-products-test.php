@@ -8,6 +8,7 @@
 // phpcs:ignore Squiz.Commenting.FileComment.Missing
 
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
+use Automattic\WooCommerce\Internal\StockNotifications\Admin\SettingsController as StockNotificationsSettings;
 
 require_once __DIR__ . '/class-wc-settings-unit-test-case.php';
 
@@ -20,6 +21,11 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 	 * @testdox get_sections should get all the existing sections.
 	 */
 	public function test_get_sections() {
+		// Get customer stock notification settings.
+		// This is required because this class is loaded only in admin context,
+		// and this test doesn't run with an admin user.
+		wc_get_container()->get( StockNotificationsSettings::class );
+
 		$sut = new WC_Settings_Products();
 
 		$section_names = array_keys( $sut->get_sections() );
@@ -27,6 +33,7 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 		$expected = array(
 			'',
 			'inventory',
+			'customer_stock_notifications',
 			'downloadable',
 		);
 
@@ -121,6 +128,7 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 			'woocommerce_hold_stock_minutes'      => 'number',
 			'woocommerce_notify_low_stock'        => 'checkbox',
 			'woocommerce_notify_no_stock'         => 'checkbox',
+			'woocommerce_notify_backorder'        => 'checkbox',
 			'woocommerce_stock_email_recipient'   => 'text',
 			'woocommerce_notify_low_stock_amount' => 'number',
 			'woocommerce_notify_no_stock_amount'  => 'number',

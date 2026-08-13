@@ -8,9 +8,12 @@ import { registerBlockType } from '@wordpress/blocks';
  * Internal dependencies
  */
 import { Edit, Save } from './edit';
-import './style.scss';
+import metadata from './block.json';
 
+// Register the block
 registerBlockType( 'woocommerce/checkout-order-note-block', {
+	apiVersion: metadata.apiVersion,
+	title: metadata.title,
 	icon: {
 		src: (
 			<Icon

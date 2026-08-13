@@ -147,6 +147,7 @@ class AdvancedFilters extends Component {
 		return createInterpolateElement( config.title, {
 			select: (
 				<SelectControl
+					__next40pxDefaultSize
 					className="woocommerce-filters-advanced__title-select"
 					options={ matches }
 					value={ match }
@@ -294,7 +295,7 @@ class AdvancedFilters extends Component {
 					</Text>
 				</CardHeader>
 				{ !! activeFilters.length && (
-					<CardBody size={ null }>
+					<CardBody size="none">
 						<ul
 							className="woocommerce-filters-advanced__list"
 							ref={ this.filterListRef }

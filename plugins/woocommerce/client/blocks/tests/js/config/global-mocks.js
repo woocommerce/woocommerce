@@ -5,6 +5,12 @@ global.crypto = webcrypto;
 global.TextEncoder = require( 'util' ).TextEncoder;
 global.TextDecoder = require( 'util' ).TextDecoder;
 
+// The @woocommerce/email-editor package reads `__i18n_text_domain__` as its
+// text domain. It is normally replaced by `webpack.DefinePlugin` at bundle
+// time, but Jest does not run through webpack, so provide a default here so
+// test files that import from the package do not hit a ReferenceError.
+global.__i18n_text_domain__ = 'woocommerce';
+
 /**
  * Set up `wp.*` aliases.  Doing this because any tests importing wp stuff will
  * likely run into this.
@@ -275,6 +281,36 @@ global.wcSettings = {
 			autocapitalize: 'characters',
 			index: 100,
 		},
+		'namespace/contact_field': {
+			label: 'Contact Field',
+			optionalLabel: 'Contact Field (optional)',
+			required: false,
+			hidden: false,
+			type: 'text',
+		},
+		'namespace/order_field': {
+			label: 'Order Field',
+			optionalLabel: 'Order Field (optional)',
+			required: false,
+			hidden: false,
+			type: 'text',
+		},
+	},
+	addressFieldsLocations: {
+		address: [
+			'first_name',
+			'last_name',
+			'company',
+			'address_1',
+			'address_2',
+			'city',
+			'state',
+			'postcode',
+			'phone',
+			'country',
+		],
+		contact: [ 'email', 'namespace/contact_field' ],
+		order: [ 'namespace/order_field' ],
 	},
 	checkoutData: {
 		order_id: 100,
@@ -309,7 +345,8 @@ global.__webpack_public_path__ = '';
 Object.defineProperty( window, 'matchMedia', {
 	writable: true,
 	value: jest.fn().mockImplementation( ( query ) => ( {
-		matches: false,
+		// Return true for prefers-reduced-motion queries to skip animations in tests
+		matches: /prefers-reduced-motion/.test( query ),
 		media: query,
 		onchange: null,
 		addListener: jest.fn(), // Deprecated
@@ -330,6 +367,16 @@ if ( ! window.DOMRect ) {
 }
 
 /**
+ * `@wordpress/block-editor`@14.14.6 (wp-6.8) constructs `DOMRectReadOnly`
+ * instances in `getElementBounds`, which `jest-fixed-jsdom` doesn't polyfill.
+ * Stub it so tests that render `<BlockToolbarPopover>` and friends don't
+ * crash.
+ */
+if ( ! window.DOMRectReadOnly ) {
+	window.DOMRectReadOnly = class DOMRectReadOnly {};
+}
+
+/**
  * client-zip is meant to be used in a browser and is therefore released as an
  * ES6 module only, in order to use it in node environment, we need to mock it.
  * See: https://github.com/Touffy/client-zip/issues/28
@@ -338,7 +385,11 @@ jest.mock( 'client-zip', () => ( {
 	downloadZip: jest.fn(),
 } ) );
 
-/*
- * Enables `window.fetch()` in Jest tests.
+/**
+ * Mock isEditor to return false by default in tests, since the core/editor
+ * store may be registered in the test environment without an actual editor
+ * context. Individual tests can override this mock if needed.
  */
-require( 'jest-fetch-mock' ).enableMocks();
+jest.mock( '@woocommerce/block-data/utils/is-editor', () => ( {
+	isEditor: jest.fn().mockReturnValue( false ),
+} ) );

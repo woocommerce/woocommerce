@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 9.8.0
+ * @version 11.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -22,7 +22,7 @@ global $product, $post;
 do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 
 <form class="cart grouped_form" action="<?php echo esc_url( apply_filters( 'woocommerce_add_to_cart_form_action', $product->get_permalink() ) ); ?>" method="post" enctype='multipart/form-data'>
-	<table cellspacing="0" class="woocommerce-grouped-product-list group_table">
+	<table cellspacing="0" class="woocommerce-grouped-product-list group_table" role="presentation">
 		<tbody>
 			<?php
 			$quantites_required      = false;
@@ -91,7 +91,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 										'input_name'  => 'quantity[' . $grouped_product_child->get_id() . ']',
 										'input_value' => isset( $_POST['quantity'][ $grouped_product_child->get_id() ] ) ? wc_stock_amount( wc_clean( wp_unslash( $_POST['quantity'][ $grouped_product_child->get_id() ] ) ) ) : '', // phpcs:ignore WordPress.Security.NonceVerification.Missing
 										'min_value'   => apply_filters( 'woocommerce_quantity_input_min', 0, $grouped_product_child ),
-										'max_value'   => apply_filters( 'woocommerce_quantity_input_max', $grouped_product_child->get_max_purchase_quantity(), $grouped_product_child ),
+										'max_value'   => $grouped_product_child->get_max_purchase_quantity(),
 										'placeholder' => '0',
 									)
 								);

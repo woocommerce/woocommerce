@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Align product status labels (Published, Draft, Pending review) across the status select, tabs, and badge in the experimental products list. Remove the helper text under the status select.

@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
+use Automattic\WooCommerce\Enums\ProductType;
 
 /**
  * Block type for variation selector in add to cart with options.
@@ -31,32 +32,17 @@ class VariationSelector extends AbstractBlock {
 	protected function render( $attributes, $content, $block ): string {
 		global $product;
 
-		if ( $product instanceof \WC_Product && $product->is_type( 'variable' ) ) {
-			add_filter( 'woocommerce_product_supports', array( $this, 'check_product_supports' ), 10, 3 );
+		if ( $product instanceof \WC_Product && $product->is_type( ProductType::VARIABLE ) && ! Utils::is_not_purchasable_product( $product ) ) {
+			$p = new \WP_HTML_Tag_Processor( $content );
 
-			return $content;
+			if ( $p->next_tag( array( 'class_name' => 'wp-block-woocommerce-add-to-cart-with-options-variation-selector' ) ) ) {
+				$p->set_attribute( 'data-wp-watch', 'callbacks.setSelectedVariationId' );
+				$p->set_attribute( 'data-wp-watch--validate', 'callbacks.validateVariation' );
+			}
+
+			return $p->get_updated_html();
 		}
 
 		return '';
-	}
-
-	/**
-	 * Add 'ajax_add_to_cart' support to a Variable Product.
-	 *
-	 * This is needed so the ProductButton block could add a Variable Product to
-	 * the Cart without a page refresh.
-	 *
-	 * @param  bool        $supports If features are already supported or not.
-	 * @param  string      $feature  The feature to check if is supported.
-	 * @param  \WC_Product $product  The product to check.
-	 * @return bool True if the product supports the feature, false otherwise.
-	 * @since  9.9.0
-	 */
-	public function check_product_supports( $supports, $feature, $product ) {
-		if ( 'ajax_add_to_cart' === $feature ) {
-			return true;
-		}
-
-		return $supports;
 	}
 }

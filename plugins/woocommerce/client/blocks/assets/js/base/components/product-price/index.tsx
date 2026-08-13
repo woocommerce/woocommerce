@@ -144,6 +144,7 @@ const SalePrice = ( {
 							regularPriceClassName
 						) }
 						style={ regularPriceStyle }
+						translate="no"
 					>
 						{ value }
 					</del>
@@ -163,6 +164,7 @@ const SalePrice = ( {
 							priceClassName
 						) }
 						style={ priceStyle }
+						translate="no"
 					>
 						{ value }
 					</ins>
@@ -237,14 +239,9 @@ export interface ProductPriceProps {
 	 */
 	regularPriceStyle?: React.CSSProperties | undefined;
 	/**
-	 * Custom margin to apply to the price wrapper.
+	 * Custom styles to apply to the price wrapper.
 	 */
-	style?:
-		| Pick<
-				React.CSSProperties,
-				'marginTop' | 'marginRight' | 'marginBottom' | 'marginLeft'
-		  >
-		| undefined;
+	style?: React.CSSProperties | undefined;
 }
 
 const ProductPrice = ( {
@@ -277,7 +274,12 @@ const ProductPrice = ( {
 		console.error( 'Price formats need to include the `<price/>` tag.' );
 	}
 
-	const isDiscounted = regularPrice && price && price < regularPrice;
+	// Explicitly check for undefined values because 0 is a valid price.
+	const isDiscounted =
+		regularPrice !== undefined &&
+		price !== undefined &&
+		price < regularPrice;
+
 	let priceComponent = (
 		<span
 			className={ clsx(
@@ -309,7 +311,7 @@ const ProductPrice = ( {
 				priceStyle={ priceStyle }
 			/>
 		);
-	} else if ( price ) {
+	} else if ( price || price === 0 ) {
 		priceComponent = (
 			<FormattedMonetaryAmount
 				className={ clsx(

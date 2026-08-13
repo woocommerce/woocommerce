@@ -1,0 +1,15 @@
+.wc-block-product-gallery-large-image__inner-blocks {
+	.wp-block-woocommerce-product-image {
+		position: absolute;
+		top: -5px;
+		right: -5px;
+		bottom: -5px;
+		left: -5px;
+	}
+}
+
+// In the editor there is no frontend wrapper, so the gallery ratio is inherited
+// from the parent Product Gallery block CSS variables.
+:where(.wc-block-product-gallery-large-image) {
+	aspect-ratio: var(--wc-block-product-gallery-large-image-ratio-width, 1) / var(--wc-block-product-gallery-large-image-ratio-height, 1);
+}

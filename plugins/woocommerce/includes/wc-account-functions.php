@@ -9,6 +9,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -106,7 +107,7 @@ function wc_get_account_menu_items() {
 		'dashboard'       => __( 'Dashboard', 'woocommerce' ),
 		'orders'          => __( 'Orders', 'woocommerce' ),
 		'downloads'       => __( 'Downloads', 'woocommerce' ),
-		'edit-address'    => _n( 'Address', 'Addresses', ( 1 + (int) wc_shipping_enabled() ), 'woocommerce' ),
+		'edit-address'    => _n( 'Address', 'Addresses', ( ! wc_ship_to_billing_address_only() && wc_shipping_enabled() ) ? 2 : 1, 'woocommerce' ),
 		'payment-methods' => __( 'Payment methods', 'woocommerce' ),
 		'edit-account'    => __( 'Account details', 'woocommerce' ),
 		'customer-logout' => __( 'Log out', 'woocommerce' ),
@@ -123,7 +124,7 @@ function wc_get_account_menu_items() {
 	if ( isset( $items['payment-methods'] ) ) {
 		$support_payment_methods = false;
 		foreach ( WC()->payment_gateways->get_available_payment_gateways() as $gateway ) {
-			if ( $gateway->supports( 'add_payment_method' ) || $gateway->supports( 'tokenization' ) ) {
+			if ( $gateway->supports( PaymentGatewayFeature::ADD_PAYMENT_METHOD ) || $gateway->supports( PaymentGatewayFeature::TOKENIZATION ) ) {
 				$support_payment_methods = true;
 				break;
 			}
@@ -298,6 +299,10 @@ function wc_get_account_orders_actions( $order ) {
 		$order    = wc_get_order( $order_id );
 	}
 
+	if ( ! $order instanceof WC_Order ) {
+		return array();
+	}
+
 	$actions = array(
 		'pay'    => array(
 			'url'        => $order->get_checkout_payment_url(),
@@ -336,7 +341,30 @@ function wc_get_account_orders_actions( $order ) {
 		unset( $actions['cancel'] );
 	}
 
-	return apply_filters( 'woocommerce_my_account_my_orders_actions', $actions, $order );
+	/**
+	 * Filters the actions available for an order on the My Account orders list.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param array    $actions Array of order actions, keyed by action slug. Each action is an array with 'url' and 'name' keys.
+	 * @param WC_Order $order   Order instance.
+	 */
+	$actions = apply_filters( 'woocommerce_my_account_my_orders_actions', $actions, $order );
+
+	if ( ! is_array( $actions ) ) {
+		return array();
+	}
+
+	// Filter out malformed action entries from third-party extensions.
+	return array_filter(
+		$actions,
+		static function ( $action ) {
+			return is_array( $action )
+				&& isset( $action['name'], $action['url'] )
+				&& is_string( $action['name'] )
+				&& is_string( $action['url'] );
+		}
+	);
 }
 
 /**

@@ -12,12 +12,19 @@
 class WC_Tests_Shipping_Zones extends WC_Unit_Test_Case {
 
 	/**
+	 * Shipping zone fixture IDs keyed by fixture name.
+	 *
+	 * @var int[]
+	 */
+	private $zone_ids;
+
+	/**
 	 * Set up tests.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		WC_Helper_Shipping_Zones::create_mock_zones();
+		$this->zone_ids = WC_Helper_Shipping_Zones::create_mock_zones();
 	}
 
 	/**
@@ -37,7 +44,7 @@ class WC_Tests_Shipping_Zones extends WC_Unit_Test_Case {
 	 */
 	public function test_get_zone() {
 		// Test.
-		$zone = WC_Shipping_Zones::get_zone( 1 );
+		$zone = WC_Shipping_Zones::get_zone( $this->zone_ids['local'] );
 
 		// Assert that the first zone is our local zone.
 		$this->assertInstanceOf( 'WC_Shipping_Zone', $zone );
@@ -49,7 +56,7 @@ class WC_Tests_Shipping_Zones extends WC_Unit_Test_Case {
 	 */
 	public function test_get_zone_by() {
 		// Test.
-		$zone = WC_Shipping_Zones::get_zone_by( 'zone_id', 2 );
+		$zone = WC_Shipping_Zones::get_zone_by( 'zone_id', $this->zone_ids['europe'] );
 
 		// Assert.
 		$this->assertInstanceOf( 'WC_Shipping_Zone', $zone );
@@ -70,7 +77,7 @@ class WC_Tests_Shipping_Zones extends WC_Unit_Test_Case {
 	 */
 	public function test_get_shipping_method() {
 		// Test.
-		$zone            = WC_Shipping_Zones::get_zone_by( 'zone_id', 1 );
+		$zone            = WC_Shipping_Zones::get_zone_by( 'zone_id', $this->zone_ids['local'] );
 		$instance_id     = $zone->add_shipping_method( 'flat_rate' );
 		$shipping_method = WC_Shipping_Zones::get_shipping_method( $instance_id );
 
@@ -79,11 +86,62 @@ class WC_Tests_Shipping_Zones extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: WC_Shipping_Zones::get_shipping_method loads enabled and method_order from database
+	 */
+	public function test_get_shipping_method_loads_enabled_and_order() {
+		$zone        = WC_Shipping_Zones::get_zone_by( 'zone_id', $this->zone_ids['local'] );
+		$instance_id = $zone->add_shipping_method( 'flat_rate' );
+
+		// Set enabled to false and order to 5 in database.
+		global $wpdb;
+		$wpdb->update(
+			$wpdb->prefix . 'woocommerce_shipping_zone_methods',
+			array(
+				'is_enabled'   => 0,
+				'method_order' => 5,
+			),
+			array( 'instance_id' => $instance_id ),
+			array( '%d', '%d' ),
+			array( '%d' )
+		);
+
+		// Fetch the shipping method.
+		$shipping_method = WC_Shipping_Zones::get_shipping_method( $instance_id );
+
+		// Assert enabled is correctly loaded as 'no' from database.
+		$this->assertEquals( 'no', $shipping_method->enabled, 'Enabled property should be loaded from database' );
+
+		// Assert method_order is correctly loaded.
+		$this->assertEquals( 5, $shipping_method->method_order, 'Method order should be loaded from database' );
+
+		// Now set enabled to true and order to 3.
+		$wpdb->update(
+			$wpdb->prefix . 'woocommerce_shipping_zone_methods',
+			array(
+				'is_enabled'   => 1,
+				'method_order' => 3,
+			),
+			array( 'instance_id' => $instance_id ),
+			array( '%d', '%d' ),
+			array( '%d' )
+		);
+
+		// Fetch again.
+		$shipping_method = WC_Shipping_Zones::get_shipping_method( $instance_id );
+
+		// Assert enabled is correctly loaded as 'yes' from database.
+		$this->assertEquals( 'yes', $shipping_method->enabled, 'Enabled property should reflect database state' );
+
+		// Assert method_order is correctly loaded.
+		$this->assertEquals( 3, $shipping_method->method_order, 'Method order should reflect database state' );
+	}
+
+	/**
 	 * Test: WC_Shipping_Zones::delete_zone
 	 */
 	public function test_delete_zone() {
 		// Test.
-		WC_Shipping_Zones::delete_zone( 1 );
+		WC_Shipping_Zones::delete_zone( $this->zone_ids['local'] );
 		$zones = WC_Shipping_Zones::get_zones();
 
 		// Assert.

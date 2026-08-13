@@ -3,6 +3,7 @@
  */
 import { render, fireEvent } from '@testing-library/react';
 import { ProductDataContextProvider } from '@woocommerce/shared-context';
+import { getSetting } from '@woocommerce/settings';
 import { ProductResponseItem } from '@woocommerce/types';
 
 /**
@@ -18,6 +19,23 @@ jest.mock( '@woocommerce/base-hooks', () => ( {
 		style: {},
 	} ) ),
 } ) );
+
+jest.mock( '@woocommerce/settings', () => {
+	const originalModule = jest.requireActual( '@woocommerce/settings' );
+	return {
+		...originalModule,
+		getSetting: jest.fn( ( key, defaultValue ) => {
+			if ( key === 'placeholderImgSrcFullSize' ) {
+				return 'placeholder-full-size.jpg';
+			}
+			if ( key === 'thumbnailAspectRatio' ) {
+				return '1/1';
+			}
+			// Use the original getSetting for other keys
+			return originalModule.getSetting( key, defaultValue );
+		} ),
+	};
+} );
 
 const productWithoutImages: ProductResponseItem = {
 	name: 'Test product',
@@ -187,9 +205,9 @@ describe( 'Product Image Block', () => {
 				</ProductDataContextProvider>
 			);
 
-			const placeholderImage = component.getByAltText( 'Test product' );
+			const placeholderImage = component.getByRole( 'presentation' );
 			expect( placeholderImage.getAttribute( 'src' ) ).toBe(
-				'placeholder.jpg'
+				'placeholder-full-size.jpg'
 			);
 
 			const anchor = placeholderImage.closest( 'a' );
@@ -250,9 +268,9 @@ describe( 'Product Image Block', () => {
 				</ProductDataContextProvider>
 			);
 
-			const placeholderImage = component.getByAltText( 'Test product' );
+			const placeholderImage = component.getByRole( 'presentation' );
 			expect( placeholderImage.getAttribute( 'src' ) ).toBe(
-				'placeholder.jpg'
+				'placeholder-full-size.jpg'
 			);
 
 			const anchor = placeholderImage.closest( 'a' );
@@ -278,12 +296,128 @@ describe( 'Product Image Block', () => {
 				</ProductDataContextProvider>
 			);
 
-			const placeholderImage = component.getByAltText( 'Test product' );
+			const placeholderImage = component.getByRole( 'presentation' );
 			expect( placeholderImage.getAttribute( 'src' ) ).toBe(
-				'placeholder.jpg'
+				'placeholder-full-size.jpg'
 			);
 			expect( placeholderImage.getAttribute( 'width' ) ).toBe( null );
 			expect( placeholderImage.getAttribute( 'height' ) ).toBe( null );
+		} );
+	} );
+
+	describe( 'aspect ratio', () => {
+		test( 'uses full-size image src even when imageSizing is thumbnail', () => {
+			const component = render(
+				<ProductDataContextProvider
+					product={ productWithImages }
+					isLoading={ false }
+				>
+					<Block
+						showProductLink={ true }
+						productId={ productWithImages.id }
+						showSaleBadge={ false }
+						saleBadgeAlign={ 'left' }
+						imageSizing={ ImageSizing.THUMBNAIL }
+						isDescendentOfQueryLoop={ false }
+					/>
+				</ProductDataContextProvider>
+			);
+
+			const image = component.getByTestId( 'product-image' );
+			fireEvent.load( image );
+
+			expect( image.getAttribute( 'src' ) ).toBe(
+				productWithImages.images[ 0 ].src
+			);
+			expect( image.getAttribute( 'src' ) ).not.toBe(
+				productWithImages.images[ 0 ].thumbnail
+			);
+		} );
+
+		test( 'applies store thumbnail aspect ratio when imageSizing is thumbnail', () => {
+			const component = render(
+				<ProductDataContextProvider
+					product={ productWithImages }
+					isLoading={ false }
+				>
+					<Block
+						showProductLink={ true }
+						productId={ productWithImages.id }
+						showSaleBadge={ false }
+						saleBadgeAlign={ 'left' }
+						imageSizing={ ImageSizing.THUMBNAIL }
+						isDescendentOfQueryLoop={ false }
+					/>
+				</ProductDataContextProvider>
+			);
+
+			const image = component.getByTestId( 'product-image' );
+			expect( image.style.aspectRatio ).toBe( '1/1' );
+			expect(
+				component.container.querySelector(
+					'.wc-block-components-product-image--aspect-ratio-1-1'
+				)
+			).not.toBeNull();
+		} );
+
+		test( 'block aspect ratio overrides store thumbnail aspect ratio', () => {
+			const component = render(
+				<ProductDataContextProvider
+					product={ productWithImages }
+					isLoading={ false }
+				>
+					<Block
+						showProductLink={ true }
+						productId={ productWithImages.id }
+						showSaleBadge={ false }
+						saleBadgeAlign={ 'left' }
+						imageSizing={ ImageSizing.THUMBNAIL }
+						isDescendentOfQueryLoop={ false }
+						aspectRatio="3/5"
+					/>
+				</ProductDataContextProvider>
+			);
+
+			const image = component.getByTestId( 'product-image' );
+			expect( image.style.aspectRatio ).toBe( '3/5' );
+		} );
+
+		test( 'uses auto aspect ratio class when store cropping is uncropped', () => {
+			( getSetting as jest.Mock ).mockImplementation(
+				( key, defaultValue ) => {
+					if ( key === 'placeholderImgSrcFullSize' ) {
+						return 'placeholder-full-size.jpg';
+					}
+					if ( key === 'thumbnailAspectRatio' ) {
+						return null;
+					}
+					return defaultValue;
+				}
+			);
+
+			const component = render(
+				<ProductDataContextProvider
+					product={ productWithImages }
+					isLoading={ false }
+				>
+					<Block
+						showProductLink={ true }
+						productId={ productWithImages.id }
+						showSaleBadge={ false }
+						saleBadgeAlign={ 'left' }
+						imageSizing={ ImageSizing.THUMBNAIL }
+						isDescendentOfQueryLoop={ false }
+					/>
+				</ProductDataContextProvider>
+			);
+
+			const image = component.getByTestId( 'product-image' );
+			expect( image.style.aspectRatio ).toBe( '' );
+			expect(
+				component.container.querySelector(
+					'.wc-block-components-product-image--aspect-ratio-auto'
+				)
+			).not.toBeNull();
 		} );
 	} );
 } );

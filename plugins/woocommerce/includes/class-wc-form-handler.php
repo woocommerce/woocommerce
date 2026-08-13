@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Enums\ProductType;
 
 defined( 'ABSPATH' ) || exit;
@@ -16,10 +17,21 @@ defined( 'ABSPATH' ) || exit;
 class WC_Form_Handler {
 
 	/**
+	 * User meta key tracking the last time the set-password link was resent. Used to rate-limit resends.
+	 */
+	const SET_PASSWORD_RESEND_META = '_wc_set_password_resend_at';
+
+	/**
+	 * Minimum seconds between back-to-back set-password resend requests.
+	 */
+	const SET_PASSWORD_RESEND_RATE_LIMIT_SECONDS = 60;
+
+	/**
 	 * Hook in methods.
 	 */
 	public static function init() {
 		add_action( 'template_redirect', array( __CLASS__, 'redirect_reset_password_link' ) );
+		add_action( 'template_redirect', array( __CLASS__, 'resend_set_password' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'save_address' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'save_account_details' ) );
 		add_action( 'wp_loaded', array( __CLASS__, 'checkout_action' ), 20 );
@@ -73,6 +85,59 @@ class WC_Form_Handler {
 			);
 			exit;
 		}
+	}
+
+	/**
+	 * Resend the change-password link to a logged-in customer who still has a temporary password.
+	 *
+	 * Triggered by the temporary-password notice on the My Account pages. Generates a fresh
+	 * password-reset key for the current user and dispatches the reset-password email, mirroring
+	 * the lost-password flow but for the already-authenticated user.
+	 *
+	 * @since 11.0.0
+	 */
+	public static function resend_set_password(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET['wc-resend-set-password'] ) || ! is_user_logged_in() ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$nonce_value = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+
+		if ( ! wp_verify_nonce( $nonce_value, 'wc-resend-set-password' ) ) {
+			return;
+		}
+
+		$user     = wp_get_current_user();
+		$redirect = wc_get_page_permalink( 'myaccount' );
+
+		// Rate-limit resends so the button can't be used to spam the customer's inbox.
+		$last_sent_at = (int) get_user_meta( $user->ID, self::SET_PASSWORD_RESEND_META, true );
+		if ( $last_sent_at > 0 && ( time() - $last_sent_at ) < self::SET_PASSWORD_RESEND_RATE_LIMIT_SECONDS ) {
+			wc_add_notice( __( 'Please wait a moment before requesting another link to change your password.', 'woocommerce' ), 'notice' );
+			wp_safe_redirect( $redirect );
+			exit;
+		}
+
+		$key = get_password_reset_key( $user );
+
+		if ( is_wp_error( $key ) ) {
+			wc_add_notice( __( 'Sorry, we were unable to resend the link. Please try again.', 'woocommerce' ), 'error' );
+		} else {
+			// Persist the rate-limit timestamp before dispatching so two near-simultaneous requests can't both pass.
+			// This timestamp also suppresses the temporary-password notice during the cooldown — see
+			// WC_Shortcode_My_Account::my_account_add_notices() — so the confirmation below isn't contradicted.
+			update_user_meta( $user->ID, self::SET_PASSWORD_RESEND_META, (string) time() );
+			// Load email classes so the reset-password notification has a listener.
+			WC()->mailer();
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks -- Re-fires woocommerce_reset_password_notification, documented in WC_Shortcode_My_Account::retrieve_password().
+			do_action( 'woocommerce_reset_password_notification', $user->user_login, $key );
+			wc_add_notice( __( 'We have emailed you a new link to change your password.', 'woocommerce' ) );
+		}
+
+		wp_safe_redirect( $redirect );
+		exit;
 	}
 
 	/**
@@ -156,7 +221,9 @@ class WC_Form_Handler {
 								}
 								break;
 							case 'phone':
-								if ( '' !== $value && ! WC_Validation::is_phone( $value ) ) {
+								$country = wc_clean( wp_unslash( $_POST[ $address_type . '_country' ] ) );
+								$country = is_string( $country ) ? $country : '';
+								if ( '' !== $value && ! WC_Validation::is_phone( $value, $country ) ) {
 									/* translators: %s: Phone number. */
 									wc_add_notice( sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>' ), 'error' );
 								}
@@ -262,10 +329,12 @@ class WC_Form_Handler {
 		$save_pass            = true;
 
 		// Current user data.
-		$current_user       = get_user_by( 'id', $user_id );
-		$current_first_name = $current_user->first_name;
-		$current_last_name  = $current_user->last_name;
-		$current_email      = $current_user->user_email;
+		/** @var WP_User $current_user */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- Type hint for PHPStan.
+		$current_user         = get_user_by( 'id', $user_id );
+		$current_first_name   = $current_user->first_name;
+		$current_last_name    = $current_user->last_name;
+		$current_email        = $current_user->user_email;
+		$current_display_name = wc_clean( $current_user->display_name );
 
 		// New user data.
 		$user               = new stdClass();
@@ -274,9 +343,9 @@ class WC_Form_Handler {
 		$user->last_name    = $account_last_name;
 		$user->display_name = $account_display_name;
 
-		// Prevent display name to be changed to email.
-		if ( is_email( $account_display_name ) ) {
-			wc_add_notice( __( 'Display name cannot be changed to email address due to privacy concern.', 'woocommerce' ), 'error' );
+		// Prevent display name from being changed to an email address.
+		if ( is_email( $account_display_name ) && $account_display_name !== $current_display_name ) {
+			wc_add_notice( __( 'Display name cannot be changed to email address due to privacy concern.', 'woocommerce' ), 'error', array( 'id' => 'account_display_name' ) );
 		}
 
 		// Handle required fields.
@@ -551,7 +620,7 @@ class WC_Form_Handler {
 			if ( isset( $available_gateways[ $payment_method_id ] ) ) {
 				$gateway = $available_gateways[ $payment_method_id ];
 
-				if ( ! $gateway->supports( 'add_payment_method' ) && ! $gateway->supports( 'tokenization' ) ) {
+				if ( ! $gateway->supports( PaymentGatewayFeature::ADD_PAYMENT_METHOD ) && ! $gateway->supports( PaymentGatewayFeature::TOKENIZATION ) ) {
 					wc_add_notice( __( 'Invalid payment gateway.', 'woocommerce' ), 'error' );
 					return;
 				}
@@ -636,6 +705,8 @@ class WC_Form_Handler {
 			return;
 		}
 
+		wc_maybe_define_constant( 'WOOCOMMERCE_CART', true );
+
 		wc_nocache_headers();
 
 		$nonce_value = wc_get_var( $_REQUEST['woocommerce-cart-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
@@ -651,7 +722,19 @@ class WC_Form_Handler {
 			$cart_item     = WC()->cart->get_cart_item( $cart_item_key );
 
 			if ( $cart_item ) {
-				WC()->cart->remove_cart_item( $cart_item_key );
+				$removed = WC()->cart->remove_cart_item( $cart_item_key );
+
+				if ( $removed ) {
+					/**
+					 * Fires when a cart item is removed from a user request.
+					 *
+					 * @param string   $cart_item_key Cart item key.
+					 * @param \WC_Cart $cart          Cart object.
+					 *
+					 * @since 10.6.0
+					 */
+					do_action( 'internal_woocommerce_cart_item_removed_from_user_request', $cart_item_key, WC()->cart );
+				}
 
 				$product = wc_get_product( $cart_item['product_id'] );
 
@@ -722,8 +805,21 @@ class WC_Form_Handler {
 					}
 
 					if ( $passed_validation ) {
+						$old_quantity = $values['quantity'];
 						WC()->cart->set_quantity( $cart_item_key, $quantity, false );
 						$cart_updated = true;
+
+						/**
+						 * Fires when a cart item quantity is updated from a user request.
+						 *
+						 * @param string   $cart_item_key Cart item key.
+						 * @param int|float $quantity     New quantity.
+						 * @param int|float $old_quantity Old quantity.
+						 * @param \WC_Cart $cart          Cart object.
+						 *
+						 * @since 10.6.0
+						 */
+						do_action( 'internal_woocommerce_cart_item_updated_from_user_request', $cart_item_key, $quantity, $old_quantity, WC()->cart );
 					}
 				}
 			}
@@ -835,6 +931,7 @@ class WC_Form_Handler {
 
 		if ( ProductType::VARIABLE === $add_to_cart_handler || ProductType::VARIATION === $add_to_cart_handler ) {
 			$was_added_to_cart = self::add_to_cart_handler_variable( $product_id );
+			$product_id        = ! empty( $_REQUEST['variation_id'] ) ? absint( wp_unslash( $_REQUEST['variation_id'] ) ) : $product_id; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		} elseif ( ProductType::GROUPED === $add_to_cart_handler ) {
 			$was_added_to_cart = self::add_to_cart_handler_grouped( $product_id );
 		} elseif ( has_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler ) ) {
@@ -845,6 +942,18 @@ class WC_Form_Handler {
 
 		// If we added the product to the cart we can now optionally do a redirect.
 		if ( $was_added_to_cart && 0 === wc_notice_count( 'error' ) ) {
+			$quantity = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+			/**
+			 * Fires when an item is added to the cart from a user request.
+			 *
+			 * @param int       $product_id Product ID.
+			 * @param int|float $quantity   Quantity added to the cart.
+			 *
+			 * @since 10.6.0
+			 */
+			do_action( 'internal_woocommerce_cart_item_added_from_user_request', $product_id, $quantity );
+
 			$url = apply_filters( 'woocommerce_add_to_cart_redirect', $url, $adding_to_cart );
 
 			if ( $url ) {
@@ -865,6 +974,11 @@ class WC_Form_Handler {
 	 * @return bool success or not
 	 */
 	private static function add_to_cart_handler_simple( $product_id ) {
+		if ( ! WC()->cart ) {
+			wc_doing_it_wrong( __FUNCTION__, 'Cart is not initialized.', '10.5.0' );
+			return false;
+		}
+
 		$quantity          = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 
@@ -956,8 +1070,19 @@ class WC_Form_Handler {
 
 		// Prevent parent variable product from being added to cart.
 		if ( empty( $variation_id ) && $product && $product->is_type( ProductType::VARIABLE ) ) {
-			/* translators: 1: product link, 2: product name */
-			wc_add_notice( sprintf( __( 'Please choose product options by visiting <a href="%1$s" title="%2$s">%2$s</a>.', 'woocommerce' ), esc_url( get_permalink( $product_id ) ), esc_html( $product->get_name() ) ), 'error' );
+			$current_url        = isset( $_SERVER['REQUEST_URI'] ) ? wp_parse_url( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ), PHP_URL_PATH ) : '';
+			$product_url        = wp_parse_url( get_permalink( $product_id ), PHP_URL_PATH );
+			$is_in_product_page = $current_url && $product_url && untrailingslashit( $current_url ) === untrailingslashit( $product_url );
+
+			if ( $is_in_product_page ) {
+				/* translators: 1: product name */
+				$error_message = sprintf( __( 'Please choose product options for %1$s.', 'woocommerce' ), esc_html( $product->get_name() ) );
+			} else {
+				/* translators: 1: product link, 2: product name */
+				$error_message = sprintf( __( 'Please choose product options by visiting <a href="%1$s" title="%2$s">%2$s</a>.', 'woocommerce' ), esc_url( get_permalink( $product_id ) ), esc_html( $product->get_name() ) );
+			}
+
+			wc_add_notice( $error_message, 'error' );
 
 			return false;
 		}
@@ -1006,21 +1131,17 @@ class WC_Form_Handler {
 					throw new Exception( '<strong>' . __( 'Error:', 'woocommerce' ) . '</strong> ' . __( 'Username is required.', 'woocommerce' ) );
 				}
 
-				// On multisite, ensure user exists on current site, if not add them before allowing login.
-				if ( is_multisite() ) {
-					$user_data = get_user_by( is_email( $creds['user_login'] ) ? 'email' : 'login', $creds['user_login'] );
-
-					if ( $user_data && ! is_user_member_of_blog( $user_data->ID, get_current_blog_id() ) ) {
-						add_user_to_blog( get_current_blog_id(), $user_data->ID, 'customer' );
-					}
-				}
-
 				// Perform the login.
 				$user = wp_signon( apply_filters( 'woocommerce_login_credentials', $creds ), is_ssl() );
 
 				if ( is_wp_error( $user ) ) {
 					throw new Exception( $user->get_error_message() );
 				} else {
+
+					// On multisite, ensure user exists on current site, if not add them.
+					if ( is_multisite() && ! is_user_member_of_blog( $user->ID, get_current_blog_id() ) ) {
+						add_user_to_blog( get_current_blog_id(), $user->ID, 'customer' );
+					}
 
 					if ( ! empty( $_POST['redirect'] ) ) {
 						$redirect = wp_unslash( $_POST['redirect'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized

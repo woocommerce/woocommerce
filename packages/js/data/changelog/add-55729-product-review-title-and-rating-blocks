@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add a getReview selector and resolver to the reviews data store.

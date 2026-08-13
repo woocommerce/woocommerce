@@ -1,33 +1,43 @@
+/*
+ * @jest-environment-options {"url": "http://woo.local/"}
+ */
+
 /**
  * External dependencies
  */
-import React from '@wordpress/element';
 import {
 	act,
 	cleanup,
 	render,
 	screen,
-	within,
 	waitFor,
+	within,
 } from '@testing-library/react';
-import { default as fetchMock } from 'jest-fetch-mock';
 import userEvent from '@testing-library/user-event';
+import { server } from '@woocommerce/test-utils/msw';
+import { allSettings } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import Block from '../block';
-import { allSettings } from '../../../settings/shared/settings-init';
 import { Attributes } from '../types';
 
 const setWindowUrl = ( { url }: { url: string } ) => {
-	Object.defineProperty( window, 'location', {
-		value: {
-			href: url,
-		},
-		writable: true,
-	} );
+	/*
+	 * jsdom (>= 21) makes `window.location` non-configurable, so navigate via
+	 * the History API instead of replacing the object. Same-origin only (see
+	 * the `@jest-environment-options` url above).
+	 */
+	window.history.replaceState( {}, '', url );
 };
+
+// Captured before any test navigates, so each test starts from the env URL.
+const initialUrl = window.location.href;
+
+afterEach( () => {
+	window.history.replaceState( {}, '', initialUrl );
+} );
 
 const mockResults = {
 	stock_status_counts: [
@@ -225,7 +235,7 @@ describe( 'Filter by Stock block', () => {
 	} );
 
 	afterEach( () => {
-		fetchMock.resetMocks();
+		server.resetHandlers();
 	} );
 
 	test( 'renders the stock filter block', async () => {

@@ -3,7 +3,7 @@
  */
 import { createElement } from '@wordpress/element';
 import { Card, CardBody, Icon } from '@wordpress/components';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import PropTypes from 'prop-types';
 
 /**
@@ -20,13 +20,8 @@ const AbbreviatedCard = ( {
 	type,
 } ) => {
 	return (
-		<Card
-			className={ classnames(
-				'woocommerce-abbreviated-card',
-				className
-			) }
-		>
-			<CardBody size={ null }>
+		<Card className={ clsx( 'woocommerce-abbreviated-card', className ) }>
+			<CardBody size="none">
 				<Link href={ href } onClick={ onClick } type={ type }>
 					<div className="woocommerce-abbreviated-card__icon">
 						<Icon icon={ icon } />

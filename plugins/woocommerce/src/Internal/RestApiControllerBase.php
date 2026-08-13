@@ -14,11 +14,7 @@ use Exception;
 /**
  * Base class for REST API controllers defined inside the 'src' directory.
  *
- * Besides implementing the abstract methods, derived classes must be registered in the dependency injection
- * container with the 'share_with_implements_tags' method inside a service provider that inherits from
- * 'AbstractInterfaceServiceProvider'. This ensures that 'register_routes' is invoked.
- *
- * Also, the following must be added at the end of the 'init_hooks' method in the 'WooCommerce' class,
+ * The following must be added at the end of the 'init_hooks' method in the 'WooCommerce' class,
  * otherwise the routes won't be registered:
  * $container->get( <full class name>::class )->register();
  *
@@ -160,7 +156,6 @@ abstract class RestApiControllerBase implements RegisterHooksInterface {
 			$data['exception_message'] = $exception->getMessage();
 			$data['exception_trace']   = (array) $exception->getTrace();
 		}
-		$data['exception_message'] = $exception->getMessage();
 
 		return new WP_Error( 'woocommerce_rest_internal_error', __( 'Internal server error', 'woocommerce' ), $data );
 	}

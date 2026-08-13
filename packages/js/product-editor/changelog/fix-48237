@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix Product template not updating in the UI when it is changed

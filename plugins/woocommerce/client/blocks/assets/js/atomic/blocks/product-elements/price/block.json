@@ -22,9 +22,7 @@
 	"apiVersion": 3,
 	"supports": {
 		"html": false,
-		"interactivity": {
-			"clientNavigation": true
-		},
+		"interactivity": true,
 		"color": {
 			"text": true,
 			"background": true,
@@ -37,20 +35,30 @@
 			"__experimentalFontFamily": true,
 			"__experimentalFontWeight": true,
 			"__experimentalFontStyle": true,
-			"__experimentalSkipSerialization": true,
-			"__experimentalLetterSpacing": true
+			"__experimentalLetterSpacing": true,
+			"__experimentalSkipSerialization": true
 		},
-		"__experimentalSelector": ".wp-block-woocommerce-product-price .wc-block-components-product-price",
+		"email": true,
 		"spacing": {
 			"margin": true,
-			"padding": true
+			"padding": true,
+			"__experimentalSkipSerialization": [ "padding" ]
+		}
+	},
+	"selectors": {
+		"root": ".wp-block-woocommerce-product-price .wc-block-components-product-price",
+		"spacing": {
+			"margin": ".wp-block-woocommerce-product-price",
+			"padding": ".wp-block-woocommerce-product-price .wc-block-components-product-price"
 		}
 	},
 	"ancestor": [
 		"woocommerce/all-products",
+		"woocommerce/featured-product",
 		"woocommerce/single-product",
 		"woocommerce/product-template",
 		"core/post-template"
 	],
+	"style": "file:../product-price.css",
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }

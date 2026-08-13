@@ -3,8 +3,13 @@
  */
 import { InspectorControls } from '@wordpress/block-editor';
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { Block } from '@wordpress/blocks/index';
-import { addFilter } from '@wordpress/hooks';
+import { BlockSupports } from '@wordpress/blocks';
+
+/**
+ * Internal dependencies
+ */
+import { updateBlockSettings } from '../../config-tools/block-config';
+import { addFilterForEmail } from '../../config-tools/filters';
 
 const columnsEditCallback = createHigherOrderComponent(
 	( BlockEdit ) =>
@@ -33,58 +38,38 @@ const columnsEditCallback = createHigherOrderComponent(
 );
 
 function deactivateStackOnMobile() {
-	addFilter(
+	addFilterForEmail(
 		'editor.BlockEdit',
 		'woocommerce-email-editor/deactivate-stack-on-mobile',
 		columnsEditCallback
 	);
 }
 
+const COLUMN_BLOCKS = [ 'core/column', 'core/columns' ];
+
 /**
  * Disables layout support for columns and column blocks because
  * the default layout `flex` add gaps between columns that it is not possible to support in emails.
+ *
+ * Also, enhances the columns block to support background image.
  */
-function disableColumnsLayout() {
-	addFilter(
-		'blocks.registerBlockType',
-		'woocommerce-email-editor/disable-columns-layout',
-		( settings, name ) => {
-			if ( name === 'core/columns' || name === 'core/column' ) {
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-return
-				return {
-					...settings,
-					supports: {
-						...settings.supports,
-						layout: false,
-					},
-				};
-			}
-
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-return
-			return settings;
-		}
-	);
+function disableColumnsLayoutAndEnhanceColumnsBlock() {
+	COLUMN_BLOCKS.forEach( ( blockName ) => {
+		updateBlockSettings( blockName, ( current ) => ( {
+			...current,
+			supports: {
+				...( current.supports || {} ),
+				layout: false,
+				background: {
+					// Preserve any existing background supports and enable backgroundImage
+					// @ts-expect-error BlockSupports type not complete
+					...( ( current.support as BlockSupports )?.background ||
+						{} ),
+					backgroundImage: true,
+				},
+			},
+		} ) );
+	} );
 }
 
-function enhanceColumnsBlock() {
-	addFilter(
-		'blocks.registerBlockType',
-		'woocommerce-email-editor/change-columns',
-		( settings: Block, name ) => {
-			if ( name === 'core/columns' ) {
-				return {
-					...settings,
-					supports: {
-						...settings.supports,
-						background: {
-							backgroundImage: true,
-						},
-					},
-				};
-			}
-			return settings;
-		}
-	);
-}
-
-export { deactivateStackOnMobile, disableColumnsLayout, enhanceColumnsBlock };
+export { deactivateStackOnMobile, disableColumnsLayoutAndEnhanceColumnsBlock };

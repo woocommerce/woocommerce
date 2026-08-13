@@ -24,7 +24,7 @@
 }
 
 %with-resizable-box {
-	.components-resizable-box__container {
+	> .components-resizable-box__container {
 		position: absolute !important;
 		top: 0;
 		left: 0;
@@ -113,6 +113,7 @@
 	}
 
 	&__description,
+	&__inner-blocks,
 	&__link,
 	&__price,
 	&__title,
@@ -152,6 +153,16 @@
 		}
 	}
 
+	&__inner-blocks {
+		.wp-block-post-title,
+		.wp-block-woocommerce-category-title {
+			&,
+			a {
+				color: inherit;
+			}
+		}
+	}
+
 	& &__title {
 		color: inherit;
 		margin-top: 0;
@@ -180,4 +191,12 @@
 	.wp-block-button.aligncenter {
 		text-align: center;
 	}
+
+	.wc-blocks-featured-items__orange-info-icon {
+		fill: var(--wp--preset--color--luminous-vivid-orange, #e26f56);
+	}
+}
+
+.color-block-support-panel .image-bg-color-warning {
+	grid-column: span 2;
 }

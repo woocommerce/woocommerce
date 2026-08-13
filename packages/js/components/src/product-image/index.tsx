@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { get } from 'lodash';
 import { createElement } from '@wordpress/element';
 
@@ -19,8 +19,8 @@ type ProductImageProps = {
 	/**
 	 * Product or variation object. The image to display will be pulled from
 	 * `product.images` or `variation.image`.
-	 * See https://woocommerce.github.io/woocommerce-rest-api-docs/#product-properties
-	 * and https://woocommerce.github.io/woocommerce-rest-api-docs/#product-variation-properties
+	 * See https://developer.woocommerce.com/docs/apis/rest-api/v3/products/#product-properties
+	 * and https://developer.woocommerce.com/docs/apis/rest-api/v3/product-variations/#product-variation-properties
 	 */
 	product?: {
 		images?: Array< Image >;
@@ -62,7 +62,7 @@ const ProductImage: React.VFC< ProductImageProps > = ( {
 	const src = ( productImage && productImage.src ) || false;
 	const altText = alt || ( productImage && productImage.alt ) || '';
 
-	const classes = classnames( 'woocommerce-product-image', className, {
+	const classes = clsx( 'woocommerce-product-image', className, {
 		'is-placeholder': ! src,
 	} );
 

@@ -30,14 +30,8 @@
 	}
 }
 
-.wc-block-add-to-cart-with-options-grouped-product-selector-item-cta,
-.wc-block-add-to-cart-with-options__quantity-selector {
-	.quantity .qty {
-		// WooCommerce core styles: https://github.com/woocommerce/woocommerce/blob/c9f62609155825cd817976c7611b9b0415e90f2f/plugins/woocommerce/client/legacy/css/woocommerce.scss/#L111-L112
-		width: 3.631em;
-	}
-
-	.wc-block-components-quantity-selector {
-		margin: 0;
-	}
+// It allows the `.wc-block-components-quantity-selector` height: 100% to work
+// when the block contents are wrapped in a <Disabled> component.
+:where(.wc-block-add-to-cart-with-options__quantity-selector .components-disabled) {
+	display: contents;
 }

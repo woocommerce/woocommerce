@@ -1,0 +1,57 @@
+.woocommerce-recommended-abandoned-cart-recovery-extensions {
+	overflow: hidden;
+
+	.woocommerce-list__item {
+		> .woocommerce-list__item-inner {
+			align-items: center;
+			padding: $gap $gap-large;
+		}
+
+		&:hover {
+			background-color: $white;
+
+			.woocommerce-list__item-title {
+				color: $gray-900;
+			}
+		}
+	}
+
+	.woocommerce-list__item-title {
+		font-size: 14px;
+		color: $gray-900;
+		font-weight: 600;
+	}
+
+	.woocommerce-pill {
+		margin-left: $gap-smallest;
+		margin-top: $gap-smallest;
+		margin-bottom: $gap-smallest;
+		padding: 2px 8px;
+
+		@media (min-width: #{ ($break-mobile) }) {
+			margin-top: 0;
+			margin-bottom: 0;
+		}
+	}
+
+	.woocommerce-list__item-after {
+		align-self: center;
+
+		.components-button {
+			margin-left: $gap-small;
+		}
+	}
+
+	.woocommerce-recommended-abandoned-cart-recovery__header-heading {
+		color: $gray-700;
+	}
+}
+
+// Scope the embedded-layout padding override to pages that actually render
+// this recommendation — without `:has()`, the selector would target every
+// wc-settings page's primary container as soon as this chunk loaded.
+body.woocommerce_page_wc-settings .woocommerce-embedded-layout__primary:has(
+.woocommerce-recommended-abandoned-cart-recovery-extensions
+) {
+	padding: 0 20px 80px;
+}

@@ -137,10 +137,6 @@ export default {
 			),
 		},
 	} ),
-	inlineNotice: {
-		title: __( 'Business Location:', 'woocommerce' ),
-		action: __( 'Change', 'woocommerce' ),
-	},
 	continue: __( 'Continue', 'woocommerce' ),
 	back: __( 'Back', 'woocommerce' ),
 	cancel: __( 'Cancel', 'woocommerce' ),

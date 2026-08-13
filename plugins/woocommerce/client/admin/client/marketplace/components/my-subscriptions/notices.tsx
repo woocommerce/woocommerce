@@ -25,13 +25,17 @@ export default function Notices() {
 		if ( ! notice.options?.actions ) {
 			return [];
 		}
+		// Marketplace notice actions carry both `url` and `onClick`, which
+		// doesn't cleanly match either arm of @wordpress/components'
+		// `NoticeActionWithOnClick | NoticeActionWithURL` discriminated union.
+		// The underlying <Notice> picks `onClick` first, so the cast is safe.
 		return notice.options?.actions.map( ( action ) => {
 			return {
 				...action,
 				variant: 'link',
 				className: 'is-link',
 			};
-		} );
+		} ) as NoticeActions;
 	};
 
 	const errorNotices = [];

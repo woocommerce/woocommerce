@@ -31,6 +31,9 @@ Object.defineProperty( window, 'location', {
 
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
+	useDispatch: jest.fn().mockReturnValue( {
+		createNotice: jest.fn(),
+	} ),
 	useSelect: jest.fn().mockImplementation( ( callback ) =>
 		callback( () => ( {
 			getInstalledPlugins: () => [],
@@ -69,11 +72,6 @@ describe( 'Products', () => {
 
 		// Reset location.href
 		mockLocation.href = '';
-
-		// @ts-expect-error -- partial mock
-		window.wcAdminFeatures = {
-			printful: true,
-		};
 	} );
 
 	it( 'should render default products types when onboardingData.profile.productType is null', () => {
@@ -277,10 +275,10 @@ describe( 'Products', () => {
 		).toBeGreaterThanOrEqual( 1 );
 	} );
 
-	it( 'should trigger event tasklist_add_product_visit_marketplace_click when clicking the Official WooCommerce Marketplace link', () => {
+	it( 'should trigger event tasklist_add_product_visit_marketplace_click when clicking the WooCommerce Marketplace link', () => {
 		const { getByText } = render( <Products /> );
 
-		userEvent.click( getByText( 'Official WooCommerce Marketplace' ) );
+		userEvent.click( getByText( 'the WooCommerce Marketplace' ) );
 
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'tasklist_add_product_visit_marketplace_click',
@@ -288,7 +286,7 @@ describe( 'Products', () => {
 		);
 	} );
 
-	it( 'should navigate to the marketplace when clicking the Official WooCommerce Marketplace link', async () => {
+	it( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', async () => {
 		mockLocation.href = 'test';
 		Object.defineProperty( global.window, 'location', {
 			value: mockLocation,
@@ -296,7 +294,7 @@ describe( 'Products', () => {
 
 		const { getByText } = render( <Products /> );
 
-		userEvent.click( getByText( 'Official WooCommerce Marketplace' ) );
+		userEvent.click( getByText( 'the WooCommerce Marketplace' ) );
 		expect( mockLocation.href ).toContain(
 			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=merchandising'
 		);
@@ -329,25 +327,6 @@ describe( 'Products', () => {
 					isPluginsRequesting: () => false,
 				} ) )
 			);
-
-			const { queryByText } = render( <Products /> );
-
-			await waitFor( () => {
-				expect(
-					queryByText( 'Print-on-demand products' )
-				).not.toBeInTheDocument();
-			} );
-		} );
-
-		it( 'should hide Printful banner when feature is disabled', async () => {
-			( useSelect as jest.Mock ).mockImplementation( ( callback ) =>
-				callback( () => ( {
-					getInstalledPlugins: () => [],
-					isPluginsRequesting: () => false,
-				} ) )
-			);
-
-			window.wcAdminFeatures.printful = false;
 
 			const { queryByText } = render( <Products /> );
 

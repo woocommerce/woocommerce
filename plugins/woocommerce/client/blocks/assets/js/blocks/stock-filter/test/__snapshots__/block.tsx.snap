@@ -26,7 +26,6 @@ exports[`Filter by Stock block renders the stock filter block 1`] = `
               aria-hidden="true"
               class="wc-block-components-checkbox__mark"
               viewBox="0 0 24 20"
-              xmlns="http://www.w3.org/2000/svg"
             >
               <path
                 d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"
@@ -58,7 +57,6 @@ exports[`Filter by Stock block renders the stock filter block 1`] = `
               aria-hidden="true"
               class="wc-block-components-checkbox__mark"
               viewBox="0 0 24 20"
-              xmlns="http://www.w3.org/2000/svg"
             >
               <path
                 d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"
@@ -90,7 +88,6 @@ exports[`Filter by Stock block renders the stock filter block 1`] = `
               aria-hidden="true"
               class="wc-block-components-checkbox__mark"
               viewBox="0 0 24 20"
-              xmlns="http://www.w3.org/2000/svg"
             >
               <path
                 d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"
@@ -138,7 +135,6 @@ exports[`Filter by Stock block renders the stock filter block with the filter bu
               aria-hidden="true"
               class="wc-block-components-checkbox__mark"
               viewBox="0 0 24 20"
-              xmlns="http://www.w3.org/2000/svg"
             >
               <path
                 d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"
@@ -170,7 +166,6 @@ exports[`Filter by Stock block renders the stock filter block with the filter bu
               aria-hidden="true"
               class="wc-block-components-checkbox__mark"
               viewBox="0 0 24 20"
-              xmlns="http://www.w3.org/2000/svg"
             >
               <path
                 d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"
@@ -202,7 +197,6 @@ exports[`Filter by Stock block renders the stock filter block with the filter bu
               aria-hidden="true"
               class="wc-block-components-checkbox__mark"
               viewBox="0 0 24 20"
-              xmlns="http://www.w3.org/2000/svg"
             >
               <path
                 d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"
@@ -266,7 +260,6 @@ exports[`Filter by Stock block renders the stock filter block with the product c
               aria-hidden="true"
               class="wc-block-components-checkbox__mark"
               viewBox="0 0 24 20"
-              xmlns="http://www.w3.org/2000/svg"
             >
               <path
                 d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"
@@ -312,7 +305,6 @@ exports[`Filter by Stock block renders the stock filter block with the product c
               aria-hidden="true"
               class="wc-block-components-checkbox__mark"
               viewBox="0 0 24 20"
-              xmlns="http://www.w3.org/2000/svg"
             >
               <path
                 d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"
@@ -358,7 +350,6 @@ exports[`Filter by Stock block renders the stock filter block with the product c
               aria-hidden="true"
               class="wc-block-components-checkbox__mark"
               viewBox="0 0 24 20"
-              xmlns="http://www.w3.org/2000/svg"
             >
               <path
                 d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"

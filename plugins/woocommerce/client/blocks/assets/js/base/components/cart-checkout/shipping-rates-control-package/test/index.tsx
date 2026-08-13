@@ -3,7 +3,7 @@
  */
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useShippingData } from '@woocommerce/base-context/hooks';
+import { useShippingData, useStoreCart } from '@woocommerce/base-context/hooks';
 
 /**
  * Internal dependencies
@@ -43,6 +43,12 @@ test( 'renders available shipping rates', async () => {
 		};
 	} );
 
+	( useStoreCart as jest.Mock ).mockImplementation( () => {
+		return {
+			cartItems: [],
+		};
+	} );
+
 	render(
 		<ShippingRatesControlPackage
 			packageData={ testPackageData }
@@ -74,6 +80,12 @@ test( 'changes rate selection locally and informs API about it', async () => {
 			selectShippingRate,
 			isSelectingRate: false,
 			shippingRates: [ testPackageData ],
+		};
+	} );
+
+	( useStoreCart as jest.Mock ).mockImplementation( () => {
+		return {
+			cartItems: [],
 		};
 	} );
 
@@ -131,6 +143,12 @@ test( 'upstream rate selection updates are properly reflected in local state', a
 			selectShippingRate: jest.fn(),
 			isSelectingRate: false,
 			shippingRates: [ packageData ],
+		};
+	} );
+
+	( useStoreCart as jest.Mock ).mockImplementation( () => {
+		return {
+			cartItems: [],
 		};
 	} );
 

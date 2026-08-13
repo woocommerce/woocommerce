@@ -5,6 +5,8 @@
  * @package WooCommerce\Classes
  */
 
+use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
+use Automattic\WooCommerce\Enums\TaxBasedOn;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -82,7 +84,20 @@ class WC_Tax {
 	 * @return array
 	 */
 	public static function calc_shipping_tax( $price, $rates ) {
-		$taxes = self::calc_exclusive_tax( $price, $rates );
+		/**
+		 * Filter to control if shipping prices include tax.
+		 *
+		 * @since 10.6.0
+		 * @param bool $shipping_prices_include_tax True if shipping cost is gross (includes tax), false if net. Default false.
+		 */
+		$shipping_prices_include_tax = wc_string_to_bool( apply_filters( 'woocommerce_shipping_prices_include_tax', false ) );
+
+		if ( $shipping_prices_include_tax ) {
+			$taxes = self::calc_inclusive_tax( $price, $rates );
+		} else {
+			$taxes = self::calc_exclusive_tax( $price, $rates );
+		}
+
 		return apply_filters( 'woocommerce_calc_shipping_tax', $taxes, $price, $rates );
 	}
 
@@ -460,7 +475,7 @@ class WC_Tax {
 
 		if ( ! empty( $customer ) ) {
 			$location = $customer->get_taxable_address();
-		} elseif ( wc_prices_include_tax() || 'base' === get_option( 'woocommerce_default_customer_address' ) || 'base' === get_option( 'woocommerce_tax_based_on' ) ) {
+		} elseif ( wc_prices_include_tax() || DefaultCustomerAddress::BASE === get_option( 'woocommerce_default_customer_address' ) || TaxBasedOn::BASE === get_option( 'woocommerce_tax_based_on' ) ) {
 			$location = array(
 				WC()->countries->get_base_country(),
 				WC()->countries->get_base_state(),
@@ -549,11 +564,22 @@ class WC_Tax {
 	}
 
 	/**
-	 * Gets an array of matching shipping tax rates for a given class.
+	 * Gets shipping tax rates based on tax class and customer location.
 	 *
-	 * @param string $tax_class Tax class to get rates for.
-	 * @param object $customer Override the customer object to get their location.
-	 * @return mixed
+	 * This method determines which tax rates to apply to shipping costs by following this priority:
+	 * 1. Uses the explicitly configured shipping tax class from WooCommerce settings if not set to 'inherit'
+	 * 2. If tax_class is provided (per-item shipping), uses that specific class
+	 * 3. If no tax_class provided (per-order shipping), analyzes cart items to determine the appropriate class:
+	 *    - Returns empty array if cart has no taxable items
+	 *    - For multiple tax classes: prioritizes standard rate, then uses first class found in tax class hierarchy
+	 *    - For single tax class: uses that class directly
+	 * 4. Returns only rates that have shipping tax enabled for the determined tax class
+	 *    - If no shipping rates exist for the tax class, returns empty array (no fallback to standard rates)
+	 *    - This ensures tax class inheritance works correctly - if a tax class doesn't apply to shipping, no shipping tax is charged
+	 *
+	 * @param string|null      $tax_class Optional. Specific tax class slug to get rates for. If null, determines from cart contents.
+	 * @param WC_Customer|null $customer Optional. Customer object to get location from. Uses current customer if null.
+	 * @return array Array of tax rate arrays, each containing 'rate', 'label', 'shipping', and 'compound' keys. Empty array if no shipping rates found for the tax class.
 	 */
 	public static function get_shipping_tax_rates( $tax_class = null, $customer = null ) {
 		// See if we have an explicitly set shipping tax class.
@@ -563,80 +589,107 @@ class WC_Tax {
 			$tax_class = $shipping_tax_class;
 		}
 
-		$location          = self::get_tax_location( $tax_class, $customer );
-		$matched_tax_rates = array();
+		// If we don't have a shipping tax class yet, work out which one to use.
+		if ( is_null( $tax_class ) ) {
+			$tax_class = self::get_shipping_tax_class_from_cart_items();
+		}
 
-		if ( 4 === count( $location ) ) {
-			list( $country, $state, $postcode, $city ) = $location;
+		// If we still don't have a tax class, there must be no taxable items.
+		if ( is_null( $tax_class ) ) {
+			return array();
+		}
 
-			if ( ! is_null( $tax_class ) ) {
-				// This will be per item shipping.
-				$matched_tax_rates = self::find_shipping_rates(
-					array(
-						'country'   => $country,
-						'state'     => $state,
-						'postcode'  => $postcode,
-						'city'      => $city,
-						'tax_class' => $tax_class,
-					)
-				);
+		$location = self::get_tax_location( $tax_class, $customer );
+		$cart     = WC()->cart ?? null;
 
-			} elseif ( WC()->cart->get_cart() ) {
+		/**
+		 * Filters the shipping tax class before calculating tax rates.
+		 *
+		 * This filter allows plugins to modify or replace the shipping tax class
+		 * that will be used to calculate shipping tax rates. It fires after core
+		 * logic determines the tax class but before rates are looked up.
+		 *
+		 * @since 10.5.0
+		 *
+		 * @param string|null      $tax_class The tax class determined by core logic. Can be null, empty string (standard), or a tax class slug.
+		 * @param WC_Cart|null     $cart      The cart object containing all cart items, or null if not available.
+		 * @param WC_Customer|null $customer  The customer object, or null if not available.
+		 * @param array            $location  The tax location array [country, state, postcode, city].
+		 */
+		$tax_class = apply_filters( 'woocommerce_shipping_tax_class', $tax_class, $cart, $customer, $location );
 
-				// This will be per order shipping - loop through the order and find the highest tax class rate.
-				$cart_tax_classes = WC()->cart->get_cart_item_tax_classes_for_shipping();
+		// If filter returned null, treat as no taxable items.
+		if ( is_null( $tax_class ) ) {
+			return array();
+		}
 
-				// No tax classes = no taxable items.
-				if ( empty( $cart_tax_classes ) ) {
-					return array();
-				}
+		// Check for a valid location.
+		if ( 4 !== count( $location ) ) {
+			return array();
+		}
 
-				// If multiple classes are found, use the first one found unless a standard rate item is found. This will be the first listed in the 'additional tax class' section.
-				if ( count( $cart_tax_classes ) > 1 && ! in_array( '', $cart_tax_classes, true ) ) {
-					$tax_classes = self::get_tax_class_slugs();
+		list( $country, $state, $postcode, $city ) = $location;
 
-					foreach ( $tax_classes as $tax_class ) {
-						if ( in_array( $tax_class, $cart_tax_classes, true ) ) {
-							$matched_tax_rates = self::find_shipping_rates(
-								array(
-									'country'   => $country,
-									'state'     => $state,
-									'postcode'  => $postcode,
-									'city'      => $city,
-									'tax_class' => $tax_class,
-								)
-							);
-							break;
-						}
-					}
-				} elseif ( 1 === count( $cart_tax_classes ) ) {
-					// If a single tax class is found, use it.
-					$matched_tax_rates = self::find_shipping_rates(
-						array(
-							'country'   => $country,
-							'state'     => $state,
-							'postcode'  => $postcode,
-							'city'      => $city,
-							'tax_class' => $cart_tax_classes[0],
-						)
-					);
-				}
-			}
+		return self::find_shipping_rates(
+			array(
+				'country'   => $country,
+				'state'     => $state,
+				'postcode'  => $postcode,
+				'city'      => $city,
+				'tax_class' => $tax_class,
+			)
+		);
+	}
 
-			// Get standard rate if no taxes were found.
-			if ( ! count( $matched_tax_rates ) ) {
-				$matched_tax_rates = self::find_shipping_rates(
-					array(
-						'country'  => $country,
-						'state'    => $state,
-						'postcode' => $postcode,
-						'city'     => $city,
-					)
-				);
+	/**
+	 * Get the shipping tax class from the cart items.
+	 *
+	 * Determines the appropriate tax class for shipping based on cart contents.
+	 * Standard tax class takes priority, followed by the first non-standard class
+	 * found in the configured tax class hierarchy.
+	 *
+	 * @return string|null The shipping tax class slug, or null if no taxable items are found.
+	 */
+	private static function get_shipping_tax_class_from_cart_items() {
+		$standard_tax_class = '';
+		$cart               = WC()->cart;
+
+		// Check if cart has items before proceeding.
+		if ( ! $cart->get_cart() ) {
+			return $standard_tax_class;
+		}
+
+		$cart_tax_classes = $cart->get_cart_item_tax_classes_for_shipping();
+
+		// No tax classes = no taxable items.
+		if ( empty( $cart_tax_classes ) ) {
+			return null;
+		}
+
+		// Standard tax class takes priority over any other tax class.
+		if ( in_array( $standard_tax_class, $cart_tax_classes, true ) ) {
+			return $standard_tax_class;
+		}
+
+		// If only one tax class, use it directly.
+		if ( 1 === count( $cart_tax_classes ) ) {
+			return reset( $cart_tax_classes );
+		}
+
+		// For multiple classes, use the first one found using the order defined in settings.
+		static $tax_class_slugs = null;
+		if ( null === $tax_class_slugs ) {
+			$tax_class_slugs = self::get_tax_class_slugs();
+		}
+
+		foreach ( $tax_class_slugs as $tax_class_slug ) {
+			if ( in_array( $tax_class_slug, $cart_tax_classes, true ) ) {
+				return $tax_class_slug;
 			}
 		}
 
-		return $matched_tax_rates;
+		// Default to standard tax class if nothing else matches.
+		return $standard_tax_class;
 	}
 
 	/**
@@ -649,8 +702,8 @@ class WC_Tax {
 		global $wpdb;
 
 		if ( is_object( $key_or_rate ) ) {
-			$key      = $key_or_rate->tax_rate_id;
-			$compound = $key_or_rate->tax_rate_compound;
+			$key      = (int) $key_or_rate->tax_rate_id;
+			$compound = (bool) $key_or_rate->tax_rate_compound;
 		} else {
 			$key      = $key_or_rate;
 			$compound = (bool) $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate_compound FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) );
@@ -669,7 +722,7 @@ class WC_Tax {
 		global $wpdb;
 
 		if ( is_object( $key_or_rate ) ) {
-			$key       = $key_or_rate->tax_rate_id;
+			$key       = (int) $key_or_rate->tax_rate_id;
 			$rate_name = $key_or_rate->tax_rate_name;
 		} else {
 			$key       = $key_or_rate;
@@ -691,7 +744,7 @@ class WC_Tax {
 	 */
 	public static function get_rate_percent( $key_or_rate ) {
 		$rate_percent_value = self::get_rate_percent_value( $key_or_rate );
-		$tax_rate_id        = is_object( $key_or_rate ) ? $key_or_rate->tax_rate_id : $key_or_rate;
+		$tax_rate_id        = is_object( $key_or_rate ) ? (int) $key_or_rate->tax_rate_id : $key_or_rate;
 		return apply_filters( 'woocommerce_rate_percent', $rate_percent_value . '%', $tax_rate_id );
 	}
 
@@ -725,7 +778,7 @@ class WC_Tax {
 		global $wpdb;
 
 		if ( is_object( $key_or_rate ) ) {
-			$key  = $key_or_rate->tax_rate_id;
+			$key  = (int) $key_or_rate->tax_rate_id;
 			$rate = $key_or_rate;
 		} else {
 			$key  = $key_or_rate;

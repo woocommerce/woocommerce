@@ -1,60 +1,239 @@
 /**
  * External dependencies
  */
-import { useSelect } from '@wordpress/data';
-import { StrictMode, createRoot } from '@wordpress/element';
-import { applyFilters } from '@wordpress/hooks';
+import { useSelect, useDispatch, select, dispatch } from '@wordpress/data';
+import {
+	StrictMode,
+	createRoot,
+	useEffect,
+	useState,
+	useMemo,
+} from '@wordpress/element';
+import { addFilter, applyFilters, hasFilter } from '@wordpress/hooks';
+import { store as editorStore } from '@wordpress/editor';
+import { useMergeRefs } from '@wordpress/compose';
 import '@wordpress/format-library'; // Enables text formatting capabilities
 
 /**
  * Internal dependencies
  */
-import { initBlocks } from './blocks';
+import { getAllowedBlockNames, initBlocks } from './blocks';
 import { initializeLayout } from './layouts/flex-email';
 import { InnerEditor } from './components/block-editor';
-import { createStore, storeName, editorCurrentPostType } from './store';
-import { initHooks } from './editor-hooks';
-import { KeyboardShortcuts } from './components/keybord-shortcuts';
-import { initEventCollector } from './events';
-import './style.scss';
+import { createStore, storeName } from './store';
+import { initTextHooks } from './text-hooks';
+import {
+	initEventCollector,
+	initStoreTracking,
+	initDomTracking,
+} from './events';
+import { initContentValidationMiddleware } from './middleware/content-validation';
+import { initHacks } from './hacks';
+import {
+	useContentValidation,
+	useFilterEditorContentStylesheets,
+	useNoticeOverrides,
+	useRemoveSavingFailedNotices,
+} from './hooks';
+import { cleanupConfigurationChanges } from './config-tools';
+import { getEditorConfigFromWindow } from './store/settings';
+import { EmailEditorConfig } from './store/types';
 
-function Editor() {
-	const { postId, settings } = useSelect(
-		( select ) => ( {
-			postId: select( storeName ).getEmailPostId(),
-			settings: select( storeName ).getInitialEditorSettings(),
+function Editor( {
+	postId,
+	postType,
+	isPreview = false,
+	contentRef = null,
+	customSavePanel,
+	customSaveButton,
+}: {
+	postId: number | string;
+	postType: string;
+	isPreview?: boolean;
+	contentRef?: React.Ref< HTMLDivElement > | null;
+	customSavePanel?: React.ReactElement;
+	customSaveButton?: React.ReactElement;
+} ) {
+	const [ isInitialized, setIsInitialized ] = useState( false );
+	const { settings } = useSelect(
+		( sel ) => ( {
+			settings: sel( storeName ).getInitialEditorSettings(),
 		} ),
 		[]
 	);
 
+	useContentValidation();
+	useRemoveSavingFailedNotices();
+	useNoticeOverrides();
+
+	const { setEmailPost } = useDispatch( storeName );
+	useEffect( () => {
+		void setEmailPost( postId, postType );
+		setIsInitialized( true );
+	}, [ postId, postType, setEmailPost ] );
+
+	const stylesContentRef = useFilterEditorContentStylesheets();
+	const mergedContentRef = useMergeRefs( [ stylesContentRef, contentRef ] );
+
+	// Set allowed blockTypes and isPreviewMode to the editor settings.
+	const editorSettings = useMemo(
+		() => ( {
+			...settings,
+			allowedBlockTypes: getAllowedBlockNames(),
+			isPreviewMode: isPreview,
+			// WordPress 7.1 responsive styles produce media-query-based styles
+			// that the email renderer cannot inline, so keep the feature off.
+			responsiveEditingEnabled: false,
+		} ),
+		[ settings, isPreview ]
+	);
+
+	if ( ! isInitialized ) {
+		return null;
+	}
+
 	return (
 		<StrictMode>
-			<KeyboardShortcuts />
 			<InnerEditor
-				initialEdits={ [] }
 				postId={ postId }
-				postType={ editorCurrentPostType }
-				settings={ settings }
+				postType={ postType }
+				settings={ editorSettings }
+				contentRef={ mergedContentRef }
+				customSavePanel={ customSavePanel }
+				customSaveButton={ customSaveButton }
 			/>
 		</StrictMode>
 	);
 }
 
-const WrappedEditor = applyFilters(
-	'woocommerce_email_editor_wrap_editor_component',
-	Editor
-) as typeof Editor;
+/**
+ * WordPress 7.0 introduces Real-time Collaboration. The email editor does not
+ * yet fully support it, so we temporarily opt out by clearing sync providers.
+ */
+function disableCollab() {
+	if (
+		hasFilter( 'sync.providers', 'woocommerce/email-editor/disable-collab' )
+	) {
+		return;
+	}
+
+	if ( window._wpCollaborationEnabled ) {
+		window._wpCollaborationEnabled = false;
+	}
+
+	addFilter(
+		'sync.providers',
+		'woocommerce/email-editor/disable-collab',
+		() => [],
+		1000
+	);
+}
+
+function onInit() {
+	disableCollab();
+	initEventCollector();
+	initStoreTracking();
+	initDomTracking();
+	createStore();
+	initContentValidationMiddleware();
+	initBlocks();
+	initHacks();
+	initTextHooks();
+	initializeLayout();
+}
 
 export function initialize( elementId: string ) {
 	const container = document.getElementById( elementId );
 	if ( ! container ) {
 		return;
 	}
-	initEventCollector();
-	createStore();
-	initializeLayout();
-	initBlocks();
-	initHooks();
+	const { current_post_id, current_post_type } =
+		window.WooCommerceEmailEditor;
+
+	if ( current_post_id === undefined || current_post_id === null ) {
+		throw new Error( 'current_post_id is required but not provided.' );
+	}
+
+	if ( ! current_post_type ) {
+		throw new Error( 'current_post_type is required but not provided.' );
+	}
+
+	const WrappedEditor = applyFilters(
+		'woocommerce_email_editor_wrap_editor_component',
+		Editor
+	) as typeof Editor;
+
+	onInit();
+
+	// Set configuration to store from window object for backward compatibility
+	const editorConfig = getEditorConfigFromWindow();
+	void dispatch( storeName ).setEditorConfig( editorConfig );
+
 	const root = createRoot( container );
-	root.render( <WrappedEditor /> );
+	root.render(
+		<WrappedEditor
+			postId={ current_post_id }
+			postType={ current_post_type }
+		/>
+	);
+}
+
+export function ExperimentalEmailEditor( {
+	postId,
+	postType,
+	isPreview = false,
+	contentRef = null,
+	config,
+	customSavePanel,
+	customSaveButton,
+}: {
+	postId: string;
+	postType: string;
+	isPreview?: boolean;
+	contentRef?: React.Ref< HTMLDivElement > | null;
+	config?: EmailEditorConfig;
+	customSavePanel?: React.ReactElement;
+	customSaveButton?: React.ReactElement;
+} ) {
+	const [ isInitialized, setIsInitialized ] = useState( false );
+
+	useEffect( () => {
+		const backupEditorSettings = select( editorStore ).getEditorSettings();
+		// Set configuration to store from window object for backward compatibility
+		const editorConfig = config || getEditorConfigFromWindow();
+		onInit();
+
+		void dispatch( storeName ).setEditorConfig( editorConfig );
+		setIsInitialized( true );
+		// Cleanup global editor settings
+		return () => {
+			try {
+				cleanupConfigurationChanges();
+			} finally {
+				void dispatch( editorStore ).updateEditorSettings(
+					backupEditorSettings
+				);
+			}
+		};
+	}, [ config ] );
+
+	const WrappedEditor = applyFilters(
+		'woocommerce_email_editor_wrap_editor_component',
+		Editor
+	) as typeof Editor;
+
+	if ( ! isInitialized ) {
+		return null;
+	}
+
+	return (
+		<WrappedEditor
+			postId={ postId }
+			postType={ postType }
+			isPreview={ isPreview }
+			contentRef={ contentRef }
+			customSavePanel={ customSavePanel }
+			customSaveButton={ customSaveButton }
+		/>
+	);
 }

@@ -24,8 +24,9 @@ import Notices from './notices';
 import InstallModal from './table/actions/install-modal';
 import { connectUrl } from '../../utils/functions';
 import Notice from '../notice/notice';
+import MySubscriptionsAccount from './my-subscriptions-account';
 
-export default function MySubscriptions(): JSX.Element {
+export default function MySubscriptions(): React.JSX.Element {
 	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 
@@ -65,7 +66,7 @@ export default function MySubscriptions(): JSX.Element {
 			notice_id: 'woo-connect-notice',
 			dismiss_notice_nonce: wccomSettings?.dismissNoticeNonce || '',
 		};
-		apiFetch( {
+		void apiFetch( {
 			path: `/wc-admin/notice/dismiss`,
 			method: 'POST',
 			data,
@@ -87,7 +88,7 @@ export default function MySubscriptions(): JSX.Element {
 				notice_id: 'woo-disconnect-notice',
 				dismiss_notice_nonce: wccomSettings?.dismissNoticeNonce || '',
 			};
-			apiFetch( {
+			void apiFetch( {
 				path: `/wc-admin/notice/dismiss`,
 				method: 'POST',
 				data,
@@ -158,11 +159,21 @@ export default function MySubscriptions(): JSX.Element {
 					</Notice>
 				) }
 
+			{ wccomSettings?.maybe_deleted_connection && (
+				<Notice
+					id={ 'woo-deleted-connection-notice' }
+					description={ wccomSettings?.maybe_deleted_connection }
+					isDismissible={ false }
+					variant="error"
+				/>
+			) }
+
 			<div className="woocommerce-marketplace__my-subscriptions">
 				<InstallModal />
 				<section className="woocommerce-marketplace__my-subscriptions__notices">
 					<Notices />
 				</section>
+				<MySubscriptionsAccount />
 				<section className="woocommerce-marketplace__my-subscriptions-section woocommerce-marketplace__my-subscriptions__installed">
 					<header className="woocommerce-marketplace__my-subscriptions__header">
 						<div className="woocommerce-marketplace__my-subscriptions__header-content">

@@ -9,7 +9,6 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import './style.scss';
 import { CategoryMenu } from './category-menu';
 import { CategorySection } from './category-section';
 import { LinkModal } from './link-modal';
@@ -75,7 +74,7 @@ const PersonalizationTagsModal = ( {
 	return (
 		<Modal
 			size="medium"
-			title={ __( 'Personalization Tags', 'woocommerce' ) }
+			title={ __( 'Personalization Tags', __i18n_text_domain__ ) }
 			onRequestClose={ () => {
 				closeCallback();
 				recordEvent( 'personalization_tags_modal_closed', {
@@ -87,7 +86,7 @@ const PersonalizationTagsModal = ( {
 			<p>
 				{ __(
 					'Insert personalization tags to dynamically fill in information and personalize your emails.',
-					'woocommerce'
+					__i18n_text_domain__
 				) }{ ' ' }
 				<ExternalLink
 					href="https://kb.mailpoet.com/article/435-a-guide-to-personalisation-tags-for-tailored-newsletters#list"
@@ -98,7 +97,7 @@ const PersonalizationTagsModal = ( {
 						)
 					}
 				>
-					{ __( 'Learn more', 'woocommerce' ) }
+					{ __( 'Learn more', __i18n_text_domain__ ) }
 				</ExternalLink>
 			</p>
 			<SearchControl

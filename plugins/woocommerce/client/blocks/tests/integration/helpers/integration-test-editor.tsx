@@ -2,14 +2,9 @@
  * External dependencies
  */
 import { useState } from '@wordpress/element';
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, type RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { registerCoreBlocks } from '@wordpress/block-library';
-import {
-	type BlockAttributes,
-	type BlockInstance,
-	createBlock,
-} from '@wordpress/blocks';
 import '@wordpress/format-library';
 import {
 	type EditorSettings,
@@ -19,13 +14,19 @@ import {
 	// @ts-expect-error privateApis exists but is not typed
 	privateApis as blockEditorPrivateApis,
 } from '@wordpress/block-editor';
-// @ts-expect-error lock-unlock exists but is not typed
-import { unlock } from '@wordpress/block-library/build/lock-unlock'; // eslint-disable-line
+import {
+	type BlockAttributes,
+	type BlockInstance,
+	createBlock,
+	createBlocksFromInnerBlocksTemplate,
+} from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
 import { waitForStoreResolvers } from './wait-for-store-resolvers';
+import { unlock } from '../../utils/lock-unlock';
+import { registerProductEntity } from '../../../packages/public-api/entity-registration/register-entities';
 
 const { ExperimentalBlockCanvas: BlockCanvas } = unlock(
 	blockEditorPrivateApis
@@ -73,11 +74,13 @@ let areCoreBlocksRegistered = false;
 export async function initializeEditor(
 	testBlocks: BlockAttributes | BlockAttributes[],
 	settings: Partial< EditorSettings & EditorBlockListSettings > = {}
-) {
+): Promise< RenderResult > {
 	if ( ! areCoreBlocksRegistered ) {
 		registerCoreBlocks();
 		areCoreBlocksRegistered = true;
 	}
+
+	registerProductEntity();
 
 	const blocks: BlockAttributes[] = Array.isArray( testBlocks )
 		? testBlocks
@@ -86,7 +89,7 @@ export async function initializeEditor(
 		createBlock(
 			testBlock.name,
 			testBlock.attributes,
-			testBlock.innerBlocks
+			createBlocksFromInnerBlocksTemplate( testBlock.innerBlocks )
 		)
 	);
 	return waitForStoreResolvers( () =>

@@ -4,7 +4,10 @@
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { useState, useEffect } from '@wordpress/element';
-import { CheckboxControl } from '@woocommerce/blocks-components';
+import {
+	CheckboxControl,
+	ValidationInputError,
+} from '@woocommerce/blocks-components';
 import { useCheckoutSubmit } from '@woocommerce/base-context/hooks';
 import { withInstanceId } from '@wordpress/compose';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -14,7 +17,6 @@ import { validationStore } from '@woocommerce/block-data';
  * Internal dependencies
  */
 import { termsConsentDefaultText, termsCheckboxDefaultText } from './constants';
-import { CheckoutOrderSummarySlot } from '../checkout-order-summary-block/slotfills';
 
 const FrontendBlock = ( {
 	text,
@@ -37,11 +39,18 @@ const FrontendBlock = ( {
 	const { setValidationErrors, clearValidationError } =
 		useDispatch( validationStore );
 
-	const error = useSelect( ( select ) => {
-		return select( validationStore ).getValidationError(
-			validationErrorId
-		);
-	} );
+	const { error, validationErrorHtmlId } = useSelect(
+		( select ) => {
+			const store = select( validationStore );
+
+			return {
+				error: store.getValidationError( validationErrorId ),
+				validationErrorHtmlId:
+					store.getValidationErrorId( validationErrorId ),
+			};
+		},
+		[ validationErrorId ]
+	);
 	const hasError = !! ( error?.message && ! error?.hidden );
 
 	// Track validation errors for this input.
@@ -50,9 +59,9 @@ const FrontendBlock = ( {
 			return;
 		}
 		if ( checked ) {
-			clearValidationError( validationErrorId );
+			void clearValidationError( validationErrorId );
 		} else {
-			setValidationErrors( {
+			void setValidationErrors( {
 				[ validationErrorId ]: {
 					message: __(
 						'Please read and accept the terms and conditions.',
@@ -63,7 +72,7 @@ const FrontendBlock = ( {
 			} );
 		}
 		return () => {
-			clearValidationError( validationErrorId );
+			void clearValidationError( validationErrorId );
 		};
 	}, [
 		checkbox,
@@ -75,7 +84,6 @@ const FrontendBlock = ( {
 
 	return (
 		<>
-			<CheckoutOrderSummarySlot />
 			<div
 				className={ clsx(
 					'wc-block-checkout__terms',
@@ -97,6 +105,9 @@ const FrontendBlock = ( {
 								setChecked( ( value ) => ! value )
 							}
 							hasError={ hasError }
+							aria-describedby={
+								hasError ? validationErrorHtmlId : undefined
+							}
 							disabled={ isDisabled }
 						>
 							<span
@@ -106,6 +117,10 @@ const FrontendBlock = ( {
 								} }
 							/>
 						</CheckboxControl>
+						<ValidationInputError
+							propertyName={ validationErrorId }
+							elementId={ validationErrorId }
+						/>
 					</>
 				) : (
 					<span

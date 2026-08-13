@@ -5,6 +5,7 @@
  * @package WooCommerce\Emails
  */
 
+use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
@@ -35,6 +36,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 			$this->id             = 'customer_invoice';
 			$this->customer_email = true;
 			$this->title          = __( 'Order details', 'woocommerce' );
+			$this->email_group    = 'payments';
 			$this->template_html  = 'emails/customer-invoice.php';
 			$this->template_plain = 'emails/plain/customer-invoice.php';
 			$this->placeholders   = array(
@@ -47,10 +49,15 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 
 			// Must be after parent's constructor which sets `email_improvements_enabled` property.
 			$this->description = $this->email_improvements_enabled
-				? __( 'Manually send an email to your shoppers containing their order information and payment links.', 'woocommerce' )
+				? __( 'Manually send an email to your customers containing their order information and payment links', 'woocommerce' )
 				: __( 'Order detail emails can be sent to customers containing their order information and payment links.', 'woocommerce' );
 
 			$this->manual = true;
+
+			if ( $this->block_email_editor_enabled ) {
+				$this->title       = __( 'Payment request', 'woocommerce' );
+				$this->description = __( 'Manually send customers an email to review their order and complete payment.', 'woocommerce' );
+			}
 		}
 
 		/**
@@ -85,7 +92,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 				$subject = $this->get_option( 'subject_paid', $this->get_default_subject( true ) );
 
 				if ( $this->block_email_editor_enabled ) {
-					$subject = $this->personalizer->personalize_transactional_content( $subject, $this );
+					$subject = $this->personalizer->personalize_transactional_content( $subject, $this, Personalizer::RENDERING_CONTEXT_TEXT );
 				}
 
 				return apply_filters( 'woocommerce_email_subject_customer_invoice_paid', $this->format_string( $subject ), $this->object, $this );
@@ -94,7 +101,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 			$subject = $this->get_option( 'subject', $this->get_default_subject() );
 
 			if ( $this->block_email_editor_enabled ) {
-				$subject = $this->personalizer->personalize_transactional_content( $subject, $this );
+				$subject = $this->personalizer->personalize_transactional_content( $subject, $this, Personalizer::RENDERING_CONTEXT_TEXT );
 			}
 
 			return apply_filters( 'woocommerce_email_subject_customer_invoice', $this->format_string( $subject ), $this->object, $this );
@@ -147,9 +154,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 				$this->placeholders['{order_number}'] = $this->object->get_order_number();
 			}
 
-			if ( $this->get_recipient() ) {
-				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
-			}
+			$this->send_if_recipient();
 
 			$this->restore_locale();
 		}
@@ -253,6 +258,9 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 			if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
 				$this->form_fields['cc']  = $this->get_cc_field();
 				$this->form_fields['bcc'] = $this->get_bcc_field();
+			}
+			if ( $this->block_email_editor_enabled ) {
+				$this->form_fields['preheader'] = $this->get_preheader_field();
 			}
 		}
 	}

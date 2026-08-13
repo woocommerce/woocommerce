@@ -1,8 +1,4 @@
 /**
- * @jest-environment jsdom
- */
-
-/**
  * External dependencies
  */
 import { createRegistry, RegistryProvider } from '@wordpress/data';

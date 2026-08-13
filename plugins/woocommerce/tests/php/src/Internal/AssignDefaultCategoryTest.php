@@ -34,16 +34,20 @@ class AssignDefaultCategoryTest extends \WC_Unit_Test_Case {
 
 		$products = array( $product1, $product2, $product3 );
 
-		// Remove all categories from products.
+		// Remove all categories from products. A direct query is used to get around WC_Post_Data::delete_product_query_transients().
 		foreach ( $products as $product ) {
-			$result = $wpdb->query(
+			$wpdb->query(
 				$wpdb->prepare(
 					"DELETE FROM {$wpdb->term_relationships} WHERE object_id = %d AND term_taxonomy_id = %d",
 					$product->get_id(),
 					$default_category
 				)
 			);
+
 		}
+
+		wp_cache_flush();
+		delete_transient( 'wc_term_counts' );
 
 		// Ensure all categories are removed from products.
 		foreach ( $products as $product ) {

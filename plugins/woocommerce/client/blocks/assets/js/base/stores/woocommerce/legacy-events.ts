@@ -15,8 +15,8 @@ interface DispatchedEventProperties {
 	element?: Element | null;
 }
 
-// Borrowing dispatchEvent from base-utils. Later we should move that
-// code to a script module.
+// Borrowing `dispatchEvent` and `translateJQueryEventToNative` from base-utils.
+// Later we should move that code to a script module.
 export const dispatchEvent = (
 	name: string,
 	{
@@ -48,4 +48,20 @@ export const triggerAddedToCartEvent = ( {
 		cancelable: true,
 		detail: { preserveCartData },
 	} );
+};
+
+export const translateJQueryEventToNative = (
+	// Name of the jQuery event to listen to.
+	jQueryEventName: string,
+	// Name of the native event to dispatch.
+	nativeEventName: string,
+	// Whether the event bubbles.
+	bubbles = false
+): ( () => void ) => {
+	const eventDispatcher = () => {
+		dispatchEvent( nativeEventName, { bubbles } );
+	};
+
+	jQuery( document ).on( jQueryEventName, eventDispatcher );
+	return () => jQuery( document ).off( jQueryEventName, eventDispatcher );
 };

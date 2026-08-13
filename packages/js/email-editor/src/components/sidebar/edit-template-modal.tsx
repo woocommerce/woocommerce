@@ -21,7 +21,7 @@ export function EditTemplateModal( { close } ) {
 		return {
 			onNavigateToEntityRecord:
 				// @ts-expect-error onNavigateToEntityRecord type is not defined
-				editorSettings.onNavigateToEntityRecord,
+				editorSettings?.onNavigateToEntityRecord,
 			template: sel( storeName ).getCurrentTemplate(),
 		};
 	}, [] );
@@ -30,8 +30,8 @@ export function EditTemplateModal( { close } ) {
 		<Modal size="medium" onRequestClose={ close } __experimentalHideHeader>
 			<p>
 				{ __(
-					'Note that the same template can be used by multiple emails, so any changes made here may affect other emails on the site. To switch back to editing the page content click the ‘Back’ button in the toolbar.',
-					'woocommerce'
+					'This template is used by multiple emails. Any changes made would affect other emails on the site. Are you sure you want to edit the template?',
+					__i18n_text_domain__
 				) }
 			</p>
 			<Flex justify={ 'end' }>
@@ -45,7 +45,7 @@ export function EditTemplateModal( { close } ) {
 							close();
 						} }
 					>
-						{ __( 'Cancel', 'woocommerce' ) }
+						{ __( 'Cancel', __i18n_text_domain__ ) }
 					</Button>
 				</FlexItem>
 				<FlexItem>
@@ -56,14 +56,14 @@ export function EditTemplateModal( { close } ) {
 								'edit_template_modal_continue_button_clicked',
 								{ templateId: template.id }
 							);
-							onNavigateToEntityRecord( {
+							onNavigateToEntityRecord?.( {
 								postId: template.id,
 								postType: 'wp_template',
 							} );
 						} }
-						disabled={ ! template.id }
+						disabled={ ! template.id || ! onNavigateToEntityRecord }
 					>
-						{ __( 'Continue', 'woocommerce' ) }
+						{ __( 'Edit template', __i18n_text_domain__ ) }
 					</Button>
 				</FlexItem>
 			</Flex>

@@ -8,8 +8,9 @@ import { useState, useMemo, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import {
-	SuggestedPaymentExtension,
-	SuggestedPaymentExtensionCategory,
+	PaymentsEntity,
+	SuggestedPaymentsExtension,
+	SuggestedPaymentsExtensionCategory,
 } from '@woocommerce/data';
 
 /**
@@ -18,28 +19,34 @@ import {
 import { GridItemPlaceholder } from '~/settings-payments/components/grid-item-placeholder';
 import { OfficialBadge } from '../official-badge';
 import { IncentiveStatusBadge } from '~/settings-payments/components/incentive-status-badge';
+import { recordPaymentsEvent } from '~/settings-payments/utils';
 
 interface OtherPaymentGatewaysProps {
 	/**
 	 * Array of suggested payment extensions.
 	 */
-	suggestions: SuggestedPaymentExtension[];
+	suggestions: SuggestedPaymentsExtension[];
 	/**
 	 * Array of categories for the suggested payment extensions.
 	 */
-	suggestionCategories: SuggestedPaymentExtensionCategory[];
+	suggestionCategories: SuggestedPaymentsExtensionCategory[];
 	/**
 	 * The ID of the plugin currently being installed, or `null` if none.
 	 */
 	installingPlugin: string | null;
 	/**
-	 * Callback to handle plugin setup. Accepts the plugin ID, slug, and onboarding URL (if available).
+	 * Callback to set up the plugin.
+	 *
+	 * @param provider      Extension provider.
+	 * @param onboardingUrl Extension onboarding URL (if available).
+	 * @param attachUrl     Extension attach URL (if available).
+	 * @param context       The context from which the plugin is set up (e.g. 'wc_settings_payments__other_payment_options').
 	 */
-	setupPlugin: (
-		id: string,
-		slug: string,
+	setUpPlugin: (
+		provider: PaymentsEntity,
 		onboardingUrl: string | null,
-		attachUrl: string | null
+		attachUrl: string | null,
+		context?: string
 	) => void;
 	/**
 	 * Indicates whether the suggestions are still being fetched.
@@ -60,7 +67,7 @@ export const OtherPaymentGateways = ( {
 	suggestions,
 	suggestionCategories,
 	installingPlugin,
-	setupPlugin,
+	setUpPlugin,
 	isFetching,
 	morePaymentOptionsLink,
 }: OtherPaymentGatewaysProps ) => {
@@ -71,9 +78,9 @@ export const OtherPaymentGateways = ( {
 	const [ isExpanded, setIsExpanded ] = useState( initialExpanded );
 	const [ categoryIdWithPopoverVisible, setCategoryIdWithPopoverVisible ] =
 		useState( '' );
-	const buttonRef = useRef< HTMLSpanElement >( null );
+	const buttonRefs = useRef< Record< string, HTMLSpanElement | null > >( {} );
 
-	const handleClick = (
+	const handleInfoIconClick = (
 		event: React.MouseEvent | React.KeyboardEvent,
 		categoryId: string
 	) => {
@@ -82,7 +89,8 @@ export const OtherPaymentGateways = ( {
 			'.other-payment-gateways__content__title__icon-container'
 		);
 
-		if ( buttonRef.current && parentSpan !== buttonRef.current ) {
+		const targetRef = buttonRefs.current[ categoryId ] ?? null;
+		if ( targetRef && parentSpan !== targetRef ) {
 			return;
 		}
 
@@ -91,8 +99,44 @@ export const OtherPaymentGateways = ( {
 		);
 	};
 
-	const handleFocusOutside = () => {
+	const handleFocusOutsidePopover = () => {
 		setCategoryIdWithPopoverVisible( '' );
+	};
+
+	const handleInfoIconKeyDown = (
+		event: React.KeyboardEvent,
+		categoryId: string
+	) => {
+		if (
+			event.key === 'Escape' &&
+			categoryId === categoryIdWithPopoverVisible
+		) {
+			event.stopPropagation();
+			setCategoryIdWithPopoverVisible( '' );
+			buttonRefs.current[ categoryId ]?.focus();
+		} else if ( event.key === 'Enter' || event.key === ' ' ) {
+			event.preventDefault();
+			handleInfoIconClick( event, categoryId );
+		}
+	};
+
+	const handleSectionToggle = () => {
+		const expand = ! isExpanded;
+
+		// Record the event when user clicks on the section.
+		recordPaymentsEvent( 'other_payment_options_section_click', {
+			action: expand ? 'expand' : 'collapse',
+		} );
+
+		setIsExpanded( expand );
+
+		// Update the URL params to reflect the expanded state.
+		urlParams.set( 'other_pes_section', expand ? 'expanded' : 'collapsed' );
+		window.history.replaceState(
+			{},
+			document.title,
+			window.location.pathname + '?' + urlParams.toString()
+		);
 	};
 
 	// Group suggestions by category.
@@ -102,8 +146,8 @@ export const OtherPaymentGateways = ( {
 				(
 					category
 				): {
-					category: SuggestedPaymentExtensionCategory;
-					suggestions: SuggestedPaymentExtension[];
+					category: SuggestedPaymentsExtensionCategory;
+					suggestions: SuggestedPaymentsExtension[];
 				} => {
 					return {
 						category,
@@ -174,19 +218,22 @@ export const OtherPaymentGateways = ( {
 								<span
 									className="other-payment-gateways__content__title__icon-container"
 									onClick={ ( event ) =>
-										handleClick( event, category.id )
+										handleInfoIconClick(
+											event,
+											category.id
+										)
 									}
-									onKeyDown={ ( event ) => {
-										if (
-											event.key === 'Enter' ||
-											event.key === ' '
-										) {
-											handleClick( event, category.id );
-										}
-									} }
+									onKeyDown={ ( event ) =>
+										handleInfoIconKeyDown(
+											event,
+											category.id
+										)
+									}
 									tabIndex={ 0 }
 									role="button"
-									ref={ buttonRef }
+									ref={ ( el ) => {
+										buttonRefs.current[ category.id ] = el;
+									} }
 								>
 									<Gridicon
 										icon="info-outline"
@@ -203,10 +250,25 @@ export const OtherPaymentGateways = ( {
 											noArrow={ true }
 											shift={ true }
 											onFocusOutside={
-												handleFocusOutside
+												handleFocusOutsidePopover
+											}
+											onKeyDown={ ( event ) =>
+												handleInfoIconKeyDown(
+													event,
+													category.id
+												)
 											}
 										>
-											<div className="components-popover__content-container">
+											{ /* eslint-disable-next-line jsx-a11y/no-static-element-interactions */ }
+											<div
+												className="components-popover__content-container"
+												onKeyDown={ ( event ) =>
+													handleInfoIconKeyDown(
+														event,
+														category.id
+													)
+												}
+											>
 												<p>
 													{ decodeEntities(
 														category.description
@@ -219,82 +281,109 @@ export const OtherPaymentGateways = ( {
 							</div>
 
 							<div className="other-payment-gateways__content__grid">
-								{ categorySuggestions.map( ( extension ) => (
-									<div
-										className="other-payment-gateways__content__grid-item"
-										key={ extension.id }
-									>
-										<img
-											className="other-payment-gateways__content__grid-item-image"
-											src={ extension.icon }
-											alt={
-												decodeEntities(
-													extension.title
-												) + ' logo'
-											}
-										/>
-										<div className="other-payment-gateways__content__grid-item__content">
-											<span className="other-payment-gateways__content__grid-item__content__title">
-												{ extension.title }
-												{ extension?._incentive && (
-													<IncentiveStatusBadge
-														incentive={
-															extension._incentive
+								{ categorySuggestions.map( ( extension ) => {
+									const isPluginAlreadyInstalled =
+										extension.plugin.status === 'installed';
+
+									// Is the button currently busy, either installing or activating the plugin?
+									const isCurrentlyBusy =
+										installingPlugin === extension.id;
+
+									// By default, the CTA is to install a plugin.
+									let ctaLabel = isCurrentlyBusy
+										? __< string >(
+												'Installing',
+												'woocommerce'
+										  )
+										: __< string >(
+												'Install',
+												'woocommerce'
+										  );
+
+									// If the plugin is already installed, the CTA is to activate it.
+									if ( isPluginAlreadyInstalled ) {
+										ctaLabel = isCurrentlyBusy
+											? __< string >(
+													'Activating',
+													'woocommerce'
+											  )
+											: __< string >(
+													'Activate',
+													'woocommerce'
+											  );
+									}
+
+									return (
+										<div
+											className="other-payment-gateways__content__grid-item"
+											key={ extension.id }
+										>
+											<img
+												className="other-payment-gateways__content__grid-item-image"
+												src={ extension.icon }
+												alt={
+													decodeEntities(
+														extension.title
+													) + ' logo'
+												}
+											/>
+											<div className="other-payment-gateways__content__grid-item__content">
+												<span className="other-payment-gateways__content__grid-item__content__title">
+													{ extension.title }
+													{ extension?._incentive && (
+														<IncentiveStatusBadge
+															incentive={
+																extension._incentive
+															}
+														/>
+													) }
+													{ /* All payment extension suggestions are official. */ }
+													<OfficialBadge
+														variant="expanded"
+														suggestionId={
+															extension.id
 														}
 													/>
-												) }
-												{ /* All payment extension suggestions are official. */ }
-												<OfficialBadge variant="expanded" />
-											</span>
-											<span className="other-payment-gateways__content__grid-item__content__description">
-												{ decodeEntities(
-													extension.description
-												) }
-											</span>
-											<div className="other-payment-gateways__content__grid-item__content__actions">
-												<Button
-													variant="link"
-													onClick={ () =>
-														setupPlugin(
-															extension.id,
-															extension.plugin
-																.slug,
-															null, // Suggested gateways won't have an onboarding URL.
-															// Only provide the attach link if not already installed.
-															extension.plugin
-																.status ===
-																'not_installed'
-																? extension
-																		._links
-																		?.attach
-																		?.href ??
-																		null
-																: null
-														)
-													}
-													isBusy={
-														installingPlugin ===
-														extension.id
-													}
-													disabled={
-														!! installingPlugin
-													}
-												>
-													{ installingPlugin ===
-													extension.id
-														? __(
-																'Installing',
-																'woocommerce'
-														  )
-														: __(
-																'Install',
-																'woocommerce'
-														  ) }
-												</Button>
+												</span>
+												<span className="other-payment-gateways__content__grid-item__content__description">
+													{ decodeEntities(
+														extension.description
+													) }
+												</span>
+												<div className="other-payment-gateways__content__grid-item__content__actions">
+													<Button
+														variant="link"
+														onClick={ () =>
+															setUpPlugin(
+																extension,
+																null, // Suggested gateways won't have an onboarding URL.
+																// Only provide the attach link if not already installed.
+																extension.plugin
+																	.status ===
+																	'not_installed'
+																	? extension
+																			._links
+																			?.attach
+																			?.href ??
+																			null
+																	: null,
+																'wc_settings_payments__other_payment_options'
+															)
+														}
+														isBusy={
+															isCurrentlyBusy
+														}
+														disabled={
+															!! installingPlugin
+														}
+													>
+														{ ctaLabel }
+													</Button>
+												</div>
 											</div>
 										</div>
-									</div>
-								) ) }
+									);
+								} ) }
 							</div>
 						</div>
 					);
@@ -304,7 +393,7 @@ export const OtherPaymentGateways = ( {
 	}, [
 		suggestionsByCategory,
 		installingPlugin,
-		setupPlugin,
+		setUpPlugin,
 		isFetching,
 		categoryIdWithPopoverVisible,
 	] );
@@ -315,31 +404,26 @@ export const OtherPaymentGateways = ( {
 				'other-payment-gateways' + ( isExpanded ? ' is-expanded' : '' )
 			}
 		>
-			<div
+			<button
 				className="other-payment-gateways__header"
-				onClick={ () => {
-					setIsExpanded( ! isExpanded );
-				} }
-				onKeyDown={ ( event ) => {
-					if ( event.key === 'Enter' || event.key === ' ' ) {
-						setIsExpanded( ! isExpanded );
-					}
-				} }
-				role="button"
-				tabIndex={ 0 }
+				onClick={ handleSectionToggle }
 				aria-expanded={ isExpanded }
+				type="button"
 			>
-				<div className="other-payment-gateways__header__title">
-					<span>
-						{ __( 'Other payment options', 'woocommerce' ) }
-					</span>
+				<span className="other-payment-gateways__header__title">
+					<span>{ __( 'More payment options', 'woocommerce' ) }</span>
 					{ ! isExpanded && <>{ collapsedImages }</> }
-				</div>
+				</span>
 				<Gridicon
 					className="other-payment-gateways__header__arrow"
 					icon={ isExpanded ? 'chevron-up' : 'chevron-down' }
 				/>
-			</div>
+				<span className="screen-reader-text">
+					{ isExpanded
+						? __( 'Collapse section', 'woocommerce' )
+						: __( 'Expand section', 'woocommerce' ) }
+				</span>
+			</button>
 			{ isExpanded && (
 				<div className="other-payment-gateways__content">
 					{ expandedContent }

@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Gateways
  */
 
+use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
+
 /**
  * Unit tests for gateways.
  */
@@ -16,7 +18,7 @@ class WC_Tests_Gateways extends WC_Unit_Test_Case {
 	public function test_supports() {
 		$gateway = new WC_Mock_Payment_Gateway();
 
-		$this->assertTrue( $gateway->supports( 'products' ) );
+		$this->assertTrue( $gateway->supports( PaymentGatewayFeature::PRODUCTS ) );
 		$this->assertFalse( $gateway->supports( 'made-up-feature' ) );
 	}
 
@@ -83,5 +85,42 @@ class WC_Tests_Gateways extends WC_Unit_Test_Case {
 
 		$this->assertEquals( $gateway->pay_button_id, $gateway->get_pay_button_id() );
 	}
-}
 
+	/**
+	 * Test WC_Payment_Gateway::is_available() returns early when gateway is disabled.
+	 */
+	public function test_is_available_does_not_calculate_order_total_when_disabled() {
+		$cart = WC()->cart;
+
+		WC()->cart = new stdClass();
+
+		$gateway = new class() extends WC_Mock_Payment_Gateway {
+			/**
+			 * Number of times get_order_total() is called.
+			 *
+			 * @var int
+			 */
+			public $get_order_total_call_count = 0;
+
+			/**
+			 * Get the order total and track how many times this method is called.
+			 *
+			 * @return float
+			 */
+			protected function get_order_total() {
+				++$this->get_order_total_call_count;
+				return 10.0;
+			}
+		};
+
+		$gateway->enabled    = 'no';
+		$gateway->max_amount = 100;
+
+		try {
+			$this->assertFalse( $gateway->is_available() );
+			$this->assertSame( 0, $gateway->get_order_total_call_count );
+		} finally {
+			WC()->cart = $cart;
+		}
+	}
+}

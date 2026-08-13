@@ -1,0 +1,329 @@
+name: 'Release: Build ZIP file'
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build (e.g. "release/9.8" or "9.8"). Non-release branches just build a ZIP.'
+        required: true
+      create_github_release:
+        description: 'Create GitHub release (release branches only).'
+        type: boolean
+        default: false
+  workflow_call:
+    inputs:
+      branch:
+        description: 'Release branch.'
+        type: string
+        required: true
+      skip_verify:
+        description: 'Skip verification steps.'
+        type: boolean
+        default: false
+      create_github_release:
+        description: 'Create GitHub release.'
+        type: boolean
+        default: false
+    outputs:
+      artifact_url:
+        description: 'URL of the built release artifact'
+        value: ${{ jobs.build.outputs.artifact-url }}
+
+permissions: {}
+
+concurrency:
+  group: release-build-zip-file-${{ inputs.branch }}-${{ ( inputs.create_github_release == true && 'with-release' ) || github.run_id }}
+
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
+
+jobs:
+  verify:
+    name: 'Pre-build verification'
+    runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    permissions:
+      contents: write # Required to fetch draft releases for some reason. See https://github.com/cli/cli/issues/9076#issuecomment-2146148572.
+    outputs:
+      branch: ${{ steps.normalize-branch.outputs.branch }}
+      is-release-branch: ${{ steps.normalize-branch.outputs.is-release-branch }}
+    steps:
+      - name: Normalize branch input
+        id: normalize-branch
+        env:
+          INPUT_BRANCH: ${{ inputs.branch }}
+        run: |
+          branch="$INPUT_BRANCH"
+          if [[ "$branch" =~ ^[0-9]+\.[0-9]+$ ]]; then
+            branch="release/$branch"
+          fi
+          echo "branch=$branch" >> $GITHUB_OUTPUT
+
+          is_release_branch=false
+          if [[ "$branch" == release/* ]]; then
+            is_release_branch=true
+          fi
+          echo "is-release-branch=$is_release_branch" >> $GITHUB_OUTPUT
+
+          # skip_verify only exists for workflow_call; manual dispatch always verifies before creating a release.
+          should_verify=false
+          if [ "$is_release_branch" = "true" ] && [ "${{ inputs.create_github_release }}" = "true" ] && [ "${{ inputs.skip_verify }}" != "true" ]; then
+            should_verify=true
+          fi
+          echo "should-verify=$should_verify" >> $GITHUB_OUTPUT
+
+      - env:
+          BRANCH: ${{ steps.normalize-branch.outputs.branch }}
+          IS_RELEASE_BRANCH: ${{ steps.normalize-branch.outputs.is-release-branch }}
+          SHOULD_VERIFY: ${{ steps.normalize-branch.outputs.should-verify }}
+          CREATE_GITHUB_RELEASE: ${{ inputs.create_github_release }}
+        run: |
+          echo "Building WooCommerce ZIP: branch=${BRANCH}, is_release_branch=${IS_RELEASE_BRANCH}, should_verify=${SHOULD_VERIFY}, create_github_release=${CREATE_GITHUB_RELEASE}"
+
+      - name: Verify release branch
+        env:
+          BRANCH: ${{ steps.normalize-branch.outputs.branch }}
+        run: |
+          if ! git ls-remote --exit-code --heads https://github.com/${GITHUB_REPOSITORY} ${BRANCH} > /dev/null; then
+            echo "::error::Source branch '$BRANCH' does not exist."
+            exit 1
+          fi
+
+      - name: Workflow checks
+        env:
+          BRANCH: ${{ steps.normalize-branch.outputs.branch }}
+          WORKFLOW_REF: ${{ github.ref }}
+        run: |
+          # No special checks when running as a reusable workflow.
+          if [ "${{ ! contains( github.workflow_ref, 'release-build-zip-file.yml' ) }}" = "true" ]; then
+            exit 0
+          fi
+
+          # Write summary header early, so it's visible even if a later check fails.
+          echo "🔨 Building WooCommerce ZIP from \`${BRANCH}\`." >> $GITHUB_STEP_SUMMARY
+
+          # Must run from trunk.
+          if [ "$WORKFLOW_REF" != "refs/heads/trunk" ]; then
+            echo "::error::This workflow must be run from the 'trunk' branch. Enter the release branch as input."
+            exit 1
+          fi
+
+          # Non-release branches: just build, no other verification.
+          if [ "${{ steps.normalize-branch.outputs.is-release-branch }}" != "true" ]; then
+            echo "⚠️ Not a release branch — skipping checks, won't create a release." >> $GITHUB_STEP_SUMMARY
+            echo "::notice::'${BRANCH}' is not a release branch — skipping checks, won't create a release."
+            exit 0
+          fi
+
+          if [ "${{ inputs.create_github_release }}" = "true" ]; then
+            echo "Creating a GitHub release." >> $GITHUB_STEP_SUMMARY
+          fi
+
+        # Checkout trunk.
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: trunk
+          path: checkout-trunk
+          sparse-checkout: |
+            /.github/workflows/scripts/release-check-db-updates.js
+          sparse-checkout-cone-mode: false
+        if: ${{ steps.normalize-branch.outputs.should-verify == 'true' }}
+
+        # Checkout branch.
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ steps.normalize-branch.outputs.branch }}
+          path: checkout-branch
+          sparse-checkout: |
+            /plugins/woocommerce/woocommerce.php
+            /plugins/woocommerce/readme.txt
+          sparse-checkout-cone-mode: false
+        if: ${{ steps.normalize-branch.outputs.should-verify == 'true' }}
+
+      - name: 'Pre-build verification'
+        id: pre-build-verification
+        if: ${{ steps.normalize-branch.outputs.should-verify == 'true' }}
+        env:
+          BRANCH: ${{ steps.normalize-branch.outputs.branch }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+            # Helper to fail with console error and summary message.
+            fail() {
+              echo "::error::$1"
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "❌ Build failed. See annotations or workflow logs for details." >> $GITHUB_STEP_SUMMARY
+              exit 1
+            }
+
+            # Branch name must be 'release/*'.
+            branch_name="${BRANCH#refs/heads/}"
+            if [[ $branch_name != release/* ]]; then
+              fail "Branch name '$branch_name' does not match 'release/*' pattern."
+            fi
+
+            # Version number in branch name and plugin main version must match.
+            branch_plugin_version=$( cat checkout-branch/plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
+            version_prefix=${branch_name/"release/"/""}
+            if [[ $branch_plugin_version != "$version_prefix."* ]]; then
+              fail "Release version in branch ($branch_plugin_version) does not match '$version_prefix.*' pattern."
+            fi
+
+            # GH release should not already exist.
+            if gh release view "$branch_plugin_version" &>/dev/null; then
+              fail "GitHub release '$branch_plugin_version' already exists."
+            fi
+
+            # Release should not already exist on wporg.
+            tag_exists=$(curl -s 'https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&request\[slug\]=woocommerce' | jq "(.versions | has(\"$branch_plugin_version\"))")
+            if [ "$tag_exists" == "true" ]; then
+              fail "Version '$branch_plugin_version' already exists on WordPress.org."
+            fi
+
+            # Stable version in release branch should match wporg.
+            svn_trunk_version=$( wget --quiet https://plugins.svn.wordpress.org/woocommerce/trunk/woocommerce.php -O /dev/stdout |  grep -oP '(?<=Version: )(.+)' | head -n1 )
+            svn_stable_version=$( wget --quiet https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt -O /dev/stdout |  grep -oP '(?<=Stable tag: )(.+)' | head -n1 )
+            
+            if [[ -z "$svn_trunk_version" || -z "$svn_stable_version" ]]; then
+                echo "::error::Pre-build verification: could not determine current version number or stable tag from SVN."
+                exit 1
+            fi
+
+            if php -r "exit( version_compare('$branch_plugin_version', '$svn_trunk_version', '>') ? 0 : 1 );"; then
+              branch_stable_version=$( cat checkout-branch/plugins/woocommerce/readme.txt | grep -oP '(?<=Stable tag: )(.+)' | head -n1 )            
+
+              if [[ $branch_stable_version != $svn_stable_version ]] ; then
+                fail "Stable version in release branch ($branch_stable_version) does not match SVN trunk ($svn_stable_version)."
+              fi
+            fi
+
+            # No non-draft PRs against release branch should remain open.
+            count=$( gh pr list --search "is:open draft:false base:$BRANCH" --limit 1 --json number | jq length )
+            if (( count > 0 )); then
+              fail "There are open PRs against the release branch ($BRANCH)."
+            fi
+
+            # No non-draft PRs with same milestone as main version should remain open.
+            milestone="$version_prefix.0"
+            count=$( gh pr list --search "is:open draft:false milestone:$milestone" --limit 1 --json number | jq length )
+            if (( count > 0 )); then
+              fail "There are open PRs with milestone '$milestone'."
+            fi
+
+            # Changelog section must have at least one entry.
+            changelog_section=$( awk '/^== Changelog ==$/,/^\[See changelog/' checkout-branch/plugins/woocommerce/readme.txt )
+            if ! echo "$changelog_section" | grep -qE '^\* '; then
+                echo "::error::Pre-build verification: changelog section in readme.txt has no entries. Please add at least one entry before releasing."
+                exit 1
+            fi
+
+            echo "release_version=$branch_plugin_version" >> $GITHUB_OUTPUT
+
+      - name: 'Pre-build verification: db updates'
+        if: ${{ steps.normalize-branch.outputs.should-verify == 'true' && ! contains( steps.pre-build-verification.outputs.release_version, '-dev' ) && ! contains( steps.pre-build-verification.outputs.release_version, '-beta.1' ) }}
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            const { run } = require( './checkout-trunk/.github/workflows/scripts/release-check-db-updates' );
+            await run( `${{ steps.normalize-branch.outputs.branch }}`, { github, context } );
+
+  build:
+    name: Build release zip file
+    runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    needs: [ verify ]
+    outputs:
+      artifact-url: ${{ steps.fetch-build-details.outputs.artifact-url }}
+      commit-hash: ${{ steps.fetch-build-details.outputs.commit-hash }}
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ needs.verify.outputs.branch }}
+
+      - name: Setup WooCommerce Monorepo
+        uses: ./.github/actions/setup-woocommerce-monorepo
+        with:
+          pull-package-deps: '@woocommerce/plugin-woocommerce'
+
+      - name: Build zip
+        working-directory: plugins/woocommerce
+        run: bash bin/build-zip.sh
+
+      - name: Unzip the file (prevents double zip problem)
+        run: unzip plugins/woocommerce/woocommerce.zip -d zipfile
+
+      - name: Upload the zip file as an artifact
+        id: artifact-upload
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: woocommerce
+          path: zipfile
+          retention-days: 1
+
+      - name: Fetch build details
+        id: fetch-build-details
+        run: |
+          ARTIFACT_URL=${{ steps.artifact-upload.outputs.artifact-url }}
+          echo "artifact-url=$ARTIFACT_URL" >> $GITHUB_OUTPUT
+
+          # Fetch commit hash for this build.
+          commit_hash=$(git rev-parse "${{ needs.verify.outputs.branch }}")
+          echo "commit-hash=$commit_hash" >> $GITHUB_OUTPUT
+
+          # Write artifact to summary.
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📎 Build artifact: ${ARTIFACT_URL}" >> $GITHUB_STEP_SUMMARY
+
+  create-release:
+    name: Create GitHub release
+    runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    needs: [ verify, build ]
+    if: ${{ inputs.create_github_release && needs.verify.outputs.is-release-branch == 'true' }}
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: woocommerce
+
+      - name: Get version from plugin file
+        id: get_version
+        run: |
+          version=$(cat ./woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1)
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: Generate release ZIP file
+        run: |
+          zip -q -9 -r ./woocommerce.zip ./woocommerce/
+
+      - name: Create draft release
+        id: create_release
+        env:
+          GH_TOKEN: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || github.token }}
+          GH_REPO: ${{ github.repository }}
+          IS_PRERELEASE: ${{ contains( steps.get_version.outputs.version, '-dev' ) || contains( steps.get_version.outputs.version, '-beta' ) || contains( steps.get_version.outputs.version, '-rc' ) }}
+        run: |
+          FLAGS=""
+          if [ "$IS_PRERELEASE" = "true" ]; then
+            FLAGS="--prerelease=true"
+          fi
+
+          gh release create ${{ steps.get_version.outputs.version }} \
+            './woocommerce.zip' \
+            --title '${{ steps.get_version.outputs.version }}' \
+            --notes '${{ steps.get_version.outputs.version }}' \
+            --target '${{ needs.build.outputs.commit-hash }}' \
+            --latest=false \
+            --draft \
+            $FLAGS
+
+          # Get the release URL directly using gh CLI, since drafts use a different URL.
+          release_url=$(gh release view "${{ steps.get_version.outputs.version }}" --json url --jq ".url")
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📦 Draft release created: ${release_url}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⏭️ For next steps, see the [release docs](https://developer.woocommerce.com/docs/contribution/releases/building-and-publishing/)." >> $GITHUB_STEP_SUMMARY

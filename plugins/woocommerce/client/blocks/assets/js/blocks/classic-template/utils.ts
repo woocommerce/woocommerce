@@ -2,7 +2,6 @@
  * External dependencies
  */
 import {
-	type Block,
 	type BlockInstance,
 	getBlockType,
 	createBlock,
@@ -11,14 +10,17 @@ import {
 /**
  * Internal dependencies
  */
-import { TEMPLATES } from './constants';
 import { TemplateDetails, InheritedAttributes } from './types';
 
 // Finds the most appropriate template details object for specific template keys such as single-product-hoodie.
 export function getTemplateDetailsBySlug(
-	parsedTemplate: string,
+	parsedTemplate: string | null,
 	templates: TemplateDetails
 ) {
+	if ( ! parsedTemplate ) {
+		return null;
+	}
+
 	const templateKeys = Object.keys( templates );
 	let templateDetails = null;
 
@@ -32,25 +34,6 @@ export function getTemplateDetailsBySlug(
 	}
 
 	return templateDetails;
-}
-
-export function isClassicTemplateBlockRegisteredWithAnotherTitle(
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	block: Block< any > | undefined,
-	parsedTemplate: string
-) {
-	const templateDetails = getTemplateDetailsBySlug(
-		parsedTemplate,
-		TEMPLATES
-	);
-	return block?.title !== templateDetails?.title;
-}
-
-export function hasTemplateSupportForClassicTemplateBlock(
-	parsedTemplate: string,
-	templates: TemplateDetails
-): boolean {
-	return getTemplateDetailsBySlug( parsedTemplate, templates ) ? true : false;
 }
 
 export const createArchiveTitleBlock = (

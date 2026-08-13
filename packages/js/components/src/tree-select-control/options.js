@@ -4,7 +4,7 @@
 import { noop } from 'lodash';
 import { Flex } from '@wordpress/components';
 import { Icon, chevronUp, chevronDown } from '@wordpress/icons';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { createElement } from '@wordpress/element';
 
 /**
@@ -65,7 +65,7 @@ const Options = ( {
 				key={ `${ option.key ?? option.value }` }
 				role={ hasChildren ? 'treegroup' : 'treeitem' }
 				aria-expanded={ hasChildren ? expanded : undefined }
-				className={ classnames(
+				className={ clsx(
 					'woocommerce-tree-select-control__node',
 					hasChildren && 'has-children'
 				) }
@@ -73,7 +73,7 @@ const Options = ( {
 				<Flex justify="flex-start">
 					{ ! isRoot && (
 						<button
-							className={ classnames(
+							className={ clsx(
 								'woocommerce-tree-select-control__expander',
 								! hasChildren && 'is-hidden'
 							) }
@@ -89,7 +89,7 @@ const Options = ( {
 					) }
 
 					<Checkbox
-						className={ classnames(
+						className={ clsx(
 							'components-base-control',
 							'woocommerce-tree-select-control__option',
 							partialChecked && 'is-partially-checked'
@@ -107,7 +107,7 @@ const Options = ( {
 
 				{ hasChildren && expanded && (
 					<div
-						className={ classnames(
+						className={ clsx(
 							'woocommerce-tree-select-control__children',
 							isRoot && 'woocommerce-tree-select-control__main'
 						) }

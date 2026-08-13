@@ -14,6 +14,29 @@ namespace Automattic\WooCommerce\Utilities;
  */
 final class NumberUtil {
 	/**
+	 * Converts numbers (floats, strings, integers) to numeric values to be safely used in PHP functions like floor() which expect int or float.
+	 *
+	 * @param mixed $value The value to convert.
+	 * @param mixed $fallback The value to return if the conversion fails.
+	 * @return int|float|mixed Returns the numeric value or the fallback value if conversion fails.
+	 */
+	public static function normalize( $value, $fallback = 0 ) {
+		// Trim string values to handle whitespace consistently across PHP versions.
+		if ( is_string( $value ) ) {
+			$value = trim( $value );
+		}
+
+		if ( is_numeric( $value ) ) {
+			$numeric_value = is_string( $value ) ? floatval( $value ) : $value;
+
+			// Round to precision to avoid floating-point precision issues.
+			return is_int( $numeric_value ) ? $numeric_value : round( $numeric_value, WC_ROUNDING_PRECISION );
+		}
+
+		return $fallback;
+	}
+
+	/**
 	 * Round a number using the built-in `round` function, but unless the value to round is numeric
 	 * (a number or a string that can be parsed as a number), apply 'floatval' first to it
 	 * (so it will convert it to 0 in most cases).
@@ -26,13 +49,30 @@ final class NumberUtil {
 	 * @param int   $precision The optional number of decimal digits to round to.
 	 * @param int   $mode A constant to specify the mode in which rounding occurs.
 	 *
-	 * @return float The value rounded to the given precision as a float, or the supplied default value.
+	 * @return float The value rounded to the given precision as a float.
 	 */
 	public static function round( $val, int $precision = 0, int $mode = PHP_ROUND_HALF_UP ): float {
-		if ( ! is_numeric( $val ) ) {
-			$val = floatval( $val );
-		}
-		return round( $val, $precision, $mode );
+		return round( self::normalize( $val ), $precision, $mode );
+	}
+
+	/**
+	 * Floor a number using the built-in `floor` function.
+	 *
+	 * @param mixed $val The value to floor.
+	 * @return float
+	 */
+	public static function floor( $val ): float {
+		return floor( self::normalize( $val ) );
+	}
+
+	/**
+	 * Ceil a number using the built-in `ceil` function.
+	 *
+	 * @param mixed $val The value to ceil.
+	 * @return float
+	 */
+	public static function ceil( $val ): float {
+		return ceil( self::normalize( $val ) );
 	}
 
 	/**
@@ -65,7 +105,7 @@ final class NumberUtil {
 		$value                      = is_null( $value ) ? '' : $value;
 		$value                      = wp_kses_post( trim( wp_unslash( $value ) ) );
 		$currency_symbol_encoded    = get_woocommerce_currency_symbol();
-		$currency_symbol_variations = array( $currency_symbol_encoded, wp_kses_normalize_entities( $currency_symbol_encoded ), html_entity_decode( $currency_symbol_encoded ) );
+		$currency_symbol_variations = array( $currency_symbol_encoded, wp_kses_normalize_entities( $currency_symbol_encoded ), html_entity_decode( $currency_symbol_encoded, ENT_COMPAT ) );
 
 		$value = str_replace( $currency_symbol_variations, '', $value );
 

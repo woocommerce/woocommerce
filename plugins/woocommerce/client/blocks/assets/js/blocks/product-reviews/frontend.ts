@@ -29,18 +29,18 @@ const productReviewsStore = {
 
 			yield actions.navigate( ref.href );
 
-			ref.closest(
-				'.wp-block-woocommerce-blockified-product-reviews'
-			)?.scrollIntoView( {
-				behavior: 'smooth',
-				block: 'start',
-			} );
+			ref
+				.closest( '.wp-block-woocommerce-product-details' )
+				?.scrollIntoView( {
+					behavior: 'smooth',
+					block: 'start',
+				} );
 		},
 	},
 };
 
 store< typeof productReviewsStore >(
-	'woocommerce/blockified-product-reviews',
+	'woocommerce/product-reviews',
 	productReviewsStore,
 	{
 		lock: true,

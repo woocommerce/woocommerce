@@ -9,8 +9,12 @@ import {
 	__experimentalSpacer as Spacer, // eslint-disable-line
 	__experimentalHeading as Heading, // eslint-disable-line
 	__experimentalView as View, // eslint-disable-line
-	__experimentalNavigatorToParentButton as NavigatorToParentButton, // eslint-disable-line
 } from '@wordpress/components';
+
+/**
+ * Internal dependencies
+ */
+import { Navigator } from '../navigator';
 
 type Props = {
 	title: string;
@@ -33,18 +37,17 @@ export function ScreenHeader( { title, description, onBack }: Props ) {
 			<View>
 				<Spacer marginBottom={ 0 } paddingX={ 4 } paddingY={ 3 }>
 					<HStack spacing={ 2 }>
-						<NavigatorToParentButton
+						<Navigator.BackButton
 							style={ { minWidth: 24, padding: 0 } }
 							icon={ chevronLeft }
 							size="small"
 							aria-label={ __(
 								'Navigate to the previous view',
-								'woocommerce'
+								__i18n_text_domain__
 							) }
 							onClick={ onBack }
 						/>
 						<Spacer>
-							{ /* @ts-expect-error Heading component it's not typed properly in the current components version. */ }
 							<Heading
 								className="woocommerce-email-editor-styles-header"
 								level={ 2 }

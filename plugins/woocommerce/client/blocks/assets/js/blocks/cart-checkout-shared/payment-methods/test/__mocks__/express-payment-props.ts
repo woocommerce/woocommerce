@@ -97,6 +97,7 @@ export const getExpectedExpressPaymentProps = ( name: string ) => ( {
 		LoadingMask: expect.any( Function ),
 		PaymentMethodIcons: expect.any( Function ),
 		PaymentMethodLabel: expect.any( Function ),
+		Skeleton: expect.any( Function ),
 		ValidationInputError: expect.any( Function ),
 	},
 	emitResponse: {

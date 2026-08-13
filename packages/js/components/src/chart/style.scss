@@ -58,19 +58,18 @@
 }
 
 .woocommerce-chart__interval-select {
-	align-items: start;
+	align-items: flex-start;
 	border-right: 1px solid $table-border;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	margin: 0 0 0 auto;
 	min-height: 50px;
-	padding: 8px $gap 0 $gap;
+	padding: 0 $gap;
 
 	@include breakpoint( '<960px' ) {
 		width: 100%;
 		order: 1;
-		margin-top: -8px;
 		margin-left: 0;
 		padding-left: math.div($gap, 2);
 		border-right: 0;

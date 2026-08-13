@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Tests\Internal\Admin\ProductReviews;
 
 use Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsUtil;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 use Generator;
 use WC_Unit_Test_Case;
 
@@ -102,4 +103,110 @@ class ReviewsUtilTest extends WC_Unit_Test_Case {
 		);
 	}
 
+	/**
+	 * @testdox      `modify_product_review_moderation_urls` modifies the moderation URLs in email notifications for product reviews.
+	 *
+	 * @covers       \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsUtil::modify_product_review_moderation_urls()
+	 * @dataProvider provider_modify_product_review_moderation_urls
+	 *
+	 * @param string $post_type  The post type of the comment's post.
+	 * @param string $message    The original message.
+	 * @param string $expected   The expected modified message.
+	 */
+	public function test_modify_product_review_moderation_urls( $post_type, $message, $expected ) {
+		// Create a test post of the specified type.
+		$post_id = wp_insert_post(
+			array(
+				'post_title'  => 'Test ' . $post_type,
+				'post_type'   => $post_type,
+				'post_status' => 'publish',
+			)
+		);
+
+		// Create a comment/review for the post.
+		$comment_id = null;
+		if ( $post_id ) {
+			$comment_id = ProductHelper::create_product_review(
+				$post_id,
+				'Test review content',
+				'0' // Unapproved status.
+			);
+		}
+
+		// Filter admin_url to return predictable URLs for testing.
+		add_filter(
+			'admin_url',
+			function ( $url, $path ) {
+				if ( 'edit.php?post_type=product&page=product-reviews' === $path ) {
+					return 'https://example.com/wp-admin/edit.php?post_type=product&page=product-reviews';
+				}
+				if ( 'edit-comments.php?comment_status=moderated#wpbody-content' === $path ) {
+					return 'https://example.com/wp-admin/edit-comments.php?comment_status=moderated#wpbody-content';
+				}
+				return $url;
+			},
+			10,
+			2
+		);
+
+		$result = ReviewsUtil::modify_product_review_moderation_urls( $message, $comment_id );
+		$this->assertEquals( $expected, $result );
+
+		// Clean up.
+		if ( $comment_id ) {
+			wp_delete_comment( $comment_id, true );
+		}
+		if ( $post_id ) {
+			wp_delete_post( $post_id, true );
+		}
+
+		// Remove the filter.
+		remove_all_filters( 'admin_url' );
+	}
+
+	/** @see test_modify_product_review_moderation_urls */
+	public function provider_modify_product_review_moderation_urls() {
+		$original_message = 'Please moderate: https://example.com/wp-admin/edit-comments.php?comment_status=moderated#wpbody-content';
+		$modified_message = 'Please moderate: https://example.com/wp-admin/edit.php?post_type=product&page=product-reviews&comment_status=moderated';
+
+		yield 'Product review comment' => array(
+			'post_type' => 'product',
+			'message'   => $original_message,
+			'expected'  => $modified_message,
+		);
+
+		yield 'Non-product review comment' => array(
+			'post_type' => 'post',
+			'message'   => $original_message,
+			'expected'  => $original_message,
+		);
+	}
+
+	/**
+	 * @testdox      `modify_product_review_moderation_urls` does not modify URLs when comment does not exist
+	 *
+	 * @covers       \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsUtil::modify_product_review_moderation_urls()
+	 */
+	public function test_modify_product_review_moderation_urls_nonexistent_comment() {
+		$original_message = 'Please moderate: https://example.com/wp-admin/edit-comments.php?comment_status=moderated#wpbody-content';
+
+		// Filter admin_url to return predictable URLs for testing.
+		add_filter(
+			'admin_url',
+			function ( $url, $path ) {
+				if ( 'edit-comments.php?comment_status=moderated#wpbody-content' === $path ) {
+					return 'https://example.com/wp-admin/edit-comments.php?comment_status=moderated#wpbody-content';
+				}
+				return $url;
+			},
+			10,
+			2
+		);
+
+		$result = ReviewsUtil::modify_product_review_moderation_urls( $original_message, 999999 ); // Non-existent comment ID.
+		$this->assertEquals( $original_message, $result );
+
+		// Remove the filter.
+		remove_all_filters( 'admin_url' );
+	}
 }

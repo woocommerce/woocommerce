@@ -7,7 +7,9 @@
  */
 
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -57,7 +59,10 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		add_filter( 'views_edit-product', array( $this, 'product_views' ) );
 		add_filter( 'get_search_query', array( $this, 'search_label' ) );
 		add_filter( 'posts_clauses', array( $this, 'posts_clauses' ), 10, 2 );
-		add_action( 'manage_product_posts_custom_column', array( $this, 'add_sample_product_badge' ), 9, 2 );
+
+		// Use hooks to prime various caches and improve products page performance.
+		add_action( 'load-edit.php', array( $this, 'prime_status_counts_cache' ) );
+		add_filter( 'the_posts', array( $this, 'prime_thumbnail_caches' ), 10, 2 );
 
 		$cogs_controller              = wc_get_container()->get( CostOfGoodsSoldController::class );
 		$this->cogs_is_enabled        = $cogs_controller->feature_is_enabled();
@@ -65,21 +70,66 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	}
 
 	/**
+	 * Pre-warm the wp_count_posts cache before the list table renders.
+	 *
+	 * @internal
+	 * @since 11.0.0
+	 *
+	 * @return void
+	 */
+	public function prime_status_counts_cache(): void {
+		$screen = get_current_screen();
+		if ( ! $screen || 'edit-product' !== $screen->id ) {
+			return;
+		}
+
+		// Performance note: the current listings architecture prevents us from isolating wp_count_posts calls.
+		// In the context of the products page, we can still isolate the underlying SQL by warming up the wp_count_posts cache.
+		$cache = (object) array_map(
+			static fn ( $count ) => $count ? (string) $count : (int) $count,
+			wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' )
+		);
+		// Trade-off: private-status tally may read slightly high for restricted roles (other users' privates included) — non-critical.
+		wp_cache_set_multiple(
+			array(
+				'posts-product' => $cache,
+				'posts-product_readable_' . get_current_user_id() => $cache,
+			),
+			'counts'
+		);
+	}
+
+	/**
+	 * Prime featured image caches for product queries to avoid individual queries during rendering.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param \WP_Post[] $posts Posts from WP Query.
+	 * @param \WP_Query  $query Current query.
+	 * @return array
+	 */
+	public function prime_thumbnail_caches( $posts, $query ) {
+		if ( $query instanceof \WP_Query && 'product' === $query->get( 'post_type' ) ) {
+			update_post_thumbnail_cache( $query );
+		}
+
+		return $posts;
+	}
+
+	/**
 	 * Render blank state.
 	 */
 	protected function render_blank_state() {
-		echo '<div class="woocommerce-BlankState">';
+		echo '<div class="woocommerce-BlankState woocommerce-BlankState--products">';
 
 		echo '<h2 class="woocommerce-BlankState-message">' . esc_html__( 'Ready to start selling something awesome?', 'woocommerce' ) . '</h2>';
 
 		echo '<div class="woocommerce-BlankState-buttons">';
 
-		echo '<a class="woocommerce-BlankState-cta button-primary button" href="' . esc_url( admin_url( 'post-new.php?post_type=product&tutorial=true' ) ) . '">' . esc_html__( 'Create Product', 'woocommerce' ) . '</a>';
-		echo '<a class="woocommerce-BlankState-cta button" href="' . esc_url( admin_url( 'edit.php?post_type=product&page=product_importer' ) ) . '">' . esc_html__( 'Start Import', 'woocommerce' ) . '</a>';
+		echo '<a class="woocommerce-BlankState-cta button button-secondary" href="' . esc_url( admin_url( 'post-new.php?post_type=product&tutorial=true' ) ) . '">' . esc_html__( 'Create Product', 'woocommerce' ) . '</a>';
+		echo '<a class="woocommerce-BlankState-cta button button-secondary" href="' . esc_url( admin_url( 'edit.php?post_type=product&page=product_importer' ) ) . '">' . esc_html__( 'Start Import', 'woocommerce' ) . '</a>';
 
 		echo '</div>';
-
-		do_action( 'wc_marketplace_suggestions_products_empty_state' );
 
 		echo '</div>';
 	}
@@ -113,9 +163,10 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 */
 	public function define_sortable_columns( $columns ) {
 		$custom = array(
-			'price' => 'price',
-			'sku'   => 'sku',
-			'name'  => 'title',
+			'price'            => 'price',
+			'sku'              => 'sku',
+			'name'             => 'title',
+			'global_unique_id' => 'global_unique_id',
 		);
 
 		if ( $this->use_cogs_lookup_column ) {
@@ -147,6 +198,8 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			$show_columns['sku'] = __( 'SKU', 'woocommerce' );
 		}
 
+		$show_columns['global_unique_id'] = __( 'GTIN, UPC, EAN, or ISBN', 'woocommerce' );
+
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
 			$show_columns['is_in_stock'] = __( 'Stock', 'woocommerce' );
 		}
@@ -156,9 +209,11 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			$show_columns['cogs_value'] = __( 'Cost', 'woocommerce' );
 		}
 		$show_columns['product_cat'] = __( 'Categories', 'woocommerce' );
-		$show_columns['product_tag'] = __( 'Tags', 'woocommerce' );
-		$show_columns['featured']    = '<span class="wc-featured parent-tips" data-tip="' . esc_attr__( 'Featured', 'woocommerce' ) . '">' . __( 'Featured', 'woocommerce' ) . '</span>';
-		$show_columns['date']        = __( 'Date', 'woocommerce' );
+		if ( is_object_in_taxonomy( 'product', 'product_tag' ) ) {
+			$show_columns['product_tag'] = __( 'Tags', 'woocommerce' );
+		}
+		$show_columns['featured'] = '<span class="wc-featured parent-tips" data-tip="' . esc_attr__( 'Featured', 'woocommerce' ) . '">' . __( 'Featured', 'woocommerce' ) . '</span>';
+		$show_columns['date']     = __( 'Date', 'woocommerce' );
 
 		return array_merge( $show_columns, $columns );
 	}
@@ -209,14 +264,30 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				'<div class="cogs_value">' . esc_html( $this->object->get_cogs_value() ?? '0' ) . '</div>' :
 				'';
 
+		/**
+		 * Product represented by the current list-table row.
+		 * Narrow the inherited object type without adding a PHPStan baseline entry.
+		 * In future we should correct the type of $this->object.
+		 *
+		 * @var WC_Product $product
+		 */
+		$product        = $this->object;
+		$sale_date_from = $product->get_date_on_sale_from( 'edit' );
+		$sale_date_to   = $product->get_date_on_sale_to( 'edit' );
+		$sale_date_from = $sale_date_from ? date_i18n( 'Y-m-d', $sale_date_from->getOffsetTimestamp() ) : '';
+		$sale_date_to   = $sale_date_to ? date_i18n( 'Y-m-d', $sale_date_to->getOffsetTimestamp() ) : '';
+
 		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- the COGS value is already escaped.
 		/* Custom inline data for woocommerce. */
 		echo '
 			<div class="hidden" id="woocommerce_inline_' . absint( $this->object->get_id() ) . '">
 				<div class="menu_order">' . esc_html( $this->object->get_menu_order() ) . '</div>
 				<div class="sku">' . esc_html( $this->object->get_sku() ) . '</div>
+				<div class="global_unique_id">' . esc_html( $this->object->get_global_unique_id() ) . '</div>
 				<div class="regular_price">' . esc_html( $this->object->get_regular_price() ) . '</div>
 				<div class="sale_price">' . esc_html( $this->object->get_sale_price() ) . '</div>
+				<div class="sale_price_dates_from">' . esc_html( $sale_date_from ) . '</div>
+				<div class="sale_price_dates_to">' . esc_html( $sale_date_to ) . '</div>
 				<div class="weight">' . esc_html( $this->object->get_weight() ) . '</div>
 				<div class="length">' . esc_html( $this->object->get_length() ) . '</div>
 				<div class="width">' . esc_html( $this->object->get_width() ) . '</div>
@@ -243,6 +314,13 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 */
 	protected function render_sku_column() {
 		echo $this->object->get_sku() ? esc_html( $this->object->get_sku() ) : '<span class="na">&ndash;</span>';
+	}
+
+	/**
+	 * Render column: global_unique_id.
+	 */
+	protected function render_global_unique_id_column() {
+		echo $this->object->get_global_unique_id() ? esc_html( $this->object->get_global_unique_id() ) : '<span class="na">&ndash;</span>';
 	}
 
 	/**
@@ -374,6 +452,10 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				array(
 					'option_select_text' => __( 'Filter by category', 'woocommerce' ),
 					'hide_empty'         => 0,
+					// Performance note: pad_counts=0 skips the hierarchical count SQL — O(all published products), degrades linearly
+					// with catalog size. show_count=0 suppresses the raw wp_term_taxonomy.count that would otherwise render in its place.
+					'pad_counts'         => 0,
+					'show_count'         => 0,
 				)
 			);
 		} else {
@@ -516,6 +598,11 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				$callback = 'DESC' === $order ? 'order_by_cogs_value_desc_post_clauses' : 'order_by_cogs_value_asc_post_clauses';
 				add_filter( 'posts_clauses', array( $this, $callback ) );
 			}
+
+			if ( 'global_unique_id' === $orderby ) {
+				$callback = 'DESC' === $order ? 'order_by_global_unique_id_desc_post_clauses' : 'order_by_global_unique_id_asc_post_clauses';
+				add_filter( 'posts_clauses', array( $this, $callback ) );
+			}
 		}
 
 		// Type filtering.
@@ -579,6 +666,8 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		remove_filter( 'posts_clauses', array( $this, 'order_by_price_desc_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'order_by_sku_asc_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'order_by_sku_desc_post_clauses' ) );
+		remove_filter( 'posts_clauses', array( $this, 'order_by_global_unique_id_asc_post_clauses' ) );
+		remove_filter( 'posts_clauses', array( $this, 'order_by_global_unique_id_desc_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'filter_downloadable_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'filter_virtual_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'filter_stock_status_post_clauses' ) );
@@ -662,6 +751,30 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	}
 
 	/**
+	 * Handle global unique ID sorting.
+	 *
+	 * @param array $args Query args.
+	 * @return array
+	 */
+	public function order_by_global_unique_id_asc_post_clauses( $args ) {
+		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
+		$args['orderby'] = ' wc_product_meta_lookup.global_unique_id ASC, wc_product_meta_lookup.product_id ASC ';
+		return $args;
+	}
+
+	/**
+	 * Handle global unique ID sorting.
+	 *
+	 * @param array $args Query args.
+	 * @return array
+	 */
+	public function order_by_global_unique_id_desc_post_clauses( $args ) {
+		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
+		$args['orderby'] = ' wc_product_meta_lookup.global_unique_id DESC, wc_product_meta_lookup.product_id DESC ';
+		return $args;
+	}
+
+	/**
 	 * Filter by type.
 	 *
 	 * @param array $args Query args.
@@ -694,8 +807,40 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	public function filter_stock_status_post_clauses( $args ) {
 		global $wpdb;
 		if ( ! empty( $_GET['stock_status'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
-			$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.stock_status=%s ', wc_clean( wp_unslash( $_GET['stock_status'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$stock_status = wc_clean( wp_unslash( $_GET['stock_status'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+			if ( ProductStockStatus::OUT_OF_STOCK === $stock_status ) {
+				// Only published variations qualify their parent for this discoverability filter.
+				// Other statuses retain normal aggregate-parent behavior.
+				$args['where'] .= $wpdb->prepare(
+					" AND {$wpdb->posts}.ID IN (
+						SELECT stock_status_products.product_id
+						FROM (
+							SELECT DISTINCT CAST(
+								CASE
+									WHEN stock_status_posts.post_type = 'product_variation' THEN stock_status_posts.post_parent
+									ELSE stock_status_lookup.product_id
+								END AS UNSIGNED
+							) AS product_id
+							FROM {$wpdb->wc_product_meta_lookup} stock_status_lookup
+							INNER JOIN {$wpdb->posts} stock_status_posts
+								ON stock_status_posts.ID = stock_status_lookup.product_id
+							WHERE stock_status_lookup.stock_status = %s
+								AND (
+									stock_status_posts.post_type = 'product'
+									OR (
+										stock_status_posts.post_type = 'product_variation'
+										AND stock_status_posts.post_status = 'publish'
+									)
+								)
+						) stock_status_products
+					) ",
+					$stock_status
+				);
+			} else {
+				$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
+				$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.stock_status=%s ', $stock_status );
+			}
 		}
 		return $args;
 	}
@@ -743,12 +888,20 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @param int    $post_id     Post ID.
 	 *
 	 * @since 8.8.0
+	 * @deprecated 11.1.0
 	 */
 	public function add_sample_product_badge( $column_name, $post_id ) {
-		$is_sample_product = 'product' === get_post_type( $post_id ) && get_post_meta( $post_id, '_headstart_post', true );
+		wc_deprecated_function( __METHOD__, '11.1.0' );
+	}
 
-		if ( $is_sample_product && 'name' === $column_name ) {
-			echo '<span class="sample-product-badge" style="margin-right: 6px;border-radius: 4px; background: #F6F7F7; padding: 4px; color: #3C434A;font-size: 12px;font-style: normal;font-weight: 400;line-height: 16px; height: 24px;">' . esc_html__( 'Sample', 'woocommerce' ) . '</span>';
-		}
+	/**
+	 * Define which columns are hidden by default.
+	 *
+	 * @return array
+	 */
+	protected function define_hidden_columns() {
+		return array(
+			'global_unique_id',
+		);
 	}
 }

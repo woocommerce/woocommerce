@@ -24,27 +24,70 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	protected $csv_file = '';
 
 	/**
-	 * @var WC_Product_CSV_Importer
+	 * Attachment IDs created by the current test.
+	 *
+	 * @var int[]
 	 */
-	private $sut;
+	private $created_attachment_ids = array();
 
 	/**
 	 * Load up the importer classes since they aren't loaded by default.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		add_action( 'add_attachment', array( $this, 'track_created_attachment' ) );
 
 		$bootstrap = WC_Unit_Tests_Bootstrap::instance();
 		require_once $bootstrap->plugin_dir . '/includes/import/class-wc-product-csv-importer.php';
 		require_once $bootstrap->plugin_dir . '/includes/admin/importers/class-wc-product-csv-importer-controller.php';
 
+		// Initialize brands classes to register import/export hooks.
+		require_once $bootstrap->plugin_dir . '/includes/class-wc-brands.php';
+		require_once $bootstrap->plugin_dir . '/includes/admin/class-wc-admin-brands.php';
+
+		WC_Brands::init_taxonomy();
+		new WC_Brands_Admin();
+
 		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.
 		$this->http_responder = array( $this, 'mock_http_responses' );
 		$this->csv_file       = dirname( __FILE__ ) . '/sample.csv';
-		$this->sut            = new WC_Product_CSV_Importer(
+	}
+
+	/**
+	 * Remove physical files for attachments created by the current test.
+	 */
+	public function tearDown(): void {
+		remove_action( 'add_attachment', array( $this, 'track_created_attachment' ) );
+		foreach ( array_unique( $this->created_attachment_ids ) as $attachment_id ) {
+			wp_delete_attachment( $attachment_id, true );
+		}
+		$this->created_attachment_ids = array();
+
+		parent::tearDown();
+	}
+
+	/**
+	 * Track an attachment created by the current test.
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 */
+	public function track_created_attachment( $attachment_id ): void {
+		$this->created_attachment_ids[] = (int) $attachment_id;
+	}
+
+	/**
+	 * Create the importer used by the full import tests.
+	 *
+	 * @return WC_Product_CSV_Importer
+	 */
+	private function get_importer() {
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register::class )->delete_all();
+
+		return new WC_Product_CSV_Importer(
 			$this->csv_file,
 			array(
 				'mapping'          => $this->get_csv_mapped_items(),
+				'lines'            => 2,
 				'parse'            => true,
 				'prevent_timeouts' => false,
 			)
@@ -85,6 +128,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 			'Regular price'           => 'regular_price',
 			'Categories'              => 'category_ids',
 			'Tags'                    => 'tag_ids',
+			'Brands'                  => 'brand_ids',
 			'Shipping class'          => 'shipping_class_id',
 			'Images'                  => 'images',
 			'Download limit'          => 'download_limit',
@@ -114,15 +158,18 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	public function test_import_for_admin_users() {
 		// In most cases, an admin user will run the import.
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
-		$results = $this->sut->import();
+		$results = $this->get_importer()->import();
 
 		$this->assertEquals( 0, count( $results['failed'] ) );
 		$this->assertEquals( 0, count( $results['updated'] ) );
 		$this->assertEquals( 0, count( $results['skipped'] ) );
 		$this->assertEquals(
-			7,
+			2,
 			count( $results['imported'] ) + count( $results['imported_variations'] ),
 			'One import item references a downloadable file stored in an unapproved location: if the import is triggered by an admin user, that location will be automatically approved.'
+		);
+		$this->assertTrue(
+			wc_get_container()->get( \Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register::class )->is_valid_path( 'http://woo.dev/albums/album.flac' )
 		);
 	}
 
@@ -132,15 +179,18 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	public function test_import_for_shop_managers() {
 		// In some cases, a shop manager may run the import.
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'shop_manager' ) ) );
-		$results = $this->sut->import();
+		$results = $this->get_importer()->import();
 
 		$this->assertEquals( 0, count( $results['updated'] ) );
 		$this->assertEquals( 0, count( $results['skipped'] ) );
-		$this->assertEquals( 6, count( $results['imported'] ) + count( $results['imported_variations'] ) );
+		$this->assertEquals( 1, count( $results['imported'] ) + count( $results['imported_variations'] ) );
 		$this->assertEquals(
 			1,
 			count( $results['failed'] ),
 			'One import item references a downloadable file stored in an unapproved location: if the import is triggered by a non-admin, that item cannot be imported.'
+		);
+		$this->assertFalse(
+			wc_get_container()->get( \Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register::class )->is_valid_path( 'http://woo.dev/albums/album.flac' )
 		);
 	}
 
@@ -172,6 +222,139 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 
 		$updated_product = wc_get_product( $product->get_id() );
 		$this->assertEquals( 20, $updated_product->get_price() );
+	}
+
+	/**
+	 * @testdox Reducing the number of images in a CSV clears previously imported gallery images.
+	 *
+	 * Regression test for https://github.com/woocommerce/woocommerce/issues/34839: replacing a
+	 * product's two images with a single image left the removed gallery image in place instead
+	 * of clearing it.
+	 */
+	public function test_reducing_images_clears_removed_gallery_images() {
+		$featured_url = 'http://example.com/featured.jpg';
+		$gallery_url  = 'http://example.com/gallery.jpg';
+		$new_url      = 'http://example.com/new.jpg';
+
+		$featured_id = $this->create_sourced_attachment( $featured_url );
+		$gallery_id  = $this->create_sourced_attachment( $gallery_url );
+		$new_id      = $this->create_sourced_attachment( $new_url );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_image_id( $featured_id );
+		$product->set_gallery_image_ids( array( $gallery_id ) );
+		$product->save();
+
+		$importer = $this->get_importer();
+		$expanded = $this->invoke_protected( $importer, 'expand_data', array( array( 'images' => array( $new_url ) ) ) );
+		$this->invoke_protected( $importer, 'set_image_data', array( &$product, $expanded ) );
+
+		$this->assertEquals( $new_id, $product->get_image_id(), 'Featured image should be replaced with the new image.' );
+		$this->assertEquals( array(), $product->get_gallery_image_ids(), 'Removed gallery images should be cleared.' );
+	}
+
+	/**
+	 * @testdox An empty images column leaves the existing featured image and gallery untouched.
+	 *
+	 * Guards against over-clearing: a blank or absent Images value must not wipe images that
+	 * were previously set on the product. See https://github.com/woocommerce/woocommerce/issues/34839.
+	 */
+	public function test_empty_images_column_preserves_existing_images() {
+		$featured_id = $this->create_sourced_attachment( 'http://example.com/featured.jpg' );
+		$gallery_id  = $this->create_sourced_attachment( 'http://example.com/gallery.jpg' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_image_id( $featured_id );
+		$product->set_gallery_image_ids( array( $gallery_id ) );
+		$product->save();
+
+		$importer = $this->get_importer();
+		$expanded = $this->invoke_protected( $importer, 'expand_data', array( array( 'images' => array() ) ) );
+		$this->invoke_protected( $importer, 'set_image_data', array( &$product, $expanded ) );
+
+		$this->assertEquals( $featured_id, $product->get_image_id(), 'Featured image should be preserved.' );
+		$this->assertEquals( array( $gallery_id ), $product->get_gallery_image_ids(), 'Existing gallery should be preserved.' );
+	}
+
+	/**
+	 * @testdox A leading empty value in the images column still imports the remaining gallery images.
+	 *
+	 * Regression test for https://github.com/woocommerce/woocommerce/issues/66583: an Images cell
+	 * like ",gallery.jpg" parses to an empty featured-image value followed by gallery URLs. The
+	 * gallery URLs must still be imported (and replace the existing gallery) even though the
+	 * featured-image slot is empty.
+	 */
+	public function test_leading_empty_image_value_still_imports_gallery_images() {
+		$gallery_url = 'http://example.com/gallery.jpg';
+		$gallery_id  = $this->create_sourced_attachment( $gallery_url );
+		$stale_id    = $this->create_sourced_attachment( 'http://example.com/stale.jpg' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_image_id( $this->create_sourced_attachment( 'http://example.com/featured.jpg' ) );
+		$product->set_gallery_image_ids( array( $stale_id ) );
+		$product->save();
+
+		$importer = $this->get_importer();
+		$expanded = $this->invoke_protected( $importer, 'expand_data', array( array( 'images' => array( '', $gallery_url ) ) ) );
+		$this->invoke_protected( $importer, 'set_image_data', array( &$product, $expanded ) );
+
+		$this->assertEmpty( $product->get_image_id(), 'An empty featured-image value should clear the featured image.' );
+		$this->assertEquals( array( $gallery_id ), $product->get_gallery_image_ids(), 'Gallery images after a leading empty value should replace the existing gallery.' );
+	}
+
+	/**
+	 * @testdox An images cell containing only separators leaves the existing gallery untouched.
+	 *
+	 * An Images cell like "," parses to an array of empty strings. It carries no image values,
+	 * so it must behave like a fully empty cell and not wipe the existing gallery.
+	 */
+	public function test_separators_only_images_cell_preserves_existing_gallery() {
+		$gallery_id = $this->create_sourced_attachment( 'http://example.com/gallery.jpg' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_image_id( $this->create_sourced_attachment( 'http://example.com/featured.jpg' ) );
+		$product->set_gallery_image_ids( array( $gallery_id ) );
+		$product->save();
+
+		$importer = $this->get_importer();
+		$expanded = $this->invoke_protected( $importer, 'expand_data', array( array( 'images' => array( '', '' ) ) ) );
+		$this->invoke_protected( $importer, 'set_image_data', array( &$product, $expanded ) );
+
+		$this->assertEquals( array( $gallery_id ), $product->get_gallery_image_ids(), 'A separators-only images cell should leave the existing gallery untouched.' );
+	}
+
+	/**
+	 * Create an attachment whose source URL is recorded, so the importer can resolve it by URL.
+	 *
+	 * @param string $url Source URL of the image.
+	 * @return int Attachment ID.
+	 */
+	private function create_sourced_attachment( $url ) {
+		$attachment_id = wp_insert_attachment(
+			array(
+				'post_title'     => basename( $url ),
+				'post_mime_type' => 'image/jpeg',
+				'post_status'    => 'inherit',
+			)
+		);
+		update_post_meta( $attachment_id, '_wc_attachment_source', $url );
+
+		return $attachment_id;
+	}
+
+	/**
+	 * Invoke a protected method on an object via reflection.
+	 *
+	 * @param object $target      Object to invoke the method on.
+	 * @param string $method_name Method name.
+	 * @param array  $args        Arguments to pass to the method.
+	 * @return mixed Return value of the method.
+	 */
+	private function invoke_protected( $target, $method_name, $args ) {
+		$method = new ReflectionMethod( $target, $method_name );
+		$method->setAccessible( true );
+
+		return $method->invokeArgs( $target, $args );
 	}
 
 	/**
@@ -210,6 +393,40 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		$importer = new WC_Product_CSV_Importer( $this->csv_file, $args );
 
 		$this->assertEquals( array_values( $args['mapping'] ), $importer->get_mapped_keys() );
+	}
+
+	/**
+	 * @testdox Special column formatting callbacks are only applied to columns whose name starts with the special prefix.
+	 */
+	public function test_get_formatting_callback_matches_special_columns_by_prefix() {
+		$importer = new WC_Product_CSV_Importer( $this->csv_file, array( 'lines' => 1 ) );
+
+		$mapped_keys = array(
+			// Canonical special columns.
+			'attributes:value1'    => array( $importer, 'parse_comma_field' ),
+			'attributes:visible1'  => array( $importer, 'parse_bool_field' ),
+			'attributes:taxonomy1' => array( $importer, 'parse_bool_field' ),
+			'downloads:url1'       => array( $importer, 'parse_download_file_field' ),
+			'meta:_my_field'       => 'wp_kses_post',
+			// Columns that merely contain a special name must fall back to wc_clean.
+			'metamask'             => 'wc_clean',
+			'hellometa:'           => 'wc_clean',
+			'product_metadata'     => 'wc_clean',
+			'my attributes:value'  => 'wc_clean',
+			'a downloads:url1'     => 'wc_clean',
+			// Special columns handled elsewhere still get the default callback.
+			'attributes:name1'     => 'wc_clean',
+			'attributes:default1'  => 'wc_clean',
+			'downloads:name1'      => 'wc_clean',
+		);
+
+		$reflected_keys = new ReflectionProperty( $importer, 'mapped_keys' );
+		$reflected_keys->setAccessible( true );
+		$reflected_keys->setValue( $importer, array_keys( $mapped_keys ) );
+
+		$callbacks = $this->invoke_protected( $importer, 'get_formatting_callback', array() );
+
+		$this->assertEquals( array_values( $mapped_keys ), $callbacks );
 	}
 
 	/**
@@ -252,6 +469,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'20',
 				'Clothing, Clothing > T-shirts',
 				'',
+				'TopBrand, TopBrand > KidCakes',
 				'',
 				'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_1_front.jpg, http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_1_back.jpg',
 				'',
@@ -300,6 +518,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'5',
 				'Music > Albums, Music',
 				'Woo',
+				'TopBrand > Slice, TopBrand',
 				'',
 				'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_1_angle.jpg, http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_1_flat.jpg',
 				'10',
@@ -363,8 +582,8 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'sale_price'            => '18',
 				'regular_price'         => '20',
 				'shipping_class_id'     => 0,
-				'download_limit'        => 0,
-				'download_expiry'       => 0,
+				'download_limit'        => '',
+				'download_expiry'       => '',
 				'product_url'           => '',
 				'button_text'           => '',
 				'status'                => ProductStatus::PUBLISH,
@@ -460,8 +679,8 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'sale_price'         => '180',
 				'regular_price'      => '199',
 				'shipping_class_id'  => 0,
-				'download_limit'     => 0,
-				'download_expiry'    => 0,
+				'download_limit'     => '',
+				'download_expiry'    => '',
 				'product_url'        => 'https://woocommerce.com/products/product-csv-import-suite/',
 				'button_text'        => 'Buy on WooCommerce.com',
 				'status'             => ProductStatus::PUBLISH,
@@ -496,8 +715,8 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'sale_price'            => '',
 				'regular_price'         => '',
 				'shipping_class_id'     => 0,
-				'download_limit'        => 0,
-				'download_expiry'       => 0,
+				'download_limit'        => '',
+				'download_expiry'       => '',
 				'product_url'           => '',
 				'button_text'           => '',
 				'status'                => ProductStatus::PUBLISH,
@@ -524,40 +743,41 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'menu_order'            => 3,
 			),
 			array(
-				'type'               => ProductType::VARIATION,
-				'sku'                => '',
-				'name'               => '',
-				'featured'           => '',
-				'catalog_visibility' => CatalogVisibility::VISIBLE,
-				'short_description'  => '',
-				'description'        => 'Lorem ipsum dolor sit amet, at exerci civibus appetere sit, iuvaret hendrerit mea no. Eam integre feugait liberavisse an.',
-				'date_on_sale_from'  => null,
-				'date_on_sale_to'    => null,
-				'tax_status'         => ProductTaxStatus::TAXABLE,
-				'tax_class'          => 'standard',
-				'stock_status'       => ProductStockStatus::IN_STOCK,
-				'stock_quantity'     => 6,
-				'backorders'         => 'no',
-				'sold_individually'  => '',
-				'weight'             => 1.0,
-				'length'             => 2.0,
-				'width'              => 25.0,
-				'height'             => 55.0,
-				'reviews_allowed'    => '',
-				'purchase_note'      => '',
-				'sale_price'         => '',
-				'regular_price'      => '20',
-				'shipping_class_id'  => 0,
-				'download_limit'     => 0,
-				'download_expiry'    => 0,
-				'product_url'        => '',
-				'button_text'        => '',
-				'status'             => ProductStatus::PUBLISH,
-				'raw_image_id'       => 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_4_front.jpg',
-				'virtual'            => false,
-				'downloadable'       => false,
-				'manage_stock'       => true,
-				'raw_attributes'     => array(
+				'type'                  => ProductType::VARIATION,
+				'sku'                   => '',
+				'name'                  => '',
+				'featured'              => '',
+				'catalog_visibility'    => CatalogVisibility::VISIBLE,
+				'short_description'     => '',
+				'description'           => 'Lorem ipsum dolor sit amet, at exerci civibus appetere sit, iuvaret hendrerit mea no. Eam integre feugait liberavisse an.',
+				'date_on_sale_from'     => null,
+				'date_on_sale_to'       => null,
+				'tax_status'            => ProductTaxStatus::TAXABLE,
+				'tax_class'             => 'standard',
+				'stock_status'          => ProductStockStatus::IN_STOCK,
+				'stock_quantity'        => 6,
+				'backorders'            => 'no',
+				'sold_individually'     => '',
+				'weight'                => 1.0,
+				'length'                => 2.0,
+				'width'                 => 25.0,
+				'height'                => 55.0,
+				'reviews_allowed'       => '',
+				'purchase_note'         => '',
+				'sale_price'            => '',
+				'regular_price'         => '20',
+				'shipping_class_id'     => 0,
+				'download_limit'        => '',
+				'download_expiry'       => '',
+				'product_url'           => '',
+				'button_text'           => '',
+				'status'                => ProductStatus::PUBLISH,
+				'raw_image_id'          => 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_4_front.jpg',
+				'raw_gallery_image_ids' => array(),
+				'virtual'               => false,
+				'downloadable'          => false,
+				'manage_stock'          => true,
+				'raw_attributes'        => array(
 					array(
 						'name' => 'Color',
 					),
@@ -566,43 +786,44 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 						'name'  => 'Size',
 					),
 				),
-				'menu_order'         => 1,
+				'menu_order'            => 1,
 			),
 			array(
-				'type'               => ProductType::VARIATION,
-				'sku'                => '',
-				'name'               => '',
-				'featured'           => '',
-				'catalog_visibility' => CatalogVisibility::VISIBLE,
-				'short_description'  => '',
-				'description'        => 'Lorem ipsum dolor sit amet, at exerci civibus appetere sit, iuvaret hendrerit mea no. Eam integre feugait liberavisse an.',
-				'date_on_sale_from'  => null,
-				'date_on_sale_to'    => null,
-				'tax_status'         => ProductTaxStatus::TAXABLE,
-				'tax_class'          => 'standard',
-				'stock_status'       => ProductStockStatus::IN_STOCK,
-				'stock_quantity'     => 10,
-				'backorders'         => 'yes',
-				'sold_individually'  => '',
-				'weight'             => 1.0,
-				'length'             => 2.0,
-				'width'              => 25.0,
-				'height'             => 55.0,
-				'reviews_allowed'    => '',
-				'purchase_note'      => '',
-				'sale_price'         => '17.99',
-				'regular_price'      => '20',
-				'shipping_class_id'  => 0,
-				'download_limit'     => 0,
-				'download_expiry'    => 0,
-				'product_url'        => '',
-				'button_text'        => '',
-				'status'             => ProductStatus::PUBLISH,
-				'raw_image_id'       => 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_3_front.jpg',
-				'virtual'            => false,
-				'downloadable'       => false,
-				'manage_stock'       => true,
-				'raw_attributes'     => array(
+				'type'                  => ProductType::VARIATION,
+				'sku'                   => '',
+				'name'                  => '',
+				'featured'              => '',
+				'catalog_visibility'    => CatalogVisibility::VISIBLE,
+				'short_description'     => '',
+				'description'           => 'Lorem ipsum dolor sit amet, at exerci civibus appetere sit, iuvaret hendrerit mea no. Eam integre feugait liberavisse an.',
+				'date_on_sale_from'     => null,
+				'date_on_sale_to'       => null,
+				'tax_status'            => ProductTaxStatus::TAXABLE,
+				'tax_class'             => 'standard',
+				'stock_status'          => ProductStockStatus::IN_STOCK,
+				'stock_quantity'        => 10,
+				'backorders'            => 'yes',
+				'sold_individually'     => '',
+				'weight'                => 1.0,
+				'length'                => 2.0,
+				'width'                 => 25.0,
+				'height'                => 55.0,
+				'reviews_allowed'       => '',
+				'purchase_note'         => '',
+				'sale_price'            => '17.99',
+				'regular_price'         => '20',
+				'shipping_class_id'     => 0,
+				'download_limit'        => '',
+				'download_expiry'       => '',
+				'product_url'           => '',
+				'button_text'           => '',
+				'status'                => ProductStatus::PUBLISH,
+				'raw_image_id'          => 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_3_front.jpg',
+				'raw_gallery_image_ids' => array(),
+				'virtual'               => false,
+				'downloadable'          => false,
+				'manage_stock'          => true,
+				'raw_attributes'        => array(
 					array(
 						'name' => 'Color',
 					),
@@ -611,7 +832,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 						'name'  => 'Size',
 					),
 				),
-				'menu_order'         => 2,
+				'menu_order'            => 2,
 			),
 			array(
 				'type'                  => ProductType::GROUPED,
@@ -638,8 +859,8 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'sale_price'            => '',
 				'regular_price'         => '',
 				'shipping_class_id'     => 0,
-				'download_limit'        => 0,
-				'download_expiry'       => 0,
+				'download_limit'        => '',
+				'download_expiry'       => '',
 				'product_url'           => '',
 				'button_text'           => '',
 				'status'                => ProductStatus::PUBLISH,
@@ -656,10 +877,89 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 
 		// Remove fields that depends on product ID or term ID.
 		foreach ( $parsed_data as &$data ) {
-			unset( $data['parent_id'], $data['upsell_ids'], $data['cross_sell_ids'], $data['children'], $data['category_ids'], $data['tag_ids'] );
+			unset( $data['parent_id'], $data['upsell_ids'], $data['cross_sell_ids'], $data['children'], $data['category_ids'], $data['tag_ids'], $data['brand_ids'] );
 		}
 
 		$this->assertEquals( $items, $parsed_data );
+	}
+
+	/**
+	 * Test get_parsed_data with brands.
+	 *
+	 * @since 10.3.5
+	 */
+	public function test_get_parsed_data_brands() {
+
+		// Set admin user to allow term creation.
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		$args = array(
+			'mapping' => $this->get_csv_mapped_items(),
+			'parse'   => true,
+		);
+
+		// Expected brand strings for each product from CSV.
+		// Note: Hierarchical terms store only the leaf name, not the full path.
+		$expected_brands = array(
+			array( 'TopBrand', 'KidCakes' ),                  // Woo Logo: "TopBrand, TopBrand > KidCakes".
+			array( 'Slice', 'TopBrand' ),                     // Woo Album #1: "TopBrand > Slice, TopBrand".
+			array( 'Another Brand' ),                         // WooCommerce Product CSV Suite: "Another Brand".
+			array( 'TopBrand', 'KidCakes' ),                  // Ship Your Idea: "TopBrand, TopBrand > KidCakes".
+			array(),                                          // Variation 1: No brands.
+			array(),                                          // Variation 2: No brands.
+			array( 'TopBrand', 'KidCakes', 'Slice' ),         // Best Woo Products: "TopBrand, TopBrand > KidCakes, TopBrand > Slice".
+		);
+
+		$importer    = new WC_Product_CSV_Importer( $this->csv_file, $args );
+		$parsed_data = $importer->get_parsed_data();
+
+		// Verify that each product in parsed_data has the correct brand_ids assigned.
+		foreach ( $parsed_data as $index => $data ) {
+			// Get the expected brand term IDs for this product.
+			$expected_brand_ids = array();
+			foreach ( $expected_brands[ $index ] as $brand_name ) {
+				$brand = get_term_by( 'name', $brand_name, 'product_brand' );
+				if ( $brand && ! is_wp_error( $brand ) ) {
+					$expected_brand_ids[] = $brand->term_id;
+				}
+			}
+
+			// Get actual brand IDs from parsed data.
+			$actual_brand_ids = isset( $data['brand_ids'] ) ? $data['brand_ids'] : array();
+
+			// Ensure it's an array (handle cases where it might be a string).
+			if ( ! is_array( $actual_brand_ids ) ) {
+				$actual_brand_ids = array();
+			}
+
+			// Sort both arrays for consistent comparison.
+			sort( $expected_brand_ids );
+			sort( $actual_brand_ids );
+
+			$this->assertEquals(
+				$expected_brand_ids,
+				$actual_brand_ids,
+				sprintf( 'Product at index %d should have correct brand_ids', $index )
+			);
+		}
+
+		// Verify hierarchical relationships.
+		$topbrand      = get_term_by( 'name', 'TopBrand', 'product_brand' );
+		$kidcakes      = get_term_by( 'name', 'KidCakes', 'product_brand' );
+		$slice         = get_term_by( 'name', 'Slice', 'product_brand' );
+		$another_brand = get_term_by( 'name', 'Another Brand', 'product_brand' );
+
+		// Assert that terms exist.
+		$this->assertNotFalse( $topbrand, 'TopBrand term should exist' );
+		$this->assertNotFalse( $kidcakes, 'KidCakes term should exist' );
+		$this->assertNotFalse( $slice, 'Slice term should exist' );
+		$this->assertNotFalse( $another_brand, 'Another Brand term should exist' );
+
+		// Assert hierarchical relationships: KidCakes and Slice should be children of TopBrand.
+		$this->assertEquals( 0, $topbrand->parent, 'TopBrand should be a top-level term' );
+		$this->assertEquals( $topbrand->term_id, $kidcakes->parent, 'KidCakes should be a child of TopBrand' );
+		$this->assertEquals( $topbrand->term_id, $slice->parent, 'Slice should be a child of TopBrand' );
+		$this->assertEquals( 0, $another_brand->parent, 'Another Brand should be a top-level term' );
 	}
 
 	/**

@@ -17,6 +17,8 @@ class WC_Tests_Notes_Run_Db_Update extends WC_Unit_Test_Case {
 	 *
 	 */
 	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+
 		include_once WC_Unit_Tests_Bootstrap::instance()->plugin_dir . '/includes/admin/wc-admin-functions.php';
 		include_once WC_Unit_Tests_Bootstrap::instance()->plugin_dir . '/includes/admin/notes/class-wc-notes-run-db-update.php';
 
@@ -26,6 +28,8 @@ class WC_Tests_Notes_Run_Db_Update extends WC_Unit_Test_Case {
 	 * Clean up before each test.
 	 */
 	public function setUp(): void {
+		parent::setUp();
+
 		if ( ! WC()->is_wc_admin_active() ) {
 			$this->markTestSkipped( 'WC Admin is not active on WP versions < 5.3' );
 			return;
@@ -110,7 +114,8 @@ class WC_Tests_Notes_Run_Db_Update extends WC_Unit_Test_Case {
 	 * No note should be created/exist if db version is equal to WC code version.
 	 */
 	public function test_noop_db_update_note() {
-		update_option( 'woocommerce_db_version', WC()->version );
+		// Set the db version to the latest.
+		\WC_Install::update_db_version();
 
 		// No notes initially.
 		$this->assertEquals( 0, count( self::get_db_update_notes() ), 'There should be no db update notes initially.' );
@@ -138,7 +143,7 @@ class WC_Tests_Notes_Run_Db_Update extends WC_Unit_Test_Case {
 		$this->assertEquals( 1, count( self::get_db_update_notes() ), 'A db update note should be created if db is NOT up to date.' );
 
 		// Update the db option back.
-		update_option( 'woocommerce_db_version', WC()->version );
+		\WC_Install::update_db_version();
 	}
 
 	/**
@@ -158,6 +163,46 @@ class WC_Tests_Notes_Run_Db_Update extends WC_Unit_Test_Case {
 		// Only one notice should remain, in case 2 were created under some weird circumstances.
 		$this->assertEquals( 1, count( self::get_db_update_notes() ), 'A db update note should be created if db is NOT up to date.' );
 
+	}
+
+	/**
+	 * @testdox Soft-deleted db update note should reappear when a new update is needed.
+	 */
+	public function test_soft_deleted_note_reappears_on_new_update() {
+		// Make it appear as if db version is lower than WC version, i.e. db update is required.
+		update_option( 'woocommerce_db_version', '3.9.0' );
+
+		// The legacy 'update' notice must be present for maybe_update_notice() to proceed.
+		\WC_Admin_Notices::add_notice( 'update' );
+
+		WC_Notes_Run_Db_Update::add_notice();
+
+		$note_ids = self::get_db_update_notes();
+		$this->assertEquals( 1, count( $note_ids ), 'A db update note should be created.' );
+
+		// Soft-delete the note (simulates user clicking X to dismiss).
+		$note = new Note( $note_ids[0] );
+		$note->set_is_deleted( true );
+		$note->save();
+
+		// Verify it's soft-deleted.
+		$note = new Note( $note_ids[0] );
+		$this->assertTrue( (bool) $note->get_is_deleted(), 'Note should be soft-deleted.' );
+
+		// Simulate a new update needed by calling add_notice again.
+		WC_Notes_Run_Db_Update::add_notice();
+
+		// Verify the note is no longer soft-deleted.
+		$note = new Note( $note_ids[0] );
+		$this->assertFalse( (bool) $note->get_is_deleted(), 'Soft-deleted note should be un-deleted when a new update is needed.' );
+		$this->assertEquals( Note::E_WC_ADMIN_NOTE_UNACTIONED, $note->get_status(), 'Note should be set back to unactioned.' );
+
+		$actions = $note->get_actions();
+		$this->assertEquals( 'update-db_run', $actions[0]->name, 'Note should show the update database action.' );
+
+		// Clean up.
+		\WC_Install::update_db_version();
+		\WC_Admin_Notices::remove_notice( 'update' );
 	}
 
 	/**
@@ -182,7 +227,7 @@ class WC_Tests_Notes_Run_Db_Update extends WC_Unit_Test_Case {
 		$this->assertEquals( 'update-db_run', $actions[0]->name, 'A db update note to update the database should be displayed now.' );
 
 		// Simulate database update has been performed.
-		update_option( 'woocommerce_db_version', WC()->version );
+		\WC_Install::update_db_version();
 
 		// Magic 2: update-db note to thank you note.
 		WC_Notes_Run_Db_Update::show_reminder();

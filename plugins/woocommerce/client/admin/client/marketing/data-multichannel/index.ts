@@ -15,7 +15,7 @@ import * as actions from './actions';
 import * as selectors from './selectors';
 import * as resolvers from './resolvers';
 
-const store = createReduxStore( STORE_KEY, {
+export const store = createReduxStore( STORE_KEY, {
 	reducer: reducer as Reducer< State, AnyAction >,
 	actions,
 	selectors,
@@ -24,3 +24,9 @@ const store = createReduxStore( STORE_KEY, {
 } );
 
 register( store );
+
+declare module '@wordpress/data' {
+	interface StoreRegistry {
+		[ STORE_KEY ]: typeof store;
+	}
+}

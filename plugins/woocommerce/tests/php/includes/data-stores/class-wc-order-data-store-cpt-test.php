@@ -3,18 +3,38 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 
 //phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Legacy class name.
 /**
  * Class WC_Order_Data_Store_CPT_Test.
+ *
+ * @group order-query-tests
  */
 class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
+	use CogsAwareUnitTestSuiteTrait;
+
 	/**
-	 * Store the COT state before the test.
+	 * Store the COT state before the test class.
 	 *
 	 * @var bool
 	 */
-	private $prev_cot_state;
+	private static $previous_cot_state;
+
+	/**
+	 * Use the CPT order data store for every test in this class.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::$previous_cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		OrderHelper::toggle_cot_feature_and_usage( false );
+	}
+
+	/**
+	 * Restore the order data store used before this class.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		OrderHelper::toggle_cot_feature_and_usage( self::$previous_cot_state );
+	}
 
 	/**
 	 * Store the COT state before the test.
@@ -23,8 +43,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->prev_cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
-		OrderHelper::toggle_cot_feature_and_usage( false );
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 	}
 
@@ -34,8 +52,8 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function tearDown(): void {
-		OrderHelper::toggle_cot_feature_and_usage( $this->prev_cot_state );
 		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
+		$this->disable_cogs_feature();
 		parent::tearDown();
 	}
 
@@ -63,16 +81,16 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			)
 		)[0];
 
-		$refund_cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $order->get_id();
-		$cached_refunds   = wp_cache_get( $refund_cache_key, 'orders' );
+		$refund_cache_key  = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refund_ids' . $order->get_id();
+		$cached_refund_ids = wp_cache_get( $refund_cache_key, 'orders' );
 
-		$this->assertEquals( $cached_refunds[0]->get_id(), $fetched_order->get_refunds()[0]->get_id() );
+		$this->assertEquals( $cached_refund_ids[0], $fetched_order->get_refunds()[0]->get_id() );
 
 		$refund->delete( true );
 
 		// Cache should be cleared now.
-		$cached_refunds = wp_cache_get( $refund_cache_key, 'orders' );
-		$this->assertEquals( false, $cached_refunds );
+		$cached_refund_ids = wp_cache_get( $refund_cache_key, 'orders' );
+		$this->assertEquals( false, $cached_refund_ids );
 	}
 
 	/**
@@ -295,6 +313,161 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$order = wc_get_order( $order_id );
 		$this->assertTrue( $order->untrash(), 'The order was restored from the trash.' );
 		$this->assertEquals( $original_status, $order->get_status(), 'The original order status is restored following untrash.' );
+	}
+
+	/**
+	 * @testdox Restoring a CPT order from trash does not re-fire transactional email dispatch, but still fires the status transition actions.
+	 */
+	public function test_untrash_suspends_email_dispatch_but_keeps_status_actions(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$order->delete();
+		$this->assertEquals( OrderStatus::TRASH, $order->get_status(), 'The order was successfully trashed.' );
+
+		$status_action_count       = 0;
+		$status_notification_count = 0;
+		$status_action             = function ( $id ) use ( $order_id, &$status_action_count ) {
+			if ( $order_id === $id ) {
+				++$status_action_count;
+			}
+		};
+		$notification_action       = function ( $id ) use ( $order_id, &$status_notification_count ) {
+			if ( $order_id === $id ) {
+				++$status_notification_count;
+			}
+		};
+
+		add_action( 'woocommerce_order_status_completed', $status_action );
+		add_action( 'woocommerce_order_status_completed_notification', $notification_action );
+
+		try {
+			$order = wc_get_order( $order_id );
+			$this->assertTrue( $order->untrash(), 'The order was restored from the trash.' );
+		} finally {
+			remove_action( 'woocommerce_order_status_completed', $status_action );
+			remove_action( 'woocommerce_order_status_completed_notification', $notification_action );
+		}
+
+		$this->assertEquals( OrderStatus::COMPLETED, $order->get_status() );
+		// The status transition action still fires so 3rd-party integrations keep working.
+		$this->assertSame( 1, $status_action_count );
+		// The _notification action (which transactional emails listen to) must NOT fire on restore.
+		$this->assertSame( 0, $status_notification_count );
+	}
+
+	/**
+	 * @testdox Restoring an order only suppresses transactional email dispatch for the restored order.
+	 */
+	public function test_untrash_does_not_suppress_email_dispatch_for_other_orders(): void {
+		$restored_order = WC_Helper_Order::create_order();
+		$restored_order->set_status( OrderStatus::COMPLETED );
+		$restored_order->save();
+		$restored_order_id = $restored_order->get_id();
+
+		$other_order = WC_Helper_Order::create_order();
+		$other_order->set_status( OrderStatus::PENDING );
+		$other_order->save();
+		$other_order_id = $other_order->get_id();
+
+		$restored_order->delete();
+		$this->assertEquals( OrderStatus::TRASH, $restored_order->get_status(), 'The restored order was successfully trashed.' );
+
+		$restored_order_notification_count = 0;
+		$other_order_notification_count    = 0;
+		$other_order_status_change_count   = 0;
+		$status_action                     = function ( $order_id ) use ( $restored_order_id, $other_order, &$other_order_status_change_count ) {
+			if ( $restored_order_id !== $order_id ) {
+				return;
+			}
+
+			$other_order->set_status( OrderStatus::COMPLETED );
+			$other_order->save();
+			++$other_order_status_change_count;
+		};
+		$notification_action               = function ( $order_id ) use ( $restored_order_id, $other_order_id, &$restored_order_notification_count, &$other_order_notification_count ) {
+			if ( $restored_order_id === $order_id ) {
+				++$restored_order_notification_count;
+			}
+			if ( $other_order_id === $order_id ) {
+				++$other_order_notification_count;
+			}
+		};
+
+		add_action( 'woocommerce_order_status_completed', $status_action );
+		add_action( 'woocommerce_order_status_completed_notification', $notification_action );
+
+		try {
+			$restored_order = wc_get_order( $restored_order_id );
+			$this->assertTrue( $restored_order->untrash(), 'The order was restored from the trash.' );
+		} finally {
+			remove_action( 'woocommerce_order_status_completed', $status_action );
+			remove_action( 'woocommerce_order_status_completed_notification', $notification_action );
+		}
+
+		$this->assertSame( 1, $other_order_status_change_count );
+		$this->assertSame( 0, $restored_order_notification_count );
+		$this->assertSame( 1, $other_order_notification_count );
+	}
+
+	/**
+	 * No-op listener used as a stable, uniquely-identified probe by
+	 * {@see test_untrash_preserves_email_hook_callback_order()}.
+	 *
+	 * @return void
+	 */
+	public static function untrash_email_hook_order_probe(): void {}
+
+	/**
+	 * @testdox Restoring an order keeps the WC_Emails dispatch listener in its original hook slot rather than removing and re-adding it.
+	 */
+	public function test_untrash_preserves_email_hook_callback_order(): void {
+		global $wp_filter;
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$order_id = $order->get_id();
+		$order->delete();
+
+		// Register a 3rd-party listener after WC_Emails dispatch, at the same priority. A
+		// uniquely-named static method is used so its hook ID is a stable string that nothing
+		// else collides with.
+		$probe = array( self::class, 'untrash_email_hook_order_probe' );
+		add_action( 'woocommerce_order_status_completed', $probe, 10 );
+
+		// Capture the priority 10 listener order at the moment the restore transition fires.
+		// A remove/re-add suspension would leave WC_Emails dispatch absent here (it would be
+		// removed before save() and only re-added afterwards); the in-place wrapper keeps
+		// it registered in its original slot, ahead of the 3rd-party listener.
+		$keys_during = array();
+		$recorder    = function () use ( &$wp_filter, &$keys_during ) {
+			$keys_during = array_keys( $wp_filter['woocommerce_order_status_completed']->callbacks[10] );
+		};
+		add_action( 'woocommerce_order_status_completed', $recorder, 99 );
+
+		try {
+			$order = wc_get_order( $order_id );
+			$this->assertTrue( $order->untrash(), 'The order was restored from the trash.' );
+		} finally {
+			remove_action( 'woocommerce_order_status_completed', $probe, 10 );
+			remove_action( 'woocommerce_order_status_completed', $recorder, 99 );
+		}
+
+		$pos_dispatch = false;
+		foreach ( array( 'WC_Emails::send_transactional_email', 'WC_Emails::queue_transactional_email' ) as $dispatch_key ) {
+			$pos_dispatch = array_search( $dispatch_key, $keys_during, true );
+			if ( false !== $pos_dispatch ) {
+				break;
+			}
+		}
+		$pos_listener = array_search( self::class . '::untrash_email_hook_order_probe', $keys_during, true );
+
+		$this->assertNotFalse( $pos_dispatch, 'WC_Emails dispatch callback stays registered during the restore transition.' );
+		$this->assertNotFalse( $pos_listener, 'The 3rd-party listener stays registered during the restore transition.' );
+		$this->assertLessThan( $pos_listener, $pos_dispatch, 'WC_Emails dispatch keeps its original position ahead of a later listener.' );
 	}
 
 	/**
@@ -536,5 +709,827 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertEquals( 1, $new_count );
 
 		remove_action( 'woocommerce_new_order', $callback );
+	}
+
+	/**
+	 * Test total filtering with operators works as expected for CPT storage.
+	 */
+	public function test_total_filtering_with_operators() {
+		$order_totals_to_test = array( 5, 10, 50, 100.00, 100.00, 250.50, 250.50, 500.75, 1000.00 );
+		foreach ( $order_totals_to_test as $order_total ) {
+			$order = wc_create_order();
+			$order->set_total( $order_total );
+			$order->save();
+		}
+
+		$test_matrix = array(
+			array(
+				'value'          => 250.50,
+				'operator'       => '=',
+				'expected_count' => 2,
+			),
+			array(
+				'value'          => 250.50,
+				'operator'       => '!=',
+				'expected_count' => 7,
+			),
+			array(
+				'value'          => 250.50,
+				'operator'       => '>',
+				'expected_count' => 2,
+			),
+			array(
+				'value'          => 250.50,
+				'operator'       => '>=',
+				'expected_count' => 4,
+			),
+			array(
+				'value'          => 250.50,
+				'operator'       => '<',
+				'expected_count' => 5,
+			),
+			array(
+				'value'          => 250.50,
+				'operator'       => '<=',
+				'expected_count' => 7,
+			),
+			array(
+				'value'          => array( 100, 500 ),
+				'operator'       => 'BETWEEN',
+				'expected_count' => 4,
+			),
+			array(
+				'value'          => array( 100, 500 ),
+				'operator'       => 'NOT BETWEEN',
+				'expected_count' => 5,
+			),
+		);
+
+		foreach ( $test_matrix as $test ) {
+			$orders = wc_get_orders(
+				array(
+					'total' => array(
+						'value'    => $test['value'],
+						'operator' => $test['operator'],
+					),
+				)
+			);
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
+			$this->assertCount( $test['expected_count'], $orders, print_r( $test, true ) );
+		}
+	}
+
+	/**
+	 * Test that order props saved by data stores are read correctly.
+	 */
+	public function test_reading_order_basic_props() {
+		$order = WC_Helper_Order::create_order();
+		$order->set_currency( 'EUR' );
+		$order->set_discount_tax( 2 );
+		$order->set_discount_total( 3 );
+		$order->set_shipping_total( 4 );
+		$order->set_shipping_tax( 5 );
+		$order->set_cart_tax( 6 );
+		$order->set_total( 100 );
+		$order->set_prices_include_tax( true );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$read_order = wc_get_order( $order_id );
+
+		$this->assertEquals( 'EUR', $read_order->get_currency() );
+		$this->assertEquals( 2, $read_order->get_discount_tax() );
+		$this->assertEquals( 3, $read_order->get_discount_total() );
+		$this->assertEquals( 4, $read_order->get_shipping_total() );
+		$this->assertEquals( 5, $read_order->get_shipping_tax() );
+		$this->assertEquals( 6, $read_order->get_cart_tax() );
+		$this->assertEquals( 100, $read_order->get_total() );
+		$this->assertEquals( WC_VERSION, $read_order->get_version() );
+		$this->assertTrue( $read_order->get_prices_include_tax() );
+	}
+
+	/**
+	 * Test that order props saved by data stores are read correctly.
+	 */
+	public function test_reading_complete_order_data() {
+		$order = WC_Helper_Order::create_order();
+		$order->set_order_key( 'wc_order_test_key_123' );
+		$order->set_customer_id( 1 );
+
+		$order->set_billing_first_name( 'John' );
+		$order->set_billing_last_name( 'Doe' );
+		$order->set_billing_company( 'Acme Inc' );
+		$order->set_billing_address_1( '123 Main St' );
+		$order->set_billing_address_2( 'Apt 4B' );
+		$order->set_billing_city( 'New York' );
+		$order->set_billing_state( 'NY' );
+		$order->set_billing_postcode( '10001' );
+		$order->set_billing_country( 'US' );
+		$order->set_billing_email( 'john@example.com' );
+		$order->set_billing_phone( '555-1234' );
+
+		$order->set_shipping_first_name( 'Jane' );
+		$order->set_shipping_last_name( 'Smith' );
+		$order->set_shipping_company( 'Tech Corp' );
+		$order->set_shipping_address_1( '456 Oak Ave' );
+		$order->set_shipping_address_2( 'Suite 200' );
+		$order->set_shipping_city( 'Boston' );
+		$order->set_shipping_state( 'MA' );
+		$order->set_shipping_postcode( '02101' );
+		$order->set_shipping_country( 'US' );
+		$order->set_shipping_phone( '555-5678' );
+
+		$order->set_payment_method( 'stripe' );
+		$order->set_payment_method_title( 'Credit Card (Stripe)' );
+		$order->set_transaction_id( 'txn_abc123def456' );
+
+		$order->set_customer_ip_address( '192.168.1.1' );
+		$order->set_customer_user_agent( 'Mozilla/5.0' );
+		$order->set_created_via( 'checkout' );
+
+		$date_completed = '2024-01-15 10:30:00';
+		$date_paid      = '2024-01-15 10:25:00';
+		$order->set_date_completed( $date_completed );
+		$order->set_date_paid( $date_paid );
+
+		$order->set_cart_hash( 'cart_hash_xyz789' );
+
+		$order->set_customer_note( 'Please ring doorbell twice' );
+
+		$order->set_download_permissions_granted( true );
+
+		$order->save();
+		$order_id = $order->get_id();
+
+		$read_order = wc_get_order( $order_id );
+
+		$this->assertEquals( 'wc_order_test_key_123', $read_order->get_order_key() );
+		$this->assertEquals( 1, $read_order->get_customer_id() );
+
+		$this->assertEquals( 'John', $read_order->get_billing_first_name() );
+		$this->assertEquals( 'Doe', $read_order->get_billing_last_name() );
+		$this->assertEquals( 'Acme Inc', $read_order->get_billing_company() );
+		$this->assertEquals( '123 Main St', $read_order->get_billing_address_1() );
+		$this->assertEquals( 'Apt 4B', $read_order->get_billing_address_2() );
+		$this->assertEquals( 'New York', $read_order->get_billing_city() );
+		$this->assertEquals( 'NY', $read_order->get_billing_state() );
+		$this->assertEquals( '10001', $read_order->get_billing_postcode() );
+		$this->assertEquals( 'US', $read_order->get_billing_country() );
+		$this->assertEquals( 'john@example.com', $read_order->get_billing_email() );
+		$this->assertEquals( '555-1234', $read_order->get_billing_phone() );
+
+		$this->assertEquals( 'Jane', $read_order->get_shipping_first_name() );
+		$this->assertEquals( 'Smith', $read_order->get_shipping_last_name() );
+		$this->assertEquals( 'Tech Corp', $read_order->get_shipping_company() );
+		$this->assertEquals( '456 Oak Ave', $read_order->get_shipping_address_1() );
+		$this->assertEquals( 'Suite 200', $read_order->get_shipping_address_2() );
+		$this->assertEquals( 'Boston', $read_order->get_shipping_city() );
+		$this->assertEquals( 'MA', $read_order->get_shipping_state() );
+		$this->assertEquals( '02101', $read_order->get_shipping_postcode() );
+		$this->assertEquals( 'US', $read_order->get_shipping_country() );
+		$this->assertEquals( '555-5678', $read_order->get_shipping_phone() );
+
+		$this->assertEquals( 'stripe', $read_order->get_payment_method() );
+		$this->assertEquals( 'Credit Card (Stripe)', $read_order->get_payment_method_title() );
+		$this->assertEquals( 'txn_abc123def456', $read_order->get_transaction_id() );
+
+		$this->assertEquals( '192.168.1.1', $read_order->get_customer_ip_address() );
+		$this->assertEquals( 'Mozilla/5.0', $read_order->get_customer_user_agent() );
+		$this->assertEquals( 'checkout', $read_order->get_created_via() );
+
+		$this->assertEquals( $date_completed, $read_order->get_date_completed()->date( 'Y-m-d H:i:s' ) );
+		$this->assertEquals( $date_paid, $read_order->get_date_paid()->date( 'Y-m-d H:i:s' ) );
+
+		$this->assertEquals( 'cart_hash_xyz789', $read_order->get_cart_hash() );
+
+		$this->assertEquals( 'Please ring doorbell twice', $read_order->get_customer_note() );
+
+		$this->assertTrue( $read_order->get_download_permissions_granted() );
+	}
+
+	/**
+	 * Test reading refund data.
+	 */
+	public function test_reading_refund_data() {
+		$order = WC_Helper_Order::create_order();
+		$order->save();
+
+		$refund = new WC_Order_Refund();
+		$refund->set_parent_id( $order->get_id() );
+		$refund->set_amount( 50.00 );
+		$refund->set_refunded_by( 8 );
+		$refund->set_refunded_payment( true );
+		$refund->set_reason( 'Customer requested refund' );
+		$refund->save();
+
+		$read_refund = wc_get_order( $refund->get_id() );
+
+		$this->assertEquals( 50.00, $read_refund->get_amount() );
+		$this->assertEquals( 8, $read_refund->get_refunded_by() );
+		$this->assertTrue( $read_refund->get_refunded_payment() );
+		$this->assertEquals( 'Customer requested refund', $read_refund->get_reason() );
+	}
+
+	/**
+	 * Test orderby total functionality works as expected for CPT storage.
+	 */
+	public function test_orderby_total() {
+		// Create orders with different totals.
+		$order_totals = array( 100.00, 50.00, 250.50, 75.25, 500.00 );
+		$orders       = array();
+		foreach ( $order_totals as $order_total ) {
+			$order = OrderHelper::create_order();
+			$order->set_total( $order_total );
+			$order->save();
+			$orders[] = $order;
+		}
+
+		// Test ascending order.
+		$orders_asc = wc_get_orders(
+			array(
+				'orderby' => 'total',
+				'order'   => 'asc',
+				'return'  => 'ids',
+			)
+		);
+
+		$this->assertCount( 5, $orders_asc );
+
+		// Verify ascending order by checking totals.
+		$totals_asc = array();
+		foreach ( $orders_asc as $order_id ) {
+			$order        = wc_get_order( $order_id );
+			$totals_asc[] = $order->get_total();
+		}
+
+		$expected_totals_asc = array( 50.00, 75.25, 100.00, 250.50, 500.00 );
+		$this->assertEquals( $expected_totals_asc, $totals_asc, 'Orders should be sorted by total in ascending order' );
+
+		// Test descending order.
+		$orders_desc = wc_get_orders(
+			array(
+				'orderby' => 'total',
+				'order'   => 'desc',
+				'return'  => 'ids',
+			)
+		);
+
+		$this->assertCount( 5, $orders_desc );
+
+		// Verify descending order by checking totals.
+		$totals_desc = array();
+		foreach ( $orders_desc as $order_id ) {
+			$order         = wc_get_order( $order_id );
+			$totals_desc[] = $order->get_total();
+		}
+
+		$expected_totals_desc = array( 500.00, 250.50, 100.00, 75.25, 50.00 );
+		$this->assertEquals( $expected_totals_desc, $totals_desc, 'Orders should be sorted by total in descending order' );
+
+		// Clean up.
+		foreach ( $orders as $order ) {
+			$order->delete( true );
+		}
+	}
+
+	/**
+	 * Helper method to add a product with COGS value to an order.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param float    $cogs_value COGS value for the product.
+	 * @param int      $quantity Quantity of the product.
+	 */
+	private function add_product_with_cogs_to_order( WC_Order $order, float $cogs_value, int $quantity ) {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_cogs_value( $cogs_value );
+		$product->save();
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $product );
+		$item->set_quantity( $quantity );
+		$item->save();
+		$order->add_item( $item );
+	}
+
+	/**
+	 * Helper method to create a test data store with protected methods exposed as public.
+	 *
+	 * @return WC_Order_Data_Store_CPT Data store with public method overrides.
+	 */
+	private function get_test_data_store() {
+		// phpcs:disable Squiz.Commenting, Generic.CodeAnalysis.UselessOverridingMethod
+		return new class() extends WC_Order_Data_Store_CPT {
+			public function get_internal_meta_keys() {
+				return $this->internal_meta_keys;
+			}
+
+			public function update_order_meta_from_object( $order ) {
+				parent::update_order_meta_from_object( $order );
+			}
+		};
+		// phpcs:enable Squiz.Commenting, Generic.CodeAnalysis.UselessOverridingMethod
+	}
+
+	/**
+	 * @testDox Saving an order does not persist its Cost of Goods Sold total value if the feature is disabled.
+	 */
+	public function test_saving_order_does_not_save_cogs_value_if_cogs_disabled() {
+		$this->expect_doing_it_wrong_cogs_disabled( 'WC_Abstract_Order::set_cogs_total_value' );
+
+		$order = new WC_Order();
+		$order->set_cogs_total_value( 12.34 );
+		$order->save();
+
+		$this->assertFalse( metadata_exists( 'post', $order->get_id(), '_cogs_total_value' ) );
+	}
+
+	/**
+	 * @testDox Saving an order does not persist its Cost of Goods Sold total value if the feature is enabled but the order doesn't manage it.
+	 */
+	public function test_saving_order_does_not_save_cogs_value_if_order_has_no_cogs() {
+		$this->enable_cogs_feature();
+
+		// phpcs:disable Squiz.Commenting
+		$order = new class() extends WC_Order {
+			public function has_cogs(): bool {
+				return false;
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+		$order->set_cogs_total_value( 12.34 );
+		$order->save();
+
+		$this->assertFalse( metadata_exists( 'post', $order->get_id(), '_cogs_total_value' ) );
+	}
+
+	/**
+	 * @testDox Saving an order persists its Cost of Goods Sold total value if the feature is enabled and the order manages it.
+	 */
+	public function test_saving_order_saves_cogs_value_if_not_zero_and_cogs_enabled() {
+		$this->enable_cogs_feature();
+
+		$order = new WC_Order();
+		$order->set_cogs_total_value( 12.34 );
+		$order->save();
+
+		$this->assertEquals( 12.34, (float) get_post_meta( $order->get_id(), '_cogs_total_value', true ) );
+
+		$order->set_cogs_total_value( 56.78 );
+		$order->save();
+
+		$this->assertEquals( 56.78, (float) get_post_meta( $order->get_id(), '_cogs_total_value', true ) );
+
+		$order->set_cogs_total_value( 0 );
+		$order->save();
+
+		$this->assertFalse( metadata_exists( 'post', $order->get_id(), '_cogs_total_value' ) );
+	}
+
+	/**
+	 * @testDox Loading an order reads its Cost of Goods Sold value from the database if the feature is enabled and the order manages it.
+	 *
+	 * @testWith [true, false]
+	 *           [false, true]
+	 *           [true, true]
+	 *           [false, false]
+	 *
+	 * @param bool $cogs_enabled True if the feature is enabled.
+	 * @param bool $order_has_cogs True if the order manages COGS.
+	 */
+	public function test_loading_order_loads_cogs_value_if_cogs_enabled( bool $cogs_enabled, bool $order_has_cogs ) {
+		if ( $cogs_enabled ) {
+			$this->enable_cogs_feature();
+		} elseif ( $order_has_cogs ) {
+			$this->expect_doing_it_wrong_cogs_disabled( 'WC_Abstract_Order::get_cogs_total_value' );
+		}
+
+		$order = new WC_Order();
+		$order->save();
+
+		$saved_meta = get_post_meta( $order->get_id(), '_cogs_total_value', true );
+		if ( $saved_meta ) {
+			delete_post_meta( $order->get_id(), '_cogs_total_value' );
+		}
+
+		update_post_meta( $order->get_id(), '_cogs_total_value', '12.34' );
+
+		if ( $order_has_cogs ) {
+			$order2 = wc_get_order( $order->get_id() );
+		} else {
+			// phpcs:disable Squiz.Commenting
+			$order2 = new class($order->get_id()) extends WC_Order {
+				public function has_cogs(): bool {
+					return false;
+				}
+			};
+			// phpcs:enable Squiz.Commenting
+		}
+		$this->assertEquals( ( $cogs_enabled && $order_has_cogs ) ? 12.34 : 0, $order2->get_cogs_total_value() );
+	}
+
+	/**
+	 * @testDox It's possible to modify the Cost of Goods Sold value that gets loaded from the database for an order using the 'woocommerce_load_order_cogs_value' filter.
+	 */
+	public function test_loaded_cogs_value_can_be_modified_via_filter() {
+		$received_filter_cogs_value = null;
+		$received_filter_item       = null;
+
+		$this->enable_cogs_feature();
+
+		$order = new WC_Order();
+		$order->set_cogs_total_value( 12.34 );
+		$order->save();
+
+		add_filter(
+			'woocommerce_load_order_cogs_value',
+			function ( $cogs_value, $item ) use ( &$received_filter_cogs_value, &$received_filter_item ) {
+				$received_filter_cogs_value = $cogs_value;
+				$received_filter_item       = $item;
+				return 56.78;
+			},
+			10,
+			2
+		);
+
+		$order2 = wc_get_order( $order->get_id() );
+
+		$this->assertEquals( 12.34, $received_filter_cogs_value );
+		$this->assertSame( $order2, $received_filter_item );
+		$this->assertEquals( 56.78, $order2->get_cogs_total_value() );
+	}
+
+	/**
+	 * @testDox It's possible to modify the Cost of Goods Sold value that gets persisted for an order using the 'woocommerce_save_order_cogs_value' filter, returning null suppresses the saving.
+	 *
+	 * @testWith [56.78, "56.78"]
+	 *           [null, "12.34"]
+	 *
+	 * @param mixed  $filter_return_value The value that the filter will return.
+	 * @param string $expected_saved_value The value that is expected to be persisted after the save attempt.
+	 */
+	public function test_saved_cogs_value_can_be_altered_via_filter_with_null_meaning_dont_save( $filter_return_value, string $expected_saved_value ) {
+		$received_filter_cogs_value = null;
+		$received_filter_item       = null;
+
+		$this->enable_cogs_feature();
+
+		$order = new WC_Order();
+		$order->set_cogs_total_value( 12.34 );
+		$order->save();
+
+		add_filter(
+			'woocommerce_save_order_cogs_value',
+			function ( $cogs_value, $item ) use ( &$received_filter_cogs_value, &$received_filter_item, $filter_return_value ) {
+				$received_filter_cogs_value = $cogs_value;
+				$received_filter_item       = $item;
+				return $filter_return_value;
+			},
+			10,
+			2
+		);
+
+		$order->set_cogs_total_value( 56.78 );
+		$order->save();
+
+		$this->assertEquals( 56.78, $received_filter_cogs_value );
+		$this->assertSame( $order, $received_filter_item );
+
+		$this->assertEquals( $expected_saved_value, (float) get_post_meta( $order->get_id(), '_cogs_total_value', true ) );
+	}
+
+	/**
+	 * @testDox COGS total value is correctly calculated and persisted when HPOS is disabled.
+	 */
+	public function test_cogs_total_value_calculated_and_persisted_with_cpt() {
+		$this->enable_cogs_feature();
+
+		$product1_cost  = 12.34;
+		$product1_qty   = 2;
+		$product2_cost  = 5.50;
+		$product2_qty   = 3;
+		$expected_total = ( $product1_cost * $product1_qty ) + ( $product2_cost * $product2_qty );
+
+		$order = new WC_Order();
+		$this->add_product_with_cogs_to_order( $order, $product1_cost, $product1_qty );
+		$this->add_product_with_cogs_to_order( $order, $product2_cost, $product2_qty );
+
+		$order->calculate_cogs_total_value();
+		$order->save();
+
+		// Verify COGS is saved to database.
+		$this->assertEquals( $expected_total, (float) get_post_meta( $order->get_id(), '_cogs_total_value', true ) );
+
+		// Verify COGS is loaded correctly when order is retrieved.
+		$loaded_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( $expected_total, $loaded_order->get_cogs_total_value() );
+	}
+
+	/**
+	 * @testDox COGS total value is zero when order has no items with COGS.
+	 */
+	public function test_cogs_total_value_zero_when_no_cogs_items() {
+		$this->enable_cogs_feature();
+
+		$order = new WC_Order();
+		$order->calculate_cogs_total_value();
+		$order->save();
+
+		// Verify no COGS meta is saved when value is zero.
+		$this->assertFalse( metadata_exists( 'post', $order->get_id(), '_cogs_total_value' ) );
+
+		// Verify COGS value is zero when order is retrieved.
+		$loaded_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 0, $loaded_order->get_cogs_total_value() );
+	}
+
+	/**
+	 * @testDox _cogs_total_value is included in internal meta keys to prevent it from showing as custom field.
+	 */
+	public function test_cogs_total_value_is_internal_meta() {
+		$data_store = $this->get_test_data_store();
+
+		$this->assertContains( '_cogs_total_value', $data_store->get_internal_meta_keys(), 'COGS total value should be in internal meta keys' );
+	}
+
+	/**
+	 * @testDox COGS value is synced via update_order_meta_from_object for compatibility mode.
+	 */
+	public function test_cogs_in_meta_key_to_props_for_sync() {
+		$this->enable_cogs_feature();
+
+		$product_cost  = 10.50;
+		$product_qty   = 2;
+		$initial_cogs  = $product_cost * $product_qty;
+		$modified_cogs = $initial_cogs * 2;
+
+		$order = new WC_Order();
+		$this->add_product_with_cogs_to_order( $order, $product_cost, $product_qty );
+		$order->calculate_cogs_total_value();
+		$order->save();
+
+		$this->assertEquals( $initial_cogs, $order->get_cogs_total_value() );
+		$this->assertEquals( $initial_cogs, (float) get_post_meta( $order->get_id(), '_cogs_total_value', true ) );
+
+		// Reload the order and modify COGS value to simulate HPOS order with different value.
+		$modified_order = wc_get_order( $order->get_id() );
+		$modified_order->set_cogs_total_value( $modified_cogs );
+
+		// Delete the post meta to simulate it not being synced yet.
+		delete_post_meta( $order->get_id(), '_cogs_total_value' );
+		$this->assertFalse( metadata_exists( 'post', $order->get_id(), '_cogs_total_value' ) );
+
+		// Simulate what happens during compatibility mode backfill.
+		$data_store = $this->get_test_data_store();
+
+		// Call update_order_meta_from_object which should sync COGS.
+		$data_store->update_order_meta_from_object( $modified_order );
+
+		// Verify the COGS value was synced to the database.
+		$this->assertEquals( $modified_cogs, (float) get_post_meta( $order->get_id(), '_cogs_total_value', true ) );
+
+		// Reload and verify.
+		$reloaded_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( $modified_cogs, $reloaded_order->get_cogs_total_value() );
+	}
+
+	/**
+	 * @testDox COGS value is synced during backfill via update_order_meta_from_object.
+	 */
+	public function test_cogs_synced_via_update_order_meta_from_object() {
+		$this->enable_cogs_feature();
+
+		$product_cost  = 15.75;
+		$product_qty   = 3;
+		$expected_cogs = $product_cost * $product_qty;
+
+		$order = new WC_Order();
+		$this->add_product_with_cogs_to_order( $order, $product_cost, $product_qty );
+		$order->calculate_cogs_total_value();
+		$order->save();
+
+		$this->assertEquals( $expected_cogs, $order->get_cogs_total_value() );
+
+		// Verify it's in the database.
+		$this->assertEquals( $expected_cogs, (float) get_post_meta( $order->get_id(), '_cogs_total_value', true ) );
+
+		// Delete the COGS meta to simulate it not being synced yet.
+		delete_post_meta( $order->get_id(), '_cogs_total_value' );
+		$this->assertFalse( metadata_exists( 'post', $order->get_id(), '_cogs_total_value' ) );
+
+		// Reload the order to get fresh state.
+		$fresh_order = wc_get_order( $order->get_id() );
+
+		// The fresh order will have 0 COGS since we deleted the meta.
+		// Set it to the expected value to simulate an HPOS order with COGS that needs to be synced.
+		$fresh_order->set_cogs_total_value( $expected_cogs );
+
+		// Create a test data store to access the protected method.
+		$data_store = $this->get_test_data_store();
+
+		// Call update_order_meta_from_object which should sync COGS.
+		$data_store->update_order_meta_from_object( $fresh_order );
+
+		// Verify COGS was synced.
+		$this->assertEquals( $expected_cogs, (float) get_post_meta( $order->get_id(), '_cogs_total_value', true ) );
+	}
+
+	/**
+	 * @testDox Items without saved COGS metadata can calculate COGS from products.
+	 */
+	public function test_items_without_saved_cogs_calculate_from_product() {
+		$this->enable_cogs_feature();
+
+		$product_cost  = 15.00;
+		$product_qty   = 2;
+		$expected_cogs = $product_cost * $product_qty;
+
+		// Create an order with COGS and save it.
+		$order = new WC_Order();
+		$this->add_product_with_cogs_to_order( $order, $product_cost, $product_qty );
+		$order->calculate_totals();
+		$order->save();
+
+		// Get the item and manually delete its _cogs_value metadata to simulate an item without saved COGS.
+		$items = $order->get_items();
+		$item  = reset( $items );
+		delete_metadata( 'order_item', $item->get_id(), '_cogs_value' );
+
+		// Reload the order.
+		$reloaded_order = wc_get_order( $order->get_id() );
+
+		// The item should not have a saved COGS value.
+		$reloaded_items = $reloaded_order->get_items();
+		$reloaded_item  = reset( $reloaded_items );
+
+		// When we call calculate_totals, it should calculate COGS from the product.
+		$reloaded_order->calculate_totals();
+
+		// Verify the COGS was calculated correctly.
+		$this->assertEquals( $expected_cogs, $reloaded_item->get_cogs_value(), 'Item without saved COGS should calculate from product' );
+		$this->assertEquals( $expected_cogs, $reloaded_order->get_cogs_total_value(), 'Order total should reflect calculated item COGS' );
+	}
+
+	/**
+	 * @testDox Refund items always recalculate COGS based on their negative quantity.
+	 */
+	public function test_refund_items_recalculate_cogs() {
+		$this->enable_cogs_feature();
+
+		$product_cost         = 20.00;
+		$product_qty          = 10;
+		$refund_qty           = 3;
+		$expected_order_cogs  = $product_cost * $product_qty;
+		$expected_refund_cogs = -( $product_cost * $refund_qty );
+
+		// Create a product with COGS and price.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( $product_cost );
+		$product->set_cogs_value( $product_cost );
+		$product->save();
+
+		// Create an order with COGS.
+		$order = new WC_Order();
+		$order->add_product( $product, $product_qty );
+		$order->calculate_totals();
+		$order->save();
+
+		$this->assertEquals( $expected_order_cogs, $order->get_cogs_total_value() );
+
+		// Get the order item.
+		$order_items = array_values( $order->get_items( 'line_item' ) );
+		$order_item  = $order_items[0];
+
+		// Create a refund.
+		$refund = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => $product_cost * $refund_qty,
+				'reason'     => 'testing',
+				'line_items' => array(
+					$order_item->get_id() => array(
+						'qty'          => $refund_qty,
+						'refund_total' => $product_cost * $refund_qty,
+					),
+				),
+			)
+		);
+
+		$this->assertNotInstanceOf( 'WP_Error', $refund, 'Refund creation should not return an error' );
+		$refund->save();
+
+		// Verify the refund has the correct COGS (negative value).
+		$this->assertEquals( $expected_refund_cogs, $refund->get_cogs_total_value(), 'Refund should have negative COGS' );
+
+		// Recalculate order totals and verify COGS is adjusted for the refund.
+		$order->calculate_totals();
+		$expected_final_cogs = $expected_order_cogs + $expected_refund_cogs;
+		$this->assertEquals( $expected_final_cogs, $order->get_cogs_total_value(), 'Order COGS should be reduced by refund amount' );
+	}
+
+	/**
+	 * @testdox CPT cache priming populates refund total and tax caches with correct values.
+	 */
+	public function test_prime_caches_for_orders_primes_refund_totals(): void {
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate'          => '20',
+				'tax_rate_name'     => 'tax',
+				'tax_rate_order'    => '1',
+				'tax_rate_shipping' => '1',
+			)
+		);
+
+		$rate = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', array(), 'flat_rate' );
+		$item = new WC_Order_Item_Shipping();
+		$item->set_props(
+			array(
+				'method_title' => $rate->label,
+				'method_id'    => $rate->id,
+				'total'        => wc_format_decimal( $rate->cost ),
+				'taxes'        => $rate->taxes,
+			)
+		);
+
+		$order = WC_Helper_Order::create_order();
+		$order->add_item( $item );
+		$order->calculate_totals();
+		$order->save();
+
+		$product_item_id  = current( $order->get_items() )->get_id();
+		$shipping_item_id = current( $order->get_items( 'shipping' ) )->get_id();
+
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					$product_item_id  => array(
+						'id'           => $product_item_id,
+						'qty'          => 1,
+						'refund_total' => 10,
+						'refund_tax'   => array( 1 => 2 ),
+					),
+					$shipping_item_id => array(
+						'id'           => $shipping_item_id,
+						'qty'          => 1,
+						'refund_total' => 10,
+						'refund_tax'   => array( 1 => 3 ),
+					),
+				),
+			)
+		);
+
+		wp_cache_flush();
+		WC_Cache_Helper::invalidate_cache_group( 'orders' );
+
+		$data_store = WC_Data_Store::load( 'order' );
+		$data_store->prime_caches_for_orders(
+			array( $order->get_id() ),
+			array(
+				'fields'    => 'all',
+				'post_type' => 'shop_order',
+			)
+		);
+
+		$cache_prefix = WC_Cache_Helper::get_cache_prefix( 'orders' );
+		$order_id     = $order->get_id();
+
+		$cached_total_refunded = wp_cache_get( $cache_prefix . 'total_refunded' . $order_id, 'orders' );
+		$cached_tax_refunded   = wp_cache_get( $cache_prefix . 'total_tax_refunded' . $order_id, 'orders' );
+
+		$this->assertNotFalse( $cached_total_refunded, 'Total refunded should be cached after priming' );
+		$this->assertNotFalse( $cached_tax_refunded, 'Total tax refunded should be cached after priming' );
+		$this->assertIsFloat( $cached_total_refunded, 'Cached total refunded should be a float' );
+		$this->assertEquals( 5.0, $cached_tax_refunded, 'Cached tax refunded should equal sum of product tax (2) + shipping tax (3)' );
+	}
+
+	/**
+	 * @testdox CPT cache priming populates order item meta caches so item access does not trigger additional queries.
+	 */
+	public function test_prime_caches_for_orders_primes_item_meta(): void {
+		$order = WC_Helper_Order::create_order();
+
+		wp_cache_flush();
+		WC_Cache_Helper::invalidate_cache_group( 'orders' );
+
+		$data_store = WC_Data_Store::load( 'order' );
+		$data_store->prime_caches_for_orders(
+			array( $order->get_id() ),
+			array(
+				'fields'    => 'all',
+				'post_type' => 'shop_order',
+			)
+		);
+
+		$reloaded_order = wc_get_order( $order->get_id() );
+		$items          = $reloaded_order->get_items();
+
+		$this->assertNotEmpty( $items, 'Order should have line items' );
+
+		foreach ( $items as $item ) {
+			$this->assertGreaterThan( 0, $item->get_product_id(), 'Item should have a product ID from cached meta' );
+		}
 	}
 }

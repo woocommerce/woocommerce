@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { createElement } from '@wordpress/element';
 
 /**
@@ -28,7 +28,7 @@ export const ListItem = ( {
 		<SortableItem
 			{ ...props }
 			index={ index }
-			className={ classnames( 'woocommerce-list-item', className ) }
+			className={ clsx( 'woocommerce-list-item', className ) }
 		>
 			{ isDraggable && <SortableHandle /> }
 			{ children }

@@ -12,6 +12,9 @@ use Automattic\WooCommerce\Internal\Email\EmailFont;
 use Automattic\WooCommerce\Internal\Email\EmailStyleSync;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\WooEmailTemplate;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmails;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncRegistry;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
@@ -84,13 +87,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		$email_improvements_enabled = $this->get_email_improvements_enabled();
 
 		// These defaults should be chosen by the same logic as the other color option properties.
-		list(
-			'base_color_default' => $base_color_default,
-			'bg_color_default' => $bg_color_default,
-			'body_bg_color_default' => $body_bg_color_default,
-			'body_text_color_default' => $body_text_color_default,
-			'footer_text_color_default' => $footer_text_color_default,
-		) = EmailColors::get_default_colors( $email_improvements_enabled );
+		$default_colors = EmailColors::get_default_colors( $email_improvements_enabled );
 
 		if ( $block_email_editor_enabled ) {
 			$email_notifications_field = 'email_notification_block_emails';
@@ -129,14 +126,15 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				),
 
 				array(
-					'title'    => __( '"From" name', 'woocommerce' ),
-					'desc'     => '',
-					'id'       => 'woocommerce_email_from_name',
-					'type'     => 'text',
-					'css'      => 'min-width:400px;',
-					'default'  => esc_attr( get_bloginfo( 'name', 'display' ) ),
-					'autoload' => false,
-					'desc_tip' => true,
+					'title'             => __( '"From" name', 'woocommerce' ),
+					'desc'              => '',
+					'id'                => 'woocommerce_email_from_name',
+					'type'              => 'text',
+					'css'               => 'min-width:400px;',
+					'default'           => esc_attr( get_bloginfo( 'name', 'display' ) ),
+					'autoload'          => false,
+					'desc_tip'          => true,
+					'skip_initial_save' => true,
 				),
 
 				array(
@@ -152,11 +150,54 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					'autoload'          => false,
 					'desc_tip'          => true,
 				),
+			);
+
+		// Add reply-to fields.
+		$settings = array_merge(
+			$settings,
+			array(
+				array(
+					'title'    => __( 'Add "Reply-to" email', 'woocommerce' ),
+					'desc'     => __( 'Add a different email address to receive replies.', 'woocommerce' ),
+					'id'       => 'woocommerce_email_reply_to_enabled',
+					'type'     => 'checkbox',
+					'default'  => 'no',
+					'autoload' => false,
+				),
+
+				array(
+					'title'    => __( '"Reply-to" name', 'woocommerce' ),
+					'desc'     => '',
+					'id'       => 'woocommerce_email_reply_to_name',
+					'type'     => 'text',
+					'css'      => 'min-width:400px;',
+					'default'  => '',
+					'autoload' => false,
+					'desc_tip' => true,
+				),
+
+				array(
+					'title'    => __( '"Reply-to" address', 'woocommerce' ),
+					'desc'     => '',
+					'id'       => 'woocommerce_email_reply_to_address',
+					'type'     => 'email',
+					'css'      => 'min-width:400px;',
+					'default'  => '',
+					'autoload' => false,
+					'desc_tip' => true,
+				),
+			)
+		);
+
+		$settings = array_merge(
+			$settings,
+			array(
 				array(
 					'type' => 'sectionend',
 					'id'   => 'email_options',
 				),
-			);
+			)
+		);
 
 		// If the email editor is enabled the design is handled by the email editor.
 		if ( ! $block_email_editor_enabled ) {
@@ -247,11 +288,11 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					array(
 						'title'    => __( 'Accent', 'woocommerce' ),
 						/* translators: %s: default color */
-						'desc'     => sprintf( __( 'Customize the color of your buttons and links. Default %s.', 'woocommerce' ), '<code>' . $base_color_default . '</code>' ),
+						'desc'     => sprintf( __( 'Customize the color of your buttons and links. Default %s.', 'woocommerce' ), '<code>' . $default_colors['base'] . '</code>' ),
 						'id'       => 'woocommerce_email_base_color',
 						'type'     => 'color',
 						'css'      => 'width:6em;',
-						'default'  => $base_color_default,
+						'default'  => $default_colors['base'],
 						'autoload' => false,
 						'desc_tip' => true,
 					),
@@ -259,11 +300,11 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					array(
 						'title'    => __( 'Email background', 'woocommerce' ),
 						/* translators: %s: default color */
-						'desc'     => sprintf( __( 'Select a color for the background of your emails. Default %s.', 'woocommerce' ), '<code>' . $bg_color_default . '</code>' ),
+						'desc'     => sprintf( __( 'Select a color for the background of your emails. Default %s.', 'woocommerce' ), '<code>' . $default_colors['bg'] . '</code>' ),
 						'id'       => 'woocommerce_email_background_color',
 						'type'     => 'color',
 						'css'      => 'width:6em;',
-						'default'  => $bg_color_default,
+						'default'  => $default_colors['bg'],
 						'autoload' => false,
 						'desc_tip' => true,
 					),
@@ -271,11 +312,11 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					array(
 						'title'    => __( 'Content background', 'woocommerce' ),
 						/* translators: %s: default color */
-						'desc'     => sprintf( __( 'Choose a background color for the content area of your emails. Default %s.', 'woocommerce' ), '<code>' . $body_bg_color_default . '</code>' ),
+						'desc'     => sprintf( __( 'Choose a background color for the content area of your emails. Default %s.', 'woocommerce' ), '<code>' . $default_colors['body_bg'] . '</code>' ),
 						'id'       => 'woocommerce_email_body_background_color',
 						'type'     => 'color',
 						'css'      => 'width:6em;',
-						'default'  => $body_bg_color_default,
+						'default'  => $default_colors['body_bg'],
 						'autoload' => false,
 						'desc_tip' => true,
 					),
@@ -283,11 +324,11 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					array(
 						'title'    => __( 'Heading & text', 'woocommerce' ),
 						/* translators: %s: default color */
-						'desc'     => sprintf( __( 'Set the color of your headings and text. Default %s.', 'woocommerce' ), '<code>' . $body_text_color_default . '</code>' ),
+						'desc'     => sprintf( __( 'Set the color of your headings and text. Default %s.', 'woocommerce' ), '<code>' . $default_colors['body_text'] . '</code>' ),
 						'id'       => 'woocommerce_email_text_color',
 						'type'     => 'color',
 						'css'      => 'width:6em;',
-						'default'  => $body_text_color_default,
+						'default'  => $default_colors['body_text'],
 						'autoload' => false,
 						'desc_tip' => true,
 					),
@@ -295,11 +336,11 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					array(
 						'title'    => __( 'Secondary text', 'woocommerce' ),
 						/* translators: %s: footer default color */
-						'desc'     => sprintf( __( 'Choose a color for your secondary text, such as your footer content. Default %s.', 'woocommerce' ), '<code>' . $footer_text_color_default . '</code>' ),
+						'desc'     => sprintf( __( 'Choose a color for your secondary text, such as your footer content. Default %s.', 'woocommerce' ), '<code>' . $default_colors['footer_text'] . '</code>' ),
 						'id'       => 'woocommerce_email_footer_text_color',
 						'type'     => 'color',
 						'css'      => 'width:6em;',
-						'default'  => $footer_text_color_default,
+						'default'  => $default_colors['footer_text'],
 						'autoload' => false,
 						'desc_tip' => true,
 					),
@@ -332,6 +373,13 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		// Remove empty elements that depend on the email_improvements feature flag.
 		$settings = array_filter( $settings );
 
+		/**
+		 * Filters the email settings array.
+		 *
+		 * @since 2.1.0
+		 *
+		 * @param array $settings Array of email settings.
+		 */
 		return apply_filters( 'woocommerce_email_settings', $settings );
 	}
 
@@ -427,6 +475,13 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				<thead>
 					<tr>
 						<?php
+						/**
+						 * Filters the columns displayed in the email settings table.
+						 *
+						 * @since 2.1.0
+						 *
+						 * @param array $columns Array of column keys and labels.
+						 */
 						$columns = apply_filters(
 							'woocommerce_email_setting_columns',
 							array(
@@ -509,6 +564,13 @@ class WC_Settings_Emails extends WC_Settings_Page {
 										</td>';
 										break;
 									default:
+										/**
+										 * Fires when rendering a custom column in the email settings table.
+										 *
+										 * @since 2.1.0
+										 *
+										 * @param WC_Email $email The email object.
+										 */
 										do_action( 'woocommerce_email_setting_column_' . $key, $email );
 										break;
 								}
@@ -534,21 +596,50 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			'https://wordpress.org/plugins/wp-mail-logging/',
 			'https://woocommerce.com/document/email-faq'
 		);
-		$email_post_manager   = WCTransactionalEmailPostsManager::get_instance();
-		$emails               = WC()->mailer()->get_emails();
-		$email_types          = array();
-		$post_id_for_template = null;
+		$email_post_manager     = WCTransactionalEmailPostsManager::get_instance();
+		$emails                 = WC()->mailer()->get_emails();
+		$email_types            = array();
+		$post_id_for_template   = null;
+		$block_editor_email_ids = WCTransactionalEmails::get_transactional_emails();
 		foreach ( $emails as $email_key => $email ) {
-			$post_id       = $email_post_manager->get_email_template_post_id( $email->id );
+			$post_id     = $email_post_manager->get_email_template_post_id( $email->id );
+			$sync_config = WCEmailTemplateSyncRegistry::get_email_sync_config( $email->id );
+			// `current_version` is the canonical version core ships right now;
+			// the list view's "Review update" cell and RSM-141's editor banner
+			// gate on `merchant_reviewed_version < current_version` so a row
+			// stays customized but stops showing the indicator once the
+			// merchant has reviewed this release.
+			$current_version = is_array( $sync_config ) ? (string) ( $sync_config['version'] ?? '' ) : '';
+
+			// Project the template-sync meta directly onto the slotfill payload
+			// so the RSM-145 `_list_viewed` aggregate event can compute
+			// `eligible_count` immediately on mount without waiting for the
+			// REST enrichment in `useTransactionalEmails` to resolve. REST
+			// enrichment still runs and overrides these values once it lands —
+			// both sources read from the same post meta, so they always agree.
+			$template_status  = $post_id ? (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ) : '';
+			$template_version = $post_id ? (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true ) : '';
+			$was_backfilled   = $post_id ? (bool) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::BACKFILLED_META_KEY, true ) : false;
+
+			$file_template_preview_url = in_array( $email->id, $block_editor_email_ids, true )
+				? wp_nonce_url( admin_url( '?preview_woo_block_email=true&email_id=' . $email->id ), 'preview-woo-block-email' )
+				: null;
+
 			$email_types[] = array(
-				'title'       => $email->get_title(),
-				'description' => $email->get_description(),
-				'id'          => $email->id,
-				'email_key'   => strtolower( $email_key ),
-				'post_id'     => $post_id,
-				'enabled'     => $email->is_enabled(),
-				'manual'      => $email->is_manual(),
-				'recipients'  => array(
+				'title'                     => $email->get_title(),
+				'description'               => $email->get_description(),
+				'id'                        => $email->id,
+				'email_key'                 => strtolower( $email_key ),
+				'email_class_name'          => get_class( $email ),
+				'post_id'                   => $post_id,
+				'file_template_preview_url' => $file_template_preview_url,
+				'enabled'                   => $email->is_enabled(),
+				'manual'                    => $email->is_manual(),
+				'current_version'           => '' !== $current_version ? $current_version : null,
+				'template_status'           => '' !== $template_status ? $template_status : null,
+				'template_version'          => '' !== $template_version ? $template_version : null,
+				'was_backfilled'            => $was_backfilled,
+				'recipients'                => array(
 					'to'  => $email->is_customer_email() ? __( 'Customers', 'woocommerce' ) : $email->get_recipient(),
 					'cc'  => $email->get_cc_recipient(),
 					'bcc' => $email->get_bcc_recipient(),
@@ -560,10 +651,13 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				$post_id_for_template = $post_id;
 			}
 		}
-		// Create URL for email editor template mode.
+		// The email editor's template mode opens through an email post's
+		// editor session, so the URL requires a post ID. When no post exists,
+		// the URL stays null and the client creates a post on demand, building
+		// the URL itself from the template ID passed below.
+		$email_template_id = get_stylesheet() . '//' . WooEmailTemplate::TEMPLATE_SLUG;
 		$edit_template_url = null;
 		if ( $post_id_for_template ) {
-			$email_template_id = get_stylesheet() . '//' . WooEmailTemplate::TEMPLATE_SLUG;
 			$edit_template_url = admin_url( 'post.php?post=' . $post_id_for_template . '&action=edit&template=' . $email_template_id );
 		}
 
@@ -572,6 +666,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			id="wc_settings_email_listing_slotfill" class="wc-settings-prevent-change-event woocommerce-email-listing-listview"
 			data-email-types="<?php echo esc_attr( wp_json_encode( $email_types ) ); ?>"
 			data-edit-template-url="<?php echo esc_attr( $edit_template_url ); ?>"
+			data-email-template-id="<?php echo esc_attr( $email_template_id ); ?>"
 		>
 			<div style="
 			display: flex;
@@ -851,7 +946,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			?>
 			<hr class="wc-settings-email-color-palette-separator" />
 			<a href="?page=wc-settings&tab=email&try-new-templates" class="components-button is-link">
-				<?php esc_html_e( 'Try new email templates!', 'woocommerce' ); ?>
+				<?php esc_html_e( 'Try our new email templates!', 'woocommerce' ); ?>
 			</a>
 			<?php
 			return;
@@ -867,7 +962,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			<hr class="wc-settings-email-color-palette-separator" />
 			<a href="<?php echo esc_url( add_query_arg( $disable_feature_args ) ); ?>"
 				class="components-button is-link"
-				onclick="return confirm('<?php esc_attr_e( 'Would you like to go back to the legacy email templates?', 'woocommerce' ); ?>');"
+				onclick="return confirm('<?php esc_attr_e( 'Are you sure want to revert to legacy? Doing so will erase any changes you’ve made to your new email templates, and will restore your previous email designs.', 'woocommerce' ); ?>');"
 			>
 				<?php esc_html_e( 'Revert to legacy template', 'woocommerce' ); ?>
 			</a>

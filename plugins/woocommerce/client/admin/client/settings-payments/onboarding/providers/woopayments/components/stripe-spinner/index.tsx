@@ -4,17 +4,12 @@
 import React from 'react';
 
 /**
- * Internal dependencies
- */
-import './style.scss';
-
-/**
  * Copy of the Stripe spinner in order to avoid pulling another Stripe dependency.
  */
 const StripeSpinner = () => {
 	return (
 		<svg
-			className="stripe-spinner" // Add a class for targeting in CSS
+			className="stripe-spinner" // Styles for this class are defined in settings-payments-main.scss and launch-your-store/hub/styles.scss.
 			width="29"
 			height="29"
 			viewBox="0 0 29 29"

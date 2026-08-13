@@ -21,6 +21,13 @@ class WC_Admin_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 	protected $endpoint = '/wc-analytics/admin/notes';
 
 	/**
+	 * Note fixture IDs keyed by their fixture number.
+	 *
+	 * @var int[]
+	 */
+	private $note_ids;
+
+	/**
 	 * Setup test admin notes data. Called before every test.
 	 *
 	 * @since 3.5.0
@@ -35,7 +42,7 @@ class WC_Admin_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 		);
 
 		WC_Helper_Admin_Notes::reset_notes_dbs();
-		WC_Helper_Admin_Notes::add_notes_for_tests();
+		$this->note_ids = WC_Helper_Admin_Notes::add_notes_for_tests();
 	}
 
 	/**
@@ -44,6 +51,8 @@ class WC_Admin_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_register_routes() {
+		// This namespace may be lazy loaded, so we make a discovery request to trigger loading for this test.
+		$this->server->dispatch( new WP_REST_Request( 'GET', '/' ) );
 		$routes = $this->server->get_routes();
 
 		$this->assertArrayHasKey( $this->endpoint, $routes );
@@ -57,12 +66,12 @@ class WC_Admin_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 	public function test_get_note() {
 		wp_set_current_user( $this->user );
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint . '/1' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint . '/' . $this->note_ids[1] ) );
 		$note     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 
-		$this->assertEquals( 1, $note['id'] );
+		$this->assertEquals( $this->note_ids[1], $note['id'] );
 		$this->assertEquals( 'PHPUNIT_TEST_NOTE_NAME', $note['name'] );
 		$this->assertEquals( Note::E_WC_ADMIN_NOTE_INFORMATIONAL, $note['type'] );
 		$this->assertArrayHasKey( 'locale', $note );
@@ -102,7 +111,7 @@ class WC_Admin_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 		$note->add_nonce_to_action( 'learn-more', 'foo', 'bar' );
 		$note->save();
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint . '/1' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint . '/' . $note->get_id() ) );
 		$note     = $response->get_data();
 
 		$expected_url = 'https://woocommerce.com/?bar=' . wp_create_nonce( 'foo' );
@@ -125,7 +134,7 @@ class WC_Admin_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 		$note->add_nonce_to_action( 'learn-more', 'foo', 'bar' );
 		$note->save();
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint . '/1' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint . '/' . $note->get_id() ) );
 		$note     = $response->get_data();
 
 		$expected_url = 'https://example.com/?x=1&y=2&bar=' . wp_create_nonce( 'foo' );
@@ -145,7 +154,7 @@ class WC_Admin_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 		// phpcs:ignore WordPress.PHP.IniSet.Risky
 		$log_file = ini_set( 'error_log', '/dev/null' );
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint . '/999' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint . '/' . ( max( $this->note_ids ) + 1 ) ) );
 		$note     = $response->get_data();
 
 		// phpcs:ignore WordPress.PHP.IniSet.Risky
@@ -160,7 +169,7 @@ class WC_Admin_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_note_without_permission() {
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint . '/1' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint . '/' . $this->note_ids[1] ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
 
@@ -170,13 +179,13 @@ class WC_Admin_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 	public function test_update_note() {
 		wp_set_current_user( $this->user );
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint . '/1' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint . '/' . $this->note_ids[1] ) );
 		$note     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'unactioned', $note['status'] );
 
-		$request = new WP_REST_Request( 'PUT', $this->endpoint . '/1' );
+		$request = new WP_REST_Request( 'PUT', $this->endpoint . '/' . $this->note_ids[1] );
 		$request->set_body_params(
 			array(
 				'status' => 'actioned',
@@ -193,7 +202,7 @@ class WC_Admin_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 	 * Test updating a single note without permission. It should fail.
 	 */
 	public function test_update_note_without_permission() {
-		$request = new WP_REST_Request( 'PUT', $this->endpoint . '/1' );
+		$request = new WP_REST_Request( 'PUT', $this->endpoint . '/' . $this->note_ids[1] );
 		$request->set_body_params(
 			array(
 				'status' => 'actioned',
@@ -434,13 +443,13 @@ class WC_Admin_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 	public function test_delete_single_note() {
 		wp_set_current_user( $this->user );
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint . '/3' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint . '/' . $this->note_ids[3] ) );
 		$note     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( false, $note['is_deleted'] );
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'DELETE', $this->endpoint . '/delete/3' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'DELETE', $this->endpoint . '/delete/' . $this->note_ids[3] ) );
 		$note     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -451,7 +460,7 @@ class WC_Admin_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 	 * Test deleting a single note without permission. It should fail.
 	 */
 	public function test_delete_single_note_without_permission() {
-		$response = $this->server->dispatch( new WP_REST_Request( 'DELETE', $this->endpoint . '/delete/3' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'DELETE', $this->endpoint . '/delete/' . $this->note_ids[3] ) );
 		$note     = $response->get_data();
 
 		$this->assertEquals( 401, $response->get_status() );
@@ -463,11 +472,11 @@ class WC_Admin_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 	public function test_undo_single_notes_delete() {
 		wp_set_current_user( $this->user );
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'DELETE', $this->endpoint . '/delete/3' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'DELETE', $this->endpoint . '/delete/' . $this->note_ids[3] ) );
 		$note     = $response->get_data();
 		$this->assertEquals( true, $note['is_deleted'] );
 
-		$request = new WP_REST_Request( 'PUT', $this->endpoint . '/3' );
+		$request = new WP_REST_Request( 'PUT', $this->endpoint . '/' . $this->note_ids[3] );
 		$request->set_body_params(
 			array(
 				'is_deleted' => '0',
@@ -537,8 +546,8 @@ class WC_Admin_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'PUT', $this->endpoint . '/update' );
 		$request->set_body_params(
 			array(
-				'noteIds'    => array( '1', '4' ),
-				'is_deleted' => '1',
+				'noteIds'    => array( (string) $this->note_ids[1], (string) $this->note_ids[4] ),
+				'is_deleted' => '0',
 			)
 		);
 
@@ -547,5 +556,14 @@ class WC_Admin_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 2, count( $notes ) );
+		foreach ( $notes as $note ) {
+			$this->assertFalse( $note['is_deleted'] );
+		}
+
+		foreach ( array( $this->note_ids[1], $this->note_ids[4] ) as $note_id ) {
+			$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint . '/' . $note_id ) );
+			$note     = $response->get_data();
+			$this->assertFalse( $note['is_deleted'] );
+		}
 	}
 }

@@ -6,10 +6,12 @@
  * External dependencies
  */
 import { createRoot } from '@wordpress/element';
+import '@wordpress/theme/design-tokens.css';
 
 /**
  * Internal dependencies
  */
+import './settings-ui.scss';
 import { isFeatureEnabled } from '~/utils/features';
 import {
 	SettingsPaymentsBacsWrapper,
@@ -17,7 +19,7 @@ import {
 	SettingsPaymentsCodWrapper,
 	SettingsPaymentsMainWrapper,
 	SettingsPaymentsOfflineWrapper,
-	SettingsPaymentsWooCommercePaymentsWrapper,
+	SettingsPaymentsWooPaymentsWrapper,
 } from '~/settings-payments';
 
 import { possiblyRenderSettingsSlots } from '~/settings/settings-slots';
@@ -29,14 +31,10 @@ import { registerSettingsEmailColorPaletteFill } from '~/settings-email/settings
 import { registerSettingsEmailImageUrlFill } from '~/settings-email/settings-email-image-url-slotfill';
 import { registerSettingsEmailPreviewFill } from '~/settings-email/settings-email-preview-slotfill';
 import { registerSettingsEmailFeedbackFill } from '~/settings-email/settings-email-feedback-slotfill';
-import { registerSettingsEmailListingFill } from '../../settings-email/settings-email-listing-slotfill';
+import { registerSettingsEmailListingFill } from '~/settings-email/settings-email-listing-slotfill';
+import { registerSettingsUIScreens } from '~/settings/settings-ui-registry';
 
 const renderPaymentsSettings = () => {
-	if ( ! isFeatureEnabled( 'reactify-classic-payments-settings' ) ) {
-		// Render the payment settings components only if the feature flag is enabled.
-		return;
-	}
-
 	const pages = [
 		{
 			id: 'experimental_wc_settings_payments_main',
@@ -60,7 +58,7 @@ const renderPaymentsSettings = () => {
 		},
 		{
 			id: 'experimental_wc_settings_payments_woocommerce_payments',
-			component: <SettingsPaymentsWooCommercePaymentsWrapper />,
+			component: <SettingsPaymentsWooPaymentsWrapper />,
 		},
 	];
 
@@ -68,9 +66,9 @@ const renderPaymentsSettings = () => {
 	pages.forEach( ( { id, component } ) => {
 		const root = document.getElementById( id );
 		if ( root ) {
-			createRoot(
-				root.insertBefore( document.createElement( 'div' ), null )
-			).render( component );
+			const newDiv = document.createElement( 'div' );
+			newDiv.className = 'wc-settings-prevent-change-event';
+			createRoot( root.insertBefore( newDiv, null ) ).render( component );
 		}
 	} );
 };
@@ -81,9 +79,8 @@ const registerSlotFills = () => {
 	registerPaymentsSettingsBannerFill();
 
 	const features = window.wcAdminFeatures;
-	if ( features?.[ 'launch-your-store' ] === true ) {
-		registerSiteVisibilitySlotFill();
-	}
+
+	registerSiteVisibilitySlotFill();
 
 	if ( isFeatureEnabled( 'blueprint' ) ) {
 		registerBlueprintSlotfill();
@@ -91,6 +88,10 @@ const registerSlotFills = () => {
 
 	if ( isFeatureEnabled( 'block_email_editor' ) ) {
 		registerSettingsEmailListingFill();
+	}
+
+	if ( features?.[ 'settings-ui' ] === true ) {
+		registerSettingsUIScreens();
 	}
 
 	registerSettingsEmailColorPaletteFill();

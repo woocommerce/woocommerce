@@ -1,69 +1,29 @@
 /**
  * External dependencies
  */
-import { dispatch, select } from '@wordpress/data';
-import { store as interfaceStore } from '@wordpress/interface';
-import {
-	store as coreStore,
-	store as coreDataStore,
-} from '@wordpress/core-data';
-import { store as preferencesStore } from '@wordpress/preferences';
-import { store as noticesStore } from '@wordpress/notices';
-import { store as editorStore } from '@wordpress/editor';
-import { __, sprintf } from '@wordpress/i18n';
+import { select } from '@wordpress/data';
+import { store as coreDataStore } from '@wordpress/core-data';
 import { apiFetch } from '@wordpress/data-controls';
-import wpApiFetch from '@wordpress/api-fetch';
-import { addQueryArgs } from '@wordpress/url';
-import { decodeEntities } from '@wordpress/html-entities';
-import {
-	// @ts-expect-error No types for __unstableSerializeAndClean
-	__unstableSerializeAndClean,
-	parse,
-} from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
-import {
-	storeName,
-	mainSidebarDocumentTab,
-	editorCurrentPostType,
-} from './constants';
+import { storeName, PERSONALIZATION_TAG_ENTITY } from './constants';
+import { getPersonalizationTagsQuery } from './personalization-tags-query';
 import {
 	SendingPreviewStatus,
 	State,
-	Feature,
-	PersonalizationTag,
+	ContentValidation,
+	EmailEditorSettings,
+	EmailTheme,
+	EmailEditorUrls,
 } from './types';
 import { recordEvent } from '../events';
-
-export const toggleFeature =
-	( feature: Feature ) =>
-	( { registry } ): unknown =>
-		registry.dispatch( preferencesStore ).toggle( storeName, feature );
-
-export const changePreviewDeviceType =
-	( deviceType: string ) =>
-	( { registry } ) =>
-		void registry.dispatch( editorStore ).setDeviceType( deviceType );
 
 export function togglePreviewModal( isOpen: boolean ) {
 	return {
 		type: 'CHANGE_PREVIEW_STATE',
 		state: { isModalOpened: isOpen } as Partial< State[ 'preview' ] >,
-	} as const;
-}
-
-export function togglePersonalizationTagsModal(
-	isOpen: boolean,
-	payload: Partial< State[ 'personalizationTags' ] > = {}
-) {
-	return {
-		type: 'CHANGE_PERSONALIZATION_TAGS_STATE',
-		state: {
-			isModalOpened: isOpen,
-			...payload,
-		} as Partial< State[ 'personalizationTags' ] >,
 	} as const;
 }
 
@@ -74,76 +34,72 @@ export function updateSendPreviewEmail( toEmail: string ) {
 	} as const;
 }
 
-export const openSidebar =
-	( key = mainSidebarDocumentTab ) =>
-	( { registry } ): unknown => {
-		return registry
-			.dispatch( interfaceStore )
-			.enableComplementaryArea( storeName, key );
+export const setEmailPost =
+	( postId: number | string, postType: string ) =>
+	async ( { dispatch } ) => {
+		if ( ! postId || ! postType ) {
+			throw new Error(
+				'setEmailPost requires valid postId and postType parameters'
+			);
+		}
+
+		dispatch( {
+			type: 'SET_EMAIL_POST',
+			state: { postId, postType } as Partial< State >,
+		} );
 	};
 
-export const closeSidebar =
+/**
+ * Invalidates the personalization tags cache to force a refetch.
+ * Call this when the tags need to be refreshed (e.g., after changing automation triggers).
+ */
+export const invalidatePersonalizationTagsCache =
 	() =>
-	( { registry } ): unknown => {
-		return registry
-			.dispatch( interfaceStore )
-			.disableComplementaryArea( storeName );
+	async ( { registry } ) => {
+		// `invalidateResolution` matches resolver arguments structurally, so this
+		// has to be the same query the selector fetched with — hence the shared
+		// builder rather than a second literal.
+		const postId = registry.select( storeName ).getEmailPostId();
+
+		registry
+			.dispatch( coreDataStore )
+			.invalidateResolution( 'getEntityRecords', [
+				PERSONALIZATION_TAG_ENTITY.kind,
+				PERSONALIZATION_TAG_ENTITY.name,
+				getPersonalizationTagsQuery( postId ),
+			] );
 	};
 
-export function toggleSettingsSidebarActiveTab( activeTab: string ) {
+export function setEmailPostType( postType: string ) {
+	if ( ! postType ) {
+		throw new Error(
+			'setEmailPostType requires a valid postType parameter'
+		);
+	}
+
 	return {
-		type: 'TOGGLE_SETTINGS_SIDEBAR_ACTIVE_TAB',
-		state: { activeTab } as Partial< State[ 'settingsSidebar' ] >,
+		type: 'SET_EMAIL_POST',
+		state: { postType } as Partial< State >,
 	} as const;
-}
-
-export function* saveEditedEmail() {
-	const postId = select( storeName ).getEmailPostId();
-	// This returns a promise
-
-	const result = yield dispatch( coreDataStore ).saveEditedEntityRecord(
-		'postType',
-		editorCurrentPostType,
-		postId,
-		{ throwOnError: true }
-	);
-
-	result.then( () => {
-		void dispatch( noticesStore ).createErrorNotice(
-			__( 'Email saved!', 'woocommerce' ),
-			{
-				type: 'snackbar',
-				isDismissible: true,
-				context: 'email-editor',
-			}
-		);
-	} );
-
-	result.catch( () => {
-		void dispatch( noticesStore ).createErrorNotice(
-			__(
-				'The email could not be saved. Please, clear browser cache and reload the page. If the problem persists, duplicate the email and try again.',
-				'woocommerce'
-			),
-			{
-				type: 'default',
-				isDismissible: true,
-				context: 'email-editor',
-			}
-		);
-	} );
 }
 
 export const setTemplateToPost =
 	( templateSlug ) =>
 	async ( { registry } ) => {
 		const postId = registry.select( storeName ).getEmailPostId();
+		const postType = registry.select( storeName ).getEmailPostType();
 		registry
 			.dispatch( coreDataStore )
-			.editEntityRecord( 'postType', editorCurrentPostType, postId, {
+			.editEntityRecord( 'postType', postType, postId, {
 				template: templateSlug,
 			} );
 	};
+
+export function setTemplateSelected() {
+	return {
+		type: 'SET_TEMPLATE_SELECTED',
+	} as const;
+}
 
 export function* requestSendingNewsletterPreview( email: string ) {
 	// If preview is already sending do nothing
@@ -194,95 +150,45 @@ export function* requestSendingNewsletterPreview( email: string ) {
 	}
 }
 
-/**
- * Revert template modifications to defaults
- * Created based on https://github.com/WordPress/gutenberg/blob/4d225cc2ba6f09822227e7a820b8a555be7c4d48/packages/editor/src/store/private-actions.js#L241
- *
- * @param template - Template post object
- */
-export function revertAndSaveTemplate( template ) {
-	return async ( { registry } ) => {
-		try {
-			const templateEntityConfig = registry
-				.select( coreStore )
-				.getEntityConfig( 'postType', template.type as string );
-
-			const fileTemplatePath = addQueryArgs(
-				`${ templateEntityConfig.baseURL as string }/${
-					template.id as string
-				}`,
-				{ context: 'edit', source: 'theme' }
-			);
-
-			const fileTemplate = await wpApiFetch( { path: fileTemplatePath } );
-
-			const serializeBlocks = ( {
-				blocks: blocksForSerialization = [],
-			} ) => __unstableSerializeAndClean( blocksForSerialization );
-
-			// @ts-expect-error template type is not defined
-			const blocks = parse( fileTemplate?.content?.raw as string );
-
-			await registry.dispatch( coreStore ).editEntityRecord(
-				'postType',
-				template.type as string,
-				// @ts-expect-error template type is not defined
-				fileTemplate.id as string,
-				{
-					content: serializeBlocks,
-					blocks,
-					source: 'theme',
-				}
-			);
-			await registry
-				.dispatch( coreStore )
-				.saveEditedEntityRecord(
-					'postType',
-					template.type,
-					template.id,
-					{}
-				);
-			void registry.dispatch( noticesStore ).createSuccessNotice(
-				sprintf(
-					/* translators: The template/part's name. */
-					__( '"%s" reset.', 'woocommerce' ),
-					decodeEntities( template.title )
-				),
-				{
-					type: 'snackbar',
-					id: 'edit-site-template-reverted',
-				}
-			);
-		} catch ( error ) {
-			void registry
-				.dispatch( noticesStore )
-				.createErrorNotice(
-					__(
-						'An error occurred while reverting the template.',
-						'woocommerce'
-					),
-					{
-						type: 'snackbar',
-					}
-				);
-		}
-	};
-}
-
-export function setIsFetchingPersonalizationTags( isFetching: boolean ) {
+export function setContentValidation(
+	validation: ContentValidation | undefined
+) {
 	return {
-		type: 'SET_IS_FETCHING_PERSONALIZATION_TAGS',
-		state: {
-			isFetching,
-		} as Partial< State[ 'personalizationTags' ] >,
+		type: 'SET_CONTENT_VALIDATION',
+		validation,
 	} as const;
 }
 
-export function setPersonalizationTagsList( list: PersonalizationTag[] ) {
+export function setEditorSettings( editorSettings: EmailEditorSettings ) {
 	return {
-		type: 'SET_PERSONALIZATION_TAGS_LIST',
-		state: {
-			list,
-		} as Partial< State[ 'personalizationTags' ] >,
+		type: 'SET_EDITOR_SETTINGS',
+		editorSettings,
+	} as const;
+}
+
+export function setEditorTheme( theme: EmailTheme ) {
+	return {
+		type: 'SET_EDITOR_THEME',
+		theme,
+	} as const;
+}
+
+export function setEditorUrls( urls: EmailEditorUrls ) {
+	return {
+		type: 'SET_EDITOR_URLS',
+		urls,
+	} as const;
+}
+
+export function setEditorConfig( config: {
+	editorSettings: EmailEditorSettings;
+	theme: EmailTheme;
+	urls: EmailEditorUrls;
+	userEmail: string;
+	globalStylesPostId?: number | null;
+} ) {
+	return {
+		type: 'SET_EDITOR_CONFIG',
+		config,
 	} as const;
 }

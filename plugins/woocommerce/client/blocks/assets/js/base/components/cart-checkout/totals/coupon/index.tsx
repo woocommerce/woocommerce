@@ -67,7 +67,7 @@ export const TotalsCoupon = ( {
 	) => {
 		e.preventDefault();
 		if ( typeof onSubmit !== 'undefined' ) {
-			onSubmit( couponValue )?.then( ( result ) => {
+			void onSubmit( couponValue )?.then( ( result ) => {
 				if ( result ) {
 					setCouponValue( '' );
 					setIsCouponFormVisible( false );
@@ -87,7 +87,7 @@ export const TotalsCoupon = ( {
 			initialOpen={ isCouponFormVisible }
 			hasBorder={ false }
 			headingLevel={ 2 }
-			title={ __( 'Add a coupon', 'woocommerce' ) }
+			title={ __( 'Add coupons', 'woocommerce' ) }
 			state={ [ isCouponFormVisible, setIsCouponFormVisible ] }
 		>
 			<LoadingMask

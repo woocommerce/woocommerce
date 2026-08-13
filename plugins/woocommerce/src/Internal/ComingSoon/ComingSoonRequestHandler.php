@@ -1,7 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Internal\ComingSoon;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\BlockTemplatesController;
 use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
 use Automattic\WooCommerce\Blocks\Package as BlocksPackage;
@@ -134,11 +133,6 @@ class ComingSoonRequestHandler {
 			return true;
 		}
 
-		// Early exit if LYS feature is disabled.
-		if ( ! Features::is_enabled( 'launch-your-store' ) ) {
-			return false;
-		}
-
 		// Early exit if the user is logged in as administrator / shop manager.
 		if ( current_user_can( 'manage_woocommerce' ) ) {
 			return false;
@@ -183,17 +177,45 @@ class ComingSoonRequestHandler {
 	}
 
 	/**
-	 * Filters the theme.json data to add the Inter and Cardo fonts when they don't exist.
+	 * Filters the theme.json data to add Coming Soon fonts.
+	 * This runs after child theme merging to ensure parent theme fonts are included.
 	 *
-	 * @param WP_Theme_JSON $theme_json The theme json object.
+	 * @param WP_Theme_JSON_Data $theme_json The theme json data object.
+	 * @return WP_Theme_JSON_Data The filtered theme json data.
 	 */
 	public function experimental_filter_theme_json_theme( $theme_json ) {
-		if ( ! Features::is_enabled( 'launch-your-store' ) ) {
-			return $theme_json;
-		}
-
 		$theme_data = $theme_json->get_data();
 		$font_data  = $theme_data['settings']['typography']['fontFamilies']['theme'] ?? array();
+
+		// Check if the current theme is a child theme. And if so, merge the parent theme fonts with the existing fonts.
+		if ( wp_get_theme()->parent() ) {
+			$parent_theme           = wp_get_theme()->parent();
+			$parent_theme_json_file = $parent_theme->get_file_path( 'theme.json' );
+
+			if ( is_readable( $parent_theme_json_file ) ) {
+				$parent_theme_json_data = json_decode( file_get_contents( $parent_theme_json_file ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+
+				if ( isset( $parent_theme_json_data['settings']['typography']['fontFamilies'] ) ) {
+					$parent_fonts = $parent_theme_json_data['settings']['typography']['fontFamilies'];
+
+					// Merge parent theme fonts with existing fonts.
+					foreach ( $parent_fonts as $parent_font ) {
+						$found = false;
+						foreach ( $font_data as $existing_font ) {
+							if ( isset( $parent_font['name'] ) && isset( $existing_font['name'] ) &&
+							$parent_font['name'] === $existing_font['name'] ) {
+								$found = true;
+								break;
+							}
+						}
+
+						if ( ! $found ) {
+							$font_data[] = $parent_font;
+						}
+					}
+				}
+			}
+		}
 
 		$fonts_to_add = array(
 			array(
@@ -225,7 +247,7 @@ class ComingSoonRequestHandler {
 			),
 		);
 
-		// Loops through all existing fonts and append when the font's name is not found.
+		// Add WooCommerce fonts if they don't already exist.
 		foreach ( $fonts_to_add as $font_to_add ) {
 			$found = false;
 			foreach ( $font_data as $font ) {
@@ -260,11 +282,6 @@ class ComingSoonRequestHandler {
 	public function enqueue_styles() {
 		// Early exit if the user is not logged in as administrator / shop manager.
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			return;
-		}
-
-		// Early exit if LYS feature is disabled.
-		if ( ! Features::is_enabled( 'launch-your-store' ) ) {
 			return;
 		}
 

@@ -31,8 +31,7 @@ class User_Theme_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test it can create and return a user theme post
 	 */
 	public function testItCreatesUserThemePostLazily(): void {
-		$post = $this->user_theme->get_user_theme_post();
-		$this->assertInstanceOf( \WP_Post::class, $post );
+		$post         = $this->user_theme->get_user_theme_post();
 		$post_content = json_decode( $post->post_content, true );
 		$this->assertIsArray( $post_content );
 		$this->assertArrayHasKey( 'version', $post_content );
@@ -64,8 +63,7 @@ class User_Theme_Test extends \Email_Editor_Integration_Test_Case {
 		);
 		wp_insert_post( $post_data );
 
-		$post = $this->user_theme->get_user_theme_post();
-		$this->assertInstanceOf( \WP_Post::class, $post );
+		$post         = $this->user_theme->get_user_theme_post();
 		$post_content = json_decode( $post->post_content, true );
 		$this->assertIsArray( $post_content );
 		$this->assertArrayHasKey( 'version', $post_content );
@@ -80,8 +78,7 @@ class User_Theme_Test extends \Email_Editor_Integration_Test_Case {
 	 */
 	public function testItCreatesThemeJson(): void {
 		$theme = $this->user_theme->get_theme();
-		$this->assertInstanceOf( \WP_Theme_JSON::class, $theme );
-		$raw = $theme->get_raw_data();
+		$raw   = $theme->get_raw_data();
 		$this->assertArrayHasKey( 'version', $raw );
 	}
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection;
 
 use WP_Query;
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 
 /**
  * Utility methods used for the Product Collection block.
@@ -33,6 +34,29 @@ class Utils {
 		}
 
 		return $query;
+	}
+
+	/**
+	 * Get the random order seed for a Product Collection.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param int   $query_id      Product Collection query ID.
+	 * @param array $query_context Product Collection query context.
+	 * @return int Random order seed.
+	 */
+	public static function get_random_order_seed( $query_id, $query_context = array() ) {
+		$seed_context         = array(
+			'blog_id'           => get_current_blog_id(),
+			'queried_object_id' => get_queried_object_id(),
+			'query_id'          => absint( $query_id ),
+			'rotation_key'      => wp_date( 'Y-m-d' ),
+			'query'             => $query_context,
+		);
+		$encoded_seed_context = wp_json_encode( $seed_context );
+		$seed_hash            = (int) sprintf( '%u', crc32( is_string( $encoded_seed_context ) ? $encoded_seed_context : '' ) );
+
+		return ( $seed_hash % 2147483646 ) + 1;
 	}
 
 	/**
@@ -120,38 +144,45 @@ class Utils {
 			$type        = 'order';
 			$source_data = array( 'orderId' => absint( $wp_query->query_vars['order-received'] ) );
 
-		} elseif ( ( is_cart() || is_checkout() ) && isset( WC()->cart ) && is_a( WC()->cart, 'WC_Cart' ) ) {
+		} else {
+			// Check if we're in a cart block context.
+			$current_page       = $wp_query->get_queried_object();
+			$has_cart_block     = $current_page && \WC_Blocks_Utils::has_block_in_page( $current_page, 'woocommerce/cart' );
+			$has_checkout_block = $current_page && \WC_Blocks_Utils::has_block_in_page( $current_page, 'woocommerce/checkout' );
+			$is_cart_available  = isset( WC()->cart ) && is_a( WC()->cart, 'WC_Cart' );
 
-			$type  = 'cart';
-			$items = array();
-			foreach ( WC()->cart->get_cart() as $cart_item ) {
-				if ( ! isset( $cart_item['product_id'] ) ) {
-					continue;
+			if ( ( $has_cart_block || $has_checkout_block || is_cart() || is_checkout() ) && $is_cart_available ) {
+				$type  = 'cart';
+				$items = array();
+				foreach ( WC()->cart->get_cart() as $cart_item ) {
+					if ( ! isset( $cart_item['product_id'] ) ) {
+						continue;
+					}
+
+					$items[] = absint( $cart_item['product_id'] );
 				}
+				$items       = array_unique( array_filter( $items ) );
+				$source_data = array( 'productIds' => $items );
 
-				$items[] = absint( $cart_item['product_id'] );
+			} elseif ( is_product_taxonomy() ) {
+
+				$source      = $wp_query->get_queried_object();
+				$is_valid    = is_a( $source, 'WP_Term' );
+				$taxonomy    = $is_valid ? $source->taxonomy : '';
+				$term_id     = $is_valid ? $source->term_id : '';
+				$type        = 'archive';
+				$source_data = array(
+					'taxonomy' => wc_clean( $taxonomy ),
+					'termId'   => absint( $term_id ),
+				);
+
+			} elseif ( is_product() ) {
+
+				$source      = $wp_query->get_queried_object();
+				$product_id  = is_a( $source, 'WP_Post' ) ? absint( $source->ID ) : 0;
+				$type        = 'product';
+				$source_data = array( 'productId' => $product_id );
 			}
-			$items       = array_unique( array_filter( $items ) );
-			$source_data = array( 'productIds' => $items );
-
-		} elseif ( is_product_taxonomy() ) {
-
-			$source      = $wp_query->get_queried_object();
-			$is_valid    = is_a( $source, 'WP_Term' );
-			$taxonomy    = $is_valid ? $source->taxonomy : '';
-			$term_id     = $is_valid ? $source->term_id : '';
-			$type        = 'archive';
-			$source_data = array(
-				'taxonomy' => wc_clean( $taxonomy ),
-				'termId'   => absint( $term_id ),
-			);
-
-		} elseif ( is_product() ) {
-
-			$source      = $wp_query->get_queried_object();
-			$product_id  = is_a( $source, 'WP_Post' ) ? absint( $source->ID ) : 0;
-			$type        = 'product';
-			$source_data = array( 'productId' => $product_id );
 		}
 
 		$context = array(

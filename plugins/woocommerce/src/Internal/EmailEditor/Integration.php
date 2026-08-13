@@ -6,14 +6,22 @@ namespace Automattic\WooCommerce\Internal\EmailEditor;
 
 use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
 use Automattic\WooCommerce\EmailEditor\Engine\Dependency_Check;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Renderer;
+use Automattic\WooCommerce\EmailEditor\Engine\Send_Preview_Email;
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailPatterns\PatternsController;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplatesController;
+use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\WooEmailTemplate;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsGenerator;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailScratchpadRefresher;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateAutoApplier;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncBackfill;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncTracker;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmails;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
-use Automattic\WooCommerce\Internal\EmailEditor\TransactionalEmailPersonalizer;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplateApiController;
-use Throwable;
+use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
 use WP_Post;
 
 defined( 'ABSPATH' ) || exit;
@@ -53,6 +61,23 @@ class Integration {
 	private EmailApiController $email_api_controller;
 
 	/**
+	 * Email type of the postless send-preview currently being handled.
+	 *
+	 * Set while {@see self::send_preview_email_for_email_type()} runs so the
+	 * personalizer-context filter can resolve the email without a post.
+	 *
+	 * @var string
+	 */
+	private string $sending_preview_for_email_type = '';
+
+	/**
+	 * The WC_Email instance.
+	 *
+	 * @var \WC_Email
+	 */
+	private \WC_Email $wc_email_instance;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -72,16 +97,33 @@ class Integration {
 		}
 
 		add_action( 'woocommerce_init', array( $this, 'initialize' ) );
+
+		// Register the post deletion cleanup hook early and unconditionally so it works in
+		// both admin and non-admin contexts (e.g. WP-CLI). This only needs $wpdb and the
+		// posts manager singleton — it must not depend on the full editor init chain.
+		add_action( 'before_delete_post', array( $this, 'delete_email_template_associated_with_email_editor_post' ), 10, 2 );
 	}
 
 	/**
 	 * Initialize the integration.
 	 */
 	public function initialize() {
+		$this->init_logger();
 		$this->init_hooks();
 		$this->extend_post_api();
 		$this->extend_template_post_api();
 		$this->register_hooks();
+	}
+
+	/**
+	 * Initialize the logger.
+	 */
+	public function init_logger() {
+		$editor_container = Email_Editor_Container::container();
+		$logger           = $editor_container->get( Email_Editor_Logger::class );
+
+		// Register the WooCommerce logger with the email editor package.
+		$logger->set_logger( new Logger( wc_get_logger() ) );
 	}
 
 	/**
@@ -97,6 +139,15 @@ class Integration {
 		$this->editor_page_renderer    = $container->get( PageRenderer::class );
 		$this->template_api_controller = $container->get( TemplateApiController::class );
 		$this->email_api_controller    = $container->get( EmailApiController::class );
+
+		// Using any email class to get the instance.
+		$registered_emails = \WC_Emails::instance()->get_emails();
+		if ( isset( $registered_emails['WC_Email_New_Order'] ) ) {
+			$this->wc_email_instance = $registered_emails['WC_Email_New_Order'];
+		} else {
+			$first_email_key         = array_key_first( $registered_emails );
+			$this->wc_email_instance = $registered_emails[ $first_email_key ];
+		}
 	}
 
 	/**
@@ -106,10 +157,37 @@ class Integration {
 		add_filter( 'woocommerce_email_editor_post_types', array( $this, 'add_email_post_type' ) );
 		add_filter( 'woocommerce_is_email_editor_page', array( $this, 'is_editor_page' ), 10, 1 );
 		add_filter( 'replace_editor', array( $this, 'replace_editor' ), 10, 2 );
-		add_action( 'before_delete_post', array( $this, 'delete_email_template_associated_with_email_editor_post' ), 10, 2 );
-		add_filter( 'woocommerce_email_editor_send_preview_email_rendered_data', array( $this, 'update_send_preview_email_rendered_data' ) );
+		add_filter( 'woocommerce_email_editor_send_preview_email_rendered_data', array( $this, 'update_send_preview_email_rendered_data' ), 10, 2 );
 		add_filter( 'woocommerce_email_editor_send_preview_email_personalizer_context', array( $this, 'update_send_preview_email_personalizer_context' ) );
 		add_filter( 'woocommerce_email_editor_preview_post_template_html', array( $this, 'update_preview_post_template_html_data' ), 100, 1 );
+		add_action( 'woocommerce_email_editor_send_preview_email_before_wp_mail', array( $this, 'send_preview_email_before_wp_mail' ), 10 );
+		add_action( 'woocommerce_email_editor_send_preview_email_after_wp_mail', array( $this, 'send_preview_email_after_wp_mail' ), 10 );
+		add_filter( 'woocommerce_email_editor_send_preview_email_subject', array( $this, 'update_email_subject_for_send_preview_email' ), 10, 2 );
+		// Postless send-preview: the listing "Send test email" action sends
+		// `emailType` instead of `postId` for emails without a published post.
+		// Priority 10 runs before the package's post-based handler (11).
+		add_filter( 'woocommerce_email_editor_send_preview_email', array( $this, 'send_preview_email_for_email_type' ), 10, 1 );
+		add_filter( 'woocommerce_email_editor_send_preview_email_without_post_permission', array( $this, 'authorize_postless_send_preview' ), 10, 2 );
+		// Listing Preview page for emails rendering from the file template.
+		add_action( 'admin_init', array( $this, 'render_block_email_preview_page' ) );
+		add_action( 'rest_api_init', array( $this->email_api_controller, 'register_routes' ) );
+		add_action( 'transition_post_status', array( $this, 'save_email_mapping_on_publish' ), 10, 3 );
+		// Priority 11 ensures the email editor's `init` bootstrap (default priority 10)
+		// has registered the `woo_email` post type before we register meta against it.
+		add_action( 'init', array( WCEmailTemplateDivergenceDetector::class, 'register_meta' ), 11 );
+		add_action( 'woocommerce_updated', array( WCEmailTemplateDivergenceDetector::class, 'run_sweep' ), 20 );
+		add_action( WCEmailTemplateSyncBackfill::BACKFILL_COMPLETE_ACTION, array( WCEmailTemplateDivergenceDetector::class, 'run_sweep' ), 10 );
+		// Fresh installs never cross the 10.8 db-update boundary, so the RSM-149
+		// backfill never runs and `BACKFILL_COMPLETE_OPTION` is never written.
+		// Stamp it from the `woocommerce_newly_installed` action so `run_sweep()`
+		// doesn't sit dormant forever on new sites.
+		add_action( 'woocommerce_newly_installed', array( WCEmailTemplateDivergenceDetector::class, 'mark_backfill_complete_on_fresh_install' ), 20 );
+		add_action( WCEmailTemplateAutoApplier::AUTO_APPLY_AS_HOOK, array( WCEmailTemplateAutoApplier::class, 'run' ), 10 );
+		add_action( 'woocommerce_email_template_divergence_sweep_complete', array( WCEmailTemplateAutoApplier::class, 'schedule' ), 10 );
+		// RSM-145 Tracks instrumentation: fire `_backfill_completed` once when the
+		// RSM-149 sync-meta backfill finalises. The backfill class itself is in the
+		// 10.8 feature freeze, so we hook the existing action it already publishes.
+		add_action( WCEmailTemplateSyncBackfill::BACKFILL_COMPLETE_ACTION, array( WCEmailTemplateSyncTracker::class, 'on_backfill_complete' ), 20 );
 	}
 
 	/**
@@ -122,22 +200,37 @@ class Integration {
 		$post_types[] = array(
 			'name' => self::EMAIL_POST_TYPE,
 			'args' => array(
-				'labels'   => array(
-					'name'          => __( 'Woo Emails', 'woocommerce' ),
-					'singular_name' => __( 'Woo Email', 'woocommerce' ),
-					'add_new_item'  => __( 'Add New Woo Email', 'woocommerce' ),
-					'edit_item'     => __( 'Edit Woo Email', 'woocommerce' ),
-					'new_item'      => __( 'New Woo Email', 'woocommerce' ),
-					'view_item'     => __( 'View Woo Email', 'woocommerce' ),
-					'search_items'  => __( 'Search Woo Emails', 'woocommerce' ),
+				'labels'          => array(
+					'name'          => __( 'Emails', 'woocommerce' ),
+					'singular_name' => __( 'Email', 'woocommerce' ),
+					'add_new_item'  => __( 'Add Email', 'woocommerce' ),
+					'edit_item'     => __( 'Edit Email', 'woocommerce' ),
+					'new_item'      => __( 'New Email', 'woocommerce' ),
+					'view_item'     => __( 'View Email', 'woocommerce' ),
+					'search_items'  => __( 'Search Emails', 'woocommerce' ),
 				),
-				'rewrite'  => array( 'slug' => self::EMAIL_POST_TYPE ),
-				'supports' => array(
+				'rewrite'         => array( 'slug' => self::EMAIL_POST_TYPE ),
+				'supports'        => array(
 					'title',
 					'editor' => array(
 						'default-mode' => 'template-locked',
 					),
+					'excerpt',
+					'custom-fields',
 				),
+				'capability_type' => self::EMAIL_POST_TYPE,
+				'capabilities'    => array(
+					'edit_post'          => 'manage_woocommerce',
+					'read_post'          => 'manage_woocommerce',
+					'delete_post'        => 'manage_woocommerce',
+					'edit_posts'         => 'manage_woocommerce',
+					'edit_others_posts'  => 'manage_woocommerce',
+					'delete_posts'       => 'manage_woocommerce',
+					'publish_posts'      => 'manage_woocommerce',
+					'read_private_posts' => 'manage_woocommerce',
+					'create_posts'       => 'manage_woocommerce',
+				),
+				'map_meta_cap'    => false,
 			),
 		);
 		return $post_types;
@@ -173,10 +266,37 @@ class Integration {
 	public function replace_editor( $replace, $post ) {
 		$current_screen = get_current_screen();
 		if ( self::EMAIL_POST_TYPE === $post->post_type && $current_screen ) {
+			$this->maybe_refresh_scratchpad( $post );
 			$this->editor_page_renderer->render();
 			return true;
 		}
 		return $replace;
+	}
+
+	/**
+	 * Refresh a never-edited scratchpad from the current file template when the
+	 * editor opens directly (bookmark, browser refresh) — the listing Edit flow
+	 * refreshes through the REST endpoint before redirecting here.
+	 *
+	 * @param WP_Post $post Post being opened in the editor.
+	 */
+	private function maybe_refresh_scratchpad( $post ): void {
+		if ( ! in_array( $post->post_status, array( 'auto-draft', 'draft' ), true ) ) {
+			return;
+		}
+
+		$post_manager = WCTransactionalEmailPostsManager::get_instance();
+		$email_type   = $post_manager->get_email_type_from_post_id( $post->ID );
+		if ( ! is_string( $email_type ) || '' === $email_type ) {
+			return;
+		}
+
+		$email = $post_manager->get_email_by_id( $email_type );
+		if ( ! $email ) {
+			return;
+		}
+
+		( new WCEmailScratchpadRefresher() )->maybe_refresh( $post, $email );
 	}
 
 	/**
@@ -192,13 +312,55 @@ class Integration {
 
 		$post_manager = WCTransactionalEmailPostsManager::get_instance();
 
-		$email_type = $post_manager->get_email_type_from_post_id( $post_id );
+		$email_type = $post_manager->get_email_type_from_post_id( $post_id, true );
 
 		if ( empty( $email_type ) ) {
 			return;
 		}
 
-		$post_manager->delete_email_template( $email_type );
+		// Only clear the mapping when it points at the post being deleted —
+		// the email type can also resolve for unpublished scratchpad posts
+		// whose type maps to a different (live) post.
+		$post_manager->delete_email_template( $email_type, (int) $post_id );
+	}
+
+	/**
+	 * Save the email type → post ID mapping when a `woo_email` post is published.
+	 *
+	 * Lazily created posts (drafts) carry only the `_wc_email_type` meta;
+	 * the mapping that makes a post the rendering source for its email type is
+	 * written here, on the first transition to `publish`. Until then the file
+	 * template remains the source of truth.
+	 *
+	 * @param string   $new_status New post status.
+	 * @param string   $old_status Old post status.
+	 * @param \WP_Post $post       Post object.
+	 *
+	 * @since 11.1.0
+	 */
+	public function save_email_mapping_on_publish( $new_status, $old_status, $post ): void {
+		if ( ! $post instanceof \WP_Post || self::EMAIL_POST_TYPE !== $post->post_type ) {
+			return;
+		}
+
+		if ( 'publish' !== $new_status || 'publish' === $old_status ) {
+			return;
+		}
+
+		$email_type = get_post_meta( $post->ID, WCTransactionalEmailPostsManager::EMAIL_TYPE_META_KEY, true );
+		if ( empty( $email_type ) || ! is_string( $email_type ) ) {
+			return;
+		}
+
+		$post_manager = WCTransactionalEmailPostsManager::get_instance();
+
+		// Only map registered email types — the meta could carry an arbitrary
+		// string on imported or programmatically created posts.
+		if ( ! $post_manager->get_email_by_id( $email_type ) ) {
+			return;
+		}
+
+		$post_manager->save_email_template_post_id( $email_type, $post->ID );
 	}
 
 	/**
@@ -225,13 +387,16 @@ class Integration {
 	 *
 	 * @param string $data       The preview data.
 	 * @param string $email_type The email type identifier (e.g., 'customer_processing_order').
+	 * @param int    $post_id    The post ID.
 	 * @return string The updated preview data with placeholders replaced.
 	 */
-	private function update_email_preview_data( $data, string $email_type ) {
+	private function update_email_preview_data( $data, string $email_type, $post_id = 0 ) {
 		$type_param = EmailPreview::DEFAULT_EMAIL_TYPE;
 
-		if ( ! empty( $email_type ) ) {
-			$type_param = WCTransactionalEmailPostsManager::get_instance()->get_email_type_class_name_from_template_name( $email_type );
+		if ( ! empty( $post_id ) ) {
+			$type_param = WCTransactionalEmailPostsManager::get_instance()->get_email_type_class_name_from_post_id( $post_id );
+		} elseif ( ! empty( $email_type ) ) {
+			$type_param = WCTransactionalEmailPostsManager::get_instance()->get_email_type_class_name_from_email_id( $email_type );
 		}
 
 		$email_preview = wc_get_container()->get( EmailPreview::class );
@@ -255,10 +420,11 @@ class Integration {
 	/**
 	 * Filter email preview data used when sending a preview email.
 	 *
-	 * @param string $data The preview data.
+	 * @param string  $data The preview data.
+	 * @param WP_Post $post The post object.
 	 * @return string The updated preview data with placeholders replaced.
 	 */
-	public function update_send_preview_email_rendered_data( $data ) {
+	public function update_send_preview_email_rendered_data( $data, $post ) {
 		$email_type = '';
 		$post_body  = file_get_contents( 'php://input' );
 
@@ -273,6 +439,11 @@ class Integration {
 					return $this->update_email_preview_data( $data, $email_type );
 				}
 			}
+		} elseif ( ! empty( $post ) && $post instanceof \WP_Post ) {
+			$email_type = WCTransactionalEmailPostsManager::get_instance()->get_email_type_from_post_id( $post->ID );
+			if ( ! empty( $email_type ) ) {
+				return $this->update_email_preview_data( $data, $email_type, $post->ID );
+			}
 		}
 		return $data;
 	}
@@ -284,10 +455,15 @@ class Integration {
 	 * @return array The updated personalizer context.
 	 */
 	public function update_send_preview_email_personalizer_context( $context ) {
-		$post_manager             = WCTransactionalEmailPostsManager::get_instance();
-		$email_type_template_name = $post_manager->get_email_type_from_post_id( get_the_ID() );
-		$email_type               = $email_type_template_name ? $post_manager->get_email_type_class_name_from_template_name( $email_type_template_name ) : EmailPreview::DEFAULT_EMAIL_TYPE;
-		$email_preview            = wc_get_container()->get( EmailPreview::class );
+		$post_manager = WCTransactionalEmailPostsManager::get_instance();
+		$email_id     = $post_manager->get_email_type_from_post_id( get_the_ID() );
+		if ( ! $email_id && '' !== $this->sending_preview_for_email_type ) {
+			// Postless send-preview: there is no post to resolve the email
+			// from, the type comes from the request instead.
+			$email_id = $this->sending_preview_for_email_type;
+		}
+		$email_type    = $email_id ? $post_manager->get_email_type_class_name_from_email_id( $email_id ) : EmailPreview::DEFAULT_EMAIL_TYPE;
+		$email_preview = wc_get_container()->get( EmailPreview::class );
 
 		try {
 			$email_preview->set_email_type( $email_type );
@@ -304,18 +480,209 @@ class Integration {
 	}
 
 	/**
+	 * Send a preview email rendered from the file template when the request
+	 * carries an email type instead of a post ID.
+	 *
+	 * Runs before the email editor package's post-based handler; requests with
+	 * a post ID pass through untouched. The rendered content is the canonical
+	 * file template — exactly what customers receive while the email has no
+	 * published post.
+	 *
+	 * @param array|bool $data Send-preview request data, or a bool when a previous handler already sent the email.
+	 * @return array|bool True/false when handled here (email sent / send failed); the unchanged data otherwise.
+	 * @throws \InvalidArgumentException When the recipient address or email type is invalid, or the email has no template content.
+	 */
+	public function send_preview_email_for_email_type( $data ) {
+		if ( ! is_array( $data ) || ! empty( $data['postId'] ) ) {
+			return $data;
+		}
+
+		$email_type = isset( $data['emailType'] ) ? sanitize_text_field( (string) $data['emailType'] ) : '';
+		if ( '' === $email_type ) {
+			return $data;
+		}
+
+		$recipient = isset( $data['email'] ) ? sanitize_email( (string) $data['email'] ) : '';
+		if ( ! is_email( $recipient ) ) {
+			throw new \InvalidArgumentException( 'Invalid email address' );
+		}
+
+		$preview = $this->render_preview_html_for_email_type( $email_type );
+
+		$send_preview = Email_Editor_Container::container()->get( Send_Preview_Email::class );
+
+		return $send_preview->send_email( $recipient, $preview['subject'], $preview['html'] );
+	}
+
+	/**
+	 * Render the file-template preview of an email type — the content customers
+	 * receive while the email has no published post — with the preview order
+	 * context applied and personalization tags resolved.
+	 *
+	 * Shared by the postless send-test handler and the listing Preview page.
+	 *
+	 * @param string $email_type The email type identifier (e.g. `customer_processing_order`).
+	 * @return array{subject: string, html: string} The preview subject and full HTML document.
+	 * @throws \InvalidArgumentException When the email type is invalid or has no template content.
+	 */
+	public function render_preview_html_for_email_type( string $email_type ): array {
+		$email = WCTransactionalEmailPostsManager::get_instance()->get_email_by_id( $email_type );
+		if ( ! $email instanceof \WC_Email || ! in_array( $email_type, WCTransactionalEmails::get_transactional_emails(), true ) ) {
+			throw new \InvalidArgumentException( 'Unknown email type' );
+		}
+
+		$content = WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $email );
+		if ( '' === $content ) {
+			throw new \InvalidArgumentException( 'The email has no template content' );
+		}
+
+		$container    = Email_Editor_Container::container();
+		$renderer     = $container->get( Renderer::class );
+		$send_preview = $container->get( Send_Preview_Email::class );
+
+		$subject = $this->get_preview_subject_for_email_type( $email_type, $email );
+
+		add_filter( 'woocommerce_email_editor_rendering_email_context', array( $send_preview, 'add_preview_context' ) );
+		try {
+			$rendered = $renderer->render_from_content(
+				$content,
+				( new WooEmailTemplate() )->get_slug(),
+				$subject,
+				__( 'Preview', 'woocommerce' ),
+				get_bloginfo( 'language' )
+			);
+		} finally {
+			remove_filter( 'woocommerce_email_editor_rendering_email_context', array( $send_preview, 'add_preview_context' ) );
+		}
+
+		$html = $this->update_email_preview_data( $rendered['html'], $email_type );
+
+		$this->sending_preview_for_email_type = $email_type;
+		try {
+			$html = $send_preview->set_personalize_content( $html );
+		} finally {
+			$this->sending_preview_for_email_type = '';
+		}
+
+		return array(
+			'subject' => $subject,
+			'html'    => $html,
+		);
+	}
+
+	/**
+	 * Render the listing Preview page for an email without a published post.
+	 *
+	 * Mirrors the `preview_woocommerce_mail` admin page pattern: a nonce-gated
+	 * query-param handler that echoes the full preview HTML document. Used by
+	 * the settings listing's Preview action for emails whose rendering source
+	 * is the file template (no post, or an unpublished draft).
+	 */
+	public function render_block_email_preview_page(): void {
+		if ( ! isset( $_GET['preview_woo_block_email'] ) ) {
+			return;
+		}
+
+		// Verifies the `_wpnonce` query arg that `wp_nonce_url()` appended to
+		// the listing payload's preview URL; dies when missing or invalid.
+		check_admin_referer( 'preview-woo-block-email' );
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_die( esc_html__( 'You do not have permission to preview emails.', 'woocommerce' ) );
+		}
+
+		$email_type = isset( $_GET['email_id'] ) ? sanitize_text_field( wp_unslash( $_GET['email_id'] ) ) : '';
+
+		try {
+			$preview = $this->render_preview_html_for_email_type( $email_type );
+		} catch ( \InvalidArgumentException $e ) {
+			wp_die( esc_html__( 'This email cannot be previewed.', 'woocommerce' ) );
+		}
+
+		echo $preview['html']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Full HTML document produced by the email renderer; escaping would break it.
+		exit;
+	}
+
+	/**
+	 * Authorize postless send-preview requests for registered block emails.
+	 *
+	 * The package rejects requests without a post ID by default; grant them for
+	 * shop managers when the requested email type is registered for the block
+	 * editor.
+	 *
+	 * @param bool             $allowed Current authorization.
+	 * @param \WP_REST_Request $request The send-preview REST request.
+	 * @return bool Whether the request is authorized.
+	 *
+	 * @phpstan-param \WP_REST_Request<array{emailType?: string}> $request
+	 */
+	public function authorize_postless_send_preview( $allowed, $request ) {
+		if ( $allowed ) {
+			return $allowed;
+		}
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return false;
+		}
+
+		$email_type = sanitize_text_field( (string) $request->get_param( 'emailType' ) );
+
+		return '' !== $email_type && in_array( $email_type, WCTransactionalEmails::get_transactional_emails(), true );
+	}
+
+	/**
+	 * Build the preview subject for an email type, mirroring the post-based
+	 * preview subject (placeholders resolved against the preview order).
+	 *
+	 * @param string    $email_type The email type identifier.
+	 * @param \WC_Email $email      The email instance, used for fallbacks.
+	 * @return string The preview subject.
+	 */
+	private function get_preview_subject_for_email_type( string $email_type, \WC_Email $email ): string {
+		$class_name = WCTransactionalEmailPostsManager::get_instance()->get_email_type_class_name_from_email_id( $email_type );
+		if ( ! empty( $class_name ) ) {
+			try {
+				$email_preview = wc_get_container()->get( EmailPreview::class );
+				$email_preview->set_email_type( $class_name );
+				return $email_preview->get_subject();
+			} catch ( \Throwable $e ) {
+				// Fall through to the WC_Email fallbacks below.
+				unset( $e );
+			}
+		}
+
+		// Third-party get_subject() implementations may assume send-time state
+		// (e.g. Bookings dereferences its booking object), so it must only run
+		// guarded; the title is the always-safe last resort.
+		try {
+			return (string) $email->get_subject();
+		} catch ( \Throwable $e ) {
+			return (string) $email->get_title();
+		}
+	}
+
+	/**
 	 * Filter email preview data used when previewing the email in new tab.
 	 *
 	 * @param string $data The preview HTML string.
 	 * @return string The updated preview HTML with placeholders replaced.
 	 */
 	public function update_preview_post_template_html_data( $data ) {
+		// return early if the data does not contain the placeholder meaning it's already been processed.
+		if ( ! str_contains( (string) $data, BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER ) ) {
+			return $data;
+		}
+
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		// Nonce verification is disabled here because the preview action doesn't modify data,
 		// and the check caused issues with the 'Preview in new tab' feature due to context changes.
 		$type_param = isset( $_GET['woo_email'] ) ? sanitize_text_field( wp_unslash( $_GET['woo_email'] ) ) : '';
+
+		// check for post id (preview id) in the request.
+		$post_id = isset( $_REQUEST['preview_id'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['preview_id'] ) ) : '';
+
 		// phpcs:enable
-		return $this->update_email_preview_data( $data, $type_param );
+		return $this->update_email_preview_data( $data, $type_param, $post_id );
 	}
 
 	/**
@@ -331,5 +698,64 @@ class Integration {
 				'schema'          => $this->email_api_controller->get_email_data_schema(),
 			)
 		);
+	}
+
+	/**
+	 * Action hook callback before sending the preview email via wp_mail
+	 *
+	 * @since 10.6.0
+	 * @return void
+	 */
+	public function send_preview_email_before_wp_mail() {
+		add_filter( 'wp_mail_from', array( $this->wc_email_instance, 'get_from_address' ) );
+		add_filter( 'wp_mail_from_name', array( $this->wc_email_instance, 'get_from_name' ) );
+	}
+
+	/**
+	 * Action hook callback after sending the preview email via wp_mail.
+	 *
+	 * @since 10.6.0
+	 * @return void
+	 */
+	public function send_preview_email_after_wp_mail() {
+		remove_filter( 'wp_mail_from', array( $this->wc_email_instance, 'get_from_address' ) );
+		remove_filter( 'wp_mail_from_name', array( $this->wc_email_instance, 'get_from_name' ) );
+	}
+
+	/**
+	 * Update the email subject for the send preview email.
+	 *
+	 * @param string  $subject The email subject.
+	 * @param WP_Post $post    The post object.
+	 * @return string The updated email subject.
+	 */
+	public function update_email_subject_for_send_preview_email( $subject, $post ) {
+		if ( ! $post instanceof \WP_Post || self::EMAIL_POST_TYPE !== $post->post_type ) {
+			return $subject;
+		}
+
+		$post_manager = WCTransactionalEmailPostsManager::get_instance();
+
+		$email_type_class_name = $post_manager->get_email_type_class_name_from_post_id( $post->ID );
+
+		if ( empty( $email_type_class_name ) ) {
+			return $subject;
+		}
+
+		/**
+		 * Validate the email type class name.
+		 *
+		 * @var EmailPreview $email_preview
+		 */
+		$email_preview = wc_get_container()->get( EmailPreview::class );
+
+		try {
+			$email_preview->set_email_type( $email_type_class_name );
+			return $email_preview->get_subject();
+		} catch ( \InvalidArgumentException $e ) {
+			return $subject;
+		} catch ( \Throwable $e ) {
+			return $subject;
+		}
 	}
 }

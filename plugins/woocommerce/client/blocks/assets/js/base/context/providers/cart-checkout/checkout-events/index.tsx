@@ -22,19 +22,24 @@ import {
 import { store as noticesStore } from '@wordpress/notices';
 import type { WPNotice } from '@wordpress/notices/build-types/store/selectors';
 import { checkoutEvents } from '@woocommerce/blocks-checkout-events';
+import {
+	ExpressPaymentMethods,
+	PlainExpressPaymentMethods,
+} from '@woocommerce/types';
+import {
+	getExpressPaymentMethods,
+	getPaymentMethods,
+} from '@woocommerce/blocks-registry';
 
 /**
  * Internal dependencies
  */
+import type { EventListenerRegistrationFunction } from '@woocommerce/blocks-checkout-events/event-emitter';
 import { reducer as emitReducer } from './event-emit';
 import { emitterCallback, noticeContexts } from '../../../event-emit';
 import { useStoreEvents } from '../../../hooks/use-store-events';
-import {
-	getExpressPaymentMethods,
-	getPaymentMethods,
-} from '../../../../../blocks-registry/payment-methods/registry';
+
 import { useEditorContext } from '../../editor-context';
-import { EventListenerRegistrationFunction } from '../../../../../events/event-emitter';
 
 type CheckoutEventsContextType = {
 	// Submits the checkout and begins processing.
@@ -82,15 +87,53 @@ export const CheckoutEventsProvider = ( {
 	children,
 	redirectUrl,
 }: {
-	children: React.ReactChildren;
+	children: React.ReactNode;
 	redirectUrl: string;
 } ): JSX.Element => {
 	const paymentMethods = getPaymentMethods();
 	const expressPaymentMethods = getExpressPaymentMethods();
+	/**
+	 * Converts registered express payment methods from registry format to plain format
+	 * suitable for storage in data stores.
+	 *
+	 * @param registeredMethods Express payment methods from the registry
+	 * @return Plain express payment methods object
+	 */
+	const convertToPlainExpressPaymentMethods = (
+		registeredMethods: ExpressPaymentMethods
+	): PlainExpressPaymentMethods => {
+		const plainRegisteredMethods: PlainExpressPaymentMethods = {};
+
+		Object.keys( registeredMethods ).forEach( ( methodName ) => {
+			const method = registeredMethods[ methodName ];
+			plainRegisteredMethods[ methodName ] = {
+				name: method.name,
+				title: method.title,
+				description: method.description,
+				gatewayId: method.gatewayId,
+				supportsStyle: method.supports?.style || [],
+			};
+		} );
+
+		return plainRegisteredMethods;
+	};
+
+	// Convert registered express payment methods from registry to plain format
+	const registeredMethods = getExpressPaymentMethods();
+
 	const { isEditor } = useEditorContext();
 
-	const { __internalUpdateAvailablePaymentMethods } =
-		useDispatch( paymentStore );
+	const {
+		__internalUpdateAvailablePaymentMethods,
+		__internalSetRegisteredExpressPaymentMethods,
+	} = useDispatch( paymentStore );
+
+	// Set the registered express payment methods
+	useEffect( () => {
+		void __internalSetRegisteredExpressPaymentMethods(
+			convertToPlainExpressPaymentMethods( registeredMethods )
+		);
+	}, [ __internalSetRegisteredExpressPaymentMethods, registeredMethods ] );
 
 	// Update the payment method store when paymentMethods or expressPaymentMethods changes.
 	// Ensure this happens in the editor even if paymentMethods is empty. This won't happen instantly when the objects
@@ -103,7 +146,7 @@ export const CheckoutEventsProvider = ( {
 		) {
 			return;
 		}
-		__internalUpdateAvailablePaymentMethods();
+		void __internalUpdateAvailablePaymentMethods();
 	}, [
 		isEditor,
 		paymentMethods,
@@ -142,7 +185,7 @@ export const CheckoutEventsProvider = ( {
 	} );
 
 	if ( redirectUrl && redirectUrl !== checkoutRedirectUrl ) {
-		__internalSetRedirectUrl( redirectUrl );
+		void __internalSetRedirectUrl( redirectUrl );
 	}
 
 	const { setValidationErrors } = useDispatch( validationStore );
@@ -197,7 +240,6 @@ export const CheckoutEventsProvider = ( {
 		return function ( ...args: Parameters< typeof onCheckoutValidation > ) {
 			deprecated( 'onCheckoutBeforeProcessing', {
 				alternative: 'onCheckoutValidation',
-				plugin: 'WooCommerce Blocks',
 			} );
 			return onCheckoutValidation( ...args );
 		};
@@ -209,9 +251,8 @@ export const CheckoutEventsProvider = ( {
 	const onCheckoutValidationBeforeProcessing = useMemo( () => {
 		return function ( ...args: Parameters< typeof onCheckoutValidation > ) {
 			deprecated( 'onCheckoutValidationBeforeProcessing', {
-				since: '9.7.0',
+				since: '7.6.0',
 				alternative: 'onCheckoutValidation',
-				plugin: 'WooCommerce Blocks',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8381',
 			} );
 			return onCheckoutValidation( ...args );
@@ -224,9 +265,8 @@ export const CheckoutEventsProvider = ( {
 	const onCheckoutAfterProcessingWithSuccess = useMemo( () => {
 		return function ( ...args: Parameters< typeof onCheckoutSuccess > ) {
 			deprecated( 'onCheckoutAfterProcessingWithSuccess', {
-				since: '9.7.0',
+				since: '7.6.0',
 				alternative: 'onCheckoutSuccess',
-				plugin: 'WooCommerce Blocks',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8381',
 			} );
 			return onCheckoutSuccess( ...args );
@@ -239,9 +279,8 @@ export const CheckoutEventsProvider = ( {
 	const onCheckoutAfterProcessingWithError = useMemo( () => {
 		return function ( ...args: Parameters< typeof onCheckoutFail > ) {
 			deprecated( 'onCheckoutAfterProcessingWithError', {
-				since: '9.7.0',
+				since: '7.6.0',
 				alternative: 'onCheckoutFail',
-				plugin: 'WooCommerce Blocks',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8381',
 			} );
 			return onCheckoutFail( ...args );
@@ -252,7 +291,7 @@ export const CheckoutEventsProvider = ( {
 	// the registered callbacks
 	useEffect( () => {
 		if ( isCheckoutBeforeProcessing ) {
-			__internalEmitValidateEvent( {
+			void __internalEmitValidateEvent( {
 				setValidationErrors,
 			} );
 		}
@@ -276,7 +315,7 @@ export const CheckoutEventsProvider = ( {
 		}
 
 		if ( isCheckoutAfterProcessing ) {
-			__internalEmitAfterProcessingEvents( {
+			void __internalEmitAfterProcessingEvents( {
 				notices: {
 					checkoutNotices,
 					paymentNotices,
@@ -304,7 +343,7 @@ export const CheckoutEventsProvider = ( {
 
 	const onSubmit = useCallback( () => {
 		dispatchCheckoutEvent( 'submit' );
-		__internalSetBeforeProcessing();
+		void __internalSetBeforeProcessing();
 	}, [ dispatchCheckoutEvent, __internalSetBeforeProcessing ] );
 
 	const checkoutEventHandlers = {

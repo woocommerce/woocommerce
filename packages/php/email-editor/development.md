@@ -45,3 +45,7 @@ Please install `wp-env` by running `npm install -g @wordpress/env` if you haven'
 2. Run `composer run test:unit` to run unit tests.
 3. Run `composer run test:integration` to run integration tests.
 4. Run `composer run env:stop` to stop wp-env.
+
+More detailed guide for writing tests can be found at [writing-tests.md](writing-tests.md)
+
+Guide for writing E2E tests can be found at [packages/js/email-editor/writing-e2e-tests.md](../../../packages/js/email-editor/writing-e2e-tests.md)

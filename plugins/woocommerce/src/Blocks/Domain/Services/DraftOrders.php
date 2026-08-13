@@ -17,6 +17,8 @@ class DraftOrders {
 	const DB_STATUS = 'wc-checkout-draft';
 	const STATUS    = 'checkout-draft';
 
+	const DRAFT_CLEANUP_EVENT_HOOK = 'woocommerce_cleanup_draft_orders';
+
 	/**
 	 * Holds the Package instance
 	 *
@@ -44,8 +46,12 @@ class DraftOrders {
 		add_filter( 'woocommerce_valid_order_statuses_for_payment_complete', [ $this, 'append_draft_order_post_status' ], 999 );
 		// Hook into the query to retrieve My Account orders so draft status is excluded.
 		add_action( 'woocommerce_my_account_my_orders_query', [ $this, 'delete_draft_order_post_status_from_args' ] );
-		add_action( 'woocommerce_cleanup_draft_orders', [ $this, 'delete_expired_draft_orders' ] );
+		add_action( self::DRAFT_CLEANUP_EVENT_HOOK, [ $this, 'delete_expired_draft_orders' ] );
 		add_action( 'admin_init', [ $this, 'install' ] );
+
+		if ( defined( 'WC_PLUGIN_BASENAME' ) ) {
+			add_action( 'deactivate_' . WC_PLUGIN_BASENAME, [ $this, 'unschedule_cronjobs' ] );
+		}
 	}
 
 	/**
@@ -58,12 +64,25 @@ class DraftOrders {
 	}
 
 	/**
+	 * Unschedule recurring actions when plugin is deactivated.
+	 *
+	 * @since 10.0.0
+	 * @internal
+	 */
+	public function unschedule_cronjobs() {
+		WC()->queue()->cancel_all( self::DRAFT_CLEANUP_EVENT_HOOK );
+	}
+
+	/**
 	 * Maybe create cron events.
 	 */
 	protected function maybe_create_cronjobs() {
 		$has_scheduled_action = function_exists( 'as_has_scheduled_action' ) ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
-		if ( false === call_user_func( $has_scheduled_action, 'woocommerce_cleanup_draft_orders' ) ) {
-			as_schedule_recurring_action( strtotime( 'midnight tonight' ), DAY_IN_SECONDS, 'woocommerce_cleanup_draft_orders' );
+		if ( false === call_user_func( $has_scheduled_action, self::DRAFT_CLEANUP_EVENT_HOOK ) ) {
+			$midnight_tonight = strtotime( 'midnight tonight' );
+			if ( false !== $midnight_tonight ) {
+				as_schedule_recurring_action( $midnight_tonight, DAY_IN_SECONDS, self::DRAFT_CLEANUP_EVENT_HOOK );
+			}
 		}
 	}
 
@@ -103,7 +122,7 @@ class DraftOrders {
 		return [
 			'label'                     => _x( 'Draft', 'Order status', 'woocommerce' ),
 			'public'                    => false,
-			'exclude_from_search'       => false,
+			'exclude_from_search'       => true,
 			'show_in_admin_all_list'    => false,
 			'show_in_admin_status_list' => true,
 			/* translators: %s: number of orders */
@@ -150,15 +169,25 @@ class DraftOrders {
 	}
 
 	/**
-	 * Delete draft orders older than a day in batches of 20.
+	 * Delete draft orders older than a day in configurable batches (default: 20).
 	 *
-	 * Ran on a daily cron schedule.
+	 * Ran on a daily cron schedule. Batch size is filterable via
+	 * `woocommerce_delete_expired_draft_orders_batch_size`.
 	 *
 	 * @internal
 	 */
 	public function delete_expired_draft_orders() {
-		$count      = 0;
-		$batch_size = 20;
+		$count = 0;
+		/**
+		 * Filters the number of draft orders deleted per batch during cleanup.
+		 *
+		 * Increasing this value can help improve deletion throughput for high-volume or busy stores
+		 * when the cleanup task cannot keep up with the draft orders backlog.
+		 *
+		 * @since 10.7.0
+		 * @param int $batch_size Number of draft orders to delete per batch. Default 20.
+		 */
+		$batch_size = max( 1, (int) apply_filters( 'woocommerce_delete_expired_draft_orders_batch_size', 20 ) );
 		$this->ensure_draft_status_registered();
 		$orders = wc_get_orders(
 			[
@@ -179,7 +208,7 @@ class DraftOrders {
 				}
 			}
 			if ( $batch_size === $count && function_exists( 'as_enqueue_async_action' ) ) {
-				as_enqueue_async_action( 'woocommerce_cleanup_draft_orders' );
+				as_enqueue_async_action( self::DRAFT_CLEANUP_EVENT_HOOK );
 			}
 		} catch ( Exception $error ) {
 			wc_caught_exception( $error, __METHOD__ );
@@ -220,7 +249,7 @@ class DraftOrders {
 		$suffix = ' This is an indicator that something is filtering WooCommerce or WordPress queries and modifying the query parameters.';
 
 		// if count is greater than our expected batch size, then that's a problem.
-		if ( count( $order_results ) > 20 ) {
+		if ( count( $order_results ) > $expected_batch_size ) {
 			throw new Exception( 'There are an unexpected number of results returned from the query.' . $suffix );
 		}
 

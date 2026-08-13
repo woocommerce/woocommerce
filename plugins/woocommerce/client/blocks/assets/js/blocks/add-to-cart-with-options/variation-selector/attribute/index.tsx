@@ -1,0 +1,28 @@
+/**
+ * External dependencies
+ */
+import { registerBlockType } from '@wordpress/blocks';
+import { Icon, button } from '@wordpress/icons';
+
+/**
+ * Internal dependencies
+ */
+import metadata from './block.json';
+import AttributeItemTemplateEdit from './edit';
+import AttributeItemTemplateSave from './save';
+import deprecated from './deprecated';
+import './style.scss';
+
+registerBlockType( metadata, {
+	edit: AttributeItemTemplateEdit,
+	icon: {
+		src: (
+			<Icon
+				icon={ button }
+				className="wc-block-editor-components-block-icon"
+			/>
+		),
+	},
+	save: AttributeItemTemplateSave,
+	deprecated,
+} );

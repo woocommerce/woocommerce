@@ -22,17 +22,16 @@ import { recordEvent } from '../../events';
 import { usePreviewTemplates } from '../../hooks';
 
 export function TemplateSelection() {
-	const { template, currentEmailContent, canUpdateTemplates } = useSelect(
-		( select ) => {
+	const { template, currentEmailContent, canUpdateTemplates, postType } =
+		useSelect( ( select ) => {
 			return {
 				template: select( storeName ).getCurrentTemplate(),
 				currentEmailContent:
 					select( storeName ).getEditedEmailContent(),
 				canUpdateTemplates: select( storeName ).canUserEditTemplates(),
+				postType: select( storeName ).getEmailPostType(),
 			};
-		},
-		[]
-	);
+		}, [] );
 	const [ templates ] = usePreviewTemplates( 'swap' );
 
 	const [ isEditTemplateModalOpen, setEditTemplateModalOpen ] =
@@ -46,7 +45,7 @@ export function TemplateSelection() {
 				<PanelRow>
 					<Flex justify={ 'start' }>
 						<FlexItem className="editor-post-panel__row-label">
-							{ __( 'Template', 'woocommerce' ) }
+							{ __( 'Template', __i18n_text_domain__ ) }
 						</FlexItem>
 						<FlexItem>
 							{ ! (
@@ -62,7 +61,7 @@ export function TemplateSelection() {
 									} }
 									label={ __(
 										'Template actions',
-										'woocommerce'
+										__i18n_text_domain__
 									) }
 									onToggle={ ( isOpen ) =>
 										recordEvent(
@@ -91,7 +90,7 @@ export function TemplateSelection() {
 												>
 													{ __(
 														'Edit template',
-														'woocommerce'
+														__i18n_text_domain__
 													) }
 												</MenuItem>
 											) }
@@ -110,7 +109,7 @@ export function TemplateSelection() {
 												>
 													{ __(
 														'Swap template',
-														'woocommerce'
+														__i18n_text_domain__
 													) }
 												</MenuItem>
 											) }
@@ -137,6 +136,7 @@ export function TemplateSelection() {
 					}
 					closeCallback={ () => setSelectTemplateModalOpen( false ) }
 					previewContent={ currentEmailContent }
+					postType={ postType }
 				/>
 			) }
 		</>

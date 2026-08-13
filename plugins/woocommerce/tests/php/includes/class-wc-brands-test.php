@@ -1,0 +1,367 @@
+<?php
+/**
+ * WooCommerce Brands Unit tests suite
+ *
+ * @package woocommerce-brands
+ */
+
+declare( strict_types = 1);
+
+/**
+ * WC Brands test
+ */
+class WC_Brands_Test extends WC_Unit_Test_Case {
+
+	/**
+	 * The admin menu label must keep translating through the non-contextual `Brands` string.
+	 *
+	 * The menu label is the one label the taxonomy update deliberately keeps as `Brands`. Before the
+	 * update WordPress derived `menu_name` from `labels['name']`, i.e. `__( 'Brands', 'woocommerce' )`,
+	 * so existing translations and `gettext_woocommerce` customizations applied to it. This asserts that
+	 * contract by filtering the non-contextual string and confirming it still reaches `menu_name`, which
+	 * would fail if the label were registered with a context (`_x()` routes through
+	 * `gettext_with_context_woocommerce` and a different catalog entry instead).
+	 *
+	 * @testdox Product brand admin menu label keeps translating through the non-contextual `Brands` string.
+	 */
+	public function test_product_brand_menu_name_uses_non_contextual_brands_translation(): void {
+		$translate_brands = static function ( $translation, $text, $domain ) {
+			if ( 'woocommerce' === $domain && 'Brands' === $text ) {
+				return 'Translated brands';
+			}
+			return $translation;
+		};
+
+		add_filter( 'gettext_woocommerce', $translate_brands, 10, 3 );
+
+		try {
+			WC_Brands::init_taxonomy();
+			$taxonomy = get_taxonomy( 'product_brand' );
+
+			$this->assertInstanceOf( WP_Taxonomy::class, $taxonomy, 'The product brand taxonomy should be registered.' );
+			$this->assertSame(
+				'Translated brands',
+				$taxonomy->labels->menu_name,
+				'The admin menu label should keep resolving through the non-contextual `Brands` translation.'
+			);
+		} finally {
+			remove_filter( 'gettext_woocommerce', $translate_brands, 10 );
+
+			// Restore the taxonomy with its unfiltered labels so later tests are unaffected.
+			WC_Brands::init_taxonomy();
+		}
+	}
+
+	/**
+	 * Tear down test data.
+	 */
+	public function tearDown(): void {
+		$this->remove_added_uploads();
+		parent::tearDown();
+
+		// Clear term cache to prevent interference between tests.
+		clean_term_cache( array(), 'product_brand' );
+	}
+	/**
+	 * Test that `product_brand_thumbnails` shortcode's `show_empty` argument works as expected.
+	 * This test prevents regression of the issue where double filtering caused no brands to be displayed.
+	 */
+	public function test_product_brand_thumbnails_shortcode_with_show_empty_arg() {
+		$data            = $this->setup_brand_test_data();
+		$brands_instance = $data['brands_instance'];
+
+		$output = $brands_instance->output_product_brand_thumbnails( array( 'show_empty' => 'false' ) );
+
+		// Full brand is shown, empty brand is not.
+		$this->assertStringContainsString( 'Full Brand', $output );
+		$this->assertStringNotContainsString( 'Empty Brand', $output );
+
+		$output = $brands_instance->output_product_brand_thumbnails( array( 'show_empty' => 'true' ) );
+
+		// Both brands are shown.
+		$this->assertStringContainsString( 'Full Brand', $output );
+		$this->assertStringContainsString( 'Empty Brand', $output );
+	}
+
+	/**
+	 * Test that `product_brand_thumbnails_description` shortcode's `show_empty` argument works as expected.
+	 */
+	public function test_product_brand_thumbnails_description_shortcode_with_show_empty_arg() {
+		$data            = $this->setup_brand_test_data();
+		$brands_instance = $data['brands_instance'];
+
+		$output = $brands_instance->output_product_brand_thumbnails_description( array( 'show_empty' => 'false' ) );
+
+		// Full brand is shown, empty brand is not.
+		$this->assertStringContainsString( 'Full Brand', $output );
+		$this->assertStringNotContainsString( 'Empty Brand', $output );
+
+		$output = $brands_instance->output_product_brand_thumbnails_description( array( 'show_empty' => 'true' ) );
+
+		// Both brands are shown.
+		$this->assertStringContainsString( 'Full Brand', $output );
+		$this->assertStringContainsString( 'Empty Brand', $output );
+	}
+
+	/**
+	 * Test that `product_brand_thumbnails_description` shortcode clamps invalid `columns`
+	 * values instead of letting them reach the template raw.
+	 *
+	 * Regression test: `columns="0"` (or any non-numeric value) used to fall straight
+	 * through to the template, where `$index % $columns` and the width calculation
+	 * throw a ModuloByZeroError/DivisionByZeroError on PHP8.
+	 */
+	public function test_product_brand_thumbnails_description_shortcode_clamps_invalid_columns() {
+		$data            = $this->setup_brand_test_data();
+		$brands_instance = $data['brands_instance'];
+
+		$output = $brands_instance->output_product_brand_thumbnails_description( array( 'columns' => '0' ) );
+		$this->assertStringContainsString( 'columns-1', $output, 'columns="0" should be clamped to 1' );
+
+		$output = $brands_instance->output_product_brand_thumbnails_description( array( 'columns' => 'abc' ) );
+		$this->assertStringContainsString( 'columns-1', $output, 'Non-numeric columns should fall back to 1' );
+	}
+
+	/**
+	 * Test that `product_brand_thumbnails` shortcode clamps invalid `columns`
+	 * values instead of letting them reach the template raw.
+	 *
+	 * Regression test: `columns="0"` (or any non-numeric value) used to fall straight
+	 * through to the template, where modulo/width calculations throw a
+	 * ModuloByZeroError/DivisionByZeroError on PHP8.
+	 */
+	public function test_product_brand_thumbnails_shortcode_clamps_invalid_columns() {
+		$data            = $this->setup_brand_test_data();
+		$brands_instance = $data['brands_instance'];
+
+		// columns="0" should not throw a division-by-zero error.
+		$output = $brands_instance->output_product_brand_thumbnails( array( 'columns' => '0' ) );
+		$this->assertNotEmpty( $output, 'columns="0" should not produce empty output' );
+
+		// Non-numeric columns should not throw either.
+		$output = $brands_instance->output_product_brand_thumbnails( array( 'columns' => 'abc' ) );
+		$this->assertNotEmpty( $output, 'Non-numeric columns should not produce empty output' );
+	}
+
+	/**
+	 * Test that `product_brand_list` shortcode's `show_empty_brands` argument works as expected.
+	 */
+	public function test_product_brand_list_shortcode_with_show_empty_brands_arg() {
+		$data            = $this->setup_brand_test_data();
+		$brands_instance = $data['brands_instance'];
+
+		$output = $brands_instance->output_product_brand_list( array( 'show_empty_brands' => 'false' ) );
+
+		// Full brand is shown, empty brand is not.
+		$this->assertStringContainsString( 'Full Brand', $output );
+		$this->assertStringNotContainsString( 'Empty Brand', $output );
+
+		$output = $brands_instance->output_product_brand_list( array( 'show_empty_brands' => 'true' ) );
+
+		// Both brands are shown.
+		$this->assertStringContainsString( 'Full Brand', $output );
+		$this->assertStringContainsString( 'Empty Brand', $output );
+	}
+
+	/**
+	 * @testdox Product brand shortcode renders a valid image style.
+	 * @dataProvider product_brand_shortcode_dimension_provider
+	 *
+	 * @param array<string, string> $dimensions     Shortcode dimensions.
+	 * @param string|null           $expected_style Expected image style.
+	 */
+	public function test_product_brand_shortcode_renders_valid_image_style( array $dimensions, ?string $expected_style ): void {
+		$data = $this->setup_single_brand_shortcode_test_data();
+
+		$output = $data['brands_instance']->output_product_brand(
+			array_merge(
+				array( 'post_id' => $data['product']->get_id() ),
+				$dimensions
+			)
+		);
+		$image  = new WP_HTML_Tag_Processor( $output );
+
+		$this->assertTrue( $image->next_tag( array( 'tag_name' => 'img' ) ) );
+		$this->assertSame( $expected_style, $image->get_attribute( 'style' ) );
+	}
+
+	/**
+	 * Data provider for product brand shortcode dimensions.
+	 *
+	 * @return array<string, array{array<string, string>, string|null}>
+	 */
+	public function product_brand_shortcode_dimension_provider(): array {
+		return array(
+			'empty dimensions'            => array( array(), null ),
+			'numeric dimensions'          => array(
+				array(
+					'width'  => '123',
+					'height' => '567',
+				),
+				'width: 123px; height: 567px;',
+			),
+			'unit width with auto height' => array(
+				array( 'width' => '4rem' ),
+				'width: 4rem; height: auto;',
+			),
+			'unit height with auto width' => array(
+				array( 'height' => '50%' ),
+				'width: auto; height: 50%;',
+			),
+		);
+	}
+
+	/**
+	 * Test that brand counts are correctly calculated and cached.
+	 */
+	public function test_brand_count_calculation_and_caching() {
+		$data = $this->setup_brand_test_data();
+
+		// Get the brand term.
+		clean_term_cache( $data['brand_with_products']['term_id'], 'product_brand' );
+		$brand_term = $this->get_first_brand_term( array( $data['brand_with_products']['term_id'] ) );
+
+		// Test that the count is correctly calculated.
+		$this->assertEquals( 1, $brand_term->count, 'Brand should have 1 product' );
+
+		// Test that the count is cached in term meta.
+		$cached_count = get_term_meta( $brand_term->term_id, 'product_count_product_brand', true );
+		$this->assertEquals( '1', $cached_count, 'Brand count should be cached in term meta' );
+	}
+
+	/**
+	 * Test that brand counts respect product visibility settings.
+	 */
+	public function test_brand_count_respects_product_visibility() {
+		$data    = $this->setup_brand_test_data();
+		$product = $data['product'];
+
+		// Enable hide out of stock setting FIRST.
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+
+		// THEN set product to out of stock (hook will fire with correct setting).
+		$product->set_stock_status( 'outofstock' );
+		$product->save();
+
+		// Get the brand term.
+		$brand_term = $this->get_first_brand_term( array( $data['brand_with_products']['term_id'] ) );
+
+		// Test that the count is 0 when product is out of stock and hidden.
+		$this->assertEquals( 0, $brand_term->count, 'Brand count should be 0 when product is out of stock and hidden' );
+
+		// Test that the count is cached correctly.
+		$cached_count = get_term_meta( $brand_term->term_id, 'product_count_product_brand', true );
+		$this->assertEquals( '0', $cached_count, 'Brand count should be cached as 0 when product is out of stock' );
+
+		// Reset the setting.
+		update_option( 'woocommerce_hide_out_of_stock_items', 'no' );
+	}
+
+	/**
+	 * Test that brand counts are updated when products are added/removed.
+	 */
+	public function test_brand_count_updates_when_products_change() {
+		$data    = $this->setup_brand_test_data();
+		$product = $data['product'];
+
+		// Initially should have 1 product.
+		$brand_term = get_term( $data['brand_with_products']['term_id'], 'product_brand' );
+		$this->assertEquals( 1, $brand_term->count, 'Brand should initially have 1 product' );
+
+		// Remove the product from the brand.
+		wp_set_object_terms( $product->get_id(), array(), 'product_brand' );
+
+		// Count should be updated to 0.
+		$brand_term_updated = get_term( $data['brand_with_products']['term_id'], 'product_brand' );
+		$this->assertEquals( 0, $brand_term_updated->count, 'Brand should have 0 products after removal' );
+
+		// Add the product back.
+		wp_set_object_terms( $product->get_id(), array( $data['brand_with_products']['term_id'] ), 'product_brand' );
+
+		// Count should be updated back to 1.
+		$brand_term_final = get_term( $data['brand_with_products']['term_id'], 'product_brand' );
+		$this->assertEquals( 1, $brand_term_final->count, 'Brand should have 1 product after re-adding' );
+	}
+
+	/**
+	 * Test that brand counts ignore product visibility in admin context.
+	 */
+	public function test_brand_count_ignores_product_visibility_in_admin_context() {
+		$data    = $this->setup_brand_test_data();
+		$product = $data['product'];
+
+		// Enable hide out of stock setting.
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+
+		// Set product to out of stock.
+		$product->set_stock_status( 'outofstock' );
+		$product->save();
+
+		// Set admin context.
+		set_current_screen( 'edit-post' );
+
+		// Get the brand term using helper.
+		$brand_term = $this->get_first_brand_term( array( $data['brand_with_products']['term_id'] ) );
+
+		// Test that the count is 1 (ignores out of stock setting in admin context).
+		$this->assertEquals( 1, $brand_term->count, 'Brand count should be 1 in admin context, ignoring out of stock setting' );
+
+		// Reset the setting.
+		update_option( 'woocommerce_hide_out_of_stock_items', 'no' );
+	}
+
+	/**
+	 * Helper method to set up test data for brand shortcode tests.
+	 *
+	 * @return array Contains brands instance, brand term IDs and product ID.
+	 */
+	private function setup_brand_test_data() {
+		WC_Brands::init_taxonomy();
+
+		$brand_with_products = wp_insert_term( 'Full Brand', 'product_brand' );
+		$empty_brand         = wp_insert_term( 'Empty Brand', 'product_brand' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->save();
+		wp_set_object_terms( $product->get_id(), array( $brand_with_products['term_id'] ), 'product_brand' );
+
+		return array(
+			'brands_instance'     => new WC_Brands(),
+			'brand_with_products' => $brand_with_products,
+			'empty_brand'         => $empty_brand,
+			'product'             => $product,
+		);
+	}
+
+	/**
+	 * Helper method to set up test data for single brand shortcode tests.
+	 *
+	 * @return array Contains brands instance, brand term IDs, and product ID.
+	 */
+	private function setup_single_brand_shortcode_test_data() {
+		$data         = $this->setup_brand_test_data();
+		$thumbnail_id = $this->factory->attachment->create_upload_object( DIR_TESTDATA . '/images/canola.jpg' );
+
+		update_term_meta( $data['brand_with_products']['term_id'], 'thumbnail_id', $thumbnail_id );
+
+		return $data;
+	}
+
+	/**
+	 * Helper method to get the first brand term.
+	 *
+	 * @param array $term_ids Array of brand term IDs to include.
+	 * @return WP_Term The first brand term.
+	 */
+	private function get_first_brand_term( $term_ids = array() ) {
+		$args = array(
+			'taxonomy'   => 'product_brand',
+			'hide_empty' => false,
+		);
+		if ( ! empty( $term_ids ) ) {
+			$args['include'] = $term_ids;
+		}
+		$brand_terms = get_terms( $args );
+		return $brand_terms[0];
+	}
+}

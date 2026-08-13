@@ -2,7 +2,7 @@
 	"name": "woocommerce/eslint-plugin",
 	"description": "ESLint plugin for WooCommerce development.",
 	"type": "library",
-	"license": "GPL-3.0-or-later",
+	"license": "GPL-2.0-or-later",
 	"minimum-stability": "dev",
 	"require-dev": {
 		"automattic/jetpack-changelogger": "3.3.0"

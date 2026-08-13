@@ -450,4 +450,99 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 		$this->assertEquals( '1.73', $order->get_total_tax() );
 		$this->assertEquals( '1.69', $order->get_discount_total() );
 	}
+
+	/**
+	 * @testdox No error is thrown when coupons are recalculated if an applied coupon with custom discount type is deleted and the code that defined the discount type has disappeared.
+	 */
+	public function test_custom_discount_type_removed_and_coupon_trashed() {
+		add_filter( 'woocommerce_coupon_discount_types', array( $this, 'handle_woocommerce_coupon_discount_types' ) );
+		add_filter( 'woocommerce_coupon_is_valid', array( $this, 'handle_woocommerce_coupon_is_valid' ), 999, 3 );
+		add_filter( 'woocommerce_coupon_get_discount_amount', array( $this, 'handle_woocommerce_coupon_get_discount_amount' ), 999, 5 );
+		add_filter( 'woocommerce_coupon_is_valid_for_cart', array( $this, 'handle_woocommerce_coupon_is_valid_for_cart' ), 999, 2 );
+
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+
+		$this->init_test();
+
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'test-coupon-3' );
+		$coupon->set_amount( 2.00 );
+		$coupon->set_discount_type( 'foobar' );
+		$coupon->save();
+
+		$order_id = $this->objects['order']->get_id();
+		$order    = wc_get_order( $order_id );
+
+		$order->remove_coupon( 'test-coupon-1' );
+		$order->remove_coupon( 'this-is-a-virtal-coupon' );
+
+		$order->apply_coupon( 'test-coupon-3' );
+
+		$order->calculate_totals( true );
+		$order->save();
+
+		$this->assertEquals( '998.00', $order->get_total() );
+
+		// Remove the custom discount type handler, trash the coupon, recalculate: should not throw.
+
+		$coupon->delete( true );
+
+		remove_filter( 'woocommerce_coupon_discount_types', array( $this, 'handle_woocommerce_coupon_discount_types' ), 999 );
+		remove_filter( 'woocommerce_coupon_is_valid', array( $this, 'handle_woocommerce_coupon_is_valid' ), 999 );
+		remove_filter( 'woocommerce_coupon_get_discount_amount', array( $this, 'handle_woocommerce_coupon_get_discount_amount' ), 999 );
+		remove_filter( 'woocommerce_coupon_is_valid_for_cart', array( $this, 'handle_woocommerce_coupon_is_valid_for_cart' ), 999 );
+
+		$order->recalculate_coupons();
+		$order->save();
+
+		$this->assertEquals( '1000.00', $order->get_total() );
+	}
+
+	/**
+	 * Handler for the woocommerce_coupon_discount_types filter.
+	 *
+	 * @param array $types Discount types.
+	 */
+	public function handle_woocommerce_coupon_discount_types( $types ) {
+		$types['foobar'] = 'Alternative fixed discount';
+		return $types;
+	}
+
+	/**
+	 * Handler for the woocommerce_coupon_is_valid filter.
+	 *
+	 * @param bool         $valid Whether the coupon is initially considered valid.
+	 * @param WC_Coupon    $coupon The coupon to check.
+	 * @param WC_Discounts $discounts Discounts object.
+	 * @return bool
+	 */
+	public function handle_woocommerce_coupon_is_valid( $valid, $coupon, $discounts = null ) {
+		return $valid || ( $coupon->get_discount_type() === 'foobar' );
+	}
+
+	/**
+	 * Handler for the woocommerce_coupon_get_discount_amount filter.
+	 *
+	 * @param float     $discount Initial discount amount.
+	 * @param float     $discounting_amount Amount from which the discount is to be substracted.
+	 * @param object    $cart_item Cart item.
+	 * @param bool      $single Always false.
+	 * @param WC_Coupon $coupon The coupon to check.
+	 * @return float
+	 */
+	public function handle_woocommerce_coupon_get_discount_amount( $discount, $discounting_amount, $cart_item, $single, $coupon ) {
+		return $coupon->get_discount_type() === 'foobar' ? $coupon->get_amount() : $discount;
+	}
+
+	/**
+	 * Handler for the woocommerce_coupon_is_valid_for_Cart filter.
+	 *
+	 * @param bool      $valid Whether the coupon is initially considered valid for the cart.
+	 * @param WC_Coupon $coupon The coupon to check.
+	 * @return bool
+	 */
+	public function handle_woocommerce_coupon_is_valid_for_cart( $valid, $coupon ) {
+		return $valid || ( $coupon->get_discount_type() === 'foobar' );
+	}
 }

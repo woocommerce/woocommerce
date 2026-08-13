@@ -3,6 +3,7 @@
  */
 import { Icon, mediaAndText } from '@wordpress/icons';
 import { getBlockMap } from '@woocommerce/atomic-utils';
+import { getSetting } from '@woocommerce/settings';
 import type { InnerBlockTemplate } from '@wordpress/blocks';
 
 /**
@@ -10,7 +11,6 @@ import type { InnerBlockTemplate } from '@wordpress/blocks';
  */
 import metadata from './block.json';
 import { VARIATION_NAME as PRODUCT_TITLE_VARIATION_NAME } from '../product-query/variations/elements/product-title';
-import { ImageSizing } from '../../atomic/blocks/product-elements/image/types';
 
 export const BLOCK_ICON = (
 	<Icon
@@ -24,20 +24,7 @@ export const DEFAULT_INNER_BLOCKS: InnerBlockTemplate[] = [
 		'core/columns',
 		{},
 		[
-			[
-				'core/column',
-				{},
-				[
-					[
-						'woocommerce/product-image',
-						{
-							showSaleBadge: false,
-							isDescendentOfSingleProductBlock: true,
-							imageSizing: ImageSizing.SINGLE,
-						},
-					],
-				],
-			],
+			[ 'core/column', {}, [ [ 'woocommerce/product-gallery' ] ] ],
 			[
 				'core/column',
 				{},
@@ -63,7 +50,11 @@ export const DEFAULT_INNER_BLOCKS: InnerBlockTemplate[] = [
 						'woocommerce/product-summary',
 						{ isDescendentOfSingleProductBlock: true },
 					],
-					[ 'woocommerce/add-to-cart-form' ],
+					[
+						getSetting( 'isBlockTheme', false )
+							? 'woocommerce/add-to-cart-with-options'
+							: 'woocommerce/add-to-cart-form',
+					],
 					[ 'woocommerce/product-meta' ],
 				],
 			],
@@ -80,7 +71,7 @@ export const ALLOWED_INNER_BLOCKS = [
 	'woocommerce/add-to-cart-with-options',
 	'woocommerce/product-meta',
 	'woocommerce/product-gallery',
-	'woocommerce/blockified-product-reviews',
-	'woocommerce/blockified-product-details',
+	'woocommerce/product-reviews',
+	'woocommerce/product-details',
 	...Object.keys( getBlockMap( metadata.name ) ),
 ];

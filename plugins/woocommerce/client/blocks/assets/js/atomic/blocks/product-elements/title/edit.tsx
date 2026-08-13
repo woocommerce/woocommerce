@@ -2,8 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Disabled, PanelBody, ToggleControl } from '@wordpress/components';
-import { compose } from '@wordpress/compose';
 import {
 	InspectorControls,
 	BlockControls,
@@ -11,14 +9,19 @@ import {
 	useBlockProps,
 } from '@wordpress/block-editor';
 import HeadingToolbar from '@woocommerce/editor-components/heading-toolbar';
+import {
+	Disabled,
+	ToggleControl,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanel as ToolsPanel,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanelItem as ToolsPanelItem,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import Block from './block';
-import withProductSelector from '../shared/with-product-selector';
-import { BLOCK_ICON } from './constants';
-import { title } from './block.json';
 import { Attributes } from './types';
 import './editor.scss';
 
@@ -26,6 +29,11 @@ interface Props {
 	attributes: Attributes;
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 }
+
+const DEFAULT_ATTRIBUTES = {
+	showProductLink: true,
+	linkTarget: '_self',
+};
 
 const TitleEdit = ( { attributes, setAttributes }: Props ): JSX.Element => {
 	const blockProps = useBlockProps();
@@ -50,18 +58,52 @@ const TitleEdit = ( { attributes, setAttributes }: Props ): JSX.Element => {
 				/>
 			</BlockControls>
 			<InspectorControls>
-				<PanelBody title={ __( 'Link settings', 'woocommerce' ) }>
-					<ToggleControl
+				<ToolsPanel
+					label={ __( 'Link settings', 'woocommerce' ) }
+					resetAll={ () =>
+						setAttributes( {
+							showProductLink: DEFAULT_ATTRIBUTES.showProductLink,
+							linkTarget: DEFAULT_ATTRIBUTES.linkTarget,
+						} )
+					}
+				>
+					<ToolsPanelItem
 						label={ __( 'Make title a link', 'woocommerce' ) }
-						checked={ showProductLink }
-						onChange={ () =>
+						hasValue={ () =>
+							showProductLink !==
+							DEFAULT_ATTRIBUTES.showProductLink
+						}
+						onDeselect={ () =>
 							setAttributes( {
-								showProductLink: ! showProductLink,
+								showProductLink:
+									DEFAULT_ATTRIBUTES.showProductLink,
 							} )
 						}
-					/>
+						isShownByDefault
+					>
+						<ToggleControl
+							label={ __( 'Make title a link', 'woocommerce' ) }
+							checked={ showProductLink }
+							onChange={ () =>
+								setAttributes( {
+									showProductLink: ! showProductLink,
+								} )
+							}
+						/>
+					</ToolsPanelItem>
 					{ showProductLink && (
-						<>
+						<ToolsPanelItem
+							label={ __( 'Open in new tab', 'woocommerce' ) }
+							hasValue={ () =>
+								linkTarget !== DEFAULT_ATTRIBUTES.linkTarget
+							}
+							onDeselect={ () =>
+								setAttributes( {
+									linkTarget: DEFAULT_ATTRIBUTES.linkTarget,
+								} )
+							}
+							isShownByDefault
+						>
 							<ToggleControl
 								label={ __( 'Open in new tab', 'woocommerce' ) }
 								onChange={ ( value ) =>
@@ -71,9 +113,9 @@ const TitleEdit = ( { attributes, setAttributes }: Props ): JSX.Element => {
 								}
 								checked={ linkTarget === '_blank' }
 							/>
-						</>
+						</ToolsPanelItem>
 					) }
-				</PanelBody>
+				</ToolsPanel>
 			</InspectorControls>
 			<Disabled>
 				<Block { ...attributes } />
@@ -82,15 +124,4 @@ const TitleEdit = ( { attributes, setAttributes }: Props ): JSX.Element => {
 	);
 };
 
-const Title = compose( [
-	withProductSelector( {
-		icon: BLOCK_ICON,
-		label: title,
-		description: __(
-			'Choose a product to display its title.',
-			'woocommerce'
-		),
-	} ),
-] )( TitleEdit );
-
-export default Title;
+export default TitleEdit;

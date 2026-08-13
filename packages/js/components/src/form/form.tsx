@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import {
 	useState,
 	createElement,
@@ -260,7 +260,7 @@ function FormComponent< Values extends Record< string, any > = any >(
 					onBlurProp();
 				}
 			},
-			className: classnames( classNameProp, {
+			className: clsx( classNameProp, {
 				'has-error': isTouched && inputError,
 			} ),
 			help: isTouched ? ( inputError as string ) : null,
@@ -331,7 +331,7 @@ function FormComponent< Values extends Record< string, any > = any >(
 
 const Form = forwardRef( FormComponent ) as <
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	Values extends Record< string, any >
+	Values extends Record< string, any >,
 >(
 	props: PropsWithChildrenFunction<
 		FormProps< Values >,

@@ -210,8 +210,7 @@ export const _Layout = () => {
 							<Route
 								key={ page.path }
 								path={ page.path || '' }
-								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-								// @ts-ignore Investigate why type error is thrown here
+								// @ts-expect-error react-router-dom v6 dropped the `exact` prop; kept here for runtime compatibility.
 								exact
 								element={ <BaseLayout page={ page } /> }
 							/>

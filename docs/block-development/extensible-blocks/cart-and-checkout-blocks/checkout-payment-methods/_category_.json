@@ -1,0 +1,10 @@
+{
+    "position": 7,
+    "label": "Checkout payment methods",
+    "collapsible": true,
+    "collapsed": true,
+    "link": {
+      "type": "generated-index",
+      "title": "Checkout payment methods"
+    }
+}

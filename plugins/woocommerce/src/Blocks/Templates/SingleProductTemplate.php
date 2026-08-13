@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Templates;
 
+use Automattic\WooCommerce\Blocks\SharedStores\ProductsStore;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
@@ -45,7 +46,7 @@ class SingleProductTemplate extends AbstractTemplate {
 	}
 
 	/**
-	 * Renders the default block template from Woo Blocks if no theme templates exist.
+	 * Run template-specific logic when the query matches this template.
 	 */
 	public function render_block_template() {
 		if ( ! is_embed() && is_singular( 'product' ) ) {
@@ -54,35 +55,25 @@ class SingleProductTemplate extends AbstractTemplate {
 			$compatibility_layer = new SingleProductTemplateCompatibility();
 			$compatibility_layer->init();
 
-			$valid_slugs         = array( self::SLUG );
-			$single_product_slug = 'product' === $post->post_type && $post->post_name ? 'single-product-' . $post->post_name : '';
-			if ( $single_product_slug ) {
-				$valid_slugs[] = 'single-product-' . $post->post_name;
+			$product = wc_get_product( $post->ID );
+			if ( $product ) {
+				$consent = 'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
+
+				// Load the product data into the products store so derived
+				// state closures can resolve it during server-side rendering.
+				ProductsStore::load_product( $consent, $product->get_id() );
+
+				// Set the current product context. The derived state
+				// closures (mainProductInContext, productVariationInContext, productInContext)
+				// are registered by ProductsStore::register_state().
+				wp_interactivity_state(
+					'woocommerce/products',
+					array(
+						'productId'   => $product->get_id(),
+						'variationId' => null,
+					)
+				);
 			}
-			$templates = get_block_templates( array( 'slug__in' => $valid_slugs ) );
-
-			if ( count( $templates ) === 0 ) {
-				return;
-			}
-
-			// Use the first template by default.
-			$template = $templates[0];
-
-			// Check if there is a template matching the slug `single-product-{post_name}`.
-			if ( count( $valid_slugs ) > 1 && count( $templates ) > 1 ) {
-				foreach ( $templates as $t ) {
-					if ( $single_product_slug === $t->slug ) {
-						$template = $t;
-						break;
-					}
-				}
-			}
-
-			if ( isset( $template ) && BlockTemplateUtils::template_has_legacy_template_block( $template ) ) {
-				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
-			}
-
-			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 		}
 	}
 
@@ -128,6 +119,7 @@ class SingleProductTemplate extends AbstractTemplate {
 			},
 			$query_result
 		);
+
 		return $query_result;
 	}
 
@@ -141,7 +133,21 @@ class SingleProductTemplate extends AbstractTemplate {
 	private static function replace_first_single_product_template_block_with_password_form( $parsed_blocks, $is_already_replaced ) {
 		// We want to replace the first single product template block with the password form. We also want to remove all other single product template blocks.
 		// This array doesn't contains all the blocks. For example, it missing the breadcrumbs blocks: it doesn't make sense replace the breadcrumbs with the password form.
-		$single_product_template_blocks = array( 'woocommerce/product-image-gallery', 'woocommerce/product-details', 'woocommerce/add-to-cart-form', 'woocommerce/product-meta', 'woocommerce/product-rating', 'woocommerce/product-price', 'woocommerce/related-products', 'woocommerce/add-to-cart-with-options', 'woocommerce/product-gallery', 'woocommerce/blockified-product-details', 'woocommerce/product-collection', 'core/post-title', 'core/post-excerpt' );
+		$single_product_template_blocks = array(
+			'woocommerce/product-image-gallery',
+			'woocommerce/product-details',
+			'woocommerce/add-to-cart-form',
+			'woocommerce/product-meta',
+			'woocommerce/product-rating',
+			'woocommerce/product-price',
+			'woocommerce/product-summary',
+			'woocommerce/related-products',
+			'woocommerce/add-to-cart-with-options',
+			'woocommerce/product-gallery',
+			'woocommerce/product-collection',
+			'core/post-title',
+			'core/post-excerpt',
+		);
 
 		return array_reduce(
 			$parsed_blocks,

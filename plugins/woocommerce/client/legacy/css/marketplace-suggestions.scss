@@ -30,6 +30,10 @@ a.suggestion-dismiss::before {
 
 #woocommerce-product-data ul.wc-tabs li.marketplace-suggestions_tab {
 
+	@media screen and (max-width: 600px) {
+		// We hide the suggestions on mobile, so should hide the tab too.
+		display: none;
+	}
 
 	a::before {
 
@@ -102,6 +106,7 @@ a.suggestion-dismiss::before {
 			flex: 1 1 30%;
 			min-width: 160px;
 			text-align: right;
+			white-space: nowrap;
 
 			.suggestion-dismiss {
 				text-decoration: none;

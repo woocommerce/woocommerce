@@ -27,7 +27,7 @@ import strings from '../strings';
  */
 const BusinessDetails: React.FC = () => {
 	const { data, setData } = useBusinessVerificationContext();
-	const { currentStep } = useOnboardingContext();
+	const { currentStep, sessionEntryPoint } = useOnboardingContext();
 	const countries = getAvailableCountries(
 		currentStep?.context?.fields?.available_countries || {}
 	);
@@ -58,32 +58,71 @@ const BusinessDetails: React.FC = () => {
 		( type ) => type.key === data.business_type
 	);
 
+	const selectedBusinessStructures = selectedBusinessType?.structures ?? [];
+	const shouldDisplayBusinessStructure =
+		selectedBusinessStructures.length > 0 &&
+		selectedBusinessType?.requires_structure !== false &&
+		! (
+			selectedBusinessStructures.length === 1 &&
+			selectedBusinessStructures[ 0 ].key === 'nil'
+		);
+	const selectedBusinessTypeKey = selectedBusinessType?.key;
+	const companyStructure = data[ 'company.structure' ];
+	const latestDataRef = React.useRef( data );
+	latestDataRef.current = data;
+
 	const selectedBusinessStructure =
-		selectedBusinessType?.structures.length === 0 ||
-		selectedBusinessType?.structures.find(
-			( structure ) => structure.key === data[ 'company.structure' ]
+		! shouldDisplayBusinessStructure ||
+		selectedBusinessStructures.find(
+			( structure ) => structure.key === companyStructure
 		);
 
-	const updateBusinessVerificationData = (
-		selfAssessmentData: OnboardingFields
-	) => {
-		const href = currentStep?.actions?.save?.href;
-		// Send POST request to the href with the Business Verification state
-		if ( href ) {
-			apiFetch( {
-				url: href,
-				method: 'POST',
-				data: {
-					self_assessment: selfAssessmentData,
-				},
+	const updateBusinessVerificationData = React.useCallback(
+		( selfAssessmentData: OnboardingFields ): Promise< void > => {
+			// Update the local state with the new data.
+			setData( selfAssessmentData );
+
+			const saveUrl = currentStep?.actions?.save?.href;
+			if ( saveUrl ) {
+				// Persist the data on the backend.
+				return apiFetch( {
+					url: saveUrl,
+					method: 'POST',
+					data: {
+						self_assessment: selfAssessmentData,
+						source: sessionEntryPoint,
+					},
+				} );
+			}
+
+			// Return a resolved promise to maintain consistency with the API.
+			return Promise.resolve();
+		},
+		[ currentStep?.actions?.save?.href, sessionEntryPoint, setData ]
+	);
+
+	React.useEffect( () => {
+		if (
+			selectedBusinessTypeKey &&
+			! shouldDisplayBusinessStructure &&
+			companyStructure !== undefined
+		) {
+			void updateBusinessVerificationData( {
+				...latestDataRef.current,
+				'company.structure': undefined,
 			} );
 		}
-	};
+	}, [
+		companyStructure,
+		selectedBusinessTypeKey,
+		shouldDisplayBusinessStructure,
+		updateBusinessVerificationData,
+	] );
 
 	const handleTiedChange = (
 		name: keyof OnboardingFields,
 		selectedItem?: Item | null
-	) => {
+	): Promise< void > => {
 		let newData: OnboardingFields = {
 			[ name ]: selectedItem?.key,
 		};
@@ -92,22 +131,20 @@ const BusinessDetails: React.FC = () => {
 		} else if ( name === 'country' ) {
 			newData = { ...newData, business_type: undefined };
 		}
-		setData( newData );
-		updateBusinessVerificationData( newData );
+
+		return updateBusinessVerificationData( newData );
 	};
 
 	const updateDataOnChange = (
 		name: keyof OnboardingFields,
 		selectedItem?: Item | null
-	) => {
-		setData( { [ name ]: selectedItem?.key } );
-
+	): Promise< void > => {
 		const newData: OnboardingFields = {
 			...data,
 			[ name ]: selectedItem?.key,
 		};
 
-		updateBusinessVerificationData( newData );
+		return updateBusinessVerificationData( newData );
 	};
 
 	return (
@@ -137,16 +174,15 @@ const BusinessDetails: React.FC = () => {
 					</OnboardingSelectField>
 				</span>
 			) }
-			{ selectedBusinessType &&
-				selectedBusinessType.structures.length > 0 && (
-					<span data-testid={ 'business-structure-select' }>
-						<OnboardingSelectField
-							name="company.structure"
-							options={ selectedBusinessType.structures }
-							onChange={ handleTiedChange }
-						/>
-					</span>
-				) }
+			{ selectedBusinessType && shouldDisplayBusinessStructure && (
+				<span data-testid={ 'business-structure-select' }>
+					<OnboardingSelectField
+						name="company.structure"
+						options={ selectedBusinessStructures }
+						onChange={ handleTiedChange }
+					/>
+				</span>
+			) }
 			{ selectedCountry &&
 				selectedBusinessType &&
 				selectedBusinessStructure && (

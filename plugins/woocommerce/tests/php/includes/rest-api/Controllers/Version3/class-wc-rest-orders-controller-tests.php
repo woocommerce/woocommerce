@@ -3,7 +3,13 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
+use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * class WC_REST_Orders_Controller_Tests.
@@ -12,6 +18,34 @@ use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	use HPOSToggleTrait;
 	use CogsAwareUnitTestSuiteTrait;
+	use MetaDataAssertionTrait;
+
+	/**
+	 * HPOS state captured at setUp so tearDown can restore it.
+	 *
+	 * @var bool
+	 */
+	private $cot_state;
+
+	/**
+	 * Administrator ID used to authenticate requests.
+	 *
+	 * @var int
+	 */
+	protected static $administrator_id;
+
+	/**
+	 * Create immutable class fixtures.
+	 *
+	 * @param WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$administrator_id = $factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
+	}
 
 	/**
 	 * Setup our test server, endpoints, and user info.
@@ -19,12 +53,23 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->endpoint = new WC_REST_Orders_Controller();
-		$this->user     = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		$this->user     = self::$administrator_id;
 		wp_set_current_user( $this->user );
+
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
+	}
+
+	/**
+	 * Tear down test environment.
+	 */
+	public function tearDown(): void {
+		unregister_post_type( 'shop_test' );
+
+		$this->toggle_cot_feature_and_usage( $this->cot_state );
+		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
+
+		parent::tearDown();
 	}
 
 	/**
@@ -316,6 +361,128 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * PUT against an ID belonging to a non 'shop_order' post type must be rejected, never
+	 * silently converted.
+	 */
+	public function test_update_rejects_non_shop_order_post_type(): void {
+		wc_register_order_type( 'shop_test' );
+		$post_id = wp_insert_post(
+			array(
+				'post_type'   => 'shop_test',
+				'post_status' => 'wc-pending',
+				'post_title'  => 'test',
+			)
+		);
+
+		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $post_id );
+		$request->set_body_params( array( 'customer_note' => 'should not apply' ) );
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertSame( 'woocommerce_rest_shop_order_invalid_id', $data['code'] );
+
+		// The persisted record must be untouched: same post type, no added customer_note.
+		$this->assertSame( 'shop_test', get_post_type( $post_id ) );
+		$this->assertSame( '', (string) get_post_meta( $post_id, '_customer_note', true ) );
+	}
+
+	/**
+	 * PUT against an ID belonging to a 'shop_order_refund' WC order type must be rejected.
+	 */
+	public function test_update_rejects_shop_order_refund_under_hpos(): void {
+		$this->toggle_cot_feature_and_usage( true );
+
+		// A refund (type 'shop_order_refund') is used because it's a real in-core order type that shares the same table as orders.
+		$order  = wc_create_order();
+		$refund = wc_create_refund(
+			array(
+				'amount'   => 0,
+				'order_id' => $order->get_id(),
+			)
+		);
+
+		$this->assertSame( 'shop_order_refund', OrderUtil::get_order_type( $refund->get_id() ) );
+
+		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $refund->get_id() );
+		$request->set_body_params( array( 'customer_note' => 'should not apply' ) );
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertSame( 'woocommerce_rest_shop_order_invalid_id', $data['code'] );
+
+		// The persisted record must be untouched: type still 'shop_order_refund'.
+		$this->assertSame( 'shop_order_refund', OrderUtil::get_order_type( $refund->get_id() ) );
+	}
+
+	/**
+	 * PUT against an HPOS row whose type isn't shop_order must be rejected.
+	 */
+	public function test_update_rejects_non_shop_order_type_under_hpos(): void {
+		global $wpdb;
+
+		$this->toggle_cot_feature_and_usage( true );
+		wc_register_order_type( 'shop_test' );
+
+		$order = wc_create_order();
+		$this->assertSame(
+			1,
+			$wpdb->update(
+				OrdersTableDataStore::get_orders_table_name(),
+				array( 'type' => 'shop_test' ),
+				array( 'id' => $order->get_id() )
+			)
+		);
+
+		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params( array( 'customer_note' => 'should not apply' ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_shop_order_invalid_id', $response->get_data()['code'] );
+		$this->assertSame( 'shop_test', OrderUtil::get_order_type( $order->get_id() ) );
+	}
+
+	/**
+	 * PUT against a non-existent ID returns the standard invalid-id error.
+	 */
+	public function test_update_rejects_nonexistent_id(): void {
+		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/999999999' );
+		$request->set_body_params( array( 'customer_note' => 'irrelevant' ) );
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertSame( 'woocommerce_rest_shop_order_invalid_id', $data['code'] );
+	}
+
+	/**
+	 * The type-mismatch override must still delegate normal shop_order updates to the
+	 * parent controller and apply the request body.
+	 */
+	public function test_update_shop_order_passes_type_guard_and_applies_changes(): void {
+		$order = new \WC_Order();
+		$order->set_customer_note( 'before' );
+		$order->save();
+
+		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params( array( 'customer_note' => 'after' ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'after', wc_get_order( $order->get_id() )->get_customer_note() );
+	}
+
+	/**
 	 * Tests that the created_via parameter cannot be updated.
 	 */
 	public function test_created_via_cannot_be_updated() {
@@ -331,6 +498,53 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$data = $response->get_data();
 		$this->assertEquals( 'original_value', $data['created_via'] );
+	}
+
+	/**
+	 * Describes the behavior of order creation (and updates) when the provided customer ID is valid
+	 * as well as when it is invalid (ie, the customer does not belong to the current blog).
+	 *
+	 * @return void
+	 */
+	public function test_valid_and_invalid_customer_ids(): void {
+		$customer_a = WC_Helper_Customer::create_customer( 'bob', 'staysafe', 'bob@rest-orders-controller.email' );
+		$customer_b = WC_Helper_Customer::create_customer( 'bill', 'trustno1', 'bill@rest-orders-controller.email' );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params( array( 'customer_id' => $customer_a->get_id() ) );
+
+		$response = $this->server->dispatch( $request );
+		$order_id = $response->get_data()['id'];
+		$this->assertEquals( 201, $response->get_status(), 'The order was created.' );
+		$this->assertEquals( $customer_a->get_id(), $response->get_data()['customer_id'], 'The order is associated with the expected customer' );
+
+		// Simulate a multisite network in which $customer_b is not a member of the blog.
+		$legacy_proxy_mock = wc_get_container()->get( LegacyProxy::class );
+		$legacy_proxy_mock->register_function_mocks(
+			array(
+				'is_multisite'           => function () {
+					return true;
+				},
+				'is_user_member_of_blog' => function () {
+					return false;
+				},
+			)
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params( array( 'customer_id' => $customer_b->get_id() ) );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status(), 'The order was not created, as the specified customer does not belong to the blog.' );
+		$this->assertEquals( 'woocommerce_rest_invalid_customer_id', $response->get_data()['code'], 'The returned error indicates the customer ID was invalid.' );
+
+		// Repeat the last test, except by performing an order update (instead of order creation).
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order_id );
+		$request->set_body_params( array( 'customer_id' => $customer_b->get_id() ) );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status(), 'The order was not updated, as the specified customer does not belong to the blog.' );
+		$this->assertEquals( 'woocommerce_rest_invalid_customer_id', $response->get_data()['code'], 'The returned error indicates the customer ID was invalid.' );
 	}
 
 	/**
@@ -520,11 +734,11 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_created_via_param_is_filters_order_when_cot_is_enabled() {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
 
-		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout = wc_create_order();
 		$order_checkout->set_created_via( 'checkout' );
 		$order_checkout->save();
 
-		$order_admin = WC_Helper_Order::create_order();
+		$order_admin = wc_create_order();
 		$order_admin->set_created_via( 'admin' );
 		$order_admin->save();
 
@@ -546,7 +760,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_get_orders_by_invalid_created_via_when_cot_is_enabled() {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
 
-		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout = wc_create_order();
 		$order_checkout->set_created_via( 'checkout' );
 		$order_checkout->save();
 
@@ -566,11 +780,11 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_created_via_param_is_filters_order_when_cot_is_disabled() {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
 
-		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout = wc_create_order();
 		$order_checkout->set_created_via( 'checkout' );
 		$order_checkout->save();
 
-		$order_admin = WC_Helper_Order::create_order();
+		$order_admin = wc_create_order();
 		$order_admin->set_created_via( 'admin' );
 		$order_admin->save();
 
@@ -592,7 +806,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_get_orders_by_invalid_created_via_when_cot_is_disabled() {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
 
-		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout = wc_create_order();
 		$order_checkout->set_created_via( 'checkout' );
 		$order_checkout->save();
 
@@ -808,5 +1022,382 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$item->set_quantity( $quantity );
 		$item->save();
 		$order->add_item( $item );
+	}
+
+	/**
+	 * @testdox Updating an order with incomplete meta_data entries does not cause errors.
+	 */
+	public function test_update_meta_data_with_incomplete_entries(): void {
+		$order = wc_create_order();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'meta_data' => $this->get_incomplete_meta_data_input() ) ) );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$this->assert_incomplete_meta_data_handled_correctly( wc_get_order( $order->get_id() ) );
+	}
+
+	/**
+	 * @testdox Updating an order accepts round-tripped line item meta_data display values with complex values.
+	 */
+	public function test_update_line_item_meta_data_ignores_display_values_with_complex_values(): void {
+		$product            = WC_Helper_Product::create_simple_product();
+		$complex_meta_value = array(
+			array(
+				'guid'      => 'https://example.com/wp-content/uploads/2022/03/upload.jpg',
+				'file_type' => 'image/jpeg',
+				'file_name' => 'upload.jpg',
+				'title'     => 'upload',
+				'key'       => 'file-key',
+			),
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 1,
+						'meta_data'  => array(
+							array(
+								'key'   => '_file_upload_data',
+								'value' => $complex_meta_value,
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 201, $response->get_status() );
+
+		$response_data  = $response->get_data();
+		$line_item_data = $response_data['line_items'][0];
+		$meta_data      = $line_item_data['meta_data'][0];
+		$this->assertIsArray( $meta_data['display_value'] );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $response_data['id'] );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'status'     => OrderStatus::PROCESSING,
+					'line_items' => array(
+						array(
+							'id'        => $line_item_data['id'],
+							'meta_data' => array( $meta_data ),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$order      = wc_get_order( $response_data['id'] );
+		$line_items = $order->get_items( 'line_item' );
+		$line_item  = $line_items[ $line_item_data['id'] ];
+		$this->assertEquals( $complex_meta_value, $line_item->get_meta( '_file_upload_data' ) );
+	}
+
+	/**
+	 * @testdox Published order schema advertises a standard type union for meta_data value/display_value, not the non-standard 'mixed'.
+	 */
+	public function test_meta_data_schema_advertises_type_union(): void {
+		$expected_union = array( 'null', 'object', 'string', 'number', 'boolean', 'integer', 'array' );
+
+		$schema     = $this->endpoint->get_item_schema();
+		$properties = $schema['properties'];
+
+		// Every order meta_data value field, at every level, should advertise the union instead of 'mixed'.
+		$meta_containers = array(
+			$properties['meta_data']['items']['properties'],
+			$properties['line_items']['items']['properties']['meta_data']['items']['properties'],
+			$properties['tax_lines']['items']['properties']['meta_data']['items']['properties'],
+			$properties['shipping_lines']['items']['properties']['meta_data']['items']['properties'],
+			$properties['fee_lines']['items']['properties']['meta_data']['items']['properties'],
+			$properties['coupon_lines']['items']['properties']['meta_data']['items']['properties'],
+		);
+		foreach ( $meta_containers as $meta_properties ) {
+			$this->assertEquals( $expected_union, $meta_properties['value']['type'] );
+		}
+
+		// The line item block also exposes read-only display fields with the same union type.
+		$line_item_meta = $properties['line_items']['items']['properties']['meta_data']['items']['properties'];
+		$this->assertEquals( $expected_union, $line_item_meta['display_value']['type'] );
+		$this->assertTrue( $line_item_meta['display_value']['readonly'] );
+		$this->assertTrue( $line_item_meta['display_key']['readonly'] );
+	}
+
+	/**
+	 * Builds a variable product with a single variation carrying a real "color" attribute.
+	 *
+	 * @return array Two-element array: the WC_Product_Variable parent and its WC_Product_Variation.
+	 */
+	private function create_variable_product_with_color_variation(): array {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'REST Switch Parent' );
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'color' );
+		$attribute->set_options( array( 'blue', 'green' ) );
+		$attribute->set_variation( true );
+		$parent->set_attributes( array( $attribute ) );
+		$parent->save();
+
+		$variation = WC_Helper_Product::create_product_variation_object(
+			$parent->get_id(),
+			'REST-VAR-' . wp_generate_uuid4(),
+			10,
+			array( 'color' => 'blue' )
+		);
+
+		return array( $parent, $variation );
+	}
+
+	/**
+	 * Creates an order carrying the given variation as its single line item.
+	 *
+	 * @param WC_Product_Variation $variation Variation to add as a line item.
+	 * @return array Two-element array: the saved WC_Order and the line item ID.
+	 */
+	private function create_order_with_variation_line_item( $variation ): array {
+		$order = new WC_Order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_product( $variation );
+		$item->set_quantity( 1 );
+		$item->set_total( 10 );
+		$order->add_item( $item );
+		$order->save();
+
+		return array( $order, $item->get_id() );
+	}
+
+	/**
+	 * Dispatches a v3 line-item update.
+	 *
+	 * @param int   $order_id Order ID.
+	 * @param array $line_item Line-item payload.
+	 * @return WP_REST_Response
+	 */
+	private function dispatch_line_item_update( int $order_id, array $line_item ): WP_REST_Response {
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order_id );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'line_items' => array( $line_item ) ) ) );
+
+		return $this->server->dispatch( $request );
+	}
+
+	/**
+	 * @testdox PUT /orders that switches a variation line item to a simple product clears variation_id over the REST round trip.
+	 */
+	public function test_update_line_item_to_simple_product_clears_variation_id(): void {
+		$fixture                 = $this->create_variable_product_with_color_variation();
+		$variation               = $fixture[1];
+		list( $order, $item_id ) = $this->create_order_with_variation_line_item( $variation );
+		$simple                  = WC_Helper_Product::create_simple_product();
+
+		$this->assertSame( $variation->get_id(), (int) wc_get_order_item_meta( $item_id, '_variation_id' ), 'Precondition: the line item stored the variation ID.' );
+
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
+			array(
+				'id'         => $item_id,
+				'product_id' => $simple->get_id(),
+			)
+		);
+		$this->assertSame( 200, $response->get_status(), 'The update should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'variation_id should be reset to 0 after switching to a simple product over REST.' );
+		$this->assertSame( 0, (int) wc_get_order_item_meta( $item_id, '_variation_id' ), 'The persisted _variation_id meta should be 0.' );
+		$this->assertSame( $simple->get_id(), $reloaded->get_product()->get_id(), 'get_product() should resolve to the simple product, not the old variation.' );
+	}
+
+	/**
+	 * @testdox PUT /orders with an unchanged parent preserves the variation while ignoring view-context variation ID filters.
+	 */
+	public function test_update_line_item_with_unchanged_parent_preserves_variation_id(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+		$parent->set_name( 'Updated parent name' );
+		$parent->set_tax_class( 'reduced-rate' );
+		$parent->save();
+		list( $order, $item_id ) = $this->create_order_with_variation_line_item( $variation );
+		$item                    = new WC_Order_Item_Product( $item_id );
+		$item->set_name( 'Historical line item name' );
+		$item->set_tax_class( '' );
+		$item->save();
+		$variation_id_filter    = static function ( $variation_id, $order_item ) use ( $item_id ) {
+			return $item_id === $order_item->get_id() ? 0 : $variation_id;
+		};
+		$variation_id_hook_name = 'woocommerce_order_item_get_variation_id';
+		add_filter( $variation_id_hook_name, $variation_id_filter, 10, 2 );
+
+		try {
+			$response = $this->dispatch_line_item_update(
+				$order->get_id(),
+				array(
+					'id'         => $item_id,
+					'product_id' => $parent->get_id(),
+				)
+			);
+		} finally {
+			remove_filter( $variation_id_hook_name, $variation_id_filter, 10 );
+		}
+		$this->assertSame( 200, $response->get_status(), 'A product_id-only payload targeting the variable parent succeeds with no error.' );
+
+		$response_item = $response->get_data()['line_items'][0];
+		$reloaded      = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( $variation->get_id(), $reloaded->get_variation_id(), 'Omitting variation_id should preserve the existing variation.' );
+		$this->assertSame( $variation->get_id(), (int) wc_get_order_item_meta( $item_id, '_variation_id' ), 'The persisted _variation_id meta should remain unchanged.' );
+		$this->assertSame( $variation->get_id(), $reloaded->get_product()->get_id(), 'get_product() should continue to resolve to the variation.' );
+		$this->assertSame( $parent->get_id(), $response_item['product_id'], 'The response should retain the variable parent product ID.' );
+		$this->assertSame( $variation->get_id(), $response_item['variation_id'], 'The response should retain the variation ID.' );
+		$this->assertSame( $parent->get_name(), $reloaded->get_name(), 'The line-item name should retain its pre-regression resynchronization behavior.' );
+		$this->assertSame( $parent->get_tax_class(), $reloaded->get_tax_class(), 'The line-item tax class should retain its pre-regression resynchronization behavior.' );
+	}
+
+	/**
+	 * @testdox PUT /orders with an explicit zero variation ID demotes a variation even when SKU resolves to it.
+	 */
+	public function test_update_line_item_with_zero_variation_id_and_current_sku_switches_to_parent(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+
+		$parent->set_name( 'REST V3 parent product' );
+		$parent->set_tax_class( '' );
+		$parent->save();
+		$variation_sku = 'REST-V3-VARIATION-' . wp_generate_uuid4();
+		$variation->set_sku( $variation_sku );
+		$variation->set_tax_class( 'reduced-rate' );
+		$variation->save();
+
+		list( $order, $item_id ) = $this->create_order_with_variation_line_item( $variation );
+
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
+			array(
+				'id'           => $item_id,
+				'product_id'   => $parent->get_id(),
+				'variation_id' => 0,
+				'sku'          => $variation_sku,
+			)
+		);
+		$this->assertSame( 200, $response->get_status(), 'Explicitly demoting the line item should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'An explicit zero variation ID should clear the existing variation.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product_id(), 'The line item should retain the submitted parent product ID.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the parent product.' );
+		$this->assertSame( $parent->get_name(), $reloaded->get_name(), 'The line-item name should be synchronized with the parent product.' );
+		$this->assertSame( $parent->get_tax_class(), $reloaded->get_tax_class(), 'The line-item tax class should be synchronized with the parent product.' );
+	}
+
+	/**
+	 * @testdox PUT /orders with the parent product as variation_id does not restore the existing variation.
+	 */
+	public function test_update_line_item_with_parent_as_variation_id_does_not_restore_variation(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
+
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
+			array(
+				'id'           => $item_id,
+				'product_id'   => $parent->get_id(),
+				'variation_id' => $parent->get_id(),
+			)
+		);
+		$this->assertSame( 200, $response->get_status(), 'The update should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'A parent product ID should not be restored as a variation.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product_id(), 'The line item should retain the parent product ID.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the parent product.' );
+	}
+
+	/**
+	 * @testdox Round-tripping a variation with its inherited parent SKU preserves the variation ID.
+	 */
+	public function test_round_trip_line_item_with_inherited_parent_sku_preserves_variation_id(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+		$parent_sku                 = 'REST-V3-PARENT-' . wp_generate_uuid4();
+		$parent->set_sku( $parent_sku );
+		$parent->save();
+		$variation->set_sku( '' );
+		$variation->save();
+		list( $order, $item_id ) = $this->create_order_with_variation_line_item( $variation );
+
+		$get_request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() );
+		$get_response = $this->server->dispatch( $get_request );
+		$this->assertSame( 200, $get_response->get_status(), 'Fetching the order should succeed.' );
+
+		$round_trip_item = $get_response->get_data()['line_items'][0];
+		$this->assertSame( $parent_sku, $round_trip_item['sku'], 'The response should expose the SKU inherited from the parent.' );
+
+		$put_response = $this->dispatch_line_item_update( $order->get_id(), $round_trip_item );
+		$this->assertSame( 200, $put_response->get_status(), 'Round-tripping the line item should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( $variation->get_id(), $reloaded->get_variation_id(), 'The inherited parent SKU should not demote the variation.' );
+		$this->assertSame( $variation->get_id(), $reloaded->get_product()->get_id(), 'The line item should continue to resolve to the variation.' );
+	}
+
+	/**
+	 * @testdox PUT /orders does not preserve the variation when product_id conflicts with a SKU resolving to the current parent.
+	 */
+	public function test_update_line_item_with_different_product_id_and_current_parent_sku_does_not_preserve_variation(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+		$parent_sku                 = 'REST-V3-PARENT-' . wp_generate_uuid4();
+		$parent->set_sku( $parent_sku );
+		$parent->save();
+		list( $order, $item_id ) = $this->create_order_with_variation_line_item( $variation );
+		$different_product       = WC_Helper_Product::create_simple_product();
+
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
+			array(
+				'id'         => $item_id,
+				'product_id' => $different_product->get_id(),
+				'sku'        => $parent_sku,
+			)
+		);
+		$this->assertSame( 200, $response->get_status(), 'The SKU-selected product update should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'A conflicting product ID should prevent restoring the variation.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product_id(), 'The line item should retain the product selected by SKU.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the product selected by SKU.' );
+	}
+
+	/**
+	 * @testdox PUT /orders still switches products when SKU conflicts with the unchanged parent product_id.
+	 */
+	public function test_update_line_item_with_different_product_sku_switches_products(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
+		$simple                     = WC_Helper_Product::create_simple_product();
+		$simple_sku                 = 'REST-V3-SIMPLE-' . wp_generate_uuid4();
+		$simple->set_sku( $simple_sku );
+		$simple->save();
+
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
+			array(
+				'id'         => $item_id,
+				'product_id' => $parent->get_id(),
+				'sku'        => $simple_sku,
+			)
+		);
+		$this->assertSame( 200, $response->get_status(), 'Switching by SKU should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'Switching to a simple product by SKU should clear variation_id.' );
+		$this->assertSame( $simple->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the product selected by SKU.' );
 	}
 }

@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\EmailEditor\PersonalizationTags;
 
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
+use Automattic\WooCommerce\Internal\EmailEditor\Integration;
 
 /**
  * Provider for store-related personalization tags.
@@ -26,11 +27,15 @@ class StoreTagsProvider extends AbstractTagProvider {
 				'woocommerce/store-email',
 				__( 'Store', 'woocommerce' ),
 				function ( array $context ): string {
-					if ( isset( $context['wc_email'], $context['wc_email']->get_from_address ) ) {
-						return $context['wc_email']->get_from_address();
+					$wc_email = $context['wc_email'] ?? null;
+					if ( $wc_email instanceof \WC_Email ) {
+						return $wc_email->get_from_address();
 					}
 					return get_option( 'admin_email' );
 				},
+				array(),
+				null,
+				array( Integration::EMAIL_POST_TYPE ),
 			)
 		);
 
@@ -42,6 +47,9 @@ class StoreTagsProvider extends AbstractTagProvider {
 				function (): string {
 					return esc_attr( wc_get_page_permalink( 'shop' ) );
 				},
+				array(),
+				null,
+				array( Integration::EMAIL_POST_TYPE ),
 			)
 		);
 
@@ -57,6 +65,9 @@ class StoreTagsProvider extends AbstractTagProvider {
 
 					return wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
 				},
+				array(),
+				null,
+				array( Integration::EMAIL_POST_TYPE ),
 			)
 		);
 
@@ -68,6 +79,9 @@ class StoreTagsProvider extends AbstractTagProvider {
 				function (): string {
 					return WC()->mailer->get_store_address() ?? '';
 				},
+				array(),
+				null,
+				array( Integration::EMAIL_POST_TYPE ),
 			)
 		);
 
@@ -79,6 +93,9 @@ class StoreTagsProvider extends AbstractTagProvider {
 				function (): string {
 					return esc_attr( wc_get_page_permalink( 'myaccount' ) );
 				},
+				array(),
+				null,
+				array( Integration::EMAIL_POST_TYPE ),
 			)
 		);
 
@@ -89,10 +106,13 @@ class StoreTagsProvider extends AbstractTagProvider {
 				__( 'Store', 'woocommerce' ),
 				function ( array $context ): string {
 					if ( isset( $context['wc_email'], $context['wc_email']->customer_note ) ) {
-						return wptexturize( $context['wc_email']->customer_note );
+						return nl2br( wptexturize( $context['wc_email']->customer_note ) );
 					}
 					return '';
 				},
+				array(),
+				null,
+				array( Integration::EMAIL_POST_TYPE ),
 			)
 		);
 	}

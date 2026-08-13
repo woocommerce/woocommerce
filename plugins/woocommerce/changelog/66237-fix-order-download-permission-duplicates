@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent duplicate order download permissions when granting access to a product again.

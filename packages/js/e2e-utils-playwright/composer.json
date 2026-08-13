@@ -2,7 +2,7 @@
 	"name": "woocommerce/e2e-utils-playwright",
 	"description": "End-To-End (E2E) test Playwright utils for WooCommerce",
 	"type": "library",
-	"license": "GPL-3.0-or-later",
+	"license": "GPL-2.0-or-later",
 	"minimum-stability": "dev",
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0"

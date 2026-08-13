@@ -8,6 +8,8 @@
  * @since    3.0.0
  */
 
+use Automattic\WooCommerce\Internal\Traits\RestApiCache;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -19,6 +21,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @extends WC_REST_Controller
  */
 class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
+
+	use RestApiCache;
 
 	/**
 	 * Endpoint namespace.
@@ -35,6 +39,13 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 	protected $rest_base = 'taxes';
 
 	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		$this->initialize_rest_api_cache();
+	}
+
+	/**
 	 * Register the routes for taxes.
 	 */
 	public function register_routes() {
@@ -44,7 +55,13 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_items' ),
+					'callback'            => $this->with_cache(
+						array( $this, 'get_items' ),
+						array(
+							'endpoint_id'              => 'get_tax_rates',
+							'relevant_version_strings' => array( 'list_tax_rates' ),
+						)
+					),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_collection_params(),
 				),
@@ -70,7 +87,7 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 				),
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_item' ),
+					'callback'            => $this->with_cache( array( $this, 'get_item' ) ),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
 						'context' => $this->get_context_param( array( 'default' => 'view' ) ),
@@ -764,5 +781,39 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 		);
 
 		return $params;
+	}
+
+	/**
+	 * Get the default entity type for response caching.
+	 *
+	 * @return string|null The entity type.
+	 */
+	protected function get_default_response_entity_type(): ?string {
+		return 'tax_rate';
+	}
+
+	/**
+	 * Whether the response cache should vary by user.
+	 *
+	 * @param WP_REST_Request<array<string, mixed>> $request     The request object.
+	 * @param string|null                           $endpoint_id Optional endpoint identifier.
+	 * @return bool False since tax data doesn't vary by user.
+	 */
+	protected function response_cache_vary_by_user( WP_REST_Request $request, ?string $endpoint_id = null ): bool { // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
+		return false;
+	}
+
+	/**
+	 * Get the hooks relevant to response caching.
+	 *
+	 * @param WP_REST_Request<array<string, mixed>> $request     The request object.
+	 * @param string|null                           $endpoint_id Optional endpoint identifier.
+	 * @return array Array of hook names to track for cache invalidation.
+	 */
+	protected function get_hooks_relevant_to_caching( WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
+		return array(
+			'woocommerce_rest_prepare_tax',
+			'woocommerce_rest_tax_query',
+		);
 	}
 }

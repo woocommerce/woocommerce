@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Framework
  */
 
+use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
+
 /**
  * Class WC_Mock_Payment_Gateway
  */
@@ -21,8 +23,8 @@ class WC_Mock_Payment_Gateway extends WC_Payment_Gateway {
 		$this->method_description = 'Mock Gateway for unit tests';
 		$this->pay_button_id      = 'mock-pay-button';
 		$this->supports           = array(
-			'products',
-			'pay_button',
+			PaymentGatewayFeature::PRODUCTS,
+			PaymentGatewayFeature::PAY_BUTTON,
 		);
 
 		// Load the settings.

@@ -7,7 +7,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\PluginsHelper;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use Automattic\WooCommerce\Admin\Notes\Note;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -19,6 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * The main entry-point for all things related to the Helper.
  */
 class WC_Helper {
+	const NOTE_NAME = 'wccom-api-failed';
+
 	/**
 	 * A log object returned by wc_get_logger().
 	 *
@@ -41,6 +43,8 @@ class WC_Helper {
 
 	/**
 	 * Loads the helper class, runs on init.
+	 *
+	 * @return void
 	 */
 	public static function load() {
 		self::includes();
@@ -54,6 +58,75 @@ class WC_Helper {
 	}
 
 	/**
+	 * Remove all notes signaling an error with the WCCOM API, when the request was successful.
+	 *
+	 * @return void
+	 */
+	protected static function remove_api_error_notice() {
+		try {
+			$data_store = \WC_Data_Store::load( 'admin-note' );
+		} catch ( Exception $e ) {
+			return;
+		}
+
+		$note_ids = $data_store->get_notes_with_name( self::NOTE_NAME );
+
+		if ( ! empty( $note_ids ) ) {
+			foreach ( $note_ids as $note_id ) {
+				$note = new Note( $note_id );
+				if ( $note->get_id() ) {
+					$data_store->delete( $note );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Adds at most one note signaling that there was an error with the WCCOM API.
+	 *
+	 * @return void
+	 */
+	protected static function add_api_error_notice() {
+		try {
+			$data_store = \WC_Data_Store::load( 'admin-note' );
+		} catch ( Exception $e ) {
+			return;
+		}
+
+		$note_ids = $data_store->get_notes_with_name( self::NOTE_NAME );
+
+		if ( ! empty( $note_ids ) ) {
+			$current_notice_id = array_shift( $note_ids );
+
+			foreach ( $note_ids as $note_id ) {
+				$note = new Note( $note_id );
+				if ( $note->get_id() ) {
+					$data_store->delete( $note );
+				}
+			}
+
+			$note = new Note( $current_notice_id );
+		} else {
+			$note = new Note();
+		}
+
+		$note->set_props(
+			array(
+				'title'        => __( 'We’re having trouble connecting to WooCommerce.com', 'woocommerce' ),
+				'content'      => __( 'Some subscription data may be temporarily unavailable. Please refresh the page in a few minutes to try again.', 'woocommerce' ),
+				'type'         => Note::E_WC_ADMIN_NOTE_UPDATE,
+				'name'         => self::NOTE_NAME,
+				'content_data' => (object) array(),
+				'source'       => 'woocommerce-admin',
+				'status'       => Note::E_WC_ADMIN_NOTE_UNACTIONED,
+				'is_deleted'   => false,
+			)
+		);
+
+		$note->save();
+	}
+
+	/**
 	 * Get the source page for the connect URL (wc-admin or wc-addons/extensions)
 	 *
 	 * @return string
@@ -64,7 +137,25 @@ class WC_Helper {
 	}
 
 	/**
+	 * Get the URL of the My Subscriptions screen used in admin notices.
+	 *
+	 * @return string
+	 */
+	private static function get_subscriptions_url() {
+		return add_query_arg(
+			array(
+				'page' => 'wc-admin',
+				'tab'  => 'my-subscriptions',
+				'path' => rawurlencode( '/extensions' ),
+			),
+			admin_url( 'admin.php' )
+		);
+	}
+
+	/**
 	 * Include supporting helper classes.
+	 *
+	 * @return void
 	 */
 	protected static function includes() {
 		include_once __DIR__ . '/class-wc-helper-options.php';
@@ -83,6 +174,8 @@ class WC_Helper {
 
 	/**
 	 * Render the helper section content based on context.
+	 *
+	 * @return void
 	 */
 	public static function render_helper_output() {
 		$auth           = WC_Helper_Options::get( 'auth' );
@@ -459,6 +552,8 @@ class WC_Helper {
 	 *
 	 * @param array  $subscriptions The subscriptions array, passed by ref.
 	 * @param string $filter The filter.
+	 *
+	 * @return void
 	 */
 	private static function _filter( &$subscriptions, $filter ) {
 		switch ( $filter ) {
@@ -502,6 +597,8 @@ class WC_Helper {
 
 	/**
 	 * Enqueue admin scripts and styles.
+	 *
+	 * @return void
 	 */
 	public static function admin_enqueue_scripts() {
 		$screen       = get_current_screen();
@@ -704,6 +801,8 @@ class WC_Helper {
 
 	/**
 	 * Maybe redirect to the new Marketplace installer.
+	 *
+	 * @return void
 	 */
 	private static function maybe_redirect_to_new_marketplace_installer() {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
@@ -746,7 +845,6 @@ class WC_Helper {
 		if (
 			( 'woocommerce_page_wc-addons' === $current_screen->id ||
 			'woocommerce_page_wc-admin' === $current_screen->id ) &&
-			FeaturesUtil::feature_is_enabled( 'marketplace' ) &&
 			(
 				false === empty( $redirect_admin_url ) ||
 				false === empty( $install_product_key )
@@ -784,6 +882,8 @@ class WC_Helper {
 
 	/**
 	 * Initiate a new OAuth connection.
+	 *
+	 * @return never
 	 */
 	private static function _helper_auth_connect() {
 		if ( empty( $_GET['wc-helper-nonce'] ) || ! wp_verify_nonce( wp_unslash( $_GET['wc-helper-nonce'] ), 'connect' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -872,6 +972,8 @@ class WC_Helper {
 
 	/**
 	 * Return from WooCommerce.com OAuth flow.
+	 *
+	 * @return never
 	 */
 	private static function _helper_auth_return() {
 		if ( empty( $_GET['wc-helper-nonce'] ) || ! wp_verify_nonce( wp_unslash( $_GET['wc-helper-nonce'] ), 'connect' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -968,6 +1070,8 @@ class WC_Helper {
 
 	/**
 	 * Disconnect from WooCommerce.com, clear OAuth tokens.
+	 *
+	 * @return never
 	 */
 	private static function _helper_auth_disconnect() {
 		if ( empty( $_GET['wc-helper-nonce'] ) || ! wp_verify_nonce( wp_unslash( $_GET['wc-helper-nonce'] ), 'disconnect' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -996,6 +1100,8 @@ class WC_Helper {
 
 	/**
 	 * User hit the Refresh button, clear all caches.
+	 *
+	 * @return never
 	 */
 	private static function _helper_auth_refresh() {
 		if ( empty( $_GET['wc-helper-nonce'] ) || ! wp_verify_nonce( wp_unslash( $_GET['wc-helper-nonce'] ), 'refresh' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -1022,6 +1128,8 @@ class WC_Helper {
 	 * Flush helper authentication cache.
 	 *
 	 * @throws Exception If there is an error refreshing subscriptions.
+	 *
+	 * @return void
 	 */
 	public static function refresh_helper_subscriptions() {
 		/**
@@ -1038,6 +1146,8 @@ class WC_Helper {
 
 	/**
 	 * Active a product subscription.
+	 *
+	 * @return never
 	 */
 	private static function _helper_subscription_activate() {
 		$product_key = isset( $_GET['wc-helper-product-key'] ) ? wc_clean( wp_unslash( $_GET['wc-helper-product-key'] ) ) : '';
@@ -1073,6 +1183,7 @@ class WC_Helper {
 	 * Activate helper subscription.
 	 *
 	 * @throws Exception If the subscription could not be activated or found.
+	 * @throws WC_Data_Exception If the activation fails with error details.
 	 * @param string $product_key Subscription product key.
 	 * @return bool True if activated, false otherwise.
 	 */
@@ -1104,11 +1215,21 @@ class WC_Helper {
 			 * @param array  $activation_response The response object from wp_safe_remote_request().
 			 */
 			do_action( 'woocommerce_helper_subscription_activate_error', $product_id, $product_key, $activation_response );
-			throw new Exception( $body['message'] ?? __( 'Unknown error', 'woocommerce' ) );
+
+			// Include HTTP status code and any extra data from the API response in the exception so callers can surface it.
+			$status_code = function_exists( 'wp_remote_retrieve_response_code' ) ? (int) wp_remote_retrieve_response_code( $activation_response ) : (int) ( $body['data']['status'] ?? 400 );
+			$error_data  = isset( $body['data'] ) && is_array( $body['data'] ) ? $body['data'] : array();
+			throw new WC_Data_Exception(
+				esc_html( $body['code'] ?? 'unknown_error' ),
+				isset( $body['message'] ) ? esc_html( $body['message'] ) : esc_html__( 'Unknown error', 'woocommerce' ),
+				(int) $status_code,
+				function_exists( 'map_deep' ) ? map_deep( $error_data, 'esc_html' ) : array_map( 'esc_html', $error_data ),
+			);
 		}
 
 		self::_flush_subscriptions_cache();
 		self::_flush_updates_cache();
+		self::flush_product_usage_notice_rules_cache();
 
 		return $activated;
 	}
@@ -1146,6 +1267,8 @@ class WC_Helper {
 
 	/**
 	 * Deactivate a product subscription.
+	 *
+	 * @return never
 	 */
 	private static function helper_subscription_deactivate() {
 		$product_key = isset( $_GET['wc-helper-product-key'] ) ? wc_clean( wp_unslash( $_GET['wc-helper-product-key'] ) ) : '';
@@ -1232,6 +1355,8 @@ class WC_Helper {
 		}
 
 		self::_flush_subscriptions_cache();
+		self::_flush_updates_cache();
+		self::flush_product_usage_notice_rules_cache();
 
 		return $deactivated;
 	}
@@ -1256,6 +1381,8 @@ class WC_Helper {
 
 	/**
 	 * Deactivate a plugin.
+	 *
+	 * @return never
 	 */
 	private static function _helper_plugin_deactivate() {
 		$product_id  = isset( $_GET['wc-helper-product-id'] ) ? absint( $_GET['wc-helper-product-id'] ) : 0;
@@ -1358,16 +1485,12 @@ class WC_Helper {
 				return $installed_subscriptions;
 			}
 
-			try {
-				$installed_subscriptions = array_filter(
-					self::get_subscriptions(),
-					function ( $subscription ) use ( $site_id ) {
-						return in_array( $site_id, $subscription['connections'], true );
-					}
-				);
-			} catch ( Exception $e ) {
-				$installed_subscriptions = array();
-			}
+			$installed_subscriptions = array_filter(
+				self::get_subscriptions(),
+				function ( $subscription ) use ( $site_id ) {
+					return in_array( $site_id, $subscription['connections'], true );
+				}
+			);
 		}
 
 		return $installed_subscriptions;
@@ -1390,16 +1513,12 @@ class WC_Helper {
 				return $unconnected_subscriptions;
 			}
 
-			try {
-				$unconnected_subscriptions = array_filter(
-					self::get_subscriptions(),
-					function ( $subscription ) use ( $site_id ) {
-						return empty( $subscription['connections'] );
-					}
-				);
-			} catch ( Exception $e ) {
-				$unconnected_subscriptions = array();
-			}
+			$unconnected_subscriptions = array_filter(
+				self::get_subscriptions(),
+				function ( $subscription ) use ( $site_id ) {
+					return empty( $subscription['connections'] );
+				}
+			);
 		}
 
 		return $unconnected_subscriptions;
@@ -1442,15 +1561,12 @@ class WC_Helper {
 	 * @return array|bool The array containing sub data or false.
 	 */
 	private static function _get_subscriptions_from_product_id( $product_id, $single = true ) {
-		try {
-			$subscriptions = wp_list_filter( self::get_subscriptions(), array( 'product_id' => $product_id ) );
-		} catch ( Exception $e ) {
-			return false;
-		}
+		$subscriptions = wp_list_filter( self::get_subscriptions(), array( 'product_id' => $product_id ) );
 
 		if ( ! empty( $subscriptions ) ) {
 			return $single ? array_shift( $subscriptions ) : $subscriptions;
 		}
+
 		return false;
 	}
 
@@ -1510,6 +1626,8 @@ class WC_Helper {
 
 	/**
 	 * Obtain a list of data about locally installed Woo extensions.
+	 *
+	 * @return array
 	 */
 	public static function get_local_woo_plugins() {
 		if ( ! function_exists( 'get_plugins' ) ) {
@@ -1573,6 +1691,8 @@ class WC_Helper {
 
 	/**
 	 * Get locally installed Woo themes.
+	 *
+	 * @return array
 	 */
 	public static function get_local_woo_themes() {
 		$themes     = wp_get_themes();
@@ -1625,13 +1745,18 @@ class WC_Helper {
 	 * Get rules for displaying notice regarding marketplace product usage.
 	 *
 	 * @return array
-	 * @throws Exception If there is an error getting product usage notice rules.
+	 *
+	 * phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- As we wrap the throw in a try/catch.
 	 */
 	public static function get_product_usage_notice_rules() {
 		$cache_key = '_woocommerce_helper_product_usage_notice_rules';
 		$data      = get_transient( $cache_key );
 		if ( false !== $data ) {
-			return $data;
+			if ( is_array( $data ) ) {
+				return $data;
+			}
+			// Cached data is corrupted, delete and fetch fresh.
+			delete_transient( $cache_key );
 		}
 
 		try {
@@ -1646,29 +1771,39 @@ class WC_Helper {
 			if ( is_wp_error( $request ) ) {
 				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
 
-				throw new Exception( $request->get_error_message() );
+				throw new Exception( $request->get_error_message(), (int) $request->get_error_data() );
 			}
 
 			$code = wp_remote_retrieve_response_code( $request );
 			if ( 200 !== $code ) {
 				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
 
-				throw new Exception( self::get_message_for_response_code( $code ) );
+				throw new Exception( self::get_message_for_response_code( $code ), $code );
 			}
 
 			$data = json_decode( wp_remote_retrieve_body( $request ), true );
 			if ( ! is_array( $data ) ) {
 				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
 
-				throw new Exception( __( 'WooCommerce.com API returned an invalid response.', 'woocommerce' ) );
+				throw new Exception( __( 'WooCommerce.com API returned an invalid response.', 'woocommerce' ), 422 );
 			}
 
-			set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
+			set_transient( $cache_key, $data, DAY_IN_SECONDS );
+
+			// Remove notice after successful API call as it's no longer applicable.
+			self::remove_api_error_notice();
 			return $data;
 		} catch ( Exception $e ) {
-			self::log( 'Error getting product usage notice rules: ' . $e->getMessage(), 'error' );
-			throw $e;
+			if ( $e->getCode() < 404 ) {
+				self::remove_api_error_notice();
+			} else {
+				// Only show error notice in case there is no proper communication with WCCOM.
+				self::log( 'Error getting product usage notice rules: ' . $e->getMessage(), 'error' );
+				self::add_api_error_notice();
+			}
 		}
+
+		return array();
 	}
 
 	/**
@@ -1701,7 +1836,13 @@ class WC_Helper {
 	 * @return array|bool cached connection data or false connection data is not cached.
 	 */
 	public static function get_cached_connection_data() {
-		return get_transient( self::CACHE_KEY_CONNECTION_DATA );
+		$data = get_transient( self::CACHE_KEY_CONNECTION_DATA );
+		if ( false !== $data && ! is_array( $data ) ) {
+			// Cached data is corrupted, delete and return false to trigger fresh fetch.
+			delete_transient( self::CACHE_KEY_CONNECTION_DATA );
+			return false;
+		}
+		return $data;
 	}
 
 	/**
@@ -1712,6 +1853,9 @@ class WC_Helper {
 	public static function fetch_helper_connection_info() {
 		$data = self::get_cached_connection_data();
 		if ( false !== $data ) {
+			if ( ! empty( $data['maybe_deleted_connection'] ) ) {
+				return new WP_Error( 'deleted_connection', 'Connection may have been deleted' );
+			}
 			return $data;
 		}
 
@@ -1723,16 +1867,21 @@ class WC_Helper {
 			)
 		);
 
-		$status = wp_remote_retrieve_response_code( $request );
+		$status          = wp_remote_retrieve_response_code( $request );
+		$body            = json_decode( wp_remote_retrieve_body( $request ), true );
+		$connection_data = is_array( $body ) ? $body : array();
+		$message         = $connection_data['message'] ?? '';
+
 		if ( 200 !== $status ) {
+			if ( 'Connected site not found.' === $message || 'Invalid access token' === $message ) {
+				set_transient( self::CACHE_KEY_CONNECTION_DATA, array( 'maybe_deleted_connection' => true ), 1 * HOUR_IN_SECONDS );
+			}
 			return new WP_Error(
 				'invalid_response',
 				'Invalid response from WooCommerce.com',
 				array( 'status' => $status )
 			);
 		}
-
-		$connection_data = json_decode( wp_remote_retrieve_body( $request ), true );
 
 		$url = $connection_data['url'] ?? '';
 
@@ -1746,32 +1895,62 @@ class WC_Helper {
 		return $connection_data;
 	}
 
+	/**
+	 * Filter malformed entries from subscription data.
+	 *
+	 * @param array $subscriptions Subscription entries.
+	 * @return array
+	 */
+	private static function filter_valid_subscriptions( $subscriptions ) {
+		return array_filter(
+			$subscriptions,
+			static function ( $subscription ) {
+				if ( ! is_array( $subscription ) ) {
+					return false;
+				}
+
+				$product_id = $subscription['product_id'] ?? null;
+				return (
+					is_int( $product_id )
+					|| ( is_string( $product_id ) && ctype_digit( $product_id ) )
+				) && 0 < (int) $product_id
+					&& is_array( $subscription['connections'] ?? null );
+			}
+		);
+	}
 
 	/**
 	 * Get the connected user's subscriptions.
 	 *
 	 * @return array
-	 * @throws Exception If there is an error getting subscriptions.
+	 *
+	 * phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- As we wrap the throw in a try/catch.
 	 */
 	public static function get_subscriptions() {
 		$cache_key = '_woocommerce_helper_subscriptions';
 		$data      = get_transient( $cache_key );
 		if ( false !== $data ) {
-			return $data;
+			if ( is_array( $data ) ) {
+				return self::filter_valid_subscriptions( $data );
+			}
+			// Cached data is corrupted, delete and fetch fresh.
+			delete_transient( $cache_key );
 		}
 
 		try {
 			$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$source      = '';
-			if ( stripos( $request_uri, 'wc-addons' ) ) :
+			if ( false !== stripos( $request_uri, 'wc/v3/marketplace/refresh' ) ) :
+				$source = 'refresh-button';
+			elseif ( false !== stripos( $request_uri, 'my-subscriptions' ) ) :
 				$source = 'my-subscriptions';
-			elseif ( stripos( $request_uri, 'plugins.php' ) ) :
+			elseif ( false !== stripos( $request_uri, 'plugins.php' ) ) :
 				$source = 'plugins';
-			elseif ( stripos( $request_uri, 'wc-admin' ) ) :
+			elseif ( false !== stripos( $request_uri, 'wc-admin' ) ) :
 				$source = 'inbox-notes';
-			elseif ( stripos( $request_uri, 'admin-ajax.php' ) ) :
+			elseif ( false !== stripos( $request_uri, 'admin-ajax.php' ) ) :
 				$source = 'heartbeat-api';
-			elseif ( stripos( $request_uri, 'installer' ) ) :
+			elseif ( false !== stripos( $request_uri, 'installer' ) ) :
 				$source = 'wccom-site-installer';
 			elseif ( defined( 'WP_CLI' ) && WP_CLI ) :
 				$source = 'wc-cli';
@@ -1789,29 +1968,51 @@ class WC_Helper {
 			if ( is_wp_error( $request ) ) {
 				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
 
-				throw new Exception( $request->get_error_message() );
+				throw new Exception( $request->get_error_message(), (int) $request->get_error_data() );
 			}
 
 			$code = wp_remote_retrieve_response_code( $request );
 			if ( 200 !== $code ) {
 				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
 
-				throw new Exception( self::get_message_for_response_code( $code ) );
+				throw new Exception( self::get_message_for_response_code( $code ), $code );
 			}
 
 			$data = json_decode( wp_remote_retrieve_body( $request ), true );
 			if ( ! is_array( $data ) ) {
 				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
 
-				throw new Exception( __( 'WooCommerce.com API returned an invalid response.', 'woocommerce' ) );
+				throw new Exception( __( 'WooCommerce.com API returned an invalid response.', 'woocommerce' ), 422 );
 			}
 
-			set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
+			$subscription_count = count( $data );
+			$data               = self::filter_valid_subscriptions( $data );
+			$invalid_count      = $subscription_count - count( $data );
+			if ( 0 < $invalid_count ) {
+				self::log(
+					sprintf(
+						'Filtered %d malformed subscription entries from the WooCommerce.com API response.',
+						$invalid_count
+					),
+					'warning'
+				);
+			}
+			set_transient( $cache_key, $data, 3 * HOUR_IN_SECONDS );
+
+			// Remove notice after successful API call as it's no longer applicable.
+			self::remove_api_error_notice();
 			return $data;
 		} catch ( Exception $e ) {
-			self::log( 'Error getting subscriptions: ' . $e->getMessage(), 'error' );
-			throw $e;
+			if ( $e->getCode() < 404 ) {
+				self::remove_api_error_notice();
+			} else {
+				// Only show error notice in case there is no proper communication with WCCOM.
+				self::log( 'Error getting subscriptions: ' . $e->getMessage(), 'error' );
+				self::add_api_error_notice();
+			}
 		}
+
+		return array();
 	}
 
 	/**
@@ -1821,14 +2022,10 @@ class WC_Helper {
 	 * @return array|bool The array containing sub data or false.
 	 */
 	public static function get_subscription( $product_key ) {
-		try {
-			$subscriptions = wp_list_filter(
-				self::get_subscriptions(),
-				array( 'product_key' => $product_key )
-			);
-		} catch ( Exception $e ) {
-			return false;
-		}
+		$subscriptions = wp_list_filter(
+			self::get_subscriptions(),
+			array( 'product_key' => $product_key )
+		);
 
 		if ( empty( $subscriptions ) ) {
 			return false;
@@ -1850,11 +2047,7 @@ class WC_Helper {
 	 */
 	public static function get_subscription_list_data() {
 		// First, connected subscriptions.
-		try {
-			$subscriptions = self::get_subscriptions();
-		} catch ( Exception $e ) {
-			$subscriptions = array();
-		}
+		$subscriptions = self::get_subscriptions();
 
 		// Then, installed plugins and themes, with or without an active subscription.
 		$woo_plugins = self::get_local_woo_plugins();
@@ -2110,6 +2303,8 @@ class WC_Helper {
 	 * need to visit the Helper UI at all after installing a new extension.
 	 *
 	 * @param string $filename The filename of the activated plugin.
+	 *
+	 * @return void
 	 */
 	public static function activated_plugin( $filename ) {
 		$plugins = self::get_local_woo_plugins();
@@ -2128,6 +2323,9 @@ class WC_Helper {
 		$plugin       = $plugins[ $filename ];
 		$product_id   = $plugin['_product_id'];
 		$subscription = self::get_available_subscription( $product_id );
+
+		self::_flush_subscriptions_cache();
+		self::_flush_updates_cache();
 
 		// No valid subscription found.
 		if ( ! $subscription ) {
@@ -2161,9 +2359,6 @@ class WC_Helper {
 			 */
 			do_action( 'woocommerce_helper_subscription_activate_error', $product_id, $product_key, $activation_response );
 		}
-
-		self::_flush_subscriptions_cache();
-		self::_flush_updates_cache();
 	}
 
 	/**
@@ -2174,6 +2369,8 @@ class WC_Helper {
 	 * need to visit the Helper UI at all after installing a new extension.
 	 *
 	 * @param string $product_id The product id of the activated theme.
+	 *
+	 * @return void
 	 */
 	public static function connect_theme( $product_id ) {
 		// Make sure we have a connection.
@@ -2242,6 +2439,8 @@ class WC_Helper {
 	 * associated with the extension.
 	 *
 	 * @param string $filename The filename of the deactivated plugin.
+	 *
+	 * @return void
 	 */
 	public static function deactivated_plugin( $filename ) {
 		$plugins = self::get_local_woo_plugins();
@@ -2311,15 +2510,18 @@ class WC_Helper {
 			}
 		}
 
+		self::_flush_subscriptions_cache();
+		self::_flush_updates_cache();
+
 		if ( $deactivated ) {
 			self::log( sprintf( 'Auto-deactivated %d subscription(s) for %s', $deactivated, $filename ) );
-			self::_flush_subscriptions_cache();
-			self::_flush_updates_cache();
 		}
 	}
 
 	/**
 	 * Various Helper-related admin notices.
+	 *
+	 * @return void
 	 */
 	public static function admin_notices() {
 		if ( apply_filters( 'woocommerce_helper_suppress_admin_notices', false ) ) {
@@ -2373,7 +2575,7 @@ class WC_Helper {
 		return sprintf(
 			/* translators: %1$s: helper url, %2$d: number of extensions */
 			_n( 'Note: You currently have <a href="%1$s">%2$d paid extension</a> which should be updated first before updating WooCommerce.', 'Note: You currently have <a href="%1$s">%2$d paid extensions</a> which should be updated first before updating WooCommerce.', $available, 'woocommerce' ),
-			admin_url( 'admin.php?page=' . self::get_source_page() . ' &section=helper' ),
+			esc_url( self::get_subscriptions_url() ),
 			$available
 		);
 	}
@@ -2403,6 +2605,8 @@ class WC_Helper {
 
 	/**
 	 * Flush subscriptions cache.
+	 *
+	 * @return void
 	 */
 	public static function _flush_subscriptions_cache() {
 		delete_transient( '_woocommerce_helper_subscriptions' );
@@ -2410,6 +2614,8 @@ class WC_Helper {
 
 	/**
 	 * Flush product-usage-notice-rules cache.
+	 *
+	 * @return void
 	 */
 	public static function flush_product_usage_notice_rules_cache() {
 		delete_transient( '_woocommerce_helper_product_usage_notice_rules' );
@@ -2417,13 +2623,17 @@ class WC_Helper {
 
 	/**
 	 * Flush connection data cache.
+	 *
+	 * @return void
 	 */
 	public static function flush_connection_data_cache() {
-		delete_transient( '_woocommerce_helper_connection_data' );
+		delete_transient( self::CACHE_KEY_CONNECTION_DATA );
 	}
 
 	/**
 	 * Flush auth cache.
+	 *
+	 * @return bool
 	 */
 	public static function _flush_authentication_cache() {
 		$request = WC_Helper_API::get(
@@ -2456,6 +2666,8 @@ class WC_Helper {
 
 	/**
 	 * Flush updates cache.
+	 *
+	 * @return void
 	 */
 	private static function _flush_updates_cache() {
 		WC_Helper_Updater::flush_updates_cache();
@@ -2490,6 +2702,8 @@ class WC_Helper {
 	 *
 	 * @param string $message Log message.
 	 * @param string $level Optional, defaults to info, valid levels: emergency|alert|critical|error|warning|notice|info|debug.
+	 *
+	 * @return void
 	 */
 	public static function log( $message, $level = 'info' ) {
 		if ( ! Constants::is_true( 'WP_DEBUG' ) ) {
@@ -2656,7 +2870,11 @@ class WC_Helper {
 		$cached_data = get_transient( $cache_key );
 
 		if ( false !== $cached_data ) {
-			return $cached_data;
+			if ( is_array( $cached_data ) ) {
+				return $cached_data;
+			}
+			// Cached data is corrupted, delete and fetch fresh.
+			delete_transient( $cache_key );
 		}
 
 		// Fetch notice data for connected store.

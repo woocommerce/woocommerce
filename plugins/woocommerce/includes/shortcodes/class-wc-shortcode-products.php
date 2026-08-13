@@ -620,9 +620,7 @@ class WC_Shortcode_Products {
 
 		if ( $products && $products->ids ) {
 			// Prime caches to reduce future queries.
-			if ( is_callable( '_prime_post_caches' ) ) {
-				_prime_post_caches( $products->ids );
-			}
+			_prime_post_caches( $products->ids );
 
 			// Setup the loop.
 			wc_setup_loop(

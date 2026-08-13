@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -12,7 +12,7 @@ import { Text } from '../experimental';
 export function Pill( { children, className = '' } ) {
 	return (
 		<Text
-			className={ classnames( 'woocommerce-pill', className ) }
+			className={ clsx( 'woocommerce-pill', className ) }
 			variant="caption"
 			as="span"
 			size="12"

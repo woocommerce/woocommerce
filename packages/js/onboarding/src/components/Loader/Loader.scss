@@ -39,7 +39,7 @@
 	}
 	.woocommerce-onboarding-progress-bar {
 		width: 520px;
-		margin: 16px 0 16px 0;
+		margin: $gap-large 0 $gap 0;
 		@include breakpoint( '<782px' ) {
 			width: 100%;
 		}

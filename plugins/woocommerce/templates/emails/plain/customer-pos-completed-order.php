@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Plain
- * @version 9.9.0
+ * @version 10.0.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -20,19 +20,19 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
 defined( 'ABSPATH' ) || exit;
 
 $email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
+$email                      = $email ?? null;
 
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n";
 echo esc_html( wp_strip_all_tags( $email_heading ) );
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-/* translators: %s: Customer first name */
-echo sprintf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) ) . "\n\n";
-if ( $email_improvements_enabled ) {
-	echo esc_html__( 'We’ve successfully processed your order, and it’s on its way to you.', 'woocommerce' ) . "\n\n";
-	echo esc_html__( 'Here’s a reminder of what you’ve ordered:', 'woocommerce' ) . "\n\n";
+if ( ! empty( $order->get_billing_first_name() ) ) {
+	/* translators: %s: Customer first name */
+	echo sprintf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) ) . "\n\n";
 } else {
-	echo esc_html__( 'We have finished processing your order.', 'woocommerce' ) . "\n\n";
+	echo esc_html__( 'Hi there,', 'woocommerce' ) . "\n\n";
 }
+echo esc_html__( 'Here’s a reminder of what you’ve ordered:', 'woocommerce' ) . "\n\n";
 
 /**
  * Show the order details table, generate and output structured data.
@@ -74,8 +74,36 @@ if ( $additional_content ) {
 }
 
 /**
+ * Show store information - store details are set in the Point of Sale settings.
+ */
+if ( ! empty( $pos_store_email ) || ! empty( $pos_store_phone_number ) || ! empty( $pos_store_address ) ) {
+	if ( ! empty( $pos_store_name ) ) {
+		echo "\n" . esc_html( $pos_store_name ) . "\n\n";
+	}
+	if ( ! empty( $pos_store_email ) ) {
+		echo esc_html( $pos_store_email ) . "\n";
+	}
+	if ( ! empty( $pos_store_phone_number ) ) {
+		echo esc_html( $pos_store_phone_number ) . "\n";
+	}
+	if ( ! empty( $pos_store_address ) ) {
+		echo esc_html( wp_strip_all_tags( wptexturize( $pos_store_address ) ) ) . "\n";
+	}
+	echo "\n----------------------------------------\n\n";
+}
+
+/**
+ * Show refund & returns policy - this is set in the Point of Sale settings.
+ */
+if ( ! empty( $pos_refund_returns_policy ) ) {
+	echo "\n" . esc_html__( 'Refund & Returns Policy', 'woocommerce' ) . "\n\n";
+	echo esc_html( wp_strip_all_tags( wptexturize( $pos_refund_returns_policy ) ) ) . "\n";
+	echo "\n----------------------------------------\n\n";
+}
+
+/**
  * Filter the email footer text.
  *
  * @since 4.0.0
  */
-echo wp_kses_post( apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) ) );
+echo wp_kses_post( apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ), $email ) );

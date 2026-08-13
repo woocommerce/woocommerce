@@ -1,0 +1,49 @@
+name: 📝 Suggestion for Documentation Improvement/Correction
+description: Propose a specific improvement or correction for an existing document.
+title: "[Documentation]: "
+labels: ["Documentation"]
+body: 
+  - type: textarea
+    id: description
+    attributes:
+      label: Description of the Request
+      description: |
+        Clearly describe your request.
+
+        If suggesting an improvement or correction: Explain the changes you suggest to improve or correct the existing documentation. Be specific about any errors or areas of confusion you've identified.
+
+        If requesting new documentation: Provide a detailed description of the topic you'd like to see documented.
+      placeholder: "Describe your suggestion or request in detail."
+
+  - type: textarea
+    id: reason
+    attributes:
+      label: Reason for the Request
+      description: Explain why this change or new document is important. Why do you believe it will make the documentation clearer, more accurate, or benefit the community?
+      placeholder: "Explain the importance of this request."
+
+  - type: input
+    id: page_link
+    attributes:
+      label: Link to the Page/Section (if applicable)
+      description: Provide a link to the specific page or section that you're referring to, or indicate if this is a request for new documentation.
+      placeholder: "https://github.com/woocommerce/woocommerce/..."
+
+  - type: textarea
+    id: potential_content
+    attributes:
+      label: Potential Content
+      description: If you have ideas about what the documentation should cover, list the points or sub-topics here.
+      placeholder: "List potential topics or points to cover."
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional Context
+      description: Add any other context, references, or screenshots that support your suggestion or can help in the creation of new documentation.
+      placeholder: "Add any extra context or references here."
+
+  - type: markdown
+    attributes:
+      value: |
+        cc @woocommerce/developer-advocacy

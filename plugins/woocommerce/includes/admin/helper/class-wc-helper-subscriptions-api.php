@@ -162,6 +162,7 @@ class WC_Helper_Subscriptions_API {
 			WC_Helper::refresh_helper_subscriptions();
 			WC_Helper::get_subscriptions();
 			WC_Helper::get_product_usage_notice_rules();
+			WC_Helper::fetch_helper_connection_info();
 			self::get_subscriptions();
 		} catch ( Exception $e ) {
 			wp_send_json_error(
@@ -171,8 +172,6 @@ class WC_Helper_Subscriptions_API {
 				400
 			);
 		}
-
-		WC_Helper::fetch_helper_connection_info();
 	}
 
 	/**
@@ -185,12 +184,23 @@ class WC_Helper_Subscriptions_API {
 		try {
 			$success = WC_Helper::activate_helper_subscription( $product_key );
 		} catch ( Exception $e ) {
-			wp_send_json_error(
-				array(
-					'message' => $e->getMessage(),
-				),
-				400
+			$error_data = array(
+				'message' => $e->getMessage(),
 			);
+
+			if ( $e instanceof WC_Data_Exception ) {
+				$error_data['code'] = $e->getErrorCode();
+				// Include extra data from the exception so the client can render contextual UI (e.g. maxed out sites list).
+				$error_data['data'] = $e->getErrorData();
+				$status_code        = (int) $e->getCode();
+				if ( 100 > $status_code || 599 < $status_code ) {
+					$status_code = 400;
+				}
+			} else {
+				$status_code = 400;
+			}
+
+			wp_send_json_error( $error_data, $status_code );
 		}
 		if ( $success ) {
 			wp_send_json_success(
@@ -284,7 +294,7 @@ class WC_Helper_Subscriptions_API {
 		$product_key  = $request->get_param( 'product_key' );
 		$subscription = WC_Helper::get_subscription( $product_key );
 
-		if ( ! $subscription ) {
+		if ( ! is_array( $subscription ) ) {
 			wp_send_json_error(
 				array(
 					'message' => __( 'We couldn\'t find a subscription for this product.', 'woocommerce' ),
@@ -310,7 +320,25 @@ class WC_Helper_Subscriptions_API {
 			);
 		}
 
+		if ( ! in_array( $subscription['product_type'] ?? null, array( 'plugin', 'theme' ), true ) ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'This product type is not supported.', 'woocommerce' ),
+				),
+				400
+			);
+		}
+
 		if ( 'plugin' === $subscription['product_type'] ) {
+			// manage_woocommerce (checked by get_permission() above) doesn't imply activate_plugins.
+			if ( ! current_user_can( 'activate_plugins' ) ) {
+				wp_send_json_error(
+					array(
+						'message' => __( 'You do not have permission to activate plugins.', 'woocommerce' ),
+					),
+					403
+				);
+			}
 			$success = activate_plugin( $subscription['local']['path'] );
 			if ( is_wp_error( $success ) ) {
 				wp_send_json_error(
@@ -321,6 +349,14 @@ class WC_Helper_Subscriptions_API {
 				);
 			}
 		} elseif ( 'theme' === $subscription['product_type'] ) {
+			if ( ! current_user_can( 'switch_themes' ) ) {
+				wp_send_json_error(
+					array(
+						'message' => __( 'You do not have permission to switch themes.', 'woocommerce' ),
+					),
+					403
+				);
+			}
 			switch_theme( $subscription['local']['slug'] );
 			$theme = wp_get_theme();
 			if ( $subscription['local']['slug'] !== $theme->get_stylesheet() ) {

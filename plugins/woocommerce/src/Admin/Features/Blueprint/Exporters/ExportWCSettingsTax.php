@@ -6,7 +6,7 @@ namespace Automattic\WooCommerce\Admin\Features\Blueprint\Exporters;
 
 use Automattic\WooCommerce\Blueprint\UseWPFunctions;
 use Automattic\WooCommerce\Blueprint\Steps\RunSql;
-use Automattic\WooCommerce\Blueprint\Util;
+use Automattic\WooCommerce\Admin\Features\Blueprint\SettingOptions;
 
 /**
  * Class ExportWCSettingsTax
@@ -17,6 +17,15 @@ use Automattic\WooCommerce\Blueprint\Util;
  */
 class ExportWCSettingsTax extends ExportWCSettings {
 	use UseWPFunctions;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param SettingOptions|null $setting_options The setting options class.
+	 */
+	public function __construct( ?SettingOptions $setting_options = null ) { // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found
+		parent::__construct( $setting_options );
+	}
 
 	/**
 	 * Get the alias for this exporter.
@@ -38,6 +47,7 @@ class ExportWCSettingsTax extends ExportWCSettings {
 
 		return array(
 			$basic_tax_settings,
+			...$this->generateTaxRateSteps( 'wc_tax_rate_classes' ),
 			...$this->generateTaxRateSteps( 'woocommerce_tax_rates' ),
 			...$this->generateTaxRateSteps( 'woocommerce_tax_rate_locations' ),
 		);
@@ -79,10 +89,10 @@ class ExportWCSettingsTax extends ExportWCSettings {
 	 */
 	private function generateTaxRateSteps( string $table ): array {
 		global $wpdb;
-		$table = $wpdb->prefix . $table;
+		$prefixed_table = $wpdb->prefix . $table;
 		return array_map(
-			fn( $record ) => new RunSql( Util::array_to_insert_sql( $record, $table, 'replace into' ) ),
-			$wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %i', $table ), ARRAY_A ),
+			fn( $record ) => RunSql::from_table_row( $record, $table ),
+			$wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %i', $prefixed_table ), ARRAY_A ),
 		);
 	}
 }

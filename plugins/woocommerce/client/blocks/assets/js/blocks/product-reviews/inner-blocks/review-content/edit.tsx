@@ -29,11 +29,12 @@ export default function Edit( {
 			[ `has-text-align-${ textAlign }` ]: textAlign,
 		} ),
 	} );
+
 	const [ content ] = useEntityProp(
 		'root',
 		'comment',
 		'content',
-		String( commentId )
+		commentId
 	);
 
 	const blockControls = (

@@ -3,18 +3,23 @@
  */
 import { createRegistrySelector, createSelector } from '@wordpress/data';
 import { store as coreDataStore } from '@wordpress/core-data';
-import { store as interfaceStore } from '@wordpress/interface';
 import { store as editorStore } from '@wordpress/editor';
 import { store as preferencesStore } from '@wordpress/preferences';
-import { serialize, parse } from '@wordpress/blocks';
-import { BlockInstance } from '@wordpress/blocks/index';
-import { Post } from '@wordpress/core-data/build-types/entity-types/post';
+import { serialize, parse, BlockInstance } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
-import { storeName, editorCurrentPostType } from './constants';
-import { State, Feature, EmailTemplate, EmailEditorPostType } from './types';
+import { storeName, PERSONALIZATION_TAG_ENTITY } from './constants';
+import { getPersonalizationTagsQuery } from './personalization-tags-query';
+import {
+	State,
+	EmailTemplate,
+	EmailEditorPostType,
+	Feature,
+	PersonalizationTag,
+	GlobalEmailStylesPost,
+} from './types';
 
 function getContentFromEntity( entity ): string {
 	if ( entity?.content && typeof entity.content === 'function' ) {
@@ -29,8 +34,25 @@ function getContentFromEntity( entity ): string {
 	return '';
 }
 
-const patternsWithParsedBlocks = new WeakMap();
-function enhancePatternWithParsedBlocks( pattern ) {
+type PatternWithContent = {
+	content: string;
+	emailContent?: string;
+	categories?: string[];
+	[ key: string ]: unknown;
+};
+
+type EnhancedPattern = PatternWithContent & {
+	readonly blocks: BlockInstance[];
+	readonly emailBlocks: BlockInstance[] | null;
+};
+
+const patternsWithParsedBlocks = new WeakMap<
+	PatternWithContent,
+	EnhancedPattern
+>();
+function enhancePatternWithParsedBlocks(
+	pattern: PatternWithContent
+): EnhancedPattern {
 	let enhancedPattern = patternsWithParsedBlocks.get( pattern );
 	if ( ! enhancedPattern ) {
 		enhancedPattern = {
@@ -38,18 +60,46 @@ function enhancePatternWithParsedBlocks( pattern ) {
 			get blocks() {
 				return parse( pattern.content );
 			},
+			// emailContent is an optional property that integrations (e.g. MailPoet)
+			// may add to patterns via REST API filters. It contains dynamic blocks
+			// (e.g. product-collection) for editor insertion, while `content` holds
+			// static HTML for template picker previews.
+			get emailBlocks() {
+				return pattern.emailContent
+					? parse( pattern.emailContent )
+					: null;
+			},
 		};
 		patternsWithParsedBlocks.set( pattern, enhancedPattern );
 	}
 	return enhancedPattern;
 }
 
+// Caches the regularized record keyed on the source entity record so repeated
+// calls with the same (referentially stable) record return the same object.
+// `@wordpress/core-data` memoizes `getEntityRecord`, so without this cache the
+// spread below would produce a new object on every selector call. That breaks
+// the referential stability `useSelect` relies on and drives an infinite
+// re-render loop (React error #185) for users who lack `edit_theme_options`,
+// because the `context: 'view'` branch — unlike `getEditedEntityRecord` — is
+// not otherwise memoized.
+const regularizedRecordCache = new WeakMap< object, object >();
+
 function regularizedGetEntityRecord( template ) {
-	return {
+	if ( ! template ) {
+		return null;
+	}
+	const cached = regularizedRecordCache.get( template );
+	if ( cached ) {
+		return cached;
+	}
+	const regularized = {
 		...template,
 		title: template?.title?.raw || template?.title || '',
 		content: template?.content?.raw || template?.content || '',
 	};
+	regularizedRecordCache.set( template, regularized );
+	return regularized;
 }
 
 export const isFeatureActive = createRegistrySelector(
@@ -58,63 +108,24 @@ export const isFeatureActive = createRegistrySelector(
 			!! select( preferencesStore ).get( storeName, feature )
 );
 
-export const isSidebarOpened = createRegistrySelector(
-	( select ) => (): boolean =>
-		!! select( interfaceStore ).getActiveComplementaryArea( storeName )
-);
-
 export const hasEdits = createRegistrySelector( ( select ) => (): boolean => {
 	const postId = select( storeName ).getEmailPostId();
+	const postType = select( storeName ).getEmailPostType();
 	return !! select( coreDataStore ).hasEditsForEntityRecord(
 		'postType',
-		editorCurrentPostType,
+		postType,
 		postId
 	);
-} );
-
-export const isEmailLoaded = createRegistrySelector(
-	( select ) => (): boolean => {
-		const postId = select( storeName ).getEmailPostId();
-		return !! select( coreDataStore ).getEntityRecord(
-			'postType',
-			editorCurrentPostType,
-			postId
-		);
-	}
-);
-
-export const isSaving = createRegistrySelector( ( select ) => (): boolean => {
-	const postId = select( storeName ).getEmailPostId();
-	return !! select( coreDataStore ).isSavingEntityRecord(
-		'postType',
-		editorCurrentPostType,
-		postId
-	);
-} );
-
-export const isEmpty = createRegistrySelector( ( select ) => (): boolean => {
-	const postId = select( storeName ).getEmailPostId();
-
-	const post: EmailEditorPostType = select( coreDataStore ).getEntityRecord(
-		'postType',
-		editorCurrentPostType,
-		postId
-	);
-	if ( ! post ) {
-		return true;
-	}
-
-	const { content, title } = post;
-	return ! content.raw && ! title.raw;
 } );
 
 export const hasEmptyContent = createRegistrySelector(
 	( select ) => (): boolean => {
 		const postId = select( storeName ).getEmailPostId();
+		const postType = select( storeName ).getEmailPostType();
 
 		const post = select( coreDataStore ).getEntityRecord(
 			'postType',
-			editorCurrentPostType,
+			postType,
 			postId
 		);
 		if ( ! post ) {
@@ -130,10 +141,11 @@ export const hasEmptyContent = createRegistrySelector(
 export const isEmailSent = createRegistrySelector(
 	( select ) => (): boolean => {
 		const postId = select( storeName ).getEmailPostId();
+		const postType = select( storeName ).getEmailPostType();
 
 		const post = select( coreDataStore ).getEntityRecord(
 			'postType',
-			editorCurrentPostType,
+			postType,
 			postId
 		);
 		if ( ! post ) {
@@ -155,9 +167,10 @@ export const isEmailSent = createRegistrySelector(
 export const getEditedEmailContent = createRegistrySelector(
 	( select ) => (): string => {
 		const postId = select( storeName ).getEmailPostId();
+		const postType = select( storeName ).getEmailPostType();
 		const record = select( coreDataStore ).getEditedEntityRecord(
 			'postType',
-			editorCurrentPostType,
+			postType,
 			postId
 		) as unknown as
 			| { content: string | unknown; blocks: BlockInstance[] }
@@ -171,36 +184,51 @@ export const getEditedEmailContent = createRegistrySelector(
 );
 
 export const getSentEmailEditorPosts = createRegistrySelector(
-	( select ) => () =>
-		select( coreDataStore )
-			.getEntityRecords( 'postType', editorCurrentPostType, {
-				per_page: 30, // show a maximum of 30 for now
-				status: 'publish,sent', // show only sent emails
-			} )
-			?.filter(
-				( post: EmailEditorPostType ) => post?.content?.raw !== '' // filter out empty content
-			) || []
+	( select ) => () => {
+		const postType = select( storeName ).getEmailPostType();
+		return (
+			select( coreDataStore )
+				.getEntityRecords( 'postType', postType, {
+					per_page: 30, // show a maximum of 30 for now
+					status: 'publish,sent', // show only sent emails
+				} )
+				?.filter(
+					( post: EmailEditorPostType ) => post?.content?.raw !== '' // filter out empty content
+				) || []
+		);
+	}
 );
 
 export const getBlockPatternsForEmailTemplate = createRegistrySelector(
-	( select ) =>
-		createSelector(
+	( select ) => {
+		const emailPostType = select( storeName ).getEmailPostType();
+		return createSelector(
 			() =>
-				select( coreDataStore )
-					.getBlockPatterns()
-					.filter(
-						( { templateTypes } ) =>
-							Array.isArray( templateTypes ) &&
-							templateTypes.includes( 'email-template' )
-					)
-					.map( enhancePatternWithParsedBlocks ),
-			() => [ select( coreDataStore ).getBlockPatterns() ]
-		)
+				emailPostType
+					? select( coreDataStore )
+							.getBlockPatterns()
+							.filter( ( { templateTypes, postTypes } ) => {
+								return (
+									// Make sure the template type matches the required one.
+									Array.isArray( templateTypes ) &&
+									templateTypes.includes(
+										'email-template'
+									) &&
+									// The current post type must be matched when post types are set.
+									( postTypes === undefined ||
+										postTypes.length === 0 ||
+										postTypes.includes( emailPostType ) )
+								);
+							} )
+							.map( enhancePatternWithParsedBlocks )
+					: [],
+			() => [ select( coreDataStore ).getBlockPatterns(), emailPostType ]
+		);
+	}
 );
 
 export const canUserEditTemplates = createRegistrySelector(
 	( select ) => () => {
-		// @ts-expect-error Selector is not typed
 		return select( coreDataStore ).canUser( 'create', {
 			kind: 'postType',
 			name: 'wp_template',
@@ -233,38 +261,40 @@ function getTemplate( select, templateId: string ): EmailTemplate {
  * @return {Object?} Post Template.
  */
 export const getEditedPostTemplate = createRegistrySelector(
-	( select ) => (): EmailTemplate => {
-		const currentTemplate =
-			// @ts-expect-error Expected 0 arguments, but got 1.
-			select( editorStore ).getEditedPostAttribute( 'template' );
+	( select ) =>
+		( _state, templateSlug?: string ): EmailTemplate | null => {
+			const currentTemplate =
+				templateSlug ||
+				select( editorStore ).getEditedPostAttribute( 'template' );
 
-		if ( currentTemplate ) {
-			const templateWithSameSlug = select( coreDataStore )
-				.getEntityRecords( 'postType', 'wp_template', {
-					per_page: -1,
+			if ( currentTemplate ) {
+				const query: Record< string, string | number > = {
 					context: 'view',
-				} )
-				// @ts-expect-error Missing property in type
-				?.find( ( template ) => template.slug === currentTemplate );
+					per_page: -1,
+					_woocommerce_email_editor: 'fetch-all-templates', // Unused parameter to avoid using cached response.
+				};
 
-			if ( ! templateWithSameSlug ) {
-				return regularizedGetEntityRecord(
-					templateWithSameSlug
-				) as EmailTemplate;
+				const templateWithSameSlug = select( coreDataStore )
+					.getEntityRecords( 'postType', 'wp_template', query )
+					// @ts-expect-error Missing property in type
+					?.find( ( template ) => template.slug === currentTemplate );
+
+				if ( ! templateWithSameSlug ) {
+					return null;
+				}
+
+				// @ts-expect-error getEditedPostAttribute
+				return getTemplate( select, templateWithSameSlug.id );
 			}
 
-			// @ts-expect-error getEditedPostAttribute
-			return getTemplate( select, templateWithSameSlug.id );
-		}
-
-		const defaultTemplateId = select( coreDataStore ).getDefaultTemplateId(
-			{
+			const defaultTemplateId = select(
+				coreDataStore
+			).getDefaultTemplateId( {
 				slug: 'email-general',
-			}
-		);
+			} );
 
-		return getTemplate( select, defaultTemplateId );
-	}
+			return getTemplate( select, defaultTemplateId );
+		}
 );
 
 export const getCurrentTemplate = createRegistrySelector( ( select ) => () => {
@@ -281,7 +311,7 @@ export const getCurrentTemplate = createRegistrySelector( ( select ) => () => {
 			templateId
 		) as unknown as EmailTemplate;
 	}
-	return getEditedPostTemplate();
+	return select( storeName ).getEditedPostTemplate();
 } );
 
 export const getCurrentTemplateContent = () => {
@@ -295,7 +325,6 @@ export const getCurrentTemplateContent = () => {
 export const canUserEditGlobalEmailStyles = createRegistrySelector(
 	( select ) => () => {
 		const postId = select( storeName ).getGlobalStylesPostId();
-		// @ts-expect-error Selector is not typed
 		const canEdit = select( coreDataStore ).canUser( 'update', {
 			kind: 'root',
 			name: 'globalStyles',
@@ -307,53 +336,70 @@ export const canUserEditGlobalEmailStyles = createRegistrySelector(
 export const getGlobalEmailStylesPost = createRegistrySelector(
 	( select ) => () => {
 		const { postId, canEdit } = canUserEditGlobalEmailStyles();
-
+		if ( ! postId || canEdit === undefined ) {
+			return null;
+		}
 		if ( postId ) {
 			if ( canEdit ) {
 				return select( coreDataStore ).getEditedEntityRecord(
-					'postType',
-					'wp_global_styles',
+					'root',
+					'globalStyles',
 					postId
-				) as unknown as Post;
+				) as GlobalEmailStylesPost;
 			}
 			return regularizedGetEntityRecord(
 				select( coreDataStore ).getEntityRecord(
-					'postType',
-					'wp_global_styles',
+					'root',
+					'globalStyles',
 					postId,
 					{ context: 'view' }
 				)
-			) as unknown as Post;
+			) as GlobalEmailStylesPost;
 		}
-		return getEditedPostTemplate();
+		return null;
 	}
 );
 
 /**
  * Retrieves the email templates.
  */
-export const getEmailTemplates = createRegistrySelector(
-	( select ) => () =>
-		select( coreDataStore )
-			.getEntityRecords( 'postType', 'wp_template', {
-				per_page: -1,
-				post_type: editorCurrentPostType,
-				context: 'view',
-			} )
-			// We still need to filter the templates because, in some cases, the API also returns custom templates
-			// ignoring the post_type filter in the query
-			?.filter( ( template ) =>
-				// @ts-expect-error Missing property in type
-				template.post_types.includes( editorCurrentPostType )
-			)
-);
+export const getEmailTemplates = createRegistrySelector( ( select ) => {
+	const postType = select( storeName ).getEmailPostType();
 
-export function getEmailPostId( state: State ): number {
+	return createSelector(
+		() =>
+			select( coreDataStore )
+				.getEntityRecords( 'postType', 'wp_template', {
+					per_page: -1,
+					post_type: postType,
+					context: 'view',
+				} )
+				// We still need to filter the templates because, in some cases, the API also returns custom templates
+				// ignoring the post_type filter in the query
+				?.filter( ( template ) =>
+					// @ts-expect-error Missing property in type
+					template.post_types.includes( postType )
+				),
+		() => [
+			select( coreDataStore ).getEntityRecords(
+				'postType',
+				'wp_template',
+				{
+					per_page: -1,
+					post_type: postType,
+					context: 'view',
+				}
+			),
+		]
+	);
+} );
+
+export function getEmailPostId( state: State ): number | string {
 	return state.postId;
 }
 
-export function getSettingsSidebarActiveTab( state: State ): string {
-	return state.settingsSidebar.activeTab;
+export function getEmailPostType( state: State ): string {
+	return state.postType;
 }
 
 export function getInitialEditorSettings(
@@ -366,39 +412,93 @@ export function getPaletteColors(
 	state: State
 ): State[ 'editorSettings' ][ '__experimentalFeatures' ][ 'color' ][ 'palette' ] {
 	// eslint-disable-next-line no-underscore-dangle
-	return state.editorSettings.__experimentalFeatures.color.palette;
+	return state.editorSettings?.__experimentalFeatures?.color?.palette;
 }
 
 export function getPreviewState( state: State ): State[ 'preview' ] {
 	return state.preview;
 }
 
-export function getPersonalizationTagsState(
-	state: State
-): State[ 'personalizationTags' ] {
-	return state.personalizationTags;
-}
+const EMPTY_PERSONALIZATION_TAGS: PersonalizationTag[] = [];
 
-export function getPersonalizationTagsList(
-	state: State
-): State[ 'personalizationTags' ][ 'list' ] {
-	return state.personalizationTags.list;
-}
+export const getPersonalizationTagsList = createRegistrySelector(
+	( select ) => {
+		// The block edit filter calls this selector once per block on every store
+		// change, so the filtered list is cached alongside the shared query object
+		// from `getPersonalizationTagsQuery`.
+		//
+		// `createRegistrySelector` resolves this factory once per registry, so the
+		// cache below is scoped to a registry rather than shared globally.
+		//
+		// Keying on `tags` identity is sound because `getQueriedItems` keeps a
+		// value-keyed cache (an `EquivalentKeyMap` per state), so it hands back the
+		// same records array until the entity state itself changes.
+		let listCache: {
+			tags: PersonalizationTag[];
+			postType: string;
+			templatePostTypes: string[] | undefined;
+			result: PersonalizationTag[];
+		} | null = null;
 
-export const getDeviceType = createRegistrySelector(
-	( select ) => () =>
-		// @ts-expect-error getDeviceType is missing in types.
-		select( editorStore ).getDeviceType() as string
+		return () => {
+			const postId = select( storeName ).getEmailPostId();
+
+			const tags = ( select( coreDataStore ).getEntityRecords(
+				PERSONALIZATION_TAG_ENTITY.kind,
+				PERSONALIZATION_TAG_ENTITY.name,
+				getPersonalizationTagsQuery( postId )
+			) || EMPTY_PERSONALIZATION_TAGS ) as PersonalizationTag[];
+
+			const postType = select( storeName ).getEmailPostType();
+
+			if ( ! postType ) {
+				return tags;
+			}
+
+			// When postType is template, we filter tags by registered template postTypes.
+			const templatePostTypes =
+				postType === 'wp_template'
+					? select( storeName ).getCurrentTemplate()?.post_types
+					: undefined;
+
+			if (
+				listCache &&
+				listCache.tags === tags &&
+				listCache.postType === postType &&
+				listCache.templatePostTypes === templatePostTypes
+			) {
+				return listCache.result;
+			}
+
+			const result = tags.filter( ( tag ) => {
+				if (
+					tag.postTypes === undefined ||
+					tag.postTypes.length === 0
+				) {
+					return true;
+				}
+
+				if ( postType === 'wp_template' ) {
+					return (
+						Array.isArray( templatePostTypes ) &&
+						templatePostTypes.some( ( pt ) =>
+							tag.postTypes.includes( pt )
+						)
+					);
+				}
+
+				return tag.postTypes.includes( postType );
+			} );
+
+			listCache = { tags, postType, templatePostTypes, result };
+
+			return result;
+		};
+	}
 );
 
 export function getStyles( state: State ): State[ 'theme' ][ 'styles' ] {
-	return state.theme.styles;
-}
-
-export function getAutosaveInterval(
-	state: State
-): State[ 'autosaveInterval' ] {
-	return state.autosaveInterval;
+	return state.theme?.styles;
 }
 
 export function getTheme( state: State ): State[ 'theme' ] {
@@ -411,4 +511,14 @@ export function getGlobalStylesPostId( state: State ): number | null {
 
 export function getUrls( state: State ): State[ 'urls' ] {
 	return state.urls;
+}
+
+export function getContentValidation(
+	state: State
+): State[ 'contentValidation' ] {
+	return state.contentValidation;
+}
+
+export function isTemplateSelected( state: State ): boolean {
+	return state.templateSelected;
 }

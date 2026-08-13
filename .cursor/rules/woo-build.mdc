@@ -1,0 +1,40 @@
+---
+description: This rule provides guidance for building the WooCommerce plugin and watching for changes in the repository.
+globs:
+alwaysApply: false
+---
+# Building the WooCommerce plugin
+
+This rule provides guidance for building the WooCommerce plugin and watching for changes in this repository.
+
+## Installing dependencies and building
+
+Specific dependencies and build instructions are listed in `README.md`.
+
+The commands to build are
+
+```bash
+# Install the PHP and Composer dependencies for all of the plugins, packages, and tools.
+# PNPM automatically uses the pinned Node version for every script it runs.
+pnpm install --frozen-lockfile
+# Build all of the plugins, packages, and tools in the monorepo
+pnpm build
+```
+
+And the command must be run in the main repository directory.
+
+## Watching for changes
+
+To watch for changes use
+
+```bash
+pnpm --filter=@woocommerce/plugin-woocommerce watch:build
+```
+
+This is a development build which ensures experimental features are active.
+
+If there are problems with this command, ensure the dependencies were installed first, but generally unless this is the first build, `pnpm build` does not need to be ran prior.
+
+```bash
+pnpm install --frozen-lockfile
+```

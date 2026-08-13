@@ -1,229 +1,194 @@
 <?php
 /**
- * WooCommerce Product Block Editor
+ * WooCommerce Product Editor Product Template compatibility shim.
  */
 
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 
 /**
- * The Product Template that represents the relation between the Product and
- * the LayoutTemplate (ProductFormTemplateInterface)
+ * Removed product editor product template value object.
  *
- * @see ProductFormTemplateInterface
+ * @deprecated 10.9.0 Product editor extension APIs were deprecated. The product block editor was removed in 11.0.0 with no replacement.
  */
 class ProductTemplate {
 	/**
-	 * The template id.
+	 * Whether the removal warning has already been logged for the current request.
 	 *
-	 * @var string
+	 * @var bool
 	 */
-	private $id;
+	private static $removal_warning_logged = false;
 
 	/**
-	 * The template title.
+	 * Constructor.
 	 *
-	 * @var string
-	 */
-	private $title;
-
-	/**
-	 * The product data.
-	 *
-	 * @var array
-	 */
-	private $product_data;
-
-	/**
-	 * The template order.
-	 *
-	 * @var Integer
-	 */
-	private $order = 999;
-
-	/**
-	 * The layout template id.
-	 *
-	 * @var string
-	 */
-	private $layout_template_id = null;
-
-	/**
-	 * The template description.
-	 *
-	 * @var string
-	 */
-	private $description = null;
-
-	/**
-	 * The template icon.
-	 *
-	 * @var string
-	 */
-	private $icon = null;
-
-	/**
-	 * If the template is directly selectable through the UI.
-	 *
-	 * @var boolean
-	 */
-	private $is_selectable_by_user = true;
-
-	/**
-	 * ProductTemplate constructor
-	 *
-	 * @param array $data The data.
+	 * @param array $data Template data.
 	 */
 	public function __construct( array $data ) {
-		$this->id           = $data['id'];
-		$this->title        = $data['title'];
-		$this->product_data = $data['product_data'];
+		unset( $data );
 
-		if ( isset( $data['order'] ) ) {
-			$this->order = $data['order'];
-		}
-
-		if ( isset( $data['layout_template_id'] ) ) {
-			$this->layout_template_id = $data['layout_template_id'];
-		}
-
-		if ( isset( $data['description'] ) ) {
-			$this->description = $data['description'];
-		}
-
-		if ( isset( $data['icon'] ) ) {
-			$this->icon = $data['icon'];
-		}
-
-		if ( isset( $data['is_selectable_by_user'] ) ) {
-			$this->is_selectable_by_user = $data['is_selectable_by_user'];
-		}
+		self::maybe_log_removal_warning();
 	}
 
 	/**
 	 * Get the template ID.
 	 *
-	 * @return string The ID.
+	 * @return string
 	 */
 	public function get_id() {
-		return $this->id;
+		self::maybe_log_removal_warning();
+
+		return '';
 	}
 
 	/**
 	 * Get the template title.
 	 *
-	 * @return string The title.
+	 * @return string
 	 */
 	public function get_title() {
-		return $this->title;
+		self::maybe_log_removal_warning();
+
+		return '';
 	}
 
 	/**
 	 * Get the layout template ID.
 	 *
-	 * @return string The layout template ID.
+	 * @return string|null
 	 */
 	public function get_layout_template_id() {
-		return $this->layout_template_id;
+		self::maybe_log_removal_warning();
+
+		return null;
 	}
 
 	/**
 	 * Set the layout template ID.
 	 *
 	 * @param string $layout_template_id The layout template ID.
+	 * @return void
 	 */
 	public function set_layout_template_id( string $layout_template_id ) {
-		$this->layout_template_id = $layout_template_id;
+		unset( $layout_template_id );
+
+		self::maybe_log_removal_warning();
 	}
 
 	/**
 	 * Get the product data.
 	 *
-	 * @return array The product data.
+	 * @return array
 	 */
 	public function get_product_data() {
-		return $this->product_data;
+		self::maybe_log_removal_warning();
+
+		return array();
 	}
 
 	/**
 	 * Get the template description.
 	 *
-	 * @return string The description.
+	 * @return string|null
 	 */
 	public function get_description() {
-		return $this->description;
+		self::maybe_log_removal_warning();
+
+		return null;
 	}
 
 	/**
 	 * Set the template description.
 	 *
 	 * @param string $description The template description.
+	 * @return void
 	 */
 	public function set_description( string $description ) {
-		$this->description = $description;
+		unset( $description );
+
+		self::maybe_log_removal_warning();
 	}
 
 	/**
 	 * Get the template icon.
 	 *
-	 * @return string The icon.
+	 * @return string|null
 	 */
 	public function get_icon() {
-		return $this->icon;
+		self::maybe_log_removal_warning();
+
+		return null;
 	}
 
 	/**
 	 * Set the template icon.
 	 *
-	 * @see https://github.com/WordPress/gutenberg/tree/trunk/packages/icons.
-	 *
-	 * @param string $icon The icon name from the @wordpress/components or a url for an external image resource.
+	 * @param string $icon The icon name or an external image URL.
+	 * @return void
 	 */
 	public function set_icon( string $icon ) {
-		$this->icon = $icon;
+		unset( $icon );
+
+		self::maybe_log_removal_warning();
 	}
 
 	/**
 	 * Get the template order.
 	 *
-	 * @return int The order.
+	 * @return int
 	 */
 	public function get_order() {
-		return $this->order;
+		self::maybe_log_removal_warning();
+
+		return 999;
 	}
 
 	/**
 	 * Get the selectable attribute.
 	 *
-	 * @return boolean Selectable.
+	 * @return bool
 	 */
 	public function get_is_selectable_by_user() {
-		return $this->is_selectable_by_user;
+		self::maybe_log_removal_warning();
+
+		return false;
 	}
 
 	/**
 	 * Set the template order.
 	 *
 	 * @param int $order The template order.
+	 * @return void
 	 */
 	public function set_order( int $order ) {
-		$this->order = $order;
+		unset( $order );
+
+		self::maybe_log_removal_warning();
 	}
 
 	/**
-	 * Get the product template as JSON like.
+	 * Get the product template as JSON-like data.
 	 *
-	 * @return array The JSON.
+	 * @return array
 	 */
 	public function to_json() {
-		return array(
-			'id'                 => $this->get_id(),
-			'title'              => $this->get_title(),
-			'description'        => $this->get_description(),
-			'icon'               => $this->get_icon(),
-			'order'              => $this->get_order(),
-			'layoutTemplateId'   => $this->get_layout_template_id(),
-			'productData'        => $this->get_product_data(),
-			'isSelectableByUser' => $this->get_is_selectable_by_user(),
+		self::maybe_log_removal_warning();
+
+		return array();
+	}
+
+	/**
+	 * Log a warning about the removed compatibility class.
+	 */
+	private static function maybe_log_removal_warning(): void {
+		if ( self::$removal_warning_logged || ! function_exists( 'wc_get_logger' ) ) {
+			return;
+		}
+
+		self::$removal_warning_logged = true;
+
+		wc_get_logger()->warning(
+			'Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplate is a temporary compatibility shim and will be removed soon. Product editor extension APIs were deprecated in WooCommerce 10.9.0, and the product block editor was removed in WooCommerce 11.0.0 with no replacement.',
+			array( 'source' => 'product-block-editor' )
 		);
 	}
 }

@@ -9,8 +9,8 @@ import {
 	useState,
 	useMemo,
 } from '@wordpress/element';
-import classnames from 'classnames';
-import { MediaItem, MediaUpload } from '@wordpress/media-utils';
+import clsx from 'clsx';
+import { type Attachment, MediaUpload } from '@wordpress/media-utils';
 
 /**
  * Internal dependencies
@@ -29,7 +29,7 @@ export type ImageGalleryProps = {
 	} ) => void;
 	onReplace?: ( props: {
 		replaceIndex: number;
-		media: { id: number } & MediaItem;
+		media: { id: number } & Attachment;
 	} ) => void;
 	allowDragging?: boolean;
 	onSelectAsCover?: ( itemId: string | null ) => void;
@@ -71,7 +71,7 @@ export const ImageGallery = ( {
 			{
 				key,
 				isDraggable: allowDragging && ! child.props.isCover,
-				className: classnames( {
+				className: clsx( {
 					'is-toolbar-visible': isToolbarVisible,
 				} ),
 				onClick() {
@@ -124,7 +124,7 @@ export const ImageGallery = ( {
 					} }
 					replaceItem={ (
 						replaceIndex: number,
-						media: { id: number } & MediaItem
+						media: { id: number } & Attachment
 					) => {
 						onReplace( { replaceIndex, media } );
 					} }

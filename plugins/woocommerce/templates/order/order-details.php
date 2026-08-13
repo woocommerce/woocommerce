@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 9.8.0
+ * @version 10.9.0
  *
  * @var bool $show_downloads Controls whether the downloads table should be rendered.
  */
@@ -89,10 +89,31 @@ if ( $show_downloads ) {
 			?>
 		</tbody>
 
-		<?php
-		if ( ! empty( $actions ) ) :
-			?>
 		<tfoot>
+			<?php
+			foreach ( $order->get_order_item_totals() as $key => $total ) {
+				?>
+					<tr>
+						<th scope="row"><?php echo esc_html( $total['label'] ); ?></th>
+						<td><?php echo wp_kses_post( $total['value'] ); ?></td>
+					</tr>
+					<?php
+			}
+			?>
+			<?php if ( $order->get_customer_note() ) : ?>
+				<tr>
+					<th><?php esc_html_e( 'Note:', 'woocommerce' ); ?></th>
+					<td>
+					<?php
+					$customer_note = wc_wptexturize_order_note( $order->get_customer_note() );
+					echo wp_kses( nl2br( $customer_note ), array( 'br' => array() ) );
+					?>
+					</td>
+				</tr>
+			<?php endif; ?>
+			<?php
+			if ( ! empty( $actions ) ) :
+				?>
 			<tr>
 				<th class="order-actions--heading"><?php esc_html_e( 'Actions', 'woocommerce' ); ?>:</th>
 				<td>
@@ -111,24 +132,6 @@ if ( $show_downloads ) {
 						}
 						?>
 					</td>
-				</tr>
-			</tfoot>
-			<?php endif ?>
-		<tfoot>
-			<?php
-			foreach ( $order->get_order_item_totals() as $key => $total ) {
-				?>
-					<tr>
-						<th scope="row"><?php echo esc_html( $total['label'] ); ?></th>
-						<td><?php echo wp_kses_post( $total['value'] ); ?></td>
-					</tr>
-					<?php
-			}
-			?>
-			<?php if ( $order->get_customer_note() ) : ?>
-				<tr>
-					<th><?php esc_html_e( 'Note:', 'woocommerce' ); ?></th>
-					<td><?php echo wp_kses( nl2br( wptexturize( $order->get_customer_note() ) ), array( 'br' => array() ) ); ?></td>
 				</tr>
 			<?php endif; ?>
 		</tfoot>

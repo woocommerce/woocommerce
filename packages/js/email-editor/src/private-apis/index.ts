@@ -1,11 +1,14 @@
 /**
  * External dependencies
  */
+import { dispatch } from '@wordpress/data';
 import { __dangerousOptInToUnstableAPIsOnlyForCoreModules } from '@wordpress/private-apis';
-import { privateApis as componentsPrivateApis } from '@wordpress/components';
-import { store as coreStore } from '@wordpress/core-data';
 import {
-	// @ts-expect-error No types for privateApis.
+	privateApis as editorPrivateApis,
+	store as editorStore,
+} from '@wordpress/editor';
+import {
+	// @ts-expect-error privateApis is not in the DT types for @wordpress/block-editor.
 	privateApis as blockEditorPrivateApis,
 } from '@wordpress/block-editor';
 
@@ -15,59 +18,51 @@ const { unlock } = __dangerousOptInToUnstableAPIsOnlyForCoreModules(
 );
 
 /**
- * We use the experimental block canvas to render the block editor's canvas.
- * Currently, this is needed because we use contentRef property which is not available in the stable BlockCanvas
- * The property is used for handling clicks for selecting block to edit and to display modal for switching between email and template.
+ * We use the ColorPanel and BackgroundPanel components from the block editor to render
+ * the color and background panels in the style settings sidebar.
+ *
+ * Since WordPress 7.1 the ColorPanel no longer renders the text and background color
+ * controls — text color lives in the typography panel and background color in the
+ * background panel. The useHasColorPanel and useHasBackgroundPanel hooks let us detect
+ * where the controls live in the running WordPress version. The fallbacks cover a WordPress
+ * version whose private API surface lacks these exports and resolve to the legacy
+ * behavior: text and background color handled by ColorPanel, no background screen.
  */
-const { ExperimentalBlockCanvas: BlockCanvas } = unlock(
-	blockEditorPrivateApis
+const {
+	ColorPanel: StylesColorPanel,
+	BackgroundPanel,
+	useHasColorPanel,
+	useHasBackgroundPanel,
+} = unlock( blockEditorPrivateApis );
+
+const StylesBackgroundPanel = BackgroundPanel ?? ( () => null );
+const useHasStylesColorPanel = useHasColorPanel ?? ( () => true );
+const useHasStylesBackgroundPanel = useHasBackgroundPanel ?? ( () => false );
+
+/**
+ * The Editor is the main component for the email editor.
+ */
+const { Editor, FullscreenMode, ViewMoreMenuGroup, BackButton } =
+	unlock( editorPrivateApis );
+
+/**
+ * The registerEntityAction and unregisterEntityAction are used to register and unregister entity actions.
+ * This is used in the move-to-trash.tsx file to modify the move to trash action.
+ * Providing us with the ability to remove the default move to trash action and add a custom trash email post action.
+ */
+const { registerEntityAction, unregisterEntityAction } = unlock(
+	dispatch( editorStore )
 );
 
-/**
- * Tabs are used in the right sidebar header to switch between Email and Block settings.
- * Tabs should be close to stabilization https://github.com/WordPress/gutenberg/pull/61072
- */
-const { Tabs } = unlock( componentsPrivateApis );
-
-/**
- * We need the following selectors from core store to fetch block patterns for the email post type.
- *
- * @param select - select function from the core store.
- */
-const unlockPatternsRelatedSelectorsFromCoreStore = ( select ) => {
-	const { hasFinishedResolution, getBlockPatternsForPostType } = unlock(
-		select( coreStore )
-	);
-	return { hasFinishedResolution, getBlockPatternsForPostType };
-};
-
-/**
- * Selector getEnabledClientIdsTree for block-editor store is used to find nearest editable block to select on click in
- * useSelectNearestEditableBlock
- * We copied useSelectNearestEditableBlock from Gutenberg.
- *
- * @param selectHook - useSelect call from the block editor store `useSelect( blockEditorStore ).
- */
-const unlockGetEnabledClientIdsTree = ( selectHook ) => {
-	const { getEnabledClientIdsTree } = unlock( selectHook );
-	return getEnabledClientIdsTree;
-};
-
-/**
- * We use the ColorPanel component from the block editor to render the color panel in the style settings sidebar.
- */
-const { ColorPanel: StylesColorPanel } = unlock( blockEditorPrivateApis );
-
-/**
- * The useGlobalStylesOutputWithConfig is used to generate the CSS for the email editor content from the style settings.
- */
-const { useGlobalStylesOutputWithConfig } = unlock( blockEditorPrivateApis );
-
 export {
-	BlockCanvas,
-	Tabs,
 	StylesColorPanel,
-	unlockPatternsRelatedSelectorsFromCoreStore,
-	unlockGetEnabledClientIdsTree,
-	useGlobalStylesOutputWithConfig,
+	StylesBackgroundPanel,
+	useHasStylesColorPanel,
+	useHasStylesBackgroundPanel,
+	Editor,
+	FullscreenMode,
+	ViewMoreMenuGroup,
+	BackButton,
+	registerEntityAction,
+	unregisterEntityAction,
 };

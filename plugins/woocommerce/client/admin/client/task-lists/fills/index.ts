@@ -13,19 +13,16 @@ import './launch-your-store';
 
 const possiblyImportProductTask = async () => {
 	if ( isImportProduct() ) {
-		import( /* webpackChunkName: "import-products" */ './import-products' );
+		void import(
+			/* webpackChunkName: "import-products" */ './import-products'
+		);
 	} else {
-		import( /* webpackChunkName: "products" */ './products' );
+		void import( /* webpackChunkName: "products" */ './products' );
 	}
 };
 
-possiblyImportProductTask();
+void possiblyImportProductTask();
 
-if (
-	window.wcAdminFeatures &&
-	window.wcAdminFeatures[ 'shipping-smart-defaults' ]
-) {
-	import(
-		/* webpackChunkName: "experimental-shipping-recommendation" */ './experimental-shipping-recommendation'
-	);
-}
+void import(
+	/* webpackChunkName: "shipping-recommendation" */ './shipping-recommendation'
+);

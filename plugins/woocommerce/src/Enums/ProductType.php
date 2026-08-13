@@ -13,33 +13,50 @@ final class ProductType {
 	 *
 	 * @var string
 	 */
-	const SIMPLE = 'simple';
+	public const SIMPLE = 'simple';
 
 	/**
 	 * Variable product type.
 	 *
 	 * @var string
 	 */
-	const VARIABLE = 'variable';
+	public const VARIABLE = 'variable';
 
 	/**
 	 * Grouped product type.
 	 *
 	 * @var string
 	 */
-	const GROUPED = 'grouped';
+	public const GROUPED = 'grouped';
 
 	/**
 	 * External/Affiliate product type.
 	 *
 	 * @var string
 	 */
-	const EXTERNAL = 'external';
+	public const EXTERNAL = 'external';
 
 	/**
 	 * Variation product type.
 	 *
 	 * @var string
 	 */
-	const VARIATION = 'variation';
+	public const VARIATION = 'variation';
+
+	/**
+	 * Returns all product type values.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @return string[]
+	 */
+	public static function get_all(): array {
+		return array(
+			self::SIMPLE,
+			self::VARIABLE,
+			self::GROUPED,
+			self::EXTERNAL,
+			self::VARIATION,
+		);
+	}
 }

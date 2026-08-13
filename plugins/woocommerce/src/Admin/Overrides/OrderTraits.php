@@ -9,6 +9,8 @@ namespace Automattic\WooCommerce\Admin\Overrides;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Enums\OrderItemType;
+
 /**
  * OrderTraits class.
  */
@@ -30,16 +32,19 @@ trait OrderTraits {
 		// Use the passed order_items_count if provided, otherwise get the total number of items in the order.
 		// This is useful when calculating refunds for partial items in an order.
 		// For example, if 2 items are refunded from an order with 4 items. The remaining 2 items should have the shipping fee of the refunded items distributed to them.
-		$order_items = $order_items_count ? $order_items_count : $this->get_item_count();
+		$order_items = null !== $order_items_count ? $order_items_count : $this->get_item_count();
 
-		if ( 0 === $order_items ) {
+		// Bail when there are no items to distribute the shipping across, to avoid dividing by zero.
+		// A loose check is used so a float 0.0 count is also treated as zero. Stores that allow decimal
+		// quantities (e.g. some Point of Sale plugins) make the item count a float, which a strict 0 === check would miss.
+		if ( ! $order_items ) {
 			return 0;
 		}
 
 		// Use the passed shipping_amount if provided, otherwise get the total shipping amount in the order.
 		// This is useful when calculating refunds for partial shipping in an order.
 		// For example, if $10 shipping is refunded from an order with $30 shipping, the remaining $20 should be distributed to the remaining items.
-		$total_shipping_amount = $shipping_amount ? $shipping_amount : (float) $this->get_shipping_total();
+		$total_shipping_amount = null !== $shipping_amount ? $shipping_amount : (float) $this->get_shipping_total();
 
 		return $total_shipping_amount / $order_items * $product_qty;
 	}
@@ -61,20 +66,23 @@ trait OrderTraits {
 		// Use the passed order_items_count if provided, otherwise get the total number of items in the order.
 		// This is useful when calculating refunds for partial items in an order.
 		// For example, if 2 items are refunded from an order with 4 items. The remaining 2 items should have the shipping tax of the refunded items distributed to them.
-		$order_items = $order_items_count ? $order_items_count : $this->get_item_count();
+		$order_items = null !== $order_items_count ? $order_items_count : $this->get_item_count();
 
-		if ( 0 === $order_items ) {
+		// Bail when there are no items to distribute the shipping tax across, to avoid dividing by zero.
+		// A loose check is used so a float 0.0 count is also treated as zero. Stores that allow decimal
+		// quantities (e.g. some Point of Sale plugins) make the item count a float, which a strict 0 === check would miss.
+		if ( ! $order_items ) {
 			return 0;
 		}
 
-		// Use the passed shipping_tax_amount if provided, otherwise initiliase it to 0 and calculate the total shipping tax amount in the order.
+		// Use the passed shipping_tax_amount if provided, otherwise initialize it to 0 and calculate the total shipping tax amount in the order.
 		// This is useful when calculating refunds for partial shipping tax in an order.
 		// For example, if $1 shipping tax is refunded from an order with $3 shipping tax, the remaining $2 should be distributed to the remaining items.
 		$total_shipping_tax_amount = $shipping_tax_amount ? $shipping_tax_amount : 0;
 
 		if ( null === $shipping_tax_amount ) {
 			$order_taxes         = $this->get_taxes();
-			$line_items_shipping = $this->get_items( 'shipping' );
+			$line_items_shipping = $this->get_items( OrderItemType::SHIPPING );
 			foreach ( $line_items_shipping as $item_id => $shipping_item ) {
 				$tax_data = $shipping_item->get_taxes();
 				if ( $tax_data ) {

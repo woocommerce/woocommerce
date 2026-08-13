@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Rename the Category filter and column label from "Categories" to "Category" in the experimental products app.

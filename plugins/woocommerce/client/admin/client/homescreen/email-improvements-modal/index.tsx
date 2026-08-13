@@ -24,11 +24,19 @@ export const EmailImprovementsModal = ( {
 	const [ guideIsOpen, setGuideIsOpen ] = useState( false );
 	const [ searchParams ] = useSearchParams();
 
-	let title = __( 'Your emails have a new look!', 'woocommerce' );
+	let title = __< string >(
+		'Your store emails have had an upgrade!',
+		'woocommerce'
+	);
+	let description = __< string >(
+		'We’ve made some exciting improvements to your email templates, including modern, shopper-friendly designs and new customization options. Head to your email settings to explore the new changes.',
+		'woocommerce'
+	);
 
 	if ( type === 'try' ) {
-		title = __(
-			'Introducing new email templates for your store!',
+		title = __( 'Store emails have had an upgrade!', 'woocommerce' );
+		description = __(
+			'We’ve made some exciting improvements to our email templates, including modern, shopper-friendly designs and new customization options. Head to your email settings to explore the new features.',
 			'woocommerce'
 		);
 	}
@@ -78,12 +86,7 @@ export const EmailImprovementsModal = ( {
 										</div>
 										<div>
 											<h1>{ title }</h1>
-											<p>
-												{ __(
-													'We’re excited to introduce our refreshed email templates designed to enhance your customers shopping experience. Preview and customize your emails in Settings.',
-													'woocommerce'
-												) }
-											</p>
+											<p>{ description }</p>
 										</div>
 										<div className="email-improvements-modal-footer">
 											<Button
@@ -102,7 +105,7 @@ export const EmailImprovementsModal = ( {
 													href="?page=wc-settings&tab=email&try-new-templates"
 												>
 													{ __(
-														'Try new templates',
+														'Try the new templates',
 														'woocommerce'
 													) }
 												</Button>
@@ -112,7 +115,7 @@ export const EmailImprovementsModal = ( {
 													href="?page=wc-settings&tab=email"
 												>
 													{ __(
-														'Manage emails',
+														'Customize your emails',
 														'woocommerce'
 													) }
 												</Button>

@@ -3,6 +3,7 @@
 	grid-template-columns: min-content min-content;
 	grid-gap: $gap-smallest * 2;
 	align-items: center;
+	white-space: nowrap;
 }
 
 .woocommerce-order-status__indicator {

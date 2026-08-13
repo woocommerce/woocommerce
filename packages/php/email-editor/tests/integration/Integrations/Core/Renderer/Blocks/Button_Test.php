@@ -9,7 +9,8 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
-use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 
 /**
  * Integration test for Button class
@@ -56,11 +57,11 @@ class Button_Test extends \Email_Editor_Integration_Test_Case {
 	);
 
 	/**
-	 * Instance of Settings_Controller class
+	 * Instance of Rendering_Context class
 	 *
-	 * @var Settings_Controller
+	 * @var Rendering_Context
 	 */
-	private $settings_controller;
+	private $rendering_context;
 
 	/**
 	 * Set up before each test
@@ -68,15 +69,16 @@ class Button_Test extends \Email_Editor_Integration_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->di_container->get( Email_Editor::class )->initialize();
-		$this->button_renderer     = new Button();
-		$this->settings_controller = $this->di_container->get( Settings_Controller::class );
+		$theme_controller        = $this->di_container->get( Theme_Controller::class );
+		$this->button_renderer   = new Button();
+		$this->rendering_context = new Rendering_Context( $theme_controller->get_theme() );
 	}
 
 	/**
 	 * Test in renders link
 	 */
 	public function testItRendersLink(): void {
-		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->settings_controller );
+		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->rendering_context );
 		$this->assertStringContainsString( 'href="http://example.com"', $output );
 		$this->assertStringContainsString( 'Button Text', $output );
 	}
@@ -91,7 +93,7 @@ class Button_Test extends \Email_Editor_Integration_Test_Case {
 			'top'    => '30px',
 			'bottom' => '40px',
 		);
-		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->settings_controller );
+		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->rendering_context );
 		$this->assertStringContainsString( 'padding-left:10px;', $output );
 		$this->assertStringContainsString( 'padding-right:20px;', $output, $output );
 		$this->assertStringContainsString( 'padding-top:30px;', $output );
@@ -106,7 +108,7 @@ class Button_Test extends \Email_Editor_Integration_Test_Case {
 			'background' => '#000000',
 			'text'       => '#111111',
 		);
-		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->settings_controller );
+		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->rendering_context );
 		$this->assertStringContainsString( 'background-color:#000000;', $output );
 		$this->assertStringContainsString( 'color:#111111;', $output );
 	}
@@ -118,8 +120,9 @@ class Button_Test extends \Email_Editor_Integration_Test_Case {
 		$this->parsed_button['attrs']['style']['border'] = array(
 			'width' => '10px',
 			'color' => '#111111',
+			'style' => 'solid',
 		);
-		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->settings_controller );
+		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->rendering_context );
 		$this->assertStringContainsString( 'border-color:#111111;', $output );
 		$this->assertStringContainsString( 'border-width:10px;', $output );
 		$this->assertStringContainsString( 'border-style:solid;', $output );
@@ -133,34 +136,40 @@ class Button_Test extends \Email_Editor_Integration_Test_Case {
 			'top'    => array(
 				'width' => '1px',
 				'color' => '#111111',
+				'style' => 'solid',
 			),
 			'right'  => array(
 				'width' => '2px',
 				'color' => '#222222',
+				'style' => 'dashed',
 			),
 			'bottom' => array(
 				'width' => '3px',
 				'color' => '#333333',
+				'style' => 'solid',
 			),
 			'left'   => array(
 				'width' => '4px',
 				'color' => '#444444',
+				'style' => 'dashed',
 			),
 		);
-		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->settings_controller );
+		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->rendering_context );
 		$this->assertStringContainsString( 'border-top-width:1px;', $output );
 		$this->assertStringContainsString( 'border-top-color:#111111;', $output );
+		$this->assertStringContainsString( 'border-top-style:solid;', $output );
 
 		$this->assertStringContainsString( 'border-right-width:2px;', $output );
 		$this->assertStringContainsString( 'border-right-color:#222222;', $output );
+		$this->assertStringContainsString( 'border-right-style:dashed;', $output );
 
 		$this->assertStringContainsString( 'border-bottom-width:3px;', $output );
 		$this->assertStringContainsString( 'border-bottom-color:#333333;', $output );
+		$this->assertStringContainsString( 'border-bottom-style:solid;', $output );
 
 		$this->assertStringContainsString( 'border-left-width:4px;', $output );
 		$this->assertStringContainsString( 'border-left-color:#444444;', $output );
-
-		$this->assertStringContainsString( 'border-style:solid;', $output );
+		$this->assertStringContainsString( 'border-left-style:dashed;', $output );
 	}
 
 	/**
@@ -170,7 +179,7 @@ class Button_Test extends \Email_Editor_Integration_Test_Case {
 		$this->parsed_button['attrs']['style']['border'] = array(
 			'radius' => '10px',
 		);
-		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->settings_controller );
+		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->rendering_context );
 		$this->assertStringContainsString( 'border-radius:10px;', $output );
 	}
 
@@ -179,7 +188,7 @@ class Button_Test extends \Email_Editor_Integration_Test_Case {
 	 */
 	public function testItRendersFontSize(): void {
 		$this->parsed_button['attrs']['style']['typography']['fontSize'] = '10px';
-		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->settings_controller );
+		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->rendering_context );
 		$this->assertStringContainsString( 'font-size:10px;', $output );
 	}
 
@@ -193,7 +202,7 @@ class Button_Test extends \Email_Editor_Integration_Test_Case {
 			'bottomLeft'  => '3px',
 			'bottomRight' => '4px',
 		);
-		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->settings_controller );
+		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->rendering_context );
 		$this->assertStringContainsString( 'border-top-left-radius:1px;', $output );
 		$this->assertStringContainsString( 'border-top-right-radius:2px;', $output );
 		$this->assertStringContainsString( 'border-bottom-left-radius:3px;', $output );
@@ -207,7 +216,7 @@ class Button_Test extends \Email_Editor_Integration_Test_Case {
 		unset( $this->parsed_button['attrs']['style']['color'] );
 		unset( $this->parsed_button['attrs']['style']['spacing']['padding'] );
 		$this->parsed_button['attrs']['backgroundColor'] = 'black';
-		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->settings_controller );
+		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->rendering_context );
 		// For other blocks this is handled by CSS-inliner, but for button we need to handle it manually
 		// because of special email HTML markup.
 		$this->assertStringContainsString( 'background-color:#000000;', $output );
@@ -220,9 +229,26 @@ class Button_Test extends \Email_Editor_Integration_Test_Case {
 		unset( $this->parsed_button['attrs']['style']['color'] );
 		unset( $this->parsed_button['attrs']['style']['spacing']['padding'] );
 		$this->parsed_button['attrs']['textColor'] = 'white';
-		$output                                    = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->settings_controller );
+		$output                                    = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->rendering_context );
 		// For other blocks this is handled by CSS-inliner, but for button we need to handle it manually
 		// because of special email HTML markup.
 		$this->assertStringContainsString( 'color:#fff', $output );
+	}
+
+	/**
+	 * Test it preserves data-link-href attribute for personalization tags
+	 */
+	public function testItPreservesDataLinkHref(): void {
+		$parsed_button              = $this->parsed_button;
+		$parsed_button['innerHTML'] = '<div class="wp-block-button"><a href="#" data-link-href="[trackable-link url=\'test\']" class="wp-block-button__link">Button Text</a></div>';
+
+		$output = $this->button_renderer->render(
+			$parsed_button['innerHTML'],
+			$parsed_button,
+			$this->rendering_context
+		);
+
+		// Note: esc_attr() encodes single quotes as &#039;.
+		$this->assertStringContainsString( 'data-link-href="[trackable-link url=&#039;test&#039;]"', $output );
 	}
 }

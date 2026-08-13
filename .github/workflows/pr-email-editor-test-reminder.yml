@@ -1,0 +1,64 @@
+name: Email Editor Test Reminder
+
+# Runs on `pull_request_target` rather than `pull_request` so it also works for
+# pull requests opened from a fork. On `pull_request` a fork gets a read-only
+# token, which a `permissions:` block cannot raise, so posting the reminder
+# comment fails with a 403. This workflow only ever checks out and runs base
+# branch code, so it never executes anything a fork controls.
+on:
+    pull_request_target:
+        types: [opened, synchronize, reopened]
+
+concurrency:
+    group: email-editor-test-reminder-${{ github.event.pull_request.number }}
+    cancel-in-progress: true
+
+permissions:
+    pull-requests: write
+    contents: read
+
+jobs:
+    check-and-comment:
+        name: Check and add test reminder comment
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+              with:
+                  # Check out the base branch, never the pull request head. The job
+                  # holds a write token, so it must not run code from the PR.
+                  ref: ${{ github.event.pull_request.base.sha }}
+                  # Keep the token out of the local git config. No later step runs
+                  # git, so nothing here needs it.
+                  persist-credentials: false
+
+            - name: Setup Node
+              uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+              with:
+                  node-version-file: '.nvmrc'
+
+            - name: Check if PR touches email editor
+              id: check-email-editor
+              uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+              with:
+                  script: |
+                      const { checkEmailEditorTestReminderComment } = require( './.github/workflows/scripts/check-email-editor-test-reminder-comment.js' );
+                      const result = await checkEmailEditorTestReminderComment( github, context, core );
+                      core.setOutput( 'touches-email-editor', result.touchesEmailEditor ? 'true' : 'false' );
+
+            - name: Create or update test reminder comment
+              if: steps.check-email-editor.outputs.touches-email-editor == 'true'
+              uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+              with:
+                  script: |
+                      const { createOrUpdateTestReminderComment } = require( './.github/workflows/scripts/manage-email-editor-test-reminder-comment.js' );
+                      await createOrUpdateTestReminderComment( github, context, core );
+
+            - name: Delete test reminder comment
+              if: steps.check-email-editor.outputs.touches-email-editor == 'false'
+              uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+              with:
+                  script: |
+                      const { deleteTestReminderComment } = require( './.github/workflows/scripts/manage-email-editor-test-reminder-comment.js' );
+                      await deleteTestReminderComment( github, context, core );
+

@@ -35,6 +35,18 @@ class EmailImprovements {
 		'yaymail.php',
 	);
 
+	private const EMAIL_TEMPLATE_PARTS = array(
+		'email-addresses.php',
+		'email-customer-details.php',
+		'email-downloads.php',
+		'email-footer.php',
+		'email-header.php',
+		'email-mobile-messaging.php',
+		'email-order-details.php',
+		'email-order-items.php',
+		'email-styles.php',
+	);
+
 	/**
 	 * Hook into WordPress.
 	 */
@@ -49,8 +61,8 @@ class EmailImprovements {
 	 */
 	public static function has_email_templates_overridden() {
 		$all_template_overrides = WC_Tracker::get_all_template_overrides();
-		$core_email_overrides   = WC_Tracker::get_core_email_overrides( $all_template_overrides );
-		return $core_email_overrides['count'] > 0;
+		$core_email_overrides   = self::get_core_email_overrides( $all_template_overrides );
+		return count( $core_email_overrides ) > 0;
 	}
 
 	/**
@@ -106,7 +118,8 @@ class EmailImprovements {
 		if ( self::is_email_customizer_enabled() ) {
 			return false;
 		}
-		return true;
+		// Temporarily paused roll-out to gather more feedback.
+		return false;
 	}
 
 	/**
@@ -142,5 +155,111 @@ class EmailImprovements {
 			wp_safe_redirect( add_query_arg( 'emailImprovementsModal', 'try' ) );
 			exit;
 		}
+	}
+
+	/**
+	 * Get all core emails.
+	 *
+	 * @return array Core emails.
+	 */
+	public static function get_core_emails() {
+		return array_filter(
+			self::get_emails(),
+			function ( $email ) {
+				return strpos( get_class( $email ), 'WC_Email_' ) === 0 && is_string( $email->template_html );
+			}
+		);
+	}
+
+	/**
+	 * Get all core email template overrides.
+	 *
+	 * @param array $template_overrides All template overrides.
+	 * @return array Core email template overrides.
+	 */
+	public static function get_core_email_overrides( $template_overrides ) {
+		$core_emails          = self::get_core_emails();
+		$core_email_templates = array_map(
+			function ( $email ) {
+				return basename( $email->template_html );
+			},
+			$core_emails
+		);
+		$all_email_templates  = array_merge( $core_email_templates, self::EMAIL_TEMPLATE_PARTS );
+		return array_intersect( $all_email_templates, $template_overrides );
+	}
+
+	/**
+	 * Get all enabled email IDs.
+	 *
+	 * @return array Enabled email IDs.
+	 */
+	public static function get_enabled_emails() {
+		$enabled_emails = array_filter(
+			self::get_emails(),
+			function ( $email ) {
+				return $email->is_enabled() && ! $email->is_manual();
+			}
+		);
+		return array_values( array_map( fn( $email ) => get_class( $email ), $enabled_emails ) );
+	}
+
+	/**
+	 * Get all disabled email IDs.
+	 *
+	 * @return array Enabled email IDs.
+	 */
+	public static function get_disabled_emails() {
+		$disabled_emails = array_filter(
+			self::get_emails(),
+			function ( $email ) {
+				return ! $email->is_enabled() && ! $email->is_manual();
+			}
+		);
+		return array_values( array_map( fn( $email ) => get_class( $email ), $disabled_emails ) );
+	}
+
+	/**
+	 * Get all enabled or manual emails with Cc or Bcc.
+	 *
+	 * @return array Enabled or manual emails with Cc or Bcc.
+	 */
+	public static function get_enabled_or_manual_emails_with_cc_or_bcc() {
+		$enabled_or_manual_emails = array_filter(
+			self::get_emails(),
+			function ( $email ) {
+				return $email->is_enabled() || $email->is_manual();
+			}
+		);
+
+		$email_ids_with_cc  = array();
+		$email_ids_with_bcc = array();
+
+		foreach ( $enabled_or_manual_emails as $email ) {
+			if ( $email->get_cc_recipient() ) {
+				$email_ids_with_cc[] = get_class( $email );
+			}
+			if ( $email->get_bcc_recipient() ) {
+				$email_ids_with_bcc[] = get_class( $email );
+			}
+		}
+
+		return array(
+			'ccs'  => $email_ids_with_cc,
+			'bccs' => $email_ids_with_bcc,
+		);
+	}
+
+	/**
+	 * A helper method to filter out non-WC_Email objects.
+	 *
+	 * @return \WC_Email[] All WC_Email objects.
+	 */
+	private static function get_emails() {
+		$emails = WC()->mailer()->get_emails();
+		return array_filter(
+			$emails,
+			fn( $email ) => is_object( $email ) && $email instanceof \WC_Email
+		);
 	}
 }

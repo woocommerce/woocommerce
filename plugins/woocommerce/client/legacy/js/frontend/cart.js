@@ -155,7 +155,7 @@ jQuery( function ( $ ) {
 				$new_coupon_field.val( $old_coupon_field_val );
 				// The coupon input with error needs to be focused before adding the live region
 				// with the error message, otherwise the screen reader won't read it.
-				$new_coupon_field.focus();
+				$new_coupon_field.trigger( 'focus' );
 				show_coupon_error( $old_coupon_error_msg, $new_coupon_field_wrapper, true );
 			}
 
@@ -234,6 +234,21 @@ jQuery( function ( $ ) {
 	};
 
 	/**
+	 * Handle when pressing the Space key on a link with the button role.
+	 *
+	 * @param {Object} event The jQuery event.
+	 */
+	var on_keydown_button = function ( event ) {
+		if ( event.key === ' ' ) {
+			event.preventDefault();
+
+			if ( ! event.originalEvent || ! event.originalEvent.repeat ) {
+				$( event.currentTarget ).trigger( 'click' );
+			}
+		}
+	};
+
+	/**
 	 * Object to handle AJAX calls for cart shipping changes.
 	 */
 	var cart_shipping = {
@@ -252,6 +267,11 @@ jQuery( function ( $ ) {
 				'click',
 				'.shipping-calculator-button',
 				this.toggle_shipping
+			);
+			$( document ).on(
+				'keydown',
+				'.shipping-calculator-button',
+				on_keydown_button
 			);
 			$( document ).on(
 				'change',
@@ -296,7 +316,6 @@ jQuery( function ( $ ) {
 		shipping_method_selected: function ( event ) {
 			var shipping_methods = {};
 
-			// eslint-disable-next-line max-len
 			$(
 				'select.shipping_method, :input[name^=shipping_method][type=radio]:checked, :input[name^=shipping_method][type=hidden]'
 			).each( function () {
@@ -415,12 +434,17 @@ jQuery( function ( $ ) {
 			$( document ).on(
 				'keydown',
 				'a.woocommerce-remove-coupon',
-				this.on_keydown_remove_coupon
+				on_keydown_button
 			);
 			$( document ).on(
 				'click',
 				'.woocommerce-cart-form .product-remove > a',
 				this.item_remove_clicked
+			);
+			$( document ).on(
+				'keydown',
+				'.woocommerce-cart-form .product-remove > a',
+				on_keydown_button
 			);
 			$( document ).on(
 				'click',
@@ -433,7 +457,7 @@ jQuery( function ( $ ) {
 				this.input_changed
 			);
 			$( document ).on(
-				'blur change input',
+				'change input',
 				'#coupon_code',
 				this.remove_coupon_error
 			);
@@ -661,26 +685,20 @@ jQuery( function ( $ ) {
 					).remove();
 					show_notice( response );
 					$( document.body ).trigger( 'removed_coupon', [ coupon ] );
+					$( '#coupon_code' )
+						.val('')
+						.removeClass('has-error')
+						.removeAttr('aria-invalid')
+						.removeAttr('aria-describedby')
+						.closest('.coupon')
+						.find('.coupon-error-notice')
+						.remove();
 					unblock( $wrapper );
 				},
 				complete: function () {
 					cart.update_cart( true );
 				},
 			} );
-		},
-
-		/**
-		 * Handle when pressing the Space key on the remove coupon link.
-		 * This is necessary because the link got the role="button" attribute
-		 * and needs to act like a button.
-		 *
-		 * @param {Object} evt The JQuery event
-		 */
-		on_keydown_remove_coupon: function ( evt ) {
-			if ( evt.key === ' ' ) {
-				evt.preventDefault();
-				$( evt.currentTarget ).trigger( 'click' );
-			}
 		},
 
 		/**

@@ -50,7 +50,7 @@ export const TallerSkeleton: StoryObj< SkeletonProps > = {
 	args: {
 		height: '48px',
 	},
-	storyName: 'Taller',
+	name: 'Taller',
 	parameters: {
 		docs: {
 			description: {
@@ -65,7 +65,7 @@ export const NarrowerSkeleton: StoryObj< SkeletonProps > = {
 	args: {
 		width: '177px',
 	},
-	storyName: 'Narrower',
+	name: 'Narrower',
 	parameters: {
 		docs: {
 			description: {

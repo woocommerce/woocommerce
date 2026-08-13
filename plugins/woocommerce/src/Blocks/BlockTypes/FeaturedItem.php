@@ -41,6 +41,144 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	);
 
 	/**
+	 * Initialize the block.
+	 */
+	protected function initialize() {
+		parent::initialize();
+		add_filter( 'render_block_context', [ $this, 'update_context' ], 10, 3 );
+		add_filter( 'render_block_core/post-title', [ $this, 'restore_global_post' ], 10, 3 );
+	}
+
+	/**
+	 * Current item (product or category) for context
+	 *
+	 * @var \WP_Term|\WC_Product|null
+	 */
+	private $current_item = null;
+
+	/**
+	 * Current featured item ID (product or category) for context
+	 *
+	 * @var int
+	 */
+	protected $featured_item_id = 0;
+
+	/**
+	 * Featured Item inner blocks names.
+	 * This is used to map all the inner blocks for a Featured Item block.
+	 *
+	 * @var array
+	 */
+	protected $featured_item_inner_blocks_names = [];
+
+	/**
+	 * Extract the inner block names for the Featured Item block. This way it's possible
+	 * to map all the inner blocks for a Featured Item block and manipulate the data as needed.
+	 *
+	 * @param array $block The Featured Item block or its inner blocks.
+	 * @param array $result Array of inner block names.
+	 *
+	 * @return array Array containing all the inner block names of a Featured Item block.
+	 */
+	protected function extract_featured_item_inner_block_names( $block, &$result = [] ) {
+		if ( isset( $block['blockName'] ) ) {
+			$result[] = $block['blockName'];
+		}
+
+		if ( 'woocommerce/product-template' === $block['blockName'] || 'core/post-template' === $block['blockName'] ) {
+			return $result;
+		}
+
+		if ( isset( $block['innerBlocks'] ) ) {
+			foreach ( $block['innerBlocks'] as $inner_block ) {
+				$this->extract_featured_item_inner_block_names( $inner_block, $result );
+			}
+		}
+		return $result;
+	}
+
+	/**
+	 * Replace the global post for the Featured Item inner blocks and reset it after.
+	 *
+	 * This is needed because some of the inner blocks may use the global post
+	 * instead of fetching the product through the context, so even if the
+	 * context is passed to the inner block, it will still use the global post.
+	 *
+	 * @param array $block Block attributes.
+	 * @param array $context Block context.
+	 */
+	protected function replace_post_for_featured_item_inner_block( $block, &$context ) {
+		if ( $this->featured_item_inner_blocks_names ) {
+			$block_name = end( $this->featured_item_inner_blocks_names );
+
+			if ( $block_name === $block['blockName'] ) {
+				array_pop( $this->featured_item_inner_blocks_names );
+
+				// Handle core blocks that need global post manipulation.
+				if ( 'core/post-excerpt' === $block_name || 'core/post-title' === $block_name ) {
+					global $post;
+					$post = get_post( $this->featured_item_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+					if ( $post instanceof \WP_Post ) {
+						setup_postdata( $post );
+					}
+				}
+
+				$context['postId']   = $this->featured_item_id;
+				$context['postType'] = 'product';
+				$this->current_item  = wc_get_product( $this->featured_item_id );
+			}
+		}
+	}
+
+	/**
+	 * Update context for inner blocks to provide postId and postType.
+	 *
+	 * @param array    $context Block context.
+	 * @param array    $parsed_block Block attributes.
+	 * @param WP_Block $parent_block Block instance.
+	 *
+	 * @return array Updated block context.
+	 */
+	public function update_context( $context, $parsed_block, $parent_block ) {
+		// Check if this is a featured item block and extract all inner block names.
+		if ( ( 'woocommerce/featured-product' === $parsed_block['blockName'] || 'woocommerce/featured-category' === $parsed_block['blockName'] )
+			&& isset( $parsed_block['attrs'] ) ) {
+
+			$item = $this->get_item( $parsed_block['attrs'] );
+			if ( $item instanceof \WC_Product ) {
+				$this->featured_item_id = $item->get_id();
+
+				$this->featured_item_inner_blocks_names = array_reverse(
+					$this->extract_featured_item_inner_block_names( $parsed_block )
+				);
+			}
+		}
+
+		// Replace post context for featured item inner blocks.
+		$this->replace_post_for_featured_item_inner_block( $parsed_block, $context );
+
+		return $context;
+	}
+
+	/**
+	 * Restore global post data after rendering core/post-title.
+	 *
+	 * @param string    $block_content The block content.
+	 * @param array     $parsed_block The full block, including name and attributes.
+	 * @param \WP_Block $block_instance The block instance.
+	 *
+	 * @return string
+	 */
+	public function restore_global_post( $block_content, $parsed_block, $block_instance ) {
+		if ( $this->current_item ) {
+			wp_reset_postdata();
+		}
+
+		return $block_content;
+	}
+
+	/**
 	 * Returns the featured item.
 	 *
 	 * @param array $attributes Block attributes. Default empty array.
@@ -64,6 +202,22 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	 * @return string
 	 */
 	abstract protected function get_item_image( $item, $size = 'full' );
+
+	/**
+	 * Returns the featured item image attachment ID.
+	 *
+	 * Note: Ideally, this method would be declared as abstract.
+	 * However, it remains a concrete method returning 0 to preserve legacy
+	 * compatibility with existing child classes that may not implement it.
+	 * See:
+	 * https://github.com/woocommerce/woocommerce/pull/66466#discussion_r3559124282
+	 *
+	 * @param \WP_Term|\WC_Product $item Item object.
+	 * @return int
+	 */
+	protected function get_item_image_id( $item ) {
+		return 0;
+	}
 
 	/**
 	 * Renders the featured item attributes.
@@ -93,8 +247,6 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 
 		$attributes['height'] = $attributes['height'] ?? wc_get_theme_support( 'featured_block::default_height', 500 );
 
-		$image_url = esc_url( $this->get_image_url( $attributes, $item ) );
-
 		$styles  = $this->get_styles( $attributes );
 		$classes = $this->get_classes( $attributes );
 
@@ -103,9 +255,9 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 		$output .= $this->render_overlay( $attributes );
 
 		if ( ! $attributes['isRepeated'] && ! $attributes['hasParallax'] ) {
-			$output .= $this->render_image( $attributes, $item, $image_url );
+			$output .= $this->render_image( $attributes, $item );
 		} else {
-			$output .= $this->render_bg_image( $attributes, $image_url );
+			$output .= $this->render_bg_image( $attributes, $item );
 		}
 
 		if ( isset( $aria_label ) && ! empty( $aria_label ) ) {
@@ -117,12 +269,32 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 			}
 		}
 
+		// Render additional attributes (e.g. description/price) for legacy compatibility.
 		$output .= $this->render_attributes( $item, $attributes );
-		$output .= sprintf( '<div class="wc-block-%s__link">%s</div>', $this->block_name, $content );
+
+		if ( ! empty( $content ) ) {
+			$output .= sprintf( '<div class="wc-block-%s__inner-blocks">%s</div>', $this->block_name, $content );
+		}
+
 		$output .= '</div>';
 		$output .= '</div>';
 
 		return $output;
+	}
+
+	/**
+	 * Returns the image size slug for the featured item image.
+	 *
+	 * @param array $attributes Block attributes. Default empty array.
+	 * @return string
+	 */
+	private function get_image_size( $attributes ) {
+		$image_size = 'large';
+		if ( 'none' !== $attributes['align'] || $attributes['height'] > 800 ) {
+			$image_size = 'full';
+		}
+
+		return $image_size;
 	}
 
 	/**
@@ -134,10 +306,7 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	 * @return string
 	 */
 	private function get_image_url( $attributes, $item ) {
-		$image_size = 'large';
-		if ( 'none' !== $attributes['align'] || $attributes['height'] > 800 ) {
-			$image_size = 'full';
-		}
+		$image_size = $this->get_image_size( $attributes );
 
 		if ( $attributes['mediaId'] ) {
 			return wp_get_attachment_image_url( $attributes['mediaId'], $image_size );
@@ -149,13 +318,14 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	/**
 	 * Renders the featured image as a div background.
 	 *
-	 * @param array  $attributes Block attributes. Default empty array.
-	 * @param string $image_url  Item image url.
+	 * @param array                $attributes Block attributes. Default empty array.
+	 * @param \WC_Product|\WP_Term $item       Item object.
 	 *
 	 * @return string
 	 */
-	private function render_bg_image( $attributes, $image_url ) {
-		$styles = $this->get_bg_styles( $attributes, $image_url );
+	private function render_bg_image( $attributes, $item ) {
+		$image_url = $this->get_image_url( $attributes, $item );
+		$styles    = $this->get_bg_styles( $attributes, $image_url );
 
 		$classes = [ "wc-block-{$this->block_name}__background-image" ];
 
@@ -207,12 +377,11 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	 *
 	 * @param array                $attributes Block attributes. Default empty array.
 	 * @param \WC_Product|\WP_Term $item       Item object.
-	 * @param string               $image_url  Item image url.
 	 *
 	 * @return string
 	 */
-	private function render_image( $attributes, $item, string $image_url ) {
-		$style   = sprintf( 'object-fit: %s;', esc_attr( $attributes['imageFit'] ) );
+	private function render_image( $attributes, $item ) {
+		$style   = sprintf( 'object-fit: %s;', $attributes['imageFit'] );
 		$img_alt = $attributes['alt'] ?: $this->get_item_title( $item );
 
 		if ( $this->hasFocalPoint( $attributes ) ) {
@@ -222,6 +391,34 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 				$attributes['focalPoint']['y'] * 100
 			);
 		}
+
+		$image_size = $this->get_image_size( $attributes );
+
+		// When imageFit is not "cover", the image uses object-fit: none, so it is
+		// not scaled to the block — it renders at its natural pixel size. Before
+		// this block used responsive images, a single large URL was always loaded,
+		// which was typically bigger than the block and got clipped by overflow:
+		// hidden, making the block look filled. wp_get_attachment_image() picks a
+		// smaller srcset candidate on narrow viewports by default, leaving empty
+		// space around the image. Override sizes so the browser still selects the
+		// full image width and the previous appearance is preserved.
+		if ( 'cover' === $attributes['imageFit'] ) {
+			$image_id = empty( $attributes['mediaId'] ) ?
+				$this->get_item_image_id( $item ) :
+				absint( $attributes['mediaId'] );
+
+			if ( $image_id ) {
+				$attr = array(
+					'alt'   => $img_alt,
+					'class' => "wc-block-{$this->block_name}__background-image",
+					'style' => $style,
+				);
+
+				return wp_get_attachment_image( $image_id, $image_size, false, $attr );
+			}
+		}
+
+		$image_url = $this->get_image_url( $attributes, $item );
 
 		if ( ! empty( $image_url ) ) {
 			return sprintf(

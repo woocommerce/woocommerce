@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix Free Shipping method name duplicated in order emails with improvements enabled
