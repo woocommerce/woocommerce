@@ -15,9 +15,9 @@ export const Save = ( {
 }: {
 	attributes: BlockAttributes;
 } ): JSX.Element => {
-	const overlayOnDesktop = attributes.overlayOnDesktop === true;
-	const showFilterDrawer =
-		overlayOnDesktop || attributes.showFilterDrawer !== false;
+	const overlayMode = attributes.overlayMode || 'mobile';
+	const showFilterDrawer = overlayMode !== 'off';
+	const overlayOnDesktop = overlayMode === 'all';
 	const blockProps = useBlockProps.save( {
 		className: clsx( 'wc-block-product-filters', {
 			'is-filter-drawer-disabled': ! showFilterDrawer,

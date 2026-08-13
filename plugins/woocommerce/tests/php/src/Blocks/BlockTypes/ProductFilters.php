@@ -104,7 +104,7 @@ class ProductFilters extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Renders Off, Mobile only, and All devices overlay settings safely.
+	 * @testdox Renders enum and legacy overlay settings safely.
 	 * @dataProvider overlay_attributes_provider
 	 *
 	 * @param array $attributes Block attributes.
@@ -131,44 +131,35 @@ class ProductFilters extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Provides legacy and desktop overlay settings.
+	 * Provides enum and legacy overlay settings.
 	 *
 	 * @return array<string, array{array, bool, bool, bool}>
 	 */
 	public function overlay_attributes_provider(): array {
 		return array(
-			'default mobile'             => array( array(), true, false, false ),
-			'legacy mobile disabled'     => array( array( 'showFilterDrawer' => false ), false, false, false ),
-			'legacy malformed enabled'   => array( array( 'showFilterDrawer' => 'false' ), true, false, false ),
-			'all devices left'           => array(
+			'default mobile'          => array( array(), true, false, false ),
+			'enum off'                => array( array( 'overlayMode' => 'off' ), false, false, false ),
+			'enum mobile'             => array( array( 'overlayMode' => 'mobile' ), true, false, false ),
+			'enum all devices right'  => array(
 				array(
-					'showFilterDrawer' => true,
+					'overlayMode'            => 'all',
+					'desktopOverlayPosition' => 'right',
+				),
+				true,
+				true,
+				true,
+			),
+			'legacy mobile disabled'  => array( array( 'showFilterDrawer' => false ), false, false, false ),
+			'legacy conflicting all'  => array(
+				array(
+					'showFilterDrawer' => false,
 					'overlayOnDesktop' => true,
 				),
 				true,
 				true,
 				false,
 			),
-			'conflicting all devices'    => array(
-				array(
-					'showFilterDrawer'       => false,
-					'overlayOnDesktop'       => true,
-					'desktopOverlayPosition' => 'right',
-				),
-				true,
-				true,
-				true,
-			),
-			'malformed desktop disabled' => array(
-				array(
-					'showFilterDrawer'       => false,
-					'overlayOnDesktop'       => 1,
-					'desktopOverlayPosition' => 'right',
-				),
-				false,
-				false,
-				false,
-			),
+			'invalid enum falls back' => array( array( 'overlayMode' => 'desktop' ), true, false, false ),
 		);
 	}
 

@@ -54,8 +54,7 @@ export type ProductFiltersContext = {
 export type BlockAttributes = {
 	productId?: string;
 	isPreview: boolean;
-	showFilterDrawer?: boolean;
-	overlayOnDesktop?: boolean;
+	overlayMode?: 'off' | 'mobile' | 'all';
 	desktopOverlayPosition?: 'left' | 'right';
 };
 
