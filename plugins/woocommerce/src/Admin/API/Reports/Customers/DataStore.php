@@ -882,7 +882,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$excluded_statuses           = array_map( array( __CLASS__, 'normalize_order_status' ), self::get_excluded_report_order_statuses() );
 		$excluded_statuses_condition = '';
 		if ( ! empty( $excluded_statuses ) ) {
-			$excluded_statuses_str       = implode( "','", $excluded_statuses );
+			$excluded_statuses_str       = implode( "','", array_map( 'esc_sql', $excluded_statuses ) );
 			$excluded_statuses_condition = "AND status NOT IN ('{$excluded_statuses_str}')";
 		}
 
