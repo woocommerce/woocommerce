@@ -1573,4 +1573,57 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( WC_Order_Refund::class, $read_refund, 'Refund should hydrate without fataling on malformed postmeta' );
 		$this->assertEquals( 0, $read_refund->get_amount(), 'Malformed refund amount meta should fall back to the default of zero' );
 	}
+
+	/**
+	 * @testdox Reading a refund with malformed _refunded_by/_refund_reason meta falls back to the post author and excerpt.
+	 */
+	public function test_reading_refund_falls_back_on_malformed_refunded_by_and_reason(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->save();
+
+		$refund = new WC_Order_Refund();
+		$refund->set_parent_id( $order->get_id() );
+		$refund->set_amount( 10 );
+		$refund->set_reason( 'test' );
+		$refund->save();
+		$refund_id = $refund->get_id();
+
+		$expected_author  = (int) get_post_field( 'post_author', $refund_id );
+		$expected_excerpt = (string) get_post_field( 'post_excerpt', $refund_id );
+
+		wp_cache_flush();
+		wp_cache_set(
+			$refund_id,
+			array(
+				'_refunded_by'   => (object) array( 'corrupt' ),
+				'_refund_reason' => (object) array( 'corrupt' ),
+			),
+			'post_meta'
+		);
+
+		$read_refund = wc_get_order( $refund_id );
+
+		$this->assertInstanceOf( WC_Order_Refund::class, $read_refund, 'Refund should hydrate without fataling on malformed postmeta' );
+		$this->assertEquals( $expected_author, $read_refund->get_refunded_by(), 'Malformed _refunded_by meta should fall back to the post author' );
+		$this->assertEquals( $expected_excerpt, $read_refund->get_reason(), 'Malformed _refund_reason meta should fall back to the post excerpt' );
+	}
+
+	/**
+	 * @testdox Reading a COGS-enabled order does not fatal when the COGS postmeta entry is malformed.
+	 */
+	public function test_reading_order_does_not_fatal_on_malformed_cogs_postmeta(): void {
+		$this->enable_cogs_feature();
+
+		$order = WC_Helper_Order::create_order();
+		$order->save();
+		$order_id = $order->get_id();
+
+		wp_cache_flush();
+		wp_cache_set( $order_id, array( '_cogs_total_value' => (object) array( 'corrupt' ) ), 'post_meta' );
+
+		$read_order = wc_get_order( $order_id );
+
+		$this->assertInstanceOf( WC_Order::class, $read_order, 'Order should hydrate without fataling on malformed COGS postmeta' );
+		$this->assertEquals( 0, $read_order->get_cogs_total_value(), 'Malformed COGS meta should fall back to zero' );
+	}
 }

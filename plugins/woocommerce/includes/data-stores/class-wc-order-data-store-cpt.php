@@ -1364,7 +1364,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param array    $post_meta The post meta data array.
 	 */
 	private function read_cogs_data( $order, $post_meta ) {
-		$cogs_value = isset( $post_meta['_cogs_total_value'][0] ) ? (float) $post_meta['_cogs_total_value'][0] : 0;
+		$cogs_value = (float) $this->get_order_meta_value( $post_meta, '_cogs_total_value', 0, $order->get_id() );
 
 		/**
 		 * Filter to customize the Cost of Goods Sold value that gets loaded for a given order.
