@@ -29,6 +29,7 @@ export type TaskListItemProps = {
 		onClick?: () => void;
 	};
 	onTaskDismissed?: ( task: TaskType ) => void;
+	onTaskDismissFailed?: ( task: TaskType ) => void;
 	showSkipAction?: boolean;
 	trackClick?: () => void;
 };
@@ -39,6 +40,7 @@ export const TaskListItem = ( {
 	setExpandedTask,
 	task,
 	onTaskDismissed,
+	onTaskDismissFailed,
 	showSkipAction = false,
 	trackClick: trackTaskListClick,
 }: TaskListItemProps ) => {
@@ -107,9 +109,25 @@ export const TaskListItem = ( {
 				onTaskDismissed( task );
 			}
 
-			dismissTask( id );
+			void Promise.resolve( dismissTask( id ) ).catch( () => {
+				onTaskDismissFailed?.( task );
+				createNotice(
+					'error',
+					__(
+						'There was a problem skipping this task. Please try again.',
+						'woocommerce'
+					)
+				);
+			} );
 		},
-		[ id, onTaskDismissed, task ]
+		[
+			createNotice,
+			dismissTask,
+			id,
+			onTaskDismissed,
+			onTaskDismissFailed,
+			task,
+		]
 	);
 
 	const onSnooze = useCallback( () => {

@@ -7,7 +7,9 @@
 	&.woocommerce-list__item-enter-active {
 		opacity: 1;
 		max-height: 100px;
-		transition: opacity 500ms, max-height 500ms;
+		transition:
+			opacity 500ms,
+			max-height 500ms;
 	}
 
 	&.woocommerce-list__item-exit {
@@ -18,7 +20,9 @@
 	&.woocommerce-list__item-exit-active {
 		opacity: 0;
 		max-height: 0;
-		transition: opacity 500ms, max-height 500ms;
+		transition:
+			opacity 500ms,
+			max-height 500ms;
 	}
 }
 
@@ -30,6 +34,13 @@
 
 	.woocommerce-task-list__item:hover,
 	.woocommerce-task-list__item:focus-within {
+		.woocommerce-task-list__item-skip {
+			opacity: 1;
+			pointer-events: auto;
+		}
+	}
+
+	@media (hover: none) {
 		.woocommerce-task-list__item-skip {
 			opacity: 1;
 			pointer-events: auto;

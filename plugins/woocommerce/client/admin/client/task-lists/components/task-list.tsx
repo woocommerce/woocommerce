@@ -47,6 +47,7 @@ export const TaskList = ( {
 	query,
 }: TaskListProps ) => {
 	const { undoDismissTask } = useDispatch( onboardingStore );
+	const { createNotice } = useDispatch( 'core/notices' );
 	const { profileItems } = useSelect( ( select ) => {
 		const { getProfileItems } = select( onboardingStore );
 
@@ -135,7 +136,7 @@ export const TaskList = ( {
 	);
 	const collapseLabel = __( 'Show less', 'woocommerce' );
 
-	const onTaskDismissed = ( task: TaskType ) => {
+	const addDismissedTask = ( task: DismissedTask ) => {
 		setDismissedTasks( ( currentDismissedTasks ) => ( {
 			...currentDismissedTasks,
 			[ task.id ]: {
@@ -145,12 +146,33 @@ export const TaskList = ( {
 		} ) );
 	};
 
-	const onUndoDismiss = ( task: DismissedTask ) => {
-		undoDismissTask( task.id );
+	const removeDismissedTask = ( taskId: string ) => {
 		setDismissedTasks( ( currentDismissedTasks ) => {
 			const updatedDismissedTasks = { ...currentDismissedTasks };
-			delete updatedDismissedTasks[ task.id ];
+			delete updatedDismissedTasks[ taskId ];
 			return updatedDismissedTasks;
+		} );
+	};
+
+	const onTaskDismissed = ( task: TaskType ) => {
+		addDismissedTask( task );
+	};
+
+	const onTaskDismissFailed = ( task: TaskType ) => {
+		removeDismissedTask( task.id );
+	};
+
+	const onUndoDismiss = ( task: DismissedTask ) => {
+		removeDismissedTask( task.id );
+		void Promise.resolve( undoDismissTask( task.id ) ).catch( () => {
+			addDismissedTask( task );
+			createNotice(
+				'error',
+				__(
+					'There was a problem restoring this task. Please try again.',
+					'woocommerce'
+				)
+			);
 		} );
 	};
 
@@ -206,6 +228,7 @@ export const TaskList = ( {
 				setExpandedTask={ setExpandedTask }
 				showSkipAction={ id === 'extended' }
 				onTaskDismissed={ onTaskDismissed }
+				onTaskDismissFailed={ onTaskDismissFailed }
 				trackClick={ () => trackClick( task ) }
 			/>
 		);
@@ -224,7 +247,7 @@ export const TaskList = ( {
 				<H>{ __( "You're all caught up", 'woocommerce' ) }</H>
 				<p>
 					{ __(
-						"You've completed all the things to do next. Watch this space for more recommendations.",
+						"There's nothing else to do right now. Watch this space for more recommendations.",
 						'woocommerce'
 					) }
 				</p>

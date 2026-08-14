@@ -1,9 +1,10 @@
 /**
  * External dependencies
  */
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { recordEvent } from '@woocommerce/tracks';
 import { TaskType } from '@woocommerce/data';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -15,9 +16,32 @@ jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
 } ) );
 jest.mock( '../task-list-item', () => ( {
-	TaskListItem: ( props: TaskListItemProps ) => (
-		<button onClick={ props.trackClick }>{ props.task.title }</button>
-	),
+	TaskListItem: ( props: TaskListItemProps ) => {
+		return (
+			<>
+				<button onClick={ props.trackClick }>
+					{ props.task.title }
+				</button>
+				{ props.showSkipAction && (
+					<button
+						onClick={ () => props.onTaskDismissed?.( props.task ) }
+					>
+						Skip { props.task.title }
+					</button>
+				) }
+				<button
+					onClick={ () => {
+						props.onTaskDismissed?.( props.task );
+						void Promise.resolve().then(
+							() => props.onTaskDismissFailed?.( props.task )
+						);
+					} }
+				>
+					Fail skipping { props.task.title }
+				</button>
+			</>
+		);
+	},
 } ) );
 jest.mock( '../task-list-menu', () => ( {
 	TaskListMenu: jest
@@ -45,6 +69,20 @@ jest.mock( '@woocommerce/admin-layout', () => {
 		useExtendLayout: jest.fn().mockReturnValue( mockContext ),
 	};
 } );
+
+jest.mock( '@wordpress/data', () => {
+	const originalModule = jest.requireActual( '@wordpress/data' );
+	return {
+		...originalModule,
+		useDispatch: jest.fn(),
+	};
+} );
+
+const mockDispatch = {
+	createNotice: jest.fn(),
+	undoDismissTask: jest.fn(),
+};
+( useDispatch as jest.Mock ).mockReturnValue( mockDispatch );
 
 const tasks: { [ key: string ]: TaskType[] } = {
 	setup: [
@@ -149,6 +187,7 @@ const tasks: { [ key: string ]: TaskType[] } = {
 describe( 'TaskList', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
+		mockDispatch.undoDismissTask.mockResolvedValue( undefined );
 	} );
 
 	it( 'should trigger tasklist_view event on initial render for setup task list', () => {
@@ -282,9 +321,80 @@ describe( 'TaskList', () => {
 		expect( queryByText( "You're all caught up" ) ).toBeInTheDocument();
 		expect(
 			queryByText(
-				"You've completed all the things to do next. Watch this space for more recommendations."
+				"There's nothing else to do right now. Watch this space for more recommendations."
 			)
 		).toBeInTheDocument();
+	} );
+
+	it( 'should restore a skipped task when dismissing fails', async () => {
+		const { getByRole, queryByText } = render(
+			<TaskList
+				id="extended"
+				eventPrefix="extended_tasklist_"
+				tasks={ [ ...tasks.extension ] }
+				title="Things to do next"
+				query={ {} }
+				isVisible={ true }
+				isHidden={ false }
+				isComplete={ false }
+				displayProgressHeader={ false }
+				keepCompletedTaskList="no"
+			/>
+		);
+
+		fireEvent.click(
+			getByRole( 'button', {
+				name: `Fail skipping ${ tasks.extension[ 0 ].title }`,
+			} )
+		);
+
+		await waitFor( () => {
+			expect(
+				queryByText( tasks.extension[ 0 ].title )
+			).toBeInTheDocument();
+		} );
+	} );
+
+	it( 'should keep a skipped task removed when undo fails', async () => {
+		mockDispatch.undoDismissTask.mockRejectedValueOnce(
+			new Error( 'Unable to restore task' )
+		);
+		const { getByRole, queryByText } = render(
+			<TaskList
+				id="extended"
+				eventPrefix="extended_tasklist_"
+				tasks={ [ ...tasks.extension ] }
+				title="Things to do next"
+				query={ {} }
+				isVisible={ true }
+				isHidden={ false }
+				isComplete={ false }
+				displayProgressHeader={ false }
+				keepCompletedTaskList="no"
+			/>
+		);
+
+		fireEvent.click(
+			getByRole( 'button', {
+				name: `Skip ${ tasks.extension[ 0 ].title }`,
+			} )
+		);
+		expect( getByRole( 'button', { name: 'Undo' } ) ).toBeInTheDocument();
+
+		fireEvent.click( getByRole( 'button', { name: 'Undo' } ) );
+
+		await waitFor( () => {
+			expect(
+				getByRole( 'button', { name: 'Undo' } )
+			).toBeInTheDocument();
+		} );
+		expect(
+			queryByText( tasks.extension[ 0 ].title )
+		).not.toBeInTheDocument();
+		expect( mockDispatch.createNotice ).toHaveBeenCalledWith(
+			'error',
+			'There was a problem restoring this task. Please try again.'
+		);
 	} );
 
 	it( 'should render an empty state for extended task list when all tasks are completed', () => {
@@ -346,7 +456,7 @@ describe( 'TaskList', () => {
 	it( 'should include task_complete when a completed task is clicked', () => {
 		const { getByRole } = render(
 			<TaskList
-				id="extended"
+				id="setup"
 				eventPrefix="extended_tasklist_"
 				tasks={ [ tasks.setup[ 2 ] ] }
 				title="List title"
