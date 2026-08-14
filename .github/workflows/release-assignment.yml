@@ -377,9 +377,10 @@ jobs:
 
             console.log( 'Found release lead from two cycles back' );
             const organizationUrlKey = '${{ steps.get-linear-data.outputs.organizationUrlKey }}';
-            core.setOutput( 'mention', assignee.username
-              ? `https://linear.app/${ organizationUrlKey }/profiles/${ assignee.username }`
-              : assignee.displayName );
+            const label = assignee.username
+              ? `[${ assignee.displayName }](https://linear.app/${ organizationUrlKey }/profiles/${ assignee.username })`
+              : assignee.displayName;
+            core.setOutput( 'mention', `${ label } (release lead from the ${ twoCyclesBackVersion } cycle)` );
 
       - name: Process template and create release tracking issue
         if: ${{ steps.check-existing-issue.outputs.exists != 'true' }}
