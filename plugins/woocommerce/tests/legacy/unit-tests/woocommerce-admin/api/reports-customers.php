@@ -83,6 +83,8 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'city', $schema );
 		$this->assertArrayHasKey( 'state', $schema );
 		$this->assertArrayHasKey( 'postcode', $schema );
+		$this->assertArrayHasKey( 'billing_phone', $schema );
+		$this->assertArrayHasKey( 'shipping_phone', $schema );
 		$this->assertArrayHasKey( 'date_registered', $schema );
 		$this->assertArrayHasKey( 'date_registered_gmt', $schema );
 		$this->assertArrayHasKey( 'date_last_active', $schema );
@@ -105,7 +107,7 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertCount( 18, $properties );
+		$this->assertCount( 20, $properties );
 		$this->assert_report_item_schema( $properties );
 	}
 
@@ -657,6 +659,8 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$order->set_billing_city( 'Random' );
 		$order->set_billing_state( 'FL' );
 		$order->set_billing_postcode( '54321' );
+		$order->set_billing_phone( '555-32123' );
+		$order->set_shipping_phone( '555-99887' );
 		$order->save();
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
@@ -675,6 +679,116 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertTrue( 'Random' === $reports[0]['city'] );
 		$this->assertTrue( 'FL' === $reports[0]['state'] );
 		$this->assertTrue( '54321' === $reports[0]['postcode'] );
+		$this->assertTrue( '555-32123' === $reports[0]['billing_phone'] );
+		$this->assertTrue( '555-99887' === $reports[0]['shipping_phone'] );
+	}
+
+	/**
+	 * @testdox Registered customer sync should populate billing and shipping phone from customer meta.
+	 */
+	public function test_update_registered_customer_syncs_phone_numbers() {
+		wp_set_current_user( $this->user );
+
+		$customer = WC_Helper_Customer::create_customer( 'phonecustomer', 'password', 'phone-customer@example.com' );
+		$customer->set_billing_phone( '555-11223' );
+		$customer->set_shipping_phone( '555-44556' );
+		$customer->save();
+
+		$this->assertNotFalse( CustomersDataStore::update_registered_customer( $customer->get_id() ) );
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'search'   => 'phonecustomer',
+				'searchby' => 'username',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports );
+		$this->assertEquals( '555-11223', $reports[0]['billing_phone'] );
+		$this->assertEquals( '555-44556', $reports[0]['shipping_phone'] );
+	}
+
+	/**
+	 * @testdox Removing order personal data should anonymize the customer's phone numbers in the lookup table.
+	 */
+	public function test_anonymize_customer_erases_phone_numbers() {
+		wp_set_current_user( $this->user );
+
+		$order = WC_Helper_Order::create_order( 0 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->set_total( 100 );
+		$order->set_billing_phone( '555-32123' );
+		$order->set_shipping_phone( '555-99887' );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		// Fire the personal-data eraser hook the analytics anonymizer is attached to.
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks -- the test fires an existing core hook, it does not introduce one.
+		do_action( 'woocommerce_privacy_remove_order_personal_data', $order );
+
+		$request  = new WP_REST_Request( 'GET', $this->endpoint );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports );
+		$this->assertEquals( '[deleted]', $reports[0]['billing_phone'] );
+		$this->assertEquals( '[deleted]', $reports[0]['shipping_phone'] );
+	}
+
+	/**
+	 * @testdox CSV export should carry the phone columns, and fall back to an empty string for rows cached before the columns existed.
+	 */
+	public function test_export_includes_phone_numbers() {
+		$controller = new \Automattic\WooCommerce\Admin\API\Reports\Customers\Controller();
+
+		$this->assertArrayHasKey( 'billing_phone', $controller->get_export_columns() );
+		$this->assertArrayHasKey( 'shipping_phone', $controller->get_export_columns() );
+
+		$item = array(
+			'name'             => 'Phone Customer',
+			'username'         => 'phonecustomer',
+			'date_last_active' => null,
+			'date_registered'  => null,
+			'email'            => 'phone-customer@example.com',
+			'orders_count'     => 0,
+			'total_spend'      => 0,
+			'avg_order_value'  => 0,
+			'country'          => 'US',
+			'city'             => 'Random',
+			'state'            => 'FL',
+			'postcode'         => '54321',
+		);
+
+		$with_phones = array_merge(
+			$item,
+			array(
+				'billing_phone'  => '555-32123',
+				'shipping_phone' => '555-99887',
+			)
+		);
+
+		$exported = $controller->prepare_item_for_export( $with_phones );
+		$this->assertEquals( '555-32123', $exported['billing_phone'] );
+		$this->assertEquals( '555-99887', $exported['shipping_phone'] );
+
+		// A row served from a report cache written before the columns existed has no phone keys at all.
+		$stale = $controller->prepare_item_for_export( $item );
+		$this->assertSame( '', $stale['billing_phone'] );
+		$this->assertSame( '', $stale['shipping_phone'] );
+
+		// The REST response must still carry the properties its schema declares.
+		$response = $controller->prepare_item_for_response( $item, new WP_REST_Request( 'GET', $this->endpoint ) );
+		$data     = $response->get_data();
+		$this->assertSame( '', $data['billing_phone'] );
+		$this->assertSame( '', $data['shipping_phone'] );
 	}
 
 	/**

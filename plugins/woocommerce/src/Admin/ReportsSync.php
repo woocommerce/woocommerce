@@ -30,6 +30,8 @@ class ReportsSync {
 		add_action( 'update_option_woocommerce_notify_no_stock_amount', array( __CLASS__, 'clear_stock_count_cache' ) );
 		// Invalidate report caches when the analytics date type changes, so all report families
 		// (Orders, Revenue, Taxes) reflect the new date basis immediately instead of after the cache TTL.
+		// The very first save of the option takes the add_option path, so hook both.
+		add_action( 'add_option_woocommerce_date_type', array( ReportsCache::class, 'invalidate' ) );
 		add_action( 'update_option_woocommerce_date_type', array( ReportsCache::class, 'invalidate' ) );
 		add_action( 'trashed_post', array( __CLASS__, 'maybe_clear_stock_count_cache_for_post' ) );
 		add_action( 'untrashed_post', array( __CLASS__, 'maybe_clear_stock_count_cache_for_post' ) );
