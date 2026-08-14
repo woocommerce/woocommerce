@@ -272,8 +272,8 @@ class WC_Shipping {
 	 */
 	private function query_shipping_class_terms() {
 		return get_terms(
-			'product_shipping_class',
 			array(
+				'taxonomy'   => 'product_shipping_class',
 				'hide_empty' => '0',
 				'orderby'    => 'name',
 			)

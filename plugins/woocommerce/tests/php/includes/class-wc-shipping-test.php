@@ -410,6 +410,10 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 	 * @testdox get_shipping_classes() recovers when a cached shipping class term is not a term object.
 	 */
 	public function test_get_shipping_classes_recovers_from_unusable_cached_term(): void {
+		if ( PHP_VERSION_ID < 80000 ) {
+			$this->markTestSkipped( 'Internal functions only throw for argument type mismatches from PHP 8.0 onwards; on PHP 7.4 get_object_vars() raises a warning instead, so there is no failure here to recover from.' );
+		}
+
 		$term    = wp_insert_term( 'Fragile', 'product_shipping_class' );
 		$term_id = $term['term_id'];
 
