@@ -342,6 +342,45 @@ jobs:
             core.setOutput( 'assignee-display-name', displayName || '' );
             core.setOutput( 'assignee-username', username || '' );
 
+      - name: Get release lead from two cycles ago
+        if: ${{ steps.check-existing-issue.outputs.exists != 'true' }}
+        id: get-previous-tracking-issue
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            const { LinearClient } = require( '@linear/sdk' );
+            const linearClient = new LinearClient( {
+              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}'
+            } );
+
+            const releaseMainVersion = '${{ needs.check-upcoming-release-events.outputs.version }}';
+            const twoCyclesBackVersion = ( releaseMainVersion - 0.2 ).toFixed( 1 );
+
+            const previousTitle = `[${ twoCyclesBackVersion }] Release tracking`;
+            console.log( `Looking for tracking issue two cycles back: "${ previousTitle }"` );
+
+            const issues = await linearClient.issues( {
+              includeArchived: true,
+              filter: {
+                team: { id: { eq: '${{ secrets.LINEAR_TEAM_ID }}' } },
+                title: { eq: previousTitle }
+              }
+            } );
+
+            const assignee = await issues.nodes[ 0 ]?.assignee;
+
+            if ( ! assignee ) {
+              console.log( 'No assignee found for the tracking issue two cycles back' );
+              core.setOutput( 'mention', `the release lead from the ${ twoCyclesBackVersion } cycle` );
+              return;
+            }
+
+            console.log( 'Found release lead from two cycles back' );
+            const organizationUrlKey = '${{ steps.get-linear-data.outputs.organizationUrlKey }}';
+            core.setOutput( 'mention', assignee.username
+              ? `https://linear.app/${ organizationUrlKey }/profiles/${ assignee.username }`
+              : assignee.displayName );
+
       - name: Process template and create release tracking issue
         if: ${{ steps.check-existing-issue.outputs.exists != 'true' }}
         id: create-tracking-issue
@@ -398,7 +437,8 @@ jobs:
               '{date_beta1}': '${{ needs.check-upcoming-release-events.outputs.beta-1-release-date }}',
               '{date_beta2}': '${{ needs.check-upcoming-release-events.outputs.beta-2-release-date }}',
               '{date_rc1}': '${{ needs.check-upcoming-release-events.outputs.rc-1-release-date }}',
-              '{date_stable}': '${{ needs.check-upcoming-release-events.outputs.final-release-date }}'
+              '{date_stable}': '${{ needs.check-upcoming-release-events.outputs.final-release-date }}',
+              '{previous_release_lead}': '${{ steps.get-previous-tracking-issue.outputs.mention }}'
             };
 
             // Apply replacements.
