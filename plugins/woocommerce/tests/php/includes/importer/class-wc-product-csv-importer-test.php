@@ -478,14 +478,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->expectException( RuntimeException::class );
 		$this->expectExceptionMessage( 'Unable to open the CSV file, please try again with a new file.' );
 
-		// Silence the fopen() warning, which PHPUnit would otherwise convert into an error before the exception is thrown.
-		set_error_handler( static fn() => true, E_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- test-scoped warning suppression, restored below.
-
-		try {
-			new WC_Product_CSV_Importer( __DIR__ . '/does-not-exist.csv' );
-		} finally {
-			restore_error_handler();
-		}
+		new WC_Product_CSV_Importer( __DIR__ . '/does-not-exist.csv' );
 	}
 
 	/**

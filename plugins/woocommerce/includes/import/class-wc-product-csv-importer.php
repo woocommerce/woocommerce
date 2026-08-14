@@ -109,7 +109,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			wp_die( esc_html__( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
 		}
 
-		$handle = fopen( $this->file, 'r' ); // @codingStandardsIgnoreLine.
+		$handle = @fopen( $this->file, 'r' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- warning suppressed so a strict error handler cannot preempt the RuntimeException below.
 
 		if ( false === $handle ) {
 			// An exception rather than wp_die(), so callers in any context (admin, AJAX, REST, CLI) can catch and present it appropriately.
