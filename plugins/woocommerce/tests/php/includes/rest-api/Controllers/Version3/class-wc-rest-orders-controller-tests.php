@@ -1,5 +1,6 @@
 <?php
 
+use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
@@ -10,6 +11,8 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+
+require_once __DIR__ . '/Fixtures/class-wc-rest-orders-controller-rejecting-order-item-product.php';
 
 /**
  * class WC_REST_Orders_Controller_Tests.
@@ -1315,6 +1318,53 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( $parent->get_id(), $reloaded->get_product_id(), 'The line item should retain the parent product ID.' );
 		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the parent product.' );
 		$this->assertSame( 0, $response_item['variation_id'], 'The response should expose the demoted line item.' );
+	}
+
+	/**
+	 * @testdox PUT /orders rethrows extension validation errors while the existing variation is still valid.
+	 */
+	public function test_update_line_item_rethrows_extension_validation_error_for_existing_variation(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
+		$extension_validation_armed = false;
+
+		$filter_item_class  = static function ( $classname, $item_type, $filtered_item_id ) use ( $item_id ) {
+			return 'line_item' === $item_type && $item_id === (int) $filtered_item_id
+				? WC_REST_Orders_Controller_Rejecting_Order_Item_Product::class
+				: $classname;
+		};
+		$reject_restoration = static function ( $product, $order_item ) use ( $item_id, &$extension_validation_armed ) {
+			if ( $item_id === $order_item->get_id() && $order_item instanceof WC_REST_Orders_Controller_Rejecting_Order_Item_Product ) {
+				WC_REST_Orders_Controller_Rejecting_Order_Item_Product::$reject_variation_restoration = true;
+				$extension_validation_armed = true;
+			}
+
+			return $product;
+		};
+
+		add_filter( 'woocommerce_get_order_item_classname', $filter_item_class, 10, 3 );
+		add_filter( 'woocommerce_get_product_from_item', $reject_restoration, 10, 2 );
+		wc_get_container()->get( OrderCache::class )->remove( $order->get_id() );
+
+		try {
+			$response = $this->dispatch_line_item_update(
+				$order->get_id(),
+				array(
+					'id'         => $item_id,
+					'product_id' => $parent->get_id(),
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_get_order_item_classname', $filter_item_class, 10 );
+			remove_filter( 'woocommerce_get_product_from_item', $reject_restoration, 10 );
+			WC_REST_Orders_Controller_Rejecting_Order_Item_Product::$reject_variation_restoration = false;
+		}
+
+		$this->assertSame( 'product_variation', get_post_type( $variation->get_id() ), 'Precondition: the stored variation still exists.' );
+		$this->assertTrue( $extension_validation_armed, 'Precondition: the filtered order item subclass handled the update.' );
+		$this->assertSame( 400, $response->get_status(), 'Extension validation should reject the update.' );
+		$this->assertSame( 'order_item_product_invalid_variation_id', $response->get_data()['code'], 'The extension validation error should be preserved.' );
+		$this->assertSame( $variation->get_id(), (int) wc_get_order_item_meta( $item_id, '_variation_id' ), 'The failed update should not demote the line item.' );
 	}
 
 	/**
