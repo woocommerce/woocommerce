@@ -27,7 +27,20 @@ export interface UseChunkedImportArgs {
 }
 
 const FALLBACK_CHUNK_SIZE = 200;
+// Mirrors FulfillmentsCsvImporter::MAX_CHUNK_SIZE; the /run route rejects larger limits.
+const MAX_CHUNK_SIZE = 1000;
 const RETRY_BACKOFFS_MS = [ 250, 1000 ];
+
+/**
+ * Coerce a chunk size to an integer the /run route accepts, falling back to
+ * the default when the value is missing or not a positive number.
+ */
+function normalizeChunkSize( value: unknown ): number {
+	if ( typeof value === 'number' && value > 0 ) {
+		return Math.min( MAX_CHUNK_SIZE, Math.max( 1, Math.floor( value ) ) );
+	}
+	return FALLBACK_CHUNK_SIZE;
+}
 
 /**
  * Reads the server-resolved chunk size from the localized settings so the
@@ -35,12 +48,9 @@ const RETRY_BACKOFFS_MS = [ 250, 1000 ];
  * (and the `woocommerce_fulfillments_csv_importer_chunk_size` filter).
  */
 function resolvedChunkSize(): number {
-	const settings = window.wcFulfillmentsImporterSettings;
-	const fromServer = settings?.chunkSize;
-	if ( typeof fromServer === 'number' && fromServer > 0 ) {
-		return Math.max( 1, Math.floor( fromServer ) );
-	}
-	return FALLBACK_CHUNK_SIZE;
+	return normalizeChunkSize(
+		window.wcFulfillmentsImporterSettings?.chunkSize
+	);
 }
 
 function delay( ms: number, signal?: AbortSignal ): Promise< void > {
@@ -148,11 +158,15 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 		mapping,
 		notifyCustomer,
 		updateExisting,
-		chunkSize = resolvedChunkSize(),
 		onChunk,
 		onFinish,
 		onError,
 	} = args;
+	// Caller-provided sizes go through the same clamp as the localized setting.
+	const chunkSize =
+		args.chunkSize === undefined
+			? resolvedChunkSize()
+			: normalizeChunkSize( args.chunkSize );
 
 	const [ isRunning, setIsRunning ] = useState( false );
 	const offsetRef = useRef< number >( 0 );
