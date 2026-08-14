@@ -222,6 +222,29 @@ class ReserveStockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox prime_reserved_stock is a no-op when a reserved-stock query filter is registered.
+	 */
+	public function test_prime_is_noop_when_filter_registered(): void {
+		global $wpdb;
+
+		$filter = static function ( $sql ) {
+			return $sql;
+		};
+		add_filter( 'woocommerce_query_for_reserved_stock', $filter );
+
+		ReserveStock::flush_reserved_stock_cache();
+		$sut = new ReserveStock();
+
+		$before = (int) $wpdb->num_queries;
+		$sut->prime_reserved_stock( $this->product_ids, 0 );
+		$after = (int) $wpdb->num_queries;
+
+		remove_filter( 'woocommerce_query_for_reserved_stock', $filter );
+
+		$this->assertSame( $before, $after, 'Priming must run no SQL while the filter is registered.' );
+	}
+
+	/**
 	 * @testdox flush_reserved_stock_cache(null) drops all cached entries; targeted flush only drops one bucket.
 	 */
 	public function test_flush_cache_behaviour(): void {
