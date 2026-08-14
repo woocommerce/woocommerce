@@ -435,7 +435,9 @@ class NoticesTest extends WC_Unit_Test_Case {
 		bool $service_is_active
 	): string {
 		if ( 'none' !== $fixture_kind ) {
-			return trailingslashit( WP_CONTENT_DIR ) . 'themes/' . $this->get_active_theme_slug( $theme_slug, $fixture_kind ) . '/woocommerce/' . $template_name;
+			$active_theme_slug = $this->get_active_theme_slug( $theme_slug, $fixture_kind );
+
+			return trailingslashit( get_theme_root( $active_theme_slug ) ) . $active_theme_slug . '/woocommerce/' . $template_name;
 		}
 
 		if ( $service_is_active ) {
