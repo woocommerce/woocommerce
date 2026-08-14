@@ -231,7 +231,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 *
 	 * A `search` argument resolves to a subquery, the `categories` and `products` filters to an ID list.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @param array $query_args Query arguments supplied by the user.
 	 * @return string SQL condition, or an empty string when the report is not restricted.
@@ -251,7 +251,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Returns a SELECT statement resolving the `search` query argument to product IDs.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @param array $query_args Query arguments supplied by the user.
 	 * @return string SQL statement, or an empty string when no search was requested.
