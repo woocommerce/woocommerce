@@ -151,4 +151,39 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		$this->assertSame( array( 'order_note' ), apply_filters( 'akismet_excluded_comment_types', array() ) );
 	}
+
+	/**
+	 * Test that WordPress 7.1 editorial 'note' comments do not increment the WooCommerce comment count cache.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/WOOPLUG-7499
+	 */
+	public function test_editorial_note_comment_does_not_increment_count_cache(): void {
+		// Reset the cache to a known state.
+		wp_cache_set( 'wc_count_comments_unapproved', 0, 'wc_comment_counts' );
+
+		$post_id = wp_insert_post(
+			array(
+				'post_title'  => 'Test Post',
+				'post_status' => 'publish',
+				'post_type'   => 'post',
+			)
+		);
+
+		// Insert a 'note' type comment (WordPress 7.1 editorial note), pending approval.
+		wp_insert_comment(
+			array(
+				'comment_post_ID' => $post_id,
+				'comment_type'    => 'note',
+				'comment_content' => 'An editorial note.',
+				'comment_approved' => '0',
+			)
+		);
+
+		// The cached count should remain 0 — 'note' comments must be excluded.
+		$cached_count = wp_cache_get( 'wc_count_comments_unapproved', 'wc_comment_counts' );
+		$this->assertSame( 0, (int) $cached_count, 'Inserting a "note" comment must not increment the WooCommerce pending comment count cache.' );
+
+		// Clean up.
+		wp_delete_post( $post_id, true );
+	}
 }
