@@ -144,10 +144,10 @@ describe( 'useCombinedIncompatibilityNotice', () => {
 		};
 		mountAndDismiss( CHECKOUT );
 
-		// Disable B, then dismiss again while only A is present.
+		// Disable B. The notice stays hidden, so there is no dismissal to make
+		// here — the merchant simply never sees it again.
 		mockIncompatiblePaymentMethods = { gw_a: 'Gateway A' };
 		expect( mountVisibility( CHECKOUT ) ).toBe( false );
-		mountAndDismiss( CHECKOUT );
 
 		// Re-enable B — it was already acknowledged, so the notice stays hidden.
 		mockIncompatiblePaymentMethods = {
@@ -164,5 +164,67 @@ describe( 'useCombinedIncompatibilityNotice', () => {
 
 		// The cart block has its own, still-undismissed notice.
 		expect( mountVisibility( CART ) ).toBe( true );
+	} );
+
+	// This key predates the storefront banner having its own, so a real site's
+	// value can still hold shapes this hook never wrote: bare slug strings left
+	// by the storefront, and more than one entry for the same block.
+	describe( 'values left in the shared key by earlier versions', () => {
+		const STORAGE_KEY =
+			'wc-blocks_dismissed_incompatible_extensions_notices';
+
+		const seed = ( value: unknown ) =>
+			window.localStorage.setItem( STORAGE_KEY, JSON.stringify( value ) );
+
+		it( 'reads acknowledgements split across several entries for one block', () => {
+			seed( [
+				{ [ CHECKOUT ]: [ 'gw_a' ] },
+				{ [ CHECKOUT ]: [ 'gw_b' ] },
+			] );
+			mockIncompatiblePaymentMethods = {
+				gw_a: 'Gateway A',
+				gw_b: 'Gateway B',
+			};
+
+			expect( mountVisibility( CHECKOUT ) ).toBe( false );
+		} );
+
+		it( 'consolidates those entries into one on the next dismissal', () => {
+			seed( [
+				{ [ CHECKOUT ]: [ 'gw_a' ] },
+				{ [ CHECKOUT ]: [ 'gw_b' ] },
+			] );
+			mockIncompatiblePaymentMethods = {
+				gw_a: 'Gateway A',
+				gw_b: 'Gateway B',
+				gw_c: 'Gateway C',
+			};
+
+			mountAndDismiss( CHECKOUT );
+
+			expect(
+				JSON.parse( window.localStorage.getItem( STORAGE_KEY ) || '[]' )
+			).toEqual( [ { [ CHECKOUT ]: [ 'gw_a', 'gw_b', 'gw_c' ] } ] );
+		} );
+
+		it( 'ignores bare slug strings the storefront banner left behind', () => {
+			seed( [ 'gw_a' ] );
+			mockIncompatiblePaymentMethods = { gw_a: 'Gateway A' };
+
+			// The string is the storefront's acknowledgement, not this block's,
+			// so the editor notice is still owed to the merchant.
+			expect( mountVisibility( CHECKOUT ) ).toBe( true );
+		} );
+
+		it( 'preserves those strings when writing its own dismissal', () => {
+			seed( [ 'gw_a' ] );
+			mockIncompatiblePaymentMethods = { gw_a: 'Gateway A' };
+
+			mountAndDismiss( CHECKOUT );
+
+			expect(
+				JSON.parse( window.localStorage.getItem( STORAGE_KEY ) || '[]' )
+			).toEqual( [ 'gw_a', { [ CHECKOUT ]: [ 'gw_a' ] } ] );
+		} );
 	} );
 } );
