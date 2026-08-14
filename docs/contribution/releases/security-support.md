@@ -18,7 +18,7 @@ When a security fix warrants it (CVSS score >=9), WooCommerce will provide secur
 
 ## Exceptions
 
-For some class of critical vulnerabilities, we may as a courtesy backport outside the established policy.
+For some classes of critical vulnerabilities, we may as a courtesy, backport outside the established policy.
 
 ## Reporting
 
