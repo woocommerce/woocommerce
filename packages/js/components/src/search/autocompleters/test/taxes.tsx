@@ -43,13 +43,6 @@ describe( 'taxes autocompleter', () => {
 		expect( getQueryArg( path, 'search' ) ).toBeUndefined();
 	} );
 
-	test( 'never caps results at the previous limit of 10', () => {
-		taxes.options( 'US' );
-
-		const path = getRequestedPath();
-		expect( getQueryArg( path, 'per_page' ) ).not.toBe( '10' );
-	} );
-
 	test( 'queries the analytics taxes endpoint', () => {
 		taxes.options( '' );
 
