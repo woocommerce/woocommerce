@@ -28,8 +28,8 @@ export type TaskListItemProps = {
 	task: TaskType & {
 		onClick?: () => void;
 	};
-	onTaskDismissed?: ( task: TaskType ) => void;
-	onTaskDismissFailed?: ( task: TaskType ) => void;
+	isSkipDisabled?: boolean;
+	onTaskSkip?: ( task: TaskType ) => Promise< void >;
 	showSkipAction?: boolean;
 	trackClick?: () => void;
 };
@@ -39,8 +39,8 @@ export const TaskListItem = ( {
 	isExpanded = false,
 	setExpandedTask,
 	task,
-	onTaskDismissed,
-	onTaskDismissFailed,
+	isSkipDisabled = false,
+	onTaskSkip,
 	showSkipAction = false,
 	trackClick: trackTaskListClick,
 }: TaskListItemProps ) => {
@@ -105,29 +105,9 @@ export const TaskListItem = ( {
 			event.preventDefault();
 			event.stopPropagation();
 
-			if ( onTaskDismissed ) {
-				onTaskDismissed( task );
-			}
-
-			void Promise.resolve( dismissTask( id ) ).catch( () => {
-				onTaskDismissFailed?.( task );
-				createNotice(
-					'error',
-					__(
-						'There was a problem skipping this task. Please try again.',
-						'woocommerce'
-					)
-				);
-			} );
+			void onTaskSkip?.( task );
 		},
-		[
-			createNotice,
-			dismissTask,
-			id,
-			onTaskDismissed,
-			onTaskDismissFailed,
-			task,
-		]
+		[ onTaskSkip, task ]
 	);
 
 	const onSnooze = useCallback( () => {
@@ -238,6 +218,7 @@ export const TaskListItem = ( {
 						showSkipAction && isDismissable && ! isComplete ? (
 							<Button
 								className="woocommerce-task-list__item-skip"
+								disabled={ isSkipDisabled }
 								variant="link"
 								onClick={ onSkip }
 							>

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { recordEvent } from '@woocommerce/tracks';
 import { TaskType } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
@@ -24,21 +24,12 @@ jest.mock( '../task-list-item', () => ( {
 				</button>
 				{ props.showSkipAction && (
 					<button
-						onClick={ () => props.onTaskDismissed?.( props.task ) }
+						disabled={ props.isSkipDisabled }
+						onClick={ () => void props.onTaskSkip?.( props.task ) }
 					>
 						Skip { props.task.title }
 					</button>
 				) }
-				<button
-					onClick={ () => {
-						props.onTaskDismissed?.( props.task );
-						void Promise.resolve().then(
-							() => props.onTaskDismissFailed?.( props.task )
-						);
-					} }
-				>
-					Fail skipping { props.task.title }
-				</button>
 			</>
 		);
 	},
@@ -80,6 +71,7 @@ jest.mock( '@wordpress/data', () => {
 
 const mockDispatch = {
 	createNotice: jest.fn(),
+	dismissTask: jest.fn(),
 	undoDismissTask: jest.fn(),
 };
 ( useDispatch as jest.Mock ).mockReturnValue( mockDispatch );
@@ -187,6 +179,7 @@ const tasks: { [ key: string ]: TaskType[] } = {
 describe( 'TaskList', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
+		mockDispatch.dismissTask.mockResolvedValue( undefined );
 		mockDispatch.undoDismissTask.mockResolvedValue( undefined );
 	} );
 
@@ -327,6 +320,9 @@ describe( 'TaskList', () => {
 	} );
 
 	it( 'should restore a skipped task when dismissing fails', async () => {
+		mockDispatch.dismissTask.mockRejectedValueOnce(
+			new Error( 'Unable to dismiss task' )
+		);
 		const { getByRole, queryByText } = render(
 			<TaskList
 				id="extended"
@@ -344,7 +340,7 @@ describe( 'TaskList', () => {
 
 		fireEvent.click(
 			getByRole( 'button', {
-				name: `Fail skipping ${ tasks.extension[ 0 ].title }`,
+				name: `Skip ${ tasks.extension[ 0 ].title }`,
 			} )
 		);
 
@@ -353,6 +349,10 @@ describe( 'TaskList', () => {
 				queryByText( tasks.extension[ 0 ].title )
 			).toBeInTheDocument();
 		} );
+		expect( mockDispatch.createNotice ).toHaveBeenCalledWith(
+			'error',
+			'There was a problem skipping this task. Please try again.'
+		);
 	} );
 
 	it( 'should keep a skipped task removed when undo fails', async () => {
@@ -379,22 +379,93 @@ describe( 'TaskList', () => {
 				name: `Skip ${ tasks.extension[ 0 ].title }`,
 			} )
 		);
-		expect( getByRole( 'button', { name: 'Undo' } ) ).toBeInTheDocument();
+		await waitFor( () => {
+			expect( getByRole( 'button', { name: 'Undo' } ) ).toBeEnabled();
+		} );
 
 		fireEvent.click( getByRole( 'button', { name: 'Undo' } ) );
 
 		await waitFor( () => {
-			expect(
-				getByRole( 'button', { name: 'Undo' } )
-			).toBeInTheDocument();
+			expect( mockDispatch.createNotice ).toHaveBeenCalledWith(
+				'error',
+				'There was a problem restoring this task. Please try again.'
+			);
 		} );
+		expect( getByRole( 'button', { name: 'Undo' } ) ).toBeEnabled();
 		expect(
 			queryByText( tasks.extension[ 0 ].title )
 		).not.toBeInTheDocument();
-		expect( mockDispatch.createNotice ).toHaveBeenCalledWith(
-			'error',
-			'There was a problem restoring this task. Please try again.'
+	} );
+
+	it( 'should serialize Skip and Undo requests for the same task', async () => {
+		let resolveDismissTask: () => void;
+		let resolveUndoDismissTask: () => void;
+		const dismissTaskRequest = new Promise< void >( ( resolve ) => {
+			resolveDismissTask = resolve;
+		} );
+		const undoDismissTaskRequest = new Promise< void >( ( resolve ) => {
+			resolveUndoDismissTask = resolve;
+		} );
+		mockDispatch.dismissTask.mockReturnValueOnce( dismissTaskRequest );
+		mockDispatch.undoDismissTask.mockReturnValueOnce(
+			undoDismissTaskRequest
 		);
+		const { getByRole } = render(
+			<TaskList
+				id="extended"
+				eventPrefix="extended_tasklist_"
+				tasks={ [ ...tasks.extension ] }
+				title="Things to do next"
+				query={ {} }
+				isVisible={ true }
+				isHidden={ false }
+				isComplete={ false }
+				displayProgressHeader={ false }
+				keepCompletedTaskList="no"
+			/>
+		);
+
+		fireEvent.click(
+			getByRole( 'button', {
+				name: `Skip ${ tasks.extension[ 0 ].title }`,
+			} )
+		);
+		expect( mockDispatch.dismissTask ).toHaveBeenCalledTimes( 1 );
+		const undoButton = getByRole( 'button', { name: 'Undo' } );
+		expect( undoButton ).toBeDisabled();
+
+		fireEvent.click( undoButton );
+		expect( mockDispatch.undoDismissTask ).not.toHaveBeenCalled();
+
+		await act( async () => {
+			resolveDismissTask!();
+			await dismissTaskRequest;
+		} );
+		await waitFor( () => {
+			expect( getByRole( 'button', { name: 'Undo' } ) ).toBeEnabled();
+		} );
+
+		fireEvent.click( getByRole( 'button', { name: 'Undo' } ) );
+		expect( mockDispatch.undoDismissTask ).toHaveBeenCalledTimes( 1 );
+		const skipButton = getByRole( 'button', {
+			name: `Skip ${ tasks.extension[ 0 ].title }`,
+		} );
+		expect( skipButton ).toBeDisabled();
+
+		fireEvent.click( skipButton );
+		expect( mockDispatch.dismissTask ).toHaveBeenCalledTimes( 1 );
+
+		await act( async () => {
+			resolveUndoDismissTask!();
+			await undoDismissTaskRequest;
+		} );
+		await waitFor( () => {
+			expect(
+				getByRole( 'button', {
+					name: `Skip ${ tasks.extension[ 0 ].title }`,
+				} )
+			).toBeEnabled();
+		} );
 	} );
 
 	it( 'should render an empty state for extended task list when all tasks are completed', () => {

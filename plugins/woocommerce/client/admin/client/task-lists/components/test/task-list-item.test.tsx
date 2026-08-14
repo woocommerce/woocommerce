@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SlotFillProvider } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
@@ -273,8 +273,8 @@ describe( 'TaskListItem', () => {
 		).not.toBeInTheDocument();
 	} );
 
-	it( 'should call dismissTask and onTaskDismissed when skipping a task', async () => {
-		const onTaskDismissed = jest.fn();
+	it( 'should request a task skip through the parent callback', async () => {
+		const onTaskSkip = jest.fn().mockResolvedValue( undefined );
 		const { getByRole } = render(
 			<TaskListItem
 				task={ { ...task } }
@@ -282,23 +282,18 @@ describe( 'TaskListItem', () => {
 				isExpanded={ false }
 				setExpandedTask={ () => {} }
 				showSkipAction={ true }
-				onTaskDismissed={ onTaskDismissed }
+				onTaskSkip={ onTaskSkip }
 			/>
 		);
 
 		await userEvent.click( getByRole( 'button', { name: 'Skip' } ) );
 
-		expect( mockDispatch.dismissTask ).toHaveBeenCalledWith( task.id );
-		expect( onTaskDismissed ).toHaveBeenCalledWith( task );
-		expect( mockDispatch.createNotice ).not.toHaveBeenCalled();
+		expect( onTaskSkip ).toHaveBeenCalledWith( task );
+		expect( mockDispatch.dismissTask ).not.toHaveBeenCalled();
 	} );
 
-	it( 'should restore the task and show an error when skipping fails', async () => {
-		const onTaskDismissed = jest.fn();
-		const onTaskDismissFailed = jest.fn();
-		mockDispatch.dismissTask.mockRejectedValueOnce(
-			new Error( 'Unable to dismiss task' )
-		);
+	it( 'should disable Skip while a task request is pending', async () => {
+		const onTaskSkip = jest.fn().mockResolvedValue( undefined );
 		const { getByRole } = render(
 			<TaskListItem
 				task={ { ...task } }
@@ -306,21 +301,16 @@ describe( 'TaskListItem', () => {
 				isExpanded={ false }
 				setExpandedTask={ () => {} }
 				showSkipAction={ true }
-				onTaskDismissed={ onTaskDismissed }
-				onTaskDismissFailed={ onTaskDismissFailed }
+				isSkipDisabled={ true }
+				onTaskSkip={ onTaskSkip }
 			/>
 		);
 
-		await userEvent.click( getByRole( 'button', { name: 'Skip' } ) );
+		const skipButton = getByRole( 'button', { name: 'Skip' } );
+		expect( skipButton ).toBeDisabled();
+		await userEvent.click( skipButton );
 
-		expect( onTaskDismissed ).toHaveBeenCalledWith( task );
-		await waitFor( () => {
-			expect( onTaskDismissFailed ).toHaveBeenCalledWith( task );
-		} );
-		expect( mockDispatch.createNotice ).toHaveBeenCalledWith(
-			'error',
-			'There was a problem skipping this task. Please try again.'
-		);
+		expect( onTaskSkip ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should call snoozeTask and trigger a notice when snoozing a task', () => {

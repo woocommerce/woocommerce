@@ -46,7 +46,7 @@ export const TaskList = ( {
 	displayProgressHeader = false,
 	query,
 }: TaskListProps ) => {
-	const { undoDismissTask } = useDispatch( onboardingStore );
+	const { dismissTask, undoDismissTask } = useDispatch( onboardingStore );
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { profileItems } = useSelect( ( select ) => {
 		const { getProfileItems } = select( onboardingStore );
@@ -58,6 +58,10 @@ export const TaskList = ( {
 	const prevQueryRef = useRef( query );
 	const [ dismissedTasks, setDismissedTasks ] = useState<
 		Record< string, DismissedTask >
+	>( {} );
+	const pendingTaskRequestsRef = useRef( new Set< string >() );
+	const [ pendingTaskRequests, setPendingTaskRequests ] = useState<
+		Record< string, boolean >
 	>( {} );
 	const visibleTasks = getVisibleTasks( tasks ).filter( ( task ) => {
 		if ( dismissedTasks[ task.id ] ) {
@@ -154,17 +158,59 @@ export const TaskList = ( {
 		} );
 	};
 
-	const onTaskDismissed = ( task: TaskType ) => {
+	const beginTaskRequest = ( taskId: string ) => {
+		if ( pendingTaskRequestsRef.current.has( taskId ) ) {
+			return false;
+		}
+
+		pendingTaskRequestsRef.current.add( taskId );
+		setPendingTaskRequests( ( currentRequests ) => ( {
+			...currentRequests,
+			[ taskId ]: true,
+		} ) );
+		return true;
+	};
+
+	const endTaskRequest = ( taskId: string ) => {
+		pendingTaskRequestsRef.current.delete( taskId );
+		setPendingTaskRequests( ( currentRequests ) => {
+			const updatedRequests = { ...currentRequests };
+			delete updatedRequests[ taskId ];
+			return updatedRequests;
+		} );
+	};
+
+	const onTaskSkip = async ( task: TaskType ) => {
+		if ( ! beginTaskRequest( task.id ) ) {
+			return;
+		}
+
 		addDismissedTask( task );
+		try {
+			await dismissTask( task.id );
+		} catch {
+			removeDismissedTask( task.id );
+			createNotice(
+				'error',
+				__(
+					'There was a problem skipping this task. Please try again.',
+					'woocommerce'
+				)
+			);
+		} finally {
+			endTaskRequest( task.id );
+		}
 	};
 
-	const onTaskDismissFailed = ( task: TaskType ) => {
-		removeDismissedTask( task.id );
-	};
+	const onUndoDismiss = async ( task: DismissedTask ) => {
+		if ( ! beginTaskRequest( task.id ) ) {
+			return;
+		}
 
-	const onUndoDismiss = ( task: DismissedTask ) => {
 		removeDismissedTask( task.id );
-		void Promise.resolve( undoDismissTask( task.id ) ).catch( () => {
+		try {
+			await undoDismissTask( task.id );
+		} catch {
 			addDismissedTask( task );
 			createNotice(
 				'error',
@@ -173,7 +219,9 @@ export const TaskList = ( {
 					'woocommerce'
 				)
 			);
-		} );
+		} finally {
+			endTaskRequest( task.id );
+		}
 	};
 
 	const taskListItems = displayTasks.map( ( task ) => {
@@ -203,13 +251,14 @@ export const TaskList = ( {
 					<div className="woocommerce-task-list__item-after">
 						<Button
 							className="woocommerce-task-list__item-undo"
+							disabled={ pendingTaskRequests[ task.id ] }
 							variant="link"
 							onClick={ (
 								event: React.MouseEvent | React.KeyboardEvent
 							) => {
 								event.preventDefault();
 								event.stopPropagation();
-								onUndoDismiss( dismissedTasks[ task.id ] );
+								void onUndoDismiss( dismissedTasks[ task.id ] );
 							} }
 						>
 							{ __( 'Undo', 'woocommerce' ) }
@@ -226,9 +275,9 @@ export const TaskList = ( {
 				isExpandable={ isExpandable }
 				task={ task }
 				setExpandedTask={ setExpandedTask }
+				isSkipDisabled={ pendingTaskRequests[ task.id ] }
 				showSkipAction={ id === 'extended' }
-				onTaskDismissed={ onTaskDismissed }
-				onTaskDismissFailed={ onTaskDismissFailed }
+				onTaskSkip={ onTaskSkip }
 				trackClick={ () => trackClick( task ) }
 			/>
 		);
