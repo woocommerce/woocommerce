@@ -88,14 +88,25 @@ class Batch extends ControllerTestCase {
 	}
 
 	/**
-	 * Test for a mixture of successful and non-successful requests in a batch.
+	 * @testdox Handles a mixture of successful and non-successful requests in a batch.
 	 */
-	public function test_mix_cart_route_batch() {
+	public function test_mix_cart_route_batch(): void {
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/batch' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'requests' => array(
+					array(
+						'method'  => 'POST',
+						'path'    => '/wc/store/v1/cart/add-item',
+						'body'    => array(
+							'id'       => $this->products[0]->get_id(),
+							'quantity' => 1,
+						),
+						'headers' => array(
+							'Nonce' => wp_create_nonce( 'wc_store_api' ),
+						),
+					),
 					array(
 						'method'  => 'POST',
 						'path'    => '/wc/store/v1/cart/add-item',
@@ -124,9 +135,25 @@ class Batch extends ControllerTestCase {
 		$response      = rest_get_server()->dispatch( $request );
 		$response_data = $response->get_data();
 
-		$this->assertEquals( 2, count( $response_data['responses'] ) );
-		$this->assertEquals( 400, $response_data['responses'][0]['status'], $response_data['responses'][0]['status'] );
-		$this->assertEquals( 201, $response_data['responses'][1]['status'], $response_data['responses'][1]['status'] );
+		$this->assertCount( 3, $response_data['responses'], 'The batch should return one response per sub-request.' );
+		$this->assertSame( 201, $response_data['responses'][0]['status'], 'The first valid product request should succeed.' );
+		$this->assertSame( 400, $response_data['responses'][1]['status'], 'The invalid product request should fail.' );
+		$this->assertSame( 201, $response_data['responses'][2]['status'], 'The second valid product request should succeed.' );
+
+		$expected_product_ids = array( $this->products[0]->get_id(), $this->products[1]->get_id() );
+		$cart_product_ids     = array_values( wp_list_pluck( WC()->cart->get_cart(), 'product_id' ) );
+		$this->assertSame(
+			$expected_product_ids,
+			$cart_product_ids,
+			'The cart should contain exactly the products from the successful sub-requests.'
+		);
+
+		$final_response_product_ids = array_values( wp_list_pluck( $response_data['responses'][2]['body']['items'], 'id' ) );
+		$this->assertSame(
+			$expected_product_ids,
+			$final_response_product_ids,
+			'The final successful response should contain exactly both valid products.'
+		);
 	}
 
 

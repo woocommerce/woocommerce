@@ -371,7 +371,14 @@ function mockBatchFetchFailingProduct( {
 			const parsed = JSON.parse( init.body as string ) as {
 				requests: CapturedRequest[];
 			};
-			const serverCart = JSON.parse( JSON.stringify( mockState.cart ) );
+			const serverCart = JSON.parse(
+				JSON.stringify( {
+					...mockState.cart,
+					items: mockState.cart.items.filter(
+						( item ) => item.id !== failForId
+					),
+				} )
+			);
 			const responses = parsed.requests.map( ( request ) =>
 				request.body.id === failForId
 					? { status, body: { code, message } }
@@ -900,6 +907,49 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					message: 'You cannot add that amount to the cart.',
 				},
 			} );
+		} );
+
+		it( 'commits successful items and excludes the failed optimistic item after mixed batch settlement', async () => {
+			mockBatchFetchFailingProduct( { failForId: 99 } );
+			const actions = await loadCartStore();
+			seedCart( [] );
+			spyOnShowNoticeError();
+
+			const [ firstValid, failed, secondValid ] = await Promise.all( [
+				runAction(
+					actions.addCartItem( {
+						id: 42,
+						quantityToAdd: 1,
+						type: 'simple',
+					} )
+				),
+				runAction(
+					actions.addCartItem( {
+						id: 99,
+						quantityToAdd: 1,
+						type: 'simple',
+					} )
+				),
+				runAction(
+					actions.addCartItem( {
+						id: 7,
+						quantityToAdd: 1,
+						type: 'simple',
+					} )
+				),
+			] );
+
+			expect( firstValid ).toEqual( { success: true } );
+			expect( ( failed as AddCartItemOutcome ).success ).toBe( false );
+			expect( secondValid ).toEqual( { success: true } );
+			const committedIds = mockState.cart.items.map(
+				( item ) => item.id
+			);
+			expect( committedIds ).toEqual(
+				expect.arrayContaining( [ 42, 7 ] )
+			);
+			expect( committedIds ).not.toContain( 99 );
+			expect( committedIds ).toHaveLength( 2 );
 		} );
 
 		it( 'still resolves { success: true } when a step after the successful request throws (post-success client bug)', async () => {
