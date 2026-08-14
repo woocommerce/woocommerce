@@ -62,7 +62,6 @@ For scheduled releases, the readiness review is the one in the RC sub-issue. Poi
 
 - [ ] Run workflow **[Release: Update stable tag]({repository_url}/actions/workflows/release-update-stable-tag.yml)**: enter `{release_version}` as _Version_ and make sure to check 'I confirm that I want to update the stable tag (this will update the SVN and GitHub stable tags).'
 - [ ] Publish the `{release_version}` [release draft]({repository_url}/releases) that was previously created, as well as any other `{release_main_version}` drafts that might exist from previous attempts. **Ensure** that "Set as the latest release" is checked for `{release_version}`.
-- [ ] If this is the stable release of a new major version: move the supported-version floor forward in the [security support policy](https://developer.woocommerce.com/docs/contribution/releases/security-support/) page (last 21 major versions).
 
 
 ### 7. Post-release tasks
