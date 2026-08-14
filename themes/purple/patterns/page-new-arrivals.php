@@ -27,7 +27,7 @@
 <h3 class="wp-block-heading has-medium-font-size" style="margin-top:0;margin-bottom:var(--wp--preset--spacing--20);font-style:normal;font-weight:400;line-height:1.6"><?php esc_html_e( 'Filter by:', 'purple' );?></h3>
 <!-- /wp:heading -->
 
-<!-- wp:woocommerce/product-filters {"style":{"spacing":{"blockGap":"var:preset|spacing|20"}}} -->
+<!-- wp:woocommerce/product-filters -->
 <div class="wp-block-woocommerce-product-filters wc-block-product-filters"><!-- wp:woocommerce/product-filter-price -->
 <div class="wp-block-woocommerce-product-filter-price"><!-- wp:accordion {"style":{"spacing":{"blockGap":"0"}}} -->
 <div role="group" class="wp-block-accordion"><!-- wp:accordion-item {"style":{"border":{"bottom":{"color":"var:preset|color|theme-6","width":"1px"},"top":[],"right":[],"left":[]},"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->

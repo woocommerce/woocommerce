@@ -503,6 +503,9 @@
 					"text": "var(--wp--preset--color--theme-2)"
 				}
 			},
+			"woocommerce/product-filters": {
+				"css": "--wc-product-filter-block-spacing: 0;"
+			},
 			"woocommerce/product-gallery": {
 				"spacing": {
 					"blockGap": "var(--wp--preset--spacing--10)"
