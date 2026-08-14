@@ -101,9 +101,10 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 							'description'       => __( 'Import session token returned by /prepare.', 'woocommerce' ),
 							'sanitize_callback' => 'sanitize_text_field',
 							'validate_callback' => static function ( $value ) {
-								// Accept the bin2hex(random_bytes(16)) form (32 hex chars) or the
-								// UUID v4 fallback emitted by ImportSession::generate_token().
-								return is_string( $value ) && preg_match( '/^[a-f0-9\-]{32,36}$/', $value ) === 1;
+								// Accept only the two forms emitted by ImportSession::generate_token():
+								// bin2hex(random_bytes(16)) (32 hex chars) or the UUID v4 fallback.
+								return is_string( $value )
+									&& preg_match( '/^(?:[a-f0-9]{32}|[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$/', $value ) === 1;
 							},
 						),
 						'offset'  => array(

@@ -120,7 +120,11 @@ class FulfillmentsCsvImporter {
 		if ( ! is_string( $delimiter ) || '' === $delimiter ) {
 			return ',';
 		}
-		return substr( $delimiter, 0, 1 );
+		// substr() slices by byte; the first byte of a multibyte character is a
+		// malformed fragment that would make fgetcsv() silently mis-parse the file,
+		// so anything outside the ASCII range falls back to the default.
+		$first = substr( $delimiter, 0, 1 );
+		return ord( $first ) < 0x80 ? $first : ',';
 	}
 
 	/**

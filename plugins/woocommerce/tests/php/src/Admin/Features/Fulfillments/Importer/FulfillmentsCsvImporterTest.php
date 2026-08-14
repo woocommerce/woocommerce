@@ -842,6 +842,16 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A multibyte delimiter falls back to comma instead of a truncated byte fragment.
+	 */
+	public function test_multibyte_delimiter_falls_back_to_comma(): void {
+		$this->assertSame( ',', FulfillmentsCsvImporter::normalize_delimiter( '—' ) );
+		$this->assertSame( ',', FulfillmentsCsvImporter::normalize_delimiter( '“' ) );
+		$this->assertSame( "\t", FulfillmentsCsvImporter::normalize_delimiter( "\t" ), 'ASCII control delimiters like tab must be preserved' );
+		$this->assertSame( '|', FulfillmentsCsvImporter::normalize_delimiter( '|' ) );
+	}
+
+	/**
 	 * @testdox parse_headers reports an error when the file is empty.
 	 */
 	public function test_parse_headers_reports_empty_csv(): void {
