@@ -55,6 +55,13 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 	private $original_options;
 
 	/**
+	 * Original taxonomies associated with products.
+	 *
+	 * @var string[]
+	 */
+	private $original_product_taxonomies;
+
+	/**
 	 * Whether the queued flush callback was initially registered.
 	 *
 	 * @var bool
@@ -75,6 +82,7 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 		$this->original_rewrite_rules       = $wp_rewrite->rules;
 		$this->original_permalink_structure = $wp_rewrite->permalink_structure;
 		$this->original_options             = array();
+		$this->original_product_taxonomies  = get_object_taxonomies( 'product' );
 		$missing_option                     = new stdClass();
 
 		foreach ( array( 'current_theme_supports_woocommerce', 'woocommerce_queue_flush_rewrite_rules', 'rewrite_rules', 'permalink_structure' ) as $option_name ) {
@@ -112,6 +120,9 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 
 		unregister_post_type( 'product' );
 		WC_Post_Types::register_post_types();
+		foreach ( $this->original_product_taxonomies as $taxonomy ) {
+			register_taxonomy_for_object_type( $taxonomy, 'product' );
+		}
 
 		$wp_rewrite->set_permalink_structure( $this->original_permalink_structure );
 
