@@ -188,6 +188,8 @@ class WC_Admin_Webhooks {
 	 */
 	public static function bulk_update_status( $webhooks, $status ) {
 		$qty = 0;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$filter_status = isset( $_GET['status'] ) ? '&status=' . sanitize_text_field( wp_unslash( $_GET['status'] ) ) : '';
 
 		foreach ( $webhooks as $webhook_id ) {
 			$webhook = new WC_Webhook( (int) $webhook_id );
@@ -198,11 +200,18 @@ class WC_Admin_Webhooks {
 
 			$webhook->set_status( $status );
 			$webhook->save();
+
+			if ( 'active' === $status && $webhook->get_pending_delivery() ) {
+				$result = $webhook->deliver_ping();
+
+				if ( is_wp_error( $result ) ) {
+					wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks' . $filter_status . '&error=' . rawurlencode( $result->get_error_message() ) ) );
+					exit();
+				}
+			}
+
 			++$qty;
 		}
-
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$filter_status = isset( $_GET['status'] ) ? '&status=' . sanitize_text_field( wp_unslash( $_GET['status'] ) ) : '';
 
 		// Redirect to webhooks page.
 		wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks' . $filter_status . '&webhooks_updated=' . $qty . '&webhook_status=' . $status ) );
@@ -288,6 +297,9 @@ class WC_Admin_Webhooks {
 			if ( 'active' === $updated_status ) {
 				/* translators: %d: count */
 				WC_Admin_Settings::add_message( sprintf( _n( '%d webhook activated.', '%d webhooks activated.', $updated, 'woocommerce' ), $updated ) );
+			} elseif ( 'paused' === $updated_status ) {
+				/* translators: %d: count */
+				WC_Admin_Settings::add_message( sprintf( _n( '%d webhook paused.', '%d webhooks paused.', $updated, 'woocommerce' ), $updated ) );
 			} elseif ( 'disabled' === $updated_status ) {
 				/* translators: %d: count */
 				WC_Admin_Settings::add_message( sprintf( _n( '%d webhook deactivated.', '%d webhooks deactivated.', $updated, 'woocommerce' ), $updated ) );
