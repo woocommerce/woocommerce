@@ -20,21 +20,21 @@ jobs:
         runs-on: ubuntu-latest
         timeout-minutes: 5
         permissions:
-            issues: write
+            pull-requests: write
 
         steps:
             - name: Apply selected labels
               uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
               with:
                   script: |
-                      const body = context.payload.pull_request.body || '';
+                      const body = (context.payload.pull_request.body || '').toLowerCase();
                       const labels = [];
 
-                      if (body.includes('[x] **Feature Highlight**')) {
+                      if (body.includes('[x] **feature highlight**')) {
                         labels.push('feature highlight');
                       }
 
-                      if (body.includes('[x] **Developer Advisory**')) {
+                      if (body.includes('[x] **developer advisory**')) {
                         labels.push('developer advisory');
                       }
 
