@@ -346,9 +346,7 @@ class WC_Install {
 			'wc_update_1110_delete_dashboard_outofstock_count_transient',
 			'wc_update_1110_cleanup_block_email_posts',
 			'wc_update_1110_flush_product_count_cache',
-		),
-		'11.2.0'   => array(
-			'wc_update_1120_invalidate_analytics_reports_cache',
+			'wc_update_1110_invalidate_analytics_reports_cache',
 		),
 	);
 

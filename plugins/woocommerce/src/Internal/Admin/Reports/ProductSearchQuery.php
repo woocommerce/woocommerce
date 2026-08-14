@@ -14,14 +14,14 @@ defined( 'ABSPATH' ) || exit;
  *
  * @internal
  *
- * @since 11.2.0
+ * @since 11.1.0
  */
 class ProductSearchQuery {
 
 	/**
 	 * Normalizes the `search` REST argument into a list of terms.
 	 *
-	 * @since 11.2.0
+	 * @since 11.1.0
 	 *
 	 * @param string|string[] $value Raw argument value, a list of terms or a comma separated string.
 	 * @return string[] Search terms.
@@ -47,7 +47,7 @@ class ProductSearchQuery {
 	 * The statement yields a single `product_id` column, for use as a derived table or as the
 	 * right-hand side of an `IN (...)` clause.
 	 *
-	 * @since 11.2.0
+	 * @since 11.1.0
 	 *
 	 * @param string[] $terms           Search terms. A product matches if it matches any term.
 	 * @param int[]    $restrict_to_ids Optional. Product IDs to intersect the results with.
