@@ -199,6 +199,26 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A failed row does not mark its order/tracking pair as seen, so an identical valid row later still imports.
+	 */
+	public function test_failed_row_does_not_block_identical_valid_row(): void {
+		$order = $this->make_order();
+		$csv   = "order_number,tracking_number,shipment_provider,items\n"
+			. "{$order->get_id()},RETRY-1,ups,999999:1\n"
+			. "{$order->get_id()},RETRY-1,ups,\n";
+		$file  = $this->make_csv( $csv );
+
+		$sut     = new FulfillmentsCsvImporter( $file );
+		$summary = $sut->run();
+
+		$this->assertSame( 1, $summary['failed'] );
+		$this->assertSame( 1, $summary['created'] );
+		$this->assertSame( 0, $summary['skipped'] );
+		$this->assertSame( 'failed', $summary['rows'][0]['status'] );
+		$this->assertSame( 'created', $summary['rows'][1]['status'], 'The valid retry row must not be treated as a duplicate of the failed row' );
+	}
+
+	/**
 	 * @testdox An existing fulfillment with the same tracking number is updated when update_existing is true.
 	 */
 	public function test_existing_fulfillment_with_same_tracking_is_updated(): void {

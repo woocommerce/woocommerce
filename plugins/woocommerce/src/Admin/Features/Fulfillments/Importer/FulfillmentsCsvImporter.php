@@ -688,6 +688,8 @@ class FulfillmentsCsvImporter {
 
 		// In-file duplicate guard. The set is persisted with the session on every chunk,
 		// so keys are hashed to a fixed short length instead of embedding raw values.
+		// The pair is only marked as seen once the row lands (created/updated/skipped),
+		// so a failed row does not make an identical valid row later skip as duplicate.
 		$dedupe_key = substr( md5( $order->get_id() . '|' . strtolower( $tracking_number ) ), 0, 20 );
 		if ( isset( $seen_tracking_pairs[ $dedupe_key ] ) ) {
 			return array(
@@ -697,7 +699,6 @@ class FulfillmentsCsvImporter {
 				'order_id' => $order->get_id(),
 			);
 		}
-		$seen_tracking_pairs[ $dedupe_key ] = true;
 
 		try {
 			$items = $this->parse_items( $items_raw, $order );
@@ -719,6 +720,7 @@ class FulfillmentsCsvImporter {
 		try {
 			if ( $existing instanceof Fulfillment ) {
 				if ( ! $this->options['update_existing'] ) {
+					$seen_tracking_pairs[ $dedupe_key ] = true;
 					return array(
 						'row'            => $row_number,
 						'status'         => 'skipped',
@@ -773,6 +775,7 @@ class FulfillmentsCsvImporter {
 					$this->options['notify_customer']
 				);
 
+				$seen_tracking_pairs[ $dedupe_key ] = true;
 				return array(
 					'row'            => $row_number,
 					'status'         => 'updated',
@@ -817,6 +820,7 @@ class FulfillmentsCsvImporter {
 				$this->options['notify_customer']
 			);
 
+			$seen_tracking_pairs[ $dedupe_key ] = true;
 			return array(
 				'row'            => $row_number,
 				'status'         => 'created',
