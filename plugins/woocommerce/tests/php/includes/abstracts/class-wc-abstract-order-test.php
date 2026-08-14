@@ -320,6 +320,96 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Create a pending order with one $100 product whose line total was manually edited to $50.
+	 *
+	 * @return WC_Order
+	 */
+	private function create_order_with_manually_edited_total() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->save();
+
+		$order = wc_create_order();
+		$order->add_product( $product, 1 );
+		$order->set_status( OrderStatus::PENDING );
+		$order->calculate_totals();
+
+		foreach ( $order->get_items() as $item ) {
+			$item->set_total( 50 );
+			$item->save();
+		}
+		$order->calculate_totals();
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * @testdox Applying a coupon calculates the discount from a manually edited line total instead of the original price.
+	 */
+	public function test_apply_coupon_uses_manually_edited_line_total() {
+		$coupon = WC_Helper_Coupon::create_coupon(
+			'percent_coupon_28591',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		$order  = $this->create_order_with_manually_edited_total();
+
+		$this->assertTrue( $order->apply_coupon( $coupon->get_code() ) );
+
+		$item = current( $order->get_items() );
+		$this->assertEquals( 50, $item->get_subtotal(), 'Edited line total should become the new pre-discount price' );
+		$this->assertEquals( 45, $item->get_total(), 'Discount should be taken off the edited price' );
+		$this->assertEquals( 5, $order->get_discount_total(), 'Discount should be 10% of the edited price' );
+		$this->assertEquals( 45, $order->get_total() );
+	}
+
+	/**
+	 * @testdox A failed coupon application leaves manually edited line items unchanged.
+	 */
+	public function test_apply_coupon_failure_keeps_manually_edited_line_items() {
+		WC_Helper_Coupon::create_coupon(
+			'expired_coupon_28591',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+				'expiry_date'   => gmdate( 'Y-m-d', time() - 2 * DAY_IN_SECONDS ),
+			)
+		);
+		$order = $this->create_order_with_manually_edited_total();
+
+		$this->assertWPError( $order->apply_coupon( 'expired_coupon_28591' ) );
+
+		$item = current( $order->get_items() );
+		$this->assertEquals( 100, $item->get_subtotal(), 'Failed coupon application should not change the subtotal' );
+		$this->assertEquals( 50, $item->get_total(), 'Failed coupon application should not change the total' );
+	}
+
+	/**
+	 * @testdox Removing a coupon restores the manually edited line total, not the original price.
+	 */
+	public function test_remove_coupon_restores_manually_edited_line_total() {
+		$coupon = WC_Helper_Coupon::create_coupon(
+			'percent_coupon_28591_remove',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		$order  = $this->create_order_with_manually_edited_total();
+
+		$this->assertTrue( $order->apply_coupon( $coupon->get_code() ) );
+		$this->assertTrue( $order->remove_coupon( $coupon->get_code() ) );
+
+		$item = current( $order->get_items() );
+		$this->assertEquals( 50, $item->get_subtotal() );
+		$this->assertEquals( 50, $item->get_total(), 'Removing the coupon should restore the edited price, not the original one' );
+		$this->assertEquals( 50, $order->get_total() );
+	}
+
+	/**
 	 * Test for get_discount_to_display which must return a value
 	 * with and without tax whatever the setting of the options.
 	 *
