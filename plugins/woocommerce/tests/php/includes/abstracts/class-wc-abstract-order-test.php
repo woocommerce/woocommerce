@@ -410,6 +410,62 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A guest usage-limit rejection leaves manually edited line items unchanged.
+	 */
+	public function test_apply_coupon_usage_limit_rejection_keeps_manually_edited_line_items() {
+		$guest_email = 'guest28591@example.com';
+		$coupon      = WC_Helper_Coupon::create_coupon(
+			'limited_coupon_28591',
+			array(
+				'discount_type'        => 'percent',
+				'coupon_amount'        => '10',
+				'usage_limit_per_user' => '1',
+			)
+		);
+		$coupon->increase_usage_count( $guest_email );
+
+		$order = $this->create_order_with_manually_edited_total();
+		$order->set_billing_email( $guest_email );
+		$order->save();
+
+		$this->assertWPError( $order->apply_coupon( $coupon->get_code() ) );
+
+		$item = current( $order->get_items() );
+		$this->assertEquals( 100, $item->get_subtotal(), 'Usage-limit rejection should not change the subtotal' );
+		$this->assertEquals( 50, $item->get_total(), 'Usage-limit rejection should not change the total' );
+	}
+
+	/**
+	 * @testdox A second coupon stacks on the manually edited price without re-syncing subtotals.
+	 */
+	public function test_apply_second_coupon_stacks_on_manually_edited_line_total() {
+		$percent_coupon = WC_Helper_Coupon::create_coupon(
+			'percent_coupon_28591_stack',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		$fixed_coupon   = WC_Helper_Coupon::create_coupon(
+			'fixed_coupon_28591_stack',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '5',
+			)
+		);
+		$order          = $this->create_order_with_manually_edited_total();
+
+		$this->assertTrue( $order->apply_coupon( $percent_coupon->get_code() ) );
+		$this->assertTrue( $order->apply_coupon( $fixed_coupon->get_code() ) );
+
+		$item = current( $order->get_items() );
+		$this->assertEquals( 50, $item->get_subtotal(), 'Second coupon application should not re-sync the subtotal' );
+		$this->assertEquals( 40, $item->get_total(), 'Both discounts should be taken off the edited price' );
+		$this->assertEquals( 10, $order->get_discount_total() );
+		$this->assertEquals( 40, $order->get_total() );
+	}
+
+	/**
 	 * Test for get_discount_to_display which must return a value
 	 * with and without tax whatever the setting of the options.
 	 *
