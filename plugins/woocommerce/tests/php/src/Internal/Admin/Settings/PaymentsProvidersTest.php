@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGate
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\RestApi\UnitTests\CorePayPalGatewayTrait;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
 use PHPUnit\Framework\MockObject\MockObject;
 use WC_Unit_Test_Case;
@@ -22,6 +23,7 @@ use WC_Gateway_Paypal;
  * @class PaymentsProviders
  */
 class PaymentsProvidersTest extends WC_Unit_Test_Case {
+	use CorePayPalGatewayTrait;
 
 	/**
 	 * @var PaymentsProviders
@@ -66,8 +68,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		// Reset gateways, hooks, and cached provider data between tests.
 		remove_all_actions( 'wc_payment_gateways_initialized' );
-		WC()->payment_gateways()->payment_gateways = array();
-		WC()->payment_gateways()->init();
+		self::reload_payment_gateways();
 		if ( isset( $this->sut ) ) {
 			$this->sut->clear_cache();
 		}
@@ -6148,59 +6149,12 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Load the WC core PayPal gateway but not enable it.
+	 * The payment providers service the core PayPal gateway helpers must invalidate.
 	 *
-	 * @return void
+	 * @return PaymentsProviders
 	 */
-	private function load_core_paypal_pg() {
-		// Make sure the WC core PayPal gateway is loaded.
-		update_option(
-			'woocommerce_paypal_settings',
-			array(
-				'_should_load' => 'yes',
-				'enabled'      => 'no',
-			)
-		);
-		// Make sure the store currency is supported by the gateway.
-		update_option( 'woocommerce_currency', 'USD' );
-		WC()->payment_gateways()->payment_gateways = array();
-		WC()->payment_gateways()->init();
-
-		// Clear cached provider data to pick up the new gateway details.
-		$this->sut->clear_cache();
-	}
-
-	/**
-	 * Enable the WC core PayPal gateway.
-	 *
-	 * @return void
-	 */
-	private function enable_core_paypal_pg() {
-		// Enable the WC core PayPal gateway.
-		update_option(
-			'woocommerce_paypal_settings',
-			array(
-				'_should_load' => 'yes',
-				'enabled'      => 'yes',
-			)
-		);
-		// Make sure the store currency is supported by the gateway.
-		update_option( 'woocommerce_currency', 'USD' );
-		WC()->payment_gateways()->payment_gateways = array();
-		WC()->payment_gateways()->init();
-
-		// Clear cached provider data to pick up the new gateway details.
-		$this->sut->clear_cache();
-	}
-
-	/**
-	 * Cleanup the core PayPal gateway.
-	 */
-	private function unload_core_paypal_pg() {
-		delete_option( 'woocommerce_paypal_settings' );
-		delete_option( 'woocommerce_currency' );
-
-		$this->sut->clear_cache();
+	protected function get_payments_providers_service(): PaymentsProviders {
+		return $this->sut;
 	}
 
 	/**
