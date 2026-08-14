@@ -87,8 +87,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	protected function assign_report_columns() {
 		global $wpdb;
-		$table_name        = self::get_db_table_name();
-		$order_stats_table = $wpdb->prefix . 'wc_order_stats';
+		$table_name = self::get_db_table_name();
 
 		// Using wp_woocommerce_tax_rates table limits the result to only the existing tax rates and
 		// omits the historical records which differs from the purpose of wp_wc_order_tax_lookup table.
@@ -108,8 +107,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'total_tax'    => 'SUM(total_tax) as total_tax',
 			'order_tax'    => 'SUM(order_tax) as order_tax',
 			'shipping_tax' => 'SUM(shipping_tax) as shipping_tax',
-			// parent_id is qualified to wc_order_stats to stay unambiguous now that the join is always present.
-			'orders_count' => "COUNT( DISTINCT ( CASE WHEN {$order_stats_table}.parent_id = 0 THEN {$table_name}.order_id END ) ) as orders_count",
+			// parent_id stays unqualified: wc_order_stats is the only joined table carrying it, and
+			// this string is carried by the public woocommerce_admin_report_columns filter, so it must
+			// match the released form for extension callbacks that inspect or rewrite it.
+			'orders_count' => "COUNT( DISTINCT ( CASE WHEN parent_id = 0 THEN {$table_name}.order_id END ) ) as orders_count",
 		);
 	}
 
