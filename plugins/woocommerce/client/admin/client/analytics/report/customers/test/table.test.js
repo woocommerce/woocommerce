@@ -9,7 +9,7 @@ import { useSelect } from '@wordpress/data';
  */
 import CustomersReportTable from '../table';
 
-const captured = { getRowsContent: null };
+const captured = { getRowsContent: null, getHeadersContent: null };
 
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
@@ -49,6 +49,7 @@ jest.mock( '../../../components/report-table', () => ( {
 	__esModule: true,
 	default: ( props ) => {
 		captured.getRowsContent = props.getRowsContent;
+		captured.getHeadersContent = props.getHeadersContent;
 		return null;
 	},
 } ) );
@@ -156,5 +157,42 @@ describe( 'CustomersReportTable country cell', () => {
 		} );
 
 		expect( () => renderCellDisplay( cell.display ) ).not.toThrow();
+	} );
+} );
+
+describe( 'CustomersReportTable phone cells', () => {
+	// Phone cells are the last two columns per getHeadersContent in table.js.
+	const BILLING_PHONE_COL = 12;
+	const SHIPPING_PHONE_COL = 13;
+
+	beforeEach( () => {
+		jest.clearAllMocks();
+	} );
+
+	it( 'maps billing and shipping phone into their cells', () => {
+		mockCountriesStore( [] );
+		captured.getRowsContent = null;
+		render( <CustomersReportTable query={ {} } /> );
+		const rows = captured.getRowsContent( [
+			{
+				...baseCustomer,
+				billing_phone: '555-32123',
+				shipping_phone: '555-99887',
+			},
+		] );
+
+		expect( rows[ 0 ][ BILLING_PHONE_COL ].value ).toBe( '555-32123' );
+		expect( rows[ 0 ][ SHIPPING_PHONE_COL ].value ).toBe( '555-99887' );
+	} );
+
+	it( 'keeps the phone headers aligned with the phone cells', () => {
+		mockCountriesStore( [] );
+		captured.getHeadersContent = null;
+		render( <CustomersReportTable query={ {} } /> );
+		const headers = captured.getHeadersContent();
+
+		expect( headers[ BILLING_PHONE_COL ].key ).toBe( 'billing_phone' );
+		expect( headers[ SHIPPING_PHONE_COL ].key ).toBe( 'shipping_phone' );
+		expect( headers ).toHaveLength( SHIPPING_PHONE_COL + 1 );
 	} );
 } );
