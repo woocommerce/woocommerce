@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
+import { useMemo } from '@wordpress/element';
 import { getSetting, CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import NoticeBanner from '@woocommerce/base-components/notice-banner';
 import { useLocalStorageState } from '@woocommerce/base-hooks';
@@ -13,6 +14,45 @@ import { useLocalStorageState } from '@woocommerce/base-hooks';
  */
 export const DISMISSED_INCOMPATIBLE_EXTENSIONS_FRONTEND_STORAGE_KEY =
 	'wc-blocks_dismissed_incompatible_extensions_notices_frontend';
+
+/**
+ * The key both surfaces shared before the storefront banner moved to its own.
+ * Still owned and written by the editor sidebar notice; the storefront only
+ * ever reads it, to carry over dismissals made before the rename.
+ */
+export const DISMISSED_INCOMPATIBLE_EXTENSIONS_STORAGE_KEY =
+	'wc-blocks_dismissed_incompatible_extensions_notices';
+
+/**
+ * Reads the slugs the merchant acknowledged on the storefront while both
+ * surfaces shared one key.
+ *
+ * The stored value can hold either surface's shape, and often both at once: the
+ * storefront wrote bare slug strings, while the editor appends
+ * `{ [blockName]: slugs }` objects without discarding what it finds. Only the
+ * strings belong to the storefront banner, so the objects are filtered out
+ * rather than treated as a reason to skip the whole value.
+ */
+const readSlugsDismissedBeforeRename = (): string[] => {
+	try {
+		const stored = window.localStorage.getItem(
+			DISMISSED_INCOMPATIBLE_EXTENSIONS_STORAGE_KEY
+		);
+		if ( ! stored ) {
+			return [];
+		}
+		const parsed = JSON.parse( stored );
+		return Array.isArray( parsed )
+			? parsed.filter(
+					( entry ): entry is string => typeof entry === 'string'
+			  )
+			: [];
+	} catch {
+		// A value we can't read is not a dismissal we can honour; showing the
+		// banner is the safe fallback.
+		return [];
+	}
+};
 
 // Whether every item in `subset` is also present in `superset`.
 const isSubsetOf = ( subset: string[], superset: string[] ): boolean =>
@@ -48,9 +88,21 @@ interface Props {
 export const IncompatibleExtensionsFrontendNotice = ( {
 	block,
 }: Props ): JSX.Element | null => {
+	// Seeding the initial value migrates pre-rename dismissals in one shot: the
+	// hook only falls back to it when the storefront key is genuinely absent,
+	// and writes the key itself on mount. Memoised because the argument is
+	// evaluated on every render even though only the first one consumes it.
+	const slugsDismissedBeforeRename = useMemo(
+		readSlugsDismissedBeforeRename,
+		[]
+	);
+
 	const [ dismissedSlugs, setDismissedSlugs ] = useLocalStorageState<
 		string[]
-	>( DISMISSED_INCOMPATIBLE_EXTENSIONS_FRONTEND_STORAGE_KEY, [] );
+	>(
+		DISMISSED_INCOMPATIBLE_EXTENSIONS_FRONTEND_STORAGE_KEY,
+		slugsDismissedBeforeRename
+	);
 
 	const { extensions, slugs } = getIncompatibleExtensions();
 	const count = slugs.length;

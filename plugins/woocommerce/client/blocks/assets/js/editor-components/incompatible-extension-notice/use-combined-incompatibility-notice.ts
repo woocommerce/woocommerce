@@ -54,6 +54,11 @@ export const useCombinedIncompatibilityNotice = (
 	const allIncompatibleItemCount =
 		incompatibleExtensionCount + incompatiblePaymentMethodCount;
 
+	// The storefront banner reads this same key once, to carry over dismissals
+	// made before it moved to its own — see
+	// `DISMISSED_INCOMPATIBLE_EXTENSIONS_STORAGE_KEY` in
+	// `blocks/cart-checkout-shared/incompatible-extensions-notice.tsx` if this
+	// key ever changes.
 	const [ dismissedNotices, setDismissedNotices ] = useLocalStorageState<
 		StoredIncompatibleExtension[]
 	>(

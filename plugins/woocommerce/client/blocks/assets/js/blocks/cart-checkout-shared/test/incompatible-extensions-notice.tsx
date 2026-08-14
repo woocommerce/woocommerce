@@ -10,6 +10,7 @@ import { getSetting } from '@woocommerce/settings';
 import {
 	IncompatibleExtensionsFrontendNotice,
 	DISMISSED_INCOMPATIBLE_EXTENSIONS_FRONTEND_STORAGE_KEY,
+	DISMISSED_INCOMPATIBLE_EXTENSIONS_STORAGE_KEY,
 } from '../incompatible-extensions-notice';
 
 jest.mock( '@woocommerce/settings', () => ( {
@@ -48,11 +49,9 @@ jest.mock( '@woocommerce/base-components/notice-banner', () => ( {
 
 const mockGetSetting = getSetting as jest.MockedFunction< typeof getSetting >;
 
-// The storefront banner's own key, imported so a rename is caught here. The
-// editor notice's key is kept as a literal on purpose: importing it would pull
-// the editor hook's data-store dependencies into this test.
+// Both keys are imported so a rename on either is caught here.
 const FRONTEND_KEY = DISMISSED_INCOMPATIBLE_EXTENSIONS_FRONTEND_STORAGE_KEY;
-const EDITOR_KEY = 'wc-blocks_dismissed_incompatible_extensions_notices';
+const EDITOR_KEY = DISMISSED_INCOMPATIBLE_EXTENSIONS_STORAGE_KEY;
 
 const setIncompatibleExtensions = (
 	extensions: Array< { id: string; title: string } >
@@ -230,6 +229,189 @@ describe( 'IncompatibleExtensionsFrontendNotice', () => {
 			);
 
 			expect( container ).toBeEmptyDOMElement();
+		} );
+	} );
+
+	// Before this key rename the storefront banner shared the editor's key, so a
+	// merchant's dismissal lives under EDITOR_KEY on every site that ran 10.7.0
+	// or later. Without a migration they would all see the banner one more time
+	// after upgrading — the exact symptom this component is meant to stop.
+	describe( 'migration from the pre-rename storage key', () => {
+		const renderCheckout = () =>
+			render(
+				<IncompatibleExtensionsFrontendNotice block="woocommerce/checkout" />
+			);
+
+		it( 'stays dismissed for a merchant who dismissed before the rename', () => {
+			window.localStorage.setItem(
+				EDITOR_KEY,
+				JSON.stringify( [ 'test-plugin' ] )
+			);
+			setIncompatibleExtensions( [
+				{ id: 'test-plugin', title: 'Test Plugin' },
+			] );
+
+			const { container } = renderCheckout();
+
+			expect( container ).toBeEmptyDOMElement();
+		} );
+
+		// The editor writes `{ [block]: slugs }` objects into the same key and
+		// preserves whatever the storefront left there, so a real site can hold
+		// both shapes at once.
+		it( 'migrates the storefront slugs out of a value the editor also wrote', () => {
+			window.localStorage.setItem(
+				EDITOR_KEY,
+				JSON.stringify( [
+					'test-plugin',
+					{ 'woocommerce/checkout': [ 'test-plugin', 'gateway-a' ] },
+				] )
+			);
+			setIncompatibleExtensions( [
+				{ id: 'test-plugin', title: 'Test Plugin' },
+			] );
+
+			const { container } = renderCheckout();
+
+			expect( container ).toBeEmptyDOMElement();
+			expect(
+				JSON.parse(
+					window.localStorage.getItem( FRONTEND_KEY ) || '[]'
+				)
+			).toEqual( [ 'test-plugin' ] );
+		} );
+
+		it( 'still shows the banner for an extension the merchant never acknowledged', () => {
+			window.localStorage.setItem(
+				EDITOR_KEY,
+				JSON.stringify( [ 'old-plugin' ] )
+			);
+			setIncompatibleExtensions( [
+				{ id: 'new-plugin', title: 'New Plugin' },
+			] );
+
+			renderCheckout();
+
+			expect( screen.getByTestId( 'notice-banner' ) ).toBeInTheDocument();
+		} );
+
+		it( 'ignores the legacy value once the storefront key exists', () => {
+			window.localStorage.setItem( FRONTEND_KEY, JSON.stringify( [] ) );
+			window.localStorage.setItem(
+				EDITOR_KEY,
+				JSON.stringify( [ 'test-plugin' ] )
+			);
+			setIncompatibleExtensions( [
+				{ id: 'test-plugin', title: 'Test Plugin' },
+			] );
+
+			renderCheckout();
+
+			expect( screen.getByTestId( 'notice-banner' ) ).toBeInTheDocument();
+		} );
+
+		it( 'migrates nothing from a value only the editor ever wrote', () => {
+			window.localStorage.setItem(
+				EDITOR_KEY,
+				JSON.stringify( [
+					{ 'woocommerce/checkout': [ 'test-plugin' ] },
+				] )
+			);
+			setIncompatibleExtensions( [
+				{ id: 'test-plugin', title: 'Test Plugin' },
+			] );
+
+			renderCheckout();
+
+			expect( screen.getByTestId( 'notice-banner' ) ).toBeInTheDocument();
+		} );
+
+		it.each( [
+			[ 'unparseable', 'not json at all' ],
+			[
+				'an object',
+				JSON.stringify( { 'woocommerce/checkout': [ 'a' ] } ),
+			],
+			[ 'a bare string', JSON.stringify( 'test-plugin' ) ],
+			[ 'null', JSON.stringify( null ) ],
+		] )(
+			'falls back to showing the banner when the legacy value is %s',
+			( _label, stored ) => {
+				window.localStorage.setItem( EDITOR_KEY, stored );
+				setIncompatibleExtensions( [
+					{ id: 'test-plugin', title: 'Test Plugin' },
+				] );
+
+				renderCheckout();
+
+				expect(
+					screen.getByTestId( 'notice-banner' )
+				).toBeInTheDocument();
+			}
+		);
+
+		// Leaving the old value intact keeps a revert of this change harmless and
+		// keeps the editor notice's own dismissals working.
+		it( 'never writes to the legacy key', () => {
+			const legacy = JSON.stringify( [
+				'test-plugin',
+				{ 'woocommerce/checkout': [ 'test-plugin' ] },
+			] );
+			window.localStorage.setItem( EDITOR_KEY, legacy );
+			setIncompatibleExtensions( [
+				{ id: 'test-plugin', title: 'Test Plugin' },
+				{ id: 'new-plugin', title: 'New Plugin' },
+			] );
+
+			renderCheckout();
+			fireEvent.click( screen.getByTestId( 'dismiss-button' ) );
+
+			expect( window.localStorage.getItem( EDITOR_KEY ) ).toBe( legacy );
+		} );
+
+		it( 'adds newly acknowledged slugs to the migrated ones', () => {
+			window.localStorage.setItem(
+				EDITOR_KEY,
+				JSON.stringify( [ 'test-plugin' ] )
+			);
+			setIncompatibleExtensions( [
+				{ id: 'test-plugin', title: 'Test Plugin' },
+				{ id: 'new-plugin', title: 'New Plugin' },
+			] );
+
+			renderCheckout();
+			fireEvent.click( screen.getByTestId( 'dismiss-button' ) );
+
+			expect(
+				JSON.parse(
+					window.localStorage.getItem( FRONTEND_KEY ) || '[]'
+				)
+			).toEqual( [ 'test-plugin', 'new-plugin' ] );
+		} );
+
+		it( 'reads the legacy value once per mount, not once per render', () => {
+			const getItem = jest.spyOn( Storage.prototype, 'getItem' );
+			window.localStorage.setItem(
+				EDITOR_KEY,
+				JSON.stringify( [ 'test-plugin' ] )
+			);
+			setIncompatibleExtensions( [
+				{ id: 'test-plugin', title: 'Test Plugin' },
+			] );
+
+			const legacyReads = () =>
+				getItem.mock.calls.filter( ( [ key ] ) => key === EDITOR_KEY )
+					.length;
+
+			const { rerender } = renderCheckout();
+			expect( legacyReads() ).toBe( 1 );
+
+			rerender(
+				<IncompatibleExtensionsFrontendNotice block="woocommerce/checkout" />
+			);
+			expect( legacyReads() ).toBe( 1 );
+
+			getItem.mockRestore();
 		} );
 	} );
 } );
