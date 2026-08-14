@@ -174,16 +174,24 @@ jobs:
           min_version=$(echo "$main_version - 2.0" | bc)
 
           file="docs/contribution/releases/security-support.md"
+          current_version=$(grep -oP '(?<=current stable WooCommerce version is )[0-9]+\.[0-9]+' "$file")
+
+          if [[ -z "$current_version" ]]; then
+            echo "::error::Could not find the currently documented version in $file. The sentence this automation matches on may have changed - update this workflow."
+            exit 1
+          fi
+
+          # Guard against a delayed or replayed release event moving the version backwards.
+          if [[ "$main_version" == "$current_version" ]] || ! printf '%s\n%s\n' "$current_version" "$main_version" | sort -C -V; then
+            echo "$file already reflects $current_version, which is not older than $main_version. Nothing to do."
+            exit 0
+          fi
+
           sed -i -E "s/(current stable WooCommerce version is )[0-9]+\.[0-9]+(, that means version \*\*)[0-9]+\.[0-9]+( and newer\*\*)/\1$main_version\2$min_version\3/" "$file"
 
           if ! grep -q "current stable WooCommerce version is $main_version, that means version \*\*$min_version and newer\*\*" "$file"; then
             echo "::error::Could not update the minimum supported version in $file. The sentence this automation matches on may have changed - update the sed pattern in this workflow."
             exit 1
-          fi
-
-          if git diff --quiet -- "$file"; then
-            echo "No changes needed, $file already reflects the $main_version / $min_version minimum."
-            exit 0
           fi
 
           git config --global user.name "woocommercebot"
