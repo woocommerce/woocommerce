@@ -247,7 +247,7 @@ export const TaskList = ( {
 				<H>{ __( "You're all caught up", 'woocommerce' ) }</H>
 				<p>
 					{ __(
-						"There's nothing else to do right now. Watch this space for more recommendations.",
+						"You've completed all the things to do next. Watch this space for more recommendations.",
 						'woocommerce'
 					) }
 				</p>

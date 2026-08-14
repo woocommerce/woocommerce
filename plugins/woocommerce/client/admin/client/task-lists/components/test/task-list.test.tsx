@@ -321,7 +321,7 @@ describe( 'TaskList', () => {
 		expect( queryByText( "You're all caught up" ) ).toBeInTheDocument();
 		expect(
 			queryByText(
-				"There's nothing else to do right now. Watch this space for more recommendations."
+				"You've completed all the things to do next. Watch this space for more recommendations."
 			)
 		).toBeInTheDocument();
 	} );
