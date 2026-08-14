@@ -367,20 +367,20 @@ jobs:
               }
             } );
 
+            const previousIssueUrl = issues.nodes[ 0 ]?.url;
+            const cycleRef = previousIssueUrl ? `[the ${ twoCyclesBackVersion } cycle](${ previousIssueUrl })` : `the ${ twoCyclesBackVersion } cycle`;
+
             const assignee = await issues.nodes[ 0 ]?.assignee;
 
             if ( ! assignee ) {
               console.log( 'No assignee found for the tracking issue two cycles back' );
-              core.setOutput( 'mention', `the release lead from the ${ twoCyclesBackVersion } cycle` );
+              core.setOutput( 'mention', `the release lead from ${ cycleRef }` );
               return;
             }
 
             console.log( 'Found release lead from two cycles back' );
-            const organizationUrlKey = '${{ steps.get-linear-data.outputs.organizationUrlKey }}';
-            const label = assignee.username
-              ? `[${ assignee.displayName }](https://linear.app/${ organizationUrlKey }/profiles/${ assignee.username })`
-              : assignee.displayName;
-            core.setOutput( 'mention', `${ label } (release lead from the ${ twoCyclesBackVersion } cycle)` );
+            const name = assignee.username || assignee.displayName;
+            core.setOutput( 'mention', `**${ name }** (release lead from ${ cycleRef })` );
 
       - name: Process template and create release tracking issue
         if: ${{ steps.check-existing-issue.outputs.exists != 'true' }}
