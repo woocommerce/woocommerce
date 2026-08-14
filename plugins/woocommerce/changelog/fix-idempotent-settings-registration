@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make settings registration idempotent so plugins booting the REST server during admin requests no longer duplicate or drop settings groups, and emails registered on admin_init are included.
