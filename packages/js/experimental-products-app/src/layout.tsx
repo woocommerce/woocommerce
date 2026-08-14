@@ -13,7 +13,6 @@ import {
 	__unstableAnimatePresence as AnimatePresence,
 } from '@wordpress/components';
 // @ts-expect-error - This component isn't available in WordPress 6.9. Given that it's an experimental project, it's okay to use it here. Remove the check below when WordPress 7.0 is the minimum supported version.
-// eslint-disable-next-line @woocommerce/dependency-group
 import { SnackbarNotices } from '@wordpress/notices';
 
 /**

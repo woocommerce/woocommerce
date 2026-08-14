@@ -5,6 +5,9 @@ namespace Automattic\WooCommerce\Internal\POS;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Utilities\Users;
+use WP_User;
+
 /**
  * POS capability model.
  *
@@ -18,8 +21,11 @@ defined( 'ABSPATH' ) || exit;
  * administrator, …) without altering their role, and revoked without leaving
  * them roleless.
  *
- * The preset layer — which `woocommerce_pos_*` caps a Cashier / Manager / Admin receives, and
- * the code that assigns them per user — is added separately.
+ * The preset layer maps each preset (see POSPreset) to a bundle of
+ * `woocommerce_pos_*` caps and assigns or clears them per user via
+ * set_pos_preset(). The assigned preset is recorded in `woocommerce_pos_preset`
+ * user meta for the UI; the caps remain the authorization signal, so a stray
+ * meta value alone grants nothing.
  *
  * @since 11.0.0
  * @internal
@@ -62,6 +68,16 @@ class Capabilities {
 	public const CAP_MANAGE_STAFF = 'woocommerce_pos_manage_staff';
 	// Leave POS mode for the full admin.
 	public const CAP_EXIT_POS = 'woocommerce_pos_exit';
+
+	/**
+	 * User meta key recording which preset was assigned to a user.
+	 *
+	 * The value is one of the POSPreset constants. It drives the admin UI, but it
+	 * is not the authorization signal: has_pos_access() reads the `woocommerce_pos_*` caps, not
+	 * this meta. Stored per-site via Users::*_site_user_meta() (which suffixes the blog prefix)
+	 * so it stays aligned with the blog-scoped capabilities on multisite.
+	 */
+	public const POS_PRESET_META_KEY = 'woocommerce_pos_preset';
 
 	/**
 	 * All known POS capability identifiers.
@@ -127,5 +143,192 @@ class Capabilities {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Resolve the assigned POS preset for a user, or null if none is set.
+	 *
+	 * Returns the `woocommerce_pos_preset` meta value only if it matches an
+	 * assignable preset, so a stale or hand-edited value reads as "no preset".
+	 *
+	 * The meta is stored per-site (see set_pos_preset()) so it stays aligned with the
+	 * blog-scoped POS capabilities on multisite.
+	 *
+	 * @param int $user_id Target user.
+	 * @return string|null One of the POSPreset constants, or null.
+	 *
+	 * @since 11.0.0
+	 */
+	public static function get_pos_preset( int $user_id ): ?string {
+		$meta = Users::get_site_user_meta( $user_id, self::POS_PRESET_META_KEY, true );
+		if ( in_array( $meta, POSPreset::get_all(), true ) ) {
+			return (string) $meta;
+		}
+		return null;
+	}
+
+	/**
+	 * WP_User_Query args selecting candidate POS staff — every user holding any
+	 * `woocommerce_pos_*` capability, via WP_User_Query's capability__in.
+	 *
+	 * Use it to enumerate POS staff — e.g. the GET /wc/pos/v1/staff endpoint and the
+	 * wp-admin Staff list — which refine the candidates for their own needs (the staff
+	 * endpoint also requires a PIN). Keying on caps rather than the preset meta keeps
+	 * this aligned with the authorization signal: a user whose caps were stripped is
+	 * excluded, and a cap granted outside a preset is still included.
+	 *
+	 * This is a candidate query, not exact parity with has_pos_access(): capability__in
+	 * matches the capability *name* wherever it appears in the serialized capabilities
+	 * row, so a user with an explicit denial (add_cap( $cap, false )) is still selected
+	 * even though has_pos_access() — which reads the resolved capabilities — treats them
+	 * as no access. Capabilities only ever grants or strips caps, never denies, so this
+	 * diverges only when external code sets an explicit denial; callers needing exact
+	 * parity should refine results with has_pos_access().
+	 *
+	 * @return array<string, mixed>
+	 *
+	 * @since 11.0.0
+	 */
+	public static function pos_staff_user_query_args(): array {
+		return array(
+			'capability__in' => self::all_pos_capabilities(),
+		);
+	}
+
+	/**
+	 * Preset metadata: the `woocommerce_pos_*` cap bundle and display label for each preset.
+	 *
+	 * Single source of truth for capabilities_for_preset() and preset_label(), so
+	 * adding or renaming a preset is one edit here (plus the POSPreset constant)
+	 * rather than several parallel switches.
+	 *
+	 *     Capability                       Cashier  Manager  Admin
+	 *     woocommerce_pos_process_sales    yes      yes      yes
+	 *     woocommerce_pos_view_orders      yes      yes      yes
+	 *     woocommerce_pos_apply_coupons    yes      yes      yes
+	 *     woocommerce_pos_create_coupons   no       yes      yes
+	 *     woocommerce_pos_issue_refunds    no       yes      yes
+	 *     woocommerce_pos_view_settings    no       yes      yes
+	 *     woocommerce_pos_edit_settings    no       no       yes
+	 *     woocommerce_pos_manage_staff     no       no       yes
+	 *     woocommerce_pos_exit             no       no       yes
+	 *
+	 * @return array<string, array{caps: array<string, true>, label: string}>
+	 */
+	private static function preset_definitions(): array {
+		$cashier_caps = array(
+			self::CAP_PROCESS_SALES => true,
+			self::CAP_VIEW_ORDERS   => true,
+			self::CAP_APPLY_COUPONS => true,
+		);
+
+		$manager_caps = $cashier_caps + array(
+			self::CAP_CREATE_COUPONS => true,
+			self::CAP_ISSUE_REFUNDS  => true,
+			self::CAP_VIEW_SETTINGS  => true,
+		);
+
+		$admin_caps = $manager_caps + array(
+			self::CAP_EDIT_SETTINGS => true,
+			self::CAP_MANAGE_STAFF  => true,
+			self::CAP_EXIT_POS      => true,
+		);
+
+		return array(
+			POSPreset::CASHIER => array(
+				'caps'  => $cashier_caps,
+				'label' => __( 'POS cashier', 'woocommerce' ),
+			),
+			POSPreset::MANAGER => array(
+				'caps'  => $manager_caps,
+				'label' => __( 'POS manager', 'woocommerce' ),
+			),
+			POSPreset::ADMIN   => array(
+				'caps'  => $admin_caps,
+				'label' => __( 'POS admin', 'woocommerce' ),
+			),
+		);
+	}
+
+	/**
+	 * The `woocommerce_pos_*` capability bundle for a given preset (see preset_definitions()).
+	 *
+	 * @param string $preset One of the POSPreset constants.
+	 * @return array<string, true> Map of granted cap => true. Empty for unknown presets.
+	 *
+	 * @since 11.0.0
+	 */
+	public static function capabilities_for_preset( string $preset ): array {
+		$definitions = self::preset_definitions();
+
+		return isset( $definitions[ $preset ] ) ? $definitions[ $preset ]['caps'] : array();
+	}
+
+	/**
+	 * Assign or clear the POS preset for a user.
+	 *
+	 * Touches only caps + meta, never WP roles: granting access to an existing user
+	 * leaves their role intact, and clearing it never leaves them roleless. Every
+	 * `woocommerce_pos_*` cap the user holds directly (via add_cap — the only way this class grants
+	 * them) is stripped first, so a preset change (Manager to Cashier) drops the caps
+	 * the new preset omits, and a clear (null) removes them along with the preset meta.
+	 * Role-granted `woocommerce_pos_*` caps, if any, are out of scope: this class never adds caps
+	 * to roles.
+	 *
+	 * @param int         $user_id Target user.
+	 * @param string|null $preset  One of POSPreset::get_all(), or null to clear.
+	 * @return bool True on success (including clears); false if the user does not
+	 *              exist or the preset value is not assignable.
+	 *
+	 * @since 11.0.0
+	 */
+	public static function set_pos_preset( int $user_id, ?string $preset ): bool {
+		$user = get_user_by( 'id', $user_id );
+		if ( ! $user instanceof WP_User ) {
+			return false;
+		}
+
+		// Validate before mutating any state.
+		if ( null !== $preset && ! in_array( $preset, POSPreset::get_all(), true ) ) {
+			return false;
+		}
+
+		// Strip the user's directly-held woocommerce_pos_* caps so a preset change (or clear)
+		// starts clean. remove_cap() is a no-op for caps the user does not hold and strips a cap
+		// whether it was granted (true) or explicitly denied (false). This class only grants caps
+		// per-user via add_cap(), so role-granted caps are out of scope.
+		foreach ( self::all_pos_capabilities() as $cap ) {
+			$user->remove_cap( $cap );
+		}
+
+		if ( null === $preset ) {
+			Users::delete_site_user_meta( $user_id, self::POS_PRESET_META_KEY );
+			return true;
+		}
+
+		// Store the preset per-site so the bookkeeping stays aligned with the blog-scoped
+		// POS capabilities on multisite (Users::update_site_user_meta suffixes the blog prefix,
+		// so the key still matches the woocommerce_% uninstall sweep).
+		Users::update_site_user_meta( $user_id, self::POS_PRESET_META_KEY, $preset );
+
+		foreach ( array_keys( self::capabilities_for_preset( $preset ) ) as $cap ) {
+			$user->add_cap( $cap );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Translated label for a POS preset.
+	 *
+	 * @param string $preset One of the POSPreset constants.
+	 * @return string Empty string for an unknown preset.
+	 *
+	 * @since 11.0.0
+	 */
+	public static function preset_label( string $preset ): string {
+		$definitions = self::preset_definitions();
+
+		return isset( $definitions[ $preset ] ) ? $definitions[ $preset ]['label'] : '';
 	}
 }

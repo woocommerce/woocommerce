@@ -17,7 +17,7 @@ jobs:
     steps:
       - name: Extract PR number from issue body
         id: extract-pr
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const body = context.payload.issue.body;
@@ -55,7 +55,7 @@ jobs:
         env:
           PR_NUMBER: ${{ needs.prep.outputs.pr_number }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const issueUrl = context.payload.issue.html_url;
@@ -130,7 +130,7 @@ jobs:
         if: ${{ steps.verify-pr.outputs.PR_BASE_REF != '' }}
         env:
           PR_BASE_REF: ${{ steps.verify-pr.outputs.PR_BASE_REF }}
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const issueUrl = context.payload.issue.html_url;
@@ -219,7 +219,7 @@ jobs:
     steps:
       - name: Set Slack Message
         id: set-message
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const event = context.payload;
@@ -311,7 +311,7 @@ jobs:
 
       - name: Set Slack Message
         id: set-message
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const event = context.payload;
@@ -347,7 +347,7 @@ jobs:
 
       - name: Set Slack Message
         id: set-message
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const event = context.payload;

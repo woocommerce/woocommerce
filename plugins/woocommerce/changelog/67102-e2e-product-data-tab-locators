@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Scope product data tab locators in product-create-simple.spec.ts to the product data metabox.

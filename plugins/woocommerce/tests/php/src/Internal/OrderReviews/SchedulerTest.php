@@ -17,6 +17,41 @@ use WC_Unit_Test_Case;
  * @covers \Automattic\WooCommerce\Internal\OrderReviews\Scheduler
  */
 class SchedulerTest extends WC_Unit_Test_Case {
+	/**
+	 * Product ID shared by generic reviewable-order fixtures.
+	 *
+	 * @var int
+	 */
+	private static $reviewable_product_id;
+
+	/**
+	 * Create the immutable reviewable product before per-test transactions begin.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::enable_direct_product_attribute_lookup_updates();
+
+		try {
+			self::$reviewable_product_id = WC_Helper_Product::create_simple_product()->get_id();
+		} finally {
+			self::disable_direct_product_attribute_lookup_updates();
+		}
+	}
+
+	/**
+	 * Delete the shared product through the WooCommerce data store.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		self::enable_direct_product_attribute_lookup_updates();
+
+		try {
+			$product = wc_get_product( self::$reviewable_product_id );
+			if ( $product ) {
+				$product->delete( true );
+			}
+		} finally {
+			self::disable_direct_product_attribute_lookup_updates();
+		}
+	}
 
 	/**
 	 * Prepare the mailer and enable the review-request email.
@@ -99,12 +134,23 @@ class SchedulerTest extends WC_Unit_Test_Case {
 		$order->update_status( 'completed' );
 		$first = (int) wc_get_order( $order->get_id() )->get_meta( Scheduler::SCHEDULED_META_KEY );
 
-		// Simulate a second completed-notification firing (e.g. status toggled back and forth).
-		sleep( 1 );
-		do_action( 'woocommerce_order_status_completed', $order->get_id() ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- existing core hook, fired here only to simulate a duplicate transition in the test.
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Existing core hook, fired here only to simulate a second completed-notification (e.g. status toggled back and forth).
+		do_action( 'woocommerce_order_status_completed', $order->get_id() );
 		$second = (int) wc_get_order( $order->get_id() )->get_meta( Scheduler::SCHEDULED_META_KEY );
 
 		$this->assertSame( $first, $second, 'Scheduled-at meta should not change on re-completion.' );
+		$this->assertCount(
+			1,
+			as_get_scheduled_actions(
+				array(
+					'hook'   => Scheduler::ACTION_HOOK,
+					'args'   => array( $order->get_id() ),
+					'status' => \ActionScheduler_Store::STATUS_PENDING,
+				),
+				'ids'
+			),
+			'A duplicate completion must not schedule a second review-request action.'
+		);
 	}
 
 	/**
@@ -305,7 +351,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 * Create an order in a non-completed status so transitioning to completed fires the hook cleanly.
 	 */
 	private function create_pending_order(): WC_Order {
-		$order = OrderHelper::create_order();
+		$order = OrderHelper::create_order( 1, wc_get_product( self::$reviewable_product_id ) );
 		$order->set_status( 'pending' );
 		$order->save();
 		return $order;

@@ -6,6 +6,10 @@
 	.components-card {
 		overflow: hidden;
 	}
+
+	.woocommerce-inbox-message:last-child:not(.is-placeholder) {
+		border-bottom: none;
+	}
 }
 
 .woocommerce-layout__inbox-panel-header {
@@ -84,7 +88,7 @@
 }
 
 .woocommerce-inbox-card__footer {
-	background-color: #f6f7f7;
+	background-color: $studio-white;
 	display: flex;
 	justify-content: center;
 	align-items: center;

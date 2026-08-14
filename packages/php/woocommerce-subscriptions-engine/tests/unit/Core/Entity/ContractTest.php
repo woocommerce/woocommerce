@@ -20,6 +20,7 @@ use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\InstrumentRef;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract
@@ -301,18 +302,27 @@ class ContractTest extends TestCase {
 	}
 
 	/**
-	 * @testdox from_storage() hydrates items, addresses, and meta children.
+	 * @testdox from_storage() hydrates the plan snapshot, items, addresses, and meta children.
 	 */
 	public function test_from_storage_hydrates_children(): void {
+		$snapshot  = PlanSnapshot::from_array( array( 'selling_plan_id' => 7 ) );
 		$items     = array( array( 'product_id' => 42 ) );
 		$addresses = array( 'billing' => array( 'first_name' => 'Ada' ) );
 		$meta      = array( 'flag' => 'on' );
 
-		$contract = Contract::from_storage( $this->valid_row(), $items, $addresses, $meta );
+		$contract = Contract::from_storage( $this->valid_row(), $snapshot, $items, $addresses, $meta );
 
+		$this->assertSame( $snapshot, $contract->get_plan_snapshot() );
 		$this->assertSame( $items, $contract->get_items() );
 		$this->assertSame( $addresses, $contract->get_addresses() );
 		$this->assertSame( $meta, $contract->get_meta() );
+	}
+
+	/**
+	 * @testdox from_storage() leaves the plan snapshot null when none is passed.
+	 */
+	public function test_from_storage_defaults_to_no_plan_snapshot(): void {
+		$this->assertNull( Contract::from_storage( $this->valid_row() )->get_plan_snapshot() );
 	}
 
 	/**
@@ -359,5 +369,36 @@ class ContractTest extends TestCase {
 		$row = $this->make_contract()->to_storage();
 
 		$this->assertArrayNotHasKey( 'cycle_count', $row, 'to_storage() must not carry a generic cycle_count; counters are per-chain and derived.' );
+	}
+
+	/**
+	 * @testdox the hydrated plan snapshot is null until set, then returns what was set.
+	 */
+	public function test_plan_snapshot_hydration_round_trips(): void {
+		$contract = $this->make_contract();
+		$this->assertNull( $contract->get_plan_snapshot() );
+
+		$snapshot = PlanSnapshot::from_array(
+			array(
+				'selling_plan_id' => 2,
+				'billing_policy'  => array(
+					'period'   => 'month',
+					'interval' => 1,
+				),
+			)
+		);
+		$contract->set_plan_snapshot( $snapshot );
+
+		$this->assertSame( $snapshot, $contract->get_plan_snapshot() );
+	}
+
+	/**
+	 * @testdox the hydrated plan snapshot is not a stored column.
+	 */
+	public function test_plan_snapshot_is_not_in_to_storage(): void {
+		$contract = $this->make_contract();
+		$contract->set_plan_snapshot( PlanSnapshot::from_array( array( 'selling_plan_id' => 2 ) ) );
+
+		$this->assertArrayNotHasKey( 'plan_snapshot', $contract->to_storage(), 'plan_snapshot is a hydrated read-only field, not a stored column.' );
 	}
 }
