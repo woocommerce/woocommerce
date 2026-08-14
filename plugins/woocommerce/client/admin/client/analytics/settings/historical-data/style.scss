@@ -110,14 +110,6 @@
 .woocommerce-settings-historical-data__actions {
 	align-items: center;
 	display: flex;
-
-	@include breakpoint( ">782px" ) {
-		padding: 0 ($gap - 3);
-	}
-
-	@include breakpoint( ">1280px" ) {
-		margin-left: 0;
-	}
 }
 
 .woocommerce-settings-historical-data__failed-orders {
