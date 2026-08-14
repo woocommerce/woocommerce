@@ -1548,7 +1548,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Only called when the order has no coupons applied, since applied coupons make the
 	 * subtotal/total difference ambiguous (coupon discount vs manual adjustment).
 	 *
-	 * @since 11.2.0
 	 * @return array Original subtotal and subtotal tax of the changed items, keyed by item ID.
 	 */
 	private function sync_subtotals_with_manually_edited_totals() {
@@ -1579,7 +1578,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Restore item subtotals changed by sync_subtotals_with_manually_edited_totals(), so
 	 * that a failed coupon application leaves the in-memory order unchanged.
 	 *
-	 * @since 11.2.0
 	 * @param array $original_subtotals Original subtotal and subtotal tax, keyed by item ID.
 	 * @return void
 	 */
