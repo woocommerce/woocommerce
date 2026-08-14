@@ -118,7 +118,7 @@
 		"watch:build:project:classic-assets": "pnpm --filter='@woocommerce/classic-assets' watch:build",
 		"watch:build:project:packages": "node ./bin/watch-packages.mjs",
 		"wp-env": "wp-env",
-		"wp-env:e2e": "wp-env --config .wp-env.e2e.json",
+		"wp-env:e2e": "wp-env --config ${E2E_WP_ENV_CONFIG:-.wp-env.e2e.json}",
 		"wp-env:e2e:gb-stable": "E2E_WP_ENV_CONFIG=.wp-env.e2e.gutenberg-stable.json wp-env --config .wp-env.e2e.gutenberg-stable.json",
 		"wp-env:e2e:gb-nightly": "E2E_WP_ENV_CONFIG=.wp-env.e2e.gutenberg-nightly.json wp-env --config .wp-env.e2e.gutenberg-nightly.json",
 		"wp-env:e2e:object-cache": "E2E_WP_ENV_CONFIG=.wp-env.e2e.default-object-cache.json wp-env --config .wp-env.e2e.default-object-cache.json",

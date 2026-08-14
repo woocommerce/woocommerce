@@ -39,6 +39,16 @@ else
 	rm -f "$SCRIPT_PATH/.env"
 fi
 
+# Plugin-installing environments (Gutenberg, object cache) run against a wp-env
+# config variant, not the base `.wp-env.e2e.json`. Point the `wp-env:e2e` script
+# and the wp-cli test helpers at that variant so they target the running instance
+# instead of the base env.
+wpEnvVariantConfig=".wp-env.e2e.$envName.json"
+if [ -f "$SCRIPT_PATH/../../$wpEnvVariantConfig" ]; then
+	export E2E_WP_ENV_CONFIG="$wpEnvVariantConfig"
+	echo "Using wp-env config variant: $wpEnvVariantConfig"
+fi
+
 echo
 title
 title "Running tests with environment: '$envName'"
