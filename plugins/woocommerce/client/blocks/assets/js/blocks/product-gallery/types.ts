@@ -29,8 +29,8 @@ export type ProductGalleryConfig = WooCommerceConfig & {
 };
 
 export type LegacyVariationPayload = {
+	variation_id?: number;
 	image_id?: number;
-	gallery_image_ids?: number[];
 };
 
 export type LegacyJQueryInstance = {
@@ -46,7 +46,10 @@ export type LegacyJQueryWindow = Window & {
 };
 
 export type LegacyJQueryFormHandlers = {
-	onVariationFound: ( imageIds: number[], featuredImageId?: number ) => void;
+	onVariationFound: (
+		variationId?: number,
+		featuredImageId?: number
+	) => void;
 	onVariationReset: () => void;
 };
 
