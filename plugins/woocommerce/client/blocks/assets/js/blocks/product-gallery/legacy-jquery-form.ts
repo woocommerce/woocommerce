@@ -26,28 +26,9 @@ import type {
 	LegacyVariationPayload,
 } from './types';
 
-/** A WP attachment ID that's safe to use as a gallery slot. */
-const isValidImageId = ( id: unknown ): id is number =>
+/** A positive integer ID from the variation event payload. */
+const isValidId = ( id: unknown ): id is number =>
 	typeof id === 'number' && Number.isInteger( id ) && id > 0;
-
-/**
- * Coerce the variation event payload's IDs into a deduped list of
- * positive integers, with the optional featured image at position 0.
- */
-const normalizeImageData = (
-	imageIds: unknown,
-	featuredImageId?: number
-): number[] => {
-	const featured = isValidImageId( featuredImageId )
-		? [ featuredImageId ]
-		: [];
-	const others = Array.isArray( imageIds )
-		? imageIds
-				.map( ( id ) => Number.parseInt( String( id ), 10 ) )
-				.filter( isValidImageId )
-		: [];
-	return Array.from( new Set( [ ...featured, ...others ] ) );
-};
 
 /**
  * Subscribe to the legacy classic Add to Cart form's jQuery variation
@@ -67,13 +48,14 @@ export const subscribeLegacyJQueryFormVariations = (
 
 	const handleFound = withScope(
 		( _event?: unknown, variation?: LegacyVariationPayload ) => {
-			const imageData = normalizeImageData(
-				variation?.gallery_image_ids,
-				variation?.image_id
-			);
-
-			if ( imageData.length ) {
-				handlers.onVariationFound( imageData, variation?.image_id );
+			if (
+				isValidId( variation?.variation_id ) &&
+				isValidId( variation?.image_id )
+			) {
+				handlers.onVariationFound(
+					variation.variation_id,
+					variation.image_id
+				);
 				return;
 			}
 

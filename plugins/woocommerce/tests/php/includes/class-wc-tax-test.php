@@ -67,9 +67,6 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 
-		// Clear cart.
-		WC()->cart->empty_cart();
-
 		remove_all_filters( 'woocommerce_shipping_tax_class' );
 		remove_all_filters( 'woocommerce_shipping_prices_include_tax' );
 

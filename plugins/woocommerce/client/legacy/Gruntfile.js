@@ -213,7 +213,7 @@ module.exports = function ( grunt ) {
 					{
 						cwd: '<%= dirs.js %>/',
 						expand: true,
-						src: [ '**', '!admin/utils/**' ],
+						src: [ '**', '!admin/utils/**', '!**/test/**' ],
 						dest: '<%= dirs.jsDest %>/',
 					},
 					{
