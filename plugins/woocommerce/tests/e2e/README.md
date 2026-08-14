@@ -141,16 +141,16 @@ If you need to create a new pre-defined environment, you can follow these steps:
   environment.
   It's recommended that the config extends the default configuration and only updates the necessary values.
 - if the environment needs extra plugins installed, add them to a wp-env config variant instead of installing
-  them after startup. Symlink `.wp-env.e2e.my-new-env.json` to `.wp-env.e2e.json` and add a paired
-  `.wp-env.e2e.my-new-env.override.json` whose `plugins` array repeats the base list with the extra plugin
-  zip(s) appended (wp-env replaces arrays on merge, so the override must carry the full list). Add a
-  `wp-env:e2e:my-new-env` script that exports `E2E_WP_ENV_CONFIG=.wp-env.e2e.my-new-env.json` before it runs
-  `wp-env --config .wp-env.e2e.my-new-env.json`, then start it with
-  `pnpm wp-env:e2e:my-new-env start --update`. The `afterStart` setup script reads `E2E_WP_ENV_CONFIG` to drive
-  wp-cli against the variant instance; without it the setup would target the base `.wp-env.e2e.json` env. wp-env
-  installs and activates the plugins before the `afterStart` lifecycle script, so they land inside the captured
-  baseline and survive every reset. See `.wp-env.e2e.gutenberg-stable.*` and the `wp-env:e2e:gb-stable` script
-  for a working example.
+  them after startup. Copy `.wp-env.e2e.json` to `.wp-env.e2e.my-new-env.json` and append the extra plugin
+  zip(s) to its `plugins` array, then register the file and its plugin(s) in
+  `tests/e2e/bin/check-wp-env-variants.mjs` — the lint rule keeps the variant identical to the base except for
+  those plugins, and running the checker with `--fix` regenerates it. Add a `wp-env:e2e:my-new-env` script that
+  exports `E2E_WP_ENV_CONFIG=.wp-env.e2e.my-new-env.json` before it runs
+  `wp-env --config .wp-env.e2e.my-new-env.json`, then start it with `pnpm wp-env:e2e:my-new-env start --update`.
+  The `afterStart` setup script reads `E2E_WP_ENV_CONFIG` to drive wp-cli against the variant instance; without
+  it the setup would target the base `.wp-env.e2e.json` env. wp-env installs and activates the plugins before the
+  `afterStart` lifecycle script, so they land inside the captured baseline and survive every reset. See
+  `.wp-env.e2e.gutenberg-stable.json` and the `wp-env:e2e:gb-stable` script for a working example.
 
   > [!NOTE]
   > A static "latest" plugin zip is only re-downloaded when wp-env re-provisions. CI always provisions fresh,

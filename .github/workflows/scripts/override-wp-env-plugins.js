@@ -42,25 +42,25 @@ const wooCommerceMapping = {
 };
 
 // The PHP-unit jobs run against the lean `.wp-env.test.json`; the E2E/API/
-// performance jobs run against the full `.wp-env.e2e.json`. Plugin-installing
-// variants (Gutenberg, object cache) start from a `.wp-env.e2e.<variant>.json`
-// symlink paired with a checked-in `.wp-env.e2e.<variant>.override.json` that
-// carries the full plugin list plus the extra plugin. A given CI job starts
-// wp-env with exactly one config via `--config`, and wp-env reads the override
-// file whose basename matches (`.wp-env.<name>.override.json`). We don't know here
-// which config the calling job uses, so process every entry present - the ones
-// that aren't the job's active config are simply ignored by wp-env.
-//
-// For a base config the plugin list lives in the config itself and we write a
-// sibling override. For a variant the list already lives in the checked-in
-// override (wp-env replaces arrays on merge, so the override is the source of
-// truth), so we read and rewrite that same file in place.
+// performance jobs run against the full `.wp-env.e2e.json` or one of its
+// plugin-installing variants (`.wp-env.e2e.<variant>.json`, a standalone config
+// whose own `plugins[]` carries the extra plugin). A given CI job starts wp-env
+// with exactly one config via `--config`, and wp-env reads the sibling override
+// whose basename matches. We don't know here which config the calling job uses,
+// so process every config present - each gets its own sibling override, and the
+// ones that aren't the job's active config are simply ignored by wp-env.
 const configFiles = [
 	'.wp-env.test.json',
-	'.wp-env.e2e.json',
-	'.wp-env.e2e.gutenberg-stable.override.json',
-	'.wp-env.e2e.gutenberg-nightly.override.json',
-	'.wp-env.e2e.default-object-cache.override.json',
+	...fs
+		.readdirSync( WP_ENV_CONFIG_PATH )
+		.filter(
+			( file ) =>
+				// The base `.wp-env.e2e.json` and its `.wp-env.e2e.<variant>.json`
+				// siblings - same shape the drift checker registers, so a
+				// misnamed config can't be processed here yet slip that guard.
+				/^\.wp-env\.e2e(\..+)?\.json$/.test( file ) &&
+				! file.endsWith( '.override.json' )
+		),
 ];
 
 let processed = 0;
@@ -95,18 +95,10 @@ for ( const configFile of configFiles ) {
 	};
 
 	if ( removed === 0 ) {
-		// Variant overrides are rewritten in place, so a re-run reads an
-		// already-filtered file. When the WooCommerce mapping is already there,
-		// this file was processed on a previous run - skip it instead of aborting,
-		// which keeps the script idempotent. A missing source entry with no mapping
-		// means the plugin layout changed and the artifact would not land at
-		// wp-content/plugins/woocommerce, so that still aborts.
-		if ( wpEnvConfig.mappings?.[ 'wp-content/plugins/woocommerce' ] ) {
-			console.log(
-				`Skipping ${ configPath } (already processed on a previous run)`
-			);
-			continue;
-		}
+		// We write a fresh sibling override and never rewrite the source config,
+		// so a re-run reads the same unfiltered config - a missing WooCommerce
+		// source entry means the plugin layout changed and the artifact would not
+		// land at wp-content/plugins/woocommerce. Abort.
 		console.error(
 			`No WooCommerce source entry (${ wooCommerceEntries.join(
 				' or '
@@ -122,9 +114,7 @@ for ( const configFile of configFiles ) {
 		} from ${ configFile }; mapping ${ pluginSource } -> wp-content/plugins/woocommerce`
 	);
 
-	const overrideConfigPath = configPath.endsWith( '.override.json' )
-		? configPath
-		: configPath.slice( 0, -5 ) + '.override.json';
+	const overrideConfigPath = configPath.slice( 0, -5 ) + '.override.json';
 	console.log( `Saving ${ overrideConfigPath }` );
 	fs.writeFileSync(
 		overrideConfigPath,

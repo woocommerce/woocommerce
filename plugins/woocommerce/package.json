@@ -55,10 +55,13 @@
 		"lint:changes:branch": "pnpm '/^lint:changes:branch:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:php": "composer run-script phpcbf",
+		"lint:fix:lang:wp-env-variants": "node ./tests/e2e/bin/check-wp-env-variants.mjs --fix",
 		"lint:changes:branch:js": "bash ./bin/eslint-branch.sh",
 		"lint:changes:branch:php": "XDEBUG_MODE=off pnpm lint:php:changes:branch",
+		"lint:changes:branch:wp-env-variants": "node ./tests/e2e/bin/check-wp-env-variants.mjs",
 		"lint:lang:js": "eslint .",
 		"lint:lang:php": "composer run-script phpcs",
+		"lint:lang:wp-env-variants": "node ./tests/e2e/bin/check-wp-env-variants.mjs",
 		"lint:php": "composer run-script phpcs",
 		"lint:php:changes": "composer run-script lint",
 		"lint:php:changes:branch": "composer run-script lint-branch",
@@ -336,8 +339,7 @@
 					"changes": [
 						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}",
 						".wp-env.e2e.json",
-						".wp-env.e2e.gutenberg-stable.json",
-						".wp-env.e2e.gutenberg-stable.override.json"
+						".wp-env.e2e.gutenberg-stable.json"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -366,8 +368,7 @@
 					"changes": [
 						"tests/e2e/**",
 						".wp-env.e2e.json",
-						".wp-env.e2e.gutenberg-nightly.json",
-						".wp-env.e2e.gutenberg-nightly.override.json"
+						".wp-env.e2e.gutenberg-nightly.json"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -727,7 +728,6 @@
 						"tests/e2e/*.sh",
 						".wp-env.e2e.json",
 						".wp-env.e2e.default-object-cache.json",
-						".wp-env.e2e.default-object-cache.override.json",
 						"woocommerce.php",
 						"uninstall.php"
 					],
