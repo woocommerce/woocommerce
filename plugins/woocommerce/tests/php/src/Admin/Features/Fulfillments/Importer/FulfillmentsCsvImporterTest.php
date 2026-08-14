@@ -402,6 +402,52 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Repeated item entries whose combined quantity exceeds the ordered quantity fail the row.
+	 */
+	public function test_items_duplicate_entries_exceeding_ordered_quantity_fail(): void {
+		$order      = $this->make_order();
+		$line_items = $order->get_items( 'line_item' );
+		$first_item = current( $line_items );
+		$item_id    = (int) $first_item->get_id();
+		$ordered    = (int) $first_item->get_quantity();
+
+		$csv  = "order_number,tracking_number,shipment_provider,items\n{$order->get_id()},ITEM-DUP-OVER,ups,{$item_id}:{$ordered}|{$item_id}:1\n";
+		$file = $this->make_csv( $csv );
+
+		$sut     = new FulfillmentsCsvImporter( $file );
+		$summary = $sut->run();
+
+		$this->assertSame( 1, $summary['failed'], 'Duplicate entries must be summed before the ordered-quantity check' );
+		$this->assertSame( 'failed', $summary['rows'][0]['status'] );
+	}
+
+	/**
+	 * @testdox Repeated item entries within the ordered quantity are summed into one item.
+	 */
+	public function test_items_duplicate_entries_are_aggregated(): void {
+		$order      = $this->make_order();
+		$line_items = $order->get_items( 'line_item' );
+		$first_item = current( $line_items );
+		$item_id    = (int) $first_item->get_id();
+		$this->assertGreaterThanOrEqual( 2, (int) $first_item->get_quantity() );
+
+		$csv  = "order_number,tracking_number,shipment_provider,items\n{$order->get_id()},ITEM-DUP-SUM,ups,{$item_id}:1|{$item_id}:1\n";
+		$file = $this->make_csv( $csv );
+
+		$sut     = new FulfillmentsCsvImporter( $file );
+		$summary = $sut->run();
+
+		$this->assertSame( 1, $summary['created'] );
+		/** @var FulfillmentsDataStore $store */
+		$store        = WC_Data_Store::load( 'order-fulfillment' );
+		$fulfillments = $store->read_fulfillments( WC_Order::class, (string) $order->get_id() );
+		$items        = $fulfillments[0]->get_items();
+		$this->assertCount( 1, $items );
+		$this->assertSame( $item_id, $items[0]['item_id'] );
+		$this->assertSame( 2, (int) $items[0]['qty'] );
+	}
+
+	/**
 	 * @testdox Item IDs that don't belong to the order fail the row.
 	 */
 	public function test_items_unknown_item_id_fails(): void {

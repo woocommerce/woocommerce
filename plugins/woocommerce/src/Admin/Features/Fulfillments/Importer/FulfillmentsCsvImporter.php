@@ -1239,7 +1239,11 @@ class FulfillmentsCsvImporter {
 			);
 		}
 
-		$result = array();
+		// Aggregate quantities per order item first, so repeated entries for the
+		// same item (e.g. "123:1|123:1") are validated against the ordered
+		// quantity as a total instead of slipping past the check individually.
+		$items_by_id = array();
+		$totals      = array();
 		foreach ( $resolved as $entry ) {
 			$order_item = $entry['item'];
 			$qty_input  = $entry['qty'];
@@ -1248,7 +1252,15 @@ class FulfillmentsCsvImporter {
 			if ( ! is_numeric( $qty_input ) || 0 >= (float) $qty_input || 0.0 !== fmod( (float) $qty_input, 1.0 ) ) {
 				throw new \Exception( esc_html__( 'Item quantity must be a positive integer.', 'woocommerce' ) );
 			}
-			$qty         = (int) $qty_input;
+
+			$item_id                 = (int) $order_item->get_id();
+			$items_by_id[ $item_id ] = $order_item;
+			$totals[ $item_id ]      = ( $totals[ $item_id ] ?? 0 ) + (int) $qty_input;
+		}
+
+		$result = array();
+		foreach ( $totals as $item_id => $qty ) {
+			$order_item  = $items_by_id[ $item_id ];
 			$ordered_qty = method_exists( $order_item, 'get_quantity' ) ? (int) $order_item->get_quantity() : 0;
 			if ( $ordered_qty > 0 && $qty > $ordered_qty ) {
 				throw new \Exception(
@@ -1264,7 +1276,7 @@ class FulfillmentsCsvImporter {
 			}
 
 			$result[] = array(
-				'item_id' => (int) $order_item->get_id(),
+				'item_id' => $item_id,
 				'qty'     => $qty,
 			);
 		}
