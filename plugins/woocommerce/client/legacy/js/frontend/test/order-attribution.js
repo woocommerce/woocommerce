@@ -49,6 +49,22 @@ describe( 'Order attribution input deduplication', () => {
 		).not.toBeNull();
 	} );
 
+	test( 'prefers the checkout form over an earlier non-checkout form', () => {
+		document.body.innerHTML = `
+			<form name="register">
+				<wc-order-attribution-inputs id="register-form"></wc-order-attribution-inputs>
+			</form>
+			<form name="checkout">
+				<wc-order-attribution-inputs id="checkout-form"></wc-order-attribution-inputs>
+			</form>
+		`;
+
+		window.wc_order_attribution.setOrderTracking( false );
+
+		expect( document.getElementById( 'checkout-form' ) ).not.toBeNull();
+		expect( document.getElementById( 'register-form' ) ).toBeNull();
+	} );
+
 	test( 'keeps the first group within another form when no checkout form exists', () => {
 		document.body.innerHTML = `
 			<wc-order-attribution-inputs id="outside-form"></wc-order-attribution-inputs>

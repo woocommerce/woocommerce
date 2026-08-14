@@ -28,8 +28,9 @@
 	}
 
 	/**
-	 * Remove duplicate `<wc-order-attribution-inputs>` elements, preferring one within a form,
-	 * to prevent sending the same data multiple times.
+	 * Remove duplicate `<wc-order-attribution-inputs>` elements to prevent sending the same data
+	 * multiple times. Keep the first group in a checkout form, otherwise the first group in any
+	 * form, otherwise the first group in DOM order.
 	 */
 	function removeDuplicateInputGroups() {
 		const groups = document.querySelectorAll( 'wc-order-attribution-inputs' );
