@@ -88,10 +88,11 @@ class SaleEventSchedulingDeferrerTest extends \WC_Unit_Test_Case {
 
 		/*
 		 * Fill the queue with IDs that resolve to no product. Rescheduling them is a no-op, and they
-		 * push the real product past the pending limit so the automatic flush can be observed.
+		 * push the real product up to the pending limit so the automatic flush can be observed. The
+		 * count lands exactly on the limit, so nothing is left queued for a later test to inherit.
 		 */
 		$absent_id_base = $product->get_id() + 100000;
-		for ( $offset = 0; $offset < 200; $offset++ ) {
+		for ( $offset = 0; $offset < 99; $offset++ ) {
 			$deferrer->queue_product( $absent_id_base + $offset );
 		}
 
@@ -125,5 +126,34 @@ class SaleEventSchedulingDeferrerTest extends \WC_Unit_Test_Case {
 			as_next_scheduled_action( 'wc_product_start_scheduled_sale', array( 'product_id' => $product->get_id() ), 'woocommerce-sales' ),
 			'Flushing an empty queue should leave the scheduled action untouched.'
 		);
+	}
+
+	/**
+	 * @testdox The shutdown flush runs after other shutdown callbacks, so their meta writes are not stranded.
+	 */
+	public function test_shutdown_flush_runs_after_other_shutdown_callbacks() {
+		$deferrer = $this->get_flushed_deferrer();
+
+		// Queueing anything registers the shutdown flush; the ID does not need to resolve to a product.
+		$deferrer->queue_product( PHP_INT_MAX );
+
+		$flush_priority = has_action( 'shutdown', array( $deferrer, 'handle_shutdown' ) );
+		$this->assertNotFalse( $flush_priority, 'Queueing a product should register the shutdown flush.' );
+
+		/*
+		 * WC_Post_Data::do_deferred_product_sync saves products during shutdown, which can write
+		 * sale-date meta and queue more work. Flushing before it runs would strand that work with
+		 * nothing left to process it.
+		 */
+		$deferred_sync_priority = has_action( 'shutdown', array( 'WC_Post_Data', 'do_deferred_product_sync' ) );
+		$this->assertNotFalse( $deferred_sync_priority, 'WC_Post_Data should register its deferred product sync.' );
+
+		$this->assertGreaterThan(
+			$deferred_sync_priority,
+			$flush_priority,
+			'The flush must run after shutdown callbacks that can write sale-date meta.'
+		);
+
+		$deferrer->flush();
 	}
 }

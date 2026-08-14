@@ -20,9 +20,14 @@ namespace Automattic\WooCommerce\Internal\Products;
 class SaleEventSchedulingDeferrer {
 
 	/**
-	 * Priority for the shutdown hook. Low, so the flush runs before later shutdown work.
+	 * Priority for the shutdown hook.
+	 *
+	 * Deliberately last. Other callbacks on `shutdown` save products and write meta, so flushing
+	 * early would queue those writes with nothing left to process them and the rescheduling would
+	 * be dropped without a trace. Nothing needs to observe the scheduled actions during shutdown,
+	 * so there is no reason to run sooner.
 	 */
-	private const SHUTDOWN_HOOK_PRIORITY = 1;
+	private const SHUTDOWN_HOOK_PRIORITY = PHP_INT_MAX;
 
 	/**
 	 * Maximum number of distinct products to hold before flushing.
