@@ -26,13 +26,11 @@ import type {
 	LegacyVariationPayload,
 } from './types';
 
-/** Normalize a positive integer ID from the variation event payload. */
+/** Normalize an integer ID from the variation event payload. */
 const normalizeId = ( id: unknown ): number | undefined => {
 	const normalizedId = Number( id );
 
-	return Number.isInteger( normalizedId ) && normalizedId > 0
-		? normalizedId
-		: undefined;
+	return Number.isInteger( normalizedId ) ? normalizedId : undefined;
 };
 
 /**
@@ -56,7 +54,12 @@ export const subscribeLegacyJQueryFormVariations = (
 			const variationId = normalizeId( variation?.variation_id );
 			const featuredImageId = normalizeId( variation?.image_id );
 
-			if ( variationId && featuredImageId ) {
+			if (
+				variationId !== undefined &&
+				variationId > 0 &&
+				featuredImageId !== undefined &&
+				featuredImageId >= 0
+			) {
 				handlers.onVariationFound( variationId, featuredImageId );
 				return;
 			}
