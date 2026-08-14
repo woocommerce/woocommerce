@@ -653,6 +653,12 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			);
 		}
 
+		// CSVUploadHelper ultimately calls wp_handle_upload(), which is only loaded
+		// on wp-admin page loads; REST requests must pull it in explicitly.
+		if ( ! function_exists( 'wp_handle_upload' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+
 		// CSVUploadHelper reads from $_FILES under a configurable key. Stage our REST file under
 		// that key and restore the superglobal in finally so the assignment cannot leak.
 		// The REST permission_callback handles authentication, hence the phpcs ignore below.
