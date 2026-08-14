@@ -12,13 +12,13 @@ When a security fix warrants it (CVSS score >=9), WooCommerce will provide secur
 
 ## What this means
 
-- When the impact of a security issue warrants it - security fixes are backported to every supported major version affected by the vulnerability (within the established support window), and ship as [point releases](/docs/contribution/releases/point-releases).
+- When the impact of a security issue warrants it (CVSS score >=9) - security fixes are backported to every supported major version affected by the vulnerability (within the established support window), and ship as [point releases](/docs/contribution/releases/point-releases).
 - Versions older than the support window do not receive security patches. Stores on unsupported versions must update to a supported version to receive fixes.
 - The window is a rolling count: each new major release moves the floor up by one version.
 
 ## Exceptions
 
-For some class of critical vulnerabilities, we may as a courtesy backport outside of the established policy.
+For some class of critical vulnerabilities, we may as a courtesy backport outside the established policy.
 
 ## Reporting
 
