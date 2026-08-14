@@ -2127,6 +2127,8 @@ CREATE TABLE {$wpdb->prefix}wc_customer_lookup (
 	postcode varchar(20) DEFAULT '' NOT NULL,
 	city varchar(100) DEFAULT '' NOT NULL,
 	state varchar(100) DEFAULT '' NOT NULL,
+	billing_phone varchar(100) DEFAULT '' NOT NULL,
+	shipping_phone varchar(100) DEFAULT '' NOT NULL,
 	PRIMARY KEY (customer_id),
 	UNIQUE KEY user_id (user_id),
 	KEY email (email)

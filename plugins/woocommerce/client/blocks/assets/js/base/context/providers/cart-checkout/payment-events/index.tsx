@@ -141,7 +141,6 @@ export const PaymentEventsProvider = ( {
 		return function ( ...args: Parameters< typeof onPaymentSetup > ) {
 			deprecated( 'onPaymentProcessing', {
 				alternative: 'onPaymentSetup',
-				plugin: 'WooCommerce Blocks',
 			} );
 			return onPaymentSetup( ...args );
 		};
