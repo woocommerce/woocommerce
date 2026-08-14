@@ -33,7 +33,7 @@ test.describe( `${ blockData.name } Block`, () => {
 					`(${ itemCount } item${ itemCount > 1 ? 's' : '' })`
 				) || titleText?.includes( `(items: ${ itemCount })` )
 			).toBeTruthy();
-		} catch ( e ) {
+		} catch {
 			// Legacy React Mini Cart.
 			if ( itemCount > 0 ) {
 				await expect(
@@ -59,7 +59,7 @@ test.describe( `${ blockData.name } Block`, () => {
 					.getByRole( 'link', { name: REGULAR_PRICED_PRODUCT_NAME } )
 					.filter( { has: page.locator( ':visible' ) } )
 			).toBeVisible( { timeout: 1000 } );
-		} catch ( e ) {
+		} catch {
 			// Legacy React Mini Cart.
 			await expect(
 				page.getByRole( 'link', { name: REGULAR_PRICED_PRODUCT_NAME } )
