@@ -2,7 +2,11 @@
  * External dependencies
  */
 import moment from 'moment';
-import { format as formatDate } from '@wordpress/date';
+import {
+	format as formatDate,
+	getSettings as getDateSettings,
+	setSettings as setDateSettings,
+} from '@wordpress/date';
 import { timeFormat as d3TimeFormat } from 'd3-time-format';
 /**
  * Internal dependencies
@@ -729,6 +733,58 @@ describe( 'getLastPeriod', () => {
 				twoYearsAgoEnd.isSame( dateValue.secondaryEnd, 'day' )
 			).toBe( true );
 		} );
+	} );
+} );
+
+describe( 'start of week setting', () => {
+	const originalSettings = getDateSettings();
+	const originalDow = moment.localeData().firstDayOfWeek();
+
+	afterEach( () => {
+		setDateSettings( originalSettings );
+		moment.updateLocale( moment.locale(), {
+			week: { dow: originalDow },
+		} );
+	} );
+
+	it( 'getCurrentPeriod should start the week on the day from the WordPress setting', () => {
+		setDateSettings( {
+			...originalSettings,
+			l10n: { ...originalSettings.l10n, startOfWeek: 1 },
+		} );
+
+		const dateValue = getCurrentPeriod( 'week', 'previous_period' );
+
+		expect( dateValue.primaryStart.day() ).toBe( 1 );
+		expect( dateValue.primaryStart.isSameOrBefore( moment(), 'day' ) ).toBe(
+			true
+		);
+	} );
+
+	it( 'getLastPeriod should start and end the week on days from the WordPress setting', () => {
+		setDateSettings( {
+			...originalSettings,
+			l10n: { ...originalSettings.l10n, startOfWeek: 3 },
+		} );
+
+		const dateValue = getLastPeriod( 'week', 'previous_period' );
+
+		expect( dateValue.primaryStart.day() ).toBe( 3 );
+		expect( dateValue.primaryEnd.day() ).toBe( 2 );
+	} );
+
+	it( 'should leave the moment default when the setting is invalid', () => {
+		setDateSettings( {
+			...originalSettings,
+			l10n: {
+				...originalSettings.l10n,
+				startOfWeek: 7 as unknown as 0,
+			},
+		} );
+
+		const dateValue = getCurrentPeriod( 'week', 'previous_period' );
+
+		expect( dateValue.primaryStart.day() ).toBe( originalDow );
 	} );
 } );
 
