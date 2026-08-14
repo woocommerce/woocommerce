@@ -55,9 +55,8 @@ const getVersionWPLatestMinusOne = async ( {
 
 const getInstalledWordPressVersion = async () => {
 	try {
-		const wpEnvConfig = process.env.E2E_WP_ENV_CONFIG || '.wp-env.e2e.json';
 		const { stdout } = await execAsync(
-			`pnpm exec wp-env --config ${ wpEnvConfig } run cli -- wp core version`
+			`pnpm exec wp-env --config ${ process.env.E2E_WP_ENV_CONFIG } run cli -- wp core version`
 		);
 
 		return Number.parseFloat( stdout.trim() );

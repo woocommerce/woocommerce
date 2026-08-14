@@ -39,15 +39,17 @@ else
 	rm -f "$SCRIPT_PATH/.env"
 fi
 
-# Plugin-installing environments (Gutenberg, object cache) run against a wp-env
-# config variant, not the base `.wp-env.e2e.json`. Point the `wp-env:e2e` script
-# and the wp-cli test helpers at that variant so they target the running instance
-# instead of the base env.
-wpEnvVariantConfig=".wp-env.e2e.$envName.json"
-if [ -f "$SCRIPT_PATH/../../$wpEnvVariantConfig" ]; then
-	export E2E_WP_ENV_CONFIG="$wpEnvVariantConfig"
-	echo "Using wp-env config variant: $wpEnvVariantConfig"
+# Tell the wp-cli test helpers which wp-env instance to target, derived from the
+# environment name: a plugin-installing environment (Gutenberg, object cache) has
+# its own `.wp-env.e2e.<env>.json` variant; every other environment uses the base
+# config. The variant pnpm scripts pass the same `--config` when starting wp-env,
+# so the config path itself is authored once (in package.json) and derived here.
+wpEnvConfig=".wp-env.e2e.$envName.json"
+if [ ! -f "$SCRIPT_PATH/../../$wpEnvConfig" ]; then
+	wpEnvConfig=".wp-env.e2e.json"
 fi
+export E2E_WP_ENV_CONFIG="$wpEnvConfig"
+echo "Using wp-env config: $wpEnvConfig"
 
 echo
 title
