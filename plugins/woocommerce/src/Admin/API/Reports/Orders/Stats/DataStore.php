@@ -871,10 +871,19 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$second_order      = isset( $oldest_orders[1] ) ? $oldest_orders[1] : false;
 		$excluded_statuses = self::get_excluded_report_order_statuses();
 
-		// Order is older than previous first order.
-		if ( $order->get_date_created() < wc_string_to_datetime( $first_order->date_created ) &&
-			! in_array( $order->get_status(), $excluded_statuses, true )
-		) {
+		// Order is older than previous first order. Stats dates only have second resolution, so
+		// orders placed within the same second are ranked by ID, the tie breaker
+		// get_oldest_orders() already sorts by. Without it, whichever of the two is imported
+		// last is reported as returning, making the customer type depend on the import order.
+		$order_date       = $order->get_date_created();
+		$first_order_date = wc_string_to_datetime( $first_order->date_created );
+		$is_older         = $order_date < $first_order_date || (
+			$order_date &&
+			$order_date->getTimestamp() === $first_order_date->getTimestamp() &&
+			(int) $order->get_id() < (int) $first_order->order_id
+		);
+
+		if ( $is_older && ! in_array( $order->get_status(), $excluded_statuses, true ) ) {
 			self::set_customer_first_order( $customer_id, $order->get_id() );
 			return false;
 		}

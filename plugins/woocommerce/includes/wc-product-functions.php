@@ -1965,7 +1965,8 @@ function wc_update_product_lookup_tables_is_running() {
 function wc_update_product_lookup_tables() {
 	global $wpdb;
 
-	$is_cli = Constants::is_true( 'WP_CLI' );
+	$is_cli          = Constants::is_true( 'WP_CLI' );
+	$reviews_enabled = wc_reviews_enabled();
 
 	// Note that the table is not yet generated.
 	update_option( 'woocommerce_product_lookup_table_is_generating', true );
@@ -1999,6 +2000,10 @@ function wc_update_product_lookup_tables() {
 	);
 
 	foreach ( $columns as $index => $column ) {
+		if ( 'average_rating' === $column && ! $reviews_enabled ) {
+			continue;
+		}
+
 		if ( $is_cli ) {
 			wc_update_product_lookup_tables_column( $column );
 		} else {
@@ -2011,6 +2016,10 @@ function wc_update_product_lookup_tables() {
 				'wc_update_product_lookup_tables'
 			);
 		}
+	}
+
+	if ( ! $reviews_enabled ) {
+		return;
 	}
 
 	// Rating counts are serialised so they have to be unserialised before populating the lookup table.
@@ -2048,6 +2057,11 @@ function wc_update_product_lookup_tables_column( $column ) {
 	if ( empty( $column ) ) {
 		return;
 	}
+
+	if ( 'average_rating' === $column && ! wc_reviews_enabled() ) {
+		return;
+	}
+
 	global $wpdb;
 	switch ( $column ) {
 		case 'min_max_price':
@@ -2206,7 +2220,7 @@ function wc_update_product_lookup_tables_rating_count( $rows ) {
 function wc_update_product_lookup_tables_rating_count_batch( $offset = 0, $limit = 0 ) {
 	global $wpdb;
 
-	if ( ! $limit ) {
+	if ( ! $limit || ! wc_reviews_enabled() ) {
 		return;
 	}
 
