@@ -39190,24 +39190,6 @@ parameters:
 			path: src/Admin/API/OnboardingTasks.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:import_sample_products_from_csv\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:import_sample_products_from_csv\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:import_sample_products_from_csv\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_Error\|Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response but returns WP_Error\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:register_routes\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1

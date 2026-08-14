@@ -101,6 +101,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 	/**
 	 * Read file.
+	 *
+	 * @throws RuntimeException When the file cannot be opened.
 	 */
 	protected function read_file() {
 		if ( ! WC_Product_CSV_Importer_Controller::is_file_valid_csv( $this->file ) ) {
@@ -110,7 +112,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		$handle = fopen( $this->file, 'r' ); // @codingStandardsIgnoreLine.
 
 		if ( false === $handle ) {
-			wp_die( esc_html__( 'Unable to open the CSV file, please try again with a new file.', 'woocommerce' ) );
+			// An exception rather than wp_die(), so callers in any context (admin, AJAX, REST, CLI) can catch and present it appropriately.
+			throw new RuntimeException( esc_html__( 'Unable to open the CSV file, please try again with a new file.', 'woocommerce' ) );
 		}
 
 		$headers = fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ); // @codingStandardsIgnoreLine

@@ -475,10 +475,10 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	 * @testdox Constructing the importer with a CSV file that cannot be opened should fail with a clear error.
 	 */
 	public function test_unopenable_csv_file_fails_with_clear_error() {
-		$this->expectException( WPDieException::class );
+		$this->expectException( RuntimeException::class );
 		$this->expectExceptionMessage( 'Unable to open the CSV file, please try again with a new file.' );
 
-		// Silence the fopen() warning, which PHPUnit would otherwise convert into an error before wp_die() is reached.
+		// Silence the fopen() warning, which PHPUnit would otherwise convert into an error before the exception is thrown.
 		set_error_handler( static fn() => true, E_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- test-scoped warning suppression, restored below.
 
 		try {
