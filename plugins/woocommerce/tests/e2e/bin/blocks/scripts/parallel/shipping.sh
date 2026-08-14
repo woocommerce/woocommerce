@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 wp wc shipping_zone_method create 0 \
 	--order=1 \
 	--enabled=true \

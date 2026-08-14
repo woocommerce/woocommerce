@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 wp option set woocommerce_calc_taxes yes
 
 wp wc tax create \
