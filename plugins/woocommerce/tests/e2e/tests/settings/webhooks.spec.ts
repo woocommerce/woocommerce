@@ -107,6 +107,9 @@ test.describe( 'Manage webhooks', () => {
 			await page.locator( 'select[name="action"]' ).selectOption( 'pause' );
 			await page.getByRole( 'button', { name: 'Apply' } ).first().click();
 
+			await expect(
+				page.getByText( '1 webhook paused.' )
+			).toBeVisible();
 			await expect( row.getByText( 'Paused' ) ).toBeVisible();
 			const pausedWebhook = await restApi.get(
 				`${ WC_API_PATH }/webhooks/${ response.data.id }`
