@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests\Functions.
  */
 
+use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
@@ -354,5 +355,27 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		wc_update_1110_delete_dashboard_outofstock_count_transient();
 		$this->assertFalse( get_transient( 'wc_outofstock_count' ) );
+	}
+
+	/**
+	 * @testdox Migration invalidates the Analytics report cache, so a response cached before the update stops being served.
+	 */
+	public function test_wc_update_1120_invalidate_analytics_reports_cache(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$db_updates = WC_Install::get_db_update_callbacks();
+		$this->assertArrayHasKey( '11.2.0', $db_updates );
+		$this->assertContains( 'wc_update_1120_invalidate_analytics_reports_cache', $db_updates['11.2.0'] );
+
+		// The cache version is a timestamp, so pin an old one rather than race the clock.
+		set_transient( ReportsCache::VERSION_OPTION . '-transient-version', '1000000000' );
+
+		$key = 'wc_report_products_pre_update';
+		ReportsCache::set( $key, 'pre-update response' );
+		$this->assertSame( 'pre-update response', ReportsCache::get( $key ), 'The response should be served from cache before the update runs' );
+
+		wc_update_1120_invalidate_analytics_reports_cache();
+
+		$this->assertFalse( ReportsCache::get( $key ), 'A response cached before the update should no longer be served' );
 	}
 }
