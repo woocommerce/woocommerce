@@ -230,14 +230,24 @@ abstract class AbstractBlock {
 			return;
 		}
 
-		$wp_scripts->registered[ $handle ]->deps = array_values(
-			array_unique(
-				array_merge(
-					$wp_scripts->registered[ $handle ]->deps,
-					$dependencies
-				)
+		$script_dependencies = array_unique(
+			array_merge(
+				$wp_scripts->registered[ $handle ]->deps,
+				$dependencies
 			)
 		);
+
+		// For performance, the unified block library combines all block editor assets, so its dependencies include
+		// wp-editor even though blocks available in the widget editor do not use it. WordPress treats loading
+		// wp-editor alongside the block-based widget editor as incorrect usage, so remove it only on this screen.
+		if ( 'wc-block-library' === $handle && function_exists( 'get_current_screen' ) ) {
+			$screen = get_current_screen();
+			if ( $screen && 'widgets' === $screen->base ) {
+				$script_dependencies = array_diff( $script_dependencies, array( 'wp-editor' ) );
+			}
+		}
+
+		$wp_scripts->registered[ $handle ]->deps = array_values( $script_dependencies );
 	}
 
 	/**

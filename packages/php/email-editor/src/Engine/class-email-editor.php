@@ -269,10 +269,23 @@ class Email_Editor {
 						return false;
 					}
 					$post_id = $request->get_param( 'postId' );
-					if ( ! is_numeric( $post_id ) || (int) $post_id <= 0 ) {
-						return false;
+					if ( is_numeric( $post_id ) && (int) $post_id > 0 ) {
+						return current_user_can( 'edit_post', (int) $post_id );
 					}
-					return current_user_can( 'edit_post', (int) $post_id );
+
+					/**
+					 * Filters whether a preview email may be sent for a request without a backing post.
+					 *
+					 * Defaults to false: postless requests are rejected unless an integration
+					 * that handles them (via the `woocommerce_email_editor_send_preview_email`
+					 * filter) explicitly authorizes the request.
+					 *
+					 * @param bool             $allowed Whether the postless request is authorized. Default false.
+					 * @param \WP_REST_Request $request The send-preview REST request.
+					 *
+					 * @since 2.16.0
+					 */
+					return (bool) apply_filters( 'woocommerce_email_editor_send_preview_email_without_post_permission', false, $request );
 				},
 			)
 		);
