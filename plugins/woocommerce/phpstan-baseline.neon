@@ -38902,18 +38902,6 @@ parameters:
 			path: src/Admin/API/OnboardingProfile.php
 
 		-
-			message: '#^Access to offset ''imported'' on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 3
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Access to offset ''imported'' on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response\.$#'
-			identifier: class.notFound
-			count: 3
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
 			message: '#^Call to an undefined method object\:\:dismiss\(\)\.$#'
 			identifier: method.notFound
 			count: 1
