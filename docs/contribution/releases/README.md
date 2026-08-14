@@ -5,7 +5,7 @@ sidebar_label: Releases
 
 # Releasing WooCommerce
 
-The WooCommerce release process is managed by a rotating release lead, paired with a per-cycle Product DRI (see [release roles](/docs/contribution/releases/readiness#release-roles)).  The documentation below outlines the process for managing releases.  To get started with a new release, see [Building and Publishing WooCommerce](/docs/contribution/releases/building-and-publishing).
+The WooCommerce release process is managed by a rotating release lead, alongside two standing Product DRI seats in `@woo-core-release` (see [release roles](/docs/contribution/releases/readiness#release-roles)).  The documentation below outlines the process for managing releases.  To get started with a new release, see [Building and Publishing WooCommerce](/docs/contribution/releases/building-and-publishing).
 
 ## Process Overview
 
