@@ -1,8 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Patterns;
 
-use Automattic\WooCommerce\Admin\Features\Features;
-
 /**
  * PatternRegistry class.
  *
@@ -72,10 +70,6 @@ class PatternRegistry {
 		}
 
 		if ( \WP_Block_Patterns_Registry::get_instance()->is_registered( $pattern_data['slug'] ) ) {
-			return;
-		}
-
-		if ( isset( $pattern_data['featureFlag'] ) && '' !== $pattern_data['featureFlag'] && ! Features::is_enabled( $pattern_data['featureFlag'] ) ) {
 			return;
 		}
 

@@ -12,6 +12,11 @@ import type {
 } from '@playwright/test/reporter';
 /* eslint-enable @typescript-eslint/no-unused-vars */
 
+/**
+ * Internal dependencies
+ */
+import { formatMetricValue } from '../utils.js';
+
 export type WPPerformanceResults = Record< string, number >;
 
 class PerformanceReporter implements Reporter {
@@ -66,7 +71,9 @@ class PerformanceReporter implements Reporter {
 			const printableResults: Record< string, { value: string } > = {};
 
 			for ( const [ key, value ] of Object.entries( results ) ) {
-				printableResults[ key ] = { value: `${ value } ms` };
+				printableResults[ key ] = {
+					value: formatMetricValue( key, value ),
+				};
 			}
 
 			// eslint-disable-next-line no-console

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update PHP development dependencies to versions that resolve reported security advisories.

@@ -26,6 +26,7 @@ export interface BusinessType {
 	key: string;
 	name: string;
 	description: string;
+	requires_structure?: boolean;
 	structures: BusinessStructure[];
 }
 

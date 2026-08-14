@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Add guard against malformed data from woocommerce_variation_prices filter

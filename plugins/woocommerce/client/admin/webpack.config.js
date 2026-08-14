@@ -213,6 +213,14 @@ const jsConfig = {
 			},
 			{ test: /\.md$/, use: 'raw-loader' },
 			{
+				// @wordpress/theme declares sideEffects: false, which would
+				// tree-shake bare imports of its design tokens stylesheet.
+				// TODO: remove this rule when bumping @wordpress/theme past
+				// 0.17.0; newer releases fix the tree-shaking upstream.
+				test: /@wordpress[\/\\]theme[\/\\].*\.css$/,
+				sideEffects: true,
+			},
+			{
 				test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/,
 				type: 'asset',
 			},

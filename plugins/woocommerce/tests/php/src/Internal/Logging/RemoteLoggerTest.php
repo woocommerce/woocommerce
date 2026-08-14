@@ -9,8 +9,8 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 	use Automattic\Jetpack\Constants;
 	use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 	use Automattic\WooCommerce\Utilities\StringUtil;
-	use WC_Rate_Limiter;
 	use WC_Cache_Helper;
+	use WC_Rate_Limiter;
 	/**
 	 * Class RemoteLoggerTest.
 	 */
@@ -22,6 +22,12 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		 */
 		private $sut;
 
+		/** @var array<string, mixed> Jetpack constant overrides before the test. */
+		private array $initial_constant_overrides = array();
+
+		/** @var array<string, array{exists: bool, value: mixed}> Namespace mock globals before the test. */
+		private array $initial_mock_globals = array();
+
 		/**
 		 * Set up test
 		 *
@@ -29,6 +35,13 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		 */
 		public function setUp(): void {
 			parent::setUp();
+			$this->initial_constant_overrides = Constants::$set_constants;
+			foreach ( array( 'mock_filter_input', 'mock_return' ) as $global_name ) {
+				$this->initial_mock_globals[ $global_name ] = array(
+					'exists' => array_key_exists( $global_name, $GLOBALS ),
+					'value'  => $GLOBALS[ $global_name ] ?? null,
+				);
+			}
 			$this->sut = wc_get_container()->get( RemoteLogger::class );
 		}
 
@@ -38,33 +51,36 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		 * @return void
 		 */
 		public function tearDown(): void {
-			$this->cleanup_filters();
-			delete_option( 'woocommerce_feature_remote_logging_enabled' );
-			delete_transient( RemoteLogger::WC_NEW_VERSION_TRANSIENT );
-			global $wpdb;
-			$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_rate_limits" );
-			WC_Cache_Helper::invalidate_cache_group( WC_Rate_Limiter::CACHE_GROUP );
-			Constants::clear_constants();
-		}
+			try {
+				Constants::$set_constants = $this->initial_constant_overrides;
+				foreach ( $this->initial_mock_globals as $global_name => $state ) {
+					if ( $state['exists'] ) {
+						$GLOBALS[ $global_name ] = $state['value'];
+					} else {
+						unset( $GLOBALS[ $global_name ] );
+					}
+				}
+			} finally {
+				try {
+					parent::tearDown();
+				} finally {
+					wp_cache_delete( 'woocommerce_feature_remote_logging_enabled', 'options' );
+					wp_cache_delete( 'alloptions', 'options' );
+					wp_cache_delete( 'notoptions', 'options' );
 
-		/**
-		 * Cleanup filters used in tests.
-		 *
-		 * @return void
-		 */
-		private function cleanup_filters() {
-			$filters = array(
-				'option_woocommerce_admin_remote_feature_enabled',
-				'option_woocommerce_allow_tracking',
-				'option_woocommerce_version',
-				'plugins_api',
-				'pre_http_request',
-				'woocommerce_remote_logger_formatted_log_data',
-				'pre_site_transient_update_plugins',
-				'woocommerce_remote_logger_request_uri_whitelist',
-			);
-			foreach ( $filters as $filter ) {
-				remove_all_filters( $filter );
+					$transient_name = RemoteLogger::WC_NEW_VERSION_TRANSIENT;
+					$network_id     = get_current_network_id();
+					wp_cache_delete( $transient_name, 'site-transient' );
+					wp_cache_delete( '_site_transient_' . $transient_name, 'options' );
+					wp_cache_delete( '_site_transient_timeout_' . $transient_name, 'options' );
+					wp_cache_delete( $network_id . ':_site_transient_' . $transient_name, 'site-options' );
+					wp_cache_delete( $network_id . ':_site_transient_timeout_' . $transient_name, 'site-options' );
+					wp_cache_delete( $network_id . ':notoptions', 'site-options' );
+					wp_cache_delete(
+						WC_Cache_Helper::get_cache_prefix( 'rate_limit' . RemoteLogger::RATE_LIMIT_ID ),
+						WC_Rate_Limiter::CACHE_GROUP
+					);
+				}
 			}
 		}
 
@@ -409,7 +425,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		}
 
 		/**
-		 * @testdox handle method successfully sends log
+		 * @testdox handle method successfully sends log.
 		 */
 		public function test_handle_successful() {
 			$this->sut = $this->getMockBuilder( RemoteLoggerWithEnvironmentOverride::class )
@@ -418,10 +434,15 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 
 			$this->sut->set_is_dev_or_local( false );
 			$this->sut->method( 'is_remote_logging_allowed' )->willReturn( true );
+			$request_count = 0;
+			$request_url   = null;
+			add_filter( 'option_woocommerce_allow_tracking', fn() => 'yes' );
 
 			add_filter(
 				'pre_http_request',
-				function ( $preempt, $args ) {
+				function ( $preempt, $args, $url ) use ( &$request_count, &$request_url ) {
+					++$request_count;
+					$request_url = $url;
 					$this->assertArrayHasKey( 'body', $args );
 					$this->assertArrayHasKey( 'headers', $args );
 					return array(
@@ -436,8 +457,10 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 				3
 			);
 
-			$this->assertTrue( $this->sut->handle( time(), 'critical', 'Test message', array( 'remote-logging' => true ) ) );
+			$this->assertTrue( $this->sut->handle( time(), 'error', 'Test message', array( 'remote-logging' => true ) ) );
+			$this->assertSame( 'https://public-api.wordpress.com/rest/v1.1/logstash', $request_url );
 			$this->assertTrue( WC_Rate_Limiter::retried_too_soon( RemoteLogger::RATE_LIMIT_ID ) );
+			$this->assertSame( 1, $request_count );
 		}
 
 		/**

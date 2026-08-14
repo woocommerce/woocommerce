@@ -131,6 +131,9 @@ test.describe( `${ blockData.name } Block `, () => {
 		page,
 	} ) => {
 		await admin.createNewPost();
+		await expect(
+			editor.canvas.getByLabel( /Add default block|Empty block/ )
+		).toBeVisible();
 		await insertProductsQuery( editor, { inherit: false } );
 		await editor.publishAndVisitPost();
 
@@ -182,12 +185,10 @@ for ( const {
 
 			await page.goto( frontendPage );
 
-			const classicProducts = await getProductsNameFromClassicTemplate(
-				page
-			);
-			const productQueryProducts = await getProductsNameFromProductQuery(
-				page
-			);
+			const classicProducts =
+				await getProductsNameFromClassicTemplate( page );
+			const productQueryProducts =
+				await getProductsNameFromProductQuery( page );
 
 			expect( classicProducts ).toEqual( productQueryProducts );
 		} );

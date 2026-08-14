@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Load frontend includes during new post editor requests to avoid Product Collection block hydration fatals.

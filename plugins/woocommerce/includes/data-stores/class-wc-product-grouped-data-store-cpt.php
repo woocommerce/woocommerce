@@ -24,19 +24,6 @@ class WC_Product_Grouped_Data_Store_CPT extends WC_Product_Data_Store_CPT implem
 	 * @since 3.0.0
 	 */
 	protected function update_post_meta( &$product, $force = false ) {
-		$this->update_post_meta_internal( $product, $force, false );
-	}
-
-	/**
-	 * Internal implementation of update_post_meta() that also knows whether the product is being created.
-	 *
-	 * @param WC_Product $product Product object.
-	 * @param bool       $force Force update. Used during create.
-	 * @param bool       $creating Whether the product is being created.
-	 * @param array      $existing_meta_keys Existing meta keys map, maintained across calls during creation. Passed by reference.
-	 * @return void
-	 */
-	protected function update_post_meta_internal( &$product, $force, $creating, &$existing_meta_keys = null ) {
 		$meta_key_to_props = array(
 			'_children' => 'children',
 		);
@@ -51,7 +38,7 @@ class WC_Product_Grouped_Data_Store_CPT extends WC_Product_Data_Store_CPT implem
 			}
 		}
 
-		parent::update_post_meta_internal( $product, $force, $creating, $existing_meta_keys );
+		parent::update_post_meta( $product, $force );
 	}
 
 	/**
@@ -99,9 +86,12 @@ class WC_Product_Grouped_Data_Store_CPT extends WC_Product_Data_Store_CPT implem
 			$child_prices = array_filter( $child_prices );
 		}
 
-		delete_post_meta( $product_id, '_price' );
-		delete_post_meta( $product_id, '_sale_price' );
-		delete_post_meta( $product_id, '_regular_price' );
+		// Performance note: prefilter with metadata_exists, to avoid unnecessary meta cache invalidations and SQLs.
+		$price_metas = array_filter(
+			array( '_price', '_sale_price', '_regular_price' ),
+			static fn( $meta_key ) => metadata_exists( 'post', $product_id, $meta_key )
+		);
+		array_walk( $price_metas, static fn( $meta_key ) => delete_post_meta( $product_id, $meta_key ) );
 
 		if ( ! empty( $child_prices ) ) {
 			add_post_meta( $product_id, '_price', min( $child_prices ) );

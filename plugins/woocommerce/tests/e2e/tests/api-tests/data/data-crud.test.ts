@@ -6521,7 +6521,7 @@ test.describe( 'Data API tests', () => {
 				expect.objectContaining( {
 					code: 'MOP',
 					name: 'Macanese pataca',
-					symbol: 'P',
+					symbol: 'MOP&#36;',
 					_links: {
 						self: [
 							{
@@ -8263,7 +8263,7 @@ test.describe( 'Data API tests', () => {
 				expect.objectContaining( {
 					code: 'ZMW',
 					name: 'Zambian kwacha',
-					symbol: 'ZK',
+					symbol: 'K',
 					_links: {
 						self: [
 							{

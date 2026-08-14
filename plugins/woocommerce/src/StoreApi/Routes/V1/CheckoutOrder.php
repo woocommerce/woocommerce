@@ -245,12 +245,10 @@ class CheckoutOrder extends AbstractCartRoute {
 	 * @return \WC_Payment_Gateway|null
 	 */
 	private function get_request_payment_method( \WP_REST_Request $request ) {
-		$available_gateways      = WC()->payment_gateways->get_available_payment_gateways();
-		$request_payment_method  = wc_clean( wp_unslash( $request['payment_method'] ?? '' ) );
-		$requires_payment_method = $this->order->needs_payment();
+		$request_payment_method = wc_clean( wp_unslash( $request['payment_method'] ?? '' ) );
 
 		if ( empty( $request_payment_method ) ) {
-			if ( $requires_payment_method ) {
+			if ( $this->order->needs_payment() ) {
 				throw new RouteException(
 					'woocommerce_rest_checkout_missing_payment_method',
 					__( 'No payment method provided.', 'woocommerce' ),
@@ -259,6 +257,8 @@ class CheckoutOrder extends AbstractCartRoute {
 			}
 			return null;
 		}
+
+		$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
 		if ( ! isset( $available_gateways[ $request_payment_method ] ) ) {
 			throw new RouteException(
