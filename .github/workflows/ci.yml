@@ -326,6 +326,11 @@ jobs:
               exit 1
             fi
             echo "::warning::wp-env-start-retry reason=${reason} attempt=${attempt}/${max_attempts} -- retrying in $((attempt * 15))s"
+            # The AggregateError wp-env surfaces names neither the host nor the address that
+            # failed, so `reason=wordpress` is as far as the log gets us. Trace the retries:
+            # a repeat failure then records every connect attempt with its address and errno.
+            # Healthy first attempts stay untraced, so this costs nothing on a green job.
+            export NODE_DEBUG=net
             sleep "$((attempt * 15))"
             attempt=$((attempt + 1))
           done
