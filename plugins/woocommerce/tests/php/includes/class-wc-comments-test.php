@@ -172,9 +172,9 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 		// Insert a 'note' type comment (WordPress 7.1 editorial note), pending approval.
 		wp_insert_comment(
 			array(
-				'comment_post_ID' => $post_id,
-				'comment_type'    => 'note',
-				'comment_content' => 'An editorial note.',
+				'comment_post_ID'  => $post_id,
+				'comment_type'     => 'note',
+				'comment_content'  => 'An editorial note.',
 				'comment_approved' => '0',
 			)
 		);
