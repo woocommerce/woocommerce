@@ -41,29 +41,39 @@ const CANONICAL_OPTIONS: Array< {
 	label: CANONICAL_LABELS[ key ],
 } ) );
 
-const HEADER_ALIASES: Array< {
-	canonical: CanonicalColumnKey;
-	matches: RegExp;
-} > = [
-	{
-		canonical: 'order_number',
-		matches: /^(order[_ ]?(number|id|no|num))$/i,
-	},
-	{
-		canonical: 'tracking_number',
-		matches: /^(tracking([_ ]?(number|no|num))?)$/i,
-	},
-	{
-		canonical: 'shipment_provider',
-		matches:
-			/^(carrier|provider|shipment[_ ]?provider|shipping[_ ]?carrier|shipping[_ ]?provider)$/i,
-	},
-	{
-		canonical: 'tracking_url',
-		matches: /^(tracking[_ ]?url|url)$/i,
-	},
-	{ canonical: 'items', matches: /^(items|line[_ ]?items)$/i },
-];
+// Accepted header aliases keyed by their normalized form. Mirrors the server-side
+// default alias table in FulfillmentsCsvImporter::get_column_aliases().
+const HEADER_ALIASES: Record< string, CanonicalColumnKey > = {
+	order_number: 'order_number',
+	order: 'order_number',
+	order_id: 'order_number',
+	order_no: 'order_number',
+	order_num: 'order_number',
+	tracking_number: 'tracking_number',
+	tracking: 'tracking_number',
+	tracking_no: 'tracking_number',
+	tracking_num: 'tracking_number',
+	shipment_provider: 'shipment_provider',
+	provider: 'shipment_provider',
+	carrier: 'shipment_provider',
+	shipping_provider: 'shipment_provider',
+	shipping_carrier: 'shipment_provider',
+	tracking_url: 'tracking_url',
+	url: 'tracking_url',
+	items: 'items',
+	line_items: 'items',
+};
+
+// Lowercase and snake_case a CSV header so "Order No", "order-no" and
+// "order_no" all resolve to the same alias entry.
+function normalizeHeader( header: string ): string {
+	return header
+		.trim()
+		.toLowerCase()
+		.split( /[\s_-]+/ )
+		.filter( Boolean )
+		.join( '_' );
+}
 
 const MappingStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 	const continueDisabled = ! hasAllRequiredColumns( state.mapping );
@@ -85,12 +95,8 @@ const MappingStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 		// extra round-trip after manual edits.
 		const detected: ColumnMapping = {};
 		state.headers.forEach( ( header, index ) => {
-			const normalized = header.trim();
-			const match = HEADER_ALIASES.find( ( a ) =>
-				a.matches.test( normalized )
-			);
-			detected[ index ] = ( match?.canonical ??
-				'' ) as CanonicalColumnKey;
+			detected[ index ] =
+				HEADER_ALIASES[ normalizeHeader( header ) ] ?? '';
 		} );
 		dispatch( { type: 'RESET_MAPPING_TO_DETECTED', mapping: detected } );
 	}, [ dispatch, state.headers ] );
