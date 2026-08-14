@@ -44,6 +44,8 @@ EVENTS="$DATA_DIR/events.tsv"
 SCANNED="$DATA_DIR/scanned.txt"
 STATE="$DATA_DIR/state.json"
 REPORT="$DATA_DIR/wp-env-start-failures.md"
+# Hand-written prose, appended verbatim so it survives regeneration.
+ANALYSIS="$DATA_DIR/analysis.md"
 
 report_only=0
 since_override=""
@@ -112,18 +114,37 @@ classify() {
 # One run -> zero or more event lines, written to $OUTDIR/<run>.tsv so parallel workers
 # never interleave into a shared file.
 scan_run() {
-  local run="$1" created="$2" wf="$3" branch="$4" ev="$5"
+  local run="$1" created="$2" wf="$3" branch="$4" ev="$5" att="${6:-1}"
   [ -z "$run" ] && return 0
   local z d out
-  out="$OUTDIR/$run.tsv"
+  out="$OUTDIR/$run-$att.tsv"
   z=$(mktemp) || return 0
   d=$(mktemp -d) || { rm -f "$z"; return 0; }
-  # One API call returns every job log for the run -- ~20x cheaper than fetching
-  # annotations per job.
-  if ! gh api "repos/$REPO/actions/runs/$run/logs" > "$z" 2>/dev/null; then
+  # One API call returns every job log for the attempt -- ~20x cheaper than fetching
+  # annotations per job. Always address the attempt explicitly: the bare /logs endpoint
+  # serves only the latest attempt, so a re-run would hide every failure that caused it.
+  local ok=0 try err
+  err=$(mktemp)
+  for try in 1 2 3; do
+    if gh api "repos/$REPO/actions/runs/$run/attempts/$att/logs" > "$z" 2>"$err" \
+       && unzip -qq -o "$z" -d "$d" 2>/dev/null; then
+      ok=1; break
+    fi
+    # 404 means there is nothing to read and never will be -- most of these are runs held
+    # at `action_required` that never started a job. Count them as read; retrying them
+    # every collection is pure waste.
+    if grep -q 'HTTP 404' "$err"; then ok=2; break; fi
+    sleep $((try * 3))
+  done
+  rm -f "$err"
+  if [ "$ok" -eq 0 ]; then
+    # Leave a marker so the collector does not record this attempt as scanned. Treating a
+    # failed download as "nothing to report" silently drops every event in the run and
+    # never looks at it again.
+    : > "$OUTDIR/$run-$att.fail"
     rm -rf "$z" "$d"; return 0
   fi
-  unzip -qq -o "$z" -d "$d" 2>/dev/null || { rm -rf "$z" "$d"; return 0; }
+  [ "$ok" -eq 2 ] && { rm -rf "$z" "$d"; return 0; }
 
   # Top-level *.txt entries are the per-job logs; subdirectories repeat them per step.
   find "$d" -maxdepth 1 -name '*.txt' -print0 2>/dev/null | while IFS= read -r -d '' f; do
@@ -152,14 +173,14 @@ scan_run() {
       outcome=SAVED
       cause=-
     fi
-    printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
-      "$run" "$created" "$wf" "$branch" "$ev" "$job" "$outcome" "$reason" "$attempts" "$cause" >> "$out"
+    printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+      "$run" "$created" "$wf" "$branch" "$ev" "$job" "$outcome" "$reason" "$attempts" "$cause" "$att" >> "$out"
   done
   rm -rf "$z" "$d"
 }
 
 if [ "$worker" -eq 1 ]; then
-  scan_run "${1:-}" "${2:-}" "${3:-}" "${4:-}" "${5:-}"
+  scan_run "${1:-}" "${2:-}" "${3:-}" "${4:-}" "${5:-}" "${6:-1}"
   exit 0
 fi
 
@@ -201,7 +222,7 @@ if [ "$report_only" -eq 0 ]; then
       for page in 1 2 3 4 5 6 7 8 9 10; do
         out=$(gh api -X GET "repos/$REPO/actions/workflows/$id/runs" \
           -f created="$day" -f status=completed -f per_page=100 -f page="$page" \
-          --jq '.workflow_runs[] | [(.id|tostring), .created_at, .name, .head_branch, .event] | @tsv' 2>/dev/null)
+          --jq '.workflow_runs[] | [(.id|tostring), .created_at, .name, .head_branch, .event, (.run_attempt|tostring)] | @tsv' 2>/dev/null)
         [ -z "$out" ] && break
         printf '%s\n' "$out"
         [ "$(printf '%s\n' "$out" | wc -l)" -lt 100 ] && break
@@ -213,26 +234,40 @@ if [ "$report_only" -eq 0 ]; then
       # Read the seen-set with getline rather than the usual NR==FNR idiom: when the first
       # file is empty, NR==FNR stays true for every line of the second and silently drops
       # all of them.
-      new=$(printf '%s\n' "$runs" | awk -F'\t' -v f="$SCANNED" \
+      # Expand each run into one line per attempt, keyed "<run>:<attempt>". A re-run keeps
+      # its run id, so keying the seen-set on the id alone would dedupe away every attempt
+      # after the first -- and the failures that prompted the re-run are exactly the ones
+      # worth counting.
+      expanded=$(printf '%s\n' "$runs" | awk -F'\t' \
+        '{n=($6==""?1:$6+0); for(i=1;i<=n;i++) print $1":"i"\t"$0"\t"i}')
+      new=$(printf '%s\n' "$expanded" | awk -F'\t' -v f="$SCANNED" \
         'BEGIN{while((getline l < f) > 0) seen[l]=1} !($1 in seen)')
       count=$(printf '%s' "$new" | grep -c . || true)
       if [ "${count:-0}" -gt 0 ]; then
-        echo "  $day: $count new run(s)"
+        echo "  $day: $count new run-attempt(s)"
         OUTDIR=$(mktemp -d); export OUTDIR
         # Fan out in fixed-size batches. Passing the fields as separate arguments matters:
         # `xargs -I` collapses the tabs in a TSV line into spaces, which silently merges
         # every field into one.
         inflight=0
-        while IFS=$'\t' read -r r_id r_created r_wf r_branch r_ev; do
+        while IFS=$'\t' read -r r_key r_id r_created r_wf r_branch r_ev r_natt r_att; do
           [ -z "$r_id" ] && continue
-          "$SELF" --scan-one "$r_id" "$r_created" "$r_wf" "$r_branch" "$r_ev" &
+          "$SELF" --scan-one "$r_id" "$r_created" "$r_wf" "$r_branch" "$r_ev" "$r_att" &
           inflight=$((inflight + 1))
           if [ "$inflight" -ge "$PARALLEL" ]; then wait; inflight=0; fi
         done <<< "$new"
         wait
         cat "$OUTDIR"/*.tsv >> "$EVENTS" 2>/dev/null
+        # Record only the attempts whose log actually downloaded and parsed. Anything that
+        # left a .fail marker stays out of the seen-set, so the next collection retries it.
+        printf '%s\n' "$new" | cut -f1 | while read -r k; do
+          [ -z "$k" ] && continue
+          [ -f "$OUTDIR/$(printf '%s' "$k" | tr ':' '-').fail" ] || printf '%s\n' "$k"
+        done >> "$SCANNED"
+        failed=$(find "$OUTDIR" -name '*.fail' 2>/dev/null | grep -c . || true)
+        [ "${failed:-0}" -gt 0 ] \
+          && echo "    $failed attempt(s) failed to download; queued for the next run"
         rm -rf "$OUTDIR"
-        printf '%s\n' "$new" | cut -f1 >> "$SCANNED"
       else
         echo "  $day: up to date"
       fi
@@ -260,8 +295,9 @@ fi
 
 # ---------------------------------------------------------------- report
 count_lines() { [ -s "$1" ] && grep -c . "$1" || echo 0; }
-runs_scanned=$(count_lines "$SCANNED")
-last_run=$(sort -n "$SCANNED" | tail -1)
+# SCANNED holds one "<run>:<attempt>" key per line, so count distinct run ids.
+runs_scanned=$(cut -d: -f1 "$SCANNED" 2>/dev/null | sort -u | grep -c . || echo 0)
+last_run=$(cut -d: -f1 "$SCANNED" 2>/dev/null | sort -n | tail -1)
 last_day=$(cut -f2 "$EVENTS" | cut -c1-10 | sort | tail -1)
 cursor_now=$([ -s "$STATE" ] && jq -r '.cursor // "-"' "$STATE" || echo "-")
 
@@ -331,6 +367,7 @@ emit_table() {  # emit_table <group> <first-column-header> <limit|0>
   echo "# wp-env start: retries and failures"
   echo
   echo "Generated by \`.claude/scripts/wp-env-start-stats.sh\` — do not edit by hand."
+  echo "Write prose in \`.claude/ci-monitoring/analysis.md\`; it is appended at the end."
   echo
   echo "| | |"
   echo "|---|---|"
@@ -416,6 +453,10 @@ emit_table() {  # emit_table <group> <first-column-header> <limit|0>
     | sort -r | head -15
   echo
   echo "Links are run-level: open the run and the failed job is the red one."
+  if [ -f "$ANALYSIS" ]; then
+    echo
+    cat "$ANALYSIS"
+  fi
 } > "$REPORT"
 
 tot=$(count_lines "$EVENTS")
