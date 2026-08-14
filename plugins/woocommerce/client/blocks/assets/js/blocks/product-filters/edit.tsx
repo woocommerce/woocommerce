@@ -54,10 +54,10 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 	const { attributes, setAttributes } = props;
 	const { isPreview } = attributes;
 	const overlayOnDesktop = attributes.overlayOnDesktop === true;
-	const showFilterDrawer =
+	const hasOverlay =
 		overlayOnDesktop || attributes.showFilterDrawer !== false;
 	let overlayMode = 'off';
-	if ( showFilterDrawer ) {
+	if ( hasOverlay ) {
 		overlayMode = 'mobile';
 	}
 	if ( overlayOnDesktop ) {
@@ -65,7 +65,6 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 	}
 	const desktopOverlayPosition =
 		attributes.desktopOverlayPosition === 'right' ? 'right' : 'left';
-	const hasOverlay = showFilterDrawer;
 	const [ isOpen, setIsOpen ] = useState( false );
 
 	const globalColors = getSetting< { background?: string; text?: string } >(
@@ -84,7 +83,7 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filters', {
 			'is-overlay-opened': isOpen,
-			'is-filter-drawer-disabled': ! showFilterDrawer,
+			'is-filter-drawer-disabled': ! hasOverlay,
 			'has-desktop-overlay': overlayOnDesktop,
 			'is-desktop-overlay-right':
 				overlayOnDesktop && desktopOverlayPosition === 'right',
@@ -198,11 +197,11 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 						/>
 						<ToggleGroupControlOption
 							value="mobile"
-							label={ __( 'Mobile only', 'woocommerce' ) }
+							label={ __( 'Mobile', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
 							value="all"
-							label={ __( 'All devices', 'woocommerce' ) }
+							label={ __( 'Always', 'woocommerce' ) }
 						/>
 					</ToggleGroupControl>
 					{ overlayMode === 'all' && (

@@ -138,8 +138,8 @@ class ProductFilters extends \WP_UnitTestCase {
 	public function overlay_attributes_provider(): array {
 		return array(
 			'default mobile'             => array( array(), true, false, false ),
-			'legacy mobile disabled'     => array( array( 'showFilterDrawer' => false ), false, false, false ),
-			'legacy malformed enabled'   => array( array( 'showFilterDrawer' => 'false' ), true, false, false ),
+			'mobile disabled'            => array( array( 'showFilterDrawer' => false ), false, false, false ),
+			'malformed mobile enabled'   => array( array( 'showFilterDrawer' => 'false' ), true, false, false ),
 			'all devices left'           => array(
 				array(
 					'showFilterDrawer' => true,

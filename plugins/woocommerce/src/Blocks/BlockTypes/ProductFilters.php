@@ -111,17 +111,16 @@ class ProductFilters extends AbstractBlock {
 			'forcePageReload' => isset( $block->context['forcePageReload'] ) ? (bool) $block->context['forcePageReload'] : null,
 		);
 
-		$overlay_on_desktop = isset( $attributes['overlayOnDesktop'] ) && true === $attributes['overlayOnDesktop'];
-		$show_filter_drawer = $overlay_on_desktop || ! isset( $attributes['showFilterDrawer'] ) || false !== $attributes['showFilterDrawer'];
-		$desktop_position   = isset( $attributes['desktopOverlayPosition'] ) && 'right' === $attributes['desktopOverlayPosition'] ? 'right' : 'left';
-		$has_overlay        = $show_filter_drawer;
-		$wrapper_classes    = array( 'wc-block-product-filters' );
-		if ( ! $show_filter_drawer ) {
+		$overlay_on_desktop       = isset( $attributes['overlayOnDesktop'] ) && true === $attributes['overlayOnDesktop'];
+		$has_overlay              = $overlay_on_desktop || ! isset( $attributes['showFilterDrawer'] ) || false !== $attributes['showFilterDrawer'];
+		$desktop_overlay_position = isset( $attributes['desktopOverlayPosition'] ) && 'right' === $attributes['desktopOverlayPosition'] ? 'right' : 'left';
+		$wrapper_classes          = array( 'wc-block-product-filters' );
+		if ( ! $has_overlay ) {
 			$wrapper_classes[] = 'is-filter-drawer-disabled';
 		}
 		if ( $overlay_on_desktop ) {
 			$wrapper_classes[] = 'has-desktop-overlay';
-			if ( 'right' === $desktop_position ) {
+			if ( 'right' === $desktop_overlay_position ) {
 				$wrapper_classes[] = 'is-desktop-overlay-right';
 			}
 		}
