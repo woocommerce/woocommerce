@@ -28,12 +28,20 @@
 	}
 
 	/**
-	 * Remove duplicate `<wc-order-attribution-inputs>` elements, leaving only the first one,
+	 * Remove duplicate `<wc-order-attribution-inputs>` elements, preferring one within a form,
 	 * to prevent sending the same data multiple times.
 	 */
 	function removeDuplicateInputGroups() {
-		document.querySelectorAll( 'wc-order-attribution-inputs' ).forEach( ( group, index ) => {
-			if ( index > 0 ) {
+		const groups = document.querySelectorAll( 'wc-order-attribution-inputs' );
+		const groupToKeep =
+			document.querySelector(
+				'form[name="checkout"] wc-order-attribution-inputs'
+			) ||
+			document.querySelector( 'form wc-order-attribution-inputs' ) ||
+			groups[ 0 ];
+
+		groups.forEach( ( group ) => {
+			if ( group !== groupToKeep ) {
 				group.remove();
 			}
 		} );
