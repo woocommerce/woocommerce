@@ -59,7 +59,7 @@ class Products extends Task {
 		$tutorial = wc_clean( wp_unslash( $_GET['tutorial'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$tutorial = is_string( $tutorial ) ? $tutorial : '';
 
-		if ( ! $this->is_active() || ! wc_string_to_bool( $tutorial ) || ! $screen || 'product' !== $screen->post_type ) {
+		if ( ! $this->is_active() || ! wc_string_to_bool( $tutorial ) || ! $screen || 'post' !== $screen->base || 'product' !== $screen->post_type ) {
 			return $submenu_file;
 		}
 
