@@ -49,6 +49,14 @@ const errorResponse: ApiErrorResponse = {
 	},
 };
 
+const errorResponseWithoutContext: ApiErrorResponse = {
+	code: 'woocommerce_rest_cart_extensions_error',
+	message: 'There is no such namespace registered: test-plugin.',
+	data: {
+		status: 400,
+	},
+};
+
 describe( 'getNoticeContextFromErrorResponse', () => {
 	it( 'should generate notice contexts and ids for the correct fields/errors', () => {
 		const result = getNoticeContextFromErrorResponse( errorResponse );
@@ -73,9 +81,24 @@ describe( 'getNoticeContextFromErrorResponse', () => {
 		);
 		expect( result[ 0 ].context ).toEqual( 'test_context' );
 	} );
+
+	it( 'should use the cart context for a non-parameter error without a server context', () => {
+		expect(
+			getNoticeContextFromErrorResponse( errorResponseWithoutContext )
+		).toEqual( [
+			{
+				id: 'woocommerce_rest_cart_extensions_error',
+				context: 'wc/cart',
+			},
+		] );
+	} );
 } );
 
 describe( 'processErrorResponse', () => {
+	beforeEach( () => {
+		jest.clearAllMocks();
+	} );
+
 	it( 'should dismiss old notices and create new ones', () => {
 		processErrorResponse( errorResponse );
 		expect( createNotice ).toHaveBeenCalledTimes( 2 );
@@ -94,6 +117,20 @@ describe( 'processErrorResponse', () => {
 			{
 				id: 'shipping_address_gov_id_mismatch',
 				context: 'wc/checkout/shipping-address',
+			}
+		);
+	} );
+
+	it( 'should create a non-parameter error notice in the cart context by default', () => {
+		processErrorResponse( errorResponseWithoutContext );
+
+		expect( createNotice ).toHaveBeenCalledTimes( 1 );
+		expect( createNotice ).toHaveBeenCalledWith(
+			'error',
+			'There is no such namespace registered: test-plugin.',
+			{
+				id: 'woocommerce_rest_cart_extensions_error',
+				context: 'wc/cart',
 			}
 		);
 	} );
