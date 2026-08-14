@@ -74,7 +74,7 @@ test.describe( 'Manage webhooks', () => {
 	);
 
 	test(
-		'Webhooks can be activated and deactivated in bulk',
+		'Webhooks can be activated, paused, and deactivated in bulk',
 		{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
 		async ( { page, restApi } ) => {
 			const response = await restApi.post( `${ WC_API_PATH }/webhooks`, {
@@ -102,6 +102,16 @@ test.describe( 'Manage webhooks', () => {
 				`${ WC_API_PATH }/webhooks/${ response.data.id }`
 			);
 			expect( activeWebhook.data.status ).toBe( 'active' );
+
+			await row.getByRole( 'checkbox' ).check();
+			await page.locator( 'select[name="action"]' ).selectOption( 'pause' );
+			await page.getByRole( 'button', { name: 'Apply' } ).first().click();
+
+			await expect( row.getByText( 'Paused' ) ).toBeVisible();
+			const pausedWebhook = await restApi.get(
+				`${ WC_API_PATH }/webhooks/${ response.data.id }`
+			);
+			expect( pausedWebhook.data.status ).toBe( 'paused' );
 
 			await row.getByRole( 'checkbox' ).check();
 			await page.locator( 'select[name="action"]' ).selectOption( 'deactivate' );
