@@ -43,8 +43,8 @@ class CurrencyFormatter implements FormatterInterface {
 				'currency_code'               => get_woocommerce_currency(),
 				'currency_symbol'             => $symbol,
 				'currency_minor_unit'         => wc_get_price_decimals(),
-				'currency_decimal_separator'  => wc_get_price_decimal_separator(),
-				'currency_thousand_separator' => wc_get_price_thousand_separator(),
+				'currency_decimal_separator'  => html_entity_decode( wc_get_price_decimal_separator(), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ),
+				'currency_thousand_separator' => html_entity_decode( wc_get_price_thousand_separator(), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ),
 				'currency_prefix'             => $prefix,
 				'currency_suffix'             => $suffix,
 			]
