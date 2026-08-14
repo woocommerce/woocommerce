@@ -386,6 +386,8 @@ jobs:
         if: ${{ steps.check-existing-issue.outputs.exists != 'true' }}
         id: create-tracking-issue
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        env:
+          PREVIOUS_RELEASE_LEAD: ${{ steps.get-previous-tracking-issue.outputs.mention }}
         with:
           script: |
             const { LinearClient } = require( '@linear/sdk' );
@@ -439,7 +441,7 @@ jobs:
               '{date_beta2}': '${{ needs.check-upcoming-release-events.outputs.beta-2-release-date }}',
               '{date_rc1}': '${{ needs.check-upcoming-release-events.outputs.rc-1-release-date }}',
               '{date_stable}': '${{ needs.check-upcoming-release-events.outputs.final-release-date }}',
-              '{previous_release_lead}': '${{ steps.get-previous-tracking-issue.outputs.mention }}'
+              '{previous_release_lead}': process.env.PREVIOUS_RELEASE_LEAD || ''
             };
 
             // Apply replacements.
