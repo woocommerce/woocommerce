@@ -15012,11 +15012,6 @@ parameters:
 			count: 1
 			path: includes/class-wc-shipping.php
 
-		-
-			message: '#^Parameter \#1 \$args of function get_terms expects array\{taxonomy\?\: array\<string\>\|string, object_ids\?\: array\<int\>\|int, orderby\?\: string, order\?\: string, hide_empty\?\: bool\|int, include\?\: array\<int\>\|string, exclude\?\: array\<int\>\|string, exclude_tree\?\: array\<int\>\|string, \.\.\.\}, ''product_shipping…'' given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-shipping.php
 
 		-
 			message: '#^@param bool \$force_rendering does not accept actual type of parameter\: null\.$#'
