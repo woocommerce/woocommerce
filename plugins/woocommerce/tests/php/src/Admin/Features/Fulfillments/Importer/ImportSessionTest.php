@@ -70,6 +70,33 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox create() stores the staged file's real size and mtime so handle_run can detect swapped files.
+	 */
+	public function test_create_stores_file_size_and_mtime(): void {
+		$path = wp_tempnam( 'wc-fulfillments-session-' );
+		file_put_contents( $path, "order_number,tracking_number,shipment_provider\n1,TRK-1,ups\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture write.
+
+		$session          = ImportSession::create(
+			31,
+			$path,
+			',',
+			array( 'order_number', 'tracking_number', 'shipment_provider' ),
+			1,
+			false,
+			true
+		);
+		$this->sessions[] = $session;
+
+		$loaded = ImportSession::load( 31, $session->token() );
+		$this->assertNotNull( $loaded );
+		$this->assertSame( (int) filesize( $path ), $loaded->file_size() );
+		$this->assertGreaterThan( 0, $loaded->file_size() );
+		$this->assertSame( (int) filemtime( $path ), $loaded->file_mtime() );
+
+		wp_delete_file( $path );
+	}
+
+	/**
 	 * @testdox A missing transient yields a null load result.
 	 */
 	public function test_load_returns_null_for_unknown_token(): void {

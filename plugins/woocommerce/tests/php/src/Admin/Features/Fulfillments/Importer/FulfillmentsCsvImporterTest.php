@@ -989,6 +989,11 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$this->assertSame( $one_shot['skipped'], $counts['skipped'] );
 		$this->assertSame( $one_shot['failed'], $counts['failed'] );
 		$this->assertCount( count( $one_shot['rows'] ), $rows );
+		$this->assertSame(
+			array_column( $one_shot['rows'], 'status' ),
+			array_column( $rows, 'status' ),
+			'Chunked processing must visit rows in the same order with the same outcome'
+		);
 	}
 
 	/**
