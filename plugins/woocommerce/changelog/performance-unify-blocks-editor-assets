@@ -1,0 +1,4 @@
+Significance: major
+Type: performance
+
+Unify Woo blocks editor scripts and editor styles into shared editor assets.

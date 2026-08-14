@@ -42,7 +42,7 @@ const buildProduct = (
 		categories: [],
 		tags: [],
 		...overrides,
-	} as ProductEntityRecord );
+	} ) as ProductEntityRecord;
 
 const renderStatus = ( item: ProductEntityRecord ) => {
 	if ( ! fieldExtensions.render ) {

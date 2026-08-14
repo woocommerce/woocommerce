@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Customer email verification now confirms via a one-time login-gated link instead of a 6-digit code.

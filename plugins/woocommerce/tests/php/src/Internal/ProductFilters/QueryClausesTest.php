@@ -239,4 +239,69 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 
 		$this->assertEqualsCanonicalizing( $expected_products_name, $received_products_name );
 	}
+
+	/**
+	 * @testdox A hierarchical category filter must match products in descendant categories without a child_of query per chosen term.
+	 *
+	 * @testWith [["hcat-parent"], ["In Parent", "In Child", "In Grandchild"]]
+	 *           [["hcat-child"], ["In Child", "In Grandchild"]]
+	 *           [["hcat-grandchild"], ["In Grandchild"]]
+	 *           [["hcat-parent", "hcat-sibling"], ["In Parent", "In Child", "In Grandchild", "In Sibling"]]
+	 *
+	 * @param string[] $terms             Chosen category slugs.
+	 * @param string[] $expected_products Product names expected to match.
+	 */
+	public function test_taxonomy_clauses_expand_descendants_without_per_term_queries( array $terms, array $expected_products ): void {
+		$parent     = $this->fixture_data->get_product_category( array( 'name' => 'HCat Parent' ) );
+		$child      = $this->fixture_data->get_product_category( array( 'name' => 'HCat Child' ) );
+		$grandchild = $this->fixture_data->get_product_category( array( 'name' => 'HCat Grandchild' ) );
+		$sibling    = $this->fixture_data->get_product_category( array( 'name' => 'HCat Sibling' ) );
+		// parent > child > grandchild; sibling stays top-level (own branch).
+		wp_update_term( $child['term_id'], 'product_cat', array( 'parent' => $parent['term_id'] ) );
+		wp_update_term( $grandchild['term_id'], 'product_cat', array( 'parent' => $child['term_id'] ) );
+
+		$make_product = function ( $name, $term ) {
+			return $this->fixture_data->get_simple_product(
+				array(
+					'name'         => $name,
+					'category_ids' => array( $term['term_id'] ),
+				)
+			);
+		};
+		$products     = array(
+			$make_product( 'In Parent', $parent ),
+			$make_product( 'In Child', $child ),
+			$make_product( 'In Grandchild', $grandchild ),
+			$make_product( 'In Sibling', $sibling ),
+		);
+
+		// Fail if anything still resolves children one term at a time.
+		$child_of_queries = 0;
+		$counter          = function ( $args ) use ( &$child_of_queries ) {
+			if ( ! empty( $args['child_of'] ) ) {
+				++$child_of_queries;
+			}
+			return $args;
+		};
+		add_filter( 'get_terms_args', $counter );
+
+		$chosen          = array( 'product_cat' => $terms );
+		$filter_callback = function ( $args ) use ( $chosen ) {
+			return $this->sut->add_taxonomy_clauses( $args, $chosen );
+		};
+		add_filter( 'posts_clauses', $filter_callback );
+		$received = $this->get_data_from_products_array( wc_get_products( array() ) );
+		remove_filter( 'posts_clauses', $filter_callback );
+		remove_filter( 'get_terms_args', $counter );
+
+		$this->assertEqualsCanonicalizing( $expected_products, $received );
+		$this->assertSame( 0, $child_of_queries, 'Hierarchy must be resolved in batch, not via a child_of query per chosen term.' );
+
+		foreach ( $products as $product ) {
+			$product->delete( true );
+		}
+		foreach ( array( $grandchild, $sibling, $child, $parent ) as $term ) {
+			wp_delete_term( $term['term_id'], 'product_cat' );
+		}
+	}
 }
