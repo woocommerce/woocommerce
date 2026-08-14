@@ -54,10 +54,7 @@ export const subscribeLegacyJQueryFormVariations = (
 			const variationId = normalizeId( variation?.variation_id );
 			const featuredImageId = normalizeId( variation?.image_id );
 
-			if (
-				variationId !== undefined &&
-				featuredImageId !== undefined
-			) {
+			if ( variationId !== undefined && featuredImageId !== undefined ) {
 				handlers.onVariationFound( variationId, featuredImageId );
 				return;
 			}
