@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { expect, test as base, FrontendUtils } from '@woocommerce/e2e-utils';
-import { Dialog } from '@playwright/test';
+import { expect, test as base, wpCLI } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -10,244 +9,186 @@ import { Dialog } from '@playwright/test';
 import { CheckoutPage } from '../checkout/checkout.page';
 import { REGULAR_PRICED_PRODUCT_NAME } from '../checkout/constants';
 
+type ShippingTopology = {
+	defaultRate?: boolean;
+	gbRate?: boolean;
+	pickup?: boolean;
+	requiresAddress: boolean;
+};
+
 const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 	checkoutPageObject: async ( { page }, use ) => {
-		const pageObject = new CheckoutPage( {
-			page,
-		} );
+		const pageObject = new CheckoutPage( { page } );
 		await use( pageObject );
 	},
 } );
+
+const configureShippingTopology = async ( topology: ShippingTopology ) => {
+	const encodedTopology = Buffer.from(
+		JSON.stringify( {
+			defaultRate: false,
+			gbRate: false,
+			pickup: false,
+			...topology,
+		} )
+	).toString( 'base64' );
+
+	await wpCLI( `eval '
+		$config = json_decode( base64_decode( "${ encodedTopology }" ), true );
+
+		foreach ( WC_Shipping_Zones::get_zones() as $zone_data ) {
+			$zone = new WC_Shipping_Zone( $zone_data["zone_id"] );
+			$zone->delete( true );
+		}
+
+		$default_zone = WC_Shipping_Zones::get_zone( 0 );
+		foreach ( $default_zone->get_shipping_methods() as $method ) {
+			$default_zone->delete_shipping_method( $method->instance_id );
+		}
+
+		update_option( "woocommerce_flat_rate_settings", array( "enabled" => "no" ) );
+		update_option( "woocommerce_free_shipping_settings", array( "enabled" => "no" ) );
+		update_option( "woocommerce_local_pickup_settings", array( "enabled" => "no" ) );
+		update_option( "woocommerce_default_customer_address", "" );
+		update_option( "woocommerce_shipping_cost_requires_address", $config["requiresAddress"] ? "yes" : "no" );
+
+		if ( $config["defaultRate"] ) {
+			$instance_id = $default_zone->add_shipping_method( "flat_rate" );
+			update_option(
+				"woocommerce_flat_rate_{$instance_id}_settings",
+				array( "enabled" => "yes", "title" => "Home delivery", "tax_status" => "none", "cost" => "10" )
+			);
+		}
+
+		if ( $config["gbRate"] ) {
+			$gb_zone = new WC_Shipping_Zone();
+			$gb_zone->set_zone_name( "United Kingdom" );
+			$gb_zone->set_zone_locations( array( (object) array( "code" => "GB", "type" => "country" ) ) );
+			$gb_zone->save();
+			$instance_id = $gb_zone->add_shipping_method( "flat_rate" );
+			update_option(
+				"woocommerce_flat_rate_{$instance_id}_settings",
+				array( "enabled" => "yes", "title" => "UK delivery", "tax_status" => "none", "cost" => "15" )
+			);
+		}
+
+		update_option(
+			"woocommerce_pickup_location_settings",
+			array( "enabled" => $config["pickup"] ? "yes" : "no", "title" => "Pickup", "tax_status" => "none", "cost" => "" )
+		);
+		update_option(
+			"pickup_location_pickup_locations",
+			$config["pickup"]
+				? array(
+					array(
+						"name" => "Automattic, Inc.",
+						"address" => array(
+							"address_1" => "60 29th Street, Suite 343",
+							"city" => "San Francisco",
+							"postcode" => "94110",
+							"state" => "CA",
+							"country" => "US"
+						),
+						"details" => "American entity",
+						"enabled" => true
+					)
+				)
+				: array()
+		);
+
+		WC_Cache_Helper::get_transient_version( "shipping", true );
+		delete_transient( "wc_shipping_method_count" );
+		WC()->shipping()->reset_shipping();
+	'` );
+};
 
 test.describe( 'Merchant → Shipping', () => {
 	test( 'Merchant can hide shipping costs before address is entered', async ( {
 		page,
 		shippingUtils,
-		localPickupUtils,
 	} ) => {
-		await localPickupUtils.disableLocalPickup();
-		await shippingUtils.enableShippingCostsRequireAddress();
+		await configureShippingTopology( { requiresAddress: false } );
+		await shippingUtils.openShippingSettings();
 
-		await expect(
-			page.getByLabel( 'Hide shipping costs until an address is entered' )
-		).toBeChecked();
+		const hideShippingCosts = page.getByLabel(
+			'Hide shipping costs until an address is entered'
+		);
+		await expect( hideShippingCosts ).not.toBeChecked();
+		await hideShippingCosts.check();
+		await shippingUtils.saveShippingSettings();
+		await page.reload();
+
+		await expect( hideShippingCosts ).toBeChecked();
 	} );
 } );
 
 test.describe( 'Shopper → Shipping', () => {
-	test.beforeEach( async ( { shippingUtils } ) => {
-		await shippingUtils.enableShippingCostsRequireAddress();
-	} );
-
-	test.beforeEach( async ( { admin } ) => {
-		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=general' );
-		await admin.page
-			.getByLabel( 'Default customer location' )
-			.selectOption( 'No location by default' );
-		await admin.saveAdminPage();
-
-		await admin.visitAdminPage(
-			'admin.php?page=wc-settings&tab=shipping&zone_id=new'
-		);
-		await admin.page.getByLabel( 'Zone name' ).fill( 'UK' );
-		await admin.page
-			.getByRole( 'combobox', { name: 'Start typing to filter zones' } )
-			.fill( 'United Kingdom' );
-		await admin.page
-			.getByRole( 'checkbox', { name: 'United Kingdom (UK)' } )
-			.click(); // .check() won't work here as the input disappears immediately after checking.
-		await admin.saveAdminPage();
-		await admin.page
-			.getByRole( 'button', { name: 'Add shipping method' } )
-			.click();
-		await admin.page.getByText( 'Flat rate' ).click();
-		await admin.page.getByRole( 'button', { name: 'Continue' } ).click();
-		await admin.page
-			.getByRole( 'button', { name: 'Save zone and method' } )
-			.click();
-		await expect( admin.page.getByText( 'Flat rate' ) ).toBeVisible();
-		if (
-			! ( await admin.page
-				.getByRole( 'button', { name: 'Save changes' } )
-				.isDisabled() )
-		) {
-			await admin.saveAdminPage();
-		}
-		await expect(
-			admin.page.getByRole( 'button', { name: 'Save changes' } )
-		).toBeDisabled();
-	} );
-
-	// Series of tests below to cover the following scenarios: see PR https://github.com/woocommerce/woocommerce/pull/56460 for more details
-
-	/**
-	 * Rates enabled for default customer location
-	 * Rates enabled for _any_ location
-	 * Local pickup enabled
-	 * Hide rates until an address is entered (only applicable when Local pickup is DISABLED)
-	 *
-	 * 1.  Y Y Y #
-	 * 2.  Y Y N N
-	 * 3.  Y N Y # - Skipping because this behaves the same as test 1.
-	 * 4.  Y N N N
-	 * 5.  N Y Y #
-	 * 6.  N Y N N
-	 * 7.  N N Y # - known bug here with the text/UI to enter an address, despite there being no methods.
-	 * 8.  N N N N
-	 * 9.  Y Y N Y
-	 * 10. Y N N Y
-	 * 11. N Y N Y
-	 * 12. N N N Y
-	 */
-
-	test( '1. With shipping methods for the default location, shipping methods for _any_ location, and local pickup enabled, the shopper sees shipping rates and pickup options - rates are selected default', async ( {
-		localPickupUtils,
+	test( 'Shopper can switch between shipping and local pickup while preserving the effective selected rate', async ( {
 		frontendUtils,
-		shippingUtils,
+		page,
 	} ) => {
-		await localPickupUtils.enableLocalPickup();
-		await shippingUtils.disableShippingCostsRequireAddress();
-		await localPickupUtils.addPickupLocation( {
-			location: {
-				name: 'Automattic, Inc.',
-				address: '60 29th Street, Suite 343',
-				city: 'San Francisco',
-				postcode: '94110',
-				state: 'US:CA',
-				details: 'American entity',
-			},
+		await configureShippingTopology( {
+			defaultRate: true,
+			pickup: true,
+			requiresAddress: false,
 		} );
 
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
-		await expect(
-			frontendUtils.page.getByRole( 'radio', {
-				name: 'Ship',
-				exact: true,
-			} )
-		).toBeChecked();
-		await expect(
-			frontendUtils.page.getByRole( 'radio', {
-				name: 'Flat rate shipping $',
-			} )
-		).toBeChecked();
-		await expect(
-			frontendUtils.page.getByRole( 'radio', {
-				name: 'Flat rate shipping $',
-			} )
-		).toBeChecked();
+
+		const ship = page.getByRole( 'radio', { name: 'Ship', exact: true } );
+		const pickup = page.getByRole( 'radio', {
+			name: 'Pickup',
+			exact: true,
+		} );
+		const deliveryRate = page.getByRole( 'radio', {
+			name: /Home delivery/,
+		} );
+		const pickupRate = page.getByRole( 'radio', {
+			name: /Automattic, Inc\./,
+		} );
+
+		await expect( ship ).toBeChecked();
+		await expect( pickup ).not.toBeChecked();
+		await expect( deliveryRate ).toBeChecked();
+
+		await pickup.click();
+		await expect( pickup ).toBeChecked();
+		await expect( ship ).not.toBeChecked();
+		await expect( pickupRate ).toBeChecked();
+		await expect( deliveryRate ).toBeHidden();
+
+		await ship.click();
+		await expect( ship ).toBeChecked();
+		await expect( pickup ).not.toBeChecked();
+		await expect( deliveryRate ).toBeChecked();
 	} );
 
-	test( '2. With shipping methods for the default location, shipping methods for _any_ location, local pickup disabled, and shipping costs requires address disabled, the shopper sees shipping rates only', async ( {
-		localPickupUtils,
-		frontendUtils,
-		shippingUtils,
-	} ) => {
-		await localPickupUtils.disableLocalPickup();
-		await shippingUtils.disableShippingCostsRequireAddress();
-
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
-		await expect(
-			frontendUtils.page.getByRole( 'radio', {
-				name: 'Ship',
-				exact: true,
-			} )
-		).toBeHidden();
-		await expect(
-			frontendUtils.page.getByRole( 'radio', {
-				name: 'Flat rate shipping $',
-			} )
-		).toBeChecked();
-		await expect(
-			frontendUtils.page.getByRole( 'radio', {
-				name: 'Flat rate shipping $',
-			} )
-		).toBeChecked();
-	} );
-
-	// 3. With shipping methods for the default location, no shipping methods for _any_ other location, and local pickup enabled, the shopper sees shipping rates and pickup options - skipped as same result as 1.
-
-	test( '4. With shipping methods for the default location, no shipping methods for _any_ other location, local pickup disabled, and shipping costs require address disabled, the shopper sees shipping rates only after entering an address', async ( {
-		localPickupUtils,
-		admin,
-		frontendUtils,
+	test( 'Shopper sees no matching rates until a complete address reveals the zone rate', async ( {
 		checkoutPageObject,
-		shippingUtils,
-	} ) => {
-		await localPickupUtils.disableLocalPickup();
-		await shippingUtils.disableShippingCostsRequireAddress();
-
-		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=shipping' );
-		// Accept the delete dialog, then remove the listener;
-		const acceptDialog = ( dialog: Dialog ) => dialog.accept();
-		admin.page.on( 'dialog', acceptDialog );
-		await admin.page.getByRole( 'link', { name: 'Delete' } ).click();
-		admin.page.off( 'dialog', acceptDialog );
-
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
-
-		await expect(
-			frontendUtils.page.getByText(
-				'Enter a shipping address to view shipping options'
-			)
-		).toBeHidden();
-
-		await expect(
-			checkoutPageObject.page.getByRole( 'radio', {
-				name: 'Flat rate shipping $',
-			} )
-		).toBeChecked();
-	} );
-
-	// 5. With no shipping methods for the default location, but shipping methods for _any_ other location, local pickup enabled, the shopper sees pickup rates until entering an address for the zone with rates
-	// Not testing because this is a "bug" we are going to fix - see https://github.com/woocommerce/woocommerce/issues/56462
-
-	test( '6. With no shipping methods for the default location, but shipping methods for _any_ other location, local pickup disabled, and shipping costs require address disabled, the shopper sees shipping rates only after entering an address', async ( {
-		localPickupUtils,
-		admin,
 		frontendUtils,
-		checkoutPageObject,
-		shippingUtils,
+		page,
 	} ) => {
-		await localPickupUtils.disableLocalPickup();
-		await shippingUtils.disableShippingCostsRequireAddress();
-		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=general' );
-		await admin.page
-			.getByLabel( 'Default customer location' )
-			.selectOption( 'No location by default' );
-		await admin.saveAdminPage();
-
-		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=shipping' );
-
-		await admin.page
-			.getByRole( 'row', { name: 'Rest of the world' } )
-			.getByRole( 'link' )
-			.click();
-
-		// There are two shipping rates enabled. Clicking the first one turns it off.
-		// Then only one "name: yes" remains, making it the first, even though it's the second rate.
-		await admin.page.getByRole( 'link', { name: 'Yes' } ).first().click();
-		await admin.page.getByRole( 'link', { name: 'Yes' } ).first().click();
-		await admin.saveAdminPage();
+		await configureShippingTopology( {
+			gbRate: true,
+			requiresAddress: true,
+		} );
 
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
 
 		await expect(
-			frontendUtils.page.getByText(
-				'Enter a shipping address to view shipping options'
+			page.getByText(
+				/Enter a shipping address to view shipping options/
 			)
 		).toBeVisible();
-		await checkoutPageObject.fillInCheckoutWithTestData();
 
+		await checkoutPageObject.fillInCheckoutWithTestData();
+		await checkoutPageObject.waitForCheckoutToFinishUpdating();
 		await expect(
-			checkoutPageObject.page
+			page
 				.getByLabel( 'Checkout' )
 				.getByText(
 					'No shipping options are available for this address. Please verify the address is correct or try a different address.'
@@ -255,275 +196,26 @@ test.describe( 'Shopper → Shipping', () => {
 		).toBeVisible();
 
 		await checkoutPageObject.fillInCheckoutWithTestData( {
-			country: 'GB',
-			postcode: 'SW19 5AE',
+			country: 'United Kingdom (UK)',
+			countryKey: 'GB',
+			city: 'London',
+			state: '',
+			postcode: 'EC4M 9AF',
 		} );
 
-		await expect(
-			checkoutPageObject.page.getByRole( 'radio', {
-				name: 'Flat rate Free',
-			} )
-		).toBeChecked();
-	} );
-
-	test( '7. With no shipping methods for the default location, no shipping methods for _any_ other location, local pickup enabled the shopper sees local pickup rates only', async ( {
-		localPickupUtils,
-		admin,
-		frontendUtils,
-		shippingUtils,
-	} ) => {
-		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=shipping' );
-		// Accept the delete dialog, then remove the listener;
-		const acceptDialog = ( dialog: Dialog ) => dialog.accept();
-		admin.page.on( 'dialog', acceptDialog );
-		await admin.page.getByRole( 'link', { name: 'Delete' } ).click();
-		admin.page.off( 'dialog', acceptDialog );
-
-		await localPickupUtils.enableLocalPickup();
-		await shippingUtils.disableShippingCostsRequireAddress();
-		await localPickupUtils.addPickupLocation( {
-			location: {
-				name: 'Automattic, Inc.',
-				address: '60 29th Street, Suite 343',
-				city: 'San Francisco',
-				postcode: '94110',
-				state: 'US:CA',
-				details: 'American entity',
-			},
+		const shippingAddress = page.getByRole( 'group', {
+			name: 'Shipping address',
 		} );
-
-		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=shipping' );
-
-		await admin.page
-			.getByRole( 'row', { name: 'Rest of the world' } )
-			.getByRole( 'link' )
-			.click();
-
-		// There are two shipping rates enabled. Clicking the first one turns it off.
-		// Then only one "name: yes" remains, making it the first, even though it's the second rate.
-		await admin.page.getByRole( 'link', { name: 'Yes' } ).first().click();
-		await admin.page.getByRole( 'link', { name: 'Yes' } ).first().click();
-		await admin.saveAdminPage();
-
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
+		await expect(
+			shippingAddress.getByLabel( 'Country/Region' )
+		).toHaveValue( 'GB' );
+		await expect(
+			shippingAddress.locator( '#shipping-postcode' )
+		).toHaveValue( 'EC4M 9AF' );
+		await checkoutPageObject.waitForCheckoutToFinishUpdating();
 
 		await expect(
-			frontendUtils.page.getByRole( 'radio', {
-				name: 'Automattic, Inc. free 60 29th',
-			} )
+			page.getByRole( 'radio', { name: /UK delivery/ } )
 		).toBeChecked();
-
-		await expect(
-			frontendUtils.page.getByRole( 'radio', {
-				name: 'Ship',
-				exact: true,
-			} )
-		).toBeHidden();
-	} );
-
-	// Skipping test due to a known bug with needs_shipping - see issue https://github.com/woocommerce/woocommerce/issues/56507
-	test.skip( '8. With no shipping methods for the default location, no shipping methods for _any_ other location, local pickup disabled the shopper sees no shipping and no pickup rates', async ( {
-		localPickupUtils,
-		admin,
-		frontendUtils,
-		shippingUtils,
-	} ) => {
-		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=shipping' );
-		// Accept the delete dialog, then remove the listener;
-		const acceptDialog = ( dialog: Dialog ) => dialog.accept();
-		admin.page.on( 'dialog', acceptDialog );
-		await admin.page.getByRole( 'link', { name: 'Delete' } ).click();
-		admin.page.off( 'dialog', acceptDialog );
-
-		await localPickupUtils.disableLocalPickup();
-		await shippingUtils.disableShippingCostsRequireAddress();
-
-		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=shipping' );
-
-		await admin.page
-			.getByRole( 'row', { name: 'Rest of the world' } )
-			.getByRole( 'link' )
-			.click();
-
-		// There are two shipping rates enabled. Clicking the first one turns it off.
-		// Then only one "name: yes" remains, making it the first, even though it's the second rate.
-		await admin.page.getByRole( 'link', { name: 'Yes' } ).first().click();
-		await admin.page.getByRole( 'link', { name: 'Yes' } ).first().click();
-		await admin.saveAdminPage();
-
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
-
-		await expect(
-			frontendUtils.page.getByRole( 'radio', {
-				name: 'Ship',
-				exact: true,
-			} )
-		).toBeHidden();
-
-		await expect(
-			frontendUtils.page.getByRole( 'heading', {
-				name: 'Shipping options',
-			} )
-		).toBeHidden();
-	} );
-
-	test( '9. With shipping methods for the default location, shipping methods for _any_ other location, local pickup disabled and shipping requires address enabled, shopper sees shipping rates immediately.', async ( {
-		localPickupUtils,
-		frontendUtils,
-		shippingUtils,
-		checkoutPageObject,
-	} ) => {
-		await localPickupUtils.disableLocalPickup();
-		await shippingUtils.enableShippingCostsRequireAddress();
-
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
-
-		await expect(
-			frontendUtils.page.getByText(
-				'Enter a shipping address to view shipping options.'
-			)
-		).toBeVisible();
-
-		await expect(
-			frontendUtils.page.getByRole( 'radio', {
-				name: 'Ship',
-				exact: true,
-			} )
-		).toBeHidden();
-
-		await expect(
-			frontendUtils.page.getByRole( 'heading', {
-				name: 'Shipping options',
-			} )
-		).toBeVisible();
-
-		await checkoutPageObject.fillInCheckoutWithTestData();
-
-		await expect(
-			checkoutPageObject.page.getByRole( 'radio', {
-				name: 'Flat rate shipping $',
-			} )
-		).toBeVisible();
-	} );
-
-	test( '10. With shipping methods for the default location, no shipping methods for _any_ other location, local pickup disabled, and shipping costs require address enabled, the shopper sees shipping rates only after entering an address', async ( {
-		localPickupUtils,
-		admin,
-		frontendUtils,
-		checkoutPageObject,
-		shippingUtils,
-	} ) => {
-		await localPickupUtils.disableLocalPickup();
-		await shippingUtils.enableShippingCostsRequireAddress();
-
-		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=shipping' );
-		// Accept the delete dialog, then remove the listener;
-		const acceptDialog = ( dialog: Dialog ) => dialog.accept();
-		admin.page.on( 'dialog', acceptDialog );
-		await admin.page.getByRole( 'link', { name: 'Delete' } ).click();
-		admin.page.off( 'dialog', acceptDialog );
-
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
-
-		await expect(
-			frontendUtils.page.getByText(
-				'Enter a shipping address to view shipping options'
-			)
-		).toBeVisible();
-		await checkoutPageObject.fillInCheckoutWithTestData();
-
-		await expect(
-			checkoutPageObject.page.getByRole( 'radio', {
-				name: 'Flat rate shipping $',
-			} )
-		).toBeVisible();
-	} );
-
-	// 11. With no shipping methods for the default location, but shipping methods for _any_ other location, local pickup disabled, and shipping requires address enabled, the shopper sees no shipping until an address is entered no pickup rates
-	// Skipping testing 11 because it is the same as 6.
-
-	// Skipping test due to a known bug with needs_shipping - see issue https://github.com/woocommerce/woocommerce/issues/56507
-	test.skip( '12. With no shipping methods for the default location, no shipping methods for _any_ other location, local pickup disabled, and shipping requires address enabled the shopper sees no shipping and no pickup rates', async ( {
-		localPickupUtils,
-		admin,
-		frontendUtils,
-		shippingUtils,
-	} ) => {
-		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=shipping' );
-		// Accept the delete dialog, then remove the listener;
-		const acceptDialog = ( dialog: Dialog ) => dialog.accept();
-		admin.page.on( 'dialog', acceptDialog );
-		await admin.page.getByRole( 'link', { name: 'Delete' } ).click();
-		admin.page.off( 'dialog', acceptDialog );
-
-		await localPickupUtils.disableLocalPickup();
-		await shippingUtils.enableShippingCostsRequireAddress();
-
-		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=shipping' );
-
-		await admin.page
-			.getByRole( 'row', { name: 'Rest of the world' } )
-			.getByRole( 'link' )
-			.click();
-
-		// There are two shipping rates enabled. Clicking the first one turns it off.
-		// Then only one "name: yes" remains, making it the first, even though it's the second rate.
-		await admin.page.getByRole( 'link', { name: 'Yes' } ).first().click();
-		await admin.page.getByRole( 'link', { name: 'Yes' } ).first().click();
-		await admin.saveAdminPage();
-
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
-
-		await expect(
-			frontendUtils.page.getByRole( 'radio', {
-				name: 'Ship',
-				exact: true,
-			} )
-		).toBeHidden();
-
-		await expect(
-			frontendUtils.page.getByRole( 'heading', {
-				name: 'Shipping options',
-			} )
-		).toBeHidden();
-	} );
-
-	test( 'Guest user does not see shipping rates until full address is entered', async ( {
-		requestUtils,
-		browser,
-	} ) => {
-		const guestContext = await browser.newContext();
-		const userPage = await guestContext.newPage();
-
-		const userFrontendUtils = new FrontendUtils( userPage, requestUtils );
-		const userCheckoutPageObject = new CheckoutPage( { page: userPage } );
-
-		await userFrontendUtils.goToShop();
-		await userFrontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await userFrontendUtils.goToCheckout();
-
-		await expect(
-			userPage.getByText(
-				'Enter a shipping address to view shipping options.'
-			)
-		).toBeVisible();
-
-		await userCheckoutPageObject.fillInCheckoutWithTestData();
-
-		await expect(
-			userPage.getByText(
-				'Enter a shipping address to view shipping options.'
-			)
-		).toBeHidden();
 	} );
 } );
