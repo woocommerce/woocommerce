@@ -149,7 +149,7 @@ jobs:
   bump-min-security-support-version:
     name: 'Bump the minimum security-support version after a new major release'
     runs-on: ubuntu-latest
-    if: ${{ github.event.action == 'published' }}
+    if: ${{ github.event.action == 'published' && endsWith(inputs.release_tag_name, '.0') }}
     permissions:
       contents: write
       pull-requests: write
@@ -168,13 +168,9 @@ jobs:
           GH_TOKEN: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: |
-          # Only the first release of a major version (tag X.Y.0) bumps the
-          # minimum supported version, always 2.0 behind it (e.g. 11.0 -> 9.0).
-          if [[ ! "$RELEASE_TAG" =~ ^([0-9]+)\.([0-9]+)\.0$ ]]; then
-            echo "$RELEASE_TAG is not a major release. Nothing to do."
-            exit 0
-          fi
-          main_version="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}"
+          # This job only runs for tag X.Y.0 (see the job-level `if`). The minimum
+          # supported version always sits 2.0 behind it (e.g. 11.0 -> 9.0).
+          main_version="${RELEASE_TAG%.0}"
           min_version=$(echo "$main_version - 2.0" | bc)
 
           file="docs/contribution/releases/security-support.md"
