@@ -105,6 +105,28 @@ export function createInitialState(): ImporterState {
 	};
 }
 
+/**
+ * Drop repeated canonical fields from a detected mapping, keeping the first
+ * column (lowest index) that maps to each field.
+ */
+function uniqueMapping( mapping: ColumnMapping ): ColumnMapping {
+	const taken = new Set< CanonicalColumnKey >();
+	const next: ColumnMapping = {};
+	Object.keys( mapping )
+		.map( Number )
+		.sort( ( a, b ) => a - b )
+		.forEach( ( col ) => {
+			const value = mapping[ col ];
+			if ( value !== '' && taken.has( value ) ) {
+				next[ col ] = '';
+				return;
+			}
+			taken.add( value );
+			next[ col ] = value;
+		} );
+	return next;
+}
+
 function normalizeMapping(
 	wireMapping: PrepareResponse[ 'detected_mapping' ]
 ): ColumnMapping {
@@ -115,12 +137,35 @@ function normalizeMapping(
 			? candidate
 			: '';
 	} );
-	return out;
+	return uniqueMapping( out );
 }
 
 export function hasAllRequiredColumns( mapping: ColumnMapping ): boolean {
 	const present = new Set( Object.values( mapping ).filter( Boolean ) );
 	return REQUIRED_COLUMNS.every( ( required ) => present.has( required ) );
+}
+
+/**
+ * Assign a canonical field to one CSV column, keeping the mapping one-to-one:
+ * any other column currently mapped to the same field is cleared, and values
+ * outside the canonical set are treated as "do not import".
+ */
+function assignMappingForCol(
+	mapping: ColumnMapping,
+	col: number,
+	value: CanonicalColumnKey
+): ColumnMapping {
+	const safeValue = CANONICAL_COLUMN_KEYS.has( value ) ? value : '';
+	const next: ColumnMapping = {};
+	Object.entries( mapping ).forEach( ( [ key, mapped ] ) => {
+		const index = Number( key );
+		next[ index ] =
+			safeValue !== '' && mapped === safeValue && index !== col
+				? ''
+				: mapped;
+	} );
+	next[ col ] = safeValue;
+	return next;
 }
 
 export function importerReducer(
@@ -166,10 +211,14 @@ export function importerReducer(
 		case 'SET_MAPPING_FOR_COL':
 			return {
 				...state,
-				mapping: { ...state.mapping, [ action.col ]: action.value },
+				mapping: assignMappingForCol(
+					state.mapping,
+					action.col,
+					action.value
+				),
 			};
 		case 'RESET_MAPPING_TO_DETECTED':
-			return { ...state, mapping: action.mapping };
+			return { ...state, mapping: uniqueMapping( action.mapping ) };
 		case 'GO_IMPORT':
 			if ( ! hasAllRequiredColumns( state.mapping ) ) {
 				return state;

@@ -110,6 +110,79 @@ describe( 'importerReducer', () => {
 		expect( state ).toEqual( createInitialState() );
 	} );
 
+	it( 'SET_MAPPING_FOR_COL clears any other column mapped to the same field', () => {
+		let state = createInitialState();
+		state = importerReducer( state, {
+			type: 'PREPARE_OK',
+			payload: prepareResponse,
+		} );
+
+		state = importerReducer( state, {
+			type: 'SET_MAPPING_FOR_COL',
+			col: 2,
+			value: 'tracking_number',
+		} );
+
+		expect( state.mapping[ 2 ] ).toBe( 'tracking_number' );
+		expect( state.mapping[ 1 ] ).toBe( '' );
+		expect( state.mapping[ 0 ] ).toBe( 'order_number' );
+	} );
+
+	it( 'SET_MAPPING_FOR_COL treats unknown values as "do not import"', () => {
+		let state = createInitialState();
+		state = importerReducer( state, {
+			type: 'PREPARE_OK',
+			payload: prepareResponse,
+		} );
+
+		state = importerReducer( state, {
+			type: 'SET_MAPPING_FOR_COL',
+			col: 1,
+			value: 'not_a_column' as never,
+		} );
+
+		expect( state.mapping[ 1 ] ).toBe( '' );
+	} );
+
+	it( 'RESET_MAPPING_TO_DETECTED keeps only the first column per field', () => {
+		let state = createInitialState();
+		state = importerReducer( state, {
+			type: 'RESET_MAPPING_TO_DETECTED',
+			mapping: {
+				0: 'tracking_number',
+				1: 'tracking_number',
+				2: 'order_number',
+			},
+		} );
+
+		expect( state.mapping ).toEqual( {
+			0: 'tracking_number',
+			1: '',
+			2: 'order_number',
+		} );
+	} );
+
+	it( 'PREPARE_OK drops duplicate detected fields, first column wins', () => {
+		let state = createInitialState();
+		state = importerReducer( state, {
+			type: 'PREPARE_OK',
+			payload: {
+				...prepareResponse,
+				detected_mapping: {
+					'0': 'order_number',
+					'1': 'tracking_number',
+					'2': 'tracking_number',
+				},
+			},
+		} );
+
+		expect( state.mapping ).toEqual( {
+			0: 'order_number',
+			1: 'tracking_number',
+			2: '',
+		} );
+	} );
+
 	it( 'hasAllRequiredColumns is true only when every required column is mapped', () => {
 		expect( hasAllRequiredColumns( {} ) ).toBe( false );
 		expect(

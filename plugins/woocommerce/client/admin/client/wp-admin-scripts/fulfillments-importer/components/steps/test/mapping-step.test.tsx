@@ -107,6 +107,37 @@ describe( 'MappingStep', () => {
 		expect( reset?.mapping[ 2 ] ).toBe( 'shipment_provider' );
 	} );
 
+	it( 'dispatches SET_MAPPING_FOR_COL with the changed column and value', () => {
+		const state = buildStateWithHeaders( {
+			0: 'order_number',
+			1: 'tracking_number',
+			2: '',
+		} );
+
+		const dispatched: ImporterAction[] = [];
+		render(
+			<MappingStep
+				state={ state }
+				dispatch={ ( action: ImporterAction ) => {
+					dispatched.push( action );
+				} }
+				onClose={ jest.fn() }
+			/>
+		);
+
+		fireEvent.change( screen.getByLabelText( 'Map column Carrier' ), {
+			target: { value: 'shipment_provider' },
+		} );
+
+		expect( dispatched ).toEqual( [
+			{
+				type: 'SET_MAPPING_FOR_COL',
+				col: 2,
+				value: 'shipment_provider',
+			},
+		] );
+	} );
+
 	it( 'leaves ambiguous headers unmapped on auto-detect', () => {
 		const state = buildStateWithHeaders( {}, [ 'foo', 'bar', 'baz' ] );
 
