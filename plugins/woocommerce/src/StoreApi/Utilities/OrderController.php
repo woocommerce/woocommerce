@@ -570,6 +570,11 @@ class OrderController {
 			return;
 		}
 
+		// Once this order recorded usage, its `_used_by` row is this order's own use.
+		if ( $order->get_recorded_coupon_usage_counts() ) {
+			return;
+		}
+
 		// First, we check a logged in customer usage count, which happens against their user id, billing email, and account email.
 		if ( $order->get_customer_id() ) {
 			// We get usage per user id and associated emails.
@@ -608,6 +613,8 @@ class OrderController {
 			);
 		}
 
+		$usage_count -= $this->count_active_order_coupon_hold( $order, (int) $coupon->get_id(), '_maybe_used_by_' );
+
 		if ( $usage_count >= $coupon_usage_limit ) {
 			throw new Exception( $coupon->get_coupon_error( \WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED ) );
 		}
@@ -629,11 +636,13 @@ class OrderController {
 			return;
 		}
 
-		// Include tentative holds, matching WC_Discounts::validate_coupon_usage_limit().
+		// Include tentative holds from other checkouts, but not this order's own hold.
 		$data_store      = $coupon->get_data_store();
 		$tentative_usage = is_callable( array( $data_store, 'get_tentative_usage_count' ) )
 			? (int) $data_store->get_tentative_usage_count( $coupon->get_id() )
 			: 0;
+
+		$tentative_usage -= $this->count_active_order_coupon_hold( $order, (int) $coupon->get_id(), '_coupon_held_' );
 
 		if ( $coupon->get_usage_count() + $tentative_usage >= $usage_limit ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
@@ -676,6 +685,49 @@ class OrderController {
 		// Coupons can be held for an x amount of time before being applied to an order, so we need to check if it's already being held in (maybe via another flow).
 		$tentative_usage_count = $data_store->get_tentative_usages_for_user( $coupon->get_id(), $aliases );
 		return $tentative_usage_count + $usage_count;
+	}
+
+	/**
+	 * Count this order's still-active tentative hold for a coupon.
+	 *
+	 * Only the key currently recorded on the order is considered. Expired or
+	 * released holds are already omitted from tentative usage queries and must
+	 * not be subtracted. Re-holding overwrites the order map and can orphan an
+	 * earlier key; that orphan is not recorded, so it is not excluded.
+	 *
+	 * @param \WC_Order $order     Order being paid.
+	 * @param int       $coupon_id Coupon ID.
+	 * @param string    $prefix    Hold meta key prefix (`_coupon_held_` or `_maybe_used_by_`).
+	 * @return int 0 or 1.
+	 */
+	private function count_active_order_coupon_hold( \WC_Order $order, int $coupon_id, string $prefix ): int {
+		$order_data_store = $order->get_data_store();
+		if ( ! $order_data_store ) {
+			return 0;
+		}
+
+		$held_key = '_coupon_held_' === $prefix
+			? ( is_callable( array( $order_data_store, 'get_coupon_held_keys' ) )
+				? $order_data_store->get_coupon_held_keys( $order, $coupon_id )
+				: null )
+			: ( is_callable( array( $order_data_store, 'get_coupon_held_keys_for_users' ) )
+				? $order_data_store->get_coupon_held_keys_for_users( $order, $coupon_id )
+				: null );
+
+		if ( ! is_string( $held_key ) || '' === $held_key ) {
+			return 0;
+		}
+
+		if ( ! metadata_exists( 'post', $coupon_id, $held_key ) ) {
+			return 0;
+		}
+
+		// Same expiry comparison as WC_Coupon_Data_Store_CPT tentative queries.
+		if ( $held_key <= $prefix . time() ) {
+			return 0;
+		}
+
+		return 1;
 	}
 
 	/**
