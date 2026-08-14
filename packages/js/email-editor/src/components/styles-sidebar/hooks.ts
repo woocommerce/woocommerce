@@ -23,6 +23,21 @@ const TEXT_BACKGROUND_PROBE_SETTINGS = {
 };
 
 /**
+ * Whether the current user may edit the global email styles record.
+ *
+ * `StylesSidebar` uses this to decide whether to register itself at all.
+ * Consumers rendering `StylesPanel` inside their own container use it to gate
+ * that container, so an unprivileged user doesn't get an empty panel.
+ */
+export function useCanEditEmailStyles(): boolean {
+	return useSelect(
+		( select ) =>
+			select( storeName ).canUserEditGlobalEmailStyles().canEdit,
+		[]
+	);
+}
+
+/**
  * Whether the text color control belongs in the typography panel rather than
  * the Colors screen in the running WordPress version.
  */

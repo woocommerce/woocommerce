@@ -183,11 +183,55 @@ export function initializeEditor( htmlId: string ) {
 export { ExperimentalEmailEditor } from './editor';
 
 export type {
+	EmailEditorConfig,
 	EmailEditorSettings,
 	EmailTheme,
 	EmailEditorUrls,
 	PostWithPermissions,
 } from './store/types';
+
+/**
+ * The global email styles UI.
+ *
+ * `StylesSidebar` is what the email editor mounts: it gates on the user's
+ * permission and registers itself as a `PluginSidebar`. Use it when you are
+ * inside an editor that provides the interface skeleton.
+ *
+ * `StylesPanel` is the same UI without any chrome, for consumers that already
+ * own their container — their own sidebar, a modal, a settings screen. Pair it
+ * with `useCanEditEmailStyles` to gate that container yourself.
+ *
+ * Both read and write through the `email-editor/editor` store rather than
+ * props, so register it with `createStore()` and configure it with
+ * `dispatch( storeName ).setEditorConfig( config )` first. `globalStylesPostId`
+ * on that config decides which `wp_global_styles` record the panel edits.
+ *
+ * The panel also needs the block editor's settings in the block-editor store
+ * (font sizes, spacing units, color origins) and the package's
+ * `build-style/style.css` enqueued.
+ *
+ * @example
+ * ```jsx
+ * import {
+ *   createStore, storeName, StylesPanel, useCanEditEmailStyles,
+ * } from '@woocommerce/email-editor';
+ *
+ * createStore();
+ * dispatch( storeName ).setEditorConfig( config );
+ *
+ * function MySidebar() {
+ *   if ( ! useCanEditEmailStyles() ) {
+ *     return null;
+ *   }
+ *   return <MyContainer><StylesPanel /></MyContainer>;
+ * }
+ * ```
+ */
+export {
+	StylesPanel,
+	StylesSidebar,
+	useCanEditEmailStyles,
+} from './components/styles-sidebar';
 
 /**
  * The registerEntityAction and unregisterEntityAction are used to register and unregister entity actions.

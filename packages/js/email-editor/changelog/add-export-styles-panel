@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Export the global email styles UI: StylesSidebar for editors that provide the interface skeleton, StylesPanel for consumers that own their own container, and useCanEditEmailStyles to gate it
