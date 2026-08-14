@@ -1257,6 +1257,45 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			).toBe( false );
 		} );
 
+		it( 'emits no notice when a successful keyed update returns the requested absolute quantity', async () => {
+			mockBatchFetchReturning(
+				makeServerCart( [
+					makeKeyedLine( {
+						key: 'server-key-abc',
+						id: 42,
+						quantity: 5,
+					} ),
+				] )
+			);
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( {
+					key: 'server-key-abc',
+					id: 42,
+					quantity: 3,
+				} ),
+			] );
+			const updateNotices = spyOnUpdateNotices();
+			const errors = spyOnShowNoticeError();
+
+			await runAction(
+				actions.addCartItem( {
+					id: 42,
+					key: 'server-key-abc',
+					quantity: 5,
+					type: 'simple',
+				} )
+			);
+
+			expect( updateNotices ).toEqual( [] );
+			expect( errors ).toEqual( [] );
+			expect( mockState.cart.items ).toHaveLength( 1 );
+			expect( mockState.cart.items[ 0 ] ).toMatchObject( {
+				key: 'server-key-abc',
+				quantity: 5,
+			} );
+		} );
+
 		it( 'still emits the quantity-changed notice for a keyed mini-cart stepper change returned at its pre-stepper quantity', async () => {
 			// A keyed update (explicit key + absolute quantity) is never recorded
 			// in the keyless baseline set, so the override does not apply. The

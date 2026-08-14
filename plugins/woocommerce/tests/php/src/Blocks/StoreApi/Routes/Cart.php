@@ -154,6 +154,45 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
+	 * Dispatches a Store API add-item request.
+	 *
+	 * @param array $body Request body.
+	 * @return \WP_REST_Response
+	 */
+	private function dispatch_add_item_request( array $body ): \WP_REST_Response {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params( $body );
+
+		return rest_get_server()->dispatch( $request );
+	}
+
+	/**
+	 * Gets a canonical map of the cart lines that participate in identity.
+	 *
+	 * @return array<string, array{key: string, product_id: int, variation_id: int, variation: array, quantity: int|float}>
+	 */
+	private function get_cart_line_identity_map(): array {
+		$cart_line_map = array();
+
+		foreach ( WC()->cart->get_cart() as $key => $cart_item ) {
+			$variation = $cart_item['variation'] ?? array();
+			ksort( $variation );
+
+			$cart_line_map[ $key ] = array(
+				'key'          => $key,
+				'product_id'   => (int) $cart_item['product_id'],
+				'variation_id' => (int) $cart_item['variation_id'],
+				'variation'    => $variation,
+				'quantity'     => wc_stock_amount( $cart_item['quantity'] ),
+			);
+		}
+
+		ksort( $cart_line_map );
+		return $cart_line_map;
+	}
+
+	/**
 	 * Test getting cart.
 	 */
 	public function test_get_item() {
@@ -1022,6 +1061,288 @@ class Cart extends ControllerTestCase {
 			$request,
 			400
 		);
+	}
+
+	/**
+	 * @testdox Re-adding a standalone product preserves its cart-line key and increments its quantity.
+	 */
+	public function test_add_item_preserves_standalone_cart_line_identity(): void {
+		wc_empty_cart();
+
+		$first_response = $this->dispatch_add_item_request(
+			array(
+				'id'       => $this->products[0]->get_id(),
+				'quantity' => 1,
+			)
+		);
+		$first_data     = $first_response->get_data();
+
+		$this->assertSame( 201, $first_response->get_status(), 'The first standalone add should succeed.' );
+		$this->assertCount( 1, $first_data['items'], 'The first add should create exactly one cart line.' );
+		$cart_item_key = $first_data['items'][0]['key'];
+		$this->assertSame(
+			array(
+				$cart_item_key => array(
+					'key'          => $cart_item_key,
+					'product_id'   => $this->products[0]->get_id(),
+					'variation_id' => 0,
+					'variation'    => array(),
+					'quantity'     => 1,
+				),
+			),
+			$this->get_cart_line_identity_map(),
+			'The first add should create the expected standalone cart line.'
+		);
+
+		$second_response = $this->dispatch_add_item_request(
+			array(
+				'id'       => $this->products[0]->get_id(),
+				'quantity' => 1,
+			)
+		);
+		$second_data     = $second_response->get_data();
+
+		$this->assertSame( 201, $second_response->get_status(), 'The standalone re-add should succeed.' );
+		$this->assertCount( 1, $second_data['items'], 'The re-add should not create another cart line.' );
+		$this->assertSame( $cart_item_key, $second_data['items'][0]['key'], 'The re-add should preserve the server cart-line key.' );
+		$this->assertSame(
+			array(
+				$cart_item_key => array(
+					'key'          => $cart_item_key,
+					'product_id'   => $this->products[0]->get_id(),
+					'variation_id' => 0,
+					'variation'    => array(),
+					'quantity'     => 2,
+				),
+			),
+			$this->get_cart_line_identity_map(),
+			'The re-add should increment only the existing standalone line.'
+		);
+	}
+
+	/**
+	 * @testdox Cart item data keeps a same-product meta line distinct from the standalone line.
+	 */
+	public function test_add_item_preserves_cart_item_data_identity(): void {
+		wc_empty_cart();
+
+		$add_cart_item_data = function ( $add_to_cart_data, $request ) {
+			if ( 'meta-line' === $request->get_param( 'cart_line_identity_marker' ) ) {
+				$add_to_cart_data['cart_item_data']['_cart_line_identity'] = 'meta-line';
+			}
+			return $add_to_cart_data;
+		};
+		add_filter( 'woocommerce_store_api_add_to_cart_data', $add_cart_item_data, 10, 2 );
+
+		try {
+			$meta_response = $this->dispatch_add_item_request(
+				array(
+					'id'                        => $this->products[0]->get_id(),
+					'quantity'                  => 1,
+					'cart_line_identity_marker' => 'meta-line',
+				)
+			);
+			$meta_map      = $this->get_cart_line_identity_map();
+			$meta_key      = array_key_first( $meta_map );
+
+			$this->assertSame( 201, $meta_response->get_status(), 'The marker-scoped meta-line add should succeed.' );
+			$this->assertCount( 1, $meta_map, 'The first request should create exactly the meta line.' );
+
+			$plain_response = $this->dispatch_add_item_request(
+				array(
+					'id'       => $this->products[0]->get_id(),
+					'quantity' => 1,
+				)
+			);
+			$mixed_map      = $this->get_cart_line_identity_map();
+			$plain_keys     = array_values( array_diff( array_keys( $mixed_map ), array( $meta_key ) ) );
+
+			$this->assertSame( 201, $plain_response->get_status(), 'The first plain add should succeed.' );
+			$this->assertCount( 1, $plain_keys, 'The plain add should create one distinct standalone key.' );
+			$plain_key = $plain_keys[0];
+			$expected  = array(
+				$meta_key  => array(
+					'key'          => $meta_key,
+					'product_id'   => $this->products[0]->get_id(),
+					'variation_id' => 0,
+					'variation'    => array(),
+					'quantity'     => 1,
+				),
+				$plain_key => array(
+					'key'          => $plain_key,
+					'product_id'   => $this->products[0]->get_id(),
+					'variation_id' => 0,
+					'variation'    => array(),
+					'quantity'     => 1,
+				),
+			);
+			ksort( $expected );
+			$this->assertSame( $expected, $mixed_map, 'The meta and standalone lines should remain distinct at quantity one.' );
+
+			$second_plain_response              = $this->dispatch_add_item_request(
+				array(
+					'id'       => $this->products[0]->get_id(),
+					'quantity' => 1,
+				)
+			);
+			$expected[ $plain_key ]['quantity'] = 2;
+
+			$this->assertSame( 201, $second_plain_response->get_status(), 'The standalone re-add should succeed.' );
+			$this->assertSame( $expected, $this->get_cart_line_identity_map(), 'Only the standalone line should increment.' );
+		} finally {
+			remove_filter( 'woocommerce_store_api_add_to_cart_data', $add_cart_item_data, 10 );
+		}
+	}
+
+	/**
+	 * @testdox Re-adding one variation preserves its key while another variation creates a distinct line.
+	 */
+	public function test_add_item_preserves_variation_identity(): void {
+		wc_empty_cart();
+
+		$fixtures         = new FixtureData();
+		$variable_product = $fixtures->get_variable_product(
+			array(
+				'name'          => 'Cart line identity variable product',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 10,
+			),
+			array(
+				$fixtures->get_product_attribute( 'color', array( 'red', 'blue' ) ),
+			)
+		);
+		$red_variation    = $fixtures->get_variation_product( $variable_product->get_id(), array( 'pa_color' => 'red' ) );
+		$blue_variation   = $fixtures->get_variation_product( $variable_product->get_id(), array( 'pa_color' => 'blue' ) );
+
+		$red_body       = array(
+			'id'        => $red_variation->get_id(),
+			'quantity'  => 1,
+			'variation' => array(
+				array(
+					'attribute' => 'pa_color',
+					'value'     => 'red',
+				),
+			),
+		);
+		$first_response = $this->dispatch_add_item_request( $red_body );
+		$first_map      = $this->get_cart_line_identity_map();
+		$red_key        = array_key_first( $first_map );
+
+		$this->assertSame( 201, $first_response->get_status(), 'The first variation add should succeed.' );
+		$this->assertCount( 1, $first_map, 'The first variation add should create exactly one line.' );
+
+		$second_response = $this->dispatch_add_item_request( $red_body );
+		$second_map      = $this->get_cart_line_identity_map();
+
+		$this->assertSame( 201, $second_response->get_status(), 'Re-adding the same variation should succeed.' );
+		$this->assertSame( array( $red_key ), array_keys( $second_map ), 'The same variation should preserve its cart-line key.' );
+		$this->assertSame( 2, $second_map[ $red_key ]['quantity'], 'The same variation should increment its line.' );
+
+		$blue_response = $this->dispatch_add_item_request(
+			array(
+				'id'        => $blue_variation->get_id(),
+				'quantity'  => 1,
+				'variation' => array(
+					array(
+						'attribute' => 'pa_color',
+						'value'     => 'blue',
+					),
+				),
+			)
+		);
+		$final_map     = $this->get_cart_line_identity_map();
+		$blue_keys     = array_values( array_diff( array_keys( $final_map ), array( $red_key ) ) );
+
+		$this->assertSame( 201, $blue_response->get_status(), 'Adding a different variation should succeed.' );
+		$this->assertCount( 1, $blue_keys, 'The different variation should create one distinct key.' );
+		$blue_key = $blue_keys[0];
+		$this->assertSame( $red_variation->get_id(), $final_map[ $red_key ]['variation_id'], 'The original key should still identify the red variation.' );
+		$this->assertSame( 2, $final_map[ $red_key ]['quantity'], 'The red variation quantity should remain two.' );
+		$this->assertSame( $blue_variation->get_id(), $final_map[ $blue_key ]['variation_id'], 'The new key should identify the blue variation.' );
+		$this->assertSame( 1, $final_map[ $blue_key ]['quantity'], 'The blue variation should start at quantity one.' );
+	}
+
+	/**
+	 * @testdox A rejected sold-individually re-add leaves the exact cart-line map unchanged.
+	 */
+	public function test_rejected_add_item_leaves_sold_individually_cart_unchanged(): void {
+		wc_empty_cart();
+
+		$product                    = $this->products[0];
+		$original_sold_individually = $product->get_sold_individually();
+		$product->set_sold_individually( true );
+		$product->save();
+
+		try {
+			$first_response  = $this->dispatch_add_item_request(
+				array(
+					'id'       => $product->get_id(),
+					'quantity' => 1,
+				)
+			);
+			$before          = $this->get_cart_line_identity_map();
+			$second_response = $this->dispatch_add_item_request(
+				array(
+					'id'       => $product->get_id(),
+					'quantity' => 1,
+				)
+			);
+			$second_data     = $second_response->get_data();
+
+			$this->assertSame( 201, $first_response->get_status(), 'The first sold-individually add should succeed.' );
+			$this->assertSame( 400, $second_response->get_status(), 'The sold-individually re-add should be rejected.' );
+			$this->assertSame( 'readonly_quantity', $second_data['code'], 'The rejection should report the Store API quantity-limit code.' );
+			$this->assertSame( $before, $this->get_cart_line_identity_map(), 'The rejected re-add should leave every cart line unchanged.' );
+		} finally {
+			$product->set_sold_individually( $original_sold_individually );
+			$product->save();
+		}
+	}
+
+	/**
+	 * @testdox A rejected managed-stock re-add leaves the exact cart-line map unchanged.
+	 */
+	public function test_rejected_add_item_leaves_managed_stock_cart_unchanged(): void {
+		wc_empty_cart();
+
+		$product                 = $this->products[1];
+		$original_manage_stock   = $product->get_manage_stock();
+		$original_stock_quantity = $product->get_stock_quantity();
+		$original_backorders     = $product->get_backorders();
+		$original_stock_status   = $product->get_stock_status();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 1 );
+		$product->set_backorders( 'no' );
+		$product->set_stock_status( ProductStockStatus::IN_STOCK );
+		$product->save();
+
+		try {
+			$first_response  = $this->dispatch_add_item_request(
+				array(
+					'id'       => $product->get_id(),
+					'quantity' => 1,
+				)
+			);
+			$before          = $this->get_cart_line_identity_map();
+			$second_response = $this->dispatch_add_item_request(
+				array(
+					'id'       => $product->get_id(),
+					'quantity' => 1,
+				)
+			);
+			$second_data     = $second_response->get_data();
+
+			$this->assertSame( 201, $first_response->get_status(), 'The first managed-stock add should succeed.' );
+			$this->assertSame( 400, $second_response->get_status(), 'The managed-stock re-add should be rejected.' );
+			$this->assertSame( 'woocommerce_rest_product_partially_out_of_stock', $second_data['code'], 'The rejection should report the Store API partial-stock code.' );
+			$this->assertSame( $before, $this->get_cart_line_identity_map(), 'The rejected re-add should leave every cart line unchanged.' );
+		} finally {
+			$product->set_manage_stock( $original_manage_stock );
+			$product->set_stock_quantity( $original_stock_quantity );
+			$product->set_backorders( $original_backorders );
+			$product->set_stock_status( $original_stock_status );
+			$product->save();
+		}
 	}
 
 	/**
