@@ -1007,7 +1007,6 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		};
 		add_action( 'wc_product_start_scheduled_sale', $writer, 1, 1 );
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'wc_product_start_scheduled_sale', $product->get_id() );
 
 		remove_action( 'wc_product_start_scheduled_sale', $writer, 1 );
@@ -1029,7 +1028,6 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		};
 		add_action( 'wc_product_end_scheduled_sale', $writer, 1, 1 );
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'wc_product_end_scheduled_sale', $product->get_id() );
 
 		remove_action( 'wc_product_end_scheduled_sale', $writer, 1 );
