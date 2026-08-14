@@ -205,6 +205,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	protected function get_bulk_actions() {
 		return array(
 			'activate'   => __( 'Activate', 'woocommerce' ),
+			'pause'      => __( 'Pause', 'woocommerce' ),
 			'deactivate' => __( 'Deactivate', 'woocommerce' ),
 			'delete'     => __( 'Delete permanently', 'woocommerce' ),
 		);
@@ -227,6 +228,9 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 			switch ( $action ) {
 				case 'activate':
 					WC_Admin_Webhooks::bulk_update_status( $webhooks, 'active' );
+					break;
+				case 'pause':
+					WC_Admin_Webhooks::bulk_update_status( $webhooks, 'paused' );
 					break;
 				case 'deactivate':
 					WC_Admin_Webhooks::bulk_update_status( $webhooks, 'disabled' );
