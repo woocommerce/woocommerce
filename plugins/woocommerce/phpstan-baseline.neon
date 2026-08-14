@@ -14203,18 +14203,6 @@ parameters:
 			path: includes/class-wc-register-wp-admin-settings.php
 
 		-
-			message: '#^Access to protected property WC_Email\|WC_Settings_Page\:\:\$id\.$#'
-			identifier: property.protected
-			count: 1
-			path: includes/class-wc-register-wp-admin-settings.php
-
-		-
-			message: '#^Call to an undefined method WC_Email\|WC_Settings_Page\:\:get_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-register-wp-admin-settings.php
-
-		-
 			message: '#^Call to an undefined method WC_Register_WP_Admin_Settings\:\:get_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
