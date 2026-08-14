@@ -2,6 +2,7 @@
  * Internal dependencies
  */
 import reducer from '../reducer';
+import { getItems } from '../selectors';
 import TYPES from '../action-types';
 import { getResourceName } from '../../utils';
 import { getTotalCountResourceName } from '../utils';
@@ -106,6 +107,32 @@ describe( 'items reducer', () => {
 
 		expect( ( state.data[ itemType ] || {} )[ '1' ] ).toBe( items[ 0 ] );
 		expect( ( state.data[ itemType ] || {} )[ '2' ] ).toBe( items[ 1 ] );
+	} );
+
+	it( 'keeps leaderboard responses isolated by query', () => {
+		const latestQuery = { per_page: 5 };
+		const staleQuery = { per_page: 12 };
+		const latestItems = [ { id: 'products', label: 'five rows' } ];
+		const staleItems = [ { id: 'products', label: 'twelve rows' } ];
+
+		const latestState = reducer( defaultState, {
+			type: TYPES.SET_ITEMS,
+			items: latestItems,
+			itemType: 'leaderboards',
+			query: latestQuery,
+		} );
+		const state = reducer( latestState, {
+			type: TYPES.SET_ITEMS,
+			items: staleItems,
+			itemType: 'leaderboards',
+			query: staleQuery,
+		} );
+
+		expect(
+			Array.from(
+				getItems( state, 'leaderboards', latestQuery ).values()
+			)[ 0 ]?.label
+		).toBe( 'five rows' );
 	} );
 
 	it( 'should handle SET_ITEMS_TOTAL_COUNT', () => {

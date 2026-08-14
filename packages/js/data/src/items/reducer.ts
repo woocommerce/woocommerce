@@ -41,17 +41,21 @@ const reducer: Reducer< ItemsState, Action > = (
 			};
 		case TYPES.SET_ITEMS:
 			const ids: Array< ItemID > = [];
-			const nextItems = action.items.reduce< Record< ItemID, Item > >(
-				( result, theItem ) => {
-					ids.push( theItem.id );
-					result[ theItem.id ] = theItem;
-					return result;
-				},
-				{}
-			);
 			const resourceName = getResourceName(
 				action.itemType,
 				action.query
+			);
+			const nextItems = action.items.reduce< Record< ItemID, Item > >(
+				( result, theItem ) => {
+					const id =
+						action.itemType === 'leaderboards'
+							? `${ resourceName }:${ theItem.id }`
+							: theItem.id;
+					ids.push( id );
+					result[ id ] = theItem;
+					return result;
+				},
+				{}
 			);
 			return {
 				...state,

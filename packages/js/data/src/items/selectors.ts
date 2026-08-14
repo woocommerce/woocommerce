@@ -41,7 +41,8 @@ export const getItems = createSelector< getItemsSelectorType >(
 			return defaultValue;
 		}
 		return ids.reduce( ( map, id: number ) => {
-			map.set( id, state.data[ itemType ]?.[ id ] );
+			const item = state.data[ itemType ]?.[ id ];
+			map.set( ( item?.id ?? id ) as number, item );
 			return map;
 		}, new Map() );
 	},
