@@ -443,7 +443,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * @since 11.1.0
 	 */
 	protected function get_order_meta_value( array $meta_data, string $key, $default_value = '', int $post_id = 0 ) {
-		if ( isset( $meta_data[ $key ] ) && is_array( $meta_data[ $key ] ) && ! empty( $meta_data[ $key ] ) ) {
+		if ( isset( $meta_data[ $key ] ) && is_array( $meta_data[ $key ] ) && array_key_exists( 0, $meta_data[ $key ] ) ) {
 			return $meta_data[ $key ][0];
 		}
 
@@ -473,7 +473,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 		$meta_data = get_post_meta( $id );
 
-		$prices_include_tax = $this->get_order_meta_value( $meta_data, '_prices_include_tax', '', $id );
+		$prices_include_tax = $this->get_order_meta_value( $meta_data, '_prices_include_tax', null, $id );
 
 		$this->set_order_props(
 			$order,
@@ -486,7 +486,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 				'cart_tax'           => $this->get_order_meta_value( $meta_data, '_order_tax', '', $id ),
 				'total'              => $this->get_order_meta_value( $meta_data, '_order_total', '', $id ),
 				'version'            => $this->get_order_meta_value( $meta_data, '_order_version', '', $id ),
-				'prices_include_tax' => metadata_exists( 'post', $id, '_prices_include_tax' ) ? 'yes' === $prices_include_tax : 'yes' === get_option( 'woocommerce_prices_include_tax' ),
+				'prices_include_tax' => null !== $prices_include_tax ? 'yes' === $prices_include_tax : 'yes' === get_option( 'woocommerce_prices_include_tax' ),
 			)
 		);
 
