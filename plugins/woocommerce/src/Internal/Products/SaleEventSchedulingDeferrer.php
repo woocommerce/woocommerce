@@ -46,23 +46,19 @@ class SaleEventSchedulingDeferrer {
 	private array $pending_product_ids = array();
 
 	/**
-	 * Whether the shutdown flush has been registered.
-	 *
-	 * @var bool
-	 */
-	private bool $shutdown_hook_registered = false;
-
-	/**
 	 * Record a product ID whose sale events need rescheduling.
 	 *
 	 * @param int $product_id ID of the product or variation whose sale-date meta changed.
 	 * @return void
 	 */
 	public function queue_product( int $product_id ): void {
-		if ( ! $this->shutdown_hook_registered ) {
-			add_action( 'shutdown', array( $this, 'handle_shutdown' ), self::SHUTDOWN_HOOK_PRIORITY );
-			$this->shutdown_hook_registered = true;
-		}
+		/*
+		 * Registered on every call rather than tracked with a flag. WordPress keys callbacks by
+		 * hook, callable and priority, so repeating this is a no-op, whereas a flag would keep
+		 * claiming the hook was registered after something removed it and the queue would then
+		 * never be flushed.
+		 */
+		add_action( 'shutdown', array( $this, 'handle_shutdown' ), self::SHUTDOWN_HOOK_PRIORITY );
 
 		$this->pending_product_ids[ $product_id ] = true;
 
