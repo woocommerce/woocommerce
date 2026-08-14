@@ -15,20 +15,6 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
  */
 class OrderControllerTests extends \WC_Unit_Test_Case {
 	/**
-	 * Whether the checkout phone field option existed before the test.
-	 *
-	 * @var bool
-	 */
-	private $checkout_phone_field_option_existed = false;
-
-	/**
-	 * Checkout phone field option value before the test.
-	 *
-	 * @var mixed
-	 */
-	private $checkout_phone_field_option_value;
-
-	/**
 	 * The system under test.
 	 *
 	 * @var OrderController
@@ -43,13 +29,10 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$missing_option                            = new \stdClass();
-		$this->checkout_phone_field_option_value   = get_option( 'woocommerce_checkout_phone_field', $missing_option );
-		$this->checkout_phone_field_option_existed = $missing_option !== $this->checkout_phone_field_option_value;
-
 		// The fixtures in this class do not provide phone numbers, so make the
 		// phone field optional as other Store API test classes do. Without this
 		// the class only passes when run after a class that already did so.
+		// The per-test database rollback restores the option.
 		update_option( 'woocommerce_checkout_phone_field', 'optional' );
 
 		$this->sut = new class() extends OrderController {
@@ -64,28 +47,6 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 				parent::validate_address_fields( $order, $address_type, $errors );
 			}
 		};
-	}
-
-	/**
-	 * Tear down after test.
-	 */
-	public function tearDown(): void {
-		try {
-			// The cart lives on the WC singleton, which the database rollback does not touch,
-			// so empty it or the products some tests add leak into every later test.
-			WC()->cart->empty_cart();
-
-			WC()->countries->locale = null;
-			$this->sut              = null;
-
-			if ( $this->checkout_phone_field_option_existed ) {
-				update_option( 'woocommerce_checkout_phone_field', $this->checkout_phone_field_option_value );
-			} else {
-				delete_option( 'woocommerce_checkout_phone_field' );
-			}
-		} finally {
-			parent::tearDown();
-		}
 	}
 
 	/**
@@ -443,7 +404,6 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 			$threw = true;
 		} finally {
 			remove_action( 'woocommerce_before_calculate_totals', $thrower );
-			WC()->cart->empty_cart();
 		}
 
 		$this->assertTrue( $threw, 'The injected exception should propagate out of create_order_from_cart().' );
@@ -466,12 +426,8 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product->get_id() );
 		$this->assertFalse( WC()->cart->is_empty(), 'The cart must be non-empty so create_order_from_cart() runs to completion.' );
 
-		try {
-			$this->sut->create_order_from_cart();
-			$this->sut->create_order_from_cart();
-		} finally {
-			WC()->cart->empty_cart();
-		}
+		$this->sut->create_order_from_cart();
+		$this->sut->create_order_from_cart();
 
 		$this->assertSame(
 			$filters_before,

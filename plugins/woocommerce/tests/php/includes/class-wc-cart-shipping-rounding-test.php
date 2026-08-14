@@ -62,8 +62,6 @@ class WC_Cart_Shipping_Rounding_Test extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		try {
-			WC()->cart->empty_cart();
-
 			if ( $this->zone ) {
 				$this->zone->delete();
 			}
