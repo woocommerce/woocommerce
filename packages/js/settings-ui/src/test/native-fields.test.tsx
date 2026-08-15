@@ -419,6 +419,46 @@ describe( 'NativeSettingsField', () => {
 		} );
 	} );
 
+	describe( 'select fields', () => {
+		const selectField: SettingsUIField = {
+			id: 'woocommerce_shop_page_id',
+			label: 'Shop page',
+			type: 'select',
+			options: [
+				{ value: '', label: 'Select a page...' },
+				{ value: '5', label: 'Shop' },
+			],
+		};
+
+		const getTrigger = ( container: HTMLElement ) => {
+			const trigger = container.querySelector( '[role="combobox"]' );
+
+			if ( ! ( trigger instanceof HTMLElement ) ) {
+				throw new Error( 'Expected a select trigger.' );
+			}
+
+			return trigger;
+		};
+
+		it( 'renders an empty-string option value without throwing and shows its label as selected', () => {
+			const container = render(
+				<NativeSettingsField { ...makeProps( selectField, '' ) } />
+			);
+
+			expect( getTrigger( container ).textContent ).toContain(
+				'Select a page...'
+			);
+		} );
+
+		it( 'shows the selected option label for non-empty values', () => {
+			const container = render(
+				<NativeSettingsField { ...makeProps( selectField, '5' ) } />
+			);
+
+			expect( getTrigger( container ).textContent ).toContain( 'Shop' );
+		} );
+	} );
+
 	describe( 'text fields', () => {
 		it( 'renders text fields without spin buttons', () => {
 			const container = render(

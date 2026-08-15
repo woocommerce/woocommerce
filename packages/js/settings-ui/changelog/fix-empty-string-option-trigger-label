@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix select and radio fields showing the generic placeholder instead of the selected option label when the option value is an empty string.

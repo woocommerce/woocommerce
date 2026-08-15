@@ -154,6 +154,10 @@ export const NativeSettingsField = ( {
 				value={ selectedItem }
 				disabled={ field.disabled }
 				onValueChange={ ( item ) => onChange( item?.value ?? '' ) }
+				// Base UI treats a value that stringifies to '' as "no selection"
+				// and shows the placeholder, so pass the label explicitly to keep
+				// empty-string options displaying as selected.
+				triggerContent={ selectedItem?.label }
 			/>
 		);
 	}
