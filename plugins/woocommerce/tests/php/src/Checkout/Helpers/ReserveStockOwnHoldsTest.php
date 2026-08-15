@@ -369,6 +369,10 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 	 * for 4 units of a 1-unit product and throw ReserveStockException. Same approach
 	 * as create_order_holding_stock() in class-wc-cart-test.php.
 	 *
+	 * The save() between removing and adding is required, not cosmetic: without it
+	 * the replacement line item never reaches wc_order_items, so the order reloads
+	 * with no items and reserves nothing.
+	 *
 	 * @param int               $customer_id Customer ID, 0 for a guest.
 	 * @param WC_Product_Simple $product     Product to add.
 	 * @return int Order ID.
@@ -376,6 +380,7 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 	private function create_unpaid_order_for( int $customer_id, WC_Product_Simple $product ): int {
 		$order = WC_Helper_Order::create_order( $customer_id );
 		$order->remove_order_items();
+		$order->save();
 		$order->add_product( wc_get_product( $product->get_id() ), 1 );
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
