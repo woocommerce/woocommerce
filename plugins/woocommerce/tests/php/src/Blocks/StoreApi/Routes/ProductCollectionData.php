@@ -197,6 +197,108 @@ class ProductCollectionData extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox OR attribute counts remove the counted facet while preserving price filters.
+	 */
+	public function test_attribute_count_matrix(): void {
+		$fixtures    = new FixtureData();
+		$attribute   = $this->create_product_attribute( 'color', array( 'blue', 'gray', 'red' ) );
+		$term_ids    = array(
+			'blue' => $attribute['term_ids'][0],
+			'gray' => $attribute['term_ids'][1],
+			'red'  => $attribute['term_ids'][2],
+		);
+		$product_ids = array();
+
+		try {
+			$product_ids[] = $this->create_attribute_count_product( $fixtures, $attribute, array( $term_ids['blue'] ), 10 );
+			$product_ids[] = $this->create_attribute_count_product( $fixtures, $attribute, array( $term_ids['blue'], $term_ids['gray'] ), 20 );
+			$product_ids[] = $this->create_attribute_count_product( $fixtures, $attribute, array( $term_ids['gray'] ), 30 );
+			$product_ids[] = $this->create_attribute_count_product( $fixtures, $attribute, array( $term_ids['red'] ), 50 );
+
+			$unfiltered_counts = array(
+				$term_ids['blue'] => 2,
+				$term_ids['gray'] => 2,
+				$term_ids['red']  => 1,
+			);
+			$test_cases        = array(
+				'selected blue'                  => array(
+					'attributes' => array(
+						array(
+							'attribute' => 'pa_color',
+							'operator'  => 'in',
+							'slug'      => array( 'blue-slug' ),
+						),
+					),
+					'expected'   => $unfiltered_counts,
+				),
+				'selected blue and gray'         => array(
+					'attributes' => array(
+						array(
+							'attribute' => 'pa_color',
+							'operator'  => 'in',
+							'slug'      => array( 'blue-slug', 'gray-slug' ),
+						),
+					),
+					'expected'   => $unfiltered_counts,
+				),
+				'selected blue with price range' => array(
+					'attributes' => array(
+						array(
+							'attribute' => 'pa_color',
+							'operator'  => 'in',
+							'slug'      => array( 'blue-slug' ),
+						),
+					),
+					'min_price'  => '1500',
+					'max_price'  => '4000',
+					'expected'   => array(
+						$term_ids['blue'] => 1,
+						$term_ids['gray'] => 2,
+					),
+				),
+			);
+
+			foreach ( $test_cases as $case_name => $test_case ) {
+				$params = array(
+					'attributes'                 => $test_case['attributes'],
+					'calculate_attribute_counts' => array(
+						array(
+							'taxonomy'   => 'pa_color',
+							'query_type' => 'or',
+						),
+					),
+				);
+
+				if ( isset( $test_case['min_price'] ) ) {
+					$params['min_price'] = $test_case['min_price'];
+					$params['max_price'] = $test_case['max_price'];
+				}
+
+				$response = $this->dispatch_collection_data_request( $params );
+				$counts   = array();
+
+				foreach ( $response->get_data()['attribute_counts'] as $count ) {
+					$counts[ $count->term ] = $count->count;
+				}
+
+				ksort( $counts );
+				ksort( $test_case['expected'] );
+
+				$this->assertSame( 200, $response->get_status(), "{$case_name}: the route should accept the count request." );
+				$this->assertSame( $test_case['expected'], $counts, "{$case_name}: counts should ignore the active color facet and retain other filters." );
+			}
+		} finally {
+			foreach ( $product_ids as $product_id ) {
+				$product = wc_get_product( $product_id );
+
+				if ( $product ) {
+					$product->delete( true );
+				}
+			}
+		}
+	}
+
+	/**
 	 * Test calculation method.
 	 */
 	public function test_calculate_rating_counts() {
@@ -794,6 +896,35 @@ class ProductCollectionData extends ControllerTestCase {
 		}
 
 		return $attribute;
+	}
+
+	/**
+	 * Create a simple product for the attribute-count matrix.
+	 *
+	 * @param FixtureData $fixtures Fixture data helper.
+	 * @param array       $attribute Attribute taxonomy data.
+	 * @param int[]       $term_ids Attribute term IDs assigned to the product.
+	 * @param int         $price Product price.
+	 * @return int Product ID.
+	 */
+	private function create_attribute_count_product( FixtureData $fixtures, array $attribute, array $term_ids, int $price ): int {
+		$product_attribute = new \WC_Product_Attribute();
+		$product_attribute->set_id( $attribute['attribute_id'] );
+		$product_attribute->set_name( $attribute['attribute_taxonomy'] );
+		$product_attribute->set_options( $term_ids );
+		$product_attribute->set_visible( true );
+
+		$product = $fixtures->get_simple_product(
+			array(
+				'name'          => "Attribute count product {$price}",
+				'regular_price' => $price,
+				'stock_status'  => 'instock',
+			)
+		);
+		$product->set_attributes( array( $product_attribute ) );
+		$product->save();
+
+		return $product->get_id();
 	}
 
 	/**
