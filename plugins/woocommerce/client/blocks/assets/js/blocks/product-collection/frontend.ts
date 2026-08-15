@@ -282,5 +282,5 @@ const productCollectionStore = {
 };
 
 store( 'woocommerce/product-collection', productCollectionStore, {
-	lock: true,
+	lock: universalLock,
 } );

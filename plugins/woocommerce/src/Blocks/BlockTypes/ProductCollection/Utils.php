@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection;
 
 use WP_Query;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 /**
  * Utility methods used for the Product Collection block.
@@ -106,6 +107,60 @@ class Utils {
 	}
 
 	/**
+	 * Whether the cart is initialized and available for reading.
+	 *
+	 * @return bool
+	 */
+	private static function is_cart_available() {
+		return isset( WC()->cart ) && is_a( WC()->cart, 'WC_Cart' );
+	}
+
+	/**
+	 * Get the unique product IDs of the items currently in the cart.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @return int[] Product IDs, or an empty array when the cart is unavailable.
+	 */
+	public static function get_cart_product_ids() {
+		if ( ! self::is_cart_available() ) {
+			return array();
+		}
+
+		$items = array();
+		foreach ( WC()->cart->get_cart() as $cart_item ) {
+			if ( ! isset( $cart_item['product_id'] ) ) {
+				continue;
+			}
+
+			$items[] = absint( $cart_item['product_id'] );
+		}
+
+		return ArrayUtil::unique_truthy_values( $items );
+	}
+
+	/**
+	 * Get a `cart` location context built from the current cart contents.
+	 *
+	 * Used when an ancestor block provides a `cart` product reference for a
+	 * Product Collection (e.g. the Mini-Cart overlay), independently of the
+	 * page the block is rendered on.
+	 *
+	 * When the cart is unavailable this still returns a cart location, with
+	 * an empty product list.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @return array The cart location context.
+	 */
+	public static function get_cart_location_context() {
+		return array(
+			'type'       => 'cart',
+			'sourceData' => array( 'productIds' => self::get_cart_product_ids() ),
+		);
+	}
+
+	/**
 	 * Parse WP Query's front-end context for the Product Collection block.
 	 *
 	 * The sourceData structure depends on the context type as follows:
@@ -149,20 +204,11 @@ class Utils {
 			$current_page       = $wp_query->get_queried_object();
 			$has_cart_block     = $current_page && \WC_Blocks_Utils::has_block_in_page( $current_page, 'woocommerce/cart' );
 			$has_checkout_block = $current_page && \WC_Blocks_Utils::has_block_in_page( $current_page, 'woocommerce/checkout' );
-			$is_cart_available  = isset( WC()->cart ) && is_a( WC()->cart, 'WC_Cart' );
+			$is_cart_available  = self::is_cart_available();
 
 			if ( ( $has_cart_block || $has_checkout_block || is_cart() || is_checkout() ) && $is_cart_available ) {
-				$type  = 'cart';
-				$items = array();
-				foreach ( WC()->cart->get_cart() as $cart_item ) {
-					if ( ! isset( $cart_item['product_id'] ) ) {
-						continue;
-					}
-
-					$items[] = absint( $cart_item['product_id'] );
-				}
-				$items       = array_unique( array_filter( $items ) );
-				$source_data = array( 'productIds' => $items );
+				$type        = 'cart';
+				$source_data = array( 'productIds' => self::get_cart_product_ids() );
 
 			} elseif ( is_product_taxonomy() ) {
 

@@ -100,7 +100,7 @@ function getClosestColor(
 	return getClosestColor( element.parentElement, colorType );
 }
 
-type MiniCart = {
+export type MiniCart = {
 	state: {
 		isHydrated: boolean;
 		isOpen: boolean;
@@ -425,11 +425,7 @@ function resolveDataItemAttr(): ItemData | undefined {
 		dataProperty: DataProperty;
 	} >();
 
-	return (
-		itemData ||
-		// eslint-disable-next-line @typescript-eslint/no-use-before-define
-		cartItemState.cartItem[ dataProperty ]?.[ 0 ]
-	);
+	return itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
 }
 
 /**

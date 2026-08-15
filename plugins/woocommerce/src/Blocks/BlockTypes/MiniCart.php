@@ -49,6 +49,23 @@ class MiniCart extends AbstractBlock {
 	protected $display_cart_prices_including_tax = false;
 
 	/**
+	 * Scopes the render_block_context filter to the overlay render.
+	 *
+	 * The overlay is a template part rendered by its own do_blocks() call,
+	 * outside the mini-cart block's tree, we can't use context to pass it down.
+	 *
+	 * @var bool
+	 */
+	private $is_providing_reference_context = false;
+
+	/**
+	 * Overlay markup built during block render, echoed on wp_footer.
+	 *
+	 * @var string
+	 */
+	private $overlay_markup = '';
+
+	/**
 	 * Block Hook API placements.
 	 *
 	 * @var array
@@ -104,6 +121,9 @@ class MiniCart extends AbstractBlock {
 		add_action( 'wp_loaded', array( $this, 'register_empty_cart_message_block_pattern' ) );
 		add_filter( 'hooked_block_woocommerce/mini-cart', array( $this, 'modify_hooked_block_attributes' ), 10, 5 );
 		add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 9, 4 );
+
+		// Provide a `cart` product reference to inner blocks rendered in the overlay.
+		add_filter( 'render_block_context', array( $this, 'handle_render_block_context' ), 10, 1 );
 	}
 
 	/**
@@ -294,17 +314,14 @@ class MiniCart extends AbstractBlock {
 		$cart = $this->get_cart_instance();
 
 		if ( $cart ) {
-			$classes_styles           = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
-			$icon_color               = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
-			$product_count_color      = isset( $attributes['productCountColor']['color'] ) ? $attributes['productCountColor']['color'] : '';
-			$styles                   = $product_count_color ? 'background:' . esc_attr( $product_count_color ) : '';
-			$icon                     = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
-			$product_count_visibility = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
-			$wrapper_classes          = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
-			$wrapper_styles           = $classes_styles['styles'];
-			// Pre-render the template part so nested blocks enqueue their assets before the overlay is printed in wp_footer.
-			$template_part_contents           = $this->get_template_part_contents( false );
-			$template_part_contents           = do_blocks( $this->process_template_contents( $template_part_contents ) );
+			$classes_styles                   = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
+			$icon_color                       = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
+			$product_count_color              = isset( $attributes['productCountColor']['color'] ) ? $attributes['productCountColor']['color'] : '';
+			$styles                           = $product_count_color ? 'background:' . esc_attr( $product_count_color ) : '';
+			$icon                             = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
+			$product_count_visibility         = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
+			$wrapper_classes                  = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
+			$wrapper_styles                   = $classes_styles['styles'];
 			$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
 			$display_cart_price_including_tax = get_option( 'woocommerce_tax_display_cart' ) === TaxDisplayMode::INCLUSIVE;
 			$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
@@ -372,6 +389,7 @@ class MiniCart extends AbstractBlock {
 
 			// Render the minicart overlay in the body, outside of the block itself.
 			if ( ! has_action( 'wp_footer', array( $this, 'render_mini_cart_overlay' ) ) ) {
+				$this->overlay_markup = $this->build_mini_cart_overlay();
 				add_action( 'wp_footer', array( $this, 'render_mini_cart_overlay' ) );
 			}
 			ob_start();
@@ -444,8 +462,26 @@ class MiniCart extends AbstractBlock {
 	 * @return void
 	 */
 	public function render_mini_cart_overlay() {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo $this->overlay_markup;
+	}
+
+	/**
+	 * Build the Interactivity API Mini Cart overlay markup.
+	 *
+	 * Called while the block itself renders (before the `head` is printed on
+	 * block themes), so script modules that inner blocks enqueue during this
+	 * render still reach the import map.
+	 *
+	 * @return string The overlay markup.
+	 */
+	private function build_mini_cart_overlay() {
 		$template_part_contents = $this->get_template_part_contents( false );
-		$template_part_contents = do_blocks( $this->process_template_contents( $template_part_contents ) );
+
+		// Provide the product reference context only while the overlay renders.
+		$this->is_providing_reference_context = true;
+		$template_part_contents               = do_blocks( $this->process_template_contents( $template_part_contents ) );
+		$this->is_providing_reference_context = false;
 		ob_start();
 		?>
 		<div
@@ -475,8 +511,7 @@ class MiniCart extends AbstractBlock {
 			</div>
 		</div>
 		<?php
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo wp_interactivity_process_directives( ob_get_clean() );
+		return wp_interactivity_process_directives( (string) ob_get_clean() );
 	}
 
 	/**
@@ -716,5 +751,27 @@ class MiniCart extends AbstractBlock {
 	 */
 	public function should_not_render_mini_cart( array $attributes ) {
 		return isset( $attributes['cartAndCheckoutRenderStyle'] ) && 'hidden' !== $attributes['cartAndCheckoutRenderStyle'];
+	}
+
+	/**
+	 * Provide a `cart` product reference to inner blocks rendered in the
+	 * Mini Cart overlay.
+	 *
+	 * The overlay is rendered out of the regular block tree (via `do_blocks()`
+	 * in the footer), so this is exposed through the `render_block_context`
+	 * filter rather than a static `providesContext` declaration.
+	 *
+	 * @internal For exclusive use of the render_block_context filter.
+	 *
+	 * @param array $context The block context.
+	 * @return array The block context, with the product reference added while the overlay renders.
+	 */
+	public function handle_render_block_context( $context ) {
+		if ( ! $this->is_providing_reference_context ) {
+			return $context;
+		}
+
+		$context['woocommerce/productCollection/referenceType'] = 'cart';
+		return $context;
 	}
 }
