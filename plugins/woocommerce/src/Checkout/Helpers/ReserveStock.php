@@ -536,6 +536,12 @@ final class ReserveStock {
 			return self::$unpaid_order_ids_by_customer[ $customer_id ];
 		}
 
+		/**
+		 * The 'ids' return yields plain ints, but wc_get_orders() is documented as
+		 * returning objects, so both shapes are accepted rather than assumed.
+		 *
+		 * @var array<int|\WC_Order> $order_ids
+		 */
 		$order_ids = wc_get_orders(
 			array(
 				'customer' => $customer_id,
@@ -547,8 +553,14 @@ final class ReserveStock {
 			)
 		);
 
-		self::$unpaid_order_ids_by_customer[ $customer_id ] = is_array( $order_ids ) ? array_map( 'absint', $order_ids ) : array();
+		$ids = array();
 
-		return self::$unpaid_order_ids_by_customer[ $customer_id ];
+		foreach ( $order_ids as $order_id ) {
+			$ids[] = $order_id instanceof \WC_Order ? $order_id->get_id() : absint( $order_id );
+		}
+
+		self::$unpaid_order_ids_by_customer[ $customer_id ] = $ids;
+
+		return $ids;
 	}
 }
