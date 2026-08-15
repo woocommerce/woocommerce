@@ -129,7 +129,7 @@ describe( 'Product Details block', () => {
 		).not.toContain( 'style=' );
 	} );
 
-	describe( 'Single Product block', () => {
+	describe( 'editor integration', () => {
 		const server = setupServer(
 			http.get( '/wc-admin/options', ( { request } ) => {
 				const url = new URL( request.url );
@@ -190,6 +190,20 @@ describe( 'Product Details block', () => {
 		afterAll( () => {
 			server.close();
 			jest.restoreAllMocks();
+		} );
+
+		test( 'should populate a freshly inserted block with the Product Description placeholder', async () => {
+			await initializeEditor( {
+				name: 'woocommerce/product-details',
+				attributes: {},
+			} );
+
+			expect(
+				await screen.findByText(
+					'This block displays the product description. When viewing a product page, the description content will automatically appear here.',
+					{ exact: true }
+				)
+			).toBeVisible();
 		} );
 
 		test( 'should render product specifications when product is selected', async () => {
