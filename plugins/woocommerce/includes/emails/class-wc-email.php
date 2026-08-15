@@ -1586,7 +1586,7 @@ class WC_Email extends WC_Settings_API {
 		?>
 		<?php wc_back_header( $this->get_title(), __( 'Return to emails', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=email' ) ); ?>
 
-		<?php echo wpautop( wp_kses_post( $this->get_description() ) ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
+		<?php echo wpautop( wp_kses_post( $this->get_description() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_kses_post() sanitizes the description before wpautop() formats it. ?>
 
 		<?php
 		/**
