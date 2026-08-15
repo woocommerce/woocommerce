@@ -93,6 +93,18 @@ class OrderNoteSchema extends AbstractSchema {
 				'default'     => false,
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 			),
+			'cc_email'         => array(
+				'description' => __( 'Cc email addresses the note was sent to.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'readonly'    => true,
+			),
+			'bcc_email'        => array(
+				'description' => __( 'Bcc email addresses the note was sent to.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'readonly'    => true,
+			),
 		);
 
 		return $schema;
@@ -107,9 +119,10 @@ class OrderNoteSchema extends AbstractSchema {
 	 * @return array The item response.
 	 */
 	public function get_item_response( $note, WP_REST_Request $request, array $include_fields = array() ): array {
-		$group            = get_comment_meta( $note->comment_ID, 'note_group', true );
-		$title            = get_comment_meta( $note->comment_ID, 'note_title', true );
-		$is_customer_note = wc_string_to_bool( get_comment_meta( $note->comment_ID, 'is_customer_note', true ) );
+		$comment_id       = $note->comment_ID;
+		$group            = get_comment_meta( $comment_id, 'note_group', true );
+		$title            = get_comment_meta( $comment_id, 'note_title', true );
+		$is_customer_note = wc_string_to_bool( get_comment_meta( $comment_id, 'is_customer_note', true ) );
 
 		if ( $group && ! $title ) {
 			$title = OrderNoteGroup::get_default_group_title( $group );
@@ -125,6 +138,8 @@ class OrderNoteSchema extends AbstractSchema {
 			'title'            => $title,
 			'group'            => $group,
 			'is_customer_note' => $is_customer_note,
+			'cc_email'         => get_comment_meta( $comment_id, 'cc', true ),
+			'bcc_email'        => get_comment_meta( $comment_id, 'bcc', true ),
 		);
 	}
 }

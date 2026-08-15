@@ -96,12 +96,16 @@ if ( ! class_exists( 'WC_Email_Customer_Note', false ) ) :
 				$defaults = array(
 					'order_id'      => '',
 					'customer_note' => '',
+					'cc'            => '',
+					'bcc'           => '',
 				);
 
 				$args = wp_parse_args( $args, $defaults );
 
 				$order_id      = $args['order_id'];
 				$customer_note = $args['customer_note'];
+				$cc            = $args['cc'];
+				$bcc           = $args['bcc'];
 
 				if ( $order_id ) {
 					$this->object = wc_get_order( $order_id );
@@ -109,6 +113,8 @@ if ( ! class_exists( 'WC_Email_Customer_Note', false ) ) :
 					if ( $this->object ) {
 						$this->recipient                      = $this->object->get_billing_email();
 						$this->customer_note                  = $customer_note;
+						$this->cc                             = $cc;
+						$this->bcc                            = $bcc;
 						$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
 						$this->placeholders['{order_number}'] = $this->object->get_order_number();
 					}

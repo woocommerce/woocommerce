@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add CC/BCC email fields to public customer notes. Admins can now enter Cc and Bcc addresses when adding a public note to a customer, and the note email will be sent to those recipients in addition to the billing email.

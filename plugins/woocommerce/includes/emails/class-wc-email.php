@@ -704,7 +704,7 @@ class WC_Email extends WC_Settings_API {
 			}
 		}
 
-		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
+		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) || ! empty( $this->cc ) || ! empty( $this->bcc ) ) {
 			$cc = $this->get_cc_recipient();
 			if ( ! empty( $cc ) ) {
 				$header .= 'Cc: ' . sanitize_text_field( $cc ) . "\r\n";

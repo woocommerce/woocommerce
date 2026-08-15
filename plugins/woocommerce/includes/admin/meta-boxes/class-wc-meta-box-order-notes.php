@@ -64,6 +64,14 @@ class WC_Meta_Box_Order_Notes {
 					);
 					?>
 				</p>
+				<p class="add_note_cc_fields" hidden>
+					<label for="add_order_note_cc"><?php esc_html_e( 'Cc', 'woocommerce' ); ?></label>
+					<input type="text" id="add_order_note_cc" name="add_order_note_cc" class="input-text" placeholder="<?php esc_attr_e( 'Comma-separated emails', 'woocommerce' ); ?>" />
+				</p>
+				<p class="add_note_bcc_fields" hidden>
+					<label for="add_order_note_bcc"><?php esc_html_e( 'Bcc', 'woocommerce' ); ?></label>
+					<input type="text" id="add_order_note_bcc" name="add_order_note_bcc" class="input-text" placeholder="<?php esc_attr_e( 'Comma-separated emails', 'woocommerce' ); ?>" />
+				</p>
 			</div>
 			<p class="add_note_actions">
 				<button type="button" class="add_note button"><?php echo esc_html( $private_button_label ); ?></button>

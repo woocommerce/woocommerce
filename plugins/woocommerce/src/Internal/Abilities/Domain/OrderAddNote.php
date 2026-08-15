@@ -89,10 +89,19 @@ class OrderAddNote extends AbstractDomainAbility implements AbilityDefinition {
 			);
 		}
 
+		$meta_data = array();
+		if ( ! empty( $input['cc_email'] ) ) {
+			$meta_data['cc'] = sanitize_text_field( $input['cc_email'] );
+		}
+		if ( ! empty( $input['bcc_email'] ) ) {
+			$meta_data['bcc'] = sanitize_text_field( $input['bcc_email'] );
+		}
+
 		$note_id = $order->add_order_note(
 			$note,
 			( (bool) ( $input['customer_note'] ?? false ) ) ? 1 : 0,
-			get_current_user_id() > 0
+			get_current_user_id() > 0,
+			$meta_data
 		);
 
 		if ( $note_id <= 0 ) {
@@ -135,6 +144,20 @@ class OrderAddNote extends AbstractDomainAbility implements AbilityDefinition {
 						'woocommerce'
 					),
 					'default'     => false,
+				),
+				'cc_email'      => array(
+					'type'        => 'string',
+					'description' => __(
+						'Cc email addresses to send the note to. Comma-separated.',
+						'woocommerce'
+					),
+				),
+				'bcc_email'     => array(
+					'type'        => 'string',
+					'description' => __(
+						'Bcc email addresses to send the note to. Comma-separated.',
+						'woocommerce'
+					),
 				),
 			),
 			'required'             => array( 'id', 'note' ),
