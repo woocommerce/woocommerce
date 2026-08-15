@@ -14,9 +14,11 @@ import {
 	unregisterBlockType,
 } from '@wordpress/blocks';
 import { store as coreStore } from '@wordpress/core-data';
+import { store as blockEditorStore } from '@wordpress/block-editor';
 import { dispatch, select } from '@wordpress/data';
 import { applyFilters, removeFilter } from '@wordpress/hooks';
 import { useCallback, useState } from '@wordpress/element';
+import { CORE_EDITOR_STORE } from '@woocommerce/utils';
 
 /**
  * Internal dependencies
@@ -32,7 +34,11 @@ import {
 	DEFAULT_QUERY,
 	PRODUCT_COLLECTION_BLOCK_NAME,
 } from '../constants';
-import { addProductCollectionToQueryPaginationParentOrAncestor } from '../utils';
+import {
+	addProductCollectionToQueryPaginationParentOrAncestor,
+	getDefaultValueOfFilterable,
+	getDefaultValueOfInherit,
+} from '../utils';
 import {
 	CoreCollectionNames,
 	LayoutOptions,
@@ -200,6 +206,112 @@ describe( 'Product Collection editor contracts', () => {
 			);
 		}
 	} );
+} );
+
+describe( 'Product Collection page-context defaults', () => {
+	afterEach( () => {
+		dispatch( blockEditorStore ).resetBlocks( [] );
+		jest.restoreAllMocks();
+	} );
+
+	it.each( [
+		{
+			caseName: 'Product Catalog archive inheritance',
+			getDefault: getDefaultValueOfInherit,
+			property: 'inherit',
+			templateSlug: 'archive-product',
+		},
+		{
+			caseName: 'Product Attribute archive inheritance',
+			getDefault: getDefaultValueOfInherit,
+			property: 'inherit',
+			templateSlug: 'taxonomy-product_attribute',
+		},
+		{
+			caseName: 'Product Search Results archive inheritance',
+			getDefault: getDefaultValueOfInherit,
+			property: 'inherit',
+			templateSlug: 'product-search-results',
+		},
+		{
+			caseName: 'Product Category archive inheritance',
+			getDefault: getDefaultValueOfInherit,
+			property: 'inherit',
+			templateSlug: 'taxonomy-product_cat',
+		},
+		{
+			caseName: 'Product Tag archive inheritance',
+			getDefault: getDefaultValueOfInherit,
+			property: 'inherit',
+			templateSlug: 'taxonomy-product_tag',
+		},
+		{
+			caseName: 'Product Brand archive inheritance',
+			getDefault: getDefaultValueOfInherit,
+			property: 'inherit',
+			templateSlug: 'taxonomy-product_brand',
+		},
+		{
+			caseName: 'post filtering',
+			getDefault: getDefaultValueOfFilterable,
+			property: 'filterable',
+			templateSlug: 'post',
+		},
+		{
+			caseName: 'home filtering',
+			getDefault: getDefaultValueOfFilterable,
+			property: 'filterable',
+			templateSlug: 'home',
+		},
+		{
+			caseName: 'index filtering',
+			getDefault: getDefaultValueOfFilterable,
+			property: 'filterable',
+			templateSlug: 'index',
+		},
+		{
+			caseName: 'Single Product filtering',
+			getDefault: getDefaultValueOfFilterable,
+			property: 'filterable',
+			templateSlug: 'single-product',
+		},
+	] as const )(
+		'allows only the first collection to own $caseName',
+		( { getDefault, property, templateSlug } ) => {
+			jest.spyOn(
+				select( CORE_EDITOR_STORE ) as unknown as {
+					getEditedPostSlug: () => string;
+				},
+				'getEditedPostSlug'
+			).mockReturnValue( templateSlug );
+
+			dispatch( blockEditorStore ).resetBlocks( [] );
+			expect( getDefault() ).toBe( true );
+
+			const firstCollection = createBlock(
+				PRODUCT_COLLECTION_BLOCK_NAME,
+				{
+					query: {
+						...DEFAULT_QUERY,
+						[ property ]: true,
+					},
+				}
+			);
+			dispatch( blockEditorStore ).resetBlocks( [ firstCollection ] );
+			expect( getDefault() ).toBe( false );
+
+			dispatch( blockEditorStore ).updateBlockAttributes(
+				firstCollection.clientId,
+				{
+					query: {
+						...DEFAULT_QUERY,
+						[ property ]: false,
+					},
+				}
+			);
+			expect( getDefault() ).toBe( true );
+		}
+	);
 } );
 
 const createPreviewAttributes = (): ProductCollectionAttributes => ( {
