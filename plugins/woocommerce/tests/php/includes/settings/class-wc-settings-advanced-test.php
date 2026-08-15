@@ -141,6 +141,91 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox save should persist the selected WooCommerce.com checkbox without enabling its peer.
+	 *
+	 * @dataProvider woocommerce_com_checkbox_options_provider
+	 *
+	 * @param string $selected_option_id Selected checkbox option ID.
+	 * @param string $peer_option_id     Peer checkbox option ID.
+	 */
+	public function test_save_persists_woocommerce_com_checkbox_options( $selected_option_id, $peer_option_id ): void {
+		$option_ids                  = array( $selected_option_id, $peer_option_id );
+		$missing_option_value        = new stdClass();
+		$original_options            = array();
+		$original_post               = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Restored after the test.
+		$had_current_section         = array_key_exists( 'current_section', $GLOBALS );
+		$original_current_section    = $had_current_section ? $GLOBALS['current_section'] : null;
+		$tracking_callback_methods   = array( 'get_tracking_history', 'handle_tracking_setting_change' );
+		$registered_tracking_methods = array();
+
+		foreach ( $option_ids as $option_id ) {
+			$value = get_option( $option_id, $missing_option_value );
+
+			$original_options[ $option_id ] = array(
+				'exists' => $missing_option_value !== $value,
+				'value'  => $value,
+			);
+		}
+
+		foreach ( $tracking_callback_methods as $method ) {
+			$callback = array( WC(), $method );
+
+			if ( 10 === has_action( 'update_option_woocommerce_allow_tracking', $callback ) ) {
+				$registered_tracking_methods[] = $method;
+			}
+
+			remove_action( 'update_option_woocommerce_allow_tracking', $callback, 10 );
+		}
+
+		try {
+			foreach ( $option_ids as $option_id ) {
+				update_option( $option_id, 'no' );
+			}
+
+			$GLOBALS['current_section'] = 'woocommerce_com';
+			$_POST                      = array( $selected_option_id => 'yes' );
+
+			$sut = new WC_Settings_Advanced();
+			$sut->save();
+
+			$this->assertSame( 'yes', get_option( $selected_option_id ) );
+			$this->assertSame( 'no', get_option( $peer_option_id ) );
+		} finally {
+			foreach ( $original_options as $option_id => $state ) {
+				if ( $state['exists'] ) {
+					update_option( $option_id, $state['value'] );
+				} else {
+					delete_option( $option_id );
+				}
+			}
+
+			$_POST = $original_post;
+
+			if ( $had_current_section ) {
+				$GLOBALS['current_section'] = $original_current_section;
+			} else {
+				unset( $GLOBALS['current_section'] );
+			}
+
+			foreach ( $registered_tracking_methods as $method ) {
+				add_action( 'update_option_woocommerce_allow_tracking', array( WC(), $method ), 10, 2 );
+			}
+		}
+	}
+
+	/**
+	 * Provides WooCommerce.com checkbox options and their peers.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public function woocommerce_com_checkbox_options_provider(): array {
+		return array(
+			'analytics tracking'      => array( 'woocommerce_allow_tracking', 'woocommerce_show_marketplace_suggestions' ),
+			'marketplace suggestions' => array( 'woocommerce_show_marketplace_suggestions', 'woocommerce_allow_tracking' ),
+		);
+	}
+
+	/**
 	 * @testdox output method should invoke the output method of the appropriate class depending on the section.
 	 *
 	 * @testWith ["webhooks", "WC_Admin_Webhooks"]
