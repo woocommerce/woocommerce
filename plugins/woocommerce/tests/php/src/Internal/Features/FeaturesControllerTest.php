@@ -1030,6 +1030,37 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * navigation_v2 is registered as an experimental, disabled-by-default feature.
+	 */
+	public function test_navigation_v2_feature_is_registered() {
+		// Instantiate Bootstrap so it registers the woocommerce_register_feature_definitions hook.
+		// We re-add its register_feature callback at priority 12 so it runs *after* the
+		// register_dummy_features callback (priority 11) which resets the feature list.
+		$bootstrap = new \Automattic\WooCommerce\Internal\Admin\Navigation\Bootstrap();
+		// Remove the default-priority hook added by the constructor and re-add at priority 12.
+		remove_action( 'woocommerce_register_feature_definitions', array( $bootstrap, 'register_feature' ) );
+		add_action( 'woocommerce_register_feature_definitions', array( $bootstrap, 'register_feature' ), 12, 1 );
+
+		$controller = new FeaturesController();
+		$controller->init( wc_get_container()->get( \Automattic\WooCommerce\Proxies\LegacyProxy::class ), $this->fake_plugin_util );
+		// include_enabled_info=true so each feature carries the `is_enabled` key
+		// the disabled-by-default assertion below reads.
+		$features = $controller->get_features( true, true );
+
+		remove_action( 'woocommerce_register_feature_definitions', array( $bootstrap, 'register_feature' ), 12 );
+		// Bootstrap also registered an `init` hook in its constructor; clean
+		// that up so it doesn't leak into later tests in this file.
+		remove_action( 'init', array( $bootstrap, 'boot_when_enabled' ), 20 );
+
+		$this->assertArrayHasKey( 'navigation_v2', $features );
+		$this->assertTrue( $features['navigation_v2']['is_experimental'] );
+		$this->assertFalse(
+			$features['navigation_v2']['is_enabled'],
+			'navigation_v2 must be disabled by default'
+		);
+	}
+
+	/**
 	 * Simulates that the code is running inside the 'before_woocommerce_init' action.
 	 */
 	private function simulate_inside_before_woocommerce_init_hook() {
@@ -1284,7 +1315,8 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			->onlyMethods( array( 'get_wp_plugin_id', 'get_woocommerce_aware_plugins' ) )
 			->getMock();
 
-		$plugin_util_mock->expects( $this->exactly( 2 ) ) // Called once per each file during processing.
+		$plugin_util_mock->expects( $this->exactly( 2 ) )
+		// Called once per each file during processing.
 			->method( 'get_wp_plugin_id' )
 			->willReturnMap(
 				array(
@@ -1294,7 +1326,8 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			);
 
 		$plugin_util_mock->method( 'get_woocommerce_aware_plugins' )
-			->willReturn( array() ); // Mock to empty to avoid real/environmental plugins in 'uncertain'.
+			->willReturn( array() );
+		// Mock to empty to avoid real/environmental plugins in 'uncertain'.
 
 		// Manually set private $proxy on the mock via reflection on the parent class.
 		// If we don't, the mocked PluginUtil will try to call things using ->proxy, which hasn't
@@ -1360,7 +1393,8 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		$plugin_util_mock->expects( $this->atLeastOnce() )
 			->method( 'get_wp_plugin_id' )
-			->willReturn( 'plugin/plugin.php' ); // All plugins resolve to the same path (we only register 1 anyway).
+			->willReturn( 'plugin/plugin.php' );
+		// All plugins resolve to the same path (we only register 1 anyway).
 
 		// Set private $proxy on the mock via reflection on parent.
 		// If we don't, the mocked PluginUtil will try to call things using ->proxy, which hasn't
@@ -1408,8 +1442,10 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			->willReturn( 'plugin/plugin.php' );
 
 		// Control get_woocommerce_aware_plugins to simulate before/after deactivation.
-		$deactivated   = false; // Flag to toggle in callback.
-		$aware_plugins = array( 'plugin/plugin.php', 'other/plugin.php' ); // Controlled list.
+		$deactivated = false;
+		// Flag to toggle in callback.
+		$aware_plugins = array( 'plugin/plugin.php', 'other/plugin.php' );
+		// Controlled list.
 		$plugin_util_mock->method( 'get_woocommerce_aware_plugins' )
 					->will(
 						$this->returnCallback(

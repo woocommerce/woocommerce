@@ -130,5 +130,6 @@ CLAUDE.local.md
 
 # Docusaurus
 .docusaurus
+.gstack/
 
 .mcp.json

@@ -1,0 +1,36 @@
+<?php
+
+declare( strict_types = 1 );
+
+
+namespace Automattic\WooCommerce\Tests\Internal\Admin\Navigation;
+
+// phpcs:disable Squiz.Commenting.ClassComment.Missing -- Self-documenting test class.
+class DefaultTreeTest extends \WC_Unit_Test_Case {
+
+	/**
+	 * The default tree must be well-formed: every non-null parent must reference
+	 * an existing slug in the tree.
+	 */
+	public function test_default_tree_is_well_formed() {
+		$tree = require dirname( WC_PLUGIN_FILE ) . '/src/Internal/Admin/Navigation/default-tree.php';
+
+		$this->assertIsArray( $tree );
+		$this->assertArrayHasKey( 'woocommerce', $tree );
+		$this->assertNull( $tree['woocommerce']['parent'], 'WooCommerce root must have null parent' );
+
+		foreach ( $tree as $slug => $node ) {
+			$this->assertArrayHasKey( 'parent', $node, "Node '$slug' missing parent key" );
+			$this->assertArrayHasKey( 'title', $node, "Node '$slug' missing title key" );
+			$this->assertArrayHasKey( 'position', $node, "Node '$slug' missing position key" );
+
+			if ( null !== $node['parent'] ) {
+				$this->assertArrayHasKey(
+					$node['parent'],
+					$tree,
+					"Node '$slug' references unknown parent '{$node['parent']}'"
+				);
+			}
+		}
+	}
+}

@@ -46,6 +46,7 @@ use Automattic\WooCommerce\Internal\Caches\OrdersVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\TaxRateVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\CustomerEmailVerification\CustomerEmailVerification;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
+use Automattic\WooCommerce\Internal\Admin\Navigation\Bootstrap as NavigationV2Bootstrap;
 use Automattic\Jetpack\Constants;
 
 /**
@@ -394,6 +395,7 @@ final class WooCommerce {
 		$container->get( ProductVersionStringInvalidator::class );
 		$container->get( OrdersVersionStringInvalidator::class );
 		$container->get( TaxRateVersionStringInvalidator::class );
+		$container->get( NavigationV2Bootstrap::class );
 		$container->get( OrderMilestoneEasterEgg::class );
 		$container->get( CustomerEmailVerification::class );
 		$container->get( OrderLogsCleanupHelper::class );

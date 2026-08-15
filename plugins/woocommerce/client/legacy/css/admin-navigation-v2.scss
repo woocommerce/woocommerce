@@ -1,0 +1,418 @@
+// Nested admin navigation v2.
+//
+// The rail itself (Woo and non-Woo pages) is rendered natively by WordPress
+// via PHP-side menu splicing, so admin-menu.css handles fonts, icons, hover,
+// current-page highlighting, color schemes, RTL, and folded mode for free.
+//
+// This file only contains the extras WP's CSS doesn't cover:
+// 1. The second-level cascade on the rail-root flyout (hover Settings →
+//    Payments / WooPayments / Status).
+// 2. Breadcrumb-only (non-clickable) ancestor styling.
+// 3. Current-page highlight overrides (border/shadow removal, text color).
+// 4. Attention-dot badge sizing and label wrapping fixes.
+// 5. Touch-device hover suppression per spec §6.3.
+
+// Second-level cascade on the native rail flyout. Injected by JS into
+// `.wp-submenu li` for tree items that have grandchildren (e.g. Settings →
+// Payments / WooPayments / Status). Scoped to #adminmenu so it applies to
+// both the WooCommerce flyout (non-Woo pages) and the individual rail-root
+// inline submenus (Woo pages).
+#adminmenu .wp-submenu li.wc-nav-v2-has-subflyout {
+	position: relative;
+
+	> a::after {
+		content: "";
+		position: absolute;
+		right: 10px;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 0;
+		height: 0;
+		border-style: solid;
+		border-width: 4px 0 4px 5px;
+		border-color: transparent transparent transparent currentColor;
+		opacity: 0.7;
+	}
+
+	// Background / text / hover color come from the active admin color scheme
+	// via `#adminmenu .wp-submenu` rules (our <ul> carries the `wp-submenu`
+	// class). We only override positioning, sizing, and layout here.
+	> .wc-nav-v2-subflyout {
+		position: absolute;
+		left: 100%;
+		top: -6px;
+		min-width: 180px;
+		padding: 6px 0;
+		box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+		list-style: none;
+		margin: 0;
+		display: none;
+		z-index: 10000;
+
+		> li {
+			margin: 0;
+			padding: 0;
+
+			> a {
+				display: block;
+				padding: 5px 12px;
+				text-decoration: none;
+				font-size: 13px;
+				line-height: 1.4;
+			}
+		}
+	}
+
+	// JS toggles .wc-nav-v2-subopen with a 600ms close delay (hover-intent
+	// style) so users can correct mid-motion when moving between the parent
+	// flyout item and the nested cascade. :focus-within covers keyboard nav.
+	// Before JS runs, CSS :hover acts as an immediate fallback so the cascade
+	// is usable as soon as the menu is rendered.
+	&.wc-nav-v2-subopen > .wc-nav-v2-subflyout,
+	&:focus-within > .wc-nav-v2-subflyout,
+	&:hover > .wc-nav-v2-subflyout {
+		display: block;
+	}
+
+	// Once JS has run and set up delayed-hover management, suppress the
+	// immediate CSS :hover so only wc-nav-v2-subopen drives visibility
+	// (giving the 600 ms forgiveness window).
+	.wc-nav-v2-js-ready &:not(.wc-nav-v2-subopen):not(:focus-within):hover > .wc-nav-v2-subflyout {
+		display: none;
+	}
+}
+
+body.rtl #adminmenu .wp-submenu li.wc-nav-v2-has-subflyout {
+	> a::after {
+		right: auto;
+		left: 10px;
+		border-width: 4px 5px 4px 0;
+		border-color: transparent currentColor transparent transparent;
+	}
+	> .wc-nav-v2-subflyout {
+		left: auto;
+		right: 100%;
+	}
+}
+
+// Capability-hidden ancestors render as non-clickable breadcrumb labels so
+// users can still reach visible descendants.
+#adminmenu li.wc-nav-v2-breadcrumb > a {
+	pointer-events: none;
+	opacity: 0.6;
+}
+
+// The active rail-root's $entry[4] is tagged with `wp-has-current-submenu
+// wp-menu-open` by Native_Rail_Splicer::mark_root_current() so its submenu
+// renders inline. WP's `_wp_menu_output()` still also appends
+// `wp-not-current-submenu` (its else branch, line 104 of menu-header.php)
+// — that branch is guarded by `$parent_file === $item[2]` which can't be
+// made true for descendant pages where `get_admin_page_parent()` overrides
+// `$parent_file` to the `$_wp_real_parent_file` remap target or to the
+// page's original (non-Woo) parent.
+//
+// With both classes on the LI, admin-menu.css:206 wins (later in source) and
+// adds `border-left-width: 5px` to the inline submenu, shifting items 5px to
+// the right of the rail-root label. Reset the border so the active rail-root's
+// inline submenu aligns left.
+#adminmenu li.menu-top.wp-has-current-submenu.wp-not-current-submenu > .wp-submenu {
+	border: 0 none;
+}
+
+// Small filled circle indicating "attention needed" on top-level menu
+// items where a numeric `.menu-counter` would collide with the
+// rail-row's right-edge flyout arrow (notably the WooCommerce
+// top-level). The drill-down items still use the numeric bubble.
+//
+// The element also carries the `.menu-counter` class so its background
+// color tracks whatever WP's admin color scheme assigns to badges. We
+// only override the dimensions to render a dot rather than a pill.
+#adminmenu .wc-attention-dot {
+	width: 8px !important;
+	min-width: 8px !important;
+	height: 8px !important;
+	padding: 0 !important;
+	margin: 0 0 0 2px !important;
+	border-radius: 50% !important;
+	vertical-align: middle !important;
+}
+
+// Keep the order-attention bubble (numeric counter or plain dot)
+// inline next to its label. `.wp-menu-name` defaults to
+// `word-break: break-word`, which wraps the inline-block bubble onto
+// a second line once the label fills the rail width — notably on
+// the WooCommerce top-level where "WooCommerce" almost fills the row.
+#adminmenu li#toplevel_page_woocommerce > a .wp-menu-name,
+#adminmenu li#toplevel_page_wc-orders > a .wp-menu-name {
+	white-space: nowrap;
+	word-break: keep-all;
+	overflow-wrap: normal;
+}
+
+// WP admin color-scheme files use !important on hover border/shadow and
+// text color, which overrides the base .current a:hover rule. Force the
+// current-page styling to win on all possible implementations of the
+// hover indicator (border-left on the <li>, border-left on the <a>,
+// or box-shadow).
+#adminmenu .wp-submenu li.current,
+#adminmenu .wp-submenu li.current:hover {
+	border-left: none !important;
+	box-shadow: none !important;
+}
+#adminmenu .wp-submenu li.current > a,
+#adminmenu .wp-submenu li.current > a:hover {
+	border-left: none !important;
+	box-shadow: none !important;
+	// Do not force color here — WP's native color-scheme CSS already sets the
+	// correct current-item text color for every scheme. Overriding with #fff
+	// breaks light schemes where the submenu flyout background is white.
+}
+
+// Top-level nav-v2 rail roots use background color as their active indicator.
+// Remove the color-scheme box-shadow / border-left notch that WP applies to
+// `li.current > a` on top-level items — it creates a thin white stripe along
+// the left edge that conflicts with the full-row highlight.
+#adminmenu li.menu-top.current > a,
+#adminmenu li.menu-top.current:hover > a {
+	border-left: none !important;
+	box-shadow: none !important;
+}
+
+// Spec §6.3: touch devices do not get the hover cascade. Tapping a cascade
+// parent (Settings, Marketing, etc.) navigates directly.
+//
+// NOTE: we deliberately do NOT hide `#toplevel_page_woocommerce > .wp-submenu`
+// here. WP's small-screen responsive mode (< 783px) reveals top-level
+// submenus inline when `.wp-menu-open` is added to the parent <li>; hiding
+// our first-level flyout with `!important` would break that, leaving the
+// WooCommerce tap unresponsive on mobile.
+@media (hover: none) {
+	#adminmenu .wp-submenu li.wc-nav-v2-has-subflyout > .wc-nav-v2-subflyout {
+		display: none !important;
+	}
+	// Drop the `›` caret on cascade parents — on touch they behave as plain
+	// links (tap navigates), so the indicator would be misleading.
+	#adminmenu .wp-submenu li.wc-nav-v2-has-subflyout > a::after {
+		display: none;
+	}
+}
+
+// WooCommerce W logo and Payments icon color-scheme fix.
+//
+// background-image SVGs can't inherit CSS `color` (fill="currentColor" resolves
+// to black in that context). The correct hook is `div.wp-menu-image::before`,
+// which WP's admin-menu.css and ALL color-scheme files already set to the right
+// color for every state: normal gray, hover blue, current white. Using
+// `background-color: currentColor` on ::before picks that up automatically —
+// no hardcoded colors, works across every scheme.
+//
+// Technique: remove the PHP-registered background-image, render the icon via
+// a ::before mask instead. mask-size: 20px auto matches WP's background-size
+// rule for SVG menu icons. margin: 7px auto centers the 20px icon in the
+// 34px element (7 + 20 + 7 = 34).
+
+// W logo — WooCommerce top-level item (non-Woo rail) AND the Home rail root
+// (li#toplevel_page_wc-admin, the first item in the Woo rail).
+#adminmenu li#toplevel_page_woocommerce .wp-menu-image.svg,
+#adminmenu li#toplevel_page_wc-admin .wp-menu-image.svg {
+	background-image: none !important;
+
+	&::before {
+		content: '';
+		display: block;
+		width: 20px;
+		height: 20px;
+		// WP's admin-menu.css already applies `padding: 7px 0` to
+		// div.wp-menu-image:before — that handles vertical centering.
+		// `margin: 0 auto` only centers horizontally within the 36px element.
+		margin: 0 auto;
+		background-color: currentColor;
+		// stylelint-disable function-url-quotes
+		-webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDg1LjkgNDcuNiI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik03Ny40LDAuMWMtNC4zLDAtNy4xLDEuNC05LjYsNi4xTDU2LjQsMjcuN1Y4LjZjMC01LjctMi43LTguNS03LjctOC41cy03LjEsMS43LTkuNiw2LjVMMjguMywyNy43VjguOGMwLTYuMS0yLjUtOC43LTguNi04LjdINy4zQzIuNiwwLjEsMCwyLjMsMCw2LjNzMi41LDYuNCw3LjEsNi40aDUuMXYyNC4xYzAsNi44LDQuNiwxMC44LDExLjIsMTAuOFMzMyw0NSwzNi4zLDM4LjlsNy4yLTEzLjV2MTEuNGMwLDYuNyw0LjQsMTAuOCwxMS4xLDEwLjhzOS4yLTIuMywxMy04LjdsMTYuNi0yOGMzLjYtNi4xLDEuMS0xMC44LTYuOS0xMC44Qzc3LjMsMC4xLDc3LjMsMC4xLDc3LjQsMC4xeiIvPjwvc3ZnPg==");
+		mask-image: url("data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDg1LjkgNDcuNiI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik03Ny40LDAuMWMtNC4zLDAtNy4xLDEuNC05LjYsNi4xTDU2LjQsMjcuN1Y4LjZjMC01LjctMi43LTguNS03LjctOC41cy03LjEsMS43LTkuNiw2LjVMMjguMywyNy43VjguOGMwLTYuMS0yLjUtOC43LTguNi04LjdINy4zQzIuNiwwLjEsMCwyLjMsMCw2LjNzMi41LDYuNCw3LjEsNi40aDUuMXYyNC4xYzAsNi44LDQuNiwxMC44LDExLjIsMTAuOFMzMyw0NSwzNi4zLDM4LjlsNy4yLTEzLjV2MTEuNGMwLDYuNyw0LjQsMTAuOCwxMS4xLDEwLjhzOS4yLTIuMywxMy04LjdsMTYuNi0yOGMzLjYtNi4xLDEuMS0xMC44LTYuOS0xMC44Qzc3LjMsMC4xLDc3LjMsMC4xLDc3LjQsMC4xeiIvPjwvc3ZnPg==");
+		// stylelint-enable function-url-quotes
+		-webkit-mask-size: contain;
+		-webkit-mask-repeat: no-repeat;
+		-webkit-mask-position: center;
+		mask-size: contain;
+		mask-repeat: no-repeat;
+		mask-position: center;
+	}
+}
+
+// Payments icon — nav-v2 rail root (slug wc-settings&tab=checkout →
+// CSS slug wc-settings-tab-checkout → LI id toplevel_page_wc-settings-tab-checkout).
+#adminmenu li#toplevel_page_wc-settings-tab-checkout .wp-menu-image.svg {
+	background-image: none !important;
+
+	&::before {
+		content: '';
+		display: block;
+		width: 20px;
+		height: 20px;
+		margin: 0 auto;
+		background-color: currentColor;
+		// stylelint-disable function-url-quotes
+		-webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4NTIiIGhlaWdodD0iNjg0Ij48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTgyIDg2djUxMmg2ODRWODZabTAgNTk4Yy00OCAwLTg0LTM4LTg0LTg2Vjg2Qy0yIDM4IDM0IDAgODIgMGg2ODRjNDggMCA4NCAzOCA4NCA4NnY1MTJjMCA0OC0zNiA4Ni04NCA4NnptMzg0LTU1NnY0NGg4NnY4NEgzODJ2NDRoMTI4YzI0IDAgNDIgMTggNDIgNDJ2MTI4YzAgMjQtMTggNDIgLTQyIDQyaC00NHY0NGgtODR2LTQ0aC04NnYtODRoMTcwdi00NEgzMzhjLTI0IDAtNDItMTgtNDItNDJWMjE0YzAtMjQgMTgtNDIgNDItNDJoNDR2LTQ0eiIvPjwvc3ZnPg==");
+		mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4NTIiIGhlaWdodD0iNjg0Ij48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTgyIDg2djUxMmg2ODRWODZabTAgNTk4Yy00OCAwLTg0LTM4LTg0LTg2Vjg2Qy0yIDM4IDM0IDAgODIgMGg2ODRjNDggMCA4NCAzOCA4NCA4NnY1MTJjMCA0OC0zNiA4Ni04NCA4NnptMzg0LTU1NnY0NGg4NnY4NEgzODJ2NDRoMTI4YzI0IDAgNDIgMTggNDIgNDJ2MTI4YzAgMjQtMTggNDIgLTQyIDQyaC00NHY0NGgtODR2LTQ0aC04NnYtODRoMTcwdi00NEgzMzhjLTI0IDAtNDItMTgtNDItNDJWMjE0YzAtMjQgMTgtNDIgNDItNDJoNDR2LTQ0eiIvPjwvc3ZnPg==");
+		// stylelint-enable function-url-quotes
+		-webkit-mask-size: contain;
+		-webkit-mask-repeat: no-repeat;
+		-webkit-mask-position: center;
+		mask-size: contain;
+		mask-repeat: no-repeat;
+		mask-position: center;
+	}
+}
+
+// WP's native rule `#adminmenu { margin: 12px 0 }` adds a 12px gap above the
+// first rail item. Remove it on every admin page (this stylesheet only loads
+// when nav-v2 is enabled) so the top of the rail sits flush — keeping the
+// non-Woo WordPress rail, the Woo rail, and the slide-in WP overlay panel
+// aligned instead of letting the plain WP rail keep the 12px gap.
+#adminmenu {
+	margin-top: 0;
+}
+
+// WP's admin-menu.css sets display:block, padding, and dimensions on
+// #adminmenu .wp-menu-image:before for all menu icon pseudo-elements.
+// Those rules don't reach our panel, so mirror the base layout here.
+// Plugins like Code Snippets rely on these dimensions being present when
+// they register their icon purely via mask-image on ::before (no explicit
+// display/size in their own CSS — they inherit it from admin-menu.css).
+// Dashicon items get their font/glyph from the global .dashicons-before
+// rules which aren't scoped to #adminmenu, so those still render correctly.
+#wc-nav-v2-wp-rail .wp-menu-image::before {
+	display: block;
+	// padding: 7px 0 + height: 20px = 34px total, matching the li row height.
+	// mask-position:center then centers the icon at 17px = li center. ✓
+	// Dashicon glyphs (font-size: 20px) also fill this 20px content area.
+	padding: 7px 0;
+	width: 36px;
+	height: 20px;
+	vertical-align: middle;
+}
+
+// WP-rail overlay ──────────────────────────────────────────────────────────
+//
+// On Woo pages the back (←) link slides in a panel showing the original
+// WordPress navigation so users can jump to any WP section without a
+// full page reload back to the Dashboard.
+//
+// Layout: #wc-nav-v2-wp-rail is absolutely positioned over #adminmenu inside
+// #adminmenuwrap. It slides in from the LEFT (back = going up the hierarchy)
+// while #adminmenu slides out to the RIGHT. WP's flyout .wp-submenu elements
+// use `position:fixed` so they are not clipped by the overflow:hidden we apply
+// to #adminmenuwrap during the transition.
+
+// When the WP rail overlay is open, JS sets left to wrapRect.left (on-screen).
+// We use left-based animation instead of transform so that position:fixed
+// flyout children are positioned relative to the viewport (not the panel) —
+// any transform on a parent creates a new containing block for fixed
+// descendants, which would break flyout coordinate calculations.
+body.wc-nav-v2-showing-wp-rail #wc-nav-v2-wp-rail {
+	// left value set dynamically by JS (wrapRect.left).
+}
+
+#wc-nav-v2-wp-rail {
+	// Position, size, and initial left are set by JS from #adminmenuwrap's
+	// bounding rect. We animate via `left` (not transform) so that
+	// position:fixed flyout children are positioned relative to the viewport —
+	// any transform on a parent creates a new CSS fixed-positioning context,
+	// which would offset all flyout coordinates by the panel's own top/left.
+	position: fixed;
+	top: 32px;    // Fallback; JS overrides from wrapRect.
+	left: -160px; // Fallback hidden state; JS sets to wrapRect.left - wrapRect.width.
+	width: 160px; // Fallback; JS overrides.
+	bottom: 0;
+	overflow-y: auto;
+	z-index: 9991;
+	background: #23282d; // Fallback; JS overwrites with computed #adminmenu color.
+	// Transition duration must match RAIL_SLIDE_MS in JS.
+	transition: left 240ms ease;
+
+	> ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	// Top-level items need position:relative so flyout position:absolute works
+	// as a fallback, but JS positions flyouts as position:fixed at runtime.
+	li.menu-top {
+		position: relative;
+	}
+
+	// WP's admin-menu.css hides .wp-submenu with `top:-1000em` inside
+	// #adminmenu, but our panel is outside that scope so submenus would
+	// render inline by default. Hide them here; JS shows them on hover.
+	.wp-submenu {
+		display: none;
+	}
+
+	// Separators: WP's admin-menu.css styles these on #adminmenu specifically,
+	// so we replicate the essential rule here.
+	li.wp-menu-separator {
+		height: 5px;
+		padding: 0;
+		margin: 0;
+		overflow: hidden;
+		background: transparent;
+		cursor: default;
+	}
+
+	// Show flyout submenus when JS adds .opensub (via bindDelayedHover).
+	// :focus-within covers keyboard nav.
+	li.opensub > .wp-submenu,
+	li:focus-within > .wp-submenu {
+		display: block;
+	}
+
+	// Link text color is set by JS at runtime by copying #adminmenu a's computed
+	// color — this makes it scheme-aware without hardcoding. `inherit` picks that
+	// up from the panel element's inline style. text-decoration matches #adminmenu.
+	a {
+		color: inherit;
+		text-decoration: none;
+
+		&:hover,
+		&:focus {
+			// --wc-rail-hover-color is read from the active color-scheme stylesheet
+			// at window.load (same pass as --wc-rail-hover-bg). Falls back to #fff
+			// which is correct for all dark schemes.
+			color: var( --wc-rail-hover-color, #fff );
+		}
+	}
+
+	// Submenu link color is copied separately by JS — it's often a different
+	// (lighter/gray) shade from the top-level link color in custom schemes.
+	// Falls back to `inherit` (the top-level color) if the property isn't set.
+	.wp-submenu a {
+		color: var( --wc-rail-submenu-color, inherit );
+		text-decoration: none;
+
+		&:hover,
+		&:focus {
+			color: var( --wc-rail-hover-color, #fff );
+		}
+	}
+
+	// Top-level hover: color-scheme background + scheme-appropriate text.
+	// Both --wc-rail-hover-bg and --wc-rail-hover-color are read from the active
+	// color-scheme stylesheet at window.load; fall back to WP defaults.
+	// !important overrides any WP admin or plugin CSS that may conflict.
+	li.menu-top > a:hover,
+	li.menu-top > a:focus {
+		background-color: var(--wc-rail-hover-bg, #2271b1) !important;
+		color: var( --wc-rail-hover-color, #fff ) !important;
+		border-left: none !important;
+		box-shadow: none !important;
+	}
+
+	// SVG icons (background-image data URIs) aren't affected by CSS `color`.
+	// Invert them to white so they're visible against the blue hover background.
+	li.menu-top > a:hover .wp-menu-image.svg,
+	li.menu-top > a:focus .wp-menu-image.svg {
+		filter: brightness( 0 ) invert( 1 );
+	}
+}
