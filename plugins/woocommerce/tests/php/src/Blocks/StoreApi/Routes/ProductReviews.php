@@ -138,6 +138,103 @@ class ProductReviews extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Reviews are returned in the requested sort order and respect offset.
+	 * @dataProvider get_items_sort_and_offset_data
+	 *
+	 * @param string $orderby Review field used for sorting.
+	 * @param string $order Sort direction.
+	 * @param int    $offset Number of reviews to skip.
+	 * @param array  $expected_contents Expected review contents in response order.
+	 */
+	public function test_get_items_sort_and_offset_matrix( string $orderby, string $order, int $offset, array $expected_contents ): void {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Review ordering product',
+				'regular_price' => 20,
+			)
+		);
+
+		$fixtures->add_product_review(
+			$product->get_id(),
+			1,
+			'Oldest one-star review',
+			array(
+				'comment_date'     => '2024-01-01 09:00:00',
+				'comment_date_gmt' => '2024-01-01 09:00:00',
+			)
+		);
+		$fixtures->add_product_review(
+			$product->get_id(),
+			5,
+			'Middle five-star review',
+			array(
+				'comment_date'     => '2024-01-02 09:00:00',
+				'comment_date_gmt' => '2024-01-02 09:00:00',
+			)
+		);
+		$fixtures->add_product_review(
+			$product->get_id(),
+			3,
+			'Newest three-star review',
+			array(
+				'comment_date'     => '2024-01-03 09:00:00',
+				'comment_date_gmt' => '2024-01-03 09:00:00',
+			)
+		);
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/reviews' );
+		$request->set_param( 'product_id', (string) $product->get_id() );
+		$request->set_param( 'per_page', 10 );
+		$request->set_param( 'orderby', $orderby );
+		$request->set_param( 'order', $order );
+		$request->set_param( 'offset', $offset );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'Unexpected status code.' );
+		$this->assertSame(
+			array_map( 'wpautop', $expected_contents ),
+			wp_list_pluck( $response->get_data(), 'review' ),
+			'Reviews were not returned in the requested order.'
+		);
+		$this->assertSame( 3, $response->get_headers()['X-WP-Total'], 'Unexpected total review count.' );
+	}
+
+	/**
+	 * Data provider for review sort and offset requests.
+	 *
+	 * @return array<string, array{string, string, int, string[]}>
+	 */
+	public function get_items_sort_and_offset_data(): array {
+		return array(
+			'recent'             => array(
+				'date_gmt',
+				'desc',
+				0,
+				array( 'Newest three-star review', 'Middle five-star review', 'Oldest one-star review' ),
+			),
+			'rating ascending'   => array(
+				'rating',
+				'asc',
+				0,
+				array( 'Oldest one-star review', 'Newest three-star review', 'Middle five-star review' ),
+			),
+			'rating descending'  => array(
+				'rating',
+				'desc',
+				0,
+				array( 'Middle five-star review', 'Newest three-star review', 'Oldest one-star review' ),
+			),
+			'recent with offset' => array(
+				'date_gmt',
+				'desc',
+				1,
+				array( 'Middle five-star review', 'Oldest one-star review' ),
+			),
+		);
+	}
+
+	/**
 	 * Test getting reviews from a specific product.
 	 */
 	public function test_get_items_with_product_id_param() {
