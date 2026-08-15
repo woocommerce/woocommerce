@@ -138,6 +138,174 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Create products whose sortable properties have independent orders.
+	 *
+	 * @return array{first: WC_Product_Simple, second: WC_Product_Simple, third: WC_Product_Simple, fourth: WC_Product_Simple, pending: WC_Product_Simple, variable: WC_Product_Variable} Products keyed by creation order.
+	 */
+	private function create_ordering_products(): array {
+		$definitions = array(
+			'first'   => array(
+				'name'           => 'Slice 022 Delta',
+				'slug'           => 'slice-022-charlie',
+				'date_created'   => '2024-01-03 12:00:00',
+				'price'          => '40',
+				'total_sales'    => 3,
+				'average_rating' => 4.0,
+				'rating_counts'  => array( 4 => 3 ),
+			),
+			'second'  => array(
+				'name'           => 'Slice 022 Alpha',
+				'slug'           => 'slice-022-bravo',
+				'date_created'   => '2024-01-01 12:00:00',
+				'price'          => '20',
+				'total_sales'    => 2,
+				'average_rating' => 2.0,
+				'rating_counts'  => array( 2 => 2 ),
+			),
+			'third'   => array(
+				'name'           => 'Slice 022 Charlie',
+				'slug'           => 'slice-022-delta',
+				'date_created'   => '2024-01-06 12:00:00',
+				'price'          => '10',
+				'total_sales'    => 1,
+				'average_rating' => 3.0,
+				'rating_counts'  => array( 3 => 1 ),
+			),
+			'fourth'  => array(
+				'name'           => 'Slice 022 Bravo',
+				'slug'           => 'slice-022-alpha',
+				'date_created'   => '2024-01-02 12:00:00',
+				'price'          => '30',
+				'total_sales'    => 4,
+				'average_rating' => 1.0,
+				'rating_counts'  => array( 1 => 4 ),
+			),
+			'pending' => array(
+				'name'           => 'Slice 022 Echo',
+				'date_created'   => '2024-01-04 12:00:00',
+				'price'          => '25',
+				'total_sales'    => 5,
+				'average_rating' => 0.0,
+				'rating_counts'  => array(),
+				'status'         => ProductStatus::PENDING,
+			),
+		);
+		$products    = array();
+
+		try {
+			foreach ( $definitions as $key => $definition ) {
+				$props = array(
+					'name'          => $definition['name'],
+					'regular_price' => $definition['price'],
+					'price'         => $definition['price'],
+				);
+				if ( isset( $definition['slug'] ) ) {
+					$props['slug'] = $definition['slug'];
+				}
+				if ( isset( $definition['status'] ) ) {
+					$props['status'] = $definition['status'];
+				}
+				$product = WC_Helper_Product::create_simple_product(
+					false,
+					$props
+				);
+				$product->set_date_created( $definition['date_created'] );
+				$product->set_total_sales( $definition['total_sales'] );
+				$product->set_average_rating( $definition['average_rating'] );
+				$product->set_rating_counts( $definition['rating_counts'] );
+				$product->set_review_count( array_sum( $definition['rating_counts'] ) );
+				$products[ $key ] = $product;
+				$product->save();
+			}
+
+			$variable = new WC_Product_Variable();
+			$variable->set_name( 'Slice 022 Foxtrot' );
+			$variable->set_slug( 'slice-022-echo' );
+			$variable->set_date_created( '2024-01-05 12:00:00' );
+			$variable->set_total_sales( 6 );
+			$variable->set_average_rating( 5.0 );
+			$variable->set_rating_counts( array( 5 => 6 ) );
+			$variable->set_review_count( 6 );
+			$products['variable'] = $variable;
+			$variable->save();
+
+			WC_Helper_Product::create_product_variation_object(
+				$variable->get_id(),
+				'SLICE 022 LOW ' . wp_generate_uuid4(),
+				5,
+				array()
+			);
+			WC_Helper_Product::create_product_variation_object(
+				$variable->get_id(),
+				'SLICE 022 HIGH ' . wp_generate_uuid4(),
+				50,
+				array()
+			);
+			WC_Product_Variable::sync( $variable->get_id() );
+			$persisted_variable = wc_get_product( $variable->get_id() );
+			if ( ! $persisted_variable instanceof WC_Product_Variable ) {
+				throw new RuntimeException( 'The variable ordering fixture could not be reloaded.' );
+			}
+			$products['variable'] = $persisted_variable;
+		} catch ( Throwable $throwable ) {
+			$this->delete_ordering_products( $products );
+			throw $throwable;
+		}
+
+		return $products;
+	}
+
+	/**
+	 * Delete products created for an ordering test.
+	 *
+	 * @param WC_Product[] $products Products to delete.
+	 */
+	private function delete_ordering_products( array $products ): void {
+		foreach ( $products as $product ) {
+			if ( $product->get_id() ) {
+				$persisted_product = wc_get_product( $product->get_id() );
+				if ( $persisted_product instanceof WC_Product_Variable ) {
+					foreach ( $persisted_product->get_children() as $child_id ) {
+						WC_Helper_Product::delete_product( $child_id );
+					}
+				}
+				$product->delete( true );
+			}
+		}
+	}
+
+	/**
+	 * Dispatch an authenticated product collection request and assert exact order.
+	 *
+	 * @param int[]       $included_ids Product IDs that constrain the collection.
+	 * @param int[]       $expected_ids Product IDs in the expected response order.
+	 * @param string|null $orderby      REST orderby value, or null to use the default.
+	 * @param string|null $order        REST order value, or null to use the default.
+	 * @param string      $description  Assertion context.
+	 */
+	private function assert_product_collection_order( array $included_ids, array $expected_ids, ?string $orderby, ?string $order, string $description ): void {
+		$query_params = array(
+			'include'  => $included_ids,
+			'per_page' => count( $included_ids ),
+		);
+		if ( null !== $orderby ) {
+			$query_params['orderby'] = $orderby;
+		}
+		if ( null !== $order ) {
+			$query_params['order'] = $order;
+		}
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params( $query_params );
+		$response      = $this->server->dispatch( $request );
+		$response_data = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status(), "$description should return HTTP 200." );
+		$this->assertCount( count( $included_ids ), $response_data, "$description should return every included product." );
+		$this->assertSame( $expected_ids, array_map( 'absint', wp_list_pluck( $response_data, 'id' ) ), "$description should return products in the expected order." );
+	}
+
+	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
@@ -588,6 +756,86 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$decoded_data_object = json_decode( $encoded_data_string, false ); // Ensure object instead of associative array.
 
 		$this->assertIsArray( $decoded_data_object[0]->meta_data );
+	}
+
+	/**
+	 * @testdox Product collection ordering returns exact core-field orders through the registered V3 route.
+	 */
+	public function test_collection_orderby_core_fields(): void {
+		$products = $this->create_ordering_products();
+
+		try {
+			$first    = $products['first']->get_id();
+			$second   = $products['second']->get_id();
+			$third    = $products['third']->get_id();
+			$fourth   = $products['fourth']->get_id();
+			$pending  = $products['pending']->get_id();
+			$variable = $products['variable']->get_id();
+			$all      = array( $first, $second, $third, $fourth, $pending, $variable );
+
+			$this->assertSame( ProductStatus::PENDING, $products['pending']->get_status(), 'The empty-slug fixture should remain unpublished.' );
+			$this->assertSame( '', get_post_field( 'post_name', $pending ), 'The pending fixture should exercise the actual empty post_name boundary.' );
+			$this->assert_product_collection_order( $all, array( $third, $variable, $pending, $first, $fourth, $second ), null, null, 'Default date DESC ordering' );
+			$this->assert_product_collection_order( $all, array( $second, $fourth, $first, $pending, $variable, $third ), 'date', 'asc', 'Date ASC ordering' );
+			$this->assert_product_collection_order( $all, array( $third, $variable, $pending, $first, $fourth, $second ), 'date', 'desc', 'Date DESC ordering' );
+			$this->assert_product_collection_order( $all, array( $first, $second, $third, $fourth, $pending, $variable ), 'id', 'asc', 'ID ASC ordering' );
+			$this->assert_product_collection_order( $all, array( $variable, $pending, $fourth, $third, $second, $first ), 'id', 'desc', 'ID DESC ordering' );
+			$this->assert_product_collection_order( $all, array( $second, $fourth, $third, $first, $pending, $variable ), 'title', 'asc', 'Title ASC ordering' );
+			$this->assert_product_collection_order( $all, array( $variable, $pending, $first, $third, $fourth, $second ), 'title', 'desc', 'Title DESC ordering' );
+			$this->assert_product_collection_order( $all, array( $pending, $fourth, $second, $first, $third, $variable ), 'slug', 'asc', 'Slug ASC ordering' );
+			$this->assert_product_collection_order( $all, array( $variable, $third, $first, $second, $fourth, $pending ), 'slug', 'desc', 'Slug DESC ordering' );
+		} finally {
+			$this->delete_ordering_products( $products );
+		}
+	}
+
+	/**
+	 * @testdox Product collection ordering returns exact lookup-field orders through the registered V3 route.
+	 */
+	public function test_collection_orderby_lookup_fields(): void {
+		$products = $this->create_ordering_products();
+
+		try {
+			$first    = $products['first']->get_id();
+			$second   = $products['second']->get_id();
+			$third    = $products['third']->get_id();
+			$fourth   = $products['fourth']->get_id();
+			$pending  = $products['pending']->get_id();
+			$variable = $products['variable']->get_id();
+			$all      = array( $first, $second, $third, $fourth, $pending, $variable );
+
+			$this->assertSame( '5.00', $products['variable']->get_variation_price( 'min' ), 'The variable fixture should expose its persisted minimum lookup price.' );
+			$this->assertSame( '50.00', $products['variable']->get_variation_price( 'max' ), 'The variable fixture should expose a distinct persisted maximum lookup price.' );
+			$this->assert_product_collection_order( $all, array( $variable, $third, $second, $pending, $fourth, $first ), 'price', 'asc', 'Price ASC ordering' );
+			$this->assert_product_collection_order( $all, array( $variable, $first, $fourth, $pending, $second, $third ), 'price', 'desc', 'Price DESC ordering' );
+			$this->assert_product_collection_order( $all, array( $variable, $first, $third, $second, $fourth, $pending ), 'rating', 'desc', 'Rating DESC ordering' );
+			$this->assert_product_collection_order( $all, array( $variable, $pending, $fourth, $first, $second, $third ), 'popularity', 'desc', 'Popularity DESC ordering' );
+		} finally {
+			$this->delete_ordering_products( $products );
+		}
+	}
+
+	/**
+	 * @testdox Product collection include ordering preserves request order regardless of the order parameter.
+	 */
+	public function test_collection_orderby_include_order(): void {
+		$products = $this->create_ordering_products();
+
+		try {
+			$included_ids = array(
+				$products['pending']->get_id(),
+				$products['fourth']->get_id(),
+				$products['first']->get_id(),
+				$products['variable']->get_id(),
+				$products['third']->get_id(),
+				$products['second']->get_id(),
+			);
+
+			$this->assert_product_collection_order( $included_ids, $included_ids, 'include', 'asc', 'Include ASC ordering' );
+			$this->assert_product_collection_order( $included_ids, $included_ids, 'include', 'desc', 'Include DESC ordering' );
+		} finally {
+			$this->delete_ordering_products( $products );
+		}
 	}
 
 	/**
