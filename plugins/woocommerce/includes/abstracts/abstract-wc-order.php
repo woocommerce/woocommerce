@@ -1765,13 +1765,19 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function add_product( $product, $qty = 1, $args = array() ) {
 		if ( $product ) {
 			$order = ArrayUtil::get_value_or_default( $args, 'order' );
-			$total = wc_get_price_excluding_tax(
+			// wc_get_price_excluding_tax() clamps qty to >= 0, so pass the absolute
+			// value and re-sign the resulting line total to support negative quantities.
+			$abs_qty = abs( (float) $qty );
+			$total   = wc_get_price_excluding_tax(
 				$product,
 				array(
-					'qty'   => $qty,
+					'qty'   => $abs_qty,
 					'order' => $order,
 				)
 			);
+			if ( '' !== $total && (float) $qty < 0 ) {
+				$total = -1 * (float) $total;
+			}
 
 			$default_args = array(
 				'name'         => $product->get_name(),

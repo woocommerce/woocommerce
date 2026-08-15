@@ -121,7 +121,7 @@ $item_name = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $i
 			* @param   WC_Product  $product The product that is being edited.
 			* @param   string      $context The context in which the quantity editor is shown, 'edit' or 'refund'.
 			*/
-			$min_edit   = apply_filters( 'woocommerce_quantity_input_min_admin', '0', $product, 'edit' );
+			$min_edit   = apply_filters( 'woocommerce_quantity_input_min_admin', '-9999', $product, 'edit' );
 			$min_refund = apply_filters( 'woocommerce_quantity_input_min_admin', '0', $product, 'refund' );
 		?>
 		<div class="edit" style="display: none;">
