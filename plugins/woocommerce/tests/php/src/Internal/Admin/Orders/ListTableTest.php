@@ -360,6 +360,129 @@ class ListTableTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Preparing the list table filters persisted HPOS orders by the requested status.
+	 */
+	public function test_prepare_items_filters_orders_by_status(): void {
+		$create_order = static function ( string $status ): \WC_Order {
+			$order = \WC_Helper_Order::create_order();
+			$order->set_status( $status );
+			$order->save();
+
+			return $order;
+		};
+
+		$orders              = array(
+			'pending_id'      => $create_order( OrderStatus::PENDING ),
+			'processing_id_1' => $create_order( OrderStatus::PROCESSING ),
+			'processing_id_2' => $create_order( OrderStatus::PROCESSING ),
+			'on_hold_id'      => $create_order( OrderStatus::ON_HOLD ),
+			'completed_id'    => $create_order( OrderStatus::COMPLETED ),
+			'cancelled_id'    => $create_order( OrderStatus::CANCELLED ),
+			'refunded_id'     => $create_order( OrderStatus::REFUNDED ),
+			'failed_id'       => $create_order( OrderStatus::FAILED ),
+		);
+		$order_ids           = array_map(
+			static fn( \WC_Order $order ): int => $order->get_id(),
+			$orders
+		);
+		$cases               = array(
+			'all'           => array(
+				'ids'      => array_values( $order_ids ),
+				'statuses' => array( 'pending', 'processing', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed' ),
+			),
+			'wc-pending'    => array(
+				'ids'      => array( $order_ids['pending_id'] ),
+				'statuses' => array( 'pending' ),
+			),
+			'wc-processing' => array(
+				'ids'      => array( $order_ids['processing_id_1'], $order_ids['processing_id_2'] ),
+				'statuses' => array( 'processing', 'processing' ),
+			),
+			'wc-on-hold'    => array(
+				'ids'      => array( $order_ids['on_hold_id'] ),
+				'statuses' => array( 'on-hold' ),
+			),
+			'wc-completed'  => array(
+				'ids'      => array( $order_ids['completed_id'] ),
+				'statuses' => array( 'completed' ),
+			),
+			'wc-cancelled'  => array(
+				'ids'      => array( $order_ids['cancelled_id'] ),
+				'statuses' => array( 'cancelled' ),
+			),
+			'wc-refunded'   => array(
+				'ids'      => array( $order_ids['refunded_id'] ),
+				'statuses' => array( 'refunded' ),
+			),
+			'wc-failed'     => array(
+				'ids'      => array( $order_ids['failed_id'] ),
+				'statuses' => array( 'failed' ),
+			),
+		);
+		$expected_view_slugs = array_keys( $cases );
+		sort( $expected_view_slugs, SORT_STRING );
+
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Direct request input is required to exercise the list-table boundary.
+		$status_was_set  = array_key_exists( 'status', $_REQUEST );
+		$previous_status = $_REQUEST['status'] ?? null;
+
+		try {
+			foreach ( $cases as $requested_status => $expected ) {
+				$_REQUEST['status'] = $requested_status;
+				$this->sut->prepare_items();
+
+				$get_items = function () {
+					return $this->items;
+				};
+				$items     = $get_items->call( $this->sut );
+
+				$actual_ids        = array_map(
+					static fn( \WC_Order $order ): int => $order->get_id(),
+					$items
+				);
+				$actual_statuses   = array_map(
+					static fn( \WC_Order $order ): string => $order->get_status(),
+					$items
+				);
+				$expected_ids      = $expected['ids'];
+				$expected_statuses = $expected['statuses'];
+				sort( $actual_ids, SORT_NUMERIC );
+				sort( $expected_ids, SORT_NUMERIC );
+				sort( $actual_statuses, SORT_STRING );
+				sort( $expected_statuses, SORT_STRING );
+
+				$this->assertCount( count( $expected_ids ), $items, "The {$requested_status} request should return the expected number of orders" );
+				$this->assertSame( $expected_ids, $actual_ids, "The {$requested_status} request should return the complete expected order set" );
+				$this->assertSame( $expected_statuses, $actual_statuses, "The {$requested_status} request should return only the expected statuses" );
+
+				$views             = $this->sut->get_views();
+				$actual_view_slugs = array_keys( $views );
+				sort( $actual_view_slugs, SORT_STRING );
+
+				$this->assertSame( $expected_view_slugs, $actual_view_slugs, "The {$requested_status} request should expose every populated status view" );
+				foreach ( $expected_view_slugs as $view_slug ) {
+					$this->assertStringContainsString( "status={$view_slug}", $views[ $view_slug ], "The {$view_slug} view should target its matching status" );
+				}
+
+				$current_view_slugs = array_keys(
+					array_filter(
+						$views,
+						static fn( string $view_link ): bool => str_contains( $view_link, 'class="current"' )
+					)
+				);
+				$this->assertSame( array( $requested_status ), $current_view_slugs, "Only the {$requested_status} view should be current" );
+			}
+		} finally {
+			if ( $status_was_set ) {
+				$_REQUEST['status'] = $previous_status;
+			} else {
+				unset( $_REQUEST['status'] );
+			}
+		}
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+	}
+
+	/**
 	 * Create two paid orders with all date props set to the given dates.
 	 *
 	 * @param string $date1 Date for the first order.
