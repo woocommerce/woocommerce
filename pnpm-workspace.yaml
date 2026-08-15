@@ -85,6 +85,7 @@ packages:
     - 'tools/release-posts'
     - 'tools/storybook'
     - 'tools/monorepo-utils'
+    - 'tools/email-editor-parity'
 
 # Quality of life tweaks (migrated from .npmrc)
 childConcurrency: 8        # 5 by default
