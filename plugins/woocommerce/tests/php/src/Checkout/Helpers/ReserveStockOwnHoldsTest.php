@@ -45,6 +45,20 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 	private const HOLD_MINUTES = 2880;
 
 	/**
+	 * The session the bootstrap set up, put back in tearDown.
+	 *
+	 * @var \WC_Session|null
+	 */
+	private $original_session;
+
+	/**
+	 * The customer the bootstrap set up, put back in tearDown.
+	 *
+	 * @var WC_Customer|null
+	 */
+	private $original_customer;
+
+	/**
 	 * Set up a shopper session and a store that manages stock.
 	 */
 	public function setUp(): void {
@@ -54,12 +68,18 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_schema_version', 430 );
 		update_option( 'woocommerce_hold_stock_minutes', self::HOLD_MINUTES );
 
+		$this->original_session  = WC()->session;
+		$this->original_customer = WC()->customer;
+
 		WC()->session = new WC_Session_Handler();
 		WC()->session->init();
 	}
 
 	/**
 	 * Leave no session, user or reservation behind.
+	 *
+	 * The session and customer singletons are restored rather than nulled: this
+	 * suite runs in one process, and a null WC()->session fatals later classes.
 	 */
 	public function tearDown(): void {
 		global $wpdb;
@@ -67,7 +87,9 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 		$wpdb->query( "DELETE FROM {$wpdb->wc_reserved_stock}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		wp_set_current_user( 0 );
-		WC()->session = null;
+
+		WC()->session  = $this->original_session;
+		WC()->customer = $this->original_customer;
 
 		parent::tearDown();
 	}
@@ -173,8 +195,45 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 		// The Store API mints a new draft and repoints the session at it.
 		WC()->session->set( 'store_api_draft_order', $this->create_unpaid_order_for( 0, $product ) );
 
-		$this->assertContains( $order, WC()->session->get( 'stock_holding_orders', array() ) );
+		$remembered = WC()->session->get( 'stock_holding_orders', array() );
+
+		$this->assertContains( $order, $remembered['order_ids'] );
 		$this->assertSame( 0, wc_get_held_stock_quantity( $product, 0 ) );
+	}
+
+	/**
+	 * A session list that arrived from somebody else's session confers nothing.
+	 *
+	 * WC_Session_Handler hands one shopper's session data to another in two places:
+	 * clone_session_data() copies everything but `customer` into a freshly minted
+	 * session when a cart token is presented, and
+	 * migrate_guest_session_to_user_session() moves a guest session onto whichever
+	 * account next signs in on that browser. Both change the session customer id
+	 * first, which is what the stamp detects.
+	 */
+	public function test_borrowed_session_list_confers_no_ownership() {
+		$product = $this->create_stock_managed_product( 1 );
+		$order   = $this->create_unpaid_order_for( 0, $product );
+
+		wc_reserve_stock_for_order( wc_get_order( $order ) );
+		$this->age_hold( $order, 11 );
+
+		$borrowed = WC()->session->get( 'stock_holding_orders', array() );
+
+		$this->assertContains( $order, $borrowed['order_ids'], 'Precondition: the owner recorded the hold.' );
+
+		// A second shopper, whose session carries the first shopper's list verbatim
+		// but under their own, different customer id.
+		WC()->session = new WC_Session_Handler();
+		WC()->session->init();
+		WC()->session->set( 'stock_holding_orders', $borrowed );
+
+		$this->assertNotSame(
+			$borrowed['customer'],
+			(string) WC()->session->get_customer_id(),
+			'Precondition: the borrowing session has a different customer id.'
+		);
+		$this->assertSame( 1, wc_get_held_stock_quantity( $product, 0 ) );
 	}
 
 	/**
@@ -302,14 +361,22 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * An unpaid order for a customer, containing the product.
+	 * An unpaid order for a customer, holding one unit of the product.
+	 *
+	 * The line item is rebuilt rather than left as WC_Helper_Order::create_order()
+	 * makes it, because that helper hard-codes a quantity of 4
+	 * (class-wc-helper-order.php:73). A test that then reserves for real would ask
+	 * for 4 units of a 1-unit product and throw ReserveStockException. Same approach
+	 * as create_order_holding_stock() in class-wc-cart-test.php.
 	 *
 	 * @param int               $customer_id Customer ID, 0 for a guest.
 	 * @param WC_Product_Simple $product     Product to add.
 	 * @return int Order ID.
 	 */
 	private function create_unpaid_order_for( int $customer_id, WC_Product_Simple $product ): int {
-		$order = WC_Helper_Order::create_order( $customer_id, $product );
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->remove_order_items();
+		$order->add_product( wc_get_product( $product->get_id() ), 1 );
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 

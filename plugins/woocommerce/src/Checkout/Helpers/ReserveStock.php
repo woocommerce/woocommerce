@@ -20,6 +20,9 @@ final class ReserveStock {
 
 	/**
 	 * Session key listing orders this shopper has taken a stock hold for.
+	 *
+	 * Holds array( 'customer' => string, 'order_ids' => int[] ), where `customer`
+	 * is the session customer id that recorded them.
 	 */
 	private const OWN_ORDERS_SESSION_KEY = 'stock_holding_orders';
 
@@ -395,12 +398,21 @@ final class ReserveStock {
 	/**
 	 * Returns order ids that demonstrably belong to the shopper making this request.
 	 *
-	 * Three sources, all of them authenticated: the two session pointers, the list
-	 * this class records as it takes holds, and the account when the shopper is
-	 * signed in. Ownership is never taken from anything a shopper can type. An
-	 * unauthenticated field such as the billing email would let one shopper claim
-	 * another's in flight hold, which is the oversell the grace window exists to
-	 * bound.
+	 * Two sources. The list this class records as it takes holds, which is bound to
+	 * the session that recorded it, and the account when the shopper is signed in.
+	 * Ownership is never taken from anything a shopper can type: an unauthenticated
+	 * field such as the billing email would let one shopper claim another's in
+	 * flight hold, which is the oversell the grace window exists to bound.
+	 *
+	 * order_awaiting_payment and store_api_draft_order are deliberately NOT read
+	 * here. Session contents are not by themselves a proof of identity, because
+	 * core hands them to a different shopper in two places: clone_session_data()
+	 * copies everything except `customer` into a freshly minted session when a cart
+	 * token is presented, and migrate_guest_session_to_user_session() moves a guest
+	 * session wholesale onto whichever account next signs in on that browser. Those
+	 * two keys carry no record of who wrote them, so they cannot be checked. They
+	 * also add nothing: an order can only hold stock by passing through
+	 * reserve_stock_for_order(), which is where the bound list is written.
 	 *
 	 * This runs inside get_query_for_reserved_stock(), which wc_get_held_stock_quantity()
 	 * also reaches from the admin, WP-CLI and cron. There is no shopper in those
@@ -416,24 +428,7 @@ final class ReserveStock {
 			return array();
 		}
 
-		$order_ids = array();
-
-		// Read through get() rather than the magic property: WC_Session::__isset()
-		// is true for a stored `false`, which is what payment_complete() leaves in
-		// order_awaiting_payment.
-		foreach ( array( 'order_awaiting_payment', 'store_api_draft_order' ) as $session_key ) {
-			$order_id = absint( $session->get( $session_key, 0 ) );
-
-			if ( $order_id ) {
-				$order_ids[] = $order_id;
-			}
-		}
-
-		$remembered = $session->get( self::OWN_ORDERS_SESSION_KEY, array() );
-
-		if ( is_array( $remembered ) ) {
-			$order_ids = array_merge( $order_ids, array_map( 'absint', $remembered ) );
-		}
+		$order_ids = $this->get_remembered_order_ids( $session );
 
 		$customer_id = get_current_user_id();
 
@@ -442,6 +437,34 @@ final class ReserveStock {
 		}
 
 		return array_values( array_filter( array_unique( $order_ids ) ) );
+	}
+
+	/**
+	 * Returns the recorded order ids, but only if this is still the session that
+	 * recorded them.
+	 *
+	 * The customer id is stamped alongside the ids when they are written, and both
+	 * of the ways core moves session data between shoppers change it first:
+	 * init_session_from_request() mints a new customer id before cloning, and
+	 * migrate_guest_session_to_user_session() swaps the guest id for the account id.
+	 * A mismatch therefore means the data arrived from somebody else's session, and
+	 * the list is ignored rather than trusted.
+	 *
+	 * @param \WC_Session $session Session of the shopper making this request.
+	 * @return int[]
+	 */
+	private function get_remembered_order_ids( \WC_Session $session ): array {
+		$remembered = $session->get( self::OWN_ORDERS_SESSION_KEY, array() );
+
+		if ( ! is_array( $remembered ) || ! isset( $remembered['customer'], $remembered['order_ids'] ) || ! is_array( $remembered['order_ids'] ) ) {
+			return array();
+		}
+
+		if ( (string) $remembered['customer'] !== (string) $session->get_customer_id() ) {
+			return array();
+		}
+
+		return array_map( 'absint', $remembered['order_ids'] );
 	}
 
 	/**
@@ -462,29 +485,37 @@ final class ReserveStock {
 	 * Neither existing pointer survives an abandoned attempt. The Store API
 	 * repoints store_api_draft_order at a new draft as soon as the previous one
 	 * leaves checkout-draft, and order_awaiting_payment is only ever written by the
-	 * classic checkout. This list keeps the ids for the life of the session, which
-	 * is the same trust boundary as the pointers themselves.
+	 * classic checkout. This list keeps the ids for the life of the session.
+	 *
+	 * The session's customer id is stamped alongside them so that the list can be
+	 * discarded if it later turns up in somebody else's session. See
+	 * get_remembered_order_ids().
 	 *
 	 * Skipped entirely where there is no session, which is how an order created in
 	 * the admin or over WP-CLI leaves nothing behind.
 	 *
 	 * @param \WC_Order $order Order that now holds stock.
 	 */
-	private function remember_order_for_shopper( $order ) {
+	private function remember_order_for_shopper( $order ): void {
 		$session = $this->get_shopper_session();
 
 		if ( ! $session instanceof \WC_Session ) {
 			return;
 		}
 
-		$order_ids = $session->get( self::OWN_ORDERS_SESSION_KEY, array() );
-		$order_ids = is_array( $order_ids ) ? $order_ids : array();
+		$order_ids = $this->get_remembered_order_ids( $session );
 
 		array_unshift( $order_ids, $order->get_id() );
 
 		$order_ids = array_slice( array_values( array_unique( array_map( 'absint', $order_ids ) ) ), 0, self::MAX_OWN_ORDERS );
 
-		$session->set( self::OWN_ORDERS_SESSION_KEY, $order_ids );
+		$session->set(
+			self::OWN_ORDERS_SESSION_KEY,
+			array(
+				'customer'  => (string) $session->get_customer_id(),
+				'order_ids' => $order_ids,
+			)
+		);
 	}
 
 	/**
