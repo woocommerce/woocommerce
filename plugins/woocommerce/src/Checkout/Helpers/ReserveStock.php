@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Checkout\Helpers;
 
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Enums\OrderItemType;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 
@@ -18,11 +19,33 @@ defined( 'ABSPATH' ) || exit;
 final class ReserveStock {
 
 	/**
+	 * Session key listing orders this shopper has taken a stock hold for.
+	 */
+	private const OWN_ORDERS_SESSION_KEY = 'stock_holding_orders';
+
+	/**
+	 * Most of the current shopper's own orders to consider when discounting their
+	 * own stale holds. Keeps the generated IN clause bounded.
+	 */
+	private const MAX_OWN_ORDERS = 10;
+
+	/**
 	 * Is stock reservation enabled?
 	 *
 	 * @var boolean
 	 */
 	private $enabled = true;
+
+	/**
+	 * Request scoped memo of a signed in customer's unpaid order ids.
+	 *
+	 * A new ReserveStock is constructed for each wc_get_held_stock_quantity()
+	 * call, and the cart makes one per stock managed item, so the memo cannot
+	 * live on the instance.
+	 *
+	 * @var array<int, int[]>
+	 */
+	private static $unpaid_order_ids_by_customer = array();
 
 	/**
 	 * Constructor
@@ -149,6 +172,8 @@ final class ReserveStock {
 				foreach ( $rows as $product_id => $quantity ) {
 					$this->reserve_stock_for_product( $product_id, $quantity, $order, $minutes );
 				}
+
+				$this->remember_order_for_shopper( $order );
 			}
 		} catch ( ReserveStockException $e ) {
 			$this->release_stock_for_order( $order );
@@ -293,6 +318,8 @@ final class ReserveStock {
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
+		$query .= $this->get_clause_to_discount_stale_own_holds( $exclude_order_id );
+
 		/**
 		 * Filter: woocommerce_query_for_reserved_stock
 		 * Allows to filter the query for getting reserved stock of a product.
@@ -303,5 +330,194 @@ final class ReserveStock {
 		 * @param int    $exclude_order_id Order to exclude from the results.
 		 */
 		return apply_filters( 'woocommerce_query_for_reserved_stock', $query, $product_id, $exclude_order_id );
+	}
+
+	/**
+	 * Returns a clause discounting holds the current shopper placed themselves and
+	 * then left unpaid for longer than a grace window.
+	 *
+	 * Only one order is excluded by $exclude_order_id, so a shopper who abandons a
+	 * checkout and starts another is blocked by their own earlier hold for the
+	 * whole of woocommerce_hold_stock_minutes, which stores accepting slow payment
+	 * methods set to days. Inside the window their hold still counts, so a genuine
+	 * in flight payment is protected across a bank app switch or a one time code.
+	 * Past it, that shopper stops being blocked by their own abandoned attempt.
+	 * Holds belonging to anybody else are unaffected either way.
+	 *
+	 * @param int $exclude_order_id Order already excluded by the caller.
+	 * @return string Clause to append, or an empty string when nothing qualifies.
+	 */
+	private function get_clause_to_discount_stale_own_holds( $exclude_order_id ): string {
+		global $wpdb;
+
+		/**
+		 * Filters how long a shopper's own unpaid hold keeps blocking that same shopper.
+		 *
+		 * The hold is only ever discounted for the shopper who placed it, and only
+		 * once it is older than this. Return 0 to keep such holds blocking for the
+		 * full reservation window, which is how WooCommerce behaved before this
+		 * filter existed.
+		 *
+		 * @since 11.2.0
+		 *
+		 * @param int $minutes Grace window in minutes.
+		 */
+		$grace_minutes = (int) apply_filters( 'woocommerce_own_reserved_stock_grace_minutes', 10 );
+
+		if ( $grace_minutes < 1 ) {
+			return '';
+		}
+
+		$order_ids = array_values( array_diff( $this->get_current_shopper_order_ids(), array( absint( $exclude_order_id ) ) ) );
+
+		if ( empty( $order_ids ) ) {
+			return '';
+		}
+
+		$placeholders = implode( ',', array_fill( 0, count( $order_ids ), '%d' ) );
+
+		// The `timestamp` column records when the hold was first placed and is not
+		// touched by the ON DUPLICATE KEY UPDATE in reserve_stock_for_product(), so
+		// it measures the age of the shopper's attempt rather than of the last write.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return $wpdb->prepare(
+			"
+			AND NOT (
+				stock_table.`order_id` IN ( $placeholders )
+				AND stock_table.`timestamp` < ( NOW() - INTERVAL %d MINUTE )
+			)
+			",
+			array_merge( $order_ids, array( $grace_minutes ) )
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	}
+
+	/**
+	 * Returns order ids that demonstrably belong to the shopper making this request.
+	 *
+	 * Three sources, all of them authenticated: the two session pointers, the list
+	 * this class records as it takes holds, and the account when the shopper is
+	 * signed in. Ownership is never taken from anything a shopper can type. An
+	 * unauthenticated field such as the billing email would let one shopper claim
+	 * another's in flight hold, which is the oversell the grace window exists to
+	 * bound.
+	 *
+	 * This runs inside get_query_for_reserved_stock(), which wc_get_held_stock_quantity()
+	 * also reaches from the admin, WP-CLI and cron. There is no shopper in those
+	 * contexts and WC()->session is not initialised, so there is no ownership and
+	 * the query is returned unchanged.
+	 *
+	 * @return int[]
+	 */
+	private function get_current_shopper_order_ids(): array {
+		$session = $this->get_shopper_session();
+
+		if ( ! $session instanceof \WC_Session ) {
+			return array();
+		}
+
+		$order_ids = array();
+
+		// Read through get() rather than the magic property: WC_Session::__isset()
+		// is true for a stored `false`, which is what payment_complete() leaves in
+		// order_awaiting_payment.
+		foreach ( array( 'order_awaiting_payment', 'store_api_draft_order' ) as $session_key ) {
+			$order_id = absint( $session->get( $session_key, 0 ) );
+
+			if ( $order_id ) {
+				$order_ids[] = $order_id;
+			}
+		}
+
+		$remembered = $session->get( self::OWN_ORDERS_SESSION_KEY, array() );
+
+		if ( is_array( $remembered ) ) {
+			$order_ids = array_merge( $order_ids, array_map( 'absint', $remembered ) );
+		}
+
+		$customer_id = get_current_user_id();
+
+		if ( $customer_id ) {
+			$order_ids = array_merge( $order_ids, $this->get_unpaid_order_ids_for_customer( $customer_id ) );
+		}
+
+		return array_values( array_filter( array_unique( $order_ids ) ) );
+	}
+
+	/**
+	 * Returns the session of the shopper making this request, if there is one.
+	 *
+	 * @return \WC_Session|null
+	 */
+	private function get_shopper_session() {
+		$session = function_exists( 'WC' ) && WC() ? WC()->session : null;
+
+		return $session instanceof \WC_Session ? $session : null;
+	}
+
+	/**
+	 * Records an order against the shopper's session so that a later request can
+	 * still recognise the hold as theirs.
+	 *
+	 * Neither existing pointer survives an abandoned attempt. The Store API
+	 * repoints store_api_draft_order at a new draft as soon as the previous one
+	 * leaves checkout-draft, and order_awaiting_payment is only ever written by the
+	 * classic checkout. This list keeps the ids for the life of the session, which
+	 * is the same trust boundary as the pointers themselves.
+	 *
+	 * Skipped entirely where there is no session, which is how an order created in
+	 * the admin or over WP-CLI leaves nothing behind.
+	 *
+	 * @param \WC_Order $order Order that now holds stock.
+	 */
+	private function remember_order_for_shopper( $order ) {
+		$session = $this->get_shopper_session();
+
+		if ( ! $session instanceof \WC_Session ) {
+			return;
+		}
+
+		$order_ids = $session->get( self::OWN_ORDERS_SESSION_KEY, array() );
+		$order_ids = is_array( $order_ids ) ? $order_ids : array();
+
+		array_unshift( $order_ids, $order->get_id() );
+
+		$order_ids = array_slice( array_values( array_unique( array_map( 'absint', $order_ids ) ) ), 0, self::MAX_OWN_ORDERS );
+
+		$session->set( self::OWN_ORDERS_SESSION_KEY, $order_ids );
+	}
+
+	/**
+	 * Returns unpaid order ids belonging to a signed in customer, newest first.
+	 *
+	 * Session pointers are lost when the shopper switches device, clears cookies or
+	 * lets the session lapse, which is when they come back and meet their own hold.
+	 * The account covers that case for shoppers who are signed in.
+	 *
+	 * The statuses match the ones the reserved stock query counts, so an order that
+	 * cannot be holding stock is never fetched.
+	 *
+	 * @param int $customer_id Customer ID.
+	 * @return int[]
+	 */
+	private function get_unpaid_order_ids_for_customer( int $customer_id ): array {
+		if ( isset( self::$unpaid_order_ids_by_customer[ $customer_id ] ) ) {
+			return self::$unpaid_order_ids_by_customer[ $customer_id ];
+		}
+
+		$order_ids = wc_get_orders(
+			array(
+				'customer' => $customer_id,
+				'status'   => array( OrderStatus::CHECKOUT_DRAFT, OrderStatus::PENDING ),
+				'limit'    => self::MAX_OWN_ORDERS,
+				'orderby'  => 'date',
+				'order'    => 'DESC',
+				'return'   => 'ids',
+			)
+		);
+
+		self::$unpaid_order_ids_by_customer[ $customer_id ] = is_array( $order_ids ) ? array_map( 'absint', $order_ids ) : array();
+
+		return self::$unpaid_order_ids_by_customer[ $customer_id ];
 	}
 }
