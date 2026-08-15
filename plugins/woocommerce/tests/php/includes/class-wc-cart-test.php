@@ -1759,6 +1759,78 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$product->delete( true );
 	}
 
+	/**
+	 * @testdox Should add only selected grouped children with their submitted quantities.
+	 */
+	public function test_add_to_cart_action_handles_grouped_product_quantities(): void {
+		$first_child = WC_Helper_Product::create_simple_product();
+		$first_child->set_name( 'First grouped child' );
+		$first_child->save();
+
+		$skipped_child = WC_Helper_Product::create_simple_product();
+		$skipped_child->set_name( 'Skipped grouped child' );
+		$skipped_child->save();
+
+		$single_child = WC_Helper_Product::create_simple_product();
+		$single_child->set_name( 'Sold individually grouped child' );
+		$single_child->set_sold_individually( true );
+		$single_child->save();
+
+		$grouped_product = new WC_Product_Grouped();
+		$grouped_product->set_name( 'Grouped request product' );
+		$grouped_product->set_children(
+			array(
+				$first_child->get_id(),
+				$skipped_child->get_id(),
+				$single_child->get_id(),
+			)
+		);
+		$grouped_product->save();
+
+		$original_redirect = get_option( 'woocommerce_cart_redirect_after_add' );
+
+		try {
+			update_option( 'woocommerce_cart_redirect_after_add', 'no' );
+			WC()->cart->empty_cart();
+
+			$grouped_quantities = array(
+				$first_child->get_id()   => 2,
+				$skipped_child->get_id() => 0,
+				$single_child->get_id()  => 1,
+			);
+
+			$_REQUEST['add-to-cart'] = $grouped_product->get_id();
+			$_REQUEST['quantity']    = $grouped_quantities;
+			$_POST['quantity']       = $grouped_quantities;
+
+			WC_Form_Handler::add_to_cart_action( false );
+
+			$cart_quantities = array();
+			foreach ( WC()->cart->get_cart() as $cart_item ) {
+				$cart_quantities[ $cart_item['product_id'] ] = (int) $cart_item['quantity'];
+			}
+
+			$this->assertSame(
+				array(
+					$first_child->get_id()  => 2,
+					$single_child->get_id() => 1,
+				),
+				$cart_quantities,
+				'Only positive grouped child quantities should be added to the cart.'
+			);
+			$this->assertArrayNotHasKey( $skipped_child->get_id(), $cart_quantities, 'A zero-quantity grouped child should be skipped.' );
+			$this->assertArrayNotHasKey( $grouped_product->get_id(), $cart_quantities, 'The grouped parent should not become a cart line.' );
+		} finally {
+			unset( $_REQUEST['add-to-cart'], $_REQUEST['quantity'], $_POST['quantity'] );
+			update_option( 'woocommerce_cart_redirect_after_add', $original_redirect );
+			WC()->cart->empty_cart();
+			$grouped_product->delete( true );
+			$single_child->delete( true );
+			$skipped_child->delete( true );
+			$first_child->delete( true );
+		}
+	}
+
 
 	/**
 	 * Capture all arguments passed to the filter without modifying the quantity.
