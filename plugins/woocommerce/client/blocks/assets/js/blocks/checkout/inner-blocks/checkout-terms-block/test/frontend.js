@@ -20,6 +20,12 @@ import { validationStore } from '@woocommerce/block-data';
 import * as actionCreators from '@woocommerce/block-data/validation/actions';
 import FrontendBlock from '../frontend';
 
+jest.mock( '@woocommerce/block-settings', () => ( {
+	...jest.requireActual( '@woocommerce/block-settings' ),
+	TERMS_URL: 'https://example.com/terms/',
+	PRIVACY_URL: 'https://example.com/privacy/',
+} ) );
+
 jest.mock( '@woocommerce/block-data/validation/actions', () => {
 	const actions = jest.requireActual(
 		'@woocommerce/block-data/validation/actions'
@@ -33,6 +39,34 @@ jest.mock( '@woocommerce/block-data/validation/actions', () => {
 } );
 
 describe( 'FrontendBlock', () => {
+	it( 'Renders the default Terms and Privacy links without a checkbox', () => {
+		render(
+			<SlotFillProvider>
+				<FrontendBlock
+					checkbox={ false }
+					text=""
+					showSeparator={ false }
+				/>
+			</SlotFillProvider>
+		);
+
+		expect(
+			screen.getByText(
+				( _, element ) =>
+					element?.tagName === 'SPAN' &&
+					element.textContent ===
+						'By proceeding with your purchase you agree to our Terms and Conditions and Privacy Policy'
+			)
+		).toBeVisible();
+		expect(
+			screen.getByRole( 'link', { name: 'Terms and Conditions' } )
+		).toHaveAttribute( 'href', 'https://example.com/terms/' );
+		expect(
+			screen.getByRole( 'link', { name: 'Privacy Policy' } )
+		).toHaveAttribute( 'href', 'https://example.com/privacy/' );
+		expect( screen.queryByRole( 'checkbox' ) ).not.toBeInTheDocument();
+	} );
+
 	it( 'Renders a checkbox if the checkbox prop is true', async () => {
 		const { container } = render(
 			<SlotFillProvider>
