@@ -417,6 +417,69 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should dispatch the registered reset route for a capable user and persist canonical sync state.
+	 */
+	public function test_reset_route_dispatches_registered_callback_and_persists_sync_state(): void {
+		$email_type = 'customer_new_account';
+
+		WCEmailTemplateSyncRegistry::reset_cache();
+
+		$post_id = $this->create_published_email_post( $email_type );
+		wp_update_post(
+			array(
+				'ID'           => $post_id,
+				'post_content' => '<!-- wp:paragraph --><p>Customized before REST reset</p><!-- /wp:paragraph -->',
+			)
+		);
+		update_post_meta(
+			$post_id,
+			WCEmailTemplateDivergenceDetector::STATUS_META_KEY,
+			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_CUSTOMIZED
+		);
+
+		$email = $this->resolve_wc_email( $email_type );
+		$this->assertNotNull( $email );
+		$expected_canonical = WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $email );
+
+		global $wp_rest_server;
+
+		$previous_user_id     = get_current_user_id();
+		$capable_user_id      = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
+		$previous_rest_server = $wp_rest_server;
+		$wp_rest_server       = new \WP_REST_Server();
+		wp_set_current_user( $capable_user_id );
+
+		try {
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This test invokes the production route-registration action.
+			do_action( 'rest_api_init', $wp_rest_server );
+			$this->email_api_controller->register_routes();
+			$request  = new \WP_REST_Request( 'POST', '/woocommerce-email-editor/v1/emails/' . $post_id . '/reset' );
+			$response = $wp_rest_server->dispatch( $request );
+		} finally {
+			wp_set_current_user( $previous_user_id );
+			$wp_rest_server = $previous_rest_server;
+		}
+
+		$this->assertSame( 200, $response->get_status(), 'The registered route must authorize a manage_woocommerce user.' );
+
+		$response_data = $response->get_data();
+		$this->assertSame( $expected_canonical, $response_data['content'], 'The route response must contain the canonical render.' );
+		$this->assertSame( sha1( $expected_canonical ), $response_data['source_hash'], 'The route response must contain the canonical source hash.' );
+		$this->assertSame( WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC, $response_data['status'], 'The route response must report in_sync.' );
+		$this->assertNotEmpty( $response_data['version'], 'The route response must contain a template version.' );
+		$this->assertNotEmpty( $response_data['synced_at'], 'The route response must contain a sync timestamp.' );
+
+		$persisted_post = get_post( $post_id );
+		$this->assertInstanceOf( \WP_Post::class, $persisted_post );
+		$this->assertSame( $expected_canonical, $persisted_post->post_content, 'The route callback must persist the canonical content.' );
+		$this->assertSame( $response_data['version'], (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true ), 'Persisted version meta must match the REST response.' );
+		$this->assertSame( $response_data['source_hash'], (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true ), 'Persisted source hash meta must match the REST response.' );
+		$this->assertSame( $response_data['synced_at'], (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, true ), 'Persisted sync timestamp must match the REST response.' );
+		$this->assertSame( WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC, (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ), 'Persisted status meta must be in_sync.' );
+		$this->assertSame( $expected_canonical, (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, true ), 'Persisted base render meta must match canonical content.' );
+	}
+
+	/**
 	 * @testdox Should return 404 when reset post ID has no associated email type.
 	 */
 	public function test_reset_response_returns_404_for_unknown_post(): void {

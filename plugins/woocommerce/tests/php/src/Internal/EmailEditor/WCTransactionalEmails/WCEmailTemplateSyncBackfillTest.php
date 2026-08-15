@@ -167,6 +167,67 @@ class WCEmailTemplateSyncBackfillTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A second backfill run should perform no writes and preserve the stamped sync state.
+	 */
+	public function test_second_run_is_noop_and_preserves_stamped_meta(): void {
+		$email_id = 'wc_test_backfill_repeat_run';
+		$email    = $this->register_fixture_email( $email_id );
+
+		$canonical   = WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $email );
+		$legacy_body = "<!-- wp:paragraph -->\n<p>Legacy content that the first run must replace.</p>\n<!-- /wp:paragraph -->";
+		$post_id     = $this->create_unstamped_post( $email_id, $legacy_body, true );
+
+		WCEmailTemplateSyncBackfill::run();
+
+		$stamp_keys = array(
+			WCEmailTemplateDivergenceDetector::VERSION_META_KEY,
+			WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY,
+			WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY,
+			WCEmailTemplateDivergenceDetector::STATUS_META_KEY,
+			WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY,
+		);
+
+		$stamps_after_first_run = array();
+		foreach ( $stamp_keys as $meta_key ) {
+			$stamps_after_first_run[ $meta_key ] = get_post_meta( $post_id, $meta_key, true );
+		}
+
+		$post_write_count = 0;
+		$meta_write_count = 0;
+		$post_counter     = static function ( array $data, array $postarr ) use ( &$post_write_count, $post_id ): array {
+			if ( (int) ( $postarr['ID'] ?? 0 ) === $post_id ) {
+				++$post_write_count;
+			}
+			return $data;
+		};
+		$meta_counter     = static function ( $check, int $object_id, string $meta_key ) use ( &$meta_write_count, $post_id, $stamp_keys ) {
+			if ( $post_id === $object_id && in_array( $meta_key, $stamp_keys, true ) ) {
+				++$meta_write_count;
+			}
+			return $check;
+		};
+
+		add_filter( 'wp_insert_post_data', $post_counter, 10, 2 );
+		add_filter( 'update_post_metadata', $meta_counter, 10, 3 );
+		try {
+			WCEmailTemplateSyncBackfill::run();
+		} finally {
+			remove_filter( 'wp_insert_post_data', $post_counter, 10 );
+			remove_filter( 'update_post_metadata', $meta_counter, 10 );
+		}
+
+		$stamps_after_second_run = array();
+		foreach ( $stamp_keys as $meta_key ) {
+			$stamps_after_second_run[ $meta_key ] = get_post_meta( $post_id, $meta_key, true );
+		}
+
+		$this->assertSame( $canonical, (string) $this->require_post( $post_id )->post_content, 'The first run must establish the Case B canonical-content state.' );
+		$this->assertSame( 0, $post_write_count, 'A second run must not attempt to update the already-stamped post.' );
+		$this->assertSame( 0, $meta_write_count, 'A second run must not attempt to update any sync stamp.' );
+		$this->assertSame( $stamps_after_first_run, $stamps_after_second_run, 'A second run must preserve the complete stamped sync state.' );
+	}
+
+	/**
 	 * Case C: content diverges from canonical AND the post has been edited.
 	 * Expectation: content untouched, source_hash = sha1(canonical) (NOT sha1(post_content)),
 	 * status seeded to core_updated_customized to match what the divergence detector
