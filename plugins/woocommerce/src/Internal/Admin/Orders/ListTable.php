@@ -364,9 +364,8 @@ class ListTable extends WP_List_Table {
 	 *
 	 * Checks the `delete_others_posts` primitive (such as `delete_others_shop_orders`)
 	 * because that is what per-order `delete_post` checks resolve to: orders have no
-	 * meaningful author, so HposOrderCapabilityHelper treats them as belonging to
-	 * someone else for every user but ID 1
-	 * (see https://github.com/woocommerce/woocommerce/issues/39289).
+	 * meaningful author, so they are treated as belonging to someone else for every
+	 * user but ID 1.
 	 *
 	 * @return bool
 	 */
@@ -828,8 +827,8 @@ class ListTable extends WP_List_Table {
 		}
 
 		// Emptying the trash permanently deletes orders, so it needs the delete capability too.
-		$can_empty_trash = $this->wp_post_type && current_user_can( $this->wp_post_type->cap->edit_others_posts ) && $this->current_user_can_delete_orders();
-		if ( $this->is_trash && $this->has_items() && $can_empty_trash ) {
+		if ( $this->is_trash && $this->has_items() && $this->wp_post_type
+			&& current_user_can( $this->wp_post_type->cap->edit_others_posts ) && $this->current_user_can_delete_orders() ) {
 			submit_button( __( 'Empty Trash', 'woocommerce' ), 'apply', 'delete_all', false );
 		}
 
@@ -1450,10 +1449,14 @@ class ListTable extends WP_List_Table {
 		/*
 		 * Checked here, before the nonce check and with no side effects, so the capability applies
 		 * however the request was assembled: the bulk UI, the Empty Trash button, or a crafted POST.
+		 * Failing loudly matches how wp-admin/edit.php handles the equivalent bulk actions.
 		 */
-		$is_empty_trash = ( 'delete_all' === $action );
 		if ( in_array( $action, array( 'trash', 'delete', 'delete_all' ), true ) && ! $this->current_user_can_delete_orders() ) {
-			return;
+			if ( 'trash' === $action ) {
+				wp_die( esc_html__( 'Sorry, you are not allowed to move these orders to the Trash.', 'woocommerce' ) );
+			}
+
+			wp_die( esc_html__( 'Sorry, you are not allowed to delete these orders.', 'woocommerce' ) );
 		}
 
 		check_admin_referer( 'bulk-orders' );
@@ -1488,21 +1491,6 @@ class ListTable extends WP_List_Table {
 			$action,
 			'order'
 		);
-
-		/*
-		 * Per-order checks, consistent with the order actions meta box and WP core. Empty Trash is
-		 * excluded because it is gated above and would otherwise load every trashed order.
-		 */
-		if ( ! $is_empty_trash && in_array( $action, array( 'trash', 'delete' ), true ) ) {
-			$ids = array_values(
-				array_filter(
-					$ids,
-					function ( $id ) {
-						return current_user_can( 'delete_post', $id );
-					}
-				)
-			);
-		}
 
 		if ( ! $ids ) {
 			wp_safe_redirect( $redirect_to );
@@ -1647,7 +1635,7 @@ class ListTable extends WP_List_Table {
 			$order->delete( $force_delete );
 			$updated_order = wc_get_order( $id );
 
-			if ( $force_delete ? false === $updated_order : ( $updated_order && $updated_order->get_status() === 'trash' ) ) {
+			if ( $force_delete ? false === $updated_order : ( $updated_order && OrderStatus::TRASH === $updated_order->get_status() ) ) {
 				++$changed;
 			}
 		}
