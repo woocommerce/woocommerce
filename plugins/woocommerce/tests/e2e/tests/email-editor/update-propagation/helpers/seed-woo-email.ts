@@ -179,16 +179,6 @@ export async function seedWooEmailPostDirect(
 	return Number( first.post_id );
 }
 
-export async function getWooEmailMeta(
-	postId: number
-): Promise< Record< string, string[] > > {
-	const client = apiClient();
-	const res = await client.get(
-		`${ TEST_HELPER_API_BASE }/seed-meta/${ postId }`
-	);
-	return ( res?.data?.meta ?? {} ) as Record< string, string[] >;
-}
-
 export async function getWooEmailPostContent(
 	postId: number
 ): Promise< string > {
@@ -197,45 +187,6 @@ export async function getWooEmailPostContent(
 		`${ TEST_HELPER_API_BASE }/post-content/${ postId }`
 	);
 	return String( res?.data?.post_content ?? '' );
-}
-
-export type ApplyChoice = {
-	path: ( number | string )[];
-	decision: 'keep_yours' | 'use_core';
-};
-
-export type ApplyResult = {
-	merged_content: string;
-	revision_id: string;
-	version_to: string;
-	status: string;
-	structural_skipped: boolean;
-	aliases_migrated: string[];
-};
-
-/**
- * Call the /apply endpoint for a woo_email post using basic-auth credentials,
- * bypassing the cookie+nonce requirement of the WP REST API for authenticated
- * cookie sessions. `choices` defaults to [] (keep all merchant edits, apply
- * only core additions).
- */
-export async function applyWooEmailTemplate(
-	postId: number,
-	choices: ApplyChoice[] = []
-): Promise< ApplyResult > {
-	const client = apiClient();
-	const res = await client.post(
-		`woocommerce-email-editor/v1/emails/${ postId }/apply`,
-		{ choices } as Record< string, unknown >
-	);
-	if ( ! res?.data?.status ) {
-		throw new Error(
-			`applyWooEmailTemplate: unexpected response for post ${ postId }: ${ JSON.stringify(
-				res?.data
-			) }`
-		);
-	}
-	return res.data as ApplyResult;
 }
 
 export type ResetResult = {
@@ -252,9 +203,8 @@ export type ResetResult = {
  * bypassing the cookie+nonce requirement of the WP REST API for authenticated
  * cookie sessions. Resets the post content to the canonical WooCommerce template.
  *
- * Note: unlike applyWooEmailTemplate whose `status` field is "applied", the
- * reset endpoint returns the post-reset sync status (e.g. "in_sync") in the
- * `status` field.
+ * The reset endpoint returns the post-reset sync status (for example,
+ * "in_sync") in the `status` field.
  */
 export async function resetWooEmailTemplate(
 	postId: number

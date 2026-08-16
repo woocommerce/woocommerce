@@ -1001,6 +1001,10 @@ class WCEmailTemplateSelectiveApplierTest extends \WC_Unit_Test_Case {
 	 * @return \WC_Email Registered fixture email instance.
 	 */
 	private function register_fixture_email( string $email_id ): \WC_Email {
+		if ( ! class_exists( \WC_Email::class ) ) {
+			require_once WC_ABSPATH . 'includes/emails/class-wc-email.php';
+		}
+
 		$stub = $this->getMockBuilder( \WC_Email::class )
 			->disableOriginalConstructor()
 			->getMock();
