@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createElement } from '@wordpress/element';
+import { updateQueryString } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -14,7 +14,18 @@ import Search from '../../search';
 import productAutocompleter from '../../search/autocompleters/product';
 // Due to Jest implementation we cannot mock it only for specific tests.
 // If your test requires non-mocked Search, move them to another test file.
-jest.mock( '../../search' );
+jest.mock( '../../search', () => ( {
+	__esModule: true,
+	default: jest.fn(),
+} ) );
+jest.mock( '../../search/autocompleters/product', () => ( {
+	__esModule: true,
+	default: { name: 'products' },
+} ) );
+jest.mock( '@woocommerce/navigation', () => ( {
+	...jest.requireActual( '@woocommerce/navigation' ),
+	updateQueryString: jest.fn(),
+} ) );
 
 describe( 'FilterPicker', () => {
 	it( 'should render the example from the storybook', async () => {
@@ -159,6 +170,198 @@ describe( 'FilterPicker', () => {
 			expect( allParams ).toHaveLength( 2 );
 			expect( allParams.includes( 'param_1' ) ).toBeTruthy();
 			expect( allParams.includes( 'param_2' ) ).toBeTruthy();
+		} );
+	} );
+
+	describe( 'search selection query updates', () => {
+		const advancedFilters = {
+			filters: {
+				product: {
+					rules: [ { value: 'includes' }, { value: 'excludes' } ],
+				},
+			},
+		};
+
+		const productFilter = {
+			component: 'Search',
+			label: 'Single product',
+			value: 'single_product',
+			settings: {
+				type: 'products',
+				param: 'products',
+				getLabels: () =>
+					Promise.resolve( [ { key: 999, label: 'Old product' } ] ),
+				labels: {
+					placeholder: 'Type to search for a product',
+					button: 'Single product',
+				},
+			},
+		};
+
+		const variationFilter = {
+			component: 'Search',
+			label: 'Single variation',
+			value: 'single_variation',
+			settings: {
+				type: 'variations',
+				param: 'variations',
+				getLabels: () =>
+					Promise.resolve( [ { key: 999, label: 'Old variation' } ] ),
+				labels: {
+					placeholder: 'Type to search for a variation',
+					button: 'Single variation',
+				},
+			},
+		};
+
+		beforeEach( () => {
+			jest.clearAllMocks();
+			Search.mockImplementation( ( { onChange, selected, type } ) => {
+				const choice =
+					type === 'products'
+						? { key: 101, label: 'Product 101' }
+						: { key: 202, label: 'Variation 202' };
+				return (
+					<div>
+						{ selected.map( ( tag ) => (
+							<span key={ tag.key }>{ tag.label }</span>
+						) ) }
+						<button onClick={ () => onChange( [ choice ] ) }>
+							Choose { choice.label }
+						</button>
+					</div>
+				);
+			} );
+		} );
+
+		it( 'selects a product, preserves static parameters, and clears stale filters', async () => {
+			const onFilterSelect = jest.fn();
+			const query = {
+				period: 'last_month',
+				compare: 'previous_year',
+				filter: 'single_product',
+				products: 999,
+				variations: 404,
+				product_includes: 303,
+				product_excludes: 505,
+			};
+			const config = {
+				label: 'Show',
+				staticParams: [ 'period', 'compare' ],
+				param: 'filter',
+				showFilters: () => true,
+				filters: [
+					{ label: 'All products', value: 'all' },
+					productFilter,
+					variationFilter,
+				],
+			};
+
+			render(
+				<FilterPicker
+					advancedFilters={ advancedFilters }
+					config={ config }
+					onFilterSelect={ onFilterSelect }
+					path="/analytics/products"
+					query={ query }
+				/>
+			);
+
+			const persistedButton = await screen.findByRole( 'button', {
+				name: /Old product.*Single product/,
+			} );
+			await userEvent.click( persistedButton );
+			await userEvent.click(
+				screen.getByRole( 'button', { name: 'Choose Product 101' } )
+			);
+
+			const expectedUpdate = {
+				filter: 'single_product',
+				products: 101,
+				period: 'last_month',
+				compare: 'previous_year',
+				variations: undefined,
+				product_includes: undefined,
+				product_excludes: undefined,
+			};
+			expect( updateQueryString ).toHaveBeenCalledTimes( 1 );
+			expect( updateQueryString ).toHaveBeenCalledWith(
+				expectedUpdate,
+				'/analytics/products',
+				query
+			);
+			expect( onFilterSelect ).toHaveBeenCalledTimes( 1 );
+			expect( onFilterSelect ).toHaveBeenCalledWith( expectedUpdate );
+			expect(
+				screen.getByRole( 'button', {
+					name: /Product 101.*Single product/,
+				} )
+			).toBeInTheDocument();
+		} );
+
+		it( 'selects a variation and preserves its product and date scope', async () => {
+			const onFilterSelect = jest.fn();
+			const query = {
+				period: 'last_month',
+				compare: 'previous_year',
+				filter: 'single_product',
+				products: 101,
+				'filter-variations': 'single_variation',
+				variations: 999,
+			};
+			const config = {
+				label: 'Variation',
+				staticParams: [ 'filter', 'products', 'period', 'compare' ],
+				param: 'filter-variations',
+				showFilters: () => true,
+				filters: [
+					{ label: 'All variations', value: 'all' },
+					productFilter,
+					variationFilter,
+				],
+			};
+
+			render(
+				<FilterPicker
+					advancedFilters={ { filters: {} } }
+					config={ config }
+					onFilterSelect={ onFilterSelect }
+					path="/analytics/products"
+					query={ query }
+				/>
+			);
+
+			const persistedButton = await screen.findByRole( 'button', {
+				name: /Old variation.*Single variation/,
+			} );
+			await userEvent.click( persistedButton );
+			await userEvent.click(
+				screen.getByRole( 'button', {
+					name: 'Choose Variation 202',
+				} )
+			);
+
+			const expectedUpdate = {
+				'filter-variations': 'single_variation',
+				variations: 202,
+				filter: 'single_product',
+				products: 101,
+				period: 'last_month',
+				compare: 'previous_year',
+			};
+			expect( updateQueryString ).toHaveBeenCalledTimes( 1 );
+			expect( updateQueryString ).toHaveBeenCalledWith(
+				expectedUpdate,
+				'/analytics/products',
+				query
+			);
+			expect( onFilterSelect ).toHaveBeenCalledTimes( 1 );
+			expect( onFilterSelect ).toHaveBeenCalledWith( expectedUpdate );
+			expect(
+				screen.getByRole( 'button', {
+					name: /Variation 202.*Single variation/,
+				} )
+			).toBeInTheDocument();
 		} );
 	} );
 } );
