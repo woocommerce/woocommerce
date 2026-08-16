@@ -16,18 +16,118 @@ class Settings extends WC_REST_Unit_Test_Case {
 	use ArraySubsetAsserts;
 
 	/**
+	 * Whether the email settings contract state needs restoring.
+	 *
+	 * @var bool
+	 */
+	private $email_contract_state_active = false;
+
+	/**
+	 * Missing-option sentinel for the email improvements feature.
+	 *
+	 * @var stdClass|null
+	 */
+	private $email_improvements_missing;
+
+	/**
+	 * Previous email improvements feature option.
+	 *
+	 * @var mixed
+	 */
+	private $previous_email_improvements_option;
+
+	/**
+	 * Previous email singleton.
+	 *
+	 * @var WC_Emails|null
+	 */
+	private $previous_emails_instance;
+
+	/**
+	 * Email singleton instance property.
+	 *
+	 * @var ReflectionProperty|null
+	 */
+	private $emails_instance_property;
+
+	/**
 	 * Setup our test server, endpoints, and user info.
+	 *
+	 * @throws Throwable When route or fixture setup fails.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->initialize_rest_api_routes();
-		$this->endpoint = new WC_REST_Setting_Options_Controller();
-		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\SettingsHelper::register();
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+
+		try {
+			if ( 'test_email_setting_group_contracts' === $this->getName( false ) ) {
+				$this->set_up_email_setting_group_contract_state();
+			}
+
+			$this->initialize_rest_api_routes();
+			$this->endpoint = new WC_REST_Setting_Options_Controller();
+			\Automattic\WooCommerce\RestApi\UnitTests\Helpers\SettingsHelper::register();
+			$this->user = $this->factory->user->create(
+				array(
+					'role' => 'administrator',
+				)
+			);
+		} catch ( Throwable $throwable ) {
+			$this->restore_email_setting_group_contract_state();
+			throw $throwable;
+		}
+	}
+
+	/**
+	 * Restore test-specific email state before the base teardown restores hooks.
+	 */
+	public function tearDown(): void {
+		try {
+			$this->restore_email_setting_group_contract_state();
+		} finally {
+			parent::tearDown();
+		}
+	}
+
+	/**
+	 * Enable email improvements before REST callbacks capture email objects.
+	 */
+	private function set_up_email_setting_group_contract_state(): void {
+		$this->email_improvements_missing         = new stdClass();
+		$this->previous_email_improvements_option = get_option( 'woocommerce_feature_email_improvements_enabled', $this->email_improvements_missing );
+		$this->emails_instance_property           = new ReflectionProperty( WC_Emails::class, 'instance' );
+		$this->emails_instance_property->setAccessible( true );
+		$this->previous_emails_instance    = $this->emails_instance_property->getValue();
+		$this->email_contract_state_active = true;
+
+		update_option( 'woocommerce_feature_email_improvements_enabled', 'yes' );
+		$this->emails_instance_property->setValue( null, null );
+	}
+
+	/**
+	 * Restore the exact option presence/value and email singleton.
+	 */
+	private function restore_email_setting_group_contract_state(): void {
+		if ( ! $this->email_contract_state_active ) {
+			return;
+		}
+
+		try {
+			try {
+				$this->emails_instance_property->setValue( null, $this->previous_emails_instance );
+			} finally {
+				$this->restore_option(
+					'woocommerce_feature_email_improvements_enabled',
+					$this->previous_email_improvements_option,
+					$this->email_improvements_missing
+				);
+			}
+		} finally {
+			$this->email_contract_state_active        = false;
+			$this->email_improvements_missing         = null;
+			$this->previous_email_improvements_option = null;
+			$this->previous_emails_instance           = null;
+			$this->emails_instance_property           = null;
+		}
 	}
 
 	/**
@@ -109,6 +209,355 @@ class Settings extends WC_REST_Unit_Test_Case {
 			),
 			$matching_settings_data
 		);
+	}
+
+	/**
+	 * @testdox Core settings groups expose stable IDs and email subgroup relationships.
+	 */
+	public function test_core_settings_groups_contract(): void {
+		wp_set_current_user( $this->user );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/settings' ) );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertIsArray( $data );
+
+		$groups = $this->index_settings_by_id( $data );
+		foreach ( array( 'wc_admin', 'general', 'products', 'tax', 'shipping', 'checkout', 'account', 'email', 'integration', 'advanced' ) as $group_id ) {
+			$this->assertArrayHasKey( $group_id, $groups, "Expected the {$group_id} settings group to be registered." );
+			$this->assertSame( '', $groups[ $group_id ]['parent_id'] );
+		}
+
+		$expected_email_groups = array(
+			'email_new_order',
+			'email_cancelled_order',
+			'email_failed_order',
+			'email_customer_on_hold_order',
+			'email_customer_processing_order',
+			'email_customer_completed_order',
+			'email_customer_refunded_order',
+			'email_customer_invoice',
+			'email_customer_note',
+			'email_customer_reset_password',
+			'email_customer_new_account',
+		);
+
+		$this->assertIsArray( $groups['email']['sub_groups'] );
+		foreach ( $expected_email_groups as $group_id ) {
+			$this->assertContains( $group_id, $groups['email']['sub_groups'] );
+			$this->assertArrayHasKey( $group_id, $groups );
+			$this->assertSame( 'email', $groups[ $group_id ]['parent_id'] );
+			$this->assertSame( array(), $groups[ $group_id ]['sub_groups'] );
+		}
+	}
+
+	/**
+	 * @testdox Core settings pages expose stable setting IDs, types, and option keys.
+	 * @dataProvider core_setting_group_contracts_provider
+	 *
+	 * @param string $group_id          Settings group ID.
+	 * @param array  $expected_settings Expected setting contracts keyed by setting ID.
+	 */
+	public function test_core_setting_group_contracts( string $group_id, array $expected_settings ): void {
+		wp_set_current_user( $this->user );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', "/wc/v3/settings/{$group_id}" ) );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertIsArray( $data );
+		$this->assert_setting_contracts( $data, $expected_settings );
+	}
+
+	/**
+	 * Data provider for core settings page contracts.
+	 *
+	 * @return array
+	 */
+	public function core_setting_group_contracts_provider(): array {
+		return array(
+			'products' => array(
+				'products',
+				array(
+					'woocommerce_weight_unit' => array(
+						'type'        => 'select',
+						'option_keys' => array( 'kg', 'g', 'lbs', 'oz' ),
+					),
+				),
+			),
+			'tax'      => array(
+				'tax',
+				array(
+					'woocommerce_prices_include_tax' => array(
+						'type'        => 'radio',
+						'option_keys' => array( 'yes', 'no' ),
+					),
+				),
+			),
+			'shipping' => array(
+				'shipping',
+				array(
+					'woocommerce_ship_to_destination' => array(
+						'type'        => 'radio',
+						'option_keys' => array( 'shipping', 'billing', 'billing_only' ),
+					),
+				),
+			),
+			'checkout' => array( 'checkout', array() ),
+			'account'  => array(
+				'account',
+				array(
+					'woocommerce_enable_guest_checkout' => array( 'type' => 'checkbox' ),
+				),
+			),
+			'email'    => array(
+				'email',
+				array(
+					'woocommerce_email_from_name'    => array( 'type' => 'text' ),
+					'woocommerce_email_from_address' => array( 'type' => 'email' ),
+				),
+			),
+			'advanced' => array(
+				'advanced',
+				array(
+					'woocommerce_cart_page_id'          => array( 'type' => 'select' ),
+					'woocommerce_checkout_page_id'      => array( 'type' => 'select' ),
+					'woocommerce_myaccount_page_id'     => array( 'type' => 'select' ),
+					'woocommerce_checkout_pay_endpoint' => array( 'type' => 'text' ),
+					'woocommerce_checkout_order_received_endpoint' => array( 'type' => 'text' ),
+					'woocommerce_myaccount_add_payment_method_endpoint' => array( 'type' => 'text' ),
+					'woocommerce_myaccount_delete_payment_method_endpoint' => array( 'type' => 'text' ),
+					'woocommerce_myaccount_orders_endpoint' => array( 'type' => 'text' ),
+					'woocommerce_myaccount_view_order_endpoint' => array( 'type' => 'text' ),
+					'woocommerce_myaccount_downloads_endpoint' => array( 'type' => 'text' ),
+					'woocommerce_myaccount_edit_account_endpoint' => array( 'type' => 'text' ),
+					'woocommerce_myaccount_edit_address_endpoint' => array( 'type' => 'text' ),
+					'woocommerce_myaccount_payment_methods_endpoint' => array( 'type' => 'text' ),
+					'woocommerce_myaccount_lost_password_endpoint' => array( 'type' => 'text' ),
+					'woocommerce_logout_endpoint'       => array( 'type' => 'text' ),
+					'woocommerce_allow_tracking'        => array( 'type' => 'checkbox' ),
+					'woocommerce_show_marketplace_suggestions' => array( 'type' => 'checkbox' ),
+					'woocommerce_analytics_enabled'     => array( 'type' => 'checkbox' ),
+				),
+			),
+		);
+	}
+
+	/**
+	 * @testdox General settings support registered single and batch updates with persisted values.
+	 */
+	public function test_general_settings_crud_contract(): void {
+		wp_set_current_user( $this->user );
+
+		$missing                    = new stdClass();
+		$previous_allowed_countries = get_option( 'woocommerce_allowed_countries', $missing );
+		$previous_currency          = get_option( 'woocommerce_currency', $missing );
+
+		try {
+			update_option( 'woocommerce_allowed_countries', 'all' );
+			update_option( 'woocommerce_currency', 'USD' );
+
+			$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/settings/general' ) );
+			$this->assertSame( 200, $response->get_status() );
+			$this->assert_setting_contracts(
+				$response->get_data(),
+				array(
+					'woocommerce_allowed_countries' => array(
+						'type'        => 'select',
+						'option_keys' => array( 'all', 'all_except', 'specific' ),
+					),
+					'woocommerce_currency'          => array( 'type' => 'select' ),
+				)
+			);
+
+			$request = new WP_REST_Request( 'PUT', '/wc/v3/settings/general/woocommerce_allowed_countries' );
+			$request->set_body_params( array( 'value' => 'specific' ) );
+			$response = $this->server->dispatch( $request );
+			$data     = $response->get_data();
+
+			$this->assertSame( 200, $response->get_status() );
+			$this->assertSame( 'woocommerce_allowed_countries', $data['id'] );
+			$this->assertSame( 'general', $data['group_id'] );
+			$this->assertSame( 'specific', $data['value'] );
+			$this->assertSame( 'specific', get_option( 'woocommerce_allowed_countries' ) );
+
+			$request = new WP_REST_Request( 'POST', '/wc/v3/settings/general/batch' );
+			$request->set_body_params(
+				array(
+					'update' => array(
+						array(
+							'id'    => 'woocommerce_allowed_countries',
+							'value' => 'all_except',
+						),
+						array(
+							'id'    => 'woocommerce_currency',
+							'value' => 'EUR',
+						),
+					),
+				)
+			);
+			$response = $this->server->dispatch( $request );
+			$data     = $response->get_data();
+
+			$this->assertSame( 200, $response->get_status() );
+			$this->assertSame( 'all_except', $data['update'][0]['value'] );
+			$this->assertSame( 'EUR', $data['update'][1]['value'] );
+
+			foreach ( array(
+				'woocommerce_allowed_countries' => 'all_except',
+				'woocommerce_currency'          => 'EUR',
+			) as $setting_id => $expected_value ) {
+				$response = $this->server->dispatch( new WP_REST_Request( 'GET', "/wc/v3/settings/general/{$setting_id}" ) );
+				$data     = $response->get_data();
+
+				$this->assertSame( 200, $response->get_status() );
+				$this->assertSame( $setting_id, $data['id'] );
+				$this->assertSame( 'general', $data['group_id'] );
+				$this->assertSame( $expected_value, $data['value'] );
+				$this->assertSame( $expected_value, get_option( $setting_id ) );
+			}
+		} finally {
+			$this->restore_option( 'woocommerce_allowed_countries', $previous_allowed_countries, $missing );
+			$this->restore_option( 'woocommerce_currency', $previous_currency, $missing );
+		}
+	}
+
+	/**
+	 * @testdox Email settings groups expose stable field IDs, types, and email format options.
+	 * @dataProvider email_setting_group_contracts_provider
+	 *
+	 * @param string $group_id          Email settings group ID.
+	 * @param array  $expected_settings Expected setting contracts keyed by setting ID.
+	 * @param bool   $has_enabled       Whether the email supports an enabled setting.
+	 */
+	public function test_email_setting_group_contracts( string $group_id, array $expected_settings, bool $has_enabled = true ): void {
+		wp_set_current_user( $this->user );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', "/wc/v3/settings/{$group_id}" ) );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertIsArray( $data );
+		$common_settings = array(
+			'cc'         => array( 'type' => 'text' ),
+			'bcc'        => array( 'type' => 'text' ),
+			'email_type' => array(
+				'type'        => 'select',
+				'option_keys' => array( 'plain', 'html', 'multipart' ),
+			),
+		);
+		if ( $has_enabled ) {
+			$common_settings['enabled'] = array( 'type' => 'checkbox' );
+		}
+
+		$this->assert_setting_contracts(
+			$data,
+			array_merge( $expected_settings, $common_settings )
+		);
+	}
+
+	/**
+	 * Data provider for email settings group contracts.
+	 *
+	 * @return array
+	 */
+	public function email_setting_group_contracts_provider(): array {
+		return array(
+			'new order'        => array(
+				'email_new_order',
+				array(
+					'recipient' => array( 'type' => 'text' ),
+					'subject'   => array( 'type' => 'text' ),
+				),
+			),
+			'failed order'     => array(
+				'email_failed_order',
+				array(
+					'recipient' => array( 'type' => 'text' ),
+					'subject'   => array( 'type' => 'text' ),
+				),
+			),
+			'on-hold order'    => array( 'email_customer_on_hold_order', array( 'subject' => array( 'type' => 'text' ) ) ),
+			'processing order' => array( 'email_customer_processing_order', array( 'subject' => array( 'type' => 'text' ) ) ),
+			'completed order'  => array( 'email_customer_completed_order', array( 'subject' => array( 'type' => 'text' ) ) ),
+			'refunded order'   => array(
+				'email_customer_refunded_order',
+				array(
+					'subject_full'    => array( 'type' => 'text' ),
+					'subject_partial' => array( 'type' => 'text' ),
+				),
+			),
+			'customer invoice' => array(
+				'email_customer_invoice',
+				array(
+					'subject'      => array( 'type' => 'text' ),
+					'heading'      => array( 'type' => 'text' ),
+					'subject_paid' => array( 'type' => 'text' ),
+					'heading_paid' => array( 'type' => 'text' ),
+				),
+				false,
+			),
+			'customer note'    => array( 'email_customer_note', array( 'subject' => array( 'type' => 'text' ) ) ),
+			'reset password'   => array( 'email_customer_reset_password', array( 'subject' => array( 'type' => 'text' ) ) ),
+			'new account'      => array( 'email_customer_new_account', array( 'subject' => array( 'type' => 'text' ) ) ),
+		);
+	}
+
+	/**
+	 * Index settings or groups by their stable ID.
+	 *
+	 * @param array $settings Settings or groups from a REST response.
+	 * @return array
+	 */
+	private function index_settings_by_id( array $settings ): array {
+		$indexed = array();
+		foreach ( $settings as $setting ) {
+			if ( isset( $setting['id'] ) ) {
+				$indexed[ $setting['id'] ] = $setting;
+			}
+		}
+		return $indexed;
+	}
+
+	/**
+	 * Assert stable setting contracts without depending on translated copy.
+	 *
+	 * @param array $settings          Settings from a REST response.
+	 * @param array $expected_settings Expected contracts keyed by setting ID.
+	 */
+	private function assert_setting_contracts( array $settings, array $expected_settings ): void {
+		$this->assertIsArray( $settings );
+		$indexed = $this->index_settings_by_id( $settings );
+
+		foreach ( $expected_settings as $setting_id => $expected ) {
+			$this->assertArrayHasKey( $setting_id, $indexed, "Expected the {$setting_id} setting to be exposed." );
+			$this->assertSame( $expected['type'], $indexed[ $setting_id ]['type'] );
+
+			if ( isset( $expected['option_keys'] ) ) {
+				$this->assertArrayHasKey( 'options', $indexed[ $setting_id ] );
+				$actual_keys   = array_keys( $indexed[ $setting_id ]['options'] );
+				$expected_keys = $expected['option_keys'];
+				sort( $actual_keys );
+				sort( $expected_keys );
+				$this->assertSame( $expected_keys, $actual_keys );
+			}
+		}
+	}
+
+	/**
+	 * Restore an option to its exact pre-test presence and value.
+	 *
+	 * @param string   $option_name    Option name.
+	 * @param mixed    $previous_value Previous option value or the missing sentinel.
+	 * @param stdClass $missing        Missing-option sentinel.
+	 */
+	private function restore_option( string $option_name, $previous_value, stdClass $missing ): void {
+		if ( $missing === $previous_value ) {
+			delete_option( $option_name );
+		} else {
+			update_option( $option_name, $previous_value );
+		}
 	}
 
 	/**
