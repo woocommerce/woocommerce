@@ -304,6 +304,115 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Order statuses accepted when creating through the V3 route.
+	 *
+	 * @return array<string, array{string|null, string}>
+	 */
+	public function order_create_statuses(): array {
+		return array(
+			'default pending'     => array( null, OrderStatus::PENDING ),
+			'explicit pending'    => array( OrderStatus::PENDING, OrderStatus::PENDING ),
+			'explicit processing' => array( OrderStatus::PROCESSING, OrderStatus::PROCESSING ),
+			'explicit on-hold'    => array( OrderStatus::ON_HOLD, OrderStatus::ON_HOLD ),
+			'explicit completed'  => array( OrderStatus::COMPLETED, OrderStatus::COMPLETED ),
+			'explicit cancelled'  => array( OrderStatus::CANCELLED, OrderStatus::CANCELLED ),
+			'explicit refunded'   => array( OrderStatus::REFUNDED, OrderStatus::REFUNDED ),
+			'explicit failed'     => array( OrderStatus::FAILED, OrderStatus::FAILED ),
+		);
+	}
+
+	/**
+	 * @testdox Creating an order through the registered V3 route returns and persists the requested status.
+	 *
+	 * @dataProvider order_create_statuses
+	 *
+	 * @param string|null $requested_status Status supplied in the request, or null for the default.
+	 * @param string      $expected_status Expected response and persisted status.
+	 */
+	public function test_orders_create_status_matrix( $requested_status, string $expected_status ): void {
+		$order_id = 0;
+
+		try {
+			$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+			$request->set_body_params( array( 'status' => $requested_status ) );
+			$response = $this->server->dispatch( $request );
+			$data     = $response->get_data();
+
+			$this->assertSame( 201, $response->get_status(), 'Creating the order should return HTTP 201.' );
+			$this->assertArrayHasKey( 'id', $data, 'The create response should contain an order ID.' );
+			$this->assertIsInt( $data['id'], 'The create response should contain an integer order ID.' );
+			$order_id = $data['id'];
+			$this->assertSame( $expected_status, $data['status'], 'The create response should contain the expected order status.' );
+
+			wp_cache_flush();
+			$persisted_order = wc_get_order( $order_id );
+			$this->assertInstanceOf( WC_Order::class, $persisted_order, 'The created order should remain persisted.' );
+			$this->assertSame( $order_id, $persisted_order->get_id(), 'The persisted order should retain the response ID.' );
+			$this->assertSame( $expected_status, $persisted_order->get_status(), 'The created order should persist the expected status.' );
+		} finally {
+			$persisted_order = $order_id ? wc_get_order( $order_id ) : false;
+			if ( $persisted_order ) {
+				$persisted_order->delete( true );
+			}
+		}
+	}
+
+	/**
+	 * Order statuses accepted when updating through the V3 route.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public function order_update_statuses(): array {
+		return array(
+			'pending to pending'     => array( OrderStatus::PENDING, OrderStatus::PENDING ),
+			'pending to processing'  => array( OrderStatus::PENDING, OrderStatus::PROCESSING ),
+			'processing to on-hold'  => array( OrderStatus::PROCESSING, OrderStatus::ON_HOLD ),
+			'on-hold to completed'   => array( OrderStatus::ON_HOLD, OrderStatus::COMPLETED ),
+			'completed to cancelled' => array( OrderStatus::COMPLETED, OrderStatus::CANCELLED ),
+			'cancelled to refunded'  => array( OrderStatus::CANCELLED, OrderStatus::REFUNDED ),
+			'refunded to failed'     => array( OrderStatus::REFUNDED, OrderStatus::FAILED ),
+		);
+	}
+
+	/**
+	 * @testdox Updating an order through the registered V3 route returns and persists the requested status.
+	 *
+	 * @dataProvider order_update_statuses
+	 *
+	 * @param string $initial_status   Status persisted before the update request.
+	 * @param string $requested_status Expected response and persisted status.
+	 */
+	public function test_orders_update_status_matrix( string $initial_status, string $requested_status ): void {
+		$order = new WC_Order();
+		$order->set_status( $initial_status );
+		$order_id = $order->save();
+
+		try {
+			$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order_id );
+			$request->set_body_params( array( 'status' => $requested_status ) );
+			$response = $this->server->dispatch( $request );
+			$data     = $response->get_data();
+
+			$this->assertSame( 200, $response->get_status(), 'Updating the order should return HTTP 200.' );
+			$this->assertArrayHasKey( 'id', $data, 'The update response should contain an order ID.' );
+			$this->assertIsInt( $data['id'], 'The update response should contain an integer order ID.' );
+			$this->assertSame( $order_id, $data['id'], 'The update response should retain the order ID.' );
+			$this->assertSame( $requested_status, $data['status'], 'The update response should contain the requested order status.' );
+
+			wp_cache_flush();
+			$persisted_order = wc_get_order( $order_id );
+			$this->assertInstanceOf( WC_Order::class, $persisted_order, 'The updated order should remain persisted.' );
+			$this->assertSame( $order_id, $persisted_order->get_id(), 'The persisted order should retain its ID.' );
+			$this->assertSame( $requested_status, $persisted_order->get_status(), 'The updated order should persist the requested status.' );
+		} finally {
+			$persisted_order = wc_get_order( $order_id );
+			if ( $persisted_order ) {
+				$persisted_order->delete( true );
+			}
+		}
+	}
+
+	/**
 	 * Tests that the created_via parameter is properly stored when creating orders.
 	 */
 	public function test_order_created_via_param(): void {
