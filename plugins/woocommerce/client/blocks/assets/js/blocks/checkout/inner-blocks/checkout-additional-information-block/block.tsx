@@ -1,48 +1,50 @@
 /**
  * External dependencies
  */
-import { noticeContexts } from '@woocommerce/base-context';
+import { Fragment } from '@wordpress/element';
+import { noticeContexts, useEditorContext } from '@woocommerce/base-context';
 import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { checkoutStore } from '@woocommerce/block-data';
 import { ORDER_FORM_KEYS } from '@woocommerce/block-settings';
 import { Form } from '@woocommerce/base-components/cart-checkout';
-import type { FunctionComponent } from 'react';
+import Noninteractive from '@woocommerce/base-components/noninteractive';
+import type { OrderFormValues } from '@woocommerce/settings';
 
-const Block: FunctionComponent = () => {
+const Block = () => {
 	const { additionalFields } = useSelect( ( select ) => {
 		const store = select( checkoutStore );
 		return {
 			additionalFields: store.getAdditionalFields(),
 		};
-	} );
-
+	}, [] );
+	const { isEditor } = useEditorContext();
 	const { setAdditionalFields } = useDispatch( checkoutStore );
 
-	const onChangeForm = ( additionalValues ) => {
-		setAdditionalFields( additionalValues );
+	const onChangeForm = ( additionalValues: OrderFormValues ) => {
+		void setAdditionalFields( additionalValues );
 	};
 
 	const additionalFieldValues = {
 		...additionalFields,
 	};
 
-	if ( ORDER_FORM_KEYS.length === 0 ) {
-		return null;
-	}
+	const WrapperComponent = isEditor ? Noninteractive : Fragment;
 
 	return (
 		<>
 			<StoreNoticesContainer
 				context={ noticeContexts.ORDER_INFORMATION }
 			/>
-			<Form
-				id="order"
-				addressType="order"
-				onChange={ onChangeForm }
-				values={ additionalFieldValues }
-				fields={ ORDER_FORM_KEYS }
-			/>
+			<WrapperComponent>
+				<Form
+					id="order"
+					addressType="order"
+					onChange={ onChangeForm }
+					fields={ ORDER_FORM_KEYS }
+					values={ additionalFieldValues }
+				/>
+			</WrapperComponent>
 		</>
 	);
 };

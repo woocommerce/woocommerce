@@ -8,6 +8,8 @@
  * @since   3.5.0
  */
 
+use Automattic\WooCommerce\Internal\Traits\RestApiCache;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -17,6 +19,8 @@ defined( 'ABSPATH' ) || exit;
  * @extends WC_REST_Controller
  */
 class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
+
+	use RestApiCache;
 
 	/**
 	 * Endpoint namespace.
@@ -33,6 +37,13 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 	protected $rest_base = 'data/continents';
 
 	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		$this->initialize_rest_api_cache();
+	}
+
+	/**
 	 * Register routes.
 	 *
 	 * @since 3.5.0
@@ -44,7 +55,7 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_items' ),
+					'callback'            => $this->with_cache( array( $this, 'get_items' ) ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
@@ -56,7 +67,7 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_item' ),
+					'callback'            => $this->with_cache( array( $this, 'get_item' ) ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => array(
 						'continent' => array(
@@ -358,5 +369,71 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 		);
 
 		return $this->add_additional_fields_schema( $schema );
+	}
+
+	/**
+	 * Get the default entity type for response caching.
+	 *
+	 * @return string|null The entity type.
+	 */
+	protected function get_default_response_entity_type(): ?string {
+		return 'continent';
+	}
+
+	/**
+	 * Get the files relevant to response caching.
+	 *
+	 * @param WP_REST_Request<array<string, mixed>> $request     The request object.
+	 * @param string|null                           $endpoint_id Optional endpoint identifier.
+	 * @return array Array of file paths to track for cache invalidation.
+	 */
+	protected function get_files_relevant_to_response_caching( WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
+		return array(
+			'i18n/continents.php',
+			'i18n/countries.php',
+			'i18n/states.php',
+			'i18n/locale-info.php',
+		);
+	}
+
+	/**
+	 * Get the hooks relevant to response caching.
+	 *
+	 * @param WP_REST_Request<array<string, mixed>> $request     The request object.
+	 * @param string|null                           $endpoint_id Optional endpoint identifier.
+	 * @return array Array of hook names to track for cache invalidation.
+	 */
+	protected function get_hooks_relevant_to_caching( WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
+		return array(
+			'woocommerce_continents',
+			'woocommerce_countries',
+			'woocommerce_states',
+			'woocommerce_rest_prepare_data_continent',
+		);
+	}
+
+	/**
+	 * Whether the response cache should vary by user.
+	 *
+	 * @param WP_REST_Request<array<string, mixed>> $request     The request object.
+	 * @param string|null                           $endpoint_id Optional endpoint identifier.
+	 * @return bool False since continent data doesn't vary by user.
+	 */
+	protected function response_cache_vary_by_user( WP_REST_Request $request, ?string $endpoint_id = null ): bool { // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
+		return false;
+	}
+
+	/**
+	 * Extract entity IDs from response data.
+	 *
+	 * Continents don't have entity IDs, cache invalidation is file-based.
+	 *
+	 * @param array                                 $response_data Response data.
+	 * @param WP_REST_Request<array<string, mixed>> $request       The request object.
+	 * @param string|null                           $endpoint_id   Optional endpoint identifier.
+	 * @return array Empty array since continents don't have entity IDs.
+	 */
+	protected function extract_entity_ids_from_response( array $response_data, WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
+		return array();
 	}
 }

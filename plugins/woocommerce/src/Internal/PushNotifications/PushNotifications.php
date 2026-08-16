@@ -1,0 +1,181 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Automattic\WooCommerce\Internal\PushNotifications;
+
+defined( 'ABSPATH' ) || exit;
+
+use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
+use Automattic\WooCommerce\Internal\PushNotifications\Controllers\NotificationPreferencesRestController;
+use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushNotificationRestController;
+use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestController;
+use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationRetryHandler;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
+use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewOrderNotificationTrigger;
+use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewReviewNotificationTrigger;
+use Automattic\WooCommerce\Internal\PushNotifications\Triggers\StockNotificationRecoveryHandler;
+use Automattic\WooCommerce\Internal\PushNotifications\Triggers\StockNotificationTrigger;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+use WC_Logger;
+use Exception;
+
+/**
+ * WC Push Notifications
+ *
+ * Class for setting up the WooCommerce-driven push notifications.
+ *
+ * @since 10.4.0
+ */
+class PushNotifications {
+	/**
+	 * Feature name for the push notifications feature.
+	 */
+	const FEATURE_NAME = 'push_notifications';
+
+	/**
+	 * Roles that can receive push notifications.
+	 *
+	 * This will be used to gate functionality access to just these roles.
+	 */
+	const ROLES_WITH_PUSH_NOTIFICATIONS_ENABLED = array(
+		'administrator',
+		'shop_manager',
+	);
+
+	/**
+	 * 'Memoized' enablement flag.
+	 *
+	 * @var bool|null
+	 */
+	private ?bool $enabled = null;
+
+	/**
+	 * Registers initialisation tasks to the `init` hook.
+	 *
+	 * @return void
+	 *
+	 * @since 10.4.0
+	 */
+	public function register(): void {
+		add_action( 'init', array( $this, 'on_init' ) );
+	}
+
+	/**
+	 * Loads the push notifications class.
+	 *
+	 * @return void
+	 *
+	 * @since 10.6.0
+	 */
+	public function on_init(): void {
+		if ( ! $this->should_be_enabled() ) {
+			return;
+		}
+
+		$this->register_post_types();
+
+		wc_get_container()->get( PendingNotificationStore::class )->register();
+
+		( new PushTokenRestController() )->register();
+		( new PushNotificationRestController() )->register();
+		( new NotificationPreferencesRestController() )->register();
+		( new NewOrderNotificationTrigger() )->register();
+		( new NewReviewNotificationTrigger() )->register();
+		( new StockNotificationTrigger() )->register();
+		( new StockNotificationRecoveryHandler() )->register();
+
+		wc_get_container()->get( NotificationProcessor::class )->register();
+		wc_get_container()->get( NotificationRetryHandler::class )->register();
+	}
+
+	/**
+	 * Registers the push token custom post type.
+	 *
+	 * @since 10.5.0
+	 * @return void
+	 */
+	public function register_post_types(): void {
+		register_post_type(
+			PushToken::POST_TYPE,
+			array(
+				'labels'             => array(
+					'name'          => __( 'Push Tokens', 'woocommerce' ),
+					'singular_name' => __( 'Push Token', 'woocommerce' ),
+				),
+				'public'             => false,
+				'publicly_queryable' => false,
+				'show_ui'            => false,
+				'show_in_menu'       => false,
+				'query_var'          => false,
+				'rewrite'            => false,
+				'capability_type'    => 'post',
+				'has_archive'        => false,
+				'hierarchical'       => false,
+				'supports'           => array( 'author' ),
+				'can_export'         => false,
+				'delete_with_user'   => true,
+			)
+		);
+	}
+
+	/**
+	 * Determines if local push notification functionality should be enabled.
+	 * Push notifications require Jetpack to be connected. Memoize the value so
+	 * we only check once per request.
+	 *
+	 * @return bool
+	 *
+	 * @since 10.4.0
+	 */
+	public function should_be_enabled(): bool {
+		if ( null !== $this->enabled ) {
+			return $this->enabled;
+		}
+
+		$feature_disabled = wc_string_to_bool(
+			/**
+			 * Filters whether enhanced push notifications should be disabled.
+			 *
+			 * The feature was previously controlled by a now-deprecated feature
+			 * flag. It is now enabled by default for all compatible users, but this
+			 * filter lets a store force it off (e.g. to fall back to Jetpack Sync
+			 * if something isn't working). The feature also requires a Jetpack
+			 * connection, which is checked separately below.
+			 *
+			 * @since 10.9.2
+			 *
+			 * @param bool $disabled Whether enhanced push notifications are disabled. Defaults to false.
+			 */
+			apply_filters( 'woocommerce_enhanced_push_notifications_disabled', false )
+		);
+
+		if ( $feature_disabled ) {
+			$this->enabled = false;
+			return $this->enabled;
+		}
+
+		try {
+			$proxy = wc_get_container()->get( LegacyProxy::class );
+
+			$this->enabled = (
+				class_exists( JetpackConnectionManager::class )
+				&& $proxy->get_instance_of( JetpackConnectionManager::class )->is_connected()
+			);
+		} catch ( Exception $e ) {
+			$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
+
+			if ( $logger instanceof WC_Logger ) {
+				$logger->error(
+					'Error determining if PushNotifications feature should be enabled: ' . $e->getMessage()
+				);
+			}
+
+			$this->enabled = false;
+		}
+
+		return $this->enabled;
+	}
+}

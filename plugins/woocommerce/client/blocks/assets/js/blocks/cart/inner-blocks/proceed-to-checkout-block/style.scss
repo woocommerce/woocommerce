@@ -7,6 +7,21 @@
 	width: 100%;
 	margin: 0;
 	box-sizing: border-box;
+
+	// Hides labels when the spinner is shown.
+	&--loading {
+		.wc-block-components-button__text {
+			visibility: hidden;
+		}
+		.wc-block-components-spinner {
+			visibility: visible;
+		}
+	}
+}
+.wc-block-cart__submit-button[aria-disabled="true"] {
+	.wc-block-components-button__text {
+		opacity: 0.5;
+	}
 }
 
 .wc-block-cart {
@@ -39,7 +54,7 @@
 	}
 }
 
-@include breakpoint(">=782px") {
+@include breakpoint(">782px") {
 	.wc-block-cart .wc-block-cart__submit-container--sticky {
 		display: none;
 	}

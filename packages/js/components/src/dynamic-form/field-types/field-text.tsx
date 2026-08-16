@@ -6,13 +6,15 @@ import { createElement } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { TextControl } from '../../index';
+import TextControl from '../../text-control';
 import { ControlProps } from '../types';
 
-export const TextField: React.FC< ControlProps & { type?: string } > = ( {
+export const TextField = ( {
 	field,
 	type = 'text',
 	...props
+}: ControlProps & {
+	type?: string;
 } ) => {
 	const { label, description } = field;
 

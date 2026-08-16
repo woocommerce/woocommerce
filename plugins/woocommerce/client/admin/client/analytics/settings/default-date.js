@@ -16,10 +16,15 @@ const DefaultDate = ( { value, onChange } ) => {
 	const { woocommerce_default_date_range: defaultDateRange } =
 		wcAdminSettings;
 	const change = ( query ) => {
+		const sanitizedQuery = Object.fromEntries(
+			Object.entries( query ).filter(
+				( [ , queryValue ] ) => typeof queryValue !== 'undefined'
+			)
+		);
 		onChange( {
 			target: {
 				name: 'woocommerce_default_date_range',
-				value: new URLSearchParams( query ).toString(),
+				value: new URLSearchParams( sanitizedQuery ).toString(),
 			},
 		} );
 	};

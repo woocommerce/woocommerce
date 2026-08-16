@@ -15,10 +15,8 @@ import { MARKETPLACE_PATH } from '../constants';
 
 /**
  * Search component.
- *
- * @return {JSX.Element} Search component.
  */
-function Search(): JSX.Element {
+function Search(): React.JSX.Element {
 	const [ searchTerm, setSearchTerm ] = useState( '' );
 	const searchPlaceholder = __( 'Search Marketplace', 'woocommerce' );
 
@@ -73,7 +71,7 @@ function Search(): JSX.Element {
 	const onFocus = () => {
 		recordEvent( 'marketplace_search_start', {
 			current_search_term: searchTerm,
-			current_tab: query.tab,
+			current_tab: query.tab || 'discover',
 		} );
 	};
 

@@ -10,12 +10,12 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { CustomerFeedbackModal } from '../';
+import { CustomerFeedbackModal } from '../customer-feedback-modal';
 import { getStoreAgeInWeeks } from '../../utils';
 import { ADMIN_INSTALL_TIMESTAMP_OPTION_NAME } from '../../constants';
 import store from '../../store';
 
-export const CustomerEffortScoreModalContainer: React.FC = () => {
+export const CustomerEffortScoreModalContainer = () => {
 	const { createSuccessNotice } = useDispatch( 'core/notices' );
 	const { hideCesModal } = useDispatch( store );
 	const {
@@ -82,12 +82,12 @@ export const CustomerEffortScoreModalContainer: React.FC = () => {
 			secondQuestion={ visibleCESModalData.secondQuestion }
 			recordScoreCallback={ ( ...args ) => {
 				recordScore( ...args );
-				hideCesModal();
+				void hideCesModal();
 				visibleCESModalData.props?.onRecordScore?.();
 			} }
 			onCloseModal={ () => {
 				visibleCESModalData.props?.onCloseModal?.();
-				hideCesModal();
+				void hideCesModal();
 			} }
 			shouldShowComments={ visibleCESModalData.props?.shouldShowComments }
 			getExtraFieldsToBeShown={

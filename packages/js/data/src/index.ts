@@ -28,26 +28,29 @@ export { EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME } from './product-categories
 export { EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME } from './product-attribute-terms';
 export { EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME } from './product-variations';
 export { EXPERIMENTAL_TAX_CLASSES_STORE_NAME } from './tax-classes';
-export { PaymentGateway } from './payment-gateways/types';
-export {
-	PaymentProvider,
-	PaymentProviderType,
-	PaymentProviderState,
-	PaymentProviderOnboardingState,
+export { ACTIVITY_PANEL_STORE_NAME } from './activity-panel';
+export type { PaymentGateway } from './payment-gateways/types';
+export type {
+	PaymentsEntity,
+	PaymentsProvider,
+	PaymentsProviderState,
+	PaymentsProviderOnboardingState,
 	PaymentGatewayProvider,
 	OfflinePaymentMethodProvider,
-	PaymentExtensionSuggestionProvider,
+	PaymentsExtensionSuggestionProvider,
 	OfflinePmsGroupProvider,
-	SuggestedPaymentExtension,
-	SuggestedPaymentExtensionCategory,
-	PaymentIncentive,
+	SuggestedPaymentsExtension,
+	SuggestedPaymentsExtensionCategory,
+	PaymentsProviderIncentive,
 	EnableGatewayResponse,
-	PaymentGatewayLink,
+	PaymentsProviderLink,
 	RecommendedPaymentMethod,
 	PluginData,
 } from './payment-settings/types';
-export { ShippingMethod } from './shipping-methods/types';
+export { PaymentsProviderType } from './payment-settings/types';
+export type { ShippingMethod } from './shipping-methods/types';
 export { EXPERIMENTAL_PRODUCT_FORM_STORE_NAME } from './product-form';
+export { WOOPAYMENTS_ONBOARDING_STORE_NAME } from './woopayments-onboarding';
 
 // Export stores
 export { store as onboardingStore } from './onboarding';
@@ -73,6 +76,11 @@ export { store as paymentGatewaysStore } from './payment-gateways';
 export { store as importStore } from './import';
 export { store as experimentalProductFormStore } from './product-form';
 export { store as paymentSettingsStore } from './payment-settings';
+export { store as woopaymentsOnboardingStore } from './woopayments-onboarding';
+export { store as reportsStore } from './reports';
+export { store as itemsStore } from './items';
+export { store as experimentalSettingOptionsStore } from './setting-options';
+export { store as activityPanelStore } from './activity-panel';
 
 // Export hooks
 export { withSettingsHydration } from './settings/with-settings-hydration';
@@ -90,7 +98,8 @@ export { useUser } from './user/use-user';
 
 // Export utils
 export { getVisibleTasks } from './onboarding/utils';
-export { getLeaderboard, searchItemsByString } from './items/utils';
+export { searchItemsByString } from './items/utils';
+export { getLeaderboard } from './items/store-aware-utils';
 export {
 	getFilterQuery,
 	getSummaryNumbers,
@@ -121,18 +130,19 @@ export {
 // Export types
 export * from './types';
 export * from './countries/types';
-export {
+export type {
 	ProductForm,
 	ProductFormField,
 	ProductFormSection,
 } from './product-form/types';
 export * from './onboarding/types';
 export * from './plugins/types';
-export { PluginSelectors } from './plugins/selectors';
-export { PaymentSelectors } from './payment-gateways/selectors';
-export { OnboardingSelectors } from './onboarding/selectors';
-export { PaymentSettingsSelectors } from './payment-settings/selectors';
-export { ActionDispatchers as PluginActions } from './plugins/actions';
+export type { PluginSelectors } from './plugins/selectors';
+export type { PaymentSelectors } from './payment-gateways/selectors';
+export type { OnboardingSelectors } from './onboarding/selectors';
+export type { PaymentSettingsSelectors } from './payment-settings/selectors';
+export type { WooPaymentsOnboardingSelectors } from './woopayments-onboarding/selectors';
+export type { ActionDispatchers as PluginActions } from './plugins/actions';
 export * from './products/types';
 export type {
 	PartialProductVariation,
@@ -140,26 +150,33 @@ export type {
 	ProductVariationAttribute,
 	ProductVariationImage,
 } from './product-variations/types';
-export {
+export type {
 	QueryProductAttribute,
 	ProductAttribute,
 	ProductAttributeSelectors,
 } from './product-attributes/types';
 export * from './product-shipping-classes/types';
-export {
+export type {
 	ProductAttributeTerm,
 	ProductAttributeTermsSelectors,
 } from './product-attribute-terms/types';
 export * from './orders/types';
-export {
+export type {
 	ProductCategory,
 	ProductCategoryImage,
 	ProductCategorySelectors,
 } from './product-categories/types';
-export { TaxClass } from './tax-classes/types';
-export { ProductTag, Query } from './product-tags/types';
-export { WCUser } from './user/types';
-export { UserPreferences } from './user/types';
+export type { TaxClass } from './tax-classes/types';
+export type { ProductTag, Query } from './product-tags/types';
+export type { WCUser } from './user/types';
+export type { UserPreferences } from './user/types';
+export type { StepContent as WooPaymentsOnboardingStepContent } from './woopayments-onboarding/types';
+export type {
+	Setting,
+	SettingsGroup,
+	SettingValue,
+	SettingType,
+} from './setting-options/types';
 
 /**
  * Internal dependencies
@@ -177,6 +194,7 @@ import type { ITEMS_STORE_NAME } from './items';
 import type { COUNTRIES_STORE_NAME } from './countries';
 import type { PAYMENT_GATEWAYS_STORE_NAME } from './payment-gateways';
 import type { PAYMENT_SETTINGS_STORE_NAME } from './payment-settings';
+import type { WOOPAYMENTS_ONBOARDING_STORE_NAME } from './woopayments-onboarding';
 import type { SHIPPING_METHODS_STORE_NAME } from './shipping-methods';
 import type { PRODUCTS_STORE_NAME } from './products';
 import type { ORDERS_STORE_NAME } from './orders';
@@ -189,6 +207,7 @@ import type { EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME } from './product-
 import type { EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME } from './product-variations';
 import type { EXPERIMENTAL_TAX_CLASSES_STORE_NAME } from './tax-classes';
 import type { EXPERIMENTAL_PRODUCT_FORM_STORE_NAME } from './product-form';
+import type { ACTIVITY_PANEL_STORE_NAME } from './activity-panel';
 
 export type WCDataStoreName =
 	| typeof REVIEWS_STORE_NAME
@@ -204,6 +223,7 @@ export type WCDataStoreName =
 	| typeof COUNTRIES_STORE_NAME
 	| typeof PAYMENT_GATEWAYS_STORE_NAME
 	| typeof PAYMENT_SETTINGS_STORE_NAME
+	| typeof WOOPAYMENTS_ONBOARDING_STORE_NAME
 	| typeof SHIPPING_METHODS_STORE_NAME
 	| typeof PRODUCTS_STORE_NAME
 	| typeof ORDERS_STORE_NAME
@@ -215,7 +235,8 @@ export type WCDataStoreName =
 	| typeof EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME
 	| typeof EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 	| typeof EXPERIMENTAL_TAX_CLASSES_STORE_NAME
-	| typeof EXPERIMENTAL_PRODUCT_FORM_STORE_NAME;
+	| typeof EXPERIMENTAL_PRODUCT_FORM_STORE_NAME
+	| typeof ACTIVITY_PANEL_STORE_NAME;
 
 /**
  * Internal dependencies
@@ -238,6 +259,8 @@ import { ProductAttributeTermsSelectors } from './product-attribute-terms/types'
 import { ProductVariationSelectors } from './product-variations/types';
 import { TaxClassSelectors } from './tax-classes/types';
 import { ProductFormSelectors } from './product-form/selectors';
+import { WooPaymentsOnboardingSelectors } from './woopayments-onboarding/selectors';
+import { ActivityPanelSelectors } from './activity-panel/types';
 
 // As we add types to all the package selectors we can fill out these unknown types with real ones. See one
 // of the already typed selectors for an example of how you can do this.
@@ -253,6 +276,8 @@ export type WCSelectorType< T > = T extends typeof REVIEWS_STORE_NAME
 	? PaymentSelectors
 	: T extends typeof PAYMENT_SETTINGS_STORE_NAME
 	? PaymentSettingsSelectors
+	: T extends typeof WOOPAYMENTS_ONBOARDING_STORE_NAME
+	? WooPaymentsOnboardingSelectors
 	: T extends typeof SHIPPING_METHODS_STORE_NAME
 	? ShippingMethodsSelectors
 	: T extends typeof USER_STORE_NAME
@@ -291,6 +316,8 @@ export type WCSelectorType< T > = T extends typeof REVIEWS_STORE_NAME
 	? TaxClassSelectors
 	: T extends typeof EXPERIMENTAL_PRODUCT_FORM_STORE_NAME
 	? ProductFormSelectors
+	: T extends typeof ACTIVITY_PANEL_STORE_NAME
+	? ActivityPanelSelectors
 	: never;
 
 export interface WCDataSelector {
@@ -298,13 +325,13 @@ export interface WCDataSelector {
 }
 
 // Other exports
-export { ActionDispatchers as PluginsStoreActions } from './plugins/actions';
-export { ActionDispatchers as ProductTagsActions } from './product-tags/types';
-export { ActionDispatchers as ProductCategoryActions } from './product-categories/types';
-export { ActionDispatchers as ProductAttributeTermsActions } from './product-attribute-terms/types';
-export { ActionDispatchers as ProductAttributesActions } from './product-attributes/types';
-export { ActionDispatchers as ProductVariationsActions } from './product-variations/types';
-export { ActionDispatchers as ProductsStoreActions } from './products/actions';
-export { ActionDispatchers as ProductShippingClassesActions } from './product-shipping-classes/types';
-export { ActionDispatchers as ShippingZonesActions } from './shipping-zones/types';
-export { ActionDispatchers as TaxClassActions } from './tax-classes/types';
+export type { ActionDispatchers as PluginsStoreActions } from './plugins/actions';
+export type { ActionDispatchers as ProductTagsActions } from './product-tags/types';
+export type { ActionDispatchers as ProductCategoryActions } from './product-categories/types';
+export type { ActionDispatchers as ProductAttributeTermsActions } from './product-attribute-terms/types';
+export type { ActionDispatchers as ProductAttributesActions } from './product-attributes/types';
+export type { ActionDispatchers as ProductVariationsActions } from './product-variations/types';
+export type { ActionDispatchers as ProductsStoreActions } from './products/actions';
+export type { ActionDispatchers as ProductShippingClassesActions } from './product-shipping-classes/types';
+export type { ActionDispatchers as ShippingZonesActions } from './shipping-zones/types';
+export type { ActionDispatchers as TaxClassActions } from './tax-classes/types';

@@ -4,9 +4,10 @@
 import { __ } from '@wordpress/i18n';
 import { MenuGroup, MenuItem } from '@wordpress/components';
 import { check } from '@wordpress/icons';
-import { Fragment } from '@wordpress/element';
+import { Fragment, useEffect } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { onboardingStore, TaskListType, TaskType } from '@woocommerce/data';
+import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -29,7 +30,7 @@ export type TaskListsProps = {
 	context?: string;
 };
 
-export const TaskLists: React.FC< TaskListsProps > = ( { query } ) => {
+export const TaskLists = ( { query }: TaskListsProps ) => {
 	const { task } = query;
 	const { hideTaskList } = useDispatch( onboardingStore );
 
@@ -74,10 +75,16 @@ export const TaskLists: React.FC< TaskListsProps > = ( { query } ) => {
 			{}
 		);
 
-		hideTaskList( id );
+		void hideTaskList( id );
 	};
 
 	const currentTask = getCurrentTask();
+
+	useEffect( () => {
+		if ( task && ! currentTask && ! isResolving ) {
+			getHistory().replace( getNewPath( {}, '/', {} ) );
+		}
+	}, [ currentTask, isResolving, task ] );
 
 	if ( task && ! currentTask ) {
 		return null;

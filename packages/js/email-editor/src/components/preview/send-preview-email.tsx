@@ -10,6 +10,7 @@ import {
 	useRef,
 	createInterpolateElement,
 	memo,
+	useMemo,
 } from '@wordpress/element';
 import { ENTER } from '@wordpress/keycodes';
 import { isEmail } from '@wordpress/url';
@@ -18,17 +19,8 @@ import { applyFilters } from '@wordpress/hooks';
 /**
  * Internal dependencies
  */
-import {
-	SendingPreviewStatus,
-	storeName,
-	editorCurrentPostType,
-} from '../../store';
+import { SendingPreviewStatus, storeName } from '../../store';
 import { recordEvent, recordEventOnce } from '../../events';
-
-const sendingMethodConfigurationLink = applyFilters(
-	'woocommerce_email_editor_check_sending_method_configuration_link',
-	`https://www.mailpoet.com/blog/mailpoet-smtp-plugin/?utm_source=woocommerce_email_editor&utm_medium=plugin&utm_source_platform=${ editorCurrentPostType }`
-) as string;
 
 function RawSendPreviewEmail() {
 	const sendToRef = useRef( null );
@@ -45,11 +37,27 @@ function RawSendPreviewEmail() {
 		sendingPreviewStatus,
 		isModalOpened,
 		errorMessage,
-	} = useSelect( ( select ) => select( storeName ).getPreviewState(), [] );
+		postType,
+	} = useSelect(
+		( select ) => ( {
+			...select( storeName ).getPreviewState(),
+			postType: select( storeName ).getEmailPostType(),
+		} ),
+		[]
+	);
 
 	const handleSendPreviewEmail = () => {
 		void requestSendingNewsletterPreview( previewToEmail );
 	};
+
+	const sendingMethodConfigurationLink = useMemo(
+		() =>
+			applyFilters(
+				'woocommerce_email_editor_check_sending_method_configuration_link',
+				`https://www.mailpoet.com/blog/mailpoet-smtp-plugin/?utm_source=woocommerce_email_editor&utm_medium=plugin&utm_source_platform=${ postType }`
+			) as string,
+		[ postType ]
+	);
 
 	const closeCallback = () => {
 		recordEvent( 'send_preview_email_modal_closed' );
@@ -71,7 +79,7 @@ function RawSendPreviewEmail() {
 	return (
 		<Modal
 			className="woocommerce-send-preview-email"
-			title={ __( 'Send a test email', 'woocommerce' ) }
+			title={ __( 'Send a test email', __i18n_text_domain__ ) }
 			onRequestClose={ closeCallback }
 			focusOnMount={ false }
 		>
@@ -80,7 +88,7 @@ function RawSendPreviewEmail() {
 					<p>
 						{ __(
 							'Sorry, we were unable to send this email.',
-							'woocommerce'
+							__i18n_text_domain__
 						) }
 					</p>
 
@@ -88,7 +96,7 @@ function RawSendPreviewEmail() {
 						{ errorMessage &&
 							sprintf(
 								// translators: %s is an error message.
-								__( 'Error: %s', 'woocommerce' ),
+								__( 'Error: %s', __i18n_text_domain__ ),
 								errorMessage
 							) }
 					</strong>
@@ -99,7 +107,7 @@ function RawSendPreviewEmail() {
 								createInterpolateElement(
 									__(
 										'Please check your <link>sending method configuration</link> with your hosting provider.',
-										'woocommerce'
+										__i18n_text_domain__
 									),
 									{
 										link: (
@@ -124,13 +132,13 @@ function RawSendPreviewEmail() {
 							{ createInterpolateElement(
 								__(
 									'Or, sign up for MailPoet Sending Service to easily send emails. <link>Sign up for free</link>',
-									'woocommerce'
+									__i18n_text_domain__
 								),
 								{
 									link: (
 										// eslint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/control-has-associated-label
 										<a
-											href={ `https://account.mailpoet.com/?s=1&g=1&utm_source=woocommerce_email_editor&utm_medium=plugin&utm_source_platform=${ editorCurrentPostType }` }
+											href={ `https://account.mailpoet.com/?s=1&g=1&utm_source=woocommerce_email_editor&utm_medium=plugin&utm_source_platform=${ postType }` }
 											key="sign-up-for-free"
 											target="_blank"
 											rel="noopener noreferrer"
@@ -148,43 +156,13 @@ function RawSendPreviewEmail() {
 				</div>
 			) : null }
 			<p>
-				{ createInterpolateElement(
-					__(
-						'Send yourself a test email to test how your email would look like in different email apps. You can also test your spam score by sending a test email to <link1>{$serviceName}</link1>. <link2>Learn more</link2>.',
-						'woocommerce'
-					).replace( '{$serviceName}', 'Mail Tester' ),
-					{
-						link1: (
-							// eslint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/control-has-associated-label
-							<a
-								href="https://www.mail-tester.com/"
-								target="_blank"
-								rel="noopener noreferrer"
-								onClick={ () =>
-									recordEvent(
-										'send_preview_email_modal_send_test_email_to_mail_tester_link_clicked'
-									)
-								}
-							/>
-						),
-						link2: (
-							// eslint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/control-has-associated-label
-							<a
-								href="https://kb.mailpoet.com/article/147-test-your-spam-score-with-mail-tester"
-								target="_blank"
-								rel="noopener noreferrer"
-								onClick={ () =>
-									recordEvent(
-										'send_preview_email_modal_learn_more_about_mail_tester_link_clicked'
-									)
-								}
-							/>
-						),
-					}
+				{ __(
+					'Send yourself a test email to test how your email would look like in different email apps.',
+					__i18n_text_domain__
 				) }
 			</p>
 			<TextControl
-				label={ __( 'Send to', 'woocommerce' ) }
+				label={ __( 'Send to', __i18n_text_domain__ ) }
 				onChange={ ( email ) => {
 					void updateSendPreviewEmail( email );
 					recordEventOnce(
@@ -201,15 +179,21 @@ function RawSendPreviewEmail() {
 						);
 					}
 				} }
+				className="woocommerce-send-preview-email__send-to-field"
 				value={ previewToEmail }
 				type="email"
 				ref={ sendToRef }
 				required
+				__next40pxDefaultSize
+				__nextHasNoMarginBottom
 			/>
 			{ sendingPreviewStatus === SendingPreviewStatus.SUCCESS ? (
 				<p className="woocommerce-send-preview-modal-notice-success">
 					<Icon icon={ check } style={ { fill: '#4AB866' } } />
-					{ __( 'Test email sent successfully!', 'woocommerce' ) }
+					{ __(
+						'Test email sent successfully!',
+						__i18n_text_domain__
+					) }
 				</p>
 			) : null }
 			<div className="woocommerce-send-preview-modal-footer">
@@ -222,7 +206,7 @@ function RawSendPreviewEmail() {
 						closeCallback();
 					} }
 				>
-					{ __( 'Close', 'woocommerce' ) }
+					{ __( 'Cancel', __i18n_text_domain__ ) }
 				</Button>
 				<Button
 					variant="primary"
@@ -237,8 +221,8 @@ function RawSendPreviewEmail() {
 					}
 				>
 					{ isSendingPreviewEmail
-						? __( 'Sending…', 'woocommerce' )
-						: __( 'Send test email', 'woocommerce' ) }
+						? __( 'Sending…', __i18n_text_domain__ )
+						: __( 'Send test email', __i18n_text_domain__ ) }
 				</Button>
 			</div>
 		</Modal>

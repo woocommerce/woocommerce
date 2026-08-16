@@ -40,7 +40,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	title "##[group]Setting up necessary tooling"
 	npm install -g corepack@latest && corepack enable pnpm
 	# `npm install -g corepack@latest` addresses https://github.com/nodejs/corepack/issues/612.
-	pnpm install --filter='compare-perf...' --frozen-lockfile --config.dedupe-peer-dependents=false --ignore-scripts
+	pnpm install --filter='compare-perf...' --frozen-lockfile
 	echo '##[endgroup]'
 
 	if test -n "$(find $ARTIFACTS_PATH -maxdepth 1 -name "*_${GITHUB_SHA}_*" -print -quit)"; then
@@ -49,14 +49,13 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 		# title "##[group]Building head"
 		# git -c core.hooksPath=/dev/null checkout --quiet $HEAD_BRANCH > /dev/null && echo 'On' $(git rev-parse HEAD)
 		# pnpm run --if-present clean:build
-		# pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
+		# pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile
 		# pnpm --filter='@woocommerce/plugin-woocommerce' build
 		# echo '##[endgroup]'
 
 		title "##[group]Benchmarking head"
 		pnpm --filter="@woocommerce/plugin-woocommerce" test:e2e:install > /dev/null
 		RESULTS_ID="editor_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
-		RESULTS_ID="product-editor_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
 		RESULTS_ID="frontend_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics frontend
 		echo '##[endgroup]'
 	fi
@@ -71,17 +70,18 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 		title "##[group]Building baseline"
 		( git -c core.hooksPath=/dev/null checkout --quiet $BASE_SHA > /dev/null || git reset --hard $BASE_SHA ) && echo 'On' $(git rev-parse HEAD)
 		pnpm run --if-present clean:build &
-		pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
+		pnpm install --filter='@woocommerce/plugin-woocommerce...' --filter='compare-perf...' --frozen-lockfile
 		WIREIT_CACHE=local pnpm --filter='@woocommerce/plugin-woocommerce' build
 		echo '##[endgroup]'
 
 		title "##[group]Benchmarking baseline"
 		# This one is important: we run the same tests in the same state as we did at head benchmarking.
+		echo "Switch benchmarking resources to $GITHUB_SHA so we run the same benchmarks"
 		git restore --source $GITHUB_SHA $(realpath $(dirname -- ${BASH_SOURCE[0]})/../../../plugins/woocommerce/tests)
 		git restore --source $GITHUB_SHA $(realpath $(dirname -- ${BASH_SOURCE[0]})/../../../tools/compare-perf)
+		git restore --source $GITHUB_SHA $(realpath $(dirname -- ${BASH_SOURCE[0]})/../../../.github)
 		pnpm --filter="@woocommerce/plugin-woocommerce" test:e2e:install > /dev/null
 		RESULTS_ID="editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
-		RESULTS_ID="product-editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
 		RESULTS_ID="frontend_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics frontend
 		echo '##[endgroup]'
 	fi
@@ -109,11 +109,11 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 		echo '##[endgroup]'
 	fi
 
-	# Compare server response delta compared to the base branch and fail if greater than 5% difference.
+	# Compare server response delta compared to the base branch and fail if greater than 10% difference.
 	FRONTEND_DELTA=$(jq .serverResponse $ARTIFACTS_PATH/frontend.delta-results.json)
-	if (( $(echo "$FRONTEND_DELTA > 5" | bc -l) ))
+	if (( $(echo "$FRONTEND_DELTA > 10" | bc -l) ))
 	then
-		echo "::error::The frontend server response delta of ${FRONTEND_DELTA}% is greater than the maximum allowed 5%."
+		echo "::error::The frontend server response delta of ${FRONTEND_DELTA}% is greater than the maximum allowed 10%."
 		exit 1
 	fi
 

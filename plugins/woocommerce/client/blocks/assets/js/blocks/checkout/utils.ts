@@ -1,11 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	ALLOWED_COUNTRIES,
-	ALLOWED_STATES,
-	LOGIN_URL,
-} from '@woocommerce/block-settings';
+import { COUNTRIES, STATES, LOGIN_URL } from '@woocommerce/block-settings';
 import { getSetting } from '@woocommerce/settings';
 import {
 	CartBillingAddress,
@@ -25,17 +21,17 @@ export const isLoginRequired = ( customerId: number ): boolean => {
 export const getFormattedState = (
 	address: CartBillingAddress | CartShippingAddress
 ): string => {
-	return isObject( ALLOWED_STATES[ address.country ] ) &&
-		isString( ALLOWED_STATES[ address.country ][ address.state ] )
-		? decodeEntities( ALLOWED_STATES[ address.country ][ address.state ] )
+	return isObject( STATES[ address.country ] ) &&
+		isString( STATES[ address.country ][ address.state ] )
+		? decodeEntities( STATES[ address.country ][ address.state ] )
 		: address.state;
 };
 
 export const getFormattedCountry = (
 	address: CartBillingAddress | CartShippingAddress
 ): string => {
-	return isString( ALLOWED_COUNTRIES[ address.country ] )
-		? decodeEntities( ALLOWED_COUNTRIES[ address.country ] )
+	return isString( COUNTRIES[ address.country ] )
+		? decodeEntities( COUNTRIES[ address.country ] )
 		: address.country;
 };
 
@@ -120,12 +116,19 @@ export const formatAddress = (
 		parsedAddress = parsedAddress.replace( token, value );
 	} );
 	const addressParts = parsedAddress
-		.replace( /^,\s|,\s$/g, '' )
-		.replace( /\n{2,}/, '\n' )
+		.trim()
+		.replace( /\n{2,}/g, '\n' )
 		.split( '\n' )
-		.filter( Boolean );
+		.map( ( part ) =>
+			part
+				.split( ', ' )
+				.map( ( segment ) => segment.trim() )
+				.filter( Boolean )
+				.join( ', ' )
+		)
+		.filter( ( part ) => part.length > 0 );
 
 	return { name: parsedName, address: addressParts };
 };
 
-export const reloadPage = (): void => void window.location.reload( true );
+export const reloadPage = (): void => void window.location.reload();

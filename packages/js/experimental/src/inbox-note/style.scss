@@ -5,23 +5,6 @@
 	border-radius: 2px;
 	@include font-size( 13 );
 	margin: 0 0;
-	-ms-box-orient: horizontal;
-	&.banner {
-		-webkit-flex-direction: column;
-		flex-direction: column;
-		img {
-			width: 100%;
-		}
-	}
-	&.thumbnail {
-		display: flex;
-		-webkit-flex-direction: row-reverse;
-		flex-direction: row-reverse;
-		img {
-			width: 128px;
-			height: 100%;
-		}
-	}
 	&:hover {
 		background: $gray-100;
 	}
@@ -68,7 +51,7 @@
 		font-style: normal;
 		line-height: 1.5;
 		font-weight: bold;
-		margin: $gap-smaller 0;
+		margin: $gap-smaller 0 $gap-smallest;
 
 		.is-placeholder & {
 			& > div {
@@ -111,6 +94,7 @@
 	font-weight: normal;
 	@include font-size( 14 );
 	line-height: 20px;
+	text-wrap: pretty;
 	& > p:first-child {
 		margin-top: 0;
 	}

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Move blueprint package to plugins/woocommerce/packages and enable core watch to sync directory changes.

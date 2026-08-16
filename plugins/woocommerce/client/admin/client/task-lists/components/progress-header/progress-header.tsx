@@ -16,9 +16,9 @@ import {
 	DefaultProgressHeaderProps,
 } from './default-progress-header';
 
-export const ProgressHeader: React.FC< DefaultProgressHeaderProps > = ( {
+export const ProgressHeader = ( {
 	taskListId,
-} ) => {
+}: DefaultProgressHeaderProps ) => {
 	const slot = useSlot( WC_TASKLIST_EXPERIMENTAL_PROGRESS_HEADER_SLOT_NAME );
 
 	return Boolean( slot?.fills?.length ) ? (

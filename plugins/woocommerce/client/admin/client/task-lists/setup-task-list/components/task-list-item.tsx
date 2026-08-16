@@ -18,13 +18,13 @@ export type TaskListItemProps = {
 	trackClick: () => void;
 };
 
-export const TaskListItem: React.FC< TaskListItemProps > = ( {
+export const TaskListItem = ( {
 	task,
 	activeTaskId,
 	taskIndex,
 	goToTask,
 	trackClick,
-} ) => {
+}: TaskListItemProps ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { dismissTask, undoDismissTask } = useDispatch( onboardingStore );
 
@@ -35,6 +35,8 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 		content,
 		time,
 		actionLabel,
+		isInProgress,
+		inProgressLabel,
 		isComplete,
 		additionalInfo,
 		isDismissable,
@@ -44,7 +46,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	const hasFills = Boolean( slot?.fills?.length );
 
 	const onDismissTask = ( onDismiss?: () => void ) => {
-		dismissTask( taskId );
+		void dismissTask( taskId );
 		createNotice( 'success', __( 'Task dismissed', 'woocommerce' ), {
 			actions: [
 				{
@@ -64,6 +66,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 			const className = clsx(
 				'woocommerce-task-list__item index-' + taskIndex,
 				{
+					in_progress: isInProgress,
 					complete: isComplete,
 					'is-active': taskId === activeTaskId,
 				}
@@ -86,6 +89,8 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 					className={ className }
 					title={ title }
 					badge={ badge }
+					inProgress={ isInProgress }
+					inProgressLabel={ inProgressLabel }
 					completed={ isComplete }
 					additionalInfo={ additionalInfo }
 					content={ content }

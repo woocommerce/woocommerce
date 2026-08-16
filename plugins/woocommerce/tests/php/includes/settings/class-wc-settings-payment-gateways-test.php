@@ -5,6 +5,9 @@
  * @package WooCommerce\Tests\Settings
  */
 
+use Automattic\WooCommerce\Admin\Settings\SettingsSection;
+use Automattic\WooCommerce\Admin\Settings\SettingsSectionInterface;
+use Automattic\WooCommerce\Admin\Settings\SettingsSectionRegistry;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 
@@ -25,6 +28,16 @@ class WC_Settings_Payment_Gateways_Test extends WC_Settings_Unit_Test_Case {
 
 		// Make sure the class file is loaded.
 		require_once WC_ABSPATH . 'includes/admin/settings/class-wc-settings-payment-gateways.php';
+		SettingsSectionRegistry::get_instance()->unregister_all();
+	}
+
+	/**
+	 * Tear down test case.
+	 */
+	public function tearDown(): void {
+		SettingsSectionRegistry::get_instance()->unregister_all();
+
+		parent::tearDown();
 	}
 
 	/**
@@ -45,8 +58,7 @@ class WC_Settings_Payment_Gateways_Test extends WC_Settings_Unit_Test_Case {
 	/**
 	 * get_settings should trigger the appropriate filter depending on the requested section name.
 	 *
-	 * @testWith ["", "woocommerce_payment_gateways_settings"]
-	 *           ["woocommerce_com", "woocommerce_get_settings_checkout"]
+	 * @testWith ["woocommerce_com", "woocommerce_get_settings_checkout"]
 	 *
 	 * @param string $section_name The section name to test getting the settings for.
 	 * @param string $filter_name The name of the filter that is expected to be triggered.
@@ -84,45 +96,39 @@ class WC_Settings_Payment_Gateways_Test extends WC_Settings_Unit_Test_Case {
 
 		$expected = array(
 			'payment_gateways_options' => 'sectionend',
-			''                         => array( 'title', 'payment_gateways_banner', 'payment_gateways' ),
+			''                         => 'title',
 		);
 
 		$this->assertEquals( $expected, $setting_ids_and_types );
 	}
 
 	/**
-	 * @testDox When the current section is the name of an existing gateway, 'output' invokes that gateway's 'admin_options' method.
-	 *
-	 * @testWith ["bacs"]
-	 *           ["wc_gateway_bacs"]
-	 *
-	 * @param string $section_name The name of the current section.
+	 * @testdox Output should render registered checkout settings sections.
 	 */
-	public function test_output_is_done_via_admin_options_method_of_gateway_specified_as_settings_section( $section_name ) {
+	public function test_output_renders_registered_checkout_settings_section(): void {
 		global $current_section;
-		$current_section = $section_name;
+		$current_section = 'acme_payments';
 
-		$admin_options_invoked = false;
-		$actual_gateway        = null;
+		SettingsSectionRegistry::get_instance()->register( $this->get_registered_payment_section( 'acme_payments' ) );
+		$disable_reactified_sections = static function () {
+			return array();
+		};
+		add_filter( 'experimental_woocommerce_admin_payment_reactify_render_sections', $disable_reactified_sections );
 
 		$sut = $this->getMockBuilder( WC_Settings_Payment_Gateways::class )
-					->setMethods( array( 'run_gateway_admin_options' ) )
-					->getMock();
+			->setMethods( array( 'run_gateway_admin_options' ) )
+			->getMock();
+		$sut->expects( $this->never() )->method( 'run_gateway_admin_options' );
 
-		$sut->method( 'run_gateway_admin_options' )
-			->will(
-				$this->returnCallback(
-					function( $gateway ) use ( &$admin_options_invoked, &$actual_gateway ) {
-						$admin_options_invoked = true;
-						$actual_gateway        = $gateway;
-					}
-				)
-			);
+		try {
+			ob_start();
+			$sut->output();
+			$output = ob_get_clean();
+		} finally {
+			remove_filter( 'experimental_woocommerce_admin_payment_reactify_render_sections', $disable_reactified_sections );
+		}
 
-		$sut->output();
-
-		$this->assertTrue( $admin_options_invoked );
-		$this->assertInstanceOf( WC_Gateway_BACS::class, $actual_gateway );
+		$this->assertStringContainsString( 'name="registered_acme_payments_setting"', $output );
 	}
 
 	/**
@@ -187,5 +193,75 @@ class WC_Settings_Payment_Gateways_Test extends WC_Settings_Unit_Test_Case {
 
 		$this->assertEquals( '' === $section_name ? 0 : 1, did_action( 'woocommerce_update_options_payment_gateways_bacs' ) );
 		$this->assertEquals( '' === $section_name ? 0 : 1, did_action( 'woocommerce_update_options_checkout_' . $section_name ) );
+	}
+
+	/**
+	 * Build a registered payment settings section.
+	 *
+	 * @param string $section_id Section id.
+	 * @return SettingsSectionInterface
+	 */
+	private function get_registered_payment_section( string $section_id ): SettingsSectionInterface {
+		return new class( $section_id ) extends SettingsSection {
+			/**
+			 * Section id.
+			 *
+			 * @var string
+			 */
+			private string $section_id;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param string $section_id Section id.
+			 */
+			public function __construct( string $section_id ) {
+				$this->section_id = $section_id;
+			}
+
+			/**
+			 * Get the parent page id.
+			 *
+			 * @return string
+			 */
+			public function get_parent_page_id(): string {
+				return WC_Settings_Payment_Gateways::TAB_NAME;
+			}
+
+			/**
+			 * Get the section id.
+			 *
+			 * @return string
+			 */
+			public function get_id(): string {
+				return $this->section_id;
+			}
+
+			/**
+			 * Get the section label.
+			 *
+			 * @return string
+			 */
+			public function get_label(): string {
+				return 'Registered payment section';
+			}
+
+			/**
+			 * Get legacy settings.
+			 *
+			 * @param WC_Settings_Page $parent_page Parent settings page.
+			 * @return array
+			 */
+			public function get_settings( WC_Settings_Page $parent_page ): array {
+				return array(
+					array(
+						'id'    => 'registered_' . $this->section_id . '_setting',
+						'type'  => 'text',
+						'title' => 'Registered payment section setting',
+					),
+				);
+			}
+
+		};
 	}
 }

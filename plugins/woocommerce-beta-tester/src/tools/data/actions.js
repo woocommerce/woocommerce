@@ -253,16 +253,6 @@ export function* resetCustomizeYourStore() {
 			method: 'DELETE',
 			path: `${ API_NAMESPACE }/options/${ optionsToDelete.join( ',' ) }`,
 		} );
-
-		yield apiFetch( {
-			path: API_NAMESPACE + '/tools/reset-cys',
-			method: 'POST',
-		} );
-
-		yield apiFetch( {
-			path: '/wc-admin/ai/patterns',
-			method: 'DELETE',
-		} );
 	} );
 }
 
@@ -354,6 +344,28 @@ export function* resetLaunchYourStore() {
 		yield apiFetch( {
 			path: API_NAMESPACE + '/tools/reset-launch-your-store',
 			method: 'POST',
+		} );
+	} );
+}
+
+export function* loadTemplateVersion( params ) {
+	if ( ! params || ! params.template_name || ! params.version ) {
+		yield updateMessage(
+			'Load Template Version',
+			'Please select a template and version',
+			'error'
+		);
+		return;
+	}
+
+	yield runCommand( 'Load Template Version', function* () {
+		yield apiFetch( {
+			path: `${ API_NAMESPACE }/tools/load-template-version`,
+			method: 'POST',
+			data: {
+				template_name: params.template_name,
+				version: params.version,
+			},
 		} );
 	} );
 }

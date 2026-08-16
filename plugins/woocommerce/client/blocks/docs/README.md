@@ -34,13 +34,12 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
 -   [Blocks](internal-developers/blocks/README.md)
     -   [Stock Reservation during Checkout](internal-developers/blocks/stock-reservation.md)
     -   [Features Flags and Experimental interfaces](internal-developers/blocks/feature-flags-and-experimental-interfaces.md)
--   [Block Data](../assets/js/data/README.md)
-    -   [Collections Store](../assets/js/data/collections/README.md)
-    -   [Query State Store](../assets/js/data/query-state/README.md)
-    -   [Schema Store](../assets/js/data/schema/README.md)
+-   [Block Data](../packages/public-api/block-data/README.md)
+    -   [Collections Store](../packages/public-api/block-data/collections/README.md)
+    -   [Query State Store](../packages/public-api/block-data/query-state/README.md)
+    -   [Schema Store](../packages/public-api/block-data/schema/README.md)
 -   [Block Client APIs](internal-developers/block-client-apis/README.md)
     -   [Checkout API interface](internal-developers/block-client-apis/checkout/checkout-api.md)
-    -   [Checkout Flow and Events](internal-developers/block-client-apis/checkout/checkout-flow-and-events.md)
     -   [Notices](internal-developers/block-client-apis/notices.md)
 -   [Data store](internal-developers/data-store/README.md)
     -   [Validation](internal-developers/data-store/validation.md)
@@ -81,31 +80,28 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
 
 > Are you a third-party developer? The following documents explain how to extend the WooCommerce Blocks plugin with your custom extension.
 
--   [Extensibility](third-party-developers/extensibility/README.md)
-    -   Hooks
-        -   [Actions](third-party-developers/extensibility/hooks/actions.md)
-        -   [Filters](third-party-developers/extensibility/hooks/filters.md)
-    -   REST API
-        -   [Exposing your data in the Store API](third-party-developers/extensibility/rest-api/extend-rest-api-add-data.md)
-        -   [Available endpoints to extend with ExtendSchema](third-party-developers/extensibility/rest-api/available-endpoints-to-extend.md)
-        -   [Adding an endpoint to ExtendSchema](internal-developers/rest-api/extend-rest-api-new-endpoint.md)
-        -   [Available Formatters](third-party-developers/extensibility/rest-api/extend-rest-api-formatters.md)
-        -   [Updating the cart with the Store API](third-party-developers/extensibility/rest-api/extend-rest-api-update-cart.md)
-    -   Checkout Payment Methods
-        -   [Checkout Flow and Events](third-party-developers/extensibility/checkout-payment-methods/checkout-flow-and-events.md)
-        -   [Payment Method Integration](third-party-developers/extensibility/checkout-payment-methods/payment-method-integration.md)
-        -   [Filtering Payment Methods](third-party-developers/extensibility/checkout-payment-methods/filtering-payment-methods.md)
-    -   Checkout Blocks
-        -   [IntegrationInterface](third-party-developers/extensibility/checkout-block/integration-interface.md)
-        -   [Available Filters](third-party-developers/extensibility/checkout-block/available-filters.md)
-        -   [Slots and Fills](third-party-developers/extensibility/checkout-block/slot-fills.md)
-        -   [Available Slot Fills](third-party-developers/extensibility/checkout-block/available-slot-fills.md)
-        -   [DOM Events](third-party-developers/extensibility/checkout-block/dom-events.md)
-        -   [Blocks Registry](../packages/checkout/blocks-registry/README.md)
-        -   [Components](../packages/checkout/components/README.md)
-        -   [Filter Registry](../packages/checkout/filter-registry/README.md)
-        -   [Slot and Fill](../packages/checkout/slot/README.md)
-        -   [Utilities](../packages/checkout/utils/README.md)
+-   [JavaScript public API packages](../packages/public-api/README.md)
+
+### Extensibility
+
+-   Hooks
+    -   [Actions](third-party-developers/extensibility/hooks/actions.md)
+    -   [Filters](third-party-developers/extensibility/hooks/filters.md)
+-   REST API
+    -   [Exposing your data in the Store API](third-party-developers/extensibility/rest-api/extend-rest-api-add-data.md)
+    -   [Available endpoints to extend with ExtendSchema](third-party-developers/extensibility/rest-api/available-endpoints-to-extend.md)
+    -   [Adding an endpoint to ExtendSchema](internal-developers/rest-api/extend-rest-api-new-endpoint.md)
+    -   [Available Formatters](third-party-developers/extensibility/rest-api/extend-rest-api-formatters.md)
+    -   [Updating the cart with the Store API](third-party-developers/extensibility/rest-api/extend-rest-api-update-cart.md)
+-   Checkout Payment Methods
+    -   [Check out more in the WooCommerce Developer Documentation](https://developer.woocommerce.com/docs/category/cart-and-checkout-blocks/payment-methods/)
+-   Cart and Checkout Blocks
+    -   [Blocks Registry](../packages/public-api/blocks-checkout/blocks-registry/README.md)
+    -   [Components](../packages/public-api/blocks-checkout/components/README.md)
+    -   [Filter Registry](../packages/public-api/blocks-checkout/filter-registry/README.md)
+    -   [Slot and Fill](../packages/public-api/blocks-checkout/slot/README.md)
+    -   [Utilities](../packages/public-api/blocks-checkout/utils/README.md)
+    -   [Check out more in WooCommerce Developer Documentation](https://developer.woocommerce.com/docs/category/cart-and-checkout-blocks/)
 
 ## Designers and theme developers
 
@@ -115,7 +111,7 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
 
 ## Block References
 
-- [Block References](block-references/block-references.md)
+-   [Block References](/docs/block-development/block-references.md)
 
 ## Developer Resources
 

@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\AssetsController as TestedAssetsController;
 
@@ -195,11 +196,12 @@ class AssetsController extends \WP_UnitTestCase {
 				),
 			),
 			'version' => array(
-				'woocommerce' => WOOCOMMERCE_VERSION,
+				'woocommerce' => Constants::get_constant( 'WC_VERSION' ),
 				'wordpress'   => get_bloginfo( 'version' ),
+				'site_url'    => site_url(),
 			),
 		);
-		set_site_transient( 'woocommerce_block_asset_resource_hints', $mock_cache );
+		set_transient( 'woocommerce_block_asset_resource_hints', $mock_cache );
 
 		$urls = $this->assets_controller->add_resource_hints( array(), 'prefetch' );
 
@@ -210,11 +212,35 @@ class AssetsController extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Data provider for invalid cache.
+	 *
+	 * @return array[] Test cases with invalid cache keys and values.
+	 */
+	public function resource_hints_invalid_cache_provider(): array {
+		return array(
+			array( 'woocommerce', Constants::get_constant( 'WC_VERSION' ) . '-old' ),
+			array( 'wordpress', get_bloginfo( 'version' ) . '-old' ),
+			array( 'site_url', 'http://old-url.local' ),
+		);
+	}
+
+	/**
 	 * Tests that the additional resource hints don't use the cache when the version is invalid.
+	 *
+	 * @dataProvider resource_hints_invalid_cache_provider
+	 * @param string $key   The cache key to set to an invalid value.
+	 * @param string $value The cache value to set.
 	 *
 	 * @return void
 	 */
-	public function test_additional_resource_hints_invalid_cache() {
+	public function test_additional_resource_hints_invalid_cache( string $key, string $value ) {
+		$mock_version         = array(
+			'woocommerce' => Constants::get_constant( 'WC_VERSION' ),
+			'wordpress'   => get_bloginfo( 'version' ),
+			'site_url'    => site_url(),
+		);
+		$mock_version[ $key ] = $value;
+
 		$this->api->expects( $this->once() )
 			->method( 'get_script_data' )
 			->willReturn(
@@ -232,12 +258,9 @@ class AssetsController extends \WP_UnitTestCase {
 					'as'   => 'script',
 				),
 			),
-			'version' => array(
-				'woocommerce' => WOOCOMMERCE_VERSION,
-				'wordpress'   => '0.1.0-old',
-			),
+			'version' => $mock_version,
 		);
-		set_site_transient( 'woocommerce_block_asset_resource_hints', $mock_cache );
+		set_transient( 'woocommerce_block_asset_resource_hints', $mock_cache );
 
 		$urls = $this->assets_controller->add_resource_hints( array(), 'prefetch' );
 

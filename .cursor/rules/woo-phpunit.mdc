@@ -1,0 +1,86 @@
+---
+description:
+globs: plugins/woocommerce/tests/**/*.php
+alwaysApply: false
+---
+
+# WooCommerce PHPUnit Tests
+
+Rules for running WooCommerce PHPUnit tests.
+
+## Run PHPUnit Tests
+
+Run WooCommerce PHPUnit tests for specific files or directories.
+
+The command to run is
+
+```
+pnpm run test:php:env {relative_path} --verbose
+```
+
+And the command must be run in the `plugins/woocommerce` directory.
+
+## Test Execution Best Practices
+
+### Command Structure
+
+-   **Basic test file**: `pnpm run test:php:env tests/php/includes/rest-api/Controllers/Version3/class-wc-rest-product-brands-controller-test.php --verbose`
+-   **Filter by test method**: `pnpm run test:php:env -- --filter="test_get_brands_with_correct_count"`
+-   **Filter by test class**: `pnpm run test:php:env -- --filter="WC_REST_Product_Brands_Controller_Test"`
+
+### Common Issues & Solutions
+
+#### 1. Class Not Found Errors
+
+If you get "Class could not be found" errors:
+
+-   Use the `--filter` approach instead of direct file paths
+-   Ensure test classes have `public` setUp() and tearDown() methods (not `protected`)
+-   Add `declare( strict_types = 1 );` at the top of test files
+
+#### 2. Test Method Visibility
+
+All test methods must be `public`, not `protected`:
+
+```php
+public function setUp(): void {
+    parent::setUp();
+    // test setup
+}
+
+public function tearDown(): void {
+    parent::tearDown();
+    // test cleanup
+}
+```
+
+#### 3. Test File Structure
+
+Ensure proper test file structure (the below is an example):
+
+```php
+<?php
+declare( strict_types = 1 );
+
+/**
+ * Test class description (this is an exmample)
+ */
+class WC_REST_Product_Brands_Controller_Test extends WC_Unit_Test_Case {
+    // test methods
+}
+```
+
+### Debugging Tips
+
+-   Use `--verbose` flag for detailed output
+-   Run individual test methods to isolate issues
+-   Check for syntax errors in test files
+-   Ensure all dependencies are properly initialized in setUp()
+
+### Environment Notes
+
+-   Tests run in a Docker container via wp-env
+-   Node version warnings can be ignored (tests still work)
+-   Memory usage is typically 150-200MB for test suites
+
+And the command must be run in the `plugins/woocommerce` directory.

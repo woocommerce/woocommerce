@@ -1,5 +1,5 @@
 {
-	"extends": "../tsconfig",
+	"extends": "@woocommerce/internal-build/configs/tsconfig.json",
 	"compilerOptions": {
 		"rootDir": "src",
 		"noCheck": false,
@@ -7,7 +7,38 @@
 		"declaration": true,
 		"declarationMap": true,
 		"declarationDir": "./build-types",
-		"typeRoots": [ "./typings", "./node_modules/@types" ]
+		"typeRoots": [
+			"./typings",
+			"./node_modules/@types"
+		],
+		"composite": true
 	},
-	"include": [ "typings/**/*", "src/**/*" ]
+	"include": [
+		"typings/**/*",
+		"src/**/*"
+	],
+	"exclude": [
+		"**/test/**",
+		"**/stories/**"
+	],
+	"references": [
+		{
+			"path": "../csv-export"
+		},
+		{
+			"path": "../currency"
+		},
+		{
+			"path": "../data"
+		},
+		{
+			"path": "../date"
+		},
+		{
+			"path": "../navigation"
+		},
+		{
+			"path": "../sanitize"
+		}
+	]
 }

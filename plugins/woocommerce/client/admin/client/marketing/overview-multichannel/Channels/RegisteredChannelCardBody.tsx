@@ -17,9 +17,9 @@ type RegisteredChannelCardBodyProps = {
 	registeredChannel: RegisteredChannel;
 };
 
-export const RegisteredChannelCardBody: React.FC<
-	RegisteredChannelCardBodyProps
-> = ( { registeredChannel } ) => {
+export const RegisteredChannelCardBody = ( {
+	registeredChannel,
+}: RegisteredChannelCardBodyProps ) => {
 	/**
 	 * The description section in the channel card.
 	 *

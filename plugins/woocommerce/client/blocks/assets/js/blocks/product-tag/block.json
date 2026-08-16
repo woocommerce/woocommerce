@@ -2,15 +2,13 @@
 	"name": "woocommerce/product-tag",
 	"title": "Products by Tag",
 	"category": "woocommerce",
-	"keywords": [
-		"WooCommerce"
-	],
+	"keywords": [ "WooCommerce" ],
 	"description": "Display a grid of products with selected tags.",
 	"supports": {
-		"align": [
-			"wide",
-			"full"
-		],
+		"interactivity": {
+			"clientNavigation": false
+		},
+		"align": [ "wide", "full" ],
 		"html": false,
 		"inserter": false
 	},

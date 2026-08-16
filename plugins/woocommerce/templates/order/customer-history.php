@@ -6,7 +6,7 @@
  *
  * @see     Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomerHistory
  * @package WooCommerce\Templates
- * @version 8.7.0
+ * @version 10.8.0
  */
 
 declare( strict_types=1 );
@@ -16,9 +16,10 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Variables used in this file.
  *
- * @var int   $orders_count   The number of paid orders placed by the current customer.
- * @var float $total_spend   The total money spent by the current customer.
- * @var float $avg_order_value The average money spent by the current customer.
+ * @var int    $orders_count    The number of paid orders placed by the current customer.
+ * @var float  $total_spend     The total money spent by the current customer.
+ * @var float  $avg_order_value The average money spent by the current customer.
+ * @var string $tooltip         The tooltip text for the "Total orders" heading.
  */
 ?>
 
@@ -26,11 +27,7 @@ defined( 'ABSPATH' ) || exit;
 	<h4>
 		<?php
 		esc_html_e( 'Total orders', 'woocommerce' );
-		echo wp_kses_post(
-			wc_help_tip(
-				__( 'Total number of non-cancelled, non-failed orders for this customer, including the current one.', 'woocommerce' )
-			)
-		);
+		echo wp_kses_post( wc_help_tip( $tooltip ) );
 		?>
 	</h4>
 

@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Render the Stock column in the products list as a Badge, with intents reflecting in stock, out of stock, and on backorder states.

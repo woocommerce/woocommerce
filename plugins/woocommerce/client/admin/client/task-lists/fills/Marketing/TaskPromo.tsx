@@ -24,7 +24,7 @@ export type TaskPromoProps = {
 	onButtonClick?: () => void;
 };
 
-export const TaskPromo: React.FC< TaskPromoProps > = ( {
+export const TaskPromo = ( {
 	title = '',
 	iconSrc = `${ WC_ASSET_URL }images/woo-app-icon.svg`,
 	iconAlt = __( 'Woo icon', 'woocommerce' ),
@@ -33,7 +33,7 @@ export const TaskPromo: React.FC< TaskPromoProps > = ( {
 	buttonHref = '',
 	buttonText = '',
 	onButtonClick,
-} ) => {
+}: TaskPromoProps ) => {
 	useEffect( () => {
 		recordEvent( 'task_marketing_marketplace_promo_shown', {
 			task: 'marketing',

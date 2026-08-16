@@ -31,7 +31,6 @@ export const Default = Template.bind( {} );
 Default.args = {
 	children: 'Buy Now',
 	disabled: false,
-	showSpinner: false,
 	type: 'button',
 };
 
@@ -45,5 +44,4 @@ export const Loading = Template.bind( {} );
 Loading.args = {
 	...Default.args,
 	disabled: true,
-	showSpinner: true,
 };

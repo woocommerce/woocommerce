@@ -32,4 +32,13 @@
 
 	<!-- Skip the node_modules directory -->
 	<exclude-pattern>node_modules/*</exclude-pattern>
+
+	<!-- Skip the PHPStan temp directory -->
+	<exclude-pattern>tasks/phpstan/temp/*</exclude-pattern>
+
+	<!-- Skip the vendor-prefixed directories -->
+	<exclude-pattern>vendor-prefixed/*</exclude-pattern>
+
+	<!-- Skip the build directory -->
+	<exclude-pattern>build/*</exclude-pattern>
 </ruleset>

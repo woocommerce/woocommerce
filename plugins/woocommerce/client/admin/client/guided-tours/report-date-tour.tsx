@@ -19,10 +19,13 @@ import './report-date-tour.scss';
 
 const DATE_TYPE_OPTION = 'woocommerce_date_type';
 
-export const ReportDateTour: React.FC< {
+export const ReportDateTour = ( {
+	optionName,
+	headingText,
+}: {
 	optionName: string;
 	headingText: string;
-} > = ( { optionName, headingText } ) => {
+} ) => {
 	const [ isDismissed, setIsDismissed ] = useState( false );
 	const { updateOptions } = useDispatch( optionsStore );
 
@@ -93,7 +96,7 @@ export const ReportDateTour: React.FC< {
 			},
 		],
 		closeHandler: () => {
-			updateOptions( {
+			void updateOptions( {
 				[ optionName ]: 'yes',
 			} );
 			setIsDismissed( true );

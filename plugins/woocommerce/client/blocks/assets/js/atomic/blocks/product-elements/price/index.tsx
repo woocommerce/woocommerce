@@ -7,15 +7,12 @@ import { currencyDollar, Icon } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import sharedConfig from '../shared/config';
+import save from '../save';
 import edit from './edit';
-import { supports } from './supports';
 import metadata from './block.json';
 
 const blockConfig = {
 	...metadata,
-	...sharedConfig,
-	supports,
 	icon: (
 		<Icon
 			icon={ currencyDollar }
@@ -23,6 +20,7 @@ const blockConfig = {
 		/>
 	),
 	edit,
+	save,
 };
 
 registerProductBlockType( blockConfig, {

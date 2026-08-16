@@ -54,12 +54,12 @@ class InstallPlugin extends Step {
 	 */
 	public function prepare_json_array(): array {
 		return array(
-			'step'          => static::get_step_name(),
-			'pluginZipFile' => array(
+			'step'       => static::get_step_name(),
+			'pluginData' => array(
 				'resource' => $this->resource,
 				'slug'     => $this->slug,
 			),
-			'options'       => $this->options,
+			'options'    => $this->options,
 		);
 	}
 
@@ -73,23 +73,22 @@ class InstallPlugin extends Step {
 		return array(
 			'type'       => 'object',
 			'properties' => array(
-				'step'          => array(
+				'step'       => array(
 					'type' => 'string',
 					'enum' => array( static::get_step_name() ),
 				),
-				'pluginZipFile' => array(
-					'type'       => 'object',
-					'properties' => array(
-						'resource' => array(
-							'type' => 'string',
-						),
-						'slug'     => array(
-							'type' => 'string',
-						),
+				'pluginData' => array(
+					'anyOf' => array(
+						require __DIR__ . '/schemas/definitions/VFSReference.php',
+						require __DIR__ . '/schemas/definitions/LiteralReference.php',
+						require __DIR__ . '/schemas/definitions/CorePluginReference.php',
+						require __DIR__ . '/schemas/definitions/CoreThemeReference.php',
+						require __DIR__ . '/schemas/definitions/UrlReference.php',
+						require __DIR__ . '/schemas/definitions/GitDirectoryReference.php',
+						require __DIR__ . '/schemas/definitions/DirectoryLiteralReference.php',
 					),
-					'required'   => array( 'resource', 'slug' ),
 				),
-				'options'       => array(
+				'options'    => array(
 					'type'       => 'object',
 					'properties' => array(
 						'activate' => array(
@@ -98,7 +97,7 @@ class InstallPlugin extends Step {
 					),
 				),
 			),
-			'required'   => array( 'step', 'pluginZipFile' ),
+			'required'   => array( 'step', 'pluginData' ),
 		);
 	}
 

@@ -65,11 +65,11 @@ export const getProductData = () => {
 	let tagsText = '';
 
 	if ( ! isBlockEditor ) {
-		tagsText = (
-			document.querySelector(
-				'[name="tax_input[product_tag]"]'
-			) as HTMLInputElement
-		 ).value;
+		const tagsElement = document.querySelector(
+			'[name="tax_input[product_tag]"]'
+		) as HTMLInputElement | null;
+		tagsText = tagsElement?.value || '';
+
 		const content = document.querySelector(
 			'#content'
 		) as HTMLInputElement;
@@ -79,11 +79,10 @@ export const getProductData = () => {
 			description_value = tinymce.get( 'content' ).getContent();
 		}
 	} else {
-		description_value = (
-			document.querySelector(
-				'.block-editor-rich-text__editable'
-			) as HTMLInputElement
-		 )?.value;
+		const blockEditorElement = document.querySelector(
+			'.block-editor-rich-text__editable'
+		) as HTMLInputElement | null;
+		description_value = blockEditorElement?.value || '';
 	}
 
 	const productTypeOptions = getProductTypeOptions();
@@ -141,8 +140,8 @@ export const getProductData = () => {
 				(
 					document.querySelector(
 						'#_thumbnail_id'
-					) as HTMLInputElement
-				 )?.value,
+					) as HTMLInputElement | null
+				 )?.value || '0',
 				10
 			) > 0
 				? 'Yes'
@@ -181,21 +180,36 @@ export const getProductData = () => {
  * @return string
  */
 const getPublishDate = ( prefix = '' ) => {
-	const month = (
-		document.querySelector( `#${ prefix }mm` ) as HTMLInputElement
-	 )?.value;
-	const day = (
-		document.querySelector( `#${ prefix }jj` ) as HTMLInputElement
-	 )?.value;
-	const year = (
-		document.querySelector( `#${ prefix }aa` ) as HTMLInputElement
-	 )?.value;
-	const hours = (
-		document.querySelector( `#${ prefix }hh` ) as HTMLInputElement
-	 )?.value;
-	const seconds = (
-		document.querySelector( `#${ prefix }mn` ) as HTMLInputElement
-	 )?.value;
+	const month =
+		(
+			document.querySelector(
+				`#${ prefix }mm`
+			) as HTMLInputElement | null
+		 )?.value || '';
+	const day =
+		(
+			document.querySelector(
+				`#${ prefix }jj`
+			) as HTMLInputElement | null
+		 )?.value || '';
+	const year =
+		(
+			document.querySelector(
+				`#${ prefix }aa`
+			) as HTMLInputElement | null
+		 )?.value || '';
+	const hours =
+		(
+			document.querySelector(
+				`#${ prefix }hh`
+			) as HTMLInputElement | null
+		 )?.value || '';
+	const seconds =
+		(
+			document.querySelector(
+				`#${ prefix }mn`
+			) as HTMLInputElement | null
+		 )?.value || '';
 
 	return `${ month }-${ day }-${ year } ${ hours }:${ seconds }`;
 };
@@ -333,7 +347,7 @@ const attachProductInventoryTabTracks = () => {
  * Attaches product tags tracks.
  */
 const attachProductTagsTracks = () => {
-	function deleteTagEventListener(/* event: Event */) {
+	function deleteTagEventListener( /* event: Event */ ) {
 		recordEvent( 'product_tags_delete', {
 			page: 'product',
 			tag_list_size:
@@ -357,7 +371,7 @@ const attachProductTagsTracks = () => {
 
 	document
 		.querySelector( '.tagadd' )
-		?.addEventListener( 'click', (/* event: Event */) => {
+		?.addEventListener( 'click', ( /* event: Event */ ) => {
 			const tagInput = document.querySelector< HTMLInputElement >(
 				'#new-tag-product_tag'
 			);
@@ -443,8 +457,7 @@ const attachAddCustomAttributeTracks = () => {
  */
 const attachAddExistingAttributeTracks = () => {
 	window
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore Need to use jQuery to hook up to the select2:select event since the select2 component is jQuery-based
+		// @ts-expect-error jQuery is attached to window by WordPress at runtime but is not declared on the Window type.
 		?.jQuery( 'select.wc-attribute-search' )
 		.on( 'select2:select', function () {
 			recordEvent( 'product_attributes_buttons', {
@@ -584,12 +597,20 @@ const attachProductVariationsTracks = () => {
 			callback: () => {
 				const selectElement = document.querySelector(
 					'#field_to_edit'
-				) as HTMLSelectElement;
+				) as HTMLSelectElement | null;
+				if ( ! selectElement ) {
+					return;
+				}
 				// Get the index of the selected option
 				const selectedIndex = selectElement.selectedIndex;
+				const selectedOption = selectElement.options[ selectedIndex ];
+				if ( ! selectedOption ) {
+					return;
+				}
+
 				recordEvent( 'product_variations_buttons', {
 					action: 'bulk_actions',
-					selected: selectElement.options[ selectedIndex ]?.value,
+					selected: selectedOption?.value,
 				} );
 			},
 		},
@@ -760,7 +781,7 @@ export function addExitPageListener( pageId: string ) {
 		}
 		return isDisabled;
 	}
-	window.addEventListener( 'beforeunload', function (/* event */) {
+	window.addEventListener( 'beforeunload', function ( /* event */ ) {
 		// Check if button disabled or triggered delete to see if user saved or deleted the product instead.
 		if ( checkIfSubmitButtonsDisabled() || triggeredDelete ) {
 			productChanged = false;

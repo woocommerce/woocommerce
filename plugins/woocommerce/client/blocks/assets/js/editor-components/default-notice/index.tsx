@@ -2,12 +2,13 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { store as editorStore } from '@wordpress/editor';
 import triggerFetch from '@wordpress/api-fetch';
 import { store as coreStore } from '@wordpress/core-data';
 import { Notice } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { CHECKOUT_PAGE_ID, CART_PAGE_ID } from '@woocommerce/block-settings';
+import { CORE_EDITOR_STORE } from '@woocommerce/utils';
+
 import {
 	useCallback,
 	useState,
@@ -30,23 +31,25 @@ export function DefaultNotice( { block }: { block: string } ) {
 
 	// Everything below works the same for Cart/Checkout
 	const { saveEntityRecord } = useDispatch( coreStore );
-	const { editPost, savePost } = useDispatch( editorStore );
-	const { slug, postPublished, currentPostId } = useSelect( ( select ) => {
-		const { getEntityRecord } = select( coreStore );
-		const { isCurrentPostPublished, getCurrentPostId } =
-			select( editorStore );
-		return {
-			slug:
-				getEntityRecord( 'postType', 'page', ORIGINAL_PAGE_ID )?.slug ||
-				block,
-			postPublished: isCurrentPostPublished(),
-			currentPostId: getCurrentPostId(),
-		};
-	}, [] );
+	const { editPost, savePost } = useDispatch( CORE_EDITOR_STORE );
+	const { slug, postPublished, currentPostId } = useSelect(
+		( select ) => {
+			const { getEntityRecord } = select( coreStore );
+			const editor = select( CORE_EDITOR_STORE );
+			return {
+				slug:
+					getEntityRecord( 'postType', 'page', ORIGINAL_PAGE_ID )
+						?.slug || block,
+				postPublished: editor?.isCurrentPostPublished?.() ?? false,
+				currentPostId: editor?.getCurrentPostId?.() ?? 0,
+			};
+		},
+		[ ORIGINAL_PAGE_ID, block ]
+	);
 	const [ settingStatus, setStatus ] = useState( 'pristine' );
 	const updatePage = useCallback( () => {
 		setStatus( 'updating' );
-		Promise.resolve()
+		void Promise.resolve()
 			.then( () =>
 				triggerFetch( {
 					path: `/wc/v3/settings/advanced/${ settingName }`,
@@ -60,7 +63,7 @@ export function DefaultNotice( { block }: { block: string } ) {
 			} )
 			.then( () => {
 				if ( ! postPublished ) {
-					editPost( { status: 'publish' } );
+					void editPost( { status: 'publish' } );
 					return savePost();
 				}
 			} )

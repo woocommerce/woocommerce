@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import { useBlockProps } from '@wordpress/block-editor';
+import {
+	useBlockProps,
+	__experimentalUseColorProps as useColorProps,
+} from '@wordpress/block-editor';
 import EditableButton from '@woocommerce/editor-components/editable-button';
 
 /**
@@ -22,12 +25,15 @@ export const Edit = ( {
 	const blockProps = useBlockProps( {
 		className: 'wp-block-button aligncenter',
 	} );
+	const colorProps = useColorProps( attributes );
 	const { startShoppingButtonLabel } = attributes;
 
 	return (
 		<div { ...blockProps }>
 			<EditableButton
-				className="wc-block-mini-cart__shopping-button"
+				className={ `wc-block-mini-cart__shopping-button ${
+					colorProps.className || ''
+				}` }
 				value={ startShoppingButtonLabel }
 				placeholder={ defaultStartShoppingButtonLabel }
 				onChange={ ( content ) => {
@@ -36,6 +42,7 @@ export const Edit = ( {
 					} );
 				} }
 				variant={ getVariant( blockProps.className, 'contained' ) }
+				style={ colorProps.style }
 			/>
 		</div>
 	);

@@ -3,7 +3,7 @@
  */
 import { createElement } from '@wordpress/element';
 import { chevronRight, chevronLeft, trash } from '@wordpress/icons';
-import { MediaItem, MediaUpload } from '@wordpress/media-utils';
+import { type Attachment, MediaUpload } from '@wordpress/media-utils';
 import { __ } from '@wordpress/i18n';
 import {
 	Toolbar,
@@ -27,14 +27,14 @@ export type ImageGalleryToolbarProps = {
 	removeItem: ( removeIndex: number ) => void;
 	replaceItem: (
 		replaceIndex: number,
-		media: { id: number } & MediaItem
+		media: { id: number } & Attachment
 	) => void;
 	setToolBarItem: ( key: string | null ) => void;
 	lastChild: boolean;
 	MediaUploadComponent: MediaUploadComponentType;
 } & React.HTMLAttributes< HTMLDivElement >;
 
-export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
+export const ImageGalleryToolbar = ( {
 	childIndex,
 	allowDragging = true,
 	moveItem,
@@ -105,11 +105,11 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 					<ToolbarGroup className="woocommerce-image-gallery__toolbar-media">
 						<MediaUploadComponent
 							value={ value }
-							onSelect={ ( media ) =>
-								replaceItem( childIndex, media as MediaItem )
+							onSelect={ ( media: Attachment ) =>
+								replaceItem( childIndex, media )
 							}
 							allowedTypes={ [ 'image' ] }
-							render={ ( { open } ) => (
+							render={ ( { open }: { open: () => void } ) => (
 								<ToolbarButton onClick={ open }>
 									{ __( 'Replace', 'woocommerce' ) }
 								</ToolbarButton>

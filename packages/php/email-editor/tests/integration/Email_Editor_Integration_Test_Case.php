@@ -9,18 +9,21 @@ declare(strict_types = 1);
 
 use Automattic\WooCommerce\EmailEditor\Container;
 use Automattic\WooCommerce\EmailEditor\Email_Css_Inliner;
+use Automattic\WooCommerce\EmailEditor\Engine\Assets_Manager;
 use Automattic\WooCommerce\EmailEditor\Engine\Dependency_Check;
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Api_Controller;
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
+use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
 use Automattic\WooCommerce\EmailEditor\Engine\Patterns\Patterns;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
-use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Blocks_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Content_Renderer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors\Highlighting_Postprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors\Variables_Postprocessor;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors\Border_Style_Postprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Blocks_Width_Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Cleanup_Preprocessor;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Quote_Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Spacing_Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Typography_Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Process_Manager;
@@ -32,6 +35,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\EmailEditor\Engine\User_Theme;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Initializer;
+use Automattic\WooCommerce\EmailEditor\Engine\Site_Style_Sync_Controller;
 
 /**
  * Base class for MailPoet tests.
@@ -74,11 +78,13 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 	/**
 	 * Get a service from the DI container.
 	 *
-	 * @template T
-	 * @param class-string<T> $id The service ID.
-	 * @param array           $overrides The properties to override.
+	 * @template T of object
+	 * @param string $id The service ID.
+	 * @param array  $overrides The properties to override.
+	 * @return T
+	 * @phpstan-param class-string<T> $id The service ID.
 	 */
-	public function getServiceWithOverrides( $id, array $overrides ) {
+	public function getServiceWithOverrides( string $id, array $overrides ): object {
 		$instance = $this->di_container->get( $id );
 
 		foreach ( $overrides as $property => $value ) {
@@ -105,13 +111,19 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 			}
 		);
 		$container->set(
+			Email_Editor_Logger::class,
+			function () {
+				return new Email_Editor_Logger();
+			}
+		);
+		$container->set(
 			Initializer::class,
 			function () {
 				return new Initializer();
 			}
 		);
 		$container->set(
-			\Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller::class,
+			Theme_Controller::class,
 			function () {
 				return new Theme_Controller();
 			}
@@ -177,6 +189,12 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 			}
 		);
 		$container->set(
+			Quote_Preprocessor::class,
+			function () {
+				return new Quote_Preprocessor();
+			}
+		);
+		$container->set(
 			Highlighting_Postprocessor::class,
 			function () {
 				return new Highlighting_Postprocessor();
@@ -189,6 +207,23 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 			}
 		);
 		$container->set(
+			Border_Style_Postprocessor::class,
+			function () {
+				return new Border_Style_Postprocessor();
+			}
+		);
+		$container->set(
+			Assets_Manager::class,
+			function ( $container ) {
+				return new Assets_Manager(
+					$container->get( Settings_Controller::class ),
+					$container->get( Theme_Controller::class ),
+					$container->get( User_Theme::class ),
+					$container->get( Email_Editor_Logger::class )
+				);
+			}
+		);
+		$container->set(
 			Process_Manager::class,
 			function ( $container ) {
 				return new Process_Manager(
@@ -196,15 +231,11 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 					$container->get( Blocks_Width_Preprocessor::class ),
 					$container->get( Typography_Preprocessor::class ),
 					$container->get( Spacing_Preprocessor::class ),
+					$container->get( Quote_Preprocessor::class ),
 					$container->get( Highlighting_Postprocessor::class ),
 					$container->get( Variables_Postprocessor::class ),
+					$container->get( Border_Style_Postprocessor::class )
 				);
-			}
-		);
-		$container->set(
-			Blocks_Registry::class,
-			function () {
-				return new Blocks_Registry();
 			}
 		);
 		$container->set(
@@ -212,10 +243,9 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 			function ( $container ) {
 				return new Content_Renderer(
 					$container->get( Process_Manager::class ),
-					$container->get( Blocks_Registry::class ),
-					$container->get( Settings_Controller::class ),
 					$container->get( Email_Css_Inliner::class ),
 					$container->get( Theme_Controller::class ),
+					$container->get( Email_Editor_Logger::class ),
 				);
 			}
 		);
@@ -227,13 +257,17 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 					$container->get( Templates::class ),
 					$container->get( Email_Css_Inliner::class ),
 					$container->get( Theme_Controller::class ),
+					$container->get( Personalization_Tags_Registry::class ),
+					$container->get( Process_Manager::class ),
 				);
 			}
 		);
 		$container->set(
 			Personalization_Tags_Registry::class,
-			function () {
-				return new Personalization_Tags_Registry();
+			function ( $container ) {
+				return new Personalization_Tags_Registry(
+					$container->get( Email_Editor_Logger::class )
+				);
 			}
 		);
 		$container->set(
@@ -262,6 +296,12 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 			}
 		);
 		$container->set(
+			Site_Style_Sync_Controller::class,
+			function () {
+				return new Site_Style_Sync_Controller();
+			}
+		);
+		$container->set(
 			Dependency_Check::class,
 			function () {
 				return new Dependency_Check();
@@ -276,6 +316,8 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 					$container->get( Patterns::class ),
 					$container->get( Send_Preview_Email::class ),
 					$container->get( Personalization_Tags_Registry::class ),
+					$container->get( Email_Editor_Logger::class ),
+					$container->get( Assets_Manager::class )
 				);
 			}
 		);

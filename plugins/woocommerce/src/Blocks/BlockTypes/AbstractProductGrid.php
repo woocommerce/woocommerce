@@ -83,6 +83,9 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 			return '';
 		}
 
+		// Prime caches to reduce future queries.
+		_prime_post_caches( array_filter( array_map( fn( $product ) => (int) $product->get_image_id(), $products ) ) );
+
 		/**
 		 * Override product description to prevent infinite loop.
 		 *
@@ -361,9 +364,8 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 		// Remove ordering query arguments which may have been added by get_catalog_ordering_args.
 		WC()->query->remove_ordering_args();
 
-		// Prime caches to reduce future queries. Note _prime_post_caches is private--we could replace this with our own
-		// query if it becomes unavailable.
-		if ( is_callable( '_prime_post_caches' ) ) {
+		if ( ! empty( $results ) ) {
+			// Prime caches to reduce future queries.
 			_prime_post_caches( $results );
 		}
 

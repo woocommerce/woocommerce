@@ -73,10 +73,7 @@ const ApmNotice = ( { enabledApms }: { enabledApms: Set< Apm > } ) => {
 	);
 };
 
-const ApmList: React.FunctionComponent< ApmListProps > = ( {
-	enabledApms,
-	setEnabledApms,
-} ) => {
+const ApmList = ( { enabledApms, setEnabledApms }: ApmListProps ) => {
 	const handleToggleChange = ( apm: Apm ) => {
 		if ( enabledApms.has( apm ) ) {
 			enabledApms.delete( apm );

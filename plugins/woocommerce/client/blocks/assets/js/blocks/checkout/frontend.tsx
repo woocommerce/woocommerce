@@ -56,11 +56,12 @@ const Wrapper = ( {
 renderParentBlock( {
 	Block,
 	blockName,
-	selector: '.wp-block-woocommerce-checkout',
+	selector:
+		'.wp-block-woocommerce-checkout[data-block-name="woocommerce/checkout"]',
 	getProps,
-	blockMap: getRegisteredBlockComponents( blockName ) as Record<
-		string,
-		React.ReactNode
-	>,
+	blockMap: getRegisteredBlockComponents( blockName ),
 	blockWrapper: Wrapper,
+	options: {
+		multiple: metadata.supports.multiple,
+	},
 } );

@@ -8,7 +8,7 @@ import {
 	useLayoutEffect,
 } from '@wordpress/element';
 import { useSelect } from 'downshift';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -80,7 +80,7 @@ const { countries, countryCodes } = parseData( data );
 /**
  * An international phone number input with a country code select and a phone textfield which supports numbers, spaces and hyphens. And returns the full number as it is, in E.164 format, and the selected country alpha2.
  */
-const PhoneNumberInput: React.FC< Props > = ( {
+const PhoneNumberInput = ( {
 	value,
 	onChange,
 	id,
@@ -88,7 +88,7 @@ const PhoneNumberInput: React.FC< Props > = ( {
 	selectedRender = defaultSelectedRender,
 	itemRender = defaultItemRender,
 	arrowRender = defaultArrowRender,
-} ) => {
+}: Props ) => {
 	const menuRef = useRef< HTMLButtonElement >( null );
 	const inputRef = useRef< HTMLInputElement >( null );
 
@@ -158,7 +158,7 @@ const PhoneNumberInput: React.FC< Props > = ( {
 
 	return (
 		<div
-			className={ classNames(
+			className={ clsx(
 				className,
 				'wcpay-component-phone-number-input'
 			) }
@@ -167,14 +167,14 @@ const PhoneNumberInput: React.FC< Props > = ( {
 				{ ...getToggleButtonProps( {
 					ref: menuRef,
 					type: 'button',
-					className: classNames(
+					className: clsx(
 						'wcpay-component-phone-number-input__button'
 					),
 				} ) }
 			>
 				{ selectedRender( countries[ countryKey ] ) }
 				<span
-					className={ classNames(
+					className={ clsx(
 						'wcpay-component-phone-number-input__button-arrow',
 						{ invert: isOpen }
 					) }
@@ -206,7 +206,7 @@ const PhoneNumberInput: React.FC< Props > = ( {
 								key,
 								index,
 								item: key,
-								className: classNames(
+								className: clsx(
 									'wcpay-component-phone-number-input__menu-item',
 									{ highlighted: highlightedIndex === index }
 								),

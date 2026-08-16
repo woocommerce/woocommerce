@@ -34,7 +34,7 @@ export class Leaderboard extends Component {
 		 * The format property is used for numeric columns and is optional.
 		 * The `value` property type is specified as string in the API schema
 		 * and it's extensible from other extensions. Therefore, even if the
-		 * actual type of numeric columns returned by WooCoomerce's own API is
+		 * actual type of numeric columns returned by WooCommerce's own API is
 		 * number, there is no guarantee the value will be a number.
 		 */
 		if ( formattable.has( column.format ) && isFinite( column.value ) ) {
@@ -105,7 +105,7 @@ export class Leaderboard extends Component {
 							{ title }
 						</Text>
 					</CardHeader>
-					<CardBody size={ null }>
+					<CardBody size="none">
 						<EmptyTable>
 							{ __(
 								'No data recorded for the selected time period.',

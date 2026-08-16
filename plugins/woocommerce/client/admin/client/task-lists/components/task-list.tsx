@@ -32,7 +32,7 @@ export type TaskListProps = TaskListType & {
 	cesHeader?: boolean;
 };
 
-export const TaskList: React.FC< TaskListProps > = ( {
+export const TaskList = ( {
 	id,
 	eventPrefix,
 	tasks,
@@ -41,7 +41,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	isExpandable = false,
 	displayProgressHeader = false,
 	query,
-} ) => {
+}: TaskListProps ) => {
 	const { profileItems } = useSelect( ( select ) => {
 		const { getProfileItems } = select( onboardingStore );
 
@@ -65,6 +65,15 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		recordEvent( eventPrefix + 'view', {
 			number_tasks: visibleTasks.length,
 			store_connected: profileItems.wccom_connected,
+			context: layoutString,
+		} );
+	};
+
+	const trackClick = ( task: TaskListProps[ 'tasks' ][ number ] ) => {
+		recordEvent( eventPrefix + 'task_click', {
+			task_name: task.id,
+			task_complete: task.isComplete,
+			task_dismissed: task.isDismissed,
 			context: layoutString,
 		} );
 	};
@@ -106,6 +115,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 			isExpandable={ isExpandable }
 			task={ task }
 			setExpandedTask={ setExpandedTask }
+			trackClick={ () => trackClick( task ) }
 		/>
 	) );
 

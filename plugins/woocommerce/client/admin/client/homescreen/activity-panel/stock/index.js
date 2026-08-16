@@ -6,7 +6,7 @@ import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
 import { Section } from '@woocommerce/components';
-import { ITEMS_STORE_NAME } from '@woocommerce/data';
+import { activityPanelStore, itemsStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -39,7 +39,11 @@ export class StockPanel extends Component {
 	}
 
 	async updateStock( product, quantity ) {
-		const { invalidateResolution, updateProductStock } = this.props;
+		const {
+			invalidateResolution,
+			invalidateActivityPanel,
+			updateProductStock,
+		} = this.props;
 		const success = await updateProductStock( product, quantity );
 
 		if ( success ) {
@@ -53,6 +57,7 @@ export class StockPanel extends Component {
 				getLowStockCountQuery,
 				null,
 			] );
+			invalidateActivityPanel( 'getActivityPanelCounts', [] );
 		}
 
 		return success;
@@ -117,8 +122,7 @@ StockPanel.defaultProps = {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getItems, getItemsError, isResolving } =
-			select( ITEMS_STORE_NAME );
+		const { getItems, getItemsError, isResolving } = select( itemsStore );
 
 		const products = Array.from(
 			getItems( 'products/low-in-stock', productsQuery ).values()
@@ -135,12 +139,15 @@ export default compose(
 	} ),
 	withDispatch( ( dispatch ) => {
 		const { invalidateResolution, updateProductStock } =
-			dispatch( ITEMS_STORE_NAME );
+			dispatch( itemsStore );
+		const { invalidateResolution: invalidateActivityPanel } =
+			dispatch( activityPanelStore );
 		const { createNotice } = dispatch( 'core/notices' );
 
 		return {
 			createNotice,
 			invalidateResolution,
+			invalidateActivityPanel,
 			updateProductStock,
 		};
 	} )

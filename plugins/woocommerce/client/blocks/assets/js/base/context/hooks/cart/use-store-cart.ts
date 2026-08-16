@@ -1,5 +1,3 @@
-/** @typedef { import('@woocommerce/type-defs/hooks').StoreCart } StoreCart */
-
 /**
  * External dependencies
  */
@@ -19,24 +17,23 @@ import {
 	EMPTY_PAYMENT_REQUIREMENTS,
 	EMPTY_EXTENSIONS,
 } from '@woocommerce/block-data';
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { decodeEntities } from '@wordpress/html-entities';
 import type {
 	StoreCart,
-	CartResponse,
 	CartResponseTotals,
 	CartResponseFeeItem,
 	CartResponseBillingAddress,
 	CartResponseShippingAddress,
 	CartResponseCouponItem,
-	CartResponseCoupons,
+	CartShippingRate,
+	CartShippingPackageShippingRate,
 } from '@woocommerce/types';
 import { emptyHiddenAddressFields } from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
  */
-import { useEditorContext } from '../../providers/editor-context';
 import { useStoreCartEventListeners } from './use-store-cart-event-listeners';
 
 declare module '@wordpress/html-entities' {
@@ -82,7 +79,13 @@ const defaultCartTotals: CartResponseTotals = {
 	currency_suffix: '',
 };
 
-const decodeValues = < T extends Record< string, unknown > >(
+const decodeValues = <
+	T extends
+		| Record< string, unknown >
+		| CartResponseBillingAddress
+		| CartResponseShippingAddress
+		| CartShippingPackageShippingRate,
+>(
 	object: T
 ): T => {
 	return Object.fromEntries(
@@ -93,187 +96,166 @@ const decodeValues = < T extends Record< string, unknown > >(
 	) as T;
 };
 
-/**
- * @constant
- * @type  {StoreCart} Object containing cart data.
- */
+// Normalize address fields to ensure they are always in the same format and update the ref to track the latest value.
+const normalizeAddress = <
+	T extends CartResponseBillingAddress | CartResponseShippingAddress,
+>(
+	address: T,
+	addressRef: React.MutableRefObject< T >
+): T => {
+	const normalizedAddress = emptyHiddenAddressFields(
+		decodeValues( address )
+	);
+	if ( ! fastDeepEqual( addressRef.current, normalizedAddress ) ) {
+		addressRef.current = normalizedAddress;
+	}
+	return addressRef.current;
+};
+
+const normalizeCoupons = ( coupons: CartResponseCouponItem[] ) => {
+	return coupons.length > 0
+		? coupons.map( ( coupon: CartResponseCouponItem ) => ( {
+				...coupon,
+				label: decodeEntities( coupon.code ),
+		  } ) )
+		: EMPTY_CART_COUPONS;
+};
+
+const normalizeFees = ( fees: CartResponseFeeItem[] ) => {
+	return fees.length > 0
+		? fees.map( ( fee: CartResponseFeeItem ) => decodeValues( fee ) )
+		: EMPTY_CART_FEES;
+};
+
+const normalizeShippingRates = ( shippingRates: CartShippingRate[] ) => {
+	return shippingRates.length > 0
+		? shippingRates.map( ( shippingRate: CartShippingRate ) => ( {
+				...shippingRate,
+				shipping_rates:
+					shippingRate.shipping_rates.length > 0
+						? shippingRate.shipping_rates.map(
+								( rate: CartShippingPackageShippingRate ) =>
+									decodeValues( rate )
+						  )
+						: [],
+		  } ) )
+		: [];
+};
+
 export const defaultCartData: StoreCart = {
+	billingAddress: defaultBillingAddress,
+	billingData: defaultBillingAddress,
 	cartCoupons: EMPTY_CART_COUPONS,
-	cartItems: EMPTY_CART_ITEMS,
+	cartErrors: EMPTY_CART_ERRORS,
 	cartFees: EMPTY_CART_FEES,
+	cartHasCalculatedShipping: false,
+	cartIsLoading: true,
+	cartItemErrors: EMPTY_CART_ITEM_ERRORS,
+	cartItems: EMPTY_CART_ITEMS,
 	cartItemsCount: 0,
 	cartItemsWeight: 0,
-	crossSellsProducts: EMPTY_CART_CROSS_SELLS,
 	cartNeedsPayment: true,
 	cartNeedsShipping: true,
-	cartItemErrors: EMPTY_CART_ITEM_ERRORS,
 	cartTotals: defaultCartTotals,
-	cartIsLoading: true,
-	cartErrors: EMPTY_CART_ERRORS,
-	billingData: defaultBillingAddress,
-	billingAddress: defaultBillingAddress,
-	shippingAddress: defaultShippingAddress,
-	shippingRates: EMPTY_SHIPPING_RATES,
+	crossSellsProducts: EMPTY_CART_CROSS_SELLS,
+	extensions: EMPTY_EXTENSIONS,
+	hasPendingItemsOperations: false,
 	isLoadingRates: false,
-	cartHasCalculatedShipping: false,
 	paymentMethods: EMPTY_PAYMENT_METHODS,
 	paymentRequirements: EMPTY_PAYMENT_REQUIREMENTS,
 	receiveCart: () => undefined,
 	receiveCartContents: () => undefined,
-	extensions: EMPTY_EXTENSIONS,
+	shippingAddress: defaultShippingAddress,
+	shippingRates: EMPTY_SHIPPING_RATES,
 };
 
 /**
- * This is a custom hook that is wired up to the `wc/store/cart` data
- * store.
- *
- * @param {Object}  options              An object declaring the various
- *                                       collection arguments.
- * @param {boolean} options.shouldSelect If false, the previous results will be
- *                                       returned and internal selects will not
- *                                       fire.
- *
- * @return {StoreCart} Object containing cart data.
+ * This is a custom hook that is wired up to the `wc/store/cart` data store.
  */
-
 export const useStoreCart = (
 	options: { shouldSelect: boolean } = { shouldSelect: true }
 ): StoreCart => {
 	const { shouldSelect } = options;
-	const { isEditor, previewData } = useEditorContext();
-	const previewCart = previewData?.previewCart as unknown as CartResponse & {
-		receiveCart?: ( cart: CartResponse ) => void;
-		receiveCartContents?: ( cart: CartResponse ) => void;
-	};
-	const currentResults = useRef();
+	const currentStoreCart = useRef< StoreCart >();
 	const billingAddressRef = useRef( defaultBillingAddress );
 	const shippingAddressRef = useRef( defaultShippingAddress );
 
 	// This will keep track of jQuery and DOM events that invalidate the store resolution.
 	useStoreCartEventListeners();
 
-	const results: StoreCart = useSelect(
-		( select, { dispatch } ) => {
-			if ( ! shouldSelect ) {
-				return defaultCartData;
-			}
+	const { receiveCart, receiveCartContents } = useDispatch( cartStore );
+	const {
+		cartData,
+		cartErrors,
+		cartTotals,
+		cartIsLoading,
+		isLoadingRates,
+		hasPendingItemsOperations,
+	} = useSelect( ( select ) => {
+		const store = select( cartStore );
 
-			if ( isEditor ) {
-				return {
-					...defaultCartData,
-					cartCoupons: previewCart.coupons,
-					cartItems: previewCart.items,
-					crossSellsProducts: previewCart.cross_sells,
-					cartFees: previewCart.fees,
-					cartItemsCount: previewCart.items_count,
-					cartItemsWeight: previewCart.items_weight,
-					cartNeedsPayment: previewCart.needs_payment,
-					cartNeedsShipping: previewCart.needs_shipping,
-					cartTotals: previewCart.totals,
-					shippingRates: previewCart.shipping_rates,
-					cartHasCalculatedShipping:
-						previewCart.has_calculated_shipping,
-					paymentMethods: previewCart.payment_methods,
-					paymentRequirements: previewCart.payment_requirements,
-					cartIsLoading: false,
-					receiveCart:
-						typeof previewCart?.receiveCart === 'function'
-							? previewCart.receiveCart
-							: () => undefined,
-					receiveCartContents:
-						typeof previewCart?.receiveCartContents === 'function'
-							? previewCart.receiveCartContents
-							: () => undefined,
-				};
-			}
+		// Base loading state - whether initial cart data resolution has finished
+		const baseCartIsLoading = ! store.hasFinishedResolution(
+			'getCartData',
+			[]
+		);
 
-			const store = select( cartStore );
-			const cartData = store.getCartData();
-			const cartErrors = store.getCartErrors();
-			const cartTotals = store.getCartTotals();
-			const cartIsLoading =
-				// @ts-expect-error `hasFinishedResolution` is not typed in @wordpress/data yet.
-				! store.hasFinishedResolution( 'getCartData' );
+		return {
+			cartData: store.getCartData(),
+			cartErrors: store.getCartErrors(),
+			cartTotals: store.getCartTotals(),
+			cartIsLoading: baseCartIsLoading,
+			isLoadingRates: store.isAddressFieldsForShippingRatesUpdating(),
+			hasPendingItemsOperations: store.hasPendingItemsOperations(),
+		};
+	}, [] );
 
-			const isLoadingRates = store.isCustomerDataUpdating();
-			const { receiveCart, receiveCartContents } = dispatch( cartStore );
-
-			const cartFees =
-				cartData.fees.length > 0
-					? cartData.fees.map( ( fee: CartResponseFeeItem ) =>
-							decodeValues( fee )
-					  )
-					: EMPTY_CART_FEES;
-
-			// Add a text property to the coupon to allow extensions to modify
-			// the text used to display the coupon, without affecting the
-			// functionality when it comes to removing the coupon.
-			const cartCoupons: CartResponseCoupons =
-				cartData.coupons.length > 0
-					? cartData.coupons.map(
-							( coupon: CartResponseCouponItem ) => ( {
-								...coupon,
-								label: coupon.code,
-							} )
-					  )
-					: EMPTY_CART_COUPONS;
-
-			// Update refs to keep the hook stable.
-			const billingAddress = emptyHiddenAddressFields(
-				decodeValues( cartData.billingAddress )
-			);
-			const shippingAddress = cartData.needsShipping
-				? emptyHiddenAddressFields(
-						decodeValues( cartData.shippingAddress )
-				  )
-				: billingAddress;
-
-			if (
-				! fastDeepEqual( billingAddress, billingAddressRef.current )
-			) {
-				billingAddressRef.current = billingAddress;
-			}
-
-			if (
-				! fastDeepEqual( shippingAddress, shippingAddressRef.current )
-			) {
-				shippingAddressRef.current = shippingAddress;
-			}
-
-			return {
-				cartCoupons,
-				cartItems: cartData.items,
-				crossSellsProducts: cartData.crossSells,
-				cartFees,
-				cartItemsCount: cartData.itemsCount,
-				cartItemsWeight: cartData.itemsWeight,
-				cartNeedsPayment: cartData.needsPayment,
-				cartNeedsShipping: cartData.needsShipping,
-				cartItemErrors: cartData.errors,
-				cartTotals,
-				cartIsLoading,
-				cartErrors,
-				billingData: billingAddressRef.current,
-				billingAddress: billingAddressRef.current,
-				shippingAddress: shippingAddressRef.current,
-				extensions: cartData.extensions,
-				shippingRates: cartData.shippingRates,
-				isLoadingRates,
-				cartHasCalculatedShipping: cartData.hasCalculatedShipping,
-				paymentRequirements: cartData.paymentRequirements,
-				receiveCart,
-				receiveCartContents,
-			};
-		},
-		[ shouldSelect, isEditor ]
-	);
-
-	if (
-		! currentResults.current ||
-		! fastDeepEqual( currentResults.current, results )
-	) {
-		currentResults.current = results;
+	if ( ! shouldSelect ) {
+		return defaultCartData;
 	}
 
-	return currentResults.current;
+	const billingAddress = normalizeAddress(
+		cartData.billingAddress,
+		billingAddressRef
+	);
+
+	const shippingAddress = cartData.needsShipping
+		? normalizeAddress( cartData.shippingAddress, shippingAddressRef )
+		: billingAddress;
+
+	const storeCart: StoreCart = {
+		billingAddress,
+		billingData: billingAddress,
+		cartCoupons: normalizeCoupons( cartData.coupons ),
+		cartErrors,
+		cartFees: normalizeFees( cartData.fees ),
+		cartHasCalculatedShipping: cartData.hasCalculatedShipping,
+		cartIsLoading,
+		cartItemErrors: cartData.errors,
+		cartItems: cartData.items,
+		cartItemsCount: cartData.itemsCount,
+		cartItemsWeight: cartData.itemsWeight,
+		cartNeedsPayment: cartData.needsPayment,
+		cartNeedsShipping: cartData.needsShipping,
+		cartTotals,
+		crossSellsProducts: cartData.crossSells,
+		extensions: cartData.extensions,
+		hasPendingItemsOperations,
+		isLoadingRates,
+		paymentMethods: cartData.paymentMethods,
+		paymentRequirements: cartData.paymentRequirements,
+		receiveCart,
+		receiveCartContents,
+		shippingAddress,
+		shippingRates: normalizeShippingRates( cartData.shippingRates ),
+	};
+
+	if (
+		! currentStoreCart.current ||
+		! fastDeepEqual( currentStoreCart.current, storeCart )
+	) {
+		currentStoreCart.current = storeCart;
+	}
+
+	return currentStoreCart.current;
 };

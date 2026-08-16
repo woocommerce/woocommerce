@@ -1,22 +1,18 @@
 {
 	"name": "woocommerce/product-meta",
-	"version": "1.0.0",
 	"title": "Product Meta",
 	"icon": "product",
 	"description": "Display a product’s SKU, categories, tags, and more.",
 	"category": "woocommerce-product-elements",
 	"supports": {
+		"interactivity": {
+			"clientNavigation": true
+		},
 		"align": true,
 		"reusable": false
 	},
-	"keywords": [
-		"WooCommerce"
-	],
-	"usesContext": [
-		"postId",
-		"postType",
-		"queryId"
-	],
+	"keywords": [ "WooCommerce" ],
+	"usesContext": [ "postId", "postType", "queryId" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

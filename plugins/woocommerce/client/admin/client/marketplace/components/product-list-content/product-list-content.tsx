@@ -3,29 +3,26 @@
  */
 import { Fragment, useEffect, useState } from '@wordpress/element';
 import clsx from 'clsx';
-import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
  */
 import './product-list-content.scss';
-import '~/customize-store/intro/intro.scss';
-import '~/customize-store/style.scss';
 import ProductCard from '../product-card/product-card';
-import { Product, ProductType } from '../product-list/types';
+import { Product, ProductCardType, ProductType } from '../product-list/types';
 import { appendURLParams } from '../../utils/functions';
-import { ADMIN_URL, getAdminSetting } from '~/utils/admin-settings';
-import { NoAIBanner } from '~/customize-store/intro/intro-banners';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 export default function ProductListContent( props: {
 	products: Product[];
 	group?: string;
 	productGroup?: string;
 	type: ProductType;
+	cardType?: ProductCardType;
 	className?: string;
 	searchTerm?: string;
 	category?: string;
-} ): JSX.Element {
+} ): React.JSX.Element {
 	const wccomHelperSettings = getAdminSetting( 'wccomHelper', {} );
 
 	const [ productsToShow, setProductsToShow ] = useState( props.products );
@@ -72,6 +69,13 @@ export default function ProductListContent( props: {
 		 * If the productGroups set, component is likely used on Discover or NoResult component.
 		 */
 		if ( ! props.productGroup ) {
+			setProductsToShow( props.products );
+			return;
+		}
+
+		// For compact cards, show all products.
+		if ( props.cardType === ProductCardType.compact ) {
+			setProductsToShow( props.products );
 			return;
 		}
 
@@ -95,9 +99,7 @@ export default function ProductListContent( props: {
 
 		// Slice the products, this will get rid of any rows that are not fully filled.
 		setProductsToShow( props.products.slice( 0, completeRows * columns ) );
-	}, [ columns, props.products, props.productGroup ] );
-
-	const bannerPosition = columns * 2 - 1;
+	}, [ columns, props.products, props.productGroup, props.cardType ] );
 
 	const classes = clsx(
 		'woocommerce-marketplace__product-list-content',
@@ -110,8 +112,8 @@ export default function ProductListContent( props: {
 				{ productsToShow.map( ( product, index ) => (
 					<Fragment key={ product.id }>
 						<ProductCard
-							key={ product.id }
 							type={ props.type }
+							cardType={ props.cardType }
 							product={ {
 								id: product.id,
 								slug: product.slug,
@@ -157,6 +159,7 @@ export default function ProductListContent( props: {
 								currency: product.currency,
 								isOnSale: product.isOnSale,
 								regularPrice: product.regularPrice,
+								hasQualityBadge: product.hasQualityBadge,
 							} }
 							tracksData={ {
 								position: index + 1,
@@ -175,23 +178,6 @@ export default function ProductListContent( props: {
 								} ),
 							} }
 						/>
-						{ index === bannerPosition &&
-							props.type === 'theme' && (
-								<NoAIBanner
-									redirectToCYSFlow={ () => {
-										const customizeStoreDesignUrl =
-											addQueryArgs(
-												`${ ADMIN_URL }admin.php`,
-												{
-													page: 'wc-admin',
-													path: '/customize-store/design',
-												}
-											);
-										window.location.href =
-											customizeStoreDesignUrl;
-									} }
-								/>
-							) }
 					</Fragment>
 				) ) }
 			</div>

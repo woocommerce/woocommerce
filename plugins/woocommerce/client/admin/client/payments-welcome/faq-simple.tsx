@@ -9,7 +9,7 @@ import { Icon, help } from '@wordpress/icons';
  */
 import strings from './strings';
 
-const FrequentlyAskedQuestionsSimple: React.FC = () => {
+const FrequentlyAskedQuestionsSimple = () => {
 	return (
 		<Card className="woopayments-welcome-page__faq">
 			<Icon icon={ help } />

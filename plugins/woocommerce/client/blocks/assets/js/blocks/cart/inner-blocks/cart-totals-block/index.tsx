@@ -9,8 +9,11 @@ import { registerBlockType } from '@wordpress/blocks';
  */
 import { Edit, Save } from './edit';
 import './style.scss';
+import metadata from './block.json';
 
 registerBlockType( 'woocommerce/cart-totals-block', {
+	apiVersion: metadata.apiVersion,
+	title: metadata.title,
 	icon: {
 		src: (
 			<Icon

@@ -23,6 +23,7 @@ export type BlueprintImportResponse = {
 
 export type BlueprintStep = {
 	step: string;
+	options?: Record< string, string >;
 };
 
 export type BlueprintImportStepResponse = {
@@ -32,4 +33,5 @@ export type BlueprintImportStepResponse = {
 		type: string;
 		message: string;
 	}[];
+	sessionToken?: string;
 };

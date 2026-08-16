@@ -10,23 +10,17 @@ import { EmbeddedBodyProps } from '../embedded-body-layout/embedded-body-props';
 import RecommendationsEligibilityWrapper from '../settings-recommendations/recommendations-eligibility-wrapper';
 
 const ShippingRecommendationsLoader = lazy( () => {
-	if ( window.wcAdminFeatures[ 'shipping-smart-defaults' ] ) {
-		return import(
-			/* webpackChunkName: "shipping-recommendations" */ './experimental-shipping-recommendations'
-		);
-	}
-
 	return import(
 		/* webpackChunkName: "shipping-recommendations" */ './shipping-recommendations'
 	);
 } );
 
-export const ShippingRecommendations: React.FC< EmbeddedBodyProps > = ( {
+export const ShippingRecommendations = ( {
 	page,
 	tab,
 	section,
 	zone_id,
-} ) => {
+}: EmbeddedBodyProps ) => {
 	if ( page !== 'wc-settings' ) {
 		return null;
 	}

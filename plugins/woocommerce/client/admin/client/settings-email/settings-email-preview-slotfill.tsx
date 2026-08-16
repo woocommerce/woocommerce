@@ -39,11 +39,11 @@ const wpMenuWidth = document.getElementById( 'adminmenu' )?.clientWidth || 160;
 // Calculation: WP menu + email settings + email preview + padding
 const FLOATING_PREVIEW_WIDTH_LIMIT = wpMenuWidth + 666 + 684 + 40;
 
-const EmailPreviewFill: React.FC< EmailPreviewFillProps > = ( {
+const EmailPreviewFill = ( {
 	emailTypes,
 	previewUrl,
 	settingsIds,
-} ) => {
+}: EmailPreviewFillProps ) => {
 	const [ deviceType, setDeviceType ] =
 		useState< string >( DEVICE_TYPE_DESKTOP );
 	const isSingleEmail = emailTypes.length === 1;
@@ -78,7 +78,9 @@ const EmailPreviewFill: React.FC< EmailPreviewFillProps > = ( {
 
 	return (
 		<Fill>
-			{ ! isWide && <h2>{ __( 'Email preview', 'woocommerce' ) }</h2> }
+			{ ! isWide && ! isSingleEmail && (
+				<h2>{ __( 'Email preview', 'woocommerce' ) }</h2>
+			) }
 			<div
 				className={ `wc-settings-email-preview-container ${
 					isWide ? 'wc-settings-email-preview-container-floating' : ''
@@ -127,16 +129,11 @@ const EmailPreviewFill: React.FC< EmailPreviewFillProps > = ( {
 	);
 };
 
-export const registerSettingsEmailPreviewFill = (
-	isFeatureEnabled: boolean
-) => {
+export const registerSettingsEmailPreviewFill = () => {
 	const slotElementId = 'wc_settings_email_preview_slotfill';
 	const slotElement = document.getElementById( slotElementId );
 	if ( ! slotElement ) {
 		return null;
-	}
-	if ( ! isFeatureEnabled ) {
-		slotElement.className = 'wc-settings-email-improvements-disabled';
 	}
 	const previewUrl = slotElement.getAttribute( 'data-preview-url' );
 	if ( ! previewUrl ) {

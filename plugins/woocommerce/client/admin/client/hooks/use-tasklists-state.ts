@@ -2,7 +2,9 @@
  * External dependencies
  */
 import { useSelect } from '@wordpress/data';
+import type { CurriedSelectorsOf } from '@wordpress/data/build-types/types';
 import {
+	onboardingStore,
 	ONBOARDING_STORE_NAME,
 	getVisibleTasks,
 	TaskListType,
@@ -12,11 +14,7 @@ import {
  */
 import { getAdminSetting } from '~/utils/admin-settings';
 
-// TODO: replace this with the actual selectors when @woocommerce/data types are updated.
-type Selectors = {
-	getTaskList: ( taskListId: string ) => TaskListType;
-	hasFinishedResolution: ( action: string ) => boolean;
-};
+type Selectors = CurriedSelectorsOf< typeof onboardingStore >;
 
 /**
  * Get the number of things to do next
@@ -24,7 +22,7 @@ type Selectors = {
  * @param {Object} extendedTaskList The extended task list
  * @return {number} The number of things to do next
  */
-function getThingsToDoNextCount( extendedTaskList: TaskListType ) {
+function getThingsToDoNextCount( extendedTaskList: TaskListType | undefined ) {
 	if (
 		! extendedTaskList ||
 		! extendedTaskList.tasks.length ||

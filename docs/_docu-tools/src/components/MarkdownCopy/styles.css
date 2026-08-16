@@ -1,0 +1,100 @@
+/* Screen reader only class */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.markdown-copy-button {
+  width: 16px;
+  height: 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: opacity 0.2s ease;
+  opacity: 0.7;
+  border-radius: 4px;
+  position: relative;
+  margin-left: auto;
+  float: right;
+}
+
+.markdown-copy-button:hover {
+  opacity: 1;
+}
+
+.markdown-copy-button:active {
+  opacity: 0.5;
+}
+
+/* Focus styles for accessibility */
+.markdown-copy-button:focus {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+  opacity: 1;
+}
+
+.markdown-copy-button:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.markdown-copy-button:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+  opacity: 1;
+}
+
+/* Disabled state */
+.markdown-copy-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+/* Success state */
+.markdown-copy-button--success {
+  opacity: 1;
+}
+
+.markdown-copy-button--success svg {
+  stroke: #10b981; /* Green color for success */
+}
+
+/* Error state */
+.markdown-copy-button--error {
+  opacity: 1;
+}
+
+.markdown-copy-button--error svg {
+  stroke: #ef4444; /* Red color for error */
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .markdown-copy-button {
+  opacity: 0.8;
+}
+
+[data-theme='dark'] .markdown-copy-button:hover {
+  opacity: 1;
+}
+
+[data-theme='dark'] .markdown-copy-button:focus {
+  outline-color: var(--ifm-color-primary);
+}
+
+/* Use theme primary color  */
+.markdown-copy-button svg {
+  width: 16px;
+  height: 16px;
+  stroke: var(--ifm-color-primary);
+  fill: none;
+}

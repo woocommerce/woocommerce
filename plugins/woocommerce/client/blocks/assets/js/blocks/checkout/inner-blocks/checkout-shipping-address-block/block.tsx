@@ -16,8 +16,6 @@ import {
 import Noninteractive from '@woocommerce/base-components/noninteractive';
 import type { BillingAddress } from '@woocommerce/settings';
 import { getSetting } from '@woocommerce/settings';
-import { useSelect } from '@wordpress/data';
-import { cartStore } from '@woocommerce/block-data';
 import { emptyAddressFields } from '@woocommerce/base-utils';
 import type { CartResponseBillingAddress } from '@woocommerce/types';
 
@@ -53,7 +51,19 @@ const Block = (): JSX.Element => {
 			delete syncValues.company;
 		}
 
-		setBillingAddress( syncValues );
+		// Only sync if any values are different
+		const needsSync =
+			Object.keys( syncValues ).length !==
+				Object.keys( billingAddress ).length ||
+			! Object.keys( syncValues ).every(
+				( key ) =>
+					syncValues[ key as keyof BillingAddress ] ===
+					billingAddress[ key as keyof BillingAddress ]
+			);
+
+		if ( needsSync ) {
+			setBillingAddress( syncValues );
+		}
 	};
 
 	const clearBillingAddress = ( address: BillingAddress ) => {
@@ -80,18 +90,11 @@ const Block = (): JSX.Element => {
 		? [ noticeContexts.SHIPPING_ADDRESS, noticeContexts.BILLING_ADDRESS ]
 		: [ noticeContexts.SHIPPING_ADDRESS ];
 
-	const { cartDataLoaded } = useSelect( ( select ) => {
-		const store = select( cartStore );
-		return {
-			cartDataLoaded: store.hasFinishedResolution( 'getCartData' ),
-		};
-	} );
-
 	return (
 		<>
 			<StoreNoticesContainer context={ noticeContext } />
 			<WrapperComponent>
-				{ cartDataLoaded ? <CustomerAddress /> : null }
+				<CustomerAddress />
 			</WrapperComponent>
 			<CheckboxControl
 				className="wc-block-checkout__use-address-for-billing"

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Monorepo: drop the unused `concurrently` package from dependencies.

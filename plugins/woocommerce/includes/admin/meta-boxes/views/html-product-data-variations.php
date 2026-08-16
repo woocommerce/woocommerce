@@ -5,10 +5,23 @@
  * @package WooCommerce\Admin\Metaboxes\Views
  */
 
+use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Admin\Features\ProductVariationsClassicRedesign;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
+}
+
+if ( Features::exists( ProductVariationsClassicRedesign::FEATURE_ID ) ) {
+	?>
+	<div id="variable_product_options" class="panel wc-metaboxes-wrapper hidden">
+		<div id="variable_product_options_inner">
+			<div id="<?php echo esc_attr( ProductVariationsClassicRedesign::ROOT_ID ); ?>"></div>
+		</div>
+	</div>
+	<?php
+	return;
 }
 
 $add_attributes_img_url = WC_ADMIN_IMAGES_FOLDER_URL . '/icons/info.svg';
@@ -94,6 +107,11 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 						<option value="variable_sale_price_decrease"><?php esc_html_e( 'Decrease sale prices (fixed amount or percentage)', 'woocommerce' ); ?></option>
 						<option value="variable_sale_schedule"><?php esc_html_e( 'Set scheduled sale dates', 'woocommerce' ); ?></option>
 					</optgroup>
+					<?php if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) : ?>
+						<optgroup label="<?php esc_attr_e( 'Cost of goods', 'woocommerce' ); ?>">
+							<option value="variable_unset_cogs_value"><?php esc_html_e( 'Remove custom costs', 'woocommerce' ); ?></option>
+						</optgroup>
+					<?php endif; ?>
 					<optgroup label="<?php esc_attr_e( 'Inventory', 'woocommerce' ); ?>">
 						<option value="toggle_manage_stock"><?php esc_html_e( 'Toggle &quot;Manage stock&quot;', 'woocommerce' ); ?></option>
 						<option value="variable_stock"><?php esc_html_e( 'Stock', 'woocommerce' ); ?></option>
@@ -112,11 +130,6 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 						<option value="variable_download_limit"><?php esc_html_e( 'Download limit', 'woocommerce' ); ?></option>
 						<option value="variable_download_expiry"><?php esc_html_e( 'Download expiry', 'woocommerce' ); ?></option>
 					</optgroup>
-					<?php if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) : ?>
-						<optgroup label="<?php esc_attr_e( 'Cost of goods', 'woocommerce' ); ?>">
-							<option value="variable_unset_cogs_value"><?php esc_html_e( 'Remove custom costs', 'woocommerce' ); ?></option>
-						</optgroup>
-					<?php endif; ?>
 					<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
 					<?php do_action( 'woocommerce_variable_product_bulk_edit_actions' ); ?>
 					<?php /* phpcs:enable */ ?>
@@ -203,23 +216,28 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 	</div>
 </div>
 <script type="text/template" id="tmpl-wc-modal-set-price-variations">
-	<div class="wc-backbone-modal">
+	<div class="wc-backbone-modal wc-backbone-modal-set-price-variations">
 		<div class="wc-backbone-modal-content">
-			<div class="components-modal__content woocommerce-set-price-variations" role="document">
-				<div class="components-modal__header">
-					<h2><?php echo esc_attr( $modal_title ); ?></h2>
-				</div>
-				<div class="woocommerce-usage-modal__wrapper">
-					<div class="woocommerce-usage-modal__message">
+			<section class="wc-backbone-modal-main" role="main">
+				<header class="wc-backbone-modal-header">
+					<h1><?php esc_html_e( 'Set variation prices', 'woocommerce' ); ?></h1>
+					<button class="modal-close modal-close-link dashicons dashicons-no-alt">
+						<span class="screen-reader-text"><?php esc_html_e( 'Close modal panel', 'woocommerce' ); ?></span>
+					</button>
+				</header>
+				<article>
+					<div>
 						<span><?php esc_html_e( 'Add price to all variations that don\'t have a price', 'woocommerce' ); ?> (<?php echo esc_attr( get_woocommerce_currency_symbol() ); ?> <?php echo esc_textarea( get_woocommerce_currency() ); ?>)</span>
 						<input type="text" class="components-text-control__input wc_input_variations_price"/>
 					</div>
-					<div class="woocommerce-usage-modal__actions">
-						<button class="modal-close components-button is-secondary"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
+				</article>
+				<footer>
+					<div class="wc-backbone-modal-buttons">
+						<button class="modal-close button components-button is-secondary"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
 						<button class="modal-close button components-button add_variations_price_button button-primary" disabled><?php esc_html_e( 'Add prices', 'woocommerce' ); ?></button>
 					</div>
-				</div>
-			</div>
+				</footer>
+			</section>
 		</div>
 	</div>
 	<div class="wc-backbone-modal-backdrop modal-close"></div>

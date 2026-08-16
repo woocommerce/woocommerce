@@ -16,7 +16,7 @@ const generateWordpressPlaygroundBlueprint = ( runId, prNumber ) => {
 		steps: [
 			{
 				step: 'installPlugin',
-				pluginZipFile: {
+				pluginData: {
 					resource: 'url',
 					url: `https://playground.wordpress.net/plugin-proxy.php?org=woocommerce&repo=woocommerce&workflow=Build%20Live%20Branch&artifact=plugins-${ runId }&pr=${ prNumber }`,
 				},
@@ -26,12 +26,20 @@ const generateWordpressPlaygroundBlueprint = ( runId, prNumber ) => {
 			},
 			{
 				step: 'installPlugin',
-				pluginZipFile: {
+				pluginData: {
 					resource: 'url',
-					url: `https://github-proxy.com/https://github.com/woocommerce/woocommerce/releases/download/wc-beta-tester-2.3.1/woocommerce-beta-tester.zip`,
+					url: 'https://github.com/woocommerce/woocommerce/releases/download/wc-beta-tester-3.0.0/woocommerce-beta-tester.zip',
 				},
 				options: {
 					activate: true,
+				},
+			},
+			{
+				step: 'setSiteOptions',
+				options: {
+					woocommerce_onboarding_profile: {
+						skipped: true,
+					},
 				},
 			},
 			{
@@ -83,7 +91,7 @@ The changes in this pull request can be previewed and tested using a [WordPress 
 
 [Test this pull request with WordPress Playground](${ url }).
 
-Note that this URL is valid for 30 days from when this comment was last updated. You can update it by closing/reopening the PR or pushing a new commit.
+Note that this URL is valid for 30 days from when this comment was last updated. You can update it by closing/reopening the PR or pushing a commit that changes plugin code.
 `;
 
 	if ( existingCommentId ) {

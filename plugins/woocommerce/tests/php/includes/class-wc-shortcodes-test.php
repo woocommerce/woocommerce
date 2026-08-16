@@ -463,7 +463,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertStringContainsString( 'This content is password protected', $product_page );
+		$this->assertMatchesRegularExpression( '/This content is password[- ]protected/', $product_page );
 
 		wp_set_current_user( self::$user_contributor );
 
@@ -474,6 +474,6 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertStringContainsString( 'This content is password protected', $product_page );
+		$this->assertMatchesRegularExpression( '/This content is password[- ]protected/', $product_page );
 	}
 }

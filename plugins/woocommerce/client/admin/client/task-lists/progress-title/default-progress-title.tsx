@@ -16,9 +16,9 @@ export type DefaultProgressTitleProps = {
 	taskListId: string;
 };
 
-export const DefaultProgressTitle: React.FC< DefaultProgressTitleProps > = ( {
+export const DefaultProgressTitle = ( {
 	taskListId,
-} ) => {
+}: DefaultProgressTitleProps ) => {
 	const { loading, tasksCount, completedCount, hasVisitedTasks } = useSelect(
 		( select ) => {
 			const taskList =
@@ -51,7 +51,7 @@ export const DefaultProgressTitle: React.FC< DefaultProgressTitleProps > = ( {
 				? sprintf(
 						/* translators: %s = site title */
 						__( 'Welcome to %s', 'woocommerce' ),
-						siteTitle
+						siteTitle as string
 				  )
 				: __( 'Welcome to your store', 'woocommerce' );
 		}

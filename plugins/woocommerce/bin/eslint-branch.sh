@@ -11,7 +11,7 @@
 baseBranch=${1:-"origin/trunk"}
 
 # shellcheck disable=SC2046
-changedFiles=$(git diff $(git merge-base HEAD $baseBranch) --relative --name-only --diff-filter=d -- '*.js' '*.ts' '*.tsx')
+changedFiles=$(git diff $(git merge-base HEAD $baseBranch) --relative --name-only --diff-filter=d -- '*.js' '*.jsx' '*.ts' '*.tsx')
 
 # Only complete this if changed files are detected.
 if [[ -z $changedFiles ]]; then
@@ -19,5 +19,8 @@ if [[ -z $changedFiles ]]; then
     exit 0
 fi
 
+# A changed client/blocks file is linted with that package's own flat config,
+# whose import/webpack resolver loads its webpack.config.js. That config only
+# exports an iterable when WP_EXPERIMENTAL_MODULES is set, matching its lint:js.
 # shellcheck disable=SC2086
-pnpm eslint $changedFiles
+WP_EXPERIMENTAL_MODULES=true pnpm eslint $changedFiles

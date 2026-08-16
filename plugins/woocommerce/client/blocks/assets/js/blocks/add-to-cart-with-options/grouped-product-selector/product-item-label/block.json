@@ -1,0 +1,48 @@
+{
+	"name": "woocommerce/add-to-cart-with-options-grouped-product-item-label",
+	"title": "Grouped Product: Item Label (Beta)",
+	"description": "Display the product title as a label or paragraph.",
+	"category": "woocommerce-product-elements",
+	"keywords": [ "WooCommerce" ],
+	"ancestor": [ "woocommerce/add-to-cart-with-options-grouped-product-item" ],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"supports": {
+		"color": {
+			"text": true,
+			"background": true,
+			"gradients": true,
+			"__experimentalDefaultControls": {
+				"background": true,
+				"text": true
+			}
+		},
+		"html": false,
+		"layout": {
+			"selfStretch": true
+		},
+		"spacing": {
+			"margin": true,
+			"padding": true,
+			"blockGap": true
+		},
+		"typography": {
+			"fontSize": true,
+			"lineHeight": true,
+			"__experimentalFontFamily": true,
+			"__experimentalFontWeight": true,
+			"__experimentalFontStyle": true,
+			"__experimentalTextTransform": true,
+			"__experimentalTextDecoration": true,
+			"__experimentalLetterSpacing": true,
+			"textAlign": true,
+			"__experimentalDefaultControls": {
+				"fontSize": true,
+				"fontWeight": true,
+				"fontStyle": true
+			}
+		}
+	},
+	"usesContext": [ "postId", "postType" ]
+}

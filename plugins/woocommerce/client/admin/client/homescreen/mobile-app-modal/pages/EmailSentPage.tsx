@@ -9,9 +9,9 @@ interface EmailSentProps {
 	returnToSendLinkPage: () => void;
 }
 
-export const EmailSentPage: React.FC< EmailSentProps > = ( {
+export const EmailSentPage = ( {
 	returnToSendLinkPage: returnToSendLinkPage,
-} ) => {
+}: EmailSentProps ) => {
 	return (
 		<div className="email-sent-modal-body">
 			<div className="email-sent-illustration"></div>

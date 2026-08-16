@@ -12,6 +12,13 @@ import userEvent from '@testing-library/user-event';
 import { CartEventsProvider } from '../index';
 import Block from '../../../../../../blocks/cart/inner-blocks/proceed-to-checkout-block/block';
 
+jest.mock( '@woocommerce/base-context/hooks', () => ( {
+	useStoreCart: jest.fn( () => ( {
+		cartIsLoading: false,
+		isLoadingRates: false,
+	} ) ),
+} ) );
+
 describe( 'CartEventsProvider', () => {
 	it( 'allows observers to unsubscribe', async () => {
 		const user = userEvent.setup();
@@ -37,14 +44,11 @@ describe( 'CartEventsProvider', () => {
 			</CartEventsProvider>
 		);
 
-		// TODO: Fix a recent deprecation of showSpinner prop of Button called in this component.
-		expect( console ).toHaveWarned();
-
 		expect( screen.getByText( 'Mock observer' ) ).toBeInTheDocument();
 		const button = screen.getByText( 'Proceed to Checkout' );
 
 		// Forcibly set the button URL to # to prevent JSDOM error: `["Error: Not implemented: navigation (except hash changes)`
-		button.parentElement?.removeAttribute( 'href' );
+		button.closest( 'a' )?.removeAttribute( 'href' );
 
 		await act( async () => {
 			await user.click( button );

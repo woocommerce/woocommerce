@@ -12,7 +12,7 @@ import { CSSTransitionProps } from 'react-transition-group/CSSTransition';
 import { CSSTransition, TransitionStatus } from 'react-transition-group';
 
 export type VerticalCSSTransitionProps<
-	Ref extends HTMLElement | undefined = undefined
+	Ref extends HTMLElement | undefined = undefined,
 > = CSSTransitionProps< Ref > & {
 	defaultStyle?: React.CSSProperties;
 	children: JSX.Element;
@@ -34,11 +34,11 @@ function getContainerHeight( container: HTMLDivElement ) {
  * VerticalCSSTransition is a wrapper for CSSTransition, automatically adding a vertical height transition.
  * The maxHeight is calculated through JS, something CSS does not support.
  */
-export const VerticalCSSTransition: React.FC< VerticalCSSTransitionProps > = ( {
+export const VerticalCSSTransition = ( {
 	children,
 	defaultStyle,
 	...props
-} ) => {
+}: VerticalCSSTransitionProps ) => {
 	const [ containerHeight, setContainerHeight ] = useState( 0 );
 	const [ transitionIn, setTransitionIn ] = useState( props.in || false );
 	const cssTransitionRef = useRef<

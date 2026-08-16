@@ -32,6 +32,7 @@ import {
 	changeUrl,
 	PREFIX_QUERY_ARG_FILTER_TYPE,
 	normalizeQueryParams,
+	generateUniqueId,
 } from '@woocommerce/utils';
 import clsx from 'clsx';
 
@@ -40,7 +41,7 @@ import clsx from 'clsx';
  */
 import { previewOptions } from './preview';
 import './style.scss';
-import { formatSlug, getActiveFilters, generateUniqueId } from './utils';
+import { formatSlug, getActiveFilters } from './utils';
 import { Attributes, DisplayOption, Current } from './types';
 import { useSetWrapperVisibility } from '../filter-wrapper/context';
 

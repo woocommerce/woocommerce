@@ -1,0 +1,22 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "woocommerce/reviews-by-category",
+	"title": "Reviews by Category",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"description": "Show product reviews from specific categories.",
+	"textdomain": "woocommerce",
+	"supports": {
+		"html": false,
+		"interactivity": {
+			"clientNavigation": true
+		},
+		"color": {
+			"background": false
+		},
+		"typography": {
+			"fontSize": true
+		}
+	}
+}

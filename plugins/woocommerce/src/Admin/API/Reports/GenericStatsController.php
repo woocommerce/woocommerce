@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\GenericController;
+use WP_Error;
 
 /**
  * Generic base for all stats controllers.

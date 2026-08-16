@@ -11,7 +11,6 @@ import { __ } from '@wordpress/i18n';
  */
 import metadata from './block.json';
 import edit from './edit';
-import './style.scss';
 
 registerBlockType( metadata, {
 	icon: {
@@ -43,6 +42,7 @@ registerBlockVariation( 'woocommerce/customer-account', {
 	attributes: {
 		...metadata.attributes,
 		displayStyle: 'icon_and_text',
+		hasDropdownNavigation: false,
 		iconStyle: 'default',
 		iconClass: 'wc-block-customer-account__account-icon',
 	},

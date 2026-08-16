@@ -35,12 +35,12 @@ type StackWithoutText = {
 	isTaskListItemClicked?: boolean;
 };
 
-const Stack: React.FC< StackProps > = ( {
+const Stack = ( {
 	items,
 	onClickLoadSampleProduct = () => {},
 	showOtherOptions = true,
 	isTaskListItemClicked = false,
-} ) => {
+}: StackProps ) => {
 	const { recordCompletionTime } = useRecordCompletionTime( 'products' );
 
 	return (

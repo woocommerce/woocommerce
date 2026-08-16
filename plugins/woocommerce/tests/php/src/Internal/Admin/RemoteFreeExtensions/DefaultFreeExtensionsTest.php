@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\RemoteFreeExtensions;
 
@@ -45,14 +46,6 @@ class DefaultFreeExtensionsTest extends WC_Unit_Test_Case {
 				'plugins' => array(
 					DefaultFreeExtensions::get_plugin( 'woocommerce-shipping' ),
 					DefaultFreeExtensions::get_plugin( 'woocommerce-services:tax' ),
-				),
-			),
-			array(
-				'key'     => 'obw/core-profiler',
-				'title'   => 'Core Profiler Bundle',
-				'plugins' => array(
-					DefaultFreeExtensions::get_plugin( 'woocommerce-payments' ),
-					DefaultFreeExtensions::get_plugin( 'mailpoet' ),
 				),
 			),
 		);
@@ -132,6 +125,43 @@ class DefaultFreeExtensionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Core profiler defaults should exclude Facebook from the growth plugin rotation.
+	 */
+	public function test_core_profiler_excludes_facebook_from_growth_plugin_rotation(): void {
+		$plugin_slugs = array_map(
+			function ( $plugin ) {
+				return $plugin->key;
+			},
+			$this->get_core_profiler_plugins()
+		);
+
+		$this->assertNotContains(
+			'facebook-for-woocommerce',
+			$plugin_slugs,
+			'Facebook should not be included in the core profiler defaults.'
+		);
+	}
+
+	/**
+	 * @testdox Core profiler defaults should split the growth plugin rotation between TikTok and Pinterest.
+	 */
+	public function test_core_profiler_splits_growth_plugin_rotation_between_tiktok_and_pinterest(): void {
+		$tiktok    = $this->get_core_profiler_plugin_by_slug( 'tiktok-for-business' );
+		$pinterest = $this->get_core_profiler_plugin_by_slug( 'pinterest-for-woocommerce' );
+
+		$this->assertSame(
+			array( 1, 60 ),
+			$tiktok->is_visible[0]->value,
+			'TikTok should cover the first half of the shared rotation.'
+		);
+		$this->assertSame(
+			array( 61, 120 ),
+			$pinterest->is_visible[0]->value,
+			'Pinterest should cover the second half of the shared rotation.'
+		);
+	}
+
+	/**
 	 * Evaluates bundles passed as argument and extracts keys of recommended plugins.
 	 *
 	 * @param array $bundles Array of bundles to evaluate.
@@ -157,86 +187,33 @@ class DefaultFreeExtensionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that core profiler bundle is removed when feature flag is enabled and user is in rollout group.
+	 * Gets default core profiler plugin specs.
+	 *
+	 * @return array
 	 */
-	public function test_core_profiler_bundle_is_removed_when_feature_enabled_and_in_rollout() {
-		// Enable the feature flag.
-		$filter = function ( $config ) {
-			$config['disable-core-profiler-fallback'] = true;
-			return $config;
-		};
-		add_filter( 'woocommerce_admin_get_feature_config', $filter );
+	private function get_core_profiler_plugins(): array {
+		foreach ( DefaultFreeExtensions::get_all() as $bundle ) {
+			if ( 'obw/core-profiler' === $bundle->key ) {
+				return $bundle->plugins;
+			}
+		}
 
-		// Set user in rollout group (1-60).
-		update_option( 'woocommerce_remote_variant_assignment', 30 );
-
-		$bundles     = DefaultFreeExtensions::get_all();
-		$bundle_keys = array_map(
-			function ( $bundle ) {
-				return $bundle->key;
-			},
-			$bundles
-		);
-
-		$this->assertNotContains( 'obw/core-profiler', $bundle_keys );
-
-		// Cleanup.
-		remove_filter( 'woocommerce_admin_get_feature_config', $filter );
+		$this->fail( 'Core profiler bundle was not found.' );
 	}
 
 	/**
-	 * Tests that core profiler bundle remains when feature flag is enabled but user is not in rollout group.
+	 * Gets a default core profiler plugin by slug.
+	 *
+	 * @param string $slug Plugin slug.
+	 * @return object
 	 */
-	public function test_core_profiler_bundle_remains_when_feature_enabled_but_not_in_rollout() {
-		// Enable the feature flag.
-		$filter = function ( $config ) {
-			$config['disable-core-profiler-fallback'] = true;
-			return $config;
-		};
-		add_filter( 'woocommerce_admin_get_feature_config', $filter );
+	private function get_core_profiler_plugin_by_slug( string $slug ): object {
+		foreach ( $this->get_core_profiler_plugins() as $plugin ) {
+			if ( $slug === $plugin->key ) {
+				return $plugin;
+			}
+		}
 
-		// Set user outside rollout group (61-120).
-		update_option( 'woocommerce_remote_variant_assignment', 90 );
-
-		$bundles     = DefaultFreeExtensions::get_all();
-		$bundle_keys = array_map(
-			function ( $bundle ) {
-				return $bundle->key;
-			},
-			$bundles
-		);
-
-		$this->assertContains( 'obw/core-profiler', $bundle_keys );
-
-		// Cleanup.
-		remove_filter( 'woocommerce_admin_get_feature_config', $filter );
-	}
-
-	/**
-	 * Tests that core profiler bundle remains when feature flag is disabled.
-	 */
-	public function test_core_profiler_bundle_remains_when_feature_disabled() {
-		// Disable the feature flag.
-		$filter = function ( $config ) {
-			$config['disable-core-profiler-fallback'] = false;
-			return $config;
-		};
-		add_filter( 'woocommerce_admin_get_feature_config', $filter );
-
-		// Set user in rollout group (shouldn't matter).
-		update_option( 'woocommerce_remote_variant_assignment', 30 );
-
-		$bundles     = DefaultFreeExtensions::get_all();
-		$bundle_keys = array_map(
-			function ( $bundle ) {
-				return $bundle->key;
-			},
-			$bundles
-		);
-
-		$this->assertContains( 'obw/core-profiler', $bundle_keys );
-
-		// Cleanup.
-		remove_filter( 'woocommerce_admin_get_feature_config', $filter );
+		$this->fail( "Plugin {$slug} was not found." );
 	}
 }

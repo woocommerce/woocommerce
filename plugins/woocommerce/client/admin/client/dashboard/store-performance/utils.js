@@ -1,14 +1,13 @@
 /**
  * External dependencies
  */
-import moment from 'moment';
 import { find } from 'lodash';
-import { getCurrentDates, appendTimestamp } from '@woocommerce/date';
 import {
-	getFilterQuery,
-	settingsStore,
-	REPORTS_STORE_NAME,
-} from '@woocommerce/data';
+	getCurrentDates,
+	appendTimestamp,
+	getStoreTimeZoneMoment,
+} from '@woocommerce/date';
+import { getFilterQuery, settingsStore, reportsStore } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
 import { calculateDelta, formatValue } from '@woocommerce/number';
 import { getAdminLink } from '@woocommerce/settings';
@@ -75,7 +74,7 @@ export const getIndicatorValues = ( {
 
 export const getIndicatorData = ( select, indicators, query, filters ) => {
 	const { getReportItems, getReportItemsError, isResolving } =
-		select( REPORTS_STORE_NAME );
+		select( reportsStore );
 	const { woocommerce_default_date_range: defaultDateRange } = select(
 		settingsStore
 	).getSetting( 'wc_admin', 'wcAdminSettings' );
@@ -91,7 +90,7 @@ export const getIndicatorData = ( select, indicators, query, filters ) => {
 		after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
 		before: appendTimestamp(
 			endPrimary,
-			endPrimary.isSame( moment(), 'day' ) ? 'now' : 'end'
+			endPrimary.isSame( getStoreTimeZoneMoment(), 'day' ) ? 'now' : 'end'
 		),
 		stats: statKeys,
 	};
@@ -101,7 +100,9 @@ export const getIndicatorData = ( select, indicators, query, filters ) => {
 		after: appendTimestamp( datesFromQuery.secondary.after, 'start' ),
 		before: appendTimestamp(
 			endSecondary,
-			endSecondary.isSame( moment(), 'day' ) ? 'now' : 'end'
+			endSecondary.isSame( getStoreTimeZoneMoment(), 'day' )
+				? 'now'
+				: 'end'
 		),
 		stats: statKeys,
 	};

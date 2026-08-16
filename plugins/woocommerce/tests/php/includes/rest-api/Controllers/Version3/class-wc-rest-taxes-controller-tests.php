@@ -225,7 +225,7 @@ class WC_REST_Taxes_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$data = array_values( $response->get_data() );
 		$ids  = array_map(
-			function( $item ) {
+			function ( $item ) {
 				return $item['id'];
 			},
 			$data
@@ -277,12 +277,39 @@ class WC_REST_Taxes_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$data = array_values( $response->get_data() );
 		$ids  = array_map(
-			function( $item ) {
+			function ( $item ) {
 				return $item['id'];
 			},
 			$data
 		);
 
 		$this->assertEquals( array( $tax_ids_by_class[ $class ] ), $ids );
+	}
+
+	/**
+	 * @testdox Tax rates with non-Latin characters in tax class names are properly created and associated with the correct class.
+	 */
+	public function test_can_create_tax_rate_with_non_latin_tax_class() {
+		wp_set_current_user( $this->user );
+
+		$tax_class_name = '∑';
+		$tax_class_slug = WC_Tax::create_tax_class( $tax_class_name )['slug'];
+
+		$controller = new WC_REST_Taxes_V1_Controller();
+		$request    = new WP_REST_Request( 'POST', '/wc/v1/taxes' );
+		$request->set_body_params(
+			array(
+				'class' => $tax_class_slug,
+			)
+		);
+
+		$response    = $controller->create_item( $request );
+		$tax_rate_id = $response->get_data()['id'];
+
+		$tax_rate = WC_Tax::_get_tax_rate( $tax_rate_id );
+		$this->assertEquals( $tax_class_slug, $tax_rate['tax_rate_class'] );
+
+		WC_Tax::_delete_tax_rate( $tax_rate_id );
+		WC_Tax::delete_tax_class_by( 'slug', $tax_class_slug );
 	}
 }

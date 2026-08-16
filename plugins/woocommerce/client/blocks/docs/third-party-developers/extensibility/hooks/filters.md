@@ -849,7 +849,7 @@ Automattic\WooCommerce\Blocks\Package::container()->get( Automattic\WooCommerce\
 Filters the shipping package name.
 
 ```php
-apply_filters( 'woocommerce_shipping_package_name', string $shipping_package_name, string $package_id, array $package )
+apply_filters( 'woocommerce_shipping_package_name', string $shipping_package_name, string $package_id, array $package, int $total_packages )
 ```
 
 **Note: Matches filter name in WooCommerce core.**

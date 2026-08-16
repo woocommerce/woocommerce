@@ -7,6 +7,12 @@ import { registerCheckoutFilters } from '@woocommerce/blocks-checkout';
 import { useCartEventsContext } from '@woocommerce/base-context';
 import { useEffect } from '@wordpress/element';
 
+jest.mock( '@woocommerce/base-context/hooks', () => ( {
+	useStoreCart: jest.fn( () => ( {
+		cartIsLoading: false,
+		isLoadingRates: false,
+	} ) ),
+} ) );
 /**
  * Internal dependencies
  */
@@ -23,9 +29,6 @@ describe( 'Proceed to checkout block', () => {
 		render(
 			<Block checkoutPageId={ 0 } buttonLabel={ '' } className={ '' } />
 		);
-
-		// TODO: Fix a recent deprecation of showSpinner prop of Button called in this component.
-		expect( console ).toHaveWarned();
 
 		expect( screen.getByText( 'Proceed to step two' ) ).toBeInTheDocument();
 	} );
@@ -83,7 +86,7 @@ describe( 'Proceed to checkout block', () => {
 		const button = screen.getByText( 'Proceed to Checkout' );
 
 		// Forcibly set the button URL to # to prevent JSDOM error: `["Error: Not implemented: navigation (except hash changes)`
-		button.parentElement?.removeAttribute( 'href' );
+		button.closest( 'a' )?.removeAttribute( 'href' );
 
 		button.click();
 		await waitFor( () => {

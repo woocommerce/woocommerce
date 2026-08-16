@@ -34,7 +34,7 @@ const initTracks = () => {
 	) as HTMLInputElement;
 
 	const hasValue = ( selector: string ) => {
-		const element = <HTMLInputElement>document.querySelector( selector );
+		const element = < HTMLInputElement >document.querySelector( selector );
 		return !! element && element.value !== '' && element.value !== '-1';
 	};
 

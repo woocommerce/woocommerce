@@ -1,23 +1,11 @@
 /**
  * External dependencies
  */
-import { useState, useEffect } from '@wordpress/element';
-import { act, render, screen } from '@testing-library/react';
+import { useState } from '@wordpress/element';
+import { act, render, screen, type RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { registerCoreBlocks } from '@wordpress/block-library';
-import {
-	type BlockAttributes,
-	type BlockInstance,
-	createBlock,
-	getBlockTypes,
-	unregisterBlockType,
-} from '@wordpress/blocks';
-import { useSelect } from '@wordpress/data';
 import '@wordpress/format-library';
-import {
-	store as richTextStore,
-	unregisterFormatType,
-} from '@wordpress/rich-text';
 import {
 	type EditorSettings,
 	type EditorBlockListSettings,
@@ -26,13 +14,19 @@ import {
 	// @ts-expect-error privateApis exists but is not typed
 	privateApis as blockEditorPrivateApis,
 } from '@wordpress/block-editor';
-// @ts-expect-error lock-unlock exists but is not typed
-import { unlock } from '@wordpress/block-library/build/lock-unlock'; // eslint-disable-line
+import {
+	type BlockAttributes,
+	type BlockInstance,
+	createBlock,
+	createBlocksFromInnerBlocksTemplate,
+} from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
 import { waitForStoreResolvers } from './wait-for-store-resolvers';
+import { unlock } from '../../utils/lock-unlock';
+import { registerProductEntity } from '../../../packages/public-api/entity-registration/register-entities';
 
 const { ExperimentalBlockCanvas: BlockCanvas } = unlock(
 	blockEditorPrivateApis
@@ -55,18 +49,6 @@ export function Editor( {
 	settings?: Partial< EditorSettings & EditorBlockListSettings >;
 } ) {
 	const [ currentBlocks, updateBlocks ] = useState( testBlocks );
-	const { getFormatTypes } = useSelect( richTextStore, [] );
-
-	useEffect( () => {
-		return () => {
-			getBlockTypes().forEach( ( { name } ) =>
-				unregisterBlockType( name )
-			);
-			getFormatTypes().forEach( ( { name } ) =>
-				unregisterFormatType( name )
-			);
-		};
-	}, [ getFormatTypes ] );
 
 	return (
 		<BlockEditorProvider
@@ -81,21 +63,25 @@ export function Editor( {
 	);
 }
 
+let areCoreBlocksRegistered = false;
+
 /**
  * Registers the core block, creates the test block instances, and then instantiates the Editor.
  *
- * @param testBlocks    Block or array of block settings for blocks to be tested.
- * @param useCoreBlocks Defaults to true. If false, core blocks will not be registered.
- * @param settings      Any additional editor settings to be passed to the editor.
+ * @param testBlocks Block or array of block settings for blocks to be tested.
+ * @param settings   Any additional editor settings to be passed to the editor.
  */
 export async function initializeEditor(
 	testBlocks: BlockAttributes | BlockAttributes[],
-	useCoreBlocks = true,
 	settings: Partial< EditorSettings & EditorBlockListSettings > = {}
-) {
-	if ( useCoreBlocks ) {
+): Promise< RenderResult > {
+	if ( ! areCoreBlocksRegistered ) {
 		registerCoreBlocks();
+		areCoreBlocksRegistered = true;
 	}
+
+	registerProductEntity();
+
 	const blocks: BlockAttributes[] = Array.isArray( testBlocks )
 		? testBlocks
 		: [ testBlocks ];
@@ -103,7 +89,7 @@ export async function initializeEditor(
 		createBlock(
 			testBlock.name,
 			testBlock.attributes,
-			testBlock.innerBlocks
+			createBlocksFromInnerBlocksTemplate( testBlock.innerBlocks )
 		)
 	);
 	return waitForStoreResolvers( () =>

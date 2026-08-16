@@ -17,7 +17,7 @@
 -   [Examples](#examples)
     -   [Passing a value from the client through to server side payment processing](#passing-a-value-from-the-client-through-to-server-side-payment-processing)
 
-This document gives an overview of some of the major architectural components/APIs for the checkout block. If you haven't already, you may also want to read about the [Checkout Flow and Events](checkout-flow-and-events.md).
+This document gives an overview of some of the major architectural components/APIs for the checkout block. If you haven't already, you may also want to read about the [Checkout Flow and Events](https://developer.woocommerce.com/docs/cart-and-checkout-checkout-flow-and-events/).
 
 ## Data Stores
 
@@ -31,7 +31,7 @@ For more details on the checkout data store, see the [Checkout Data Store](../..
 
 #### Selectors
 
-For a full list of selectors see the [Checkout Data Store](
+For a full list of selectors see the [Checkout Data Store](../../../third-party-developers/extensibility/data-store/checkout.md) docs.
 
 Data can be accessed through the following selectors:
 
@@ -65,19 +65,30 @@ The following actions can be dispatched from the Checkout data store:
 -   `__internalSrocessCheckoutResponse( response: CheckoutResponse )`: This is a thunk that will extract the paymentResult from the CheckoutResponse, and dispatch 3 actions: `__internalSetRedirectUrl`, `__internalSetPaymentResult` and `__internalSetAfterProcessing`.
 -   `__internalSetRedirectUrl( url: string )`: Set `state.redirectUrl` to `url`
 -   `__internalSetHasError( trueOrFalse: bool )`: Set `state.hasError` to `trueOrFalse`
--   `__internalIncrementCalculating()`: Increment `state.calculatingCount`
--   `__internalDecrementCalculating()`: Decrement `state.calculatingCount`
+-   `__internalStartCalculation`: Increment `state.calculatingCount`
+-   `__internalFinishCalculation`: Decrement `state.calculatingCount`
 -   `__internalSetCustomerId( id: number )`: Set `state.customerId` to `id`
 -   `__internalSetUseShippingAsBilling( useShippingAsBilling: boolean )`: Set `state.useShippingAsBilling` to `useShippingAsBilling`
 -   `__internalSetShouldCreateAccount( shouldCreateAccount: boolean )`: Set `state.shouldCreateAccount` to `shouldCreateAccount`
 -   `__internalSetOrderNotes( orderNotes: string )`: Set `state.orderNotes` to `orderNotes`
 -   `setExtensionData( namespace: string, extensionData: Record< string, unknown > )`: Set `state.extensionData` to `extensionData`
+-   `disableCheckoutFor( asyncFunc: () => Promise< unknown > )`: A thunk that allows to disable checkout button until promise returned by `asyncFunc` gets resolved. Relies on the same internal state as the one powering the tracking of pending calculations.
+
+##### Deprecated actions
+
+Please don't use actions listed below, instead relying on suggested alternatives.
+
+###### Since 9.9.0
+
+-   `__internalIncrementCalculating()`: Use `disableCheckoutFor` thunk instead
+-   `__internalDecrementCalculating()`: Use `disableCheckoutFor` thunk instead
+-   `__internalSetExtensionData`: Use `setExtensionData` instead
 
 ## Contexts
 
 Much of the data and api interface for components in the Checkout Block are constructed and exposed via [usage of `React.Context`](https://reactjs.org/docs/context.html). In some cases the context maintains the "tree" state within the context itself (via `useReducer`) and in others it interacts with a global `wp.data` store (for data that communicates with the server).
 
-You can find type definitions (`typedef`) for contexts in [this file](../../../../assets/js/types/type-defs/contexts.js).
+You can find type definitions (`typedef`) for contexts in [this file](../../../../packages/public-api/types/type-defs/contexts.js).
 
 ### Shipping Method Data context
 
@@ -113,7 +124,7 @@ These docs currently don't go into detail for all the hooks as that is fairly st
 
 ### `usePaymentMethodInterface`
 
-This hook is used to expose all the interfaces for the registered payment method components to utilize. Essentially the result from this hook is fed in as props on the registered payment components when they are setup by checkout. You can use the typedef ([`PaymentMethodInterface`](../../../../assets/js/types/type-defs/payment-method-interface.ts)) to see what is fed to payment methods as props from this hook.
+This hook is used to expose all the interfaces for the registered payment method components to utilize. Essentially the result from this hook is fed in as props on the registered payment components when they are setup by checkout. You can use the typedef ([`PaymentMethodInterface`](../../../../packages/public-api/types/type-defs/payment-method-interface.ts)) to see what is fed to payment methods as props from this hook.
 
 _Why don't payment methods just implement this hook_?
 

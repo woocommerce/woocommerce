@@ -15,9 +15,9 @@ export type DefaultProgressHeaderProps = {
 	taskListId: string;
 };
 
-export const DefaultProgressHeader: React.FC< DefaultProgressHeaderProps > = ( {
+export const DefaultProgressHeader = ( {
 	taskListId,
-} ) => {
+}: DefaultProgressHeaderProps ) => {
 	const { loading, tasksCount, completedCount } = useSelect(
 		( select ) => {
 			const taskList =

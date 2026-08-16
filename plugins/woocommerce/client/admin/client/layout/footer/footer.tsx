@@ -11,7 +11,7 @@ import clsx from 'clsx';
 import './footer.scss';
 import useIsScrolled from '~/hooks/useIsScrolled';
 
-export const Footer: React.FC = () => {
+export const Footer = () => {
 	const slot = useSlot( WC_FOOTER_SLOT_NAME );
 	const hasFills = Boolean( slot?.fills?.length );
 	const { atBottom } = useIsScrolled();

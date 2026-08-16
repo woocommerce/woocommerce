@@ -1,70 +1,33 @@
-.wp-block-woocommerce-checkout-actions-block {
-	.wc-block-checkout__actions {
-		&_row {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
+.wc-block-checkout__actions {
+	margin-bottom: $gap-larger;
 
-			.wc-block-components-checkout-place-order-button {
-				width: 50%;
-				padding: 1em;
-				height: auto;
+	.wc-block-checkout__actions_row {
+		@include font-small-locked;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: $gap-smaller;
 
-				&--full-width {
-					width: 100%;
-				}
-
-				// Keeps the text in the DOM but not visible, so it doesn't cause the button to resize while showing the spinner.
-				.wc-block-components-checkout-place-order-button__text--visually-hidden {
-					visibility: hidden;
-				}
-
-				.wc-block-components-checkout-place-order-button__text {
-					display: flex;
-					align-items: center;
-
-					// Prevent runts/widows. Overwrite `balance` with `pretty`, as `pretty` is not supported in all browsers.
-					text-wrap: balance;
-					text-wrap: pretty;
-				}
-
-				.wc-block-components-checkout-place-order-button__separator {
-					margin: 0 20px;
-				}
-
-				.wc-block-components-button__text {
-					> svg {
-						fill: $white;
-						vertical-align: top;
-						position: absolute;
-						top: 50%;
-						left: 50%;
-						transform: translate(-50%, -50%);
-					}
-				}
-			}
+		&--justify-flex-end {
+			justify-content: flex-end;
 		}
-	}
 
-	.is-large {
-		.wc-block-checkout__actions {
-			padding: 0 0 $gap-largest 0;
+		.wc-block-components-checkout-place-order-button--full-width {
+			width: 100%;
 		}
 	}
 }
 
-.is-mobile {
+@include cart-checkout-mobile-container {
 	.wc-block-checkout__actions {
 		.wc-block-checkout__actions_row {
 			flex-direction: column-reverse;
+			justify-content: center;
+			gap: $gap;
 		}
 
 		.wc-block-components-checkout-place-order-button {
 			width: 100%;
-		}
-
-		.wc-block-components-checkout-return-to-cart-button {
-			margin: $gap auto;
 		}
 	}
 }

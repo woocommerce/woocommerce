@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Caching\CacheNameSpaceTrait;
+use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -26,56 +27,98 @@ class WC_Cache_Helper {
 	 * Hook in methods.
 	 */
 	public static function init() {
-		add_filter( 'nocache_headers', array( __CLASS__, 'additional_nocache_headers' ), 10 );
+		add_action( 'wp_headers', array( __CLASS__, 'prevent_caching' ), 5 ); // Lower priority than default to facilitate plugins enforcing `no-store` if desired.
 		add_action( 'shutdown', array( __CLASS__, 'delete_transients_on_shutdown' ), 10 );
 		add_action( 'template_redirect', array( __CLASS__, 'geolocation_ajax_redirect' ) );
 		add_action( 'wc_ajax_update_order_review', array( __CLASS__, 'update_geolocation_hash' ), 5 );
 		add_action( 'admin_notices', array( __CLASS__, 'notices' ) );
 		add_action( 'delete_version_transients', array( __CLASS__, 'delete_version_transients' ), 10 );
-		add_action( 'wp', array( __CLASS__, 'prevent_caching' ) );
 		add_action( 'clean_term_cache', array( __CLASS__, 'clean_term_cache' ), 10, 2 );
 		add_action( 'edit_terms', array( __CLASS__, 'clean_term_cache' ), 10, 2 );
 	}
 
 	/**
-	 * Set additional nocache headers.
+	 * Prevent caching on certain pages.
 	 *
-	 * @param array $headers Header names and field values.
 	 * @since 3.6.0
+	 * @since 10.1.0 This is now a callback for the `wp_headers` filter as opposed to a callback for the `wp` action.
+	 *
+	 * @param array<string, string> $headers Header names and field values.
+	 * @return array<string, string> Filtered headers.
 	 */
-	public static function additional_nocache_headers( $headers ) {
-		global $wp_query;
+	public static function prevent_caching( $headers ) {
+		if ( ! is_blog_installed() ) {
+			return $headers;
+		}
 
-		$agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		// Optimization note: this is the earliest stage at which we can bulk-prime pages data. As a result, we
+		// prime data for all pages used in is_page checks across the core, even if only a subset is required here.
+		$pages                    = array( 'cart', 'checkout', 'coming_soon', 'myaccount', 'shop', 'terms' );
+		$woocommerce_page_options = array_map( static fn ( string $page ) => sprintf( 'woocommerce_%s_page_id', $page ), $pages );
+		wp_prime_option_caches( $woocommerce_page_options );
+		$woocommerce_page_ids = array_combine( $pages, array_map( static fn ( string $page ) => wc_get_page_id( $page ), $pages ) );
+		_prime_post_caches( array_values( array_filter( $woocommerce_page_ids ) ), false, false );
 
-		$set_cache = false;
+		$page_ids = array_filter( array( $woocommerce_page_ids['cart'], $woocommerce_page_ids['checkout'], $woocommerce_page_ids['myaccount'] ) );
+		if ( ! is_page( $page_ids ) ) {
+			return $headers;
+		}
 
-		/**
-		 * Allow plugins to enable nocache headers. Enabled for Google weblight.
+		self::set_nocache_constants();
+
+		// Gather the original Cache-Control directives as well as the nocache ones to merge into one new Cache-Control header.
+		if ( isset( $headers['Cache-Control'] ) ) {
+			$old_directives = preg_split( '/\s*,\s*/', trim( $headers['Cache-Control'] ) );
+		} else {
+			$old_directives = array();
+		}
+		$nocache_headers = wp_get_nocache_headers();
+		if ( isset( $nocache_headers['Cache-Control'] ) ) {
+			$new_directives = preg_split( '/\s*,\s*/', trim( $nocache_headers['Cache-Control'] ) );
+		} else {
+			$new_directives = array();
+		}
+
+		$headers = array_merge( $headers, $nocache_headers );
+
+		/*
+		 * If the user is not logged in, remove the `no-store` directive so that bfcache is not blocked for visitors,
+		 * allowing them to benefit from instant back/forward navigations in the storefront. This essentially undoes
+		 * <https://core.trac.wordpress.org/ticket/61942> which seems to have been excessive since the `private`
+		 * directive was already being sent to prevent the page from being cached in a proxy server.
 		 *
-		 * @param bool $enable_nocache_headers Flag indicating whether to add nocache headers. Default: false.
-		 */
-		if ( apply_filters( 'woocommerce_enable_nocache_headers', false ) ) {
-			$set_cache = true;
-		}
-
-		/**
-		 * Enabled for Google weblight.
+		 * Note that <https://core.trac.wordpress.org/ticket/63636> proposes removing `no-store` for logged-in users as
+		 * well. When that happens, the following if statement can be removed since core would no longer be sending
+		 * `no-store` in the first place.
 		 *
-		 * @see https://support.google.com/webmasters/answer/1061943?hl=en
+		 * If a site really wants to enforce the `no-store` directive for some reason, they can do so by making sure
+		 * that the `no-store` directive is added to the `Cache-Control` header via the `wp_headers` filter, for
+		 * example:
+		 *
+		 *     add_filter( 'wp_headers', function ( $headers ) {
+		 *         if ( isset( $headers['Cache-Control'] ) ) {
+		 *             $directives = preg_split( ':\s*,\s*:', trim( $headers['Cache-Control'] ) );
+		 *             if ( in_array( 'private', $directives, true ) ) {
+		 *                 $headers['Cache-Control'] = join(
+		 *                     ', ',
+		 *                     array_unique(
+		 *                         array_merge(
+		 *                             $directives,
+		 *                             array( 'no-store' )
+		 *                         )
+		 *                     )
+		 *                 );
+		 *             }
+		 *         }
+		 *         return $headers;
+		 *     } );
 		 */
-		if ( false !== strpos( $agent, 'googleweblight' ) ) {
-			// no-transform: Opt-out of Google weblight. https://support.google.com/webmasters/answer/6211428?hl=en.
-			$set_cache = true;
+		if ( ! is_user_logged_in() ) {
+			$new_directives = array_diff( $new_directives, array( 'no-store' ) );
 		}
 
-		if ( false !== strpos( $agent, 'Chrome' ) && isset( $wp_query ) && is_cart() ) {
-			$set_cache = true;
-		}
+		$headers['Cache-Control'] = implode( ', ', array_unique( array_merge( $old_directives, $new_directives ) ) );
 
-		if ( $set_cache ) {
-			$headers['Cache-Control'] = 'no-transform, no-cache, no-store, must-revalidate';
-		}
 		return $headers;
 	}
 
@@ -144,27 +187,12 @@ class WC_Cache_Helper {
 	}
 
 	/**
-	 * Prevent caching on certain pages
-	 */
-	public static function prevent_caching() {
-		if ( ! is_blog_installed() ) {
-			return;
-		}
-		$page_ids = array_filter( array( wc_get_page_id( 'cart' ), wc_get_page_id( 'checkout' ), wc_get_page_id( 'myaccount' ) ) );
-
-		if ( is_page( $page_ids ) ) {
-			self::set_nocache_constants();
-			nocache_headers();
-		}
-	}
-
-	/**
 	 * When using geolocation via ajax, to bust cache, redirect if the location hash does not equal the querystring.
 	 *
 	 * This prevents caching of the wrong data for this request.
 	 */
 	public static function geolocation_ajax_redirect() {
-		if ( 'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' ) && ! is_checkout() && ! is_cart() && ! is_account_page() && ! wp_doing_ajax() && empty( $_POST ) ) { // WPCS: CSRF ok, input var ok.
+		if ( DefaultCustomerAddress::GEOLOCATION_AJAX === get_option( 'woocommerce_default_customer_address' ) && ! is_checkout() && ! is_cart() && ! is_account_page() && ! is_robots() && ! wp_doing_ajax() && empty( $_POST ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$location_hash = self::geolocation_ajax_get_location_hash();
 			$current_hash  = isset( $_GET['v'] ) ? wc_clean( wp_unslash( $_GET['v'] ) ) : ''; // WPCS: sanitization ok, input var ok, CSRF ok.
 			if ( empty( $current_hash ) || $current_hash !== $location_hash ) {
@@ -200,7 +228,7 @@ class WC_Cache_Helper {
 	 *    ensuring we update the cookie any time the billing country is changed.
 	 */
 	public static function update_geolocation_hash() {
-		if ( 'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' ) ) {
+		if ( DefaultCustomerAddress::GEOLOCATION_AJAX === get_option( 'woocommerce_default_customer_address' ) ) {
 			wc_setcookie( 'woocommerce_geo_hash', static::geolocation_ajax_get_location_hash(), time() + HOUR_IN_SECONDS );
 		}
 	}

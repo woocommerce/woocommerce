@@ -10,6 +10,7 @@ import { useCollectionData } from '@woocommerce/base-context/hooks';
 import { __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
 import { getSetting } from '@woocommerce/settings';
+import type { SelectableItemsContext } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -17,6 +18,7 @@ import { getSetting } from '@woocommerce/settings';
 import { InitialDisabled } from '../../components/initial-disabled';
 import { Inspector } from './inspector';
 import type { EditProps } from './types';
+import type { FilterItemFields } from '../../types';
 
 const Edit = ( props: EditProps ) => {
 	const { showCounts, hideEmpty } = props.attributes;
@@ -27,8 +29,8 @@ const Edit = ( props: EditProps ) => {
 				[
 					'core/heading',
 					{
-						level: 4,
-						content: __( 'Status', 'woocommerce' ),
+						level: 3,
+						content: __( 'Availability', 'woocommerce' ),
 						style: {
 							spacing: {
 								margin: {
@@ -57,6 +59,14 @@ const Edit = ( props: EditProps ) => {
 
 	const items = useMemo( () => {
 		return Object.entries( stockStatusOptions )
+			.filter( ( [ key ] ) => {
+				if ( ! hideEmpty ) return true;
+				const count =
+					filteredCounts?.stock_status_counts?.find(
+						( item ) => item.status === key
+					)?.count ?? 0;
+				return count > 0;
+			} )
 			.map( ( [ key, value ], index ) => {
 				const count =
 					filteredCounts?.stock_status_counts?.find(
@@ -64,16 +74,15 @@ const Edit = ( props: EditProps ) => {
 					)?.count ?? 0;
 
 				return {
+					label: value,
+					ariaLabel: value,
 					value: key,
-					label: showCounts
-						? `${ value } (${ count.toString() })`
-						: value,
-					count,
 					selected: index === 0,
+					...( showCounts && { count } ),
+					type: 'status',
 				};
-			} )
-			.filter( ( item ) => ! hideEmpty || item.count > 0 );
-	}, [ stockStatusOptions, filteredCounts, showCounts, hideEmpty ] );
+			} );
+	}, [ stockStatusOptions, filteredCounts, hideEmpty, showCounts ] );
 
 	return (
 		<div { ...innerBlocksProps }>
@@ -81,10 +90,12 @@ const Edit = ( props: EditProps ) => {
 			<InitialDisabled>
 				<BlockContextProvider
 					value={ {
-						filterData: {
+						'woocommerce/selectableItems': {
 							items,
+							selectionMode: 'multiple' as const,
+							storeNamespace: 'woocommerce/product-filters',
 							isLoading,
-						},
+						} satisfies SelectableItemsContext< FilterItemFields >,
 					} }
 				>
 					{ children }

@@ -12,8 +12,8 @@ use Automattic\WooCommerce\StoreApi\Schemas\V1\CartSchema;
 use Automattic\WooCommerce\StoreApi\SessionHandler;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
-use Automattic\WooCommerce\StoreApi\Utilities\JsonWebToken;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
+use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 
 /**
  * Abstract Cart Route
@@ -111,6 +111,8 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * @return \WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
+		$this->load_cart_session( $request );
+
 		$response    = null;
 		$nonce_check = $this->requires_nonce( $request ) ? $this->check_nonce( $request ) : null;
 
@@ -156,8 +158,28 @@ abstract class AbstractCartRoute extends AbstractRoute {
 		$response->header( 'User-ID', get_current_user_id() );
 		$response->header( 'Cart-Token', $this->get_cart_token() );
 		$response->header( 'Cart-Hash', WC()->cart->get_cart_hash() );
+		$response->header( 'Cache-Control', 'no-store' );
 
 		return $response;
+	}
+
+	/**
+	 * Load the cart session before handling responses.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 */
+	protected function load_cart_session( \WP_REST_Request $request ) {
+		if ( $this->has_cart_token( $request ) ) {
+			// Overrides the core session class.
+			add_filter(
+				'woocommerce_session_handler',
+				function () {
+					return SessionHandler::class;
+				}
+			);
+		}
+		$this->cart_controller->load_cart();
+		$this->cart_controller->normalize_cart();
 	}
 
 	/**
@@ -176,50 +198,20 @@ abstract class AbstractCartRoute extends AbstractRoute {
 			return null;
 		}
 
-		return JsonWebToken::create(
-			[
-				'user_id' => wc()->session->get_customer_id(),
-				'exp'     => $this->get_cart_token_expiration(),
-				'iss'     => $this->namespace,
-			],
-			$this->get_cart_token_secret()
-		);
-	}
-
-	/**
-	 * Gets the secret for the cart token using wp_salt.
-	 *
-	 * @return string
-	 */
-	protected function get_cart_token_secret() {
-		return '@' . wp_salt();
-	}
-
-	/**
-	 * Gets the expiration of the cart token. Defaults to 48h.
-	 *
-	 * @return int
-	 */
-	protected function get_cart_token_expiration() {
-		/**
-		 * Filters the session expiration.
-		 *
-		 * @since 8.7.0
-		 *
-		 * @param int $expiration Expiration in seconds.
-		 */
-		return time() + intval( apply_filters( 'wc_session_expiration', DAY_IN_SECONDS * 2 ) );
+		return CartTokenUtils::get_cart_token( (string) wc()->session->get_customer_id() );
 	}
 
 	/**
 	 * Checks if the request has a valid cart token.
 	 *
-	 * @param \WP_REST_Request $request Request object.
+	 * Reads the outer HTTP header, not `$request` one, to avoid conflicting cart tokens on a batch request.
+	 *
+	 * @param \WP_REST_Request $request Request object. Unused here; kept for subclasses.
 	 * @return bool
 	 */
 	protected function has_cart_token( \WP_REST_Request $request ) {
 		if ( is_null( $this->has_cart_token ) ) {
-			$this->has_cart_token = JsonWebToken::validate( $request->get_header( 'Cart-Token' ) ?? '', $this->get_cart_token_secret() );
+			$this->has_cart_token = CartTokenUtils::validate_cart_token( CartTokenUtils::get_request_cart_token() );
 		}
 		return $this->has_cart_token;
 	}

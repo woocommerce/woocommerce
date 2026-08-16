@@ -29,9 +29,10 @@ class CartLink extends AbstractBlock {
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 		$icon               = MiniCartUtils::get_svg_icon( $attributes['cartIcon'] ?? '' );
 		$text               = array_key_exists( 'content', $attributes ) ? esc_html( $attributes['content'] ) : esc_html__( 'Cart', 'woocommerce' );
+		$aria_label         = empty( $text ) ? sprintf( ' aria-label="%s"', esc_attr__( 'Cart', 'woocommerce' ) ) : '';
 
 		return sprintf(
-			'<div %1$s><a class="wc-block-cart-link" href="%2$s">%3$s<span class="wc-block-cart-link__text">%4$s</span></a></div>',
+			'<div %1$s><a class="wc-block-cart-link" href="%2$s"%5$s>%3$s<span class="wc-block-cart-link__text">%4$s</span></a></div>',
 			get_block_wrapper_attributes(
 				array(
 					'class' => esc_attr( $classes_and_styles['classes'] ),
@@ -40,7 +41,8 @@ class CartLink extends AbstractBlock {
 			),
 			esc_url( wc_get_cart_url() ),
 			$icon,
-			$text
+			$text,
+			$aria_label
 		);
 	}
 

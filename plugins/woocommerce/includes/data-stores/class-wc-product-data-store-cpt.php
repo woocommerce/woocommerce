@@ -6,6 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Caches\ProductCache;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
@@ -71,6 +72,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		'_thumbnail_id',
 		'_file_paths',
 		'_product_image_gallery',
+		'_wc_video_gallery',
 		'_product_version',
 		'_wp_old_slug',
 		'_edit_last',
@@ -195,6 +197,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * @param WC_Product $product Product object.
 	 * @throws Exception If SKU is already under processing.
+	 * @return void
 	 */
 	public function create( &$product ) {
 		if ( ! $product->get_date_created( 'edit' ) ) {
@@ -266,6 +269,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * @param WC_Product $product Product object.
 	 * @throws Exception If invalid product.
+	 * @return void
 	 */
 	public function read( &$product ) {
 		$product->set_defaults();
@@ -314,6 +318,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Method to update a product in the database.
 	 *
 	 * @param WC_Product $product Product object.
+	 * @return void
 	 */
 	public function update( &$product ) {
 		$product->save_meta_data();
@@ -437,6 +442,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * @param WC_Product $product Product object.
 	 * @since 3.0.0
+	 * @return void
 	 */
 	protected function read_product_data( &$product ) {
 		$id                = $product->get_id();
@@ -486,6 +492,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$set_props['category_ids']      = $this->get_term_ids( $product, 'product_cat' );
 		$set_props['tag_ids']           = $this->get_term_ids( $product, 'product_tag' );
+		$set_props['brand_ids']         = $this->get_term_ids( $product, 'product_brand' );
 		$set_props['shipping_class_id'] = current( $this->get_term_ids( $product, 'product_shipping_class' ) );
 		$set_props['gallery_image_ids'] = array_filter( explode( ',', $set_props['gallery_image_ids'] ?? '' ) );
 
@@ -500,6 +507,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Load the Cost of Goods Sold related data for a given product.
 	 *
 	 * @param WC_Product $product The product to apply the loaded data to.
+	 * @return void
 	 */
 	protected function load_cogs_data( $product ) {
 		$cogs_value = get_post_meta( $product->get_id(), '_cogs_total_value', true );
@@ -523,6 +531,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * @param WC_Product $product Product object.
 	 * @param int|float  $new_stock New stock level if already read.
+	 * @return void
 	 */
 	public function read_stock_quantity( &$product, $new_stock = null ) {
 		$object_read = $product->get_object_read();
@@ -536,6 +545,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * @param WC_Product $product Product object.
 	 * @since 3.0.0
+	 * @return void
 	 */
 	protected function read_extra_data( &$product ) {
 		foreach ( $product->get_extra_data_keys() as $key ) {
@@ -552,6 +562,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * @param WC_Product $product Product object.
 	 * @since 3.0.0
+	 * @return void
 	 */
 	protected function read_visibility( &$product ) {
 		$terms           = get_the_terms( $product->get_id(), 'product_visibility' );
@@ -582,9 +593,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Read attributes from post meta.
 	 *
 	 * @param WC_Product $product Product object.
+	 * @return void
 	 */
 	protected function read_attributes( &$product ) {
-		$meta_attributes = get_post_meta( $product->get_id(), '_product_attributes', true );
+		$product_id      = $product->get_id();
+		$meta_attributes = get_post_meta( $product_id, '_product_attributes', true );
 
 		if ( ! empty( $meta_attributes ) && is_array( $meta_attributes ) ) {
 			$attributes = array();
@@ -607,7 +620,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 						continue;
 					}
 					$id      = wc_attribute_taxonomy_id_by_name( $meta_value['name'] );
-					$options = wc_get_object_terms( $product->get_id(), $meta_value['name'], 'term_id' );
+					$options = wc_get_object_terms( $product_id, $meta_value['name'], 'term_id' );
 				} else {
 					$id      = 0;
 					$options = wc_get_text_attributes( $meta_value['value'] );
@@ -620,7 +633,17 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				$attribute->set_position( $meta_value['position'] );
 				$attribute->set_visible( $meta_value['is_visible'] );
 				$attribute->set_variation( $meta_value['is_variation'] );
-				$attributes[] = $attribute;
+
+				/**
+				 * Filter product attribute after initialization.
+				 *
+				 * @since 10.6.0
+				 *
+				 * @param WC_Product_Attribute $attribute  The attribute object.
+				 * @param array                $meta_value The meta value.
+				 * @param WC_Product           $product    The product object.
+				 */
+				$attributes[] = apply_filters( 'woocommerce_product_read_attribute', $attribute, $meta_value, $product );
 			}
 			$product->set_attributes( $attributes );
 		}
@@ -631,24 +654,74 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * @param WC_Product $product Product object.
 	 * @since 3.0.0
+	 * @return void
 	 */
 	protected function read_downloads( &$product ) {
 		$meta_values = array_filter( (array) get_post_meta( $product->get_id(), '_downloadable_files', true ) );
 
 		if ( $meta_values ) {
 			$downloads = array();
-			foreach ( $meta_values as $key => $value ) {
-				if ( ! isset( $value['name'], $value['file'] ) ) {
+			foreach ( $meta_values as $key => $meta_value ) {
+				if ( ! isset( $meta_value['name'], $meta_value['file'] ) ) {
 					continue;
 				}
 				$download = new WC_Product_Download();
 				$download->set_id( $key );
-				$download->set_name( $value['name'] ? $value['name'] : wc_get_filename_from_url( $value['file'] ) );
-				$download->set_file( apply_filters( 'woocommerce_file_download_path', $value['file'], $product, $key ) );
-				$downloads[] = $download;
+				$download->set_name( $meta_value['name'] ? $meta_value['name'] : wc_get_filename_from_url( $meta_value['file'] ) );
+
+				/**
+				 * Filter for the path of the downloadable file.
+				 *
+				 * @since 2.1.0
+				 *
+				 * @param string     $file    The file path.
+				 * @param WC_Product $product The product object.
+				 * @param string     $key     The download key.
+				 */
+				$download->set_file( apply_filters( 'woocommerce_file_download_path', $meta_value['file'], $product, $key ) );
+
+				/**
+				 * Filter product download after initialization.
+				 *
+				 * @since 10.6.0
+				 *
+				 * @param WC_Product_Download $download   The attribute object.
+				 * @param array               $meta_value The meta value.
+				 * @param WC_Product          $product    The product object.
+				 */
+				$downloads[] = apply_filters( 'woocommerce_product_read_download', $download, $meta_value, $product );
 			}
 			$product->set_downloads( $downloads );
 		}
+	}
+
+	/**
+	 * Update meta data in, or delete it from, the database.
+	 *
+	 * Avoids storing meta when it's either an empty string or empty array.
+	 * Other empty values such as numeric 0 and null should still be stored.
+	 * Data-stores can force meta to exist using `must_exist_meta_keys`.
+	 *
+	 * Note: WordPress `get_metadata` function returns an empty string when meta data does not exist.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param WC_Data $product    The WP_Data object (product).
+	 * @param string  $meta_key   Meta key to update.
+	 * @param mixed   $meta_value Value to save.
+	 *
+	 * @return bool
+	 */
+	protected function update_or_delete_post_meta( $product, $meta_key, $meta_value ) {
+		// Performance note: overrides \WC_Data_Store_WP::update_or_delete_post_meta — adds metadata_exists() guard to skip DELETE when meta is absent.
+		$product_id = $product->get_id();
+		if ( in_array( $meta_value, array( array(), '' ), true ) && ! in_array( $meta_key, $this->must_exist_meta_keys, true ) ) {
+			$updated = metadata_exists( 'post', $product_id, $meta_key ) && delete_post_meta( $product_id, $meta_key );
+		} else {
+			$updated = update_post_meta( $product_id, $meta_key, $meta_value );
+		}
+
+		return (bool) $updated;
 	}
 
 	/**
@@ -657,6 +730,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @param WC_Product $product Product object.
 	 * @param bool       $force Force update. Used during create.
 	 * @since 3.0.0
+	 * @return void
 	 */
 	protected function update_post_meta( &$product, $force = false ) {
 		$meta_key_to_props = array(
@@ -803,6 +877,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * @since 3.0.0
 	 * @param WC_Product $product Product Object.
+	 * @return void
 	 */
 	protected function handle_updated_props( &$product ) {
 		$price_is_synced = $product->is_type( array( ProductType::VARIABLE, ProductType::GROUPED ) );
@@ -898,11 +973,23 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	}
 
 	/**
+	 * Refresh the product meta lookup table row for a given product.
+	 *
+	 * @since 10.8.0
+	 * @param int $product_id Product ID.
+	 * @return void
+	 */
+	public function refresh_product_lookup_table( int $product_id ): void {
+		$this->update_lookup_table( $product_id, 'wc_product_meta_lookup' );
+	}
+
+	/**
 	 * For all stored terms in all taxonomies, save them to the DB.
 	 *
 	 * @param WC_Product $product Product object.
 	 * @param bool       $force Force update. Used during create.
 	 * @since 3.0.0
+	 * @return void
 	 */
 	protected function update_terms( &$product, $force = false ) {
 		$changes = $product->get_changes();
@@ -919,11 +1006,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		if ( $force || array_key_exists( 'tag_ids', $changes ) ) {
 			wp_set_post_terms( $product->get_id(), $product->get_tag_ids( 'edit' ), 'product_tag', false );
 		}
+		if ( $force || array_key_exists( 'brand_ids', $changes ) ) {
+			wp_set_post_terms( $product->get_id(), $product->get_brand_ids( 'edit' ), 'product_brand', false );
+		}
 		if ( $force || array_key_exists( 'shipping_class_id', $changes ) ) {
 			wp_set_post_terms( $product->get_id(), array( $product->get_shipping_class_id( 'edit' ) ), 'product_shipping_class', false );
 		}
-
-		_wc_recount_terms_by_product( $product->get_id() );
 	}
 
 	/**
@@ -933,6 +1021,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * @param WC_Product $product Product object.
 	 * @param bool       $force Force update. Used during create.
+	 * @return void
 	 */
 	protected function update_visibility( &$product, $force = false ) {
 		$changes = $product->get_changes();
@@ -979,6 +1068,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @param WC_Product $product Product object.
 	 * @param bool       $force Force update. Used during create.
 	 * @since 3.0.0
+	 * @return void
 	 */
 	protected function update_attributes( &$product, $force = false ) {
 		$changes = $product->get_changes();
@@ -1008,18 +1098,30 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					}
 
 					// Store in format WC uses in meta.
-					$meta_values[ $attribute_key ] = array(
-						'name'         => $attribute->get_name(),
-						'value'        => $value,
-						'position'     => $attribute->get_position(),
-						'is_visible'   => $attribute->get_visible() ? 1 : 0,
-						'is_variation' => $attribute->get_variation() ? 1 : 0,
-						'is_taxonomy'  => $attribute->is_taxonomy() ? 1 : 0,
+					$meta_values[ $attribute_key ] = array_merge(
+						$attribute->get_all_extra_data(),
+						array(
+							'name'         => $attribute->get_name(),
+							'value'        => $value,
+							'position'     => $attribute->get_position(),
+							'is_visible'   => $attribute->get_visible() ? 1 : 0,
+							'is_variation' => $attribute->get_variation() ? 1 : 0,
+							'is_taxonomy'  => $attribute->is_taxonomy() ? 1 : 0,
+						),
 					);
 				}
 			}
 			// Note, we use wp_slash to add extra level of escaping. See https://codex.wordpress.org/Function_Reference/update_post_meta#Workaround.
 			$this->update_or_delete_post_meta( $product, '_product_attributes', wp_slash( $meta_values ) );
+
+			/**
+			 * Fires after WooCommerce product attributes have been updated.
+			 *
+			 * @since 10.2.0
+			 * @param WC_Product $product The product object whose attributes were updated.
+			 * @param bool $force Indicates if the update was forced.
+			 */
+			do_action( 'woocommerce_product_attributes_updated', $product, $force );
 		}
 	}
 
@@ -1059,15 +1161,25 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Make sure we store the product type and version (to track data changes).
 	 *
-	 * @param WC_Product $product Product object.
+	 * @since 11.2.0 Skips wp_set_object_terms() when the stored product type term already matches to avoid unnecessary term cache invalidation.
 	 * @since 3.0.0
+	 *
+	 * @param WC_Product $product Product object.
+	 * @return void
 	 */
 	protected function update_version_and_type( &$product ) {
-		$old_type = WC_Product_Factory::get_product_type( $product->get_id() );
-		$new_type = $product->get_type();
+		$product_id        = $product->get_id();
+		$old_type          = \WC_Product_Factory::get_product_type( $product_id );
+		$new_type          = $product->get_type();
+		$stored_type_terms = get_the_terms( $product_id, 'product_type' );
+		$stored_type_slug  = ! empty( $stored_type_terms ) && is_array( $stored_type_terms ) ? $stored_type_terms[0]->slug : null;
 
-		wp_set_object_terms( $product->get_id(), $new_type, 'product_type' );
-		update_post_meta( $product->get_id(), '_product_version', Constants::get_constant( 'WC_VERSION' ) );
+		// Skip wp_set_object_terms() when the stored term already matches — it always clears the term cache even on no-op writes.
+		if ( $stored_type_slug !== $new_type ) {
+			wp_set_object_terms( $product_id, $new_type, 'product_type' );
+		}
+
+		update_post_meta( $product_id, '_product_version', Constants::get_constant( 'WC_VERSION' ) );
 
 		// Action for the transition.
 		if ( $old_type !== $new_type ) {
@@ -1081,6 +1193,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * @param WC_Product $product Product object.
 	 * @since 3.0.0
+	 * @return void
 	 */
 	protected function clear_caches( &$product ) {
 		wc_delete_product_transients( $product->get_id() );
@@ -1090,6 +1203,19 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 		WC_Cache_Helper::invalidate_attribute_count( array_keys( $product->get_attributes() ) );
 		WC_Cache_Helper::invalidate_cache_group( 'product_' . $product->get_id() );
+
+		// Clear product object cache last, as operations above may call wc_get_product() and re-cache.
+		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_instance_caching' ) ) {
+			$product_cache = wc_get_container()->get( ProductCache::class );
+			$product_cache->remove( $product->get_id() );
+
+			// Also clear parent's cache if this is a variation, as operations above may have cached
+			// the parent with stale children data.
+			$parent_id = $product->get_parent_id( 'edit' );
+			if ( $parent_id ) {
+				$product_cache->remove( $parent_id );
+			}
+		}
 	}
 
 	/*
@@ -1475,21 +1601,41 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			return $count;
 		}
 
-		$attributes = wc_list_pluck( array_filter( $product->get_attributes(), 'wc_attributes_array_filter_variation' ), 'get_slugs' );
+		$variation_attributes = array_filter( $product->get_attributes(), 'wc_attributes_array_filter_variation' );
+		$attributes           = array();
+
+		foreach ( $variation_attributes as $attribute_key => $attribute ) {
+			if ( $attribute->is_taxonomy() && taxonomy_exists( $attribute->get_name() ) ) {
+				// Respect the attribute's configured term order (e.g. custom "menu_order") instead of
+				// the alphabetical order returned from the cached object terms. See get_slugs(), which
+				// preserves the order of the options read in read_attributes() via wc_get_object_terms().
+				$attributes[ $attribute_key ] = wc_get_product_terms( $product->get_id(), $attribute->get_name(), array( 'fields' => 'slugs' ) );
+			} else {
+				$attributes[ $attribute_key ] = $attribute->get_slugs();
+			}
+		}
 
 		if ( empty( $attributes ) ) {
 			return $count;
 		}
 
-		// Get existing variations so we don't create duplicates.
-		$existing_variations = array_map( 'wc_get_product', $product->get_children() );
 		$existing_attributes = array();
 
-		foreach ( $existing_variations as $existing_variation ) {
-			$existing_attributes[] = $existing_variation->get_attributes();
+		$child_ids = $product->get_children();
+		if ( ! empty( $child_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $child_ids );
+			// Get existing variations so we don't create duplicates.
+			foreach ( $child_ids as $child_id ) {
+				$child = wc_get_product( $child_id );
+				if ( $child ) {
+					$existing_attributes[] = $child->get_attributes();
+				}
+			}
 		}
 
 		$possible_attributes = array_reverse( wc_array_cartesian( $attributes ) );
+		$product_id          = $product->get_id();
 
 		foreach ( $possible_attributes as $possible_attribute ) {
 			// Allow any order if key/values -- do not use strict mode.
@@ -1501,7 +1647,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			foreach ( $metadata as $meta ) {
 				$variation->add_meta_data( $meta['key'], $meta['value'] );
 			}
-			$variation->set_parent_id( $product->get_id() );
+			$variation->set_parent_id( $product_id );
 			$variation->set_attributes( $possible_attribute );
 			$variation_id = $variation->save();
 
@@ -1521,22 +1667,25 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Make sure all variations have a sort order set so they can be reordered correctly.
 	 *
 	 * @param int $parent_id Product ID.
+	 * @return void
 	 */
 	public function sort_all_product_variations( $parent_id ) {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
+		$index = 1;
 		$ids   = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT ID FROM {$wpdb->posts} WHERE post_type = 'product_variation' AND post_parent = %d AND post_status in ( 'publish', 'private' ) ORDER BY menu_order ASC, ID ASC",
 				$parent_id
 			)
 		);
-		$index = 1;
 
 		foreach ( $ids as $id ) {
-			// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
-			$wpdb->update( $wpdb->posts, array( 'menu_order' => ( $index++ ) ), array( 'ID' => absint( $id ) ) );
+			$product_id = absint( $id );
+			$updated    = (bool) $wpdb->update( $wpdb->posts, array( 'menu_order' => ( $index++ ) ), array( 'ID' => $product_id ) );
+			if ( $updated ) {
+				clean_post_cache( $product_id );
+			}
 		}
 	}
 
@@ -1633,14 +1782,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * @param int            $product_id_with_stock Product ID.
 	 * @param int|float|null $stock_quantity        Stock quantity.
+	 * @return void
 	 */
 	protected function set_product_stock( $product_id_with_stock, $stock_quantity ) {
 		global $wpdb;
 
 		// Generate SQL.
 		$sql = $wpdb->prepare(
-			"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'",
-			$stock_quantity,
+			"UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE post_id = %d AND meta_key='_stock'",
+			number_format( (float) $stock_quantity, WC_ROUNDING_PRECISION, '.', '' ),
 			$product_id_with_stock
 		);
 
@@ -1679,8 +1829,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 			// Generate SQL.
 			$sql = $wpdb->prepare(
-				"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'",
-				$new_stock,
+				"UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE post_id = %d AND meta_key='_stock'",
+				number_format( (float) $new_stock, WC_ROUNDING_PRECISION, '.', '' ),
 				$product_id_with_stock
 			);
 		} else {
@@ -1743,6 +1893,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @param  int      $product_id Product ID.
 	 * @param  int|null $quantity Quantity.
 	 * @param  string   $operation set, increase and decrease.
+	 * @return void
 	 */
 	public function update_product_sales( $product_id, $quantity = null, $operation = 'set' ) {
 		global $wpdb;
@@ -1774,8 +1925,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 				$wpdb->query(
 					$wpdb->prepare(
-						"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='total_sales'",
-						$quantity,
+						"UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE post_id = %d AND meta_key='total_sales'",
+						number_format( (float) $quantity, WC_ROUNDING_PRECISION, '.', '' ),
 						$product_id
 					)
 				);
@@ -1801,6 +1952,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @since 3.0.0
 	 * @todo Deprecate unused function?
 	 * @param WC_Product $product Product object.
+	 * @return void
 	 */
 	public function update_average_rating( $product ) {
 		update_post_meta( $product->get_id(), '_wc_average_rating', $product->get_average_rating( 'edit' ) );
@@ -1813,6 +1965,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @since 3.0.0
 	 * @todo Deprecate unused function?
 	 * @param WC_Product $product Product object.
+	 * @return void
 	 */
 	public function update_review_count( $product ) {
 		update_post_meta( $product->get_id(), '_wc_review_count', $product->get_review_count( 'edit' ) );
@@ -1824,6 +1977,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @since 3.0.0
 	 * @todo Deprecate unused function?
 	 * @param WC_Product $product Product object.
+	 * @return void
 	 */
 	public function update_rating_counts( $product ) {
 		update_post_meta( $product->get_id(), '_wc_rating_count', $product->get_rating_counts( 'edit' ) );
@@ -1925,38 +2079,43 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				$search_terms = array( $term_group );
 			}
 
-			$term_group_query = '';
-			$searchand        = '';
+			$term_group_query = array();
 
 			foreach ( $search_terms as $search_term ) {
 				$like = '%' . $wpdb->esc_like( $search_term ) . '%';
 
+				// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- an array of placeholders is a valid arg.
+				$term_query = $wpdb->prepare(
+					'( posts.post_title LIKE %s ) OR ( posts.post_excerpt LIKE %s ) OR ( posts.post_content LIKE %s ) OR ( wc_product_meta_lookup.sku LIKE %s ) OR ( wc_product_meta_lookup.global_unique_id LIKE %s )',
+					array_fill( 0, 5, $like )
+				);
+
 				// Variations should also search the parent's meta table for fallback fields.
 				if ( $include_variations ) {
-					$variation_query = $wpdb->prepare( " OR ( wc_product_meta_lookup.sku = '' AND parent_wc_product_meta_lookup.sku LIKE %s ) ", $like );
-				} else {
-					$variation_query = '';
+					$term_query .= $wpdb->prepare( " OR ( wc_product_meta_lookup.sku = '' AND parent_wc_product_meta_lookup.sku LIKE %s )", $like );
+					$term_query .= $wpdb->prepare( " OR ( wc_product_meta_lookup.global_unique_id = '' AND parent_wc_product_meta_lookup.global_unique_id LIKE %s )", $like );
 				}
 
-				$term_group_query .= $wpdb->prepare( " {$searchand} ( ( posts.post_title LIKE %s) OR ( posts.post_excerpt LIKE %s) OR ( posts.post_content LIKE %s ) OR ( wc_product_meta_lookup.sku LIKE %s ) $variation_query)", $like, $like, $like, $like ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$searchand         = ' AND ';
+				$term_group_query[] = "( {$term_query} )";
 			}
 
 			if ( $term_group_query ) {
-				$search_queries[] = $term_group_query;
+				$search_queries[] = implode( ' AND ', $term_group_query );
 			}
 		}
 
 		if ( ! empty( $search_queries ) ) {
-			$search_where = ' AND (' . implode( ') OR (', $search_queries ) . ') ';
+			$search_where = ' AND ((' . implode( ') OR (', $search_queries ) . ')) ';
 		}
 
 		if ( ! empty( $include ) && is_array( $include ) ) {
 			$search_where .= ' AND posts.ID IN(' . implode( ',', array_map( 'absint', $include ) ) . ') ';
 		}
 
-		if ( ! empty( $exclude ) && is_array( $exclude ) ) {
-			$search_where .= ' AND posts.ID NOT IN(' . implode( ',', array_map( 'absint', $exclude ) ) . ') ';
+		$exclude_ids = ! empty( $exclude ) && is_array( $exclude ) ? array_filter( array_map( 'absint', $exclude ) ) : array();
+
+		if ( $exclude_ids ) {
+			$search_where .= ' AND posts.ID NOT IN(' . implode( ',', $exclude_ids ) . ') ';
 		}
 
 		if ( 'virtual' === $type ) {
@@ -1973,10 +2132,18 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$limit_query = $wpdb->prepare( ' LIMIT %d ', $limit );
 		}
 
+		// A matching variation contributes its parent ID, so excluded parents are discarded here
+		// rather than reintroduced alongside the variation.
+		$parent_id_select = 'posts.post_parent as parent_id';
+
+		if ( $exclude_ids ) {
+			$parent_id_select = 'CASE WHEN posts.post_parent IN(' . implode( ',', $exclude_ids ) . ') THEN NULL ELSE posts.post_parent END as parent_id';
+		}
+
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 		$search_results = $wpdb->get_results(
 			// phpcs:disable
-			"SELECT DISTINCT posts.ID as product_id, posts.post_parent as parent_id FROM {$wpdb->posts} posts
+			"SELECT DISTINCT posts.ID as product_id, {$parent_id_select} FROM {$wpdb->posts} posts
 			 LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON posts.ID = wc_product_meta_lookup.product_id
 			 $join_query
 			WHERE posts.post_type IN ('" . implode( "','", $post_types ) . "')
@@ -1995,13 +2162,21 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$post_id   = absint( $term );
 			$post_type = get_post_type( $post_id );
 
-			if ( 'product_variation' === $post_type && $include_variations ) {
-				$product_ids[] = $post_id;
-			} elseif ( 'product' === $post_type ) {
-				$product_ids[] = $post_id;
+			// A numeric term bypasses the query above, so the exclusion is applied to both the
+			// searched ID and its parent before either is appended.
+			if ( ! in_array( $post_id, $exclude_ids, true ) ) {
+				if ( 'product_variation' === $post_type && $include_variations ) {
+					$product_ids[] = $post_id;
+				} elseif ( 'product' === $post_type ) {
+					$product_ids[] = $post_id;
+				}
 			}
 
-			$product_ids[] = wp_get_post_parent_id( $post_id );
+			$parent_id = absint( wp_get_post_parent_id( $post_id ) );
+
+			if ( ! in_array( $parent_id, $exclude_ids, true ) ) {
+				$product_ids[] = $parent_id;
+			}
 		}
 
 		return wp_parse_id_list( $product_ids );

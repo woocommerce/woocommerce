@@ -10,7 +10,6 @@ import {
 } from '@woocommerce/blocks/product-collection/constants';
 import {
 	createBlock,
-	// @ts-expect-error Type definitions for this function are missing in Gutenberg
 	createBlocksFromInnerBlocksTemplate,
 	type BlockInstance,
 } from '@wordpress/blocks';
@@ -64,11 +63,7 @@ const getBlockifiedTemplateWithTermDescription = (
 	inheritedAttributes: InheritedAttributes
 ) => getBlockifiedTemplate( inheritedAttributes, true );
 
-const isConversionPossible = () => {
-	return true;
-};
-
-const getDescriptionAllowingConversion = ( templateTitle: string ) =>
+const getDescription = ( templateTitle: string ) =>
 	sprintf(
 		/* translators: %s is the template title */
 		__(
@@ -77,24 +72,6 @@ const getDescriptionAllowingConversion = ( templateTitle: string ) =>
 		),
 		templateTitle
 	);
-
-const getDescriptionDisallowingConversion = ( templateTitle: string ) =>
-	sprintf(
-		/* translators: %s is the template title */
-		__(
-			'This block serves as a placeholder for your %s. It will display the actual product image, title, price in your store. You can move this placeholder around and add more blocks around to customize the template.',
-			'woocommerce'
-		),
-		templateTitle
-	);
-
-const getDescription = ( templateTitle: string, canConvert: boolean ) => {
-	if ( canConvert ) {
-		return getDescriptionAllowingConversion( templateTitle );
-	}
-
-	return getDescriptionDisallowingConversion( templateTitle );
-};
 
 const getButtonLabel = () => __( 'Transform into blocks', 'woocommerce' );
 
@@ -161,13 +138,11 @@ const productTaxonomyBlockifyConfig = {
 };
 
 export const blockifiedProductCatalogConfig = {
-	isConversionPossible,
 	getDescription,
 	blockifyConfig: productCatalogBlockifyConfig,
 };
 
 export const blockifiedProductTaxonomyConfig = {
-	isConversionPossible,
 	getDescription,
 	blockifyConfig: productTaxonomyBlockifyConfig,
 };

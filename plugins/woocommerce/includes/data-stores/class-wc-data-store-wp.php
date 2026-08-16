@@ -256,6 +256,7 @@ class WC_Data_Store_WP {
 	 * @return bool True if updated/deleted.
 	 */
 	protected function update_or_delete_post_meta( $object, $meta_key, $meta_value ) {
+		// Performance note: see \WC_Product_Data_Store_CPT::update_or_delete_post_meta — keep both in sync.
 		if ( in_array( $meta_value, array( array(), '' ), true ) && ! in_array( $meta_key, $this->must_exist_meta_keys, true ) ) {
 			$updated = delete_post_meta( $object->get_id(), $meta_key );
 		} else {
@@ -472,25 +473,23 @@ class WC_Data_Store_WP {
 						'compare' => '<=',
 					);
 			}
-		} else {
-			if ( '...' !== $operator ) {
+		} elseif ( '...' !== $operator ) {
 				$wp_query_args['meta_query'][] = array(
 					'key'     => $key,
 					'value'   => $dates[0]->getTimestamp(),
 					'compare' => $operator,
 				);
-			} else {
-				$wp_query_args['meta_query'][] = array(
-					'key'     => $key,
-					'value'   => $dates[0]->getTimestamp(),
-					'compare' => '>=',
-				);
-				$wp_query_args['meta_query'][] = array(
-					'key'     => $key,
-					'value'   => $dates[1]->getTimestamp(),
-					'compare' => '<=',
-				);
-			}
+		} else {
+			$wp_query_args['meta_query'][] = array(
+				'key'     => $key,
+				'value'   => $dates[0]->getTimestamp(),
+				'compare' => '>=',
+			);
+			$wp_query_args['meta_query'][] = array(
+				'key'     => $key,
+				'value'   => $dates[1]->getTimestamp(),
+				'compare' => '<=',
+			);
 		}
 
 		return $wp_query_args;

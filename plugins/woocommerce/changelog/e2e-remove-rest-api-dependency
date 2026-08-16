@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-dev: remove unused dev depencency @woocommerce/woocommerce-rest-api

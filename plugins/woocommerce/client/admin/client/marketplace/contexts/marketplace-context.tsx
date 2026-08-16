@@ -12,7 +12,18 @@ import {
  * Internal dependencies
  */
 import { SearchResultsCountType, MarketplaceContextType } from './types';
-import { getAdminSetting } from '../../utils/admin-settings';
+import { LOCALE, getAdminSetting } from '../../utils/admin-settings';
+import { createStorageUtils } from '../../utils/localStorage';
+import {
+	MARKETPLACE_HOST,
+	MARKETPLACE_IAM_SETTINGS_API_PATH,
+} from '../components/constants';
+
+// Create storage utils with 24h expiration
+const iamSettingsStorage = createStorageUtils< {
+	locale: string | null | undefined;
+	settings: MarketplaceContextType[ 'iamSettings' ];
+} >( 'wc_iam_settings', 24 * 60 * 60 );
 
 export const MarketplaceContext = createContext< MarketplaceContextType >( {
 	isLoading: false,
@@ -27,13 +38,15 @@ export const MarketplaceContext = createContext< MarketplaceContextType >( {
 		'business-services': 0,
 	},
 	setSearchResultsCount: () => {},
+	iamSettings: {},
 } );
 
 export function MarketplaceContextProvider( props: {
-	children: JSX.Element;
-} ): JSX.Element {
+	children: React.JSX.Element;
+} ): React.JSX.Element {
 	const [ isLoading, setIsLoading ] = useState( true );
 	const [ selectedTab, setSelectedTab ] = useState( '' );
+	const [ iamSettings, setIamSettings ] = useState( {} );
 	const [ installedPlugins, setInstalledPlugins ] = useState< string[] >(
 		[]
 	);
@@ -53,6 +66,45 @@ export function MarketplaceContextProvider( props: {
 		},
 		[]
 	);
+
+	/**
+	 * Load IAM settings from localStorage or WCCOM. The response contains
+	 * translated copy (e.g. the quality badge tooltip), so the cache is keyed
+	 * to the locale it was fetched for.
+	 */
+	useEffect( () => {
+		const cached = iamSettingsStorage.getWithExpiry();
+		if ( cached?.settings && cached.locale === LOCALE.userLocale ) {
+			setIamSettings( cached.settings );
+			return;
+		}
+
+		let url = `${ MARKETPLACE_HOST }${ MARKETPLACE_IAM_SETTINGS_API_PATH }`;
+		if ( LOCALE.userLocale ) {
+			url += `?locale=${ LOCALE.userLocale }`;
+		}
+		fetch( url )
+			.then( ( response ) => {
+				if ( ! response.ok ) {
+					throw new Error(
+						`Network response was not ok: ${ response.statusText }`
+					);
+				}
+				return response.json();
+			} )
+			.then( ( data ) => {
+				setIamSettings( data );
+				iamSettingsStorage.setWithExpiry( {
+					locale: LOCALE.userLocale,
+					settings: data,
+				} );
+			} )
+			.catch( ( error ) => {
+				// eslint-disable-next-line no-console
+				console.error( 'Failed to fetch IAM settings:', error );
+				setIamSettings( {} ); // Fallback to an empty object
+			} );
+	}, [] );
 
 	/**
 	 * Knowing installed products will help us to determine which products
@@ -83,6 +135,7 @@ export function MarketplaceContextProvider( props: {
 		addInstalledProduct,
 		searchResultsCount,
 		setSearchResultsCount,
+		iamSettings,
 	};
 
 	return (

@@ -1,7 +1,9 @@
 ---
 post_title: Useful core functions
-tags: code-snippet
+
 ---
+
+# Useful core functions
 
 WooCommerce core functions are available on both front-end and admin. They can be found in `includes/wc-core-functions.php` and can be used by themes in plugins.
 
@@ -145,7 +147,7 @@ This function is the standard way of retrieving orders based on certain paramete
 wc_get_orders( $args )
 ```
 
-[Arguments and usage](https://github.com/woocommerce/woocommerce/wiki/wc_get_orders-and-WC_Order_Query)
+[Arguments and usage](/docs/features/orders/wc-get-orders/)
 
 ### wc_get_order
 
@@ -201,7 +203,7 @@ This function is the standard way of retrieving products based on certain parame
 wc_get_products( $args )
 ```
 
-[Arguments and usage](https://github.com/woocommerce/woocommerce/wiki/wc_get_products-and-WC_Product_Query)
+[Arguments and usage](/docs/features/products/wc-get-products/)
 
 ### wc_get_product
 

@@ -56,7 +56,7 @@ export const useStoreCartItemQuantity = (
 	const { key: cartItemKey = '', quantity: cartItemQuantity = 1 } =
 		verifiedCartItem;
 	const { cartErrors } = useStoreCart();
-	const { __internalIncrementCalculating, __internalDecrementCalculating } =
+	const { __internalStartCalculation, __internalFinishCalculation } =
 		useDispatch( checkoutStore );
 
 	// Store quantity in hook state. This is used to keep the UI updated while server request is updated.
@@ -65,9 +65,6 @@ export const useStoreCartItemQuantity = (
 	const previousDebouncedQuantity = usePrevious( debouncedQuantity );
 	const { removeItemFromCart, changeCartItemQuantity } =
 		useDispatch( cartStore );
-
-	// Update local state when server updates.
-	useEffect( () => setQuantity( cartItemQuantity ), [ cartItemQuantity ] );
 
 	// Track when things are already pending updates.
 	const isPending = useSelect(
@@ -86,6 +83,36 @@ export const useStoreCartItemQuantity = (
 		},
 		[ cartItemKey ]
 	);
+
+	// Update local state when server updates, but only if:
+	// 1. User hasn't made a change waiting to be debounced
+	// 2. No API request is currently in flight
+	// 3. No API call about to fire (debounce just caught up but thunk hasn't started)
+	// This prevents stale API responses from overwriting user's pending changes,
+	// while still allowing server-initiated changes (e.g., bundled products) to sync.
+	useEffect( () => {
+		const hasPendingLocalChange = quantity !== debouncedQuantity;
+		const hasInflightRequest = isPending.quantity;
+		// Only block if debounce JUST caught up and differs from server (about to fire API)
+		// If debounce didn't change, server must have changed cartItemQuantity → allow sync
+		const debouncedJustChanged =
+			debouncedQuantity !== previousDebouncedQuantity;
+		const aboutToFireApiCall =
+			debouncedJustChanged && debouncedQuantity !== cartItemQuantity;
+		if (
+			! hasPendingLocalChange &&
+			! hasInflightRequest &&
+			! aboutToFireApiCall
+		) {
+			setQuantity( cartItemQuantity );
+		}
+	}, [
+		cartItemQuantity,
+		quantity,
+		debouncedQuantity,
+		previousDebouncedQuantity,
+		isPending.quantity,
+	] );
 
 	const removeItem = useCallback( () => {
 		if ( cartItemKey ) {
@@ -119,35 +146,35 @@ export const useStoreCartItemQuantity = (
 
 	useEffect( () => {
 		if ( isPending.delete ) {
-			__internalIncrementCalculating();
+			__internalStartCalculation();
 		} else {
-			__internalDecrementCalculating();
+			__internalFinishCalculation();
 		}
 		return () => {
 			if ( isPending.delete ) {
-				__internalDecrementCalculating();
+				__internalFinishCalculation();
 			}
 		};
 	}, [
-		__internalDecrementCalculating,
-		__internalIncrementCalculating,
+		__internalFinishCalculation,
+		__internalStartCalculation,
 		isPending.delete,
 	] );
 
 	useEffect( () => {
 		if ( isPending.quantity || debouncedQuantity !== quantity ) {
-			__internalIncrementCalculating();
+			__internalStartCalculation();
 		} else {
-			__internalDecrementCalculating();
+			__internalFinishCalculation();
 		}
 		return () => {
 			if ( isPending.quantity || debouncedQuantity !== quantity ) {
-				__internalDecrementCalculating();
+				__internalFinishCalculation();
 			}
 		};
 	}, [
-		__internalIncrementCalculating,
-		__internalDecrementCalculating,
+		__internalStartCalculation,
+		__internalFinishCalculation,
 		isPending.quantity,
 		debouncedQuantity,
 		quantity,

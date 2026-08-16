@@ -3,13 +3,14 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Blocks;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Blocks\BlockTypes\Cart;
 use Automattic\WooCommerce\Blocks\BlockTypes\Checkout;
 use Automattic\WooCommerce\Blocks\BlockTypes\MiniCartContents;
+use Automattic\WooCommerce\Internal\Features\BlockEditorUnifiedAssets;
+use Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController;
 
 /**
  * BlockTypesController class.
@@ -41,6 +42,18 @@ final class BlockTypesController {
 	private $registered_blocks_with_woocommerce_parents;
 
 	/**
+	 * Whether register_blocks() has run in this request.
+	 *
+	 * Static because it mirrors the WordPress block-type registry, which is a process-global singleton: once
+	 * any controller has registered the blocks they are registered for the whole request, regardless of which
+	 * container instance owns the controller. Only tracks the AbstractBlock-based block types registered by
+	 * register_blocks(); blocks registered through other paths are not reflected here.
+	 *
+	 * @var bool
+	 */
+	private static $register_blocks_has_run = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param AssetApi          $asset_api Instance of the asset API.
@@ -62,7 +75,10 @@ final class BlockTypesController {
 		add_filter( 'render_block', array( $this, 'add_data_attributes' ), 10, 2 );
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
 		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
-		add_action( 'woocommerce_delete_product_transients', array( $this, 'delete_product_transients' ) );
+		add_filter( 'block_type_metadata_settings', array( $this, 'use_single_block_editor_style' ), 10, 2 );
+		add_filter( 'register_block_type_args', array( $this, 'enqueue_block_style_for_classic_themes' ), 10, 2 );
+		add_filter( 'block_core_breadcrumbs_post_type_settings', array( $this, 'set_product_breadcrumbs_preferred_taxonomy' ), 10, 3 );
+		add_filter( 'block_core_breadcrumbs_items', array( $this, 'apply_woocommerce_breadcrumb_filters' ), 10, 1 );
 	}
 
 	/**
@@ -108,6 +124,9 @@ final class BlockTypesController {
 	 * Register blocks, hooking up assets and render functions as needed.
 	 */
 	public function register_blocks() {
+		// Set before registering rather than after: it guards against re-entry through the on-demand
+		// registration in Bootstrap, and a registration failure must not be retried on later filter fires.
+		self::$register_blocks_has_run = true;
 		$this->register_block_metadata();
 		$block_types = $this->get_block_types();
 
@@ -116,6 +135,22 @@ final class BlockTypesController {
 
 			new $block_type_class( $this->asset_api, $this->asset_data_registry, new IntegrationRegistry() );
 		}
+	}
+
+	/**
+	 * Whether register_blocks() has run in this request.
+	 *
+	 * Covers only the AbstractBlock-based block types that register_blocks() registers — blocks registered
+	 * through other paths are not tracked. Used by the on-demand registration on the
+	 * woocommerce_short_description filter (see Bootstrap::maybe_register_blocks_from_content) to avoid
+	 * re-registering the block set when eager registration already ran on init.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @return bool True if register_blocks() has already run.
+	 */
+	public function register_blocks_has_run() {
+		return self::$register_blocks_has_run;
 	}
 
 	/**
@@ -284,9 +319,7 @@ final class BlockTypesController {
 	 */
 	public function add_data_attributes( $content, $block ) {
 
-		$content = trim( $content );
-
-		if ( ! $this->block_should_have_data_attributes( $block['blockName'] ) ) {
+		if ( ! is_string( $content ) || ! $this->block_should_have_data_attributes( $block['blockName'] ) ) {
 			return $content;
 		}
 
@@ -296,10 +329,9 @@ final class BlockTypesController {
 		$processor = new \WP_HTML_Tag_Processor( $content );
 
 		if (
-			false === $processor->next_token() ||
-			'DIV' !== $processor->get_token_name() ||
-			$processor->is_tag_closer()
+			false === $processor->next_tag() || $processor->is_tag_closer()
 		) {
+
 			return $content;
 		}
 
@@ -361,50 +393,12 @@ final class BlockTypesController {
 
 	/**
 	 * Delete product transients when a product is deleted.
+	 *
+	 * @deprecated since 10.6.0
+	 * @return void
 	 */
 	public function delete_product_transients() {
-		delete_transient( 'wc_blocks_has_downloadable_product' );
-	}
-
-	/**
-	 * Get list of block types allowed in Widget Areas. New blocks won't be
-	 * exposed in the Widget Area unless specifically added here.
-	 *
-	 * @return array Array of block types.
-	 */
-	protected function get_widget_area_block_types() {
-		return array(
-			'ActiveFilters',
-			'AllReviews',
-			'AttributeFilter',
-			'Breadcrumbs',
-			'CartLink',
-			'CatalogSorting',
-			'ClassicShortcode',
-			'CustomerAccount',
-			'FeaturedCategory',
-			'FeaturedProduct',
-			'FilterWrapper',
-			'MiniCart',
-			'PriceFilter',
-			'ProductCategories',
-			'ProductResultsCount',
-			'ProductSearch',
-			'RatingFilter',
-			'ReviewsByCategory',
-			'ReviewsByProduct',
-			'StockFilter',
-			// Below product grids are hidden from inserter however they could have been used in widgets.
-			// Keep them for backward compatibility.
-			'HandpickedProducts',
-			'ProductBestSellers',
-			'ProductNew',
-			'ProductOnSale',
-			'ProductTopRated',
-			'ProductsByAttribute',
-			'ProductCategory',
-			'ProductTag',
-		);
+		wc_deprecated_function( __METHOD__, '10.6.0' );
 	}
 
 	/**
@@ -413,8 +407,6 @@ final class BlockTypesController {
 	 * @return array
 	 */
 	protected function get_block_types() {
-		global $pagenow;
-
 		$block_types = array(
 			'ActiveFilters',
 			'AddToCartForm',
@@ -424,16 +416,23 @@ final class BlockTypesController {
 			'Breadcrumbs',
 			'CartLink',
 			'CatalogSorting',
+			'CategoryTitle',
+			'CategoryDescription',
 			'ClassicTemplate',
 			'ClassicShortcode',
 			'ComingSoon',
+			'CouponCode',
 			'CustomerAccount',
+			'Dropdown',
+			'EmailContent',
 			'FeaturedCategory',
 			'FeaturedProduct',
 			'FilterWrapper',
 			'HandpickedProducts',
 			'MiniCart',
+			'NextPreviousButtons',
 			'StoreNotices',
+			'PaymentMethodIcons',
 			'PriceFilter',
 			'ProductBestSellers',
 			'ProductButton',
@@ -452,9 +451,9 @@ final class BlockTypesController {
 			'ProductFilterClearButton',
 			'ProductFilterCheckboxList',
 			'ProductFilterChips',
+			'ProductFilterTaxonomy',
 			'ProductGallery',
 			'ProductGalleryLargeImage',
-			'ProductGalleryLargeImageNextPrevious',
 			'ProductGalleryThumbnails',
 			'ProductImage',
 			'ProductImageGallery',
@@ -469,7 +468,6 @@ final class BlockTypesController {
 			'ProductRatingCounter',
 			'ProductRatingStars',
 			'ProductResultsCount',
-			'ProductReviews',
 			'ProductSaleBadge',
 			'ProductSearch',
 			'ProductSKU',
@@ -483,7 +481,6 @@ final class BlockTypesController {
 			'ReviewsByCategory',
 			'ReviewsByProduct',
 			'RelatedProducts',
-			'ProductDetails',
 			'SingleProduct',
 			'StockFilter',
 			'PageContentWrapper',
@@ -501,6 +498,27 @@ final class BlockTypesController {
 			'OrderConfirmation\AdditionalFieldsWrapper',
 			'OrderConfirmation\AdditionalFields',
 			'OrderConfirmation\CreateAccount',
+			'ProductDetails',
+			'ProductDescription',
+			'ProductSpecifications',
+			// Generic blocks that will be pushed upstream.
+			'Accordion\AccordionGroup',
+			'Accordion\AccordionItem',
+			'Accordion\AccordionPanel',
+			'Accordion\AccordionHeader',
+			// End: generic blocks that will be pushed upstream.
+			'Reviews\ProductReviews',
+			'Reviews\ProductReviewRating',
+			'Reviews\ProductReviewsTitle',
+			'Reviews\ProductReviewForm',
+			'Reviews\ProductReviewDate',
+			'Reviews\ProductReviewContent',
+			'Reviews\ProductReviewAuthorName',
+			'Reviews\ProductReviewsPagination',
+			'Reviews\ProductReviewsPaginationNext',
+			'Reviews\ProductReviewsPaginationPrevious',
+			'Reviews\ProductReviewsPaginationNumbers',
+			'Reviews\ProductReviewTemplate',
 		);
 
 		$block_types = array_merge(
@@ -510,70 +528,26 @@ final class BlockTypesController {
 			MiniCartContents::get_mini_cart_block_types()
 		);
 
-		// Update plugins/woocommerce/client/blocks/docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md
-		// when modifying this list.
-		if ( Features::is_enabled( 'experimental-blocks' ) ) {
-			if ( Features::is_enabled( 'blockified-add-to-cart' ) && wc_current_theme_is_fse_theme() ) {
-				$block_types[] = 'AddToCartWithOptions';
-				$block_types[] = 'AddToCartWithOptionsQuantitySelector';
-				$block_types[] = 'AddToCartWithOptionsVariationSelector';
-				$block_types[] = 'AddToCartWithOptionsVariationSelectorItemTemplate';
-				$block_types[] = 'AddToCartWithOptionsVariationSelectorAttributeName';
-				$block_types[] = 'AddToCartWithOptionsVariationSelectorAttributeOptions';
-				$block_types[] = 'AddToCartWithOptionsGroupedProductSelector';
-				$block_types[] = 'AddToCartWithOptionsGroupedProductSelectorItemTemplate';
-				$block_types[] = 'AddToCartWithOptionsGroupedProductSelectorItemCTA';
-			}
-			// Generic blocks that will be pushed upstream.
-			$block_types[] = 'Accordion\AccordionGroup';
-			$block_types[] = 'Accordion\AccordionItem';
-			$block_types[] = 'Accordion\AccordionPanel';
-			$block_types[] = 'Accordion\AccordionHeader';
-			$block_types[] = 'BlockifiedProductDetails';
-			$block_types[] = 'ProductDescription';
-
-			$block_types[] = 'Reviews\ProductReviews';
-			$block_types[] = 'Reviews\ProductReviewRating';
-			$block_types[] = 'Reviews\ProductReviewsTitle';
+		if ( wc_get_container()->get( ShopperListsController::class )->is_enabled( 'saved-for-later' ) ) {
+			$block_types[] = 'SavedForLater';
 		}
 
-		/**
-		 * This enables specific blocks in Widget Areas using an opt-in approach.
-		 */
-		if ( in_array( $pagenow, array( 'widgets.php', 'themes.php', 'customize.php' ), true ) && ( empty( $_GET['page'] ) || 'gutenberg-edit-site' !== $_GET['page'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			$block_types = array_intersect(
-				$block_types,
-				$this->get_widget_area_block_types()
-			);
+		if ( wc_get_container()->get( ShopperListsController::class )->is_enabled( 'wishlist' ) ) {
+			$block_types[] = 'Wishlist';
+			$block_types[] = 'AddToWishlistButton';
 		}
 
-		/**
-		 * This disables specific blocks in Post and Page editor by not registering them.
-		 */
-		if ( in_array( $pagenow, array( 'post.php', 'post-new.php' ), true ) ) {
-			$block_types = array_diff(
-				$block_types,
-				array(
-					'Breadcrumbs',
-					'CatalogSorting',
-					'ClassicTemplate',
-					'ProductResultsCount',
-					'ProductDetails',
-					'OrderConfirmation\Status',
-					'OrderConfirmation\Summary',
-					'OrderConfirmation\Totals',
-					'OrderConfirmation\TotalsWrapper',
-					'OrderConfirmation\Downloads',
-					'OrderConfirmation\DownloadsWrapper',
-					'OrderConfirmation\BillingAddress',
-					'OrderConfirmation\ShippingAddress',
-					'OrderConfirmation\BillingWrapper',
-					'OrderConfirmation\ShippingWrapper',
-					'OrderConfirmation\AdditionalInformation',
-					'OrderConfirmation\AdditionalFieldsWrapper',
-					'OrderConfirmation\AdditionalFields',
-				)
-			);
+		if ( wp_is_block_theme() ) {
+			$block_types[] = 'AddToCartWithOptions\AddToCartWithOptions';
+			$block_types[] = 'AddToCartWithOptions\QuantitySelector';
+			$block_types[] = 'AddToCartWithOptions\VariationDescription';
+			$block_types[] = 'AddToCartWithOptions\VariationSelector';
+			$block_types[] = 'AddToCartWithOptions\VariationSelectorAttribute';
+			$block_types[] = 'AddToCartWithOptions\VariationSelectorAttributeName';
+			$block_types[] = 'AddToCartWithOptions\GroupedProductSelector';
+			$block_types[] = 'AddToCartWithOptions\GroupedProductItem';
+			$block_types[] = 'AddToCartWithOptions\GroupedProductItemSelector';
+			$block_types[] = 'AddToCartWithOptions\GroupedProductItemLabel';
 		}
 
 		/**
@@ -584,5 +558,145 @@ final class BlockTypesController {
 		 * @param array $block_types List of block types.
 		 */
 		return apply_filters( 'woocommerce_get_block_types', $block_types );
+	}
+
+	/**
+	 * By default, when the classic theme is used, block style is always
+	 * enqueued even if the block is not used on the page. We want WooCommerce
+	 * store to always performant so we have to manually enqueue the block style
+	 * on-demand for classic themes.
+	 *
+	 * @internal
+	 *
+	 * @param array  $args Block metadata.
+	 * @param string $block_name Block name.
+	 *
+	 * @return array Block metadata.
+	 */
+	public function enqueue_block_style_for_classic_themes( $args, $block_name ) {
+
+		// Repeatedly checking the theme is expensive. So statically cache this logic result and remove the filter if not needed.
+		static $should_enqueue_block_style_for_classic_themes = null;
+		if ( null === $should_enqueue_block_style_for_classic_themes ) {
+			$should_enqueue_block_style_for_classic_themes = ! (
+				is_admin() ||
+				wp_is_block_theme() ||
+				( function_exists( 'wp_should_load_block_assets_on_demand' ) && wp_should_load_block_assets_on_demand() ) ||
+				wp_should_load_separate_core_block_assets()
+			);
+		}
+		if ( ! $should_enqueue_block_style_for_classic_themes ) {
+			remove_filter( 'register_block_type_args', array( $this, 'enqueue_block_style_for_classic_themes' ), 10 );
+
+			return $args;
+		}
+
+		if (
+			false === strpos( $block_name, 'woocommerce/' ) ||
+			( empty( $args['style_handles'] ) && empty( $args['style'] )
+			)
+		) {
+			return $args;
+		}
+
+		$style_handlers = $args['style_handles'] ?? $args['style'];
+
+		add_filter(
+			'render_block_' . $block_name,
+			static function ( $html ) use ( $style_handlers ) {
+				array_map( 'wp_enqueue_style', $style_handlers );
+
+				return $html;
+			},
+			10
+		);
+
+		$args['style_handles'] = array();
+		$args['style']         = array();
+
+		return $args;
+	}
+
+	/**
+	 * Use one shared editor stylesheet for WooCommerce blocks.
+	 *
+	 * WordPress loads `style` handles in both the frontend and editor. WooCommerce
+	 * keeps those per-block handles for frontend performance, but removes them in
+	 * admin so the block editor loads the combined stylesheet only.
+	 *
+	 * @internal
+	 *
+	 * @param array $settings Block settings.
+	 * @param array $metadata Block metadata.
+	 *
+	 * @return array Block settings.
+	 */
+	public function use_single_block_editor_style( $settings, $metadata ) {
+		if (
+			! BlockEditorUnifiedAssets::is_enabled() ||
+			! is_admin() ||
+			! $this->is_woocommerce_block_metadata( $metadata ) ) {
+			return $settings;
+		}
+
+		$settings['style_handles']        = array();
+		$settings['style']                = array();
+		$settings['editor_style_handles'] = array( 'wc-block-library-style' );
+		$settings['editor_style']         = array( 'wc-block-library-style' );
+
+		return $settings;
+	}
+
+	/**
+	 * Check whether block metadata belongs to a block bundled with WooCommerce.
+	 *
+	 * @param array $metadata Block metadata.
+	 *
+	 * @return bool Whether the metadata file is in the WooCommerce blocks directory.
+	 */
+	private function is_woocommerce_block_metadata( $metadata ) {
+		static $blocks_path = null;
+
+		if ( null === $blocks_path ) {
+			$resolved_path = realpath( WC_ABSPATH . 'assets/client/blocks' );
+			$blocks_path   = false === $resolved_path
+				? ''
+				: trailingslashit( wp_normalize_path( $resolved_path ) );
+		}
+
+		if ( '' === $blocks_path || empty( $metadata['file'] ) ) {
+			return false;
+		}
+
+		return str_starts_with(
+			wp_normalize_path( $metadata['file'] ),
+			$blocks_path
+		);
+	}
+
+	/**
+	 * Set the preferred taxonomy and term for the breadcrumbs block on the product post type.
+	 *
+	 * @internal
+	 *
+	 * @param array  $settings The settings for the breadcrumbs block.
+	 * @param string $post_type The post type.
+	 * @param int    $post_id The current post ID.
+	 * @return array The settings for the breadcrumbs block.
+	 */
+	public function set_product_breadcrumbs_preferred_taxonomy( $settings, $post_type, $post_id = 0 ) {
+		return Package::container()->get( CoreBreadcrumbsCompatibility::class )->set_product_breadcrumbs_preferred_taxonomy( $settings, $post_type, $post_id );
+	}
+
+	/**
+	 * Apply WooCommerce compatibility behavior to Core breadcrumb items.
+	 *
+	 * @internal
+	 *
+	 * @param array $items Array of breadcrumb items from Core.
+	 * @return array Modified breadcrumb items.
+	 */
+	public function apply_woocommerce_breadcrumb_filters( $items ) {
+		return Package::container()->get( CoreBreadcrumbsCompatibility::class )->apply_woocommerce_breadcrumb_filters( $items );
 	}
 }

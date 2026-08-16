@@ -1,6 +1,19 @@
 .woocommerce_page_wc-settings-advanced-blueprint {
 	.blueprint-settings-slotfill {
-		min-height: 650px;
+		min-height: 100%;
+	}
+
+	.components-snackbar .components-snackbar__content-with-icon {
+		padding-left: 0;
+	}
+
+	.components-snackbar .components-snackbar__icon {
+		display: flex;
+		margin-right: $gap-smaller;
+	}
+
+	.components-snackbar__content {
+		align-items: center;
 	}
 }
 
@@ -160,6 +173,32 @@
 	.blueprint-settings-export-button {
 		margin-top: 14px;
 	}
+
+	.components-notice {
+		padding: 12px;
+
+		button.components-notice__dismiss {
+			align-self: inherit;
+			svg {
+				fill: #1e1e1e;
+				width: 15px;
+			}
+		}
+
+		.components-notice__content,
+		&.is-error .components-notice__content pre {
+			margin: 0;
+			color: $gray-900;
+			line-height: 24px; /* 184.615% */
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+			text-wrap: auto;
+		}
+	}
+
+	.components-notice.is-error {
+		background: #fcf0f0;
+		border-left-color: #cc1818;
+	}
 }
 
 // Show the notice at the bottom right of the screen
@@ -196,6 +235,22 @@
 		margin: 0 0 8px;
 	}
 
+	.woocommerce-blueprint-overwrite-modal__description--actions {
+		margin-top: 16px;
+	}
+
+	.woocommerce-blueprint-overwrite-modal__trust-notice {
+		margin: 24px 0 0;
+
+		.components-notice__content {
+			color: $gray-900;
+			font-size: 13px;
+			font-weight: 400;
+			line-height: 20px; /* 153.846% */
+			margin: 0;
+		}
+	}
+
 	ul {
 		margin: 0;
 		list-style: disc;
@@ -229,7 +284,14 @@
 			width: 132px;
 			justify-content: center;
 			align-items: center;
+
+			svg {
+				margin: 0;
+			}
 		}
 	}
 }
 
+.blueprint-export-error {
+	margin: 16px 0;
+}

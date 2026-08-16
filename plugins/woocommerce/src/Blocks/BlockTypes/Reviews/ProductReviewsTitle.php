@@ -25,13 +25,11 @@ class ProductReviewsTitle extends AbstractBlock {
 		$show_product_title = ! empty( $attributes['showProductTitle'] ) && $attributes['showProductTitle'];
 		$show_reviews_count = ! empty( $attributes['showReviewsCount'] ) && $attributes['showReviewsCount'];
 		$reviews_count      = $product->get_review_count();
-		/* translators: %s: Product title. */
-		$product_title = sprintf( __( '&#8220;%s&#8221;', 'woocommerce' ), $product->get_title() );
 
 		if ( $show_reviews_count && $show_product_title ) {
 			return 1 === $reviews_count
 				/* translators: %s: Product title. */
-				? sprintf( __( 'One review for %s', 'woocommerce' ), $product_title )
+				? sprintf( __( 'One review for %s', 'woocommerce' ), $product->get_title() )
 				: sprintf(
 					/* translators: 1: Number of reviews, 2: Product title. */
 					_n(
@@ -41,18 +39,18 @@ class ProductReviewsTitle extends AbstractBlock {
 						'woocommerce'
 					),
 					number_format_i18n( $reviews_count ),
-					$product_title
+					$product->get_title()
 				);
 		}
 
 		if ( ! $show_reviews_count && $show_product_title ) {
 			return 1 === $reviews_count
 				/* translators: %s: Product title. */
-				? sprintf( __( 'Review for %s', 'woocommerce' ), $product_title )
+				? sprintf( __( 'Review for %s', 'woocommerce' ), $product->get_title() )
 				: sprintf(
 					/* translators: %s: Product title. */
 					__( 'Reviews for %s', 'woocommerce' ),
-					$product_title
+					$product->get_title()
 				);
 		}
 

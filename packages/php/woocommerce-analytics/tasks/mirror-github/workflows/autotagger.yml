@@ -1,0 +1,113 @@
+name: Auto-tagger
+
+on:
+    push:
+        branches:
+            - trunk
+            - prerelease
+            - '*/branch-*'
+    workflow_dispatch:
+
+# We use secrets.API_TOKEN_GITHUB for everything here, so no need for permissions.
+permissions: {}
+
+jobs:
+    tag:
+        name: Tag
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check that the secret is set
+              env:
+                  TOKEN: ${{ secrets.API_TOKEN_GITHUB }}
+              run: |
+                  if [[ -z "$TOKEN" ]]; then
+                    echo '::error::The secret API_TOKEN_GITHUB must be set.'
+                    exit 1
+                  fi
+
+            - uses: actions/checkout@v6
+              with:
+                  # We want to potentially trigger "tag" events, but the default GITHUB_TOKEN
+                  # explicitly does not trigger events.
+                  token: ${{ secrets.API_TOKEN_GITHUB }}
+
+            - name: Check branch
+              id: check-branch
+              run: |
+                  PREFIXES=
+                  if [[ -e composer.json ]]; then
+                    PREFIXES=$(jq -r '.extra["release-branch-prefix"] // "" | if type == "array" then .[] else . end' composer.json)
+                  fi
+                  if [[ -z "$PREFIXES" && "$GITHUB_REF" != "refs/heads/trunk" && "$GITHUB_REF" != "refs/heads/prerelease" ]]; then
+                    echo "::error::Expected to be called for \"refs/heads/trunk\" or \"refs/heads/prerelease\", not \"$GITHUB_REF\""
+                    exit 1
+                  elif [[ -n "$PREFIXES" && ( "$GITHUB_REF" == "refs/heads/trunk" || "$GITHUB_REF" == "refs/heads/prerelease" ) ]]; then
+                    echo "::notice::Ignoring push to $GITHUB_REF, as this project has a release branch prefix set (\"${PREFIXES//$'\n'/'" "'}\")"
+                    echo "run=false" >> "$GITHUB_OUTPUT"
+                  else
+                    if [[ -n "$PREFIXES" ]]; then
+                      OK=false
+                      while IFS= read -r P; do
+                        [[ "$GITHUB_REF" == "refs/heads/$P/branch-"* ]] && OK=true
+                      done <<<"$PREFIXES"
+                      if ! $OK; then
+                        echo "::error::Expected to be called for \"refs/heads/\$PREFIX/branch-*\" for a prefix in \"${PREFIXES//$'\n'/'" "'}\", not \"$GITHUB_REF\""
+                        exit 1
+                      fi
+                    fi
+
+                    echo "Push to \"$GITHUB_REF\" ok"
+                    echo "run=true" >> "$GITHUB_OUTPUT"
+                  fi
+
+            - name: Check version
+              id: version
+              if: steps.check-branch.outputs.run == 'true'
+              run: |
+                  VER=$(sed -nEe 's/^## \[?([^]]*)\]? - .*/\1/;T;p;q' CHANGELOG.md || true)
+                  echo "Version from changelog is ${VER:-<unknown>}"
+                  echo "version=$VER" >> "$GITHUB_OUTPUT"
+                  if [[ "$VER" =~ ^[0-9]+(\.[0-9]+)+(-[a-z0-9._-]+)?$ && ! "$VER" =~ -(alpha|a\.[0-9]*[02468])$ ]]; then
+                    echo "Version $VER ok to tag"
+                    echo "run=true" >> "$GITHUB_OUTPUT"
+                  else
+                    echo "::notice::Not tagging version $VER"
+                    echo "run=false" >> "$GITHUB_OUTPUT"
+                  fi
+
+            - name: Check deps
+              id: check-deps
+              if: steps.check-branch.outputs.run == 'true' && steps.version.outputs.run == 'true'
+              run: |
+                  RUN=true
+                  if [[ -e composer.json ]]; then
+                    TMP=$(jq -r '.require // {} | to_entries[] | select( .value | test( "-(alpha|a\\.[0-9]*[02468])$" ) ) | "\(.key) (\(.value))"' composer.json)
+                    if [[ -n "$TMP" ]]; then
+                      echo "::notice::Not tagging due to -alpha deps on ${TMP//$'\n'/ }"
+                      RUN=false
+                    fi
+                  fi
+                  echo "run=$RUN" >> "$GITHUB_OUTPUT"
+
+            - name: Tag
+              if: steps.check-branch.outputs.run == 'true' && steps.version.outputs.run == 'true' && steps.check-deps.outputs.run == 'true'
+              env:
+                  VER: ${{ steps.version.outputs.version }}
+              run: |
+                  export GIT_AUTHOR_NAME=matticbot
+                  export GIT_AUTHOR_EMAIL=matticbot@users.noreply.github.com
+                  export GIT_COMMITTER_NAME=matticbot
+                  export GIT_COMMITTER_EMAIL=matticbot@users.noreply.github.com
+                  if [[ -e composer.json ]] && ! jq -e 'if try ( .extra.autotagger | has("v") ) catch false then .extra.autotagger.v else true end' composer.json >/dev/null; then
+                    TAG="$VER"
+                  else
+                    TAG="v$VER"
+                  fi
+                  echo "::notice::Tagging $TAG"
+                  git tag "$TAG"
+                  git push origin "$TAG"
+                  if [[ -e composer.json ]] && jq -e '.extra.autotagger.major?' composer.json >/dev/null; then
+                    echo "::notice::Tagging ${TAG%%.*}"
+                    git tag --force "${TAG%%.*}"
+                    git push --force origin "${TAG%%.*}"
+                  fi

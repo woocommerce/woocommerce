@@ -1,8 +1,11 @@
 ---
-post_title: How to Use WooCommerce CLI
-menu_title: Using WooCommerce CLI
-tags: how-to
+post_title: How to use WooCommerce CLI
+sidebar_label: Using WooCommerce CLI
+sidebar_position: 2
+
 ---
+
+# How to Use WooCommerce CLI
 
 ## Introduction
 
@@ -65,4 +68,4 @@ To delete a product (e.g., product ID 123):
 wp wc product delete 123 --force
 ```
 
-For a complete list of WC-CLI commands, check out our [WC-CLI commands](./wc-cli-commands.md) documentation
+For a complete list of WC-CLI commands, check out our [WC-CLI commands](/docs/wc-cli/wc-cli-commands/) documentation.

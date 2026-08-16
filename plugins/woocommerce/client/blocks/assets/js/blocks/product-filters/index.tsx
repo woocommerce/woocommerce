@@ -9,12 +9,13 @@ import { Icon } from '@wordpress/icons';
  * Internal dependencies
  */
 import metadata from './block.json';
+import deprecated from './deprecated';
 import { Edit } from './edit';
 import { Save } from './save';
-import './style.scss';
 
 registerBlockType( metadata, {
 	icon: <Icon icon={ filterThreeLines } />,
 	edit: Edit,
 	save: Save,
+	deprecated,
 } );

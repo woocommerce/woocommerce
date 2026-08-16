@@ -9,11 +9,11 @@ import { createElement } from '@wordpress/element';
  */
 import { ControlProps } from '../types';
 
-export const CheckboxField: React.FC< ControlProps > = ( {
+export const CheckboxField = ( {
 	field,
 	onChange,
 	...props
-} ) => {
+}: ControlProps ) => {
 	const { label, description } = field;
 
 	return (

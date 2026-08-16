@@ -13,7 +13,6 @@ import { __, sprintf } from '@wordpress/i18n';
 import metadata from './block.json';
 import Edit from './edit';
 import Save from './save';
-import './style.scss';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 const defaultAttribute = getSetting< AttributeSetting >(
@@ -34,14 +33,15 @@ registerBlockType( metadata, {
 	variations: ATTRIBUTES.map( ( attribute, index ) => {
 		return {
 			name: `product-filter-attribute-${ attribute.attribute_name }`,
-			title: `${ attribute.attribute_label }`,
+			title: sprintf(
+				// translators: %s is the attribute label.
+				__( '%s Filter', 'woocommerce' ),
+				attribute.attribute_label
+			),
 			description: sprintf(
 				// translators: %s is the attribute label.
-				__(
-					`Enable customers to filter the product collection by selecting one or more %s attributes.`,
-					'woocommerce'
-				),
-				attribute.attribute_label
+				__( 'Let shoppers filter products by %s.', 'woocommerce' ),
+				attribute.attribute_label.toLocaleLowerCase()
 			),
 			attributes: {
 				attributeId: parseInt( attribute.attribute_id, 10 ),

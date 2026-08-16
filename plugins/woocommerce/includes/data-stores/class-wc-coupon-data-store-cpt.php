@@ -55,9 +55,16 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	);
 
 	/**
-	 * The updated coupon properties
+	 * The updated coupon properties.
+	 *
+	 * Accumulates the properties written by every save performed through this data
+	 * store instance, with duplicates, and is never reset. It feeds the payload of
+	 * the deprecated woocommerce_coupon_object_updated_props action and must not be
+	 * removed while that action still fires. Use the woocommerce_coupon_updated_props
+	 * action to learn what the current save changed.
 	 *
 	 * @since 4.1.0
+	 * @deprecated 11.1.0 Use the woocommerce_coupon_updated_props action.
 	 * @var array
 	 */
 	protected $updated_props = array();
@@ -78,7 +85,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				'woocommerce_new_coupon_data',
 				array(
 					'post_type'     => 'shop_coupon',
-					'post_status'   => 'publish',
+					'post_status'   => $coupon->get_status( 'edit' ) ? $coupon->get_status( 'edit' ) : 'publish',
 					'post_author'   => get_current_user_id(),
 					'post_title'    => $coupon->get_code( 'edit' ),
 					'post_content'  => '',
@@ -144,7 +151,6 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				'minimum_amount'              => get_post_meta( $coupon_id, 'minimum_amount', true ),
 				'maximum_amount'              => get_post_meta( $coupon_id, 'maximum_amount', true ),
 				'email_restrictions'          => array_filter( (array) get_post_meta( $coupon_id, 'customer_email', true ) ),
-				'used_by'                     => array_filter( (array) get_post_meta( $coupon_id, '_used_by' ) ),
 			)
 		);
 		$coupon->read_meta_data();
@@ -180,10 +186,11 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		$coupon->save_meta_data();
 		$changes = $coupon->get_changes();
 
-		if ( array_intersect( array( 'code', 'description', 'date_created', 'date_modified' ), array_keys( $changes ) ) ) {
+		if ( array_intersect( array( 'code', 'description', 'date_created', 'date_modified', 'status' ), array_keys( $changes ) ) ) {
 			$post_data = array(
 				'post_title'        => $coupon->get_code( 'edit' ),
 				'post_excerpt'      => $coupon->get_description( 'edit' ),
+				'post_status'       => $coupon->get_status( 'edit' ),
 				'post_date'         => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created( 'edit' )->getOffsetTimestamp() ),
 				'post_date_gmt'     => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created( 'edit' )->getTimestamp() ),
 				'post_modified'     => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $coupon->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
@@ -212,7 +219,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 
 		// The `coupon_id_from_code` entry in the object cache must not exist when the coupon is not published, otherwise the coupon will remain available for use.
 		if ( 'publish' !== $coupon->get_status() ) {
-			wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $coupon->get_code(), 'coupons' );
+			$hashed_code = md5( wc_strtolower( $coupon->get_code() ) );
+			wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $hashed_code, 'coupons' );
 		}
 
 		do_action( 'woocommerce_update_coupon', $coupon->get_id(), $coupon );
@@ -243,7 +251,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		if ( $args['force_delete'] ) {
 			wp_delete_post( $id );
 
-			wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $coupon->get_code(), 'coupons' );
+			$hashed_code = md5( wc_strtolower( $coupon->get_code() ) );
+			wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $hashed_code, 'coupons' );
 
 			$coupon->set_id( 0 );
 			do_action( 'woocommerce_delete_coupon', $id );
@@ -261,6 +270,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * @since 3.0.0
 	 */
 	private function update_post_meta( &$coupon ) {
+		$updated_props = array();
+
 		$meta_key_to_props = array(
 			'discount_type'              => 'discount_type',
 			'coupon_amount'              => 'amount',
@@ -311,10 +322,37 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 
 			if ( $updated ) {
 				$this->updated_props[] = $prop;
+				$updated_props[]       = $prop;
 			}
 		}
 
-		do_action( 'woocommerce_coupon_object_updated_props', $coupon, $this->updated_props );
+		/**
+		 * Fires after a coupon's properties have been updated, with its historical
+		 * payload: the properties written by every save performed through this data
+		 * store instance, accumulated with duplicates and never reset.
+		 *
+		 * @param WC_Coupon $coupon        Coupon object.
+		 * @param string[]  $updated_props Properties updated by all saves through this data store instance, with duplicates.
+		 *
+		 * @since 3.0.0
+		 * @deprecated 11.1.0 Use woocommerce_coupon_updated_props, which reports only the current save's properties.
+		 */
+		do_action_deprecated(
+			'woocommerce_coupon_object_updated_props',
+			array( $coupon, $this->updated_props ),
+			'11.1.0',
+			'woocommerce_coupon_updated_props'
+		);
+
+		/**
+		 * Fires after a coupon's properties have been updated.
+		 *
+		 * @param WC_Coupon $coupon        Coupon object.
+		 * @param string[]  $updated_props Properties updated by the current save.
+		 *
+		 * @since 11.1.0
+		 */
+		do_action( 'woocommerce_coupon_updated_props', $coupon, $updated_props );
 	}
 
 	/**
@@ -786,7 +824,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		global $wpdb;
 		return $wpdb->get_col(
 			$wpdb->prepare(
-				"SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' ORDER BY post_date DESC",
+				"SELECT ID FROM $wpdb->posts WHERE LOWER(post_title) = LOWER(%s) AND post_type = 'shop_coupon' AND post_status = 'publish' ORDER BY post_date DESC",
 				wc_sanitize_coupon_code( $code )
 			)
 		);

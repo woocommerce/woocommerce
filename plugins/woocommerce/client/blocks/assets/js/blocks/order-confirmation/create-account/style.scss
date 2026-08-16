@@ -94,14 +94,13 @@
 	}
 
 	.wc-block-order-confirmation-create-account-button {
-		.wc-block-components-button__text {
-			position: relative;
-		}
-		&.is-loading {
-			pointer-events: none;
-
-			.wc-block-components-spinner + .wc-block-order-confirmation-create-account-button-text {
+		// Hides labels when the spinner is shown.
+		&--loading {
+			.wc-block-components-button__text {
 				visibility: hidden;
+			}
+			.wc-block-components-spinner {
+				visibility: visible;
 			}
 		}
 	}

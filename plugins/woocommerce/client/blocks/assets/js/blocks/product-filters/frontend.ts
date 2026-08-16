@@ -2,57 +2,83 @@
  * External dependencies
  */
 import * as iAPI from '@wordpress/interactivity';
+import type { SelectableItemsParentStore } from '@woocommerce/types';
 
-const { getContext, store, getServerContext } = iAPI;
-const getSetting = window.wc.wcSettings.getSetting;
+/**
+ * Internal dependencies
+ */
+import { decodeHtmlEntities } from '../../utils/html-entities';
+import type {
+	ActiveFilterItem,
+	FilterItemFields,
+	FilterOptionItem,
+	ProductFiltersContext,
+} from './types';
+import { getClosestColor } from './utils/get-closest-color';
+import { reload } from '../../utils/navigation';
+import { PRODUCT_FILTERS_STORE_NAME } from './constants';
 
-function isParamsEqual(
-	obj1: Record< string, string >,
-	obj2: Record< string, string >
-): boolean {
-	const keys1 = Object.keys( obj1 );
-	const keys2 = Object.keys( obj2 );
+const { getContext, getElement, store, getServerContext, getConfig } = iAPI;
 
-	// First check if both objects have the same number of keys
-	if ( keys1.length !== keys2.length ) {
-		return false;
-	}
+const BLOCK_NAME = PRODUCT_FILTERS_STORE_NAME;
 
-	// Check if all keys and values are the same
-	for ( const key of keys1 ) {
-		if ( obj1[ key ] !== obj2[ key ] ) {
-			return false;
-		}
-	}
+type ValidFilterOptionItem = FilterOptionItem & {
+	type: string;
+	value: string;
+};
 
-	return true;
+function isValidFilterOptionItem(
+	item: FilterOptionItem
+): item is ValidFilterOptionItem {
+	return (
+		typeof item.type === 'string' &&
+		item.type.length > 0 &&
+		typeof item.value === 'string' &&
+		item.value.length > 0
+	);
 }
 
-export type ActiveFilter = {
-	label: string;
-	type: 'attribute' | 'price' | 'rating' | 'status';
-	value: string | null;
-	attribute?: {
-		slug: string;
-		queryType: 'and' | 'or';
-	};
-	price?: {
-		min: number | null;
-		max: number | null;
-	};
-};
+function getFilterLabel( item: ValidFilterOptionItem ): string {
+	const label = item.ariaLabel ?? item.label;
+	return typeof label === 'string' && label.length > 0 ? label : item.value;
+}
 
-export type ProductFiltersContext = {
-	isOverlayOpened: boolean;
-	params: Record< string, string >;
-	originalParams: Record< string, string >;
-	activeFilters: ActiveFilter[];
-};
+function selectFilter( item: ValidFilterOptionItem ) {
+	const context = getContext< ProductFiltersContext >();
+	const newActiveFilter: ActiveFilterItem = {
+		value: item.value,
+		type: item.type,
+		activeLabel: context.activeLabelTemplate.replace(
+			'{{label}}',
+			getFilterLabel( item )
+		),
+	};
+	if ( item.attributeQueryType ) {
+		newActiveFilter.attributeQueryType = item.attributeQueryType;
+	}
+	const newActiveFilters = context.activeFilters.filter(
+		( activeFilter ) =>
+			! (
+				activeFilter.value === newActiveFilter.value &&
+				activeFilter.type === newActiveFilter.type
+			)
+	);
 
-const productFiltersStore = store( 'woocommerce/product-filters', {
+	newActiveFilters.push( newActiveFilter );
+
+	context.activeFilters = newActiveFilters;
+}
+
+function unselectFilter( item: ValidFilterOptionItem ) {
+	actions.removeActiveFiltersBy(
+		( activeFilter ) =>
+			activeFilter.type === item.type && activeFilter.value === item.value
+	);
+}
+
+const productFiltersStore = {
 	state: {
 		get params() {
-			const { activeFilters } = getContext< ProductFiltersContext >();
 			const params: Record< string, string > = {};
 
 			function addParam( key: string, value: string ) {
@@ -61,16 +87,19 @@ const productFiltersStore = store( 'woocommerce/product-filters', {
 				params[ key ] = value;
 			}
 
-			activeFilters.forEach( ( filter ) => {
+			const config = getConfig( BLOCK_NAME );
+			const taxonomyParamsMap = config?.taxonomyParamsMap || {};
+
+			state.activeFilters.forEach( ( filter ) => {
+				// todo: refactor this to use params data from Automattic\WooCommerce\Internal\ProductFilters\Params.
 				const { type, value } = filter;
 
 				if ( ! value ) return;
 
-				if ( type === 'price' && 'price' in filter ) {
-					if ( filter.price.min )
-						params.min_price = filter.price.min.toString();
-					if ( filter.price.max )
-						params.max_price = filter.price.max.toString();
+				if ( type === 'price' ) {
+					const [ min, max ] = value.split( '|' );
+					if ( min ) params.min_price = min;
+					if ( max ) params.max_price = max;
 				}
 
 				if ( type === 'status' ) {
@@ -81,10 +110,17 @@ const productFiltersStore = store( 'woocommerce/product-filters', {
 					addParam( `rating_filter`, value );
 				}
 
-				if ( type === 'attribute' && 'attribute' in filter ) {
-					addParam( `filter_${ filter.attribute.slug }`, value );
-					params[ `query_type_${ filter.attribute.slug }` ] =
-						filter.attribute.queryType;
+				if ( type.includes( 'attribute' ) ) {
+					const [ , slug ] = type.split( '/' );
+					addParam( `filter_${ slug }`, value );
+					params[ `query_type_${ slug }` ] =
+						filter.attributeQueryType || 'or';
+				}
+
+				if ( type.includes( 'taxonomy' ) ) {
+					const [ , taxonomy ] = type.split( '/' );
+					const paramKey = taxonomyParamsMap[ taxonomy ];
+					addParam( paramKey, value );
 				}
 			} );
 			return params;
@@ -94,14 +130,33 @@ const productFiltersStore = store( 'woocommerce/product-filters', {
 			return activeFilters
 				.filter( ( item ) => !! item.value )
 				.sort( ( a, b ) => {
-					return a.label
+					return a.activeLabel
 						.toLowerCase()
-						.localeCompare( b.label.toLowerCase() );
+						.localeCompare( b.activeLabel.toLowerCase() );
 				} )
 				.map( ( item ) => ( {
 					...item,
+					activeLabel: decodeHtmlEntities( item.activeLabel ),
 					uid: `${ item.type }/${ item.value }`,
 				} ) );
+		},
+		get selectableItems() {
+			// Items are server-owned (narrow on every navigation); read
+			// from server context so they refresh post-navigation.
+			// `getContext()` soft-merges and would keep the stale client
+			// snapshot.
+			const server = getServerContext
+				? getServerContext< ProductFiltersContext >()
+				: getContext< ProductFiltersContext >();
+			const items = server.items;
+			if ( ! Array.isArray( items ) ) return [];
+			return items.map( ( item ) => ( {
+				...item,
+				selected: state.activeFilters.some(
+					( filter ) =>
+						filter.type === item.type && filter.value === item.value
+				),
+			} ) );
 		},
 	},
 	actions: {
@@ -127,92 +182,119 @@ const productFiltersStore = store( 'woocommerce/product-filters', {
 		closeOverlayOnEscape: ( event: KeyboardEvent ) => {
 			const context = getContext< ProductFiltersContext >();
 			if ( context.isOverlayOpened && event.key === 'Escape' ) {
-				productFiltersStore.actions.closeOverlay();
+				actions.closeOverlay();
 			}
 		},
-		setActiveFilter: ( activeFilter: ActiveFilter ) => {
-			const { value, type } = activeFilter;
-			const context = getContext< ProductFiltersContext >();
-			const newActiveFilters = context.activeFilters.filter(
-				( item ) => ! ( item.value === value && item.type === type )
-			);
-
-			newActiveFilters.push( activeFilter );
-
-			context.activeFilters = newActiveFilters;
-		},
 		removeActiveFiltersBy: (
-			callback: ( item: ActiveFilter ) => boolean
+			callback: ( item: ActiveFilterItem ) => boolean
 		) => {
 			const context = getContext< ProductFiltersContext >();
 			context.activeFilters = context.activeFilters.filter(
 				( item ) => ! callback( item )
 			);
 		},
-		removeActiveFiltersByType: ( type: ActiveFilter[ 'type' ] ) => {
-			productFiltersStore.actions.removeActiveFiltersBy(
-				( item ) => item.type === type
+		toggle: ( itemArg?: FilterOptionItem | Event ) => {
+			const context = getContext< ProductFiltersContext >();
+			const item =
+				itemArg && ! ( itemArg instanceof Event )
+					? itemArg
+					: context.item;
+			if ( ! item || ! isValidFilterOptionItem( item ) ) return;
+			const isSelected = state.activeFilters.some(
+				( f ) => f.type === item.type && f.value === item.value
 			);
-		},
-		removeActiveFilter: (
-			type: ActiveFilter[ 'type' ],
-			value: ActiveFilter[ 'value' ]
-		) => {
-			productFiltersStore.actions.removeActiveFiltersBy(
-				( item ) => item.type === type && item.value === value
-			);
+			if ( isSelected ) {
+				unselectFilter( item );
+			} else {
+				selectFilter( item );
+			}
+			void actions.navigate();
 		},
 		*navigate() {
-			const { originalParams } = getServerContext
+			const context = getServerContext
 				? getServerContext< ProductFiltersContext >()
 				: getContext< ProductFiltersContext >();
 
-			if (
-				isParamsEqual(
-					productFiltersStore.state.params,
-					originalParams
-				)
-			) {
-				return;
-			}
-
-			const canonicalUrl = getSetting( 'canonicalUrl' );
-			const url = new URL( canonicalUrl );
+			const config = getConfig( BLOCK_NAME );
+			const url = new URL( config.canonicalUrl );
 			const { searchParams } = url;
 
-			for ( const key in originalParams ) {
+			for ( const key in context.params ) {
 				searchParams.delete( key );
 			}
 
-			for ( const key in productFiltersStore.state.params ) {
-				searchParams.set(
-					key,
-					productFiltersStore.state.params[ key ]
-				);
+			for ( const key in state.params ) {
+				const value = state.params[ key ];
+				let decodedValue = value;
+
+				try {
+					decodedValue = decodeURIComponent( value );
+				} catch ( error ) {
+					if ( error instanceof URIError ) {
+						// eslint-disable-next-line no-console
+						console.warn(
+							'woocommerce/product-filters: Failed to decode filter parameter',
+							key,
+							error
+						);
+					}
+				}
+
+				searchParams.set( key, decodedValue );
 			}
 
-			const isBlockTheme = getSetting( 'isBlockTheme' );
-			const isProductArchive = getSetting( 'isProductArchive' );
-			const needsRefreshForInteractivityAPI = getSetting(
-				'needsRefreshForInteractivityAPI',
-				false
-			);
-
-			if (
-				needsRefreshForInteractivityAPI ||
-				( ! isBlockTheme && isProductArchive )
-			) {
-				return ( window.location.href = url.href );
+			if ( window.location.href === url.href ) {
+				return;
 			}
 
-			const { actions } = yield import(
-				'@wordpress/interactivity-router'
-			);
+			// Per-instance context (set when Product Filters is a descendant
+			// of Product Collection) wins over the global config, which is
+			// the fallback for the sibling-block layout.
+			const forcePageReload =
+				typeof context.forcePageReload === 'boolean'
+					? context.forcePageReload
+					: config?.forcePageReload;
 
-			yield actions.navigate( url.href );
+			if ( forcePageReload ) {
+				reload( url.href );
+				return;
+			}
+
+			const routerModule: typeof import('@wordpress/interactivity-router') =
+				yield import( '@wordpress/interactivity-router' );
+
+			yield routerModule.actions.navigate( url.href );
 		},
 	},
 	callbacks: {
+		initColors: () => {
+			const el = getElement();
+			if ( ! el.ref ) return;
+
+			const style = el.ref.style;
+			const hasBg = style.getPropertyValue(
+				'--wc-product-filters-background-color'
+			);
+			const hasFg = style.getPropertyValue(
+				'--wc-product-filters-text-color'
+			);
+
+			if ( ! hasBg ) {
+				const bg = getClosestColor( el.ref, 'backgroundColor' );
+				if ( bg ) {
+					style.setProperty(
+						'--wc-product-filters-background-color',
+						bg
+					);
+				}
+			}
+			if ( ! hasFg ) {
+				const fg = getClosestColor( el.ref, 'color' );
+				if ( fg ) {
+					style.setProperty( '--wc-product-filters-text-color', fg );
+				}
+			}
+		},
 		scrollLimit: () => {
 			const { isOverlayOpened } = getContext< ProductFiltersContext >();
 			if ( isOverlayOpened ) {
@@ -221,7 +303,25 @@ const productFiltersStore = store( 'woocommerce/product-filters', {
 				document.body.style.overflow = 'auto';
 			}
 		},
+		syncActiveFiltersWithServer: () => {
+			if ( ! getServerContext ) return;
+			const context = getContext< ProductFiltersContext >();
+			const serverContext = getServerContext< ProductFiltersContext >();
+
+			context.activeFilters = Array.isArray( serverContext.activeFilters )
+				? serverContext.activeFilters.map( ( item ) => ( { ...item } ) )
+				: [];
+		},
 	},
-} );
+};
+
+// Compile-time protocol conformance check.
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+productFiltersStore satisfies SelectableItemsParentStore< FilterItemFields >;
 
 export type ProductFiltersStore = typeof productFiltersStore;
+
+const { state, actions } = store< ProductFiltersStore >(
+	BLOCK_NAME,
+	productFiltersStore
+);

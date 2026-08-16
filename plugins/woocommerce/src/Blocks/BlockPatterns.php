@@ -3,12 +3,9 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Blocks;
 
-use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 use Automattic\WooCommerce\Blocks\Domain\Package;
 use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
 use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
-use WP_Error;
 
 /**
  * Registers patterns under the `./patterns/` directory and from the PTK API and updates their content.
@@ -53,13 +50,6 @@ class BlockPatterns {
 	private PatternRegistry $pattern_registry;
 
 	/**
-	 * Patterns dictionary
-	 *
-	 * @var array|WP_Error
-	 */
-	private $dictionary;
-
-	/**
 	 * PTKPatternsStore instance.
 	 *
 	 * @var PTKPatternsStore $ptk_patterns_store
@@ -83,27 +73,18 @@ class BlockPatterns {
 		$this->ptk_patterns_store = $ptk_patterns_store;
 
 		add_action( 'init', array( $this, 'register_block_patterns' ) );
-
-		if ( Features::is_enabled( 'pattern-toolkit-full-composability' ) ) {
-			add_action( 'init', array( $this, 'register_ptk_patterns' ) );
-		}
-	}
-
-	/**
-	 * Returns the Patterns dictionary.
-	 *
-	 * @return array|WP_Error
-	 */
-	private function get_patterns_dictionary() {
-		if ( null === $this->dictionary ) {
-			$this->dictionary = PatternsHelper::get_patterns_dictionary();
-		}
-
-		return $this->dictionary;
+		add_action( 'init', array( $this, 'register_ptk_patterns' ) );
 	}
 
 	/**
 	 * Register block patterns from core.
+	 *
+	 * The pattern content is not loaded here. Instead, each pattern is registered
+	 * with the absolute path to its source file (via the `filePath` property), so
+	 * that core's `WP_Block_Patterns_Registry` loads (and caches) the content
+	 * lazily, only when a pattern is actually requested. This avoids the cost of
+	 * `include`-ing all pattern files on every request (e.g. front-end, REST,
+	 * cron), where patterns are never consumed.
 	 *
 	 * @return void
 	 */
@@ -114,7 +95,27 @@ class BlockPatterns {
 
 		$patterns = $this->get_block_patterns();
 		foreach ( $patterns as $pattern ) {
-			$this->pattern_registry->register_block_pattern( $pattern['source'], $pattern, $this->get_patterns_dictionary() );
+			// The pattern list can come from a stale or malformed site transient, so make sure the source is a
+			// usable string before dereferencing it, to avoid a PHP warning when building the path.
+			if ( empty( $pattern['source'] ) || ! is_string( $pattern['source'] ) ) {
+				continue;
+			}
+
+			$pattern_path = $this->patterns_path . '/' . $pattern['source'];
+
+			// The pattern list can come from a stale cache, so confirm the file
+			// still exists before registering it with a `filePath`. Without
+			// inline content, core would otherwise emit an undefined-content
+			// warning when it tries to load a missing file on demand. This
+			// mirrors core's own `_register_theme_block_patterns()` guard.
+			if ( ! file_exists( $pattern_path ) ) {
+				continue;
+			}
+
+			$pattern['source']   = $pattern_path;
+			$pattern['filePath'] = $pattern_path;
+
+			$this->pattern_registry->register_block_pattern( $pattern_path, $pattern );
 		}
 	}
 
@@ -139,7 +140,6 @@ class BlockPatterns {
 			'keywords'      => 'Keywords',
 			'blockTypes'    => 'Block Types',
 			'inserter'      => 'Inserter',
-			'featureFlag'   => 'Feature Flag',
 			'templateTypes' => 'Template Types',
 		);
 
@@ -155,8 +155,9 @@ class BlockPatterns {
 		$patterns = array();
 
 		foreach ( $files as $file ) {
-			$data           = get_file_data( $file, $default_headers );
-			$data['source'] = $file;
+			$data = get_file_data( $file, $default_headers );
+			// We want to store the relative path in the cache, so we can use it later to register the pattern.
+			$data['source'] = str_replace( $this->patterns_path . '/', '', $file );
 			$patterns[]     = $data;
 		}
 
@@ -210,7 +211,7 @@ class BlockPatterns {
 		$has_scheduled_action = function_exists( 'as_has_scheduled_action' ) ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
 
 		$patterns = $this->ptk_patterns_store->get_patterns();
-		if ( empty( $patterns ) ) {
+		if ( empty( $patterns ) || ! is_array( $patterns ) ) {
 			// Only log once per day by using a transient.
 			$transient_key = 'wc_ptk_pattern_store_warning';
 			// By only logging when patterns are empty and no fetch is scheduled,
@@ -232,7 +233,7 @@ class BlockPatterns {
 			$pattern['slug']    = $pattern['name'];
 			$pattern['content'] = $pattern['html'];
 
-			$this->pattern_registry->register_block_pattern( $pattern['ID'], $pattern, $this->get_patterns_dictionary() );
+			$this->pattern_registry->register_block_pattern( $pattern['ID'], $pattern );
 		}
 	}
 
@@ -245,6 +246,18 @@ class BlockPatterns {
 	private function parse_categories( array $patterns ) {
 		return array_map(
 			function ( $pattern ) {
+				if ( ! isset( $pattern['categories'] ) ) {
+					$pattern['categories'] = array();
+				}
+
+				$values = array_values( $pattern['categories'] );
+
+				foreach ( $values as $value ) {
+					if ( ! isset( $value['title'] ) || ! isset( $value['slug'] ) ) {
+						$pattern['categories'] = array();
+					}
+				}
+
 				$pattern['categories'] = array_map(
 					function ( $category ) {
 						foreach ( self::CATEGORIES_PREFIXES as $prefix ) {

@@ -4,21 +4,31 @@
 import clsx from 'clsx';
 import {
 	useCheckoutSubmit,
+	usePaymentMethodInterface,
 	useStoreCart,
 } from '@woocommerce/base-context/hooks';
-import { Icon, check } from '@wordpress/icons';
 import Button from '@woocommerce/base-components/button';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import {
 	FormattedMonetaryAmount,
 	Spinner,
 } from '@woocommerce/blocks-components';
+import { useValidateCheckout } from '@woocommerce/blocks-checkout';
+import type { CustomPlaceOrderButtonComponent } from '@woocommerce/types';
+import { useEditorContext } from '@woocommerce/base-context';
+
+/**
+ * Internal dependencies
+ */
+import './style.scss';
 
 interface PlaceOrderButtonProps {
-	label: string;
+	label: React.ReactNode;
 	fullWidth?: boolean;
 	showPrice?: boolean;
 	priceSeparator?: string;
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	CustomButtonComponent?: CustomPlaceOrderButtonComponent;
 }
 
 const PlaceOrderButton = ( {
@@ -26,6 +36,7 @@ const PlaceOrderButton = ( {
 	fullWidth = false,
 	showPrice = false,
 	priceSeparator = '·',
+	CustomButtonComponent,
 }: PlaceOrderButtonProps ): JSX.Element => {
 	const {
 		onSubmit,
@@ -35,45 +46,32 @@ const PlaceOrderButton = ( {
 		waitingForRedirect,
 	} = useCheckoutSubmit();
 
-	const { cartTotals } = useStoreCart();
-	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
+	const paymentMethodInterface = usePaymentMethodInterface();
+	const validateCheckout = useValidateCheckout();
+	const { isEditor, isPreview = false } = useEditorContext();
 
-	const buttonLabel = (
-		<div
-			// Hide this from screen readers while the checkout is processing. The text will not be removed from the
-			// DOM, it will just be hidden with CSS to maintain the button's size while the spinner appears.
-			aria-hidden={ waitingForProcessing || waitingForRedirect }
-			className={ clsx(
-				'wc-block-components-checkout-place-order-button__text',
-				{
-					'wc-block-components-checkout-place-order-button__text--visually-hidden':
-						waitingForProcessing || waitingForRedirect,
+	const { cartTotals, cartIsLoading } = useStoreCart();
+
+	// when provided, the `CustomButtonComponent` should take precedence over the default button.
+	if ( CustomButtonComponent ) {
+		return (
+			<CustomButtonComponent
+				waitingForProcessing={ waitingForProcessing }
+				waitingForRedirect={ waitingForRedirect }
+				disabled={
+					isCalculating ||
+					isDisabled ||
+					waitingForProcessing ||
+					waitingForRedirect ||
+					cartIsLoading
 				}
-			) }
-		>
-			{ label }
-			{ showPrice && (
-				<>
-					<style>
-						{ `.wp-block-woocommerce-checkout-actions-block {
-							.wc-block-components-checkout-place-order-button__separator {
-								&::after {
-									content: "${ priceSeparator }";
-								}
-							}
-						}` }
-					</style>
-					<div className="wc-block-components-checkout-place-order-button__separator" />
-					<div className="wc-block-components-checkout-place-order-button__price">
-						<FormattedMonetaryAmount
-							value={ cartTotals.total_price }
-							currency={ totalsCurrency }
-						/>
-					</div>
-				</>
-			) }
-		</div>
-	);
+				isEditor={ isEditor }
+				isPreview={ isPreview }
+				validate={ validateCheckout }
+				{ ...paymentMethodInterface }
+			/>
+		);
+	}
 
 	return (
 		<Button
@@ -83,20 +81,63 @@ const PlaceOrderButton = ( {
 					'wc-block-components-checkout-place-order-button--full-width':
 						fullWidth,
 				},
-				{ 'wc-blocks-components-button--loading': waitingForProcessing }
+				{
+					'wc-block-components-checkout-place-order-button--loading':
+						waitingForProcessing || waitingForRedirect,
+				}
 			) }
 			onClick={ onSubmit }
 			disabled={
 				isCalculating ||
 				isDisabled ||
 				waitingForProcessing ||
-				waitingForRedirect
+				waitingForRedirect ||
+				cartIsLoading
 			}
-			showSpinner={ waitingForProcessing }
 		>
 			{ waitingForProcessing && <Spinner /> }
-			{ waitingForRedirect && <Icon icon={ check } /> }
-			{ buttonLabel }
+			{ waitingForRedirect && (
+				<svg
+					className="wc-block-components-checkout-place-order-button__icon"
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 24 24"
+					width="24"
+					height="24"
+					aria-hidden="true"
+					focusable="false"
+				>
+					<path d="M16.7 7.1l-6.3 8.5-3.3-2.5-.9 1.2 4.5 3.4L17.9 8z" />
+				</svg>
+			) }
+			<div
+				className={
+					'wc-block-components-checkout-place-order-button__text'
+				}
+			>
+				{ label }
+				{ showPrice && (
+					<>
+						<style>
+							{ `.wp-block-woocommerce-checkout-actions-block {
+							.wc-block-components-checkout-place-order-button__separator {
+								&::after {
+									content: "${ priceSeparator }";
+								}
+							}
+						}` }
+						</style>
+						<div className="wc-block-components-checkout-place-order-button__separator" />
+						<div className="wc-block-components-checkout-place-order-button__price">
+							<FormattedMonetaryAmount
+								value={ cartTotals.total_price }
+								currency={ getCurrencyFromPriceResponse(
+									cartTotals
+								) }
+							/>
+						</div>
+					</>
+				) }
+			</div>
 		</Button>
 	);
 };

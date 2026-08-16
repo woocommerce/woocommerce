@@ -4,7 +4,8 @@
 	box-sizing: content-box;
 	width: 12px;
 	height: 12px;
-	border: 2px solid var(--wc-product-filter-price-slider-handle-border, $gray-900);
+	border: 2px solid
+		var(--wc-product-filter-price-slider-handle-border, $gray-900);
 	border-radius: 100%;
 	padding: 0;
 	margin: 0;
@@ -78,13 +79,23 @@
 		--low: 0%;
 		--high: 100%;
 		--range-color: var(--wc-product-filter-price-slider, currentColor);
-		--track-background:
-			linear-gradient(to right, transparent var(--low), var(--range-color) 0, var(--range-color) var(--high), transparent 0)
+		--track-background: linear-gradient(
+				to right,
+				transparent var(--low),
+				var(--range-color) 0,
+				var(--range-color) var(--high),
+				transparent 0
+			)
 			no-repeat 0 100% / 100% 100%;
 
 		.rtl & {
-			--track-background:
-				linear-gradient(to left, transparent var(--low), var(--range-color) 0, var(--range-color) var(--high), transparent 0)
+			--track-background: linear-gradient(
+					to left,
+					transparent var(--low),
+					var(--range-color) 0,
+					var(--range-color) var(--high),
+					transparent 0
+				)
 				no-repeat 0 100% / 100% 100%;
 		}
 
@@ -219,5 +230,4 @@
 			border-radius: 4px;
 		}
 	}
-
 }

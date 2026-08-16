@@ -11,7 +11,7 @@ import { Date, Link } from '@woocommerce/components';
 import { formatValue } from '@woocommerce/number';
 import {
 	getReportTableQuery,
-	REPORTS_STORE_NAME,
+	reportsStore,
 	settingsStore,
 	QUERY_DEFAULTS,
 	optionsStore,
@@ -359,7 +359,7 @@ export default compose(
 		const dateType = getOption( 'woocommerce_date_type' ) || 'date_paid';
 		const datesFromQuery = getCurrentDates( query, defaultDateRange );
 		const { getReportStats, getReportStatsError, isResolving } =
-			select( REPORTS_STORE_NAME );
+			select( reportsStore );
 
 		const tableQuery = formatTableQuery(
 			query.order || 'desc',

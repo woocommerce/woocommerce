@@ -285,13 +285,12 @@ class WC_Shop_Customizer {
 			?>
 			<script type="text/javascript">
 				jQuery( document ).ready( function( $ ) {
-					const message = <?php echo wp_json_encode( $message ); ?>;
+					const message = <?php echo wp_json_encode( $message, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ); ?>;
 					$( "#sub-accordion-panel-woocommerce" ).append( "<li class='notice notice-info'>" + message + "</li>" );
 				} );
 			</script>
 			<?php
 		}
-
 	}
 
 	/**
@@ -947,15 +946,6 @@ class WC_Shop_Customizer {
 	 */
 	private function has_block_checkout() {
 		$post = get_post( get_option( 'woocommerce_checkout_page_id' ) );
-		return strpos( $post->post_content, '<!-- wp:woocommerce/checkout' ) !== false;
+		return $post && strpos( $post->post_content, '<!-- wp:woocommerce/checkout' ) !== false;
 	}
-}
-
-global $pagenow;
-if (
-	'customize.php' === $pagenow ||
-	isset( $_REQUEST['customize_theme'] ) || // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	! wc_current_theme_is_fse_theme()
-) {
-	new WC_Shop_Customizer();
 }

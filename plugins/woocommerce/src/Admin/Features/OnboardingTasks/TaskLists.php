@@ -5,8 +5,9 @@
 
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\ReviewShippingOptions;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
+
 /**
  * Task Lists class.
  */
@@ -48,7 +49,6 @@ class TaskLists {
 		'Tax',
 		'Shipping',
 		'Marketing',
-		'Appearance',
 		'AdditionalPayments',
 		'ReviewShippingOptions',
 		'GetMobileApp',
@@ -107,37 +107,18 @@ class TaskLists {
 	 */
 	public static function init_default_lists() {
 		$tasks = array(
-			'CustomizeStore',
 			'StoreDetails',
 			'Products',
-			'Appearance',
-			'WooCommercePayments',
 			'Payments',
+			'CustomizeStore',
 			'Tax',
 			'Shipping',
 			'LaunchYourStore',
 		);
 
-		if ( Features::is_enabled( 'core-profiler' ) ) {
-			$key = array_search( 'StoreDetails', $tasks, true );
-			if ( false !== $key ) {
-				unset( $tasks[ $key ] );
-			}
-		}
-
-		// Remove the old Personalize your store task if the new CustomizeStore is enabled.
-		$task_to_remove                 = Features::is_enabled( 'customize-store' ) ? 'Appearance' : 'CustomizeStore';
-		$store_customisation_task_index = array_search( $task_to_remove, $tasks, true );
-		if ( false !== $store_customisation_task_index ) {
-			unset( $tasks[ $store_customisation_task_index ] );
-		}
-
-		// If the React-based Payments settings page is enabled, we don't need the dedicated WooPayments task.
-		if ( Features::is_enabled( 'reactify-classic-payments-settings' ) ) {
-			$key = array_search( 'WooCommercePayments', $tasks, true );
-			if ( false !== $key ) {
-				unset( $tasks[ $key ] );
-			}
+		$key = array_search( 'StoreDetails', $tasks, true );
+		if ( false !== $key ) {
+			unset( $tasks[ $key ] );
 		}
 
 		self::add_list(
@@ -177,28 +158,26 @@ class TaskLists {
 			)
 		);
 
-		if ( Features::is_enabled( 'shipping-smart-defaults' ) ) {
-			self::add_task(
-				'extended',
-				new ReviewShippingOptions(
-					self::get_list( 'extended' )
-				)
-			);
+		self::add_task(
+			'extended',
+			new ReviewShippingOptions(
+				self::get_list( 'extended' )
+			)
+		);
 
-			// Tasklist that will never be shown in homescreen,
-			// used for having tasks that are accessed by other means.
-			self::add_list(
-				array(
-					'id'           => 'secret_tasklist',
-					'hidden_id'    => 'setup',
-					'tasks'        => array(
-						'ExperimentalShippingRecommendation',
-					),
-					'event_prefix' => 'secret_tasklist_',
-					'visible'      => false,
-				)
-			);
-		}
+		// Tasklist that will never be shown in homescreen,
+		// used for having tasks that are accessed by other means.
+		self::add_list(
+			array(
+				'id'           => 'secret_tasklist',
+				'hidden_id'    => 'setup',
+				'tasks'        => array(
+					'ExperimentalShippingRecommendation',
+				),
+				'event_prefix' => 'secret_tasklist_',
+				'visible'      => false,
+			)
+		);
 
 		if ( has_filter( 'woocommerce_admin_experimental_onboarding_tasklists' ) ) {
 			/**
@@ -449,7 +428,7 @@ class TaskLists {
 
 		foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
 			if ( 0 === strpos( $menu_item[0], _x( 'Home', 'Admin menu name', 'woocommerce' ) ) ) {
-				$submenu['woocommerce'][ $key ][0] .= ' <span class="awaiting-mod update-plugins remaining-tasks-badge woocommerce-task-list-remaining-tasks-badge"><span class="count-' . esc_attr( $tasks_count ) . '">' . absint( $tasks_count ) . '</span></span>'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+				$submenu['woocommerce'][ $key ][0] .= ' <span class="menu-counter remaining-tasks-badge woocommerce-task-list-remaining-tasks-badge"><span class="count-' . esc_attr( $tasks_count ) . '">' . absint( $tasks_count ) . '</span></span>'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 				break;
 			}
 		}

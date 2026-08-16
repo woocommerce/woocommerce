@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Implement restricted options handling in ImportSetSiteOptions

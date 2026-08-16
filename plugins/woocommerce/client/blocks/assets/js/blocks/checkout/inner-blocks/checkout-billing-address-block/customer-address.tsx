@@ -3,7 +3,11 @@
  */
 import { useCallback, useEffect } from '@wordpress/element';
 import { Form } from '@woocommerce/base-components/cart-checkout';
-import { useCheckoutAddress, useStoreEvents } from '@woocommerce/base-context';
+import {
+	useCheckoutAddress,
+	useStoreEvents,
+	useCustomerData,
+} from '@woocommerce/base-context';
 import type { AddressFormValues } from '@woocommerce/settings';
 import { useSelect } from '@wordpress/data';
 import { validationStore } from '@woocommerce/block-data';
@@ -21,33 +25,47 @@ const CustomerAddress = () => {
 		setShippingAddress,
 		setBillingAddress,
 		useBillingAsShipping,
-		editingBillingAddress: editing,
-		setEditingBillingAddress: setEditing,
+		editingBillingAddress,
+		setEditingBillingAddress,
 	} = useCheckoutAddress();
 	const { dispatchCheckoutEvent } = useStoreEvents();
+	const { isInitialized } = useCustomerData();
 
-	// Forces editing state if store has errors.
-	const { hasValidationErrors, invalidProps } = useSelect( ( select ) => {
-		const store = select( validationStore );
-		return {
-			hasValidationErrors: store.hasValidationErrors(),
-			invalidProps: Object.keys( billingAddress )
-				.filter( ( key ) => {
-					return (
-						key !== 'email' &&
-						store.getValidationError( 'billing_' + key ) !==
-							undefined
-					);
-				} )
-				.filter( Boolean ),
-		};
-	} );
+	const { validationErrors } = useSelect(
+		( select ) => {
+			return {
+				validationErrors:
+					select( validationStore ).getValidationErrors(),
+			};
+		},
+		[ billingAddress ]
+	);
 
 	useEffect( () => {
-		if ( invalidProps.length > 0 && editing === false ) {
-			setEditing( true );
+		// Check if any billing field has validation errors
+		const hasValidationErrors = Object.keys( billingAddress ).some(
+			( key ) => {
+				// Check if 'billing_' + key exists in validationErrors
+				return validationErrors[ `billing_${ key }` ] !== undefined;
+			}
+		);
+
+		// Forces editing state if store has errors,
+		// but not on initial render when all fields are empty.
+		if (
+			isInitialized &&
+			hasValidationErrors &&
+			editingBillingAddress === false
+		) {
+			setEditingBillingAddress( true );
 		}
-	}, [ editing, hasValidationErrors, invalidProps.length, setEditing ] );
+	}, [
+		editingBillingAddress,
+		billingAddress,
+		isInitialized,
+		setEditingBillingAddress,
+		validationErrors,
+	] );
 
 	const onChangeAddress = useCallback(
 		( values: AddressFormValues ) => {
@@ -66,41 +84,29 @@ const CustomerAddress = () => {
 		]
 	);
 
-	const renderAddressCardComponent = useCallback(
-		() => (
-			<AddressCard
-				address={ billingAddress }
-				target="billing"
-				onEdit={ () => {
-					setEditing( true );
-				} }
-				isExpanded={ editing }
-			/>
-		),
-		[ billingAddress, editing, setEditing ]
-	);
-
-	const renderAddressFormComponent = useCallback(
-		() => (
-			<>
+	return (
+		<AddressWrapper
+			isEditing={ editingBillingAddress }
+			addressCard={
+				<AddressCard
+					address={ billingAddress }
+					target="billing"
+					onEdit={ () => {
+						setEditingBillingAddress( true );
+					} }
+					isExpanded={ editingBillingAddress }
+				/>
+			}
+			addressForm={
 				<Form
 					id="billing"
 					addressType="billing"
 					onChange={ onChangeAddress }
 					values={ billingAddress }
 					fields={ ADDRESS_FORM_KEYS }
-					isEditing={ editing }
+					isEditing={ editingBillingAddress }
 				/>
-			</>
-		),
-		[ billingAddress, onChangeAddress, editing ]
-	);
-
-	return (
-		<AddressWrapper
-			isEditing={ editing }
-			addressCard={ renderAddressCardComponent }
-			addressForm={ renderAddressFormComponent }
+			}
 		/>
 	);
 };

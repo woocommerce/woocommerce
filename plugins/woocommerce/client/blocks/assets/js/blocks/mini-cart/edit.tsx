@@ -18,8 +18,7 @@ import { __, isRTL } from '@wordpress/i18n';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
 import { isSiteEditorPage } from '@woocommerce/utils';
 import type { ReactElement } from 'react';
-import { useEffect, useRef } from '@wordpress/element';
-import { select } from '@wordpress/data';
+import { useRef } from '@wordpress/element';
 import { cartOutline, bag, bagAlt } from '@woocommerce/icons';
 import { Icon } from '@wordpress/icons';
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
@@ -33,6 +32,7 @@ import QuantityBadge from './quantity-badge';
 import { defaultColorItem } from './utils/defaults';
 import { migrateAttributesToColorPanel } from './utils/data';
 import './editor.scss';
+import { useThemeColors } from '../../shared/hooks/use-theme-colors';
 
 export interface Attributes {
 	miniCartIcon: 'cart' | 'bag' | 'bag-alt';
@@ -88,71 +88,24 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 		className: 'wc-block-mini-cart',
 	} );
 
-	const isSiteEditor = isSiteEditorPage( select( 'core/edit-site' ) );
+	const isSiteEditor = isSiteEditorPage();
 
 	const templatePartEditUri = getSetting(
 		'templatePartEditUri',
 		''
 	) as string;
 
-	/**
-	 * This is a workaround for the Site Editor to set the correct
-	 * background color of the Mini-Cart QuantityBadge block based on
-	 * the main background color set by the theme.
-	 */
-	useEffect( () => {
-		let editorStylesWrapper = document.querySelector(
-			'.editor-styles-wrapper'
-		);
-		// If the editor styles wrapper is not available, look in the site editor canvas for it.
-		if ( ! editorStylesWrapper ) {
-			const canvasEl = document.querySelector(
-				'.edit-site-visual-editor__editor-canvas'
-			);
-
-			if ( ! ( canvasEl instanceof HTMLIFrameElement ) ) {
-				return;
+	// Apply Mini Cart quantity badge styles based on Site Editor's background and text colors.
+	// We need to set `span` in the selector so it has more specificity than the CSS.
+	useThemeColors(
+		'mini-cart-badge',
+		( { editorBackgroundColor, editorColor } ) => `
+			span:where(.wc-block-mini-cart__badge) {
+				color: ${ editorBackgroundColor };
+				background-color: ${ editorColor };
 			}
-			const canvas =
-				canvasEl.contentDocument || canvasEl.contentWindow?.document;
-			if ( ! canvas ) {
-				return;
-			}
-			editorStylesWrapper = canvas.querySelector(
-				'.editor-styles-wrapper'
-			);
-		}
-
-		if ( ! editorStylesWrapper ) {
-			return;
-		}
-
-		const editorBackgroundColor =
-			window.getComputedStyle( editorStylesWrapper )?.backgroundColor;
-		const editorColor =
-			window.getComputedStyle( editorStylesWrapper )?.color;
-
-		if (
-			editorStylesWrapper &&
-			! editorStylesWrapper.querySelector(
-				'#mini-cart-quantity-badge-foreground-color'
-			) &&
-			editorBackgroundColor &&
-			editorColor
-		) {
-			const style = document.createElement( 'style' );
-			style.id = 'mini-cart-quantity-badge-foreground-color';
-			style.appendChild(
-				document.createTextNode(
-					`:where(.wc-block-mini-cart__badge) {
-						color: ${ editorBackgroundColor };
-						background-color: ${ editorColor };
-					}`
-				)
-			);
-			editorStylesWrapper.appendChild( style );
-		}
-	}, [] );
+		`
+	);
 
 	const productCount =
 		productCountVisibility === 'never' ||
@@ -166,6 +119,8 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 			<InspectorControls>
 				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
 					<ToggleGroupControl
+						__nextHasNoMarginBottom
+						__next40pxDefaultSize
 						className="wc-block-editor-mini-cart__cart-icon-toggle"
 						isBlock
 						label={ __( 'Cart Icon', 'woocommerce' ) }
@@ -190,10 +145,13 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 						/>
 					</ToggleGroupControl>
 					<BaseControl
+						__nextHasNoMarginBottom
 						id="wc-block-mini-cart__display-toggle"
 						label={ __( 'Display', 'woocommerce' ) }
 					>
 						<ToggleControl
+							__nextHasNoMarginBottom
+							__next40pxDefaultSize
 							label={ __( 'Display total price', 'woocommerce' ) }
 							help={ __(
 								'Toggle to display the total price of products in the shopping cart. If no products have been added, the price will not display.',
@@ -208,6 +166,7 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 						/>
 					</BaseControl>
 					<BaseControl
+						__nextHasNoMarginBottom
 						id="wc-block-mini-cart__product-count-basecontrol"
 						label={ __( 'Show Cart Item Count:', 'woocommerce' ) }
 					>
@@ -247,6 +206,8 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 					</BaseControl>
 					{ isSiteEditor && (
 						<ToggleGroupControl
+							__nextHasNoMarginBottom
+							__next40pxDefaultSize
 							className="wc-block-editor-mini-cart__render-in-cart-and-checkout-toggle"
 							label={ __(
 								'Mini-Cart in cart and checkout pages',
@@ -304,10 +265,12 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 						</>
 					) }
 					<BaseControl
+						__nextHasNoMarginBottom
 						id="wc-block-mini-cart__add-to-cart-behaviour-toggle"
 						label={ __( 'Behavior', 'woocommerce' ) }
 					>
 						<ToggleControl
+							__nextHasNoMarginBottom
 							label={ __(
 								'Open drawer when adding',
 								'woocommerce'
@@ -326,6 +289,7 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 							checked={ addToCartBehaviour === 'open_drawer' }
 						/>
 						<ToggleControl
+							__nextHasNoMarginBottom
 							label={ __(
 								'Navigate to checkout when clicking the Mini-Cart, instead of opening the drawer.',
 								'woocommerce'

@@ -11,12 +11,16 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
+use Automattic\WooCommerce\Internal\CLI\Migrator\Core\MigratorTracker;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
-use Automattic\WooCommerce\Utilities\{ FeaturesUtil, OrderUtil, PluginUtil };
 use Automattic\WooCommerce\Internal\Utilities\BlocksUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
-use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
+use Automattic\WooCommerce\Utilities\{ FeaturesUtil, OrderUtil, PluginUtil };
 
 defined( 'ABSPATH' ) || exit;
 
@@ -182,6 +186,9 @@ class WC_Tracker {
 		$data['categories'] = self::get_category_counts();
 		$data['brands']     = self::get_brands_counts();
 
+		// Migrator CLI statistics.
+		$data['migrator'] = self::get_migrator_data();
+
 		// Get order snapshot.
 		$data['order_snapshot'] = self::get_order_snapshot();
 
@@ -230,6 +237,12 @@ class WC_Tracker {
 		// Email improvements tracking data.
 		$data['email_improvements'] = self::get_email_improvements_info( $template_overrides );
 
+		// Store email usage.
+		$data['store_emails'] = self::get_store_emails();
+
+		// Address autocomplete usage.
+		$data['address_autocomplete'] = self::get_address_autocomplete_info();
+
 		/**
 		 * Filter the data that's sent with the tracker.
 		 *
@@ -244,6 +257,53 @@ class WC_Tracker {
 	}
 
 	/**
+	 * Get address autocomplete info.
+	 *
+	 * @return array Address autocomplete info.
+	 */
+	public static function get_address_autocomplete_info() {
+		$data = array(
+			'enabled'            => ( 'yes' === wc_bool_to_string( get_option( 'woocommerce_address_autocomplete_enabled', 'no' ) ) ) ? 'yes' : 'no',
+			'providers'          => array(),
+			'preferred_provider' => '',
+		);
+
+		if ( ! class_exists( \Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController::class ) ) {
+			// The option could still be set even if the class doesn't exist (e.g. if set manually in the DB).
+			$data['enabled'] = 'no';
+			return $data;
+		}
+
+		$autocomplete_controller = wc_get_container()->get( \Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController::class );
+		$autocomplete_controller->init();
+
+		// Get all registered providers.
+		$providers = $autocomplete_controller->get_providers();
+		if ( is_array( $providers ) ) {
+			foreach ( $providers as $provider ) {
+				if ( ! ( $provider instanceof WC_Address_Provider ) ) {
+					continue;
+				}
+				$data['providers'][] = $provider->id;
+			}
+		}
+
+		if ( empty( $data['providers'] ) ) {
+			// If there are no providers, the feature is effectively disabled.
+			$data['enabled'] = 'no';
+			return $data;
+		}
+
+		if ( 'no' === $data['enabled'] ) {
+			// If the feature is disabled, no need to go further, but we will still track which providers are available.
+			return $data;
+		}
+
+		$data['preferred_provider'] = $autocomplete_controller->get_preferred_provider();
+		return $data;
+	}
+
+	/**
 	 * Get the current theme info, theme name and version.
 	 *
 	 * @return array
@@ -252,7 +312,7 @@ class WC_Tracker {
 		$theme_data           = wp_get_theme();
 		$theme_child_theme    = wc_bool_to_string( is_child_theme() );
 		$theme_wc_support     = wc_bool_to_string( current_theme_supports( 'woocommerce' ) );
-		$theme_is_block_theme = wc_bool_to_string( wc_current_theme_is_fse_theme() );
+		$theme_is_block_theme = wc_bool_to_string( wp_is_block_theme() );
 
 		return array(
 			'name'        => $theme_data->Name, // @phpcs:ignore
@@ -337,7 +397,7 @@ class WC_Tracker {
 	 *
 	 * @return array
 	 */
-	private static function get_all_plugins() {
+	public static function get_all_plugins() {
 		// Ensure get_plugins function is loaded.
 		if ( ! function_exists( 'get_plugins' ) ) {
 			include ABSPATH . '/wp-admin/includes/plugin.php';
@@ -430,9 +490,8 @@ class WC_Tracker {
 	 * @return array
 	 */
 	public static function get_product_counts() {
-		$product_count          = array();
-		$product_count_data     = wp_count_posts( 'product' );
-		$product_count['total'] = $product_count_data->publish;
+		$product_count_data = wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' );
+		$product_count      = array( 'total' => $product_count_data[ ProductStatus::PUBLISH ] ?? 0 );
 
 		$product_statuses = get_terms( 'product_type', array( 'hide_empty' => 0 ) );
 		foreach ( $product_statuses as $product_status ) {
@@ -916,6 +975,24 @@ class WC_Tracker {
 	}
 
 	/**
+	 * Get migrator CLI statistics.
+	 *
+	 * @return array
+	 */
+	private static function get_migrator_data() {
+		if ( ! class_exists( MigratorTracker::class ) ) {
+			return array();
+		}
+
+		try {
+			$tracker = wc_get_container()->get( MigratorTracker::class );
+			return $tracker->get_data();
+		} catch ( \Throwable $e ) {
+			return array();
+		}
+	}
+
+	/**
 	 * Get a list of all active payment gateways.
 	 *
 	 * @return array
@@ -980,13 +1057,13 @@ class WC_Tracker {
 	 */
 	private static function get_all_woocommerce_options_values() {
 		return array(
-			'version'                               => WC()->version,
+			'version'                               => WC()->stable_version(),
 			'currency'                              => get_woocommerce_currency(),
 			'base_location'                         => WC()->countries->get_base_country(),
 			'base_state'                            => WC()->countries->get_base_state(),
 			'base_postcode'                         => WC()->countries->get_base_postcode(),
 			'selling_locations'                     => WC()->countries->get_allowed_countries(),
-			'api_enabled'                           => get_option( 'woocommerce_api_enabled', 'no' ),
+			'api_enabled'                           => WC()->legacy_rest_api_is_available() ? 'yes' : 'no',
 			'weight_unit'                           => get_option( 'woocommerce_weight_unit' ),
 			'dimension_unit'                        => get_option( 'woocommerce_dimension_unit' ),
 			'download_method'                       => get_option( 'woocommerce_file_download_method' ),
@@ -1015,7 +1092,7 @@ class WC_Tracker {
 	 *
 	 * @return array
 	 */
-	private static function get_all_template_overrides() {
+	public static function get_all_template_overrides() {
 		$override_data = array();
 		/**
 		 * Filter the paths to scan for template overrides.
@@ -1188,7 +1265,7 @@ class WC_Tracker {
 	 */
 	private static function get_mini_cart_info() {
 		$mini_cart_block_name = 'woocommerce/mini-cart';
-		$mini_cart_block_data = wc_current_theme_is_fse_theme() ? BlocksUtil::get_block_from_template_part( $mini_cart_block_name, 'header' ) : BlocksUtil::get_blocks_from_widget_area( $mini_cart_block_name );
+		$mini_cart_block_data = wp_is_block_theme() ? BlocksUtil::get_block_from_template_part( $mini_cart_block_name, 'header' ) : BlocksUtil::get_blocks_from_widget_area( $mini_cart_block_name );
 		return array(
 			'mini_cart_used'             => empty( $mini_cart_block_data[0] ) ? 'No' : 'Yes',
 			'mini_cart_block_attributes' => empty( $mini_cart_block_data[0] ) ? array() : $mini_cart_block_data[0]['attrs'],
@@ -1452,6 +1529,7 @@ class WC_Tracker {
 		return array(
 			'enabled'                        => get_option( 'woocommerce_feature_email_improvements_enabled', 'no' ),
 			'default_enabled'                => get_option( 'woocommerce_email_improvements_default_enabled', 'no' ),
+			'existing_store_enabled'         => get_option( 'woocommerce_email_improvements_existing_store_enabled', 'no' ),
 			'auto_sync_enabled'              => get_option( 'woocommerce_email_auto_sync_with_theme', 'no' ),
 			'first_enabled_at'               => get_option( 'woocommerce_email_improvements_first_enabled_at', null ),
 			'last_enabled_at'                => get_option( 'woocommerce_email_improvements_last_enabled_at', null ),
@@ -1467,12 +1545,34 @@ class WC_Tracker {
 	}
 
 	/**
+	 * Get store email usage.
+	 *
+	 * @return array Email usage.
+	 */
+	private static function get_store_emails() {
+		$enabled_emails                          = EmailImprovements::get_enabled_emails();
+		$disabled_emails                         = EmailImprovements::get_disabled_emails();
+		$enabled_or_manual_emails_with_cc_or_bcc = EmailImprovements::get_enabled_or_manual_emails_with_cc_or_bcc();
+
+		return array(
+			'enabled_emails'                          => $enabled_emails,
+			'enabled_emails_count'                    => count( $enabled_emails ),
+			'disabled_emails'                         => $disabled_emails,
+			'disabled_emails_count'                   => count( $disabled_emails ),
+			'enabled_or_manual_emails_with_cc'        => $enabled_or_manual_emails_with_cc_or_bcc['ccs'],
+			'enabled_or_manual_emails_with_cc_count'  => count( $enabled_or_manual_emails_with_cc_or_bcc['ccs'] ),
+			'enabled_or_manual_emails_with_bcc'       => $enabled_or_manual_emails_with_cc_or_bcc['bccs'],
+			'enabled_or_manual_emails_with_bcc_count' => count( $enabled_or_manual_emails_with_cc_or_bcc['bccs'] ),
+		);
+	}
+
+	/**
 	 * Get counts of enabled and disabled core emails.
 	 *
 	 * @return array Array with counts of enabled and disabled emails.
 	 */
 	private static function get_core_email_status_counts() {
-		$core_emails = self::get_core_emails();
+		$core_emails = EmailImprovements::get_core_emails();
 		$enabled     = 0;
 		$disabled    = 0;
 
@@ -1494,34 +1594,13 @@ class WC_Tracker {
 	 * Check if any core emails are being overridden by a template override.
 	 *
 	 * @param array $template_overrides Template overrides.
-	 * @return bool True if core emails are being overridden, false otherwise.
+	 * @return array Array with count of core email overrides and the templates that are overridden.
 	 */
-	private static function get_core_email_overrides( $template_overrides ) {
-		$core_emails            = self::get_core_emails();
-		$core_email_templates   = array_map(
-			function ( $email ) {
-				return basename( $email->template_html );
-			},
-			$core_emails
-		);
-		$intersecting_templates = array_intersect( $core_email_templates, $template_overrides );
+	public static function get_core_email_overrides( $template_overrides ): array {
+		$email_template_overrides = EmailImprovements::get_core_email_overrides( $template_overrides );
 		return array(
-			'count'     => count( $intersecting_templates ),
-			'templates' => $intersecting_templates,
-		);
-	}
-
-	/**
-	 * Get all core emails.
-	 *
-	 * @return array Core emails.
-	 */
-	private static function get_core_emails() {
-		return array_filter(
-			WC()->mailer()->get_emails(),
-			function ( $email ) {
-				return strpos( get_class( $email ), 'WC_Email_' ) === 0;
-			}
+			'count'     => count( $email_template_overrides ),
+			'templates' => $email_template_overrides,
 		);
 	}
 }

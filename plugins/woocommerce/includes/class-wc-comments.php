@@ -45,8 +45,9 @@ class WC_Comments {
 		add_action( 'wp_update_comment_count', array( __CLASS__, 'clear_transients' ) );
 
 		// Secure order notes.
-		add_filter( 'comments_clauses', array( __CLASS__, 'exclude_order_comments' ), 10, 1 );
+		add_filter( 'comments_clauses', array( __CLASS__, 'exclude_order_comments' ) );
 		add_filter( 'comment_feed_where', array( __CLASS__, 'exclude_order_comments_from_feed_where' ) );
+		add_filter( 'akismet_excluded_comment_types', array( __CLASS__, 'akismet_excluded_comment_types' ) );
 
 		// Secure webhook comments.
 		add_filter( 'comments_clauses', array( __CLASS__, 'exclude_webhook_comments' ), 10, 1 );
@@ -59,10 +60,13 @@ class WC_Comments {
 		// Exclude product reviews from general comments.
 		add_filter( 'comments_clauses', array( ReviewsUtil::class, 'comments_clauses_without_product_reviews' ), 10, 2 );
 
+		// Modifies the moderation URLs in the email notifications for product reviews.
+		add_filter( 'comment_moderation_text', array( ReviewsUtil::class, 'modify_product_review_moderation_urls' ), 10, 2 );
+
 		// Count comments.
 		add_filter( 'wp_count_comments', array( __CLASS__, 'wp_count_comments' ), 10, 2 );
 
-		// Delete comments count cache whenever there is a new comment or a comment status changes.
+		// Actualize comments count cache whenever there is a new comment or a comment status changes.
 		add_action( 'wp_insert_comment', array( __CLASS__, 'increment_comments_count_cache_on_wp_insert_comment' ), 10, 2 );
 		add_action( 'transition_comment_status', array( __CLASS__, 'update_comments_count_cache_on_comment_status_change' ), 10, 3 );
 
@@ -119,6 +123,19 @@ class WC_Comments {
 	}
 
 	/**
+	 * Exclude order comments from Akismet comments counting SQL queries for better performance.
+	 *
+	 * @since 10.6.0
+	 *
+	 * @param string[] $comment_types Excluded comments types.
+	 * @return string[]
+	 */
+	public static function akismet_excluded_comment_types( $comment_types ): array {
+		$comment_types[] = 'order_note';
+		return $comment_types;
+	}
+
+	/**
 	 * Exclude order comments from feed.
 	 *
 	 * @deprecated 3.1
@@ -161,9 +178,20 @@ class WC_Comments {
 	}
 
 	/**
-	 * Exclude action_log comments from queries and RSS.
+	 * Exclude webhook comments from queries and RSS.
 	 *
 	 * @since  2.1
+	 * @param  string $where The WHERE clause of the query.
+	 * @return string
+	 */
+	public static function exclude_webhook_comments_from_feed_where( $where ) {
+		return $where . ( trim( $where ) ? ' AND ' : '' ) . " comment_type != 'webhook_delivery' ";
+	}
+
+	/**
+	 * Exclude action_log comments from queries and RSS.
+	 *
+	 * @since  9.9
 	 * @param  string $where The WHERE clause of the query.
 	 * @return string
 	 */
@@ -245,8 +273,13 @@ class WC_Comments {
 	 * @param int $post_id Post ID.
 	 */
 	public static function clear_transients( $post_id ) {
-		if ( 'product' === get_post_type( $post_id ) ) {
-			$product = wc_get_product( $post_id );
+		$post_id = absint( $post_id );
+		if ( 0 === $post_id || 'product' !== get_post_type( $post_id ) ) {
+			return;
+		}
+
+		$product = wc_get_product( $post_id );
+		if ( $product instanceof WC_Product ) {
 			$product->set_rating_counts( self::get_rating_counts_for_product( $product ) );
 			$product->set_average_rating( self::get_average_rating_for_product( $product ) );
 			$product->set_review_count( self::get_review_count_for_product( $product ) );
@@ -470,7 +503,9 @@ class WC_Comments {
 		$comment  = get_comment( $comment_id );
 		$verified = false;
 		if ( 'product' === get_post_type( $comment->comment_post_ID ) ) {
-			$verified = wc_customer_bought_product( $comment->comment_author_email, $comment->user_id, $comment->comment_post_ID );
+			// When possible, narrow down wc_customer_bought_product inputs for better performance.
+			$email    = $comment->user_id ? '' : $comment->comment_author_email;
+			$verified = wc_customer_bought_product( $email, $comment->user_id, $comment->comment_post_ID );
 			add_comment_meta( $comment_id, 'verified', (int) $verified, true );
 		}
 		return $verified;

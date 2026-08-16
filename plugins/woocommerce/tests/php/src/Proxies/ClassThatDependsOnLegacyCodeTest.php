@@ -5,7 +5,6 @@
 
 namespace Automattic\WooCommerce\Tests\Proxies;
 
-use Automattic\WooCommerce\Internal\DependencyManagement\ExtendedContainer;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Tests\Proxies\ExampleClasses\ClassThatDependsOnLegacyCode;
 use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\DependencyClass;
@@ -25,12 +24,9 @@ class ClassThatDependsOnLegacyCodeTest extends \WC_Unit_Test_Case {
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
-		$container = wc_get_container();
+		parent::setUp();
 
-		// TODO: Remove this in WooCommerce 10.0.
-		if ( $container instanceof ExtendedContainer ) {
-			$container->add( ClassThatDependsOnLegacyCode::class )->addArgument( LegacyProxy::class );
-		}
+		$container = wc_get_container();
 
 		$this->sut = $container->get( ClassThatDependsOnLegacyCode::class );
 	}

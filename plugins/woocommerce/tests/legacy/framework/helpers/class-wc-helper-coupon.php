@@ -56,7 +56,7 @@ class WC_Helper_Coupon {
 			update_post_meta( $coupon_id, $key, $value );
 		}
 
-		return new WC_Coupon( $coupon_code );
+		return new WC_Coupon( $coupon_id );
 	}
 
 	/**
@@ -67,9 +67,8 @@ class WC_Helper_Coupon {
 	 * @return bool
 	 */
 	public static function delete_coupon( $coupon_id ) {
-		wp_delete_post( $coupon_id, true );
-
-		return true;
+		$coupon = new WC_Coupon( $coupon_id );
+		return $coupon->delete( true );
 	}
 
 	/**

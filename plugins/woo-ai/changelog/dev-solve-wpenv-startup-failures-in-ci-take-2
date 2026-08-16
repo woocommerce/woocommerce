@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Monorepo: bump and patch wp-env to reduce amount of crashes in CI.

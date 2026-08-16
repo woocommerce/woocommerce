@@ -92,7 +92,7 @@ const RenderField = () => {
 	);
 };
 
-export const Basic: React.FC = () => {
+export const Basic = () => {
 	return (
 		<RegistryProvider value={ registry }>
 			<RenderField />
@@ -100,7 +100,7 @@ export const Basic: React.FC = () => {
 	);
 };
 
-export const ToggleWithTooltip: React.FC = () => {
+export const ToggleWithTooltip = () => {
 	const [ value, setValue ] = useState();
 	return (
 		<RegistryProvider value={ registry }>

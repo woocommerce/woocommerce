@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\CostOfGoodsSold;
 
+use Automattic\WooCommerce\Enums\FeaturePluginCompatibility;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
@@ -22,7 +23,6 @@ class CostOfGoodsSoldController implements RegisterHooksInterface {
 	 * Register hooks.
 	 */
 	public function register() {
-		add_action( 'woocommerce_register_feature_definitions', array( $this, 'add_feature_definition' ) );
 		add_filter( 'woocommerce_debug_tools', array( $this, 'add_debug_tools_entry' ), 999, 1 );
 	}
 
@@ -54,9 +54,10 @@ class CostOfGoodsSoldController implements RegisterHooksInterface {
 	 */
 	public function add_feature_definition( $features_controller ) {
 		$definition = array(
-			'description'        => __( 'Allows entering cost of goods sold information for products. Feature under active development, enable only for testing purposes', 'woocommerce' ),
-			'is_experimental'    => true,
-			'enabled_by_default' => false,
+			'description'                  => __( 'Allows entering cost of goods sold information for products.', 'woocommerce' ),
+			'is_experimental'              => false,
+			'enabled_by_default'           => false,
+			'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 		);
 
 		$features_controller->add_feature_definition(
@@ -145,5 +146,17 @@ class CostOfGoodsSoldController implements RegisterHooksInterface {
 				'cogs_total_value'
 			)
 		);
+	}
+
+	/**
+	 * Get the tooltip text for the COGS value field in the product editor.
+	 *
+	 * @param bool $for_variable_products True to get the value for variable products, false for other types of products.
+	 * @return string The string to use as tooltip (translated but not escaped).
+	 */
+	public function get_general_cost_edit_field_tooltip( bool $for_variable_products ) {
+		return $for_variable_products ?
+			__( 'Add the amount it costs you to buy or make this product. This will be applied as the default value for variations.', 'woocommerce' ) :
+			__( 'Add the amount it costs you to buy or make this product.', 'woocommerce' );
 	}
 }

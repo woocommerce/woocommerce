@@ -7,6 +7,9 @@
  * @version  2.6.0
  */
 
+declare(strict_types=1);
+
+use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -23,14 +26,22 @@ class WC_Admin {
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'includes' ) );
+
+		// Hook in early (priority 1) to make sure the PageController's hooks are added before any WC admin pages or
+		// menus logic is run, including the enqueuing of assets via \Automattic\WooCommerce\Internal\Admin\WCAdminAssets.
+		// While it may not sound like it, the admin_menu action is triggered quite early,
+		// before the admin_init or admin_enqueue_scripts  action.
+		// @see https://developer.wordpress.org/apis/hooks/action-reference/#actions-run-during-an-admin-page-request.
+		add_action( 'admin_menu', array( $this, 'init_page_controller' ), 1 );
+
 		add_action( 'current_screen', array( $this, 'conditional_includes' ) );
 		add_action( 'admin_init', array( $this, 'buffer' ), 1 );
 		add_action( 'admin_init', array( $this, 'preview_emails' ) );
-		add_action( 'admin_init', array( $this, 'preview_email_editor_dummy_content' ) );
 		add_action( 'admin_init', array( $this, 'prevent_admin_access' ) );
 		add_action( 'admin_init', array( $this, 'admin_redirects' ) );
 		add_action( 'admin_footer', 'wc_print_js', 25 );
 		add_filter( 'admin_footer_text', array( $this, 'admin_footer_text' ), 1 );
+		add_filter( 'update_footer', array( $this, 'update_footer_version' ), 20 );
 
 		// Disable WXR export of schedule action posts.
 		add_filter( 'action_scheduler_post_type_args', array( $this, 'disable_webhook_post_export' ) );
@@ -39,7 +50,7 @@ class WC_Admin {
 		add_filter( 'admin_body_class', array( $this, 'include_admin_body_class' ), 9999 );
 
 		// Add body class for Marketplace and My Subscriptions pages.
-		if ( isset( $_GET['page'] ) && 'wc-addons' === $_GET['page'] ) {
+		if ( isset( $_GET['page'] ) && 'wc-addons' === $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			add_filter( 'admin_body_class', array( 'WC_Admin_Addons', 'filter_admin_body_classes' ) );
 		}
 	}
@@ -70,6 +81,11 @@ class WC_Admin {
 		include_once __DIR__ . '/class-wc-admin-exporters.php';
 
 		// Help Tabs.
+		/**
+		 * Filter to enable/disable admin help tab.
+		 *
+		 * @since 3.6.0
+		 */
 		if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) ) {
 			include_once __DIR__ . '/class-wc-admin-help.php';
 		}
@@ -80,6 +96,14 @@ class WC_Admin {
 		// Marketplace suggestions & related REST API.
 		include_once __DIR__ . '/marketplace-suggestions/class-wc-marketplace-suggestions.php';
 		include_once __DIR__ . '/marketplace-suggestions/class-wc-marketplace-updater.php';
+	}
+
+	/**
+	 * Initialize the admin page controller logic.
+	 */
+	public function init_page_controller() {
+		// We only need to make sure the controller is instantiated since the hooking is done in the constructor.
+		PageController::get_instance();
 	}
 
 	/**
@@ -117,23 +141,23 @@ class WC_Admin {
 	}
 
 	/**
-	 * Handle redirects to setup/welcome page after install and updates.
+	 * Handle redirects:
+	 * 1. Nonced plugin install redirects.
 	 *
 	 * The user must have access rights, and we must ignore the network/bulk plugin updaters.
 	 */
 	public function admin_redirects() {
-		// Don't run this fn from Action Scheduler requests, as it would clear _wc_activation_redirect transient.
-		// That means OBW would never be shown.
+		// Don't run this fn from Action Scheduler requests.
 		if ( wc_is_running_from_async_action_scheduler() ) {
 			return;
 		}
 
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		// Nonced plugin install redirects.
 		if ( ! empty( $_GET['wc-install-plugin-redirect'] ) ) {
-			$plugin_slug = wc_clean( wp_unslash( $_GET['wc-install-plugin-redirect'] ) );
+			$plugin_slug    = is_string( $_GET['wc-install-plugin-redirect'] ) ? sanitize_text_field( wp_unslash( $_GET['wc-install-plugin-redirect'] ) ) : '';
+			$redirect_nonce = isset( $_GET['_wpnonce'] ) && is_string( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
 
-			if ( current_user_can( 'install_plugins' ) && in_array( $plugin_slug, array( 'woocommerce-gateway-stripe' ), true ) ) {
+			if ( wp_verify_nonce( $redirect_nonce, 'wc-install-plugin-redirect_' . $plugin_slug ) && current_user_can( 'install_plugins' ) && in_array( $plugin_slug, array( 'woocommerce-gateway-stripe' ), true ) ) {
 				$nonce = wp_create_nonce( 'install-plugin_' . $plugin_slug );
 				$url   = self_admin_url( 'update.php?action=install-plugin&plugin=' . $plugin_slug . '&_wpnonce=' . $nonce );
 			} else {
@@ -143,8 +167,6 @@ class WC_Admin {
 			wp_safe_redirect( $url );
 			exit;
 		}
-
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
@@ -181,6 +203,11 @@ class WC_Admin {
 			}
 		}
 
+		/**
+		 * Filter to prevent admin access.
+		 *
+		 * @since 3.6.0
+		 */
 		if ( apply_filters( 'woocommerce_prevent_admin_access', $prevent_access ) ) {
 			wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
 			exit;
@@ -239,97 +266,11 @@ class WC_Admin {
 	}
 
 	/**
-	 * Preview email editor placeholder dummy content.
-	 */
-	public function preview_email_editor_dummy_content() {
-		if ( isset( $_GET['preview_woocommerce_mail_editor_content'] ) ) {
-			if ( ! ( isset( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ), 'preview-mail' ) ) ) {
-				die( 'Security check' );
-			}
-
-			/**
-			 * Email preview instance for rendering dummy content.
-			 *
-			 * @var EmailPreview $email_preview - email preview instance
-			 */
-			$email_preview = wc_get_container()->get( EmailPreview::class );
-
-			if ( isset( $_GET['type'] ) ) {
-				$type_param = sanitize_text_field( wp_unslash( $_GET['type'] ) );
-				try {
-					$email_preview->set_email_type( $type_param );
-				} catch ( InvalidArgumentException $e ) {
-					wp_die( esc_html__( 'Invalid email type.', 'woocommerce' ), 400 );
-				}
-			}
-
-			$message = $this->capture_woo_content( $email_preview );
-
-			// print the preview email.
-			// phpcs:ignore WordPress.Security.EscapeOutput
-			echo $message;
-			// phpcs:enable
-			exit;
-		}
-	}
-
-	/**
-	 * Captures and returns the main content of a WooCommerce email preview without header and footer.
-	 *
-	 * This is an extracted function from an active PR.
-	 *
-	 * @see https://github.com/woocommerce/woocommerce/pull/56199
-	 *
-	 * Updater after https://github.com/woocommerce/woocommerce/pull/56199 is merged
-	 *
-	 * @param EmailPreview $email_preview - email preview instance.
-	 * @return string
-	 */
-	private function capture_woo_content( $email_preview ): string {
-		// Store the existing header and footer callbacks.
-		global $wp_filter;
-		$original_header_filters = isset( $wp_filter['woocommerce_email_header'] ) ? clone $wp_filter['woocommerce_email_header'] : null;
-		$original_footer_filters = isset( $wp_filter['woocommerce_email_footer'] ) ? clone $wp_filter['woocommerce_email_footer'] : null;
-
-		// Remove header and footer filters because we want to get only the main content.
-		remove_all_filters( 'woocommerce_email_header' );
-		remove_all_filters( 'woocommerce_email_footer' );
-
-		// Start output buffering to prevent partial renders with PHP notices or warnings.
-		ob_start();
-		try {
-			$message = $email_preview->render();
-			$message = $email_preview->ensure_links_open_in_new_tab( $message );
-		} catch ( Throwable $e ) {
-			ob_end_clean();
-			wp_die( esc_html__( 'There was an error rendering an email preview.', 'woocommerce' ), 404 );
-		}
-		ob_end_clean();
-
-		// Restore the original header and footer filters.
-		if ( $original_header_filters ) {
-			foreach ( $original_header_filters->callbacks as $priority => $callbacks ) {
-				foreach ( $callbacks as $filter ) {
-					add_filter( 'woocommerce_email_header', $filter['function'], $priority, $filter['accepted_args'] );
-				}
-			}
-		}
-		if ( $original_footer_filters ) {
-			foreach ( $original_footer_filters->callbacks as $priority => $callbacks ) {
-				foreach ( $callbacks as $filter ) {
-					add_filter( 'woocommerce_email_footer', $filter['function'], $priority, $filter['accepted_args'] );
-				}
-			}
-		}
-
-		return $message;
-	}
-
-	/**
 	 * Change the admin footer text on WooCommerce admin pages.
 	 *
-	 * @since  2.3
-	 * @param  string $footer_text text to be rendered in the footer.
+	 * @since 2.3
+	 *
+	 * @param string $footer_text Footer text to be rendered.
 	 * @return string
 	 */
 	public function admin_footer_text( $footer_text ) {
@@ -337,12 +278,16 @@ class WC_Admin {
 			return $footer_text;
 		}
 		$current_screen = get_current_screen();
-		$wc_pages       = wc_get_screen_ids();
+		$wc_pages       = array_merge( wc_get_screen_ids(), array( 'woocommerce_page_wc-admin' ) );
 
 		// Set only WC pages.
 		$wc_pages = array_diff( $wc_pages, array( 'profile', 'user-edit' ) );
 
-		// Check to make sure we're on a WooCommerce admin page.
+		/**
+		 * Filter to determine if admin footer text should be displayed.
+		 *
+		 * @since 2.3
+		 */
 		if ( isset( $current_screen->id ) && apply_filters( 'woocommerce_display_admin_footer_text', in_array( $current_screen->id, $wc_pages, true ) ) ) {
 			// Change the footer text.
 			if ( ! get_option( 'woocommerce_admin_footer_text_rated' ) ) {
@@ -352,18 +297,78 @@ class WC_Admin {
 					sprintf( '<strong>%s</strong>', esc_html__( 'WooCommerce', 'woocommerce' ) ),
 					'<a href="https://wordpress.org/support/plugin/woocommerce/reviews?rate=5#new-post" target="_blank" class="wc-rating-link" aria-label="' . esc_attr__( 'five star', 'woocommerce' ) . '" data-rated="' . esc_attr__( 'Thanks :)', 'woocommerce' ) . '">&#9733;&#9733;&#9733;&#9733;&#9733;</a>'
 				);
-				wc_enqueue_js(
-					"jQuery( 'a.wc-rating-link' ).on( 'click', function() {
-						jQuery.post( '" . WC()->ajax_url() . "', { action: 'woocommerce_rated' } );
-						jQuery( this ).parent().text( jQuery( this ).data( 'rated' ) );
-					});"
-				);
+
+				$script = "
+		            (function() {
+		                'use strict';
+		                var ratingLink = document.querySelector('a.wc-rating-link');
+		                if (ratingLink) {
+		                    ratingLink.addEventListener('click', function(e) {
+		                        var link = e.currentTarget;
+		                        var formData = new FormData();
+		                        formData.append('action', 'woocommerce_rated');
+		                        
+		                        fetch('" . esc_js( WC()->ajax_url() ) . "', {
+		                            method: 'POST',
+		                            body: formData,
+		                            credentials: 'same-origin'
+		                        });
+		                        
+		                        var parent = link.parentElement;
+		                        if (parent) {
+		                            parent.textContent = link.getAttribute('data-rated');
+		                        }
+		                    });
+		                }
+		            })();
+		            ";
+
+				$handle = 'wc-admin-footer-rating';
+				wp_register_script( $handle, '', array(), WC_VERSION, true );
+				wp_enqueue_script( $handle );
+				wp_add_inline_script( $handle, $script );
 			} else {
 				$footer_text = __( 'Thank you for selling with WooCommerce.', 'woocommerce' );
 			}
 		}
 
-		return $footer_text;
+		return '<span id="footer-thankyou">' . $footer_text . '</span>';
+	}
+
+	/**
+	 * Update the footer version text.
+	 *
+	 * @since 10.2.0
+	 *
+	 * @param string $version The current version string.
+	 * @return string
+	 */
+	public function update_footer_version( $version ) {
+		if ( ! function_exists( 'wc_get_screen_ids' ) ) {
+			return $version;
+		}
+		$current_screen = get_current_screen();
+		$wc_pages       = array_merge( wc_get_screen_ids(), array( 'woocommerce_page_wc-admin' ) );
+
+		// Set only WC pages.
+		$wc_pages = array_diff( $wc_pages, array( 'profile', 'user-edit' ) );
+
+		// Check to make sure we're on a WooCommerce admin page.
+		/**
+		 * Filter to determine if update footer text should be displayed.
+		 *
+		 * @since 2.3
+		 */
+		if ( isset( $current_screen->id ) && apply_filters( 'woocommerce_display_update_footer_text', in_array( $current_screen->id, $wc_pages, true ) ) ) {
+			// Replace WordPress version with WooCommerce version.
+			$version = sprintf(
+				/* translators: %s: WooCommerce version */
+				__( 'Version %s', 'woocommerce' ),
+				esc_html( WC()->version )
+			);
+		}
+
+		return $version;
 	}
 
 	/**
@@ -403,22 +408,27 @@ class WC_Admin {
 	 * @return string
 	 */
 	public function include_admin_body_class( $classes ) {
-		if ( in_array( array( 'wc-wp-version-gte-53', 'wc-wp-version-gte-55' ), explode( ' ', $classes ), true ) ) {
+		$raw_version = get_bloginfo( 'version' );
+
+		if ( ! $raw_version ) {
 			return $classes;
 		}
 
-		$raw_version   = get_bloginfo( 'version' );
 		$version_parts = explode( '-', $raw_version );
 		$version       = count( $version_parts ) > 1 ? $version_parts[0] : $raw_version;
+		$class_list    = explode( ' ', $classes );
 
-		// Add WP 5.3+ compatibility class.
-		if ( $raw_version && version_compare( $version, '5.3', '>=' ) ) {
-			$classes .= ' wc-wp-version-gte-53';
-		}
+		// WP version compatibility classes.
+		$version_classes = array(
+			'5.3' => 'wc-wp-version-gte-53',
+			'5.5' => 'wc-wp-version-gte-55',
+			'7.0' => 'wc-wp-version-gte-70',
+		);
 
-		// Add WP 5.5+ compatibility class.
-		if ( $raw_version && version_compare( $version, '5.5', '>=' ) ) {
-			$classes .= ' wc-wp-version-gte-55';
+		foreach ( $version_classes as $min_version => $class_name ) {
+			if ( ! in_array( $class_name, $class_list, true ) && version_compare( $version, $min_version, '>=' ) ) {
+				$classes .= ' ' . $class_name;
+			}
 		}
 
 		return $classes;

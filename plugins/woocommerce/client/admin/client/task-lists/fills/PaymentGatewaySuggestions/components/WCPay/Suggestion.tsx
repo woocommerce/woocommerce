@@ -31,10 +31,10 @@ interface SuggestionProps {
 	onSetupCallback?: ( () => void ) | null;
 }
 
-export const Suggestion: React.FC< SuggestionProps > = ( {
+export const Suggestion = ( {
 	paymentGateway,
 	onSetupCallback = null,
-} ) => {
+}: SuggestionProps ) => {
 	const {
 		id,
 		needsSetup,

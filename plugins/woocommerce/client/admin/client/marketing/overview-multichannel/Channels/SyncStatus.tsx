@@ -20,7 +20,7 @@ type SyncStatusPropsType = {
 
 const className = 'woocommerce-marketing-sync-status';
 
-export const SyncStatus: React.FC< SyncStatusPropsType > = ( { status } ) => {
+export const SyncStatus = ( { status }: SyncStatusPropsType ) => {
 	if ( status === 'failed' ) {
 		return (
 			<div className={ clsx( className, `${ className }__failed` ) }>

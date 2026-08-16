@@ -4,26 +4,38 @@
  * External dependencies
  */
 import type { BlockAlignment } from '@wordpress/blocks';
-import { ProductResponseItem, isEmpty } from '@woocommerce/types';
+import type { ComponentType, Dispatch, SetStateAction } from 'react';
+import { ProductResponseItem } from '@woocommerce/types';
 import { Icon, Placeholder, Spinner } from '@wordpress/components';
+import { ProductDataContextProvider } from '@woocommerce/shared-context';
 import clsx from 'clsx';
-import { useCallback, useState } from '@wordpress/element';
+import {
+	useCallback,
+	useState,
+	useEffect,
+	useRef,
+	useMemo,
+} from '@wordpress/element';
 import { WP_REST_API_Category } from 'wp-types';
 import { useStyleProps } from '@woocommerce/base-hooks';
-import type { ComponentType, Dispatch, SetStateAction } from 'react';
+import { InnerBlocks, BlockContextProvider } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
  */
-import { CallToAction } from './call-to-action';
 import { ConstrainedResizable } from './constrained-resizable';
 import { EditorBlock, GenericBlockUIConfig } from './types';
-import { useBackgroundImage } from './use-background-image';
+import { BgImageDimensions, useBackgroundImage } from './use-background-image';
 import {
+	getBackgroundColorVisibilityStatus,
 	dimRatioToClass,
 	getBackgroundImageStyles,
 	getClassPrefixFromName,
 } from './utils';
+import {
+	FEATURED_CATEGORY_DEFAULT_TEMPLATE,
+	FEATURED_PRODUCT_DEFAULT_TEMPLATE,
+} from './constants';
 
 interface WithFeaturedItemConfig extends GenericBlockUIConfig {
 	emptyMessage: string;
@@ -45,7 +57,13 @@ export interface FeaturedItemRequiredAttributes {
 	overlayGradient: string;
 	showDesc: boolean;
 	showPrice: boolean;
-	editMode: boolean;
+	backgroundColor: string | undefined;
+	style: { color: { background: string } };
+	backgroundColorVisibilityStatus: {
+		isBackgroundVisible: boolean;
+		message?: string | null;
+	};
+	__woocommerceBlockVersion: number;
 }
 
 interface FeaturedCategoryRequiredAttributes
@@ -64,7 +82,7 @@ interface FeaturedItemRequiredProps< T > {
 	attributes: (
 		| FeaturedCategoryRequiredAttributes
 		| FeaturedProductRequiredAttributes
-	 ) &
+	) &
 		EditorBlock< T >[ 'attributes' ] & {
 			// This is hardcoded because border and color are not yet included
 			// in Gutenberg's official types.
@@ -77,6 +95,7 @@ interface FeaturedItemRequiredProps< T > {
 	isLoading: boolean;
 	setAttributes: ( attrs: Partial< FeaturedItemRequiredAttributes > ) => void;
 	useEditingImage: [ boolean, Dispatch< SetStateAction< boolean > > ];
+	useEditMode: [ boolean, Dispatch< SetStateAction< boolean > > ];
 }
 
 interface FeaturedCategoryProps< T > extends FeaturedItemRequiredProps< T > {
@@ -103,6 +122,7 @@ export const withFeaturedItem =
 	< T extends EditorBlock< T > >( Component: ComponentType< T > ) =>
 	( props: FeaturedItemProps< T > ) => {
 		const [ isEditingImage ] = props.useEditingImage;
+		const [ , setEditMode ] = props.useEditMode;
 
 		const {
 			attributes,
@@ -113,16 +133,61 @@ export const withFeaturedItem =
 			product,
 			setAttributes,
 		} = props;
-		const { mediaId, mediaSrc } = attributes;
+		const { mediaId, mediaSrc, isRepeated, imageFit } = attributes;
 		const item = category || product;
 		const [ backgroundImageSize, setBackgroundImageSize ] = useState( {} );
-
-		const { backgroundImageSrc } = useBackgroundImage( {
+		const {
+			backgroundImageSrc,
+			isImageBgTransparent,
+			originalImgDimension,
+		} = useBackgroundImage( {
 			item,
 			mediaId,
 			mediaSrc,
 			blockName: name,
 		} );
+		const featuredProductParentRef = useRef( null );
+		const [ parentContainerDimension, setParentContainerDimension ] =
+			useState< BgImageDimensions >( { height: 0, width: 0 } );
+
+		useEffect( () => {
+			// Observes the resizable block's dimension changes.
+			const observer = new ResizeObserver( ( entries ) => {
+				setParentContainerDimension( {
+					height: entries[ 0 ].contentRect.height,
+					width: entries[ 0 ].contentRect.width,
+				} );
+			} );
+
+			if ( isLoading === false ) {
+				const element =
+					featuredProductParentRef.current as HTMLElement | null;
+
+				if ( ! element ) return;
+
+				observer.observe( element );
+			}
+
+			return () => observer.disconnect();
+		}, [ isLoading ] );
+
+		const backgroundColorVisibilityStatus = useMemo(
+			() =>
+				getBackgroundColorVisibilityStatus( {
+					isImageBgTransparent,
+					originalImgDimension,
+					parentContainerDimension,
+					isRepeated,
+					imageFit,
+				} ),
+			[
+				parentContainerDimension,
+				originalImgDimension,
+				isRepeated,
+				imageFit,
+				isImageBgTransparent,
+			]
+		);
 
 		const className = getClassPrefixFromName( name );
 
@@ -135,18 +200,6 @@ export const withFeaturedItem =
 			[ setAttributes ]
 		);
 
-		const renderButton = () => {
-			const { categoryId, linkText, productId } = attributes;
-
-			return (
-				<CallToAction
-					itemId={ categoryId || productId }
-					linkText={ linkText }
-					permalink={ ( category || product ).permalink as string }
-				/>
-			);
-		};
-
 		const renderNoItemButton = () => {
 			return (
 				<>
@@ -155,11 +208,53 @@ export const withFeaturedItem =
 					<button
 						type="button"
 						className="components-button is-secondary"
-						onClick={ () => setAttributes( { editMode: true } ) }
+						onClick={ () => setEditMode( true ) }
 					>
 						{ noSelectionButtonLabel }
 					</button>
 				</>
+			);
+		};
+
+		const renderInnerBlocks = () => {
+			if ( product ) {
+				const innerBlocksTemplate =
+					FEATURED_PRODUCT_DEFAULT_TEMPLATE( product );
+				return (
+					<BlockContextProvider
+						value={ { postId: product.id, postType: 'product' } }
+					>
+						<ProductDataContextProvider
+							product={ product }
+							isLoading={ isLoading }
+						>
+							<div className={ `${ className }__inner-blocks` }>
+								<InnerBlocks
+									template={ innerBlocksTemplate }
+									templateLock={ false }
+								/>
+							</div>
+						</ProductDataContextProvider>
+					</BlockContextProvider>
+				);
+			}
+
+			return (
+				<BlockContextProvider
+					value={ {
+						termId: category.term_id,
+						termTaxonomy: 'product_cat',
+					} }
+				>
+					<div className={ `${ className }__inner-blocks` }>
+						<InnerBlocks
+							template={ FEATURED_CATEGORY_DEFAULT_TEMPLATE(
+								category
+							) }
+							templateLock={ false }
+						/>
+					</div>
+				</BlockContextProvider>
 			);
 		};
 
@@ -181,13 +276,9 @@ export const withFeaturedItem =
 				dimRatio,
 				focalPoint,
 				hasParallax,
-				isRepeated,
-				imageFit,
 				minHeight,
 				overlayColor,
 				overlayGradient,
-				showDesc,
-				showPrice,
 				style,
 				textColor,
 			} = attributes;
@@ -209,7 +300,7 @@ export const withFeaturedItem =
 				styleProps.className
 			);
 
-			const containerStyle = {
+			const containerStyle: React.CSSProperties = {
 				borderRadius: style?.border?.radius,
 				color: textColor
 					? `var(--wp--preset--color--${ textColor })`
@@ -242,7 +333,11 @@ export const withFeaturedItem =
 						showHandle={ isSelected }
 						style={ { minHeight } }
 					/>
-					<div className={ containerClass } style={ containerStyle }>
+					<div
+						className={ containerClass }
+						ref={ featuredProductParentRef }
+						style={ containerStyle }
+					>
 						<div className={ `${ className }__wrapper` }>
 							<div
 								className="background-dim__overlay"
@@ -275,41 +370,7 @@ export const withFeaturedItem =
 										style={ backgroundImageStyle }
 									/>
 								) ) }
-							<h2
-								className={ `${ className }__title` }
-								dangerouslySetInnerHTML={ {
-									__html: item.name,
-								} }
-							/>
-							{ ! isEmpty( product?.variation ) && (
-								<h3
-									className={ `${ className }__variation` }
-									dangerouslySetInnerHTML={ {
-										__html: product.variation,
-									} }
-								/>
-							) }
-							{ showDesc && (
-								<div
-									className={ `${ className }__description` }
-									dangerouslySetInnerHTML={ {
-										__html:
-											category?.description ||
-											product?.short_description,
-									} }
-								/>
-							) }
-							{ showPrice && (
-								<div
-									className={ `${ className }__price` }
-									dangerouslySetInnerHTML={ {
-										__html: product.price_html,
-									} }
-								/>
-							) }
-							<div className={ `${ className }__link` }>
-								{ renderButton() }
-							</div>
+							{ renderInnerBlocks() }
 						</div>
 					</div>
 				</>
@@ -321,6 +382,9 @@ export const withFeaturedItem =
 				<Component
 					{ ...props }
 					backgroundImageSize={ backgroundImageSize }
+					backgroundColorVisibilityStatus={
+						backgroundColorVisibilityStatus
+					}
 				/>
 			);
 		}
@@ -330,6 +394,9 @@ export const withFeaturedItem =
 				<Component
 					{ ...props }
 					backgroundImageSize={ backgroundImageSize }
+					backgroundColorVisibilityStatus={
+						backgroundColorVisibilityStatus
+					}
 				/>
 				{ item ? renderItem() : renderNoItem() }
 			</>

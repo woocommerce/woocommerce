@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import deprecated from '@wordpress/deprecated';
@@ -19,7 +19,7 @@ import LegacyListItem from './list-item';
  */
 function List( props ) {
 	const { className, items, children } = props;
-	const listClassName = classnames( 'woocommerce-list', className );
+	const listClassName = clsx( 'woocommerce-list', className );
 
 	deprecated( 'List with items prop is deprecated', {
 		version: '9.0.0',
@@ -31,7 +31,7 @@ function List( props ) {
 			{ items.map( ( item, index ) => {
 				const { className: itemClasses, href, key, onClick } = item;
 				const hasAction = typeof onClick === 'function' || href;
-				const itemClassName = classnames(
+				const itemClassName = clsx(
 					'woocommerce-list__item',
 					itemClasses,
 					{

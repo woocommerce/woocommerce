@@ -5,7 +5,30 @@
  * @package WooCommerce\Admin
  */
 
+use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
+use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
+
 defined( 'ABSPATH' ) || exit;
+
+/*
+ * Pre-load the enum file because the in-process Jetpack autoloader classmap is
+ * captured at request start by the pre-upgrade plugin version, so during a same-
+ * request in-place upgrade it will not contain new src/Enums/* classes added in
+ * the new version. Without this, the DefaultCustomerAddress::* references below
+ * would trigger an autoloader miss and a "Class not found" fatal during the
+ * upgrade-completion iframe of /wp-admin/update.php.
+ *
+ * The class_exists() guard (with autoload disabled) matches the defensive
+ * pattern used elsewhere in includes/, e.g. class-wc-gateway-paypal.php, and
+ * keeps this safe under opcache.preload or any other mechanism that may have
+ * already defined the class before the file is included.
+ *
+ * The architectural fix lives in https://github.com/woocommerce/woocommerce/issues/54657.
+ */
+if ( ! class_exists( '\Automattic\WooCommerce\Enums\DefaultCustomerAddress', false ) ) {
+	require_once dirname( WC_PLUGIN_FILE ) . '/src/Enums/DefaultCustomerAddress.php';
+}
 
 if ( class_exists( 'WC_Settings_General', false ) ) {
 	return new WC_Settings_General();
@@ -46,6 +69,57 @@ class WC_Settings_General extends WC_Settings_Page {
 			$currency_code_options[ $code ] = $name . ' (' . get_woocommerce_currency_symbol( $code ) . ') — ' . esc_html( $code );
 		}
 
+		$address_autocomplete_preferred_provider_setting = array();
+		$address_autocomplete_setting_desc_tip           = __( 'Suggest full addresses to customers as they type.', 'woocommerce' );
+
+		// This is in a try because getting the class from the container may fail if the class is not available.
+		// If it fails, these settings should not be shown as the feature is not available.
+		try {
+			$address_provider_class         = wc_get_container()->get( AddressProviderController::class );
+			$address_autocomplete_providers = $address_provider_class->get_providers();
+			$address_autocomplete_available = ! empty( $address_autocomplete_providers );
+
+			if ( ! $address_autocomplete_available ) {
+				// translators: %s: WooPayments URL.
+				$address_autocomplete_setting_desc_tip .= ' ' . sprintf( __( 'Requires a plugin with predictive address search support (e.g. <a href="%s" target="_blank">WooPayments</a>).', 'woocommerce' ), 'https://woocommerce.com/products/woocommerce-payments/' );
+			}
+
+			$enable_address_autocomplete_setting = array(
+				'id'       => 'woocommerce_address_autocomplete_enabled',
+				'desc'     => __( 'Enable predictive address search', 'woocommerce' ),
+				'name'     => __( 'Address autocomplete', 'woocommerce' ),
+				'type'     => 'checkbox',
+				'disabled' => ! $address_autocomplete_available,
+				'desc_tip' => $address_autocomplete_setting_desc_tip,
+				'default'  => 'no',
+			);
+
+			// If no providers are available, make sure the checkbox is unchecked.
+			if ( ! $address_autocomplete_available ) {
+				$enable_address_autocomplete_setting['value'] = false;
+			}
+
+			if ( count( $address_autocomplete_providers ) > 1 ) {
+				$address_provider_options = array();
+				foreach ( $address_autocomplete_providers as $address_provider ) {
+					$address_provider_options[ $address_provider->id ] = sanitize_text_field( $address_provider->name );
+				}
+				$address_autocomplete_preferred_provider_setting = array(
+					'id'      => 'woocommerce_address_autocomplete_provider',
+					'name'    => __( 'Preferred address autocomplete provider', 'woocommerce' ),
+					'type'    => 'select',
+					'class'   => 'wc-enhanced-select',
+					'default' => $address_autocomplete_providers[0]->id ?? '',
+					'options' => $address_provider_options,
+				);
+			}
+		} catch ( \Exception $e ) {
+			// If the class is not available, we don't want to show the setting.
+			wc_get_logger()->log( 'error', 'Error getting address provider class: ' . $e->getMessage() );
+			$enable_address_autocomplete_setting             = array();
+			$address_autocomplete_preferred_provider_setting = array();
+		}
+
 		$settings =
 			array(
 
@@ -54,6 +128,7 @@ class WC_Settings_General extends WC_Settings_Page {
 					'type'  => 'title',
 					'desc'  => __( 'This is where your business is located. Tax rates and shipping rates will use this address.', 'woocommerce' ),
 					'id'    => 'store_address',
+					'order' => 10,
 				),
 
 				array(
@@ -112,6 +187,7 @@ class WC_Settings_General extends WC_Settings_Page {
 					'type'  => 'title',
 					'desc'  => '',
 					'id'    => 'general_options',
+					'order' => 20,
 				),
 
 				array(
@@ -177,15 +253,32 @@ class WC_Settings_General extends WC_Settings_Page {
 					'title'    => __( 'Default customer location', 'woocommerce' ),
 					'id'       => 'woocommerce_default_customer_address',
 					'desc_tip' => __( 'This option determines a customers default location. The MaxMind GeoLite Database will be periodically downloaded to your wp-content directory if using geolocation.', 'woocommerce' ),
-					'default'  => 'base',
+					'default'  => DefaultCustomerAddress::BASE,
 					'type'     => 'select',
 					'class'    => 'wc-enhanced-select',
 					'options'  => array(
-						''                 => __( 'No location by default', 'woocommerce' ),
-						'base'             => __( 'Shop country/region', 'woocommerce' ),
-						'geolocation'      => __( 'Geolocate', 'woocommerce' ),
-						'geolocation_ajax' => __( 'Geolocate (with page caching support)', 'woocommerce' ),
+						DefaultCustomerAddress::NO_DEFAULT => __( 'No location by default', 'woocommerce' ),
+						DefaultCustomerAddress::BASE => __( 'Shop country/region', 'woocommerce' ),
+						DefaultCustomerAddress::GEOLOCATION => __( 'Geolocate', 'woocommerce' ),
+						DefaultCustomerAddress::GEOLOCATION_AJAX => __( 'Geolocate (with page caching support)', 'woocommerce' ),
 					),
+				),
+
+				$enable_address_autocomplete_setting,
+
+				$address_autocomplete_preferred_provider_setting,
+
+				array(
+					'type' => 'sectionend',
+					'id'   => 'general_options',
+				),
+
+				array(
+					'title' => __( 'Taxes and coupons', 'woocommerce' ),
+					'type'  => 'title',
+					'desc'  => __( 'Enable taxes and coupons and configure how they are calculated.', 'woocommerce' ),
+					'id'    => 'taxes_and_coupons_options',
+					'order' => 30,
 				),
 
 				array(
@@ -221,7 +314,7 @@ class WC_Settings_General extends WC_Settings_Page {
 
 				array(
 					'type' => 'sectionend',
-					'id'   => 'general_options',
+					'id'   => 'taxes_and_coupons_options',
 				),
 
 				array(
@@ -229,6 +322,7 @@ class WC_Settings_General extends WC_Settings_Page {
 					'type'  => 'title',
 					'desc'  => __( 'The following options affect how prices are displayed on the frontend.', 'woocommerce' ),
 					'id'    => 'pricing_options',
+					'order' => 40,
 				),
 
 				array(
@@ -298,6 +392,14 @@ class WC_Settings_General extends WC_Settings_Page {
 				),
 			);
 
+		// Remove any empty items from settings array.
+		// e.g. The preferred autocomplete provider setting would be empty if <=1 providers are registered.
+		$settings = array_filter(
+			$settings,
+			function ( $setting ) {
+				return ! empty( $setting );
+			}
+		);
 		return apply_filters( 'woocommerce_general_settings', $settings );
 	}
 
@@ -313,6 +415,42 @@ class WC_Settings_General extends WC_Settings_Page {
 		echo '<div class="color_box">' . wc_help_tip( $desc ) . '
 			<input name="' . esc_attr( $id ) . '" id="' . esc_attr( $id ) . '" type="text" value="' . esc_attr( $value ) . '" class="colorpick" /> <div id="colorPickerDiv_' . esc_attr( $id ) . '" class="colorpickdiv"></div>
 		</div>';
+	}
+
+	/**
+	 * Output settings with additional JS to hide preferred provider if autocomplete is disabled.
+	 *
+	 * @return void
+	 */
+	public function output() {
+		parent::output();
+
+		$handle = 'wc-admin-settings-general';
+		wp_register_script( $handle, '', array(), WC_VERSION, array( 'in_footer' => true ) );
+		wp_enqueue_script( $handle );
+		wp_add_inline_script(
+			$handle,
+			"
+			const preferredProviderInput = document.querySelector( '#woocommerce_address_autocomplete_provider' );
+			const autocompleteEnabledInput = document.querySelector( '#woocommerce_address_autocomplete_enabled' );
+			let preferredProviderRow = null;
+			if ( preferredProviderInput ) {
+				preferredProviderRow = preferredProviderInput.closest( 'tr' );
+			}
+			if ( autocompleteEnabledInput && preferredProviderRow ) {
+				if ( ! autocompleteEnabledInput.checked ) {
+					preferredProviderRow.style.display = 'none';
+				}
+				autocompleteEnabledInput.addEventListener( 'change', function( e ) {
+					if ( e.target.checked ) {
+						preferredProviderRow.style.display = 'table-row';
+					} else {
+						preferredProviderRow.style.display = 'none';
+					}
+				} );
+			}
+			"
+		);
 	}
 }
 

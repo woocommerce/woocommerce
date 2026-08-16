@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Monorepo: consolidate syncpack config around React 17/18 usage.

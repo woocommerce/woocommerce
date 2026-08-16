@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { noop } from 'lodash';
 import { forwardRef, createElement } from '@wordpress/element';
 
@@ -76,7 +76,7 @@ const Control = forwardRef(
 			 */
 			/* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
 			<div
-				className={ classnames(
+				className={ clsx(
 					'components-base-control',
 					'woocommerce-tree-select-control__control',
 					{

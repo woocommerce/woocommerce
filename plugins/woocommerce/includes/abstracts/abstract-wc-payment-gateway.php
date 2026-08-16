@@ -10,8 +10,9 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
+use Automattic\WooCommerce\Internal\Admin\Settings\Utils as SettingsUtils;
 use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
-use Automattic\WooCommerce\Admin\Features\Features;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -35,6 +36,22 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @var string
 	 */
 	public $order_button_text;
+
+	/**
+	 * Whether the gateway provides a custom place order button.
+	 *
+	 * When true, the default "Place order" button will be hidden on page load
+	 * if this gateway is pre-selected. The gateway must register its custom
+	 * button via JavaScript using wc.customPlaceOrderButton.register().
+	 *
+	 * Note: This property is purely for UX (preventing flash of default button).
+	 * It does NOT affect security or functionality - the JS registration is what
+	 * actually enables the custom button.
+	 *
+	 * @since 10.6.0
+	 * @var bool
+	 */
+	public $has_custom_place_order_button = false;
 
 	/**
 	 * Yes or no based on whether the method is enabled.
@@ -160,7 +177,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			return $this->tokens;
 		}
 
-		if ( is_user_logged_in() && $this->supports( 'tokenization' ) ) {
+		if ( is_user_logged_in() && $this->supports( PaymentGatewayFeature::TOKENIZATION ) ) {
 			$this->tokens = WC_Payment_Tokens::get_customer_tokens( get_current_user_id(), $this->id );
 		}
 
@@ -205,18 +222,21 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * Output the gateway settings screen.
 	 */
 	public function admin_options() {
-		$is_reactify_enabled      = Features::is_enabled( 'reactify-classic-payments-settings' );
 		$offline_payment_gateways = array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID );
 		$is_offline_gateway       = in_array( $this->id, $offline_payment_gateways, true );
 
-		$return_url = admin_url( 'admin.php?page=wc-settings&tab=checkout' );
-		if ( $is_reactify_enabled && $is_offline_gateway ) {
-			$return_url = add_query_arg( 'section', 'offline', $return_url );
+		$return_path = null;
+		if ( $is_offline_gateway ) {
+			// For offline gateways, we return to the offline settings section which is a Reactified page,
+			// hence the use of `path` parameter.
+			$offline_section = class_exists( 'WC_Settings_Payment_Gateways' )
+				? WC_Settings_Payment_Gateways::OFFLINE_SECTION_NAME
+				: 'offline';
+			$return_path     = '/' . $offline_section;
 		}
 
-		echo '<h2>' . esc_html( $this->get_method_title() );
-		wc_back_link( __( 'Return to payments', 'woocommerce' ), $return_url );
-		echo '</h2>';
+		wc_back_header( $this->get_method_title(), esc_html__( 'Return to payments', 'woocommerce' ), SettingsUtils::wc_payments_settings_url( $return_path ) );
+
 		echo wp_kses_post( wpautop( $this->get_method_description() ) );
 		parent::admin_options();
 	}
@@ -320,13 +340,17 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	/**
 	 * Check if the gateway is available for use.
 	 *
+	 * @since 10.7.0 Added early return when gateway is disabled.
 	 * @return bool
 	 */
 	public function is_available() {
-		$is_available = ( 'yes' === $this->enabled );
+		$is_available = 'yes' === $this->enabled;
 
-		if ( WC()->cart && 0 < $this->get_order_total() && 0 < $this->max_amount && $this->max_amount < $this->get_order_total() ) {
-			$is_available = false;
+		if ( $is_available && WC()->cart ) {
+			$order_total = $this->get_order_total();
+			if ( 0 < $order_total && 0 < $this->max_amount && $order_total > $this->max_amount ) {
+				$is_available = false;
+			}
 		}
 
 		return $is_available;
@@ -477,7 +501,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			echo wpautop( wptexturize( $description ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 
-		if ( $this->supports( 'default_credit_card_form' ) ) {
+		if ( $this->supports( PaymentGatewayFeature::DEFAULT_CREDIT_CARD_FORM ) ) {
 			$this->credit_card_form(); // Deprecated, will be removed in a future version.
 		}
 	}
@@ -514,7 +538,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @return bool If false, the automatic refund button is hidden in the UI.
 	 */
 	public function can_refund_order( $order ) {
-		return $order && $this->supports( 'refunds' );
+		return $order && $this->supports( PaymentGatewayFeature::REFUNDS );
 	}
 
 	/**

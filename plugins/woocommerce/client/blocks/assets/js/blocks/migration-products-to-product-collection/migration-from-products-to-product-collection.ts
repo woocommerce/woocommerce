@@ -7,12 +7,10 @@ import { select, dispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { getInitialStatusLSValue } from './constants';
 import {
 	getProductsBlockClientIds,
 	checkIfBlockCanBeInserted,
 	postTemplateHasSupportForGridView,
-	setUpgradeStatus,
 } from './migration-utils';
 import type {
 	TransformBlock,
@@ -221,6 +219,5 @@ export const replaceProductsWithProductCollection = () => {
 };
 
 export const manualUpdate = () => {
-	setUpgradeStatus( getInitialStatusLSValue() );
 	replaceProductsWithProductCollection();
 };

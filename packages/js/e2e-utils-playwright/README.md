@@ -33,6 +33,42 @@ test('can add products to cart', async ({ page }) => {
 });
 ```
 
+## API Client
+
+The package provides an API client utility for making authenticated requests to the WooCommerce REST API.
+
+### Basic Auth Example
+
+```js
+import { createClient } from '@woocommerce/e2e-utils-playwright';
+
+const client = createClient('http://localhost:8889/', {
+  type: 'basic',
+  username: 'admin',
+  password: 'password',
+});
+
+const response = await client.get('wc/v3/products');
+console.log(response.data);
+```
+
+### OAuth1 Example
+
+```js
+import { createClient } from '@woocommerce/e2e-utils-playwright';
+
+const client = createClient('http://localhost:8889/', {
+  type: 'oauth1',
+  consumerKey: 'ck_xxx',
+  consumerSecret: 'cs_xxx',
+});
+
+const response = await client.get('wc/v3/products');
+console.log(response.data);
+```
+
+Supported methods: `get(path, params, debug)`, `post(path, data, debug)`, `put(path, data, debug)`, `delete(path, params, debug)`
+
 ## Contributing to this package
 
 This is an individual package that's part of the WooCommerce project, which is organized as a monorepo.

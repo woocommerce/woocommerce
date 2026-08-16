@@ -6,24 +6,15 @@ import { createElement, Fragment, useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { useInView } from 'react-intersection-observer';
 import moment from 'moment';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { H, Section } from '@woocommerce/components';
-import { sanitize } from 'dompurify';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 
 /**
  * Internal dependencies
  */
 import { InboxNoteActionButton } from './action';
 import { useCallbackOnLinkClick } from './use-callback-on-link-click';
-
-const ALLOWED_TAGS = [ 'a', 'b', 'em', 'i', 'strong', 'p', 'br' ];
-const ALLOWED_ATTR = [ 'target', 'href', 'rel', 'name', 'download' ];
-
-const sanitizeHTML = ( html: string ) => {
-	return {
-		__html: sanitize( html, { ALLOWED_TAGS, ALLOWED_ATTR } ),
-	};
-};
 
 type InboxNoteAction = {
 	id: number;
@@ -42,11 +33,13 @@ type InboxNote = {
 	date_created: string;
 	date_created_gmt: string;
 	actions: InboxNoteAction[];
-	layout: string;
-	image: string;
 	is_deleted: boolean;
 	type: string;
 	is_read: boolean;
+	/** @deprecated No longer rendered. Will be removed in a future release. */
+	layout?: string;
+	/** @deprecated No longer rendered. Will be removed in a future release. */
+	image?: string;
 };
 
 type InboxNoteProps = {
@@ -58,14 +51,14 @@ type InboxNoteProps = {
 	className?: string;
 };
 
-const InboxNoteCard: React.FC< InboxNoteProps > = ( {
+const InboxNoteCard = ( {
 	note,
 	onDismiss,
 	onNoteActionClick,
 	onBodyLinkClick,
 	onNoteVisible,
 	className,
-} ) => {
+}: InboxNoteProps ) => {
 	const [ clickedActionText, setClickedActionText ] = useState( false );
 	const { ref } = useInView( {
 		triggerOnce: true,
@@ -143,9 +136,7 @@ const InboxNoteCard: React.FC< InboxNoteProps > = ( {
 	const {
 		content,
 		date_created_gmt: dateCreatedGmt,
-		image,
 		is_deleted: isDeleted,
-		layout,
 		status,
 		title,
 		is_read,
@@ -156,30 +147,16 @@ const InboxNoteCard: React.FC< InboxNoteProps > = ( {
 	}
 
 	const unread = is_read === false;
-	const hasImage = layout === 'thumbnail';
-	const cardClassName = classnames(
-		'woocommerce-inbox-message',
-		className,
-		layout,
-		{
-			'message-is-unread': unread && status === 'unactioned',
-		}
-	);
+	const cardClassName = clsx( 'woocommerce-inbox-message', className, {
+		'message-is-unread': unread && status === 'unactioned',
+	} );
 
-	const actionWrapperClassName = classnames(
-		'woocommerce-inbox-message__actions',
-		{
-			'has-multiple-actions': note.actions?.length > 1,
-		}
-	);
+	const actionWrapperClassName = clsx( 'woocommerce-inbox-message__actions', {
+		'has-multiple-actions': note.actions?.length > 1,
+	} );
 
 	return (
 		<section ref={ ref } className={ cardClassName }>
-			{ hasImage && (
-				<div className="woocommerce-inbox-message__image">
-					<img src={ image } alt="" />
-				</div>
-			) }
 			<div className="woocommerce-inbox-message__wrapper">
 				<div className="woocommerce-inbox-message__content">
 					{ unread && (
@@ -213,7 +190,9 @@ const InboxNoteCard: React.FC< InboxNoteProps > = ( {
 					</H>
 					<Section className="woocommerce-inbox-message__text">
 						<span
-							dangerouslySetInnerHTML={ sanitizeHTML( content ) }
+							dangerouslySetInnerHTML={ {
+								__html: sanitizeHTML( content ),
+							} }
 							ref={ linkCallbackRef }
 						/>
 					</Section>
@@ -227,4 +206,4 @@ const InboxNoteCard: React.FC< InboxNoteProps > = ( {
 	);
 };
 
-export { InboxNoteCard, InboxNote, InboxNoteAction };
+export { InboxNoteCard, type InboxNote, type InboxNoteAction };

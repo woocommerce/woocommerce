@@ -44,7 +44,7 @@ export const useShippingDataContext = (): ShippingDataContextType => {
 export const ShippingDataProvider = ( {
 	children,
 }: ShippingDataProviderProps ) => {
-	const { __internalIncrementCalculating, __internalDecrementCalculating } =
+	const { __internalStartCalculation, __internalFinishCalculation } =
 		useDispatch( checkoutStore );
 	const { shippingRates, isLoadingRates, cartErrors } = useStoreCart();
 	const { selectedRates, isSelectingRate } = useShippingData();
@@ -75,26 +75,26 @@ export const ShippingDataProvider = ( {
 	// increment/decrement checkout calculating counts when shipping is loading.
 	useEffect( () => {
 		if ( isLoadingRates ) {
-			__internalIncrementCalculating();
+			void __internalStartCalculation();
 		} else {
-			__internalDecrementCalculating();
+			void __internalFinishCalculation();
 		}
 	}, [
 		isLoadingRates,
-		__internalIncrementCalculating,
-		__internalDecrementCalculating,
+		__internalStartCalculation,
+		__internalFinishCalculation,
 	] );
 
 	// increment/decrement checkout calculating counts when shipping rates are being selected.
 	useEffect( () => {
 		if ( isSelectingRate ) {
-			__internalIncrementCalculating();
+			void __internalStartCalculation();
 		} else {
-			__internalDecrementCalculating();
+			void __internalFinishCalculation();
 		}
 	}, [
-		__internalIncrementCalculating,
-		__internalDecrementCalculating,
+		__internalStartCalculation,
+		__internalFinishCalculation,
 		isSelectingRate,
 	] );
 
@@ -128,7 +128,7 @@ export const ShippingDataProvider = ( {
 			! isLoadingRates &&
 			( shippingRates.length === 0 || currentErrorStatus.hasError )
 		) {
-			emitEvent(
+			void emitEvent(
 				currentObservers.current,
 				EMIT_TYPES.SHIPPING_RATES_FAIL,
 				{
@@ -150,7 +150,7 @@ export const ShippingDataProvider = ( {
 			shippingRates.length > 0 &&
 			! currentErrorStatus.hasError
 		) {
-			emitEvent(
+			void emitEvent(
 				currentObservers.current,
 				EMIT_TYPES.SHIPPING_RATES_SUCCESS,
 				shippingRates
@@ -164,7 +164,7 @@ export const ShippingDataProvider = ( {
 			return;
 		}
 		if ( currentErrorStatus.hasError ) {
-			emitEvent(
+			void emitEvent(
 				currentObservers.current,
 				EMIT_TYPES.SHIPPING_RATE_SELECT_FAIL,
 				{
@@ -173,7 +173,7 @@ export const ShippingDataProvider = ( {
 				}
 			);
 		} else {
-			emitEvent(
+			void emitEvent(
 				currentObservers.current,
 				EMIT_TYPES.SHIPPING_RATE_SELECT_SUCCESS,
 				selectedRates.current

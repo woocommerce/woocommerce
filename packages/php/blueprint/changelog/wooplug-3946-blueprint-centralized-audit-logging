@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Implement logging functionality in ExportSchema and ImportStep classes

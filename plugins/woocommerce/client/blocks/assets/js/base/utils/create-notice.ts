@@ -12,9 +12,9 @@ import { CurriedSelectorsOf } from '@wordpress/data/build-types/types';
 /**
  * Internal dependencies
  */
+import type { PaymentStoreDescriptor } from '@woocommerce/block-data/payment';
+import type { StoreNoticesStoreDescriptor } from '@woocommerce/block-data/store-notices';
 import { noticeContexts } from '../context/event-emit/utils';
-import type { PaymentStoreDescriptor } from '../../data/payment';
-import type { StoreNoticesStoreDescriptor } from '../../data/store-notices';
 
 export const DEFAULT_ERROR_MESSAGE = __(
 	'Something went wrong. Please contact us to get assistance.',
@@ -48,7 +48,7 @@ export const createNotice = (
 		return;
 	}
 
-	dispatch( noticesStore ).createNotice( status, message, {
+	void dispatch( noticesStore ).createNotice( status, message, {
 		isDismissible: true,
 		...options,
 		context: noticeContext,
@@ -71,7 +71,7 @@ export const removeAllNotices = () => {
 
 	containers.forEach( ( container ) => {
 		getNotices( container ).forEach( ( notice ) => {
-			removeNotice( notice.id, container );
+			void removeNotice( notice.id, container );
 		} );
 	} );
 };
@@ -81,6 +81,36 @@ export const removeNoticesWithContext = ( context: string ) => {
 	const { getNotices } = select( noticesStore );
 
 	getNotices( context ).forEach( ( notice ) => {
-		removeNotice( notice.id, context );
+		void removeNotice( notice.id, context );
+	} );
+};
+
+/**
+ * Remove notices that have an ID starting with the provided string
+ *
+ * @param {string} id        - The string to match notice IDs against.
+ * @param {string} [context] - The context of the notice to remove. If not provided, will check all contexts.
+ */
+export const removeNoticesForField = ( id: string, context?: string ) => {
+	const { removeNotice } = dispatch( noticesStore );
+
+	if ( context ) {
+		void removeNotice( id, context );
+		return;
+	}
+
+	const selectors = select(
+		'wc/store/store-notices'
+	) as CurriedSelectorsOf< StoreNoticesStoreDescriptor >;
+	const containers = selectors.getRegisteredContainers();
+	const { getNotices } = select( noticesStore );
+
+	// At this point we are removing the notice from all WC contexts since we don't know which one it is.
+	containers.forEach( ( container ) => {
+		getNotices( container ).forEach( ( notice ) => {
+			if ( notice.id.startsWith( id ) ) {
+				void removeNotice( notice.id, container );
+			}
+		} );
 	} );
 };

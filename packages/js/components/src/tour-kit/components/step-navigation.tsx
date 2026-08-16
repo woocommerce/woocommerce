@@ -15,13 +15,13 @@ type Props = Omit<
 	'onMinimize' | 'setInitialFocusedElement'
 >;
 
-const StepNavigation: React.FunctionComponent< Props > = ( {
+const StepNavigation = ( {
 	currentStepIndex,
 	onNextStep,
 	onPreviousStep,
 	onDismiss,
 	steps,
-} ) => {
+}: Props ) => {
 	const isFirstStep = currentStepIndex === 0;
 	const isLastStep = currentStepIndex === steps.length - 1;
 

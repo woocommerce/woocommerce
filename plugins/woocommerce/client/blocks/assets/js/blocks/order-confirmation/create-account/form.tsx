@@ -148,16 +148,15 @@ const Form = ( {
 				className={ clsx(
 					'wc-block-order-confirmation-create-account-button',
 					{
-						'is-loading': isLoading,
+						'wc-block-order-confirmation-create-account-button--loading':
+							isLoading,
 					}
 				) }
 				type="submit"
 				disabled={ !! hasValidationError || needsPassword || isLoading }
 			>
 				{ !! isLoading && <Spinner /> }
-				<span className="wc-block-order-confirmation-create-account-button-text">
-					{ __( 'Create account', 'woocommerce' ) }
-				</span>
+				{ __( 'Create account', 'woocommerce' ) }
 			</Button>
 			<input type="hidden" name="email" value={ customerEmail } />
 			<input type="hidden" name="password" value={ password } />

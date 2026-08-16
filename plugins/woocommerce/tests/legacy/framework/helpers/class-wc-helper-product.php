@@ -135,18 +135,23 @@ class WC_Helper_Product {
 	 * @return WC_Product_Grouped
 	 */
 	public static function create_grouped_product() {
-		$simple_product_1 = self::create_simple_product();
-		$simple_product_2 = self::create_simple_product();
-		$product          = new WC_Product_Grouped();
-		$product->set_props(
+		$simple_product_1 = self::create_simple_product(
+			true,
 			array(
-				'name' => 'Dummy Grouped Product',
-				'sku'  => 'DUMMY GROUPED SKU',
+				'price'         => 1,
+				'regular_price' => 1,
 			)
 		);
+		$simple_product_2 = self::create_simple_product();
+			$product      = new WC_Product_Grouped();
+			$product->set_props(
+				array(
+					'name' => 'Dummy Grouped Product',
+					'sku'  => 'DUMMY GROUPED SKU',
+				)
+			);
 		$product->set_children( array( $simple_product_1->get_id(), $simple_product_2->get_id() ) );
 		$product->save();
-
 		return wc_get_product( $product->get_id() );
 	}
 
@@ -167,7 +172,7 @@ class WC_Helper_Product {
 		$product->set_props(
 			array(
 				'name' => 'Dummy Variable Product',
-				'sku'  => 'DUMMY VARIABLE SKU',
+				'sku'  => 'DUMMY VARIABLE SKU' . microtime(),
 			)
 		);
 
@@ -245,7 +250,7 @@ class WC_Helper_Product {
 		}
 
 		$variation_ids = array_map(
-			function( $variation ) {
+			function ( $variation ) {
 				return $variation->get_id();
 			},
 			$variations
@@ -379,13 +384,13 @@ class WC_Helper_Product {
 
 		foreach ( $terms as $term ) {
 			$result = term_exists( $term, $attribute->slug );
-
-			if ( ! $result ) {
-				$result               = wp_insert_term( $term, $attribute->slug );
-				$return['term_ids'][] = $result['term_id'];
-			} else {
-				$return['term_ids'][] = $result['term_id'];
+			if ( $result ) {
+				// Delete pre-existing term data to guarantee clean testing environment.
+				wp_delete_term( $result['term_id'], $attribute->slug );
 			}
+
+			$result               = wp_insert_term( $term, $attribute->slug );
+			$return['term_ids'][] = $result['term_id'];
 		}
 
 		return $return;

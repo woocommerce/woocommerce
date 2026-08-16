@@ -116,19 +116,6 @@ class Notes extends \WC_REST_CRUD_Controller {
 
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/tracker/(?P<note_id>[\d-]+)/user/(?P<user_id>[\d-]+)',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'track_opened_email' ),
-					'permission_callback' => '__return_true',
-				),
-				'schema' => array( $this, 'get_public_item_schema' ),
-			)
-		);
-
-		register_rest_route(
-			$this->namespace,
 			'/' . $this->rest_base . '/update',
 			array(
 				array(
@@ -609,19 +596,15 @@ class Notes extends \WC_REST_CRUD_Controller {
 		return apply_filters( 'woocommerce_rest_prepare_note', $response, $data, $request );
 	}
 
-
 	/**
 	 * Track opened emails.
+	 *
+	 * @deprecated 10.6.0 This method is no longer functional as the email tracking feature was removed in WooCommerce 9.9.
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 */
 	public function track_opened_email( $request ) {
-		$note = NotesRepository::get_note( $request->get_param( 'note_id' ) );
-		if ( ! $note ) {
-			return;
-		}
-
-		NotesRepository::record_tracks_event_with_user( $request->get_param( 'user_id' ), 'email_note_opened', array( 'note_name' => $note->get_name() ) );
+		wc_deprecated_function( __METHOD__, '10.6.0' );
 	}
 
 	/**
@@ -802,13 +785,13 @@ class Notes extends \WC_REST_CRUD_Controller {
 					'readonly'    => true,
 				),
 				'layout'            => array(
-					'description' => __( 'The layout of the note (e.g. banner, thumbnail, plain).', 'woocommerce' ),
+					'description' => __( 'Deprecated. Always returns "plain". Inbox notes no longer support layout variants; this field will be removed in a future release.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'image'             => array(
-					'description' => __( 'The image of the note, if any.', 'woocommerce' ),
+					'description' => __( 'Deprecated. Always returns an empty string. Inbox notes no longer render images; this field will be removed in a future release.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,

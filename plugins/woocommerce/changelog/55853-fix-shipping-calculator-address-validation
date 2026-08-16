@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Prevent shipping calculator submission with an incomplete address and display inline validation errors.

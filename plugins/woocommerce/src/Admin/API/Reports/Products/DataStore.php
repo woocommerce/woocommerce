@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Enums\ProductType;
 
@@ -235,6 +236,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		if ( 'sku' === $order_by ) {
 			return 'meta_value';
 		}
+
 		return $order_by;
 	}
 
@@ -248,6 +250,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		global $wpdb;
 		$product_names = array();
 
+		if ( $query_args['extended_info'] ) {
+			self::prime_object_caches( array_column( $products_data, 'product_id' ) );
+		}
+
 		foreach ( $products_data as $key => $product_data ) {
 			$extended_info = new \ArrayObject();
 			if ( $query_args['extended_info'] ) {
@@ -259,11 +265,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 						$product_names[ $product_id ] = $wpdb->get_var(
 							$wpdb->prepare(
 								"SELECT i.order_item_name
-								FROM {$wpdb->prefix}woocommerce_order_items i, {$wpdb->prefix}woocommerce_order_itemmeta m
-								WHERE i.order_item_id = m.order_item_id
-								AND m.meta_key = '_product_id'
-								AND m.meta_value = %s
-								ORDER BY i.order_item_id DESC
+								FROM {$wpdb->prefix}wc_order_product_lookup l
+								JOIN {$wpdb->prefix}woocommerce_order_items i ON i.order_item_id = l.order_item_id
+								WHERE l.product_id = %d
+								ORDER BY l.order_item_id DESC
 								LIMIT 1",
 								$product_id
 							)
@@ -413,7 +418,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			$this->subquery->clear_sql_clause( 'select' );
 			$this->subquery->add_sql_clause( 'select', $selections );
-			$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+			if ( in_array( $query_args['orderby'], array( 'items_sold', 'net_revenue', 'orders_count', 'variations' ), true ) ) {
+				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) . ', product_id' );
+			} else {
+				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+			}
 			$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
 			$products_query = $this->subquery->get_query_statement();
 		}
@@ -439,7 +448,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Create or update an entry in the wc_admin_order_product_lookup table for an order.
+	 * Create or update an entry in the wc_order_product_lookup table for an order.
 	 *
 	 * @since 3.5.0
 	 * @param int $order_id Order ID.
@@ -470,15 +479,17 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$is_full_refund_without_line_items = false;
 		$partial_refund_product_revenue    = array();
 		$refund_type                       = $order->get_meta( '_refund_type' );
+		$uses_new_full_refund_data         = OrderUtil::uses_new_full_refund_data();
 
 		$parent_order = null;
 
 		// When changing the order status to "Refunded", the refund order's type will be full refund, and the order items will be empty.
-		// We need to get the parent order items, and exclude the items that is already being patially refunded.
+		// We need to get the parent order items, and exclude the items that are already being partially refunded.
 		if (
 			'shop_order_refund' === $order->get_type() &&
 			'full' === $refund_type &&
-			empty( $order_items )
+			empty( $order_items ) &&
+			$uses_new_full_refund_data
 		) {
 			$is_full_refund_without_line_items = true;
 

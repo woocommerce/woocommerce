@@ -87,4 +87,23 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 	public function test_wc_format_postcode( string $assert, string $postcode, string $country ) {
 		$this->assertSame( $assert, wc_format_postcode( $postcode, $country ), "Test formatting of $postcode postcodes." );
 	}
+
+	/**
+	 * Test wc_is_stock_amount_integer function.
+	 *
+	 * @testdox wc_is_stock_amount_integer should return true when stock amounts are integers and false when they are floats.
+	 */
+	public function test_wc_is_stock_amount_integer() {
+		// Remove all filters from woocommerce_stock_amount.
+		remove_all_filters( 'woocommerce_stock_amount' );
+
+		// Test with floatval applied to the filter.
+		add_filter( 'woocommerce_stock_amount', 'floatval' );
+		$this->assertFalse( wc_is_stock_amount_integer(), 'Should return false when floatval is applied to stock amount filter.' );
+
+		// Remove floatval filter and add intval filter.
+		remove_all_filters( 'woocommerce_stock_amount' );
+		add_filter( 'woocommerce_stock_amount', 'intval' );
+		$this->assertTrue( wc_is_stock_amount_integer(), 'Should return true when intval is applied to stock amount filter.' );
+	}
 }

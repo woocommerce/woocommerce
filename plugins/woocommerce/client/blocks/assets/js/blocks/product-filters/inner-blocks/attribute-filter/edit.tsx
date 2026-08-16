@@ -19,6 +19,7 @@ import { withSpokenMessages } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
+import type { SelectableItemsContext } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -30,9 +31,10 @@ import { EditProps, isAttributeCounts } from './types';
 import { getAttributeFromId } from './utils';
 import { getAllowedBlocks } from '../../utils/get-allowed-blocks';
 import { EXCLUDED_BLOCKS } from '../../constants';
-import { FilterOptionItem } from '../../types';
+import { FilterOptionItem, FilterItemFields } from '../../types';
 import { InitialDisabled } from '../../components/initial-disabled';
 import { Notice } from '../../components/notice';
+import { sortFilterOptions } from '../../utils/sort-filter-options';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
@@ -63,7 +65,11 @@ const Edit = ( props: EditProps ) => {
 			resourceName: 'products/attributes/terms',
 			resourceValues: [ attributeObject?.id || 0 ],
 			shouldSelect: !! attributeObject?.id,
-			query: { orderby: 'menu_order', hide_empty: hideEmpty },
+			query: {
+				orderby: 'menu_order',
+				hide_empty: hideEmpty,
+				__experimental_visual: true,
+			},
 		} );
 
 	const { data: filteredCounts, isLoading: isFilterCountsLoading } =
@@ -88,34 +94,25 @@ const Edit = ( props: EditProps ) => {
 		if ( termIdHasProducts.length === 0 && hideEmpty ) {
 			setAttributeOptions( [] );
 		} else {
+			const filteredOptions = attributeTerms
+				.filter( ( term ) => {
+					if ( hideEmpty )
+						return termIdHasProducts.includes( term.id );
+					return true;
+				} )
+				.map( ( term, index ) => ( {
+					id: term.id.toString(),
+					label: term.name,
+					value: term.id.toString(),
+					selected: index === 0,
+					...( showCounts && { count: term.count } ),
+					...( term.__experimentalVisual && {
+						visual: term.__experimentalVisual,
+					} ),
+				} ) );
+
 			setAttributeOptions(
-				attributeTerms
-					.filter( ( term ) => {
-						if ( hideEmpty )
-							return termIdHasProducts.includes( term.id );
-						return true;
-					} )
-					.sort( ( a, b ) => {
-						switch ( sortOrder ) {
-							case 'name-asc':
-								return a.name > b.name ? 1 : -1;
-							case 'name-desc':
-								return a.name < b.name ? 1 : -1;
-							case 'count-asc':
-								return a.count > b.count ? 1 : -1;
-							case 'count-desc':
-							default:
-								return a.count < b.count ? 1 : -1;
-						}
-					} )
-					.map( ( term, index ) => ( {
-						label: showCounts
-							? `${ term.name } (${ term.count })`
-							: term.name,
-						value: term.id.toString(),
-						selected: index === 0,
-						rawData: term,
-					} ) )
+				sortFilterOptions( filteredOptions, sortOrder )
 			);
 		}
 
@@ -128,6 +125,7 @@ const Edit = ( props: EditProps ) => {
 		hideEmpty,
 		isTermsLoading,
 		isFilterCountsLoading,
+		attributeObject,
 	] );
 
 	const { children, ...innerBlocksProps } = useInnerBlocksProps(
@@ -138,7 +136,7 @@ const Edit = ( props: EditProps ) => {
 				[
 					'core/heading',
 					{
-						level: 4,
+						level: 3,
 						content:
 							attributeObject?.label ||
 							__( 'Attribute', 'woocommerce' ),
@@ -211,13 +209,15 @@ const Edit = ( props: EditProps ) => {
 			<InitialDisabled>
 				<BlockContextProvider
 					value={ {
-						filterData: {
+						'woocommerce/selectableItems': {
 							items:
 								attributeOptions.length === 0 && isPreview
 									? attributeOptionsPreview
 									: attributeOptions,
+							selectionMode: 'multiple' as const,
+							storeNamespace: 'woocommerce/product-filters',
 							isLoading,
-						},
+						} satisfies SelectableItemsContext< FilterItemFields >,
 					} }
 				>
 					{ children }

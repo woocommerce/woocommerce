@@ -3,9 +3,8 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\StoreApi;
 
 use Automattic\WooCommerce\StoreApi\Utilities\RateLimits;
-use Automattic\WooCommerce\StoreApi\Utilities\JsonWebToken;
+use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
-use Automattic\WooCommerce\StoreApi\SessionHandler;
 
 /**
  * Authentication class.
@@ -21,20 +20,9 @@ class Authentication {
 		add_filter( 'rest_authentication_errors', array( $this, 'check_authentication' ) );
 		add_filter( 'rest_authentication_errors', array( $this, 'opt_in_checkout_endpoint' ), 9, 1 );
 		add_action( 'set_logged_in_cookie', array( $this, 'set_logged_in_cookie' ) );
-		add_filter( 'rest_pre_serve_request', array( $this, 'send_cors_headers' ), 10, 1 );
+		add_filter( 'rest_pre_serve_request', array( $this, 'send_cors_headers' ), 10, 4 );
 		add_filter( 'rest_allowed_cors_headers', array( $this, 'allowed_cors_headers' ) );
 		add_filter( 'rest_exposed_cors_headers', array( $this, 'exposed_cors_headers' ) );
-
-		// If cart has a valid token, override the core session class.
-		// Validate returns early if no token, so no performance penalty.
-		if ( JsonWebToken::validate( $this->get_cart_token(), $this->get_cart_token_secret() ) ) {
-			add_filter(
-				'woocommerce_session_handler',
-				function () {
-					return SessionHandler::class;
-				}
-			);
-		}
 
 		// Remove the default CORS headers--we will add our own.
 		remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
@@ -50,6 +38,25 @@ class Authentication {
 		$allowed_headers[] = 'Cart-Token';
 		$allowed_headers[] = 'Nonce';
 		return $allowed_headers;
+	}
+
+	/**
+	 * Use the Store API session handler when a valid Cart-Token is present.
+	 *
+	 * @since 10.6.0
+	 * @param string $handler Session handler class name.
+	 * @return string
+	 */
+	public function maybe_use_store_api_session_handler( $handler ): string {
+		if ( ! WC()->is_store_api_request() && ! $this->has_store_api_route_as_get_parameter() ) {
+			return $handler;
+		}
+
+		$cart_token = CartTokenUtils::get_request_cart_token();
+		if ( $cart_token && CartTokenUtils::validate_cart_token( $cart_token ) ) {
+			return SessionHandler::class;
+		}
+		return $handler;
 	}
 
 	/**
@@ -75,10 +82,13 @@ class Authentication {
 	 *
 	 * Users of valid Cart Tokens are also allowed access from any origin.
 	 *
-	 * @param bool $value  Whether the request has already been served.
+	 * @param bool              $served Whether the request has already been served.
+	 * @param \WP_REST_Response $result The response object.
+	 * @param \WP_REST_Request  $request The request object.
+	 * @param \WP_REST_Server   $server The REST server instance.
 	 * @return bool
 	 */
-	public function send_cors_headers( $value ) {
+	public function send_cors_headers( $served, $result, $request, $server ) {
 		$origin = get_http_origin();
 
 		if ( 'null' !== $origin ) {
@@ -86,14 +96,13 @@ class Authentication {
 		}
 
 		// Send standard CORS headers.
-		$server = rest_get_server();
 		$server->send_header( 'Access-Control-Allow-Methods', 'OPTIONS, GET, POST, PUT, PATCH, DELETE' );
 		$server->send_header( 'Access-Control-Allow-Credentials', 'true' );
 		$server->send_header( 'Vary', 'Origin', false );
 
 		// Allow preflight requests, certain http origins, and any origin if a cart token is present. Preflight requests
 		// are allowed because we'll be unable to validate cart token headers at that point.
-		if ( $this->is_preflight() || JsonWebToken::validate( $this->get_cart_token(), $this->get_cart_token_secret() ) || is_allowed_http_origin( $origin ) ) {
+		if ( $this->is_preflight() || CartTokenUtils::validate_cart_token( $this->get_cart_token( $request ) ) || is_allowed_http_origin( $origin ) ) {
 			$server->send_header( 'Access-Control-Allow-Origin', $origin );
 		}
 
@@ -103,7 +112,24 @@ class Authentication {
 			exit;
 		}
 
-		return $value;
+		return $served;
+	}
+
+	/**
+	 * Checks if the request has a store API route as a GET `rest_route` parameter.
+	 *
+	 * @since 10.6.0
+	 * @return bool
+	 */
+	protected function has_store_api_route_as_get_parameter(): bool {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Store API
+		if ( ! isset( $_GET['rest_route'] ) || ! is_string( $_GET['rest_route'] ) ) {
+			return false;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Store API context check.
+		$rest_route = rawurldecode( esc_url_raw( wp_unslash( $_GET['rest_route'] ) ) );
+		return 0 === strpos( $rest_route, '/wc/store/' );
 	}
 
 	/**
@@ -118,19 +144,11 @@ class Authentication {
 	/**
 	 * Gets the cart token from the request header.
 	 *
+	 * @param \WP_REST_Request $request Deprecated since 11.1.0. Unused; kept for subclasses.
 	 * @return string
 	 */
-	protected function get_cart_token() {
-		return wc_clean( wp_unslash( $_SERVER['HTTP_CART_TOKEN'] ?? '' ) );
-	}
-
-	/**
-	 * Gets the secret for the cart token using wp_salt.
-	 *
-	 * @return string
-	 */
-	protected function get_cart_token_secret() {
-		return '@' . wp_salt();
+	protected function get_cart_token( \WP_REST_Request $request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Signature kept for backwards compatibility.
+		return CartTokenUtils::get_request_cart_token();
 	}
 
 	/**
@@ -173,8 +191,7 @@ class Authentication {
 			FeaturesUtil::feature_is_enabled( 'rate_limit_checkout' )
 			&& $this->is_request_to_store_api()
 			&& preg_match( '#/wc/store(?:/v\d+)?/checkout#', $GLOBALS['wp']->query_vars['rest_route'] )
-			&& isset( $_SERVER['REQUEST_METHOD'] )
-			&& 'POST' === $_SERVER['REQUEST_METHOD']
+			&& $this->is_only_post_request()
 		) {
 			add_filter(
 				'woocommerce_store_api_rate_limit_options',
@@ -281,6 +298,31 @@ class Authentication {
 			return false;
 		}
 		return 0 === strpos( $GLOBALS['wp']->query_vars['rest_route'], '/wc/store/' );
+	}
+
+	/**
+	 * Returns true only for POST requests that are NOT overridden to another method
+	 * via the X-HTTP-Method-Override header (used by wp.apiFetch for PUT/DELETE).
+	 *
+	 * @see https://github.com/wordpress/gutenberg/blob/trunk/packages/api-fetch/src/middlewares/http-v1.ts#L21-L43
+	 *
+	 * @return bool
+	 */
+	private function is_only_post_request() {
+		// Check that REQUEST_METHOD is POST.
+		if ( ! isset( $_SERVER['REQUEST_METHOD'] ) || 'POST' !== $_SERVER['REQUEST_METHOD'] ) {
+			return false;
+		}
+
+		// Check X-HTTP-Method-Override header if it exists and is not empty - it must also be POST.
+		if ( isset( $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] ) ) {
+			$method_override = strtoupper( sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] ) ) );
+			if ( '' !== $method_override && 'POST' !== $method_override ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**

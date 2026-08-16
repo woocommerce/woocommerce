@@ -349,5 +349,74 @@
 			$underObservation.on( 'change', changeAgent );
 			changeAgent();
 		} );
+
+		// Ensures the active tab is visible and centered on small screens if it's out of view in a scrollable tab list.
+		function settings_scroll_to_active_tab() {
+			const body = document.body;
+			if (
+				! body.classList.contains('mobile') ||
+				! body.classList.contains('woocommerce_page_wc-settings')
+			) {
+				return;
+			}
+			// Select the currently active tab
+			const activeTab = document.querySelector( '.nav-tab-active' );
+
+			// Exit if there's no active tab or screen is wider than 500px (desktop)
+			if ( ! activeTab || window.innerWidth >= 500 ) {
+				return;
+			}
+
+			// Get the parent element, assumed to be the scrollable container
+			const parent = activeTab.parentElement;
+
+			// Exit if no parent or if scrolling isn't needed (content fits)
+			if ( ! parent || parent.scrollWidth <= parent.clientWidth ) {
+				return;
+			}
+
+			// Get the position of the active tab relative to its parent
+			const tabLeft = activeTab.offsetLeft;
+			const tabRight = tabLeft + activeTab.offsetWidth;
+			const scrollLeft = parent.scrollLeft;
+			const visibleLeft = scrollLeft;
+			const visibleRight = scrollLeft + parent.clientWidth;
+			const isOutOfView = tabLeft < visibleLeft || tabRight > visibleRight;
+
+			// If it’s out of view, scroll the parent so the tab is centered
+			if ( isOutOfView ) {
+				const offset = tabLeft - parent.clientWidth / 2 + activeTab.offsetWidth / 2;
+					parent.scrollTo( {
+					left: offset,
+					behavior: 'auto' // Instant scroll (no animation)
+				} );
+			}
+		}
+
+		// Some legacy setting pages have tables that span beyond the set width of its parents
+		// causing layout issues.
+		// Fixe the width of the nav tab wrapper to match the window width on mobile.
+		function settings_fix_nav_width() {
+			const body = document.body;
+			if (
+				! body.classList.contains('mobile') ||
+				! body.classList.contains('woocommerce_page_wc-settings')
+			) {
+				return;
+			}
+			const navWrapper = document.getElementsByClassName('nav-tab-wrapper');
+			if ( ! navWrapper.length ) {
+				return;
+			}
+
+			const navWrapperWidth = navWrapper[0].offsetWidth;
+			if ( navWrapperWidth !== window.innerWidth) {
+				navWrapper[0].style.width = window.innerWidth + 'px';
+			}
+		}
+
+		settings_scroll_to_active_tab();
+		settings_fix_nav_width();
+
 	} );
 } )( jQuery, woocommerce_settings_params, wp );

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix a bug in which having 2x of a sold individually item in cart would throw a fatal.

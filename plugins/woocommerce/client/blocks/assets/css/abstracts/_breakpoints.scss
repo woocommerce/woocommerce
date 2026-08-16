@@ -1,5 +1,7 @@
 /* stylelint-disable block-closing-brace-newline-after */
 
+@use "sass:meta";
+
 // Breakpoints
 // Forked from https://github.com/Automattic/wp-calypso/blob/46ae24d8800fb85da6acf057a640e60dac988a38/assets/stylesheets/shared/mixins/_breakpoints.scss
 
@@ -12,7 +14,7 @@ $breakpoints: 480px, 600px, 782px, 960px, 1280px, 1440px;
 // https://github.com/WordPress/gutenberg/blob/master/packages/base-styles/_mixins.scss
 @mixin breakpoint($sizes...) {
 	@each $size in $sizes {
-		@if type-of($size) == string {
+		@if meta.type-of($size) == string {
 			$approved-value: 0;
 			@each $breakpoint in $breakpoints {
 				$and-larger: ">" + $breakpoint;

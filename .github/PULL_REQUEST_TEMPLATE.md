@@ -37,7 +37,7 @@ Closes # .
 
 <!-- Include detailed instructions on how these changes can be tested. Review and follow the guide for how to write high-quality testing instructions. -->
 
-Using the [WooCommerce Testing Instructions Guide](https://github.com/woocommerce/woocommerce/wiki/Writing-high-quality-testing-instructions), include your detailed testing instructions:
+Using the [WooCommerce Testing Instructions Guide](https://developer.woocommerce.com/docs/contribution/testing/writing-high-quality-testing-instructions/), include your detailed testing instructions:
 
 1.
 2.
@@ -51,6 +51,18 @@ Using the [WooCommerce Testing Instructions Guide](https://github.com/woocommerc
 <!-- Include environment details such as hosting type, plugins, theme, store size, store age, and relevant settings. -->
 <!-- Mention any analysis performed, such as assessing potential impacts on environment attributes and other plugins, performance profiling, or LLM/AI-based analysis. -->
 <!-- Within the testing details you provide, please ensure that no sensitive information (such as API keys, passwords, user data, etc.) is included in this public pull request. -->
+
+### Milestone
+
+<!-- DO NOT remove or modify this section (other than to check the box). -->
+
+<!-- milestone-target-selection -->
+- [ ] Automatically assign milestone for the **[next WooCommerce version](../blob/trunk/plugins/woocommerce/woocommerce.php#L6)**
+<!-- /milestone-target-selection -->
+
+> **Note:** Check the box above to have the milestone automatically assigned when merged.
+> Alternatively (e.g. for point releases), manually assign the appropriate milestone.
+
 
 ### Changelog entry
 
@@ -102,3 +114,31 @@ Using the [WooCommerce Testing Instructions Guide](https://github.com/woocommerc
 #### Comment <!-- If your Pull Request doesn't require a changelog entry, a comment explaining why is required instead -->
 
 </details>
+
+### Release Communication
+
+<!-- release-communication-section -->
+Select the release communication labels this PR needs:
+
+- [ ] **Feature Highlight** - For user-facing features (what changed, user impact)
+- [ ] **Developer Advisory** - For developer-facing changes (what changed, how to detect, actions needed)
+
+<details>
+<summary>When to use each?</summary>
+
+**Feature Highlight**: New features, UI changes, or improvements that merchants/store owners will notice.
+
+- Example: "New bulk editing for products", "Improved checkout performance"
+
+**Developer Advisory**: Breaking changes, deprecations, or changes that affect themes/plugins/extensions.
+
+- Example: "Hook signature change", "Deprecated filter", "REST API field removed"
+
+Selected labels are applied when the pull request is merged.
+</details>
+
+### Use of AI Tools
+
+<!--
+You are free to use artificial intelligence (AI) tooling to contribute, but you must disclose what tooling you are using and to what extent a pull request has been authored by AI. It is your responsibility to review and take responsibility for what AI generates. See the WordPress AI Guidelines: <https://make.wordpress.org/ai/handbook/ai-guidelines/>.
+-->

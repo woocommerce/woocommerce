@@ -1,8 +1,7 @@
 {
 	"name": "woocommerce/product-filter-price-slider",
-	"version": "1.0.0",
 	"title": "Price Slider",
-	"description": "A slider helps shopper choose a price range.",
+	"description": "Let shoppers choose a price range with a slider.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"supports": {
@@ -50,8 +49,10 @@
 		}
 	},
 	"ancestor": [ "woocommerce/product-filter-price" ],
-	"usesContext": [ "filterData" ],
+	"usesContext": [ "woocommerce/rangeInput" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
-	"$schema": "https://schemas.wp.org/trunk/block.json"
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"viewScriptModule": "woocommerce/product-filter-price-slider",
+	"style": "file:../woocommerce/product-filter-price-slider-style.css"
 }

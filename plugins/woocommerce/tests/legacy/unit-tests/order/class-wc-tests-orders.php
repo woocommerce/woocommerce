@@ -5,10 +5,13 @@
  * @package WooCommerce\Tests\Order
  */
 
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
+
 /**
  * Class WC_Tests_Order.
  */
 class WC_Tests_Orders extends WC_Unit_Test_Case {
+	use CogsAwareUnitTestSuiteTrait;
 
 	/**
 	 * Test for total when round at subtotal is enabled.
@@ -78,8 +81,8 @@ class WC_Tests_Orders extends WC_Unit_Test_Case {
 		$product->set_regular_price( 23.85 );
 		$product->save();
 
-		$shipping_rate   = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '9.5', array(), 'flat_rate' );
-		$shipping_item   = new WC_Order_Item_Shipping();
+		$shipping_rate = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '9.5', array(), 'flat_rate' );
+		$shipping_item = new WC_Order_Item_Shipping();
 		$shipping_item->set_props(
 			array(
 				'method_title' => $shipping_rate->label,
@@ -151,10 +154,62 @@ class WC_Tests_Orders extends WC_Unit_Test_Case {
 		WC()->cart->calculate_totals();
 
 		$checkout = WC_Checkout::instance();
-		$order = new WC_Order();
+		$order    = new WC_Order();
 		$checkout->set_data_from_cart( $order );
 		$this->assertEquals( 3.05, $order->get_total_tax() );
 		$this->assertEquals( 36.04, $order->get_total() );
 	}
 
+	/**
+	 * @testdox Refunds of products with Cost of Goods Sold have the proper cost value, and calculate_totals in the order substracts it from the order cost.
+	 */
+	public function test_calculate_cogs_for_orders_with_refunds() {
+		$this->enable_cogs_feature();
+
+		$product1 = WC_Helper_Product::create_simple_product();
+		$product1->set_regular_price( 100 );
+		$product1->set_cogs_value( 10 );
+		$product1->save();
+
+		$product2 = WC_Helper_Product::create_simple_product();
+		$product2->set_regular_price( 150 );
+		$product2->set_cogs_value( 15 );
+		$product2->save();
+
+		$order = new WC_Order();
+		$order->add_product( $product1, 10 );
+		$order->add_product( $product2, 10 );
+		$order->calculate_totals();
+		$order->save();
+
+		$this->assertEquals( 250, $order->get_cogs_total_value() );
+
+		$order_items = array_values( $order->get_items( 'line_item' ) );
+
+		$refund = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 65,
+				'reason'     => 'testing',
+				'line_items' => array(
+					$order_items[0]->get_id() =>
+						array(
+							'qty'          => 2,
+							'refund_total' => 20,
+						),
+					$order_items[1]->get_id() =>
+						array(
+							'qty'          => 3,
+							'refund_total' => 45,
+						),
+				),
+			)
+		);
+		$refund->save();
+
+		$this->assertEquals( -65, $refund->get_cogs_total_value() );
+
+		$order->calculate_totals();
+		$this->assertEquals( 250 - 65, $order->get_cogs_total_value() );
+	}
 }

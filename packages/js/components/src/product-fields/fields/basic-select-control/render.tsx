@@ -14,13 +14,13 @@ type SelectControlFieldProps = BaseProductFieldProps< string | string[] > & {
 	multiple?: boolean;
 	options: SelectControlProps[ 'options' ];
 };
-const SelectControlField: React.FC< SelectControlFieldProps > = ( {
+const SelectControlField = ( {
 	label,
 	value,
 	onChange,
 	multiple,
 	options = [],
-} ) => {
+}: SelectControlFieldProps ) => {
 	return (
 		<>
 			{ /* @ts-expect-error wrong type for multiple, should be boolean but explicitly set to true/false */ }

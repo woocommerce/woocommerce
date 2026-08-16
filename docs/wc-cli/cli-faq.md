@@ -1,8 +1,11 @@
 ---
-post_title: WooCommerce CLI Frequently Asked Questions
-menu_title: Frequently Asked Questions
-tags: reference
+post_title: WooCommerce CLI frequently asked questions
+sidebar_label: Frequently asked questions
+sidebar_position: 5
+
 ---
+
+# WooCommerce CLI Frequently Asked Questions
 
 ## General Questions
 

@@ -31,6 +31,14 @@ class RegisterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Clean up after all tests have run.
+	 */
+	public static function tearDownAfterClass(): void {
+		parent::tearDownAfterClass();
+		static::$sut->delete_all();
+	}
+
+	/**
 	 * @testdox Test a range of filepaths and URLs that we expect to be seen as valid.
 	 */
 	public function test_valid_paths() {

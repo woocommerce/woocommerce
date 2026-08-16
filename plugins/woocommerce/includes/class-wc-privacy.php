@@ -282,6 +282,7 @@ class WC_Privacy extends WC_Abstract_Privacy {
 					'limit'        => $limit, // Batches of 20.
 					'status'       => OrderInternalStatus::REFUNDED,
 					'type'         => 'shop_order',
+					'anonymized'   => false,
 				)
 			)
 		);
@@ -301,7 +302,7 @@ class WC_Privacy extends WC_Abstract_Privacy {
 		if ( $orders ) {
 			foreach ( $orders as $order ) {
 				$order->delete( false );
-				$count ++;
+				++$count;
 			}
 		}
 
@@ -350,7 +351,7 @@ class WC_Privacy extends WC_Abstract_Privacy {
 		if ( $orders ) {
 			foreach ( $orders as $order ) {
 				WC_Privacy_Erasers::remove_order_personal_data( $order );
-				$count ++;
+				++$count;
 			}
 		}
 
@@ -429,7 +430,7 @@ class WC_Privacy extends WC_Abstract_Privacy {
 						$user_id
 					)
 				);
-				$count ++;
+				++$count;
 			}
 		}
 

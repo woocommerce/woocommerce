@@ -1,0 +1,1 @@
+export { useProductActions } from './actions';

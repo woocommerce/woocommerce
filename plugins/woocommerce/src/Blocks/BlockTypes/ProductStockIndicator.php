@@ -10,6 +10,8 @@ use Automattic\WooCommerce\Enums\ProductType;
  */
 class ProductStockIndicator extends AbstractBlock {
 
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -95,7 +97,11 @@ class ProductStockIndicator extends AbstractBlock {
 
 		$availability = ProductAvailabilityUtils::get_product_availability( $product_to_render );
 
-		if ( empty( $availability['availability'] ) ) {
+		$is_descendant_of_product_collection       = isset( $block->context['query']['isProductCollectionBlock'] );
+		$is_descendant_of_grouped_product_selector = isset( $block->context['isDescendantOfGroupedProductSelector'] );
+		$is_interactive                            = ! $is_descendant_of_product_collection && ! $is_descendant_of_grouped_product_selector && $product_to_render->is_type( ProductType::VARIABLE );
+
+		if ( empty( $availability['availability'] ) && ! $is_interactive ) {
 			return '';
 		}
 
@@ -115,11 +121,25 @@ class ProductStockIndicator extends AbstractBlock {
 			);
 		}
 
+		$wrapper_attributes = array();
+		$watch_attribute    = '';
+
+		if ( $is_interactive && 'out-of-stock' !== $availability['class'] ) {
+			wp_enqueue_script_module( 'woocommerce/product-elements' );
+			$wrapper_attributes['data-wp-interactive'] = 'woocommerce/products';
+			$wrapper_attributes['data-wp-text']        = 'state.productInContext.stock_availability.text';
+			$wrapper_attributes['aria-live']           = 'polite';
+			$wrapper_attributes['aria-atomic']         = 'true';
+		}
+
 		$output_text = $low_stock_text ?? $availability['availability'];
 
 		$output  = '';
 		$output .= '<div class="wc-block-components-product-stock-indicator wp-block-woocommerce-product-stock-indicator ' . esc_attr( $classnames ) . '"';
 		$output .= isset( $classes_and_styles['styles'] ) ? ' style="' . esc_attr( $classes_and_styles['styles'] ) . '"' : '';
+		if ( $is_interactive && 'out-of-stock' !== $availability['class'] ) {
+			$output .= ' ' . get_block_wrapper_attributes( $wrapper_attributes );
+		}
 		$output .= '>';
 		$output .= wp_kses_post( $output_text );
 		$output .= '</div>';

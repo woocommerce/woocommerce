@@ -3,29 +3,30 @@
  */
 import { useSelect } from '@wordpress/data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
-
-const unsupportedBlocks = [
-	'core/post-content',
-	'woocommerce/mini-cart',
-	'woocommerce/featured-product',
-];
-const supportedPrefixes = [ 'core/', 'woocommerce/' ];
+import { getBlockSupport } from '@wordpress/blocks';
 
 const isBlockSupported = ( blockName: string ) => {
-	// Check for explicitly unsupported blocks
-	if ( unsupportedBlocks.includes( blockName ) ) {
-		return false;
-	}
+	// Client side navigation can be true in two states:
+	// - supports.interactivity === true;
+	// - supports.interactivity.clientNavigation === true;
 
-	// Check for supported prefixes
-	if (
-		supportedPrefixes.find( ( prefix ) => blockName.startsWith( prefix ) )
-	) {
-		return true;
-	}
+	const blockSupportsInteractivity = Object.is(
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore it's a valid supports key
+		getBlockSupport( blockName, 'interactivity' ),
+		true
+	);
 
-	// Otherwise block is unsupported
-	return false;
+	const blockSupportsInteractivityClientNavigation = getBlockSupport(
+		blockName,
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore it's a valid supports key
+		'interactivity.clientNavigation'
+	);
+
+	return (
+		blockSupportsInteractivity || blockSupportsInteractivityClientNavigation
+	);
 };
 
 export const useHasUnsupportedBlocks = ( clientId: string ): boolean =>

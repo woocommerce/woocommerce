@@ -14,25 +14,25 @@ import {
 	useEffect,
 	useRef,
 } from '@wordpress/element';
-import { registerPlugin } from '@wordpress/plugins';
+import { registerPlugin, getPlugin } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { useCopyToClipboard } from '@wordpress/compose';
 import { recordEvent } from '@woocommerce/tracks';
-import { getSetting } from '@woocommerce/settings';
+import { getSetting, getAdminLink } from '@woocommerce/settings';
+import { useSelect } from '@wordpress/data';
+import { store as coreStore } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
  */
 import { SETTINGS_SLOT_FILL_CONSTANT } from '../../settings/settings-slots';
 import './style.scss';
-import {
-	COMING_SOON_PAGE_EDITOR_LINK,
-	SITE_VISIBILITY_DOC_LINK,
-} from '../constants';
+import { SITE_VISIBILITY_DOC_LINK } from '../constants';
 import { ConfirmationModal } from './components/confirmation-modal';
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
+const PLUGIN_ID = 'woocommerce-admin-site-visibility-settings-slotfill';
 
 const SiteVisibility = () => {
 	const setting = window?.wcSettings?.admin?.siteVisibilitySettings || {};
@@ -47,8 +47,17 @@ const SiteVisibility = () => {
 	const [ privateLink, setPrivateLink ] = useState(
 		setting?.woocommerce_private_link || 'no'
 	);
+	const [ siteVisibilityBadge, setSiteVisibilityBadge ] = useState(
+		setting?.woocommerce_feature_site_visibility_badge_enabled || 'yes'
+	);
 	const formRef = useRef( null );
 	const saveButtonRef = useRef( null );
+
+	const comingSoonTemplateId = useSelect( ( select ) => {
+		return select( coreStore ).getDefaultTemplateId( {
+			slug: 'coming-soon',
+		} );
+	}, [] );
 
 	useEffect( () => {
 		const saveButton = document.getElementsByClassName(
@@ -68,9 +77,17 @@ const SiteVisibility = () => {
 			comingSoon: setting.woocommerce_coming_soon,
 			storePagesOnly: setting.woocommerce_store_pages_only,
 			privateLink: setting.woocommerce_private_link || 'no',
+			siteVisibilityBadge:
+				setting.woocommerce_feature_site_visibility_badge_enabled ||
+				'yes',
 		};
 
-		const currentValues = { comingSoon, storePagesOnly, privateLink };
+		const currentValues = {
+			comingSoon,
+			storePagesOnly,
+			privateLink,
+			siteVisibilityBadge,
+		};
 		const saveButton = document.getElementsByClassName(
 			'woocommerce-save-button'
 		)[ 0 ];
@@ -78,9 +95,11 @@ const SiteVisibility = () => {
 			saveButton.disabled =
 				initValues.comingSoon === currentValues.comingSoon &&
 				initValues.storePagesOnly === currentValues.storePagesOnly &&
-				initValues.privateLink === currentValues.privateLink;
+				initValues.privateLink === currentValues.privateLink &&
+				initValues.siteVisibilityBadge ===
+					currentValues.siteVisibilityBadge;
 		}
-	}, [ comingSoon, storePagesOnly, privateLink ] );
+	}, [ comingSoon, storePagesOnly, privateLink, siteVisibilityBadge ] );
 
 	const copyLink = __( 'Copy link', 'woocommerce' );
 	const copied = __( 'Copied!', 'woocommerce' );
@@ -130,6 +149,11 @@ const SiteVisibility = () => {
 				value={ privateLink }
 				name="woocommerce_private_link"
 			/>
+			<input
+				type="hidden"
+				value={ siteVisibilityBadge }
+				name="woocommerce_feature_site_visibility_badge_enabled"
+			/>
 			<h2>{ __( 'Site visibility', 'woocommerce' ) }</h2>
 			<p className="site-visibility-settings-slotfill-description">
 				{ createInterpolateElement(
@@ -172,7 +196,11 @@ const SiteVisibility = () => {
 								{
 									a: createElement( 'a', {
 										target: '_blank',
-										href: COMING_SOON_PAGE_EDITOR_LINK,
+										href: comingSoonTemplateId
+											? getAdminLink(
+													`site-editor.php?postType=wp_template&postId=${ comingSoonTemplateId }&canvas=edit`
+											  )
+											: getAdminLink( 'site-editor.php' ),
 									} ),
 								}
 						  )
@@ -199,7 +227,7 @@ const SiteVisibility = () => {
 								) }
 								<p>
 									{ __(
-										'Display a “coming soon” message on your store pages — the rest of your site will remain visible.',
+										'Display a "coming soon" message on your store pages — the rest of your site will remain visible.',
 										'woocommerce'
 									) }
 								</p>
@@ -288,6 +316,34 @@ const SiteVisibility = () => {
 					) }
 				</p>
 			</div>
+			<div className="site-visibility-settings-slotfill-section">
+				<div className="site-visibility-settings-slotfill-section-content site-visibility-settings-slotfill-section-visibility-badge">
+					<ToggleControl
+						__nextHasNoMarginBottom
+						label={
+							<>
+								{ __(
+									'Display site visibility badge in admin bar',
+									'woocommerce'
+								) }
+								<p>
+									{ __(
+										'Show the site visibility status badge in the WordPress admin bar.',
+										'woocommerce'
+									) }
+								</p>
+							</>
+						}
+						checked={ siteVisibilityBadge === 'yes' }
+						onChange={ ( enabled ) => {
+							setSiteVisibilityBadge( enabled ? 'yes' : 'no' );
+							recordEvent( 'site_visibility_badge_toggle', {
+								enabled,
+							} );
+						} }
+					/>
+				</div>
+			</div>
 			{ formRef.current && saveButtonRef.current ? (
 				<ConfirmationModal
 					saveButtonRef={ saveButtonRef }
@@ -308,7 +364,11 @@ const SiteVisibilitySlotFill = () => {
 };
 
 export const registerSiteVisibilitySlotFill = () => {
-	registerPlugin( 'woocommerce-admin-site-visibility-settings-slotfill', {
+	if ( getPlugin( PLUGIN_ID ) ) {
+		return;
+	}
+
+	registerPlugin( PLUGIN_ID, {
 		scope: 'woocommerce-site-visibility-settings',
 		render: SiteVisibilitySlotFill,
 	} );

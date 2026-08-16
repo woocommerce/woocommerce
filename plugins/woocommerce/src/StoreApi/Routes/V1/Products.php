@@ -7,11 +7,14 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\StoreApi\Utilities\Pagination;
 use Automattic\WooCommerce\StoreApi\Utilities\ProductQuery;
+use Automattic\WooCommerce\StoreApi\Utilities\ProductLinksTrait;
 
 /**
  * Products class.
  */
 class Products extends AbstractRoute {
+	use ProductLinksTrait;
+
 	/**
 	 * The route identifier.
 	 *
@@ -78,7 +81,7 @@ class Products extends AbstractRoute {
 			$response_objects = [];
 
 			foreach ( $query_results['objects'] as $object ) {
-				$data               = rest_ensure_response( $this->schema->get_item_response( $object ) );
+				$data               = $this->prepare_item_for_response( $object, $request );
 				$response_objects[] = $this->prepare_response_for_collection( $data );
 			}
 
@@ -87,36 +90,13 @@ class Products extends AbstractRoute {
 			$query_results = $product_query->get_results( $request );
 		}
 
-		$response = ( new Pagination() )->add_headers( $response, $request, $query_results['total'], $query_results['pages'] );
-		$response->header( 'Last-Modified', $product_query->get_last_modified() );
-
-		return $response;
-	}
-
-	/**
-	 * Prepare links for the request.
-	 *
-	 * @param \WC_Product      $item Product object.
-	 * @param \WP_REST_Request $request Request object.
-	 * @return array
-	 */
-	protected function prepare_links( $item, $request ) {
-		$links = array(
-			'self'       => array(
-				'href' => rest_url( $this->get_namespace() . $this->get_path() . '/' . $item->get_id() ),
-			),
-			'collection' => array(
-				'href' => rest_url( $this->get_namespace() . $this->get_path() ),
-			),
-		);
-
-		if ( $item->get_parent_id() ) {
-			$links['up'] = array(
-				'href' => rest_url( $this->get_namespace() . $this->get_path() . '/' . $item->get_parent_id() ),
-			);
+		$response      = ( new Pagination() )->add_headers( $response, $request, $query_results['total'], $query_results['pages'] );
+		$last_modified = $product_query->get_last_modified();
+		if ( $last_modified ) {
+			$response->header( 'Last-Modified', $last_modified );
 		}
 
-		return $links;
+		return $response;
 	}
 
 	/**
@@ -139,10 +119,10 @@ class Products extends AbstractRoute {
 		);
 
 		$params['per_page'] = array(
-			'description'       => __( 'Maximum number of items to be returned in result set. Defaults to no limit if left blank.', 'woocommerce' ),
+			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 10,
-			'minimum'           => 0,
+			'minimum'           => 1,
 			'maximum'           => 100,
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -456,6 +436,13 @@ class Products extends AbstractRoute {
 			),
 			'default'           => [],
 			'sanitize_callback' => 'wp_parse_id_list',
+		);
+
+		$params['related'] = array(
+			'description'       => __( 'Limit result set to products related to a specific product ID.', 'woocommerce' ),
+			'type'              => 'integer',
+			'sanitize_callback' => 'absint',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		return $params;

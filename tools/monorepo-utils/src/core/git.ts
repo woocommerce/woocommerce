@@ -6,7 +6,7 @@ import { join } from 'path';
 import { tmpdir } from 'os';
 import { mkdirSync } from 'fs';
 import { simpleGit, TaskOptions } from 'simple-git';
-import { v4 } from 'uuid';
+import { randomUUID as v4 } from 'crypto';
 import { mkdir, rm } from 'fs/promises';
 import { URL } from 'node:url';
 
@@ -219,6 +219,9 @@ export const sparseCheckoutRepoShallow = async (
 export const checkoutRef = ( pathToRepo: string, ref: string ) => {
 	const git = simpleGit( {
 		baseDir: pathToRepo,
+		unsafe: {
+			allowUnsafeHooksPath: true,
+		},
 		config: [ 'core.hooksPath=/dev/null' ],
 	} );
 	return git.checkout( ref );
@@ -342,6 +345,9 @@ export const getPullRequestNumberFromHash = async (
 	try {
 		const git = await simpleGit( {
 			baseDir,
+			unsafe: {
+				allowUnsafeHooksPath: true,
+			},
 			config: [ 'core.hooksPath=/dev/null' ],
 		} );
 		const formerHead = await git.revparse( 'HEAD' );
@@ -387,6 +393,9 @@ export const generateDiff = async (
 	try {
 		const git = simpleGit( {
 			baseDir: tmpRepoPath,
+			unsafe: {
+				allowUnsafeHooksPath: true,
+			},
 			config: [ 'core.hooksPath=/dev/null' ],
 		} );
 
@@ -448,6 +457,9 @@ export const checkoutRemoteBranch = async (
 ): Promise< void > => {
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
+		unsafe: {
+			allowUnsafeHooksPath: true,
+		},
 		config: [ 'core.hooksPath=/dev/null' ],
 	} );
 

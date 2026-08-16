@@ -7,6 +7,7 @@ import { getRegisteredBlockComponents } from '@woocommerce/blocks-registry';
 /**
  * Internal dependencies
  */
+import './register-components';
 import Block from './block';
 
 renderParentBlock( {
@@ -14,4 +15,8 @@ renderParentBlock( {
 	selector: '.wp-block-woocommerce-filter-wrapper',
 	Block,
 	blockMap: getRegisteredBlockComponents( 'woocommerce/filter-wrapper' ),
+	options: {
+		multiple: true,
+	},
+	getProps: () => ( {} ),
 } );

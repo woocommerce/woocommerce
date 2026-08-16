@@ -7,7 +7,6 @@ use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
 use Automattic\WooCommerce\Blocks\BlockPatterns as TestedBlockPatterns;
 use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
 use Automattic\WooCommerce\Blocks\Domain\Package;
-use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 
 /**
  * Unit tests for the BlockPatterns class.
@@ -59,6 +58,9 @@ class BlockPatterns extends \WP_UnitTestCase {
 	 * Tests if patterns are registered with the correct pattern data.
 	 */
 	public function test_block_patterns_registration() {
+
+		// Content is no longer loaded eagerly. Patterns are registered with a
+		// `filePath` so core can load the content lazily on demand.
 		$this->pattern_registry
 			->expects( $this->exactly( 2 ) )
 			->method( 'register_block_pattern' )
@@ -74,11 +76,10 @@ class BlockPatterns extends \WP_UnitTestCase {
 						'keywords'      => '',
 						'blockTypes'    => 'core/template-part/footer',
 						'inserter'      => '',
-						'featureFlag'   => '',
 						'templateTypes' => '',
 						'source'        => __DIR__ . '/patterns/mock-footer.php',
+						'filePath'      => __DIR__ . '/patterns/mock-footer.php',
 					),
-					PatternsHelper::get_patterns_dictionary(),
 				),
 				array(
 					__DIR__ . '/patterns/mock-header.php',
@@ -91,11 +92,10 @@ class BlockPatterns extends \WP_UnitTestCase {
 						'keywords'      => '',
 						'blockTypes'    => 'core/template-part/header',
 						'inserter'      => '',
-						'featureFlag'   => '',
 						'templateTypes' => '',
 						'source'        => __DIR__ . '/patterns/mock-header.php',
+						'filePath'      => __DIR__ . '/patterns/mock-header.php',
 					),
-					PatternsHelper::get_patterns_dictionary(),
 				),
 			);
 
@@ -106,10 +106,14 @@ class BlockPatterns extends \WP_UnitTestCase {
 	 * Tests if patterns are registered with the cached data.
 	 */
 	public function test_cached_block_patterns_registration() {
+		// The cached source points at a file that still exists on disk, so it is
+		// registered with a `filePath` for lazy loading. The registry is mocked,
+		// so the file is never actually read; only its existence matters here.
 		$mock_patterns = array(
 			array(
-				'title'  => 'Mock Cached',
-				'source' => __DIR__ . '/patterns/mock-cached.php',
+				'title'   => 'Mock Cached',
+				'source'  => 'mock-header.php',
+				'content' => '',
 			),
 		);
 		$pattern_data  = array(
@@ -119,14 +123,72 @@ class BlockPatterns extends \WP_UnitTestCase {
 
 		set_site_transient( 'woocommerce_blocks_patterns', $pattern_data );
 
+		$expected_pattern             = $mock_patterns[0];
+		$expected_pattern['source']   = __DIR__ . '/patterns/mock-header.php';
+		$expected_pattern['content']  = '';
+		$expected_pattern['filePath'] = __DIR__ . '/patterns/mock-header.php';
+
 		$this->pattern_registry
 			->expects( $this->exactly( 1 ) )
 			->method( 'register_block_pattern' )
 			->with(
-				__DIR__ . '/patterns/mock-cached.php',
-				$mock_patterns[0],
-				PatternsHelper::get_patterns_dictionary()
+				__DIR__ . '/patterns/mock-header.php',
+				$expected_pattern,
 			);
+
+		$this->block_patterns->register_block_patterns();
+	}
+
+	/**
+	 * Tests that a cached pattern whose source file no longer exists on disk is
+	 * skipped, so core is never asked to lazily load a missing file.
+	 */
+	public function test_cached_pattern_with_missing_file_is_skipped() {
+		$pattern_data = array(
+			'version'  => WOOCOMMERCE_VERSION,
+			'patterns' => array(
+				array(
+					'title'   => 'Mock Missing',
+					'source'  => 'does-not-exist.php',
+					'content' => '',
+				),
+			),
+		);
+
+		set_site_transient( 'woocommerce_blocks_patterns', $pattern_data );
+
+		$this->pattern_registry
+			->expects( $this->never() )
+			->method( 'register_block_pattern' );
+
+		$this->block_patterns->register_block_patterns();
+	}
+
+	/**
+	 * Tests that a cached pattern with a missing or invalid source is skipped, so the source is never
+	 * dereferenced (which would raise a PHP warning) when building the pattern path.
+	 */
+	public function test_cached_pattern_with_invalid_source_is_skipped() {
+		$pattern_data = array(
+			'version'  => WOOCOMMERCE_VERSION,
+			'patterns' => array(
+				array(
+					'title'   => 'No Source',
+					'content' => '',
+				),
+				array(
+					'title'   => 'Invalid Source',
+					'source'  => array( 'not', 'a', 'string' ),
+					'content' => '',
+				),
+			),
+		);
+
+		set_site_transient( 'woocommerce_blocks_patterns', $pattern_data );
+
+		$this->pattern_registry
+			->expects( $this->never() )
+			->method( 'register_block_pattern' );
 
 		$this->block_patterns->register_block_patterns();
 	}
@@ -148,6 +210,8 @@ class BlockPatterns extends \WP_UnitTestCase {
 
 		set_site_transient( 'woocommerce_blocks_patterns', $pattern_data );
 
+		// Content is no longer loaded eagerly. Patterns are registered with a
+		// `filePath` so core can load the content lazily on demand.
 		$this->pattern_registry
 			->expects( $this->exactly( 2 ) )
 			->method( 'register_block_pattern' )
@@ -163,11 +227,10 @@ class BlockPatterns extends \WP_UnitTestCase {
 						'keywords'      => '',
 						'blockTypes'    => 'core/template-part/footer',
 						'inserter'      => '',
-						'featureFlag'   => '',
 						'templateTypes' => '',
 						'source'        => __DIR__ . '/patterns/mock-footer.php',
+						'filePath'      => __DIR__ . '/patterns/mock-footer.php',
 					),
-					PatternsHelper::get_patterns_dictionary(),
 				),
 				array(
 					__DIR__ . '/patterns/mock-header.php',
@@ -180,11 +243,10 @@ class BlockPatterns extends \WP_UnitTestCase {
 						'keywords'      => '',
 						'blockTypes'    => 'core/template-part/header',
 						'inserter'      => '',
-						'featureFlag'   => '',
 						'templateTypes' => '',
 						'source'        => __DIR__ . '/patterns/mock-header.php',
+						'filePath'      => __DIR__ . '/patterns/mock-header.php',
 					),
-					PatternsHelper::get_patterns_dictionary(),
 				),
 			);
 

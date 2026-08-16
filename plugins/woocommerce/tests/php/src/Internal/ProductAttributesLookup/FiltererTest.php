@@ -1,10 +1,12 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Tests\Internal\ProductAttributesLookup;
 
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
-use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\AttributesHelper;
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
@@ -13,6 +15,13 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
  * Tests related to filtering for WC_Query.
  */
 class FiltererTest extends \WC_Unit_Test_Case {
+
+	/**
+	 * Product IDs owned by the current test.
+	 *
+	 * @var int[]
+	 */
+	private $product_ids = array();
 
 	/**
 	 * Counter to insert unique SKU for concurrent tests.
@@ -29,6 +38,25 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		global $wpdb, $wp_post_types;
 
 		parent::setUpBeforeClass();
+
+		foreach ( wc_get_attribute_taxonomy_ids() as $attribute_name => $attribute_id ) {
+			$taxonomy_name = wc_attribute_taxonomy_name( wc_sanitize_taxonomy_name( $attribute_name ) );
+			$terms         = get_terms(
+				array(
+					'taxonomy'   => $taxonomy_name,
+					'hide_empty' => false,
+				)
+			);
+
+			if ( ! is_wp_error( $terms ) ) {
+				foreach ( $terms as $term ) {
+					wp_delete_term( $term->term_id, $taxonomy_name );
+				}
+			}
+
+			unregister_taxonomy( $taxonomy_name );
+			wc_delete_attribute( $attribute_id );
+		}
 
 		$wpdb->query(
 			"
@@ -53,48 +81,59 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
-		global $wpdb;
-
-		parent::tearDown();
-
-		// Unregister all product attributes.
+		remove_all_filters( 'woocommerce_layered_nav_count_cache_max_entries' );
 
 		$attribute_ids_by_name = wc_get_attribute_taxonomy_ids();
-		foreach ( $attribute_ids_by_name as $attribute_name => $attribute_id ) {
+		foreach ( array_keys( $attribute_ids_by_name ) as $attribute_name ) {
 			$attribute_name = wc_sanitize_taxonomy_name( $attribute_name );
 			$taxonomy_name  = wc_attribute_taxonomy_name( $attribute_name );
 			unregister_taxonomy( $taxonomy_name );
-
-			wc_delete_attribute( $attribute_id );
 		}
 
-		// Remove all products.
-
-		$product_ids = wc_get_products( array( 'return' => 'ids' ) );
-		foreach ( $product_ids as $product_id ) {
-			$product     = wc_get_product( $product_id );
-			$is_variable = $product->is_type( ProductType::VARIABLE );
-
-			foreach ( $product->get_children() as $child_id ) {
-				$child = wc_get_product( $child_id );
-				if ( empty( $child ) ) {
-					continue;
-				}
-
-				if ( $is_variable ) {
-					$child->delete( true );
-				} else {
-					$child->set_parent_id( 0 );
-					$this->save( $child );
-				}
-			}
-
-			$product->delete( true );
-		}
-
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_product_attributes_lookup" );
-
+		\WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 		\WC_Query::reset_chosen_attributes();
+		parent::tearDown();
+	}
+
+	/**
+	 * @testdox Layered nav count cache entries are capped per taxonomy transient.
+	 */
+	public function test_layered_nav_count_cache_entries_are_capped() {
+		add_filter( 'woocommerce_layered_nav_count_cache_max_entries', fn() => 2 );
+
+		$cached_counts = array(
+			'first'  => array( 1 => 1 ),
+			'second' => array( 2 => 2 ),
+			'third'  => array( 3 => 3 ),
+		);
+
+		$limited_counts = Filterer::limit_layered_nav_count_cache_entries( $cached_counts, 'third' );
+
+		$this->assertSame(
+			array(
+				'second' => array( 2 => 2 ),
+				'third'  => array( 3 => 3 ),
+			),
+			$limited_counts
+		);
+	}
+
+	/**
+	 * @testdox The layered nav count cache cap can be disabled.
+	 */
+	public function test_layered_nav_count_cache_cap_can_be_disabled() {
+		add_filter( 'woocommerce_layered_nav_count_cache_max_entries', '__return_zero' );
+
+		$cached_counts = array(
+			'first'  => array( 1 => 1 ),
+			'second' => array( 2 => 2 ),
+			'third'  => array( 3 => 3 ),
+		);
+
+		$this->assertSame(
+			$cached_counts,
+			Filterer::limit_layered_nav_count_cache_entries( $cached_counts, 'third' )
+		);
 	}
 
 	/**
@@ -200,6 +239,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		$product->set_stock_status( $in_stock ? ProductStockStatus::IN_STOCK : ProductStockStatus::OUT_OF_STOCK );
 
 		$this->save( $product );
+		$this->product_ids[] = $product->get_id();
 
 		if ( empty( $attribute_terms_by_name ) ) {
 			return $product;
@@ -271,6 +311,8 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		$this->save( $product );
 
 		$product_id = $product->get_id();
+
+		$this->product_ids[] = $product_id;
 
 		// * Now create the variations.
 
@@ -444,12 +486,44 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			$_GET[ 'query_type_' . wc_sanitize_taxonomy_name( $name ) ] = $value;
 		}
 
-		return $wp_the_query->query(
-			array(
-				'post_type' => 'product',
-				'fields'    => 'ids',
-			)
+		$include_owned_products = fn() => $this->product_ids;
+		add_filter( 'loop_shop_post_in', $include_owned_products );
+
+		try {
+			return $wp_the_query->query(
+				array(
+					'post_type' => 'product',
+					'fields'    => 'ids',
+				)
+			);
+		} finally {
+			remove_filter( 'loop_shop_post_in', $include_owned_products );
+		}
+	}
+
+	/**
+	 * @testdox Product requests and counters are scoped to fixtures owned by the current test.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $using_lookup_table Whether attribute filtering uses the lookup table.
+	 */
+	public function test_product_requests_are_scoped_to_owned_products( bool $using_lookup_table ): void {
+		$this->set_use_lookup_table( $using_lookup_table );
+		$this->create_product_attribute( 'Color', array( 'Blue', 'Green' ) );
+
+		$owned_product = $this->create_simple_product( array( 'Color' => array( 'Blue' ) ), true );
+		$this->create_simple_product( array( 'Color' => array( 'Blue' ) ), true );
+		$this->create_simple_product( array( 'Color' => array( 'Green' ) ), true );
+
+		$this->product_ids = array( $owned_product->get_id() );
+
+		$this->assertSame(
+			array( $owned_product->get_id() ),
+			$this->do_product_request( array( 'Color' => array( 'Blue' ) ), array( 'Color' => 'or' ) )
 		);
+		$this->assert_counters( 'Color', array( 'Blue' ), 'or' );
 	}
 
 	/**
@@ -461,6 +535,8 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 * @param string $filter_type The filter type in use, "and" or "or".
 	 */
 	private function assert_counters( $attribute_name, $expected_terms, $filter_type = 'and' ) {
+		global $wpdb;
+
 		$widget = new class() extends \WC_Widget_Layered_Nav {
 			// phpcs:disable Generic.CodeAnalysis.UselessOverridingMethod, Squiz.Commenting.FunctionComment
 			public function get_filtered_term_product_counts( $term_ids, $taxonomy, $query_type ) {
@@ -477,7 +553,19 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			$expected[ $term_ids_by_name[ $term ] ] = 1;
 		}
 
-		$term_counts = $widget->get_filtered_term_product_counts( $term_ids_by_name, $taxonomy, $filter_type );
+		$scope_to_owned_products = function ( $query ) use ( $wpdb ) {
+			$owned_product_ids = implode( ',', array_map( 'absint', $this->product_ids ) );
+			$query['where']   .= empty( $owned_product_ids ) ? ' AND 1=0' : " AND {$wpdb->posts}.ID IN ({$owned_product_ids})";
+
+			return $query;
+		};
+		add_filter( 'woocommerce_get_filtered_term_product_counts_query', $scope_to_owned_products );
+
+		try {
+			$term_counts = $widget->get_filtered_term_product_counts( $term_ids_by_name, $taxonomy, $filter_type );
+		} finally {
+			remove_filter( 'woocommerce_get_filtered_term_product_counts_query', $scope_to_owned_products );
+		}
 		$this->assertEqualsCanonicalizing( $expected, $term_counts );
 	}
 
@@ -948,7 +1036,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 *
 	 * @return array[]
 	 */
-	private function data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_core() {
+	public function data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_core() {
 		return array(
 			array( array(), 'and', true ),
 			array( array(), 'or', true ),
@@ -958,25 +1046,8 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			array( array( 'Blue', 'Red' ), 'or', true ),
 			array( array( 'Green' ), 'and', false ),
 			array( array( 'Green' ), 'or', false ),
-
+			array( array( 'Blue', 'Green' ), 'and', false ),
 		);
-	}
-
-	/**
-	 * Data provider for test_filtering_variable_product_in_stock_for_variation_defining_attributes_using_lookup_table.
-	 *
-	 * @return array[]
-	 */
-	public function data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_using_lookup_table() {
-		$data = $this->data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_core();
-
-		/**
-		 * When filtering by an attribute having a variation AND another one not having it:
-		 * The product shows, since when dealing with variation attributes we're effectively doing OR.
-		 */
-
-		$data[] = array( array( 'Blue', 'Green' ), 'and', true );
-		return $data;
 	}
 
 	/**
@@ -984,7 +1055,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 *
 	 * Note that the difference with the simple product or the non-variation attributes case is that "and" is equivalent to "or".
 	 *
-	 * @dataProvider data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_using_lookup_table
+	 * @dataProvider data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_core
 	 *
 	 * @param array  $attributes The color attribute names that will be included in the query.
 	 * @param string $filter_type The filtering type, "or" or "and".
@@ -996,28 +1067,11 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Data provider for test_filtering_variable_product_in_stock_for_variation_defining_attributes_not_using_lookup_table.
-	 *
-	 * @return array[]
-	 */
-	public function data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_not_using_lookup_table() {
-		$data = $this->data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_core();
-
-		/**
-		 * When filtering by an attribute having a variation AND another one not having it:
-		 * The product doesn't show because variation attributes are treated as non-variation ones.
-		 */
-
-		$data[] = array( array( 'Blue', 'Green' ), 'and', false );
-		return $data;
-	}
-
-	/**
 	 * @testdox The product query shows a variable product only if it's not filtered out by the specified attribute filters (for variation-defining attributes), not using the lookup table.
 	 *
 	 * Note that the difference with the simple product or the non-variation attributes case is that "and" is equivalent to "or".
 	 *
-	 * @dataProvider data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_not_using_lookup_table
+	 * @dataProvider data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_core
 	 *
 	 * @param array  $attributes The color attribute names that will be included in the query.
 	 * @param string $filter_type The filtering type, "or" or "and".
@@ -1081,7 +1135,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 *
 	 * @return array[]
 	 */
-	private function data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value_core() {
+	public function data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value_core() {
 		return array(
 			array( array(), 'and', true ),
 			array( array(), 'or', true ),
@@ -1093,30 +1147,14 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			array( array( 'Green' ), 'or', true ),
 			array( array( 'White' ), 'and', false ),
 			array( array( 'White' ), 'or', false ),
+			array( array( 'Blue', 'Red', 'Green', 'White' ), 'and', false ),
 		);
-	}
-
-	/**
-	 * Data provider for test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value_using_lookup_table.
-	 *
-	 * @return array[]
-	 */
-	public function data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value_using_lookup_table() {
-		$data = $this->data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value_core();
-
-		/**
-		 * When filtering by attributes having a variation AND others not having it:
-		 * The product shows, since when dealing with variation attributes we're effectively doing OR.
-		 */
-		$data[] = array( array( 'Blue', 'Red', 'Green', 'White' ), 'and', true );
-
-		return $data;
 	}
 
 	/**
 	 * @testdox The product query shows a variable product only if it's not filtered out by the specified attribute filters (for variation-defining attributes, with "Any" values), using the lookup table.
 	 *
-	 * @dataProvider data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value_using_lookup_table
+	 * @dataProvider data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value_core
 	 *
 	 * @param array  $attributes The color attribute names that will be included in the query.
 	 * @param string $filter_type The filtering type, "or" or "and".
@@ -1128,26 +1166,9 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Data provider for test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value_not_using_lookup_table.
-	 *
-	 * @return array[]
-	 */
-	public function data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value_not_using_lookup_table() {
-		$data = $this->data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value_core();
-
-		/**
-		 * When filtering by attributes having a variation AND others not having it:
-		 * The product doesn't show because variation attributes are treated as non-variation ones.
-		 */
-		$data[] = array( array( 'Blue', 'Red', 'Green', 'White' ), 'and', false );
-
-		return $data;
-	}
-
-	/**
 	 * @testdox The product query shows a variable product only if it's not filtered out by the specified attribute filters (for variation-defining attributes, with "Any" values), not using the lookup table.
 	 *
-	 * @dataProvider data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value_not_using_lookup_table
+	 * @dataProvider data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value_core
 	 *
 	 * @param array  $attributes The color attribute names that will be included in the query.
 	 * @param string $filter_type The filtering type, "or" or "and".

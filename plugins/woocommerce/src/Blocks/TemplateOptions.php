@@ -28,7 +28,7 @@ class TemplateOptions {
 	 * @return void
 	 */
 	public function check_should_use_blockified_product_grid_templates( $old_name, $old_theme ) {
-		if ( ! $old_theme->is_block_theme() && wc_current_theme_is_fse_theme() ) {
+		if ( ! $old_theme->is_block_theme() && wp_is_block_theme() ) {
 			$option_name = Options::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE;
 			// We previously stored "yes" or "no" values. This will convert them to true or false.
 			$option_value = wc_string_to_bool( get_option( $option_name ) );

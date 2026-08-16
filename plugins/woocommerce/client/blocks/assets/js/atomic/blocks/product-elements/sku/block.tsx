@@ -19,7 +19,11 @@ import { __ } from '@wordpress/i18n';
 import './style.scss';
 import type { Attributes } from './types';
 
-type Props = BlockEditProps< Attributes > & HTMLAttributes< HTMLDivElement >;
+type Props = BlockEditProps< Attributes > &
+	HTMLAttributes< HTMLDivElement > & {
+		isDescendantOfAllProducts: boolean;
+		isDescendentOfSingleProductTemplate: boolean;
+	};
 
 const Preview = ( {
 	setAttributes,
@@ -53,7 +57,9 @@ const Preview = ( {
 		/>
 		<span> { sku }</span>
 		<RichText
-			className="wc-block-components-product-sku__suffix"
+			className={ clsx( 'wc-block-components-product-sku__suffix', {
+				'has-content': !! suffix,
+			} ) }
 			tagName="span"
 			placeholder={ ' ' + __( 'Suffix', 'woocommerce' ) }
 			value={ suffix }

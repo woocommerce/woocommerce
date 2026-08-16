@@ -5,6 +5,7 @@ import { __, _n } from '@wordpress/i18n';
 import { Fragment, useContext } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { Tooltip } from '@wordpress/components';
+import { decodeEntities } from '@wordpress/html-entities';
 import { Date, Link, Pill } from '@woocommerce/components';
 import { formatValue } from '@woocommerce/number';
 import { getAdminLink } from '@woocommerce/settings';
@@ -104,13 +105,22 @@ function CustomersReportTable( {
 				hiddenByDefault: true,
 				isSortable: true,
 			},
+			{
+				label: __( 'Billing phone', 'woocommerce' ),
+				key: 'billing_phone',
+				hiddenByDefault: true,
+			},
+			{
+				label: __( 'Shipping phone', 'woocommerce' ),
+				key: 'shipping_phone',
+				hiddenByDefault: true,
+			},
 		];
 	};
 
 	const getCountryName = ( code ) => {
-		return typeof countries[ code ] !== 'undefined'
-			? countries[ code ]
-			: null;
+		const country = countries.find( ( c ) => c.code === code );
+		return country ? decodeEntities( country.name ) : null;
 	};
 
 	const getRowsContent = ( customers ) => {
@@ -139,6 +149,8 @@ function CustomersReportTable( {
 				city,
 				state,
 				country,
+				billing_phone: billingPhone,
+				shipping_phone: shippingPhone,
 			} = customer;
 			const countryName = getCountryName( country );
 			const customerName =
@@ -232,6 +244,14 @@ function CustomersReportTable( {
 				{
 					display: postcode,
 					value: postcode,
+				},
+				{
+					display: billingPhone,
+					value: billingPhone,
+				},
+				{
+					display: shippingPhone,
+					value: shippingPhone,
 				},
 			];
 		} );

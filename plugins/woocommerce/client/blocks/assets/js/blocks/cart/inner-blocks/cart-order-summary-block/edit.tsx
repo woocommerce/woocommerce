@@ -53,6 +53,7 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 				<TotalsFooterItem
 					currency={ totalsCurrency }
 					values={ cartTotals }
+					isEstimate={ true }
 				/>
 			</div>
 			{ /* do I put an totals wrapper here? */ }

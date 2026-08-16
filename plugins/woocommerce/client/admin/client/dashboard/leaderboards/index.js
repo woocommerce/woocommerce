@@ -3,17 +3,16 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Fragment, useState } from '@wordpress/element';
-import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import { SelectControl } from '@wordpress/components';
-import { withSelect } from '@wordpress/data';
+
 import {
 	EllipsisMenu,
 	MenuItem,
 	MenuTitle,
 	SectionHeader,
 } from '@woocommerce/components';
-import { useUserPreferences, ITEMS_STORE_NAME } from '@woocommerce/data';
+import { useUserPreferences } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -178,20 +177,9 @@ Leaderboards.propTypes = {
 	query: PropTypes.object.isRequired,
 };
 
-export default compose(
-	withSelect( ( select ) => {
-		const { getItems, getItemsError } = select( ITEMS_STORE_NAME );
-		const { leaderboards: allLeaderboards } = getAdminSetting(
-			'dataEndpoints',
-			{
-				leaderboards: [],
-			}
-		);
-
-		return {
-			allLeaderboards,
-			getItems,
-			getItemsError,
-		};
-	} )
-)( Leaderboards );
+export default ( ownProps ) => {
+	const { leaderboards } = getAdminSetting( 'dataEndpoints', {
+		leaderboards: [],
+	} );
+	return <Leaderboards { ...ownProps } allLeaderboards={ leaderboards } />;
+};

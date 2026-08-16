@@ -3,9 +3,10 @@
  */
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { addFilter } from '@wordpress/hooks';
-import { select, useSelect } from '@wordpress/data';
+import { select, useSelect, useDispatch } from '@wordpress/data';
 import { store as coreDataStore } from '@wordpress/core-data';
 import type { BlockEditProps, Block } from '@wordpress/blocks';
+import { CORE_EDITOR_STORE } from '@woocommerce/utils';
 import {
 	useEffect,
 	useLayoutEffect,
@@ -13,7 +14,7 @@ import {
 	useMemo,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import type { ProductResponseItem } from '@woocommerce/types';
+import { isString, type ProductResponseItem } from '@woocommerce/types';
 import { getProduct } from '@woocommerce/editor-components/utils';
 import {
 	createBlock,
@@ -33,6 +34,7 @@ import {
 	PreviewState,
 	SetPreviewState,
 	ProductCollectionUIStatesInEditor,
+	CoreCollectionNames,
 } from './types';
 import {
 	coreQueryPaginationBlockName,
@@ -51,39 +53,62 @@ import {
  *
  * Shorthand for setting new nested query parameters.
  */
+export const getUpdatedQuery = (
+	query: ProductCollectionQuery,
+	queryParams: Partial< ProductCollectionQuery >
+): ProductCollectionQuery => {
+	const { taxQuery, ...queryParamsWithoutTaxQuery } = queryParams;
+	const hasTaxQueryUpdates =
+		taxQuery && typeof taxQuery === 'object' && ! Array.isArray( taxQuery );
+
+	return {
+		...query,
+		...queryParamsWithoutTaxQuery,
+		...( hasTaxQueryUpdates && {
+			taxQuery: {
+				...query.taxQuery,
+				...taxQuery,
+			},
+		} ),
+	};
+};
+
 export function setQueryAttribute(
 	block: BlockEditProps< ProductCollectionAttributes >,
 	queryParams: Partial< ProductCollectionQuery >
 ) {
-	const { query } = block.attributes;
+	const currentBlock = select( blockEditorStore ).getBlock( block.clientId );
+	const currentAttributes = currentBlock?.attributes as
+		| ProductCollectionAttributes
+		| undefined;
+	const query = currentAttributes?.query || block.attributes.query;
 
 	block.setAttributes( {
-		query: {
-			...query,
-			...queryParams,
-		},
+		query: getUpdatedQuery( query, queryParams ),
 	} );
 }
 
 const isInProductArchive = () => {
 	const ARCHIVE_PRODUCT_TEMPLATES = [
-		'woocommerce/woocommerce//archive-product',
-		'woocommerce/woocommerce//taxonomy-product_attribute',
-		'woocommerce/woocommerce//product-search-results',
+		'archive-product',
+		'taxonomy-product_attribute',
+		'product-search-results',
 		// Custom taxonomy templates have structure:
-		// <<THEME>>//taxonomy-product_cat-<<CATEGORY>>
+		// taxonomy-product_cat-<<CATEGORY>>
 		// hence we're checking if template ID includes the middle part.
 		//
 		// That includes:
-		// - woocommerce/woocommerce//taxonomy-product_cat
-		// - woocommerce/woocommerce//taxonomy-product_tag
-		'//taxonomy-product_cat',
-		'//taxonomy-product_tag',
+		// - taxonomy-product_cat
+		// - taxonomy-product_tag
+		// - taxonomy-product_brand
+		'taxonomy-product_cat',
+		'taxonomy-product_tag',
+		'taxonomy-product_brand',
 	];
 
-	const currentTemplateId = select(
-		'core/edit-site'
-	)?.getEditedPostId() as string;
+	// @ts-expect-error getEditedPostSlug is not typed
+	const currentTemplateId =
+		select( CORE_EDITOR_STORE )?.getEditedPostSlug?.();
 
 	/**
 	 * Set inherit value when Product Collection block is first added to the page.
@@ -92,7 +117,9 @@ const isInProductArchive = () => {
 	 */
 	if ( currentTemplateId ) {
 		return ARCHIVE_PRODUCT_TEMPLATES.some( ( template ) =>
-			currentTemplateId.includes( template )
+			isString( currentTemplateId )
+				? currentTemplateId.includes( template )
+				: false
 		);
 	}
 
@@ -260,7 +287,60 @@ export const useProductCollectionUIState = ( {
 		}
 
 		/**
-		 * Case 3: Preview mode - based on `usesReference` value
+		 * Case 3: Hand-picked products picker
+		 * Show the product picker when the Hand-Picked collection is selected
+		 * but no products have been chosen yet.
+		 */
+		const isHandPickedCollection =
+			attributes.collection === CoreCollectionNames.HAND_PICKED;
+		const hasHandPickedProducts =
+			( attributes.query?.woocommerceHandPickedProducts?.length ?? 0 ) >
+			0;
+
+		if (
+			isCollectionSelected &&
+			isHandPickedCollection &&
+			! hasHandPickedProducts
+		) {
+			return ProductCollectionUIStatesInEditor.HAND_PICKED_PRODUCTS_PICKER;
+		}
+
+		/**
+		 * Case 4: Taxonomy picker for BY_CATEGORY, BY_TAG, BY_BRAND collections
+		 * Show the picker when no taxonomy terms are selected.
+		 */
+		const isTaxonomyCollection =
+			attributes.collection === CoreCollectionNames.BY_CATEGORY ||
+			attributes.collection === CoreCollectionNames.BY_TAG ||
+			attributes.collection === CoreCollectionNames.BY_BRAND;
+
+		if ( isCollectionSelected && isTaxonomyCollection ) {
+			let taxonomySlug: string;
+			switch ( attributes.collection ) {
+				case CoreCollectionNames.BY_CATEGORY:
+					taxonomySlug = 'product_cat';
+					break;
+				case CoreCollectionNames.BY_TAG:
+					taxonomySlug = 'product_tag';
+					break;
+				case CoreCollectionNames.BY_BRAND:
+					taxonomySlug = 'product_brand';
+					break;
+				default:
+					taxonomySlug = '';
+			}
+
+			const selectedTermIds =
+				attributes.query?.taxQuery?.[ taxonomySlug ] || [];
+			const hasSelectedTerms = selectedTermIds.length > 0;
+
+			if ( ! hasSelectedTerms ) {
+				return ProductCollectionUIStatesInEditor.TAXONOMY_PICKER;
+			}
+		}
+
+		/**
+		 * Case 5: Preview mode - based on `usesReference` value
 		 */
 		if ( isInRequiredLocation ) {
 			/**
@@ -305,6 +385,8 @@ export const useProductCollectionUIState = ( {
 		product,
 		hasInnerBlocks,
 		attributes.query?.productReference,
+		attributes.query?.woocommerceHandPickedProducts,
+		attributes.query?.taxQuery,
 	] );
 
 	return { productCollectionUIStateInEditor, isLoading: ! hasResolved };
@@ -326,7 +408,11 @@ export const useSetPreviewState = ( {
 	usesReference?: string[] | undefined;
 	isUsingReferencePreviewMode: boolean;
 } ) => {
+	const { __unstableMarkNextChangeAsNotPersistent } =
+		useDispatch( blockEditorStore );
+
 	const setState = ( newPreviewState: PreviewState ) => {
+		__unstableMarkNextChangeAsNotPersistent();
 		setAttributes( {
 			__privatePreviewState: {
 				...attributes.__privatePreviewState,
@@ -343,8 +429,9 @@ export const useSetPreviewState = ( {
 		location,
 		isUsingReferencePreviewMode
 	);
-	useLayoutEffect( () => {
+	useEffect( () => {
 		if ( isUsingReferencePreviewMode ) {
+			__unstableMarkNextChangeAsNotPersistent();
 			setAttributes( {
 				__privatePreviewState: {
 					isPreview: usesReferencePreviewMessage.length > 0,
@@ -356,6 +443,7 @@ export const useSetPreviewState = ( {
 		setAttributes,
 		usesReferencePreviewMessage,
 		isUsingReferencePreviewMode,
+		__unstableMarkNextChangeAsNotPersistent,
 	] );
 
 	// Running setPreviewState function provided by Collection, if it exists.
@@ -382,19 +470,21 @@ export const useSetPreviewState = ( {
 	 * For all Product Collection blocks that inherit query from the template,
 	 * we want to show a preview message in the editor if the block is in
 	 * generic archive template i.e.
-	 * - Products by category
-	 * - Products by tag
-	 * - Products by attribute
+	 * - Products by Category
+	 * - Products by Tag
+	 * - Products by Attribute
+	 * - Products by Brand
 	 */
 	const termId =
 		location.type === LocationType.Archive
 			? location.sourceData?.termId
 			: null;
-	useLayoutEffect( () => {
+	useEffect( () => {
 		if ( ! setPreviewState && ! isUsingReferencePreviewMode ) {
 			const isGenericArchiveTemplate =
 				location.type === LocationType.Archive && termId === null;
 
+			__unstableMarkNextChangeAsNotPersistent();
 			setAttributes( {
 				__privatePreviewState: {
 					isPreview: isGenericArchiveTemplate
@@ -415,6 +505,7 @@ export const useSetPreviewState = ( {
 		setAttributes,
 		setPreviewState,
 		isUsingReferencePreviewMode,
+		__unstableMarkNextChangeAsNotPersistent,
 	] );
 };
 export const getDefaultQueryForSettingsSection = (
@@ -455,6 +546,56 @@ export const getDefaultProductCollection = () =>
 		createBlocksFromInnerBlocksTemplate( INNER_BLOCKS_TEMPLATE )
 	);
 
+/**
+ * Sets preview state for product collections in the email editor context.
+ * When the email editor store is present, activates preview mode so that
+ * the collection shows sample products instead of "No products to display".
+ *
+ * When NOT in the email editor, explicitly resets preview state so the
+ * default archive-template fallback behavior in useSetPreviewState is
+ * preserved (providing setPreviewState suppresses the generic fallback).
+ */
+export const setEmailEditorPreviewState: SetPreviewState = ( {
+	setState,
+	location,
+	attributes,
+} ) => {
+	let isEmailEditor = false;
+	try {
+		// Detect the email editor by checking for its store.
+		// Depending on @wordpress/data version, select() may throw
+		// or return undefined for unregistered stores — handle both.
+		isEmailEditor = !! select( 'email-editor/editor' );
+	} catch {
+		// Not in email editor context.
+	}
+
+	if ( isEmailEditor ) {
+		setState( {
+			isPreview: true,
+			previewMessage: __(
+				'Sample products shown for preview. Actual products will be based on store inventory.',
+				'woocommerce'
+			),
+		} );
+	} else {
+		// Replicate the generic archive-template fallback: show preview
+		// label only when inheriting query in a generic archive template.
+		const isGenericArchiveTemplate =
+			location.type === LocationType.Archive &&
+			! location.sourceData?.termId;
+		setState( {
+			isPreview: isGenericArchiveTemplate
+				? !! attributes?.query?.inherit
+				: false,
+			previewMessage: __(
+				'Actual products will vary depending on the page being viewed.',
+				'woocommerce'
+			),
+		} );
+	}
+};
+
 export const useGetProduct = ( productId: number | undefined ) => {
 	const [ product, setProduct ] = useState< ProductResponseItem | null >(
 		null
@@ -481,7 +622,7 @@ export const useGetProduct = ( productId: number | undefined ) => {
 			}
 		};
 
-		fetchProduct();
+		void fetchProduct();
 	}, [ productId ] );
 
 	return { product, isLoading };

@@ -36,7 +36,7 @@
 		}
 	}
 
-	.is-large {
+	@include cart-checkout-large-container {
 		.wc-block-checkout__sidebar {
 			top: 0;
 		}
@@ -76,10 +76,32 @@ body.wc-lock-selected-block--remove {
 }
 
 .wp-block-woocommerce-checkout-order-summary-block {
-	.block-editor-block-list__layout > div {
-		margin: 0 !important;
+	.block-editor-block-list__layout {
+		padding-left: 0;
+
+		> div {
+			margin: 0 !important;
+		}
 	}
 	.wc-block-components-totals-wrapper {
 		box-sizing: border-box;
+	}
+	.wp-block-woocommerce-checkout-order-summary-cart-items-block {
+		.wc-block-components-totals-wrapper {
+			border-top: 0;
+		}
+	}
+}
+
+// The editor includes extra markup that impacts the flex layout.
+.wc-block-components-sidebar-layout {
+	> .block-editor-inner-blocks > .block-editor-block-list__layout {
+		display: flex;
+		flex-wrap: wrap;
+		margin: 0 auto $gap;
+		position: relative;
+		&:has(> :last-child.wp-block-woocommerce-checkout-fields-block) {
+			flex-direction: row-reverse;
+		}
 	}
 }

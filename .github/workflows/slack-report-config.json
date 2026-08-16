@@ -1,0 +1,18 @@
+{
+	"defaultChannel": "DEFAULT_CHECKS_CHANNEL",
+	"routes": [
+		{
+			"checkType": "release-checks*",
+			"refName": "release/**",
+			"channels": [
+				"RELEASE_CHECKS_CHANNEL"
+			]
+		},
+		{
+			"checkType": "nightly-checks*",
+			"channels": [
+				"DAILY_CHECKS_CHANNEL"
+			]
+		}
+	]
+}

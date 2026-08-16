@@ -2,7 +2,8 @@
  * External dependencies
  */
 import moment from 'moment';
-import momentTz from 'moment-timezone';
+import { getTimezoneOffset } from 'date-fns-tz';
+import { getSettings as getDateSettings } from '@wordpress/date';
 import { find, memoize } from 'lodash';
 import { __ } from '@wordpress/i18n';
 import { parse } from 'qs';
@@ -168,21 +169,123 @@ export function getRangeLabel( after: moment.Moment, before: moment.Moment ) {
 }
 
 /**
+ * Reads the configured store time zone from `wcSettings`.
+ *
+ * @return {string | undefined} - IANA zone name or `±HH:mm` offset, if set.
+ */
+function getStoreTimeZoneSetting() {
+	// Optional chaining does not protect the free `window` reference, so guard
+	// it for non-browser environments before falling back to the local moment.
+	if ( typeof window === 'undefined' ) {
+		return undefined;
+	}
+
+	return window.wcSettings?.timeZone || window.wcSettings?.admin?.timeZone;
+}
+
+/**
  * Gets the current time in the store time zone if set.
  *
- * @return {string} - Datetime string.
+ * @return {moment.Moment} - Moment object in the store time zone.
  */
 export function getStoreTimeZoneMoment() {
-	if ( ! window.wcSettings || ! window.wcSettings.timeZone ) {
+	const timeZone = getStoreTimeZoneSetting();
+
+	if ( typeof timeZone !== 'string' || timeZone.length === 0 ) {
 		return moment();
 	}
 
-	if ( [ '+', '-' ].includes( window.wcSettings.timeZone.charAt( 0 ) ) ) {
-		return moment().utcOffset( window.wcSettings.timeZone );
+	if ( [ '+', '-' ].includes( timeZone.charAt( 0 ) ) ) {
+		return moment().utcOffset( timeZone );
 	}
 
-	return ( moment() as momentTz.Moment ).tz( window.wcSettings.timeZone );
+	// Named IANA zone (e.g. `America/New_York`). Resolve the current UTC
+	// offset with `date-fns-tz` (which uses the browser `Intl` API) rather
+	// than `moment-timezone`'s `.tz()`: the admin build externalises
+	// `moment-timezone` to the global `window.moment`, so a plugin replacing
+	// `window.moment` strips `.tz` and crashes Analytics (#64020).
+	const offsetInMinutes = getTimezoneOffset( timeZone ) / 60000;
+
+	if ( Number.isNaN( offsetInMinutes ) ) {
+		return moment();
+	}
+
+	return moment().utcOffset( offsetInMinutes );
 }
+
+/**
+ * Re-applies the store time zone's UTC offset for a moment's own date, keeping
+ * its wall-clock time. `getStoreTimeZoneMoment` resolves a named IANA zone's
+ * offset for "now", so a range boundary in a different DST period (e.g. last
+ * year/quarter) would otherwise be an hour off; this corrects each boundary
+ * against its own date. Fixed `±HH:mm` offsets and the no-zone case are
+ * returned unchanged (#64020).
+ *
+ * @param {moment.Moment} date - The moment to anchor.
+ * @return {moment.Moment} - The anchored moment.
+ */
+function anchorToStoreTimeZone( date: moment.Moment ) {
+	const timeZone = getStoreTimeZoneSetting();
+
+	if (
+		typeof timeZone !== 'string' ||
+		timeZone.length === 0 ||
+		[ '+', '-' ].includes( timeZone.charAt( 0 ) )
+	) {
+		return date;
+	}
+
+	const offsetInMinutes =
+		getTimezoneOffset( timeZone, date.toDate() ) / 60000;
+
+	return Number.isNaN( offsetInMinutes )
+		? date
+		: date.utcOffset( offsetInMinutes, true );
+}
+
+/**
+ * Anchors every boundary of a date range to the store time zone.
+ * See {@link anchorToStoreTimeZone}.
+ *
+ * @param {DateValue} range - The computed range.
+ * @return {DateValue} - The range with each boundary anchored.
+ */
+function anchorRangeToStoreTimeZone( range: DateValue ): DateValue {
+	return {
+		primaryStart: anchorToStoreTimeZone( range.primaryStart ),
+		primaryEnd: anchorToStoreTimeZone( range.primaryEnd ),
+		secondaryStart: anchorToStoreTimeZone( range.secondaryStart ),
+		secondaryEnd: anchorToStoreTimeZone( range.secondaryEnd ),
+	};
+}
+
+/**
+ * Aligns the moment locale's start of the week with the WordPress
+ * "Week Starts On" setting. WordPress core applies the setting to the moment
+ * locale, but `wp.date.setSettings` then redefines the locale without a `week`
+ * key, resetting the start of the week to Sunday; without this correction,
+ * week ranges and calendar layouts ignore the setting.
+ */
+function ensureMomentStartOfWeek() {
+	const startOfWeek = getDateSettings().l10n?.startOfWeek;
+
+	if (
+		typeof startOfWeek !== 'number' ||
+		! Number.isInteger( startOfWeek ) ||
+		startOfWeek < 0 ||
+		startOfWeek > 6
+	) {
+		return;
+	}
+
+	if ( moment.localeData().firstDayOfWeek() !== startOfWeek ) {
+		moment.updateLocale( moment.locale(), {
+			week: { dow: startOfWeek },
+		} );
+	}
+}
+
+ensureMomentStartOfWeek();
 
 /**
  * Get a DateValue object for a period prior to the current period.
@@ -195,6 +298,8 @@ export function getLastPeriod(
 	period: moment.DurationInputArg2,
 	compare: string
 ) {
+	ensureMomentStartOfWeek();
+
 	const primaryStart = getStoreTimeZoneMoment()
 		.startOf( period )
 		.subtract( 1, period );
@@ -227,12 +332,12 @@ export function getLastPeriod(
 		secondaryEnd = secondaryEnd.clone().endOf( 'month' );
 	}
 
-	return {
+	return anchorRangeToStoreTimeZone( {
 		primaryStart,
 		primaryEnd,
 		secondaryStart,
 		secondaryEnd,
-	};
+	} );
 }
 
 /**
@@ -247,6 +352,8 @@ export function getCurrentPeriod(
 	period: moment.DurationInputArg2,
 	compare: string
 ) {
+	ensureMomentStartOfWeek();
+
 	const primaryStart = getStoreTimeZoneMoment().startOf( period );
 	const primaryEnd = getStoreTimeZoneMoment();
 
@@ -265,12 +372,12 @@ export function getCurrentPeriod(
 			.add( daysSoFar + 1, 'days' )
 			.subtract( 1, 'seconds' );
 	}
-	return {
+	return anchorRangeToStoreTimeZone( {
 		primaryStart,
 		primaryEnd,
 		secondaryStart,
 		secondaryEnd,
-	};
+	} );
 }
 
 /**
@@ -364,7 +471,7 @@ const getDateParamsFromQueryMemoized = memoize<
 			string | undefined,
 			string | undefined,
 			string | undefined,
-			string
+			string,
 		]
 	) => DateParams
 >(
@@ -468,7 +575,7 @@ const getCurrentDatesMemoized = memoize<
 			moment.Moment,
 			moment.Moment,
 			moment.Moment,
-			moment.Moment
+			moment.Moment,
 		]
 	) => {
 		primary: DataPickerOptions;

@@ -14,7 +14,7 @@ import { EmailCesFeedback } from './settings-email-ces-feedback';
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
-const EmailFeedbackFill: React.FC = () => {
+const EmailFeedbackFill = () => {
 	const description = __(
 		'Thank you for trying out our new email customization features. We’d love to hear your feedback on how we could improve the experience.',
 		'woocommerce'

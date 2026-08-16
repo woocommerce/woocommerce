@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
@@ -21,33 +22,6 @@ class ProductImage extends AbstractBlock {
 	 * @var string
 	 */
 	protected $api_version = '3';
-
-	/**
-	 * Get block supports. Shared with the frontend.
-	 * IMPORTANT: If you change anything here, make sure to update the JS file too.
-	 *
-	 * @return array
-	 */
-	protected function get_block_type_supports() {
-		return array(
-			'__experimentalBorder'   =>
-			array(
-				'radius'                          => true,
-				'__experimentalSkipSerialization' => true,
-			),
-			'typography'             =>
-			array(
-				'fontSize'                        => true,
-				'__experimentalSkipSerialization' => true,
-			),
-			'spacing'                =>
-			array(
-				'margin'                          => true,
-				'__experimentalSkipSerialization' => true,
-			),
-			'__experimentalSelector' => '.wc-block-components-product-image',
-		);
-	}
 
 	/**
 	 * It is necessary to register and enqueues assets during the render phase because we want to load assets only if the block has the content.
@@ -72,13 +46,12 @@ class ProductImage extends AbstractBlock {
 	private function parse_attributes( $attributes ) {
 		// These should match what's set in JS `registerBlockType`.
 		$defaults = array(
-			'showProductLink'         => true,
-			'showSaleBadge'           => true,
-			'saleBadgeAlign'          => 'right',
-			'imageSizing'             => 'single',
-			'productId'               => 'number',
-			'isDescendentOfQueryLoop' => 'false',
-			'scale'                   => 'cover',
+			'showProductLink'                  => true,
+			'imageSizing'                      => 'single',
+			'productId'                        => 'number',
+			'isDescendentOfQueryLoop'          => 'false',
+			'isDescendentOfSingleProductBlock' => 'false',
+			'scale'                            => 'cover',
 		);
 
 		return wp_parse_args( $attributes, $defaults );
@@ -92,26 +65,29 @@ class ProductImage extends AbstractBlock {
 	 * @return string
 	 */
 	private function render_on_sale_badge( $product, $attributes ) {
-		if ( ! $product->is_on_sale() || false === $attributes['showSaleBadge'] ) {
+		if (
+			! $product->is_on_sale()
+			|| ! isset( $attributes['showSaleBadge'] )
+			|| ( isset( $attributes['showSaleBadge'] ) && false === $attributes['showSaleBadge'] )
+		) {
 			return '';
 		}
 
-		$font_size = StyleAttributesUtils::get_font_size_class_and_style( $attributes );
+		$align = $attributes['saleBadgeAlign'] ?? 'right';
 
-		$on_sale_badge = sprintf(
-			'
-		<div class="wc-block-components-product-sale-badge wc-block-components-product-sale-badge--align-%s wc-block-grid__product-onsale %s" style="%s">
-			<span aria-hidden="true">%s</span>
-			<span class="screen-reader-text">%s</span>
-		</div>
-	',
-			esc_attr( $attributes['saleBadgeAlign'] ),
-			isset( $font_size['class'] ) ? esc_attr( $font_size['class'] ) : '',
-			isset( $font_size['style'] ) ? esc_attr( $font_size['style'] ) : '',
-			esc_html__( 'Sale', 'woocommerce' ),
-			esc_html__( 'Product on sale', 'woocommerce' )
+		$block = new \WP_Block(
+			array(
+				'blockName' => 'woocommerce/product-sale-badge',
+				'attrs'     => array(
+					'align' => $align,
+				),
+			),
+			array(
+				'postId' => $product->get_id(),
+			)
 		);
-		return $on_sale_badge;
+
+		return $block->render();
 	}
 
 	/**
@@ -121,38 +97,93 @@ class ProductImage extends AbstractBlock {
 	 * @param string      $on_sale_badge Return value from $render_image.
 	 * @param string      $product_image Return value from $render_on_sale_badge.
 	 * @param array       $attributes    Attributes.
+	 * @param string      $inner_blocks_content Rendered HTML of inner blocks.
 	 * @return string
 	 */
-	private function render_anchor( $product, $on_sale_badge, $product_image, $attributes ) {
+	private function render_anchor( $product, $on_sale_badge, $product_image, $attributes, $inner_blocks_content ) {
 		$product_permalink = $product->get_permalink();
 
-		$is_link        = true === $attributes['showProductLink'];
-		$pointer_events = $is_link ? '' : 'pointer-events: none;';
-		$directive      = $is_link ? 'data-wp-on--click="woocommerce/product-collection::actions.viewProduct"' : '';
+		$is_link = isset( $attributes['showProductLink'] ) ? $attributes['showProductLink'] : true;
+
+		$inner_blocks_container = sprintf(
+			'<div class="wc-block-components-product-image__inner-container">%s</div>',
+			$inner_blocks_content
+		);
+
+		if ( ! $is_link ) {
+			return $on_sale_badge . $product_image . $inner_blocks_container;
+		}
 
 		return sprintf(
-			'<a href="%1$s" style="%2$s" %3$s>%4$s %5$s</a>',
-			$product_permalink,
-			$pointer_events,
-			$directive,
+			'<a href="%1$s" data-wp-on--click="woocommerce/product-collection::actions.viewProduct">%2$s%3$s%4$s</a>',
+			esc_url( $product_permalink ),
 			$on_sale_badge,
-			$product_image
+			$product_image,
+			$inner_blocks_container
 		);
 	}
 
+	/**
+	 * Get the store thumbnail aspect ratio from WooCommerce Customizer settings.
+	 *
+	 * @return string|null CSS aspect ratio value (e.g. "1/1", "4/3"), or null when uncropped.
+	 */
+	private function get_store_thumbnail_aspect_ratio() {
+		$cropping = get_option( 'woocommerce_thumbnail_cropping', '1:1' );
 
+		if ( 'uncropped' === $cropping ) {
+			return null;
+		}
+
+		if ( 'custom' === $cropping ) {
+			$width  = max( 1, (float) get_option( 'woocommerce_thumbnail_cropping_custom_width', '4' ) );
+			$height = max( 1, (float) get_option( 'woocommerce_thumbnail_cropping_custom_height', '3' ) );
+
+			return $width . '/' . $height;
+		}
+
+		return str_replace( ':', '/', $cropping );
+	}
+
+	/**
+	 * Resolve the aspect ratio for a product image.
+	 *
+	 * Block-level overrides take priority over store thumbnail cropping settings.
+	 *
+	 * @param array $attributes Parsed block attributes.
+	 * @return string|null CSS aspect ratio value, or null when no ratio should be applied.
+	 */
+	private function resolve_aspect_ratio( $attributes ) {
+		if ( ! empty( $attributes['style']['dimensions']['aspectRatio'] ) ) {
+			return $attributes['style']['dimensions']['aspectRatio'];
+		}
+
+		if ( ! empty( $attributes['aspectRatio'] ) ) {
+			return $attributes['aspectRatio'];
+		}
+
+		// For backwards compatibility, we interpret "thumbnail" as following
+		// the store thumbnail cropping settings.
+		// "cropped" was used as a synonym for "thumbnail" in the past, but it's now deprecated.
+		if ( 'thumbnail' === $attributes['imageSizing'] || 'cropped' === $attributes['imageSizing'] ) {
+			return $this->get_store_thumbnail_aspect_ratio();
+		}
+
+		return null;
+	}
 
 	/**
 	 * Render Image.
 	 *
 	 * @param \WC_Product $product Product object.
 	 * @param array       $attributes Parsed attributes.
+	 * @param int|null    $image_id Optional image ID from context.
 	 * @return string
 	 */
-	private function render_image( $product, $attributes ) {
-		$image_size = 'single' === $attributes['imageSizing'] ? 'woocommerce_single' : 'woocommerce_thumbnail';
+	private function render_image( $product, $attributes, $image_id = null ) {
+		$image_size  = 'large';
+		$image_style = '';
 
-		$image_style = 'max-width:none;';
 		if ( ! empty( $attributes['height'] ) ) {
 			$image_style .= sprintf( 'height:%s;', $attributes['height'] );
 		}
@@ -162,27 +193,139 @@ class ProductImage extends AbstractBlock {
 		if ( ! empty( $attributes['scale'] ) ) {
 			$image_style .= sprintf( 'object-fit:%s;', $attributes['scale'] );
 		}
-		if ( ! empty( $attributes['aspectRatio'] ) ) {
-			$image_style .= sprintf( 'aspect-ratio:%s;', $attributes['aspectRatio'] );
+
+		$aspect_ratio = $this->resolve_aspect_ratio( $attributes );
+		if ( $aspect_ratio ) {
+			$image_style .= sprintf( 'aspect-ratio:%s;', $aspect_ratio );
 		}
 
-		$image_id = $product->get_image_id();
-		$alt_text = '';
-		$title    = '';
+		if ( ! empty( $attributes['style']['dimensions']['minHeight'] ) ) {
+			$image_style .= sprintf( 'min-height:%s;', $attributes['style']['dimensions']['minHeight'] );
+		}
+
+		$featured_image_id          = (int) $product->get_image_id();
+		$provided_image_id_is_valid = false;
+
 		if ( $image_id ) {
-			$alt_text = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
-			$title    = get_the_title( $image_id );
+			$gallery_image_ids          = ProductGalleryUtils::get_all_image_ids( $product );
+			$available_image_ids        = array_merge( [ $featured_image_id ], $gallery_image_ids );
+			$provided_image_id_is_valid = in_array( $image_id, $available_image_ids, true );
 		}
 
-		return $product->get_image(
-			$image_size,
-			array(
-				'alt'         => empty( $alt_text ) ? $product->get_title() : $alt_text,
-				'data-testid' => 'product-image',
-				'style'       => $image_style,
-				'title'       => $title,
-			)
+		$target_image_id = $provided_image_id_is_valid ? $image_id : $featured_image_id;
+
+		if ( ! $target_image_id ) {
+			return wc_placeholder_img(
+				$image_size,
+				array(
+					'style'         => $image_style,
+					'data-image-id' => 0,
+				)
+			);
+		}
+
+		$alt_text = get_post_meta( $target_image_id, '_wp_attachment_image_alt', true );
+
+		/**
+		 * Filters the loading attribute for product images.
+		 *
+		 * Allowed values are 'lazy', 'eager', and 'auto'. Any other value will result in default browser behavior.
+		 *
+		 * @since 10.6.0
+		 *
+		 * @param string $loading_attr The loading attribute. Default 'lazy'.
+		 * @param int    $image_id     Target image ID.
+		 */
+		$loading_attr = apply_filters(
+			'woocommerce_product_image_loading_attr',
+			'lazy',
+			$target_image_id,
 		);
+
+		$loading_attr    = is_string( $loading_attr ) ? strtolower( trim( $loading_attr ) ) : '';
+		$allowed_loading = array( 'lazy', 'eager', 'auto' );
+
+		if ( ! in_array( $loading_attr, $allowed_loading, true ) ) {
+			$loading_attr = '';
+		}
+
+		$attr = array(
+			'alt'           => empty( $alt_text ) ? $product->get_title() : $alt_text,
+			'data-testid'   => 'product-image',
+			'data-image-id' => $target_image_id,
+			'style'         => $image_style,
+		);
+
+		if ( ! empty( $loading_attr ) ) {
+			$attr['loading'] = $loading_attr;
+		}
+
+		$srcset_aspect_ratio = $aspect_ratio;
+		if ( is_numeric( $srcset_aspect_ratio ) ) {
+			$srcset_aspect_ratio = (string) $srcset_aspect_ratio . '/1';
+		}
+
+		$adjust_srcset = function ( $sources, $size_array, $image_src, $image_meta ) use ( $srcset_aspect_ratio ) {
+			if (
+				! is_string( $srcset_aspect_ratio ) ||
+				! is_array( $sources ) ||
+				! is_array( $image_meta ) ||
+				! isset( $image_meta['width'], $image_meta['height'] ) ||
+				! is_numeric( $image_meta['width'] ) ||
+				! is_numeric( $image_meta['height'] ) ||
+				$image_meta['width'] <= 0 ||
+				$image_meta['height'] <= 0
+			) {
+				return $sources;
+			}
+
+			$aspect_ratio_parts = explode( '/', $srcset_aspect_ratio );
+
+			if (
+				count( $aspect_ratio_parts ) !== 2 ||
+				! is_numeric( $aspect_ratio_parts[0] ) ||
+				! is_numeric( $aspect_ratio_parts[1] ) ||
+				$aspect_ratio_parts[0] <= 0 ||
+				$aspect_ratio_parts[1] <= 0
+			) {
+				return $sources;
+			}
+
+			$block_aspect_ratio = $aspect_ratio_parts[0] / $aspect_ratio_parts[1];
+			$image_aspect_ratio = $image_meta['width'] / $image_meta['height'];
+
+			if ( $image_aspect_ratio > $block_aspect_ratio ) {
+				$stretch_factor = $image_aspect_ratio / $block_aspect_ratio;
+
+				foreach ( $sources as $key => $source ) {
+					if ( ! is_array( $source ) || ! isset( $source['value'] ) || ! is_numeric( $source['value'] ) ) {
+						continue;
+					}
+					$sources[ $key ]['value'] = max( 1, (int) round( $source['value'] / $stretch_factor ) );
+				}
+			}
+
+			return $sources;
+		};
+
+		$maybe_adjust_srcset =
+			'cover' === $attributes['scale'] &&
+			is_string( $srcset_aspect_ratio ) &&
+			false !== strpos( $srcset_aspect_ratio, '/' );
+
+		if ( $maybe_adjust_srcset ) {
+			add_filter( 'wp_calculate_image_srcset', $adjust_srcset, 10, 4 );
+		}
+
+		try {
+			$image_html = $provided_image_id_is_valid ? wp_get_attachment_image( $image_id, $image_size, false, $attr ) : $product->get_image( $image_size, $attr );
+		} finally {
+			if ( $maybe_adjust_srcset ) {
+				remove_filter( 'wp_calculate_image_srcset', $adjust_srcset, 10 );
+			}
+		}
+
+		return $image_html;
 	}
 
 	/**
@@ -193,9 +336,9 @@ class ProductImage extends AbstractBlock {
 	 *                           not in the post content on editor load.
 	 */
 	protected function enqueue_data( array $attributes = [] ) {
-		$this->asset_data_registry->add( 'isBlockTheme', wc_current_theme_is_fse_theme() );
+		$this->asset_data_registry->add( 'placeholderImgSrcFullSize', wc_placeholder_img_src( 'woocommerce_single' ) );
+		$this->asset_data_registry->add( 'thumbnailAspectRatio', $this->get_store_thumbnail_aspect_ratio() );
 	}
-
 
 	/**
 	 * Include and render the block
@@ -206,23 +349,20 @@ class ProductImage extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( ! empty( $content ) ) {
-			parent::register_block_type_assets();
-			$this->register_chunk_translations( [ $this->block_name ] );
-			return $content;
-		}
-		$parsed_attributes = $this->parse_attributes( $attributes );
-
-		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
-
-		$post_id = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
-		$product = wc_get_product( $post_id );
+		$parsed_attributes     = $this->parse_attributes( $attributes );
+		$classes_and_styles    = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
+		$post_id               = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
+		$image_id              = isset( $block->context['imageId'] ) ? (int) $block->context['imageId'] : null;
+		$product               = wc_get_product( $post_id );
+		$resolved_aspect_ratio = $this->resolve_aspect_ratio( $parsed_attributes );
+		$aspect_ratio_class    = 'wc-block-components-product-image--aspect-ratio-' . ( $resolved_aspect_ratio ? str_replace( '/', '-', $resolved_aspect_ratio ) : 'auto' );
 
 		$classes = implode(
 			' ',
 			array_filter(
 				array(
 					'wc-block-components-product-image wc-block-grid__product-image',
+					$aspect_ratio_class,
 					esc_attr( $classes_and_styles['classes'] ),
 				)
 			)
@@ -230,25 +370,27 @@ class ProductImage extends AbstractBlock {
 
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
-				'class' => $classes,
+				'class' => esc_attr( $classes ),
 				'style' => esc_attr( $classes_and_styles['styles'] ),
 			)
 		);
 
 		if ( $product ) {
-			return sprintf(
-				'<div %1$s>
-					%2$s
-				</div>',
-				$wrapper_attributes,
-				$this->render_anchor(
-					$product,
-					$this->render_on_sale_badge( $product, $parsed_attributes ),
-					$this->render_image( $product, $parsed_attributes ),
-					$parsed_attributes
-				)
+			$inner_content = $this->render_anchor(
+				$product,
+				$this->render_on_sale_badge( $product, $parsed_attributes ),
+				$this->render_image( $product, $parsed_attributes, $image_id ),
+				$attributes,
+				$content
 			);
 
+			return sprintf(
+				'<div %1$s>%2$s</div>',
+				$wrapper_attributes,
+				$inner_content
+			);
 		}
+
+		return '';
 	}
 }

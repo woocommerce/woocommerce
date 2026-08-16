@@ -2,7 +2,11 @@
  * External dependencies
  */
 import moment from 'moment';
-import { format as formatDate } from '@wordpress/date';
+import {
+	format as formatDate,
+	getSettings as getDateSettings,
+	setSettings as setDateSettings,
+} from '@wordpress/date';
 import { timeFormat as d3TimeFormat } from 'd3-time-format';
 /**
  * Internal dependencies
@@ -33,16 +37,12 @@ declare global {
 	interface Window {
 		wcSettings: {
 			timeZone?: string;
+			admin?: {
+				timeZone?: string;
+			};
 		};
 	}
 }
-
-jest.mock( 'moment', () => {
-	const m = jest.requireActual( 'moment' );
-	m.prototype.tz = jest.fn().mockImplementation( () => m() );
-
-	return m;
-} );
 
 describe( 'appendTimestamp', () => {
 	it( 'should append `start` timestamp', () => {
@@ -736,6 +736,58 @@ describe( 'getLastPeriod', () => {
 	} );
 } );
 
+describe( 'start of week setting', () => {
+	const originalSettings = getDateSettings();
+	const originalDow = moment.localeData().firstDayOfWeek();
+
+	afterEach( () => {
+		setDateSettings( originalSettings );
+		moment.updateLocale( moment.locale(), {
+			week: { dow: originalDow },
+		} );
+	} );
+
+	it( 'getCurrentPeriod should start the week on the day from the WordPress setting', () => {
+		setDateSettings( {
+			...originalSettings,
+			l10n: { ...originalSettings.l10n, startOfWeek: 1 },
+		} );
+
+		const dateValue = getCurrentPeriod( 'week', 'previous_period' );
+
+		expect( dateValue.primaryStart.day() ).toBe( 1 );
+		expect( dateValue.primaryStart.isSameOrBefore( moment(), 'day' ) ).toBe(
+			true
+		);
+	} );
+
+	it( 'getLastPeriod should start and end the week on days from the WordPress setting', () => {
+		setDateSettings( {
+			...originalSettings,
+			l10n: { ...originalSettings.l10n, startOfWeek: 3 },
+		} );
+
+		const dateValue = getLastPeriod( 'week', 'previous_period' );
+
+		expect( dateValue.primaryStart.day() ).toBe( 3 );
+		expect( dateValue.primaryEnd.day() ).toBe( 2 );
+	} );
+
+	it( 'should leave the moment default when the setting is invalid', () => {
+		setDateSettings( {
+			...originalSettings,
+			l10n: {
+				...originalSettings.l10n,
+				startOfWeek: 7 as unknown as 0,
+			},
+		} );
+
+		const dateValue = getCurrentPeriod( 'week', 'previous_period' );
+
+		expect( dateValue.primaryStart.day() ).toBe( originalDow );
+	} );
+} );
+
 describe( 'getRangeLabel', () => {
 	it( 'should return correct string for dates on the same day', () => {
 		const label = getRangeLabel(
@@ -1028,41 +1080,41 @@ describe( 'getChartTypeForQuery', () => {
 } );
 
 describe( 'getStoreTimeZoneMoment', () => {
+	const previousWcSettings = global.window.wcSettings;
+
+	afterEach( () => {
+		jest.restoreAllMocks();
+		// These tests mutate the global store settings; restore them so a
+		// leaked time zone cannot make later tests order-dependent.
+		global.window.wcSettings = previousWcSettings;
+	} );
+
 	it( 'should return the default moment when no timezone exists', () => {
-		const mockTz = ( moment.prototype.tz = jest.fn() );
-		const utcOffset = ( moment.prototype.utcOffset = jest.fn() );
+		const utcOffset = jest.spyOn( moment.prototype, 'utcOffset' );
 
 		expect( getStoreTimeZoneMoment() ).toHaveProperty( '_isAMomentObject' );
 
-		expect( mockTz ).not.toHaveBeenCalled();
 		expect( utcOffset ).not.toHaveBeenCalled();
 	} );
 
-	it( 'should use the timezone string when one is set', () => {
+	it( 'should resolve the offset for a named timezone', () => {
 		global.window.wcSettings = {
 			timeZone: 'Asia/Taipei',
 		};
 
-		const mockTz = ( moment.prototype.tz = jest.fn() );
-		const utcOffset = ( moment.prototype.utcOffset = jest.fn() );
-
-		getStoreTimeZoneMoment();
-
-		expect( mockTz ).toHaveBeenCalledWith( 'Asia/Taipei' );
-		expect( utcOffset ).not.toHaveBeenCalled();
+		// Taipei is a fixed UTC+8 (no DST) => +480 minutes.
+		expect( getStoreTimeZoneMoment().utcOffset() ).toBe( 480 );
 	} );
 
 	it( 'should use the utc offset when it is set', () => {
+		const utcOffset = jest.spyOn( moment.prototype, 'utcOffset' );
+
 		global.window.wcSettings = {
 			timeZone: '+06:00',
 		};
 
-		const mockTz = ( moment.prototype.tz = jest.fn() );
-		const utcOffset = ( moment.prototype.utcOffset = jest.fn() );
-
 		getStoreTimeZoneMoment();
 
-		expect( mockTz ).not.toHaveBeenCalled();
 		expect( utcOffset ).toHaveBeenCalledWith( '+06:00' );
 
 		global.window.wcSettings = {
@@ -1071,8 +1123,150 @@ describe( 'getStoreTimeZoneMoment', () => {
 
 		getStoreTimeZoneMoment();
 
-		expect( mockTz ).not.toHaveBeenCalled();
 		expect( utcOffset ).toHaveBeenCalledWith( '-04:00' );
+	} );
+
+	it( 'should fall back to wcSettings.admin.timeZone when wcSettings.timeZone is not set', () => {
+		global.window.wcSettings = {
+			admin: {
+				timeZone: 'America/New_York',
+			},
+		};
+
+		// New York is UTC-5 (EST) or UTC-4 (EDT) depending on the date.
+		expect( [ -300, -240 ] ).toContain(
+			getStoreTimeZoneMoment().utcOffset()
+		);
+	} );
+
+	it( 'should use wcSettings.admin.timeZone utc offset when wcSettings.timeZone is not set', () => {
+		const utcOffset = jest.spyOn( moment.prototype, 'utcOffset' );
+
+		global.window.wcSettings = {
+			admin: {
+				timeZone: '+05:00',
+			},
+		};
+
+		getStoreTimeZoneMoment();
+
+		expect( utcOffset ).toHaveBeenCalledWith( '+05:00' );
+	} );
+
+	it( 'should prefer wcSettings.timeZone over wcSettings.admin.timeZone', () => {
+		global.window.wcSettings = {
+			timeZone: 'Asia/Taipei',
+			admin: {
+				timeZone: 'America/New_York',
+			},
+		};
+
+		// Resolves Taipei (+480), not New York.
+		expect( getStoreTimeZoneMoment().utcOffset() ).toBe( 480 );
+	} );
+
+	it( 'should not rely on the clobberable window.moment.tz (regression for #64020)', () => {
+		// A third-party plugin can replace window.moment with a build that
+		// has no timezone data, removing the `.tz` method. Because the admin
+		// build externalises moment-timezone to window.moment, this used to
+		// crash getStoreTimeZoneMoment with `TypeError: tz is not a function`.
+		// The offset is now resolved via the browser Intl API, so the
+		// missing `.tz` no longer matters.
+		global.window.wcSettings = {
+			timeZone: 'America/New_York',
+		};
+
+		const momentWithTz = moment as unknown as { tz?: unknown };
+		const momentProtoWithTz = moment.prototype as unknown as {
+			tz?: unknown;
+		};
+		const originalStaticTz = momentWithTz.tz;
+		const originalProtoTz = momentProtoWithTz.tz;
+		delete momentWithTz.tz;
+		delete momentProtoWithTz.tz;
+
+		try {
+			let result: moment.Moment | undefined;
+
+			expect( () => {
+				result = getStoreTimeZoneMoment();
+			} ).not.toThrow();
+
+			expect( [ -300, -240 ] ).toContain( result?.utcOffset() );
+		} finally {
+			momentWithTz.tz = originalStaticTz;
+			momentProtoWithTz.tz = originalProtoTz;
+		}
+	} );
+
+	it( 'keeps named-zone range boundaries DST-correct across a transition (#64020)', () => {
+		// "Now" is summer (EDT, UTC-4); the previous-year range lands in
+		// winter (EST, UTC-5). A single "now" offset would leave the boundary
+		// an hour off, so each boundary is re-anchored against its own date.
+		jest.useFakeTimers().setSystemTime(
+			new Date( '2026-07-15T12:00:00Z' )
+		);
+		global.window.wcSettings = { timeZone: 'America/New_York' };
+
+		try {
+			const { primaryStart, primaryEnd, secondaryStart, secondaryEnd } =
+				getLastPeriod( 'year', 'previous_period' );
+
+			// Every boundary lands in winter (EST, -300) even though the
+			// current offset is EDT, and each is anchored against its own date
+			// (not "now"), with its wall-clock preserved.
+			expect( primaryStart.utcOffset() ).toBe( -300 );
+			expect( primaryStart.format( 'YYYY-MM-DDTHH:mm:ss' ) ).toBe(
+				'2025-01-01T00:00:00'
+			);
+			expect( primaryEnd.utcOffset() ).toBe( -300 );
+			expect( primaryEnd.format( 'YYYY-MM-DDTHH:mm:ss' ) ).toBe(
+				'2025-12-31T23:59:59'
+			);
+			expect( secondaryStart.utcOffset() ).toBe( -300 );
+			expect( secondaryStart.format( 'YYYY-MM-DDTHH:mm:ss' ) ).toBe(
+				'2024-01-01T00:00:00'
+			);
+			expect( secondaryEnd.utcOffset() ).toBe( -300 );
+			expect( secondaryEnd.format( 'YYYY-MM-DDTHH:mm:ss' ) ).toBe(
+				'2024-12-31T23:59:59'
+			);
+		} finally {
+			jest.useRealTimers();
+		}
+	} );
+
+	it( 'anchors getCurrentPeriod boundaries to their own dates across a DST transition (#64020)', () => {
+		// "Now" is summer (EDT, -240); the year-to-date range opens in winter
+		// (EST, -300). Each boundary must resolve its own date's offset, so a
+		// single "now" offset is not reused across the range. This also covers
+		// getCurrentPeriod, whose boundary math differs from getLastPeriod.
+		jest.useFakeTimers().setSystemTime(
+			new Date( '2026-07-15T12:00:00Z' )
+		);
+		global.window.wcSettings = { timeZone: 'America/New_York' };
+
+		try {
+			const { primaryStart, primaryEnd, secondaryStart, secondaryEnd } =
+				getCurrentPeriod( 'year', 'previous_year' );
+
+			// January is EST (-300); "now" in July is EDT (-240).
+			expect( primaryStart.utcOffset() ).toBe( -300 );
+			expect( primaryStart.format( 'YYYY-MM-DDTHH:mm:ss' ) ).toBe(
+				'2026-01-01T00:00:00'
+			);
+			expect( primaryEnd.utcOffset() ).toBe( -240 );
+
+			// The previous-year comparison opens in winter and ends in summer,
+			// so its boundaries carry different offsets too.
+			expect( secondaryStart.utcOffset() ).toBe( -300 );
+			expect( secondaryStart.format( 'YYYY-MM-DDTHH:mm:ss' ) ).toBe(
+				'2025-01-01T00:00:00'
+			);
+			expect( secondaryEnd.utcOffset() ).toBe( -240 );
+		} finally {
+			jest.useRealTimers();
+		}
 	} );
 } );
 

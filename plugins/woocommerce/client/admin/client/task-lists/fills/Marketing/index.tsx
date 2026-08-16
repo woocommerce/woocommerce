@@ -115,7 +115,7 @@ export type MarketingProps = {
 	onComplete: ( option?: { redirectPath: string } ) => void;
 };
 
-const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
+const Marketing = ( { onComplete }: MarketingProps ) => {
 	const [ currentPlugin, setCurrentPlugin ] = useState< string | null >(
 		null
 	);
@@ -148,7 +148,7 @@ const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
 
 	const installAndActivate = ( slug: string ) => {
 		setCurrentPlugin( slug );
-		actionTask( 'marketing' );
+		void actionTask( 'marketing' );
 		installAndActivatePlugins( [ slug ] )
 			.then( ( response: unknown ) => {
 				recordEvent( 'tasklist_marketing_install', {
@@ -174,7 +174,7 @@ const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
 	};
 
 	const onManage = () => {
-		actionTask( 'marketing' );
+		void actionTask( 'marketing' );
 	};
 
 	const trackPromoButtonClick = () => {
@@ -254,7 +254,7 @@ const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
 					) }
 					text={ __(
 						'Discover hand-picked extensions to grow your business in' +
-							' the official WooCommerce marketplace.',
+							' the WooCommerce marketplace.',
 						'woocommerce'
 					) }
 					buttonHref={ getAdminLink(

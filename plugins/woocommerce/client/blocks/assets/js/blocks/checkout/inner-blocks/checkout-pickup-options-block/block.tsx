@@ -70,11 +70,12 @@ const getPickupDetails = (
 
 const renderPickupLocation = (
 	option: CartShippingPackageShippingRate,
-	packageCount: number
+	packageCount: number,
+	clientSelectedOption = ''
 ): RadioControlOptionType => {
 	const priceWithTaxes = getSetting( 'displayCartPricesIncludingTax', false )
 		? parseInt( option.price, 10 ) + parseInt( option.taxes, 10 )
-		: option.price;
+		: parseInt( option.price, 10 );
 	const location = getPickupLocation( option );
 	const address = getPickupAddress( option );
 	const details = getPickupDetails( option );
@@ -83,7 +84,7 @@ const renderPickupLocation = (
 	let secondaryLabel = <em>{ __( 'free', 'woocommerce' ) }</em>;
 
 	// If there is a cost for local pickup, show the cost per package.
-	if ( parseInt( priceWithTaxes, 10 ) > 0 ) {
+	if ( priceWithTaxes > 0 ) {
 		// If only one package, show the price and not the package count.
 		if ( packageCount === 1 ) {
 			secondaryLabel = (
@@ -125,36 +126,73 @@ const renderPickupLocation = (
 				<Icon
 					icon={ mapMarker }
 					className="wc-block-editor-components-block-icon"
+					width={ 16 }
+					height={ 16 }
 				/>
 				{ decodeEntities( address ) }
 			</>
 		) : undefined,
-		secondaryDescription: details ? (
-			<ReadMore maxLines={ 2 }>{ decodeEntities( details ) }</ReadMore>
-		) : undefined,
+		secondaryDescription:
+			clientSelectedOption === option?.rate_id && details ? (
+				<ReadMore maxLines={ 2 }>
+					{ decodeEntities( details ) }
+				</ReadMore>
+			) : undefined,
 	};
 };
 
-const Block = (): JSX.Element | null => {
+const Block = () => {
 	const { shippingRates, selectShippingRate } = useShippingData();
 
 	// Memoize pickup locations to prevent re-rendering when the shipping rates change.
-	const pickupLocations = useMemo( () => {
+	const pickupLocations: CartShippingPackageShippingRate[] = useMemo( () => {
 		return ( shippingRates[ 0 ]?.shipping_rates || [] ).filter(
 			isPackageRateCollectable
 		);
 	}, [ shippingRates ] );
 
-	const [ selectedOption, setSelectedOption ] = useState< string >(
-		() => pickupLocations.find( ( rate ) => rate.selected )?.rate_id || ''
+	const [ selectedOption, setSelectedOption ] = useState<
+		string | undefined
+	>(
+		() =>
+			pickupLocations.find( ( rate ) => rate.selected )?.rate_id ??
+			pickupLocations[ 0 ]?.rate_id
 	);
 
-	const onSelectRate = useCallback(
+	const handleShippingRateChange = useCallback(
 		( rateId: string ) => {
+			setSelectedOption( rateId );
 			selectShippingRate( rateId );
 		},
-		[ selectShippingRate ]
+		[ setSelectedOption, selectShippingRate ]
 	);
+
+	// Update on mount, we do it every time to:
+	// - sync the initial value with the server
+	// - or reset pending request to change shipping rate that might be coming
+	//   from other components (e.g. shipping options), selectShippingRate thunk
+	//   in the cart store properly handles aborting the previous request if needed
+	useEffect( () => {
+		if ( selectedOption ) {
+			selectShippingRate( selectedOption );
+		}
+		// We want this to run on mount only, beware of updating it as it may cause
+		// shipping rate selection to end up in inifite loop
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [] );
+
+	// Update the selected option if cart state changes in the data store.
+	useEffect( () => {
+		const selectedRate = pickupLocations.find( ( rate ) => rate.selected );
+		const selectedRateId = selectedRate?.rate_id;
+
+		if ( selectedRateId && selectedRateId !== selectedOption ) {
+			setSelectedOption( selectedRateId );
+		}
+		// We want to explicitly react to changes in the data store only here, local state is managed
+		// through different code path.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ pickupLocations ] );
 
 	// Prepare props to pass to the ExperimentalOrderLocalPickupPackages slot fill.
 	// We need to pluck out receiveCart.
@@ -170,32 +208,22 @@ const Block = (): JSX.Element | null => {
 		renderPickupLocation,
 	};
 
-	useEffect( () => {
-		if (
-			! selectedOption &&
-			pickupLocations[ 0 ] &&
-			selectedOption !== pickupLocations[ 0 ].rate_id
-		) {
-			setSelectedOption( pickupLocations[ 0 ].rate_id );
-			onSelectRate( pickupLocations[ 0 ].rate_id );
-		}
-		// Removing onSelectRate as it lead to an infinite loop when only one pickup location is available.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ pickupLocations, selectedOption ] );
+	const packageData = shippingRates[ 0 ] || null;
 
-	const packageCount = getShippingRatesPackageCount( shippingRates );
 	return (
 		<>
 			<ExperimentalOrderLocalPickupPackages.Slot { ...slotFillProps } />
 			<ExperimentalOrderLocalPickupPackages>
 				<LocalPickupSelect
-					title={ shippingRates[ 0 ].name }
-					setSelectedOption={ setSelectedOption }
-					onSelectRate={ onSelectRate }
-					selectedOption={ selectedOption }
+					title={ packageData?.name }
+					packageData={ packageData }
+					selectedOption={ selectedOption ?? '' }
 					renderPickupLocation={ renderPickupLocation }
 					pickupLocations={ pickupLocations }
-					packageCount={ packageCount }
+					packageCount={ getShippingRatesPackageCount(
+						shippingRates
+					) }
+					onChange={ ( value ) => handleShippingRateChange( value ) }
 				/>
 			</ExperimentalOrderLocalPickupPackages>
 		</>

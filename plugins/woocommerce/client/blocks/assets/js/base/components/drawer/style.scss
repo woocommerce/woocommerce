@@ -1,9 +1,3 @@
-:root {
-	/* This value might be overridden in PHP based on the attribute set by the user. */
-	--drawer-width: 480px;
-	--neg-drawer-width: calc(var(--drawer-width) * -1);
-}
-
 $drawer-animation-duration: 0.3s;
 
 @keyframes fadein {
@@ -37,7 +31,7 @@ $drawer-animation-duration: 0.3s;
 }
 
 .wc-block-components-drawer__screen-overlay {
-	background-color: rgba(95, 95, 95, 0.35);
+	background-color: $drawer-overlay-background;
 	bottom: 0;
 	left: 0;
 	position: fixed;
@@ -66,42 +60,39 @@ $drawer-animation-duration: 0.3s;
 }
 
 .wc-block-components-drawer {
-	@include with-translucent-border(0 0 0 1px);
 	background: #fff;
 	display: block;
 	height: 100%;
-	left: 100%;
+	inset-inline-start: 100%;
 	position: fixed;
-	right: 0;
 	top: 0;
 	transform: translateX(max(-100%, var(--neg-drawer-width)));
 	width: var(--drawer-width);
 	max-width: 100%;
 }
 
-.rtl .wc-block-components-drawer {
+.wc-block-components-drawer:dir(rtl) {
 	transform: translateX(min(100%, var(--drawer-width)));
 }
 
 .wc-block-components-drawer__screen-overlay--with-slide-out
-.wc-block-components-drawer {
+	.wc-block-components-drawer {
 	transition: transform $drawer-animation-duration;
 }
 
 .wc-block-components-drawer__screen-overlay--with-slide-in
-.wc-block-components-drawer {
+	.wc-block-components-drawer {
 	animation-duration: $drawer-animation-duration;
 	animation-name: slidein;
 }
 
-.rtl
 .wc-block-components-drawer__screen-overlay--with-slide-in
-.wc-block-components-drawer {
+	.wc-block-components-drawer:dir(rtl) {
 	animation-name: rtlslidein;
 }
 
 .wc-block-components-drawer__screen-overlay--is-hidden
-.wc-block-components-drawer {
+	.wc-block-components-drawer {
 	transform: translateX(0);
 }
 
@@ -123,7 +114,7 @@ $drawer-animation-duration: 0.3s;
 	color: inherit !important;
 	position: absolute !important;
 	top: $gap-small;
-	right: $gap-small;
+	inset-inline-end: $gap-small;
 	opacity: 0.6;
 	z-index: 2;
 	// Increase clickable area.
@@ -157,13 +148,6 @@ $drawer-animation-duration: 0.3s;
 }
 
 .admin-bar .wc-block-components-drawer__content {
-	margin-top: 46px;
-	height: calc(100dvh - 46px);
-}
-
-@media only screen and (min-width: 783px) {
-	.admin-bar .wc-block-components-drawer__content {
-		margin-top: 32px;
-		height: calc(100dvh - 32px);
-	}
+	margin-top: var(--wp-admin--admin-bar--height, 0px);
+	height: calc(100dvh - var(--wp-admin--admin-bar--height, 0px));
 }

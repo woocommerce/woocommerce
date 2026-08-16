@@ -23,7 +23,7 @@ export type ImageGalleryItemProps = {
 	children?: JSX.Element;
 } & React.HTMLAttributes< HTMLDivElement >;
 
-export const ImageGalleryItem: React.FC< ImageGalleryItemProps > = ( {
+export const ImageGalleryItem = ( {
 	id,
 	alt,
 	isCover = false,

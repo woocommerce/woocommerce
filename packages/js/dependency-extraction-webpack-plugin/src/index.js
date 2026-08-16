@@ -19,16 +19,16 @@ function camelCaseDash( string ) {
 
 const wooRequestToExternal = ( request, excludedExternals ) => {
 	if ( packages.includes( request ) ) {
+		if ( ( excludedExternals || [] ).includes( request ) ) {
+			return;
+		}
+
 		const handle = request.substring( WOOCOMMERCE_NAMESPACE.length );
 		const irregularExternalMap = {
 			'block-data': [ 'wc', 'wcBlocksData' ],
 			'blocks-registry': [ 'wc', 'wcBlocksRegistry' ],
 			settings: [ 'wc', 'wcSettings' ],
 		};
-
-		if ( ( excludedExternals || [] ).includes( request ) ) {
-			return;
-		}
 
 		if ( irregularExternalMap[ handle ] ) {
 			return irregularExternalMap[ handle ];
@@ -56,56 +56,81 @@ const wooRequestToHandle = ( request ) => {
 };
 
 class DependencyExtractionWebpackPlugin extends WPDependencyExtractionWebpackPlugin {
-	externalizeWpDeps( data, callback ) {
-		const request = data.request;
+	constructor( options ) {
+		const bundledPackages = options?.bundledPackages || [];
+		const userRequestToExternal = options?.requestToExternal;
+		const userRequestToHandle = options?.requestToHandle;
+		// Mirror the upstream default so WooCommerce defaults respect useDefaults: false.
+		const useDefaults = options?.useDefaults !== false;
 
-		let externalRequest;
-
-		// Handle via options.requestToExternal first
-		if ( typeof this.options.requestToExternal === 'function' ) {
-			externalRequest = this.options.requestToExternal( request );
-		}
-
-		// Cascade to default if unhandled and enabled
-		if (
-			typeof externalRequest === 'undefined' &&
-			this.options.useDefaults
-		) {
-			externalRequest = wooRequestToExternal(
-				request,
-				this.options.bundledPackages || []
-			);
-		}
-
-		if ( externalRequest ) {
-			this.externalizedDeps.add( request );
-
-			return callback( null, externalRequest );
-		}
-
-		// Fall back to the WP method
-		return super.externalizeWpDeps( data, callback );
+		super( {
+			...options,
+			// Inject WooCommerce defaults ahead of WP defaults, without overriding externalizeWpDeps/mapRequestToDependency.
+			requestToExternal: ( request ) => {
+				if ( userRequestToExternal ) {
+					const result = userRequestToExternal( request );
+					if ( result !== undefined ) {
+						return result;
+					}
+				}
+				if ( useDefaults ) {
+					return wooRequestToExternal( request, bundledPackages );
+				}
+			},
+			requestToHandle: ( request ) => {
+				if ( userRequestToHandle ) {
+					const result = userRequestToHandle( request );
+					if ( result !== undefined ) {
+						return result;
+					}
+				}
+				if ( useDefaults ) {
+					return wooRequestToHandle( request );
+				}
+			},
+		} );
 	}
 
-	mapRequestToDependency( request ) {
-		// Handle via options.requestToHandle first
-		if ( typeof this.options.requestToHandle === 'function' ) {
-			const scriptDependency = this.options.requestToHandle( request );
-			if ( scriptDependency ) {
-				return scriptDependency;
-			}
-		}
+	/**
+	 * Patched copy of WPDependencyExtractionWebpackPlugin.apply() from @wordpress/dependency-extraction-webpack-plugin/lib/index.js.
+	 * Patches wrong webpack instance usage. Keep in sync with the parent when upgrading @wordpress/dependency-extraction-webpack-plugin.
+	 *
+	 * @param {import('webpack').Compiler} compiler
+	 */
+	apply( compiler ) {
+		this.useModules = Boolean( compiler.options.output?.module );
 
-		// Cascade to default if enabled
-		if ( this.options.useDefaults ) {
-			const scriptDependency = wooRequestToHandle( request );
-			if ( scriptDependency ) {
-				return scriptDependency;
-			}
-		}
+		// This is THE patch, originally: 'this.externalsPlugin = new webpack.ExternalsPlugin(.' The root cause is pnpm
+		// peer dependencies causing different webpack instance usage, causing the external modules being uncacheable.
+		// Please remove the apply override once https://github.com/WordPress/gutenberg/pull/77284 is merged and released.
+		this.externalsPlugin = new compiler.webpack.ExternalsPlugin(
+			this.useModules ? 'import' : 'window',
+			this.externalizeWpDeps.bind( this )
+		);
 
-		// Fall back to the WP method
-		return super.mapRequestToDependency( request );
+		this.externalsPlugin.apply( compiler );
+
+		compiler.hooks.thisCompilation.tap(
+			this.constructor.name,
+			( compilation ) => {
+				compilation.hooks.processAssets.tap(
+					{
+						name: this.constructor.name,
+						stage: compiler.webpack.Compilation
+							.PROCESS_ASSETS_STAGE_OPTIMIZE_COMPATIBILITY,
+					},
+					() => this.checkForMagicComments( compilation )
+				);
+				compilation.hooks.processAssets.tap(
+					{
+						name: this.constructor.name,
+						stage: compiler.webpack.Compilation
+							.PROCESS_ASSETS_STAGE_ANALYSE,
+					},
+					() => this.addAssets( compilation )
+				);
+			}
+		);
 	}
 }
 

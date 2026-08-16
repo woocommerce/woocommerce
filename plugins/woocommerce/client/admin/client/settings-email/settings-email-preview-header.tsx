@@ -19,9 +19,9 @@ type EmailPreviewSubjectResponse = {
 	subject: string;
 };
 
-export const EmailPreviewHeader: React.FC< EmailPreviewHeaderProps > = ( {
+export const EmailPreviewHeader = ( {
 	emailType,
-} ) => {
+}: EmailPreviewHeaderProps ) => {
 	const [ fromName, setFromName ] = useState( '' );
 	const [ fromAddress, setFromAddress ] = useState( '' );
 	const [ subject, setSubject ] = useState( '' );
@@ -85,7 +85,7 @@ export const EmailPreviewHeader: React.FC< EmailPreviewHeaderProps > = ( {
 	}, [] );
 
 	useEffect( () => {
-		fetchSubject();
+		void fetchSubject();
 	}, [ fetchSubject ] );
 
 	useEffect( () => {

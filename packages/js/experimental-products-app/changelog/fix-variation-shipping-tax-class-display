@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix shipping class and tax class selects in variation edit panel to show "Same as parent" instead of blank when no override is set.

@@ -4,7 +4,7 @@
 import { createInterpolateElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Link } from '@woocommerce/components';
-import { PaymentIncentive } from '@woocommerce/data';
+import { PaymentsProviderIncentive } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -16,11 +16,11 @@ interface IncentiveStatusBadgeProps {
 	/**
 	 * The payment incentive used to generate the status badge.
 	 */
-	incentive: PaymentIncentive;
+	incentive: PaymentsProviderIncentive;
 }
 
 /**
- * A helper component that accepts a PaymentIncentive and renders the appropriate
+ * A helper component that accepts a PaymentsProviderIncentive and renders the appropriate
  * StatusBadge component.
  *
  * @example

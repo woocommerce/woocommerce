@@ -7,9 +7,7 @@ type PlaceholderProps = {
 	className: string;
 };
 
-const InboxNotePlaceholder: React.FC< PlaceholderProps > = ( {
-	className,
-} ) => {
+const InboxNotePlaceholder = ( { className }: PlaceholderProps ) => {
 	return (
 		<div
 			className={ `woocommerce-inbox-message is-placeholder ${ className }` }

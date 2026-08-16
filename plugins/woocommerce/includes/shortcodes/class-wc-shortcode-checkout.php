@@ -157,7 +157,7 @@ class WC_Shortcode_Checkout {
 								}
 
 								// We only need to check products managing stock, with a limited stock qty.
-								if ( ! $product->managing_stock() || $product->backorders_allowed()  ) {
+								if ( ! $product->managing_stock() || $product->backorders_allowed() ) {
 									continue;
 								}
 
@@ -195,11 +195,8 @@ class WC_Shortcode_Checkout {
 				);
 				WC()->customer->save();
 
-				$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
-
-				if ( count( $available_gateways ) ) {
-					current( $available_gateways )->set_current();
-				}
+				$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
+				WC()->payment_gateways()->set_current_gateway( $available_gateways );
 
 				/**
 				 * Allows the text of the submit button on the Pay for Order page to be changed.

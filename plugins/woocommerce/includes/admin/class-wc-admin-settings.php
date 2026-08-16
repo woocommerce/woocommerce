@@ -7,7 +7,6 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Admin\Features\Features;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -50,22 +49,17 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 				include_once __DIR__ . '/settings/class-wc-settings-page.php';
 
-				$settings[] = include __DIR__ . '/settings/class-wc-settings-general.php';
-				$settings[] = include __DIR__ . '/settings/class-wc-settings-products.php';
-				$settings[] = include __DIR__ . '/settings/class-wc-settings-tax.php';
-				$settings[] = include __DIR__ . '/settings/class-wc-settings-shipping.php';
-				if ( \Automattic\WooCommerce\Admin\Features\Features::is_enabled( 'reactify-classic-payments-settings' ) ) {
-					$settings[] = include __DIR__ . '/settings/class-wc-settings-payment-gateways-react.php';
-				} else {
-					$settings[] = include __DIR__ . '/settings/class-wc-settings-payment-gateways.php';
-				}
-				$settings[] = include __DIR__ . '/settings/class-wc-settings-accounts.php';
-				$settings[] = include __DIR__ . '/settings/class-wc-settings-emails.php';
-				$settings[] = include __DIR__ . '/settings/class-wc-settings-integrations.php';
-				if ( \Automattic\WooCommerce\Admin\Features\Features::is_enabled( 'launch-your-store' ) ) {
-					$settings[] = include __DIR__ . '/settings/class-wc-settings-site-visibility.php';
-				}
-				$settings[] = include __DIR__ . '/settings/class-wc-settings-advanced.php';
+				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-general.php';
+				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-products.php';
+				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-tax.php';
+				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-shipping.php';
+				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-payment-gateways.php';
+				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-accounts.php';
+				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-emails.php';
+				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-integrations.php';
+				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-site-visibility.php';
+				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-point-of-sale.php';
+				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-advanced.php';
 
 				self::$settings = apply_filters( 'woocommerce_get_settings_pages', $settings );
 				add_action(
@@ -90,11 +84,11 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		public static function save() {
 			global $current_tab;
 
-			if ( Features::is_enabled( 'settings' ) ) {
-				check_admin_referer( 'wp_rest' );
-			} else {
-				check_admin_referer( 'woocommerce-settings' );
+			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+				wp_die( esc_html__( 'You do not have permission to save settings.', 'woocommerce' ), 403 );
 			}
+
+			check_admin_referer( 'woocommerce-settings' );
 
 			// Trigger actions.
 			do_action( 'woocommerce_settings_save_' . $current_tab );
@@ -110,6 +104,33 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 			WC()->query->add_endpoints();
 
 			do_action( 'woocommerce_settings_saved' );
+
+			self::maybe_redirect_after_settings_ui_save();
+		}
+
+		/**
+		 * Redirect to the requested Settings UI destination after a form-post save.
+		 */
+		private static function maybe_redirect_after_settings_ui_save(): void {
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- The settings nonce is verified before this method is called.
+			if ( empty( $_POST['wc_settings_ui_redirect_to'] ) ) {
+				return;
+			}
+
+			$redirect_to = wp_validate_redirect(
+				esc_url_raw(
+					// phpcs:ignore WordPress.Security.NonceVerification.Missing -- The settings nonce is verified before this method is called.
+					wp_unslash( $_POST['wc_settings_ui_redirect_to'] )
+				),
+				''
+			);
+
+			if ( '' === $redirect_to ) {
+				return;
+			}
+
+			wp_safe_redirect( $redirect_to );
+			exit;
 		}
 
 		/**
@@ -276,6 +297,10 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					$value['value'] = self::get_option( $value['id'], $value['default'] );
 				}
 
+				if ( ! is_null( $value['fixed_value'] ?? null ) ) {
+					$value['value'] = $value['fixed_value'];
+				}
+
 				// Custom attribute handling.
 				$custom_attributes = array();
 
@@ -316,6 +341,20 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						<?php
 						echo wp_kses_post( wpautop( wptexturize( $value['text'] ) ) );
 						echo '</td></tr>';
+						break;
+
+					// Notice.
+					case 'notice':
+						$notice_type = $value['notice_type'] ?? 'info';
+						$notice_text = $value['text'] ?? '';
+
+						?>
+						</table>
+						<div class="notice notice-<?php echo esc_attr( $notice_type ); ?> inline">
+							<p><?php echo wp_kses_post( $notice_text ); ?></p>
+						</div>
+						<table class="form-table" role="presentation">
+						<?php
 						break;
 
 					// Section Ends.
@@ -474,14 +513,23 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						$option_value     = $value['value'];
 						$disabled_values  = $value['disabled'] ?? array();
 						$show_desc_at_end = $value['desc_at_end'] ?? false;
+						// Only build a title ID when the field has a usable ID.
+						$normalized_id  = is_scalar( $value['id'] ) ? (string) $value['id'] : '';
+						$radio_title_id = '' !== $normalized_id ? $normalized_id . '-title' : '';
 
 						?>
 						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
-								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
+								<span class="wc-settings-radio-title">
+									<span<?php echo '' !== $radio_title_id ? ' id="' . esc_attr( $radio_title_id ) . '"' : ''; ?>><?php echo esc_html( $value['title'] ); ?></span>
+									<?php
+									// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Built by self::get_field_description(), which passes the tip through wc_help_tip(); that helper sanitizes the tip text and escapes the aria-label.
+									echo $tooltip_html;
+									?>
+								</span>
 							</th>
 							<td class="forminp forminp-<?php echo esc_attr( sanitize_title( $value['type'] ) ); ?>">
-								<fieldset>
+								<fieldset<?php echo '' !== $radio_title_id ? ' aria-labelledby="' . esc_attr( $radio_title_id ) . '"' : ''; ?>>
 									<?php
 									if ( ! $show_desc_at_end ) {
 										echo wp_kses_post( $description );
@@ -725,7 +773,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
-							<td class="forminp"><select name="<?php echo esc_attr( $value['field_name'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php esc_attr_e( 'Choose a country / region&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Country / Region', 'woocommerce' ); ?>" class="wc-enhanced-select">
+							<td class="forminp"><select name="<?php echo esc_attr( $value['field_name'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php esc_attr_e( 'Choose a country / region&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Country / Region', 'woocommerce' ); ?>" class="wc-enhanced-select">
 								<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
 							</select> <?php echo $description; // WPCS: XSS ok. ?>
 							</td>
@@ -750,7 +798,14 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
 							<td class="forminp">
-								<select multiple="multiple" name="<?php echo esc_attr( $value['field_name'] ); ?>[]" style="width:350px" data-placeholder="<?php esc_attr_e( 'Choose countries / regions&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Country / Region', 'woocommerce' ); ?>" class="wc-enhanced-select">
+								<select
+									multiple="multiple"
+									name="<?php echo esc_attr( $value['field_name'] ); ?>[]"
+									id="<?php echo esc_attr( $value['id'] ); ?>"
+									style="width:350px"
+									data-placeholder="<?php esc_attr_e( 'Choose countries / regions&hellip;', 'woocommerce' ); ?>"
+									aria-label="<?php esc_attr_e( 'Country / Region', 'woocommerce' ); ?>"
+									class="wc-enhanced-select">
 									<?php
 									if ( ! empty( $countries ) ) {
 										foreach ( $countries as $key => $val ) {
@@ -941,6 +996,14 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						break;
 					case 'relative_date_selector':
 						$value = wc_parse_relative_date_option( $raw_value );
+						break;
+					case 'password':
+						// Non-string or absent → null so the option is skipped, not overwritten.
+						// Only trim — no wp_strip_all_tags() or wc_clean() which would corrupt
+						// passwords containing '<' or percent-like sequences.
+						// $raw_value is already wp_unslash()ed upstream, so no stripslashes() needed.
+						// Matches WC_Settings_API::validate_password_field() behavior.
+						$value = is_string( $raw_value ) ? trim( $raw_value ) : null;
 						break;
 					default:
 						$value = wc_clean( $raw_value );

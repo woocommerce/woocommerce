@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { createElement, Fragment, useState } from '@wordpress/element';
 import { find, first, without } from 'lodash';
 import {
@@ -41,7 +41,7 @@ const defaultOnColumnsChange: (
  * `TableCard` serves as Card wrapper & contains a card header, `<Table />`, `<TableSummary />`, and `<Pagination />`.
  * This includes filtering and comparison functionality for report pages.
  */
-const TableCard: React.VFC< TableCardProps > = ( {
+const TableCard: React.FC< TableCardProps > = ( {
 	actions,
 	className,
 	hasSearch,
@@ -126,7 +126,7 @@ const TableCard: React.VFC< TableCardProps > = ( {
 			} )
 			.filter( Boolean );
 	} );
-	const classes = classnames( 'woocommerce-table', className, {
+	const classes = clsx( 'woocommerce-table', className, {
 		'has-actions': !! actions,
 		'has-menu': showMenu,
 		'has-search': hasSearch,
@@ -181,8 +181,8 @@ const TableCard: React.VFC< TableCardProps > = ( {
 				) }
 			</CardHeader>
 			{ /* Ignoring the error to make it backward compatible for now. */ }
-			{ /* @ts-expect-error: size must be one of small, medium, largel, xSmall, extraSmall. */ }
-			<CardBody size={ null }>
+			{ /* @ts-expect-error: size must be one of none, small, medium, largel, xSmall, extraSmall. */ }
+			<CardBody size="none">
 				{ tablePreface && (
 					<div className="woocommerce-table__preface">
 						{ tablePreface }

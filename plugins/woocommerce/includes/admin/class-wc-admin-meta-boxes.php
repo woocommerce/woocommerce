@@ -168,7 +168,6 @@ class WC_Admin_Meta_Boxes {
 				'advanced' => '',
 			)
 		);
-
 	}
 
 	/**
@@ -220,7 +219,7 @@ class WC_Admin_Meta_Boxes {
 			return;
 		}
 
-		// Dont' save meta boxes for revisions or autosaves.
+		// Don't save meta boxes for revisions or autosaves.
 		if ( Constants::is_true( 'DOING_AUTOSAVE' ) || is_int( wp_is_post_revision( $post ) ) || is_int( wp_is_post_autosave( $post ) ) ) {
 			return;
 		}
@@ -283,7 +282,7 @@ class WC_Admin_Meta_Boxes {
 	 * @return string[] Templates array excluding block-based templates.
 	 */
 	public function remove_block_templates( $templates ) {
-		if ( count( $templates ) === 0 || ! wc_current_theme_is_fse_theme() ) {
+		if ( count( $templates ) === 0 || ! wp_is_block_theme() ) {
 			return $templates;
 		}
 

@@ -4,29 +4,24 @@
 import { memo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
-import { ComplementaryArea } from '@wordpress/interface';
-import { ComponentProps } from 'react';
 import { styles } from '@wordpress/icons';
-import {
-	__experimentalNavigatorProvider as NavigatorProvider,
-	__experimentalNavigatorScreen as NavigatorScreen,
-} from '@wordpress/components';
+import { PluginSidebar, PluginSidebarMoreMenuItem } from '@wordpress/editor';
 
 /**
  * Internal dependencies
  */
-import { storeName, stylesSidebarId } from '../../store';
+import { storeName } from '../../store';
 import {
 	ScreenTypography,
 	ScreenTypographyElement,
 	ScreenLayout,
 	ScreenRoot,
 	ScreenColors,
+	ScreenBackground,
 } from './screens';
+import { Navigator } from './navigator';
 
-type Props = ComponentProps< typeof ComplementaryArea >;
-
-export function RawStylesSidebar( props: Props ): JSX.Element {
+export function RawStylesSidebar(): JSX.Element {
 	const { userCanEditGlobalStyles } = useSelect( ( select ) => {
 		const { canEdit } = select( storeName ).canUserEditGlobalEmailStyles();
 		return {
@@ -36,50 +31,58 @@ export function RawStylesSidebar( props: Props ): JSX.Element {
 
 	return (
 		userCanEditGlobalStyles && (
-			<ComplementaryArea
-				identifier={ stylesSidebarId }
-				className="woocommerce-email-editor-styles-panel"
-				header={ __( 'Styles', 'woocommerce' ) }
-				closeLabel={ __( 'Close styles sidebar', 'woocommerce' ) }
-				icon={ styles }
-				scope={ storeName }
-				smallScreenTitle={ __( 'No title', 'woocommerce' ) }
-				{ ...props }
-			>
-				<NavigatorProvider initialPath="/">
-					<NavigatorScreen path="/">
-						<ScreenRoot />
-					</NavigatorScreen>
+			<>
+				<PluginSidebarMoreMenuItem
+					target="email-styles-sidebar"
+					icon={ styles }
+				>
+					{ __( 'Email styles', __i18n_text_domain__ ) }
+				</PluginSidebarMoreMenuItem>
+				<PluginSidebar
+					name="email-styles-sidebar"
+					icon={ styles }
+					title={ __( 'Styles', __i18n_text_domain__ ) }
+					className="woocommerce-email-editor-styles-panel"
+				>
+					<Navigator initialPath="/">
+						<Navigator.Screen path="/">
+							<ScreenRoot />
+						</Navigator.Screen>
 
-					<NavigatorScreen path="/typography">
-						<ScreenTypography />
-					</NavigatorScreen>
+						<Navigator.Screen path="/typography">
+							<ScreenTypography />
+						</Navigator.Screen>
 
-					<NavigatorScreen path="/typography/text">
-						<ScreenTypographyElement element="text" />
-					</NavigatorScreen>
+						<Navigator.Screen path="/typography/text">
+							<ScreenTypographyElement element="text" />
+						</Navigator.Screen>
 
-					<NavigatorScreen path="/typography/link">
-						<ScreenTypographyElement element="link" />
-					</NavigatorScreen>
+						<Navigator.Screen path="/typography/link">
+							<ScreenTypographyElement element="link" />
+						</Navigator.Screen>
 
-					<NavigatorScreen path="/typography/heading">
-						<ScreenTypographyElement element="heading" />
-					</NavigatorScreen>
+						<Navigator.Screen path="/typography/heading">
+							<ScreenTypographyElement element="heading" />
+						</Navigator.Screen>
 
-					<NavigatorScreen path="/typography/button">
-						<ScreenTypographyElement element="button" />
-					</NavigatorScreen>
+						<Navigator.Screen path="/typography/button">
+							<ScreenTypographyElement element="button" />
+						</Navigator.Screen>
 
-					<NavigatorScreen path="/colors">
-						<ScreenColors />
-					</NavigatorScreen>
+						<Navigator.Screen path="/colors">
+							<ScreenColors />
+						</Navigator.Screen>
 
-					<NavigatorScreen path="/layout">
-						<ScreenLayout />
-					</NavigatorScreen>
-				</NavigatorProvider>
-			</ComplementaryArea>
+						<Navigator.Screen path="/background">
+							<ScreenBackground />
+						</Navigator.Screen>
+
+						<Navigator.Screen path="/layout">
+							<ScreenLayout />
+						</Navigator.Screen>
+					</Navigator>
+				</PluginSidebar>
+			</>
 		)
 	);
 }

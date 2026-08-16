@@ -1,9 +1,13 @@
 /**
  * External dependencies
  */
-import { useCallback, useEffect } from '@wordpress/element';
+import { useCallback, useEffect, useState } from '@wordpress/element';
 import { Form } from '@woocommerce/base-components/cart-checkout';
-import { useCheckoutAddress, useStoreEvents } from '@woocommerce/base-context';
+import {
+	useCheckoutAddress,
+	useStoreEvents,
+	useCustomerData,
+} from '@woocommerce/base-context';
 import type { ShippingAddress } from '@woocommerce/settings';
 import { useSelect } from '@wordpress/data';
 import { validationStore } from '@woocommerce/block-data';
@@ -21,35 +25,49 @@ const CustomerAddress = () => {
 		setShippingAddress,
 		setBillingAddress,
 		useShippingAsBilling,
-		editingShippingAddress: editing,
-		setEditingShippingAddress: setEditing,
+		editingShippingAddress,
+		setEditingShippingAddress,
 	} = useCheckoutAddress();
 	const { dispatchCheckoutEvent } = useStoreEvents();
+	const [ shouldAnimate, setShouldAnimate ] = useState( false );
 
-	// Forces editing state if store has errors.
-	const { hasValidationErrors, invalidProps } = useSelect(
+	const { isInitialized } = useCustomerData();
+
+	const { validationErrors } = useSelect(
 		( select ) => {
-			const store = select( validationStore );
 			return {
-				hasValidationErrors: store.hasValidationErrors(),
-				invalidProps: Object.keys( shippingAddress )
-					.filter( ( key ) => {
-						return (
-							store.getValidationError( 'shipping_' + key ) !==
-							undefined
-						);
-					} )
-					.filter( Boolean ),
+				validationErrors:
+					select( validationStore ).getValidationErrors(),
 			};
 		},
 		[ shippingAddress ]
 	);
 
 	useEffect( () => {
-		if ( invalidProps.length > 0 && editing === false ) {
-			setEditing( true );
+		// Check if any shipping field has validation errors
+		const hasValidationErrors = Object.keys( shippingAddress ).some(
+			( key ) => {
+				// Check if 'shipping_' + key exists in validationErrors
+				return validationErrors[ `shipping_${ key }` ] !== undefined;
+			}
+		);
+
+		// Forces editing state if store has errors,
+		// but not on initial render when all fields are empty.
+		if (
+			isInitialized &&
+			hasValidationErrors &&
+			editingShippingAddress === false
+		) {
+			setEditingShippingAddress( true );
 		}
-	}, [ editing, hasValidationErrors, invalidProps.length, setEditing ] );
+	}, [
+		editingShippingAddress,
+		shippingAddress,
+		isInitialized,
+		setEditingShippingAddress,
+		validationErrors,
+	] );
 
 	const onChangeAddress = useCallback(
 		( values: ShippingAddress ) => {
@@ -68,39 +86,33 @@ const CustomerAddress = () => {
 		]
 	);
 
-	const renderAddressCardComponent = useCallback(
-		() => (
-			<AddressCard
-				address={ shippingAddress }
-				target="shipping"
-				onEdit={ () => {
-					setEditing( true );
-				} }
-				isExpanded={ editing }
-			/>
-		),
-		[ shippingAddress, editing, setEditing ]
-	);
-
-	const renderAddressFormComponent = useCallback(
-		() => (
-			<Form< ShippingAddress >
-				id="shipping"
-				addressType="shipping"
-				onChange={ onChangeAddress }
-				values={ shippingAddress }
-				fields={ ADDRESS_FORM_KEYS }
-				isEditing={ editing }
-			/>
-		),
-		[ onChangeAddress, shippingAddress, editing ]
-	);
+	const handleEditClick = useCallback( () => {
+		setShouldAnimate( true );
+		setEditingShippingAddress( true );
+	}, [ setEditingShippingAddress ] );
 
 	return (
 		<AddressWrapper
-			isEditing={ editing }
-			addressCard={ renderAddressCardComponent }
-			addressForm={ renderAddressFormComponent }
+			isEditing={ editingShippingAddress }
+			shouldAnimate={ shouldAnimate }
+			addressCard={
+				<AddressCard
+					address={ shippingAddress }
+					target="shipping"
+					onEdit={ handleEditClick }
+					isExpanded={ editingShippingAddress }
+				/>
+			}
+			addressForm={
+				<Form< ShippingAddress >
+					id="shipping"
+					addressType="shipping"
+					onChange={ onChangeAddress }
+					values={ shippingAddress }
+					fields={ ADDRESS_FORM_KEYS }
+					isEditing={ editingShippingAddress }
+				/>
+			}
 		/>
 	);
 };

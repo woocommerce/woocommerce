@@ -25,17 +25,8 @@ const downgradeToClassicAddToCartWithOptions = ( blockClientId: string ) => {
 		return false;
 	}
 
-	const foundQuantitySelectorBlock = findBlock( {
-		blocks,
-		findCondition: ( block ) =>
-			block.name ===
-			'woocommerce/add-to-cart-with-options-quantity-selector',
-	} );
-
 	const newBlock = createBlock( 'woocommerce/add-to-cart-form', {
-		quantitySelectorStyle:
-			foundQuantitySelectorBlock?.attributes?.quantitySelectorStyle ||
-			'input',
+		quantitySelectorStyle: 'input',
 	} );
 
 	dispatch( 'core/block-editor' ).replaceBlock(
@@ -52,16 +43,15 @@ export const DowngradeNotice = ( {
 	blockClientId: string;
 } ) => {
 	const notice = __(
-		'Switch back to the classic Add to Cart with Options block.',
+		'Facing compatibility issues with extensions? You can switch back to the classic Add to Cart with Options block.',
 		'woocommerce'
 	);
 
 	const buttonLabel = __( 'Switch back', 'woocommerce' );
 
 	const handleClick = async () => {
-		const downgraded = await downgradeToClassicAddToCartWithOptions(
-			blockClientId
-		);
+		const downgraded =
+			await downgradeToClassicAddToCartWithOptions( blockClientId );
 		if ( downgraded ) {
 			recordEvent( 'blocks_add_to_cart_with_options_migration', {
 				transform_to: 'legacy',

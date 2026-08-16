@@ -6,6 +6,8 @@
  * @version 2.4.0
  */
 
+use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
+use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIPages\ProductsSettingsPageAdapter;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -37,6 +39,16 @@ class WC_Settings_Products extends WC_Settings_Page {
 	 * @var string
 	 */
 	public $icon = 'box';
+
+	/**
+	 * Get the settings UI page adapter for this settings page.
+	 *
+	 * @since 10.9.0
+	 * @return SettingsUIPageInterface|null
+	 */
+	public function get_settings_ui_page(): ?SettingsUIPageInterface {
+		return new ProductsSettingsPageAdapter( $this );
+	}
 
 	/**
 	 * Get own sections.
@@ -277,6 +289,16 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'id'            => 'woocommerce_notify_no_stock',
 					'default'       => 'yes',
 					'type'          => 'checkbox',
+					'checkboxgroup' => '',
+					'autoload'      => false,
+					'class'         => 'manage_stock_field',
+				),
+
+				array(
+					'desc'          => __( 'Enable backorder notifications', 'woocommerce' ),
+					'id'            => 'woocommerce_notify_backorder',
+					'default'       => 'yes',
+					'type'          => 'checkbox',
 					'checkboxgroup' => 'end',
 					'autoload'      => false,
 					'class'         => 'manage_stock_field',
@@ -490,7 +512,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 		 * Product->Inventory has a setting `Out of stock visibility`.
 		 * Because of this, we need to recount the terms to keep them in-sync.
 		 */
-		WC()->call_function( 'wc_recount_all_terms' );
+		WC()->call_function( 'wc_recount_all_terms', false );
 
 		$this->do_update_options_action();
 	}

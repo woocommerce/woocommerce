@@ -6,11 +6,10 @@
 	padding: $gap !important;
 	gap: $gap-small;
 	margin: $gap 0;
+	border: 1px solid $gray-800;
 	border-radius: $universal-border-radius;
-	border-color: $gray-800;
 	font-weight: 400;
 	line-height: 1.5;
-	border: 1px solid;
 	@include font-size(small);
 	background-color: #fff;
 	box-sizing: border-box;
@@ -48,7 +47,7 @@
 			color: $gray-800 !important;
 			background: transparent !important; // For transparent notice button in Twenty Twenty-One theme.
 			padding: 0 !important;
-			margin: 0;
+			margin: 0 0 0 20px;
 			border: 0;
 			appearance: none;
 			opacity: 0.7;

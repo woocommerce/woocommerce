@@ -1,14 +1,13 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
 import {
 	useBlockProps,
 	useInnerBlocksProps,
 	BlockContextProvider,
 } from '@wordpress/block-editor';
-import Rating from '@woocommerce/base-components/product-rating';
 import {
 	useQueryStateByKey,
 	useQueryStateByContext,
@@ -18,6 +17,8 @@ import { getSettingWithCoercion } from '@woocommerce/settings';
 import { isBoolean } from '@woocommerce/types';
 import { useState, useMemo, useEffect } from '@wordpress/element';
 import { withSpokenMessages } from '@wordpress/components';
+import type { BlockEditProps } from '@wordpress/blocks';
+import type { SelectableItemsContext } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -29,8 +30,9 @@ import { getAllowedBlocks } from '../../utils/get-allowed-blocks';
 import { EXCLUDED_BLOCKS } from '../../constants';
 import { Notice } from '../../components/notice';
 import type { Attributes } from './types';
-import './style.scss';
+import type { FilterItemFields } from '../../types';
 import { InitialDisabled } from '../../components/initial-disabled';
+import RatingStars from './components/rating-stars';
 
 const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 	const { attributes, setAttributes, clientId } = props;
@@ -45,7 +47,7 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 				[
 					'core/heading',
 					{
-						level: 4,
+						level: 3,
 						content: __( 'Rating', 'woocommerce' ),
 						style: {
 							spacing: {
@@ -120,15 +122,16 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 					.sort( ( a, b ) => b.rating - a.rating )
 					.filter( ( { rating } ) => rating >= minimumRating )
 					.map( ( { rating, count }, index ) => ( {
-						label: (
-							<Rating
-								key={ rating }
-								rating={ rating }
-								ratedProductsCount={ showCounts ? count : null }
-							/>
+						id: `rating-${ rating }`,
+						label: <RatingStars key={ rating } stars={ rating } />,
+						ariaLabel: sprintf(
+							/* translators: %d: rating value. Example: Rated 4 out of 5. */
+							__( 'Rated %d out of 5', 'woocommerce' ),
+							rating
 						),
 						value: rating?.toString(),
 						selected: index === 0,
+						...( showCounts && { count } ),
 					} ) )
 			: [];
 
@@ -184,10 +187,13 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 					>
 						<BlockContextProvider
 							value={ {
-								filterData: {
+								'woocommerce/selectableItems': {
 									items: displayedOptions,
+									selectionMode: 'multiple' as const,
+									storeNamespace:
+										'woocommerce/product-filters',
 									isLoading,
-								},
+								} satisfies SelectableItemsContext< FilterItemFields >,
 							} }
 						>
 							{ children }

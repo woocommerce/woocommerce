@@ -24,6 +24,13 @@ class ListTable extends WP_List_Table {
 	private $order_type;
 
 	/**
+	 * Underlying WordPress post type. Used for checking permissions.
+	 *
+	 * @var WP_Post_Type|null
+	 */
+	private $wp_post_type;
+
+	/**
 	 * Request vars.
 	 *
 	 * @var array
@@ -84,7 +91,7 @@ class ListTable extends WP_List_Table {
 	 * Init method, invoked by DI container.
 	 *
 	 * @internal This method is not intended to be used directly (except for testing).
-	 * @param PageController      $page_controller Page controller instance for this request.
+	 * @param PageController $page_controller Page controller instance for this request.
 	 */
 	final public function init( PageController $page_controller ) {
 		$this->page_controller = $page_controller;
@@ -98,13 +105,15 @@ class ListTable extends WP_List_Table {
 	 * @return void
 	 */
 	public function setup( $args = array() ): void {
-		$this->order_type = $args['order_type'] ?? 'shop_order';
+		$this->order_type   = $args['order_type'] ?? 'shop_order';
+		$this->wp_post_type = get_post_type_object( $this->order_type );
 
 		add_action( 'admin_notices', array( $this, 'bulk_action_notices' ) );
 		add_filter( "manage_{$this->screen->id}_columns", array( $this, 'get_columns' ), 0 );
 		add_filter( 'set_screen_option_edit_' . $this->order_type . '_per_page', array( $this, 'set_items_per_page' ), 10, 3 );
 		add_filter( 'default_hidden_columns', array( $this, 'default_hidden_columns' ), 10, 2 );
 		add_action( 'admin_footer', array( $this, 'enqueue_scripts' ) );
+		add_action( 'woocommerce_order_list_table_restrict_manage_orders', array( $this, 'created_via_filter' ) );
 		add_action( 'woocommerce_order_list_table_restrict_manage_orders', array( $this, 'customers_filter' ) );
 
 		$this->items_per_page();
@@ -245,12 +254,18 @@ class ListTable extends WP_List_Table {
 			$search_label .= '</span>';
 		}
 
+		// Add new.
+		$add_new_button = '';
+		if ( $post_type && current_user_can( $post_type->cap->publish_posts ) ) {
+			$add_new_button = "<a href='" . esc_url( $new_page_link ) . "' class='page-title-action'>{$add_new}</a>";
+		}
+
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo wp_kses_post(
 			"
 			<div class='wrap'>
 				<h1 class='wp-heading-inline'>{$title}</h1>
-				<a href='" . esc_url( $new_page_link ) . "' class='page-title-action'>{$add_new}</a>
+				{$add_new_button}
 				{$search_label}
 				<hr class='wp-header-end'>"
 		);
@@ -277,14 +292,14 @@ class ListTable extends WP_List_Table {
 	 */
 	public function render_blank_state(): void {
 		?>
-			<div class="woocommerce-BlankState">
+			<div class="woocommerce-BlankState woocommerce-BlankState--orders">
 
 				<h2 class="woocommerce-BlankState-message">
 					<?php esc_html_e( 'When you receive a new order, it will appear here.', 'woocommerce' ); ?>
 				</h2>
 
 				<div class="woocommerce-BlankState-buttons">
-					<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="https://woocommerce.com/document/managing-orders/?utm_source=blankslate&utm_medium=product&utm_content=ordersdoc&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Learn more about orders', 'woocommerce' ); ?></a>
+					<a class="woocommerce-BlankState-cta button button-secondary" target="_blank" rel="noopener noreferrer" href="https://woocommerce.com/document/managing-orders/?utm_source=blankslate&utm_medium=product&utm_content=ordersdoc&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Learn more about orders', 'woocommerce' ); ?></a>
 				</div>
 
 			<?php
@@ -307,6 +322,10 @@ class ListTable extends WP_List_Table {
 	 */
 	protected function get_bulk_actions() {
 		$selected_status = $this->order_query_args['status'] ?? false;
+
+		if ( ! current_user_can( $this->wp_post_type->cap->edit_others_posts ) ) {
+			return array();
+		}
 
 		if ( array( 'trash' ) === $selected_status ) {
 			$actions = array(
@@ -392,6 +411,7 @@ class ListTable extends WP_List_Table {
 		$this->set_date_args();
 		$this->set_customer_args();
 		$this->set_search_args();
+		$this->set_created_via_args();
 
 		/**
 		 * Provides an opportunity to modify the query arguments used in the (Custom Order Table-powered) order list
@@ -416,7 +436,7 @@ class ListTable extends WP_List_Table {
 		$order_query_args['paginate'] = true;
 
 		// Attempt to use cache if no additional query arguments are used.
-		if ( empty( array_diff( array_keys( $this->order_query_args ), array( 'limit', 'page', 'paginate', 'type', 'status', 'orderby', 'order' ) ) ) ) {
+		if ( empty( array_diff( array_keys( $order_query_args ), array( 'limit', 'page', 'paginate', 'type', 'status', 'orderby', 'order' ) ) ) ) {
 			$this->order_query_args['no_found_rows'] = true;
 			$order_query_args['no_found_rows']       = true;
 		}
@@ -484,25 +504,43 @@ class ListTable extends WP_List_Table {
 	}
 
 	/**
-	 * Implements date (month-based) filtering.
+	 * Implements date filtering.
+	 *
+	 * The 'm' query arg is accepted at month (YYYYMM) or day (YYYYMMDD) granularity. The date field being filtered
+	 * defaults to 'date_created' and can be changed via the 'order_date_type' query arg, which is how Analytics
+	 * reports link to orders paid or completed on a given day.
 	 */
 	private function set_date_args() {
-		$year_month = sanitize_text_field( wp_unslash( $_GET['m'] ?? '' ) );
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$date_value = sanitize_text_field( wp_unslash( $_GET['m'] ?? '' ) );
 
-		if ( empty( $year_month ) || ! preg_match( '/^[0-9]{6}$/', $year_month ) ) {
+		if ( empty( $date_value ) || ! preg_match( '/^([0-9]{4})([0-9]{2})([0-9]{2})?$/', $date_value, $matches ) ) {
 			return;
 		}
 
-		$year  = (int) substr( $year_month, 0, 4 );
-		$month = (int) substr( $year_month, 4, 2 );
+		$year  = (int) $matches[1];
+		$month = (int) $matches[2];
+		$day   = isset( $matches[3] ) ? (int) $matches[3] : null;
 
-		if ( $month < 0 || $month > 12 ) {
+		if ( ! checkdate( $month, $day ?? 1, $year ) ) {
 			return;
 		}
 
-		$last_day_of_month                      = date_create( "$year-$month" )->format( 'Y-m-t' );
-		$this->order_query_args['date_created'] = "$year-$month-01..." . $last_day_of_month;
-		$this->has_filter                       = true;
+		$date_type = sanitize_text_field( wp_unslash( $_GET['order_date_type'] ?? '' ) );
+		if ( ! in_array( $date_type, array( 'date_created', 'date_paid', 'date_completed' ), true ) ) {
+			$date_type = 'date_created';
+		}
+
+		if ( is_null( $day ) ) {
+			$date_start = sprintf( '%04d-%02d-01', $year, $month );
+			$date_end   = date_create( $date_start )->format( 'Y-m-t' );
+		} else {
+			$date_start = sprintf( '%04d-%02d-%02d', $year, $month, $day );
+			$date_end   = $date_start;
+		}
+
+		$this->order_query_args[ $date_type ] = "$date_start...$date_end";
+		$this->has_filter                     = true;
 	}
 
 	/**
@@ -557,12 +595,57 @@ class ListTable extends WP_List_Table {
 		if ( ! empty( $search_term ) ) {
 			$this->order_query_args['s'] = $search_term;
 			$this->has_filter            = true;
+
+			// 'search_filter' is inert without a search term, but setting it (the form always submits the dropdown)
+			// would disqualify the request from the cached-count fast path in prepare_items() and force a COUNT.
+			$filter = trim( sanitize_text_field( $this->request['search-filter'] ) );
+			if ( ! empty( $filter ) ) {
+				$this->order_query_args['search_filter'] = $filter;
+			}
+		}
+	}
+
+	/**
+	 * Implements filtering of orders by created_via value.
+	 */
+	private function set_created_via_args(): void {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$created_via = sanitize_text_field( wp_unslash( $_GET['_created_via'] ?? '' ) );
+
+		if ( empty( $created_via ) ) {
+			return;
 		}
 
-		$filter = trim( sanitize_text_field( $this->request['search-filter'] ) );
-		if ( ! empty( $filter ) ) {
-			$this->order_query_args['search_filter'] = $filter;
-		}
+		$this->order_query_args['created_via'] = array_map( 'trim', explode( ',', $created_via ) );
+
+		$this->has_filter = true;
+	}
+
+	/**
+	 * Render the created_via filter dropdown.
+	 *
+	 * @return void
+	 */
+	public function created_via_filter() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$current_created_via = isset( $_GET['_created_via'] ) ? sanitize_text_field( wp_unslash( $_GET['_created_via'] ) ) : '';
+
+		$created_via_options = array(
+			''                   => __( 'All sales channels', 'woocommerce' ),
+			'admin'              => __( 'Admin', 'woocommerce' ),
+			'checkout,store-api' => __( 'Checkout', 'woocommerce' ),
+			'pos-rest-api'       => __( 'Point of Sale', 'woocommerce' ),
+		);
+		?>
+
+		<select name="_created_via" id="filter-by-created-via">
+			<?php foreach ( $created_via_options as $value => $label ) : ?>
+				<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $value, $current_created_via ); ?>>
+					<?php echo esc_html( $label ); ?>
+				</option>
+			<?php endforeach; ?>
+		</select>
+		<?php
 	}
 
 	/**
@@ -811,66 +894,81 @@ class ListTable extends WP_List_Table {
 	protected function get_months_filter_options(): array {
 		global $wpdb;
 
-		$orders_table = esc_sql( OrdersTableDataStore::get_orders_table_name() );
-		$trash_status = esc_sql( OrderStatus::TRASH );
-
-		$first_year_month_gmt = $wpdb->get_row(
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$table_name = OrdersTableDataStore::get_orders_table_name();
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
+		$min_max_months = $wpdb->get_row(
 			$wpdb->prepare(
-				"
-					SELECT YEAR( t.date_created_gmt ) AS year,
-					       MONTH( t.date_created_gmt ) AS month
-					FROM $orders_table t
-					WHERE type = %s
-					AND status != %s
-					ORDER BY year ASC, month ASC
-					LIMIT 1
-				",
+				"SELECT MIN(date_created_gmt) as min_date_gmt, MAX(date_created_gmt) as max_date_gmt
+				 FROM (
+					( SELECT date_created_gmt FROM {$table_name} WHERE type = %s AND status != 'trash' ORDER BY date_created_gmt DESC LIMIT 1 )
+					UNION ALL
+					( SELECT date_created_gmt FROM {$table_name} WHERE type = %s AND status != 'trash' ORDER BY date_created_gmt ASC LIMIT 1 )
+				 ) d",
 				$this->order_type,
-				$trash_status
+				$this->order_type
 			)
-			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-		if ( is_object( $first_year_month_gmt ) ) {
-			$start = new \WC_DateTime(
-				sprintf(
-					'%s-%s-01',
-					$first_year_month_gmt->year,
-					$first_year_month_gmt->month
-				)
-			);
-			$start->setTimezone( wp_timezone() ); // Adjust date and time to reflect site timezone.
-		} else {
-			$start = new \WC_DateTime( 'now', wp_timezone() );
-		}
+		/**
+		 * Normalize "this month" to be the first day of the month in the current timezone of the site.
+		 */
+		$this_month = new \WC_DateTime(
+			'now',
+			new \DateTimeZone( 'UTC' )
+		);
+		$this_month->setTimezone( wp_timezone() );
+		$this_month->setDate( $this_month->format( 'Y' ), $this_month->format( 'm' ), 1 );
+		$this_month->setTime( 0, 0 );
 
-		$end     = new \WC_DateTime( 'now', wp_timezone() );
 		$options = array();
 
-		// If, somehow, the oldest order date is in the future, swap the start and end of the range.
-		if ( $start > $end ) {
-			$end   = $start;
-			$start = new \WC_DateTime( 'now', wp_timezone() );
-		}
+		if ( isset( $min_max_months ) && ! is_null( $min_max_months->min_date_gmt ) ) {
+			$start = new \WC_DateTime(
+				$min_max_months->min_date_gmt,
+				new \DateTimeZone( 'UTC' )
+			);
+			$start->setTimezone( wp_timezone() );
+			$start->setDate( $start->format( 'Y' ), $start->format( 'm' ), 1 );
+			$start->setTime( 0, 0 );
 
-		while (
-			$start->date( 'Y' ) < $end->date( 'Y' )
-			|| $start->date( 'n' ) < $end->date( 'n' )
-		) {
+			$end = new \WC_DateTime(
+				$min_max_months->max_date_gmt,
+				new \DateTimeZone( 'UTC' )
+			);
+			$end->setTimezone( wp_timezone() );
+			$end->setDate( $end->format( 'Y' ), $end->format( 'm' ), 1 );
+			$end->setTime( 0, 0 );
+
+			if ( $start > $this_month ) {
+				$start = $this_month;
+			}
+
+			if ( $end < $this_month ) {
+				$end = $this_month;
+			}
+
+			$intervals = new \DatePeriod( $start, new \DateInterval( 'P1M' ), $end );
+
+			foreach ( $intervals as $interval ) {
+				$option        = new \stdClass();
+				$option->year  = $interval->format( 'Y' );
+				$option->month = $interval->format( 'n' );
+				$options[]     = $option;
+			}
+
 			$option        = new \stdClass();
-			$option->year  = $start->date( 'Y' );
-			$option->month = $start->date( 'n' );
+			$option->year  = $end->format( 'Y' );
+			$option->month = $end->format( 'n' );
 			$options[]     = $option;
-
-			$start->add( new \DateInterval( 'P1M' ) );
 		}
 
-		// Add in the current year-month.
-		$option        = new \stdClass();
-		$option->year  = $end->date( 'Y' );
-		$option->month = $end->date( 'n' );
-		$options[]     = $option;
+		if ( count( $options ) < 1 ) {
+			$option        = new \stdClass();
+			$option->year  = $this_month->format( 'Y' );
+			$option->month = $this_month->format( 'n' );
+			$options[]     = $option;
+		}
 
 		return array_reverse( $options );
 	}
@@ -1006,6 +1104,10 @@ class ListTable extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_cb( $item ) {
+		if ( ! $this->wp_post_type || ! current_user_can( $this->wp_post_type->cap->edit_post, $item->get_id() ) ) {
+			return;
+		}
+
 		ob_start();
 		?>
 		<input id="cb-select-<?php echo esc_attr( $item->get_id() ); ?>" type="checkbox" name="id[]" value="<?php echo esc_attr( $item->get_id() ); ?>" />
@@ -1332,7 +1434,7 @@ class ListTable extends WP_List_Table {
 	public function handle_bulk_actions() {
 		$action = $this->current_action();
 
-		if ( ! $action ) {
+		if ( ! $action || ! current_user_can( $this->wp_post_type->cap->edit_others_posts ) ) {
 			return;
 		}
 
@@ -1673,13 +1775,19 @@ class ListTable extends WP_List_Table {
 
 							<?php do_action( 'woocommerce_admin_order_preview_end' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 						</article>
+						<# if ( data.actions_html || data.is_editable ) { #>
 						<footer>
 							<div class="inner">
 								{{{ data.actions_html }}}
 
-								<a class="button button-primary button-large" aria-label="<?php esc_attr_e( 'Edit this order', 'woocommerce' ); ?>" href="<?php echo $order_edit_url_placeholder; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
+								<# if ( data.is_editable ) { #>
+								<div class="wc-backbone-modal-buttons">
+									<a class="button button-primary button-large" aria-label="<?php esc_attr_e( 'Edit this order', 'woocommerce' ); ?>" href="<?php echo $order_edit_url_placeholder; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
+								</div>
+								<# } #>
 							</div>
 						</footer>
+						<# } #>
 					</section>
 				</div>
 			</div>

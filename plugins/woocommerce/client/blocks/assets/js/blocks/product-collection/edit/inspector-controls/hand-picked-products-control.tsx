@@ -10,7 +10,6 @@ import { __ } from '@wordpress/i18n';
 import { blocksConfig } from '@woocommerce/block-settings';
 import {
 	FormTokenField,
-	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
@@ -41,6 +40,9 @@ function useProducts(
 		[]
 	);
 
+	// Flag to check if products are loaded
+	const [ productsLoaded, setProductsLoaded ] = useState( false );
+
 	useEffect( () => {
 		// We take two strategies here because of internal logic of
 		// `getProducts` and `getProductsRequests` that skips request for
@@ -62,10 +64,10 @@ function useProducts(
 				  }
 				: {
 						// For a small catalog we fetch all the products.
-						per_page: 0,
+						per_page: 100,
 				  },
 		};
-		getProducts( query ).then( ( results ) => {
+		void getProducts( query ).then( ( results ) => {
 			const newProductsMap = new Map();
 			( results as ProductResponseItem[] ).forEach( ( product ) => {
 				newProductsMap.set( product.id, product );
@@ -74,10 +76,11 @@ function useProducts(
 
 			setProductsList( results as ProductResponseItem[] );
 			setProductsMap( newProductsMap );
+			setProductsLoaded( true );
 		} );
 	}, [ isLargeCatalog, search, selected ] );
 
-	return { productsMap, productsList };
+	return { productsMap, productsList, productsLoaded };
 }
 
 export const HandPickedProductsControlField = ( {
@@ -88,7 +91,7 @@ export const HandPickedProductsControlField = ( {
 	const isLargeCatalog = ( blocksConfig.productCount || 0 ) > 100;
 	const selectedProductIds = query.woocommerceHandPickedProducts;
 	const [ searchQuery, setSearchQuery ] = useState( '' );
-	const { productsMap, productsList } = useProducts(
+	const { productsMap, productsList, productsLoaded } = useProducts(
 		isLargeCatalog,
 		searchQuery,
 		selectedProductIds
@@ -171,17 +174,18 @@ export const HandPickedProductsControlField = ( {
 
 	return (
 		<FormTokenField
+			__next40pxDefaultSize
+			__nextHasNoMarginBottom
 			displayTransform={ transformTokenIntoProductName }
 			label={ __( 'Hand-Picked', 'woocommerce' ) }
 			onChange={ onTokenChange }
 			onInputChange={ isLargeCatalog ? handleSearch : undefined }
 			suggestions={ suggestions }
-			// @ts-expect-error Using experimental features
 			__experimentalValidateInput={ ( value: string ) =>
 				productsMap.has( value )
 			}
 			value={
-				! productsMap.size
+				! productsLoaded
 					? [ __( 'Loading…', 'woocommerce' ) ]
 					: validSelectedProductIds || []
 			}

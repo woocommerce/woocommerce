@@ -12,21 +12,6 @@ import edit from './edit';
 import { queryPaginationIcon } from './icon';
 import './style.scss';
 
-const featurePluginSupport = {
-	...metadata.supports,
-
-	typography: {
-		...metadata.supports.typography,
-		__experimentalFontFamily: true,
-		__experimentalFontStyle: true,
-		__experimentalFontWeight: true,
-		__experimentalTextTransform: true,
-		__experimentalDefaultControls: {
-			fontSize: true,
-		},
-	},
-};
-
 registerBlockType( metadata, {
 	icon: {
 		src: (
@@ -38,9 +23,6 @@ registerBlockType( metadata, {
 	},
 	attributes: {
 		...metadata.attributes,
-	},
-	supports: {
-		...featurePluginSupport,
 	},
 	edit,
 	save() {

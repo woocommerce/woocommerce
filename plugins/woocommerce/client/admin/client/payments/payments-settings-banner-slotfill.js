@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createSlotFill } from '@wordpress/components';
-import { registerPlugin } from '@wordpress/plugins';
+import { registerPlugin, getPlugin } from '@wordpress/plugins';
 
 /**
  * Internal dependencies
@@ -11,6 +11,8 @@ import { PaymentsBannerWrapper } from './payment-settings-banner';
 import { SETTINGS_SLOT_FILL_CONSTANT } from '../settings/settings-slots';
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
+const PLUGIN_ID = 'woocommerce-admin-paymentsgateways-settings-banner';
+
 const PaymentsBannerFill = () => {
 	return (
 		<Fill>
@@ -20,7 +22,11 @@ const PaymentsBannerFill = () => {
 };
 
 export const registerPaymentsSettingsBannerFill = () => {
-	registerPlugin( 'woocommerce-admin-paymentsgateways-settings-banner', {
+	if ( getPlugin( PLUGIN_ID ) ) {
+		return;
+	}
+
+	registerPlugin( PLUGIN_ID, {
 		scope: 'woocommerce-payments-settings',
 		render: PaymentsBannerFill,
 	} );

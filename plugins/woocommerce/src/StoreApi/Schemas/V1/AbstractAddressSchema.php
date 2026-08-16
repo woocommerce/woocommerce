@@ -127,16 +127,16 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			function ( $carry, $key ) use ( $address, $validation_util, $schema ) {
 				switch ( $key ) {
 					case 'country':
-						$carry[ $key ] = wc_strtoupper( sanitize_text_field( wp_unslash( $address[ $key ] ) ) );
+						$carry[ $key ] = wc_strtoupper( sanitize_text_field( $address[ $key ] ) );
 						break;
 					case 'state':
-						$carry[ $key ] = $validation_util->format_state( sanitize_text_field( wp_unslash( $address[ $key ] ) ), $address['country'] );
+						$carry[ $key ] = $validation_util->format_state( sanitize_text_field( $address[ $key ] ), $address['country'] );
 						break;
 					case 'postcode':
-						$carry[ $key ] = $address['postcode'] ? wc_format_postcode( sanitize_text_field( wp_unslash( $address['postcode'] ) ), $address['country'] ) : '';
+						$carry[ $key ] = $address['postcode'] ? wc_format_postcode( sanitize_text_field( $address['postcode'] ), $address['country'] ) : '';
 						break;
 					default:
-						$carry[ $key ] = rest_sanitize_value_from_schema( wp_unslash( $address[ $key ] ), $schema[ $key ], $key );
+						$carry[ $key ] = rest_sanitize_value_from_schema( $address[ $key ], $schema[ $key ], $key );
 						break;
 				}
 				if ( $this->additional_fields_controller->is_field( $key ) ) {
@@ -233,9 +233,10 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 		}
 
 		if ( ! empty( $address['phone'] ) ) {
-			$address['phone'] = wc_sanitize_phone_number( $address['phone'] );
+			// This is a safe sanitize to prevent copy-paste issues with invisible chars. Won't ensure validation.
+			$address['phone'] = wc_remove_non_displayable_chars( $address['phone'] );
 
-			if ( ! \WC_Validation::is_phone( $address['phone'] ) ) {
+			if ( ! \WC_Validation::is_phone( $address['phone'], $address['country'] ?? null ) ) {
 				$errors->add(
 					'invalid_phone',
 					__( 'The provided phone number is not valid', 'woocommerce' )

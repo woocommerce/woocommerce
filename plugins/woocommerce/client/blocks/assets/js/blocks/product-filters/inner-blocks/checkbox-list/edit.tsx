@@ -6,6 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { Icon, Disabled } from '@wordpress/components';
 import { checkMark } from '@woocommerce/icons';
 import { useMemo } from '@wordpress/element';
+import { decodeHtmlEntities } from '@woocommerce/utils';
 import {
 	useBlockProps,
 	withColors,
@@ -25,6 +26,10 @@ import './style.scss';
 import './editor.scss';
 import { EditProps } from './types';
 import { getColorClasses, getColorVars } from './utils';
+import {
+	getVisualAttributeTermStyle,
+	isVisualAttributeTermEmpty,
+} from '../../../../base/utils/visual-attribute-terms';
 
 const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 	const {
@@ -38,15 +43,21 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 		setOptionElementSelected,
 		optionElement,
 		setOptionElement,
+		labelElement,
+		setLabelElement,
 	} = props;
 
 	const {
 		customOptionElementBorder,
 		customOptionElementSelected,
 		customOptionElement,
+		customLabelElement,
 	} = attributes;
-	const { filterData } = context;
-	const { isLoading, items } = filterData;
+	const selectableItems = context?.[ 'woocommerce/selectableItems' ] ?? {};
+	const isLoading = selectableItems.isLoading ?? false;
+	const items = Array.isArray( selectableItems.items )
+		? selectableItems.items
+		: [];
 
 	const colorGradientSettings = useMultipleOriginColorsAndGradients();
 	const blockProps = useBlockProps( {
@@ -59,21 +70,18 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 
 	const loadingState = useMemo( () => {
 		return [ ...Array( 5 ) ].map( ( x, i ) => (
-			<li
+			<div
+				className="wc-block-product-filter-checkbox-list__item"
 				key={ i }
 				style={ {
 					/* stylelint-disable */
-					width: Math.floor( Math.random() * ( 100 - 25 ) ) + '%',
+					width: Math.floor( Math.random() * 75 ) + '%',
 				} }
 			>
 				&nbsp;
-			</li>
+			</div>
 		) );
 	}, [] );
-
-	if ( ! items ) {
-		return <></>;
-	}
 
 	const threshold = 15;
 	const isLongList = items.length > threshold;
@@ -82,16 +90,22 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 		<>
 			<div { ...blockProps }>
 				<Disabled>
-					<ul className="wc-block-product-filter-checkbox-list__list">
+					<div className="wc-block-product-filter-checkbox-list__items">
 						{ isLoading && loadingState }
 						{ ! isLoading &&
 							( isLongList
 								? items.slice( 0, threshold )
 								: items
 							).map( ( item, index ) => (
-								<li
+								<div
 									key={ index }
-									className="wc-block-product-filter-checkbox-list__item"
+									className={ clsx(
+										'wc-block-product-filter-checkbox-list__item',
+										{
+											[ `has-depth-${ item?.depth }` ]:
+												item?.depth,
+										}
+									) }
 								>
 									<label
 										htmlFor={ `interactive-checkbox-${ index }` }
@@ -111,13 +125,41 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 												icon={ checkMark }
 											/>
 										</span>
-										<span className="wc-block-product-filter-checkbox-list__text">
-											{ item.label }
+										<span className="wc-block-product-filter-checkbox-list__text-wrapper">
+											{ item.visual !== undefined && (
+												<span
+													className={ clsx(
+														'wc-block-product-filter-checkbox-list__color-swatch',
+														{
+															'is-empty':
+																isVisualAttributeTermEmpty(
+																	item.visual
+																),
+														}
+													) }
+													style={ getVisualAttributeTermStyle(
+														item.visual
+													) }
+													aria-hidden="true"
+												/>
+											) }
+											<span className="wc-block-product-filter-checkbox-list__text">
+												{ typeof item.label === 'string'
+													? decodeHtmlEntities(
+															item.label
+													  )
+													: item.label }
+											</span>
+											{ item.count !== undefined && (
+												<span className="wc-block-product-filter-checkbox-list__count">
+													{ ` (${ item.count })` }
+												</span>
+											) }
 										</span>
 									</label>
-								</li>
+								</div>
 							) ) }
-					</ul>
+					</div>
 					{ ! isLoading && isLongList && (
 						<button className="wc-block-product-filter-checkbox-list__show-more">
 							{ __( 'Show more…', 'woocommerce' ) }
@@ -130,6 +172,25 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 					<ColorGradientSettingsDropdown
 						__experimentalIsRenderedInSidebar
 						settings={ [
+							{
+								label: __( 'Label', 'woocommerce' ),
+								colorValue:
+									labelElement.color || customLabelElement,
+								isShownByDefault: true,
+								enableAlpha: true,
+								onColorChange: ( colorValue: string ) => {
+									setLabelElement( colorValue );
+									setAttributes( {
+										customLabelElement: colorValue,
+									} );
+								},
+								resetAllFilter: () => {
+									setLabelElement( '' );
+									setAttributes( {
+										customLabelElement: '',
+									} );
+								},
+							},
 							{
 								label: __(
 									'Option Element Border',
@@ -209,4 +270,5 @@ export default withColors( {
 	optionElementBorder: 'option-element-border',
 	optionElementSelected: 'option-element-border',
 	optionElement: 'option-element',
+	labelElement: 'label-element',
 } )( CheckboxListEdit );

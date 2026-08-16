@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Add support to `count` output format on `tax_class` and `payment_gateway` endpoints.

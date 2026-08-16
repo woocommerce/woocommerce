@@ -12,8 +12,8 @@ import { isExperimentalBlocksEnabled } from '@woocommerce/block-settings';
 import Block from './block';
 
 export type BlockAttributes = {
-	className: string;
-	disableProductDescriptions: boolean;
+	className?: string;
+	disableProductDescriptions?: boolean;
 };
 
 export const Edit = ( {
@@ -23,7 +23,7 @@ export const Edit = ( {
 	attributes: BlockAttributes;
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element => {
-	const { className, disableProductDescriptions } = attributes;
+	const { className = '', disableProductDescriptions = false } = attributes;
 	const blockProps = useBlockProps();
 
 	return (
@@ -33,6 +33,7 @@ export const Edit = ( {
 				<InspectorControls>
 					<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
 						<ToggleControl
+							__nextHasNoMarginBottom
 							label={ __(
 								'Disable product descriptions',
 								'woocommerce'

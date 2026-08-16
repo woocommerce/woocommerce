@@ -25,6 +25,7 @@ export const refundPolicyTitle = ( location: string ) => {
 				'30-day {{Link}}money-back guarantee{{/Link}}',
 				'woocommerce'
 			) }
+			target="_blank"
 		/>
 	);
 };
@@ -42,6 +43,7 @@ export const supportTitle = ( location: string ) => {
 				'{{Link}}Get help{{/Link}} when you need it',
 				'woocommerce'
 			) }
+			target="_blank"
 		/>
 	);
 };
@@ -59,11 +61,12 @@ export const paymentTitle = ( location: string ) => {
 				'{{Link}}Products{{/Link}} you can trust',
 				'woocommerce'
 			) }
+			target="_blank"
 		/>
 	);
 };
 
-function FooterContent(): JSX.Element {
+function FooterContent(): React.JSX.Element {
 	return (
 		<div className="woocommerce-marketplace__footer-content">
 			<h2 className="woocommerce-marketplace__footer-title">
@@ -110,7 +113,7 @@ function FooterContent(): JSX.Element {
 	);
 }
 
-export default function Footer(): JSX.Element {
+export default function Footer(): React.JSX.Element {
 	return (
 		<div className="woocommerce-marketplace__footer">
 			<FooterContent />

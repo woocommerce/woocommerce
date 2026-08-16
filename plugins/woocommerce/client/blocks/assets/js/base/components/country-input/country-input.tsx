@@ -16,6 +16,7 @@ export const CountryInput = ( {
 	className,
 	countries,
 	id,
+	errorId,
 	label,
 	onChange,
 	value = '',
@@ -35,6 +36,7 @@ export const CountryInput = ( {
 		<Select
 			className={ clsx( className, 'wc-block-components-country-input' ) }
 			id={ id }
+			errorId={ errorId }
 			label={ label || '' }
 			onChange={ onChange }
 			options={ options }

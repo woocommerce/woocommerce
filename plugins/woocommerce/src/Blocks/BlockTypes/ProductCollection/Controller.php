@@ -4,12 +4,15 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
+use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use WP_Query;
 
 /**
  * Controller class.
  */
 class Controller extends AbstractBlock {
+
+	use EnableBlockJsonAssetsTrait;
 
 	/**
 	 * Block name.
@@ -120,32 +123,14 @@ class Controller extends AbstractBlock {
 	 * @return boolean
 	 */
 	private function is_block_compatible( $block_name ) {
-		// Check for explicitly unsupported blocks.
-		$unsupported_blocks = array(
-			'core/post-content',
-			'woocommerce/mini-cart',
-			'woocommerce/featured-product',
-			'woocommerce/active-filters',
-			'woocommerce/price-filter',
-			'woocommerce/stock-filter',
-			'woocommerce/attribute-filter',
-			'woocommerce/rating-filter',
-		);
+		$block_type = \WP_Block_Type_Registry::get_instance()->get_registered( $block_name );
+		// Client side navigation can be true in two states:
+		// - supports.interactivity === true;
+		// - supports.interactivity.clientNavigation === true; .
+		$supports_interactivity     = isset( $block_type->supports['interactivity'] ) && true === $block_type->supports['interactivity'];
+		$supports_client_navigation = isset( $block_type->supports['interactivity']['clientNavigation'] ) && true === $block_type->supports['interactivity']['clientNavigation'];
 
-		if ( in_array( $block_name, $unsupported_blocks, true ) ) {
-			return false;
-		}
-
-		// Check for supported prefixes.
-		if (
-			str_starts_with( $block_name, 'core/' ) ||
-			str_starts_with( $block_name, 'woocommerce/' )
-		) {
-			return true;
-		}
-
-		// Otherwise block is unsupported.
-		return false;
+		return $supports_interactivity || $supports_client_navigation;
 	}
 
 	/**
@@ -164,13 +149,14 @@ class Controller extends AbstractBlock {
 		$block_name                  = $parsed_block['blockName'];
 		$is_product_collection_block = $parsed_block['attrs']['query']['isProductCollectionBlock'] ?? false;
 		$force_page_reload_global    =
-			$parsed_block['attrs']['forcePageReload'] ?? false &&
+			( $parsed_block['attrs']['forcePageReload'] ?? false ) &&
 			isset( $parsed_block['attrs']['queryId'] );
 
 		if (
 			$is_product_collection_block &&
 			'woocommerce/product-collection' === $block_name &&
-			! $force_page_reload_global
+			! $force_page_reload_global &&
+			isset( $parsed_block['attrs']['queryId'] )
 		) {
 			$enhanced_query_stack[] = $parsed_block['attrs']['queryId'];
 
@@ -187,14 +173,14 @@ class Controller extends AbstractBlock {
 				 */
 				$render_product_collection_callback = static function ( $content, $block ) use ( &$enhanced_query_stack, &$dirty_enhanced_queries, &$render_product_collection_callback ) {
 					$force_page_reload =
-						$parsed_block['attrs']['forcePageReload'] ?? false &&
+						( $block['attrs']['forcePageReload'] ?? false ) &&
 						isset( $block['attrs']['queryId'] );
 
 					if ( $force_page_reload ) {
 						return $content;
 					}
 
-					if ( isset( $dirty_enhanced_queries[ $block['attrs']['queryId'] ] ) ) {
+					if ( isset( $block['attrs']['queryId'] ) && isset( $dirty_enhanced_queries[ $block['attrs']['queryId'] ] ) ) {
 						wp_interactivity_config( 'core/router', array( 'clientNavigationDisabled' => true ) );
 						$dirty_enhanced_queries[ $block['attrs']['queryId'] ] = null;
 					}
@@ -202,14 +188,14 @@ class Controller extends AbstractBlock {
 					array_pop( $enhanced_query_stack );
 
 					if ( empty( $enhanced_query_stack ) ) {
-						remove_filter( 'render_block_woocommerce/product-collection', $render_product_collection_callback );
+						remove_filter( 'render_block_woocommerce/product-collection', $render_product_collection_callback, 5 );
 						$render_product_collection_callback = null;
 					}
 
 					return $content;
 				};
 
-				add_filter( 'render_block_woocommerce/product-collection', $render_product_collection_callback, 10, 2 );
+				add_filter( 'render_block_woocommerce/product-collection', $render_product_collection_callback, 5, 2 );
 			}
 		} elseif (
 			! empty( $enhanced_query_stack ) &&
@@ -298,13 +284,15 @@ class Controller extends AbstractBlock {
 			return $this->query_builder->get_preview_query_args( $collection_args, array_merge( $query, array( 'orderby' => $orderby ) ), $request );
 		}
 
-		$on_sale             = $request->get_param( 'woocommerceOnSale' ) === 'true';
-		$stock_status        = $request->get_param( 'woocommerceStockStatus' );
-		$product_attributes  = $request->get_param( 'woocommerceAttributes' );
-		$handpicked_products = $request->get_param( 'woocommerceHandPickedProducts' );
-		$featured            = $request->get_param( 'featured' );
-		$time_frame          = $request->get_param( 'timeFrame' );
-		$price_range         = $request->get_param( 'priceRange' );
+		$on_sale                        = $request->get_param( 'woocommerceOnSale' ) === 'true';
+		$stock_status                   = $request->get_param( 'woocommerceStockStatus' );
+		$product_attributes             = $request->get_param( 'woocommerceAttributes' );
+		$handpicked_products            = $request->get_param( 'woocommerceHandPickedProducts' );
+		$featured                       = $request->get_param( 'featured' );
+		$time_frame                     = $request->get_param( 'timeFrame' );
+		$price_range                    = $request->get_param( 'priceRange' );
+		$raw_tax_query_from_rest_params = $query['tax_query'] ?? array();
+
 		// This argument is required for the tests to PHP Unit Tests to run correctly.
 		// Most likely this argument is being accessed in the test environment image.
 		$query['author'] = '';
@@ -322,6 +310,7 @@ class Controller extends AbstractBlock {
 				'featured'            => $featured,
 				'timeFrame'           => $time_frame,
 				'priceRange'          => $price_range,
+				'taxonomies_query'    => $raw_tax_query_from_rest_params,
 			)
 		);
 	}
@@ -351,15 +340,33 @@ class Controller extends AbstractBlock {
 		 */
 		$this->asset_data_registry->add( 'isRenderingPhpTemplate', true );
 
+		/*
+		 * When forcePageReload is enabled, the product collection has no data-wp-router-region,
+		 * so the Interactivity Router cannot update it client-side. Signal the product-filters
+		 * block so its navigate action falls back to a full page reload instead of using the
+		 * router, without affecting other blocks on the page.
+		 *
+		 * This is only needed when the query is inherited from the template, as that's the
+		 * only case where the Product Filters block can be a sibling rather than a descendant
+		 * of the Product Collection. When it's a descendant, forcePageReload is passed through
+		 * the block context instead.
+		 */
+		if (
+			( $parsed_block['attrs']['forcePageReload'] ?? false ) &&
+			( $parsed_block['attrs']['query']['inherit'] ?? false )
+		) {
+			wp_interactivity_config( 'woocommerce/product-filters', array( 'forcePageReload' => true ) );
+		}
+
 		return $pre_render;
 	}
 
 	/**
 	 * Return a custom query based on attributes, filters and global WP_Query.
 	 *
-	 * @param WP_Query $query The WordPress Query.
-	 * @param WP_Block $block The block being rendered.
-	 * @param int      $page  The page number.
+	 * @param WP_Query  $query The WordPress Query.
+	 * @param \WP_Block $block The block being rendered.
+	 * @param int       $page  The page number.
 	 *
 	 * @return array
 	 */
@@ -374,6 +381,7 @@ class Controller extends AbstractBlock {
 
 		// phpcs:ignore WordPress.DB.SlowDBQuery
 		$block_context_query['tax_query'] = ! empty( $query['tax_query'] ) ? $query['tax_query'] : array();
+		$block_context_query['queryId']   = $block->context['queryId'] ?? null;
 
 		$inherit    = $block->context['query']['inherit'] ?? false;
 		$filterable = $block->context['query']['filterable'] ?? false;
@@ -417,17 +425,5 @@ class Controller extends AbstractBlock {
 		// Use HandlerRegistry to register collections.
 		$collection_handler_store = $this->collection_handler_registry->register_core_collections();
 		$this->query_builder->set_collection_handler_store( $collection_handler_store );
-	}
-
-
-	/**
-	 * Disable the block type script, this block uses script modules.
-	 *
-	 * @param string|null $key The key of the script.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_script( $key = null ) {
-		return null;
 	}
 }

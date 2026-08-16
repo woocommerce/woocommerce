@@ -1,7 +1,9 @@
 ---
 post_title: Adjust the quantity input values
-tags: code-snippet
+
 ---
+
+# Adjust the quantity input values
 
 Set the starting value, maximum value, minimum value, and increment amount for quantity input fields on product pages.
 

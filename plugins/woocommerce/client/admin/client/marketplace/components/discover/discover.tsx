@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useContext, useEffect, useState } from '@wordpress/element';
+import { useContext, useEffect, useRef, useState } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -11,28 +11,36 @@ import ProductList from '../product-list/product-list';
 import { fetchDiscoverPageData, ProductGroup } from '../../utils/functions';
 import ProductLoader from '../product-loader/product-loader';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
-import { ProductType } from '../product-list/types';
+import { ProductCardType, ProductType } from '../product-list/types';
 import './discover.scss';
 import { recordMarketplaceView } from '~/marketplace/utils/tracking';
 
-export default function Discover(): JSX.Element | null {
+export default function Discover(): React.JSX.Element | null {
 	const [ productGroups, setProductGroups ] = useState<
 		Array< ProductGroup >
 	>( [] );
+	const groupElements = useRef< Record< string, HTMLDivElement | null > >(
+		{}
+	);
 	const marketplaceContextValue = useContext( MarketplaceContext );
 	const { isLoading, setIsLoading } = marketplaceContextValue;
 
 	function recordTracksEvent( products: ProductGroup[] ) {
 		const product_ids = products
 			.flatMap( ( group ) => group.items )
-			.map( ( product ) => {
-				return product.id;
-			} );
+			.map( ( product ) => product.id );
+		const groups = Object.fromEntries(
+			products.map( ( group ) => [
+				group.id,
+				group.items.map( ( product ) => product.id ),
+			] )
+		);
 
 		// This is a new event specific to the Discover tab, added with Woo 8.4.
 		recordEvent( 'marketplace_discover_viewed', {
 			view: 'discover',
 			product_ids,
+			groups,
 		} );
 
 		// This is the new page view event added with Woo 8.3. It's improved with the marketplace_discover_viewed event
@@ -42,11 +50,19 @@ export default function Discover(): JSX.Element | null {
 		} );
 	}
 
+	function recordGroupViewedTrackEvent( group: ProductGroup ) {
+		recordEvent( 'marketplace_discover_group_viewed', {
+			view: 'discover',
+			group_id: group.id,
+			product_ids: group.items.map( ( product ) => product.id ),
+		} );
+	}
+
 	// Get the content for this screen
 	useEffect( () => {
 		setIsLoading( true );
 
-		fetchDiscoverPageData()
+		void fetchDiscoverPageData()
 			.then(
 				( response: Array< ProductGroup > | { success: boolean } ) => {
 					if ( ! Array.isArray( response ) ) {
@@ -62,7 +78,65 @@ export default function Discover(): JSX.Element | null {
 			.finally( () => {
 				setIsLoading( false );
 			} );
-	}, [] );
+	}, [ setIsLoading ] );
+
+	useEffect( () => {
+		if (
+			isLoading ||
+			! productGroups.length ||
+			! ( 'IntersectionObserver' in window )
+		) {
+			return;
+		}
+
+		const productGroupsById = new Map(
+			productGroups.map( ( productGroup ) => [
+				productGroup.id,
+				productGroup,
+			] )
+		);
+		const seenGroups = new Set< string >();
+
+		const observer = new IntersectionObserver(
+			( entries ) => {
+				entries.forEach( ( entry ) => {
+					if ( ! entry.isIntersecting ) {
+						return;
+					}
+
+					const groupId = ( entry.target as HTMLDivElement ).dataset
+						.groupId;
+
+					if ( ! groupId || seenGroups.has( groupId ) ) {
+						return;
+					}
+
+					const group = productGroupsById.get( groupId );
+
+					if ( ! group ) {
+						return;
+					}
+
+					recordGroupViewedTrackEvent( group );
+					seenGroups.add( groupId );
+					observer.unobserve( entry.target );
+				} );
+			},
+			{ threshold: 0.25 }
+		);
+
+		productGroups.forEach( ( group ) => {
+			const groupElement = groupElements.current[ group.id ];
+
+			if ( groupElement ) {
+				observer.observe( groupElement );
+			}
+		} );
+
+		return () => {
+			observer.disconnect();
+		};
+	}, [ isLoading, productGroups ] );
 
 	if ( isLoading ) {
 		return (
@@ -89,6 +163,11 @@ export default function Discover(): JSX.Element | null {
 					groupURLText={ groups.url_text }
 					groupURLType={ groups.url_type }
 					type={ groups.itemType }
+					cardType={ groups.cardType ?? ProductCardType.regular }
+					groupId={ groups.id }
+					containerRef={ ( element ) => {
+						groupElements.current[ groups.id ] = element;
+					} }
 				/>
 			) ) }
 		</div>

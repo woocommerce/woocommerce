@@ -4,6 +4,11 @@
  *
  * Functions for determining the current query/page.
  *
+ * Note that the query-dependent conditional functions are only reliable
+ * once the main query has been set up, that is, on or after the "wp" action hook.
+ * If used before that, they won't trigger any error or warning: they will simply
+ * return false, even if the condition they check for would be met later in the request.
+ *
  * @package     WooCommerce\Functions
  * @version     2.3.0
  */
@@ -125,14 +130,25 @@ if ( ! function_exists( 'is_checkout' ) ) {
 if ( ! function_exists( 'is_checkout_pay_page' ) ) {
 
 	/**
-	 * Is_checkout_pay - Returns true when viewing the checkout's pay page.
+	 * Is_checkout_pay - Returns true when viewing the checkout's pay page (aka pay for order page).
 	 *
+	 * @param bool $use_query_params Whether to use query parameters to determine if this is the pay for order page.
 	 * @return bool
 	 */
-	function is_checkout_pay_page() {
+	function is_checkout_pay_page( bool $use_query_params = false ): bool {
 		global $wp;
 
-		return is_checkout() && ! empty( $wp->query_vars['order-pay'] );
+		// Use-case: attempt to identify the page based on global variables.
+		if ( ! empty( $wp->query_vars['order-pay'] ) && is_checkout() ) {
+			return true;
+		}
+
+		// Use-case: check for the presence of a specific query parameter when globals are not available.
+		if ( $use_query_params ) {
+			return isset( $_GET['pay_for_order'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		}
+
+		return false;
 	}
 }
 
@@ -233,6 +249,22 @@ if ( ! function_exists( 'is_order_received_page' ) ) {
 	}
 }
 
+if ( ! function_exists( 'is_payment_methods_page' ) ) {
+
+	/**
+	 * Is_payment_methods_page - Returns true when viewing the payment methods list page.
+	 *
+	 * @return bool
+	 */
+	function is_payment_methods_page() {
+		global $wp;
+
+		$page_id = wc_get_page_id( 'myaccount' );
+
+		return ( $page_id && is_page( $page_id ) && isset( $wp->query_vars['payment-methods'] ) );
+	}
+}
+
 if ( ! function_exists( 'is_add_payment_method_page' ) ) {
 
 	/**
@@ -262,6 +294,19 @@ if ( ! function_exists( 'is_lost_password_page' ) ) {
 		$page_id = wc_get_page_id( 'myaccount' );
 
 		return ( $page_id && is_page( $page_id ) && isset( $wp->query_vars['lost-password'] ) );
+	}
+}
+
+if ( ! function_exists( 'is_wc_admin_settings_page' ) ) {
+
+	/**
+	 * Is_wc_admin_settings_page - Returns true when viewing the admin settings page.
+	 *
+	 * @return bool
+	 */
+	function is_wc_admin_settings_page(): bool {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		return isset( $_REQUEST['page'] ) && 'wc-settings' === wp_unslash( $_REQUEST['page'] ) && is_admin();
 	}
 }
 
@@ -484,7 +529,7 @@ function wc_is_file_valid_csv( $file, $check_path = true ) {
 	 */
 	$check_import_file_path = apply_filters( 'woocommerce_csv_importer_check_import_file_path', true, $file );
 
-	if ( $check_path && $check_import_file_path && false !== stripos( $file, '://' ) ) {
+	if ( $check_path && $check_import_file_path && false !== stripos( $file, 'file://' ) ) {
 		return false;
 	}
 
@@ -515,17 +560,12 @@ function wc_is_file_valid_csv( $file, $check_path = true ) {
  * Check if the current theme is a block theme.
  *
  * @since 6.0.0
+ * @deprecated 9.9.0 Use wp_is_block_theme() instead.
  * @return bool
  */
 function wc_current_theme_is_fse_theme() {
-	if ( function_exists( 'wp_is_block_theme' ) ) {
-		return (bool) wp_is_block_theme();
-	}
-	if ( function_exists( 'gutenberg_is_fse_theme' ) ) {
-		return (bool) gutenberg_is_fse_theme();
-	}
-
-	return false;
+	wc_deprecated_function( __FUNCTION__, '9.9.0', 'wp_is_block_theme' );
+	return wp_is_block_theme();
 }
 
 /**
@@ -535,7 +575,7 @@ function wc_current_theme_is_fse_theme() {
  * @return bool
  */
 function wc_current_theme_supports_woocommerce_or_fse() {
-	return (bool) current_theme_supports( 'woocommerce' ) || wc_current_theme_is_fse_theme();
+	return (bool) current_theme_supports( 'woocommerce' ) || wp_is_block_theme();
 }
 
 /**
@@ -549,7 +589,7 @@ function wc_current_theme_supports_woocommerce_or_fse() {
  * @return string
  */
 function wc_wp_theme_get_element_class_name( $element ) {
-	if ( wc_current_theme_is_fse_theme() && function_exists( 'wp_theme_get_element_class_name' ) ) {
+	if ( wp_is_block_theme() && function_exists( 'wp_theme_get_element_class_name' ) ) {
 		return wp_theme_get_element_class_name( $element );
 	}
 
@@ -570,7 +610,7 @@ function wc_wp_theme_get_element_class_name( $element ) {
  */
 function wc_block_theme_has_styles_for_element( $element ) {
 	if (
-		! wc_current_theme_is_fse_theme() ||
+		! wp_is_block_theme() ||
 		wc_wp_theme_get_element_class_name( $element ) === ''
 	) {
 		return false;

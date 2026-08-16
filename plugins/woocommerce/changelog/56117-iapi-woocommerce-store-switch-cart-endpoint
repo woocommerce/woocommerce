@@ -1,6 +1,0 @@
-Significance: patch
-Type: fix
-
--   Switched the endpoint of the iAPI's `woocommerce` store to `cart/add-item` and `cart/update-item`.
--   Notices are now displayed only in the relevant Product Collection block.
--   Now correctly handles errors embedded in successful API responses

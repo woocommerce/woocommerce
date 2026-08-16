@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -19,13 +20,28 @@ type EmailPreviewDeviceTypeProps = {
 	setDeviceType: ( deviceType: string ) => void;
 };
 
-export const EmailPreviewDeviceType: React.FC<
-	EmailPreviewDeviceTypeProps
-> = ( { deviceType, setDeviceType } ) => {
+export const EmailPreviewDeviceType = ( {
+	deviceType,
+	setDeviceType,
+}: EmailPreviewDeviceTypeProps ) => {
 	const isDesktop = deviceType === DEVICE_TYPE_DESKTOP;
 	const isMobile = deviceType === DEVICE_TYPE_MOBILE;
-	const setDesktop = () => setDeviceType( DEVICE_TYPE_DESKTOP );
-	const setMobile = () => setDeviceType( DEVICE_TYPE_MOBILE );
+	const setDesktop = () => {
+		if ( ! isDesktop ) {
+			recordEvent( 'settings_emails_preview_device_type_toggle', {
+				device_type: DEVICE_TYPE_DESKTOP,
+			} );
+			setDeviceType( DEVICE_TYPE_DESKTOP );
+		}
+	};
+	const setMobile = () => {
+		if ( ! isMobile ) {
+			recordEvent( 'settings_emails_preview_device_type_toggle', {
+				device_type: DEVICE_TYPE_MOBILE,
+			} );
+			setDeviceType( DEVICE_TYPE_MOBILE );
+		}
+	};
 
 	return (
 		<div className="wc-settings-email-preview-device-type">

@@ -1,5 +1,5 @@
-name: 'On demand tests run'
-run-name: On demand tests run - ${{ inputs.trigger }}
+name: 'On demand checks'
+run-name: On demand checks ${{ inputs.custom-trigger != '' && inputs.custom-trigger || inputs.trigger }}
 
 on:
   workflow_dispatch:
@@ -9,30 +9,42 @@ on:
         description: 'Event name: it will be used to filter the jobs to run in ci.yml.'
         required: true
         options:
-          - push
-          - daily-checks
           - pre-release
-          - on-demand
           - custom
-        default: on-demand
+        default: pre-release
       custom-trigger:
         type: string
         description: 'Custom event name: In case the `Event name` choice is `custom`, this field is required.'
         required: false
-      wc-version:
+      artifact-name:
         type: string
-        description: 'Optional, for `on-demand` or `custom` jobs. Most jobs (wp-env) ignore this. It can be `latest`, `nightly`, or a specific WC version (e.g., `9.7.0-rc.1`).'
+        description: 'Release artifact to install instead of building from the branch (e.g. woocommerce-trunk-nightly.zip). Leave empty to build from the checked-out branch.'
         required: false
-        default: latest
+        default: ''
+      release-tag:
+        type: string
+        description: 'Release tag to download the artifact from (e.g. nightly). Required when artifact-name is set; the checkout still uses the dispatched branch.'
+        required: false
+        default: ''
 
 jobs:
   validate-input:
     runs-on: ubuntu-latest
     steps:
       - name: 'Validate input'
+        env:
+          INPUT_TRIGGER: ${{ inputs.trigger }}
+          INPUT_CUSTOM_TRIGGER: ${{ inputs.custom-trigger }}
+          INPUT_ARTIFACT_NAME: ${{ inputs.artifact-name }}
+          INPUT_RELEASE_TAG: ${{ inputs.release-tag }}
         run: |
-          if [ "${{ inputs.trigger }}" == "custom" ] && [ -z "${{ inputs.custom-trigger }}" ]; then
-            echo "Custom event name is required when event name choice `custom`."
+          if [ "$INPUT_TRIGGER" = "custom" ] && [ -z "$INPUT_CUSTOM_TRIGGER" ]; then
+            echo "Custom event name is required when event name choice \`custom\`."
+            exit 1
+          fi
+
+          if [ -n "$INPUT_ARTIFACT_NAME" ] && [ -z "$INPUT_RELEASE_TAG" ]; then
+            echo "Input \`release-tag\` is required when \`artifact-name\` is provided."
             exit 1
           fi
 
@@ -41,5 +53,6 @@ jobs:
     uses: ./.github/workflows/ci.yml
     with:
       trigger: ${{ inputs.trigger == 'custom' && inputs.custom-trigger || inputs.trigger }}
-      wc-version: ${{ inputs.wc-version }}
+      artifactName: ${{ inputs.artifact-name }}
+      releaseTag: ${{ inputs.release-tag }}
     secrets: inherit

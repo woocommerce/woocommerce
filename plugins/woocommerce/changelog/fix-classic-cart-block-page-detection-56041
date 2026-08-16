@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix is_cart/is_checkout detection when using classic shortcode block

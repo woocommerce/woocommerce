@@ -1,12 +1,9 @@
 {
 	"name": "woocommerce/attribute-filter",
-	"version": "1.0.0",
 	"title": "Filter by Attribute Controls",
 	"description": "Enable customers to filter the product grid by selecting one or more attributes, such as color.",
 	"category": "woocommerce",
-	"keywords": [
-		"WooCommerce"
-	],
+	"keywords": [ "WooCommerce" ],
 	"supports": {
 		"html": false,
 		"color": {
@@ -14,7 +11,8 @@
 			"background": false
 		},
 		"inserter": false,
-		"lock": false
+		"lock": false,
+		"interactivity": false
 	},
 	"attributes": {
 		"className": {

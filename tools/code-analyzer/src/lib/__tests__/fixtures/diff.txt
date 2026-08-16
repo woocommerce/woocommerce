@@ -7784,12 +7784,11 @@ new file mode 100644
 index 0000000000..bd6cb4938a
 --- /dev/null
 +++ b/packages/js/data/src/items/index.ts
-@@ -0,0 +1,43 @@
+@@ -0,0 +1,47 @@
 +/**
 + * External dependencies
 + */
 +import { registerStore } from '@wordpress/data';
-+import { SelectFromMap, DispatchFromMap } from '@automattic/data-stores';
 +import { Reducer, AnyAction } from 'redux';
 +/**
 + * Internal dependencies
@@ -7800,7 +7799,12 @@ index 0000000000..bd6cb4938a
 +import * as resolvers from './resolvers';
 +import reducer, { State } from './reducer';
 +import controls from '../controls';
-+import { WPDataActions, WPDataSelectors } from '../types';
++import {
++ SelectFromMap,
++ DispatchFromMap,
++ WPDataActions,
++ WPDataSelectors
++} from '../types';
 +import { getItemsType } from './selectors';
 +export * from './types';
 +export type { State };
@@ -8990,12 +8994,12 @@ index 0000000000..11f38ddad1
 +/**
 + * External dependencies
 + */
-+import { DispatchFromMap } from '@automattic/data-stores';
 +
 +/**
 + * Internal dependencies
 + */
 +import { CrudActions, CrudSelectors } from '../crud/types';
++import { DispatchFromMap } from '../types';
 +
 +type ProductAttribute = {
 +	id: number;
@@ -9119,13 +9123,12 @@ index 0000000000..79d72e85f2
 +/**
 + * External dependencies
 + */
-+import { DispatchFromMap } from '@automattic/data-stores';
 +
 +/**
 + * Internal dependencies
 + */
 +import { CrudActions, CrudSelectors } from '../crud/types';
-+import { BaseQueryParams } from '../types';
++import { BaseQueryParams, DispatchFromMap } from '../types';
 +
 +type ProductShippingClass = {
 +	id: number;
@@ -9434,12 +9437,12 @@ index 0000000000..4008831f47
 +/**
 + * External dependencies
 + */
-+import { DispatchFromMap } from '@automattic/data-stores';
 +
 +/**
 + * Internal dependencies
 + */
 +import { CrudActions, CrudSelectors } from '../crud/types';
++import { DispatchFromMap } from '../types';
 +
 +type ShippingZone = {
 +	id: number;

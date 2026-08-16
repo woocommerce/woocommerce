@@ -1,3 +1,15 @@
+@import "../../base/components/button/style";
+@import "../../base/components/drawer/style";
+@import "../../base/components/cart-checkout/cart-line-items-table/style";
+@import "../../base/components/cart-checkout/payment-method-icons/style";
+@import "../../base/components/cart-checkout/product-badge/style";
+@import "../../base/components/cart-checkout/product-details/style";
+@import "../../base/components/cart-checkout/product-metadata/style";
+@import "../../base/components/quantity-selector/style";
+@import "../../base/components/product-name/style";
+@import "../../base/components/product-price/style";
+@import "quantity-badge/style";
+
 .wc-block-mini-cart {
 	display: inline-block;
 }
@@ -105,6 +117,10 @@
 	max-height: fill-available;
 	display: flex;
 	flex-direction: column;
+
+	&[hidden] {
+		display: none;
+	}
 }
 
 .wp-block-woocommerce-empty-mini-cart-contents-block {
@@ -115,7 +131,8 @@
 	justify-content: space-between;
 }
 
-.wp-block-woocommerce-empty-mini-cart-contents-block .wc-block-mini-cart__empty-cart-wrapper {
+.wp-block-woocommerce-empty-mini-cart-contents-block
+	.wc-block-mini-cart__empty-cart-wrapper {
 	overflow-y: auto;
 	padding: $gap-largest $gap $gap;
 }
@@ -149,6 +166,10 @@ h2.wc-block-mini-cart__title {
 			padding-top: $gap-smaller;
 			padding-bottom: $gap-smaller;
 
+			&[hidden] {
+				display: none;
+			}
+
 			&:last-child::after {
 				content: none;
 			}
@@ -157,7 +178,7 @@ h2.wc-block-mini-cart__title {
 }
 
 .wc-block-mini-cart__footer {
-	@include with-translucent-border(1px 0 0);
+	border-top: 1px solid $universal-border-light;
 	padding: $gap-large $gap;
 
 	.wc-block-components-totals-item.wc-block-mini-cart__footer-subtotal {
@@ -165,8 +186,8 @@ h2.wc-block-mini-cart__title {
 		margin-bottom: $gap;
 
 		.wc-block-components-totals-item__description {
+			@include font-x-small-locked;
 			display: none;
-			font-size: 0.75em;
 			font-weight: 400;
 
 			@media only screen and (min-width: 480px) {
@@ -177,7 +198,9 @@ h2.wc-block-mini-cart__title {
 
 	// First selector for the frontend, second selector for the editor.
 	.wc-block-mini-cart__footer-actions,
-	.wc-block-mini-cart__footer-actions > .block-editor-inner-blocks > .block-editor-block-list__layout {
+	.wc-block-mini-cart__footer-actions
+		> .block-editor-inner-blocks
+		> .block-editor-block-list__layout {
 		display: flex;
 		gap: $gap;
 

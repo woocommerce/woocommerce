@@ -5,6 +5,7 @@
  * @package WooCommerce\Emails
  */
 
+use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -46,6 +47,7 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 			$this->customer_email = true;
 			$this->id             = 'customer_refunded_order';
 			$this->title          = __( 'Refunded order', 'woocommerce' );
+			$this->email_group    = 'order-changes';
 			$this->template_html  = 'emails/customer-refunded-order.php';
 			$this->template_plain = 'emails/plain/customer-refunded-order.php';
 			$this->placeholders   = array(
@@ -62,8 +64,13 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 
 			// Must be after parent's constructor which sets `email_improvements_enabled` property.
 			$this->description = $this->email_improvements_enabled
-				? __( 'Let shoppers know when a full or partial refund is on its way to them.', 'woocommerce' )
+				? __( 'Send an email to customers notifying them when an order has been partially or fully refunded', 'woocommerce' )
 				: __( 'Order refunded emails are sent to customers when their orders are refunded.', 'woocommerce' );
+
+			if ( $this->block_email_editor_enabled ) {
+				$this->title       = __( 'Order refunded', 'woocommerce' );
+				$this->description = __( 'Notifies customers when their order has been partially or fully refunded.', 'woocommerce' );
+			}
 		}
 
 		/**
@@ -111,7 +118,19 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 			} else {
 				$subject = $this->get_option( 'subject_full', $this->get_default_subject() );
 			}
-			return apply_filters( 'woocommerce_email_subject_customer_refunded_order', $this->format_string( $subject ), $this->object, $this );
+			/**
+			 * Filter the email subject for customer refunded order.
+			 *
+			 * @param string $subject The email subject.
+			 * @param WC_Order $order Order object.
+			 * @param WC_Email_Customer_Refunded_Order $email Email object.
+			 * @since 3.7.0
+			 */
+			$subject = apply_filters( 'woocommerce_email_subject_customer_refunded_order', $this->format_string( $subject ), $this->object, $this );
+			if ( $this->block_email_editor_enabled ) {
+				$subject = $this->personalizer->personalize_transactional_content( $subject, $this, Personalizer::RENDERING_CONTEXT_TEXT );
+			}
+			return $subject;
 		}
 
 		/**
@@ -125,6 +144,14 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 			} else {
 				$heading = $this->get_option( 'heading_full', $this->get_default_heading() );
 			}
+			/**
+			 * Filter the email heading for customer refunded order.
+			 *
+			 * @param string $heading The email heading.
+			 * @param WC_Order $order Order object.
+			 * @param WC_Email_Customer_Refunded_Order $email Email object.
+			 * @since 3.7.0
+			 */
 			return apply_filters( 'woocommerce_email_heading_customer_refunded_order', $this->format_string( $heading ), $this->object, $this );
 		}
 
@@ -181,9 +208,7 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 				$this->refund = false;
 			}
 
-			if ( $this->is_enabled() && $this->get_recipient() ) {
-				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
-			}
+			$this->send_notification();
 
 			$this->restore_locale();
 		}
@@ -228,6 +253,25 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 					'sent_to_admin'      => false,
 					'plain_text'         => true,
 					'email'              => $this,
+				)
+			);
+		}
+
+		/**
+		 * Get block editor email template content.
+		 *
+		 * @return string
+		 */
+		public function get_block_editor_email_template_content() {
+			return wc_get_template_html(
+				$this->template_block_content,
+				array(
+					'order'          => $this->object,
+					'refund'         => $this->refund,
+					'partial_refund' => $this->partial_refund,
+					'sent_to_admin'  => false,
+					'plain_text'     => false,
+					'email'          => $this,
 				)
 			);
 		}
@@ -311,6 +355,9 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 			if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
 				$this->form_fields['cc']  = $this->get_cc_field();
 				$this->form_fields['bcc'] = $this->get_bcc_field();
+			}
+			if ( $this->block_email_editor_enabled ) {
+				$this->form_fields['preheader'] = $this->get_preheader_field();
 			}
 		}
 	}

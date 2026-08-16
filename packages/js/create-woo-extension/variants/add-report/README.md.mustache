@@ -1,0 +1,36 @@
+# {{title}}
+
+{{#description}}
+{{description}}
+{{/description}}
+
+This is a WooCommerce extension that adds a custom report to the Analytics section.
+
+## Development
+
+### Getting started
+
+1. `npm install` to install dependencies
+2. `npm start` to start the development server
+3. `npm run build` to build the production version
+
+### File Structure
+
+- `src/index.js` - Main JavaScript file that registers the custom report
+- `includes/Admin/Setup.php` - PHP class that handles script registration and menu item addition
+- `{{slug}}.php` - Main plugin file
+
+## Features
+
+- Adds a custom report page to WooCommerce Analytics
+- Demonstrates how to use the `woocommerce_admin_reports_list` filter
+- Shows example usage of `ReportFilters` and `TableCard` components
+
+## Customization
+
+To customize this report for your needs:
+
+1. Update the report data in `src/index.js`
+2. Modify the table headers and rows to display your data
+3. Connect to your own data source (REST API, database, etc.)
+4. Update the report title and path in `includes/Admin/Setup.php`

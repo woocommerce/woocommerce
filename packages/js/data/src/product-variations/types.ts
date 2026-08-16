@@ -1,13 +1,13 @@
 /**
  * External dependencies
  */
-import { DispatchFromMap } from '@automattic/data-stores';
 
 /**
  * Internal dependencies
  */
 import { CrudActions, CrudSelectors } from '../crud/types';
 import { Product, ProductQuery, ReadOnlyProperties } from '../products/types';
+import { DispatchFromMap } from '../types';
 import { CustomActions } from './actions';
 import { CustomSelectors } from './selectors';
 

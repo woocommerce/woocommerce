@@ -3,7 +3,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 /**
- * BlockifiedProductDetails class.
+ * ProductDescription class.
  */
 class ProductDescription extends AbstractBlock {
 	/**
@@ -57,6 +57,12 @@ class ProductDescription extends AbstractBlock {
 
 		// Get the description content.
 		$description = $product->get_description();
+		/**
+		 * This filter is documented in wp-includes/post-template.php.
+		 * We follow core/content block to replace ]]> with ]&gt;
+		 */
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		$description = apply_filters( 'the_content', str_replace( ']]>', ']]&gt;', $description ) );
 		if ( empty( $description ) ) {
 			unset( self::$seen_ids[ $product_id ] );
 			return '';
@@ -75,5 +81,25 @@ class ProductDescription extends AbstractBlock {
 			$wrapper_attributes,
 			$description
 		);
+	}
+
+	/**
+	 * Disable the frontend stylesheet for this block type. It does not have one.
+	 *
+	 * @return null
+	 */
+	protected function get_block_type_style() {
+		return null;
+	}
+
+	/**
+	 * Disable the frontend script for this block type. It does not have one.
+	 *
+	 * @param string|null $key The script key.
+	 *
+	 * @return null
+	 */
+	protected function get_block_type_script( $key = null ) {
+		return null;
 	}
 }

@@ -46,11 +46,6 @@
 	.components-checkbox-control__input[type="checkbox"] {
 		width: 16px !important;
 		height: 16px !important;
-		border-color: #757575;
-
-		&:checked {
-			border-color: transparent;
-		}
 	}
 
 	svg.components-checkbox-control__checked {
@@ -316,6 +311,21 @@
 		.components-base-control__label {
 			left: 13px;
 		}
+
+		.woocommerce-profiler-geolocation-notice {
+			max-width: 400px;
+			margin: auto auto 12px auto;
+		}
+
+		.woocommerce-profiler-select-control__country {
+			margin-bottom: 12px;
+			max-width: 404px;
+		}
+
+		.woocommerce-profiler-select-control__country-error {
+			max-width: 400px;
+			margin: auto auto 12px auto;
+		}
 	}
 }
 
@@ -546,12 +556,10 @@
 
 			.components-text-control__input {
 				height: 40px;
-				border-color: #bbb;
 				border-radius: 2px;
 				border-width: 1px;
 				font-size: 13px;
 				&:focus {
-					border-color: transparent;
 					box-shadow: 0 0 0 2px var(--wp-admin-theme-color, #006088);
 				}
 			}
@@ -609,43 +617,8 @@
 			margin: 0;
 		}
 
-		.woocommerce-profiler-select-control__country-error {
-			background: #fce2e4;
-			padding: $gap-small;
-			font-size: 13px;
-			font-style: normal;
-			font-weight: 400;
-			line-height: 24px;
-			color: $gray-900;
-			margin: 12px 0;
-
-			.components-notice__content {
-				margin: 0;
-			}
-
-			.components-button {
-				padding: 0;
-				height: initial;
-				min-width: 24px;
-				min-height: 24px;
-
-				svg {
-					width: 16px;
-					fill: $gray-900;
-				}
-			}
-		}
-
-		.woocommerce-profiler-select-control__country-spacer {
-			margin: auto auto 12px auto;
-		}
-
 		.woocommerce-profiler-button-container {
 			margin-top: 32px;
-		}
-
-		.woocommerce-select-control__control-icon {
-			display: none;
 		}
 
 		.woocommerce-select-control__control.is-active {
@@ -654,51 +627,97 @@
 			}
 		}
 
-		.woocommerce-select-control.is-searchable
 		.woocommerce-select-control__control-input {
 			margin: 0;
-			padding: 0;
-			padding-left: 1px;
 		}
+	}
+}
 
-		.woocommerce-select-control.is-searchable
+.woocommerce-profiler-select-control__country-error {
+	background: #fce2e4;
+	padding: $gap-small;
+	font-size: 13px;
+	font-style: normal;
+	font-weight: 400;
+	line-height: 24px;
+	color: $gray-900;
+
+	.components-notice__content {
+		margin: 0;
+	}
+
+	.components-button {
+		padding: 0;
+		height: initial;
+		min-width: 24px;
+		min-height: 24px;
+
+		svg {
+			width: 16px;
+			fill: $gray-900;
+		}
+	}
+}
+
+.woocommerce-geolocation-country-select {
+	.woocommerce-profiler-select-control__country-spacer {
+		margin: auto auto 12px auto;
+	}
+
+	.woocommerce-select-control__control-icon {
+		display: none;
+	}
+
+	.woocommerce-select-control__control.is-active {
 		.components-base-control__label {
-			left: 13px;
+			display: none;
+		}
+	}
+
+	.woocommerce-select-control.is-searchable
+	.woocommerce-select-control__control-input {
+		margin: 0;
+		padding: 0;
+		padding-left: 1px;
+	}
+
+	.woocommerce-select-control.is-searchable
+	.components-base-control__label {
+		left: 13px;
+	}
+
+	.woocommerce-profiler-geolocation-notice {
+		margin: 0;
+		margin-bottom: 0;
+		padding-right: 0;
+		color: $gray-900;
+
+		.components-notice__dismiss > svg {
+			height: 16px;
+			fill: #000;
 		}
 
-		.woocommerce-profiler-geolocation-notice {
+		.components-notice__dismiss {
+			height: 16px;
+			margin-right: 8px;
+		}
+
+		p {
+			font-weight: 400;
+			font-size: 13px;
+			line-height: 20px;
 			margin: 0;
-			margin-bottom: 0;
-			padding-right: 0;
-			color: $gray-900;
 
-			.components-notice__dismiss > svg {
-				height: 16px;
-				fill: #000;
+			.geolocation-notice-geolocated-country {
+				text-decoration: none;
 			}
+		}
 
-			.components-notice__dismiss {
-				height: 16px;
-				margin-right: 8px;
-			}
-
-			p {
-				font-weight: 400;
-				font-size: 13px;
-				line-height: 20px;
-				margin: 0;
-
-				.geolocation-notice-geolocated-country {
-					text-decoration: none;
-				}
-			}
-
-			.woocommerce-profiler-geolocation-notice__list {
-				list-style-type: unset;
-				padding-left: 20px;
-				font-weight: 500;
-				line-height: 20px;
-			}
+		.woocommerce-profiler-geolocation-notice__list {
+			list-style-type: unset;
+			padding-left: 20px;
+			font-weight: 500;
+			line-height: 20px;
 		}
 	}
 }

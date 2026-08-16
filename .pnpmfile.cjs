@@ -30,63 +30,185 @@ function loadPackageFile( packagePath ) {
 }
 
 /**
- * Updates a package file on disk and in the cache.
+ * Loads a tsconfig.json, or null if missing or not plain JSON.
  *
- * @param {string} packagePath The path to the package file to update.
- * @param {Object} packageFile The new package file contents.
+ * Returning null on a parse failure keeps the hook from clobbering JSONC
+ * tsconfigs that include structural comments. Affected packages must be
+ * converted to plain JSON to participate in the references sync.
+ *
+ * @param {string} tsconfigPath Absolute path to the tsconfig.json file.
+ * @return {Object|null} Parsed config, or null if missing or unparseable.
  */
-function updatePackageFile( packagePath, packageFile ) {
-	// Resolve the absolute path for consistency when loading and updating.
-	packagePath = path.resolve( __dirname, packagePath );
-	packageFileCache[ packagePath ] = packageFile;
+function loadTsconfig( tsconfigPath ) {
+	if ( ! fs.existsSync( tsconfigPath ) ) {
+		return null;
+	}
+	try {
+		return JSON.parse( fs.readFileSync( tsconfigPath, 'utf8' ) );
+	} catch {
+		return null;
+	}
+}
 
+/**
+ * Writes a tsconfig.json with the project's standard tab indentation.
+ *
+ * @param {string} tsconfigPath Absolute path to the tsconfig.json file.
+ * @param {Object} tsconfig     Config object to serialize.
+ */
+function writeTsconfig( tsconfigPath, tsconfig ) {
 	fs.writeFileSync(
-		path.join( packagePath, 'package.json' ),
-		// Make sure to keep the newline at the end of the file.
-		JSON.stringify( packageFile, null, '\t' ) + "\n",
+		tsconfigPath,
+		JSON.stringify( tsconfig, null, '\t' ) + '\n',
 		'utf8'
 	);
 }
 
 /**
- * Populated config object based on declared and resolved dependencies.
+ * Identify workspace packages that consume @woocommerce/internal-build.
  *
- * @param {string}            packageName          Package name.
- * @param {string}            packagePath          Package path.
- * @param {Object}            declaredDependencies Declared dependencies from package-file.
- * @param {Object}            resolvedDependencies Resolved dependencies from lock-file.
- * @param {Object}            config               Dependency output path configuration.
- * @param {Object}            context              The hook context object.
- * @param {Function.<string>} context.log          Logs a message to the console.
+ * A TS consumer has @woocommerce/internal-build in dependencies or
+ * devDependencies. Whether the package has a tsconfig.json on disk is
+ * verified by loadTsconfig later in syncTsReferences.
  *
- * @return void
+ * @param {Object} lockfile The lockfile passed to afterAllResolved.
+ * @return {Map<string, { packagePath: string, absolutePath: string }>}
  */
-function updateConfig( packageName, packagePath, declaredDependencies, resolvedDependencies, config, context ) {
-	for ( const [ key, value ] of Object.entries( declaredDependencies ) ) {
-		if ( value.startsWith( 'workspace:' ) ) {
-			const normalizedPath = path.join( packagePath, resolvedDependencies[key].replace( 'link:', '' ) );
-			context.log( `[wireit][${ packageName }]    Inspecting workspace dependency: ${ key } (${ normalizedPath })` );
+function identifyTsConsumers( lockfile ) {
+	const consumers = new Map();
 
-			// Actualize output storage with the identified entries.
-			const dependencyFile = loadPackageFile( normalizedPath );
-			if ( dependencyFile.files ) {
-				for ( const entry in dependencyFile.files ) {
-					const entryValue = dependencyFile.files[entry];
-					let normalizedValue;
-					if ( entryValue.startsWith( '!' ) ) {
-						normalizedValue = '!' + path.join( 'node_modules', key, entryValue.substring( 1 ) );
-					} else {
-						normalizedValue = path.join( 'node_modules', key, entryValue );
-					}
-					config.files.push( normalizedValue );
+	for ( const packagePath in lockfile.importers ) {
+		const packageFile = loadPackageFile( packagePath );
+		const allDeps = {
+			...( packageFile.dependencies || {} ),
+			...( packageFile.devDependencies || {} ),
+		};
+		if ( ! ( '@woocommerce/internal-build' in allDeps ) ) {
+			continue;
+		}
 
-					context.log( `[wireit][${ packageName }]        - ${ normalizedValue }` );
-				}
-			} else {
-				context.log( `[wireit][${ packageName }]        ---` );
-			}
+		const absolutePath = path.resolve( __dirname, packagePath );
+		consumers.set( packageFile.name, { packagePath, absolutePath } );
+	}
+
+	return consumers;
+}
+
+/**
+ * Compute the list of project references for a given consumer.
+ *
+ * References include workspace dependencies (from `dependencies`, not
+ * `devDependencies`) that are themselves TS consumers. Paths are stored
+ * as posix-style relative paths from the consumer to the dep.
+ *
+ * @param {Object} packageFile          The consumer's package.json contents.
+ * @param {Object} resolvedDependencies The lockfile importer entry for the consumer.
+ * @param {Map}    consumers            Output of identifyTsConsumers.
+ * @param {string} consumerAbsolutePath Absolute path to the consumer's directory.
+ * @return {Array<{ path: string }>} Sorted references array.
+ */
+function computeReferences(
+	packageFile,
+	resolvedDependencies,
+	consumers,
+	consumerAbsolutePath
+) {
+	const references = [];
+	const declared = packageFile.dependencies || {};
+	const resolved = resolvedDependencies.dependencies || {};
+
+	for ( const depName of Object.keys( declared ) ) {
+		if ( ! declared[ depName ].startsWith( 'workspace:' ) ) {
+			continue;
+		}
+		if ( ! consumers.has( depName ) ) {
+			continue;
+		}
+		const resolvedDep = resolved[ depName ];
+		if ( ! resolvedDep || ! resolvedDep.startsWith( 'link:' ) ) {
+			continue;
+		}
+
+		const depAbsolutePath = path.resolve(
+			consumerAbsolutePath,
+			resolvedDep.slice( 'link:'.length )
+		);
+		const relPath = path
+			.relative( consumerAbsolutePath, depAbsolutePath )
+			.split( path.sep )
+			.join( '/' );
+
+		references.push( { path: relPath } );
+	}
+
+	references.sort( ( a, b ) => a.path.localeCompare( b.path ) );
+	return references;
+}
+
+/**
+ * Synchronize TypeScript project references across all TS-consuming packages.
+ *
+ * For each consumer:
+ *   - Set compilerOptions.composite = true
+ *   - Replace the top-level `references` array with the computed list
+ *
+ * Workspace deps that are themselves TS consumers become references so that
+ * `tsc -b` can walk the graph and build/type-check dependencies in order.
+ *
+ * @param {Object} lockfile The lockfile passed to afterAllResolved.
+ * @param {Object} context  The pnpm hook context.
+ */
+function syncTsReferences( lockfile, context ) {
+	context.log( '[tsrefs] Synchronizing TypeScript project references' );
+
+	const consumers = identifyTsConsumers( lockfile );
+	if ( consumers.size === 0 ) {
+		context.log( '[tsrefs] No TS consumers found' );
+		return;
+	}
+
+	// Update each consumer's own tsconfig.json with composite + references.
+	for ( const [ name, { packagePath, absolutePath } ] of consumers ) {
+		const tsconfigPath = path.join( absolutePath, 'tsconfig.json' );
+		const tsconfig = loadTsconfig( tsconfigPath );
+		if ( ! tsconfig ) {
+			context.log(
+				`[tsrefs][${ name }]    Skipped — tsconfig.json could not be parsed as plain JSON.`
+			);
+			continue;
+		}
+
+		const packageFile = loadPackageFile( packagePath );
+		const references = computeReferences(
+			packageFile,
+			lockfile.importers[ packagePath ],
+			consumers,
+			absolutePath
+		);
+
+		const originalState = JSON.stringify( {
+			composite: tsconfig.compilerOptions?.composite,
+			references: tsconfig.references,
+		} );
+
+		tsconfig.compilerOptions = tsconfig.compilerOptions || {};
+		tsconfig.compilerOptions.composite = true;
+		tsconfig.references = references;
+
+		const newState = JSON.stringify( {
+			composite: tsconfig.compilerOptions.composite,
+			references: tsconfig.references,
+		} );
+
+		if ( newState !== originalState ) {
+			context.log(
+				`[tsrefs][${ name }]    Updating references (${ references.length } entries)`
+			);
+			writeTsconfig( tsconfigPath, tsconfig );
 		}
 	}
+
+	context.log( '[tsrefs] Done' );
 }
 
 /**
@@ -101,56 +223,7 @@ function updateConfig( packageName, packagePath, declaredDependencies, resolvedD
  * @return {Object} lockfile The updated lockfile.
  */
 function afterAllResolved( lockfile, context ) {
-	context.log( '[wireit] Updating Dependency Lists' );
-
-	for ( const packagePath in lockfile.importers ) {
-		const packageFile = loadPackageFile( packagePath );
-		if ( packageFile.wireit ) {
-			context.log( `[wireit][${ packageFile.name }] Verifying 'wireit.dependencyOutputs'` );
-
-			// Initialize outputs storage and hash it's original state.
-			const config              = {
-				allowUsuallyExcludedPaths: true, // This is needed so we can reference files in `node_modules`.
-				files: [ "package.json" ],       // The files list will include globs for dependency files that we should fingerprint.
-			};
-			const originalConfigState = JSON.stringify( config );
-
-			// Walk through workspace-located dependencies and provision.
-			updateConfig(
-				packageFile.name,
-				packagePath,
-				{
-					...( packageFile.dependencies || {} ),
-					...( packageFile.devDependencies || {} ),
-				},
-				{
-					...( lockfile.importers[ packagePath ].dependencies || {} ),
-					...( lockfile.importers[ packagePath ].devDependencies || {} ),
-				},
-				config,
-				context
-			);
-
-			// Verify config state and update manifest on mismatch.
-			let updated = false;
-			const newConfigState = JSON.stringify( config );
-			if ( newConfigState !== originalConfigState ) {
-				const loadedConfigState = JSON.stringify( packageFile.wireit?.dependencyOutputs || {} );
-				if ( newConfigState !== loadedConfigState ) {
-					context.log( `[wireit][${ packageFile.name }]    Conclusion: outdated, updating 'wireit.dependencyOutputs'` );
-
-					packageFile.wireit.dependencyOutputs = config;
-					updatePackageFile( packagePath, packageFile );
-					updated = true;
-				}
-			}
-			if ( ! updated ) {
-				context.log( `[wireit][${ packageFile.name }]    Conclusion: up to date` );
-			}
-		}
-	}
-
-	context.log( '[wireit] Done' );
+	syncTsReferences( lockfile, context );
 
 	return lockfile;
 }

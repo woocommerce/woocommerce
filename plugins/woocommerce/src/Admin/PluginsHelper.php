@@ -86,7 +86,7 @@ class PluginsHelper {
 	 */
 	public static function init() {
 		add_action( 'woocommerce_plugins_install_callback', array( __CLASS__, 'install_plugins' ), 10, 2 );
-		add_action( 'woocommerce_plugins_install_and_activate_async_callback', array( __CLASS__, 'install_and_activate_plugins_async_callback' ), 10, 2 );
+		add_action( 'woocommerce_plugins_install_and_activate_async_callback', array( __CLASS__, 'install_and_activate_plugins_async_callback' ), 10, 3 );
 		add_action( 'woocommerce_plugins_activate_callback', array( __CLASS__, 'activate_plugins' ), 10, 2 );
 		add_action( 'admin_notices', array( __CLASS__, 'maybe_show_connect_notice_in_plugin_list' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_connect_notice' ) );
@@ -224,10 +224,11 @@ class PluginsHelper {
 	 *
 	 * @param array                     $plugins Plugins to install.
 	 * @param PluginsInstallLogger|null $logger an optional logger.
+	 * @param string|null               $source place where the request is coming from.
 	 *
 	 * @return array
 	 */
-	public static function install_plugins( $plugins, ?PluginsInstallLogger $logger = null ) {
+	public static function install_plugins( $plugins, ?PluginsInstallLogger $logger = null, ?string $source = null ) {
 		/**
 		 * Filter the list of plugins to install.
 		 *
@@ -285,7 +286,7 @@ class PluginsHelper {
 					'error_message'     => sprintf(
 						// translators: %s: plugin slug (example: woocommerce-services).
 						__(
-							'The requested plugin `%s` could not be installed. Plugin API call failed.',
+							'We couldn\'t install `%s`. Try again in a few minutes, or install it later from the Extensions page.',
 							'woocommerce'
 						),
 						$slug
@@ -307,7 +308,7 @@ class PluginsHelper {
 
 				$error_message = sprintf(
 				/* translators: %s: plugin slug (example: woocommerce-services) */
-					__( 'The requested plugin `%s` could not be installed. Plugin API call failed.', 'woocommerce' ),
+					__( 'We couldn\'t install `%s`. Try again in a few minutes, or install it later from the Extensions page.', 'woocommerce' ),
 					$slug
 				);
 
@@ -316,6 +317,13 @@ class PluginsHelper {
 
 				continue;
 			}
+
+			/**
+			 * Action triggered before a plugin is installed.
+			 *
+			 * @since 9.8
+			 */
+			do_action( 'woocommerce_plugins_install_before', $slug, $source );
 
 			$upgrader = new Plugin_Upgrader( new Automatic_Upgrader_Skin() );
 			$result   = $upgrader->install( $api->download_link );
@@ -355,7 +363,7 @@ class PluginsHelper {
 
 				$install_error_message = sprintf(
 				/* translators: %s: plugin slug (example: woocommerce-services) */
-					__( 'The requested plugin `%s` could not be installed. Upgrader install failed.', 'woocommerce' ),
+					__( 'We couldn\'t install `%s`. Try again, or install it manually. If it keeps failing, contact your host.', 'woocommerce' ),
 					$slug
 				);
 				$errors->add(
@@ -369,6 +377,13 @@ class PluginsHelper {
 
 			$installed_plugins[] = $plugin;
 			$logger && $logger->installed( $plugin, $time[ $plugin ] );
+
+			/**
+			 * Action triggered after a plugin is installed.
+			 *
+			 * @since 9.8
+			 */
+			do_action( 'woocommerce_plugins_install_after', $slug, $source );
 		}
 
 		$data = array(
@@ -388,14 +403,16 @@ class PluginsHelper {
 	 *
 	 * It is used to call install_plugins and activate_plugins with a custom logger.
 	 *
-	 * @param array  $plugins A list of plugins to install.
-	 * @param string $job_id An unique job I.D.
+	 * @param array       $plugins A list of plugins to install.
+	 * @param string      $job_id An unique job I.D.
+	 * @param string|null $source The source of the request.
+	 *
 	 * @return bool
 	 */
-	public static function install_and_activate_plugins_async_callback( array $plugins, string $job_id ) {
+	public static function install_and_activate_plugins_async_callback( array $plugins, string $job_id, ?string $source = null ) {
 		$option_name = 'woocommerce_onboarding_plugins_install_and_activate_async_' . $job_id;
 		$logger      = new AsyncPluginsInstallLogger( $option_name );
-		self::install_plugins( $plugins, $logger );
+		self::install_plugins( $plugins, $logger, $source );
 		self::activate_plugins( $plugins, $logger );
 		return true;
 	}
@@ -609,15 +626,9 @@ class PluginsHelper {
 
 		$notice_type = WC_Helper_Updater::get_woo_connect_notice_type();
 
-		if ( 'none' === $notice_type ) {
+		// The outdated plugin risk state is reported in Site Health.
+		if ( in_array( $notice_type, array( 'none', 'long' ), true ) ) {
 			return;
-		}
-
-		$notice_string = '';
-
-		if ( 'long' === $notice_type ) {
-			$notice_string .= __( 'Your store might be at risk as you are running old versions of WooCommerce plugins.', 'woocommerce' );
-			$notice_string .= ' ';
 		}
 
 		$connect_page_url = add_query_arg(
@@ -631,7 +642,7 @@ class PluginsHelper {
 			admin_url( 'admin.php' )
 		);
 
-		$notice_string .= sprintf(
+		$notice_string = sprintf(
 			/* translators: %s: Connect page URL */
 			__( '<a id="woo-connect-notice-url" href="%s">Connect your store</a> to WooCommerce.com to get updates and streamlined support for your subscriptions.', 'woocommerce' ),
 			esc_url( $connect_page_url )
@@ -654,7 +665,7 @@ class PluginsHelper {
 
 		$notice_type = WC_Helper_Updater::get_woo_connect_notice_type();
 
-		if ( 'none' === $notice_type ) {
+		if ( in_array( $notice_type, array( 'none', 'long' ), true ) ) {
 			return;
 		}
 
@@ -750,7 +761,7 @@ class PluginsHelper {
 	 * @param int    $total total subscription count.
 	 * @param array  $messages message.
 	 * @param string $type type of notice, whether it is for expiring or expired subscription.
-	 * @return array notice data to return. Contains type, parsed_message and product_id.
+	 * @return array notice data to return. Contains type, parsed_message and product_id (can be a single value or an array).
 	 */
 	public static function get_subscriptions_notice_data( array $all_subs, array $subs_to_show, int $total, array $messages, string $type ) {
 		$utm_campaign = 'expired' === $type ?
@@ -785,7 +796,7 @@ class PluginsHelper {
 			return array(
 				'type'           => 'different_subscriptions',
 				'parsed_message' => $parsed_message,
-				'product_ids'    => $product_ids,
+				'product_id'     => $product_ids,
 			);
 		}
 
@@ -801,7 +812,18 @@ class PluginsHelper {
 			)
 		);
 
-		$message_key      = $has_multiple_subs_for_product ? 'multiple_manage' : 'single_manage';
+		$message_key = $has_multiple_subs_for_product ? 'multiple_manage' : 'single_manage';
+
+		/**
+		 * Even if there are multiple subscriptions for this product, if the store is covered by an active subscription,
+		 * show the 'site covered' message instead of the 'manage' message.
+		 */
+		if ( 'expired' === $type && $has_multiple_subs_for_product ) {
+			if ( self::has_active_usable_product_subscription( $product_id, $all_subs ) ) {
+				$message_key = 'multiple_manage_site_covered';
+			}
+		}
+
 		$renew_string     = __( 'Renew', 'woocommerce' );
 		$subscribe_string = __( 'Subscribe', 'woocommerce' );
 		if ( isset( $subscription['product_regular_price'] ) ) {
@@ -847,6 +869,39 @@ class PluginsHelper {
 			'parsed_message' => '',
 			'product_id'     => '',
 		);
+	}
+
+	/**
+	 * Check whether the current store has an active usable subscription for a product.
+	 *
+	 * @param int   $product_id Product id.
+	 * @param array $subscriptions Subscription list data.
+	 * @return bool
+	 */
+	private static function has_active_usable_product_subscription( int $product_id, array $subscriptions ): bool {
+		$auth    = \WC_Helper_Options::get( 'auth' );
+		$site_id = isset( $auth['site_id'] ) ? absint( $auth['site_id'] ) : 0;
+
+		if ( 0 === $site_id ) {
+			return false;
+		}
+
+		foreach ( $subscriptions as $subscription ) {
+			if ( absint( $subscription['product_id'] ?? 0 ) !== $product_id ) {
+				continue;
+			}
+
+			$connections = isset( $subscription['connections'] ) && is_array( $subscription['connections'] ) ? $subscription['connections'] : array();
+			if ( ! in_array( $site_id, $connections, true ) ) {
+				continue;
+			}
+
+			if ( empty( $subscription['expired'] ) || ! empty( $subscription['lifetime'] ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -973,25 +1028,39 @@ class PluginsHelper {
 			$total_expired_subscriptions,
 			array(
 				/* translators: 1) product name 3) URL to My Subscriptions page 4) Renew product price string */
-				'single_manage'           => __( 'Your subscription for <strong>%1$s</strong> expired. <a href="%3$s">%4$s</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
+				'single_manage'                => __( 'Your subscription for <strong>%1$s</strong> expired. <a href="%3$s">%4$s</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
 				/* translators: 1) product name 3) URL to My Subscriptions page 4) Renew product price string */
-				'multiple_manage'         => __( 'One of your subscriptions for <strong>%1$s</strong> has expired. <a href="%3$s">%4$s</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
+				'multiple_manage'              => __( 'One of your subscriptions for <strong>%1$s</strong> has expired. <a href="%3$s">%4$s</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
+				/* translators: 1) product name 3) URL to My Subscriptions page */
+				'multiple_manage_site_covered' => __( 'One of your subscriptions for <strong>%1$s</strong> has expired. This store is still covered by another active subscription.', 'woocommerce' ),
 				/* translators: 1) total expired subscriptions 2) URL to My Subscriptions page */
-				'different_subscriptions' => __( 'You have <strong>%1$s Woo extension subscriptions</strong> that expired. <a href="%2$s">Renew</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
+				'different_subscriptions'      => __( 'You have <strong>%1$s Woo extension subscriptions</strong> that expired. <a href="%2$s">Renew</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
 			),
 			'expired',
 		);
 
+		$button_text = __( 'Renew', 'woocommerce' );
 		$button_link = add_query_arg(
 			array(
-				'add-to-cart'  => $notice_data['product_ids'],
+				'add-to-cart'  => $notice_data['product_id'],
 				'utm_source'   => 'pu',
 				'utm_campaign' => $allowed_link ? 'pu_settings_screen_renew' : 'pu_in_apps_screen_renew',
 			),
 			self::WOO_CART_PAGE_URL
 		);
 
-		if ( in_array( $notice_data['type'], array( 'single_manage', 'multiple_manage' ), true ) ) {
+		if ( 'multiple_manage_site_covered' === $notice_data['type'] ) {
+			$button_text = __( 'Review subscriptions', 'woocommerce' );
+			$button_link = add_query_arg(
+				array(
+					'product_id'   => $notice_data['product_id'],
+					'type'         => 'expired',
+					'utm_source'   => 'pu',
+					'utm_campaign' => $allowed_link ? 'pu_settings_screen_review_subscriptions' : 'pu_in_apps_screen_review_subscriptions',
+				),
+				self::WOO_SUBSCRIPTION_PAGE_URL
+			);
+		} elseif ( in_array( $notice_data['type'], array( 'single_manage', 'multiple_manage' ), true ) ) {
 			$button_link = add_query_arg(
 				array(
 					'add-to-cart' => $notice_data['product_id'],
@@ -1002,7 +1071,7 @@ class PluginsHelper {
 
 		return array(
 			'description' => $allowed_link ? $notice_data['parsed_message'] : preg_replace( '#<a.*?>(.*?)</a>#i', '\1', $notice_data['parsed_message'] ),
-			'button_text' => __( 'Renew', 'woocommerce' ),
+			'button_text' => $button_text,
 			'button_link' => $button_link,
 		);
 	}
@@ -1062,7 +1131,7 @@ class PluginsHelper {
 
 		$button_link = add_query_arg(
 			array(
-				'add-to-cart'  => $notice_data['product_ids'],
+				'add-to-cart'  => $notice_data['product_id'],
 				'utm_source'   => 'pu',
 				'utm_campaign' => 'pu_in_apps_screen_purchase',
 			),

@@ -37,7 +37,6 @@
 		top: var(--top-padding);
 		background-color: transparent;
 		transition: background-color 500ms;
-		z-index: 9999;
 	}
 
 	.wc-block-product-filters__overlay-wrapper {
@@ -51,12 +50,17 @@
 		inset: 0;
 		transform: translateY(100vh);
 		transition: none;
-		background-color: var(--wc-product-filters-overlay-background-color, var(--wc-product-filters-background-color, var(--wp--preset--color--base, #fff)));
-		color: var(--wc-product-filters-overlay-text-color, var(--wc-product-filters-text-color, var(--wp--preset--color--base, #111)));
+		background-color: var(
+			--wc-product-filters-overlay-background-color,
+			var(--wc-product-filters-background-color, Canvas)
+		);
+		color: var(
+			--wc-product-filters-overlay-text-color,
+			var(--wc-product-filters-text-color, CanvasText)
+		);
 		display: flex !important;
 		flex-direction: column;
 		max-height: 100%;
-		gap: var(--wp--preset--spacing--40);
 	}
 
 	.wc-block-product-filters__overlay-header {
@@ -65,17 +69,24 @@
 		flex-flow: row-reverse;
 	}
 
+	.wc-block-product-filters__content,
 	.wc-block-product-filters__overlay-content {
 		display: flex;
-		padding: 0 var(--wp--preset--spacing--40);
-		overflow-y: scroll;
 		flex-grow: 1;
 		flex-direction: column;
-		gap: var(--wc-product-filter-block-spacing, var(--wp--style--block-gap, 1.2rem));
+		gap: var(
+			--wc-product-filter-block-spacing,
+			var(--wp--style--block-gap, 1.2rem)
+		);
 
 		> *:first-child {
 			margin-top: 0;
 		}
+	}
+
+	.wc-block-product-filters__overlay-content {
+		padding: 0 var(--wp--preset--spacing--40);
+		overflow-y: scroll;
 	}
 
 	.wc-block-product-filters__overlay-footer {
@@ -96,15 +107,15 @@
 
 		.wc-block-product-filters__overlay-dialog {
 			transform: translateY(0);
-			color: var(--wc-product-filters-overlay-color, inherit);
 			transition: transform 500ms;
 		}
 	}
 
+	&.is-filter-drawer-disabled {
+		display: flex;
+	}
+
 	@include breakpoint(">600px") {
-		// If we add "Always show" option in the future, we can support that behavior
-		// by adding a class to the wrapper and refer it here, like this:
-		// &:not(.always-show) {
 		&,
 		&.is-overlay-opened {
 			display: flex;
@@ -122,6 +133,7 @@
 				background: inherit;
 				color: inherit;
 				transition: none;
+				flex-grow: 1;
 			}
 			.wc-block-product-filters__overlay-wrapper {
 				width: auto;
@@ -148,6 +160,7 @@
 	}
 
 	@include breakpoint("<600px") {
+		.wc-block-product-filters__content,
 		.wc-block-product-filters__overlay-content {
 			.wp-block-group {
 				display: block;
@@ -157,5 +170,30 @@
 				}
 			}
 		}
+	}
+}
+
+// We don't want zero specificity for this style.
+.wc-block-product-filter--hidden {
+	display: none;
+}
+
+.wc-block-product-filter__show-more {
+	background: none;
+	border: none;
+	font-family: inherit;
+	margin-top: 0.5em;
+	color: inherit;
+	cursor: pointer;
+	text-decoration: underline;
+	padding: 0;
+
+	&:hover {
+		text-decoration: none;
+	}
+
+	&:focus {
+		outline: 1px dotted currentColor;
+		outline-offset: 2px;
 	}
 }

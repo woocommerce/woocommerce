@@ -17,6 +17,7 @@ import {
 } from '@woocommerce/base-context';
 import NoticeBanner from '@woocommerce/base-components/notice-banner';
 import { isObject } from '@woocommerce/types';
+import { CheckoutShippingSkeleton } from '@woocommerce/base-components/skeleton/patterns/checkout-shipping';
 
 /**
  * Internal dependencies
@@ -132,6 +133,10 @@ const ShippingRatesControl = ( {
 	const allPackagesHaveSameRate = selectedRateIds.every( ( rate: string ) => {
 		return rate === selectedRateIds[ 0 ];
 	} );
+
+	if ( isLoadingRates ) {
+		return <CheckoutShippingSkeleton />;
+	}
 
 	return (
 		<LoadingMask

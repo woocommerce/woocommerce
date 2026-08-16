@@ -1,22 +1,16 @@
 {
+	"extends": "@woocommerce/internal-build/configs/tsconfig.json",
 	"compilerOptions": {
 		"rootDir": "src",
-		"noEmit": true,
-		"composite": true,
-		"incremental": true,
-		"target": "esnext",
-		"module": "esnext",
-		"moduleResolution": "node",
-		"esModuleInterop": true,
+		"outDir": "build-module",
+		"declaration": true,
+		"declarationDir": "build-types",
 		"resolveJsonModule": true,
 		"allowSyntheticDefaultImports": true,
-		"allowJs": true,
-		"skipLibCheck": true,
 		"downlevelIteration": true,
 		"jsx": "react-jsx",
-
-		// strict checks
-		"strict": true,
+		"jsxFactory": null,
+		"jsxFragmentFactory": null,
 		"alwaysStrict": true,
 		"strictBindCallApply": false,
 		"strictFunctionTypes": false,
@@ -25,13 +19,21 @@
 		"noImplicitAny": false,
 		"noImplicitThis": false,
 		"forceConsistentCasingInFileNames": true,
-
-		// additional checks
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitReturns": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
-		"typeRoots": [ "./node_modules/@types" ]
+		"typeRoots": [
+			"./node_modules/@types"
+		],
+		"composite": true
 	},
-	"include": [ "src/**/*" ]
+	"include": [
+		"typings/**/*",
+		"src/**/*"
+	],
+	"exclude": [
+		"**/test/**"
+	],
+	"references": []
 }

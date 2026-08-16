@@ -48,6 +48,37 @@ class WooContentProcessor {
 	}
 
 	/**
+	 * Filter CSS for the email.
+	 * The CSS from the email editor was already inlined.
+	 * The method hooks to woocommerce_email_styles and removes CSS rules that we don't want to apply to the email.
+	 *
+	 * Typography properties (font-size, font-weight, line-height, letter-spacing) are stripped
+	 * because the email editor theme controls all typography via theme.json. Leaving these in
+	 * the WooCommerce CSS would override the editor's heading sizes and weights.
+	 *
+	 * @since 10.8.0
+	 * @param string $css CSS.
+	 * @return string
+	 */
+	public function prepare_css( string $css ): string {
+		remove_filter( 'woocommerce_email_styles', array( $this, 'prepare_css' ) );
+		// Remove typography declarations from WooCommerce CSS.
+		// The email editor theme.json controls all typography; WC CSS would override it.
+		return (string) preg_replace(
+			array(
+				'/color\s*:\s*[^;]+;/',
+				'/font-family\s*:\s*[^;]+;/',
+				'/font-size\s*:\s*[^;]+;/',
+				'/font-weight\s*:\s*[^;]+;/',
+				'/line-height\s*:\s*[^;]+;/',
+				'/letter-spacing\s*:\s*[^;]+;/',
+			),
+			'',
+			$css
+		);
+	}
+
+	/**
 	 * Get the content of the body tag from the HTML.
 	 *
 	 * @param string $html HTML.
@@ -68,8 +99,75 @@ class WooContentProcessor {
 	 * @return string
 	 */
 	private function inline_css( string $woo_content ): string {
-		$css = $this->theme_controller->get_stylesheet_for_rendering();
+		if ( empty( $woo_content ) ) {
+			return '';
+		}
+		$css  = $this->theme_controller->get_stylesheet_for_rendering();
+		$css .= $this->get_woo_content_styles();
 		return $this->css_inliner->from_html( $woo_content )->inline_css( $css )->render();
+	}
+
+	/**
+	 * Get CSS styles specific to WooCommerce email content.
+	 *
+	 * These styles target WooCommerce-specific HTML classes in the order details,
+	 * totals, and other email content areas. They are needed because the WooCommerce
+	 * email CSS selectors (prefixed with #body_content) do not match in the block
+	 * email editor template structure.
+	 *
+	 * @since 10.8.0
+	 * @return string CSS styles.
+	 */
+	private function get_woo_content_styles(): string {
+		return '
+			.email-order-details td,
+			.email-order-details th {
+				padding: 8px 12px;
+			}
+			.email-order-details td:first-child,
+			.email-order-details th:first-child {
+				padding-left: 0;
+			}
+			.email-order-details td:last-child,
+			.email-order-details th:last-child {
+				padding-right: 0;
+			}
+			.order-item-data td {
+				border: 0;
+				padding: 0;
+				vertical-align: middle;
+			}
+			.order-item-data img {
+				border-radius: 4px;
+			}
+			.order-totals th,
+			.order-totals td {
+				font-weight: 400;
+				padding-bottom: 5px;
+				padding-top: 5px;
+			}
+			.order-totals-total th {
+				font-weight: 700;
+			}
+			.order-totals-total td {
+				font-weight: 700;
+				font-size: 20px;
+			}
+			h2.email-order-detail-heading {
+				font-size: 20px;
+				font-weight: 700;
+				line-height: 1.6;
+			}
+			h2.email-order-detail-heading span {
+				font-size: 14px;
+				font-weight: 400;
+				color: #757575;
+			}
+			.email-order-item-meta {
+				font-size: 14px;
+				line-height: 1.4;
+			}
+		';
 	}
 
 	/**
@@ -79,33 +177,6 @@ class WooContentProcessor {
 	 * @return string
 	 */
 	private function capture_woo_content( \WC_Email $wc_email ): string {
-		// Store the existing header and footer callbacks.
-		global $wp_filter;
-		$original_header_filters = isset( $wp_filter['woocommerce_email_header'] ) ? clone $wp_filter['woocommerce_email_header'] : null;
-		$original_footer_filters = isset( $wp_filter['woocommerce_email_footer'] ) ? clone $wp_filter['woocommerce_email_footer'] : null;
-
-		// Remove header and footer filters because we want to get only the main content.
-		remove_all_filters( 'woocommerce_email_header' );
-		remove_all_filters( 'woocommerce_email_footer' );
-
-		$woo_content = $wc_email->get_content_html();
-
-		// Restore the original header and footer filters.
-		if ( $original_header_filters ) {
-			foreach ( $original_header_filters->callbacks as $priority => $callbacks ) {
-				foreach ( $callbacks as $filter ) {
-					add_filter( 'woocommerce_email_header', $filter['function'], $priority, $filter['accepted_args'] );
-				}
-			}
-		}
-		if ( $original_footer_filters ) {
-			foreach ( $original_footer_filters->callbacks as $priority => $callbacks ) {
-				foreach ( $callbacks as $filter ) {
-					add_filter( 'woocommerce_email_footer', $filter['function'], $priority, $filter['accepted_args'] );
-				}
-			}
-		}
-
-		return $woo_content;
+		return $wc_email->get_block_editor_email_template_content();
 	}
 }

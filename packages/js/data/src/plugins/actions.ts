@@ -3,16 +3,15 @@
  */
 import { apiFetch } from '@wordpress/data-controls';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { DispatchFromMap } from '@automattic/data-stores';
 import { controls } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
+import { DispatchFromMap, isRestApiError } from '../types';
 import { STORE_NAME } from './constants';
 import { ACTION_TYPES as TYPES } from './action-types';
 import { WC_ADMIN_NAMESPACE } from '../constants';
-import { isRestApiError } from '../types';
 import {
 	PaypalOnboardingStatus,
 	SelectorKeysWithActions,
@@ -26,7 +25,10 @@ import {
 } from './types';
 
 class PluginError extends Error {
-	constructor( message: string, public data: unknown ) {
+	constructor(
+		message: string,
+		public data: unknown
+	) {
 		super( message );
 	}
 }
@@ -175,7 +177,20 @@ function* handlePluginAPIError(
 ) {
 	let rawErrorMessage;
 
-	if ( isPluginResponseError( plugins, error ) ) {
+	// Check for plugin-management permission errors before generic handling.
+	// Match the specific code so we don't misattribute other 403s
+	// (e.g. nonce or session failures) as permission problems.
+	const isPermissionError =
+		isRestApiError( error ) &&
+		error.code === 'woocommerce_rest_cannot_update' &&
+		( error as { data?: { status?: number } } ).data?.status === 403;
+
+	if ( isPermissionError ) {
+		rawErrorMessage = __(
+			'You do not have permissions to manage plugins. Please contact your site administrator.',
+			'woocommerce'
+		);
+	} else if ( isPluginResponseError( plugins, error ) ) {
 		// Backend error messages are in the form of { plugin-slug: [ error messages ] }.
 		rawErrorMessage = Object.values( error ).join( ', \n' );
 	} else {
@@ -210,7 +225,8 @@ function* handlePluginAPIError(
 // Action Creator Generators
 export function* installPlugins(
 	plugins: Partial< PluginNames >[],
-	async = false
+	async = false,
+	source?: string
 ) {
 	yield setIsRequesting( 'installPlugins', true );
 
@@ -218,7 +234,7 @@ export function* installPlugins(
 		const results: InstallPluginsResponse = yield apiFetch( {
 			path: `${ WC_ADMIN_NAMESPACE }/plugins/install`,
 			method: 'POST',
-			data: { plugins: plugins.join( ',' ), async },
+			data: { plugins: plugins.join( ',' ), async, source },
 		} );
 
 		if ( results.data.installed?.length ) {
@@ -267,12 +283,17 @@ export function* activatePlugins( plugins: Partial< PluginNames >[] ) {
 	}
 }
 
-export function* installAndActivatePlugins( plugins: string[] ) {
+export function* installAndActivatePlugins(
+	plugins: string[],
+	source?: string
+) {
 	try {
 		const installations: InstallPluginsResponse = yield controls.dispatch(
 			STORE_NAME,
 			'installPlugins',
-			plugins
+			plugins,
+			false,
+			source
 		);
 		const activations: InstallPluginsResponse = yield controls.dispatch(
 			STORE_NAME,
@@ -288,14 +309,14 @@ export function* installAndActivatePlugins( plugins: string[] ) {
 			},
 		};
 
-		// If everything was a success and we both installed and activated, make the success message more informative.
+		// If everything was a success and we BOTH installed and activated, make the success message more informative.
 		if (
 			installations.success &&
 			Object.keys( installations.data.results ).length &&
 			activations.success &&
 			activations.data.activated.length
 		) {
-			// If only one plugin was installed, use the plugin details to create a more informative message.
+			// If only ONE plugin was installed, use the plugin details to create a more informative message.
 			if ( activations.data.activated.length === 1 ) {
 				const plugin_slug = activations.data.activated[ 0 ];
 				const plugin = activations.data.plugin_details?.[ plugin_slug ];
@@ -319,6 +340,28 @@ export function* installAndActivatePlugins( plugins: string[] ) {
 			} else {
 				response.message = __(
 					'Plugins were successfully installed and activated.',
+					'woocommerce'
+				);
+			}
+		} else if (
+			// If everything was a success, and we ONLY activated ONE plugin, make the success message more informative.
+			installations.success &&
+			! Object.keys( installations.data.results ).length &&
+			activations.success &&
+			activations.data.activated.length === 1
+		) {
+			const plugin_slug = activations.data.activated[ 0 ];
+			const plugin = activations.data.plugin_details?.[ plugin_slug ];
+
+			if ( plugin ) {
+				response.message = sprintf(
+					/* translators: %1$s: plugin name */
+					__( '%1$s was successfully activated.', 'woocommerce' ),
+					plugin.name
+				);
+			} else {
+				response.message = __(
+					'A plugin was successfully activated.',
 					'woocommerce'
 				);
 			}

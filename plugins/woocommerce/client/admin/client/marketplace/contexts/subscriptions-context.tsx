@@ -15,18 +15,21 @@ import {
 	refreshSubscriptions as fetchSubscriptionsFromWooCom,
 } from '../utils/functions';
 
-export const SubscriptionsContext = createContext< SubscriptionsContextType >( {
+const defaultContext: SubscriptionsContextType = {
 	subscriptions: [],
 	setSubscriptions: () => {},
-	loadSubscriptions: () => new Promise( () => {} ),
-	refreshSubscriptions: () => new Promise( () => {} ),
+	loadSubscriptions: () => Promise.resolve(),
+	refreshSubscriptions: () => Promise.resolve(),
 	isLoading: true,
 	setIsLoading: () => {},
-} );
+};
+
+export const SubscriptionsContext =
+	createContext< SubscriptionsContextType >( defaultContext );
 
 export function SubscriptionsContextProvider( props: {
-	children: JSX.Element;
-} ): JSX.Element {
+	children: React.JSX.Element;
+} ): React.JSX.Element {
 	const [ subscriptions, setSubscriptions ] = useState<
 		Array< Subscription >
 	>( [] );
@@ -56,6 +59,9 @@ export function SubscriptionsContextProvider( props: {
 		return fetchSubscriptionsFromWooCom()
 			.then( ( subscriptionResponse ) => {
 				setSubscriptions( subscriptionResponse );
+			} )
+			.catch( ( error ) => {
+				throw error;
 			} )
 			.finally( () => {
 				if ( toggleLoading ) {

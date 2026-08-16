@@ -8,13 +8,12 @@ import {
 	InspectorControls,
 	RichText,
 } from '@wordpress/block-editor';
+import { useProduct } from '@woocommerce/entities';
 import {
 	RangeControl,
 	ToggleControl,
-	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanel as ToolsPanel,
-	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
@@ -67,7 +66,7 @@ const MaxWordCountControl = ( {
 }: ControlProps< 'summaryLength' > ) => {
 	const label = __( 'Max word count', 'woocommerce' );
 	const help = __(
-		'When there is a word limit, only the first paragraph will be considered and displayed. Set to 0 to remove the word limit.',
+		'If the content exceeds the word limit, only the first paragraph will be shown. If the content is within the limit, all paragraphs will be displayed. Set to 0 to remove the word limit.',
 		'woocommerce'
 	);
 
@@ -89,7 +88,7 @@ const MaxWordCountControl = ( {
 				} }
 				min={ 0 }
 				max={ 200 }
-				step={ 10 }
+				step={ 1 }
 			/>
 		</ToolsPanelItem>
 	);
@@ -133,7 +132,7 @@ const LinkToDescription = ( {
 	return (
 		<p>
 			<RichText
-				identifier="linkToDescrption"
+				identifier="linkToDescription"
 				className="wc-block-components-product-summary__more-link"
 				tagName="a"
 				aria-label={ __( '“Read more” link text', 'woocommerce' ) }
@@ -186,9 +185,11 @@ const Edit = ( {
 		]
 	);
 
+	const { product } = useProduct( context.postId );
+
 	return (
 		<div { ...blockProps }>
-			<Block { ...attributes } />
+			<Block isAdmin={ true } { ...attributes } product={ product } />
 			<InspectorControls>
 				<ToolsPanel
 					label={ __( 'Settings', 'woocommerce' ) }

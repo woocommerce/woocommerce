@@ -16,9 +16,7 @@ import {
 	DefaultProgressTitleProps,
 } from './default-progress-title';
 
-export const ProgressTitle: React.FC< DefaultProgressTitleProps > = ( {
-	taskListId,
-} ) => {
+export const ProgressTitle = ( { taskListId }: DefaultProgressTitleProps ) => {
 	const slot = useSlot( WC_TASKLIST_EXPERIMENTAL_PROGRESS_TITLE_SLOT_NAME );
 
 	return Boolean( slot?.fills?.length ) ? (

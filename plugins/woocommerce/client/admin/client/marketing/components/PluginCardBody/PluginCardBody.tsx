@@ -26,14 +26,14 @@ type PluginCardBodyProps = {
 /**
  * Renders a CardBody layout component to display plugin info and button.
  */
-export const PluginCardBody: React.FC< PluginCardBodyProps > = ( {
+export const PluginCardBody = ( {
 	className,
 	icon,
 	name,
 	pills,
 	description,
 	button,
-} ) => {
+}: PluginCardBodyProps ) => {
 	return (
 		<CardBody
 			className={ clsx(

@@ -76,11 +76,8 @@ export const Select = ( props: SelectProps ) => {
 	const errorId = incomingErrorId || inputId;
 
 	const optionsWithEmpty = useMemo< SelectOption[] >( () => {
-		if ( required && value ) {
-			return options;
-		}
 		return [ emptyOption ].concat( options );
-	}, [ required, value, emptyOption, options ] );
+	}, [ emptyOption, options ] );
 
 	const { setValidationErrors, clearValidationError } =
 		useDispatch( validationStore );
@@ -98,9 +95,9 @@ export const Select = ( props: SelectProps ) => {
 
 	useEffect( () => {
 		if ( ! required || value ) {
-			clearValidationError( errorId );
+			void clearValidationError( errorId );
 		} else {
-			setValidationErrors( {
+			void setValidationErrors( {
 				[ errorId ]: {
 					message: errorMessage,
 					hidden: true,
@@ -108,7 +105,7 @@ export const Select = ( props: SelectProps ) => {
 			} );
 		}
 		return () => {
-			clearValidationError( errorId );
+			void clearValidationError( errorId );
 		};
 	}, [
 		clearValidationError,

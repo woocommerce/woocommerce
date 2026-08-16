@@ -1,4 +1,4 @@
-export const Bullet: React.FC = () => {
+export const Bullet = () => {
 	return (
 		<svg
 			width="13"

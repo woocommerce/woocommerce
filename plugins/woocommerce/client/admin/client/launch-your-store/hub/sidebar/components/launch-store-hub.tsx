@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable @woocommerce/dependency-group */
 /**
  * External dependencies
  */
@@ -31,11 +30,9 @@ import {
 import type { SidebarComponentProps } from '../xstate';
 import { SidebarContainer } from './sidebar-container';
 import { taskCompleteIcon } from './icons';
-import { SiteHub } from '~/customize-store/assembler-hub/site-hub';
+import { SiteHub } from '~/customize-store/site-hub';
 import { CompletedTaskItem, IncompleteTaskItem } from '../tasklist';
-export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
-	props
-) => {
+export const LaunchYourStoreHubSidebar = ( props: SidebarComponentProps ) => {
 	const {
 		context: {
 			tasklist,
@@ -58,7 +55,7 @@ export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 	);
 
 	const sidebarDescription = __(
-		'Ready to start selling? Before you launch your store, make sure you’ve completed these essential tasks. If you’d like to change your store visibility, go to WooCommerce | Settings | Site visibility.',
+		'Ready to start selling? Before you launch your store, make sure you’ve completed these essential tasks. If you’d like to change your store visibility, go to WooCommerce > Settings > Site visibility.',
 		'woocommerce'
 	);
 
@@ -108,6 +105,7 @@ export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 			<SidebarContainer
 				title={ sidebarTitle }
 				description={ sidebarDescription }
+				onMobileClose={ props.onMobileClose }
 			>
 				<div className="woocommerce-edit-site-sidebar-navigation-screen-essential-tasks__group-header">
 					<Heading level={ 2 }>

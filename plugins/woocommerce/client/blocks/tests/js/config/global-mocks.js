@@ -5,6 +5,12 @@ global.crypto = webcrypto;
 global.TextEncoder = require( 'util' ).TextEncoder;
 global.TextDecoder = require( 'util' ).TextDecoder;
 
+// The @woocommerce/email-editor package reads `__i18n_text_domain__` as its
+// text domain. It is normally replaced by `webpack.DefinePlugin` at bundle
+// time, but Jest does not run through webpack, so provide a default here so
+// test files that import from the package do not hit a ReferenceError.
+global.__i18n_text_domain__ = 'woocommerce';
+
 /**
  * Set up `wp.*` aliases.  Doing this because any tests importing wp stuff will
  * likely run into this.
@@ -18,12 +24,6 @@ require( '@wordpress/data' );
  */
 global.wcSettings = {
 	adminUrl: 'https://vagrant.local/wp/wp-admin/',
-	addressFormats: {
-		default:
-			'{name}\n{company}\n{address_1}\n{address_2}\n{city}\n{state}\n{postcode}\n{country}',
-		JP: '{postcode}\n{state} {city} {address_1}\n{address_2}\n{company}\n{last_name} {first_name}\n{country}',
-		CA: '{company}\n{name}\n{address_1}\n{address_2}\n{city} {state_code} {postcode}\n{country}',
-	},
 	shippingMethodsExist: true,
 	currency: {
 		code: 'USD',
@@ -55,6 +55,7 @@ global.wcSettings = {
 		AT: 'Austria',
 		CA: 'Canada',
 		GB: 'United Kingdom (UK)',
+		ES: 'Spain',
 	},
 	countryData: {
 		AT: {
@@ -102,13 +103,31 @@ global.wcSettings = {
 			format: '{postcode}\n{state} {city} {address_1}\n{address_2}\n{company}\n{last_name} {first_name}\n{country}',
 		},
 		GB: {
-			states: {},
 			allowBilling: true,
 			allowShipping: true,
+			states: {},
 			locale: {
 				postcode: { label: 'Postcode' },
 				state: { label: 'County', required: false },
 			},
+		},
+		ES: {
+			allowBilling: true,
+			allowShipping: true,
+			states: {
+				B: 'Barcelona',
+				M: 'Madrid',
+			},
+			locale: {
+				postcode: {
+					required: false,
+					hidden: true,
+				},
+				state: {
+					label: 'Province',
+				},
+			},
+			format: '{name}\n{company}\n{address_1}\n{address_2}\n{postcode} {city}\n{state}\n{country}',
 		},
 	},
 	storePages: {
@@ -162,95 +181,136 @@ global.wcSettings = {
 		},
 	],
 	defaultFields: {
+		email: {
+			label: 'Email address',
+			optionalLabel: 'Email address (optional)',
+			required: true,
+			hidden: false,
+			autocomplete: 'email',
+			autocapitalize: 'none',
+			type: 'email',
+			index: 0,
+		},
+		country: {
+			label: 'Country/Region',
+			optionalLabel: 'Country/Region (optional)',
+			required: true,
+			hidden: false,
+			autocomplete: 'country',
+			index: 1,
+		},
 		first_name: {
 			label: 'First name',
 			optionalLabel: 'First name (optional)',
-			autocomplete: 'given-name',
-			autocapitalize: 'sentences',
 			required: true,
 			hidden: false,
+			autocomplete: 'given-name',
+			autocapitalize: 'sentences',
 			index: 10,
 		},
 		last_name: {
 			label: 'Last name',
 			optionalLabel: 'Last name (optional)',
-			autocomplete: 'family-name',
-			autocapitalize: 'sentences',
 			required: true,
 			hidden: false,
+			autocomplete: 'family-name',
+			autocapitalize: 'sentences',
 			index: 20,
 		},
 		company: {
 			label: 'Company',
 			optionalLabel: 'Company (optional)',
+			required: false,
+			hidden: true,
 			autocomplete: 'organization',
 			autocapitalize: 'sentences',
-			required: false,
-			hidden: false,
 			index: 30,
 		},
 		address_1: {
 			label: 'Address',
 			optionalLabel: 'Address (optional)',
-			autocomplete: 'address-line1',
-			autocapitalize: 'sentences',
 			required: true,
 			hidden: false,
+			autocomplete: 'address-line1',
+			autocapitalize: 'sentences',
 			index: 40,
 		},
 		address_2: {
 			label: 'Apartment, suite, etc.',
 			optionalLabel: 'Apartment, suite, etc. (optional)',
-			autocomplete: 'address-line2',
-			autocapitalize: 'sentences',
 			required: false,
 			hidden: false,
+			autocomplete: 'address-line2',
+			autocapitalize: 'sentences',
 			index: 50,
-		},
-		country: {
-			label: 'Country/Region',
-			optionalLabel: 'Country/Region (optional)',
-			autocomplete: 'country',
-			required: true,
-			hidden: false,
-			index: 60,
 		},
 		city: {
 			label: 'City',
 			optionalLabel: 'City (optional)',
-			autocomplete: 'address-level2',
-			autocapitalize: 'sentences',
 			required: true,
 			hidden: false,
+			autocomplete: 'address-level2',
+			autocapitalize: 'sentences',
 			index: 70,
 		},
 		state: {
 			label: 'State/County',
 			optionalLabel: 'State/County (optional)',
-			autocomplete: 'address-level1',
-			autocapitalize: 'sentences',
 			required: true,
 			hidden: false,
+			autocomplete: 'address-level1',
+			autocapitalize: 'sentences',
 			index: 80,
 		},
 		postcode: {
 			label: 'Postal code',
 			optionalLabel: 'Postal code (optional)',
-			autocomplete: 'postal-code',
-			autocapitalize: 'characters',
 			required: true,
 			hidden: false,
+			autocomplete: 'postal-code',
+			autocapitalize: 'characters',
 			index: 90,
 		},
 		phone: {
 			label: 'Phone',
 			optionalLabel: 'Phone (optional)',
-			autocomplete: 'tel',
+			required: false,
+			hidden: true,
 			type: 'tel',
-			required: true,
-			hidden: false,
+			autocomplete: 'tel',
+			autocapitalize: 'characters',
 			index: 100,
 		},
+		'namespace/contact_field': {
+			label: 'Contact Field',
+			optionalLabel: 'Contact Field (optional)',
+			required: false,
+			hidden: false,
+			type: 'text',
+		},
+		'namespace/order_field': {
+			label: 'Order Field',
+			optionalLabel: 'Order Field (optional)',
+			required: false,
+			hidden: false,
+			type: 'text',
+		},
+	},
+	addressFieldsLocations: {
+		address: [
+			'first_name',
+			'last_name',
+			'company',
+			'address_1',
+			'address_2',
+			'city',
+			'state',
+			'postcode',
+			'phone',
+			'country',
+		],
+		contact: [ 'email', 'namespace/contact_field' ],
+		order: [ 'namespace/order_field' ],
 	},
 	checkoutData: {
 		order_id: 100,
@@ -285,7 +345,8 @@ global.__webpack_public_path__ = '';
 Object.defineProperty( window, 'matchMedia', {
 	writable: true,
 	value: jest.fn().mockImplementation( ( query ) => ( {
-		matches: false,
+		// Return true for prefers-reduced-motion queries to skip animations in tests
+		matches: /prefers-reduced-motion/.test( query ),
 		media: query,
 		onchange: null,
 		addListener: jest.fn(), // Deprecated
@@ -306,6 +367,16 @@ if ( ! window.DOMRect ) {
 }
 
 /**
+ * `@wordpress/block-editor`@14.14.6 (wp-6.8) constructs `DOMRectReadOnly`
+ * instances in `getElementBounds`, which `jest-fixed-jsdom` doesn't polyfill.
+ * Stub it so tests that render `<BlockToolbarPopover>` and friends don't
+ * crash.
+ */
+if ( ! window.DOMRectReadOnly ) {
+	window.DOMRectReadOnly = class DOMRectReadOnly {};
+}
+
+/**
  * client-zip is meant to be used in a browser and is therefore released as an
  * ES6 module only, in order to use it in node environment, we need to mock it.
  * See: https://github.com/Touffy/client-zip/issues/28
@@ -314,7 +385,11 @@ jest.mock( 'client-zip', () => ( {
 	downloadZip: jest.fn(),
 } ) );
 
-/*
- * Enables `window.fetch()` in Jest tests.
+/**
+ * Mock isEditor to return false by default in tests, since the core/editor
+ * store may be registered in the test environment without an actual editor
+ * context. Individual tests can override this mock if needed.
  */
-require( 'jest-fetch-mock' ).enableMocks();
+jest.mock( '@woocommerce/block-data/utils/is-editor', () => ( {
+	isEditor: jest.fn().mockReturnValue( false ),
+} ) );

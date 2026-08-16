@@ -43,7 +43,7 @@ class WC_Admin_API_Keys {
 	 * @return bool
 	 */
 	private function is_api_keys_settings_page() {
-		return isset( $_GET['page'], $_GET['tab'], $_GET['section'] ) && 'wc-settings' === $_GET['page'] && 'advanced' === $_GET['tab'] && 'keys' === $_GET['section']; // WPCS: input var okay, CSRF ok.
+		return is_wc_admin_settings_page() && isset( $_GET['tab'], $_GET['section'] ) && 'advanced' === $_GET['tab'] && 'keys' === $_GET['section']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
@@ -115,7 +115,7 @@ class WC_Admin_API_Keys {
 			echo '<div class="woocommerce-BlankState woocommerce-BlankState--api">';
 			?>
 			<h2 class="woocommerce-BlankState-message"><?php esc_html_e( 'The WooCommerce REST API allows external apps to view and manage store data. Access is granted only to those with valid API keys.', 'woocommerce' ); ?></h2>
-			<a class="woocommerce-BlankState-cta button-primary button" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys&create-key=1' ) ); ?>"><?php esc_html_e( 'Create an API key', 'woocommerce' ); ?></a>
+			<a class="woocommerce-BlankState-cta button button-secondary" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys&create-key=1' ) ); ?>"><?php esc_html_e( 'Create an API key', 'woocommerce' ); ?></a>
 			<style type="text/css">#posts-filter .wp-list-table, #posts-filter .tablenav.top, .tablenav.bottom .actions { display: none; }</style>
 			<?php
 		}

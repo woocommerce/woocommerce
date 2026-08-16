@@ -17,6 +17,7 @@ export const Basic = () => (
 					label: 'United States',
 				},
 			],
+			geolocatedLocation: undefined,
 		} }
 	/>
 );

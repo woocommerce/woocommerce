@@ -25,20 +25,32 @@
 			"default": false
 		}
 	},
-	"usesContext": [
-		"query",
-		"queryId",
-		"postId"
-	],
-	"keywords": [
-		"WooCommerce"
-	],
+	"usesContext": [ "query", "queryId", "postId" ],
+	"keywords": [ "WooCommerce" ],
 	"supports": {
-		"align": true
+		"interactivity": {
+			"clientNavigation": true
+		},
+		"inserter": false,
+		"color": {
+			"text": true,
+			"background": false,
+			"link": false,
+			"__experimentalSkipSerialization": true
+		},
+		"spacing": {
+			"margin": true,
+			"padding": true
+		},
+		"typography": {
+			"fontSize": true,
+			"__experimentalSkipSerialization": true
+		}
 	},
-	"ancestor": [
-		"woocommerce/single-product"
-	],
+	"selectors": {
+		"root": ".wp-block-woocommerce-product-rating-stars.wc-block-components-product-rating, .wp-block-woocommerce-product-rating-stars .wc-block-components-product-rating"
+	},
+	"ancestor": [ "woocommerce/single-product" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

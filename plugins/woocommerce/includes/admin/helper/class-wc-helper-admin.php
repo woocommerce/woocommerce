@@ -20,6 +20,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * an account on WooCommerce.com.
  */
 class WC_Helper_Admin {
+	/**
+	 * Clear cache tool identifier.
+	 */
+	const CACHE_TOOL_ID = 'clear_woocommerce_helper_cache';
 
 	/**
 	 * Loads the class, runs on init
@@ -35,6 +39,8 @@ class WC_Helper_Admin {
 			if ( $is_wc_home_or_in_app_marketplace ) {
 				add_filter( 'woocommerce_admin_shared_settings', array( __CLASS__, 'add_marketplace_settings' ) );
 			}
+
+			add_filter( 'woocommerce_debug_tools', array( __CLASS__, 'register_cache_clear_tool' ) );
 		}
 
 		add_filter( 'rest_api_init', array( __CLASS__, 'register_rest_routes' ) );
@@ -65,12 +71,12 @@ class WC_Helper_Admin {
 			$installed_products
 		);
 
-		$woo_connect_notice_type = WC_Helper_Updater::get_woo_connect_notice_type();
-		$blog_name               = get_bloginfo( 'name' );
+		$blog_name = get_bloginfo( 'name' );
 
 		$settings['wccomHelper'] = array(
 			'isConnected'                => WC_Helper::is_site_connected(),
 			'connectURL'                 => self::get_connection_url(),
+			'reConnectURL'               => self::get_connection_url( true ),
 			'userEmail'                  => $auth_user_email,
 			'userAvatar'                 => get_avatar_url( $auth_user_email, array( 'size' => '48' ) ),
 			'storeCountry'               => wc_get_base_location()['country'],
@@ -82,18 +88,28 @@ class WC_Helper_Admin {
 			'wooUpdateManagerActive'     => WC_Woo_Update_Manager_Plugin::is_plugin_active(),
 			'wooUpdateManagerInstallUrl' => WC_Woo_Update_Manager_Plugin::generate_install_url(),
 			'wooUpdateManagerPluginSlug' => WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_SLUG,
-			'wooUpdateCount'             => WC_Helper_Updater::get_updates_count_based_on_site_status(),
-			'woocomConnectNoticeType'    => $woo_connect_notice_type,
 			'dismissNoticeNonce'         => wp_create_nonce( 'dismiss_notice' ),
-			'connected_notice'           => PluginsHelper::get_wccom_connected_notice( $auth_user_email ),
+			'trackingAllowed'            => 'yes' === get_option( 'woocommerce_allow_tracking' ),
 		);
 
-		if ( WC_Helper::is_site_connected() ) {
-			$settings['wccomHelper']['subscription_expired_notice']  = PluginsHelper::get_expired_subscription_notice( false );
-			$settings['wccomHelper']['subscription_expiring_notice'] = PluginsHelper::get_expiring_subscription_notice( false );
-			$settings['wccomHelper']['subscription_missing_notice']  = PluginsHelper::get_missing_subscription_notice();
-		} else {
-			$settings['wccomHelper']['disconnected_notice'] = PluginsHelper::get_wccom_disconnected_notice();
+		// This data is only used in the `Extensions` screen, so only populate it there.
+		// More specifically, it's used in `My Subscriptions`, however, switching tabs doesn't require
+		// a page reload, so we just check for `path` (/extensions), rather than `tab` (my-subscriptions).
+		if ( ! empty( $_GET['path'] ) && '/extensions' === $_GET['path'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$settings['wccomHelper']['wooUpdateCount']          = WC_Helper_Updater::get_updates_count_based_on_site_status();
+			$settings['wccomHelper']['connected_notice']        = PluginsHelper::get_wccom_connected_notice( $auth_user_email );
+			$settings['wccomHelper']['woocomConnectNoticeType'] = WC_Helper_Updater::get_woo_connect_notice_type();
+
+			if ( WC_Helper::is_site_connected() ) {
+				$settings['wccomHelper']['subscription_expired_notice']  = PluginsHelper::get_expired_subscription_notice( false );
+				$settings['wccomHelper']['subscription_expiring_notice'] = PluginsHelper::get_expiring_subscription_notice( false );
+				$settings['wccomHelper']['subscription_missing_notice']  = PluginsHelper::get_missing_subscription_notice();
+				$settings['wccomHelper']['connection_url_notice']        = WC_Woo_Helper_Connection::get_connection_url_notice();
+				$settings['wccomHelper']['has_host_plan_orders']         = WC_Woo_Helper_Connection::has_host_plan_orders();
+				$settings['wccomHelper']['maybe_deleted_connection']     = WC_Woo_Helper_Connection::get_deleted_connection_notice();
+			} else {
+				$settings['wccomHelper']['disconnected_notice'] = PluginsHelper::get_wccom_disconnected_notice();
+			}
 		}
 
 		return $settings;
@@ -103,11 +119,11 @@ class WC_Helper_Admin {
 	 * Generates the URL for connecting or disconnecting the store to/from WooCommerce.com.
 	 * Approach taken from existing helper code that isn't exposed.
 	 *
+	 * @param bool $reconnect indicate if the site is being reconnected.
+	 *
 	 * @return string
 	 */
-	public static function get_connection_url() {
-		global $current_screen;
-
+	public static function get_connection_url( $reconnect = false ) {
 		// Default to wc-addons, although this can be changed from the frontend
 		// in the function `connectUrl()` within marketplace functions.tsx.
 		$connect_url_args = array(
@@ -116,7 +132,7 @@ class WC_Helper_Admin {
 		);
 
 		// No active connection.
-		if ( WC_Helper::is_site_connected() ) {
+		if ( WC_Helper::is_site_connected() && ! $reconnect ) {
 			$connect_url_args['wc-helper-disconnect'] = 1;
 			$connect_url_args['wc-helper-nonce']      = wp_create_nonce( 'disconnect' );
 		} else {
@@ -139,17 +155,28 @@ class WC_Helper_Admin {
 	}
 
 	/**
-	 * Registers the REST routes for the featured products endpoint.
-	 * This endpoint is used by the WooCommerce > Extensions > Discover
-	 * page.
+	 * Registers the REST routes for the featured products and product
+	 * previews endpoints.
 	 */
 	public static function register_rest_routes() {
+		/* Used by the WooCommerce > Extensions > Discover page. */
 		register_rest_route(
 			'wc/v3',
 			'/marketplace/featured',
 			array(
 				'methods'             => 'GET',
 				'callback'            => array( __CLASS__, 'get_featured' ),
+				'permission_callback' => array( __CLASS__, 'get_permission' ),
+			)
+		);
+
+		/* Used to show previews of products in a modal in in-app marketplace. */
+		register_rest_route(
+			'wc/v1',
+			'/marketplace/product-preview',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'get_product_preview' ),
 				'permission_callback' => array( __CLASS__, 'get_permission' ),
 			)
 		);
@@ -175,6 +202,99 @@ class WC_Helper_Admin {
 		}
 
 		wp_send_json( $featured );
+	}
+
+	/**
+	 * Fetch data for product previews from WooCommerce.com.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 */
+	public static function get_product_preview( $request ) {
+		$product_id = (int) $request->get_param( 'product_id' );
+
+		if ( ! $product_id ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'Missing product ID', 'woocommerce' ),
+				),
+				400
+			);
+		}
+
+		$product_preview = WC_Admin_Addons::fetch_product_preview( $product_id );
+
+		if ( ! $product_preview ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'We couldn\'t find a preview for this product.', 'woocommerce' ),
+				),
+				404
+			);
+		}
+
+		if ( is_wp_error( $product_preview ) ) {
+			wp_send_json_error(
+				array(
+					'message' => $product_preview->get_error_message(),
+				)
+			);
+		}
+
+		if (
+			! isset( $product_preview['css'] )
+			|| ! is_string( $product_preview['css'] )
+			|| ! isset( $product_preview['html'] )
+			|| ! is_string( $product_preview['html'] )
+		) {
+			wp_send_json_error(
+				array(
+					'message' => __(
+						'API response is missing required elements, or they are in the wrong form.',
+						'woocommerce'
+					),
+				),
+				500
+			);
+		}
+
+		$sanitized_product_preview = array(
+			'css'  => WC_Helper_Sanitization::sanitize_css( $product_preview['css'] ),
+			'html' => WC_Helper_Sanitization::sanitize_html( $product_preview['html'] ),
+		);
+
+		wp_send_json( $sanitized_product_preview );
+	}
+
+	/**
+	 * Register the cache clearing tool on the WooCommerce > Status > Tools page.
+	 *
+	 * @param array $debug_tools Available debug tool registrations.
+	 * @return array Filtered debug tool registrations.
+	 */
+	public static function register_cache_clear_tool( $debug_tools ) {
+		$debug_tools[ self::CACHE_TOOL_ID ] = array(
+			'name'     => __( 'Clear WooCommerce.com cache', 'woocommerce' ),
+			'button'   => __( 'Clear', 'woocommerce' ),
+			'desc'     => sprintf(
+				__( 'This tool will empty the WooCommerce.com data cache, used in WooCommerce Extensions.', 'woocommerce' ),
+			),
+			'callback' => array( __CLASS__, 'run_clear_cache_tool' ),
+		);
+
+		return $debug_tools;
+	}
+
+
+	/**
+	 * "Clear" helper cache by invalidating it.
+	 */
+	public static function run_clear_cache_tool() {
+		WC_Helper::_flush_subscriptions_cache();
+		WC_Helper::flush_product_usage_notice_rules_cache();
+		WC_Helper::flush_connection_data_cache();
+		WC_Helper_Updater::flush_updates_cache();
+
+		return __( 'Helper cache cleared.', 'woocommerce' );
 	}
 }
 

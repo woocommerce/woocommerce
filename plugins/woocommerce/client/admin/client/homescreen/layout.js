@@ -7,9 +7,10 @@ import {
 	useCallback,
 	useLayoutEffect,
 	useRef,
+	useEffect,
 } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { withSelect } from '@wordpress/data';
+import { withSelect, dispatch } from '@wordpress/data';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import {
@@ -32,6 +33,7 @@ import StatsOverview from './stats-overview';
 import { StoreManagementLinks } from '../store-management-links';
 import { TasksPlaceholder, ProgressTitle } from '../task-lists';
 import { MobileAppModal } from './mobile-app-modal';
+import { EmailImprovementsModal } from './email-improvements-modal';
 import './style.scss';
 import '../dashboard/style.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
@@ -42,6 +44,7 @@ import {
 	useTaskListsState,
 } from '~/hooks/use-tasklists-state';
 import { hasTwoColumnLayout } from './utils';
+import { isFeatureEnabled } from '~/utils/features';
 
 const TaskLists = lazy( () =>
 	import( /* webpackChunkName: "tasks" */ '../task-lists' ).then(
@@ -59,6 +62,7 @@ export const Layout = ( {
 	isLoadingTaskLists,
 } ) => {
 	const userPrefs = useUserPreferences();
+	const { createInfoNotice } = dispatch( 'core/notices' );
 
 	// Use hook to get setup task list state so when the task list is completed or hidden, the homescreen layout is updated immediately
 	const { setupTaskListActive: isSetupTaskListActive, setupTaskListHidden } =
@@ -89,8 +93,27 @@ export const Layout = ( {
 		};
 	}, [ maybeToggleColumns ] );
 
+	useEffect( () => {
+		if ( query?.nox === 'test_account_created' ) {
+			createInfoNotice(
+				__(
+					'Your WooPayments test account was successfully created.',
+					'woocommerce'
+				),
+				{
+					type: 'info',
+					duration: 5000,
+				}
+			);
+		}
+	}, [ query?.nox, createInfoNotice ] );
+
 	const shouldStickColumns = isWideViewport.current && twoColumns;
 	const shouldShowMobileAppModal = query.mobileAppModal ?? false;
+	const shouldShowEmailImprovementsModal =
+		query.emailImprovementsModal ?? false;
+	const emailImprovementsType =
+		shouldShowEmailImprovementsModal === 'enabled' ? 'enabled' : 'try';
 
 	const renderTaskList = () => {
 		return (
@@ -126,7 +149,7 @@ export const Layout = ( {
 					<InboxPanel />
 				</Column>
 				<Column shouldStick={ shouldStickColumns }>
-					{ window.wcAdminFeatures.analytics && <StatsOverview /> }
+					{ isFeatureEnabled( 'analytics' ) && <StatsOverview /> }
 					{ ! isSetupTaskListActive && <StoreManagementLinks /> }
 				</Column>
 			</>
@@ -149,6 +172,9 @@ export const Layout = ( {
 			>
 				{ isDashboardShown ? renderColumns() : renderTaskList() }
 				{ shouldShowMobileAppModal && <MobileAppModal /> }
+				{ shouldShowEmailImprovementsModal && (
+					<EmailImprovementsModal type={ emailImprovementsType } />
+				) }
 			</div>
 		</>
 	);

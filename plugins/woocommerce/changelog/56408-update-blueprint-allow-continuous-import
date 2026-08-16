@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Blueprint: Fixed an issue where closing an imported file failed to reset the upload component state.

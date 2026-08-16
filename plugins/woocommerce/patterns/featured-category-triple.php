@@ -5,15 +5,13 @@
  * Categories: WooCommerce, featured-selling
  */
 
-use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
+$image1 = plugins_url( 'assets/images/pattern-placeholders/tree-branch-plant-wood-leaf-flower.jpg', WC_PLUGIN_FILE );
+$image2 = plugins_url( 'assets/images/pattern-placeholders/watch-hand-brand-jewellery-strap-platinum.jpg', WC_PLUGIN_FILE );
+$image3 = plugins_url( 'assets/images/pattern-placeholders/white-vase-decoration-pattern-ceramic-lamp.jpg', WC_PLUGIN_FILE );
 
-$image1 = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/tree-branch-plant-wood-leaf-flower.jpg' );
-$image2 = PatternsHelper::get_image_url( $images, 1, 'assets/images/pattern-placeholders/watch-hand-brand-jewellery-strap-platinum.jpg' );
-$image3 = PatternsHelper::get_image_url( $images, 2, 'assets/images/pattern-placeholders/white-vase-decoration-pattern-ceramic-lamp.jpg' );
-
-$first_title  = $content['titles'][0]['default'] ?? '';
-$second_title = $content['titles'][1]['default'] ?? '';
-$third_title  = $content['titles'][2]['default'] ?? '';
+$first_title  = __( 'Home decor', 'woocommerce' );
+$second_title = __( 'Retro photography', 'woocommerce' );
+$third_title  = __( 'Handmade gifts', 'woocommerce' );
 ?>
 
 <!-- wp:group {"metadata":{"name":"Featured Category Triple"},"align":"full","style":{"spacing":{"padding":{"top":"calc( 0.5 * var(--wp--style--root--padding-right, var(--wp--custom--gap--horizontal)))","bottom":"calc( 0.5 * var(--wp--style--root--padding-right, var(--wp--custom--gap--horizontal)))","left":"var(--wp--style--root--padding-left, var(--wp--custom--gap--horizontal))","right":"var(--wp--style--root--padding-right, var(--wp--custom--gap--horizontal))"},"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->

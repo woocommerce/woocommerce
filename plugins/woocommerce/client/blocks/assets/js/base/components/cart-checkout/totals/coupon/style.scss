@@ -34,6 +34,16 @@
 		padding-right: $gap;
 		white-space: nowrap;
 		flex: 1 1 auto;
+
+		// Hides labels when the spinner is shown.
+		&--loading {
+			.wc-block-components-button__text {
+				visibility: hidden;
+			}
+			.wc-block-components-spinner {
+				visibility: visible;
+			}
+		}
 	}
 }
 

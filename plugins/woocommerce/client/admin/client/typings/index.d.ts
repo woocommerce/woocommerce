@@ -1,5 +1,3 @@
-declare module '@woocommerce/e2e-utils';
-declare module '@woocommerce/e2e-environment';
 declare module '@woocommerce/settings' {
 	export declare function getAdminLink( path: string ): string;
 	export declare function getSetting< T >(
@@ -8,6 +6,42 @@ declare module '@woocommerce/settings' {
 		filter = ( val: unknown, fb: unknown ) =>
 			typeof val !== 'undefined' ? val : fb
 	): T;
+}
+declare module '@wordpress/keyboard-shortcuts' {
+	// The package ships no type declarations; declare the minimal surface in use.
+	export type ShortcutKeyCombination = {
+		modifier?: string;
+		character: string;
+	};
+	export declare const store: import('@wordpress/data').StoreDescriptor<
+		import('@wordpress/data').ReduxStoreConfig<
+			unknown,
+			{
+				registerShortcut: ( shortcut: {
+					name: string;
+					category: string;
+					description?: string;
+					keyCombination: ShortcutKeyCombination;
+				} ) => unknown;
+				unregisterShortcut: ( name: string ) => unknown;
+			},
+			{
+				getShortcutKeyCombination: (
+					state: unknown,
+					name: string
+				) => ShortcutKeyCombination | null;
+				getShortcutDescription: (
+					state: unknown,
+					name: string
+				) => string | undefined;
+			}
+		>
+	>;
+	export declare function useShortcut(
+		name: string,
+		callback: ( event: { preventDefault: () => void } ) => void,
+		options?: { isDisabled?: boolean }
+	): void;
 }
 declare module '@wordpress/components/build/ui' {
 	// Typescript seems unable to resolve this correctly by default, so we need to re-export it in our type defs.

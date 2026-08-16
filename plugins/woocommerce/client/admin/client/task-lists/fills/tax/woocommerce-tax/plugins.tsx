@@ -21,12 +21,12 @@ const isWcConnectOptions = (
 	[ key: string ]: unknown;
 } => typeof wcConnectOptions === 'object' && wcConnectOptions !== null;
 
-export const Plugins: React.FC< SetupStepProps > = ( {
+export const Plugins = ( {
 	nextStep,
 	onDisable,
 	onManual,
 	pluginsToActivate,
-} ) => {
+}: SetupStepProps ) => {
 	const { updateOptions } = useDispatch( optionsStore );
 	const { isResolving, tosAccepted } = useSelect( ( select ) => {
 		const { getOption, hasFinishedResolution } = select( optionsStore );
@@ -75,7 +75,7 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 					recordEvent( 'tasklist_tax_install_extensions', {
 						install_extensions: true,
 					} );
-					updateOptions( {
+					void updateOptions( {
 						woocommerce_setup_jetpack_opted_in: true,
 					} );
 					nextStep();

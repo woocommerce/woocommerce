@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { ALLOWED_STATES } from '@woocommerce/block-settings';
+import { STATES } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -12,7 +12,7 @@ import type { StateInputProps } from './StateInputProps';
 const BillingStateInput = ( props: StateInputProps ): JSX.Element => {
 	const { ...restOfProps } = props;
 
-	return <StateInput states={ ALLOWED_STATES } { ...restOfProps } />;
+	return <StateInput states={ STATES } { ...restOfProps } />;
 };
 
 export default BillingStateInput;

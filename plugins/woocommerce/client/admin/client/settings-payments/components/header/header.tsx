@@ -6,17 +6,12 @@ import {
 	registerPlugin,
 	getPlugins,
 } from '@wordpress/plugins';
-import {
-	WooHeaderNavigationItem,
-	WooHeaderPageTitle,
-	WooHeaderItem,
-} from '@woocommerce/admin-layout';
+import { WooHeaderPageTitle, WooHeaderItem } from '@woocommerce/admin-layout';
 import { Button } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
-import { BackButton } from '../buttons/back-button';
 import './header.scss';
 
 interface HeaderProps {
@@ -24,10 +19,6 @@ interface HeaderProps {
 	 * The title of the header.
 	 */
 	title: string;
-	/**
-	 * The link to go back to. If not provided, the back button will not be shown.
-	 */
-	backLink?: string;
 	/**
 	 * The description of the header.
 	 */
@@ -55,7 +46,6 @@ let hasRegisteredPlugins = false;
  */
 export const Header = ( {
 	title,
-	backLink,
 	description,
 	hasButton,
 	buttonLabel,
@@ -79,11 +69,6 @@ export const Header = ( {
 		registerPlugin( HEADER_PLUGIN_NAME, {
 			render: () => (
 				<>
-					{ backLink && (
-						<WooHeaderNavigationItem>
-							<BackButton href={ backLink } title={ title } />
-						</WooHeaderNavigationItem>
-					) }
 					<WooHeaderPageTitle>
 						<span className="woocommerce-settings-payments-header__title">
 							{ title }
