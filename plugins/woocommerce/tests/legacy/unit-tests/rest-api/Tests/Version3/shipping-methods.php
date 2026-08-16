@@ -36,6 +36,153 @@ class Shipping_Methods extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Shipping method collection and item routes are read-only.
+	 */
+	public function test_read_only_route_contract(): void {
+		$routes          = $this->server->get_routes();
+		$collection_path = '/wc/v3/shipping_methods';
+		$item_path       = '/wc/v3/shipping_methods/(?P<id>[\w-]+)';
+
+		$this->assertSame( array( 'GET' ), $this->get_registered_methods( $routes[ $collection_path ] ) );
+		$this->assertSame( array( 'GET' ), $this->get_registered_methods( $routes[ $item_path ] ) );
+
+		wp_set_current_user( $this->user );
+		$response = $this->server->dispatch( new WP_REST_Request( 'POST', $collection_path ) );
+		$this->assertSame( 404, $response->get_status() );
+		$this->assertSame( 'rest_no_route', $response->get_data()['code'] );
+		$this->assertSame( 'No route was found matching the URL and request method.', $response->get_data()['message'] );
+	}
+
+	/**
+	 * @testdox The registered shipping method catalog exposes the stable core methods and links.
+	 */
+	public function test_core_shipping_method_catalog(): void {
+		wp_set_current_user( $this->user );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/shipping_methods' ) );
+		$this->assertSame( 200, $response->get_status() );
+
+		$methods = $response->get_data();
+		$this->assertGreaterThanOrEqual( 3, count( $methods ) );
+		$this->assertSame( count( $methods ), $response->get_headers()['X-WP-Total'] );
+		$this->assertSame( 1, $response->get_headers()['X-WP-TotalPages'] );
+		$this->assertSame( array( 'flat_rate', 'free_shipping', 'local_pickup' ), array_slice( wp_list_pluck( $methods, 'id' ), 0, 3 ) );
+
+		foreach ( array_slice( $methods, 0, 3 ) as $method ) {
+			$this->assertNotSame( '', $method['title'] );
+			$this->assertNotSame( '', $method['description'] );
+			$this->assertSame( rest_url( '/wc/v3/shipping_methods/' . $method['id'] ), $method['_links']['self'][0]['href'] );
+			$this->assertSame( rest_url( '/wc/v3/shipping_methods' ), $method['_links']['collection'][0]['href'] );
+		}
+	}
+
+	/**
+	 * @testdox A core shipping method completes a registered V3 zone lifecycle.
+	 *
+	 * @dataProvider core_shipping_method_provider
+	 *
+	 * @param string      $method_id Shipping method ID.
+	 * @param string      $method_title Shipping method title.
+	 * @param string|null $cost Optional instance cost.
+	 */
+	public function test_core_zone_method_create_lifecycle( $method_id, $method_title, $cost ): void {
+		$zone_id     = 0;
+		$instance_id = 0;
+
+		try {
+			wp_set_current_user( $this->user );
+
+			$zone = new WC_Shipping_Zone( null );
+			$zone->set_zone_name( 'Slice 46 ' . $method_title );
+			$zone->save();
+			$zone_id = $zone->get_id();
+			$this->assertGreaterThan( 0, $zone_id );
+
+			$body = array(
+				'method_id' => $method_id,
+				'enabled'   => true,
+			);
+			if ( null !== $cost ) {
+				$body['settings'] = array( 'cost' => $cost );
+			}
+
+			$collection_path = '/wc/v3/shipping/zones/' . $zone_id . '/methods';
+			$request         = new WP_REST_Request( 'POST', $collection_path );
+			$request->set_body_params( $body );
+			$response = $this->server->dispatch( $request );
+			$data     = $response->get_data();
+			if ( isset( $data['instance_id'] ) && is_numeric( $data['instance_id'] ) ) {
+				$instance_id = (int) $data['instance_id'];
+			}
+
+			$this->assertSame( 200, $response->get_status() );
+			$this->assertGreaterThan( 0, $instance_id );
+			$this->assertSame( $instance_id, $data['id'] );
+			$this->assertSame( $instance_id, $data['instance_id'] );
+			$this->assertSame( $method_id, $data['method_id'] );
+			$this->assertSame( $method_title, $data['method_title'] );
+			$this->assertSame( $method_title, $data['title'] );
+			$this->assertTrue( $data['enabled'] );
+			if ( null === $cost ) {
+				$this->assertArrayNotHasKey( 'cost', $data['settings'] );
+			} else {
+				$this->assertSame( $cost, $data['settings']['cost']['value'] );
+			}
+
+			$item_path = $collection_path . '/' . $instance_id;
+			$this->assertSame( rest_url( $item_path ), $data['_links']['self'][0]['href'] );
+			$this->assertSame( rest_url( $collection_path ), $data['_links']['collection'][0]['href'] );
+
+			$response = $this->server->dispatch( new WP_REST_Request( 'GET', $item_path ) );
+			$this->assertSame( 200, $response->get_status() );
+			$this->assertSame( $instance_id, $response->get_data()['instance_id'] );
+			$this->assertSame( $method_id, $response->get_data()['method_id'] );
+			$this->assertSame( $method_title, $response->get_data()['title'] );
+			$this->assertTrue( $response->get_data()['enabled'] );
+
+			$fresh_zone = new WC_Shipping_Zone( $zone_id );
+			$methods    = $fresh_zone->get_shipping_methods();
+			$this->assertArrayHasKey( $instance_id, $methods );
+			$this->assertSame( $method_id, $methods[ $instance_id ]->id );
+			$this->assertSame( 'yes', $methods[ $instance_id ]->enabled );
+			$this->assertSame( $method_title, $methods[ $instance_id ]->instance_settings['title'] );
+			if ( null !== $cost ) {
+				$this->assertSame( $cost, $methods[ $instance_id ]->instance_settings['cost'] );
+			}
+
+			$delete_request = new WP_REST_Request( 'DELETE', $item_path );
+			$delete_request->set_param( 'force', true );
+			$response = $this->server->dispatch( $delete_request );
+			$this->assertSame( 200, $response->get_status() );
+			$this->assertSame( $instance_id, $response->get_data()['instance_id'] );
+			$this->assertSame( 404, $this->server->dispatch( new WP_REST_Request( 'GET', $item_path ) )->get_status() );
+			$this->assertArrayNotHasKey( $instance_id, ( new WC_Shipping_Zone( $zone_id ) )->get_shipping_methods() );
+			$instance_id = 0;
+		} finally {
+			if ( $zone_id > 0 ) {
+				$fresh_zone = new WC_Shipping_Zone( $zone_id );
+				if ( $instance_id > 0 && isset( $fresh_zone->get_shipping_methods()[ $instance_id ] ) ) {
+					$fresh_zone->delete_shipping_method( $instance_id );
+				}
+				WC_Shipping_Zones::delete_zone( $zone_id );
+			}
+		}
+	}
+
+	/**
+	 * Core shipping methods and optional instance costs.
+	 *
+	 * @return array
+	 */
+	public function core_shipping_method_provider(): array {
+		return array(
+			'flat rate'     => array( 'flat_rate', 'Flat rate', '10' ),
+			'free shipping' => array( 'free_shipping', 'Free shipping', null ),
+			'local pickup'  => array( 'local_pickup', 'Local pickup', '30' ),
+		);
+	}
+
+	/**
 	 * Test getting all shipping methods.
 	 *
 	 * @since 3.5.0
@@ -154,5 +301,23 @@ class Shipping_Methods extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'title', $properties );
 		$this->assertArrayHasKey( 'description', $properties );
+	}
+
+	/**
+	 * Return the exact methods registered across a route's handlers.
+	 *
+	 * @param array $handlers Registered route handlers.
+	 * @return string[]
+	 */
+	private function get_registered_methods( array $handlers ): array {
+		$methods = array();
+		foreach ( $handlers as $handler ) {
+			foreach ( array_keys( $handler['methods'] ) as $method ) {
+				$methods[ $method ] = true;
+			}
+		}
+		ksort( $methods );
+
+		return array_map( 'strval', array_keys( $methods ) );
 	}
 }
