@@ -435,25 +435,29 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * treated as missing and the provided default is returned instead of
 	 * fatalling on the illegal array access.
 	 *
-	 * @param array  $meta_data The full postmeta array for a post.
-	 * @param string $key       The meta key to read.
-	 * @param mixed  $default_value The value to return when the key is missing or malformed.
-	 * @param int    $post_id       The post ID, used for logging when a malformed entry is skipped.
-	 * @return mixed
 	 * @since 11.1.0
+	 * @param array  $meta_data     The full postmeta array for a post.
+	 * @param string $key           The meta key to read.
+	 * @param int    $post_id       The post ID, used for logging when a malformed entry is skipped.
+	 * @param mixed  $default_value The value to return when the key is missing or malformed.
+	 * @return mixed The stored value for the key, or the default value when the key is missing or malformed.
 	 */
-	protected function get_order_meta_value( array $meta_data, string $key, $default_value = '', int $post_id = 0 ) {
-		if ( isset( $meta_data[ $key ] ) && is_array( $meta_data[ $key ] ) && array_key_exists( 0, $meta_data[ $key ] ) ) {
+	protected function get_order_meta_value( $meta_data, string $key, int $post_id = 0, $default_value = '' ) {
+		if ( is_array( $meta_data ) && isset( $meta_data[ $key ] ) && is_array( $meta_data[ $key ] ) && array_key_exists( 0, $meta_data[ $key ] ) ) {
 			return $meta_data[ $key ][0];
 		}
 
-		if ( isset( $meta_data[ $key ] ) ) {
+		if ( is_array( $meta_data ) && isset( $meta_data[ $key ] ) ) {
 			wc_get_logger()->warning(
 				sprintf(
-					/* translators: 1: postmeta key, 2: post ID */
 					'Skipping malformed postmeta entry "%1$s" for post ID %2$d while reading order data.',
 					$key,
 					$post_id
+				),
+				array(
+					'source'  => 'woocommerce-order-data-store',
+					'meta'    => $key,
+					'post_id' => $post_id,
 				)
 			);
 		}
@@ -473,19 +477,19 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 		$meta_data = get_post_meta( $id );
 
-		$prices_include_tax = $this->get_order_meta_value( $meta_data, '_prices_include_tax', null, $id );
+		$prices_include_tax = $this->get_order_meta_value( $meta_data, '_prices_include_tax', $id, null );
 
 		$this->set_order_props(
 			$order,
 			array(
-				'currency'           => $this->get_order_meta_value( $meta_data, '_order_currency', '', $id ),
-				'discount_total'     => $this->get_order_meta_value( $meta_data, '_cart_discount', '', $id ),
-				'discount_tax'       => $this->get_order_meta_value( $meta_data, '_cart_discount_tax', '', $id ),
-				'shipping_total'     => $this->get_order_meta_value( $meta_data, '_order_shipping', '', $id ),
-				'shipping_tax'       => $this->get_order_meta_value( $meta_data, '_order_shipping_tax', '', $id ),
-				'cart_tax'           => $this->get_order_meta_value( $meta_data, '_order_tax', '', $id ),
-				'total'              => $this->get_order_meta_value( $meta_data, '_order_total', '', $id ),
-				'version'            => $this->get_order_meta_value( $meta_data, '_order_version', '', $id ),
+				'currency'           => $this->get_order_meta_value( $meta_data, '_order_currency', $id ),
+				'discount_total'     => $this->get_order_meta_value( $meta_data, '_cart_discount', $id ),
+				'discount_tax'       => $this->get_order_meta_value( $meta_data, '_cart_discount_tax', $id ),
+				'shipping_total'     => $this->get_order_meta_value( $meta_data, '_order_shipping', $id ),
+				'shipping_tax'       => $this->get_order_meta_value( $meta_data, '_order_shipping_tax', $id ),
+				'cart_tax'           => $this->get_order_meta_value( $meta_data, '_order_tax', $id ),
+				'total'              => $this->get_order_meta_value( $meta_data, '_order_total', $id ),
+				'version'            => $this->get_order_meta_value( $meta_data, '_order_version', $id ),
 				'prices_include_tax' => null !== $prices_include_tax ? 'yes' === $prices_include_tax : 'yes' === get_option( 'woocommerce_prices_include_tax' ),
 			)
 		);
@@ -494,7 +498,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		foreach ( $order->get_extra_data_keys() as $key ) {
 			$function = 'set_' . $key;
 			if ( is_callable( array( $order, $function ) ) ) {
-				$order->{$function}( $this->get_order_meta_value( $meta_data, '_' . $key, '', $id ) );
+				$order->{$function}( $this->get_order_meta_value( $meta_data, '_' . $key, $id ) );
 			}
 		}
 	}

@@ -130,59 +130,59 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		$post_meta = get_post_meta( $id );
 
-		$date_completed = $this->get_order_meta_value( $post_meta, '_date_completed', '', $id );
-		$date_paid      = $this->get_order_meta_value( $post_meta, '_date_paid', '', $id );
+		$date_completed = $this->get_order_meta_value( $post_meta, '_date_completed', $id );
+		$date_paid      = $this->get_order_meta_value( $post_meta, '_date_paid', $id );
 
 		if ( ! $date_completed ) {
-			$date_completed = $this->get_order_meta_value( $post_meta, '_completed_date', '', $id );
+			$date_completed = $this->get_order_meta_value( $post_meta, '_completed_date', $id );
 		}
 
 		if ( ! $date_paid ) {
-			$date_paid = $this->get_order_meta_value( $post_meta, '_paid_date', '', $id );
+			$date_paid = $this->get_order_meta_value( $post_meta, '_paid_date', $id );
 		}
 
 		$order->set_props(
 			array(
-				'order_key'                    => $this->get_order_meta_value( $post_meta, '_order_key', '', $id ),
-				'customer_id'                  => $this->get_order_meta_value( $post_meta, '_customer_user', '', $id ),
-				'billing_first_name'           => $this->get_order_meta_value( $post_meta, '_billing_first_name', '', $id ),
-				'billing_last_name'            => $this->get_order_meta_value( $post_meta, '_billing_last_name', '', $id ),
-				'billing_company'              => $this->get_order_meta_value( $post_meta, '_billing_company', '', $id ),
-				'billing_address_1'            => $this->get_order_meta_value( $post_meta, '_billing_address_1', '', $id ),
-				'billing_address_2'            => $this->get_order_meta_value( $post_meta, '_billing_address_2', '', $id ),
-				'billing_city'                 => $this->get_order_meta_value( $post_meta, '_billing_city', '', $id ),
-				'billing_state'                => $this->get_order_meta_value( $post_meta, '_billing_state', '', $id ),
-				'billing_postcode'             => $this->get_order_meta_value( $post_meta, '_billing_postcode', '', $id ),
-				'billing_country'              => $this->get_order_meta_value( $post_meta, '_billing_country', '', $id ),
-				'billing_email'                => $this->get_order_meta_value( $post_meta, '_billing_email', '', $id ),
-				'billing_phone'                => $this->get_order_meta_value( $post_meta, '_billing_phone', '', $id ),
-				'shipping_first_name'          => $this->get_order_meta_value( $post_meta, '_shipping_first_name', '', $id ),
-				'shipping_last_name'           => $this->get_order_meta_value( $post_meta, '_shipping_last_name', '', $id ),
-				'shipping_company'             => $this->get_order_meta_value( $post_meta, '_shipping_company', '', $id ),
-				'shipping_address_1'           => $this->get_order_meta_value( $post_meta, '_shipping_address_1', '', $id ),
-				'shipping_address_2'           => $this->get_order_meta_value( $post_meta, '_shipping_address_2', '', $id ),
-				'shipping_city'                => $this->get_order_meta_value( $post_meta, '_shipping_city', '', $id ),
-				'shipping_state'               => $this->get_order_meta_value( $post_meta, '_shipping_state', '', $id ),
-				'shipping_postcode'            => $this->get_order_meta_value( $post_meta, '_shipping_postcode', '', $id ),
-				'shipping_country'             => $this->get_order_meta_value( $post_meta, '_shipping_country', '', $id ),
-				'shipping_phone'               => $this->get_order_meta_value( $post_meta, '_shipping_phone', '', $id ),
-				'payment_method'               => $this->get_order_meta_value( $post_meta, '_payment_method', '', $id ),
-				'payment_method_title'         => $this->get_order_meta_value( $post_meta, '_payment_method_title', '', $id ),
-				'transaction_id'               => $this->get_order_meta_value( $post_meta, '_transaction_id', '', $id ),
-				'customer_ip_address'          => $this->get_order_meta_value( $post_meta, '_customer_ip_address', '', $id ),
-				'customer_user_agent'          => $this->get_order_meta_value( $post_meta, '_customer_user_agent', '', $id ),
-				'created_via'                  => $this->get_order_meta_value( $post_meta, '_created_via', '', $id ),
+				'order_key'                    => $this->get_order_meta_value( $post_meta, '_order_key', $id ),
+				'customer_id'                  => $this->get_order_meta_value( $post_meta, '_customer_user', $id ),
+				'billing_first_name'           => $this->get_order_meta_value( $post_meta, '_billing_first_name', $id ),
+				'billing_last_name'            => $this->get_order_meta_value( $post_meta, '_billing_last_name', $id ),
+				'billing_company'              => $this->get_order_meta_value( $post_meta, '_billing_company', $id ),
+				'billing_address_1'            => $this->get_order_meta_value( $post_meta, '_billing_address_1', $id ),
+				'billing_address_2'            => $this->get_order_meta_value( $post_meta, '_billing_address_2', $id ),
+				'billing_city'                 => $this->get_order_meta_value( $post_meta, '_billing_city', $id ),
+				'billing_state'                => $this->get_order_meta_value( $post_meta, '_billing_state', $id ),
+				'billing_postcode'             => $this->get_order_meta_value( $post_meta, '_billing_postcode', $id ),
+				'billing_country'              => $this->get_order_meta_value( $post_meta, '_billing_country', $id ),
+				'billing_email'                => $this->get_order_meta_value( $post_meta, '_billing_email', $id ),
+				'billing_phone'                => $this->get_order_meta_value( $post_meta, '_billing_phone', $id ),
+				'shipping_first_name'          => $this->get_order_meta_value( $post_meta, '_shipping_first_name', $id ),
+				'shipping_last_name'           => $this->get_order_meta_value( $post_meta, '_shipping_last_name', $id ),
+				'shipping_company'             => $this->get_order_meta_value( $post_meta, '_shipping_company', $id ),
+				'shipping_address_1'           => $this->get_order_meta_value( $post_meta, '_shipping_address_1', $id ),
+				'shipping_address_2'           => $this->get_order_meta_value( $post_meta, '_shipping_address_2', $id ),
+				'shipping_city'                => $this->get_order_meta_value( $post_meta, '_shipping_city', $id ),
+				'shipping_state'               => $this->get_order_meta_value( $post_meta, '_shipping_state', $id ),
+				'shipping_postcode'            => $this->get_order_meta_value( $post_meta, '_shipping_postcode', $id ),
+				'shipping_country'             => $this->get_order_meta_value( $post_meta, '_shipping_country', $id ),
+				'shipping_phone'               => $this->get_order_meta_value( $post_meta, '_shipping_phone', $id ),
+				'payment_method'               => $this->get_order_meta_value( $post_meta, '_payment_method', $id ),
+				'payment_method_title'         => $this->get_order_meta_value( $post_meta, '_payment_method_title', $id ),
+				'transaction_id'               => $this->get_order_meta_value( $post_meta, '_transaction_id', $id ),
+				'customer_ip_address'          => $this->get_order_meta_value( $post_meta, '_customer_ip_address', $id ),
+				'customer_user_agent'          => $this->get_order_meta_value( $post_meta, '_customer_user_agent', $id ),
+				'created_via'                  => $this->get_order_meta_value( $post_meta, '_created_via', $id ),
 				'date_completed'               => $date_completed,
 				'date_paid'                    => $date_paid,
-				'cart_hash'                    => $this->get_order_meta_value( $post_meta, '_cart_hash', '', $id ),
+				'cart_hash'                    => $this->get_order_meta_value( $post_meta, '_cart_hash', $id ),
 				'customer_note'                => $post_object->post_excerpt,
 
 				// Operational data props.
-				'order_stock_reduced'          => $this->get_order_meta_value( $post_meta, '_order_stock_reduced', '', $id ),
-				'download_permissions_granted' => $this->get_order_meta_value( $post_meta, '_download_permissions_granted', '', $id ),
-				'new_order_email_sent'         => $this->get_order_meta_value( $post_meta, '_new_order_email_sent', '', $id ),
-				'recorded_sales'               => wc_string_to_bool( $this->get_order_meta_value( $post_meta, '_recorded_sales', '', $id ) ),
-				'recorded_coupon_usage_counts' => $this->get_order_meta_value( $post_meta, '_recorded_coupon_usage_counts', '', $id ),
+				'order_stock_reduced'          => $this->get_order_meta_value( $post_meta, '_order_stock_reduced', $id ),
+				'download_permissions_granted' => $this->get_order_meta_value( $post_meta, '_download_permissions_granted', $id ),
+				'new_order_email_sent'         => $this->get_order_meta_value( $post_meta, '_new_order_email_sent', $id ),
+				'recorded_sales'               => wc_string_to_bool( $this->get_order_meta_value( $post_meta, '_recorded_sales', $id ) ),
+				'recorded_coupon_usage_counts' => $this->get_order_meta_value( $post_meta, '_recorded_coupon_usage_counts', $id ),
 			)
 		);
 
@@ -1364,7 +1364,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param array    $post_meta The post meta data array.
 	 */
 	private function read_cogs_data( $order, $post_meta ) {
-		$cogs_value = (float) $this->get_order_meta_value( $post_meta, '_cogs_total_value', 0, $order->get_id() );
+		$cogs_value = (float) $this->get_order_meta_value( $post_meta, '_cogs_total_value', $order->get_id(), 0 );
 
 		/**
 		 * Filter to customize the Cost of Goods Sold value that gets loaded for a given order.
