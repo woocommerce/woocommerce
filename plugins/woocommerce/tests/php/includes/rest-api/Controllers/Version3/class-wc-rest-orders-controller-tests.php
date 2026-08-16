@@ -413,6 +413,93 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Search terms accepted by the registered V3 orders collection route.
+	 *
+	 * @return array<string, array{string|null, string, bool}>
+	 */
+	public function order_search_matrix(): array {
+		return array(
+			'billing first name'  => array( 'billing_first_name', 'S36BillingFirstName', true ),
+			'billing company'     => array( 'billing_company', 'S36BillingCompany', true ),
+			'billing address 2'   => array( 'billing_address_2', 'S36BillingAddressTwo', true ),
+			'billing city'        => array( 'billing_city', 'S36BillingCity', true ),
+			'billing postcode'    => array( 'billing_postcode', 'S36BillingPostcode', true ),
+			'billing phone'       => array( 'billing_phone', 'S36BillingPhone', true ),
+			'billing state'       => array( 'billing_state', 'S36BillingState', true ),
+			'shipping first name' => array( 'shipping_first_name', 'S36ShippingFirstName', true ),
+			'shipping last name'  => array( 'shipping_last_name', 'S36ShippingLastName', true ),
+			'shipping address 2'  => array( 'shipping_address_2', 'S36ShippingAddressTwo', true ),
+			'shipping city'       => array( 'shipping_city', 'S36ShippingCity', true ),
+			'shipping postcode'   => array( 'shipping_postcode', 'S36ShippingPostcode', true ),
+			'shipping state'      => array( 'shipping_state', 'S36ShippingState', true ),
+			'order ID'            => array( null, 'order-id', true ),
+			'no matches'          => array( null, 'S36NoOrderMatchesThisTerm', false ),
+		);
+	}
+
+	/**
+	 * @testdox Searching the registered V3 orders route returns the exact matching order.
+	 *
+	 * @dataProvider order_search_matrix
+	 *
+	 * @param string|null $field          Order field containing the search term, or null for an ID/no-match search.
+	 * @param string      $search_term    Search term, replaced with the target ID for the order-ID row.
+	 * @param bool        $matches_target Whether the target order should be returned.
+	 */
+	public function test_orders_search_matrix( ?string $field, string $search_term, bool $matches_target ): void {
+		$order_ids        = array();
+		$disable_hpos_fts = static function () {
+			return 'no';
+		};
+
+		add_filter( 'pre_option_woocommerce_hpos_fts_index_enabled', $disable_hpos_fts );
+
+		try {
+			$target = new WC_Order();
+			$target->set_billing_first_name( 'OrderSearchTargetControl' );
+			if ( null !== $field ) {
+				$setter = 'set_' . $field;
+				$target->{$setter}( $search_term );
+			}
+			$order_ids[] = $target->save();
+
+			$decoy = new WC_Order();
+			$decoy->set_billing_first_name( 'OrderSearchDecoyControl' );
+			$order_ids[] = $decoy->save();
+
+			if ( $matches_target && null === $field ) {
+				$search_term = (string) $target->get_id();
+			}
+
+			$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+			$request->set_param( 'search', $search_term );
+			$response = $this->server->dispatch( $request );
+			$data     = $response->get_data();
+
+			$this->assertSame( 200, $response->get_status(), 'Searching orders should return HTTP 200.' );
+			$this->assertIsArray( $data, 'The collection response should be an array.' );
+
+			if ( $matches_target ) {
+				$response_ids = array_column( $data, 'id' );
+				$this->assertCount( 1, $data, 'Only the target order should match the search term. Returned IDs: ' . wp_json_encode( $response_ids ) );
+				$this->assertSame( array( $target->get_id() ), $response_ids, 'The response should contain exactly the target order ID.' );
+				$this->assertNotContains( $decoy->get_id(), $response_ids, 'The decoy order should be excluded.' );
+			} else {
+				$this->assertSame( array(), $data, 'An unmatched search term should return an empty collection.' );
+			}
+		} finally {
+			remove_filter( 'pre_option_woocommerce_hpos_fts_index_enabled', $disable_hpos_fts );
+
+			foreach ( array_reverse( $order_ids ) as $order_id ) {
+				$order = wc_get_order( $order_id );
+				if ( $order ) {
+					$order->delete( true );
+				}
+			}
+		}
+	}
+
+	/**
 	 * Tests that the created_via parameter is properly stored when creating orders.
 	 */
 	public function test_order_created_via_param(): void {
