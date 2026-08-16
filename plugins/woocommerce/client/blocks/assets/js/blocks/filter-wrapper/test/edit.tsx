@@ -2,7 +2,7 @@
  * External dependencies
  */
 import React from '@wordpress/element';
-import { cleanup, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { InnerBlocks } from '@wordpress/block-editor';
 
@@ -10,6 +10,7 @@ import { InnerBlocks } from '@wordpress/block-editor';
  * Internal dependencies
  */
 import FilterWrapperEdit from '../edit';
+import PriceFilterEdit from '../../price-filter/edit';
 import RatingFilterEdit from '../../rating-filter/edit';
 import StockFilterEdit from '../../stock-filter/edit';
 
@@ -38,14 +39,15 @@ jest.mock( '@wordpress/components', () => {
 		Notice: jest.fn( ( { children } ) => <div>{ children }</div> ),
 		PanelBody: jest.fn( ( { children } ) => <div>{ children }</div> ),
 		ToggleControl: jest.fn( ( { label, checked, onChange } ) => (
-			<label>
+			<span>
 				<input
 					type="checkbox"
+					aria-label={ label }
 					checked={ checked }
 					onChange={ ( event ) => onChange( event.target.checked ) }
 				/>
 				{ label }
-			</label>
+			</span>
 		) ),
 		withSpokenMessages: jest.fn( ( Component ) => Component ),
 		__experimentalToggleGroupControl: jest.fn(
@@ -63,14 +65,15 @@ jest.mock( '@wordpress/components', () => {
 		),
 		__experimentalToggleGroupControlOption: jest.fn(
 			( { label, onSelect, selectedValue, value } ) => (
-				<label>
+				<span>
 					<input
 						type="radio"
+						aria-label={ label }
 						checked={ selectedValue === value }
 						onChange={ () => onSelect( value ) }
 					/>
 					{ label }
-				</label>
+				</span>
 			)
 		),
 		__experimentalToolsPanel: jest.fn( ( { children } ) => (
@@ -98,6 +101,11 @@ jest.mock( '@woocommerce/editor-components/upgrade-downgrade-notice', () => ( {
 	) ),
 } ) );
 
+jest.mock( '@woocommerce/block-settings', () => ( {
+	...jest.requireActual( '@woocommerce/block-settings' ),
+	blocksConfig: { productCount: 1 },
+} ) );
+
 jest.mock( '@woocommerce/base-context/hooks', () => {
 	const queryState = {};
 	const queryValues: string[] = [];
@@ -111,6 +119,17 @@ jest.mock( '@woocommerce/base-context/hooks', () => {
 			{ status: 'instock', count: 2 },
 			{ status: 'outofstock', count: 1 },
 		],
+		price_range: {
+			min_price: '100',
+			max_price: '5000',
+			currency_code: 'USD',
+			currency_symbol: '$',
+			currency_thousand_separator: ',',
+			currency_decimal_separator: '.',
+			currency_minor_unit: 2,
+			currency_prefix: '$',
+			currency_suffix: '',
+		},
 	};
 
 	return {
@@ -150,13 +169,16 @@ jest.mock( '@wordpress/a11y', () => ( {
 } ) );
 
 afterEach( () => {
-	cleanup();
 	jest.clearAllMocks();
 	jest.restoreAllMocks();
 } );
 
 describe( 'legacy filter editor ownership', () => {
 	it.each( [
+		{
+			filterType: 'price-filter',
+			heading: 'Filter by price',
+		},
 		{
 			filterType: 'rating-filter',
 			heading: 'Filter by rating',
@@ -202,6 +224,86 @@ describe( 'legacy filter editor ownership', () => {
 				{ heading: '', lock: { remove: true } },
 			],
 		] );
+	} );
+
+	it( 'maps Price display and Apply controls to preview behavior', async () => {
+		const user = userEvent.setup();
+		const setAttributes = jest.fn();
+		const attributes = {
+			heading: '',
+			headingLevel: 3,
+			showInputFields: true,
+			inlineInput: false,
+			showFilterButton: false,
+		};
+		const PriceEdit = PriceFilterEdit as unknown as React.ComponentType<
+			Record< string, unknown >
+		>;
+		const renderEdit = ( editAttributes: Record< string, unknown > ) => (
+			<PriceEdit
+				attributes={ editAttributes }
+				clientId="filter-client-id"
+				setAttributes={ setAttributes }
+			/>
+		);
+
+		const { rerender } = render( renderEdit( attributes ) );
+
+		expect(
+			await screen.findByRole( 'textbox', {
+				name: 'Filter products by minimum price',
+			} )
+		).toBeVisible();
+		expect(
+			screen.getByRole( 'textbox', {
+				name: 'Filter products by maximum price',
+			} )
+		).toBeVisible();
+		expect(
+			screen.queryByRole( 'button', { name: 'Apply price filter' } )
+		).not.toBeInTheDocument();
+
+		await user.click( screen.getByRole( 'radio', { name: 'Text' } ) );
+		expect( setAttributes ).toHaveBeenCalledTimes( 1 );
+		expect( setAttributes ).toHaveBeenCalledWith( {
+			showInputFields: false,
+		} );
+
+		rerender( renderEdit( { ...attributes, showInputFields: false } ) );
+		expect(
+			screen.queryByRole( 'textbox', {
+				name: 'Filter products by minimum price',
+			} )
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'textbox', {
+				name: 'Filter products by maximum price',
+			} )
+		).not.toBeInTheDocument();
+		expect( screen.getByText( '$1' ) ).toBeVisible();
+		expect( screen.getByText( '$50' ) ).toBeVisible();
+
+		setAttributes.mockClear();
+		await user.click(
+			screen.getByRole( 'checkbox', {
+				name: "Show 'Apply filters' button",
+			} )
+		);
+		expect( setAttributes ).toHaveBeenCalledTimes( 1 );
+		expect( setAttributes ).toHaveBeenCalledWith( {
+			showFilterButton: true,
+		} );
+
+		rerender(
+			renderEdit( {
+				...attributes,
+				showInputFields: false,
+				showFilterButton: true,
+			} )
+		);
+		expect(
+			await screen.findByRole( 'button', { name: 'Apply price filter' } )
+		).toBeVisible();
 	} );
 
 	it.each( [
