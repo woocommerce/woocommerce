@@ -1,182 +1,241 @@
 /**
+ * External dependencies
+ */
+import type { APIRequestContext } from '@playwright/test';
+
+/**
  * Internal dependencies
  */
 import { test, expect } from '../../../fixtures/api-tests-fixtures';
-import { refund } from '../../../data';
 
-let productId: number;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let expectedRefund: any;
-let orderId: number;
+const positiveSafeInteger = ( value: unknown ): number => {
+	expect( Number.isSafeInteger( value ) ).toBe( true );
+	expect( value ).toEqual( expect.any( Number ) );
+	expect( value ).toBeGreaterThan( 0 );
+	return value as number;
+};
+
+const cleanupRefundFixtures = async (
+	request: APIRequestContext,
+	ids: { productId: number; orderId: number; refundId: number }
+): Promise< unknown[] > => {
+	const paths: string[] = [];
+	if ( ids.refundId > 0 && ids.orderId > 0 ) {
+		paths.push(
+			`./wp-json/wc/v3/orders/${ ids.orderId }/refunds/${ ids.refundId }`
+		);
+	}
+	if ( ids.orderId > 0 ) {
+		paths.push( `./wp-json/wc/v3/orders/${ ids.orderId }` );
+	}
+	if ( ids.productId > 0 ) {
+		paths.push( `./wp-json/wc/v3/products/${ ids.productId }` );
+	}
+
+	const errors: unknown[] = [];
+	for ( const path of paths ) {
+		try {
+			const response = await request.delete( path, {
+				data: { force: true },
+			} );
+			if ( ! [ 200, 404 ].includes( response.status() ) ) {
+				throw new Error(
+					`Cleanup failed with HTTP ${ response.status() } for ${ path }`
+				);
+			}
+		} catch ( error ) {
+			errors.push( error );
+		}
+	}
+	return errors;
+};
+
+const throwLifecycleErrors = (
+	primaryError: unknown,
+	cleanupErrors: unknown[]
+) => {
+	if ( primaryError && cleanupErrors.length > 0 ) {
+		throw new AggregateError(
+			[ primaryError, ...cleanupErrors ],
+			'Refund lifecycle and cleanup both failed.'
+		);
+	}
+	if ( primaryError ) {
+		throw primaryError;
+	}
+	if ( cleanupErrors.length > 0 ) {
+		throw new AggregateError( cleanupErrors, 'Refund cleanup failed.' );
+	}
+};
 
 test.describe( 'Refunds API tests', () => {
-	test.beforeAll( async ( { request } ) => {
-		// Create a product and save its product ID
-		const product = {
-			name: 'Simple Product for Refunds API tests',
-			regular_price: '100',
-		};
-		const createProductResponse = await request.post(
-			`./wp-json/wc/v3/products`,
-			{
-				data: product,
-			}
-		);
-		const createProductResponseJSON = await createProductResponse.json();
-		productId = createProductResponseJSON.id;
-		expectedRefund = {
-			...refund,
-			line_items: [
-				{
-					product_id: productId,
-				},
-			],
-		};
-	} );
-
-	test.beforeEach( async ( { request } ) => {
-		const order = {
-			status: 'pending',
-			line_items: [
-				{
-					product_id: productId,
-				},
-			],
-		};
-		const createOrderResponse = await request.post(
-			`./wp-json/wc/v3/orders`,
-			{
-				data: order,
-			}
-		);
-		const createOrderResponseJSON = await createOrderResponse.json();
-		orderId = createOrderResponseJSON.id;
-	} );
-
-	test.afterEach( async ( { request } ) => {
-		await request
-			.delete( `./wp-json/wc/v3/orders/${ orderId }`, {
-				data: { force: true },
-			} )
-			.catch( () => {} );
-	} );
-
-	test.afterAll( async ( { request } ) => {
-		// Cleanup the created product
-		await request.delete( `./wp-json/wc/v3/products/${ productId }`, {
-			data: { force: true },
-		} );
-	} );
-
-	test( 'can create a refund', async ( { request } ) => {
-		const response = await request.post(
-			`./wp-json/wc/v3/orders/${ orderId }/refunds`,
-			{
-				data: expectedRefund,
-			}
-		);
-		const responseJSON = await response.json();
-		expect( response.status() ).toEqual( 201 );
-		expect( responseJSON.id ).toBeDefined();
-		// Verify that the order was refunded.
-		const getOrderResponse = await request.get(
-			`./wp-json/wc/v3/orders/${ orderId }`
-		);
-		const getOrderResponseJSON = await getOrderResponse.json();
-		expect( getOrderResponseJSON.refunds ).toHaveLength( 1 );
-		expect( getOrderResponseJSON.refunds[ 0 ].id ).toEqual(
-			responseJSON.id
-		);
-		expect( getOrderResponseJSON.refunds[ 0 ].reason ).toEqual(
-			expectedRefund.reason
-		);
-		expect( getOrderResponseJSON.refunds[ 0 ].total ).toEqual(
-			`-${ expectedRefund.amount }`
-		);
-	} );
-
-	test( 'can retrieve a refund', async ( { request } ) => {
-		const refundCreateResponse = await request.post(
-			`./wp-json/wc/v3/orders/${ orderId }/refunds`,
-			{
-				data: expectedRefund,
-			}
-		);
-		const refundJSON = await refundCreateResponse.json();
-		const refundGetResponse = await request.get(
-			`./wp-json/wc/v3/orders/${ orderId }/refunds/${ refundJSON.id }`
-		);
-		const responseJSON = await refundGetResponse.json();
-		expect( refundGetResponse.status() ).toEqual( 200 );
-		expect( responseJSON.id ).toEqual( refundJSON.id );
-	} );
-
-	test( 'can retrieve refund info from refund endpoint', async ( {
+	test( 'can round-trip a refund through authenticated installed V3 HTTP', async ( {
 		request,
 	} ) => {
-		const refundCreateResponse = await request.post(
-			`./wp-json/wc/v3/orders/${ orderId }/refunds`,
-			{
-				data: expectedRefund,
-			}
-		);
-		const refundJSON = await refundCreateResponse.json();
-		const refundsListResponse = await request.get(
-			`./wp-json/wc/v3/refunds/`
-		);
-		const responseJSON = await refundsListResponse.json();
-		expect( refundsListResponse.status() ).toEqual( 200 );
-		expect( responseJSON.length ).toBeGreaterThan( 0 );
-		const foundRefund = responseJSON.find(
-			( r ) => r.id === refundJSON.id
-		);
-		expect( foundRefund ).toBeDefined();
-		expect( foundRefund.reason ).toEqual( expectedRefund.reason );
-		expect( foundRefund.amount ).toEqual( expectedRefund.amount );
-	} );
+		let productId = 0;
+		let orderId = 0;
+		let refundId = 0;
+		let primaryError: unknown;
 
-	test( 'can list all refunds', async ( { request } ) => {
-		const refundCreateResponse = await request.post(
-			`./wp-json/wc/v3/orders/${ orderId }/refunds`,
-			{
-				data: expectedRefund,
-			}
-		);
-		const refundJSON = await refundCreateResponse.json();
-		const refundsListResponse = await request.get(
-			`./wp-json/wc/v3/orders/${ orderId }/refunds`
-		);
-		const responseJSON = await refundsListResponse.json();
-		expect( refundsListResponse.status() ).toEqual( 200 );
-		expect( responseJSON ).toHaveLength( 1 );
-		expect( responseJSON[ 0 ].id ).toEqual( refundJSON.id );
-	} );
+		try {
+			const productResponse = await request.post(
+				'./wp-json/wc/v3/products',
+				{
+					data: {
+						name: 'Refund lifecycle product',
+						regular_price: '10.00',
+					},
+				}
+			);
+			const product = await productResponse.json();
+			productId = positiveSafeInteger( product.id );
 
-	test( 'can delete a refund', async ( { request } ) => {
-		const refundCreateResponse = await request.post(
-			`./wp-json/wc/v3/orders/${ orderId }/refunds`,
-			{
-				data: expectedRefund,
-			}
-		);
-		const refundJSON = await refundCreateResponse.json();
-		const refundDeleteResponse = await request.delete(
-			`./wp-json/wc/v3/orders/${ orderId }/refunds/${ refundJSON.id }`,
-			{
+			expect( productResponse.status() ).toBe( 201 );
+
+			const orderResponse = await request.post(
+				'./wp-json/wc/v3/orders',
+				{
+					data: {
+						status: 'completed',
+						line_items: [
+							{
+								product_id: productId,
+								quantity: 1,
+							},
+						],
+					},
+				}
+			);
+			const order = await orderResponse.json();
+			orderId = positiveSafeInteger( order.id );
+
+			expect( orderResponse.status() ).toBe( 201 );
+			expect( order.line_items ).toHaveLength( 1 );
+			const lineItemId = positiveSafeInteger( order.line_items[ 0 ].id );
+
+			const nestedCollectionPath = `./wp-json/wc/v3/orders/${ orderId }/refunds`;
+			const createRefundResponse = await request.post(
+				nestedCollectionPath,
+				{
+					data: {
+						amount: '1.00',
+						reason: 'Late delivery refund.',
+						api_refund: false,
+						api_restock: false,
+						line_items: [
+							{
+								id: lineItemId,
+								quantity: 1,
+								refund_total: 1,
+							},
+						],
+					},
+				}
+			);
+			const createdRefund = await createRefundResponse.json();
+			refundId = positiveSafeInteger( createdRefund.id );
+
+			expect( createRefundResponse.status() ).toBe( 201 );
+			expect( createdRefund.amount ).toBe( '1.00' );
+			expect( createdRefund.reason ).toBe( 'Late delivery refund.' );
+			expect( createdRefund.line_items ).toHaveLength( 1 );
+			expect( createdRefund.line_items[ 0 ] ).toMatchObject( {
+				product_id: productId,
+				total: '-1.00',
+			} );
+
+			const nestedItemPath = `${ nestedCollectionPath }/${ refundId }`;
+			const nestedItemResponse = await request.get( nestedItemPath );
+			expect( nestedItemResponse.status() ).toBe( 200 );
+
+			const nestedItem = await nestedItemResponse.json();
+			const { _links: nestedItemLinks } = nestedItem;
+
+			expect( nestedItem ).toMatchObject( {
+				id: refundId,
+				amount: '1.00',
+				reason: 'Late delivery refund.',
+			} );
+			expect( nestedItem.line_items[ 0 ].product_id ).toBe( productId );
+			expect( nestedItemLinks.self[ 0 ].href ).toContain(
+				`/wp-json/wc/v3/orders/${ orderId }/refunds/${ refundId }`
+			);
+
+			const nestedListResponse =
+				await request.get( nestedCollectionPath );
+			expect( nestedListResponse.status() ).toBe( 200 );
+
+			const nestedList = await nestedListResponse.json();
+
+			expect( nestedList.map( ( refund ) => refund.id ) ).toEqual( [
+				refundId,
+			] );
+
+			const globalListResponse = await request.get(
+				'./wp-json/wc/v3/refunds'
+			);
+			expect( globalListResponse.status() ).toBe( 200 );
+
+			const globalList = await globalListResponse.json();
+			const globalRefund = globalList.find(
+				( candidate ) => candidate.id === refundId
+			);
+
+			expect( globalRefund ).toMatchObject( {
+				id: refundId,
+				parent_id: orderId,
+				amount: '1.00',
+				reason: 'Late delivery refund.',
+			} );
+			const { _links: globalRefundLinks } = globalRefund;
+			expect( globalRefundLinks.collection[ 0 ].href ).toContain(
+				`/wp-json/wc/v3/orders/${ orderId }/refunds`
+			);
+
+			const parentResponse = await request.get(
+				`./wp-json/wc/v3/orders/${ orderId }`
+			);
+			expect( parentResponse.status() ).toBe( 200 );
+
+			const parent = await parentResponse.json();
+
+			expect( parent.refunds ).toEqual( [
+				expect.objectContaining( {
+					id: refundId,
+					reason: 'Late delivery refund.',
+					total: '-1.00',
+				} ),
+			] );
+
+			const deleteResponse = await request.delete( nestedItemPath, {
 				data: { force: true },
-			}
-		);
-		const responseJSON = await refundDeleteResponse.json();
-		expect( refundDeleteResponse.status() ).toEqual( 200 );
-		expect( responseJSON.id ).toEqual( refundJSON.id );
-		const refundRetrieveResponse = await request.get(
-			`./wp-json/wc/v3/orders/${ orderId }/refunds/${ refundJSON.id }`
-		);
-		expect( refundRetrieveResponse.status() ).toEqual( 404 );
-		const orderRetrieveResponse = await request.get(
-			`./wp-json/wc/v3/orders/${ orderId }`
-		);
-		const retrieveOrderResponseJSON = await orderRetrieveResponse.json();
-		expect( retrieveOrderResponseJSON.refunds ).toHaveLength( 0 );
+			} );
+			expect( deleteResponse.status() ).toBe( 200 );
+
+			const deletedRefund = await deleteResponse.json();
+
+			expect( deletedRefund.id ).toBe( refundId );
+			expect( ( await request.get( nestedItemPath ) ).status() ).toBe(
+				404
+			);
+
+			const freshParentResponse = await request.get(
+				`./wp-json/wc/v3/orders/${ orderId }`
+			);
+			expect( freshParentResponse.status() ).toBe( 200 );
+
+			const freshParent = await freshParentResponse.json();
+
+			expect( freshParent.refunds ).toEqual( [] );
+		} catch ( error ) {
+			primaryError = error;
+		}
+
+		const cleanupErrors = await cleanupRefundFixtures( request, {
+			productId,
+			orderId,
+			refundId,
+		} );
+		throwLifecycleErrors( primaryError, cleanupErrors );
 	} );
 } );
