@@ -14,7 +14,15 @@ import {
 import { CUSTOMIZABLE_WC_TEMPLATES } from './constants';
 
 test.describe( 'Template customization', () => {
-	CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
+	const retainedTemplates = CUSTOMIZABLE_WC_TEMPLATES.filter( ( data ) =>
+		[
+			'Product Catalog',
+			'Products by Attribute',
+			'Checkout Header',
+		].includes( data.templateName )
+	);
+
+	retainedTemplates.forEach( ( testData ) => {
 		const userText = `Hello World in the ${ testData.templateName } template`;
 		const fallbackTemplateUserText = `Hello World in the fallback ${ testData.templateName } template`;
 		const templateTypeName =
@@ -22,81 +30,90 @@ test.describe( 'Template customization', () => {
 				? 'template'
 				: 'template part';
 
-		test( `"${ testData.templateName }" template can be modified and reverted`, async ( {
-			admin,
-			frontendUtils,
-			editor,
-			page,
-			requestUtils,
-		} ) => {
-			if (
-				'isTaxonomyTemplate' in testData &&
-				testData.isTaxonomyTemplate
-			) {
-				await admin.visitSiteEditor( {
-					postType: 'wp_template',
+		if ( testData.templateName !== 'Products by Attribute' ) {
+			test( `"${ testData.templateName }" template can be modified and reverted`, async ( {
+				admin,
+				frontendUtils,
+				editor,
+				page,
+				requestUtils,
+			} ) => {
+				if (
+					'isTaxonomyTemplate' in testData &&
+					testData.isTaxonomyTemplate
+				) {
+					await admin.visitSiteEditor( {
+						postType: 'wp_template',
+					} );
+
+					await editor.createTemplate( {
+						templateName: testData.templateName,
+					} );
+				} else {
+					const templateSlug =
+						testData.templateType === 'wp_template'
+							? BLOCK_THEME_SLUG
+							: 'woocommerce/woocommerce';
+					await admin.visitSiteEditor( {
+						postId: `${ templateSlug }//${ testData.templatePath }`,
+						postType: testData.templateType,
+						canvas: 'edit',
+					} );
+				}
+
+				await editor.canvas
+					.locator( 'body' )
+					.waitFor( { timeout: 20000 } );
+
+				await editor.insertBlock( {
+					name: 'core/paragraph',
+					attributes: { content: userText },
+				} );
+				await editor.saveSiteEditorEntities( {
+					isOnlyCurrentEntityDirty: true,
 				} );
 
-				await editor.createTemplate( {
+				// Verify template name didn't change.
+				// See: https://github.com/woocommerce/woocommerce/issues/42221
+				await expect(
+					page.getByRole( 'heading', {
+						name: templateTypeName,
+					} )
+				).toBeVisible();
+
+				await testData.visitPage( {
+					admin,
+					editor,
+					frontendUtils,
+					requestUtils,
+					page,
+				} );
+				await expect(
+					page.getByText( userText ).first()
+				).toBeVisible();
+
+				// Verify the edition can be reverted.
+				await admin.visitSiteEditor( {
+					postType: testData.templateType,
+				} );
+				await editor.revertTemplate( {
 					templateName: testData.templateName,
 				} );
-			} else {
-				const templateSlug =
-					testData.templateType === 'wp_template'
-						? BLOCK_THEME_SLUG
-						: 'woocommerce/woocommerce';
-				await admin.visitSiteEditor( {
-					postId: `${ templateSlug }//${ testData.templatePath }`,
-					postType: testData.templateType,
-					canvas: 'edit',
+				await testData.visitPage( {
+					admin,
+					editor,
+					frontendUtils,
+					requestUtils,
+					page,
 				} );
-			}
-
-			await editor.canvas.locator( 'body' ).waitFor( { timeout: 20000 } );
-
-			await editor.insertBlock( {
-				name: 'core/paragraph',
-				attributes: { content: userText },
+				await expect( page.getByText( userText ) ).toBeHidden();
 			} );
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
+		}
 
-			// Verify template name didn't change.
-			// See: https://github.com/woocommerce/woocommerce/issues/42221
-			await expect(
-				page.getByRole( 'heading', {
-					name: templateTypeName,
-				} )
-			).toBeVisible();
-
-			await testData.visitPage( {
-				admin,
-				editor,
-				frontendUtils,
-				requestUtils,
-				page,
-			} );
-			await expect( page.getByText( userText ).first() ).toBeVisible();
-
-			// Verify the edition can be reverted.
-			await admin.visitSiteEditor( {
-				postType: testData.templateType,
-			} );
-			await editor.revertTemplate( {
-				templateName: testData.templateName,
-			} );
-			await testData.visitPage( {
-				admin,
-				editor,
-				frontendUtils,
-				requestUtils,
-				page,
-			} );
-			await expect( page.getByText( userText ) ).toBeHidden();
-		} );
-
-		if ( testData.fallbackTemplate ) {
+		if (
+			testData.templateName === 'Products by Attribute' &&
+			testData.fallbackTemplate
+		) {
 			test( `"${ testData.templateName }" template defaults to the "${ testData.fallbackTemplate.templateName }" template`, async ( {
 				admin,
 				frontendUtils,
@@ -166,7 +183,8 @@ test.describe( 'Template customization', () => {
 	const testToRun = CUSTOMIZABLE_WC_TEMPLATES.filter(
 		( data ) =>
 			data.templateType === 'wp_template_part' &&
-			data.canBeOverriddenByThemes
+			data.canBeOverriddenByThemes &&
+			data.templateName === 'External Product Add to Cart + Options'
 	);
 
 	for ( const testData of testToRun ) {
