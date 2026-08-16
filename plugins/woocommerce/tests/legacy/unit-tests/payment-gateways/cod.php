@@ -72,17 +72,69 @@ class WC_Tests_Payment_Gateway_COD extends WC_Unit_Test_Case {
 
 	/**
 	 * Make sure that the options for the "enable_for_methods" setting are loaded for API requests that need it.
+	 *
+	 * @dataProvider provide_payment_gateway_rest_routes
+	 * @param string $rest_route REST route under test.
 	 */
-	public function test_method_options_loaded_for_correct_api() {
-		Constants::set_constant( 'REST_REQUEST', true );
-		$GLOBALS['wp']->query_vars['rest_route'] = '/wc/v2/payment_gateways';
+	public function test_method_options_loaded_for_correct_api( $rest_route ) {
+		$had_rest_route            = array_key_exists( 'rest_route', $GLOBALS['wp']->query_vars );
+		$original_route            = $had_rest_route ? $GLOBALS['wp']->query_vars['rest_route'] : null;
+		$shipping                  = WC()->shipping();
+		$original_shipping_methods = $shipping->shipping_methods;
+		$pickup_location           = null;
+		$register_pickup_location  = static function ( $methods ) {
+			$methods['pickup_location'] = 'Automattic\WooCommerce\Blocks\Shipping\PickupLocation';
+			return $methods;
+		};
 
-		$gateway = new WC_Gateway_COD();
+		try {
+			add_filter( 'woocommerce_shipping_methods', $register_pickup_location );
+			$shipping->unregister_shipping_methods();
+			Constants::set_constant( 'REST_REQUEST', true );
+			$GLOBALS['wp']->query_vars['rest_route'] = $rest_route;
 
-		$form_fields = $gateway->get_form_fields();
+			$gateway         = new WC_Gateway_COD();
+			$pickup_location = $shipping->shipping_methods['pickup_location'] ?? null;
+			$form_fields     = $gateway->get_form_fields();
 
-		$this->assertArrayHasKey( 'enable_for_methods', $form_fields );
-		$this->assertNotEmpty( $form_fields['enable_for_methods']['options'] );
+			$this->assertArrayHasKey( 'enable_for_methods', $form_fields );
+			$this->assertSame( 'multiselect', $form_fields['enable_for_methods']['type'] );
+			$this->assertIsArray( $form_fields['enable_for_methods']['options'] );
+			$this->assertNotEmpty( $form_fields['enable_for_methods']['options'] );
+
+			$option_ids = array();
+			foreach ( $form_fields['enable_for_methods']['options'] as $method_options ) {
+				$option_ids = array_merge( $option_ids, array_keys( $method_options ) );
+			}
+
+			$this->assertContains( 'flat_rate', $option_ids );
+			$this->assertContains( 'free_shipping', $option_ids );
+			$this->assertContains( 'pickup_location', $option_ids );
+		} finally {
+			remove_filter( 'woocommerce_shipping_methods', $register_pickup_location );
+			if ( $pickup_location ) {
+				remove_filter( 'woocommerce_attribute_label', array( $pickup_location, 'translate_meta_data' ), 10 );
+			}
+			$shipping->shipping_methods = $original_shipping_methods;
+
+			if ( $had_rest_route ) {
+				$GLOBALS['wp']->query_vars['rest_route'] = $original_route;
+			} else {
+				unset( $GLOBALS['wp']->query_vars['rest_route'] );
+			}
+		}
+	}
+
+	/**
+	 * Payment gateway REST routes that need shipping-method options.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function provide_payment_gateway_rest_routes() {
+		return array(
+			'V2' => array( '/wc/v2/payment_gateways' ),
+			'V3' => array( '/wc/v3/payment_gateways' ),
+		);
 	}
 
 	/**
