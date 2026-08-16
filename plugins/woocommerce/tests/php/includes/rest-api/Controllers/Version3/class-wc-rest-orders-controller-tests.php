@@ -500,6 +500,372 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The registered V3 collection route paginates and applies identity and parent filters exactly.
+	 */
+	public function test_orders_collection_pagination_and_identity_filters(): void {
+		$order_ids = array();
+
+		try {
+			foreach ( range( 1, 6 ) as $day ) {
+				$order = new WC_Order();
+				$order->set_date_created( "2024-01-0{$day} 12:00:00" );
+				$order->set_created_via( 'slice35-identity' );
+				$order_ids[] = $order->save();
+			}
+
+			$parent_id   = $order_ids[0];
+			$child_id    = $order_ids[1];
+			$child_order = wc_get_order( $child_id );
+			if ( ! $child_order instanceof WC_Order ) {
+				$this->fail( 'The child fixture should be persisted.' );
+			}
+			$child_order->set_parent_id( $parent_id );
+			$child_order->save();
+
+			$sorted_ids = $order_ids;
+			sort( $sorted_ids, SORT_NUMERIC );
+
+			$dispatch_page = function ( int $page, ?int $offset = null ) use ( $sorted_ids ): WP_REST_Response {
+				$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+				$request->set_param( 'include', $sorted_ids );
+				$request->set_param( 'orderby', 'id' );
+				$request->set_param( 'order', 'asc' );
+				$request->set_param( 'per_page', 2 );
+				$request->set_param( 'page', $page );
+				if ( null !== $offset ) {
+					$request->set_param( 'offset', $offset );
+				}
+
+				return $this->server->dispatch( $request );
+			};
+
+			$page_1  = $dispatch_page( 1 );
+			$page_2  = $dispatch_page( 2 );
+			$page_3  = $dispatch_page( 3 );
+			$page_4  = $dispatch_page( 4 );
+			$headers = $page_1->get_headers();
+
+			$this->assertSame( 200, $page_1->get_status(), 'The first page should return HTTP 200.' );
+			$this->assertSame( 200, $page_2->get_status(), 'The second page should return HTTP 200.' );
+			$this->assertSame( '6', (string) $headers['X-WP-Total'], 'The total header should count all six fixtures.' );
+			$this->assertSame( '3', (string) $headers['X-WP-TotalPages'], 'The total-pages header should reflect two orders per page.' );
+			$this->assertSame( array_slice( $sorted_ids, 0, 2 ), array_column( $page_1->get_data(), 'id' ), 'Page one should contain the first two IDs.' );
+			$this->assertSame( array_slice( $sorted_ids, 2, 2 ), array_column( $page_2->get_data(), 'id' ), 'Page two should contain the next two IDs.' );
+			$this->assertSame( array_slice( $sorted_ids, 4, 2 ), array_column( $page_3->get_data(), 'id' ), 'Page three should contain the final two IDs.' );
+			$this->assertSame( array(), $page_4->get_data(), 'A page beyond the result set should be empty.' );
+			$this->assertSame( 4, count( array_unique( array_merge( array_column( $page_1->get_data(), 'id' ), array_column( $page_2->get_data(), 'id' ) ) ) ), 'The first two pages should not overlap.' );
+
+			$offset_page = $dispatch_page( 2, 3 );
+			$this->assertSame( array_slice( $sorted_ids, 3, 2 ), array_column( $offset_page->get_data(), 'id' ), 'Offset should take precedence over the page-derived offset.' );
+
+			$included_ids = array( $sorted_ids[4], $sorted_ids[1], $sorted_ids[3] );
+			$request      = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+			$request->set_param( 'include', $included_ids );
+			$request->set_param( 'orderby', 'include' );
+			$response = $this->server->dispatch( $request );
+			$this->assertSame( $included_ids, array_column( $response->get_data(), 'id' ), 'Include should return exactly the requested IDs in include order.' );
+
+			$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+			$request->set_param( 'exclude', $included_ids );
+			$request->set_param( 'created_via', 'slice35-identity' );
+			$request->set_param( 'orderby', 'id' );
+			$request->set_param( 'order', 'asc' );
+			$response = $this->server->dispatch( $request );
+			$this->assertSame( array_values( array_diff( $sorted_ids, $included_ids ) ), array_column( $response->get_data(), 'id' ), 'Exclude should remove every requested ID from the constrained fixture set.' );
+
+			$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+			$request->set_param( 'include', $sorted_ids );
+			$request->set_param( 'parent', $parent_id );
+			$response = $this->server->dispatch( $request );
+			$this->assertSame( array( $child_id ), array_column( $response->get_data(), 'id' ), 'Parent should return only the matching child order.' );
+
+			$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+			$request->set_param( 'include', $sorted_ids );
+			$request->set_param( 'parent_exclude', $parent_id );
+			$request->set_param( 'orderby', 'id' );
+			$request->set_param( 'order', 'asc' );
+			$response = $this->server->dispatch( $request );
+			$this->assertSame( array_values( array_diff( $sorted_ids, array( $child_id ) ) ), array_column( $response->get_data(), 'id' ), 'Parent exclusion should remove only the matching child order.' );
+		} finally {
+			foreach ( array_reverse( $order_ids ) as $order_id ) {
+				$order = wc_get_order( $order_id );
+				if ( $order ) {
+					$order->delete( true );
+				}
+			}
+		}
+	}
+
+	/**
+	 * @testdox The registered V3 collection route applies status, customer, and product filters exactly.
+	 */
+	public function test_orders_collection_domain_filters(): void {
+		$order_ids    = array();
+		$customer_ids = array();
+		$product      = ProductHelper::create_simple_product();
+
+		try {
+			$customer_a     = WC_Helper_Customer::create_customer( wp_unique_id( 'slice35-a-' ), 'password', wp_unique_id( 'slice35-a-' ) . '@example.com' );
+			$customer_ids[] = $customer_a->get_id();
+			$customer_b     = WC_Helper_Customer::create_customer( wp_unique_id( 'slice35-b-' ), 'password', wp_unique_id( 'slice35-b-' ) . '@example.com' );
+			$customer_ids[] = $customer_b->get_id();
+
+			$fixtures = array(
+				array( OrderStatus::COMPLETED, $customer_a->get_id(), true ),
+				array( OrderStatus::PROCESSING, $customer_a->get_id(), false ),
+				array( OrderStatus::COMPLETED, 0, false ),
+				array( OrderStatus::PROCESSING, $customer_b->get_id(), true ),
+			);
+
+			foreach ( $fixtures as $fixture ) {
+				list( $status, $customer_id, $contains_product ) = $fixture;
+				$order = new WC_Order();
+				$order->set_status( $status );
+				$order->set_customer_id( $customer_id );
+				if ( $contains_product ) {
+					$order->add_product( $product, 1 );
+				}
+				$order_ids[] = $order->save();
+			}
+
+			$assert_filter = function ( array $params, array $expected_ids, string $message ) use ( $order_ids ): array {
+				$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+				$request->set_param( 'include', $order_ids );
+				$request->set_param( 'orderby', 'id' );
+				$request->set_param( 'order', 'asc' );
+				foreach ( $params as $key => $value ) {
+					$request->set_param( $key, $value );
+				}
+				$response = $this->server->dispatch( $request );
+				$this->assertSame( 200, $response->get_status(), $message . ' should return HTTP 200.' );
+				$this->assertSame( $expected_ids, array_column( $response->get_data(), 'id' ), $message );
+
+				return $response->get_data();
+			};
+
+			$status_data = $assert_filter( array( 'status' => array( OrderStatus::COMPLETED ) ), array( $order_ids[0], $order_ids[2] ), 'Status should return only completed fixtures.' );
+			$this->assertSame( $product->get_id(), $status_data[0]['line_items'][0]['product_id'], 'The completed target should retain its product line item.' );
+			$this->assertSame( $product->get_name(), $status_data[0]['line_items'][0]['name'], 'The completed target should expose the stable product name.' );
+			$assert_filter( array( 'customer' => $customer_a->get_id() ), array( $order_ids[0], $order_ids[1] ), 'Customer should return only that customer\'s fixtures.' );
+			$assert_filter( array( 'customer' => 0 ), array( $order_ids[2] ), 'Customer zero should return only guest fixtures.' );
+			$assert_filter( array( 'product' => $product->get_id() ), array( $order_ids[0], $order_ids[3] ), 'Product should return only fixtures containing that product.' );
+		} finally {
+			foreach ( array_reverse( $order_ids ) as $order_id ) {
+				$order = wc_get_order( $order_id );
+				if ( $order ) {
+					$order->delete( true );
+				}
+			}
+
+			if ( $product ) {
+				$product->delete( true );
+			}
+
+			foreach ( $customer_ids as $customer_id ) {
+				wp_delete_user( $customer_id );
+			}
+		}
+	}
+
+	/**
+	 * @testdox The registered V3 order route formats every monetary collection at the requested precision.
+	 */
+	public function test_orders_collection_decimal_precision(): void {
+		$order_id  = 0;
+		$product   = ProductHelper::create_simple_product();
+		$refund_id = 0;
+
+		try {
+			$order = new WC_Order();
+			$order->set_discount_total( '1.2345' );
+			$order->set_discount_tax( '0.2345' );
+			$order->set_shipping_total( '3.4567' );
+			$order->set_shipping_tax( '0.4567' );
+			$order->set_cart_tax( '2.3456' );
+			$order->set_total( '24.6912' );
+
+			$product_item = new WC_Order_Item_Product();
+			$product_item->set_product( $product );
+			$product_item->set_quantity( 1 );
+			$product_item->set_subtotal( '12.3456' );
+			$product_item->set_total( '10.9876' );
+			$product_item->set_taxes(
+				array(
+					'subtotal' => array( 1 => '1.2345' ),
+					'total'    => array( 1 => '1.0987' ),
+				)
+			);
+			$order->add_item( $product_item );
+
+			$tax_item = new WC_Order_Item_Tax();
+			$tax_item->set_props(
+				array(
+					'rate_id'            => 1,
+					'label'              => 'Precision tax',
+					'tax_total'          => '2.3456',
+					'shipping_tax_total' => '0.4567',
+				)
+			);
+			$order->add_item( $tax_item );
+
+			$shipping_item = new WC_Order_Item_Shipping();
+			$shipping_item->set_method_title( 'Precision shipping' );
+			$shipping_item->set_method_id( 'precision' );
+			$shipping_item->set_total( '3.4567' );
+			$shipping_item->set_taxes( array( 'total' => array( 1 => '0.4567' ) ) );
+			$order->add_item( $shipping_item );
+
+			$fee_item = new WC_Order_Item_Fee();
+			$fee_item->set_name( 'Precision fee' );
+			$fee_item->set_total( '4.5678' );
+			$fee_item->set_total_tax( '0.5678' );
+			$fee_item->set_taxes( array( 'total' => array( 1 => '0.5678' ) ) );
+			$order->add_item( $fee_item );
+
+			$order_id = $order->save();
+			$refund   = wc_create_refund(
+				array(
+					'amount'         => 2.3456,
+					'reason'         => 'Precision refund',
+					'order_id'       => $order_id,
+					'refund_payment' => false,
+					'restock_items'  => false,
+				)
+			);
+			if ( ! $refund instanceof WC_Order_Refund ) {
+				$this->fail( 'The refund fixture should be created.' );
+			}
+			$refund_id = $refund->get_id();
+
+			foreach ( array( 1, 3, wc_get_price_decimals() ) as $precision ) {
+				$request = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id );
+				if ( wc_get_price_decimals() !== $precision ) {
+					$request->set_param( 'dp', $precision );
+				}
+				$response = $this->server->dispatch( $request );
+				$data     = $response->get_data();
+				$pattern  = '/^-?\\d+\\.\\d{' . $precision . '}$/';
+
+				$this->assertSame( 200, $response->get_status(), 'Reading the precision fixture should return HTTP 200.' );
+				foreach ( array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' ) as $field ) {
+					$this->assertMatchesRegularExpression( $pattern, $data[ $field ], "{$field} should use the requested precision." );
+				}
+
+				$this->assertCount( 1, $data['line_items'], 'The precision response should contain its product line.' );
+				$this->assertMatchesRegularExpression( $pattern, $data['line_items'][0]['total'], 'Product total should use the requested precision.' );
+				$this->assertMatchesRegularExpression( $pattern, $data['line_items'][0]['total_tax'], 'Product tax should use the requested precision.' );
+				$this->assertCount( 1, $data['tax_lines'], 'The precision response should contain its tax line.' );
+				$this->assertMatchesRegularExpression( $pattern, $data['tax_lines'][0]['tax_total'], 'Tax total should use the requested precision.' );
+				$this->assertMatchesRegularExpression( $pattern, $data['tax_lines'][0]['shipping_tax_total'], 'Shipping tax total should use the requested precision.' );
+				$this->assertCount( 1, $data['shipping_lines'], 'The precision response should contain its shipping line.' );
+				$this->assertMatchesRegularExpression( $pattern, $data['shipping_lines'][0]['total'], 'Shipping line total should use the requested precision.' );
+				$this->assertMatchesRegularExpression( $pattern, $data['shipping_lines'][0]['total_tax'], 'Shipping line tax should use the requested precision.' );
+				$this->assertCount( 1, $data['fee_lines'], 'The precision response should contain its fee line.' );
+				$this->assertMatchesRegularExpression( $pattern, $data['fee_lines'][0]['total'], 'Fee total should use the requested precision.' );
+				$this->assertMatchesRegularExpression( $pattern, $data['fee_lines'][0]['total_tax'], 'Fee tax should use the requested precision.' );
+				$this->assertCount( 1, $data['refunds'], 'The precision response should contain its refund.' );
+				$this->assertMatchesRegularExpression( $pattern, $data['refunds'][0]['total'], 'Refund total should use the requested precision.' );
+			}
+		} finally {
+			if ( $refund_id ) {
+				$refund = wc_get_order( $refund_id );
+				if ( $refund ) {
+					$refund->delete( true );
+				}
+			}
+
+			if ( $order_id ) {
+				$order = wc_get_order( $order_id );
+				if ( $order ) {
+					$order->delete( true );
+				}
+			}
+
+			if ( $product ) {
+				$product->delete( true );
+			}
+		}
+	}
+
+	/**
+	 * @testdox The registered V3 collection route preserves date, ID, and include ordering.
+	 */
+	public function test_orders_collection_ordering(): void {
+		$order_ids = array();
+
+		try {
+			foreach ( array( '2024-01-03 12:00:00', '2024-01-01 12:00:00', '2024-01-02 12:00:00' ) as $created_at ) {
+				$order = new WC_Order();
+				$order->set_date_created( $created_at );
+				$order_ids[] = $order->save();
+			}
+
+			$id_ascending    = $order_ids;
+			$id_descending   = array_reverse( $id_ascending );
+			$date_ascending  = array( $order_ids[1], $order_ids[2], $order_ids[0] );
+			$date_descending = array_reverse( $date_ascending );
+			$include_order   = array( $order_ids[2], $order_ids[0], $order_ids[1] );
+
+			$assert_order = function ( array $params, array $expected_ids, string $message ) use ( $order_ids ): void {
+				$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+				$request->set_param( 'include', $order_ids );
+				foreach ( $params as $key => $value ) {
+					$request->set_param( $key, $value );
+				}
+				$response = $this->server->dispatch( $request );
+				$this->assertSame( 200, $response->get_status(), $message . ' should return HTTP 200.' );
+				$this->assertSame( $expected_ids, array_column( $response->get_data(), 'id' ), $message );
+			};
+
+			$assert_order( array(), $date_descending, 'Default ordering should be date descending.' );
+			$assert_order(
+				array(
+					'orderby' => 'date',
+					'order'   => 'asc',
+				),
+				$date_ascending,
+				'Date ascending should use creation date.'
+			);
+			$assert_order(
+				array(
+					'orderby' => 'id',
+					'order'   => 'asc',
+				),
+				$id_ascending,
+				'ID ascending should use numeric order IDs.'
+			);
+			$assert_order(
+				array(
+					'orderby' => 'id',
+					'order'   => 'desc',
+				),
+				$id_descending,
+				'ID descending should reverse numeric order IDs.'
+			);
+
+			$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+			$request->set_param( 'include', $include_order );
+			$request->set_param( 'orderby', 'include' );
+			$request->set_param( 'order', 'asc' );
+			$response = $this->server->dispatch( $request );
+			$this->assertSame( 200, $response->get_status(), 'Include ascending should return HTTP 200.' );
+			$this->assertSame( $include_order, array_column( $response->get_data(), 'id' ), 'Include ascending should preserve the requested ID order.' );
+
+			$request->set_param( 'order', 'desc' );
+			$response = $this->server->dispatch( $request );
+			$this->assertSame( 200, $response->get_status(), 'Include descending should return HTTP 200.' );
+			$this->assertSame( $include_order, array_column( $response->get_data(), 'id' ), 'Include descending should preserve the requested ID order.' );
+		} finally {
+			foreach ( array_reverse( $order_ids ) as $order_id ) {
+				$order = wc_get_order( $order_id );
+				if ( $order ) {
+					$order->delete( true );
+				}
+			}
+		}
+	}
+
+	/**
 	 * Tests that the created_via parameter is properly stored when creating orders.
 	 */
 	public function test_order_created_via_param(): void {
@@ -922,7 +1288,8 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$response_data       = $this->server->response_to_data( $response, false );
 		$encoded_data_string = wp_json_encode( $response_data );
-		$decoded_data_object = json_decode( $encoded_data_string, false ); // Ensure object instead of associative array.
+		$decoded_data_object = json_decode( $encoded_data_string, false );
+		// Ensure object instead of associative array.
 
 		$this->assertIsArray( $decoded_data_object[0]->meta_data );
 	}
@@ -1122,7 +1489,8 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$product->set_stock_quantity( 10 );
 		$product->save();
 
-		$order = WC_Helper_Order::create_order( 1, $product, array( 'status' => OrderStatus::ON_HOLD ) ); // Initial qty of 4.
+		$order = WC_Helper_Order::create_order( 1, $product, array( 'status' => OrderStatus::ON_HOLD ) );
+		// Initial qty of 4.
 		$items = $order->get_items();
 		$item  = reset( $items );
 		wc_maybe_adjust_line_item_product_stock( $item );
