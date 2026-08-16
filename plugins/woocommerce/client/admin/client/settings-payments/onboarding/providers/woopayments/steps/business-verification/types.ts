@@ -26,6 +26,7 @@ export interface BusinessType {
 	key: string;
 	name: string;
 	description: string;
+	requires_structure?: boolean;
 	structures: BusinessStructure[];
 }
 
@@ -61,6 +62,16 @@ export interface EmbeddedKycSession {
  */
 export interface EmbeddedKycSessionCreateResult {
 	session: EmbeddedKycSession;
+}
+
+export type EmbeddedAccountInitializationFailureReason =
+	| 'bad_session'
+	| 'init_error';
+
+export interface EmbeddedAccountInitializationFailure {
+	reason: EmbeddedAccountInitializationFailureReason;
+	message: string;
+	receivedKeys?: string[];
 }
 
 /**

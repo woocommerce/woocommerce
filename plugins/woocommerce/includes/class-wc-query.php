@@ -374,8 +374,11 @@ class WC_Query {
 			$q->is_comment_feed = false;
 		}
 
+		$shop_page    = null;
+		$shop_page_id = wc_get_page_id( 'shop' );
+
 		// Special check for shops with the PRODUCT POST TYPE ARCHIVE on front.
-		if ( wc_current_theme_supports_woocommerce_or_fse() && $q->is_page() && 'page' === get_option( 'show_on_front' ) && absint( $q->get( 'page_id' ) ) === wc_get_page_id( 'shop' ) ) {
+		if ( wc_current_theme_supports_woocommerce_or_fse() && $q->is_page() && 'page' === get_option( 'show_on_front' ) && absint( $q->get( 'page_id' ) ) === $shop_page_id ) {
 			// This is a front-page shop.
 			$q->set( 'post_type', 'product' );
 			$q->set( 'page_id', '' );
@@ -391,7 +394,7 @@ class WC_Query {
 			// This is hacky but works. Awaiting https://core.trac.wordpress.org/ticket/21096.
 			global $wp_post_types;
 
-			$shop_page = get_post( wc_get_page_id( 'shop' ) );
+			$shop_page = get_post( $shop_page_id );
 
 			$wp_post_types['product']->ID         = $shop_page->ID;
 			$wp_post_types['product']->post_title = $shop_page->post_title;
@@ -413,6 +416,9 @@ class WC_Query {
 				add_filter( 'wpseo_metadesc', array( $this, 'wpseo_metadesc' ) );
 				add_filter( 'wpseo_metakey', array( $this, 'wpseo_metakey' ) );
 			}
+		} elseif ( $q->is_post_type_archive( 'product' ) && ! $q->is_tax() && $shop_page_id > 0 ) {
+			// This is a regular shop page (product archive).
+			$shop_page = get_post( $shop_page_id );
 		} elseif ( ! $q->is_post_type_archive( 'product' ) && ! $q->is_tax( get_object_taxonomies( 'product' ) ) ) {
 			// Only apply to product categories, the product post archive, the shop page, product tags, and product attribute taxonomies.
 			if ( $q->is_search() ) {
@@ -435,6 +441,12 @@ class WC_Query {
 				}
 			}
 			return;
+		}
+
+		// Set queried object for any shop page scenario.
+		if ( $shop_page ) {
+			$q->queried_object    = $shop_page;
+			$q->queried_object_id = $shop_page->ID;
 		}
 
 		$this->product_query( $q );

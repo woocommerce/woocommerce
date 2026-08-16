@@ -7,11 +7,26 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use WC_Unit_Test_Case;
 use WP_Filesystem_Base;
+use WP_Filesystem_Direct;
 
 /**
  * FilesystemUtilTest class.
  */
 class FilesystemUtilTest extends WC_Unit_Test_Case {
+	/**
+	 * Tracked temp files to clean up after each test.
+	 *
+	 * @var string[]
+	 */
+	private $temp_files = array();
+
+	/**
+	 * Tracked temp directories to clean up after each test.
+	 *
+	 * @var string[]
+	 */
+	private $temp_dirs = array();
+
 	/**
 	 * Set up before running any tests.
 	 *
@@ -32,11 +47,58 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function tearDown(): void {
+		foreach ( $this->temp_files as $temp_file ) {
+			if ( file_exists( $temp_file ) ) {
+				wp_delete_file( $temp_file );
+			}
+		}
+		foreach ( $this->temp_dirs as $temp_dir ) {
+			if ( is_dir( $temp_dir ) ) {
+				// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Test cleanup of an empty directory we created in this process.
+				rmdir( $temp_dir );
+			}
+		}
+		$this->temp_files = array();
+		$this->temp_dirs  = array();
+
 		unset( $GLOBALS['wp_filesystem'] );
 		$this->reset_legacy_proxy_mocks();
 		Constants::clear_constants();
+		$this->reset_direct_filesystem_cache();
 
 		parent::tearDown();
+	}
+
+	/**
+	 * Clear FilesystemUtil's memoized direct filesystem so each test starts
+	 * from a cold cache. Without this, a warm cache makes the FS_METHOD-bypass
+	 * test pass trivially from cache instead of exercising construction.
+	 *
+	 * @return void
+	 */
+	private function reset_direct_filesystem_cache(): void {
+		$property = new \ReflectionProperty( FilesystemUtil::class, 'cached_direct_filesystem' );
+		$property->setAccessible( true );
+		$property->setValue( null, null );
+	}
+
+	/**
+	 * Create a real temp file inside a directory and track it for cleanup.
+	 *
+	 * @param string $dir Directory to create the file in.
+	 * @return string The absolute path of the file.
+	 */
+	private function make_temp_file( string $dir ): string {
+		if ( ! is_dir( $dir ) ) {
+			wp_mkdir_p( $dir );
+			$this->temp_dirs[] = $dir;
+		}
+		$path = tempnam( $dir, 'fsutil_' );
+		if ( false === $path ) {
+			throw new \RuntimeException( esc_html( "Could not create a temp file in {$dir}." ) );
+		}
+		$this->temp_files[] = $path;
+		return $path;
 	}
 
 	/**
@@ -162,130 +224,140 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'validate_upload_file_path' returns without throwing an exception if the file path is valid.
+	 * @testdox 'get_wp_filesystem_direct' returns a WP_Filesystem_Direct instance regardless of FS_METHOD.
 	 */
-	public function test_validate_upload_file_path_success() {
-		$this->expectNotToPerformAssertions();
+	public function test_get_wp_filesystem_direct_returns_direct_even_with_ftp_method(): void {
+		Constants::set_constant( 'FS_METHOD', 'ftpext' );
+		Constants::set_constant( 'FTP_HOST', 'ftp.example.com' );
 
-		global $wp_filesystem;
-		$original_wp_filesystem = $wp_filesystem;
-		$mock_wp_filesystem     = $this->createMock( WP_Filesystem_Base::class );
-		$mock_wp_filesystem->method( 'is_readable' )->willReturn( true );
-		$mock_wp_filesystem->method( 'abspath' )->willReturn( ABSPATH );
-		$wp_filesystem = $mock_wp_filesystem; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$result = FilesystemUtil::get_wp_filesystem_direct();
 
-		FilesystemUtil::validate_upload_file_path( ABSPATH . 'test.txt' );
-
-		$wp_filesystem = $original_wp_filesystem; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$this->assertInstanceOf( WP_Filesystem_Direct::class, $result );
+		$this->assertSame( 'direct', $result->method );
 	}
 
 	/**
-	 * @testdox 'validate_upload_file_path' throws an exception if the filesystem cannot be initialized.
+	 * @testdox 'get_wp_filesystem_direct' returns the same cached instance on repeated calls.
 	 */
-	public function test_validate_upload_file_path_failure_on_initialize_wp_filesystem() {
-		Constants::set_constant( 'FS_METHOD', null );
+	public function test_get_wp_filesystem_direct_caches_instance(): void {
+		$first  = FilesystemUtil::get_wp_filesystem_direct();
+		$second = FilesystemUtil::get_wp_filesystem_direct();
 
-		$this->expectException( 'Exception' );
+		$this->assertSame( $first, $second );
+	}
 
-		FilesystemUtil::validate_upload_file_path( ABSPATH . 'test.txt' );
+	/**
+	 * @testdox 'get_wp_filesystem_direct' returns an instance whose method is 'direct' when used to write to a known-writable temp dir.
+	 */
+	public function test_get_wp_filesystem_direct_writes_through_native_php(): void {
+		$dir = sys_get_temp_dir() . '/wc-fsutil-write-' . wp_generate_uuid4();
+		wp_mkdir_p( $dir );
+		$this->temp_dirs[] = $dir;
+
+		$path  = $dir . '/sentinel.txt';
+		$value = 'hello-' . wp_generate_uuid4();
+		try {
+			$wp_fs  = FilesystemUtil::get_wp_filesystem_direct();
+			$result = $wp_fs->put_contents( $path, $value );
+		} finally {
+			if ( file_exists( $path ) ) {
+				$this->temp_files[] = $path;
+			}
+		}
+
+		$this->assertTrue( $result );
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local file we just wrote, not a remote URL.
+		$this->assertSame( $value, file_get_contents( $path ) );
+
+		// A successful put_contents() with no explicit mode proves the FS_CHMOD_*
+		// constants were available; assert them directly to lock in the fix for
+		// the "Undefined constant FS_CHMOD_FILE" fatal that motivated this method.
+		$this->assertTrue( defined( 'FS_CHMOD_DIR' ) );
+		$this->assertTrue( defined( 'FS_CHMOD_FILE' ) );
+	}
+
+	/**
+	 * @testdox 'validate_upload_file_path' returns without throwing for a real file inside ABSPATH.
+	 */
+	public function test_validate_upload_file_path_success(): void {
+		$this->expectNotToPerformAssertions();
+
+		// Use an existing readable core file so the test does not depend on
+		// ABSPATH being writable.
+		FilesystemUtil::validate_upload_file_path( ABSPATH . 'index.php' );
 	}
 
 	/**
 	 * @testdox 'validate_upload_file_path' throws an exception if the file path is not readable.
 	 */
-	public function test_validate_upload_file_path_failure_on_not_readable() {
+	public function test_validate_upload_file_path_failure_on_not_readable(): void {
 		$this->expectException( 'Exception' );
 
-		global $wp_filesystem;
-		$original_wp_filesystem = $wp_filesystem;
-		$mock_wp_filesystem     = $this->createMock( WP_Filesystem_Base::class );
-		$mock_wp_filesystem->method( 'is_readable' )->willReturn( false );
-		$mock_wp_filesystem->method( 'abspath' )->willReturn( ABSPATH );
-		$wp_filesystem = $mock_wp_filesystem; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-
-		FilesystemUtil::validate_upload_file_path( ABSPATH . 'test.txt' );
-
-		$wp_filesystem = $original_wp_filesystem; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		FilesystemUtil::validate_upload_file_path( ABSPATH . 'definitely-does-not-exist-' . wp_generate_uuid4() . '.txt' );
 	}
 
 	/**
-	 * @testdox 'validate_upload_file_path' throws an exception if the file path is not in the upload directory.
+	 * @testdox 'validate_upload_file_path' throws when the file is outside ABSPATH and the uploads directory.
 	 */
-	public function test_validate_upload_file_path_failure_on_not_in_directory() {
+	public function test_validate_upload_file_path_failure_on_not_in_directory(): void {
 		$this->expectException( 'Exception' );
 
-		global $wp_filesystem;
-		$original_wp_filesystem = $wp_filesystem;
-		$mock_wp_filesystem     = $this->createMock( WP_Filesystem_Base::class );
-		$mock_wp_filesystem->method( 'is_readable' )->willReturn( true );
-		$mock_wp_filesystem->method( 'abspath' )->willReturn( ABSPATH );
-		$wp_filesystem = $mock_wp_filesystem; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$outside_dir = sys_get_temp_dir() . '/wc-fsutil-outside-' . wp_generate_uuid4();
+		$path        = $this->make_temp_file( $outside_dir );
 
-		FilesystemUtil::validate_upload_file_path( '/etc/test.txt' );
+		// Make sure the temp file is genuinely outside ABSPATH and uploads.
+		$abspath_real = wp_normalize_path( realpath( ABSPATH ) );
+		$path_real    = wp_normalize_path( realpath( $path ) );
+		$this->assertStringStartsNotWith( $abspath_real, $path_real );
 
-		$wp_filesystem = $original_wp_filesystem; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		FilesystemUtil::validate_upload_file_path( $path );
 	}
 
 	/**
-	 * @testdox 'validate_upload_file_path' returns without throwing an exception if the file path is in the upload directory.
+	 * @testdox 'validate_upload_file_path' returns without throwing for a real file inside the uploads directory.
 	 */
-	public function test_validate_upload_file_path_success_with_upload_dir() {
+	public function test_validate_upload_file_path_success_with_upload_dir(): void {
 		$this->expectNotToPerformAssertions();
 
-		$callback = fn() => array(
-			'path'    => '/uploads/',
-			'basedir' => '/uploads/',
-			'error'   => false,
+		$upload_dir = wp_get_upload_dir();
+		$path       = $this->make_temp_file( $upload_dir['basedir'] );
+
+		FilesystemUtil::validate_upload_file_path( $path );
+	}
+
+	/**
+	 * @testdox 'validate_upload_file_path' accepts a file:// protocol prefix on a real path inside ABSPATH.
+	 */
+	public function test_validate_upload_file_path_success_with_file_protocol(): void {
+		$this->expectNotToPerformAssertions();
+
+		// Use an existing readable core file so the test does not depend on
+		// ABSPATH being writable.
+		FilesystemUtil::validate_upload_file_path( 'file://' . ABSPATH . 'index.php' );
+	}
+
+	/**
+	 * @testdox 'file_is_in_directory' keeps stream-wrapper (e.g. s3://) containment intact for upload paths.
+	 *
+	 * Exercises the non-file:// protocol branch of the containment check. The
+	 * public validate_upload_file_path() gates on is_readable() first, which a
+	 * real direct filesystem cannot satisfy for an unregistered s3:// path in a
+	 * unit test, so the protocol branch is verified directly. This restores the
+	 * coverage previously provided by the (now removed) abspath()-mocking test
+	 * and locks in the no-regression claim for WordPress VIP / S3-Uploads sites.
+	 */
+	public function test_file_is_in_directory_handles_stream_wrapper_protocol(): void {
+		$method = new \ReflectionMethod( FilesystemUtil::class, 'file_is_in_directory' );
+		$method->setAccessible( true );
+
+		// A path inside an s3:// uploads basedir is contained.
+		$this->assertTrue(
+			$method->invoke( null, 's3://mock-bucket/test.txt', 's3://mock-bucket/' )
 		);
-		add_filter( 'upload_dir', $callback );
-
-		global $wp_filesystem;
-		$original_wp_filesystem = $wp_filesystem;
-		$mock_wp_filesystem     = $this->createMock( WP_Filesystem_Base::class );
-		$mock_wp_filesystem->method( 'is_readable' )->willReturn( true );
-		$mock_wp_filesystem->method( 'abspath' )->willReturn( ABSPATH );
-		$wp_filesystem = $mock_wp_filesystem; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-
-		FilesystemUtil::validate_upload_file_path( '/uploads/test.txt' );
-
-		$wp_filesystem = $original_wp_filesystem; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		remove_filter( 'upload_dir', $callback );
-	}
-
-	/**
-	 * @testdox 'validate_upload_file_path' returns without throwing an exception if the file path has a file:// protocol.
-	 */
-	public function test_validate_upload_file_path_success_with_file_protocol() {
-		$this->expectNotToPerformAssertions();
-
-		global $wp_filesystem;
-		$original_wp_filesystem = $wp_filesystem;
-		$mock_wp_filesystem     = $this->createMock( WP_Filesystem_Base::class );
-		$mock_wp_filesystem->method( 'is_readable' )->willReturn( true );
-		$mock_wp_filesystem->method( 'abspath' )->willReturn( ABSPATH );
-		$wp_filesystem = $mock_wp_filesystem; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-
-		FilesystemUtil::validate_upload_file_path( 'file://' . ABSPATH . 'test.txt' );
-
-		$wp_filesystem = $original_wp_filesystem; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-	}
-
-	/**
-	 * @testdox 'validate_upload_file_path' returns without throwing an exception if the file path has a protocol other than file://.
-	 */
-	public function test_validate_upload_file_path_success_with_other_protocol() {
-		$this->expectNotToPerformAssertions();
-
-		global $wp_filesystem;
-		$original_wp_filesystem = $wp_filesystem;
-		$mock_wp_filesystem     = $this->createMock( WP_Filesystem_Base::class );
-		$mock_wp_filesystem->method( 'is_readable' )->willReturn( true );
-		$mock_wp_filesystem->method( 'abspath' )->willReturn( 's3://mock-bucket/' );
-		$wp_filesystem = $mock_wp_filesystem; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-
-		FilesystemUtil::validate_upload_file_path( 's3://mock-bucket/test.txt' );
-
-		$wp_filesystem = $original_wp_filesystem; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		// A path under a different bucket is rejected.
+		$this->assertFalse(
+			$method->invoke( null, 's3://other-bucket/test.txt', 's3://mock-bucket/' )
+		);
 	}
 
 	/**

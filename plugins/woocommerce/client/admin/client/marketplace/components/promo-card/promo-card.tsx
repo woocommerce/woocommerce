@@ -16,6 +16,11 @@ import PercentSVG from './images/percent';
 
 interface PromoCardProps {
 	promotion: Promotion;
+	// Extra properties merged into the promotion Tracks events (e.g. order_count, surface).
+	eventProperties?: Record< string, unknown >;
+	// Called on dismiss. When provided, replaces the default localStorage dismissal so the
+	// caller can persist it elsewhere (e.g. server-side, per user).
+	onDismiss?: () => void;
 }
 
 const imageComponents = {
@@ -24,6 +29,8 @@ const imageComponents = {
 
 const PromoCard = ( {
 	promotion,
+	eventProperties = {},
+	onDismiss,
 }: PromoCardProps ): React.ReactElement | null => {
 	const path = window.location.pathname + window.location.search;
 
@@ -32,13 +39,18 @@ const PromoCard = ( {
 			localStorage.getItem( 'wc-marketplaceDismissedPromos' ) || '[]'
 		);
 
+	// When a caller provides onDismiss it owns dismissal persistence (e.g. server-side, per user),
+	// so the localStorage fallback is bypassed for both the initial visibility check here and the
+	// write in handleDismiss. Without a callback, fall back to the localStorage-by-path behavior.
 	const [ isVisible, setIsVisible ] = useState(
-		! getDismissedURIs().includes( path )
+		onDismiss ? true : ! getDismissedURIs().includes( path )
 	);
 
 	useEffect( () => {
 		if ( isVisible ) {
 			recordEvent( 'marketplace_promotion_viewed', {
+				// Custom properties first so the authoritative fields below win.
+				...eventProperties,
 				path,
 				format: 'promo-card',
 			} );
@@ -51,12 +63,18 @@ const PromoCard = ( {
 
 	const handleDismiss = () => {
 		setIsVisible( false );
-		localStorage.setItem(
-			'wc-marketplaceDismissedPromos',
-			JSON.stringify( getDismissedURIs().concat( path ) )
-		);
+
+		if ( onDismiss ) {
+			onDismiss();
+		} else {
+			localStorage.setItem(
+				'wc-marketplaceDismissedPromos',
+				JSON.stringify( getDismissedURIs().concat( path ) )
+			);
+		}
 
 		recordEvent( 'marketplace_promotion_dismissed', {
+			...eventProperties,
 			path,
 			format: 'promo-card',
 		} );
@@ -64,6 +82,7 @@ const PromoCard = ( {
 
 	const handleClick = () => {
 		recordEvent( 'marketplace_promotion_actioned', {
+			...eventProperties,
 			path,
 			target_uri: promotion.cta_link,
 			format: 'promo-card',

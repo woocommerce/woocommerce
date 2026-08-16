@@ -11,8 +11,6 @@
  * and adds the live-gateway lookup, the override filter, and the ready-hook
  * wiring on top.
  *
- * Integration zone: WordPress-native. May use WooCommerce.
- *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Gateway
  */
 
@@ -40,7 +38,7 @@ final class CapabilityRegistry {
 	 * gateways (where capability resolution depends on the merchant account
 	 * routing the order) flip a capability on or off here per order.
 	 */
-	const CAPABILITY_CHECK_FILTER = 'woocommerce_subscriptions_engine_gateway_capability_check';
+	public const CAPABILITY_CHECK_FILTER = 'woocommerce_subscriptions_engine_gateway_capability_check';
 
 	/**
 	 * Action fired once capability resolution is stable for the request.
@@ -50,7 +48,7 @@ final class CapabilityRegistry {
 	 * Consumers that resolve capabilities should wait for this action so the
 	 * live-gateway step has a populated registry to read.
 	 */
-	const CAPABILITIES_READY_ACTION = 'woocommerce_subscriptions_engine_capabilities_ready';
+	public const CAPABILITIES_READY_ACTION = 'woocommerce_subscriptions_engine_capabilities_ready';
 
 	/**
 	 * `woocommerce_loaded` priority for the ready dispatch.
@@ -59,7 +57,7 @@ final class CapabilityRegistry {
 	 * capability flags onto the live gateway instance, so the live-gateway step
 	 * sees those flags by the time the ready action fires.
 	 */
-	const READY_HOOK_PRIORITY = 20;
+	public const READY_HOOK_PRIORITY = 20;
 
 	/**
 	 * Whether hooks have already been registered, to keep registration

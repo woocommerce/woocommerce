@@ -23,7 +23,7 @@ import strings from './strings';
  *
  */
 function ExitSurveyModal( {}: {
-	// eslint-disable-next-line @typescript-eslint/ban-types
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type, @typescript-eslint/no-empty-object-type
 	setExitSurveyModalOpen: Function;
 } ): JSX.Element | null {
 	const incentive = getAdminSetting( 'wcpayWelcomePageIncentive' );
@@ -67,7 +67,7 @@ function ExitSurveyModal( {}: {
 			incentive_id: incentive.id,
 		} );
 
-		closeModal();
+		void closeModal();
 	};
 
 	const sendFeedback = () => {
@@ -83,12 +83,12 @@ function ExitSurveyModal( {}: {
 
 		if ( isMoreInfoChecked ) {
 			// Record that the user would possibly consider installing WCPay with more information in the future.
-			updateOptions( {
+			void updateOptions( {
 				wcpay_welcome_page_exit_survey_more_info_needed_timestamp:
 					Math.floor( Date.now() / 1000 ),
 			} );
 		}
-		closeModal();
+		void closeModal();
 	};
 
 	if ( ! isOpen ) {

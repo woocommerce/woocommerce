@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Rename the new coupon result filters to woocommerce_coupon_is_valid_for_* so their true=valid polarity is clear and no longer collides with the woocommerce_coupon_validate_* family.

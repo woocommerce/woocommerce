@@ -29,7 +29,7 @@ Please take a moment to review the [project readme](https://github.com/woocommer
 - [Naming conventions](https://developer.woocommerce.com/docs/contribution/contributing/naming-conventions/)
 - [String localisation guidelines](https://developer.woocommerce.com/docs/contribution/contributing/string-localisation-guidelines/)
 - [Running unit tests](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/README.md)
-- [Running e2e tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw#guide-for-writing-e2e-tests)
+- [Running e2e tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e#writing-e2e-tests)
 
 ## Coding Guidelines and Development 🛠
 
@@ -39,8 +39,8 @@ Please take a moment to review the [project readme](https://github.com/woocommer
 - Whenever possible, please fix pre-existing code standards errors in code that you change.
 - Please consider adding appropriate tests related to your change if applicable such as unit, API and E2E tests. You can check the following resources for this purpose:
     - [Writing unit tests](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/README.md#guide-for-writing-unit-tests).
-    - [API tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw/tests/api-tests).
-    - [Writing E2E tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw#guide-for-writing-e2e-tests).
+    - [API tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e/tests/api-tests).
+    - [Writing E2E tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e#writing-e2e-tests).
 - Ensure you use LF line endings in your code editor. Use [EditorConfig](http://editorconfig.org/) if your editor supports it so that indentation, line endings and other settings are auto configured.
 - When committing, reference your issue number (#1234) and include a note about the fix.
 - Ensure that your code supports the minimum supported versions of PHP and WordPress; this is shown at the top of the `readme.txt` file.

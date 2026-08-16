@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+WP-CLI's blueprint command no longer risks a fatal error from loading its class twice.

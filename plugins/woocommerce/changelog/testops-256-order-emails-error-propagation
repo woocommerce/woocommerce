@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Propagate REST API errors in the order emails e2e spec instead of swallowing them; test-only, no changes to shipped code.

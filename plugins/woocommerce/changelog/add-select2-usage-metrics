@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add telemetry for legacy Select2 script usage.

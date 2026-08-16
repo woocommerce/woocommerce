@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Mark PHPStan workflows as required for CI

@@ -73,7 +73,7 @@ We then replace this code with the following code:
 <!-- wp:pattern {"slug":"woocommerce/mini-cart-empty-cart-message"} /-->
 ```
 
-In the file, that holds the logic for this FSE-template, in this case `src/BlockTypes/MiniCart.php`, we then register this placeholder as a block pattern:
+In the file, that holds the logic for this FSE-template, in this case `src/Blocks/BlockTypes/MiniCart.php`, we then register this placeholder as a block pattern:
 
 ```php
 /**
@@ -83,9 +83,9 @@ public function register_empty_cart_message_block_pattern() {
     register_block_pattern(
         'woocommerce/mini-cart-empty-cart-message',
         array(
-            'title'    => __( 'Empty Mini-Cart Message', 'woo-gutenberg-products-block' ),
+            'title'    => __( 'Empty Mini-Cart Message', 'woocommerce' ),
             'inserter' => false,
-            'content'  => '<!-- wp:paragraph {"align":"center"} --><p class="has-text-align-center"><strong>' . __( 'Your cart is currently empty!', 'woo-gutenberg-products-block' ) . '</strong></p><!-- /wp:paragraph -->',
+            'content'  => '<!-- wp:paragraph {"align":"center"} --><p class="has-text-align-center"><strong>' . __( 'Your cart is currently empty!', 'woocommerce' ) . '</strong></p><!-- /wp:paragraph -->',
         )
     );
 }

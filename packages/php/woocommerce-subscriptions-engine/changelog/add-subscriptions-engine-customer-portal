@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add the customer-portal engine surface: extend the Api\Subscriptions facade with customer-scoped reads (list_for_customer, get_for_customer), hold/reactivate/cancel-at-period-end verbs, and get_related_orders(); add focused per-operation contract services (Hold, Reactivation, and a period-end mode on Cancellation); add authenticated wc/v3 lifecycle-action endpoints (hold, reactivate, cancel) under Api\Rest responding with a domain summary; and hydrate the contract's frozen plan snapshot on the facade reads (PlanSnapshot::get_billing_policy()).

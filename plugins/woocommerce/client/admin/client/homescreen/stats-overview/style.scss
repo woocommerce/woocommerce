@@ -7,6 +7,13 @@ $promo-actions-border-bottom: $gray-100;
 	.woocommerce-card__body {
 		padding: 0;
 	}
+
+	.components-card__footer {
+		justify-content: flex-start;
+		min-height: auto;
+		padding: $gap $gap-large;
+	}
+
 	.woocommerce-summary {
 		margin: 0;
 	}
@@ -14,7 +21,13 @@ $promo-actions-border-bottom: $gray-100;
 
 .woocommerce-stats-overview__more-btn {
 	display: inline-block;
-	padding: $gap;
+	padding: 0;
+}
+
+.woocommerce-stats-overview__dropdown-item[aria-checked="false"] {
+	.components-menu-items__item-icon {
+		opacity: 0;
+	}
 }
 
 .woocommerce-stats-overview__tabs {
@@ -24,9 +37,15 @@ $promo-actions-border-bottom: $gray-100;
 		border-bottom: 1px solid $outer-border;
 
 		.components-button {
+			border-radius: 0;
 			width: 33.33%;
 			padding-right: $gap-large;
 			padding-left: $gap-large;
+
+			&::before,
+			&::after {
+				border-radius: 0;
+			}
 		}
 	}
 }

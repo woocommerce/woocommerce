@@ -231,18 +231,16 @@ final class OrderUtil {
 
 		if ( null === $count_per_status ) {
 			if ( self::custom_orders_table_usage_is_enabled() ) {
-				// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-				$results = $wpdb->get_results(
+				$orders_table = self::get_table_for_orders();
+				$results      = $wpdb->get_results(
 					$wpdb->prepare(
-						'SELECT `status`, COUNT(*) AS `count` FROM ' . self::get_table_for_orders() . ' WHERE `type` = %s GROUP BY `status`',
+						// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
+						"SELECT status, COUNT(*) AS count FROM {$orders_table} WHERE type = %s GROUP BY status",
 						$order_type
 					),
 					ARRAY_A
 				);
-				// phpcs:enable
-
 				$count_per_status = array_map( 'absint', array_column( $results, 'count', 'status' ) );
-
 			} else {
 				$count_per_status = (array) wp_count_posts( $order_type );
 			}

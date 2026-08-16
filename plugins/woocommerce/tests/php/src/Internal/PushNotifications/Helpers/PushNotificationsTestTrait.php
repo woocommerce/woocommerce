@@ -5,7 +5,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Helpers;
 
 use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -14,10 +13,9 @@ use ReflectionClass;
 /**
  * Shared test helpers for the PushNotifications module.
  *
- * Mocks the Jetpack connection state, the FeaturesController, and resets the
- * memoized enablement flag on the container's `PushNotifications` instance —
- * the three things every push-notifications-related controller test needs in
- * setUp.
+ * Mocks the Jetpack connection state and resets the memoized enablement flag on
+ * the container's `PushNotifications` instance — the two things every
+ * push-notifications-related controller test needs in setUp.
  *
  * @package WooCommerce\Tests\PushNotifications
  */
@@ -26,11 +24,6 @@ trait PushNotificationsTestTrait {
 	 * @var JetpackConnectionManager|MockObject|null
 	 */
 	protected $jetpack_connection_manager_mock;
-
-	/**
-	 * @var FeaturesController|MockObject|null
-	 */
-	protected $features_controller_mock;
 
 	/**
 	 * Mocks the JetpackConnectionManager so its `is_connected()` returns the
@@ -56,28 +49,6 @@ trait PushNotificationsTestTrait {
 			->willReturn( $is_connected );
 
 		$this->reset_push_notifications_cache();
-	}
-
-	/**
-	 * Sets up the FeaturesController mock so the `push_notifications` feature
-	 * reports as enabled (and only that feature).
-	 */
-	protected function set_up_features_controller_mock() {
-		$this->features_controller_mock = $this
-			->getMockBuilder( FeaturesController::class )
-			->disableOriginalConstructor()
-			->onlyMethods( array( 'feature_is_enabled' ) )
-			->getMock();
-
-		$this->features_controller_mock
-			->method( 'feature_is_enabled' )
-			->willReturnCallback(
-				function ( $feature_id ) {
-					return PushNotifications::FEATURE_NAME === $feature_id;
-				}
-			);
-
-		wc_get_container()->replace( FeaturesController::class, $this->features_controller_mock );
 	}
 
 	/**

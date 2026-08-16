@@ -1,22 +1,53 @@
 .woocommerce-homescreen .woocommerce-activity-panel {
-	background: transparent;
+	background: $studio-white;
 	border: 0;
+	border-radius: 8px;
+	box-shadow: 0 0 0 1px rgba($black, 0.1);
+	overflow: hidden;
 
 	.components-panel__body {
-		background: #fff;
-		border: 1px solid $gray-200;
+		background: transparent;
+		border: 0;
+		border-bottom: 1px solid $gray-200;
+		margin-top: 0;
+
+		&:first-child {
+			border-top-left-radius: 8px;
+			border-top-right-radius: 8px;
+		}
+
+		&:last-child {
+			border-bottom: 0;
+			border-bottom-left-radius: 8px;
+			border-bottom-right-radius: 8px;
+		}
+
+		&.is-opened + .components-panel__body {
+			border-top-left-radius: 8px;
+			border-top-right-radius: 8px;
+		}
 
 		&.is-opened {
 			margin-bottom: $gap-large;
+			border-bottom-left-radius: 8px;
+			border-bottom-right-radius: 8px;
 
 			.components-panel__body-toggle {
 				border-bottom: 1px solid $gray-200;
+				border-bottom-left-radius: 0;
+				border-bottom-right-radius: 0;
+			}
+
+			.components-panel__row {
+				border-bottom-left-radius: inherit;
+				border-bottom-right-radius: inherit;
+				overflow: hidden;
 			}
 		}
 	}
 
 	&.components-panel > .components-panel__body:last-child {
-		border-bottom: 1px solid $gray-200;
+		border-bottom: 0;
 	}
 
 	.components-panel__row {
@@ -26,11 +57,21 @@
 		}
 	}
 
+	.components-panel__body-title,
 	.components-panel__body-toggle {
-		border-radius: 0;
+		border-radius: inherit;
 
 		&:disabled {
 			opacity: 1;
+		}
+	}
+
+	.components-panel__body-toggle {
+		min-height: 69px;
+		padding-left: $gap-large;
+
+		.components-panel__arrow {
+			right: $gap-large;
 		}
 	}
 
