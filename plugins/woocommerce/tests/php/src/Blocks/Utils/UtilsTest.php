@@ -154,11 +154,12 @@ class UtilsTest extends WC_Unit_Test_Case {
 	/**
 	 * Get the current page URL after temporarily setting request state.
 	 *
-	 * @param string      $request_path The request path relative to home.
-	 * @param string|null $query_string The raw query string, or null to omit it.
+	 * @param string      $request_path         The request path relative to home.
+	 * @param string|null $query_string         The raw query string, or null to omit it.
+	 * @param bool        $use_trailing_slashes Whether permalinks should use trailing slashes.
 	 * @return string
 	 */
-	private function get_current_page_url_with_request_state( string $request_path, ?string $query_string ): string {
+	private function get_current_page_url_with_request_state( string $request_path, ?string $query_string, bool $use_trailing_slashes ): string {
 		global $wp, $wp_rewrite;
 
 		$original_request              = $wp->request;
@@ -168,7 +169,7 @@ class UtilsTest extends WC_Unit_Test_Case {
 
 		try {
 			$wp->request                      = $request_path;
-			$wp_rewrite->use_trailing_slashes = true;
+			$wp_rewrite->use_trailing_slashes = $use_trailing_slashes;
 
 			if ( null === $query_string ) {
 				unset( $_SERVER['QUERY_STRING'] );
@@ -193,12 +194,13 @@ class UtilsTest extends WC_Unit_Test_Case {
 	 * @testdox get_current_page_url() preserves request URL components exactly.
 	 * @dataProvider provider_current_page_url_cases
 	 *
-	 * @param string      $request_path  The request path relative to home.
-	 * @param string|null $query_string  The raw query string, or null to omit it.
-	 * @param string      $expected_path The expected path relative to home.
+	 * @param string      $request_path         The request path relative to home.
+	 * @param string|null $query_string         The raw query string, or null to omit it.
+	 * @param string      $expected_path        The expected path relative to home.
+	 * @param bool        $use_trailing_slashes Whether permalinks should use trailing slashes.
 	 */
-	public function test_get_current_page_url( string $request_path, ?string $query_string, string $expected_path ): void {
-		$url = $this->get_current_page_url_with_request_state( $request_path, $query_string );
+	public function test_get_current_page_url( string $request_path, ?string $query_string, string $expected_path, bool $use_trailing_slashes ): void {
+		$url = $this->get_current_page_url_with_request_state( $request_path, $query_string, $use_trailing_slashes );
 
 		$this->assertSame(
 			untrailingslashit( home_url() ) . $expected_path,
@@ -210,24 +212,33 @@ class UtilsTest extends WC_Unit_Test_Case {
 	/**
 	 * Current page URL inputs and their exact expected paths.
 	 *
-	 * @return array<string, array{string, string|null, string}>
+	 * @return array<string, array{string, string|null, string, bool}>
 	 */
 	public function provider_current_page_url_cases(): array {
 		return array(
-			'encoded label query'       => array(
+			'encoded label query'                   => array(
 				'product/hoodie',
 				'label=Black%20%26%20White',
 				'/product/hoodie/?label=Black%20%26%20White',
+				true,
 			),
-			'question mark query value' => array(
+			'question mark query value'             => array(
 				'search-results',
 				'search=?',
 				'/search-results/?search=?',
+				true,
 			),
-			'lone zero query string'    => array(
+			'lone zero query string'                => array(
 				'product/hoodie',
 				'0',
 				'/product/hoodie/?0',
+				true,
+			),
+			'encoded label query no trailing slash' => array(
+				'product/hoodie',
+				'label=Black%20%26%20White',
+				'/product/hoodie?label=Black%20%26%20White',
+				false,
 			),
 		);
 	}
