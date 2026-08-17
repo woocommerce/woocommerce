@@ -219,23 +219,19 @@ export const resolveFieldComponentForRendering = (
 	field: SettingsUIField,
 	context: SettingsFieldContext
 ): SettingsFieldComponent | undefined => {
-	const componentName = field.component;
-	if ( componentName ) {
-		const component = findInMatchingRegistrations(
-			context,
-			( registration ) => registration.components?.[ componentName ]
-		);
+	const component = resolveFieldComponent( field, context );
 
-		if ( ! component ) {
-			throw new Error(
-				`Component "${ componentName }" is not registered.`
-			);
-		}
-
+	if ( component ) {
 		return component;
 	}
 
-	return resolveFieldComponent( field, context );
+	if ( field.component ) {
+		throw new Error(
+			`Component "${ field.component }" is not registered.`
+		);
+	}
+
+	return undefined;
 };
 
 export const resolveFieldVisibilityPredicate = (

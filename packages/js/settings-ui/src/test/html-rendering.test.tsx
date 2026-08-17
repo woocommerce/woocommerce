@@ -209,6 +209,7 @@ describe( 'settings HTML rendering', () => {
 			'',
 			'/wp-admin/admin.php?page=wc-settings&tab=products&section=advanced&preserved=yes#wc-settings'
 		);
+		jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
 		jest.spyOn( console, 'error' ).mockImplementation( () => undefined );
 		const schema: SettingsUISchema = {
 			id: 'products',
@@ -258,6 +259,125 @@ describe( 'settings HTML rendering', () => {
 		expect( classicUrl.searchParams.get( 'section' ) ).toBe( 'advanced' );
 		expect( classicUrl.searchParams.get( 'preserved' ) ).toBe( 'yes' );
 		expect( classicUrl.hash ).toBe( '#wc-settings' );
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
+	it( 'uses a field override when an explicit component is not registered', () => {
+		const FieldOverride = () => <div>Extension field override</div>;
+		registerSettingsExtension( {
+			scope: { page: 'test-page' },
+			fieldOverrides: { test_field: FieldOverride },
+		} );
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'none' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'test_field',
+							label: 'Test field',
+							type: 'text',
+							component: 'test/missing-component',
+						},
+					],
+				},
+			},
+		};
+
+		const { container, root } = renderElement(
+			<SettingsUIErrorBoundary>
+				<SettingsUIPage schema={ schema } />
+			</SettingsUIErrorBoundary>
+		);
+
+		expect( container.textContent ).toContain( 'Extension field override' );
+		expect( container.textContent ).not.toContain(
+			'Something went wrong while rendering this settings page.'
+		);
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
+	it( 'renders extension-defined types through registered type renderers', () => {
+		const TypeRenderer = () => <div>Extension type renderer</div>;
+		registerSettingsExtension( {
+			scope: { page: 'test-page' },
+			typeRenderers: { extension_defined: TypeRenderer },
+		} );
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'none' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'test_field',
+							label: 'Test field',
+							type: 'extension_defined',
+						},
+					],
+				},
+			},
+		};
+
+		const { container, root } = renderElement(
+			<SettingsUIErrorBoundary>
+				<SettingsUIPage schema={ schema } />
+			</SettingsUIErrorBoundary>
+		);
+
+		expect( container.textContent ).toContain( 'Extension type renderer' );
+		expect( container.querySelector( 'input' ) ).toBeNull();
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
+	it( 'fails closed and focuses the error region for an unrenderable type', () => {
+		jest.spyOn( console, 'error' ).mockImplementation( () => undefined );
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'none' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'test_field',
+							label: 'Test field',
+							type: 'extension_defined',
+						},
+					],
+				},
+			},
+		};
+
+		const { container, root } = renderElement(
+			<SettingsUIErrorBoundary>
+				<SettingsUIPage schema={ schema } />
+			</SettingsUIErrorBoundary>
+		);
+
+		const errorRegion = container.querySelector( '.wc-settings-ui__error' );
+		expect( errorRegion ).toHaveAttribute( 'role', 'region' );
+		expect( errorRegion ).toHaveAttribute( 'tabindex', '-1' );
+		expect( errorRegion?.ownerDocument.activeElement ).toBe( errorRegion );
+		expect( container.querySelector( 'input' ) ).toBeNull();
+		expect(
+			container.querySelector( '.woocommerce-save-button' )
+		).toBeNull();
 
 		act( () => root.unmount() );
 		container.remove();

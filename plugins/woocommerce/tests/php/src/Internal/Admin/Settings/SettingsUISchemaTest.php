@@ -314,6 +314,122 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox It builds options for legacy page selectors that do not declare options.
+	 */
+	public function test_from_legacy_settings_builds_page_options(): void {
+		$page_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Checkout',
+			)
+		);
+
+		$schema = SettingsUISchema::from_legacy_settings(
+			'acme',
+			'',
+			'Acme',
+			array(
+				array(
+					'id'    => 'acme_page',
+					'label' => 'Acme page',
+					'type'  => 'single_select_page',
+					'value' => (string) $page_id,
+				),
+			)
+		);
+
+		$field   = $schema['groups']['default']['fields'][0];
+		$options = array_column( $field['options'], 'label', 'value' );
+
+		$this->assertSame( 'select', $field['type'], 'The legacy page selector should use the canonical select type.' );
+		$this->assertSame( (string) $page_id, $field['value'], 'The selected page ID should stay unchanged.' );
+		$this->assertSame( 'Checkout', $options[ (string) $page_id ], 'The created page should be available as an option.' );
+		SettingsUISchema::assert_valid_schema( $schema );
+	}
+
+	/**
+	 * @testdox It builds country and state options for legacy country selectors that do not declare options.
+	 */
+	public function test_from_legacy_settings_builds_country_and_state_options(): void {
+		$schema = SettingsUISchema::from_legacy_settings(
+			'acme',
+			'',
+			'Acme',
+			array(
+				array(
+					'id'    => 'acme_country',
+					'label' => 'Acme country',
+					'type'  => 'single_select_country',
+					'value' => 'US:CA',
+				),
+			)
+		);
+
+		$field         = $schema['groups']['default']['fields'][0];
+		$options       = array_column( $field['options'], 'label', 'value' );
+		$country_label = WC()->countries->get_countries()['US'];
+		$state_label   = WC()->countries->get_states( 'US' )['CA'];
+
+		$this->assertSame( 'select', $field['type'], 'The legacy country selector should use the canonical select type.' );
+		$this->assertSame( 'US:CA', $field['value'], 'The selected country and state value should stay unchanged.' );
+		$this->assertSame( $country_label . ' — ' . $state_label, $options['US:CA'], 'The state option should include its country label.' );
+		SettingsUISchema::assert_valid_schema( $schema );
+	}
+
+	/**
+	 * @testdox It builds options for legacy country multiselects that do not declare options.
+	 */
+	public function test_from_legacy_settings_builds_country_multiselect_options(): void {
+		$schema = SettingsUISchema::from_legacy_settings(
+			'acme',
+			'',
+			'Acme',
+			array(
+				array(
+					'id'    => 'acme_countries',
+					'label' => 'Acme countries',
+					'type'  => 'multi_select_countries',
+					'value' => array( 'US', 'MA' ),
+				),
+			)
+		);
+
+		$field   = $schema['groups']['default']['fields'][0];
+		$options = array_column( $field['options'], 'label', 'value' );
+
+		$this->assertSame( 'array', $field['type'], 'The legacy country multiselect should use the canonical array type.' );
+		$this->assertSame( array( 'US', 'MA' ), $field['value'], 'The selected country values should stay unchanged.' );
+		$this->assertSame( WC()->countries->get_countries()['US'], $options['US'], 'The United States should be available as an option.' );
+		$this->assertSame( WC()->countries->get_countries()['MA'], $options['MA'], 'Morocco should be available as an option.' );
+		SettingsUISchema::assert_valid_schema( $schema );
+	}
+
+	/**
+	 * @testdox It keeps declared options mandatory for ordinary legacy multiselects.
+	 */
+	public function test_from_legacy_settings_requires_options_for_multiselects(): void {
+		$schema = SettingsUISchema::from_legacy_settings(
+			'acme',
+			'',
+			'Acme',
+			array(
+				array(
+					'id'    => 'acme_choices',
+					'label' => 'Acme choices',
+					'type'  => 'multiselect',
+					'value' => array(),
+				),
+			)
+		);
+
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Field "acme_choices" of type "array" must define a non-empty options list.' );
+
+		SettingsUISchema::assert_valid_schema( $schema );
+	}
+
+	/**
 	 * @testdox It rejects duplicate legacy group ids before either group can be overwritten.
 	 *
 	 * @dataProvider duplicate_legacy_group_ids

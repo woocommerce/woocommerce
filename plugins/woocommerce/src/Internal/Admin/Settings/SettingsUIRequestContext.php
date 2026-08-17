@@ -335,7 +335,7 @@ class SettingsUIRequestContext {
 	 * This check does not validate registrations. Extensions can register their
 	 * declared handles after WooCommerce builds the settings embed dependencies.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @return bool
 	 */
@@ -353,7 +353,7 @@ class SettingsUIRequestContext {
 	 * Handle names are collected separately so extensions can register their
 	 * scripts after WooCommerce builds the settings embed dependency list.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @return string[] Enqueued script handles, or an empty array on failure.
 	 */
@@ -391,7 +391,7 @@ class SettingsUIRequestContext {
 	}
 
 	/**
-	 * Whether script handle resolution failed.
+	 * Whether script handle resolution or registration validation failed.
 	 *
 	 * @return bool
 	 */
@@ -449,7 +449,7 @@ class SettingsUIRequestContext {
 	 *
 	 * @return string
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 */
 	public function get_schema_failure_reason(): string {
 		if ( ! $this->schema_resolved ) {

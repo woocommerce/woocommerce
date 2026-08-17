@@ -165,6 +165,8 @@ Resolution order is:
 3. `typeRenderers[ field.type ]`
 4. Native field renderer
 
+If one registry entry is missing, resolution continues to the next entry. The page fails closed only when no registered or native renderer can render the field.
+
 ## Enqueue the component script
 
 Register your script in WordPress and return its handle from the settings integration that owns the fields.
@@ -203,4 +205,4 @@ WooCommerce loads the settings UI package first, then your script, then mounts t
 
 WooCommerce validates server-observable schema metadata and declared script handles before rendering the Settings UI mount. An invalid schema or a script handle that is not registered and enqueued renders the complete classic settings page in the same response.
 
-PHP cannot inspect the component registry in the browser. If a declared script executes but does not register the named component, or if the component throws while rendering, the Settings UI fails closed inside its page error boundary. It renders no editable fallback control and no Save action. The error notice offers a **Use classic settings** action that reloads the same page and section with `wc_settings_ui=classic` for that request. The action does not disable the feature flag, persist a preference, or reload automatically.
+PHP cannot inspect the component registry in the browser. If no named component, field override, type renderer, or native renderer can render a field, or if a component throws while rendering, the Settings UI fails closed inside its page error boundary. It renders no editable fallback control and no Save action. The error notice offers a **Use classic settings** action that reloads the same page and section with `wc_settings_ui=classic` for that request. The action does not disable the feature flag, persist a preference, or reload automatically.

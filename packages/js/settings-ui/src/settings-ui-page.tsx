@@ -22,7 +22,10 @@ import type { ErrorInfo, ReactNode } from 'react';
 import { HiddenInputs } from './hidden-inputs';
 import { error, warn } from './diagnostics';
 import { sanitizeSettingsHtml } from './html';
-import { NativeSettingsField } from './native-fields';
+import {
+	isNativeSettingsFieldType,
+	NativeSettingsField,
+} from './native-fields';
 import {
 	resolveFieldComponentForRendering,
 	resolveFieldVisibilityPredicate,
@@ -351,6 +354,7 @@ export class SettingsUIErrorBoundary extends Component<
 	ErrorBoundaryState
 > {
 	state: ErrorBoundaryState = { hasError: false };
+	private errorRegion: HTMLDivElement | null = null;
 
 	static getDerivedStateFromError(): ErrorBoundaryState {
 		return { hasError: true };
@@ -361,22 +365,38 @@ export class SettingsUIErrorBoundary extends Component<
 			error: caughtError,
 			errorInfo,
 		} );
+		this.errorRegion?.focus();
 	}
 
 	render() {
 		if ( this.state.hasError ) {
+			const message = __(
+				'Something went wrong while rendering this settings page.',
+				'woocommerce'
+			);
+
 			return (
-				<Notice status="error" isDismissible={ false }>
-					{ __(
-						'Something went wrong while rendering this settings page.',
-						'woocommerce'
-					) }
-					<div className="components-notice__buttons">
-						<Button href={ getClassicSettingsUrl() } variant="link">
-							{ __( 'Use classic settings', 'woocommerce' ) }
-						</Button>
-					</div>
-				</Notice>
+				<div
+					className="wc-settings-ui__error"
+					role="region"
+					aria-label={ message }
+					tabIndex={ -1 }
+					ref={ ( region ) => {
+						this.errorRegion = region;
+					} }
+				>
+					<Notice status="error" isDismissible={ false }>
+						{ message }
+						<div className="components-notice__buttons">
+							<Button
+								href={ getClassicSettingsUrl() }
+								variant="link"
+							>
+								{ __( 'Use classic settings', 'woocommerce' ) }
+							</Button>
+						</div>
+					</Notice>
+				</div>
 			);
 		}
 
@@ -890,11 +910,26 @@ export const SettingsUIPage = ( {
 							<GroupHeader group={ group } />
 							<div className="wc-settings-ui__section-fields">
 								{ group.fields.map( ( field ) => {
-									const FieldComponent =
+									const RegisteredFieldComponent =
 										resolveFieldComponentForRendering(
 											field,
 											context
-										) || NativeSettingsField;
+										);
+
+									if (
+										! RegisteredFieldComponent &&
+										! isNativeSettingsFieldType(
+											field.type
+										)
+									) {
+										throw new Error(
+											`Field type "${ field.type }" is not supported.`
+										);
+									}
+
+									const FieldComponent =
+										RegisteredFieldComponent ||
+										NativeSettingsField;
 									const value = values[ field.id ];
 
 									return (

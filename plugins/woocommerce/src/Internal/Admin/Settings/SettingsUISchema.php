@@ -186,7 +186,7 @@ class SettingsUISchema {
 	 * before this assertion. An invalid schema throws before it can be cached or
 	 * emitted to JavaScript.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @param array $schema Settings UI schema.
 	 * @throws \InvalidArgumentException When the schema is malformed or unsupported.
@@ -671,12 +671,106 @@ class SettingsUISchema {
 	 * @return array
 	 */
 	private static function get_options( array $setting ): array {
+		$type = isset( $setting['type'] ) && is_string( $setting['type'] ) ? $setting['type'] : '';
+
+		if ( 'single_select_page' === $type ) {
+			return self::get_page_options( $setting );
+		}
+
+		if ( 'single_select_country' === $type ) {
+			return self::get_country_and_state_options();
+		}
+
+		if ( 'multi_select_countries' === $type && ( ! isset( $setting['options'] ) || ! is_array( $setting['options'] ) || empty( $setting['options'] ) ) ) {
+			$countries = WC()->countries->get_countries();
+			asort( $countries );
+
+			return self::normalize_options( $countries );
+		}
+
 		if ( ! isset( $setting['options'] ) || ! is_array( $setting['options'] ) ) {
 			return array();
 		}
 
+		return self::normalize_options( $setting['options'] );
+	}
+
+	/**
+	 * Build options for a legacy page selector.
+	 *
+	 * @param array $setting Legacy field definition.
+	 * @return array
+	 */
+	private static function get_page_options( array $setting ): array {
+		$args = array(
+			'sort_column' => 'menu_order',
+			'sort_order'  => 'ASC',
+			'post_status' => array( 'publish', 'private', 'draft' ),
+		);
+
+		if ( isset( $setting['args'] ) && is_array( $setting['args'] ) ) {
+			$args = wp_parse_args( $setting['args'], $args );
+		}
+
+		$options = array(
+			array(
+				'label' => __( 'Select a page...', 'woocommerce' ),
+				'value' => '',
+			),
+		);
+
+		$pages = get_pages( $args );
+		if ( ! is_array( $pages ) ) {
+			return $options;
+		}
+
+		foreach ( $pages as $page ) {
+			$options[] = array(
+				'label' => wp_strip_all_tags( $page->post_title ),
+				'value' => (string) $page->ID,
+			);
+		}
+
+		return $options;
+	}
+
+	/**
+	 * Build country and state options for a legacy country selector.
+	 *
+	 * @return array
+	 */
+	private static function get_country_and_state_options(): array {
 		$options = array();
-		foreach ( $setting['options'] as $value => $label ) {
+		foreach ( WC()->countries->get_countries() as $country_code => $country_label ) {
+			$states = WC()->countries->get_states( $country_code );
+			if ( $states ) {
+				foreach ( $states as $state_code => $state_label ) {
+					$options[] = array(
+						'label' => wp_strip_all_tags( $country_label . ' — ' . $state_label ),
+						'value' => $country_code . ':' . $state_code,
+					);
+				}
+				continue;
+			}
+
+			$options[] = array(
+				'label' => wp_strip_all_tags( $country_label ),
+				'value' => (string) $country_code,
+			);
+		}
+
+		return $options;
+	}
+
+	/**
+	 * Normalize an option map.
+	 *
+	 * @param array $raw_options Raw option map.
+	 * @return array
+	 */
+	private static function normalize_options( array $raw_options ): array {
+		$options = array();
+		foreach ( $raw_options as $value => $label ) {
 			if ( ! is_scalar( $label ) && null !== $label ) {
 				continue;
 			}

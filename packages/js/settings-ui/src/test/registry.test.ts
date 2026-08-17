@@ -22,6 +22,7 @@ import type {
 describe( 'settings extension registry', () => {
 	afterEach( () => {
 		__resetRegistry();
+		jest.restoreAllMocks();
 	} );
 
 	it( 'resolves named field components within the matching scope', () => {
@@ -116,6 +117,34 @@ describe( 'settings extension registry', () => {
 				{ page: 'registry-missing-component' }
 			)
 		).toBe( fieldOverride );
+
+		expect(
+			resolveFieldComponentForRendering(
+				{
+					id: 'field',
+					label: 'Field',
+					type: 'text',
+					component: 'test/missing-component',
+				},
+				{ page: 'registry-missing-component' }
+			)
+		).toBe( fieldOverride );
+
+		expect(
+			resolveFieldComponentForRendering(
+				{
+					id: 'field_without_override',
+					label: 'Field',
+					type: 'text',
+					component: 'test/missing-component',
+				},
+				{ page: 'registry-missing-component' }
+			)
+		).toBe( typeRenderer );
+	} );
+
+	it( 'fails closed when an explicit component has no resolver fallback', () => {
+		jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
 
 		expect( () =>
 			resolveFieldComponentForRendering(

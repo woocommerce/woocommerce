@@ -200,6 +200,8 @@ The legacy adapter converts the existing `get_settings()` array into a canonical
 
 Fields before the first `title` marker are placed into a default group automatically.
 
+For legacy country and page selectors, the adapter creates the same option list that the classic renderer creates at render time. Other select and multiselect fields must declare their options in the settings definition.
+
 The default save adapter is `form_post`, which serializes hidden inputs so `WC_Admin_Settings::save_fields()` continues to save the submitted values.
 
 ## Custom component migration
@@ -256,9 +258,9 @@ final class My_Plugin_Settings_UI_Page extends LegacySettingsPageAdapter {
 
 The settings embed script depends on the settings UI package and these handles only for the opted-in page. Other settings pages do not load it.
 
-WooCommerce validates the schema and declared script handles on the server. If either is invalid, it renders the complete classic settings page in that response. Extension-defined field types remain valid when their values use the Settings UI value contract and a matching `typeRenderers` entry renders them in the browser.
+WooCommerce validates the schema shape and declared script handles on the server. If either is invalid, it renders the complete classic settings page in that response. PHP cannot inspect the JavaScript component registry. Extension-defined field types remain valid when their values use the Settings UI value contract and a matching `typeRenderers` entry renders them in the browser.
 
-The component registry exists only in the browser, after PHP has selected the Settings UI mount. If a script loads without registering a field's named component, or a component throws during rendering, the page fails closed with no editable fallback and no Save action. The error notice provides a **Use classic settings** link that preserves the current page and section and adds `wc_settings_ui=classic`. This is a user-initiated, request-only reload: it does not change the feature flag or automatically reload the page.
+The component registry exists only in the browser, after PHP has selected the Settings UI mount. The browser resolves a named component, a field override, a type renderer, and then a native renderer. If none exists, or if a component throws during rendering, the page fails closed with no editable fallback and no Save action. The error notice provides a **Use classic settings** link that preserves the current page and section and adds `wc_settings_ui=classic`. This is a user-initiated, request-only reload: it does not change the feature flag or automatically reload the page.
 
 ## Save adapters
 
@@ -355,5 +357,5 @@ In development, the settings UI logs warnings for common integration issues:
 -   The settings payload is missing.
 -   The `wc-settings-ui` script is missing for a settings UI mount.
 -   A field declares a component that is not registered.
--   A field type is unsupported.
+-   A field type has no registered or native renderer.
 -   A field declares an unknown save adapter.
