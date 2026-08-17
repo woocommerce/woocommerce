@@ -406,9 +406,9 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox It keeps declared options mandatory for ordinary legacy multiselects.
+	 * @testdox It accepts an ordinary legacy multiselect with no options.
 	 */
-	public function test_from_legacy_settings_requires_options_for_multiselects(): void {
+	public function test_from_legacy_settings_accepts_multiselect_without_options(): void {
 		$schema = SettingsUISchema::from_legacy_settings(
 			'acme',
 			'',
@@ -423,10 +423,11 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->expectException( \InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Field "acme_choices" of type "array" must define a non-empty options list.' );
-
 		SettingsUISchema::assert_valid_schema( $schema );
+
+		$field = $schema['groups']['default']['fields'][0];
+		$this->assertSame( 'array', $field['type'], 'The legacy multiselect should use the canonical array type.' );
+		$this->assertArrayNotHasKey( 'options', $field, 'An empty legacy option map should remain an empty choice set.' );
 	}
 
 	/**
@@ -955,6 +956,37 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox It accepts choice fields with missing or empty option lists.
+	 */
+	public function test_assert_valid_schema_accepts_choice_fields_without_options(): void {
+		$fields = array();
+		foreach (
+			array(
+				'select' => '',
+				'radio'  => '',
+				'array'  => array(),
+			) as $type => $value
+		) {
+			$field = array(
+				'id'    => 'acme_' . $type . '_without_options',
+				'label' => ucfirst( $type ) . ' without options',
+				'type'  => $type,
+				'value' => $value,
+				'save'  => array( 'adapter' => 'form_post' ),
+			);
+
+			$fields[]         = $field;
+			$field['id']      = 'acme_empty_' . $type;
+			$field['label']   = 'Empty ' . $type;
+			$field['options'] = array();
+			$fields[]         = $field;
+		}
+
+		SettingsUISchema::assert_valid_schema( $this->get_native_schema_with_fields( $fields ) );
+		$this->addToAssertionCount( 1 );
+	}
+
+	/**
 	 * Supported field type fixtures.
 	 *
 	 * @return array<string, array{string, mixed}>
@@ -1055,9 +1087,14 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 		$empty_schema_id['id']                                  = '';
 		$malformed_group                                        = $valid;
 		$malformed_group['groups']['main']['fields']            = 'invalid';
-		$missing_options                                        = $valid;
-		$missing_options['groups']['main']['fields'][0]['type'] = 'select';
-		$invalid_option = $missing_options;
+		$invalid_options                                        = $valid;
+		$invalid_options['groups']['main']['fields'][0]['type'] = 'select';
+		$invalid_options['groups']['main']['fields'][0]['options'] = array( 'one' => 'One' );
+		$null_options                                        = $valid;
+		$null_options['groups']['main']['fields'][0]['type'] = 'select';
+		$null_options['groups']['main']['fields'][0]['options'] = null;
+		$invalid_option                                        = $valid;
+		$invalid_option['groups']['main']['fields'][0]['type'] = 'select';
 		$invalid_option['groups']['main']['fields'][0]['options'] = array(
 			array(
 				'label' => 'One',
@@ -1112,7 +1149,8 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 			'group and field collision'   => array( $group_field_collision, 'Field id "main" collides with a group id.' ),
 			'empty schema id'             => array( $empty_schema_id, 'Schema id must be a non-empty string.' ),
 			'malformed group fields'      => array( $malformed_group, 'Group "main" fields must be a list.' ),
-			'missing choice options'      => array( $missing_options, 'Field "acme_field" of type "select" must define a non-empty options list.' ),
+			'non-list choice options'     => array( $invalid_options, 'Field "acme_field" options must be a list.' ),
+			'null choice options'         => array( $null_options, 'Field "acme_field" options must be a list.' ),
 			'non-string option value'     => array( $invalid_option, 'Field "acme_field" option 0 value must be a string.' ),
 			'empty component name'        => array( $invalid_component, 'Field "acme_field" component must be a non-empty string.' ),
 			'unsupported field save'      => array( $invalid_field_save, 'Field "acme_field" save adapter must be "form_post" or "none".' ),

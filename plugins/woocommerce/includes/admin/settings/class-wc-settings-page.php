@@ -148,7 +148,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 
 				// The legacy fallback renderer needs the classic styling: the settings UI
 				// body class hides the legacy Save button via CSS.
-				if ( $context->has_schema_failed() || $context->has_script_handles_failed() ) {
+				if ( $context->has_schema_failed() || $context->has_script_handle_loading_failed() ) {
 					return $classes;
 				}
 
@@ -433,7 +433,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 
 						$context->enqueue_script_handles();
 
-						if ( $context->has_script_handles_failed() ) {
+						if ( $context->has_script_handle_loading_failed() ) {
 							$this->log_settings_ui_fallback( $settings_ui_page, $section, $context->get_script_handles_failure_reason() );
 						} else {
 							$GLOBALS['hide_save_button'] = true;

@@ -430,7 +430,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		// WooCommerce collects dependencies at priority 15; extensions may register them later in the same hook.
 		$dependencies = $this->invoke_private_method( new WCAdminAssets(), 'get_settings_ui_script_dependencies' );
 		$this->assertSame( array( 'wc-settings-ui', 'settings-ui-late-registered-handle' ), $dependencies );
-		$this->assertFalse( $context->has_script_handle_resolution_failed() );
+		$this->assertFalse( $context->has_script_handles_failed(), 'Dependency collection should only resolve handle declarations.' );
 		wp_register_script( 'settings-ui-late-registered-handle', false, array(), '1.0.0', true );
 
 		ob_start();
@@ -439,7 +439,20 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 
 		$this->assertTrue( wp_script_is( 'settings-ui-late-registered-handle', 'enqueued' ) );
 		$this->assertStringContainsString( 'data-wc-settings-ui="1"', $output );
-		$this->assertFalse( $context->has_script_handles_failed() );
+		$this->assertFalse( $context->has_script_handle_loading_failed() );
+	}
+
+	/**
+	 * @testdox Should preserve the public resolution check when a declared script is not registered.
+	 */
+	public function test_script_handle_loading_check_does_not_change_resolution_check_contract(): void {
+		$page    = $this->get_settings_ui_test_page_with_script_handles( array( 'settings-ui-unregistered-handle' ) );
+		$context = SettingsUIRequestContext::for_settings_page( $page, '' );
+
+		$this->assertFalse( $context->has_script_handles_failed(), 'A valid handle declaration should pass resolution.' );
+		$this->assertNotNull( $context->get_schema(), 'Schema access should not require script registration.' );
+		$this->assertTrue( $context->has_script_handle_loading_failed(), 'The strict loading check should reject an unregistered handle.' );
+		$this->assertStringContainsString( 'not registered', $context->get_script_handles_failure_reason() );
 	}
 
 	/**

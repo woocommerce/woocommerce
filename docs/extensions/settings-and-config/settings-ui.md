@@ -200,7 +200,7 @@ The legacy adapter converts the existing `get_settings()` array into a canonical
 
 Fields before the first `title` marker are placed into a default group automatically.
 
-For legacy country and page selectors, the adapter creates the same option list that the classic renderer creates at render time. Other select and multiselect fields must declare their options in the settings definition.
+For legacy country and page selectors, the adapter creates the same option list that the classic renderer creates at render time. Other select, radio, and multiselect fields can omit `options` or use an empty array. The Settings UI then renders the same empty choice set that the classic settings API accepts. When a field supplies options, WooCommerce validates their structure before rendering.
 
 The default save adapter is `form_post`, which serializes hidden inputs so `WC_Admin_Settings::save_fields()` continues to save the submitted values.
 

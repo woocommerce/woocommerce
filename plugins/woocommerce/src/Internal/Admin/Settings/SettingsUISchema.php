@@ -49,13 +49,6 @@ class SettingsUISchema {
 	);
 
 	/**
-	 * Field types that require a choice list.
-	 *
-	 * @var string[]
-	 */
-	private const CHOICE_FIELD_TYPES = array( 'array', 'radio', 'select' );
-
-	/**
 	 * Custom attributes that describe a numeric range.
 	 *
 	 * @var string[]
@@ -1117,15 +1110,12 @@ class SettingsUISchema {
 	 * @param array $field Field definition.
 	 */
 	private static function assert_field_options( array $field ): void {
-		$field_id = $field['id'];
-		$options  = $field['options'] ?? null;
-		if ( in_array( $field['type'], self::CHOICE_FIELD_TYPES, true ) && ( ! is_array( $options ) || empty( $options ) || ! ArrayUtil::array_is_list( $options ) ) ) {
-			throw self::invalid_schema( sprintf( 'Field "%s" of type "%s" must define a non-empty options list.', $field_id, $field['type'] ) );
-		}
-
-		if ( null === $options ) {
+		if ( ! array_key_exists( 'options', $field ) ) {
 			return;
 		}
+
+		$field_id = $field['id'];
+		$options  = $field['options'];
 
 		if ( ! is_array( $options ) || ! ArrayUtil::array_is_list( $options ) ) {
 			throw self::invalid_schema( sprintf( 'Field "%s" options must be a list.', $field_id ) );
