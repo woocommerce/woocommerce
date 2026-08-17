@@ -34,7 +34,7 @@ if [ -n "$matchingRemoteBranches" ]; then
 fi
 
 git fetch origin trunk >/dev/null 2>&1
-changedFiles=$(git diff $(git merge-base HEAD origin/trunk) --relative --name-only --diff-filter=d -- '.syncpackrc' 'package.json' '*/package.json')
+changedFiles=$(git diff $(git merge-base HEAD origin/trunk) --relative --name-only --diff-filter=d -- '.syncpackrc' 'package.json' '*/package.json' 'pnpm-workspace.yaml')
 if [ -n "$changedFiles" ]; then
 	echo -n 'pre-push: validating syncpack mismatches '
 	pnpm exec syncpack lint
