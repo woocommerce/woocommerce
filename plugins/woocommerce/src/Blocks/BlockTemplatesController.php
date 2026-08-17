@@ -315,7 +315,7 @@ class BlockTemplatesController {
 			// There is the chance that the user customized the default template, installed a theme with a custom template
 			// and customized that one as well. When that happens, duplicates might appear in the list.
 			// See: https://github.com/woocommerce/woocommerce/issues/42220.
-			$query_result = BlockTemplateUtils::remove_duplicate_customized_templates( $query_result );
+			// $query_result = BlockTemplateUtils::remove_duplicate_customized_templates( $query_result );
 		}
 
 		/**
