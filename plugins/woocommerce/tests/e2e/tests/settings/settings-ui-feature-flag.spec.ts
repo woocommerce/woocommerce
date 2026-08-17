@@ -56,7 +56,6 @@ test.describe( 'Settings UI feature flag', { tag: [ tags.NOT_E2E ] }, () => {
 
 	test( 'loads the private DataForm runtime without compatibility failures', async ( {
 		page,
-		baseURL,
 	} ) => {
 		const compatibilityFailures: string[] = [];
 		const recordCompatibilityFailure = ( message: string ) => {
@@ -72,12 +71,6 @@ test.describe( 'Settings UI feature flag', { tag: [ tags.NOT_E2E ] }, () => {
 			recordCompatibilityFailure( message.text() );
 		} );
 
-		await setFeatureFlag(
-			request,
-			getBaseURL( baseURL ),
-			'settings-ui',
-			true
-		);
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=products' );
 		await expect( page.locator( '[data-wc-settings-ui]' ) ).toBeVisible();
 		await expect(
