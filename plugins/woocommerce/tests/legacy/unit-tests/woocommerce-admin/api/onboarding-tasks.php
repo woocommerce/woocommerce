@@ -409,6 +409,39 @@ class WC_Admin_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that the dismiss endpoint rejects an unknown task list ID instead of
+	 * falling back to a successful dismissal outside the requested scope.
+	 *
+	 * @group tasklist
+	 */
+	public function test_dismiss_rejects_unknown_task_list_id() {
+		wp_set_current_user( $this->user );
+
+		TaskLists::add_list( array( 'id' => 'list-a' ) );
+		TaskLists::add_task(
+			'list-a',
+			new TestTask(
+				TaskLists::get_list( 'list-a' ),
+				array(
+					'id'             => 'test-task',
+					'title'          => 'Test Task',
+					'is_dismissable' => true,
+				)
+			)
+		);
+
+		$request = new WP_REST_Request( 'POST', $this->endpoint . '/test-task/dismiss' );
+		$request->set_headers( array( 'content-type' => 'application/json' ) );
+		$request->set_param( 'task_list_id', 'does-not-exist' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 404, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_invalid_task_list', $data['code'] );
+		$this->assertEquals( false, TaskLists::get_task( 'test-task', 'list-a' )->is_dismissed() );
+	}
+
+	/**
 	 * Test that dismiss endpoint returns error for invalid task.
 	 * @group tasklist
 	 */

@@ -773,7 +773,18 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	public function dismiss_task( $request ) {
 		$id           = $request->get_param( 'id' );
 		$task_list_id = $request->get_param( 'task_list_id' );
-		$task         = TaskLists::get_task( $id, $task_list_id );
+
+		if ( $task_list_id && ! TaskLists::get_list( $task_list_id ) ) {
+			return new \WP_Error(
+				'woocommerce_rest_invalid_task_list',
+				__( 'Sorry, no task list with that ID was found.', 'woocommerce' ),
+				array(
+					'status' => 404,
+				)
+			);
+		}
+
+		$task = TaskLists::get_task( $id, $task_list_id );
 
 		if ( ! $task && $id ) {
 			$task = new DeprecatedExtendedTask(
@@ -808,7 +819,18 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	public function undo_dismiss_task( $request ) {
 		$id           = $request->get_param( 'id' );
 		$task_list_id = $request->get_param( 'task_list_id' );
-		$task         = TaskLists::get_task( $id, $task_list_id );
+
+		if ( $task_list_id && ! TaskLists::get_list( $task_list_id ) ) {
+			return new \WP_Error(
+				'woocommerce_rest_invalid_task_list',
+				__( 'Sorry, no task list with that ID was found.', 'woocommerce' ),
+				array(
+					'status' => 404,
+				)
+			);
+		}
+
+		$task = TaskLists::get_task( $id, $task_list_id );
 
 		if ( ! $task && $id ) {
 			$task = new DeprecatedExtendedTask(
