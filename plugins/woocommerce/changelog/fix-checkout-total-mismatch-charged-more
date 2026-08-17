@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Store API/Checkout Block: the total-mismatch guard added in #66420 now applies the addresses sent with the place-order request before recalculating, so it compares against the total the order will actually settle at. It also only rejects the order when the recalculated total is higher than what the shopper confirmed (a lower total, e.g. from a coupon or price drop, is no longer treated as a mismatch), reports both the confirmed and updated totals in the error, and requires expected_total to be sent in the documented minor-unit format.
