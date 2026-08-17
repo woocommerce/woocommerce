@@ -96,6 +96,13 @@ final class TermCountTest extends WC_Unit_Test_Case {
 			);
 			$this->assertSame( 1, $recount_attempts, 'Removing a count-affecting relationship should recount once.' );
 
+			$recount_attempts = $this->count_recount_attempts(
+				static function () use ( $product ): void {
+					wp_add_object_terms( $product->get_id(), ProductStockStatus::OUT_OF_STOCK, 'product_visibility' );
+				}
+			);
+			$this->assertSame( 1, $recount_attempts, 'Appending a count-affecting relationship should recount once.' );
+
 			wp_set_object_terms( $product->get_id(), 'exclude-from-catalog', 'product_visibility' );
 			$recount_attempts = $this->count_recount_attempts(
 				static function () use ( $product ): void {
