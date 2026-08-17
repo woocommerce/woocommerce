@@ -628,7 +628,7 @@ class WC_Comments {
 		);
 
 		foreach ( $raw_counts as $count ) {
-			$counts[ $count->meta_value ] = absint( $count->meta_value_count ); // WPCS: slow query ok.
+			$counts[ $count->meta_value ] = absint( $count->meta_value_count ); // phpcs:ignore WordPress.DB.SlowDBQuery.meta_value -- meta_value is a result-object property, not a query argument.
 		}
 
 		return $counts;
