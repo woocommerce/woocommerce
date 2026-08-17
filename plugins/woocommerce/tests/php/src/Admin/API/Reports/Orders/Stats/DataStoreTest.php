@@ -449,4 +449,65 @@ class DataStoreTest extends WC_Unit_Test_Case {
 
 		WC_Helper_Order::delete_order( $order_id );
 	}
+
+	/**
+	 * @testdox Changing the first order to an excluded custom status longer than the 20-char storage limit reassigns the first-order role and marks the customer as returning.
+	 */
+	public function test_returning_customer_recalculated_for_long_excluded_status(): void {
+		global $wpdb;
+
+		$long_status = 'competition-completed';
+		register_post_status( 'wc-' . $long_status, array( 'public' => true ) );
+		$add_status = function ( $statuses ) use ( $long_status ) {
+			$statuses[ 'wc-' . $long_status ] = 'Competition Completed';
+			return $statuses;
+		};
+		add_filter( 'wc_order_statuses', $add_status );
+		update_option( 'woocommerce_excluded_report_order_statuses', array( 'pending', 'failed', 'cancelled', $long_status ) );
+
+		$customer = \WC_Helper_Customer::create_customer( 'cust_long_status', 'pwd', 'long_status_customer@mail.com' );
+
+		$order_1 = WC_Helper_Order::create_order( $customer->get_id() );
+		$order_1->set_date_created( time() - 2 * HOUR_IN_SECONDS );
+		$order_1->set_status( 'processing' );
+		$order_1->save();
+
+		$order_2 = WC_Helper_Order::create_order( $customer->get_id() );
+		$order_2->set_date_created( time() - HOUR_IN_SECONDS );
+		$order_2->set_status( 'processing' );
+		$order_2->save();
+
+		OrdersStatsDataStore::sync_order( $order_1->get_id() );
+		OrdersStatsDataStore::sync_order( $order_2->get_id() );
+
+		$returning_flag = static function ( $id ) use ( $wpdb ) {
+			return $wpdb->get_var(
+				$wpdb->prepare( "SELECT returning_customer FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $id )
+			);
+		};
+		$this->assertSame( '0', $returning_flag( $order_1->get_id() ), 'Oldest order should start as the non-returning first order.' );
+		$this->assertSame( '1', $returning_flag( $order_2->get_id() ), 'Second order should start as returning.' );
+
+		// Core warns when saving a status longer than the 20-char column; that
+		// truncated storage is the exact scenario under test.
+		$this->setExpectedIncorrectUsage( 'Abstract_WC_Order_Data_Store_CPT::get_post_status' );
+		$order_1->set_status( $long_status );
+		$order_1->save();
+
+		// Reload so the order reports the truncated status actually stored in the database.
+		$order_1 = wc_get_order( $order_1->get_id() );
+
+		$this->assertTrue(
+			OrdersStatsDataStore::is_returning_customer( $order_1 ),
+			'An order moved to an excluded long custom status should be reported as returning.'
+		);
+		$this->assertSame(
+			'0',
+			$returning_flag( $order_2->get_id() ),
+			'The next oldest order should be reassigned as the customer\'s first order.'
+		);
+
+		remove_filter( 'wc_order_statuses', $add_status );
+		unset( $GLOBALS['wp_post_statuses'][ 'wc-' . $long_status ] );
+	}
 }
