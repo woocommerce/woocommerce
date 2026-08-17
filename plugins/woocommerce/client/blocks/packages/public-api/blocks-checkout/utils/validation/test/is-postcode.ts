@@ -3,13 +3,14 @@
  */
 import isPostcode from '../is-postcode';
 import type { IsPostcodeProps } from '../is-postcode';
+import postcodeValidationFixtures from './postcode-validation-fixtures.json';
 
 describe( 'isPostcode', () => {
 	const cases = [
 		// Austrian postcodes
 		[ true, '1000', 'AT' ],
 		[ true, '9999', 'AT' ],
-		[ false, '0000', 'AT' ],
+		[ true, '0000', 'AT' ],
 		[ false, '10000', 'AT' ],
 
 		// Bosnian postcodes
@@ -64,7 +65,7 @@ describe( 'isPostcode', () => {
 		// French postcodes
 		[ true, '01000', 'FR' ],
 		[ true, '99999', 'FR' ],
-		[ true, '01 000', 'FR' ],
+		[ false, '01 000', 'FR' ],
 		[ false, '1234', 'FR' ],
 
 		// British postcodes
@@ -200,5 +201,14 @@ describe( 'isPostcode', () => {
 		expect( isPostcode( { postcode, country } as IsPostcodeProps ) ).toBe(
 			result
 		)
+	);
+} );
+
+describe( 'shared postcode validation contract', () => {
+	test.each( postcodeValidationFixtures )(
+		'$expected: $postcode for $country',
+		( { expected, postcode, country } ) => {
+			expect( isPostcode( { postcode, country } ) ).toBe( expected );
+		}
 	);
 } );

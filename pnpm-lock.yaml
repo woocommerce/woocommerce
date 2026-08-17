@@ -3505,8 +3505,8 @@ importers:
         specifier: 3.0.4
         version: 3.0.4(react@18.3.1)
       postcode-validator:
-        specifier: 3.9.2
-        version: 3.9.2
+        specifier: 3.10.22
+        version: 3.10.22
       preact:
         specifier: ^10.24.2
         version: 10.29.1
@@ -18577,8 +18577,9 @@ packages:
     resolution: {integrity: sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg==}
     engines: {node: '>= 0.4'}
 
-  postcode-validator@3.9.2:
-    resolution: {integrity: sha512-C+oaXif+z+mAN1EWDZG/EM2dnrUxRQR0gpMq8VeLSZwHuT3Bqo4hR3+k7OaEevPl0VK/7W27JwEQb24CbdtzuQ==}
+  postcode-validator@3.10.22:
+    resolution: {integrity: sha512-4rQfw8cPGHaAwIJsOAh1RTxr34EkBcKYYgp72+IQrVTPnmmrdz45OsVeese6X7oOkJ19SY/leRP+o1syeWGJuw==}
+    engines: {node: '>=20.8.1'}
 
   postcss-calc@8.2.4:
     resolution: {integrity: sha512-SmWMSJmB8MRnnULldx0lQIyhSNvuDl9HfrZkaqqE/WHAhToYsAvDq+yAsA/kIyINDszOp3Rh0GFoNuH5Ypsm3Q==}
@@ -45833,7 +45834,7 @@ snapshots:
 
   possible-typed-array-names@1.1.0: {}
 
-  postcode-validator@3.9.2: {}
+  postcode-validator@3.10.22: {}
 
   postcss-calc@8.2.4(postcss@8.4.49):
     dependencies:
