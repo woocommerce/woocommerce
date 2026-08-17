@@ -28,7 +28,7 @@ defined( 'ABSPATH' ) || exit;
  * - `POST /wc/v3/fulfillments/import/prepare` uploads the CSV, parses headers, opens an ImportSession.
  * - `POST /wc/v3/fulfillments/import/run` processes one chunk against an existing session.
  *
- * @since 11.1.0
+ * @since 11.2.0
  */
 class FulfillmentsImporterRestController extends RestApiControllerBase {
 
@@ -43,7 +43,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	/**
 	 * Get the WooCommerce REST API namespace key for this controller.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @return string
 	 */
@@ -54,7 +54,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	/**
 	 * Register the routes for the importer.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 */
 	public function register_routes(): void {
 		register_rest_route(
@@ -263,7 +263,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	/**
 	 * Permission check for the import endpoints.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 * @param WP_REST_Request $request The request for which the permission is checked.
@@ -276,7 +276,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	/**
 	 * Prepare step: validate + stage the upload, parse headers, open a session.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 * @param WP_REST_Request $request The incoming multipart request.
@@ -358,7 +358,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	/**
 	 * Run step: process one chunk against an existing session.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 * @param WP_REST_Request $request The incoming JSON request.
@@ -601,7 +601,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			/**
 			 * Fires after a bulk fulfillments CSV import completes.
 			 *
-			 * @since 11.1.0
+			 * @since 11.2.0
 			 *
 			 * @param array $summary Import summary counts.
 			 */

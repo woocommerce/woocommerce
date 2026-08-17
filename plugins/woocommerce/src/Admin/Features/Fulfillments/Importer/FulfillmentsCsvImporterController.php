@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * The actual import is handled by FulfillmentsImporterRestController.
  *
- * @since 11.1.0
+ * @since 11.2.0
  */
 class FulfillmentsCsvImporterController {
 
@@ -35,7 +35,7 @@ class FulfillmentsCsvImporterController {
 	/**
 	 * Register hooks. Called by FulfillmentsController when the feature is enabled.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 */
 	public function register(): void {
 		// The React script (`fulfillments-importer`) injects the "Import fulfillments" trigger
@@ -49,7 +49,7 @@ class FulfillmentsCsvImporterController {
 	/**
 	 * Render the React mount slot once per page load on the orders list.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 */
 	public function render_modal_slot(): void {
 		if ( ! $this->should_render_importer() ) {
@@ -61,7 +61,7 @@ class FulfillmentsCsvImporterController {
 	/**
 	 * Register and enqueue the React script and style on the orders list screen.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 */
 	public function enqueue_assets(): void {
 		if ( $this->assets_enqueued ) {
@@ -93,7 +93,7 @@ class FulfillmentsCsvImporterController {
 	 * Mirrors the guard used by {@see FulfillmentsRenderer::should_render_fulfillment_drawer()}:
 	 * admin orders-list only, with the manage_woocommerce capability.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @return bool
 	 */

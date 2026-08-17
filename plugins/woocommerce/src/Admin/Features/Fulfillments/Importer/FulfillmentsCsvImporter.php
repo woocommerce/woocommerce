@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Parses a CSV file of fulfillment rows and creates/updates fulfillment records.
  *
- * @since 11.1.0
+ * @since 11.2.0
  */
 class FulfillmentsCsvImporter {
 
@@ -88,7 +88,7 @@ class FulfillmentsCsvImporter {
 	/**
 	 * Constructor.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @param string               $file    Absolute path to the CSV file.
 	 * @param array<string, mixed> $options Importer options:
@@ -111,7 +111,7 @@ class FulfillmentsCsvImporter {
 	/**
 	 * Normalize a delimiter input, falling back to ',' when empty or non-string.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @param mixed $delimiter Raw delimiter input.
 	 * @return string Delimiter string (defaults to ',').
@@ -132,7 +132,7 @@ class FulfillmentsCsvImporter {
 	 *
 	 * Each row is processed independently; a single bad row never aborts the run.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @return array{
 	 *     created: int,
@@ -230,7 +230,7 @@ class FulfillmentsCsvImporter {
 	 * Does not fail when required canonical columns cannot be auto-detected; the caller can
 	 * present the mapping UI so the user resolves it manually.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @param string $delimiter Delimiter override; falls back to the constructor delimiter when empty.
 	 * @return array{
@@ -320,7 +320,7 @@ class FulfillmentsCsvImporter {
 	/**
 	 * Process a contiguous slice of CSV rows.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @param int                  $offset  0-based row offset to start at (header is implicitly skipped).
 	 * @param int                  $limit   Maximum number of CSV records to consume from the slice.
@@ -583,7 +583,7 @@ class FulfillmentsCsvImporter {
 	 * Shared between the importer's own loop and the REST controller so a single filter and a
 	 * single hard ceiling govern both call sites.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @return int
 	 */
@@ -594,7 +594,7 @@ class FulfillmentsCsvImporter {
 		 * Shared by the one-shot run() path and the wizard's per-chunk REST handler.
 		 * The server enforces sane bounds regardless of what callers send.
 		 *
-		 * @since 11.1.0
+		 * @since 11.2.0
 		 *
 		 * @param int $chunk_size Default chunk size (200).
 		 */
@@ -621,7 +621,7 @@ class FulfillmentsCsvImporter {
 	/**
 	 * Invert a column-index-keyed mapping into the canonical-keyed header map used by process_row().
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @param array<int, string> $mapping CSV column index => canonical column key. Unmapped slots may be "".
 	 * @return array<string, int> Canonical column key => CSV column index. First wins on duplicates.
@@ -895,7 +895,7 @@ class FulfillmentsCsvImporter {
 	/**
 	 * Determine which required columns are missing.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @param array<string, int> $header_map Header map.
 	 * @return array<int, string> Human-friendly names of missing columns.
@@ -964,7 +964,7 @@ class FulfillmentsCsvImporter {
 		 * Keys are canonical column identifiers; values are arrays of accepted (lowercase,
 		 * snake-cased) aliases.
 		 *
-		 * @since 11.1.0
+		 * @since 11.2.0
 		 *
 		 * @param array<string, array<int, string>> $aliases Default alias map.
 		 */
@@ -1063,7 +1063,7 @@ class FulfillmentsCsvImporter {
 		 * Return a WC_Order to override resolution (for custom order-number schemes), or null
 		 * to indicate the order number could not be resolved.
 		 *
-		 * @since 11.1.0
+		 * @since 11.2.0
 		 *
 		 * @param WC_Order|null $order        The order resolved by default behavior, or null.
 		 * @param string        $order_number The raw order number string from the CSV.
