@@ -105,13 +105,21 @@ export type SendTestEmailSource = 'email_preview' | 'email_listing';
  *
  * - `settings`: the wc-admin-email send-preview endpoint, driven by the exact
  *   WC_Email class name (`emailType`). Used by the legacy email preview page.
- * - `editor`: the email editor's send_preview_email endpoint, driven by the
- *   `woo_email` post ID — the exact pipeline the block email editor's own
- *   "Send a test email" modal uses. `emailType` is only used for Tracks.
+ * - `editor`: the email editor's send_preview_email endpoint — the exact
+ *   pipeline the block email editor's own "Send a test email" modal uses.
+ *   Driven by the `woo_email` post ID when the email has a published post;
+ *   without one, `emailTypeId` (the WC_Email id) is sent instead and the
+ *   server renders the file template — matching what customers receive.
+ *   `emailType` (the class name) is only used for Tracks.
  */
 export type SendTestEmailTarget =
 	| { endpoint: 'settings'; emailType: string }
-	| { endpoint: 'editor'; postId: number; emailType: string };
+	| {
+			endpoint: 'editor';
+			postId: number | null;
+			emailType: string;
+			emailTypeId: string;
+	  };
 
 /**
  * State and send logic for the "Send a test email" flow, shared between the
@@ -138,7 +146,9 @@ export const useSendTestEmail = (
 				await apiFetch( {
 					path: '/woocommerce-email-editor/v1/send_preview_email',
 					method: 'POST',
-					data: { email, postId: target.postId },
+					data: target.postId
+						? { email, postId: target.postId }
+						: { email, emailType: target.emailTypeId },
 				} );
 
 				setNotice(

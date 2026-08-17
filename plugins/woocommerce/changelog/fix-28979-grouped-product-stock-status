@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Reset stock management and stock status when converting products to grouped or external types.

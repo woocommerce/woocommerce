@@ -56,6 +56,15 @@ test.describe( 'WooCommerce Email Editor Core', () => {
 		await accessTheEmailEditor( page, 'New order' );
 		await page.getByRole( 'button', { name: 'View', exact: true } ).click();
 
+		// WP 7.1 adds a "Responsive styles" toggle to this menu; the email
+		// editor disables it because the email renderer cannot inline
+		// per-viewport styles. Also passes on older WP without the feature.
+		await expect(
+			page.getByRole( 'menuitemcheckbox', {
+				name: 'Responsive styles',
+			} )
+		).toBeHidden();
+
 		const [ newPage ] = await Promise.all( [
 			page.waitForEvent( 'popup' ), // Waits for the new tab to open
 			page

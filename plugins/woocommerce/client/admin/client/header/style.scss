@@ -179,9 +179,7 @@
 			box-shadow: none;
 		}
 		&:focus-visible,
-		&.components-button:not(:disabled):not(
-				[aria-disabled="true"]
-			):focus-visible {
+		&.components-button:not(:disabled):not([aria-disabled="true"]):focus-visible {
 			box-shadow:
 				inset -1px -1px 0 $gray-700,
 				inset 1px 1px 0 $gray-700;

@@ -3,6 +3,7 @@
  */
 import moment from 'moment';
 import { getTimezoneOffset } from 'date-fns-tz';
+import { getSettings as getDateSettings } from '@wordpress/date';
 import { find, memoize } from 'lodash';
 import { __ } from '@wordpress/i18n';
 import { parse } from 'qs';
@@ -259,6 +260,34 @@ function anchorRangeToStoreTimeZone( range: DateValue ): DateValue {
 }
 
 /**
+ * Aligns the moment locale's start of the week with the WordPress
+ * "Week Starts On" setting. WordPress core applies the setting to the moment
+ * locale, but `wp.date.setSettings` then redefines the locale without a `week`
+ * key, resetting the start of the week to Sunday; without this correction,
+ * week ranges and calendar layouts ignore the setting.
+ */
+function ensureMomentStartOfWeek() {
+	const startOfWeek = getDateSettings().l10n?.startOfWeek;
+
+	if (
+		typeof startOfWeek !== 'number' ||
+		! Number.isInteger( startOfWeek ) ||
+		startOfWeek < 0 ||
+		startOfWeek > 6
+	) {
+		return;
+	}
+
+	if ( moment.localeData().firstDayOfWeek() !== startOfWeek ) {
+		moment.updateLocale( moment.locale(), {
+			week: { dow: startOfWeek },
+		} );
+	}
+}
+
+ensureMomentStartOfWeek();
+
+/**
  * Get a DateValue object for a period prior to the current period.
  *
  * @param {moment.DurationInputArg2} period  - the chosen period
@@ -269,6 +298,8 @@ export function getLastPeriod(
 	period: moment.DurationInputArg2,
 	compare: string
 ) {
+	ensureMomentStartOfWeek();
+
 	const primaryStart = getStoreTimeZoneMoment()
 		.startOf( period )
 		.subtract( 1, period );
@@ -321,6 +352,8 @@ export function getCurrentPeriod(
 	period: moment.DurationInputArg2,
 	compare: string
 ) {
+	ensureMomentStartOfWeek();
+
 	const primaryStart = getStoreTimeZoneMoment().startOf( period );
 	const primaryEnd = getStoreTimeZoneMoment();
 

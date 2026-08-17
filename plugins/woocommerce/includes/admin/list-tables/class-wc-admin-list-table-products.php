@@ -59,9 +59,13 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		add_filter( 'views_edit-product', array( $this, 'product_views' ) );
 		add_filter( 'get_search_query', array( $this, 'search_label' ) );
 		add_filter( 'posts_clauses', array( $this, 'posts_clauses' ), 10, 2 );
+		// On posts_clauses, which core applies after every posts_orderby priority, so no posts_orderby
+		// callback sees the relevance clause. The late priority gives earlier posts_clauses callbacks
+		// that same unmodified view.
+		add_filter( 'posts_clauses', array( $this, 'order_search_results' ), 9999, 2 );
 
 		// Use hooks to prime various caches and improve products page performance.
-		// Until persistent counters reactivated, disable callback for load-edit.php action.
+		add_action( 'load-edit.php', array( $this, 'prime_status_counts_cache' ) );
 		add_filter( 'the_posts', array( $this, 'prime_thumbnail_caches' ), 10, 2 );
 
 		$cogs_controller              = wc_get_container()->get( CostOfGoodsSoldController::class );
@@ -633,10 +637,16 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 
 		// Search using CRUD.
 		if ( ! empty( $query_vars['s'] ) ) {
+			$search_term                  = wc_clean( wp_unslash( $query_vars['s'] ) );
 			$data_store                   = WC_Data_Store::load( 'product' );
-			$ids                          = $data_store->search_products( wc_clean( wp_unslash( $query_vars['s'] ) ), '', true, true );
+			$ids                          = $data_store->search_products( $search_term, '', true, true );
 			$query_vars['post__in']       = array_merge( $ids, array( 0 ) );
 			$query_vars['product_search'] = true;
+			$default_search_order         = $this->get_default_search_order( $query_vars );
+			if ( null !== $default_search_order ) {
+				$query_vars['product_search_term']          = $search_term;
+				$query_vars['product_search_default_order'] = $default_search_order;
+			}
 			unset( $query_vars['s'] );
 		}
 
@@ -653,6 +663,239 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	public function posts_clauses( $args, $query ) {
 
 		return $args;
+	}
+
+	/**
+	 * Prioritize title matches in unsorted product searches.
+	 *
+	 * Runs on posts_clauses rather than posts_orderby so that every posts_orderby callback, at any
+	 * priority, still observes the ORDER BY clause core generated. Reading it that late means it may
+	 * already carry third-party ordering, so orderby_leads_with() decides whether ranking still leads.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param array    $clauses Array of SELECT statement pieces (from, where, orderby, etc).
+	 * @param WP_Query $query   WP_Query instance.
+	 * @return array
+	 */
+	public function order_search_results( $clauses, $query ) {
+		// Another callback produced this array, so confirm the piece being read is still a clause.
+		if ( ! is_array( $clauses ) || ! isset( $clauses['orderby'] ) || ! is_string( $clauses['orderby'] ) ) {
+			return $clauses;
+		}
+
+		$orderby              = $clauses['orderby'];
+		$search_term          = $query->get( 'product_search_term' );
+		$default_search_order = $query->get( 'product_search_default_order' );
+		if ( ! $query->get( 'product_search' ) || ! is_string( $search_term ) || '' === $search_term ) {
+			return $clauses;
+		}
+
+		global $wpdb;
+		if ( 'date' === $default_search_order ) {
+			if ( $query->get( 'orderby' ) || ! $this->orderby_leads_with( $orderby, "{$wpdb->posts}.post_date DESC" ) ) {
+				return $clauses;
+			}
+		} elseif ( 'modified' === $default_search_order ) {
+			$post_status = $query->get( 'post_status' );
+			$order       = $query->get( 'order' );
+			if (
+				'modified' !== $query->get( 'orderby' )
+				|| ! is_string( $post_status )
+				|| ! is_string( $order )
+				|| ( ! ( 'draft' === $post_status && 'DESC' === $order ) && ! ( 'pending' === $post_status && 'ASC' === $order ) )
+				|| ! $this->orderby_leads_with( $orderby, "{$wpdb->posts}.post_modified {$order}" )
+			) {
+				return $clauses;
+			}
+		} else {
+			return $clauses;
+		}
+
+		$case_clause = $this->build_title_match_case_clause( $search_term );
+		if ( '' === $case_clause ) {
+			return $clauses;
+		}
+
+		$clauses['orderby'] = $case_clause . ', ' . $orderby;
+
+		return $clauses;
+	}
+
+	/**
+	 * Determine whether a clause still leads with the ordering core generated for this view.
+	 *
+	 * A third party that appends a tiebreak leaves core's ordering in charge of the primary sort, so
+	 * ranking can still lead. One that prepends or replaces has taken the primary sort over, and
+	 * ranking defers to it. Only a comma may follow the core clause, so a longer token that merely
+	 * starts the same way is not mistaken for it.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param string $orderby      Clause observed on the query.
+	 * @param string $core_orderby Clause core generated for this view.
+	 * @return bool
+	 */
+	private function orderby_leads_with( $orderby, $core_orderby ) {
+		return $orderby === $core_orderby || 0 === strpos( $orderby, $core_orderby . ',' );
+	}
+
+	/**
+	 * Build the relevance expression that ranks title matches ahead of the remaining search results.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param string $search_term Search term the product matcher already ran against.
+	 * @return string CASE expression, or an empty string when the term yields no title predicates.
+	 */
+	private function build_title_match_case_clause( $search_term ) {
+		global $wpdb;
+
+		// Group exactly as search_products() does, so ranking and matching agree on what an OR group is.
+		// \s+or\s+ alone would not: \s also matches \x0B and \x0C, which wc_clean() leaves in place.
+		$search_groups = stristr( $search_term, ' or ' ) ? preg_split( '/\s+or\s+/i', $search_term ) : array( $search_term );
+		if ( ! $search_groups ) {
+			return '';
+		}
+
+		$title_match_groups = array();
+		foreach ( $search_groups as $search_group ) {
+			$title_match_queries = array();
+			foreach ( $this->parse_search_terms( $search_group ) as $title_search_term ) {
+				$title_match_queries[] = $wpdb->prepare(
+					"{$wpdb->posts}.post_title LIKE %s",
+					'%' . $wpdb->esc_like( $title_search_term ) . '%'
+				);
+			}
+
+			if ( $title_match_queries ) {
+				$title_match_groups[] = '(' . implode( ' AND ', $title_match_queries ) . ')';
+			}
+		}
+
+		if ( ! $title_match_groups ) {
+			return '';
+		}
+
+		return 'CASE WHEN (' . implode( ' OR ', $title_match_groups ) . ') THEN 0 ELSE 1 END';
+	}
+
+	/**
+	 * Get the default ordering mode for a product search.
+	 *
+	 * @param array $query_vars Query variables.
+	 * @return string|null
+	 */
+	private function get_default_search_order( $query_vars ) {
+		$orderby = $query_vars['orderby'] ?? '';
+		if ( ! is_string( $orderby ) ) {
+			return null;
+		}
+
+		if ( '' === $orderby ) {
+			return 'date';
+		}
+
+		// Draft and Pending views receive modified ordering from wp_edit_posts_query() only when no orderby was requested.
+		if ( isset( $_GET['orderby'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only presence check distinguishes explicit sorting from the core default.
+			return null;
+		}
+
+		$post_status = $query_vars['post_status'] ?? '';
+		$order       = $query_vars['order'] ?? '';
+		if ( 'modified' !== strtolower( $orderby ) || ! is_string( $post_status ) || ! is_string( $order ) ) {
+			return null;
+		}
+
+		$order = $order ? strtoupper( $order ) : 'DESC';
+		if ( ( 'draft' === $post_status && 'DESC' === $order ) || ( 'pending' === $post_status && 'ASC' === $order ) ) {
+			return 'modified';
+		}
+
+		return null;
+	}
+
+	/**
+	 * Parse a product search group using WooCommerce search-term rules.
+	 *
+	 * @param string $search_group Search group without OR separators.
+	 * @return string[]
+	 */
+	private function parse_search_terms( $search_group ) {
+		// Mirrors WP_Query::parse_search_terms(): each match is either a double-quoted phrase (closed by
+		// a quote or the end of the string) or a run of characters delimited by tab, space, double quote,
+		// comma, or plus. The `u` modifier is intentionally omitted for parity with WordPress core.
+		if ( ! preg_match_all( '/".*?("|$)|((?<=[\t ",+])|^)[^\t ",+]+/', $search_group, $matches ) ) {
+			return array( $search_group );
+		}
+
+		$search_terms = $this->get_valid_search_terms( $matches[0] );
+		$count        = count( $search_terms );
+
+		return 9 < $count || 0 === $count ? array( $search_group ) : $search_terms;
+	}
+
+	/**
+	 * Remove unsuitable product search terms.
+	 *
+	 * Mirrors WP_Query::get_search_terms(), including its stopword and single-character rules.
+	 *
+	 * @param string[] $terms Search terms.
+	 * @return string[]
+	 */
+	private function get_valid_search_terms( $terms ) {
+		$valid_terms = array();
+		$stopwords   = $this->get_search_stopwords();
+
+		foreach ( $terms as $term ) {
+			// Keep before/after spaces when term is for exact match, otherwise trim quotes and spaces.
+			if ( preg_match( '/^".+"$/', $term ) ) {
+				$term = trim( $term, "\"'" );
+			} else {
+				$term = trim( $term, "\"' " );
+			}
+
+			if ( empty( $term ) || ( 1 === strlen( $term ) && preg_match( '/^[a-z\-]$/i', $term ) ) ) {
+				continue;
+			}
+
+			if ( in_array( wc_strtolower( $term ), $stopwords, true ) ) {
+				continue;
+			}
+
+			$valid_terms[] = $term;
+		}
+
+		return $valid_terms;
+	}
+
+	/**
+	 * Retrieve stopwords used when parsing product search terms.
+	 *
+	 * @return string[]
+	 */
+	private function get_search_stopwords() {
+		// Translators: This is a comma-separated list of very common words that should be excluded from a search, like a, an, and the. These are usually called "stopwords". You should not simply translate these individual words into your language. Instead, look for and provide commonly accepted stopwords in your language.
+		$stopwords = array_map(
+			'wc_strtolower',
+			array_map(
+				'trim',
+				explode(
+					',',
+					_x(
+						'about,an,are,as,at,be,by,com,for,from,how,in,is,it,of,on,or,that,the,this,to,was,what,when,where,who,will,with,www',
+						'Comma-separated list of search stopwords in your language',
+						'woocommerce'
+					)
+				)
+			)
+		);
+
+		/** This filter is documented in wp-includes/class-wp-query.php. */
+		$filtered_stopwords = apply_filters( 'wp_search_stopwords', $stopwords ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment -- The hook is documented by WordPress.
+
+		// A callback can return anything; keep only strings so the strict in_array() below stays safe.
+		return is_array( $filtered_stopwords ) ? array_filter( $filtered_stopwords, 'is_string' ) : $stopwords;
 	}
 
 	/**
