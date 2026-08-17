@@ -70,7 +70,7 @@ class FulfillmentsCsvImporter {
 	private array $pending_validation_errors = array();
 
 	/**
-	 * Default chunk size when looping import_chunk() from run().
+	 * Default chunk size when looping import_chunk().
 	 */
 	public const DEFAULT_CHUNK_SIZE = 200;
 
@@ -125,102 +125,6 @@ class FulfillmentsCsvImporter {
 		// so anything outside the ASCII range falls back to the default.
 		$first = substr( $delimiter, 0, 1 );
 		return ord( $first ) < 0x80 ? $first : ',';
-	}
-
-	/**
-	 * Parse and process the CSV file.
-	 *
-	 * Each row is processed independently; a single bad row never aborts the run.
-	 *
-	 * @since 11.2.0
-	 *
-	 * @return array{
-	 *     created: int,
-	 *     updated: int,
-	 *     skipped: int,
-	 *     failed:  int,
-	 *     notified: int,
-	 *     rows:    array<int, array<string, mixed>>
-	 * }
-	 */
-	public function run(): array {
-		$this->order_cache        = array();
-		$this->fulfillments_cache = array();
-
-		$summary = array(
-			'created'  => 0,
-			'updated'  => 0,
-			'skipped'  => 0,
-			'failed'   => 0,
-			'notified' => 0,
-			'rows'     => array(),
-		);
-
-		$parsed = $this->parse_headers( $this->options['delimiter'] );
-		if ( isset( $parsed['error'] ) ) {
-			$summary['rows'][] = $this->fail( 0, (string) $parsed['error']['code'], (string) $parsed['error']['message'] );
-			++$summary['failed'];
-			$this->flush_validation_error_events();
-			return $summary;
-		}
-
-		$mapping = isset( $parsed['detected_mapping'] ) && is_array( $parsed['detected_mapping'] ) ? $parsed['detected_mapping'] : array();
-
-		// A missing required canonical column aborts the run with a single failed row.
-		$header_map = self::mapping_to_header_map( $mapping );
-		$missing    = self::find_missing_required_columns( $header_map );
-		if ( ! empty( $missing ) ) {
-			$summary['rows'][] = $this->fail(
-				0,
-				'missing_required_columns',
-				sprintf(
-					/* translators: %s: comma-separated list of missing column names. */
-					__( 'CSV is missing required column(s): %s.', 'woocommerce' ),
-					implode( ', ', $missing )
-				)
-			);
-			++$summary['failed'];
-			$this->flush_validation_error_events();
-			return $summary;
-		}
-
-		$chunk_size = $this->get_chunk_size();
-		if ( $this->options['notify_customer'] ) {
-			$chunk_size = min( $chunk_size, self::NOTIFY_CHUNK_SIZE );
-		}
-		$total       = (int) ( $parsed['total'] ?? 0 );
-		$seen        = array();
-		$offset      = 0;
-		$byte_offset = 0;
-
-		do {
-			$result = $this->import_chunk(
-				$offset,
-				$chunk_size,
-				$mapping,
-				array(
-					'seen_tracking_pairs' => $seen,
-					'byte_offset'         => $byte_offset,
-				)
-			);
-
-			foreach ( array( 'created', 'updated', 'skipped', 'failed', 'notified' ) as $key ) {
-				$summary[ $key ] += (int) ( $result['counts'][ $key ] ?? 0 );
-			}
-			if ( ! empty( $result['rows'] ) ) {
-				$summary['rows'] = array_merge( $summary['rows'], $result['rows'] );
-			}
-			if ( isset( $result['seen_tracking_pairs'] ) && is_array( $result['seen_tracking_pairs'] ) ) {
-				$seen = $result['seen_tracking_pairs'];
-			}
-			if ( isset( $result['byte_offset'] ) && is_int( $result['byte_offset'] ) ) {
-				$byte_offset = $result['byte_offset'];
-			}
-
-			$offset += $chunk_size;
-		} while ( $offset < $total );
-
-		return $summary;
 	}
 
 	/**
@@ -569,19 +473,7 @@ class FulfillmentsCsvImporter {
 	}
 
 	/**
-	 * Resolve the effective chunk size for one-shot run() invocations.
-	 *
-	 * @return int
-	 */
-	private function get_chunk_size(): int {
-		return self::resolve_chunk_size();
-	}
-
-	/**
 	 * Resolve the filtered chunk size, clamped to [1, MAX_CHUNK_SIZE].
-	 *
-	 * Shared between the importer's own loop and the REST controller so a single filter and a
-	 * single hard ceiling govern both call sites.
 	 *
 	 * @since 11.2.0
 	 *
@@ -591,8 +483,8 @@ class FulfillmentsCsvImporter {
 		/**
 		 * Filter the chunk size used when looping CSV rows through the importer.
 		 *
-		 * Shared by the one-shot run() path and the wizard's per-chunk REST handler.
-		 * The server enforces sane bounds regardless of what callers send.
+		 * Used by the wizard's per-chunk REST handler. The server enforces sane
+		 * bounds regardless of what callers send.
 		 *
 		 * @since 11.2.0
 		 *

@@ -93,6 +93,70 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Drive a full import by looping import_chunk() with the auto-detected mapping,
+	 * mirroring how the REST controller consumes the importer.
+	 *
+	 * @param FulfillmentsCsvImporter $importer Importer under test.
+	 * @param int                     $limit    Chunk size.
+	 * @return array{created:int, updated:int, skipped:int, failed:int, notified:int, rows:array<int, array<string, mixed>>}
+	 */
+	private function run_import( FulfillmentsCsvImporter $importer, int $limit = FulfillmentsCsvImporter::DEFAULT_CHUNK_SIZE ): array {
+		$summary = array(
+			'created'  => 0,
+			'updated'  => 0,
+			'skipped'  => 0,
+			'failed'   => 0,
+			'notified' => 0,
+			'rows'     => array(),
+		);
+
+		$parsed = $importer->parse_headers();
+		if ( isset( $parsed['error'] ) ) {
+			$summary['rows'][] = array(
+				'row'     => 0,
+				'status'  => 'failed',
+				'code'    => (string) $parsed['error']['code'],
+				'message' => (string) $parsed['error']['message'],
+			);
+			++$summary['failed'];
+			return $summary;
+		}
+
+		$mapping     = is_array( $parsed['detected_mapping'] ?? null ) ? $parsed['detected_mapping'] : array();
+		$total       = (int) ( $parsed['total'] ?? 0 );
+		$seen        = array();
+		$offset      = 0;
+		$byte_offset = 0;
+
+		do {
+			$result = $importer->import_chunk(
+				$offset,
+				$limit,
+				$mapping,
+				array(
+					'seen_tracking_pairs' => $seen,
+					'byte_offset'         => $byte_offset,
+				)
+			);
+
+			foreach ( array( 'created', 'updated', 'skipped', 'failed', 'notified' ) as $key ) {
+				$summary[ $key ] += (int) ( $result['counts'][ $key ] ?? 0 );
+			}
+			$summary['rows'] = array_merge( $summary['rows'], (array) $result['rows'] );
+			$seen            = (array) $result['seen_tracking_pairs'];
+			$byte_offset     = (int) $result['byte_offset'];
+
+			if ( ! empty( $result['aborted'] ) || ! empty( $result['eof'] ) ) {
+				break;
+			}
+
+			$offset += $limit;
+		} while ( $offset < $total );
+
+		return $summary;
+	}
+
+	/**
 	 * @testdox A valid CSV row creates a fulfilled fulfillment.
 	 */
 	public function test_valid_row_creates_fulfillment(): void {
@@ -101,7 +165,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$file  = $this->make_csv( $csv );
 
 		$sut     = new FulfillmentsCsvImporter( $file );
-		$summary = $sut->run();
+		$summary = $this->run_import( $sut );
 
 		$this->assertSame( 1, $summary['created'] );
 		$this->assertSame( 0, $summary['failed'] );
@@ -130,7 +194,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$file  = $this->make_csv( $csv );
 
 		$sut     = new FulfillmentsCsvImporter( $file );
-		$summary = $sut->run();
+		$summary = $this->run_import( $sut );
 
 		$this->assertSame( 1, $summary['failed'] );
 		$this->assertSame( 1, $summary['created'] );
@@ -146,7 +210,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$file = $this->make_csv( $csv );
 
 		$sut     = new FulfillmentsCsvImporter( $file );
-		$summary = $sut->run();
+		$summary = $this->run_import( $sut );
 
 		$this->assertSame( 1, $summary['failed'] );
 		$this->assertSame( 0, $summary['created'] );
@@ -161,7 +225,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$file = $this->make_csv( '' );
 
 		$sut     = new FulfillmentsCsvImporter( $file );
-		$summary = $sut->run();
+		$summary = $this->run_import( $sut );
 
 		$this->assertSame( 1, $summary['failed'] );
 		$this->assertSame( 0, $summary['created'] );
@@ -176,7 +240,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$file  = $this->make_csv( $csv );
 
 		$sut     = new FulfillmentsCsvImporter( $file );
-		$summary = $sut->run();
+		$summary = $this->run_import( $sut );
 
 		$this->assertSame( 1, $summary['failed'] );
 		$this->assertSame( 'failed', $summary['rows'][0]['status'] );
@@ -192,7 +256,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$file  = $this->make_csv( $csv );
 
 		$sut     = new FulfillmentsCsvImporter( $file );
-		$summary = $sut->run();
+		$summary = $this->run_import( $sut );
 
 		$this->assertSame( 1, $summary['created'] );
 		$this->assertSame( 1, $summary['skipped'] );
@@ -209,7 +273,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$file  = $this->make_csv( $csv );
 
 		$sut     = new FulfillmentsCsvImporter( $file );
-		$summary = $sut->run();
+		$summary = $this->run_import( $sut );
 
 		$this->assertSame( 1, $summary['failed'] );
 		$this->assertSame( 1, $summary['created'] );
@@ -227,14 +291,14 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$file  = $this->make_csv( $csv );
 
 		// First import creates the fulfillment.
-		( new FulfillmentsCsvImporter( $file ) )->run();
+		$this->run_import( new FulfillmentsCsvImporter( $file ) );
 
 		// Second import with the same tracking number should update the existing record's provider.
 		$csv2  = "order_number,tracking_number,shipment_provider\n{$order->get_id()},TRACK-UP,fedex\n";
 		$file2 = $this->make_csv( $csv2 );
 
 		$sut     = new FulfillmentsCsvImporter( $file2 );
-		$summary = $sut->run();
+		$summary = $this->run_import( $sut );
 
 		$this->assertSame( 0, $summary['created'] );
 		$this->assertSame( 1, $summary['updated'] );
@@ -253,7 +317,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	public function test_existing_fulfillment_is_skipped_when_update_disabled(): void {
 		$order = $this->make_order();
 		$csv   = "order_number,tracking_number,shipment_provider\n{$order->get_id()},TRACK-S,ups\n";
-		( new FulfillmentsCsvImporter( $this->make_csv( $csv ) ) )->run();
+		$this->run_import( new FulfillmentsCsvImporter( $this->make_csv( $csv ) ) );
 
 		$csv2 = "order_number,tracking_number,shipment_provider\n{$order->get_id()},TRACK-S,fedex\n";
 		$sut  = new FulfillmentsCsvImporter(
@@ -261,7 +325,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 			array( 'update_existing' => false )
 		);
 
-		$summary = $sut->run();
+		$summary = $this->run_import( $sut );
 
 		$this->assertSame( 0, $summary['updated'] );
 		$this->assertSame( 1, $summary['skipped'] );
@@ -282,7 +346,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 
 		try {
 			$sut     = new FulfillmentsCsvImporter( $file, array( 'notify_customer' => true ) );
-			$summary = $sut->run();
+			$summary = $this->run_import( $sut );
 		} finally {
 			remove_action( 'woocommerce_fulfillment_created_notification', $listener );
 		}
@@ -306,7 +370,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 
 		try {
 			$sut     = new FulfillmentsCsvImporter( $file );
-			$summary = $sut->run();
+			$summary = $this->run_import( $sut );
 		} finally {
 			remove_action( 'woocommerce_fulfillment_created_notification', $listener );
 		}
@@ -325,7 +389,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$file  = $this->make_csv( $csv );
 
 		$sut     = new FulfillmentsCsvImporter( $file );
-		$summary = $sut->run();
+		$summary = $this->run_import( $sut );
 
 		$this->assertSame( 1, $summary['created'] );
 		$this->assertSame( 0, $summary['failed'] );
@@ -340,7 +404,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$file  = $this->make_csv( $csv );
 
 		$sut = new FulfillmentsCsvImporter( $file );
-		$sut->run();
+		$this->run_import( $sut );
 
 		/** @var FulfillmentsDataStore $store */
 		$store        = WC_Data_Store::load( 'order-fulfillment' );
@@ -370,7 +434,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$file = $this->make_csv( $csv );
 
 		$sut     = new FulfillmentsCsvImporter( $file );
-		$summary = $sut->run();
+		$summary = $this->run_import( $sut );
 
 		$this->assertSame( 1, $summary['created'] );
 		/** @var FulfillmentsDataStore $store */
@@ -396,7 +460,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$file = $this->make_csv( $csv );
 
 		$sut     = new FulfillmentsCsvImporter( $file );
-		$summary = $sut->run();
+		$summary = $this->run_import( $sut );
 		$this->assertSame( 1, $summary['failed'] );
 		$this->assertSame( 'failed', $summary['rows'][0]['status'] );
 	}
@@ -415,7 +479,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$file = $this->make_csv( $csv );
 
 		$sut     = new FulfillmentsCsvImporter( $file );
-		$summary = $sut->run();
+		$summary = $this->run_import( $sut );
 
 		$this->assertSame( 1, $summary['failed'], 'Duplicate entries must be summed before the ordered-quantity check' );
 		$this->assertSame( 'failed', $summary['rows'][0]['status'] );
@@ -435,7 +499,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$file = $this->make_csv( $csv );
 
 		$sut     = new FulfillmentsCsvImporter( $file );
-		$summary = $sut->run();
+		$summary = $this->run_import( $sut );
 
 		$this->assertSame( 1, $summary['created'] );
 		/** @var FulfillmentsDataStore $store */
@@ -456,7 +520,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$file  = $this->make_csv( $csv );
 
 		$sut     = new FulfillmentsCsvImporter( $file );
-		$summary = $sut->run();
+		$summary = $this->run_import( $sut );
 		$this->assertSame( 1, $summary['failed'] );
 	}
 
@@ -473,7 +537,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$file = $this->make_csv( $csv );
 
 		$sut     = new FulfillmentsCsvImporter( $file );
-		$summary = $sut->run();
+		$summary = $this->run_import( $sut );
 
 		$this->assertSame( 1, $summary['failed'] );
 		$this->assertSame( 'failed', $summary['rows'][0]['status'] );
@@ -488,7 +552,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$file  = $this->make_csv( $csv );
 
 		$sut     = new FulfillmentsCsvImporter( $file );
-		$summary = $sut->run();
+		$summary = $this->run_import( $sut );
 
 		$this->assertSame( 1, $summary['created'] );
 		$this->assertSame( 0, $summary['failed'] );
@@ -503,7 +567,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$file  = $this->make_csv( $csv );
 
 		$sut     = new FulfillmentsCsvImporter( $file );
-		$summary = $sut->run();
+		$summary = $this->run_import( $sut );
 
 		$this->assertArrayHasKey( 'created', $summary );
 		$this->assertArrayHasKey( 'updated', $summary );
@@ -527,7 +591,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$csv   = "\xEF\xBB\xBForder_number,tracking_number,shipment_provider\n{$order->get_id()},BOM-1,ups\n";
 		$file  = $this->make_csv( $csv );
 
-		$summary = ( new FulfillmentsCsvImporter( $file ) )->run();
+		$summary = $this->run_import( new FulfillmentsCsvImporter( $file ) );
 
 		$this->assertSame( 1, $summary['created'] );
 		$this->assertSame( 0, $summary['failed'] );
@@ -542,7 +606,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$file  = $this->make_csv( $csv );
 
 		$sut     = new FulfillmentsCsvImporter( $file, array( 'delimiter' => ';' ) );
-		$summary = $sut->run();
+		$summary = $this->run_import( $sut );
 
 		$this->assertSame( 1, $summary['created'] );
 	}
@@ -556,7 +620,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 			. "{$order->get_id()},URL-1,ups,https://example.test/track/URL-1\n";
 		$file  = $this->make_csv( $csv );
 
-		( new FulfillmentsCsvImporter( $file ) )->run();
+		$this->run_import( new FulfillmentsCsvImporter( $file ) );
 
 		/** @var FulfillmentsDataStore $store */
 		$store        = WC_Data_Store::load( 'order-fulfillment' );
@@ -586,7 +650,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 			. "{$order->get_id()},SKU-1,ups,sku:{$sku}:1\n";
 		$file = $this->make_csv( $csv );
 
-		$summary = ( new FulfillmentsCsvImporter( $file ) )->run();
+		$summary = $this->run_import( new FulfillmentsCsvImporter( $file ) );
 
 		$this->assertSame( 1, $summary['created'] );
 		$this->assertSame( 0, $summary['failed'] );
@@ -619,7 +683,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	public function test_update_existing_fires_updated_notification(): void {
 		$order = $this->make_order();
 		$csv   = "order_number,tracking_number,shipment_provider\n{$order->get_id()},UPDN-1,ups\n";
-		( new FulfillmentsCsvImporter( $this->make_csv( $csv ), array( 'notify_customer' => true ) ) )->run();
+		$this->run_import( new FulfillmentsCsvImporter( $this->make_csv( $csv ), array( 'notify_customer' => true ) ) );
 
 		$updated_hits = 0;
 		$created_hits = 0;
@@ -638,7 +702,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 				$this->make_csv( $csv2 ),
 				array( 'notify_customer' => true )
 			);
-			$summary = $sut->run();
+			$summary = $this->run_import( $sut );
 		} finally {
 			remove_action( 'woocommerce_fulfillment_updated_notification', $on_updated );
 			remove_action( 'woocommerce_fulfillment_created_notification', $on_created );
@@ -660,7 +724,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$file  = $this->make_csv( $csv );
 
 		$sut     = new FulfillmentsCsvImporter( $file );
-		$summary = $sut->run();
+		$summary = $this->run_import( $sut );
 
 		/** @var FulfillmentsDataStore $store */
 		$store        = WC_Data_Store::load( 'order-fulfillment' );
@@ -678,15 +742,19 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	public function test_case_insensitive_match_updates_stored_fulfillment(): void {
 		$order = $this->make_order();
 
-		$first = ( new FulfillmentsCsvImporter(
-			$this->make_csv( "order_number,tracking_number,shipment_provider\n{$order->get_id()},TRK-STORED,ups\n" )
-		) )->run();
+		$first = $this->run_import(
+			new FulfillmentsCsvImporter(
+				$this->make_csv( "order_number,tracking_number,shipment_provider\n{$order->get_id()},TRK-STORED,ups\n" )
+			)
+		);
 		$this->assertSame( 1, $first['created'] );
 
 		// A separate import run, so the match must come from the store, not the in-file dedupe.
-		$second = ( new FulfillmentsCsvImporter(
-			$this->make_csv( "order_number,tracking_number,shipment_provider\n{$order->get_id()},trk-stored,fedex\n" )
-		) )->run();
+		$second = $this->run_import(
+			new FulfillmentsCsvImporter(
+				$this->make_csv( "order_number,tracking_number,shipment_provider\n{$order->get_id()},trk-stored,fedex\n" )
+			)
+		);
 
 		$this->assertSame( 1, $second['updated'], 'The lowercase spelling must update the stored fulfillment' );
 		$this->assertSame( 0, $second['created'] );
@@ -742,7 +810,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	public function test_header_only_csv_yields_empty_summary(): void {
 		$file = $this->make_csv( "order_number,tracking_number,shipment_provider\n" );
 
-		$summary = ( new FulfillmentsCsvImporter( $file ) )->run();
+		$summary = $this->run_import( new FulfillmentsCsvImporter( $file ) );
 
 		$this->assertSame( 0, $summary['created'] );
 		$this->assertSame( 0, $summary['updated'] );
@@ -932,7 +1000,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Looping import_chunk yields the same counts as one-shot run() on the same fixture.
+	 * @testdox Looping import_chunk with a small limit matches a full single-pass import.
 	 */
 	public function test_chunked_and_one_shot_produce_equivalent_counts(): void {
 		$orders = array();
@@ -946,7 +1014,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$csv .= "99999999,TRK-MISS,ups\n";
 
 		$one_shot_file = $this->make_csv( $csv );
-		$one_shot      = ( new FulfillmentsCsvImporter( $one_shot_file ) )->run();
+		$one_shot      = $this->run_import( new FulfillmentsCsvImporter( $one_shot_file ) );
 
 		// Reset for the chunked variant by creating fresh orders + a fresh file.
 		$orders = array();
@@ -1006,7 +1074,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$file  = $this->make_csv( $csv );
 
 		$sut     = new FulfillmentsCsvImporter( $file );
-		$summary = $sut->run();
+		$summary = $this->run_import( $sut );
 
 		$this->assertSame( 0, $summary['created'] );
 		$this->assertSame( 1, $summary['failed'] );
