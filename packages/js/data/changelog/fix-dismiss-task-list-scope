@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Pass the task list ID when dismissing or restoring an onboarding task so the correct task is resolved when the same task ID exists in more than one task list.

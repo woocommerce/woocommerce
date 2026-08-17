@@ -187,7 +187,7 @@ export const TaskList = ( {
 
 		addDismissedTask( task );
 		try {
-			await dismissTask( task.id );
+			await dismissTask( task.id, id );
 		} catch {
 			removeDismissedTask( task.id );
 			createNotice(
@@ -209,7 +209,7 @@ export const TaskList = ( {
 
 		removeDismissedTask( task.id );
 		try {
-			await undoDismissTask( task.id );
+			await undoDismissTask( task.id, id );
 		} catch {
 			addDismissedTask( task );
 			createNotice(

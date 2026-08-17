@@ -3,6 +3,7 @@
  */
 import { apiFetch } from '@wordpress/data-controls';
 import { controls, dispatch } from '@wordpress/data';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -430,12 +431,15 @@ export function* undoSnoozeTask( id: string ) {
 	}
 }
 
-export function* dismissTask( id: string ) {
+export function* dismissTask( id: string, taskListId?: string ) {
 	yield dismissTaskRequest( id );
 
 	try {
 		const task: TaskType = yield apiFetch( {
-			path: `${ WC_ADMIN_NAMESPACE }/onboarding/tasks/${ id }/dismiss`,
+			path: addQueryArgs(
+				`${ WC_ADMIN_NAMESPACE }/onboarding/tasks/${ id }/dismiss`,
+				taskListId ? { task_list_id: taskListId } : {}
+			),
 			method: 'POST',
 		} );
 
@@ -451,12 +455,15 @@ export function* dismissTask( id: string ) {
 	}
 }
 
-export function* undoDismissTask( id: string ) {
+export function* undoDismissTask( id: string, taskListId?: string ) {
 	yield undoDismissTaskRequest( id );
 
 	try {
 		const task: TaskType = yield apiFetch( {
-			path: `${ WC_ADMIN_NAMESPACE }/onboarding/tasks/${ id }/undo_dismiss`,
+			path: addQueryArgs(
+				`${ WC_ADMIN_NAMESPACE }/onboarding/tasks/${ id }/undo_dismiss`,
+				taskListId ? { task_list_id: taskListId } : {}
+			),
 			method: 'POST',
 		} );
 

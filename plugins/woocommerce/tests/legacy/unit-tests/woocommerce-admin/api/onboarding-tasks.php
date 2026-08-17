@@ -340,6 +340,75 @@ class WC_Admin_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that a task is dismissed and restored in the correct task list when
+	 * the same task ID exists in more than one list.
+	 *
+	 * Regression: the "Things to do next" (extended) list registers an
+	 * AdditionalPayments task whose ID ("payments") collides with the core,
+	 * non-dismissable Payments task in the setup list. Without a task list ID,
+	 * the endpoint resolved the non-dismissable task first and returned a 404.
+	 *
+	 * @group tasklist
+	 */
+	public function test_colliding_task_id_is_resolved_by_task_list_id() {
+		wp_set_current_user( $this->user );
+
+		// Registered first: a non-dismissable task that shares the ID.
+		TaskLists::add_list( array( 'id' => 'list-a' ) );
+		TaskLists::add_task(
+			'list-a',
+			new TestTask(
+				TaskLists::get_list( 'list-a' ),
+				array(
+					'id'             => 'shared-task',
+					'title'          => 'Shared Task (not dismissable)',
+					'is_dismissable' => false,
+				)
+			)
+		);
+
+		// Registered second: the dismissable task with the same ID.
+		TaskLists::add_list( array( 'id' => 'list-b' ) );
+		TaskLists::add_task(
+			'list-b',
+			new TestTask(
+				TaskLists::get_list( 'list-b' ),
+				array(
+					'id'             => 'shared-task',
+					'title'          => 'Shared Task (dismissable)',
+					'is_dismissable' => true,
+				)
+			)
+		);
+
+		// Without a task list ID, the non-dismissable task resolves first -> 404.
+		$request = new WP_REST_Request( 'POST', $this->endpoint . '/shared-task/dismiss' );
+		$request->set_headers( array( 'content-type' => 'application/json' ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 404, $response->get_status() );
+
+		// Scoping to the list that owns the dismissable task succeeds.
+		$request = new WP_REST_Request( 'POST', $this->endpoint . '/shared-task/dismiss' );
+		$request->set_headers( array( 'content-type' => 'application/json' ) );
+		$request->set_param( 'task_list_id', 'list-b' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( true, $data['isDismissed'] );
+		$this->assertEquals( true, TaskLists::get_task( 'shared-task', 'list-b' )->is_dismissed() );
+
+		// Undo is likewise scoped to the correct list.
+		$request = new WP_REST_Request( 'POST', $this->endpoint . '/shared-task/undo_dismiss' );
+		$request->set_headers( array( 'content-type' => 'application/json' ) );
+		$request->set_param( 'task_list_id', 'list-b' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( false, $data['isDismissed'] );
+	}
+
+	/**
 	 * Test that dismiss endpoint returns error for invalid task.
 	 * @group tasklist
 	 */

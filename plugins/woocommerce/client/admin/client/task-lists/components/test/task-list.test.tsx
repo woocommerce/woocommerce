@@ -397,6 +397,45 @@ describe( 'TaskList', () => {
 		).not.toBeInTheDocument();
 	} );
 
+	it( 'should pass the task list id when skipping and restoring a task', async () => {
+		const { getByRole } = render(
+			<TaskList
+				id="extended"
+				eventPrefix="extended_tasklist_"
+				tasks={ [ ...tasks.extension ] }
+				title="Things to do next"
+				query={ {} }
+				isVisible={ true }
+				isHidden={ false }
+				isComplete={ false }
+				displayProgressHeader={ false }
+				keepCompletedTaskList="no"
+			/>
+		);
+
+		fireEvent.click(
+			getByRole( 'button', {
+				name: `Skip ${ tasks.extension[ 0 ].title }`,
+			} )
+		);
+
+		await waitFor( () => {
+			expect( mockDispatch.dismissTask ).toHaveBeenCalledWith(
+				tasks.extension[ 0 ].id,
+				'extended'
+			);
+		} );
+
+		fireEvent.click( getByRole( 'button', { name: 'Undo' } ) );
+
+		await waitFor( () => {
+			expect( mockDispatch.undoDismissTask ).toHaveBeenCalledWith(
+				tasks.extension[ 0 ].id,
+				'extended'
+			);
+		} );
+	} );
+
 	it( 'should serialize Skip and Undo requests for the same task', async () => {
 		let resolveDismissTask: () => void;
 		let resolveUndoDismissTask: () => void;
