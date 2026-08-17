@@ -976,54 +976,39 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox It accepts every field type supported by the current renderer.
+	 * @testdox It accepts Settings UI transport values without interpreting the field type.
 	 *
-	 * @dataProvider supported_field_types
+	 * @dataProvider settings_ui_values
 	 *
-	 * @param string $type Field type.
-	 * @param mixed  $value Field value.
+	 * @param mixed $value Field value.
 	 */
-	public function test_assert_valid_schema_accepts_supported_field_types( string $type, $value ): void {
+	public function test_assert_valid_schema_accepts_settings_ui_values_for_extension_defined_field_types( $value ): void {
 		$field = array(
-			'id'    => 'acme_' . str_replace( '-', '_', $type ),
-			'label' => 'Acme field',
-			'type'  => $type,
+			'id'    => 'acme_custom_field',
+			'label' => 'Acme custom field',
+			'type'  => 'acme/custom',
 			'value' => $value,
 			'save'  => array( 'adapter' => 'form_post' ),
 		);
-
-		if ( in_array( $type, array( 'array', 'radio', 'select' ), true ) ) {
-			$field['options'] = array(
-				array(
-					'label' => 'Option A',
-					'value' => 'a',
-				),
-			);
-		}
-
-		if ( 'info' === $type ) {
-			unset( $field['value'] );
-			$field['save'] = array( 'adapter' => 'none' );
-		}
 
 		SettingsUISchema::assert_valid_schema( $this->get_native_schema_with_field( $field ) );
 		$this->addToAssertionCount( 1 );
 	}
 
 	/**
-	 * @testdox It accepts an extension-defined field type for a registered type renderer.
+	 * Settings UI transport value fixtures.
+	 *
+	 * @return array<string, array{mixed}>
 	 */
-	public function test_assert_valid_schema_accepts_extension_defined_field_type(): void {
-		$field = array(
-			'id'    => 'acme_color',
-			'label' => 'Acme color',
-			'type'  => 'acme_color',
-			'value' => '#96588a',
-			'save'  => array( 'adapter' => 'form_post' ),
+	public static function settings_ui_values(): array {
+		return array(
+			'string'      => array( 'Acme' ),
+			'integer'     => array( 10 ),
+			'float'       => array( 10.5 ),
+			'boolean'     => array( true ),
+			'string list' => array( array( 'one', 'two' ) ),
+			'null'        => array( null ),
 		);
-
-		SettingsUISchema::assert_valid_schema( $this->get_native_schema_with_field( $field ) );
-		$this->addToAssertionCount( 1 );
 	}
 
 	/**
@@ -1058,88 +1043,25 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox It accepts HTML range attributes for native temporal fields.
-	 *
-	 * @dataProvider native_temporal_fields_with_range_attributes
-	 *
-	 * @param string $type Field type.
-	 * @param string $value Field value.
-	 * @param array  $custom_attributes HTML range attributes.
+	 * @testdox It accepts scalar custom attributes without interpreting renderer semantics.
 	 */
-	public function test_assert_valid_schema_accepts_range_attributes_for_native_temporal_fields( string $type, string $value, array $custom_attributes ): void {
+	public function test_assert_valid_schema_accepts_scalar_custom_attributes_without_interpreting_renderer_semantics(): void {
 		$field = array(
-			'id'               => 'acme_' . $type,
-			'label'            => 'Acme ' . $type,
-			'type'             => $type,
-			'value'            => $value,
-			'customAttributes' => $custom_attributes,
+			'id'               => 'acme_custom_field',
+			'label'            => 'Acme custom field',
+			'type'             => 'acme/custom',
+			'value'            => '',
+			'customAttributes' => array(
+				'min'          => 'extension-defined',
+				'max'          => 10,
+				'step'         => 'any',
+				'data-enabled' => true,
+			),
 			'save'             => array( 'adapter' => 'form_post' ),
 		);
 
 		SettingsUISchema::assert_valid_schema( $this->get_native_schema_with_field( $field ) );
 		$this->addToAssertionCount( 1 );
-	}
-
-	/**
-	 * Native temporal field fixtures with valid HTML range attributes.
-	 *
-	 * @return array<string, array{string, string, array<string, int|string>}>
-	 */
-	public static function native_temporal_fields_with_range_attributes(): array {
-		return array(
-			'date'           => array(
-				'date',
-				'2026-08-03',
-				array(
-					'min'  => '2026-01-01',
-					'max'  => '2026-12-31',
-					'step' => 1,
-				),
-			),
-			'time'           => array(
-				'time',
-				'12:30',
-				array(
-					'min'  => '09:00',
-					'max'  => '17:00',
-					'step' => 900,
-				),
-			),
-			'datetime-local' => array(
-				'datetime-local',
-				'2026-08-03T12:30',
-				array(
-					'min'  => '2026-08-03T09:00',
-					'max'  => '2026-08-03T17:00',
-					'step' => 'any',
-				),
-			),
-		);
-	}
-
-	/**
-	 * Supported field type fixtures.
-	 *
-	 * @return array<string, array{string, mixed}>
-	 */
-	public static function supported_field_types(): array {
-		return array(
-			'array'          => array( 'array', array( 'a' ) ),
-			'checkbox'       => array( 'checkbox', true ),
-			'date'           => array( 'date', '2026-08-03' ),
-			'datetime-local' => array( 'datetime-local', '2026-08-03T12:30' ),
-			'email'          => array( 'email', 'merchant@example.com' ),
-			'info'           => array( 'info', null ),
-			'number'         => array( 'number', '02' ),
-			'password'       => array( 'password', 'secret' ),
-			'radio'          => array( 'radio', 'a' ),
-			'select'         => array( 'select', 'a' ),
-			'tel'            => array( 'tel', '+1 555 555 5555' ),
-			'text'           => array( 'text', 'Acme' ),
-			'textarea'       => array( 'textarea', 'Acme description' ),
-			'time'           => array( 'time', '12:30' ),
-			'url'            => array( 'url', 'https://example.com' ),
-		);
 	}
 
 	/**
@@ -1238,8 +1160,14 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 		$invalid_field_save['groups']['main']['fields'][0]['save'] = array( 'adapter' => 'custom' );
 		$invalid_visibility                                        = $valid;
 		$invalid_visibility['groups']['main']['fields'][0]['visibility'] = array( 'controller' => 'missing' );
-		$invalid_bound = $valid;
-		$invalid_bound['groups']['main']['fields'][0]['customAttributes'] = array( 'min' => 1 );
+		$invalid_field_value = $valid;
+		$invalid_field_value['groups']['main']['fields'][0]['value'] = array( 'tier' => 1 );
+		$invalid_custom_attributes                                   = $valid;
+		$invalid_custom_attributes['groups']['main']['fields'][0]['customAttributes'] = 'invalid';
+		$invalid_custom_attribute_value = $valid;
+		$invalid_custom_attribute_value['groups']['main']['fields'][0]['customAttributes'] = array( 'data-values' => array() );
+		$invalid_custom_attribute_float = $valid;
+		$invalid_custom_attribute_float['groups']['main']['fields'][0]['customAttributes'] = array( 'data-value' => INF );
 		$invalid_info                                        = $valid;
 		$invalid_info['groups']['main']['fields'][0]['type'] = 'info';
 		$invalid_shell                                       = $valid;
@@ -1286,7 +1214,10 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 			'empty component name'        => array( $invalid_component, 'Field "acme_field" component must be a non-empty string.' ),
 			'unsupported field save'      => array( $invalid_field_save, 'Field "acme_field" save adapter must be "form_post" or "none".' ),
 			'missing visibility control'  => array( $invalid_visibility, 'Field "acme_field" visibility controller "missing" does not reference a field.' ),
-			'bound on text field'         => array( $invalid_bound, 'Field "acme_field" may define "min" only when its type supports range attributes.' ),
+			'invalid field value'         => array( $invalid_field_value, 'Field "acme_field" value is not a valid Settings UI value.' ),
+			'invalid custom attributes'   => array( $invalid_custom_attributes, 'Field "acme_field" customAttributes must be a map.' ),
+			'invalid custom value'        => array( $invalid_custom_attribute_value, 'Field "acme_field" custom attribute "data-values" has an invalid value.' ),
+			'non-finite custom value'     => array( $invalid_custom_attribute_float, 'Field "acme_field" custom attribute "data-value" has an invalid value.' ),
 			'saving info field'           => array( $invalid_info, 'Field "acme_field" of type "info" must use the "none" save adapter.' ),
 			'malformed shell navigation'  => array( $invalid_shell, 'Shell navigation item 0 href must be a string.' ),
 			'malformed breadcrumb'        => array( $invalid_breadcrumb, 'Shell breadcrumb 0 label must be a string.' ),

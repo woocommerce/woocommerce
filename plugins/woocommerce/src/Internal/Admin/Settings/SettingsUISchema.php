@@ -26,43 +26,6 @@ class SettingsUISchema {
 	private const DEFAULT_GROUP_ID = 'default';
 
 	/**
-	 * Field types that the current Settings UI renderer handles explicitly.
-	 *
-	 * @var string[]
-	 */
-	private const SUPPORTED_FIELD_TYPES = array(
-		'array',
-		'checkbox',
-		'date',
-		'datetime-local',
-		'email',
-		'info',
-		'number',
-		'password',
-		'radio',
-		'select',
-		'tel',
-		'text',
-		'textarea',
-		'time',
-		'url',
-	);
-
-	/**
-	 * Custom attributes that describe an input range.
-	 *
-	 * @var string[]
-	 */
-	private const RANGE_ATTRIBUTES = array( 'min', 'max', 'step' );
-
-	/**
-	 * Native temporal field types that accept range attributes.
-	 *
-	 * @var string[]
-	 */
-	private const TEMPORAL_RANGE_FIELD_TYPES = array( 'date', 'datetime-local', 'time' );
-
-	/**
 	 * Build a schema from a legacy WC settings array.
 	 *
 	 * @since 10.9.0
@@ -181,7 +144,7 @@ class SettingsUISchema {
 	// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 
 	/**
-	 * Assert that a schema is safe for the current Settings UI renderer.
+	 * Assert that a schema can safely cross the PHP-to-JavaScript boundary.
 	 *
 	 * Compatibility normalization and request-owned shell defaults must run
 	 * before this assertion. An invalid schema throws before it can be cached or
@@ -190,7 +153,7 @@ class SettingsUISchema {
 	 * @since 11.2.0
 	 *
 	 * @param array $schema Settings UI schema.
-	 * @throws \InvalidArgumentException When the schema is malformed or unsupported.
+	 * @throws \InvalidArgumentException When the schema is malformed.
 	 */
 	public static function assert_valid_schema( array $schema ): void {
 		self::assert_non_empty_string( $schema['id'] ?? null, 'Schema id must be a non-empty string.' );
@@ -1089,26 +1052,8 @@ class SettingsUISchema {
 			return;
 		}
 
-		$value = $field['value'];
-		switch ( $field['type'] ) {
-			case 'array':
-				$valid = is_array( $value ) && ArrayUtil::array_is_list( $value ) && count( $value ) === count( array_filter( $value, 'is_string' ) );
-				break;
-			case 'checkbox':
-				$valid = is_bool( $value );
-				break;
-			case 'number':
-				$valid = self::is_finite_number( $value, true );
-				break;
-			default:
-				$valid = in_array( $field['type'], self::SUPPORTED_FIELD_TYPES, true )
-					? is_string( $value )
-					: self::is_settings_value( $value );
-				break;
-		}
-
-		if ( ! $valid ) {
-			throw self::invalid_schema( sprintf( 'Field "%s" value is invalid for type "%s".', $field['id'], $field['type'] ) );
+		if ( ! self::is_settings_value( $field['value'] ) ) {
+			throw self::invalid_schema( sprintf( 'Field "%s" value is not a valid Settings UI value.', $field['id'] ) );
 		}
 	}
 
@@ -1161,23 +1106,8 @@ class SettingsUISchema {
 				throw self::invalid_schema( sprintf( 'Field "%s" custom attribute names must be non-empty strings.', $field['id'] ) );
 			}
 
-			if ( ! is_string( $value ) && ! is_int( $value ) && ! is_float( $value ) && ! is_bool( $value ) ) {
+			if ( ! is_scalar( $value ) || ( is_float( $value ) && ! is_finite( $value ) ) ) {
 				throw self::invalid_schema( sprintf( 'Field "%s" custom attribute "%s" has an invalid value.', $field['id'], $attribute ) );
-			}
-
-			if ( in_array( $attribute, self::RANGE_ATTRIBUTES, true ) ) {
-				$is_number_field   = 'number' === $field['type'];
-				$is_temporal_field = in_array( $field['type'], self::TEMPORAL_RANGE_FIELD_TYPES, true );
-				if ( ! $is_number_field && ! $is_temporal_field ) {
-					throw self::invalid_schema( sprintf( 'Field "%s" may define "%s" only when its type supports range attributes.', $field['id'], $attribute ) );
-				}
-
-				if ( $is_number_field ) {
-					$allow_any = 'step' === $attribute;
-					if ( ! self::is_finite_number( $value, false ) && ! ( $allow_any && 'any' === $value ) ) {
-						throw self::invalid_schema( sprintf( 'Field "%s" custom attribute "%s" must be a finite number.', $field['id'], $attribute ) );
-					}
-				}
 			}
 		}
 	}
@@ -1264,33 +1194,6 @@ class SettingsUISchema {
 		}
 
 		return is_array( $value ) && ArrayUtil::array_is_list( $value ) && count( $value ) === count( array_filter( $value, 'is_string' ) );
-	}
-
-	/**
-	 * Whether a value is a finite number accepted by the transitional renderer.
-	 *
-	 * @param mixed $value Candidate value.
-	 * @param bool  $allow_empty_string Whether an empty input representation is valid.
-	 * @return bool
-	 */
-	private static function is_finite_number( $value, bool $allow_empty_string ): bool {
-		if ( is_int( $value ) ) {
-			return true;
-		}
-
-		if ( is_float( $value ) ) {
-			return is_finite( $value );
-		}
-
-		if ( ! is_string( $value ) ) {
-			return false;
-		}
-
-		if ( $allow_empty_string && '' === $value ) {
-			return true;
-		}
-
-		return is_numeric( $value ) && is_finite( (float) $value );
 	}
 
 	/**
