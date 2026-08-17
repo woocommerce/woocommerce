@@ -6,6 +6,7 @@ import {
 	expect,
 	PostCompiler,
 	test as base,
+	wpCLI,
 } from '@woocommerce/e2e-utils';
 
 /**
@@ -13,6 +14,40 @@ import {
  */
 
 const BLOCK_NAME = 'woocommerce/all-products';
+
+const getProductAttributeIds = async () => {
+	const { stdout } = await wpCLI(
+		'wc product_attribute list --format=json --user=1'
+	);
+	const firstBracket = stdout.indexOf( '[' );
+	const lastBracket = stdout.lastIndexOf( ']' );
+
+	if ( firstBracket < 0 || lastBracket <= firstBracket ) {
+		throw new Error( 'Product attribute CLI output did not contain JSON.' );
+	}
+
+	const attributes = JSON.parse(
+		stdout.slice( firstBracket, lastBracket + 1 )
+	) as Array< { id: number | string; slug: string } >;
+	const getAttributeId = ( slug: string ) => {
+		const matchingAttributes = attributes.filter(
+			( attribute ) => attribute.slug === slug
+		);
+
+		expect( matchingAttributes ).toHaveLength( 1 );
+		const attributeId = Number( matchingAttributes[ 0 ].id );
+		expect( Number.isSafeInteger( attributeId ) && attributeId > 0 ).toBe(
+			true
+		);
+
+		return attributeId;
+	};
+
+	return {
+		colorAttributeId: getAttributeId( 'pa_color' ),
+		sizeAttributeId: getAttributeId( 'pa_size' ),
+	};
+};
 
 const test = base.extend< { postCompiler: PostCompiler } >( {
 	postCompiler: async ( { requestUtils }, use ) => {
@@ -65,7 +100,9 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 		page,
 		postCompiler,
 	} ) => {
-		const post = await postCompiler.compile();
+		const post = await postCompiler.compile(
+			await getProductAttributeIds()
+		);
 
 		const productsResponse = page.waitForResponse(
 			( response ) =>

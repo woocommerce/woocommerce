@@ -28,75 +28,117 @@ test.describe( 'Shopper → Taxes', () => {
 		page,
 		checkoutPageObject,
 	} ) => {
-		// Turn off tax display.
-		await requestUtils.rest( {
-			method: 'PUT',
-			path: 'wc/v3/settings/general/woocommerce_calc_taxes',
-			data: { value: 'no' },
-		} );
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( DISCOUNTED_PRODUCT_NAME );
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await frontendUtils.goToCart();
-
-		let cartSidebar = page.locator(
-			'.wp-block-woocommerce-cart-totals-block'
+		const originalTaxSetting = await requestUtils.rest< { value: string } >(
+			{
+				method: 'GET',
+				path: 'wc/v3/settings/general/woocommerce_calc_taxes',
+			}
 		);
-		const taxRow = cartSidebar
-			.locator( '.wc-block-components-totals-taxes' )
-			.getByText( 'Tax' );
-		await expect( taxRow ).toBeHidden();
+		let taxRateId: number | null = null;
 
-		// Move to Checkout and look for Tax row.
-		await frontendUtils.goToCheckout();
-		let checkoutSidebar = page.locator(
-			'.wp-block-woocommerce-checkout-totals-block'
-		);
-		const checkoutTaxRow = checkoutSidebar
-			.locator( '.wc-block-components-totals-taxes' )
-			.getByText( 'Tax' );
-		await expect( checkoutTaxRow ).toBeHidden();
+		try {
+			const taxRate = await requestUtils.rest< { id: number } >( {
+				method: 'POST',
+				path: 'wc/v3/taxes',
+				data: {
+					rate: '20',
+					name: 'Blocks tax visibility rate',
+					class: 'standard',
+				},
+			} );
+			taxRateId = taxRate.id;
+			expect( Number.isSafeInteger( taxRateId ) && taxRateId > 0 ).toBe(
+				true
+			);
 
-		// Check out and look for tax on order confirmation page.
-		await checkoutPageObject.fillInCheckoutWithTestData();
-		await checkoutPageObject.placeOrder();
-		const taxOnOrderConfirmation = page.getByText( 'Tax:' );
-		await expect( taxOnOrderConfirmation ).toBeHidden();
+			// Turn off tax display.
+			await requestUtils.rest( {
+				method: 'PUT',
+				path: 'wc/v3/settings/general/woocommerce_calc_taxes',
+				data: { value: 'no' },
+			} );
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( DISCOUNTED_PRODUCT_NAME );
+			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await frontendUtils.goToCart();
 
-		// Empty the cart (it should be empty already, but just in case).
-		await frontendUtils.emptyCart();
+			let cartSidebar = page.locator(
+				'.wp-block-woocommerce-cart-totals-block'
+			);
+			const taxRow = cartSidebar
+				.locator( '.wc-block-components-totals-taxes' )
+				.getByText( 'Tax' );
+			await expect( taxRow ).toBeHidden();
 
-		// Turn on tax display.
-		await requestUtils.rest( {
-			method: 'PUT',
-			path: 'wc/v3/settings/general/woocommerce_calc_taxes',
-			data: { value: 'yes' },
-		} );
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( DISCOUNTED_PRODUCT_NAME );
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await frontendUtils.goToCart();
+			// Move to Checkout and look for Tax row.
+			await frontendUtils.goToCheckout();
+			let checkoutSidebar = page.locator(
+				'.wp-block-woocommerce-checkout-totals-block'
+			);
+			const checkoutTaxRow = checkoutSidebar
+				.locator( '.wc-block-components-totals-taxes' )
+				.getByText( 'Tax' );
+			await expect( checkoutTaxRow ).toBeHidden();
 
-		cartSidebar = page.locator( '.wp-block-woocommerce-cart-totals-block' );
-		const visibleTaxRow = cartSidebar
-			.locator( '.wc-block-components-totals-taxes' )
-			.getByText( 'Tax' );
-		await expect( visibleTaxRow ).toBeVisible();
+			// Check out and look for tax on order confirmation page.
+			await checkoutPageObject.fillInCheckoutWithTestData();
+			await checkoutPageObject.placeOrder();
+			const taxOnOrderConfirmation = page.getByText( 'Tax:' );
+			await expect( taxOnOrderConfirmation ).toBeHidden();
 
-		// Move to Checkout and look for Tax row.
-		await frontendUtils.goToCheckout();
-		checkoutSidebar = page.locator(
-			'.wp-block-woocommerce-checkout-totals-block'
-		);
-		const visibleCheckoutTaxRow = checkoutSidebar
-			.locator( '.wc-block-components-totals-taxes' )
-			.getByText( 'Tax' );
-		await expect( visibleCheckoutTaxRow ).toBeVisible();
+			// Empty the cart (it should be empty already, but just in case).
+			await frontendUtils.emptyCart();
 
-		// Check out and look for tax on order confirmation page.
-		await checkoutPageObject.fillInCheckoutWithTestData();
-		await checkoutPageObject.placeOrder();
-		const visibleTaxOnOrderConfirmation = page.getByText( 'Tax:' );
-		await expect( visibleTaxOnOrderConfirmation ).toBeVisible();
+			// Turn on tax display.
+			await requestUtils.rest( {
+				method: 'PUT',
+				path: 'wc/v3/settings/general/woocommerce_calc_taxes',
+				data: { value: 'yes' },
+			} );
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( DISCOUNTED_PRODUCT_NAME );
+			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await frontendUtils.goToCart();
+
+			cartSidebar = page.locator(
+				'.wp-block-woocommerce-cart-totals-block'
+			);
+			const visibleTaxRow = cartSidebar
+				.locator( '.wc-block-components-totals-taxes' )
+				.getByText( 'Tax' );
+			await expect( visibleTaxRow ).toBeVisible();
+
+			// Move to Checkout and look for Tax row.
+			await frontendUtils.goToCheckout();
+			checkoutSidebar = page.locator(
+				'.wp-block-woocommerce-checkout-totals-block'
+			);
+			const visibleCheckoutTaxRow = checkoutSidebar
+				.locator( '.wc-block-components-totals-taxes' )
+				.getByText( 'Tax' );
+			await expect( visibleCheckoutTaxRow ).toBeVisible();
+
+			// Check out and look for tax on order confirmation page.
+			await checkoutPageObject.fillInCheckoutWithTestData();
+			await checkoutPageObject.placeOrder();
+			const visibleTaxOnOrderConfirmation = page.getByText( 'Tax:' );
+			await expect( visibleTaxOnOrderConfirmation ).toBeVisible();
+		} finally {
+			try {
+				if ( taxRateId !== null ) {
+					await requestUtils.rest( {
+						method: 'DELETE',
+						path: `wc/v3/taxes/${ taxRateId }`,
+						data: { force: true },
+					} );
+				}
+			} finally {
+				await requestUtils.rest( {
+					method: 'PUT',
+					path: 'wc/v3/settings/general/woocommerce_calc_taxes',
+					data: { value: originalTaxSetting.value },
+				} );
+			}
+		}
 	} );
 } );

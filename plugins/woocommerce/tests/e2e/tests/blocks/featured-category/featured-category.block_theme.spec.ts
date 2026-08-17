@@ -31,15 +31,26 @@ test.describe( `${ blockData.slug } Block`, () => {
 
 	test( 'image can be edited', async ( { editor, admin } ) => {
 		await test.step( 'Create a product category with an image', async () => {
-			// Get the id of the image associated to the Cap product (for example).
+			// Use an uploaded fixture whose source file is present in wp-env.
+			const mediaCliOutput = await wpCLI(
+				'post list --post_type=attachment --title=image-01 --field=ID'
+			);
+			const mediaId = mediaCliOutput.stdout.match( /^\d+$/m )?.[ 0 ];
+			if ( ! mediaId ) {
+				throw new Error(
+					`Failed to find image-01 attachment: ${ mediaCliOutput.stdout }`
+				);
+			}
+
 			const productCliOutput = await wpCLI(
 				`post list --post_type=product --title=Cap --field=ID`
 			);
-			const productId = productCliOutput.stdout.match( /\d+/g )?.pop();
-			const mediaCliOutput = await wpCLI(
-				`post meta get ${ productId } _thumbnail_id`
-			);
-			const mediaId = mediaCliOutput.stdout.match( /\d+/g )?.pop();
+			const productId = productCliOutput.stdout.match( /^\d+$/m )?.[ 0 ];
+			if ( ! productId ) {
+				throw new Error(
+					`Failed to find Cap product: ${ productCliOutput.stdout }`
+				);
+			}
 
 			// Create a product category with that image.
 			const categoryCliOutput = await wpCLI(

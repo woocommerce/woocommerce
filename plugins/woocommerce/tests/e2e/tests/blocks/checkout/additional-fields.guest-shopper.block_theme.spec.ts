@@ -218,16 +218,17 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 			await frontendUtils.goToCheckout();
 
-			// The shipping insurance field should be hidden by default (cart total < 2000)
+			// The field is hidden while the cart total is at or below $40.
 			await expect(
 				checkoutPageObject.page.getByLabel( 'Add shipping insurance' )
 			).toBeHidden();
 
 			await frontendUtils.goToShop();
 			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 			await frontendUtils.goToCheckout();
 
-			// The shipping insurance field should now be visible (cart total > 2000)
+			// Three $20 products exceed the field's $59 required threshold.
 			await expect(
 				checkoutPageObject.page.getByLabel( 'Add shipping insurance' )
 			).toBeVisible();
