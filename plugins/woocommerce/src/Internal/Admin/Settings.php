@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIRequestContext;
+use Automattic\WooCommerce\Internal\Utilities\PriceSeparators;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Marketplace_Suggestions;
@@ -105,8 +106,8 @@ class Settings {
 				'precision'         => wc_get_price_decimals(),
 				'symbol'            => html_entity_decode( get_woocommerce_currency_symbol( $code ) ),
 				'symbolPosition'    => get_option( 'woocommerce_currency_pos' ),
-				'decimalSeparator'  => html_entity_decode( wc_get_price_decimal_separator(), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ),
-				'thousandSeparator' => html_entity_decode( wc_get_price_thousand_separator(), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ),
+				'decimalSeparator'  => PriceSeparators::get_decimal(),
+				'thousandSeparator' => PriceSeparators::get_thousand(),
 				'priceFormat'       => html_entity_decode( get_woocommerce_price_format() ),
 			)
 		);
