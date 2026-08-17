@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep a cell's first item on the same line as its "+N more" badge in Analytics report tables, so rows carrying a badge are no longer taller than rows without one.
