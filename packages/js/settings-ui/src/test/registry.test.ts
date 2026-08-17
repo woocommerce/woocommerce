@@ -143,7 +143,7 @@ describe( 'settings extension registry', () => {
 		).toBe( typeRenderer );
 	} );
 
-	it( 'fails closed when an explicit component has no resolver fallback', () => {
+	it( 'fails closed when an explicit component has no registry fallback even for a native field type', () => {
 		jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
 
 		expect( () =>

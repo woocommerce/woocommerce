@@ -163,9 +163,10 @@ Resolution order is:
 1. `field.component`
 2. `fieldOverrides[ field.id ]`
 3. `typeRenderers[ field.type ]`
-4. Native field renderer
 
-If one registry entry is missing, resolution continues to the next entry. The page fails closed only when no registered or native renderer can render the field.
+If one registry entry is missing, resolution continues to the next registry entry. When a field declares `field.component`, that metadata states that a custom control is required. If no named component, field override, or type renderer resolves it, the page fails closed instead of silently replacing the required control with a native field.
+
+For a field without `field.component`, the native field renderer is the final fallback after field overrides and type renderers.
 
 ## Enqueue the component script
 
@@ -205,4 +206,4 @@ WooCommerce loads the settings UI package first, then your script, then mounts t
 
 WooCommerce validates server-observable schema metadata and declared script handles before rendering the Settings UI mount. An invalid schema or a script handle that is not registered and enqueued renders the complete classic settings page in the same response.
 
-PHP cannot inspect the component registry in the browser. If no named component, field override, type renderer, or native renderer can render a field, or if a component throws while rendering, the Settings UI fails closed inside its page error boundary. It renders no editable fallback control and no Save action. The error notice offers a **Use classic settings** action that reloads the same page and section with `wc_settings_ui=classic` for that request. The action does not disable the feature flag, persist a preference, or reload automatically.
+PHP cannot inspect the component registry in the browser. The Settings UI fails closed when an explicitly required component has no registry fallback, when a field without an explicit component has no registered or native renderer, or when a component throws while rendering. It renders no editable fallback control and no Save action. The error notice offers a **Use classic settings** action that reloads the same page and section with `wc_settings_ui=classic` for that request. The action does not disable the feature flag, persist a preference, or reload automatically.

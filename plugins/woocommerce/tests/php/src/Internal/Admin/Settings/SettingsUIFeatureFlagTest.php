@@ -396,6 +396,22 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should trim and deduplicate declared extension script handles before loading them.
+	 */
+	public function test_script_handles_are_normalized_before_loading(): void {
+		wp_register_script( 'settings-ui-normalized-handle', false, array(), '1.0.0', true );
+
+		$page    = $this->get_settings_ui_test_page_with_script_handles(
+			array( ' settings-ui-normalized-handle ', 'settings-ui-normalized-handle' )
+		);
+		$context = SettingsUIRequestContext::for_settings_page( $page, '' );
+
+		$this->assertSame( array( 'settings-ui-normalized-handle' ), $context->get_script_handles() );
+		$this->assertSame( array( 'settings-ui-normalized-handle' ), $context->enqueue_script_handles() );
+		$this->assertTrue( wp_script_is( 'settings-ui-normalized-handle', 'enqueued' ) );
+	}
+
+	/**
 	 * @testdox Should enqueue each registered extension script handle before rendering the Settings UI mount.
 	 */
 	public function test_registered_script_handle_is_enqueued_before_settings_ui_mount(): void {
