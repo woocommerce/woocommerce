@@ -102,6 +102,90 @@ class RendererTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should add one render event initializer to each Product Collection.
+	 */
+	public function test_adds_one_render_event_init_per_collection(): void {
+		$hook_snapshots      = $this->snapshot_render_hooks();
+		$script_module_id    = 'woocommerce/product-collection';
+		$module_was_enqueued = in_array( $script_module_id, wp_script_modules()->get_queue(), true );
+
+		try {
+			$renderer = new Renderer();
+
+			foreach ( array( 'featured', 'on-sale', 'best-sellers' ) as $collection ) {
+				$block_content = '<div class="wp-block-woocommerce-product-collection">Products</div>';
+				$block         = array(
+					'blockName' => 'woocommerce/product-collection',
+					'attrs'     => array(
+						'collection'      => $collection,
+						'forcePageReload' => true,
+						'query'           => array(
+							'isProductCollectionBlock' => true,
+						),
+					),
+				);
+
+				$rendered  = $renderer->enhance_product_collection_with_interactivity( $block_content, $block );
+				$processor = new \WP_HTML_Tag_Processor( $rendered );
+
+				$this->assertTrue(
+					$processor->next_tag( array( 'class_name' => 'wp-block-woocommerce-product-collection' ) ),
+					"The {$collection} Product Collection root should remain present."
+				);
+				$this->assertSame(
+					'woocommerce/product-collection',
+					$processor->get_attribute( 'data-wp-interactive' ),
+					"The {$collection} Product Collection should use the real interactive namespace."
+				);
+				$this->assertSame(
+					1,
+					substr_count( $rendered, 'data-wp-interactive="woocommerce/product-collection"' ),
+					"The {$collection} Product Collection should declare its interactive namespace exactly once."
+				);
+				$this->assertSame(
+					'callbacks.onRender',
+					$processor->get_attribute( 'data-wp-init' ),
+					"The {$collection} Product Collection should initialize its render event callback."
+				);
+				$this->assertSame(
+					1,
+					substr_count( $rendered, 'data-wp-init="callbacks.onRender"' ),
+					"The {$collection} Product Collection should initialize its render event exactly once."
+				);
+
+				$context = json_decode( (string) $processor->get_attribute( 'data-wp-context' ), true );
+				$this->assertIsArray( $context, "The {$collection} Product Collection context should be valid JSON." );
+				$this->assertSame(
+					$collection,
+					$context['collection'] ?? null,
+					"The {$collection} Product Collection should retain its collection context."
+				);
+			}
+
+			$non_collection_content = '<div class="wp-block-query">Posts</div>';
+			$this->assertSame(
+				$non_collection_content,
+				$renderer->enhance_product_collection_with_interactivity(
+					$non_collection_content,
+					array(
+						'attrs' => array(
+							'query' => array(
+								'isProductCollectionBlock' => false,
+							),
+						),
+					)
+				),
+				'Non-Product Collection markup should remain byte-identical.'
+			);
+		} finally {
+			$this->restore_render_hooks( $hook_snapshots );
+			if ( ! $module_was_enqueued ) {
+				wp_dequeue_script_module( $script_module_id );
+			}
+		}
+	}
+
+	/**
 	 * Snapshot the hook stacks touched by the renderer constructor.
 	 *
 	 * @return array<string, WP_Hook|null>

@@ -78,4 +78,92 @@ class ControllerTest extends WC_Unit_Test_Case {
 			'Product Filters should be configured to reload when the inherited Product Collection forces page reload.'
 		);
 	}
+
+	/**
+	 * @testdox Should add the viewed-product action to a linked Product Collection title.
+	 */
+	public function test_adds_view_product_directive_to_linked_product_title(): void {
+		$block_content = '<h2 class="wp-block-post-title"><a href="https://example.com/product">Product</a></h2>';
+		$instance      = $this->create_post_title_block(
+			array(
+				'__woocommerceNamespace' => 'woocommerce/product-collection/product-title',
+				'isLink'                 => true,
+			)
+		);
+
+		$rendered = $this->sut->add_product_title_click_event_directives( $block_content, array(), $instance );
+
+		$this->assertSame(
+			1,
+			substr_count( $rendered, 'data-wp-on--click="woocommerce/product-collection::actions.viewProduct"' ),
+			'The linked Product Collection title should receive exactly one viewed-product action.'
+		);
+	}
+
+	/**
+	 * @testdox Should leave unrelated or unlinked Product Title markup byte-identical.
+	 * @dataProvider provide_uninstrumented_product_title_cases
+	 *
+	 * @param array  $attributes    Block attributes.
+	 * @param string $block_content Rendered block content.
+	 */
+	public function test_does_not_add_view_product_directive_to_unrelated_titles( array $attributes, string $block_content ): void {
+		$instance = $this->create_post_title_block( $attributes );
+
+		$this->assertSame(
+			$block_content,
+			$this->sut->add_product_title_click_event_directives( $block_content, array(), $instance )
+		);
+	}
+
+	/**
+	 * Cases that must not receive the viewed-product action.
+	 *
+	 * @return array<string, array{0: array<string, mixed>, 1: string}>
+	 */
+	public function provide_uninstrumented_product_title_cases(): array {
+		$linked_title = '<h2 class="wp-block-post-title"><a href="https://example.com/product">Product</a></h2>';
+
+		return array(
+			'wrong namespace' => array(
+				array(
+					'__woocommerceNamespace' => 'woocommerce/single-product/product-title',
+					'isLink'                 => true,
+				),
+				$linked_title,
+			),
+			'link disabled'   => array(
+				array(
+					'__woocommerceNamespace' => 'woocommerce/product-collection/product-title',
+					'isLink'                 => false,
+				),
+				$linked_title,
+			),
+			'missing anchor'  => array(
+				array(
+					'__woocommerceNamespace' => 'woocommerce/product-collection/product-title',
+					'isLink'                 => true,
+				),
+				'<h2 class="wp-block-post-title">Product</h2>',
+			),
+		);
+	}
+
+	/**
+	 * Create a real Post Title block instance for the public render filter.
+	 *
+	 * @param array $attributes Block attributes.
+	 * @return \WP_Block
+	 */
+	private function create_post_title_block( array $attributes ): \WP_Block {
+		return new \WP_Block(
+			array(
+				'blockName'    => 'core/post-title',
+				'attrs'        => $attributes,
+				'innerBlocks'  => array(),
+				'innerHTML'    => '',
+				'innerContent' => array(),
+			)
+		);
+	}
 }
