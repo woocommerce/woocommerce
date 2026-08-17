@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Admin\API\Reports\Products;
 use Automattic\WooCommerce\Admin\API\Reports\Cache;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
@@ -57,16 +58,29 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	 * @return int Product ID.
 	 */
 	private function create_synced_custom_status_order() {
-		// Core warns when saving a status longer than the 20-char column; that
-		// truncated storage is the exact scenario under test.
-		$this->setExpectedIncorrectUsage( 'Abstract_WC_Order_Data_Store_CPT::get_post_status' );
+		global $wpdb;
 
 		$product = WC_Helper_Product::create_simple_product();
 		$order   = wc_create_order();
 		$order->add_product( $product, 2 );
 		$order->calculate_totals();
-		$order->set_status( $this->long_status );
 		$order->save();
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->setExpectedIncorrectUsage( 'Abstract_WC_Order_Data_Store_CPT::get_post_status' );
+			$order->set_status( $this->long_status );
+			$order->save();
+		} else {
+			// Stamp the truncated value directly: strict SQL modes reject an
+			// overlength CPT write instead of truncating it, which would leave
+			// this fixture pending.
+			$wpdb->update(
+				$wpdb->posts,
+				array( 'post_status' => mb_substr( 'wc-' . $this->long_status, 0, 20 ) ),
+				array( 'ID' => $order->get_id() )
+			);
+			clean_post_cache( $order->get_id() );
+		}
 
 		OrdersStatsDataStore::sync_order( $order->get_id() );
 		ProductsDataStore::sync_order_products( $order->get_id() );

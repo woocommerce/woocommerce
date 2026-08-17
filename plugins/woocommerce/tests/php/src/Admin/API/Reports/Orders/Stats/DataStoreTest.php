@@ -602,11 +602,21 @@ class DataStoreTest extends WC_Unit_Test_Case {
 		$this->assertSame( '0', $returning_flag( $order_1->get_id() ), 'Oldest order should start as the non-returning first order.' );
 		$this->assertSame( '1', $returning_flag( $order_2->get_id() ), 'Second order should start as returning.' );
 
-		// Core warns when saving a status longer than the 20-char column; that
-		// truncated storage is the exact scenario under test.
-		$this->setExpectedIncorrectUsage( 'Abstract_WC_Order_Data_Store_CPT::get_post_status' );
-		$order_1->set_status( $long_status );
-		$order_1->save();
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->setExpectedIncorrectUsage( 'Abstract_WC_Order_Data_Store_CPT::get_post_status' );
+			$order_1->set_status( $long_status );
+			$order_1->save();
+		} else {
+			// Stamp the truncated value directly: strict SQL modes reject an
+			// overlength CPT write instead of truncating it, which would leave
+			// this fixture in its previous status.
+			$wpdb->update(
+				$wpdb->posts,
+				array( 'post_status' => mb_substr( 'wc-' . $long_status, 0, 20 ) ),
+				array( 'ID' => $order_1->get_id() )
+			);
+			clean_post_cache( $order_1->get_id() );
+		}
 
 		// Reload so the order reports the truncated status actually stored in the database.
 		$order_1 = wc_get_order( $order_1->get_id() );
