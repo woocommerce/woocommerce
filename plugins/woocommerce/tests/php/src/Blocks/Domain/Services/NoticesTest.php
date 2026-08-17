@@ -66,12 +66,23 @@ class NoticesTest extends WC_Unit_Test_Case {
 	private $style_snapshot = array();
 
 	/**
+	 * Theme directories registered before each test.
+	 *
+	 * @var string[]
+	 */
+	private $theme_directories = array();
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
+		global $wp_theme_directories;
+
+		$this->theme_directories = $wp_theme_directories;
 		register_theme_directory( trailingslashit( WC_ABSPATH ) . 'tests/e2e/themes/blocks' );
+		search_theme_directories( true );
 		if ( null === self::$original_theme ) {
 			self::$original_theme = get_stylesheet();
 		}
@@ -86,6 +97,8 @@ class NoticesTest extends WC_Unit_Test_Case {
 	 * Restore test fixtures.
 	 */
 	public function tearDown(): void {
+		global $wp_theme_directories;
+
 		if ( null !== self::$original_theme && get_stylesheet() !== self::$original_theme ) {
 			switch_theme( self::$original_theme );
 		}
@@ -94,6 +107,8 @@ class NoticesTest extends WC_Unit_Test_Case {
 		$this->restore_action_counts();
 		$this->restore_styles();
 		wc_clear_template_cache();
+		$wp_theme_directories = $this->theme_directories; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the exact theme roots registered before this test.
+		search_theme_directories( true );
 
 		parent::tearDown();
 	}

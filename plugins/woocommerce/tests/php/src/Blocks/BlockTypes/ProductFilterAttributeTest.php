@@ -141,37 +141,40 @@ class ProductFilterAttributeTest extends WC_Unit_Test_Case {
 	 * @testdox Should render ordered attribute options and counts in the interactivity context.
 	 */
 	public function test_renders_ordered_attribute_options_and_counts_in_interactivity_context(): void {
-		$attribute_id = wc_create_attribute(
+		$attribute_slug     = 'filter-count-color';
+		$attribute_taxonomy = 'pa_' . $attribute_slug;
+		$filter_type        = 'attribute/' . $attribute_slug;
+		$attribute_id       = wc_create_attribute(
 			array(
 				'name' => 'Color',
-				'slug' => 'color',
+				'slug' => $attribute_slug,
 			)
 		);
 
 		$this->assertIsInt( $attribute_id, 'Attribute should be created.' );
 		$this->attribute_ids[] = $attribute_id;
 
-		if ( ! taxonomy_exists( 'pa_color' ) ) {
-			register_taxonomy( 'pa_color', array( 'product' ), array( 'labels' => array( 'name' => 'Color' ) ) );
-			$this->registered_taxonomies[] = 'pa_color';
+		if ( ! taxonomy_exists( $attribute_taxonomy ) ) {
+			register_taxonomy( $attribute_taxonomy, array( 'product' ), array( 'labels' => array( 'name' => 'Color' ) ) );
+			$this->registered_taxonomies[] = $attribute_taxonomy;
 		}
 
-		$blue = wp_insert_term( 'Blue', 'pa_color' );
+		$blue = wp_insert_term( 'Blue', $attribute_taxonomy );
 		$this->assertNotWPError( $blue );
-		$blue_id                                = (int) $blue['term_id'];
-		$this->attribute_term_ids['pa_color'][] = $blue_id;
+		$blue_id = (int) $blue['term_id'];
+		$this->attribute_term_ids[ $attribute_taxonomy ][] = $blue_id;
 
-		$red = wp_insert_term( 'Red', 'pa_color' );
+		$red = wp_insert_term( 'Red', $attribute_taxonomy );
 		$this->assertNotWPError( $red );
-		$red_id                                 = (int) $red['term_id'];
-		$this->attribute_term_ids['pa_color'][] = $red_id;
-		$this->attribute_counts                 = array(
+		$red_id = (int) $red['term_id'];
+		$this->attribute_term_ids[ $attribute_taxonomy ][] = $red_id;
+		$this->attribute_counts                            = array(
 			$blue_id => 7,
 			$red_id  => 3,
 		);
 
 		$output_without_counts  = $this->render_attribute_filter_with_checkbox_list( $attribute_id );
-		$context_without_counts = $this->get_attribute_filter_context( $output_without_counts, 'attribute/color' );
+		$context_without_counts = $this->get_attribute_filter_context( $output_without_counts, $filter_type );
 
 		$this->assertIsArray( $context_without_counts, 'The attribute filter should expose an interactivity context without counts.' );
 		foreach ( $context_without_counts['items'] as $item ) {
@@ -179,30 +182,30 @@ class ProductFilterAttributeTest extends WC_Unit_Test_Case {
 		}
 
 		$output  = $this->render_attribute_filter_with_checkbox_list( $attribute_id, true );
-		$context = $this->get_attribute_filter_context( $output, 'attribute/color' );
+		$context = $this->get_attribute_filter_context( $output, $filter_type );
 
 		$this->assertIsArray( $context, 'The attribute filter should expose an interactivity context.' );
 		$this->assertSame( 'Color: {{label}}', $context['activeLabelTemplate'] );
-		$this->assertSame( 'attribute/color', $context['filterType'] );
+		$this->assertSame( $filter_type, $context['filterType'] );
 		$this->assertSame(
 			array(
 				array(
-					'id'                 => 'attribute/color-blue',
+					'id'                 => $filter_type . '-blue',
 					'label'              => 'Blue',
 					'ariaLabel'          => 'Blue',
 					'value'              => 'blue',
 					'selected'           => false,
-					'type'               => 'attribute/color',
+					'type'               => $filter_type,
 					'attributeQueryType' => 'or',
 					'count'              => 7,
 				),
 				array(
-					'id'                 => 'attribute/color-red',
+					'id'                 => $filter_type . '-red',
 					'label'              => 'Red',
 					'ariaLabel'          => 'Red',
 					'value'              => 'red',
 					'selected'           => false,
-					'type'               => 'attribute/color',
+					'type'               => $filter_type,
 					'attributeQueryType' => 'or',
 					'count'              => 3,
 				),
