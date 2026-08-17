@@ -966,9 +966,7 @@ class SettingsUISchema {
 		}
 
 		$type = $field['type'] ?? null;
-		if ( ! is_string( $type ) || ! in_array( $type, self::SUPPORTED_FIELD_TYPES, true ) ) {
-			throw self::invalid_schema( sprintf( 'Field "%s" has unsupported type "%s".', $field_id, is_scalar( $type ) ? (string) $type : gettype( $type ) ) );
-		}
+		self::assert_non_empty_string( $type, sprintf( 'Field "%s" type must be a non-empty string.', $field_id ) );
 
 		self::assert_optional_strings( $field, array( 'description', 'placeholder' ), sprintf( 'Field "%s"', $field_id ) );
 		if ( isset( $field['disabled'] ) && ! is_bool( $field['disabled'] ) ) {
@@ -1008,7 +1006,9 @@ class SettingsUISchema {
 				$valid = self::is_finite_number( $value, true );
 				break;
 			default:
-				$valid = is_string( $value );
+				$valid = in_array( $field['type'], self::SUPPORTED_FIELD_TYPES, true )
+					? is_string( $value )
+					: self::is_settings_value( $value );
 				break;
 		}
 

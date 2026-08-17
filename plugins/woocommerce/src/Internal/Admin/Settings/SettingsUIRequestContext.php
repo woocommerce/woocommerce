@@ -330,6 +330,24 @@ class SettingsUIRequestContext {
 	}
 
 	/**
+	 * Whether script handle declaration resolution failed.
+	 *
+	 * This check does not validate registrations. Extensions can register their
+	 * declared handles after WooCommerce builds the settings embed dependencies.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @return bool
+	 */
+	public function has_script_handle_resolution_failed(): bool {
+		if ( ! $this->script_handles_resolved ) {
+			$this->resolve_script_handles();
+		}
+
+		return $this->script_handles_failed;
+	}
+
+	/**
 	 * Validate and enqueue extension script handles for this context.
 	 *
 	 * Handle names are collected separately so extensions can register their

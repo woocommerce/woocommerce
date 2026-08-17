@@ -130,6 +130,28 @@ describe( 'settings extension registry', () => {
 		).toThrow( 'Component "test/missing-component" is not registered.' );
 	} );
 
+	it( 'resolves extension-defined field types through type renderers', () => {
+		const colorRenderer: SettingsFieldComponent = () => null;
+
+		registerSettingsExtension( {
+			scope: { page: 'registry-custom-type' },
+			typeRenderers: {
+				acme_color: colorRenderer,
+			},
+		} );
+
+		expect(
+			resolveFieldComponentForRendering(
+				{
+					id: 'color',
+					label: 'Color',
+					type: 'acme_color',
+				},
+				{ page: 'registry-custom-type' }
+			)
+		).toBe( colorRenderer );
+	} );
+
 	it( 'ignores malformed registration payloads', () => {
 		const warnSpy = jest
 			.spyOn( console, 'warn' )

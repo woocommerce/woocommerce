@@ -338,7 +338,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		$this->assertSame( 1, $this->get_schema_resolution_count( $page ), 'Schema validation should run once per request context.' );
 		$this->assertCount( 1, $settings_page_notices, 'The fallback diagnostic should be emitted once.' );
 		$this->assertStringContainsString( 'woocommerce_settings_ui_flag_test', $settings_page_notices[0]['message'] );
-		$this->assertStringContainsString( 'unsupported type "future-control"', $settings_page_notices[0]['message'] );
+		$this->assertStringContainsString( 'type must be a non-empty string', $settings_page_notices[0]['message'] );
 		$this->assertSame( $stored_before, $stored_after, 'Classic fallback must preserve the raw stored option representation.' );
 	}
 
@@ -424,10 +424,13 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		global $current_section;
 		$current_section = '';
 		$page            = $this->get_settings_ui_test_page_with_script_handles( array( 'settings-ui-late-registered-handle' ) );
-		$context         = SettingsUIRequestContext::for_settings_page( $page, '' );
+		$this->set_current_settings_page_request( $page );
+		$context = SettingsUIRequestContext::for_settings_page( $page, '' );
 
 		// WooCommerce collects dependencies at priority 15; extensions may register them later in the same hook.
-		$this->assertSame( array( 'settings-ui-late-registered-handle' ), $context->get_script_handles() );
+		$dependencies = $this->invoke_private_method( new WCAdminAssets(), 'get_settings_ui_script_dependencies' );
+		$this->assertSame( array( 'wc-settings-ui', 'settings-ui-late-registered-handle' ), $dependencies );
+		$this->assertFalse( $context->has_script_handle_resolution_failed() );
 		wp_register_script( 'settings-ui-late-registered-handle', false, array(), '1.0.0', true );
 
 		ob_start();
@@ -1238,7 +1241,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 					public function get_schema( string $section_id ): array {
 						$schema = parent::get_schema( $section_id );
 						$this->settings_page->increment_schema_resolution_count();
-						$schema['groups']['default']['fields'][0]['type'] = 'future-control';
+						$schema['groups']['default']['fields'][0]['type'] = '';
 
 						return $schema;
 					}

@@ -372,10 +372,7 @@ export class SettingsUIErrorBoundary extends Component<
 						'woocommerce'
 					) }
 					<div className="components-notice__buttons">
-						<Button
-							href={ getClassicSettingsUrl() }
-							variant="link"
-						>
+						<Button href={ getClassicSettingsUrl() } variant="link">
 							{ __( 'Use classic settings', 'woocommerce' ) }
 						</Button>
 					</div>

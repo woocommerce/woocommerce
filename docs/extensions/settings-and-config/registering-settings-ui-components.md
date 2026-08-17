@@ -151,25 +151,12 @@ registerSettingsExtension( {
 		page: 'my_plugin',
 	},
 	typeRenderers: {
-		text: TextField,
+		my_plugin_color: ColorField,
 	},
 } );
 ```
 
-`typeRenderers` only overrides a canonical field type that WooCommerce already accepts. It does not register a new field type. PHP rejects unknown types before the Settings UI mounts.
-
-To migrate an extension-defined type, keep the field's storage shape on a canonical type and name the specialized component explicitly:
-
-```php
-array(
-	'id'        => 'my_plugin_color',
-	'title'     => __( 'Color', 'my-plugin' ),
-	'type'      => 'text',
-	'component' => 'my-plugin/color-field',
-)
-```
-
-Register `my-plugin/color-field` in `components`, or use `fieldOverrides` when the PHP field metadata cannot be changed yet.
+The PHP schema validator accepts extension-defined field types when their values use the Settings UI value contract. The extension script must register the matching renderer before the page mounts.
 
 Resolution order is:
 

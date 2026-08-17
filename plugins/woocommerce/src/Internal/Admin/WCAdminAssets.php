@@ -447,7 +447,7 @@ class WCAdminAssets {
 			}
 
 			$context = SettingsUIRequestContext::get_current();
-			if ( ! $context || $context->has_script_handles_failed() ) {
+			if ( ! $context || $context->has_script_handle_resolution_failed() ) {
 				return array();
 			}
 

@@ -823,6 +823,22 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox It accepts an extension-defined field type for a registered type renderer.
+	 */
+	public function test_assert_valid_schema_accepts_extension_defined_field_type(): void {
+		$field = array(
+			'id'    => 'acme_color',
+			'label' => 'Acme color',
+			'type'  => 'acme_color',
+			'value' => '#96588a',
+			'save'  => array( 'adapter' => 'form_post' ),
+		);
+
+		SettingsUISchema::assert_valid_schema( $this->get_native_schema_with_field( $field ) );
+		$this->addToAssertionCount( 1 );
+	}
+
+	/**
 	 * Supported field type fixtures.
 	 *
 	 * @return array<string, array{string, mixed}>
@@ -912,11 +928,12 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	public static function invalid_schemas(): array {
 		$valid = self::get_valid_schema_for_validation();
 
-		$unknown_type                                        = $valid;
-		$unknown_type['groups']['main']['fields'][0]['type'] = 'custom';
-		$duplicate_id                                        = $valid;
-		$duplicate_id['groups']['main']['fields'][]          = $duplicate_id['groups']['main']['fields'][0];
-		$group_field_collision                               = $valid;
+		$empty_type                                        = $valid;
+		$empty_type['groups']['main']['fields'][0]['type'] = '';
+
+		$duplicate_id                               = $valid;
+		$duplicate_id['groups']['main']['fields'][] = $duplicate_id['groups']['main']['fields'][0];
+		$group_field_collision                      = $valid;
 		$group_field_collision['groups']['main']['fields'][0]['id'] = 'main';
 		$empty_schema_id                                        = $valid;
 		$empty_schema_id['id']                                  = '';
@@ -974,7 +991,7 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 		unset( $invalid_group_map['groups']['main'] );
 
 		return array(
-			'unknown field type'          => array( $unknown_type, 'Field "acme_field" has unsupported type "custom".' ),
+			'empty field type'            => array( $empty_type, 'Field "acme_field" type must be a non-empty string.' ),
 			'duplicate field id'          => array( $duplicate_id, 'Field id "acme_field" is duplicated.' ),
 			'group and field collision'   => array( $group_field_collision, 'Field id "main" collides with a group id.' ),
 			'empty schema id'             => array( $empty_schema_id, 'Schema id must be a non-empty string.' ),
