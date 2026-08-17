@@ -4553,13 +4553,28 @@ function wc_get_formatted_cart_item_data( $cart_item, $flat = false ) {
 	if ( is_array( $item_data ) ) {
 		// Format item data ready to display.
 		foreach ( $item_data as $key => $data ) {
+			if ( ! is_array( $data ) ) {
+				unset( $item_data[ $key ] );
+				continue;
+			}
 			// Set hidden to true to not display meta on cart.
 			if ( ! empty( $data['hidden'] ) ) {
 				unset( $item_data[ $key ] );
 				continue;
 			}
-			$item_data[ $key ]['key']     = ! empty( $data['key'] ) ? $data['key'] : $data['name'];
-			$item_data[ $key ]['display'] = ! empty( $data['display'] ) ? $data['display'] : $data['value'];
+			$label   = ! empty( $data['key'] ) ? $data['key'] : ( $data['name'] ?? '' );
+			$display = ! empty( $data['display'] ) ? $data['display'] : ( $data['value'] ?? '' );
+
+			$label_is_renderable   = is_scalar( $label ) || ( is_object( $label ) && method_exists( $label, '__toString' ) );
+			$display_is_renderable = is_scalar( $display ) || ( is_object( $display ) && method_exists( $display, '__toString' ) );
+
+			if ( ! $label_is_renderable || ! $display_is_renderable ) {
+				unset( $item_data[ $key ] );
+				continue;
+			}
+
+			$item_data[ $key ]['key']     = (string) $label;
+			$item_data[ $key ]['display'] = (string) $display;
 		}
 
 		// Output flat or in list format.
