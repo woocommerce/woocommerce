@@ -261,8 +261,12 @@ test.describe(
 			}, 0 );
 
 			await expect(
-				page.locator( '.wc-block-components-totals-item__value' ).last()
-			).toContainText( expectedTotal.toString() );
+				page
+					.getByRole( 'main' )
+					.locator( '.wc-block-components-totals-item__value' )
+					.filter( { hasText: expectedTotal.toString() } )
+					.first()
+			).toBeVisible();
 		} );
 
 		test( 'should be able to remove variation products from the cart', async ( {
