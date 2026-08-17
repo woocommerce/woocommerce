@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Settings registration now runs at `admin_init` priority 999 instead of the default 10, so extensions that add settings pages or email classes from their own `admin_init` callbacks are no longer dropped. Code that unhooks it must match the new priority: `remove_action( 'admin_init', array( WC(), 'register_wp_admin_settings' ), 999 )`.
