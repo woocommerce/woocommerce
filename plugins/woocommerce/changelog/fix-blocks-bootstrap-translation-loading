@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent early translation loading when checking unified block editor build assets.

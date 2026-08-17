@@ -51,6 +51,8 @@ class ProductQuery extends \WP_UnitTestCase {
 	 * Initiate the mock object.
 	 */
 	protected function setUp(): void {
+		parent::setUp();
+
 		$this->block_instance = new ProductQueryMock();
 	}
 

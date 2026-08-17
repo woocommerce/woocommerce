@@ -37,6 +37,7 @@ use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Internal\Admin\OrderMilestoneEasterEgg;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, TimeUtil};
+use Automattic\WooCommerce\Internal\Logging\OrderLogsCleanupHelper;
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 use Automattic\WooCommerce\Caches\OrderCountCacheService;
 use Automattic\WooCommerce\Caches\ProductCountCacheService;
@@ -59,7 +60,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '11.1.0-dev';
+	public $version = '11.2.0-dev';
 
 	/**
 	 * WooCommerce Schema version.
@@ -344,7 +345,13 @@ final class WooCommerce {
 		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin' ) );
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_inbox_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_inbox_variant' ) );
+
+		// Originating from https://github.com/woocommerce/woocommerce/pull/11082 (WC_API::register_wp_admin_settings(), July 2016),
+		// the settings were intended for REST context only. By chance, admin pages relied on unconditional rest_preload_api_request calls,
+		// that triggered rest_api_init as a side effect, and over time admin code bound to these settings as well.
+		add_action( 'admin_init', array( $this, 'register_wp_admin_settings' ) );
 		add_action( 'rest_api_init', array( $this, 'register_wp_admin_settings' ) );
+
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_newly_installed', 'wc_set_hooked_blocks_version', 10 );
@@ -389,6 +396,7 @@ final class WooCommerce {
 		$container->get( TaxRateVersionStringInvalidator::class );
 		$container->get( OrderMilestoneEasterEgg::class );
 		$container->get( CustomerEmailVerification::class );
+		$container->get( OrderLogsCleanupHelper::class );
 
 		// Feature flags.
 		if ( Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
@@ -1534,6 +1542,11 @@ final class WooCommerce {
 	 * @return void
 	 */
 	public function register_wp_admin_settings() {
+		// Avoid double-loading in admin caused by rest_preload_api_request calls (e.g. analytics page).
+		if ( doing_action( 'rest_api_init' ) && did_action( 'admin_init' ) ) {
+			return;
+		}
+
 		$pages = WC_Admin_Settings::get_settings_pages();
 		foreach ( $pages as $page ) {
 			new WC_Register_WP_Admin_Settings( $page, 'page' );

@@ -161,4 +161,46 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 			);
 		}
 	}
+
+	/**
+	 * @testdox CSV data is written with an append-only fopen mode so write-only stream wrappers are supported.
+	 */
+	public function test_write_csv_data_uses_append_only_fopen_mode(): void {
+		$exporter = new WC_Product_CSV_Exporter();
+		$exporter->set_filename( 'wc-csv-exporter-fopen-mode-test' );
+
+		// Creates the file so write_csv_data() gets past its writability check.
+		$exporter->get_file();
+
+		$captured_mode = null;
+		$capture_mode  = function ( $fopen_mode ) use ( &$captured_mode ) {
+			$captured_mode = $fopen_mode;
+			return $fopen_mode;
+		};
+
+		add_filter( 'woocommerce_csv_exporter_fopen_mode', $capture_mode );
+
+		$reflected_exporter = new ReflectionClass( WC_Product_CSV_Exporter::class );
+		$write_csv_data     = $reflected_exporter->getMethod( 'write_csv_data' );
+		$write_csv_data->setAccessible( true );
+		$get_file_path = $reflected_exporter->getMethod( 'get_file_path' );
+		$get_file_path->setAccessible( true );
+		$get_headers_row_file_path = $reflected_exporter->getMethod( 'get_headers_row_file_path' );
+		$get_headers_row_file_path->setAccessible( true );
+
+		try {
+			$write_csv_data->invoke( $exporter, "sku,name\n" );
+
+			$this->assertSame( 'a', $captured_mode, 'The default fopen mode must be append-only; "a+" is rejected by stream wrappers that cannot seek.' );
+			$this->assertStringContainsString( "sku,name\n", $exporter->get_file(), 'Data passed to write_csv_data() should reach the export file.' );
+		} finally {
+			remove_filter( 'woocommerce_csv_exporter_fopen_mode', $capture_mode );
+
+			foreach ( array( $get_file_path->invoke( $exporter ), $get_headers_row_file_path->invoke( $exporter ) ) as $path ) {
+				if ( file_exists( $path ) ) {
+					wp_delete_file( $path );
+				}
+			}
+		}
+	}
 }
