@@ -947,6 +947,107 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Registered Remove Order Coupon AJAX removes the coupon, recalculates totals, and records its internal note.
+	 */
+	public function test_remove_order_coupon(): void {
+		$original_post             = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Test snapshots request state before installing a real nonce.
+		$original_request          = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Test snapshots request state before installing a real nonce.
+		$original_user_id          = get_current_user_id();
+		$original_last_response    = $this->_last_response;
+		$output_buffering_level    = ob_get_level();
+		$product                   = null;
+		$coupon                    = null;
+		$order                     = null;
+		$coupon_code               = 'slice-105-remove-coupon-' . wp_rand( 1000, 9999 );
+		$product_name              = 'Slice 105 Coupon Product';
+		$expected_removal_note     = sprintf( 'Coupon removed: "%s".', $coupon_code );
+		$expected_product_total    = '10.00';
+		$expected_discounted_total = '5.00';
+
+		try {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_name( $product_name );
+			$product->set_regular_price( $expected_product_total );
+			$product->save();
+
+			$coupon = WC_Helper_Coupon::create_coupon(
+				$coupon_code,
+				array(
+					'discount_type' => 'fixed_product',
+					'coupon_amount' => $expected_discounted_total,
+					'product_ids'   => array( $product->get_id() ),
+				)
+			);
+			$order  = wc_create_order();
+			if ( is_wp_error( $order ) ) {
+				throw new RuntimeException( 'Could not create the coupon-removal order fixture.' );
+			}
+			$order->add_product( $product, 1 );
+			$order->calculate_totals();
+			$this->assertTrue( $order->apply_coupon( $coupon_code ), 'The fixture order should accept its fixed-product coupon.' );
+			$order->calculate_totals();
+			$order->save();
+			$this->assertSame( $expected_discounted_total, $order->get_total(), 'The fixture order should start with its coupon discount applied.' );
+
+			$this->_setRole( 'administrator' );
+			$request_data = array(
+				'security' => wp_create_nonce( 'order-item' ),
+				'order_id' => $order->get_id(),
+				'coupon'   => $coupon_code,
+				'country'  => 'US',
+				'state'    => 'CA',
+				'postcode' => '94105',
+				'city'     => 'San Francisco',
+			);
+			$_POST        = $request_data;
+			$_REQUEST     = $request_data;
+
+			$response = $this->do_ajax( 'woocommerce_remove_order_coupon' );
+			$this->assertTrue( $response['success'] ?? false, 'The registered AJAX action should report success.' );
+			$this->assertStringContainsString( $product_name, $response['data']['html'] ?? '', 'The AJAX response should render the order items.' );
+			$this->assertStringContainsString( esc_html( $expected_removal_note ), $response['data']['notes_html'] ?? '', 'The AJAX response should render the coupon-removal note.' );
+
+			$fresh_order = wc_get_order( $order->get_id() );
+			if ( ! $fresh_order instanceof WC_Order ) {
+				throw new RuntimeException( 'Could not reload the coupon-removal order fixture.' );
+			}
+			$this->assertNotContains( $coupon_code, $fresh_order->get_coupon_codes(), 'The fresh order should no longer have the removed coupon.' );
+			$this->assertSame( $expected_product_total, $fresh_order->get_total(), 'Removing the coupon should restore the product total.' );
+
+			$removal_notes = array_values(
+				array_filter(
+					wc_get_order_notes( array( 'order_id' => $fresh_order->get_id() ) ),
+					static fn ( $note ): bool => esc_html( $expected_removal_note ) === $note->content
+				)
+			);
+			$this->assertCount( 1, $removal_notes, 'Removing the coupon should create one exact removal note.' );
+			$this->assertSame( 0, (int) $removal_notes[0]->customer_note, 'The coupon-removal note should remain internal.' );
+		} finally {
+			$_POST                = $original_post;
+			$_REQUEST             = $original_request;
+			$this->_last_response = $original_last_response;
+			wp_set_current_user( $original_user_id );
+
+			while ( ob_get_level() > $output_buffering_level ) {
+				ob_end_clean();
+			}
+			while ( ob_get_level() < $output_buffering_level ) {
+				ob_start();
+			}
+
+			if ( $order instanceof WC_Order ) {
+				$order->delete( true );
+			}
+			if ( $coupon instanceof WC_Coupon ) {
+				$coupon->delete( true );
+			}
+			if ( $product instanceof WC_Product ) {
+				$product->delete( true );
+			}
+		}
+	}
+
+	/**
 	 * @testdox Should fire internal_woocommerce_cart_item_added_from_user_request when adding an item via AJAX.
 	 */
 	public function test_add_to_cart_fires_cart_item_added_from_user_request(): void {
