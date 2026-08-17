@@ -52,11 +52,8 @@ class WC_Products_Tracking {
 	 * Send a Tracks event when the Products page is viewed.
 	 */
 	public function track_products_view() {
-		// We only record Tracks event when no `_wp_http_referer` query arg is set, since
-		// when searching, the request gets sent from the browser twice,
-		// once with the `_wp_http_referer` and once without it.
-		//
-		// Otherwise, we would double-record the view and search events.
+		// Product searches trigger an initial request with `_wp_http_referer`, followed
+		// by a request without it. Track only the latter to avoid duplicate events.
 
 		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification
 		if (
@@ -66,7 +63,16 @@ class WC_Products_Tracking {
 		) {
 			// phpcs:enable
 
-			WC_Tracks::record_event( 'products_view' );
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended
+			if (
+				isset( $_GET['orderby'] )
+				&& 'menu_order title' === wc_clean( wp_unslash( $_GET['orderby'] ) )
+			) {
+				WC_Tracks::record_event( 'products_sorting_view' );
+			} else {
+				WC_Tracks::record_event( 'products_view' );
+			}
+			// phpcs:enable
 
 			// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification
 			if (
