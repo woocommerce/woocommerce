@@ -25,7 +25,7 @@ class WC_Register_WP_Admin_Settings {
 	/**
 	 * Type of settings the wrapped object holds ('page' or 'email').
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 * @var string
 	 */
 	protected $type;
@@ -55,7 +55,7 @@ class WC_Register_WP_Admin_Settings {
 	 * reset. Repeat calls re-add the same callbacks, which WordPress stores under the same
 	 * identifiers, so they never duplicate registered groups or settings.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 * @return void
 	 */
 	public function register() {

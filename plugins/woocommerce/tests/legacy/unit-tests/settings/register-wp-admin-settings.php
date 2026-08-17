@@ -53,7 +53,7 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 * @covers WC_Register_WP_Admin_Settings::register
 	 */
 	public function test_register_is_idempotent() {
