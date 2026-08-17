@@ -7,9 +7,9 @@ import { useDispatch, useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import FrontendBlock from '../frontend';
 import { useShippingData } from '@woocommerce/base-context/hooks';
 import { useCheckoutBlockContext } from '@woocommerce/blocks/checkout/context';
+import FrontendBlock from '../frontend';
 
 let mockNeedsShipping = true;
 

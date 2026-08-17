@@ -64,7 +64,7 @@ class WC_Tests_API_Reports_Top_Sellers extends WC_REST_Unit_Test_Case {
 			$response = $this->server->dispatch( $request );
 			$this->assertSame( 200, $response->get_status() );
 
-			$reports  = array_values(
+			$reports = array_values(
 				array_filter(
 					$response->get_data(),
 					static function ( array $report ) use ( $high_seller, $lower_seller ): bool {

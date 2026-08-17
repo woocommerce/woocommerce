@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Admin\Views
  */
 
+declare( strict_types = 1 );
+
 /**
  * Product Export admin view tests.
  */
@@ -27,8 +29,8 @@ class WC_Admin_Product_Export_View_Test extends WC_Unit_Test_Case {
 		$product_ids = array();
 
 		try {
-			$first_product = WC_Helper_Product::create_simple_product();
-			$product_ids[] = $first_product->get_id();
+			$first_product  = WC_Helper_Product::create_simple_product();
+			$product_ids[]  = $first_product->get_id();
 			$second_product = WC_Helper_Product::create_simple_product();
 			$product_ids[]  = $second_product->get_id();
 
@@ -113,28 +115,29 @@ class WC_Admin_Product_Export_View_Test extends WC_Unit_Test_Case {
 	private function render_export_view( array $product_ids ): string {
 		global $wp_scripts;
 
-		$original_get            = $_GET;
-		$original_request        = $_REQUEST;
-		$original_user_id        = get_current_user_id();
-		$original_buffer_level   = ob_get_level();
-		$had_request_uri         = isset( $_SERVER['REQUEST_URI'] );
-		$original_request_uri    = $had_request_uri ? $_SERVER['REQUEST_URI'] : null;
-		$had_wp_scripts          = isset( $wp_scripts );
-		$original_scripts_queue  = $had_wp_scripts ? $wp_scripts->queue : array();
-		$original_scripts_to_do  = $had_wp_scripts ? $wp_scripts->to_do : array();
-		$admin_user_id           = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		$output                  = '';
+		$original_get           = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Snapshot test globals before constructing the isolated request.
+		$original_request       = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Snapshot test globals before constructing the isolated request.
+		$original_user_id       = get_current_user_id();
+		$original_buffer_level  = ob_get_level();
+		$had_request_uri        = isset( $_SERVER['REQUEST_URI'] );
+		$original_request_uri   = $had_request_uri ? $_SERVER['REQUEST_URI'] : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Preserve the exact pre-test server value for restoration.
+		$had_wp_scripts         = isset( $wp_scripts );
+		$original_scripts_queue = $had_wp_scripts ? $wp_scripts->queue : array();
+		$original_scripts_to_do = $had_wp_scripts ? $wp_scripts->to_do : array();
+		$admin_user_id          = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$output                 = '';
 
 		try {
 			wp_set_current_user( $admin_user_id );
 
-			$_GET = array( 'page' => 'product_exporter' );
+			$request_args = array( 'page' => 'product_exporter' );
 			if ( $product_ids ) {
-				$_GET['product_ids'] = implode( ',', $product_ids );
-				$_GET['_wpnonce']     = wp_create_nonce( 'export-selected-products' );
+				$request_args['product_ids'] = implode( ',', $product_ids );
+				$request_args['_wpnonce']    = wp_create_nonce( 'export-selected-products' );
 			}
-			$_REQUEST              = $_GET;
-			$_SERVER['REQUEST_URI'] = add_query_arg( $_GET, '/wp-admin/admin.php' );
+			$_GET                   = $request_args;
+			$_REQUEST               = $request_args;
+			$_SERVER['REQUEST_URI'] = add_query_arg( $request_args, '/wp-admin/admin.php' );
 
 			ob_start();
 			include WC_ABSPATH . 'includes/admin/views/html-admin-page-product-export.php';
@@ -144,8 +147,8 @@ class WC_Admin_Product_Export_View_Test extends WC_Unit_Test_Case {
 				ob_end_clean();
 			}
 
-			$_GET     = $original_get;
-			$_REQUEST = $original_request;
+			$_GET     = $original_get; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Restore the exact globals captured before the test request.
+			$_REQUEST = $original_request; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Restore the exact globals captured before the test request.
 			if ( $had_request_uri ) {
 				$_SERVER['REQUEST_URI'] = $original_request_uri;
 			} else {

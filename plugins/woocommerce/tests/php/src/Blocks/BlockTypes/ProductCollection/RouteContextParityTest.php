@@ -43,11 +43,11 @@ class RouteContextParityTest extends WC_Unit_Test_Case {
 			'wp_the_query'     => $wp_the_query ?? null,
 		);
 		$original_options = array(
-			'posts_per_page'                         => get_option( 'posts_per_page' ),
-			'woocommerce_default_catalog_orderby'   => get_option( 'woocommerce_default_catalog_orderby' ),
+			'posts_per_page'                      => get_option( 'posts_per_page' ),
+			'woocommerce_default_catalog_orderby' => get_option( 'woocommerce_default_catalog_orderby' ),
 		);
-		$product_ids     = array();
-		$term_ids        = array();
+		$product_ids      = array();
+		$term_ids         = array();
 
 		try {
 			update_option( 'posts_per_page', 20 );
@@ -67,7 +67,7 @@ class RouteContextParityTest extends WC_Unit_Test_Case {
 					'slug'     => 'slice-028-tag',
 				)
 			);
-			$term_ids   = array(
+			$term_ids    = array(
 				'product_cat' => $category_id,
 				'product_tag' => $tag_id,
 			);
@@ -226,7 +226,7 @@ class RouteContextParityTest extends WC_Unit_Test_Case {
 	/**
 	 * Resolve the provider row to a real frontend route.
 	 *
-	 * @param string            $route_label  Route label.
+	 * @param string             $route_label  Route label.
 	 * @param array<string, int> $term_ids    Product term IDs.
 	 * @return string Route URL.
 	 */
@@ -250,8 +250,8 @@ class RouteContextParityTest extends WC_Unit_Test_Case {
 	 */
 	private function render_product_collection(): string {
 		$attributes = array(
-			'queryId'      => 28,
-			'query'        => array(
+			'queryId'       => 28,
+			'query'         => array(
 				'inherit'                  => true,
 				'isProductCollectionBlock' => true,
 			),
@@ -330,7 +330,7 @@ class RouteContextParityTest extends WC_Unit_Test_Case {
 
 		$names = array();
 		foreach ( $nodes as $node ) {
-			$names[] = trim( html_entity_decode( $node->textContent, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+			$names[] = trim( html_entity_decode( $node->textContent, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- DOMNode defines this public property name.
 		}
 
 		return $names;

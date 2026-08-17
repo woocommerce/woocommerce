@@ -40,7 +40,7 @@ class RendererTest extends WC_Unit_Test_Case {
 
 			new Renderer();
 
-			$collection_block = array(
+			$collection_block  = array(
 				'blockName' => 'woocommerce/product-collection',
 				'attrs'     => array(
 					'query' => array(
@@ -50,7 +50,7 @@ class RendererTest extends WC_Unit_Test_Case {
 			);
 			$populated_wrapper = '<div class="wp-block-woocommerce-product-collection">Populated collection</div>';
 			$empty_wrapper     = '<div class="wp-block-woocommerce-product-collection">Empty collection wrapper</div>';
-			$no_results       = '<p>No results found</p>';
+			$no_results        = '<p>No results found</p>';
 
 			apply_filters( 'render_block_woocommerce/product-template', '<ul><li>Product</li></ul>' );
 			$this->assertSame(
