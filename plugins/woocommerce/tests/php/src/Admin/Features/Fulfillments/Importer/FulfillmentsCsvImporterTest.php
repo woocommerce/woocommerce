@@ -428,6 +428,31 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Malformed values from the column-aliases filter are dropped instead of fataling the import.
+	 */
+	public function test_malformed_alias_filter_output_is_tolerated(): void {
+		$order  = $this->make_order();
+		$filter = function ( $aliases ) {
+			// A misbehaving callback: non-array alias list, non-string entries, junk key.
+			$aliases[ FulfillmentsCsvImporter::COL_TRACKING_URL ] = 'not-an-array';
+			$aliases[ FulfillmentsCsvImporter::COL_ITEMS ]        = array( 42, null, 'items' );
+			$aliases[0] = array( 'zero' );
+			return $aliases;
+		};
+		add_filter( 'woocommerce_fulfillments_csv_importer_column_aliases', $filter );
+
+		try {
+			$csv     = "order_number,tracking_number,shipment_provider,items\n{$order->get_id()},ALIAS-BAD,ups,\n";
+			$summary = $this->run_import( new FulfillmentsCsvImporter( $this->make_csv( $csv ) ) );
+		} finally {
+			remove_filter( 'woocommerce_fulfillments_csv_importer_column_aliases', $filter );
+		}
+
+		$this->assertSame( 1, $summary['created'], 'Valid alias entries must keep working when the filter returns junk for others' );
+		$this->assertSame( 0, $summary['failed'] );
+	}
+
+	/**
 	 * @testdox When no items column is provided, all order line items are included at full ordered qty.
 	 */
 	public function test_items_default_to_full_order(): void {

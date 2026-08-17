@@ -853,6 +853,14 @@ class FulfillmentsCsvImporter {
 	 * @return array<string, array<int, string>>
 	 */
 	private function get_column_aliases(): array {
+		$defaults = array(
+			self::COL_ORDER_NUMBER    => array( 'order_number', 'order', 'order_id', 'order_no', 'order_num' ),
+			self::COL_TRACKING_NUMBER => array( 'tracking_number', 'tracking', 'tracking_no', 'tracking_num' ),
+			self::COL_PROVIDER        => array( 'shipment_provider', 'provider', 'carrier', 'shipping_provider', 'shipping_carrier' ),
+			self::COL_TRACKING_URL    => array( 'tracking_url', 'url' ),
+			self::COL_ITEMS           => array( 'items', 'line_items' ),
+		);
+
 		/**
 		 * Filter the header aliases recognized by the fulfillments CSV importer.
 		 *
@@ -864,16 +872,29 @@ class FulfillmentsCsvImporter {
 		 *
 		 * @param array<string, array<int, string>> $aliases Default alias map.
 		 */
-		return apply_filters(
-			'woocommerce_fulfillments_csv_importer_column_aliases',
-			array(
-				self::COL_ORDER_NUMBER    => array( 'order_number', 'order', 'order_id', 'order_no', 'order_num' ),
-				self::COL_TRACKING_NUMBER => array( 'tracking_number', 'tracking', 'tracking_no', 'tracking_num' ),
-				self::COL_PROVIDER        => array( 'shipment_provider', 'provider', 'carrier', 'shipping_provider', 'shipping_carrier' ),
-				self::COL_TRACKING_URL    => array( 'tracking_url', 'url' ),
-				self::COL_ITEMS           => array( 'items', 'line_items' ),
-			)
-		);
+		$aliases = apply_filters( 'woocommerce_fulfillments_csv_importer_column_aliases', $defaults );
+
+		// Any callback can return anything; drop malformed entries instead of
+		// letting a non-array alias list fatal in build_header_map().
+		if ( ! is_array( $aliases ) ) {
+			return $defaults;
+		}
+
+		$sanitized = array();
+		foreach ( $aliases as $canonical => $alias_list ) {
+			if ( ! is_string( $canonical ) || '' === $canonical || ! is_array( $alias_list ) ) {
+				continue;
+			}
+			$clean = array();
+			foreach ( $alias_list as $alias ) {
+				if ( is_string( $alias ) && '' !== $alias ) {
+					$clean[] = $alias;
+				}
+			}
+			$sanitized[ $canonical ] = $clean;
+		}
+
+		return $sanitized;
 	}
 
 	/**
