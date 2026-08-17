@@ -20,7 +20,6 @@ jest.mock( '@woocommerce/data', () => ( {
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
 	useDispatch: jest.fn(),
-	withDispatch: () => ( Component ) => Component,
 } ) );
 
 jest.mock( '@woocommerce/tracks', () => ( {
@@ -62,6 +61,7 @@ describe( 'Settings - Import Mode Modal', () => {
 	const mockUpdateAndPersistSettings = jest.fn();
 	const mockInvalidateReportResolutions = jest.fn();
 	const mockInvalidateItemResolutions = jest.fn();
+	const mockCreateNotice = jest.fn();
 	let settingsState;
 
 	beforeEach( () => {
@@ -79,12 +79,17 @@ describe( 'Settings - Import Mode Modal', () => {
 			},
 		};
 		useSettings.mockImplementation( () => settingsState );
-		useDispatch.mockImplementation( ( store ) => ( {
-			invalidateResolutionForStoreSelector:
-				store === reportsStore
-					? mockInvalidateReportResolutions
-					: mockInvalidateItemResolutions,
-		} ) );
+		useDispatch.mockImplementation( ( store ) => {
+			if ( store === 'core/notices' ) {
+				return { createNotice: mockCreateNotice };
+			}
+			return {
+				invalidateResolutionForStoreSelector:
+					store === reportsStore
+						? mockInvalidateReportResolutions
+						: mockInvalidateItemResolutions,
+			};
+		} );
 		window.wpNavMenuUrlUpdate = jest.fn();
 	} );
 
@@ -235,6 +240,7 @@ describe( 'Settings - Import Mode Modal', () => {
 		settingsState = { ...settingsState, isRequesting: false };
 		rerender( <Settings createNotice={ jest.fn() } query={ {} } /> );
 
+		expect( useDispatch ).toHaveBeenCalledWith( 'core/notices' );
 		expect( useDispatch ).toHaveBeenCalledWith( reportsStore );
 		expect( useDispatch ).toHaveBeenCalledWith( itemsStore );
 		expect( mockInvalidateReportResolutions ).toHaveBeenNthCalledWith(
@@ -266,6 +272,10 @@ describe( 'Settings - Import Mode Modal', () => {
 
 		expect( mockInvalidateReportResolutions ).not.toHaveBeenCalled();
 		expect( mockInvalidateItemResolutions ).not.toHaveBeenCalled();
+		expect( mockCreateNotice ).toHaveBeenCalledWith(
+			'error',
+			'There was an error saving your settings. Please try again.'
+		);
 	} );
 
 	it( 'invalidates report resolutions after resetting defaults', () => {

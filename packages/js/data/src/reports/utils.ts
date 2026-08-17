@@ -1,8 +1,9 @@
 /**
  * External dependencies
  */
-import { find, forEach, isNull, get, includes, memoize } from 'lodash';
+import { find, forEach, isNull, get, includes } from 'lodash';
 import moment from 'moment';
+import createSelector from 'rememo';
 import {
 	appendTimestamp,
 	getCurrentDates,
@@ -388,18 +389,17 @@ const EMPTY_ARRAY = [] as const;
 
 /**
  * Cache helper for returning the full chart dataset after multiple
- * requests. Memoized on the request query (string), only called after
+ * requests. Memoized on the response data references, only called after
  * all the requests have resolved successfully.
  */
-const getReportChartDataResponse = memoize(
+const getReportChartDataResponse = createSelector(
 	( _requestString, totals, intervals ) => ( {
 		isEmpty: false,
 		isError: false,
 		isRequesting: false,
 		data: { totals, intervals },
 	} ),
-	( requestString, totals, intervals ) =>
-		[ requestString, totals.length, intervals.length ].join( ':' )
+	( _requestString, totals, intervals ) => [ totals, intervals ]
 );
 
 /**
