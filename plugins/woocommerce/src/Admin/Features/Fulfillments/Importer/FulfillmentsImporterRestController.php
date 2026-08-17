@@ -469,21 +469,37 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		if ( $limit <= 0 ) {
 			$limit = FulfillmentsCsvImporter::DEFAULT_CHUNK_SIZE;
 		}
-		$limit   = min( $limit, FulfillmentsCsvImporter::resolve_chunk_size() );
-		$mapping = $this->normalize_mapping_input( $request->get_param( 'mapping' ) );
+		$limit = min( $limit, FulfillmentsCsvImporter::resolve_chunk_size() );
 
-		$header_map = FulfillmentsCsvImporter::mapping_to_header_map( $mapping );
-		$missing    = FulfillmentsCsvImporter::find_missing_required_columns( $header_map );
-		if ( ! empty( $missing ) ) {
-			return new WP_Error(
-				'woocommerce_fulfillments_import_mapping_invalid',
-				sprintf(
-					/* translators: %s: comma-separated list of missing column names. */
-					__( 'Mapping is missing required column(s): %s.', 'woocommerce' ),
-					implode( ', ', $missing )
-				),
-				array( 'status' => WP_Http::BAD_REQUEST )
-			);
+		// Mapping and options are frozen into the session by the first chunk and
+		// ignored afterwards; otherwise an API caller could import different row
+		// ranges of the same session under different rules.
+		$mapping = $session->frozen_mapping();
+		if ( null === $mapping ) {
+			$mapping = $this->normalize_mapping_input( $request->get_param( 'mapping' ) );
+
+			$header_map = FulfillmentsCsvImporter::mapping_to_header_map( $mapping );
+			$missing    = FulfillmentsCsvImporter::find_missing_required_columns( $header_map );
+			if ( ! empty( $missing ) ) {
+				return new WP_Error(
+					'woocommerce_fulfillments_import_mapping_invalid',
+					sprintf(
+						/* translators: %s: comma-separated list of missing column names. */
+						__( 'Mapping is missing required column(s): %s.', 'woocommerce' ),
+						implode( ', ', $missing )
+					),
+					array( 'status' => WP_Http::BAD_REQUEST )
+				);
+			}
+
+			$options_param   = (array) $request->get_param( 'options' );
+			$notify_customer = array_key_exists( 'notify_customer', $options_param ) ? (bool) $options_param['notify_customer'] : $session->notify_customer();
+			$update_existing = array_key_exists( 'update_existing', $options_param ) ? (bool) $options_param['update_existing'] : $session->update_existing();
+
+			$session->freeze_run_settings( $mapping, $notify_customer, $update_existing );
+		} else {
+			$notify_customer = $session->notify_customer();
+			$update_existing = $session->update_existing();
 		}
 
 		// Idempotency guard: a client retry can arrive after the server already processed
@@ -504,10 +520,6 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 				array( 'status' => WP_Http::CONFLICT )
 			);
 		}
-
-		$options_param   = (array) $request->get_param( 'options' );
-		$notify_customer = array_key_exists( 'notify_customer', $options_param ) ? (bool) $options_param['notify_customer'] : $session->notify_customer();
-		$update_existing = array_key_exists( 'update_existing', $options_param ) ? (bool) $options_param['update_existing'] : $session->update_existing();
 
 		// Notified rows send mail synchronously, so cap the per-request row count to
 		// keep a chunk within typical execution time limits.

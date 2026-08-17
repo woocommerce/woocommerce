@@ -459,6 +459,44 @@ final class ImportSession {
 	}
 
 	/**
+	 * Column mapping frozen by the first processed chunk, or null when not frozen yet.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @return array<int, string>|null CSV column index => canonical column key.
+	 */
+	public function frozen_mapping(): ?array {
+		$mapping = $this->data['mapping'] ?? null;
+		if ( ! is_array( $mapping ) ) {
+			return null;
+		}
+		$out = array();
+		foreach ( $mapping as $col => $canonical ) {
+			$out[ (int) $col ] = (string) $canonical;
+		}
+		return $out;
+	}
+
+	/**
+	 * Freeze the mapping and run options so every chunk of this session imports
+	 * under the same rules regardless of what later requests send.
+	 *
+	 * Mutates in-memory state only; the values are persisted together with the
+	 * next recorded chunk, so a failed first chunk simply re-freezes on retry.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param array<int, string> $mapping CSV column index => canonical column key.
+	 * @param bool               $notify  Whether to fire customer notifications.
+	 * @param bool               $update  Whether to update existing fulfillments.
+	 */
+	public function freeze_run_settings( array $mapping, bool $notify, bool $update ): void {
+		$this->data['mapping']         = $mapping;
+		$this->data['notify_customer'] = $notify;
+		$this->data['update_existing'] = $update;
+	}
+
+	/**
 	 * Byte offset in the CSV reached by the most recent chunk.
 	 *
 	 * @since 11.2.0
