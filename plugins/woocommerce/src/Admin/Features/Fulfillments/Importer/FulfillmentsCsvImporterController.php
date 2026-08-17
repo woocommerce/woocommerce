@@ -26,6 +26,11 @@ defined( 'ABSPATH' ) || exit;
 class FulfillmentsCsvImporterController {
 
 	/**
+	 * Importer ID listed under Tools > Import.
+	 */
+	private const WP_IMPORTER_ID = 'woocommerce_fulfillment_csv';
+
+	/**
 	 * Whether the React assets are already enqueued for this page load.
 	 *
 	 * @var bool
@@ -43,7 +48,64 @@ class FulfillmentsCsvImporterController {
 		// to mount the modal slot and enqueue the assets.
 		add_action( 'admin_footer', array( $this, 'render_modal_slot' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+		add_action( 'admin_init', array( $this, 'register_wp_importer' ) );
+		add_action( 'load-importer-' . self::WP_IMPORTER_ID, array( $this, 'redirect_to_orders_screen' ) );
 		add_action( ImportSession::CLEANUP_HOOK, array( ImportSession::class, 'cleanup_abandoned_file' ), 10, 4 );
+	}
+
+	/**
+	 * List the importer on Tools > Import alongside the product and tax importers.
+	 *
+	 * The wizard itself lives on the orders screen, so "Run Importer" redirects there.
+	 *
+	 * @since 11.2.0
+	 */
+	public function register_wp_importer(): void {
+		if ( ! defined( 'WP_LOAD_IMPORTERS' ) || ! function_exists( 'register_importer' ) ) {
+			return;
+		}
+		register_importer(
+			self::WP_IMPORTER_ID,
+			__( 'WooCommerce fulfillments (CSV)', 'woocommerce' ),
+			__( 'Import <strong>order fulfillments</strong> to your store via a csv file.', 'woocommerce' ),
+			array( $this, 'render_importer_link' )
+		);
+	}
+
+	/**
+	 * Send "Run Importer" to the orders screen. Fires on load-importer-{id},
+	 * before the admin header is rendered, so the redirect can still happen.
+	 *
+	 * @since 11.2.0
+	 */
+	public function redirect_to_orders_screen(): void {
+		wp_safe_redirect( $this->get_importer_url() );
+		exit;
+	}
+
+	/**
+	 * Fallback importer-page body in case the pre-render redirect did not run.
+	 *
+	 * @since 11.2.0
+	 */
+	public function render_importer_link(): void {
+		printf(
+			'<div class="wrap"><p><a href="%s">%s</a></p></div>',
+			esc_url( $this->get_importer_url() ),
+			esc_html__( 'Open the fulfillments importer on the orders screen.', 'woocommerce' )
+		);
+	}
+
+	/**
+	 * Orders-list URL that auto-opens the import wizard.
+	 *
+	 * @return string
+	 */
+	private function get_importer_url(): string {
+		$base = OrderUtil::custom_orders_table_usage_is_enabled()
+			? admin_url( 'admin.php?page=wc-orders' )
+			: admin_url( 'edit.php?post_type=shop_order' );
+		return add_query_arg( 'fulfillments_importer', 'open', $base );
 	}
 
 	/**

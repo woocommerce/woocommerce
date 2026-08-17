@@ -82,6 +82,17 @@ function FulfillmentsImporterController() {
 		setTriggerSlot( getOrCreateTriggerSlot() );
 	}, [] );
 
+	// Tools > Import redirects here with this flag so the wizard opens directly.
+	useEffect( () => {
+		const params = new URLSearchParams( window.location.search );
+		if ( params.get( 'fulfillments_importer' ) === 'open' ) {
+			setIsOpen( true );
+			recordEvent( 'fulfillments_import_modal_opened', {
+				source: 'tools_import',
+			} );
+		}
+	}, [] );
+
 	return (
 		<>
 			{ triggerSlot
