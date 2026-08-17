@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Update Checkout total guard to run after addresses in the request have been applied.
