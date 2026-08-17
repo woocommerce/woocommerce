@@ -28,22 +28,19 @@
 	}
 
 	/**
-	 * Remove duplicate `<wc-order-attribution-inputs>` elements to prevent sending the same data
-	 * multiple times. Keep the first group in a checkout form, otherwise the first group in any
-	 * form, otherwise the first group in DOM order.
+	 * Remove duplicate `<wc-order-attribution-inputs>` elements within each owning form to prevent
+	 * sending the same data multiple times. Treat groups without an enclosing form as document-owned.
 	 */
 	function removeDuplicateInputGroups() {
-		const groups = document.querySelectorAll( 'wc-order-attribution-inputs' );
-		const groupToKeep =
-			document.querySelector(
-				'form[name="checkout"] wc-order-attribution-inputs'
-			) ||
-			document.querySelector( 'form wc-order-attribution-inputs' ) ||
-			groups[ 0 ];
+		const owners = new Set();
 
-		groups.forEach( ( group ) => {
-			if ( group !== groupToKeep ) {
+		document.querySelectorAll( 'wc-order-attribution-inputs' ).forEach( ( group ) => {
+			const owner = group.closest( 'form' ) || document;
+
+			if ( owners.has( owner ) ) {
 				group.remove();
+			} else {
+				owners.add( owner );
 			}
 		} );
 	}

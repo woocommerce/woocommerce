@@ -25,7 +25,7 @@ describe( 'Order attribution input deduplication', () => {
 		delete window.wc_order_attribution;
 	} );
 
-	test( 'keeps the first group within the checkout form', () => {
+	test( 'keeps checkout attribution when an out-of-form group appears first', () => {
 		document.body.innerHTML = `
 			<wc-order-attribution-inputs id="outside-form"></wc-order-attribution-inputs>
 			<form name="checkout">
@@ -38,9 +38,9 @@ describe( 'Order attribution input deduplication', () => {
 
 		expect(
 			document.querySelectorAll( 'wc-order-attribution-inputs' )
-		).toHaveLength( 1 );
+		).toHaveLength( 2 );
 		expect( document.getElementById( 'checkout-first' ) ).not.toBeNull();
-		expect( document.getElementById( 'outside-form' ) ).toBeNull();
+		expect( document.getElementById( 'outside-form' ) ).not.toBeNull();
 		expect( document.getElementById( 'checkout-second' ) ).toBeNull();
 		expect(
 			document.querySelector( 'form[name="checkout"]' ).elements.namedItem(
@@ -49,37 +49,40 @@ describe( 'Order attribution input deduplication', () => {
 		).not.toBeNull();
 	} );
 
-	test( 'prefers the checkout form over an earlier non-checkout form', () => {
+	test( 'keeps one group in each form', () => {
 		document.body.innerHTML = `
 			<form name="register">
-				<wc-order-attribution-inputs id="register-form"></wc-order-attribution-inputs>
+				<wc-order-attribution-inputs id="register-first"></wc-order-attribution-inputs>
+				<wc-order-attribution-inputs id="register-second"></wc-order-attribution-inputs>
 			</form>
 			<form name="checkout">
-				<wc-order-attribution-inputs id="checkout-form"></wc-order-attribution-inputs>
+				<wc-order-attribution-inputs id="checkout-first"></wc-order-attribution-inputs>
+				<wc-order-attribution-inputs id="checkout-second"></wc-order-attribution-inputs>
 			</form>
 		`;
 
 		window.wc_order_attribution.setOrderTracking( false );
 
-		expect( document.getElementById( 'checkout-form' ) ).not.toBeNull();
-		expect( document.getElementById( 'register-form' ) ).toBeNull();
+		expect(
+			document.querySelectorAll( 'wc-order-attribution-inputs' )
+		).toHaveLength( 2 );
+		expect( document.getElementById( 'register-first' ) ).not.toBeNull();
+		expect( document.getElementById( 'register-second' ) ).toBeNull();
+		expect( document.getElementById( 'checkout-first' ) ).not.toBeNull();
+		expect( document.getElementById( 'checkout-second' ) ).toBeNull();
+		expect(
+			document.querySelector( 'form[name="register"]' ).elements.namedItem(
+				'wc_order_attribution_source_type'
+			)
+		).not.toBeNull();
+		expect(
+			document.querySelector( 'form[name="checkout"]' ).elements.namedItem(
+				'wc_order_attribution_source_type'
+			)
+		).not.toBeNull();
 	} );
 
-	test( 'keeps the first group within another form when no checkout form exists', () => {
-		document.body.innerHTML = `
-			<wc-order-attribution-inputs id="outside-form"></wc-order-attribution-inputs>
-			<form name="register">
-				<wc-order-attribution-inputs id="register-form"></wc-order-attribution-inputs>
-			</form>
-		`;
-
-		window.wc_order_attribution.setOrderTracking( false );
-
-		expect( document.getElementById( 'register-form' ) ).not.toBeNull();
-		expect( document.getElementById( 'outside-form' ) ).toBeNull();
-	} );
-
-	test( 'keeps the first group when no group belongs to a form', () => {
+	test( 'keeps the first document-owned group', () => {
 		document.body.innerHTML = `
 			<wc-order-attribution-inputs id="first"></wc-order-attribution-inputs>
 			<wc-order-attribution-inputs id="second"></wc-order-attribution-inputs>
