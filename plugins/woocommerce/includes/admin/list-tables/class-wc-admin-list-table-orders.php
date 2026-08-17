@@ -533,17 +533,17 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		global $post_type, $pagenow;
 
 		// Bail out if not on shop order list page.
-		if ( 'edit.php' !== $pagenow || 'shop_order' !== $post_type || ! isset( $_REQUEST['bulk_action'] ) ) { // WPCS: input var ok, CSRF ok.
+		if ( 'edit.php' !== $pagenow || 'shop_order' !== $post_type || ! isset( $_REQUEST['bulk_action'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only notice/filter; mutations use list-table nonce/capability checks.
 			return;
 		}
 
 		$order_statuses = wc_get_order_statuses();
-		$number         = isset( $_REQUEST['changed'] ) ? absint( $_REQUEST['changed'] ) : 0; // WPCS: input var ok, CSRF ok.
-		$bulk_action    = wc_clean( wp_unslash( $_REQUEST['bulk_action'] ) ); // WPCS: input var ok, CSRF ok.
+		$number         = isset( $_REQUEST['changed'] ) ? absint( $_REQUEST['changed'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only notice/filter; mutations use list-table nonce/capability checks.
+		$bulk_action    = wc_clean( wp_unslash( $_REQUEST['bulk_action'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only notice/filter; mutations use list-table nonce/capability checks.
 
 		// Check if any status changes happened.
 		foreach ( $order_statuses as $slug => $name ) {
-			if ( 'marked_' . str_replace( 'wc-', '', $slug ) === $bulk_action ) { // WPCS: input var ok, CSRF ok.
+			if ( 'marked_' . str_replace( 'wc-', '', $slug ) === $bulk_action ) {
 				/* translators: %d: orders count */
 				$message = sprintf( _n( '%s order status changed.', '%s order statuses changed.', $number, 'woocommerce' ), number_format_i18n( $number ) );
 				echo '<div class="updated"><p>' . esc_html( $message ) . '</p></div>';
@@ -551,7 +551,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			}
 		}
 
-		if ( 'removed_personal_data' === $bulk_action ) { // WPCS: input var ok, CSRF ok.
+		if ( 'removed_personal_data' === $bulk_action ) {
 			/* translators: %d: orders count */
 			$message = sprintf( _n( 'Removed personal data from %s order.', 'Removed personal data from %s orders.', $number, 'woocommerce' ), number_format_i18n( $number ) );
 			echo '<div class="updated"><p>' . esc_html( $message ) . '</p></div>';
@@ -603,12 +603,12 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		global $wp_post_statuses;
 
 		// Filter the orders by the posted customer.
-		if ( ! empty( $_GET['_customer_user'] ) ) { // WPCS: input var ok.
+		if ( ! empty( $_GET['_customer_user'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only notice/filter; mutations use list-table nonce/capability checks.
 			// @codingStandardsIgnoreStart.
 			$query_vars['meta_query'] = array(
 				array(
 					'key'     => '_customer_user',
-					'value'   => (int) $_GET['_customer_user'], // WPCS: input var ok, sanitization ok.
+					'value'   => (int) $_GET['_customer_user'],
 					'compare' => '=',
 				),
 			);
@@ -671,7 +671,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			return $query;
 		}
 
-		return wc_clean( wp_unslash( $_GET['s'] ) ); // WPCS: input var ok, sanitization ok.
+		return wc_clean( wp_unslash( $_GET['s'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only notice/filter; mutations use list-table nonce/capability checks.
 	}
 
 	/**
