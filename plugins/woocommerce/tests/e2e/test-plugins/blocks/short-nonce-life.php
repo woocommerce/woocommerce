@@ -11,11 +11,13 @@
 declare( strict_types=1 );
 
 /**
- * Set nonce lifetime to 2 seconds to simulate cache expiry scenarios.
+ * Set nonce lifetime to 20 seconds to simulate cache expiry scenarios while
+ * leaving enough validity for the replacement nonce to survive a rendered
+ * browser retry.
  */
 add_filter(
 	'nonce_life',
 	function () {
-		return 2;
+		return 20;
 	}
 );

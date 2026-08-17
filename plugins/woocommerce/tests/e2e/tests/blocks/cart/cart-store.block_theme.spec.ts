@@ -57,7 +57,7 @@ test.describe( 'Cart Store', () => {
 
 		// Wait for the nonce to expire.
 		// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
-		await page.waitForTimeout( 2000 );
+		await page.waitForTimeout( 20000 );
 
 		// Adding another product should fail because it is using an expired nonce.
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
