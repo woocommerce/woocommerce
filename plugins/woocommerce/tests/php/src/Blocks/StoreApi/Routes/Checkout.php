@@ -24,7 +24,7 @@ use WC_Gateway_BACS;
 /**
  * Checkout Controller Tests.
  *
- * phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_print_r, WooCommerce.Commenting.CommentHooks.MissingHookComment
+ * phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_print_r
  */
 class Checkout extends \WP_Test_REST_TestCase {
 	use MockeryPHPUnitIntegration;
