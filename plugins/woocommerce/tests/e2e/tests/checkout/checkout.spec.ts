@@ -86,7 +86,12 @@ async function addProductToCartAndProceedToCheckout(
 }
 
 async function placeOrder( page: Page ) {
-	if ( ! isClassicCheckout( page ) ) {
+	if ( isClassicCheckout( page ) ) {
+		await page
+			.locator( '.woocommerce-terms-and-conditions-checkbox-text' )
+			.click();
+		await expect( page.locator( '#terms' ) ).toBeChecked();
+	} else {
 		await page.getByLabel( 'Add a note to your order' ).check();
 		// this helps with flakiness on clicking the Place order button
 		await page
@@ -279,7 +284,7 @@ checkoutPages.forEach( ( { name, slug } ) => {
 			);
 			const newCustomer = getFakeCustomer();
 			await fillBillingDetails( page, newCustomer.billing, false );
-			await page.getByText( 'Cash on delivery' ).click();
+			await page.getByText( 'Cash on delivery', { exact: true } ).click();
 			await placeOrder( page );
 			await page.goto( 'my-account/' );
 			await expect( page.locator( '#username' ) ).toBeVisible();
@@ -301,7 +306,9 @@ checkoutPages.forEach( ( { name, slug } ) => {
 			);
 			const newCustomer = getFakeCustomer();
 			await fillBillingDetails( page, newCustomer.billing, true );
-			await page.getByText( 'Direct bank transfer' ).click();
+			await page
+				.getByText( 'Direct bank transfer', { exact: true } )
+				.click();
 			await placeOrder( page );
 			await page.goto( 'my-account/' );
 			await expect(
@@ -328,7 +335,9 @@ checkoutPages.forEach( ( { name, slug } ) => {
 				tax
 			);
 
-			await page.getByText( 'Direct bank transfer' ).click();
+			await page
+				.getByText( 'Direct bank transfer', { exact: true } )
+				.click();
 			await placeOrder( page );
 		}
 	);
@@ -426,7 +435,7 @@ checkoutPages.forEach( ( { name, slug } ) => {
 				await fillShippingCheckoutBlocks( page, shippingAddress );
 			}
 
-			await page.getByText( 'Cash on delivery' ).click();
+			await page.getByText( 'Cash on delivery', { exact: true } ).click();
 			await placeOrder( page );
 		}
 	);
@@ -476,7 +485,9 @@ checkoutPages.forEach( ( { name, slug } ) => {
 				} );
 			}
 
-			await page.getByText( 'Direct bank transfer' ).click();
+			await page
+				.getByText( 'Direct bank transfer', { exact: true } )
+				.click();
 			await placeOrder( page );
 		}
 	);
