@@ -45,9 +45,9 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 		}
 
 		$_chosen_attributes = WC_Query::get_layered_nav_chosen_attributes();
-		$min_price          = isset( $_GET['min_price'] ) ? wc_clean( wp_unslash( $_GET['min_price'] ) ) : 0; // WPCS: input var ok, CSRF ok.
-		$max_price          = isset( $_GET['max_price'] ) ? wc_clean( wp_unslash( $_GET['max_price'] ) ) : 0; // WPCS: input var ok, CSRF ok.
-		$rating_filter      = isset( $_GET['rating_filter'] ) ? array_filter( array_map( 'absint', explode( ',', wp_unslash( $_GET['rating_filter'] ) ) ) ) : array(); // WPCS: sanitization ok, input var ok, CSRF ok.
+		$min_price          = isset( $_GET['min_price'] ) ? wc_clean( wp_unslash( $_GET['min_price'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public read-only filter; values are cleaned or cast.
+		$max_price          = isset( $_GET['max_price'] ) ? wc_clean( wp_unslash( $_GET['max_price'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public read-only filter; values are cleaned or cast.
+		$rating_filter      = isset( $_GET['rating_filter'] ) ? array_filter( array_map( 'absint', explode( ',', wp_unslash( $_GET['rating_filter'] ) ) ) ) : array(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Public read-only filter; values are cleaned or cast.
 		$base_link          = $this->get_current_page_url();
 
 		if ( 0 < count( $_chosen_attributes ) || 0 < $min_price || 0 < $max_price || ! empty( $rating_filter ) ) {
@@ -76,7 +76,7 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 						}
 
 						$filter_name    = 'filter_' . wc_attribute_taxonomy_slug( $taxonomy );
-						$current_filter = isset( $_GET[ $filter_name ] ) ? explode( ',', wc_clean( wp_unslash( $_GET[ $filter_name ] ) ) ) : array(); // WPCS: input var ok, CSRF ok.
+						$current_filter = isset( $_GET[ $filter_name ] ) ? explode( ',', wc_clean( wp_unslash( $_GET[ $filter_name ] ) ) ) : array(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public read-only filter; values are cleaned or cast.
 						$current_filter = array_map( 'sanitize_title', $current_filter );
 						$new_filter     = array_diff( $current_filter, array( $term_slug ) );
 
