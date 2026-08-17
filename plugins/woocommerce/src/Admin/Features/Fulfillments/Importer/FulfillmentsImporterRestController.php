@@ -493,6 +493,18 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			return $this->build_run_response( $session, array(), array() );
 		}
 
+		// An offset ahead of the recorded progress would import from the stored byte
+		// position anyway but record offset + consumed, inflating progress and ending
+		// the import with tail rows unprocessed. The shipped client always resumes
+		// from the server-reported processed count, so reject the mismatch.
+		if ( $offset > $session->processed() ) {
+			return new WP_Error(
+				'woocommerce_fulfillments_import_offset_mismatch',
+				__( 'The requested offset is ahead of the recorded progress. Please resume from the last confirmed position.', 'woocommerce' ),
+				array( 'status' => WP_Http::CONFLICT )
+			);
+		}
+
 		$options_param   = (array) $request->get_param( 'options' );
 		$notify_customer = array_key_exists( 'notify_customer', $options_param ) ? (bool) $options_param['notify_customer'] : $session->notify_customer();
 		$update_existing = array_key_exists( 'update_existing', $options_param ) ? (bool) $options_param['update_existing'] : $session->update_existing();

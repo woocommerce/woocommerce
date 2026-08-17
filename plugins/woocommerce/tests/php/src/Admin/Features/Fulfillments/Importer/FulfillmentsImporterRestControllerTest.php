@@ -197,6 +197,35 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox handle_run rejects an offset ahead of the recorded progress.
+	 */
+	public function test_run_rejects_offset_ahead_of_progress(): void {
+		$order = OrderHelper::create_order();
+		$csv   = "order_number,tracking_number,shipment_provider\n{$order->get_id()},T-AHEAD,ups\n{$order->get_id()},T-AHEAD-2,ups\n";
+		$file  = $this->make_csv( $csv );
+
+		$session = $this->open_session_for( $file );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/fulfillments/import/run' );
+		$request->set_param( 'token', $session->token() );
+		$request->set_param( 'offset', 2 );
+		$request->set_param( 'limit', 10 );
+		$request->set_param(
+			'mapping',
+			array(
+				'0' => FulfillmentsCsvImporter::COL_ORDER_NUMBER,
+				'1' => FulfillmentsCsvImporter::COL_TRACKING_NUMBER,
+				'2' => FulfillmentsCsvImporter::COL_PROVIDER,
+			)
+		);
+
+		$response = $this->invoke( 'handle_run', $request );
+
+		$this->assertInstanceOf( \WP_Error::class, $response );
+		$this->assertSame( 'woocommerce_fulfillments_import_offset_mismatch', $response->get_error_code() );
+	}
+
+	/**
 	 * @testdox handle_run processes a chunk, advances processed, and attaches summary on the final chunk.
 	 */
 	public function test_run_processes_chunks_and_attaches_summary_on_completion(): void {
