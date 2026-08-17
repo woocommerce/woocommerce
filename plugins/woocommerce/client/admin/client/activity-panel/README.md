@@ -1,7 +1,6 @@
 # Activity Panel
 
-This component contains the Activity Panel. This is shown on every page and is rendered as part of the header.
-It provides access to the notices system and actionable items like stock.
+This component renders contextual controls in the WooCommerce Admin header, including setup, store preview, account, display options, and help actions.
 
 ## Components
 
