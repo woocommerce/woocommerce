@@ -28,14 +28,6 @@
 				stroke: currentColor;
 			}
 		}
-
-		.setup-progress-slice {
-			stroke: none;
-		}
-
-		.setup-progress-ring {
-			stroke-width: 2px;
-		}
 	}
 
 	.woocommerce-layout__homescreen-display-options {
@@ -225,17 +217,6 @@
 	.woocommerce-empty-content {
 		padding-left: $gap-large;
 		padding-right: $gap-large;
-	}
-}
-
-.woocommerce-layout__activity-panel-avatar-flag-overlay {
-	position: relative;
-	top: -$gap-small;
-
-	.woocommerce-flag {
-		position: relative;
-		top: 16px;
-		border: 2px solid $studio-white;
 	}
 }
 
