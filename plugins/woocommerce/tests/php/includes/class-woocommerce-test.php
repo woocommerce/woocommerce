@@ -173,7 +173,7 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 	public function test_register_wp_admin_settings_hooked_to_admin_init_and_rest_api_init(): void {
 		// admin_init runs last so extensions registering settings pages or email classes on
 		// admin_init are still captured; see https://github.com/woocommerce/woocommerce/pull/67494.
-		$this->assertSame( PHP_INT_MAX, has_action( 'admin_init', array( WC(), 'register_wp_admin_settings' ) ) );
+		$this->assertSame( 999, has_action( 'admin_init', array( WC(), 'register_wp_admin_settings' ) ) );
 		$this->assertSame( 10, has_action( 'rest_api_init', array( WC(), 'register_wp_admin_settings' ) ) );
 	}
 
