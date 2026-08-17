@@ -124,7 +124,9 @@ test.describe(
 			} );
 			await test.step( 'Select payment method and pay for the order', async () => {
 				// explicitly select the payment method
-				await page.getByText( 'Direct bank transfer' ).click();
+				await page
+					.getByText( 'Direct bank transfer', { exact: true } )
+					.click();
 
 				// Handle notice if present
 				await page.addLocatorHandler(
@@ -137,6 +139,7 @@ test.describe(
 				);
 
 				// pay for the order
+				await page.locator( '#terms' ).check();
 				await page
 					.getByRole( 'button', { name: 'Pay for order' } )
 					.click();

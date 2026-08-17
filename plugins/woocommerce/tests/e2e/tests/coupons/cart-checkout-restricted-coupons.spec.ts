@@ -235,6 +235,7 @@ test.describe(
 				page.getByText( 'Coupon code applied successfully.' )
 			).toBeVisible();
 
+			await page.locator( '#terms' ).check();
 			await page.getByRole( 'button', { name: 'Place order' } ).click();
 			await expect(
 				page.getByText( 'Your order has been received' )
@@ -250,6 +251,7 @@ test.describe(
 				page.getByText( 'Coupon code applied successfully.' )
 			).toBeVisible();
 
+			await page.locator( '#terms' ).check();
 			await page.getByRole( 'button', { name: 'Place order' } ).click();
 			await expect(
 				page.getByText(

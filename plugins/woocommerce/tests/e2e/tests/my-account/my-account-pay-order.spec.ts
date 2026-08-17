@@ -104,6 +104,7 @@ test.describe(
 				}
 			);
 
+			await page.locator( '#terms' ).check();
 			await page.locator( '#place_order' ).click();
 
 			await expect(
