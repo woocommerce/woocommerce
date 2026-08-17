@@ -12,21 +12,44 @@ test.describe( 'Colour picker swatch height on Email settings', () => {
 	} ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
 
-		// Add the WP 7.0+ body class to simulate WP 7.0 environment.
+		await expect( page.locator( 'body' ) ).toHaveClass(
+			/wc-wp-version-gte-53/
+		);
+
+		// Email Improvements no longer renders the classic color fields. Mount the
+		// exact structural classes emitted by WC_Admin_Settings so this test stays
+		// focused on the real Woo admin stylesheet loaded by the settings page.
+		await page.evaluate( () => {
+			document.body.classList.remove( 'wc-wp-version-gte-70' );
+
+			const fixture = document.createElement( 'div' );
+			fixture.className = 'woocommerce';
+			fixture.innerHTML = `
+				<table class="form-table">
+					<tbody>
+						<tr>
+							<td class="forminp-color">
+								<span class="colorpickpreview" data-testid="colour-picker-swatch">&nbsp;</span>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			`;
+			document.body.appendChild( fixture );
+		} );
+
+		const swatch = page.getByTestId( 'colour-picker-swatch' );
+		await expect( swatch ).toBeVisible();
+
+		await expect( swatch ).toHaveCSS( 'height', '30px' );
+		await expect( swatch ).toHaveCSS( 'width', '30px' );
+
+		// Add the WP 7.0+ body class to activate the compatibility rule.
 		await page.evaluate( () => {
 			document.body.classList.add( 'wc-wp-version-gte-70' );
 		} );
 
-		const swatch = page.locator( '.colorpickpreview' ).first();
-		await expect( swatch ).toBeVisible();
-
-		const swatchBox = await swatch.boundingBox();
-		if ( ! swatchBox ) {
-			throw new Error( 'Could not get bounding box for swatch' );
-		}
-
-		// With the gte-70 class, the swatch should be 40px to match WP 7.0 input height.
-		expect( swatchBox.height ).toBe( 40 );
-		expect( swatchBox.width ).toBe( 40 );
+		await expect( swatch ).toHaveCSS( 'height', '40px' );
+		await expect( swatch ).toHaveCSS( 'width', '40px' );
 	} );
 } );
