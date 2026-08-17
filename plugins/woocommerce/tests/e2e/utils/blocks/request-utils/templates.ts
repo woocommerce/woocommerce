@@ -19,6 +19,7 @@ export type WPTemplateType = 'wp_template' | 'wp_template_part';
 export interface WPTemplate {
 	wp_id: number;
 	id: string;
+	slug: string;
 	type: WPTemplateType;
 	origin: 'plugin' | 'theme' | null;
 	content: {

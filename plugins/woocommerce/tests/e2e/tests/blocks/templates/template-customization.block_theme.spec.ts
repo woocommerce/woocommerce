@@ -154,7 +154,7 @@ test.describe( 'Template customization', () => {
 		const userText = `Hello World in the ${ testData.templateName } template`;
 		const woocommerceTemplateUserText = `Hello World in the WooCommerce ${ testData.templateName } template`;
 
-		test( `user-modified "${ testData.templateName }" template based on the theme template has priority over the user-modified template based on the default WooCommerce template`, async ( {
+		test.only( `user-modified "${ testData.templateName }" template based on the theme template has priority over the user-modified template based on the default WooCommerce template`, async ( {
 			page,
 			admin,
 			editor,
@@ -196,6 +196,17 @@ test.describe( 'Template customization', () => {
 			await editor.saveSiteEditorEntities( {
 				isOnlyCurrentEntityDirty: true,
 			} );
+
+			// Verify only the customized theme template is returned for this slug.
+			// See: https://github.com/woocommerce/woocommerce/issues/42220
+			const templates = await requestUtils.getTemplates(
+				testData.templateType
+			);
+			expect(
+				templates.filter(
+					( template ) => template.slug === testData.templatePath
+				)
+			).toHaveLength( 1 );
 
 			// Verify the template is the one modified by the user based on the theme.
 			await testData.visitPage( {
