@@ -78,6 +78,8 @@ class SavedForLaterTests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox block.json declares auto-injection after the Cart block via blockHooks.
+	 *
 	 * Auto-injection after `woocommerce/cart` is declared in block.json via
 	 * `blockHooks`. Registering it on the block type (rather than through the
 	 * `hooked_block_types` filter alone) is what makes the editor treat it as a
@@ -96,6 +98,24 @@ class SavedForLaterTests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox block.json declares supports.multiple false so only one instance can be inserted per document.
+	 *
+	 * The block renders a shopper's single personal list, so a second instance
+	 * is never meaningful; `multiple: false` makes the editor refuse to insert
+	 * a duplicate, matching the Checkout and Mini Cart blocks.
+	 */
+	public function test_block_json_declares_single_instance_support(): void {
+		$block_json = WC_ABSPATH . 'assets/client/blocks/saved-for-later/block.json';
+		$this->assertFileExists( $block_json, 'Built saved-for-later block.json should exist.' );
+
+		$metadata = wp_json_file_decode( $block_json, array( 'associative' => true ) );
+		$this->assertIsArray( $metadata );
+		$this->assertSame( false, $metadata['supports']['multiple'] ?? null, 'supports.multiple must be false so the editor refuses a second instance.' );
+	}
+
+	/**
+	 * @testdox disable_when_feature_off strips block_hooks and hides the inserter when the feature is off.
+	 *
 	 * The block type is registered unconditionally, but when the feature is off
 	 * `disable_when_feature_off` strips the `block_hooks` setting and hides the
 	 * block from the inserter, so it neither auto-injects nor can be added
@@ -117,6 +137,8 @@ class SavedForLaterTests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox disable_when_feature_off leaves settings untouched when the feature is enabled.
+	 *
 	 * When the feature is enabled the settings are left untouched, so the block
 	 * keeps its `block_hooks` setting and stays inserter-visible.
 	 */
@@ -137,6 +159,8 @@ class SavedForLaterTests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox disable_when_feature_off passes other block types through untouched.
+	 *
 	 * `disable_when_feature_off` only touches the Saved for Later block; other
 	 * blocks' settings pass through untouched even when the feature is off.
 	 */
@@ -150,8 +174,10 @@ class SavedForLaterTests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * `render()` outputs nothing when the feature is disabled, so a block
-	 * persisted while the feature was on renders empty instead of as content.
+	 * @testdox render() outputs nothing when the feature is disabled.
+	 *
+	 * A block persisted while the feature was on renders empty instead of as
+	 * content once it is turned off.
 	 */
 	public function test_render_returns_empty_when_feature_disabled(): void {
 		$this->features_controller->change_feature_enable( 'cart_save_for_later', false );
@@ -164,6 +190,8 @@ class SavedForLaterTests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox The auto-injected block is seeded with a default heading inner block.
+	 *
 	 * The auto-injected block ships with a seeded `core/heading` inner block so
 	 * fresh cart pages render the heading on the frontend out of the box. The
 	 * matching `null` push onto `innerContent` is what makes `WP_Block::render()`
@@ -202,6 +230,8 @@ class SavedForLaterTests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox The seeded heading is appended alongside inner blocks added by extensions.
+	 *
 	 * Extensions are free to hook `hooked_block_woocommerce/saved-for-later`
 	 * to add their own inner blocks at a different priority. Our heading must
 	 * still be seeded alongside, not in place of, what they added.
@@ -241,7 +271,7 @@ class SavedForLaterTests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * `render()` returns an empty string for logged-out shoppers.
+	 * @testdox render() returns an empty string for logged-out shoppers.
 	 */
 	public function test_render_returns_empty_for_logged_out_user(): void {
 		wp_set_current_user( 0 );
@@ -253,6 +283,8 @@ class SavedForLaterTests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox render() seeds a hidden empty state for a shopper with no saved items.
+	 *
 	 * For a logged-in shopper whose list is empty (the new-shopper /
 	 * never-saved-an-item case), SSR must:
 	 *   - emit the empty-state `<li>` already `hidden`, so the message
@@ -316,6 +348,8 @@ class SavedForLaterTests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox render() hides the header behind the visibility gate when the list is empty.
+	 *
 	 * The seeded heading (and any future sibling inner blocks rendered via
 	 * `$content`) must share the empty-state visibility gating: hidden on
 	 * first paint for new shoppers / empty refreshes, revealed once the
@@ -395,6 +429,8 @@ class SavedForLaterTests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox cartPageHasSavedForLater is registered only on the cart page for logged-in shoppers.
+	 *
 	 * `cartPageHasSavedForLater` is the wcSettings flag the cart line item row reads
 	 * to decide whether to render the "Save for later" link. The block sets it
 	 * only when rendering the saved-for-later list, on the cart page, for a
