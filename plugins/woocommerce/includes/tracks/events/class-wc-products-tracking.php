@@ -52,8 +52,12 @@ class WC_Products_Tracking {
 	 * Send a Tracks event when the Products page is viewed.
 	 */
 	public function track_products_view() {
-		// Product searches trigger an initial request with `_wp_http_referer`, followed
-		// by a request without it. Track only the latter to avoid duplicate events.
+		// Only record Tracks events when `_wp_http_referer` is absent. Product searches
+		// first request this page with the argument, then WordPress redirects to the same
+		// URL without it. Tracking both requests would duplicate the view and search events.
+		//
+		// Sorting mode records `products_sorting_view` instead of `products_view` so the
+		// two view events remain mutually exclusive.
 
 		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification
 		if (
