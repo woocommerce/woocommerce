@@ -167,8 +167,9 @@ class Social_Links extends Abstract_Block_Renderer {
 		);
 
 		if ( $is_pill_shape ) {
-			$row_container_styles['padding-left']  = '0.667em';
-			$row_container_styles['padding-right'] = '0.667em';
+			$pill_shape_horizontal_padding         = round( $font_size_value * 2 / 3, 2 ) . 'px';
+			$row_container_styles['padding-left']  = $pill_shape_horizontal_padding;
+			$row_container_styles['padding-right'] = $pill_shape_horizontal_padding;
 		}
 		$row_container_styles = $this->compile_css( $row_container_styles );
 

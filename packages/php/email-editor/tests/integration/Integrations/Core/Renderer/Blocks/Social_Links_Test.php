@@ -119,8 +119,31 @@ class Social_Links_Test extends \Email_Editor_Integration_Test_Case {
 
 		$rendered = $this->social_links_renderer->render( '', $parsed_social_links, $this->rendering_context );
 		$this->checkValidHTML( $rendered );
-		$this->assertStringContainsString( 'padding-left:0.667em;', $rendered );
-		$this->assertStringContainsString( 'padding-right:0.667em;', $rendered );
+		$this->assertStringContainsString( 'padding-left:16px;', $rendered );
+		$this->assertStringContainsString( 'padding-right:16px;', $rendered );
+	}
+
+	/**
+	 * Test it renders pill shape padding based on the selected icon size.
+	 */
+	public function testItRendersSocialLinksWithPillShapePaddingForDifferentSizes(): void {
+		$sizes = array(
+			'has-small-icon-size'  => '10.67px',
+			'has-normal-icon-size' => '16px',
+			'has-large-icon-size'  => '24px',
+			'has-huge-icon-size'   => '32px',
+		);
+
+		foreach ( $sizes as $size_class => $expected_padding ) {
+			$parsed_social_links                       = $this->parsed_social_links;
+			$parsed_social_links['attrs']['className'] = 'is-style-pill-shape';
+			$parsed_social_links['attrs']['size']      = $size_class;
+
+			$rendered = $this->social_links_renderer->render( '', $parsed_social_links, $this->rendering_context );
+			$this->checkValidHTML( $rendered );
+			$this->assertStringContainsString( "padding-left:{$expected_padding};", $rendered );
+			$this->assertStringContainsString( "padding-right:{$expected_padding};", $rendered );
+		}
 	}
 
 	/**
