@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Update a product's average rating and rating counts when a review is created or its rating is edited through the REST API.
