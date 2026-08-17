@@ -401,8 +401,10 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			return false;
 		}
 
-		update_option( $lock_key, (string) time(), false );
-		return true;
+		// Stale lock: delete then re-add so concurrent takeover attempts race on
+		// add_option() and only one of them can win.
+		delete_option( $lock_key );
+		return add_option( $lock_key, (string) time(), '', false );
 	}
 
 	/**
