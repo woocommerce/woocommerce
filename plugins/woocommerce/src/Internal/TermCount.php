@@ -60,12 +60,12 @@ class TermCount {
 	 *
 	 * @internal
 	 *
-	 * @param mixed $object_id  Object ID.
-	 * @param mixed $terms      An array of object terms.
-	 * @param mixed $tt_ids     An array of term taxonomy IDs.
-	 * @param mixed $taxonomy   Taxonomy slug.
-	 * @param mixed $append     Whether to append new terms to the old terms.
-	 * @param mixed $old_tt_ids The old array of term taxonomy IDs.
+	 * @param int               $object_id  Object ID.
+	 * @param array<int|string> $terms      An array of object term IDs or slugs.
+	 * @param array<int|string> $tt_ids     An array of term taxonomy IDs.
+	 * @param string            $taxonomy   Taxonomy slug.
+	 * @param bool              $append     Whether to append new terms to the old terms.
+	 * @param array<int|string> $old_tt_ids The old array of term taxonomy IDs.
 	 */
 	public function handle_set_object_terms( $object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids ): void {
 		$object_id = absint( $object_id );
@@ -99,9 +99,9 @@ class TermCount {
 	 *
 	 * @internal
 	 *
-	 * @param mixed $object_id Object ID.
-	 * @param mixed $tt_ids    Deleted term taxonomy IDs.
-	 * @param mixed $taxonomy  Taxonomy slug.
+	 * @param int               $object_id Object ID.
+	 * @param array<int|string> $tt_ids    Deleted term taxonomy IDs.
+	 * @param string            $taxonomy  Taxonomy slug.
 	 */
 	public function handle_deleted_term_relationships( $object_id, $tt_ids, $taxonomy ): void {
 		$object_id = absint( $object_id );
@@ -155,7 +155,7 @@ class TermCount {
 	/**
 	 * Normalizes arbitrary values to a list of positive integer IDs.
 	 *
-	 * @param array<mixed> $ids Values to normalize.
+	 * @param array<int|string> $ids Values to normalize.
 	 * @return list<int>
 	 */
 	private function normalize_ids( array $ids ): array {
