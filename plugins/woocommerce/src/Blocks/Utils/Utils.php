@@ -1,4 +1,4 @@
-<?php // phpcs:ignore Generic.PHP.RequireStrictTypes.MissingDeclaration -- Existing methods rely on scalar coercion.
+<?php
 namespace Automattic\WooCommerce\Blocks\Utils;
 
 use Automattic\WooCommerce\Proxies\LegacyProxy;
