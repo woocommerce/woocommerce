@@ -363,8 +363,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_get_formatted_cart_item_data renders rows whose label and display
-	 * value are stringable and drops the rest.
+	 * @testdox 'wc_get_formatted_cart_item_data' renders rows whose label and display value are stringable and drops the rest.
 	 */
 	public function test_wc_get_formatted_cart_item_data_skips_non_renderable_item_data() {
 		$html = $this->get_formatted_cart_item_data_with_fixture( false );
@@ -385,7 +384,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_get_formatted_cart_item_data renders the same rows in flat output.
+	 * @testdox 'wc_get_formatted_cart_item_data' renders the same rows in flat output.
 	 */
 	public function test_wc_get_formatted_cart_item_data_skips_non_renderable_item_data_in_flat_output() {
 		$output = $this->get_formatted_cart_item_data_with_fixture( true );
