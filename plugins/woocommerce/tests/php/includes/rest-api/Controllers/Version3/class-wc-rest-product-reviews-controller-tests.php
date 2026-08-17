@@ -200,4 +200,140 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 			'Comments that are not product reviews (including other types of comments belonging to products) cannot be deleted via this endpoint.'
 		);
 	}
+
+	/**
+	 * @testdox Creating a review updates the product rating aggregates within the same request.
+	 */
+	public function test_create_item_updates_the_product_rating_aggregates() {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+
+		$response = $this->create_review( $product_id, 'Holds up to daily use.', 5 );
+		$this->assertEquals( 201, $response->get_status(), 'The review is created successfully.' );
+
+		$product = wc_get_product( $product_id );
+		$this->assertEquals( 5, $product->get_average_rating(), 'The average rating includes the review created in the same request.' );
+		$this->assertEquals( array( 5 => 1 ), $product->get_rating_counts(), 'The rating counts include the review created in the same request.' );
+		$this->assertEquals( 1, $product->get_review_count(), 'The review count includes the review created in the same request.' );
+	}
+
+	/**
+	 * @testdox Creating further reviews keeps the average rating in step with every stored rating.
+	 */
+	public function test_create_item_updates_the_average_rating_for_every_review() {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+
+		$this->create_review( $product_id, 'Holds up to daily use.', 5 );
+		$this->create_review( $product_id, 'Fell apart in a week.', 1 );
+
+		$product = wc_get_product( $product_id );
+		$this->assertEquals( 3, $product->get_average_rating(), 'The average rating covers both reviews, not just the earlier one.' );
+		$this->assertEquals(
+			array(
+				1 => 1,
+				5 => 1,
+			),
+			$product->get_rating_counts(),
+			'The rating counts cover both reviews.'
+		);
+		$this->assertEquals( 2, $product->get_review_count(), 'Both reviews are counted.' );
+	}
+
+	/**
+	 * @testdox Creating a review without a rating leaves the average rating untouched.
+	 */
+	public function test_create_item_without_a_rating_leaves_the_average_rating_untouched() {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+
+		$this->create_review( $product_id, 'Holds up to daily use.', 4 );
+		$this->create_review( $product_id, 'Arrived on time.', null );
+
+		$product = wc_get_product( $product_id );
+		$this->assertEquals( 4, $product->get_average_rating(), 'A review without a rating does not affect the average rating.' );
+		$this->assertEquals( array( 4 => 1 ), $product->get_rating_counts(), 'A review without a rating is not counted as a rating.' );
+		$this->assertEquals( 2, $product->get_review_count(), 'A review without a rating is still counted as a review.' );
+	}
+
+	/**
+	 * @testdox Editing the rating of a review recalculates the product rating aggregates.
+	 */
+	public function test_update_item_recalculates_the_aggregates_when_the_rating_changes() {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+
+		$this->create_review( $product_id, 'Holds up to daily use.', 5 );
+		$review_id = $this->create_review( $product_id, 'Fell apart in a week.', 1 )->get_data()['id'];
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/reviews/' . $review_id );
+		$request->set_body_params( array( 'rating' => 3 ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status(), 'The review is updated successfully.' );
+
+		$product = wc_get_product( $product_id );
+		$this->assertEquals( 4, $product->get_average_rating(), 'The average rating reflects the new rating, not the one it replaced.' );
+		$this->assertEquals(
+			array(
+				3 => 1,
+				5 => 1,
+			),
+			$product->get_rating_counts(),
+			'The rating counts drop the replaced rating.'
+		);
+	}
+
+	/**
+	 * @testdox Holding and re-approving a review excludes and re-includes its rating.
+	 */
+	public function test_update_item_status_changes_keep_the_aggregates_correct() {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+
+		$this->create_review( $product_id, 'Holds up to daily use.', 5 );
+		$review_id = $this->create_review( $product_id, 'Not for me.', 3 )->get_data()['id'];
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/reviews/' . $review_id );
+		$request->set_body_params( array( 'status' => 'hold' ) );
+		$this->server->dispatch( $request );
+
+		$product = wc_get_product( $product_id );
+		$this->assertEquals( 5, $product->get_average_rating(), 'A review on hold is excluded from the average rating.' );
+		$this->assertEquals( 1, $product->get_review_count(), 'A review on hold is excluded from the review count.' );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/reviews/' . $review_id );
+		$request->set_body_params( array( 'status' => 'approved' ) );
+		$this->server->dispatch( $request );
+
+		$product = wc_get_product( $product_id );
+		$this->assertEquals( 4, $product->get_average_rating(), 'An approved review is included in the average rating again.' );
+		$this->assertEquals( 2, $product->get_review_count(), 'An approved review is included in the review count again.' );
+	}
+
+	/**
+	 * Creates a product review through the REST API.
+	 *
+	 * @param int      $product_id ID of the product being reviewed.
+	 * @param string   $content    Review content. Must differ between reviews, as WordPress rejects duplicates.
+	 * @param int|null $rating     Rating to submit, or null to omit the rating field.
+	 * @return WP_REST_Response
+	 */
+	private function create_review( int $product_id, string $content, ?int $rating ) {
+		$body = array(
+			'product_id'     => $product_id,
+			'review'         => $content,
+			'reviewer'       => 'Jane Smith',
+			'reviewer_email' => 'jane.smith@example.org',
+		);
+
+		if ( null !== $rating ) {
+			$body['rating'] = $rating;
+		}
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/reviews' );
+		$request->set_body_params( $body );
+
+		return $this->server->dispatch( $request );
+	}
 }

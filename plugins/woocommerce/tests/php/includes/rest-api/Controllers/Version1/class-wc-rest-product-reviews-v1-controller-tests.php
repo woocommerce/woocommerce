@@ -170,4 +170,70 @@ class WC_REST_Product_Reviews_V1_Controller_Tests extends WC_Unit_Test_Case {
 			'Comments that are not product reviews (including other types of comments belonging to products) cannot be deleted via this endpoint.'
 		);
 	}
+
+	/**
+	 * @testdox Creating a review updates the product rating aggregates within the same request.
+	 */
+	public function test_create_item_updates_the_product_rating_aggregates() {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+
+		$response = $this->create_review( $product_id, 'Holds up to daily use.', 5 );
+		$this->assertEquals( 201, $response->get_status(), 'The review is created successfully.' );
+
+		$product = wc_get_product( $product_id );
+		$this->assertEquals( 5, $product->get_average_rating(), 'The average rating includes the review created in the same request.' );
+		$this->assertEquals( array( 5 => 1 ), $product->get_rating_counts(), 'The rating counts include the review created in the same request.' );
+		$this->assertEquals( 1, $product->get_review_count(), 'The review count includes the review created in the same request.' );
+	}
+
+	/**
+	 * @testdox Editing the rating of a review recalculates the product rating aggregates.
+	 */
+	public function test_update_item_recalculates_the_aggregates_when_the_rating_changes() {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+
+		$this->create_review( $product_id, 'Holds up to daily use.', 5 );
+		$review_id = $this->create_review( $product_id, 'Fell apart in a week.', 1 )->get_data()['id'];
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v1/products/' . $product_id . '/reviews/' . $review_id );
+		$request->set_param( 'product_id', $product_id );
+		$request->set_param( 'id', $review_id );
+		$request->set_param( 'review', 'Held up better than expected.' );
+		$request->set_param( 'rating', 3 );
+
+		$response = $this->sut->update_item( $request );
+		$this->assertEquals( 200, $response->get_status(), 'The review is updated successfully.' );
+
+		$product = wc_get_product( $product_id );
+		$this->assertEquals( 4, $product->get_average_rating(), 'The average rating reflects the new rating, not the one it replaced.' );
+		$this->assertEquals(
+			array(
+				3 => 1,
+				5 => 1,
+			),
+			$product->get_rating_counts(),
+			'The rating counts drop the replaced rating.'
+		);
+	}
+
+	/**
+	 * Creates a product review through the controller.
+	 *
+	 * @param int    $product_id ID of the product being reviewed.
+	 * @param string $content    Review content.
+	 * @param int    $rating     Rating to submit.
+	 * @return WP_REST_Response
+	 */
+	private function create_review( int $product_id, string $content, int $rating ) {
+		$request = new WP_REST_Request( 'POST', '/wc/v1/products/' . $product_id . '/reviews' );
+		$request->set_param( 'product_id', $product_id );
+		$request->set_param( 'review', $content );
+		$request->set_param( 'name', 'Jane Smith' );
+		$request->set_param( 'email', 'jane.smith@example.org' );
+		$request->set_param( 'rating', $rating );
+
+		return $this->sut->create_item( $request );
+	}
 }

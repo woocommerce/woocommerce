@@ -478,6 +478,16 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 
 		$review = get_comment( $review_id );
 
+		/*
+		 * Inserting the comment already triggered a recompute of the product's rating aggregates
+		 * (wp_insert_comment() and wp_set_comment_status() both call wp_update_comment_count(), which
+		 * WC_Comments::clear_transients() hooks into), but that ran before the rating meta above
+		 * existed, leaving the stored average one review behind. Recompute now that the meta is in place.
+		 */
+		if ( $review instanceof WP_Comment ) {
+			WC_Comments::clear_transients( (int) $review->comment_post_ID );
+		}
+
 		/**
 		 * Fires after a comment is created or updated via the REST API.
 		 *
@@ -588,6 +598,17 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 
 		if ( ! empty( $request['rating'] ) ) {
 			update_comment_meta( $id, 'rating', $request['rating'] );
+
+			/*
+			 * Any recompute of the product's rating aggregates triggered while updating the comment ran
+			 * before the new rating was stored, so it used the previous value. Recompute now that the
+			 * meta is up to date. The comment is re-read because the same request can move the review
+			 * to a different product.
+			 */
+			$updated_review = get_comment( $id );
+			if ( $updated_review instanceof WP_Comment ) {
+				WC_Comments::clear_transients( (int) $updated_review->comment_post_ID );
+			}
 		}
 
 		if ( isset( $request['verified'] ) && ! empty( $request['verified'] ) ) {

@@ -306,6 +306,14 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 
 		update_comment_meta( $product_review_id, 'rating', ( ! empty( $request['rating'] ) ? $request['rating'] : '0' ) );
 
+		/*
+		 * Inserting the comment already triggered a recompute of the product's rating aggregates
+		 * (wp_insert_comment() calls wp_update_comment_count(), which WC_Comments::clear_transients()
+		 * hooks into), but that ran before the rating meta above existed, leaving the stored average
+		 * one review behind. Recompute now that the meta is in place.
+		 */
+		WC_Comments::clear_transients( $product_id );
+
 		$product_review = get_comment( $product_review_id );
 		$this->update_additional_fields_for_object( $product_review, $request );
 
@@ -352,6 +360,13 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 
 		if ( ! empty( $request['rating'] ) ) {
 			update_comment_meta( $product_review_id, 'rating', $request['rating'] );
+
+			/*
+			 * The recompute of the product's rating aggregates triggered by wp_update_comment() above ran
+			 * before the new rating was stored, so it used the previous value. Recompute now that the meta
+			 * is up to date. The review is guaranteed to belong to $product_id by get_review() above.
+			 */
+			WC_Comments::clear_transients( $product_id );
 		}
 
 		$product_review = get_comment( $product_review_id );
