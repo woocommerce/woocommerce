@@ -22,7 +22,7 @@
 	<h3 id="payment_status_section_title"><?php echo strtoupper( $data['texts']['payment_status_section_title'] ); ?></h3>
 	<p><?php echo $data['texts']['payment_status']; ?></p>
 
-	<?php if ( isset( $data['payment_method'] ) ) { ?>
+	<?php if ( isset( $data['payment_method'] ) && ( '' !== trim( $data['payment_method'] ) || ! $data['show_payment_method_title'] ) ) { ?>
 		<h3 id="payment_method_section_title"><?php echo strtoupper( $data['texts']['payment_method_section_title'] ); ?></h3>
 		<p>
 			<?php if ( $data['show_payment_method_title'] ) { ?>
