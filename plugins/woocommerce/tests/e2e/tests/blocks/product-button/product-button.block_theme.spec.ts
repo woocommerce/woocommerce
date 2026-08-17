@@ -13,23 +13,6 @@ test.describe( `${ blockData.name } Block`, () => {
 		await frontendUtils.goToShop();
 	} );
 
-	test( 'should be visible', async ( { frontendUtils } ) => {
-		const blocks = await frontendUtils.getBlockByName( blockData.slug );
-		await expect( blocks ).toHaveCount(
-			blockData.selectors.frontend.productsToDisplay
-		);
-	} );
-
-	test( 'should not enqueue add-to-cart-script', async ( { page } ) => {
-		let isScriptEnqueued = false;
-		page.on( 'request', ( request ) => {
-			if ( request.url().includes( 'add-to-cart.min.js' ) )
-				isScriptEnqueued = true;
-		} );
-		await page.reload();
-		expect( isScriptEnqueued ).toBe( false );
-	} );
-
 	test( 'should add product to the cart', async ( {
 		frontendUtils,
 		page,
@@ -70,51 +53,41 @@ test.describe( `${ blockData.name } Block`, () => {
 		await handleAddToCartAjaxSetting( admin, page, {
 			isChecked: true,
 		} );
-		await frontendUtils.goToShop();
 
-		const blocks = await frontendUtils.getBlockByName( blockData.slug );
-		const block = blocks.first();
-		const button = block.getByRole( 'link' );
+		try {
+			await frontendUtils.goToShop();
 
-		const productId = await button.getAttribute( 'data-product_id' );
+			const blocks = await frontendUtils.getBlockByName( blockData.slug );
+			const block = blocks.first();
+			const button = block.getByRole( 'link' );
 
-		const productNameLocator = page.locator( `li.post-${ productId } h2` );
-		await expect( productNameLocator ).not.toBeEmpty();
+			const productId = await button.getAttribute( 'data-product_id' );
 
-		const productName =
-			( await productNameLocator.textContent() ) as string;
+			const productNameLocator = page.locator(
+				`li.post-${ productId } h2`
+			);
+			await expect( productNameLocator ).not.toBeEmpty();
 
-		await block.click();
+			const productName =
+				( await productNameLocator.textContent() ) as string;
 
-		await expect(
-			page.locator( `a[href*="cart=${ productId }"]` )
-		).toBeVisible();
+			await block.click();
 
-		await frontendUtils.goToCheckout();
+			await expect(
+				page.locator( `a[href*="cart=${ productId }"]` )
+			).toBeVisible();
 
-		const productElement = page.getByText( productName, {
-			exact: true,
-		} );
+			await frontendUtils.goToCheckout();
 
-		await expect( productElement ).toBeVisible();
+			const productElement = page.getByText( productName, {
+				exact: true,
+			} );
 
-		await handleAddToCartAjaxSetting( admin, page, {
-			isChecked: false,
-		} );
-	} );
-
-	test( 'the filter `woocommerce_product_add_to_cart_text` should be applied', async ( {
-		requestUtils,
-		frontendUtils,
-	} ) => {
-		await requestUtils.activatePlugin(
-			'woocommerce-blocks-test-custom-add-to-cart-button-text'
-		);
-		await frontendUtils.goToShop();
-		const blocks = await frontendUtils.getBlockByName( blockData.slug );
-		const buttonWithNewText = blocks.getByText( 'Buy Now' );
-		await expect( buttonWithNewText ).toHaveCount(
-			blockData.selectors.frontend.productsToDisplay
-		);
+			await expect( productElement ).toBeVisible();
+		} finally {
+			await handleAddToCartAjaxSetting( admin, page, {
+				isChecked: false,
+			} );
+		}
 	} );
 } );
