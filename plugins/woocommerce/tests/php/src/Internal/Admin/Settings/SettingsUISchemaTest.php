@@ -484,6 +484,77 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox It gives separate generated groups to separate runs of loose fields.
+	 */
+	public function test_from_legacy_settings_preserves_separate_runs_of_loose_fields(): void {
+		$schema = SettingsUISchema::from_legacy_settings(
+			'acme',
+			'',
+			'Acme',
+			array(
+				array(
+					'id'    => 'acme_before',
+					'type'  => 'text',
+					'title' => 'Before',
+				),
+				array(
+					'id'    => 'main',
+					'type'  => 'title',
+					'title' => 'Main',
+				),
+				array(
+					'id'    => 'acme_main',
+					'type'  => 'text',
+					'title' => 'Main field',
+				),
+				array( 'type' => 'sectionend' ),
+				array(
+					'id'    => 'acme_after',
+					'type'  => 'text',
+					'title' => 'After',
+				),
+			)
+		);
+
+		$this->assertSame( array( 'default', 'main', 'default_1' ), array_keys( $schema['groups'] ) );
+		$this->assertSame( 'acme_before', $schema['groups']['default']['fields'][0]['id'] );
+		$this->assertSame( 'acme_main', $schema['groups']['main']['fields'][0]['id'] );
+		$this->assertSame( 'acme_after', $schema['groups']['default_1']['fields'][0]['id'] );
+	}
+
+	/**
+	 * @testdox It reserves explicit group ids when it generates a group for loose fields.
+	 */
+	public function test_from_legacy_settings_avoids_explicit_group_id_when_generating_loose_group(): void {
+		$schema = SettingsUISchema::from_legacy_settings(
+			'acme',
+			'',
+			'Acme',
+			array(
+				array(
+					'id'    => 'acme_loose',
+					'type'  => 'text',
+					'title' => 'Loose field',
+				),
+				array(
+					'id'    => 'default',
+					'type'  => 'title',
+					'title' => 'Declared default',
+				),
+				array(
+					'id'    => 'acme_declared',
+					'type'  => 'text',
+					'title' => 'Declared field',
+				),
+			)
+		);
+
+		$this->assertSame( array( 'default_1', 'default' ), array_keys( $schema['groups'] ) );
+		$this->assertSame( 'acme_loose', $schema['groups']['default_1']['fields'][0]['id'] );
+		$this->assertSame( 'acme_declared', $schema['groups']['default']['fields'][0]['id'] );
+	}
+
+	/**
 	 * @testdox It preserves both legacy descriptions and string desc_tip values.
 	 */
 	public function test_from_legacy_settings_preserves_desc_and_string_desc_tip(): void {

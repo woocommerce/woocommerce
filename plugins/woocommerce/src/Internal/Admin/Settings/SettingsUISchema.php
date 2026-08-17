@@ -76,6 +76,7 @@ class SettingsUISchema {
 	 */
 	public static function from_legacy_settings( string $page_id, string $section, string $title, array $settings, string $default_save_adapter = 'form_post' ): array {
 		$groups                = array();
+		$declared_group_ids    = self::get_declared_group_ids( $settings );
 		$current_group         = null;
 		$current_id            = null;
 		$group_index           = 0;
@@ -96,7 +97,7 @@ class SettingsUISchema {
 
 				$current_id    = isset( $setting['id'] ) && is_scalar( $setting['id'] ) && '' !== (string) $setting['id']
 					? (string) $setting['id']
-					: 'group_' . $group_index;
+					: self::get_unique_group_id( 'group_' . $group_index, $groups, $declared_group_ids );
 				$current_group = array(
 					'id'          => $current_id,
 					'title'       => isset( $setting['title'] ) && is_scalar( $setting['title'] ) ? html_entity_decode( (string) $setting['title'], ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ) : '',
@@ -124,8 +125,8 @@ class SettingsUISchema {
 			}
 
 			if ( ! $current_group ) {
-				$current_id    = self::DEFAULT_GROUP_ID;
-				$current_group = self::get_default_group( $group_index );
+				$current_id    = self::get_unique_group_id( self::DEFAULT_GROUP_ID, $groups, $declared_group_ids );
+				$current_group = self::get_default_group( $current_id, $group_index );
 				++$group_index;
 			}
 
@@ -1335,18 +1336,63 @@ class SettingsUISchema {
 	/**
 	 * Get the default group.
 	 *
-	 * @param int $order Group order.
+	 * @param string $group_id Group id.
+	 * @param int    $order Group order.
 	 * @return array
 	 */
-	private static function get_default_group( int $order ): array {
+	private static function get_default_group( string $group_id, int $order ): array {
 		return array(
-			'id'          => self::DEFAULT_GROUP_ID,
+			'id'          => $group_id,
 			'title'       => '',
 			'description' => '',
 			'actions'     => array(),
 			'order'       => $order,
 			'fields'      => array(),
 		);
+	}
+
+	/**
+	 * Get explicit legacy group ids that generated ids must not claim.
+	 *
+	 * @param array $settings Legacy settings definitions.
+	 * @return array<string, true>
+	 */
+	private static function get_declared_group_ids( array $settings ): array {
+		$group_ids = array();
+
+		foreach ( $settings as $setting ) {
+			if (
+				is_array( $setting )
+				&& 'title' === ( $setting['type'] ?? null )
+				&& isset( $setting['id'] )
+				&& is_scalar( $setting['id'] )
+				&& '' !== (string) $setting['id']
+			) {
+				$group_ids[ (string) $setting['id'] ] = true;
+			}
+		}
+
+		return $group_ids;
+	}
+
+	/**
+	 * Get an unused id for a generated legacy group.
+	 *
+	 * @param string               $base_id Base group id.
+	 * @param array<string, array> $groups Existing groups.
+	 * @param array<string, true>  $declared_group_ids Explicit group ids.
+	 * @return string
+	 */
+	private static function get_unique_group_id( string $base_id, array $groups, array $declared_group_ids ): string {
+		$group_id = $base_id;
+		$suffix   = 1;
+
+		while ( array_key_exists( $group_id, $groups ) || isset( $declared_group_ids[ $group_id ] ) ) {
+			$group_id = $base_id . '_' . $suffix;
+			++$suffix;
+		}
+
+		return $group_id;
 	}
 
 	/**
