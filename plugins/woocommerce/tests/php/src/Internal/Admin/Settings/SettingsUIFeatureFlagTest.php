@@ -473,17 +473,20 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		$page            = $this->get_settings_ui_test_page_with_script_handles( array(), true );
 
 		try {
-			$output = $this->render_settings_view( $page );
+			$classes = $page->add_settings_ui_body_class( 'existing-class' );
+			$output  = $this->render_settings_view( $page );
 		} finally {
 			remove_action( 'woocommerce_caught_exception', $listener );
 		}
 
+		$this->assertSame( 'existing-class', $classes, 'Classic body classes should remain unchanged.' );
 		$this->assertStringContainsString( 'name="woocommerce_settings_ui_flag_test"', $output );
 		$this->assertStringContainsString( 'class="woocommerce-save-button', $output );
 		$this->assertStringNotContainsString( 'data-wc-settings-ui="1"', $output );
 		$this->assertArrayNotHasKey( 'hide_save_button', $GLOBALS );
 		$this->assertCount( 1, $caught );
 		$this->assertSame( 'Unable to resolve the Settings UI page id.', $caught[0]->getMessage() );
+		$this->assertSame( 1, $this->get_page_id_resolution_count( $page ), 'The failing extension method should run once per request.' );
 	}
 
 	/**
@@ -1318,6 +1321,13 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 			private bool $fail_page_id;
 
 			/**
+			 * Page id resolution count.
+			 *
+			 * @var int
+			 */
+			private int $page_id_resolution_count = 0;
+
+			/**
 			 * Constructor.
 			 *
 			 * @param array $script_handles Script handles.
@@ -1370,6 +1380,8 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 					 * @return string
 					 */
 					public function get_page_id(): string {
+						$this->settings_page->increment_page_id_resolution_count();
+
 						if ( $this->fail_page_id ) {
 							throw new \RuntimeException( 'Unable to resolve the Settings UI page id.' );
 						}
@@ -1392,6 +1404,22 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 			}
 
 			/**
+			 * Increment the page id resolution count.
+			 */
+			public function increment_page_id_resolution_count(): void {
+				++$this->page_id_resolution_count;
+			}
+
+			/**
+			 * Get the page id resolution count.
+			 *
+			 * @return int
+			 */
+			public function get_page_id_resolution_count(): int {
+				return $this->page_id_resolution_count;
+			}
+
+			/**
 			 * Get settings for the default section.
 			 *
 			 * @return array
@@ -1406,6 +1434,19 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 				);
 			}
 		};
+	}
+
+	/**
+	 * Get the page id resolution count for a counting test page.
+	 *
+	 * @param \WC_Settings_Page $page Settings page.
+	 * @return int
+	 */
+	private function get_page_id_resolution_count( \WC_Settings_Page $page ): int {
+		$method = new \ReflectionMethod( $page, 'get_page_id_resolution_count' );
+		$method->setAccessible( true );
+
+		return (int) $method->invoke( $page );
 	}
 
 	/**

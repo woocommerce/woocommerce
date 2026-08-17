@@ -70,6 +70,27 @@ class SettingsUIRequestContext {
 	private ?SettingsUIPageInterface $settings_ui_page;
 
 	/**
+	 * Whether the Settings UI page id has been resolved.
+	 *
+	 * @var bool
+	 */
+	private bool $page_id_resolved = false;
+
+	/**
+	 * Resolved Settings UI page id.
+	 *
+	 * @var string
+	 */
+	private string $page_id = '';
+
+	/**
+	 * Failure raised while resolving the Settings UI page id.
+	 *
+	 * @var \Throwable|null
+	 */
+	private ?\Throwable $page_id_failure = null;
+
+	/**
 	 * Whether script handles have been resolved.
 	 *
 	 * @var bool
@@ -280,9 +301,24 @@ class SettingsUIRequestContext {
 	 * Get the Settings UI page id.
 	 *
 	 * @return string
+	 * @throws \Throwable When the Settings UI page adapter cannot resolve its page id.
 	 */
 	public function get_page_id(): string {
-		return $this->settings_ui_page ? $this->settings_ui_page->get_page_id() : $this->settings_page->get_id();
+		if ( ! $this->page_id_resolved ) {
+			try {
+				$this->page_id = $this->settings_ui_page ? $this->settings_ui_page->get_page_id() : $this->settings_page->get_id();
+			} catch ( \Throwable $e ) {
+				$this->page_id_failure = $e;
+			}
+
+			$this->page_id_resolved = true;
+		}
+
+		if ( $this->page_id_failure ) {
+			throw $this->page_id_failure;
+		}
+
+		return $this->page_id;
 	}
 
 	/**
