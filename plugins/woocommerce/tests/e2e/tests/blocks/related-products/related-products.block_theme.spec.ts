@@ -20,61 +20,66 @@ const blockData: BlockData = {
 };
 
 test.describe( `${ blockData.name } Block`, () => {
-	test( "can't be added in the Post Editor", async ( { admin, editor } ) => {
-		await admin.createNewPost();
-
-		try {
-			await editor.insertBlock( { name: blockData.slug } );
-		} catch ( _error ) {
-			// noop
-		}
-
-		await expect(
-			await editor.getBlockByName( blockData.slug )
-		).toBeHidden();
-	} );
-
-	test( "can't be added in the Product Catalog Template", async ( {
+	test( 'keeps the deprecated block unavailable across editor contexts', async ( {
 		admin,
 		editor,
 	} ) => {
-		await admin.visitSiteEditor( {
-			postId: `${ BLOCK_THEME_SLUG }//archive-product`,
-			postType: 'wp_template',
-			canvas: 'edit',
+		await test.step( 'Post Editor', async () => {
+			await admin.createNewPost();
+
+			try {
+				await editor.insertBlock( { name: blockData.slug } );
+			} catch {
+				// noop
+			}
+
+			await expect(
+				await editor.getBlockByName( blockData.slug )
+			).toBeHidden();
 		} );
 
-		await editor.setContent( '' );
+		await test.step( 'Product Catalog template', async () => {
+			await admin.visitSiteEditor( {
+				postId: `${ BLOCK_THEME_SLUG }//archive-product`,
+				postType: 'wp_template',
+				canvas: 'edit',
+			} );
 
-		try {
-			await editor.insertBlock( { name: blockData.slug } );
-		} catch ( _error ) {
-			// noop
-		}
+			await editor.setContent( '' );
 
-		await expect(
-			await editor.getBlockByName( blockData.slug )
-		).toBeHidden();
-	} );
+			try {
+				await editor.insertBlock( { name: blockData.slug } );
+			} catch {
+				// noop
+			}
 
-	test( "can't be added in the Single Product Template", async ( {
-		admin,
-		editor,
-	} ) => {
-		await admin.visitSiteEditor( {
-			postId: `${ BLOCK_THEME_SLUG }//single-product`,
-			postType: 'wp_template',
-			canvas: 'edit',
+			await expect(
+				await editor.getBlockByName( blockData.slug )
+			).toBeHidden();
 		} );
-		await editor.setContent( '' );
 
-		// Inserting Related Products by name
-		// (but it's a Product Collection variation).
-		await editor.insertBlockUsingGlobalInserter( blockData.name );
+		await test.step( 'Single Product template', async () => {
+			await admin.visitSiteEditor( {
+				postId: `${ BLOCK_THEME_SLUG }//single-product`,
+				postType: 'wp_template',
+				canvas: 'edit',
+			} );
+			await editor.setContent( '' );
 
-		// Verifying by slug - it's expected it's NOT woocommerce/related-products.
-		await expect(
-			await editor.getBlockByName( blockData.slug )
-		).toBeHidden();
+			// Inserting Related Products by name
+			// (but it's a Product Collection variation).
+			await editor.insertBlockUsingGlobalInserter( blockData.name );
+
+			await expect(
+				editor.canvas
+					.getByLabel( 'Block: Related Products', { exact: true } )
+					.first()
+			).toBeVisible();
+
+			// Verifying by slug - it's expected it's NOT woocommerce/related-products.
+			await expect(
+				await editor.getBlockByName( blockData.slug )
+			).toBeHidden();
+		} );
 	} );
 } );
