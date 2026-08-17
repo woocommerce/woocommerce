@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Page, Locator, Request, Response } from '@playwright/test';
+import { Page, Locator, Request } from '@playwright/test';
 import { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
 
 const wait = ( time: number ) =>
@@ -69,6 +69,7 @@ export class FrontendUtils {
 	private trackCartRequests( timeout = 5000 ) {
 		// key: request url, value: count of pending requests with this url
 		const pendingRequests = new Map< string, number >();
+		let cartRequestObserved = false;
 
 		const requestHandler = ( request: Request ) => {
 			const url = request.url();
@@ -77,6 +78,7 @@ export class FrontendUtils {
 					url.includes( cartUrl )
 				)
 			) {
+				cartRequestObserved = true;
 				pendingRequests.set(
 					url,
 					( pendingRequests.get( url ) ?? 0 ) + 1
@@ -84,8 +86,8 @@ export class FrontendUtils {
 			}
 		};
 
-		const responseHandler = ( response: Response ) => {
-			const url = response.url();
+		const requestSettledHandler = ( request: Request ) => {
+			const url = request.url();
 			const pendingRequestCount = pendingRequests.get( url );
 
 			// means we're not dealing with cart request
@@ -102,18 +104,20 @@ export class FrontendUtils {
 		};
 
 		this.page.on( 'request', requestHandler );
-		this.page.on( 'response', responseHandler );
+		this.page.on( 'requestfinished', requestSettledHandler );
+		this.page.on( 'requestfailed', requestSettledHandler );
 
 		return {
 			waitForCartRequests: async () => {
 				try {
 					await waitForFunction(
-						() => pendingRequests.size === 0,
+						() => cartRequestObserved && pendingRequests.size === 0,
 						timeout
 					);
 				} finally {
 					this.page.off( 'request', requestHandler );
-					this.page.off( 'response', responseHandler );
+					this.page.off( 'requestfinished', requestSettledHandler );
+					this.page.off( 'requestfailed', requestSettledHandler );
 				}
 			},
 		};
