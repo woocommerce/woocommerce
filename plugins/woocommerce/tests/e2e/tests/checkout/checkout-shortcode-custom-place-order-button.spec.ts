@@ -158,7 +158,7 @@ test.describe( 'Shortcode Checkout Custom Place Order Button', () => {
 				.fill( customer.billing.email );
 
 			// Selecting Cash on Delivery first.
-			await page.getByText( 'Cash on delivery' ).click();
+			await page.getByText( 'Cash on delivery', { exact: true } ).click();
 
 			// Ensuring the default button is visible and the custom button is not.
 			await expect( page.locator( '#place_order' ) ).toBeVisible();
@@ -184,7 +184,7 @@ test.describe( 'Shortcode Checkout Custom Place Order Button', () => {
 			await expect( page.locator( '#place_order' ) ).toBeHidden();
 
 			// Switching back to Cash on Delivery.
-			await page.getByText( 'Cash on delivery' ).click();
+			await page.getByText( 'Cash on delivery', { exact: true } ).click();
 
 			await page.waitForFunction( () => {
 				const form = document.querySelector( 'form.checkout' );
@@ -239,6 +239,12 @@ test.describe( 'Shortcode Checkout Custom Place Order Button', () => {
 			await expect(
 				page.getByTestId( 'custom-place-order-button' )
 			).toBeVisible();
+			await page
+				.getByRole( 'checkbox', {
+					name: 'I have read and agree to the website terms and conditions *',
+					exact: true,
+				} )
+				.check();
 
 			await page.getByTestId( 'custom-place-order-button' ).click();
 
