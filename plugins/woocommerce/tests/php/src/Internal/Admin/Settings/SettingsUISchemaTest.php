@@ -987,6 +987,66 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox It accepts HTML range attributes for native temporal fields.
+	 *
+	 * @dataProvider native_temporal_fields_with_range_attributes
+	 *
+	 * @param string $type Field type.
+	 * @param string $value Field value.
+	 * @param array  $custom_attributes HTML range attributes.
+	 */
+	public function test_assert_valid_schema_accepts_range_attributes_for_native_temporal_fields( string $type, string $value, array $custom_attributes ): void {
+		$field = array(
+			'id'               => 'acme_' . $type,
+			'label'            => 'Acme ' . $type,
+			'type'             => $type,
+			'value'            => $value,
+			'customAttributes' => $custom_attributes,
+			'save'             => array( 'adapter' => 'form_post' ),
+		);
+
+		SettingsUISchema::assert_valid_schema( $this->get_native_schema_with_field( $field ) );
+		$this->addToAssertionCount( 1 );
+	}
+
+	/**
+	 * Native temporal field fixtures with valid HTML range attributes.
+	 *
+	 * @return array<string, array{string, string, array<string, int|string>}>
+	 */
+	public static function native_temporal_fields_with_range_attributes(): array {
+		return array(
+			'date'           => array(
+				'date',
+				'2026-08-03',
+				array(
+					'min'  => '2026-01-01',
+					'max'  => '2026-12-31',
+					'step' => 1,
+				),
+			),
+			'time'           => array(
+				'time',
+				'12:30',
+				array(
+					'min'  => '09:00',
+					'max'  => '17:00',
+					'step' => 900,
+				),
+			),
+			'datetime-local' => array(
+				'datetime-local',
+				'2026-08-03T12:30',
+				array(
+					'min'  => '2026-08-03T09:00',
+					'max'  => '2026-08-03T17:00',
+					'step' => 'any',
+				),
+			),
+		);
+	}
+
+	/**
 	 * Supported field type fixtures.
 	 *
 	 * @return array<string, array{string, mixed}>
@@ -1155,7 +1215,7 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 			'empty component name'        => array( $invalid_component, 'Field "acme_field" component must be a non-empty string.' ),
 			'unsupported field save'      => array( $invalid_field_save, 'Field "acme_field" save adapter must be "form_post" or "none".' ),
 			'missing visibility control'  => array( $invalid_visibility, 'Field "acme_field" visibility controller "missing" does not reference a field.' ),
-			'bound on text field'         => array( $invalid_bound, 'Field "acme_field" may define "min" only when its type is "number".' ),
+			'bound on text field'         => array( $invalid_bound, 'Field "acme_field" may define "min" only when its type supports range attributes.' ),
 			'saving info field'           => array( $invalid_info, 'Field "acme_field" of type "info" must use the "none" save adapter.' ),
 			'malformed shell navigation'  => array( $invalid_shell, 'Shell navigation item 0 href must be a string.' ),
 			'malformed breadcrumb'        => array( $invalid_breadcrumb, 'Shell breadcrumb 0 label must be a string.' ),

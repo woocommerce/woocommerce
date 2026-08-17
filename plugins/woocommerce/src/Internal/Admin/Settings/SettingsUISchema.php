@@ -49,11 +49,18 @@ class SettingsUISchema {
 	);
 
 	/**
-	 * Custom attributes that describe a numeric range.
+	 * Custom attributes that describe an input range.
 	 *
 	 * @var string[]
 	 */
 	private const RANGE_ATTRIBUTES = array( 'min', 'max', 'step' );
+
+	/**
+	 * Native temporal field types that accept range attributes.
+	 *
+	 * @var string[]
+	 */
+	private const TEMPORAL_RANGE_FIELD_TYPES = array( 'date', 'datetime-local', 'time' );
 
 	/**
 	 * Build a schema from a legacy WC settings array.
@@ -1158,13 +1165,17 @@ class SettingsUISchema {
 			}
 
 			if ( in_array( $attribute, self::RANGE_ATTRIBUTES, true ) ) {
-				if ( 'number' !== $field['type'] ) {
-					throw self::invalid_schema( sprintf( 'Field "%s" may define "%s" only when its type is "number".', $field['id'], $attribute ) );
+				$is_number_field   = 'number' === $field['type'];
+				$is_temporal_field = in_array( $field['type'], self::TEMPORAL_RANGE_FIELD_TYPES, true );
+				if ( ! $is_number_field && ! $is_temporal_field ) {
+					throw self::invalid_schema( sprintf( 'Field "%s" may define "%s" only when its type supports range attributes.', $field['id'], $attribute ) );
 				}
 
-				$allow_any = 'step' === $attribute;
-				if ( ! self::is_finite_number( $value, false ) && ! ( $allow_any && 'any' === $value ) ) {
-					throw self::invalid_schema( sprintf( 'Field "%s" custom attribute "%s" must be a finite number.', $field['id'], $attribute ) );
+				if ( $is_number_field ) {
+					$allow_any = 'step' === $attribute;
+					if ( ! self::is_finite_number( $value, false ) && ! ( $allow_any && 'any' === $value ) ) {
+						throw self::invalid_schema( sprintf( 'Field "%s" custom attribute "%s" must be a finite number.', $field['id'], $attribute ) );
+					}
 				}
 			}
 		}
