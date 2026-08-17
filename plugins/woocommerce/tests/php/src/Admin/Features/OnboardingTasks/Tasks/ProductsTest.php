@@ -143,7 +143,7 @@ class ProductsTest extends WC_Unit_Test_Case {
 		$this->trigger_current_screen( 'edit-product' );
 
 		$this->assertSame(
-			admin_url( 'admin.php?page=wc-admin&task=products' ),
+			admin_url( 'admin.php?page=wc-admin&path=/add-product&task=products' ),
 			$this->redirect_location,
 			'An empty product list should redirect to the Products task.'
 		);
@@ -197,7 +197,7 @@ class ProductsTest extends WC_Unit_Test_Case {
 		$this->trigger_current_screen( 'edit-product' );
 
 		$this->assertSame(
-			admin_url( 'admin.php?page=wc-admin&task=products' ),
+			admin_url( 'admin.php?page=wc-admin&path=/add-product&task=products' ),
 			$this->redirect_location,
 			'An auto-draft alone should not keep the product list accessible.'
 		);

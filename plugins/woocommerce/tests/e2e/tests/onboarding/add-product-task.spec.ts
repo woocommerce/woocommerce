@@ -95,9 +95,7 @@ test.describe( 'Add Product Task', () => {
 		let primaryFailure: unknown;
 
 		try {
-			await page.goto(
-				'wp-admin/admin.php?page=wc-admin&task=products'
-			);
+			await page.goto( 'wp-admin/admin.php?page=wc-admin&task=products' );
 			await expect(
 				page.getByRole( 'menuitem', { name: 'Physical product' } )
 			).toBeVisible();
@@ -114,15 +112,6 @@ test.describe( 'Add Product Task', () => {
 				page.locator( '#menu-posts-product' )
 			).not.toHaveClass( /wp-has-current-submenu/ );
 
-			await page
-				.getByRole( 'menuitem', { name: 'Physical product' } )
-				.click();
-			await expect(
-				page.locator(
-					'#menu-posts-product .wp-submenu li.current > a[href="post-new.php?post_type=product"]'
-				)
-			).toBeVisible();
-
 			await page.goto( 'wp-admin/edit.php?post_type=product' );
 			await expect( page ).toHaveURL(
 				/.+path=%2Fadd-product.+task=products/
@@ -136,9 +125,9 @@ test.describe( 'Add Product Task', () => {
 			await expect(
 				page.getByRole( 'menuitem', { name: 'Grouped product' } )
 			).toBeVisible();
-			await expect(
-				page.locator( '#menu-posts-product' )
-			).toHaveClass( /wp-has-current-submenu/ );
+			await expect( page.locator( '#menu-posts-product' ) ).toHaveClass(
+				/wp-has-current-submenu/
+			);
 			await expect(
 				page.locator(
 					'#menu-posts-product .wp-submenu li.current > a[href="edit.php?post_type=product"]'
@@ -156,7 +145,7 @@ test.describe( 'Add Product Task', () => {
 			await page.goto( 'wp-admin/edit.php?post_type=product' );
 
 			await expect( page ).toHaveURL(
-				/.+admin\.php\?page=wc-admin&task=products$/
+				/.+path=%2Fadd-product.+task=products/
 			);
 			await expect(
 				page.getByRole( 'menuitem', { name: 'Physical product' } )
@@ -196,6 +185,23 @@ test.describe( 'Add Product Task', () => {
 			await expect( page.locator( '.wp-list-table' ) ).toBeVisible();
 			await expect(
 				page.getByRole( 'link', { name: productName, exact: true } )
+			).toBeVisible();
+
+			const deleteResponse = await restApi.delete(
+				`${ WC_API_PATH }/products/${ productId }`,
+				{ force: true }
+			);
+			expect( deleteResponse.status ).toBe( 200 );
+			productId = undefined;
+
+			await page.goto( 'wp-admin/admin.php?page=wc-admin&task=products' );
+			await page
+				.getByRole( 'menuitem', { name: 'Physical product' } )
+				.click();
+			await expect(
+				page.locator(
+					'#menu-posts-product .wp-submenu li.current > a[href="post-new.php?post_type=product"]'
+				)
 			).toBeVisible();
 		} catch ( error ) {
 			primaryFailure = error;
