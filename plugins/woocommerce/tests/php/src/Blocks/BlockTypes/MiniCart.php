@@ -288,13 +288,13 @@ class MiniCart extends \WP_UnitTestCase {
 			'The filtered pattern output should be preserved.'
 		);
 
-		$p            = new \WP_HTML_Tag_Processor( $rendered_template );
-		$footer_count = 0;
-		while ( $p->next_tag( array( 'class_name' => 'wc-block-mini-cart__footer-actions' ) ) ) {
-			++$footer_count;
+		$p                    = new \WP_HTML_Tag_Processor( $rendered_template );
+		$footer_wrapper_count = 0;
+		while ( $p->next_tag( array( 'class_name' => 'wp-block-woocommerce-mini-cart-footer-block' ) ) ) {
+			++$footer_wrapper_count;
 		}
 
-		$this->assertSame( 1, $footer_count, 'The rendered template should contain exactly one footer.' );
+		$this->assertSame( 1, $footer_wrapper_count, 'The rendered template should contain exactly one footer wrapper.' );
 	}
 
 	/**
