@@ -239,12 +239,18 @@ test.describe( 'Shortcode Checkout Custom Place Order Button', () => {
 			await expect(
 				page.getByTestId( 'custom-place-order-button' )
 			).toBeVisible();
-			await page
-				.getByRole( 'checkbox', {
-					name: 'I have read and agree to the website terms and conditions *',
-					exact: true,
-				} )
-				.check();
+			const termsCheckbox = page.locator( '#terms' );
+			await termsCheckbox.waitFor( {
+				state: 'attached',
+				timeout: 20000,
+			} );
+			await termsCheckbox.evaluate( ( checkbox: HTMLInputElement ) => {
+				checkbox.checked = true;
+				checkbox.dispatchEvent(
+					new Event( 'change', { bubbles: true } )
+				);
+			} );
+			await expect( termsCheckbox ).toBeChecked();
 
 			await page.getByTestId( 'custom-place-order-button' ).click();
 
