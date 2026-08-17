@@ -686,10 +686,13 @@ class WC_Post_Data {
 	 * @param array  $old_tt_ids  The old array of term taxonomy IDs.
 	 *
 	 * @since 10.4.0
+	 * @deprecated 11.1.0 Product term-count consistency is now handled by the TermCount service.
 	 *
 	 * @return void
 	 */
 	public static function recount_terms_for_product_visibility_change( $object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids ) {
+		wc_deprecated_function( __FUNCTION__, '11.1.0' );
+
 		if ( 'product_visibility' !== $taxonomy ) {
 			return;
 		}
