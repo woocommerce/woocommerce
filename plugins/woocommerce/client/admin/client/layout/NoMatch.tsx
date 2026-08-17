@@ -49,7 +49,7 @@ const NoMatch = () => {
 				<CardBody>
 					<Text>
 						{ __(
-							'Sorry, you are not allowed to access this page.',
+							'We couldn’t find that page. Check the address for a typo, or return to WooCommerce Home.',
 							'woocommerce'
 						) }
 					</Text>

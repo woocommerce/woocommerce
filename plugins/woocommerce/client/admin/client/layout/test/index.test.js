@@ -107,7 +107,8 @@ describe( 'Layout', () => {
 	} );
 
 	describe( 'NoMatch', () => {
-		const message = 'Sorry, you are not allowed to access this page.';
+		const message =
+			'We couldn’t find that page. Check the address for a typo, or return to WooCommerce Home.';
 
 		it( 'should render a loading spinner first and then the error message after the delay', () => {
 			mockPath( '/incorrect-path' );

@@ -282,7 +282,7 @@ export const getPages = ( reports = [] ) => {
 		path: '*',
 		breadcrumbs: [
 			...initialBreadcrumbs,
-			__( 'Not allowed', 'woocommerce' ),
+			__( 'Page not found', 'woocommerce' ),
 		],
 		wpOpenMenu: 'toplevel_page_woocommerce',
 	} );
