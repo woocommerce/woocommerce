@@ -767,8 +767,8 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	/**
 	 * Dismiss a single task.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|WP_Error
+	 * @param \WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function dismiss_task( $request ) {
 		$id           = $request->get_param( 'id' );
@@ -813,8 +813,8 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	/**
 	 * Undo dismissal of a single task.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|WP_Error
+	 * @param \WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function undo_dismiss_task( $request ) {
 		$id           = $request->get_param( 'id' );
