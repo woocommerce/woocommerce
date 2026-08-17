@@ -19,7 +19,7 @@ use WC_Unit_Test_Case;
 /**
  * Tests for TermCount.
  */
-class TermCountTest extends WC_Unit_Test_Case {
+final class TermCountTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Converting an out-of-stock simple product to an external product refreshes its category count.
 	 */
