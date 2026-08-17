@@ -267,6 +267,57 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox cleanup_abandoned_file() also deletes the attachment post created for the staged file.
+	 */
+	public function test_cleanup_abandoned_file_deletes_attachment(): void {
+		$upload_dir = wp_upload_dir();
+		$file       = trailingslashit( $upload_dir['basedir'] ) . 'wc-fulfillments-import-' . wp_generate_uuid4() . '.csv';
+		file_put_contents( $file, "a,b,c\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture write.
+
+		$attachment_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'Fulfillments import test CSV',
+				'post_mime_type' => 'text/csv',
+			),
+			$file
+		);
+		$this->assertGreaterThan( 0, $attachment_id );
+
+		ImportSession::cleanup_abandoned_file( 72, 'ghost', $file, (int) $attachment_id );
+
+		$this->assertFileDoesNotExist( $file );
+		$this->assertNull( get_post( $attachment_id ), 'The attachment post must not be left behind' );
+	}
+
+	/**
+	 * @testdox cleanup_abandoned_file() ignores an attachment ID that no longer points at the staged file.
+	 */
+	public function test_cleanup_abandoned_file_ignores_mismatched_attachment(): void {
+		$upload_dir = wp_upload_dir();
+		$file       = trailingslashit( $upload_dir['basedir'] ) . 'wc-fulfillments-import-' . wp_generate_uuid4() . '.csv';
+		$other      = trailingslashit( $upload_dir['basedir'] ) . 'wc-fulfillments-other-' . wp_generate_uuid4() . '.csv';
+		file_put_contents( $file, "a,b,c\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture write.
+		file_put_contents( $other, "x,y,z\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture write.
+
+		$attachment_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'Unrelated attachment',
+				'post_mime_type' => 'text/csv',
+			),
+			$other
+		);
+		$this->assertGreaterThan( 0, $attachment_id );
+
+		ImportSession::cleanup_abandoned_file( 73, 'ghost', $file, (int) $attachment_id );
+
+		$this->assertFileDoesNotExist( $file );
+		$this->assertNotNull( get_post( $attachment_id ), 'An attachment for a different file must not be deleted' );
+
+		wp_delete_attachment( (int) $attachment_id, true );
+		wp_delete_file( $other );
+	}
+
+	/**
 	 * @testdox cleanup_abandoned_file() refuses to delete paths outside the uploads directory.
 	 */
 	public function test_cleanup_abandoned_file_refuses_paths_outside_uploads(): void {

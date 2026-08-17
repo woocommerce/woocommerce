@@ -318,11 +318,14 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 			 * Return the canned staged path.
 			 *
 			 * @param WP_REST_Request $request Unused.
-			 * @return string
+			 * @return array{file:string, id:int}
 			 */
 			protected function stage_uploaded_csv( WP_REST_Request $request ) {
 				unset( $request );
-				return $this->staged;
+				return array(
+					'file' => $this->staged,
+					'id'   => 0,
+				);
 			}
 		};
 		$controller->staged = $file;

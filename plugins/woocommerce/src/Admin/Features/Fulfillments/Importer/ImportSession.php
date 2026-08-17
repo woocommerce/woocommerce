@@ -94,16 +94,17 @@ final class ImportSession {
 	 *
 	 * @since 11.2.0
 	 *
-	 * @param int                $user_id   User ID.
-	 * @param string             $file      Absolute path to the staged CSV file.
-	 * @param string             $delimiter Effective delimiter (resolved by parse_headers()).
-	 * @param array<int, string> $headers   Header row.
-	 * @param int                $total     Total number of CSV records after the header.
-	 * @param bool               $notify    Whether to fire customer notifications when running chunks.
-	 * @param bool               $update    Whether to update existing fulfillments on tracking-number match.
+	 * @param int                $user_id       User ID.
+	 * @param string             $file          Absolute path to the staged CSV file.
+	 * @param string             $delimiter     Effective delimiter (resolved by parse_headers()).
+	 * @param array<int, string> $headers       Header row.
+	 * @param int                $total         Total number of CSV records after the header.
+	 * @param bool               $notify        Whether to fire customer notifications when running chunks.
+	 * @param bool               $update        Whether to update existing fulfillments on tracking-number match.
+	 * @param int                $attachment_id Attachment post created for the staged CSV by the upload handler.
 	 * @return self
 	 */
-	public static function create( int $user_id, string $file, string $delimiter, array $headers, int $total, bool $notify, bool $update ): self {
+	public static function create( int $user_id, string $file, string $delimiter, array $headers, int $total, bool $notify, bool $update, int $attachment_id = 0 ): self {
 		// Drop any prior session this user had open so only one import is in flight per admin.
 		$existing_token = get_transient( self::INDEX_PREFIX . $user_id );
 		if ( is_string( $existing_token ) && '' !== $existing_token ) {
@@ -113,6 +114,7 @@ final class ImportSession {
 		$token = self::generate_token();
 		$data  = array(
 			'file'                => $file,
+			'attachment_id'       => max( 0, $attachment_id ),
 			'file_size'           => file_exists( $file ) ? (int) filesize( $file ) : 0,
 			'file_mtime'          => file_exists( $file ) ? (int) filemtime( $file ) : 0,
 			'file_head_hash'      => self::hash_file_head( $file ),
@@ -136,7 +138,7 @@ final class ImportSession {
 		$session = new self( $user_id, $token, $data );
 		$session->persist();
 
-		self::schedule_cleanup( $user_id, $token, $file );
+		self::schedule_cleanup( $user_id, $token, $file, max( 0, $attachment_id ) );
 
 		return $session;
 	}
@@ -156,11 +158,12 @@ final class ImportSession {
 	 * Schedule a deferred cleanup action that will remove the staged file if the session is
 	 * abandoned (transient expires without the wizard ever completing the import).
 	 *
-	 * @param int    $user_id User ID.
-	 * @param string $token   Session token.
-	 * @param string $file    Absolute path to the staged CSV.
+	 * @param int    $user_id       User ID.
+	 * @param string $token         Session token.
+	 * @param string $file          Absolute path to the staged CSV.
+	 * @param int    $attachment_id Attachment post created for the staged CSV.
 	 */
-	private static function schedule_cleanup( int $user_id, string $token, string $file ): void {
+	private static function schedule_cleanup( int $user_id, string $token, string $file, int $attachment_id ): void {
 		if ( '' === $file || ! function_exists( 'as_schedule_single_action' ) ) {
 			return;
 		}
@@ -175,14 +178,15 @@ final class ImportSession {
 		 *
 		 * @since 11.2.0
 		 *
-		 * @param int    $user_id User who owned the session.
-		 * @param string $token   Session token.
-		 * @param string $file    Absolute path to the staged CSV.
+		 * @param int    $user_id       User who owned the session.
+		 * @param string $token         Session token.
+		 * @param string $file          Absolute path to the staged CSV.
+		 * @param int    $attachment_id Attachment post created for the staged CSV.
 		 */
 		as_schedule_single_action(
 			time() + self::TTL + self::CLEANUP_GRACE,
 			self::CLEANUP_HOOK,
-			array( $user_id, $token, $file ),
+			array( $user_id, $token, $file, $attachment_id ),
 			'woocommerce-fulfillments-importer'
 		);
 	}
@@ -195,29 +199,46 @@ final class ImportSession {
 	 *
 	 * @since 11.2.0
 	 *
-	 * @param int    $user_id User the session belongs to.
-	 * @param string $token   Session token.
-	 * @param string $file    Absolute path to the staged CSV.
+	 * @param int    $user_id       User the session belongs to.
+	 * @param string $token         Session token.
+	 * @param string $file          Absolute path to the staged CSV.
+	 * @param int    $attachment_id Attachment post created for the staged CSV.
 	 */
-	public static function cleanup_abandoned_file( int $user_id, string $token, string $file ): void {
-		if ( '' === $file || ! file_exists( $file ) ) {
+	public static function cleanup_abandoned_file( int $user_id, string $token, string $file, int $attachment_id = 0 ): void {
+		if ( '' === $file ) {
 			return;
 		}
 		if ( false !== get_transient( self::PREFIX . $user_id . '_' . $token ) ) {
 			return;
 		}
-		// The Action Scheduler payload is persisted, so refuse to delete anything that does not
-		// resolve inside an allowed upload location even if the args were tampered with.
-		try {
-			FilesystemUtil::validate_upload_file_path( $file );
-		} catch ( \Exception $e ) {
-			wc_get_logger()->warning(
-				sprintf( 'Refusing to clean up staged fulfillments import file outside the uploads directory: %s', $file ),
-				array( 'source' => 'fulfillments-csv-importer' )
-			);
+
+		$file_exists = file_exists( $file );
+		if ( ! $file_exists && $attachment_id <= 0 ) {
 			return;
 		}
-		wp_delete_file( $file );
+
+		// The Action Scheduler payload is persisted, so refuse to delete anything that does not
+		// resolve inside an allowed upload location even if the args were tampered with.
+		if ( $file_exists ) {
+			try {
+				FilesystemUtil::validate_upload_file_path( $file );
+			} catch ( \Exception $e ) {
+				wc_get_logger()->warning(
+					sprintf( 'Refusing to clean up staged fulfillments import file outside the uploads directory: %s', $file ),
+					array( 'source' => 'fulfillments-csv-importer' )
+				);
+				return;
+			}
+		}
+
+		// Deleting the attachment also removes its file; only honor IDs that still
+		// point at the staged path so a tampered ID cannot delete unrelated media.
+		if ( $attachment_id > 0 && get_attached_file( $attachment_id ) === $file ) {
+			wp_delete_attachment( $attachment_id, true );
+		}
+		if ( file_exists( $file ) ) {
+			wp_delete_file( $file );
+		}
 	}
 
 	/**
@@ -273,7 +294,7 @@ final class ImportSession {
 		if ( function_exists( 'as_unschedule_action' ) ) {
 			as_unschedule_action(
 				self::CLEANUP_HOOK,
-				array( $this->user_id, $this->token, $this->file() ),
+				array( $this->user_id, $this->token, $this->file(), $this->attachment_id() ),
 				'woocommerce-fulfillments-importer'
 			);
 		}
@@ -299,6 +320,17 @@ final class ImportSession {
 	 */
 	public function file(): string {
 		return (string) ( $this->data['file'] ?? '' );
+	}
+
+	/**
+	 * Attachment post created for the staged CSV by the upload handler.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @return int Attachment ID; 0 when the file was staged without one.
+	 */
+	public function attachment_id(): int {
+		return max( 0, (int) ( $this->data['attachment_id'] ?? 0 ) );
 	}
 
 	/**

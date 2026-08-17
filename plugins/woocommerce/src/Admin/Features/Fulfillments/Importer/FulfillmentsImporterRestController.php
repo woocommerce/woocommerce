@@ -291,17 +291,16 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		// Replace any prior session (and its staged file) for this user before staging the new upload.
 		$prior = ImportSession::active_for_user( $user_id );
 		if ( $prior instanceof ImportSession ) {
-			$prior_file = $prior->file();
-			if ( '' !== $prior_file && file_exists( $prior_file ) && $this->is_valid_staged_path( $prior_file ) ) {
-				wp_delete_file( $prior_file );
-			}
+			$this->delete_staged_file( $prior->file(), $prior->attachment_id() );
 			$prior->delete();
 		}
 
-		$file_path = $this->stage_uploaded_csv( $request );
-		if ( $file_path instanceof WP_Error ) {
-			return $file_path;
+		$staged = $this->stage_uploaded_csv( $request );
+		if ( $staged instanceof WP_Error ) {
+			return $staged;
 		}
+		$file_path     = (string) $staged['file'];
+		$attachment_id = (int) $staged['id'];
 
 		$importer = new FulfillmentsCsvImporter(
 			$file_path,
@@ -313,9 +312,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 
 		$parsed = $importer->parse_headers( $delimiter_param );
 		if ( isset( $parsed['error'] ) ) {
-			if ( file_exists( $file_path ) ) {
-				wp_delete_file( $file_path );
-			}
+			$this->delete_staged_file( $file_path, $attachment_id );
 			return new WP_Error(
 				'woocommerce_fulfillments_csv_parse_error',
 				(string) $parsed['error']['message'],
@@ -330,14 +327,13 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			(array) ( $parsed['headers'] ?? array() ),
 			(int) ( $parsed['total'] ?? 0 ),
 			$notify,
-			$update
+			$update,
+			$attachment_id
 		);
 
 		if ( ! $session->persisted() ) {
 			$session->delete();
-			if ( file_exists( $file_path ) ) {
-				wp_delete_file( $file_path );
-			}
+			$this->delete_staged_file( $file_path, $attachment_id );
 			return new WP_Error(
 				'woocommerce_fulfillments_import_session_failed',
 				__( 'The import session could not be saved. Please try again.', 'woocommerce' ),
@@ -455,8 +451,8 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		if ( $file_missing || $file_invalid || $size_changed || $mtime_changed || $hash_changed ) {
 			// The session's scheduled cleanup is unscheduled on delete, so remove the
 			// stale staged file now or nothing ever will.
-			if ( ! $file_missing && ! $file_invalid && $this->is_valid_staged_path( $session_file ) ) {
-				wp_delete_file( $session_file );
+			if ( ! $file_invalid ) {
+				$this->delete_staged_file( $session_file, $session->attachment_id() );
 			}
 			$session->delete();
 			return new WP_Error(
@@ -591,12 +587,11 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		);
 
 		if ( $done ) {
-			$summary = $session->summary();
-			$file    = $session->file();
+			$summary       = $session->summary();
+			$file          = $session->file();
+			$attachment_id = $session->attachment_id();
 			$session->delete();
-			if ( '' !== $file && file_exists( $file ) && $this->is_valid_staged_path( $file ) ) {
-				wp_delete_file( $file );
-			}
+			$this->delete_staged_file( $file, $attachment_id );
 
 			/**
 			 * Fires after a bulk fulfillments CSV import completes.
@@ -614,11 +609,11 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Validate the multipart file, hand it to CSVUploadHelper, and return the staged absolute path.
+	 * Validate the multipart file, hand it to CSVUploadHelper, and return the staged file details.
 	 *
 	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 * @param WP_REST_Request $request Incoming request carrying the multipart upload.
-	 * @return string|WP_Error
+	 * @return array{file:string, id:int}|WP_Error Staged absolute path and the attachment post ID created for it.
 	 *
 	 * @throws \Exception When staged-file validation fails; caught internally and returned as a WP_Error.
 	 */
@@ -664,10 +659,11 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		// The REST permission_callback handles authentication, hence the phpcs ignore below.
 		$_FILES['fulfillment_import_file'] = $files['file']; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$file_path                         = '';
+		$attachment_id                     = 0;
 		try {
 			try {
-				$csv_helper = wc_get_container()->get( CSVUploadHelper::class );
-				$upload     = $csv_helper->handle_csv_upload(
+				$csv_helper    = wc_get_container()->get( CSVUploadHelper::class );
+				$upload        = $csv_helper->handle_csv_upload(
 					'fulfillment',
 					'fulfillment_import_file',
 					array(
@@ -675,7 +671,8 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 						'txt' => 'text/plain',
 					)
 				);
-				$file_path  = (string) ( $upload['file'] ?? '' );
+				$file_path     = (string) ( $upload['file'] ?? '' );
+				$attachment_id = (int) ( $upload['id'] ?? 0 );
 
 				FilesystemUtil::validate_upload_file_path( $file_path );
 
@@ -683,9 +680,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 					throw new \Exception( __( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
 				}
 			} catch ( \Exception $e ) {
-				if ( '' !== $file_path && file_exists( $file_path ) ) {
-					wp_delete_file( $file_path );
-				}
+				$this->discard_failed_upload( $file_path, $attachment_id );
 				FulfillmentsTracker::track_fulfillment_validation_error( 'import', 'woocommerce_fulfillments_import_upload_failed', 'csv_importer' );
 				return new WP_Error(
 					'woocommerce_fulfillments_import_upload_failed',
@@ -693,9 +688,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 					array( 'status' => WP_Http::BAD_REQUEST )
 				);
 			} catch ( \Throwable $e ) {
-				if ( '' !== $file_path && file_exists( $file_path ) ) {
-					wp_delete_file( $file_path );
-				}
+				$this->discard_failed_upload( $file_path, $attachment_id );
 				wc_get_logger()->error(
 					'Fulfillments importer upload failed: ' . $e->getMessage(),
 					array( 'source' => 'fulfillments-csv-importer' )
@@ -711,7 +704,51 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			unset( $_FILES['fulfillment_import_file'] );
 		}
 
-		return $file_path;
+		return array(
+			'file' => $file_path,
+			'id'   => $attachment_id,
+		);
+	}
+
+	/**
+	 * Remove a just-staged upload that failed validation, including its attachment post.
+	 *
+	 * The path came straight from the upload handler, so no containment check applies here.
+	 *
+	 * @param string $file          Staged absolute path; may be empty when staging never completed.
+	 * @param int    $attachment_id Attachment post created by the upload handler; 0 when none.
+	 */
+	private function discard_failed_upload( string $file, int $attachment_id ): void {
+		if ( $attachment_id > 0 ) {
+			wp_delete_attachment( $attachment_id, true );
+		}
+		if ( '' !== $file && file_exists( $file ) ) {
+			wp_delete_file( $file );
+		}
+	}
+
+	/**
+	 * Delete a session's staged CSV and the attachment post created for it.
+	 *
+	 * The path comes from persisted session state, so it must resolve inside an allowed
+	 * upload location, and the attachment must still point at that same path.
+	 *
+	 * @param string $file          Absolute staged path from session state.
+	 * @param int    $attachment_id Attachment post created by the upload handler; 0 when none.
+	 */
+	private function delete_staged_file( string $file, int $attachment_id ): void {
+		if ( '' === $file ) {
+			return;
+		}
+		if ( file_exists( $file ) && ! $this->is_valid_staged_path( $file ) ) {
+			return;
+		}
+		if ( $attachment_id > 0 && get_attached_file( $attachment_id ) === $file ) {
+			wp_delete_attachment( $attachment_id, true );
+		}
+		if ( file_exists( $file ) ) {
+			wp_delete_file( $file );
+		}
 	}
 
 	/**
