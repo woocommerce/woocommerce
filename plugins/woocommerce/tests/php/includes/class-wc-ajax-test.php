@@ -142,6 +142,87 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Saving a new shipping class with a blank slug generates and returns its persisted slug.
+	 */
+	public function test_shipping_classes_save_changes_generates_slug(): void {
+		$original_post            = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Test snapshots request state before installing a real nonce.
+		$original_request         = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Test snapshots request state before installing a real nonce.
+		$original_user_id         = get_current_user_id();
+		$had_current_tab          = array_key_exists( 'current_tab', $GLOBALS );
+		$had_current_section      = array_key_exists( 'current_section', $GLOBALS );
+		$original_current_tab     = $GLOBALS['current_tab'] ?? null;
+		$original_current_section = $GLOBALS['current_section'] ?? null;
+		$name                     = 'Slice 103 Poster Pack ' . wp_unique_id();
+		$expected_slug            = sanitize_title( $name );
+		$description              = 'Posters, stickers, and other flat items.';
+		$term_id                  = 0;
+
+		try {
+			$this->_setRole( 'administrator' );
+			$_POST    = array(
+				'wc_shipping_classes_nonce' => wp_create_nonce( 'wc_shipping_classes_nonce' ),
+				'changes'                   => array(
+					'new-row' => array(
+						'newRow'      => true,
+						'name'        => $name,
+						'slug'        => '',
+						'description' => $description,
+					),
+				),
+			);
+			$_REQUEST = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Test installs the real nonce immediately above.
+
+			$response = $this->do_ajax( 'woocommerce_shipping_classes_save_changes' );
+			$this->assertTrue( $response['success'] ?? false, 'The registered AJAX action should report success.' );
+
+			$term = get_term_by( 'slug', $expected_slug, 'product_shipping_class' );
+			$this->assertInstanceOf( WP_Term::class, $term, 'The blank-slug request should create a shipping-class term.' );
+			if ( ! $term instanceof WP_Term ) {
+				throw new RuntimeException( 'The shipping-class term could not be reloaded.' );
+			}
+			$term_id = $term->term_id;
+
+			$this->assertSame( $name, $term->name );
+			$this->assertSame( $expected_slug, $term->slug );
+			$this->assertSame( $description, $term->description );
+
+			$response_rows = $response['data']['shipping_classes'] ?? array();
+			$matching_rows = array_values(
+				array_filter(
+					$response_rows,
+					static fn ( array $row ): bool => (int) ( $row['term_id'] ?? 0 ) === $term_id
+				)
+			);
+			$this->assertCount( 1, $matching_rows, 'The AJAX response should contain the new shipping class exactly once.' );
+			$this->assertSame( $expected_slug, $matching_rows[0]['slug'] );
+			$this->assertSame( $description, $matching_rows[0]['description'] );
+		} finally {
+			if ( 0 === $term_id ) {
+				$created_term = get_term_by( 'slug', $expected_slug, 'product_shipping_class' );
+				$term_id      = $created_term instanceof WP_Term ? $created_term->term_id : 0;
+			}
+			if ( 0 < $term_id ) {
+				wp_delete_term( $term_id, 'product_shipping_class' );
+			}
+
+			$_POST    = $original_post;
+			$_REQUEST = $original_request;
+			wp_set_current_user( $original_user_id );
+
+			if ( $had_current_tab ) {
+				$GLOBALS['current_tab'] = $original_current_tab;
+			} else {
+				unset( $GLOBALS['current_tab'] );
+			}
+			if ( $had_current_section ) {
+				$GLOBALS['current_section'] = $original_current_section;
+			} else {
+				unset( $GLOBALS['current_section'] );
+			}
+		}
+	}
+
+	/**
 	 * Skip the current test on PHP 8.1 and higher.
 	 * TODO: Remove this method and its usages once WordPress is compatible with PHP 8.1. Please note that there are multiple copies of this method.
 	 */

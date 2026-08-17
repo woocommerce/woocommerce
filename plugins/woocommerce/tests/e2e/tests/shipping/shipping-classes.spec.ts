@@ -20,13 +20,6 @@ const uq = faker.string.alphanumeric( 5 );
 		description: `Small items that don't cost much to ship ${ uq }`,
 		testTitle: 'can add a shipping class with an unique slug',
 	},
-	{
-		name: `Poster Pack ${ uq }`,
-		slug: '',
-		expectedSlug: `poster-pack-${ uq }`,
-		description: `Posters, stickers, and other flat items ${ uq }`,
-		testTitle: 'can add a shipping class with an auto-generated slug',
-	},
 ].forEach( ( { testTitle, name, slug, expectedSlug, description } ) => {
 	const test = baseTest.extend( {
 		storageState: ADMIN_STATE_PATH,
@@ -48,7 +41,6 @@ const uq = faker.string.alphanumeric( 5 );
 		},
 	} );
 
-	// eslint-disable-next-line playwright/valid-title -- Title comes from the parametrized test data row.
 	test( testTitle, { tag: [ tags.SERVICES ] }, async ( { page } ) => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-settings&tab=shipping&section=classes'
