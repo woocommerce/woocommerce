@@ -35,8 +35,9 @@ async function waitForFunction(
 	);
 }
 
-const STORE_API_CART_WRITE_REQUEST_URLS = [
+const CART_WRITE_REQUEST_URLS = [
 	'/cart/add-item',
+	'wc-ajax=add_to_cart',
 	'/batch',
 	'/cart/remove-item',
 	'/cart/update-item',
@@ -74,7 +75,7 @@ export class FrontendUtils {
 		const requestHandler = ( request: Request ) => {
 			const url = request.url();
 			if (
-				STORE_API_CART_WRITE_REQUEST_URLS.some( ( cartUrl ) =>
+				CART_WRITE_REQUEST_URLS.some( ( cartUrl ) =>
 					url.includes( cartUrl )
 				)
 			) {
