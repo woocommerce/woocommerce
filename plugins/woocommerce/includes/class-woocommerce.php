@@ -361,7 +361,7 @@ final class WooCommerce {
 		// Registration runs late on admin_init because it latches woocommerce_get_settings_pages and
 		// woocommerce_email_classes on first use: extensions adding their callbacks from their own
 		// admin_init handlers would otherwise be silently dropped for the whole request.
-		add_action( 'admin_init', array( $this, 'register_wp_admin_settings' ), PHP_INT_MAX );
+		add_action( 'admin_init', array( $this, 'register_wp_admin_settings' ), 999 );
 		add_action( 'rest_api_init', array( $this, 'register_wp_admin_settings' ) );
 
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_remote_variant' ) );
@@ -1579,10 +1579,19 @@ final class WooCommerce {
 	 * duplicates, which is what makes register_wp_admin_settings() idempotent.
 	 *
 	 * @param WC_Settings_Page|WC_Email $settings_source The object holding the settings to register.
+	 *                                                   Non-objects are ignored, matching the guard
+	 *                                                   WC_Register_WP_Admin_Settings has held since 3.0.
 	 * @param string                    $type            Type of settings to register ('page' or 'email').
 	 * @return void
 	 */
 	private function register_wp_admin_settings_for( $settings_source, $type ) {
+		// woocommerce_get_settings_pages and woocommerce_email_classes are third-party writable, and
+		// non-object entries have been skipped rather than fatal since 3.0. Check before keying:
+		// spl_object_id() throws a TypeError, which here would take down every admin and REST request.
+		if ( ! is_object( $settings_source ) ) {
+			return;
+		}
+
 		$key = spl_object_id( $settings_source );
 
 		if ( isset( $this->wp_admin_settings_registrars[ $key ] ) ) {
