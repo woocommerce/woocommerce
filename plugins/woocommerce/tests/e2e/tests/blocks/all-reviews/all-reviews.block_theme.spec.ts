@@ -26,61 +26,31 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 		await editor.insertBlock( { name: BLOCK_NAME } );
 	} );
 
-	test( 'block can be inserted and it sorts reviews by most recent by default', async ( {
+	test( 'block can be inserted and sorts reviews in the frontend', async ( {
 		frontendUtils,
 		editor,
 	} ) => {
 		await expect(
 			editor.canvas.getByText( allReviews[ 0 ].review )
 		).toBeVisible();
-
 		await editor.publishAndVisitPost();
 
 		const block = await frontendUtils.getBlockByName( BLOCK_NAME );
 		const reviews = block.locator(
 			'.wc-block-components-review-list-item__text'
 		);
+		const select = block.getByLabel( 'Order by' );
+		await test.step( 'Most recent by default', async () => {
+			await expect( reviews.first() ).toHaveText( latestReview.review );
+		} );
 
-		await expect( reviews.first() ).toHaveText( latestReview.review );
-	} );
-
-	test( 'can sort by highest rating in the frontend', async ( {
-		page,
-		frontendUtils,
-		editor,
-	} ) => {
-		await editor.publishAndVisitPost();
-
-		const block = await frontendUtils.getBlockByName( BLOCK_NAME );
-		const reviews = block.locator(
-			'.wc-block-components-review-list-item__text'
-		);
-
-		await expect( reviews.first() ).toHaveText( latestReview.review );
-
-		const select = page.getByLabel( 'Order by' );
-		await select.selectOption( 'Highest rating' );
-
-		await expect( reviews.first() ).toHaveText( highestRating.review );
-	} );
-
-	test( 'can sort by lowest rating in the frontend', async ( {
-		page,
-		frontendUtils,
-		editor,
-	} ) => {
-		await editor.publishAndVisitPost();
-
-		const block = await frontendUtils.getBlockByName( BLOCK_NAME );
-		const reviews = block.locator(
-			'.wc-block-components-review-list-item__text'
-		);
-
-		await expect( reviews.first() ).toHaveText( latestReview.review );
-
-		const select = page.getByLabel( 'Order by' );
-		await select.selectOption( 'Lowest rating' );
-
-		await expect( reviews.first() ).toHaveText( lowestRating.review );
+		await test.step( 'Highest rating', async () => {
+			await select.selectOption( 'Highest rating' );
+			await expect( reviews.first() ).toHaveText( highestRating.review );
+		} );
+		await test.step( 'Lowest rating', async () => {
+			await select.selectOption( 'Lowest rating' );
+			await expect( reviews.first() ).toHaveText( lowestRating.review );
+		} );
 	} );
 } );
