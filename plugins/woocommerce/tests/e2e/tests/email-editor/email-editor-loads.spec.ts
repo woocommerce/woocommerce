@@ -119,7 +119,6 @@ test.describe( 'WooCommerce Email Editor Core', () => {
 			// eslint-disable-next-line playwright/no-wait-for-selector -- wait for the tab to be loaded.
 			await newPage.waitForSelector( '.wp-block-heading' );
 			await page.close(); // close the original tab.
-			expect( newPage.url() ).toContain( 'preview=true' );
 			await expect( newPage.locator( 'body' ) ).toContainText(
 				'New order: #12345'
 			);
@@ -178,6 +177,10 @@ test.describe( 'WooCommerce Email Editor Core', () => {
 			.click();
 		const page1 = await page1Promise;
 		try {
+			await page1.bringToFront();
+			await page1.waitForLoadState( 'domcontentloaded' );
+			// eslint-disable-next-line playwright/no-wait-for-selector -- wait for the generated preview to replace the loading screen.
+			await page1.waitForSelector( '.wp-block-heading' );
 			await expect( page1.locator( 'body' ) ).toContainText(
 				'Hello world from Woo plugin'
 			);

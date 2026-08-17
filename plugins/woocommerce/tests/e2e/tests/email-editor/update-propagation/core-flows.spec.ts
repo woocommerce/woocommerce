@@ -7,7 +7,11 @@ import { test, expect } from '@playwright/test';
  * Internal dependencies
  */
 import { ADMIN_STATE_PATH } from '../../../playwright.config';
-import { enableEmailEditor } from '../helpers/enable-email-editor-feature';
+import {
+	deleteEmailPost,
+	disableEmailEditor,
+	enableEmailEditor,
+} from '../helpers/enable-email-editor-feature';
 import { accessTheEmailEditor } from '../../../utils/email';
 import { setTemplateHtmlOverride } from './helpers/test-helper-plugin';
 import {
@@ -23,13 +27,41 @@ import { STATUS } from './helpers/classifications';
 
 test.describe( 'Update propagation — core flows', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
+	let seededPostId: number | null = null;
 
 	test.beforeAll( async ( { baseURL } ) => {
 		await enableEmailEditor( baseURL! );
 	} );
 
-	test.afterEach( async () => {
-		await assertNoLeakedFixtureState();
+	test.afterEach( async ( { baseURL } ) => {
+		const cleanupErrors: unknown[] = [];
+
+		try {
+			await assertNoLeakedFixtureState();
+		} catch ( error ) {
+			cleanupErrors.push( error );
+		}
+
+		if ( seededPostId !== null ) {
+			try {
+				await deleteEmailPost( baseURL!, String( seededPostId ) );
+			} catch ( error ) {
+				cleanupErrors.push( error );
+			} finally {
+				seededPostId = null;
+			}
+		}
+
+		if ( cleanupErrors.length > 0 ) {
+			throw new AggregateError(
+				cleanupErrors,
+				'Update propagation cleanup failed.'
+			);
+		}
+	} );
+
+	test.afterAll( async ( { baseURL } ) => {
+		await disableEmailEditor( baseURL! );
 	} );
 
 	/**
@@ -64,6 +96,7 @@ test.describe( 'Update propagation — core flows', () => {
 			status: STATUS.IN_SYNC,
 			version: '10.0.0',
 		} );
+		seededPostId = postId;
 
 		// Move the canonical template and classify the post as requiring review.
 		await setTemplateHtmlOverride( 'new_order', newCanonical );
