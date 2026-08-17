@@ -250,6 +250,13 @@ describe( 'settings HTML rendering', () => {
 			( link ) => link.textContent?.trim() === 'Use classic settings'
 		);
 		expect( classicAction ).toBeDefined();
+		expect(
+			classicAction?.closest( '.components-notice__actions' )
+		).not.toBeNull();
+		expect(
+			container.querySelector( '.components-notice__content' )?.firstChild
+				?.textContent
+		).toBe( 'Something went wrong while rendering this settings page.' );
 		const classicUrl = new URL( classicAction?.href || '' );
 		expect( classicUrl.searchParams.getAll( 'wc_settings_ui' ) ).toEqual( [
 			'classic',

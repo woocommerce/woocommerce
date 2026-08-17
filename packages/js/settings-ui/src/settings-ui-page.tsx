@@ -385,16 +385,21 @@ export class SettingsUIErrorBoundary extends Component<
 						this.errorRegion = region;
 					} }
 				>
-					<Notice status="error" isDismissible={ false }>
+					<Notice
+						status="error"
+						isDismissible={ false }
+						actions={ [
+							{
+								label: __(
+									'Use classic settings',
+									'woocommerce'
+								),
+								url: getClassicSettingsUrl(),
+								variant: 'link',
+							},
+						] }
+					>
 						{ message }
-						<div className="components-notice__buttons">
-							<Button
-								href={ getClassicSettingsUrl() }
-								variant="link"
-							>
-								{ __( 'Use classic settings', 'woocommerce' ) }
-							</Button>
-						</div>
 					</Notice>
 				</div>
 			);
