@@ -14,6 +14,7 @@ import { faker } from '@faker-js/faker';
  */
 import { tags, test, expect } from '../../fixtures/fixtures';
 import { setGatewayEnabled } from '../../utils/payment-gateways';
+import { acceptClassicCheckoutTerms } from '../../utils/checkout';
 import {
 	createClassicCartPage,
 	createClassicCheckoutPage,
@@ -235,7 +236,7 @@ test.describe(
 				page.getByText( 'Coupon code applied successfully.' )
 			).toBeVisible();
 
-			await page.locator( '#terms' ).check();
+			await acceptClassicCheckoutTerms( page );
 			await page.getByRole( 'button', { name: 'Place order' } ).click();
 			await expect(
 				page.getByText( 'Your order has been received' )
@@ -251,7 +252,7 @@ test.describe(
 				page.getByText( 'Coupon code applied successfully.' )
 			).toBeVisible();
 
-			await page.locator( '#terms' ).check();
+			await acceptClassicCheckoutTerms( page );
 			await page.getByRole( 'button', { name: 'Place order' } ).click();
 			await expect(
 				page.getByText(

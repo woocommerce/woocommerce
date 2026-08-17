@@ -17,6 +17,7 @@ import {
 } from '../../utils/pages';
 import { wpCLI } from '../../utils/cli';
 import { setGatewayEnabled } from '../../utils/payment-gateways';
+import { acceptClassicCheckoutTerms } from '../../utils/checkout';
 
 const test = baseTest.extend( {
 	page: async ( { page, restApi }, use ) => {
@@ -239,18 +240,7 @@ test.describe( 'Shortcode Checkout Custom Place Order Button', () => {
 			await expect(
 				page.getByTestId( 'custom-place-order-button' )
 			).toBeVisible();
-			const termsCheckbox = page.locator( '#terms' );
-			await termsCheckbox.waitFor( {
-				state: 'attached',
-				timeout: 20000,
-			} );
-			await termsCheckbox.evaluate( ( checkbox: HTMLInputElement ) => {
-				checkbox.checked = true;
-				checkbox.dispatchEvent(
-					new Event( 'change', { bubbles: true } )
-				);
-			} );
-			await expect( termsCheckbox ).toBeChecked();
+			await acceptClassicCheckoutTerms( page );
 
 			await page.getByTestId( 'custom-place-order-button' ).click();
 

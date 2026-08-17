@@ -9,6 +9,7 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 import { tags, expect, test } from '../../fixtures/fixtures';
 import { getFakeProduct } from '../../utils/data';
 import { setGatewayEnabled } from '../../utils/payment-gateways';
+import { acceptClassicCheckoutTerms } from '../../utils/checkout';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 let productId: number, orderId: number;
@@ -139,7 +140,7 @@ test.describe(
 				);
 
 				// pay for the order
-				await page.locator( '#terms' ).check();
+				await acceptClassicCheckoutTerms( page );
 				await page
 					.getByRole( 'button', { name: 'Pay for order' } )
 					.click();
