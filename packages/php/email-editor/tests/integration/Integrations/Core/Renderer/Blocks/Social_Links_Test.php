@@ -119,8 +119,11 @@ class Social_Links_Test extends \Email_Editor_Integration_Test_Case {
 
 		$rendered = $this->social_links_renderer->render( '', $parsed_social_links, $this->rendering_context );
 		$this->checkValidHTML( $rendered );
-		$this->assertStringContainsString( 'padding-left:16px;', $rendered );
-		$this->assertStringContainsString( 'padding-right:16px;', $rendered );
+		$link_wrappers = $this->getRenderedSocialLinkWrappers( $rendered );
+		foreach ( $link_wrappers as $link_wrapper ) {
+			$this->assertStringContainsString( 'padding-left:16px;', $link_wrapper );
+			$this->assertStringContainsString( 'padding-right:16px;', $link_wrapper );
+		}
 	}
 
 	/**
@@ -141,8 +144,11 @@ class Social_Links_Test extends \Email_Editor_Integration_Test_Case {
 
 			$rendered = $this->social_links_renderer->render( '', $parsed_social_links, $this->rendering_context );
 			$this->checkValidHTML( $rendered );
-			$this->assertStringContainsString( "padding-left:{$expected_padding};", $rendered );
-			$this->assertStringContainsString( "padding-right:{$expected_padding};", $rendered );
+			$link_wrappers = $this->getRenderedSocialLinkWrappers( $rendered );
+			foreach ( $link_wrappers as $link_wrapper ) {
+				$this->assertStringContainsString( "padding-left:{$expected_padding};", $link_wrapper );
+				$this->assertStringContainsString( "padding-right:{$expected_padding};", $link_wrapper );
+			}
 		}
 	}
 
@@ -156,16 +162,11 @@ class Social_Links_Test extends \Email_Editor_Integration_Test_Case {
 
 		$rendered = $this->social_links_renderer->render( '', $parsed_social_links, $this->rendering_context );
 		$this->checkValidHTML( $rendered );
-		$this->assertSame(
-			1,
-			substr_count( $rendered, 'margin-left:16px;' ),
-			'Only the second social link should have a standard-client horizontal gap.'
-		);
-		$this->assertSame(
-			1,
-			substr_count( $rendered, 'padding-left:16px;' ),
-			'Only the second social link should have an Outlook horizontal gap.'
-		);
+		$link_wrappers = $this->getRenderedSocialLinkWrappers( $rendered );
+		$this->assertStringNotContainsString( 'margin-left:16px;', $link_wrappers['facebook'] );
+		$this->assertStringNotContainsString( 'padding-left:16px;', $link_wrappers['facebook'] );
+		$this->assertStringContainsString( 'margin-left:16px;', $link_wrappers['twitter'] );
+		$this->assertStringContainsString( 'padding-left:16px;', $link_wrappers['twitter'] );
 	}
 
 	/**
@@ -179,16 +180,11 @@ class Social_Links_Test extends \Email_Editor_Integration_Test_Case {
 
 		$rendered = $this->social_links_renderer->render( '', $parsed_social_links, $rtl_rendering_context );
 		$this->checkValidHTML( $rendered );
-		$this->assertSame(
-			1,
-			substr_count( $rendered, 'margin-right:16px;' ),
-			'Only the second social link should have a standard-client horizontal gap in RTL.'
-		);
-		$this->assertSame(
-			1,
-			substr_count( $rendered, 'padding-right:16px;' ),
-			'Only the second social link should have an Outlook horizontal gap in RTL.'
-		);
+		$link_wrappers = $this->getRenderedSocialLinkWrappers( $rendered );
+		$this->assertStringNotContainsString( 'margin-right:16px;', $link_wrappers['facebook'] );
+		$this->assertStringNotContainsString( 'padding-right:16px;', $link_wrappers['facebook'] );
+		$this->assertStringContainsString( 'margin-right:16px;', $link_wrappers['twitter'] );
+		$this->assertStringContainsString( 'padding-right:16px;', $link_wrappers['twitter'] );
 	}
 
 	/**
@@ -283,5 +279,50 @@ class Social_Links_Test extends \Email_Editor_Integration_Test_Case {
 
 		$non_existing_service_icon_url = $this->social_links_renderer->get_service_icon_url( 'non-existing-service' );
 		$this->assertEquals( '', $non_existing_service_icon_url );
+	}
+
+	/**
+	 * Gets the rendered wrapper fragment for each social link.
+	 *
+	 * @param string $rendered The rendered social links block.
+	 * @return array<string, string>
+	 */
+	private function getRenderedSocialLinkWrappers( string $rendered ): array {
+		$urls = array(
+			'facebook' => 'https://facebook.com',
+			'twitter'  => 'https://twitter.com',
+		);
+
+		$wrapper_starts = array();
+		foreach ( $urls as $service => $url ) {
+			$url_position = strpos( $rendered, 'href="' . $url . '"' );
+			if ( false === $url_position ) {
+				$this->fail( sprintf( 'Expected to find rendered %s social link.', $service ) );
+			}
+
+			$content_before_url = substr( $rendered, 0, $url_position );
+			$wrapper_start      = strrpos( $content_before_url, '<!--[if mso | IE]><td' );
+			if ( false === $wrapper_start ) {
+				$this->fail( sprintf( 'Expected to find rendered %s social link wrapper.', $service ) );
+			}
+
+			$wrapper_starts[ $service ] = $wrapper_start;
+		}
+
+		asort( $wrapper_starts );
+
+		$link_wrappers    = array();
+		$ordered_services = array_keys( $wrapper_starts );
+		foreach ( $ordered_services as $index => $service ) {
+			$wrapper_start = $wrapper_starts[ $service ];
+			$next_service  = $ordered_services[ $index + 1 ] ?? null;
+			$wrapper_end   = null === $next_service ? strlen( $rendered ) : $wrapper_starts[ $next_service ];
+
+			$link_wrappers[ $service ] = substr( $rendered, $wrapper_start, $wrapper_end - $wrapper_start );
+		}
+
+		$this->assertCount( 2, $link_wrappers );
+
+		return $link_wrappers;
 	}
 }
