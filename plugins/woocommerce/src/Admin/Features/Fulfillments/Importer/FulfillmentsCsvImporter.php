@@ -636,7 +636,11 @@ class FulfillmentsCsvImporter {
 				if ( '' !== $tracking_url ) {
 					$existing->set_tracking_url( $tracking_url );
 				}
-				$existing->set_items( $items );
+				// Likewise, a blank items cell preserves the existing items; applying the
+				// all-items default here would silently expand partial fulfillments.
+				if ( null !== $items ) {
+					$existing->set_items( $items );
+				}
 				$changed_fields = $existing->get_changes();
 				$existing->save();
 				unset( $this->fulfillments_cache[ $order->get_id() ] );
@@ -691,7 +695,7 @@ class FulfillmentsCsvImporter {
 			if ( '' !== $tracking_url ) {
 				$fulfillment->set_tracking_url( $tracking_url );
 			}
-			$fulfillment->set_items( $items );
+			$fulfillment->set_items( $items ?? $this->default_items_from_order( $order ) );
 			$fulfillment->save();
 			unset( $this->fulfillments_cache[ $order->get_id() ] );
 
@@ -1042,22 +1046,23 @@ class FulfillmentsCsvImporter {
 	 *   - "<order_item_id>:<qty>"
 	 *   - "sku:<sku>:<qty>", which resolves to the matching order item.
 	 *
-	 * When the column is empty, defaults to all order line items at full ordered quantity.
+	 * Returns null when the cell contains no entries; the caller decides the
+	 * default (all line items on create, keep existing items on update).
 	 *
 	 * @param string   $raw   Raw value from the CSV.
 	 * @param WC_Order $order The matched order.
-	 * @return array<int, array{item_id:int, qty:int}>
+	 * @return array<int, array{item_id:int, qty:int}>|null
 	 *
 	 * @throws \Exception When parsing fails or quantities are invalid.
 	 */
-	private function parse_items( string $raw, WC_Order $order ): array {
+	private function parse_items( string $raw, WC_Order $order ): ?array {
 		if ( '' === $raw ) {
-			return $this->default_items_from_order( $order );
+			return null;
 		}
 
 		$entries = preg_split( '/[|;]+/', $raw, -1, PREG_SPLIT_NO_EMPTY );
 		if ( false === $entries || empty( $entries ) ) {
-			return $this->default_items_from_order( $order );
+			return null;
 		}
 
 		$order_items = $order->get_items( 'line_item' );
@@ -1178,7 +1183,7 @@ class FulfillmentsCsvImporter {
 		}
 
 		if ( empty( $result ) ) {
-			return $this->default_items_from_order( $order );
+			return null;
 		}
 
 		return $result;

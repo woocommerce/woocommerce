@@ -312,6 +312,38 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A blank items cell on an update row preserves the existing partial items.
+	 */
+	public function test_blank_items_on_update_preserves_existing_items(): void {
+		$order      = $this->make_order();
+		$line_items = $order->get_items( 'line_item' );
+		$first_item = current( $line_items );
+		$item_id    = (int) $first_item->get_id();
+		$this->assertGreaterThanOrEqual( 2, (int) $first_item->get_quantity() );
+
+		// Partial fulfillment: only 1 unit of the first line item.
+		$csv     = "order_number,tracking_number,shipment_provider,items\n{$order->get_id()},PARTIAL-1,ups,{$item_id}:1\n";
+		$summary = $this->run_import( new FulfillmentsCsvImporter( $this->make_csv( $csv ) ) );
+		$this->assertSame( 1, $summary['created'] );
+
+		// Re-import the same tracking number to fix the carrier, leaving items blank.
+		$csv2    = "order_number,tracking_number,shipment_provider,items\n{$order->get_id()},PARTIAL-1,fedex,\n";
+		$summary = $this->run_import( new FulfillmentsCsvImporter( $this->make_csv( $csv2 ) ) );
+		$this->assertSame( 1, $summary['updated'] );
+
+		/** @var FulfillmentsDataStore $store */
+		$store        = WC_Data_Store::load( 'order-fulfillment' );
+		$fulfillments = $store->read_fulfillments( WC_Order::class, (string) $order->get_id() );
+		$this->assertCount( 1, $fulfillments );
+		$this->assertSame( 'fedex', $fulfillments[0]->get_shipment_provider() );
+
+		$items = $fulfillments[0]->get_items();
+		$this->assertCount( 1, $items, 'A blank items cell must not expand the fulfillment to all order items' );
+		$this->assertSame( $item_id, (int) $items[0]['item_id'] );
+		$this->assertSame( 1, (int) $items[0]['qty'] );
+	}
+
+	/**
 	 * @testdox When update_existing is false, an existing tracking number is skipped instead of updated.
 	 */
 	public function test_existing_fulfillment_is_skipped_when_update_disabled(): void {
