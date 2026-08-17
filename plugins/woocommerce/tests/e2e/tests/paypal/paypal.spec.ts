@@ -191,6 +191,8 @@ test.describe(
 				await expect(
 					page.locator( 'div.updated.inline' )
 				).toContainText( 'Your settings have been saved.' );
+
+				await page.reload();
 			} );
 
 			await test.step( 'Check the setting present only when Jetpack onboarding is complete', async () => {
