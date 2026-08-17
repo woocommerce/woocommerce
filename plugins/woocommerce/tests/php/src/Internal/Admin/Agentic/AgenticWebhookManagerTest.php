@@ -311,7 +311,6 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 				'body'    => $test['payload'],
 			);
 
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 			$modified_args = apply_filters(
 				'woocommerce_webhook_http_args',
 				$args,
@@ -346,7 +345,6 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 			'body'    => '{"test":"data"}',
 		);
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		$modified_args = apply_filters(
 			'woocommerce_webhook_http_args',
 			$args,
