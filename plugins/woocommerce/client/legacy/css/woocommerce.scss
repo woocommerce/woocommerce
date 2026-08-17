@@ -761,9 +761,14 @@ p.demo_store,
 				clear: none;
 			}
 
+			&:has( ol.commentlist .comment_container > img.avatar ) > h2 {
+				margin-inline-start: 50px;
+			}
+
 			ol.commentlist {
 				@include clearfix();
 				margin: 0;
+				padding: 0;
 				width: 100%;
 				background: none;
 				list-style: none;
