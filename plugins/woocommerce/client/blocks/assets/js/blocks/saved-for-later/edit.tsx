@@ -7,16 +7,22 @@ import {
 	useInnerBlocksProps,
 	InspectorControls,
 } from '@wordpress/block-editor';
-import { PanelBody, RangeControl, Placeholder } from '@wordpress/components';
+import {
+	PanelBody,
+	RangeControl,
+	Placeholder,
+	ExternalLink,
+} from '@wordpress/components';
 import { Icon, trash, starEmpty } from '@wordpress/icons';
 import {
 	PLACEHOLDER_IMG_SRC,
 	getSettingWithCoercion,
+	getAdminLink,
 } from '@woocommerce/settings';
 import { isBoolean } from '@woocommerce/types';
 
 interface SavedForLaterAttributes {
-	columnCount: number;
+	columnCount?: number;
 }
 
 interface EditProps {
@@ -26,6 +32,9 @@ interface EditProps {
 
 const MIN_COLUMNS = 2;
 const MAX_COLUMNS = 6;
+// Kept in sync with the PHP-side fallback in `SavedForLater::render()` —
+// the attribute has no block.json default on purpose.
+const DEFAULT_COLUMNS = 5;
 
 // Lives in JS because `__()` is needed for the heading copy. `block.json`
 // strings aren't run through translation, so keeping the template here
@@ -83,7 +92,7 @@ const PREVIEW_ITEMS = [
 ];
 
 const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
-	const { columnCount } = attributes;
+	const columnCount = attributes.columnCount ?? DEFAULT_COLUMNS;
 
 	// The block type stays registered when the `cart_save_for_later` feature is
 	// off (so content saved while it was on isn't flagged as an unsupported
@@ -116,11 +125,26 @@ const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
 				<Placeholder
 					icon={ <Icon icon={ starEmpty } /> }
 					label={ __( 'Saved for later', 'woocommerce' ) }
-					instructions={ __(
-						'The "Save for Later in Cart" feature is off, so this block will not appear on your store. Enable it under WooCommerce → Settings → Advanced → Features.',
-						'woocommerce'
+					instructions={ sprintf(
+						/* translators: %s: the feature name ("Save for Later in Cart"). */
+						__(
+							'The “%s” feature is off, so this block will not appear on your store.',
+							'woocommerce'
+						),
+						__( 'Save for Later in Cart', 'woocommerce' )
 					) }
-				/>
+				>
+					<ExternalLink
+						href={ getAdminLink(
+							'admin.php?page=wc-settings&tab=advanced&section=features'
+						) }
+					>
+						{ __(
+							'Enable it in WooCommerce settings',
+							'woocommerce'
+						) }
+					</ExternalLink>
+				</Placeholder>
 			</div>
 		);
 	}

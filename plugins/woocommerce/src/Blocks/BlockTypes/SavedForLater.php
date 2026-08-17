@@ -72,6 +72,10 @@ final class SavedForLater extends AbstractBlock {
 	 * used to build the `WP_Block_Type` (`block_hooks`, `supports`) rather than
 	 * the raw block.json metadata.
 	 *
+	 * @internal Public only because it is a filter callback; not part of the public API.
+	 *
+	 * @since 11.2.0
+	 *
 	 * @param array $settings Normalized block type settings.
 	 * @param array $metadata Parsed block.json metadata (carries the block `name`).
 	 * @return array

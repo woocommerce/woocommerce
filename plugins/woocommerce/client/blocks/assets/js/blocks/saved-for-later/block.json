@@ -13,8 +13,7 @@
 	},
 	"attributes": {
 		"columnCount": {
-			"type": "number",
-			"default": 5
+			"type": "number"
 		}
 	},
 	"allowedBlocks": [ "core/heading" ],
@@ -22,6 +21,7 @@
 		 "align": [ "wide", "full" ],
 		"interactivity": true,
 		"html": false,
+		"multiple": false,
 		"reusable": false,
 		"spacing": {
 			"margin": true,
