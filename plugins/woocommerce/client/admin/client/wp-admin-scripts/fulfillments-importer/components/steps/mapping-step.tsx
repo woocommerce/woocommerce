@@ -126,7 +126,7 @@ const MappingStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 			<h2>{ __( 'Map your columns', 'woocommerce' ) }</h2>
 			<p>
 				{ __(
-					'Required fields are marked with *. Adjust any column that did not auto-detect.',
+					'Required fields are marked with "(required)". Adjust any column that did not auto-detect.',
 					'woocommerce'
 				) }
 			</p>
@@ -141,14 +141,15 @@ const MappingStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 				</thead>
 				<tbody>
 					{ rows.map( ( row ) => {
-						const isRequiredAndUnmapped =
-							! REQUIRED_COLUMNS.includes( row.mapped ) &&
-							hasMissingRequired;
+						// While a required column is unassigned, highlight only the
+						// unmapped rows: they are the candidates for the missing field.
+						const isUnmappedCandidate =
+							row.mapped === '' && hasMissingRequired;
 						return (
 							<tr
 								key={ row.index }
 								className={
-									isRequiredAndUnmapped
+									isUnmappedCandidate
 										? 'is-required-row'
 										: undefined
 								}
@@ -175,7 +176,7 @@ const MappingStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 									{ row.mapped === 'items' ? (
 										<p className="woocommerce-fulfillment-importer-mapping-help">
 											{ __(
-												'Optional. Format: "<line_item_id>:<qty>" or "sku:<SKU>:<qty>", separated by "|" or ";". Leave blank to fulfill all unfulfilled items.',
+												'Optional. Format: "<line_item_id>:<qty>" or "sku:<SKU>:<qty>", separated by "|" or ";". Leave blank to fulfill all order items; updates keep their existing items.',
 												'woocommerce'
 											) }
 										</p>

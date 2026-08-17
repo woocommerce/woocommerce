@@ -138,6 +138,46 @@ describe( 'MappingStep', () => {
 		] );
 	} );
 
+	it( 'highlights only unmapped rows while a required column is missing', () => {
+		const state = buildStateWithHeaders( {
+			0: 'order_number',
+			1: 'tracking_url',
+			// 2 is unmapped; tracking_number and shipment_provider are missing.
+		} );
+
+		render(
+			<MappingStep
+				state={ state }
+				dispatch={ jest.fn() }
+				onClose={ jest.fn() }
+			/>
+		);
+
+		const highlighted = document.querySelectorAll( 'tr.is-required-row' );
+		expect( highlighted ).toHaveLength( 1 );
+		expect( highlighted[ 0 ] ).toHaveTextContent( 'Carrier' );
+	} );
+
+	it( 'highlights no rows when all required columns are mapped', () => {
+		const state = buildStateWithHeaders( {
+			0: 'order_number',
+			1: 'tracking_number',
+			2: 'shipment_provider',
+		} );
+
+		render(
+			<MappingStep
+				state={ state }
+				dispatch={ jest.fn() }
+				onClose={ jest.fn() }
+			/>
+		);
+
+		expect(
+			document.querySelectorAll( 'tr.is-required-row' )
+		).toHaveLength( 0 );
+	} );
+
 	it( 'leaves ambiguous headers unmapped on auto-detect', () => {
 		const state = buildStateWithHeaders( {}, [ 'foo', 'bar', 'baz' ] );
 
