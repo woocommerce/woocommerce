@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix settings pages and email classes registered from admin_init callbacks being dropped, by registering them late on admin_init.
+Fix settings groups being registered twice, and settings pages or email classes registered from admin_init callbacks being dropped.
