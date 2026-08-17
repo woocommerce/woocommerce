@@ -33,6 +33,6 @@ final class AccountUtil {
 		 */
 		$filtered_title = apply_filters( 'woocommerce_my_account_edit_address_title', $title, $address_type );
 
-		return is_string( $filtered_title ) ? $filtered_title : $title;
+		return is_scalar( $filtered_title ) || null === $filtered_title ? (string) $filtered_title : $title;
 	}
 }
