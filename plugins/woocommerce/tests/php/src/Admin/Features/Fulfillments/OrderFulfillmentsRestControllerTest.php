@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments;
 
+use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\OrderFulfillmentsRestController;
 use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;
 use WC_Helper_Order;
@@ -28,6 +29,13 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * @var array
 	 */
 	private static array $created_order_ids = array();
+
+	/**
+	 * Import action IDs created for shared order fixtures.
+	 *
+	 * @var int[]
+	 */
+	private static array $created_import_action_ids = array();
 
 	/**
 	 * Created user ID for testing purposes.
@@ -73,6 +81,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public static function setupBeforeClass(): void {
 		parent::setupBeforeClass();
+		self::enable_direct_product_attribute_lookup_updates();
 
 		self::$original_fulfillments_flag = get_option( 'woocommerce_feature_fulfillments_enabled' );
 		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
@@ -81,6 +90,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$controller->initialize_fulfillments();
 
 		self::$created_user_id = wp_create_user( 'test_user', 'password', 'nonadmin@example.com' );
+		add_action( 'action_scheduler_stored_action', array( self::class, 'track_import_action' ) );
 
 		for ( $order_number = 1; $order_number <= 10; $order_number++ ) {
 			$order                     = WC_Helper_Order::create_order( get_current_user_id() );
@@ -109,29 +119,64 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 			);
 			self::$created_fulfillment_ids[ $customer_order->get_id() ][] = $f->get_id();
 		}
+		remove_action( 'action_scheduler_stored_action', array( self::class, 'track_import_action' ) );
+		self::disable_direct_product_attribute_lookup_updates();
+	}
+
+	/**
+	 * Track import actions created for shared order fixtures.
+	 *
+	 * @param int $action_id Action ID.
+	 */
+	public static function track_import_action( $action_id ): void {
+		$action = \ActionScheduler_Store::instance()->fetch_action( $action_id );
+		if ( 'wc-admin_import_orders' === $action->get_hook() ) {
+			self::$created_import_action_ids[] = (int) $action_id;
+		}
 	}
 
 	/**
 	 * Destroys the test environment after all tests on this file are run.
 	 */
 	public static function tearDownAfterClass(): void {
-		// Delete the created orders and their fulfillments.
-		global $wpdb;
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_order_fulfillments;" );
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_order_fulfillment_meta;" );
-		foreach ( self::$created_order_ids as $order_id ) {
-			WC_Helper_Order::delete_order( $order_id );
-		}
+		remove_action( 'action_scheduler_stored_action', array( self::class, 'track_import_action' ) );
+		self::enable_direct_product_attribute_lookup_updates();
+		try {
+			$fulfillments_data_store = new FulfillmentsDataStore();
+			$action_store            = \ActionScheduler_Store::instance();
+			foreach ( self::$created_import_action_ids as $action_id ) {
+				$action_store->delete_action( $action_id );
+			}
 
-		// Delete the created user.
-		wp_delete_user( self::$created_user_id );
-		if ( false === self::$original_fulfillments_flag ) {
-			delete_option( 'woocommerce_feature_fulfillments_enabled' );
-		} else {
-			update_option( 'woocommerce_feature_fulfillments_enabled', self::$original_fulfillments_flag );
-		}
+			// Delete the created orders and their fulfillments.
+			foreach ( self::$created_order_ids as $order_id ) {
+				$fulfillments_data_store->delete_by_entity( WC_Order::class, (string) $order_id );
+				WC_Helper_Order::delete_order( $order_id );
+			}
 
-		parent::tearDownAfterClass();
+			// Delete the created user.
+			wp_delete_user( self::$created_user_id );
+		} finally {
+			try {
+				if ( false === self::$original_fulfillments_flag ) {
+					delete_option( 'woocommerce_feature_fulfillments_enabled' );
+				} else {
+					update_option( 'woocommerce_feature_fulfillments_enabled', self::$original_fulfillments_flag );
+				}
+			} finally {
+				try {
+					parent::tearDownAfterClass();
+				} finally {
+					self::$created_order_ids          = array();
+					self::$created_import_action_ids  = array();
+					self::$created_fulfillment_ids    = array();
+					self::$created_user_id            = -1;
+					self::$customer_order_id          = -1;
+					self::$original_fulfillments_flag = null;
+					self::disable_direct_product_attribute_lookup_updates();
+				}
+			}
+		}
 	}
 
 	/**

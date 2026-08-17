@@ -13,8 +13,7 @@
 1. **Environment Setup**:
 
    ```bash
-   # From repository root
-   nvm use
+   # From repository root (PNPM uses the pinned Node version automatically)
    pnpm install
    pnpm --filter='@woocommerce/plugin-woocommerce' build
    cd plugins/woocommerce

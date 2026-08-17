@@ -41,7 +41,6 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		wp_set_current_user( 0 );
 		wc_clear_notices();
-		wp_deregister_script( 'wc-customer-email-verification' );
 		parent::tearDown();
 	}
 
@@ -57,35 +56,6 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Render the verify-account endpoint content and return its HTML.
-	 *
-	 * @return string
-	 */
-	private function render_endpoint(): string {
-		ob_start();
-		$this->sut->render_endpoint_content();
-		return (string) ob_get_clean();
-	}
-
-	/**
-	 * Drive the service into a locked-out state for the given user.
-	 *
-	 * @param int $user_id User ID.
-	 */
-	private function force_lockout( int $user_id ): void {
-		$current = null;
-		$guard   = 0;
-		while ( ! $this->service->is_locked_out( $user_id ) && $guard < 15 ) {
-			if ( ! $this->service->has_pending_code( $user_id ) ) {
-				$current = $this->service->create_code( $user_id );
-			}
-			$wrong = '000000' === $current ? '111111' : '000000';
-			$this->service->verify_code( $user_id, $wrong );
-			++$guard;
-		}
-	}
-
-	/**
 	 * Invoke handle_send_request(), trapping the wp_safe_redirect() + exit it ends with.
 	 *
 	 * handle_send_request() always finishes with wp_safe_redirect() then exit;. A
@@ -93,19 +63,22 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	 * PHPUnit run, silently skipping every later test. Throwing from the wp_redirect
 	 * filter aborts control flow before exit so the test survives to assert.
 	 */
-	private function dispatch_send_request(): void {
-		$abort = static function ( $location ): void {
-			throw new \RuntimeException( esc_html( (string) $location ) );
+	private function dispatch_send_request(): string {
+		$location = '';
+		$abort    = static function ( $loc ): void {
+			throw new \RuntimeException( esc_html( (string) $loc ) );
 		};
 		add_filter( 'wp_redirect', $abort );
 		try {
 			$this->sut->handle_send_request();
 		} catch ( \RuntimeException $e ) {
 			// Expected: handle_send_request() redirects and exits.
-			unset( $e );
+			$location = $e->getMessage();
 		} finally {
 			remove_filter( 'wp_redirect', $abort );
 		}
+
+		return $location;
 	}
 
 	// -------------------------------------------------------------------------
@@ -169,83 +142,31 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * @testdox The prompt shows a send-code call to action when no code is pending.
+	 * @testdox The prompt shows a send-link call to action when no link is pending.
 	 */
-	public function test_prompt_renders_send_cta_when_no_code(): void {
+	public function test_prompt_renders_send_cta_when_no_key(): void {
 		$user_id = wc_create_new_customer( 'cta-prompt@example.com', 'ctapromptuser', 'pw' );
 		wp_set_current_user( $user_id );
 
 		$html = $this->render_prompt();
 
-		$this->assertStringContainsString( 'wc_send_verification', $html, 'A prompt with no pending code should carry the send-code action.' );
-		$this->assertStringNotContainsString( 'name="wc_verify_email_code"', $html, 'No entry form should show before a code is sent.' );
+		$this->assertStringContainsString( 'wc_send_verification', $html, 'A prompt with no pending link should carry the send-link action.' );
 	}
 
 	/**
-	 * @testdox The orders prompt links to the /orders/verify/ sub-page (not the form) when a code is pending.
+	 * @testdox The prompt points the customer to their inbox (no resend CTA) while a link was just sent.
 	 */
-	public function test_orders_prompt_links_to_endpoint_when_pending(): void {
+	public function test_prompt_points_to_inbox_when_recently_sent(): void {
 		$user_id = wc_create_new_customer( 'inbox-prompt@example.com', 'inboxpromptuser', 'pw' );
 		wp_set_current_user( $user_id );
 
-		// A code was just sent.
-		$this->service->create_code( $user_id );
-
-		$html         = $this->render_prompt();
-		$expected_url = wc_get_endpoint_url( 'orders', 'verify', wc_get_page_permalink( 'myaccount' ) );
-
-		$this->assertStringContainsString( esc_url( $expected_url ), $html, 'The pending notice should point to the /orders/verify/ sub-page.' );
-		$this->assertStringNotContainsString( 'name="wc_verify_email_code"', $html, 'The form must not render on the orders panel.' );
-		$this->assertFalse( wp_script_is( 'wc-customer-email-verification', 'enqueued' ), 'The orders notice must not enqueue the form script.' );
-	}
-
-	// -------------------------------------------------------------------------
-	// render_endpoint_content()
-	// -------------------------------------------------------------------------
-
-	/**
-	 * @testdox The verify-account endpoint renders the code-entry form and enqueues its script when a code is pending.
-	 */
-	public function test_endpoint_renders_code_form_when_pending(): void {
-		$user_id = wc_create_new_customer( 'endpoint-form@example.com', 'endpointformuser', 'pw' );
-		wp_set_current_user( $user_id );
-
-		$this->service->create_code( $user_id );
-
-		$html = $this->render_endpoint();
-
-		$this->assertStringContainsString( 'name="wc_verify_email_code"', $html, 'A pending code should surface the entry form on the endpoint.' );
-		$this->assertStringContainsString( 'type="hidden" name="wc_verify_email_submit"', $html, 'The submit marker must be a hidden field so the form stays routable regardless of the submit button state.' );
-		$this->assertTrue( wp_script_is( 'wc-customer-email-verification', 'enqueued' ), 'Rendering the endpoint form should enqueue its enhancement script.' );
-	}
-
-	/**
-	 * @testdox The verify-account endpoint shows the contact-the-owner message once the user is locked out.
-	 */
-	public function test_endpoint_renders_locked_message_when_locked_out(): void {
-		$user_id = wc_create_new_customer( 'endpoint-locked@example.com', 'endpointlocked', 'pw' );
-		wp_set_current_user( $user_id );
-		$this->force_lockout( $user_id );
-
-		$html = $this->render_endpoint();
-
-		$this->assertStringContainsString( 'store owner', $html, 'A locked-out user should be told to contact the store owner.' );
-		$this->assertStringNotContainsString( 'name="wc_verify_email_code"', $html, 'A locked-out user must not see the entry form.' );
-	}
-
-	/**
-	 * @testdox The prompt shows a contact-the-owner message once the user is locked out.
-	 */
-	public function test_prompt_renders_locked_message_when_locked_out(): void {
-		$user_id = wc_create_new_customer( 'locked-prompt@example.com', 'lockedpromptuser', 'pw' );
-		wp_set_current_user( $user_id );
-
-		$this->force_lockout( $user_id );
+		// A link was just sent (seconds_since_last_key < rate-limit window).
+		$this->service->create_verification_key( $user_id );
 
 		$html = $this->render_prompt();
 
-		$this->assertStringContainsString( 'store owner', $html, 'A locked-out user should be told to contact the store owner.' );
-		$this->assertStringNotContainsString( 'name="wc_verify_email_code"', $html, 'A locked-out user must not see the entry form.' );
+		$this->assertStringContainsString( 'check your inbox', $html, 'A just-sent prompt should point the customer to their inbox.' );
+		$this->assertStringNotContainsString( 'wc_send_verification', $html, 'A just-sent prompt must not offer an immediate resend.' );
 	}
 
 	// -------------------------------------------------------------------------
@@ -311,42 +232,39 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 		};
 		add_action( 'woocommerce_customer_verify_email_notification', $listener );
 
-		// First send (no existing code).
+		// First send (no existing key).
 		$_GET['_wpnonce'] = wp_create_nonce( 'woocommerce-send-verification-email' );
 		$this->dispatch_send_request();
 
-		// Second send — code was just created (seconds_since_last_key < 60).
+		// Second send — key was just created (seconds_since_last_key < 60).
 		$_GET['_wpnonce'] = wp_create_nonce( 'woocommerce-send-verification-email' );
-		$this->dispatch_send_request();
+		$throttled        = $this->dispatch_send_request();
 
 		remove_action( 'woocommerce_customer_verify_email_notification', $listener );
 		unset( $_GET['_wpnonce'] );
 
 		$this->assertSame( 1, $notification_count, 'Notification should fire exactly once despite two send attempts within the rate-limit window' );
-		$this->assertCount( 1, wc_get_notices( 'notice' ), 'A rate-limited resend must surface an informational notice instead of failing silently.' );
+		$this->assertStringContainsString( 'wc_verify_notice=throttled', $throttled, 'A rate-limited resend must surface the throttled result notice instead of failing silently.' );
 	}
 
 	/**
-	 * @testdox handle_send_request does not mint a new code for a locked-out user.
+	 * @testdox print_result_notice prints the matching notice for a known result code and nothing for an unknown one.
 	 */
-	public function test_handle_send_request_does_not_mint_when_locked_out(): void {
-		$user_id = wc_create_new_customer( 'locked-send@example.com', 'lockedsenduser', 'pw' );
-		$this->force_lockout( $user_id );
-		wp_set_current_user( $user_id );
+	public function test_print_result_notice_renders_only_known_codes(): void {
+		$_GET['wc_verify_notice'] = 'sent';
+		ob_start();
+		$this->sut->print_result_notice();
+		$sent_html = (string) ob_get_clean();
 
-		$notification_fired = false;
-		$listener           = static function () use ( &$notification_fired ) {
-			$notification_fired = true;
-		};
-		add_action( 'woocommerce_customer_verify_email_notification', $listener );
+		$_GET['wc_verify_notice'] = 'not-a-real-code';
+		ob_start();
+		$this->sut->print_result_notice();
+		$unknown_html = (string) ob_get_clean();
 
-		$_GET['_wpnonce'] = wp_create_nonce( 'woocommerce-send-verification-email' );
-		$this->dispatch_send_request();
+		unset( $_GET['wc_verify_notice'] );
 
-		remove_action( 'woocommerce_customer_verify_email_notification', $listener );
-		unset( $_GET['_wpnonce'] );
-
-		$this->assertFalse( $notification_fired, 'A locked-out user must not be able to mint fresh codes' );
+		$this->assertStringContainsString( 'check your inbox', $sent_html, 'A known result code should print its notice.' );
+		$this->assertSame( '', $unknown_html, 'An unknown result code should print nothing (no stray notice).' );
 	}
 
 	// -------------------------------------------------------------------------
@@ -354,26 +272,26 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * @testdox seconds_since_last_key returns null when no code has been issued.
+	 * @testdox seconds_since_last_key returns null when no key has been issued.
 	 */
 	public function test_seconds_since_last_key_returns_null_with_no_key(): void {
 		$user_id = wc_create_new_customer( 'nokey@example.com', 'nokeyuser', 'pw' );
 
-		$this->assertNull( $this->service->seconds_since_last_key( $user_id ), 'Should return null when no code has been issued' );
+		$this->assertNull( $this->service->seconds_since_last_key( $user_id ), 'Should return null when no key has been issued' );
 	}
 
 	/**
-	 * @testdox seconds_since_last_key returns a small non-negative integer immediately after code creation.
+	 * @testdox seconds_since_last_key returns a small non-negative integer immediately after key creation.
 	 */
 	public function test_seconds_since_last_key_returns_small_value_after_key_creation(): void {
 		$user_id = wc_create_new_customer( 'freshkey@example.com', 'freshkeyuser', 'pw' );
-		$this->service->create_code( $user_id );
+		$this->service->create_verification_key( $user_id );
 
 		$elapsed = $this->service->seconds_since_last_key( $user_id );
 
-		$this->assertNotNull( $elapsed, 'Should return an integer after code creation' );
+		$this->assertNotNull( $elapsed, 'Should return an integer after key creation' );
 		$this->assertGreaterThanOrEqual( 0, $elapsed, 'Elapsed time should never be negative' );
 		// Generous upper bound: proves a real, recent elapsed value without being flaky on a slow runner.
-		$this->assertLessThan( 60, $elapsed, 'Elapsed time should be well within the rate-limit window after code creation' );
+		$this->assertLessThan( 60, $elapsed, 'Elapsed time should be well within the rate-limit window after key creation' );
 	}
 }

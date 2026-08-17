@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore checkout compatibility handling for payment extensions with missing script dependencies.

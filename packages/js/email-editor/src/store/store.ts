@@ -27,7 +27,7 @@ const getConfig = () =>
 		resolvers: {},
 		reducer,
 		initialState: getInitialState(),
-	} as const );
+	} ) as const;
 
 export type EditorStoreConfig = ReturnType< typeof getConfig >;
 
@@ -42,7 +42,7 @@ export const createStore = () => {
 	register( store );
 
 	// Register personalization tag entity with core-data
-	dispatch( coreStore ).addEntities( [ PERSONALIZATION_TAG_ENTITY ] );
+	void dispatch( coreStore ).addEntities( [ PERSONALIZATION_TAG_ENTITY ] );
 
 	return store;
 };

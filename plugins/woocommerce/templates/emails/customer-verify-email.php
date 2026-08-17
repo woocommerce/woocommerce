@@ -18,7 +18,7 @@
  * @var string    $additional_content Additional content below the body.
  * @var string    $user_display_name  Customer's display name.
  * @var string    $user_email         Email address being confirmed.
- * @var string    $verify_code        One-time verification code.
+ * @var string    $verify_url         One-time verification URL.
  * @var string    $blogname           Site name.
  * @var bool      $sent_to_admin      Whether sent to admin.
  * @var bool      $plain_text         Whether plain-text variant.
@@ -46,8 +46,15 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 <p><?php printf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $user_display_name ) ); ?></p>
 <?php /* translators: %s: the customer's email address. */ ?>
 <p><?php printf( esc_html__( "Once you've confirmed that %s is your email address, we'll link any past orders to your account.", 'woocommerce' ), '<b>' . esc_html( $user_email ) . '</b>' ); ?></p>
-<p><?php esc_html_e( 'Use this code to confirm your email address:', 'woocommerce' ); ?></p>
-<p style="font-size: 32px; font-weight: 700; letter-spacing: 0.4em; text-align: center; margin: 24px 0;"><?php echo esc_html( $verify_code ); ?></p>
+<?php
+wc_get_template(
+	'emails/email-button.php',
+	array(
+		'url'   => $verify_url,
+		'label' => __( 'Confirm email address', 'woocommerce' ),
+	)
+);
+?>
 <p><?php esc_html_e( "If you didn't request this email, there's nothing to worry about, and you can safely ignore it.", 'woocommerce' ); ?></p>
 
 <?php echo $email_improvements_enabled ? '</div>' : ''; ?>

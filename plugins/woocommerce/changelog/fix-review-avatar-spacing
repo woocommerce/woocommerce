@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove empty spacing from product reviews when avatars are disabled.

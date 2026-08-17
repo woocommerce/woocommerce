@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+/* global HTMLSelectElement */
 import { speak } from '@wordpress/a11y';
 import { createElement } from '@wordpress/element';
 import { act } from 'react';
@@ -124,6 +125,107 @@ describe( 'NativeSettingsField', () => {
 			expect(
 				getSpinButton( container, 'Decrement Low stock threshold' )
 			).toBeInstanceOf( HTMLButtonElement );
+		} );
+
+		it( 'honors placeholder and disabled custom attributes for number inputs', () => {
+			const container = render(
+				<NativeSettingsField
+					{ ...makeProps(
+						{
+							...numberField,
+							customAttributes: {
+								...numberField.customAttributes,
+								disabled: 'true',
+								placeholder: 'Only configurable in code',
+							},
+						},
+						''
+					) }
+				/>
+			);
+
+			const input = container.querySelector( 'input[type="number"]' );
+			expect( input ).toBeInstanceOf( HTMLInputElement );
+			expect( input ).toHaveAttribute(
+				'placeholder',
+				'Only configurable in code'
+			);
+			expect( input?.getAttribute( 'min' ) ).toBe( '0' );
+			expect( input?.getAttribute( 'step' ) ).toBe( '1' );
+			expect( ( input as HTMLInputElement ).disabled ).toBe( true );
+			expect(
+				isSpinButtonDisabled(
+					getSpinButton( container, 'Increment Low stock threshold' )
+				)
+			).toBe( true );
+			expect(
+				isSpinButtonDisabled(
+					getSpinButton( container, 'Decrement Low stock threshold' )
+				)
+			).toBe( true );
+		} );
+
+		it( 'uses presence semantics for disabled custom attributes on number inputs', () => {
+			const container = render(
+				<NativeSettingsField
+					{ ...makeProps(
+						{
+							...numberField,
+							customAttributes: {
+								...numberField.customAttributes,
+								disabled: 'false',
+							},
+						},
+						'5'
+					) }
+				/>
+			);
+
+			const input = container.querySelector( 'input[type="number"]' );
+			expect( input ).toBeInstanceOf( HTMLInputElement );
+			expect( ( input as HTMLInputElement ).disabled ).toBe( true );
+			expect(
+				isSpinButtonDisabled(
+					getSpinButton( container, 'Increment Low stock threshold' )
+				)
+			).toBe( true );
+			expect(
+				isSpinButtonDisabled(
+					getSpinButton( container, 'Decrement Low stock threshold' )
+				)
+			).toBe( true );
+		} );
+
+		it( 'lets top-level disabled props override number input custom attributes', () => {
+			const container = render(
+				<NativeSettingsField
+					{ ...makeProps(
+						{
+							...numberField,
+							disabled: false,
+							customAttributes: {
+								...numberField.customAttributes,
+								disabled: 'true',
+							},
+						},
+						'5'
+					) }
+				/>
+			);
+
+			const input = container.querySelector( 'input[type="number"]' );
+			expect( input ).toBeInstanceOf( HTMLInputElement );
+			expect( ( input as HTMLInputElement ).disabled ).toBe( false );
+			expect(
+				isSpinButtonDisabled(
+					getSpinButton( container, 'Increment Low stock threshold' )
+				)
+			).toBe( false );
+			expect(
+				isSpinButtonDisabled(
+					getSpinButton( container, 'Decrement Low stock threshold' )
+				)
+			).toBe( false );
 		} );
 
 		it( 'calls onChange with the stepped value and announces it when a spin button is clicked', () => {
@@ -316,6 +418,108 @@ describe( 'NativeSettingsField', () => {
 
 			expect( onChange ).toHaveBeenCalledWith( '2' );
 		} );
+	} );
+
+	describe( 'select fields', () => {
+		it( 'renders a public select control and propagates scalar values', () => {
+			const onChange = jest.fn();
+			const container = render(
+				<NativeSettingsField
+					{ ...makeProps(
+						{
+							id: 'wc_test_select',
+							label: 'Inventory format',
+							description: 'Choose how inventory is displayed.',
+							type: 'select',
+							options: [
+								{ value: 'one', label: 'One' },
+								{ value: 'two', label: 'Two' },
+							],
+						},
+						'one',
+						onChange
+					) }
+				/>
+			);
+
+			const select = container.querySelector( 'select' );
+			expect( select ).toBeInstanceOf( HTMLSelectElement );
+			expect( select ).toHaveValue( 'one' );
+			expect( container.textContent ).toContain( 'Inventory format' );
+			expect( container.textContent ).toContain(
+				'Choose how inventory is displayed.'
+			);
+
+			act( () => {
+				if ( select instanceof HTMLSelectElement ) {
+					select.value = 'two';
+					select.dispatchEvent(
+						new Event( 'change', {
+							bubbles: true,
+							cancelable: true,
+						} )
+					);
+				}
+			} );
+
+			expect( onChange ).toHaveBeenCalledWith( 'two' );
+		} );
+
+		it.each( [
+			[ 'an empty option list', [], '' ],
+			[
+				'an unmatched stored value',
+				[ { label: 'One', value: 'one' } ],
+				'legacy',
+			],
+		] )(
+			'keeps the labeled control for %s',
+			( _scenario, options, value ) => {
+				const container = render(
+					<NativeSettingsField
+						{ ...makeProps(
+							{
+								id: 'wc_test_select',
+								label: 'Test select',
+								type: 'select',
+								options,
+							},
+							value
+						) }
+					/>
+				);
+
+				const select = container.querySelector( 'select' );
+				expect( select ).toBeInstanceOf( HTMLSelectElement );
+				expect( select ).toHaveAccessibleName( 'Test select' );
+				expect( select ).toHaveValue( value );
+				expect( select?.selectedOptions[ 0 ] ).toHaveTextContent(
+					'Select'
+				);
+				expect( select?.selectedOptions[ 0 ] ).toBeDisabled();
+			}
+		);
+
+		it.each( [ {}, 'invalid' ] )(
+			'handles malformed non-array options without throwing',
+			( options ) => {
+				const field = {
+					id: 'wc_test_select',
+					label: 'Test select',
+					type: 'select' as const,
+					options,
+				} as unknown as SettingsUIField;
+
+				const container = render(
+					<NativeSettingsField { ...makeProps( field, 'legacy' ) } />
+				);
+
+				const select = container.querySelector( 'select' );
+				expect( select ).toBeInstanceOf( HTMLSelectElement );
+				expect( select ).toHaveValue( 'legacy' );
+				expect( select?.options ).toHaveLength( 1 );
+			}
+		);
 	} );
 
 	describe( 'text fields', () => {

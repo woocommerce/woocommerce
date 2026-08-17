@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Log and stop redundantly deleting invalid version string cache entries, and correctly detect misses from object cache drop-ins that report them as null.

@@ -89,10 +89,12 @@ class WCAdminAssets {
 	public static function get_url( $file, $ext ) {
 		$suffix = '';
 
-		// Potentially enqueue minified JavaScript.
+		// Potentially enqueue minified JavaScript, but only if the minified file exists.
+		// Core builds do not ship minified JS files, so this also guards against the
+		// 'minified-js' feature being force-enabled (e.g. via WooCommerce Beta Tester).
 		if ( $ext === 'js' ) {
 			$script_debug = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG;
-			$suffix       = self::should_use_minified_js_file( $script_debug ) ? '.min' : '';
+			$suffix       = self::should_use_minified_js_file( $script_debug ) && is_readable( WC_ADMIN_ABSPATH . self::get_path( $ext ) . $file . '.min.' . $ext ) ? '.min' : '';
 		}
 
 		return plugins_url( self::get_path( $ext ) . $file . $suffix . '.' . $ext, WC_ADMIN_PLUGIN_FILE );
@@ -251,8 +253,10 @@ class WCAdminAssets {
 		wp_enqueue_style( 'wc-onboarding' );
 
 		if ( PageController::is_settings_page() ) {
-			$this->register_script( 'wp-admin-scripts', 'settings-embed', true, $this->get_settings_ui_script_dependencies() );
+			$settings_ui_dependencies = $this->get_settings_ui_script_dependencies();
+			$this->register_script( 'wp-admin-scripts', 'settings-embed', true, $settings_ui_dependencies );
 			$this->register_style( 'settings-embed', 'style', array( 'wp-components' ) );
+			$this->enqueue_settings_ui_style( $settings_ui_dependencies );
 		}
 
 		// Preload our assets.
@@ -400,6 +404,10 @@ class WCAdminAssets {
 			array(
 				'handle' => 'wc-onboarding',
 			),
+			array(
+				'handle'       => 'wc-settings-ui',
+				'dependencies' => array( 'wp-components' ),
+			),
 		);
 
 		$css_file_version = self::get_file_version( 'css' );
@@ -433,17 +441,38 @@ class WCAdminAssets {
 	 * @return array
 	 */
 	private function get_settings_ui_script_dependencies(): array {
-		$context = SettingsUIRequestContext::get_current();
-		if ( ! $context ) {
+		try {
+			if ( ! class_exists( SettingsUIRequestContext::class ) ) {
+				return array();
+			}
+
+			$context = SettingsUIRequestContext::get_current();
+			if ( ! $context || $context->has_script_handles_failed() ) {
+				return array();
+			}
+
+			$dependencies = array_merge(
+				array( 'wc-settings-ui' ),
+				$context->get_script_handles()
+			);
+
+			return array_values( array_unique( $dependencies ) );
+		} catch ( \Throwable $e ) {
 			return array();
 		}
+	}
 
-		$dependencies = array_merge(
-			array( 'wc-settings-ui' ),
-			$context->get_script_handles()
-		);
+	/**
+	 * Enqueue the Settings UI package style when its runtime dependency resolves.
+	 *
+	 * @param array $dependencies Resolved Settings UI script dependencies.
+	 */
+	private function enqueue_settings_ui_style( array $dependencies ): void {
+		if ( ! in_array( 'wc-settings-ui', $dependencies, true ) || ! wp_style_is( 'wc-settings-ui', 'registered' ) ) {
+			return;
+		}
 
-		return array_values( array_unique( $dependencies ) );
+		wp_enqueue_style( 'wc-settings-ui' );
 	}
 
 	/**

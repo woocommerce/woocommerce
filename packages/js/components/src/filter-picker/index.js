@@ -289,7 +289,7 @@ class FilterPicker extends Component {
 			<div className="woocommerce-filters-filter">
 				{ config.label && (
 					<span className="woocommerce-filters-label">
-						{ config.label }:
+						{ config.label }
 					</span>
 				) }
 				<Dropdown

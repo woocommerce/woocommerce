@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Page } from '@wordpress/admin-ui';
+import { NavigableRegion } from '@wordpress/admin-ui';
 import { Button, Modal, Notice } from '@wordpress/components';
 import {
 	Component,
@@ -33,6 +33,7 @@ import {
 import type {
 	SettingsUIField,
 	SettingsUIGroup,
+	SettingsUIShellBadgeIntent,
 	SettingsUISaveStrategy,
 	SettingsUISchema,
 	SettingsFieldContext,
@@ -48,6 +49,8 @@ type SaveNotice = {
 type PendingNavigation = {
 	href: string;
 };
+
+const FORM_POST_REDIRECT_INPUT_NAME = 'wc_settings_ui_redirect_to';
 
 const normalizeSection = ( section?: string ) =>
 	section === 'default' ? '' : section;
@@ -101,13 +104,19 @@ const getActionVariant = ( variant?: string ) =>
 		? variant
 		: 'secondary' ) as 'primary' | 'secondary' | 'tertiary' | 'link';
 
-// TS unions erase at runtime, so guard the className interpolation against unexpected
-// strings from PHP-supplied schemas.
-const getBadgeIntent = ( intent?: string ) =>
-	[ 'default', 'info', 'success', 'warning', 'error' ].includes(
-		intent || ''
-	)
-		? intent
+const BADGE_INTENTS = {
+	default: true,
+	info: true,
+	success: true,
+	warning: true,
+	error: true,
+} satisfies Record< SettingsUIShellBadgeIntent, true >;
+
+// TS unions erase at runtime, so guard the className interpolation against
+// unexpected strings from PHP-supplied schemas.
+const getBadgeIntent = ( intent?: string ): SettingsUIShellBadgeIntent =>
+	intent && Object.prototype.hasOwnProperty.call( BADGE_INTENTS, intent )
+		? ( intent as SettingsUIShellBadgeIntent )
 		: 'default';
 
 const getSaveStrategy = ( schema: SettingsUISchema ): SettingsUISaveStrategy =>
@@ -115,6 +124,21 @@ const getSaveStrategy = ( schema: SettingsUISchema ): SettingsUISaveStrategy =>
 
 const clearLegacyFormPrompt = () => {
 	window.onbeforeunload = null;
+};
+
+const setFormPostRedirectInput = ( form: HTMLFormElement, href: string ) => {
+	let redirectInput = form.querySelector< HTMLInputElement >(
+		`input[name="${ FORM_POST_REDIRECT_INPUT_NAME }"]`
+	);
+
+	if ( ! redirectInput ) {
+		redirectInput = document.createElement( 'input' );
+		redirectInput.type = 'hidden';
+		redirectInput.name = FORM_POST_REDIRECT_INPUT_NAME;
+		form.appendChild( redirectInput );
+	}
+
+	redirectInput.value = href;
 };
 
 const shouldPromptForNavigation = ( event: MouseEvent ) => {
@@ -175,7 +199,10 @@ const UnsavedChangesModal = ( {
 		<Modal
 			className="wc-settings-ui__unsaved-changes-modal"
 			title={ __( 'You have unsaved changes', 'woocommerce' ) }
-			onRequestClose={ onClose }
+			isDismissible={ ! isSaving }
+			shouldCloseOnClickOutside={ ! isSaving }
+			shouldCloseOnEsc={ ! isSaving }
+			onRequestClose={ isSaving ? () => undefined : onClose }
 		>
 			<p>
 				{ __(
@@ -184,16 +211,19 @@ const UnsavedChangesModal = ( {
 				) }
 			</p>
 			<div className="wc-settings-ui__unsaved-changes-actions">
-				<Button variant="tertiary" onClick={ onDiscard }>
+				<Button
+					variant="tertiary"
+					disabled={ isSaving }
+					onClick={ onDiscard }
+				>
 					{ __( 'Discard', 'woocommerce' ) }
 				</Button>
 				<Button
 					variant="primary"
 					type="button"
-					name="save"
-					value={ __( 'Save', 'woocommerce' ) }
 					isBusy={ isSaving }
 					disabled={ isSaving }
+					accessibleWhenDisabled
 					onClick={ onSave }
 				>
 					{ __( 'Save', 'woocommerce' ) }
@@ -348,23 +378,18 @@ const ShellHeader = ( {
 	context,
 	values,
 	initialValues,
-	isDirty,
-	isSaving,
-	saveStrategy,
-	onSave,
+	actions,
 	children,
 }: {
 	schema: SettingsUISchema;
 	context: SettingsFieldContext;
 	values: SettingsValues;
 	initialValues: SettingsValues;
-	isDirty: boolean;
-	isSaving: boolean;
-	saveStrategy: SettingsUISaveStrategy;
-	onSave: () => void | Promise< boolean >;
+	actions?: ReactNode;
 	children: ReactNode;
 } ) => {
 	const shell = schema.shell || {};
+	const showHeader = shell.header === 'visible';
 	const title = shell.title || schema.title;
 	const NavigationComponent = shell.navigationComponent
 		? resolveRegionComponent( shell.navigationComponent, context )
@@ -374,9 +399,6 @@ const ShellHeader = ( {
 			( shell.sectionNavigation && shell.sectionNavigation.length > 0 ) ||
 			NavigationComponent
 	);
-	const showSaveButton = saveStrategy.adapter !== 'none';
-	const saveButtonType =
-		saveStrategy.adapter === 'form_post' ? 'submit' : 'button';
 
 	const breadcrumbs =
 		shell.breadcrumbs && shell.breadcrumbs.length > 0 ? (
@@ -412,37 +434,37 @@ const ShellHeader = ( {
 		  ) )
 		: undefined;
 
-	const saveButtonLabel = __( 'Save', 'woocommerce' );
-
-	const actions = showSaveButton ? (
-		<Button
-			className="woocommerce-save-button"
-			variant="primary"
-			type={ saveButtonType }
-			name="save"
-			value={ saveButtonLabel }
-			disabled={ ! isDirty || isSaving }
-			isBusy={ isSaving }
-			onClick={ onSave }
-		>
-			{ saveButtonLabel }
-		</Button>
-	) : undefined;
-
 	return (
-		<Page
+		<NavigableRegion
 			className="wc-settings-ui-shell"
-			title={ title }
-			subTitle={ shell.subtitle }
-			breadcrumbs={ breadcrumbs }
-			badges={ badges }
-			actions={ actions }
+			ariaLabel={ title || __( 'Settings', 'woocommerce' ) }
 		>
+			{ showHeader ? (
+				<header className="wc-settings-ui-shell__header">
+					<div className="wc-settings-ui-shell__header-row">
+						{ breadcrumbs }
+						<h2 className="wc-settings-ui-shell__title">
+							{ title }
+						</h2>
+						{ badges }
+						{ actions ? (
+							<div className="wc-settings-ui-shell__header-actions">
+								{ actions }
+							</div>
+						) : null }
+					</div>
+					{ shell.subtitle ? (
+						<p className="wc-settings-ui-shell__subtitle">
+							{ shell.subtitle }
+						</p>
+					) : null }
+				</header>
+			) : null }
 			{ hasNavigation ? (
 				<div className="wc-settings-ui-shell__navigation">
 					{ shell.navigation && shell.navigation.length > 0 ? (
 						<nav
-							className="wc-settings-ui-shell__tabs wc-settings-ui-shell__tabs--primary"
+							className="wc-settings-ui-shell__tabs"
 							aria-label={ __( 'Settings pages', 'woocommerce' ) }
 						>
 							{ shell.navigation.map( ( item ) => (
@@ -463,7 +485,7 @@ const ShellHeader = ( {
 					{ shell.sectionNavigation &&
 					shell.sectionNavigation.length > 0 ? (
 						<nav
-							className="wc-settings-ui-shell__tabs wc-settings-ui-shell__tabs--secondary"
+							className="wc-settings-ui-shell__tabs"
 							aria-label={ __(
 								'Settings sections',
 								'woocommerce'
@@ -495,7 +517,7 @@ const ShellHeader = ( {
 				</div>
 			) : null }
 			{ children }
-		</Page>
+		</NavigableRegion>
 	);
 };
 
@@ -562,27 +584,31 @@ export const SettingsUIPage = ( {
 		clearLegacyFormPrompt();
 	}, [] );
 
-	const submitSettingsForm = useCallback( () => {
-		allowNavigation();
+	const submitSettingsForm = useCallback(
+		( redirectTo?: string ) => {
+			const form = document.getElementById( 'mainform' );
 
-		const form = document.getElementById( 'mainform' );
+			if ( ! ( form instanceof HTMLFormElement ) ) {
+				return;
+			}
 
-		if ( ! ( form instanceof HTMLFormElement ) ) {
-			return;
-		}
+			if ( typeof redirectTo === 'string' && redirectTo ) {
+				setFormPostRedirectInput( form, redirectTo );
+			}
 
-		const saveButton = document.querySelector( '.woocommerce-save-button' );
+			allowNavigation();
 
-		if (
-			saveButton instanceof HTMLButtonElement &&
-			saveButton.form === form
-		) {
-			form.requestSubmit( saveButton );
-			return;
-		}
+			const saveButton = form.querySelector( '.woocommerce-save-button' );
 
-		form.requestSubmit();
-	}, [ allowNavigation ] );
+			if ( saveButton instanceof HTMLButtonElement ) {
+				form.requestSubmit( saveButton );
+				return;
+			}
+
+			form.requestSubmit();
+		},
+		[ allowNavigation ]
+	);
 
 	const setValues = useCallback(
 		( nextValues: Partial< SettingsValues > ) => {
@@ -694,7 +720,10 @@ export const SettingsUIPage = ( {
 
 			if (
 				! ( target instanceof Element ) ||
-				! target.closest( '.wc-settings-ui-shell' ) ||
+				// The classic section links render outside the shell on top-level pages.
+				! target.closest(
+					'.wc-settings-ui-shell, #mainform .subsubsub'
+				) ||
 				! shouldPromptForNavigation( event )
 			) {
 				return;
@@ -722,13 +751,13 @@ export const SettingsUIPage = ( {
 	}, [ isDirty ] );
 
 	const handleDiscardNavigation = useCallback( () => {
-		if ( ! pendingNavigation ) {
+		if ( isSaving || ! pendingNavigation ) {
 			return;
 		}
 
 		allowNavigation();
 		window.location.assign( pendingNavigation.href );
-	}, [ allowNavigation, pendingNavigation ] );
+	}, [ allowNavigation, isSaving, pendingNavigation ] );
 
 	const handleSavePendingNavigation = useCallback( async () => {
 		if ( ! pendingNavigation ) {
@@ -736,7 +765,7 @@ export const SettingsUIPage = ( {
 		}
 
 		if ( saveStrategy.adapter === 'form_post' ) {
-			submitSettingsForm();
+			submitSettingsForm( pendingNavigation.href );
 			return;
 		}
 
@@ -790,20 +819,37 @@ export const SettingsUIPage = ( {
 	const formPostFields =
 		saveStrategy.adapter === 'form_post' ? getAllFields( schema ) : [];
 
+	const showHeader = schema.shell?.header === 'visible';
+	const saveButtonLabel = __( 'Save', 'woocommerce' );
+	const saveButton =
+		saveStrategy.adapter !== 'none' ? (
+			<Button
+				className="woocommerce-save-button"
+				variant="primary"
+				type={
+					saveStrategy.adapter === 'form_post' ? 'submit' : 'button'
+				}
+				name="save"
+				value={ saveButtonLabel }
+				disabled={ ! isDirty || isSaving }
+				isBusy={ isSaving }
+				onClick={ () =>
+					saveStrategy.adapter === 'form_post'
+						? submitSettingsForm()
+						: handleCustomSave()
+				}
+			>
+				{ saveButtonLabel }
+			</Button>
+		) : undefined;
+
 	return (
 		<ShellHeader
 			schema={ schema }
 			context={ context }
 			values={ values }
 			initialValues={ initialValues }
-			isDirty={ isDirty }
-			isSaving={ isSaving }
-			saveStrategy={ saveStrategy }
-			onSave={
-				saveStrategy.adapter === 'form_post'
-					? submitSettingsForm
-					: handleCustomSave
-			}
+			actions={ saveButton }
 		>
 			{ pendingNavigation ? (
 				<UnsavedChangesModal
@@ -872,6 +918,11 @@ export const SettingsUIPage = ( {
 						</div>
 					</section>
 				) ) }
+				{ ! showHeader && saveButton ? (
+					<div className="wc-settings-ui__footer-actions">
+						{ saveButton }
+					</div>
+				) : null }
 			</div>
 			{ formPostFields.length > 0 ? (
 				<div className="wc-settings-ui__hidden-inputs">

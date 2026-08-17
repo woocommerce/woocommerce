@@ -214,7 +214,7 @@ const getTrashEmailPostAction = () => {
 													items.length
 											  );
 									}
-									createSuccessNotice( successMessage, {
+									void createSuccessNotice( successMessage, {
 										type: 'snackbar',
 										id: 'trash-email-post-action',
 									} );
@@ -289,7 +289,7 @@ const getTrashEmailPostAction = () => {
 											errorMessage,
 										}
 									);
-									createErrorNotice( errorMessage, {
+									void createErrorNotice( errorMessage, {
 										type: 'snackbar',
 									} );
 								}

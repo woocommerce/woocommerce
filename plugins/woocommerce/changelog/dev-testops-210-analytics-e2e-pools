@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+E2E: reorganize the analytics specs across the core-serial/core-parallel pools — move analytics (with the Overview manual-import-trigger tests folded in) and analytics-overview to core-parallel, keep only analytics-settings serial, and drop the redundant analytics-access smoke test.
