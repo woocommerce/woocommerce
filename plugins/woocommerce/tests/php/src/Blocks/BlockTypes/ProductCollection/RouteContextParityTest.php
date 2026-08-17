@@ -24,7 +24,7 @@ class RouteContextParityTest extends WC_Unit_Test_Case {
 	 * @param string   $legacy_template   Legacy Template block template attribute.
 	 * @param string[] $expected_products Expected ordered product names.
 	 */
-	public function test_product_collection_matches_classic_route( string $route_label, string $legacy_template, array $expected_products ): void {
+	public function test_product_collection_and_product_query_match_classic_route( string $route_label, string $legacy_template, array $expected_products ): void {
 		$global_presence = array(
 			'post'             => array_key_exists( 'post', $GLOBALS ),
 			'product'          => array_key_exists( 'product', $GLOBALS ),
@@ -101,15 +101,23 @@ class RouteContextParityTest extends WC_Unit_Test_Case {
 				'woocommerce-loop-product__title'
 			);
 			$wp_query->rewind_posts();
+			$product_query_products = $this->extract_product_names(
+				$this->render_product_query(),
+				'wp-block-post-title'
+			);
+			$wp_query->rewind_posts();
 			$product_collection_products = $this->extract_product_names(
 				$this->render_product_collection(),
 				'wp-block-post-title'
 			);
 
+			$this->assertNotEmpty( $product_query_products, 'The Products route result should not be empty.' );
 			$this->assertNotEmpty( $product_collection_products, 'The Product Collection route result should not be empty.' );
 			$this->assertNotEmpty( $classic_products, 'The classic route query result should not be empty.' );
+			$this->assertSame( $expected_products, $product_query_products, 'Products should render the expected ordered identities.' );
 			$this->assertSame( $expected_products, $product_collection_products, 'Product Collection should render the expected ordered identities.' );
 			$this->assertSame( $expected_products, $classic_products, 'The classic route should expose the expected ordered identities.' );
+			$this->assertSame( $classic_products, $product_query_products, 'Products and the classic route should have strict ordered parity.' );
 			$this->assertSame( $classic_products, $product_collection_products, 'Product Collection and the classic route should have strict ordered parity.' );
 		} finally {
 			wp_reset_postdata();
@@ -258,6 +266,30 @@ class RouteContextParityTest extends WC_Unit_Test_Case {
 			sprintf(
 				'<!-- wp:woocommerce/product-collection %1$s --><div class="wp-block-woocommerce-product-collection"><!-- wp:woocommerce/product-template --><!-- wp:post-title /--><!-- /wp:woocommerce/product-template --></div><!-- /wp:woocommerce/product-collection -->',
 				wp_json_encode( $attributes )
+			)
+		);
+	}
+
+	/**
+	 * Render a minimal inherited Products block through the registered blocks.
+	 *
+	 * @return string Rendered block markup.
+	 */
+	private function render_product_query(): string {
+		$attributes = array(
+			'namespace' => 'woocommerce/product-query',
+			'queryId'   => 69,
+			'query'     => array(
+				'inherit'  => true,
+				'postType' => 'product',
+			),
+		);
+
+		return do_blocks(
+			sprintf(
+				'<!-- wp:query %1$s --><div class="wp-block-query"><!-- wp:post-template %2$s --><!-- wp:post-title /--><!-- /wp:post-template --></div><!-- /wp:query -->',
+				wp_json_encode( $attributes ),
+				wp_json_encode( array( '__woocommerceNamespace' => 'woocommerce/product-query/product-template' ) )
 			)
 		);
 	}
