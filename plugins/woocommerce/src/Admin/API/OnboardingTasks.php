@@ -774,7 +774,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		$id           = $request->get_param( 'id' );
 		$task_list_id = $request->get_param( 'task_list_id' );
 
-		if ( $task_list_id && ! TaskLists::get_list( $task_list_id ) ) {
+		if ( null !== $task_list_id && ! TaskLists::get_list( $task_list_id ) ) {
 			return new \WP_Error(
 				'woocommerce_rest_invalid_task_list',
 				__( 'Sorry, no task list with that ID was found.', 'woocommerce' ),
@@ -820,7 +820,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		$id           = $request->get_param( 'id' );
 		$task_list_id = $request->get_param( 'task_list_id' );
 
-		if ( $task_list_id && ! TaskLists::get_list( $task_list_id ) ) {
+		if ( null !== $task_list_id && ! TaskLists::get_list( $task_list_id ) ) {
 			return new \WP_Error(
 				'woocommerce_rest_invalid_task_list',
 				__( 'Sorry, no task list with that ID was found.', 'woocommerce' ),

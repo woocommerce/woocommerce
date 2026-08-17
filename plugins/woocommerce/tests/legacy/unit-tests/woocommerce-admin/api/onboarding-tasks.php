@@ -442,6 +442,42 @@ class WC_Admin_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that a falsy-but-supplied task list ID such as "0" is validated
+	 * rather than treated as unscoped (PHP casts "0" to false).
+	 *
+	 * @group tasklist
+	 */
+	public function test_dismiss_and_undo_reject_falsy_task_list_id() {
+		wp_set_current_user( $this->user );
+
+		TaskLists::add_list( array( 'id' => 'list-a' ) );
+		TaskLists::add_task(
+			'list-a',
+			new TestTask(
+				TaskLists::get_list( 'list-a' ),
+				array(
+					'id'             => 'test-task',
+					'title'          => 'Test Task',
+					'is_dismissable' => true,
+				)
+			)
+		);
+
+		foreach ( array( 'dismiss', 'undo_dismiss' ) as $action ) {
+			$request = new WP_REST_Request( 'POST', $this->endpoint . '/test-task/' . $action );
+			$request->set_headers( array( 'content-type' => 'application/json' ) );
+			$request->set_param( 'task_list_id', '0' );
+			$response = $this->server->dispatch( $request );
+			$data     = $response->get_data();
+
+			$this->assertEquals( 404, $response->get_status(), $action );
+			$this->assertEquals( 'woocommerce_rest_invalid_task_list', $data['code'], $action );
+		}
+
+		$this->assertEquals( false, TaskLists::get_task( 'test-task', 'list-a' )->is_dismissed() );
+	}
+
+	/**
 	 * Test that dismiss endpoint returns error for invalid task.
 	 * @group tasklist
 	 */
