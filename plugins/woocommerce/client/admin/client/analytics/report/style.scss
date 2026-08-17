@@ -11,3 +11,13 @@
 		}
 	}
 }
+
+// Keeps a cell's first item on the same line as its "+N more" badge. The badge
+// is a button, so once it wraps onto its own line it adds that full height and
+// rows carrying one end up taller than rows without.
+.woocommerce-analytics__inline-list {
+	display: inline-flex;
+	align-items: center;
+	gap: $gap-smaller;
+	white-space: nowrap;
+}
