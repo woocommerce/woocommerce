@@ -490,6 +490,16 @@
 			"isIgnored": true
 		},
 		{
+			"label": "settings-ui temporarily pins DataViews 17.1.0 for the DataForm migration",
+			"dependencies": [
+				"@wordpress/dataviews"
+			],
+			"packages": [
+				"@woocommerce/settings-ui"
+			],
+			"isIgnored": true
+		},
+		{
 			"label": "@wordpress/* dependencies that WooCommerce bundles instead of externalizing to WordPress",
 			"dependencyTypes": [
 				"prod",

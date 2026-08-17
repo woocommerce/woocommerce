@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add Renderer::render_from_content() for rendering block markup that has no backing post, such as file-based templates. See docs/rendering.md.
