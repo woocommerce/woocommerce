@@ -43,10 +43,10 @@
 		"@wordpress/i18n": "catalog:wp-min",
 		"date-fns-tz": "^3.2.0",
 		"moment": "^2.29.4",
-		"qs": "^6.11.2"
+		"qs": "^6.15.3"
 	},
 	"devDependencies": {
-		"@babel/core": "7.25.7",
+		"@babel/core": "catalog:tooling",
 		"@types/jest": "29.5.x",
 		"@types/lodash": "^4.14.202",
 		"@types/node": "^24.1.0",
