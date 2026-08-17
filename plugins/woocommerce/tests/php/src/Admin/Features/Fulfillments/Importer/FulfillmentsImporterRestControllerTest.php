@@ -426,6 +426,53 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox handle_prepare rejects a CSV with more rows than the importer supports.
+	 */
+	public function test_prepare_rejects_csv_over_row_cap(): void {
+		$csv = "order_number,tracking_number,shipment_provider\n";
+		for ( $i = 0; $i <= FulfillmentsCsvImporter::MAX_IMPORT_ROWS; $i++ ) {
+			$csv .= "1,CAP-{$i},ups\n";
+		}
+		$file = $this->make_csv( $csv );
+
+		$controller         = new class() extends FulfillmentsImporterRestController {
+			/**
+			 * Path returned instead of staging a real upload.
+			 *
+			 * @var string
+			 */
+			public string $staged = '';
+
+			/**
+			 * Return the canned staged path.
+			 *
+			 * @param WP_REST_Request $request Unused.
+			 * @return array{file:string, id:int}
+			 */
+			protected function stage_uploaded_csv( WP_REST_Request $request ) {
+				unset( $request );
+				return array(
+					'file' => $this->staged,
+					'id'   => 0,
+				);
+			}
+		};
+		$controller->staged = $file;
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/fulfillments/import/prepare' );
+		$request->set_param( 'delimiter', ',' );
+
+		$reflection = new \ReflectionClass( $controller );
+		$handler    = $reflection->getMethod( 'handle_prepare' );
+		$handler->setAccessible( true );
+		$response = $handler->invoke( $controller, $request );
+
+		$this->assertInstanceOf( \WP_Error::class, $response );
+		$this->assertSame( 'woocommerce_fulfillments_import_too_many_rows', $response->get_error_code() );
+		$this->assertFileDoesNotExist( $file, 'The staged file must be cleaned up when the row cap rejects it' );
+	}
+
+	/**
 	 * @testdox handle_prepare rejects an empty multipart request with a 400.
 	 */
 	public function test_prepare_rejects_missing_file(): void {

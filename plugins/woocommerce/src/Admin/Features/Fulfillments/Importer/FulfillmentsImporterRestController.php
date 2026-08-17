@@ -320,12 +320,28 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			);
 		}
 
+		$total = (int) ( $parsed['total'] ?? 0 );
+		if ( $total > FulfillmentsCsvImporter::MAX_IMPORT_ROWS ) {
+			$this->delete_staged_file( $file_path, $attachment_id );
+			FulfillmentsTracker::track_fulfillment_validation_error( 'import', 'woocommerce_fulfillments_import_too_many_rows', 'csv_importer' );
+			return new WP_Error(
+				'woocommerce_fulfillments_import_too_many_rows',
+				sprintf(
+					/* translators: 1: number of rows in the uploaded CSV, 2: maximum supported rows. */
+					__( 'The CSV contains %1$s rows; the importer supports up to %2$s rows per file. Please split the file and import it in parts.', 'woocommerce' ),
+					number_format_i18n( $total ),
+					number_format_i18n( FulfillmentsCsvImporter::MAX_IMPORT_ROWS )
+				),
+				array( 'status' => WP_Http::REQUEST_ENTITY_TOO_LARGE )
+			);
+		}
+
 		$session = ImportSession::create(
 			$user_id,
 			$file_path,
 			(string) ( $parsed['delimiter'] ?? ',' ),
 			(array) ( $parsed['headers'] ?? array() ),
-			(int) ( $parsed['total'] ?? 0 ),
+			$total,
 			$notify,
 			$update,
 			$attachment_id

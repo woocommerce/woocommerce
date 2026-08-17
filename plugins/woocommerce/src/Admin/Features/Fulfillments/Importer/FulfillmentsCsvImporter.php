@@ -86,6 +86,15 @@ class FulfillmentsCsvImporter {
 	public const NOTIFY_CHUNK_SIZE = 25;
 
 	/**
+	 * Maximum number of CSV records accepted per import.
+	 *
+	 * The cross-chunk dedupe set is serialized into the session transient and
+	 * rewritten on every chunk, so the row count must stay bounded. Larger files
+	 * should be split and imported in parts.
+	 */
+	public const MAX_IMPORT_ROWS = 5000;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 11.2.0
