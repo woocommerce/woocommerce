@@ -213,13 +213,14 @@ class WC_Product_CSV_Importer_Controller {
 			return '';
 		}
 
+		// add_query_arg() does not encode values, so characters like '+' in request-derived strings would be decoded as a space on the next request.
 		$params = array(
 			'step'               => $keys[ $step_index + 1 ],
-			'file'               => str_replace( DIRECTORY_SEPARATOR, '/', $this->file ),
-			'delimiter'          => $this->delimiter,
+			'file'               => rawurlencode( str_replace( DIRECTORY_SEPARATOR, '/', $this->file ) ),
+			'delimiter'          => rawurlencode( $this->delimiter ),
 			'update_existing'    => $this->update_existing,
 			'map_preferences'    => $this->map_preferences,
-			'character_encoding' => $this->character_encoding,
+			'character_encoding' => rawurlencode( $this->character_encoding ),
 			'_wpnonce'           => wp_create_nonce( 'woocommerce-csv-importer' ), // wp_nonce_url() escapes & to &amp; breaking redirects.
 		);
 

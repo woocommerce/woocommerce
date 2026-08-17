@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add optional customSaveButton prop to Editor/ExperimentalEmailEditor (threaded to the Gutenberg editor header, skipped in template mode) and extend the editor-save notice override to also match "Post published." and "Draft saved." for integrations whose save button publishes in the background.

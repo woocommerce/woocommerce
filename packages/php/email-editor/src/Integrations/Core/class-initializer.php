@@ -146,6 +146,7 @@ class Initializer {
 		$allowed_styles[] = 'mso-padding-alt';
 		$allowed_styles[] = 'mso-font-width';
 		$allowed_styles[] = 'mso-text-raise';
+		$allowed_styles[] = 'word-break';
 		return $allowed_styles;
 	}
 
