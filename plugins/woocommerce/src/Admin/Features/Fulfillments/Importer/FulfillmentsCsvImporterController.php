@@ -71,7 +71,19 @@ class FulfillmentsCsvImporterController {
 			return;
 		}
 
-		WCAdminAssets::register_style( 'fulfillments-importer', 'style', array( 'wp-components' ) );
+		// Not WCAdminAssets::register_style(): that derives the handle from the style
+		// name ('wc-admin-style'), which the fulfillments drawer already registers on
+		// this screen, so this stylesheet would be silently dropped.
+		$style_assets_filename = WCAdminAssets::get_script_asset_filename( 'fulfillments-importer', 'style' );
+		$style_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_CSS_FOLDER . 'fulfillments-importer/' . $style_assets_filename;
+		wp_enqueue_style(
+			'wc-admin-fulfillments-importer',
+			WCAdminAssets::get_url( 'fulfillments-importer/style', 'css' ),
+			array( 'wp-components' ),
+			WCAdminAssets::get_file_version( 'css', $style_assets['version'] )
+		);
+		wp_style_add_data( 'wc-admin-fulfillments-importer', 'rtl', 'replace' );
+
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'fulfillments-importer', true );
 
 		wp_localize_script(
