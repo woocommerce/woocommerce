@@ -174,9 +174,10 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 		$this->create_coupon( 'test-coupon' );
 		$this->set_request(
 			array(
-				'products'   => implode( ',', $product_ids ),
-				'coupon'     => 'test-coupon',
-				'utm_source' => 'checkout-link-test',
+				'products'      => implode( ',', $product_ids ),
+				'coupon'        => 'test-coupon',
+				'checkout-link' => '1',
+				'utm_source'    => 'checkout-link-test',
 			)
 		);
 
