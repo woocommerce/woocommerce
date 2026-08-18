@@ -730,7 +730,6 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		// Fire the personal-data eraser hook the analytics anonymizer is attached to.
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks -- the test fires an existing core hook, it does not introduce one.
 		do_action( 'woocommerce_privacy_remove_order_personal_data', $order );
 
 		$request  = new WP_REST_Request( 'GET', $this->endpoint );

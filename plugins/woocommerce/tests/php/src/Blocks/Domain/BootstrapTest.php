@@ -130,7 +130,6 @@ class BootstrapTest extends WC_Unit_Test_Case {
 		$this->assertNotEmpty( $this->registered_woo_blocks, 'The test bootstrap should have registered WooCommerce blocks to snapshot.' );
 		$this->assertFalse( $registry->is_registered( self::SAMPLE_BLOCK ), 'WooCommerce blocks should start unregistered for this test.' );
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Firing an existing core filter to exercise its callbacks, not declaring a new hook.
 		apply_filters( 'woocommerce_short_description', 'Intro <!-- wp:woocommerce/product-price /--> outro' );
 
 		$this->assertTrue(
@@ -164,7 +163,6 @@ class BootstrapTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( $registry->is_registered( 'woocommerce/accordion-group' ), 'WooCommerce blocks should start unregistered for this test.' );
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Firing an existing core filter to exercise its callbacks, not declaring a new hook.
 		apply_filters( 'woocommerce_short_description', $markup );
 
 		$this->assertTrue(
@@ -183,7 +181,6 @@ class BootstrapTest extends WC_Unit_Test_Case {
 
 		// The referenced pattern's content cannot be inspected without fetching it, so a wp:block reference
 		// must register the block types in case the pattern contains a WooCommerce block at any depth.
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Firing an existing core filter to exercise its callbacks, not declaring a new hook.
 		apply_filters( 'woocommerce_short_description', '<!-- wp:block {"ref":129} /-->' );
 
 		$this->assertTrue(
@@ -201,7 +198,6 @@ class BootstrapTest extends WC_Unit_Test_Case {
 		$this->assertNotEmpty( $this->registered_woo_blocks, 'The test bootstrap should have registered WooCommerce blocks to snapshot.' );
 		$this->assertFalse( $registry->is_registered( self::SAMPLE_BLOCK ), 'WooCommerce blocks should start unregistered for this test.' );
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Firing an existing core filter to exercise its callbacks, not declaring a new hook.
 		apply_filters( 'woocommerce_short_description', 'Just plain text with no blocks, or only a core <!-- wp:paragraph -->.' );
 
 		$this->assertFalse(
@@ -211,7 +207,6 @@ class BootstrapTest extends WC_Unit_Test_Case {
 
 		// Without whitespace after the comment opener this is not a block per the parser grammar (`<!--\s+wp:`),
 		// so do_blocks would leave it untouched and registration would be wasted.
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Firing an existing core filter to exercise its callbacks, not declaring a new hook.
 		apply_filters( 'woocommerce_short_description', '<!--wp:woocommerce/product-price /-->' );
 
 		$this->assertFalse(
@@ -340,7 +335,6 @@ HTML;
 
 		// Firing the filter must not call register_blocks() again — doing so would re-register already-registered
 		// block types and trigger a doing_it_wrong failure, which WC_Unit_Test_Case turns into a test failure.
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Firing an existing core filter to exercise its callbacks, not declaring a new hook.
 		apply_filters( 'woocommerce_short_description', 'Intro <!-- wp:woocommerce/product-price /--> outro' );
 
 		$this->assertTrue(
