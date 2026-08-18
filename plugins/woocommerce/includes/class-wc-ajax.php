@@ -2325,6 +2325,7 @@ class WC_AJAX {
 		}
 
 		wc_reorder_terms( $term, $next_id, $taxonomy );
+		WC_Cache_Helper::invalidate_cache_group( 'product_terms_' . $taxonomy );
 
 		$children = get_terms( $taxonomy, "child_of=$id&menu_order=ASC&hide_empty=0" );
 
