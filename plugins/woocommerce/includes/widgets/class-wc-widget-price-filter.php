@@ -81,7 +81,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		}
 
 		// If there are not posts and we're not filtering, hide the widget.
-		if ( ! WC()->query->get_main_query()->post_count && ! isset( $_GET['min_price'] ) && ! isset( $_GET['max_price'] ) ) { // WPCS: input var ok, CSRF ok.
+		if ( ! WC()->query->get_main_query()->post_count && ! isset( $_GET['min_price'] ) && ! isset( $_GET['max_price'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public read-only filter; values are unslashed and converted to numbers.
 			return;
 		}
 
@@ -116,8 +116,8 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			return;
 		}
 
-		$current_min_price = isset( $_GET['min_price'] ) ? floor( floatval( wp_unslash( $_GET['min_price'] ) ) / $step ) * $step : $min_price; // WPCS: input var ok, CSRF ok.
-		$current_max_price = isset( $_GET['max_price'] ) ? ceil( floatval( wp_unslash( $_GET['max_price'] ) ) / $step ) * $step : $max_price; // WPCS: input var ok, CSRF ok.
+		$current_min_price = isset( $_GET['min_price'] ) ? floor( floatval( wp_unslash( $_GET['min_price'] ) ) / $step ) * $step : $min_price; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public read-only filter; values are unslashed and converted to numbers.
+		$current_max_price = isset( $_GET['max_price'] ) ? ceil( floatval( wp_unslash( $_GET['max_price'] ) ) / $step ) * $step : $max_price; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public read-only filter; values are unslashed and converted to numbers.
 
 		$this->widget_start( $args, $instance );
 
