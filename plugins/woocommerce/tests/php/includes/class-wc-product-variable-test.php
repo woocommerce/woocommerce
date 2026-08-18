@@ -424,6 +424,8 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 		$bad_filter = static fn() => $malformed_value;
 		add_filter( 'woocommerce_variation_prices', $bad_filter );
 
+		$this->setExpectedIncorrectUsage( 'WC_Product_Variable_Data_Store_CPT::read_price_data' );
+
 		try {
 			$prices = $product->get_variation_prices();
 			$this->assertSame( $malformed_value, $prices );

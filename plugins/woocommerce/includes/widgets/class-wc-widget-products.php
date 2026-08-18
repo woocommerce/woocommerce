@@ -108,7 +108,7 @@ class WC_Widget_Products extends WC_Widget {
 			'tax_query'      => array(
 				'relation' => 'AND',
 			),
-		); // WPCS: slow query ok.
+		); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query -- The empty query containers do not add database joins.
 
 		if ( empty( $instance['show_hidden'] ) ) {
 			$query_args['tax_query'][] = array(
