@@ -16,9 +16,7 @@ But unlike today’s notices, this part of the UI will be reserved for “priori
 
 ## Category 2: Activity Panel Inbox
 
-The second category is what we’re focusing on in this example - and what we expect the vast majority of extension developers will want to extend - we call it the “Activity Panel Inbox.” It will look something like this:
-
-![Activity Panel Inbox](images/activity-panel-inbox.png)
+The second category is what we’re focusing on in this example - and what we expect the vast majority of extension developers will want to extend - we call it the “Activity Panel Inbox.”
 
 This section is dedicated to informational content coming from multiple sources such as WooCommerce core, WooCommerce.com Subscription management, extensions activity and store achievements. This section was also envisioned to display more insightful content in the future, e.g. content that could help with the day to day tasks of managing and optimizing a store.
 
