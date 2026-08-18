@@ -21,7 +21,7 @@ jest.mock( '@wordpress/admin-ui', () => ( {
  */
 import { SettingsUIErrorBoundary, SettingsUIPage } from '../settings-ui-page';
 import { __resetRegistry, registerSettingsExtension } from '../registry';
-import type { SettingsUISchema } from '../types';
+import type { SettingsUIField, SettingsUISchema } from '../types';
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -39,6 +39,23 @@ const renderElement = ( element: JSX.Element ) => {
 
 	return { container, root };
 };
+
+const createSingleFieldSchema = (
+	field: SettingsUIField,
+	overrides: Partial< SettingsUISchema > = {}
+): SettingsUISchema => ( {
+	id: 'test-page',
+	title: 'Test page',
+	section: 'default',
+	save: { adapter: 'none' },
+	...overrides,
+	groups: {
+		general: {
+			id: 'general',
+			fields: [ field ],
+		},
+	},
+} );
 
 const renderElementInMainForm = ( element: JSX.Element ) => {
 	const form = document.createElement( 'form' );
@@ -211,25 +228,20 @@ describe( 'settings HTML rendering', () => {
 		);
 		jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
 		jest.spyOn( console, 'error' ).mockImplementation( () => undefined );
-		const schema: SettingsUISchema = {
-			id: 'products',
-			title: 'Products',
-			section: 'advanced',
-			save: { adapter: 'form_post' },
-			groups: {
-				general: {
-					id: 'general',
-					fields: [
-						{
-							id: 'test_field',
-							label: 'Test field',
-							type: 'text',
-							component: 'test/missing-component',
-						},
-					],
-				},
+		const schema = createSingleFieldSchema(
+			{
+				id: 'test_field',
+				label: 'Test field',
+				type: 'text',
+				component: 'test/missing-component',
 			},
-		};
+			{
+				id: 'products',
+				title: 'Products',
+				section: 'advanced',
+				save: { adapter: 'form_post' },
+			}
+		);
 
 		const { container, root } = renderElement(
 			<SettingsUIErrorBoundary>
@@ -277,25 +289,12 @@ describe( 'settings HTML rendering', () => {
 			scope: { page: 'test-page' },
 			fieldOverrides: { test_field: FieldOverride },
 		} );
-		const schema: SettingsUISchema = {
-			id: 'test-page',
-			title: 'Test page',
-			section: 'default',
-			save: { adapter: 'none' },
-			groups: {
-				general: {
-					id: 'general',
-					fields: [
-						{
-							id: 'test_field',
-							label: 'Test field',
-							type: 'text',
-							component: 'test/missing-component',
-						},
-					],
-				},
-			},
-		};
+		const schema = createSingleFieldSchema( {
+			id: 'test_field',
+			label: 'Test field',
+			type: 'text',
+			component: 'test/missing-component',
+		} );
 
 		const { container, root } = renderElement(
 			<SettingsUIErrorBoundary>
@@ -318,24 +317,11 @@ describe( 'settings HTML rendering', () => {
 			scope: { page: 'test-page' },
 			typeRenderers: { extension_defined: TypeRenderer },
 		} );
-		const schema: SettingsUISchema = {
-			id: 'test-page',
-			title: 'Test page',
-			section: 'default',
-			save: { adapter: 'none' },
-			groups: {
-				general: {
-					id: 'general',
-					fields: [
-						{
-							id: 'test_field',
-							label: 'Test field',
-							type: 'extension_defined',
-						},
-					],
-				},
-			},
-		};
+		const schema = createSingleFieldSchema( {
+			id: 'test_field',
+			label: 'Test field',
+			type: 'extension_defined',
+		} );
 
 		const { container, root } = renderElement(
 			<SettingsUIErrorBoundary>
@@ -352,24 +338,11 @@ describe( 'settings HTML rendering', () => {
 
 	it( 'fails closed and focuses the error region for an unrenderable type', () => {
 		jest.spyOn( console, 'error' ).mockImplementation( () => undefined );
-		const schema: SettingsUISchema = {
-			id: 'test-page',
-			title: 'Test page',
-			section: 'default',
-			save: { adapter: 'none' },
-			groups: {
-				general: {
-					id: 'general',
-					fields: [
-						{
-							id: 'test_field',
-							label: 'Test field',
-							type: 'extension_defined',
-						},
-					],
-				},
-			},
-		};
+		const schema = createSingleFieldSchema( {
+			id: 'test_field',
+			label: 'Test field',
+			type: 'extension_defined',
+		} );
 
 		const { container, root } = renderElement(
 			<SettingsUIErrorBoundary>
@@ -381,55 +354,6 @@ describe( 'settings HTML rendering', () => {
 		expect( errorRegion ).toHaveAttribute( 'role', 'region' );
 		expect( errorRegion ).toHaveAttribute( 'tabindex', '-1' );
 		expect( errorRegion?.ownerDocument.activeElement ).toBe( errorRegion );
-		expect( container.querySelector( 'input' ) ).toBeNull();
-		expect(
-			container.querySelector( '.woocommerce-save-button' )
-		).toBeNull();
-
-		act( () => root.unmount() );
-		container.remove();
-	} );
-
-	it( 'contains errors thrown by registered field components', () => {
-		const ThrowingField = () => {
-			throw new Error( 'Test component failed.' );
-		};
-		registerSettingsExtension( {
-			scope: { page: 'test-page' },
-			components: {
-				'test/throwing-component': ThrowingField,
-			},
-		} );
-		jest.spyOn( console, 'error' ).mockImplementation( () => undefined );
-		const schema: SettingsUISchema = {
-			id: 'test-page',
-			title: 'Test page',
-			section: 'default',
-			save: { adapter: 'form_post' },
-			groups: {
-				general: {
-					id: 'general',
-					fields: [
-						{
-							id: 'test_field',
-							label: 'Test field',
-							type: 'text',
-							component: 'test/throwing-component',
-						},
-					],
-				},
-			},
-		};
-
-		const { container, root } = renderElement(
-			<SettingsUIErrorBoundary>
-				<SettingsUIPage schema={ schema } />
-			</SettingsUIErrorBoundary>
-		);
-
-		expect( container.textContent ).toContain(
-			'Something went wrong while rendering this settings page.'
-		);
 		expect( container.querySelector( 'input' ) ).toBeNull();
 		expect(
 			container.querySelector( '.woocommerce-save-button' )

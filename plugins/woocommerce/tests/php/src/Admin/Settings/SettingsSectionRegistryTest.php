@@ -170,42 +170,6 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A registered native page accepts transitional number and datetime values.
-	 */
-	public function test_registered_native_page_schema_accepts_transitional_number_and_datetime_values(): void {
-		$page = $this->get_parent_page();
-		SettingsSectionRegistry::get_instance()->register(
-			$this->get_registered_section_with_native_settings_ui_page(
-				null,
-				null,
-				null,
-				array(
-					array(
-						'id'    => 'acme_number',
-						'label' => 'Acme number',
-						'type'  => 'number',
-						'value' => '02',
-						'save'  => array( 'adapter' => 'form_post' ),
-					),
-					array(
-						'id'    => 'acme_datetime',
-						'label' => 'Acme datetime',
-						'type'  => 'datetime-local',
-						'value' => '2026-08-03T12:30',
-						'save'  => array( 'adapter' => 'form_post' ),
-					),
-				)
-			)
-		);
-
-		$settings_ui_page = SettingsUIRequestContext::for_settings_page( $page, 'acme_payments' )->get_settings_ui_page();
-		$this->assertInstanceOf( SettingsUIPageInterface::class, $settings_ui_page );
-		$schema = $settings_ui_page->get_schema( 'acme_payments' );
-
-		SettingsUISchema::assert_valid_schema( $schema );
-	}
-
-	/**
 	 * @testdox Should canonicalize option values from a native Settings UI page provider.
 	 */
 	public function test_canonicalizes_option_values_from_native_settings_ui_page(): void {

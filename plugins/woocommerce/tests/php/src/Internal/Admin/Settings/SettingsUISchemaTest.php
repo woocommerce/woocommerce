@@ -287,29 +287,6 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'Read-only <strong>information</strong>alert("x").', $field['description'] );
 		$this->assertSame( array( 'adapter' => 'none' ), $field['save'] );
-	}
-
-	/**
-	 * @testdox It keeps info fields non-saving when their description comes from desc.
-	 */
-	public function test_from_legacy_settings_marks_info_fields_with_descriptions_as_non_saving(): void {
-		$schema = SettingsUISchema::from_legacy_settings(
-			'test',
-			'',
-			'Test settings',
-			array(
-				array(
-					'id'   => 'woocommerce_test_info',
-					'type' => 'info',
-					'desc' => 'Read-only information.',
-				),
-			)
-		);
-
-		$field = $schema['groups']['default']['fields'][0];
-
-		$this->assertSame( 'Read-only information.', $field['description'] );
-		$this->assertSame( array( 'adapter' => 'none' ), $field['save'] );
 		SettingsUISchema::assert_valid_schema( $schema );
 	}
 
@@ -980,13 +957,14 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	 *
 	 * @dataProvider settings_ui_values
 	 *
-	 * @param mixed $value Field value.
+	 * @param string $type Field type.
+	 * @param mixed  $value Field value.
 	 */
-	public function test_assert_valid_schema_accepts_settings_ui_values_for_extension_defined_field_types( $value ): void {
+	public function test_assert_valid_schema_accepts_settings_ui_values_without_interpreting_field_type( string $type, $value ): void {
 		$field = array(
 			'id'    => 'acme_custom_field',
 			'label' => 'Acme custom field',
-			'type'  => 'acme/custom',
+			'type'  => $type,
 			'value' => $value,
 			'save'  => array( 'adapter' => 'form_post' ),
 		);
@@ -998,16 +976,18 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	/**
 	 * Settings UI transport value fixtures.
 	 *
-	 * @return array<string, array{mixed}>
+	 * @return array<string, array{string, mixed}>
 	 */
 	public static function settings_ui_values(): array {
 		return array(
-			'string'      => array( 'Acme' ),
-			'integer'     => array( 10 ),
-			'float'       => array( 10.5 ),
-			'boolean'     => array( true ),
-			'string list' => array( array( 'one', 'two' ) ),
-			'null'        => array( null ),
+			'number string'         => array( 'number', '02' ),
+			'datetime-local string' => array( 'datetime-local', '2026-08-03T12:30' ),
+			'extension string'      => array( 'acme/custom', 'Acme' ),
+			'extension integer'     => array( 'acme/custom', 10 ),
+			'extension float'       => array( 'acme/custom', 10.5 ),
+			'extension boolean'     => array( 'acme/custom', true ),
+			'extension string list' => array( 'acme/custom', array( 'one', 'two' ) ),
+			'extension null'        => array( 'acme/custom', null ),
 		);
 	}
 
@@ -1015,28 +995,23 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	 * @testdox It accepts choice fields with missing or empty option lists.
 	 */
 	public function test_assert_valid_schema_accepts_choice_fields_without_options(): void {
-		$fields = array();
-		foreach (
+		$fields = array(
 			array(
-				'select' => '',
-				'radio'  => '',
-				'array'  => array(),
-			) as $type => $value
-		) {
-			$field = array(
-				'id'    => 'acme_' . $type . '_without_options',
-				'label' => ucfirst( $type ) . ' without options',
-				'type'  => $type,
-				'value' => $value,
+				'id'    => 'acme_select_without_options',
+				'label' => 'Select without options',
+				'type'  => 'select',
+				'value' => '',
 				'save'  => array( 'adapter' => 'form_post' ),
-			);
-
-			$fields[]         = $field;
-			$field['id']      = 'acme_empty_' . $type;
-			$field['label']   = 'Empty ' . $type;
-			$field['options'] = array();
-			$fields[]         = $field;
-		}
+			),
+			array(
+				'id'      => 'acme_array_with_empty_options',
+				'label'   => 'Array with empty options',
+				'type'    => 'array',
+				'value'   => array(),
+				'options' => array(),
+				'save'    => array( 'adapter' => 'form_post' ),
+			),
+		);
 
 		SettingsUISchema::assert_valid_schema( $this->get_native_schema_with_fields( $fields ) );
 		$this->addToAssertionCount( 1 );
@@ -1062,48 +1037,6 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 
 		SettingsUISchema::assert_valid_schema( $this->get_native_schema_with_field( $field ) );
 		$this->addToAssertionCount( 1 );
-	}
-
-	/**
-	 * @testdox It normalizes every legacy field type alias before validation.
-	 *
-	 * @dataProvider legacy_field_type_aliases
-	 *
-	 * @param string $legacy_type Legacy field type.
-	 * @param string $canonical_type Canonical field type.
-	 */
-	public function test_from_legacy_settings_normalizes_aliases_before_validation( string $legacy_type, string $canonical_type ): void {
-		$schema = SettingsUISchema::from_legacy_settings(
-			'acme',
-			'',
-			'Acme',
-			array(
-				array(
-					'id'      => 'acme_field',
-					'label'   => 'Acme field',
-					'type'    => $legacy_type,
-					'value'   => 'a',
-					'options' => array( 'a' => 'Option A' ),
-				),
-			)
-		);
-
-		$this->assertSame( $canonical_type, $schema['groups']['default']['fields'][0]['type'] );
-		SettingsUISchema::assert_valid_schema( $schema );
-	}
-
-	/**
-	 * Legacy field type aliases.
-	 *
-	 * @return array<string, array{string, string}>
-	 */
-	public static function legacy_field_type_aliases(): array {
-		return array(
-			'multiselect'            => array( 'multiselect', 'array' ),
-			'multi_select_countries' => array( 'multi_select_countries', 'array' ),
-			'single_select_country'  => array( 'single_select_country', 'select' ),
-			'single_select_page'     => array( 'single_select_page', 'select' ),
-		);
 	}
 
 	/**

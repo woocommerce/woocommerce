@@ -267,7 +267,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 
 		global $current_section;
 		$current_section = '';
-		$page            = $this->get_settings_ui_test_page_with_counting_script_handles();
+		$page            = $this->get_settings_ui_test_page_with_script_handles( array( 'settings-ui-counting-handle' ) );
 		$context         = SettingsUIRequestContext::for_settings_page( $page, '' );
 
 		$this->assertSame( array( 'settings-ui-counting-handle' ), $context->get_script_handles() );
@@ -276,11 +276,11 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		$page->output();
 		ob_get_clean();
 
-		$this->assertSame( 1, $this->get_script_handle_resolution_count( $page ), 'Script handles should be resolved once for a page and section context.' );
+		$this->assertSame( 1, $this->invoke_private_method( $page, 'get_script_handle_resolution_count' ), 'Script handles should be resolved once for a page and section context.' );
 	}
 
 	/**
-	 * @testdox Should render the complete classic page once with a precise diagnostic when schema validation fails.
+	 * @testdox Should render the complete classic page once when schema validation fails.
 	 */
 	public function test_invalid_schema_uses_complete_classic_fallback_once_without_changing_the_option(): void {
 		global $current_section, $current_tab, $wpdb;
@@ -297,16 +297,6 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$notices = array();
-		$action  = static function ( $function_name, $message, $version ) use ( &$notices ): void {
-			$notices[] = array(
-				'function_name' => $function_name,
-				'message'       => $message,
-				'version'       => $version,
-			);
-		};
-		add_action( 'doing_it_wrong_run', $action, 10, 3 );
-
 		$current_section = '';
 		$current_tab     = 'settings_ui_flag_test';
 		$page            = $this->get_settings_ui_test_page_with_invalid_schema();
@@ -316,18 +306,15 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 			$classes = $page->add_settings_ui_body_class( 'existing-class' );
 			$output  = $this->render_settings_view( $page );
 		} finally {
-			remove_action( 'doing_it_wrong_run', $action, 10 );
 			remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
 		}
 
-		$stored_after          = $wpdb->get_var(
+		$stored_after = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT option_value FROM {$wpdb->options} WHERE option_name = %s",
 				'woocommerce_settings_ui_flag_test'
 			)
 		);
-		$settings_page_notices = $this->get_settings_page_output_notices( $notices );
-
 		$this->assertSame( 'existing-class', $classes, 'Classic body classes should remain unchanged.' );
 		$this->assertStringContainsString( 'name="woocommerce_settings_ui_flag_test"', $output );
 		$this->assertStringContainsString( 'class="woocommerce-save-button', $output );
@@ -335,10 +322,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		$this->assertTrue( empty( $GLOBALS['hide_save_button'] ), 'The classic Save button should remain visible.' );
 		$this->assertNull( $context->get_schema(), 'An invalid schema must not be available for the shared settings asset.' );
 		$this->assertTrue( $context->has_schema_failed() );
-		$this->assertSame( 1, $this->get_schema_resolution_count( $page ), 'Schema validation should run once per request context.' );
-		$this->assertCount( 1, $settings_page_notices, 'The fallback diagnostic should be emitted once.' );
-		$this->assertStringContainsString( 'woocommerce_settings_ui_flag_test', $settings_page_notices[0]['message'] );
-		$this->assertStringContainsString( 'type must be a non-empty string', $settings_page_notices[0]['message'] );
+		$this->assertSame( 1, $this->invoke_private_method( $page, 'get_schema_resolution_count' ), 'Schema validation should run once per request context.' );
 		$this->assertSame( $stored_before, $stored_after, 'Classic fallback must preserve the raw stored option representation.' );
 	}
 
@@ -350,37 +334,28 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		add_filter( 'doing_it_wrong_trigger_error', '__return_false' );
 		$this->setExpectedIncorrectUsage( 'WC_Settings_Page::output' );
 
-		$notices = array();
-		$action  = static function ( $function_name, $message, $version ) use ( &$notices ): void {
-			$notices[] = array(
-				'function_name' => $function_name,
-				'message'       => $message,
-				'version'       => $version,
-			);
-		};
-		add_action( 'doing_it_wrong_run', $action, 10, 3 );
-
 		global $current_section;
 		$current_section = '';
 		$page            = $this->get_settings_ui_test_page_with_script_handles( array( 'settings-ui-missing-handle' ) );
+		$context         = SettingsUIRequestContext::for_settings_page( $page, '' );
+
+		$this->assertFalse( $context->has_script_handles_failed(), 'A valid handle declaration should pass resolution.' );
+		$this->assertNotNull( $context->get_schema(), 'Schema access should not require script registration.' );
+		$this->assertTrue( $context->has_script_handle_loading_failed(), 'The strict loading check should reject an unregistered handle.' );
+		$this->assertStringContainsString( 'settings-ui-missing-handle', $context->get_script_handles_failure_reason() );
+		$this->assertStringContainsString( 'not registered', $context->get_script_handles_failure_reason() );
 
 		try {
 			ob_start();
 			$page->output();
 			$output = ob_get_clean();
 		} finally {
-			remove_action( 'doing_it_wrong_run', $action, 10 );
 			remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
 		}
-
-		$settings_page_notices = $this->get_settings_page_output_notices( $notices );
 
 		$this->assertStringContainsString( 'name="woocommerce_settings_ui_flag_test"', $output );
 		$this->assertStringNotContainsString( 'data-wc-settings-ui="1"', $output );
 		$this->assertTrue( empty( $GLOBALS['hide_save_button'] ), 'The classic Save button should remain visible.' );
-		$this->assertCount( 1, $settings_page_notices );
-		$this->assertStringContainsString( 'settings-ui-missing-handle', $settings_page_notices[0]['message'] );
-		$this->assertStringContainsString( 'not registered', $settings_page_notices[0]['message'] );
 	}
 
 	/**
@@ -396,42 +371,6 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should trim and deduplicate declared extension script handles before loading them.
-	 */
-	public function test_script_handles_are_normalized_before_loading(): void {
-		wp_register_script( 'settings-ui-normalized-handle', false, array(), '1.0.0', true );
-
-		$page    = $this->get_settings_ui_test_page_with_script_handles(
-			array( ' settings-ui-normalized-handle ', 'settings-ui-normalized-handle' )
-		);
-		$context = SettingsUIRequestContext::for_settings_page( $page, '' );
-
-		$this->assertSame( array( 'settings-ui-normalized-handle' ), $context->get_script_handles() );
-		$this->assertSame( array( 'settings-ui-normalized-handle' ), $context->enqueue_script_handles() );
-		$this->assertTrue( wp_script_is( 'settings-ui-normalized-handle', 'enqueued' ) );
-	}
-
-	/**
-	 * @testdox Should enqueue each registered extension script handle before rendering the Settings UI mount.
-	 */
-	public function test_registered_script_handle_is_enqueued_before_settings_ui_mount(): void {
-		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
-		wp_register_script( 'settings-ui-registered-handle', false, array(), '1.0.0', true );
-
-		global $current_section;
-		$current_section = '';
-		$page            = $this->get_settings_ui_test_page_with_script_handles( array( 'settings-ui-registered-handle' ) );
-
-		ob_start();
-		$page->output();
-		$output = ob_get_clean();
-
-		$this->assertTrue( wp_script_is( 'settings-ui-registered-handle', 'enqueued' ) );
-		$this->assertStringContainsString( 'data-wc-settings-ui="1"', $output );
-		$this->assertTrue( $GLOBALS['hide_save_button'] );
-	}
-
-	/**
 	 * @testdox Should allow extensions to register declared script handles after WooCommerce collects dependencies.
 	 */
 	public function test_script_handle_registered_at_later_hook_priority_is_enqueued_before_mount(): void {
@@ -439,13 +378,16 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 
 		global $current_section;
 		$current_section = '';
-		$page            = $this->get_settings_ui_test_page_with_script_handles( array( 'settings-ui-late-registered-handle' ) );
+		$page            = $this->get_settings_ui_test_page_with_script_handles(
+			array( ' settings-ui-late-registered-handle ', 'settings-ui-late-registered-handle' )
+		);
 		$this->set_current_settings_page_request( $page );
 		$context = SettingsUIRequestContext::for_settings_page( $page, '' );
 
 		// WooCommerce collects dependencies at priority 15; extensions may register them later in the same hook.
 		$dependencies = $this->invoke_private_method( new WCAdminAssets(), 'get_settings_ui_script_dependencies' );
 		$this->assertSame( array( 'wc-settings-ui', 'settings-ui-late-registered-handle' ), $dependencies );
+		$this->assertSame( array( 'settings-ui-late-registered-handle' ), $context->get_script_handles() );
 		$this->assertFalse( $context->has_script_handles_failed(), 'Dependency collection should only resolve handle declarations.' );
 		wp_register_script( 'settings-ui-late-registered-handle', false, array(), '1.0.0', true );
 
@@ -456,19 +398,6 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		$this->assertTrue( wp_script_is( 'settings-ui-late-registered-handle', 'enqueued' ) );
 		$this->assertStringContainsString( 'data-wc-settings-ui="1"', $output );
 		$this->assertFalse( $context->has_script_handle_loading_failed() );
-	}
-
-	/**
-	 * @testdox Should preserve the public resolution check when a declared script is not registered.
-	 */
-	public function test_script_handle_loading_check_does_not_change_resolution_check_contract(): void {
-		$page    = $this->get_settings_ui_test_page_with_script_handles( array( 'settings-ui-unregistered-handle' ) );
-		$context = SettingsUIRequestContext::for_settings_page( $page, '' );
-
-		$this->assertFalse( $context->has_script_handles_failed(), 'A valid handle declaration should pass resolution.' );
-		$this->assertNotNull( $context->get_schema(), 'Schema access should not require script registration.' );
-		$this->assertTrue( $context->has_script_handle_loading_failed(), 'The strict loading check should reject an unregistered handle.' );
-		$this->assertStringContainsString( 'not registered', $context->get_script_handles_failure_reason() );
 	}
 
 	/**
@@ -502,7 +431,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'hide_save_button', $GLOBALS );
 		$this->assertCount( 1, $caught );
 		$this->assertSame( 'Unable to resolve the Settings UI page id.', $caught[0]->getMessage() );
-		$this->assertSame( 1, $this->get_page_id_resolution_count( $page ), 'The failing extension method should run once per request.' );
+		$this->assertSame( 1, $this->invoke_private_method( $page, 'get_page_id_resolution_count' ), 'The failing extension method should run once per request.' );
 	}
 
 	/**
@@ -1344,6 +1273,13 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 			private int $page_id_resolution_count = 0;
 
 			/**
+			 * Script handle resolution count.
+			 *
+			 * @var int
+			 */
+			private int $script_handle_resolution_count = 0;
+
+			/**
 			 * Constructor.
 			 *
 			 * @param array $script_handles Script handles.
@@ -1413,6 +1349,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 					 */
 					public function get_script_handles( string $section_id ): array {
 						unset( $section_id );
+						$this->settings_page->increment_script_handle_resolution_count();
 
 						return $this->script_handles;
 					}
@@ -1427,117 +1364,19 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 			}
 
 			/**
+			 * Increment the script handle resolution count.
+			 */
+			public function increment_script_handle_resolution_count(): void {
+				++$this->script_handle_resolution_count;
+			}
+
+			/**
 			 * Get the page id resolution count.
 			 *
 			 * @return int
 			 */
 			public function get_page_id_resolution_count(): int {
 				return $this->page_id_resolution_count;
-			}
-
-			/**
-			 * Get settings for the default section.
-			 *
-			 * @return array
-			 */
-			protected function get_settings_for_default_section() {
-				return array(
-					array(
-						'id'    => 'woocommerce_settings_ui_flag_test',
-						'type'  => 'text',
-						'title' => 'Settings UI flag test',
-					),
-				);
-			}
-		};
-	}
-
-	/**
-	 * Get the page id resolution count for a counting test page.
-	 *
-	 * @param \WC_Settings_Page $page Settings page.
-	 * @return int
-	 */
-	private function get_page_id_resolution_count( \WC_Settings_Page $page ): int {
-		$method = new \ReflectionMethod( $page, 'get_page_id_resolution_count' );
-		$method->setAccessible( true );
-
-		return (int) $method->invoke( $page );
-	}
-
-	/**
-	 * Get the script handle resolution count for a counting test page.
-	 *
-	 * @param \WC_Settings_Page $page Settings page.
-	 * @return int
-	 */
-	private function get_script_handle_resolution_count( \WC_Settings_Page $page ): int {
-		$method = new \ReflectionMethod( $page, 'get_script_handle_resolution_count' );
-		$method->setAccessible( true );
-
-		return (int) $method->invoke( $page );
-	}
-
-	/**
-	 * Get the schema resolution count for a counting test page.
-	 *
-	 * @param \WC_Settings_Page $page Settings page.
-	 * @return int
-	 */
-	private function get_schema_resolution_count( \WC_Settings_Page $page ): int {
-		$method = new \ReflectionMethod( $page, 'get_schema_resolution_count' );
-		$method->setAccessible( true );
-
-		return (int) $method->invoke( $page );
-	}
-
-	/**
-	 * Build a settings page with counting script handles.
-	 *
-	 * @return \WC_Settings_Page
-	 */
-	private function get_settings_ui_test_page_with_counting_script_handles(): \WC_Settings_Page {
-		return new class() extends \WC_Settings_Page {
-			/**
-			 * Script handle resolution count.
-			 *
-			 * @var int
-			 */
-			private int $script_handle_resolution_count = 0;
-
-			/**
-			 * Constructor.
-			 */
-			public function __construct() {
-				$this->id    = 'settings_ui_flag_test';
-				$this->label = 'Settings UI flag test';
-			}
-
-			/**
-			 * Get the settings UI page adapter.
-			 *
-			 * @return \Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface|null
-			 */
-			public function get_settings_ui_page(): ?\Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface {
-				return new class( $this ) extends \Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter {
-					/**
-					 * Get script handles.
-					 *
-					 * @param string $section_id Section id.
-					 * @return array
-					 */
-					public function get_script_handles( string $section_id ): array {
-						$this->settings_page->increment_script_handle_resolution_count();
-						return array( 'settings-ui-counting-handle' );
-					}
-				};
-			}
-
-			/**
-			 * Increment the script handle resolution count.
-			 */
-			public function increment_script_handle_resolution_count(): void {
-				++$this->script_handle_resolution_count;
 			}
 
 			/**

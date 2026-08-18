@@ -611,17 +611,14 @@ class SettingsUIRequestContext {
 		// Exception messages are cached diagnostics rather than HTML output. Dynamic
 		// handles are sanitized before the exception crosses this boundary.
 		// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
-		$validated_handles = array();
 		foreach ( $script_handles as $script_handle ) {
 			if ( ! is_string( $script_handle ) || '' === trim( $script_handle ) ) {
 				throw new \InvalidArgumentException( __( 'Settings UI script handles must be non-empty strings.', 'woocommerce' ) );
 			}
-
-			$validated_handles[] = trim( $script_handle );
 		}
 		// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 
-		return array_values( array_unique( $validated_handles ) );
+		return array_values( array_unique( array_map( 'trim', $script_handles ) ) );
 	}
 
 	/**

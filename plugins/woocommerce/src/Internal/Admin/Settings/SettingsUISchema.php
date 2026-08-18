@@ -176,7 +176,6 @@ class SettingsUISchema {
 			throw self::invalid_schema( 'Schema groups must be a map.' );
 		}
 
-		$group_ids = array();
 		foreach ( $schema['groups'] as $group_key => $group ) {
 			if ( ! is_string( $group_key ) || '' === $group_key ) {
 				throw self::invalid_schema( 'Group map keys must be non-empty strings.' );
@@ -190,8 +189,6 @@ class SettingsUISchema {
 			if ( $group_key !== $group['id'] ) {
 				throw self::invalid_schema( sprintf( 'Group map key "%s" must match group id "%s".', $group_key, $group['id'] ) );
 			}
-
-			$group_ids[] = $group['id'];
 		}
 
 		$field_ids        = array();
@@ -212,14 +209,14 @@ class SettingsUISchema {
 
 				self::assert_non_empty_string( $field['id'] ?? null, sprintf( 'Group "%s" field %d id must be a non-empty string.', $group_id, $field_index ) );
 				$field_id = $field['id'];
-				if ( in_array( $field_id, $field_ids, true ) ) {
+				if ( isset( $field_ids[ $field_id ] ) ) {
 					throw self::invalid_schema( sprintf( 'Field id "%s" is duplicated.', $field_id ) );
 				}
-				if ( in_array( $field_id, $group_ids, true ) ) {
+				if ( isset( $schema['groups'][ $field_id ] ) ) {
 					throw self::invalid_schema( sprintf( 'Field id "%s" collides with a group id.', $field_id ) );
 				}
 
-				$field_ids[] = $field_id;
+				$field_ids[ $field_id ] = true;
 				self::assert_field( $field );
 				if ( isset( $field['visibility'] ) ) {
 					$visibility_rules[ $field_id ] = $field['visibility'];
@@ -229,7 +226,7 @@ class SettingsUISchema {
 
 		foreach ( $visibility_rules as $field_id => $visibility ) {
 			$controller = $visibility['controller'];
-			if ( ! in_array( $controller, $field_ids, true ) ) {
+			if ( ! isset( $field_ids[ $controller ] ) ) {
 				throw self::invalid_schema( sprintf( 'Field "%s" visibility controller "%s" does not reference a field.', $field_id, $controller ) );
 			}
 		}
@@ -909,10 +906,10 @@ class SettingsUISchema {
 			}
 
 			self::assert_non_empty_string( $item['id'] ?? null, sprintf( '%s item %d id must be a non-empty string.', $context, $index ) );
-			if ( in_array( $item['id'], $ids, true ) ) {
+			if ( isset( $ids[ $item['id'] ] ) ) {
 				throw self::invalid_schema( sprintf( '%s item id "%s" is duplicated.', $context, $item['id'] ) );
 			}
-			$ids[] = $item['id'];
+			$ids[ $item['id'] ] = true;
 
 			foreach ( array( 'label', 'href' ) as $property ) {
 				if ( ! isset( $item[ $property ] ) || ! is_string( $item[ $property ] ) ) {
@@ -998,10 +995,10 @@ class SettingsUISchema {
 			}
 
 			self::assert_non_empty_string( $action['id'] ?? null, sprintf( 'Group "%s" action %d id must be a non-empty string.', $group_id, $index ) );
-			if ( in_array( $action['id'], $ids, true ) ) {
+			if ( isset( $ids[ $action['id'] ] ) ) {
 				throw self::invalid_schema( sprintf( 'Group "%s" action id "%s" is duplicated.', $group_id, $action['id'] ) );
 			}
-			$ids[] = $action['id'];
+			$ids[ $action['id'] ] = true;
 
 			foreach ( array( 'label', 'href' ) as $property ) {
 				if ( ! isset( $action[ $property ] ) || ! is_string( $action[ $property ] ) ) {

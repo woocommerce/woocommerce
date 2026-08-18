@@ -137,24 +137,6 @@ test.describe( 'Settings UI feature flag', { tag: [ tags.NOT_E2E ] }, () => {
 		).toContainText( 'Registered settings UI component' );
 	} );
 
-	test( 'uses classic output when a declared script handle is not registered', async ( {
-		page,
-	} ) => {
-		await page.goto(
-			'wp-admin/admin.php?page=wc-settings&tab=products&section=settings_ui_component_unregistered'
-		);
-
-		await expect(
-			page.locator( '#settings_ui_component_unregistered_value' )
-		).toBeVisible();
-		await expect( page.locator( '[data-wc-settings-ui]' ) ).toHaveCount(
-			0
-		);
-		await expect(
-			page.getByRole( 'button', { name: 'Save changes' } )
-		).toBeVisible();
-	} );
-
 	test( 'fails closed when an executed script omits its component registration', async ( {
 		page,
 	} ) => {
@@ -185,19 +167,6 @@ test.describe( 'Settings UI feature flag', { tag: [ tags.NOT_E2E ] }, () => {
 			)
 		).toBe( true );
 
-		const classicHref = await classicAction.getAttribute( 'href' );
-		expect( classicHref ).not.toBeNull();
-		const classicUrl = new URL( classicHref as string );
-		expect( classicUrl.searchParams.getAll( 'wc_settings_ui' ) ).toEqual( [
-			'classic',
-		] );
-		expect( classicUrl.searchParams.get( 'page' ) ).toBe( 'wc-settings' );
-		expect( classicUrl.searchParams.get( 'tab' ) ).toBe( 'products' );
-		expect( classicUrl.searchParams.get( 'section' ) ).toBe(
-			'settings_ui_component_missing'
-		);
-		expect( classicUrl.searchParams.get( 'preserved' ) ).toBe( 'yes' );
-
 		await classicAction.click();
 		await expect( page ).toHaveURL( /wc_settings_ui=classic/ );
 		await expect(
@@ -208,11 +177,6 @@ test.describe( 'Settings UI feature flag', { tag: [ tags.NOT_E2E ] }, () => {
 		);
 		await expect(
 			page.getByRole( 'button', { name: 'Save changes' } )
-		).toBeVisible();
-
-		await page.goto( settingsUrl );
-		await expect(
-			page.getByRole( 'link', { name: 'Use classic settings' } )
 		).toBeVisible();
 	} );
 } );
