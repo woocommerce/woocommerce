@@ -548,6 +548,10 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 
 		$id = (int) $review->comment_ID;
 
+		// Captured before the update: $review still holds the pre-update comment, so this is the
+		// product the review currently belongs to.
+		$original_product_id = (int) $review->comment_post_ID;
+
 		if ( isset( $request['type'] ) && 'review' !== get_comment_type( $id ) ) {
 			return new WP_Error( 'woocommerce_rest_review_invalid_type', __( 'Sorry, you are not allowed to change the comment type.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
@@ -598,19 +602,30 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 			}
 		}
 
+		// Re-read the comment because the same request can move the review to a different product.
+		$updated_review     = get_comment( $id );
+		$current_product_id = $updated_review instanceof WP_Comment ? (int) $updated_review->comment_post_ID : 0;
+
 		if ( ! empty( $request['rating'] ) ) {
 			update_comment_meta( $id, 'rating', $request['rating'] );
 
 			/*
 			 * Any recompute of the product's rating aggregates triggered while updating the comment ran
 			 * before the new rating was stored, so it used the previous value. Recompute now that the
-			 * meta is up to date. The comment is re-read because the same request can move the review
-			 * to a different product.
+			 * meta is up to date.
 			 */
-			$updated_review = get_comment( $id );
-			if ( $updated_review instanceof WP_Comment ) {
-				WC_Comments::clear_transients( (int) $updated_review->comment_post_ID );
+			if ( $current_product_id ) {
+				WC_Comments::clear_transients( $current_product_id );
 			}
+		}
+
+		/*
+		 * When the review moves to another product, wp_update_comment() only recomputes the product it
+		 * moved to, leaving the one it left still counting it. This is not limited to rating changes,
+		 * so it sits outside the check above.
+		 */
+		if ( $current_product_id && $original_product_id !== $current_product_id ) {
+			WC_Comments::clear_transients( $original_product_id );
 		}
 
 		if ( isset( $request['verified'] ) && ! empty( $request['verified'] ) ) {

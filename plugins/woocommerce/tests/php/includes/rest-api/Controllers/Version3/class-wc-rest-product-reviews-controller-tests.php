@@ -312,6 +312,61 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Moving a review to another product updates the aggregates of both products.
+	 */
+	public function test_update_item_recalculates_the_aggregates_of_both_products_when_the_review_moves() {
+		wp_set_current_user( $this->shop_manager_id );
+		$source_id      = ProductHelper::create_simple_product()->get_id();
+		$destination_id = ProductHelper::create_simple_product()->get_id();
+
+		$review_id = $this->create_review( $source_id, 'Holds up to daily use.', 5 )->get_data()['id'];
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/reviews/' . $review_id );
+		$request->set_body_params(
+			array(
+				'product_id' => $destination_id,
+				'rating'     => 3,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), 'The review is moved successfully.' );
+
+		$source = wc_get_product( $source_id );
+		$this->assertEquals( 0, $source->get_average_rating(), 'The product the review left no longer counts its rating.' );
+		$this->assertEquals( array(), $source->get_rating_counts(), 'The product the review left no longer counts it in the rating counts.' );
+		$this->assertEquals( 0, $source->get_review_count(), 'The product the review left no longer counts it as a review.' );
+
+		$destination = wc_get_product( $destination_id );
+		$this->assertEquals( 3, $destination->get_average_rating(), 'The product the review moved to picks up the new rating.' );
+		$this->assertEquals( array( 3 => 1 ), $destination->get_rating_counts(), 'The product the review moved to picks up the rating counts.' );
+		$this->assertEquals( 1, $destination->get_review_count(), 'The product the review moved to counts the review.' );
+	}
+
+	/**
+	 * @testdox Moving a review without changing its rating still updates the aggregates of both products.
+	 */
+	public function test_update_item_recalculates_the_aggregates_when_the_review_moves_without_a_rating_change() {
+		wp_set_current_user( $this->shop_manager_id );
+		$source_id      = ProductHelper::create_simple_product()->get_id();
+		$destination_id = ProductHelper::create_simple_product()->get_id();
+
+		$review_id = $this->create_review( $source_id, 'Holds up to daily use.', 4 )->get_data()['id'];
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/reviews/' . $review_id );
+		$request->set_body_params( array( 'product_id' => $destination_id ) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), 'The review is moved successfully.' );
+
+		$source = wc_get_product( $source_id );
+		$this->assertEquals( 0, $source->get_average_rating(), 'The product the review left drops it even though the rating did not change.' );
+		$this->assertEquals( 0, $source->get_review_count(), 'The product the review left no longer counts it as a review.' );
+
+		$destination = wc_get_product( $destination_id );
+		$this->assertEquals( 4, $destination->get_average_rating(), 'The product the review moved to keeps the existing rating.' );
+		$this->assertEquals( 1, $destination->get_review_count(), 'The product the review moved to counts the review.' );
+	}
+
+	/**
 	 * Creates a product review through the REST API.
 	 *
 	 * @param int      $product_id ID of the product being reviewed.
