@@ -257,9 +257,6 @@ class WC_Emails {
 		}
 
 		// Hooks for sending emails during store events.
-		add_action( 'woocommerce_low_stock_notification', array( $this, 'low_stock' ) );
-		add_action( 'woocommerce_no_stock_notification', array( $this, 'no_stock' ) );
-		add_action( 'woocommerce_product_on_backorder_notification', array( $this, 'backorder' ) );
 		add_action( 'woocommerce_created_customer_notification', array( $this, 'customer_new_account' ), 10, 3 );
 
 		// Hook for replacing {site_title} in email-footer.
@@ -298,6 +295,9 @@ class WC_Emails {
 			'WC_Email_Customer_Reset_Password'       => __DIR__ . '/emails/class-wc-email-customer-reset-password.php',
 			'WC_Email_Customer_New_Account'          => __DIR__ . '/emails/class-wc-email-customer-new-account.php',
 			'WC_Email_Admin_Payment_Gateway_Enabled' => __DIR__ . '/emails/class-wc-email-admin-payment-gateway-enabled.php',
+			'WC_Email_Low_Stock'                     => __DIR__ . '/emails/class-wc-email-low-stock.php',
+			'WC_Email_No_Stock'                      => __DIR__ . '/emails/class-wc-email-no-stock.php',
+			'WC_Email_Backorder'                     => __DIR__ . '/emails/class-wc-email-backorder.php',
 			'WC_Email_Customer_POS_Completed_Order'  => __DIR__ . '/emails/class-wc-email-customer-pos-completed-order.php',
 			'WC_Email_Customer_POS_Refunded_Order'   => __DIR__ . '/emails/class-wc-email-customer-pos-refunded-order.php',
 		);
@@ -1003,6 +1003,7 @@ class WC_Emails {
 	/**
 	 * Low stock notification email.
 	 *
+	 * @deprecated 11.2.0 Replaced by the WC_Email_Low_Stock class, which is configurable under WooCommerce > Settings > Emails.
 	 * @param WC_Product $product Product instance.
 	 * @return void
 	 */
@@ -1094,6 +1095,7 @@ class WC_Emails {
 	/**
 	 * No stock notification email.
 	 *
+	 * @deprecated 11.2.0 Replaced by the WC_Email_No_Stock class, which is configurable under WooCommerce > Settings > Emails.
 	 * @param WC_Product $product Product instance.
 	 * @return void
 	 */
@@ -1181,6 +1183,7 @@ class WC_Emails {
 	/**
 	 * Backorder notification email.
 	 *
+	 * @deprecated 11.2.0 Replaced by the WC_Email_Backorder class, which is configurable under WooCommerce > Settings > Emails.
 	 * @param array $args Arguments.
 	 * @return void
 	 */
