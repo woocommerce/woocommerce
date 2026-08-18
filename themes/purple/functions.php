@@ -341,10 +341,11 @@ add_filter( 'woocommerce_create_pages', 'purple_filter_woocommerce_create_pages'
 
 if ( ! function_exists( 'purple_sync_cart_page_content' ) ) :
 	/**
-	 * Sync the Cart page post content to Purple's default markup once per site.
+	 * Add Purple's default markup to an empty Cart page once per site.
 	 *
-	 * Runs on theme activation so existing stores pick up the cart block without
-	 * duplicating it in the block template.
+	 * Existing content is never replaced because it may contain merchant
+	 * customizations. Runs on theme activation so stores with an empty Cart page
+	 * pick up the cart block without duplicating it in the block template.
 	 */
 	function purple_sync_cart_page_content(): void {
 		if ( ! function_exists( 'wc_get_page_id' ) ) {
@@ -360,14 +361,22 @@ if ( ! function_exists( 'purple_sync_cart_page_content' ) ) :
 			return;
 		}
 
-		wp_update_post(
+		$cart_page = get_post( $cart_page_id );
+		if ( ! $cart_page instanceof \WP_Post || '' !== trim( $cart_page->post_content ) ) {
+			return;
+		}
+
+		$updated = wp_update_post(
 			array(
 				'ID'           => $cart_page_id,
 				'post_content' => purple_get_cart_page_content(),
-			)
+			),
+			true
 		);
 
-		set_theme_mod( 'purple_cart_page_content_version', 1 );
+		if ( ! is_wp_error( $updated ) && $cart_page_id === $updated ) {
+			set_theme_mod( 'purple_cart_page_content_version', 1 );
+		}
 	}
 
 endif;
