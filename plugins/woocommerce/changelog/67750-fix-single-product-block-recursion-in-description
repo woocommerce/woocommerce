@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent a memory-exhausting recursion when a product description contains a Single Product block that references the product being loaded into the shared products store.
