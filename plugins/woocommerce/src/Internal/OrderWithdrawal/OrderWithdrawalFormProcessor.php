@@ -644,7 +644,7 @@ final class OrderWithdrawalFormProcessor {
 	 * @param int                  $submitted_at Unix timestamp for the submission.
 	 */
 	private function send_customer_order_withdrawal_email( array $data, int $submitted_at ): bool {
-		$email = WC()->mailer()->get_emails()['WC_Email_Customer_Order_Withdrawal_Requested'] ?? null;
+		$email = WC()->mailer()->get_emails()['WC_Email_Customer_Order_Withdrawal_Requested'] ?? new CustomerOrderWithdrawalRequestedEmail();
 
 		if ( ! $email instanceof CustomerOrderWithdrawalRequestedEmail ) {
 			return false;
@@ -665,7 +665,7 @@ final class OrderWithdrawalFormProcessor {
 	 * @param int                  $submitted_at  Unix timestamp for the submission.
 	 */
 	private function send_merchant_order_withdrawal_email( array $data, ?WC_Order $matched_order, int $submitted_at ): bool {
-		$email = WC()->mailer()->get_emails()['WC_Email_Order_Withdrawal_Requested'] ?? null;
+		$email = WC()->mailer()->get_emails()['WC_Email_Order_Withdrawal_Requested'] ?? new OrderWithdrawalRequestedEmail();
 
 		if ( ! $email instanceof OrderWithdrawalRequestedEmail ) {
 			return false;
