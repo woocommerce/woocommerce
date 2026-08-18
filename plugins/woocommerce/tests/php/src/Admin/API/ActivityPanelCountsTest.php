@@ -192,7 +192,6 @@ class ActivityPanelCountsTest extends WC_REST_Unit_Test_Case {
 	private function reregister_routes() {
 		$this->server              = new WP_REST_Server();
 		$GLOBALS['wp_rest_server'] = $this->server;
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Re-firing a core hook to re-register routes in the test, not defining one.
 		do_action( 'rest_api_init' );
 	}
 

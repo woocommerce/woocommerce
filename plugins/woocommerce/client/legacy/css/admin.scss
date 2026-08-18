@@ -8047,18 +8047,32 @@ table.bar_chart {
 		min-height: 180px
 	}
 
+	// Fixed layout so a long nowrap select2 selection truncates inside the Product
+	// column instead of stretching it and pushing Quantity past the modal edge.
+	&.wc-backbone-modal-add-products table.widefat {
+		table-layout: fixed;
+
+		th:last-child {
+			width: 100px;
+		}
+	}
+
 	.select2-container {
 		width: 100% !important;
 	}
 
-	// Reserve room for the clear (x) and chevron icons; .select2-container keeps this rule above the later global 24px padding.
-	.select2-container .select2-selection--single {
+	// Reserve room for the clear (x) and chevron icons; .wc-backbone-modal-content lifts specificity
+	// to 0,5,0 so the later, equal-specificity WP 7.0 reset (`.wc-wp-version-gte-70 ... padding: 0 12px`)
+	// no longer wins the right padding.
+	.wc-backbone-modal-content .select2-container .select2-selection--single {
 		.select2-selection__rendered {
 			padding-right: 40px;
 		}
 
+		// Pull the clear (x) into the 40px padding zone so it sits beside the chevron
+		// rather than at the text edge.
 		.select2-selection__clear {
-			margin-right: 18px;
+			margin-right: -10px;
 		}
 	}
 }
@@ -9561,7 +9575,7 @@ table.bar_chart {
 	margin-bottom: 0px;
 
 	.wp-editor-tools {
-		background: none;
+		background: #fff;
 		padding-top: 0px;
 		width: 100%;
 	}
