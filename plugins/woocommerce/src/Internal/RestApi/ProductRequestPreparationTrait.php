@@ -21,11 +21,20 @@ trait ProductRequestPreparationTrait {
 	 *
 	 * @param \WP_REST_Request<array<string, mixed>> $request Request object.
 	 * @return \WC_Product|\WP_Error
-	 * @throws \WC_Data_Exception When an extension-backed product store reports a typed failure.
-	 * @throws \Exception When product construction fails for a product that still exists.
+	 * @throws \Exception When construction fails for a product that still exists, or a store reports a typed WC_Data_Exception failure (rethrown with its code intact).
 	 */
 	private function get_product_for_rest_request( $request ) {
-		$id                    = isset( $request['id'] ) ? absint( $request['id'] ) : 0;
+		$id = isset( $request['id'] ) ? absint( $request['id'] ) : 0;
+
+		if ( isset( $request['type'] ) && ! is_scalar( $request['type'] ) ) {
+			// Falling back to a default class here would silently rewrite the product's type on update.
+			return new \WP_Error(
+				"woocommerce_rest_invalid_{$this->post_type}_type",
+				__( 'Invalid product type.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
 		$existing_product_type = isset( $request['type'] ) && $id ? \WC_Product_Factory::get_product_type( $id ) : false;
 
 		if ( ProductType::VARIATION === $existing_product_type ) {
@@ -33,15 +42,6 @@ trait ProductRequestPreparationTrait {
 		}
 
 		if ( isset( $request['type'] ) ) {
-			if ( ! is_scalar( $request['type'] ) ) {
-				// Falling back to a default class here would silently rewrite the product's type on update.
-				return new \WP_Error(
-					"woocommerce_rest_invalid_{$this->post_type}_type",
-					__( 'Invalid product type.', 'woocommerce' ),
-					array( 'status' => 400 )
-				);
-			}
-
 			$classname = \WC_Product_Factory::get_classname_from_product_type( (string) $request['type'] );
 
 			if ( ! $classname || ! class_exists( $classname ) ) {
@@ -50,19 +50,19 @@ trait ProductRequestPreparationTrait {
 
 			try {
 				$product = new $classname( $id );
-			} catch ( \WC_Data_Exception $e ) {
-				// Typed exceptions carry their own error codes and statuses for the handlers upstream.
-				throw $e;
 			} catch ( \Exception $e ) {
-				// Only arbitrate for a nonzero target ID: wp_delete_post() invalidates the posts
-				// cache (unlike WooCommerce's products cache group), so get_post_type() reliably
-				// reports whether the product vanished (e.g. deleted concurrently) since the
-				// route guard. Create-path and existing-product failures are rethrown unchanged.
-				if ( ! $id || 'product' === get_post_type( $id ) ) {
+				// Typed exceptions carry their own codes for the handlers upstream, and the
+				// arbitration below applies only to a nonzero target ID: wp_delete_post()
+				// invalidates the posts cache (unlike WooCommerce's products cache group), so
+				// get_post_type() reliably reports whether the product vanished (e.g. deleted
+				// concurrently) since the route guard. Everything else is rethrown unchanged.
+				$target_post_type = get_post_type( $id );
+
+				if ( $e instanceof \WC_Data_Exception || ! $id || 'product' === $target_post_type ) {
 					throw $e;
 				}
 
-				return $this->get_invalid_product_id_error( 'product_variation' === get_post_type( $id ) );
+				return $this->get_invalid_product_id_error( 'product_variation' === $target_post_type );
 			}
 		} elseif ( isset( $request['id'] ) ) {
 			$product = wc_get_product( $id );
@@ -77,6 +77,35 @@ trait ProductRequestPreparationTrait {
 		return ProductType::VARIATION === $product->get_type()
 			? $this->get_invalid_product_id_error( true )
 			: $product;
+	}
+
+	/**
+	 * Prepare the product targeted by a duplicate request, converting typed failures to errors.
+	 *
+	 * @param \WP_REST_Request<array<string, mixed>> $request Request object.
+	 * @return \WC_Product|\WP_Error
+	 */
+	private function prepare_product_for_duplication( $request ) {
+		try {
+			$product = $this->prepare_object_for_database( $request );
+		} catch ( \WC_Data_Exception $e ) {
+			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
+		}
+
+		if ( is_wp_error( $product ) ) {
+			return $product;
+		}
+
+		// The pre-insert filter runs after the trait's guarantees, so the shape must be re-checked.
+		if ( ! $product instanceof \WC_Product ) {
+			return new \WP_Error(
+				"woocommerce_rest_{$this->post_type}_not_created",
+				__( 'Invalid product.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		return $product;
 	}
 
 	/**

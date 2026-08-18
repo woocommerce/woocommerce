@@ -239,22 +239,10 @@ class Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		// Creating product object from request data in preparation for copying.
-		try {
-			$updated_product = $this->prepare_object_for_database( $request );
-		} catch ( \WC_Data_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
-		}
+		$updated_product = $this->prepare_product_for_duplication( $request );
 
 		if ( is_wp_error( $updated_product ) ) {
 			return $updated_product;
-		}
-
-		if ( ! $updated_product instanceof \WC_Product ) {
-			return new WP_Error(
-				"woocommerce_rest_{$this->post_type}_not_created",
-				__( 'Invalid product.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
 		}
 
 		$duplicated_product = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $updated_product );

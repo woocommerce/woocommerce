@@ -2258,20 +2258,26 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$request->set_url_params( array( 'id' => $product_id ) );
 		$request->set_body_params( array( 'type' => 'simple' ) );
 
-		$prepare_method = new ReflectionMethod( $this->endpoint, 'prepare_object_for_database' );
-		$prepare_method->setAccessible( true );
-
-		try {
-			$result = $prepare_method->invoke( $this->endpoint, $request, false );
-		} finally {
-			remove_filter( 'woocommerce_data_stores', $register_custom_data_store );
-			remove_filter( 'woocommerce_product_type_query', $resolve_custom_product_type );
-		}
+		$result = $this->invoke_prepare( $request, false );
 
 		$this->assertInstanceOf( WC_Product_Simple::class, $result );
 		$this->assertSame( $product_id, $result->get_id() );
 		$this->assertSame( 'product_variation', get_post_type( $product_id ) );
 		$this->assertSame( 1, $custom_data_store->read_count, 'Product type detection should not construct the product twice.' );
+	}
+
+	/**
+	 * Invoke the protected prepare_object_for_database() on the endpoint under test.
+	 *
+	 * @param WP_REST_Request $request  Request object.
+	 * @param bool            $creating Whether the request creates a new product.
+	 * @return mixed
+	 */
+	private function invoke_prepare( WP_REST_Request $request, bool $creating ) {
+		$prepare_method = new ReflectionMethod( $this->endpoint, 'prepare_object_for_database' );
+		$prepare_method->setAccessible( true );
+
+		return $prepare_method->invoke( $this->endpoint, $request, $creating );
 	}
 
 	/**
@@ -2286,10 +2292,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		// Simulate a concurrent deletion between the update_item() guard and preparation.
 		wp_delete_post( $product->get_id(), true );
 
-		$prepare_method = new ReflectionMethod( $this->endpoint, 'prepare_object_for_database' );
-		$prepare_method->setAccessible( true );
-
-		$result = $prepare_method->invoke( $this->endpoint, $request, false );
+		$result = $this->invoke_prepare( $request, false );
 
 		$this->assertWPError( $result );
 		$this->assertEquals( 'woocommerce_rest_invalid_product_id', $result->get_error_code() );
@@ -2308,17 +2311,10 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		};
 		add_filter( 'woocommerce_data_stores', $break_store );
 
-		$prepare_method = new ReflectionMethod( $this->endpoint, 'prepare_object_for_database' );
-		$prepare_method->setAccessible( true );
-
 		$this->expectException( Exception::class );
 		$this->expectExceptionMessage( 'Invalid data store.' );
 
-		try {
-			$prepare_method->invoke( $this->endpoint, $request, true );
-		} finally {
-			remove_filter( 'woocommerce_data_stores', $break_store );
-		}
+		$this->invoke_prepare( $request, true );
 	}
 
 	/**
@@ -2341,12 +2337,9 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 
 		$response = $this->server->dispatch( $request );
 
-		remove_action( 'woocommerce_product_read', $throw_data_exception );
-
 		$this->assertEquals( 409, $response->get_status(), 'A typed exception should keep its own HTTP status on the duplicate route' );
 		$this->assertEquals( 'custom_duplicate_block', $response->get_data()['code'] );
 	}
-
 
 	/**
 	 * @testdox A non-scalar type value in a batch item is rejected instead of silently rewriting the product type.
@@ -2405,17 +2398,10 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$request->set_url_params( array( 'id' => 999999991 ) );
 		$request->set_body_params( array( 'type' => 'simple' ) );
 
-		$prepare_method = new ReflectionMethod( $this->endpoint, 'prepare_object_for_database' );
-		$prepare_method->setAccessible( true );
-
 		$this->expectException( WC_Data_Exception::class );
 		$this->expectExceptionMessage( 'Backend unavailable.' );
 
-		try {
-			$prepare_method->invoke( $this->endpoint, $request, false );
-		} finally {
-			remove_filter( 'woocommerce_data_stores', $register );
-		}
+		$this->invoke_prepare( $request, false );
 	}
 
 	/**
@@ -2480,17 +2466,10 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		};
 		add_action( 'woocommerce_product_read', $throw_exception );
 
-		$prepare_method = new ReflectionMethod( $this->endpoint, 'prepare_object_for_database' );
-		$prepare_method->setAccessible( true );
-
 		$this->expectException( Exception::class );
 		$this->expectExceptionMessage( 'Simulated unexpected read failure.' );
 
-		try {
-			$prepare_method->invoke( $this->endpoint, $request, false );
-		} finally {
-			remove_action( 'woocommerce_product_read', $throw_exception );
-		}
+		$this->invoke_prepare( $request, false );
 	}
 
 	/**
