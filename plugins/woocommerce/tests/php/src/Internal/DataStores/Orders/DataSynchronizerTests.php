@@ -770,13 +770,13 @@ class DataSynchronizerTests extends \HposTestCase {
 		);
 		$sync_setting = array_values( $sync_setting )[0];
 		$this->assertEquals( $sync_setting['value'], 'no' );
-		$this->assertTrue( str_contains( $sync_setting['desc_tip'], $auth_table_change_allowed_with_sync_pending ? "There are orders pending sync" : "There are currently orders out of sync" ) );
+		$this->assertTrue( str_contains( $sync_setting['desc_tip'], $auth_table_change_allowed_with_sync_pending ? 'There are orders pending sync' : "If you'd like to switch order data storage" ) );
 		$this->assertTrue(
 			str_contains(
 				$sync_setting['desc_tip'],
 				$auth_table_change_allowed_with_sync_pending ?
 				'Switching data storage while sync is incomplete is dangerous' :
-				'You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>'
+				'run a one-time sync below first'
 			)
 		);
 		$this->assertEquals( $auth_table_change_allowed_with_sync_pending, $sync_setting['description_is_error'] );
