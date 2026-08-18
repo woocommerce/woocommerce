@@ -402,6 +402,30 @@ describe( 'FormattedMonetaryAmount', () => {
 			);
 		} );
 
+		test( 'keeps a directional mark from a filtered symbol inside the isolate', () => {
+			// Stores work around this bug today by prepending an LRM (U+200E)
+			// to the symbol via the `woocommerce_currency_symbol` filter. The
+			// mark is not whitespace, so it survives the spacing split as part
+			// of the symbol and lands inside the isolate, where it is inert.
+			const lrm = '\\u200e';
+			const { container } = render(
+				<FormattedMonetaryAmount
+					value="156345"
+					currency={ {
+						...lbpCurrency,
+						prefix: `${ lrm }${ lbpSymbol } `,
+					} }
+				/>
+			);
+
+			expect(
+				container.querySelector( symbolSelector )?.textContent
+			).toBe( `${ lrm }${ lbpSymbol }` );
+			expect( container.querySelector( 'bdi' )?.textContent ).toBe(
+				`${ lrm }${ lbpSymbol } 1,563.45`
+			);
+		} );
+
 		test( 'isolates an RTL-script suffix so it keeps its position', () => {
 			const { container } = render(
 				<FormattedMonetaryAmount

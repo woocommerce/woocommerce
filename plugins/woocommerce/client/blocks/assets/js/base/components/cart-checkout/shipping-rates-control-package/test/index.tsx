@@ -59,6 +59,11 @@ test( 'renders available shipping rates', async () => {
 		/>
 	);
 
+	// The space between the symbol and the amount is a jsdom artifact: its
+	// accessible-name computation joins text across element boundaries with a
+	// space, and the currency symbol sits in its own element now. Real
+	// browsers don't insert it — Chrome's accessibility tree reports
+	// "Flat rate $10.00".
 	const firstRate = await screen.findByRole( 'radio', {
 		name: 'Flat rate $ 10.00',
 	} );
