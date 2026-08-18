@@ -697,7 +697,7 @@ describe( 'PaymentGatewayListItem', () => {
 			);
 
 			expect( getByTestId( 'status-badge-popover' ) ).toHaveTextContent(
-				'Payments methods from this provider will only appear on classic checkout.'
+				'Payment methods from this provider will only appear on classic checkout.'
 			);
 		} );
 
