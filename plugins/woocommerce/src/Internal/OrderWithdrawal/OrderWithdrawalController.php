@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\OrderWithdrawal;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\OrderWithdrawal\Emails\CustomerOrderWithdrawalRequestedEmail;
+use Automattic\WooCommerce\Internal\OrderWithdrawal\Emails\OrderWithdrawalRequestedEmail;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
@@ -63,6 +65,7 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 	 */
 	public function register(): void {
 		add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'maybe_flush_rewrite_rules' ), 10, 1 );
+		add_filter( 'woocommerce_email_classes', array( $this, 'register_email_classes' ), 10, 1 );
 		add_filter( 'woocommerce_get_query_vars', array( $this, 'add_query_var' ), 10, 1 );
 		add_filter( 'woocommerce_endpoint_' . self::ENDPOINT_KEY . '_title', array( $this, 'get_endpoint_title' ), 10, 1 );
 		add_filter( 'woocommerce_settings_pages', array( $this, 'add_endpoint_setting' ), 10, 1 );
@@ -71,6 +74,25 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 		add_action( 'before_delete_post', array( $this->form_processor, 'delete_order_withdrawal_inbox_note_for_order' ), 10, 1 );
 		add_action( 'woocommerce_privacy_remove_order_personal_data', array( $this->form_processor, 'delete_order_withdrawal_inbox_note_for_order' ), 10, 1 );
 		add_action( 'init', array( $this, 'maybe_register_feature_highlight_notification' ), 10, 0 );
+	}
+
+	/**
+	 * Register order withdrawal emails when the feature is enabled.
+	 *
+	 * @param array $emails Registered email classes.
+	 * @return array
+	 *
+	 * @since 11.1.0
+	 */
+	public function register_email_classes( array $emails ): array {
+		if ( ! $this->is_enabled() ) {
+			return $emails;
+		}
+
+		$emails['WC_Email_Customer_Order_Withdrawal_Requested'] = new CustomerOrderWithdrawalRequestedEmail();
+		$emails['WC_Email_Order_Withdrawal_Requested']          = new OrderWithdrawalRequestedEmail();
+
+		return $emails;
 	}
 
 	/**
