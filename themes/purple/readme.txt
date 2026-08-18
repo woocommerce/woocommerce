@@ -13,7 +13,7 @@ Purple is a WooCommerce starter theme made for the Site Editor and modern commer
 
 == Changelog ==
 
-= 1.0.0 =
+= 0.0.1 =
 * Initial release
 
 == Copyright ==
