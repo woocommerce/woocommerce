@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog;
 
 use Automattic\WooCommerce\Container;
+use Automattic\WooCommerce\Internal\ProductFeed\Storage\JsonFileFeed;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -105,6 +106,19 @@ class ApiController {
 			$response = $request->get_param( 'force' )
 				? $generator->force_regeneration( $params )
 				: $generator->get_status( $params );
+
+			// Build the download URL from the current site configuration instead of persisting it with the feed status.
+			unset( $response['url'] );
+			if ( AsyncGenerator::STATE_COMPLETED === ( $response['state'] ?? '' ) ) {
+				$file_name = ! empty( $response['file_name'] )
+					? (string) $response['file_name']
+					: wp_basename( (string) ( $response['path'] ?? '' ) );
+
+				if ( '' !== $file_name && wp_basename( $file_name ) === $file_name ) {
+					$upload_dir      = wp_upload_dir( null, false, true );
+					$response['url'] = trailingslashit( $upload_dir['baseurl'] ) . JsonFileFeed::UPLOAD_DIR . '/' . rawurlencode( $file_name );
+				}
+			}
 
 			// Use the right datetime format.
 			if ( isset( $response['scheduled_at'] ) ) {
