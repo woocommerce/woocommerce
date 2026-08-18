@@ -9,7 +9,7 @@ import {
 /**
  * Internal dependencies
  */
-import postcodeValidationData from '../../../../../../../src/Internal/Utilities/postcode-validation-rules.json';
+import postcodeValidationData from '../../../../../../../i18n/postcode-validation-rules.json';
 
 type PostcodeValidationRule = {
 	pattern: string;
@@ -41,12 +41,14 @@ export interface IsPostcodeProps {
 }
 
 const isPostcode = ( { postcode, country }: IsPostcodeProps ): boolean => {
+	// Mirror WC_Validation::is_postcode(): only ASCII whitespace, letters,
+	// digits, and hyphens may reach country-specific validation.
+	if ( /[^ \t\n\r\f\vA-Za-z0-9-]/.test( postcode ) ) {
+		return false;
+	}
+
 	const sharedRule = SHARED_RULES[ country ];
 	if ( sharedRule ) {
-		if ( /[^\sA-Za-z0-9-]/.test( postcode ) ) {
-			return false;
-		}
-
 		const regex = new RegExp(
 			`^(?:${ sharedRule.pattern })$`,
 			sharedRule.flags || ''

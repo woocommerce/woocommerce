@@ -24,7 +24,7 @@ final class PostcodeValidation {
 			return self::$rules;
 		}
 
-		$rules_file = __DIR__ . '/postcode-validation-rules.json';
+		$rules_file = dirname( __DIR__, 3 ) . '/i18n/postcode-validation-rules.json';
 		if ( ! is_readable( $rules_file ) ) {
 			self::$rules = array();
 			return self::$rules;

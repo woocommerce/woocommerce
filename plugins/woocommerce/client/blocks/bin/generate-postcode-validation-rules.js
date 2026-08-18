@@ -13,7 +13,7 @@ const { dependencies } = require( '../package.json' );
 
 const OUTPUT_PATH = path.resolve(
 	__dirname,
-	'../../../src/Internal/Utilities/postcode-validation-rules.json'
+	'../../../i18n/postcode-validation-rules.json'
 );
 
 // Countries with an explicit server-side rule or a Blocks override before the
@@ -80,6 +80,7 @@ const COMPATIBILITY_OVERRIDES = {
 	},
 	IE: {
 		pattern: '(?:[AC-FHKNPRTV-Y][0-9]{2}|D6W)[0-9AC-FHKNPRTV-Y]{4}',
+		flags: 'i',
 		normalization: 'removeSpacesAndHyphens',
 	},
 	IN: { pattern: '[1-9][0-9]{2}\\s?[0-9]{3}' },
@@ -121,6 +122,18 @@ function removeAnchors( regex ) {
 	return regex.source.slice( 1, -1 );
 }
 
+/**
+ * Replace ECMAScript whitespace tokens with literal spaces. JavaScript's \s
+ * also matches Unicode whitespace that the PHP validator rejects before
+ * applying country-specific rules.
+ *
+ * @param {string} pattern Regular expression source.
+ * @return {string} Expression source with portable space matching.
+ */
+function replaceWhitespaceTokens( pattern ) {
+	return pattern.replaceAll( '\\s', '[ ]' );
+}
+
 const rules = Object.fromEntries(
 	COUNTRY_CODES.map( ( countryCode ) => {
 		const upstreamRegex = POSTCODE_REGEXES.get( countryCode );
@@ -130,10 +143,14 @@ const rules = Object.fromEntries(
 			);
 		}
 
-		const rule = {
+		const sourceRule = {
 			pattern: removeAnchors( upstreamRegex ),
 			...( upstreamRegex.flags ? { flags: upstreamRegex.flags } : {} ),
 			...COMPATIBILITY_OVERRIDES[ countryCode ],
+		};
+		const rule = {
+			...sourceRule,
+			pattern: replaceWhitespaceTokens( sourceRule.pattern ),
 		};
 
 		if ( rule.pattern.includes( '~' ) ) {

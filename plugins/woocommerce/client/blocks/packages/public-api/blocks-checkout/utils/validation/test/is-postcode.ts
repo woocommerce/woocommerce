@@ -88,6 +88,7 @@ describe( 'isPostcode', () => {
 
 		// Irish postcodes
 		[ true, 'A65F4E2', 'IE' ],
+		[ true, 'a65f4e2', 'IE' ],
 		[ true, 'A65 F4E2', 'IE' ],
 		[ true, 'A65-F4E2', 'IE' ],
 		[ false, 'B23F854', 'IE' ],
@@ -191,10 +192,16 @@ describe( 'isPostcode', () => {
 		[ true, '12345', 'TW' ],
 		[ true, '123', 'TW' ],
 
+		// Countries using the postcode-validator fallback still apply the
+		// character guard shared with PHP.
+		[ true, '2000', 'AU' ],
+		[ false, '2000#', 'AU' ],
+
 		// Unknown country codes — assumed valid since no regex applies.
 		[ true, '12345', 'XX' ],
 		[ true, 'anything', 'ZZ' ],
 		[ true, '', 'XX' ],
+		[ false, 'anything#', 'XX' ],
 	];
 
 	test.each( cases )( '%s: %s for %s', ( result, postcode, country ) =>
