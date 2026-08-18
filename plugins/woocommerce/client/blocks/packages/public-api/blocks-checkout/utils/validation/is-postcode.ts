@@ -41,6 +41,10 @@ export interface IsPostcodeProps {
 }
 
 const isPostcode = ( { postcode, country }: IsPostcodeProps ): boolean => {
+	if ( typeof postcode !== 'string' || typeof country !== 'string' ) {
+		return false;
+	}
+
 	// Mirror WC_Validation::is_postcode(): only ASCII whitespace, letters,
 	// digits, and hyphens may reach country-specific validation.
 	if ( /[^ \t\n\r\f\vA-Za-z0-9-]/.test( postcode ) ) {

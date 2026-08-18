@@ -209,6 +209,21 @@ describe( 'isPostcode', () => {
 			result
 		)
 	);
+
+	test( 'returns false for non-string runtime values', () => {
+		expect(
+			isPostcode( {
+				postcode: null,
+				country: 'GB',
+			} as unknown as IsPostcodeProps )
+		).toBe( false );
+		expect(
+			isPostcode( {
+				postcode: 'SW1A 1AA',
+				country: null,
+			} as unknown as IsPostcodeProps )
+		).toBe( false );
+	} );
 } );
 
 describe( 'shared postcode validation contract', () => {

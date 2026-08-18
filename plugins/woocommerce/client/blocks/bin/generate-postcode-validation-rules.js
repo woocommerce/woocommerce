@@ -156,7 +156,7 @@ const rules = Object.fromEntries(
 		if ( rule.pattern.includes( '~' ) ) {
 			throw new Error( `Unsupported delimiter in ${ countryCode } rule` );
 		}
-		if ( rule.flags && ! /^i?$/.test( rule.flags ) ) {
+		if ( rule.flags && rule.flags !== 'i' ) {
 			throw new Error( `Unsupported flags in ${ countryCode } rule` );
 		}
 
