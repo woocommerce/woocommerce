@@ -33,6 +33,7 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		delete_transient( '_woocommerce_helper_product_usage_notice_rules' );
 		delete_transient( '_woocommerce_helper_notices' );
 		delete_transient( '_woocommerce_helper_connection_data' );
+		delete_transient( WC_Helper_API_Backoff::TRANSIENT_PREFIX . WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS );
 	}
 
 	/**
@@ -196,6 +197,98 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 			$this->get_valid_subscription_data(),
 			get_transient( '_woocommerce_helper_subscriptions' ),
 			'Only valid API subscriptions should be cached'
+		);
+	}
+
+	/**
+	 * @testdox get_subscriptions should record a backoff on a 429 without caching an empty subscription list.
+	 */
+	public function test_get_subscriptions_does_not_cache_empty_list_when_rate_limited(): void {
+		$previous_auth = WC_Helper_Options::get( 'auth', array() );
+		$previous_log  = WC_Helper::$log;
+		$http_mock     = static function () {
+			return array(
+				'headers'  => array( 'retry-after' => '60' ),
+				'response' => array(
+					'code'    => 429,
+					'message' => 'Too Many Requests',
+				),
+				'body'     => '{"code":"wccom_rest_limit_reached","data":{"status":429}}',
+			);
+		};
+
+		WC_Helper::$log = $this->createMock( WC_Logger_Interface::class );
+		WC_Helper_Options::update(
+			'auth',
+			array(
+				'access_token'        => 'test-token',
+				'access_token_secret' => 'test-secret',
+			)
+		);
+		add_filter( 'pre_http_request', $http_mock );
+
+		try {
+			$result = WC_Helper::get_subscriptions();
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock );
+			WC_Helper_Options::update( 'auth', $previous_auth );
+			WC_Helper::$log = $previous_log;
+		}
+
+		$this->assertSame( array(), $result, 'A rate-limited response should yield no subscriptions' );
+		$this->assertFalse(
+			get_transient( '_woocommerce_helper_subscriptions' ),
+			'A 429 should not cache an empty subscription list, which would outlive the backoff window'
+		);
+		$this->assertNotFalse(
+			get_transient( WC_Helper_API_Backoff::TRANSIENT_PREFIX . WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS ),
+			'A 429 should record a backoff window for the subscriptions endpoint'
+		);
+	}
+
+	/**
+	 * @testdox get_subscriptions should cache an empty list for non-rate-limit errors.
+	 */
+	public function test_get_subscriptions_caches_empty_list_for_other_errors(): void {
+		$previous_auth = WC_Helper_Options::get( 'auth', array() );
+		$previous_log  = WC_Helper::$log;
+		$http_mock     = static function () {
+			return array(
+				'response' => array(
+					'code'    => 500,
+					'message' => 'Internal Server Error',
+				),
+				'body'     => '',
+			);
+		};
+
+		WC_Helper::$log = $this->createMock( WC_Logger_Interface::class );
+		WC_Helper_Options::update(
+			'auth',
+			array(
+				'access_token'        => 'test-token',
+				'access_token_secret' => 'test-secret',
+			)
+		);
+		add_filter( 'pre_http_request', $http_mock );
+
+		try {
+			$result = WC_Helper::get_subscriptions();
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock );
+			WC_Helper_Options::update( 'auth', $previous_auth );
+			WC_Helper::$log = $previous_log;
+		}
+
+		$this->assertSame( array(), $result, 'A failed response should yield no subscriptions' );
+		$this->assertSame(
+			array(),
+			get_transient( '_woocommerce_helper_subscriptions' ),
+			'A non-429 error should still cache an empty subscription list'
+		);
+		$this->assertFalse(
+			get_transient( WC_Helper_API_Backoff::TRANSIENT_PREFIX . WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS ),
+			'Only a 429 should record a backoff window'
 		);
 	}
 

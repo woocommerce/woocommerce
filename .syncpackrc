@@ -1,6 +1,10 @@
 {
 	"indent": "\t",
-	"semverRange": "^",
+	"semverGroups": [
+		{
+			"range": "^"
+		}
+	],
 	"customTypes": {
 		"engines": {
 			"path": "engines",
@@ -521,7 +525,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "catalog:wp-bundled"
+			"policy": "catalog"
 		},
 		{
 			"label": "@wordpress/* runtime-dependencies (pnpm 10 requires valid semver in peerDependencies, so peer deps are excluded here)",
@@ -535,7 +539,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "catalog:wp-min"
+			"policy": "catalog"
 		},
 		{
 			"dependencies": [
