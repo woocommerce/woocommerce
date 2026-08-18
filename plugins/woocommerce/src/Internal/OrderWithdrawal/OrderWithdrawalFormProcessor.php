@@ -472,7 +472,7 @@ final class OrderWithdrawalFormProcessor {
 		$note = sprintf(
 			/* translators: %s: withdrawal type label. */
 			__( 'Order withdrawal requested. Withdrawal type: %s.', 'woocommerce' ),
-			$this->get_withdrawal_type_label( $data[ self::FIELD_WITHDRAWAL_TYPE ] )
+			$this->get_email_data_formatter()->get_withdrawal_type_label( $data[ self::FIELD_WITHDRAWAL_TYPE ] ?? '' )
 		);
 
 		try {
@@ -693,15 +693,6 @@ final class OrderWithdrawalFormProcessor {
 		}
 
 		return $this->email_data_formatter;
-	}
-
-	/**
-	 * Get the label for a withdrawal type value.
-	 *
-	 * @param string $withdrawal_type Withdrawal type value.
-	 */
-	private function get_withdrawal_type_label( string $withdrawal_type ): string {
-		return $this->get_email_data_formatter()->get_withdrawal_type_label( $withdrawal_type );
 	}
 
 	/**

@@ -81,10 +81,8 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 	 *
 	 * @param array $emails Registered email classes.
 	 * @return array
-	 *
-	 * @since 11.1.0
 	 */
-	public function register_email_classes( array $emails ): array {
+	private function register_email_classes( array $emails ): array {
 		if ( ! $this->is_enabled() ) {
 			return $emails;
 		}

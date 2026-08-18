@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Plain
- * @version 11.1.0
+ * @version 11.2.0
  *
  * @var string               $email_heading             Email heading.
  * @var string               $additional_content        Additional content below the body.
