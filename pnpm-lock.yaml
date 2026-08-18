@@ -3104,6 +3104,9 @@ importers:
       redux:
         specifier: ^4.2.1
         version: 4.2.1
+      uuid:
+        specifier: ^9.0.1
+        version: 9.0.1
       xstate:
         specifier: 4.37.1
         version: 4.37.1
