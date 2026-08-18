@@ -643,7 +643,9 @@ class TimeInterval {
 	 */
 	public static function get_timeframe_dates( $timeframe, $current_date = null ) {
 		if ( ! $current_date ) {
-			$current_date = new \DateTime();
+			// The returned date strings are interpreted in the site timezone (see DataStore::normalize_timezones()),
+			// so the reference "now" must use the site timezone too, not the PHP default (UTC in WordPress).
+			$current_date = new \DateTime( 'now', wp_timezone() );
 		}
 		$current_year  = $current_date->format( 'Y' );
 		$current_month = $current_date->format( 'm' );

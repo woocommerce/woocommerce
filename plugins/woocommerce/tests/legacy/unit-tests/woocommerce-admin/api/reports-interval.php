@@ -1155,4 +1155,29 @@ class WC_Admin_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 		$this->assertEquals( '2020-01-01 00:00:00', $dates['start'] );
 		$this->assertEquals( '2020-12-31 23:59:59', $dates['end'] );
 	}
+
+	/**
+	 * @testdox Should anchor the default reference date to the site timezone, not the PHP default timezone.
+	 */
+	public function test_timeframes_default_to_site_timezone_now() {
+		$timeframes = array( 'last_week', 'last_month', 'last_quarter', 'last_6_months', 'last_year' );
+
+		// Extreme offsets on both sides of UTC maximize the window where the site-local date differs from the UTC date.
+		foreach ( array( 'Pacific/Kiritimati', 'Pacific/Midway' ) as $timezone ) {
+			update_option( 'timezone_string', $timezone );
+
+			foreach ( $timeframes as $timeframe ) {
+				// Compute the expectation before and after the call so the assertion also holds if midnight passes mid-test.
+				$expected_before = TimeInterval::get_timeframe_dates( $timeframe, new DateTime( 'now', wp_timezone() ) );
+				$actual          = TimeInterval::get_timeframe_dates( $timeframe );
+				$expected_after  = TimeInterval::get_timeframe_dates( $timeframe, new DateTime( 'now', wp_timezone() ) );
+
+				$this->assertContains(
+					$actual,
+					array( $expected_before, $expected_after ),
+					"Default \"$timeframe\" dates should be based on the current date in the $timezone site timezone"
+				);
+			}
+		}
+	}
 }
