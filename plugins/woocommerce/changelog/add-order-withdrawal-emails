@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add configurable customer and merchant emails for order withdrawal requests.
