@@ -173,7 +173,7 @@ export const PaymentGatewayListItem = ( {
 									<p>
 										{ createInterpolateElement(
 											__(
-												'Customers might not see this provider at checkout. <a>Learn more</a>',
+												'Payments methods from this provider will only appear on classic checkout. <a>Learn more</a>',
 												'woocommerce'
 											),
 											{

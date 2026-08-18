@@ -48,37 +48,34 @@ jest.mock( '~/settings-payments/components/status-badge', () => ( {
 } ) );
 
 jest.mock( '~/settings-payments/components/ellipsis-menu-content', () => ( {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
 	EllipsisMenuWrapper: ( { provider }: { provider: { id: string } } ) => (
 		<div data-testid="ellipsis-menu">EllipsisMenu-{ provider.id }</div>
 	),
 } ) );
 
 jest.mock( '~/settings-payments/components/sortable', () => ( {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
 	DefaultDragHandle: () => <div data-testid="drag-handle">DragHandle</div>,
 } ) );
 
 jest.mock( '~/settings-payments/components/buttons', () => ( {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
 	ActivatePaymentsButton: ( { incentive }: { incentive?: unknown } ) => (
 		<button data-testid="activate-payments-button">
 			ActivatePayments{ incentive ? '-with-incentive' : '' }
 		</button>
 	),
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
+
 	CompleteSetupButton: ( { disabled }: { disabled?: boolean } ) => (
 		<button data-testid="complete-setup-button" disabled={ disabled }>
 			CompleteSetup
 		</button>
 	),
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
+
 	EnableGatewayButton: ( { incentive }: { incentive?: unknown } ) => (
 		<button data-testid="enable-gateway-button">
 			Enable{ incentive ? '-with-incentive' : '' }
 		</button>
 	),
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
+
 	SettingsButton: () => (
 		<button data-testid="settings-button">Settings</button>
 	),
@@ -87,7 +84,6 @@ jest.mock( '~/settings-payments/components/buttons', () => ( {
 jest.mock(
 	'~/settings-payments/components/buttons/reactivate-live-payments-button',
 	() => ( {
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
 		ReactivateLivePaymentsButton: () => (
 			<button data-testid="reactivate-live-payments-button">
 				ReactivateLivePayments
@@ -97,14 +93,12 @@ jest.mock(
 );
 
 jest.mock( '~/settings-payments/components/incentive-status-badge', () => ( {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
 	IncentiveStatusBadge: ( { incentive }: { incentive: { id: string } } ) => (
 		<div data-testid="incentive-badge">Incentive-{ incentive.id }</div>
 	),
 } ) );
 
 jest.mock( '~/settings-payments/components/official-badge', () => ( {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
 	OfficialBadge: ( { suggestionId }: { suggestionId: string } ) => (
 		<div data-testid="official-badge">Official-{ suggestionId }</div>
 	),
@@ -682,9 +676,7 @@ describe( 'PaymentGatewayListItem', () => {
 				/>
 			);
 
-			expect(
-				getByText( 'Limited compatibility' )
-			).toBeInTheDocument();
+			expect( getByText( 'Limited compatibility' ) ).toBeInTheDocument();
 			expect(
 				getAllByTestId( 'status-badge' ).map( ( badge ) =>
 					badge.getAttribute( 'data-status' )
@@ -705,7 +697,7 @@ describe( 'PaymentGatewayListItem', () => {
 			);
 
 			expect( getByTestId( 'status-badge-popover' ) ).toHaveTextContent(
-				'Customers might not see this provider at checkout.'
+				'Payments methods from this provider will only appear on classic checkout.'
 			);
 		} );
 
