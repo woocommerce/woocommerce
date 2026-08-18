@@ -783,6 +783,34 @@ class DataSynchronizerTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testDox The "Sync orders now" confirmation names the correct destination storage system.
+	 *
+	 * @testWith [true, "WordPress posts storage"]
+	 *           [false, "High-performance order storage"]
+	 *
+	 * @param bool   $cot_is_authoritative Whether the custom orders table is the authoritative source.
+	 * @param string $expected_sync_target The storage system the confirmation message should name.
+	 */
+	public function test_sync_now_link_names_the_correct_target_storage( $cot_is_authoritative, $expected_sync_target ) {
+		$this->toggle_cot_authoritative( $cot_is_authoritative );
+		$this->disable_cot_sync();
+		OrderHelper::create_order();
+
+		$features = apply_filters( 'woocommerce_get_settings_advanced', array(), 'features' );
+
+		$sync_setting = array_filter(
+			$features,
+			function ( $feature ) {
+				return DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION === $feature['id'];
+			}
+		);
+		$sync_setting = array_values( $sync_setting )[0];
+
+		$this->assertTrue( str_contains( $sync_setting['desc_tip'], 'wc-hpos-sync-now' ) );
+		$this->assertTrue( str_contains( $sync_setting['desc_tip'], $expected_sync_target ) );
+	}
+
+	/**
 	 * Delete an order directly from the wc_orders table so that the usual hooks and filters don't run.
 	 *
 	 * @param int $order_id The ID of the order to delete.
