@@ -101,14 +101,6 @@
 			}
 		}
 
-		// The unread state ships as `bellUnread` from @wordpress/icons — a
-		// single SVG with the dot baked in. We just colour the dot red so the
-		// urgency signal reads, instead of inheriting currentColor like the
-		// rest of the icon.
-		&.has-unread svg circle {
-			fill: $alert-red;
-		}
-
 		&:hover,
 		&.components-button:not(:disabled):not([aria-disabled="true"]):hover {
 			box-shadow: none;
@@ -174,7 +166,7 @@
 		outline: none;
 	}
 
-	height: calc(100vh - #{$header-height + $adminbar-height-mobile});
+	height: calc(100vh - var(--woocommerce-admin-header-height) - #{$adminbar-height-mobile});
 	background: $gray-100;
 	width: 430px;
 	@include breakpoint( "<782px" ) {
@@ -182,22 +174,24 @@
 	}
 	transform: translateX(100%);
 	@include activity-panel-slide();
-	position: absolute;
+	position: fixed;
 	right: 0;
-	// Clear the floating header's bottom border so it stays visible when the
-	// slide-over panel is open (otherwise the panel covers it). Shares the
-	// border width with the header — if that ever changes, this stays aligned.
-	top: calc(100% + #{$header-border-width});
+	top: calc(var(--woocommerce-admin-header-height) + #{$adminbar-height-mobile + $header-border-width});
 	z-index: 1000;
 	overflow-x: hidden;
 	overflow-y: auto;
 
 	@include breakpoint( ">782px" ) {
-		height: calc(100vh - #{$header-height + $adminbar-height});
+		height: calc(100vh - var(--woocommerce-admin-header-height) - #{$adminbar-height});
+		top: calc(var(--woocommerce-admin-header-height) + #{$adminbar-height + $header-border-width});
+	}
+	.is-wp-toolbar-disabled & {
+		height: calc(100vh - var(--woocommerce-admin-header-height));
+		top: calc(var(--woocommerce-admin-header-height) + #{$header-border-width});
 	}
 	.has-woocommerce-navigation & {
-		height: calc(100vh - #{$header-height});
-		top: #{$header-height};
+		height: calc(100vh - var(--woocommerce-admin-header-height));
+		top: var(--woocommerce-admin-header-height);
 	}
 
 	&.is-open {
