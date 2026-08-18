@@ -123,7 +123,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		$show_columns['cb']               = $columns['cb'];
 		$show_columns['order_number']     = __( 'Order', 'woocommerce' );
 		$show_columns['order_date']       = __( 'Date', 'woocommerce' );
-		$show_columns['order_status']     = __( 'Status', 'woocommerce' );
+		$show_columns['order_status']     = _x( 'Status', 'Order status', 'woocommerce' );
 		$show_columns['billing_address']  = __( 'Billing', 'woocommerce' );
 		$show_columns['shipping_address'] = __( 'Ship to', 'woocommerce' );
 		$show_columns['order_total']      = __( 'Total', 'woocommerce' );
