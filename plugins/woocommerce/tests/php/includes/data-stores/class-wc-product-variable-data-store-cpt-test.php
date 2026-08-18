@@ -1757,6 +1757,23 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox sync_price correctly writes child prices to the parent when no price meta existed before (CREATE path).
+	 */
+	public function test_sync_price_writes_prices_when_parent_has_no_prior_price_meta(): void {
+		$product    = WC_Helper_Product::create_variation_product();
+		$product_id = $product->get_id();
+
+		delete_post_meta( $product_id, '_price' );
+		$this->assertFalse( metadata_exists( 'post', $product_id, '_price' ) );
+
+		( new WC_Product_Variable_Data_Store_CPT() )->sync_price( $product );
+
+		$this->assertTrue( metadata_exists( 'post', $product_id, '_price' ) );
+
+		$product->delete();
+	}
+
+	/**
 	 * @dataProvider provider_lookup_table_generating
 	 * @testdox sync_stock_status sets instock when at least one child is in stock.
 	 *

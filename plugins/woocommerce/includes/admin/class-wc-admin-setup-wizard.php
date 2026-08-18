@@ -223,7 +223,7 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function setup_wizard() {
 		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.6.0', 'Onboarding is maintained in WooCommerce Admin.' );
-		if ( empty( $_GET['page'] ) || 'wc-setup' !== $_GET['page'] ) { // WPCS: CSRF ok, input var ok.
+		if ( empty( $_GET['page'] ) || 'wc-setup' !== $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing; step is constrained with sanitize_key().
 			return;
 		}
 		$default_steps = array(
@@ -285,7 +285,7 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		$this->steps = apply_filters( 'woocommerce_setup_wizard_steps', $default_steps );
-		$this->step  = isset( $_GET['step'] ) ? sanitize_key( $_GET['step'] ) : current( array_keys( $this->steps ) ); // WPCS: CSRF ok, input var ok.
+		$this->step  = isset( $_GET['step'] ) ? sanitize_key( $_GET['step'] ) : current( array_keys( $this->steps ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing; step is constrained with sanitize_key().
 
 		// @codingStandardsIgnoreStart
 		if ( ! empty( $_POST['save_step'] ) && isset( $this->steps[ $this->step ]['handler'] ) ) {

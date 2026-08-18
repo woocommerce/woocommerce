@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add rendering context awareness to the Personalizer: personalize_content() accepts a text/html rendering context which is exposed to tag callbacks, Personalization_Tag supports an optional text value type with automatic escaping in HTML content, and tags embedded inside larger link URLs are now replaced correctly.
