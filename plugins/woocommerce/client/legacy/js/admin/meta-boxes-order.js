@@ -1222,7 +1222,6 @@ jQuery( function ( $ ) {
 				}
 
 				load_tax_rates = function( page, is_search ) {
-					wc_meta_boxes_order_items.backbone.update_tax_rate_add_button( modal );
 					wc_meta_boxes_order_items.backbone.search_tax_rates( modal, page, is_search );
 				};
 
@@ -1297,7 +1296,10 @@ jQuery( function ( $ ) {
 
 				modal.data( 'wc-tax-rate-request-id', request_id );
 
+				// Replacing the rows drops any selected rate, so re-evaluate the Add button
+				// before the request starts rather than leaving it enabled with no selection.
 				table_body.html( wc_meta_boxes_order_items.backbone.tax_rate_status_row( status ) );
+				wc_meta_boxes_order_items.backbone.update_tax_rate_add_button( modal );
 				pagination.find( '.button, .current-page' ).prop( 'disabled', true );
 				wc_meta_boxes_order_items.backbone.announce_tax_rate_status( status );
 
