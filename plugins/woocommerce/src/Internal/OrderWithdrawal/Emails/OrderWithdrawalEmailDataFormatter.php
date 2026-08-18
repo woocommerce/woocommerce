@@ -13,6 +13,52 @@ use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormProcessor
 final class OrderWithdrawalEmailDataFormatter {
 
 	/**
+	 * Normalize and validate submitted withdrawal data before rendering emails.
+	 *
+	 * @param array<string,mixed> $data Form data.
+	 * @return array<string,string>|null
+	 */
+	public function normalize_withdrawal_data( array $data ): ?array {
+		$required_fields = array(
+			OrderWithdrawalFormProcessor::FIELD_FIRST_NAME,
+			OrderWithdrawalFormProcessor::FIELD_LAST_NAME,
+			OrderWithdrawalFormProcessor::FIELD_EMAIL,
+			OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER,
+			OrderWithdrawalFormProcessor::FIELD_WITHDRAWAL_TYPE,
+			OrderWithdrawalFormProcessor::FIELD_ADDITIONAL_DETAILS,
+		);
+
+		foreach ( $required_fields as $field ) {
+			if ( ! isset( $data[ $field ] ) || ! is_scalar( $data[ $field ] ) ) {
+				return null;
+			}
+		}
+
+		$normalized_data = array(
+			OrderWithdrawalFormProcessor::FIELD_FIRST_NAME => sanitize_text_field( (string) $data[ OrderWithdrawalFormProcessor::FIELD_FIRST_NAME ] ),
+			OrderWithdrawalFormProcessor::FIELD_LAST_NAME  => sanitize_text_field( (string) $data[ OrderWithdrawalFormProcessor::FIELD_LAST_NAME ] ),
+			OrderWithdrawalFormProcessor::FIELD_EMAIL      => sanitize_email( (string) $data[ OrderWithdrawalFormProcessor::FIELD_EMAIL ] ),
+			OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => sanitize_text_field( (string) $data[ OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER ] ),
+			OrderWithdrawalFormProcessor::FIELD_WITHDRAWAL_TYPE => sanitize_text_field( (string) $data[ OrderWithdrawalFormProcessor::FIELD_WITHDRAWAL_TYPE ] ),
+			OrderWithdrawalFormProcessor::FIELD_ADDITIONAL_DETAILS => sanitize_textarea_field( (string) $data[ OrderWithdrawalFormProcessor::FIELD_ADDITIONAL_DETAILS ] ),
+		);
+
+		if ( '' === $normalized_data[ OrderWithdrawalFormProcessor::FIELD_EMAIL ] || ! is_email( $normalized_data[ OrderWithdrawalFormProcessor::FIELD_EMAIL ] ) ) {
+			return null;
+		}
+
+		if ( '' === $normalized_data[ OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER ] ) {
+			return null;
+		}
+
+		if ( ! in_array( $normalized_data[ OrderWithdrawalFormProcessor::FIELD_WITHDRAWAL_TYPE ], array( OrderWithdrawalFormProcessor::WITHDRAWAL_TYPE_FULL, OrderWithdrawalFormProcessor::WITHDRAWAL_TYPE_SPECIFIC ), true ) ) {
+			return null;
+		}
+
+		return $normalized_data;
+	}
+
+	/**
 	 * Get the customer's full name for display.
 	 *
 	 * @param array<string,string> $data Form data.

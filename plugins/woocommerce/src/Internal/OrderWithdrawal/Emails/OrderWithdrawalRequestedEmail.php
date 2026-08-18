@@ -108,15 +108,23 @@ class OrderWithdrawalRequestedEmail extends WC_Email {
 	/**
 	 * Trigger the sending of this email.
 	 *
-	 * @param array<string,string> $data                      Form data.
-	 * @param WC_Order|null        $matched_order             Matched order, if found.
-	 * @param int                  $submitted_at              Unix timestamp for the submission.
-	 * @param bool                 $outside_withdrawal_window Whether the matched order is outside the withdrawal window.
-	 * @param string               $withdrawal_window_warning Withdrawal window warning message.
+	 * @param array<string,mixed> $data                      Form data.
+	 * @param WC_Order|null       $matched_order             Matched order, if found.
+	 * @param int                 $submitted_at              Unix timestamp for the submission.
+	 * @param bool                $outside_withdrawal_window Whether the matched order is outside the withdrawal window.
+	 * @param string              $withdrawal_window_warning Withdrawal window warning message.
 	 * @return bool Whether the email was sent successfully.
 	 */
 	public function trigger( array $data, ?WC_Order $matched_order, int $submitted_at, bool $outside_withdrawal_window, string $withdrawal_window_warning ): bool {
 		$this->setup_locale();
+
+		$data = $this->formatter->normalize_withdrawal_data( $data );
+
+		if ( null === $data ) {
+			$this->restore_locale();
+
+			return false;
+		}
 
 		$this->object                               = $matched_order ? $matched_order : (object) $data;
 		$this->withdrawal_data                      = $data;

@@ -84,12 +84,20 @@ class CustomerOrderWithdrawalRequestedEmail extends WC_Email {
 	/**
 	 * Trigger the sending of this email.
 	 *
-	 * @param array<string,string> $data         Form data.
-	 * @param int                  $submitted_at Unix timestamp for the submission.
+	 * @param array<string,mixed> $data         Form data.
+	 * @param int                 $submitted_at Unix timestamp for the submission.
 	 * @return bool Whether the email was sent successfully.
 	 */
 	public function trigger( array $data, int $submitted_at ): bool {
 		$this->setup_locale();
+
+		$data = $this->formatter->normalize_withdrawal_data( $data );
+
+		if ( null === $data ) {
+			$this->restore_locale();
+
+			return false;
+		}
 
 		$this->object                               = (object) $data;
 		$this->withdrawal_data                      = $data;
