@@ -47,9 +47,14 @@ describe( 'Analytics Command Palette', () => {
 		jest.clearAllMocks();
 	} );
 
-	it.each( [ undefined, {}, { reports: {} }, { reports: [] } ] )(
-		'does not register commands for an invalid injected report state',
-		( analytics ) => {
+	it.each( [
+		{ caseName: 'missing global', analytics: undefined },
+		{ caseName: 'missing reports', analytics: {} },
+		{ caseName: 'non-array reports', analytics: { reports: {} } },
+		{ caseName: 'empty reports', analytics: { reports: [] } },
+	] )(
+		'does not register commands for an invalid injected report state: $caseName',
+		( { analytics } ) => {
 			expect( registerWithReports( analytics ) ).toEqual( [] );
 			expect( dispatch ).not.toHaveBeenCalled();
 		}
