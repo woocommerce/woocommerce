@@ -153,6 +153,39 @@ class Social_Links_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test locale-independent pill shape padding.
+	 *
+	 * @testdox Should render locale-independent pill shape padding.
+	 */
+	public function test_it_renders_locale_independent_pill_shape_padding(): void {
+		$original_locale      = setlocale( LC_NUMERIC, '0' );
+		$comma_decimal_locale = setlocale( LC_NUMERIC, 'de_DE.UTF-8', 'de_DE.utf8', 'fr_FR.UTF-8', 'fr_FR.utf8' );
+
+		if ( false === $comma_decimal_locale ) {
+			$this->markTestSkipped( 'A locale with a comma decimal separator is not available.' );
+		}
+
+		try {
+			$parsed_social_links                       = $this->parsed_social_links;
+			$parsed_social_links['attrs']['className'] = 'is-style-pill-shape';
+			$parsed_social_links['attrs']['size']      = 'has-small-icon-size';
+
+			$rendered = $this->social_links_renderer->render( '', $parsed_social_links, $this->rendering_context );
+			$this->checkValidHTML( $rendered );
+			$link_wrappers = $this->getRenderedSocialLinkWrappers( $rendered );
+
+			foreach ( $link_wrappers as $link_wrapper ) {
+				$this->assertStringContainsString( 'padding-left:10.67px;', $link_wrapper );
+				$this->assertStringContainsString( 'padding-right:10.67px;', $link_wrapper );
+			}
+		} finally {
+			if ( false !== $original_locale ) {
+				setlocale( LC_NUMERIC, $original_locale );
+			}
+		}
+	}
+
+	/**
 	 * Test it renders a gap between social link items.
 	 */
 	public function testItRendersGapBetweenSocialLinkItems(): void {
