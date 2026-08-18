@@ -179,6 +179,95 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox load_product() short-circuits single-product blocks rendered while the fetch is in flight and restores rendering afterwards.
+	 *
+	 * The per-ID re-entrancy guard above stops a self-referencing block
+	 * from recursing, but a Single Product block embedded in a
+	 * description is never a legitimate render regardless of which
+	 * product it points at — it has no page-level Single Product Template
+	 * context. This blanket short-circuit means inner blocks (e.g. Add to
+	 * Cart Form) are never touched at all, rather than relying on them to
+	 * individually guard against a missing product context.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/67750
+	 */
+	public function test_load_product_short_circuits_single_product_blocks_during_fetch(): void {
+		$product      = WC_Helper_Product::create_simple_product();
+		$other        = WC_Helper_Product::create_simple_product();
+		$block_markup = '<!-- wp:woocommerce/single-product {"productId":' . $other->get_id() . '} -->' .
+			'<div class="wp-block-woocommerce-single-product woocommerce"><p>Embedded</p></div>' .
+			'<!-- /wp:woocommerce/single-product -->';
+
+		$fake_hydration = new class( $product->get_id(), $block_markup ) {
+			/**
+			 * The product ID for the canned response.
+			 *
+			 * @var int
+			 */
+			private int $product_id;
+
+			/**
+			 * Block markup to render mid-fetch.
+			 *
+			 * @var string
+			 */
+			private string $block_markup;
+
+			/**
+			 * What do_blocks() produced while the fetch was in flight.
+			 *
+			 * @var string|null
+			 */
+			public ?string $rendered_during_fetch = null;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param int    $product_id   The product ID.
+			 * @param string $block_markup Block markup to render mid-fetch.
+			 */
+			public function __construct( int $product_id, string $block_markup ) {
+				$this->product_id   = $product_id;
+				$this->block_markup = $block_markup;
+			}
+
+			/**
+			 * Mimic Hydration::get_rest_api_response_data, rendering block
+			 * markup mid-fetch like description formatting would.
+			 *
+			 * @param string $path The REST path (ignored).
+			 * @return array The canned response.
+			 */
+			public function get_rest_api_response_data( string $path ): array {
+				// Avoid parameter not used PHPCS errors.
+				unset( $path );
+				$this->rendered_during_fetch = do_blocks( $this->block_markup );
+
+				return array(
+					'body' => array(
+						'id'   => $this->product_id,
+						'name' => 'Fake Product',
+					),
+				);
+			}
+		};
+		$this->inject_hydration( $fake_hydration );
+
+		global $wp_filter;
+		$callbacks_before = isset( $wp_filter['pre_render_block'] ) ? count( $wp_filter['pre_render_block']->callbacks[10] ?? array() ) : 0;
+
+		TestedProductsStore::load_product( $this->consent, $product->get_id() );
+
+		$callbacks_after = isset( $wp_filter['pre_render_block'] ) ? count( $wp_filter['pre_render_block']->callbacks[10] ?? array() ) : 0;
+
+		$this->assertSame( '', $fake_hydration->rendered_during_fetch, 'single-product blocks should not render while a product fetch is in flight, regardless of which product they point at.' );
+		$this->assertSame( $callbacks_before, $callbacks_after, 'The pre_render_block short-circuit should be removed after the fetch.' );
+
+		$product->delete( true );
+		$other->delete( true );
+	}
+
+	/**
 	 * @testdox load_variations() hydrates interactivity state with every child variation.
 	 */
 	public function test_load_variations_populates_state(): void {

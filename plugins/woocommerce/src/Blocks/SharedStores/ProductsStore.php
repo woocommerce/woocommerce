@@ -192,6 +192,46 @@ class ProductsStore {
 	}
 
 	/**
+	 * Fetch a Store API response while `woocommerce/single-product` blocks
+	 * are short-circuited and the hydration depth counter is held.
+	 *
+	 * The Store API formats a product's description with `do_blocks()`. A
+	 * `woocommerce/single-product` block stored inside a description
+	 * (commonly left behind by copy-pasting product page blocks) would
+	 * render detached from any Single Product Template context: its inner
+	 * blocks can fatal without a resolvable product (e.g. Add to Cart
+	 * Form), and loading its product into this store mid-fetch can recurse
+	 * indefinitely when it references a product already being fetched.
+	 * Skipping the block outright for the duration of the fetch prevents
+	 * both, regardless of whether the block's own inner blocks happen to
+	 * guard against a missing product context. This is on top of, not a
+	 * replacement for, the per-ID re-entrancy guards below.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/67750
+	 *
+	 * @param string $path The Store API path to fetch.
+	 * @return array The response data.
+	 */
+	private static function fetch_rest_api_response_data( string $path ): array {
+		$skip_single_product_block = static function ( $pre_render, $parsed_block ) {
+			if ( isset( $parsed_block['blockName'] ) && 'woocommerce/single-product' === $parsed_block['blockName'] ) {
+				return '';
+			}
+
+			return $pre_render;
+		};
+
+		add_filter( 'pre_render_block', $skip_single_product_block, 10, 2 );
+		++self::$hydration_depth;
+		try {
+			return Package::container()->get( Hydration::class )->get_rest_api_response_data( $path );
+		} finally {
+			--self::$hydration_depth;
+			remove_filter( 'pre_render_block', $skip_single_product_block, 10 );
+		}
+	}
+
+	/**
 	 * Load a product into state.
 	 *
 	 * @param string $consent_statement The consent statement string.
@@ -207,14 +247,9 @@ class ProductsStore {
 			return self::$products[ $product_id ];
 		}
 
-		++self::$hydration_depth;
-		try {
-			$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products/' . $product_id );
+		$response = self::fetch_rest_api_response_data( '/wc/store/v1/products/' . $product_id );
 
-			self::$products[ $product_id ] = $response['body'] ?? array();
-		} finally {
-			--self::$hydration_depth;
-		}
+		self::$products[ $product_id ] = $response['body'] ?? array();
 
 		self::register_getters();
 		wp_interactivity_state(
@@ -279,11 +314,9 @@ class ProductsStore {
 		}
 
 		self::$loading_child_parents[ $parent_id ] = true;
-		++self::$hydration_depth;
 		try {
-			$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products?' . $query_string );
+			$response = self::fetch_rest_api_response_data( '/wc/store/v1/products?' . $query_string );
 		} finally {
-			--self::$hydration_depth;
 			unset( self::$loading_child_parents[ $parent_id ] );
 		}
 
@@ -338,11 +371,9 @@ class ProductsStore {
 		}
 
 		self::$loading_variation_parents[ $parent_id ] = true;
-		++self::$hydration_depth;
 		try {
-			$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products?parent[]=' . $parent_id . '&type=variation' );
+			$response = self::fetch_rest_api_response_data( '/wc/store/v1/products?parent[]=' . $parent_id . '&type=variation' );
 		} finally {
-			--self::$hydration_depth;
 			unset( self::$loading_variation_parents[ $parent_id ] );
 		}
 
