@@ -72,8 +72,10 @@ class ProductResultsCountTest extends WP_UnitTestCase {
 		$this->assertTrue( $p->next_tag( array( 'class_name' => 'wc-block-product-results-count' ) ), 'The rendered result count wrapper should exist.' );
 		$this->assertSame( 'woocommerce/product-results-count', $p->get_attribute( 'data-wp-interactive' ), 'The wrapper should declare the Product Results Count Interactivity store.' );
 		$this->assertSame( 'wc-product-results-count-17', $p->get_attribute( 'data-wp-router-region' ), 'The router region should include the inherited query ID.' );
-		$this->assertStringContainsString( 'woocommerce', (string) $p->get_attribute( 'class' ), 'The wrapper should include the WooCommerce class.' );
-		$this->assertStringContainsString( 'wp-block-woocommerce-product-results-count', (string) $p->get_attribute( 'class' ), 'The wrapper should include the WordPress block class.' );
+		$class_tokens = preg_split( '/\s+/', trim( (string) $p->get_attribute( 'class' ) ) );
+		$class_tokens = is_array( $class_tokens ) ? array_values( array_filter( $class_tokens ) ) : array();
+		$this->assertContains( 'woocommerce', $class_tokens, 'The wrapper should include the WooCommerce class.' );
+		$this->assertContains( 'wp-block-woocommerce-product-results-count', $class_tokens, 'The wrapper should include the WordPress block class.' );
 
 		$text = html_entity_decode( wp_strip_all_tags( $markup ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 		$text = preg_replace( '/\s+/', ' ', trim( $text ) );
