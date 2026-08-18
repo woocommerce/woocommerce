@@ -1201,54 +1201,69 @@ jQuery( function ( $ ) {
 				}
 
 				if ( 'wc-modal-add-tax' === target ) {
-					wc_meta_boxes_order_items.backbone.init_tax_rate_modal( $( this ) );
+					wc_meta_boxes_order_items.backbone.init_tax_rate_modal(
+						$( '#wc-backbone-modal-dialog' ).find( '.wc-backbone-modal.wc-modal-add-tax' )
+					);
 				}
 			},
 
 			init_tax_rate_modal: function( modal ) {
-				var pagination = modal.find( '[data-wc-tax-rate-pagination]' ),
-					load_tax_rates = function( page, is_search ) {
-						wc_meta_boxes_order_items.backbone.update_tax_rate_add_button( modal );
-						wc_meta_boxes_order_items.backbone.search_tax_rates( modal, page, is_search );
-					};
+				var form       = modal.find( 'form' ).first(),
+					search     = modal.find( 'input[type="search"][data-wc-tax-rate-search]' ),
+					summary    = modal.find( '[data-wc-tax-rate-search-summary]' ),
+					results    = modal.find( 'table[data-wc-tax-rate-results]' ),
+					pagination = modal.find( '[data-wc-tax-rate-pagination]' ),
+					load_tax_rates;
 
-				modal.on( 'submit', 'form', function( event ) {
+				// The modal template is filterable, so only wire the controls up when the
+				// elements this code depends on are actually present.
+				if ( ! form.length || ! search.length || ! results.length || ! pagination.length ) {
+					return;
+				}
+
+				load_tax_rates = function( page, is_search ) {
+					wc_meta_boxes_order_items.backbone.update_tax_rate_add_button( modal );
+					wc_meta_boxes_order_items.backbone.search_tax_rates( modal, page, is_search );
+				};
+
+				form.on( 'submit', function( event ) {
 					event.preventDefault();
 					load_tax_rates( 1, true );
 				} );
 
-				modal.on( 'input search', '[data-wc-tax-rate-search]', function() {
+				search.on( 'input search', function() {
 					if ( ! ( $( this ).val() || '' ).trim().length ) {
 						load_tax_rates( 1, false );
 					}
 				} );
 
-				modal.on( 'click', '[data-wc-tax-rate-clear-search]', function( event ) {
+				// The clear button is rendered with the results summary, so delegate from its container.
+				summary.on( 'click', '[data-wc-tax-rate-clear-search]', function( event ) {
 					event.preventDefault();
-					modal.find( '[data-wc-tax-rate-search]' ).val( '' );
+					search.val( '' );
 					load_tax_rates( 1, false );
 				} );
 
-				modal.on( 'click', '.first-page', function() {
+				pagination.on( 'click', '.first-page', function() {
 					load_tax_rates( 1 );
 				} );
 
-				modal.on( 'click', '.prev-page', function() {
+				pagination.on( 'click', '.prev-page', function() {
 					var current_page = parseInt( pagination.data( 'page' ), 10 ) || 1;
 					load_tax_rates( Math.max( 1, current_page - 1 ) );
 				} );
 
-				modal.on( 'click', '.next-page', function() {
+				pagination.on( 'click', '.next-page', function() {
 					var current_page = parseInt( pagination.data( 'page' ), 10 ) || 1;
 					load_tax_rates( current_page + 1 );
 				} );
 
-				modal.on( 'click', '.last-page', function() {
+				pagination.on( 'click', '.last-page', function() {
 					var total_pages = parseInt( pagination.data( 'total-pages' ), 10 ) || 1;
 					load_tax_rates( total_pages );
 				} );
 
-				modal.on( 'keydown', '.current-page', function( event ) {
+				pagination.on( 'keydown', '.current-page', function( event ) {
 					if ( 13 !== event.which ) {
 						return;
 					}
@@ -1261,7 +1276,8 @@ jQuery( function ( $ ) {
 					load_tax_rates( Math.min( Math.max( 1, page ), total_pages ) );
 				} );
 
-				modal.on( 'change', 'input[name="add_order_tax"]', function() {
+				// Rows are re-rendered on every search, so delegate from the results table.
+				results.on( 'change', 'input[type="radio"][name="add_order_tax"]', function() {
 					wc_meta_boxes_order_items.backbone.update_tax_rate_add_button( modal );
 				} );
 

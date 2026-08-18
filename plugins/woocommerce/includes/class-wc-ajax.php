@@ -1833,8 +1833,16 @@ class WC_AJAX {
 			$term       = is_string( $clean_term ) ? $clean_term : '';
 		}
 
-		$page     = ! empty( $_GET['page'] ) && is_scalar( $_GET['page'] ) ? absint( wp_unslash( (string) $_GET['page'] ) ) : 1;
-		$per_page = ! empty( $_GET['per_page'] ) && is_scalar( $_GET['per_page'] ) ? absint( wp_unslash( (string) $_GET['per_page'] ) ) : absint( apply_filters( 'woocommerce_json_search_limit', 30 ) );
+		$page = ! empty( $_GET['page'] ) && is_scalar( $_GET['page'] ) ? absint( wp_unslash( (string) $_GET['page'] ) ) : 1;
+
+		/**
+		 * Filters the number of results returned by the JSON search endpoints.
+		 *
+		 * @since 3.5.0
+		 * @param int $limit Maximum number of results to return.
+		 */
+		$default_per_page = absint( apply_filters( 'woocommerce_json_search_limit', 30 ) );
+		$per_page         = ! empty( $_GET['per_page'] ) && is_scalar( $_GET['per_page'] ) ? absint( wp_unslash( (string) $_GET['per_page'] ) ) : $default_per_page;
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		global $wpdb;
@@ -1845,22 +1853,27 @@ class WC_AJAX {
 		$tax_locations   = $wpdb->prefix . 'woocommerce_tax_rate_locations';
 		$classes         = wc_get_product_tax_class_options();
 		$found_tax_rates = array();
+		$join            = '';
 		$where           = '';
+		$distinct        = '';
+		$count_select    = 'COUNT(*)';
 
 		if ( '' !== $term ) {
-			$like              = '%' . $wpdb->esc_like( $term ) . '%';
-			$where             = $wpdb->prepare(
-				'
-				WHERE (
-					CAST(tax_rates.tax_rate_id AS CHAR) LIKE %s
-					OR tax_rates.tax_rate_name LIKE %s
-					OR tax_rates.tax_rate_country LIKE %s
-					OR tax_rates.tax_rate_state LIKE %s
-					OR tax_rates.tax_rate_class LIKE %s
-					OR tax_rates.tax_rate LIKE %s
-					OR tax_locations.location_code LIKE %s
-				',
-				$like,
+			// Locations only need joining when they are actually searched, and the join is
+			// what makes the DISTINCT necessary.
+			$join         = "LEFT JOIN {$tax_locations} tax_locations ON tax_rates.tax_rate_id = tax_locations.tax_rate_id";
+			$distinct     = 'DISTINCT ';
+			$count_select = 'COUNT(DISTINCT tax_rates.tax_rate_id)';
+			$conditions   = array();
+			$like         = '%' . $wpdb->esc_like( $term ) . '%';
+
+			$conditions[] = $wpdb->prepare(
+				'CAST(tax_rates.tax_rate_id AS CHAR) LIKE %s
+				OR tax_rates.tax_rate_name LIKE %s
+				OR tax_rates.tax_rate_country LIKE %s
+				OR tax_rates.tax_rate_state LIKE %s
+				OR tax_rates.tax_rate_class LIKE %s
+				OR tax_locations.location_code LIKE %s',
 				$like,
 				$like,
 				$like,
@@ -1868,6 +1881,45 @@ class WC_AJAX {
 				$like,
 				$like
 			);
+
+			/*
+			 * The rate column stores a bare decimal (8.0000) while the modal shows a formatted
+			 * percentage (8%), so strip the percent sign and any spacing before matching it.
+			 */
+			$rate_term = trim( str_replace( '%', '', $term ) );
+
+			if ( '' !== $rate_term ) {
+				$conditions[] = $wpdb->prepare(
+					'tax_rates.tax_rate LIKE %s',
+					'%' . $wpdb->esc_like( $rate_term ) . '%'
+				);
+			}
+
+			/*
+			 * The rate code is derived rather than stored, so rebuild it in SQL to keep
+			 * WC_Tax::get_rate_code() searchable as it appears in the modal.
+			 */
+			$conditions[] = $wpdb->prepare(
+				"UPPER(
+					CONCAT_WS(
+						'-',
+						NULLIF( tax_rates.tax_rate_country, '' ),
+						NULLIF( tax_rates.tax_rate_state, '' ),
+						COALESCE( NULLIF( tax_rates.tax_rate_name, '' ), 'TAX' ),
+						NULLIF( tax_rates.tax_rate_priority, 0 )
+					)
+				) LIKE %s",
+				'%' . $wpdb->esc_like( wc_strtoupper( $term ) ) . '%'
+			);
+
+			/*
+			 * Unnamed rates fall back to the store's tax or VAT label in the results table,
+			 * so searching for that label needs to match them too.
+			 */
+			if ( false !== stripos( WC()->countries->tax_or_vat(), $term ) ) {
+				$conditions[] = "tax_rates.tax_rate_name = ''";
+			}
+
 			$matching_classes  = array();
 			$normalized_search = sanitize_title( $term );
 
@@ -1885,28 +1937,22 @@ class WC_AJAX {
 			}
 
 			if ( $matching_classes ) {
-				$class_conditions = array();
-
-				foreach ( $matching_classes as $matching_class ) {
-					$class_conditions[] = $wpdb->prepare( 'tax_rates.tax_rate_class = %s', $matching_class );
-				}
-
-				$where .= ' OR ( ' . implode( ' OR ', $class_conditions ) . ' )';
+				$conditions[] = $wpdb->prepare(
+					'tax_rates.tax_rate_class IN ( ' . implode( ', ', array_fill( 0, count( $matching_classes ), '%s' ) ) . ' )',
+					$matching_classes
+				);
 			}
 
-			$where .= '
-				)
-			';
+			$where = 'WHERE ( ' . implode( ' OR ', $conditions ) . ' )';
 		}
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 		$total       = absint(
 			$wpdb->get_var(
 				"
-				SELECT COUNT(DISTINCT tax_rates.tax_rate_id)
+				SELECT {$count_select}
 				FROM {$tax_rates} tax_rates
-				LEFT JOIN {$tax_locations} tax_locations
-					ON tax_rates.tax_rate_id = tax_locations.tax_rate_id
+				{$join}
 				{$where}
 				"
 			)
@@ -1918,10 +1964,9 @@ class WC_AJAX {
 		$rates = $wpdb->get_results(
 			$wpdb->prepare(
 				"
-				SELECT DISTINCT tax_rates.*
+				SELECT {$distinct}tax_rates.*
 				FROM {$tax_rates} tax_rates
-				LEFT JOIN {$tax_locations} tax_locations
-					ON tax_rates.tax_rate_id = tax_locations.tax_rate_id
+				{$join}
 				{$where}
 				ORDER BY tax_rates.tax_rate_name, tax_rates.tax_rate_id
 				LIMIT %d OFFSET %d
