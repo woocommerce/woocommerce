@@ -324,12 +324,15 @@ class WC_Comments {
 	 * Determines whether the given comment should be included in the core WP comment counts that are displayed in the
 	 * WordPress admin.
 	 *
+	 * The 'note' type covers the editorial notes introduced in WordPress 7.1, which core itself excludes from the
+	 * comment counts.
+	 *
 	 * @param WP_Comment $comment Comment object.
 	 *
 	 * @return bool
 	 */
 	private static function is_comment_excluded_from_wp_comment_counts( $comment ) {
-		return in_array( $comment->comment_type, array( 'action_log', 'order_note', 'webhook_delivery' ), true )
+		return in_array( $comment->comment_type, array( 'action_log', 'note', 'order_note', 'webhook_delivery' ), true )
 			|| get_post_type( $comment->comment_post_ID ) === 'product';
 	}
 
