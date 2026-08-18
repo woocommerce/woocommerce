@@ -67,6 +67,20 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected $context = 'taxes';
 
 	/**
+	 * Constructor.
+	 *
+	 * Report on the date type configured in Analytics settings (default `date_paid`),
+	 * matching the Orders and Revenue reports. The reporting period is filtered against
+	 * the chosen column on `wc_order_stats` so the Taxes report reconciles with them.
+	 *
+	 * @override ReportsDataStore::__construct()
+	 */
+	public function __construct() {
+		$this->date_column_name = $this->sanitize_date_column_name( get_option( 'woocommerce_date_type' ), 'date_paid' );
+		parent::__construct();
+	}
+
+	/**
 	 * Assign report columns once full table name has been assigned.
 	 *
 	 * @override ReportsDataStore::assign_report_columns()
@@ -93,6 +107,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'total_tax'    => 'SUM(total_tax) as total_tax',
 			'order_tax'    => 'SUM(order_tax) as order_tax',
 			'shipping_tax' => 'SUM(shipping_tax) as shipping_tax',
+			// parent_id stays unqualified: wc_order_stats is the only joined table carrying it, and
+			// this string is carried by the public woocommerce_admin_report_columns filter, so it must
+			// match the released form for extension callbacks that inspect or rewrite it.
 			'orders_count' => "COUNT( DISTINCT ( CASE WHEN parent_id = 0 THEN {$table_name}.order_id END ) ) as orders_count",
 		);
 	}
@@ -108,15 +125,15 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * Fills FROM clause of SQL request based on user supplied parameters.
 	 *
 	 * @param array  $query_args          Query arguments supplied by the user.
-	 * @param string $order_status_filter Order status subquery.
+	 * @param string $order_status_filter Order status subquery. Retained for signature compatibility; the wc_order_stats join is now always added.
 	 */
 	protected function add_from_sql_params( $query_args, $order_status_filter ) {
 		global $wpdb;
 		$table_name = self::get_db_table_name();
 
-		if ( $order_status_filter ) {
-			$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}wc_order_stats ON {$table_name}.order_id = {$wpdb->prefix}wc_order_stats.order_id" );
-		}
+		// Always join wc_order_stats: the reporting period is filtered against its
+		// configured date column (date_paid by default) and the status subquery relies on it.
+		$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}wc_order_stats ON {$table_name}.order_id = {$wpdb->prefix}wc_order_stats.order_id" );
 
 		$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}woocommerce_order_items ON {$table_name}.order_id = {$wpdb->prefix}woocommerce_order_items.order_id AND {$wpdb->prefix}woocommerce_order_items.order_item_type = 'tax'" );
 		$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}woocommerce_order_itemmeta itemmeta_rate_id ON itemmeta_rate_id.order_item_id = {$wpdb->prefix}woocommerce_order_items.order_item_id AND itemmeta_rate_id.meta_key = 'rate_id'" );
@@ -133,8 +150,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		global $wpdb;
 
 		$order_tax_lookup_table = self::get_db_table_name();
+		$order_stats_table      = $wpdb->prefix . 'wc_order_stats';
 
-		$this->add_time_period_sql_params( $query_args, $order_tax_lookup_table );
+		// Filter the reporting period against the configured date type on wc_order_stats
+		// (date_paid by default) rather than the lookup's date_created, so the Taxes report
+		// reconciles with the Orders and Revenue reports.
+		$this->add_time_period_sql_params( $query_args, $order_stats_table );
 		$this->get_limit_sql_params( $query_args );
 		$this->add_order_by_sql_params( $query_args );
 		$order_status_filter = $this->get_status_subquery( $query_args );

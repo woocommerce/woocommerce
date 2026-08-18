@@ -11,19 +11,6 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
  */
 class CheckoutLinkTest extends \WC_Unit_Test_Case {
 	/**
-	 * Tear down the test environment.
-	 */
-	public function tearDown(): void {
-		// The cart and the notice queue live on the WC singleton, so the rollback does not
-		// clear them. Without this the products this test adds stay in the cart, and the
-		// coupon success notice stays queued, for every later test in the process.
-		WC()->cart->empty_cart();
-		wc_clear_notices();
-
-		parent::tearDown();
-	}
-
-	/**
 	 * Test that products and coupon are added and token in url.
 	 */
 	public function test_products_and_coupon_are_added_and_token_in_url() {

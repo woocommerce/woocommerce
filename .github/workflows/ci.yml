@@ -45,6 +45,26 @@ concurrency:
 env:
   ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
   FORCE_COLOR: 1
+  # Paths that cannot change the behaviour of any code. `identify-jobs-to-run` derives the
+  # `needs-code-validation` filter from this list. The job-level `ignore` lists in each
+  # project's `config.ci` (see tools/monorepo-utils/src/ci-jobs/README.md) are a separate,
+  # deliberately decoupled layer; keep the glob syntax compatible between the two by
+  # convention (the gate runs picomatch, `ci-jobs` runs minimatch).
+  #
+  # `{,**/}` is required because `**/` needs at least one leading directory, so a `**/`-only
+  # pattern silently misses repository-root files such as `AGENTS.md`.
+  #
+  # The `changelog/` entry carves out source extensions because real modules live in directories
+  # of that name too, e.g. `tools/monorepo-utils/src/code-freeze/commands/changelog/index.ts`.
+  NON_CODE_PATHS: >-
+    ["{,**/}*.md",
+    "docs/docs-manifest.json",
+    "{,**/}changelog/!(*.ts|*.tsx|*.js|*.jsx|*.mjs|*.cjs|*.php|*.json|*.scss|*.css)",
+    ".github/**",
+    ".husky/**",
+    ".cursor/**",
+    ".gitignore",
+    "{,**/}readme.txt"]
 
 jobs:
   identify-jobs-to-run:
@@ -60,21 +80,19 @@ jobs:
       - uses: dorny/paths-filter@7b450fff21473bca461d4b92ce414b9d0420d706 # v4.0.2
         id: target-changes
         with:
-          # `**/` requires at least one leading directory, so a `**/`-only pattern silently
-          # misses repository-root files. Every root-anchored ignore below uses `{,**/}` so
-          # that e.g. `AGENTS.md` is excluded the same way `docs/foo.md` is.
+          # `needs-code-validation` is the negation of `NON_CODE_PATHS`: a PR needs code
+          # validation when it touches anything that list does not cover. Edit the list, not
+          # this line.
           filters: |
             needs-code-validation:
-              - '!(({,**/}*.md)|(docs/docs-manifest.json)|({,**/}changelog/*)|(.github/**)|(.husky/**)|(.cursor/**)|(.gitignore)|({,**/}readme.txt))'
-              # `changelog/*` also covers real modules, e.g. code-freeze/commands/changelog/index.ts.
-              - '{,**/}changelog/*.{ts,tsx,js,jsx,mjs,cjs,php,json,scss,css}'
+              - "!((${{ join( fromJSON( env.NON_CODE_PATHS ), ')|(' ) }}))"
             needs-changelog-validation:
               - '{packages,plugins}/*/!((changelog/*)|(readme.txt))'
             needs-markdown-validation:
               - '*.md'
               - '!(.github/**)/**/*.md'
             needs-syncpack-validation:
-              - '(.syncpackrc)|(pnpm-lock.yaml)'
+              - '(.syncpackrc)|(pnpm-lock.yaml)|(pnpm-workspace.yaml)'
 
   project-jobs:
     # Since this is a monorepo, not every pull request or change is going to impact every project.
@@ -207,7 +225,9 @@ jobs:
 
   project-test-jobs:
     name: '${{ matrix.name }}'
-    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    # While the CI_QUEUE_OVERFLOW repository variable is '1', e2e jobs route to the
+    # dedicated group. Fork PRs are excluded.
+    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || ( vars.CI_QUEUE_OVERFLOW == '1' && matrix.testType == 'e2e' && ( github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository ) ) && fromJSON('{"group":"Woo Core Dedicated CI"}') || 'ubuntu-latest' }}
     needs: [ 'identify-jobs-to-run', 'project-jobs', 'woocommerce-plugin-build-artifact' ]
     if: ${{ !cancelled() && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' ) && needs.project-jobs.outputs.test-jobs != '[]' && ( needs.woocommerce-plugin-build-artifact.result == 'success' || needs.woocommerce-plugin-build-artifact.result == 'skipped' || needs.project-jobs.outputs.shared-plugin-build-has-required-consumers != 'true' ) }}
     env: ${{ matrix.testEnv.envVars }}
@@ -306,6 +326,11 @@ jobs:
               exit 1
             fi
             echo "::warning::wp-env-start-retry reason=${reason} attempt=${attempt}/${max_attempts} -- retrying in $((attempt * 15))s"
+            # The AggregateError wp-env surfaces names neither the host nor the address that
+            # failed, so `reason=wordpress` is as far as the log gets us. Trace the retries:
+            # a repeat failure then records every connect attempt with its address and errno.
+            # Healthy first attempts stay untraced, so this costs nothing on a green job.
+            export NODE_DEBUG=net
             sleep "$((attempt * 15))"
             attempt=$((attempt + 1))
           done
@@ -589,15 +614,15 @@ jobs:
           node-version-file: .nvmrc
 
       - name: 'Setup - syncpack'
-        run: npm install -g syncpack@^10.9.3
+        run: npm install -g syncpack@15.3.3
 
       - name: 'Validate - mismatches'
-        run: syncpack list-mismatches
+        run: syncpack lint
 
       - name: 'Validate - prompt mitigation on failed validation'
         if: failure()
         run: |
-          echo "Dependency version mismatch detected. This can usually be fixed automatically by updating the pinned version in \`.syncpackrc\` and then running: \`pnpm sync-dependencies\`"
+          echo "Dependency version mismatch detected. This can usually be fixed automatically by updating the dependency version in \`.syncpackrc\` or \`pnpm-workspace.yaml\`, then running: \`pnpm sync-dependencies\`"
           exit 1
 
   validate-changelog:
