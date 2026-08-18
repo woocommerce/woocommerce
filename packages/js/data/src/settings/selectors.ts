@@ -98,7 +98,7 @@ export function getSetting(
 export const getLastSettingsErrorForGroup = (
 	state: SettingsState,
 	group: string
-) => state[ group ].error;
+) => ( state[ group ] && state[ group ].error ) || false;
 
 export const getSettingsError = (
 	state: SettingsState,
