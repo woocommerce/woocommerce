@@ -29,8 +29,9 @@ class SearchFilter extends Component {
 
 		this.updateLabels = this.updateLabels.bind( this );
 
-		if ( filter.value.length ) {
-			this.loadLabels( filter.value, query );
+		const filterValue = normalizeFilterValue( filter.value );
+		if ( filterValue.length ) {
+			this.loadLabels( filterValue, query );
 		}
 	}
 
@@ -56,9 +57,7 @@ class SearchFilter extends Component {
 		}
 	}
 
-	loadLabels( value, query ) {
-		const filterValue = normalizeFilterValue( value );
-
+	loadLabels( filterValue, query ) {
 		this.props.config.input
 			.getLabels( filterValue, query )
 			.then( ( selected ) => {
