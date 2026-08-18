@@ -32,7 +32,7 @@ trait ProductRequestPreparationTrait {
 		}
 
 		if ( isset( $request['type'] ) ) {
-			$classname = \WC_Product_Factory::get_classname_from_product_type( $request['type'] );
+			$classname = is_scalar( $request['type'] ) ? \WC_Product_Factory::get_classname_from_product_type( (string) $request['type'] ) : false;
 
 			if ( ! $classname || ! class_exists( $classname ) ) {
 				$classname = 'WC_Product_Simple';
@@ -41,15 +41,15 @@ trait ProductRequestPreparationTrait {
 			try {
 				$product = new $classname( $id );
 			} catch ( \Exception $e ) {
-				// The construction read consults the uncached post, so it is the authority on
-				// whether the product vanished (e.g. deleted concurrently) since the route guard.
-				$post_type = $id ? get_post_type( $id ) : false;
-
-				if ( 'product' === $post_type ) {
+				// Only arbitrate for a nonzero target ID: wp_delete_post() invalidates the posts
+				// cache (unlike WooCommerce's products cache group), so get_post_type() reliably
+				// reports whether the product vanished (e.g. deleted concurrently) since the
+				// route guard. Create-path and existing-product failures are rethrown unchanged.
+				if ( ! $id || 'product' === get_post_type( $id ) ) {
 					throw $e;
 				}
 
-				return $this->get_invalid_product_id_error( 'product_variation' === $post_type );
+				return $this->get_invalid_product_id_error( 'product_variation' === get_post_type( $id ) );
 			}
 		} elseif ( isset( $request['id'] ) ) {
 			$product = wc_get_product( $id );

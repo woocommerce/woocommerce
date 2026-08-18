@@ -2296,6 +2296,104 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Construction failures on the create path are rethrown instead of misreported as an invalid product ID.
+	 */
+	public function test_prepare_object_rethrows_create_path_store_failure(): void {
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products' );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$break_store = function ( $stores ) {
+			$stores['product'] = 'WC_Nonexistent_Data_Store';
+			return $stores;
+		};
+		add_filter( 'woocommerce_data_stores', $break_store );
+
+		$prepare_method = new ReflectionMethod( $this->endpoint, 'prepare_object_for_database' );
+		$prepare_method->setAccessible( true );
+
+		$this->expectException( Exception::class );
+		$this->expectExceptionMessage( 'Invalid data store.' );
+
+		try {
+			$prepare_method->invoke( $this->endpoint, $request, true );
+		} finally {
+			remove_filter( 'woocommerce_data_stores', $break_store );
+		}
+	}
+
+	/**
+	 * @testdox Duplicating a product preserves the error code of a typed data exception thrown during preparation.
+	 */
+	public function test_duplicate_preserves_data_exception_error_code(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		// The route guard is served from the warm product instance cache, so the only
+		// read on this route happens inside the preparation construction.
+		$throw_data_exception = function ( $product_id ) use ( $product ) {
+			if ( $product->get_id() === $product_id ) {
+				throw new WC_Data_Exception( 'custom_duplicate_block', 'Simulated typed failure.', 409 );
+			}
+		};
+		add_action( 'woocommerce_product_read', $throw_data_exception );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/duplicate' );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$response = $this->server->dispatch( $request );
+
+		remove_action( 'woocommerce_product_read', $throw_data_exception );
+
+		$this->assertEquals( 409, $response->get_status(), 'A typed exception should keep its own HTTP status on the duplicate route' );
+		$this->assertEquals( 'custom_duplicate_block', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox An array type value in a batch item falls back to a simple product instead of causing a fatal error.
+	 */
+	public function test_batch_update_with_array_type_does_not_fatal(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'update' => array(
+						array(
+							'id'   => $product->get_id(),
+							'type' => array( 'simple' ),
+							'name' => 'Renamed via array-type batch',
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertArrayNotHasKey( 'error', $data['update'][0], 'A non-scalar type should fall back to a simple product, not error' );
+		$this->assertEquals( 'Renamed via array-type batch', $data['update'][0]['name'] );
+	}
+
+	/**
+	 * @testdox The invalid-product error keeps one code but distinguishes variation targets in its message.
+	 */
+	public function test_invalid_product_id_error_distinguishes_variations_in_message(): void {
+		$error_method = new ReflectionMethod( $this->endpoint, 'get_invalid_product_id_error' );
+		$error_method->setAccessible( true );
+
+		$variation_error = $error_method->invoke( $this->endpoint, true );
+		$generic_error   = $error_method->invoke( $this->endpoint, false );
+
+		$this->assertEquals( 'woocommerce_rest_invalid_product_id', $variation_error->get_error_code() );
+		$this->assertEquals( 'woocommerce_rest_invalid_product_id', $generic_error->get_error_code() );
+		$this->assertStringContainsString( 'variations', $variation_error->get_error_message() );
+		$this->assertStringNotContainsString( 'variations', $generic_error->get_error_message() );
+	}
+
+	/**
 	 * @testdox A falsy type value in a batch item falls back to a simple product instead of causing a fatal error.
 	 */
 	public function test_batch_update_with_falsy_type_does_not_fatal(): void {

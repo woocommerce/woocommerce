@@ -239,7 +239,11 @@ class Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		// Creating product object from request data in preparation for copying.
-		$updated_product = $this->prepare_object_for_database( $request );
+		try {
+			$updated_product = $this->prepare_object_for_database( $request );
+		} catch ( \WC_Data_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
+		}
 
 		if ( is_wp_error( $updated_product ) ) {
 			return $updated_product;
