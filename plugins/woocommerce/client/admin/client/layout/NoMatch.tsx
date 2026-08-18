@@ -61,11 +61,9 @@ const NoMatch = ( { path }: { path?: string } ) => {
 		<div className="woocommerce-layout__no-match">
 			<Card>
 				<CardBody>
-					<Text as="h3">
-						{ isPermissionDenied
-							? __( 'Access denied', 'woocommerce' )
-							: __( 'Page not found', 'woocommerce' ) }
-					</Text>
+					{ /* The page title (driven by the breadcrumb) already says
+					 * "Access denied" or "Page not found" - repeating it here
+					 * as its own heading would just echo the title above. */ }
 					<Text>
 						{ isPermissionDenied
 							? __(

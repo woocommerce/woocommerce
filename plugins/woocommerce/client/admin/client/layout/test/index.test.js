@@ -134,11 +134,9 @@ describe( 'Layout', () => {
 			} );
 
 			expect( screen.queryByText( 'spinner' ) ).not.toBeInTheDocument();
-			// The page title (from the breadcrumb) and the card heading
-			// should agree - one for the header, one for the card content.
 			expect(
-				screen.getAllByRole( 'heading', { name: 'Page not found' } )
-			).toHaveLength( 2 );
+				screen.getByRole( 'heading', { name: 'Page not found' } )
+			).toBeInTheDocument();
 			expect( screen.getByText( message ) ).toBeInTheDocument();
 		} );
 
@@ -156,12 +154,11 @@ describe( 'Layout', () => {
 				jest.runOnlyPendingTimers();
 			} );
 
-			// Both the page title and the card heading should say the same
-			// thing here too - this is exactly the case that used to be
-			// wrong, telling a user without access to check for a typo.
+			// This is exactly the case that used to be wrong - telling a
+			// user without access to check for a typo instead.
 			expect(
-				screen.getAllByRole( 'heading', { name: 'Access denied' } )
-			).toHaveLength( 2 );
+				screen.getByRole( 'heading', { name: 'Access denied' } )
+			).toBeInTheDocument();
 			expect(
 				screen.getByText(
 					'You do not have permission to view this page. Ask a site administrator for help.'
@@ -183,8 +180,8 @@ describe( 'Layout', () => {
 			} );
 
 			expect(
-				screen.getAllByRole( 'heading', { name: 'Page not found' } )
-			).toHaveLength( 2 );
+				screen.getByRole( 'heading', { name: 'Page not found' } )
+			).toBeInTheDocument();
 			expect( screen.getByText( message ) ).toBeInTheDocument();
 			expect(
 				screen.queryByRole( 'heading', { name: 'Access denied' } )
