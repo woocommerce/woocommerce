@@ -70,8 +70,49 @@ describe( 'ProductPrice', () => {
 
 		expect( getRegularPrice( container ) ).toBe( '£1.00' );
 		expect( getDiscountedPrice( container ) ).toBe( '£0.50' );
-		expect( container.textContent ).toContain( 'pre price ' );
-		expect( container.textContent ).toContain( ' Test format' );
+		// The custom format wraps the whole price, screen reader labels
+		// included.
+		expect( container.textContent ).toBe(
+			'pre price Previous price:£1.00Discounted price:£0.50 Test format'
+		);
+	} );
+
+	test( 'keeps the sale price structure: labels and del/ins wrappers', () => {
+		const { container } = render(
+			<ProductPrice
+				price={ 50 }
+				regularPrice={ 100 }
+				currency={ currency }
+			/>
+		);
+
+		const wrapper = container.firstChild;
+		expect( wrapper ).toHaveClass(
+			'price',
+			'wc-block-components-product-price'
+		);
+
+		// Each price is preceded by its screen reader label.
+		const [ previousLabel, discountedLabel ] = container.querySelectorAll(
+			'span.screen-reader-text'
+		);
+		expect( previousLabel ).toHaveTextContent( 'Previous price:' );
+		expect( discountedLabel ).toHaveTextContent( 'Discounted price:' );
+
+		const del = container.querySelector( 'del' );
+		expect( del ).toHaveClass(
+			'wc-block-components-product-price__regular'
+		);
+		expect( del ).toHaveAttribute( 'translate', 'no' );
+		expect( previousLabel.nextElementSibling ).toBe( del );
+
+		const ins = container.querySelector( 'ins' );
+		expect( ins ).toHaveClass(
+			'wc-block-components-product-price__value',
+			'is-discounted'
+		);
+		expect( ins ).toHaveAttribute( 'translate', 'no' );
+		expect( discountedLabel.nextElementSibling ).toBe( ins );
 	} );
 
 	test( 'renders the regular price in a del and the sale price in an ins', () => {
@@ -96,7 +137,9 @@ describe( 'ProductPrice', () => {
 			/>
 		);
 
-		const symbols = container.querySelectorAll( '[dir="auto"]' );
+		const symbols = container.querySelectorAll(
+			'.wc-block-components-formatted-money-amount__currency-symbol'
+		);
 		expect( symbols ).toHaveLength( 2 );
 		expect( symbols[ 0 ].textContent ).toBe( '£' );
 		expect( symbols[ 1 ].textContent ).toBe( '£' );
@@ -107,9 +150,11 @@ describe( 'ProductPrice', () => {
 			<ProductPrice price={ 50 } currency={ currency } />
 		);
 
-		expect( container.querySelector( '[dir="auto"]' )?.textContent ).toBe(
-			'£'
-		);
+		expect(
+			container.querySelector(
+				'.wc-block-components-formatted-money-amount__currency-symbol'
+			)?.textContent
+		).toBe( '£' );
 		expect( container.querySelector( 'bdi' )?.textContent ).toBe( '£0.50' );
 	} );
 } );
