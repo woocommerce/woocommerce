@@ -5,6 +5,7 @@ import { NumericFormat } from 'react-number-format';
 import type {
 	NumberFormatValues,
 	NumericFormatProps,
+	SourceInfo,
 } from 'react-number-format';
 import clsx from 'clsx';
 import type { ReactElement } from 'react';
@@ -111,7 +112,16 @@ const FormattedMonetaryAmount = ( {
 
 	// Wrapper for NumericFormat onValueChange which handles subunit conversion.
 	const onValueChangeWrapper = onValueChange
-		? ( values: NumberFormatValues ) => {
+		? ( values: NumberFormatValues, sourceInfo: SourceInfo ) => {
+				// NumericFormat also fires when the `value` prop changes; only
+				// user input counts as a change here. A prop-driven call echoes
+				// the rounded display value back, which consumers would apply
+				// as if the user had picked it. Compared as a string because
+				// the SourceType enum only exists in the type declarations,
+				// not in the runtime build.
+				if ( ( sourceInfo.source as string ) !== 'event' ) {
+					return;
+				}
 				const minorUnitValue = +values.value * 10 ** currency.minorUnit;
 				onValueChange( minorUnitValue );
 		  }

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -120,6 +120,54 @@ describe( 'FormattedMonetaryAmount', () => {
 				/>
 			);
 			expect( screen.getByText( '€ 0,15' ) ).toBeInTheDocument();
+		} );
+	} );
+
+	describe( 'onValueChange', () => {
+		/** @type {import('@woocommerce/types').Currency} */
+		const eurCurrency = {
+			code: 'EUR',
+			symbol: '€',
+			thousandSeparator: '.',
+			decimalSeparator: ',',
+			minorUnit: 2,
+			prefix: '€ ',
+			suffix: '',
+		};
+
+		test( 'fires for user input only, converted to subunits', () => {
+			const onValueChange = jest.fn();
+			const { rerender } = render(
+				<FormattedMonetaryAmount
+					value="156345"
+					currency={ eurCurrency }
+					displayType="input"
+					onValueChange={ onValueChange }
+				/>
+			);
+
+			// Not on mount.
+			expect( onValueChange ).not.toHaveBeenCalled();
+
+			// Not on a value prop change either: NumericFormat reports it, but
+			// it echoes the rounded display value, which consumers would apply
+			// as if the user had picked it.
+			rerender(
+				<FormattedMonetaryAmount
+					value="179900"
+					currency={ eurCurrency }
+					displayType="input"
+					onValueChange={ onValueChange }
+				/>
+			);
+			expect( onValueChange ).not.toHaveBeenCalled();
+
+			// User input does fire, converted to minor units.
+			fireEvent.change( screen.getByRole( 'textbox' ), {
+				target: { value: '€ 12,00' },
+			} );
+			expect( onValueChange ).toHaveBeenCalledTimes( 1 );
+			expect( onValueChange ).toHaveBeenCalledWith( 1200 );
 		} );
 	} );
 
