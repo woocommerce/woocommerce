@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent a fatal error when a product's description embeds a Single Product block that references itself (directly, or through a chain of other products), which previously exhausted PHP's memory limit and crashed the front end.

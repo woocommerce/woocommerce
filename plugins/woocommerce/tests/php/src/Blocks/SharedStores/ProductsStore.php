@@ -116,6 +116,69 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox load_product() does not fatal when a product's own description embeds a Single Product block pointing at itself.
+	 *
+	 * Regression test for a description that embeds a Single Product block
+	 * referencing its own product (e.g. left behind by copy-pasting page
+	 * blocks into the description). Rendering the description for
+	 * hydration used to recurse into load_product() for the same ID until
+	 * PHP's memory limit was exhausted, and even once that recursion was
+	 * blocked, inner blocks like Add to Cart Form would fatal because they
+	 * inherited the page's product as ambient block context.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/67750
+	 */
+	public function test_load_product_handles_self_referencing_single_product_block(): void {
+		$product    = WC_Helper_Product::create_simple_product();
+		$product_id = $product->get_id();
+
+		$product->set_description(
+			'<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} -->' .
+			'<div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/add-to-cart-form /--></div>' .
+			'<!-- /wp:woocommerce/single-product -->'
+		);
+		$product->save();
+
+		$result = TestedProductsStore::load_product( $this->consent, $product_id );
+
+		$this->assertSame( $product->get_name(), $result['name'], 'The product should still load and hydrate normally.' );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox load_product() does not fatal on an indirect two-product description cycle.
+	 *
+	 * Same failure mode as the self-referencing case, but via a chain of
+	 * two products whose descriptions embed each other.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/67750
+	 */
+	public function test_load_product_handles_indirect_description_cycle(): void {
+		$product_a = WC_Helper_Product::create_simple_product();
+		$product_b = WC_Helper_Product::create_simple_product();
+
+		$block_for = static function ( $id ) {
+			return '<!-- wp:woocommerce/single-product {"productId":' . $id . '} -->' .
+				'<div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/add-to-cart-form /--></div>' .
+				'<!-- /wp:woocommerce/single-product -->';
+		};
+
+		$product_a->set_description( $block_for( $product_b->get_id() ) );
+		$product_a->save();
+
+		$product_b->set_description( $block_for( $product_a->get_id() ) );
+		$product_b->save();
+
+		$result = TestedProductsStore::load_product( $this->consent, $product_a->get_id() );
+
+		$this->assertSame( $product_a->get_name(), $result['name'], 'The product should still load and hydrate normally.' );
+
+		$product_a->delete( true );
+		$product_b->delete( true );
+	}
+
+	/**
 	 * @testdox load_variations() hydrates interactivity state with every child variation.
 	 */
 	public function test_load_variations_populates_state(): void {
@@ -515,6 +578,10 @@ class ProductsStore extends \WC_Unit_Test_Case {
 		$flag = $reflection->getProperty( 'getters_registered' );
 		$flag->setAccessible( true );
 		$flag->setValue( null, false );
+
+		$depth = $reflection->getProperty( 'hydration_depth' );
+		$depth->setAccessible( true );
+		$depth->setValue( null, 0 );
 	}
 
 	/**

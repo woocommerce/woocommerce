@@ -75,6 +75,22 @@ class ProductsStore {
 	private static bool $getters_registered = false;
 
 	/**
+	 * Depth counter for in-flight load_product() calls.
+	 *
+	 * A product's description can itself contain block markup, including a
+	 * Single Product block. Rendering that markup happens as a side effect
+	 * of formatting the description for hydration below, which means it
+	 * has no page-level Single Product Template context. Consumers use
+	 * is_hydrating() to detect this "detached" render and avoid wiring up
+	 * behaviour (e.g. block context) that assumes a normal page render.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/67750
+	 *
+	 * @var int
+	 */
+	private static int $hydration_depth = 0;
+
+	/**
 	 * Check that the consent statement was passed.
 	 *
 	 * @param string $consent_statement The consent statement string.
@@ -172,9 +188,15 @@ class ProductsStore {
 			return self::$products[ $product_id ];
 		}
 
-		$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products/' . $product_id );
+		++self::$hydration_depth;
+		try {
+			$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products/' . $product_id );
 
-		self::$products[ $product_id ] = $response['body'] ?? array();
+			self::$products[ $product_id ] = $response['body'] ?? array();
+		} finally {
+			--self::$hydration_depth;
+		}
+
 		self::register_getters();
 		wp_interactivity_state(
 			self::$store_namespace,
@@ -182,6 +204,19 @@ class ProductsStore {
 		);
 
 		return self::$products[ $product_id ];
+	}
+
+	/**
+	 * Whether a product's content is currently being formatted for
+	 * hydration (i.e. we're inside load_product()). Used to detect
+	 * "detached" block renders triggered by that formatting.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/67750
+	 *
+	 * @return bool
+	 */
+	public static function is_hydrating(): bool {
+		return self::$hydration_depth > 0;
 	}
 
 	/**

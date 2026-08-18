@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\SharedStores\ProductsStore;
 use Automattic\WooCommerce\Blocks\Utils\ProductDataUtils;
 use Automattic\WooCommerce\Enums\ProductType;
 
@@ -33,6 +34,19 @@ class SingleProduct extends AbstractBlock {
 	 * @var array
 	 */
 	protected $single_product_inner_blocks_names = [];
+
+	/**
+	 * Product IDs currently being rendered by this block on the current
+	 * call stack, keyed by product ID.
+	 *
+	 * Guards against a product's description (or a chain of products'
+	 * descriptions) embedding a Single Product block that points back at
+	 * a product already mid-render. Without this, rendering recurses
+	 * until PHP's memory limit is exhausted.
+	 *
+	 * @var array<int, true>
+	 */
+	protected $rendering_product_ids = [];
 
 	/**
 	 * Initialize the block and Hook into the `render_block_context` filter
@@ -81,6 +95,29 @@ class SingleProduct extends AbstractBlock {
 	 * @return array Updated block context.
 	 */
 	public function update_context( $context, $block, $parent_block ) {
+		// A product's description can itself contain WooCommerce block
+		// markup (e.g. a Single Product block left behind by copy-pasting
+		// page content into the description). Rendering that markup
+		// happens as a side effect of ProductsStore::load_product()
+		// formatting the description for hydration. WordPress core seeds
+		// render_block_context with the *page's* queried post (global
+		// $post) by default, so left alone, embedded blocks (e.g. Add to
+		// Cart Form) inherit the page's product as their context even
+		// though there's no real Single Product Template render behind
+		// them, which can fatal. Strip that ambient context so embedded
+		// blocks fall back to their own "no product context" guards
+		// instead.
+		// @see https://github.com/woocommerce/woocommerce/issues/67750.
+		if ( ProductsStore::is_hydrating() ) {
+			// Set (rather than unset) so direct `$context['postId']` reads
+			// elsewhere (e.g. Add to Cart Form) don't emit "undefined
+			// array key" notices; isset() still resolves to false either
+			// way, so guards depending on it behave the same.
+			$context['postId']   = null;
+			$context['postType'] = null;
+			return $context;
+		}
+
 		if ( 'woocommerce/single-product' === $block['blockName']
 			&& isset( $block['attrs']['productId'] ) ) {
 				$this->product_id = $block['attrs']['productId'];
@@ -193,44 +230,60 @@ class SingleProduct extends AbstractBlock {
 
 		$product_id = $product->get_id();
 
-		if ( post_password_required( $product_id ) ) {
-			$password_form = get_the_password_form( $product_id );
-			$html          = new \WP_HTML_Tag_Processor( $password_form );
-			$current_url   = home_url( add_query_arg( null, null ) );
+		// Guard against re-entrant rendering: a product's description (or a
+		// chain of products' descriptions) may embed a Single Product block
+		// that points back at a product already being rendered on the
+		// current call stack. Rendering it again would recurse until PHP's
+		// memory limit is exhausted.
+		// @see https://github.com/woocommerce/woocommerce/issues/67750.
+		if ( isset( $this->rendering_product_ids[ $product_id ] ) ) {
+			return '';
+		}
 
-			while ( $html->next_tag( array( 'tag_name' => 'input' ) ) ) {
-				if ( 'redirect_to' !== $html->get_attribute( 'name' ) ) {
-					continue;
+		$this->rendering_product_ids[ $product_id ] = true;
+
+		try {
+			if ( post_password_required( $product_id ) ) {
+				$password_form = get_the_password_form( $product_id );
+				$html          = new \WP_HTML_Tag_Processor( $password_form );
+				$current_url   = home_url( add_query_arg( null, null ) );
+
+				while ( $html->next_tag( array( 'tag_name' => 'input' ) ) ) {
+					if ( 'redirect_to' !== $html->get_attribute( 'name' ) ) {
+						continue;
+					}
+
+					$html->set_attribute( 'value', $current_url );
+					break;
 				}
 
-				$html->set_attribute( 'value', $current_url );
-				break;
+				return $html->get_updated_html();
 			}
 
-			return $html->get_updated_html();
+			// Load product into the shared products store.
+			wc_interactivity_api_load_product(
+				'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce',
+				$product_id
+			);
+
+			$interactivity_context = array(
+				'productId'   => $product_id,
+				'variationId' => null,
+			);
+
+			$html = new \WP_HTML_Tag_Processor( $content );
+
+			if ( $html->next_tag( array( 'tag_name' => 'div' ) ) ) {
+				$html->set_attribute( 'data-wp-interactive', $this->get_full_block_name() );
+				$html->set_attribute( 'data-wp-context', 'woocommerce/products::' . wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
+			}
+
+			$updated_html = $html->get_updated_html();
+
+			return parent::render( $attributes, $updated_html, $block );
+		} finally {
+			unset( $this->rendering_product_ids[ $product_id ] );
 		}
-
-		// Load product into the shared products store.
-		wc_interactivity_api_load_product(
-			'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce',
-			$product_id
-		);
-
-		$interactivity_context = array(
-			'productId'   => $product_id,
-			'variationId' => null,
-		);
-
-		$html = new \WP_HTML_Tag_Processor( $content );
-
-		if ( $html->next_tag( array( 'tag_name' => 'div' ) ) ) {
-			$html->set_attribute( 'data-wp-interactive', $this->get_full_block_name() );
-			$html->set_attribute( 'data-wp-context', 'woocommerce/products::' . wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
-		}
-
-		$updated_html = $html->get_updated_html();
-
-		return parent::render( $attributes, $updated_html, $block );
 	}
 
 	/**
