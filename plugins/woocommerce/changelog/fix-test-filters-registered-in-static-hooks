@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Register test filters per test rather than in setUpBeforeClass, so they survive WordPress's per-test hook restore and the assertions that depend on them stop passing for the wrong reason.

@@ -19,6 +19,7 @@ import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
 import './quality-badge.scss';
 import { QualityBadgeIcon, QualityBadgePopover } from './quality-badge';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
+import { MarketplaceContextType } from '../../contexts/types';
 
 /**
  * Info button next to the filter label; opens the shared badge explanation
@@ -65,6 +66,24 @@ function QualityBadgeInfo( props: {
 				/>
 			) }
 		</>
+	);
+}
+
+/**
+ * Whether the badge filter applies to outgoing search requests. Kept in sync
+ * with the toggle's own visibility conditions: the `quality_badge` URL param
+ * counts only while the control that clears it can render, so a stale or
+ * bookmarked param cannot silently filter the listing when the badge is
+ * disabled or the IAM settings failed to load.
+ */
+export function isQualityBadgeFilterActive(
+	query: { quality_badge?: string },
+	iamSettings: MarketplaceContextType[ 'iamSettings' ] | undefined
+): boolean {
+	const badge = iamSettings?.quality_badge;
+
+	return (
+		query.quality_badge === '1' && Boolean( badge?.enabled && badge.label )
 	);
 }
 
