@@ -1,4 +1,4 @@
-Significance: patch
+Significance: minor
 Type: fix
 
 Render block prices with the same markup as wc_price(), so the currency position setting is honored consistently across block and PHP-rendered prices, including currencies whose symbol is written in an RTL script.
