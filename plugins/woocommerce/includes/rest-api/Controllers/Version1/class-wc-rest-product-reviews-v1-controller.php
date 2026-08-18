@@ -310,9 +310,12 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		 * Inserting the comment already triggered a recompute of the product's rating aggregates
 		 * (wp_insert_comment() calls wp_update_comment_count(), which WC_Comments::clear_transients()
 		 * hooks into), but that ran before the rating meta above existed, leaving the stored average
-		 * one review behind. Recompute now that the meta is in place.
+		 * one review behind. Recompute now that the meta is in place. Only a submitted rating can
+		 * change the aggregates, so a review created without one needs no second recompute.
 		 */
-		WC_Comments::clear_transients( $product_id );
+		if ( ! empty( $request['rating'] ) ) {
+			WC_Comments::clear_transients( $product_id );
+		}
 
 		$product_review = get_comment( $product_review_id );
 		$this->update_additional_fields_for_object( $product_review, $request );
