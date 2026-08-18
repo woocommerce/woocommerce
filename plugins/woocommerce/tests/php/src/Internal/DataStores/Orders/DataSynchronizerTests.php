@@ -151,9 +151,7 @@ class DataSynchronizerTests extends \HposTestCase {
 	}
 
 	/**
-	 * An order backfilled to a real post has no "missing" orders, but can still go stale afterwards
-	 * (post record not touched because sync is disabled). has_orders_pending_sync() must still catch
-	 * that case instead of letting the empty "missing orders" count null out the whole sum.
+	 * @testDox An order edited after a full backfill is still detected as pending sync.
 	 */
 	public function test_has_orders_pending_sync_detects_stale_order_after_backfill_with_no_missing_orders() {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
