@@ -762,10 +762,20 @@ class CustomOrdersTableController {
 					);
 				}
 
+				$sync_target = $this->data_synchronizer->custom_orders_table_is_authoritative()
+					? __( 'WordPress posts storage', 'woocommerce' )
+					: __( 'High-performance order storage', 'woocommerce' );
+
 				$sync_message[] = sprintf(
 					'<a href="%1$s" class="button-link wc-hpos-sync-now" data-confirm-message="%2$s">%3$s</a>',
 					esc_url( $sync_now_url ),
-					esc_attr__( 'This syncs all pending orders into the other storage table. Continue?', 'woocommerce' ),
+					esc_attr(
+						sprintf(
+							/* translators: %s: name of the order storage system orders will be copied into. */
+							__( 'This syncs any orders that still need syncing into %s. Continue?', 'woocommerce' ),
+							$sync_target
+						)
+					),
 					__( 'Sync orders now', 'woocommerce' )
 				);
 			}
