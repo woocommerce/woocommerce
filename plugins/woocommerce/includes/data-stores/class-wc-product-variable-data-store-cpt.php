@@ -404,7 +404,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						 *     }
 						 *
 						 *     public function apply_user_discount( $price, $variation, $product ) {
-						 *         return wc_format_decimal( $price * $this->get_discount_for_user( get_current_user_id() ) );
+						 *         return wc_format_decimal( $price * $this->get_discount_for_user( get_current_user_id() ), wc_get_price_decimals() );
 						 *     }
 						 *
 						 *     public function add_user_to_hash( $price_hash, $product, $for_display ) {
