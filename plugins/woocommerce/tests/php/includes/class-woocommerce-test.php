@@ -207,15 +207,40 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 	 * @testdox Settings registration is not conditional on the hook it runs from.
 	 */
 	public function test_register_wp_admin_settings_does_not_depend_on_hook_context(): void {
+		global $wp_current_filter, $wp_actions;
+
 		// The previous guard keyed off doing_action( 'rest_api_init' ) && did_action( 'admin_init' ),
-		// which made the rest_api_init path unreachable on admin requests.
-		remove_all_filters( 'woocommerce_settings_groups' );
+		// which made the rest_api_init path unreachable on admin requests. Reproduce that exact state
+		// rather than calling the method bare: admin_init has already run, and registration is now
+		// invoked from inside rest_api_init. Setting the globals doing_action()/did_action() read is
+		// enough, and avoids firing every core callback bound to those two hooks.
+		$current_filter_backup = $wp_current_filter;
+		$admin_init_backup     = $wp_actions['admin_init'] ?? null;
 
-		WC()->register_wp_admin_settings();
+		$wp_actions['admin_init'] = ( $admin_init_backup ?? 0 ) + 1; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp_current_filter[]      = 'rest_api_init'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Reading the registered groups under test.
-		$groups = apply_filters( 'woocommerce_settings_groups', array() );
-		$ids    = array_column( $groups, 'id' );
+		try {
+			$this->assertTrue( doing_action( 'rest_api_init' ), 'The removed guard condition should be reproduced.' );
+			$this->assertNotEmpty( did_action( 'admin_init' ), 'The removed guard condition should be reproduced.' );
+
+			remove_all_filters( 'woocommerce_settings_groups' );
+
+			WC()->register_wp_admin_settings();
+
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Reading the registered groups under test.
+			$groups = apply_filters( 'woocommerce_settings_groups', array() );
+			$ids    = array_column( $groups, 'id' );
+		} finally {
+			$wp_current_filter = $current_filter_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+			if ( null === $admin_init_backup ) {
+				unset( $wp_actions['admin_init'] );
+			} else {
+				$wp_actions['admin_init'] = $admin_init_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			}
+		}
+
 		$this->assertContains( 'general', $ids, 'Registration should happen regardless of which hook is running.' );
 	}
 
