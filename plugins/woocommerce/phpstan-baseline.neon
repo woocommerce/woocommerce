@@ -43804,12 +43804,6 @@ parameters:
 			path: src/Admin/API/Reports/SqlQuery.php
 
 		-
-			message: '#^Call to an undefined method object\:\:get\(\)\.$#'
-			identifier: method.notFound
-			count: 7
-			path: src/Admin/API/Reports/Stock/Controller.php
-
-		-
 			message: '#^Call to method get_id\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\Stock\\WC_Product\.$#'
 			identifier: class.notFound
 			count: 4

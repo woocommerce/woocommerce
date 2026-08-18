@@ -23,6 +23,7 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
  * @extends GenericController
  */
 class Controller extends GenericController implements ExportableInterface {
+	use ExcludeVariableParentsTrait;
 
 	/**
 	 * Route base.
@@ -72,6 +73,9 @@ class Controller extends GenericController implements ExportableInterface {
 		}
 
 		$args['post_type'] = array( 'product', 'product_variation' );
+
+		// Variations are reported individually, so listing their parent would only duplicate them.
+		$args['exclude_variable_parents'] = true;
 
 		if ( ProductStockStatus::LOW_STOCK === $request['type'] ) {
 			$args['low_in_stock'] = true;
@@ -147,12 +151,16 @@ class Controller extends GenericController implements ExportableInterface {
 	 * Add in conditional search filters for products.
 	 *
 	 * @internal
-	 * @param string $where Where clause used to search posts.
-	 * @param object $wp_query WP_Query object.
+	 * @param string    $where Where clause used to search posts.
+	 * @param \WP_Query $wp_query WP_Query object.
 	 * @return string
 	 */
 	public static function add_wp_query_filter( $where, $wp_query ) {
 		global $wpdb;
+
+		if ( $wp_query->get( 'exclude_variable_parents' ) ) {
+			$where .= self::get_variable_parents_exclusion_clause();
+		}
 
 		$stock_status = $wp_query->get( 'stock_status' );
 		if ( $stock_status ) {
@@ -192,8 +200,8 @@ class Controller extends GenericController implements ExportableInterface {
 	 * Join posts meta tables when product search or low stock query is present.
 	 *
 	 * @internal
-	 * @param string $join Join clause used to search posts.
-	 * @param object $wp_query WP_Query object.
+	 * @param string    $join Join clause used to search posts.
+	 * @param \WP_Query $wp_query WP_Query object.
 	 * @return string
 	 */
 	public static function add_wp_query_join( $join, $wp_query ) {
@@ -232,8 +240,8 @@ class Controller extends GenericController implements ExportableInterface {
 	 * Group by post ID to prevent duplicates.
 	 *
 	 * @internal
-	 * @param string $groupby Group by clause used to organize posts.
-	 * @param object $wp_query WP_Query object.
+	 * @param string    $groupby Group by clause used to organize posts.
+	 * @param \WP_Query $wp_query WP_Query object.
 	 * @return string
 	 */
 	public static function add_wp_query_group_by( $groupby, $wp_query ) {
@@ -249,8 +257,8 @@ class Controller extends GenericController implements ExportableInterface {
 	 * Custom orderby clauses using the lookup tables.
 	 *
 	 * @internal
-	 * @param array  $args Query args.
-	 * @param object $wp_query WP_Query object.
+	 * @param array     $args Query args.
+	 * @param \WP_Query $wp_query WP_Query object.
 	 * @return array
 	 */
 	public static function add_wp_query_orderby( $args, $wp_query ) {

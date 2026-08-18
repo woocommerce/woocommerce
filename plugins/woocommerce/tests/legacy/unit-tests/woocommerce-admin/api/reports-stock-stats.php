@@ -81,13 +81,7 @@ class WC_Admin_Tests_API_Reports_Stock_Stats extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		// Clear caches.
-		delete_transient( 'wc_admin_stock_count_lowstock' );
-		delete_transient( 'wc_admin_stock_count_outofstock' );
-		delete_transient( 'wc_admin_stock_count_onbackorder' );
-		delete_transient( 'wc_admin_stock_count_lowstock' );
-		delete_transient( 'wc_admin_stock_count_instock' );
-		delete_transient( 'wc_admin_product_count' );
+		$this->clear_stock_count_caches();
 
 		$request  = new WP_REST_Request( 'GET', $this->endpoint );
 		$response = $this->server->dispatch( $request );
@@ -130,6 +124,60 @@ class WC_Admin_Tests_API_Reports_Stock_Stats extends WC_REST_Unit_Test_Case {
 		$query .= implode( ', ', $rows );
 
 		$wpdb->query( $query ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared -- Table and row values are prepared above.
+	}
+
+	/**
+	 * A variable parent holds no sellable stock of its own, so the summary must not count it either.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/32134
+	 */
+	public function test_variable_parent_products_are_excluded_from_totals() {
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'Small', 'Large' ) );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+
+		$variable = new WC_Product_Variable();
+		$variable->set_name( 'Test variable product' );
+		$variable->set_attributes( array( $attribute ) );
+		$variable->save();
+
+		foreach ( array( 'Small', 'Large' ) as $option ) {
+			$variation = new WC_Product_Variation();
+			$variation->set_parent_id( $variable->get_id() );
+			$variation->set_attributes( array( 'size' => $option ) );
+			$variation->set_regular_price( '10' );
+			$variation->set_manage_stock( true );
+			$variation->set_stock_quantity( 25 );
+			$variation->save();
+		}
+
+		$this->clear_stock_count_caches();
+
+		$request  = new WP_REST_Request( 'GET', $this->endpoint );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		// The two variations, without their parent.
+		$this->assertEquals( 2, $reports['totals']['products'] );
+		$this->assertEquals( 2, $reports['totals'][ ProductStockStatus::IN_STOCK ] );
+	}
+
+	/**
+	 * Drop the transients the stock stats are served from.
+	 */
+	private function clear_stock_count_caches() {
+		delete_transient( 'wc_admin_product_count_v2' );
+		delete_transient( 'wc_admin_stock_count_lowstock_v2' );
+		foreach ( array_keys( wc_get_product_stock_status_options() ) as $status ) {
+			delete_transient( 'wc_admin_stock_count_' . $status . '_v2' );
+		}
 	}
 
 	/**

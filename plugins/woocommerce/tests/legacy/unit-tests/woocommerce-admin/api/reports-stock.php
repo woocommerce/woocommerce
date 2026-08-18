@@ -92,6 +92,109 @@ class WC_Admin_Tests_API_Reports_Stock extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * A variable parent holds no sellable stock of its own, so only its variations belong in the report.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/32134
+	 */
+	public function test_variable_parent_products_are_excluded() {
+		wp_set_current_user( $this->user );
+
+		$variable = $this->create_variable_product( 25 );
+
+		// Stock managed at product level, with none left, is what made the parent claim to be out of
+		// stock while its variations were in stock.
+		$variable->set_manage_stock( true );
+		$variable->set_stock_quantity( 0 );
+		$variable->save();
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_param( 'orderby', 'id' );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$reported_ids = wp_list_pluck( $reports, 'id' );
+		$this->assertNotContains( $variable->get_id(), $reported_ids, 'The variable parent should not be reported.' );
+		foreach ( $variable->get_children() as $variation_id ) {
+			$this->assertContains( $variation_id, $reported_ids, 'Each variation should still be reported.' );
+		}
+	}
+
+	/**
+	 * A variable product with no variations has nothing else representing it, so it stays in the report.
+	 */
+	public function test_variable_product_without_variations_is_included() {
+		wp_set_current_user( $this->user );
+
+		$variable = new WC_Product_Variable();
+		$variable->set_name( 'Variable without variations' );
+		$variable->save();
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_param( 'include', (string) $variable->get_id() );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports );
+		$this->assertEquals( $variable->get_id(), $reports[0]['id'] );
+	}
+
+	/**
+	 * Stores that want the previous listing back can opt out of the exclusion.
+	 */
+	public function test_variable_parent_products_can_be_restored_by_filter() {
+		wp_set_current_user( $this->user );
+
+		$variable = $this->create_variable_product( 25 );
+
+		add_filter( 'woocommerce_analytics_stock_report_exclude_variable_parents', '__return_false' );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_param( 'include', (string) $variable->get_id() );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		remove_filter( 'woocommerce_analytics_stock_report_exclude_variable_parents', '__return_false' );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports );
+		$this->assertEquals( $variable->get_id(), $reports[0]['id'] );
+	}
+
+	/**
+	 * Create a published variable product with two variations that manage their own stock.
+	 *
+	 * @param int $variation_stock Stock quantity to give each variation.
+	 * @return WC_Product_Variable
+	 */
+	private function create_variable_product( $variation_stock ) {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'Small', 'Large' ) );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+
+		$variable = new WC_Product_Variable();
+		$variable->set_name( 'Test variable product' );
+		$variable->set_attributes( array( $attribute ) );
+		$variable->save();
+
+		foreach ( array( 'Small', 'Large' ) as $option ) {
+			$variation = new WC_Product_Variation();
+			$variation->set_parent_id( $variable->get_id() );
+			$variation->set_attributes( array( 'size' => $option ) );
+			$variation->set_regular_price( '10' );
+			$variation->set_manage_stock( true );
+			$variation->set_stock_quantity( $variation_stock );
+			$variation->save();
+		}
+
+		return new WC_Product_Variable( $variable->get_id() );
+	}
+
+	/**
 	 * Test getting reports without valid permissions.
 	 */
 	public function test_get_reports_without_permission() {
