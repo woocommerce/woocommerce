@@ -28,6 +28,8 @@ export interface FormattedMonetaryAmountProps
 	currency?: Currency | undefined; // Currency configuration object. Defaults to site currency.
 	onValueChange?: ( unit: number ) => void; // Function to call when value changes.
 	style?: React.CSSProperties | undefined;
+	// Render prop receiving the formatted price string; forwarded to
+	// NumericFormat.
 	renderText?: NonNullable< NumericFormatProps[ 'renderText' ] >;
 }
 
@@ -38,7 +40,11 @@ const currencyToNumericFormatProps = ( currency: Currency ) => {
 	const { prefix, suffix, thousandSeparator, decimalSeparator } = currency;
 	// Decode HTML entities in separators
 	const decodedThousandSeparator = decodeHtmlEntities( thousandSeparator );
-	const decodedDecimalSeparator = decodeHtmlEntities( decimalSeparator );
+	// NumericFormat throws when both separators are identical; an empty
+	// decimal separator would collide with the thousand separator cleared
+	// below, so fall back to '.'.
+	const decodedDecimalSeparator =
+		decodeHtmlEntities( decimalSeparator ) || '.';
 
 	const hasDuplicateSeparator =
 		decodedThousandSeparator === decodedDecimalSeparator;
