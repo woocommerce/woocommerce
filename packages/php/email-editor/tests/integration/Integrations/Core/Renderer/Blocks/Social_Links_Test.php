@@ -161,8 +161,8 @@ class Social_Links_Test extends \Email_Editor_Integration_Test_Case {
 		$original_locale      = setlocale( LC_NUMERIC, '0' );
 		$comma_decimal_locale = setlocale( LC_NUMERIC, 'de_DE.UTF-8', 'de_DE.utf8', 'fr_FR.UTF-8', 'fr_FR.utf8' );
 
-		if ( false === $comma_decimal_locale ) {
-			$this->markTestSkipped( 'A locale with a comma decimal separator is not available.' );
+		if ( false === $comma_decimal_locale || ',' !== localeconv()['decimal_point'] ) {
+			$this->markTestSkipped( 'A working locale with a comma decimal separator is not available.' );
 		}
 
 		try {
