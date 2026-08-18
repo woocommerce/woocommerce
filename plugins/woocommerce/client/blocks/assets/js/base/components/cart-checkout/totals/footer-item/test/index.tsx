@@ -277,4 +277,41 @@ describe( 'TotalsFooterItem', () => {
 			'wc-block-components-totals-footer-item-tax'
 		);
 	} );
+
+	it( 'Isolates the currency symbol of each itemised tax amount', async () => {
+		const valuesWithTax = {
+			...values,
+			total_tax: '100',
+			total_items_tax: '100',
+			tax_lines: [
+				{ name: '10% VAT', price: '50', rate: '10.000' },
+				{ name: '5% VAT', price: '50', rate: '5.000' },
+			],
+		};
+		const { container } = render(
+			<TotalsFooterItem currency={ currency } values={ valuesWithTax } />
+		);
+
+		const taxInfo = container.querySelector(
+			'.wc-block-components-totals-footer-item-tax'
+		);
+
+		// The line reads the same as it did when it was one flat string.
+		expect( taxInfo?.textContent ).toBe(
+			'Including £0.50 10% VAT, £0.50 5% VAT'
+		);
+
+		// Each amount is a price element with the symbol in its own isolate,
+		// so the bidi algorithm cannot move it to the other side of the digits.
+		const amounts = taxInfo?.querySelectorAll( 'bdi' );
+		expect( amounts ).toHaveLength( 2 );
+		amounts?.forEach( ( amount ) => {
+			expect( amount.textContent ).toBe( '£0.50' );
+			expect(
+				amount.querySelector(
+					'.wc-block-components-formatted-money-amount__currency-symbol'
+				)?.textContent
+			).toBe( '£' );
+		} );
+	} );
 } );
