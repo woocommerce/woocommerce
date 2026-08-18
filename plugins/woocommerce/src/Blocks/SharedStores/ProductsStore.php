@@ -68,6 +68,24 @@ class ProductsStore {
 	private static array $loaded_variation_parents = array();
 
 	/**
+	 * Parent product IDs whose purchasable-child-products fetch is
+	 * currently in flight. Guards load_purchasable_child_products() against
+	 * the same re-entrancy cycle described on $hydration_depth below.
+	 *
+	 * @var array<int, true>
+	 */
+	private static array $loading_child_parents = array();
+
+	/**
+	 * Parent product IDs whose variations fetch is currently in flight.
+	 * Guards load_variations() against the same re-entrancy cycle
+	 * described on $hydration_depth below.
+	 *
+	 * @var array<int, true>
+	 */
+	private static array $loading_variation_parents = array();
+
+	/**
 	 * Whether the derived-state getters have been registered.
 	 *
 	 * @var bool
@@ -75,7 +93,8 @@ class ProductsStore {
 	private static bool $getters_registered = false;
 
 	/**
-	 * Depth counter for in-flight load_product() calls.
+	 * Depth counter for in-flight load_product() / load_variations() /
+	 * load_purchasable_child_products() calls.
 	 *
 	 * A product's description can itself contain block markup, including a
 	 * Single Product block. Rendering that markup happens as a side effect
@@ -251,7 +270,22 @@ class ProductsStore {
 		);
 		$query_string   = implode( '&', $include_params );
 
-		$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products?' . $query_string );
+		// Bail on a re-entrant load of a parent whose fetch is still in
+		// flight (e.g. a child product's description embeds a block that
+		// loads this same parent's children again). Recursing would
+		// exhaust memory. @see https://github.com/woocommerce/woocommerce/issues/67750.
+		if ( isset( self::$loading_child_parents[ $parent_id ] ) ) {
+			return array();
+		}
+
+		self::$loading_child_parents[ $parent_id ] = true;
+		++self::$hydration_depth;
+		try {
+			$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products?' . $query_string );
+		} finally {
+			--self::$hydration_depth;
+			unset( self::$loading_child_parents[ $parent_id ] );
+		}
 
 		if ( empty( $response['body'] ) ) {
 			return array();
@@ -295,7 +329,22 @@ class ProductsStore {
 			);
 		}
 
-		$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products?parent[]=' . $parent_id . '&type=variation' );
+		// Bail on a re-entrant load of a parent whose fetch is still in
+		// flight (e.g. a variation's description embeds a block that loads
+		// this same parent's variations again). Recursing would exhaust
+		// memory. @see https://github.com/woocommerce/woocommerce/issues/67750.
+		if ( isset( self::$loading_variation_parents[ $parent_id ] ) ) {
+			return array();
+		}
+
+		self::$loading_variation_parents[ $parent_id ] = true;
+		++self::$hydration_depth;
+		try {
+			$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products?parent[]=' . $parent_id . '&type=variation' );
+		} finally {
+			--self::$hydration_depth;
+			unset( self::$loading_variation_parents[ $parent_id ] );
+		}
 
 		self::$loaded_variation_parents[ $parent_id ] = true;
 

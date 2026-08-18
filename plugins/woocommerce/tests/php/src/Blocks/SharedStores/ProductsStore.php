@@ -242,6 +242,94 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox load_variations() breaks a re-entrant load of a parent whose fetch is still in flight instead of recursing.
+	 *
+	 * Same failure mode as load_product()'s self-reference: a variation's
+	 * description can embed a block that re-triggers load_variations() for
+	 * the same parent while the first fetch is still on the stack.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/67750
+	 */
+	public function test_load_variations_breaks_reentrant_load_of_same_parent(): void {
+		$product   = WC_Helper_Product::create_variation_product();
+		$parent_id = $product->get_id();
+
+		$fake_hydration = new class( $parent_id, $this->consent ) {
+			/**
+			 * The parent ID to re-enter the store with.
+			 *
+			 * @var int
+			 */
+			private int $parent_id;
+
+			/**
+			 * The consent string.
+			 *
+			 * @var string
+			 */
+			private string $consent;
+
+			/**
+			 * How many times get_rest_api_response_data was called.
+			 *
+			 * @var int
+			 */
+			public int $call_count = 0;
+
+			/**
+			 * The result of the re-entrant load_variations() call.
+			 *
+			 * @var array|null
+			 */
+			public ?array $inner_result = null;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param int    $parent_id The parent product ID.
+			 * @param string $consent   The consent string.
+			 */
+			public function __construct( int $parent_id, string $consent ) {
+				$this->parent_id = $parent_id;
+				$this->consent   = $consent;
+			}
+
+			/**
+			 * Mimic Hydration::get_rest_api_response_data, re-entering the
+			 * store mid-fetch like a block in a variation's description would.
+			 *
+			 * @param string $path The REST path (ignored).
+			 * @return array The canned response.
+			 */
+			public function get_rest_api_response_data( string $path ): array {
+				// Avoid parameter not used PHPCS errors.
+				unset( $path );
+				++$this->call_count;
+				$this->inner_result = TestedProductsStore::load_variations( $this->consent, $this->parent_id );
+
+				return array(
+					'body' => array(
+						array(
+							'id'     => 999,
+							'parent' => $this->parent_id,
+							'name'   => 'Self Referencing Variation',
+						),
+					),
+				);
+			}
+		};
+		$this->inject_hydration( $fake_hydration );
+
+		$result = TestedProductsStore::load_variations( $this->consent, $parent_id );
+
+		$this->assertSame( 1, $fake_hydration->call_count, 'The re-entrant call should not trigger a second fetch.' );
+		$this->assertSame( array(), $fake_hydration->inner_result, 'The re-entrant call should return an empty array.' );
+		$this->assertArrayHasKey( 999, $result, 'The outer call should still return the fetched variation.' );
+
+		$product->delete( true );
+	}
+
+	/**
 	 * @testdox load_variations() returns only the variations belonging to the requested parent.
 	 */
 	public function test_load_variations_second_call_filters_by_parent(): void {
@@ -300,6 +388,102 @@ class ProductsStore extends \WC_Unit_Test_Case {
 		$this->assertSame( array(), $result );
 
 		$grouped->delete( true );
+	}
+
+	/**
+	 * @testdox load_purchasable_child_products() breaks a re-entrant load of a parent whose fetch is still in flight instead of recursing.
+	 *
+	 * Same failure mode as load_product()'s self-reference: a child
+	 * product's description can embed a block that re-triggers
+	 * load_purchasable_child_products() for the same parent while the
+	 * first fetch is still on the stack.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/67750
+	 */
+	public function test_load_purchasable_child_products_breaks_reentrant_load_of_same_parent(): void {
+		$child = WC_Helper_Product::create_simple_product();
+
+		$grouped = new WC_Product_Grouped();
+		$grouped->set_name( 'Reentrant Grouped Parent' );
+		$grouped->set_children( array( $child->get_id() ) );
+		$grouped->save();
+		$parent_id = $grouped->get_id();
+
+		$fake_hydration = new class( $parent_id, $this->consent ) {
+			/**
+			 * The parent ID to re-enter the store with.
+			 *
+			 * @var int
+			 */
+			private int $parent_id;
+
+			/**
+			 * The consent string.
+			 *
+			 * @var string
+			 */
+			private string $consent;
+
+			/**
+			 * How many times get_rest_api_response_data was called.
+			 *
+			 * @var int
+			 */
+			public int $call_count = 0;
+
+			/**
+			 * The result of the re-entrant load_purchasable_child_products() call.
+			 *
+			 * @var array|null
+			 */
+			public ?array $inner_result = null;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param int    $parent_id The parent product ID.
+			 * @param string $consent   The consent string.
+			 */
+			public function __construct( int $parent_id, string $consent ) {
+				$this->parent_id = $parent_id;
+				$this->consent   = $consent;
+			}
+
+			/**
+			 * Mimic Hydration::get_rest_api_response_data, re-entering the
+			 * store mid-fetch like a block in a child product's description
+			 * would.
+			 *
+			 * @param string $path The REST path (ignored).
+			 * @return array The canned response.
+			 */
+			public function get_rest_api_response_data( string $path ): array {
+				// Avoid parameter not used PHPCS errors.
+				unset( $path );
+				++$this->call_count;
+				$this->inner_result = TestedProductsStore::load_purchasable_child_products( $this->consent, $this->parent_id );
+
+				return array(
+					'body' => array(
+						array(
+							'id'             => 999,
+							'is_purchasable' => true,
+							'name'           => 'Self Referencing Child',
+						),
+					),
+				);
+			}
+		};
+		$this->inject_hydration( $fake_hydration );
+
+		$result = TestedProductsStore::load_purchasable_child_products( $this->consent, $parent_id );
+
+		$this->assertSame( 1, $fake_hydration->call_count, 'The re-entrant call should not trigger a second fetch.' );
+		$this->assertSame( array(), $fake_hydration->inner_result, 'The re-entrant call should return an empty array.' );
+		$this->assertArrayHasKey( 999, $result, 'The outer call should still return the fetched child.' );
+
+		$grouped->delete( true );
+		$child->delete( true );
 	}
 
 	/**
@@ -569,7 +753,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	private function reset_products_store_static_state(): void {
 		$reflection = new \ReflectionClass( TestedProductsStore::class );
 
-		foreach ( array( 'products', 'product_variations', 'loaded_variation_parents' ) as $name ) {
+		foreach ( array( 'products', 'product_variations', 'loaded_variation_parents', 'loading_child_parents', 'loading_variation_parents' ) as $name ) {
 			$property = $reflection->getProperty( $name );
 			$property->setAccessible( true );
 			$property->setValue( null, array() );
