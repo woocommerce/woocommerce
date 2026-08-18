@@ -119,12 +119,9 @@ const FormattedMonetaryAmount = ( {
 	// Wrapper for NumericFormat onValueChange which handles subunit conversion.
 	const onValueChangeWrapper = onValueChange
 		? ( values: NumberFormatValues, sourceInfo: SourceInfo ) => {
-				// NumericFormat also fires when the `value` prop changes; only
-				// user input counts as a change here. A prop-driven call echoes
-				// the rounded display value back, which consumers would apply
-				// as if the user had picked it. Compared as a string because
-				// the SourceType enum only exists in the type declarations,
-				// not in the runtime build.
+				// Only forward user input; NumericFormat also fires for
+				// `value` prop changes. Its SourceType enum isn't exported,
+				// so compare the raw string.
 				if ( ( sourceInfo.source as string ) !== 'event' ) {
 					return;
 				}
