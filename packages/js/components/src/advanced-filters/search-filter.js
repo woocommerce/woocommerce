@@ -16,8 +16,11 @@ import {
 	textContent,
 } from './utils';
 
+const normalizeFilterValue = ( value ) =>
+	Array.isArray( value ) ? value.join( ',' ) : value;
+
 class SearchFilter extends Component {
-	constructor( { filter, config, query } ) {
+	constructor( { filter, query } ) {
 		super( ...arguments );
 		this.onSearchChange = this.onSearchChange.bind( this );
 		this.state = {
@@ -27,25 +30,20 @@ class SearchFilter extends Component {
 		this.updateLabels = this.updateLabels.bind( this );
 
 		if ( filter.value.length ) {
-			config.input
-				.getLabels( filter.value, query )
-				.then( this.updateLabels );
+			this.loadLabels( filter.value, query );
 		}
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { config, filter, query } = this.props;
+		const { filter, query } = this.props;
 		const { filter: prevFilter } = prevProps;
+		const filterValue = normalizeFilterValue( filter.value );
 
-		if ( filter.value.length && ! isEqual( prevFilter, filter ) ) {
+		if ( filterValue.length && ! isEqual( prevFilter, filter ) ) {
 			const { selected } = this.state;
 			const selectedIds = selected.map( ( item ) => String( item.key ) );
-			const filterIds = []
-				.concat(
-					typeof filter.value === 'string'
-						? filter.value.split( ',' )
-						: filter.value
-				)
+			const filterIds = filterValue
+				.split( ',' )
 				.filter( Boolean )
 				.map( String );
 			const haveIdsChanged =
@@ -53,11 +51,24 @@ class SearchFilter extends Component {
 				filterIds.some( ( id ) => ! selectedIds.includes( id ) );
 
 			if ( haveIdsChanged ) {
-				config.input
-					.getLabels( filter.value, query )
-					.then( this.updateLabels );
+				this.loadLabels( filterValue, query );
 			}
 		}
+	}
+
+	loadLabels( value, query ) {
+		const filterValue = normalizeFilterValue( value );
+
+		this.props.config.input
+			.getLabels( filterValue, query )
+			.then( ( selected ) => {
+				if (
+					filterValue ===
+					normalizeFilterValue( this.props.filter.value )
+				) {
+					this.updateLabels( selected );
+				}
+			} );
 	}
 
 	updateLabels( selected ) {
@@ -143,7 +154,6 @@ class SearchFilter extends Component {
 
 		const screenReaderText = this.getScreenReaderText( filter, config );
 
-		/*eslint-disable jsx-a11y/no-noninteractive-tabindex*/
 		return (
 			<fieldset
 				className="woocommerce-filters-advanced__line-item"
@@ -169,7 +179,6 @@ class SearchFilter extends Component {
 				) }
 			</fieldset>
 		);
-		/*eslint-enable jsx-a11y/no-noninteractive-tabindex*/
 	}
 }
 

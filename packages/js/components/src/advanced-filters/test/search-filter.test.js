@@ -180,4 +180,85 @@ describe( 'SearchFilter', () => {
 
 		expect( getLabels ).not.toHaveBeenCalled();
 	} );
+
+	test( 'passes changed array filter values to getLabels as strings', async () => {
+		const getLabels = jest
+			.fn()
+			.mockResolvedValue( [ { id: 60, label: '#60' } ] );
+		const ref = createRef();
+		const props = {
+			config: getConfig( getLabels ),
+			filter: { key: 'order', rule: 'includes', value: '' },
+			onFilterChange: jest.fn(),
+			query: {},
+		};
+		const { rerender } = render(
+			<SearchFilter ref={ ref } { ...props } />
+		);
+
+		rerender(
+			<SearchFilter
+				ref={ ref }
+				{ ...props }
+				filter={ { ...props.filter, value: [ 60 ] } }
+			/>
+		);
+
+		await waitFor( () =>
+			expect( getLabels ).toHaveBeenCalledWith( '60', {} )
+		);
+	} );
+
+	test( 'ignores stale label responses', async () => {
+		let resolveFirstRequest;
+		let resolveSecondRequest;
+		const firstRequest = new Promise( ( resolve ) => {
+			resolveFirstRequest = resolve;
+		} );
+		const secondRequest = new Promise( ( resolve ) => {
+			resolveSecondRequest = resolve;
+		} );
+		const getLabels = jest
+			.fn()
+			.mockReturnValueOnce( firstRequest )
+			.mockReturnValueOnce( secondRequest );
+		const ref = createRef();
+		const props = {
+			config: getConfig( getLabels ),
+			filter: { key: 'ip_address', rule: 'includes', value: '' },
+			onFilterChange: jest.fn(),
+			query: {},
+		};
+		const { rerender } = render(
+			<SearchFilter ref={ ref } { ...props } />
+		);
+
+		rerender(
+			<SearchFilter
+				ref={ ref }
+				{ ...props }
+				filter={ { ...props.filter, value: '::1' } }
+			/>
+		);
+		rerender(
+			<SearchFilter
+				ref={ ref }
+				{ ...props }
+				filter={ { ...props.filter, value: '127.0.0.1' } }
+			/>
+		);
+
+		await act( async () => {
+			resolveSecondRequest( [ { id: '127.0.0.1', label: '127.0.0.1' } ] );
+			await secondRequest;
+		} );
+		await act( async () => {
+			resolveFirstRequest( [ { id: '::1', label: '::1' } ] );
+			await firstRequest;
+		} );
+
+		expect( ref.current.state.selected ).toEqual( [
+			{ id: '127.0.0.1', key: '127.0.0.1', label: '127.0.0.1' },
+		] );
+	} );
 } );
