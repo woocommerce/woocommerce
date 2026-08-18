@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix keyboard flow in the order Add products modal so products can be added without a rogue search box, and fix the clear/chevron icon overlap.
