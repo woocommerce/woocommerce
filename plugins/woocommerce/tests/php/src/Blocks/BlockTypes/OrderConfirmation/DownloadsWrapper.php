@@ -148,7 +148,6 @@ final class DownloadsWrapper extends \WP_UnitTestCase {
 			$downloadable_order   = $this->create_order_with_product( $downloadable_product );
 			$plain_order          = $this->create_order_with_product( $plain_product );
 
-			$this->assertSame( '', $this->render( $downloadable_order, false ), 'View permission is required.' );
 			$this->assertSame( '', $this->render( $downloadable_order, 'full' ), 'A pending order should not expose downloads.' );
 
 			$plain_order->set_status( 'completed' );
@@ -157,6 +156,7 @@ final class DownloadsWrapper extends \WP_UnitTestCase {
 
 			$downloadable_order->set_status( 'completed' );
 			$downloadable_order->save();
+			$this->assertSame( '', $this->render( $downloadable_order, false ), 'View permission is required.' );
 			$this->assertSame( '<p>Download marker</p>', $this->render( $downloadable_order, 'full' ), 'A completed downloadable order should render non-empty wrapper content.' );
 		} finally {
 			if ( $downloadable_order instanceof \WC_Order ) {
