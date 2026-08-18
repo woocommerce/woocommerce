@@ -219,6 +219,33 @@ class WC_REST_Product_Reviews_V1_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Creating a review updates the aggregates of the product the review was written to.
+	 */
+	public function test_create_item_updates_the_aggregates_of_the_product_the_review_was_written_to() {
+		wp_set_current_user( $this->shop_manager_id );
+		$requested_product_id = ProductHelper::create_simple_product()->get_id();
+		$written_product_id   = ProductHelper::create_simple_product()->get_id();
+
+		// Third party code can send the review to a different product than the request named.
+		$send_to_other_product = function ( $prepared_review ) use ( $written_product_id ) {
+			$prepared_review['comment_post_ID'] = $written_product_id;
+			return $prepared_review;
+		};
+
+		add_filter( 'rest_pre_insert_product_review', $send_to_other_product );
+		try {
+			$this->create_review( $requested_product_id, 'Holds up to daily use.', 5 );
+		} finally {
+			remove_filter( 'rest_pre_insert_product_review', $send_to_other_product );
+		}
+
+		$written_product = wc_get_product( $written_product_id );
+		$this->assertEquals( 5, $written_product->get_average_rating(), 'The product the review was written to has the new average rating.' );
+		$this->assertEquals( array( 5 => 1 ), $written_product->get_rating_counts(), 'The product the review was written to has the new rating counts.' );
+		$this->assertEquals( 1, $written_product->get_review_count(), 'The product the review was written to counts the review.' );
+	}
+
+	/**
 	 * Creates a product review through the controller.
 	 *
 	 * @param int    $product_id ID of the product being reviewed.
