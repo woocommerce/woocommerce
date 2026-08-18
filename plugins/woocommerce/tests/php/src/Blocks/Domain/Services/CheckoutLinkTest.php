@@ -82,6 +82,20 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 	private $original_cart;
 
 	/**
+	 * Filter callback that provides a deterministic Cart URL.
+	 *
+	 * @var \Closure
+	 */
+	private $cart_url_filter;
+
+	/**
+	 * Filter callback that provides a deterministic Checkout URL.
+	 *
+	 * @var \Closure
+	 */
+	private $checkout_url_filter;
+
+	/**
 	 * Set up an isolated checkout-link runtime.
 	 */
 	public function setUp(): void {
@@ -95,6 +109,15 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 		$this->original_session      = WC()->session;
 		$this->original_cart         = WC()->cart;
 		$this->sut                   = new CheckoutLink();
+		$this->cart_url_filter       = static function () {
+			return 'https://example.org/test-cart/';
+		};
+		$this->checkout_url_filter   = static function () {
+			return 'https://example.org/test-checkout/';
+		};
+
+		add_filter( 'woocommerce_get_cart_url', $this->cart_url_filter );
+		add_filter( 'woocommerce_get_checkout_url', $this->checkout_url_filter );
 
 		$this->reset_runtime();
 	}
@@ -123,6 +146,9 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 				}
 			}
 		} finally {
+			remove_filter( 'woocommerce_get_cart_url', $this->cart_url_filter );
+			remove_filter( 'woocommerce_get_checkout_url', $this->checkout_url_filter );
+
 			$_GET    = $this->original_get;
 			$_COOKIE = $this->original_cookie;
 
