@@ -15,13 +15,18 @@
 
 baseBranch=${1:-"origin/trunk"}
 
+# Validated outside the process substitution below, where a failure (unfetched base
+# branch, shallow clone) would be swallowed and read as "no changed files": exit 0
+# with PHPCS never run.
+mergeBase=$(git merge-base HEAD "$baseBranch") || exit 1
+
 # -z plus the read loop keeps one path per argument: a filename with a space or a
 # glob character would otherwise split into several bogus arguments. (mapfile is
 # not an option; macOS ships bash 3.2, which doesn't have it.)
 changedFiles=()
 while IFS= read -r -d '' file; do
     changedFiles+=("$file")
-done < <(git diff -z "$(git merge-base HEAD "$baseBranch")" --relative --name-only --diff-filter=d -- '*.php')
+done < <(git diff -z "$mergeBase" --relative --name-only --diff-filter=d -- '*.php')
 
 # Only complete this if changed files are detected.
 if [[ ${#changedFiles[@]} -eq 0 ]]; then
