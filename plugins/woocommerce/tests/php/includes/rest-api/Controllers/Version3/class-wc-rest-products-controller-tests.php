@@ -2275,6 +2275,57 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Updating a product that no longer exists with a type param returns an error response instead of a fatal error.
+	 */
+	public function test_prepare_object_returns_error_when_product_deleted_with_type(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+		$request->set_url_params( array( 'id' => $product->get_id() ) );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		// Simulate a concurrent deletion between the update_item() guard and preparation.
+		wp_delete_post( $product->get_id(), true );
+
+		$prepare_method = new ReflectionMethod( $this->endpoint, 'prepare_object_for_database' );
+		$prepare_method->setAccessible( true );
+
+		$result = $prepare_method->invoke( $this->endpoint, $request, false );
+
+		$this->assertWPError( $result );
+		$this->assertEquals( 'woocommerce_rest_invalid_product_id', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox A falsy type value in a batch item falls back to a simple product instead of causing a fatal error.
+	 */
+	public function test_batch_update_with_falsy_type_does_not_fatal(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'update' => array(
+						array(
+							'id'   => $product->get_id(),
+							'type' => '',
+							'name' => 'Renamed via batch',
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertArrayNotHasKey( 'error', $data['update'][0], 'A falsy type should fall back to a simple product, not error' );
+		$this->assertEquals( 'Renamed via batch', $data['update'][0]['name'] );
+	}
+
+	/**
 	 * @testdox Product constructor exceptions are rethrown when the product still exists.
 	 */
 	public function test_prepare_object_rethrows_unexpected_constructor_exception(): void {

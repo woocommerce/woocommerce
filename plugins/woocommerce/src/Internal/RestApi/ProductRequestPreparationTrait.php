@@ -34,11 +34,23 @@ trait ProductRequestPreparationTrait {
 		if ( isset( $request['type'] ) ) {
 			$classname = \WC_Product_Factory::get_classname_from_product_type( $request['type'] );
 
-			if ( ! class_exists( $classname ) ) {
+			if ( ! $classname || ! class_exists( $classname ) ) {
 				$classname = 'WC_Product_Simple';
 			}
 
-			$product = new $classname( $id );
+			try {
+				$product = new $classname( $id );
+			} catch ( \Exception $e ) {
+				// The construction read consults the uncached post, so it is the authority on
+				// whether the product vanished (e.g. deleted concurrently) since the route guard.
+				$post_type = $id ? get_post_type( $id ) : false;
+
+				if ( 'product' === $post_type ) {
+					throw $e;
+				}
+
+				return $this->get_invalid_product_id_error( 'product_variation' === $post_type );
+			}
 		} elseif ( isset( $request['id'] ) ) {
 			$product = wc_get_product( $id );
 		} else {
