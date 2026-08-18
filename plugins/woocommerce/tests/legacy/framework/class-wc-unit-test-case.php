@@ -223,7 +223,6 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		}
 
 		try {
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 			do_action( 'rest_api_init' );
 		} finally {
 			if ( null === $rest_api_init_hook ) {

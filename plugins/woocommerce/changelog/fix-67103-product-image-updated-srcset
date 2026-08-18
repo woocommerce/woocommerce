@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Improve Product Image srcset to prevent wide images from appearing blurry

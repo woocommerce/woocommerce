@@ -84,6 +84,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'city'             => 'city',
 			'state'            => 'state',
 			'postcode'         => 'postcode',
+			'billing_phone'    => 'billing_phone',
+			'shipping_phone'   => 'shipping_phone',
 			'date_registered'  => 'date_registered',
 			// Use single quotes for string literals to ensure compatibility with sql_mode=ANSI_QUOTES.
 			'date_last_active' => "IF( date_last_active <= '0000-00-00 00:00:00', NULL, date_last_active ) AS date_last_active",
@@ -736,9 +738,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'state'            => $order->get_billing_state( 'edit' ),
 			'postcode'         => $order->get_billing_postcode( 'edit' ),
 			'country'          => $order->get_billing_country( 'edit' ),
+			'billing_phone'    => $order->get_billing_phone( 'edit' ),
+			'shipping_phone'   => $order->get_shipping_phone( 'edit' ),
 			'date_last_active' => $date_created ? gmdate( 'Y-m-d H:i:s', $date_created->getTimestamp() ) : null,
 		);
 		$format = array(
+			'%s',
+			'%s',
 			'%s',
 			'%s',
 			'%s',
@@ -959,11 +965,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'state'            => $customer->get_billing_state( 'edit' ),
 			'postcode'         => $customer->get_billing_postcode( 'edit' ),
 			'country'          => $customer->get_billing_country( 'edit' ),
+			'billing_phone'    => $customer->get_billing_phone( 'edit' ),
+			'shipping_phone'   => $customer->get_shipping_phone( 'edit' ),
 			'date_registered'  => $customer->get_date_created( 'edit' ) ? $customer->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format ) : null,
 			'date_last_active' => $last_active ? gmdate( 'Y-m-d H:i:s', $last_active ) : null,
 		);
 		$format      = array(
 			'%d',
+			'%s',
 			'%s',
 			'%s',
 			'%s',
@@ -1126,7 +1135,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 						country = '',
 						postcode = %s,
 						city = %s,
-						state = %s
+						state = %s,
+						billing_phone = %s,
+						shipping_phone = %s
 					WHERE
 						customer_id = %d",
 				array(
@@ -1134,6 +1145,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					$deleted_text,
 					$deleted_text,
 					'deleted@site.invalid',
+					$deleted_text,
+					$deleted_text,
 					$deleted_text,
 					$deleted_text,
 					$deleted_text,
