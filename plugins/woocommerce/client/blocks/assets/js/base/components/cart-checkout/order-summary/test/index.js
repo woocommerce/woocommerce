@@ -9,6 +9,15 @@ import { previewCart } from '@woocommerce/resource-previews';
  */
 import OrderSummary from '../index';
 
+// The currency symbol sits in its own element, so the whole price is read at once.
+/**
+ * @param {HTMLElement} container
+ */
+const getLineSubtotal = ( container ) =>
+	container.querySelector(
+		'.wc-block-components-order-summary-item__total-price bdi'
+	)?.textContent;
+
 jest.mock( '@woocommerce/base-context', () => ( {
 	...jest.requireActual( '@woocommerce/base-context' ),
 	useStoreCart: () => ( {
@@ -22,7 +31,7 @@ jest.mock( '@woocommerce/base-context', () => ( {
 
 describe( 'Order Summary', () => {
 	it( 'renders correct cart line subtotal when currency has 0 decimals', async () => {
-		render(
+		const { container } = render(
 			<OrderSummary
 				cartItems={ [
 					{
@@ -41,11 +50,11 @@ describe( 'Order Summary', () => {
 			/>
 		);
 
-		expect( screen.getByText( '16€' ) ).toBeTruthy();
+		expect( getLineSubtotal( container ) ).toBe( '16€' );
 	} );
 
 	it( 'renders correct cart line subtotal when product price is 0', async () => {
-		render(
+		const { container } = render(
 			<OrderSummary
 				cartItems={ [
 					{
@@ -68,6 +77,6 @@ describe( 'Order Summary', () => {
 			/>
 		);
 
-		expect( screen.getByText( '$0.00' ) ).toBeTruthy();
+		expect( getLineSubtotal( container ) ).toBe( '$0.00' );
 	} );
 } );

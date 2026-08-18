@@ -19,9 +19,14 @@ const mockCurrency: Currency = {
 	minorUnit: 2,
 };
 
+// The currency symbol sits in its own element, so the whole value is read at once.
+const getValue = ( container: HTMLElement ) =>
+	container.querySelector( '.wc-block-components-totals-item__value' )
+		?.textContent;
+
 describe( 'TotalsItem', () => {
 	it( 'renders label and value correctly', () => {
-		render(
+		const { container } = render(
 			<TotalsItem
 				label="Subtotal"
 				value={ 2599 }
@@ -30,11 +35,11 @@ describe( 'TotalsItem', () => {
 		);
 
 		expect( screen.getByText( 'Subtotal' ) ).toBeInTheDocument();
-		expect( screen.getByText( '$25.99' ) ).toBeInTheDocument();
+		expect( getValue( container ) ).toBe( '$25.99' );
 	} );
 
 	it( 'renders value of 0 correctly', () => {
-		render(
+		const { container } = render(
 			<TotalsItem
 				label="Discount"
 				value={ 0 }
@@ -43,7 +48,7 @@ describe( 'TotalsItem', () => {
 		);
 
 		expect( screen.getByText( 'Discount' ) ).toBeInTheDocument();
-		expect( screen.getByText( '$0.00' ) ).toBeInTheDocument();
+		expect( getValue( container ) ).toBe( '$0.00' );
 	} );
 
 	it( 'renders ReactNode value correctly', () => {
@@ -58,7 +63,7 @@ describe( 'TotalsItem', () => {
 	} );
 
 	it( 'renders description when provided', () => {
-		render(
+		const { container } = render(
 			<TotalsItem
 				label="Tax"
 				value={ 599 }
@@ -68,12 +73,12 @@ describe( 'TotalsItem', () => {
 		);
 
 		expect( screen.getByText( 'Tax' ) ).toBeInTheDocument();
-		expect( screen.getByText( '$5.99' ) ).toBeInTheDocument();
+		expect( getValue( container ) ).toBe( '$5.99' );
 		expect( screen.getByText( 'Including VAT' ) ).toBeInTheDocument();
 	} );
 
 	it( 'shows skeleton when showSkeleton is true', () => {
-		render(
+		const { container } = render(
 			<TotalsItem
 				label="Loading"
 				value={ 100 }
@@ -83,11 +88,11 @@ describe( 'TotalsItem', () => {
 		);
 
 		expect( screen.getByLabelText( 'Loading price…' ) ).toBeInTheDocument();
-		expect( screen.queryByText( '$1.00' ) ).not.toBeInTheDocument();
+		expect( getValue( container ) ).not.toBe( '$1.00' );
 	} );
 
 	it( 'does not show skeleton when showSkeleton is false', () => {
-		render(
+		const { container } = render(
 			<TotalsItem
 				label="Loaded"
 				value={ 155 }
@@ -97,7 +102,7 @@ describe( 'TotalsItem', () => {
 		);
 
 		expect( screen.getByText( 'Loaded' ) ).toBeInTheDocument();
-		expect( screen.getByText( '$1.55' ) ).toBeInTheDocument();
+		expect( getValue( container ) ).toBe( '$1.55' );
 		expect(
 			screen.queryByLabelText( 'Loading price…' )
 		).not.toBeInTheDocument();
@@ -113,19 +118,21 @@ describe( 'TotalsItem', () => {
 			suffix: '',
 		};
 
-		render(
+		const { container } = render(
 			<TotalsItem label="Total" value={ 1000 } currency={ jpyCurrency } />
 		);
 
 		expect( screen.getByText( 'Total' ) ).toBeInTheDocument();
-		expect( screen.getByText( '¥1,000' ) ).toBeInTheDocument();
+		expect( getValue( container ) ).toBe( '¥1,000' );
 	} );
 
 	it( 'renders without currency when not provided', () => {
-		render( <TotalsItem label="Amount" value={ 42 } /> );
+		const { container } = render(
+			<TotalsItem label="Amount" value={ 42 } />
+		);
 
 		expect( screen.getByText( 'Amount' ) ).toBeInTheDocument();
 		// When no currency is provided, the value should still render
-		expect( screen.getByText( '$0.42' ) ).toBeInTheDocument();
+		expect( getValue( container ) ).toBe( '$0.42' );
 	} );
 } );
