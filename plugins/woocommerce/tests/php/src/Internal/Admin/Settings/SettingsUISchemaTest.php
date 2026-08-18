@@ -383,6 +383,40 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox It leaves generated country options empty when the countries controller is unavailable.
+	 */
+	public function test_from_legacy_settings_handles_an_unavailable_countries_controller(): void {
+		$woocommerce            = WC();
+		$original_countries     = $woocommerce->countries;
+		$woocommerce->countries = null;
+
+		try {
+			$schema = SettingsUISchema::from_legacy_settings(
+				'acme',
+				'',
+				'Acme',
+				array(
+					array(
+						'id'   => 'acme_country',
+						'type' => 'single_select_country',
+					),
+					array(
+						'id'   => 'acme_countries',
+						'type' => 'multi_select_countries',
+					),
+				)
+			);
+		} finally {
+			$woocommerce->countries = $original_countries;
+		}
+
+		$fields = $schema['groups']['default']['fields'];
+		$this->assertArrayNotHasKey( 'options', $fields[0], 'The country selector should not fail when the countries controller is unavailable.' );
+		$this->assertArrayNotHasKey( 'options', $fields[1], 'The country multiselect should not fail when the countries controller is unavailable.' );
+		SettingsUISchema::assert_valid_schema( $schema );
+	}
+
+	/**
 	 * @testdox It accepts an ordinary legacy multiselect with no options.
 	 */
 	public function test_from_legacy_settings_accepts_multiselect_without_options(): void {

@@ -700,7 +700,7 @@ class SettingsUIRequestContext {
 			$this->schema_failed         = true;
 			$this->schema_failure_reason = self::sanitize_failure_reason( $e );
 
-			self::log_resolution_failure( 'Settings UI schema', $this->get_page_id(), $this->section, $e, __METHOD__ );
+			self::log_resolution_failure( 'Settings UI schema', $this->settings_page->get_id(), $this->section, $e, __METHOD__ );
 		}
 	}
 

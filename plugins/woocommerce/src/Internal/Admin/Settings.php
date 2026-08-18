@@ -446,6 +446,8 @@ class Settings {
 			$settings['settingsUI'][ $page_id ] = array();
 		}
 
+		// PHP converts numeric-string array keys to integers. Keep groups as a JSON object for the client.
+		$schema['groups']                                   = (object) $schema['groups'];
 		$settings['settingsUI'][ $page_id ][ $section_key ] = $schema;
 
 		return $settings;

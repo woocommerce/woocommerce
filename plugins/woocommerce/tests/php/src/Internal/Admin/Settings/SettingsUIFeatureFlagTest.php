@@ -435,6 +435,35 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should contain a schema failure after page id resolution has failed.
+	 */
+	public function test_schema_failure_does_not_rethrow_a_cached_page_id_failure(): void {
+		$page    = $this->get_settings_ui_test_page_with_script_handles( array(), true );
+		$context = SettingsUIRequestContext::for_settings_page( $page, '' );
+		$filter  = static function ( array $settings ): array {
+			unset( $settings );
+			throw new \RuntimeException( 'Unable to build the Settings UI schema.' );
+		};
+
+		try {
+			$context->get_page_id();
+			$this->fail( 'Page id resolution should fail.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertSame( 'Unable to resolve the Settings UI page id.', $e->getMessage() );
+		}
+
+		add_filter( 'woocommerce_get_settings_settings_ui_flag_test', $filter );
+
+		try {
+			$this->assertNull( $context->get_schema() );
+			$this->assertTrue( $context->has_schema_failed() );
+			$this->assertStringContainsString( 'Unable to build the Settings UI schema.', $context->get_schema_failure_reason() );
+		} finally {
+			remove_filter( 'woocommerce_get_settings_settings_ui_flag_test', $filter );
+		}
+	}
+
+	/**
 	 * @testdox Should use classic settings only for a request carrying the namespaced override.
 	 */
 	public function test_classic_request_override_preserves_routing_without_changing_the_feature_flag(): void {
@@ -581,6 +610,54 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		$settings = $this->invoke_private_method( new Settings(), 'add_settings_ui_schema', array( array() ) );
 
 		$this->assertArrayNotHasKey( 'settingsUI', $settings );
+	}
+
+	/**
+	 * @testdox Should serialize numeric group ids as JSON object keys.
+	 *
+	 * @dataProvider numeric_group_ids
+	 *
+	 * @param string $group_id Numeric group id.
+	 */
+	public function test_shared_settings_serialize_numeric_group_ids_as_json_object_keys( string $group_id ): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+		$page = $this->get_settings_ui_test_page();
+		$this->set_current_settings_page_request( $page );
+
+		$settings_filter = static function () use ( $group_id ): array {
+			return array(
+				array(
+					'id'    => $group_id,
+					'type'  => 'title',
+					'title' => 'Numeric group',
+				),
+			);
+		};
+		add_filter( 'woocommerce_get_settings_settings_ui_flag_test', $settings_filter );
+
+		try {
+			$settings = $this->invoke_private_method( new Settings(), 'add_settings_ui_schema', array( array() ) );
+		} finally {
+			remove_filter( 'woocommerce_get_settings_settings_ui_flag_test', $settings_filter );
+		}
+
+		$schema = $settings['settingsUI']['settings_ui_flag_test']['default'];
+		$json   = wp_json_encode( $schema );
+
+		$this->assertInstanceOf( \stdClass::class, $schema['groups'], 'The transport boundary should expose groups as an object.' );
+		$this->assertStringContainsString( '"groups":{"' . $group_id . '":{', $json, 'The encoded schema should keep the numeric group id as an object key.' );
+	}
+
+	/**
+	 * Numeric group ids converted by PHP.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public static function numeric_group_ids(): array {
+		return array(
+			'zero'     => array( '0' ),
+			'positive' => array( '123' ),
+		);
 	}
 
 	/**
@@ -1527,12 +1604,16 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		$tabs   = array( $current_tab => $page->get_label() );
 		$action = array( $page, 'output' );
 		add_action( 'woocommerce_settings_' . $current_tab, $action );
+		$buffer_level = ob_get_level();
+		ob_start();
 
 		try {
-			ob_start();
 			include WC_ABSPATH . 'includes/admin/views/html-admin-settings.php';
 			return (string) ob_get_clean();
 		} finally {
+			while ( ob_get_level() > $buffer_level ) {
+				ob_end_clean();
+			}
 			remove_action( 'woocommerce_settings_' . $current_tab, $action );
 		}
 	}

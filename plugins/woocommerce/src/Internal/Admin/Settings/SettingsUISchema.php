@@ -177,17 +177,18 @@ class SettingsUISchema {
 		}
 
 		foreach ( $schema['groups'] as $group_key => $group ) {
-			if ( ! is_string( $group_key ) || '' === $group_key ) {
+			$group_id = (string) $group_key;
+			if ( '' === $group_id ) {
 				throw self::invalid_schema( 'Group map keys must be non-empty strings.' );
 			}
 
 			if ( ! is_array( $group ) ) {
-				throw self::invalid_schema( sprintf( 'Group "%s" must be an array.', $group_key ) );
+				throw self::invalid_schema( sprintf( 'Group "%s" must be an array.', $group_id ) );
 			}
 
-			self::assert_non_empty_string( $group['id'] ?? null, sprintf( 'Group "%s" id must be a non-empty string.', $group_key ) );
-			if ( $group_key !== $group['id'] ) {
-				throw self::invalid_schema( sprintf( 'Group map key "%s" must match group id "%s".', $group_key, $group['id'] ) );
+			self::assert_non_empty_string( $group['id'] ?? null, sprintf( 'Group "%s" id must be a non-empty string.', $group_id ) );
+			if ( $group_id !== $group['id'] ) {
+				throw self::invalid_schema( sprintf( 'Group map key "%s" must match group id "%s".', $group_id, $group['id'] ) );
 			}
 		}
 
@@ -640,11 +641,18 @@ class SettingsUISchema {
 		}
 
 		if ( 'single_select_country' === $type ) {
-			return self::get_country_and_state_options();
+			$countries = self::get_countries_controller();
+
+			return $countries ? self::get_country_and_state_options( $countries ) : array();
 		}
 
 		if ( 'multi_select_countries' === $type && ( ! isset( $setting['options'] ) || ! is_array( $setting['options'] ) || empty( $setting['options'] ) ) ) {
-			$countries = WC()->countries->get_countries();
+			$countries_controller = self::get_countries_controller();
+			if ( ! $countries_controller ) {
+				return array();
+			}
+
+			$countries = $countries_controller->get_countries();
 			asort( $countries );
 
 			return self::normalize_options( $countries );
@@ -655,6 +663,21 @@ class SettingsUISchema {
 		}
 
 		return self::normalize_options( $setting['options'] );
+	}
+
+	/**
+	 * Get the initialized WooCommerce countries controller.
+	 *
+	 * @return \WC_Countries|null
+	 */
+	private static function get_countries_controller(): ?\WC_Countries {
+		if ( ! function_exists( 'WC' ) ) {
+			return null;
+		}
+
+		$woocommerce = WC();
+
+		return $woocommerce && $woocommerce->countries instanceof \WC_Countries ? $woocommerce->countries : null;
 	}
 
 	/**
@@ -699,12 +722,13 @@ class SettingsUISchema {
 	/**
 	 * Build country and state options for a legacy country selector.
 	 *
+	 * @param \WC_Countries $countries Countries controller.
 	 * @return array
 	 */
-	private static function get_country_and_state_options(): array {
+	private static function get_country_and_state_options( \WC_Countries $countries ): array {
 		$options = array();
-		foreach ( WC()->countries->get_countries() as $country_code => $country_label ) {
-			$states = WC()->countries->get_states( $country_code );
+		foreach ( $countries->get_countries() as $country_code => $country_label ) {
+			$states = $countries->get_states( $country_code );
 			if ( $states ) {
 				foreach ( $states as $state_code => $state_label ) {
 					$options[] = array(
