@@ -272,9 +272,7 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 
 		try {
 			$this->assertTrue( is_admin(), 'New post editor load action should run in an admin context.' );
-			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment, WordPress.NamingConventions.ValidHookName.UseUnderscores
 			do_action( 'load-post-new.php' );
-			// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment, WordPress.NamingConventions.ValidHookName.UseUnderscores
 			$query_after_action = WC()->query;
 		} finally {
 			WC()->query                = $original_query;

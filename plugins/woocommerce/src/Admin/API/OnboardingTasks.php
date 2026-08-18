@@ -316,7 +316,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 * Import sample products from given CSV path.
 	 *
 	 * @param  string $csv_file CSV file path.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|array
 	 */
 	public static function import_sample_products_from_csv( $csv_file ) {
 		include_once WC_ABSPATH . 'includes/import/class-wc-product-csv-importer.php';
@@ -325,15 +325,29 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			// Override locale so we can return mappings from WooCommerce in English language stores.
 			add_filter( 'locale', '__return_false', 9999 );
 			$importer_class = apply_filters( 'woocommerce_product_csv_importer_class', 'WC_Product_CSV_Importer' );
-			$args           = array(
-				'parse'   => true,
-				'mapping' => self::get_header_mappings( $csv_file ),
-			);
-			$args           = apply_filters( 'woocommerce_product_csv_importer_args', $args, $importer_class );
 
-			$importer = new $importer_class( $csv_file, $args );
-			$import   = $importer->import();
-			return $import;
+			try {
+				$args = array(
+					'parse'   => true,
+					'mapping' => self::get_header_mappings( $csv_file ),
+				);
+
+				/**
+				 * Filter the arguments used by the product CSV importer.
+				 *
+				 * @since 3.1.0
+				 *
+				 * @param array  $args           Importer arguments.
+				 * @param string $importer_class Importer class name.
+				 */
+				$args = apply_filters( 'woocommerce_product_csv_importer_args', $args, $importer_class );
+
+				$importer = new $importer_class( $csv_file, $args );
+				$import   = $importer->import();
+				return $import;
+			} catch ( \RuntimeException $e ) {
+				return new \WP_Error( 'woocommerce_rest_import_error', $e->getMessage() );
+			}
 		} else {
 			return new \WP_Error( 'woocommerce_rest_import_error', __( 'Sorry, the sample products data file was not found.', 'woocommerce' ) );
 		}

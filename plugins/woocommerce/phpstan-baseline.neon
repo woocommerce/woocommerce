@@ -20209,12 +20209,6 @@ parameters:
 			path: includes/import/class-wc-product-csv-importer.php
 
 		-
-			message: '#^Parameter \#2 \$array of function array_map expects array, list\<string\|null\>\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/import/class-wc-product-csv-importer.php
-
-		-
 			message: '#^Parameter \#2 \$array of function array_map expects array, list\<string\|null\>\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -38830,18 +38824,6 @@ parameters:
 			path: src/Admin/API/OnboardingProfile.php
 
 		-
-			message: '#^Access to offset ''imported'' on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 3
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Access to offset ''imported'' on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response\.$#'
-			identifier: class.notFound
-			count: 3
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
 			message: '#^Call to an undefined method object\:\:dismiss\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -39113,24 +39095,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:import_sample_products\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_Error\|Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response but returns WP_Error\|WP_REST_Response\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:import_sample_products_from_csv\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:import_sample_products_from_csv\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:import_sample_products_from_csv\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_Error\|Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response but returns WP_Error\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Admin/API/OnboardingTasks.php

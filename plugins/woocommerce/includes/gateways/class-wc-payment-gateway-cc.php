@@ -95,7 +95,7 @@ class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 		<?php
 
 		if ( $this->supports( PaymentGatewayFeature::CREDIT_CARD_FORM_CVC_ON_SAVED_METHOD ) ) {
-			echo '<fieldset>' . $cvc_field . '</fieldset>'; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+			echo '<fieldset>' . $cvc_field . '</fieldset>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $cvc_field is assembled from fixed markup and escaped dynamic values.
 		}
 	}
 }

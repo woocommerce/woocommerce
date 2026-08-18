@@ -314,7 +314,6 @@ class WC_Meta_Box_Product_Data {
 						$value = sanitize_title( $value );
 					} else {
 						$value = html_entity_decode( wc_clean( $value ), ENT_QUOTES, get_bloginfo( 'charset' ) );
-						// WPCS: sanitization ok.
 					}
 
 					$attributes[ $attribute_key ] = $value;
