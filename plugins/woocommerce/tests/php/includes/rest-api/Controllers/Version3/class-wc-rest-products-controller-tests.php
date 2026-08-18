@@ -2347,11 +2347,12 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$this->assertEquals( 'custom_duplicate_block', $response->get_data()['code'] );
 	}
 
+
 	/**
-	 * @testdox An array type value in a batch item falls back to a simple product instead of causing a fatal error.
+	 * @testdox A non-scalar type value in a batch item is rejected instead of silently rewriting the product type.
 	 */
-	public function test_batch_update_with_array_type_does_not_fatal(): void {
-		$product = WC_Helper_Product::create_simple_product();
+	public function test_batch_update_with_array_type_is_rejected(): void {
+		$variable_product = WC_Helper_Product::create_variation_product();
 
 		$request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
 		$request->set_header( 'content-type', 'application/json' );
@@ -2360,7 +2361,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 				array(
 					'update' => array(
 						array(
-							'id'   => $product->get_id(),
+							'id'   => $variable_product->get_id(),
 							'type' => array( 'simple' ),
 							'name' => 'Renamed via array-type batch',
 						),
@@ -2373,8 +2374,48 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertArrayNotHasKey( 'error', $data['update'][0], 'A non-scalar type should fall back to a simple product, not error' );
-		$this->assertEquals( 'Renamed via array-type batch', $data['update'][0]['name'] );
+		$this->assertArrayHasKey( 'error', $data['update'][0], 'A non-scalar type must be rejected, not coerced' );
+		$this->assertEquals( 'woocommerce_rest_invalid_product_type', $data['update'][0]['error']['code'] );
+		$this->assertInstanceOf( WC_Product_Variable::class, wc_get_product( $variable_product->get_id() ), 'The product type must not be rewritten' );
+	}
+
+	/**
+	 * @testdox Typed exceptions from extension-backed product stores are rethrown instead of becoming a 404.
+	 */
+	public function test_prepare_object_rethrows_typed_exception_for_extension_backed_product(): void {
+		$typed_store = new class() extends WC_Product_Data_Store_CPT {
+			/**
+			 * Simulate an extension backend that is temporarily unavailable.
+			 *
+			 * @param WC_Product $product Product being read.
+			 * @throws WC_Data_Exception Always, with a typed error code and status.
+			 */
+			public function read( &$product ) {
+				throw new WC_Data_Exception( 'ext_backend_unavailable', 'Backend unavailable.', 503 );
+			}
+		};
+		$register    = static function ( $data_stores ) use ( $typed_store ) {
+			$data_stores['product-simple'] = $typed_store;
+			return $data_stores;
+		};
+		add_filter( 'woocommerce_data_stores', $register );
+
+		// Extension-backed product: the ID does not correspond to any WordPress post.
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/999999991' );
+		$request->set_url_params( array( 'id' => 999999991 ) );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$prepare_method = new ReflectionMethod( $this->endpoint, 'prepare_object_for_database' );
+		$prepare_method->setAccessible( true );
+
+		$this->expectException( WC_Data_Exception::class );
+		$this->expectExceptionMessage( 'Backend unavailable.' );
+
+		try {
+			$prepare_method->invoke( $this->endpoint, $request, false );
+		} finally {
+			remove_filter( 'woocommerce_data_stores', $register );
+		}
 	}
 
 	/**

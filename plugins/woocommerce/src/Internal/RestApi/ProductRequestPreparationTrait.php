@@ -21,7 +21,8 @@ trait ProductRequestPreparationTrait {
 	 *
 	 * @param \WP_REST_Request<array<string, mixed>> $request Request object.
 	 * @return \WC_Product|\WP_Error
-	 * @throws \Exception When product construction fails.
+	 * @throws \WC_Data_Exception When an extension-backed product store reports a typed failure.
+	 * @throws \Exception When product construction fails for a product that still exists.
 	 */
 	private function get_product_for_rest_request( $request ) {
 		$id                    = isset( $request['id'] ) ? absint( $request['id'] ) : 0;
@@ -32,7 +33,16 @@ trait ProductRequestPreparationTrait {
 		}
 
 		if ( isset( $request['type'] ) ) {
-			$classname = is_scalar( $request['type'] ) ? \WC_Product_Factory::get_classname_from_product_type( (string) $request['type'] ) : false;
+			if ( ! is_scalar( $request['type'] ) ) {
+				// Falling back to a default class here would silently rewrite the product's type on update.
+				return new \WP_Error(
+					"woocommerce_rest_invalid_{$this->post_type}_type",
+					__( 'Invalid product type.', 'woocommerce' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			$classname = \WC_Product_Factory::get_classname_from_product_type( (string) $request['type'] );
 
 			if ( ! $classname || ! class_exists( $classname ) ) {
 				$classname = 'WC_Product_Simple';
@@ -40,6 +50,9 @@ trait ProductRequestPreparationTrait {
 
 			try {
 				$product = new $classname( $id );
+			} catch ( \WC_Data_Exception $e ) {
+				// Typed exceptions carry their own error codes and statuses for the handlers upstream.
+				throw $e;
 			} catch ( \Exception $e ) {
 				// Only arbitrate for a nonzero target ID: wp_delete_post() invalidates the posts
 				// cache (unlike WooCommerce's products cache group), so get_post_type() reliably

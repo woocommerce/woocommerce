@@ -26971,12 +26971,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
 
 		-
-			message: '#^Parameter \#1 \$classname of function class_exists expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
 			message: '#^Parameter \#1 \$date of function wc_rest_prepare_date_response expects string\|WC_DateTime\|null, int\<1, max\> given\.$#'
 			identifier: argument.type
 			count: 2
@@ -30005,12 +29999,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$array_arg of function current expects array\|object, list\<bool\|int\|string\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
-
-		-
-			message: '#^Parameter \#1 \$classname of function class_exists expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
@@ -65372,12 +65360,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$array_arg of function current expects array\|object, list\<bool\|int\|string\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Parameter \#1 \$classname of function class_exists expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
