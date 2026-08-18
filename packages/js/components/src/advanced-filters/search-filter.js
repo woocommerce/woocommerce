@@ -16,8 +16,12 @@ import {
 	textContent,
 } from './utils';
 
-const normalizeFilterValue = ( value ) =>
-	Array.isArray( value ) ? value.join( ',' ) : value;
+const normalizeFilterValue = ( value ) => {
+	if ( Array.isArray( value ) ) {
+		return value.join( ',' );
+	}
+	return typeof value === 'string' ? value : '';
+};
 
 class SearchFilter extends Component {
 	constructor( { filter, query } ) {

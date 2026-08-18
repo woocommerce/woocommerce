@@ -181,6 +181,27 @@ describe( 'SearchFilter', () => {
 		expect( getLabels ).not.toHaveBeenCalled();
 	} );
 
+	test( 'handles null filter values', () => {
+		const getLabels = jest.fn();
+		const props = {
+			config: getConfig( getLabels ),
+			filter: { key: 'order', rule: 'includes', value: null },
+			onFilterChange: jest.fn(),
+			query: {},
+		};
+		const { rerender } = render( <SearchFilter { ...props } /> );
+
+		rerender(
+			<SearchFilter
+				{ ...props }
+				filter={ { ...props.filter, value: '' } }
+			/>
+		);
+		rerender( <SearchFilter { ...props } /> );
+
+		expect( getLabels ).not.toHaveBeenCalled();
+	} );
+
 	test( 'passes changed array filter values to getLabels as strings', async () => {
 		const getLabels = jest
 			.fn()
