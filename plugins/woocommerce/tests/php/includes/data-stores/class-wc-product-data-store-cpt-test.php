@@ -387,7 +387,7 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->expectException( 'Exception' );
 		$this->expectExceptionMessage(
 			sprintf(
-				'The SKU (DUMMY SKU) is already in use by product #%d. Use a different SKU.',
+				'The SKU (DUMMY SKU) is already in use by published product #%d. Use a different SKU.',
 				$product1->get_id()
 			)
 		);
@@ -477,6 +477,50 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			sprintf(
 				'The SKU (DRAFT SKU) is already assigned to draft product #%d. Use a different SKU, or update the existing draft.',
 				$draft_product->get_id()
+			)
+		);
+
+		$conflicting_product->save();
+	}
+
+	/**
+	 * Test that a status with no dedicated message - private here, but equally
+	 * a scheduled product or a status added by an extension - still falls back
+	 * to naming the conflicting product rather than saying nothing useful.
+	 *
+	 * @return void
+	 */
+	public function test_create_product_with_sku_conflicting_with_other_status_product() {
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/v3/products';
+
+		$private_product = new WC_Product_Simple();
+		$private_product->set_props(
+			array(
+				'name'          => 'Private Product',
+				'regular_price' => 10,
+				'price'         => 10,
+				'sku'           => 'PRIVATE SKU',
+				'status'        => 'private',
+			)
+		);
+
+		$conflicting_product = new WC_Product_Simple();
+		$conflicting_product->set_props(
+			array(
+				'name'          => 'Conflicting Product',
+				'regular_price' => 10,
+				'price'         => 10,
+				'sku'           => 'PRIVATE SKU',
+			)
+		);
+
+		$private_product->save();
+
+		$this->expectException( 'Exception' );
+		$this->expectExceptionMessage(
+			sprintf(
+				'The SKU (PRIVATE SKU) is already in use by product #%d. Use a different SKU.',
+				$private_product->get_id()
 			)
 		);
 

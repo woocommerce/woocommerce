@@ -242,6 +242,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			);
 		}
 
+		if ( ProductStatus::PUBLISH === $conflict->post_status ) {
+			return sprintf(
+				// translators: 1: SKU, 2: conflicting product ID.
+				__( 'The SKU (%1$s) is already in use by published product #%2$d. Use a different SKU.', 'woocommerce' ),
+				$sku,
+				$conflict_id
+			);
+		}
+
+		// Any other status - private, scheduled, or one added by an extension.
 		return sprintf(
 			// translators: 1: SKU, 2: conflicting product ID.
 			__( 'The SKU (%1$s) is already in use by product #%2$d. Use a different SKU.', 'woocommerce' ),
