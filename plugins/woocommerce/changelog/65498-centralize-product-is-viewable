@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Add WC_Product::is_viewable() and is_publicly_viewable() to centralize product visibility checks.

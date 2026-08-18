@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Balance the output-buffer level in the WC_AJAX order-add-meta nonce test so it is no longer reported as risky.
