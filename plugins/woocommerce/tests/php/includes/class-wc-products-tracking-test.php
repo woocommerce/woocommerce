@@ -117,7 +117,7 @@ class WC_Products_Tracking_Test extends \WC_Unit_Test_Case {
 		$_GET['post_type'] = 'product';
 		$_GET['orderby']   = 'menu_order title';
 		do_action( 'load-edit.php' );
-		$this->assertNotRecordedTracksEvent( 'wcadmin_products_view' );
+		$this->assertRecordedTracksEvent( 'wcadmin_products_view' );
 		$this->assertRecordedTracksEvent( 'wcadmin_products_sorting_view' );
 	}
 
