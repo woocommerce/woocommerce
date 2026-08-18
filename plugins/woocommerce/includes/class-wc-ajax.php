@@ -1921,7 +1921,7 @@ class WC_AJAX {
 				}
 
 				if ( ! empty( $stock_parts ) ) {
-					$formatted_name .= ' (' . implode( ' &ndash; ', $stock_parts ) . ')';
+					$formatted_name .= ' (' . implode( ' – ', $stock_parts ) . ')';
 				}
 
 				$product_status = $product_object->get_status();
