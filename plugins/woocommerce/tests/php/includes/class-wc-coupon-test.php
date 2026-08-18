@@ -289,10 +289,12 @@ class WC_Coupon_Tests extends WC_Unit_Test_Case {
 		$coupon = new WC_Coupon();
 		$coupon->set_maximum_amount( '100.00' );
 
-		$this->expectException( \WC_Data_Exception::class );
-		$this->expectExceptionCode( 'coupon_invalid_minimum_amount' );
-
-		$coupon->set_minimum_amount( '200.00' );
+		try {
+			$coupon->set_minimum_amount( '200.00' );
+			$this->fail( 'Expected WC_Data_Exception was not thrown.' );
+		} catch ( \WC_Data_Exception $e ) {
+			$this->assertSame( 'coupon_invalid_minimum_amount', $e->getErrorCode() );
+		}
 	}
 
 	/**
@@ -302,10 +304,12 @@ class WC_Coupon_Tests extends WC_Unit_Test_Case {
 		$coupon = new WC_Coupon();
 		$coupon->set_minimum_amount( '100.00' );
 
-		$this->expectException( \WC_Data_Exception::class );
-		$this->expectExceptionCode( 'coupon_invalid_maximum_amount' );
-
-		$coupon->set_maximum_amount( '50.00' );
+		try {
+			$coupon->set_maximum_amount( '50.00' );
+			$this->fail( 'Expected WC_Data_Exception was not thrown.' );
+		} catch ( \WC_Data_Exception $e ) {
+			$this->assertSame( 'coupon_invalid_maximum_amount', $e->getErrorCode() );
+		}
 	}
 
 	/**
@@ -503,5 +507,4 @@ class WC_Coupon_Tests extends WC_Unit_Test_Case {
 		$this->assertSame( '50.00', $coupon->get_minimum_amount() );
 		$this->assertSame( '100.00', $coupon->get_maximum_amount() );
 	}
-
 }

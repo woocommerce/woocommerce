@@ -1542,5 +1542,4 @@ class WC_Coupon extends WC_Legacy_Coupon {
 
 		return parent::set_props( $remaining, $context );
 	}
-
 }

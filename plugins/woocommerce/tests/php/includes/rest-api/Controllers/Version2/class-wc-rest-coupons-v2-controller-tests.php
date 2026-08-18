@@ -41,6 +41,11 @@ class WC_REST_Coupons_V2_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Sets minimum_amount first, then maximum_amount. The setter guards are
 	 * safe in this order as long as max >= min, which is always true for
 	 * valid fixture data.
+	 *
+	 * @param string $code Coupon code.
+	 * @param string $min  Minimum amount.
+	 * @param string $max  Maximum amount.
+	 * @return WC_Coupon
 	 */
 	private function make_coupon( string $code, string $min = '0', string $max = '0' ): WC_Coupon {
 		$coupon = new WC_Coupon();
@@ -53,6 +58,10 @@ class WC_REST_Coupons_V2_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Build a PATCH REST request for an existing coupon.
+	 *
+	 * @param int   $id     Coupon post ID.
+	 * @param array $params Request parameters.
+	 * @return WP_REST_Request
 	 */
 	private function patch_request( int $id, array $params ): WP_REST_Request {
 		$request = new WP_REST_Request( 'PUT', '/wc/v2/coupons/' . $id );
@@ -65,6 +74,9 @@ class WC_REST_Coupons_V2_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Build a POST REST request to create a coupon.
+	 *
+	 * @param array $params Request parameters.
+	 * @return WP_REST_Request
 	 */
 	private function post_request( array $params ): WP_REST_Request {
 		$request = new WP_REST_Request( 'POST', '/wc/v2/coupons' );
