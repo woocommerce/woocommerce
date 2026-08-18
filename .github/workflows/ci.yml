@@ -92,7 +92,7 @@ jobs:
               - '*.md'
               - '!(.github/**)/**/*.md'
             needs-syncpack-validation:
-              - '(.syncpackrc)|(pnpm-lock.yaml)'
+              - '(.syncpackrc)|(pnpm-lock.yaml)|(pnpm-workspace.yaml)'
 
   project-jobs:
     # Since this is a monorepo, not every pull request or change is going to impact every project.
@@ -326,6 +326,11 @@ jobs:
               exit 1
             fi
             echo "::warning::wp-env-start-retry reason=${reason} attempt=${attempt}/${max_attempts} -- retrying in $((attempt * 15))s"
+            # The AggregateError wp-env surfaces names neither the host nor the address that
+            # failed, so `reason=wordpress` is as far as the log gets us. Trace the retries:
+            # a repeat failure then records every connect attempt with its address and errno.
+            # Healthy first attempts stay untraced, so this costs nothing on a green job.
+            export NODE_DEBUG=net
             sleep "$((attempt * 15))"
             attempt=$((attempt + 1))
           done
@@ -609,15 +614,15 @@ jobs:
           node-version-file: .nvmrc
 
       - name: 'Setup - syncpack'
-        run: npm install -g syncpack@^10.9.3
+        run: npm install -g syncpack@15.3.3
 
       - name: 'Validate - mismatches'
-        run: syncpack list-mismatches
+        run: syncpack lint
 
       - name: 'Validate - prompt mitigation on failed validation'
         if: failure()
         run: |
-          echo "Dependency version mismatch detected. This can usually be fixed automatically by updating the pinned version in \`.syncpackrc\` and then running: \`pnpm sync-dependencies\`"
+          echo "Dependency version mismatch detected. This can usually be fixed automatically by updating the dependency version in \`.syncpackrc\` or \`pnpm-workspace.yaml\`, then running: \`pnpm sync-dependencies\`"
           exit 1
 
   validate-changelog:

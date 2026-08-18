@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ensure Helcim account connectivity follows the gateway's setup status.

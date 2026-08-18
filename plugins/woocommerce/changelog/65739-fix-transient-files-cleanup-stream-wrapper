@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Delete expired transient files on sites whose uploads directory is a stream wrapper path, such as S3-Uploads and WordPress VIP installs, where the cleanup previously reported success without deleting anything.
