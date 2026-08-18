@@ -186,6 +186,70 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		return (bool) $result;
 	}
 
+	/**
+	 * Build a message explaining which existing product is holding a SKU, so a
+	 * merchant knows where to look instead of only seeing a generic conflict.
+	 *
+	 * The regular SKU uniqueness check (@see wc_product_has_unique_sku) excludes
+	 * trashed products, so a SKU held by a trashed product can still block a new
+	 * product here without ever surfacing in that check. This looks up the
+	 * conflicting product regardless of status to explain that case specifically.
+	 *
+	 * @param string $sku The SKU that could not be locked.
+	 * @return string
+	 */
+	private function get_sku_conflict_message( $sku ) {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
+		$conflict = $wpdb->get_row(
+			$wpdb->prepare(
+				"
+				SELECT posts.ID, posts.post_status
+				FROM {$wpdb->posts} as posts
+				INNER JOIN {$wpdb->wc_product_meta_lookup} AS lookup ON posts.ID = lookup.product_id
+				WHERE
+				posts.post_type IN ( 'product', 'product_variation' )
+				AND lookup.sku = %s
+				LIMIT 1
+				",
+				$sku
+			)
+		);
+
+		if ( ! $conflict ) {
+			// translators: %s: SKU.
+			return sprintf( __( 'The SKU (%s) you are trying to insert is already in use and could not be verified further.', 'woocommerce' ), $sku );
+		}
+
+		$conflict_id = (int) $conflict->ID;
+
+		if ( ProductStatus::TRASH === $conflict->post_status ) {
+			return sprintf(
+				// translators: 1: SKU, 2: conflicting product ID.
+				__( 'The SKU (%1$s) conflicts with product #%2$d, which is in the Trash. Use a different SKU, or restore or permanently delete that product to free it up.', 'woocommerce' ),
+				$sku,
+				$conflict_id
+			);
+		}
+
+		if ( in_array( $conflict->post_status, array( ProductStatus::DRAFT, ProductStatus::AUTO_DRAFT, ProductStatus::PENDING ), true ) ) {
+			return sprintf(
+				// translators: 1: SKU, 2: conflicting product ID.
+				__( 'The SKU (%1$s) is already assigned to draft product #%2$d. Use a different SKU, or update the existing draft.', 'woocommerce' ),
+				$sku,
+				$conflict_id
+			);
+		}
+
+		return sprintf(
+			// translators: 1: SKU, 2: conflicting product ID.
+			__( 'The SKU (%1$s) is already in use by product #%2$d. Use a different SKU.', 'woocommerce' ),
+			$sku,
+			$conflict_id
+		);
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| CRUD Methods
@@ -239,8 +303,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			 */
 			if ( ! empty( $sku ) && WC()->is_rest_api_request() && ! $this->obtain_lock_on_sku_for_concurrent_requests( $product ) ) {
 				$product->delete( true );
-				// translators: 1: SKU.
-				throw new Exception( esc_html( sprintf( __( 'The product with SKU (%1$s) you are trying to insert is already present in the lookup table', 'woocommerce' ), $sku ) ) );
+				throw new Exception( esc_html( $this->get_sku_conflict_message( $sku ) ) );
 			}
 
 			// get the post object so that we can set the status

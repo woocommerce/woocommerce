@@ -356,50 +356,87 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 	/**
 	 * Test that only one product is created with a unique SKU
-	 * during concurrent requests and when request is initiated via REST API.
-	 *
-	 * Throw error when two concurrent requests try to create a product with the same SKU.
+	 * during concurrent requests and when request is initiated via REST API,
+	 * and that the resulting error names the conflicting published product.
 	 *
 	 * @return void
 	 */
 	public function test_create_product_with_unique_sku_on_concurrent_requests() {
-		$this->expectException(
-			'Exception',
-		);
-		$this->expectExceptionMessage(
-			'The product with SKU (DUMMY SKU) you are trying to insert is already present in the lookup table'
-		);
-
 		// exception is only thrown during the REST API request.
 		$_SERVER['REQUEST_URI'] = '/wp-json/wc/v3/products';
-		$this->create_products_concurrently();
-	}
 
-	/**
-	 * Helper function to create products concurrently with same SKU
-	 *
-	 * @return void
-	 */
-	private static function create_products_concurrently() {
-		$default_props =
+		$existing_product = new WC_Product_Simple();
+		$existing_product->set_props(
 			array(
 				'name'          => 'Dummy Product',
 				'regular_price' => 10,
 				'price'         => 10,
 				'sku'           => 'DUMMY SKU',
-			);
+			)
+		);
+		$existing_product->save();
 
-		$product1 = new WC_Product_Simple();
-		$product2 = new WC_Product_Simple();
-		$product3 = new WC_Product_Simple();
+		$this->expectException( 'Exception' );
+		$this->expectExceptionMessage(
+			sprintf(
+				'The SKU (DUMMY SKU) is already in use by product #%d. Use a different SKU.',
+				$existing_product->get_id()
+			)
+		);
 
-		$product1->set_props( $default_props );
-		$product2->set_props( $default_props );
-		$product3->set_props( $default_props );
+		$conflicting_product = new WC_Product_Simple();
+		$conflicting_product->set_props(
+			array(
+				'name'          => 'Dummy Product',
+				'regular_price' => 10,
+				'price'         => 10,
+				'sku'           => 'DUMMY SKU',
+			)
+		);
+		$conflicting_product->save();
+	}
 
-		$product1->save();
-		$product2->save();
-		$product3->save();
+	/**
+	 * Test that creating a product with a SKU already held by a trashed
+	 * product names the trashed product specifically, since the regular
+	 * uniqueness check (wc_product_has_unique_sku) excludes trashed products
+	 * and would otherwise let this conflict through with no explanation.
+	 *
+	 * @return void
+	 */
+	public function test_create_product_with_sku_conflicting_with_trashed_product() {
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/v3/products';
+
+		$trashed_product = new WC_Product_Simple();
+		$trashed_product->set_props(
+			array(
+				'name'          => 'Trashed Product',
+				'regular_price' => 10,
+				'price'         => 10,
+				'sku'           => 'TRASHED SKU',
+			)
+		);
+		$trashed_product->save();
+		wp_trash_post( $trashed_product->get_id() );
+
+		$this->expectException( 'Exception' );
+		$this->expectExceptionMessage(
+			sprintf(
+				'The SKU (TRASHED SKU) conflicts with product #%d, which is in the Trash. Use a different SKU, or restore or permanently delete that product to free it up.',
+				$trashed_product->get_id()
+			)
+		);
+
+		$new_product = new WC_Product_Simple();
+		$new_product->set_props(
+			array(
+				'name'          => 'New Product',
+				'regular_price' => 10,
+				'price'         => 10,
+				'sku'           => 'TRASHED SKU',
+			)
+		);
+		$new_product->save();
 	}
 
 	/**
