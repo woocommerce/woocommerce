@@ -365,35 +365,34 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		// exception is only thrown during the REST API request.
 		$_SERVER['REQUEST_URI'] = '/wp-json/wc/v3/products';
 
-		$existing_product = new WC_Product_Simple();
-		$existing_product->set_props(
-			array(
-				'name'          => 'Dummy Product',
-				'regular_price' => 10,
-				'price'         => 10,
-				'sku'           => 'DUMMY SKU',
-			)
+		$default_props = array(
+			'name'          => 'Dummy Product',
+			'regular_price' => 10,
+			'price'         => 10,
+			'sku'           => 'DUMMY SKU',
 		);
-		$existing_product->save();
+
+		// Set props on both before either is saved, so neither exists in the
+		// database yet when the SKU is assigned - the regular uniqueness check
+		// (wc_product_has_unique_sku) can't catch this, only the DB-level lock
+		// obtained during create() can, which is what this test targets.
+		$product1 = new WC_Product_Simple();
+		$product1->set_props( $default_props );
+
+		$product2 = new WC_Product_Simple();
+		$product2->set_props( $default_props );
+
+		$product1->save();
 
 		$this->expectException( 'Exception' );
 		$this->expectExceptionMessage(
 			sprintf(
 				'The SKU (DUMMY SKU) is already in use by product #%d. Use a different SKU.',
-				$existing_product->get_id()
+				$product1->get_id()
 			)
 		);
 
-		$conflicting_product = new WC_Product_Simple();
-		$conflicting_product->set_props(
-			array(
-				'name'          => 'Dummy Product',
-				'regular_price' => 10,
-				'price'         => 10,
-				'sku'           => 'DUMMY SKU',
-			)
-		);
-		$conflicting_product->save();
+		$product2->save();
 	}
 
 	/**

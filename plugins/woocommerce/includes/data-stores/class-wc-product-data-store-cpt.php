@@ -260,7 +260,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Method to create a new product in the database.
 	 *
 	 * @param WC_Product $product Product object.
-	 * @throws Exception If SKU is already under processing.
+	 * @throws Exception If the SKU could not be locked (see get_sku_conflict_message()).
 	 * @return void
 	 */
 	public function create( &$product ) {
