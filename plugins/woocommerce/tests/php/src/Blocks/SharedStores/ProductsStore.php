@@ -285,9 +285,10 @@ class ProductsStore extends \WC_Unit_Test_Case {
 
 		$this->assertIsArray( $result );
 		$this->assertSame( $product->get_id(), $result['id'] ?? null, 'The product should load despite the self-referencing description.' );
+		$this->assertArrayHasKey( 'description', $result, 'The response should include the formatted description.' );
 		$this->assertStringNotContainsString(
 			'wp-block-woocommerce-single-product',
-			$result['description'] ?? '',
+			$result['description'],
 			'The embedded single-product block should not be rendered into the description.'
 		);
 
