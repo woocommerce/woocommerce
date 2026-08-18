@@ -59,7 +59,6 @@ class RendererTest extends WC_Unit_Test_Case {
 				'A populated Product Collection should render its wrapper.'
 			);
 
-			apply_filters( 'render_block_woocommerce/product-template', '' );
 			$this->assertSame(
 				'',
 				apply_filters( 'render_block_woocommerce/product-collection', $empty_wrapper, $collection_block ),
