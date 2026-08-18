@@ -1,10 +1,10 @@
 /**
  * External dependencies
  */
-import NumberFormat from 'react-number-format';
+import { NumericFormat } from 'react-number-format';
 import type {
 	NumberFormatValues,
-	NumberFormatProps,
+	NumericFormatProps,
 } from 'react-number-format';
 import clsx from 'clsx';
 import type { ReactElement } from 'react';
@@ -18,22 +18,22 @@ import { decodeHtmlEntities } from '@woocommerce/utils';
 import './style.scss';
 
 export interface FormattedMonetaryAmountProps
-	extends Omit< NumberFormatProps, 'onValueChange' | 'displayType' > {
+	extends Omit< NumericFormatProps, 'onValueChange' | 'displayType' > {
 	className?: string;
-	displayType?: NumberFormatProps[ 'displayType' ] | undefined;
+	displayType?: NumericFormatProps[ 'displayType' ] | undefined;
 	allowNegative?: boolean;
 	isAllowed?: ( formattedValue: NumberFormatValues ) => boolean;
 	value: number | string; // Value of money amount.
 	currency?: Currency | undefined; // Currency configuration object. Defaults to site currency.
 	onValueChange?: ( unit: number ) => void; // Function to call when value changes.
 	style?: React.CSSProperties | undefined;
-	renderText?: ( value: string ) => JSX.Element;
+	renderText?: NonNullable< NumericFormatProps[ 'renderText' ] >;
 }
 
 /**
- * Formats currency data into the expected format for NumberFormat.
+ * Maps the currency configuration onto the props NumericFormat expects.
  */
-const currencyToNumberFormat = ( currency: Currency ) => {
+const currencyToNumericFormatProps = ( currency: Currency ) => {
 	const { prefix, suffix, thousandSeparator, decimalSeparator } = currency;
 	// Decode HTML entities in separators
 	const decodedThousandSeparator = decodeHtmlEntities( thousandSeparator );
@@ -55,14 +55,14 @@ const currencyToNumberFormat = ( currency: Currency ) => {
 		fixedDecimalScale: true,
 		prefix: decodeHtmlEntities( prefix ),
 		suffix: decodeHtmlEntities( suffix ),
-		isNumericString: true,
+		valueIsNumericString: true,
 	};
 };
 
 /**
  * FormattedMonetaryAmount component.
  *
- * Takes a price and returns a formatted price using the NumberFormat component.
+ * Takes a price and returns a formatted price using the NumericFormat component.
  *
  * More detailed docs on the additional props can be found here:https://s-yadav.github.io/react-number-format/docs/intro
  */
@@ -100,16 +100,16 @@ const FormattedMonetaryAmount = ( {
 		className
 	);
 	const decimalScale = props.decimalScale ?? currency?.minorUnit;
-	const numberFormatProps = {
+	const numericFormatProps = {
 		...props,
-		...currencyToNumberFormat( currency ),
+		...currencyToNumericFormatProps( currency ),
 		decimalScale,
 		value: undefined,
 		currency: undefined,
 		onValueChange: undefined,
 	};
 
-	// Wrapper for NumberFormat onValueChange which handles subunit conversion.
+	// Wrapper for NumericFormat onValueChange which handles subunit conversion.
 	const onValueChangeWrapper = onValueChange
 		? ( values: NumberFormatValues ) => {
 				const minorUnitValue = +values.value * 10 ** currency.minorUnit;
@@ -118,11 +118,11 @@ const FormattedMonetaryAmount = ( {
 		: () => void 0;
 
 	return (
-		<NumberFormat
+		<NumericFormat
 			className={ classes }
 			displayType={ displayType }
 			translate="no"
-			{ ...numberFormatProps }
+			{ ...numericFormatProps }
 			value={ priceValue }
 			onValueChange={ onValueChangeWrapper }
 		/>
