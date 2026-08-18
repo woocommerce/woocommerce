@@ -9,7 +9,7 @@ declare( strict_types = 1 );
  *
  * @covers WC_REST_Coupons_V2_Controller::prepare_object_for_database
  */
-class WC_REST_Coupons_V2_Controller_Tests extends WC_Unit_Test_Case {
+class WC_REST_Coupons_V2_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * @var WC_REST_Coupons_V2_Controller System under test.
@@ -79,7 +79,7 @@ class WC_REST_Coupons_V2_Controller_Tests extends WC_Unit_Test_Case {
 	// -----------------------------------------------------------------------
 
 	/**
-	 * @testDox A valid simultaneous raise of both minimum and maximum spend succeeds via REST.
+	 * @testdox A valid simultaneous raise of both minimum and maximum spend succeeds via REST.
 	 */
 	public function test_rest_allows_raising_both_amounts_together(): void {
 		$coupon = $this->make_coupon( 'RAISE-BOTH', '100', '200' );
@@ -101,7 +101,7 @@ class WC_REST_Coupons_V2_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testDox A valid simultaneous decrease of both minimum and maximum spend succeeds via REST.
+	 * @testdox A valid simultaneous decrease of both minimum and maximum spend succeeds via REST.
 	 */
 	public function test_rest_allows_lowering_both_amounts_together(): void {
 		$coupon = $this->make_coupon( 'LOWER-BOTH', '100', '200' );
@@ -127,7 +127,7 @@ class WC_REST_Coupons_V2_Controller_Tests extends WC_Unit_Test_Case {
 	// -----------------------------------------------------------------------
 
 	/**
-	 * @testDox Creating a coupon with minimum spend exceeding maximum spend returns a 400 error.
+	 * @testdox Creating a coupon with minimum spend exceeding maximum spend returns a 400 error.
 	 */
 	public function test_rest_create_rejects_invalid_amount_pair(): void {
 		$result = $this->sut->create_item(
@@ -147,7 +147,7 @@ class WC_REST_Coupons_V2_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testDox Updating a coupon with an invalid amount pair returns a 400 error without persisting either amount.
+	 * @testdox Updating a coupon with an invalid amount pair returns a 400 error without persisting either amount.
 	 */
 	public function test_rest_update_rejects_invalid_amount_pair_without_mutation(): void {
 		$coupon = $this->make_coupon( 'NO-MUTATE', '50', '150' );
@@ -177,7 +177,7 @@ class WC_REST_Coupons_V2_Controller_Tests extends WC_Unit_Test_Case {
 	// -----------------------------------------------------------------------
 
 	/**
-	 * @testDox Updating only minimum spend to a value that exceeds the stored maximum returns a 400 error.
+	 * @testdox Updating only minimum spend to a value that exceeds the stored maximum returns a 400 error.
 	 */
 	public function test_rest_minimum_only_update_rejected_when_exceeds_stored_maximum(): void {
 		$coupon = $this->make_coupon( 'MIN-ONLY-FAIL', '50', '100' );
@@ -194,7 +194,7 @@ class WC_REST_Coupons_V2_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testDox Updating only maximum spend to a value below the stored minimum returns a 400 error.
+	 * @testdox Updating only maximum spend to a value below the stored minimum returns a 400 error.
 	 */
 	public function test_rest_maximum_only_update_rejected_when_below_stored_minimum(): void {
 		$coupon = $this->make_coupon( 'MAX-ONLY-FAIL', '100', '200' );
