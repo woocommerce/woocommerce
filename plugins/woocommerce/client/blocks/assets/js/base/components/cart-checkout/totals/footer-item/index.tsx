@@ -115,13 +115,13 @@ const TotalsFooterItem = ( {
 	// algorithm move an RTL symbol to the wrong side of the amount.
 	const taxLinesList = (
 		<>
-			{ taxLines?.map( ( { name, price }, index ) => (
-				<Fragment key={ `tax-line-${ index }` }>
+			{ taxLines?.map( ( { name, price, rate }, index ) => (
+				<Fragment key={ `${ name }-${ rate }` }>
 					{ index > 0 && ', ' }
 					<FormattedMonetaryAmount
 						className="wc-block-components-totals-footer-item-tax-value"
 						currency={ currency }
-						value={ parseInt( price, 10 ) }
+						value={ price }
 					/>
 					{ ` ${ name }` }
 				</Fragment>

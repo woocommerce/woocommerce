@@ -8,7 +8,6 @@ import type {
 	SourceInfo,
 } from 'react-number-format';
 import clsx from 'clsx';
-import { useMemo } from '@wordpress/element';
 import type { ReactElement, ReactNode } from 'react';
 import type { Currency } from '@woocommerce/types';
 import { SITE_CURRENCY } from '@woocommerce/settings';
@@ -139,9 +138,6 @@ const createStructuredPriceRenderer =
 		const isNegative = formattedValue.startsWith( '-' );
 
 		return (
-			// NumericFormat types the second argument as its own props rather
-			// than as span attributes, so it is narrowed to what it is at
-			// runtime: the attributes it would have put on the element.
 			<span
 				{ ...( spanProps as React.HTMLAttributes< HTMLSpanElement > ) }
 				ref={ getInputRef as React.Ref< HTMLSpanElement > }
@@ -177,20 +173,6 @@ const FormattedMonetaryAmount = ( {
 		...rawCurrency,
 	};
 
-	const decodedPrefix = decodeHtmlEntities( currency.prefix );
-	const decodedSuffix = decodeHtmlEntities( currency.suffix );
-	const { getInputRef } = props;
-
-	const structuredPriceRenderer = useMemo(
-		() =>
-			createStructuredPriceRenderer( {
-				prefix: decodedPrefix,
-				suffix: decodedSuffix,
-				getInputRef,
-			} ),
-		[ decodedPrefix, decodedSuffix, getInputRef ]
-	);
-
 	// Convert values to int.
 	const value =
 		typeof rawValue === 'string' ? parseInt( rawValue, 10 ) : rawValue;
@@ -211,6 +193,8 @@ const FormattedMonetaryAmount = ( {
 		className
 	);
 	const decimalScale = props.decimalScale ?? currency?.minorUnit;
+	const decodedPrefix = decodeHtmlEntities( currency.prefix );
+	const decodedSuffix = decodeHtmlEntities( currency.suffix );
 
 	// Compose the price as markup so it matches the structure `wc_price()`
 	// produces everywhere else in the store. An input value cannot hold
@@ -227,8 +211,15 @@ const FormattedMonetaryAmount = ( {
 		value: undefined,
 		currency: undefined,
 		onValueChange: undefined,
-		renderText: renderAsMarkup ? structuredPriceRenderer : props.renderText,
 	};
+
+	if ( renderAsMarkup ) {
+		numericFormatProps.renderText = createStructuredPriceRenderer( {
+			prefix: decodedPrefix,
+			suffix: decodedSuffix,
+			getInputRef: props.getInputRef,
+		} );
+	}
 
 	// Wrapper for NumericFormat onValueChange which handles subunit conversion.
 	const onValueChangeWrapper = onValueChange
