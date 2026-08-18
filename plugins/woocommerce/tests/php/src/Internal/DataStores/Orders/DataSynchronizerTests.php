@@ -161,7 +161,6 @@ class DataSynchronizerTests extends \HposTestCase {
 		$this->sut->process_batch( array( $order->get_id() ) );
 		$this->assertFalse( $this->sut->has_orders_pending_sync(), 'No orders should be pending sync right after a full backfill.' );
 
-		// The order changes after the backfill; with sync disabled its post record is not updated to match.
 		$order->set_date_modified( time() + 1000 );
 		$order->save();
 
