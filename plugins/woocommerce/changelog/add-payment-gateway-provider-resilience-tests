@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Add tests covering the payments provider base class's resilience to gateways that throw from state probes or return non-scalar option values.

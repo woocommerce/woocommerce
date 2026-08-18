@@ -12,19 +12,6 @@ use Automattic\WooCommerce\StoreApi\Utilities\NoticeHandler;
 class NoticeHandlerTests extends \WC_Unit_Test_Case {
 
 	/**
-	 * Clear the WooCommerce notice queue.
-	 *
-	 * Notices live on the WC session singleton, which neither the per-test database
-	 * transaction nor the hook restore touches, so they have to be cleared explicitly or
-	 * they leak into every later test in the process.
-	 */
-	public function tearDown(): void {
-		wc_clear_notices();
-
-		parent::tearDown();
-	}
-
-	/**
 	 * Test convert_notices_to_exceptions.
 	 */
 	public function test_convert_notices_to_exceptions() {
