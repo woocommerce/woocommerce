@@ -1,4 +1,4 @@
 Significance: minor
 Type: update
 
-Update react-number-format to 5.4.5 and make FormattedMonetaryAmount's onValueChange fire only for user input, not for value prop changes.
+Update react-number-format from 4.9.3 to 5.4.5.

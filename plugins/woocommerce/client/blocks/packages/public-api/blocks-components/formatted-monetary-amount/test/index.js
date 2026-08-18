@@ -135,9 +135,9 @@ describe( 'FormattedMonetaryAmount', () => {
 			suffix: '',
 		};
 
-		test( 'fires for user input only, converted to subunits', () => {
+		test( 'fires for user input, converted to subunits', () => {
 			const onValueChange = jest.fn();
-			const { rerender } = render(
+			render(
 				<FormattedMonetaryAmount
 					value="156345"
 					currency={ eurCurrency }
@@ -149,9 +149,27 @@ describe( 'FormattedMonetaryAmount', () => {
 			// Not on mount.
 			expect( onValueChange ).not.toHaveBeenCalled();
 
-			// Not on a value prop change either: NumericFormat reports it, but
-			// it echoes the rounded display value, which consumers would apply
-			// as if the user had picked it.
+			fireEvent.change( screen.getByRole( 'textbox' ), {
+				target: { value: '€ 12,00' },
+			} );
+			expect( onValueChange ).toHaveBeenCalledTimes( 1 );
+			expect( onValueChange ).toHaveBeenCalledWith( 1200 );
+		} );
+
+		test( 'also fires for value prop changes, matching v4', () => {
+			const onValueChange = jest.fn();
+			const { rerender } = render(
+				<FormattedMonetaryAmount
+					value="156345"
+					currency={ eurCurrency }
+					displayType="input"
+					onValueChange={ onValueChange }
+				/>
+			);
+
+			// Kept deliberately so the major bump does not change the
+			// callback's behaviour; consumers that push values back must
+			// guard against the echo themselves.
 			rerender(
 				<FormattedMonetaryAmount
 					value="179900"
@@ -160,64 +178,7 @@ describe( 'FormattedMonetaryAmount', () => {
 					onValueChange={ onValueChange }
 				/>
 			);
-			expect( onValueChange ).not.toHaveBeenCalled();
-
-			// User input does fire, converted to minor units.
-			fireEvent.change( screen.getByRole( 'textbox' ), {
-				target: { value: '€ 12,00' },
-			} );
-			expect( onValueChange ).toHaveBeenCalledTimes( 1 );
-			expect( onValueChange ).toHaveBeenCalledWith( 1200 );
-		} );
-
-		test( 'does not echo the value rounded to decimalScale (price filter configuration)', () => {
-			const onValueChange = jest.fn();
-			const { rerender } = render(
-				<FormattedMonetaryAmount
-					value="156345"
-					currency={ eurCurrency }
-					displayType="input"
-					decimalScale={ 0 }
-					onValueChange={ onValueChange }
-				/>
-			);
-
-			// 1799 minor units display as "18" with decimalScale 0; before the
-			// source guard, the prop-driven call reported that back as 1800.
-			rerender(
-				<FormattedMonetaryAmount
-					value="1799"
-					currency={ eurCurrency }
-					displayType="input"
-					decimalScale={ 0 }
-					onValueChange={ onValueChange }
-				/>
-			);
-			expect( onValueChange ).not.toHaveBeenCalledWith( 1800 );
-			expect( onValueChange ).not.toHaveBeenCalled();
-		} );
-
-		test( 'still fires for blur corrections, which report as user events', () => {
-			const onValueChange = jest.fn();
-			render(
-				<FormattedMonetaryAmount
-					value="156345"
-					currency={ eurCurrency }
-					displayType="input"
-					onValueChange={ onValueChange }
-				/>
-			);
-
-			const input = screen.getByRole( 'textbox' );
-			fireEvent.change( input, { target: { value: '€ 012,5' } } );
-			expect( onValueChange ).toHaveBeenCalledTimes( 1 );
-
-			// Blur strips the leading zero and reports the correction with
-			// source "event", so the guard must let it through — while still
-			// swallowing the prop-sourced resync that follows it.
-			fireEvent.blur( input );
-			expect( onValueChange ).toHaveBeenCalledTimes( 2 );
-			expect( onValueChange ).toHaveBeenLastCalledWith( 1250 );
+			expect( onValueChange ).toHaveBeenCalledWith( 179900 );
 		} );
 	} );
 
