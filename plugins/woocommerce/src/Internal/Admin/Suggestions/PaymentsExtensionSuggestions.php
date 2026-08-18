@@ -107,7 +107,7 @@ class PaymentsExtensionSuggestions {
 	/**
 	 * The memoized processed country extensions to avoid rebuilding the list multiple times during a request.
 	 *
-	 * Keyed by country code and context. Cleared via clear_cache().
+	 * Keyed by user, country code, and context. Cleared via clear_cache().
 	 *
 	 * @var array
 	 */
@@ -2981,7 +2981,7 @@ class PaymentsExtensionSuggestions {
 	/**
 	 * Get the list of payment extensions details for a specific country.
 	 *
-	 * The list is memoized per country and context for the duration of the request. Use clear_cache() to force a rebuild.
+	 * The list is memoized per user, country, and context for the duration of the request. Use clear_cache() to force a rebuild.
 	 *
 	 * @param string $country_code The two-letter country code.
 	 * @param string $context      Optional. The context ID of where these extensions are being used.
@@ -2999,7 +2999,8 @@ class PaymentsExtensionSuggestions {
 			return array();
 		}
 
-		$memo_key = $country_code . '__' . $context;
+		// Key on the user since incentive visibility and dismissals are user-specific.
+		$memo_key = get_current_user_id() . '__' . $country_code . '__' . $context;
 		if ( isset( $this->country_extensions_memo[ $memo_key ] ) ) {
 			return $this->country_extensions_memo[ $memo_key ];
 		}
@@ -3145,7 +3146,9 @@ class PaymentsExtensionSuggestions {
 	 * Call after changing store state that influences the suggestions list during a request.
 	 * Also useful for testing purposes.
 	 *
-	 * @since 11.1.0
+	 * This only clears this class's memos, not the incentives provider's own caches.
+	 *
+	 * @since 11.2.0
 	 *
 	 * @internal
 	 * @return void

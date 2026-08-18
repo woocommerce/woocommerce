@@ -88,6 +88,39 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertGreaterThan( $build_calls, $incentives_calls, 'A different context should build its own list.' );
+
+		// Act.
+		$calls_before_country_change = $incentives_calls;
+		$this->sut->get_country_extensions( 'GB' );
+
+		// Assert.
+		$this->assertGreaterThan( $calls_before_country_change, $incentives_calls, 'A different country should build its own list.' );
+	}
+
+	/**
+	 * Test that the payment extension suggestions list is memoized per user, since incentive visibility and dismissals are user-specific.
+	 */
+	public function test_get_country_extensions_memoizes_per_user() {
+		// Arrange.
+		$incentives_calls = 0;
+		$this->suggestion_incentives
+			->method( 'get_incentives' )
+			->willReturnCallback(
+				function () use ( &$incentives_calls ) {
+					++$incentives_calls;
+					return array();
+				}
+			);
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		$this->sut->get_country_extensions( 'US' );
+		$build_calls = $incentives_calls;
+
+		// Act.
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		$this->sut->get_country_extensions( 'US' );
+
+		// Assert.
+		$this->assertGreaterThan( $build_calls, $incentives_calls, 'A different user should build its own list.' );
 	}
 
 	/**
