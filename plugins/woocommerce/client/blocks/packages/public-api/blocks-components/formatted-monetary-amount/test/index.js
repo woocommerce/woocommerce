@@ -8,6 +8,10 @@ import { fireEvent, render, screen } from '@testing-library/react';
  */
 import FormattedMonetaryAmount from '../index';
 
+// The element isolating the currency symbol from the amount.
+const symbolSelector =
+	'.wc-block-components-formatted-money-amount__currency-symbol';
+
 jest.mock( '@woocommerce/settings', () => ( {
 	...jest.requireActual( '@woocommerce/settings' ),
 	SITE_CURRENCY: {
@@ -244,10 +248,11 @@ describe( 'FormattedMonetaryAmount', () => {
 				/>
 			);
 
-			const symbol = container.querySelector( '[dir="auto"]' );
+			const symbol = container.querySelector( symbolSelector );
 			// The space stays outside the isolate; inside it, it would be drawn
 			// on the wrong side of the symbol.
 			expect( symbol?.textContent ).toBe( '€' );
+			expect( symbol ).toHaveAttribute( 'dir', 'auto' );
 		} );
 
 		test( 'keeps the negative sign inside the bdi, ahead of the symbol', () => {
@@ -276,7 +281,7 @@ describe( 'FormattedMonetaryAmount', () => {
 			);
 
 			expect(
-				container.querySelector( '[dir="auto"]' )?.textContent
+				container.querySelector( symbolSelector )?.textContent
 			).toBe( '€' );
 			expect( container.textContent ).toBe( '1.563,45 €' );
 		} );
@@ -292,6 +297,59 @@ describe( 'FormattedMonetaryAmount', () => {
 
 			expect( container.querySelector( 'bdi' ) ).toBeNull();
 			expect( screen.getByRole( 'textbox' ) ).toHaveValue( '€ 1.563,45' );
+		} );
+
+		test( 'keeps the wrapper span classes, style and translate attribute', () => {
+			const { container } = render(
+				<FormattedMonetaryAmount
+					value="156345"
+					currency={ eurCurrency }
+					className="custom-class"
+					style={ { color: 'red' } }
+				/>
+			);
+
+			// The span props come through the renderText callback now, so pin
+			// down that nothing is lost on the way.
+			const wrapper = container.firstChild;
+			expect( wrapper ).toHaveClass(
+				'wc-block-formatted-money-amount',
+				'wc-block-components-formatted-money-amount',
+				'custom-class'
+			);
+			expect( wrapper ).toHaveStyle( { color: 'rgb(255, 0, 0)' } );
+			expect( wrapper ).toHaveAttribute( 'translate', 'no' );
+		} );
+
+		test( 'keeps an entity-encoded non-breaking space outside the isolate', () => {
+			const { container } = render(
+				<FormattedMonetaryAmount
+					value="156345"
+					currency={ { ...eurCurrency, prefix: '€&nbsp;' } }
+				/>
+			);
+
+			// wc_price() separates the symbol and the amount with `&nbsp;`; the
+			// entity is decoded and split off the symbol like any other spacing.
+			expect(
+				container.querySelector( symbolSelector )?.textContent
+			).toBe( '€' );
+			expect( container.textContent ).toBe( '€ 1.563,45' );
+		} );
+
+		test( 'forwards getInputRef to the wrapper span in text mode', () => {
+			const getInputRef = jest.fn();
+			const { container } = render(
+				<FormattedMonetaryAmount
+					value="156345"
+					currency={ eurCurrency }
+					getInputRef={ getInputRef }
+				/>
+			);
+
+			// NumericFormat does not apply getInputRef when renderText is set,
+			// so the component wires it to the span itself.
+			expect( getInputRef ).toHaveBeenCalledWith( container.firstChild );
 		} );
 
 		test( 'leaves a consumer-supplied renderText in control of the output', () => {
@@ -337,7 +395,7 @@ describe( 'FormattedMonetaryAmount', () => {
 			);
 
 			expect(
-				container.querySelector( '[dir="auto"]' )?.textContent
+				container.querySelector( symbolSelector )?.textContent
 			).toBe( lbpSymbol );
 			expect( container.querySelector( 'bdi' )?.textContent ).toBe(
 				`${ lbpSymbol } 1,563.45`
@@ -357,7 +415,7 @@ describe( 'FormattedMonetaryAmount', () => {
 			);
 
 			expect(
-				container.querySelector( '[dir="auto"]' )?.textContent
+				container.querySelector( symbolSelector )?.textContent
 			).toBe( lbpSymbol );
 			expect( container.querySelector( 'bdi' )?.textContent ).toBe(
 				`1,563.45 ${ lbpSymbol }`

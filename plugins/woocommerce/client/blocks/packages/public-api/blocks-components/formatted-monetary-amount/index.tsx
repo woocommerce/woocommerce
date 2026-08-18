@@ -8,6 +8,7 @@ import type {
 	SourceInfo,
 } from 'react-number-format';
 import clsx from 'clsx';
+import { useMemo } from '@wordpress/element';
 import type { ReactElement, ReactNode } from 'react';
 import type { Currency } from '@woocommerce/types';
 import { SITE_CURRENCY } from '@woocommerce/settings';
@@ -44,8 +45,11 @@ export interface FormattedMonetaryAmountProps
  * the symbol.
  */
 const splitCurrencySymbolAndSpacing = ( currencySymbol: string ) => {
-	const [ , before = '', symbol = '', after = '' ] =
-		currencySymbol.match( /^(\s*)(.*?)(\s*)$/ ) || [];
+	// The pattern matches any string, including the empty one, so the match
+	// cannot be null.
+	const [ , before, symbol, after ] = currencySymbol.match(
+		/^(\s*)(.*?)(\s*)$/
+	) as RegExpMatchArray;
 	return { before, symbol, after };
 };
 
@@ -55,13 +59,15 @@ const splitCurrencySymbolAndSpacing = ( currencySymbol: string ) => {
  *
  * `dir="auto"` keeps the symbol a self-contained run, so it cannot pull the
  * neighbouring digits into a right-to-left run and land on the wrong side of
- * the amount. A span is used rather than a nested `<bdi>` because
- * `wp_kses_post()` strips `bdi` but keeps the `dir` attribute.
+ * the amount. A `<span dir="auto">` rather than a nested `<bdi>` to keep the
+ * structure identical to the PHP-rendered price, which uses a span because it
+ * has to survive `wp_kses_post()` (kses strips `bdi` but keeps `dir`).
  */
 const renderIsolatedSymbol = ( currencySymbol: string ): ReactNode => {
 	const { before, symbol, after } =
 		splitCurrencySymbolAndSpacing( currencySymbol );
 
+	// A symbol that is nothing but spacing has nothing to isolate.
 	if ( ! symbol ) {
 		return currencySymbol;
 	}
@@ -69,7 +75,12 @@ const renderIsolatedSymbol = ( currencySymbol: string ): ReactNode => {
 	return (
 		<>
 			{ before }
-			<span dir="auto">{ symbol }</span>
+			<span
+				className="wc-block-components-formatted-money-amount__currency-symbol"
+				dir="auto"
+			>
+				{ symbol }
+			</span>
 			{ after }
 		</>
 	);
@@ -164,6 +175,20 @@ const FormattedMonetaryAmount = ( {
 		...rawCurrency,
 	};
 
+	const decodedPrefix = decodeHtmlEntities( currency.prefix );
+	const decodedSuffix = decodeHtmlEntities( currency.suffix );
+	const { getInputRef } = props;
+
+	const structuredPriceRenderer = useMemo(
+		() =>
+			createStructuredPriceRenderer( {
+				prefix: decodedPrefix,
+				suffix: decodedSuffix,
+				getInputRef,
+			} ),
+		[ decodedPrefix, decodedSuffix, getInputRef ]
+	);
+
 	// Convert values to int.
 	const value =
 		typeof rawValue === 'string' ? parseInt( rawValue, 10 ) : rawValue;
@@ -184,8 +209,6 @@ const FormattedMonetaryAmount = ( {
 		className
 	);
 	const decimalScale = props.decimalScale ?? currency?.minorUnit;
-	const decodedPrefix = decodeHtmlEntities( currency.prefix );
-	const decodedSuffix = decodeHtmlEntities( currency.suffix );
 
 	// Compose the price as markup so it matches the structure `wc_price()`
 	// produces everywhere else in the store. An input value cannot hold
@@ -202,15 +225,8 @@ const FormattedMonetaryAmount = ( {
 		value: undefined,
 		currency: undefined,
 		onValueChange: undefined,
+		renderText: renderAsMarkup ? structuredPriceRenderer : props.renderText,
 	};
-
-	if ( renderAsMarkup ) {
-		numericFormatProps.renderText = createStructuredPriceRenderer( {
-			prefix: decodedPrefix,
-			suffix: decodedSuffix,
-			getInputRef: props.getInputRef,
-		} );
-	}
 
 	// Wrapper for NumericFormat onValueChange which handles subunit conversion.
 	const onValueChangeWrapper = onValueChange
