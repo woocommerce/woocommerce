@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -59,5 +59,33 @@ describe( 'ProductPrice', () => {
 		);
 
 		expect( container ).toMatchSnapshot();
+	} );
+
+	test( 'should announce a price range using the given currency, not the site currency', () => {
+		// The site currency in tests is USD ($, `.` decimals, `,` thousands).
+		const euro = {
+			code: 'EUR',
+			decimalSeparator: ',',
+			minorUnit: 2,
+			prefix: '',
+			suffix: '&nbsp;€',
+			symbol: '€',
+			thousandSeparator: '.',
+		};
+
+		render(
+			<ProductPrice
+				currency={ euro }
+				minPrice={ 100000 }
+				maxPrice={ 250000 }
+			/>
+		);
+
+		const screenReaderText = screen.getByText( /Price between/ );
+
+		expect( screenReaderText ).toHaveTextContent(
+			'Price between 1.000,00 € and 2.500,00 €'
+		);
+		expect( screenReaderText ).not.toHaveTextContent( '$' );
 	} );
 } );

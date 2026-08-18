@@ -4,7 +4,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
 import clsx from 'clsx';
-import { formatPrice } from '@woocommerce/price-format';
+import { formatPrice, getCurrency } from '@woocommerce/price-format';
 import { createInterpolateElement } from '@wordpress/element';
 import type { Currency } from '@woocommerce/types';
 
@@ -47,14 +47,18 @@ const PriceRange = ( {
 	priceClassName,
 	priceStyle = {},
 }: PriceRangeProps ) => {
+	// `currency` may be an empty object, so merge it over the site currency the
+	// same way FormattedMonetaryAmount does for the visible prices below.
+	const priceCurrency = getCurrency( currency );
+
 	return (
 		<>
 			<span className="screen-reader-text">
 				{ sprintf(
 					/* translators: %1$s min price, %2$s max price */
 					__( 'Price between %1$s and %2$s', 'woocommerce' ),
-					formatPrice( minPrice ),
-					formatPrice( maxPrice )
+					formatPrice( minPrice, priceCurrency ),
+					formatPrice( maxPrice, priceCurrency )
 				) }
 			</span>
 			<span aria-hidden={ true }>

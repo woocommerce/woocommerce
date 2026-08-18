@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use the product's own currency, not the site currency, in the screen reader text announcing a product price range.
