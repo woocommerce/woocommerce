@@ -45,12 +45,14 @@ export interface FormattedMonetaryAmountProps
  * the symbol.
  */
 const splitCurrencySymbolAndSpacing = ( currencySymbol: string ) => {
-	// The pattern matches any string, including the empty one, so the match
-	// cannot be null.
-	const [ , before, symbol, after ] = currencySymbol.match(
-		/^(\s*)(.*?)(\s*)$/
-	) as RegExpMatchArray;
-	return { before, symbol, after };
+	const symbol = currencySymbol.trim();
+	const symbolStart = currencySymbol.indexOf( symbol );
+
+	return {
+		before: currencySymbol.slice( 0, symbolStart ),
+		symbol,
+		after: currencySymbol.slice( symbolStart + symbol.length ),
+	};
 };
 
 /**
