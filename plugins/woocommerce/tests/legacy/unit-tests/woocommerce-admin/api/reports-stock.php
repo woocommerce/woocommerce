@@ -142,28 +142,6 @@ class WC_Admin_Tests_API_Reports_Stock extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Stores that want the previous listing back can opt out of the exclusion.
-	 */
-	public function test_variable_parent_products_can_be_restored_by_filter() {
-		wp_set_current_user( $this->user );
-
-		$variable = $this->create_variable_product( 25 );
-
-		add_filter( 'woocommerce_analytics_stock_report_exclude_variable_parents', '__return_false' );
-
-		$request = new WP_REST_Request( 'GET', $this->endpoint );
-		$request->set_param( 'include', (string) $variable->get_id() );
-		$response = $this->server->dispatch( $request );
-		$reports  = $response->get_data();
-
-		remove_filter( 'woocommerce_analytics_stock_report_exclude_variable_parents', '__return_false' );
-
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertCount( 1, $reports );
-		$this->assertEquals( $variable->get_id(), $reports[0]['id'] );
-	}
-
-	/**
 	 * Create a published variable product with two variations that manage their own stock.
 	 *
 	 * @param int $variation_stock Stock quantity to give each variation.

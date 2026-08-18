@@ -28,24 +28,9 @@ trait ExcludeVariableParentsTrait {
 	 * reported instead of disappearing from the report altogether.
 	 *
 	 * @param string $posts_alias Table or alias the outer query uses for the posts table. Defaults to the posts table name.
-	 * @return string SQL fragment starting with AND, or an empty string when the exclusion is filtered off.
+	 * @return string SQL fragment starting with AND.
 	 */
 	protected static function get_variable_parents_exclusion_clause( $posts_alias = '' ) {
-		/**
-		 * Filters whether variable parent products are excluded from the stock report and its summary.
-		 *
-		 * Variations are reported individually and carry the stock that can actually be sold, so the
-		 * parent row duplicates them. Return false to list parents as well, as WooCommerce did before
-		 * 11.2.0.
-		 *
-		 * @param bool $exclude Whether to exclude variable parent products. Default true.
-		 *
-		 * @since 11.2.0
-		 */
-		if ( ! apply_filters( 'woocommerce_analytics_stock_report_exclude_variable_parents', true ) ) {
-			return '';
-		}
-
 		global $wpdb;
 
 		// $posts_alias is a hardcoded table name or alias supplied by the calling report query, never user input.
