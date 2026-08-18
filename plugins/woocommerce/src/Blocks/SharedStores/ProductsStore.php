@@ -68,6 +68,41 @@ class ProductsStore {
 	private static array $loaded_variation_parents = array();
 
 	/**
+	 * Product IDs whose Store API fetch is currently in flight.
+	 *
+	 * Formatting a Store API product response runs the product description
+	 * through `do_blocks()`, so a description containing a block that loads
+	 * products (e.g. `woocommerce/single-product`) can re-enter
+	 * `load_product()` for the ID being fetched before it is memoized in
+	 * `$products`. This map breaks that cycle. See
+	 * https://github.com/woocommerce/woocommerce/issues/67750.
+	 *
+	 * @var array<int, true>
+	 */
+	private static array $loading_products = array();
+
+	/**
+	 * Parent product IDs whose variations fetch is currently in flight.
+	 *
+	 * Guards `load_variations()` against the same re-entrancy cycle as
+	 * `$loading_products` guards `load_product()`.
+	 *
+	 * @var array<int, true>
+	 */
+	private static array $loading_variation_parents = array();
+
+	/**
+	 * Parent product IDs whose purchasable child products fetch is
+	 * currently in flight.
+	 *
+	 * Guards `load_purchasable_child_products()` against the same
+	 * re-entrancy cycle as `$loading_products` guards `load_product()`.
+	 *
+	 * @var array<int, true>
+	 */
+	private static array $loading_child_parents = array();
+
+	/**
 	 * Whether the derived-state getters have been registered.
 	 *
 	 * @var bool
@@ -157,6 +192,40 @@ class ProductsStore {
 	}
 
 	/**
+	 * Fetch a Store API response while `woocommerce/single-product` blocks
+	 * are short-circuited.
+	 *
+	 * The Store API formats product descriptions with `do_blocks()`. A
+	 * `woocommerce/single-product` block stored inside a description
+	 * (commonly left behind by copy-pasting product page blocks) would
+	 * render detached from any Single Product Template context: its inner
+	 * blocks can fatal without a resolvable product, and loading its
+	 * product into this store mid-fetch can recurse indefinitely when it
+	 * references the product being fetched. Skipping the block for the
+	 * duration of the fetch prevents both.
+	 *
+	 * @param string $path The Store API path to fetch.
+	 * @return array The response data.
+	 */
+	private static function fetch_rest_api_response_data( string $path ): array {
+		$skip_single_product_block = static function ( $pre_render, $parsed_block ) {
+			if ( isset( $parsed_block['blockName'] ) && 'woocommerce/single-product' === $parsed_block['blockName'] ) {
+				return '';
+			}
+
+			return $pre_render;
+		};
+
+		add_filter( 'pre_render_block', $skip_single_product_block, 10, 2 );
+
+		try {
+			return Package::container()->get( Hydration::class )->get_rest_api_response_data( $path );
+		} finally {
+			remove_filter( 'pre_render_block', $skip_single_product_block, 10 );
+		}
+	}
+
+	/**
 	 * Load a product into state.
 	 *
 	 * @param string $consent_statement The consent statement string.
@@ -172,7 +241,21 @@ class ProductsStore {
 			return self::$products[ $product_id ];
 		}
 
-		$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products/' . $product_id );
+		// Bail on a re-entrant load: rendering block markup stored in this
+		// product's description (or in the description of another product
+		// fetched further up the stack) triggered a load of a product whose
+		// fetch is still in flight. Recursing would exhaust memory.
+		if ( isset( self::$loading_products[ $product_id ] ) ) {
+			return array();
+		}
+
+		self::$loading_products[ $product_id ] = true;
+
+		try {
+			$response = self::fetch_rest_api_response_data( '/wc/store/v1/products/' . $product_id );
+		} finally {
+			unset( self::$loading_products[ $product_id ] );
+		}
 
 		self::$products[ $product_id ] = $response['body'] ?? array();
 		self::register_getters();
@@ -216,7 +299,18 @@ class ProductsStore {
 		);
 		$query_string   = implode( '&', $include_params );
 
-		$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products?' . $query_string );
+		// Bail on a re-entrant load of a parent whose fetch is in flight.
+		if ( isset( self::$loading_child_parents[ $parent_id ] ) ) {
+			return array();
+		}
+
+		self::$loading_child_parents[ $parent_id ] = true;
+
+		try {
+			$response = self::fetch_rest_api_response_data( '/wc/store/v1/products?' . $query_string );
+		} finally {
+			unset( self::$loading_child_parents[ $parent_id ] );
+		}
 
 		if ( empty( $response['body'] ) ) {
 			return array();
@@ -260,7 +354,18 @@ class ProductsStore {
 			);
 		}
 
-		$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products?parent[]=' . $parent_id . '&type=variation' );
+		// Bail on a re-entrant load of a parent whose fetch is in flight.
+		if ( isset( self::$loading_variation_parents[ $parent_id ] ) ) {
+			return array();
+		}
+
+		self::$loading_variation_parents[ $parent_id ] = true;
+
+		try {
+			$response = self::fetch_rest_api_response_data( '/wc/store/v1/products?parent[]=' . $parent_id . '&type=variation' );
+		} finally {
+			unset( self::$loading_variation_parents[ $parent_id ] );
+		}
 
 		self::$loaded_variation_parents[ $parent_id ] = true;
 

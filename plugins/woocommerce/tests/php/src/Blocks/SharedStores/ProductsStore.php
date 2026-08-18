@@ -116,6 +116,185 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox load_product() breaks a re-entrant load of a product whose fetch is still in flight instead of recursing.
+	 */
+	public function test_load_product_breaks_reentrant_load_of_same_product(): void {
+		$product    = WC_Helper_Product::create_simple_product();
+		$product_id = $product->get_id();
+
+		$fake_hydration = new class( $product_id, $this->consent ) {
+			/**
+			 * The product ID to re-enter the store with.
+			 *
+			 * @var int
+			 */
+			private int $product_id;
+
+			/**
+			 * The consent string.
+			 *
+			 * @var string
+			 */
+			private string $consent;
+
+			/**
+			 * How many times get_rest_api_response_data was called.
+			 *
+			 * @var int
+			 */
+			public int $call_count = 0;
+
+			/**
+			 * The result of the re-entrant load_product() call.
+			 *
+			 * @var array|null
+			 */
+			public ?array $inner_result = null;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param int    $product_id The product ID.
+			 * @param string $consent    The consent string.
+			 */
+			public function __construct( int $product_id, string $consent ) {
+				$this->product_id = $product_id;
+				$this->consent    = $consent;
+			}
+
+			/**
+			 * Mimic Hydration::get_rest_api_response_data, re-entering the
+			 * store mid-fetch like a block in the product description would.
+			 *
+			 * @param string $path The REST path (ignored).
+			 * @return array The canned response.
+			 */
+			public function get_rest_api_response_data( string $path ): array {
+				// Avoid parameter not used PHPCS errors.
+				unset( $path );
+				++$this->call_count;
+				$this->inner_result = TestedProductsStore::load_product( $this->consent, $this->product_id );
+
+				return array(
+					'body' => array(
+						'id'   => $this->product_id,
+						'name' => 'Self Referencing Product',
+					),
+				);
+			}
+		};
+		$this->inject_hydration( $fake_hydration );
+
+		$result = TestedProductsStore::load_product( $this->consent, $product_id );
+
+		$this->assertSame( 1, $fake_hydration->call_count, 'The re-entrant call should not trigger a second fetch.' );
+		$this->assertSame( array(), $fake_hydration->inner_result, 'The re-entrant call should return an empty array.' );
+		$this->assertSame( 'Self Referencing Product', $result['name'], 'The outer call should still return the fetched product.' );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox load_product() skips single-product blocks rendered while the fetch is in flight and restores rendering afterwards.
+	 */
+	public function test_load_product_short_circuits_single_product_blocks_during_fetch(): void {
+		$product    = WC_Helper_Product::create_simple_product();
+		$product_id = $product->get_id();
+
+		$block_markup = '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><div class="wp-block-woocommerce-single-product woocommerce"><p>Embedded</p></div><!-- /wp:woocommerce/single-product -->';
+
+		$fake_hydration = new class( $product_id, $block_markup ) {
+			/**
+			 * The product ID for the canned response.
+			 *
+			 * @var int
+			 */
+			private int $product_id;
+
+			/**
+			 * Block markup to render mid-fetch.
+			 *
+			 * @var string
+			 */
+			private string $block_markup;
+
+			/**
+			 * What do_blocks() produced while the fetch was in flight.
+			 *
+			 * @var string|null
+			 */
+			public ?string $rendered_during_fetch = null;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param int    $product_id   The product ID.
+			 * @param string $block_markup Block markup to render mid-fetch.
+			 */
+			public function __construct( int $product_id, string $block_markup ) {
+				$this->product_id   = $product_id;
+				$this->block_markup = $block_markup;
+			}
+
+			/**
+			 * Mimic Hydration::get_rest_api_response_data, rendering block
+			 * markup mid-fetch like description formatting would.
+			 *
+			 * @param string $path The REST path (ignored).
+			 * @return array The canned response.
+			 */
+			public function get_rest_api_response_data( string $path ): array {
+				// Avoid parameter not used PHPCS errors.
+				unset( $path );
+				$this->rendered_during_fetch = do_blocks( $this->block_markup );
+
+				return array(
+					'body' => array(
+						'id'   => $this->product_id,
+						'name' => 'Fake Product',
+					),
+				);
+			}
+		};
+		$this->inject_hydration( $fake_hydration );
+
+		global $wp_filter;
+		$callbacks_before = isset( $wp_filter['pre_render_block'] ) ? count( $wp_filter['pre_render_block']->callbacks[10] ?? array() ) : 0;
+
+		TestedProductsStore::load_product( $this->consent, $product_id );
+
+		$callbacks_after = isset( $wp_filter['pre_render_block'] ) ? count( $wp_filter['pre_render_block']->callbacks[10] ?? array() ) : 0;
+
+		$this->assertSame( '', $fake_hydration->rendered_during_fetch, 'single-product blocks should not render while a product fetch is in flight.' );
+		$this->assertSame( $callbacks_before, $callbacks_after, 'The pre_render_block short-circuit should be removed after the fetch.' );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox load_product() survives a product whose description embeds a single-product block referencing itself.
+	 */
+	public function test_load_product_with_self_referencing_description_block(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_description(
+			'<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/add-to-cart-form /--></div><!-- /wp:woocommerce/single-product -->'
+		);
+		$product->save();
+
+		$result = TestedProductsStore::load_product( $this->consent, $product->get_id() );
+
+		$this->assertIsArray( $result );
+		$this->assertSame( $product->get_id(), $result['id'] ?? null, 'The product should load despite the self-referencing description.' );
+		$this->assertStringNotContainsString(
+			'wp-block-woocommerce-single-product',
+			$result['description'] ?? '',
+			'The embedded single-product block should not be rendered into the description.'
+		);
+
+		$product->delete( true );
+	}
+
+	/**
 	 * @testdox load_variations() hydrates interactivity state with every child variation.
 	 */
 	public function test_load_variations_populates_state(): void {
@@ -506,7 +685,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	private function reset_products_store_static_state(): void {
 		$reflection = new \ReflectionClass( TestedProductsStore::class );
 
-		foreach ( array( 'products', 'product_variations', 'loaded_variation_parents' ) as $name ) {
+		foreach ( array( 'products', 'product_variations', 'loaded_variation_parents', 'loading_products', 'loading_variation_parents', 'loading_child_parents' ) as $name ) {
 			$property = $reflection->getProperty( $name );
 			$property->setAccessible( true );
 			$property->setValue( null, array() );
