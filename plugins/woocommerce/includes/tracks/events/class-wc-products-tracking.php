@@ -52,12 +52,11 @@ class WC_Products_Tracking {
 	 * Send a Tracks event when the Products page is viewed.
 	 */
 	public function track_products_view() {
-		// Only record Tracks events when `_wp_http_referer` is absent. Product searches
-		// first request this page with the argument, then WordPress redirects to the same
-		// URL without it. Tracking both requests would duplicate the view and search events.
+		// We only record Tracks event when no `_wp_http_referer` query arg is set, since
+		// when searching, the request gets sent from the browser twice,
+		// once with the `_wp_http_referer` and once without it.
 		//
-		// Sorting mode records `products_sorting_view` instead of `products_view` so the
-		// two view events remain mutually exclusive.
+		// Otherwise, we would double-record the view and search events.
 
 		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification
 		if (
@@ -65,18 +64,16 @@ class WC_Products_Tracking {
 			&& 'product' === wp_unslash( $_GET['post_type'] )
 			&& ! isset( $_GET['_wp_http_referer'] )
 		) {
-			// phpcs:enable
 
-			// phpcs:disable WordPress.Security.NonceVerification.Recommended
+			WC_Tracks::record_event( 'products_view' );
+
+			// Track sorting mode.
 			if (
 				isset( $_GET['orderby'] )
 				&& 'menu_order title' === wc_clean( wp_unslash( $_GET['orderby'] ) )
 			) {
 				WC_Tracks::record_event( 'products_sorting_view' );
-			} else {
-				WC_Tracks::record_event( 'products_view' );
 			}
-			// phpcs:enable
 
 			// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification
 			if (
