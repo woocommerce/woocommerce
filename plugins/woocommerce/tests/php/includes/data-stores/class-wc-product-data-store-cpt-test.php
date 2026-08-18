@@ -439,6 +439,51 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that a concurrent-creation conflict with a draft product names it
+	 * as a draft. Props are set on both before either is saved, same as the
+	 * published-conflict test, since a draft is still caught by the regular
+	 * uniqueness check once saved - only the race case reaches this code.
+	 *
+	 * @return void
+	 */
+	public function test_create_product_with_sku_conflicting_with_draft_product() {
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/v3/products';
+
+		$draft_product = new WC_Product_Simple();
+		$draft_product->set_props(
+			array(
+				'name'          => 'Draft Product',
+				'regular_price' => 10,
+				'price'         => 10,
+				'sku'           => 'DRAFT SKU',
+				'status'        => 'draft',
+			)
+		);
+
+		$conflicting_product = new WC_Product_Simple();
+		$conflicting_product->set_props(
+			array(
+				'name'          => 'Conflicting Product',
+				'regular_price' => 10,
+				'price'         => 10,
+				'sku'           => 'DRAFT SKU',
+			)
+		);
+
+		$draft_product->save();
+
+		$this->expectException( 'Exception' );
+		$this->expectExceptionMessage(
+			sprintf(
+				'The SKU (DRAFT SKU) is already assigned to draft product #%d. Use a different SKU, or update the existing draft.',
+				$draft_product->get_id()
+			)
+		);
+
+		$conflicting_product->save();
+	}
+
+	/**
 	 * @testDox Test that meta cache key is changed on direct post meta add.
 	 */
 	public function test_get_meta_data_is_busted_on_post_meta_add() {
