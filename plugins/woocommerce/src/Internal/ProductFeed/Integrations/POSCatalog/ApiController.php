@@ -114,9 +114,9 @@ class ApiController {
 					? (string) $response['file_name']
 					: wp_basename( (string) ( $response['path'] ?? '' ) );
 
-				if ( '' !== $file_name && wp_basename( $file_name ) === $file_name ) {
-					$upload_dir      = wp_upload_dir( null, false, true );
-					$response['url'] = trailingslashit( $upload_dir['baseurl'] ) . JsonFileFeed::UPLOAD_DIR . '/' . rawurlencode( $file_name );
+				$file_url = JsonFileFeed::get_file_url_for_identifier( $file_name );
+				if ( null !== $file_url ) {
+					$response['url'] = $file_url;
 				}
 			}
 
