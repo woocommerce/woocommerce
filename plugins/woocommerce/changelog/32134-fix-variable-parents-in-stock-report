@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Analytics > Stock: stop listing variable parent products alongside their variations, so a parent no longer reports a stock status and quantity that contradict them.
+Analytics > Stock: report each product's stock once, from wherever it is managed, instead of listing a variable parent and its variations against the same units.
