@@ -225,7 +225,7 @@ jobs:
                 fi
                 if [[ $branch_plugin_version == *-beta* ]]; then
                   echo ""
-                  echo "If a PR can't be merged or closed right now, temporarily marking it as a draft or changing its milestone can be used as a workaround."
+                  echo "If a PR can't be merged or closed right now, temporarily marking it as a draft can be used as a workaround."
                 fi
               } )
               fail "There are open PRs against the release branch ($BRANCH) or with milestone '$milestone'." "$details"
