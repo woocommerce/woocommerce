@@ -456,6 +456,8 @@ class SettingsUIRequestContext {
 	 */
 	public function get_schema(): ?array {
 		if ( $this->has_script_handles_failed() ) {
+			$this->schema_resolved = true;
+
 			return null;
 		}
 

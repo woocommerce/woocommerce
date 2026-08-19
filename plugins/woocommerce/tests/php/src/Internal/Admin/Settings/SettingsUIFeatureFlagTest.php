@@ -372,6 +372,8 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $context->has_script_handles_failed() );
 		$this->assertNull( $context->get_schema() );
 		$this->assertStringContainsString( 'must be non-empty strings', $context->get_script_handles_failure_reason() );
+		$this->assertFalse( $context->has_schema_failed(), 'A script handle failure should not be reported as a schema failure.' );
+		$this->assertSame( 0, $page->get_schema_resolution_count(), 'The fail-closed schema path must not resolve the schema after a script handle failure.' );
 	}
 
 	/**
@@ -1375,6 +1377,13 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 			private int $script_handle_resolution_count = 0;
 
 			/**
+			 * Schema resolution count.
+			 *
+			 * @var int
+			 */
+			private int $schema_resolution_count = 0;
+
+			/**
 			 * Constructor.
 			 *
 			 * @param array $script_handles Script handles.
@@ -1448,6 +1457,18 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 
 						return $this->script_handles;
 					}
+
+					/**
+					 * Get the schema.
+					 *
+					 * @param string $section Section id.
+					 * @return array
+					 */
+					public function get_schema( string $section ): array {
+						$this->settings_page->increment_schema_resolution_count();
+
+						return parent::get_schema( $section );
+					}
 				};
 			}
 
@@ -1466,6 +1487,13 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 			}
 
 			/**
+			 * Increment the schema resolution count.
+			 */
+			public function increment_schema_resolution_count(): void {
+				++$this->schema_resolution_count;
+			}
+
+			/**
 			 * Get the page id resolution count.
 			 *
 			 * @return int
@@ -1481,6 +1509,15 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 			 */
 			public function get_script_handle_resolution_count(): int {
 				return $this->script_handle_resolution_count;
+			}
+
+			/**
+			 * Get the schema resolution count.
+			 *
+			 * @return int
+			 */
+			public function get_schema_resolution_count(): int {
+				return $this->schema_resolution_count;
 			}
 
 			/**
