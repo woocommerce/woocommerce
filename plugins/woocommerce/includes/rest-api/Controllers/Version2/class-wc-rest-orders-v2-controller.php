@@ -978,6 +978,18 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 						throw $e;
 					}
 					// The stored variation ID no longer identifies a variation. Keep set_product()'s parent demotion.
+					// A subclass veto reusing this error code for an already-deleted variation is indistinguishable
+					// from the core throw and is deliberately swallowed too: rethrowing for subclasses (e.g. via a
+					// get_class() check) would revive the 400 on every store substituting order item classes.
+					wc_get_logger()->warning(
+						sprintf(
+							'Order item #%d (order #%d) referenced variation #%d, which no longer exists; the item was demoted to its parent product during a REST update.',
+							$product_item->get_id(),
+							$product_item->get_order_id(),
+							$current_variation_id
+						),
+						array( 'source' => 'rest-api' )
+					);
 				}
 			}
 

@@ -709,6 +709,15 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 					// Unlike v2, no get_post_type() recheck is needed: $item is always a base WC_Order_Item_Product
 					// (never a woocommerce_get_order_item_classname subclass), whose setter throws this code only
 					// when the post is not a product_variation.
+					wc_get_logger()->warning(
+						sprintf(
+							'Order item #%d (order #%d) referenced variation #%d, which no longer exists; the item was demoted to its parent product during a REST update.',
+							$item->get_id(),
+							$item->get_order_id(),
+							$current_variation_id
+						),
+						array( 'source' => 'rest-api' )
+					);
 				}
 			}
 
