@@ -302,7 +302,11 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				return (string) $field_name;
 			}
 
-			return (string) ( $option['id'] ?? '' );
+			$id = $option['id'] ?? null;
+
+			// The ID is third-party supplied too, so it gets the same treatment as the name above.
+			// Casting a non-scalar here would yield the literal 'Array' and name a real option.
+			return is_scalar( $id ) ? (string) $id : '';
 		}
 
 		/**
@@ -1012,10 +1016,22 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 				$option_name = self::get_field_option_name( $option );
 
+				// A definition that resolves to no usable name has nowhere to be stored.
+				if ( '' === $option_name ) {
+					continue;
+				}
+
 				// Get posted value.
 				if ( strstr( $option_name, '[' ) ) {
 					parse_str( $option_name, $option_name_array );
-					$option_name  = (string) current( array_keys( $option_name_array ) );
+					$option_name = (string) current( array_keys( $option_name_array ) );
+
+					// A malformed name such as 'foo[' parses to a string rather than a key path.
+					// The read side returns the default for these, so skip rather than fatal.
+					if ( ! is_array( $option_name_array[ $option_name ] ?? null ) ) {
+						continue;
+					}
+
 					$setting_name = key( $option_name_array[ $option_name ] );
 					$raw_value    = isset( $data[ $option_name ][ $setting_name ] ) ? wp_unslash( $data[ $option_name ][ $setting_name ] ) : null;
 				} else {
