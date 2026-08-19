@@ -39,7 +39,7 @@
 		"glob": "^10.3.10",
 		"graphql": "^16.8.1",
 		"gray-matter": "^4.0.3",
-		"js-yaml": "^4.1.0",
+		"js-yaml": "^4.3.1",
 		"luxon": "^3.4.4",
 		"minimatch": "^9.0.3",
 		"octokit": "^3.1.2",
