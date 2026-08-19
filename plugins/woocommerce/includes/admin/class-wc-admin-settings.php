@@ -227,11 +227,14 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				 * Take the bracketed keys from the raw name rather than from the parsed structure.
 				 * parse_str() renders 'opt[a][]' and 'opt[a][0]' identically, yet the first names
 				 * the whole array stored at 'a' while the second names its first element, so the
-				 * descent has to stop at an empty bracket. Only the base name is mangled by
-				 * parse_str() (dots and spaces become underscores); the keys are left alone, and
-				 * save_fields() derives the first of them the same way.
+				 * descent has to stop at an empty bracket.
+				 *
+				 * Only the run of brackets directly following the base name counts, because that is
+				 * all parse_str() itself consumes: it reads 'opt[a]extra[b]' as one key 'a', so
+				 * scanning the whole string would descend a level deeper than save_fields() writes.
 				 */
-				preg_match_all( '/\[([^\]]*)\]/', $option_name, $option_keys );
+				preg_match( '/^[^\[]*((?:\[[^\]]*\])*)/', $option_name, $bracket_run );
+				preg_match_all( '/\[([^\]]*)\]/', $bracket_run[1], $option_keys );
 
 				// Option name is first key.
 				$option_name = (string) current( array_keys( $option_array ) );
@@ -250,7 +253,17 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						break;
 					}
 
-					if ( ! is_array( $option_value ) || ! isset( $option_value[ $option_key ] ) ) {
+					// parse_str() form-decodes the keys it derives, so the raw ones must match it.
+					$option_key = urldecode( $option_key );
+
+					// Indexing a string here would read a character by offset, so require a
+					// container. ArrayAccess is honoured because isset() resolved it before.
+					if ( ! is_array( $option_value ) && ! $option_value instanceof ArrayAccess ) {
+						$option_value = null;
+						break;
+					}
+
+					if ( ! isset( $option_value[ $option_key ] ) ) {
 						$option_value = null;
 						break;
 					}
