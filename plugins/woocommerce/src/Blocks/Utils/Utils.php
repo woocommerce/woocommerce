@@ -54,8 +54,10 @@ class Utils {
 	 * Get the current page URL using the request path relative to home.
 	 *
 	 * @internal This function is used internally by WooCommerce blocks to get the current page URL. It is not intended for external use.
-	 * @since 11.1.0
+	 *
 	 * @return string The current page URL.
+	 *
+	 * @since 11.1.0
 	 */
 	public static function get_current_page_url() {
 		global $wp, $wp_rewrite;
