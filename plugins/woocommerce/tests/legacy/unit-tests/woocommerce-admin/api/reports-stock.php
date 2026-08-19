@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
  * Class WC_Admin_Tests_API_Reports_Stock
  */
 class WC_Admin_Tests_API_Reports_Stock extends WC_REST_Unit_Test_Case {
+	use WC_Stock_Report_Fixtures;
 
 	/**
 	 * Endpoints.
@@ -99,7 +100,7 @@ class WC_Admin_Tests_API_Reports_Stock extends WC_REST_Unit_Test_Case {
 	public function test_parent_is_excluded_when_its_variations_own_the_stock() {
 		wp_set_current_user( $this->user );
 
-		list( $variable, $variation_ids ) = $this->create_variable_product(
+		list( $variable, $variation_ids ) = $this->create_stock_report_variable_product(
 			'Variations manage stock, parent does not',
 			array(
 				array(
@@ -127,7 +128,7 @@ class WC_Admin_Tests_API_Reports_Stock extends WC_REST_Unit_Test_Case {
 	public function test_variations_without_a_quantity_are_reported_when_the_parent_manages_no_stock() {
 		wp_set_current_user( $this->user );
 
-		list( $variable, $variation_ids ) = $this->create_variable_product(
+		list( $variable, $variation_ids ) = $this->create_stock_report_variable_product(
 			'Nothing manages stock',
 			array(
 				array( 'stock_status' => ProductStockStatus::OUT_OF_STOCK ),
@@ -149,7 +150,7 @@ class WC_Admin_Tests_API_Reports_Stock extends WC_REST_Unit_Test_Case {
 	public function test_variations_are_excluded_when_the_parent_owns_the_stock() {
 		wp_set_current_user( $this->user );
 
-		list( $variable, $variation_ids ) = $this->create_variable_product( 'Parent manages stock, variations inherit', array( array(), array() ) );
+		list( $variable, $variation_ids ) = $this->create_stock_report_variable_product( 'Parent manages stock, variations inherit', array( array(), array() ) );
 
 		$variable->set_manage_stock( true );
 		$variable->set_stock_quantity( 3 );
@@ -169,7 +170,7 @@ class WC_Admin_Tests_API_Reports_Stock extends WC_REST_Unit_Test_Case {
 	public function test_variation_managing_its_own_stock_is_reported_next_to_its_parent() {
 		wp_set_current_user( $this->user );
 
-		list( $variable, $variation_ids ) = $this->create_variable_product(
+		list( $variable, $variation_ids ) = $this->create_stock_report_variable_product(
 			'Parent manages stock, one variation overrides',
 			array(
 				array(),
@@ -202,7 +203,7 @@ class WC_Admin_Tests_API_Reports_Stock extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		update_option( 'woocommerce_notify_low_stock_amount', 5 );
 
-		list( $variable ) = $this->create_variable_product( 'Parent manages low stock, variations inherit', array( array(), array() ) );
+		list( $variable, $variation_ids ) = $this->create_stock_report_variable_product( 'Parent manages low stock, variations inherit', array( array(), array() ) );
 
 		$variable->set_manage_stock( true );
 		$variable->set_stock_quantity( 3 );
@@ -212,6 +213,11 @@ class WC_Admin_Tests_API_Reports_Stock extends WC_REST_Unit_Test_Case {
 
 		// Its variations carry no quantity of their own, so the parent is the only row that can report this.
 		$this->assertContains( $variable->get_id(), $reported_ids, 'Stock managed at product level should still show up as low stock.' );
+
+		// Low stock matches on a quantity, which is why this report needs no mirrored stock exclusion of its own.
+		foreach ( $variation_ids as $variation_id ) {
+			$this->assertNotContains( $variation_id, $reported_ids, 'A variation carrying no quantity cannot be low on stock.' );
+		}
 	}
 
 	/**
@@ -232,52 +238,6 @@ class WC_Admin_Tests_API_Reports_Stock extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 1, $reports );
 		$this->assertEquals( $variable->get_id(), $reports[0]['id'] );
-	}
-
-	/**
-	 * Create a published variable product with a Small and a Large variation.
-	 *
-	 * @param string $name       Product name, describing the stock configuration under test.
-	 * @param array  $variations One entry per variation, in the order Small then Large. Each accepts
-	 *                           the 'manage_stock', 'stock_quantity' and 'stock_status' keys.
-	 * @return array The WC_Product_Variable, and the variation IDs in the order given.
-	 */
-	private function create_variable_product( $name, array $variations ) {
-		$options = array( 'Small', 'Large' );
-
-		$attribute = new WC_Product_Attribute();
-		$attribute->set_name( 'Size' );
-		$attribute->set_options( $options );
-		$attribute->set_visible( true );
-		$attribute->set_variation( true );
-
-		$variable = new WC_Product_Variable();
-		$variable->set_name( $name );
-		$variable->set_attributes( array( $attribute ) );
-		$variable->save();
-
-		$variation_ids = array();
-		foreach ( $options as $index => $option ) {
-			$args = $variations[ $index ];
-
-			$variation = new WC_Product_Variation();
-			$variation->set_parent_id( $variable->get_id() );
-			$variation->set_attributes( array( 'size' => $option ) );
-			$variation->set_regular_price( '10' );
-			$variation->set_manage_stock( ! empty( $args['manage_stock'] ) );
-
-			if ( isset( $args['stock_quantity'] ) ) {
-				$variation->set_stock_quantity( $args['stock_quantity'] );
-			}
-			if ( isset( $args['stock_status'] ) ) {
-				$variation->set_stock_status( $args['stock_status'] );
-			}
-
-			$variation->save();
-			$variation_ids[] = $variation->get_id();
-		}
-
-		return array( new WC_Product_Variable( $variable->get_id() ), $variation_ids );
 	}
 
 	/**

@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
  * Class WC_Admin_Tests_API_Reports_Stock_Stats
  */
 class WC_Admin_Tests_API_Reports_Stock_Stats extends WC_REST_Unit_Test_Case {
+	use WC_Stock_Report_Fixtures;
 
 	/**
 	 * Endpoints.
@@ -135,7 +136,7 @@ class WC_Admin_Tests_API_Reports_Stock_Stats extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		WC_Helper_Reports::reset_stats_dbs();
 
-		$this->create_variable_product(
+		$this->create_stock_report_variable_product(
 			'Variations manage stock, parent does not',
 			array(
 				array(
@@ -170,7 +171,7 @@ class WC_Admin_Tests_API_Reports_Stock_Stats extends WC_REST_Unit_Test_Case {
 		WC_Helper_Reports::reset_stats_dbs();
 		update_option( 'woocommerce_notify_low_stock_amount', 5 );
 
-		$variable = $this->create_variable_product( 'Parent manages stock, variations inherit', array( array(), array() ) );
+		list( $variable ) = $this->create_stock_report_variable_product( 'Parent manages stock, variations inherit', array( array(), array() ) );
 		$variable->set_manage_stock( true );
 		$variable->set_stock_quantity( 3 );
 		$variable->save();
@@ -187,58 +188,6 @@ class WC_Admin_Tests_API_Reports_Stock_Stats extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 1, $reports['totals']['products'] );
 		$this->assertEquals( 1, $reports['totals'][ ProductStockStatus::IN_STOCK ] );
 		$this->assertEquals( 1, $reports['totals'][ ProductStockStatus::LOW_STOCK ] );
-	}
-
-	/**
-	 * Create a published variable product with a Small and a Large variation.
-	 *
-	 * @param string $name       Product name, describing the stock configuration under test.
-	 * @param array  $variations One entry per variation, in the order Small then Large. Each accepts
-	 *                           the 'manage_stock' and 'stock_quantity' keys.
-	 * @return WC_Product_Variable
-	 */
-	private function create_variable_product( $name, array $variations ) {
-		$options = array( 'Small', 'Large' );
-
-		$attribute = new WC_Product_Attribute();
-		$attribute->set_name( 'Size' );
-		$attribute->set_options( $options );
-		$attribute->set_visible( true );
-		$attribute->set_variation( true );
-
-		$variable = new WC_Product_Variable();
-		$variable->set_name( $name );
-		$variable->set_attributes( array( $attribute ) );
-		$variable->save();
-
-		foreach ( $options as $index => $option ) {
-			$args = $variations[ $index ];
-
-			$variation = new WC_Product_Variation();
-			$variation->set_parent_id( $variable->get_id() );
-			$variation->set_attributes( array( 'size' => $option ) );
-			$variation->set_regular_price( '10' );
-			$variation->set_manage_stock( ! empty( $args['manage_stock'] ) );
-
-			if ( isset( $args['stock_quantity'] ) ) {
-				$variation->set_stock_quantity( $args['stock_quantity'] );
-			}
-
-			$variation->save();
-		}
-
-		return new WC_Product_Variable( $variable->get_id() );
-	}
-
-	/**
-	 * Drop the transients the stock stats are served from.
-	 */
-	private function clear_stock_count_caches() {
-		delete_transient( 'wc_admin_product_count' );
-		delete_transient( 'wc_admin_stock_count_lowstock' );
-		foreach ( array_keys( wc_get_product_stock_status_options() ) as $status ) {
-			delete_transient( 'wc_admin_stock_count_' . $status );
-		}
 	}
 
 	/**
