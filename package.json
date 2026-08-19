@@ -79,6 +79,13 @@
 		"wp-textdomain": "1.0.1"
 	},
 	"pnpm": {
+		"packageExtensions": {
+			"@wordpress/dataviews@10.1.7": {
+				"dependencies": {
+					"uuid": "^9.0.1"
+				}
+			}
+		},
 		"overrides": {
 			"@types/react": "18.3.x",
 			"@wordpress/data-controls>@wordpress/api-fetch": "catalog:wp-min",
