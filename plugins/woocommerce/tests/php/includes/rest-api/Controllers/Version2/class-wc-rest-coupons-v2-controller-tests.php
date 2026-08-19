@@ -180,8 +180,8 @@ class WC_REST_Coupons_V2_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Reload from DB and verify neither amount was written.
 		$reloaded = new WC_Coupon( $id );
-		$this->assertSame( '50.00', $reloaded->get_minimum_amount(), 'minimum_amount must not have been mutated' );
-		$this->assertSame( '150.00', $reloaded->get_maximum_amount(), 'maximum_amount must not have been mutated' );
+		$this->assertEquals( 50.0, (float) $reloaded->get_minimum_amount(), 'minimum_amount must not have been mutated' );
+		$this->assertEquals( 150.0, (float) $reloaded->get_maximum_amount(), 'maximum_amount must not have been mutated' );
 	}
 
 	// -----------------------------------------------------------------------

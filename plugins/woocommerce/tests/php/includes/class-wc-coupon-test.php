@@ -496,9 +496,9 @@ class WC_Coupon_Tests extends WC_Unit_Test_Case {
 
 		$result = $coupon->set_props(
 			array(
-				'minimum_amount'     => '50.00',
-				'maximum_amount'     => '100.00',
-				'email_restrictions' => array( 'not-a-valid-email' ),
+				'minimum_amount' => '50.00',
+				'maximum_amount' => '100.00',
+				'amount'         => '-10',
 			)
 		);
 
