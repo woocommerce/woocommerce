@@ -219,7 +219,7 @@ jobs:
             blocking_prs=$( echo "$search_result" | jq '.nodes' )
             if (( blocking_total > 0 )); then
               details=$( {
-                echo "$blocking_prs" | jq -r '.[] | "- [#\(.number)](\(.url)) " + .title'
+                echo "$blocking_prs" | jq -r '.[] | "- *[\(.title) #\(.number)](\(.url))*"'
                 if (( blocking_total > 20 )); then
                   search_url="https://github.com/${GH_REPO}/pulls?q=$( echo -n "$pr_query" | jq -sRr @uri )"
                   echo "- ... and $(( blocking_total - 20 )) more ([view all]($search_url))"
