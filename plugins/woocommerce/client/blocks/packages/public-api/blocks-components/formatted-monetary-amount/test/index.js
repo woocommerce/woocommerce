@@ -103,6 +103,24 @@ describe( 'FormattedMonetaryAmount', () => {
 			expect( console ).toHaveWarned();
 			expect( screen.getByText( '1563.45 €' ) ).toBeInTheDocument();
 		} );
+
+		test( 'should render when both separators are empty', () => {
+			render(
+				<FormattedMonetaryAmount
+					value="156345"
+					currency={ {
+						code: 'EUR',
+						symbol: '€',
+						thousandSeparator: '',
+						decimalSeparator: '',
+						minorUnit: 2,
+						prefix: '',
+						suffix: ' €',
+					} }
+				/>
+			);
+			expect( screen.getByText( '1563.45 €' ) ).toBeInTheDocument();
+		} );
 	} );
 	describe( 'suffix/prefix', () => {
 		test( 'should add the currency suffix', () => {
