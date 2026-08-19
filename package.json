@@ -27,7 +27,7 @@
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "husky",
 		"run-canonical-extensions-tests": "bash bin/run-canonical-extensions-tests.sh",
-		"sync-dependencies": "pnpm exec syncpack -- fix-mismatches",
+		"sync-dependencies": "pnpm exec syncpack fix",
 		"utils": "./tools/monorepo-utils/bin/run",
 		"wc:build": "pnpm --filter='@woocommerce/plugin-woocommerce' build",
 		"wc:build:admin": "pnpm --filter='@woocommerce/plugin-woocommerce' build:admin",
@@ -68,7 +68,7 @@
 		"rimraf": "5.0.5",
 		"sass": "^1.69.5",
 		"sass-loader": "10.5.x",
-		"syncpack": "^10.9.3",
+		"syncpack": "15.3.3",
 		"typescript": "5.7.x",
 		"webpack": "5.97.x"
 	},
