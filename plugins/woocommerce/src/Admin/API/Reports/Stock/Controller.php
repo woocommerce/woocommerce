@@ -74,13 +74,16 @@ class Controller extends GenericController implements ExportableInterface {
 
 		$args['post_type'] = array( 'product', 'product_variation' );
 
-		// A row whose stock is owned by another row in the report would only duplicate it.
-		$args['exclude_mirrored_stock'] = true;
-
 		if ( ProductStockStatus::LOW_STOCK === $request['type'] ) {
+			// Low stock matches on a quantity, which only a row owning its stock has. Nothing to exclude.
 			$args['low_in_stock'] = true;
-		} elseif ( in_array( $request['type'], array_keys( $this->status_options ), true ) ) {
-			$args['stock_status'] = $request['type'];
+		} else {
+			// A row whose stock is owned by another row in the report would only duplicate it.
+			$args['exclude_mirrored_stock'] = true;
+
+			if ( in_array( $request['type'], array_keys( $this->status_options ), true ) ) {
+				$args['stock_status'] = $request['type'];
+			}
 		}
 
 		$args['ignore_sticky_posts'] = true;
@@ -234,12 +237,7 @@ class Controller extends GenericController implements ExportableInterface {
 	 * @return string
 	 */
 	protected static function append_product_sorting_table_join( $sql ) {
-		global $wpdb;
-
-		if ( ! strstr( $sql, 'wc_product_meta_lookup' ) ) {
-			$sql .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
-		}
-		return $sql;
+		return self::append_stock_lookup_join( $sql );
 	}
 
 	/**

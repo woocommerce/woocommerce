@@ -72,22 +72,18 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	private function get_low_stock_count() {
 		global $wpdb;
 
-		$no_stock_amount   = absint( max( get_option( 'woocommerce_notify_no_stock_amount' ), 0 ) );
-		$low_stock_amount  = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
-		$parent_lookup_sql = self::get_parent_stock_lookup_join( 'posts' );
-		$mirrored_sql      = self::get_mirrored_stock_exclusion_clause( 'posts' );
+		$no_stock_amount  = absint( max( get_option( 'woocommerce_notify_no_stock_amount' ), 0 ) );
+		$low_stock_amount = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
 
+		// Matching on a quantity already keeps rows mirroring another row's stock out: they carry none.
 		return (int) $wpdb->get_var(
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Both fragments are built from hardcoded identifiers.
 			$wpdb->prepare(
 				"
 				SELECT count( DISTINCT posts.ID ) FROM {$wpdb->posts} posts
 				LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON posts.ID = wc_product_meta_lookup.product_id
 				LEFT JOIN {$wpdb->postmeta} low_stock_amount_meta ON posts.ID = low_stock_amount_meta.post_id AND low_stock_amount_meta.meta_key = '_low_stock_amount'
-				{$parent_lookup_sql}
 				WHERE posts.post_type IN ( 'product', 'product_variation' )
 				AND posts.post_status IN ( 'publish', 'private' )
-				{$mirrored_sql}
 				AND wc_product_meta_lookup.stock_quantity IS NOT NULL
 				AND wc_product_meta_lookup.stock_status = 'instock'
 				AND (
@@ -109,7 +105,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$low_stock_amount,
 				$no_stock_amount
 			)
-			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		);
 	}
 
@@ -188,10 +183,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return string
 	 */
 	public static function add_wp_query_join( $join, $wp_query ) {
-		global $wpdb;
-
 		if ( $wp_query->get( 'exclude_mirrored_stock' ) ) {
-			$join .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON {$wpdb->posts}.ID = wc_product_meta_lookup.product_id ";
+			// The exclusion clause reads stock ownership off the lookup table, for the row and for its parent.
+			$join  = self::append_stock_lookup_join( $join );
 			$join .= self::get_parent_stock_lookup_join();
 		}
 
