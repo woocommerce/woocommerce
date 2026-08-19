@@ -89,7 +89,7 @@
 		"lint:lang:js": "eslint src",
 		"lint:lang:types": "tsc --build --emitDeclarationOnly",
 		"prepack": "pnpm build:publish:project",
-		"test:js": "jest --config ./jest.config.json --passWithNoTests",
+		"test:js": "jest --config ./jest.config.js --passWithNoTests",
 		"watch:build": "pnpm watch:build:project",
 		"watch:build:project": "pnpm --stream '/^watch:build:project:.*$/'",
 		"watch:build:project:esm": "node build.mjs --watch"

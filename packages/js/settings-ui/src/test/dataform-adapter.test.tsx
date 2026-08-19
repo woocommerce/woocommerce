@@ -192,50 +192,94 @@ describe( 'dataform adapter', () => {
 			expect( container.textContent ).toBe( 'Useful information.' );
 		} );
 
-		it( 'maps field descriptions to sanitized help elements', () => {
-			const field = buildDataFormField(
-				{
-					...textField,
-					description:
-						'See the <a href="https://woocommerce.com">docs</a>.',
-				},
-				createOptions( [] )
-			);
-
-			const { container } = renderElement( <>{ field.description }</> );
-			const link = container.querySelector( 'a' );
-			expect( link?.textContent ).toBe( 'docs' );
-			expect( container.textContent ).toBe( 'See the docs.' );
-		} );
-
 		it.each( [
 			'extension_defined',
 			'constructor',
 			'__proto__',
 			'toString',
 		] )(
-			'warns and leaves the control unset for unknown type "%s"',
+			'fails closed for unknown type "%s" with no registered renderer',
 			( type ) => {
-				const warnSpy = jest
-					.spyOn( console, 'warn' )
-					.mockImplementation( () => undefined );
-				const field = buildDataFormField(
-					{ ...textField, type },
-					createOptions( [] )
-				);
-
-				expect( field.type ).toBeUndefined();
-				expect( field.Edit ).toBeUndefined();
-				expect( field.render ).toBeUndefined();
-				expect( field.readOnly ).toBeUndefined();
-				expect( warnSpy ).toHaveBeenCalledWith(
-					expect.stringContaining(
-						`Field type "${ type }" is not supported.`
-					),
-					expect.any( Object )
-				);
+				expect( () =>
+					buildDataFormField(
+						{ ...textField, type },
+						createOptions( [] )
+					)
+				).toThrow( `Field type "${ type }" is not supported.` );
 			}
 		);
+	} );
+
+	describe( 'descriptions and components', () => {
+		it( 'maps field descriptions to sanitized help elements', () => {
+			const field = buildDataFormField(
+				{
+					...textField,
+					description:
+						'A <a href="https://example.com">link</a><script>alert("x")</script>.',
+				},
+				createOptions( [] )
+			);
+
+			const { container } = renderElement( <>{ field.description }</> );
+			expect( container.querySelector( 'a' )?.textContent ).toBe(
+				'link'
+			);
+			expect( container.querySelector( 'script' ) ).toBeNull();
+			expect( container.textContent ).toBe( 'A link.' );
+		} );
+
+		it( 'strips group descriptions to plain text', () => {
+			const schema: SettingsUISchema = {
+				id: 'test-page',
+				groups: {
+					general: {
+						id: 'general',
+						title: 'General',
+						description: 'Configure <strong>the basics</strong>.',
+						fields: [ textField ],
+					},
+				},
+			};
+			const adapter = createDataFormAdapter( {
+				schema,
+				context,
+				initialValues: {},
+			} );
+
+			const [ group ] = adapter.getForm( {} ).fields as Array< {
+				description?: string;
+			} >;
+			expect( group.description ).toBe( 'Configure the basics.' );
+		} );
+
+		it( 'attaches a registered control as the field edit component', () => {
+			const Registered = () => <div>Registered control</div>;
+			registerSettingsExtension( {
+				scope: { page: 'test-page' },
+				components: { 'test/custom-field': Registered },
+			} );
+
+			const field = buildDataFormField(
+				{ ...textField, component: 'test/custom-field' },
+				createOptions( [] )
+			);
+
+			expect( field.Edit ).toBe( Registered );
+		} );
+
+		it( 'fails closed when a declared component is not registered', () => {
+			jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
+
+			expect( () =>
+				buildDataFormField(
+					{ ...textField, component: 'test/missing-component' },
+					createOptions( [] )
+				)
+			).toThrow(
+				'Component "test/missing-component" is not registered.'
+			);
+		} );
 	} );
 
 	describe( 'visibility', () => {
