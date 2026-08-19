@@ -168,7 +168,16 @@ test.describe( 'Settings UI feature flag', { tag: [ tags.NOT_E2E ] }, () => {
 		).toBe( true );
 
 		await classicAction.click();
-		await expect( page ).toHaveURL( /wc_settings_ui=classic/ );
+		await expect( page ).toHaveURL( ( url ) => {
+			const params = url.searchParams;
+
+			return (
+				params.get( 'wc_settings_ui' ) === 'classic' &&
+				params.get( 'tab' ) === 'products' &&
+				params.get( 'section' ) === 'settings_ui_component_missing' &&
+				params.get( 'preserved' ) === 'yes'
+			);
+		} );
 		await expect(
 			page.locator( '#settings_ui_component_missing_value' )
 		).toBeVisible();
