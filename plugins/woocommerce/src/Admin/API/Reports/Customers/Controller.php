@@ -754,7 +754,6 @@ class Controller extends GenericController implements ExportableInterface {
 		$export_columns = array(
 			'name'            => __( 'Name', 'woocommerce' ),
 			'username'        => __( 'Username', 'woocommerce' ),
-			'role'            => __( 'Role', 'woocommerce' ),
 			'last_active'     => __( 'Last Active', 'woocommerce' ),
 			'registered'      => __( 'Sign Up', 'woocommerce' ),
 			'email'           => __( 'Email', 'woocommerce' ),
@@ -767,6 +766,7 @@ class Controller extends GenericController implements ExportableInterface {
 			'postcode'        => __( 'Postal Code', 'woocommerce' ),
 			'billing_phone'   => __( 'Billing Phone', 'woocommerce' ),
 			'shipping_phone'  => __( 'Shipping Phone', 'woocommerce' ),
+			'role'            => __( 'Role', 'woocommerce' ),
 		);
 
 		/**
@@ -791,7 +791,6 @@ class Controller extends GenericController implements ExportableInterface {
 		$export_item = array(
 			'name'            => $item['name'],
 			'username'        => $item['username'],
-			'role'            => $item['role'] ?? '',
 			'last_active'     => $item['date_last_active'],
 			'registered'      => $item['date_registered'],
 			'email'           => $item['email'],
@@ -804,6 +803,7 @@ class Controller extends GenericController implements ExportableInterface {
 			'postcode'        => $item['postcode'],
 			'billing_phone'   => $item['billing_phone'] ?? '',
 			'shipping_phone'  => $item['shipping_phone'] ?? '',
+			'role'            => $item['role'] ?? '',
 		);
 
 		/**

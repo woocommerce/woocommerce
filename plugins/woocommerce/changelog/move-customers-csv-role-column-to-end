@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Move the Role column to the end of the Analytics > Customers CSV export so pre-existing columns keep their positions.
