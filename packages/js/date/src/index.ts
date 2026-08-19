@@ -141,23 +141,29 @@ export function toMoment( format: string, str: unknown ) {
  * "10月", where replacing the day "1" lands on the month instead, and locales
  * with non-Latin digits never match a Latin day number at all.
  *
- * @param {string} format      - localized date string format
- * @param {string} replacement - literal text to render in place of the day
+ * @param {string}   format      - localized date string format
+ * @param {Function} replacement - builds the literal text to render in place of
+ *                               the day, from the token it replaces
  * @return {string|null} - format string, or null when it holds no day token
  */
-function replaceDayToken( format: string, replacement: string ) {
+function replaceDayToken(
+	format: string,
+	replacement: ( dayToken: string ) => string
+) {
 	let replaced = false;
 	// Bracketed sections are moment's escaped literals, so a "D" inside one is text.
 	const dayRangeFormat = format.replace( /\[[^\]]*\]|D+o?/g, ( token ) => {
 		// Runs longer than "DD" are day of year tokens, not day of month.
-		const isDayOfMonth = token.replace( /o$/, '' ).length <= 2;
+		const dayDigits = token.endsWith( 'o' )
+			? token.length - 1
+			: token.length;
 
-		if ( replaced || token.startsWith( '[' ) || ! isDayOfMonth ) {
+		if ( replaced || token.startsWith( '[' ) || dayDigits > 2 ) {
 			return token;
 		}
 
 		replaced = true;
-		return `[${ replacement }]`;
+		return `[${ replacement( token ) }]`;
 	} );
 
 	return replaced ? dayRangeFormat : null;
@@ -180,13 +186,18 @@ export function getRangeLabel( after: moment.Moment, before: moment.Moment ) {
 	if ( isSameDay ) {
 		return after.format( fullDateFormat );
 	} else if ( isSameMonth ) {
+		// Formatting each day through the token it replaces keeps whatever the
+		// format asked for, such as the zero padding of "DD" or the ordinal of "Do".
 		const dayRangeFormat = replaceDayToken(
 			fullDateFormat,
-			`${ after.date() } - ${ before.date() }`
+			( dayToken ) =>
+				`${ after.format( dayToken ) } - ${ before.format( dayToken ) }`
 		);
 
-		// A translated format without a day token cannot express days at all,
-		// so the shared month is as much of the range as it can carry.
+		// No day of month token to swap: the format either omits the day, or
+		// renders one through an aggregate token such as "LL" that is not
+		// scanned. Either way the shared month is as much of the range as this
+		// format can carry.
 		if ( dayRangeFormat === null ) {
 			return after.format( fullDateFormat );
 		}

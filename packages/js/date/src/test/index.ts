@@ -839,6 +839,54 @@ describe( 'getRangeLabel', () => {
 		expect( label ).toBe( '2024年10月' );
 	} );
 
+	it( 'should keep the zero padding a "DD" format asks for', () => {
+		// Mirrors the Serbian translation of the format.
+		( __ as jest.Mock ).mockReturnValueOnce( 'DD. MMM YYYY.' );
+
+		const label = getRangeLabel(
+			moment( '2018-04-01' ),
+			moment( '2018-04-15' )
+		);
+
+		expect( label ).toBe( '01 - 15. Apr 2018.' );
+	} );
+
+	it( 'should keep the ordinal a "Do" format asks for', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( 'MMM Do, YYYY' );
+
+		const label = getRangeLabel(
+			moment( '2018-04-01' ),
+			moment( '2018-04-15' )
+		);
+
+		expect( label ).toBe( 'Apr 1st - 15th, 2018' );
+	} );
+
+	it( 'should leave a bracketed day literal alone', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( '[Day] MMM D, YYYY' );
+
+		const label = getRangeLabel(
+			moment( '2018-04-01' ),
+			moment( '2018-04-15' )
+		);
+
+		expect( label ).toBe( 'Day Apr 1 - 15, 2018' );
+	} );
+
+	it( 'should not mistake day of year tokens for the day of month', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( 'DDDD, YYYY' );
+
+		expect(
+			getRangeLabel( moment( '2018-04-01' ), moment( '2018-04-15' ) )
+		).toBe( '091, 2018' );
+
+		( __ as jest.Mock ).mockReturnValueOnce( 'DDDo, YYYY' );
+
+		expect(
+			getRangeLabel( moment( '2018-04-01' ), moment( '2018-04-15' ) )
+		).toBe( '91st, 2018' );
+	} );
+
 	describe( 'with a locale whose month names contain digits', () => {
 		// Mirrors moment's Japanese locale, which renders October as "10月".
 		const monthNames = Array.from(
@@ -888,6 +936,7 @@ describe( 'getRangeLabel', () => {
 			).toBe( '10月 1, 2023 - 12月 31, 2024' );
 		} );
 	} );
+
 } );
 
 describe( 'loadLocaleData', () => {
