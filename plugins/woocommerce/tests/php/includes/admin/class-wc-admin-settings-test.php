@@ -81,6 +81,116 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should resolve nested option names without fataling on malformed ones.
+	 *
+	 * @dataProvider get_option_name_shape_data
+	 *
+	 * @param string $option_name Option name to look up.
+	 * @param mixed  $expected    Expected resolved value.
+	 */
+	public function test_get_option_resolves_name_shapes( string $option_name, $expected ): void {
+		$this->option_names_to_clean[] = 'test_get_option_nested';
+		$this->option_names_to_clean[] = 'test_get_option_scalar';
+		update_option(
+			'test_get_option_nested',
+			array(
+				'key'  => 'one level',
+				'deep' => array( 'leaf' => 'two levels' ),
+				'list' => array( 'x', 'y' ),
+			)
+		);
+		update_option( 'test_get_option_scalar', 'abc' );
+
+		$this->assertSame( $expected, WC_Admin_Settings::get_option( $option_name, 'DEFAULT' ) );
+	}
+
+	/**
+	 * Data provider for test_get_option_resolves_name_shapes().
+	 *
+	 * @return array<string, array{string, mixed}>
+	 */
+	public static function get_option_name_shape_data(): array {
+		return array(
+			'single level'            => array( 'test_get_option_nested[key]', 'one level' ),
+			'two levels resolve leaf' => array( 'test_get_option_nested[deep][leaf]', 'two levels' ),
+			'array value preserved'   => array( 'test_get_option_nested[list]', array( 'x', 'y' ) ),
+			'append syntax'           => array( 'test_get_option_nested[]', 'DEFAULT' ),
+			'no parsable base'        => array( '[key]', 'DEFAULT' ),
+			'missing key'             => array( 'test_get_option_nested[absent]', 'DEFAULT' ),
+			'missing option'          => array( 'test_get_option_absent[key]', 'DEFAULT' ),
+			'no string offset read'   => array( 'test_get_option_scalar[0]', 'DEFAULT' ),
+			'empty name'              => array( '', 'DEFAULT' ),
+		);
+	}
+
+	/**
+	 * @testdox Should return the default for a non-scalar option name instead of fataling.
+	 */
+	public function test_get_option_returns_default_for_non_scalar_name(): void {
+		$this->assertSame( 'DEFAULT', WC_Admin_Settings::get_option( array( 'unexpected' ), 'DEFAULT' ) );
+	}
+
+	/**
+	 * @testdox Should render a non-scalar field name using the field ID rather than fataling.
+	 */
+	public function test_output_fields_falls_back_to_id_for_non_scalar_field_name(): void {
+		$this->option_names_to_clean[] = 'test_output_fields_bad_name';
+		update_option( 'test_output_fields_bad_name', 'saved by id' );
+
+		ob_start();
+		try {
+			WC_Admin_Settings::output_fields(
+				array(
+					array(
+						'id'         => 'test_output_fields_bad_name',
+						'field_name' => array( 'unexpected' ),
+						'type'       => 'text',
+						'default'    => 'default value',
+					),
+				)
+			);
+		} finally {
+			$output = ob_get_clean();
+		}
+
+		$this->assertStringContainsString( 'value="saved by id"', $output );
+		$this->assertStringContainsString( 'name="test_output_fields_bad_name"', $output );
+	}
+
+	/**
+	 * @testdox Should render the value a nested field just saved, exercising both parsing paths.
+	 */
+	public function test_save_fields_then_output_fields_round_trip(): void {
+		$this->option_names_to_clean[] = 'test_round_trip';
+		$field                         = array(
+			'id'         => 'test_round_trip_enabled',
+			'field_name' => 'test_round_trip[enabled]',
+			'type'       => 'text',
+			'default'    => 'default value',
+		);
+
+		WC_Admin_Settings::save_fields(
+			array( $field ),
+			array( 'test_round_trip' => array( 'enabled' => 'round trip value' ) )
+		);
+
+		$this->assertSame(
+			array( 'enabled' => 'round trip value' ),
+			get_option( 'test_round_trip' ),
+			'save_fields() should persist under the field_name-derived option and key'
+		);
+
+		ob_start();
+		try {
+			WC_Admin_Settings::output_fields( array( $field ) );
+		} finally {
+			$output = ob_get_clean();
+		}
+
+		$this->assertStringContainsString( 'value="round trip value"', $output );
+	}
+
+	/**
 	 * Clean up options after each test to ensure test isolation even on assertion failure.
 	 */
 	public function tearDown(): void {
