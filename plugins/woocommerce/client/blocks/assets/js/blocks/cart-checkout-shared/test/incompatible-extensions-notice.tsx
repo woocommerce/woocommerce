@@ -259,6 +259,29 @@ describe( 'IncompatibleExtensionsFrontendNotice', () => {
 			).toEqual( [ 'plugin-one' ] );
 		} );
 
+		it.each( [
+			[ 'an object', { 'plugin-one': true } ],
+			[ 'a bare string', 'plugin-one' ],
+			[ 'a number', 7 ],
+			[ 'null', null ],
+			[ 'an array of junk', [ 1, null, { a: 1 } ] ],
+		] )( 'survives a stored value that is %s', ( _label, value ) => {
+			window.localStorage.setItem(
+				FRONTEND_KEY,
+				JSON.stringify( value )
+			);
+			setIncompatibleExtensions( [
+				{ id: 'plugin-one', title: 'Plugin One' },
+			] );
+
+			render(
+				<IncompatibleExtensionsFrontendNotice block="woocommerce/checkout" />
+			);
+
+			// Nothing readable was acknowledged, so the banner is still owed.
+			expect( screen.getByTestId( 'notice-banner' ) ).toBeInTheDocument();
+		} );
+
 		it( 'renders again when a new, never-acknowledged extension appears', () => {
 			window.localStorage.setItem(
 				FRONTEND_KEY,

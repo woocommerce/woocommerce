@@ -104,13 +104,22 @@ export const IncompatibleExtensionsFrontendNotice = ( {
 		slugsDismissedBeforeRename
 	);
 
+	// Plain localStorage that anything can overwrite, so nothing about the
+	// stored value's shape is guaranteed. Narrow it rather than let a corrupt
+	// value throw on the storefront.
+	const acknowledgedSlugs = Array.isArray( dismissedSlugs )
+		? dismissedSlugs.filter(
+				( slug ): slug is string => typeof slug === 'string'
+		  )
+		: [];
+
 	const { extensions, slugs } = getIncompatibleExtensions();
 	const count = slugs.length;
 
 	// Stay dismissed while every currently-incompatible extension has already
 	// been acknowledged; deactivating one keeps it dismissed, while a new,
 	// never-acknowledged extension brings the notice back.
-	const isDismissedAndUpToDate = isSubsetOf( slugs, dismissedSlugs );
+	const isDismissedAndUpToDate = isSubsetOf( slugs, acknowledgedSlugs );
 
 	const shouldShow =
 		CURRENT_USER_IS_ADMIN && count > 0 && ! isDismissedAndUpToDate;
@@ -126,12 +135,12 @@ export const IncompatibleExtensionsFrontendNotice = ( {
 	// Limited to admins because `incompatibleExtensions` is only exposed to
 	// them; for a shopper the empty list would erase the acknowledgement.
 	const hasStaleAcknowledgements =
-		CURRENT_USER_IS_ADMIN && ! isSubsetOf( dismissedSlugs, slugs );
+		CURRENT_USER_IS_ADMIN && ! isSubsetOf( acknowledgedSlugs, slugs );
 
 	useEffect( () => {
 		if ( hasStaleAcknowledgements ) {
 			setDismissedSlugs(
-				dismissedSlugs.filter( ( slug ) => slugs.includes( slug ) )
+				acknowledgedSlugs.filter( ( slug ) => slugs.includes( slug ) )
 			);
 		}
 		// `slugs` is rebuilt every render; `hasStaleAcknowledgements` is the

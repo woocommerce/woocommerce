@@ -19,6 +19,26 @@ const initialDismissedNotices: StoredIncompatibleExtension[] = [];
 const isSubsetOf = ( subset: string[], superset: string[] ) =>
 	subset.every( ( item ) => superset.includes( item ) );
 
+// This key is shared with older versions and with the storefront banner, and is
+// plain localStorage that anything can overwrite, so nothing about its contents
+// is guaranteed. Reads below are written to tolerate any JSON value rather than
+// take the editor down with a corrupt one.
+const isPlainObject = ( value: unknown ): value is Record< string, unknown > =>
+	typeof value === 'object' && value !== null && ! Array.isArray( value );
+
+const readSlugsFor = ( notice: unknown, blockName: string ): string[] => {
+	if ( ! isPlainObject( notice ) ) {
+		return [];
+	}
+	const slugs = notice[ blockName ];
+	return Array.isArray( slugs )
+		? slugs.filter( ( slug ): slug is string => typeof slug === 'string' )
+		: [];
+};
+
+const holdsEntryFor = ( notice: unknown, blockName: string ): boolean =>
+	isPlainObject( notice ) && blockName in notice;
+
 const sortAlphabetically = ( obj: {
 	[ key: string ]: string;
 } ): { [ key: string ]: string } =>
@@ -83,11 +103,13 @@ export const useCombinedIncompatibilityNotice = (
 	// Every incompatible item the merchant has already dismissed for this block.
 	// Reduce (not find) so we tolerate the legacy shape where a single block
 	// could have accumulated multiple stored entries.
-	const dismissedItemSlugs = dismissedNotices.reduce< string[] >(
+	const storedNotices: unknown[] = Array.isArray( dismissedNotices )
+		? dismissedNotices
+		: [];
+
+	const dismissedItemSlugs = storedNotices.reduce< string[] >(
 		( acc, notice ) => {
-			if ( Object.keys( notice ).includes( blockName ) ) {
-				acc.push( ...notice[ blockName ] );
-			}
+			acc.push( ...readSlugsFor( notice, blockName ) );
 			return acc;
 		},
 		[]
@@ -108,8 +130,8 @@ export const useCombinedIncompatibilityNotice = (
 	// of `slugs`, leaving other blocks' entries untouched.
 	const storeAcknowledgedSlugs = ( slugs: string[] ) =>
 		setDismissedNotices( ( notices ) => [
-			...notices.filter(
-				( notice ) => ! Object.keys( notice ).includes( blockName )
+			...( Array.isArray( notices ) ? notices : [] ).filter(
+				( notice ) => ! holdsEntryFor( notice, blockName )
 			),
 			{ [ blockName ]: slugs },
 		] );

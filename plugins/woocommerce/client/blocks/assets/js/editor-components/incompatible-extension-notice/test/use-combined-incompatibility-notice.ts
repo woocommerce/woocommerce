@@ -284,6 +284,21 @@ describe( 'useCombinedIncompatibilityNotice', () => {
 			expect( mountVisibility( CHECKOUT ) ).toBe( true );
 		} );
 
+		it.each( [
+			[ 'an object', { [ CHECKOUT ]: [ 'gw_a' ] } ],
+			[ 'a bare string', 'gw_a' ],
+			[ 'a number', 7 ],
+			[ 'null', null ],
+			[ 'an array holding junk', [ null, 7, { [ CHECKOUT ]: 'gw_a' } ] ],
+		] )( 'survives a stored value that is %s', ( _label, value ) => {
+			seed( value );
+			mockIncompatiblePaymentMethods = { gw_a: 'Gateway A' };
+
+			// Nothing readable was acknowledged, so the notice is still owed,
+			// and reading it must not throw.
+			expect( mountVisibility( CHECKOUT ) ).toBe( true );
+		} );
+
 		it( 'preserves those strings when writing its own dismissal', () => {
 			seed( [ 'gw_a' ] );
 			mockIncompatiblePaymentMethods = { gw_a: 'Gateway A' };
