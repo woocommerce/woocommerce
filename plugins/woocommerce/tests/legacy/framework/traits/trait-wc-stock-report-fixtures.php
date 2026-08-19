@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Traits
  */
 
+declare( strict_types=1 );
+
 /**
  * Trait WC_Stock_Report_Fixtures
  */
