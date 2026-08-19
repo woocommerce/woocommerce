@@ -111,15 +111,27 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	 */
 	public static function get_option_name_shape_data(): array {
 		return array(
-			'single level'            => array( 'test_get_option_nested[key]', 'one level' ),
-			'two levels resolve leaf' => array( 'test_get_option_nested[deep][leaf]', 'two levels' ),
-			'array value preserved'   => array( 'test_get_option_nested[list]', array( 'x', 'y' ) ),
-			'append syntax'           => array( 'test_get_option_nested[]', 'DEFAULT' ),
-			'no parsable base'        => array( '[key]', 'DEFAULT' ),
-			'missing key'             => array( 'test_get_option_nested[absent]', 'DEFAULT' ),
-			'missing option'          => array( 'test_get_option_absent[key]', 'DEFAULT' ),
-			'no string offset read'   => array( 'test_get_option_scalar[0]', 'DEFAULT' ),
-			'empty name'              => array( '', 'DEFAULT' ),
+			'single level'             => array( 'test_get_option_nested[key]', 'one level' ),
+			'two levels resolve leaf'  => array( 'test_get_option_nested[deep][leaf]', 'two levels' ),
+			'array value preserved'    => array( 'test_get_option_nested[list]', array( 'x', 'y' ) ),
+			'multi value append'       => array( 'test_get_option_nested[list][]', array( 'x', 'y' ) ),
+			'explicit numeric index'   => array( 'test_get_option_nested[list][0]', 'x' ),
+			'append syntax on base'    => array(
+				'test_get_option_nested[]',
+				array(
+					'key'  => 'one level',
+					'deep' => array( 'leaf' => 'two levels' ),
+					'list' => array( 'x', 'y' ),
+				),
+			),
+			'no parsable base'         => array( '[key]', 'DEFAULT' ),
+			'unterminated bracket'     => array( 'test_get_option_absent[', 'DEFAULT' ),
+			'missing key'              => array( 'test_get_option_nested[absent]', 'DEFAULT' ),
+			'missing intermediate key' => array( 'test_get_option_nested[absent][leaf]', 'DEFAULT' ),
+			'depth beyond stored'      => array( 'test_get_option_nested[key][deeper]', 'DEFAULT' ),
+			'missing option'           => array( 'test_get_option_absent[key]', 'DEFAULT' ),
+			'no string offset read'    => array( 'test_get_option_scalar[0]', 'DEFAULT' ),
+			'empty name'               => array( '', 'DEFAULT' ),
 		);
 	}
 
@@ -155,6 +167,97 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'value="saved by id"', $output );
 		$this->assertStringContainsString( 'name="test_output_fields_bad_name"', $output );
+	}
+
+	/**
+	 * @testdox Should treat an empty field name as absent and fall back to the field ID.
+	 */
+	public function test_output_fields_falls_back_to_id_for_empty_field_name(): void {
+		$this->option_names_to_clean[] = 'test_output_fields_empty_name';
+		update_option( 'test_output_fields_empty_name', 'saved by id' );
+
+		ob_start();
+		try {
+			WC_Admin_Settings::output_fields(
+				array(
+					array(
+						'id'         => 'test_output_fields_empty_name',
+						'field_name' => '',
+						'type'       => 'text',
+						'default'    => 'default value',
+					),
+				)
+			);
+		} finally {
+			$output = ob_get_clean();
+		}
+
+		$this->assertStringContainsString( 'value="saved by id"', $output );
+		$this->assertStringContainsString( 'name="test_output_fields_empty_name"', $output );
+	}
+
+	/**
+	 * @testdox Should save under the field ID rather than fataling when the field name is unusable.
+	 *
+	 * @dataProvider unusable_field_name_data
+	 *
+	 * @param mixed $field_name Unusable field name supplied by a field definition.
+	 */
+	public function test_save_fields_falls_back_to_id_for_unusable_field_name( $field_name ): void {
+		$this->option_names_to_clean[] = 'test_save_fields_bad_name';
+
+		WC_Admin_Settings::save_fields(
+			array(
+				array(
+					'id'         => 'test_save_fields_bad_name',
+					'field_name' => $field_name,
+					'type'       => 'text',
+				),
+			),
+			array( 'test_save_fields_bad_name' => 'posted value' )
+		);
+
+		$this->assertSame( 'posted value', get_option( 'test_save_fields_bad_name' ) );
+	}
+
+	/**
+	 * Data provider for test_save_fields_falls_back_to_id_for_unusable_field_name().
+	 *
+	 * @return array<string, array{mixed}>
+	 */
+	public static function unusable_field_name_data(): array {
+		return array(
+			'array'        => array( array( 'unexpected' ) ),
+			'empty string' => array( '' ),
+			'null'         => array( null ),
+		);
+	}
+
+	/**
+	 * @testdox Should round trip a multi-value nested field without collapsing it to one element.
+	 */
+	public function test_save_fields_then_get_option_round_trip_multi_value(): void {
+		$this->option_names_to_clean[] = 'test_round_trip_multi';
+		$field                         = array(
+			'id'         => 'test_round_trip_multi_choices',
+			'field_name' => 'test_round_trip_multi[choices][]',
+			'type'       => 'multiselect',
+			'options'    => array(
+				'x' => 'X',
+				'y' => 'Y',
+			),
+		);
+
+		WC_Admin_Settings::save_fields(
+			array( $field ),
+			array( 'test_round_trip_multi' => array( 'choices' => array( 'x', 'y' ) ) )
+		);
+
+		$this->assertSame(
+			array( 'x', 'y' ),
+			WC_Admin_Settings::get_option( 'test_round_trip_multi[choices][]', 'DEFAULT' ),
+			'A [] field name must resolve to the whole stored array, not its first element'
+		);
 	}
 
 	/**
