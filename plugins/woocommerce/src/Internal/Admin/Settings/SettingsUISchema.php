@@ -646,16 +646,21 @@ class SettingsUISchema {
 			return $countries ? self::get_country_and_state_options( $countries ) : array();
 		}
 
-		if ( 'multi_select_countries' === $type && ( ! isset( $setting['options'] ) || ! is_array( $setting['options'] ) || empty( $setting['options'] ) ) ) {
-			$countries_controller = self::get_countries_controller();
-			if ( ! $countries_controller ) {
-				return array();
+		if ( 'multi_select_countries' === $type ) {
+			if ( ! isset( $setting['options'] ) || ! is_array( $setting['options'] ) || empty( $setting['options'] ) ) {
+				$countries_controller = self::get_countries_controller();
+				if ( ! $countries_controller ) {
+					return array();
+				}
+
+				$options = $countries_controller->get_countries();
+			} else {
+				$options = $setting['options'];
 			}
 
-			$countries = $countries_controller->get_countries();
-			asort( $countries );
+			asort( $options );
 
-			return self::normalize_options( $countries );
+			return self::normalize_options( $options );
 		}
 
 		if ( ! isset( $setting['options'] ) || ! is_array( $setting['options'] ) ) {

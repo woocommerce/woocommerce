@@ -383,6 +383,46 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox It sorts declared legacy country multiselect options by label.
+	 */
+	public function test_from_legacy_settings_sorts_declared_country_multiselect_options(): void {
+		$schema = SettingsUISchema::from_legacy_settings(
+			'acme',
+			'',
+			'Acme',
+			array(
+				array(
+					'id'      => 'acme_countries',
+					'label'   => 'Acme countries',
+					'type'    => 'multi_select_countries',
+					'options' => array(
+						'US' => 'Zulu country',
+						'MA' => 'Alpha country',
+					),
+				),
+			)
+		);
+
+		$field = $schema['groups']['default']['fields'][0];
+
+		$this->assertSame(
+			array(
+				array(
+					'label' => 'Alpha country',
+					'value' => 'MA',
+				),
+				array(
+					'label' => 'Zulu country',
+					'value' => 'US',
+				),
+			),
+			$field['options'],
+			'The canonical options should match the label order used by the classic renderer.'
+		);
+		SettingsUISchema::assert_valid_schema( $schema );
+	}
+
+	/**
 	 * @testdox It leaves generated country options empty when the countries controller is unavailable.
 	 */
 	public function test_from_legacy_settings_handles_an_unavailable_countries_controller(): void {
