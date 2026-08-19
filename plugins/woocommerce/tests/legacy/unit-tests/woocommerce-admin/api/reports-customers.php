@@ -257,11 +257,13 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$export_columns = $controller->get_export_columns();
 		$this->assertArrayHasKey( 'role', $export_columns, 'CSV export should include a role column' );
 		$this->assertEquals( 'Role', $export_columns['role'] );
+		$this->assertSame( 'role', array_key_last( $export_columns ), 'Role must stay the last CSV column so positional consumers of the pre-existing columns are unaffected' );
 
 		$export_roles_by_user_id = array();
 		foreach ( $reports as $report ) {
 			$export_item = $controller->prepare_item_for_export( $report );
 			$export_roles_by_user_id[ (int) $report['user_id'] ] = $export_item['role'];
+			$this->assertSame( 'role', array_key_last( $export_item ), 'Role must stay the last column in prepared export rows, matching the header order' );
 		}
 
 		$this->assertEquals( 'Editor, Shop manager', $export_roles_by_user_id[ $editor_id ], 'CSV export should carry the role value' );
