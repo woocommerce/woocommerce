@@ -91,15 +91,21 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	public function test_get_option_resolves_name_shapes( string $option_name, $expected ): void {
 		$this->option_names_to_clean[] = 'test_get_option_nested';
 		$this->option_names_to_clean[] = 'test_get_option_scalar';
+		$this->option_names_to_clean[] = 'test_get_option_malformed_';
+		$this->option_names_to_clean[] = 'test_get_option_object';
 		update_option(
 			'test_get_option_nested',
 			array(
-				'key'  => 'one level',
-				'deep' => array( 'leaf' => 'two levels' ),
-				'list' => array( 'x', 'y' ),
+				'key'        => 'one level',
+				'deep'       => array( 'leaf' => 'two levels' ),
+				'list'       => array( 'x', 'y' ),
+				'spaced key' => 'form decoded',
 			)
 		);
 		update_option( 'test_get_option_scalar', 'abc' );
+		// parse_str() turns the trailing bracket into an underscore, so this is the base it derives.
+		update_option( 'test_get_option_malformed_', 'mangled base' );
+		update_option( 'test_get_option_object', new ArrayObject( array( 'k' => 'array access' ) ) );
 
 		$this->assertSame( $expected, WC_Admin_Settings::get_option( $option_name, 'DEFAULT' ) );
 	}
@@ -119,13 +125,18 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 			'append syntax on base'    => array(
 				'test_get_option_nested[]',
 				array(
-					'key'  => 'one level',
-					'deep' => array( 'leaf' => 'two levels' ),
-					'list' => array( 'x', 'y' ),
+					'key'        => 'one level',
+					'deep'       => array( 'leaf' => 'two levels' ),
+					'list'       => array( 'x', 'y' ),
+					'spaced key' => 'form decoded',
 				),
 			),
+			'plus encoded key'         => array( 'test_get_option_nested[spaced+key]', 'form decoded' ),
+			'percent encoded key'      => array( 'test_get_option_nested[spaced%20key]', 'form decoded' ),
+			'keys after the base only' => array( 'test_get_option_nested[deep]extra[leaf]', array( 'leaf' => 'two levels' ) ),
+			'array access container'   => array( 'test_get_option_object[k]', 'array access' ),
 			'no parsable base'         => array( '[key]', 'DEFAULT' ),
-			'unterminated bracket'     => array( 'test_get_option_absent[', 'DEFAULT' ),
+			'unterminated bracket'     => array( 'test_get_option_malformed[', 'mangled base' ),
 			'missing key'              => array( 'test_get_option_nested[absent]', 'DEFAULT' ),
 			'missing intermediate key' => array( 'test_get_option_nested[absent][leaf]', 'DEFAULT' ),
 			'depth beyond stored'      => array( 'test_get_option_nested[key][deeper]', 'DEFAULT' ),
@@ -257,6 +268,146 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 			array( 'x', 'y' ),
 			WC_Admin_Settings::get_option( 'test_round_trip_multi[choices][]', 'DEFAULT' ),
 			'A [] field name must resolve to the whole stored array, not its first element'
+		);
+	}
+
+	/**
+	 * @testdox Should resolve to no option name when the field ID is unusable, rather than naming one.
+	 *
+	 * @dataProvider unusable_field_id_data
+	 *
+	 * @param mixed $id Unusable field ID supplied by a field definition.
+	 */
+	public function test_save_fields_writes_nothing_for_an_unusable_field_id( $id ): void {
+		$this->option_names_to_clean[] = 'Array';
+
+		$saved = WC_Admin_Settings::save_fields(
+			array(
+				array(
+					'id'   => $id,
+					'type' => 'text',
+				),
+			),
+			array( 'anything' => 'posted value' )
+		);
+
+		$this->assertTrue( $saved, 'save_fields() still reports it ran' );
+		$this->assertFalse(
+			get_option( 'Array' ),
+			'A non-scalar ID must not be cast into an option literally named Array'
+		);
+	}
+
+	/**
+	 * Data provider for test_save_fields_writes_nothing_for_an_unusable_field_id().
+	 *
+	 * @return array<string, array{mixed}>
+	 */
+	public static function unusable_field_id_data(): array {
+		return array(
+			'array'  => array( array( 'unexpected' ) ),
+			'object' => array( new stdClass() ),
+		);
+	}
+
+	/**
+	 * @testdox Should skip a malformed bracket name on save rather than fataling the whole request.
+	 */
+	public function test_save_fields_skips_malformed_bracket_names(): void {
+		$this->option_names_to_clean[] = 'test_save_fields_alongside';
+
+		$saved = WC_Admin_Settings::save_fields(
+			array(
+				array(
+					'id'         => 'test_save_fields_malformed',
+					'field_name' => 'test_save_fields_malformed[',
+					'type'       => 'text',
+				),
+				array(
+					'id'   => 'test_save_fields_alongside',
+					'type' => 'text',
+				),
+			),
+			array(
+				'test_save_fields_malformed' => 'ignored',
+				'test_save_fields_alongside' => 'saved anyway',
+			)
+		);
+
+		$this->assertTrue( $saved );
+		$this->assertSame(
+			'saved anyway',
+			get_option( 'test_save_fields_alongside' ),
+			'A malformed name must not take down the other fields on the same screen'
+		);
+	}
+
+	/**
+	 * @testdox Should resolve the same location on save and on read for every supported name shape.
+	 *
+	 * @dataProvider round_trip_shape_data
+	 *
+	 * @param string $field_name Field name declared by the definition.
+	 * @param string $option     Option the value lands in.
+	 * @param array  $posted     Posted data keyed as the browser would send it.
+	 * @param mixed  $expected   Value the read path should return.
+	 */
+	public function test_save_and_read_resolve_the_same_location( string $field_name, string $option, array $posted, $expected ): void {
+		$this->option_names_to_clean[] = $option;
+
+		WC_Admin_Settings::save_fields(
+			array(
+				array(
+					'id'         => 'test_symmetry_field',
+					'field_name' => $field_name,
+					'type'       => 'text',
+				),
+			),
+			$posted
+		);
+
+		$this->assertSame(
+			$expected,
+			WC_Admin_Settings::get_option( $field_name, 'DEFAULT' ),
+			sprintf( 'Read and write disagree about where %s lives', $field_name )
+		);
+	}
+
+	/**
+	 * Data provider for test_save_and_read_resolve_the_same_location().
+	 *
+	 * Each row saves through save_fields() and reads back through get_option(), so the two
+	 * independent bracket parsers are compared against each other rather than each being
+	 * checked against a pre-seeded option.
+	 *
+	 * @return array<string, array{string, string, array<string, mixed>, mixed}>
+	 */
+	public static function round_trip_shape_data(): array {
+		return array(
+			'plain name'   => array(
+				'test_symmetry_plain',
+				'test_symmetry_plain',
+				array( 'test_symmetry_plain' => 'plain value' ),
+				'plain value',
+			),
+			'single level' => array(
+				'test_symmetry_one[key]',
+				'test_symmetry_one',
+				array( 'test_symmetry_one' => array( 'key' => 'nested value' ) ),
+				'nested value',
+			),
+			'two levels'   => array(
+				'test_symmetry_two[outer][inner]',
+				'test_symmetry_two',
+				array( 'test_symmetry_two' => array( 'outer' => array( 'inner' => 'deep value' ) ) ),
+				'deep value',
+			),
+			'encoded key'  => array(
+				'test_symmetry_encoded[spaced+key]',
+				'test_symmetry_encoded',
+				array( 'test_symmetry_encoded' => array( 'spaced key' => 'encoded value' ) ),
+				'encoded value',
+			),
 		);
 	}
 
