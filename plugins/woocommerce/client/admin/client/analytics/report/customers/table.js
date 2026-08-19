@@ -35,6 +35,11 @@ function CustomersReportTable( {
 		};
 	} );
 
+	// This order is also the browser-side CSV export order (ReportTable exports
+	// the table as-is when the report fits one page), so it must match
+	// Controller::get_export_columns() in
+	// src/Admin/API/Reports/Customers/Controller.php, which the same Download
+	// button uses for larger reports. New columns go last in both.
 	const getHeadersContent = () => {
 		return [
 			{
@@ -48,10 +53,6 @@ function CustomersReportTable( {
 				label: __( 'Username', 'woocommerce' ),
 				key: 'username',
 				hiddenByDefault: true,
-			},
-			{
-				label: __( 'Role', 'woocommerce' ),
-				key: 'role',
 			},
 			{
 				label: __( 'Last active', 'woocommerce' ),
@@ -118,6 +119,10 @@ function CustomersReportTable( {
 				label: __( 'Shipping phone', 'woocommerce' ),
 				key: 'shipping_phone',
 				hiddenByDefault: true,
+			},
+			{
+				label: __( 'Role', 'woocommerce' ),
+				key: 'role',
 			},
 		];
 	};
@@ -207,10 +212,6 @@ function CustomersReportTable( {
 					value: username,
 				},
 				{
-					display: role,
-					value: role,
-				},
-				{
 					display: dateLastActiveDisplay,
 					value: dateLastActive,
 				},
@@ -261,6 +262,10 @@ function CustomersReportTable( {
 				{
 					display: shippingPhone,
 					value: shippingPhone,
+				},
+				{
+					display: role,
+					value: role,
 				},
 			];
 		} );
