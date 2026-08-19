@@ -165,7 +165,7 @@ describe( 'dataform adapter', () => {
 			expect( field.elements ).toEqual( options );
 		} );
 
-		it( 'renders info fields read-only with only the sanitized description', () => {
+		it( 'renders sanitized info content without a Woo-owned control', () => {
 			const infoField: SettingsUIField = {
 				id: 'info_field',
 				label: 'Read this',
@@ -190,11 +190,14 @@ describe( 'dataform adapter', () => {
 			);
 			expect(
 				container.querySelector( '.wc-settings-ui__info' )
-			).not.toBeNull();
-			expect( container.querySelector( 'script' ) ).toBeNull();
-			// DataForm owns the label for read-only fields, so the render
+			).toBeNull();
+			// DataForm owns the label for a read-only field, so the render
 			// contributes the description and nothing else.
 			expect( container.textContent ).toBe( 'Useful information.' );
+			expect( container.querySelector( 'strong' )?.textContent ).toBe(
+				'information'
+			);
+			expect( container.querySelector( 'script' ) ).toBeNull();
 		} );
 
 		it.each( [
