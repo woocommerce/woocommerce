@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useMemo } from '@wordpress/element';
+import { useEffect, useMemo } from '@wordpress/element';
 import { getSetting, CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import NoticeBanner from '@woocommerce/base-components/notice-banner';
 import { useLocalStorageState } from '@woocommerce/base-hooks';
@@ -115,14 +115,38 @@ export const IncompatibleExtensionsFrontendNotice = ( {
 	const shouldShow =
 		CURRENT_USER_IS_ADMIN && count > 0 && ! isDismissedAndUpToDate;
 
+	// An acknowledgement only lasts while the extension stays incompatible.
+	// Dropping the ones that no longer are means reactivating (or reinstalling)
+	// an extension counts as a fresh incompatibility and warns again, while the
+	// ones that never left stay acknowledged — so deactivating a single
+	// extension still doesn't resurface the banner for the rest.
+	//
+	// This only ever removes slugs, never adds, so an extension the merchant
+	// hasn't acknowledged can't be marked as accepted while the banner is up.
+	// Limited to admins because `incompatibleExtensions` is only exposed to
+	// them; for a shopper the empty list would erase the acknowledgement.
+	const hasStaleAcknowledgements =
+		CURRENT_USER_IS_ADMIN && ! isSubsetOf( dismissedSlugs, slugs );
+
+	useEffect( () => {
+		if ( hasStaleAcknowledgements ) {
+			setDismissedSlugs(
+				dismissedSlugs.filter( ( slug ) => slugs.includes( slug ) )
+			);
+		}
+		// `slugs` is rebuilt every render; `hasStaleAcknowledgements` is the
+		// value that gates the write, and it goes false once the pruned set has
+		// been stored.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ hasStaleAcknowledgements ] );
+
 	if ( ! shouldShow ) {
 		return null;
 	}
 
+	// The merchant has just seen and accepted exactly what is incompatible now.
 	const dismissNotice = () => {
-		// Record the union of everything acknowledged so far, so that later
-		// reactivating a previously dismissed extension doesn't resurface it.
-		setDismissedSlugs( [ ...new Set( [ ...dismissedSlugs, ...slugs ] ) ] );
+		setDismissedSlugs( slugs );
 	};
 
 	const extensionNames = Object.values( extensions );

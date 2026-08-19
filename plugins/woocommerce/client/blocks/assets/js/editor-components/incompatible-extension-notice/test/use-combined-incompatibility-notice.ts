@@ -14,6 +14,11 @@ jest.mock( '@wordpress/data', () => ( {
 // Incompatible payment gateways returned by the payment store, controllable per render.
 let mockIncompatiblePaymentMethods: Record< string, string > = {};
 
+// Whether the payment store has finished loading. Until it has, it reports an
+// empty incompatible set, which the hook must not read as "nothing is
+// incompatible any more".
+let mockPaymentMethodsLoaded = true;
+
 // Incompatible extensions returned from settings, controllable per render.
 let mockIncompatibleExtensions: Array< { id: string; title: string } > = [];
 
@@ -36,7 +41,10 @@ import { useCombinedIncompatibilityNotice } from '../use-combined-incompatibilit
 
 ( wpData.useSelect as jest.Mock ).mockImplementation( ( mapSelect ) =>
 	mapSelect( () => ( {
-		getIncompatiblePaymentMethods: () => mockIncompatiblePaymentMethods,
+		getIncompatiblePaymentMethods: () =>
+			mockPaymentMethodsLoaded ? mockIncompatiblePaymentMethods : {},
+		paymentMethodsInitialized: () => mockPaymentMethodsLoaded,
+		expressPaymentMethodsInitialized: () => mockPaymentMethodsLoaded,
 	} ) )
 );
 
@@ -65,11 +73,14 @@ const mountAndDismiss = ( block: string ) => {
 	unmount();
 };
 
+const STORAGE_KEY = 'wc-blocks_dismissed_incompatible_extensions_notices';
+
 describe( 'useCombinedIncompatibilityNotice', () => {
 	beforeEach( () => {
 		window.localStorage.clear();
 		mockIncompatiblePaymentMethods = {};
 		mockIncompatibleExtensions = [];
+		mockPaymentMethodsLoaded = true;
 	} );
 
 	it( 'shows the notice when there is an incompatible gateway', () => {
@@ -135,26 +146,86 @@ describe( 'useCombinedIncompatibilityNotice', () => {
 		expect( mountVisibility( CHECKOUT ) ).toBe( true );
 	} );
 
-	// Re-enabling a previously-dismissed gateway must not re-trigger the notice,
-	// even after it was disabled and the (now smaller) notice was dismissed again.
-	it( 'keeps a re-enabled gateway dismissed once it has been acknowledged', () => {
+	// An acknowledgement lasts only while the gateway stays incompatible: the
+	// merchant accepted it being unusable at checkout *then*, which says nothing
+	// about turning it back on later.
+	it( 'warns again when an acknowledged gateway is disabled and re-enabled', () => {
 		mockIncompatiblePaymentMethods = {
 			gw_a: 'Gateway A',
 			gw_b: 'Gateway B',
 		};
 		mountAndDismiss( CHECKOUT );
 
-		// Disable B. The notice stays hidden, so there is no dismissal to make
-		// here — the merchant simply never sees it again.
+		// Disable B. The notice stays hidden for the still-incompatible A,
+		// which is the #42469 fix.
 		mockIncompatiblePaymentMethods = { gw_a: 'Gateway A' };
 		expect( mountVisibility( CHECKOUT ) ).toBe( false );
 
-		// Re-enable B — it was already acknowledged, so the notice stays hidden.
+		// Re-enable B. It stopped being incompatible in between, so it counts
+		// as a fresh incompatibility and warns.
 		mockIncompatiblePaymentMethods = {
 			gw_a: 'Gateway A',
 			gw_b: 'Gateway B',
 		};
 
+		expect( mountVisibility( CHECKOUT ) ).toBe( true );
+	} );
+
+	it( 'drops the acknowledgement of a disabled gateway from storage', () => {
+		mockIncompatiblePaymentMethods = {
+			gw_a: 'Gateway A',
+			gw_b: 'Gateway B',
+		};
+		mountAndDismiss( CHECKOUT );
+
+		mockIncompatiblePaymentMethods = { gw_a: 'Gateway A' };
+		mountVisibility( CHECKOUT );
+
+		expect(
+			JSON.parse( window.localStorage.getItem( STORAGE_KEY ) || '[]' )
+		).toEqual( [ { [ CHECKOUT ]: [ 'gw_a' ] } ] );
+	} );
+
+	// Pruning must only ever remove slugs. If it wrote the current set wholesale
+	// it would silently acknowledge the gateway the merchant is being warned about.
+	it( 'does not acknowledge a new gateway while the notice is on screen', () => {
+		mockIncompatiblePaymentMethods = {
+			gw_a: 'Gateway A',
+			gw_b: 'Gateway B',
+		};
+		mountAndDismiss( CHECKOUT );
+
+		// B goes away and a brand-new C arrives, so the notice is showing for C.
+		mockIncompatiblePaymentMethods = {
+			gw_a: 'Gateway A',
+			gw_c: 'Gateway C',
+		};
+		expect( mountVisibility( CHECKOUT ) ).toBe( true );
+
+		// B was pruned, but C was not silently accepted, so it still warns.
+		expect(
+			JSON.parse( window.localStorage.getItem( STORAGE_KEY ) || '[]' )
+		).toEqual( [ { [ CHECKOUT ]: [ 'gw_a' ] } ] );
+		expect( mountVisibility( CHECKOUT ) ).toBe( true );
+	} );
+
+	// The payment store reports an empty set until it has loaded. Pruning on
+	// that would wipe the acknowledgement on every single editor load.
+	it( 'keeps acknowledgements while the payment store is still loading', () => {
+		mockIncompatiblePaymentMethods = {
+			gw_a: 'Gateway A',
+			gw_b: 'Gateway B',
+		};
+		mountAndDismiss( CHECKOUT );
+
+		mockPaymentMethodsLoaded = false;
+		expect( mountVisibility( CHECKOUT ) ).toBe( false );
+		expect(
+			JSON.parse( window.localStorage.getItem( STORAGE_KEY ) || '[]' )
+		).toEqual( [ { [ CHECKOUT ]: [ 'gw_a', 'gw_b' ] } ] );
+
+		// Once it loads, both are still incompatible and still acknowledged.
+		mockPaymentMethodsLoaded = true;
 		expect( mountVisibility( CHECKOUT ) ).toBe( false );
 	} );
 
@@ -170,9 +241,6 @@ describe( 'useCombinedIncompatibilityNotice', () => {
 	// value can still hold shapes this hook never wrote: bare slug strings left
 	// by the storefront, and more than one entry for the same block.
 	describe( 'values left in the shared key by earlier versions', () => {
-		const STORAGE_KEY =
-			'wc-blocks_dismissed_incompatible_extensions_notices';
-
 		const seed = ( value: unknown ) =>
 			window.localStorage.setItem( STORAGE_KEY, JSON.stringify( value ) );
 

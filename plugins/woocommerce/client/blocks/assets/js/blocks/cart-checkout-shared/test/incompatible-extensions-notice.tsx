@@ -126,8 +126,9 @@ describe( 'IncompatibleExtensionsFrontendNotice', () => {
 
 	describe( 'dismissal behavior', () => {
 		it( 'hides the banner and records the acknowledged extension on dismiss', () => {
-			// Seed a previously acknowledged extension that is not currently
-			// present, to prove the union is stored rather than replaced.
+			// Seed a previously acknowledged extension that is no longer
+			// incompatible: its acknowledgement has lapsed, so the stored value
+			// ends up as exactly what the merchant just accepted.
 			window.localStorage.setItem(
 				FRONTEND_KEY,
 				JSON.stringify( [ 'old-plugin' ] )
@@ -148,7 +149,7 @@ describe( 'IncompatibleExtensionsFrontendNotice', () => {
 				JSON.parse(
 					window.localStorage.getItem( FRONTEND_KEY ) || '[]'
 				)
-			).toEqual( [ 'old-plugin', 'test-plugin' ] );
+			).toEqual( [ 'test-plugin' ] );
 		} );
 
 		it( 'does not write the editor notice key (no cross-surface collision)', () => {
@@ -181,7 +182,7 @@ describe( 'IncompatibleExtensionsFrontendNotice', () => {
 			expect( container ).toBeEmptyDOMElement();
 		} );
 
-		it( 'stays dismissed when a previously acknowledged extension is reactivated', () => {
+		it( 'stays dismissed while every acknowledged extension is still active', () => {
 			window.localStorage.setItem(
 				FRONTEND_KEY,
 				JSON.stringify( [ 'plugin-one', 'plugin-two' ] )
@@ -196,6 +197,66 @@ describe( 'IncompatibleExtensionsFrontendNotice', () => {
 			);
 
 			expect( container ).toBeEmptyDOMElement();
+		} );
+
+		// An acknowledgement lasts only while the extension stays incompatible.
+		it( 'warns again when an acknowledged extension is deactivated and reactivated', () => {
+			window.localStorage.setItem(
+				FRONTEND_KEY,
+				JSON.stringify( [ 'plugin-one', 'plugin-two' ] )
+			);
+
+			// Deactivate plugin-two. The banner stays hidden for plugin-one,
+			// and plugin-two's lapsed acknowledgement is dropped.
+			setIncompatibleExtensions( [
+				{ id: 'plugin-one', title: 'Plugin One' },
+			] );
+			const { container, unmount } = render(
+				<IncompatibleExtensionsFrontendNotice block="woocommerce/checkout" />
+			);
+			expect( container ).toBeEmptyDOMElement();
+			expect(
+				JSON.parse(
+					window.localStorage.getItem( FRONTEND_KEY ) || '[]'
+				)
+			).toEqual( [ 'plugin-one' ] );
+			unmount();
+
+			// Reactivate it: a fresh incompatibility, so the banner returns.
+			setIncompatibleExtensions( [
+				{ id: 'plugin-one', title: 'Plugin One' },
+				{ id: 'plugin-two', title: 'Plugin Two' },
+			] );
+			render(
+				<IncompatibleExtensionsFrontendNotice block="woocommerce/checkout" />
+			);
+
+			expect( screen.getByTestId( 'notice-banner' ) ).toBeInTheDocument();
+		} );
+
+		// Pruning must only ever remove slugs, never add, or it would silently
+		// accept the extension the merchant is being warned about.
+		it( 'does not acknowledge a new extension while the banner is on screen', () => {
+			window.localStorage.setItem(
+				FRONTEND_KEY,
+				JSON.stringify( [ 'plugin-one', 'plugin-two' ] )
+			);
+			// plugin-two is gone and a brand-new plugin-three has arrived.
+			setIncompatibleExtensions( [
+				{ id: 'plugin-one', title: 'Plugin One' },
+				{ id: 'plugin-three', title: 'Plugin Three' },
+			] );
+
+			render(
+				<IncompatibleExtensionsFrontendNotice block="woocommerce/checkout" />
+			);
+
+			expect( screen.getByTestId( 'notice-banner' ) ).toBeInTheDocument();
+			expect(
+				JSON.parse(
+					window.localStorage.getItem( FRONTEND_KEY ) || '[]'
+				)
+			).toEqual( [ 'plugin-one' ] );
 		} );
 
 		it( 'renders again when a new, never-acknowledged extension appears', () => {

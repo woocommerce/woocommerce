@@ -2,6 +2,8 @@
  * External dependencies
  */
 import { useState, useEffect } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
+import { paymentStore } from '@woocommerce/block-data';
 import { useLocalStorageState } from '@woocommerce/base-hooks';
 
 /**
@@ -40,6 +42,16 @@ export const useCombinedIncompatibilityNotice = (
 		incompatiblePaymentMethodSlugs,
 		incompatiblePaymentMethodCount,
 	] = useIncompatiblePaymentGatewaysNotice();
+
+	// Until both are true the payment store reports an empty incompatible set,
+	// which is indistinguishable from "nothing is incompatible any more".
+	const arePaymentMethodsLoaded = useSelect( ( select ) => {
+		const { paymentMethodsInitialized, expressPaymentMethodsInitialized } =
+			select( paymentStore );
+		return (
+			paymentMethodsInitialized() && expressPaymentMethodsInitialized()
+		);
+	}, [] );
 
 	const allIncompatibleItems = {
 		...incompatibleExtensions,
@@ -92,24 +104,49 @@ export const useCombinedIncompatibilityNotice = (
 	const shouldBeDismissed =
 		allIncompatibleItemCount === 0 || isDismissedNoticeUpToDate;
 
-	const dismissNotice = () => {
-		// Consolidate any existing entries for this block into a single record
-		// holding the union of everything acknowledged so far, so that later
-		// re-enabling a previously-dismissed item doesn't resurface the notice.
-		const otherBlockNotices = dismissedNotices.filter(
-			( notice ) => ! Object.keys( notice ).includes( blockName )
-		);
-		const acknowledgedSlugs = [
-			...new Set( [
-				...dismissedItemSlugs,
-				...allIncompatibleItemSlugs,
-			] ),
-		];
-		setDismissedNotices( [
-			...otherBlockNotices,
-			{ [ blockName ]: acknowledgedSlugs },
+	// Replaces every entry this block may have accumulated with a single record
+	// of `slugs`, leaving other blocks' entries untouched.
+	const storeAcknowledgedSlugs = ( slugs: string[] ) =>
+		setDismissedNotices( ( notices ) => [
+			...notices.filter(
+				( notice ) => ! Object.keys( notice ).includes( blockName )
+			),
+			{ [ blockName ]: slugs },
 		] );
+
+	// The merchant has just seen and accepted exactly what is incompatible now.
+	const dismissNotice = () => {
+		storeAcknowledgedSlugs( allIncompatibleItemSlugs );
 	};
+
+	// An acknowledgement only lasts while the item stays incompatible. Dropping
+	// the ones that no longer are means re-enabling an item (or reinstalling an
+	// extension) counts as a fresh incompatibility and warns again, while the
+	// items that never left stay acknowledged — so disabling one item still
+	// doesn't resurface the notice for the rest, which is the #42469 fix.
+	//
+	// This only ever removes slugs, never adds, so an item the merchant hasn't
+	// acknowledged can't be marked as accepted while the notice is on screen.
+	// Held back until the payment store has loaded, because the empty set it
+	// reports until then is indistinguishable from "nothing is incompatible"
+	// and would erase the acknowledgement.
+	const hasStaleAcknowledgements =
+		arePaymentMethodsLoaded &&
+		! isSubsetOf( dismissedItemSlugs, allIncompatibleItemSlugs );
+
+	useEffect( () => {
+		if ( hasStaleAcknowledgements ) {
+			storeAcknowledgedSlugs(
+				dismissedItemSlugs.filter( ( slug ) =>
+					allIncompatibleItemSlugs.includes( slug )
+				)
+			);
+		}
+		// `storeAcknowledgedSlugs` and the slug arrays are rebuilt every render;
+		// `hasStaleAcknowledgements` is the value that actually gates the write,
+		// and it goes false as soon as the pruned set is stored.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ hasStaleAcknowledgements ] );
 
 	// This ensures the notice is not shown on first render. This is required so
 	// Gutenberg doesn't steal the focus from the Guide and focuses the block.
