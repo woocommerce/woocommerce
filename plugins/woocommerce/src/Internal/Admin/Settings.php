@@ -431,13 +431,17 @@ class Settings {
 			return $settings;
 		}
 
-		$schema = $context->get_schema();
-		if ( ! is_array( $schema ) ) {
+		try {
+			$schema = $context->get_schema();
+			if ( ! is_array( $schema ) ) {
+				return $settings;
+			}
+
+			$page_id     = $context->get_page_id();
+			$section_key = $context->get_current_section_key();
+		} catch ( \Throwable $e ) {
 			return $settings;
 		}
-
-		$page_id     = $context->get_page_id();
-		$section_key = $context->get_current_section_key();
 
 		if ( ! isset( $settings['settingsUI'] ) || ! is_array( $settings['settingsUI'] ) ) {
 			$settings['settingsUI'] = array();

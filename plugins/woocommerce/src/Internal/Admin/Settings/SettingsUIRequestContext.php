@@ -726,7 +726,7 @@ class SettingsUIRequestContext {
 	 * @param string     $caller Calling method, for exception tracking.
 	 */
 	private static function log_resolution_failure( string $subject, string $page_id, string $section, \Throwable $e, string $caller ): void {
-		wc_get_logger()->debug(
+		wc_get_logger()->error(
 			sprintf(
 				'%1$s could not be resolved for page "%2$s" section "%3$s": %4$s: %5$s',
 				$subject,

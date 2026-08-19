@@ -146,6 +146,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 					return $classes;
 				}
 
+				// Preflight and cache adapter failures before this body class can hide the classic Save button.
 				$context->get_page_id();
 
 				// The legacy fallback renderer needs the classic styling: the settings UI
@@ -459,7 +460,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 					}
 				}
 
-				wc_get_logger()->debug(
+				wc_get_logger()->error(
 					sprintf(
 						'Settings UI rendering failed for page "%1$s" section "%2$s": %3$s: %4$s',
 						$this->id,

@@ -13,12 +13,15 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Internal\Admin\Settings;
 use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIRequestContext;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 use WC_Unit_Test_Case;
 
 /**
  * Tests for the settings UI feature flag boundary.
  */
 class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
+
+	use LoggerSpyTrait;
 
 	/**
 	 * Original request globals.
@@ -256,6 +259,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'settings_ui_flag_test', $settings_page_notices[0]['message'] );
 		$this->assertStringContainsString( 'advanced', $settings_page_notices[0]['message'] );
 		$this->assertStringContainsString( 'Unable to build settings UI schema.', $settings_page_notices[0]['message'] );
+		$this->assertLogged( 'error', 'Settings UI schema could not be resolved', array( 'source' => 'settings-ui' ) );
 	}
 
 	/**
@@ -432,6 +436,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		$this->assertCount( 1, $caught );
 		$this->assertSame( 'Unable to resolve the Settings UI page id.', $caught[0]->getMessage() );
 		$this->assertSame( 1, $this->invoke_private_method( $page, 'get_page_id_resolution_count' ), 'The failing extension method should run once per request.' );
+		$this->assertLogged( 'error', 'Settings UI rendering failed', array( 'source' => 'settings-ui' ) );
 	}
 
 	/**
@@ -610,6 +615,19 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		$settings = $this->invoke_private_method( new Settings(), 'add_settings_ui_schema', array( array() ) );
 
 		$this->assertArrayNotHasKey( 'settingsUI', $settings );
+	}
+
+	/**
+	 * @testdox Should keep shared settings unchanged when adapter page id resolution fails.
+	 */
+	public function test_shared_settings_are_unchanged_when_page_id_resolution_fails(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+		$this->set_current_settings_page_request( $this->get_settings_ui_test_page_with_script_handles( array(), true ) );
+		$original_settings = array( 'existing' => 'value' );
+
+		$settings = $this->invoke_private_method( new Settings(), 'add_settings_ui_schema', array( $original_settings ) );
+
+		$this->assertSame( $original_settings, $settings, 'A failing third-party adapter must not escape or change shared settings.' );
 	}
 
 	/**
