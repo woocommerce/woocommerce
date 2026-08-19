@@ -221,35 +221,35 @@ class UtilsTest extends WC_Unit_Test_Case {
 	 */
 	public function provider_current_page_url_cases(): array {
 		return array(
-			'encoded label query'                      => array(
+			'encoded label query'                          => array(
 				'product/hoodie',
 				'label=Black%20%26%20White',
 				'/product/hoodie/?label=Black%20%26%20White',
 				true,
 				false,
 			),
-			'question mark query value'                => array(
+			'question mark query value'                    => array(
 				'search-results',
 				'search=?',
 				'/search-results/?search=?',
 				true,
 				false,
 			),
-			'lone zero query string'                   => array(
+			'lone zero query string'                       => array(
 				'product/hoodie',
 				'0',
 				'/product/hoodie/?0',
 				true,
 				false,
 			),
-			'encoded label query no trailing slash'    => array(
+			'encoded label query no trailing slash'        => array(
 				'product/hoodie',
 				'label=Black%20%26%20White',
 				'/product/hoodie?label=Black%20%26%20White',
 				false,
 				false,
 			),
-			'index permalinks product path with query' => array(
+			'index permalinks product path with query'     => array(
 				'product/hoodie',
 				'label=Black%20%26%20White',
 				'/index.php/product/hoodie/?label=Black%20%26%20White',
@@ -260,6 +260,13 @@ class UtilsTest extends WC_Unit_Test_Case {
 				'index.php/product/hoodie',
 				null,
 				'/index.php/product/hoodie/',
+				true,
+				true,
+			),
+			'index permalinks empty request stays at home' => array(
+				'',
+				null,
+				'/',
 				true,
 				true,
 			),

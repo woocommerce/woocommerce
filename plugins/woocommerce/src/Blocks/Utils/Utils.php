@@ -65,7 +65,11 @@ class Utils {
 		$request_path = is_object( $wp ) && isset( $wp->request ) && is_string( $wp->request ) ? $wp->request : '';
 
 		// PATHINFO permalinks keep index.php in the public URL; $wp->request does not.
-		if ( $wp_rewrite instanceof \WP_Rewrite && $wp_rewrite->using_index_permalinks() ) {
+		if (
+			'' !== $request_path &&
+			$wp_rewrite instanceof \WP_Rewrite &&
+			$wp_rewrite->using_index_permalinks()
+		) {
 			$index = is_string( $wp_rewrite->index ) && '' !== $wp_rewrite->index ? $wp_rewrite->index : 'index.php';
 			if ( $index !== $request_path && ! str_starts_with( $request_path, $index . '/' ) ) {
 				$request_path = $index . '/' . $request_path;
