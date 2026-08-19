@@ -3620,3 +3620,23 @@ function wc_update_1110_flush_product_count_cache() {
 		( new \Automattic\WooCommerce\Caches\ProductCountCache() )->flush( 'product' );
 	}
 }
+
+/**
+ * Delete the cached Analytics stock report counts.
+ *
+ * The counts used to include variable parents, which mirror their variations'
+ * stock. Dropping the transients makes the report recalculate them.
+ *
+ * @since 11.2.0
+ *
+ * @return void
+ */
+function wc_update_1120_delete_stock_report_count_transients() {
+	delete_transient( 'wc_admin_stock_count_lowstock' );
+	delete_transient( 'wc_admin_product_count' );
+
+	$status_options = wc_get_product_stock_status_options();
+	foreach ( $status_options as $status => $label ) {
+		delete_transient( 'wc_admin_stock_count_' . $status );
+	}
+}

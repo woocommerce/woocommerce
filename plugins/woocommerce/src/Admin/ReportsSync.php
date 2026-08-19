@@ -219,11 +219,11 @@ class ReportsSync {
 	 * @param int $id Post/product ID.
 	 */
 	public static function clear_stock_count_cache( $id ) {
-		delete_transient( 'wc_admin_stock_count_lowstock_v2' );
-		delete_transient( 'wc_admin_product_count_v2' );
+		delete_transient( 'wc_admin_stock_count_lowstock' );
+		delete_transient( 'wc_admin_product_count' );
 		$status_options = wc_get_product_stock_status_options();
 		foreach ( $status_options as $status => $label ) {
-			delete_transient( 'wc_admin_stock_count_' . $status . '_v2' );
+			delete_transient( 'wc_admin_stock_count_' . $status );
 		}
 	}
 }

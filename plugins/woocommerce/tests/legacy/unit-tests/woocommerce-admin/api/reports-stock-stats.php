@@ -234,10 +234,10 @@ class WC_Admin_Tests_API_Reports_Stock_Stats extends WC_REST_Unit_Test_Case {
 	 * Drop the transients the stock stats are served from.
 	 */
 	private function clear_stock_count_caches() {
-		delete_transient( 'wc_admin_product_count_v2' );
-		delete_transient( 'wc_admin_stock_count_lowstock_v2' );
+		delete_transient( 'wc_admin_product_count' );
+		delete_transient( 'wc_admin_stock_count_lowstock' );
 		foreach ( array_keys( wc_get_product_stock_status_options() ) as $status ) {
-			delete_transient( 'wc_admin_stock_count_' . $status . '_v2' );
+			delete_transient( 'wc_admin_stock_count_' . $status );
 		}
 	}
 

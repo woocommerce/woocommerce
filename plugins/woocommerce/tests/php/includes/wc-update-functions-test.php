@@ -355,4 +355,30 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		wc_update_1110_delete_dashboard_outofstock_count_transient();
 		$this->assertFalse( get_transient( 'wc_outofstock_count' ) );
 	}
+
+	/**
+	 * @testdox Migration registers and deletes the cached Analytics stock report counts.
+	 */
+	public function test_wc_update_1120_delete_stock_report_count_transients(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$db_updates = WC_Install::get_db_update_callbacks();
+		$this->assertArrayHasKey( '11.2.0', $db_updates );
+		$this->assertContains( 'wc_update_1120_delete_stock_report_count_transients', $db_updates['11.2.0'] );
+
+		$transients = array( 'wc_admin_stock_count_lowstock', 'wc_admin_product_count' );
+		foreach ( array_keys( wc_get_product_stock_status_options() ) as $status ) {
+			$transients[] = 'wc_admin_stock_count_' . $status;
+		}
+
+		foreach ( $transients as $transient ) {
+			set_transient( $transient, 3, DAY_IN_SECONDS );
+		}
+
+		wc_update_1120_delete_stock_report_count_transients();
+
+		foreach ( $transients as $transient ) {
+			$this->assertFalse( get_transient( $transient ), $transient . ' should have been deleted.' );
+		}
+	}
 }
