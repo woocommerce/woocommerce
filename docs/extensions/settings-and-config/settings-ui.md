@@ -288,32 +288,22 @@ array(
 )
 ```
 
-## Rich group descriptions and actions
+## Group descriptions
 
-Group title rows can include sanitized description markup and structured header actions. Use this for contextual links such as documentation or secondary actions that belong to the whole group, rather than creating a display-only custom field.
+Group title rows can include a plain-text description. Use it for short context
+that applies to the whole group.
 
 ```php
 array(
-	'id'      => 'my_plugin_checkout',
-	'type'    => 'title',
-	'title'   => __( 'Checkout experience', 'my-plugin' ),
-	'desc'    => sprintf(
-		/* translators: %s: documentation link */
-		__( 'Choose where customers can use express payment methods. %s', 'my-plugin' ),
-		'<a href="' . esc_url( 'https://example.com/docs' ) . '">' . esc_html__( 'Learn more', 'my-plugin' ) . '</a>'
-	),
-	'actions' => array(
-		array(
-			'id'      => 'manage',
-			'label'   => __( 'Manage locations', 'my-plugin' ),
-			'href'    => admin_url( 'admin.php?page=wc-settings&tab=shipping' ),
-			'variant' => 'secondary',
-		),
-	),
+	'id'    => 'my_plugin_checkout',
+	'type'  => 'title',
+	'title' => __( 'Checkout experience', 'my-plugin' ),
+	'desc'  => __( 'Choose where customers can use express payment methods.', 'my-plugin' ),
 )
 ```
 
-Descriptions are sanitized with `wp_kses_post()`. Actions are structured data with `id`, `label`, `href`, optional `variant`, optional `target`, and optional `rel`.
+Group descriptions render as plain text. Put links and other sanitized HTML in
+a field description instead.
 
 ## Page header
 

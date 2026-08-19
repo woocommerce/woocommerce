@@ -8,9 +8,9 @@ sidebar_position: 8
 
 > **The settings UI is experimental** and subject to change. See the [settings UI status](./settings-ui.md#status) for details.
 
-Use custom components when a WooCommerce settings field needs plugin-specific React UI that cannot be represented by a native field type.
+Use custom components when a WooCommerce settings field needs plugin-specific React UI that cannot be represented by a built-in DataForm field type.
 
-For most fields, prefer the native renderer. Custom components are best for specialized selectors, previews, or validation flows.
+For most fields, prefer DataForm's built-in controls. Custom components are best for specialized selectors, previews, or validation flows.
 
 ## PHP field metadata
 
@@ -54,49 +54,51 @@ Registrations are scoped by settings page and, optionally, by section. This prev
 
 ## Component props
 
-Custom components receive stable field props:
+Custom components receive a stable subset of the DataForm edit-control props:
 
 ```ts
-type SettingsFieldComponentProps = {
+type SettingsEditControlProps = {
+	data: Record< string, string | number | boolean | string[] | null >;
 	field: {
 		id: string;
-		label: string;
-		type: string;
-		description?: string;
-		value?: string | number | boolean | string[] | null;
-		options?: Array< { label: string; value: string } >;
-		component?: string;
+		label?: string;
+		description?: string | JSX.Element;
 		placeholder?: string;
-		disabled?: boolean;
-		customAttributes?: Record< string, string | number | boolean >;
+		elements?: Array< { label: string; value: string } >;
+		getValue: ( args: {
+			item: Record< string, string | number | boolean | string[] | null >;
+		} ) => string | number | boolean | string[] | null;
 	};
-	value: string | number | boolean | string[] | null;
-	onChange: ( value: string | number | boolean | string[] | null ) => void;
-	context: {
-		page: string;
-		section?: string;
-	};
+	onChange: (
+		value: Partial<
+			Record< string, string | number | boolean | string[] | null >
+		>
+	) => void;
+	hideLabelFromVision?: boolean;
 };
 ```
 
-Call `onChange()` with the next field value. The settings UI handles hidden input serialization for the field's save adapter.
+Read the current value with `field.getValue( { item: data } )`. Call
+`onChange()` with an object containing the changed field value. The settings UI
+handles hidden input serialization for the field's save adapter.
 
 ## Example component
 
 ```tsx
-import type { SettingsFieldComponentProps } from '@woocommerce/settings-ui';
+import type { SettingsEditControlProps } from '@woocommerce/settings-ui';
 
 export const PaymentMethodPicker = ( {
+	data,
 	field,
-	value,
 	onChange,
-}: SettingsFieldComponentProps ) => {
+}: SettingsEditControlProps ) => {
+	const value = field.getValue( { item: data } );
 	const selectedValues = Array.isArray( value ) ? value : [];
 
 	return (
 		<fieldset>
 			<legend>{ field.label }</legend>
-			{ field.options?.map( ( option ) => {
+			{ field.elements?.map( ( option ) => {
 				const checked = selectedValues.includes( option.value );
 
 				return (
@@ -105,14 +107,14 @@ export const PaymentMethodPicker = ( {
 							type="checkbox"
 							checked={ checked }
 							onChange={ () => {
-								onChange(
-									checked
+								onChange( {
+									[ field.id ]: checked
 										? selectedValues.filter(
 												( item ) =>
 													item !== option.value
 										  )
-										: [ ...selectedValues, option.value ]
-								);
+										: [ ...selectedValues, option.value ],
+								} );
 							} }
 						/>
 						{ option.label }
@@ -163,10 +165,11 @@ Resolution order is:
 1. `field.component`
 2. `fieldOverrides[ field.id ]`
 3. `typeRenderers[ field.type ]`
+4. DataForm's built-in control
 
-If one registry entry is missing, resolution continues to the next registry entry. When a field declares `field.component`, that metadata states that a custom control is required. If no named component, field override, or type renderer resolves it, the page fails closed instead of silently replacing the required control with a native field.
+If one registry entry is missing, resolution continues to the next registry entry. When a field declares `field.component`, that metadata states that a custom control is required. If no named component, field override, or type renderer resolves it, the page fails closed instead of silently replacing the required control with a built-in one.
 
-For a field without `field.component`, the native field renderer is the final fallback after field overrides and type renderers.
+For a field without `field.component`, DataForm's built-in control for the field type is the final fallback after field overrides and type renderers. A field type with no registered renderer and no built-in control fails closed.
 
 ## Enqueue the component script
 

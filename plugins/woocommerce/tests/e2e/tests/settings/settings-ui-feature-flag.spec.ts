@@ -82,22 +82,16 @@ test.describe( 'Settings UI feature flag', { tag: [ tags.NOT_E2E ] }, () => {
 			'gap',
 			'24px'
 		);
-		const sectionCard = settingsUI
-			.locator( '.wc-settings-ui__section-card' )
+		const dataForm = settingsUI
+			.locator( '.dataforms-layouts__wrapper' )
 			.first();
-		await expect( sectionCard ).toHaveCSS( 'display', 'flex' );
-		await expect( sectionCard ).toHaveCSS( 'border-top-width', '1px' );
-		await expect( sectionCard ).toHaveCSS( 'border-radius', '8px' );
-		await expect( sectionCard ).toHaveCSS(
-			'background-color',
-			'rgb(255, 255, 255)'
-		);
+		await expect( dataForm ).toBeVisible();
 		await expect(
-			sectionCard.locator( '.wc-settings-ui__section-header' )
-		).toHaveCSS( 'padding', '24px' );
+			dataForm.locator( '.dataforms-layouts-card__field' )
+		).toHaveCount( 3 );
 		await expect(
-			sectionCard.locator( '.wc-settings-ui__section-fields' )
-		).toHaveCSS( 'padding', '0px 24px 24px' );
+			settingsUI.locator( '.wc-settings-ui__section-card' )
+		).toHaveCount( 0 );
 
 		const weightUnit = settingsUI.getByLabel( 'Weight unit' );
 		expect( [ 'kg', 'g', 'lbs', 'oz' ] ).toContain(
