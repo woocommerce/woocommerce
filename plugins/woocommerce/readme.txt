@@ -488,7 +488,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Performance - Unify Woo blocks editor scripts and editor styles into shared editor assets. [#66200](https://github.com/woocommerce/woocommerce/pull/66200)
 * Enhancement - Add background, spacing, and border style controls to the Product Details block. [#67409](https://github.com/woocommerce/woocommerce/pull/67409)
 * Enhancement - CSV import now creates new variations of existing variable products when "Update existing products" is selected, instead of skipping them. [#66903](https://github.com/woocommerce/woocommerce/pull/66903)
-* Enhancement - Improve vertical alignment in default Product Collection templates. [#67056](https://github.com/woocommerce/woocommerce/pull/67056)
 * Enhancement - Product attributes: tailor the slug field hint to the user's language, showing an approximate character limit based on the locale's script alongside the authoritative byte limit, with a leaner description for clients that have the live byte counter. [#65814](https://github.com/woocommerce/woocommerce/pull/65814)
 * Enhancement - Warn merchants when a higher-priority shipping zone prevents a narrower zone from matching. [#66348](https://github.com/woocommerce/woocommerce/pull/66348)
 
