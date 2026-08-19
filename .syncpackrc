@@ -1,6 +1,10 @@
 {
 	"indent": "\t",
-	"semverRange": "^",
+	"semverGroups": [
+		{
+			"range": "^"
+		}
+	],
 	"customTypes": {
 		"engines": {
 			"path": "engines",
@@ -490,6 +494,16 @@
 			"isIgnored": true
 		},
 		{
+			"label": "settings-ui temporarily pins DataViews 17.1.0 for the DataForm migration",
+			"dependencies": [
+				"@wordpress/dataviews"
+			],
+			"packages": [
+				"@woocommerce/settings-ui"
+			],
+			"isIgnored": true
+		},
+		{
 			"label": "@wordpress/* dependencies that WooCommerce bundles instead of externalizing to WordPress",
 			"dependencyTypes": [
 				"prod",
@@ -511,7 +525,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "catalog:wp-bundled"
+			"policy": "catalog"
 		},
 		{
 			"label": "@wordpress/* runtime-dependencies (pnpm 10 requires valid semver in peerDependencies, so peer deps are excluded here)",
@@ -525,7 +539,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "catalog:wp-min"
+			"policy": "catalog"
 		},
 		{
 			"dependencies": [

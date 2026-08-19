@@ -109,6 +109,16 @@ function CustomersReportTable( {
 				hiddenByDefault: true,
 				isSortable: true,
 			},
+			{
+				label: __( 'Billing phone', 'woocommerce' ),
+				key: 'billing_phone',
+				hiddenByDefault: true,
+			},
+			{
+				label: __( 'Shipping phone', 'woocommerce' ),
+				key: 'shipping_phone',
+				hiddenByDefault: true,
+			},
 		];
 	};
 
@@ -144,6 +154,8 @@ function CustomersReportTable( {
 				city,
 				state,
 				country,
+				billing_phone: billingPhone,
+				shipping_phone: shippingPhone,
 			} = customer;
 			const countryName = getCountryName( country );
 			const customerName =
@@ -241,6 +253,14 @@ function CustomersReportTable( {
 				{
 					display: postcode,
 					value: postcode,
+				},
+				{
+					display: billingPhone,
+					value: billingPhone,
+				},
+				{
+					display: shippingPhone,
+					value: shippingPhone,
 				},
 			];
 		} );

@@ -252,7 +252,10 @@ class Controller extends GenericController implements ExportableInterface {
 		$data['date_last_active_gmt'] = wc_rest_prepare_date_response( $data['date_last_active'], false );
 		$data['date_last_active']     = wc_rest_prepare_date_response( $data['date_last_active'] );
 		$data['role']                 = $this->get_user_role_names( $data['user_id'] ?? 0 );
-		$data                         = $this->filter_response_by_context( $data, $context );
+		// Rows can be served from a report cache written before these columns existed.
+		$data['billing_phone']  = $data['billing_phone'] ?? '';
+		$data['shipping_phone'] = $data['shipping_phone'] ?? '';
+		$data                   = $this->filter_response_by_context( $data, $context );
 
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
@@ -399,6 +402,18 @@ class Controller extends GenericController implements ExportableInterface {
 				),
 				'postcode'             => array(
 					'description' => __( 'Postal code.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'billing_phone'        => array(
+					'description' => __( 'Billing phone.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'shipping_phone'       => array(
+					'description' => __( 'Shipping phone.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -750,6 +765,8 @@ class Controller extends GenericController implements ExportableInterface {
 			'city'            => __( 'City', 'woocommerce' ),
 			'region'          => __( 'Region', 'woocommerce' ),
 			'postcode'        => __( 'Postal Code', 'woocommerce' ),
+			'billing_phone'   => __( 'Billing Phone', 'woocommerce' ),
+			'shipping_phone'  => __( 'Shipping Phone', 'woocommerce' ),
 		);
 
 		/**
@@ -785,6 +802,8 @@ class Controller extends GenericController implements ExportableInterface {
 			'city'            => $item['city'],
 			'region'          => $item['state'],
 			'postcode'        => $item['postcode'],
+			'billing_phone'   => $item['billing_phone'] ?? '',
+			'shipping_phone'  => $item['shipping_phone'] ?? '',
 		);
 
 		/**

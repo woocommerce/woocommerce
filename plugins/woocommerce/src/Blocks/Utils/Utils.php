@@ -49,4 +49,24 @@ class Utils {
 		}
 		return $src;
 	}
+
+	/**
+	 * Get the current page URL using the request path relative to home.
+	 *
+	 * @since 11.1.0
+	 * @return string The current page URL.
+	 */
+	public static function get_current_page_url() {
+		global $wp;
+
+		$request_path = is_object( $wp ) && isset( $wp->request ) && is_string( $wp->request ) ? $wp->request : '';
+		$url          = home_url( user_trailingslashit( $request_path ) );
+
+		if ( isset( $_SERVER['QUERY_STRING'] ) && is_string( $_SERVER['QUERY_STRING'] ) && '' !== $_SERVER['QUERY_STRING'] ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Preserving the raw query string encoding and delimiters.
+			$url .= '?' . wp_unslash( $_SERVER['QUERY_STRING'] );
+		}
+
+		return $url;
+	}
 }
