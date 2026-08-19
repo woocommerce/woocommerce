@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix Add to Cart + Options redirect when a plugin modifies the form and WooCommerce is installed in a subdirectory

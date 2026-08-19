@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-CSV import now creates new variations of existing variable products when "Update existing products" is selected, instead of skipping them.
