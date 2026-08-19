@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add the `woocommerce_email_editor_recent_emails_query` filter so integrations can change which emails the "Recent" category of the template selection modal lists.
