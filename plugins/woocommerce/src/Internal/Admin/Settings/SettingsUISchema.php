@@ -66,7 +66,6 @@ class SettingsUISchema {
 					'id'          => $current_id,
 					'title'       => isset( $setting['title'] ) && is_scalar( $setting['title'] ) ? html_entity_decode( (string) $setting['title'], ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ) : '',
 					'description' => isset( $setting['desc'] ) && is_scalar( $setting['desc'] ) ? wp_kses_post( (string) $setting['desc'] ) : '',
-					'actions'     => self::get_group_actions( $setting ),
 					'order'       => isset( $setting['order'] ) ? (int) $setting['order'] : $group_index,
 					'fields'      => array(),
 				);
@@ -800,58 +799,6 @@ class SettingsUISchema {
 		return $attributes;
 	}
 
-	/**
-	 * Normalize group header actions.
-	 *
-	 * @param array $setting Legacy title setting definition.
-	 * @return array
-	 */
-	private static function get_group_actions( array $setting ): array {
-		if ( empty( $setting['actions'] ) || ! is_array( $setting['actions'] ) ) {
-			return array();
-		}
-
-		$actions = array();
-
-		foreach ( $setting['actions'] as $index => $action ) {
-			if ( ! is_array( $action ) || empty( $action['label'] ) || ! is_scalar( $action['label'] ) ) {
-				continue;
-			}
-
-			$href = $action['href'] ?? $action['url'] ?? '';
-			if ( ! is_scalar( $href ) || '' === (string) $href ) {
-				continue;
-			}
-
-			$href = esc_url_raw( (string) $href );
-			if ( '' === $href ) {
-				continue;
-			}
-
-			$normalized_action = array(
-				'id'    => isset( $action['id'] ) && is_scalar( $action['id'] ) ? sanitize_key( (string) $action['id'] ) : 'action_' . $index,
-				'label' => wp_strip_all_tags( html_entity_decode( (string) $action['label'], ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ) ),
-				'href'  => $href,
-			);
-
-			if ( isset( $action['variant'] ) && is_scalar( $action['variant'] ) ) {
-				$normalized_action['variant'] = sanitize_key( (string) $action['variant'] );
-			}
-
-			if ( isset( $action['target'] ) && is_scalar( $action['target'] ) && in_array( (string) $action['target'], array( '_blank', '_self', '_parent', '_top' ), true ) ) {
-				$normalized_action['target'] = (string) $action['target'];
-			}
-
-			if ( isset( $action['rel'] ) && is_scalar( $action['rel'] ) ) {
-				$normalized_action['rel'] = sanitize_text_field( (string) $action['rel'] );
-			}
-
-			$actions[] = $normalized_action;
-		}
-
-		return $actions;
-	}
-
 	// The assertion helpers deliberately propagate InvalidArgumentException to
 	// the public boundary method, whose contract documents that exception.
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.Missing
@@ -1275,7 +1222,6 @@ class SettingsUISchema {
 			'id'          => $group_id,
 			'title'       => '',
 			'description' => '',
-			'actions'     => array(),
 			'order'       => $order,
 			'fields'      => array(),
 		);

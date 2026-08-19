@@ -11,7 +11,6 @@ export {
 export type {
 	SettingsUIField,
 	SettingsUIGroup,
-	SettingsUIGroupAction,
 	SettingsUIOption,
 	SettingsUIRegistry,
 	SettingsUISaveSchema,

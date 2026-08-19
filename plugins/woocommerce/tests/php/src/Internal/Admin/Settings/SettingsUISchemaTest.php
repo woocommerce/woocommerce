@@ -144,9 +144,9 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox It preserves sanitized group description markup and header actions.
+	 * @testdox It preserves sanitized group description markup and omits header actions.
 	 */
-	public function test_from_legacy_settings_preserves_group_description_and_actions(): void {
+	public function test_from_legacy_settings_preserves_group_description_without_actions(): void {
 		$schema = SettingsUISchema::from_legacy_settings(
 			'test',
 			'advanced',
@@ -174,19 +174,7 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 		$group = $schema['groups']['group'];
 
 		$this->assertSame( 'Read the <a href="https://woocommerce.com">documentation</a>alert("x").', $group['description'] );
-		$this->assertSame(
-			array(
-				array(
-					'id'      => 'learn-more',
-					'label'   => 'Learn more',
-					'href'    => 'https://woocommerce.com/documentation',
-					'variant' => 'secondary',
-					'target'  => '_blank',
-					'rel'     => 'noopener noreferrer',
-				),
-			),
-			$group['actions']
-		);
+		$this->assertArrayNotHasKey( 'actions', $group );
 	}
 
 	/**
