@@ -272,6 +272,27 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		}
 
 		/**
+		 * Resolve the option name a field definition reads and writes.
+		 *
+		 * The 'field_name' key can specify an input field name that differs from the field ID (for
+		 * example a nested `option_name[key]` path). It is rendered into markup and looked up as a
+		 * string, so a value that is not a usable scalar falls back to the ID. Shared by the render
+		 * and save paths so the two cannot disagree about where a field lives.
+		 *
+		 * @param array $option Field definition.
+		 * @return string
+		 */
+		private static function get_field_option_name( $option ) {
+			$field_name = $option['field_name'] ?? null;
+
+			if ( is_scalar( $field_name ) && '' !== (string) $field_name ) {
+				return (string) $field_name;
+			}
+
+			return (string) ( $option['id'] ?? '' );
+		}
+
+		/**
 		 * Output admin fields.
 		 *
 		 * Loops through the woocommerce options array and outputs each field.
@@ -289,10 +310,8 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 				// The 'field_name' key can be used when it is useful to specify an input field name that is different
 				// from the input field ID. We use the key 'field_name' because 'name' is already in use for a different
-				// purpose. It is rendered and looked up as a string, so fall back to the ID for non-scalars.
-				if ( ! isset( $value['field_name'] ) || ! is_scalar( $value['field_name'] ) ) {
-					$value['field_name'] = $value['id'];
-				}
+				// purpose.
+				$value['field_name'] = self::get_field_option_name( $value );
 				if ( ! isset( $value['title'] ) ) {
 					$value['title'] = isset( $value['name'] ) ? $value['name'] : '';
 				}
@@ -978,12 +997,12 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					continue;
 				}
 
-				$option_name = $option['field_name'] ?? $option['id'];
+				$option_name = self::get_field_option_name( $option );
 
 				// Get posted value.
 				if ( strstr( $option_name, '[' ) ) {
 					parse_str( $option_name, $option_name_array );
-					$option_name  = current( array_keys( $option_name_array ) );
+					$option_name  = (string) current( array_keys( $option_name_array ) );
 					$setting_name = key( $option_name_array[ $option_name ] );
 					$raw_value    = isset( $data[ $option_name ][ $setting_name ] ) ? wp_unslash( $data[ $option_name ][ $setting_name ] ) : null;
 				} else {
