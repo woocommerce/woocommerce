@@ -29,6 +29,10 @@ SELF=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/$(basename -- "${BASH_S
 REPO="woocommerce/woocommerce"
 # The retry loop and its annotations landed here. Nothing before this date is measurable.
 START_DATE="2026-07-15"
+# Causes outside this project's control: a third-party outage, or a branch that does not
+# build. Losses from these are excluded from the adjusted recovery rate, so a bad
+# afternoon upstream does not read as wp-env instability. Keep in step with classify().
+NOT_OURS="github-api plugin-code workspace-eacces"
 # Workflows that call the reusable ci.yml and therefore run the wp-env start step.
 WORKFLOWS=".github/workflows/ci.yml .github/workflows/tests-on-release.yml .github/workflows/tests-on-demand.yml"
 PARALLEL=6
@@ -96,6 +100,7 @@ classify() {
   # got@11 is only used by wp-env to fetch core, plugin and theme zips from wordpress.org,
   # so any transport or 5xx error raised through it belongs to that subsystem.
   elif grep -qaE  'AggregateError \[ETIMEDOUT\]|RequestError: read ECONNRESET' "$s"; then echo wordpress-org
+  elif grep -qaE  'HTTPError: Response code 429' "$s"; then echo wordpress-org-ratelimit
   elif grep -qaE  'HTTPError: Response code 5[0-9][0-9]' "$s"; then echo wordpress-org
   elif grep -qaiE 'socket hang up' "$s"; then echo wordpress-org
   elif grep -qaE  'curl error 28|could not be fully loaded' "$s"; then echo packagist
@@ -105,6 +110,9 @@ classify() {
   elif grep -qaE  'EACCES: permission denied' "$s"; then echo workspace-eacces
   elif grep -qaiE 'Cannot connect to the Docker daemon' "$s"; then echo docker-daemon
   elif grep -qaiE 'afterStart Error' "$s"; then echo wp-env-afterstart
+  # Composer fetching dists inside the Docker build. Must stay above the buildkit rule:
+  # BuildKit reports it as "failed to solve", which hides the upstream that actually failed.
+  elif grep -qaE  'api\.github\.com.*file could not be downloaded' "$s"; then echo github-api
   elif grep -qaiE 'failed to solve' "$s"; then echo buildkit
   elif grep -qaiE 'Error while running docker compose command' "$s"; then echo docker-compose
   else echo unclassified
@@ -385,6 +393,26 @@ emit_table() {  # emit_table <group> <first-column-header> <limit|0>
   echo "## Since monitoring started"
   echo
   emit_table total "Window" 0
+  echo
+  awk -F'\t' -v skip="$NOT_OURS" '
+    BEGIN {
+      n = split(skip, a, " ")
+      for (i = 1; i <= n; i++) { ext[a[i]] = 1; list = list (i > 1 ? ", " : "") "`" a[i] "`" }
+    }
+    { tot++; if ($7 == "SAVED") rec++; else if ($10 in ext) drop++ }
+    END {
+      adj = tot - drop
+      if (adj > 0) {
+        printf "Excluding the %d losses this project cannot fix — a third-party outage, or a\n", drop + 0
+        printf "branch that does not build — the rate is **%.0f%%** (%d of %d).\n", 100 * rec / adj, rec, adj
+        printf "\n"
+        printf "Excluded causes: %s.\n", list
+        printf "\n"
+        printf "A cause is only recorded for a lost job, so jobs that hit the same outages and\n"
+        printf "then recovered still count in the numerator; read the adjusted rate as an upper\n"
+        printf "bound.\n"
+      }
+    }' "$EVENTS"
   echo
   echo "### By reason"
   echo
