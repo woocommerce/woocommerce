@@ -6,6 +6,8 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\ProductReviews;
 
 use Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable;
 use DOMDocument;
+use DOMElement;
+use DOMXPath;
 use Generator;
 use ReflectionClass;
 use ReflectionException;
@@ -98,7 +100,26 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 				}
 			}
 
-			$this->assertStringContainsString( 'Exact Review Author', $row_output );
+			$document = new DOMDocument();
+			$errors   = libxml_use_internal_errors( true );
+			$document->loadHTML( '<!doctype html><html><body><table>' . $row_output . '</table></body></html>' );
+			libxml_clear_errors();
+			libxml_use_internal_errors( $errors );
+
+			$author_cells = ( new DOMXPath( $document ) )->query(
+				'//td[contains(concat(" ", normalize-space(@class), " "), " author ") and contains(concat(" ", normalize-space(@class), " "), " column-author ")]'
+			);
+			if ( false === $author_cells ) {
+				throw new \RuntimeException( 'Unable to query the author cell.' );
+			}
+
+			$author_cell = $author_cells->item( 0 );
+			$this->assertInstanceOf( DOMElement::class, $author_cell );
+			if ( ! $author_cell instanceof DOMElement ) {
+				throw new \RuntimeException( 'The author cell was not found.' );
+			}
+			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- DOM API property name.
+			$this->assertStringContainsString( 'Exact Review Author', $author_cell->textContent );
 			$this->assertStringContainsString( 'mailto:row-reviewer@example.com', $row_output );
 			$this->assertStringContainsString( 'aria-label="4 out of 5"', $row_output );
 			$this->assertStringContainsString( 'Exact review row content', $row_output );
