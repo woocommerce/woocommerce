@@ -2183,7 +2183,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		$pending = get_post_meta( $object_data->get_id(), '_wc_rest_pending_images', true );
-		if ( is_array( $pending ) && ! empty( $pending ) ) {
+		if ( is_array( $pending ) && ! empty( $pending['images'] ) ) {
 			$data['images_processing'] = true;
 		}
 

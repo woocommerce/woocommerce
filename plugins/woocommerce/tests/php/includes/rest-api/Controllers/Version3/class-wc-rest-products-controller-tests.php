@@ -1647,6 +1647,67 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Creating a product with `images_async` defers image processing via Action Scheduler and clears the pending meta once the worker runs.
+	 */
+	public function test_create_product_with_images_async_schedules_processing_and_clears_pending_meta() {
+		$attachment_id = self::factory()->attachment->create(
+			array(
+				'file'           => WC_Unit_Tests_Bootstrap::instance()->tests_dir . '/data/Dr1Bczxq4q.png',
+				'post_mime_type' => 'image/png',
+			)
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products' );
+		$request->set_body_params(
+			array(
+				'name'          => 'Async Image Product',
+				'type'          => 'simple',
+				'regular_price' => '10',
+				'images_async'  => true,
+				'images'        => array(
+					array(
+						'id'   => $attachment_id,
+						'alt'  => 'Async image alt',
+						'name' => 'Async Image',
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 201, $response->get_status() );
+		$data = $response->get_data();
+
+		// Async flow: images buffer is cleared and processing is flagged while the job is pending.
+		$this->assertTrue( $data['images_processing'] );
+		$this->assertEquals( array(), $data['images'] );
+
+		$product_id = $data['id'];
+		$this->assertNotEmpty( get_post_meta( $product_id, '_wc_rest_pending_images', true ), 'Pending images meta should be stored while processing is pending.' );
+
+		// The controller should have queued the async image-processing task through Action Scheduler.
+		$this->assertTrue(
+			as_has_scheduled_action( 'wc_rest_process_pending_product_images', array( $product_id ), 'woocommerce-rest-api-images' ),
+			'Creating a product with images_async should queue the pending-image task.'
+		);
+
+		// Run the queued task through the scheduler; the product image is applied and the pending meta is cleared.
+		\WC_Helper_Queue::run_all_pending( 'woocommerce-rest-api-images' );
+
+		$product = wc_get_product( $product_id );
+		$this->assertEquals( $attachment_id, $product->get_image_id(), 'The worker should apply the queued image.' );
+		$this->assertEmpty( get_post_meta( $product_id, '_wc_rest_pending_images', true ), 'Pending images meta should be cleared after processing.' );
+
+		// After processing, the pending meta no longer exists so `images_processing` is not reported.
+		$get_request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $product_id );
+		$get_data    = $this->server->dispatch( $get_request )->get_data();
+		$this->assertArrayNotHasKey( 'images_processing', $get_data, 'images_processing should be absent once the pending image is processed.' );
+
+		wp_delete_post( $product_id, true );
+		wp_delete_attachment( $attachment_id, true );
+	}
+
+	/**
 	 * Test that the `search_fields` parameter works with single field.
 	 *
 	 * @return void

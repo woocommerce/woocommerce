@@ -327,4 +327,103 @@ class WC_REST_Product_Categories_Controller_Test extends WC_REST_Unit_Test_Case 
 
 		$this->assertEquals( 201, $response->get_status() );
 	}
+
+	/**
+	 * @testdox A failed async category image update restores the previous thumbnail instead of leaving the category without an image.
+	 */
+	public function test_failed_async_category_image_restores_previous_thumbnail() {
+		$attachment_id = self::factory()->attachment->create(
+			array(
+				'file'           => WC_Unit_Tests_Bootstrap::instance()->tests_dir . '/data/Dr1Bczxq4q.png',
+				'post_mime_type' => 'image/png',
+			)
+		);
+
+		// Seed a category with an existing thumbnail.
+		$category_id = wp_insert_term( 'Async category', 'product_cat' )['term_id'];
+		update_term_meta( $category_id, 'thumbnail_id', $attachment_id );
+
+		// Schedule an async update pointing at an invalid attachment id.
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/categories/' . $category_id );
+		$request->set_body_params(
+			array(
+				'image'        => array( 'id' => 999999 ),
+				'images_async' => true,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		// The controller should have queued the async category-image task through Action Scheduler.
+		$this->assertTrue(
+			as_has_scheduled_action( 'wc_rest_process_pending_category_image', array( $category_id ), 'woocommerce-rest-api-images' ),
+			'An images_async category update should queue the pending-image task.'
+		);
+
+		// The old thumbnail is cleared while the job is pending.
+		$this->assertEquals( '', get_term_meta( $category_id, 'thumbnail_id', true ) );
+
+		// Run the queued task through the scheduler; it fails to apply the invalid image and restores the previous thumbnail.
+		\WC_Helper_Queue::run_all_pending( 'woocommerce-rest-api-images' );
+
+		$this->assertEquals( $attachment_id, get_term_meta( $category_id, 'thumbnail_id', true ), 'The previous thumbnail should be restored after a failed async job.' );
+		$this->assertEmpty( get_term_meta( $category_id, '_wc_rest_pending_image', true ), 'Pending image meta should be cleared after processing.' );
+	}
+
+	/**
+	 * @testdox A stale failed async category image job does not clobber a newer thumbnail applied after it.
+	 */
+	public function test_stale_failed_async_category_image_does_not_restore_over_newer_image() {
+		$original_attachment_id = self::factory()->attachment->create(
+			array(
+				'file'           => WC_Unit_Tests_Bootstrap::instance()->tests_dir . '/data/Dr1Bczxq4q.png',
+				'post_mime_type' => 'image/png',
+			)
+		);
+
+		$category_id = wp_insert_term( 'Stale async category', 'product_cat' )['term_id'];
+		update_term_meta( $category_id, 'thumbnail_id', $original_attachment_id );
+
+		// A new image is applied by a later synchronous request while the earlier async job is still queued.
+		$new_attachment_id = self::factory()->attachment->create(
+			array(
+				'file'           => WC_Unit_Tests_Bootstrap::instance()->tests_dir . '/data/Dr1Bczxq4q.png',
+				'post_mime_type' => 'image/png',
+			)
+		);
+
+		// Schedule the async job (points at an invalid attachment, so it will fail).
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/categories/' . $category_id );
+		$request->set_body_params(
+			array(
+				'image'        => array( 'id' => 999999 ),
+				'images_async' => true,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertTrue(
+			as_has_scheduled_action( 'wc_rest_process_pending_category_image', array( $category_id ), 'woocommerce-rest-api-images' ),
+			'An images_async category update should queue the pending-image task.'
+		);
+
+		// A newer synchronous update applies a different image and leaves the pending marker in place.
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/categories/' . $category_id );
+		$request->set_body_params(
+			array(
+				'image' => array( 'id' => $new_attachment_id ),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		// The stale async task is still queued; it fails but must not clobber the newer thumbnail.
+		\WC_Helper_Queue::run_all_pending( 'woocommerce-rest-api-images' );
+
+		$this->assertEquals( $new_attachment_id, get_term_meta( $category_id, 'thumbnail_id', true ), 'A stale failed job should not clobber a newer thumbnail.' );
+		$this->assertNotEmpty( get_term_meta( $category_id, '_wc_rest_image_processing_errors', true ), 'The failed job should still record the processing error.' );
+
+		wp_delete_attachment( $original_attachment_id, true );
+		wp_delete_attachment( $new_attachment_id, true );
+	}
 }

@@ -249,12 +249,18 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 
 		if ( isset( $request['image'] ) ) {
 			if ( ! empty( $request['images_async'] ) ) {
-				update_term_meta( $id, '_wc_rest_pending_image', $request['image'] );
+				// Preserve the current thumbnail so it can be restored if the async job fails.
+				$image                   = $request['image'];
+				$image['previous_thumb'] = get_term_meta( $id, 'thumbnail_id', true );
+				update_term_meta( $id, '_wc_rest_pending_image', $image );
 				if ( function_exists( 'as_schedule_single_action' ) ) {
 					as_schedule_single_action( time(), 'wc_rest_process_pending_category_image', array( $id ), 'woocommerce-rest-api-images' );
+					// Clear the current thumbnail so the response does not show the old image while the async job runs.
+					update_term_meta( $id, 'thumbnail_id', '' );
 					return true;
 				}
-				// Fallback: fall through to synchronous image handling below.
+				// Fallback: process the image synchronously below, without leaving stale pending meta.
+				delete_term_meta( $id, '_wc_rest_pending_image' );
 			}
 
 			if ( empty( $request['image']['id'] ) && ! empty( $request['image']['src'] ) ) {

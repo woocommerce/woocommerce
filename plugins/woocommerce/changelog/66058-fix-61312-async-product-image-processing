@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add opt-in `images_async` (products/categories) and `image_async` (variations) parameters to REST API endpoints for asynchronous image processing via Action Scheduler.

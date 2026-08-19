@@ -182,7 +182,14 @@ function wc_rest_process_pending_product_images( $product_id ) {
 	}
 
 	$pending = get_post_meta( $product_id, '_wc_rest_pending_images', true );
-	if ( ! is_array( $pending ) || empty( $pending['images'] ) ) {
+	if (
+		! is_array( $pending ) ||
+		! isset( $pending['images'] ) ||
+		! is_array( $pending['images'] ) ||
+		empty( $pending['images'] )
+	) {
+		// Clear any stored pending meta so `images_processing` does not stay stuck true.
+		delete_post_meta( $product_id, '_wc_rest_pending_images' );
 		return;
 	}
 
@@ -310,6 +317,21 @@ function wc_rest_process_pending_variation_image( $variation_id ) {
 				$variation->set_image_id( $attachment_id );
 				$variation->save();
 				$success = true;
+
+				// Apply the image alt if present, mirroring the synchronous path.
+				if ( ! empty( $pending['alt'] ) ) {
+					update_post_meta( $attachment_id, '_wp_attachment_image_alt', wc_clean( $pending['alt'] ) );
+				}
+
+				// Apply the image name if present, mirroring the synchronous path.
+				if ( ! empty( $pending['name'] ) ) {
+					wp_update_post(
+						array(
+							'ID'         => $attachment_id,
+							'post_title' => $pending['name'],
+						)
+					);
+				}
 			}
 		}
 	} elseif ( isset( $pending['id'] ) ) {
@@ -318,6 +340,21 @@ function wc_rest_process_pending_variation_image( $variation_id ) {
 			$variation->set_image_id( $attachment_id );
 			$variation->save();
 			$success = true;
+
+			// Apply the image alt if present, mirroring the synchronous path.
+			if ( ! empty( $pending['alt'] ) ) {
+				update_post_meta( $attachment_id, '_wp_attachment_image_alt', wc_clean( $pending['alt'] ) );
+			}
+
+			// Apply the image name if present, mirroring the synchronous path.
+			if ( ! empty( $pending['name'] ) ) {
+				wp_update_post(
+					array(
+						'ID'         => $attachment_id,
+						'post_title' => $pending['name'],
+					)
+				);
+			}
 		} else {
 			$errors[] = array(
 				'id'    => $pending['id'],
@@ -396,6 +433,16 @@ function wc_rest_process_pending_category_image( $term_id ) {
 				'id'    => $pending['id'],
 				'error' => sprintf( '#%s is not a valid image.', $image_id ),
 			);
+		}
+	}
+
+	if ( isset( $pending['previous_thumb'] ) && ! $success ) {
+		// Only restore if this job is still the current pending update and no newer image has since been applied,
+		// so a stale failed job cannot clobber a newer thumbnail.
+		$current_pending = get_term_meta( $term_id, '_wc_rest_pending_image', true );
+		$current_thumb   = get_term_meta( $term_id, 'thumbnail_id', true );
+		if ( $current_pending === $pending && '' === $current_thumb ) {
+			update_term_meta( $term_id, 'thumbnail_id', $pending['previous_thumb'] );
 		}
 	}
 
