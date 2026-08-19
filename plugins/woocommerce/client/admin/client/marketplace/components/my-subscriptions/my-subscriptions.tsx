@@ -3,7 +3,13 @@
  */
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { createInterpolateElement, useContext } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useContext,
+	useEffect,
+	useState,
+} from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
 import { Icon, external } from '@wordpress/icons';
 import apiFetch from '@wordpress/api-fetch';
 
@@ -23,12 +29,40 @@ import { RefreshButton } from './table/actions/refresh-button';
 import Notices from './notices';
 import InstallModal from './table/actions/install-modal';
 import { connectUrl } from '../../utils/functions';
+import { noticeStore } from '../../contexts/notice-store';
+import { REFRESH_SUBSCRIPTIONS_NOTICE_ID } from '../../contexts/types';
 import Notice from '../notice/notice';
 import MySubscriptionsAccount from './my-subscriptions-account';
 
 export default function MySubscriptions(): React.JSX.Element {
 	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+
+	// The Refresh button reports its own failure, and it reruns the same request
+	// this page-load notice describes. Showing both would state the same problem
+	// twice, so the refresh notice — which is dismissible and current — wins.
+	const hasRefreshNotice = useSelect(
+		( select ) =>
+			select( noticeStore )
+				.notices()
+				.some(
+					( notice: { productKey: string } ) =>
+						notice.productKey === REFRESH_SUBSCRIPTIONS_NOTICE_ID
+				),
+		[]
+	);
+
+	// Latch it: this notice was rendered from state captured at page load, so
+	// once a refresh has reported on the same request it is stale for good.
+	// Without the latch, dismissing the refresh notice would bring this
+	// non-dismissible one straight back and dismissal would achieve nothing.
+	const [ refreshHasReported, setRefreshHasReported ] = useState( false );
+
+	useEffect( () => {
+		if ( hasRefreshNotice ) {
+			setRefreshHasReported( true );
+		}
+	}, [ hasRefreshNotice ] );
 
 	const installedTableDescription = createInterpolateElement(
 		__(
@@ -163,6 +197,15 @@ export default function MySubscriptions(): React.JSX.Element {
 				<Notice
 					id={ 'woo-deleted-connection-notice' }
 					description={ wccomSettings?.maybe_deleted_connection }
+					isDismissible={ false }
+					variant="error"
+				/>
+			) }
+
+			{ wccomSettings?.api_error_notice && ! refreshHasReported && (
+				<Notice
+					id={ 'woo-subscriptions-api-error-notice' }
+					description={ wccomSettings?.api_error_notice }
 					isDismissible={ false }
 					variant="error"
 				/>

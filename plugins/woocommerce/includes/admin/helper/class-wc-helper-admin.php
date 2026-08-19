@@ -107,6 +107,12 @@ class WC_Helper_Admin {
 				$settings['wccomHelper']['connection_url_notice']        = WC_Woo_Helper_Connection::get_connection_url_notice();
 				$settings['wccomHelper']['has_host_plan_orders']         = WC_Woo_Helper_Connection::has_host_plan_orders();
 				$settings['wccomHelper']['maybe_deleted_connection']     = WC_Woo_Helper_Connection::get_deleted_connection_notice();
+
+				// Read last: the notices above already trigger a subscriptions fetch,
+				// so by this point any failure from it has been recorded.
+				$api_error = WC_Helper::get_api_error();
+
+				$settings['wccomHelper']['api_error_notice'] = null !== $api_error ? $api_error['message'] : '';
 			} else {
 				$settings['wccomHelper']['disconnected_notice'] = PluginsHelper::get_wccom_disconnected_notice();
 			}

@@ -474,6 +474,29 @@ function addNotice(
 	}
 }
 
+/**
+ * Pull the human-readable message out of a rejected subscriptions request.
+ *
+ * `/wc/v3/marketplace/refresh` answers failures with `wp_send_json_error()`,
+ * which nests the message under `data`, while transport failures and generic
+ * REST errors put it at the top level. Reading only one shape renders
+ * "undefined" to the merchant.
+ *
+ * @param error The rejection value from apiFetch.
+ * @return The best available message.
+ */
+const getRefreshErrorMessage = ( error: unknown ): string => {
+	const candidate = error as
+		| { data?: { message?: string }; message?: string }
+		| undefined;
+
+	return (
+		candidate?.data?.message ||
+		candidate?.message ||
+		__( 'Unexpected error.', 'woocommerce' )
+	);
+};
+
 const removeNotice = ( productKey: string ) => {
 	void dispatch( noticeStore ).removeNotice( productKey );
 };
@@ -587,6 +610,7 @@ export {
 	installProduct,
 	updateProduct,
 	addNotice,
+	getRefreshErrorMessage,
 	removeNotice,
 	renewUrl,
 	subscribeUrl,

@@ -34,6 +34,7 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		delete_transient( '_woocommerce_helper_notices' );
 		delete_transient( '_woocommerce_helper_connection_data' );
 		delete_transient( WC_Helper_API_Backoff::TRANSIENT_PREFIX . WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS );
+		delete_transient( '_woocommerce_helper_subscriptions_api_error' );
 	}
 
 	/**
@@ -289,6 +290,193 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		$this->assertFalse(
 			get_transient( WC_Helper_API_Backoff::TRANSIENT_PREFIX . WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS ),
 			'Only a 429 should record a backoff window'
+		);
+	}
+
+	/**
+	 * Run get_subscriptions() against a mocked Helper API response.
+	 *
+	 * @param array|WP_Error $response The response pre_http_request should return.
+	 * @return array The value get_subscriptions() returned.
+	 */
+	private function fetch_subscriptions_with_response( $response ): array {
+		$previous_auth = WC_Helper_Options::get( 'auth', array() );
+		$previous_log  = WC_Helper::$log;
+		$http_mock     = static function () use ( $response ) {
+			return $response;
+		};
+
+		WC_Helper::$log = $this->createMock( WC_Logger_Interface::class );
+
+		// Install the mock before touching `auth`. Updating that option fires
+		// hooks that call the Helper API themselves, and an unmocked call there
+		// caches an empty list, which the measured fetch would then return
+		// straight from cache without ever exercising the response under test.
+		add_filter( 'pre_http_request', $http_mock );
+
+		try {
+			WC_Helper_Options::update(
+				'auth',
+				array(
+					'access_token'        => 'test-token',
+					'access_token_secret' => 'test-secret',
+					// A real connection always carries this, and the subscription
+					// notes that run after a successful fetch dereference it.
+					'site_id'             => 1,
+				)
+			);
+
+			// Whatever those hooks recorded, start the measured call from a clean
+			// slate so the assertions describe this response and nothing else.
+			delete_transient( '_woocommerce_helper_subscriptions' );
+			delete_transient( '_woocommerce_helper_subscriptions_api_error' );
+			WC_Helper_API_Backoff::clear( WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS );
+
+			return WC_Helper::get_subscriptions();
+		} finally {
+			// Restore `auth` while the mock is still installed, so the hooks it
+			// fires stay off the network.
+			WC_Helper_Options::update( 'auth', $previous_auth );
+			remove_filter( 'pre_http_request', $http_mock );
+			WC_Helper::$log = $previous_log;
+		}
+	}
+
+	/**
+	 * A rate-limited Helper API response.
+	 *
+	 * @return array
+	 */
+	private function get_rate_limited_response(): array {
+		return array(
+			'headers'  => array( 'retry-after' => '60' ),
+			'response' => array(
+				'code'    => 429,
+				'message' => 'Too Many Requests',
+			),
+			'body'     => '{"code":"wccom_rest_limit_reached","data":{"status":429}}',
+		);
+	}
+
+	/**
+	 * @testdox get_api_error should return no error when nothing has failed.
+	 */
+	public function test_get_api_error_returns_null_without_a_recorded_failure(): void {
+		$this->assertNull(
+			WC_Helper::get_api_error(),
+			'No error should be reported before any Helper API call has failed'
+		);
+	}
+
+	/**
+	 * @testdox get_api_error should report the rate-limit message after a 429.
+	 */
+	public function test_get_api_error_reports_rate_limit_message_after_429(): void {
+		$result = $this->fetch_subscriptions_with_response( $this->get_rate_limited_response() );
+
+		$this->assertSame( array(), $result, 'A rate-limited response should yield no subscriptions' );
+
+		$error = WC_Helper::get_api_error();
+
+		$this->assertNotNull( $error, 'A 429 should record a surfaceable error' );
+		$this->assertSame( 429, $error['code'], 'The recorded error should carry the HTTP status' );
+		$this->assertSame(
+			'You have exceeded the request limit. Please try again in 1 minute.',
+			$error['message'],
+			'A 429 should name the wait rather than say "a few minutes"'
+		);
+		$this->assertSame( 60, $error['retry_after'], 'The Retry-After window should be reported' );
+	}
+
+	/**
+	 * The generic "a few minutes" copy understates a window that the server can
+	 * set to hours, which is the case this replaces.
+	 *
+	 * @testdox get_api_error should report a multi-hour rate-limit window in hours.
+	 */
+	public function test_get_api_error_reports_a_long_rate_limit_window_in_hours(): void {
+		$response                           = $this->get_rate_limited_response();
+		$response['headers']['retry-after'] = (string) ( 3 * HOUR_IN_SECONDS );
+
+		$this->fetch_subscriptions_with_response( $response );
+
+		$error = WC_Helper::get_api_error();
+
+		$this->assertNotNull( $error, 'A 429 should record a surfaceable error' );
+		$this->assertSame(
+			'You have exceeded the request limit. Please try again in 3 hours.',
+			$error['message'],
+			'A multi-hour window should be stated in hours, not as "a few minutes"'
+		);
+	}
+
+	/**
+	 * get_message_for_response_code() only has copy for 429 and 403. Rebuilding
+	 * from the status for anything else replaces real guidance — the reconnect
+	 * instructions carried by a 401, for instance — with a bare status code.
+	 *
+	 * @testdox get_api_error should keep the recorded message for statuses with no specific copy.
+	 */
+	public function test_get_api_error_keeps_the_recorded_message_without_specific_copy(): void {
+		$actionable = 'Authentication failed. Please try again after a few minutes. If the issue persists, disconnect your store from WooCommerce.com and reconnect.';
+
+		$this->fetch_subscriptions_with_response( new WP_Error( 'authentication', $actionable, 401 ) );
+
+		$error = WC_Helper::get_api_error();
+
+		$this->assertNotNull( $error, 'A transport-level failure should record a surfaceable error' );
+		$this->assertSame( 401, $error['code'], 'The recorded error should carry the status' );
+		$this->assertSame(
+			$actionable,
+			$error['message'],
+			'The reconnect guidance should survive rather than becoming a bare status code'
+		);
+	}
+
+	/**
+	 * A 429 suppresses further requests for the whole backoff window. The error has
+	 * to outlive the request that received it, or the screen silently reverts to
+	 * looking like an empty account while requests are still being held back.
+	 *
+	 * @testdox get_api_error should keep reporting a 429 for the whole backoff window.
+	 */
+	public function test_api_error_persists_across_the_backoff_window(): void {
+		$this->fetch_subscriptions_with_response( $this->get_rate_limited_response() );
+
+		// A second call short-circuits on the backoff and never reaches the API,
+		// so nothing new is recorded — the first record has to still be there.
+		$second_result = WC_Helper::get_subscriptions();
+
+		$this->assertSame( array(), $second_result, 'A backed-off call should yield no subscriptions' );
+		$this->assertTrue(
+			WC_Helper_API_Backoff::is_rate_limited( WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS ),
+			'The backoff window should still be open'
+		);
+
+		$error = WC_Helper::get_api_error();
+
+		$this->assertNotNull( $error, 'The error should survive for as long as requests are suppressed' );
+		$this->assertSame( 429, $error['code'], 'The persisted error should still be the rate limit' );
+	}
+
+	/**
+	 * @testdox get_api_error should stop reporting once a fetch succeeds.
+	 */
+	public function test_api_error_is_cleared_after_a_successful_fetch(): void {
+		$this->fetch_subscriptions_with_response( $this->get_rate_limited_response() );
+
+		$this->assertNotNull( WC_Helper::get_api_error(), 'Precondition: an error is recorded' );
+
+		$this->fetch_subscriptions_with_response(
+			array(
+				'response' => array( 'code' => 200 ),
+				'body'     => wp_json_encode( $this->get_valid_subscription_data() ),
+			)
+		);
+
+		$this->assertNull(
+			WC_Helper::get_api_error(),
+			'A successful fetch should clear the recorded error'
 		);
 	}
 
