@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Surface WooCommerce.com API failures on My Subscriptions instead of rendering an empty subscription list, including the rate-limit message for the whole backoff window after an HTTP 429.
