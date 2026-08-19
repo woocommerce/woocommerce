@@ -1,0 +1,5 @@
+Significance: patch
+Type: tweak
+Comment: Documentation-only: fix the copy-pasted param description and wrong return type in the woocommerce_blocks_product_grid_is_cacheable filter docblock and its generated hook reference.
+
+Fix the docblock for the woocommerce_blocks_product_grid_is_cacheable filter and its generated hook documentation.
