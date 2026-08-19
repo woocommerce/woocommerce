@@ -937,6 +937,70 @@ describe( 'getRangeLabel', () => {
 		} );
 	} );
 
+	describe( 'with a locale that renders non-Latin digits', () => {
+		// Mirrors moment's Arabic locale, which maps digits when formatting.
+		const arabicDigits = [
+			'٠',
+			'١',
+			'٢',
+			'٣',
+			'٤',
+			'٥',
+			'٦',
+			'٧',
+			'٨',
+			'٩',
+		];
+		const monthNames = [
+			'يناير',
+			'فبراير',
+			'مارس',
+			'أبريل',
+			'مايو',
+			'يونيو',
+			'يوليو',
+			'أغسطس',
+			'سبتمبر',
+			'أكتوبر',
+			'نوفمبر',
+			'ديسمبر',
+		];
+		let originalLocale: string;
+
+		beforeAll( () => {
+			originalLocale = moment.locale();
+			moment.defineLocale( 'non-latin-digits', {
+				months: monthNames,
+				monthsShort: monthNames,
+				postformat: ( value: string ) =>
+					value.replace(
+						/\d/g,
+						( digit ) => arabicDigits[ Number( digit ) ]
+					),
+			} );
+			moment.locale( 'non-latin-digits' );
+		} );
+
+		afterAll( () => {
+			moment.locale( originalLocale );
+		} );
+
+		it( 'should keep both ends of the range', () => {
+			const label = getRangeLabel(
+				moment( '2024-10-01' ),
+				moment( '2024-10-31' )
+			);
+			expect( label ).toBe( 'أكتوبر ١ - ٣١, ٢٠٢٤' );
+		} );
+
+		it( 'should leave a single day label alone', () => {
+			const label = getRangeLabel(
+				moment( '2024-10-01' ),
+				moment( '2024-10-01' )
+			);
+			expect( label ).toBe( 'أكتوبر ١, ٢٠٢٤' );
+		} );
+	} );
 } );
 
 describe( 'loadLocaleData', () => {
