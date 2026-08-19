@@ -223,6 +223,16 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					return $default;
 				}
 
+				/*
+				 * Take the bracketed keys from the raw name rather than from the parsed structure.
+				 * parse_str() renders 'opt[a][]' and 'opt[a][0]' identically, yet the first names
+				 * the whole array stored at 'a' while the second names its first element, so the
+				 * descent has to stop at an empty bracket. Only the base name is mangled by
+				 * parse_str() (dots and spaces become underscores); the keys are left alone, and
+				 * save_fields() derives the first of them the same way.
+				 */
+				preg_match_all( '/\[([^\]]*)\]/', $option_name, $option_keys );
+
 				// Option name is first key.
 				$option_name = (string) current( array_keys( $option_array ) );
 
@@ -230,27 +240,22 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				$option_value = get_option( $option_name, null );
 
 				/*
-				 * Walk the parsed key path down the stored value, so 'opt[a][b]' resolves to the
-				 * leaf that the matching input field posts rather than the sub-array above it.
-				 * Anything the path cannot reach resolves to null, and falls back to the default.
+				 * Walk the key path down the stored value, so 'opt[a][b]' resolves to the leaf the
+				 * matching input posts rather than the sub-array above it. Anything the path cannot
+				 * reach resolves to null, and falls back to the default.
 				 */
-				$node = $option_array[ $option_name ];
-
-				while ( is_array( $node ) ) {
-					$key = key( $node );
-
-					if ( null === $key ) {
+				foreach ( $option_keys[1] as $option_key ) {
+					if ( '' === $option_key ) {
+						// An empty bracket names the whole array at this depth.
 						break;
 					}
 
-					if ( is_array( $option_value ) && isset( $option_value[ $key ] ) ) {
-						$option_value = $option_value[ $key ];
-					} else {
+					if ( ! is_array( $option_value ) || ! isset( $option_value[ $option_key ] ) ) {
 						$option_value = null;
 						break;
 					}
 
-					$node = $node[ $key ];
+					$option_value = $option_value[ $option_key ];
 				}
 			} else {
 				// Single value.
