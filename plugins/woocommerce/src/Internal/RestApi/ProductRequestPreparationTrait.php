@@ -51,14 +51,16 @@ trait ProductRequestPreparationTrait {
 			try {
 				$product = new $classname( $id );
 			} catch ( \Exception $e ) {
-				// Typed exceptions carry their own codes for the handlers upstream, and the
-				// arbitration below applies only to a nonzero target ID: wp_delete_post()
-				// invalidates the posts cache (unlike WooCommerce's products cache group), so
-				// get_post_type() reliably reports whether the product vanished (e.g. deleted
-				// concurrently) since the route guard. Everything else is rethrown unchanged.
-				$target_post_type = get_post_type( $id );
+				// Convert only the core data store's own invalid-product failure for a nonzero
+				// target that is no longer a product post; absence of a post proves deletion
+				// there because wp_delete_post() invalidates the posts cache (unlike
+				// WooCommerce's products cache group). Everything else is rethrown unchanged:
+				// typed exceptions carry their own codes for the handlers upstream, and
+				// extension-backed stores may fail transiently for IDs that never had a post.
+				$is_core_invalid_product = ! ( $e instanceof \WC_Data_Exception ) && __( 'Invalid product.', 'woocommerce' ) === $e->getMessage();
+				$target_post_type        = get_post_type( $id );
 
-				if ( $e instanceof \WC_Data_Exception || ! $id || 'product' === $target_post_type ) {
+				if ( ! $is_core_invalid_product || ! $id || 'product' === $target_post_type ) {
 					throw $e;
 				}
 

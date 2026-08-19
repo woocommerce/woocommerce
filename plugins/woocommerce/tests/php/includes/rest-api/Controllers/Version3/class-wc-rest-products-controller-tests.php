@@ -2405,6 +2405,38 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Generic exceptions from extension-backed product stores are rethrown instead of becoming a 404.
+	 */
+	public function test_prepare_object_rethrows_generic_exception_for_extension_backed_product(): void {
+		$failing_store = new class() extends WC_Product_Data_Store_CPT {
+			/**
+			 * Simulate a transient failure in an extension backend that stores products outside wp_posts.
+			 *
+			 * @param WC_Product $product Product being read.
+			 * @throws RuntimeException Always, simulating a temporary outage.
+			 */
+			public function read( &$product ) {
+				throw new RuntimeException( 'Remote backend timeout.' );
+			}
+		};
+		$register      = static function ( $data_stores ) use ( $failing_store ) {
+			$data_stores['product-simple'] = $failing_store;
+			return $data_stores;
+		};
+		add_filter( 'woocommerce_data_stores', $register );
+
+		// Extension-backed product: the ID has no corresponding WordPress post.
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/999999992' );
+		$request->set_url_params( array( 'id' => 999999992 ) );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$this->expectException( RuntimeException::class );
+		$this->expectExceptionMessage( 'Remote backend timeout.' );
+
+		$this->invoke_prepare( $request, false );
+	}
+
+	/**
 	 * @testdox The invalid-product error keeps one code but distinguishes variation targets in its message.
 	 */
 	public function test_invalid_product_id_error_distinguishes_variations_in_message(): void {
