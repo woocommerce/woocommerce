@@ -66,9 +66,9 @@ class WC_Tests_Widget extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should limit recently viewed widget queries from oversized cookies.
+	 * @testdox Should preserve extension-provided recently viewed cookie IDs in widget queries.
 	 */
-	public function test_recently_viewed_widget_query_limits_oversized_cookie(): void {
+	public function test_recently_viewed_widget_query_preserves_extension_cookie_ids(): void {
 		$viewed_product_ids = range( 1, 20 );
 		$query_args         = array();
 		$query_args_filter  = static function ( $args ) use ( &$query_args ) {
@@ -82,19 +82,19 @@ class WC_Tests_Widget extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_recently_viewed_products_widget_query_args', $query_args_filter );
 
 		try {
-			$widget = new WC_Widget_Recently_Viewed();
+			$sut = new WC_Widget_Recently_Viewed();
 
 			ob_start();
 			try {
-				$widget->widget( array(), array() );
+				$sut->widget( array(), array() );
 			} finally {
 				ob_end_clean();
 			}
 
 			$this->assertSame(
-				array_slice( array_reverse( $viewed_product_ids ), 0, 15 ),
+				array_reverse( $viewed_product_ids ),
 				$query_args['post__in'],
-				'An oversized recently viewed cookie should only send the 15 newest product IDs to the query.'
+				'The recently viewed widget query should preserve every product ID provided through the shared cookie.'
 			);
 		} finally {
 			remove_filter( 'woocommerce_recently_viewed_products_widget_query_args', $query_args_filter );
