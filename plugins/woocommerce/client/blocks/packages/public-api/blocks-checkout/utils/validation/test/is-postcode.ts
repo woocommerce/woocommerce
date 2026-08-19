@@ -202,6 +202,11 @@ describe( 'isPostcode', () => {
 		[ true, 'anything', 'ZZ' ],
 		[ true, '', 'XX' ],
 		[ false, 'anything#', 'XX' ],
+
+		// Object prototype keys are unknown country codes, not shared rules.
+		[ true, '12345', 'constructor' ],
+		[ true, '12345', '__proto__' ],
+		[ true, '12345', 'toString' ],
 	];
 
 	test.each( cases )( '%s: %s for %s', ( result, postcode, country ) =>

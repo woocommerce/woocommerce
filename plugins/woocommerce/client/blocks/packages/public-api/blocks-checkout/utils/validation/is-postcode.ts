@@ -51,8 +51,8 @@ const isPostcode = ( { postcode, country }: IsPostcodeProps ): boolean => {
 		return false;
 	}
 
-	const sharedRule = SHARED_RULES[ country ];
-	if ( sharedRule ) {
+	if ( Object.hasOwn( SHARED_RULES, country ) ) {
+		const sharedRule = SHARED_RULES[ country ];
 		const regex = new RegExp(
 			`^(?:${ sharedRule.pattern })$`,
 			sharedRule.flags || ''
