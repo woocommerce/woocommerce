@@ -1,3 +1,12 @@
+/**
+ * Internal dependencies
+ */
+const { htmlToMarkdown } = require( '../utilities/html-to-markdown' );
+
+// Angle-bracket autolinks, so markdownlint (MD034) doesn't flag bare URLs.
+const linkify = ( text ) =>
+	/^https?:\/\//.test( text ) ? `<${ text }>` : text;
+
 const related = ( hookDoc ) => {
 	const tags = hookDoc.tags || [];
 	const seeDocs =
@@ -6,7 +15,10 @@ const related = ( hookDoc ) => {
 	return seeDocs && seeDocs.length
 		? {
 				ul: seeDocs.map( ( { refers, content = '' } ) => {
-					return content ? refers + ' - ' + content : refers;
+					const reference = linkify( refers );
+					return content
+						? reference + ' - ' + htmlToMarkdown( content )
+						: reference;
 				} ),
 		  }
 		: null;

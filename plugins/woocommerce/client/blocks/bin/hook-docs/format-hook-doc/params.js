@@ -1,3 +1,13 @@
+/**
+ * Internal dependencies
+ */
+const { htmlToMarkdown } = require( '../utilities/html-to-markdown' );
+
+// json2md only escapes the first unescaped pipe per cell; escape them all so
+// values like `shipping|billing|other` don't add phantom table columns.
+const cell = ( text ) =>
+	htmlToMarkdown( String( text ) ).replace( /\|/g, '\\|' );
+
 const params = ( hookDoc ) => {
 	const tags = hookDoc.tags || [];
 	const paramDocs =
@@ -10,9 +20,9 @@ const params = ( hookDoc ) => {
 					rows: [
 						...paramDocs.map(
 							( { variable, types, content }, index ) => [
-								variable ? variable : index + 1,
-								types.join( ', ' ),
-								content,
+								variable ? cell( variable ) : index + 1,
+								cell( types.join( ', ' ) ),
+								cell( content ),
 							]
 						),
 					],

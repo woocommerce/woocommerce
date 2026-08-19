@@ -1,0 +1,36 @@
+--- a/src/generate.php
++++ b/src/generate.php
+@@ -378,21 +378,21 @@
+ 					$tag_data['content'] = $html;
+ 				} elseif ( $tag instanceof \phpDocumentor\Reflection\DocBlock\Tags\InvalidTag && $tag->getName() === 'see' ) {
+ 					//
+-				} elseif ( $tag instanceof \phpDocumentor\Reflection\DocBlock\Tags\Return_ ) {
++				} elseif ( $tag instanceof \phpDocumentor\Reflection\DocBlock\Tags\Return_ || $tag instanceof \phpDocumentor\Reflection\DocBlock\Tags\Throws ) {
++					$type = $tag->getType();
++					if ( $type instanceof \phpDocumentor\Reflection\Types\Compound ) {
++						$tag_data['types'] = array_map( 'strval', iterator_to_array( $type ) );
++					} else {
++						$tag_data['types'] = [ (string) $type ];
++					}
++				} else {
+ 					printf(
+-						'Hook "%s" contains a `@return` tag, which is not supported.' . "\n",
++						'Warning: unknown tag type "%s" (@%s) for hook "%s" in file "%s".' . "\n",
++						get_class( $tag ),
++						$tag->getName(),
+ 						$hook_name,
++						$filename,
+ 					);
+-				} else {
+-					throw new \Exception(
+-						sprintf(
+-							'Unknown tag type "%s" (@%s) for hook "%s" in file "%s".',
+-							get_class( $tag ),
+-							$tag->getName(),
+-							$hook_name,
+-							$filename,
+-						)
+-					);
+ 				}
+ 
+ 				$tags[] = $tag_data;

@@ -1,9 +1,26 @@
 {
-    "$schema": "https://raw.githubusercontent.com/wp-hooks/generator/0.9.0/schema.json",
+    "$schema": "https://raw.githubusercontent.com/wp-hooks/generator/1.0.2/schema.json",
     "hooks": [
         {
+            "name": "$hook",
+            "file": "Blocks/Templates/AbstractTemplateCompatibility.php",
+            "type": "action",
+            "doc": {
+                "description": "Action to render the content of a hook.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "9.5.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
             "name": "deprecated_function_run",
-            "file": "Domain/Bootstrap.php",
+            "file": "Blocks/Domain/Bootstrap.php",
             "type": "action",
             "doc": {
                 "description": "Fires when a deprecated function is called.",
@@ -17,6 +34,175 @@
                 "long_description_html": ""
             },
             "args": 3
+        },
+        {
+            "name": "internal_woocommerce_cart_item_added_from_user_request",
+            "file": "StoreApi/Routes/V1/CartAddItem.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires when an item is added to the cart from a user request.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "param",
+                        "content": "Product ID (variation ID for variable products).",
+                        "types": [
+                            "int"
+                        ],
+                        "variable": "$product_id"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Quantity added to the cart.",
+                        "types": [
+                            "int",
+                            "float"
+                        ],
+                        "variable": "$quantity"
+                    },
+                    {
+                        "name": "since",
+                        "content": "10.6.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 2
+        },
+        {
+            "name": "internal_woocommerce_cart_item_removed_from_user_request",
+            "file": "StoreApi/Routes/V1/CartRemoveItem.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires when a cart item is removed from a user request.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "param",
+                        "content": "Cart item key.",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$cart_item_key"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Cart object.",
+                        "types": [
+                            "\\WC_Cart"
+                        ],
+                        "variable": "$cart"
+                    },
+                    {
+                        "name": "since",
+                        "content": "10.6.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 2
+        },
+        {
+            "name": "internal_woocommerce_cart_item_updated_from_user_request",
+            "file": "StoreApi/Routes/V1/CartUpdateItem.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires when a cart item quantity is updated from a user request.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "param",
+                        "content": "Cart item key.",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$cart_item_key"
+                    },
+                    {
+                        "name": "param",
+                        "content": "New quantity.",
+                        "types": [
+                            "int",
+                            "float"
+                        ],
+                        "variable": "$quantity"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Old quantity.",
+                        "types": [
+                            "int",
+                            "float"
+                        ],
+                        "variable": "$old_quantity"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Cart object.",
+                        "types": [
+                            "\\WC_Cart"
+                        ],
+                        "variable": "$cart"
+                    },
+                    {
+                        "name": "since",
+                        "content": "10.6.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 4
+        },
+        {
+            "name": "woocommerce_' . $product->get_type() . '_add_to_cart",
+            "file": "Blocks/BlockTypes/AddToCartForm.php",
+            "type": "action",
+            "doc": {
+                "description": "Trigger the single product add to cart action for each product type.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "9.7.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_' . $product_type . '_add_to_cart",
+            "file": "Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php",
+            "type": "action",
+            "doc": {
+                "description": "Trigger the single product add to cart action that prints the markup.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "9.7.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_' . $product_type . '_add_to_cart",
+            "file": "Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php",
+            "type": "action",
+            "doc": {
+                "description": "Trigger the single product add to cart action that prints the markup.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "9.7.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
         },
         {
             "name": "woocommerce_add_to_cart",
@@ -46,7 +232,7 @@
                         "name": "param",
                         "content": "ID of the product added to the cart.",
                         "types": [
-                            "integer"
+                            "int"
                         ],
                         "variable": "$product_id"
                     },
@@ -54,7 +240,7 @@
                         "name": "param",
                         "content": "Quantity of the item added to the cart.",
                         "types": [
-                            "integer"
+                            "int"
                         ],
                         "variable": "$request_quantity"
                     },
@@ -62,7 +248,7 @@
                         "name": "param",
                         "content": "Variation ID of the product added to the cart.",
                         "types": [
-                            "integer"
+                            "int"
                         ],
                         "variable": "$variation_id"
                     },
@@ -88,8 +274,127 @@
             "args": 6
         },
         {
+            "name": "woocommerce_after_add_to_cart_button",
+            "file": "Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_after_add_to_cart_button.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "10.0.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_after_add_to_cart_button",
+            "file": "Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_after_add_to_cart_button.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "10.0.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_after_add_to_cart_button",
+            "file": "Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_after_add_to_cart_button.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "10.0.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_after_add_to_cart_button",
+            "file": "Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_after_add_to_cart_button.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "10.0.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_after_add_to_cart_form",
+            "file": "Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_after_add_to_cart_form.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "10.1.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_after_add_to_cart_quantity",
+            "file": "Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_after_add_to_cart_quantity.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "10.0.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_after_add_to_cart_quantity",
+            "file": "Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_after_add_to_cart_quantity.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "10.0.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
             "name": "woocommerce_after_main_content",
-            "file": "BlockTypes/ClassicTemplate.php",
+            "file": "Blocks/BlockTypes/ClassicTemplate.php",
             "type": "action",
             "doc": {
                 "description": "Hook: woocommerce_after_main_content",
@@ -111,7 +416,7 @@
         },
         {
             "name": "woocommerce_after_main_content",
-            "file": "BlockTypes/ClassicTemplate.php",
+            "file": "Blocks/BlockTypes/ClassicTemplate.php",
             "type": "action",
             "doc": {
                 "description": "Hook: woocommerce_after_main_content",
@@ -133,7 +438,7 @@
         },
         {
             "name": "woocommerce_after_shop_loop",
-            "file": "BlockTypes/ClassicTemplate.php",
+            "file": "Blocks/BlockTypes/ClassicTemplate.php",
             "type": "action",
             "doc": {
                 "description": "Hook: woocommerce_after_shop_loop.",
@@ -147,6 +452,57 @@
                     {
                         "name": "since",
                         "content": "6.3.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_after_single_variation",
+            "file": "Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_after_single_variation.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "10.0.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_after_variations_form",
+            "file": "Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_after_variations_form.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "10.0.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_after_variations_table",
+            "file": "Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_after_variations_table.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "10.0.0"
                     }
                 ],
                 "long_description_html": ""
@@ -184,7 +540,7 @@
         },
         {
             "name": "woocommerce_archive_description",
-            "file": "BlockTypes/ClassicTemplate.php",
+            "file": "Blocks/BlockTypes/ClassicTemplate.php",
             "type": "action",
             "doc": {
                 "description": "Hook: woocommerce_archive_description.",
@@ -210,8 +566,127 @@
             "args": 0
         },
         {
+            "name": "woocommerce_before_add_to_cart_button",
+            "file": "Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_before_add_to_cart_button.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "10.0.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_before_add_to_cart_button",
+            "file": "Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_before_add_to_cart_button.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "10.0.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_before_add_to_cart_button",
+            "file": "Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_before_add_to_cart_button.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "10.0.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_before_add_to_cart_button",
+            "file": "Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_before_add_to_cart_button.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "10.0.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_before_add_to_cart_form",
+            "file": "Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_before_add_to_cart_form.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "10.1.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_before_add_to_cart_quantity",
+            "file": "Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_before_add_to_cart_quantity.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "10.0.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_before_add_to_cart_quantity",
+            "file": "Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_before_add_to_cart_quantity.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "10.0.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
             "name": "woocommerce_before_main_content",
-            "file": "BlockTypes/ClassicTemplate.php",
+            "file": "Blocks/BlockTypes/ClassicTemplate.php",
             "type": "action",
             "doc": {
                 "description": "Hook: woocommerce_before_main_content",
@@ -243,7 +718,7 @@
         },
         {
             "name": "woocommerce_before_main_content",
-            "file": "BlockTypes/ClassicTemplate.php",
+            "file": "Blocks/BlockTypes/ClassicTemplate.php",
             "type": "action",
             "doc": {
                 "description": "Hook: woocommerce_before_main_content",
@@ -275,7 +750,7 @@
         },
         {
             "name": "woocommerce_before_shop_loop",
-            "file": "BlockTypes/ClassicTemplate.php",
+            "file": "Blocks/BlockTypes/ClassicTemplate.php",
             "type": "action",
             "doc": {
                 "description": "Hook: woocommerce_before_shop_loop.",
@@ -306,16 +781,16 @@
             "args": 0
         },
         {
-            "name": "woocommerce_blocks_cart_enqueue_data",
-            "file": "BlockTypes/MiniCart.php",
+            "name": "woocommerce_before_single_variation",
+            "file": "Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php",
             "type": "action",
             "doc": {
-                "description": "Fires after cart block data is registered.",
+                "description": "Hook: woocommerce_before_single_variation.",
                 "long_description": "",
                 "tags": [
                     {
                         "name": "since",
-                        "content": "5.8.0"
+                        "content": "10.0.0"
                     }
                 ],
                 "long_description_html": ""
@@ -323,8 +798,50 @@
             "args": 0
         },
         {
+            "name": "woocommerce_before_variations_form",
+            "file": "Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_before_variations_form.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "10.0.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_blocks_' . $this->registry_identifier . '_registration",
+            "file": "Blocks/Integrations/IntegrationRegistry.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires when the IntegrationRegistry is initialized.",
+                "long_description": "Runs before integrations are initialized allowing new integration to be registered for use. This should be used as the primary hook for integrations to include their scripts, styles, and other code extending the blocks.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "4.6.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Instance of the IntegrationRegistry class which exposes the IntegrationRegistry::register() method.",
+                        "types": [
+                            "\\IntegrationRegistry"
+                        ],
+                        "variable": "$this"
+                    }
+                ],
+                "long_description_html": "<p>Runs before integrations are initialized allowing new integration to be registered for use. This should be used as the primary hook for integrations to include their scripts, styles, and other code extending the blocks.</p>"
+            },
+            "args": 1
+        },
+        {
             "name": "woocommerce_blocks_cart_enqueue_data",
-            "file": "BlockTypes/Cart.php",
+            "file": "Blocks/BlockTypes/Cart.php",
             "type": "action",
             "doc": {
                 "description": "Fires after cart block data is registered.",
@@ -340,8 +857,25 @@
             "args": 0
         },
         {
+            "name": "woocommerce_blocks_cart_enqueue_data",
+            "file": "Blocks/BlockTypes/MiniCart.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires after cart block data is registered.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "5.8.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
             "name": "woocommerce_blocks_checkout_enqueue_data",
-            "file": "BlockTypes/Checkout.php",
+            "file": "Blocks/BlockTypes/Checkout.php",
             "type": "action",
             "doc": {
                 "description": "Fires after checkout block data is registered.",
@@ -358,7 +892,7 @@
         },
         {
             "name": "woocommerce_blocks_enqueue_cart_block_scripts_after",
-            "file": "BlockTypes/Cart.php",
+            "file": "Blocks/BlockTypes/Cart.php",
             "type": "action",
             "doc": {
                 "description": "Fires after cart block scripts are enqueued.",
@@ -375,7 +909,7 @@
         },
         {
             "name": "woocommerce_blocks_enqueue_cart_block_scripts_before",
-            "file": "BlockTypes/Cart.php",
+            "file": "Blocks/BlockTypes/Cart.php",
             "type": "action",
             "doc": {
                 "description": "Fires before cart block scripts are enqueued.",
@@ -392,7 +926,7 @@
         },
         {
             "name": "woocommerce_blocks_enqueue_checkout_block_scripts_after",
-            "file": "BlockTypes/Checkout.php",
+            "file": "Blocks/BlockTypes/Checkout.php",
             "type": "action",
             "doc": {
                 "description": "Fires after checkout block scripts are enqueued.",
@@ -409,7 +943,7 @@
         },
         {
             "name": "woocommerce_blocks_enqueue_checkout_block_scripts_before",
-            "file": "BlockTypes/Checkout.php",
+            "file": "Blocks/BlockTypes/Checkout.php",
             "type": "action",
             "doc": {
                 "description": "Fires before checkout block scripts are enqueued.",
@@ -426,7 +960,7 @@
         },
         {
             "name": "woocommerce_blocks_loaded",
-            "file": "Domain/Bootstrap.php",
+            "file": "Blocks/Domain/Bootstrap.php",
             "type": "action",
             "doc": {
                 "description": "Fires when the woocommerce blocks are loaded and ready to use.",
@@ -442,29 +976,45 @@
             "args": 0
         },
         {
-            "name": "woocommerce_blocks_{$this->registry_identifier}_registration",
-            "file": "Integrations/IntegrationRegistry.php",
+            "name": "woocommerce_blocks_validate_location_' . $location . '_fields",
+            "file": "Blocks/Domain/Services/CheckoutFields.php",
             "type": "action",
             "doc": {
-                "description": "Fires when the IntegrationRegistry is initialized.",
-                "long_description": "Runs before integrations are initialized allowing new integration to be registered for use. This should be used as the primary hook for integrations to include their scripts, styles, and other code extending the blocks.",
+                "description": "Pass an error object to allow validation of an additional field.",
+                "long_description": "",
                 "tags": [
                     {
-                        "name": "since",
-                        "content": "4.6.0"
+                        "name": "param",
+                        "content": "A WP_Error object that extensions may add errors to.",
+                        "types": [
+                            "\\WP_Error"
+                        ],
+                        "variable": "$errors"
                     },
                     {
                         "name": "param",
-                        "content": "Instance of the IntegrationRegistry class which exposes the IntegrationRegistry::register() method.",
+                        "content": "List of fields (key value pairs) in this location.",
                         "types": [
-                            "\\Automattic\\WooCommerce\\Blocks\\Integrations\\IntegrationRegistry"
+                            "mixed"
                         ],
-                        "variable": "$this"
+                        "variable": "$fields"
+                    },
+                    {
+                        "name": "param",
+                        "content": "The group of this location (shipping|billing|other).",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$group"
+                    },
+                    {
+                        "name": "since",
+                        "content": "8.7.0"
                     }
                 ],
-                "long_description_html": "<p>Runs before integrations are initialized allowing new integration to be registered for use. This should be used as the primary hook for integrations to include their scripts, styles, and other code extending the blocks.</p>"
+                "long_description_html": ""
             },
-            "args": 1
+            "args": 3
         },
         {
             "name": "woocommerce_check_cart_items",
@@ -492,53 +1042,41 @@
             "args": 0
         },
         {
-            "name": "woocommerce_created_customer",
-            "file": "StoreApi/Routes/V1/Checkout.php",
+            "name": "woocommerce_checkout_validate_order_before_payment",
+            "file": "StoreApi/Utilities/OrderController.php",
             "type": "action",
             "doc": {
-                "description": "Fires after a customer account has been registered.",
-                "long_description": "This hook fires after customer accounts are created and passes the customer data.",
+                "description": "Allow plugins to perform custom validation before payment.",
+                "long_description": "Plugins can add errors to the $validation_errors object.",
                 "tags": [
                     {
+                        "name": "param",
+                        "content": "The order object.",
+                        "types": [
+                            "\\WC_Order"
+                        ],
+                        "variable": "$order"
+                    },
+                    {
+                        "name": "param",
+                        "content": "WP_Error object to add custom errors to.",
+                        "types": [
+                            "\\WP_Error"
+                        ],
+                        "variable": "$validation_errors"
+                    },
+                    {
                         "name": "since",
-                        "content": "7.2.0"
-                    },
-                    {
-                        "name": "internal",
-                        "content": "Matches filter name in WooCommerce core."
-                    },
-                    {
-                        "name": "param",
-                        "content": "New customer (user) ID.",
-                        "types": [
-                            "integer"
-                        ],
-                        "variable": "$customer_id"
-                    },
-                    {
-                        "name": "param",
-                        "content": "Array of customer (user) data.",
-                        "types": [
-                            "array"
-                        ],
-                        "variable": "$new_customer_data"
-                    },
-                    {
-                        "name": "param",
-                        "content": "The generated password for the account.",
-                        "types": [
-                            "string"
-                        ],
-                        "variable": "$password_generated"
+                        "content": "9.9.0"
                     }
                 ],
-                "long_description_html": "<p>This hook fires after customer accounts are created and passes the customer data.</p>"
+                "long_description_html": "<p>Plugins can add errors to the $validation_errors object.</p>"
             },
-            "args": 3
+            "args": 2
         },
         {
             "name": "woocommerce_no_products_found",
-            "file": "BlockTypes/ClassicTemplate.php",
+            "file": "Blocks/BlockTypes/ClassicTemplate.php",
             "type": "action",
             "doc": {
                 "description": "Hook: woocommerce_no_products_found.",
@@ -559,53 +1097,98 @@
             "args": 0
         },
         {
-            "name": "woocommerce_register_post",
-            "file": "StoreApi/Routes/V1/Checkout.php",
-            "type": "action",
+            "name": "woocommerce_rest_checkout_process_payment_with_context",
+            "file": "StoreApi/Utilities/CheckoutTrait.php",
+            "type": "action_reference",
             "doc": {
-                "description": "Fires before a customer account is registered.",
-                "long_description": "This hook fires before customer accounts are created and passes the form data (username, email) and an array of errors.\n This could be used to add extra validation logic and append errors to the array.",
+                "description": "Process payment with context.",
+                "long_description": "",
                 "tags": [
                     {
-                        "name": "since",
-                        "content": "7.2.0"
+                        "name": "hook",
+                        "content": "woocommerce_rest_checkout_process_payment_with_context"
                     },
                     {
-                        "name": "internal",
-                        "content": "Matches filter name in WooCommerce core."
+                        "name": "throws",
+                        "content": "If there is an error taking payment, an \\Exception object can be thrown with an error message.",
+                        "types": [
+                            "\\Exception"
+                        ]
                     },
                     {
                         "name": "param",
-                        "content": "Customer username.",
+                        "content": "Holds context for the payment, including order ID and payment method.",
                         "types": [
-                            "string"
+                            "\\PaymentContext"
                         ],
-                        "variable": "$username"
+                        "variable": "$context"
                     },
                     {
                         "name": "param",
-                        "content": "Customer email address.",
+                        "content": "Result object for the transaction.",
                         "types": [
-                            "string"
+                            "\\PaymentResult"
                         ],
-                        "variable": "$user_email"
-                    },
-                    {
-                        "name": "param",
-                        "content": "Error object.",
-                        "types": [
-                            "\\WP_Error"
-                        ],
-                        "variable": "$errors"
+                        "variable": "$payment_result"
                     }
                 ],
-                "long_description_html": "<p>This hook fires before customer accounts are created and passes the form data (username, email) and an array of errors.</p> <p>This could be used to add extra validation logic and append errors to the array.</p>"
+                "long_description_html": ""
             },
-            "args": 3
+            "args": 1
+        },
+        {
+            "name": "woocommerce_set_additional_field_value",
+            "file": "Blocks/Domain/Services/CheckoutFields.php",
+            "type": "action",
+            "doc": {
+                "description": "Allow reacting for saving an additional field value.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "param",
+                        "content": "The key of the field being saved.",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$key"
+                    },
+                    {
+                        "name": "param",
+                        "content": "The value of the field being saved.",
+                        "types": [
+                            "mixed"
+                        ],
+                        "variable": "$value"
+                    },
+                    {
+                        "name": "param",
+                        "content": "The group of this location (shipping|billing|other).",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$group"
+                    },
+                    {
+                        "name": "param",
+                        "content": "The object to set the field value for.",
+                        "types": [
+                            "\\WC_Customer",
+                            "\\WC_Order"
+                        ],
+                        "variable": "$wc_object"
+                    },
+                    {
+                        "name": "since",
+                        "content": "8.9.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 4
         },
         {
             "name": "woocommerce_shop_loop",
-            "file": "BlockTypes/ClassicTemplate.php",
+            "file": "Blocks/BlockTypes/ClassicTemplate.php",
             "type": "action",
             "doc": {
                 "description": "Hook: woocommerce_shop_loop.",
@@ -614,6 +1197,23 @@
                     {
                         "name": "since",
                         "content": "6.3.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_single_variation",
+            "file": "Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_single_variation.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "10.0.0"
                     }
                 ],
                 "long_description_html": ""
@@ -634,7 +1234,7 @@
                     },
                     {
                         "name": "example",
-                        "content": "docs/examples/validate-cart.md"
+                        "content": "See docs/examples/validate-cart.md"
                     },
                     {
                         "name": "param",
@@ -774,6 +1374,31 @@
             "args": 2
         },
         {
+            "name": "woocommerce_store_api_checkout_order_created",
+            "file": "StoreApi/Routes/V1/Checkout.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires once when the Store API checkout draft order is first materialised.",
+                "long_description": "Use this hook for first-touch logic that should only run when the draft order is initially created (e.g. analytics, abandoned-cart trackers). As of WooCommerce 10.8.0 the Store API defers draft order creation to place-order time, so this action fires once at POST rather than on the first PATCH.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "10.8.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Order object.",
+                        "types": [
+                            "\\WC_Order"
+                        ],
+                        "variable": "$order"
+                    }
+                ],
+                "long_description_html": "<p>Use this hook for first-touch logic that should only run when the draft order is initially created (e.g. analytics, abandoned-cart trackers). As of WooCommerce 10.8.0 the Store API defers draft order creation to place-order time, so this action fires once at POST rather than on the first PATCH.</p>"
+            },
+            "args": 1
+        },
+        {
             "name": "woocommerce_store_api_checkout_order_processed",
             "file": "StoreApi/Routes/V1/CheckoutOrder.php",
             "type": "action",
@@ -792,7 +1417,7 @@
                     },
                     {
                         "name": "example",
-                        "content": "docs/examples/checkout-order-processed.md"
+                        "content": "See docs/examples/checkout-order-processed.md"
                     },
                     {
                         "name": "param",
@@ -826,7 +1451,7 @@
                     },
                     {
                         "name": "example",
-                        "content": "docs/examples/checkout-order-processed.md"
+                        "content": "See docs/examples/checkout-order-processed.md"
                     },
                     {
                         "name": "param",
@@ -904,6 +1529,64 @@
                     }
                 ],
                 "long_description_html": ""
+            },
+            "args": 2
+        },
+        {
+            "name": "woocommerce_store_api_checkout_update_draft",
+            "file": "StoreApi/Routes/V1/Checkout.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires after a Store API checkout PATCH request has been validated and live customer/session state has been updated, before the response is returned.",
+                "long_description": "Hook this action when an extension needs to observe live checkout state \u2014 e.g. abandoned-cart trackers, side-panel previews, conditional shipping or payment validators, or anything else that needs to react to every customer interaction with the form.\n No `WC_Order` exists at this point under deferred draft order creation. Read checkout state from `WC()->cart`, `WC()->customer`, and the supplied `$request`, and persist any extension-owned state to `WC()->session`. To apply that state to the real order at place-order time, hook `woocommerce_store_api_checkout_update_order_meta` or `woocommerce_store_api_checkout_update_order_from_request` \u2014 both fire against the real, persisted order at POST exactly as they always have.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "10.8.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "The current PATCH request.",
+                        "types": [
+                            "\\WP_REST_Request"
+                        ],
+                        "variable": "$request"
+                    }
+                ],
+                "long_description_html": "<p>Hook this action when an extension needs to observe live checkout state \u2014 e.g. abandoned-cart trackers, side-panel previews, conditional shipping or payment validators, or anything else that needs to react to every customer interaction with the form.</p> <p>No <code>WC_Order</code> exists at this point under deferred draft order creation. Read checkout state from <code>WC()-&gt;cart</code>, <code>WC()-&gt;customer</code>, and the supplied <code>$request</code>, and persist any extension-owned state to <code>WC()-&gt;session</code>. To apply that state to the real order at place-order time, hook <code>woocommerce_store_api_checkout_update_order_meta</code> or <code>woocommerce_store_api_checkout_update_order_from_request</code> \u2014 both fire against the real, persisted order at POST exactly as they always have.</p>"
+            },
+            "args": 1
+        },
+        {
+            "name": "woocommerce_store_api_checkout_update_order_from_request",
+            "file": "StoreApi/Utilities/CheckoutTrait.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires when the Checkout Block/Store API updates an order's from the API request data.",
+                "long_description": "This hook gives extensions the chance to update orders based on the data in the request. This can be used in conjunction with the ExtendSchema class to post custom data and then process it.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "7.2.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Order object.",
+                        "types": [
+                            "\\WC_Order"
+                        ],
+                        "variable": "$order"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Full details about the request.",
+                        "types": [
+                            "\\WP_REST_Request"
+                        ],
+                        "variable": "$request"
+                    }
+                ],
+                "long_description_html": "<p>This hook gives extensions the chance to update orders based on the data in the request. This can be used in conjunction with the ExtendSchema class to post custom data and then process it.</p>"
             },
             "args": 2
         },
@@ -946,21 +1629,34 @@
                 "long_description": "",
                 "tags": [
                     {
-                        "name": "since",
-                        "content": "8.9.0"
-                    },
-                    {
                         "name": "param",
                         "content": "The IP address of the request.",
                         "types": [
                             "string"
                         ],
                         "variable": "$ip_address"
+                    },
+                    {
+                        "name": "param",
+                        "content": "The grouping identifier to the request.",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$action_id"
+                    },
+                    {
+                        "name": "since",
+                        "content": "8.9.0"
+                    },
+                    {
+                        "name": "since",
+                        "content": "9.8.0",
+                        "description": "Added $action_id parameter."
                     }
                 ],
                 "long_description_html": ""
             },
-            "args": 1
+            "args": 2
         },
         {
             "name": "woocommerce_store_api_validate_add_to_cart",
@@ -1029,38 +1725,45 @@
             "args": 2
         },
         {
-            "name": "woocommerce_{$product->get_type()}_add_to_cart",
-            "file": "BlockTypes/AddToCartForm.php",
+            "name": "woocommerce_validate_additional_field",
+            "file": "Blocks/Domain/Services/CheckoutFields.php",
             "type": "action",
             "doc": {
-                "description": "Trigger the single product add to cart action for each product type.",
+                "description": "Pass an error object to allow validation of an additional field.",
                 "long_description": "",
                 "tags": [
                     {
+                        "name": "param",
+                        "content": "A WP_Error object that extensions may add errors to.",
+                        "types": [
+                            "\\WP_Error"
+                        ],
+                        "variable": "$errors"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Key of the field being sanitized.",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$field_key"
+                    },
+                    {
+                        "name": "param",
+                        "content": "The value of the field being validated.",
+                        "types": [
+                            "mixed"
+                        ],
+                        "variable": "$field_value"
+                    },
+                    {
                         "name": "since",
-                        "content": "9.7.0"
+                        "content": "8.7.0"
                     }
                 ],
                 "long_description_html": ""
             },
-            "args": 0
-        },
-        {
-            "name": "{$hook}",
-            "file": "Templates/AbstractTemplateCompatibility.php",
-            "type": "action",
-            "doc": {
-                "description": "Action to render the content of a hook.",
-                "long_description": "",
-                "tags": [
-                    {
-                        "name": "since",
-                        "content": "9.5.0"
-                    }
-                ],
-                "long_description_html": ""
-            },
-            "args": 0
+            "args": 3
         }
     ]
 }

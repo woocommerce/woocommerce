@@ -1,3 +1,8 @@
+/**
+ * Internal dependencies
+ */
+const { htmlToMarkdown } = require( '../utilities/html-to-markdown' );
+
 const exceptions = ( hookDoc ) => {
 	const tags = hookDoc.tags || [];
 	const throwsDoc =
@@ -6,9 +11,9 @@ const exceptions = ( hookDoc ) => {
 
 	return throwsDoc
 		? {
-				p: `\`${ throwsDoc.types.join( ', ' ) }\` ${
+				p: `\`${ throwsDoc.types.join( ', ' ) }\` ${ htmlToMarkdown(
 					throwsDoc.content
-				}`,
+				) }`,
 		  }
 		: null;
 };
