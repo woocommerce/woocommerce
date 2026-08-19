@@ -151,20 +151,29 @@ function replaceDayToken(
 	replacement: ( dayToken: string ) => string
 ) {
 	let replaced = false;
-	// Bracketed sections are moment's escaped literals, so a "D" inside one is text.
-	const dayRangeFormat = format.replace( /\[[^\]]*\]|D+o?/g, ( token ) => {
-		// Runs longer than "DD" are day of year tokens, not day of month.
-		const dayDigits = token.endsWith( 'o' )
-			? token.length - 1
-			: token.length;
+	// Backslash escapes and bracketed sections are moment's literals, so a "D"
+	// inside one is text.
+	const dayRangeFormat = format.replace(
+		/\\.|\[[^\]]*\]|D+o?/g,
+		( token ) => {
+			// Runs longer than "DD" are day of year tokens, not day of month.
+			const dayDigits = token.endsWith( 'o' )
+				? token.length - 1
+				: token.length;
 
-		if ( replaced || token.startsWith( '[' ) || dayDigits > 2 ) {
-			return token;
+			if (
+				replaced ||
+				token.startsWith( '[' ) ||
+				token.startsWith( '\\' ) ||
+				dayDigits > 2
+			) {
+				return token;
+			}
+
+			replaced = true;
+			return `[${ replacement( token ) }]`;
 		}
-
-		replaced = true;
-		return `[${ replacement( token ) }]`;
-	} );
+	);
 
 	return replaced ? dayRangeFormat : null;
 }
