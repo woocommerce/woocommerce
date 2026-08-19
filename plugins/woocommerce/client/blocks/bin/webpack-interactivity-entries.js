@@ -102,7 +102,7 @@ const interactivityBlocks = findInteractivityBlockAssets(
 
 const scriptModuleEntries = interactivityBlocks.reduce( ( acc, block ) => {
 	const frontendFile = block.assets.find( ( f ) =>
-		/^frontend\.(ts|js)$/.test( path.basename( f ) )
+		[ 'frontend.ts', 'frontend.js' ].includes( path.basename( f ) )
 	);
 	if ( frontendFile ) {
 		acc[ block.blockName ] = frontendFile;
