@@ -127,34 +127,27 @@ class WC_Admin_Tests_API_Reports_Stock_Stats extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * A variable parent holds no sellable stock of its own, so the summary must not count it either.
+	 * @testdox Variations owning the stock replace their parent in the totals.
 	 *
 	 * @see https://github.com/woocommerce/woocommerce/issues/32134
 	 */
-	public function test_variable_parent_products_are_excluded_from_totals() {
+	public function test_a_parent_owning_no_stock_is_left_out_of_the_totals() {
 		wp_set_current_user( $this->user );
 		WC_Helper_Reports::reset_stats_dbs();
 
-		$attribute = new WC_Product_Attribute();
-		$attribute->set_name( 'Size' );
-		$attribute->set_options( array( 'Small', 'Large' ) );
-		$attribute->set_visible( true );
-		$attribute->set_variation( true );
-
-		$variable = new WC_Product_Variable();
-		$variable->set_name( 'Test variable product' );
-		$variable->set_attributes( array( $attribute ) );
-		$variable->save();
-
-		foreach ( array( 'Small', 'Large' ) as $option ) {
-			$variation = new WC_Product_Variation();
-			$variation->set_parent_id( $variable->get_id() );
-			$variation->set_attributes( array( 'size' => $option ) );
-			$variation->set_regular_price( '10' );
-			$variation->set_manage_stock( true );
-			$variation->set_stock_quantity( 25 );
-			$variation->save();
-		}
+		$this->create_variable_product(
+			'Variations manage stock, parent does not',
+			array(
+				array(
+					'manage_stock'   => true,
+					'stock_quantity' => 25,
+				),
+				array(
+					'manage_stock'   => true,
+					'stock_quantity' => 25,
+				),
+			)
+		);
 
 		$this->clear_stock_count_caches();
 
@@ -167,6 +160,74 @@ class WC_Admin_Tests_API_Reports_Stock_Stats extends WC_REST_Unit_Test_Case {
 		// The two variations, without their parent.
 		$this->assertEquals( 2, $reports['totals']['products'] );
 		$this->assertEquals( 2, $reports['totals'][ ProductStockStatus::IN_STOCK ] );
+	}
+
+	/**
+	 * @testdox A parent managing stock at product level replaces its variations in the totals.
+	 */
+	public function test_a_stock_managing_parent_replaces_its_variations_in_the_totals() {
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+		update_option( 'woocommerce_notify_low_stock_amount', 5 );
+
+		$variable = $this->create_variable_product( 'Parent manages stock, variations inherit', array( array(), array() ) );
+		$variable->set_manage_stock( true );
+		$variable->set_stock_quantity( 3 );
+		$variable->save();
+
+		$this->clear_stock_count_caches();
+
+		$request  = new WP_REST_Request( 'GET', $this->endpoint );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		// The parent, without the variations that only repeat its quantity.
+		$this->assertEquals( 1, $reports['totals']['products'] );
+		$this->assertEquals( 1, $reports['totals'][ ProductStockStatus::IN_STOCK ] );
+		$this->assertEquals( 1, $reports['totals'][ ProductStockStatus::LOW_STOCK ] );
+	}
+
+	/**
+	 * Create a published variable product with a Small and a Large variation.
+	 *
+	 * @param string $name       Product name, describing the stock configuration under test.
+	 * @param array  $variations One entry per variation, in the order Small then Large. Each accepts
+	 *                           the 'manage_stock' and 'stock_quantity' keys.
+	 * @return WC_Product_Variable
+	 */
+	private function create_variable_product( $name, array $variations ) {
+		$options = array( 'Small', 'Large' );
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( $options );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+
+		$variable = new WC_Product_Variable();
+		$variable->set_name( $name );
+		$variable->set_attributes( array( $attribute ) );
+		$variable->save();
+
+		foreach ( $options as $index => $option ) {
+			$args = $variations[ $index ];
+
+			$variation = new WC_Product_Variation();
+			$variation->set_parent_id( $variable->get_id() );
+			$variation->set_attributes( array( 'size' => $option ) );
+			$variation->set_regular_price( '10' );
+			$variation->set_manage_stock( ! empty( $args['manage_stock'] ) );
+
+			if ( isset( $args['stock_quantity'] ) ) {
+				$variation->set_stock_quantity( $args['stock_quantity'] );
+			}
+
+			$variation->save();
+		}
+
+		return new WC_Product_Variable( $variable->get_id() );
 	}
 
 	/**

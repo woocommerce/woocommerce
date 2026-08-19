@@ -9,14 +9,14 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
-use Automattic\WooCommerce\Admin\API\Reports\Stock\ExcludeVariableParentsTrait;
+use Automattic\WooCommerce\Admin\API\Reports\Stock\ExcludeMirroredStockTrait;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
  * API\Reports\Stock\Stats\DataStore.
  */
 class DataStore extends ReportsDataStore implements DataStoreInterface {
-	use ExcludeVariableParentsTrait;
+	use ExcludeMirroredStockTrait;
 
 	/**
 	 * Get stock counts for the whole store.
@@ -72,20 +72,22 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	private function get_low_stock_count() {
 		global $wpdb;
 
-		$no_stock_amount     = absint( max( get_option( 'woocommerce_notify_no_stock_amount' ), 0 ) );
-		$low_stock_amount    = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
-		$exclude_parents_sql = self::get_variable_parents_exclusion_clause( 'posts' );
+		$no_stock_amount   = absint( max( get_option( 'woocommerce_notify_no_stock_amount' ), 0 ) );
+		$low_stock_amount  = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
+		$parent_lookup_sql = self::get_parent_stock_lookup_join( 'posts' );
+		$mirrored_sql      = self::get_mirrored_stock_exclusion_clause( 'posts' );
 
 		return (int) $wpdb->get_var(
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $exclude_parents_sql is built from hardcoded identifiers.
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Both fragments are built from hardcoded identifiers.
 			$wpdb->prepare(
 				"
 				SELECT count( DISTINCT posts.ID ) FROM {$wpdb->posts} posts
 				LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON posts.ID = wc_product_meta_lookup.product_id
 				LEFT JOIN {$wpdb->postmeta} low_stock_amount_meta ON posts.ID = low_stock_amount_meta.post_id AND low_stock_amount_meta.meta_key = '_low_stock_amount'
+				{$parent_lookup_sql}
 				WHERE posts.post_type IN ( 'product', 'product_variation' )
 				AND posts.post_status IN ( 'publish', 'private' )
-				{$exclude_parents_sql}
+				{$mirrored_sql}
 				AND wc_product_meta_lookup.stock_quantity IS NOT NULL
 				AND wc_product_meta_lookup.stock_status = 'instock'
 				AND (
@@ -120,18 +122,20 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	private function get_count( $status ) {
 		global $wpdb;
 
-		$exclude_parents_sql = self::get_variable_parents_exclusion_clause( 'posts' );
+		$parent_lookup_sql = self::get_parent_stock_lookup_join( 'posts' );
+		$mirrored_sql      = self::get_mirrored_stock_exclusion_clause( 'posts' );
 
 		return (int) $wpdb->get_var(
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $exclude_parents_sql is built from hardcoded identifiers.
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Both fragments are built from hardcoded identifiers.
 			$wpdb->prepare(
 				"
 				SELECT count( DISTINCT posts.ID ) FROM {$wpdb->posts} posts
 				LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON posts.ID = wc_product_meta_lookup.product_id
+				{$parent_lookup_sql}
 				WHERE posts.post_type IN ( 'product', 'product_variation' )
 				AND posts.post_status IN ( 'publish', 'private' )
 				AND wc_product_meta_lookup.stock_status = %s
-				{$exclude_parents_sql}
+				{$mirrored_sql}
 				",
 				$status
 			)
@@ -145,20 +149,22 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return int Product count.
 	 */
 	private function get_product_count() {
-		$query_args                             = array();
-		$query_args['post_type']                = array( 'product', 'product_variation' );
-		$query_args['exclude_variable_parents'] = true;
+		$query_args                           = array();
+		$query_args['post_type']              = array( 'product', 'product_variation' );
+		$query_args['exclude_mirrored_stock'] = true;
 
 		add_filter( 'posts_where', array( __CLASS__, 'add_wp_query_filter' ), 10, 2 );
+		add_filter( 'posts_join', array( __CLASS__, 'add_wp_query_join' ), 10, 2 );
 		$query = new \WP_Query();
 		$query->query( $query_args );
 		remove_filter( 'posts_where', array( __CLASS__, 'add_wp_query_filter' ), 10 );
+		remove_filter( 'posts_join', array( __CLASS__, 'add_wp_query_join' ), 10 );
 
 		return intval( $query->found_posts );
 	}
 
 	/**
-	 * Keep variable parent products out of the product count query.
+	 * Keep rows that only mirror another row's stock out of the product count query.
 	 *
 	 * @internal
 	 * @param string    $where    Where clause used to search posts.
@@ -166,10 +172,29 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return string
 	 */
 	public static function add_wp_query_filter( $where, $wp_query ) {
-		if ( $wp_query->get( 'exclude_variable_parents' ) ) {
-			$where .= self::get_variable_parents_exclusion_clause();
+		if ( $wp_query->get( 'exclude_mirrored_stock' ) ) {
+			$where .= self::get_mirrored_stock_exclusion_clause();
 		}
 
 		return $where;
+	}
+
+	/**
+	 * Join the stock the product count query reads ownership from.
+	 *
+	 * @internal
+	 * @param string    $join     Join clause used to search posts.
+	 * @param \WP_Query $wp_query WP_Query object.
+	 * @return string
+	 */
+	public static function add_wp_query_join( $join, $wp_query ) {
+		global $wpdb;
+
+		if ( $wp_query->get( 'exclude_mirrored_stock' ) ) {
+			$join .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON {$wpdb->posts}.ID = wc_product_meta_lookup.product_id ";
+			$join .= self::get_parent_stock_lookup_join();
+		}
+
+		return $join;
 	}
 }

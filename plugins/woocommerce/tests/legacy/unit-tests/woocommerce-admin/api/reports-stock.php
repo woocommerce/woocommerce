@@ -92,43 +92,136 @@ class WC_Admin_Tests_API_Reports_Stock extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * A variable parent holds no sellable stock of its own, so only its variations belong in the report.
+	 * @testdox Variations owning the stock replace their parent in the report.
 	 *
 	 * @see https://github.com/woocommerce/woocommerce/issues/32134
 	 */
-	public function test_variable_parent_products_are_excluded() {
+	public function test_parent_is_excluded_when_its_variations_own_the_stock() {
 		wp_set_current_user( $this->user );
 
-		$variable = $this->create_variable_product( 25 );
+		list( $variable, $variation_ids ) = $this->create_variable_product(
+			'Variations manage stock, parent does not',
+			array(
+				array(
+					'manage_stock'   => true,
+					'stock_quantity' => 25,
+				),
+				array(
+					'manage_stock'   => true,
+					'stock_quantity' => 25,
+				),
+			)
+		);
 
-		// Stock managed at product level, with none left, is what made the parent claim to be out of
-		// stock while its variations were in stock.
-		$variable->set_manage_stock( true );
-		$variable->set_stock_quantity( 0 );
-		$variable->save();
+		$reported_ids = $this->get_reported_ids();
 
-		$request = new WP_REST_Request( 'GET', $this->endpoint );
-		$request->set_param( 'orderby', 'id' );
-		$response = $this->server->dispatch( $request );
-		$reports  = $response->get_data();
-
-		$this->assertEquals( 200, $response->get_status() );
-
-		$reported_ids = wp_list_pluck( $reports, 'id' );
-		$this->assertNotContains( $variable->get_id(), $reported_ids, 'The variable parent should not be reported.' );
-		foreach ( $variable->get_children() as $variation_id ) {
-			$this->assertContains( $variation_id, $reported_ids, 'Each variation should still be reported.' );
+		$this->assertNotContains( $variable->get_id(), $reported_ids, 'The parent holds no stock of its own, so it should not be reported.' );
+		foreach ( $variation_ids as $variation_id ) {
+			$this->assertContains( $variation_id, $reported_ids, 'Each variation holds its own stock, so it should be reported.' );
 		}
 	}
 
 	/**
-	 * A variable product with no variations has nothing else representing it, so it stays in the report.
+	 * @testdox Variations carrying only a stock status of their own are still reported.
+	 */
+	public function test_variations_without_a_quantity_are_reported_when_the_parent_manages_no_stock() {
+		wp_set_current_user( $this->user );
+
+		list( $variable, $variation_ids ) = $this->create_variable_product(
+			'Nothing manages stock',
+			array(
+				array( 'stock_status' => ProductStockStatus::OUT_OF_STOCK ),
+				array( 'stock_status' => ProductStockStatus::IN_STOCK ),
+			)
+		);
+
+		$reported_ids = $this->get_reported_ids();
+
+		$this->assertNotContains( $variable->get_id(), $reported_ids, 'The parent only derives its status from its variations, so it should not be reported.' );
+		foreach ( $variation_ids as $variation_id ) {
+			$this->assertContains( $variation_id, $reported_ids, 'A variation sets its own stock status even when it manages no quantity.' );
+		}
+	}
+
+	/**
+	 * @testdox A parent managing stock at product level replaces the variations inheriting it.
+	 */
+	public function test_variations_are_excluded_when_the_parent_owns_the_stock() {
+		wp_set_current_user( $this->user );
+
+		list( $variable, $variation_ids ) = $this->create_variable_product( 'Parent manages stock, variations inherit', array( array(), array() ) );
+
+		$variable->set_manage_stock( true );
+		$variable->set_stock_quantity( 3 );
+		$variable->save();
+
+		$reported_ids = $this->get_reported_ids();
+
+		$this->assertContains( $variable->get_id(), $reported_ids, 'The parent holds the only real quantity, so it should be reported.' );
+		foreach ( $variation_ids as $variation_id ) {
+			$this->assertNotContains( $variation_id, $reported_ids, 'A variation inheriting the parent quantity would only repeat it.' );
+		}
+	}
+
+	/**
+	 * @testdox A variation overriding a stock managing parent is reported next to it.
+	 */
+	public function test_variation_managing_its_own_stock_is_reported_next_to_its_parent() {
+		wp_set_current_user( $this->user );
+
+		list( $variable, $variation_ids ) = $this->create_variable_product(
+			'Parent manages stock, one variation overrides',
+			array(
+				array(),
+				array(
+					'manage_stock'   => true,
+					'stock_quantity' => 2,
+				),
+			)
+		);
+
+		list( $inheriting_id, $own_stock_id ) = $variation_ids;
+
+		$variable->set_manage_stock( true );
+		$variable->set_stock_quantity( 10 );
+		$variable->save();
+
+		$reported_ids = $this->get_reported_ids();
+
+		$this->assertContains( $variable->get_id(), $reported_ids, 'The parent holds the quantity the inheriting variation sells from.' );
+		$this->assertNotContains( $inheriting_id, $reported_ids, 'The inheriting variation would only repeat the parent quantity.' );
+		$this->assertContains( $own_stock_id, $reported_ids, 'The overriding variation holds a quantity of its own.' );
+	}
+
+	/**
+	 * @testdox A parent running low on stock it manages at product level is reported as low stock.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/32134
+	 */
+	public function test_low_stock_managed_at_product_level_is_reported() {
+		wp_set_current_user( $this->user );
+		update_option( 'woocommerce_notify_low_stock_amount', 5 );
+
+		list( $variable ) = $this->create_variable_product( 'Parent manages low stock, variations inherit', array( array(), array() ) );
+
+		$variable->set_manage_stock( true );
+		$variable->set_stock_quantity( 3 );
+		$variable->save();
+
+		$reported_ids = $this->get_reported_ids( ProductStockStatus::LOW_STOCK );
+
+		// Its variations carry no quantity of their own, so the parent is the only row that can report this.
+		$this->assertContains( $variable->get_id(), $reported_ids, 'Stock managed at product level should still show up as low stock.' );
+	}
+
+	/**
+	 * @testdox A variable product with no variations is reported.
 	 */
 	public function test_variable_product_without_variations_is_included() {
 		wp_set_current_user( $this->user );
 
 		$variable = new WC_Product_Variable();
-		$variable->set_name( 'Variable without variations' );
+		$variable->set_name( 'Variable product with no variations' );
 		$variable->save();
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
@@ -142,34 +235,66 @@ class WC_Admin_Tests_API_Reports_Stock extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Create a published variable product with two variations that manage their own stock.
+	 * Create a published variable product with a Small and a Large variation.
 	 *
-	 * @param int $variation_stock Stock quantity to give each variation.
-	 * @return WC_Product_Variable
+	 * @param string $name       Product name, describing the stock configuration under test.
+	 * @param array  $variations One entry per variation, in the order Small then Large. Each accepts
+	 *                           the 'manage_stock', 'stock_quantity' and 'stock_status' keys.
+	 * @return array The WC_Product_Variable, and the variation IDs in the order given.
 	 */
-	private function create_variable_product( $variation_stock ) {
+	private function create_variable_product( $name, array $variations ) {
+		$options = array( 'Small', 'Large' );
+
 		$attribute = new WC_Product_Attribute();
 		$attribute->set_name( 'Size' );
-		$attribute->set_options( array( 'Small', 'Large' ) );
+		$attribute->set_options( $options );
 		$attribute->set_visible( true );
 		$attribute->set_variation( true );
 
 		$variable = new WC_Product_Variable();
-		$variable->set_name( 'Test variable product' );
+		$variable->set_name( $name );
 		$variable->set_attributes( array( $attribute ) );
 		$variable->save();
 
-		foreach ( array( 'Small', 'Large' ) as $option ) {
+		$variation_ids = array();
+		foreach ( $options as $index => $option ) {
+			$args = $variations[ $index ];
+
 			$variation = new WC_Product_Variation();
 			$variation->set_parent_id( $variable->get_id() );
 			$variation->set_attributes( array( 'size' => $option ) );
 			$variation->set_regular_price( '10' );
-			$variation->set_manage_stock( true );
-			$variation->set_stock_quantity( $variation_stock );
+			$variation->set_manage_stock( ! empty( $args['manage_stock'] ) );
+
+			if ( isset( $args['stock_quantity'] ) ) {
+				$variation->set_stock_quantity( $args['stock_quantity'] );
+			}
+			if ( isset( $args['stock_status'] ) ) {
+				$variation->set_stock_status( $args['stock_status'] );
+			}
+
 			$variation->save();
+			$variation_ids[] = $variation->get_id();
 		}
 
-		return new WC_Product_Variable( $variable->get_id() );
+		return array( new WC_Product_Variable( $variable->get_id() ), $variation_ids );
+	}
+
+	/**
+	 * Dispatch the report and return the IDs it reported.
+	 *
+	 * @param string $type Report type to request.
+	 * @return array Reported product and variation IDs.
+	 */
+	private function get_reported_ids( $type = 'all' ) {
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_param( 'per_page', 100 );
+		$request->set_param( 'type', $type );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		return wp_list_pluck( $response->get_data(), 'id' );
 	}
 
 	/**

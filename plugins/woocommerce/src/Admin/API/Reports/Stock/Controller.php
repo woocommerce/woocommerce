@@ -23,7 +23,7 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
  * @extends GenericController
  */
 class Controller extends GenericController implements ExportableInterface {
-	use ExcludeVariableParentsTrait;
+	use ExcludeMirroredStockTrait;
 
 	/**
 	 * Route base.
@@ -74,8 +74,8 @@ class Controller extends GenericController implements ExportableInterface {
 
 		$args['post_type'] = array( 'product', 'product_variation' );
 
-		// Variations are reported individually, so listing their parent would only duplicate them.
-		$args['exclude_variable_parents'] = true;
+		// A row whose stock is owned by another row in the report would only duplicate it.
+		$args['exclude_mirrored_stock'] = true;
 
 		if ( ProductStockStatus::LOW_STOCK === $request['type'] ) {
 			$args['low_in_stock'] = true;
@@ -158,8 +158,8 @@ class Controller extends GenericController implements ExportableInterface {
 	public static function add_wp_query_filter( $where, $wp_query ) {
 		global $wpdb;
 
-		if ( $wp_query->get( 'exclude_variable_parents' ) ) {
-			$where .= self::get_variable_parents_exclusion_clause();
+		if ( $wp_query->get( 'exclude_mirrored_stock' ) ) {
+			$where .= self::get_mirrored_stock_exclusion_clause();
 		}
 
 		$stock_status = $wp_query->get( 'stock_status' );
@@ -215,6 +215,12 @@ class Controller extends GenericController implements ExportableInterface {
 		if ( $wp_query->get( 'low_in_stock' ) ) {
 			$join  = self::append_product_sorting_table_join( $join );
 			$join .= " LEFT JOIN {$wpdb->postmeta} AS low_stock_amount_meta ON {$wpdb->posts}.ID = low_stock_amount_meta.post_id AND low_stock_amount_meta.meta_key = '_low_stock_amount' ";
+		}
+
+		if ( $wp_query->get( 'exclude_mirrored_stock' ) ) {
+			// The exclusion clause reads stock ownership off the lookup table, for the row and for its parent.
+			$join  = self::append_product_sorting_table_join( $join );
+			$join .= self::get_parent_stock_lookup_join();
 		}
 
 		return $join;
