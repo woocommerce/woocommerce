@@ -475,7 +475,7 @@ class SettingsUIRequestContext {
 	 */
 	public function has_schema_failed(): bool {
 		if ( ! $this->schema_resolved ) {
-			$this->resolve_schema();
+			$this->get_schema();
 		}
 
 		return $this->schema_failed;
@@ -490,7 +490,7 @@ class SettingsUIRequestContext {
 	 */
 	public function get_schema_failure_reason(): string {
 		if ( ! $this->schema_resolved ) {
-			$this->resolve_schema();
+			$this->get_schema();
 		}
 
 		return '' !== $this->schema_failure_reason

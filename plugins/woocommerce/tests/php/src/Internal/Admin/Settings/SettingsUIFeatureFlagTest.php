@@ -377,6 +377,18 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should stay fail-closed when has_schema_failed() is called before get_schema().
+	 */
+	public function test_has_schema_failed_called_before_get_schema_stays_fail_closed(): void {
+		$page    = $this->get_settings_ui_test_page_with_script_handles( array( 42 ) );
+		$context = SettingsUIRequestContext::for_settings_page( $page, '' );
+
+		$this->assertFalse( $context->has_schema_failed(), 'A script handle failure should not be reported as a schema failure, even when checked first.' );
+		$this->assertSame( 0, $page->get_schema_resolution_count(), 'Checking has_schema_failed() first must not resolve the schema after a script handle failure.' );
+		$this->assertNull( $context->get_schema() );
+	}
+
+	/**
 	 * @testdox Should allow extensions to register declared script handles after WooCommerce collects dependencies.
 	 */
 	public function test_script_handle_registered_at_later_hook_priority_is_enqueued_before_mount(): void {
