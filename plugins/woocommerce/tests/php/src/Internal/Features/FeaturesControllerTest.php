@@ -529,7 +529,6 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		);
 		$this->assertEquals( $expected, $result );
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'deactivated_plugin', 'the_plugin' );
 		$this->fake_plugin_util->set_active_plugins( array( 'the_plugin_2', 'the_plugin_3', 'the_plugin_4' ) );
 
@@ -984,11 +983,9 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		);
 		$this->assertEquals( $expected, $result );
 
-		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'deactivated_plugin', 'the_plugin_2' );
 		do_action( 'deactivated_plugin', 'the_plugin_4' );
 		do_action( 'deactivated_plugin', 'the_plugin_6' );
-		// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 		$this->fake_plugin_util->set_active_plugins( array( 'the_plugin', 'the_plugin_3', 'the_plugin_5' ) );
 		$result             = $this->sut->get_compatible_plugins_for_feature( 'mature1', $active_only );
@@ -1455,7 +1452,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		// Simulate deactivation: set flag (for mock callback) and trigger action (to unset compatibility).
 		$deactivated = true;
-		do_action( 'deactivated_plugin', 'plugin/plugin.php' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'deactivated_plugin', 'plugin/plugin.php' );
 
 		// Check after: compatibility unset, so moves to 'uncertain' (still in aware list when ! active_only).
 		$compat_after = $this->sut->get_compatible_plugins_for_feature( 'mature1' );

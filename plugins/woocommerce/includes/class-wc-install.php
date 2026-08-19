@@ -344,6 +344,8 @@ class WC_Install {
 		),
 		'11.1.0'   => array(
 			'wc_update_1110_delete_dashboard_outofstock_count_transient',
+			'wc_update_1110_cleanup_block_email_posts',
+			'wc_update_1110_flush_product_count_cache',
 		),
 	);
 
@@ -597,7 +599,6 @@ class WC_Install {
 	 */
 	public static function install_actions() {
 		if ( ! empty( $_GET['do_update_woocommerce'] ) ) {
-			// WPCS: input var ok.
 			check_admin_referer( 'wc_db_update', 'wc_db_update_nonce' );
 			wc_get_logger()->info( 'Manual database update triggered.', array( 'source' => 'wc-updater' ) );
 			self::update();
@@ -621,7 +622,6 @@ class WC_Install {
 
 				$return_url = esc_url_raw( wp_unslash( $return_url ) );
 				wp_safe_redirect( $return_url );
-				// WPCS: input var ok.
 				exit;
 			}
 		}
@@ -2122,6 +2122,8 @@ CREATE TABLE {$wpdb->prefix}wc_customer_lookup (
 	postcode varchar(20) DEFAULT '' NOT NULL,
 	city varchar(100) DEFAULT '' NOT NULL,
 	state varchar(100) DEFAULT '' NOT NULL,
+	billing_phone varchar(100) DEFAULT '' NOT NULL,
+	shipping_phone varchar(100) DEFAULT '' NOT NULL,
 	PRIMARY KEY (customer_id),
 	UNIQUE KEY user_id (user_id),
 	KEY email (email)
@@ -2644,10 +2646,13 @@ $email_unsubscribes_table_schema;
 	 *
 	 * @throws Exception If unable to proceed with plugin installation.
 	 * @since  2.6.0
+	 * @deprecated 11.1.0 No longer used.
 	 *
 	 * @return void
 	 */
 	public static function background_installer( $plugin_to_install_id, $plugin_to_install ) {
+		wc_deprecated_function( 'WC_Install::background_installer', '11.1.0' );
+
 		// Explicitly clear the event.
 		$args = func_get_args();
 
@@ -2749,7 +2754,12 @@ $email_unsubscribes_table_schema;
 							__( '%1$s could not be installed (%2$s). <a href="%3$s">Please install it manually by clicking here.</a>', 'woocommerce' ),
 							$plugin_to_install['name'],
 							$e->getMessage(),
-							esc_url( admin_url( 'index.php?wc-install-plugin-redirect=' . $plugin_slug ) )
+							esc_url(
+								wp_nonce_url(
+									admin_url( 'index.php?wc-install-plugin-redirect=' . $plugin_slug ),
+									'wc-install-plugin-redirect_' . $plugin_slug
+								)
+							)
 						)
 					);
 				}
@@ -2807,10 +2817,13 @@ $email_unsubscribes_table_schema;
 	 *
 	 * @throws Exception If unable to proceed with theme installation.
 	 * @since  3.1.0
+	 * @deprecated 11.1.0 No longer used.
 	 *
 	 * @return void
 	 */
 	public static function theme_background_installer( $theme_slug ) {
+		wc_deprecated_function( 'WC_Install::theme_background_installer', '11.1.0' );
+
 		// Explicitly clear the event.
 		$args = func_get_args();
 

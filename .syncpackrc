@@ -1,6 +1,10 @@
 {
 	"indent": "\t",
-	"semverRange": "^",
+	"semverGroups": [
+		{
+			"range": "^"
+		}
+	],
 	"customTypes": {
 		"engines": {
 			"path": "engines",
@@ -81,7 +85,26 @@
 			"dependencies": [
 				"@typescript-eslint/**"
 			],
-			"pinVersion": "^5.62.0",
+			"pinVersion": "^8.63.0",
+			"packages": [
+				"**"
+			]
+		},
+		{
+			"label": "typescript-eslint meta-package (flat config); keep aligned with @typescript-eslint/*",
+			"dependencies": [
+				"typescript-eslint"
+			],
+			"pinVersion": "^8.63.0",
+			"packages": [
+				"**"
+			]
+		},
+		{
+			"dependencies": [
+				"eslint-plugin-testing-library"
+			],
+			"pinVersion": "^7.16.2",
 			"packages": [
 				"**"
 			]
@@ -173,13 +196,18 @@
 			"pinVersion": "^0.0.10"
 		},
 		{
+			"label": "ESLint dev target. Peer deps are excluded so @woocommerce/eslint-plugin can peer the wider `^9 || ^10` range.",
+			"dependencyTypes": [
+				"prod",
+				"dev"
+			],
 			"dependencies": [
 				"eslint"
 			],
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^8.55.0"
+			"pinVersion": "^10.0.0"
 		},
 		{
 			"dependencies": [
@@ -382,7 +410,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "2.17.0"
+			"pinVersion": "4.49.0"
 		},
 		{
 			"dependencies": [
@@ -391,7 +419,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "14.7.0"
+			"pinVersion": "25.6.0"
 		},
 		{
 			"dependencies": [
@@ -466,6 +494,16 @@
 			"isIgnored": true
 		},
 		{
+			"label": "settings-ui temporarily pins DataViews 17.1.0 for the DataForm migration",
+			"dependencies": [
+				"@wordpress/dataviews"
+			],
+			"packages": [
+				"@woocommerce/settings-ui"
+			],
+			"isIgnored": true
+		},
+		{
 			"label": "@wordpress/* dependencies that WooCommerce bundles instead of externalizing to WordPress",
 			"dependencyTypes": [
 				"prod",
@@ -487,7 +525,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "catalog:wp-bundled"
+			"policy": "catalog"
 		},
 		{
 			"label": "@wordpress/* runtime-dependencies (pnpm 10 requires valid semver in peerDependencies, so peer deps are excluded here)",
@@ -501,7 +539,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "catalog:wp-min"
+			"policy": "catalog"
 		},
 		{
 			"dependencies": [

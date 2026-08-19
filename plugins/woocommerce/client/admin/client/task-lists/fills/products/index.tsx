@@ -217,7 +217,7 @@ export const Products = () => {
 						} }
 						onImport={ () => {
 							setIsConfirmingLoadSampleProducts( false );
-							loadSampleProduct();
+							void loadSampleProduct();
 						} }
 					/>
 				)

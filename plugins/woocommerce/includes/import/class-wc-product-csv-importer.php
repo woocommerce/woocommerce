@@ -90,59 +90,75 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 */
 	private function adjust_character_encoding( $value ) {
 		$encoding = $this->params['character_encoding'];
-		return 'UTF-8' === $encoding ? $value : mb_convert_encoding( $value, 'UTF-8', $encoding );
+
+		// Skip conversion when the value is already UTF-8 or when mbstring is unavailable.
+		if ( 'UTF-8' === $encoding || ! function_exists( 'mb_convert_encoding' ) ) {
+			return $value;
+		}
+
+		return mb_convert_encoding( $value, 'UTF-8', $encoding );
 	}
 
 	/**
 	 * Read file.
+	 *
+	 * @throws RuntimeException When the file cannot be opened.
 	 */
 	protected function read_file() {
 		if ( ! WC_Product_CSV_Importer_Controller::is_file_valid_csv( $this->file ) ) {
 			wp_die( esc_html__( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
 		}
 
-		$handle = fopen( $this->file, 'r' ); // @codingStandardsIgnoreLine.
+		$handle = @fopen( $this->file, 'r' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- warning suppressed so a strict error handler cannot preempt the RuntimeException below.
 
-		if ( false !== $handle ) {
-			$this->raw_keys = array_map( 'trim', fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ) ); // @codingStandardsIgnoreLine
+		if ( false === $handle ) {
+			// An exception rather than wp_die(), so callers in any context (admin, AJAX, REST, CLI) can catch and present it appropriately.
+			throw new RuntimeException( esc_html__( 'Unable to open the CSV file, please try again with a new file.', 'woocommerce' ) );
+		}
 
-			if ( ArrayUtil::is_truthy( $this->params, 'character_encoding' ) ) {
-				$this->raw_keys = array_map( array( $this, 'adjust_character_encoding' ), $this->raw_keys );
-			}
+		$headers = fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ); // @codingStandardsIgnoreLine
 
-			// Remove line breaks in keys, to avoid mismatch mapping of keys.
-			$this->raw_keys = wc_clean( wp_unslash( $this->raw_keys ) );
+		// fgetcsv() returns false for an empty file; leave the keys empty so the empty-file error can be shown instead of fataling on array_map().
+		$this->raw_keys = is_array( $headers ) ? array_map( 'trim', $headers ) : array();
 
-			// Remove BOM signature from the first item.
-			if ( isset( $this->raw_keys[0] ) ) {
-				$this->raw_keys[0] = $this->remove_utf8_bom( $this->raw_keys[0] );
-			}
+		if ( ArrayUtil::is_truthy( $this->params, 'character_encoding' ) ) {
+			$this->raw_keys = array_map( array( $this, 'adjust_character_encoding' ), $this->raw_keys );
+		}
 
-			if ( 0 !== $this->params['start_pos'] ) {
-				fseek( $handle, (int) $this->params['start_pos'] );
-			}
+		// Remove line breaks in keys, to avoid mismatch mapping of keys.
+		$this->raw_keys = wc_clean( wp_unslash( $this->raw_keys ) );
 
-			while ( 1 ) {
-				$row = fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ); // @codingStandardsIgnoreLine
+		// Remove BOM signature from the first item.
+		if ( isset( $this->raw_keys[0] ) ) {
+			$this->raw_keys[0] = $this->remove_utf8_bom( $this->raw_keys[0] );
+		}
 
-				if ( false !== $row ) {
-					if ( ArrayUtil::is_truthy( $this->params, 'character_encoding' ) ) {
-						$row = array_map( array( $this, 'adjust_character_encoding' ), $row );
-					}
+		if ( 0 !== $this->params['start_pos'] ) {
+			fseek( $handle, (int) $this->params['start_pos'] );
+		}
 
-					$this->raw_data[]                                 = $row;
-					$this->file_positions[ count( $this->raw_data ) ] = ftell( $handle );
+		while ( 1 ) {
+			$row = fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ); // @codingStandardsIgnoreLine
 
-					if ( ( $this->params['end_pos'] > 0 && ftell( $handle ) >= $this->params['end_pos'] ) || 0 === --$this->params['lines'] ) {
-						break;
-					}
-				} else {
+			if ( false !== $row ) {
+				if ( ArrayUtil::is_truthy( $this->params, 'character_encoding' ) ) {
+					$row = array_map( array( $this, 'adjust_character_encoding' ), $row );
+				}
+
+				$this->raw_data[]                                 = $row;
+				$this->file_positions[ count( $this->raw_data ) ] = ftell( $handle );
+
+				if ( ( $this->params['end_pos'] > 0 && ftell( $handle ) >= $this->params['end_pos'] ) || 0 === --$this->params['lines'] ) {
 					break;
 				}
+			} else {
+				break;
 			}
-
-			$this->file_position = ftell( $handle );
 		}
+
+		$this->file_position = ftell( $handle );
+
+		fclose( $handle ); // @codingStandardsIgnoreLine.
 
 		if ( ! empty( $this->params['mapping'] ) ) {
 			$this->set_mapped_keys();
@@ -213,7 +229,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			}
 
 			// See if the given ID maps to a valid product already.
-			$existing_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation' ) AND ID = %d;", $id ) ); // WPCS: db call ok, cache ok.
+			$existing_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation' ) AND ID = %d;", $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- The importer requires a fresh indexed ID lookup that may include newly created placeholders.
 
 			if ( $existing_id ) {
 				return absint( $existing_id );
@@ -825,14 +841,20 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		);
 
 		/**
-		 * Match special column names.
+		 * Match special column names by prefix.
+		 *
+		 * These prefixes must stay in sync with the `starts_with()` checks in `expand_data()`,
+		 * which is what decides how the column is actually consumed. Matching anywhere in the
+		 * column name instead of at the start would apply a formatting callback to columns
+		 * `expand_data()` never treats as special.
 		 */
-		$regex_match_data_formatting = array(
-			'/attributes:value*/'    => array( $this, 'parse_comma_field' ),
-			'/attributes:visible*/'  => array( $this, 'parse_bool_field' ),
-			'/attributes:taxonomy*/' => array( $this, 'parse_bool_field' ),
-			'/downloads:url*/'       => array( $this, 'parse_download_file_field' ),
-			'/meta:*/'               => 'wp_kses_post', // Allow some HTML in meta fields.
+		$prefix_match_data_formatting = array(
+			'attributes:value'    => array( $this, 'parse_comma_field' ),
+			'attributes:visible'  => array( $this, 'parse_bool_field' ),
+			'attributes:taxonomy' => array( $this, 'parse_bool_field' ),
+			'downloads:url'       => array( $this, 'parse_download_file_field' ),
+			// Allow some HTML in meta fields.
+			'meta:'               => 'wp_kses_post',
 		);
 
 		$callbacks = array();
@@ -844,9 +866,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			if ( isset( $data_formatting[ $heading ] ) ) {
 				$callback = $data_formatting[ $heading ];
 			} else {
-				foreach ( $regex_match_data_formatting as $regex => $regex_callback ) {
-					if ( preg_match( $regex, $heading ) ) {
-						$callback = $regex_callback;
+				foreach ( $prefix_match_data_formatting as $prefix => $prefix_callback ) {
+					if ( $this->starts_with( $heading, $prefix ) ) {
+						$callback = $prefix_callback;
 						break;
 					}
 				}
@@ -1151,6 +1173,41 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Whether a variation row that does not exist yet can be created under its parent product.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param array $parsed_data Parsed row data.
+	 * @return bool
+	 */
+	protected function can_create_variation( $parsed_data ) {
+		// A row ID cannot be honored when creating a new variation: reusing an existing
+		// post's ID would corrupt that post, and a nonexistent ID cannot be assigned.
+		if ( ! empty( $parsed_data['id'] ) ) {
+			return false;
+		}
+
+		// A CSV ID cannot be assigned to a new variation, so without a SKU the created variation
+		// could never be matched again and every re-import would duplicate it.
+		if ( empty( $parsed_data['sku'] ) ) {
+			return false;
+		}
+
+		if ( empty( $parsed_data['parent_id'] ) ) {
+			return false;
+		}
+
+		$parent = wc_get_product( $parsed_data['parent_id'] );
+
+		if ( ! $parent || ! $parent->is_type( ProductType::VARIABLE ) ) {
+			return false;
+		}
+
+		// A parent with the 'importing' status is a placeholder, meaning the parent does not exist either.
+		return ! in_array( $parent->get_status(), array( 'importing', ProductStatus::TRASH ), true );
+	}
+
+	/**
 	 * Process importer.
 	 *
 	 * Do not import products with IDs or SKUs that already exist if option
@@ -1215,16 +1272,34 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			}
 
 			if ( $update_existing && ( isset( $parsed_data['id'] ) || isset( $parsed_data['sku'] ) ) && ! $id_exists && ! $sku_exists ) {
-				$data['skipped'][] = new WP_Error(
-					'woocommerce_product_importer_error',
-					esc_html__( 'No matching product exists to update.', 'woocommerce' ),
-					array(
-						'id'  => $id,
-						'sku' => esc_attr( $sku ),
-						'row' => $this->get_row_id( $parsed_data ),
-					)
-				);
-				continue;
+				$create_variation = false;
+
+				if ( ProductType::VARIATION === ( $parsed_data['type'] ?? '' ) && $this->can_create_variation( $parsed_data ) ) {
+					/**
+					 * Filters whether a new variation should be created for an existing variable product when updating existing products.
+					 *
+					 * Only fires for variation rows that passed validation, so it can veto the creation but not force it.
+					 *
+					 * @since 11.1.0
+					 *
+					 * @param bool  $create_variation Whether to create the new variation instead of skipping the row.
+					 * @param array $parsed_data      Parsed row data.
+					 */
+					$create_variation = apply_filters( 'woocommerce_product_import_create_variation_of_existing_product', true, $parsed_data );
+				}
+
+				if ( ! $create_variation ) {
+					$data['skipped'][] = new WP_Error(
+						'woocommerce_product_importer_error',
+						esc_html__( 'No matching product exists to update.', 'woocommerce' ),
+						array(
+							'id'  => $id,
+							'sku' => esc_attr( $sku ),
+							'row' => $this->get_row_id( $parsed_data ),
+						)
+					);
+					continue;
+				}
 			}
 
 			$result = $this->process_item( $parsed_data );

@@ -102,7 +102,7 @@ export const currencies = {
 	MKD: 'Macedonian denar (&#x434;&#x435;&#x43d;) — MKD',
 	MMK: 'Burmese kyat (Ks) — MMK',
 	MNT: 'Mongolian t&ouml;gr&ouml;g (&#x20ae;) — MNT',
-	MOP: 'Macanese pataca (P) — MOP',
+	MOP: 'Macanese pataca (MOP&#36;) — MOP',
 	MRU: 'Mauritanian ouguiya (UM) — MRU',
 	MUR: 'Mauritian rupee (&#x20a8;) — MUR',
 	MVR: 'Maldivian rufiyaa (.&#x783;) — MVR',
@@ -169,7 +169,7 @@ export const currencies = {
 	XPF: 'CFP franc (XPF) — XPF',
 	YER: 'Yemeni rial (&#xfdfc;) — YER',
 	ZAR: 'South African rand (&#82;) — ZAR',
-	ZMW: 'Zambian kwacha (ZK) — ZMW',
+	ZMW: 'Zambian kwacha (K) — ZMW',
 };
 
 export const externalCurrencies = {
@@ -267,7 +267,7 @@ export const externalCurrencies = {
 	MKD: 'Macedonian denar (&#x434;&#x435;&#x43d;)',
 	MMK: 'Burmese kyat (Ks)',
 	MNT: 'Mongolian t&ouml;gr&ouml;g (&#x20ae;)',
-	MOP: 'Macanese pataca (P)',
+	MOP: 'Macanese pataca (MOP&#36;)',
 	MRU: 'Mauritanian ouguiya (UM)',
 	MUR: 'Mauritian rupee (&#x20a8;)',
 	MVR: 'Maldivian rufiyaa (.&#x783;)',
@@ -334,7 +334,7 @@ export const externalCurrencies = {
 	XPF: 'CFP franc (Fr)',
 	YER: 'Yemeni rial (&#xfdfc;)',
 	ZAR: 'South African rand (&#82;)',
-	ZMW: 'Zambian kwacha (ZK)',
+	ZMW: 'Zambian kwacha (K)',
 };
 
 export const stateOptions = {

@@ -27,6 +27,27 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	private array $original_get = array();
 
 	/**
+	 * Original request globals.
+	 *
+	 * @var array
+	 */
+	private array $original_request = array();
+
+	/**
+	 * Original cached settings pages.
+	 *
+	 * @var array
+	 */
+	private array $original_settings_pages = array();
+
+	/**
+	 * Original current user id.
+	 *
+	 * @var int
+	 */
+	private int $original_user_id = 0;
+
+	/**
 	 * Original current settings section.
 	 *
 	 * @var mixed
@@ -66,6 +87,9 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		global $current_section, $current_tab;
 
 		$this->original_get                     = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$this->original_request                 = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$this->original_settings_pages          = $this->get_cached_settings_pages();
+		$this->original_user_id                 = get_current_user_id();
 		$this->original_current_section         = $current_section ?? null;
 		$this->original_current_tab             = $current_tab ?? null;
 		$this->original_hide_save_button_exists = array_key_exists( 'hide_save_button', $GLOBALS );
@@ -81,8 +105,12 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		global $current_section, $current_tab;
 
 		$_GET            = $this->original_get;
+		$_REQUEST        = $this->original_request;
 		$current_section = $this->original_current_section;
 		$current_tab     = $this->original_current_tab;
+		$this->set_cached_settings_pages( $this->original_settings_pages );
+		wp_set_current_user( $this->original_user_id );
+		set_current_screen( 'front' );
 
 		if ( $this->original_hide_save_button_exists ) {
 			$GLOBALS['hide_save_button'] = $this->original_hide_save_button;
@@ -92,6 +120,8 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 
 		remove_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
 		remove_filter( 'woocommerce_admin_features', array( $this, 'disable_settings_ui_feature' ) );
+		wp_dequeue_style( 'wc-settings-ui' );
+		wp_deregister_style( 'wc-settings-ui' );
 		SettingsUIRequestContext::reset();
 
 		parent::tearDown();
@@ -362,6 +392,84 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not resolve the Settings UI schema while determining script dependencies.
+	 */
+	public function test_settings_ui_script_dependencies_preserve_schema_filter_timing(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+		$page = $this->get_settings_ui_test_page();
+		$this->set_current_settings_page_request( $page );
+
+		$schema_filter_calls = 0;
+		$schema_filter       = static function ( array $settings ) use ( &$schema_filter_calls ): array {
+			++$schema_filter_calls;
+			return $settings;
+		};
+		add_filter( 'woocommerce_get_settings_settings_ui_flag_test', $schema_filter );
+
+		try {
+			$dependencies = $this->invoke_private_method( new WCAdminAssets(), 'get_settings_ui_script_dependencies' );
+
+			$this->assertContains( 'wc-settings-ui', $dependencies );
+			$this->assertSame( 0, $schema_filter_calls, 'Asset dependency resolution should not move public settings filters earlier in the request.' );
+
+			SettingsUIRequestContext::for_settings_page( $page, '' )->get_schema();
+			$this->assertSame( 1, $schema_filter_calls, 'The settings filter should still run when the schema is requested.' );
+		} finally {
+			remove_filter( 'woocommerce_get_settings_settings_ui_flag_test', $schema_filter );
+		}
+	}
+
+	/**
+	 * @testdox Should register and enqueue matching Settings UI styles for a resolved context.
+	 */
+	public function test_settings_ui_style_is_registered_and_enqueued_for_a_resolved_context(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+		$this->set_current_settings_page_request( $this->get_settings_ui_test_page() );
+
+		$assets = new WCAdminAssets();
+		$assets->register_scripts();
+		$dependencies = $this->invoke_private_method( $assets, 'get_settings_ui_script_dependencies' );
+
+		$this->invoke_private_method( $assets, 'enqueue_settings_ui_style', array( $dependencies ) );
+
+		$registered_style = wp_styles()->registered['wc-settings-ui'] ?? null;
+		$this->assertNotNull( $registered_style, 'The Settings UI style should be registered by the admin asset registry.' );
+		$this->assertSame( array( 'wp-components' ), $registered_style->deps, 'The Settings UI style should load after WordPress components.' );
+		$this->assertSame( 'replace', $registered_style->extra['rtl'] ?? null, 'The generated RTL stylesheet should replace the LTR stylesheet.' );
+		$this->assertTrue( wp_style_is( 'wc-settings-ui', 'enqueued' ), 'The Settings UI style should be enqueued for a resolved context.' );
+	}
+
+	/**
+	 * @testdox Should not enqueue Settings UI styles for ineligible contexts.
+	 */
+	public function test_settings_ui_style_is_not_enqueued_for_ineligible_contexts(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'disable_settings_ui_feature' ) );
+		$this->set_current_settings_page_request( $this->get_settings_ui_test_page() );
+
+		$assets = new WCAdminAssets();
+		$assets->register_scripts();
+
+		$this->assert_settings_ui_style_is_not_enqueued( $assets, 'Disabled Settings UI requests should keep the new stylesheet out of the queue.' );
+		remove_filter( 'woocommerce_admin_features', array( $this, 'disable_settings_ui_feature' ) );
+
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+		$page = new class() extends \WC_Settings_Page {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id    = 'classic_settings_test';
+				$this->label = 'Classic settings test';
+			}
+		};
+		$this->set_current_settings_page_request( $page );
+		$this->assert_settings_ui_style_is_not_enqueued( $assets, 'Classic settings pages should not request the Settings UI stylesheet.' );
+
+		$this->set_current_settings_page_request( $this->get_settings_ui_test_page_with_failing_script_handles(), 'advanced' );
+		$this->assert_settings_ui_style_is_not_enqueued( $assets, 'A script handle failure should keep the Settings UI stylesheet out of the queue.' );
+	}
+
+	/**
 	 * It does not resolve a current request context when the feature flag is disabled.
 	 */
 	public function test_current_request_context_is_null_when_feature_flag_is_disabled(): void {
@@ -408,7 +516,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * It adds the settings UI body class when the feature flag is enabled.
+	 * @testdox Should add only the top-level Settings UI body class for top-level pages.
 	 */
 	public function test_settings_ui_body_class_is_added_when_feature_flag_is_enabled(): void {
 		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
@@ -421,6 +529,92 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'existing-class', $classes );
 		$this->assertStringContainsString( 'woocommerce-settings-ui-page', $classes );
+		$this->assertStringNotContainsString( 'woocommerce-settings-ui-drill-down', $classes );
+	}
+
+	/**
+	 * @testdox Should add the drill-down body class for Settings UI drill-down pages.
+	 */
+	public function test_settings_ui_drill_down_body_class_is_added_for_drill_down_pages(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+
+		global $current_section, $current_tab;
+		$current_section = 'test_gateway';
+		$current_tab     = 'checkout';
+		$page            = $this->get_settings_ui_test_page_for_drill_down();
+
+		$classes = $page->add_settings_ui_body_class( 'existing-class woocommerce-settings-ui-page' );
+
+		$this->assertStringContainsString( 'existing-class', $classes );
+		$this->assertSame( 1, substr_count( $classes, 'woocommerce-settings-ui-page' ) );
+		$this->assertSame( 1, substr_count( $classes, 'woocommerce-settings-ui-drill-down' ) );
+	}
+
+	/**
+	 * @testdox Should add the exact Settings UI body classes even when a similarly prefixed class is already present.
+	 */
+	public function test_settings_ui_body_classes_use_exact_token_matching_against_prefixed_classes(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+
+		global $current_section, $current_tab;
+		$current_section = 'test_gateway';
+		$current_tab     = 'checkout';
+		$page            = $this->get_settings_ui_test_page_for_drill_down();
+
+		$classes      = $page->add_settings_ui_body_class( 'existing-class woocommerce-settings-ui-page-preview' );
+		$body_classes = explode( ' ', $classes );
+
+		$this->assertContains( 'woocommerce-settings-ui-page-preview', $body_classes );
+		$this->assertCount( 1, array_keys( $body_classes, 'woocommerce-settings-ui-page', true ) );
+		$this->assertCount( 1, array_keys( $body_classes, 'woocommerce-settings-ui-drill-down', true ) );
+	}
+
+	/**
+	 * @testdox Should not add the Settings UI body classes when schema generation falls back to legacy rendering.
+	 */
+	public function test_settings_ui_body_classes_are_not_added_when_schema_generation_fails(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+
+		global $current_section, $current_tab;
+		$current_section = 'test_gateway';
+		$current_tab     = 'checkout';
+		$page            = $this->get_settings_ui_test_page_with_failing_schema( 'checkout' );
+
+		$classes = $page->add_settings_ui_body_class( 'existing-class' );
+
+		$this->assertSame( 'existing-class', $classes, 'The fallback page should keep the classic body classes so the legacy Save button stays visible' );
+	}
+
+	/**
+	 * @testdox Should not add the Settings UI body classes when script handle resolution falls back to legacy rendering.
+	 */
+	public function test_settings_ui_body_classes_are_not_added_when_script_handle_resolution_fails(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+
+		global $current_section, $current_tab;
+		$current_section = 'test_gateway';
+		$current_tab     = 'checkout';
+		$page            = $this->get_settings_ui_test_page_with_failing_script_handles( 'checkout' );
+
+		$classes = $page->add_settings_ui_body_class( 'existing-class' );
+
+		$this->assertSame( 'existing-class', $classes, 'The fallback page should keep the classic body classes so the legacy Save button stays visible' );
+	}
+
+	/**
+	 * @testdox Should not add the Settings UI body class when a top-level page falls back to legacy rendering.
+	 */
+	public function test_settings_ui_body_class_is_not_added_when_a_top_level_page_falls_back(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+
+		global $current_section, $current_tab;
+		$current_section = 'failing_section';
+		$current_tab     = 'settings_ui_flag_test';
+		$page            = $this->get_settings_ui_test_page_with_failing_schema();
+
+		$classes = $page->add_settings_ui_body_class( 'existing-class' );
+
+		$this->assertSame( 'existing-class', $classes, 'The fallback page should keep the classic body classes so the legacy Save button stays visible' );
 	}
 
 	/**
@@ -649,15 +843,18 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	/**
 	 * Build a settings page whose settings UI adapter cannot provide script handles.
 	 *
+	 * @param string $page_id Page id.
 	 * @return \WC_Settings_Page
 	 */
-	private function get_settings_ui_test_page_with_failing_script_handles(): \WC_Settings_Page {
-		return new class() extends \WC_Settings_Page {
+	private function get_settings_ui_test_page_with_failing_script_handles( string $page_id = 'settings_ui_flag_test' ): \WC_Settings_Page {
+		return new class( $page_id ) extends \WC_Settings_Page {
 			/**
 			 * Constructor.
+			 *
+			 * @param string $page_id Page id.
 			 */
-			public function __construct() {
-				$this->id    = 'settings_ui_flag_test';
+			public function __construct( string $page_id ) {
+				$this->id    = $page_id;
 				$this->label = 'Settings UI flag test';
 			}
 
@@ -675,7 +872,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 					 * @return array
 					 */
 					public function get_script_handles( string $section_id ): array {
-						if ( 'advanced' === $section_id ) {
+						if ( '' !== $section_id ) {
 							throw new \RuntimeException( 'Unable to load extension script handles.' );
 						}
 
@@ -705,15 +902,18 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	/**
 	 * Build a settings page whose settings UI adapter cannot provide a schema.
 	 *
+	 * @param string $page_id Page id.
 	 * @return \WC_Settings_Page
 	 */
-	private function get_settings_ui_test_page_with_failing_schema(): \WC_Settings_Page {
-		return new class() extends \WC_Settings_Page {
+	private function get_settings_ui_test_page_with_failing_schema( string $page_id = 'settings_ui_flag_test' ): \WC_Settings_Page {
+		return new class( $page_id ) extends \WC_Settings_Page {
 			/**
 			 * Constructor.
+			 *
+			 * @param string $page_id Page id.
 			 */
-			public function __construct() {
-				$this->id    = 'settings_ui_flag_test';
+			public function __construct( string $page_id ) {
+				$this->id    = $page_id;
 				$this->label = 'Settings UI flag test';
 			}
 
@@ -731,7 +931,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 					 * @return array
 					 */
 					public function get_schema( string $section_id ): array {
-						if ( 'advanced' === $section_id ) {
+						if ( '' !== $section_id ) {
 							throw new \RuntimeException( 'Unable to build settings UI schema.' );
 						}
 
@@ -882,6 +1082,63 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 				);
 			}
 		};
+	}
+
+	/**
+	 * Assert that the current request does not enqueue the Settings UI style.
+	 *
+	 * @param WCAdminAssets $assets Admin assets instance.
+	 * @param string        $message Assertion failure message.
+	 */
+	private function assert_settings_ui_style_is_not_enqueued( WCAdminAssets $assets, string $message ): void {
+		$dependencies = $this->invoke_private_method( $assets, 'get_settings_ui_script_dependencies' );
+
+		$this->invoke_private_method( $assets, 'enqueue_settings_ui_style', array( $dependencies ) );
+		$this->assertFalse( wp_style_is( 'wc-settings-ui', 'enqueued' ), $message );
+	}
+
+	/**
+	 * Point the current request and settings-page cache at a test page.
+	 *
+	 * @param \WC_Settings_Page $page Settings page.
+	 * @param string            $section Settings section.
+	 */
+	private function set_current_settings_page_request( \WC_Settings_Page $page, string $section = '' ): void {
+		global $current_section, $current_tab;
+
+		$_GET['page']        = 'wc-settings';
+		$_GET['tab']         = $page->get_id();
+		$_REQUEST['section'] = $section;
+		$current_section     = $section;
+		$current_tab         = $page->get_id();
+
+		wp_set_current_user( 1 );
+		set_current_screen( 'woocommerce_page_wc-settings' );
+		$this->set_cached_settings_pages( array( $page ) );
+		SettingsUIRequestContext::reset();
+	}
+
+	/**
+	 * Get the settings pages cached by WC_Admin_Settings.
+	 *
+	 * @return array
+	 */
+	private function get_cached_settings_pages(): array {
+		$property = new \ReflectionProperty( \WC_Admin_Settings::class, 'settings' );
+		$property->setAccessible( true );
+
+		return $property->getValue();
+	}
+
+	/**
+	 * Replace the settings pages cached by WC_Admin_Settings.
+	 *
+	 * @param array $pages Settings pages.
+	 */
+	private function set_cached_settings_pages( array $pages ): void {
+		$property = new \ReflectionProperty( \WC_Admin_Settings::class, 'settings' );
+		$property->setAccessible( true );
+		$property->setValue( null, $pages );
 	}
 
 	/**

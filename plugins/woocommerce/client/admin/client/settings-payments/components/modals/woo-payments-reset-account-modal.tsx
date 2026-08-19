@@ -107,9 +107,9 @@ export const WooPaymentsResetAccountModal = ( {
 					provider_extension_slug: wooPaymentsExtensionSlug,
 				} );
 				// Refresh the providers store.
-				invalidatePaymentGateways( 'getPaymentProviders' );
+				void invalidatePaymentGateways( 'getPaymentProviders' );
 				// Refresh the WooPayments in-context onboarding store.
-				invalidateWooPaymentsOnboarding( 'getOnboardingData' );
+				void invalidateWooPaymentsOnboarding( 'getOnboardingData' );
 			} )
 			.catch( () => {
 				recordPaymentsEvent( 'provider_reset_onboarding_failed', {
