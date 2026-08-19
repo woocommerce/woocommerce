@@ -296,15 +296,10 @@ export const buildDataFormField = (
 
 	if ( settingsField.type === 'info' ) {
 		field.readOnly = true;
-		// DataForm paints the label for a read-only field and drops its
-		// description, so info shows the sanitized element the field already
-		// carries rather than sanitizing the same string again per render.
+		// The description is already a sanitized element, and DataForm paints
+		// the label for a read-only field, so info reuses it as its body.
 		field.render = ( { field: normalizedField } ) =>
-			normalizedField.description ? (
-				<div className="wc-settings-ui__info">
-					{ normalizedField.description }
-				</div>
-			) : null;
+			normalizedField.description ?? null;
 		return field;
 	}
 
