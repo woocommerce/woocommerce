@@ -11,13 +11,13 @@ import { useLocalStorageState } from '@woocommerce/base-hooks';
  */
 import { useIncompatiblePaymentGatewaysNotice } from './use-incompatible-payment-gateways-notice';
 import { useIncompatibleExtensionNotice } from './use-incompatible-extensions-notice';
+import {
+	DISMISSED_INCOMPATIBLE_EXTENSIONS_STORAGE_KEY,
+	isSubsetOf,
+} from './storage';
 
 type StoredIncompatibleExtension = { [ k: string ]: string[] };
 const initialDismissedNotices: StoredIncompatibleExtension[] = [];
-
-// Whether every item in `subset` is also present in `superset`.
-const isSubsetOf = ( subset: string[], superset: string[] ) =>
-	subset.every( ( item ) => superset.includes( item ) );
 
 // This key is shared with older versions and with the storefront banner, and is
 // plain localStorage that anything can overwrite, so nothing about its contents
@@ -86,27 +86,19 @@ export const useCombinedIncompatibilityNotice = (
 	const allIncompatibleItemCount =
 		incompatibleExtensionCount + incompatiblePaymentMethodCount;
 
-	// The storefront banner reads this same key once, to carry over dismissals
-	// made before it moved to its own — see
-	// `DISMISSED_INCOMPATIBLE_EXTENSIONS_STORAGE_KEY` in
-	// `blocks/cart-checkout-shared/incompatible-extensions-notice.tsx` if this
-	// key ever changes.
 	const [ dismissedNotices, setDismissedNotices ] = useLocalStorageState<
 		StoredIncompatibleExtension[]
-	>(
-		`wc-blocks_dismissed_incompatible_extensions_notices`,
-		initialDismissedNotices
-	);
+	>( DISMISSED_INCOMPATIBLE_EXTENSIONS_STORAGE_KEY, initialDismissedNotices );
 
 	const [ isVisible, setIsVisible ] = useState( false );
 
-	// Every incompatible item the merchant has already dismissed for this block.
-	// Reduce (not find) so we tolerate the legacy shape where a single block
-	// could have accumulated multiple stored entries.
 	const storedNotices: unknown[] = Array.isArray( dismissedNotices )
 		? dismissedNotices
 		: [];
 
+	// Every incompatible item the merchant has already dismissed for this block.
+	// Reduce (not find) so we tolerate the legacy shape where a single block
+	// could have accumulated multiple stored entries.
 	const dismissedItemSlugs = storedNotices.reduce< string[] >(
 		( acc, notice ) => {
 			acc.push( ...readSlugsFor( notice, blockName ) );

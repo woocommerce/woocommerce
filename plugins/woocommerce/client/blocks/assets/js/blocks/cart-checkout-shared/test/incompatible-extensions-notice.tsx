@@ -8,10 +8,10 @@ import { getSetting } from '@woocommerce/settings';
  * Internal dependencies
  */
 import {
-	IncompatibleExtensionsFrontendNotice,
 	DISMISSED_INCOMPATIBLE_EXTENSIONS_FRONTEND_STORAGE_KEY,
 	DISMISSED_INCOMPATIBLE_EXTENSIONS_STORAGE_KEY,
-} from '../incompatible-extensions-notice';
+} from '@woocommerce/editor-components/incompatible-extension-notice/storage';
+import { IncompatibleExtensionsFrontendNotice } from '../incompatible-extensions-notice';
 
 jest.mock( '@woocommerce/settings', () => ( {
 	getSetting: jest.fn(),

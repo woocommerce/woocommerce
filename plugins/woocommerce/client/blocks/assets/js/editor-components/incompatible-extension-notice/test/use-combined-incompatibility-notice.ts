@@ -38,6 +38,7 @@ jest.mock( '@woocommerce/settings', () => ( {
  * Internal dependencies
  */
 import { useCombinedIncompatibilityNotice } from '../use-combined-incompatibility-notice';
+import { DISMISSED_INCOMPATIBLE_EXTENSIONS_STORAGE_KEY } from '../storage';
 
 ( wpData.useSelect as jest.Mock ).mockImplementation( ( mapSelect ) =>
 	mapSelect( () => ( {
@@ -73,7 +74,7 @@ const mountAndDismiss = ( block: string ) => {
 	unmount();
 };
 
-const STORAGE_KEY = 'wc-blocks_dismissed_incompatible_extensions_notices';
+const STORAGE_KEY = DISMISSED_INCOMPATIBLE_EXTENSIONS_STORAGE_KEY;
 
 describe( 'useCombinedIncompatibilityNotice', () => {
 	beforeEach( () => {

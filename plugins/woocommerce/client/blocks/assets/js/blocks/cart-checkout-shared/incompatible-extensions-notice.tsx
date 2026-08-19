@@ -6,22 +6,11 @@ import { useEffect, useMemo } from '@wordpress/element';
 import { getSetting, CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import NoticeBanner from '@woocommerce/base-components/notice-banner';
 import { useLocalStorageState } from '@woocommerce/base-hooks';
-
-/**
- * localStorage key for the storefront banner's dismissed extensions. Kept
- * distinct from the editor sidebar notice's key so the two surfaces don't share
- * (and overwrite) each other's storage.
- */
-export const DISMISSED_INCOMPATIBLE_EXTENSIONS_FRONTEND_STORAGE_KEY =
-	'wc-blocks_dismissed_incompatible_extensions_notices_frontend';
-
-/**
- * The key both surfaces shared before the storefront banner moved to its own.
- * Still owned and written by the editor sidebar notice; the storefront only
- * ever reads it, to carry over dismissals made before the rename.
- */
-export const DISMISSED_INCOMPATIBLE_EXTENSIONS_STORAGE_KEY =
-	'wc-blocks_dismissed_incompatible_extensions_notices';
+import {
+	DISMISSED_INCOMPATIBLE_EXTENSIONS_FRONTEND_STORAGE_KEY,
+	DISMISSED_INCOMPATIBLE_EXTENSIONS_STORAGE_KEY,
+	isSubsetOf,
+} from '@woocommerce/editor-components/incompatible-extension-notice/storage';
 
 /**
  * Reads the slugs the merchant acknowledged on the storefront while both
@@ -53,10 +42,6 @@ const readSlugsDismissedBeforeRename = (): string[] => {
 		return [];
 	}
 };
-
-// Whether every item in `subset` is also present in `superset`.
-const isSubsetOf = ( subset: string[], superset: string[] ): boolean =>
-	subset.every( ( item ) => superset.includes( item ) );
 
 interface IncompatibleExtension {
 	id: string;
