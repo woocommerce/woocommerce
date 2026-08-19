@@ -152,11 +152,15 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-            # Helper to fail with console error and summary message.
+            # Helper to fail with a console error and summary message. An optional second
+            # argument adds more detail (e.g. a PR list) to the summary only.
             fail() {
               echo "::error::$1"
               echo "" >> $GITHUB_STEP_SUMMARY
               echo "❌ Build failed: $1" >> $GITHUB_STEP_SUMMARY
+              if [[ -n "$2" ]]; then
+                echo "$2" >> $GITHUB_STEP_SUMMARY
+              fi
               exit 1
             }
 
@@ -214,18 +218,18 @@ jobs:
             blocking_total=$( echo "$search_result" | jq '.issueCount' )
             blocking_prs=$( echo "$search_result" | jq '.nodes' )
             if (( blocking_total > 0 )); then
-              echo "" >> $GITHUB_STEP_SUMMARY
-              echo "Open PRs blocking the release (oldest first):" >> $GITHUB_STEP_SUMMARY
-              echo "$blocking_prs" | jq -r '.[] | "- [#\(.number)](\(.url)) " + .title' >> $GITHUB_STEP_SUMMARY
-              if (( blocking_total > 20 )); then
-                search_url="https://github.com/${GH_REPO}/pulls?q=$( echo -n "$pr_query" | jq -sRr @uri )"
-                echo "- ... and $(( blocking_total - 20 )) more ([view all]($search_url))" >> $GITHUB_STEP_SUMMARY
-              fi
-              if [[ $branch_plugin_version == *-beta* ]]; then
-                echo "" >> $GITHUB_STEP_SUMMARY
-                echo "If a PR can't be merged or closed right now, temporarily marking it as a draft or changing its milestone can be used as a workaround." >> $GITHUB_STEP_SUMMARY
-              fi
-              fail "There are open PRs blocking the release."
+              details=$( {
+                echo "$blocking_prs" | jq -r '.[] | "- [#\(.number)](\(.url)) " + .title'
+                if (( blocking_total > 20 )); then
+                  search_url="https://github.com/${GH_REPO}/pulls?q=$( echo -n "$pr_query" | jq -sRr @uri )"
+                  echo "- ... and $(( blocking_total - 20 )) more ([view all]($search_url))"
+                fi
+                if [[ $branch_plugin_version == *-beta* ]]; then
+                  echo ""
+                  echo "If a PR can't be merged or closed right now, temporarily marking it as a draft or changing its milestone can be used as a workaround."
+                fi
+              } )
+              fail "There are open PRs against the release branch ($BRANCH) or with milestone '$milestone'." "$details"
             fi
 
             # Changelog section must have at least one entry.
