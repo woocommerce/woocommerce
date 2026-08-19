@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Keep the Cart/Checkout incompatible extensions notices dismissed when an incompatible payment gateway or extension is disabled — both the editor sidebar notice and the storefront admin banner now reappear only when a new, never-acknowledged incompatibility is added. The storefront banner also no longer shares a localStorage key with the editor notice, and dismissals made before that split are carried over.
+Keep the Cart/Checkout incompatible extensions notices dismissed when an incompatible payment gateway or extension is disabled — both the editor sidebar notice and the storefront admin banner stay dismissed for the ones that remain, and warn again only when something becomes incompatible that the merchant has not already acknowledged. Re-enabling a gateway or reactivating an extension counts as new, so it warns again. The storefront banner also no longer shares a localStorage key with the editor notice, and dismissals made before that split are carried over.
