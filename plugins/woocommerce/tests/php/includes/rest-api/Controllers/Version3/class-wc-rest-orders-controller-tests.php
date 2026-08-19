@@ -1368,6 +1368,55 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox PUT /orders swallows an extension veto that coincides with a deleted variation and demotes the item.
+	 */
+	public function test_update_line_item_swallows_extension_veto_when_variation_is_also_deleted(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
+
+		$filter_item_class = static function ( $classname, $item_type, $filtered_item_id ) use ( $item_id ) {
+			return 'line_item' === $item_type && $item_id === (int) $filtered_item_id
+				? WC_REST_Orders_Controller_Rejecting_Order_Item_Product::class
+				: $classname;
+		};
+		$arm_and_delete    = static function ( $product, $order_item ) use ( $item_id, $variation ) {
+			static $done = false;
+
+			if ( ! $done && $item_id === $order_item->get_id() && $order_item instanceof WC_REST_Orders_Controller_Rejecting_Order_Item_Product ) {
+				$done = true;
+				WC_REST_Orders_Controller_Rejecting_Order_Item_Product::$reject_variation_restoration = true;
+				wp_delete_post( $variation->get_id(), true );
+			}
+
+			return $product;
+		};
+
+		add_filter( 'woocommerce_get_order_item_classname', $filter_item_class, 10, 3 );
+		add_filter( 'woocommerce_get_product_from_item', $arm_and_delete, 10, 2 );
+		wc_get_container()->get( OrderCache::class )->remove( $order->get_id() );
+
+		try {
+			$response = $this->dispatch_line_item_update(
+				$order->get_id(),
+				array(
+					'id'         => $item_id,
+					'product_id' => $parent->get_id(),
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_get_order_item_classname', $filter_item_class, 10 );
+			remove_filter( 'woocommerce_get_product_from_item', $arm_and_delete, 10 );
+			WC_REST_Orders_Controller_Rejecting_Order_Item_Product::$reject_variation_restoration = false;
+		}
+
+		$this->assertSame( 200, $response->get_status(), 'An extension veto for an already-deleted variation should be swallowed like the core throw.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'The deleted variation should not be restored.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product_id(), 'The line item should retain the parent product ID.' );
+	}
+
+	/**
 	 * @testdox PUT /orders with an echoed variation ID demotes the line item if the variation is deleted after loading.
 	 */
 	public function test_update_line_item_with_echoed_variation_id_demotes_when_variation_is_deleted_after_loading(): void {
