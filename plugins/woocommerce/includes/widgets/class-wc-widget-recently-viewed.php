@@ -78,7 +78,7 @@ class WC_Widget_Recently_Viewed extends WC_Widget {
 					'terms'    => ProductStockStatus::OUT_OF_STOCK,
 					'operator' => 'NOT IN',
 				),
-			); // WPCS: slow query ok.
+			); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query -- The taxonomy filter is bounded to the non-empty recently viewed product ID list.
 		}
 
 		$r = new WP_Query( apply_filters( 'woocommerce_recently_viewed_products_widget_query_args', $query_args ) );
