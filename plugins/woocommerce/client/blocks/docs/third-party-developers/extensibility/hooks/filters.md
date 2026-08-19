@@ -1244,7 +1244,7 @@ apply_filters( 'woocommerce_store_api_rate_limit_id', string $identifier );
 ## woocommerce_store_api_validate_cart_item_quantity
 
 
-Filters the quantity validation for a cart item being added to or updated in the cart via the Store API. Return a \WP_Error with an informative message to reject the new quantity, or true to accept it.
+Filters the quantity validation for a cart item being updated in the cart via the Store API. Return a \WP_Error with an informative message to reject the new quantity, or true to accept it.
 
 ```php
 apply_filters( 'woocommerce_store_api_validate_cart_item_quantity', \WP_Error|true $valid, int|float $quantity, array $cart_item )
