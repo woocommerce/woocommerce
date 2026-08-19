@@ -106,7 +106,8 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 			libxml_clear_errors();
 			libxml_use_internal_errors( $errors );
 
-			$author_cells = ( new DOMXPath( $document ) )->query(
+			$xpath        = new DOMXPath( $document );
+			$author_cells = $xpath->query(
 				'//td[contains(concat(" ", normalize-space(@class), " "), " author ") and contains(concat(" ", normalize-space(@class), " "), " column-author ")]'
 			);
 			if ( false === $author_cells ) {
@@ -120,7 +121,18 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 			}
 			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- DOM API property name.
 			$this->assertStringContainsString( 'Exact Review Author', $author_cell->textContent );
-			$this->assertStringContainsString( 'mailto:row-reviewer@example.com', $row_output );
+
+			$email_links = $xpath->query( './/a[normalize-space(text())="row-reviewer@example.com"]', $author_cell );
+			if ( false === $email_links ) {
+				throw new \RuntimeException( 'Unable to query the author email link.' );
+			}
+
+			$email_link = $email_links->item( 0 );
+			$this->assertInstanceOf( DOMElement::class, $email_link );
+			if ( ! $email_link instanceof DOMElement ) {
+				throw new \RuntimeException( 'The author email link was not found.' );
+			}
+			$this->assertSame( 'mailto:row-reviewer@example.com', $email_link->getAttribute( 'href' ) );
 			$this->assertStringContainsString( 'aria-label="4 out of 5"', $row_output );
 			$this->assertStringContainsString( 'Exact review row content', $row_output );
 			$this->assertStringContainsString( 'Exact Review Row Product', $row_output );
