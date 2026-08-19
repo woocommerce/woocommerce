@@ -5,6 +5,34 @@ settings:
   excludeLinksFromLockfile: false
 
 catalogs:
+  tooling:
+    '@babel/cli':
+      specifier: 7.25.7
+      version: 7.25.7
+    '@babel/core':
+      specifier: 7.25.7
+      version: 7.25.7
+    '@babel/plugin-syntax-jsx':
+      specifier: 7.25.7
+      version: 7.25.7
+    '@babel/preset-env':
+      specifier: 7.25.7
+      version: 7.25.7
+    '@babel/preset-react':
+      specifier: 7.25.7
+      version: 7.25.7
+    '@babel/preset-typescript':
+      specifier: 7.25.7
+      version: 7.25.7
+    '@babel/runtime':
+      specifier: 7.25.7
+      version: 7.25.7
+    postcss:
+      specifier: 8.4.x
+      version: 8.4.49
+    webpack:
+      specifier: 5.97.x
+      version: 5.97.1
   wp-bundled:
     '@wordpress/admin-ui':
       specifier: 2.4.1
@@ -192,7 +220,7 @@ importers:
   .:
     dependencies:
       '@babel/core':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@wordpress/babel-preset-default':
         specifier: next
@@ -205,10 +233,10 @@ importers:
         version: 1.0.1
     devDependencies:
       '@babel/preset-env':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7(@babel/core@7.25.7)
       '@babel/runtime':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@types/node':
         specifier: ^24.1.0
@@ -289,7 +317,7 @@ importers:
         specifier: 5.7.x
         version: 5.7.3
       webpack:
-        specifier: 5.97.x
+        specifier: catalog:tooling
         version: 5.97.1(@swc/core@1.15.24)(webpack-cli@5.1.4)
 
   packages/js/admin-layout:
@@ -353,7 +381,7 @@ importers:
         specifier: 5.7.x
         version: 5.7.3
       webpack:
-        specifier: 5.97.x
+        specifier: catalog:tooling
         version: 5.97.1(@swc/core@1.15.24)(webpack-cli@5.1.4)
       webpack-cli:
         specifier: 5.1.x
@@ -543,10 +571,10 @@ importers:
         version: 1.8.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@babel/core':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@babel/runtime':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@storybook/addon-console':
         specifier: ^1.2.3
@@ -627,7 +655,7 @@ importers:
         specifier: 29.5.x
         version: 29.5.0
       postcss:
-        specifier: 8.4.x
+        specifier: catalog:tooling
         version: 8.4.49
       postcss-loader:
         specifier: 4.3.x
@@ -660,7 +688,7 @@ importers:
         specifier: ^9.0.1
         version: 9.0.1
       webpack:
-        specifier: 5.97.x
+        specifier: catalog:tooling
         version: 5.97.1(@swc/core@1.15.24)(webpack-cli@5.1.4)
       webpack-cli:
         specifier: 5.1.x
@@ -678,7 +706,7 @@ importers:
         version: 1.1.1
     devDependencies:
       '@babel/core':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@types/jest':
         specifier: 29.5.x
@@ -739,7 +767,7 @@ importers:
         version: 6.6.1
     devDependencies:
       '@babel/core':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@types/jest':
         specifier: 29.5.x
@@ -815,7 +843,7 @@ importers:
         version: 4.4.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@babel/core':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@testing-library/dom':
         specifier: ^10.4.x
@@ -872,7 +900,7 @@ importers:
         specifier: 29.5.x
         version: 29.5.0
       postcss:
-        specifier: 8.4.x
+        specifier: catalog:tooling
         version: 8.4.49
       postcss-loader:
         specifier: 4.3.x
@@ -896,7 +924,7 @@ importers:
         specifier: 5.7.x
         version: 5.7.3
       webpack:
-        specifier: 5.97.x
+        specifier: catalog:tooling
         version: 5.97.1(@swc/core@1.15.24)(webpack-cli@5.1.4)
       webpack-cli:
         specifier: 5.1.x
@@ -957,10 +985,10 @@ importers:
         version: 4.0.2
     devDependencies:
       '@babel/core':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@babel/runtime':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@testing-library/dom':
         specifier: ^10.4.x
@@ -1054,7 +1082,7 @@ importers:
         version: 6.15.1
     devDependencies:
       '@babel/core':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@types/jest':
         specifier: 29.5.x
@@ -1112,7 +1140,7 @@ importers:
         version: 6.43.1-next.v.202604091042.0(webpack@5.97.1)
     devDependencies:
       '@babel/core':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@woocommerce/eslint-config':
         specifier: workspace:*
@@ -1139,7 +1167,7 @@ importers:
         specifier: 5.7.x
         version: 5.7.3
       webpack:
-        specifier: 5.97.x
+        specifier: catalog:tooling
         version: 5.97.1(@swc/core@1.15.24)(webpack-cli@5.1.4)
       webpack-cli:
         specifier: 5.1.x
@@ -1399,7 +1427,7 @@ importers:
         specifier: 5.7.x
         version: 5.7.3
       webpack:
-        specifier: 5.97.x
+        specifier: catalog:tooling
         version: 5.97.1(@swc/core@1.15.24)(webpack-cli@5.1.4)
       webpack-cli:
         specifier: 5.1.x
@@ -1421,7 +1449,7 @@ importers:
         version: 8.64.0(eslint@10.7.0(jiti@2.6.1))(typescript@5.7.3)
     devDependencies:
       '@babel/core':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       eslint:
         specifier: ^10.0.0
@@ -1473,10 +1501,10 @@ importers:
         version: 4.4.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@babel/core':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@babel/runtime':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@storybook/addon-actions':
         specifier: 6.5.17-alpha.0
@@ -1536,7 +1564,7 @@ importers:
         specifier: 29.5.x
         version: 29.5.0
       postcss:
-        specifier: 8.4.x
+        specifier: catalog:tooling
         version: 8.4.49
       postcss-loader:
         specifier: 4.3.x
@@ -1560,7 +1588,7 @@ importers:
         specifier: 5.7.x
         version: 5.7.3
       webpack:
-        specifier: 5.97.x
+        specifier: catalog:tooling
         version: 5.97.1(@swc/core@1.15.24)(webpack-cli@5.1.4)
       webpack-cli:
         specifier: 5.1.x
@@ -1654,10 +1682,10 @@ importers:
         version: 18.3.1(react@18.3.1)
     devDependencies:
       '@babel/core':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@babel/runtime':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@testing-library/dom':
         specifier: ^10.4.x
@@ -1708,7 +1736,7 @@ importers:
         specifier: 29.5.x
         version: 29.5.0
       postcss:
-        specifier: 8.4.x
+        specifier: catalog:tooling
         version: 8.4.49
       postcss-loader:
         specifier: 4.3.x
@@ -1726,7 +1754,7 @@ importers:
         specifier: 5.7.x
         version: 5.7.3
       webpack:
-        specifier: 5.97.x
+        specifier: catalog:tooling
         version: 5.97.1(@swc/core@1.15.24)(webpack-cli@5.1.4)
       webpack-cli:
         specifier: 5.1.x
@@ -1757,7 +1785,7 @@ importers:
         version: 6.15.1
     devDependencies:
       '@babel/core':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@types/cookie':
         specifier: ^0.4.1
@@ -1818,7 +1846,7 @@ importers:
         version: 3.0.2
     devDependencies:
       '@babel/core':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@types/jest':
         specifier: 29.5.x
@@ -1954,7 +1982,7 @@ importers:
         version: 0.13.11
     devDependencies:
       '@babel/core':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@woocommerce/eslint-config':
         specifier: workspace:*
@@ -2042,10 +2070,10 @@ importers:
         version: 6.3.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@babel/core':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@babel/runtime':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@types/jest':
         specifier: 29.5.x
@@ -2112,7 +2140,7 @@ importers:
         version: 4.17.21
     devDependencies:
       '@babel/core':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@types/lodash':
         specifier: ^4.14.202
@@ -2161,10 +2189,10 @@ importers:
         version: 3.0.34
     devDependencies:
       '@babel/core':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@babel/runtime':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@types/jest':
         specifier: 29.5.x
@@ -2246,7 +2274,7 @@ importers:
         version: 4.0.4
     devDependencies:
       '@babel/core':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@testing-library/react':
         specifier: ^16.x.x
@@ -2291,7 +2319,7 @@ importers:
         specifier: 29.5.x
         version: 29.5.0
       postcss:
-        specifier: 8.4.x
+        specifier: catalog:tooling
         version: 8.4.49
       postcss-loader:
         specifier: 4.3.x
@@ -2309,7 +2337,7 @@ importers:
         specifier: 5.7.x
         version: 5.7.3
       webpack:
-        specifier: 5.97.x
+        specifier: catalog:tooling
         version: 5.97.1(@swc/core@1.15.24)(webpack-cli@5.1.4)
       webpack-cli:
         specifier: 5.1.x
@@ -2331,7 +2359,7 @@ importers:
         version: 0.4.9
     devDependencies:
       '@babel/core':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@types/debug':
         specifier: ^4.1.12
@@ -2386,7 +2414,7 @@ importers:
         version: 3.4.0
     devDependencies:
       '@babel/core':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@types/dompurify':
         specifier: ^2.0.4
@@ -2453,7 +2481,7 @@ importers:
         version: 6.6.1
     devDependencies:
       '@babel/core':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@types/jest':
         specifier: 29.5.x
@@ -2505,7 +2533,7 @@ importers:
         version: 4.4.3(supports-color@9.4.0)
     devDependencies:
       '@babel/core':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@types/debug':
         specifier: ^4.1.12
@@ -2584,13 +2612,13 @@ importers:
         version: 4.4.3(supports-color@9.4.0)
     devDependencies:
       '@babel/core':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@babel/preset-env':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7(@babel/core@7.25.7)
       '@babel/preset-typescript':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7(@babel/core@7.25.7)
       '@jest/globals':
         specifier: 29.5.x
@@ -2617,7 +2645,7 @@ importers:
         specifier: 5.7.x
         version: 5.7.3
       webpack:
-        specifier: 5.97.x
+        specifier: catalog:tooling
         version: 5.97.1(@swc/core@1.15.24)(webpack-cli@5.1.4)
       webpack-cli:
         specifier: 5.1.x
@@ -2642,13 +2670,13 @@ importers:
         version: link:client/legacy
     devDependencies:
       '@babel/cli':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7(@babel/core@7.25.7)
       '@babel/core':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@babel/preset-env':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7(@babel/core@7.25.7)
       '@faker-js/faker':
         specifier: ^9.3.0
@@ -3118,19 +3146,19 @@ importers:
         specifier: ^4.0.0
         version: 4.0.0
       '@babel/cli':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7(@babel/core@7.25.7)
       '@babel/core':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@babel/preset-env':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7(@babel/core@7.25.7)
       '@babel/preset-typescript':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7(@babel/core@7.25.7)
       '@babel/runtime':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@pmmmwh/react-refresh-webpack-plugin':
         specifier: ^0.5.11
@@ -3319,7 +3347,7 @@ importers:
         specifier: ^0.7.4
         version: 0.7.4
       postcss:
-        specifier: 8.4.x
+        specifier: catalog:tooling
         version: 8.4.49
       postcss-color-function:
         specifier: ^4.1.0
@@ -3370,7 +3398,7 @@ importers:
         specifier: 5.7.x
         version: 5.7.3
       webpack:
-        specifier: 5.97.x
+        specifier: catalog:tooling
         version: 5.97.1(@swc/core@1.15.24)(webpack-cli@5.1.4)
       webpack-bundle-analyzer:
         specifier: 4.9.x
@@ -3542,19 +3570,19 @@ importers:
         specifier: 4.0.0
         version: 4.0.0
       '@babel/cli':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7(@babel/core@7.25.7)
       '@babel/core':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@babel/plugin-syntax-jsx':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7(@babel/core@7.25.7)
       '@babel/preset-react':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7(@babel/core@7.25.7)
       '@babel/preset-typescript':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7(@babel/core@7.25.7)
       '@bartekbp/typescript-checkstyle':
         specifier: 5.0.0
@@ -3872,7 +3900,7 @@ importers:
         specifier: 0.0.27
         version: 0.0.27
       postcss:
-        specifier: 8.4.x
+        specifier: catalog:tooling
         version: 8.4.49
       postcss-color-function:
         specifier: 4.1.0
@@ -3932,7 +3960,7 @@ importers:
         specifier: 3.10.0
         version: 3.10.0
       webpack:
-        specifier: 5.97.x
+        specifier: catalog:tooling
         version: 5.97.1(@swc/core@1.15.24)(esbuild@0.18.20)(webpack-cli@5.1.4)
       webpack-bundle-analyzer:
         specifier: 4.9.x
@@ -4283,7 +4311,7 @@ importers:
         specifier: 5.7.x
         version: 5.7.3
       webpack:
-        specifier: 5.97.x
+        specifier: catalog:tooling
         version: 5.97.1(@swc/core@1.15.24)(webpack-cli@5.1.4)
       webpack-cli:
         specifier: 5.1.x
@@ -4411,16 +4439,16 @@ importers:
   tools/storybook:
     devDependencies:
       '@babel/preset-env':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7(@babel/core@7.25.7)
       '@babel/preset-react':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7(@babel/core@7.25.7)
       '@babel/preset-typescript':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7(@babel/core@7.25.7)
       '@babel/runtime':
-        specifier: 7.25.7
+        specifier: catalog:tooling
         version: 7.25.7
       '@storybook/addon-a11y':
         specifier: 7.6.19
@@ -4498,7 +4526,7 @@ importers:
         specifier: 5.7.x
         version: 5.7.3
       webpack:
-        specifier: 5.97.x
+        specifier: catalog:tooling
         version: 5.97.1(@swc/core@1.15.24)(webpack-cli@5.1.4)
 
 packages:
