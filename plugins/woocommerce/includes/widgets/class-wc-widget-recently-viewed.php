@@ -51,7 +51,7 @@ class WC_Widget_Recently_Viewed extends WC_Widget {
 	 */
 	public function widget( $args, $instance ) {
 		$viewed_products = ! empty( $_COOKIE['woocommerce_recently_viewed'] ) ? (array) explode( '|', wp_unslash( $_COOKIE['woocommerce_recently_viewed'] ) ) : array(); // @codingStandardsIgnoreLine
-		$viewed_products = array_slice( array_reverse( array_filter( array_map( 'absint', $viewed_products ) ) ), 0, 15 );
+		$viewed_products = array_reverse( array_filter( array_map( 'absint', $viewed_products ) ) );
 
 		if ( empty( $viewed_products ) ) {
 			return;
@@ -71,7 +71,7 @@ class WC_Widget_Recently_Viewed extends WC_Widget {
 		);
 
 		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
-			$query_args['tax_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Recently viewed product IDs are capped at 15.
+			$query_args['tax_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Required to exclude hidden out-of-stock products from the recently viewed widget.
 				array(
 					'taxonomy' => 'product_visibility',
 					'field'    => 'name',
