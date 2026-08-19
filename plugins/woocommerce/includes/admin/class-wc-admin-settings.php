@@ -284,8 +284,8 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 				// The 'field_name' key can be used when it is useful to specify an input field name that is different
 				// from the input field ID. We use the key 'field_name' because 'name' is already in use for a different
-				// purpose.
-				if ( ! isset( $value['field_name'] ) ) {
+				// purpose. It is rendered and looked up as a string, so fall back to the ID for non-scalars.
+				if ( ! isset( $value['field_name'] ) || ! is_scalar( $value['field_name'] ) ) {
 					$value['field_name'] = $value['id'];
 				}
 				if ( ! isset( $value['title'] ) ) {
