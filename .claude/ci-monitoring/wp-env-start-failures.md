@@ -5,11 +5,11 @@ Write prose in `.claude/ci-monitoring/analysis.md`; it is appended at the end.
 
 | | |
 |---|---|
-| Window | 2026-07-15 (retry merged, PR #66491) → 2026-08-14 |
-| Runs scanned | 3155 |
-| Last run tracked | [31797416619](https://github.com/woocommerce/woocommerce/actions/runs/31797416619) |
-| Collection cursor | 2026-08-14 |
-| Updated | 2026-08-14T12:23:18Z |
+| Window | 2026-07-15 (retry merged, PR #66491) → 2026-08-19 |
+| Runs scanned | 3544 |
+| Last run tracked | [32243525667](https://github.com/woocommerce/woocommerce/actions/runs/32243525667) |
+| Collection cursor | 2026-08-19 |
+| Updated | 2026-08-19T10:48:29Z |
 
 A job is **recovered** when it emitted a retry warning and then passed, and lost
 when it exhausted every attempt. Jobs that started cleanly first time are not
@@ -20,7 +20,16 @@ cells read *recovered / retried*.
 
 | Window | Retried | Recovered | Recovery Rate | `dockerhub` | `packagist` | `unknown` | `wordpress` |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| since 2026-07-15 | 1027 | 733 | 71% | 156/201 | 361/361 | 80/244 | 136/221 |
+| since 2026-07-15 | 1332 | 902 | 68% | 218/274 | 395/395 | 134/423 | 155/240 |
+
+Excluding the 221 losses this project cannot fix — a third-party outage, or a
+branch that does not build — the rate is **81%** (902 of 1111).
+
+Excluded causes: `github-api`, `plugin-code`, `workspace-eacces`.
+
+A cause is only recorded for a lost job, so jobs that hit the same outages and
+then recovered still count in the numerator; read the adjusted rate as an upper
+bound.
 
 ### By reason
 
@@ -28,17 +37,17 @@ cells read *recovered / retried*.
 
 | `reason=` | Retried | Share | Recovered | Recovery Rate |
 |---|---:|---:|---:|---:|
-| `packagist` | 361 | 35% | 361 | 100% |
-| `unknown` | 244 | 24% | 80 | 33% |
-| `wordpress` | 221 | 22% | 136 | 62% |
-| `dockerhub` | 201 | 20% | 156 | 78% |
-| **All** | **1027** | **100%** | **733** | **71%** |
+| `unknown` | 423 | 32% | 134 | 32% |
+| `packagist` | 395 | 30% | 395 | 100% |
+| `dockerhub` | 274 | 21% | 218 | 80% |
+| `wordpress` | 240 | 18% | 155 | 65% |
+| **All** | **1332** | **100%** | **902** | **68%** |
 
 ## By month
 
 | Month | Retried | Recovered | Recovery Rate | `dockerhub` | `packagist` | `unknown` | `wordpress` |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| 2026-08 | 456 | 369 | 81% | 76/88 | 152/152 | 47/62 | 94/154 |
+| 2026-08 | 761 | 538 | 71% | 138/161 | 186/186 | 101/241 | 113/173 |
 | 2026-07 | 571 | 364 | 64% | 80/113 | 209/209 | 33/182 | 42/67 |
 
 ## By week
@@ -47,7 +56,8 @@ Weeks start Monday, labelled by that date. Last 12.
 
 | Week of | Retried | Recovered | Recovery Rate | `dockerhub` | `packagist` | `unknown` | `wordpress` |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| 2026-08-10 | 237 | 195 | 82% | 61/65 | 61/61 | 23/30 | 50/81 |
+| 2026-08-17 | 288 | 152 | 53% | 61/72 | 28/28 | 53/178 | 10/10 |
+| 2026-08-10 | 254 | 212 | 83% | 62/66 | 67/67 | 24/31 | 59/90 |
 | 2026-08-03 | 199 | 159 | 80% | 14/21 | 85/85 | 23/31 | 37/62 |
 | 2026-07-27 | 205 | 156 | 76% | 42/61 | 73/73 | 14/31 | 27/40 |
 | 2026-07-20 | 215 | 122 | 57% | 21/33 | 71/71 | 12/82 | 18/29 |
@@ -59,7 +69,12 @@ Last 30 days with activity.
 
 | Day | Retried | Recovered | Recovery Rate | `dockerhub` | `packagist` | `unknown` | `wordpress` |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| 2026-08-14 | 7 | 6 | 86% | – | 3/3 | – | 3/4 |
+| 2026-08-19 | 2 | 2 | 100% | – | 2/2 | – | – |
+| 2026-08-18 | 32 | 31 | 97% | 10/10 | 13/13 | 3/4 | 5/5 |
+| 2026-08-17 | 254 | 119 | 47% | 51/62 | 13/13 | 50/174 | 5/5 |
+| 2026-08-16 | 5 | 5 | 100% | – | – | – | 5/5 |
+| 2026-08-15 | 4 | 4 | 100% | – | 1/1 | – | 3/3 |
+| 2026-08-14 | 15 | 14 | 93% | 1/1 | 8/8 | 1/1 | 4/5 |
 | 2026-08-13 | 55 | 31 | 56% | 3/3 | 16/16 | 3/4 | 9/32 |
 | 2026-08-12 | 78 | 70 | 90% | 26/26 | 11/11 | 13/18 | 20/23 |
 | 2026-08-11 | 38 | 35 | 92% | 10/11 | 14/14 | 4/4 | 7/9 |
@@ -84,11 +99,6 @@ Last 30 days with activity.
 | 2026-07-23 | 25 | 21 | 84% | 3/6 | 16/16 | – | 2/3 |
 | 2026-07-22 | 66 | 32 | 48% | 9/11 | 11/11 | 11/43 | 1/1 |
 | 2026-07-21 | 23 | 21 | 91% | – | 19/19 | 0/1 | 2/3 |
-| 2026-07-20 | 19 | 17 | 89% | 1/1 | 12/12 | 1/2 | 3/4 |
-| 2026-07-19 | 2 | 2 | 100% | – | – | – | 2/2 |
-| 2026-07-18 | 1 | 0 | 0% | 0/1 | – | – | – |
-| 2026-07-17 | 75 | 22 | 29% | 2/2 | 18/18 | 1/54 | 1/1 |
-| 2026-07-16 | 49 | 41 | 84% | 7/8 | 30/30 | 3/7 | 1/4 |
 
 ## Types of failure
 
@@ -98,34 +108,36 @@ than infrastructure. One example per type, the most recent.
 
 | Cause | Jobs | Share | Retryable | Latest | `reason=` | Branch | Job | Run |
 |---|---:|---:|---|---|---|---|---|---|
-| `wordpress-org` | 89 | 30% | yes | 2026-08-14 | `wordpress` | `trunk` | Run nightly checks _ Core e2e tests - Gutenberg stable - @woocommerce_plugin-woocommerce [e2e] | [31767738632](https://github.com/woocommerce/woocommerce/actions/runs/31767738632) |
-| `plugin-code` | 68 | 23% | no — the branch is broken | 2026-08-05 | `unknown` | `add/WOOPRD-3412-payment-partnership-updates-mastercard` | PHP 7.4 WP latest - 1 [WP 6.9.5] - @woocommerce_plugin-woocommerce [unitphp] | [30981602040](https://github.com/woocommerce/woocommerce/actions/runs/30981602040) |
-| `workspace-eacces` | 62 | 21% | no — the branch is broken | 2026-08-10 | `unknown` | `fix/35607-product-search-order` | Blocks e2e tests 9_10 - @woocommerce_plugin-woocommerce [e2e] | [31405873676](https://github.com/woocommerce/woocommerce/actions/runs/31405873676) |
-| `dockerhub` | 44 | 15% | yes | 2026-08-10 | `dockerhub` | `fix/WOO6-68` | PHP 8.5 WP latest [WP latest] - @woocommerce_plugin-woocommerce [unitphp] | [31377574837](https://github.com/woocommerce/woocommerce/actions/runs/31377574837) |
-| `composer-installer` | 18 | 6% | no — BuildKit caches the bad layer | 2026-08-12 | `unknown` | `fix/36758-category-list-order` | PHP 8.5 WP latest (HPOSoff) [WP latest] - @woocommerce_plugin-woocommerce [unitphp] | [31633094812](https://github.com/woocommerce/woocommerce/actions/runs/31633094812) |
-| `packagist` | 10 | 3% | yes | 2026-07-31 | `unknown` | `fix/42323-old-filters-markup-e2e-tests` | Blocks e2e tests 1_10 - @woocommerce_plugin-woocommerce [e2e] | [30634563069](https://github.com/woocommerce/woocommerce/actions/runs/30634563069) |
-| `buildkit` | 2 | 1% | yes | 2026-08-12 | `unknown` | `fix/36758-category-list-order` | Blocks e2e tests 2_10 - @woocommerce_plugin-woocommerce [e2e] | [31574663624](https://github.com/woocommerce/woocommerce/actions/runs/31574663624) |
+| `wordpress-org` | 101 | 23% | yes | 2026-08-17 | `unknown` | `codex/wooprd-3593-settings-schema-validation` | Blocks e2e tests - WP pre-release [WP 7.1-RC3] 1_10 - @woocommerce_plugin-woocommerce [e2e] (optional) | [32040891065](https://github.com/woocommerce/woocommerce/actions/runs/32040891065) |
+| `github-api` | 91 | 21% | yes | 2026-08-17 | `unknown` | `codex/wooprd-3593-settings-schema-validation` | Blocks e2e tests 4_10 - @woocommerce_plugin-woocommerce [e2e] | [32040891065](https://github.com/woocommerce/woocommerce/actions/runs/32040891065) |
+| `plugin-code` | 68 | 16% | no — the branch is broken | 2026-08-05 | `unknown` | `add/WOOPRD-3412-payment-partnership-updates-mastercard` | PHP 7.4 WP latest - 1 [WP 6.9.5] - @woocommerce_plugin-woocommerce [unitphp] | [30981602040](https://github.com/woocommerce/woocommerce/actions/runs/30981602040) |
+| `workspace-eacces` | 62 | 14% | no — the branch is broken | 2026-08-10 | `unknown` | `fix/35607-product-search-order` | Blocks e2e tests 9_10 - @woocommerce_plugin-woocommerce [e2e] | [31405873676](https://github.com/woocommerce/woocommerce/actions/runs/31405873676) |
+| `dockerhub` | 52 | 12% | yes | 2026-08-17 | `unknown` | `codex/wooprd-3593-settings-schema-validation` | Core e2e tests - PHP 8.5 - parallel 1_2 - @woocommerce_plugin-woocommerce [e2e] | [32040891065](https://github.com/woocommerce/woocommerce/actions/runs/32040891065) |
+| `wordpress-org-ratelimit` | 20 | 5% | yes | 2026-08-17 | `unknown` | `codex/wooprd-3593-settings-schema-validation` | Blocks e2e tests - WP latest-1 [WP 6.9.7] 9_10 - @woocommerce_plugin-woocommerce [e2e] | [32040891065](https://github.com/woocommerce/woocommerce/actions/runs/32040891065) |
+| `composer-installer` | 20 | 5% | no — BuildKit caches the bad layer | 2026-08-18 | `unknown` | `trunk` | Core API tests (with object cache plugin) - @woocommerce_plugin-woocommerce [api] | [32133317596](https://github.com/woocommerce/woocommerce/actions/runs/32133317596) |
+| `packagist` | 10 | 2% | yes | 2026-07-31 | `unknown` | `fix/42323-old-filters-markup-e2e-tests` | Blocks e2e tests 1_10 - @woocommerce_plugin-woocommerce [e2e] | [30634563069](https://github.com/woocommerce/woocommerce/actions/runs/30634563069) |
+| `buildkit` | 5 | 1% | yes | 2026-08-17 | `unknown` | `codex/wooprd-3593-settings-schema-validation` | Blocks e2e tests - WP pre-release [WP 7.1-RC3] 3_10 - @woocommerce_plugin-woocommerce [e2e] (optional) | [32040891065](https://github.com/woocommerce/woocommerce/actions/runs/32040891065) |
 | `docker-daemon` | 1 | 0% | yes | 2026-07-17 | `unknown` | `trunk` | Blocks e2e tests 6_10 - @woocommerce_plugin-woocommerce [e2e] | [29586056557](https://github.com/woocommerce/woocommerce/actions/runs/29586056557) |
 
 ## Most recent failures
 
 | Day | Cause | `reason=` | Branch | Job | Run |
 |---|---|---|---|---|---|
-| 2026-08-14 | `wordpress-org` | `wordpress` | `trunk` | Run nightly checks _ Core e2e tests - Gutenberg stable - @woocommerce_plugin-woocommerce [e2e] | [31767738632](https://github.com/woocommerce/woocommerce/actions/runs/31767738632) |
-| 2026-08-13 | `wordpress-org` | `wordpress` | `trunk` | Run nightly checks _ Core e2e tests - PHP 8.5 - parallel 1_2 - @woocommerce_plugin-woocommerce [e2e] | [31664944740](https://github.com/woocommerce/woocommerce/actions/runs/31664944740) |
-| 2026-08-13 | `wordpress-org` | `wordpress` | `trunk` | Run nightly checks _ Blocks e2e tests - unified editor assets 9_10 - @woocommerce_plugin-woocommerce [e2e] | [31664944740](https://github.com/woocommerce/woocommerce/actions/runs/31664944740) |
-| 2026-08-13 | `wordpress-org` | `wordpress` | `fix/42492-product-collection-fixtures` | Core e2e tests - WP L-1 - serial [WP 6.9.7] 2_2 - @woocommerce_plugin-woocommerce [e2e] | [31716765099](https://github.com/woocommerce/woocommerce/actions/runs/31716765099) |
-| 2026-08-13 | `wordpress-org` | `wordpress` | `fix/42492-product-collection-fixtures` | Core e2e tests - WP L-1 - serial [WP 6.9.7] 1_2 - @woocommerce_plugin-woocommerce [e2e] | [31716765099](https://github.com/woocommerce/woocommerce/actions/runs/31716765099) |
-| 2026-08-13 | `wordpress-org` | `wordpress` | `fix/42492-product-collection-fixtures` | Core e2e tests - serial 2_2 - @woocommerce_plugin-woocommerce [e2e] | [31716765099](https://github.com/woocommerce/woocommerce/actions/runs/31716765099) |
-| 2026-08-13 | `wordpress-org` | `wordpress` | `fix/42492-product-collection-fixtures` | Core e2e tests - serial 1_2 - @woocommerce_plugin-woocommerce [e2e] | [31716765099](https://github.com/woocommerce/woocommerce/actions/runs/31716765099) |
-| 2026-08-13 | `wordpress-org` | `wordpress` | `fix/42492-product-collection-fixtures` | Core e2e tests - PHP 8.5 - serial 2_2 - @woocommerce_plugin-woocommerce [e2e] | [31716765099](https://github.com/woocommerce/woocommerce/actions/runs/31716765099) |
-| 2026-08-13 | `wordpress-org` | `wordpress` | `fix/42492-product-collection-fixtures` | Core e2e tests - PHP 8.5 - serial 1_2 - @woocommerce_plugin-woocommerce [e2e] | [31716765099](https://github.com/woocommerce/woocommerce/actions/runs/31716765099) |
-| 2026-08-13 | `wordpress-org` | `wordpress` | `fix/42492-product-collection-fixtures` | Core e2e tests - PHP 8.5 - parallel 2_2 - @woocommerce_plugin-woocommerce [e2e] | [31716765099](https://github.com/woocommerce/woocommerce/actions/runs/31716765099) |
-| 2026-08-13 | `wordpress-org` | `wordpress` | `fix/42492-product-collection-fixtures` | Core e2e tests - PHP 8.5 - parallel 1_2 - @woocommerce_plugin-woocommerce [e2e] | [31716765099](https://github.com/woocommerce/woocommerce/actions/runs/31716765099) |
-| 2026-08-13 | `wordpress-org` | `wordpress` | `fix/42492-product-collection-fixtures` | Core e2e tests - parallel 2_2 - @woocommerce_plugin-woocommerce [e2e] | [31716765099](https://github.com/woocommerce/woocommerce/actions/runs/31716765099) |
-| 2026-08-13 | `wordpress-org` | `wordpress` | `fix/42492-product-collection-fixtures` | Core e2e tests - parallel 1_2 - @woocommerce_plugin-woocommerce [e2e] | [31716765099](https://github.com/woocommerce/woocommerce/actions/runs/31716765099) |
-| 2026-08-13 | `wordpress-org` | `wordpress` | `fix/42492-product-collection-fixtures` | Core e2e tests - Gutenberg stable - @woocommerce_plugin-woocommerce [e2e] | [31716765099](https://github.com/woocommerce/woocommerce/actions/runs/31716765099) |
-| 2026-08-13 | `wordpress-org` | `wordpress` | `fix/42492-product-collection-fixtures` | Core e2e tests - (HPOSoff) - @woocommerce_plugin-woocommerce [e2e] | [31716765099](https://github.com/woocommerce/woocommerce/actions/runs/31716765099) |
+| 2026-08-18 | `composer-installer` | `unknown` | `trunk` | Core API tests (with object cache plugin) - @woocommerce_plugin-woocommerce [api] | [32133317596](https://github.com/woocommerce/woocommerce/actions/runs/32133317596) |
+| 2026-08-17 | `wordpress-org` | `unknown` | `wooplug-7494-update-npm-dependencies-and-parents` | Core e2e tests - serial 1_2 - @woocommerce_plugin-woocommerce [e2e] | [32040264513](https://github.com/woocommerce/woocommerce/actions/runs/32040264513) |
+| 2026-08-17 | `wordpress-org` | `unknown` | `wooplug-7494-update-npm-dependencies-and-parents` | Core e2e tests - parallel 1_2 - @woocommerce_plugin-woocommerce [e2e] | [32040264513](https://github.com/woocommerce/woocommerce/actions/runs/32040264513) |
+| 2026-08-17 | `wordpress-org` | `unknown` | `wooplug-7494-update-npm-dependencies-and-parents` | Blocks e2e tests - WP latest-1 [WP 6.9.7] 5_10 - @woocommerce_plugin-woocommerce [e2e] | [32040264513](https://github.com/woocommerce/woocommerce/actions/runs/32040264513) |
+| 2026-08-17 | `wordpress-org` | `unknown` | `fix/29906-rest-review-rating-recompute` | Core e2e tests - WP pre-release - serial [WP 7.1-RC3] 2_2 - @woocommerce_plugin-woocommerce [e2e] (optional) | [32040692625](https://github.com/woocommerce/woocommerce/actions/runs/32040692625) |
+| 2026-08-17 | `wordpress-org` | `unknown` | `codex/wooprd-3593-settings-schema-validation` | Core e2e tests - WP pre-release - serial [WP 7.1-RC3] 2_2 - @woocommerce_plugin-woocommerce [e2e] (optional) | [32040891065](https://github.com/woocommerce/woocommerce/actions/runs/32040891065) |
+| 2026-08-17 | `wordpress-org` | `unknown` | `codex/wooprd-3593-settings-schema-validation` | Core e2e tests - WP L-1 - serial [WP 6.9.7] 1_2 - @woocommerce_plugin-woocommerce [e2e] | [32040891065](https://github.com/woocommerce/woocommerce/actions/runs/32040891065) |
+| 2026-08-17 | `wordpress-org` | `unknown` | `codex/wooprd-3593-settings-schema-validation` | Core e2e tests - WP L-1 - parallel [WP 6.9.7] 1_2 - @woocommerce_plugin-woocommerce [e2e] | [32040891065](https://github.com/woocommerce/woocommerce/actions/runs/32040891065) |
+| 2026-08-17 | `wordpress-org` | `unknown` | `codex/wooprd-3593-settings-schema-validation` | Core e2e tests - PHP 8.5 - parallel 2_2 - @woocommerce_plugin-woocommerce [e2e] | [32040891065](https://github.com/woocommerce/woocommerce/actions/runs/32040891065) |
+| 2026-08-17 | `wordpress-org` | `unknown` | `codex/wooprd-3593-settings-schema-validation` | Core API tests - @woocommerce_plugin-woocommerce [api] | [32040891065](https://github.com/woocommerce/woocommerce/actions/runs/32040891065) |
+| 2026-08-17 | `wordpress-org` | `unknown` | `codex/wooprd-3593-settings-schema-validation` | Blocks e2e tests 3_10 - @woocommerce_plugin-woocommerce [e2e] | [32040891065](https://github.com/woocommerce/woocommerce/actions/runs/32040891065) |
+| 2026-08-17 | `wordpress-org` | `unknown` | `codex/wooprd-3593-settings-schema-validation` | Blocks e2e tests 2_10 - @woocommerce_plugin-woocommerce [e2e] | [32040891065](https://github.com/woocommerce/woocommerce/actions/runs/32040891065) |
+| 2026-08-17 | `wordpress-org` | `unknown` | `codex/wooprd-3593-settings-schema-validation` | Blocks e2e tests - WP pre-release [WP 7.1-RC3] 1_10 - @woocommerce_plugin-woocommerce [e2e] (optional) | [32040891065](https://github.com/woocommerce/woocommerce/actions/runs/32040891065) |
+| 2026-08-17 | `wordpress-org-ratelimit` | `unknown` | `wooplug-7494-update-npm-dependencies-and-parents` | Core e2e tests - WP L-1 - serial [WP 6.9.7] 2_2 - @woocommerce_plugin-woocommerce [e2e] | [32040264513](https://github.com/woocommerce/woocommerce/actions/runs/32040264513) |
+| 2026-08-17 | `wordpress-org-ratelimit` | `unknown` | `wooplug-7494-update-npm-dependencies-and-parents` | Blocks e2e tests 9_10 - @woocommerce_plugin-woocommerce [e2e] | [32040264513](https://github.com/woocommerce/woocommerce/actions/runs/32040264513) |
 
 Links are run-level: open the run and the failed job is the red one.
 
