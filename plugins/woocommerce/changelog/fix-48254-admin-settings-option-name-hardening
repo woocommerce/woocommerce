@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent malformed admin settings field names from fataling the settings screen, and resolve deeply nested field names to the stored value.

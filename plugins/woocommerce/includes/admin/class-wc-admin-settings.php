@@ -205,27 +205,52 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		 * @return mixed
 		 */
 		public static function get_option( $option_name, $default = '' ) {
-			if ( ! $option_name ) {
+			// The name is supplied by field definitions, which third-party code can populate with
+			// anything. Bail on non-scalars rather than letting them reach strstr() below.
+			if ( ! is_scalar( $option_name ) || ! $option_name ) {
 				return $default;
 			}
+
+			$option_name = (string) $option_name;
 
 			// Array value.
 			if ( strstr( $option_name, '[' ) ) {
 
 				parse_str( $option_name, $option_array );
 
+				// A name with no parsable base (for example '[key]') yields nothing to look up.
+				if ( empty( $option_array ) ) {
+					return $default;
+				}
+
 				// Option name is first key.
-				$option_name = current( array_keys( $option_array ) );
+				$option_name = (string) current( array_keys( $option_array ) );
 
 				// Get value.
-				$option_values = get_option( $option_name, '' );
+				$option_value = get_option( $option_name, null );
 
-				$key = key( $option_array[ $option_name ] );
+				/*
+				 * Walk the parsed key path down the stored value, so 'opt[a][b]' resolves to the
+				 * leaf that the matching input field posts rather than the sub-array above it.
+				 * Anything the path cannot reach resolves to null, and falls back to the default.
+				 */
+				$node = $option_array[ $option_name ];
 
-				if ( isset( $option_values[ $key ] ) ) {
-					$option_value = $option_values[ $key ];
-				} else {
-					$option_value = null;
+				while ( is_array( $node ) ) {
+					$key = key( $node );
+
+					if ( null === $key ) {
+						break;
+					}
+
+					if ( is_array( $option_value ) && isset( $option_value[ $key ] ) ) {
+						$option_value = $option_value[ $key ];
+					} else {
+						$option_value = null;
+						break;
+					}
+
+					$node = $node[ $key ];
 				}
 			} else {
 				// Single value.
