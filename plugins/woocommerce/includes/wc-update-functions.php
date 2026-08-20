@@ -3586,16 +3586,19 @@ function wc_update_1100_enable_point_of_sale_feature() {
 }
 
 /**
- * Set the stored value of the variation gallery feature flag to enabled.
+ * Replace the former variation gallery feature opt-out with the enabled value.
  *
  * The variation gallery is enabled for all stores as of 11.1.0 and no longer supports opting out.
+ * Missing and already-enabled options are left untouched.
  *
  * @since 11.1.0
  *
  * @return void
  */
-function wc_update_11102_enable_variation_gallery_feature(): void {
-	update_option( VariationGalleryPackage::ENABLE_OPTION_NAME, 'yes' );
+function wc_update_11101_enable_variation_gallery_feature(): void {
+	if ( 'no' === get_option( VariationGalleryPackage::ENABLE_OPTION_NAME, '' ) ) {
+		update_option( VariationGalleryPackage::ENABLE_OPTION_NAME, 'yes' );
+	}
 }
 
 /**

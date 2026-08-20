@@ -341,21 +341,24 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Migration registers and enables the variation gallery regardless of the previous option value.
+	 * @testdox Migration registers and only replaces an explicit variation gallery opt-out.
 	 */
-	public function test_wc_update_11102_enable_variation_gallery_feature(): void {
+	public function test_wc_update_11101_enable_variation_gallery_feature(): void {
 		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
 
 		$db_updates = WC_Install::get_db_update_callbacks();
-		$this->assertArrayHasKey( '11.1.0-2', $db_updates );
-		$this->assertContains( 'wc_update_11102_enable_variation_gallery_feature', $db_updates['11.1.0-2'] );
-
-		update_option( VariationGalleryPackage::ENABLE_OPTION_NAME, 'no' );
-		wc_update_11102_enable_variation_gallery_feature();
-		$this->assertSame( 'yes', get_option( VariationGalleryPackage::ENABLE_OPTION_NAME ) );
+		$this->assertArrayHasKey( '11.1.0-1', $db_updates );
+		$this->assertContains( 'wc_update_11101_enable_variation_gallery_feature', $db_updates['11.1.0-1'] );
 
 		delete_option( VariationGalleryPackage::ENABLE_OPTION_NAME );
-		wc_update_11102_enable_variation_gallery_feature();
+		wc_update_11101_enable_variation_gallery_feature();
+		$this->assertFalse( get_option( VariationGalleryPackage::ENABLE_OPTION_NAME ) );
+
+		update_option( VariationGalleryPackage::ENABLE_OPTION_NAME, 'no' );
+		wc_update_11101_enable_variation_gallery_feature();
+		$this->assertSame( 'yes', get_option( VariationGalleryPackage::ENABLE_OPTION_NAME ) );
+
+		wc_update_11101_enable_variation_gallery_feature();
 		$this->assertSame( 'yes', get_option( VariationGalleryPackage::ENABLE_OPTION_NAME ) );
 	}
 

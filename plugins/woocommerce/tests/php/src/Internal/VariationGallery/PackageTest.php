@@ -12,11 +12,6 @@ use Automattic\WooCommerce\Internal\VariationGallery\Package;
 class PackageTest extends \WC_Unit_Test_Case {
 
 	/**
-	 * Action Scheduler group for variation gallery migration callbacks.
-	 */
-	private const UPDATE_CALLBACK_GROUP = 'woocommerce-variation-gallery-migration';
-
-	/**
 	 * Reset migration-related state before each test.
 	 */
 	public function setUp(): void {
@@ -42,7 +37,7 @@ class PackageTest extends \WC_Unit_Test_Case {
 		WC()->queue()->cancel_all(
 			'woocommerce_run_update_callback',
 			$this->get_migration_action_args(),
-			self::UPDATE_CALLBACK_GROUP
+			'woocommerce-db-updates'
 		);
 		WC()->queue()->cancel_all(
 			'woocommerce_run_update_callback',
@@ -79,7 +74,7 @@ class PackageTest extends \WC_Unit_Test_Case {
 			WC()->queue()->get_next(
 				'woocommerce_run_update_callback',
 				$this->get_migration_action_args(),
-				self::UPDATE_CALLBACK_GROUP
+				'woocommerce-db-updates'
 			)
 		);
 	}
@@ -96,7 +91,7 @@ class PackageTest extends \WC_Unit_Test_Case {
 		WC()->queue()->add(
 			'woocommerce_run_update_callback',
 			$this->get_migration_action_args(),
-			self::UPDATE_CALLBACK_GROUP
+			'woocommerce-db-updates'
 		);
 
 		Package::maybe_schedule_migration();
@@ -107,7 +102,7 @@ class PackageTest extends \WC_Unit_Test_Case {
 				'args'     => $this->get_migration_action_args(),
 				'status'   => \ActionScheduler_Store::STATUS_PENDING,
 				'per_page' => -1,
-				'group'    => self::UPDATE_CALLBACK_GROUP,
+				'group'    => 'woocommerce-db-updates',
 			),
 			'ids'
 		);
@@ -127,7 +122,7 @@ class PackageTest extends \WC_Unit_Test_Case {
 			WC()->queue()->get_next(
 				'woocommerce_run_update_callback',
 				$this->get_migration_action_args(),
-				self::UPDATE_CALLBACK_GROUP
+				'woocommerce-db-updates'
 			)
 		);
 	}
