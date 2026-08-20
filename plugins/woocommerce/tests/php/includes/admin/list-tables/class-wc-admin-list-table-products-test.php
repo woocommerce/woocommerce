@@ -119,8 +119,6 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-<<<<<<< HEAD
-=======
 	 * Every stock status leaves the lookup table joined for later posts_clauses callbacks.
 	 *
 	 * The out-of-stock branch builds a self-contained subquery and does not read the alias itself, but
@@ -328,10 +326,12 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 			'where' => '',
 		);
 
+		$sut = ( new ReflectionClass( WC_Admin_List_Table_Products::class ) )->newInstanceWithoutConstructor();
+
 		return $this->with_stock_status(
 			$stock_status,
-			function () use ( $clauses ) {
-				return $this->sut->filter_stock_status_post_clauses( $clauses );
+			function () use ( $sut, $clauses ) {
+				return $sut->filter_stock_status_post_clauses( $clauses );
 			}
 		);
 	}
@@ -356,58 +356,6 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Create title and content-only search matches.
-	 *
-	 * @return array{WC_Product, WC_Product, string}
-	 */
-	private function create_search_products(): array {
-		$search_phrase = 'Night Light ' . wp_generate_password( 8, false );
-
-		// The content-only match is deliberately the newer one, so date ordering alone puts it first and
-		// only ranking can restore the expected order. Undated fixtures tie, and the assertion then rides
-		// on an unspecified tie-break rather than the clause under test.
-		$title_match = WC_Helper_Product::create_simple_product();
-		$title_match->set_name( $search_phrase );
-		$title_match->set_date_created( '2024-01-01 00:00:00' );
-		$title_match->save();
-
-		$content_match = WC_Helper_Product::create_simple_product();
-		$content_match->set_name( 'Archive Lamp Notes ' . wp_generate_password( 8, false ) );
-		$content_match->set_description( $search_phrase );
-		$content_match->set_date_created( '2024-01-02 00:00:00' );
-		$content_match->save();
-
-		return array( $title_match, $content_match, $search_phrase );
-	}
-
-
-	/**
-	 * Run a Products list search.
-	 *
-	 * @param string $search_term Search term.
-	 * @param array  $query_args  Additional query arguments.
-	 * @return int[]
-	 */
-	private function get_search_results( string $search_term, array $query_args = array() ): array {
-		$query_vars = $this->sut->request_query(
-			array_merge(
-				array(
-					'post_type'      => 'product',
-					'post_status'    => 'publish',
-					'posts_per_page' => -1,
-					'fields'         => 'ids',
-					's'              => $search_term,
-				),
-				$query_args
-			)
-		);
-
-		$query = new WP_Query( $query_vars );
-		return array_map( 'intval', $query->get_posts() );
-	}
-
-	/**
->>>>>>> 1dbe696c01 (Restore lookup table join for the out-of-stock products filter (#67871))
 	 * Create a variable product with children that use the supplied stock statuses.
 	 *
 	 * @param array $stock_statuses Child variation stock statuses.
