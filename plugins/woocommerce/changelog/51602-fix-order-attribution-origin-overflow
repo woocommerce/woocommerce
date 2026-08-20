@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Truncate a long order origin in the Order attribution metabox so it no longer overflows the sidebar, and wrap the attribution values when the details are expanded.

@@ -9597,10 +9597,21 @@ table.bar_chart {
 		display: flex;
 		justify-content: space-between;
 		align-items: start;
+		gap: 0.5em;
 	}
 
 	.order-attribution-origin {
 		flex-grow: 1;
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.woocommerce-order-attribution-origin-container:has(.woocommerce-order-attribution-details-toggle[aria-expanded="true"]) .order-attribution-origin {
+		overflow: visible;
+		white-space: normal;
+		overflow-wrap: anywhere;
 	}
 
 	.woocommerce-order-attribution-details-toggle {
@@ -9609,6 +9620,7 @@ table.bar_chart {
 
 	.woocommerce-order-attribution-details-container {
 		display: none;
+		overflow-wrap: anywhere;
 	}
 
 	.woocommerce-order-attribution-details-toggle {
