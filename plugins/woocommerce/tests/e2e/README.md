@@ -97,17 +97,21 @@ CUSTOMER_PASSWORD='customer.password'
 > file you should read further on how to create an alternative env, or you should run the tests using the raw Playwright 
 > command: `pnpm playwright ...`
 
-There are some pre-defined environments set in the `tests/e2e/envs` path.
-Each folder represents an environment, and contains a setup script, a `playwright.config.js` file and optionally an
-encrypted `.env` file.
-Running the tests with one of these environments will first decrypt the `.env.enc` file if it exists, execute the setup 
-script and then run the tests using the configuration in the `playwright.config.js` file.
+There are some pre-defined environments in the `tests/e2e/envs` path.
+Each folder is an environment. It holds a `playwright.config.ts` file and, optionally, an encrypted `.env` file.
+Running the tests with one of these environments decrypts the `.env.enc` file if it exists, then runs the tests with
+that `playwright.config.ts`.
 
-To run the tests using one of these environment, you can use the `test:e2e:with-env` script. Some examples:
+These environments do not start or provision a site. Start the target environment first. A plugin-installing environment
+(Gutenberg, object cache) starts from a wp-env config variant that installs the extra plugin into the baseline — start it
+with its `wp-env:e2e:*` script before you run the tests.
+
+To run the tests using one of these environments, you can use the `test:e2e:with-env` script. Some examples:
 
 ```bash
-# Runs the tests using the gutenberg-stable environment, 
-# which is set up to run a subset of relevant tests against a wp-env instance with the latest stable version of the Gutenberg plugin
+# Start the Gutenberg stable environment. This installs the latest stable Gutenberg plugin into the baseline.
+pnpm wp-env:e2e:gb-stable start --update
+# Run a subset of relevant tests against it.
 pnpm test:e2e:with-env gutenberg-stable
 
 # Runs the tests using the default-pressable environment, 
@@ -133,11 +137,25 @@ If you need to create a new pre-defined environment, you can follow these steps:
 
 - create a new folder in the `tests/e2e/envs` directory with the name of the environment.
   Example: `tests/e2e/envs/my-new-env`
-- create an `env-setup.sh` file in the new folder. This file should contain any setup steps for the environment. This
-  will run before any test execution.
 - create a `playwright.config.ts` file in the new folder. This file should contain the configuration for the
   environment.
   It's recommended that the config extends the default configuration and only updates the necessary values.
+- if the environment needs extra plugins installed, add them to a wp-env config variant instead of installing
+  them after startup. Copy `.wp-env.e2e.json` to `.wp-env.e2e.my-new-env.json` and append the extra plugin
+  zip(s) to its `plugins` array, then register the file and its plugin(s) in
+  `tests/e2e/bin/check-wp-env-variants.mjs` — the lint rule keeps the variant identical to the base except for
+  those plugins, and running the checker with `--fix` regenerates it. Add a `wp-env:e2e:my-new-env` script that
+  exports `E2E_WP_ENV_CONFIG=.wp-env.e2e.my-new-env.json` before it runs
+  `wp-env --config .wp-env.e2e.my-new-env.json`, then start it with `pnpm wp-env:e2e:my-new-env start --update`.
+  The `afterStart` setup script reads `E2E_WP_ENV_CONFIG` to drive wp-cli against the variant instance; without
+  it the setup would target the base `.wp-env.e2e.json` env. wp-env installs and activates the plugins before the
+  `afterStart` lifecycle script, so they land inside the captured baseline and survive every reset. See
+  `.wp-env.e2e.gutenberg-stable.json` and the `wp-env:e2e:gb-stable` script for a working example.
+
+  > [!NOTE]
+  > A static "latest" plugin zip is only re-downloaded when wp-env re-provisions. CI always provisions fresh,
+  > so nightly builds stay honest; locally the zip is cached until you `destroy` the env or start it with
+  > `--update`.
 
 > [!NOTE]
 > If you previously created a custom environment with a `playwright.config.js` file, it will still work — the test runner falls back to `.js` when no `.ts` config is found. However, new environments should use `.ts`.

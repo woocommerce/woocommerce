@@ -2,22 +2,6 @@
 
 set -eo pipefail
 
-skipEnvSetup=False
-
-while getopts "x" opt; do
-  case $opt in
-    x)
-      skipEnvSetup=True
-      ;;
-    \?)
-      echo "Invalid option: -$OPTARG" >&2
-      exit 1
-      ;;
-  esac
-done
-
-shift $((OPTIND-1))
-
 envName=$1
 shift
 
@@ -55,12 +39,17 @@ else
 	rm -f "$SCRIPT_PATH/.env"
 fi
 
-if [ "$skipEnvSetup" == "True" ]; then
-	echo "Skipping environment setup"
-else
-	echo "Executing environment setup script(s)"
-	"$SCRIPT_PATH/envs/$envName/env-setup.sh"
+# Tell the wp-cli test helpers which wp-env instance to target, derived from the
+# environment name: a plugin-installing environment (Gutenberg, object cache) has
+# its own `.wp-env.e2e.<env>.json` variant; every other environment uses the base
+# config. The variant pnpm scripts pass the same `--config` when starting wp-env,
+# so the config path itself is authored once (in package.json) and derived here.
+wpEnvConfig=".wp-env.e2e.$envName.json"
+if [ ! -f "$SCRIPT_PATH/../../$wpEnvConfig" ]; then
+	wpEnvConfig=".wp-env.e2e.json"
 fi
+export E2E_WP_ENV_CONFIG="$wpEnvConfig"
+echo "Using wp-env config: $wpEnvConfig"
 
 echo
 title

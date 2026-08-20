@@ -55,10 +55,13 @@
 		"lint:changes:branch": "pnpm '/^lint:changes:branch:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:php": "composer run-script phpcbf",
+		"lint:fix:lang:wp-env-variants": "node ./tests/e2e/bin/check-wp-env-variants.mjs --fix",
 		"lint:changes:branch:js": "bash ./bin/eslint-branch.sh",
 		"lint:changes:branch:php": "XDEBUG_MODE=off pnpm lint:php:changes:branch",
+		"lint:changes:branch:wp-env-variants": "node ./tests/e2e/bin/check-wp-env-variants.mjs",
 		"lint:lang:js": "eslint .",
 		"lint:lang:php": "composer run-script phpcs",
+		"lint:lang:wp-env-variants": "node ./tests/e2e/bin/check-wp-env-variants.mjs",
 		"lint:php": "composer run-script phpcs",
 		"lint:php:changes": "composer run-script lint",
 		"lint:php:changes:branch": "composer run-script lint-branch",
@@ -118,7 +121,10 @@
 		"watch:build:project:classic-assets": "pnpm --filter='@woocommerce/classic-assets' watch:build",
 		"watch:build:project:packages": "node ./bin/watch-packages.mjs",
 		"wp-env": "wp-env",
-		"wp-env:e2e": "wp-env --config .wp-env.e2e.json",
+		"wp-env:e2e": "wp-env --config ${E2E_WP_ENV_CONFIG:-.wp-env.e2e.json}",
+		"wp-env:e2e:gb-stable": "E2E_WP_ENV_CONFIG=.wp-env.e2e.gutenberg-stable.json wp-env --config .wp-env.e2e.gutenberg-stable.json",
+		"wp-env:e2e:gb-nightly": "E2E_WP_ENV_CONFIG=.wp-env.e2e.gutenberg-nightly.json wp-env --config .wp-env.e2e.gutenberg-nightly.json",
+		"wp-env:e2e:object-cache": "E2E_WP_ENV_CONFIG=.wp-env.e2e.default-object-cache.json wp-env --config .wp-env.e2e.default-object-cache.json",
 		"wp-env:test": "wp-env --config .wp-env.test.json"
 	},
 	"lint-staged": {
@@ -331,7 +337,9 @@
 					"command": "test:e2e:gb-stable",
 					"shardingArguments": [],
 					"changes": [
-						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}",
+						".wp-env.e2e.json",
+						".wp-env.e2e.gutenberg-stable.json"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -343,7 +351,7 @@
 						"core-e2e-gutenberg"
 					],
 					"testEnv": {
-						"start": "env:e2e --debug"
+						"start": "wp-env:e2e:gb-stable start --update --debug"
 					},
 					"report": {
 						"resultsBlobName": "gutenberg-stable-e2e-report",
@@ -358,7 +366,9 @@
 					"command": "test:e2e:gb-nightly",
 					"shardingArguments": [],
 					"changes": [
-						"tests/e2e/**"
+						"tests/e2e/**",
+						".wp-env.e2e.json",
+						".wp-env.e2e.gutenberg-nightly.json"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -369,7 +379,7 @@
 						"core-e2e-gutenberg"
 					],
 					"testEnv": {
-						"start": "env:e2e --debug"
+						"start": "wp-env:e2e:gb-nightly start --update --debug"
 					},
 					"report": {
 						"resultsBlobName": "gutenberg-nightly-e2e-report",
@@ -717,6 +727,7 @@
 						"tests/e2e/*.js",
 						"tests/e2e/*.sh",
 						".wp-env.e2e.json",
+						".wp-env.e2e.default-object-cache.json",
 						"woocommerce.php",
 						"uninstall.php"
 					],
@@ -726,7 +737,7 @@
 						"core-api-object-cache"
 					],
 					"testEnv": {
-						"start": "env:e2e --debug"
+						"start": "wp-env:e2e:object-cache start --update --debug"
 					},
 					"report": {
 						"resultsBlobName": "core-api-report-object-cache",
