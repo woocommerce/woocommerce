@@ -82,7 +82,8 @@ class MyAccountEndpoint {
 	 * @return array<string, string>
 	 */
 	public function register_menu_item( $items, $endpoints ) {
-		unset( $endpoints ); // Avoid parameter not used PHPCS errors.
+		// Avoid parameter not used PHPCS errors.
+		unset( $endpoints );
 
 		if ( ! is_array( $items ) ) {
 			return $items;
@@ -122,7 +123,8 @@ class MyAccountEndpoint {
 	 * @return string
 	 */
 	public function filter_endpoint_title( $title ) {
-		unset( $title ); // Avoid parameter not used PHPCS errors.
+		// Avoid parameter not used PHPCS errors.
+		unset( $title );
 		return __( 'Stock notifications', 'woocommerce' );
 	}
 

@@ -155,8 +155,8 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
 		\wp_set_current_user( $user_id );
 
-		$active    = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
-		$pending   = $this->create_notification( $user_id, NotificationStatus::PENDING );
+		$active  = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
+		$pending = $this->create_notification( $user_id, NotificationStatus::PENDING );
 		$this->create_notification( $user_id, NotificationStatus::SENT );
 		$this->create_notification( $user_id, NotificationStatus::CANCELLED );
 
@@ -181,7 +181,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 
 		$endpoint = new MyAccountEndpoint();
 		// Per-page 2 → 3 pages exist (rows 1-2, 3-4, 5). Asking for page 99 should clamp to 3.
-		$page     = $endpoint->get_current_user_notifications_page( 99, 2 );
+		$page = $endpoint->get_current_user_notifications_page( 99, 2 );
 
 		$this->assertSame( 3, $page['current_page'] );
 		$this->assertCount( 1, $page['notifications'] );
@@ -280,7 +280,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	 * An anonymous POST with a cancel payload is silently dropped.
 	 */
 	public function test_cancel_ignored_when_anonymous(): void {
-		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		$user_id      = $this->factory->user->create( array( 'role' => 'customer' ) );
 		$notification = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
 
 		\wp_set_current_user( 0 );

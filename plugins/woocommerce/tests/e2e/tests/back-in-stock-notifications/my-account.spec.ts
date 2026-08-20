@@ -77,9 +77,7 @@ test.describe(
 					await page.goto( secondProduct.permalink );
 					await signUpOnProductPage( page );
 
-					await page.goto(
-						'my-account/stock-notifications/'
-					);
+					await page.goto( 'my-account/stock-notifications/' );
 
 					// The page renders the expected heading.
 					await expect(
@@ -131,9 +129,7 @@ test.describe(
 					await page.goto( pendingProduct.permalink );
 					await signUpOnProductPage( page );
 
-					await page.goto(
-						'my-account/stock-notifications/'
-					);
+					await page.goto( 'my-account/stock-notifications/' );
 
 					const row = page
 						.locator(
