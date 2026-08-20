@@ -235,7 +235,7 @@ jobs:
 
   update-gh-stable-tag:
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
-    timeout-minutes: 5
+    timeout-minutes: 10
     needs: [validate-release, update-wporg-stable-tag]
     strategy:
       fail-fast: false
