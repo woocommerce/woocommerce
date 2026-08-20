@@ -2353,8 +2353,18 @@ class WC_AJAX {
 		$product_id  = absint( $_POST['id'] );
 		$next_id     = absint( $_POST['nextid'] ?? 0 );
 
-		$use_legacy_algorithm = has_action( 'woocommerce_after_single_product_ordering' ) || has_action( 'woocommerce_after_product_ordering' );
-		if ( $use_legacy_algorithm ) {
+		$has_per_product_hook   = has_action( 'woocommerce_after_single_product_ordering' );
+		$has_post_ordering_hook = has_action( 'woocommerce_after_product_ordering' );
+		if ( $has_per_product_hook || $has_post_ordering_hook ) {
+			// See `clean_post_cache`, `wp_ajax_woocommerce_product_ordering`, `woocommerce_product_ordering_process_reindexed_products`
+			// and `woocommerce_product_ordering_process_moved_products` for available migration primitives.
+			if ( $has_per_product_hook ) {
+				wc_deprecated_hook( 'woocommerce_after_single_product_ordering', '11.2', null, 'Using this hook forces a non-optimized reordering path which causes performance issues on larger catalogs.' );
+			}
+			if ( $has_post_ordering_hook ) {
+				wc_deprecated_hook( 'woocommerce_after_product_ordering', '11.2', null, 'Using this hook forces a non-optimized reordering path which causes performance issues on larger catalogs.' );
+			}
+
 			// Based on Simple Page Ordering by 10up (https://wordpress.org/plugins/simple-page-ordering/).
 			$menu_orders = wp_list_pluck( $wpdb->get_results( "SELECT ID, menu_order FROM {$wpdb->posts} WHERE post_type = 'product' ORDER BY menu_order ASC, post_title ASC" ), 'menu_order', 'ID' );
 			$index       = 0;
@@ -2415,9 +2425,35 @@ class WC_AJAX {
 
 		} else {
 			$modifications = wc_get_container()->get( ProductsOrderingMoveService::class )->move( $previous_id, $product_id, $next_id );
-			if ( ! empty( $modifications->moved ) || ! empty( $modifications->reindexed ) ) {
+			$moved         = ! empty( $modifications->moved );
+			$reindexed     = ! empty( $modifications->reindexed );
+			if ( $moved || $reindexed ) {
 				WC_Post_Data::delete_product_query_transients();
-				unset( $modifications->reindexed );
+
+				if ( $reindexed ) {
+					/**
+					 * Fires after a full catalog reindex was triggered during product ordering.
+					 *
+					 * @param int            $product_id The product ID that was repositioned.
+					 * @param array<int,int> $reindexed  Reindexed product positions (product ID → menu_order), excludes moved products.
+					 *
+					 * @since 11.2.0
+					 */
+					do_action( 'woocommerce_product_ordering_process_reindexed_products', $product_id, $modifications->reindexed );
+					unset( $modifications->reindexed );
+				}
+
+				if ( $moved ) {
+					/**
+					 * Fires after products have been repositioned during product ordering.
+					 *
+					 * @param int            $product_id The product ID that was repositioned.
+					 * @param array<int,int> $moved      Moved product positions (product ID → menu_order).
+					 *
+					 * @since 11.2.0
+					 */
+					do_action( 'woocommerce_product_ordering_process_moved_products', $product_id, $modifications->moved );
+				}
 			}
 			wp_send_json( $modifications->moved );
 		}
