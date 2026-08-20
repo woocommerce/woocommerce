@@ -144,7 +144,8 @@ export function toMoment( format: string, str: unknown ) {
  *
  * @param {string}        format     - localized date string format
  * @param {moment.Locale} localeData - locale the format will be rendered with
- * @return {string} - format string with no localized format tokens left
+ * @return {string} - format string with its localized tokens expanded, leaving
+ *                      escaped and bracketed ones as the literals they are
  */
 function expandLocalizedFormat( format: string, localeData: moment.Locale ) {
 	// Bracketed sections and backslash escapes are moment's literals, so an "L"
