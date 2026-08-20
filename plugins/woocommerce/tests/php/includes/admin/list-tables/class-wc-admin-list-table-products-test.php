@@ -717,6 +717,59 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Every stock status leaves the lookup table joined for later posts_clauses callbacks.
+	 *
+	 * The out-of-stock branch builds a self-contained subquery and does not read the alias itself, but
+	 * callbacks registered after this one have always been able to rely on it being joined whenever a
+	 * stock filter is active. Dropping it for one status only breaks those callbacks asymmetrically.
+	 *
+	 * @testdox Every stock status leaves the lookup table joined for later posts_clauses callbacks.
+	 *
+	 * @dataProvider stock_status_provider
+	 *
+	 * @param string $stock_status Stock status the products list is filtered by.
+	 */
+	public function test_stock_status_filter_always_joins_the_product_meta_lookup_table( string $stock_status ): void {
+		global $wpdb;
+
+		$sut          = ( new ReflectionClass( WC_Admin_List_Table_Products::class ) )->newInstanceWithoutConstructor();
+		$original_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request data.
+
+		$_GET['stock_status'] = $stock_status;
+
+		try {
+			$args = $sut->filter_stock_status_post_clauses(
+				array(
+					'join'  => '',
+					'where' => '',
+				)
+			);
+		} finally {
+			$_GET = $original_get;
+		}
+
+		$this->assertStringContainsString(
+			"LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup",
+			$args['join'],
+			"The {$stock_status} filter must leave the wc_product_meta_lookup alias joined so later posts_clauses callbacks can reference it."
+		);
+	}
+
+	/**
+	 * Stock statuses offered by the products list filter.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function stock_status_provider(): array {
+		return array(
+			'in stock'     => array( ProductStockStatus::IN_STOCK ),
+			'out of stock' => array( ProductStockStatus::OUT_OF_STOCK ),
+			'on backorder' => array( ProductStockStatus::ON_BACKORDER ),
+		);
+	}
+
+
+	/**
 	 * Create title and content-only search matches.
 	 *
 	 * @return array{WC_Product, WC_Product, string}
