@@ -442,7 +442,7 @@ class ProductGalleryUtils {
 	 * Decision tree (variation chosen):
 	 * - no variation images → parent featured + parent gallery
 	 * - own featured only → variation featured + parent gallery extras
-	 * - own featured + gallery (flag on) → variation images only
+	 * - own featured + gallery → variation images only
 	 * - gallery only, no own featured (potential AVI shape) → parent featured + variation gallery
 	 *
 	 * @param int   $variation_id          Variation post ID.

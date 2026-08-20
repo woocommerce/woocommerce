@@ -29,58 +29,12 @@ class Package {
 	private const UPDATE_CALLBACK_GROUP = 'woocommerce-db-updates';
 
 	/**
-	 * The feature id used by `FeaturesController` (Settings → Advanced → Features).
-	 */
-	public const FEATURE_ID = 'variation_gallery';
-
-	/**
-	 * Option backing the variation gallery feature toggle.
-	 */
-	public const ENABLE_OPTION_NAME = 'wc_feature_woocommerce_additional_variation_images_enabled';
-
-	/**
-	 * `woocommerce_remote_variant_assignment` option name.
-	 */
-	private const REMOTE_VARIANT_OPTION_NAME = 'woocommerce_remote_variant_assignment';
-
-	/**
-	 * Highest variant bucket in the canary cohort. Range is 1-120, so
-	 * `<= 6` gets exactly 5%. Matches the Brands merge precedent.
-	 */
-	public const CANARY_MAX_VARIANT = 6;
-
-	/**
-	 * Whether the current store is in the canary cohort.
-	 *
-	 * @internal Removable once the feature is at 100% rollout.
-	 * @return bool
-	 */
-	public static function is_in_canary_cohort(): bool {
-		$variant_assignment = (int) get_option( self::REMOTE_VARIANT_OPTION_NAME, 0 );
-		return $variant_assignment > 0 && $variant_assignment <= self::CANARY_MAX_VARIANT;
-	}
-
-	/**
-	 * Whether the merged variation gallery feature is enabled for the current
-	 * request.
-	 *
-	 * Explicit `yes`/`no` on the option wins; unset falls back to the canary
-	 * cohort.
+	 * As of WooCommerce 11.2, the variation gallery is enabled for all users.
 	 *
 	 * @return bool
 	 */
 	public static function is_enabled() {
-		$option_value = get_option( self::ENABLE_OPTION_NAME, '' );
-
-		if ( 'yes' === $option_value ) {
-			return true;
-		}
-
-		if ( 'no' === $option_value ) {
-			return false;
-		}
-
-		return self::is_in_canary_cohort();
+		return true;
 	}
 
 	/**
