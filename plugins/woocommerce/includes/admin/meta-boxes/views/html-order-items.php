@@ -178,8 +178,16 @@ if ( wc_tax_enabled() ) {
 			<tr>
 				<td class="label"><?php esc_html_e( 'Discount:', 'woocommerce' ); ?></td>
 				<td width="1%"></td>
-				<td class="total">-
-					<?php echo wc_price( $order->get_total_discount(), array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<td class="total">
+					<?php
+					echo wc_price( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						$order->get_total_discount(),
+						array(
+							'currency'    => $order->get_currency(),
+							'is_negative' => true,
+						)
+					);
+					?>
 				</td>
 			</tr>
 		<?php endif; ?>
@@ -272,7 +280,17 @@ if ( wc_tax_enabled() ) {
 			<tr>
 				<td class="label refunded-total"><?php esc_html_e( 'Refunded', 'woocommerce' ); ?>:</td>
 				<td width="1%"></td>
-				<td class="total refunded-total">-<?php echo wc_price( $order->get_total_refunded(), array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></td>
+				<td class="total refunded-total">
+					<?php
+					echo wc_price( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						$order->get_total_refunded(),
+						array(
+							'currency'    => $order->get_currency(),
+							'is_negative' => true,
+						)
+					);
+					?>
+				</td>
 			</tr>
 
 			<?php do_action( 'woocommerce_admin_order_totals_after_refunded', $order->get_id() ); ?>
@@ -347,6 +365,16 @@ if ( wc_tax_enabled() ) {
 	<button type="button" class="button button-primary save-action"><?php esc_html_e( 'Save', 'woocommerce' ); ?></button>
 </div>
 <?php if ( $render_refunds ) : ?>
+	<?php
+	$refunded_total           = $order->get_total_refunded();
+	$formatted_refunded_total = wc_price(
+		$refunded_total,
+		array(
+			'currency'    => $order->get_currency(),
+			'is_negative' => true,
+		)
+	);
+	?>
 <div class="wc-order-data-row wc-order-refund-items wc-order-data-row-toggle" style="display: none;">
 	<table class="wc-order-totals">
 		<?php if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) : ?>
@@ -357,7 +385,7 @@ if ( wc_tax_enabled() ) {
 		<?php endif; ?>
 		<tr>
 			<td class="label"><?php esc_html_e( 'Amount already refunded', 'woocommerce' ); ?>:</td>
-			<td class="total">-<?php echo wc_price( $order->get_total_refunded(), array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></td>
+			<td class="total"><?php echo $formatted_refunded_total; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></td>
 		</tr>
 		<tr>
 			<td class="label"><?php esc_html_e( 'Total available to refund', 'woocommerce' ); ?>:</td>

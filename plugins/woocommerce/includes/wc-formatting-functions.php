@@ -590,6 +590,9 @@ function wc_get_price_decimals() {
  *                                      Defaults the result of get_woocommerce_price_format().
  *     @type bool   $in_span            Whether to enclose the formatted price in an HTML <span> element.
  *                                      Defaults to true.
+ *     @type bool|null $is_negative      Whether to display the price as negative. When omitted or set to null,
+ *                                      the sign is determined from the price. The displayed sign is also
+ *                                      reflected in the unformatted price passed to the `wc_price` filter.
  * }
  * @return string
  */
@@ -616,8 +619,9 @@ function wc_price( $price, $args = array() ) {
 	// Convert to float to avoid issues on PHP 8.
 	$price = (float) $price;
 
-	$unformatted_price = $price;
 	$negative          = $price < 0;
+	$is_negative       = isset( $args['is_negative'] ) ? (bool) $args['is_negative'] : $negative;
+	$unformatted_price = $is_negative ? -abs( $price ) : abs( $price );
 
 	/**
 	 * Filter raw price.
@@ -644,11 +648,11 @@ function wc_price( $price, $args = array() ) {
 	}
 
 	if ( $args['in_span'] ) {
-		$formatted_price = ( $negative ? '-' : '' ) . sprintf( $args['price_format'], '<span class="woocommerce-Price-currencySymbol" translate="no">' . get_woocommerce_currency_symbol( $args['currency'] ) . '</span>', $price );
+		$formatted_price = ( $is_negative ? '-' : '' ) . sprintf( $args['price_format'], '<span class="woocommerce-Price-currencySymbol" translate="no">' . get_woocommerce_currency_symbol( $args['currency'] ) . '</span>', $price );
 		$aria_hidden     = $args['aria-hidden'] ? ' aria-hidden="true"' : '';
 		$return          = '<span class="woocommerce-Price-amount amount"' . $aria_hidden . '><bdi>' . $formatted_price . '</bdi></span>';
 	} else {
-		$formatted_price = ( $negative ? '-' : '' ) . sprintf( $args['price_format'], get_woocommerce_currency_symbol( $args['currency'] ), $price );
+		$formatted_price = ( $is_negative ? '-' : '' ) . sprintf( $args['price_format'], get_woocommerce_currency_symbol( $args['currency'] ), $price );
 		$return          = $formatted_price;
 	}
 
@@ -662,7 +666,8 @@ function wc_price( $price, $args = array() ) {
 	 * @param string       $return            Price HTML markup.
 	 * @param string       $price             Formatted price.
 	 * @param array        $args              Pass on the args.
-	 * @param float        $unformatted_price Price as float to allow plugins custom formatting. Since 3.2.0.
+	 * @param float        $unformatted_price Price as float to allow plugins custom formatting. Carries the
+	 *                                        displayed sign, which may be forced via the `is_negative` arg. Since 3.2.0.
 	 * @param float|string $original_price    Original price as float, or empty string. Since 5.0.0.
 	 */
 	return apply_filters( 'wc_price', $return, $price, $args, $unformatted_price, $original_price );
