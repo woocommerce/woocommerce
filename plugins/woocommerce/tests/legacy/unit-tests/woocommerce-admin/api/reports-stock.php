@@ -261,6 +261,78 @@ class WC_Admin_Tests_API_Reports_Stock extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Filtering by a stock status still reports the parent owning the stock, not its variations.
+	 */
+	public function test_stock_status_filter_excludes_variations_inheriting_the_parent_stock() {
+		wp_set_current_user( $this->user );
+
+		list( $variable, $variation_ids ) = $this->create_stock_report_variable_product( 'Parent manages stock, variations inherit', array( array(), array() ) );
+
+		$variable->set_manage_stock( true );
+		$variable->set_stock_quantity( 6 );
+		$variable->save();
+
+		$reported_ids = $this->get_reported_ids( ProductStockStatus::IN_STOCK );
+
+		$this->assertContains( $variable->get_id(), $reported_ids, 'The parent holds the only real quantity, so it should be reported.' );
+		foreach ( $variation_ids as $variation_id ) {
+			$this->assertNotContains( $variation_id, $reported_ids, 'A variation inheriting the parent quantity would only repeat it.' );
+		}
+	}
+
+	/**
+	 * @testdox Filtering by a stock status still reports the variations owning the status, not their parent.
+	 */
+	public function test_stock_status_filter_excludes_the_parent_deriving_its_status() {
+		wp_set_current_user( $this->user );
+
+		list( $variable, $variation_ids ) = $this->create_stock_report_variable_product(
+			'Nothing manages stock, every variation is out of stock',
+			array(
+				array( 'stock_status' => ProductStockStatus::OUT_OF_STOCK ),
+				array( 'stock_status' => ProductStockStatus::OUT_OF_STOCK ),
+			)
+		);
+
+		$reported_ids = $this->get_reported_ids( ProductStockStatus::OUT_OF_STOCK );
+
+		$this->assertNotContains( $variable->get_id(), $reported_ids, 'The parent only derives its status from its variations, so it should not be reported.' );
+		foreach ( $variation_ids as $variation_id ) {
+			$this->assertContains( $variation_id, $reported_ids, 'A variation sets its own stock status even when it manages no quantity.' );
+		}
+	}
+
+	/**
+	 * @testdox Variations are reported when their parent post is gone but its lookup row is not.
+	 */
+	public function test_variations_are_reported_when_their_parent_post_is_gone() {
+		global $wpdb;
+
+		wp_set_current_user( $this->user );
+
+		list( $variable, $variation_ids ) = $this->create_stock_report_variable_product( 'Parent removed without WooCommerce noticing', array( array(), array() ) );
+
+		$variable->set_manage_stock( true );
+		$variable->set_stock_quantity( 7 );
+		$variable->save();
+
+		// Drop the parent the way a database import or a direct query would, leaving its lookup row behind.
+		$wpdb->delete( $wpdb->posts, array( 'ID' => $variable->get_id() ) );
+		clean_post_cache( $variable->get_id() );
+
+		$this->assertNotNull(
+			$wpdb->get_var( $wpdb->prepare( "SELECT stock_quantity FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d", $variable->get_id() ) ),
+			'This test is only meaningful while the parent lookup row outlives the parent post.'
+		);
+
+		$reported_ids = $this->get_reported_ids();
+
+		foreach ( $variation_ids as $variation_id ) {
+			$this->assertContains( $variation_id, $reported_ids, 'Nothing else is left to report this stock, so the variations have to.' );
+		}
+	}
+
+	/**
 	 * Dispatch the report and return the IDs it reported.
 	 *
 	 * @param string $type Report type to request.

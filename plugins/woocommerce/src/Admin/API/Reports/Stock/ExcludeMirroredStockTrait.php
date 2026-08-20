@@ -116,7 +116,7 @@ trait ExcludeMirroredStockTrait {
 			{$posts_alias}.post_type = 'product_variation'
 			AND wc_product_meta_lookup.stock_quantity IS NULL
 			AND stock_report_parent_lookup.stock_quantity IS NOT NULL
-			AND stock_report_parent.post_status IN ( 'publish', 'private' )
+			AND IFNULL( stock_report_parent.post_status, '' ) IN ( 'publish', 'private' )
 		) ";
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
