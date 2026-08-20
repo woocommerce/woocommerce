@@ -26,7 +26,7 @@ class Package {
 	/**
 	 * Action Scheduler group for DB update callbacks.
 	 */
-	private const UPDATE_CALLBACK_GROUP = 'woocommerce-db-updates';
+	private const UPDATE_CALLBACK_GROUP = 'woocommerce-variation-gallery-migration';
 
 	/**
 	 * The feature id used by `FeaturesController` (Settings → Advanced → Features).
