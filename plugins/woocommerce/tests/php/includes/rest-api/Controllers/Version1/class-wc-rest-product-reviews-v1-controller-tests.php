@@ -188,6 +188,37 @@ class WC_REST_Product_Reviews_V1_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Creating a held review does not save the product after rating meta is written.
+	 */
+	public function test_create_item_does_not_save_the_product_for_a_review_held_for_moderation() {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+
+		$hold_review = function ( $prepared_review ) {
+			$prepared_review['comment_approved'] = 0;
+			return $prepared_review;
+		};
+		$saves       = 0;
+		$count_save  = function ( $updated_product_id ) use ( &$saves, $product_id ) {
+			if ( $product_id === (int) $updated_product_id ) {
+				++$saves;
+			}
+		};
+
+		add_filter( 'rest_pre_insert_product_review', $hold_review );
+		add_action( 'woocommerce_update_product', $count_save );
+		try {
+			$this->create_review( $product_id, 'Waiting for moderation.', 4 );
+		} finally {
+			remove_action( 'woocommerce_update_product', $count_save );
+			remove_filter( 'rest_pre_insert_product_review', $hold_review );
+		}
+
+		$this->assertSame( 0, $saves );
+		$this->assertEquals( 0, wc_get_product( $product_id )->get_average_rating() );
+	}
+
+	/**
 	 * @testdox Editing the rating of a review recalculates the product rating aggregates.
 	 */
 	public function test_update_item_recalculates_the_aggregates_when_the_rating_changes() {

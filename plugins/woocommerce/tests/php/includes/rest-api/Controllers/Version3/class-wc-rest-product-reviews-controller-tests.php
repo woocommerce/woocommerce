@@ -218,6 +218,44 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Creating a rated review on hold does not save the product.
+	 */
+	public function test_create_item_does_not_save_the_product_for_a_held_status() {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+
+		$saves      = 0;
+		$count_save = function ( $updated_product_id ) use ( &$saves, $product_id ) {
+			if ( $product_id === (int) $updated_product_id ) {
+				++$saves;
+			}
+		};
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/reviews' );
+		$request->set_body_params(
+			array(
+				'product_id'     => $product_id,
+				'review'         => 'Waiting for moderation.',
+				'reviewer'       => 'Jane Smith',
+				'reviewer_email' => 'jane.smith@example.org',
+				'rating'         => 4,
+				'status'         => 'hold',
+			)
+		);
+
+		add_action( 'woocommerce_update_product', $count_save );
+		try {
+			$response = $this->server->dispatch( $request );
+		} finally {
+			remove_action( 'woocommerce_update_product', $count_save );
+		}
+
+		$this->assertSame( 201, $response->get_status() );
+		$this->assertSame( 0, $saves );
+		$this->assertEquals( 0, wc_get_product( $product_id )->get_average_rating() );
+	}
+
+	/**
 	 * @testdox Creating further reviews keeps the average rating in step with every stored rating.
 	 */
 	public function test_create_item_updates_the_average_rating_for_every_review() {

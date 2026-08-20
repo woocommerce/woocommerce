@@ -309,14 +309,14 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		$product_review = get_comment( $product_review_id );
 
 		/*
-		 * Inserting the comment already triggered a recompute of the product's rating aggregates
-		 * (wp_insert_comment() calls wp_update_comment_count(), which WC_Comments::clear_transients()
-		 * hooks into), but that ran before the rating meta above existed, leaving the stored average
-		 * one review behind. Recompute now that the meta is in place. Only a submitted rating can
-		 * change the aggregates, and the recompute targets the comment's own product because a
-		 * rest_pre_insert_product_review callback can send the review to a different one.
+		 * Core has already updated wp_posts.comment_count, but the rating meta above was unavailable
+		 * during that update. Refresh the post-meta aggregates directly now that the meta is in place:
+		 * repeating wp_update_comment_count() would add count queries, post writes, edit hooks, and
+		 * deferral where an immediate post-meta aggregate refresh is required. Only an approved rated
+		 * review can change the aggregates, and the refresh targets the comment's own product because
+		 * a rest_pre_insert_product_review callback can send the review to a different one.
 		 */
-		if ( ! empty( $request['rating'] ) && $product_review instanceof WP_Comment ) {
+		if ( ! empty( $request['rating'] ) && $product_review instanceof WP_Comment && '1' === $product_review->comment_approved ) {
 			WC_Comments::clear_transients( (int) $product_review->comment_post_ID );
 		}
 
