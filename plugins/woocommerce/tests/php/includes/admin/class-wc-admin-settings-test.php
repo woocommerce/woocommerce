@@ -132,6 +132,7 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 				),
 			),
 			'plus encoded key'         => array( 'test_get_option_nested[spaced+key]', 'form decoded' ),
+			'encoded closing bracket'  => array( 'test_get_option_nested[deep%5Dx]', array( 'leaf' => 'two levels' ) ),
 			'percent encoded key'      => array( 'test_get_option_nested[spaced%20key]', 'form decoded' ),
 			'keys after the base only' => array( 'test_get_option_nested[deep]extra[leaf]', array( 'leaf' => 'two levels' ) ),
 			'array access container'   => array( 'test_get_option_object[k]', 'array access' ),
@@ -279,6 +280,7 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	 * @param mixed $id Unusable field ID supplied by a field definition.
 	 */
 	public function test_save_fields_writes_nothing_for_an_unusable_field_id( $id ): void {
+		$this->setExpectedIncorrectUsage( 'WC_Admin_Settings::save_fields' );
 		$this->option_names_to_clean[] = 'Array';
 
 		$saved = WC_Admin_Settings::save_fields(
@@ -314,6 +316,7 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	 * @testdox Should skip a malformed bracket name on save rather than fataling the whole request.
 	 */
 	public function test_save_fields_skips_malformed_bracket_names(): void {
+		$this->setExpectedIncorrectUsage( 'WC_Admin_Settings::save_fields' );
 		$this->option_names_to_clean[] = 'test_save_fields_alongside';
 
 		$saved = WC_Admin_Settings::save_fields(
@@ -384,31 +387,87 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	 */
 	public static function round_trip_shape_data(): array {
 		return array(
-			'plain name'   => array(
+			'plain name'      => array(
 				'test_symmetry_plain',
 				'test_symmetry_plain',
 				array( 'test_symmetry_plain' => 'plain value' ),
 				'plain value',
 			),
-			'single level' => array(
+			'single level'    => array(
 				'test_symmetry_one[key]',
 				'test_symmetry_one',
 				array( 'test_symmetry_one' => array( 'key' => 'nested value' ) ),
 				'nested value',
 			),
-			'two levels'   => array(
+			'two levels'      => array(
 				'test_symmetry_two[outer][inner]',
 				'test_symmetry_two',
 				array( 'test_symmetry_two' => array( 'outer' => array( 'inner' => 'deep value' ) ) ),
 				'deep value',
 			),
-			'encoded key'  => array(
+			'encoded key'     => array(
 				'test_symmetry_encoded[spaced+key]',
 				'test_symmetry_encoded',
 				array( 'test_symmetry_encoded' => array( 'spaced key' => 'encoded value' ) ),
 				'encoded value',
 			),
+			'encoded bracket' => array(
+				'test_symmetry_bracket[key%5Dx]',
+				'test_symmetry_bracket',
+				array( 'test_symmetry_bracket' => array( 'key' => 'bracket value' ) ),
+				'bracket value',
+			),
 		);
+	}
+
+	/**
+	 * @testdox Should render an empty name when neither the field name nor the ID can name an option.
+	 */
+	public function test_output_fields_renders_no_name_when_nothing_can_name_an_option(): void {
+		ob_start();
+		try {
+			WC_Admin_Settings::output_fields(
+				array(
+					array(
+						'id'         => array( 'unexpected' ),
+						'field_name' => array( 'also unexpected' ),
+						'type'       => 'text',
+						'default'    => 'default value',
+					),
+				)
+			);
+		} finally {
+			$output = ob_get_clean();
+		}
+
+		$this->assertStringContainsString( 'name=""', $output );
+		$this->assertStringContainsString( 'value="default value"', $output );
+	}
+
+	/**
+	 * @testdox Should accept a field name object that defines __toString(), as PHP coerced before.
+	 */
+	public function test_output_fields_accepts_a_stringable_field_name(): void {
+		$this->option_names_to_clean[] = 'test_stringable_name';
+		update_option( 'test_stringable_name', 'saved via stringable' );
+
+		ob_start();
+		try {
+			WC_Admin_Settings::output_fields(
+				array(
+					array(
+						'id'         => 'test_stringable_id',
+						'field_name' => new WC_Admin_Settings_Test_Stringable_Name(),
+						'type'       => 'text',
+						'default'    => 'default value',
+					),
+				)
+			);
+		} finally {
+			$output = ob_get_clean();
+		}
+
+		$this->assertStringContainsString( 'value="saved via stringable"', $output );
 	}
 
 	/**
@@ -915,5 +974,21 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 		if ( null !== $redirect_to ) {
 			$_POST['wc_settings_ui_redirect_to'] = $redirect_to;
 		}
+	}
+}
+
+// phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound -- Test fixture for the Stringable field name case.
+/**
+ * Field name object used by test_output_fields_accepts_a_stringable_field_name().
+ */
+class WC_Admin_Settings_Test_Stringable_Name {
+
+	/**
+	 * Render as the option name.
+	 *
+	 * @return string
+	 */
+	public function __toString() {
+		return 'test_stringable_name';
 	}
 }
