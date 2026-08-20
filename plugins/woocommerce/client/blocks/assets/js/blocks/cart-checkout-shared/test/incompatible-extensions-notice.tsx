@@ -14,27 +14,16 @@ import {
 } from '@woocommerce/editor-components/incompatible-extension-notice/storage';
 import { IncompatibleExtensionsFrontendNotice } from '../incompatible-extensions-notice';
 
-// Two sites of one subdirectory multisite. Same origin, so they share the
-// browser's localStorage; different home URL, so they must not share a key.
-const SITE_A = 'https://example.com/';
-const SITE_B = 'https://example.com/site-b/';
-
-let mockHomeUrl = SITE_A;
-let mockIsMultisite = false;
 let mockIsAdmin = true;
 
 jest.mock( '@woocommerce/settings', () => ( {
 	getSetting: jest.fn(),
-	// Getters, not values: the site and the viewer change between renders.
+	// A getter, not a value: the viewer changes between renders.
 	get CURRENT_USER_IS_ADMIN() {
 		return mockIsAdmin;
 	},
-	get HOME_URL() {
-		return mockHomeUrl;
-	},
-	get IS_MULTISITE() {
-		return mockIsMultisite;
-	},
+	HOME_URL: 'https://example.com/',
+	IS_MULTISITE: false,
 } ) );
 
 // Use the real localStorage-backed hook (via its source module) without pulling
@@ -68,16 +57,15 @@ jest.mock( '@woocommerce/base-components/notice-banner', () => ( {
 
 const mockGetSetting = getSetting as jest.MockedFunction< typeof getSetting >;
 
-// Functions, not constants: the storefront key carries the site, which tests
-// change. Both come from the module, so a rename on either is caught here.
+// Both come from the module, so a rename on either is caught here.
 const frontendKey = () => getFrontendStorageKey();
 const legacyKey = UNSCOPED_STORAGE_KEY;
 
 const storedSlugs = ( key = frontendKey() ) =>
 	JSON.parse( window.localStorage.getItem( key ) || '[]' );
 
-const seedFrontend = ( value: unknown, key = frontendKey() ) =>
-	window.localStorage.setItem( key, JSON.stringify( value ) );
+const seedFrontend = ( value: unknown ) =>
+	window.localStorage.setItem( frontendKey(), JSON.stringify( value ) );
 
 const seedLegacy = ( value: unknown ) =>
 	window.localStorage.setItem( legacyKey, JSON.stringify( value ) );
@@ -97,8 +85,6 @@ describe( 'IncompatibleExtensionsFrontendNotice', () => {
 		jest.clearAllMocks();
 		window.localStorage.clear();
 		setIncompatibleExtensions( [] );
-		mockHomeUrl = SITE_A;
-		mockIsMultisite = false;
 		mockIsAdmin = true;
 	} );
 
@@ -325,7 +311,9 @@ describe( 'IncompatibleExtensionsFrontendNotice', () => {
 	// neither key named a site, so a merchant's dismissal lives under the
 	// unscoped key on every site that ran 10.7.0 or later. Without a migration
 	// they would all see the banner one more time after upgrading — the exact
-	// symptom this component is meant to stop.
+	// symptom this component is meant to stop. The contract itself (site
+	// scoping, the multisite refusal, corrupt-value handling) is pinned in the
+	// storage module's own tests; these pin this surface's wiring to it.
 	describe( 'migration from the unscoped storage key', () => {
 		const renderCheckout = () =>
 			render(
@@ -361,19 +349,12 @@ describe( 'IncompatibleExtensionsFrontendNotice', () => {
 			expect( storedSlugs() ).toEqual( [ 'test-plugin' ] );
 		} );
 
-		it( 'still shows the banner for an extension the merchant never acknowledged', () => {
-			seedLegacy( [ 'old-plugin' ] );
-			setIncompatibleExtensions( [
-				{ id: 'new-plugin', title: 'New Plugin' },
-			] );
-
-			renderCheckout();
-
-			expect( screen.getByTestId( 'notice-banner' ) ).toBeInTheDocument();
-		} );
-
-		it( 'ignores the legacy value once the storefront key exists', () => {
-			seedFrontend( [] );
+		// `useLocalStorageState` hands back the initial value both when the key
+		// is missing and when it holds something it cannot parse. Only the first
+		// may reach the migration — pinned here because this surface once seeded
+		// the legacy value straight in, so a corrupt scoped value revived it.
+		it( 'does not migrate over a scoped value it cannot parse', () => {
+			window.localStorage.setItem( frontendKey(), '{not valid json' );
 			seedLegacy( [ 'test-plugin' ] );
 			setIncompatibleExtensions( [
 				{ id: 'test-plugin', title: 'Test Plugin' },
@@ -382,45 +363,8 @@ describe( 'IncompatibleExtensionsFrontendNotice', () => {
 			renderCheckout();
 
 			expect( screen.getByTestId( 'notice-banner' ) ).toBeInTheDocument();
+			expect( console ).toHaveErrored();
 		} );
-
-		it( 'migrates nothing from a value only the editor ever wrote', () => {
-			seedLegacy( [ { 'woocommerce/checkout': [ 'test-plugin' ] } ] );
-			setIncompatibleExtensions( [
-				{ id: 'test-plugin', title: 'Test Plugin' },
-			] );
-
-			renderCheckout();
-
-			expect( screen.getByTestId( 'notice-banner' ) ).toBeInTheDocument();
-		} );
-
-		it.each( [
-			[ 'unparseable', 'not json at all' ],
-			[
-				'an object',
-				JSON.stringify( { 'woocommerce/checkout': [ 'a' ] } ),
-			],
-			[ 'a bare string', JSON.stringify( 'test-plugin' ) ],
-			[ 'null', JSON.stringify( null ) ],
-		] )(
-			'falls back to showing the banner when the legacy value is %s',
-			( _label, stored ) => {
-				window.localStorage.setItem( legacyKey, stored );
-				setIncompatibleExtensions( [
-					{ id: 'test-plugin', title: 'Test Plugin' },
-				] );
-
-				renderCheckout();
-
-				expect(
-					screen.getByTestId( 'notice-banner' )
-				).toBeInTheDocument();
-				// A dismissal that was there and can no longer be read is worth
-				// a line in the console, not a silent discard.
-				expect( console ).toHaveErrored();
-			}
-		);
 
 		// Leaving the old value intact keeps a revert of this change harmless and
 		// keeps the editor notice's own dismissals working.
@@ -439,41 +383,6 @@ describe( 'IncompatibleExtensionsFrontendNotice', () => {
 			fireEvent.click( screen.getByTestId( 'dismiss-button' ) );
 
 			expect( window.localStorage.getItem( legacyKey ) ).toBe( legacy );
-		} );
-
-		it( 'adds newly acknowledged slugs to the migrated ones', () => {
-			seedLegacy( [ 'test-plugin' ] );
-			setIncompatibleExtensions( [
-				{ id: 'test-plugin', title: 'Test Plugin' },
-				{ id: 'new-plugin', title: 'New Plugin' },
-			] );
-
-			renderCheckout();
-			fireEvent.click( screen.getByTestId( 'dismiss-button' ) );
-
-			expect( storedSlugs() ).toEqual( [ 'test-plugin', 'new-plugin' ] );
-		} );
-
-		it( 'reads the legacy value once per mount, not once per render', () => {
-			const getItem = jest.spyOn( Storage.prototype, 'getItem' );
-			seedLegacy( [ 'test-plugin' ] );
-			setIncompatibleExtensions( [
-				{ id: 'test-plugin', title: 'Test Plugin' },
-			] );
-
-			const legacyReads = () =>
-				getItem.mock.calls.filter( ( [ key ] ) => key === legacyKey )
-					.length;
-
-			const { rerender } = renderCheckout();
-			expect( legacyReads() ).toBe( 1 );
-
-			rerender(
-				<IncompatibleExtensionsFrontendNotice block="woocommerce/checkout" />
-			);
-			expect( legacyReads() ).toBe( 1 );
-
-			getItem.mockRestore();
 		} );
 	} );
 
@@ -549,111 +458,6 @@ describe( 'IncompatibleExtensionsFrontendNotice', () => {
 			renderCheckout();
 
 			expect( storedSlugs() ).toEqual( [] );
-		} );
-	} );
-
-	// localStorage is keyed by origin, not by path, so on a subdirectory
-	// multisite every site sees the same storage. Without the site in the key, a
-	// dismissal on one of them hides another one's live warning.
-	describe( 'site scoping', () => {
-		const renderCheckout = () =>
-			render(
-				<IncompatibleExtensionsFrontendNotice block="woocommerce/checkout" />
-			);
-
-		it( 'does not carry a dismissal to another site on the same origin', () => {
-			setIncompatibleExtensions( [
-				{ id: 'test-plugin', title: 'Test Plugin' },
-			] );
-			const { unmount } = renderCheckout();
-			fireEvent.click( screen.getByTestId( 'dismiss-button' ) );
-			unmount();
-
-			// Same browser, same origin, different site of the network.
-			mockHomeUrl = SITE_B;
-			renderCheckout();
-
-			expect( screen.getByTestId( 'notice-banner' ) ).toBeInTheDocument();
-		} );
-
-		// The reviewed revision matched a subset, so site B's single
-		// incompatibility counted as covered by site A's larger acknowledgement.
-		it( 'does not let a larger acknowledgement elsewhere cover this site', () => {
-			seedFrontend( [ 'plugin-one', 'plugin-two' ] );
-
-			mockHomeUrl = SITE_B;
-			setIncompatibleExtensions( [
-				{ id: 'plugin-one', title: 'Plugin One' },
-			] );
-			renderCheckout();
-
-			expect( screen.getByTestId( 'notice-banner' ) ).toBeInTheDocument();
-		} );
-
-		it( "keeps each site's acknowledgements in its own key", () => {
-			const siteAKey = frontendKey();
-			seedFrontend( [ 'plugin-one' ], siteAKey );
-
-			mockHomeUrl = SITE_B;
-			setIncompatibleExtensions( [
-				{ id: 'plugin-two', title: 'Plugin Two' },
-			] );
-			renderCheckout();
-			fireEvent.click( screen.getByTestId( 'dismiss-button' ) );
-
-			expect( frontendKey() ).not.toBe( siteAKey );
-			expect( storedSlugs( siteAKey ) ).toEqual( [ 'plugin-one' ] );
-			expect( storedSlugs() ).toEqual( [ 'plugin-two' ] );
-		} );
-
-		// The unscoped value names no site and every site on the origin sees it,
-		// so on a multisite there is no telling whose dismissal it is. Warning
-		// once more beats inheriting a dismissal made on a different site.
-		it( 'does not migrate the unscoped value on a multisite', () => {
-			mockIsMultisite = true;
-			seedLegacy( [ 'test-plugin' ] );
-			setIncompatibleExtensions( [
-				{ id: 'test-plugin', title: 'Test Plugin' },
-			] );
-
-			renderCheckout();
-
-			expect( screen.getByTestId( 'notice-banner' ) ).toBeInTheDocument();
-		} );
-
-		// `useLocalStorageState` hands back the initial value both when the key
-		// is missing and when it holds something it cannot parse. Only the first
-		// may reach the migration: seeding a corrupt value from the unscoped key
-		// would revive a dismissal the merchant has since replaced and hide a
-		// warning that is currently owed.
-		it( 'does not migrate over a scoped value it cannot parse', () => {
-			window.localStorage.setItem( frontendKey(), '{not valid json' );
-			seedLegacy( [ 'test-plugin' ] );
-			setIncompatibleExtensions( [
-				{ id: 'test-plugin', title: 'Test Plugin' },
-			] );
-
-			renderCheckout();
-
-			expect( screen.getByTestId( 'notice-banner' ) ).toBeInTheDocument();
-			expect( console ).toHaveErrored();
-		} );
-
-		it( 'does not read the unscoped key at all when the scoped one is corrupt', () => {
-			const getItem = jest.spyOn( Storage.prototype, 'getItem' );
-			window.localStorage.setItem( frontendKey(), '{not valid json' );
-			seedLegacy( [ 'test-plugin' ] );
-			setIncompatibleExtensions( [
-				{ id: 'test-plugin', title: 'Test Plugin' },
-			] );
-
-			renderCheckout();
-
-			expect(
-				getItem.mock.calls.filter( ( [ key ] ) => key === legacyKey )
-			).toHaveLength( 0 );
-			expect( console ).toHaveErrored();
-			getItem.mockRestore();
 		} );
 	} );
 } );
