@@ -50,6 +50,10 @@ function CustomersReportTable( {
 				hiddenByDefault: true,
 			},
 			{
+				label: __( 'Role', 'woocommerce' ),
+				key: 'role',
+			},
+			{
 				label: __( 'Last active', 'woocommerce' ),
 				key: 'date_last_active',
 				defaultSort: true,
@@ -144,6 +148,7 @@ function CustomersReportTable( {
 				user_id: userId,
 				orders_count: ordersCount,
 				username,
+				role,
 				total_spend: totalSpend,
 				postcode,
 				city,
@@ -200,6 +205,10 @@ function CustomersReportTable( {
 				{
 					display: username,
 					value: username,
+				},
+				{
+					display: role,
+					value: role,
 				},
 				{
 					display: dateLastActiveDisplay,
