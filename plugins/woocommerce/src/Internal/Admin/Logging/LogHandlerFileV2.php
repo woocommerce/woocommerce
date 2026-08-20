@@ -11,6 +11,13 @@ use WC_Log_Handler;
  */
 class LogHandlerFileV2 extends WC_Log_Handler {
 	/**
+	 * Maximum number of log files to delete in one loop iteration.
+	 *
+	 * @var int
+	 */
+	private const DELETE_BATCH_SIZE = 100;
+
+	/**
 	 * Instance of the FileController class.
 	 *
 	 * @var FileController
@@ -18,18 +25,10 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 	private $file_controller;
 
 	/**
-	 * Instance of the Settings class.
-	 *
-	 * @var Settings
-	 */
-	private $settings;
-
-	/**
 	 * LogHandlerFileV2 class.
 	 */
 	public function __construct() {
 		$this->file_controller = wc_get_container()->get( FileController::class );
-		$this->settings        = wc_get_container()->get( Settings::class );
 	}
 
 	/**
@@ -90,8 +89,9 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 		unset( $context_for_entry['source'] );
 
 		if ( ! empty( $context_for_entry ) ) {
-			$formatted_context = wp_json_encode( $context_for_entry, JSON_UNESCAPED_UNICODE );
-			$message          .= stripslashes( " CONTEXT: $formatted_context" );
+			// Keep the JSON flags in sync with the context re-encoding in PageController::format_line().
+			$formatted_context = wp_json_encode( $context_for_entry, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
+			$message          .= " CONTEXT: $formatted_context";
 		}
 
 		$entry = "$time_string $level_string $message";
@@ -175,22 +175,59 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 	public function clear( string $source, bool $quiet = false ): int {
 		$source = File::sanitize_source( $source );
 
-		$files = $this->file_controller->get_files(
-			array(
-				'source' => $source,
-			)
-		);
-
-		if ( is_wp_error( $files ) || count( $files ) < 1 ) {
+		// Bail on an empty source: an empty value would match every file and,
+		// combined with the batched deletion below, wipe out all log files.
+		if ( '' === $source ) {
 			return 0;
 		}
 
-		$file_ids = array_map(
-			fn( $file ) => $file->get_file_id(),
-			$files
-		);
+		$deleted = 0;
+		$skipped = 0;
 
-		$deleted = $this->file_controller->delete_files( $file_ids );
+		/*
+		 * Fetch and delete in batches so that sources with more than the default
+		 * per-page of log files don't leave files behind.
+		 *
+		 * Order by 'created' rather than the default 'modified'. Because paging
+		 * advances $skipped past undeletable files, the offset is only reliable if
+		 * get_files() returns a stable, strict total order across iterations. For a
+		 * single source, created timestamps (plus rotation) are unique per file,
+		 * whereas modified times can tie -- and on PHP < 8.0 usort() is not stable,
+		 * so tied files could re-order between iterations and strand a deletable file.
+		 */
+		do {
+			$files = $this->file_controller->get_files(
+				array(
+					'source'       => $source,
+					'exact_source' => true,
+					'orderby'      => 'created',
+					'per_page'     => self::DELETE_BATCH_SIZE,
+					'offset'       => $skipped,
+				)
+			);
+
+			if ( is_wp_error( $files ) || ! is_array( $files ) ) {
+				break;
+			}
+
+			$fetched_count = count( $files );
+			if ( $fetched_count < 1 ) {
+				break;
+			}
+
+			$file_ids = array_map(
+				fn( $file ) => $file->get_file_id(),
+				$files
+			);
+
+			$deleted_in_batch = $this->file_controller->delete_files( $file_ids );
+			$deleted         += $deleted_in_batch;
+
+			// Deleted files disappear from the directory, so only files that could
+			// not be deleted need to be skipped. This avoids retrying a permanently
+			// undeletable batch forever.
+			$skipped += $fetched_count - $deleted_in_batch;
+		} while ( self::DELETE_BATCH_SIZE === $fetched_count );
 
 		if ( $deleted > 0 && ! $quiet ) {
 			$this->handle(
@@ -234,47 +271,72 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 			return 0;
 		}
 
-		$files = $this->file_controller->get_files(
-			array(
-				'date_filter' => 'created',
-				'date_start'  => 1,
-				'date_end'    => $timestamp,
-			)
-		);
+		$deleted = 0;
+		$skipped = 0;
 
-		if ( is_wp_error( $files ) ) {
-			return 0;
-		}
+		/*
+		 * Fetch and delete in batches so that sites with more than the default
+		 * per-page of log files don't leave expired files behind.
+		 *
+		 * Order by 'created' so that paging past vetoed files stays reliable: the
+		 * offset only lands correctly if get_files() returns a strict, stable total
+		 * order across iterations, and (created, source, rotation) is unique per file
+		 * whereas the default 'modified' order can tie -- which PHP < 8.0's unstable
+		 * usort() could re-order between iterations, stranding an expired file.
+		 */
+		do {
+			$files = $this->file_controller->get_files(
+				array(
+					'date_filter' => 'created',
+					'date_start'  => 1,
+					'date_end'    => $timestamp,
+					'orderby'     => 'created',
+					'per_page'    => self::DELETE_BATCH_SIZE,
+					'offset'      => $skipped,
+				)
+			);
 
-		$files = array_filter(
-			$files,
-			function ( $file ) use ( $timestamp ) {
-				/**
-				 * Allows preventing an expired log file from being deleted.
-				 *
-				 * @param bool $delete    True to delete the file.
-				 * @param File $file      The log file object.
-				 * @param int  $timestamp The expiration threshold.
-				 *
-				 * @since 8.7.0
-				 */
-				$delete = apply_filters( 'woocommerce_logger_delete_expired_file', true, $file, $timestamp );
-
-				return boolval( $delete );
+			if ( is_wp_error( $files ) || ! is_array( $files ) ) {
+				break;
 			}
-		);
 
-		if ( count( $files ) < 1 ) {
-			return 0;
-		}
+			$fetched_count = count( $files );
+			$files         = array_filter(
+				$files,
+				function ( $file ) use ( $timestamp ) {
+					/**
+					 * Allows preventing an expired log file from being deleted.
+					 *
+					 * @param bool $delete    True to delete the file.
+					 * @param File $file      The log file object.
+					 * @param int  $timestamp The expiration threshold.
+					 *
+					 * @since 8.7.0
+					 */
+					$delete = apply_filters( 'woocommerce_logger_delete_expired_file', true, $file, $timestamp );
 
-		$file_ids = array_map(
-			fn( $file ) => $file->get_file_id(),
-			$files
-		);
+					return boolval( $delete );
+				}
+			);
 
-		$deleted        = $this->file_controller->delete_files( $file_ids );
-		$retention_days = $this->settings->get_retention_period();
+			$file_count       = count( $files );
+			$vetoed_count     = $fetched_count - $file_count;
+			$deleted_in_batch = 0;
+			if ( $file_count > 0 ) {
+				$file_ids = array_map(
+					fn( $file ) => $file->get_file_id(),
+					$files
+				);
+
+				$deleted_in_batch = $this->file_controller->delete_files( $file_ids );
+				$deleted         += $deleted_in_batch;
+			}
+
+			// Deleted files disappear from the directory, so only vetoed files
+			// need to be skipped. If no progress was made, skip the full page to
+			// avoid retrying a permanently vetoed or undeletable batch forever.
+			$skipped += $deleted_in_batch > 0 ? $vetoed_count : $fetched_count;
+		} while ( self::DELETE_BATCH_SIZE === $fetched_count );
 
 		if ( $deleted > 0 ) {
 			$this->handle(

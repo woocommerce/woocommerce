@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Store fulfillment datetimes as UTC and return them from the REST API as ISO 8601 with an explicit `Z` suffix so they render correctly on non-UTC sites.

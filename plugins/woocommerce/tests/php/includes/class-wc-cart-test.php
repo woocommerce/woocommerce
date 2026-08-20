@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests\Cart.
  */
 
+use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 
@@ -12,6 +13,14 @@ use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
  * Class WC_Cart_Test
  */
 class WC_Cart_Test extends \WC_Unit_Test_Case {
+
+	/**
+	 * Stores arguments received by the woocommerce_add_to_cart_quantity filter.
+	 *
+	 * @var array
+	 */
+	protected $add_to_cart_quantity_filter_args = array();
+
 	/**
 	 * Called before every test.
 	 */
@@ -27,9 +36,10 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 
-		WC()->cart->empty_cart();
 		WC()->customer->set_is_vat_exempt( false );
 		WC()->session->set( 'wc_notices', null );
+
+		remove_filter( 'woocommerce_add_to_cart_quantity', array( $this, 'capture_add_to_cart_quantity_filter_args' ), 10 );
 	}
 
 	/**
@@ -46,9 +56,20 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		WC()->session->set( 'wc_notices', null );
 
-		$variable_product = WC_Helper_Product::create_variation_product();
+		$variable_product = new WC_Product_Variable();
+		$variable_product->set_name( 'Sold individually variable product' );
+		$variable_product->set_attributes(
+			array( WC_Helper_Product::create_product_attribute_object( 'size', array( 'small' ) ) )
+		);
 		$variable_product->set_sold_individually( true );
 		$variable_product->save();
+		WC_Helper_Product::create_product_variation_object(
+			$variable_product->get_id(),
+			'SOLD INDIVIDUALLY VARIATION ' . microtime(),
+			10,
+			array( 'pa_size' => 'small' )
+		);
+		$variable_product = new WC_Product_Variable( $variable_product->get_id() );
 
 		$variation_ids = $variable_product->get_children();
 		$this->assertNotEmpty( $variation_ids, 'Expected at least one variation.' );
@@ -214,6 +235,47 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		// Reset cart.
 		WC()->cart->empty_cart();
 		WC()->customer->set_is_vat_exempt( false );
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Should preserve zero variation attributes when adding a variation directly by ID.
+	 */
+	public function test_add_variation_to_the_cart_directly_by_id_preserves_zero_attributes(): void {
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Variable product with zero attribute' );
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_id( 0 );
+		$attribute->set_name( 'length' );
+		$attribute->set_options( array( '0', '1' ) );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'length' => '0' ) );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+
+		$cart_item_key = WC()->cart->add_to_cart( $variation->get_id(), 1 );
+
+		$this->assertNotFalse( $cart_item_key, 'The variation should be added to the cart.' );
+
+		$cart_item = WC()->cart->get_cart_item( (string) $cart_item_key );
+
+		$this->assertSame( $product->get_id(), $cart_item['product_id'], 'The cart item should use the parent product ID.' );
+		$this->assertSame( $variation->get_id(), $cart_item['variation_id'], 'The cart item should use the variation ID.' );
+		$this->assertSame(
+			array( 'attribute_length' => '0' ),
+			$cart_item['variation'],
+			'The zero variation attribute should be preserved in cart item data.'
+		);
+
+		$variation->delete( true );
 		$product->delete( true );
 	}
 
@@ -844,6 +906,286 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Set up a stock-managed product with exactly one unit, held by a separate unpaid order.
+	 *
+	 * Mirrors the state an abandoned checkout leaves behind: the last unit is reserved by an
+	 * order that belongs to the shopper's own session.
+	 *
+	 * @return array{0: WC_Product, 1: WC_Order} The product and the order holding its stock.
+	 */
+	private function create_last_unit_product_held_by_order(): array {
+		$product       = $this->create_stock_managed_product( 1 );
+		$holding_order = $this->create_order_holding_stock( $product, 1 );
+
+		// Sanity check: the separate order really holds the only unit.
+		$this->assertEquals( 1, wc_get_held_stock_quantity( wc_get_product( $product->get_id() ), 0 ) );
+
+		return array( $product, $holding_order );
+	}
+
+	/**
+	 * Create a simple product that manages stock, with no backorders.
+	 *
+	 * @param int $stock_quantity How many units the product has in stock.
+	 * @return WC_Product The product.
+	 */
+	private function create_stock_managed_product( int $stock_quantity ): WC_Product {
+		update_option( 'woocommerce_manage_stock', 'yes' );
+		update_option( 'woocommerce_hold_stock_minutes', 60 );
+		// ReserveStock is only enabled once the reserved-stock table has shipped (schema >= 430).
+		update_option( 'woocommerce_schema_version', 430 );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( $stock_quantity );
+		$product->set_backorders( 'no' );
+		$product->set_stock_status( 'instock' );
+		$product->save();
+
+		return $product;
+	}
+
+	/**
+	 * Create an unpaid order that holds a quantity of a product, as an in-progress checkout does.
+	 *
+	 * @param WC_Product $product  The product to hold stock for.
+	 * @param int        $quantity How many units the order holds.
+	 * @return WC_Order The order holding the stock.
+	 */
+	private function create_order_holding_stock( WC_Product $product, int $quantity ): WC_Order {
+		$holding_order = WC_Helper_Order::create_order();
+		$holding_order->remove_order_items();
+		$holding_order->add_product( wc_get_product( $product->get_id() ), $quantity );
+		$holding_order->set_status( OrderStatus::PENDING );
+		$holding_order->save();
+
+		( new ReserveStock() )->reserve_stock_for_order( $holding_order, 60 );
+
+		return $holding_order;
+	}
+
+	/**
+	 * @testdox check_cart_item_stock does not block the shopper when their own hold is tracked by store_api_draft_order and order_awaiting_payment is boolean false (Cause A: payment_complete() writes false, not unset).
+	 */
+	public function test_check_cart_item_stock_not_blocked_by_own_hold_when_awaiting_payment_is_false() {
+		list( $product, $holding_order ) = $this->create_last_unit_product_held_by_order();
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// The draft pointer correctly identifies the shopper's own holding order...
+		WC()->session->set( 'store_api_draft_order', $holding_order->get_id() );
+		// ...but a completed payment earlier in the session left this as boolean false rather than unsetting it.
+		WC()->session->set( 'order_awaiting_payment', false );
+
+		$this->assertTrue(
+			WC()->cart->check_cart_item_stock(),
+			'A boolean-false order_awaiting_payment must fall through to the store_api_draft_order pointer, not skip it.'
+		);
+	}
+
+	/**
+	 * @testdox check_cart_item_stock does not block the shopper when only store_api_draft_order identifies their own hold (baseline fallback, no order_awaiting_payment set).
+	 */
+	public function test_check_cart_item_stock_not_blocked_by_own_hold_via_draft_fallback() {
+		list( $product, $holding_order ) = $this->create_last_unit_product_held_by_order();
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		WC()->session->set( 'store_api_draft_order', $holding_order->get_id() );
+		WC()->session->set( 'order_awaiting_payment', null );
+
+		$this->assertTrue( WC()->cart->check_cart_item_stock() );
+	}
+
+	/**
+	 * @testdox check_cart_item_stock uses order_awaiting_payment to exclude the shopper's own hold when it holds a real order id.
+	 */
+	public function test_check_cart_item_stock_uses_order_awaiting_payment_when_set() {
+		list( $product, $holding_order ) = $this->create_last_unit_product_held_by_order();
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		WC()->session->set( 'store_api_draft_order', 0 );
+		WC()->session->set( 'order_awaiting_payment', $holding_order->get_id() );
+
+		$this->assertTrue( WC()->cart->check_cart_item_stock() );
+	}
+
+	/**
+	 * @testdox check_cart_item_stock still blocks when a live hold is NOT identified as the shopper's own (oversell safety: the fix must not relax holds it cannot attribute to this session).
+	 */
+	public function test_check_cart_item_stock_blocks_when_hold_is_not_the_shoppers_own() {
+		list( $product ) = $this->create_last_unit_product_held_by_order();
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Session points at neither the holding order nor any awaiting order.
+		WC()->session->set( 'store_api_draft_order', 0 );
+		WC()->session->set( 'order_awaiting_payment', false );
+
+		$result = WC()->cart->check_cart_item_stock();
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertContains( 'out-of-stock', $result->get_error_codes() );
+	}
+
+	/**
+	 * @testdox check_cart_item_stock prefers order_awaiting_payment over store_api_draft_order when both point at a live hold (the classic checkout order wins).
+	 */
+	public function test_check_cart_item_stock_prefers_order_awaiting_payment_over_draft_order() {
+		// Three units in stock: the classic checkout order holds two of them, the draft order holds one.
+		$product       = $this->create_stock_managed_product( 3 );
+		$classic_order = $this->create_order_holding_stock( $product, 2 );
+		$draft_order   = $this->create_order_holding_stock( $product, 1 );
+
+		// Sanity check: between them, the two orders hold all three units.
+		$this->assertEquals( 3, wc_get_held_stock_quantity( wc_get_product( $product->get_id() ), 0 ) );
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 2 );
+
+		WC()->session->set( 'order_awaiting_payment', $classic_order->get_id() );
+		WC()->session->set( 'store_api_draft_order', $draft_order->get_id() );
+
+		/*
+		 * Excluding the classic order leaves one unit held, so the two units in the cart fit into
+		 * the three in stock. Excluding the draft order instead would leave two units held and
+		 * block the cart, so this assertion only holds while order_awaiting_payment takes priority.
+		 */
+		$this->assertTrue(
+			WC()->cart->check_cart_item_stock(),
+			'order_awaiting_payment must take priority over store_api_draft_order when both hold stock.'
+		);
+	}
+
+	/**
+	 * @testdox Should clear the cart after payment when the order cart hash matches.
+	 */
+	public function test_clear_cart_after_payment_clears_cart_when_order_cart_hash_matches(): void {
+		global $wp;
+
+		$previous_query_vars = $wp->query_vars;
+		$previous_order_key  = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserving request state for test cleanup.
+		$order               = null;
+
+		try {
+			$product = WC_Helper_Product::create_simple_product();
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+			$order = WC_Helper_Order::create_order( 1, $product, array( 'status' => OrderStatus::COMPLETED ) );
+			$order->set_cart_hash( WC()->cart->get_cart_hash() );
+			$order->save();
+
+			$wp->query_vars['order-received'] = $order->get_id();
+			$_GET['key']                      = $order->get_order_key();
+
+			wc_clear_cart_after_payment();
+
+			$this->assertTrue( WC()->cart->is_empty(), 'Cart should be emptied when the paid order matches the current cart hash.' );
+		} finally {
+			$wp->query_vars = $previous_query_vars;
+
+			if ( null === $previous_order_key ) {
+				unset( $_GET['key'] );
+			} else {
+				$_GET['key'] = $previous_order_key;
+			}
+
+			if ( $order instanceof WC_Order ) {
+				WC_Helper_Order::delete_order( $order->get_id() );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Should not clear the cart after payment when the order cart hash differs.
+	 */
+	public function test_clear_cart_after_payment_keeps_cart_when_order_cart_hash_differs(): void {
+		global $wp;
+
+		$previous_query_vars = $wp->query_vars;
+		$previous_order_key  = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserving request state for test cleanup.
+		$order               = null;
+
+		try {
+			$product = WC_Helper_Product::create_simple_product();
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+			$order = WC_Helper_Order::create_order( 1, $product, array( 'status' => OrderStatus::COMPLETED ) );
+			$order->set_cart_hash( 'different-cart-hash' );
+			$order->save();
+
+			$wp->query_vars['order-received'] = $order->get_id();
+			$_GET['key']                      = $order->get_order_key();
+
+			wc_clear_cart_after_payment();
+
+			$this->assertFalse( WC()->cart->is_empty(), 'Cart should not be emptied when the paid order does not match the current cart hash.' );
+		} finally {
+			$wp->query_vars = $previous_query_vars;
+
+			if ( null === $previous_order_key ) {
+				unset( $_GET['key'] );
+			} else {
+				$_GET['key'] = $previous_order_key;
+			}
+
+			if ( $order instanceof WC_Order ) {
+				WC_Helper_Order::delete_order( $order->get_id() );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Should allow woocommerce_should_clear_cart_after_payment to override the final clear cart value.
+	 */
+	public function test_clear_cart_after_payment_filter_can_override_final_value(): void {
+		global $wp;
+
+		$previous_query_vars = $wp->query_vars;
+		$previous_order_key  = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserving request state for test cleanup.
+		$order               = null;
+		$filter              = function ( $should_clear_cart_after_payment ) {
+			$this->assertFalse( $should_clear_cart_after_payment, 'The filter should receive the final value after the cart hash check.' );
+			return true;
+		};
+
+		try {
+			$product = WC_Helper_Product::create_simple_product();
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+			$order = WC_Helper_Order::create_order( 1, $product, array( 'status' => OrderStatus::COMPLETED ) );
+			$order->set_cart_hash( 'different-cart-hash' );
+			$order->save();
+
+			$wp->query_vars['order-received'] = $order->get_id();
+			$_GET['key']                      = $order->get_order_key();
+
+			add_filter( 'woocommerce_should_clear_cart_after_payment', $filter );
+
+			wc_clear_cart_after_payment();
+
+			$this->assertTrue( WC()->cart->is_empty(), 'Cart should be emptied when the filter overrides the final value.' );
+		} finally {
+			remove_filter( 'woocommerce_should_clear_cart_after_payment', $filter );
+			$wp->query_vars = $previous_query_vars;
+
+			if ( null === $previous_order_key ) {
+				unset( $_GET['key'] );
+			} else {
+				$_GET['key'] = $previous_order_key;
+			}
+
+			if ( $order instanceof WC_Order ) {
+				WC_Helper_Order::delete_order( $order->get_id() );
+			}
+		}
+	}
+
+	/**
 	 * @testdox should clear shipping data from session when the cart is empty
 	 */
 	public function test_setting_session_should_clear_shipping_data_when_cart_is_empty() {
@@ -1415,5 +1757,97 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		unset( $_REQUEST['add-to-cart'], $_REQUEST['variation_id'], $_REQUEST['quantity'], $_POST['quantity'], $_REQUEST['attribute_pa_color'] );
 		$variation->delete( true );
 		$product->delete( true );
+	}
+
+
+	/**
+	 * Capture all arguments passed to the filter without modifying the quantity.
+	 *
+	 * @param int $quantity       The quantity to add to cart.
+	 * @param int $product_id     The parent product ID.
+	 * @param int $variation_id   The variation ID being added.
+	 *
+	 * @return int
+	 */
+	public function capture_add_to_cart_quantity_filter_args( $quantity, $product_id, $variation_id ) {
+		$this->add_to_cart_quantity_filter_args = func_get_args();
+		return $quantity;
+	}
+
+	/**
+	 * @testdox woocommerce_add_to_cart_quantity filter should receive variation_id when a variable product is added to cart.
+	 */
+	public function test_add_to_cart_quantity_filter_receives_variation_id() {
+		add_filter( 'woocommerce_add_to_cart_quantity', array( $this, 'capture_add_to_cart_quantity_filter_args' ), 10, 3 );
+
+		// Create a variable product and pick the first available variation to add.
+		$product    = WC_Helper_Product::create_variation_product();
+		$variations = $product->get_available_variations();
+		$variation  = $variations[0];
+
+		WC()->cart->add_to_cart(
+			$product->get_id(),
+			1,
+			$variation['variation_id'],
+			$variation['attributes']
+		);
+
+		// Ensure all 3 arguments were passed before accessing individual indexes.
+		$this->assertCount( 3, $this->add_to_cart_quantity_filter_args, 'Filter should receive exactly 3 arguments.' );
+
+		$this->assertEquals( 1, $this->add_to_cart_quantity_filter_args[0] );
+		$this->assertEquals( $product->get_id(), $this->add_to_cart_quantity_filter_args[1] );
+		$this->assertEquals( $variation['variation_id'], $this->add_to_cart_quantity_filter_args[2] );
+	}
+
+	/**
+	 * @testdox woocommerce_add_to_cart_quantity filter should receive 0 as variation_id when a simple product is added to cart.
+	 */
+	public function test_add_to_cart_quantity_filter_receives_zero_variation_id_for_simple_product() {
+		add_filter( 'woocommerce_add_to_cart_quantity', array( $this, 'capture_add_to_cart_quantity_filter_args' ), 10, 3 );
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$this->assertCount( 3, $this->add_to_cart_quantity_filter_args, 'Filter should receive exactly 3 arguments.' );
+
+		$this->assertEquals( 1, $this->add_to_cart_quantity_filter_args[0] );
+		$this->assertEquals( $product->get_id(), $this->add_to_cart_quantity_filter_args[1] );
+		$this->assertEquals( 0, $this->add_to_cart_quantity_filter_args[2] );
+	}
+
+	/**
+	 * Applying the same coupon a second time returns false and leaves the discount total unchanged.
+	 */
+	public function test_apply_same_coupon_twice_returns_false() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 20 ) );
+		$coupon  = WC_Helper_Coupon::create_coupon(
+			'dup-coupon',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '5',
+			)
+		);
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$first = WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+		$discount_after_first = WC()->cart->get_discount_total();
+
+		$second = WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+
+		$this->assertTrue( $first, 'first application should succeed' );
+		$this->assertFalse( $second, 'second application of same coupon should be rejected' );
+		$this->assertEqualsWithDelta( $discount_after_first, WC()->cart->get_discount_total(), 0.001, 'discount total should be unchanged after rejected re-application' );
+
+		WC()->cart->empty_cart();
+		$product->delete( true );
+		$coupon->delete( true );
 	}
 }

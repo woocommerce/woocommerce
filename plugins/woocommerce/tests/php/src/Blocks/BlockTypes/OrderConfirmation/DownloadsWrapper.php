@@ -9,20 +9,38 @@ use Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\DownloadsWrapper 
  */
 final class DownloadsWrapper extends \WP_UnitTestCase {
 	/**
-	 * Perform products/options/cache cleanup.
+	 * Enable synchronous product attribute lookup updates for test fixtures.
+	 *
+	 * @return string
 	 */
-	public function tear_down() {
+	public static function enable_direct_attribute_lookup_updates(): string {
+		return 'yes';
+	}
+
+	/**
+	 * Set up test fixtures.
+	 */
+	public function set_up() {
 		global $wpdb;
+
+		parent::set_up();
+		add_filter( 'pre_option_woocommerce_attribute_lookup_direct_updates', array( self::class, 'enable_direct_attribute_lookup_updates' ) );
 
 		/** @var \WC_Product[] $products */
 		$products = ( new \WC_Product_Query() )->get_products();
 		foreach ( $products as $product ) {
 			$product->delete();
 		}
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->wc_product_meta_lookup}" );
+		$wpdb->query( "DELETE FROM {$wpdb->wc_product_meta_lookup}" );
+	}
 
+	/**
+	 * Perform products/options/cache cleanup.
+	 */
+	public function tear_down() {
 		delete_option( 'woocommerce_product_lookup_table_is_generating' );
 		wp_cache_delete( 'woocommerce_has_downloadable_products', 'woocommerce' );
+		remove_filter( 'pre_option_woocommerce_attribute_lookup_direct_updates', array( self::class, 'enable_direct_attribute_lookup_updates' ) );
 
 		parent::tear_down();
 	}
@@ -31,10 +49,11 @@ final class DownloadsWrapper extends \WP_UnitTestCase {
 	 * Test `store_has_downloadable_products`: query product meta lookup table.
 	 *
 	 * @dataProvider provider_downloadable_products
-	 * @param \WC_Product $product The product instance.
+	 * @param bool $downloadable Whether the product is downloadable.
 	 */
-	public function test_store_has_downloadable_products_via_product_meta_lookup_table_with_downloadable( \WC_Product $product ): void {
-		$proxy = new class() extends DownloadsWrapperClass {
+	public function test_store_has_downloadable_products_via_product_meta_lookup_table_with_downloadable( bool $downloadable ): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'downloadable' => $downloadable ) );
+		$proxy   = new class() extends DownloadsWrapperClass {
 			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
 			public function __construct() {
 			}
@@ -44,7 +63,7 @@ final class DownloadsWrapper extends \WP_UnitTestCase {
 			}
 		};
 
-		$this->assertSame( $product->is_downloadable(), $proxy->store_has_downloadable_products_proxy() );
+		$this->assertSame( $downloadable, $proxy->store_has_downloadable_products_proxy() );
 	}
 
 	/**
@@ -54,8 +73,8 @@ final class DownloadsWrapper extends \WP_UnitTestCase {
 	 */
 	public function provider_downloadable_products(): array {
 		return array(
-			array( \WC_Helper_Product::create_simple_product( true, array( 'downloadable' => true ) ) ),
-			array( \WC_Helper_Product::create_simple_product( true, array( 'downloadable' => false ) ) ),
+			array( true ),
+			array( false ),
 		);
 	}
 

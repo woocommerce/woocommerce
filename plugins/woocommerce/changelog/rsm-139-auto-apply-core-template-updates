@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Auto-apply the current core block template render to woo_email posts classified as core_updated_uncustomized after a plugin upgrade. Batched via Action Scheduler so the upgrade request is not blocked. Posts edited by the merchant are left untouched.

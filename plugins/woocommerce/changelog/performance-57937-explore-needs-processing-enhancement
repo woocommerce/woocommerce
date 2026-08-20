@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Reduced the number of SQL queries required to handle order collections in both the storefront and REST interfaces.

@@ -56,14 +56,6 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		),
 	);
 
-	/**
-	 * The product object is set using set_product or is automatically populated by get_product. This property was introduced
-	 * to reduce the number of wc_get_product calls when working with this class in core and extension workflows.
-	 *
-	 * @var null|false|WC_Product
-	 */
-	private $product;
-
 	/*
 	|--------------------------------------------------------------------------
 	| Setters
@@ -100,19 +92,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		if ( $value > 0 && 'product' !== get_post_type( absint( $value ) ) ) {
 			$this->error( 'order_item_product_invalid_product_id', __( 'Invalid product ID', 'woocommerce' ) );
 		}
-		$product_id = absint( $value );
-		$this->set_prop( 'product_id', $product_id );
-
-		if ( null !== $this->product ) {
-			// Cached instance invalidation: match the cached product identity against the incoming ID.
-			$cached_product_id = null;
-			if ( $this->product ) {
-				$cached_product_id = $this->product->is_type( ProductType::VARIATION ) ? $this->product->get_parent_id() : $this->product->get_id();
-			}
-			if ( ! $this->product || $cached_product_id !== $product_id ) {
-				$this->product = null;
-			}
-		}
+		$this->set_prop( 'product_id', absint( $value ) );
 	}
 
 	/**
@@ -129,19 +109,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 				array( 'variation_id' => $value )
 			);
 		}
-		$variation_id = absint( $value );
-		$this->set_prop( 'variation_id', $variation_id );
-
-		if ( null !== $this->product ) {
-			// Cached instance invalidation: match the cached product identity against the incoming ID.
-			$cached_variation_id = null;
-			if ( $this->product ) {
-				$cached_variation_id = $this->product->is_type( ProductType::VARIATION ) ? $this->product->get_id() : 0;
-			}
-			if ( ! $this->product || $cached_variation_id !== $variation_id ) {
-				$this->product = null;
-			}
-		}
+		$this->set_prop( 'variation_id', absint( $value ) );
 	}
 
 	/**
@@ -291,10 +259,14 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			$this->set_variation( is_callable( array( $product, 'get_variation_attributes' ) ) ? $product->get_variation_attributes() : array() );
 		} else {
 			$this->set_product_id( $product->get_id() );
+			$this->set_variation_id( 0 );
+			// Any variation attribute meta written by a previous set_variation() call is left in
+			// place on purpose: it is stored with the `attribute_` prefix stripped, so a key like
+			// `color` is indistinguishable from a merchant's own custom meta and clearing it here
+			// risks deleting real data. Removing that stale display meta is tracked in #66733.
 		}
 		$this->set_name( $product->get_name() );
 		$this->set_tax_class( $product->get_tax_class() );
-		$this->product = $product;
 	}
 
 	/**
@@ -417,31 +389,18 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Get the associated product.
 	 *
-	 * @since 10.9.0 returns the same product instance; if the product is updated or deleted, the instance will be re-instantiated.
 	 * @return WC_Product|bool
 	 */
 	public function get_product() {
-		if ( $this->product ) {
-			$reinstantiate = ! ( $this->product instanceof WC_Product ) ||
-				$this->product->_woocommerce_object_is_stale() ||
-				$this->product->_woocommerce_object_is_dirty();
-			if ( $reinstantiate ) {
-				$this->product = null;
-			}
-		}
-		if ( ! $this->product ) {
-			$product_id    = $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id();
-			$this->product = wc_get_product( $product_id );
-		}
+		$product_id = $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id();
+		$product    = wc_get_product( $product_id );
 
 		// Backwards compatible filter from WC_Order::get_product_from_item().
 		/** @var WC_Product|false $product */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
-		$product = $this->product;
 		if ( has_filter( 'woocommerce_get_product_from_item' ) ) {
 			/**
 			 * Modifies the product object returned by \WC_Order_Item_Product::get_product.
 			 *
-			 * @since 10.9.0 the method is caching the product object.
 			 * @since 2.7.0 filter introduction.
 			 *
 			 * @param WC_Product|false      $product   Product instance.
@@ -453,7 +412,6 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		/**
 		 * Modifies the product object returned by \WC_Order_Item_Product::get_product.
 		 *
-		 * @since 10.9.0 the method is caching the product object.
 		 * @since 2.7.0 filter introduction.
 		 *
 		 * @param WC_Product|false      $product   Product instance.

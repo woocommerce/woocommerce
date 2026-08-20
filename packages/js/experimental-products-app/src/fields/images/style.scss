@@ -1,8 +1,12 @@
+.woocommerce-fields-control__images-fieldset {
+	gap: 8px;
+}
+
 .woocommerce-fields-control__featured-image {
 	display: grid;
-	gap: 10px;
-	grid-template-columns: repeat( auto-fill, 108px );
-	grid-template-rows: repeat( auto-fill, 108px );
+	gap: 8px;
+	grid-template-columns: repeat( auto-fill, 72px );
+	grid-auto-rows: 72px;
 }
 
 .woocommerce-fields-controls__featured-image-uploaded-images {
@@ -11,13 +15,21 @@
 
 .woocommerce-fields-controls__image-wrapper {
 	position: relative;
-	width: 100%;
-	height: 100%;
+	width: 72px;
+	height: 72px;
 	border-radius: var( --wpds-border-radius-lg );
 	display: flex;
 	box-sizing: border-box;
 	transform-origin: 0 0;
 	touch-action: manipulation;
+
+	&:has( .woocommerce-fields-controls__image-drag-handle-container ) {
+		cursor: grab;
+
+		&:active {
+			cursor: grabbing;
+		}
+	}
 }
 
 .woocommerce-fields-controls__image-wrapper.is-dragging {
@@ -36,11 +48,6 @@
 		opacity: 1;
 		background-color: rgba( 0, 0, 0, 0.5 );
 	}
-}
-
-.woocommerce-fields-controls__image-wrapper.is-featured {
-	grid-column: span 2;
-	grid-row: span 2;
 }
 
 .woocommerce-fields-controls__image-overlay {
@@ -67,16 +74,10 @@
 	justify-content: center;
 	opacity: 0;
 	transition: opacity 0.2s ease-in-out;
-	pointer-events: none;
 	z-index: 1;
-
-	&:has( .woocommerce-fields-controls__image-drag-handle:focus ) {
-		opacity: 1;
-	}
 }
 
 .woocommerce-fields-controls__image-drag-handle {
-	pointer-events: auto;
 	cursor: grab;
 	color: #fff;
 	border-radius: 3px;
@@ -97,8 +98,8 @@
 
 .woocommerce-fields-controls__image-remove-button {
 	position: absolute;
-	top: calc( 2 * var( --wpds-dimension-base ) );
-	right: calc( 2 * var( --wpds-dimension-base ) );
+	top: calc( var( --wpds-dimension-base ) );
+	right: calc( var( --wpds-dimension-base ) );
 	border-radius: 50%;
 	border: 1px solid var( --wpds-color-stroke-interactive-neutral );
 	background-color: var( --wpds-color-bg-surface-neutral-strong );
@@ -107,7 +108,7 @@
 	height: $button-size-small;
 	opacity: 0;
 	transition: opacity 0.2s ease-in-out;
-	z-index: 1;
+	z-index: 2;
 }
 
 .woocommerce-fields-controls__image-wrapper {
@@ -130,11 +131,14 @@
 	border-radius: var( --wpds-border-radius-lg );
 	width: 100%;
 	height: 100%;
+	pointer-events: none;
+	-webkit-user-drag: none;
+	user-drag: none;
 }
 
 .woocommerce-fields-control__featured-image-actions {
-	width: 108px;
-	height: 108px;
+	width: 72px;
+	height: 72px;
 	border: 1px dashed var( --wpds-color-stroke-interactive-neutral );
 	border-radius: var( --wpds-border-radius-lg );
 

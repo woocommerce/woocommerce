@@ -50,12 +50,14 @@ class OrderController {
 
 		add_filter( 'woocommerce_default_order_status', array( $this, 'default_order_status' ) );
 
-		$order = new \WC_Order();
-		$order->set_status( 'checkout-draft' );
-		$order->set_created_via( 'store-api' );
-		$this->update_order_from_cart( $order );
-
-		remove_filter( 'woocommerce_default_order_status', array( $this, 'default_order_status' ) );
+		try {
+			$order = new \WC_Order();
+			$order->set_status( 'checkout-draft' );
+			$order->set_created_via( 'store-api' );
+			$this->update_order_from_cart( $order );
+		} finally {
+			remove_filter( 'woocommerce_default_order_status', array( $this, 'default_order_status' ) );
+		}
 
 		return $order;
 	}
@@ -67,41 +69,10 @@ class OrderController {
 	 * @param boolean   $update_totals Whether to update totals or not.
 	 */
 	public function update_order_from_cart( \WC_Order $order, $update_totals = true ) {
-		/**
-		 * This filter ensures that local pickup locations are still used for order taxes by forcing the address used to
-		 * calculate tax for an order to match the current address of the customer.
-		 *
-		 * -    The method `$customer->get_taxable_address()` runs the filter `woocommerce_customer_taxable_address`.
-		 * -    While we have a session, our `ShippingController::filter_taxable_address` function uses this hook to set
-		 *      the customer address to the pickup location address if local pickup is the chosen method.
-		 *
-		 * Without this code in place, `$customer->get_taxable_address()` is not used when order taxes are calculated,
-		 * resulting in the wrong taxes being applied with local pickup.
-		 *
-		 * The alternative would be to instead use `woocommerce_order_get_tax_location` to return the pickup location
-		 * address directly, however since we have the customer filter in place we don't need to duplicate effort.
-		 *
-		 * @see \WC_Abstract_Order::get_tax_location()
-		 */
-		add_filter(
-			'woocommerce_order_get_tax_location',
-			function ( $location ) {
-
-				if ( ! is_null( wc()->customer ) ) {
-
-					$taxable_address = wc()->customer->get_taxable_address();
-
-					$location = array(
-						'country'  => $taxable_address[0],
-						'state'    => $taxable_address[1],
-						'postcode' => $taxable_address[2],
-						'city'     => $taxable_address[3],
-					);
-				}
-
-				return $location;
-			}
-		);
+		// Tax location for local pickup orders is handled by ShippingController::filter_order_tax_location(), which
+		// hooks woocommerce_order_get_tax_location once and derives the pickup location address from the order's own
+		// shipping line item. This avoids registering a per-call (and unremovable) closure on every sync.
+		// See \WC_Abstract_Order::get_tax_location().
 
 		// Ensure cart is current.
 		if ( $update_totals ) {
@@ -204,6 +175,18 @@ class OrderController {
 	}
 
 	/**
+	 * Validate an existing order's address data before the order is updated from the request.
+	 *
+	 * Runs before any request data is persisted so a rejected address cannot mutate the order.
+	 *
+	 * @throws RouteException Exception if invalid data is detected.
+	 * @param \WC_Order $order Order object.
+	 */
+	public function validate_existing_order_before_update( \WC_Order $order ): void {
+		$this->validate_addresses( $order, $order->needs_shipping() );
+	}
+
+	/**
 	 * Perform custom order validation via WooCommerce hooks.
 	 *
 	 * Allows plugins to perform custom validation before payment.
@@ -258,6 +241,10 @@ class OrderController {
 		$validators    = array( 'validate_coupon_email_restriction', 'validate_coupon_usage_limit' );
 		$coupon_errors = array();
 
+		if ( $use_order_data ) {
+			$validators[] = 'validate_coupon_global_usage_limit';
+		}
+
 		foreach ( $coupons as $coupon ) {
 			try {
 				array_walk(
@@ -277,8 +264,18 @@ class OrderController {
 			if ( $use_order_data ) {
 				$error_code = 'woocommerce_rest_order_coupon_errors';
 
-				foreach ( $coupon_errors as $coupon_code => $message ) {
-					$order->remove_coupon( $coupon_code );
+				if ( $order->get_recorded_coupon_usage_counts() ) {
+					foreach ( $coupon_errors as $coupon_code => $message ) {
+						$order->remove_coupon( $coupon_code );
+					}
+				} else {
+					// Remove directly. `remove_coupon()` would decrement `usage_count` this order never recorded.
+					foreach ( $order->get_items( 'coupon' ) as $item_id => $coupon_item ) {
+						if ( $coupon_item instanceof \WC_Order_Item_Coupon && isset( $coupon_errors[ $coupon_item->get_code() ] ) ) {
+							$order->remove_item( $item_id );
+						}
+					}
+					$order->recalculate_coupons();
 				}
 
 				// Recalculate totals.
@@ -612,6 +609,34 @@ class OrderController {
 		}
 
 		if ( $usage_count >= $coupon_usage_limit ) {
+			throw new Exception( $coupon->get_coupon_error( \WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED ) );
+		}
+	}
+
+	/**
+	 * Check the coupon's global usage limit against the order.
+	 *
+	 * Skipped once the order has recorded its own usage, so it is not counted against itself.
+	 *
+	 * @throws Exception Exception if the global usage limit has been reached.
+	 * @param \WC_Coupon $coupon Coupon object applied to the order.
+	 * @param \WC_Order  $order Order object.
+	 */
+	protected function validate_coupon_global_usage_limit( \WC_Coupon $coupon, \WC_Order $order ): void {
+		$usage_limit = $coupon->get_usage_limit();
+
+		if ( ! $usage_limit || $order->get_recorded_coupon_usage_counts() ) {
+			return;
+		}
+
+		// Include tentative holds, matching WC_Discounts::validate_coupon_usage_limit().
+		$data_store      = $coupon->get_data_store();
+		$tentative_usage = is_callable( array( $data_store, 'get_tentative_usage_count' ) )
+			? (int) $data_store->get_tentative_usage_count( $coupon->get_id() )
+			: 0;
+
+		if ( $coupon->get_usage_count() + $tentative_usage >= $usage_limit ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			throw new Exception( $coupon->get_coupon_error( \WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED ) );
 		}
 	}

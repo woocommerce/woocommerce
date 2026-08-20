@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\Mutations;
 
+use Automattic\WooCommerce\Api\Attributes\ArrayOf;
 use Automattic\WooCommerce\Api\Attributes\Description;
 use Automattic\WooCommerce\Api\Attributes\RequiredCapability;
 use Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\InputTypes\CreateWidgetInput;
@@ -22,6 +23,9 @@ class CreateWidget {
 	public function execute(
 		#[Description( 'The data for the new widget' )]
 		CreateWidgetInput $input,
+		#[Description( 'Related widget inputs for array input generation coverage' )]
+		#[ArrayOf( CreateWidgetInput::class )]
+		?array $related_inputs = null,
 	): Widget {
 		$widget = Store::create_widget( $input->label, $input->color );
 		if ( null !== $input->weight ) {

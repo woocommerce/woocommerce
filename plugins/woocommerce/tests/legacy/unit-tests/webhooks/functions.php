@@ -63,6 +63,113 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Default-resource + default-event topics with no registered hook are rejected,
+	 * to prevent ghost webhooks that save as Active and never deliver (issue #64502).
+	 */
+	public function test_wc_is_webhook_valid_topic_rejects_unregistered_pairs() {
+		$this->assertFalse( wc_is_webhook_valid_topic( 'order.published' ) );
+		$this->assertFalse( wc_is_webhook_valid_topic( 'coupon.published' ) );
+		$this->assertFalse( wc_is_webhook_valid_topic( 'customer.published' ) );
+		$this->assertFalse( wc_is_webhook_valid_topic( 'customer.restored' ) );
+	}
+
+	/**
+	 * The default-pair allowlist is derived from `WC_Webhook::get_default_topic_hooks()`,
+	 * so the validator and the topic-hooks map cannot drift. Any default-pair
+	 * topic the map registers a hook for must validate; any that the map leaves
+	 * empty must be rejected.
+	 */
+	public function test_wc_is_webhook_valid_topic_matches_topic_hooks_map() {
+		$topic_hooks       = WC_Webhook::get_default_topic_hooks();
+		$default_resources = array( 'coupon', 'customer', 'order', 'product' );
+		$default_events    = array( 'created', 'updated', 'deleted', 'restored', 'published' );
+
+		foreach ( $default_resources as $resource ) {
+			foreach ( $default_events as $event ) {
+				$topic    = "{$resource}.{$event}";
+				$expected = ! empty( $topic_hooks[ $topic ] );
+				$this->assertSame(
+					$expected,
+					wc_is_webhook_valid_topic( $topic ),
+					"Validator out of sync with WC_Webhook::get_default_topic_hooks() for `{$topic}`."
+				);
+			}
+		}
+	}
+
+	/**
+	 * Plugins extending the default-pair allowlist via `woocommerce_webhook_topic_hooks`
+	 * (e.g. wiring `untrashed_post` to fire `customer.restored`) are honored: the
+	 * validator accepts the topic so the webhook can save and deliver.
+	 */
+	public function test_wc_is_webhook_valid_topic_passes_filter_extended_default_pair() {
+		$this->assertFalse( wc_is_webhook_valid_topic( 'customer.restored' ) );
+
+		$add_default_pair_hook = function ( $hooks ) {
+			$hooks['customer.restored'] = array( 'untrashed_post' );
+			return $hooks;
+		};
+
+		try {
+			add_filter( 'woocommerce_webhook_topic_hooks', $add_default_pair_hook );
+			$this->assertTrue( wc_is_webhook_valid_topic( 'customer.restored' ) );
+		} finally {
+			remove_filter( 'woocommerce_webhook_topic_hooks', $add_default_pair_hook );
+		}
+
+		$this->assertFalse( wc_is_webhook_valid_topic( 'customer.restored' ) );
+	}
+
+	/**
+	 * Inverse of the filter-extended case: a plugin that empties a previously-valid
+	 * default pair via `woocommerce_webhook_topic_hooks` causes the validator to
+	 * reject that topic, since there are no hooks left to deliver it.
+	 */
+	public function test_wc_is_webhook_valid_topic_rejects_filter_emptied_default_pair() {
+		$this->assertTrue( wc_is_webhook_valid_topic( 'order.created' ) );
+
+		$empty_default_pair_hooks = function ( $hooks ) {
+			$hooks['order.created'] = array();
+			return $hooks;
+		};
+
+		try {
+			add_filter( 'woocommerce_webhook_topic_hooks', $empty_default_pair_hooks );
+			$this->assertFalse( wc_is_webhook_valid_topic( 'order.created' ) );
+		} finally {
+			remove_filter( 'woocommerce_webhook_topic_hooks', $empty_default_pair_hooks );
+		}
+
+		$this->assertTrue( wc_is_webhook_valid_topic( 'order.created' ) );
+	}
+
+	/**
+	 * Plugins extending the resource/event lists via the marginal-set filters keep
+	 * working: their topics include a custom resource or event, which skips the
+	 * default-pair check.
+	 */
+	public function test_wc_is_webhook_valid_topic_passes_filter_extended_resource_or_event() {
+		$add_event    = function ( $events ) {
+			$events[] = 'refunded';
+			return $events;
+		};
+		$add_resource = function ( $resources ) {
+			$resources[] = 'subscription';
+			return $resources;
+		};
+		add_filter( 'woocommerce_valid_webhook_events', $add_event );
+		add_filter( 'woocommerce_valid_webhook_resources', $add_resource );
+
+		try {
+			$this->assertTrue( wc_is_webhook_valid_topic( 'order.refunded' ) );
+			$this->assertTrue( wc_is_webhook_valid_topic( 'subscription.created' ) );
+		} finally {
+			remove_filter( 'woocommerce_valid_webhook_events', $add_event );
+			remove_filter( 'woocommerce_valid_webhook_resources', $add_resource );
+		}
+	}
+
+	/**
 	 * Data provider for test_wc_is_webhook_valid_status.
 	 *
 	 * @since 3.5.3

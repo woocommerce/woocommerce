@@ -19,7 +19,6 @@ class VariationDescription extends AbstractBlock {
 	 */
 	protected $block_name = 'add-to-cart-with-options-variation-description';
 
-
 	/**
 	 * Render the block.
 	 *

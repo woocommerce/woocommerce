@@ -17,6 +17,7 @@ import HistoricalDataPeriodSelector from './period-selector';
 import HistoricalDataProgress from './progress';
 import HistoricalDataStatus from './status';
 import HistoricalDataSkipCheckbox from './skip-checkbox';
+import FailedOrdersNotice from './failed-orders-notice';
 import './style.scss';
 
 class HistoricalDataLayout extends Component {
@@ -86,18 +87,19 @@ class HistoricalDataLayout extends Component {
 								importDate={ importDate }
 								status={ status }
 							/>
+							<FailedOrdersNotice />
 						</div>
 					</div>
+					<HistoricalDataActions
+						clearStatusAndTotalsCache={ clearStatusAndTotalsCache }
+						dateFormat={ dateFormat }
+						importDate={ importDate }
+						lastImportStartTimestamp={ lastImportStartTimestamp }
+						onImportStarted={ onImportStarted }
+						stopImport={ stopImport }
+						status={ status }
+					/>
 				</div>
-				<HistoricalDataActions
-					clearStatusAndTotalsCache={ clearStatusAndTotalsCache }
-					dateFormat={ dateFormat }
-					importDate={ importDate }
-					lastImportStartTimestamp={ lastImportStartTimestamp }
-					onImportStarted={ onImportStarted }
-					stopImport={ stopImport }
-					status={ status }
-				/>
 			</Fragment>
 		);
 	}

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Resolve the table prefix placeholder in runSql steps to the importing site's database prefix, so Blueprints exported from a site with a different prefix import correctly.

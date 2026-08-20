@@ -2,6 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { decodeEntities } from '@wordpress/html-entities';
+import { resolveSelect } from '@wordpress/data';
+import { store as coreStore } from '@wordpress/core-data';
 
 import type { DataFormControlProps, Field } from '@wordpress/dataviews';
 
@@ -15,13 +18,10 @@ import { TaxonomyEdit } from '../components/taxonomy-edit';
 const fieldDefinition = {
 	type: 'array',
 	label: __( 'Tags', 'woocommerce' ),
-	description: __(
-		'Add descriptive tags to help customers find related items while shopping.',
-		'woocommerce'
-	),
 	enableSorting: false,
-	enableHiding: false,
-	filterBy: false,
+	filterBy: {
+		operators: [ 'isAny', 'isNone' ],
+	},
 } satisfies Partial< Field< ProductEntityRecord > >;
 
 export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
@@ -35,6 +35,22 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 				id: parseInt( v, 10 ),
 			} ) ),
 		};
+	},
+	getElements: async () => {
+		const records = ( await resolveSelect( coreStore ).getEntityRecords(
+			'taxonomy',
+			'product_tag',
+			{ per_page: -1 }
+		) ) as Array< { id: number; name: string } > | null;
+		return ( records ?? [] ).map( ( { id, name } ) => ( {
+			value: id.toString(),
+			label: decodeEntities( name ),
+		} ) );
+	},
+	render: ( { item } ) => {
+		return ( item.tags ?? [] )
+			.map( ( { name } ) => decodeEntities( name ?? '' ) )
+			.join( ', ' );
 	},
 	Edit: ( props: DataFormControlProps< ProductEntityRecord > ) => (
 		<TaxonomyEdit

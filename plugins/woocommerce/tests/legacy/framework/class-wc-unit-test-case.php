@@ -35,6 +35,65 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	private static $code_hacker_temporary_disables_requested = 0;
 
 	/**
+	 * Stable filter used to run product attribute lookup updates synchronously.
+	 *
+	 * @var Closure|null
+	 */
+	private static $direct_product_attribute_lookup_updates_filter;
+
+	/**
+	 * How many unbalanced enable_direct_product_attribute_lookup_updates() calls are active.
+	 *
+	 * @var int
+	 */
+	private static $direct_product_attribute_lookup_updates_depth = 0;
+
+	/**
+	 * Enable synchronous product attribute lookup updates for test fixtures.
+	 *
+	 * Calls can be nested; the filter is removed once every enable has been
+	 * balanced by a disable_direct_product_attribute_lookup_updates() call.
+	 */
+	protected static function enable_direct_product_attribute_lookup_updates(): void {
+		if ( null === self::$direct_product_attribute_lookup_updates_filter ) {
+			self::$direct_product_attribute_lookup_updates_filter = static function () {
+				return 'yes';
+			};
+		}
+
+		if ( 0 === self::$direct_product_attribute_lookup_updates_depth++ ) {
+			add_filter( 'pre_option_woocommerce_attribute_lookup_direct_updates', self::$direct_product_attribute_lookup_updates_filter );
+		}
+	}
+
+	/**
+	 * Restore the product attribute lookup update mode after fixture work.
+	 */
+	protected static function disable_direct_product_attribute_lookup_updates(): void {
+		if ( self::$direct_product_attribute_lookup_updates_depth > 0 && 0 === --self::$direct_product_attribute_lookup_updates_depth ) {
+			remove_filter( 'pre_option_woocommerce_attribute_lookup_direct_updates', self::$direct_product_attribute_lookup_updates_filter );
+		}
+	}
+
+	/**
+	 * Run a callback with synchronous product attribute lookup updates enabled.
+	 *
+	 * Use for fixture creation/deletion so product writes update the lookup
+	 * table directly instead of leaving scheduled actions behind.
+	 *
+	 * @param callable $callback Fixture lifecycle callback.
+	 * @return mixed The callback's return value.
+	 */
+	public static function with_direct_product_attribute_lookup_updates( callable $callback ) {
+		self::enable_direct_product_attribute_lookup_updates();
+		try {
+			return $callback();
+		} finally {
+			self::disable_direct_product_attribute_lookup_updates();
+		}
+	}
+
+	/**
 	 * Increase the count of Code Hacker disable requests, and effectively disable it if the count was zero.
 	 * Does nothing if the code hacker wasn't enabled when the test suite started running.
 	 */
@@ -89,6 +148,159 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	}
 
 	/**
+	 * Tear down test case.
+	 *
+	 * The cart contents, the cart context, the queued notices, and the cached country
+	 * locale all live on the WC() singletons, which neither the per-test database
+	 * rollback nor the hook restore resets, so clear them here or they leak into every
+	 * later test in the process.
+	 *
+	 * @since 11.1.0
+	 */
+	public function tearDown(): void {
+		try {
+			$this->clear_wc_singleton_state();
+		} finally {
+			// The parent teardown must always run: it rolls back the database
+			// transaction and restores the hooks. Skipping it would poison every
+			// test that runs after this one.
+			parent::tearDown();
+		}
+	}
+
+	/**
+	 * Clear the WC() singleton state that survives the parent teardown.
+	 *
+	 * Kept separate from tearDown() so it can be asserted directly, without a test having to
+	 * depend on running after another one.
+	 *
+	 * @since 11.1.0
+	 */
+	protected function clear_wc_singleton_state(): void {
+		if ( isset( WC()->cart ) ) {
+			// Emptying the cart writes to the session via the woocommerce_cart_emptied
+			// callbacks, so only do it when that singleton is present too — tests may
+			// legitimately null it out.
+			if ( isset( WC()->session ) ) {
+				// The parent teardown rolls back persistent cart database changes.
+				WC()->cart->empty_cart( false );
+			}
+
+			// Loading a Store API cart route sets this to 'store-api' and never puts it
+			// back, and production code branches on it.
+			WC()->cart->cart_context = 'shortcode';
+		}
+
+		if ( isset( WC()->session ) ) {
+			wc_clear_notices();
+		}
+
+		if ( isset( WC()->countries ) ) {
+			// The locale is cached on first read. A test that reads it while a
+			// woocommerce_get_country_locale filter is attached leaves the filtered
+			// value behind, because the hook restore removes the filter but not the
+			// cache it produced.
+			WC()->countries->locale = array();
+		}
+	}
+
+	/**
+	 * Fire rest_api_init with only the provided callbacks attached.
+	 *
+	 * The global rest_api_init hook is stashed, replaced with a fresh hook
+	 * holding just the callbacks, fired, and restored afterwards.
+	 *
+	 * @param callable[] $callbacks Callbacks to run on the isolated hook.
+	 */
+	protected static function do_isolated_rest_api_init( array $callbacks ): void {
+		global $wp_filter;
+
+		$rest_api_init_hook         = $wp_filter['rest_api_init'] ?? null;
+		$wp_filter['rest_api_init'] = new WP_Hook(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The original hook is restored below.
+
+		foreach ( $callbacks as $callback ) {
+			add_action( 'rest_api_init', $callback );
+		}
+
+		try {
+			do_action( 'rest_api_init' );
+		} finally {
+			if ( null === $rest_api_init_hook ) {
+				unset( $wp_filter['rest_api_init'] );
+			} else {
+				$wp_filter['rest_api_init'] = $rest_api_init_hook; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the original hook.
+			}
+		}
+	}
+
+	/**
+	 * Run a callback with $wp->query_vars['rest_route'] temporarily set (or unset).
+	 *
+	 * WooCommerce registers REST namespaces lazily based on the requested route,
+	 * so this lets fixture code scope rest_api_init work to one namespace, or
+	 * force full registration by passing null.
+	 *
+	 * @param string|null $route    REST route to expose during the callback, or null to unset it.
+	 * @param callable    $callback Callback to run.
+	 * @return mixed The callback's return value.
+	 */
+	public static function with_rest_route_context( ?string $route, callable $callback ) {
+		$wp             = $GLOBALS['wp'] ?? null;
+		$has_wp_context = is_object( $wp );
+		$had_rest_route = $has_wp_context && array_key_exists( 'rest_route', $wp->query_vars );
+		$rest_route     = $has_wp_context ? ( $wp->query_vars['rest_route'] ?? null ) : null;
+
+		if ( $has_wp_context ) {
+			if ( null === $route ) {
+				unset( $wp->query_vars['rest_route'] );
+			} else {
+				$wp->query_vars['rest_route'] = $route;
+			}
+		}
+
+		try {
+			return $callback();
+		} finally {
+			if ( $has_wp_context ) {
+				if ( $had_rest_route ) {
+					$wp->query_vars['rest_route'] = $rest_route;
+				} else {
+					unset( $wp->query_vars['rest_route'] );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Create a REST server with only the requested route callbacks registered.
+	 *
+	 * @param callable[] $route_registration_callbacks Callbacks that register routes on rest_api_init.
+	 * @param bool       $register_default_filters     Whether to register WordPress default REST filters.
+	 * @return WP_REST_Server
+	 */
+	protected function create_rest_server_with_routes( array $route_registration_callbacks, bool $register_default_filters = false ): WP_REST_Server {
+		global $wp_rest_server;
+
+		$wp_rest_server = new WP_REST_Server();
+
+		if ( $register_default_filters ) {
+			array_unshift( $route_registration_callbacks, 'rest_api_default_filters' );
+		}
+
+		self::do_isolated_rest_api_init( $route_registration_callbacks );
+
+		return $wp_rest_server;
+	}
+
+	/**
+	 * Clear the global REST server created for a test.
+	 */
+	protected function clear_rest_server(): void {
+		global $wp_rest_server;
+		$wp_rest_server = null;
+	}
+
+	/**
 	 * Set up class unit test.
 	 *
 	 * @since 3.5.0
@@ -104,8 +316,13 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * Clean up after tests have run.
 	 */
 	public static function tearDownAfterClass(): void {
-		self::clear_hpos_orders();
-		parent::tearDownAfterClass();
+		self::enable_direct_product_attribute_lookup_updates();
+		try {
+			self::clear_hpos_orders();
+			parent::tearDownAfterClass();
+		} finally {
+			self::disable_direct_product_attribute_lookup_updates();
+		}
 	}
 
 	/**
@@ -481,7 +698,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		$existing_tables = array_unique( array_intersect( $order_tables, $wpdb->get_col( 'SHOW TABLES' ) ) );
 		foreach ( $existing_tables as $table ) {
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$wpdb->query( "TRUNCATE TABLE {$table}" );
+			$wpdb->query( "DELETE FROM {$table}" );
 		}
 	}
 }

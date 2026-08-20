@@ -1,4 +1,4 @@
-<?php
+<?php declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Admin\Features\ShippingPartnerSuggestions;
 
@@ -102,7 +102,8 @@ class DefaultShippingPartners {
 				'description'             => '',
 				'learn_more_link'         => 'https://wordpress.org/plugins/skydropx-cotizador-y-envios/',
 				'is_visible'              => array(
-					self::get_rules_for_countries( array() ), // No countries eligible for SkydropX promotion at this time.
+					self::get_rules_for_countries( array() ),
+					// No countries eligible for SkydropX promotion at this time.
 				),
 				'available_layouts'       => array( 'column' ),
 				'countries_where_primary' => array(),
@@ -242,6 +243,29 @@ class DefaultShippingPartners {
 						),
 					),
 				),
+				'layout_row'              => array(
+					'image'       => $asset_base_url . 'wcs-row.svg',
+					'image_label' => __( 'WooCommerce Shipping', 'woocommerce' ),
+					'description' => __( 'Save time and money by managing shipping right from your WooCommerce dashboard.', 'woocommerce' ),
+					'features'    => array(
+						array(
+							'icon'        => $check_icon,
+							'description' => __( 'Instantly save on USPS, UPS, FedEx and DHL Express labels.', 'woocommerce' ),
+						),
+						array(
+							'icon'        => $check_icon,
+							'description' => __( 'Access live rates across carriers to get the best prices for you and your customers.', 'woocommerce' ),
+						),
+						array(
+							'icon'        => $check_icon,
+							'description' => __( 'Keep customers happy and informed every step of the way.', 'woocommerce' ),
+						),
+						array(
+							'icon'        => $check_icon,
+							'description' => __( 'Free to install, with no markup or monthly fees.', 'woocommerce' ),
+						),
+					),
+				),
 				'learn_more_link'         => 'https://woocommerce.com/products/shipping/',
 				'is_visible'              => array(
 					self::get_rules_for_countries( array( 'US' ) ),
@@ -255,7 +279,7 @@ class DefaultShippingPartners {
 						),
 					),
 				),
-				'available_layouts'       => array( 'column' ),
+				'available_layouts'       => array( 'row', 'column' ),
 				'countries_where_primary' => array( 'US' ),
 			),
 		);

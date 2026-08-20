@@ -30,7 +30,11 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		);
 
 		if ( item.manage_stock ) {
-			if ( ! Number.isFinite( item.stock_quantity ) ) {
+			if (
+				! Number.isFinite( item.stock_quantity ) ||
+				item.stock_quantity === null ||
+				item.stock_quantity === undefined
+			) {
 				return (
 					<div className="woocommerce-fields-field__inventory-summary">
 						{ __( 'No stock quantity set', 'woocommerce' ) }

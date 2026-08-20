@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Do not update theme support option or queue rewrite rule flush when running in WP-CLI or cron contexts, preventing hosts that run WP-CLI with --skip-themes from corrupting the shop page rewrite rules.

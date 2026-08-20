@@ -1,7 +1,15 @@
 {
 	"extends": "../../tsconfig.base.json",
 	"references": [
-		{ "path": "../../packages/js/api" }
+		{
+			"path": "client/admin"
+		},
+		{
+			"path": "client/blocks"
+		}
 	],
-	"files": []
+	"files": [],
+	"compilerOptions": {
+		"composite": true
+	}
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Internal\LegacyPhpApi;
 
-use Automattic\WooCommerce\Internal\Api\Main;
+use Automattic\WooCommerce\Api\Infrastructure\Main;
 use Automattic\WooCommerce\Internal\Api\Settings;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use WC_Unit_Test_Case;
