@@ -34,16 +34,93 @@ class WC_Post_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Order items should be deleted before deleting order.
+	 * @testdox Should delete order items and their metadata before deleting an order.
 	 */
-	public function test_before_delete_order() {
+	public function test_before_delete_order(): void {
+		global $wpdb;
+
 		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
 		$items = $order->get_items();
 		$this->assertNotEmpty( $items );
+		$item = reset( $items );
+		$this->assertInstanceOf( WC_Order_Item::class, $item );
+		$this->assertGreaterThan(
+			0,
+			(int) $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d",
+					$item->get_id()
+				)
+			),
+			'The fixture should include order item metadata'
+		);
 
 		WC_Post_Data::before_delete_order( $order->get_id() );
-		$order = wc_get_order( $order->get_id() );
-		$this->assertEmpty( $order->get_items() );
+
+		$this->assertSame(
+			'0',
+			$wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d",
+					$item->get_id()
+				)
+			),
+			'The order item should be deleted'
+		);
+		$this->assertSame(
+			'0',
+			$wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d",
+					$item->get_id()
+				)
+			),
+			'The order item metadata should be deleted'
+		);
+	}
+
+	/**
+	 * @testdox Should preserve order items associated with a non-order post.
+	 */
+	public function test_delete_order_items_ignores_non_order_posts(): void {
+		global $wpdb;
+
+		$post_id       = self::factory()->post->create();
+		$order_item_id = wc_add_order_item(
+			$post_id,
+			array(
+				'order_item_name' => 'Test item',
+				'order_item_type' => 'line_item',
+			)
+		);
+		$this->assertIsInt( $order_item_id );
+		wc_add_order_item_meta( $order_item_id, '_test_meta', 'test value' );
+
+		WC_Post_Data::delete_order_items( $post_id );
+
+		$this->assertSame(
+			'1',
+			$wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d",
+					$order_item_id
+				)
+			),
+			'Order items associated with non-order posts should be preserved'
+		);
+		$this->assertSame(
+			'1',
+			$wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d",
+					$order_item_id
+				)
+			),
+			'Order item metadata associated with non-order posts should be preserved'
+		);
+
+		wc_delete_order_item( $order_item_id );
+		wp_delete_post( $post_id, true );
 	}
 
 	/**
