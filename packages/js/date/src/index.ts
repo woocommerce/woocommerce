@@ -134,6 +134,51 @@ export function toMoment( format: string, str: unknown ) {
 }
 
 /**
+ * Swaps the day of month token of a moment format string for an escaped literal.
+ *
+ * Substituting in the format instead of in the formatted date keeps the value
+ * away from the rest of the localized output: Japanese renders October as
+ * "10月", where replacing the day "1" lands on the month instead, and locales
+ * with non-Latin digits never match a Latin day number at all.
+ *
+ * @param {string}   format      - localized date string format
+ * @param {Function} replacement - builds the literal text to render in place of
+ *                               the day, from the token it replaces
+ * @return {string|null} - format string, or null when it holds no day token
+ */
+function replaceDayToken(
+	format: string,
+	replacement: ( dayToken: string ) => string
+) {
+	let replaced = false;
+	// Backslash escapes and bracketed sections are moment's literals, so a "D"
+	// inside one is text.
+	const dayRangeFormat = format.replace(
+		/\\.|\[[^\]]*\]|D+o?/g,
+		( token ) => {
+			// Runs longer than "DD" are day of year tokens, not day of month.
+			const dayDigits = token.endsWith( 'o' )
+				? token.length - 1
+				: token.length;
+
+			if (
+				replaced ||
+				token.startsWith( '[' ) ||
+				token.startsWith( '\\' ) ||
+				dayDigits > 2
+			) {
+				return token;
+			}
+
+			replaced = true;
+			return `[${ replacement( token ) }]`;
+		}
+	);
+
+	return replaced ? dayRangeFormat : null;
+}
+
+/**
  * Given two dates, derive a string representation
  *
  * @param {moment.Moment} after  - start date
@@ -150,13 +195,23 @@ export function getRangeLabel( after: moment.Moment, before: moment.Moment ) {
 	if ( isSameDay ) {
 		return after.format( fullDateFormat );
 	} else if ( isSameMonth ) {
-		const afterDate = after.date();
-		return after
-			.format( fullDateFormat )
-			.replace(
-				String( afterDate ),
-				`${ afterDate } - ${ before.date() }`
-			);
+		// Formatting each day through the token it replaces keeps whatever the
+		// format asked for, such as the zero padding of "DD" or the ordinal of "Do".
+		const dayRangeFormat = replaceDayToken(
+			fullDateFormat,
+			( dayToken ) =>
+				`${ after.format( dayToken ) } - ${ before.format( dayToken ) }`
+		);
+
+		// No day of month token to swap: the format either omits the day, or
+		// renders one through an aggregate token such as "LL" that is not
+		// scanned. Either way the shared month is as much of the range as this
+		// format can carry.
+		if ( dayRangeFormat === null ) {
+			return after.format( fullDateFormat );
+		}
+
+		return after.format( dayRangeFormat );
 	} else if ( isSameYear ) {
 		const monthDayFormat = __( 'MMM D', 'woocommerce' );
 		return `${ after.format( monthDayFormat ) } - ${ before.format(

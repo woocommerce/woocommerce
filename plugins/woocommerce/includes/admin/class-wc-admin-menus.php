@@ -89,7 +89,7 @@ class WC_Admin_Menus {
 		$woocommerce_icon = 'data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDg1LjkgNDcuNiI+CjxwYXRoIGZpbGw9IiNhMmFhYjIiIGQ9Ik03Ny40LDAuMWMtNC4zLDAtNy4xLDEuNC05LjYsNi4xTDU2LjQsMjcuN1Y4LjZjMC01LjctMi43LTguNS03LjctOC41cy03LjEsMS43LTkuNiw2LjVMMjguMywyNy43VjguOAoJYzAtNi4xLTIuNS04LjctOC42LTguN0g3LjNDMi42LDAuMSwwLDIuMywwLDYuM3MyLjUsNi40LDcuMSw2LjRoNS4xdjI0LjFjMCw2LjgsNC42LDEwLjgsMTEuMiwxMC44UzMzLDQ1LDM2LjMsMzguOWw3LjItMTMuNXYxMS40CgljMCw2LjcsNC40LDEwLjgsMTEuMSwxMC44czkuMi0yLjMsMTMtOC43bDE2LjYtMjhjMy42LTYuMSwxLjEtMTAuOC02LjktMTAuOEM3Ny4zLDAuMSw3Ny4zLDAuMSw3Ny40LDAuMXoiLz4KPC9zdmc+Cg==';
 
 		if ( self::can_view_woocommerce_menu_item() ) {
-			$menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator woocommerce' ); // WPCS: override ok.
+			$menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator woocommerce' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- WordPress uses the $menu global for admin menu registration.
 		}
 
 		add_menu_page( __( 'WooCommerce', 'woocommerce' ), __( 'WooCommerce', 'woocommerce' ), 'edit_others_shop_orders', 'woocommerce', null, $woocommerce_icon, '55.5' );
@@ -154,12 +154,12 @@ class WC_Admin_Menus {
 		WC_Admin_Settings::get_settings_pages();
 
 		// Add any posted messages.
-		if ( ! empty( $_GET['wc_error'] ) ) { // WPCS: input var okay, CSRF ok.
-			WC_Admin_Settings::add_error( wp_kses_post( wp_unslash( $_GET['wc_error'] ) ) ); // WPCS: input var okay, CSRF ok.
+		if ( ! empty( $_GET['wc_error'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only selector; settings mutations verify capability and nonce.
+			WC_Admin_Settings::add_error( wp_kses_post( wp_unslash( $_GET['wc_error'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only selector; settings mutations verify capability and nonce.
 		}
 
-		if ( ! empty( $_GET['wc_message'] ) ) { // WPCS: input var okay, CSRF ok.
-			WC_Admin_Settings::add_message( wp_kses_post( wp_unslash( $_GET['wc_message'] ) ) ); // WPCS: input var okay, CSRF ok.
+		if ( ! empty( $_GET['wc_message'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only selector; settings mutations verify capability and nonce.
+			WC_Admin_Settings::add_message( wp_kses_post( wp_unslash( $_GET['wc_message'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only selector; settings mutations verify capability and nonce.
 		}
 
 		do_action( 'woocommerce_settings_page_init' );
@@ -182,8 +182,8 @@ class WC_Admin_Menus {
 		WC_Admin_Settings::get_settings_pages();
 
 		// Get current tab/section.
-		$current_tab     = empty( $_GET['tab'] ) ? 'general' : sanitize_title( wp_unslash( $_GET['tab'] ) ); // WPCS: input var okay, CSRF ok.
-		$current_section = empty( $_REQUEST['section'] ) ? '' : sanitize_title( wp_unslash( $_REQUEST['section'] ) ); // WPCS: input var okay, CSRF ok.
+		$current_tab     = empty( $_GET['tab'] ) ? 'general' : sanitize_title( wp_unslash( $_GET['tab'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only selector; settings mutations verify capability and nonce.
+		$current_section = empty( $_REQUEST['section'] ) ? '' : sanitize_title( wp_unslash( $_REQUEST['section'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only selector; settings mutations verify capability and nonce.
 
 		// Save settings if data has been posted.
 		if ( '' !== $current_section && apply_filters( "woocommerce_save_settings_{$current_tab}_{$current_section}", ! empty( $_POST['save'] ) ) ) { // WPCS: input var okay, CSRF ok.
@@ -252,13 +252,13 @@ class WC_Admin_Menus {
 		switch ( $post_type ) {
 			case 'shop_order':
 			case 'shop_coupon':
-				$parent_file = 'woocommerce'; // WPCS: override ok.
+				$parent_file = 'woocommerce'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- WordPress uses $parent_file to control admin menu highlighting.
 				break;
 			case 'product':
 				$screen = get_current_screen();
 				if ( $screen && taxonomy_is_product_attribute( $screen->taxonomy ) ) {
-					$submenu_file = 'product_attributes'; // WPCS: override ok.
-					$parent_file  = 'edit.php?post_type=product'; // WPCS: override ok.
+					$submenu_file = 'product_attributes'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- $submenu_file is a WordPress admin menu routing global.
+					$parent_file  = 'edit.php?post_type=product'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- $parent_file is a WordPress admin menu routing global.
 				}
 				break;
 		}
