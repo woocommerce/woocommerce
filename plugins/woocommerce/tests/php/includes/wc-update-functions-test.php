@@ -355,4 +355,22 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		wc_update_1110_delete_dashboard_outofstock_count_transient();
 		$this->assertFalse( get_transient( 'wc_outofstock_count' ) );
 	}
+
+	/**
+	 * @testdox Migration registers and enables the variation gallery regardless of its previous feature option value.
+	 */
+	public function test_wc_update_11101_enable_variation_gallery_feature(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$db_updates = WC_Install::get_db_update_callbacks();
+		$this->assertArrayHasKey( '11.1.0-1', $db_updates );
+		$this->assertContains( 'wc_update_11101_enable_variation_gallery_feature', $db_updates['11.1.0-1'] );
+
+		update_option( 'wc_feature_woocommerce_additional_variation_images_enabled', 'no' );
+		wc_update_11101_enable_variation_gallery_feature();
+
+		$this->assertSame( 'yes', get_option( 'wc_feature_woocommerce_additional_variation_images_enabled' ) );
+
+		delete_option( 'wc_feature_woocommerce_additional_variation_images_enabled' );
+	}
 }

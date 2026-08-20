@@ -3620,3 +3620,18 @@ function wc_update_1110_flush_product_count_cache() {
 		( new \Automattic\WooCommerce\Caches\ProductCountCache() )->flush( 'product' );
 	}
 }
+
+/**
+ * Set the stored variation gallery feature option to enabled.
+ *
+ * The feature is deprecated as of 11.1.0 and always enabled in core, but extension
+ * developers read this option via PHP and the wc/v3 settings REST API, so the
+ * stored value must reflect the always-enabled state.
+ *
+ * @since 11.1.0
+ *
+ * @return void
+ */
+function wc_update_11101_enable_variation_gallery_feature(): void {
+	update_option( 'wc_feature_woocommerce_additional_variation_images_enabled', 'yes' );
+}

@@ -171,6 +171,7 @@ class FeaturesController {
 		add_action( self::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'flag_abandoned_cart_recovery_enabled_notice' ), 10, 2 );
 		add_action( 'woocommerce_settings_advanced', array( $this, 'maybe_render_abandoned_cart_recovery_enabled_notice' ), 1 );
 		add_filter( 'woocommerce_settings-advanced', array( $this, 'add_point_of_sale_setting_for_rest_api' ), 10, 1 ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
+		add_filter( 'woocommerce_settings-advanced', array( $this, 'add_variation_gallery_setting_for_rest_api' ), 10, 1 ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 	}
 
 	/**
@@ -538,6 +539,18 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'enabled_by_default'           => false,
+			),
+			\Automattic\WooCommerce\Internal\VariationGallery\Package::FEATURE_ID => array(
+				'name'                         => __( 'Variation gallery', 'woocommerce' ),
+				'description'                  => __( 'Add multiple images per product variation.', 'woocommerce' ),
+				'option_key'                   => \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME,
+				'is_experimental'              => false,
+				'enabled_by_default'           => true,
+				'disable_ui'                   => true,
+				'deprecated_since'             => '11.1.0',
+				'deprecated_value'             => true,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			'wc-visual-attribute'                  => array(
 				'name'                         => __( 'Color swatches for attributes', 'woocommerce' ),
@@ -1399,6 +1412,30 @@ class FeaturesController {
 			'option_key'  => 'woocommerce_feature_point_of_sale_enabled',
 			'label'       => __( 'Point of Sale', 'woocommerce' ),
 			'description' => __( 'Enable Point of Sale functionality in the WooCommerce mobile apps.', 'woocommerce' ),
+			'type'        => 'checkbox',
+			'default'     => 'yes',
+		);
+		return $settings;
+	}
+
+	/**
+	 * Preserve the variation gallery setting in the wc/v3 settings REST API.
+	 *
+	 * Extension developers were directed to this setting while the feature was
+	 * experimental. The setting is no longer rendered in the admin UI, but it
+	 * remains available for feature detection during the compatibility window.
+	 *
+	 * @param array $settings The settings of the 'advanced' group, as exposed in the REST API.
+	 * @return array The updated settings array.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function add_variation_gallery_setting_for_rest_api( $settings ): array {
+		$settings[] = array(
+			'id'          => \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME,
+			'option_key'  => \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME,
+			'label'       => __( 'Variation gallery', 'woocommerce' ),
+			'description' => __( 'Add multiple images per product variation.', 'woocommerce' ),
 			'type'        => 'checkbox',
 			'default'     => 'yes',
 		);

@@ -127,11 +127,13 @@ class Packages {
 
 		foreach ( self::$merged_packages as $merged_package_name => $package_class ) {
 
-			$option       = 'wc_feature_' . str_replace( '-', '_', $merged_package_name ) . '_enabled';
-			$option_value = get_option( $option, '' );
+			$option                  = 'wc_feature_' . str_replace( '-', '_', $merged_package_name ) . '_enabled';
+			$option_value            = get_option( $option, '' );
+			$allows_opt_out_callback = array( $package_class, 'allows_opt_out' );
+			$package_allows_opt_out  = ! is_callable( $allows_opt_out_callback ) || call_user_func( $allows_opt_out_callback );
 
 			// Opt out from the feature.
-			if ( 'no' === $option_value ) {
+			if ( $package_allows_opt_out && 'no' === $option_value ) {
 				continue;
 			}
 

@@ -3,8 +3,10 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\VariationGallery;
 
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\VariationGallery\Migration;
 use Automattic\WooCommerce\Internal\VariationGallery\Package;
+use Automattic\WooCommerce\Packages;
 
 /**
  * Tests for the variation gallery package bootstrap.
@@ -37,6 +39,29 @@ class PackageTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_is_enabled_returns_true(): void {
 		$this->assertTrue( Package::is_enabled() );
+	}
+
+	/**
+	 * @testdox The merged package remains enabled when the old feature option is no.
+	 */
+	public function test_package_cannot_be_disabled_by_the_old_feature_option(): void {
+		update_option( Package::ENABLE_OPTION_NAME, 'no' );
+
+		$this->assertTrue( Packages::is_package_enabled( 'woocommerce-additional-variation-images' ) );
+	}
+
+	/**
+	 * @testdox Feature detection retains variation_gallery as an always-enabled mature feature.
+	 */
+	public function test_feature_detection_reports_an_always_enabled_mature_feature(): void {
+		update_option( Package::ENABLE_OPTION_NAME, 'no' );
+
+		$feature = wc_get_container()->get( FeaturesController::class )->get_features( true, true )[ Package::FEATURE_ID ];
+
+		$this->assertTrue( $feature['is_enabled'] );
+		$this->assertFalse( $feature['is_experimental'] );
+		$this->assertTrue( $feature['disable_ui'] );
+		$this->assertSame( '11.1.0', $feature['deprecated_since'] );
 	}
 
 	/**
