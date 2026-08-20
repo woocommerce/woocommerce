@@ -560,10 +560,8 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 			return $prepared_args;
 		}
 
-		if ( ! empty( $prepared_args['comment_post_ID'] ) ) {
-			if ( 'product' !== get_post_type( (int) $prepared_args['comment_post_ID'] ) ) {
-				return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
-			}
+		if ( isset( $prepared_args['comment_post_ID'] ) && 'product' !== get_post_type( (int) $prepared_args['comment_post_ID'] ) ) {
+			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		if ( empty( $prepared_args ) && isset( $request['status'] ) ) {
@@ -618,7 +616,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		 * moved to, leaving the one it left still counting it. This is not limited to rating changes,
 		 * so it sits outside the check above.
 		 */
-		if ( $current_product_id && $original_product_id !== $current_product_id ) {
+		if ( $updated_review instanceof WP_Comment && $original_product_id !== $current_product_id ) {
 			wp_update_comment_count( $original_product_id );
 		}
 

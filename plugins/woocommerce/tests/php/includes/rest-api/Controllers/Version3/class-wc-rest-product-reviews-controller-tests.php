@@ -463,6 +463,28 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A supplied zero product ID is rejected without moving the review.
+	 */
+	public function test_update_item_rejects_a_zero_product_id() {
+		wp_set_current_user( $this->shop_manager_id );
+		$source_id = ProductHelper::create_simple_product()->get_id();
+		$review_id = $this->create_review( $source_id, 'Stays with its product.', 5 )->get_data()['id'];
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/reviews/' . $review_id );
+		$request->set_body_params( array( 'product_id' => 0 ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 404, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_product_invalid_id', $response->get_data()['code'] );
+		$this->assertSame( $source_id, (int) get_comment( $review_id )->comment_post_ID );
+		$this->assertEquals( 5, wc_get_product( $source_id )->get_average_rating() );
+		$this->assertEquals( 1, wc_get_product( $source_id )->get_review_count() );
+
+		clean_post_cache( $source_id );
+		$this->assertSame( 1, (int) get_post( $source_id )->comment_count );
+	}
+
+	/**
 	 * @testdox Moving a review without changing its rating still updates the aggregates of both products.
 	 */
 	public function test_update_item_recalculates_the_aggregates_when_the_review_moves_without_a_rating_change() {

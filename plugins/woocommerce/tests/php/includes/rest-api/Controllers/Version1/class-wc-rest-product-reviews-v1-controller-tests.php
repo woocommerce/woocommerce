@@ -448,6 +448,40 @@ class WC_REST_Product_Reviews_V1_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A filter-driven move to post zero still refreshes the source product.
+	 */
+	public function test_update_item_refreshes_the_source_when_a_filter_moves_the_review_to_post_zero() {
+		wp_set_current_user( $this->shop_manager_id );
+		$source_id = ProductHelper::create_simple_product()->get_id();
+		$review_id = $this->create_review( $source_id, 'Starts at five.', 5 )->get_data()['id'];
+
+		$send_to_post_zero = static function ( $prepared_review ) {
+			$prepared_review['comment_post_ID'] = 0;
+			return $prepared_review;
+		};
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v1/products/' . $source_id . '/reviews/' . $review_id );
+		$request->set_param( 'product_id', $source_id );
+		$request->set_param( 'id', $review_id );
+		$request->set_param( 'rating', 2 );
+
+		add_filter( 'rest_preprocess_product_review', $send_to_post_zero );
+		try {
+			$response = $this->sut->update_item( $request );
+		} finally {
+			remove_filter( 'rest_preprocess_product_review', $send_to_post_zero );
+		}
+
+		$this->assertNotWPError( $response );
+		$this->assertSame( 0, (int) get_comment( $review_id )->comment_post_ID );
+		$this->assertEquals( 0, wc_get_product( $source_id )->get_average_rating() );
+		$this->assertEquals( 0, wc_get_product( $source_id )->get_review_count() );
+
+		clean_post_cache( $source_id );
+		$this->assertSame( 0, (int) get_post( $source_id )->comment_count );
+	}
+
+	/**
 	 * Creates a product review through the controller.
 	 *
 	 * @param int    $product_id ID of the product being reviewed.

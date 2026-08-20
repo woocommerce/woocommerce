@@ -387,7 +387,7 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		 * Core updates the destination count after a move, but not the source. Use the full count
 		 * primitive for the source so wp_posts.comment_count and WooCommerce aggregates agree.
 		 */
-		if ( $current_product_id && $original_product_id !== $current_product_id ) {
+		if ( $product_review instanceof WP_Comment && $original_product_id !== $current_product_id ) {
 			wp_update_comment_count( $original_product_id );
 		}
 
