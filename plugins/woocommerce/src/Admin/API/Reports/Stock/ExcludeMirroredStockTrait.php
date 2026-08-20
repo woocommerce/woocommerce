@@ -10,28 +10,22 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Stock;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Shared SQL for keeping rows that only mirror someone else's stock out of the stock report.
+ * Shared SQL for keeping rows that only mirror another row's stock out of the stock report.
  *
  * Within a variable product the stock lives in exactly one place, and which place that is depends on
  * `_manage_stock` rather than on post type:
  *
  * - When the parent manages stock, it holds the quantity and WooCommerce syncs its stock status onto
- *   every variation that does not manage its own. Those variations report the parent's numbers back,
- *   so listing them repeats the same units once per variation.
- * - When the parent does not manage stock, it holds no quantity of its own and its stock status is
- *   derived from its variations. Listing it repeats, or contradicts, the rows below it.
+ *   every variation that does not manage its own. Those variations repeat the same units.
+ * - When the parent does not manage stock, its status is derived from its variations, so listing it
+ *   repeats, or contradicts, the rows below it.
  *
- * Both of those are dropped here, but only in favour of a row the report can actually show. Each
- * clause checks the other row's post status against the ones the report queries, so nothing drops
- * out of the report altogether. The variations of a draft parent stay listed for that reason: the
- * parent is out of the report on its status alone, whether or not it manages the stock.
- *
- * Everything that owns its stock is kept: a parent managing stock at product level, a variation that
- * manages its own, a variation whose parent manages none (its stock status is its own), and a
- * variable product with no variations to speak for it.
+ * Both are dropped only in favour of a row the report can actually show: each clause checks the
+ * other row's post status against the ones the report queries. The variations of a draft parent
+ * stay listed for that reason.
  *
  * Ownership is read from `wc_product_meta_lookup.stock_quantity`, which the lookup table leaves NULL
- * for anything not managing its own stock. The rest of this report already filters on that table.
+ * for anything not managing its own stock.
  *
  * @internal
  */
@@ -50,17 +44,16 @@ trait ExcludeMirroredStockTrait {
 	protected static function append_stock_lookup_join( $sql, $posts_alias = '' ) {
 		global $wpdb;
 
-		// $sql reaches this file, which is strict about types, from a filter any third party can return.
+		// This file declares strict types, and $sql arrives from a filter any third party can return.
 		$sql = is_string( $sql ) ? $sql : '';
 
 		if ( strstr( $sql, 'wc_product_meta_lookup' ) ) {
 			return $sql;
 		}
 
-		// $posts_alias is a hardcoded table name or alias supplied by the calling report query, never user input.
 		$posts_alias = $posts_alias ? $posts_alias : $wpdb->posts;
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $posts_alias is a hardcoded table name or alias supplied by the calling report query, never user input.
 		return $sql . " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup
 			ON {$posts_alias}.ID = wc_product_meta_lookup.product_id ";
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -71,8 +64,7 @@ trait ExcludeMirroredStockTrait {
 	 *
 	 * The parent joins name the lookup table as well, so adding them first would leave the guard in
 	 * self::append_stock_lookup_join() unable to tell them from the row's own join, and the query
-	 * would go on to read an alias nothing bound. Callers take the whole set from here rather than
-	 * ordering the pieces themselves.
+	 * would go on to read an alias nothing bound.
 	 *
 	 * @param string $sql         Join clause the calling report query has built so far.
 	 * @param string $posts_alias Table or alias the outer query uses for the posts table. Defaults to the posts table name.
@@ -83,10 +75,9 @@ trait ExcludeMirroredStockTrait {
 
 		$sql = self::append_stock_lookup_join( $sql, $posts_alias );
 
-		// $posts_alias is a hardcoded table name or alias supplied by the calling report query, never user input.
 		$posts_alias = $posts_alias ? $posts_alias : $wpdb->posts;
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $posts_alias is a hardcoded table name or alias supplied by the calling report query, never user input.
 		return $sql . " LEFT JOIN {$wpdb->wc_product_meta_lookup} stock_report_parent_lookup
 			ON stock_report_parent_lookup.product_id = {$posts_alias}.post_parent
 			LEFT JOIN {$wpdb->posts} stock_report_parent
@@ -108,10 +99,9 @@ trait ExcludeMirroredStockTrait {
 	protected static function get_mirrored_stock_exclusion_clause( $posts_alias = '' ) {
 		global $wpdb;
 
-		// $posts_alias is a hardcoded table name or alias supplied by the calling report query, never user input.
 		$posts_alias = $posts_alias ? $posts_alias : $wpdb->posts;
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $posts_alias is a hardcoded table name or alias supplied by the calling report query, never user input.
 		return " AND NOT (
 			{$posts_alias}.post_type = 'product'
 			AND wc_product_meta_lookup.stock_quantity IS NULL

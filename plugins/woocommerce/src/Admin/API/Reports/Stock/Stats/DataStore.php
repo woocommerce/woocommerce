@@ -183,7 +183,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	public static function add_wp_query_join( $join, $wp_query ) {
 		if ( $wp_query->get( 'exclude_mirrored_stock' ) ) {
-			// The exclusion clause reads stock ownership off the lookup table, for the row and for its parent.
 			$join = self::append_mirrored_stock_joins( $join );
 		}
 

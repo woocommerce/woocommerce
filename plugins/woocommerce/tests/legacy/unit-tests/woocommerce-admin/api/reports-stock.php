@@ -233,10 +233,8 @@ class WC_Admin_Tests_API_Reports_Stock extends WC_REST_Unit_Test_Case {
 
 		$reported_ids = $this->get_reported_ids( ProductStockStatus::LOW_STOCK );
 
-		// Its variations carry no quantity of their own, so the parent is the only row that can report this.
 		$this->assertContains( $variable->get_id(), $reported_ids, 'Stock managed at product level should still show up as low stock.' );
 
-		// Low stock matches on a quantity, which is why this report needs no mirrored stock exclusion of its own.
 		foreach ( $variation_ids as $variation_id ) {
 			$this->assertNotContains( $variation_id, $reported_ids, 'A variation carrying no quantity cannot be low on stock.' );
 		}

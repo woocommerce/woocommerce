@@ -3632,6 +3632,6 @@ function wc_update_1110_flush_product_count_cache() {
  * @return void
  */
 function wc_update_1120_delete_stock_report_count_transients() {
-	// The product ID this takes is only there for the hooks it is attached to, and goes unused.
+	// The product ID argument is there for the hooks this method is attached to, and goes unused.
 	\Automattic\WooCommerce\Admin\ReportsSync::clear_stock_count_cache( 0 );
 }

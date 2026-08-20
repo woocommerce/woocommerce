@@ -78,7 +78,6 @@ class Controller extends GenericController implements ExportableInterface {
 			// Low stock matches on a quantity, which only a row owning its stock has. Nothing to exclude.
 			$args['low_in_stock'] = true;
 		} else {
-			// A row whose stock is owned by another row in the report would only duplicate it.
 			$args['exclude_mirrored_stock'] = true;
 
 			if ( in_array( $request['type'], array_keys( $this->status_options ), true ) ) {
@@ -221,7 +220,6 @@ class Controller extends GenericController implements ExportableInterface {
 		}
 
 		if ( $wp_query->get( 'exclude_mirrored_stock' ) ) {
-			// The exclusion clause reads stock ownership off the lookup table, for the row and for its parent.
 			$join = self::append_mirrored_stock_joins( $join );
 		}
 
