@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the issue where the create shipping label button doesn't refresh page by adding correct information notice and adding a manual reload button when install and activation is complete.
