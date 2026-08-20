@@ -176,8 +176,8 @@ export type TemplateCategory = string;
  * REST collection endpoint.
  */
 export type RecentEmailsQuery = {
-	per_page: number;
-	status: string;
+	per_page?: number;
+	status?: string;
 	orderby?: string;
 	order?: string;
 	exclude?: Array< number | string >;
