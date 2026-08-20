@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Avoid customized WooCommerce template parts from taking priority over template parts queried directly
