@@ -10,6 +10,7 @@ jobs:
     add-dev-comment:
         if: "github.event.label.name == 'needs: developer feedback'"
         runs-on: ubuntu-latest
+        timeout-minutes: 6
         permissions:
             issues: write
         steps:
@@ -88,6 +89,7 @@ jobs:
     add-votes-comment:
         if: "github.event.label.name == 'needs: votes'"
         runs-on: ubuntu-latest
+        timeout-minutes: 6
         permissions:
             issues: write
         steps:

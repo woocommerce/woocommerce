@@ -12,6 +12,7 @@ jobs:
     mirror:
         name: Prepare and mirror the package
         runs-on: ubuntu-latest
+        timeout-minutes: 6
         permissions:
             contents: read
         steps:

@@ -10,6 +10,7 @@ env:
 jobs:
   check-feature-freeze:
     runs-on: ubuntu-latest
+    timeout-minutes: 6
     outputs:
       event-version: ${{ steps.find-feature-freeze-event.outputs.event-version }}
       event-title: ${{ steps.find-feature-freeze-event.outputs.event-title }}

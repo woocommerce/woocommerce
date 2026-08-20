@@ -24,6 +24,7 @@ jobs:
   notify-release-published:
     name: 'Notify in Slack when a new (pre)release is published'
     runs-on: ubuntu-latest
+    timeout-minutes: 6
     if: ${{ github.event.action == 'published' && ! ( contains( inputs.release_tag_name, '-dev' ) || contains( inputs.release_tag_name, '-rc' ) ) }}
     steps:
       - name: 'Checkout repository'
@@ -84,6 +85,7 @@ jobs:
   update-global-changelog:
     name: 'Update changelog.txt after any stable release'
     runs-on: ubuntu-latest
+    timeout-minutes: 6
     if: ${{ github.event.action == 'published' && ! ( contains( inputs.release_tag_name, '-dev' ) || contains( inputs.release_tag_name, '-beta' ) || contains( inputs.release_tag_name, '-rc' ) ) }}
     permissions:
       contents: write
