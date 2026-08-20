@@ -21,11 +21,14 @@ const SITE_B = 'https://example.com/site-b/';
 
 let mockHomeUrl = SITE_A;
 let mockIsMultisite = false;
+let mockIsAdmin = true;
 
 jest.mock( '@woocommerce/settings', () => ( {
 	getSetting: jest.fn(),
-	CURRENT_USER_IS_ADMIN: true,
-	// Getters, not values: the site under test changes between renders.
+	// Getters, not values: the site and the viewer change between renders.
+	get CURRENT_USER_IS_ADMIN() {
+		return mockIsAdmin;
+	},
 	get HOME_URL() {
 		return mockHomeUrl;
 	},
@@ -81,7 +84,13 @@ const seedLegacy = ( value: unknown ) =>
 
 const setIncompatibleExtensions = (
 	extensions: Array< { id: string; title: string } >
-) => mockGetSetting.mockReturnValue( extensions );
+) => mockGetSetting.mockImplementation( () => extensions );
+
+// The setting is registered by the Cart and Checkout blocks, not by core data,
+// so the payload can arrive without it — `getSetting` then hands back whatever
+// fallback the caller passed.
+const withoutIncompatibleExtensionsSetting = () =>
+	mockGetSetting.mockImplementation( ( _name, fallback ) => fallback );
 
 describe( 'IncompatibleExtensionsFrontendNotice', () => {
 	beforeEach( () => {
@@ -90,6 +99,7 @@ describe( 'IncompatibleExtensionsFrontendNotice', () => {
 		setIncompatibleExtensions( [] );
 		mockHomeUrl = SITE_A;
 		mockIsMultisite = false;
+		mockIsAdmin = true;
 	} );
 
 	describe( 'rendering', () => {
@@ -461,6 +471,81 @@ describe( 'IncompatibleExtensionsFrontendNotice', () => {
 			expect( legacyReads() ).toBe( 1 );
 
 			getItem.mockRestore();
+		} );
+	} );
+
+	// Pruning turns "this extension is no longer incompatible" into a write that
+	// drops the acknowledgement. Everything that makes the incompatible list read
+	// as empty therefore has to be told apart from the list genuinely being
+	// empty, or a real acknowledgement is erased by a page that never had the
+	// data to judge it.
+	describe( 'when the list of incompatible extensions is not available', () => {
+		const renderCheckout = () =>
+			render(
+				<IncompatibleExtensionsFrontendNotice block="woocommerce/checkout" />
+			);
+
+		it( 'leaves the acknowledgement alone when the setting is missing', () => {
+			seedFrontend( [ 'plugin-one', 'plugin-two' ] );
+			withoutIncompatibleExtensionsSetting();
+
+			const { container } = renderCheckout();
+
+			expect( container ).toBeEmptyDOMElement();
+			expect( storedSlugs() ).toEqual( [ 'plugin-one', 'plugin-two' ] );
+		} );
+
+		// The load that lost the setting must not cost the merchant the
+		// dismissal they will need on the next, normal one.
+		it( 'still hides the banner on the next load with the setting back', () => {
+			seedFrontend( [ 'plugin-one', 'plugin-two' ] );
+			withoutIncompatibleExtensionsSetting();
+			renderCheckout();
+
+			setIncompatibleExtensions( [
+				{ id: 'plugin-one', title: 'Plugin One' },
+				{ id: 'plugin-two', title: 'Plugin Two' },
+			] );
+			const { container } = renderCheckout();
+
+			expect( container ).toBeEmptyDOMElement();
+		} );
+
+		// A shopper is never sent the list, so for them it is always missing.
+		// The admin check has to hold on its own even if it were not: a viewer
+		// who cannot see the banner must not rewrite what it is based on.
+		it( 'leaves the acknowledgement alone for a shopper', () => {
+			seedFrontend( [ 'plugin-one', 'plugin-two' ] );
+			mockIsAdmin = false;
+			// Registered and empty, so only the admin check can hold the prune.
+			setIncompatibleExtensions( [] );
+
+			const { container } = renderCheckout();
+
+			expect( container ).toBeEmptyDOMElement();
+			expect( storedSlugs() ).toEqual( [ 'plugin-one', 'plugin-two' ] );
+		} );
+
+		it( 'renders nothing for a shopper even when extensions are incompatible', () => {
+			mockIsAdmin = false;
+			setIncompatibleExtensions( [
+				{ id: 'plugin-one', title: 'Plugin One' },
+			] );
+
+			const { container } = renderCheckout();
+
+			expect( container ).toBeEmptyDOMElement();
+		} );
+
+		// The control for the two above: with an admin and a list that really is
+		// empty, the lapsed acknowledgement is dropped as it should be.
+		it( 'does drop a lapsed acknowledgement for an admin', () => {
+			seedFrontend( [ 'plugin-one', 'plugin-two' ] );
+			setIncompatibleExtensions( [] );
+
+			renderCheckout();
+
+			expect( storedSlugs() ).toEqual( [] );
 		} );
 	} );
 

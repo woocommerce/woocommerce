@@ -33,19 +33,36 @@ interface IncompatibleExtension {
 	title: string;
 }
 
+/**
+ * The extensions this site currently declares incompatible, and whether that
+ * list was delivered at all.
+ *
+ * The two are not the same thing. `incompatibleExtensions` is registered by the
+ * Cart and Checkout blocks rather than by core data, so it can be missing from
+ * the payload — a `woocommerce_shared_settings` callback that trims the settings
+ * drops it, and both blocks skip registering it when `get_plugins()` is not
+ * loaded. An absent list means "we don't know", which reads identically to an
+ * empty one and must not be mistaken for "nothing is incompatible any more".
+ */
 const getIncompatibleExtensions = (): {
 	extensions: Record< string, string >;
 	slugs: string[];
+	isKnown: boolean;
 } => {
-	const extensions: Record< string, string > = {};
-	const data = getSetting< IncompatibleExtension[] >(
+	const data = getSetting< IncompatibleExtension[] | undefined >(
 		'incompatibleExtensions',
-		[]
+		undefined
 	);
+
+	if ( ! Array.isArray( data ) ) {
+		return { extensions: {}, slugs: [], isKnown: false };
+	}
+
+	const extensions: Record< string, string > = {};
 	data.forEach( ( ext ) => {
 		extensions[ ext.id ] = ext.title;
 	} );
-	return { extensions, slugs: Object.keys( extensions ) };
+	return { extensions, slugs: Object.keys( extensions ), isKnown: true };
 };
 
 interface Props {
@@ -86,7 +103,7 @@ export const IncompatibleExtensionsFrontendNotice = ( {
 		  )
 		: [];
 
-	const { extensions, slugs } = getIncompatibleExtensions();
+	const { extensions, slugs, isKnown } = getIncompatibleExtensions();
 	const count = slugs.length;
 
 	// Stay dismissed while every currently-incompatible extension has already
@@ -105,10 +122,13 @@ export const IncompatibleExtensionsFrontendNotice = ( {
 	//
 	// This only ever removes slugs, never adds, so an extension the merchant
 	// hasn't acknowledged can't be marked as accepted while the banner is up.
-	// Limited to admins because `incompatibleExtensions` is only exposed to
-	// them; for a shopper the empty list would erase the acknowledgement.
+	// Held back unless the list was actually delivered: to a shopper, and to
+	// anyone whose payload lost the setting, the empty list is indistinguishable
+	// from "nothing is incompatible" and would erase a real acknowledgement.
 	const hasStaleAcknowledgements =
-		CURRENT_USER_IS_ADMIN && ! isSubsetOf( acknowledgedSlugs, slugs );
+		CURRENT_USER_IS_ADMIN &&
+		isKnown &&
+		! isSubsetOf( acknowledgedSlugs, slugs );
 
 	useEffect( () => {
 		if ( hasStaleAcknowledgements ) {

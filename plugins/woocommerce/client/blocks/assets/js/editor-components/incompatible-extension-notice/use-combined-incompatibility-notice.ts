@@ -66,6 +66,7 @@ export const useCombinedIncompatibilityNotice = (
 		incompatibleExtensions,
 		incompatibleExtensionSlugs,
 		incompatibleExtensionCount,
+		areIncompatibleExtensionsKnown,
 	] = useIncompatibleExtensionNotice();
 
 	const [
@@ -167,11 +168,15 @@ export const useCombinedIncompatibilityNotice = (
 	//
 	// This only ever removes slugs, never adds, so an item the merchant hasn't
 	// acknowledged can't be marked as accepted while the notice is on screen.
-	// Held back until the payment store has loaded, because the empty set it
-	// reports until then is indistinguishable from "nothing is incompatible"
-	// and would erase the acknowledgement.
+	// Held back until both halves of the incompatible set are actually known:
+	// the empty set the payment store reports before it loads, and the empty
+	// list a missing `incompatibleExtensions` setting produces, are both
+	// indistinguishable from "nothing is incompatible" and would erase the
+	// acknowledgement. Neither half can be pruned on its own, because a stored
+	// slug does not say which of the two it came from.
 	const hasStaleAcknowledgements =
 		arePaymentMethodsLoaded &&
+		areIncompatibleExtensionsKnown &&
 		! isSubsetOf( dismissedItemSlugs, allIncompatibleItemSlugs );
 
 	useEffect( () => {

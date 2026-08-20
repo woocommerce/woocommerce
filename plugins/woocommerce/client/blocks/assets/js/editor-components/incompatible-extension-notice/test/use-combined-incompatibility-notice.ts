@@ -20,7 +20,13 @@ let mockIncompatiblePaymentMethods: Record< string, string > = {};
 let mockPaymentMethodsLoaded = true;
 
 // Incompatible extensions returned from settings, controllable per render.
-let mockIncompatibleExtensions: Array< { id: string; title: string } > = [];
+// `undefined` stands for the setting never reaching the payload, which is not
+// the same thing as an empty list: the Cart and Checkout blocks register it
+// themselves, so a `woocommerce_shared_settings` callback that trims the
+// settings drops it and `getSetting` falls back to what the caller passed.
+let mockIncompatibleExtensions:
+	| Array< { id: string; title: string } >
+	| undefined = [];
 
 // Two sites of one subdirectory multisite. Same origin, so they share the
 // browser's localStorage; different home URL, so they must not share a key.
@@ -253,6 +259,52 @@ describe( 'useCombinedIncompatibilityNotice', () => {
 
 		// The cart block has its own, still-undismissed notice.
 		expect( mountVisibility( CART ) ).toBe( true );
+	} );
+
+	// Pruning turns "this is no longer incompatible" into a write that drops the
+	// acknowledgement, so every reason the incompatible set can read as empty has
+	// to be told apart from it genuinely being empty. The payment store has its
+	// own guard; the extensions half needs the same one.
+	describe( 'when the list of incompatible extensions is not available', () => {
+		it( 'leaves the acknowledgement alone when the setting is missing', () => {
+			mockIncompatibleExtensions = [ { id: 'ext_x', title: 'Ext X' } ];
+			mockIncompatiblePaymentMethods = { gw_a: 'Gateway A' };
+			mountAndDismiss( CHECKOUT );
+
+			mockIncompatibleExtensions = undefined;
+			mountVisibility( CHECKOUT );
+
+			expect( storedNotices() ).toEqual( [
+				{ [ CHECKOUT ]: [ 'ext_x', 'gw_a' ] },
+			] );
+		} );
+
+		it( 'still hides the notice on the next load with the setting back', () => {
+			mockIncompatibleExtensions = [ { id: 'ext_x', title: 'Ext X' } ];
+			mockIncompatiblePaymentMethods = { gw_a: 'Gateway A' };
+			mountAndDismiss( CHECKOUT );
+
+			mockIncompatibleExtensions = undefined;
+			mountVisibility( CHECKOUT );
+
+			mockIncompatibleExtensions = [ { id: 'ext_x', title: 'Ext X' } ];
+			expect( mountVisibility( CHECKOUT ) ).toBe( false );
+		} );
+
+		// The control: with the list delivered and the extension really gone,
+		// the lapsed acknowledgement is dropped as it should be.
+		it( 'does drop a lapsed acknowledgement once the list arrives', () => {
+			mockIncompatibleExtensions = [ { id: 'ext_x', title: 'Ext X' } ];
+			mockIncompatiblePaymentMethods = { gw_a: 'Gateway A' };
+			mountAndDismiss( CHECKOUT );
+
+			mockIncompatibleExtensions = [];
+			mountVisibility( CHECKOUT );
+
+			expect( storedNotices() ).toEqual( [
+				{ [ CHECKOUT ]: [ 'gw_a' ] },
+			] );
+		} );
 	} );
 
 	// Before the storefront banner had its own key, and before either key was
