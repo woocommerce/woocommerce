@@ -27,6 +27,10 @@
 <h3 class="wp-block-heading has-medium-font-size" style="margin-top:0;margin-bottom:var(--wp--preset--spacing--20);font-style:normal;font-weight:400;line-height:1.6"><?php esc_html_e( 'Filter by:', 'purple' );?></h3>
 <!-- /wp:heading -->
 
+<?php
+// TODO: Remove the Product Filters spacing override in theme.json once WooCommerce
+// PR #67870 ships: https://github.com/woocommerce/woocommerce/pull/67870.
+?>
 <!-- wp:woocommerce/product-filters -->
 <div class="wp-block-woocommerce-product-filters wc-block-product-filters"><!-- wp:woocommerce/product-filter-price -->
 <div class="wp-block-woocommerce-product-filter-price"><!-- wp:accordion {"style":{"spacing":{"blockGap":"0"}}} -->

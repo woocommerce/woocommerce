@@ -34,7 +34,12 @@
 
 <!-- wp:columns {"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|50","bottom":"0"}}}} -->
 <div class="wp-block-columns alignwide" style="margin-top:var(--wp--preset--spacing--50);margin-bottom:0"><!-- wp:column {"width":"22%"} -->
-<div class="wp-block-column" style="flex-basis:22%"><!-- wp:woocommerce/product-filters -->
+<div class="wp-block-column" style="flex-basis:22%">
+<?php
+// TODO: Remove the Product Filters spacing override in theme.json once WooCommerce
+// PR #67870 ships: https://github.com/woocommerce/woocommerce/pull/67870.
+?>
+<!-- wp:woocommerce/product-filters -->
 <div class="wp-block-woocommerce-product-filters wc-block-product-filters"><!-- wp:woocommerce/product-filter-price -->
 <div class="wp-block-woocommerce-product-filter-price"><!-- wp:accordion {"style":{"spacing":{"blockGap":"0"}}} -->
 <div role="group" class="wp-block-accordion"><!-- wp:accordion-item {"style":{"border":{"bottom":{"color":"var:preset|color|theme-6","width":"1px"},"top":[],"right":[],"left":[]},"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
