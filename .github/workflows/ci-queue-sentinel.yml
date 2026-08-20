@@ -5,8 +5,16 @@ name: 'CI Queue Sentinel'
 # it is set. Variables written here must only be consumed via `env:` or `${{ }}`
 # comparisons, never interpolated into `run:` blocks.
 on:
+  # The cron is the floor and the switch-off path. GitHub delivers it late and
+  # unevenly (43-84 ticks/day observed against the 96 this asks for), so the
+  # queue is also evaluated when new work arrives, which is when congestion
+  # starts. Bursts need no debounce: the concurrency group below keeps at most
+  # one run pending and cancels any earlier pending one.
   schedule:
     - cron: '*/15 * * * *'
+  workflow_run:
+    workflows: ['CI']
+    types: ['requested']
   workflow_dispatch:
     inputs:
       mode:
@@ -42,6 +50,11 @@ jobs:
       - uses: 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' # v7.0.1
         name: 'Checkout'
         with:
+          # Pinned to the default branch, not left to the event default: the
+          # workflow_run trigger fires for fork PRs, and this checkout supplies
+          # the script that runs with SENTINEL_TOKEN. Never check out the
+          # triggering PR's code here.
+          ref: ${{ github.event.repository.default_branch }}
           sparse-checkout: |
               ./tools/monorepo-utils
               .github/workflows
