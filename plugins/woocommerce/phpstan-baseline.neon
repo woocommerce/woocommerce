@@ -45273,8 +45273,6 @@ parameters:
 			count: 1
 			path: src/Admin/DataSourcePoller.php
 
-
-
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\DeprecatedClassFacade\:\:__call\(\) has no return type specified\.$#'
 			identifier: missingType.return
