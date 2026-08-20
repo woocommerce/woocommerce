@@ -7,41 +7,25 @@ import { getSetting, CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import NoticeBanner from '@woocommerce/base-components/notice-banner';
 import { useLocalStorageState } from '@woocommerce/base-hooks';
 import {
-	DISMISSED_INCOMPATIBLE_EXTENSIONS_FRONTEND_STORAGE_KEY,
-	DISMISSED_INCOMPATIBLE_EXTENSIONS_STORAGE_KEY,
+	getFrontendStorageKey,
 	isSubsetOf,
+	readDismissalsFromBeforeScoping,
 } from '@woocommerce/editor-components/incompatible-extension-notice/storage';
 
 /**
- * Reads the slugs the merchant acknowledged on the storefront while both
- * surfaces shared one key.
+ * The slugs the merchant acknowledged on the storefront before the keys were
+ * scoped to a site.
  *
- * The stored value can hold either surface's shape, and often both at once: the
+ * That value holds either surface's shape, and often both at once: the
  * storefront wrote bare slug strings, while the editor appends
- * `{ [blockName]: slugs }` objects without discarding what it finds. Only the
- * strings belong to the storefront banner, so the objects are filtered out
+ * `{ [blockName]: slugs }` records without discarding what it finds. Only the
+ * strings were ever the storefront banner's, so the records are filtered out
  * rather than treated as a reason to skip the whole value.
  */
-const readSlugsDismissedBeforeRename = (): string[] => {
-	try {
-		const stored = window.localStorage.getItem(
-			DISMISSED_INCOMPATIBLE_EXTENSIONS_STORAGE_KEY
-		);
-		if ( ! stored ) {
-			return [];
-		}
-		const parsed = JSON.parse( stored );
-		return Array.isArray( parsed )
-			? parsed.filter(
-					( entry ): entry is string => typeof entry === 'string'
-			  )
-			: [];
-	} catch {
-		// A value we can't read is not a dismissal we can honour; showing the
-		// banner is the safe fallback.
-		return [];
-	}
-};
+const readSlugsDismissedBeforeScoping = (): string[] =>
+	readDismissalsFromBeforeScoping().filter(
+		( entry ): entry is string => typeof entry === 'string'
+	);
 
 interface IncompatibleExtension {
 	id: string;
@@ -73,21 +57,20 @@ interface Props {
 export const IncompatibleExtensionsFrontendNotice = ( {
 	block,
 }: Props ): JSX.Element | null => {
-	// Seeding the initial value migrates pre-rename dismissals in one shot: the
-	// hook only falls back to it when the storefront key is genuinely absent,
-	// and writes the key itself on mount. Memoised because the argument is
-	// evaluated on every render even though only the first one consumes it.
-	const slugsDismissedBeforeRename = useMemo(
-		readSlugsDismissedBeforeRename,
+	const storageKey = getFrontendStorageKey();
+
+	// Seeding the initial value migrates the pre-scoping dismissals in one shot:
+	// the hook only falls back to it when this site's key has never been
+	// written, and writes the key itself on mount. Memoised because the argument
+	// is evaluated on every render even though only the first one consumes it.
+	const initialDismissedSlugs = useMemo(
+		readSlugsDismissedBeforeScoping,
 		[]
 	);
 
 	const [ dismissedSlugs, setDismissedSlugs ] = useLocalStorageState<
 		string[]
-	>(
-		DISMISSED_INCOMPATIBLE_EXTENSIONS_FRONTEND_STORAGE_KEY,
-		slugsDismissedBeforeRename
-	);
+	>( storageKey, initialDismissedSlugs );
 
 	// Plain localStorage that anything can overwrite, so nothing about the
 	// stored value's shape is guaranteed. Narrow it rather than let a corrupt

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useMemo } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { paymentStore } from '@woocommerce/block-data';
 import { useLocalStorageState } from '@woocommerce/base-hooks';
@@ -12,12 +12,12 @@ import { useLocalStorageState } from '@woocommerce/base-hooks';
 import { useIncompatiblePaymentGatewaysNotice } from './use-incompatible-payment-gateways-notice';
 import { useIncompatibleExtensionNotice } from './use-incompatible-extensions-notice';
 import {
-	DISMISSED_INCOMPATIBLE_EXTENSIONS_STORAGE_KEY,
+	getEditorStorageKey,
 	isSubsetOf,
+	readDismissalsFromBeforeScoping,
 } from './storage';
 
 type StoredIncompatibleExtension = { [ k: string ]: string[] };
-const initialDismissedNotices: StoredIncompatibleExtension[] = [];
 
 // This key is shared with older versions and with the storefront banner, and is
 // plain localStorage that anything can overwrite, so nothing about its contents
@@ -25,6 +25,16 @@ const initialDismissedNotices: StoredIncompatibleExtension[] = [];
 // take the editor down with a corrupt one.
 const isPlainObject = ( value: unknown ): value is Record< string, unknown > =>
 	typeof value === 'object' && value !== null && ! Array.isArray( value );
+
+// The pre-scoping key was shared with the storefront banner, which wrote bare
+// slug strings into the same array; only the records were ever the editor's.
+// Their contents stay untrusted, and `readSlugsFor` re-checks every slug.
+const isStoredNotice = (
+	value: unknown
+): value is StoredIncompatibleExtension => isPlainObject( value );
+
+const readNoticesDismissedBeforeScoping = (): StoredIncompatibleExtension[] =>
+	readDismissalsFromBeforeScoping().filter( isStoredNotice );
 
 const readSlugsFor = ( notice: unknown, blockName: string ): string[] => {
 	if ( ! isPlainObject( notice ) ) {
@@ -86,9 +96,20 @@ export const useCombinedIncompatibilityNotice = (
 	const allIncompatibleItemCount =
 		incompatibleExtensionCount + incompatiblePaymentMethodCount;
 
+	const storageKey = getEditorStorageKey();
+
+	// Seeding the initial value migrates the pre-scoping dismissals in one shot:
+	// the hook only falls back to it when this site's key has never been
+	// written, and writes the key itself on mount. Memoised because the argument
+	// is evaluated on every render even though only the first one consumes it.
+	const initialDismissedNotices = useMemo(
+		readNoticesDismissedBeforeScoping,
+		[]
+	);
+
 	const [ dismissedNotices, setDismissedNotices ] = useLocalStorageState<
 		StoredIncompatibleExtension[]
-	>( DISMISSED_INCOMPATIBLE_EXTENSIONS_STORAGE_KEY, initialDismissedNotices );
+	>( storageKey, initialDismissedNotices );
 
 	const [ isVisible, setIsVisible ] = useState( false );
 

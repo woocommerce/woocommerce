@@ -22,8 +22,23 @@ let mockPaymentMethodsLoaded = true;
 // Incompatible extensions returned from settings, controllable per render.
 let mockIncompatibleExtensions: Array< { id: string; title: string } > = [];
 
+// Two sites of one subdirectory multisite. Same origin, so they share the
+// browser's localStorage; different home URL, so they must not share a key.
+const SITE_A = 'https://example.com/';
+const SITE_B = 'https://example.com/site-b/';
+
+let mockHomeUrl = SITE_A;
+let mockIsMultisite = false;
+
 jest.mock( '@woocommerce/settings', () => ( {
 	...jest.requireActual( '@woocommerce/settings' ),
+	// Getters, not values: the site under test changes between renders.
+	get HOME_URL() {
+		return mockHomeUrl;
+	},
+	get IS_MULTISITE() {
+		return mockIsMultisite;
+	},
 	getSetting: jest.fn().mockImplementation( ( name: string, ...rest ) => {
 		if ( name === 'incompatibleExtensions' ) {
 			return mockIncompatibleExtensions;
@@ -38,7 +53,7 @@ jest.mock( '@woocommerce/settings', () => ( {
  * Internal dependencies
  */
 import { useCombinedIncompatibilityNotice } from '../use-combined-incompatibility-notice';
-import { DISMISSED_INCOMPATIBLE_EXTENSIONS_STORAGE_KEY } from '../storage';
+import { getEditorStorageKey, UNSCOPED_STORAGE_KEY } from '../storage';
 
 ( wpData.useSelect as jest.Mock ).mockImplementation( ( mapSelect ) =>
 	mapSelect( () => ( {
@@ -74,7 +89,11 @@ const mountAndDismiss = ( block: string ) => {
 	unmount();
 };
 
-const STORAGE_KEY = DISMISSED_INCOMPATIBLE_EXTENSIONS_STORAGE_KEY;
+// A function, not a constant: the key carries the site, which tests change.
+const storageKey = () => getEditorStorageKey();
+
+const storedNotices = ( key = storageKey() ) =>
+	JSON.parse( window.localStorage.getItem( key ) || '[]' );
 
 describe( 'useCombinedIncompatibilityNotice', () => {
 	beforeEach( () => {
@@ -82,6 +101,8 @@ describe( 'useCombinedIncompatibilityNotice', () => {
 		mockIncompatiblePaymentMethods = {};
 		mockIncompatibleExtensions = [];
 		mockPaymentMethodsLoaded = true;
+		mockHomeUrl = SITE_A;
+		mockIsMultisite = false;
 	} );
 
 	it( 'shows the notice when there is an incompatible gateway', () => {
@@ -182,9 +203,7 @@ describe( 'useCombinedIncompatibilityNotice', () => {
 		mockIncompatiblePaymentMethods = { gw_a: 'Gateway A' };
 		mountVisibility( CHECKOUT );
 
-		expect(
-			JSON.parse( window.localStorage.getItem( STORAGE_KEY ) || '[]' )
-		).toEqual( [ { [ CHECKOUT ]: [ 'gw_a' ] } ] );
+		expect( storedNotices() ).toEqual( [ { [ CHECKOUT ]: [ 'gw_a' ] } ] );
 	} );
 
 	// Pruning must only ever remove slugs. If it wrote the current set wholesale
@@ -204,9 +223,7 @@ describe( 'useCombinedIncompatibilityNotice', () => {
 		expect( mountVisibility( CHECKOUT ) ).toBe( true );
 
 		// B was pruned, but C was not silently accepted, so it still warns.
-		expect(
-			JSON.parse( window.localStorage.getItem( STORAGE_KEY ) || '[]' )
-		).toEqual( [ { [ CHECKOUT ]: [ 'gw_a' ] } ] );
+		expect( storedNotices() ).toEqual( [ { [ CHECKOUT ]: [ 'gw_a' ] } ] );
 		expect( mountVisibility( CHECKOUT ) ).toBe( true );
 	} );
 
@@ -221,9 +238,9 @@ describe( 'useCombinedIncompatibilityNotice', () => {
 
 		mockPaymentMethodsLoaded = false;
 		expect( mountVisibility( CHECKOUT ) ).toBe( false );
-		expect(
-			JSON.parse( window.localStorage.getItem( STORAGE_KEY ) || '[]' )
-		).toEqual( [ { [ CHECKOUT ]: [ 'gw_a', 'gw_b' ] } ] );
+		expect( storedNotices() ).toEqual( [
+			{ [ CHECKOUT ]: [ 'gw_a', 'gw_b' ] },
+		] );
 
 		// Once it loads, both are still incompatible and still acknowledged.
 		mockPaymentMethodsLoaded = true;
@@ -238,12 +255,16 @@ describe( 'useCombinedIncompatibilityNotice', () => {
 		expect( mountVisibility( CART ) ).toBe( true );
 	} );
 
-	// This key predates the storefront banner having its own, so a real site's
-	// value can still hold shapes this hook never wrote: bare slug strings left
+	// Before the storefront banner had its own key, and before either key was
+	// scoped to a site, both surfaces wrote into one. A migrated value can
+	// therefore still hold shapes this hook never wrote: bare slug strings left
 	// by the storefront, and more than one entry for the same block.
-	describe( 'values left in the shared key by earlier versions', () => {
+	describe( 'values left by earlier versions', () => {
 		const seed = ( value: unknown ) =>
-			window.localStorage.setItem( STORAGE_KEY, JSON.stringify( value ) );
+			window.localStorage.setItem(
+				storageKey(),
+				JSON.stringify( value )
+			);
 
 		it( 'reads acknowledgements split across several entries for one block', () => {
 			seed( [
@@ -271,9 +292,9 @@ describe( 'useCombinedIncompatibilityNotice', () => {
 
 			mountAndDismiss( CHECKOUT );
 
-			expect(
-				JSON.parse( window.localStorage.getItem( STORAGE_KEY ) || '[]' )
-			).toEqual( [ { [ CHECKOUT ]: [ 'gw_a', 'gw_b', 'gw_c' ] } ] );
+			expect( storedNotices() ).toEqual( [
+				{ [ CHECKOUT ]: [ 'gw_a', 'gw_b', 'gw_c' ] },
+			] );
 		} );
 
 		it( 'ignores bare slug strings the storefront banner left behind', () => {
@@ -306,9 +327,114 @@ describe( 'useCombinedIncompatibilityNotice', () => {
 
 			mountAndDismiss( CHECKOUT );
 
-			expect(
-				JSON.parse( window.localStorage.getItem( STORAGE_KEY ) || '[]' )
-			).toEqual( [ 'gw_a', { [ CHECKOUT ]: [ 'gw_a' ] } ] );
+			expect( storedNotices() ).toEqual( [
+				'gw_a',
+				{ [ CHECKOUT ]: [ 'gw_a' ] },
+			] );
+		} );
+	} );
+
+	// localStorage is keyed by origin, not by path, so on a subdirectory
+	// multisite every site sees the same storage. Without the site in the key, a
+	// dismissal on one of them hides another one's live warning.
+	describe( 'site scoping', () => {
+		it( 'does not carry a dismissal to another site on the same origin', () => {
+			mockIncompatiblePaymentMethods = {
+				gw_a: 'Gateway A',
+				gw_b: 'Gateway B',
+			};
+			mountAndDismiss( CHECKOUT );
+			expect( mountVisibility( CHECKOUT ) ).toBe( false );
+
+			// Same browser, same origin, different site of the network.
+			mockHomeUrl = SITE_B;
+
+			expect( mountVisibility( CHECKOUT ) ).toBe( true );
+		} );
+
+		// The reviewed revision matched a subset, so site B's single
+		// incompatibility counted as covered by site A's larger acknowledgement.
+		it( 'does not let a larger acknowledgement elsewhere cover this site', () => {
+			mockIncompatiblePaymentMethods = {
+				gw_a: 'Gateway A',
+				gw_b: 'Gateway B',
+			};
+			mountAndDismiss( CHECKOUT );
+
+			mockHomeUrl = SITE_B;
+			mockIncompatiblePaymentMethods = { gw_a: 'Gateway A' };
+
+			expect( mountVisibility( CHECKOUT ) ).toBe( true );
+		} );
+
+		it( "keeps each site's acknowledgements in its own key", () => {
+			const siteAKey = storageKey();
+			mockIncompatiblePaymentMethods = { gw_a: 'Gateway A' };
+			mountAndDismiss( CHECKOUT );
+
+			mockHomeUrl = SITE_B;
+			mockIncompatiblePaymentMethods = { gw_b: 'Gateway B' };
+			mountAndDismiss( CHECKOUT );
+
+			expect( storageKey() ).not.toBe( siteAKey );
+			expect( storedNotices( siteAKey ) ).toEqual( [
+				{ [ CHECKOUT ]: [ 'gw_a' ] },
+			] );
+			expect( storedNotices() ).toEqual( [
+				{ [ CHECKOUT ]: [ 'gw_b' ] },
+			] );
+		} );
+	} );
+
+	// The dismissals merchants already made live under the unscoped key, so
+	// without a migration every one of them would see the notice one more time.
+	describe( 'migration from before site scoping', () => {
+		const seedUnscoped = ( value: unknown ) =>
+			window.localStorage.setItem(
+				UNSCOPED_STORAGE_KEY,
+				JSON.stringify( value )
+			);
+
+		it( 'stays dismissed for a merchant who dismissed before scoping', () => {
+			seedUnscoped( [ { [ CHECKOUT ]: [ 'gw_a' ] } ] );
+			mockIncompatiblePaymentMethods = { gw_a: 'Gateway A' };
+
+			expect( mountVisibility( CHECKOUT ) ).toBe( false );
+		} );
+
+		// Leaving the old value intact keeps a revert of this change harmless.
+		it( 'never writes to the unscoped key', () => {
+			const before = JSON.stringify( [ { [ CHECKOUT ]: [ 'gw_a' ] } ] );
+			window.localStorage.setItem( UNSCOPED_STORAGE_KEY, before );
+			mockIncompatiblePaymentMethods = {
+				gw_a: 'Gateway A',
+				gw_b: 'Gateway B',
+			};
+
+			mountAndDismiss( CHECKOUT );
+
+			expect( window.localStorage.getItem( UNSCOPED_STORAGE_KEY ) ).toBe(
+				before
+			);
+		} );
+
+		// The unscoped value names no site and every site on the origin sees it,
+		// so on a multisite there is no telling whose dismissal it is. Warning
+		// once more beats inheriting a dismissal made on a different site.
+		it( 'does not migrate on a multisite', () => {
+			mockIsMultisite = true;
+			seedUnscoped( [ { [ CHECKOUT ]: [ 'gw_a' ] } ] );
+			mockIncompatiblePaymentMethods = { gw_a: 'Gateway A' };
+
+			expect( mountVisibility( CHECKOUT ) ).toBe( true );
+		} );
+
+		it( 'ignores the unscoped value once this site has its own', () => {
+			window.localStorage.setItem( storageKey(), JSON.stringify( [] ) );
+			seedUnscoped( [ { [ CHECKOUT ]: [ 'gw_a' ] } ] );
+			mockIncompatiblePaymentMethods = { gw_a: 'Gateway A' };
+
+			expect( mountVisibility( CHECKOUT ) ).toBe( true );
 		} );
 	} );
 } );
