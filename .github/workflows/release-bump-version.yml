@@ -63,7 +63,7 @@ jobs:
         run: |
           if ! git ls-remote --exit-code --heads https://github.com/${GITHUB_REPOSITORY} "$BRANCH" > /dev/null; then
             error="Source branch '$BRANCH' does not exist."
-            if [[ "$BRANCH" =~ ^(release/)?([0-9]+\.[0-9]+)\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            if [[ "$BRANCH" =~ ^(release/)?([0-9]+\.[0-9]+)\..+$ ]]; then
               minor="${BASH_REMATCH[2]}"
               error="$error Release branches are named by minor version — enter either the full branch name ('release/$minor') or just the minor version ('$minor')."
             fi
