@@ -150,8 +150,19 @@ const isHostedPoolJob = ( job ) =>
 const collectQueuedJobs = async ( runList ) => {
 	const queued = [];
 	let ignoredPools = 0;
+	let failed = 0;
 	for ( const run of runList ) {
-		const jobs = await fetchJobsForRun( run.id );
+		let jobs;
+		try {
+			jobs = await fetchJobsForRun( run.id );
+		} catch ( error ) {
+			// A 5xx that outlives the retries used to abort the tick and alert.
+			// Missing one run's jobs can only understate the queue, so record it
+			// and let the incomplete probe suppress switch-off instead.
+			failed++;
+			console.log( `Probe skipped run ${ run.id }: ${ error.message }` );
+			continue;
+		}
 		for ( const job of jobs ) {
 			if ( job.status !== 'queued' ) {
 				continue;
@@ -163,7 +174,7 @@ const collectQueuedJobs = async ( runList ) => {
 			}
 		}
 	}
-	return { queued, ignoredPools };
+	return { queued, ignoredPools, failed };
 };
 
 const fetchQueuedJobs = async ( runs ) => {
@@ -179,8 +190,14 @@ const fetchQueuedJobs = async ( runs ) => {
 		...allQueued.slice( MAX_QUEUED_RUNS_TO_PROBE ),
 		...allInProgress.slice( MAX_IN_PROGRESS_RUNS_TO_PROBE ),
 	];
-	const { queued, ignoredPools } = await collectQueuedJobs( probeList );
-	return { queued, complete: remainder.length === 0, ignoredPools, remainder };
+	const { queued, ignoredPools, failed } = await collectQueuedJobs( probeList );
+	return {
+		queued,
+		complete: remainder.length === 0 && failed === 0,
+		ignoredPools,
+		remainder,
+		failed,
+	};
 };
 
 const fetchVariable = async () => {
@@ -256,7 +273,7 @@ const main = async () => {
 	// Forced modes skip the probe: a manual override must succeed even when
 	// the queue API is failing, and needs no queue data to decide.
 	const forced = MODE === 'on' || MODE === 'off';
-	let runs = [], queuedJobs = [], dropped = 0, ignoredPools = 0, remainder = [];
+	let runs = [], queuedJobs = [], dropped = 0, ignoredPools = 0, remainder = [], failedProbes = 0;
 	let runsListComplete = true, probeComplete = true;
 	if ( ! forced ) {
 		const runsResult = await fetchActiveRuns();
@@ -268,6 +285,7 @@ const main = async () => {
 		dropped = runsResult.dropped;
 		ignoredPools = jobsResult.ignoredPools;
 		remainder = jobsResult.remainder;
+		failedProbes = jobsResult.failed;
 	}
 	// Measure ages after the probe; retries can stretch it by minutes.
 	let nowMs = Date.now();
@@ -300,12 +318,13 @@ const main = async () => {
 		const extra = await collectQueuedJobs( remainder );
 		queuedJobs = [ ...queuedJobs, ...extra.queued ];
 		ignoredPools += extra.ignoredPools;
+		failedProbes += extra.failed;
 		escalated = remainder.length;
 		nowMs = Date.now();
 		oldestAgeMin = oldestAge( queuedJobs, nowMs );
-		// Every listed run is now probed; only run-list page truncation can
-		// still leave the probe incomplete.
-		probeComplete = runsListComplete;
+		// Every listed run has now been attempted; run-list page truncation and
+		// unreadable runs are the only things that can still leave it incomplete.
+		probeComplete = runsListComplete && failedProbes === 0;
 	}
 
 	const value = decide( {
@@ -330,7 +349,7 @@ const main = async () => {
 		'### CI Queue Sentinel',
 		`- Mode: \`${ MODE }\``,
 		...( forced ? [ '- Probe skipped (forced mode)' ] : [
-			`- Active runs probed: ${ probed } of ${ runs.length }${ dropped ? ` (${ dropped } dropped by age window)` : '' }${ escalated ? ` (escalated: +${ escalated } runs to verify switch-off)` : '' }${ probeComplete ? '' : ' (probe truncated — switch-off suppressed)' }`,
+			`- Active runs probed: ${ probed } of ${ runs.length }${ dropped ? ` (${ dropped } dropped by age window)` : '' }${ escalated ? ` (escalated: +${ escalated } runs to verify switch-off)` : '' }${ failedProbes ? ` (${ failedProbes } unreadable — API errors)` : '' }${ probeComplete ? '' : ' (probe incomplete — switch-off suppressed)' }`,
 			`- Queued jobs found: ${ queuedJobs.length } (hosted pool${ ignoredPools ? `; ${ ignoredPools } in runner groups ignored` : '' })`,
 			`- Oldest queued job age: ${ oldestAgeMin === null ? 'n/a (queue clear)' : `${ oldestAgeMin.toFixed( 1 ) } min` } (threshold ${ QUEUE_AGE_THRESHOLD_MIN } min)`,
 		] ),
