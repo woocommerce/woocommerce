@@ -1,4 +1,4 @@
 Significance: patch
 Type: update
 
-Update the vendored webonyx/graphql-php to 15.32.3 for a parser recursion limit, and make its new field-comparison cap memory-safe in the GraphQL controller because the upstream cap allocates a conflict per remaining field pair once exceeded.
+Update the vendored webonyx/graphql-php to 15.32.3 to limit parser recursion and field comparisons.
