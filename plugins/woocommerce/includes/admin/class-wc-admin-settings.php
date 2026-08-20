@@ -216,25 +216,14 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 			// Array value.
 			if ( strstr( $option_name, '[' ) ) {
 
+				$raw_option_name = $option_name;
+
 				parse_str( $option_name, $option_array );
 
 				// A name with no parsable base (for example '[key]') yields nothing to look up.
 				if ( empty( $option_array ) ) {
 					return $default;
 				}
-
-				/*
-				 * Take the bracketed keys from the raw name rather than from the parsed structure.
-				 * parse_str() renders 'opt[a][]' and 'opt[a][0]' identically, yet the first names
-				 * the whole array stored at 'a' while the second names its first element, so the
-				 * descent has to stop at an empty bracket.
-				 *
-				 * Only the run of brackets directly following the base name counts, because that is
-				 * all parse_str() itself consumes: it reads 'opt[a]extra[b]' as one key 'a', so
-				 * scanning the whole string would descend a level deeper than save_fields() writes.
-				 */
-				preg_match( '/^[^\[]*((?:\[[^\]]*\])*)/', $option_name, $bracket_run );
-				preg_match_all( '/\[([^\]]*)\]/', $bracket_run[1], $option_keys );
 
 				// Option name is first key.
 				$option_name = (string) current( array_keys( $option_array ) );
@@ -243,19 +232,41 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				$option_value = get_option( $option_name, null );
 
 				/*
+				 * parse_str() has already decoded the name and split it into a nested key path, and
+				 * save_fields() derives its own key from that same call, so read the path back out
+				 * of the parsed structure rather than re-deriving it from the raw string. Deriving
+				 * it twice is what let the two sides disagree about form-decoded and trailing keys.
+				 */
+				$option_keys = array();
+				$node        = $option_array[ $option_name ];
+
+				while ( is_array( $node ) ) {
+					$node_key = key( $node );
+
+					if ( null === $node_key ) {
+						break;
+					}
+
+					$option_keys[] = $node_key;
+					$node          = $node[ $node_key ];
+				}
+
+				/*
+				 * The one distinction parse_str() cannot express is 'opt[a][]' against 'opt[a][0]':
+				 * both arrive as the integer key 0. A trailing empty bracket names the whole array
+				 * at that depth, so drop the level it produced. Test the decoded name, because
+				 * parse_str() decodes before it splits.
+				 */
+				if ( '[]' === substr( urldecode( $raw_option_name ), -2 ) ) {
+					array_pop( $option_keys );
+				}
+
+				/*
 				 * Walk the key path down the stored value, so 'opt[a][b]' resolves to the leaf the
 				 * matching input posts rather than the sub-array above it. Anything the path cannot
 				 * reach resolves to null, and falls back to the default.
 				 */
-				foreach ( $option_keys[1] as $option_key ) {
-					if ( '' === $option_key ) {
-						// An empty bracket names the whole array at this depth.
-						break;
-					}
-
-					// parse_str() form-decodes the keys it derives, so the raw ones must match it.
-					$option_key = urldecode( $option_key );
-
+				foreach ( $option_keys as $option_key ) {
 					// Indexing a string here would read a character by offset, so require a
 					// container. ArrayAccess is honoured because isset() resolved it before.
 					if ( ! is_array( $option_value ) && ! $option_value instanceof ArrayAccess ) {
