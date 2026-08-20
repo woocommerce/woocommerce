@@ -322,10 +322,12 @@ const main = async () => {
 	// is ON and the probed hosted queue looks healthy, that suppression may
 	// rest only on unprobed runs — probe them so the off decision is proven
 	// rather than dependent on the run count fitting the caps. Runs only in
-	// that narrow state, so normal ticks pay nothing extra.
+	// that narrow state, so normal ticks pay nothing extra. Skipped once any probe
+	// has failed: probeComplete can no longer become true, so it could not change
+	// the outcome, and the failure allowance stays global to the tick.
 	let escalated = 0;
 	if (
-		! forced && ! probeComplete && current === '1' &&
+		! forced && ! probeComplete && failedProbes === 0 && current === '1' &&
 		! ( oldestAgeMin !== null && oldestAgeMin > thresholdMin ) &&
 		nowMs - updatedAtMs >= hysteresisMin * 60 * 1000 &&
 		remainder.length > 0 && remainder.length <= MAX_ESCALATION_RUNS_TO_PROBE
@@ -335,7 +337,7 @@ const main = async () => {
 		ignoredPools += extra.ignoredPools;
 		failedProbes += extra.failed;
 		probeAttempts += extra.attempted;
-		escalated = remainder.length;
+		escalated = extra.attempted;
 		nowMs = Date.now();
 		oldestAgeMin = oldestAge( queuedJobs, nowMs );
 		// Every listed run has now been attempted; run-list page truncation and
@@ -368,14 +370,11 @@ const main = async () => {
 		await writeVariable( value, !! variable );
 	}
 
-	const probed = escalated +
-		Math.min( runs.filter( ( run ) => run.status === 'queued' ).length, MAX_QUEUED_RUNS_TO_PROBE ) +
-		Math.min( runs.filter( ( run ) => run.status !== 'queued' ).length, MAX_IN_PROGRESS_RUNS_TO_PROBE );
 	summarize( [
 		'### CI Queue Sentinel',
 		`- Mode: \`${ MODE }\``,
 		...( forced ? [ '- Probe skipped (forced mode)' ] : [
-			`- Active runs attempted: ${ probed } of ${ runs.length }${ dropped ? ` (${ dropped } dropped by age window)` : '' }${ escalated ? ` (escalated: +${ escalated } runs to verify switch-off)` : '' }${ failedProbes ? ` (${ failedProbes } unreadable — API errors)` : '' }${ probeComplete ? '' : ' (probe incomplete — switch-off suppressed)' }`,
+			`- Active runs attempted: ${ probeAttempts } of ${ runs.length }${ dropped ? ` (${ dropped } dropped by age window)` : '' }${ escalated ? ` (escalated: +${ escalated } runs to verify switch-off)` : '' }${ failedProbes ? ` (${ failedProbes } unreadable — API errors)` : '' }${ probeComplete ? '' : ' (probe incomplete — switch-off suppressed)' }`,
 			`- Queued jobs found: ${ queuedJobs.length } (hosted pool${ ignoredPools ? `; ${ ignoredPools } in runner groups ignored` : '' })`,
 			`- Oldest queued job age: ${ oldestAgeMin === null ? 'n/a (queue clear)' : `${ oldestAgeMin.toFixed( 1 ) } min` } (threshold ${ QUEUE_AGE_THRESHOLD_MIN } min)`,
 		] ),
