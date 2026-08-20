@@ -307,17 +307,32 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		 * @return string
 		 */
 		private static function get_field_option_name( $option ) {
-			$field_name = $option['field_name'] ?? null;
+			$field_name = self::stringify_option_name( $option['field_name'] ?? null );
 
-			if ( is_scalar( $field_name ) && '' !== (string) $field_name ) {
-				return (string) $field_name;
+			if ( '' !== $field_name ) {
+				return $field_name;
 			}
-
-			$id = $option['id'] ?? null;
 
 			// The ID is third-party supplied too, so it gets the same treatment as the name above.
 			// Casting a non-scalar here would yield the literal 'Array' and name a real option.
-			return is_scalar( $id ) ? (string) $id : '';
+			return self::stringify_option_name( $option['id'] ?? null );
+		}
+
+		/**
+		 * Cast a field definition's name to a string, or to '' when it cannot name an option.
+		 *
+		 * Objects that define __toString() are accepted because PHP coerced them here before this
+		 * guard existed, and a field relying on that would otherwise have its stored data relocated.
+		 *
+		 * @param mixed $name Raw 'field_name' or 'id' from a field definition.
+		 * @return string
+		 */
+		private static function stringify_option_name( $name ) {
+			if ( is_scalar( $name ) || ( is_object( $name ) && method_exists( $name, '__toString' ) ) ) {
+				return (string) $name;
+			}
+
+			return '';
 		}
 
 		/**
@@ -332,9 +347,9 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				if ( ! isset( $value['type'] ) ) {
 					continue;
 				}
-				if ( ! isset( $value['id'] ) ) {
-					$value['id'] = '';
-				}
+				// The ID is rendered into markup and into hook names, so anything that cannot be a
+				// string is dropped rather than being coerced into one.
+				$value['id'] = self::stringify_option_name( $value['id'] ?? '' );
 
 				// The 'field_name' key can be used when it is useful to specify an input field name that is different
 				// from the input field ID. We use the key 'field_name' because 'name' is already in use for a different
@@ -1029,6 +1044,11 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 				// A definition that resolves to no usable name has nowhere to be stored.
 				if ( '' === $option_name ) {
+					wc_doing_it_wrong(
+						__METHOD__,
+						'Setting field definitions need a scalar "id" or "field_name" to be saved. This field was skipped.',
+						'11.2.0'
+					);
 					continue;
 				}
 
@@ -1037,9 +1057,19 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					parse_str( $option_name, $option_name_array );
 					$option_name = (string) current( array_keys( $option_name_array ) );
 
-					// A malformed name such as 'foo[' parses to a string rather than a key path.
-					// The read side returns the default for these, so skip rather than fatal.
+					/*
+					 * A malformed name such as 'foo[' parses to a base with no key path, so there
+					 * is no array offset to write to. Skipping keeps the rest of the screen saving,
+					 * where the unguarded key() below fataled the whole request. The read side
+					 * resolves the same base and returns whatever that option holds, so a field
+					 * shaped like this renders a value it can never save.
+					 */
 					if ( ! is_array( $option_name_array[ $option_name ] ?? null ) ) {
+						wc_doing_it_wrong(
+							__METHOD__,
+							'A setting "field_name" with unbalanced brackets cannot be saved. This field was skipped.',
+							'11.2.0'
+						);
 						continue;
 					}
 

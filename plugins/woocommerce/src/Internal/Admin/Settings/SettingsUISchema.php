@@ -464,8 +464,9 @@ class SettingsUISchema {
 	 * Resolve the option name used to read and save a field.
 	 *
 	 * The 'field_name' key can specify an input field name that differs from the field 'id' (for example a nested
-	 * `option_name[key]` path). When present it is authoritative for both reading and saving the value, so the two
-	 * paths stay in sync. Falls back to the field 'id' otherwise.
+	 * `option_name[key]` path). When set to a non-empty scalar it is authoritative for both reading and saving the
+	 * value, so the two paths stay in sync. Falls back to the field 'id' otherwise, including when 'field_name' is
+	 * present but empty.
 	 *
 	 * @param array $setting Legacy field definition.
 	 * @return string
