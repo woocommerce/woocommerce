@@ -50,6 +50,10 @@ function CustomersReportTable( {
 				hiddenByDefault: true,
 			},
 			{
+				label: __( 'Role', 'woocommerce' ),
+				key: 'role',
+			},
+			{
 				label: __( 'Last active', 'woocommerce' ),
 				key: 'date_last_active',
 				defaultSort: true,
@@ -105,6 +109,16 @@ function CustomersReportTable( {
 				hiddenByDefault: true,
 				isSortable: true,
 			},
+			{
+				label: __( 'Billing phone', 'woocommerce' ),
+				key: 'billing_phone',
+				hiddenByDefault: true,
+			},
+			{
+				label: __( 'Shipping phone', 'woocommerce' ),
+				key: 'shipping_phone',
+				hiddenByDefault: true,
+			},
 		];
 	};
 
@@ -134,11 +148,14 @@ function CustomersReportTable( {
 				user_id: userId,
 				orders_count: ordersCount,
 				username,
+				role,
 				total_spend: totalSpend,
 				postcode,
 				city,
 				state,
 				country,
+				billing_phone: billingPhone,
+				shipping_phone: shippingPhone,
 			} = customer;
 			const countryName = getCountryName( country );
 			const customerName =
@@ -190,6 +207,10 @@ function CustomersReportTable( {
 					value: username,
 				},
 				{
+					display: role,
+					value: role,
+				},
+				{
 					display: dateLastActiveDisplay,
 					value: dateLastActive,
 				},
@@ -232,6 +253,14 @@ function CustomersReportTable( {
 				{
 					display: postcode,
 					value: postcode,
+				},
+				{
+					display: billingPhone,
+					value: billingPhone,
+				},
+				{
+					display: shippingPhone,
+					value: shippingPhone,
 				},
 			];
 		} );

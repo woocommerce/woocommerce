@@ -46,8 +46,8 @@ class WC_Tests_API_Reports_Reviews_Totals extends WC_REST_Unit_Test_Case {
 		$query_data = array(
 			'count'      => true,
 			'post_type'  => 'product',
-			'meta_key'   => 'rating', // WPCS: slow query ok.
-			'meta_value' => '', // WPCS: slow query ok.
+			'meta_key'   => 'rating', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Test setup intentionally mirrors the legacy production query shape.
+			'meta_value' => '', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- Test setup intentionally mirrors the legacy production query shape.
 		);
 
 		for ( $i = 1; $i <= 5; $i++ ) {

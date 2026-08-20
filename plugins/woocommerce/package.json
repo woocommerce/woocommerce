@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "11.1.0",
+	"version": "11.2.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -137,6 +137,11 @@
 		"wp_org_slug": "woocommerce",
 		"build_step": "pnpm build:zip",
 		"ci": {
+			"ignore": [
+				"{,**/}*.md",
+				"{,**/}readme.txt",
+				"{,**/}changelog/!(*.ts|*.tsx|*.js|*.jsx|*.mjs|*.cjs|*.php|*.json|*.scss|*.css)"
+			],
 			"lint": {
 				"command": "lint:changes:branch <baseRef>",
 				"changes": [
@@ -1086,9 +1091,9 @@
 		}
 	},
 	"devDependencies": {
-		"@babel/cli": "7.25.7",
-		"@babel/core": "7.25.7",
-		"@babel/preset-env": "7.25.7",
+		"@babel/cli": "catalog:tooling",
+		"@babel/core": "catalog:tooling",
+		"@babel/preset-env": "catalog:tooling",
 		"@faker-js/faker": "^9.3.0",
 		"@playwright/test": "^1.61.1",
 		"@typescript-eslint/eslint-plugin": "^8.63.0",

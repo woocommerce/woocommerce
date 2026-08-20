@@ -378,7 +378,7 @@ class WC_Admin_Post_Types {
 		// Get the product and save.
 		$product = wc_get_product( $post );
 
-		if ( ! empty( $request_data['woocommerce_quick_edit'] ) ) { // WPCS: input var ok.
+		if ( ! empty( $request_data['woocommerce_quick_edit'] ) ) {
 			$this->quick_edit_save( $post_id, $product );
 		} else {
 			$this->bulk_edit_save( $post_id, $product );

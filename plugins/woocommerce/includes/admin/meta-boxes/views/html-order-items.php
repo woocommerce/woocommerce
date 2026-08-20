@@ -417,7 +417,7 @@ if ( wc_tax_enabled() ) {
 <?php endif; ?>
 
 <script type="text/template" id="tmpl-wc-modal-add-products">
-	<div class="wc-backbone-modal">
+	<div class="wc-backbone-modal wc-backbone-modal-add-products">
 		<div class="wc-backbone-modal-content">
 			<section class="wc-backbone-modal-main" role="main">
 				<header class="wc-backbone-modal-header">

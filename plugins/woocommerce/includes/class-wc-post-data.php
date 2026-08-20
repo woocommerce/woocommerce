@@ -360,8 +360,8 @@ class WC_Post_Data {
 				$order_title .= ' &ndash; ' . date_i18n( 'F j, Y @ h:i A', strtotime( $data['post_date'] ) );
 			}
 			$data['post_title'] = $order_title;
-		} elseif ( 'product' === $data['post_type'] && isset( $_POST['product-type'] ) ) { // WPCS: input var ok, CSRF ok.
-			$product_type = wc_clean( wp_unslash( $_POST['product-type'] ) ); // WPCS: input var ok, CSRF ok.
+		} elseif ( 'product' === $data['post_type'] && isset( $_POST['product-type'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Cleaned input selects known product types only.
+			$product_type = wc_clean( wp_unslash( $_POST['product-type'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Cleaned input selects known product types only.
 			switch ( $product_type ) {
 				case ProductType::GROUPED:
 				case ProductType::VARIABLE:
