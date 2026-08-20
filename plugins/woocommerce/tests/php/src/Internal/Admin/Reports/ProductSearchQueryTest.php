@@ -16,7 +16,7 @@ class ProductSearchQueryTest extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_all_filters( 'wc_product_sku_enabled' );
+		remove_filter( 'wc_product_sku_enabled', '__return_false' );
 		parent::tearDown();
 	}
 
