@@ -271,7 +271,7 @@
 		"postcode-validator": "3.9.2",
 		"preact": "^10.24.2",
 		"prop-types": "^15.8.1",
-		"react-number-format": "4.9.3",
+		"react-number-format": "5.4.5",
 		"react-transition-group": "^4.4.5",
 		"request": "2.88.2",
 		"trim-html": "0.1.9",

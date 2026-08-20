@@ -71,8 +71,8 @@ const baseCustomer = {
 	country: '',
 };
 
-// Country cell is the 9th column (0-indexed: 8) per getHeadersContent in table.js.
-const COUNTRY_COL = 8;
+// Country cell is the 10th column (0-indexed: 9) per getHeadersContent in table.js.
+const COUNTRY_COL = 9;
 
 function getCountryCell( customer ) {
 	captured.getRowsContent = null;
@@ -162,8 +162,8 @@ describe( 'CustomersReportTable country cell', () => {
 
 describe( 'CustomersReportTable phone cells', () => {
 	// Phone cells are the last two columns per getHeadersContent in table.js.
-	const BILLING_PHONE_COL = 12;
-	const SHIPPING_PHONE_COL = 13;
+	const BILLING_PHONE_COL = 13;
+	const SHIPPING_PHONE_COL = 14;
 
 	beforeEach( () => {
 		jest.clearAllMocks();
