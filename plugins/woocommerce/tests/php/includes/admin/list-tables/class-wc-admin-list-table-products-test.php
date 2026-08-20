@@ -789,6 +789,68 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Values that normalise to nothing still join the lookup table.
+	 *
+	 * The filter is registered on a non-empty raw request value, so anything that survives that check
+	 * but empties out during sanitisation still reaches the filter. Those requests have always been
+	 * joined and have always matched no product; deciding the join after normalising would silently
+	 * drop it for exactly them.
+	 *
+	 * @testdox A stock_status that normalises to nothing still joins the lookup table and matches no product.
+	 *
+	 * @dataProvider degenerate_stock_status_provider
+	 *
+	 * @param string|array $stock_status Value of the stock_status request parameter.
+	 */
+	public function test_degenerate_stock_status_still_joins_the_lookup_table( $stock_status ): void {
+		global $wpdb;
+
+		$args = $this->filter_clauses_for_stock_status( $stock_status );
+
+		$this->assertStringContainsString(
+			"LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup",
+			$args['join'],
+			'A stock_status that sanitises away must still leave the lookup table joined for later callbacks.'
+		);
+		$this->assertStringContainsString(
+			"wc_product_meta_lookup.stock_status=''",
+			$args['where'],
+			'A stock_status that sanitises away should keep matching no product rather than dropping the filter.'
+		);
+	}
+
+	/**
+	 * A multi-value stock_status honours the first value.
+	 *
+	 * @testdox A multi-value stock_status request filters on the first value.
+	 */
+	public function test_multi_value_stock_status_uses_the_first_value(): void {
+		$args = $this->filter_clauses_for_stock_status(
+			array( ProductStockStatus::OUT_OF_STOCK, ProductStockStatus::IN_STOCK )
+		);
+
+		$this->assertStringContainsString(
+			'stock_status_products',
+			$args['where'],
+			'A multi-value request should filter on its first value rather than matching the whole catalogue.'
+		);
+	}
+
+	/**
+	 * Request values that survive the non-empty check but sanitise away.
+	 *
+	 * @return array<string, array<mixed>>
+	 */
+	public function degenerate_stock_status_provider(): array {
+		return array(
+			'whitespace only'       => array( ' ' ),
+			'markup only'           => array( '<b>' ),
+			'array with empty item' => array( array( '' ) ),
+			'nested array'          => array( array( array( 'x' ) ) ),
+		);
+	}
+
+	/**
 	 * Clauses arriving without a usable join string are tolerated.
 	 *
 	 * @testdox Clauses arriving without a join string do not break the stock filter.
