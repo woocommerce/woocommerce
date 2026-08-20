@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Update a product's average rating and rating counts when a review is created, its rating is edited, or it is moved to another product through the REST API.
+Update product rating aggregates when REST API reviews are created or re-rated, and keep both products' counts correct when wc/v3 moves a review.
