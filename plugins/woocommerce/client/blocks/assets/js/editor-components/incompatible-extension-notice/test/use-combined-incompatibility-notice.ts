@@ -261,6 +261,31 @@ describe( 'useCombinedIncompatibilityNotice', () => {
 		expect( mountVisibility( CART ) ).toBe( true );
 	} );
 
+	// The notice stays dismissed while everything currently incompatible has been
+	// acknowledged, even when the acknowledgement covers more than that. Asserted
+	// with the payment store still loading, because once it has loaded the prune
+	// makes the two sets equal and a comparison demanding equality would pass
+	// here too — which is the #42469 bug.
+	it( 'stays dismissed off a wider acknowledgement while the store loads', () => {
+		mockIncompatibleExtensions = [ { id: 'ext_x', title: 'Ext X' } ];
+		mockIncompatiblePaymentMethods = { gw_a: 'Gateway A' };
+		mountAndDismiss( CHECKOUT );
+		expect( storedNotices() ).toEqual( [
+			{ [ CHECKOUT ]: [ 'ext_x', 'gw_a' ] },
+		] );
+
+		// Reload with the store still loading: it reports no gateways, so only
+		// the extension is incompatible, and the acknowledgement covers it and
+		// one thing more.
+		mockPaymentMethodsLoaded = false;
+
+		expect( mountVisibility( CHECKOUT ) ).toBe( false );
+		// Held back, so nothing was pruned on the strength of an empty set.
+		expect( storedNotices() ).toEqual( [
+			{ [ CHECKOUT ]: [ 'ext_x', 'gw_a' ] },
+		] );
+	} );
+
 	// Pruning turns "this is no longer incompatible" into a write that drops the
 	// acknowledgement, so every reason the incompatible set can read as empty has
 	// to be told apart from it genuinely being empty. The payment store has its
