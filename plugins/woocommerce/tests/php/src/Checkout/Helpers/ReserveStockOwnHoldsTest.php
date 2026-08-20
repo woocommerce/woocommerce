@@ -35,7 +35,10 @@ use WC_Session_Handler;
 use WC_Unit_Test_Case;
 
 /**
- * Class ReserveStockOwnHoldsTest
+ * Class ReserveStockOwnHoldsTest.
+ *
+ * Exercises the grace window that stops a shopper being blocked by their own
+ * stale, unpaid stock hold. The full contract is in the file docblock above.
  */
 class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 
@@ -187,8 +190,11 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 		$this->hold_stock( $order, $product->get_id(), 1, 2000 );
 
 		add_filter( 'woocommerce_own_reserved_stock_grace_minutes', '__return_zero' );
-		$held = wc_get_held_stock_quantity( $product, 0 );
-		remove_filter( 'woocommerce_own_reserved_stock_grace_minutes', '__return_zero' );
+		try {
+			$held = wc_get_held_stock_quantity( $product, 0 );
+		} finally {
+			remove_filter( 'woocommerce_own_reserved_stock_grace_minutes', '__return_zero' );
+		}
 
 		$this->assertSame( 1, $held );
 	}
@@ -327,8 +333,11 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 		};
 
 		add_filter( 'woocommerce_query_for_reserved_stock', $capture, 10, 3 );
-		wc_get_held_stock_quantity( $product, 4242 );
-		remove_filter( 'woocommerce_query_for_reserved_stock', $capture, 10 );
+		try {
+			wc_get_held_stock_quantity( $product, 4242 );
+		} finally {
+			remove_filter( 'woocommerce_query_for_reserved_stock', $capture, 10 );
+		}
 
 		$this->assertIsInt( $seen['exclude_order_id'] );
 		$this->assertSame( 4242, $seen['exclude_order_id'] );
