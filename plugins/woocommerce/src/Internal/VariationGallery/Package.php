@@ -19,16 +19,22 @@ defined( 'ABSPATH' ) || exit;
 class Package {
 
 	/**
-	 * Former feature id used by FeaturesController.
-	 *
-	 * @deprecated 11.1.0 The variation gallery is no longer feature flagged.
+	 * Action Scheduler hook for DB update callbacks.
+	 */
+	private const UPDATE_CALLBACK_HOOK = 'woocommerce_run_update_callback';
+
+	/**
+	 * Action Scheduler group for DB update callbacks.
+	 */
+	private const UPDATE_CALLBACK_GROUP = 'woocommerce-db-updates';
+
+	/**
+	 * The feature id used by `FeaturesController` (Settings → Advanced → Features).
 	 */
 	public const FEATURE_ID = 'variation_gallery';
 
 	/**
-	 * Former option backing the variation gallery feature toggle.
-	 *
-	 * @deprecated 11.1.0 The variation gallery is no longer feature flagged.
+	 * Option backing the variation gallery feature toggle.
 	 */
 	public const ENABLE_OPTION_NAME = 'wc_feature_woocommerce_additional_variation_images_enabled';
 
@@ -40,25 +46,6 @@ class Package {
 	public const CANARY_MAX_VARIANT = 6;
 
 	/**
-	 * Action Scheduler hook for DB update callbacks.
-	 */
-	private const UPDATE_CALLBACK_HOOK = 'woocommerce_run_update_callback';
-
-	/**
-	 * Action Scheduler group for DB update callbacks.
-	 */
-	private const UPDATE_CALLBACK_GROUP = 'woocommerce-db-updates';
-
-	/**
-	 * As of WooCommerce 11.1, the variation gallery is enabled for all users.
-	 *
-	 * @return bool
-	 */
-	public static function is_enabled() {
-		return true;
-	}
-
-	/**
 	 * Whether the current store is in the former canary cohort.
 	 *
 	 * @deprecated 11.1.0 Use Package::is_enabled() instead.
@@ -67,6 +54,15 @@ class Package {
 	public static function is_in_canary_cohort(): bool {
 		wc_deprecated_function( __METHOD__, '11.1.0', __CLASS__ . '::is_enabled' );
 		return self::is_enabled();
+	}
+
+	/**
+	 * As of WooCommerce 11.1, the variation gallery is enabled for all users.
+	 *
+	 * @return bool
+	 */
+	public static function is_enabled() {
+		return true;
 	}
 
 	/**
