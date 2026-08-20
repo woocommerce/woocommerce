@@ -872,6 +872,20 @@ describe( 'getRangeLabel', () => {
 		expect( label ).toBe( 'LL Oct 1 - 31, 2024' );
 	} );
 
+	it( 'should leave a backslash escaped localized format token alone', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( '\\LL MMM D, YYYY' );
+
+		expect(
+			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+		).toBe( 'LL Oct 1 - 31, 2024' );
+
+		( __ as jest.Mock ).mockReturnValueOnce( '\\L\\L MMM D, YYYY' );
+
+		expect(
+			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+		).toBe( 'LL Oct 1 - 31, 2024' );
+	} );
+
 	it( 'should keep the zero padding a "DD" format asks for', () => {
 		// Mirrors the Serbian translation of the format.
 		( __ as jest.Mock ).mockReturnValueOnce( 'DD. MMM YYYY.' );
