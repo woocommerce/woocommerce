@@ -272,15 +272,7 @@ class Controller extends GenericController implements ExportableInterface {
 			),
 
 		);
-		$params['search']        = array(
-			'description'       => __( 'Limit result to products whose name or SKU matches any of the given terms.', 'woocommerce' ),
-			'type'              => 'array',
-			'sanitize_callback' => array( ProductSearchQuery::class, 'parse_terms' ),
-			'validate_callback' => 'rest_validate_request_arg',
-			'items'             => array(
-				'type' => 'string',
-			),
-		);
+		$params['search']        = ProductSearchQuery::get_collection_param();
 		$params['extended_info'] = array(
 			'description'       => __( 'Add additional piece of info about each product to the report.', 'woocommerce' ),
 			'type'              => 'boolean',

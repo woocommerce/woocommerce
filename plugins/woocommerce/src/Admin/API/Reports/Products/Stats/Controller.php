@@ -238,15 +238,7 @@ class Controller extends GenericStatsController {
 				'type' => 'integer',
 			),
 		);
-		$params['search']          = array(
-			'description'       => __( 'Limit result to products whose name or SKU matches any of the given terms.', 'woocommerce' ),
-			'type'              => 'array',
-			'sanitize_callback' => array( ProductSearchQuery::class, 'parse_terms' ),
-			'validate_callback' => 'rest_validate_request_arg',
-			'items'             => array(
-				'type' => 'string',
-			),
-		);
+		$params['search']          = ProductSearchQuery::get_collection_param();
 		$params['segmentby']       = array(
 			'description'       => __( 'Segment the response by additional constraint.', 'woocommerce' ),
 			'type'              => 'string',

@@ -42,6 +42,25 @@ class ProductSearchQuery {
 	}
 
 	/**
+	 * Returns the REST collection parameter definition for the product search.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @return array Parameter definition.
+	 */
+	public static function get_collection_param() {
+		return array(
+			'description'       => __( 'Limit result to products whose name or SKU matches any of the given terms.', 'woocommerce' ),
+			'type'              => 'array',
+			'sanitize_callback' => array( self::class, 'parse_terms' ),
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'type' => 'string',
+			),
+		);
+	}
+
+	/**
 	 * Returns a SELECT statement resolving the given search terms to product IDs.
 	 *
 	 * The statement yields a single `product_id` column, for use as a derived table or as the
