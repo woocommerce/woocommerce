@@ -203,6 +203,11 @@ final class WooCommerce {
 	 * @return void
 	 */
 	public function __wakeup() {
+		$x =1 + 2;
+
+		if (true ) {
+		}
+		
 		wc_doing_it_wrong( __FUNCTION__, __( 'Unserializing instances of this class is forbidden.', 'woocommerce' ), '2.1' );
 	}
 
