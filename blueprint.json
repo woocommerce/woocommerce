@@ -3,7 +3,7 @@
 	"landingPage": "/wp-admin/edit.php?post_type=product&page=woocommerce-products-dashboard",
 	"preferredVersions": {
 		"php": "8.2",
-		"wp": "latest"
+		"wp": "7.1"
 	},
 	"features": {
 		"networking": true
@@ -18,7 +18,7 @@
 			"step": "installPlugin",
 			"pluginData": {
 				"resource": "url",
-				"url": "https://github.com/woocommerce/woocommerce/releases/download/nightly/woocommerce-trunk-nightly.zip"
+				"url": "https://downloads.wordpress.org/plugin/woocommerce.11.0.1.zip"
 			},
 			"options": {
 				"activate": true
@@ -27,8 +27,8 @@
 		{
 			"step": "installPlugin",
 			"pluginData": {
-				"resource": "wordpress.org/plugins",
-				"slug": "gutenberg"
+				"resource": "url",
+				"url": "https://downloads.wordpress.org/plugin/gutenberg.27.0.0.zip"
 			},
 			"options": {
 				"activate": true
