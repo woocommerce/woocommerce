@@ -620,7 +620,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		 * so it sits outside the check above.
 		 */
 		if ( $current_product_id && $original_product_id !== $current_product_id ) {
-			WC_Comments::clear_transients( $original_product_id );
+			wp_update_comment_count( $original_product_id );
 		}
 
 		if ( isset( $request['verified'] ) && ! empty( $request['verified'] ) ) {

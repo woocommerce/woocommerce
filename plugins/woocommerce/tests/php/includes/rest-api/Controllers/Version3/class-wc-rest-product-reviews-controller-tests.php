@@ -394,8 +394,19 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 				'rating'     => 3,
 			)
 		);
-		$response = $this->server->dispatch( $request );
+		$counted_products = array();
+		$record_count     = function ( $post_id ) use ( &$counted_products ) {
+			$counted_products[] = (int) $post_id;
+		};
+
+		add_action( 'wp_update_comment_count', $record_count );
+		try {
+			$response = $this->server->dispatch( $request );
+		} finally {
+			remove_action( 'wp_update_comment_count', $record_count );
+		}
 		$this->assertEquals( 200, $response->get_status(), 'The review is moved successfully.' );
+		$this->assertSame( array( $destination_id, $source_id ), $counted_products );
 
 		$source = wc_get_product( $source_id );
 		$this->assertEquals( 0, $source->get_average_rating(), 'The product the review left no longer counts its rating.' );
@@ -406,6 +417,11 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 3, $destination->get_average_rating(), 'The product the review moved to picks up the new rating.' );
 		$this->assertEquals( array( 3 => 1 ), $destination->get_rating_counts(), 'The product the review moved to picks up the rating counts.' );
 		$this->assertEquals( 1, $destination->get_review_count(), 'The product the review moved to counts the review.' );
+
+		clean_post_cache( $source_id );
+		clean_post_cache( $destination_id );
+		$this->assertSame( 0, (int) get_post( $source_id )->comment_count );
+		$this->assertSame( 1, (int) get_post( $destination_id )->comment_count );
 	}
 
 	/**
@@ -430,6 +446,47 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$destination = wc_get_product( $destination_id );
 		$this->assertEquals( 4, $destination->get_average_rating(), 'The product the review moved to keeps the existing rating.' );
 		$this->assertEquals( 1, $destination->get_review_count(), 'The product the review moved to counts the review.' );
+
+		clean_post_cache( $source_id );
+		clean_post_cache( $destination_id );
+		$this->assertSame( 0, (int) get_post( $source_id )->comment_count );
+		$this->assertSame( 1, (int) get_post( $destination_id )->comment_count );
+	}
+
+	/**
+	 * @testdox Moving a review honours deferred comment counting for both products.
+	 */
+	public function test_update_item_defers_both_products_when_a_review_moves() {
+		wp_set_current_user( $this->shop_manager_id );
+		$source_id      = ProductHelper::create_simple_product()->get_id();
+		$destination_id = ProductHelper::create_simple_product()->get_id();
+		$review_id      = $this->create_review( $source_id, 'Moving later.', 4 )->get_data()['id'];
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/reviews/' . $review_id );
+		$request->set_body_params( array( 'product_id' => $destination_id ) );
+
+		wp_defer_comment_counting( true );
+		try {
+			$response = $this->server->dispatch( $request );
+			$this->assertSame( 200, $response->get_status() );
+
+			clean_post_cache( $source_id );
+			clean_post_cache( $destination_id );
+			$this->assertSame( 1, (int) get_post( $source_id )->comment_count );
+			$this->assertSame( 0, (int) get_post( $destination_id )->comment_count );
+		} finally {
+			wp_defer_comment_counting( false );
+		}
+
+		clean_post_cache( $source_id );
+		clean_post_cache( $destination_id );
+		$this->assertSame( 0, (int) get_post( $source_id )->comment_count );
+		$this->assertSame( 1, (int) get_post( $destination_id )->comment_count );
+
+		$source      = wc_get_product( $source_id );
+		$destination = wc_get_product( $destination_id );
+		$this->assertEquals( 0, $source->get_average_rating() );
+		$this->assertEquals( 4, $destination->get_average_rating() );
 	}
 
 	/**

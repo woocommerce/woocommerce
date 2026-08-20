@@ -356,6 +356,8 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 			return $review;
 		}
 
+		$original_product_id = (int) $review->comment_post_ID;
+
 		$prepared_review = $this->prepare_item_for_database( $request );
 		if ( is_wp_error( $prepared_review ) ) {
 			return $prepared_review;
@@ -378,7 +380,17 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 			return new WP_Error( 'rest_product_review_failed_edit', __( 'Updating product review failed.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
-		$product_review = get_comment( $product_review_id );
+		$product_review     = get_comment( $product_review_id );
+		$current_product_id = $product_review instanceof WP_Comment ? (int) $product_review->comment_post_ID : 0;
+
+		/*
+		 * Core updates the destination count after a move, but not the source. Use the full count
+		 * primitive for the source so wp_posts.comment_count and WooCommerce aggregates agree.
+		 */
+		if ( $current_product_id && $original_product_id !== $current_product_id ) {
+			wp_update_comment_count( $original_product_id );
+		}
+
 		$this->update_additional_fields_for_object( $product_review, $request );
 
 		/**

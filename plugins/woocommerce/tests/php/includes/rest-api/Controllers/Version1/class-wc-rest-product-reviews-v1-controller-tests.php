@@ -356,6 +356,67 @@ class WC_REST_Product_Reviews_V1_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A filter-driven move refreshes both products and their core comment counts.
+	 */
+	public function test_update_item_recalculates_both_products_when_a_filter_moves_the_review() {
+		wp_set_current_user( $this->shop_manager_id );
+		$source_id      = ProductHelper::create_simple_product()->get_id();
+		$destination_id = ProductHelper::create_simple_product()->get_id();
+
+		$this->create_review( $destination_id, 'Already here.', 1 );
+		$review_id = $this->create_review( $source_id, 'Starts at five.', 5 )->get_data()['id'];
+
+		$send_to_destination = function ( $prepared_review ) use ( $destination_id ) {
+			$prepared_review['comment_post_ID'] = $destination_id;
+			return $prepared_review;
+		};
+		$counted_products    = array();
+		$record_count        = function ( $post_id ) use ( &$counted_products ) {
+			$counted_products[] = (int) $post_id;
+		};
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v1/products/' . $source_id . '/reviews/' . $review_id );
+		$request->set_param( 'product_id', $source_id );
+		$request->set_param( 'id', $review_id );
+		$request->set_param( 'rating', 2 );
+
+		add_filter( 'rest_preprocess_product_review', $send_to_destination );
+		add_action( 'wp_update_comment_count', $record_count );
+		try {
+			$response = $this->sut->update_item( $request );
+		} finally {
+			remove_action( 'wp_update_comment_count', $record_count );
+			remove_filter( 'rest_preprocess_product_review', $send_to_destination );
+		}
+
+		$this->assertNotWPError( $response );
+		$this->assertSame( $destination_id, (int) get_comment( $review_id )->comment_post_ID );
+		$this->assertSame( 2, (int) get_comment_meta( $review_id, 'rating', true ) );
+		$this->assertSame( array( $destination_id, $source_id ), $counted_products );
+
+		$source = wc_get_product( $source_id );
+		$this->assertEquals( 0, $source->get_average_rating() );
+		$this->assertSame( array(), $source->get_rating_counts() );
+		$this->assertEquals( 0, $source->get_review_count() );
+
+		$destination = wc_get_product( $destination_id );
+		$this->assertEquals( 1.5, $destination->get_average_rating() );
+		$this->assertEquals(
+			array(
+				1 => 1,
+				2 => 1,
+			),
+			$destination->get_rating_counts()
+		);
+		$this->assertEquals( 2, $destination->get_review_count() );
+
+		clean_post_cache( $source_id );
+		clean_post_cache( $destination_id );
+		$this->assertSame( 0, (int) get_post( $source_id )->comment_count );
+		$this->assertSame( 2, (int) get_post( $destination_id )->comment_count );
+	}
+
+	/**
 	 * Creates a product review through the controller.
 	 *
 	 * @param int    $product_id ID of the product being reviewed.
