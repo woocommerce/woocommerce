@@ -114,33 +114,27 @@ export const IncompatibleExtensionsFrontendNotice = ( {
 	const shouldShow =
 		CURRENT_USER_IS_ADMIN && count > 0 && ! isDismissedAndUpToDate;
 
-	// An acknowledgement only lasts while the extension stays incompatible.
-	// Dropping the ones that no longer are means reactivating (or reinstalling)
-	// an extension counts as a fresh incompatibility and warns again, while the
-	// ones that never left stay acknowledged — so deactivating a single
-	// extension still doesn't resurface the banner for the rest.
-	//
-	// This only ever removes slugs, never adds, so an extension the merchant
-	// hasn't acknowledged can't be marked as accepted while the banner is up.
-	// Held back unless the list was actually delivered: to a shopper, and to
-	// anyone whose payload lost the setting, the empty list is indistinguishable
-	// from "nothing is incompatible" and would erase a real acknowledgement.
-	const hasStaleAcknowledgements =
+	// An acknowledgement only lasts while the extension stays incompatible:
+	// slugs no longer incompatible are dropped, so a reactivated extension
+	// counts as fresh and warns again, while the ones that never left stay
+	// acknowledged. It only ever removes slugs, and only when the list was
+	// actually delivered — to a shopper, and to a payload that lost the
+	// setting, the empty list is indistinguishable from "nothing is
+	// incompatible" and would erase a real acknowledgement.
+	const prunedAcknowledgement =
 		CURRENT_USER_IS_ADMIN &&
 		isKnown &&
-		! isSubsetOf( acknowledgedSlugs, slugs );
+		! isSubsetOf( acknowledgedSlugs, slugs )
+			? acknowledgedSlugs.filter( ( slug ) => slugs.includes( slug ) )
+			: null;
 
+	// Deliberately no dependency array: a pruned set is always strictly smaller
+	// than what is stored, so the write settles.
 	useEffect( () => {
-		if ( hasStaleAcknowledgements ) {
-			setDismissedSlugs(
-				acknowledgedSlugs.filter( ( slug ) => slugs.includes( slug ) )
-			);
+		if ( prunedAcknowledgement !== null ) {
+			setDismissedSlugs( prunedAcknowledgement );
 		}
-		// `slugs` is rebuilt every render; `hasStaleAcknowledgements` is the
-		// value that gates the write, and it goes false once the pruned set has
-		// been stored.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ hasStaleAcknowledgements ] );
+	} );
 
 	if ( ! shouldShow ) {
 		return null;

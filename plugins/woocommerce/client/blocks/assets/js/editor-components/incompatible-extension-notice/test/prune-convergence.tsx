@@ -8,9 +8,9 @@
  * with both initialized flags already true.
  *
  * This suite deliberately runs outside React's act environment and drives a
- * real registered store. Under `act()` the prune's own state update is flushed
- * between the two dispatches, the gate boolean dips false, and the effect
- * re-runs on its own — which hides the very ordering being tested.
+ * real registered store: `act()` flushes the prune's own state update between
+ * the two dispatches, which hides exactly the interleaving that once let a
+ * dependency-keyed prune effect skip the second shrink.
  *
  * External dependencies
  */
@@ -165,6 +165,8 @@ describe( 'prune convergence across consecutive shrinks', () => {
 			wasActEnvironment;
 	} );
 
+	// The one prune scenario the act-based suite cannot represent; everything
+	// else about pruning lives in test/use-combined-incompatibility-notice.ts.
 	it( 'drops both halves when the express and regular sets shrink in separate renders', async () => {
 		// The merchant acknowledged everything that was incompatible.
 		window.localStorage.setItem(
@@ -193,46 +195,5 @@ describe( 'prune convergence across consecutive shrinks', () => {
 		// Both gateways stopped being incompatible, so neither acknowledgement
 		// may survive: if either comes back it has to warn again.
 		expect( acknowledgedSlugs() ).toEqual( [ 'ext_x' ] );
-	} );
-
-	it( 'still converges when the two shrinks land in the same render', async () => {
-		window.localStorage.setItem(
-			getEditorStorageKey(),
-			JSON.stringify( [
-				{ [ CHECKOUT ]: [ 'ext_x', 'gw_express', 'gw_regular' ] },
-			] )
-		);
-
-		root.render( createElement( Harness ) );
-		await settle();
-
-		dispatch( STORE ).setExpress( {} );
-		dispatch( STORE ).setRegular( {} );
-		await settle();
-
-		expect( acknowledgedSlugs() ).toEqual( [ 'ext_x' ] );
-	} );
-
-	it( 'leaves the acknowledgement alone while the payment store is still loading', async () => {
-		window.localStorage.setItem(
-			getEditorStorageKey(),
-			JSON.stringify( [
-				{ [ CHECKOUT ]: [ 'ext_x', 'gw_express', 'gw_regular' ] },
-			] )
-		);
-		// A page where the payment store has not reported yet: its empty
-		// incompatible set must not be read as "nothing is incompatible".
-		dispatch( STORE ).setExpress( {} );
-		dispatch( STORE ).setRegular( {} );
-		dispatch( STORE ).deinitialize();
-
-		root.render( createElement( Harness ) );
-		await settle();
-
-		expect( acknowledgedSlugs() ).toEqual( [
-			'ext_x',
-			'gw_express',
-			'gw_regular',
-		] );
 	} );
 } );

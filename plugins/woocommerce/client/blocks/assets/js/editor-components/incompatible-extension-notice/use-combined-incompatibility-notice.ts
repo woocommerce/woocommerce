@@ -160,20 +160,13 @@ export const useCombinedIncompatibilityNotice = (
 		storeAcknowledgedSlugs( allIncompatibleItemSlugs );
 	};
 
-	// An acknowledgement only lasts while the item stays incompatible. Dropping
-	// the ones that no longer are means re-enabling an item (or reinstalling an
-	// extension) counts as a fresh incompatibility and warns again, while the
-	// items that never left stay acknowledged — so disabling one item still
-	// doesn't resurface the notice for the rest, which is the #42469 fix.
-	//
-	// This only ever removes slugs, never adds, so an item the merchant hasn't
-	// acknowledged can't be marked as accepted while the notice is on screen.
-	// Held back until both halves of the incompatible set are actually known:
-	// the empty set the payment store reports before it loads, and the empty
-	// list a missing `incompatibleExtensions` setting produces, are both
-	// indistinguishable from "nothing is incompatible" and would erase the
-	// acknowledgement. Neither half can be pruned on its own, because a stored
-	// slug does not say which of the two it came from.
+	// An acknowledgement only lasts while the item stays incompatible: slugs no
+	// longer incompatible are dropped, so an item that goes away and comes back
+	// counts as fresh and warns again, while the items that never left stay
+	// acknowledged (the #42469 fix). It only ever removes slugs, and is held
+	// back until both halves of the incompatible set are known — the payment
+	// store before it loads and a missing `incompatibleExtensions` setting both
+	// report an empty set, indistinguishable from "nothing is incompatible".
 	const prunedAcknowledgement =
 		arePaymentMethodsLoaded &&
 		areIncompatibleExtensionsKnown &&
@@ -183,30 +176,15 @@ export const useCombinedIncompatibilityNotice = (
 			  )
 			: null;
 
-	// The set to store, serialised, rather than a boolean saying that some set
-	// needs storing. The incompatible set can shrink twice while the gate stays
-	// open — `__internalUpdateAvailablePaymentMethods` awaits
-	// `checkPaymentMethodsCanPay` once per half, so the express and regular
-	// halves land in separate renders — and "something is stale" reads true
-	// through both of them. Keyed on that boolean the effect would run once,
-	// prune to the first render's set, and never revisit the second shrink,
-	// leaving a slug acknowledged that is no longer incompatible.
-	const prunedAcknowledgementKey =
-		prunedAcknowledgement === null
-			? null
-			: prunedAcknowledgement.join( '\u0000' );
-
+	// Deliberately no dependency array: a pruned set is always strictly smaller
+	// than what is stored, so the write settles, and re-checking on every
+	// render is what keeps consecutive shrinks of the incompatible set from
+	// slipping past a memoised gate.
 	useEffect( () => {
 		if ( prunedAcknowledgement !== null ) {
 			storeAcknowledgedSlugs( prunedAcknowledgement );
 		}
-		// `storeAcknowledgedSlugs` and `prunedAcknowledgement` are rebuilt every
-		// render; the serialisation is what actually distinguishes one target
-		// set from another. A non-null pruned set is always strictly smaller
-		// than what is stored, so the key always changes after a write and the
-		// effect settles.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ prunedAcknowledgementKey ] );
+	} );
 
 	// This ensures the notice is not shown on first render. This is required so
 	// Gutenberg doesn't steal the focus from the Guide and focuses the block.
