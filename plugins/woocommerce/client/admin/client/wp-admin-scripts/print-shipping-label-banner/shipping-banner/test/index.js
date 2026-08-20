@@ -248,6 +248,7 @@ describe( 'Create shipping label button', () => {
 
 		const reloadButton = getByRole( 'button', { name: 'Reload page' } );
 		expect( reloadButton ).toBeInTheDocument();
+		expect( reloadButton ).not.toHaveClass( 'is-busy' );
 
 		userEvent.click( reloadButton );
 
@@ -595,6 +596,73 @@ describe( 'Setup error message', () => {
 			expect(
 				getByText(
 					'Unable to set up the plugin. Refresh the page and try again.'
+				)
+			).toBeInTheDocument()
+		);
+		expect(
+			getByRole( 'button', { name: actionButtonLabel } )
+		).not.toHaveClass( 'is-busy' );
+	} );
+
+	it( 'should clear busy state and show error if installPlugins throws an error', async () => {
+		const actionButtonLabel = 'Create shipping label';
+
+		const { getByRole, getByText } = render(
+			<ShippingBanner
+				isJetpackConnected={ true }
+				activatePlugins={ jest.fn() }
+				activePlugins={ [ 'jetpack' ] }
+				installPlugins={ jest
+					.fn()
+					.mockRejectedValue( new Error( 'Network error' ) ) }
+				itemsCount={ 1 }
+				isRequesting={ false }
+				orderId={ 1 }
+				isWcstCompatible={ true }
+				actionButtonLabel={ actionButtonLabel }
+			/>
+		);
+
+		userEvent.click( getByRole( 'button', { name: actionButtonLabel } ) );
+
+		await waitFor( () =>
+			expect(
+				getByText(
+					'Unable to install the plugin. Refresh the page and try again.'
+				)
+			).toBeInTheDocument()
+		);
+		expect(
+			getByRole( 'button', { name: actionButtonLabel } )
+		).not.toHaveClass( 'is-busy' );
+	} );
+
+	it( 'should clear busy state and show error if activatePlugins throws an error', async () => {
+		const actionButtonLabel = 'Create shipping label';
+
+		const { getByRole, getByText } = render(
+			<ShippingBanner
+				isJetpackConnected={ true }
+				activatePlugins={ jest
+					.fn()
+					.mockRejectedValue( new Error( 'Activation failed' ) ) }
+				activePlugins={ [ 'jetpack' ] }
+				installPlugins={ jest.fn().mockReturnValue( {
+					success: true,
+				} ) }
+				itemsCount={ 1 }
+				orderId={ 1 }
+				isWcstCompatible={ true }
+				actionButtonLabel={ actionButtonLabel }
+			/>
+		);
+
+		userEvent.click( getByRole( 'button', { name: actionButtonLabel } ) );
+
+		await waitFor( () =>
+			expect(
+				getByText(
+					'Unable to activate the plugin. Refresh the page and try again.'
 				)
 			).toBeInTheDocument()
 		);
