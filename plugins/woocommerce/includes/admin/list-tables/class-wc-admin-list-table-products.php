@@ -685,7 +685,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	public function order_by_price_asc_post_clauses( $args ) {
-		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
+		$args['join']    = $this->append_product_sorting_table_join( $args['join'] ?? '' );
 		$args['orderby'] = ' wc_product_meta_lookup.min_price ASC, wc_product_meta_lookup.product_id ASC ';
 		return $args;
 	}
@@ -697,7 +697,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	public function order_by_price_desc_post_clauses( $args ) {
-		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
+		$args['join']    = $this->append_product_sorting_table_join( $args['join'] ?? '' );
 		$args['orderby'] = ' wc_product_meta_lookup.max_price DESC, wc_product_meta_lookup.product_id DESC ';
 		return $args;
 	}
@@ -709,7 +709,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	public function order_by_sku_asc_post_clauses( $args ) {
-		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
+		$args['join']    = $this->append_product_sorting_table_join( $args['join'] ?? '' );
 		$args['orderby'] = ' wc_product_meta_lookup.sku ASC, wc_product_meta_lookup.product_id ASC ';
 		return $args;
 	}
@@ -721,7 +721,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	public function order_by_sku_desc_post_clauses( $args ) {
-		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
+		$args['join']    = $this->append_product_sorting_table_join( $args['join'] ?? '' );
 		$args['orderby'] = ' wc_product_meta_lookup.sku DESC, wc_product_meta_lookup.product_id DESC ';
 		return $args;
 	}
@@ -733,7 +733,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	public function order_by_cogs_value_asc_post_clauses( $args ) {
-		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
+		$args['join']    = $this->append_product_sorting_table_join( $args['join'] ?? '' );
 		$args['orderby'] = ' wc_product_meta_lookup.cogs_total_value ASC, wc_product_meta_lookup.product_id ASC ';
 		return $args;
 	}
@@ -745,7 +745,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	public function order_by_cogs_value_desc_post_clauses( $args ) {
-		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
+		$args['join']    = $this->append_product_sorting_table_join( $args['join'] ?? '' );
 		$args['orderby'] = ' wc_product_meta_lookup.cogs_total_value DESC, wc_product_meta_lookup.product_id DESC ';
 		return $args;
 	}
@@ -757,7 +757,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	public function order_by_global_unique_id_asc_post_clauses( $args ) {
-		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
+		$args['join']    = $this->append_product_sorting_table_join( $args['join'] ?? '' );
 		$args['orderby'] = ' wc_product_meta_lookup.global_unique_id ASC, wc_product_meta_lookup.product_id ASC ';
 		return $args;
 	}
@@ -769,7 +769,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	public function order_by_global_unique_id_desc_post_clauses( $args ) {
-		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
+		$args['join']    = $this->append_product_sorting_table_join( $args['join'] ?? '' );
 		$args['orderby'] = ' wc_product_meta_lookup.global_unique_id DESC, wc_product_meta_lookup.product_id DESC ';
 		return $args;
 	}
@@ -781,7 +781,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	public function filter_downloadable_post_clauses( $args ) {
-		$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
+		$args['join']   = $this->append_product_sorting_table_join( $args['join'] ?? '' );
 		$args['where'] .= ' AND wc_product_meta_lookup.downloadable=1 ';
 		return $args;
 	}
@@ -793,7 +793,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	public function filter_virtual_post_clauses( $args ) {
-		$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
+		$args['join']   = $this->append_product_sorting_table_join( $args['join'] ?? '' );
 		$args['where'] .= ' AND wc_product_meta_lookup.virtual=1 ';
 		return $args;
 	}
@@ -807,7 +807,26 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	public function filter_stock_status_post_clauses( $args ) {
 		global $wpdb;
 		if ( ! empty( $_GET['stock_status'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			// Join before looking at the value at all. This filter is registered on a non-empty raw
+			// stock_status, and has joined the lookup table for every such request since the feature
+			// shipped; callbacks running after it rely on the alias existing. Values that normalise to
+			// nothing ( ' ', '<b>', 'stock_status[]=' ) still reach here, so deciding the join after
+			// normalising would drop it for exactly the requests that used to keep it.
+			$args['join'] = $this->append_product_sorting_table_join( $args['join'] ?? '' );
+
 			$stock_status = wc_clean( wp_unslash( $_GET['stock_status'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+			// The request can shape this as an array, but the filter only ever describes a single
+			// status, so the first value wins. That is deliberate: multi-value requests previously
+			// matched the whole catalogue, because wpdb::prepare() rejects the surplus argument and
+			// returns no clause at all. Anything that is still not a string normalises to '', which
+			// matches no product -- the behaviour those requests have always had.
+			if ( is_array( $stock_status ) ) {
+				$stock_status = reset( $stock_status );
+			}
+			if ( ! is_string( $stock_status ) ) {
+				$stock_status = '';
+			}
 
 			if ( ProductStockStatus::OUT_OF_STOCK === $stock_status ) {
 				// Only published variations qualify their parent for this discoverability filter.
@@ -838,7 +857,6 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 					$stock_status
 				);
 			} else {
-				$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
 				$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.stock_status=%s ', $stock_status );
 			}
 		}
@@ -853,6 +871,14 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 */
 	private function append_product_sorting_table_join( $sql ) {
 		global $wpdb;
+
+		// Another posts_clauses callback produced this clause, so it is not guaranteed to be a string.
+		// Keep anything that can become one: discarding a join while the WHERE that depends on it
+		// survives would leave a broken query rather than a merely unfiltered one.
+		if ( ! is_string( $sql ) ) {
+			$stringable = is_scalar( $sql ) || ( is_object( $sql ) && method_exists( $sql, '__toString' ) );
+			$sql        = $stringable ? (string) $sql : '';
+		}
 
 		if ( ! strstr( $sql, 'wc_product_meta_lookup' ) ) {
 			$sql .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
