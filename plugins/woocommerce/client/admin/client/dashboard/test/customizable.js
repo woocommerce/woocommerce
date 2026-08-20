@@ -103,7 +103,7 @@ describe( 'mergeSectionsWithDefaults', () => {
 		} );
 	} );
 
-	it( 'returns the defaults when no stored key matches a default section', () => {
+	it( 'drops stored keys that no longer exist', () => {
 		const sections = mergeSectionsWithDefaults( [ { key: 'gone' } ] );
 
 		expect( sections.map( ( section ) => section.key ) ).toEqual( [
@@ -111,16 +111,30 @@ describe( 'mergeSectionsWithDefaults', () => {
 			'charts',
 		] );
 	} );
+
+	it( 'ignores a stored hiddenBlocks that is not an array', () => {
+		// Every section component calls `hiddenBlocks.includes()` on it.
+		const [ charts ] = mergeSectionsWithDefaults( [
+			{ key: 'charts', title: 'My charts', hiddenBlocks: null },
+		] );
+
+		expect( charts.hiddenBlocks ).toEqual( [ 'coupons_amount' ] );
+		expect( charts.title ).toBe( 'My charts' );
+	} );
 } );
 
 describe( 'CustomizableDashboard', () => {
 	const updateUserPreferences = jest.fn();
 
 	const renderDashboard = ( dashboardSections ) => {
-		useUserPreferences.mockReturnValue( {
+		// The stored preference is JSON parsed on every render, so the dashboard
+		// gets a new reference each time and the repair has to guard itself.
+		useUserPreferences.mockImplementation( () => ( {
 			updateUserPreferences,
-			dashboard_sections: dashboardSections,
-		} );
+			dashboard_sections: Array.isArray( dashboardSections )
+				? [ ...dashboardSections ]
+				: dashboardSections,
+		} ) );
 
 		return render(
 			<CustomizableDashboard path="/analytics/overview" query={ {} } />
@@ -170,6 +184,22 @@ describe( 'CustomizableDashboard', () => {
 		renderDashboard( '[,,]' );
 
 		expect( updateUserPreferences ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	it( 'repairs a preference holding a corrupted hiddenBlocks', () => {
+		renderDashboard( [
+			{ key: 'charts', isVisible: true, hiddenBlocks: null },
+		] );
+
+		expect( updateUserPreferences ).toHaveBeenCalledTimes( 1 );
+		expect( updateUserPreferences ).toHaveBeenCalledWith( {
+			dashboard_sections: expect.arrayContaining( [
+				expect.objectContaining( {
+					key: 'charts',
+					hiddenBlocks: [ 'coupons_amount' ],
+				} ),
+			] ),
+		} );
 	} );
 
 	it( 'leaves a well formed preference alone', () => {

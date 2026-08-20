@@ -55,6 +55,17 @@ const isValidSection = ( section ) =>
 	typeof section.key === 'string';
 
 /**
+ * `hiddenBlocks` is spread over the default one and then dereferenced by every
+ * section component, so a stored value that is not an array crashes the
+ * dashboard just like a malformed entry does.
+ *
+ * @param {Object} section Well formed entry of the stored preference.
+ * @return {boolean} Whether the entry's `hiddenBlocks` can be used as is.
+ */
+const hasUsableHiddenBlocks = ( section ) =>
+	undefined === section.hiddenBlocks || Array.isArray( section.hiddenBlocks );
+
+/**
  * Whether the stored `dashboard_sections` preference is well formed.
  *
  * @param {*} prefSections Stored `dashboard_sections` preference.
@@ -63,7 +74,10 @@ const isValidSection = ( section ) =>
 const isValidSectionsPreference = ( prefSections ) =>
 	Array.isArray( prefSections ) &&
 	prefSections.length > 0 &&
-	prefSections.every( isValidSection );
+	prefSections.every(
+		( section ) =>
+			isValidSection( section ) && hasUsableHiddenBlocks( section )
+	);
 
 /**
  * `icon` and `component` are React nodes, they must never be persisted.
@@ -116,15 +130,22 @@ export const mergeSectionsWithDefaults = ( prefSections ) => {
 			( section ) => section.key === key
 		);
 
-		sections.push( {
+		const section = {
 			...defaultSection,
 			// A stored `icon` is a stale React node, the default one wins.
 			...( prefSection ? toStorableSection( prefSection ) : {} ),
-		} );
+		};
+
+		// The same goes for a `hiddenBlocks` that is not an array, which every
+		// section component would blow up on.
+		if ( ! Array.isArray( section.hiddenBlocks ) ) {
+			section.hiddenBlocks = defaultSection.hiddenBlocks;
+		}
+
+		sections.push( section );
 	} );
 
-	// None of the stored keys is known anymore, so nothing would render.
-	return sections.length > 0 ? sections : defaults;
+	return sections;
 };
 
 const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
