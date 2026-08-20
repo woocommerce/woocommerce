@@ -151,7 +151,7 @@ function expandLocalizedFormat( format: string, localeData: moment.Locale ) {
 	// Bracketed sections and backslash escapes are moment's literals, so an "L"
 	// inside one is text; matching them first leaves them untouched, as
 	// `longDateFormat` has no entry for them.
-	const localizedTokens = /(\[[^[]*\])|(\\)?(LTS|LT|LL?L?L?|l{1,4})/g;
+	const localizedTokens = /\[[^[]*\]|\\?(?:LTS|LT|LL?L?L?|l{1,4})/g;
 	let expanded = format;
 	// An expansion can itself hold localized tokens; moment allows six passes.
 	let passes = 6;
