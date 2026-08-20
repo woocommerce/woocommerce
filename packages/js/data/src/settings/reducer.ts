@@ -50,6 +50,15 @@ const reducer: Reducer< SettingsState, Actions > = ( state = {}, action ) => {
 				},
 			};
 			break;
+		case TYPES.CLEAR_ERROR_FOR_GROUP:
+			state = {
+				...state,
+				[ action.group ]: {
+					...state[ action.group ],
+					error: null,
+				},
+			};
+			break;
 		case TYPES.CLEAR_IS_DIRTY:
 			state = {
 				...state,
@@ -71,6 +80,7 @@ const reducer: Reducer< SettingsState, Actions > = ( state = {}, action ) => {
 				state = {
 					...state,
 					[ group ]: {
+						...state[ group ],
 						data: state[ group ] ? state[ group ].data : [],
 						error,
 						lastReceived: time,
