@@ -79,11 +79,15 @@ export class ShippingBanner extends Component {
 			return;
 		}
 
-		const { activePlugins } = this.props;
+		const { activePlugins, isRequesting } = this.props;
+		if ( isRequesting ) {
+			return;
+		}
+
 		this.setState( {
 			isShippingLabelButtonBusy: true,
 			infoMessage: __(
-				'Installing and activating WooCommerce Shipping in the background...',
+				'Installing and activating WooCommerce Shipping in the background…',
 				'woocommerce'
 			),
 			wcsSetupError: false,
@@ -98,18 +102,15 @@ export class ShippingBanner extends Component {
 
 	async installAndActivatePlugins( pluginSlug ) {
 		// Avoid double activating.
-		const {
-			installPlugins,
-			activatePlugins,
-			isRequesting,
-		} = this.props;
+		const { installPlugins, activatePlugins, isRequesting } = this.props;
 		if ( isRequesting ) {
+			this.setState( { isShippingLabelButtonBusy: false } );
 			return false;
 		}
 
 		try {
 			const install = await installPlugins( [ pluginSlug ] );
-			if ( install && install.success !== true ) {
+			if ( ! install || install.success !== true ) {
 				this.setState( {
 					setupErrorReason: setupErrorTypes.INSTALL,
 					wcsSetupError: true,
@@ -130,7 +131,7 @@ export class ShippingBanner extends Component {
 
 		try {
 			const activation = await activatePlugins( [ pluginSlug ] );
-			if ( activation && activation.success !== true ) {
+			if ( ! activation || activation.success !== true ) {
 				this.setState( {
 					setupErrorReason: setupErrorTypes.ACTIVATE,
 					wcsSetupError: true,
@@ -196,6 +197,7 @@ export class ShippingBanner extends Component {
 			.catch( () => {
 				this.setState( {
 					wcsSetupError: true,
+					wcsAssetsLoading: false,
 					isShippingLabelButtonBusy: false,
 					infoMessage: null,
 				} );
@@ -450,38 +452,40 @@ export class ShippingBanner extends Component {
 					/>
 					<div className="wc-admin-shipping-banner-blob">
 						<h3>{ headline }</h3>
-						<p>
-							{ interpolateComponents( {
-								mixedString: sprintf(
-									// translators: %s is the action button label.
-									__(
-										'By clicking "%s", {{wcsLink}}WooCommerce Shipping{{/wcsLink}} will be installed and you agree to its {{tosLink}}Terms of Service{{/tosLink}}.',
-										'woocommerce'
+						{ ! isPluginInstalledAndActivated && (
+							<p>
+								{ interpolateComponents( {
+									mixedString: sprintf(
+										// translators: %s is the action button label.
+										__(
+											'By clicking "%s", {{wcsLink}}WooCommerce Shipping{{/wcsLink}} will be installed and you agree to its {{tosLink}}Terms of Service{{/tosLink}}.',
+											'woocommerce'
+										),
+										actionButtonLabel
 									),
-									actionButtonLabel
-								),
-								components: {
-									tosLink: (
-										<ExternalLink
-											href="https://wordpress.com/tos"
-											target="_blank"
-											type="external"
-										/>
-									),
-									wcsLink: (
-										<ExternalLink
-											href="https://woocommerce.com/products/shipping/?utm_medium=product"
-											target="_blank"
-											type="external"
-											onClick={
-												this
-													.woocommerceServiceLinkClicked
-											}
-										/>
-									),
-								},
-							} ) }
-						</p>
+									components: {
+										tosLink: (
+											<ExternalLink
+												href="https://wordpress.com/tos"
+												target="_blank"
+												type="external"
+											/>
+										),
+										wcsLink: (
+											<ExternalLink
+												href="https://woocommerce.com/products/shipping/?utm_medium=product"
+												target="_blank"
+												type="external"
+												onClick={
+													this
+														.woocommerceServiceLinkClicked
+												}
+											/>
+										),
+									},
+								} ) }
+							</p>
+						) }
 						<SetupNotice
 							isSetupError={ this.isSetupError() }
 							errorReason={ this.state.setupErrorReason }

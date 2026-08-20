@@ -212,7 +212,7 @@ describe( 'Create shipping label button', () => {
 
 	it( 'should show info notice and switch button to "Reload page" when installation and activation finishes', async () => {
 		const actionButtonLabel = 'Create shipping label';
-		const { getByRole, getByText } = render(
+		const { getByRole, getByText, queryByText } = render(
 			<ShippingBanner
 				isJetpackConnected={ true }
 				activatePlugins={ activatePlugins }
@@ -245,6 +245,10 @@ describe( 'Create shipping label button', () => {
 				)
 			).toBeInTheDocument()
 		);
+
+		expect(
+			queryByText( /By clicking "Create shipping label"/i )
+		).not.toBeInTheDocument();
 
 		const reloadButton = getByRole( 'button', { name: 'Reload page' } );
 		expect( reloadButton ).toBeInTheDocument();
@@ -670,6 +674,148 @@ describe( 'Setup error message', () => {
 			getByRole( 'button', { name: actionButtonLabel } )
 		).not.toHaveClass( 'is-busy' );
 	} );
+
+	it( 'should clear busy state and show error if installPlugins returns null or undefined', async () => {
+		const actionButtonLabel = 'Create shipping label';
+
+		const { getByRole, getByText } = render(
+			<ShippingBanner
+				isJetpackConnected={ true }
+				activatePlugins={ jest.fn() }
+				activePlugins={ [ 'jetpack' ] }
+				installPlugins={ jest.fn().mockResolvedValue( undefined ) }
+				itemsCount={ 1 }
+				isRequesting={ false }
+				orderId={ 1 }
+				isWcstCompatible={ true }
+				actionButtonLabel={ actionButtonLabel }
+			/>
+		);
+
+		userEvent.click( getByRole( 'button', { name: actionButtonLabel } ) );
+
+		await waitFor( () =>
+			expect(
+				getByText(
+					'Unable to install the plugin. Refresh the page and try again.'
+				)
+			).toBeInTheDocument()
+		);
+		expect(
+			getByRole( 'button', { name: actionButtonLabel } )
+		).not.toHaveClass( 'is-busy' );
+	} );
+
+	it( 'should clear busy state and show error if activatePlugins returns null or undefined', async () => {
+		const actionButtonLabel = 'Create shipping label';
+
+		const { getByRole, getByText } = render(
+			<ShippingBanner
+				isJetpackConnected={ true }
+				activatePlugins={ jest.fn().mockResolvedValue( undefined ) }
+				activePlugins={ [ 'jetpack' ] }
+				installPlugins={ jest.fn().mockReturnValue( {
+					success: true,
+				} ) }
+				itemsCount={ 1 }
+				isRequesting={ false }
+				orderId={ 1 }
+				isWcstCompatible={ true }
+				actionButtonLabel={ actionButtonLabel }
+			/>
+		);
+
+		userEvent.click( getByRole( 'button', { name: actionButtonLabel } ) );
+
+		await waitFor( () =>
+			expect(
+				getByText(
+					'Unable to activate the plugin. Refresh the page and try again.'
+				)
+			).toBeInTheDocument()
+		);
+		expect(
+			getByRole( 'button', { name: actionButtonLabel } )
+		).not.toHaveClass( 'is-busy' );
+	} );
+
+	it( 'should not set busy state when isRequesting is true', () => {
+		const actionButtonLabel = 'Create shipping label';
+		const installPluginsMock = jest.fn();
+
+		const { getByRole } = render(
+			<ShippingBanner
+				isJetpackConnected={ true }
+				activatePlugins={ jest.fn() }
+				activePlugins={ [] }
+				installPlugins={ installPluginsMock }
+				itemsCount={ 1 }
+				isRequesting={ true }
+				orderId={ 1 }
+				isWcstCompatible={ true }
+				actionButtonLabel={ actionButtonLabel }
+			/>
+		);
+
+		userEvent.click( getByRole( 'button', { name: actionButtonLabel } ) );
+
+		expect(
+			getByRole( 'button', { name: actionButtonLabel } )
+		).not.toHaveClass( 'is-busy' );
+		expect( installPluginsMock ).not.toHaveBeenCalled();
+	} );
+
+	it( 'should reset wcsAssetsLoading to false when asset loading fails so retry attempts to load assets again', async () => {
+		const actionButtonLabel = 'Create shipping label';
+		getWcsLabelPurchaseConfigs.mockResolvedValue( {} );
+		getWcsAssets.mockResolvedValue( {
+			assets: {
+				wcshipping_create_label_script: '/path/to/fail.js',
+				wcshipping_create_label_style: '',
+				wcshipping_shipment_tracking_script:
+					'/path/to/fail-tracking.js',
+				wcshipping_shipment_tracking_style: '',
+			},
+		} );
+
+		// Simulate asset loading error
+		const loadWcsAssetsSpy = jest
+			.spyOn( ShippingBanner.prototype, 'loadWcsAssets' )
+			.mockRejectedValueOnce( new Error( 'Failed to load script' ) );
+
+		const { getByRole, getByText } = render(
+			<Fragment>
+				<div id="woocommerce-order-data" />
+				<div id="woocommerce-order-actions" />
+				<ShippingBanner
+					isJetpackConnected={ true }
+					activatePlugins={ jest.fn() }
+					activePlugins={ [ wcsPluginSlug, 'jetpack' ] }
+					installPlugins={ jest.fn() }
+					itemsCount={ 1 }
+					isRequesting={ false }
+					orderId={ 1 }
+					isWcstCompatible={ true }
+					actionButtonLabel={ actionButtonLabel }
+				/>
+			</Fragment>
+		);
+
+		userEvent.click( getByRole( 'button', { name: actionButtonLabel } ) );
+
+		await waitFor( () =>
+			expect(
+				getByText(
+					'Unable to set up the plugin. Refresh the page and try again.'
+				)
+			).toBeInTheDocument()
+		);
+		expect(
+			getByRole( 'button', { name: actionButtonLabel } )
+		).not.toHaveClass( 'is-busy' );
+
+		loadWcsAssetsSpy.mockRestore();
+	} );
 } );
 
 describe( 'The message in the banner', () => {
@@ -743,7 +889,7 @@ describe( 'If incompatible WCS&T is active', () => {
 	it( 'should install and activate but show an error notice when an incompatible version of WCS&T is installed', async () => {
 		const actionButtonLabel = 'Install WooCommerce Shipping';
 
-		const { getByRole, findByText } = render(
+		const { getByRole } = render(
 			<Fragment>
 				<div id="woocommerce-order-data" />
 				<div id="woocommerce-order-actions" />
