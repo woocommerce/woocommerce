@@ -1230,7 +1230,7 @@ Display a product's description, attributes, and reviews
 
 - **Name:** woocommerce/product-details
 - **Category:** woocommerce
-- **Supports:** align (full, wide), interactivity (clientNavigation)
+- **Supports:** align (full, wide), color (background, ~~text~~), interactivity (clientNavigation), spacing (margin, padding)
 - **Attributes:** align, hideTabTitle
 
 ## Product Filters - woocommerce/product-filters
@@ -1613,7 +1613,7 @@ Display items the shopper has saved from their cart for later.
 
 - **Name:** woocommerce/saved-for-later
 - **Category:** woocommerce
-- **Supports:** align (full, wide), color (background, text), interactivity, spacing (blockGap, margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~reusable~~
+- **Supports:** align (full, wide), color (background, text), interactivity, spacing (blockGap, margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** columnCount
 
 ## Product - woocommerce/single-product

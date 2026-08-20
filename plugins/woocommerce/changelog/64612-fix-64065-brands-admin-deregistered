@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Skip the brands product column when the product_brand taxonomy is deregistered

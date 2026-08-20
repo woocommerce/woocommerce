@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Fixed ordering products performance (N-query pattern).

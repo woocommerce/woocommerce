@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix the order-review moderation guard missing reviews written before 10.9.0.

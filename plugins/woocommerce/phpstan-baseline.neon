@@ -3513,7 +3513,7 @@ parameters:
 		-
 			message: '#^Cannot access offset ''local'' on non\-empty\-array\|true\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
+			count: 1
 			path: includes/admin/helper/class-wc-helper-subscriptions-api.php
 
 		-
@@ -9187,12 +9187,6 @@ parameters:
 			path: includes/class-wc-brands.php
 
 		-
-			message: '#^Argument of an invalid type array\<WP_Term\>\|WP_Error supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: includes/class-wc-brands.php
-
-		-
 			message: '#^Argument of an invalid type array\<int, WP_Term\>\|WP_Error supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 2
@@ -9403,19 +9397,7 @@ parameters:
 			path: includes/class-wc-brands.php
 
 		-
-			message: '#^Parameter \#1 \$terms of function _wc_term_recount expects array, array\<int, int\>\|WP_Error given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-brands.php
-
-		-
 			message: '#^Parameter \#2 \$str of function explode expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: includes/class-wc-brands.php
-
-		-
-			message: '#^Parameter \#2 \$taxonomy of function _wc_term_recount expects WP_Taxonomy, WP_Taxonomy\|false given\.$#'
 			identifier: argument.type
 			count: 2
 			path: includes/class-wc-brands.php
@@ -13111,12 +13093,6 @@ parameters:
 			path: includes/class-wc-order.php
 
 		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: includes/class-wc-payment-gateways.php
-
-		-
 			message: '#^Cannot call method set_current\(\) on class\-string\|object\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -14161,12 +14137,6 @@ parameters:
 			path: includes/class-wc-regenerate-images.php
 
 		-
-			message: '#^Cannot use array destructuring on array\<int\|string, int\|string\>\|false\.$#'
-			identifier: offsetAccess.nonArray
-			count: 1
-			path: includes/class-wc-regenerate-images.php
-
-		-
 			message: '#^Function remove_action invoked with 4 parameters, 2\-3 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -14193,36 +14163,6 @@ parameters:
 		-
 			message: '#^Method WC_Regenerate_Images\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-regenerate-images.php
-
-		-
-			message: '#^Method WC_Regenerate_Images\:\:maybe_resize_image\(\) should return array but returns string\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/class-wc-regenerate-images.php
-
-		-
-			message: '#^Method WC_Regenerate_Images\:\:resize_and_return_image\(\) should return string but returns array\.$#'
-			identifier: return.type
-			count: 3
-			path: includes/class-wc-regenerate-images.php
-
-		-
-			message: '#^Method WC_Regenerate_Images\:\:resize_and_return_image\(\) should return string but returns array\<int, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/class-wc-regenerate-images.php
-
-		-
-			message: '#^Method WC_Regenerate_Images\:\:resize_and_return_image\(\) should return string but returns array\|string\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/class-wc-regenerate-images.php
-
-		-
-			message: '#^Method WC_Regenerate_Images\:\:unfiltered_image_downsize\(\) should return string but returns list\<bool\|int\|string\>\|false\.$#'
-			identifier: return.type
 			count: 1
 			path: includes/class-wc-regenerate-images.php
 
@@ -14259,18 +14199,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property WC_Register_WP_Admin_Settings\:\:\$title\.$#'
 			identifier: property.notFound
-			count: 1
-			path: includes/class-wc-register-wp-admin-settings.php
-
-		-
-			message: '#^Access to protected property WC_Email\|WC_Settings_Page\:\:\$id\.$#'
-			identifier: property.protected
-			count: 1
-			path: includes/class-wc-register-wp-admin-settings.php
-
-		-
-			message: '#^Call to an undefined method WC_Email\|WC_Settings_Page\:\:get_id\(\)\.$#'
-			identifier: method.notFound
 			count: 1
 			path: includes/class-wc-register-wp-admin-settings.php
 
@@ -20276,12 +20204,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$value of method WC_Product_Importer\:\:unescape_data\(\) expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/import/class-wc-product-csv-importer.php
-
-		-
-			message: '#^Parameter \#2 \$array of function array_map expects array, list\<string\|null\>\|false\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/import/class-wc-product-csv-importer.php
@@ -30148,12 +30070,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-refunds-controller.php
 
 		-
-			message: '#^Method WC_REST_Refunds_Controller\:\:register_routes\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-refunds-controller.php
-
-		-
 			message: '#^PHPDoc tag @extends has invalid value \(WC_REST_Order_Refunds_Controller\)\: Unexpected token "\\n ", expected ''\<'' at offset 127 on line 5$#'
 			identifier: phpDoc.parseError
 			count: 1
@@ -38704,18 +38620,6 @@ parameters:
 			path: src/Admin/API/OnboardingProfile.php
 
 		-
-			message: '#^Access to offset ''imported'' on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 3
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Access to offset ''imported'' on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response\.$#'
-			identifier: class.notFound
-			count: 3
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
 			message: '#^Call to an undefined method object\:\:dismiss\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -38987,24 +38891,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:import_sample_products\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_Error\|Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response but returns WP_Error\|WP_REST_Response\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:import_sample_products_from_csv\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:import_sample_products_from_csv\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:import_sample_products_from_csv\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_Error\|Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response but returns WP_Error\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Admin/API/OnboardingTasks.php
@@ -40996,12 +40882,6 @@ parameters:
 			path: src/Admin/API/Reports/Customers/Controller.php
 
 		-
-			message: '#^@param object \$export_item does not accept actual type of parameter\: array\{name\: mixed, username\: mixed, last_active\: mixed, registered\: mixed, email\: mixed, orders_count\: mixed, total_spend\: string, avg_order_value\: string, \.\.\.\}\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Admin/API/Reports/Customers/Controller.php
-
-		-
 			message: '#^@param object \$item does not accept actual type of parameter\: array\.$#'
 			identifier: parameter.phpDocType
 			count: 1
@@ -41027,12 +40907,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\Controller\:\:get_item\(\) should return array\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\WP_Error but returns WP_REST_Response\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/Customers/Controller.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\Controller\:\:prepare_item_for_export\(\) should return array but returns object\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Admin/API/Reports/Customers/Controller.php
@@ -53524,18 +53398,6 @@ parameters:
 			path: src/Blocks/Domain/Services/Hydration.php
 
 		-
-			message: '#^Default value of the parameter \#1 \$path \(string\) of method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\Hydration\:\:get_rest_api_response_data\(\) is incompatible with type array\.$#'
-			identifier: parameter.defaultValue
-			count: 1
-			path: src/Blocks/Domain/Services/Hydration.php
-
-		-
-			message: '#^Invalid array key type array\.$#'
-			identifier: offsetAccess.invalidOffset
-			count: 1
-			path: src/Blocks/Domain/Services/Hydration.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\Hydration\:\:cache_store_notices\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -53562,30 +53424,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\Hydration\:\:restore_nonce_check\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/Domain/Services/Hydration.php
-
-		-
-			message: '#^Parameter \#1 \$haystack of function str_starts_with expects string\|null, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/Domain/Services/Hydration.php
-
-		-
-			message: '#^Parameter \#1 \$path of method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\Hydration\:\:match_route_to_handler\(\) expects string, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/Domain/Services/Hydration.php
-
-		-
-			message: '#^Parameter \#2 \$path of function rest_preload_api_request expects string, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/Domain/Services/Hydration.php
-
-		-
-			message: '#^Parameter \#2 \$path of method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\Hydration\:\:get_response_from_controller\(\) expects string, array given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/Domain/Services/Hydration.php
 
@@ -55728,12 +55566,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Emails\\EmailListingRestController\:\:get_schema_with_message\(\) should return array\<array\> but returns array\<string, array\<string, array\<string, bool\|list\<string\>\|string\>\>\|string\>\.$#'
 			identifier: return.type
-			count: 1
-			path: src/Internal/Admin/Emails/EmailListingRestController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Emails\\EmailListingRestController\:\:initialize_template_generator\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Emails/EmailListingRestController.php
 
@@ -58798,21 +58630,9 @@ parameters:
 			path: src/Internal/Admin/Settings.php
 
 		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: src/Internal/Admin/Settings/Payments.php
-
-		-
 			message: '#^Access to an undefined property WooCommerce\:\:\$payment_gateways\.$#'
 			identifier: property.notFound
 			count: 1
-			path: src/Internal/Admin/Settings/PaymentsController.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
 			path: src/Internal/Admin/Settings/PaymentsController.php
 
 		-
@@ -58882,90 +58702,6 @@ parameters:
 			path: src/Internal/Admin/Settings/PaymentsProviders.php
 
 		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/Affirm.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/AfterpayClearpay.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/Airwallex.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/AmazonPay.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/Antom.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/Eway.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/GoCardless.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/HelioPay.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/Klarna.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/KlarnaCheckout.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/MercadoPago.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/Mollie.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/Monei.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/NexiCheckout.php
-
-		-
 			message: '#^Access to constant SANDBOX on an unknown class WooCommerce\\PayPalCommerce\\Onboarding\\Environment\.$#'
 			identifier: class.notFound
 			count: 1
@@ -58976,30 +58712,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: src/Internal/Admin/Settings/PaymentsProviders/PayPal.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/PayPal.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/PayUIndia.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/Payfast.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 16
-			path: src/Internal/Admin/Settings/PaymentsProviders/PaymentGateway.php
 
 		-
 			message: '#^Call to function is_callable\(\) with array\{WC_Payment_Gateway, ''get_connection_url''\} will always evaluate to true\.$#'
@@ -59096,66 +58808,6 @@ parameters:
 			identifier: nullCoalesce.property
 			count: 1
 			path: src/Internal/Admin/Settings/PaymentsProviders/PaymentGateway.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/Paymob.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/Payoneer.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/Paystack.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/Paytrail.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/Razorpay.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 3
-			path: src/Internal/Admin/Settings/PaymentsProviders/Stripe.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/Tilopay.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 2
-			path: src/Internal/Admin/Settings/PaymentsProviders/Visa.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/Vivacom.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 5
-			path: src/Internal/Admin/Settings/PaymentsProviders/WooPayments.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Settings\\PaymentsProviders\\WooPayments\\WooPaymentsController\:\:register\(\) has no return type specified\.$#'
@@ -62191,30 +61843,6 @@ parameters:
 			path: src/Internal/EmailEditor/PersonalizationTags/StoreTagsProvider.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsGenerator\:\:generate_email_templates\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsGenerator.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsGenerator\:\:generate_initial_email_templates\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsGenerator.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsGenerator\:\:init_default_transactional_emails\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsGenerator.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsGenerator\:\:initialize\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsGenerator.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\:\:clear_caches\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -62258,12 +61886,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmails\:\:init\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmails.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmails\:\:init_email_templates\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmails.php
@@ -62422,12 +62044,6 @@ parameters:
 			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:set_site_transient\(\)\.$#'
 			identifier: staticMethod.notFound
 			count: 1
-			path: src/Internal/Logging/RemoteLogger.php
-
-		-
-			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 5
 			path: src/Internal/Logging/RemoteLogger.php
 
 		-
@@ -67801,18 +67417,6 @@ parameters:
 			path: src/Internal/TransientFiles/TransientFilesEngine.php
 
 		-
-			message: '#^Parameter \#1 \$input of function array_slice expects array, list\<string\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/TransientFiles/TransientFilesEngine.php
-
-		-
-			message: '#^Parameter \#1 \$var of function count expects array\|Countable, list\<string\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/TransientFiles/TransientFilesEngine.php
-
-		-
 			message: '#^Parameter \#2 \$timestamp of function gmdate expects int, int\|string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -68199,12 +67803,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Authentication\:\:get_cart_token\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Authentication.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Authentication\:\:get_cart_token\(\) should return string but returns array\|string\.$#'
-			identifier: return.type
 			count: 1
 			path: src/StoreApi/Authentication.php
 
@@ -69853,12 +69451,6 @@ parameters:
 			path: src/StoreApi/Schemas/ExtendSchema.php
 
 		-
-			message: '#^Parameter \#1 \$exception_object of function wc_caught_exception expects Exception, Throwable given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/StoreApi/Schemas/ExtendSchema.php
-
-		-
 			message: '#^Variable \$data might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -70569,12 +70161,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\SessionHandler\:\:init_session_from_token\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/StoreApi/SessionHandler.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\StoreApi\\SessionHandler\:\:\$token \(string\) does not accept array\|string\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: src/StoreApi/SessionHandler.php
 

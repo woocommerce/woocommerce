@@ -331,9 +331,9 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		// Build tax_query if taxonomies are set.
 		if ( ! empty( $tax_query ) ) {
 			if ( ! empty( $args['tax_query'] ) ) {
-				$args['tax_query'] = array_merge( $tax_query, $args['tax_query'] ); // WPCS: slow query ok.
+				$args['tax_query'] = array_merge( $tax_query, $args['tax_query'] ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Product taxonomy filters use WordPress's canonical indexed taxonomy tables.
 			} else {
-				$args['tax_query'] = $tax_query; // WPCS: slow query ok.
+				$args['tax_query'] = $tax_query; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Product taxonomy filters use WordPress's canonical indexed taxonomy tables.
 			}
 		}
 
@@ -472,7 +472,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		$args['orderby'] = $ordering_args['orderby'];
 		$args['order']   = $ordering_args['order'];
 		if ( $ordering_args['meta_key'] ) {
-			$args['meta_key'] = $ordering_args['meta_key']; // WPCS: slow query ok.
+			$args['meta_key'] = $ordering_args['meta_key']; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Core orderings bypass postmeta; this fallback supports extension-defined meta keys.
 		}
 
 		/*
@@ -1111,7 +1111,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			}
 
 			if ( isset( $request['button_text'] ) ) {
-				$product->set_button_text( $request['button_text'] );
+				$product->set_button_text( sanitize_text_field( $request['button_text'] ) );
 			}
 		}
 
