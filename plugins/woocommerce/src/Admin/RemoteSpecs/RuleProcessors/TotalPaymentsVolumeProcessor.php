@@ -11,11 +11,31 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\Revenue\Query as RevenueQuery;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use Automattic\WooCommerce\Admin\DateTimeProvider\CurrentDateTimeProvider;
+use Automattic\WooCommerce\Admin\DateTimeProvider\DateTimeProviderInterface;
 
 /**
  * Rule processor that passes when a store's payments volume exceeds a provided amount.
  */
 class TotalPaymentsVolumeProcessor implements RuleProcessorInterface {
+	/**
+	 * Provider for the current DateTime.
+	 *
+	 * @var DateTimeProviderInterface
+	 */
+	protected $date_time_provider;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param DateTimeProviderInterface|null $date_time_provider The DateTime provider.
+	 */
+	public function __construct( $date_time_provider = null ) {
+		$this->date_time_provider = null === $date_time_provider
+			? new CurrentDateTimeProvider()
+			: $date_time_provider;
+	}
+
 	/**
 	 * Compare against the store's total payments volume.
 	 *
@@ -25,7 +45,10 @@ class TotalPaymentsVolumeProcessor implements RuleProcessorInterface {
 	 * @return bool The result of the operation.
 	 */
 	public function process( $rule, $stored_state ) {
-		$dates           = TimeInterval::get_timeframe_dates( $rule->timeframe );
+		// The timeframe must be resolved against the site's calendar date: the report query
+		// parses the returned boundary strings as site-local datetimes.
+		$now             = $this->date_time_provider->get_now()->setTimezone( wp_timezone() );
+		$dates           = TimeInterval::get_timeframe_dates( $rule->timeframe, $now );
 		$reports_revenue = $this->get_reports_query(
 			array(
 				'before'   => $dates['end'],
