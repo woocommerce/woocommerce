@@ -2506,10 +2506,10 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A falsy type value in a batch item falls back to a simple product instead of causing a fatal error.
+	 * @testdox A falsy type value in a batch item preserves the stored product type instead of causing a fatal error.
 	 */
-	public function test_batch_update_with_falsy_type_does_not_fatal(): void {
-		$product = WC_Helper_Product::create_simple_product();
+	public function test_batch_update_with_falsy_type_preserves_stored_type(): void {
+		$variable_product = WC_Helper_Product::create_variation_product();
 
 		$request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
 		$request->set_header( 'content-type', 'application/json' );
@@ -2518,9 +2518,9 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 				array(
 					'update' => array(
 						array(
-							'id'   => $product->get_id(),
+							'id'   => $variable_product->get_id(),
 							'type' => '',
-							'name' => 'Renamed via batch',
+							'name' => 'Renamed via falsy-type batch',
 						),
 					),
 				)
@@ -2531,8 +2531,9 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertArrayNotHasKey( 'error', $data['update'][0], 'A falsy type should fall back to a simple product, not error' );
-		$this->assertEquals( 'Renamed via batch', $data['update'][0]['name'] );
+		$this->assertArrayNotHasKey( 'error', $data['update'][0], 'A falsy type should not fail the item' );
+		$this->assertEquals( 'Renamed via falsy-type batch', $data['update'][0]['name'] );
+		$this->assertInstanceOf( WC_Product_Variable::class, wc_get_product( $variable_product->get_id() ), 'The stored product type must be preserved' );
 	}
 
 	/**

@@ -45,7 +45,12 @@ trait ProductRequestPreparationTrait {
 			$classname = \WC_Product_Factory::get_classname_from_product_type( (string) $request['type'] );
 
 			if ( ! $classname || ! class_exists( $classname ) ) {
-				$classname = 'WC_Product_Simple';
+				// Fall back to the stored type rather than silently converting the product to simple.
+				$classname = $existing_product_type ? \WC_Product_Factory::get_classname_from_product_type( $existing_product_type ) : false;
+
+				if ( ! $classname || ! class_exists( $classname ) ) {
+					$classname = 'WC_Product_Simple';
+				}
 			}
 
 			try {
