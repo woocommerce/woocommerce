@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { CliUx, Command, Flags } from '@oclif/core';
+import { Args, Command, Flags, ux } from '@oclif/core';
 import { join } from 'path';
 import { tmpdir } from 'os';
 
@@ -15,19 +15,17 @@ export default class Merge extends Command {
 	static description =
 		'Merges another repository into this one with history.';
 
-	static args = [
-		{
-			name: 'source',
+	static args = {
+		source: Args.string( {
 			description: 'The GitHub repository we are merging from.',
 			required: true,
-		},
-		{
-			name: 'destination',
+		} ),
+		destination: Args.string( {
 			description:
 				'The monorepo path for the repository to be merged at.',
 			required: true,
-		},
-	];
+		} ),
+	};
 
 	static flags = {
 		branch: Flags.string( {
@@ -45,10 +43,13 @@ export default class Merge extends Command {
 
 		await this.checkDependencies();
 		await this.validateArgs( args.source, args.destination );
+		const { default: confirm } = await import( '@inquirer/confirm' );
 
-		let confirmation = await CliUx.ux.confirm(
-			'WARNING: This command will DESTROY the history of your current branch. Are you sure you want to proceed? (y/n)'
-		);
+		let confirmation = await confirm( {
+			message:
+				'WARNING: This command will DESTROY the history of your current branch. Are you sure you want to proceed?',
+			default: false,
+		} );
 		if ( ! confirmation ) {
 			this.exit( 0 );
 		}
@@ -60,13 +61,15 @@ export default class Merge extends Command {
 			args.destination
 		);
 
-		confirmation = await CliUx.ux.confirm(
-			'Are you ready to merge ' +
+		confirmation = await confirm( {
+			message:
+				'Are you ready to merge ' +
 				args.source +
 				' from ' +
 				repositoryPath +
-				'? (y/n)'
-		);
+				'?',
+			default: false,
+		} );
 		if ( ! confirmation ) {
 			// Remove the repository we've cloned.
 			try {
@@ -141,7 +144,7 @@ export default class Merge extends Command {
 	private async cloneRepository( source: string ): Promise< string > {
 		// Show progress for the cloning.
 		const gitPath = 'https://github.com/' + source;
-		CliUx.ux.action.start( 'Cloning from ' + gitPath );
+		ux.action.start( 'Cloning from ' + gitPath );
 
 		// We need a fresh directory to clone the source into.
 		const cloneDir = join( tmpdir(), 'monorepo-merge', source );
@@ -152,7 +155,7 @@ export default class Merge extends Command {
 
 		await exec( 'git clone ' + gitPath + ' ' + cloneDir );
 
-		CliUx.ux.action.stop();
+		ux.action.stop();
 		return cloneDir;
 	}
 
@@ -178,14 +181,14 @@ export default class Merge extends Command {
 				'\\\\1", message))\'',
 		].join( ' ' );
 
-		CliUx.ux.action.start( 'Altering repository history' );
+		ux.action.start( 'Altering repository history' );
 
 		try {
 			await exec( filterCommand, { cwd: cloneDir } );
 		} catch {
 			this.error( 'Failed to alter the repository history' );
 		} finally {
-			CliUx.ux.action.stop();
+			ux.action.stop();
 		}
 	}
 
@@ -201,13 +204,13 @@ export default class Merge extends Command {
 		cloneDir: string,
 		branchToMerge: string
 	): Promise< void > {
-		CliUx.ux.action.start( 'Merging repositories' );
+		ux.action.start( 'Merging repositories' );
 
 		// We need the cloned repository as a remote in order to merge it.
 		try {
 			await exec( 'git remote add ' + source + ' "' + cloneDir + '"' );
 		} catch {
-			CliUx.ux.action.stop();
+			ux.action.stop();
 
 			this.error( 'Failed to add clone repository as remote' );
 		}
@@ -215,7 +218,7 @@ export default class Merge extends Command {
 		try {
 			await exec( 'git fetch ' + source );
 		} catch {
-			CliUx.ux.action.stop();
+			ux.action.stop();
 
 			this.error( 'Failed to fetch clone repository' );
 		}
@@ -228,7 +231,7 @@ export default class Merge extends Command {
 					branchToMerge
 			);
 		} catch {
-			CliUx.ux.action.stop();
+			ux.action.stop();
 
 			this.error( 'Failed to merge the repositories' );
 		}
@@ -238,11 +241,11 @@ export default class Merge extends Command {
 			await exec( 'git remote remove ' + source );
 			await exec( 'rm -rf ' + cloneDir );
 		} catch {
-			CliUx.ux.action.stop();
+			ux.action.stop();
 
 			this.error( 'Failed to remove clone repository remote' );
 		}
 
-		CliUx.ux.action.stop();
+		ux.action.stop();
 	}
 }

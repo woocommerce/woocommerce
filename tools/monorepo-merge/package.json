@@ -24,9 +24,11 @@
 		"posttest": "pnpm lint"
 	},
 	"dependencies": {
-		"@oclif/core": "^1.26.2",
-		"@oclif/plugin-help": "^5.2.20",
-		"@oclif/plugin-plugins": "^2.4.7",
+		"@inquirer/confirm": "^6.1.1",
+		"@inquirer/password": "^5.1.1",
+		"@oclif/core": "^4.13.5",
+		"@oclif/plugin-help": "^6.2.58",
+		"@oclif/plugin-plugins": "^5.4.87",
 		"@octokit/graphql": "4.8.0"
 	},
 	"devDependencies": {
@@ -36,7 +38,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"eslint": "^10.0.0",
 		"jscodeshift": "^0.13.1",
-		"oclif": "^2.7.0",
+		"oclif": "^4.23.30",
 		"shx": "^0.3.4",
 		"ts-node": "^10.9.2",
 		"tslib": "^2.6.2",
