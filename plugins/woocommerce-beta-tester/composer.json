@@ -12,7 +12,7 @@
 	},
 	"require-dev": {
 		"woocommerce/woocommerce-sniffs": "^1.0.0",
-		"automattic/jetpack-changelogger": "^3.3.11"
+		"automattic/jetpack-changelogger": "3.3.0"
 	},
 	"scripts": {
 		"phpcs": [
@@ -27,7 +27,6 @@
 	},
 	"extra": {
 		"scripts-description": {
-			"test": "Run unit tests",
 			"phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
 			"phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
 		},

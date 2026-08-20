@@ -6,7 +6,7 @@
 	"minimum-stability": "dev",
 	"prefer-stable": true,
 	"require-dev": {
-		"automattic/jetpack-changelogger": "^3.3.11"
+		"automattic/jetpack-changelogger": "3.3.0"
 	},
 	"config": {
 		"platform": {

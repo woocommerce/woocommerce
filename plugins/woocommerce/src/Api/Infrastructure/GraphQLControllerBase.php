@@ -20,7 +20,6 @@ use Automattic\WooCommerce\Vendor\GraphQL\Language\AST\OperationDefinitionNode;
 use Automattic\WooCommerce\Vendor\GraphQL\Language\AST\SelectionSetNode;
 use Automattic\WooCommerce\Vendor\GraphQL\Validator\DocumentValidator;
 use Automattic\WooCommerce\Vendor\GraphQL\Validator\Rules\DisableIntrospection;
-use Automattic\WooCommerce\Vendor\GraphQL\Validator\Rules\OverlappingFieldsCanBeMerged;
 
 /**
  * Handles incoming GraphQL requests over the WooCommerce REST API.
@@ -417,29 +416,8 @@ abstract class GraphQLControllerBase {
 		// 6. Build validation rules.
 		// A single complexity-rule instance is kept so its computed score can
 		// be surfaced in the debug extensions after execution.
-		$complexity_rule  = new QueryComplexityRule( self::get_max_query_complexity() );
-		$validation_rules = array_values( DocumentValidator::allRules() );
-
-		// graphql-php 15.32.2 added a 100,000 field-comparison cap to
-		// OverlappingFieldsCanBeMerged. Past that cap the rule does not stop
-		// traversing: it returns a freshly allocated conflict for every
-		// remaining pair, so a query with many fields sharing one response name
-		// allocates O(n^2) conflicts and exhausts memory. The depth and
-		// complexity rules below cannot bound that — DocumentValidator runs
-		// every rule in a single parallel traversal and both of those report
-		// only after it finishes — so the cap is kept and made memory-safe by
-		// {@see BoundedOverlappingFieldsCanBeMerged} instead.
-		//
-		// Only the stock rule is swapped: a subclass here means an extension
-		// registered its own via DocumentValidator::addRule(), and replacing it
-		// would silently drop that customization.
-		foreach ( $validation_rules as $index => $rule ) {
-			if ( OverlappingFieldsCanBeMerged::class === get_class( $rule ) ) {
-				$validation_rules[ $index ] = new BoundedOverlappingFieldsCanBeMerged();
-				break;
-			}
-		}
-
+		$complexity_rule    = new QueryComplexityRule( self::get_max_query_complexity() );
+		$validation_rules   = array_values( DocumentValidator::allRules() );
 		$validation_rules[] = new QueryDepthRule( self::get_max_query_depth() );
 		$validation_rules[] = $complexity_rule;
 		if ( ! $this->is_introspection_allowed( $principal, $request ) ) {
