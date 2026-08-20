@@ -12,7 +12,7 @@ jobs:
       github.event.issue.state == 'open' &&
       contains(github.event.issue.labels.*.name, 'needs: author feedback')
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 5
     permissions:
       issues: write
     steps:

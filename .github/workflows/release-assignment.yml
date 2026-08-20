@@ -15,7 +15,7 @@ jobs:
   check-upcoming-release-events:
     name: Check for upcoming release events
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 5
     outputs:
       should-trigger-webhook: ${{ steps.check-code-freeze-8-weeks.outputs.should-trigger-webhook }}
       version: ${{ steps.check-code-freeze-8-weeks.outputs.version }}

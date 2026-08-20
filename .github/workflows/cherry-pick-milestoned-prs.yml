@@ -19,7 +19,7 @@ jobs:
   prepare:
     if: ${{ github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'trunk' && github.event.pull_request.milestone != null }}
     runs-on: ubuntu-latest
-    timeout-minutes: 7
+    timeout-minutes: 5
     outputs:
       milestoned_branch: ${{ steps.get-branches.outputs.milestoned_branch }}
       next_branch: ${{ steps.get-branches.outputs.next_branch }}
@@ -152,7 +152,7 @@ jobs:
     needs: [prepare, cherry-pick-milestoned]
     if: ${{ always() && needs.cherry-pick-milestoned.outputs.status == 'success' && needs.cherry-pick-milestoned.outputs.cherry_pick_pr_number }}
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 5
     steps:
       # Add original milestone to new PR
       - name: Add milestone
@@ -221,7 +221,7 @@ jobs:
   handle-skipped-milestoned:
     needs: [prepare, cherry-pick-milestoned]
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 5
     if: ${{ always() && needs.cherry-pick-milestoned.outputs.status == 'skipped' }}
     steps:
       - name: Comment on original PR about skip
