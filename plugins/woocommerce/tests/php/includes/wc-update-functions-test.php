@@ -7,6 +7,8 @@
 
 use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator;
+use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
 
 /**
@@ -378,5 +380,28 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		wc_update_1110_delete_dashboard_outofstock_count_transient();
 		$this->assertFalse( get_transient( 'wc_outofstock_count' ) );
+	}
+
+	/**
+	 * @testdox Migration registers and queues the rebuild of the tax lookup table.
+	 */
+	public function test_wc_update_1120_migrate_tax_lookup_order_items(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$db_updates = WC_Install::get_db_update_callbacks();
+		$this->assertArrayHasKey( '11.2.0', $db_updates );
+		$this->assertContains( 'wc_update_1120_migrate_tax_lookup_order_items', $db_updates['11.2.0'] );
+
+		$batch_processor = wc_get_container()->get( BatchProcessingController::class );
+		$batch_processor->remove_processor( OrderTaxLookupMigrator::class );
+
+		wc_update_1120_migrate_tax_lookup_order_items();
+
+		$this->assertTrue(
+			$batch_processor->is_enqueued( OrderTaxLookupMigrator::class ),
+			'The migration should hand the rebuild to the batch processing controller.'
+		);
+
+		$batch_processor->remove_processor( OrderTaxLookupMigrator::class );
 	}
 }

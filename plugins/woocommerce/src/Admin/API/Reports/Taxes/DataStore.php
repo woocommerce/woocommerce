@@ -162,6 +162,19 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$this->add_from_sql_params( $query_args, $order_status_filter );
 
 		$this->subquery->add_sql_clause( 'where', "AND itemmeta_rate_id.meta_value = {$order_tax_lookup_table}.tax_rate_id" );
+
+		/*
+		 * Narrow the rate match to the single tax line the row was written for. The rate id on its
+		 * own fans one lookup row out across every line of the order that shares it, which is how
+		 * an order carrying several lines on one rate id came to report the wrong tax.
+		 *
+		 * Rows recorded before the lookup held one row per tax order item sit at the column's zero
+		 * default and have no line to narrow to, so they go on matching the rate id alone, which is
+		 * how the report read them all along. OrderTaxLookupMigrator rebuilds them in the
+		 * background.
+		 */
+		$this->subquery->add_sql_clause( 'where', "AND ( {$order_tax_lookup_table}.order_item_id = 0 OR {$order_tax_lookup_table}.order_item_id = {$wpdb->prefix}woocommerce_order_items.order_item_id )" );
+
 		if ( isset( $query_args['taxes'] ) && ! empty( $query_args['taxes'] ) ) {
 			$allowed_taxes = self::get_filtered_ids( $query_args, 'taxes' );
 			$this->subquery->add_sql_clause( 'where', "AND {$order_tax_lookup_table}.tax_rate_id IN ({$allowed_taxes})" );
@@ -285,6 +298,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Create or update an entry in the wc_order_tax_lookup table for an order.
 	 *
+	 * Writes one row per tax order item and removes rows left over from a previous sync.
+	 *
 	 * @param int $order_id Order ID.
 	 * @return int|bool Returns -1 if order won't be processed, or a boolean indicating processing success.
 	 */
@@ -296,23 +311,37 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return -1;
 		}
 
-		$tax_items   = $order->get_items( OrderItemType::TAX );
-		$num_updated = 0;
+		$table_name     = self::get_db_table_name();
+		$existing_items = $wpdb->get_col(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
+				"SELECT order_item_id FROM {$table_name} WHERE order_id = %d",
+				$order_id
+			)
+		);
+		$existing_items = array_flip( $existing_items );
+		$tax_items      = $order->get_items( OrderItemType::TAX );
+		$num_updated    = 0;
 
 		foreach ( $tax_items as $tax_item ) {
+			$order_item_id = $tax_item->get_id();
+			unset( $existing_items[ $order_item_id ] );
+
 			$result = $wpdb->replace(
-				self::get_db_table_name(),
+				$table_name,
 				array(
-					'order_id'     => $order->get_id(),
-					'date_created' => $order->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format ),
-					'tax_rate_id'  => $tax_item->get_rate_id(),
-					'shipping_tax' => $tax_item->get_shipping_tax_total(),
-					'order_tax'    => $tax_item->get_tax_total(),
-					'total_tax'    => (float) $tax_item->get_tax_total() + (float) $tax_item->get_shipping_tax_total(),
+					'order_id'      => $order->get_id(),
+					'date_created'  => $order->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format ),
+					'tax_rate_id'   => $tax_item->get_rate_id(),
+					'order_item_id' => $order_item_id,
+					'shipping_tax'  => $tax_item->get_shipping_tax_total(),
+					'order_tax'     => $tax_item->get_tax_total(),
+					'total_tax'     => (float) $tax_item->get_tax_total() + (float) $tax_item->get_shipping_tax_total(),
 				),
 				array(
 					'%d',
 					'%s',
+					'%d',
 					'%d',
 					'%f',
 					'%f',
@@ -330,6 +359,20 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			// Sum the rows affected. Using REPLACE can affect 2 rows if the row already exists.
 			$num_updated += 2 === intval( $result ) ? 1 : intval( $result );
+		}
+
+		// Includes rows written before the lookup was keyed by order item, which sit at zero.
+		if ( ! empty( $existing_items ) ) {
+			$existing_items = array_flip( $existing_items );
+			$format         = implode( ',', array_fill( 0, count( $existing_items ), '%d' ) );
+			array_unshift( $existing_items, $order_id );
+			$wpdb->query(
+				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input, placeholders are built above.
+					"DELETE FROM {$table_name} WHERE order_id = %d AND order_item_id IN ({$format})",
+					$existing_items
+				)
+			);
 		}
 
 		return ( count( $tax_items ) === $num_updated );
