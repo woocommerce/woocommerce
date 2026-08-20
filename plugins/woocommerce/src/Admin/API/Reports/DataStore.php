@@ -184,6 +184,13 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	protected $force_cache_refresh = false;
 
 	/**
+	 * Whether the query currently being served may use the cache.
+	 *
+	 * @var bool
+	 */
+	protected $query_is_cacheable = true;
+
+	/**
 	 * Include debugging information in the returned data when true.
 	 *
 	 * @var bool
@@ -237,6 +244,8 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 		$defaults   = $this->get_default_query_vars();
 		$query_args = wp_parse_args( $query_args, $defaults );
 		$this->normalize_timezones( $query_args, $defaults );
+
+		$this->query_is_cacheable = $this->is_cacheable_query( $query_args );
 
 		/*
 		 * We need to get the cache key here because
@@ -331,6 +340,10 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	 * @return boolean Whether or not to utilize caching.
 	 */
 	protected function should_use_cache() {
+		if ( ! $this->query_is_cacheable ) {
+			return false;
+		}
+
 		/**
 		 * Determines if a report will utilize caching.
 		 *
@@ -338,6 +351,20 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 		 * @param string $cache_key The report's cache key. Used to identify the report.
 		 */
 		return (bool) apply_filters( 'woocommerce_analytics_report_should_use_cache', true, $this->cache_key );
+	}
+
+	/**
+	 * Whether the result of a query may be read from and written to the report cache.
+	 *
+	 * Reports answer no when a result depends on data that never invalidates the cache.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param array $query_args Query parameters.
+	 * @return bool
+	 */
+	protected function is_cacheable_query( $query_args ) {
+		return true;
 	}
 
 	/**

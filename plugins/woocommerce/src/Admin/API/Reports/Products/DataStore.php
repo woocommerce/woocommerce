@@ -285,6 +285,24 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
+	 * Whether the result of a query may be read from and written to the report cache.
+	 *
+	 * @override ReportsDataStore::is_cacheable_query()
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param array $query_args Query parameters.
+	 * @return bool
+	 */
+	protected function is_cacheable_query( $query_args ) {
+		// A `search` argument is resolved against product titles and SKUs while the report runs, so
+		// the response records which products matched at that moment. Nothing invalidates the report
+		// cache when a product is renamed or its SKU changes, so a cached response would keep
+		// answering with the old matches for up to a week.
+		return empty( $query_args['search'] ) && parent::is_cacheable_query( $query_args );
+	}
+
+	/**
 	 * Maps ordering specified by the user to columns in the database/fields in the data.
 	 *
 	 * @override ReportsDataStore::normalize_order_by()
