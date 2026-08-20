@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Document that Enums get_all() returns the complete enum rather than the set of values a product or order can be assigned, and point to the filterable wc_get_*() helpers for that.

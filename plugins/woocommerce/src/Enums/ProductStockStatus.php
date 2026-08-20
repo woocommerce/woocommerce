@@ -37,7 +37,14 @@ final class ProductStockStatus {
 	public const LOW_STOCK = 'lowstock';
 
 	/**
-	 * Returns all product stock status values.
+	 * Returns every stock status value defined by this enum.
+	 *
+	 * This is the complete enum, not the set of statuses a product can hold. It includes
+	 * self::LOW_STOCK, which is a derived reporting state and is never stored against a product.
+	 *
+	 * For the statuses a product can be set to, and the options a stock filter should offer, use
+	 * wc_get_product_stock_status_options(). That helper is filterable, so unlike this method it
+	 * also reflects statuses an extension has added.
 	 *
 	 * @since 10.9.0
 	 *

@@ -108,7 +108,14 @@ final class OrderStatus {
 	);
 
 	/**
-	 * Returns all order status values defined in this class.
+	 * Returns every order status value defined by this enum.
+	 *
+	 * This is the complete enum, not the set of statuses an order can be assigned. It includes
+	 * post-level states such as self::TRASH, self::AUTO_DRAFT and self::CHECKOUT_DRAFT.
+	 *
+	 * For assignable statuses, use wc_get_order_statuses(). That helper is filterable, so unlike
+	 * this method it also reflects statuses an extension has registered; OrderInternalStatus lists
+	 * the same seven core statuses in their prefixed form.
 	 *
 	 * @since 10.9.0
 	 *

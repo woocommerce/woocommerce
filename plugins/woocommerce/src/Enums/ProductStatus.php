@@ -58,7 +58,11 @@ final class ProductStatus {
 	public const FUTURE = 'future';
 
 	/**
-	 * Returns all product status values.
+	 * Returns every product status value defined by this enum.
+	 *
+	 * This is the complete enum, including statuses WordPress manages rather than ones an author
+	 * chooses: self::AUTO_DRAFT, self::TRASH and self::FUTURE. WooCommerce has no narrower helper,
+	 * so callers that need only the editorial statuses should narrow this list themselves.
 	 *
 	 * @since 10.9.0
 	 *
