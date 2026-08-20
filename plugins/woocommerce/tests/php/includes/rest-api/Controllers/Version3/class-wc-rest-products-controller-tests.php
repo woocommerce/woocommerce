@@ -2437,6 +2437,37 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An extension store reusing the core invalid-product message is rethrown instead of becoming a 404.
+	 */
+	public function test_prepare_object_rethrows_extension_exception_reusing_core_message(): void {
+		$mimicking_store = new class() extends WC_Product_Data_Store_CPT {
+			/**
+			 * Simulate an extension store that reuses the core failure message for its own failures.
+			 *
+			 * @param WC_Product $product Product being read.
+			 * @throws RuntimeException Always, with the core store's message text.
+			 */
+			public function read( &$product ) {
+				throw new RuntimeException( 'Invalid product.' );
+			}
+		};
+		$register        = static function ( $data_stores ) use ( $mimicking_store ) {
+			$data_stores['product-simple'] = $mimicking_store;
+			return $data_stores;
+		};
+		add_filter( 'woocommerce_data_stores', $register );
+
+		// Extension-backed product: the ID has no corresponding WordPress post.
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/999999993' );
+		$request->set_url_params( array( 'id' => 999999993 ) );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$this->expectException( RuntimeException::class );
+
+		$this->invoke_prepare( $request, false );
+	}
+
+	/**
 	 * @testdox The invalid-product error keeps one code but distinguishes variation targets in its message.
 	 */
 	public function test_invalid_product_id_error_distinguishes_variations_in_message(): void {
