@@ -208,7 +208,7 @@ export const getSentEmailEditorPosts = createRegistrySelector(
 
 		const filteredQuery = applyFilters(
 			'woocommerce_email_editor_recent_emails_query',
-			DEFAULT_RECENT_EMAILS_QUERY,
+			{ ...DEFAULT_RECENT_EMAILS_QUERY },
 			postType
 		);
 
