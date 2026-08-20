@@ -732,26 +732,107 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	public function test_stock_status_filter_always_joins_the_product_meta_lookup_table( string $stock_status ): void {
 		global $wpdb;
 
-		$sut          = ( new ReflectionClass( WC_Admin_List_Table_Products::class ) )->newInstanceWithoutConstructor();
-		$original_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request data.
-
-		$_GET['stock_status'] = $stock_status;
-
-		try {
-			$args = $sut->filter_stock_status_post_clauses(
-				array(
-					'join'  => '',
-					'where' => '',
-				)
-			);
-		} finally {
-			$_GET = $original_get;
-		}
+		$args = $this->filter_clauses_for_stock_status( $stock_status );
 
 		$this->assertStringContainsString(
 			"LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup",
 			$args['join'],
 			"The {$stock_status} filter must leave the wc_product_meta_lookup alias joined so later posts_clauses callbacks can reference it."
+		);
+	}
+
+	/**
+	 * A join an earlier callback already added is left alone.
+	 *
+	 * Joining unconditionally is only safe because of this: extensions that append their own join must
+	 * not end up with a duplicate, which the database rejects outright.
+	 *
+	 * @testdox A lookup table join added by an earlier callback is not duplicated.
+	 *
+	 * @dataProvider stock_status_provider
+	 *
+	 * @param string $stock_status Stock status the products list is filtered by.
+	 */
+	public function test_stock_status_filter_does_not_duplicate_an_existing_lookup_join( string $stock_status ): void {
+		global $wpdb;
+
+		$existing_join = " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON {$wpdb->posts}.ID = wc_product_meta_lookup.product_id ";
+
+		$args = $this->filter_clauses_for_stock_status(
+			$stock_status,
+			array(
+				'join'  => $existing_join,
+				'where' => '',
+			)
+		);
+
+		$this->assertSame(
+			1,
+			substr_count( $args['join'], 'wc_product_meta_lookup ON' ),
+			"The {$stock_status} filter must not join wc_product_meta_lookup a second time; a duplicate alias is a hard SQL error."
+		);
+	}
+
+	/**
+	 * An array-shaped stock_status request still selects the matching branch.
+	 *
+	 * @testdox An array-shaped stock_status request still uses the variation-aware out-of-stock branch.
+	 */
+	public function test_array_shaped_stock_status_uses_the_matching_branch(): void {
+		$args = $this->filter_clauses_for_stock_status( array( ProductStockStatus::OUT_OF_STOCK ) );
+
+		$this->assertStringContainsString(
+			'stock_status_products',
+			$args['where'],
+			'An array-shaped out-of-stock request should take the same branch as the scalar form.'
+		);
+	}
+
+	/**
+	 * Clauses arriving without a usable join string are tolerated.
+	 *
+	 * @testdox Clauses arriving without a join string do not break the stock filter.
+	 */
+	public function test_stock_status_filter_tolerates_missing_join_clause(): void {
+		global $wpdb;
+
+		$args = $this->filter_clauses_for_stock_status( ProductStockStatus::OUT_OF_STOCK, array( 'where' => '' ) );
+
+		$this->assertStringContainsString(
+			"LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup",
+			$args['join'],
+			'A callback that drops the join clause should not stop the filter from joining the lookup table.'
+		);
+	}
+
+	/**
+	 * Later callbacks can read the lookup alias without joining it themselves.
+	 *
+	 * This is the behaviour the join exists for. Asserting the join string alone cannot catch a change
+	 * that leaves the alias unusable in the assembled query, so drive a real query through it.
+	 *
+	 * @testdox Out-of-stock filtering works for callbacks that read the lookup alias without joining it.
+	 */
+	public function test_out_of_stock_filter_supports_callbacks_relying_on_the_lookup_join(): void {
+		update_option( 'woocommerce_manage_stock', 'no' );
+
+		$out_of_stock = WC_Helper_Product::create_simple_product();
+		$out_of_stock->set_manage_stock( false );
+		$out_of_stock->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$out_of_stock->save();
+
+		// Stands in for an extension: reads the alias, appends no join of its own.
+		$consumer = static function ( $clauses ) {
+			$clauses['where'] .= ' AND wc_product_meta_lookup.virtual = 0 ';
+			return $clauses;
+		};
+
+		$ids = $this->query_product_ids_for_stock_status( ProductStockStatus::OUT_OF_STOCK, $consumer );
+
+		$this->assertContains(
+			$out_of_stock->get_id(),
+			$ids,
+			'A posts_clauses callback that references wc_product_meta_lookup without joining it should still produce a valid query.'
 		);
 	}
 
@@ -768,6 +849,45 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 		);
 	}
 
+	/**
+	 * Run the stock status clause filter for a given request value.
+	 *
+	 * @param string|array $stock_status Value of the stock_status request parameter.
+	 * @param array|null   $clauses      Clause array to filter; defaults to an empty join and where.
+	 * @return array
+	 */
+	private function filter_clauses_for_stock_status( $stock_status, ?array $clauses = null ): array {
+		$clauses = $clauses ?? array(
+			'join'  => '',
+			'where' => '',
+		);
+
+		return $this->with_stock_status(
+			$stock_status,
+			function () use ( $clauses ) {
+				return $this->sut->filter_stock_status_post_clauses( $clauses );
+			}
+		);
+	}
+
+	/**
+	 * Run a callback with the stock_status request parameter set, restoring $_GET afterwards.
+	 *
+	 * @param string|array $stock_status Value of the stock_status request parameter.
+	 * @param callable     $callback     Callback to run.
+	 * @return mixed
+	 */
+	private function with_stock_status( $stock_status, callable $callback ) {
+		$original_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request data.
+
+		$_GET['stock_status'] = $stock_status;
+
+		try {
+			return $callback();
+		} finally {
+			$_GET = $original_get;
+		}
+	}
 
 	/**
 	 * Create title and content-only search matches.
@@ -850,39 +970,44 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	/**
 	 * Query product IDs through the products list table stock-status filter.
 	 *
-	 * @param string      $stock_status      Stock status to query.
-	 * @param string|null $additional_filter Optional clause filter to register after the stock filter.
+	 * @param string               $stock_status      Stock status to query.
+	 * @param string|callable|null $additional_filter Optional clause filter to register after the stock
+	 *                                                filter: a method name on the list table, or any callable.
 	 * @return array
 	 */
 	private function query_product_ids_for_stock_status( $stock_status, $additional_filter = null ) {
-		$sut          = ( new ReflectionClass( WC_Admin_List_Table_Products::class ) )->newInstanceWithoutConstructor();
-		$original_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request data.
+		$sut = ( new ReflectionClass( WC_Admin_List_Table_Products::class ) )->newInstanceWithoutConstructor();
 
-		$_GET['stock_status'] = $stock_status;
-		add_filter( 'posts_clauses', array( $sut, 'filter_stock_status_post_clauses' ) );
-		if ( $additional_filter ) {
-			add_filter( 'posts_clauses', array( $sut, $additional_filter ) );
-		}
+		return $this->with_stock_status(
+			$stock_status,
+			function () use ( $sut, $additional_filter ) {
+				$extra = is_string( $additional_filter ) ? array( $sut, $additional_filter ) : $additional_filter;
 
-		try {
-			$query = new WP_Query(
-				array(
-					'fields'         => 'ids',
-					'orderby'        => 'ID',
-					'order'          => 'ASC',
-					'post_status'    => 'publish',
-					'post_type'      => 'product',
-					'posts_per_page' => -1,
-				)
-			);
+				add_filter( 'posts_clauses', array( $sut, 'filter_stock_status_post_clauses' ) );
+				if ( $extra ) {
+					add_filter( 'posts_clauses', $extra );
+				}
 
-			return array_map( 'intval', $query->posts );
-		} finally {
-			remove_filter( 'posts_clauses', array( $sut, 'filter_stock_status_post_clauses' ) );
-			if ( $additional_filter ) {
-				remove_filter( 'posts_clauses', array( $sut, $additional_filter ) );
+				try {
+					$query = new WP_Query(
+						array(
+							'fields'         => 'ids',
+							'orderby'        => 'ID',
+							'order'          => 'ASC',
+							'post_status'    => 'publish',
+							'post_type'      => 'product',
+							'posts_per_page' => -1,
+						)
+					);
+
+					return array_map( 'intval', $query->posts );
+				} finally {
+					remove_filter( 'posts_clauses', array( $sut, 'filter_stock_status_post_clauses' ) );
+					if ( $extra ) {
+						remove_filter( 'posts_clauses', $extra );
+					}
+				}
 			}
-			$_GET = $original_get;
-		}
+		);
 	}
 }

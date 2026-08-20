@@ -1052,12 +1052,21 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		if ( ! empty( $_GET['stock_status'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$stock_status = wc_clean( wp_unslash( $_GET['stock_status'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
-			if ( ProductStockStatus::OUT_OF_STOCK === $stock_status ) {
-				// The subquery below is self-contained, but callbacks running after this one have always
-				// been able to reference the wc_product_meta_lookup alias whenever a stock filter is
-				// active. Keep that true for every stock status; the helper is idempotent.
-				$args['join'] = $this->append_product_sorting_table_join( $args['join'] );
+			// The request can shape this as an array, but the filter only ever describes one status.
+			// Without collapsing it first, a strict comparison below silently picks the wrong branch.
+			if ( is_array( $stock_status ) ) {
+				$stock_status = reset( $stock_status );
+			}
+			if ( ! is_string( $stock_status ) || '' === $stock_status ) {
+				return $args;
+			}
 
+			// Callbacks running after this one have always been able to reference the
+			// wc_product_meta_lookup alias whenever a stock filter is active. Join once here so that
+			// stays a property of this filter rather than something each branch has to remember.
+			$args['join'] = $this->append_product_sorting_table_join( $args['join'] ?? '' );
+
+			if ( ProductStockStatus::OUT_OF_STOCK === $stock_status ) {
 				// Only published variations qualify their parent for this discoverability filter.
 				// Other statuses retain normal aggregate-parent behavior.
 				$args['where'] .= $wpdb->prepare(
@@ -1086,7 +1095,6 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 					$stock_status
 				);
 			} else {
-				$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
 				$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.stock_status=%s ', $stock_status );
 			}
 		}
@@ -1101,6 +1109,11 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 */
 	private function append_product_sorting_table_join( $sql ) {
 		global $wpdb;
+
+		// Another posts_clauses callback produced this clause, so it is not guaranteed to be a string.
+		if ( ! is_string( $sql ) ) {
+			$sql = '';
+		}
 
 		if ( ! strstr( $sql, 'wc_product_meta_lookup' ) ) {
 			$sql .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
