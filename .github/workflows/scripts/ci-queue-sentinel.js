@@ -38,9 +38,9 @@ const MAX_FETCH_RETRIES = 2;
 // Each unreadable run costs ~45s of retry sleep. Probing 60 of them would burn
 // the job timeout without producing an answer, so give up early instead.
 const MAX_PROBE_FAILURES = 3;
-// The longest real overflow window observed is 102 min. Far past that the probe
-// has most likely stopped being able to prove the queue is healthy, and a switch
-// silently stuck ON bills the paid group indefinitely.
+// The longest real overflow window observed is 102 min. Past this, combined with
+// a probe that cannot prove the queue is healthy, the switch is stuck rather than
+// busy, and it bills the paid group for as long as nobody notices.
 const MAX_ON_MINUTES = 240;
 
 const sleep = ( seconds ) => new Promise( ( resolve ) => setTimeout( resolve, seconds * 1000 ) );
@@ -343,13 +343,10 @@ const main = async () => {
 		probeComplete = runsListComplete && failedProbes === 0;
 	}
 
-	// Tolerating unreadable runs must not let a blind sentinel sit green for
-	// hours. One bad run is noise; learning nothing is an outage, so stay loud.
-	if ( failedProbes > 0 && failedProbes === probeAttempts ) {
-		throw new Error(
-			`Queue probe blind: all ${ probeAttempts } active run(s) were unreadable`
-		);
-	}
+	// A blind tick is deliberately not an alert: most ticks see a single active
+	// run, so one transient error would page constantly for a state that
+	// self-heals on the next tick and costs nothing while the switch is off.
+	// Sustained blindness that is actually costing money is caught at the end.
 	if ( failedProbes > 0 ) {
 		console.log(
 			`::warning::Queue probe could not read ${ failedProbes } of ${ probeAttempts } active runs; switch-off is suppressed this tick.`
@@ -387,10 +384,12 @@ const main = async () => {
 
 	// Checked last: the decision above still stands and is recorded. Failing here
 	// only rings the alarm, so a switch nobody can turn off cannot bill quietly.
+	// Requires an incomplete probe: a long window backed by a healthy probe is
+	// real congestion doing its job, not a stuck switch, and must stay quiet.
 	const onForMin = ( nowMs - updatedAtMs ) / 60000;
-	if ( value === '1' && rawValue === '1' && onForMin > MAX_ON_MINUTES ) {
+	if ( value === '1' && rawValue === '1' && ! probeComplete && onForMin > MAX_ON_MINUTES ) {
 		throw new Error(
-			`${ VARIABLE_NAME } has been ON for ${ Math.round( onForMin ) } min (expected under ${ MAX_ON_MINUTES }) — the queue probe may no longer be able to prove the queue is healthy`
+			`${ VARIABLE_NAME } has been ON for ${ Math.round( onForMin ) } min with an incomplete queue probe — the switch cannot be proven safe to turn off`
 		);
 	}
 };
