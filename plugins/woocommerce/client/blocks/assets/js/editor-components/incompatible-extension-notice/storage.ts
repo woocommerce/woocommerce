@@ -29,8 +29,19 @@ export const UNSCOPED_STORAGE_KEY =
  * subdirectory multisite reads and writes the same keys. Appending the site's
  * own home URL gives each of them their own storage, so one site's dismissal
  * can no longer hide another site's warning.
+ *
+ * `HOME_URL` is typed as possibly absent because it comes from `wcSettings`,
+ * which a page can load without. It is core data — `AssetDataRegistry` merges
+ * `get_core_data()` back over whatever the `woocommerce_shared_settings` filter
+ * returns — so in practice only a payload that failed to load at all is missing
+ * it, and such a page has no incompatible extensions list to warn about either.
+ * Falling back to the origin keeps the key well-formed rather than writing the
+ * string `undefined` into it. It does not recover the site's identity: sites
+ * that share an origin share the fallback key, exactly as they shared the
+ * unscoped key this replaced.
  */
-const scopeToSite = ( key: string ): string => `${ key }__${ HOME_URL }`;
+const scopeToSite = ( key: string ): string =>
+	`${ key }__${ HOME_URL || window.location.origin }`;
 
 /**
  * The key the editor sidebar notice reads and writes. It holds an array of
