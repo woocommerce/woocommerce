@@ -37,6 +37,7 @@ use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Internal\Admin\OrderMilestoneEasterEgg;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, TimeUtil};
+use Automattic\WooCommerce\Internal\Logging\OrderLogsCleanupHelper;
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 use Automattic\WooCommerce\Caches\OrderCountCacheService;
 use Automattic\WooCommerce\Caches\ProductCountCacheService;
@@ -59,7 +60,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '11.1.0-dev';
+	public $version = '11.2.0-dev';
 
 	/**
 	 * WooCommerce Schema version.
@@ -100,6 +101,15 @@ final class WooCommerce {
 	 * @var WC_API
 	 */
 	private $api;
+
+	/**
+	 * WP admin settings registrars created by register_wp_admin_settings(), memoized per
+	 * settings page or email object (keyed by spl_object_id) so that repeat registrations
+	 * reuse the same callback identities instead of stacking duplicate filters.
+	 *
+	 * @var WC_Register_WP_Admin_Settings[]
+	 */
+	private $wp_admin_settings_registrars = array();
 
 	/**
 	 * Product factory instance.
@@ -344,7 +354,16 @@ final class WooCommerce {
 		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin' ) );
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_inbox_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_inbox_variant' ) );
+
+		// Originating from https://github.com/woocommerce/woocommerce/pull/11082 (WC_API::register_wp_admin_settings(), July 2016),
+		// the settings were intended for REST context only. By chance, admin pages relied on unconditional rest_preload_api_request calls,
+		// that triggered rest_api_init as a side effect, and over time admin code bound to these settings as well.
+		// Registration runs late on admin_init because it latches woocommerce_get_settings_pages and
+		// woocommerce_email_classes on first use: extensions adding their callbacks from their own
+		// admin_init handlers would otherwise be silently dropped for the whole request.
+		add_action( 'admin_init', array( $this, 'register_wp_admin_settings' ), 999 );
 		add_action( 'rest_api_init', array( $this, 'register_wp_admin_settings' ) );
+
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_newly_installed', 'wc_set_hooked_blocks_version', 10 );
@@ -389,6 +408,7 @@ final class WooCommerce {
 		$container->get( TaxRateVersionStringInvalidator::class );
 		$container->get( OrderMilestoneEasterEgg::class );
 		$container->get( CustomerEmailVerification::class );
+		$container->get( OrderLogsCleanupHelper::class );
 
 		// Feature flags.
 		if ( Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
@@ -1527,6 +1547,12 @@ final class WooCommerce {
 	 *
 	 * This method used to be part of the now removed Legacy REST API.
 	 *
+	 * It is idempotent and independent of the hook it runs from: it fires on whichever of
+	 * admin_init / rest_api_init comes first and is safe to run again on the other, or on
+	 * any repeat invocation (plugins can boot the REST server at any point of an admin
+	 * request). Repeat calls re-attach the same registrar callbacks, which WordPress
+	 * deduplicates, so settings groups and settings are never registered twice.
+	 *
 	 * @since 9.0.0
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
@@ -1536,13 +1562,46 @@ final class WooCommerce {
 	public function register_wp_admin_settings() {
 		$pages = WC_Admin_Settings::get_settings_pages();
 		foreach ( $pages as $page ) {
-			new WC_Register_WP_Admin_Settings( $page, 'page' );
+			$this->register_wp_admin_settings_for( $page, 'page' );
 		}
 
 		$emails = WC_Emails::instance();
 		foreach ( $emails->get_emails() as $email ) {
-			new WC_Register_WP_Admin_Settings( $email, 'email' );
+			$this->register_wp_admin_settings_for( $email, 'email' );
 		}
+	}
+
+	/**
+	 * Creates (or re-attaches) the settings registrar for one settings page or email.
+	 *
+	 * The registrar is memoized per settings object so that every registration pass reuses
+	 * the same callback identities: add_filter() then overwrites instead of stacking
+	 * duplicates, which is what makes register_wp_admin_settings() idempotent.
+	 *
+	 * @param WC_Settings_Page|WC_Email $settings_source The object holding the settings to register.
+	 *                                                   Non-objects are ignored, matching the guard
+	 *                                                   WC_Register_WP_Admin_Settings has held since 3.0.
+	 * @param string                    $type            Type of settings to register ('page' or 'email').
+	 * @return void
+	 */
+	private function register_wp_admin_settings_for( $settings_source, $type ) {
+		// woocommerce_get_settings_pages and woocommerce_email_classes are third-party writable, and
+		// non-object entries have been skipped rather than fatal since 3.0. Check before keying:
+		// spl_object_id() throws a TypeError, which here would take down every admin and REST request.
+		if ( ! is_object( $settings_source ) ) {
+			return;
+		}
+
+		$key = spl_object_id( $settings_source );
+
+		if ( isset( $this->wp_admin_settings_registrars[ $key ] ) ) {
+			// Re-attach in case hook state was reset since the first registration (e.g. between tests).
+			$this->wp_admin_settings_registrars[ $key ]->register();
+			return;
+		}
+
+		// The constructor attaches the filters.
+		$this->wp_admin_settings_registrars[ $key ] = new WC_Register_WP_Admin_Settings( $settings_source, $type );
 	}
 
 	/**

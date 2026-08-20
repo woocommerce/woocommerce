@@ -221,6 +221,44 @@ class EndpointTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox render_shortcode() only renders on the managed page with a matching order key.
+	 */
+	public function test_render_shortcode_requires_managed_page_and_key(): void {
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$page_id       = (int) wc_get_page_id( Endpoint::PAGE_KEY );
+		$other_page_id = (int) wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Some other page',
+			)
+		);
+
+		global $wp, $wp_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture.
+		$wp             = new \stdClass();
+		$wp->query_vars = array( Endpoint::QUERY_VAR => (string) $order->get_id() );
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture.
+		$wp_query          = new WP_Query();
+		$wp_query->is_page = true;
+
+		$wp_query->queried_object = get_post( $page_id );
+		$_GET                     = array( 'key' => 'wc_order_definitelywrong' );
+		$this->assertSame( '', $this->endpoint->render_shortcode(), 'Wrong key on the managed page.' );
+
+		$wp_query->queried_object = get_post( $other_page_id );
+		$_GET                     = array( 'key' => $order->get_order_key() );
+		$this->assertSame( '', $this->endpoint->render_shortcode(), 'Correct key off the managed page.' );
+
+		$wp_query->queried_object = get_post( $page_id );
+		$html                     = $this->endpoint->render_shortcode();
+		$this->assertStringContainsString( 'Order #' . $order->get_order_number(), $html, 'Correct key on the managed page.' );
+	}
+
+	/**
 	 * @testdox The woocommerce_review_order_eligible_statuses filter widens the eligible set.
 	 */
 	public function test_eligible_statuses_filter_widens_set(): void {
@@ -714,6 +752,78 @@ class EndpointTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox maybe_create_host_page() preserves an intentionally empty Shop page setting.
+	 */
+	public function test_maybe_create_host_page_preserves_empty_shop_page_option(): void {
+		// Snapshot the Shop page option before staging: option values survive the
+		// per-test DB-transaction rollback (see setUp()), so the `finally` block
+		// must restore the pre-test value rather than leave it deleted for later
+		// tests in the same PHPUnit process.
+		$original_shop_page_id = get_option( 'woocommerce_shop_page_id' );
+
+		$this->reset_review_order_pages();
+		$this->reset_shop_pages();
+
+		$shop_page_id = (int) wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Shop',
+				'post_name'   => 'shop',
+			)
+		);
+		update_option( 'woocommerce_shop_page_id', '' );
+		delete_option( 'woocommerce_review_order_flush_rewrite_pending' );
+
+		$customize_review_order_page = static function ( $pages ) {
+			if ( isset( $pages[ Endpoint::PAGE_KEY ] ) ) {
+					$pages[ Endpoint::PAGE_KEY ]['title'] = 'Customized review order page';
+
+					$pages[ Endpoint::PAGE_KEY ]['content'] .= '<!-- extension-customization -->';
+			}
+			return $pages;
+		};
+		$restore_shop_page           = static function ( $pages ) {
+			$pages['shop'] = array(
+				'name'    => 'shop',
+				'title'   => 'Shop',
+				'content' => '',
+			);
+			return $pages;
+		};
+
+		add_filter( 'woocommerce_create_pages', array( $this->endpoint, 'inject_review_order_page' ) );
+		add_filter( 'woocommerce_create_pages', $customize_review_order_page, 50 );
+		add_filter( 'woocommerce_create_pages', $restore_shop_page, 200 );
+		try {
+			$this->endpoint->maybe_create_host_page();
+
+			$this->assertSame( '', get_option( 'woocommerce_shop_page_id' ), 'intentional empty shop page option should stay empty' );
+
+			$review_order_page = get_post( (int) wc_get_page_id( Endpoint::PAGE_KEY ) );
+			$this->assertInstanceOf( \WP_Post::class, $review_order_page, 'review order page should still be created' );
+			$this->assertSame( 'Customized review order page', $review_order_page->post_title, 'earlier page-definition customizations should be preserved' );
+			$this->assertStringContainsString( '<!-- extension-customization -->', $review_order_page->post_content, 'earlier content customizations should be preserved' );
+
+			\WC_Install::create_pages();
+			$this->assertSame( $shop_page_id, (int) wc_get_page_id( 'shop' ), 'a later full repair should adopt the staged Shop page' );
+		} finally {
+			remove_filter( 'woocommerce_create_pages', array( $this->endpoint, 'inject_review_order_page' ) );
+			remove_filter( 'woocommerce_create_pages', $customize_review_order_page, 50 );
+			remove_filter( 'woocommerce_create_pages', $restore_shop_page, 200 );
+			$this->reset_review_order_pages();
+			$this->reset_shop_pages();
+
+			// Restore the pre-test Shop page option. `reset_shop_pages()` deletes
+			// it for a clean slate; put back whatever was there before so the
+			// suite's shared option state is unchanged by this test.
+			if ( false !== $original_shop_page_id ) {
+				update_option( 'woocommerce_shop_page_id', $original_shop_page_id );
+			}
+		}
+	}
+
+	/**
 	 * @testdox The `woocommerce_create_pages` filter injects the Review Order entry so any caller of `WC_Install::create_pages()` (e.g. Status → Tools repair) seeds the page.
 	 */
 	public function test_inject_review_order_page_filter_adds_entry_for_third_party_callers(): void {
@@ -731,14 +841,15 @@ class EndpointTest extends WC_Unit_Test_Case {
 	/**
 	 * Remove every page that could match the Review Order lookup, plus the
 	 * stored option, so a test can stage a clean slate before exercising
-	 * `maybe_create_host_page()`.
+	 * `maybe_create_host_page()`. Trashed pages must go too: `'any'` skips
+	 * `trash`, but `wc_create_page()` untrashes matching pages.
 	 */
 	private function reset_review_order_pages(): void {
 		$candidates = get_posts(
 			array(
 				'name'             => 'review-order',
 				'post_type'        => 'page',
-				'post_status'      => 'any',
+				'post_status'      => array_keys( get_post_stati() ),
 				'numberposts'      => -1,
 				'suppress_filters' => false,
 			)
@@ -747,5 +858,27 @@ class EndpointTest extends WC_Unit_Test_Case {
 			wp_delete_post( (int) $page->ID, true );
 		}
 		delete_option( 'woocommerce_review_order_page_id' );
+	}
+
+	/**
+	 * Remove every page that could match the Shop page lookup, plus the
+	 * stored option, so a test can stage an intentionally empty setting.
+	 * Trashed pages must go too: `'any'` skips `trash`, but
+	 * `wc_create_page()` untrashes matching pages.
+	 */
+	private function reset_shop_pages(): void {
+		$candidates = get_posts(
+			array(
+				'name'             => 'shop',
+				'post_type'        => 'page',
+				'post_status'      => array_keys( get_post_stati() ),
+				'numberposts'      => -1,
+				'suppress_filters' => false,
+			)
+		);
+		foreach ( $candidates as $page ) {
+			wp_delete_post( (int) $page->ID, true );
+		}
+		delete_option( 'woocommerce_shop_page_id' );
 	}
 }

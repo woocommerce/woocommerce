@@ -194,14 +194,14 @@ class WC_Cache_Helper {
 	public static function geolocation_ajax_redirect() {
 		if ( DefaultCustomerAddress::GEOLOCATION_AJAX === get_option( 'woocommerce_default_customer_address' ) && ! is_checkout() && ! is_cart() && ! is_account_page() && ! is_robots() && ! wp_doing_ajax() && empty( $_POST ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$location_hash = self::geolocation_ajax_get_location_hash();
-			$current_hash  = isset( $_GET['v'] ) ? wc_clean( wp_unslash( $_GET['v'] ) ) : ''; // WPCS: sanitization ok, input var ok, CSRF ok.
+			$current_hash  = isset( $_GET['v'] ) ? wc_clean( wp_unslash( $_GET['v'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Hash is cleaned; same-site redirect uses esc_url_raw() and wp_safe_redirect().
 			if ( empty( $current_hash ) || $current_hash !== $location_hash ) {
 				global $wp;
 
 				$redirect_url = trailingslashit( home_url( $wp->request ) );
 
-				if ( ! empty( $_SERVER['QUERY_STRING'] ) ) { // WPCS: Input var ok.
-					$redirect_url = add_query_arg( wp_unslash( $_SERVER['QUERY_STRING'] ), '', $redirect_url ); // WPCS: sanitization ok, Input var ok.
+				if ( ! empty( $_SERVER['QUERY_STRING'] ) ) {
+					$redirect_url = add_query_arg( wp_unslash( $_SERVER['QUERY_STRING'] ), '', $redirect_url ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Hash is cleaned; same-site redirect uses esc_url_raw() and wp_safe_redirect().
 				}
 
 				if ( ! get_option( 'permalink_structure' ) ) {
@@ -350,7 +350,7 @@ class WC_Cache_Helper {
 				return;
 			}
 
-			$affected = $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s LIMIT %d;", '\_transient\_%' . $version, $limit ) ); // WPCS: cache ok, db call ok.
+			$affected = $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s LIMIT %d;", '\_transient\_%' . $version, $limit ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct deletion is required for bounded transient cleanup; caching a DELETE is not applicable.
 
 			// If affected rows is equal to limit, there are more rows to delete. Delete in 30 secs.
 			if ( $affected === $limit ) {

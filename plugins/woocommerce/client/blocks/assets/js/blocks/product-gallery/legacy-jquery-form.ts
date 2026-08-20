@@ -26,27 +26,11 @@ import type {
 	LegacyVariationPayload,
 } from './types';
 
-/** A WP attachment ID that's safe to use as a gallery slot. */
-const isValidImageId = ( id: unknown ): id is number =>
-	typeof id === 'number' && Number.isInteger( id ) && id > 0;
+/** Normalize an integer ID from the variation event payload. */
+const normalizeId = ( id: unknown ): number | undefined => {
+	const normalizedId = Number( id );
 
-/**
- * Coerce the variation event payload's IDs into a deduped list of
- * positive integers, with the optional featured image at position 0.
- */
-const normalizeImageData = (
-	imageIds: unknown,
-	featuredImageId?: number
-): number[] => {
-	const featured = isValidImageId( featuredImageId )
-		? [ featuredImageId ]
-		: [];
-	const others = Array.isArray( imageIds )
-		? imageIds
-				.map( ( id ) => Number.parseInt( String( id ), 10 ) )
-				.filter( isValidImageId )
-		: [];
-	return Array.from( new Set( [ ...featured, ...others ] ) );
+	return Number.isInteger( normalizedId ) ? normalizedId : undefined;
 };
 
 /**
@@ -67,13 +51,11 @@ export const subscribeLegacyJQueryFormVariations = (
 
 	const handleFound = withScope(
 		( _event?: unknown, variation?: LegacyVariationPayload ) => {
-			const imageData = normalizeImageData(
-				variation?.gallery_image_ids,
-				variation?.image_id
-			);
+			const variationId = normalizeId( variation?.variation_id );
+			const featuredImageId = normalizeId( variation?.image_id );
 
-			if ( imageData.length ) {
-				handlers.onVariationFound( imageData, variation?.image_id );
+			if ( variationId !== undefined && featuredImageId !== undefined ) {
+				handlers.onVariationFound( variationId, featuredImageId );
 				return;
 			}
 

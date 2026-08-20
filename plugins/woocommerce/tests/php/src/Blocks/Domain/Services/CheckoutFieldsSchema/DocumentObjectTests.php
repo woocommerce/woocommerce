@@ -8,7 +8,6 @@ use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Blocks\Package;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 use Opis\JsonSchema\{
 	Validator,
 	ValidationResult,
@@ -20,7 +19,7 @@ use WC_Customer;
 /**
  * DocumentObjectTests class.
  */
-class DocumentObjectTests extends TestCase {
+class DocumentObjectTests extends \WC_Unit_Test_Case {
 	/**
 	 * Trait to use for the test_additional_fields_schema test.
 	 *
@@ -121,8 +120,12 @@ class DocumentObjectTests extends TestCase {
 	 * Tear down the test environment.
 	 */
 	public function tearDown(): void {
+		// The CheckoutFields registry lives on the container-cached singleton, which the
+		// parent teardown does not reset, so deregister the fields unconditionally.
+		$this->additional_fields_controller->deregister_checkout_field( 'namespace/contact_field' );
+		$this->additional_fields_controller->deregister_checkout_field( 'namespace/order_field' );
+
 		parent::tearDown();
-		wc_empty_cart();
 	}
 	/**
 	 * test_default_document_schema.
@@ -286,9 +289,6 @@ class DocumentObjectTests extends TestCase {
 				'namespace/order_field' => 'Order field',
 			]
 		);
-
-		$this->additional_fields_controller->deregister_checkout_field( 'namespace/contact_field' );
-		$this->additional_fields_controller->deregister_checkout_field( 'namespace/order_field' );
 	}
 
 	/**
