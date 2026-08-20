@@ -1,14 +1,11 @@
 /**
- * The stored-dismissal contract for the incompatible extensions notices.
+ * The stored-dismissal contract shared by the editor sidebar notice and the
+ * storefront admin banner: the keys, their site scoping, and the containment
+ * check.
  *
- * Both surfaces — the editor sidebar notice and the storefront admin banner —
- * import from here, so the keys, the site they are scoped to, and the comparison
- * that decides whether a stored acknowledgement still covers what is
- * incompatible live in one place.
- *
- * Kept to `@woocommerce/settings`, which is a webpack external both surfaces
- * already load. Barrels that run code at import time (`@woocommerce/utils`) stay
- * out, because the storefront bundle imports this module.
+ * Dependencies are kept to `@woocommerce/settings` (a webpack external both
+ * surfaces already load); barrels that run code at import time stay out,
+ * because the storefront bundle imports this module.
  */
 
 /**
@@ -25,20 +22,11 @@ export const UNSCOPED_STORAGE_KEY =
 	'wc-blocks_dismissed_incompatible_extensions_notices';
 
 /**
- * `localStorage` is scoped to the origin, not to the path, so every site of a
- * subdirectory multisite reads and writes the same keys. Appending the site's
- * own home URL gives each of them their own storage, so one site's dismissal
- * can no longer hide another site's warning.
- *
- * `HOME_URL` is typed as possibly absent because it comes from `wcSettings`,
- * which a page can load without. It is core data — `AssetDataRegistry` merges
- * `get_core_data()` back over whatever the `woocommerce_shared_settings` filter
- * returns — so in practice only a payload that failed to load at all is missing
- * it, and such a page has no incompatible extensions list to warn about either.
- * Falling back to the origin keeps the key well-formed rather than writing the
- * string `undefined` into it. It does not recover the site's identity: sites
- * that share an origin share the fallback key, exactly as they shared the
- * unscoped key this replaced.
+ * `localStorage` is scoped to the origin, not the path, so every site of a
+ * subdirectory multisite shares the same keys; appending the site's home URL
+ * gives each its own storage. `HOME_URL` can be absent when `wcSettings` never
+ * loaded — the origin fallback keeps the key well-formed (not the string
+ * `undefined`), without recovering the site's identity.
  */
 const scopeToSite = ( key: string ): string =>
 	`${ key }__${ HOME_URL || window.location.origin }`;
@@ -60,17 +48,13 @@ export const getFrontendStorageKey = (): string =>
 
 /**
  * The dismissals stored before the keys were scoped to a site, when this site
- * can claim them.
+ * can claim them. Both surfaces shared that key, so the value can hold bare
+ * slug strings (storefront) and `{ [blockName]: slugs }` records (editor) at
+ * once; callers keep the entries their own surface wrote.
  *
- * Both surfaces shared that one key, so its value can hold either shape, and on
- * a real site usually holds both: the storefront wrote bare slug strings, while
- * the editor appends `{ [blockName]: slugs }` records without discarding what it
- * finds. Callers keep the entries their own surface wrote.
- *
- * Nothing is migrated on a multisite. The value names no site and every site on
- * the origin sees it, so there is no way to tell whose dismissal it is. Warning
- * an admin one more time is safer than hiding a live warning behind a dismissal
- * that was made somewhere else.
+ * Nothing is migrated on a multisite: the value names no site, so there is no
+ * telling whose dismissal it is, and warning an admin once more is safer than
+ * hiding a live warning behind another site's dismissal.
  */
 export const readDismissalsFromBeforeScoping = (): unknown[] => {
 	if ( IS_MULTISITE ) {
@@ -90,10 +74,8 @@ export const readDismissalsFromBeforeScoping = (): unknown[] => {
 		// Unparseable, handled the same way as a shape we don't recognise.
 	}
 
-	// A value we can't read is not a dismissal we can honour; showing the notice
-	// is the safe fallback. Logged the way `useLocalStorageState` logs its own
-	// unreadable values, so a merchant who reports the notice coming back after
-	// an update has something in the console to point at.
+	// A value we can't read is not a dismissal we can honour; the log gives a
+	// merchant who reports the notice coming back something to point at.
 	// eslint-disable-next-line no-console
 	console.error(
 		`Value for key '${ UNSCOPED_STORAGE_KEY }' could not be carried over from localStorage because it can't be read as a list of dismissals.`
@@ -104,15 +86,11 @@ export const readDismissalsFromBeforeScoping = (): unknown[] => {
 /**
  * What a notice should hand `useLocalStorageState` as its initial value.
  *
- * That hook falls back to the initial value in two cases it can't tell apart:
- * when `key` holds nothing, and when it holds something unparseable. Only the
- * first may be seeded from `migrate`. Letting a corrupt value reach past itself
- * to the pre-scoping data would revive a dismissal the merchant has since
- * replaced and hide a warning that is currently owed — so it starts empty
- * instead, and the notice shows.
- *
- * A value the hook can read is parsed by the hook itself and never reaches this
- * fallback, which is why only absence is answered here.
+ * That hook falls back to the initial value both when `key` holds nothing and
+ * when it holds something unparseable, and cannot tell the two apart. Only
+ * absence may open the migration: seeding a corrupt value from the pre-scoping
+ * data would revive a dismissal the merchant has since replaced and hide a
+ * warning that is currently owed.
  */
 export const readInitialDismissals = < T >(
 	key: string,

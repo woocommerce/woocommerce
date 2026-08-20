@@ -15,13 +15,9 @@ import {
 
 /**
  * The slugs the merchant acknowledged on the storefront before the keys were
- * scoped to a site.
- *
- * That value holds either surface's shape, and often both at once: the
- * storefront wrote bare slug strings, while the editor appends
- * `{ [blockName]: slugs }` records without discarding what it finds. Only the
- * strings were ever the storefront banner's, so the records are filtered out
- * rather than treated as a reason to skip the whole value.
+ * scoped to a site. The shared pre-scoping value usually holds both surfaces'
+ * shapes at once; only the bare strings were ever the storefront banner's, so
+ * the editor's records are filtered out rather than failing the whole value.
  */
 const readSlugsDismissedBeforeScoping = (): string[] =>
 	readDismissalsFromBeforeScoping().filter(
@@ -35,14 +31,10 @@ interface IncompatibleExtension {
 
 /**
  * The extensions this site currently declares incompatible, and whether that
- * list was delivered at all.
- *
- * The two are not the same thing. `incompatibleExtensions` is registered by the
- * Cart and Checkout blocks rather than by core data, so it can be missing from
- * the payload — a `woocommerce_shared_settings` callback that trims the settings
- * drops it, and both blocks skip registering it when `get_plugins()` is not
- * loaded. An absent list means "we don't know", which reads identically to an
- * empty one and must not be mistaken for "nothing is incompatible any more".
+ * list was delivered at all. `incompatibleExtensions` is registered by the
+ * Cart and Checkout blocks rather than by core data, so the payload can arrive
+ * without it — and an absent list means "we don't know", which must not be
+ * mistaken for "nothing is incompatible any more".
  */
 const getIncompatibleExtensions = (): {
 	extensions: Record< string, string >;
