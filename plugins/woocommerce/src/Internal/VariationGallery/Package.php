@@ -19,6 +19,11 @@ defined( 'ABSPATH' ) || exit;
 class Package {
 
 	/**
+	 * Option backing the variation gallery feature toggle.
+	 */
+	public const ENABLE_OPTION_NAME = 'wc_feature_woocommerce_additional_variation_images_enabled';
+
+	/**
 	 * Action Scheduler hook for DB update callbacks.
 	 */
 	private const UPDATE_CALLBACK_HOOK = 'woocommerce_run_update_callback';

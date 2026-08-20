@@ -27,6 +27,7 @@ class PackageTest extends \WC_Unit_Test_Case {
 			'woocommerce-db-updates'
 		);
 		delete_option( Migration::COMPLETED_OPTION );
+		delete_option( Package::ENABLE_OPTION_NAME );
 
 		parent::tearDown();
 	}
@@ -36,6 +37,18 @@ class PackageTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_is_enabled_returns_true(): void {
 		$this->assertTrue( Package::is_enabled() );
+	}
+
+	/**
+	 * @testdox Telemetry reports the rollout as enabled while preserving whether the old feature option was explicit.
+	 */
+	public function test_telemetry_reports_enabled_and_explicit_option(): void {
+		update_option( Package::ENABLE_OPTION_NAME, 'no' );
+
+		$snapshot = Telemetry::collect_snapshot();
+
+		$this->assertSame( 'yes', $snapshot['feature_enabled'] );
+		$this->assertSame( 'yes', $snapshot['feature_option_explicit'] );
 	}
 
 	/**
