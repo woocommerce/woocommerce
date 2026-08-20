@@ -29,7 +29,7 @@ class Package {
 	private const UPDATE_CALLBACK_GROUP = 'woocommerce-db-updates';
 
 	/**
-	 * As of WooCommerce 11.2, the variation gallery is enabled for all users.
+	 * As of WooCommerce 11.1, the variation gallery is enabled for all users.
 	 *
 	 * @return bool
 	 */
