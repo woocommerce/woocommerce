@@ -40,14 +40,14 @@ class PackageTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Telemetry reports the rollout as enabled while preserving whether the old feature option was explicit.
+	 * @testdox Telemetry reports an explicit feature opt-out.
 	 */
-	public function test_telemetry_reports_enabled_and_explicit_option(): void {
+	public function test_telemetry_reports_explicit_opt_out(): void {
 		update_option( Package::ENABLE_OPTION_NAME, 'no' );
 
 		$snapshot = Telemetry::collect_snapshot();
 
-		$this->assertSame( 'yes', $snapshot['feature_enabled'] );
+		$this->assertSame( 'no', $snapshot['feature_enabled'] );
 		$this->assertSame( 'yes', $snapshot['feature_option_explicit'] );
 	}
 
