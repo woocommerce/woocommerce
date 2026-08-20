@@ -9,7 +9,11 @@ import {
 	updateErrorForGroup,
 	updateSettingsForGroup,
 } from '../actions';
-import { getDirtyKeys, getLastSettingsErrorForGroup } from '../selectors';
+import {
+	getDirtyKeys,
+	getLastSettingsErrorForGroup,
+	isUpdateSettingsRequesting,
+} from '../selectors';
 import { SettingsState } from '../types';
 
 const GROUP = 'wc_admin';
@@ -40,15 +44,17 @@ describe( 'settings reducer', () => {
 			] );
 		} );
 
-		it( 'keeps the requesting flag it was given', () => {
-			let state = edit( {}, 'period=month' );
-			state = reducer( state, setIsRequesting( GROUP, true ) );
+		it( 'does not leave the group stuck in a requesting state', () => {
+			// Mirrors the getSettings resolver, which flags the group as
+			// requesting and never resets it when the fetch fails.
+			let state = reducer( {}, setIsRequesting( GROUP, true ) );
 			state = reducer(
 				state,
 				updateErrorForGroup( GROUP, null, new Error( 'Nope.' ) )
 			);
 
-			expect( state[ GROUP ].isRequesting ).toBe( true );
+			expect( getLastSettingsErrorForGroup( state, GROUP ) ).toBeTruthy();
+			expect( isUpdateSettingsRequesting( state, GROUP ) ).toBe( false );
 		} );
 	} );
 
@@ -80,6 +86,7 @@ describe( 'settings reducer', () => {
 		it( 'does not create a group that was never loaded', () => {
 			const state = reducer( {}, clearErrorForGroup( GROUP ) );
 
+			expect( state ).toEqual( {} );
 			expect( getLastSettingsErrorForGroup( state, GROUP ) ).toBe(
 				false
 			);
@@ -100,8 +107,10 @@ describe( 'settings reducer', () => {
 
 		state = reducer( state, clearErrorForGroup( GROUP ) );
 		state = reducer( state, clearIsDirty( GROUP ) );
+		state = reducer( state, setIsRequesting( GROUP, false ) );
 
 		expect( getLastSettingsErrorForGroup( state, GROUP ) ).toBe( false );
 		expect( getDirtyKeys( state, GROUP ) ).toEqual( [] );
+		expect( isUpdateSettingsRequesting( state, GROUP ) ).toBe( false );
 	} );
 } );
