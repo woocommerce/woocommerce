@@ -31,7 +31,14 @@ final class CatalogVisibility {
 	public const HIDDEN = 'hidden';
 
 	/**
-	 * Returns all catalog visibility values.
+	 * Returns every catalog visibility value defined by this enum, as a flat list.
+	 *
+	 * These happen to be the same four values wc_get_product_visibility_options() returns today, so
+	 * the two look interchangeable. They are not: that helper returns a value => label map, it is
+	 * filterable, and it is what WC_Product::set_catalog_visibility() validates against -- so a site
+	 * can legitimately accept a visibility this list does not contain.
+	 *
+	 * Use wc_get_product_visibility_options() for anything that validates or presents a choice.
 	 *
 	 * @since 10.9.0
 	 *
