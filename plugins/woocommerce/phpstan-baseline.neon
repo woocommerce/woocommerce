@@ -44469,7 +44469,6 @@ parameters:
 			count: 2
 			path: src/Admin/API/Reports/TimeInterval.php
 
-
 		-
 			message: '#^Parameter \$datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:iterate\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
 			identifier: class.notFound
@@ -45273,7 +45272,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Admin/DataSourcePoller.php
-
 
 
 
