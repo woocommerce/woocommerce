@@ -188,8 +188,6 @@ export const getEditedEmailContent = createRegistrySelector(
 const DEFAULT_RECENT_EMAILS_QUERY: RecentEmailsQuery = {
 	per_page: 30, // show a maximum of 30 for now
 	status: 'publish,sent',
-	orderby: 'date',
-	order: 'desc',
 };
 
 function isRecentEmailsQuery( value: unknown ): value is RecentEmailsQuery {
