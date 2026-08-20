@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Review follow-ups for the unreleased wc/v3 refund preview endpoint: schema/doc polish and additional test coverage. No user-facing change.

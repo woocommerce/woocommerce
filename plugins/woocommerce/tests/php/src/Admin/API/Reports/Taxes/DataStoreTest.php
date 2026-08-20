@@ -290,6 +290,10 @@ class DataStoreTest extends WC_Unit_Test_Case {
 			has_action( 'update_option_woocommerce_date_type', array( ReportsCache::class, 'invalidate' ) ),
 			'Changing the analytics date type should invalidate the report cache so all report families reflect the new basis immediately.'
 		);
+		$this->assertNotFalse(
+			has_action( 'add_option_woocommerce_date_type', array( ReportsCache::class, 'invalidate' ) ),
+			'The very first save of the date type takes the add_option path and should invalidate the report cache too.'
+		);
 	}
 
 	/**

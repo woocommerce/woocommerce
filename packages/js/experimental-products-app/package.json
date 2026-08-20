@@ -80,8 +80,8 @@
 		"react-dom": "18.3.x"
 	},
 	"devDependencies": {
-		"@babel/core": "7.25.7",
-		"@babel/runtime": "7.25.7",
+		"@babel/core": "catalog:tooling",
+		"@babel/runtime": "catalog:tooling",
 		"@testing-library/dom": "^10.4.x",
 		"@testing-library/jest-dom": "^6.x.x",
 		"@testing-library/react": "^16.x.x",
@@ -98,13 +98,13 @@
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
 		"jest-environment-jsdom": "29.5.x",
-		"postcss": "8.4.x",
+		"postcss": "catalog:tooling",
 		"postcss-loader": "4.3.x",
 		"rimraf": "5.0.5",
 		"sass-loader": "10.5.x",
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x",
-		"webpack": "5.97.x",
+		"webpack": "catalog:tooling",
 		"webpack-cli": "5.1.x",
 		"webpack-remove-empty-scripts": "1.0.x"
 	},
