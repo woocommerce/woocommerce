@@ -91,6 +91,7 @@ class AssetDataRegistry {
 			'currentThemeIsFSETheme' => wp_is_block_theme(),
 			'dateFormat'             => wc_date_format(),
 			'homeUrl'                => esc_url( home_url( '/' ) ),
+			'isMultisite'            => is_multisite(),
 			'locale'                 => $this->get_locale_data(),
 			'isRemoteLoggingEnabled' => wc_get_container()->get( RemoteLogger::class )->is_remote_logging_allowed(),
 			'dashboardUrl'           => wc_get_account_endpoint_url( 'dashboard' ),

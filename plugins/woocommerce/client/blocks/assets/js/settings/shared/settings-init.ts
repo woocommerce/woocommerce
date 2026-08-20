@@ -60,6 +60,7 @@ export interface WooCommerceSharedSettings {
 	currentUserId: number;
 	currentUserIsAdmin: boolean;
 	homeUrl: string;
+	isMultisite: boolean;
 	locale: WooCommerceSiteLocale;
 	orderStatuses: Record< string, string > | never[];
 	placeholderImgSrc: string;
@@ -96,6 +97,7 @@ const defaults: WooCommerceSharedSettings = {
 	currentUserId: 0,
 	currentUserIsAdmin: false,
 	homeUrl: '',
+	isMultisite: false,
 	locale: {
 		siteLocale: 'en_US',
 		userLocale: 'en_US',
