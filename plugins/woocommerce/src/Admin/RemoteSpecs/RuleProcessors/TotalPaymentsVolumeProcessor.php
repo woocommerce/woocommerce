@@ -51,8 +51,13 @@ class TotalPaymentsVolumeProcessor implements RuleProcessorInterface {
 		// parses the returned boundary strings as site-local datetimes. Work on a fresh
 		// instance: the date calculations modify it in place, and the provider's own object
 		// (which an implementation may cache and return again) must not absorb that.
-		$now             = ( new \DateTime( '@' . $provider->get_now()->getTimestamp() ) )->setTimezone( wp_timezone() );
-		$dates           = TimeInterval::get_timeframe_dates( $rule->timeframe, $now );
+		$now   = ( new \DateTime( '@' . $provider->get_now()->getTimestamp() ) )->setTimezone( wp_timezone() );
+		$dates = TimeInterval::get_timeframe_dates( $rule->timeframe, $now );
+
+		if ( false === $dates ) {
+			return false;
+		}
+
 		$reports_revenue = $this->get_reports_query(
 			array(
 				'before'   => $dates['end'],

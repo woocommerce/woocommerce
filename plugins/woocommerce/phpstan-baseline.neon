@@ -44338,12 +44338,6 @@ parameters:
 			path: src/Admin/API/Reports/TimeInterval.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:get_timeframe_dates\(\) should return array but returns false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:iterate\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
 			identifier: class.notFound
 			count: 1

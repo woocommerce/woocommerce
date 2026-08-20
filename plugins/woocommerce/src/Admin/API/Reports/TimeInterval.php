@@ -645,7 +645,7 @@ class TimeInterval {
 	 *
 	 * @param string         $timeframe Timeframe to use.  One of: last_week|last_month|last_quarter|last_6_months|last_year.
 	 * @param \DateTime|null $current_date DateTime of current date to compare.
-	 * @return array
+	 * @return array|false Array of start and end dates, or false for an unknown timeframe.
 	 */
 	public static function get_timeframe_dates( $timeframe, $current_date = null ) {
 		if ( ! $current_date ) {

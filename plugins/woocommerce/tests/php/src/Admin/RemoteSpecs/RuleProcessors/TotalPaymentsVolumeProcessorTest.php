@@ -106,4 +106,21 @@ class TotalPaymentsVolumeProcessorTest extends WC_Unit_Test_Case {
 		$this->assertSame( '2020-08-01 00:00:00', $processor->captured_args['after'], 'Repeated process() calls should not drift the timeframe' );
 		$this->assertSame( '2020-08-31 23:59:59', $processor->captured_args['before'], 'Repeated process() calls should not drift the timeframe' );
 	}
+
+	/**
+	 * @testdox Should fail the rule without querying reports when the timeframe is unknown.
+	 */
+	public function test_process_returns_false_for_unknown_timeframe(): void {
+		$processor = $this->get_processor_with_frozen_clock();
+		$rule      = (object) array(
+			'timeframe' => 'last_century',
+			'value'     => 50,
+			'operation' => '>',
+		);
+
+		$result = $processor->process( $rule, (object) array() );
+
+		$this->assertFalse( $result );
+		$this->assertNull( $processor->captured_args, 'No report query should be built for an unknown timeframe' );
+	}
 }
