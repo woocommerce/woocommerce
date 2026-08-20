@@ -134,6 +134,47 @@ export function toMoment( format: string, str: unknown ) {
 }
 
 /**
+ * Expands moment's localized format tokens ("L", "LL", "ll", ...) into the
+ * underlying format the locale defines for them.
+ *
+ * Moment resolves those tokens only while formatting, so a day rendered through
+ * one is invisible to the day token scan below and the range end would be
+ * dropped. This mirrors moment's own expansion, including its pass limit, so
+ * the expanded format renders exactly what the original one would.
+ *
+ * @param {string}        format     - localized date string format
+ * @param {moment.Locale} localeData - locale the format will be rendered with
+ * @return {string} - format string with no localized format tokens left
+ */
+function expandLocalizedFormat( format: string, localeData: moment.Locale ) {
+	// Bracketed sections and backslash escapes are moment's literals, so an "L"
+	// inside one is text; matching them first leaves them untouched, as
+	// `longDateFormat` has no entry for them.
+	const localizedTokens = /(\[[^[]*\])|(\\)?(LTS|LT|LL?L?L?|l{1,4})/g;
+	let expanded = format;
+	let passes = 5;
+
+	// An expansion can itself hold localized tokens.
+	while ( passes-- > 0 ) {
+		localizedTokens.lastIndex = 0;
+
+		if ( ! localizedTokens.test( expanded ) ) {
+			break;
+		}
+
+		expanded = expanded.replace(
+			localizedTokens,
+			( token ) =>
+				localeData.longDateFormat(
+					token as moment.LongDateFormatKey
+				) || token
+		);
+	}
+
+	return expanded;
+}
+
+/**
  * Swaps the day of month token of a moment format string for an escaped literal.
  *
  * Substituting in the format instead of in the formatted date keeps the value
@@ -198,15 +239,13 @@ export function getRangeLabel( after: moment.Moment, before: moment.Moment ) {
 		// Formatting each day through the token it replaces keeps whatever the
 		// format asked for, such as the zero padding of "DD" or the ordinal of "Do".
 		const dayRangeFormat = replaceDayToken(
-			fullDateFormat,
+			expandLocalizedFormat( fullDateFormat, after.localeData() ),
 			( dayToken ) =>
 				`${ after.format( dayToken ) } - ${ before.format( dayToken ) }`
 		);
 
-		// No day of month token to swap: the format either omits the day, or
-		// renders one through an aggregate token such as "LL" that is not
-		// scanned. Either way the shared month is as much of the range as this
-		// format can carry.
+		// No day of month token to swap: the format omits the day altogether,
+		// so the shared month is as much of the range as it can carry.
 		if ( dayRangeFormat === null ) {
 			return after.format( fullDateFormat );
 		}

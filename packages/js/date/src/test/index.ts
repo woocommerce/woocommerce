@@ -839,6 +839,39 @@ describe( 'getRangeLabel', () => {
 		expect( label ).toBe( '2024年10月' );
 	} );
 
+	it( 'should keep the range when the format uses a localized format token', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( 'LL' );
+
+		const label = getRangeLabel(
+			moment( '2024-10-01' ),
+			moment( '2024-10-31' )
+		);
+
+		expect( label ).toBe( 'October 1 - 31, 2024' );
+	} );
+
+	it( 'should keep the range when the format uses an abbreviated localized format token', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( 'll' );
+
+		const label = getRangeLabel(
+			moment( '2024-10-01' ),
+			moment( '2024-10-31' )
+		);
+
+		expect( label ).toBe( 'Oct 1 - 31, 2024' );
+	} );
+
+	it( 'should leave a bracketed localized format token alone', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( '[LL] MMM D, YYYY' );
+
+		const label = getRangeLabel(
+			moment( '2024-10-01' ),
+			moment( '2024-10-31' )
+		);
+
+		expect( label ).toBe( 'LL Oct 1 - 31, 2024' );
+	} );
+
 	it( 'should keep the zero padding a "DD" format asks for', () => {
 		// Mirrors the Serbian translation of the format.
 		( __ as jest.Mock ).mockReturnValueOnce( 'DD. MMM YYYY.' );
