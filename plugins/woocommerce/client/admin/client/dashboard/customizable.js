@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useMemo } from '@wordpress/element';
+import { useEffect, useMemo, useRef } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { partial } from 'lodash';
 import { Dropdown, Button } from '@wordpress/components';
@@ -30,6 +30,7 @@ const DASHBOARD_FILTERS_FILTER = 'woocommerce_admin_dashboard_filters';
 
 /**
  * @typedef {import('../analytics/report/index.js').filter} filter
+ * @typedef {import('./default-sections.js').section} section
  */
 
 /**
@@ -40,50 +41,90 @@ const DASHBOARD_FILTERS_FILTER = 'woocommerce_admin_dashboard_filters';
  */
 const filters = applyFilters( DASHBOARD_FILTERS_FILTER, [] );
 
-const mergeSectionsWithDefaults = ( prefSections ) => {
-	if (
-		! prefSections ||
-		! Array.isArray( prefSections ) ||
-		prefSections.length === 0
-	) {
-		return defaultSections.reduce( ( sections, section ) => {
-			return [ ...sections, { ...section } ];
-		}, [] );
-	}
+/**
+ * A stored section is only usable when it carries the `key` that ties it back to
+ * a default section. Corrupted `dashboard_sections` preferences have been seen
+ * holding `null` entries, which used to crash the whole dashboard.
+ *
+ * @param {*} section Entry of the stored `dashboard_sections` preference.
+ * @return {boolean} Whether the entry can be merged with a default section.
+ */
+const isValidSection = ( section ) =>
+	!! section &&
+	typeof section === 'object' &&
+	typeof section.key === 'string';
 
+/**
+ * Whether the stored `dashboard_sections` preference is well formed.
+ *
+ * @param {*} prefSections Stored `dashboard_sections` preference.
+ * @return {boolean} Whether the preference can be used as is.
+ */
+const isValidSectionsPreference = ( prefSections ) =>
+	Array.isArray( prefSections ) &&
+	prefSections.length > 0 &&
+	prefSections.every( isValidSection );
+
+/**
+ * `icon` and `component` are React nodes, they must never be persisted.
+ *
+ * @param {section} section Section to persist.
+ * @return {Object} Section without its React nodes.
+ */
+const toStorableSection = ( { icon, component, ...section } ) => section;
+
+/**
+ * Copy of the default sections, throwing a descriptive error when the
+ * `woocommerce_dashboard_default_sections` filter returned something unusable.
+ *
+ * @return {Array.<section>} Default sections.
+ */
+const getDefaultSections = () => {
 	if ( ! Array.isArray( defaultSections ) ) {
 		throw new Error(
 			`The \`defaultSections\` is not an array, please make sure \`${ DEFAULT_SECTIONS_FILTER }\` filter is used correctly.`
 		);
 	}
 
-	const defaultKeys = defaultSections.map( ( section ) => section.key );
-	const prefKeys = prefSections.map( ( section ) => section.key );
+	return defaultSections.map( ( section ) => ( { ...section } ) );
+};
+
+export const mergeSectionsWithDefaults = ( prefSections ) => {
+	const defaults = getDefaultSections();
+	// Malformed entries are dropped instead of failing the whole dashboard.
+	const validPrefSections = Array.isArray( prefSections )
+		? prefSections.filter( isValidSection )
+		: [];
+
+	if ( validPrefSections.length === 0 ) {
+		return defaults;
+	}
+
+	const defaultKeys = defaults.map( ( section ) => section.key );
+	const prefKeys = validPrefSections.map( ( section ) => section.key );
 	const keys = new Set( [ ...prefKeys, ...defaultKeys ] );
 	const sections = [];
 
 	keys.forEach( ( key ) => {
-		const defaultSection = defaultSections.find(
+		const defaultSection = defaults.find(
 			( section ) => section.key === key
 		);
 		if ( ! defaultSection ) {
 			return;
 		}
-		const prefSection = prefSections.find(
+		const prefSection = validPrefSections.find(
 			( section ) => section.key === key
 		);
-		// Not defined by a string anymore.
-		if ( prefSection ) {
-			delete prefSection.icon;
-		}
 
 		sections.push( {
 			...defaultSection,
-			...prefSection,
+			// A stored `icon` is a stale React node, the default one wins.
+			...( prefSection ? toStorableSection( prefSection ) : {} ),
 		} );
 	} );
 
-	return sections;
+	// None of the stored keys is known anymore, so nothing would render.
+	return sections.length > 0 ? sections : defaults;
 };
 
 const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
@@ -95,13 +136,34 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 	);
 
 	const updateSections = ( newSections ) => {
-		updateUserPreferences( { dashboard_sections: newSections } );
+		updateUserPreferences( {
+			dashboard_sections: newSections.map( toStorableSection ),
+		} );
 	};
+
+	// Repair a corrupted `dashboard_sections` preference by storing the sections
+	// the dashboard fell back to. Without this the merchant keeps loading the
+	// broken value on every visit until they happen to customize a section.
+	const hasRepairedSections = useRef( false );
+	useEffect( () => {
+		const prefSections = userPrefs.dashboard_sections;
+
+		// An empty preference means the dashboard was never customized.
+		if (
+			hasRepairedSections.current ||
+			! prefSections ||
+			isValidSectionsPreference( prefSections )
+		) {
+			return;
+		}
+
+		hasRepairedSections.current = true;
+		updateSections( sections );
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ userPrefs.dashboard_sections ] );
 
 	const updateSection = ( updatedKey, newSettings ) => {
 		const newSections = sections.map( ( section ) => {
-			// Do not save section icon as it is a component.
-			delete section.icon;
 			if ( section.key === updatedKey ) {
 				return {
 					...section,
