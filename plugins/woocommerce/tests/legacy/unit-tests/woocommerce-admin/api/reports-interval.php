@@ -1157,7 +1157,31 @@ class WC_Admin_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should select periods from the reference date's local calendar date, not its UTC instant.
+	 */
+	public function test_timeframes_use_local_calendar_date() {
+		// 2022-09-01 05:00 in Kiritimati (UTC+14) is 2022-08-31 15:00 UTC: last month is August, not July.
+		$datetime = new DateTime( '2022-09-01 05:00:00', new DateTimeZone( 'Pacific/Kiritimati' ) );
+		$dates    = TimeInterval::get_timeframe_dates( 'last_month', $datetime );
+
+		$this->assertEquals( '2022-08-01 00:00:00', $dates['start'] );
+		$this->assertEquals( '2022-08-31 23:59:59', $dates['end'] );
+
+		// 2021-12-31 20:00 in Midway (UTC-11) is 2022-01-01 07:00 UTC: last year is 2020, not 2021.
+		$datetime = new DateTime( '2021-12-31 20:00:00', new DateTimeZone( 'Pacific/Midway' ) );
+		$dates    = TimeInterval::get_timeframe_dates( 'last_year', $datetime );
+
+		$this->assertEquals( '2020-01-01 00:00:00', $dates['start'] );
+		$this->assertEquals( '2020-12-31 23:59:59', $dates['end'] );
+	}
+
+	/**
 	 * @testdox Should anchor the default reference date to the site timezone, not the PHP default timezone.
+	 *
+	 * With a real clock this assertion can only distinguish a wrong default anchor while the UTC
+	 * date and the site-local date fall in different periods (around period-boundary midnights),
+	 * so an intermittent failure here means a real timezone regression, not flakiness. The
+	 * deterministic local-calendar guarantees are pinned by test_timeframes_use_local_calendar_date().
 	 */
 	public function test_timeframes_default_to_site_timezone_now() {
 		$timeframes = array( 'last_week', 'last_month', 'last_quarter', 'last_6_months', 'last_year' );
