@@ -291,6 +291,40 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox create_order_fee_lines sets tax status to 'none' for non-taxable cart fees and 'taxable' for taxable ones.
+	 *
+	 * @testWith [true, "taxable"]
+	 *           [false, "none"]
+	 *
+	 * @param bool   $taxable Whether the cart fee is taxable.
+	 * @param string $expected_tax_status The expected tax status for the created fee order item.
+	 */
+	public function test_create_order_fee_lines_sets_correct_tax_status( $taxable, $expected_tax_status ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$add_fee = static function ( $cart ) use ( $taxable ) {
+			$cart->add_fee( 'Test fee', 10, $taxable );
+		};
+		add_action( 'woocommerce_cart_calculate_fees', $add_fee );
+
+		try {
+			WC()->cart->calculate_totals();
+			$order = wc_get_order( $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) ) );
+		} finally {
+			remove_action( 'woocommerce_cart_calculate_fees', $add_fee );
+		}
+
+		$fee_items = $order->get_fees();
+
+		$this->assertCount( 1, $fee_items );
+
+		/** @var WC_Order_Item_Fee $fee_item */
+		$fee_item = array_values( $fee_items )[0];
+		$this->assertSame( $expected_tax_status, $fee_item->get_tax_status() );
+	}
+
+	/**
 	 * @testdox Checkout page contains login form for guests.
 	 */
 	public function test_checkout_page_contains_login_form_for_guests() {
