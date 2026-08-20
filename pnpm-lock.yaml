@@ -177,6 +177,8 @@ overrides:
   react-resize-aware: 3.1.1
   sass: 1.69.5
 
+packageExtensionsChecksum: sha256-Bd7QxlEbzBKxNWC7ENjsz13HMrXMdmoBe/wU8Vnmv+Q=
+
 pnpmfileChecksum: sha256-7lEtYKkj9MKUQ1wDfOySWQ01OX5tYIUQTnfpMq5epMI=
 
 patchedDependencies:
@@ -33128,6 +33130,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       remove-accents: 0.5.0
+      uuid: 9.0.1
     transitivePeerDependencies:
       - '@emotion/is-prop-valid'
       - '@types/react'
