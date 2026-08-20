@@ -113,8 +113,6 @@ export function* persistSettingsForGroup( group: string ) {
 			data: { update },
 		} );
 
-		yield setIsRequesting( group, false );
-
 		if ( ! results ) {
 			throw new Error(
 				__(
@@ -129,6 +127,10 @@ export function* persistSettingsForGroup( group: string ) {
 		yield clearErrorForGroup( group );
 		// remove dirtyKeys from map - note we're only doing this if there is no error.
 		yield clearIsDirty( group );
+		// Marked as finished last so that consumers watching `isRequesting`
+		// for the end of a save never see it flip while the stale error is
+		// still in state.
+		yield setIsRequesting( group, false );
 	} catch ( e ) {
 		yield updateErrorForGroup( group, null, e );
 		yield setIsRequesting( group, false );
