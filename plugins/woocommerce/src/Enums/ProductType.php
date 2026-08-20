@@ -44,13 +44,15 @@ final class ProductType {
 	public const VARIATION = 'variation';
 
 	/**
-	 * Returns every product type value defined by this enum.
+	 * Returns every product type value defined by this enum, as a flat list.
 	 *
-	 * This is the complete enum, not the set of types a product can be created as. It includes
-	 * self::VARIATION, which is a child post type rather than a selectable product type.
+	 * The list includes self::VARIATION. Variations are real products that can be created --
+	 * WC_Product_Variation::get_type() returns this value -- but they belong to a parent, so they
+	 * are not a standalone choice when creating a product.
 	 *
-	 * For the selectable types, use wc_get_product_types(). That helper is filterable, so unlike
-	 * this method it also reflects types an extension has registered.
+	 * For the top-level types a merchant can pick, use wc_get_product_types(). It returns a
+	 * value => label map rather than a list, and being filterable it also reflects types an
+	 * extension has registered.
 	 *
 	 * @since 10.9.0
 	 *

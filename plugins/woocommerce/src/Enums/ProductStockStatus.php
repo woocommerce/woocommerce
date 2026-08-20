@@ -37,14 +37,16 @@ final class ProductStockStatus {
 	public const LOW_STOCK = 'lowstock';
 
 	/**
-	 * Returns every stock status value defined by this enum.
+	 * Returns every stock status value defined by this enum, as a flat list.
 	 *
-	 * This is the complete enum, not the set of statuses a product can hold. It includes
-	 * self::LOW_STOCK, which is a derived reporting state and is never stored against a product.
+	 * The list is wider than the set of statuses stored against products: self::LOW_STOCK is
+	 * derived from stock quantity rather than persisted, so a query filtering the stock_status
+	 * column can never match it. It remains a legitimate choice elsewhere -- the Analytics stock
+	 * report offers it, and adds it back explicitly for that reason.
 	 *
-	 * For the statuses a product can be set to, and the options a stock filter should offer, use
-	 * wc_get_product_stock_status_options(). That helper is filterable, so unlike this method it
-	 * also reflects statuses an extension has added.
+	 * For the persisted statuses, and the options a stock_status filter should offer, use
+	 * wc_get_product_stock_status_options(). It returns a value => label map rather than a list,
+	 * and being filterable it also reflects statuses an extension has added.
 	 *
 	 * @since 10.9.0
 	 *
