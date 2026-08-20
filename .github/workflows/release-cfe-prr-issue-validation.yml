@@ -340,6 +340,7 @@ jobs:
   request-rejected:
     if: ${{ github.event.label.name == 'Rejected' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       issues: write
     steps:

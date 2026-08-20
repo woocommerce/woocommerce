@@ -390,6 +390,7 @@ jobs:
   notify-slack-on-failure:
     name: Notify Slack on Failure
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [ check-feature-freeze-event, prepare-for-feature-freeze, run-feature-freeze, cleanup-milestones, bump-version-in-trunk, build-dev-release, publish-dev-release, notify-slack, trigger-webhook ]
     if: always() && ((contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')))
     steps:

@@ -31,6 +31,7 @@ jobs:
     add-reproduction-comment:
         if: "github.event.label.name == 'status: reproduction'"
         runs-on: ubuntu-latest
+        timeout-minutes: 5
         permissions:
             issues: write
         steps:
@@ -50,6 +51,7 @@ jobs:
     add-support-comment:
         if: "github.event.label.name == 'type: support request'"
         runs-on: ubuntu-latest
+        timeout-minutes: 5
         permissions:
             issues: write
         steps:
@@ -125,6 +127,7 @@ jobs:
     fill-template-comment:
         if: "github.event.label.name == 'needs: template'"
         runs-on: ubuntu-latest
+        timeout-minutes: 5
         permissions:
             issues: write
         steps:

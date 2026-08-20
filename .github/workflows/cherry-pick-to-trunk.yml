@@ -194,6 +194,7 @@ jobs:
   handle-skipped:
     needs: [prepare, cherry-pick, frozen-release-check]
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     if: ${{ always() && needs.cherry-pick.outputs.status == 'skipped' }}
     steps:
       - name: Comment on original PR about skip
@@ -216,6 +217,7 @@ jobs:
   handle-failures:
     needs: [prepare, cherry-pick, frozen-release-check]
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     if: ${{ always() && needs.cherry-pick.outputs.status == 'failed' }}
     steps:
       - name: Add "cherry pick failed" label

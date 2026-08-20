@@ -246,6 +246,7 @@ jobs:
     needs: [prepare, cherry-pick-next]
     if: ${{ always() && needs.cherry-pick-next.outputs.status == 'success' && needs.cherry-pick-next.outputs.cherry_pick_pr_number }}
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       # Add original milestone to new PR
       - name: Add milestone
@@ -314,6 +315,7 @@ jobs:
   handle-skipped-next:
     needs: [prepare, cherry-pick-next]
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     if: ${{ always() && needs.cherry-pick-next.outputs.status == 'skipped' }}
     steps:
       - name: Comment on original PR about skip
@@ -337,6 +339,7 @@ jobs:
   handle-failures-milestoned:
     needs: [prepare, cherry-pick-milestoned]
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     if: ${{ always() && needs.cherry-pick-milestoned.outputs.status == 'failed' }}
     steps:
       - name: Handle failure for milestoned branch
@@ -416,6 +419,7 @@ jobs:
   handle-failures-next:
     needs: [prepare, cherry-pick-next]
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     if: ${{ always() && needs.cherry-pick-next.outputs.status == 'failed' }}
     steps:
       - name: Handle failure for next branch

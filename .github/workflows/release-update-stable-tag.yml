@@ -30,7 +30,7 @@ env:
 jobs:
   validate-release:
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
-    timeout-minutes: 5
+    timeout-minutes: 10
     outputs:
       version: ${{ steps.extract-version.outputs.version }}
       branch: ${{ steps.extract-version.outputs.branch }}

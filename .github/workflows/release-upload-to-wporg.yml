@@ -292,6 +292,7 @@ jobs:
   handle-failure:
     name: Report SVN state
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [get-and-validate-release-asset, commit]
     if: failure() && github.repository == 'woocommerce/woocommerce' && github.event.inputs.confirm-update == 'true' && needs.get-and-validate-release-asset.outputs.release_tag != ''
     permissions: {}
