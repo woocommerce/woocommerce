@@ -5,11 +5,12 @@ name: 'CI Queue Sentinel'
 # it is set. Variables written here must only be consumed via `env:` or `${{ }}`
 # comparisons, never interpolated into `run:` blocks.
 on:
-  # The cron is the floor and the switch-off path. GitHub delivers it late and
-  # unevenly (43-84 ticks/day observed against the 96 this asks for), so the
-  # queue is also evaluated when new work arrives, which is when congestion
-  # starts. Bursts need no debounce: the concurrency group below keeps at most
-  # one run pending and cancels any earlier pending one.
+  # The cron is the floor: GitHub delivers it late and unevenly (43-84 ticks/day
+  # observed against the 96 this asks for). Firing on CI run creation samples the
+  # queue far more densely during working hours, which is when a backlog builds.
+  # It does not detect the triggering run's own jobs — those are zero minutes old
+  # and cannot exceed the threshold — it just looks more often at the existing
+  # queue. Both triggers run the full auto evaluation, switch-off included.
   schedule:
     - cron: '*/15 * * * *'
   workflow_run:
@@ -28,15 +29,23 @@ on:
 
 permissions: {}
 
-# One sentinel at a time; cron and manual dispatches must not race the variable.
+# One sentinel at a time; ticks must not race each other over the variable.
+# Auto ticks queue: GitHub keeps a single pending run per group and drops the
+# older one, so bursts collapse to the newest read on their own. A manual force
+# takes the slot immediately instead, because a pending dispatch would be
+# displaced by the next CI run and cancellation does not fire the alert step.
 concurrency:
   group: 'ci-queue-sentinel'
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'workflow_dispatch' }}
 
 jobs:
   evaluate:
     name: 'Evaluate CI queue'
-    if: ${{ github.repository == 'woocommerce/woocommerce' }}
+    # Fork PRs raise workflow_run too, and a contributor pushing on a loop would
+    # keep the sentinel running back to back. Their e2e jobs can never reach the
+    # paid group anyway (ci.yml excludes fork PRs), and internal runs are ~86% of
+    # arrivals, so the cron still covers fork-driven congestion within a tick.
+    if: ${{ github.repository == 'woocommerce/woocommerce' && ( github.event_name != 'workflow_run' || github.event.workflow_run.head_repository.full_name == github.repository ) }}
     # Under the cron cadence, so a wedged run fails (and alerts) before the next tick.
     timeout-minutes: 10
     # Dedicated group: the sentinel must not queue behind the congestion it measures.
@@ -50,10 +59,10 @@ jobs:
       - uses: 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' # v7.0.1
         name: 'Checkout'
         with:
-          # Pinned to the default branch, not left to the event default: the
-          # workflow_run trigger fires for fork PRs, and this checkout supplies
-          # the script that runs with SENTINEL_TOKEN. Never check out the
-          # triggering PR's code here.
+          # Belt and braces. Under workflow_run the default ref is already the
+          # default branch, never the triggering PR's head, but this checkout
+          # supplies the script that runs with SENTINEL_TOKEN, so the guarantee
+          # is stated rather than inherited.
           ref: ${{ github.event.repository.default_branch }}
           sparse-checkout: |
               ./tools/monorepo-utils
