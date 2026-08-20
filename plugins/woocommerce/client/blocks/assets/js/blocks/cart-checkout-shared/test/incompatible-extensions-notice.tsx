@@ -416,6 +416,9 @@ describe( 'IncompatibleExtensionsFrontendNotice', () => {
 				expect(
 					screen.getByTestId( 'notice-banner' )
 				).toBeInTheDocument();
+				// A dismissal that was there and can no longer be read is worth
+				// a line in the console, not a silent discard.
+				expect( console ).toHaveErrored();
 			}
 		);
 

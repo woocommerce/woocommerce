@@ -83,12 +83,22 @@ export const readDismissalsFromBeforeScoping = (): unknown[] => {
 			return [];
 		}
 		const parsed = JSON.parse( stored );
-		return Array.isArray( parsed ) ? parsed : [];
+		if ( Array.isArray( parsed ) ) {
+			return parsed;
+		}
 	} catch {
-		// A value we can't read is not a dismissal we can honour; showing the
-		// notice is the safe fallback.
-		return [];
+		// Unparseable, handled the same way as a shape we don't recognise.
 	}
+
+	// A value we can't read is not a dismissal we can honour; showing the notice
+	// is the safe fallback. Logged the way `useLocalStorageState` logs its own
+	// unreadable values, so a merchant who reports the notice coming back after
+	// an update has something in the console to point at.
+	// eslint-disable-next-line no-console
+	console.error(
+		`Value for key '${ UNSCOPED_STORAGE_KEY }' could not be carried over from localStorage because it can't be read as a list of dismissals.`
+	);
+	return [];
 };
 
 /**
