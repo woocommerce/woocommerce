@@ -5,6 +5,7 @@
  * @package WooCommerce\Admin\Tests\API
  */
 
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
@@ -188,6 +189,32 @@ class WC_Admin_Tests_API_Reports_Stock_Stats extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 1, $reports['totals']['products'] );
 		$this->assertEquals( 1, $reports['totals'][ ProductStockStatus::IN_STOCK ] );
 		$this->assertEquals( 1, $reports['totals'][ ProductStockStatus::LOW_STOCK ] );
+	}
+
+	/**
+	 * @testdox Variations of an unpublished parent are counted, since the parent itself is not.
+	 */
+	public function test_variations_of_an_unpublished_stock_managing_parent_are_counted() {
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		list( $variable ) = $this->create_stock_report_variable_product( 'Draft parent manages stock, variations inherit', array( array(), array() ) );
+		$variable->set_manage_stock( true );
+		$variable->set_stock_quantity( 8 );
+		$variable->set_status( ProductStatus::DRAFT );
+		$variable->save();
+
+		$this->clear_stock_count_caches();
+
+		$request  = new WP_REST_Request( 'GET', $this->endpoint );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		// The two variations. Their parent is out of the report on its status alone.
+		$this->assertEquals( 2, $reports['totals']['products'] );
+		$this->assertEquals( 2, $reports['totals'][ ProductStockStatus::IN_STOCK ] );
 	}
 
 	/**

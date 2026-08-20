@@ -222,8 +222,7 @@ class Controller extends GenericController implements ExportableInterface {
 
 		if ( $wp_query->get( 'exclude_mirrored_stock' ) ) {
 			// The exclusion clause reads stock ownership off the lookup table, for the row and for its parent.
-			$join  = self::append_product_sorting_table_join( $join );
-			$join .= self::get_parent_stock_lookup_join();
+			$join = self::append_mirrored_stock_joins( $join );
 		}
 
 		return $join;

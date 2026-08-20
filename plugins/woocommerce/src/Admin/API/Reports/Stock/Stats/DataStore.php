@@ -117,16 +117,15 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	private function get_count( $status ) {
 		global $wpdb;
 
-		$parent_lookup_sql = self::get_parent_stock_lookup_join( 'posts' );
-		$mirrored_sql      = self::get_mirrored_stock_exclusion_clause( 'posts' );
+		$mirrored_joins = self::append_mirrored_stock_joins( '', 'posts' );
+		$mirrored_sql   = self::get_mirrored_stock_exclusion_clause( 'posts' );
 
 		return (int) $wpdb->get_var(
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Both fragments are built from hardcoded identifiers.
 			$wpdb->prepare(
 				"
 				SELECT count( DISTINCT posts.ID ) FROM {$wpdb->posts} posts
-				LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON posts.ID = wc_product_meta_lookup.product_id
-				{$parent_lookup_sql}
+				{$mirrored_joins}
 				WHERE posts.post_type IN ( 'product', 'product_variation' )
 				AND posts.post_status IN ( 'publish', 'private' )
 				AND wc_product_meta_lookup.stock_status = %s
@@ -185,8 +184,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	public static function add_wp_query_join( $join, $wp_query ) {
 		if ( $wp_query->get( 'exclude_mirrored_stock' ) ) {
 			// The exclusion clause reads stock ownership off the lookup table, for the row and for its parent.
-			$join  = self::append_stock_lookup_join( $join );
-			$join .= self::get_parent_stock_lookup_join();
+			$join = self::append_mirrored_stock_joins( $join );
 		}
 
 		return $join;

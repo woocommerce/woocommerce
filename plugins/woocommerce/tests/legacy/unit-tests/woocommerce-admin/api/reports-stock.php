@@ -6,6 +6,7 @@
  * @since 3.5.0
  */
 
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
@@ -192,6 +193,27 @@ class WC_Admin_Tests_API_Reports_Stock extends WC_REST_Unit_Test_Case {
 		$this->assertContains( $variable->get_id(), $reported_ids, 'The parent holds the quantity the inheriting variation sells from.' );
 		$this->assertNotContains( $inheriting_id, $reported_ids, 'The inheriting variation would only repeat the parent quantity.' );
 		$this->assertContains( $own_stock_id, $reported_ids, 'The overriding variation holds a quantity of its own.' );
+	}
+
+	/**
+	 * @testdox Variations of an unpublished parent are reported, since the parent itself cannot be.
+	 */
+	public function test_variations_are_reported_when_their_stock_managing_parent_is_not_published() {
+		wp_set_current_user( $this->user );
+
+		list( $variable, $variation_ids ) = $this->create_stock_report_variable_product( 'Draft parent manages stock, variations inherit', array( array(), array() ) );
+
+		$variable->set_manage_stock( true );
+		$variable->set_stock_quantity( 8 );
+		$variable->set_status( ProductStatus::DRAFT );
+		$variable->save();
+
+		$reported_ids = $this->get_reported_ids();
+
+		$this->assertNotContains( $variable->get_id(), $reported_ids, 'A draft product is out of the report on its status alone.' );
+		foreach ( $variation_ids as $variation_id ) {
+			$this->assertContains( $variation_id, $reported_ids, 'Nothing else can report this stock, so the variations have to.' );
+		}
 	}
 
 	/**

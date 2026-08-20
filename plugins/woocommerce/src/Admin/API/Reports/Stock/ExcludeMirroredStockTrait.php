@@ -21,9 +21,14 @@ defined( 'ABSPATH' ) || exit;
  * - When the parent does not manage stock, it holds no quantity of its own and its stock status is
  *   derived from its variations. Listing it repeats, or contradicts, the rows below it.
  *
- * Both of those are dropped here. Everything that owns its stock is kept: a parent managing stock at
- * product level, a variation that manages its own, a variation whose parent manages none (its stock
- * status is its own), and a variable product with no variations to speak for it.
+ * Both of those are dropped here, but only in favour of a row the report can actually show. Each
+ * clause checks the other row's post status against the ones the report queries, so nothing drops
+ * out of the report altogether. The variations of a draft parent stay listed for that reason: the
+ * parent is out of the report on its status alone, whether or not it manages the stock.
+ *
+ * Everything that owns its stock is kept: a parent managing stock at product level, a variation that
+ * manages its own, a variation whose parent manages none (its stock status is its own), and a
+ * variable product with no variations to speak for it.
  *
  * Ownership is read from `wc_product_meta_lookup.stock_quantity`, which the lookup table leaves NULL
  * for anything not managing its own stock. The rest of this report already filters on that table.
@@ -62,30 +67,37 @@ trait ExcludeMirroredStockTrait {
 	}
 
 	/**
-	 * Get a JOIN fragment giving the exclusion clause access to the parent's stock.
+	 * Append every join the exclusion clause reads, in the one order that works.
 	 *
-	 * Append this after self::append_stock_lookup_join(), never before: it names the same table, so
-	 * the guard there can no longer tell an existing join from this one.
+	 * The parent joins name the lookup table as well, so adding them first would leave the guard in
+	 * self::append_stock_lookup_join() unable to tell them from the row's own join, and the query
+	 * would go on to read an alias nothing bound. Callers take the whole set from here rather than
+	 * ordering the pieces themselves.
 	 *
+	 * @param string $sql         Join clause the calling report query has built so far.
 	 * @param string $posts_alias Table or alias the outer query uses for the posts table. Defaults to the posts table name.
-	 * @return string SQL fragment starting with LEFT JOIN.
+	 * @return string The join clause, with every table the exclusion reads joined.
 	 */
-	protected static function get_parent_stock_lookup_join( $posts_alias = '' ) {
+	protected static function append_mirrored_stock_joins( $sql, $posts_alias = '' ) {
 		global $wpdb;
+
+		$sql = self::append_stock_lookup_join( $sql, $posts_alias );
 
 		// $posts_alias is a hardcoded table name or alias supplied by the calling report query, never user input.
 		$posts_alias = $posts_alias ? $posts_alias : $wpdb->posts;
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		return " LEFT JOIN {$wpdb->wc_product_meta_lookup} stock_report_parent_lookup
-			ON stock_report_parent_lookup.product_id = {$posts_alias}.post_parent ";
+		return $sql . " LEFT JOIN {$wpdb->wc_product_meta_lookup} stock_report_parent_lookup
+			ON stock_report_parent_lookup.product_id = {$posts_alias}.post_parent
+			LEFT JOIN {$wpdb->posts} stock_report_parent
+			ON stock_report_parent.ID = {$posts_alias}.post_parent ";
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**
 	 * Get a WHERE fragment that drops rows mirroring stock owned by another row in the report.
 	 *
-	 * Requires the joins from self::append_stock_lookup_join() and self::get_parent_stock_lookup_join().
+	 * Requires the joins from self::append_mirrored_stock_joins().
 	 *
 	 * A query that already matches on a stock quantity has no use for this: only a row that owns its
 	 * stock carries one, so every row this would drop is filtered out by the quantity alone.
@@ -114,6 +126,7 @@ trait ExcludeMirroredStockTrait {
 			{$posts_alias}.post_type = 'product_variation'
 			AND wc_product_meta_lookup.stock_quantity IS NULL
 			AND stock_report_parent_lookup.stock_quantity IS NOT NULL
+			AND stock_report_parent.post_status IN ( 'publish', 'private' )
 		) ";
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
