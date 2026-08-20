@@ -174,24 +174,39 @@ export const useCombinedIncompatibilityNotice = (
 	// indistinguishable from "nothing is incompatible" and would erase the
 	// acknowledgement. Neither half can be pruned on its own, because a stored
 	// slug does not say which of the two it came from.
-	const hasStaleAcknowledgements =
+	const prunedAcknowledgement =
 		arePaymentMethodsLoaded &&
 		areIncompatibleExtensionsKnown &&
-		! isSubsetOf( dismissedItemSlugs, allIncompatibleItemSlugs );
+		! isSubsetOf( dismissedItemSlugs, allIncompatibleItemSlugs )
+			? dismissedItemSlugs.filter( ( slug ) =>
+					allIncompatibleItemSlugs.includes( slug )
+			  )
+			: null;
+
+	// The set to store, serialised, rather than a boolean saying that some set
+	// needs storing. The incompatible set can shrink twice while the gate stays
+	// open — `__internalUpdateAvailablePaymentMethods` awaits
+	// `checkPaymentMethodsCanPay` once per half, so the express and regular
+	// halves land in separate renders — and "something is stale" reads true
+	// through both of them. Keyed on that boolean the effect would run once,
+	// prune to the first render's set, and never revisit the second shrink,
+	// leaving a slug acknowledged that is no longer incompatible.
+	const prunedAcknowledgementKey =
+		prunedAcknowledgement === null
+			? null
+			: prunedAcknowledgement.join( '\u0000' );
 
 	useEffect( () => {
-		if ( hasStaleAcknowledgements ) {
-			storeAcknowledgedSlugs(
-				dismissedItemSlugs.filter( ( slug ) =>
-					allIncompatibleItemSlugs.includes( slug )
-				)
-			);
+		if ( prunedAcknowledgement !== null ) {
+			storeAcknowledgedSlugs( prunedAcknowledgement );
 		}
-		// `storeAcknowledgedSlugs` and the slug arrays are rebuilt every render;
-		// `hasStaleAcknowledgements` is the value that actually gates the write,
-		// and it goes false as soon as the pruned set is stored.
+		// `storeAcknowledgedSlugs` and `prunedAcknowledgement` are rebuilt every
+		// render; the serialisation is what actually distinguishes one target
+		// set from another. A non-null pruned set is always strictly smaller
+		// than what is stored, so the key always changes after a write and the
+		// effect settles.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ hasStaleAcknowledgements ] );
+	}, [ prunedAcknowledgementKey ] );
 
 	// This ensures the notice is not shown on first render. This is required so
 	// Gutenberg doesn't steal the focus from the Guide and focuses the block.
