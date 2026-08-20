@@ -1203,4 +1203,39 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 			$calls
 		);
 	}
+
+	/**
+	 * Test that an interceptor return value at the href sites is escaped as a URL when
+	 * written into the href attribute: esc_url() strips characters not allowed in URLs
+	 * (such as curly braces) and prepends a missing scheme.
+	 */
+	public function testValueInterceptorHrefReturnIsEscapedAsUrl(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'Store URL',
+				'test/store-url',
+				'Test',
+				function () {
+					return 'https://example.com/store';
+				}
+			)
+		);
+
+		$this->personalizer->set_value_interceptor(
+			function (): string {
+				return '{{placeholder-1}}';
+			}
+		);
+
+		$this->assertSame(
+			'<a  href="http://placeholder-1">Click here</a>',
+			$this->personalizer->personalize_content( '<a data-link-href="[test/store-url]" href="#">Click here</a>' ),
+			'The data-link-href site should write the interceptor return through esc_url()'
+		);
+		$this->assertSame(
+			'<a href="https://example.com/?ref=placeholder-1">Click here</a>',
+			$this->personalizer->personalize_content( '<a href="https://example.com/?ref=[test/store-url]">Click here</a>' ),
+			'The plain-href site should write the interceptor return through esc_url()'
+		);
+	}
 }

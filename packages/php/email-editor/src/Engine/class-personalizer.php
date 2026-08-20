@@ -128,9 +128,13 @@ class Personalizer {
 	 * the raw data-link-href attribute value, or the tag token found inside a plain href),
 	 * and the rendering context of the replacement site — one of the RENDERING_CONTEXT_HTML,
 	 * RENDERING_CONTEXT_TEXT, or RENDERING_CONTEXT_HREF constants. Its return value is
-	 * written instead of the resolved value. In the href rendering context an empty
-	 * return value means no replacement — the link is left untouched, just like an
-	 * empty resolved value. This allows consumers (e.g. bulk-sending integrations)
+	 * written instead of the resolved value — verbatim in the html and text rendering
+	 * contexts. In the href rendering context the return value ends up in the href
+	 * attribute, which WordPress escapes with esc_url(): characters not allowed in URLs
+	 * (such as curly braces) are stripped and a missing scheme is prepended, so a
+	 * "{{placeholder}}" return comes out as "http://placeholder". An empty return value
+	 * in the href rendering context means no replacement — the link is left untouched,
+	 * just like an empty resolved value. This allows consumers (e.g. bulk-sending integrations)
 	 * to substitute placeholders for values while recording the values externally.
 	 *
 	 * The interceptor persists until cleared by passing null.
