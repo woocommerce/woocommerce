@@ -10,6 +10,7 @@ import {
 	getFrontendStorageKey,
 	isSubsetOf,
 	readDismissalsFromBeforeScoping,
+	readInitialDismissals,
 } from '@woocommerce/editor-components/incompatible-extension-notice/storage';
 
 /**
@@ -64,8 +65,12 @@ export const IncompatibleExtensionsFrontendNotice = ( {
 	// written, and writes the key itself on mount. Memoised because the argument
 	// is evaluated on every render even though only the first one consumes it.
 	const initialDismissedSlugs = useMemo(
-		readSlugsDismissedBeforeScoping,
-		[]
+		() =>
+			readInitialDismissals(
+				storageKey,
+				readSlugsDismissedBeforeScoping
+			),
+		[ storageKey ]
 	);
 
 	const [ dismissedSlugs, setDismissedSlugs ] = useLocalStorageState<

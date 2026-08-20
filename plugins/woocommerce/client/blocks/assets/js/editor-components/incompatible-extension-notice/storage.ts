@@ -81,6 +81,34 @@ export const readDismissalsFromBeforeScoping = (): unknown[] => {
 };
 
 /**
+ * What a notice should hand `useLocalStorageState` as its initial value.
+ *
+ * That hook falls back to the initial value in two cases it can't tell apart:
+ * when `key` holds nothing, and when it holds something unparseable. Only the
+ * first may be seeded from `migrate`. Letting a corrupt value reach past itself
+ * to the pre-scoping data would revive a dismissal the merchant has since
+ * replaced and hide a warning that is currently owed — so it starts empty
+ * instead, and the notice shows.
+ *
+ * A value the hook can read is parsed by the hook itself and never reaches this
+ * fallback, which is why only absence is answered here.
+ */
+export const readInitialDismissals = < T >(
+	key: string,
+	migrate: () => T[]
+): T[] => {
+	try {
+		// Deliberately `=== null`: an empty string is stored data we failed to
+		// write, not an absent key, and must not open the migration path.
+		return window.localStorage.getItem( key ) === null ? migrate() : [];
+	} catch {
+		// Storage can be unavailable altogether (private browsing, blocked
+		// cookies). Nothing is stored, and nothing can be migrated into it.
+		return [];
+	}
+};
+
+/**
  * Whether every item in `subset` is also present in `superset`.
  *
  * The notices stay dismissed while everything currently incompatible has

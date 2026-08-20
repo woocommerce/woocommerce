@@ -436,5 +436,18 @@ describe( 'useCombinedIncompatibilityNotice', () => {
 
 			expect( mountVisibility( CHECKOUT ) ).toBe( true );
 		} );
+
+		// `useLocalStorageState` hands back the initial value both when the key
+		// is missing and when it holds something it cannot parse. Only the first
+		// may reach the migration, or a corrupt value would revive a dismissal
+		// the merchant has since replaced.
+		it( 'does not migrate over a scoped value it cannot parse', () => {
+			window.localStorage.setItem( storageKey(), '{not valid json' );
+			seedUnscoped( [ { [ CHECKOUT ]: [ 'gw_a' ] } ] );
+			mockIncompatiblePaymentMethods = { gw_a: 'Gateway A' };
+
+			expect( mountVisibility( CHECKOUT ) ).toBe( true );
+			expect( console ).toHaveErrored();
+		} );
 	} );
 } );

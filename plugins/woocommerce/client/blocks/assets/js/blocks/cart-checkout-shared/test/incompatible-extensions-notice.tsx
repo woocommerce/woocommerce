@@ -532,5 +532,40 @@ describe( 'IncompatibleExtensionsFrontendNotice', () => {
 
 			expect( screen.getByTestId( 'notice-banner' ) ).toBeInTheDocument();
 		} );
+
+		// `useLocalStorageState` hands back the initial value both when the key
+		// is missing and when it holds something it cannot parse. Only the first
+		// may reach the migration: seeding a corrupt value from the unscoped key
+		// would revive a dismissal the merchant has since replaced and hide a
+		// warning that is currently owed.
+		it( 'does not migrate over a scoped value it cannot parse', () => {
+			window.localStorage.setItem( frontendKey(), '{not valid json' );
+			seedLegacy( [ 'test-plugin' ] );
+			setIncompatibleExtensions( [
+				{ id: 'test-plugin', title: 'Test Plugin' },
+			] );
+
+			renderCheckout();
+
+			expect( screen.getByTestId( 'notice-banner' ) ).toBeInTheDocument();
+			expect( console ).toHaveErrored();
+		} );
+
+		it( 'does not read the unscoped key at all when the scoped one is corrupt', () => {
+			const getItem = jest.spyOn( Storage.prototype, 'getItem' );
+			window.localStorage.setItem( frontendKey(), '{not valid json' );
+			seedLegacy( [ 'test-plugin' ] );
+			setIncompatibleExtensions( [
+				{ id: 'test-plugin', title: 'Test Plugin' },
+			] );
+
+			renderCheckout();
+
+			expect(
+				getItem.mock.calls.filter( ( [ key ] ) => key === legacyKey )
+			).toHaveLength( 0 );
+			expect( console ).toHaveErrored();
+			getItem.mockRestore();
+		} );
 	} );
 } );

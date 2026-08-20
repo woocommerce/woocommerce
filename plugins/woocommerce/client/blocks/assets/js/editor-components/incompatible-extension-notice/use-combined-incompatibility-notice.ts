@@ -15,6 +15,7 @@ import {
 	getEditorStorageKey,
 	isSubsetOf,
 	readDismissalsFromBeforeScoping,
+	readInitialDismissals,
 } from './storage';
 
 type StoredIncompatibleExtension = { [ k: string ]: string[] };
@@ -103,8 +104,12 @@ export const useCombinedIncompatibilityNotice = (
 	// written, and writes the key itself on mount. Memoised because the argument
 	// is evaluated on every render even though only the first one consumes it.
 	const initialDismissedNotices = useMemo(
-		readNoticesDismissedBeforeScoping,
-		[]
+		() =>
+			readInitialDismissals(
+				storageKey,
+				readNoticesDismissedBeforeScoping
+			),
+		[ storageKey ]
 	);
 
 	const [ dismissedNotices, setDismissedNotices ] = useLocalStorageState<
