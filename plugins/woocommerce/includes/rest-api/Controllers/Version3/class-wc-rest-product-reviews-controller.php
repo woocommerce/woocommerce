@@ -591,6 +591,14 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 				return new WP_Error( 'woocommerce_rest_' . $error_code, __( 'Product review field exceeds maximum length allowed.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 
+			/*
+			 * Core stores update-side comment meta before it updates the comment count. Keep this value
+			 * as an integer so wp_slash() below cannot change its shape.
+			 */
+			if ( ! empty( $request['rating'] ) ) {
+				$prepared_args['comment_meta']['rating'] = (int) $request['rating'];
+			}
+
 			$updated = wp_update_comment( wp_slash( (array) $prepared_args ) );
 
 			if ( false === $updated ) {
@@ -605,19 +613,6 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		// Re-read the comment because the same request can move the review to a different product.
 		$updated_review     = get_comment( $id );
 		$current_product_id = $updated_review instanceof WP_Comment ? (int) $updated_review->comment_post_ID : 0;
-
-		if ( ! empty( $request['rating'] ) ) {
-			update_comment_meta( $id, 'rating', $request['rating'] );
-
-			/*
-			 * Any recompute of the product's rating aggregates triggered while updating the comment ran
-			 * before the new rating was stored, so it used the previous value. Recompute now that the
-			 * meta is up to date.
-			 */
-			if ( $current_product_id ) {
-				WC_Comments::clear_transients( $current_product_id );
-			}
-		}
 
 		/*
 		 * When the review moves to another product, wp_update_comment() only recomputes the product it

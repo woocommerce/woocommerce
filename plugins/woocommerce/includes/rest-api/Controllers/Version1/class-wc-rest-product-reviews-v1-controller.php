@@ -357,21 +357,25 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		}
 
 		$prepared_review = $this->prepare_item_for_database( $request );
-
-		$updated = wp_update_comment( $prepared_review );
-		if ( 0 === $updated ) {
-			return new WP_Error( 'rest_product_review_failed_edit', __( 'Updating product review failed.', 'woocommerce' ), array( 'status' => 500 ) );
+		if ( is_wp_error( $prepared_review ) ) {
+			return $prepared_review;
 		}
 
+		/*
+		 * Core stores update-side comment meta before it updates the comment count. Passing the
+		 * rating here lets WooCommerce's count callback see the new value in the same product save.
+		 */
 		if ( ! empty( $request['rating'] ) ) {
-			update_comment_meta( $product_review_id, 'rating', $request['rating'] );
+			$prepared_review['comment_meta']['rating'] = (int) $request['rating'];
+		}
 
-			/*
-			 * The recompute of the product's rating aggregates triggered by wp_update_comment() above ran
-			 * before the new rating was stored, so it used the previous value. Recompute now that the meta
-			 * is up to date. The review is guaranteed to belong to $product_id by get_review() above.
-			 */
-			WC_Comments::clear_transients( $product_id );
+		/*
+		 * Zero means no comment-table row changed; false is the actual update failure. A rating-only
+		 * request legitimately returns zero while still storing comment_meta and refreshing counts.
+		 */
+		$updated = wp_update_comment( $prepared_review );
+		if ( false === $updated ) {
+			return new WP_Error( 'rest_product_review_failed_edit', __( 'Updating product review failed.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		$product_review = get_comment( $product_review_id );
