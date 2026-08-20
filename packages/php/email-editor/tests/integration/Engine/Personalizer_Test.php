@@ -1238,4 +1238,21 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 			'The plain-href site should write the interceptor return through esc_url()'
 		);
 	}
+
+	/**
+	 * Test that set_value_interceptor() returns the previously registered interceptor
+	 * so a consumer replacing it temporarily can restore it.
+	 */
+	public function testValueInterceptorSetterReturnsPrevious(): void {
+		$first  = function (): string {
+			return 'first';
+		};
+		$second = function (): string {
+			return 'second';
+		};
+
+		$this->assertNull( $this->personalizer->set_value_interceptor( $first ) );
+		$this->assertSame( $first, $this->personalizer->set_value_interceptor( $second ) );
+		$this->assertSame( $second, $this->personalizer->set_value_interceptor( null ) );
+	}
 }

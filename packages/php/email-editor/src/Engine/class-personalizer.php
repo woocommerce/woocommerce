@@ -137,14 +137,19 @@ class Personalizer {
 	 * just like an empty resolved value. This allows consumers (e.g. bulk-sending integrations)
 	 * to substitute placeholders for values while recording the values externally.
 	 *
-	 * The interceptor persists until cleared by passing null.
+	 * The interceptor persists until cleared by passing null, and the Personalizer
+	 * instance may be shared with other consumers, so clear or restore the interceptor
+	 * (e.g. in a finally block) as soon as the work it was registered for is done.
+	 * The previously registered interceptor is returned to support restoring it.
 	 *
 	 * @param callable|null $interceptor The interceptor callback or null to clear. The callback receives
 	 *                                    the resolved value, the raw source token, and a RENDERING_CONTEXT_* constant.
-	 * @return void
+	 * @return callable|null The previously registered interceptor, or null when none was set.
 	 */
-	public function set_value_interceptor( ?callable $interceptor ): void {
+	public function set_value_interceptor( ?callable $interceptor ): ?callable {
+		$previous                = $this->value_interceptor;
 		$this->value_interceptor = $interceptor;
+		return $previous;
 	}
 
 	/**
