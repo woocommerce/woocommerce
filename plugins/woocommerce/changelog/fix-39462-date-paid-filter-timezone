@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make the date_paid/date_completed day filter on the legacy orders list table respect the site timezone, so the listed orders match the requested local day.
