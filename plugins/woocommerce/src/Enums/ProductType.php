@@ -46,13 +46,13 @@ final class ProductType {
 	/**
 	 * Returns every product type value defined by this enum, as a flat list.
 	 *
-	 * The list includes self::VARIATION. Variations are real products that can be created --
-	 * WC_Product_Variation::get_type() returns this value -- but they belong to a parent, so they
-	 * are not a standalone choice when creating a product.
+	 * It includes self::VARIATION. Variations are real, creatable products, and
+	 * WC_Product_Variation::get_type() returns this value, but each belongs to a parent rather than
+	 * standing on its own.
 	 *
 	 * For the top-level types a merchant can pick, use wc_get_product_types(). It returns a
-	 * value => label map rather than a list, and being filterable it also reflects types an
-	 * extension has registered.
+	 * value => label map rather than a list, and being filterable it also carries types an
+	 * extension registered.
 	 *
 	 * @since 10.9.0
 	 *

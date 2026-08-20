@@ -33,12 +33,12 @@ final class CatalogVisibility {
 	/**
 	 * Returns every catalog visibility value defined by this enum, as a flat list.
 	 *
-	 * These happen to be the same four values wc_get_product_visibility_options() returns today, so
-	 * the two look interchangeable. They are not: that helper returns a value => label map, it is
-	 * filterable, and it is what WC_Product::set_catalog_visibility() validates against -- so a site
-	 * can legitimately accept a visibility this list does not contain.
+	 * These are the same four values wc_get_product_visibility_options() returns by default, which
+	 * makes the two look interchangeable. They are not. That helper returns a value => label map,
+	 * it is filterable, and WC_Product::set_catalog_visibility() validates against it, so a site can
+	 * accept a visibility this list does not contain.
 	 *
-	 * Use wc_get_product_visibility_options() for anything that validates or presents a choice.
+	 * Use wc_get_product_visibility_options() wherever you validate or present a choice.
 	 *
 	 * @since 10.9.0
 	 *

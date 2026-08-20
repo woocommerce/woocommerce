@@ -60,14 +60,13 @@ final class ProductStatus {
 	/**
 	 * Returns every product status value defined by this enum, as a flat list.
 	 *
-	 * All of these can be set on a product: WC_Product::set_status() does not validate, and core
-	 * assigns self::AUTO_DRAFT and self::TRASH itself. The distinction is who chooses them --
-	 * self::AUTO_DRAFT, self::TRASH and self::FUTURE are driven by WordPress rather than picked by
-	 * an author, so they are not offered everywhere a status is.
+	 * A product can hold any of them: WC_Product::set_status() does not validate, and core assigns
+	 * self::AUTO_DRAFT and self::TRASH itself. What separates them is who decides. WordPress sets
+	 * self::AUTO_DRAFT, self::TRASH and self::FUTURE; an author chooses the rest.
 	 *
 	 * WooCommerce has no narrower helper, and get_post_statuses() is not one: it is unfiltered and
-	 * omits self::FUTURE. Callers that need only what a particular editor or REST schema exposes
-	 * should narrow this list themselves.
+	 * lists only draft, pending, private and publish. Narrow this list yourself for a particular
+	 * editor or REST schema.
 	 *
 	 * @since 10.9.0
 	 *

@@ -39,14 +39,15 @@ final class ProductStockStatus {
 	/**
 	 * Returns every stock status value defined by this enum, as a flat list.
 	 *
-	 * The list is wider than the set of statuses stored against products: self::LOW_STOCK is
-	 * derived from stock quantity rather than persisted, so a query filtering the stock_status
-	 * column can never match it. It remains a legitimate choice elsewhere -- the Analytics stock
-	 * report offers it, and adds it back explicitly for that reason.
+	 * It is wider than the set of statuses products store. self::LOW_STOCK is a reporting
+	 * aggregate: the Analytics stock report counts in-stock products whose quantity has fallen to
+	 * their low-stock threshold, so a low-stock product stores self::IN_STOCK. That report adds
+	 * self::LOW_STOCK to its own enum for exactly that reason.
 	 *
-	 * For the persisted statuses, and the options a stock_status filter should offer, use
-	 * wc_get_product_stock_status_options(). It returns a value => label map rather than a list,
-	 * and being filterable it also reflects statuses an extension has added.
+	 * WC_Product::set_stock_status() coerces anything outside wc_get_product_stock_status_options()
+	 * to self::IN_STOCK, so use that helper for values you intend to store or filter on. It returns
+	 * a value => label map rather than a list, and being filterable it also carries statuses an
+	 * extension added.
 	 *
 	 * @since 10.9.0
 	 *

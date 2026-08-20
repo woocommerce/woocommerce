@@ -110,18 +110,19 @@ final class OrderStatus {
 	/**
 	 * Returns every order status value defined by this enum, as a flat list of unprefixed slugs.
 	 *
-	 * The list is not the set of statuses WooCommerce registers, in either direction. It carries
+	 * It differs from the statuses WooCommerce registers in both directions. It carries
 	 * self::TRASH, self::NEW, self::AUTO_DRAFT and self::DRAFT, which wc_get_order_statuses() does
-	 * not return by default; self::TRASH and self::AUTO_DRAFT are nonetheless accepted by
-	 * WC_Abstract_Order::set_status(), which exempts them from its own validation. It also cannot
-	 * carry statuses an extension registers. self::CHECKOUT_DRAFT is not an exception to the
-	 * helper: WooCommerce adds it through the `wc_order_statuses` filter, and the Store API assigns
-	 * it to live orders during checkout.
+	 * not return by default, and it cannot carry statuses an extension registers.
+	 * WC_Abstract_Order::set_status() accepts self::TRASH and self::AUTO_DRAFT even so, exempting
+	 * them from its own validation.
+	 *
+	 * self::CHECKOUT_DRAFT sits on the helper's side of that line: WooCommerce adds it through the
+	 * `wc_order_statuses` filter, and the Store API assigns it to live orders during checkout.
 	 *
 	 * For the registered statuses, use wc_get_order_statuses(). It returns a value => label map
-	 * keyed on the `wc-` prefixed slug, so its keys never compare equal to this enum's values
-	 * without OrderUtil::remove_status_prefix(). OrderInternalStatus lists the seven core statuses
-	 * in prefixed form.
+	 * keyed on the `wc-` prefixed slug, so comparing its keys with this enum's values needs
+	 * OrderUtil::remove_status_prefix(). OrderInternalStatus lists the seven core statuses in
+	 * prefixed form.
 	 *
 	 * @since 10.9.0
 	 *
