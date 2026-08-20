@@ -86,7 +86,7 @@ jobs:
             error="Source branch '$BRANCH' does not exist."
             if [[ "$BRANCH" =~ ^(release/)?([0-9]+\.[0-9]+)\..+$ ]]; then
               minor="${BASH_REMATCH[2]}"
-              error="$error Release branches are named by minor version — enter either the full branch name ('release/$minor') or just the minor version ('$minor')."
+              error="$error Try 'release/$minor' or '$minor' instead."
             fi
             echo "::error::$error"
             exit 1
