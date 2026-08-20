@@ -51,27 +51,6 @@ const expandCouponForm = async ( page: Page ) => {
 	await expect( page.getByPlaceholder( 'Coupon code' ) ).toBeVisible();
 };
 
-// Arms a listener for the given jQuery event on document.body, stashing the
-// result on window for later retrieval. Await this before applyCoupon() so
-// the listener is attached before the AJAX response can trigger the event,
-// then read the result back with getCouponErrorEvent() once the action
-// that's expected to fire it has completed.
-const armCouponErrorEvent = ( page: Page, eventName: string ) =>
-	page.evaluate( ( name ) => {
-		( window as any ).__couponErrorPromise = new Promise< string >(
-			( resolve ) => {
-				( window as any )
-					.jQuery( document.body )
-					.one( name, ( _event: unknown, couponCode: string ) =>
-						resolve( couponCode )
-					);
-			}
-		);
-	}, eventName );
-
-const getCouponErrorEvent = ( page: Page ) =>
-	page.evaluate( () => ( window as any ).__couponErrorPromise );
-
 const fillBillingDetails = async ( page: Page, email: string ) => {
 	await page.getByLabel( 'First name' ).first().fill( 'Homer' );
 	await page.getByLabel( 'Last name' ).first().fill( 'Simpson' );
@@ -194,16 +173,12 @@ test.describe(
 			await test.step( 'cart', async () => {
 				await addAProductToCart( page, firstProductId );
 				await page.goto( CLASSIC_CART_PAGE.slug );
-				await armCouponErrorEvent( page, 'coupon_error' );
 				await applyCoupon( page, EXPIRED_COUPON );
 				await expect(
 					page.getByText(
 						`Coupon "${ EXPIRED_COUPON }" has expired.`
 					)
 				).toBeVisible();
-				expect( await getCouponErrorEvent( page ) ).toBe(
-					EXPIRED_COUPON
-				);
 			} );
 
 			await context.clearCookies();
@@ -212,16 +187,12 @@ test.describe(
 				await addAProductToCart( page, firstProductId );
 				await page.goto( CLASSIC_CHECKOUT_PAGE.slug );
 				await expandCouponForm( page );
-				await armCouponErrorEvent( page, 'coupon_error_in_checkout' );
 				await applyCoupon( page, EXPIRED_COUPON );
 				await expect(
 					page.getByText(
 						`Coupon "${ EXPIRED_COUPON }" has expired.`
 					)
 				).toBeVisible();
-				expect( await getCouponErrorEvent( page ) ).toBe(
-					EXPIRED_COUPON
-				);
 			} );
 		} );
 

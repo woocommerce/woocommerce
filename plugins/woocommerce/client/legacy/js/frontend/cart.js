@@ -643,7 +643,7 @@ jQuery( function ( $ ) {
 							show_coupon_error( response, $coupon_wrapper, false );
 						}
 
-						$( document.body ).trigger( 'coupon_error', [
+						$( document.body ).trigger( 'errored_coupon', [
 							coupon_code,
 							response,
 						] );

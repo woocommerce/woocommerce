@@ -1296,7 +1296,7 @@ jQuery( function ( $ ) {
 							);
 
 							$( document.body ).trigger(
-								'coupon_error_in_checkout',
+								'errored_coupon_in_checkout',
 								[ data.coupon_code, response ]
 							);
 						}
