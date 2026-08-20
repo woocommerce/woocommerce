@@ -992,6 +992,7 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 		);
 		$html_content = '<p>Hello, <!--[user-firstname]-->!</p>';
 		$this->assertSame( '<p>Hello, {placeholder-1}!</p>', $this->personalizer->personalize_content( $html_content ) );
+		// The second call verifies that the interceptor persists across personalize_content() calls.
 		$this->assertSame( '<p>Hello, {placeholder-1}!</p>', $this->personalizer->personalize_content( $html_content ) );
 
 		$this->personalizer->set_value_interceptor( null );
