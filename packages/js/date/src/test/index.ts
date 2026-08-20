@@ -2,12 +2,19 @@
  * External dependencies
  */
 import moment from 'moment';
+import { __ } from '@wordpress/i18n';
 import {
 	format as formatDate,
 	getSettings as getDateSettings,
 	setSettings as setDateSettings,
 } from '@wordpress/date';
 import { timeFormat as d3TimeFormat } from 'd3-time-format';
+
+jest.mock( '@wordpress/i18n', () => ( {
+	...jest.requireActual( '@wordpress/i18n' ),
+	__: jest.fn( ( text: string ) => text ),
+} ) );
+
 /**
  * Internal dependencies
  */
@@ -819,6 +826,191 @@ describe( 'getRangeLabel', () => {
 			moment( '2018-05-15' )
 		);
 		expect( label ).toBe( 'Apr 1, 2017 - May 15, 2018' );
+	} );
+
+	it( 'should fall back to the shared month when the format holds no day token', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( 'YYYY年M月' );
+
+		const label = getRangeLabel(
+			moment( '2024-10-01' ),
+			moment( '2024-10-31' )
+		);
+
+		expect( label ).toBe( '2024年10月' );
+	} );
+
+	it( 'should keep the zero padding a "DD" format asks for', () => {
+		// Mirrors the Serbian translation of the format.
+		( __ as jest.Mock ).mockReturnValueOnce( 'DD. MMM YYYY.' );
+
+		const label = getRangeLabel(
+			moment( '2018-04-01' ),
+			moment( '2018-04-15' )
+		);
+
+		expect( label ).toBe( '01 - 15. Apr 2018.' );
+	} );
+
+	it( 'should keep the ordinal a "Do" format asks for', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( 'MMM Do, YYYY' );
+
+		const label = getRangeLabel(
+			moment( '2018-04-01' ),
+			moment( '2018-04-15' )
+		);
+
+		expect( label ).toBe( 'Apr 1st - 15th, 2018' );
+	} );
+
+	it( 'should leave a bracketed day literal alone', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( '[Day] MMM D, YYYY' );
+
+		const label = getRangeLabel(
+			moment( '2018-04-01' ),
+			moment( '2018-04-15' )
+		);
+
+		expect( label ).toBe( 'Day Apr 1 - 15, 2018' );
+	} );
+
+	it( 'should leave a backslash escaped day literal alone', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( '\\D MMM D, YYYY' );
+
+		const label = getRangeLabel(
+			moment( '2018-04-01' ),
+			moment( '2018-04-15' )
+		);
+
+		expect( label ).toBe( 'D Apr 1 - 15, 2018' );
+	} );
+
+	it( 'should not mistake day of year tokens for the day of month', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( 'DDDD, YYYY' );
+
+		expect(
+			getRangeLabel( moment( '2018-04-01' ), moment( '2018-04-15' ) )
+		).toBe( '091, 2018' );
+
+		( __ as jest.Mock ).mockReturnValueOnce( 'DDDo, YYYY' );
+
+		expect(
+			getRangeLabel( moment( '2018-04-01' ), moment( '2018-04-15' ) )
+		).toBe( '91st, 2018' );
+	} );
+
+	describe( 'with a locale whose month names contain digits', () => {
+		// Mirrors moment's Japanese locale, which renders October as "10月".
+		const monthNames = Array.from(
+			{ length: 12 },
+			( _, index ) => `${ index + 1 }月`
+		);
+		let originalLocale: string;
+
+		beforeAll( () => {
+			originalLocale = moment.locale();
+			moment.defineLocale( 'digit-months', {
+				months: monthNames,
+				monthsShort: monthNames,
+			} );
+			moment.locale( 'digit-months' );
+		} );
+
+		afterAll( () => {
+			moment.locale( originalLocale );
+		} );
+
+		it( 'should not expand the day range inside the month name', () => {
+			const label = getRangeLabel(
+				moment( '2024-10-01' ),
+				moment( '2024-10-31' )
+			);
+			expect( label ).toBe( '10月 1 - 31, 2024' );
+		} );
+
+		it( 'should not expand the day range inside a month name sharing the day digits', () => {
+			const label = getRangeLabel(
+				moment( '2024-12-12' ),
+				moment( '2024-12-31' )
+			);
+			expect( label ).toBe( '12月 12 - 31, 2024' );
+		} );
+
+		it( 'should leave single day, cross month and cross year labels alone', () => {
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-01' ) )
+			).toBe( '10月 1, 2024' );
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-12-31' ) )
+			).toBe( '10月 1 - 12月 31, 2024' );
+			expect(
+				getRangeLabel( moment( '2023-10-01' ), moment( '2024-12-31' ) )
+			).toBe( '10月 1, 2023 - 12月 31, 2024' );
+		} );
+	} );
+
+	describe( 'with a locale that renders non-Latin digits', () => {
+		// Mirrors moment's Arabic locale, which maps digits when formatting.
+		const arabicDigits = [
+			'٠',
+			'١',
+			'٢',
+			'٣',
+			'٤',
+			'٥',
+			'٦',
+			'٧',
+			'٨',
+			'٩',
+		];
+		const monthNames = [
+			'يناير',
+			'فبراير',
+			'مارس',
+			'أبريل',
+			'مايو',
+			'يونيو',
+			'يوليو',
+			'أغسطس',
+			'سبتمبر',
+			'أكتوبر',
+			'نوفمبر',
+			'ديسمبر',
+		];
+		let originalLocale: string;
+
+		beforeAll( () => {
+			originalLocale = moment.locale();
+			moment.defineLocale( 'non-latin-digits', {
+				months: monthNames,
+				monthsShort: monthNames,
+				postformat: ( value: string ) =>
+					value.replace(
+						/\d/g,
+						( digit ) => arabicDigits[ Number( digit ) ]
+					),
+			} );
+			moment.locale( 'non-latin-digits' );
+		} );
+
+		afterAll( () => {
+			moment.locale( originalLocale );
+		} );
+
+		it( 'should keep both ends of the range', () => {
+			const label = getRangeLabel(
+				moment( '2024-10-01' ),
+				moment( '2024-10-31' )
+			);
+			expect( label ).toBe( 'أكتوبر ١ - ٣١, ٢٠٢٤' );
+		} );
+
+		it( 'should leave a single day label alone', () => {
+			const label = getRangeLabel(
+				moment( '2024-10-01' ),
+				moment( '2024-10-01' )
+			);
+			expect( label ).toBe( 'أكتوبر ١, ٢٠٢٤' );
+		} );
 	} );
 } );
 
