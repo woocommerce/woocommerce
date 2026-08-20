@@ -40,6 +40,7 @@ use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchro
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
+use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
 use Automattic\WooCommerce\Utilities\StringUtil;
 use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
@@ -3582,6 +3583,19 @@ function wc_update_10902_remove_deprecated_push_notifications_option(): void {
  */
 function wc_update_1100_enable_point_of_sale_feature() {
 	update_option( 'woocommerce_feature_point_of_sale_enabled', 'yes' );
+}
+
+/**
+ * Set the stored value of the variation gallery feature flag to enabled.
+ *
+ * The variation gallery is enabled for all stores as of 11.1.0 and no longer supports opting out.
+ *
+ * @since 11.1.0
+ *
+ * @return void
+ */
+function wc_update_11102_enable_variation_gallery_feature(): void {
+	update_option( VariationGalleryPackage::ENABLE_OPTION_NAME, 'yes' );
 }
 
 /**

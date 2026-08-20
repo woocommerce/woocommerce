@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Tests\Internal\VariationGallery;
 
 use Automattic\WooCommerce\Internal\VariationGallery\Migration;
 use Automattic\WooCommerce\Internal\VariationGallery\Package;
-use Automattic\WooCommerce\Internal\VariationGallery\Telemetry;
 
 /**
  * Tests for the variation gallery package bootstrap.
@@ -62,15 +61,12 @@ class PackageTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Telemetry reports an explicit feature opt-out.
+	 * @testdox is_enabled returns true for a former explicit opt-out.
 	 */
-	public function test_telemetry_reports_explicit_opt_out(): void {
+	public function test_is_enabled_returns_true_for_former_explicit_opt_out(): void {
 		update_option( Package::ENABLE_OPTION_NAME, 'no' );
 
-		$snapshot = Telemetry::collect_snapshot();
-
-		$this->assertSame( 'no', $snapshot['feature_enabled'] );
-		$this->assertSame( 'yes', $snapshot['feature_option_explicit'] );
+		$this->assertTrue( Package::is_enabled() );
 	}
 
 	/**

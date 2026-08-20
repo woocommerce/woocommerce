@@ -50,8 +50,6 @@ class Telemetry implements RegisterHooksInterface {
 	public static function collect_snapshot(): array {
 		global $wpdb;
 
-		$option_value         = get_option( Package::ENABLE_OPTION_NAME, '' );
-		$feature_enabled      = 'yes' === $option_value || ( 'no' !== $option_value && Package::is_enabled() );
 		$legacy_plugin_active = self::is_legacy_plugin_active();
 		$legacy_plugin_file   = WP_PLUGIN_DIR . '/' . self::LEGACY_PLUGIN_FILE;
 
@@ -104,8 +102,7 @@ class Telemetry implements RegisterHooksInterface {
 		);
 
 		return array(
-			'feature_enabled'               => $feature_enabled ? 'yes' : 'no',
-			'feature_option_explicit'       => '' === $option_value ? 'no' : 'yes',
+			'feature_enabled'               => 'yes',
 			'legacy_avi_plugin_active'      => $legacy_plugin_active ? 'yes' : 'no',
 			'legacy_avi_plugin_installed'   => file_exists( $legacy_plugin_file ) ? 'yes' : 'no',
 			'migrated_variation_count'      => $migrated_variation_count,
