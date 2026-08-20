@@ -27,8 +27,11 @@ final class ReserveStock {
 	private const OWN_ORDERS_SESSION_KEY = 'stock_holding_orders';
 
 	/**
-	 * Most of the current shopper's own orders to consider when discounting their
-	 * own stale holds. Keeps the generated IN clause bounded.
+	 * Upper bound on own orders considered when excluding a shopper's stale holds.
+	 *
+	 * Keeps the generated IN clause bounded. A shopper who exceeds it loses the
+	 * oldest ids from the list, and those holds simply block again until they
+	 * expire — the failure direction is blocking, never overselling.
 	 */
 	private const MAX_OWN_ORDERS = 10;
 
@@ -40,15 +43,14 @@ final class ReserveStock {
 	private $enabled = true;
 
 	/**
-	 * Request scoped memo of a signed in customer's unpaid order ids.
+	 * Request scoped memo of a signed in customer's potential stock-holding order ids.
 	 *
 	 * A new ReserveStock is constructed for each wc_get_held_stock_quantity()
-	 * call, and the cart makes one per stock managed item, so the memo cannot
-	 * live on the instance.
+	 * call, so the memo cannot live on the instance.
 	 *
 	 * @var array<int, int[]>
 	 */
-	private static $unpaid_order_ids_by_customer = array();
+	private static $potential_order_ids_by_customer = array();
 
 	/**
 	 * Constructor
@@ -321,7 +323,7 @@ final class ReserveStock {
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-		$query .= $this->get_clause_to_discount_stale_own_holds( $exclude_order_id );
+		$query .= $this->get_stale_own_holds_exclusion_clause( $product_id, $exclude_order_id );
 
 		/**
 		 * Filter: woocommerce_query_for_reserved_stock
@@ -336,42 +338,38 @@ final class ReserveStock {
 	}
 
 	/**
-	 * Returns a clause discounting holds the current shopper placed themselves and
-	 * then left unpaid for longer than a grace window.
+	 * Builds a SQL clause excluding the current shopper's stale stock holds.
 	 *
-	 * Only one order is excluded by $exclude_order_id, so a shopper who abandons a
-	 * checkout and starts another is blocked by their own earlier hold for the
-	 * whole of woocommerce_hold_stock_minutes, which stores accepting slow payment
-	 * methods set to days. Inside the window their hold still counts, so a genuine
-	 * in flight payment is protected across a bank app switch or a one time code.
-	 * Past it, that shopper stops being blocked by their own abandoned attempt.
-	 * Holds belonging to anybody else are unaffected either way.
-	 *
+	 * @param int $product_id       Product whose reserved stock is being counted.
 	 * @param int $exclude_order_id Order already excluded by the caller.
-	 * @return string Clause to append, or an empty string when nothing qualifies.
+	 * @return string SQL clause, or an empty string when no holds qualify.
 	 */
-	private function get_clause_to_discount_stale_own_holds( $exclude_order_id ): string {
+	private function get_stale_own_holds_exclusion_clause( $product_id, $exclude_order_id ): string {
 		global $wpdb;
 
 		/**
-		 * Filters how long a shopper's own unpaid hold keeps blocking that same shopper.
+		 * Filters how many minutes must pass before a shopper's own unpaid stock hold
+		 * stops blocking that same shopper.
 		 *
-		 * The hold is only ever discounted for the shopper who placed it, and only
-		 * once it is older than this. Return 0 to keep such holds blocking for the
-		 * full reservation window, which is how WooCommerce behaved before this
-		 * filter existed.
+		 * Only the shopper who placed the hold is affected. Return 0 to exclude own
+		 * holds immediately, or false to disable the exclusion and keep own holds
+		 * blocking for the full reservation window.
 		 *
 		 * @since 11.2.0
 		 *
-		 * @param int $minutes Grace window in minutes.
+		 * @param int|false $threshold_minutes Threshold in minutes, or false to disable.
+		 * @param int       $product_id        Product whose reserved stock is being counted.
+		 * @param int       $exclude_order_id  Order already excluded by the caller.
 		 */
-		$grace_minutes = (int) apply_filters( 'woocommerce_own_reserved_stock_grace_minutes', 10 );
+		$threshold_minutes = apply_filters( 'woocommerce_own_stock_hold_exclusion_threshold_minutes', 10, $product_id, $exclude_order_id );
 
-		if ( $grace_minutes < 1 ) {
+		if ( false === $threshold_minutes ) {
 			return '';
 		}
 
-		$order_ids = array_values( array_diff( $this->get_current_shopper_order_ids(), array( absint( $exclude_order_id ) ) ) );
+		$threshold_minutes = max( 0, (int) $threshold_minutes );
+
+		$order_ids = array_values( array_diff( $this->get_current_shopper_stock_holding_order_ids(), array( absint( $exclude_order_id ) ) ) );
 
 		if ( empty( $order_ids ) ) {
 			return '';
@@ -379,10 +377,9 @@ final class ReserveStock {
 
 		$placeholders = implode( ',', array_fill( 0, count( $order_ids ), '%d' ) );
 
-		// The `timestamp` column records when the hold was first placed and is not
-		// touched by the ON DUPLICATE KEY UPDATE in reserve_stock_for_product(), so
-		// it measures the age of the shopper's attempt rather than of the last write.
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// The `timestamp` column records when the hold was first placed, so it
+		// measures the age of the shopper's attempt rather than of the last write.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The interpolated value contains only generated %d placeholders.
 		return $wpdb->prepare(
 			"
 			AND NOT (
@@ -390,120 +387,88 @@ final class ReserveStock {
 				AND stock_table.`timestamp` < ( NOW() - INTERVAL %d MINUTE )
 			)
 			",
-			array_merge( $order_ids, array( $grace_minutes ) )
+			array_merge( $order_ids, array( $threshold_minutes ) )
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**
-	 * Returns order ids that demonstrably belong to the shopper making this request.
+	 * Returns stock-holding order ids associated with the current shopper.
 	 *
-	 * Two sources. The list this class records as it takes holds, which is bound to
-	 * the session that recorded it, and the account when the shopper is signed in.
-	 * Ownership is never taken from anything a shopper can type: an unauthenticated
-	 * field such as the billing email would let one shopper claim another's in
-	 * flight hold, which is the oversell the grace window exists to bound.
-	 *
-	 * order_awaiting_payment and store_api_draft_order are deliberately NOT read
-	 * here. Session contents are not by themselves a proof of identity, because
-	 * core hands them to a different shopper in two places: clone_session_data()
-	 * copies everything except `customer` into a freshly minted session when a cart
-	 * token is presented, and migrate_guest_session_to_user_session() moves a guest
-	 * session wholesale onto whichever account next signs in on that browser. Those
-	 * two keys carry no record of who wrote them, so they cannot be checked. They
-	 * also add nothing: an order can only hold stock by passing through
-	 * reserve_stock_for_order(), which is where the bound list is written.
-	 *
-	 * This runs inside get_query_for_reserved_stock(), which wc_get_held_stock_quantity()
-	 * also reaches from the admin, WP-CLI and cron. There is no shopper in those
-	 * contexts and WC()->session is not initialised, so there is no ownership and
-	 * the query is returned unchanged.
+	 * Includes orders recorded by the current session and unpaid orders belonging
+	 * to the signed-in customer. Ownership is never inferred from anything a
+	 * shopper can type, such as the billing email.
 	 *
 	 * @return int[]
 	 */
-	private function get_current_shopper_order_ids(): array {
-		$session = $this->get_shopper_session();
+	private function get_current_shopper_stock_holding_order_ids(): array {
+		$session = WC()->session;
 
+		// In the admin, WP-CLI and cron there is no shopper and WC()->session is
+		// not initialised, so nothing is ever treated as the requester's own hold.
 		if ( ! $session instanceof \WC_Session ) {
 			return array();
 		}
 
-		$order_ids = $this->get_remembered_order_ids( $session );
+		$order_ids = $this->get_session_stock_holding_order_ids( $session );
 
 		$customer_id = get_current_user_id();
 
 		if ( $customer_id ) {
-			$order_ids = array_merge( $order_ids, $this->get_unpaid_order_ids_for_customer( $customer_id ) );
+			$order_ids = array_merge( $order_ids, $this->get_potential_stock_holding_order_ids_for_customer( $customer_id ) );
 		}
 
 		return array_values( array_filter( array_unique( $order_ids ) ) );
 	}
 
 	/**
-	 * Returns the recorded order ids, but only if this is still the session that
-	 * recorded them.
+	 * Returns the stock-holding order ids recorded against the current session.
 	 *
-	 * The customer id is stamped alongside the ids when they are written, and both
-	 * of the ways core moves session data between shoppers change it first:
-	 * init_session_from_request() mints a new customer id before cloning, and
-	 * migrate_guest_session_to_user_session() swaps the guest id for the account id.
-	 * A mismatch therefore means the data arrived from somebody else's session, and
-	 * the list is ignored rather than trusted.
+	 * The list is only trusted if it was written under this session's customer id.
 	 *
 	 * @param \WC_Session $session Session of the shopper making this request.
 	 * @return int[]
 	 */
-	private function get_remembered_order_ids( \WC_Session $session ): array {
+	private function get_session_stock_holding_order_ids( \WC_Session $session ): array {
 		$remembered = $session->get( self::OWN_ORDERS_SESSION_KEY, array() );
 
-		if ( ! is_array( $remembered ) || ! isset( $remembered['customer'], $remembered['order_ids'] ) || ! is_array( $remembered['order_ids'] ) ) {
+		if ( ! is_array( $remembered ) ) {
 			return array();
 		}
 
+		if ( ! isset( $remembered['customer'], $remembered['order_ids'] ) || ! is_array( $remembered['order_ids'] ) ) {
+			return array();
+		}
+
+		// Core hands session data to a different shopper in two places (cart token
+		// cloning and guest-to-user migration), and both change the session
+		// customer id first. A mismatch means the list arrived from somebody
+		// else's session, so it confers no ownership.
 		if ( (string) $remembered['customer'] !== (string) $session->get_customer_id() ) {
 			return array();
 		}
 
-		return array_map( 'absint', $remembered['order_ids'] );
+		return array_slice( array_map( 'absint', $remembered['order_ids'] ), 0, self::MAX_OWN_ORDERS );
 	}
 
 	/**
-	 * Returns the session of the shopper making this request, if there is one.
+	 * Records a stock-holding order against the current customer session.
 	 *
-	 * @return \WC_Session|null
-	 */
-	private function get_shopper_session() {
-		$session = function_exists( 'WC' ) && WC() ? WC()->session : null;
-
-		return $session instanceof \WC_Session ? $session : null;
-	}
-
-	/**
-	 * Records an order against the shopper's session so that a later request can
-	 * still recognise the hold as theirs.
-	 *
-	 * Neither existing pointer survives an abandoned attempt. The Store API
-	 * repoints store_api_draft_order at a new draft as soon as the previous one
-	 * leaves checkout-draft, and order_awaiting_payment is only ever written by the
-	 * classic checkout. This list keeps the ids for the life of the session.
-	 *
-	 * The session's customer id is stamped alongside them so that the list can be
+	 * The session's customer id is stamped alongside the ids so the list can be
 	 * discarded if it later turns up in somebody else's session. See
-	 * get_remembered_order_ids().
-	 *
-	 * Skipped entirely where there is no session, which is how an order created in
-	 * the admin or over WP-CLI leaves nothing behind.
+	 * get_session_stock_holding_order_ids().
 	 *
 	 * @param \WC_Order $order Order that now holds stock.
 	 */
-	private function remember_order_for_shopper( $order ): void {
-		$session = $this->get_shopper_session();
+	private function remember_order_for_shopper( \WC_Order $order ): void {
+		$session = WC()->session;
 
+		// An order created in the admin or over WP-CLI has no session to record against.
 		if ( ! $session instanceof \WC_Session ) {
 			return;
 		}
 
-		$order_ids = $this->get_remembered_order_ids( $session );
+		$order_ids = $this->get_session_stock_holding_order_ids( $session );
 
 		array_unshift( $order_ids, $order->get_id() );
 
@@ -519,29 +484,21 @@ final class ReserveStock {
 	}
 
 	/**
-	 * Returns unpaid order ids belonging to a signed in customer, newest first.
+	 * Returns order ids of a signed-in customer that could be holding stock, newest first.
 	 *
-	 * Session pointers are lost when the shopper switches device, clears cookies or
-	 * lets the session lapse, which is when they come back and meet their own hold.
-	 * The account covers that case for shoppers who are signed in.
-	 *
-	 * The statuses match the ones the reserved stock query counts, so an order that
-	 * cannot be holding stock is never fetched.
+	 * Covers a shopper whose session pointers were lost (new device, cleared
+	 * cookies, lapsed session). The statuses match the ones the reserved stock
+	 * query counts.
 	 *
 	 * @param int $customer_id Customer ID.
 	 * @return int[]
 	 */
-	private function get_unpaid_order_ids_for_customer( int $customer_id ): array {
-		if ( isset( self::$unpaid_order_ids_by_customer[ $customer_id ] ) ) {
-			return self::$unpaid_order_ids_by_customer[ $customer_id ];
+	private function get_potential_stock_holding_order_ids_for_customer( int $customer_id ): array {
+		if ( isset( self::$potential_order_ids_by_customer[ $customer_id ] ) ) {
+			return self::$potential_order_ids_by_customer[ $customer_id ];
 		}
 
-		/**
-		 * The 'ids' return yields plain ints, but wc_get_orders() is documented as
-		 * returning objects, so both shapes are accepted rather than assumed.
-		 *
-		 * @var array<int|\WC_Order> $order_ids
-		 */
+		/** @var int[] $order_ids */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 		$order_ids = wc_get_orders(
 			array(
 				'customer' => $customer_id,
@@ -553,14 +510,10 @@ final class ReserveStock {
 			)
 		);
 
-		$ids = array();
+		$order_ids = array_map( 'absint', $order_ids );
 
-		foreach ( $order_ids as $order_id ) {
-			$ids[] = $order_id instanceof \WC_Order ? $order_id->get_id() : absint( $order_id );
-		}
+		self::$potential_order_ids_by_customer[ $customer_id ] = $order_ids;
 
-		self::$unpaid_order_ids_by_customer[ $customer_id ] = $ids;
-
-		return $ids;
+		return $order_ids;
 	}
 }

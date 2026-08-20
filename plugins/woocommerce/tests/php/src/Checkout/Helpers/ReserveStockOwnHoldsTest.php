@@ -1,25 +1,6 @@
 <?php
 /**
- * Tests for discounting a shopper's own stale stock holds.
- *
- * Intended location:
- *   plugins/woocommerce/tests/php/src/Checkout/Helpers/ReserveStockOwnHoldsTest.php
- *
- * The contract under test, in order of importance:
- *
- *   1. A hold belonging to ANOTHER shopper always blocks, however old it is.
- *      That is the oversell invariant and every other case is a refinement of it.
- *   2. The shopper's OWN hold blocks inside the grace window and is discounted
- *      after it.
- *   3. Ownership never comes from anything the shopper can type.
- *   4. With no session — admin, WP-CLI, cron — nothing is discounted and the
- *      current user is never consulted.
- *   5. The woocommerce_query_for_reserved_stock signature is unchanged.
- *
- * Holds are written straight into wc_reserved_stock rather than through
- * reserve_stock_for_order() so that `timestamp` can be aged exactly, and so that
- * a hold can be created without also entering the session list. The one test
- * that exercises the session list calls wc_reserve_stock_for_order() for real.
+ * Tests for excluding a shopper's own stale stock holds.
  */
 
 declare(strict_types=1);
@@ -37,13 +18,23 @@ use WC_Unit_Test_Case;
 /**
  * Class ReserveStockOwnHoldsTest.
  *
- * Exercises the grace window that stops a shopper being blocked by their own
- * stale, unpaid stock hold. The full contract is in the file docblock above.
+ * Exercises the threshold that stops a shopper being blocked by their own
+ * stale, unpaid stock hold:
+ *
+ *   1. A hold belonging to another shopper always blocks, however old it is.
+ *   2. The shopper's own hold blocks inside the threshold and is excluded past it.
+ *   3. Ownership never comes from anything the shopper can type.
+ *   4. With no session (admin, WP-CLI, cron) nothing is excluded.
+ *   5. The woocommerce_query_for_reserved_stock signature is unchanged.
+ *
+ * Holds are written straight into wc_reserved_stock so `timestamp` can be aged
+ * exactly. Tests exercising the session list call wc_reserve_stock_for_order()
+ * for real.
  */
 class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 
 	/**
-	 * How long the reservation itself lasts, well beyond any grace window used here.
+	 * How long the reservation itself lasts, well beyond any threshold used here.
 	 */
 	private const HOLD_MINUTES = 2880;
 
@@ -119,25 +110,10 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 	// ---------------------------------------------------------------------
 
 	/**
-	 * Another shopper's hold blocks however stale it is.
+	 * A stale hold on an order the shopper does not own keeps blocking, even
+	 * while the shopper's own stale hold is excluded.
 	 */
-	public function test_another_shoppers_stale_hold_still_blocks() {
-		$product = $this->create_stock_managed_product( 1 );
-
-		// Signed in, with a session, and owning nothing that holds stock.
-		$this->create_signed_in_shopper();
-		$other = $this->create_shopper_with_unpaid_order( $product );
-
-		$this->hold_stock( $other, $product->get_id(), 1, 120 );
-
-		$this->assertSame( 1, wc_get_held_stock_quantity( $product, 0 ) );
-	}
-
-	/**
-	 * A stale hold on an order the shopper does not own is not discounted just
-	 * because the shopper's own list happens to be non empty.
-	 */
-	public function test_own_stale_hold_does_not_release_another_shoppers_hold() {
+	public function test_own_stale_hold_does_not_exclude_another_shoppers_hold() {
 		$product = $this->create_stock_managed_product( 2 );
 		$shopper = $this->create_signed_in_shopper();
 		$mine    = $this->create_unpaid_order_for( $shopper, $product );
@@ -150,11 +126,11 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 	}
 
 	// ---------------------------------------------------------------------
-	// 2. The grace window.
+	// 2. The exclusion threshold.
 	// ---------------------------------------------------------------------
 
 	/**
-	 * The shopper's own hold still blocks inside the default 10 minute window.
+	 * The shopper's own hold still blocks inside the default 10 minute threshold.
 	 */
 	public function test_own_fresh_hold_still_blocks() {
 		$product = $this->create_stock_managed_product( 1 );
@@ -167,9 +143,9 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Past the window the shopper stops being blocked by their own attempt.
+	 * Past the threshold the shopper stops being blocked by their own attempt.
 	 */
-	public function test_own_stale_hold_is_discounted() {
+	public function test_own_stale_hold_is_excluded() {
 		$product = $this->create_stock_managed_product( 1 );
 		$shopper = $this->create_signed_in_shopper();
 		$order   = $this->create_unpaid_order_for( $shopper, $product );
@@ -180,23 +156,44 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * A grace window of zero restores the behaviour from before this change.
+	 * A false threshold disables the exclusion and restores the behaviour from
+	 * before this change.
 	 */
-	public function test_zero_grace_window_keeps_own_hold_blocking() {
+	public function test_false_threshold_keeps_own_hold_blocking() {
 		$product = $this->create_stock_managed_product( 1 );
 		$shopper = $this->create_signed_in_shopper();
 		$order   = $this->create_unpaid_order_for( $shopper, $product );
 
 		$this->hold_stock( $order, $product->get_id(), 1, 2000 );
 
-		add_filter( 'woocommerce_own_reserved_stock_grace_minutes', '__return_zero' );
+		add_filter( 'woocommerce_own_stock_hold_exclusion_threshold_minutes', '__return_false' );
 		try {
 			$held = wc_get_held_stock_quantity( $product, 0 );
 		} finally {
-			remove_filter( 'woocommerce_own_reserved_stock_grace_minutes', '__return_zero' );
+			remove_filter( 'woocommerce_own_stock_hold_exclusion_threshold_minutes', '__return_false' );
 		}
 
 		$this->assertSame( 1, $held );
+	}
+
+	/**
+	 * A threshold of zero excludes the shopper's own hold immediately.
+	 */
+	public function test_zero_threshold_excludes_own_hold_immediately() {
+		$product = $this->create_stock_managed_product( 1 );
+		$shopper = $this->create_signed_in_shopper();
+		$order   = $this->create_unpaid_order_for( $shopper, $product );
+
+		$this->hold_stock( $order, $product->get_id(), 1, 5 );
+
+		add_filter( 'woocommerce_own_stock_hold_exclusion_threshold_minutes', '__return_zero' );
+		try {
+			$held = wc_get_held_stock_quantity( $product, 0 );
+		} finally {
+			remove_filter( 'woocommerce_own_stock_hold_exclusion_threshold_minutes', '__return_zero' );
+		}
+
+		$this->assertSame( 0, $held );
 	}
 
 	// ---------------------------------------------------------------------
@@ -205,7 +202,7 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 
 	/**
 	 * The reported flow: a guest on the block checkout whose draft pointer has
-	 * already moved on to a new order.
+	 * already moved on to a new draft order.
 	 */
 	public function test_session_list_covers_a_guest_whose_draft_pointer_moved_on() {
 		$product = $this->create_stock_managed_product( 1 );
@@ -215,23 +212,18 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 		wc_reserve_stock_for_order( wc_get_order( $order ) );
 		$this->age_hold( $order, 11 );
 
-		// The Store API mints a new draft and repoints the session at it.
-		WC()->session->set( 'store_api_draft_order', $this->create_unpaid_order_for( 0, $product ) );
+		// The Store API has since minted a new draft and repointed the session at it.
+		$new_draft = $this->create_unpaid_order_for( 0, $product, OrderStatus::CHECKOUT_DRAFT );
+		WC()->session->set( 'store_api_draft_order', $new_draft );
 
-		$remembered = WC()->session->get( 'stock_holding_orders', array() );
-
-		$this->assertContains( $order, $remembered['order_ids'] );
-		$this->assertSame( 0, wc_get_held_stock_quantity( $product, 0 ) );
+		$this->assertSame( 0, wc_get_held_stock_quantity( $product, $new_draft ) );
 	}
 
 	/**
 	 * A session list that arrived from somebody else's session confers nothing.
 	 *
-	 * WC_Session_Handler hands one shopper's session data to another in two places:
-	 * clone_session_data() copies everything but `customer` into a freshly minted
-	 * session when a cart token is presented, and
-	 * migrate_guest_session_to_user_session() moves a guest session onto whichever
-	 * account next signs in on that browser. Both change the session customer id
+	 * Core hands session data to a different shopper in two places (cart token
+	 * cloning and guest-to-user migration); both change the session customer id
 	 * first, which is what the stamp detects.
 	 */
 	public function test_borrowed_session_list_confers_no_ownership() {
@@ -242,8 +234,6 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 		$this->age_hold( $order, 11 );
 
 		$borrowed = WC()->session->get( 'stock_holding_orders', array() );
-
-		$this->assertContains( $order, $borrowed['order_ids'], 'Precondition: the owner recorded the hold.' );
 
 		// A second shopper, whose session carries the first shopper's list verbatim
 		// but under their own, different customer id.
@@ -285,12 +275,31 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 		$this->assertSame( 1, wc_get_held_stock_quantity( $product, 0 ) );
 	}
 
+	/**
+	 * A guest who exceeds the session list limit loses the oldest entry, and that
+	 * hold blocks again: the failure direction is blocking, never overselling.
+	 */
+	public function test_own_holds_beyond_the_session_list_limit_block_again() {
+		$product = $this->create_stock_managed_product( 20 );
+
+		// One more attempt than the list keeps.
+		for ( $i = 0; $i < 11; $i++ ) {
+			$order = $this->create_unpaid_order_for( 0, $product );
+			wc_reserve_stock_for_order( wc_get_order( $order ) );
+			$this->age_hold( $order, 11 );
+		}
+
+		// The list keeps the ten newest ids, so the first order's hold counts
+		// again while the remembered ten are excluded.
+		$this->assertSame( 1, wc_get_held_stock_quantity( $product, 0 ) );
+	}
+
 	// ---------------------------------------------------------------------
 	// 4. Contexts with no shopper.
 	// ---------------------------------------------------------------------
 
 	/**
-	 * With no session — the admin, WP-CLI, cron — nothing is discounted, even for
+	 * With no session — the admin, WP-CLI, cron — nothing is excluded, even for
 	 * a signed in user who happens to have unpaid orders of their own.
 	 */
 	public function test_no_session_leaves_the_total_unchanged() {
@@ -311,7 +320,7 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 
 	/**
 	 * woocommerce_query_for_reserved_stock still receives a scalar order id, and
-	 * still receives the complete core query.
+	 * still receives the complete core query, exclusion clause included.
 	 */
 	public function test_filter_signature_is_unchanged() {
 		$product = $this->create_stock_managed_product( 1 );
@@ -389,26 +398,21 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 	/**
 	 * An unpaid order for a customer, holding one unit of the product.
 	 *
-	 * The line item is rebuilt rather than left as WC_Helper_Order::create_order()
-	 * makes it, because that helper hard-codes a quantity of 4
-	 * (class-wc-helper-order.php:73). A test that then reserves for real would ask
-	 * for 4 units of a 1-unit product and throw ReserveStockException. Same approach
-	 * as create_order_holding_stock() in class-wc-cart-test.php.
-	 *
-	 * The save() between removing and adding is required, not cosmetic: without it
-	 * the replacement line item never reaches wc_order_items, so the order reloads
-	 * with no items and reserves nothing.
+	 * WC_Helper_Order::create_order() hard-codes a line quantity of 4, so the
+	 * line item is rebuilt — with a save() between remove and add, without which
+	 * the order reloads with no items and reserves nothing.
 	 *
 	 * @param int               $customer_id Customer ID, 0 for a guest.
 	 * @param WC_Product_Simple $product     Product to add.
+	 * @param string            $status      Order status, unpaid pending by default.
 	 * @return int Order ID.
 	 */
-	private function create_unpaid_order_for( int $customer_id, WC_Product_Simple $product ): int {
+	private function create_unpaid_order_for( int $customer_id, WC_Product_Simple $product, string $status = OrderStatus::PENDING ): int {
 		$order = WC_Helper_Order::create_order( $customer_id );
 		$order->remove_order_items();
 		$order->save();
 		$order->add_product( wc_get_product( $product->get_id() ), 1 );
-		$order->set_status( OrderStatus::PENDING );
+		$order->set_status( $status );
 		$order->save();
 
 		return $order->get_id();

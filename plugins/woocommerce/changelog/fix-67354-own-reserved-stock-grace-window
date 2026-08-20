@@ -1,4 +1,4 @@
 Significance: minor
 Type: fix
 
-Stop a shopper being blocked by their own abandoned stock reservation. A hold placed by the same shopper is discounted once it is older than a grace window, filterable via woocommerce_own_reserved_stock_grace_minutes and defaulting to 10 minutes. Holds belonging to other shoppers are unaffected.
+Stop a shopper being blocked by their own abandoned stock reservation. A hold placed by the same shopper is excluded once it is older than a threshold, filterable via woocommerce_own_stock_hold_exclusion_threshold_minutes and defaulting to 10 minutes. Holds belonging to other shoppers are unaffected.
