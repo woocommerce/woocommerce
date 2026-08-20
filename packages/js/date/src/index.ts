@@ -152,9 +152,9 @@ function expandLocalizedFormat( format: string, localeData: moment.Locale ) {
 	// `longDateFormat` has no entry for them.
 	const localizedTokens = /(\[[^[]*\])|(\\)?(LTS|LT|LL?L?L?|l{1,4})/g;
 	let expanded = format;
-	let passes = 5;
+	// An expansion can itself hold localized tokens; moment allows six passes.
+	let passes = 6;
 
-	// An expansion can itself hold localized tokens.
 	while ( passes-- > 0 ) {
 		localizedTokens.lastIndex = 0;
 
