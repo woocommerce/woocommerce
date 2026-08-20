@@ -17,6 +17,8 @@ Each cycle has two named owners, listed on the parent tracking issue:
 
 The release lead is assigned by rotation via the [Release: Assignment workflow](/docs/contribution/releases/workflows). The Product DRI role is covered by two standing Product seats in Slack's `@woo-core-release` group. Their names are on the tracking issue. If you're unsure who to loop in, ping the handle.
 
+The handle also holds a standing set of engineering members and the current and previous release leads, who rotate at each feature freeze.
+
 ## Readiness review (at RC)
 
 The RC is the last point where finding a problem is cheap: nothing has shipped, and delaying costs a day, not a revert. The review runs before the RC build starts and answers one question - is there anything we know about that should stop this release?

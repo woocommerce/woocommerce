@@ -21,7 +21,7 @@ This issue provides visibility on the progress of the release process of WooComm
 ##### Setup
 
 - [ ] Read this issue carefully and familiarize yourself with the [release process documentation](https://developer.woocommerce.com/docs/contribution/releases/).
-- [ ] Update `@woo-core-release` membership in Slack: add yourself, and give {previous_release_lead} a heads-up before removing them from the handle. Leave everyone else alone.
+- [ ] On feature freeze ({date_feature_freeze}), update `@woo-core-release` membership in Slack: add yourself, give {previous_release_lead} a heads-up, then remove them. The previous cycle's lead stays for point releases. Leave everyone else alone.
 - [ ] Join the release channels in Slack (`#woo-core-releases`, `#woo-core-releases-notifications`), where discussions happen and notifications are sent.
 
 ##### Good to know

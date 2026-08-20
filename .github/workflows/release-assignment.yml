@@ -355,32 +355,38 @@ jobs:
 
             const releaseMainVersion = '${{ needs.check-upcoming-release-events.outputs.version }}';
             const twoCyclesBackVersion = ( releaseMainVersion - 0.2 ).toFixed( 1 );
+            const fallbackMention = `the release lead from the ${ twoCyclesBackVersion } cycle`;
 
-            const previousTitle = `[${ twoCyclesBackVersion }] Release tracking`;
-            console.log( `Looking for tracking issue two cycles back: "${ previousTitle }"` );
+            try {
+              const previousTitle = `[${ twoCyclesBackVersion }] Release tracking`;
+              console.log( `Looking for tracking issue two cycles back: "${ previousTitle }"` );
 
-            const issues = await linearClient.issues( {
-              includeArchived: true,
-              filter: {
-                team: { id: { eq: '${{ secrets.LINEAR_TEAM_ID }}' } },
-                title: { eq: previousTitle }
+              const issues = await linearClient.issues( {
+                includeArchived: true,
+                filter: {
+                  team: { id: { eq: '${{ secrets.LINEAR_TEAM_ID }}' } },
+                  title: { eq: previousTitle }
+                }
+              } );
+
+              const previousIssueUrl = issues.nodes[ 0 ]?.url;
+              const cycleRef = previousIssueUrl ? `[the ${ twoCyclesBackVersion } cycle](${ previousIssueUrl })` : `the ${ twoCyclesBackVersion } cycle`;
+
+              const assignee = await issues.nodes[ 0 ]?.assignee;
+
+              if ( ! assignee ) {
+                console.log( 'No assignee found for the tracking issue two cycles back' );
+                core.setOutput( 'mention', `the release lead from ${ cycleRef }` );
+                return;
               }
-            } );
 
-            const previousIssueUrl = issues.nodes[ 0 ]?.url;
-            const cycleRef = previousIssueUrl ? `[the ${ twoCyclesBackVersion } cycle](${ previousIssueUrl })` : `the ${ twoCyclesBackVersion } cycle`;
-
-            const assignee = await issues.nodes[ 0 ]?.assignee;
-
-            if ( ! assignee ) {
-              console.log( 'No assignee found for the tracking issue two cycles back' );
-              core.setOutput( 'mention', `the release lead from ${ cycleRef }` );
-              return;
+              console.log( 'Found release lead from two cycles back' );
+              const name = assignee.displayName;
+              core.setOutput( 'mention', `**${ name }** (release lead from ${ cycleRef })` );
+            } catch ( error ) {
+              core.warning( `Failed to look up the release lead from two cycles back, falling back to a generic mention: ${ error.message }` );
+              core.setOutput( 'mention', fallbackMention );
             }
-
-            console.log( 'Found release lead from two cycles back' );
-            const name = assignee.username || assignee.displayName;
-            core.setOutput( 'mention', `**${ name }** (release lead from ${ cycleRef })` );
 
       - name: Process template and create release tracking issue
         if: ${{ steps.check-existing-issue.outputs.exists != 'true' }}
