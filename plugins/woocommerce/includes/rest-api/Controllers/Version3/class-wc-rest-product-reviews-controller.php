@@ -593,6 +593,10 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 			 * as an integer so wp_slash() below cannot change its shape.
 			 */
 			if ( ! empty( $request['rating'] ) ) {
+				if ( array_key_exists( 'comment_meta', $prepared_args ) && ! is_array( $prepared_args['comment_meta'] ) ) {
+					return new WP_Error( 'woocommerce_rest_comment_failed_edit', __( 'Updating review failed.', 'woocommerce' ), array( 'status' => 500 ) );
+				}
+
 				$prepared_args['comment_meta']['rating'] = (int) $request['rating'];
 			}
 

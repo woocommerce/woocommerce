@@ -368,6 +368,10 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		 * rating here lets WooCommerce's count callback see the new value in the same product save.
 		 */
 		if ( ! empty( $request['rating'] ) ) {
+			if ( array_key_exists( 'comment_meta', $prepared_review ) && ! is_array( $prepared_review['comment_meta'] ) ) {
+				return new WP_Error( 'rest_product_review_failed_edit', __( 'Updating product review failed.', 'woocommerce' ), array( 'status' => 500 ) );
+			}
+
 			$prepared_review['comment_meta']['rating'] = (int) $request['rating'];
 		}
 

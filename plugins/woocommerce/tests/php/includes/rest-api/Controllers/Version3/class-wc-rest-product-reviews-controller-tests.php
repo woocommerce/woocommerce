@@ -389,6 +389,36 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A malformed comment_meta value from the preprocess filter returns an update error.
+	 */
+	public function test_update_item_rejects_malformed_filtered_comment_meta() {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+		$review_id  = $this->create_review( $product_id, 'Still five stars.', 5 )->get_data()['id'];
+
+		$set_malformed_comment_meta = static function ( $prepared_review ) {
+			$prepared_review['comment_meta'] = 'not-an-array';
+			return $prepared_review;
+		};
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/reviews/' . $review_id );
+		$request->set_param( 'id', $review_id );
+		$request->set_param( 'rating', 3 );
+
+		add_filter( 'woocommerce_rest_preprocess_product_review', $set_malformed_comment_meta );
+		try {
+			$response = $this->sut->update_item( $request );
+		} finally {
+			remove_filter( 'woocommerce_rest_preprocess_product_review', $set_malformed_comment_meta );
+		}
+
+		$this->assertWPError( $response );
+		$this->assertSame( 'woocommerce_rest_comment_failed_edit', $response->get_error_code() );
+		$this->assertSame( 5, (int) get_comment_meta( $review_id, 'rating', true ) );
+		$this->assertEquals( 5, wc_get_product( $product_id )->get_average_rating() );
+	}
+
+	/**
 	 * @testdox Holding and re-approving a review excludes and re-includes its rating.
 	 */
 	public function test_update_item_status_changes_keep_the_aggregates_correct() {
