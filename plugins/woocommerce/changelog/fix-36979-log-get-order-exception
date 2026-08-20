@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Log get_order() exceptions to WC Logger for easier debugging.

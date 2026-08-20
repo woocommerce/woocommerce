@@ -21,7 +21,7 @@ interface ProductListHeaderProps {
 
 export default function ProductListHeader(
 	props: ProductListHeaderProps
-): JSX.Element {
+): React.JSX.Element {
 	const { title, description, groupURL, groupURLText, groupURLType } = props;
 	const isLoading = title === '';
 

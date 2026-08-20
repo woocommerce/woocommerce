@@ -16,6 +16,7 @@ const TimelineGroup = ( {
 	className = '',
 	orderBy = 'desc',
 	clockFormat,
+	timezone,
 } ) => {
 	const groupClassName = clsx( 'woocommerce-timeline-group', className );
 	const itemsToTimlineItem = ( item, itemIndex ) => {
@@ -25,6 +26,7 @@ const TimelineGroup = ( {
 				key={ itemKey }
 				item={ item }
 				clockFormat={ clockFormat }
+				timezone={ timezone }
 			/>
 		);
 	};
@@ -101,6 +103,10 @@ TimelineGroup.propTypes = {
 	 * The PHP clock format string used to format times, see php.net/date.
 	 */
 	clockFormat: PropTypes.string,
+	/**
+	 * Defines whether item dates should be displayed in the browser timezone or the WordPress site timezone.
+	 */
+	timezone: PropTypes.oneOf( [ 'browser', 'site' ] ),
 };
 
 export default TimelineGroup;

@@ -206,13 +206,10 @@
 }
 
 button.components-button.send-magic-link-button {
-	background: var(--wp-admin-theme-color, #007cba);
+	background: #007cba;
 	color: #fff;
 	position: relative;
 	margin-bottom: 1em;
-	&:hover {
-		background: var(--wp-admin-theme-color-darker-20, #005a87);
-	}
 	:hover {
 		// the hover state makes the text invisible so we need to override it
 		color: #fff;
@@ -238,6 +235,102 @@ button.components-button.send-magic-link-button {
 			display: inline-block;
 			vertical-align: top;
 		}
+	}
+}
+
+// Shared `<QRDirectLoginCode />` rules live in the partial below. They are
+// reused by the standalone wc-admin page (`client/mobile-app-login`) so both
+// surfaces render the same QR / number-match / approved / rejected layouts.
+@import "./components/qr-direct-login.scss";
+
+// FAQ paragraph that sits below the stepper / QR block. Adds the breathing
+// room and the thin grey divider so the link doesn't visually collide with
+// the content above it.
+.mobile-app-login-faq {
+	margin-top: 24px;
+	padding-top: 16px;
+	border-top: 1px solid #f0f0f0;
+	font-size: 13px;
+	line-height: 1.5;
+	color: $gray-700;
+	text-align: left;
+
+	a {
+		color: #007cba;
+	}
+}
+
+// Step 3 — sign-in success panel.
+// Mirrors the rest of the modal: 24px / 16px vertical rhythm and WP base
+// palette text colours.
+.qr-login-success-step {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	margin-top: 8px;
+
+	// "Heading" + "description" are reused only by the post-revoke "Access
+	// revoked" panel; the inline success copy was dropped because the
+	// stepper label already conveys success.
+	.qr-login-success-step__heading {
+		font-size: 14px;
+		font-weight: 600;
+		line-height: 1.5;
+		margin: 0 0 4px;
+		color: $gray-900;
+	}
+
+	.qr-login-success-step__description {
+		font-size: 14px;
+		line-height: 1.5;
+		color: $gray-700;
+		margin: 0;
+		max-width: 32em;
+	}
+
+	// Single-line device summary (device · app version) shown above the
+	// revoke prompt — mirrors the standalone QRLoginConsumedPanel subline so
+	// the merchant can confirm which device signed in.
+	.qr-login-success-step__device-details {
+		font-size: 13px;
+		line-height: 1.5;
+		color: $gray-700;
+		margin: 0 0 12px;
+		max-width: 32em;
+	}
+
+	// "It wasn't you?" prompt + "Revoke access" CTA on the same row to make
+	// better use of the horizontal space the stepper layout already gives us.
+	.qr-login-success-step__revoke-row {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 12px;
+	}
+
+	.qr-login-success-step__challenge {
+		font-size: 13px;
+		font-weight: 500;
+		line-height: 1.5;
+		color: $gray-900;
+		margin: 0;
+	}
+
+	.qr-login-success-step__error {
+		margin: 12px 0 0;
+		color: $alert-red;
+		font-size: 13px;
+		line-height: 1.4;
+	}
+}
+
+// Confirmation modal — keep the action row right-aligned (Cancel | Revoke).
+.components-modal__frame.qr-login-success-step__confirm-modal {
+	.qr-login-success-step__confirm-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: 12px;
+		margin-top: 16px;
 	}
 }
 
@@ -322,4 +415,3 @@ button.components-button.send-magic-link-button {
 		}
 	}
 }
-

@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Services;
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewReviewNotification;
+use Automattic\WooCommerce\Internal\PushNotifications\Notifications\StockNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
 use WC_Unit_Test_Case;
 
@@ -202,5 +203,39 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 			->setConstructorArgs( array( $resource_id ) )
 			->onlyMethods( array( 'to_payload', 'has_meta', 'write_meta' ) )
 			->getMock();
+	}
+
+	/**
+	 * Creates a mock StockNotification that avoids database calls.
+	 *
+	 * @param int    $resource_id The resource ID.
+	 * @param string $event_type  The stock event type.
+	 * @return StockNotification
+	 */
+	private function create_stock_mock( int $resource_id, string $event_type ): StockNotification {
+		return $this->getMockBuilder( StockNotification::class )
+			->setConstructorArgs( array( $resource_id, $event_type ) )
+			->onlyMethods( array( 'to_payload', 'has_meta', 'write_meta' ) )
+			->getMock();
+	}
+
+	/**
+	 * @testdox Should store different stock event types for the same product separately.
+	 */
+	public function test_add_allows_different_stock_event_types_for_same_product(): void {
+		$this->store->add( $this->create_stock_mock( 42, StockNotification::EVENT_LOW_STOCK ) );
+		$this->store->add( $this->create_stock_mock( 42, StockNotification::EVENT_OUT_OF_STOCK ) );
+
+		$this->assertSame( 2, $this->store->count() );
+	}
+
+	/**
+	 * @testdox Should deduplicate the same stock event type for the same product.
+	 */
+	public function test_add_deduplicates_same_stock_event_type_and_product(): void {
+		$this->store->add( $this->create_stock_mock( 42, StockNotification::EVENT_LOW_STOCK ) );
+		$this->store->add( $this->create_stock_mock( 42, StockNotification::EVENT_LOW_STOCK ) );
+
+		$this->assertSame( 1, $this->store->count() );
 	}
 }

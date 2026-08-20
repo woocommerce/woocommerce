@@ -1,16 +1,9 @@
 /**
  * External dependencies
  */
-import {
-	BaseControl,
-	FlexBlock,
-	FormToggle,
-	__experimentalHStack as HStack,
-} from '@wordpress/components';
+import { CheckboxControl } from '@wordpress/components';
 
-import { useInstanceId } from '@wordpress/compose';
-
-import { useState } from '@wordpress/element';
+import { useCallback, useMemo, useState } from '@wordpress/element';
 
 import { __ } from '@wordpress/i18n';
 
@@ -22,6 +15,11 @@ import type { Field } from '@wordpress/dataviews';
 import type { ProductEntityRecord } from '../types';
 
 import { getLocalDefaultSaleStart } from '../price/utils';
+import {
+	DatePicker,
+	formatDateTimeLocal,
+	parseDateTimeLocal,
+} from '../components/date-picker';
 
 const fieldDefinition = {
 	type: 'boolean',
@@ -33,11 +31,7 @@ const fieldDefinition = {
 
 export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	...fieldDefinition,
-	isVisible: ( item ) => {
-		return !! item.on_sale || !! item.sale_price;
-	},
 	Edit: ( { data, onChange, field } ) => {
-		const toggleId = useInstanceId( FormToggle, 'schedule-sale-toggle' );
 		const [ tempDateOnSaleFrom, setTempDateOnSaleFrom ] = useState(
 			data.date_on_sale_from || ''
 		);
@@ -45,51 +39,152 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 			data.date_on_sale_to || ''
 		);
 		const checked = !! data.date_on_sale_to || !! data.date_on_sale_from;
-		return (
-			<BaseControl className="components-toggle-control">
-				<HStack justify="flex-start" spacing={ 2 }>
-					<FormToggle
-						id={ toggleId }
-						checked={ checked }
-						onChange={ () => {
-							if ( checked ) {
-								setTempDateOnSaleFrom(
-									data.date_on_sale_from || ''
-								);
-								setTempDateOnSaleTo(
-									data.date_on_sale_to || ''
-								);
-								onChange( {
-									date_on_sale_from: '',
-									date_on_sale_to: '',
-								} );
-							} else {
-								let dateOnSaleFrom =
-									data.date_on_sale_from ||
-									tempDateOnSaleFrom;
-								const dateOnSaleTo =
-									data.date_on_sale_to || tempDateOnSaleTo;
-
-								if ( ! dateOnSaleFrom && ! dateOnSaleTo ) {
-									dateOnSaleFrom = getLocalDefaultSaleStart();
-								}
-
-								onChange( {
-									date_on_sale_from: dateOnSaleFrom,
-									date_on_sale_to: dateOnSaleTo,
-								} );
-							}
-						} }
-					/>
-					<FlexBlock
-						as="label"
-						htmlFor={ toggleId }
-						className="components-toggle-control__label"
-					>
-						{ field.label }
-					</FlexBlock>
-				</HStack>
-			</BaseControl>
+		const today = useMemo( () => {
+			const d = new Date();
+			d.setHours( 0, 0, 0, 0 );
+			return d;
+		}, [] );
+		const dateOnSaleFrom = useMemo(
+			() =>
+				typeof data.date_on_sale_from === 'string' &&
+				data.date_on_sale_from
+					? parseDateTimeLocal( data.date_on_sale_from )
+					: null,
+			[ data.date_on_sale_from ]
 		);
+		const minDateOnSaleTo = useMemo( () => {
+			if ( dateOnSaleFrom ) {
+				const min = new Date( dateOnSaleFrom );
+				min.setMinutes( min.getMinutes() + 1 );
+				return min;
+			}
+
+			return today;
+		}, [ dateOnSaleFrom, today ] );
+		const handleScheduleChange = useCallback(
+			( value: boolean ) => {
+				if ( ! value ) {
+					setTempDateOnSaleFrom( data.date_on_sale_from || '' );
+					setTempDateOnSaleTo( data.date_on_sale_to || '' );
+					onChange( {
+						date_on_sale_from: '',
+						date_on_sale_to: '',
+					} );
+					return;
+				}
+
+				let nextDateOnSaleFrom =
+					data.date_on_sale_from || tempDateOnSaleFrom;
+				const nextDateOnSaleTo =
+					data.date_on_sale_to || tempDateOnSaleTo;
+
+				if ( ! nextDateOnSaleFrom && ! nextDateOnSaleTo ) {
+					nextDateOnSaleFrom = getLocalDefaultSaleStart();
+				}
+
+				onChange( {
+					date_on_sale_from: nextDateOnSaleFrom,
+					date_on_sale_to: nextDateOnSaleTo,
+				} );
+			},
+			[
+				data.date_on_sale_from,
+				data.date_on_sale_to,
+				onChange,
+				tempDateOnSaleFrom,
+				tempDateOnSaleTo,
+			]
+		);
+		const handleDateOnSaleFromChange = useCallback(
+			( value: { date_on_sale_from?: string | null } ) => {
+				const newStart = value.date_on_sale_from;
+				const currentEnd = data.date_on_sale_to;
+
+				if (
+					typeof newStart !== 'string' ||
+					! newStart ||
+					typeof currentEnd !== 'string' ||
+					! currentEnd
+				) {
+					onChange( value );
+					return;
+				}
+
+				const startDate = parseDateTimeLocal( newStart );
+				const endDate = parseDateTimeLocal( currentEnd );
+
+				if (
+					startDate &&
+					endDate &&
+					startDate.getTime() >= endDate.getTime()
+				) {
+					const newEndDate = new Date( startDate );
+					newEndDate.setDate( newEndDate.getDate() + 1 );
+
+					onChange( {
+						...value,
+						date_on_sale_to: formatDateTimeLocal( newEndDate ),
+					} );
+					return;
+				}
+
+				onChange( value );
+			},
+			[ data.date_on_sale_to, onChange ]
+		);
+
+		return (
+			<div className="woocommerce-schedule-sale-control">
+				<CheckboxControl
+					label={ field.label }
+					checked={ checked }
+					onChange={ handleScheduleChange }
+				/>
+				{ checked && (
+					<div className="woocommerce-schedule-sale-control__dates">
+						<DatePicker
+							data={ data }
+							onChange={ handleDateOnSaleFromChange }
+							field={ {
+								label: __( 'Start sale on', 'woocommerce' ),
+							} }
+							fieldKey="date_on_sale_from"
+							min={ today }
+						/>
+						<DatePicker
+							data={ data }
+							onChange={ onChange }
+							field={ {
+								label: __( 'End sale on', 'woocommerce' ),
+							} }
+							fieldKey="date_on_sale_to"
+							min={ minDateOnSaleTo }
+						/>
+					</div>
+				) }
+			</div>
+		);
+	},
+	getValue: ( { item } ) =>
+		!! item.date_on_sale_to || !! item.date_on_sale_from,
+	setValue: ( { item, value } ) => {
+		if ( ! value ) {
+			return {
+				date_on_sale_from: '',
+				date_on_sale_to: '',
+			};
+		}
+
+		let dateOnSaleFrom = item.date_on_sale_from || '';
+		const dateOnSaleTo = item.date_on_sale_to || '';
+
+		if ( ! dateOnSaleFrom && ! dateOnSaleTo ) {
+			dateOnSaleFrom = getLocalDefaultSaleStart();
+		}
+
+		return {
+			date_on_sale_from: dateOnSaleFrom,
+			date_on_sale_to: dateOnSaleTo,
+		};
 	},
 };

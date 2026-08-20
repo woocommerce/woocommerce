@@ -16,6 +16,19 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 	/**
+	 * Sets up the test fixture.
+	 */
+	public function set_up() {
+		parent::set_up();
+
+		// The WP AJAX test case removes these before the class runs, but mixed
+		// test sequences can re-add core admin hooks before individual tests.
+		remove_action( 'admin_init', '_maybe_update_core' );
+		remove_action( 'admin_init', '_maybe_update_plugins' );
+		remove_action( 'admin_init', '_maybe_update_themes' );
+	}
+
+	/**
 	 * Stock should not be reduced from AJAX when an item is added to an order.
 	 */
 	public function test_add_item_to_pending_payment_order() {
@@ -107,11 +120,18 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$_POST['permissions'] = 'read';
 		$_POST['description'] = $description;
 
+		$output_buffering_level = ob_get_level();
+
 		try {
 			$this->_handleAjax( 'woocommerce_update_api_key' );
 		} catch ( WPAjaxDieContinueException $e ) {
-			// wp_die() doesn't actually occur, so we need to clean up WC_AJAX::update_api_key's output buffer.
-			ob_end_clean();
+			unset( $e );
+		} finally {
+			// wp_die() doesn't actually occur, so clean up any output buffer
+			// WC_AJAX::update_api_key leaves open, keeping the level balanced.
+			while ( ob_get_level() > $output_buffering_level ) {
+				ob_end_clean();
+			}
 		}
 
 		$response = json_decode( $this->_last_response, true );
@@ -128,6 +148,189 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		if ( version_compare( PHP_VERSION, '8.1', '>=' ) ) {
 			$this->markTestSkipped( 'Waiting for WordPress compatibility with PHP 8.1' );
 		}
+	}
+
+	/**
+	 * Test to verify that term color is saved in AJAX calls, but only for terms belonging to a visual attribute.
+	 *
+	 * @testdox Should save term color only when adding visual attribute terms via AJAX.
+	 */
+	public function test_add_new_attribute_saves_color_and_image_only_for_visual_attributes(): void {
+		$original_theme      = wp_get_theme()->get_stylesheet();
+		$visual_attribute_id = null;
+		$text_attribute_id   = null;
+		$visual_taxonomy     = null;
+		$text_taxonomy       = null;
+		$visual_term_id      = 0;
+		$image_term_id       = 0;
+		$color_type_term_id  = 0;
+		$text_term_id        = 0;
+		$image_id            = 0;
+		$suffix              = (string) wp_rand( 1000, 9999 );
+
+		try {
+			switch_theme( 'twentytwentyfour' );
+			delete_option( 'woocommerce_feature_wc_visual_attribute_enabled' );
+			$this->assertTrue(
+				wc_get_container()->get( \Automattic\WooCommerce\Internal\Features\FeaturesController::class )->change_feature_enable( 'wc-visual-attribute', true ),
+				'The visual attribute feature should be toggled on.'
+			);
+
+			$visual_attribute_id = wc_create_attribute(
+				array(
+					'name' => 'Visual AJAX ' . $suffix,
+					'type' => 'wc-visual',
+				)
+			);
+			$text_attribute_id   = wc_create_attribute(
+				array(
+					'name' => 'Text AJAX ' . $suffix,
+					'type' => 'select',
+				)
+			);
+
+			$this->assertIsInt( $visual_attribute_id, 'The visual attribute should be created.' );
+			$this->assertIsInt( $text_attribute_id, 'The text attribute should be created.' );
+
+			$visual_taxonomy = $this->register_attribute_taxonomy_for_test( $visual_attribute_id );
+			$text_taxonomy   = $this->register_attribute_taxonomy_for_test( $text_attribute_id );
+
+			$this->_setRole( 'administrator' );
+
+			$_POST['security']                 = wp_create_nonce( 'add-attribute' );
+			$_POST['taxonomy']                 = $visual_taxonomy;
+			$_POST['term']                     = 'Cerulean ' . $suffix;
+			$_POST['wc_visual_attribute_type'] = 'color';
+			$_POST['term_color']               = '#336699';
+
+			$visual_response = $this->do_ajax( 'woocommerce_add_new_attribute' );
+			$visual_term_id  = isset( $visual_response['term_id'] ) ? absint( $visual_response['term_id'] ) : 0;
+
+			$this->assertNotEmpty( $visual_term_id, 'The visual attribute term should be created.' );
+			$this->assertSame( '#336699', get_term_meta( $visual_term_id, 'color', true ), 'Visual attribute terms should store the posted color.' );
+			$this->assertSame( '', get_term_meta( $visual_term_id, 'image', true ), 'Visual attribute terms should not store image meta when only color is posted.' );
+
+			$image_id = wp_insert_attachment(
+				array(
+					'post_title'     => 'Visual AJAX term image',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image/jpeg',
+				)
+			);
+			$this->assertIsInt( $image_id, 'The image should be created.' );
+
+			update_post_meta( $image_id, '_wp_attached_file', 'visual-ajax-term-image.jpg' );
+
+			$_POST['security']                 = wp_create_nonce( 'add-attribute' );
+			$_POST['taxonomy']                 = $visual_taxonomy;
+			$_POST['term']                     = 'Color selected ' . $suffix;
+			$_POST['wc_visual_attribute_type'] = 'color';
+			$_POST['term_color']               = '#445566';
+			$_POST['term_image']               = (string) $image_id;
+
+			$color_type_response = $this->do_ajax( 'woocommerce_add_new_attribute' );
+			$color_type_term_id  = isset( $color_type_response['term_id'] ) ? absint( $color_type_response['term_id'] ) : 0;
+
+			$this->assertNotEmpty( $color_type_term_id, 'The visual attribute term with selected color type should be created.' );
+			$this->assertSame( '#445566', get_term_meta( $color_type_term_id, 'color', true ), 'Selected color type should store color even when image is posted.' );
+			$this->assertSame( '', get_term_meta( $color_type_term_id, 'image', true ), 'Selected color type should ignore stale image values.' );
+
+			$_POST['security']                 = wp_create_nonce( 'add-attribute' );
+			$_POST['taxonomy']                 = $visual_taxonomy;
+			$_POST['term']                     = 'Pattern ' . $suffix;
+			$_POST['wc_visual_attribute_type'] = 'image';
+			$_POST['term_color']               = '#abcdef';
+			$_POST['term_image']               = (string) $image_id;
+
+			$image_response = $this->do_ajax( 'woocommerce_add_new_attribute' );
+			$image_term_id  = isset( $image_response['term_id'] ) ? absint( $image_response['term_id'] ) : 0;
+
+			$this->assertNotEmpty( $image_term_id, 'The visual attribute term with image should be created.' );
+			$this->assertSame( (string) $image_id, get_term_meta( $image_term_id, 'image', true ), 'Selected image type should store image even when color is posted.' );
+			$this->assertSame( '', get_term_meta( $image_term_id, 'color', true ), 'Selected image type should ignore stale color values.' );
+
+			$_POST['security']   = wp_create_nonce( 'add-attribute' );
+			$_POST['taxonomy']   = $text_taxonomy;
+			$_POST['term']       = 'Plain ' . $suffix;
+			$_POST['term_color'] = '#abcdef';
+
+			$text_response = $this->do_ajax( 'woocommerce_add_new_attribute' );
+			$text_term_id  = isset( $text_response['term_id'] ) ? absint( $text_response['term_id'] ) : 0;
+
+			$this->assertNotEmpty( $text_term_id, 'The text attribute term should be created.' );
+			$this->assertSame( '', get_term_meta( $text_term_id, 'color', true ), 'Text attribute terms should ignore posted colors.' );
+		} finally {
+			unset( $_POST['security'], $_POST['taxonomy'], $_POST['term'], $_POST['wc_visual_attribute_type'], $_POST['term_color'], $_POST['term_image'] );
+
+			if ( $image_id ) {
+				wp_delete_attachment( $image_id, true );
+			}
+
+			if ( $visual_term_id && taxonomy_exists( $visual_taxonomy ) ) {
+				wp_delete_term( $visual_term_id, $visual_taxonomy );
+			}
+
+			if ( $image_term_id && taxonomy_exists( $visual_taxonomy ) ) {
+				wp_delete_term( $image_term_id, $visual_taxonomy );
+			}
+
+			if ( $color_type_term_id && taxonomy_exists( $visual_taxonomy ) ) {
+				wp_delete_term( $color_type_term_id, $visual_taxonomy );
+			}
+
+			if ( $text_term_id && taxonomy_exists( $text_taxonomy ) ) {
+				wp_delete_term( $text_term_id, $text_taxonomy );
+			}
+
+			if ( is_int( $visual_attribute_id ) ) {
+				wc_delete_attribute( $visual_attribute_id );
+			}
+
+			if ( is_int( $text_attribute_id ) ) {
+				wc_delete_attribute( $text_attribute_id );
+			}
+
+			global $wc_product_attributes;
+			foreach ( array_filter( array( $visual_taxonomy, $text_taxonomy ) ) as $taxonomy ) {
+				if ( taxonomy_exists( $taxonomy ) ) {
+					unregister_taxonomy( $taxonomy );
+				}
+				unset( $wc_product_attributes[ $taxonomy ] );
+			}
+
+			delete_option( 'woocommerce_feature_wc_visual_attribute_enabled' );
+			switch_theme( $original_theme );
+		}//end try
+	}
+
+	/**
+	 * Register a product attribute taxonomy created inside a test.
+	 *
+	 * @param int $attribute_id Attribute ID.
+	 * @return string
+	 */
+	private function register_attribute_taxonomy_for_test( int $attribute_id ): string {
+		global $wc_product_attributes;
+
+		$taxonomy             = wc_attribute_taxonomy_name_by_id( $attribute_id );
+		$attribute_taxonomies = wc_get_attribute_taxonomies();
+
+		$wc_product_attributes[ $taxonomy ] = $attribute_taxonomies[ 'id:' . $attribute_id ];
+
+		register_taxonomy(
+			$taxonomy,
+			array( 'product' ),
+			array(
+				'capabilities' => array(
+					'manage_terms' => 'manage_product_terms',
+					'edit_terms'   => 'edit_product_terms',
+					'delete_terms' => 'delete_product_terms',
+					'assign_terms' => 'assign_product_terms',
+				),
+			)
+		);
+
+		return $taxonomy;
 	}
 
 	/**
@@ -424,6 +627,470 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should clear variation sale dates when bulk schedule dates are blank.
+	 * @group ajax
+	 */
+	public function test_bulk_sale_schedule_clears_blank_dates(): void {
+		$variation = new WC_Product_Variation();
+		$variation->set_date_on_sale_from( '2026-06-01 00:00:00' );
+		$variation->set_date_on_sale_to( '2026-06-30 23:59:59' );
+		$variation->save();
+
+		$method = new ReflectionMethod( WC_AJAX::class, 'variation_bulk_action_variable_sale_schedule' );
+		$method->setAccessible( true );
+
+		$method->invokeArgs(
+			null,
+			array(
+				array( $variation->get_id() ),
+				array(
+					'date_from' => '',
+					'date_to'   => '',
+				),
+			)
+		);
+
+		$variation = wc_get_product( $variation->get_id() );
+
+		$this->assertNull( $variation->get_date_on_sale_from( 'edit' ), 'The sale start date should be cleared when the bulk action start date is blank.' );
+		$this->assertNull( $variation->get_date_on_sale_to( 'edit' ), 'The sale end date should be cleared when the bulk action end date is blank.' );
+
+		$variation->delete( true );
+	}
+
+	/**
+	 * @testdox Adding a custom field renders a Delete button with a valid delete nonce.
+	 */
+	public function test_order_add_meta_delete_button_uses_name_value_nonce(): void {
+		$this->_setRole( 'administrator' );
+		$order = WC_Helper_Order::create_order();
+
+		$_POST['_ajax_nonce-add-meta'] = wp_create_nonce( 'add-meta' );
+		$_POST['order_id']             = $order->get_id();
+		$_POST['metakeyinput']         = 'my_test_key';
+		$_POST['metavalue']            = 'my_test_value';
+
+		$output_buffering_level = ob_get_level();
+
+		try {
+			// Note that _handleAjax makes use of output buffering, which the die
+			// handler usually cleans up; the finally block below closes only any
+			// buffer it leaves dangling so the buffer level stays balanced.
+			$this->_handleAjax( 'woocommerce_order_add_meta' );
+		} catch ( WPAjaxDieContinueException $e ) {
+			unset( $e );
+		} finally {
+			while ( ob_get_level() > $output_buffering_level ) {
+				ob_end_clean();
+			}
+		}
+
+		$this->assertStringContainsString(
+			'::_ajax_nonce=',
+			(string) $this->_last_response,
+			'Delete button should use the _ajax_nonce= token.'
+		);
+	}
+
+	/**
+	 * Data provider for test_product_ordering.
+	 *
+	 * Columns: sorting_idx, previd_idx (-1 = none), nextid_idx (-1 = none), expected menu_orders [P1..P5].
+	 */
+	public function product_ordering_provider(): array {
+		return array(
+			'last to first'             => array( 4, -1, 0, array( 2, 3, 4, 5, 1 ) ),
+			'first to last'             => array( 0, 4, -1, array( 5, 1, 2, 3, 4 ) ),
+			'middle one position left'  => array( 2, 0, 1, array( 1, 3, 2, 4, 5 ) ),
+			'middle one position right' => array( 2, 3, 4, array( 1, 2, 4, 3, 5 ) ),
+			'middle to first'           => array( 2, -1, 0, array( 2, 3, 1, 4, 5 ) ),
+			'middle to last'            => array( 2, 4, -1, array( 1, 2, 5, 3, 4 ) ),
+			'drop in place'             => array( 2, 1, 3, array( 1, 2, 3, 4, 5 ) ),
+		);
+	}
+
+	/**
+	 * @testdox 'product_ordering' (legacy algorithm) moves a product to the correct position and shifts the affected range.
+	 * @dataProvider product_ordering_provider
+	 *
+	 * @param int   $sorting_idx     Index (0-based) of the product being dragged.
+	 * @param int   $previd_idx      Index of the product immediately before the drop target, or -1 if dropped at the top.
+	 * @param int   $nextid_idx      Index of the product immediately after the drop target, or -1 if dropped at the bottom.
+	 * @param int[] $expected_orders Expected menu_order values indexed by original product position [P1..P5].
+	 */
+	public function test_product_ordering_using_legacy_algorithm( int $sorting_idx, int $previd_idx, int $nextid_idx, array $expected_orders ): void {
+		global $wpdb;
+
+		$this->_setRole( 'administrator' );
+
+		// Attach a listener to force the legacy branching path.
+		$legacy_hook = function () {};
+		add_action( 'woocommerce_after_single_product_ordering', $legacy_hook );
+
+		$products = array();
+		for ( $i = 1; $i <= 5; ++$i ) {
+			$product                 = WC_Helper_Product::create_simple_product();
+			$product_id              = $product->get_id();
+			$products[ $product_id ] = $product;
+			wp_update_post(
+				array(
+					'ID'         => $product_id,
+					'menu_order' => $i,
+				)
+			);
+		}
+		$product_ids = array_keys( $products );
+
+		$_POST['security'] = wp_create_nonce( 'product-ordering' );
+		$_POST['id']       = $product_ids[ $sorting_idx ];
+		$_POST['previd']   = $previd_idx >= 0 ? $product_ids[ $previd_idx ] : 0;
+		$_POST['nextid']   = $nextid_idx >= 0 ? $product_ids[ $nextid_idx ] : 0;
+
+		$this->do_ajax( 'woocommerce_product_ordering' );
+
+		unset( $_POST['security'], $_POST['id'], $_POST['previd'], $_POST['nextid'] );
+		remove_action( 'woocommerce_after_single_product_ordering', $legacy_hook );
+
+		foreach ( $product_ids as $idx => $product_id ) {
+			$actual = (int) $wpdb->get_var( $wpdb->prepare( "SELECT menu_order FROM {$wpdb->posts} WHERE ID = %d", $product_id ) );
+			$this->assertSame( $expected_orders[ $idx ], $actual, "Product at index {$idx} has wrong menu_order." );
+			$products[ $product_id ]->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox 'product_ordering' (range algorithm) moves a product to the correct position and shifts the affected range.
+	 * @dataProvider product_ordering_provider
+	 *
+	 * @param int   $sorting_idx     Index (0-based) of the product being dragged.
+	 * @param int   $previd_idx      Index of the product immediately before the drop target, or -1 if dropped at the top.
+	 * @param int   $nextid_idx      Index of the product immediately after the drop target, or -1 if dropped at the bottom.
+	 * @param int[] $expected_orders Expected menu_order values indexed by original product position [P1..P5].
+	 */
+	public function test_product_ordering_using_range_algorithm( int $sorting_idx, int $previd_idx, int $nextid_idx, array $expected_orders ): void {
+		global $wpdb;
+
+		$this->_setRole( 'administrator' );
+
+		$products = array();
+		for ( $i = 1; $i <= 5; ++$i ) {
+			$product                 = WC_Helper_Product::create_simple_product();
+			$product_id              = $product->get_id();
+			$products[ $product_id ] = $product;
+			wp_update_post(
+				array(
+					'ID'         => $product_id,
+					'menu_order' => $i,
+				)
+			);
+		}
+		$product_ids = array_keys( $products );
+
+		$_POST['security'] = wp_create_nonce( 'product-ordering' );
+		$_POST['id']       = $product_ids[ $sorting_idx ];
+		$_POST['previd']   = $previd_idx >= 0 ? $product_ids[ $previd_idx ] : 0;
+		$_POST['nextid']   = $nextid_idx >= 0 ? $product_ids[ $nextid_idx ] : 0;
+
+		$this->do_ajax( 'woocommerce_product_ordering' );
+
+		unset( $_POST['security'], $_POST['id'], $_POST['previd'], $_POST['nextid'] );
+		foreach ( $product_ids as $idx => $product_id ) {
+			$actual = (int) $wpdb->get_var( $wpdb->prepare( "SELECT menu_order FROM {$wpdb->posts} WHERE ID = %d", $product_id ) );
+			$this->assertSame( $expected_orders[ $idx ], $actual, "Product at index {$idx} has wrong menu_order." );
+			$products[ $product_id ]->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox 'product_ordering' fires 'woocommerce_after_product_ordering' with the moved product ID and full positions map.
+	 */
+	public function test_product_ordering_fires_after_product_ordering_action(): void {
+		$this->_setRole( 'administrator' );
+
+		$products = array();
+		for ( $i = 1; $i <= 2; ++$i ) {
+			$product                 = WC_Helper_Product::create_simple_product();
+			$product_id              = $product->get_id();
+			$products[ $product_id ] = $product;
+			wp_update_post(
+				array(
+					'ID'         => $product_id,
+					'menu_order' => $i,
+				)
+			);
+		}
+		$product_ids = array_keys( $products );
+
+		$hook_fired = false;
+		$captured   = array();
+		$hook       = function ( $sorting_id, $all_positions ) use ( &$hook_fired, &$captured ) {
+			$hook_fired = true;
+			$captured   = array(
+				'sorting_id'    => $sorting_id,
+				'all_positions' => $all_positions,
+			);
+		};
+		add_action( 'woocommerce_after_product_ordering', $hook, 10, 2 );
+
+		// Move the last one to the front.
+		$_POST['security'] = wp_create_nonce( 'product-ordering' );
+		$_POST['id']       = $product_ids[1];
+		$_POST['previd']   = 0;
+		$_POST['nextid']   = $product_ids[0];
+
+		$this->do_ajax( 'woocommerce_product_ordering' );
+
+		unset( $_POST['security'], $_POST['id'], $_POST['previd'], $_POST['nextid'] );
+		remove_action( 'woocommerce_after_product_ordering', $hook, 10 );
+
+		$this->assertTrue( $hook_fired, 'woocommerce_after_product_ordering was not fired.' );
+		$this->assertSame( $product_ids[1], $captured['sorting_id'] );
+		$this->assertSame(
+			array(
+				$product_ids[0] => 2,
+				$product_ids[1] => 1,
+			),
+			$captured['all_positions']
+		);
+
+		foreach ( $product_ids as $product_id ) {
+			$products[ $product_id ]->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox Refunding a 0% taxed line item via the AJAX handler preserves the 0-rate tax line on the refund order.
+	 */
+	public function test_refund_line_items_preserves_zero_rate_tax(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		$rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '0.0000',
+				'tax_rate_name'     => 'Zero Rate',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		$order = new WC_Order();
+		$order->add_product( $product, 1 );
+		$order->calculate_totals( true );
+		$order->save();
+
+		$item_id = array_keys( $order->get_items( 'line_item' ) )[0];
+
+		$this->_setRole( 'administrator' );
+
+		// The exact payload shape the admin refund form serializes: the tax
+		// amount arrives as a numeric 0 (accounting.unformat of an empty field).
+		$_POST['security']             = wp_create_nonce( 'order-item' );
+		$_POST['order_id']             = $order->get_id();
+		$_POST['refund_amount']        = $order->get_total();
+		$_POST['refunded_amount']      = '0';
+		$_POST['refund_reason']        = '';
+		$_POST['line_item_qtys']       = wp_json_encode( array( $item_id => 1 ) );
+		$_POST['line_item_totals']     = wp_json_encode( array( $item_id => $order->get_total() ) );
+		$_POST['line_item_tax_totals'] = wp_json_encode( array( $item_id => array( $rate_id => 0 ) ) );
+		$_POST['api_refund']           = 'false';
+
+		$response = $this->do_ajax( 'woocommerce_refund_line_items' );
+
+		$this->assertTrue( $response['success'] ?? false, 'The AJAX refund request should succeed.' );
+
+		$refunds = wc_get_order( $order->get_id() )->get_refunds();
+		$this->assertCount( 1, $refunds, 'One refund should be created for the order.' );
+
+		$refund_tax_items = $refunds[0]->get_items( 'tax' );
+		$this->assertCount( 1, $refund_tax_items, 'The 0% tax line must be carried over to the refund order.' );
+		$this->assertEquals(
+			$rate_id,
+			array_values( $refund_tax_items )[0]->get_rate_id(),
+			'The preserved tax line must reference the 0% rate.'
+		);
+
+		unset( $_POST['security'], $_POST['order_id'], $_POST['refund_amount'], $_POST['refunded_amount'], $_POST['refund_reason'], $_POST['line_item_qtys'], $_POST['line_item_totals'], $_POST['line_item_tax_totals'], $_POST['api_refund'] );
+		WC_Tax::_delete_tax_rate( $rate_id );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+	}
+
+	/**
+	 * @testdox An amount-only AJAX refund on a multi-item order creates no line items and keeps downloads of unrefunded products.
+	 */
+	public function test_refund_line_items_amount_only_skips_untouched_items(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$downloadable_product = WC_Helper_Product::create_simple_product();
+		$downloadable_product->set_downloadable( true );
+		$downloadable_product->save();
+
+		$order = new WC_Order();
+		$order->add_product( $product, 1 );
+		$order->add_product( $downloadable_product, 1 );
+		$order->calculate_totals();
+		$order->save();
+
+		$download = new WC_Customer_Download();
+		$download->set_user_id( 1 );
+		$download->set_order_id( $order->get_id() );
+		$download->set_product_id( $downloadable_product->get_id() );
+		$download->set_download_id( wp_generate_uuid4() );
+		$download->save();
+
+		$item_ids = array_keys( $order->get_items( 'line_item' ) );
+
+		$this->_setRole( 'administrator' );
+
+		// An amount-only refund: the form posts no qtys, but a 0 total and a 0
+		// tax amount for every row in the order (those inputs are not gated).
+		$totals     = array();
+		$tax_totals = array();
+		foreach ( $item_ids as $item_id ) {
+			$totals[ $item_id ]     = 0;
+			$tax_totals[ $item_id ] = array( 1 => 0 );
+		}
+
+		$_POST['security']             = wp_create_nonce( 'order-item' );
+		$_POST['order_id']             = $order->get_id();
+		$_POST['refund_amount']        = '5';
+		$_POST['refunded_amount']      = '0';
+		$_POST['refund_reason']        = '';
+		$_POST['line_item_qtys']       = wp_json_encode( array() );
+		$_POST['line_item_totals']     = wp_json_encode( $totals );
+		$_POST['line_item_tax_totals'] = wp_json_encode( $tax_totals );
+		$_POST['api_refund']           = 'false';
+
+		$response = $this->do_ajax( 'woocommerce_refund_line_items' );
+
+		$this->assertTrue( $response['success'] ?? false, 'The AJAX refund request should succeed.' );
+
+		$refunds = wc_get_order( $order->get_id() )->get_refunds();
+		$this->assertCount( 1, $refunds, 'One refund should be created for the order.' );
+		$this->assertCount( 0, $refunds[0]->get_items( 'line_item' ), 'Untouched items must not become refund line items.' );
+		$this->assertCount( 0, $refunds[0]->get_items( 'tax' ), 'Untouched items must not produce refund tax items.' );
+
+		$download_data_store = WC_Data_Store::load( 'customer-download' );
+		$remaining_downloads = $download_data_store->get_downloads(
+			array(
+				'order_id'   => $order->get_id(),
+				'product_id' => $downloadable_product->get_id(),
+			)
+		);
+		$this->assertCount( 1, $remaining_downloads, 'Download permissions for a product that was not refunded must be kept.' );
+
+		unset( $_POST['security'], $_POST['order_id'], $_POST['refund_amount'], $_POST['refunded_amount'], $_POST['refund_reason'], $_POST['line_item_qtys'], $_POST['line_item_totals'], $_POST['line_item_tax_totals'], $_POST['api_refund'] );
+	}
+
+	/**
+	 * The ?wc-ajax=get_variation endpoint renders the matched variation's description through
+	 * wc_format_content(), which fires the woocommerce_short_description filter. Eager block registration is
+	 * skipped on AJAX requests, so Bootstrap registers WooCommerce block types on demand there — otherwise a
+	 * block in a variation description would render empty. See Bootstrap::maybe_register_blocks_from_content.
+	 *
+	 * @testdox The get_variation AJAX endpoint registers WooCommerce block types on demand for a variation description block.
+	 */
+	public function test_get_variation_registers_block_types_on_demand_for_description(): void {
+		$registry = WP_Block_Type_Registry::get_instance();
+
+		// Snapshot and unregister WooCommerce blocks so this test mirrors a request whose eager registration
+		// was skipped; on-demand registration should then re-register them when the description is rendered.
+		$snapshot = array();
+		foreach ( $registry->get_all_registered() as $name => $block_type ) {
+			if ( 0 === strpos( $name, 'woocommerce/' ) ) {
+				$snapshot[ $name ] = $block_type;
+				$registry->unregister( $name );
+			}
+		}
+
+		// The on-demand registration asks the shared BlockTypesController whether register_blocks() already ran
+		// this request; the test bootstrap ran it once for the whole PHPUnit process, so clear the flag too.
+		$this->set_register_blocks_has_run_flag( false );
+
+		// A foundational block register_blocks() always registers (not gated behind a theme/feature flag).
+		$sample = 'woocommerce/product-price';
+		$this->assertNotEmpty( $snapshot, 'The test bootstrap should have registered WooCommerce blocks to snapshot.' );
+
+		$posted_keys = array();
+
+		try {
+			$product   = WC_Helper_Product::create_variation_product();
+			$children  = $product->get_children();
+			$variation = wc_get_product( $children[0] );
+			$variation->set_description( '<!-- wp:woocommerce/product-price /-->' );
+			$variation->save();
+
+			$_POST['product_id'] = $product->get_id();
+			$posted_keys[]       = 'product_id';
+			foreach ( $variation->get_attributes() as $attribute_name => $attribute_value ) {
+				$key           = 'attribute_' . $attribute_name;
+				$_POST[ $key ] = $attribute_value;
+				$posted_keys[] = $key;
+			}
+
+			$this->assertFalse( $registry->is_registered( $sample ), 'Blocks should start unregistered for this test.' );
+
+			$response = $this->do_ajax( 'woocommerce_get_variation' );
+
+			$this->assertIsArray( $response, 'The get_variation endpoint should return the matched variation.' );
+			$this->assertSame(
+				$variation->get_id(),
+				$response['variation_id'],
+				'The endpoint should match the variation carrying the block description.'
+			);
+			$this->assertTrue(
+				$registry->is_registered( $sample ),
+				'Hitting ?wc-ajax=get_variation should register block types on demand so a variation description block renders.'
+			);
+		} finally {
+			foreach ( $posted_keys as $key ) {
+				unset( $_POST[ $key ] );
+			}
+
+			// Delete the created posts so they do not leak into later tests. Guarded because
+			// create_variation_product() could throw before either is assigned.
+			if ( isset( $variation ) ) {
+				$variation->delete( true );
+			}
+			if ( isset( $product ) ) {
+				$product->delete( true );
+			}
+
+			foreach ( array_keys( $registry->get_all_registered() ) as $name ) {
+				if ( 0 === strpos( (string) $name, 'woocommerce/' ) ) {
+					$registry->unregister( $name );
+				}
+			}
+			foreach ( $snapshot as $block_type ) {
+				$registry->register( $block_type );
+			}
+			$this->set_register_blocks_has_run_flag( true );
+		}
+	}
+
+	/**
+	 * Set the static registration flag on BlockTypesController.
+	 *
+	 * The flag records whether register_blocks() ran in the current request, and Bootstrap's on-demand block
+	 * registration consults it. Tests that simulate a request whose eager registration was skipped must clear
+	 * it alongside unregistering the block types, and restore it afterwards. It is static, so this sets it on
+	 * the class, not on any one container instance.
+	 *
+	 * @param bool $has_run The flag value to set.
+	 */
+	private function set_register_blocks_has_run_flag( bool $has_run ): void {
+		$property = new \ReflectionProperty( \Automattic\WooCommerce\Blocks\BlockTypesController::class, 'register_blocks_has_run' );
+		$property->setAccessible( true );
+		$property->setValue( null, $has_run );
+	}
+
+	/**
 	 * Does the 'hard work' of triggering an ajax endpoint and capturing the response.
 	 *
 	 * @param string $ajax_action The action to be triggered.
@@ -434,13 +1101,15 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$output_buffering_level = ob_get_level();
 
 		try {
-			// Note that _handleAjax makes use of output buffering...
+			// Note that _handleAjax makes use of output buffering, which the die
+			// handler usually cleans up; the finally block below closes only any
+			// buffer it leaves dangling so the buffer level stays balanced.
 			$this->_handleAjax( $ajax_action );
 		} catch ( Exception $e ) {
-			// ...However, if an exception is raised, it may not be able to clean-up,
-			// which can lead to PhpUnit emitting risky test warnings.
-			if ( ob_get_level() === $output_buffering_level + 1 ) {
-				ob_get_clean();
+			unset( $e );
+		} finally {
+			while ( ob_get_level() > $output_buffering_level ) {
+				ob_end_clean();
 			}
 		}
 

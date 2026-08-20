@@ -100,7 +100,7 @@ You may not need to create a block to get your extension working the way you wan
 
 In this case, you could remove the block folder from the example block, modify the Webpack config file so it no longer reads from that directory, and include the code you need in the entry JavaScript file.
 
-More information about how to use filters can be found in the [Filter Registry](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/packages/checkout/filter-registry/README.md) and [Available Filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/) documents.
+More information about how to use filters can be found in the [Filter Registry](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/packages/public-api/blocks-checkout/filter-registry/README.md) and [Available Filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/) documents.
 
 ### Importing WooCommerce components into your extension
 
@@ -125,6 +125,54 @@ Some checkout utilities and React hooks are available for external use from `@wo
 For accessing store data, using the [`wc/store/...`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/data-store/) data stores is preferred over importing internal hooks like `useStoreCart`.
 
 ## Back-end extensibility
+
+### Declaring compatibility with the Cart and Checkout blocks
+
+Declaring compatibility helps merchants understand whether an extension supports the Cart and Checkout blocks if compatibility conflicts arise. Extensions usually fall into one of these categories:
+
+- An extension that is incompatible with the Cart and Checkout blocks should declare its incompatibility.
+- An extension that is compatible with the Cart and Checkout blocks should declare its compatibility.
+- An extension that does not affect the Cart or Checkout flow does not need to declare compatibility.
+
+WooCommerce only checks block compatibility for extensions that declare the `WC tested up to` header in the main plugin file. Add the header with the WooCommerce version your extension has tested against:
+
+```php
+<?php
+/**
+ * Plugin Name: WooCommerce Example Extension
+ * Plugin URI: https://wordpress.org/plugins/example-extension/
+ * Description: Sample description.
+ * Author: WooCommerce
+ * Author URI: https://woocommerce.com/
+ * Version: 1.0.0
+ * Text Domain: woocommerce-example-extension
+ * Domain Path: /languages
+ * WC requires at least: 6.0
+ * WC tested up to: 8.0
+ */
+```
+
+To declare that an extension is compatible with the Cart and Checkout blocks, add the following snippet to the main plugin file:
+
+```php
+add_action( 'before_woocommerce_init', function() {
+	if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', __FILE__, true );
+	}
+} );
+```
+
+To declare that an extension is incompatible with the Cart and Checkout blocks, add the following snippet to the main plugin file:
+
+```php
+add_action( 'before_woocommerce_init', function() {
+	if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', __FILE__, false );
+	}
+} );
+```
+
+If you prefer to include the compatibility declaration outside the main plugin file, pass the plugin file path, such as `my-plugin-slug/my-plugin.php`, instead of `__FILE__`.
 
 ### Modifying information during the Checkout process
 

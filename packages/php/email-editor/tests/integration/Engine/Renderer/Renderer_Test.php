@@ -46,7 +46,10 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 				),
 			),
 			'typography' => array(
-				'fontFamily' => 'Test Font Family',
+				'fontFamily'    => 'Test Font Family',
+				'fontWeight'    => '300',
+				'fontStyle'     => 'italic',
+				'letterSpacing' => '-0.1px',
 			),
 			'color'      => array(
 				'background' => '#123456',
@@ -108,6 +111,131 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test it renders LTR direction by default.
+	 */
+	public function testItRendersLtrDirectionByDefault(): void {
+		$rendered = $this->renderer->render( $this->email_post, 'Subject', '', 'en_US' );
+
+		$html_tag_position = strpos( $rendered['html'], '<html ' );
+		$head_tag_position = strpos( $rendered['html'], '<head>' );
+
+		$this->assertNotFalse( $html_tag_position );
+		$this->assertNotFalse( $head_tag_position );
+		$this->assertLessThan( $head_tag_position, $html_tag_position );
+		$html_opening_tag = substr( $rendered['html'], $html_tag_position, $head_tag_position - $html_tag_position );
+		$this->assertStringContainsString( 'lang="', $html_opening_tag );
+		$this->assertStringContainsString( 'dir="ltr"', $html_opening_tag );
+		$this->assertStringContainsString( 'dir="ltr"', $rendered['html'] );
+		$this->assertStringContainsString( 'direction: ltr', $rendered['html'] );
+		$this->assertStringContainsString( 'text-align: left', $rendered['html'] );
+	}
+
+	/**
+	 * Test it renders RTL direction from language fallback.
+	 */
+	public function testItRendersRtlDirectionFromLanguage(): void {
+		$rendered = $this->renderer->render( $this->email_post, 'Subject', '', 'ar_SA' );
+
+		$this->assertStringContainsString( 'lang="ar-SA"', $rendered['html'] );
+		$this->assertStringContainsString( 'dir="rtl"', $rendered['html'] );
+		$this->assertStringContainsString( 'direction: rtl', $rendered['html'] );
+		$this->assertStringContainsString( 'text-align: right', $rendered['html'] );
+	}
+
+	/**
+	 * Test explicit LTR context takes precedence over RTL language.
+	 */
+	public function testExplicitLtrContextTakesPrecedenceOverRtlLanguage(): void {
+		$context_filter = function () {
+			return array( 'is_rtl' => false );
+		};
+		add_filter( 'woocommerce_email_editor_rendering_email_context', $context_filter );
+
+		try {
+			$rendered = $this->renderer->render( $this->email_post, 'Subject', '', 'ar' );
+		} finally {
+			remove_filter( 'woocommerce_email_editor_rendering_email_context', $context_filter );
+		}
+
+		$this->assertStringContainsString( 'dir="ltr"', $rendered['html'] );
+		$this->assertStringContainsString( 'direction: ltr', $rendered['html'] );
+	}
+
+	/**
+	 * Test explicit RTL context takes precedence over LTR language.
+	 */
+	public function testExplicitRtlContextTakesPrecedenceOverLtrLanguage(): void {
+		$context_filter = function () {
+			return array( 'is_rtl' => true );
+		};
+		add_filter( 'woocommerce_email_editor_rendering_email_context', $context_filter );
+
+		try {
+			$rendered = $this->renderer->render( $this->email_post, 'Subject', '', 'en_US' );
+		} finally {
+			remove_filter( 'woocommerce_email_editor_rendering_email_context', $context_filter );
+		}
+
+		$this->assertStringContainsString( 'dir="rtl"', $rendered['html'] );
+		$this->assertStringContainsString( 'direction: rtl', $rendered['html'] );
+	}
+
+	/**
+	 * Test it applies the rendering email context filter once per full render.
+	 */
+	public function testItAppliesRenderingContextFilterOncePerRender(): void {
+		$filter_calls   = 0;
+		$context_filter = function () use ( &$filter_calls ) {
+			++$filter_calls;
+			return array( 'is_rtl' => true );
+		};
+		add_filter( 'woocommerce_email_editor_rendering_email_context', $context_filter );
+
+		try {
+			$rendered = $this->renderer->render( $this->email_post, 'Subject', '', 'en_US' );
+		} finally {
+			remove_filter( 'woocommerce_email_editor_rendering_email_context', $context_filter );
+		}
+
+		$this->assertSame( 1, $filter_calls );
+		$this->assertStringContainsString( 'dir="rtl"', $rendered['html'] );
+	}
+
+	/**
+	 * Test render restores a previously active rendering context.
+	 */
+	public function testRenderRestoresPreviousRenderingContext(): void {
+		$content_renderer_property = new \ReflectionProperty( Renderer::class, 'content_renderer' );
+		$content_renderer_property->setAccessible( true );
+		$content_renderer = $content_renderer_property->getValue( $this->renderer );
+		$this->assertInstanceOf( \Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Content_Renderer::class, $content_renderer );
+
+		$previous_context = new \Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context(
+			$this->createMock( \WP_Theme_JSON::class ),
+			array( 'is_rtl' => true ),
+			'ar_SA'
+		);
+		$content_renderer->set_rendering_context( $previous_context );
+
+		try {
+			$this->renderer->render( $this->email_post, 'Subject', '', 'en_US' );
+			$this->assertSame( $previous_context, $content_renderer->get_current_rendering_context() );
+		} finally {
+			$content_renderer->restore_rendering_context( null );
+		}
+	}
+
+	/**
+	 * Test base template CSS resets both physical flex padding sides on mobile.
+	 */
+	public function testTemplateCssResetsBothFlexGapSides(): void {
+		$template_styles = (string) file_get_contents( __DIR__ . '/../../../../src/Engine/Renderer/template-canvas.css' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local fixture file.
+
+		$this->assertStringContainsString( 'padding-left: 0 !important;', $template_styles );
+		$this->assertStringContainsString( 'padding-right: 0 !important;', $template_styles );
+	}
+
+	/**
 	 * Test it inlines styles.
 	 */
 	public function testItInlinesStyles(): void {
@@ -142,6 +270,9 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$style = $this->getStylesValueForTag( $rendered['html'], array( 'tag_name' => 'body' ) );
 		$this->assertIsString( $style );
 		$this->assertStringContainsString( 'background-color: #123456', $style );
+		$this->assertStringContainsString( 'font-weight: 300;', $style );
+		$this->assertStringContainsString( 'font-style: italic;', $style );
+		$this->assertStringContainsString( 'letter-spacing: -.1px;', $style );
 
 		// Verify layout element styles.
 		$doc = new \DOMDocument();
@@ -156,6 +287,9 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$style = $wrapper->getAttribute( 'style' );
 		$this->assertStringContainsString( 'background-color: #123456', $style );
 		$this->assertStringContainsString( 'font-family: Test Font Family;', $style );
+		$this->assertStringContainsString( 'font-weight: 300;', $style );
+		$this->assertStringContainsString( 'font-style: italic;', $style );
+		$this->assertStringContainsString( 'letter-spacing: -.1px;', $style );
 		$this->assertStringContainsString( 'padding-top: 3px;', $style );
 		$this->assertStringContainsString( 'padding-bottom: 4px;', $style );
 		// Horizontal padding is now distributed to individual block wrappers via Spacing_Preprocessor.
@@ -212,6 +346,77 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			'test-email-template-extra'
 		);
 		$this->assertStringContainsString( 'test-template-class-extra', $rendered['html'] );
+	}
+
+	/**
+	 * Test it renders block markup without a backing post.
+	 */
+	public function testItRendersFromContentWithoutBackingPost(): void {
+		// @phpstan-ignore-next-line PHPStan is not aware of the register_block_template function's side effects.
+		register_block_template(
+			'renderer-tests//test-email-template-content',
+			array(
+				'title'       => 'Test Email Template',
+				'description' => 'A test email template.',
+				'content'     => '<!-- wp:group --><div class="wp-block-group test-template-class-content"><!-- wp:post-content /--></div><!-- /wp:group -->',
+			)
+		);
+
+		$rendered = $this->renderer->render_from_content(
+			'<!-- wp:paragraph --><p>Content without a post!</p><!-- /wp:paragraph -->',
+			'test-email-template-content',
+			'Subject',
+			'Preheader content'
+		);
+
+		$this->assertStringContainsString( 'test-template-class-content', $rendered['html'] );
+		$this->assertStringContainsString( 'Content without a post!', $rendered['html'] );
+		$this->assertStringContainsString( 'Subject', $rendered['html'] );
+		$this->assertStringContainsString( 'Content without a post!', $rendered['text'] );
+		// The fixture post created in setUp must not leak into the output.
+		$this->assertStringNotContainsString( 'Hello!', $rendered['html'] );
+	}
+
+	/**
+	 * Test it renders the template chrome with an empty body for empty content.
+	 */
+	public function testItRendersFromEmptyContent(): void {
+		// @phpstan-ignore-next-line PHPStan is not aware of the register_block_template function's side effects.
+		register_block_template(
+			'renderer-tests//test-email-template-empty',
+			array(
+				'title'       => 'Test Email Template',
+				'description' => 'A test email template.',
+				'content'     => '<!-- wp:group --><div class="wp-block-group test-template-class-empty"><!-- wp:post-content /--></div><!-- /wp:group -->',
+			)
+		);
+
+		$rendered = $this->renderer->render_from_content(
+			'',
+			'test-email-template-empty',
+			'Subject',
+			'Preheader content'
+		);
+
+		$this->assertStringContainsString( 'test-template-class-empty', $rendered['html'] );
+		$this->assertStringContainsString( 'Subject', $rendered['html'] );
+	}
+
+	/**
+	 * Test the documented contract: a resolvable template slug is required.
+	 *
+	 * Pins the current failure mode so a behavior change (e.g. a graceful
+	 * fallback) is a conscious API decision, not an accident.
+	 */
+	public function testItRequiresResolvableTemplateSlug(): void {
+		$this->expectException( \TypeError::class );
+
+		$this->renderer->render_from_content(
+			'<!-- wp:paragraph --><p>Content</p><!-- /wp:paragraph -->',
+			'this-template-slug-is-not-registered',
+			'Subject',
+			'Preheader content'
+		);
 	}
 
 	/**

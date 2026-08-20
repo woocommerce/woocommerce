@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure the experimental products app quick edit drawer closes when using the close icon or Cancel button.

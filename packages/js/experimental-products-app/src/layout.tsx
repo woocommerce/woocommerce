@@ -8,11 +8,12 @@ import {
 } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 import { privateApis as editorPrivateApis } from '@wordpress/editor';
-import { SnackbarNotices } from '@wordpress/notices';
 import {
 	__unstableMotion as motion,
 	__unstableAnimatePresence as AnimatePresence,
 } from '@wordpress/components';
+// @ts-expect-error - This component isn't available in WordPress 6.9. Given that it's an experimental project, it's okay to use it here. Remove the check below when WordPress 7.0 is the minimum supported version.
+import { SnackbarNotices } from '@wordpress/notices';
 
 /**
  * Internal dependencies
@@ -36,6 +37,7 @@ export function Layout( { route, showNewNavigation = false }: LayoutProps ) {
 	const disableMotion = useReducedMotion();
 
 	const { key: routeKey, areas, widths } = route;
+	const mobileArea = areas.mobile === true ? areas.content : areas.mobile;
 
 	return (
 		<>
@@ -77,7 +79,9 @@ export function Layout( { route, showNewNavigation = false }: LayoutProps ) {
 							</NavigableRegion>
 						) }
 
-					<SnackbarNotices className="product_page_woocommerce-products-dashboard-snackbar" />
+					{ SnackbarNotices && (
+						<SnackbarNotices className="product_page_woocommerce-products-dashboard-snackbar" />
+					) }
 
 					{ ! isMobileViewport && areas.content && (
 						<div
@@ -90,16 +94,13 @@ export function Layout( { route, showNewNavigation = false }: LayoutProps ) {
 						</div>
 					) }
 
-					{ ! isMobileViewport && areas.edit && (
-						<div
-							className="edit-site-layout__area"
-							style={ {
-								maxWidth: widths?.edit,
-							} }
-						>
-							{ areas.edit }
+					{ isMobileViewport && mobileArea && (
+						<div className="edit-site-layout__area">
+							{ mobileArea }
 						</div>
 					) }
+
+					{ ! isMobileViewport && areas.edit }
 				</div>
 			</div>
 		</>

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-REST API: prevent PUT /wc/v(2|3)/orders/{id} from converting non-shop_order records into orders.

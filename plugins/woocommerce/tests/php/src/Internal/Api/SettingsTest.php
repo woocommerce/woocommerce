@@ -3,8 +3,9 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Api;
 
-use Automattic\WooCommerce\Internal\Api\GraphQLController;
-use Automattic\WooCommerce\Internal\Api\Main;
+use Automattic\WooCommerce\Api\Infrastructure\GraphQLControllerBase;
+use Automattic\WooCommerce\Api\Infrastructure\Main;
+use Automattic\WooCommerce\Internal\Api\QueryCache;
 use Automattic\WooCommerce\Internal\Api\Settings;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use WC_Unit_Test_Case;
@@ -120,7 +121,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 
 		$this->assertArrayHasKey( Main::OPTION_ENDPOINT_URL, $by_id );
 		$this->assertSame( 'text', $by_id[ Main::OPTION_ENDPOINT_URL ]['type'] );
-		$this->assertSame( GraphQLController::DEFAULT_ENDPOINT_URL, $by_id[ Main::OPTION_ENDPOINT_URL ]['default'] );
+		$this->assertSame( GraphQLControllerBase::DEFAULT_ENDPOINT_URL, $by_id[ Main::OPTION_ENDPOINT_URL ]['default'] );
 	}
 
 	/**
@@ -221,6 +222,18 @@ class SettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox add_settings defines the OPcache checkbox with a 'yes' default.
+	 */
+	public function test_add_settings_defines_opcache_checkbox(): void {
+		$fields = $this->sut->add_settings( array(), Settings::SECTION_ID );
+		$by_id  = array_column( $fields, null, 'id' );
+
+		$this->assertArrayHasKey( Main::OPTION_OPCACHE_ENABLED, $by_id );
+		$this->assertSame( 'checkbox', $by_id[ Main::OPTION_OPCACHE_ENABLED ]['type'] );
+		$this->assertSame( 'yes', $by_id[ Main::OPTION_OPCACHE_ENABLED ]['default'] );
+	}
+
+	/**
 	 * @testdox add_settings defines the max query depth field with min=1 and the default constant as default.
 	 */
 	public function test_add_settings_defines_max_query_depth_field(): void {
@@ -230,7 +243,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( Main::OPTION_MAX_QUERY_DEPTH, $by_id );
 		$this->assertSame( 'number', $by_id[ Main::OPTION_MAX_QUERY_DEPTH ]['type'] );
 		$this->assertSame(
-			(string) GraphQLController::DEFAULT_MAX_QUERY_DEPTH,
+			(string) GraphQLControllerBase::DEFAULT_MAX_QUERY_DEPTH,
 			$by_id[ Main::OPTION_MAX_QUERY_DEPTH ]['default']
 		);
 		$this->assertSame( '1', $by_id[ Main::OPTION_MAX_QUERY_DEPTH ]['custom_attributes']['min'] );
@@ -246,7 +259,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( Main::OPTION_MAX_QUERY_COMPLEXITY, $by_id );
 		$this->assertSame( 'number', $by_id[ Main::OPTION_MAX_QUERY_COMPLEXITY ]['type'] );
 		$this->assertSame(
-			(string) GraphQLController::DEFAULT_MAX_QUERY_COMPLEXITY,
+			(string) GraphQLControllerBase::DEFAULT_MAX_QUERY_COMPLEXITY,
 			$by_id[ Main::OPTION_MAX_QUERY_COMPLEXITY ]['default']
 		);
 		$this->assertSame( '1', $by_id[ Main::OPTION_MAX_QUERY_COMPLEXITY ]['custom_attributes']['min'] );
@@ -283,5 +296,21 @@ class SettingsTest extends WC_Unit_Test_Case {
 		$result = $this->sut->add_settings( array(), Settings::SECTION_ID );
 
 		$this->assertSame( array(), $result );
+	}
+
+	/**
+	 * @testdox add_settings defines the parsed query cache TTL field with min=1 and the default constant as default.
+	 */
+	public function test_add_settings_defines_query_cache_ttl_field(): void {
+		$fields = $this->sut->add_settings( array(), Settings::SECTION_ID );
+		$by_id  = array_column( $fields, null, 'id' );
+
+		$this->assertArrayHasKey( Main::OPTION_QUERY_CACHE_TTL, $by_id );
+		$this->assertSame( 'number', $by_id[ Main::OPTION_QUERY_CACHE_TTL ]['type'] );
+		$this->assertSame(
+			(string) QueryCache::DEFAULT_CACHE_TTL,
+			$by_id[ Main::OPTION_QUERY_CACHE_TTL ]['default']
+		);
+		$this->assertSame( '1', $by_id[ Main::OPTION_QUERY_CACHE_TTL ]['custom_attributes']['min'] );
 	}
 }

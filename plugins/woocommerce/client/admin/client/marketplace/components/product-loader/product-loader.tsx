@@ -16,7 +16,7 @@ interface ProductLoaderProps {
 
 export default function ProductLoader(
 	props: ProductLoaderProps
-): JSX.Element {
+): React.JSX.Element {
 	const { hasTitle, type } = props;
 	const placeholderCount = props.placeholderCount || 12;
 

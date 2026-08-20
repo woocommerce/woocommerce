@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __, sprintf, TranslatableText } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
 import { store as coreStore, type WpTemplate } from '@wordpress/core-data';
 import { backup } from '@wordpress/icons';
@@ -126,7 +126,7 @@ const getResetEmailTemplateAction = () => {
 									);
 
 									// Apply the reset with original blocks
-									editEntityRecord(
+									void editEntityRecord(
 										'postType',
 										item.type,
 										item.id,
@@ -153,11 +153,10 @@ const getResetEmailTemplateAction = () => {
 									} );
 
 									// Invalidate to ensure editor and actions menu see the file version
-									invalidateResolution( 'getEntityRecord', [
-										'postType',
-										item.type,
-										item.id,
-									] );
+									void invalidateResolution(
+										'getEntityRecord',
+										[ 'postType', item.type, item.id ]
+									);
 
 									const successMessage = sprintf(
 										/* translators: The template's title. */
@@ -168,7 +167,7 @@ const getResetEmailTemplateAction = () => {
 										getItemTitle( item )
 									);
 
-									createSuccessNotice( successMessage, {
+									void createSuccessNotice( successMessage, {
 										type: 'snackbar',
 										id: 'reset-email-template-action',
 									} );
@@ -177,7 +176,7 @@ const getResetEmailTemplateAction = () => {
 									setIsBusy( false );
 									closeModal?.();
 								} catch ( error ) {
-									let errorMessage = __(
+									let errorMessage = __< string >(
 										'An error occurred while resetting the template.',
 										__i18n_text_domain__
 									);
@@ -187,14 +186,15 @@ const getResetEmailTemplateAction = () => {
 										typeof error === 'object' &&
 										'message' in error
 									) {
-										errorMessage = String( error.message );
+										errorMessage =
+											error.message as TranslatableText< string >;
 									}
 
 									recordEvent( 'reset_modal_error', {
 										errorMessage,
 									} );
 
-									createErrorNotice( errorMessage, {
+									void createErrorNotice( errorMessage, {
 										type: 'snackbar',
 									} );
 

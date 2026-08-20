@@ -171,7 +171,17 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_woocommerce_updated_action() {
-		$versions     = array_keys( WC_Install::get_db_update_callbacks() );
+		// DB update keys may include a suffix (e.g. "10.8.0-1") used to schedule extra updates
+		// for an already-released version, so normalize each key to its X.Y.Z form and dedupe
+		// before picking the previous one — otherwise count-2 can land on a sibling of the
+		// latest version that is not actually older than the running code.
+		$normalized   = array_map(
+			static function ( $v ) {
+				return preg_replace( '/-.*$/', '', $v );
+			},
+			array_keys( WC_Install::get_db_update_callbacks() )
+		);
+		$versions     = array_values( array_unique( $normalized ) );
 		$prev_version = $versions[ count( $versions ) - 2 ];
 		update_option( 'woocommerce_version', $prev_version );
 		WC_Install::check_version();
@@ -225,6 +235,22 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 
 		// Verify the option remains 'no' (not overwritten).
 		$this->assertEquals( 'no', get_option( 'woocommerce_analytics_scheduled_import' ) );
+	}
+
+	/**
+	 * Test product object caching is enabled by default for new installations.
+	 *
+	 * @return void
+	 */
+	public function test_enable_product_instance_caching_for_new_installation() {
+		// Ensure the feature option doesn't exist before testing.
+		delete_option( 'woocommerce_feature_product_instance_caching_enabled' );
+
+		// Call the method to enable the feature for new installs.
+		WC_Install::enable_product_instance_caching_for_newly_installed();
+
+		// Verify the feature option was set to 'yes'.
+		$this->assertEquals( 'yes', get_option( 'woocommerce_feature_product_instance_caching_enabled' ) );
 	}
 
 	/**

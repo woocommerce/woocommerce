@@ -4,6 +4,9 @@ on:
     - cron: '0 9 * * *' # Every day at 9 AM UTC
   workflow_dispatch:
 
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
+
 jobs:
   check-feature-freeze:
     runs-on: ubuntu-latest
@@ -17,7 +20,7 @@ jobs:
 
       - name: Check for Feature Freeze events in a week
         id: find-feature-freeze-event
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const ical = require('node-ical');
