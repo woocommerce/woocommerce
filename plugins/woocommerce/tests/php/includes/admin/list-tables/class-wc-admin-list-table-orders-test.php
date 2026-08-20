@@ -467,15 +467,17 @@ class WC_Admin_List_Table_Orders_Test extends WC_Unit_Test_Case {
 			}
 		);
 
-		// Do not set post_type in the query.
-		new WP_Query(
-			array(
-				'post_status' => 'all',
-				'fields'      => 'ids',
-			)
-		);
-
-		restore_error_handler();
+		try {
+			// Do not set post_type in the query.
+			new WP_Query(
+				array(
+					'post_status' => 'all',
+					'fields'      => 'ids',
+				)
+			);
+		} finally {
+			restore_error_handler();
+		}
 
 		// Check no warnings were triggered.
 		$this->assertEmpty(
@@ -508,19 +510,21 @@ class WC_Admin_List_Table_Orders_Test extends WC_Unit_Test_Case {
 			}
 		);
 
-		$query = new WP_Query(
-			array(
-				'post_type'      => 'shop_order',
-				'post_status'    => 'all',
-				'fields'         => 'ids',
-				'posts_per_page' => -1,
-				'm'              => array( '20230720' ),
-			)
-		);
+		try {
+			$query = new WP_Query(
+				array(
+					'post_type'      => 'shop_order',
+					'post_status'    => 'all',
+					'fields'         => 'ids',
+					'posts_per_page' => -1,
+					'm'              => array( '20230720' ),
+				)
+			);
 
-		$results = $query->get_posts();
-
-		restore_error_handler();
+			$results = $query->get_posts();
+		} finally {
+			restore_error_handler();
+		}
 
 		$this->assertSame( array(), $errors, 'An array "m" parameter should not raise an "Array to string conversion" warning.' );
 		$this->assertEmpty( $query->query_vars['meta_key'], 'An unusable "m" parameter should not build a date meta query.' );
