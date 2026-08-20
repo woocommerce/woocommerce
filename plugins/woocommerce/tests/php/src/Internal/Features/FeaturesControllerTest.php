@@ -1488,17 +1488,4 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 'checkbox', $settings[0]['type'] );
 		$this->assertSame( 'yes', $settings[0]['default'], 'The setting should default to yes so unset options read as enabled' );
 	}
-
-	/**
-	 * @testdox The variation gallery setting remains exposed in the REST API advanced settings group for extension compatibility.
-	 */
-	public function test_variation_gallery_setting_is_added_for_rest_api(): void {
-		$settings = $this->sut->add_variation_gallery_setting_for_rest_api( array() );
-
-		$this->assertCount( 1, $settings );
-		$this->assertSame( 'wc_feature_woocommerce_additional_variation_images_enabled', $settings[0]['id'] );
-		$this->assertSame( 'wc_feature_woocommerce_additional_variation_images_enabled', $settings[0]['option_key'] );
-		$this->assertSame( 'checkbox', $settings[0]['type'] );
-		$this->assertSame( 'yes', $settings[0]['default'], 'The setting should default to yes so unset options read as enabled' );
-	}
 }

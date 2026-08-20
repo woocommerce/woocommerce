@@ -19,12 +19,16 @@ defined( 'ABSPATH' ) || exit;
 class Package {
 
 	/**
-	 * Feature id used by FeaturesController and external feature detection.
+	 * Former feature id used by FeaturesController.
+	 *
+	 * @deprecated 11.1.0 The variation gallery is no longer feature flagged.
 	 */
 	public const FEATURE_ID = 'variation_gallery';
 
 	/**
-	 * Option backing the variation gallery feature toggle.
+	 * Former option backing the variation gallery feature toggle.
+	 *
+	 * @deprecated 11.1.0 The variation gallery is no longer feature flagged.
 	 */
 	public const ENABLE_OPTION_NAME = 'wc_feature_woocommerce_additional_variation_images_enabled';
 
@@ -52,16 +56,6 @@ class Package {
 	 */
 	public static function is_enabled() {
 		return true;
-	}
-
-	/**
-	 * Whether stores can opt out of loading the merged package.
-	 *
-	 * @internal
-	 * @return bool
-	 */
-	public static function allows_opt_out(): bool {
-		return false;
 	}
 
 	/**
