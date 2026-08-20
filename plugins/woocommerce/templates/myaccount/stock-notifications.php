@@ -14,7 +14,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.9.0
+ * @version 11.2.0
  *
  * @var array $notifications Array of Notification objects for the current user (one page).
  * @var bool  $has_items     Whether there are any notifications to render.
@@ -33,22 +33,22 @@ $wp_button_class = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_
 /**
  * Fires before the back in stock notifications table is rendered on My Account.
  *
- * @since 10.8.0
+ * @since 11.2.0
  *
  * @param bool $has_items Whether there are any notifications to render.
  */
-do_action( 'woocommerce_before_account_back_in_stock_notifications', $has_items );
+do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items );
 ?>
 
 <?php if ( $has_items ) : ?>
 
-	<table class="woocommerce-back-in-stock-notifications-table woocommerce-MyAccount-back-in-stock-notifications shop_table shop_table_responsive">
+	<table class="woocommerce-customer-stock-notifications-table woocommerce-MyAccount-customerStockNotifications shop_table shop_table_responsive">
 		<thead>
 			<tr>
-				<th scope="col" class="woocommerce-back-in-stock-notifications-table__header woocommerce-back-in-stock-notifications-table__header-product"><?php esc_html_e( 'Product', 'woocommerce' ); ?></th>
-				<th scope="col" class="woocommerce-back-in-stock-notifications-table__header woocommerce-back-in-stock-notifications-table__header-variation"><?php esc_html_e( 'Variation', 'woocommerce' ); ?></th>
-				<th scope="col" class="woocommerce-back-in-stock-notifications-table__header woocommerce-back-in-stock-notifications-table__header-date"><?php esc_html_e( 'Date signed up', 'woocommerce' ); ?></th>
-				<th scope="col" class="woocommerce-back-in-stock-notifications-table__header woocommerce-back-in-stock-notifications-table__header-actions"><?php esc_html_e( 'Actions', 'woocommerce' ); ?></th>
+				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-product"><?php esc_html_e( 'Product', 'woocommerce' ); ?></th>
+				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-variation"><?php esc_html_e( 'Variation', 'woocommerce' ); ?></th>
+				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-date"><?php esc_html_e( 'Date signed up', 'woocommerce' ); ?></th>
+				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-actions"><?php esc_html_e( 'Actions', 'woocommerce' ); ?></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -59,8 +59,8 @@ do_action( 'woocommerce_before_account_back_in_stock_notifications', $has_items 
 			$variation    = $notification->get_product_formatted_variation_list( true );
 			$date_created = $notification->get_date_created();
 			?>
-			<tr class="woocommerce-back-in-stock-notifications-table__row woocommerce-back-in-stock-notifications-table__row--status-<?php echo esc_attr( (string) $notification->get_status() ); ?>">
-				<td class="woocommerce-back-in-stock-notifications-table__cell woocommerce-back-in-stock-notifications-table__cell-product" data-title="<?php esc_attr_e( 'Product', 'woocommerce' ); ?>">
+			<tr class="woocommerce-customer-stock-notifications-table__row woocommerce-customer-stock-notifications-table__row--status-<?php echo esc_attr( (string) $notification->get_status() ); ?>">
+				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-product" data-title="<?php esc_attr_e( 'Product', 'woocommerce' ); ?>">
 					<?php if ( '' !== $product_name && '' !== $permalink ) : ?>
 						<a href="<?php echo esc_url( $permalink ); ?>"><?php echo esc_html( $product_name ); ?></a>
 					<?php elseif ( '' !== $product_name ) : ?>
@@ -69,18 +69,18 @@ do_action( 'woocommerce_before_account_back_in_stock_notifications', $has_items 
 						<?php esc_html_e( 'Product unavailable', 'woocommerce' ); ?>
 					<?php endif; ?>
 				</td>
-				<td class="woocommerce-back-in-stock-notifications-table__cell woocommerce-back-in-stock-notifications-table__cell-variation" data-title="<?php esc_attr_e( 'Variation', 'woocommerce' ); ?>">
+				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-variation" data-title="<?php esc_attr_e( 'Variation', 'woocommerce' ); ?>">
 					<?php echo '' !== $variation ? esc_html( $variation ) : '&mdash;'; ?>
 				</td>
-				<td class="woocommerce-back-in-stock-notifications-table__cell woocommerce-back-in-stock-notifications-table__cell-date" data-title="<?php esc_attr_e( 'Date signed up', 'woocommerce' ); ?>">
+				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-date" data-title="<?php esc_attr_e( 'Date signed up', 'woocommerce' ); ?>">
 					<?php if ( $date_created ) : ?>
 						<time datetime="<?php echo esc_attr( $date_created->date( 'c' ) ); ?>"><?php echo esc_html( wc_format_datetime( $date_created ) ); ?></time>
 					<?php else : ?>
 						&mdash;
 					<?php endif; ?>
 				</td>
-				<td class="woocommerce-back-in-stock-notifications-table__cell woocommerce-back-in-stock-notifications-table__cell-actions" data-title="<?php esc_attr_e( 'Actions', 'woocommerce' ); ?>">
-					<form method="post" action="<?php echo esc_url( wc_get_endpoint_url( MyAccountEndpoint::ENDPOINT, '', wc_get_page_permalink( 'myaccount' ) ) ); ?>" class="woocommerce-back-in-stock-notifications-cancel-form">
+				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-actions" data-title="<?php esc_attr_e( 'Actions', 'woocommerce' ); ?>">
+					<form method="post" action="<?php echo esc_url( wc_get_endpoint_url( MyAccountEndpoint::ENDPOINT, '', wc_get_page_permalink( 'myaccount' ) ) ); ?>" class="woocommerce-customer-stock-notifications-cancel-form">
 						<input type="hidden" name="<?php echo esc_attr( MyAccountEndpoint::CANCEL_ACTION ); ?>" value="1" />
 						<input type="hidden" name="notification_id" value="<?php echo esc_attr( (string) $notification->get_id() ); ?>" />
 						<?php wp_nonce_field( MyAccountEndpoint::get_cancel_nonce_action( (int) $notification->get_id() ) ); ?>
@@ -92,30 +92,27 @@ do_action( 'woocommerce_before_account_back_in_stock_notifications', $has_items 
 		</tbody>
 	</table>
 
+	<?php
+	/**
+	 * Fires before the stock notifications pagination is rendered on My Account.
+	 *
+	 * Mirrors `woocommerce_before_account_orders_pagination`.
+	 *
+	 * @since 11.2.0
+	 */
+	do_action( 'woocommerce_before_account_customer_stock_notifications_pagination' );
+	?>
+
 	<?php if ( $total_pages > 1 ) : ?>
-		<?php
-		$endpoint_url = wc_get_endpoint_url( MyAccountEndpoint::ENDPOINT, '', wc_get_page_permalink( 'myaccount' ) );
-		// `format` uses %#% as the page-number placeholder; WC's pretty endpoints
-		// rewrite to `<endpoint>/<page>/`, ugly fallback uses ?<endpoint>=<page>.
-		$pretty = get_option( 'permalink_structure' );
-		$format = $pretty ? '%#%/' : '?' . MyAccountEndpoint::ENDPOINT . '=%#%';
-		$base   = $pretty ? trailingslashit( $endpoint_url ) . '%_%' : $endpoint_url . '%_%';
-		?>
-		<nav class="woocommerce-pagination woocommerce-back-in-stock-notifications-pagination" aria-label="<?php esc_attr_e( 'Stock notifications pagination', 'woocommerce' ); ?>">
-			<?php
-			echo paginate_links( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				array(
-					'base'      => $base,
-					'format'    => $format,
-					'current'   => $current_page,
-					'total'     => $total_pages,
-					'prev_text' => esc_html_x( '&larr; Previous', 'pagination', 'woocommerce' ),
-					'next_text' => esc_html_x( 'Next &rarr;', 'pagination', 'woocommerce' ),
-					'type'      => 'list',
-				)
-			);
-			?>
-		</nav>
+		<div class="woocommerce-pagination woocommerce-pagination--without-numbers woocommerce-Pagination">
+			<?php if ( 1 !== $current_page ) : ?>
+				<a class="woocommerce-button woocommerce-button--previous woocommerce-Button woocommerce-Button--previous button<?php echo esc_attr( $wp_button_class ); ?>" href="<?php echo esc_url( wc_get_endpoint_url( MyAccountEndpoint::ENDPOINT, (string) ( $current_page - 1 ), wc_get_page_permalink( 'myaccount' ) ) ); ?>"><?php esc_html_e( 'Previous', 'woocommerce' ); ?></a>
+			<?php endif; ?>
+
+			<?php if ( $total_pages !== $current_page ) : ?>
+				<a class="woocommerce-button woocommerce-button--next woocommerce-Button woocommerce-Button--next button<?php echo esc_attr( $wp_button_class ); ?>" href="<?php echo esc_url( wc_get_endpoint_url( MyAccountEndpoint::ENDPOINT, (string) ( $current_page + 1 ), wc_get_page_permalink( 'myaccount' ) ) ); ?>"><?php esc_html_e( 'Next', 'woocommerce' ); ?></a>
+			<?php endif; ?>
+		</div>
 	<?php endif; ?>
 
 <?php else : ?>
@@ -128,8 +125,8 @@ do_action( 'woocommerce_before_account_back_in_stock_notifications', $has_items 
 /**
  * Fires after the back in stock notifications table is rendered on My Account.
  *
- * @since 10.8.0
+ * @since 11.2.0
  *
  * @param bool $has_items Whether there were any notifications rendered.
  */
-do_action( 'woocommerce_after_account_back_in_stock_notifications', $has_items );
+do_action( 'woocommerce_after_account_customer_stock_notifications', $has_items );

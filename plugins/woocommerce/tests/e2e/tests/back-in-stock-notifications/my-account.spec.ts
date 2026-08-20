@@ -88,7 +88,7 @@ test.describe(
 
 					// Both products appear as rows.
 					const table = page.locator(
-						'.woocommerce-back-in-stock-notifications-table'
+						'.woocommerce-customer-stock-notifications-table'
 					);
 					await expect( table ).toBeVisible();
 					await expect(
@@ -133,7 +133,7 @@ test.describe(
 
 					const row = page
 						.locator(
-							'.woocommerce-back-in-stock-notifications-table tbody tr'
+							'.woocommerce-customer-stock-notifications-table tbody tr'
 						)
 						.filter( {
 							has: page.getByRole( 'link', {
@@ -195,7 +195,7 @@ test.describe(
 
 				await expect(
 					page.locator(
-						'.woocommerce-back-in-stock-notifications-table'
+						'.woocommerce-customer-stock-notifications-table'
 					)
 				).toHaveCount( 0 );
 			} );

@@ -152,11 +152,11 @@ class MyAccountEndpoint {
 		/**
 		 * Filter the per-page count for the My Account stock-notifications table.
 		 *
-		 * @since 10.9.0
+		 * @since 11.2.0
 		 *
 		 * @param int $per_page Number of notifications shown per page. Default {@see self::DEFAULT_PER_PAGE}.
 		 */
-		$per_page = (int) apply_filters( 'woocommerce_account_back_in_stock_notifications_per_page', self::DEFAULT_PER_PAGE );
+		$per_page = (int) apply_filters( 'woocommerce_account_customer_stock_notifications_per_page', self::DEFAULT_PER_PAGE );
 		$per_page = max( 1, $per_page );
 
 		$page = $this->get_current_user_notifications_page( $current_page, $per_page );
@@ -206,12 +206,12 @@ class MyAccountEndpoint {
 		 * reason. Merchants who want a full history can build their own view via
 		 * {@see NotificationQuery::get_notifications()}.
 		 *
-		 * @since 10.9.0
+		 * @since 11.2.0
 		 *
 		 * @param string[] $statuses List of {@see NotificationStatus} values to include.
 		 */
 		$statuses = (array) apply_filters(
-			'woocommerce_account_back_in_stock_notifications_statuses',
+			'woocommerce_account_customer_stock_notifications_statuses',
 			array( NotificationStatus::PENDING, NotificationStatus::ACTIVE )
 		);
 
