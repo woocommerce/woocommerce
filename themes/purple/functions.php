@@ -223,30 +223,6 @@ endif;
 
 add_action( 'init', 'purple_register_pattern_categories' );
 
-if ( ! function_exists( 'purple_rename_woocommerce_pattern_category' ) ) :
-	/**
-	 * Rename the "WooCommerce" pattern category to "Shop" in the inserter.
-	 *
-	 * The slug stays "woo-commerce" so patterns categorised under it
-	 * (Purple's and the WC plugin's) don't need re-tagging; only the
-	 * label displayed in the editor changes. Hooked late so it runs
-	 * after WooCommerce's own registration.
-	 */
-	function purple_rename_woocommerce_pattern_category() {
-		$registry = \WP_Block_Pattern_Categories_Registry::get_instance();
-		if ( $registry->is_registered( 'woo-commerce' ) ) {
-			unregister_block_pattern_category( 'woo-commerce' );
-		}
-		register_block_pattern_category(
-			'woo-commerce',
-			array( 'label' => __( 'Shop', 'purple' ) )
-		);
-	}
-
-endif;
-
-add_action( 'init', 'purple_rename_woocommerce_pattern_category', 99 );
-
 if ( ! function_exists( 'purple_styles' ) ) :
 	/**
 	 * Enqueue styles.
