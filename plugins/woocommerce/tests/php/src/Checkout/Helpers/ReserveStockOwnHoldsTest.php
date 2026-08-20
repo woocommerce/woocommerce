@@ -59,6 +59,13 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 	private $original_customer;
 
 	/**
+	 * $_COOKIE as it was before the test, put back in tearDown.
+	 *
+	 * @var array
+	 */
+	private $original_cookies;
+
+	/**
 	 * Set up a shopper session and a store that manages stock.
 	 */
 	public function setUp(): void {
@@ -70,6 +77,15 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 
 		$this->original_session  = WC()->session;
 		$this->original_customer = WC()->customer;
+
+		// Earlier suites can leave a valid session cookie in $_COOKIE (the test
+		// framework never resets it), and WC_Session_Handler::init() would then
+		// give every session in these tests that cookie's customer id instead of
+		// minting distinct ones.
+		$this->original_cookies = $_COOKIE;
+
+		/** This filter is documented in includes/class-wc-session-handler.php */
+		unset( $_COOKIE[ (string) apply_filters( 'woocommerce_cookie', 'wp_woocommerce_session_' . COOKIEHASH ) ] );
 
 		WC()->session = new WC_Session_Handler();
 		WC()->session->init();
@@ -88,6 +104,7 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 
 		wp_set_current_user( 0 );
 
+		$_COOKIE       = $this->original_cookies;
 		WC()->session  = $this->original_session;
 		WC()->customer = $this->original_customer;
 
