@@ -44266,12 +44266,6 @@ parameters:
 			path: src/Admin/API/Reports/TimeInterval.php
 
 		-
-			message: '#^Call to method modify\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 4
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
 			message: '#^Call to method setTime\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
 			identifier: class.notFound
 			count: 2
