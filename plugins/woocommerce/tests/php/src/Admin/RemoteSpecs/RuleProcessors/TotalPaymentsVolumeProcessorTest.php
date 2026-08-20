@@ -26,12 +26,24 @@ class TotalPaymentsVolumeProcessorTest extends WC_Unit_Test_Case {
 	private function get_processor_with_frozen_clock() {
 		$frozen_provider = new class() implements DateTimeProviderInterface {
 			/**
-			 * Returns the frozen current DateTime.
+			 * The cached frozen instance.
+			 *
+			 * @var DateTime|null
+			 */
+			private $now;
+
+			/**
+			 * Returns the frozen current DateTime. Deliberately returns the same cached
+			 * instance on every call, like the legacy MockDateTimeProvider: the processor
+			 * must not leak its date mutations back into the provider's object.
 			 *
 			 * @return DateTime
 			 */
 			public function get_now() {
-				return new DateTime( '2020-08-31 15:00:00', new DateTimeZone( 'UTC' ) );
+				if ( null === $this->now ) {
+					$this->now = new DateTime( '2020-08-31 15:00:00', new DateTimeZone( 'UTC' ) );
+				}
+				return $this->now;
 			}
 		};
 
@@ -86,5 +98,12 @@ class TotalPaymentsVolumeProcessorTest extends WC_Unit_Test_Case {
 		// 2020-08-31, so last_month must resolve to August 2020, not July 2020.
 		$this->assertSame( '2020-08-01 00:00:00', $processor->captured_args['after'] );
 		$this->assertSame( '2020-08-31 23:59:59', $processor->captured_args['before'] );
+
+		// A second evaluation must produce the same window: the date calculations mutate the
+		// reference date in place, and that must not leak into the provider's cached instance.
+		$processor->process( $rule, (object) array() );
+
+		$this->assertSame( '2020-08-01 00:00:00', $processor->captured_args['after'], 'Repeated process() calls should not drift the timeframe' );
+		$this->assertSame( '2020-08-31 23:59:59', $processor->captured_args['before'], 'Repeated process() calls should not drift the timeframe' );
 	}
 }
