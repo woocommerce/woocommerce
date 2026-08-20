@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
  * functions remain responsible for calculating and persisting category, tag, brand,
  * and ancestor counts.
  *
- * @since 11.1.0
+ * @since 11.2.0
  *
  * @internal
  */
@@ -29,7 +29,7 @@ class TermCount {
 	/**
 	 * Class initialization, executed when the class is resolved by the container.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @internal
 	 */
@@ -44,7 +44,7 @@ class TermCount {
 	 * Removals are recounted by handle_deleted_term_relationships(), which runs before
 	 * the set_object_terms hook during wp_set_object_terms().
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @internal
 	 *
@@ -83,7 +83,7 @@ class TermCount {
 	/**
 	 * Recounts product terms after count-affecting visibility relationships are deleted.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @internal
 	 *
