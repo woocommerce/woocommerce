@@ -283,7 +283,10 @@ class CustomerHistory {
 		$prefixed = array_map(
 			function ( $status ) {
 				$status = sanitize_title( $status );
-				return 'auto-draft' === $status || 'trash' === $status ? $status : 'wc-' . $status;
+				$status = 'auto-draft' === $status || 'trash' === $status ? $status : 'wc-' . $status;
+				// Status columns are varchar(20) and longer values are silently truncated
+				// on write, so truncate the same way or comparisons never match long slugs.
+				return mb_substr( $status, 0, 20 );
 			},
 			$excluded_statuses
 		);
