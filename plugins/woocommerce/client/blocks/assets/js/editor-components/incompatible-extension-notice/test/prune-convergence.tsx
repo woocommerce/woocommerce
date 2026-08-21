@@ -12,6 +12,11 @@
  * the two dispatches, which hides exactly the interleaving that once let a
  * dependency-keyed prune effect skip the second shrink.
  *
+ * What this pins is a **boolean** dependency, `}, [ hasStaleAcknowledgements ] )`,
+ * which reads true through both shrinks and so prunes only the first. The
+ * serialised `}, [ prunedAcknowledgementKey ] )` form was already correct, and
+ * is an equivalent mutant no test can separate from today's effect.
+ *
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
