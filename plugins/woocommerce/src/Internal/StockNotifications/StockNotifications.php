@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\StockNotifications;
 
 use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailActionController;
 use Automattic\WooCommerce\Internal\StockNotifications\StockSyncController;
 use Automattic\WooCommerce\Internal\StockNotifications\Privacy\PrivacyEraser;
@@ -14,6 +15,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Admin\AdminManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\ProductPageIntegration;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\FormHandlerService;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\NotificationManagementService;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
  * The controller for the stock notifications.
@@ -21,10 +23,27 @@ use Automattic\WooCommerce\Internal\StockNotifications\Frontend\NotificationMana
 class StockNotifications {
 
 	/**
-	 * Initialize the controller.
+	 * The feature that gates the whole Back in Stock Notifications experience.
 	 */
-	public function __construct() {
+	public const FEATURE_NAME = 'customer_stock_notifications';
+
+	/**
+	 * Register the hooks that must exist regardless of the feature's state.
+	 *
+	 * Only the feature-independent listeners live here. The services themselves are
+	 * wired up in `maybe_init_services()`, behind the feature check, following the same
+	 * shape as `ShopperListsController` and `OrderWithdrawalController`.
+	 *
+	 * Listening for the feature change has to happen outside the feature check:
+	 * during the request that turns the feature on it is still off, so a listener
+	 * registered behind the gate would never observe its own activation.
+	 *
+	 * @internal
+	 */
+	public function register(): void {
+		add_action( 'init', array( $this, 'maybe_init_services' ), 1 );
 		add_action( 'woocommerce_installed', array( $this, 'on_install_or_update' ) );
+		add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'on_feature_enabled_changed' ), 10, 2 );
 	}
 
 	/**
@@ -34,18 +53,56 @@ class StockNotifications {
 	 * It initializes the data retention controller to set up necessary tasks.
 	 */
 	public function on_install_or_update() {
+		if ( ! FeaturesUtil::feature_is_enabled( self::FEATURE_NAME ) ) {
+			return;
+		}
+
 		wc_get_container()->get( DataRetentionController::class )->on_woo_install_or_update();
 	}
 
 	/**
-	 * Register hooks and services.
+	 * Set up or tear down the feature's side effects when it is toggled.
 	 *
-	 * Called from `WooCommerce::maybe_init_stock_notifications()` on `init` priority 1,
-	 * at which point `plugins_loaded` has already fired.
+	 * Enabling the feature from the Features screen fires no install event, so the
+	 * daily data retention task and the My Account endpoint rewrite rules have to be
+	 * taken care of here. Disabling it has to undo both.
+	 *
+	 * @param string $feature_id The feature that changed.
+	 * @param bool   $enabled    Whether the feature is now enabled.
 	 *
 	 * @internal
 	 */
-	public function register(): void {
+	public function on_feature_enabled_changed( string $feature_id, bool $enabled ): void {
+		if ( self::FEATURE_NAME !== $feature_id ) {
+			return;
+		}
+
+		// The My Account endpoint appears or disappears with the feature.
+		update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
+
+		$data_retention_controller = wc_get_container()->get( DataRetentionController::class );
+
+		if ( $enabled ) {
+			$data_retention_controller->on_woo_install_or_update();
+		} else {
+			$data_retention_controller->clear_daily_task();
+		}
+	}
+
+	/**
+	 * Wire up the services, unless the feature is disabled.
+	 *
+	 * Hooked to `init` priority 1 so the feature check runs after the textdomain is
+	 * loaded, and before `WC_Install::check_version()` (priority 5) fires
+	 * `woocommerce_installed`.
+	 *
+	 * @internal
+	 */
+	public function maybe_init_services(): void {
+		if ( ! FeaturesUtil::feature_is_enabled( self::FEATURE_NAME ) ) {
+			return;
+		}
+
 		add_filter( 'woocommerce_data_stores', array( $this, 'register_data_stores' ) );
 
 		$container = wc_get_container();
