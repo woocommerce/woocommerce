@@ -572,7 +572,7 @@ test('buildCommentBody: first-ever comment with failures mentions the author, no
 
     assert.equal(mentioned, true);
     assert.ok(body.includes('<!-- pr-readiness-summary status=failing -->'));
-    assert.ok(body.includes('## PR Readiness Checks'));
+    assert.ok(body.includes('## PR readiness checks'));
     assert.ok(body.includes('Thanks for the PR, @octocat!'));
     assert.ok(body.includes('🔴 Lint'));
     assert.ok(body.includes('- See annotations.'));
@@ -593,7 +593,7 @@ test('buildCommentBody: first-ever comment with everything passing thanks the au
 
     assert.equal(mentioned, true);
     assert.ok(body.includes('<!-- pr-readiness-summary status=clear -->'));
-    assert.ok(body.includes('## PR Readiness Checks'));
+    assert.ok(body.includes('## PR readiness checks'));
     assert.ok(body.includes("Thanks for your contribution, @octocat!"));
     assert.ok(body.includes('🟢 All checks are passing.'));
     assert.equal(pingBody, null);
@@ -607,7 +607,7 @@ test('buildCommentBody: still failing does not re-mention, no ping, keeps header
     });
 
     assert.equal(mentioned, false);
-    assert.ok(body.includes('## PR Readiness Checks'));
+    assert.ok(body.includes('## PR readiness checks'));
     assert.ok(body.includes('@octocat'));
     assert.ok(body.includes("here's the current status"));
     assert.ok(!body.includes('Thanks for the PR'));
@@ -622,7 +622,7 @@ test('buildCommentBody: fixed from failing to clear mentions the author, no ping
     });
 
     assert.equal(mentioned, true);
-    assert.ok(body.includes('## PR Readiness Checks'));
+    assert.ok(body.includes('## PR readiness checks'));
     assert.ok(body.includes('All checks are passing now, @octocat'));
     assert.equal(pingBody, null);
 });

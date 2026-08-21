@@ -285,7 +285,9 @@ function decideAction({ pr, tasks, hasPending, ciRun, existingComment }) {
     };
 }
 
-const HEADER = '## PR Readiness Checks';
+// Sentence case, per the WooCommerce copy guidelines and matching the
+// workflow's own name ('PR readiness comment').
+const HEADER = '## PR readiness checks';
 
 // Mention-worthy transitions: the ones a real state change happened on.
 // These are the only ones that also flip the returned `mentioned` flag.
