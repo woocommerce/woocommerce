@@ -52,7 +52,7 @@ class BlockTemplatesControllerTest extends WC_Unit_Test_Case {
 	 * @testdox Should not prepend customised WooCommerce template parts when querying by wp_id.
 	 */
 	public function test_wp_id_query_does_not_prepend_unrelated_woo_templates(): void {
-		$woo_template_part   = $this->create_template_part( 'woo-custom-template-parttemplate-part' . uniqid(), BlockTemplateUtils::PLUGIN_SLUG );
+		$woo_template_part   = $this->create_template_part( 'woo-custom-template-part' . uniqid(), BlockTemplateUtils::PLUGIN_SLUG );
 		$theme_template_part = $this->create_template_part( 'theme-custom-template-part' . uniqid(), get_stylesheet() );
 		$this->flush_block_template_caches();
 
@@ -155,7 +155,7 @@ class BlockTemplatesControllerTest extends WC_Unit_Test_Case {
 		);
 
 		wp_set_post_terms( $post_id, array( $term['term_id'] ), 'wp_theme' );
-		$this->created_post_ids[] = $post_id;
+		$this->created_template_part_ids[] = $post_id;
 
 		return get_post( $post_id );
 	}
