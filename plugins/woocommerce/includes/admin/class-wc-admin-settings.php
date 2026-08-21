@@ -216,6 +216,8 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 			// Array value.
 			if ( strstr( $option_name, '[' ) ) {
 
+				$option_name_raw = urldecode( $option_name );
+
 				parse_str( $option_name, $option_array );
 
 				// A name with no parsable base, such as '[key]', names nothing to look up.
@@ -242,13 +244,16 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				 * cannot use, so fall back to the default.
 				 *
 				 * A trailing '[]' directly after this key is not deeper: it names the whole array
-				 * at this level, which is what a multi-value field stores. parse_str() renders
-				 * exactly that as array( '' ), so the parsed node distinguishes the two. Testing
-				 * the raw name for a '[]' suffix would not: 'opt[a][b][]' also ends in '[]'.
+				 * at this level, which is what a multi-value field stores. Both halves of that
+				 * test are needed. parse_str() renders such a name as array( '' ), but it renders
+				 * 'opt[key][0]' identically, so the parsed node alone would let an indexed name
+				 * through. The raw suffix alone would let 'opt[a][b][]' through, since that ends
+				 * in '[]' too. Together they match only a '[]' that follows this key directly.
 				 */
-				$node = $option_array[ $option_name ][ $key ];
+				$node     = $option_array[ $option_name ][ $key ];
+				$is_multi = array( '' ) === $node && '[]' === substr( $option_name_raw, -2 );
 
-				if ( is_array( $node ) && array( '' ) !== $node ) {
+				if ( is_array( $node ) && ! $is_multi ) {
 					return $default;
 				}
 
@@ -257,6 +262,11 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					$option_value = $option_values[ $key ];
 				} else {
 					$option_value = null;
+				}
+
+				// An object stored at this key would reach stripslashes() below and fatal.
+				if ( is_object( $option_value ) ) {
+					return $default;
 				}
 			} else {
 				// Single value.
@@ -983,7 +993,10 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					continue;
 				}
 
-				$option_name = $option['field_name'] ?? $option['id'];
+				// Matches the read path: a name that cannot address an option is treated as absent.
+				$option_name = ( isset( $option['field_name'] ) && is_scalar( $option['field_name'] ) && $option['field_name'] )
+					? $option['field_name']
+					: $option['id'];
 
 				// Get posted value.
 				if ( strstr( $option_name, '[' ) ) {
