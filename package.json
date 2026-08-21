@@ -75,7 +75,7 @@
 	"dependencies": {
 		"@babel/core": "catalog:tooling",
 		"@wordpress/babel-preset-default": "next",
-		"lodash": "^4.17.21",
+		"lodash": "^4.18.1",
 		"wp-textdomain": "1.0.1"
 	},
 	"pnpm": {
