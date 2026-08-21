@@ -1,0 +1,3 @@
+Scratch note for live-testing the pr-readiness-comment bot (PR #67081).
+This push reverts the syncpack mismatch and touches only .github, so every
+tracked check skips; the readiness comment must keep its failing state.
