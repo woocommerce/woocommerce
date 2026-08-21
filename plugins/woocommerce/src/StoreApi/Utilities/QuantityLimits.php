@@ -301,8 +301,8 @@ final class QuantityLimits {
 		 *
 		 * Return a \WP_Error with an informative message, or false, to reject the new quantity; return true
 		 * to accept it. Any other return value is ignored and the quantity is accepted. Core validation
-		 * failures (min, max, multiple_of, read-only) return early and never reach this filter, so $valid
-		 * is always true here.
+		 * failures (min, max, multiple_of, read-only), and cart items whose data key is not a WC_Product,
+		 * return early and never reach this filter, so $valid is always true here.
 		 *
 		 * This does not run when a product is first added to the cart; use the
 		 * woocommerce_store_api_validate_add_to_cart action for that. When an already-in-cart item is
