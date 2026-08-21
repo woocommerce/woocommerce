@@ -542,7 +542,6 @@ class FeaturesController {
 			\Automattic\WooCommerce\Internal\VariationGallery\Package::FEATURE_ID => array(
 				'name'                         => __( 'Variation gallery', 'woocommerce' ),
 				'description'                  => __( 'Add multiple images per product variation.', 'woocommerce' ),
-				'option_key'                   => \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME,
 				'is_experimental'              => false,
 				'enabled_by_default'           => true,
 				'disable_ui'                   => true,

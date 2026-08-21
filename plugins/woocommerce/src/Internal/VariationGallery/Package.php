@@ -80,10 +80,6 @@ class Package {
 	 * @internal
 	 */
 	final public static function init(): void {
-		if ( ! self::is_enabled() ) {
-			return;
-		}
-
 		$container = wc_get_container();
 		$container->get( ClassicVariationGalleryAdmin::class )->register();
 		$container->get( LegacyVariationGalleryCompatibility::class )->register();
