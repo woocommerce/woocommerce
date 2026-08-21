@@ -932,7 +932,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		 */
 		public static function save_fields( $options, $data = null ) {
 			if ( is_null( $data ) ) {
-				$data = $_POST; // WPCS: input var okay, CSRF ok.
+				$data = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Values are unslashed and sanitized by declared field type below; authorization belongs to the caller.
 			}
 			if ( empty( $data ) ) {
 				return false;

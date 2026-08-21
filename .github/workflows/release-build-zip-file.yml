@@ -40,6 +40,7 @@ jobs:
   verify:
     name: 'Pre-build verification'
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 5
     permissions:
       contents: write # Required to fetch draft releases for some reason. See https://github.com/cli/cli/issues/9076#issuecomment-2146148572.
     outputs:
@@ -251,6 +252,7 @@ jobs:
   build:
     name: Build release zip file
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 15
     needs: [ verify ]
     outputs:
       artifact-url: ${{ steps.fetch-build-details.outputs.artifact-url }}
@@ -302,6 +304,7 @@ jobs:
   create-release:
     name: Create GitHub release
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 5
     needs: [ verify, build ]
     if: ${{ inputs.create_github_release && needs.verify.outputs.is-release-branch == 'true' }}
     permissions:

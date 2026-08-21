@@ -44256,19 +44256,13 @@ parameters:
 		-
 			message: '#^Call to method format\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
 			identifier: class.notFound
-			count: 41
+			count: 35
 			path: src/Admin/API/Reports/TimeInterval.php
 
 		-
 			message: '#^Call to method getTimezone\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
 			identifier: class.notFound
 			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Call to method modify\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 4
 			path: src/Admin/API/Reports/TimeInterval.php
 
 		-
@@ -44339,12 +44333,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:default_before\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime but returns WC_DateTime\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:get_timeframe_dates\(\) should return array but returns false\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Admin/API/Reports/TimeInterval.php
@@ -44467,12 +44455,6 @@ parameters:
 			message: '#^Parameter \#2 \$datetime of static method DateTime\:\:createFromFormat\(\) expects string, int given\.$#'
 			identifier: argument.type
 			count: 2
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Parameter \$current_date of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:get_timeframe_dates\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
 			path: src/Admin/API/Reports/TimeInterval.php
 
 		-
@@ -45278,24 +45260,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Admin/DataSourcePoller.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\DateTimeProvider\\CurrentDateTimeProvider\:\:get_now\(\) has invalid return type Automattic\\WooCommerce\\Admin\\DateTimeProvider\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/DateTimeProvider/CurrentDateTimeProvider.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\DateTimeProvider\\CurrentDateTimeProvider\:\:get_now\(\) should return Automattic\\WooCommerce\\Admin\\DateTimeProvider\\DateTime but returns DateTime\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/DateTimeProvider/CurrentDateTimeProvider.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\DateTimeProvider\\DateTimeProviderInterface\:\:get_now\(\) has invalid return type Automattic\\WooCommerce\\Admin\\DateTimeProvider\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/DateTimeProvider/DateTimeProviderInterface.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\DeprecatedClassFacade\:\:__call\(\) has no return type specified\.$#'
