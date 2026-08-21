@@ -333,6 +333,34 @@ describe( 'dataform adapter', () => {
 		} );
 	} );
 
+	describe( 'disabled state', () => {
+		it( 'honours a disabled custom attribute with presence semantics', () => {
+			const attributeDisabled = buildDataFormField(
+				{ ...textField, customAttributes: { disabled: 'disabled' } },
+				createOptions( [] )
+			);
+			expect( attributeDisabled.isDisabled ).toBe( true );
+
+			const attributeFalse = buildDataFormField(
+				{ ...textField, customAttributes: { disabled: false } },
+				createOptions( [] )
+			);
+			expect( attributeFalse.isDisabled ).toBe( false );
+
+			const noAttribute = buildDataFormField(
+				textField,
+				createOptions( [] )
+			);
+			expect( noAttribute.isDisabled ).toBe( false );
+
+			const fieldDisabled = buildDataFormField(
+				{ ...textField, disabled: true },
+				createOptions( [] )
+			);
+			expect( fieldDisabled.isDisabled ).toBe( true );
+		} );
+	} );
+
 	describe( 'mounted DataForm behaviour', () => {
 		it( 'honours isDisabled on package controls', () => {
 			const enabledField: SettingsUIField = {

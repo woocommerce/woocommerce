@@ -167,6 +167,19 @@ const createInfoRender = (
 	};
 };
 
+// Classic settings disable fields through custom_attributes with HTML
+// presence semantics, so any defined value except boolean false disables.
+const isFieldDisabled = ( settingsField: SettingsUIField ) => {
+	if ( settingsField.disabled ) {
+		return true;
+	}
+
+	const disabledAttribute = settingsField.customAttributes?.disabled;
+	return (
+		typeof disabledAttribute !== 'undefined' && disabledAttribute !== false
+	);
+};
+
 export const buildDataFormField = (
 	settingsField: SettingsUIField,
 	options: DataFormAdapterOptions
@@ -181,7 +194,7 @@ export const buildDataFormField = (
 		type: descriptor?.type ?? 'text',
 		elements: settingsField.options,
 		isVisible: createIsVisible( settingsField, options ),
-		isDisabled: Boolean( settingsField.disabled ),
+		isDisabled: isFieldDisabled( settingsField ),
 	};
 
 	if ( settingsField.type === 'info' ) {
