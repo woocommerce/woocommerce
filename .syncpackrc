@@ -476,25 +476,12 @@
 			"isIgnored": true
 		},
 		{
-<<<<<<< HEAD
-			"label": "experimental-products-app uses custom WordPress package versions",
-			"dependencies": [
-				"@wordpress/base-styles",
-				"@wordpress/dataviews",
-				"@wordpress/icons",
-				"@wordpress/router",
-				"@wordpress/theme"
-			],
-			"packages": [
-				"@woocommerce/experimental-products-app"
-=======
 			"label": "settings-ui temporarily pins DataViews 17.1.0 for the DataForm migration",
 			"dependencies": [
 				"@wordpress/dataviews"
 			],
 			"packages": [
 				"@woocommerce/settings-ui"
->>>>>>> 105e1ed15a (Remove experimental products app features (#67883))
 			],
 			"isIgnored": true
 		},
