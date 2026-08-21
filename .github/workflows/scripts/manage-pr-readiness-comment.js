@@ -16,11 +16,14 @@ async function findExistingComment(github, context, prNumber) {
         per_page: 100,
     });
 
+    // Optional chaining: a deleted account leaves `user` null (ghost), and
+    // `body` can likewise be absent - either one on any unrelated comment
+    // in the thread would otherwise throw and fail the whole run.
     return (
         comments.find(
             (comment) =>
-                comment.user.login === 'github-actions[bot]' &&
-                comment.body.includes(MARKER_PREFIX)
+                comment.user?.login === 'github-actions[bot]' &&
+                comment.body?.includes(MARKER_PREFIX)
         ) || null
     );
 }
