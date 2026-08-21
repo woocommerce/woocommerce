@@ -86,6 +86,36 @@ class BlockTemplatesControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should still return a customised WooCommerce template part when queried by its own wp_id.
+	 */
+	public function test_wp_id_query_returns_matching_customised_woo_template(): void {
+		$woo_template_part = $this->create_template_part( 'woo-custom-template-part' . uniqid(), BlockTemplateUtils::PLUGIN_SLUG );
+		$this->create_template_part( 'other-woo-custom-template-part' . uniqid(), BlockTemplateUtils::PLUGIN_SLUG );
+		$this->flush_block_template_caches();
+
+		$result = $this->sut->add_db_templates_with_woo_slug(
+			array(),
+			array( 'wp_id' => $woo_template_part->ID ),
+			'wp_template_part'
+		);
+
+		$this->assertNotEmpty( $result, 'Customised WooCommerce template parts must remain findable by wp_id.' );
+		$this->assertSame(
+			$woo_template_part->ID,
+			(int) $result[0]->wp_id,
+			'The matching customised WooCommerce template part should be returned first.'
+		);
+
+		foreach ( $result as $template ) {
+			$this->assertSame(
+				$woo_template_part->ID,
+				(int) ( $template->wp_id ?? 0 ),
+				'A wp_id query must not include other customised WooCommerce templates.'
+			);
+		}
+	}
+
+	/**
 	 * @testdox Should still include customised WooCommerce template parts when the query has no wp_id.
 	 */
 	public function test_query_without_wp_id_includes_customised_woo_templates(): void {
