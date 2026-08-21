@@ -344,11 +344,11 @@ class WC_Post_Types {
 			$supports[] = 'comments';
 		}
 
-		$shop_page_id         = wc_get_page_id( 'shop' );
-		$theme_support        = wc_current_theme_supports_woocommerce_or_fse();
-		$active_theme_skipped = self::wp_cli_skips_active_theme();
+		$shop_page_id      = wc_get_page_id( 'shop' );
+		$theme_support     = wc_current_theme_supports_woocommerce_or_fse();
+		$theme_unavailable = self::wp_cli_skips_active_theme() || wp_installing();
 
-		if ( self::should_register_product_archive( $theme_support, $active_theme_skipped ) ) {
+		if ( self::should_register_product_archive( $theme_support, $theme_unavailable ) ) {
 			$has_archive = $shop_page_id && get_post( $shop_page_id ) ? urldecode( get_page_uri( $shop_page_id ) ) : 'shop';
 		} else {
 			$has_archive = false;
@@ -546,12 +546,12 @@ class WC_Post_Types {
 	/**
 	 * Resolve theme support used to register the product archive.
 	 *
-	 * @param bool $theme_support        Whether the current request reports theme support.
-	 * @param bool $active_theme_skipped Whether WP-CLI skipped the active theme.
+	 * @param bool $theme_support     Whether the current request reports theme support.
+	 * @param bool $theme_unavailable Whether the active theme may not be loaded on this request.
 	 * @return bool
 	 */
-	private static function should_register_product_archive( bool $theme_support, bool $active_theme_skipped ): bool {
-		if ( $theme_support || ! $active_theme_skipped ) {
+	private static function should_register_product_archive( bool $theme_support, bool $theme_unavailable ): bool {
+		if ( $theme_support || ! $theme_unavailable ) {
 			return $theme_support;
 		}
 
@@ -767,8 +767,18 @@ class WC_Post_Types {
 
 	/**
 	 * Flush rewrite rules.
+	 *
+	 * While WordPress is installing, the registration graph can be incomplete because themes and
+	 * regular plugins may not be loaded, so flushing now would persist rules that are missing
+	 * third-party post types, taxonomies, and the product archive. Queue the flush instead and let
+	 * the next normal request regenerate the rules from a complete graph.
 	 */
 	public static function flush_rewrite_rules() {
+		if ( wp_installing() ) {
+			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
+			return;
+		}
+
 		flush_rewrite_rules();
 	}
 

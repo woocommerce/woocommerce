@@ -13,6 +13,11 @@ declare( strict_types = 1 );
 class WC_Post_Types_Test extends WC_Unit_Test_Case {
 
 	/**
+	 * Post type standing in for one owned by a third-party plugin.
+	 */
+	private const THIRD_PARTY_POST_TYPE = 'wc_test_third_party';
+
+	/**
 	 * Original active theme stylesheet.
 	 *
 	 * @var string
@@ -107,6 +112,10 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 
 		wp_installing( false );
 
+		if ( post_type_exists( self::THIRD_PARTY_POST_TYPE ) ) {
+			unregister_post_type( self::THIRD_PARTY_POST_TYPE );
+		}
+
 		if ( get_stylesheet() !== $this->original_theme ) {
 			switch_theme( $this->original_theme );
 		}
@@ -145,17 +154,17 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Product archive registration uses runtime support unless WP-CLI skipped the active theme.
+	 * @testdox Product archive registration uses runtime support unless the active theme may not be loaded.
 	 * @dataProvider provide_product_archive_theme_support_cases
 	 *
 	 * @param bool   $runtime_support      Whether the current request reports theme support.
-	 * @param bool   $active_theme_skipped Whether WP-CLI skipped the active theme.
+	 * @param bool   $theme_unavailable    Whether the active theme may not be loaded on this request.
 	 * @param string $stored_support       Stored support from the last trusted request.
 	 * @param bool   $expected             Expected resolved support.
 	 */
 	public function test_should_register_product_archive(
 		bool $runtime_support,
-		bool $active_theme_skipped,
+		bool $theme_unavailable,
 		string $stored_support,
 		bool $expected
 	): void {
@@ -166,8 +175,8 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame(
 			$expected,
-			$method->invoke( null, $runtime_support, $active_theme_skipped ),
-			'Product archive support should only fall back to trusted stored support when WP-CLI skipped the active theme.'
+			$method->invoke( null, $runtime_support, $theme_unavailable ),
+			'Product archive support should only fall back to trusted stored support when the active theme may not be loaded.'
 		);
 	}
 
@@ -180,9 +189,9 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 		return array(
 			'supported runtime'                    => array( true, false, 'no', true ),
 			'ordinary cron ignores stored support' => array( false, false, 'yes', false ),
-			'WP-CLI skipped supported theme'       => array( false, true, 'yes', true ),
-			'WP-CLI skipped unsupported theme'     => array( false, true, 'no', false ),
-			'supported WP-CLI runtime'             => array( true, true, 'no', true ),
+			'unavailable theme, stored support'    => array( false, true, 'yes', true ),
+			'unavailable theme, stored no support' => array( false, true, 'no', false ),
+			'supported runtime, unavailable theme' => array( true, true, 'no', true ),
 		);
 	}
 
@@ -218,6 +227,10 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 		remove_action( 'woocommerce_after_register_post_type', $after_hook );
 
 		$this->assertTrue( post_type_exists( 'product' ), 'Product registration should continue while WordPress is installing.' );
+		$this->assertNotFalse(
+			get_post_type_object( 'product' )->has_archive,
+			'Installing mode should register the product archive from trusted stored support.'
+		);
 		$this->assertSame( 1, $before_hook_count, 'The pre-registration hook should still fire.' );
 		$this->assertSame( 1, $after_hook_count, 'The post-registration hook should still fire.' );
 		$this->assertSame( 'yes', get_option( 'current_theme_supports_woocommerce' ), 'Installing mode should not persist request-local missing theme support.' );
@@ -268,6 +281,123 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 'no', get_option( 'woocommerce_queue_flush_rewrite_rules' ), 'Normal requests should consume the queued flush.' );
 		$this->assertNotEmpty( $rules, 'Normal requests should persist regenerated rewrite rules.' );
 		$this->assertNotEmpty( $product_rules, 'Regenerated rules should include WooCommerce product rewrites.' );
+	}
+
+	/**
+	 * @testdox An installer flush during installing mode is deferred and the next normal request restores complete rules.
+	 */
+	public function test_installer_flush_during_installing_mode_recovers_on_next_normal_request(): void {
+		global $wp_rewrite;
+
+		$wp_rewrite->set_permalink_structure( '/%postname%/' );
+
+		// Phase 1 - healthy baseline: supported theme, a third-party post type, complete persisted rules.
+		switch_theme( 'storefront' );
+		add_theme_support( 'woocommerce' );
+		update_option( 'current_theme_supports_woocommerce', 'yes' );
+		update_option( 'woocommerce_queue_flush_rewrite_rules', 'no' );
+		$this->register_third_party_post_type();
+		unregister_post_type( 'product' );
+		WC_Post_Types::register_post_types();
+		WC_Post_Types::flush_rewrite_rules();
+		wp_cache_flush();
+
+		$baseline_archive     = $this->count_rules_matching( 'post_type=product' );
+		$baseline_third_party = $this->count_rules_matching( self::THIRD_PARTY_POST_TYPE );
+
+		$this->assertGreaterThan( 0, $baseline_archive, 'The baseline must contain product archive rewrite rules.' );
+		$this->assertGreaterThan( 0, $baseline_third_party, 'The baseline must contain the third-party rewrite rules.' );
+
+		// Phase 2 - installing mode: no theme, no third-party plugin, then the installer flush.
+		remove_theme_support( 'woocommerce' );
+		unregister_post_type( self::THIRD_PARTY_POST_TYPE );
+		wp_installing( true );
+
+		unregister_post_type( 'product' );
+		WC_Post_Types::register_post_types();
+
+		/**
+		 * Simulate the installer flush that WC_Install::install() fires.
+		 *
+		 * @since 2.7.0
+		 */
+		do_action( 'woocommerce_flush_rewrite_rules' );
+
+		wp_installing( false );
+		wp_cache_flush();
+
+		$this->assertSame(
+			$baseline_archive,
+			$this->count_rules_matching( 'post_type=product' ),
+			'An installer flush during installing mode must not drop the persisted product archive rules.'
+		);
+		$this->assertSame(
+			$baseline_third_party,
+			$this->count_rules_matching( self::THIRD_PARTY_POST_TYPE ),
+			'An installer flush during installing mode must not drop rules owned by plugins that were not loaded.'
+		);
+		$this->assertSame(
+			'yes',
+			get_option( 'woocommerce_queue_flush_rewrite_rules' ),
+			'An installer flush during installing mode should be deferred to the next normal request.'
+		);
+
+		// Phase 3 - next normal request with the theme and the third-party plugin back.
+		add_theme_support( 'woocommerce' );
+		$this->register_third_party_post_type();
+		unregister_post_type( 'product' );
+		WC_Post_Types::register_post_types();
+		WC_Post_Types::maybe_flush_rewrite_rules();
+		wp_cache_flush();
+
+		$this->assertSame(
+			'no',
+			get_option( 'woocommerce_queue_flush_rewrite_rules' ),
+			'The next normal request should consume the deferred flush.'
+		);
+		$this->assertSame(
+			$baseline_archive,
+			$this->count_rules_matching( 'post_type=product' ),
+			'The next normal request must serve complete product archive rules.'
+		);
+		$this->assertSame(
+			$baseline_third_party,
+			$this->count_rules_matching( self::THIRD_PARTY_POST_TYPE ),
+			'The next normal request must restore rules owned by plugins that were not loaded.'
+		);
+	}
+
+	/**
+	 * Register a public post type standing in for one owned by a third-party plugin.
+	 */
+	private function register_third_party_post_type(): void {
+		register_post_type(
+			self::THIRD_PARTY_POST_TYPE,
+			array(
+				'public'      => true,
+				'has_archive' => true,
+				'rewrite'     => array( 'slug' => self::THIRD_PARTY_POST_TYPE ),
+			)
+		);
+	}
+
+	/**
+	 * Count persisted rewrite rules whose query string contains the given needle.
+	 *
+	 * @param string $needle Query string fragment to match.
+	 * @return int
+	 */
+	private function count_rules_matching( string $needle ): int {
+		$rules = (array) get_option( 'rewrite_rules' );
+
+		return count(
+			array_filter(
+				$rules,
+				static function ( $query ) use ( $needle ): bool {
+					return str_contains( (string) $query, $needle );
+				}
+			)
+		);
 	}
 
 	/**
