@@ -18,6 +18,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
@@ -3619,4 +3620,25 @@ function wc_update_1110_flush_product_count_cache() {
 	if ( class_exists( \Automattic\WooCommerce\Caches\ProductCountCache::class ) ) {
 		( new \Automattic\WooCommerce\Caches\ProductCountCache() )->flush( 'product' );
 	}
+}
+
+/**
+ * Migrate the Back in Stock Notifications alpha opt-in from the
+ * WOOCOMMERCE_BIS_ALPHA_ENABLED wp-config constant to the
+ * 'customer_stock_notifications' feature toggle.
+ *
+ * Only stores that explicitly opted in via the constant are touched, and
+ * add_option() is a no-op when the feature option already exists, so a choice
+ * already made on the Features screen is never overwritten.
+ *
+ * @since 11.2.0
+ *
+ * @return void
+ */
+function wc_update_1120_migrate_stock_notifications_alpha_constant() {
+	if ( ! Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
+		return;
+	}
+
+	add_option( 'woocommerce_feature_customer_stock_notifications_enabled', 'yes', '', true );
 }

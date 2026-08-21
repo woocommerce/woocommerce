@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests\Functions.
  */
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
@@ -12,6 +13,14 @@ use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
  * Class WC_Core_Functions_Test
  */
 class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		Constants::clear_single_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' );
+		parent::tearDown();
+	}
 
 	/**
 	 * Test wc_update_343_cleanup_foreign_keys() function.
@@ -354,5 +363,57 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		wc_update_1110_delete_dashboard_outofstock_count_transient();
 		$this->assertFalse( get_transient( 'wc_outofstock_count' ) );
+	}
+
+	/**
+	 * @testdox Migration enables the customer_stock_notifications feature when the alpha constant is set.
+	 */
+	public function test_wc_update_1120_migrate_stock_notifications_alpha_constant_opts_in(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$db_updates = WC_Install::get_db_update_callbacks();
+		$this->assertArrayHasKey( '11.2.0', $db_updates );
+		$this->assertContains( 'wc_update_1120_migrate_stock_notifications_alpha_constant', $db_updates['11.2.0'] );
+
+		delete_option( 'woocommerce_feature_customer_stock_notifications_enabled' );
+		Constants::set_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
+
+		wc_update_1120_migrate_stock_notifications_alpha_constant();
+
+		$this->assertSame( 'yes', get_option( 'woocommerce_feature_customer_stock_notifications_enabled' ) );
+	}
+
+	/**
+	 * @testdox Migration leaves the feature untouched when the alpha constant is absent or falsy.
+	 */
+	public function test_wc_update_1120_migrate_stock_notifications_alpha_constant_without_opt_in(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		delete_option( 'woocommerce_feature_customer_stock_notifications_enabled' );
+		Constants::clear_single_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' );
+
+		wc_update_1120_migrate_stock_notifications_alpha_constant();
+
+		$this->assertFalse( get_option( 'woocommerce_feature_customer_stock_notifications_enabled' ) );
+
+		Constants::set_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', false );
+
+		wc_update_1120_migrate_stock_notifications_alpha_constant();
+
+		$this->assertFalse( get_option( 'woocommerce_feature_customer_stock_notifications_enabled' ) );
+	}
+
+	/**
+	 * @testdox Migration never overwrites a choice already made on the Features screen.
+	 */
+	public function test_wc_update_1120_migrate_stock_notifications_alpha_constant_keeps_existing_option(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		update_option( 'woocommerce_feature_customer_stock_notifications_enabled', 'no' );
+		Constants::set_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
+
+		wc_update_1120_migrate_stock_notifications_alpha_constant();
+
+		$this->assertSame( 'no', get_option( 'woocommerce_feature_customer_stock_notifications_enabled' ) );
 	}
 }
