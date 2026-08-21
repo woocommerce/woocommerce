@@ -28,6 +28,13 @@ jobs:
       - name: 'Checkout'
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
+          # workflow_run already resolves the implicit ref to the default
+          # branch, never PR code - stating it explicitly makes that
+          # security invariant reviewable instead of an implicit default.
+          ref: ${{ github.event.repository.default_branch }}
+          # No step here runs git, so the write token has no business
+          # persisting in the local git config.
+          persist-credentials: false
           sparse-checkout: |
             .github/workflows/scripts
 
