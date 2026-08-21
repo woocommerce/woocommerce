@@ -776,6 +776,16 @@ class WC_Post_Types {
 	public static function flush_rewrite_rules() {
 		if ( wp_installing() ) {
 			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
+
+			/*
+			 * While WordPress is installing, update_option() writes the row but skips every cache
+			 * update, so a persistent object cache keeps serving the previous value and the next
+			 * request never sees the queued flush. Evict both places the option can be cached: on
+			 * its own key, and inside the autoloaded bundle.
+			 */
+			wp_cache_delete( 'woocommerce_queue_flush_rewrite_rules', 'options' );
+			wp_cache_delete( 'alloptions', 'options' );
+
 			return;
 		}
 

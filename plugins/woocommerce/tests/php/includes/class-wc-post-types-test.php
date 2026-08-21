@@ -300,7 +300,6 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 		unregister_post_type( 'product' );
 		WC_Post_Types::register_post_types();
 		WC_Post_Types::flush_rewrite_rules();
-		wp_cache_flush();
 
 		$baseline_archive     = $this->count_rules_matching( 'post_type=product' );
 		$baseline_third_party = $this->count_rules_matching( self::THIRD_PARTY_POST_TYPE );
@@ -324,7 +323,6 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 		do_action( 'woocommerce_flush_rewrite_rules' );
 
 		wp_installing( false );
-		wp_cache_flush();
 
 		$this->assertSame(
 			$baseline_archive,
@@ -348,7 +346,6 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 		unregister_post_type( 'product' );
 		WC_Post_Types::register_post_types();
 		WC_Post_Types::maybe_flush_rewrite_rules();
-		wp_cache_flush();
 
 		$this->assertSame(
 			'no',
@@ -364,6 +361,44 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 			$baseline_third_party,
 			$this->count_rules_matching( self::THIRD_PARTY_POST_TYPE ),
 			'The next normal request must restore rules owned by plugins that were not loaded.'
+		);
+	}
+
+	/**
+	 * @testdox A flush deferred during installing mode survives a persistent object cache.
+	 * @dataProvider provide_queue_option_autoload_cases
+	 *
+	 * @param bool $autoload Whether the queue option is autoloaded.
+	 */
+	public function test_deferred_flush_is_visible_to_the_next_request( bool $autoload ): void {
+		// update_option() skips every cache write while WordPress is installing, and a new PHP
+		// request does not clear a persistent object cache, so the queue has to be evicted wherever
+		// the option happens to be cached.
+		delete_option( 'woocommerce_queue_flush_rewrite_rules' );
+		add_option( 'woocommerce_queue_flush_rewrite_rules', 'no', '', $autoload );
+
+		$this->assertSame( 'no', get_option( 'woocommerce_queue_flush_rewrite_rules' ), 'The queue should start cached and unset.' );
+
+		wp_installing( true );
+		WC_Post_Types::flush_rewrite_rules();
+		wp_installing( false );
+
+		$this->assertSame(
+			'yes',
+			get_option( 'woocommerce_queue_flush_rewrite_rules' ),
+			'The next request should read the queued flush rather than a stale cached value.'
+		);
+	}
+
+	/**
+	 * Data provider covering both places the queue option can be cached.
+	 *
+	 * @return array<string, array{bool}>
+	 */
+	public function provide_queue_option_autoload_cases(): array {
+		return array(
+			'autoloaded, cached in the alloptions bundle' => array( true ),
+			'not autoloaded, cached on its own key'       => array( false ),
 		);
 	}
 
