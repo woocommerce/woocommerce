@@ -101,7 +101,7 @@ class OrdersTableFieldQuery {
 	 *
 	 * @param array $q A field_query array.
 	 * @return array A sanitized field query array.
-	 * @throws \Exception When field table info is missing.
+	 * @throws \Exception When a 'field' or 'compare' value cannot be used as a string.
 	 */
 	private function sanitize_query( array $q ) {
 		$sanitized = array();
@@ -116,8 +116,15 @@ class OrdersTableFieldQuery {
 					continue;
 				}
 
-				// Sanitize 'compare'.
-				$arg['compare'] = strtoupper( $arg['compare'] ?? '=' );
+				// No fallback: an unrecognised operator becomes '=', which is promoted to 'IN' for
+				// array values, so a malformed 'NOT IN' would return the complement.
+				$compare = $arg['compare'] ?? '=';
+
+				if ( ! $this->is_stringable( $compare ) ) {
+					throw $this->invalid_query_arg( esc_html__( 'Invalid field_query comparison.', 'woocommerce' ) );
+				}
+
+				$arg['compare'] = strtoupper( (string) $compare );
 				$arg['compare'] = in_array( $arg['compare'], self::VALID_COMPARISON_OPERATORS, true ) ? $arg['compare'] : '=';
 
 				if ( '=' === $arg['compare'] && isset( $arg['value'] ) && is_array( $arg['value'] ) ) {
@@ -126,6 +133,11 @@ class OrdersTableFieldQuery {
 
 				// Sanitize 'cast'.
 				$arg['cast'] = $this->sanitize_cast_type( $arg['type'] ?? '' );
+
+				// Reaches strstr() in get_field_mapping_info().
+				if ( ! $this->is_stringable( $arg['field'] ) ) {
+					throw $this->invalid_query_arg( esc_html__( 'Invalid field_query field.', 'woocommerce' ) );
+				}
 
 				$field_info = $this->query->get_field_mapping_info( $arg['field'] );
 				if ( ! $field_info ) {
@@ -153,12 +165,67 @@ class OrdersTableFieldQuery {
 	}
 
 	/**
+	 * Reports a malformed query arg, which otherwise degrades the query silently.
+	 *
+	 * Not wc_doing_it_wrong(): that writes to error_log() unconditionally on REST and AJAX
+	 * requests, which a loop over stored bad data would flood.
+	 *
+	 * @since 11.2.0
+	 * @param string $message Description of the offending arg, already escaped.
+	 * @return void
+	 */
+	private function report_invalid_query_arg( string $message ): void {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped by the caller, which phpcs cannot see through this indirection.
+		_doing_it_wrong( 'wc_get_orders', $message, '11.2.0' );
+	}
+
+	/**
+	 * Reports a malformed query arg and returns the exception to throw for it.
+	 *
+	 * @since 11.2.0
+	 * @param string $message Description of the offending arg, already escaped.
+	 * @return \Exception The exception for the caller to throw.
+	 */
+	private function invalid_query_arg( string $message ): \Exception {
+		$this->report_invalid_query_arg( $message );
+
+		// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Escaped by the caller, which phpcs cannot see through this indirection.
+		return new \Exception( $message );
+	}
+
+	/**
+	 * Checks whether a value can be used where a string is expected.
+	 *
+	 * A null value counts as usable, because every consumer reached through this guard is an
+	 * internal function, where PHP treats null as a deprecation rather than an error. That does
+	 * NOT hold for a userland parameter declared string, which still raises a TypeError, so a
+	 * caller passing null into one of those needs its own check.
+	 *
+	 * @since 11.2.0
+	 * @param mixed $value The value to check.
+	 * @return bool True if the value can be converted to a string, false otherwise.
+	 */
+	private function is_stringable( $value ): bool {
+		return is_null( $value ) || is_scalar( $value ) || ( is_object( $value ) && method_exists( $value, '__toString' ) );
+	}
+
+	/**
 	 * Makes sure we use an AND or OR relation. Defaults to AND.
 	 *
-	 * @param string $relation An unsanitized relation prop.
+	 * @param mixed $relation An unsanitized relation prop. Untyped because it comes straight from
+	 *                        the caller's args; a value that cannot be used as a string falls back.
 	 * @return string
 	 */
-	private function sanitize_relation( string $relation ): string {
+	private function sanitize_relation( $relation ): string {
+		// Untyped: a string declaration would turn an array into an uncatchable TypeError.
+		if ( ! $this->is_stringable( $relation ) ) {
+			$this->report_invalid_query_arg( esc_html__( 'Invalid field_query relation.', 'woocommerce' ) );
+
+			return 'AND';
+		}
+
+		$relation = (string) $relation;
+
 		if ( ! empty( $relation ) && 'OR' === strtoupper( $relation ) ) {
 			return 'OR';
 		}
@@ -259,7 +326,14 @@ class OrdersTableFieldQuery {
 	 * @return string MySQL type.
 	 */
 	private function sanitize_cast_type( $type ) {
-		$clause_type = strtoupper( $type );
+		// Reaches strtoupper(). The cast does not restrict, so it falls back like an unknown type.
+		if ( ! $this->is_stringable( $type ) ) {
+			$this->report_invalid_query_arg( esc_html__( 'Invalid field_query cast type.', 'woocommerce' ) );
+
+			return 'CHAR';
+		}
+
+		$clause_type = strtoupper( (string) $type );
 
 		if ( ! $clause_type || ! preg_match( '/^(?:BINARY|CHAR|DATE|DATETIME|SIGNED|UNSIGNED|TIME|NUMERIC(?:\(\d+(?:,\s?\d+)?\))?|DECIMAL(?:\(\d+(?:,\s?\d+)?\))?)$/', $clause_type ) ) {
 			return 'CHAR';
@@ -277,6 +351,7 @@ class OrdersTableFieldQuery {
 	 *
 	 * @param array $clause An atomic field_query clause.
 	 * @return string An SQL WHERE clause or an empty string if $clause is invalid.
+	 * @throws \Exception When a clause value cannot be used as a string.
 	 */
 	private function generate_where_for_clause( $clause ): string {
 		global $wpdb;
@@ -285,7 +360,12 @@ class OrdersTableFieldQuery {
 
 		if ( in_array( $clause['compare'], array( 'IN', 'NOT IN', 'BETWEEN', 'NOT BETWEEN' ), true ) ) {
 			if ( ! is_array( $clause_value ) ) {
-				$clause_value = preg_split( '/[,\s]+/', $clause_value );
+				// Reaches preg_split(). This value restricts, so it fails closed.
+				if ( ! $this->is_stringable( $clause_value ) ) {
+					throw $this->invalid_query_arg( esc_html__( 'Invalid field_query value.', 'woocommerce' ) );
+				}
+
+				$clause_value = preg_split( '/[,\s]+/', (string) $clause_value );
 			}
 		} elseif ( is_string( $clause_value ) ) {
 			$clause_value = trim( $clause_value );
@@ -303,6 +383,11 @@ class OrdersTableFieldQuery {
 				break;
 			case 'LIKE':
 			case 'NOT LIKE':
+				// esc_like() calls addcslashes().
+				if ( ! $this->is_stringable( $clause_value ) ) {
+					throw $this->invalid_query_arg( esc_html__( 'Invalid field_query value.', 'woocommerce' ) );
+				}
+
 				$where = $wpdb->prepare( '%s', '%' . $wpdb->esc_like( $clause_value ) . '%' );
 				break;
 			case 'EXISTS':

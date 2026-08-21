@@ -194,7 +194,8 @@ class OrdersTableQuery {
 		unset( $args['suppress_filters'] );
 
 		$this->args       = $args;
-		$this->query_args = $args; // Keep a copy of the original vars used to initialize the query.
+		$this->query_args = $args;
+		// Keep a copy of the original vars used to initialize the query.
 
 		// TODO: 'name' arg (post_name equivalent) is not yet implemented for HPOS.
 		unset( $this->args['name'] );
@@ -455,6 +456,19 @@ class OrdersTableQuery {
 	 */
 	private function process_date_args(): void {
 		if ( $this->arg_isset( 'date_query' ) ) {
+			if ( ! is_array( $this->args['date_query'] ) ) {
+				// Reject rather than discard: date_query restricts, so dropping it would widen
+				// the query to every order.
+				if ( ! empty( $this->args['date_query'] ) ) {
+					throw $this->invalid_query_arg( esc_html__( 'Invalid date_query.', 'woocommerce' ) );
+				}
+
+				// Falsy values carried no restriction before, so normalise rather than reject.
+				// arg_isset() does not treat them as unset, so without this they reach the
+				// array_merge() below as soon as another date arg is present.
+				$this->args['date_query'] = array();
+			}
+
 			// Process already passed date queries args.
 			$this->args['date_query'] = $this->map_gmt_and_post_keys_to_hpos_keys( $this->args['date_query'] );
 		}
@@ -477,9 +491,15 @@ class OrdersTableQuery {
 		foreach ( $date_keys as $date_key ) {
 			$is_local   = in_array( $date_key, $local_date_keys, true );
 			$date_value = $this->args[ $date_key ];
-			$operator   = '=';
-			$dates_raw  = array();
-			$dates      = array();
+
+			// Reaches strtotime() further down. This is the failure reported in issue #58259.
+			if ( ! $this->is_stringable( $date_value ) ) {
+				throw $this->invalid_query_arg( esc_html__( 'Invalid date argument.', 'woocommerce' ) );
+			}
+
+			$operator  = '=';
+			$dates_raw = array();
+			$dates     = array();
 
 			if ( is_string( $date_value ) && preg_match( self::REGEX_SHORTHAND_DATES, $date_value, $matches ) ) {
 				$operator = in_array( $matches[2], $valid_operators, true ) ? $matches[2] : '';
@@ -570,6 +590,7 @@ class OrdersTableQuery {
 	 * @param array $query Date query argument.
 	 *
 	 * @return array|mixed Date query argument with modified keys.
+	 * @throws \Exception When a date_query column or value cannot be interpreted.
 	 */
 	private function map_gmt_and_post_keys_to_hpos_keys( $query ) {
 		if ( ! is_array( $query ) ) {
@@ -594,6 +615,19 @@ class OrdersTableQuery {
 			'date_completed' => 'date_completed_gmt',
 		);
 
+		// Every leaf, not just the ones converted below: the rest go to WP_Date_Query, which
+		// feeds them to preg_match() unchecked. This only rejects values that cannot be used as a
+		// string; WP_Date_Query's own numeric args (year, monthnum and so on) reach mktime(),
+		// which wants ?int, and are not covered here.
+		array_walk_recursive(
+			$query,
+			function ( $leaf ) {
+				if ( ! $this->is_stringable( $leaf ) ) {
+					throw $this->invalid_query_arg( esc_html__( 'Invalid date_query value.', 'woocommerce' ) );
+				}
+			}
+		);
+
 		array_walk(
 			$query,
 			function ( &$sub_query ) {
@@ -605,6 +639,11 @@ class OrdersTableQuery {
 			return $query;
 		}
 
+		// Used as an array offset below.
+		if ( ! is_string( $query['column'] ) && ! is_int( $query['column'] ) ) {
+			throw $this->invalid_query_arg( esc_html__( 'Invalid date_query column.', 'woocommerce' ) );
+		}
+
 		if ( isset( $post_to_hpos_mappings[ $query['column'] ] ) ) {
 			$query['column'] = $post_to_hpos_mappings[ $query['column'] ];
 		}
@@ -613,9 +652,17 @@ class OrdersTableQuery {
 		if ( isset( $local_to_gmt_date_keys[ $query['column'] ] ) ) {
 			$query['column']  = $local_to_gmt_date_keys[ $query['column'] ];
 			$op               = isset( $query['after'] ) ? 'after' : 'before';
-			$date_value_local = $query[ $op ];
-			$date_value_gmt   = wc_string_to_timestamp( get_gmt_from_date( wc_string_to_datetime( $date_value_local ) ) );
-			$query[ $op ]     = $this->date_to_date_query_arg( $date_value_gmt );
+			$date_value_local = $query[ $op ] ?? '';
+
+			// wc_string_to_datetime() starts with preg_match(). This includes WP_Date_Query's
+			// array form, which this local-to-GMT conversion has never supported: it fatalled
+			// here before and now fails closed. That form still works on the _gmt columns.
+			if ( ! $this->is_stringable( $date_value_local ) ) {
+				throw $this->invalid_query_arg( esc_html__( 'Invalid date_query value.', 'woocommerce' ) );
+			}
+
+			$date_value_gmt = wc_string_to_timestamp( get_gmt_from_date( wc_string_to_datetime( $date_value_local ) ) );
+			$query[ $op ]   = $this->date_to_date_query_arg( $date_value_gmt );
 		}
 
 		return $query;
@@ -678,6 +725,7 @@ class OrdersTableQuery {
 	 * Sanitizes the 'status' query var.
 	 *
 	 * @return void
+	 * @throws \Exception When a status cannot be used as a string.
 	 */
 	private function sanitize_status(): void {
 		$valid_statuses = array_keys( wc_get_order_statuses() );
@@ -701,6 +749,15 @@ class OrdersTableQuery {
 		}
 
 		foreach ( $this->args['status'] as &$status ) {
+			// Only an object raises an Error on the concatenation below. An array merely warns,
+			// and what it degrades to depends on the entry: an empty one is dropped by
+			// array_filter() and leaves the clause unrestricted, a non-empty one becomes the
+			// literal 'Array' and matches nothing. Neither fatalled, so rejecting them here would
+			// change a query that previously worked.
+			if ( is_object( $status ) && ! method_exists( $status, '__toString' ) ) {
+				throw $this->invalid_query_arg( esc_html__( 'Invalid order status.', 'woocommerce' ) );
+			}
+
 			$status = in_array( 'wc-' . $status, $valid_statuses, true ) ? 'wc-' . $status : $status;
 		}
 
@@ -765,10 +822,21 @@ class OrdersTableQuery {
 	/**
 	 * Makes sure the order in an ORDER BY statement is either 'ASC' o 'DESC'.
 	 *
-	 * @param string $order The unsanitized order.
+	 * @param mixed $order The unsanitized order. Untyped because it comes straight from the
+	 *                     caller's args; a value that cannot be used as a string falls back.
 	 * @return string The sanitized order.
 	 */
-	private function sanitize_order( string $order ): string {
+	private function sanitize_order( $order ): string {
+		// Untyped: a string declaration would turn an array into an uncatchable TypeError.
+		// Sorting does not restrict, so an unusable value falls back to the default direction.
+		if ( ! $this->is_stringable( $order ) ) {
+			$this->report_invalid_query_arg( esc_html__( 'Invalid order direction.', 'woocommerce' ) );
+
+			return 'DESC';
+		}
+
+		$order = (string) $order;
+
 		$order = strtoupper( $order );
 
 		return in_array( $order, array( 'ASC', 'DESC' ), true ) ? $order : 'DESC';
@@ -778,6 +846,7 @@ class OrdersTableQuery {
 	 * Builds the final SQL query to be run.
 	 *
 	 * @return void
+	 * @throws \Exception When the caller's query args cannot be interpreted.
 	 */
 	private function build_query(): void {
 		$this->maybe_remap_args();
@@ -798,6 +867,16 @@ class OrdersTableQuery {
 
 		// Search queries.
 		if ( ! empty( $this->args['s'] ) ) {
+			// Reaches sanitise_boolean_fts_search_term(), which declares a string parameter.
+			if ( ! $this->is_stringable( $this->args['s'] ) ) {
+				throw $this->invalid_query_arg( esc_html__( 'Invalid search term.', 'woocommerce' ) );
+			}
+
+			// Only checked alongside the search term, because on its own this arg is inert.
+			if ( isset( $this->args['search_filter'] ) && ! $this->is_stringable( $this->args['search_filter'] ) ) {
+				throw $this->invalid_query_arg( esc_html__( 'Invalid search filter.', 'woocommerce' ) );
+			}
+
 			$this->search_query = new OrdersTableSearchQuery( $this );
 			$sql                = $this->search_query->get_sql_clauses();
 			$this->join         = $sql['join'] ? array_merge( $this->join, $sql['join'] ) : $this->join;
@@ -818,7 +897,8 @@ class OrdersTableQuery {
 		// Date queries.
 		if ( ! empty( $this->args['date_query'] ) ) {
 			$this->date_query = new \WP_Date_Query( $this->args['date_query'], "{$this->tables['orders']}.date_created_gmt" );
-			$this->where[]    = substr( trim( $this->date_query->get_sql() ), 3 ); // WP_Date_Query includes "AND".
+			$this->where[]    = substr( trim( $this->date_query->get_sql() ), 3 );
+			// WP_Date_Query includes "AND".
 		}
 
 		$this->process_orderby();
@@ -1083,6 +1163,78 @@ class OrdersTableQuery {
 	}
 
 	/**
+	 * Reports a malformed query arg, which otherwise degrades the query silently.
+	 *
+	 * Not wc_doing_it_wrong(): that writes to error_log() unconditionally on REST and AJAX
+	 * requests, which a loop over stored bad data would flood.
+	 *
+	 * @since 11.2.0
+	 * @param string $message Description of the offending arg, already escaped.
+	 * @return void
+	 */
+	private function report_invalid_query_arg( string $message ): void {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped by the caller, which phpcs cannot see through this indirection.
+		_doing_it_wrong( 'wc_get_orders', $message, '11.2.0' );
+	}
+
+	/**
+	 * Reports a malformed query arg and returns the exception to throw for it.
+	 *
+	 * @since 11.2.0
+	 * @param string $message Description of the offending arg, already escaped.
+	 * @return \Exception The exception for the caller to throw.
+	 */
+	private function invalid_query_arg( string $message ): \Exception {
+		$this->report_invalid_query_arg( $message );
+
+		// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Escaped by the caller, which phpcs cannot see through this indirection.
+		return new \Exception( $message );
+	}
+
+	/**
+	 * Checks whether a value can be used where a string is expected.
+	 *
+	 * A null value counts as usable, because every consumer reached through this guard is an
+	 * internal function, where PHP treats null as a deprecation rather than an error. That does
+	 * NOT hold for a userland parameter declared string, which still raises a TypeError, so a
+	 * caller passing null into one of those needs its own check.
+	 *
+	 * @since 11.2.0
+	 * @param mixed $value The value to check.
+	 * @return bool True if the value can be converted to a string, false otherwise.
+	 */
+	private function is_stringable( $value ): bool {
+		return is_null( $value ) || is_scalar( $value ) || ( is_object( $value ) && method_exists( $value, '__toString' ) );
+	}
+
+	/**
+	 * Checks whether converting a value for a column type would raise an Error.
+	 *
+	 * The conversions in {@see DatabaseUtil::format_object_value_for_db()} do not fail uniformly:
+	 * int never fails, string tolerates an array (strval() yields 'Array') but not an object it
+	 * cannot stringify, and bool, decimal and date reject both.
+	 *
+	 * @since 11.2.0
+	 * @param mixed  $value The caller-supplied value.
+	 * @param string $type  The column type from the data store's mappings.
+	 * @return bool True if converting the value would raise an Error.
+	 */
+	private function value_fails_conversion( $value, string $type ): bool {
+		// The int cast accepts anything.
+		if ( 'int' === $type ) {
+			return false;
+		}
+
+		// An allowlist, so an unanticipated value kind is rejected rather than passed through.
+		if ( $this->is_stringable( $value ) ) {
+			return false;
+		}
+
+		// strval() turns an array into 'Array' with a warning, so a string column tolerates it.
+		return ! ( 'string' === $type && is_array( $value ) );
+	}
+
+	/**
 	 * Generates a properly escaped and sanitized WHERE condition for a given field.
 	 *
 	 * @param string $table    The table the field belongs to.
@@ -1091,9 +1243,17 @@ class OrdersTableQuery {
 	 * @param mixed  $value    The value.
 	 * @param string $type     The column type as specified in {@see OrdersTableDataStore} column mappings.
 	 * @return string The resulting WHERE condition.
+	 * @throws \Exception When a value cannot be used as a string.
 	 */
 	public function where( string $table, string $field, string $operator, $value, string $type ): string {
 		global $wpdb;
+
+		// The single point where a caller value reaches format_object_value_for_db().
+		foreach ( is_array( $value ) ? $value : array( $value ) as $single_value ) {
+			if ( $this->value_fails_conversion( $single_value, $type ) ) {
+				throw $this->invalid_query_arg( esc_html__( 'Invalid order query value.', 'woocommerce' ) );
+			}
+		}
 
 		$db_util  = wc_get_container()->get( DatabaseUtil::class );
 		$operator = strtoupper( '' !== $operator ? $operator : '=' );
@@ -1248,6 +1408,7 @@ class OrdersTableQuery {
 	 *
 	 * @param array $total_params Total query parameters with value, operator.
 	 * @return string SQL to be used in a WHERE clause.
+	 * @throws \Exception When a total value cannot be formatted as a decimal.
 	 */
 	private function generate_total_query( array $total_params ): string {
 		if ( ! isset( $total_params['value'] ) ) {
@@ -1267,6 +1428,12 @@ class OrdersTableQuery {
 			if ( ! is_array( $value ) || count( $value ) !== 2 ) {
 				return '';
 			}
+			// Reaches str_replace(), which rejects a non-stringable object, and runs before
+			// where(), so its guard never sees these.
+			if ( $this->value_fails_conversion( $value[0], 'decimal' ) || $this->value_fails_conversion( $value[1], 'decimal' ) ) {
+				throw $this->invalid_query_arg( esc_html__( 'Invalid order total.', 'woocommerce' ) );
+			}
+
 			$value1 = wc_format_decimal( $value[0], wc_get_price_decimals() );
 			$value2 = wc_format_decimal( $value[1], wc_get_price_decimals() );
 
