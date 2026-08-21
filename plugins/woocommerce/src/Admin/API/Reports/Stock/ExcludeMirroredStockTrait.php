@@ -35,8 +35,9 @@ trait ExcludeMirroredStockTrait {
 	/**
 	 * Join `wc_product_meta_lookup` for the row itself, unless the query already carries it.
 	 *
-	 * The exclusion clause reads the row's own stock off that table under this exact alias, so a
-	 * query that joined it already must not join it a second time.
+	 * The exclusion clause reads the row's own stock off that table under this exact alias, so the
+	 * guard looks for the alias rather than for the table. The table name ends in that same word, and
+	 * a query that joined the table under an alias of its own binds nothing this clause can read.
 	 *
 	 * @param string $sql         Join clause the calling report query has built so far.
 	 * @param string $posts_alias Table or alias the outer query uses for the posts table. Defaults to the posts table name.
@@ -48,7 +49,8 @@ trait ExcludeMirroredStockTrait {
 		// This file declares strict types, and $sql arrives from a filter any third party can return.
 		$sql = is_string( $sql ) ? $sql : '';
 
-		if ( strstr( $sql, 'wc_product_meta_lookup' ) ) {
+		// The word boundaries keep the table name, in someone else's join, from passing for the alias.
+		if ( preg_match( '/(?<!\w)wc_product_meta_lookup(?!\w)/', $sql ) ) {
 			return $sql;
 		}
 
@@ -61,11 +63,7 @@ trait ExcludeMirroredStockTrait {
 	}
 
 	/**
-	 * Append every join the exclusion clause reads, in the one order that works.
-	 *
-	 * The parent joins name the lookup table as well, so adding them first would leave the guard in
-	 * self::append_stock_lookup_join() unable to tell them from the row's own join, and the query
-	 * would go on to read an alias nothing bound.
+	 * Append every join the exclusion clause reads.
 	 *
 	 * @param string $sql         Join clause the calling report query has built so far.
 	 * @param string $posts_alias Table or alias the outer query uses for the posts table. Defaults to the posts table name.

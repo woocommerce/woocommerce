@@ -411,6 +411,39 @@ class WC_Admin_Tests_API_Reports_Stock extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The report holds up when a plugin joins the lookup table under an alias of its own.
+	 */
+	public function test_report_is_unaffected_by_a_lookup_table_join_under_another_alias() {
+		global $wpdb;
+
+		wp_set_current_user( $this->user );
+
+		list( $variable, $variation_ids ) = $this->create_stock_report_variable_product( 'Parent manages stock, variations inherit', array( array(), array() ) );
+
+		$variable->set_manage_stock( true );
+		$variable->set_stock_quantity( 6 );
+		$variable->save();
+
+		$join_under_another_alias = function ( $join ) use ( $wpdb ) {
+			return $join . " LEFT JOIN {$wpdb->wc_product_meta_lookup} extension_lookup ON {$wpdb->posts}.ID = extension_lookup.product_id ";
+		};
+
+		// Ahead of the report's own filter, the way a plugin hooking in earlier would be.
+		add_filter( 'posts_join', $join_under_another_alias, 9 );
+
+		try {
+			$reported_ids = $this->get_reported_ids();
+		} finally {
+			remove_filter( 'posts_join', $join_under_another_alias, 9 );
+		}
+
+		$this->assertContains( $variable->get_id(), $reported_ids, 'The exclusion reads the stock off its own alias, which that join does not stand in for.' );
+		foreach ( $variation_ids as $variation_id ) {
+			$this->assertNotContains( $variation_id, $reported_ids, 'A variation inheriting the parent quantity would only repeat it.' );
+		}
+	}
+
+	/**
 	 * Dispatch the report and return the IDs it reported.
 	 *
 	 * @param string $type   Report type to request.
