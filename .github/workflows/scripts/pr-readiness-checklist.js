@@ -78,7 +78,7 @@ const TASKS = [
         // Source: ci.yml validate-syncpack's 'Validate - prompt mitigation
         // on failed validation' step.
         remediation:
-            'Update the pinned version in `.syncpackrc`, then run `pnpm sync-dependencies` and commit the result.',
+            'Update the pinned version in `.syncpackrc` or `pnpm-workspace.yaml`, then run `pnpm sync-dependencies` and commit the result.',
     },
     {
         label: 'Markdown lint',
