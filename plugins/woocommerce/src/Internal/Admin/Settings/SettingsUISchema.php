@@ -196,7 +196,6 @@ class SettingsUISchema {
 		foreach ( $schema['groups'] as $group ) {
 			$group_id = $group['id'];
 			self::assert_optional_strings( $group, array( 'title', 'description' ), sprintf( 'Group "%s"', $group_id ) );
-			self::assert_group_actions( $group['actions'] ?? null, $group_id );
 
 			if ( ! isset( $group['fields'] ) || ! is_array( $group['fields'] ) || ! ArrayUtil::array_is_list( $group['fields'] ) ) {
 				throw self::invalid_schema( sprintf( 'Group "%s" fields must be a list.', $group_id ) );
@@ -949,42 +948,6 @@ class SettingsUISchema {
 		}
 	}
 
-	/**
-	 * Assert group header actions.
-	 *
-	 * @param mixed  $actions Group actions, or null when omitted.
-	 * @param string $group_id Group id.
-	 */
-	private static function assert_group_actions( $actions, string $group_id ): void {
-		if ( null === $actions ) {
-			return;
-		}
-
-		if ( ! is_array( $actions ) || ! ArrayUtil::array_is_list( $actions ) ) {
-			throw self::invalid_schema( sprintf( 'Group "%s" actions must be a list.', $group_id ) );
-		}
-
-		$ids = array();
-		foreach ( $actions as $index => $action ) {
-			if ( ! is_array( $action ) ) {
-				throw self::invalid_schema( sprintf( 'Group "%s" action %d must be an array.', $group_id, $index ) );
-			}
-
-			self::assert_non_empty_string( $action['id'] ?? null, sprintf( 'Group "%s" action %d id must be a non-empty string.', $group_id, $index ) );
-			if ( isset( $ids[ $action['id'] ] ) ) {
-				throw self::invalid_schema( sprintf( 'Group "%s" action id "%s" is duplicated.', $group_id, $action['id'] ) );
-			}
-			$ids[ $action['id'] ] = true;
-
-			foreach ( array( 'label', 'href' ) as $property ) {
-				if ( ! isset( $action[ $property ] ) || ! is_string( $action[ $property ] ) ) {
-					throw self::invalid_schema( sprintf( 'Group "%s" action %d %s must be a string.', $group_id, $index, $property ) );
-				}
-			}
-
-			self::assert_optional_strings( $action, array( 'variant', 'target', 'rel' ), sprintf( 'Group "%s" action %d', $group_id, $index ) );
-		}
-	}
 
 	/**
 	 * Assert a field definition.

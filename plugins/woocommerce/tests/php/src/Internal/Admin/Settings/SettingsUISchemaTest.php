@@ -1181,14 +1181,6 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 				'intent' => array( 'invalid' ),
 			),
 		);
-		$invalid_action                                      = $valid;
-		$invalid_action['groups']['main']['actions']         = array(
-			array(
-				'id'    => '',
-				'label' => 'Docs',
-				'href'  => 'https://example.com',
-			),
-		);
 		$invalid_page_save                                   = $valid;
 		$invalid_page_save['save']                           = array( 'adapter' => 'custom' );
 		$invalid_navigation_component                        = $valid;
@@ -1217,7 +1209,6 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 			'malformed shell navigation'  => array( $invalid_shell, 'Shell navigation item 0 href must be a string.' ),
 			'malformed breadcrumb'        => array( $invalid_breadcrumb, 'Shell breadcrumb 0 label must be a string.' ),
 			'invalid badge intent'        => array( $invalid_badge, 'Shell badge 0 intent must be a string.' ),
-			'empty group action id'       => array( $invalid_action, 'Group "main" action 0 id must be a non-empty string.' ),
 			'custom save without handler' => array( $invalid_page_save, 'Schema custom save strategy must define a non-empty handler.' ),
 			'empty navigation component'  => array( $invalid_navigation_component, 'Shell navigationComponent must be a non-empty string.' ),
 			'group map id mismatch'       => array( $invalid_group_map, 'Group map key "other" must match group id "main".' ),
@@ -1225,15 +1216,15 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox It accepts valid optional shell, field, visibility, action, and save metadata.
+	 * @testdox It accepts valid optional shell, field, visibility, and save metadata.
 	 */
 	public function test_assert_valid_schema_accepts_optional_metadata(): void {
-		$schema                              = self::get_valid_schema_for_validation();
-		$schema['save']                      = array(
+		$schema          = self::get_valid_schema_for_validation();
+		$schema['save']  = array(
 			'adapter' => 'custom',
 			'handler' => 'acme/save',
 		);
-		$schema['shell']                     = array(
+		$schema['shell'] = array(
 			'header'              => 'visible',
 			'title'               => 'Acme settings',
 			'subtitle'            => 'Configure Acme.',
@@ -1259,16 +1250,6 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 			),
 			'sectionNavigation'   => array(),
 			'navigationComponent' => 'acme/navigation',
-		);
-		$schema['groups']['main']['actions'] = array(
-			array(
-				'id'      => 'docs',
-				'label'   => 'Documentation',
-				'href'    => 'https://example.com/docs',
-				'variant' => 'link',
-				'target'  => '_blank',
-				'rel'     => 'noopener',
-			),
 		);
 		$schema['groups']['main']['fields'][0]['component']  = 'acme/text';
 		$schema['groups']['main']['fields'][0]['visibility'] = array(
@@ -1310,7 +1291,6 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 					'id'          => 'main',
 					'title'       => 'Main',
 					'description' => 'Main settings.',
-					'actions'     => array(),
 					'fields'      => array(
 						array(
 							'id'          => 'acme_field',
