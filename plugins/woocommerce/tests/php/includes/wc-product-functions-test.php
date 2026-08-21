@@ -17,28 +17,6 @@ use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 
 	/**
-	 * Restore settings modified by tests.
-	 */
-	public function tearDown(): void {
-<<<<<<< HEAD
-		delete_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME );
-=======
-		if ( $this->reviews_setting_changed ) {
-			delete_option( 'woocommerce_product_lookup_table_is_generating' );
-			as_unschedule_all_actions( '', array(), 'wc_update_product_lookup_tables' );
-
-			if ( null === $this->original_reviews_setting ) {
-				delete_option( 'woocommerce_enable_reviews' );
-			} else {
-				update_option( 'woocommerce_enable_reviews', $this->original_reviews_setting );
-			}
-		}
-
->>>>>>> bf74658ba5 (Enable variation galleries for all stores (#67884))
-		parent::tearDown();
-	}
-
-	/**
 	 * @testdox If 'wc_get_price_excluding_tax' gets an order as argument, it passes the order customer to 'WC_Tax::get_rates'.
 	 *
 	 * @testWith [true, 1, true]
