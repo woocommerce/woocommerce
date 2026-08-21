@@ -19,10 +19,9 @@ use Automattic\WooCommerce\Admin\DateTimeProvider\DateTimeProviderInterface;
  */
 class TotalPaymentsVolumeProcessor implements RuleProcessorInterface {
 	/**
-	 * Provider for the current DateTime. Null only when a subclass constructor
-	 * skips parent::__construct(); process() falls back to the default provider.
+	 * The DateTime provider.
 	 *
-	 * @var DateTimeProviderInterface|null
+	 * @var DateTimeProviderInterface
 	 */
 	protected $date_time_provider;
 
@@ -46,12 +45,11 @@ class TotalPaymentsVolumeProcessor implements RuleProcessorInterface {
 	 * @return bool The result of the operation.
 	 */
 	public function process( $rule, $stored_state ) {
-		$provider = $this->date_time_provider ?? new CurrentDateTimeProvider();
 		// The timeframe must be resolved against the site's calendar date: the report query
 		// parses the returned boundary strings as site-local datetimes. Work on a fresh
 		// instance: the date calculations modify it in place, and the provider's own object
 		// (which an implementation may cache and return again) must not absorb that.
-		$now   = ( new \DateTime( '@' . $provider->get_now()->getTimestamp() ) )->setTimezone( wp_timezone() );
+		$now   = ( new \DateTime( '@' . $this->date_time_provider->get_now()->getTimestamp() ) )->setTimezone( wp_timezone() );
 		$dates = TimeInterval::get_timeframe_dates( $rule->timeframe, $now );
 
 		if ( false === $dates ) {
