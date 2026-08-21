@@ -371,9 +371,33 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 * @param bool     $plain_text Email format: plain text or HTML.
 	 */
 	public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
-		if ( $this->instructions && ! $sent_to_admin && $this->id === $order->get_payment_method() ) {
-			echo wp_kses_post( wpautop( wptexturize( $this->instructions ) ) . PHP_EOL );
+		if ( ! $this->instructions || $sent_to_admin || $this->id !== $order->get_payment_method() ) {
+			return;
 		}
+
+		/**
+		 * Filter the order statuses for which CoD instructions are included in emails.
+		 *
+		 * Payment for CoD orders is collected on delivery, so the instructions are only
+		 * relevant while payment is still outstanding.
+		 *
+		 * @since 11.2.0
+		 *
+		 * @param string[] $instructions_order_statuses Order statuses for which to show the
+		 *                                               instructions. Default array( 'pending', 'on-hold', 'processing' ).
+		 * @param WC_Order $order                        The order object.
+		 */
+		$instructions_order_statuses = apply_filters(
+			'woocommerce_cod_email_instructions_order_status',
+			array( OrderStatus::PENDING, OrderStatus::ON_HOLD, OrderStatus::PROCESSING ),
+			$order
+		);
+
+		if ( ! $order->has_status( $instructions_order_statuses ) ) {
+			return;
+		}
+
+		echo wp_kses_post( wpautop( wptexturize( $this->instructions ) ) . PHP_EOL );
 	}
 
 	/**
