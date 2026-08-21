@@ -623,18 +623,6 @@ class FeaturesController {
 				'disable_ui'                   => false,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			'agentic_checkout'                     => array(
-				'name'                         => __( 'Agentic Checkout API', 'woocommerce' ),
-				'description'                  => __(
-					'Enable the Agentic Checkout API for AI-powered checkout experiences (e.g., ChatGPT). This adds REST API endpoints that allow AI agents to create and manage checkout sessions.',
-					'woocommerce'
-				),
-				'enabled_by_default'           => false,
-				'is_experimental'              => true,
-				'disable_ui'                   => true,
-				'skip_compatibility_checks'    => true,
-				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
-			),
 			'dual_code_graphql_api'                => array(
 				'name'                         => __( 'Dual Code & GraphQL API', 'woocommerce' ),
 				'description'                  => __(
