@@ -62,7 +62,28 @@ async function resolvePullRequest(github, context) {
             commit_sha: headSha,
         });
 
-    return associated.find((pr) => pr.head.sha === headSha) || null;
+    // Matching on head.sha also doubles as the stale-event guard: a
+    // workflow_run event for a superseded commit matches no PR whose head
+    // has since moved on, so it resolves to null and exits cleanly.
+    //
+    // The base-repo and open-state constraints are what make the resolved
+    // number safe to comment on. `associated` lists PRs from the fork's
+    // perspective, which can include the contributor's own fork-internal PR
+    // for the same commit (or one targeting another repo entirely) - and a
+    // number from a foreign repo, passed to createComment against
+    // context.repo, would land on an unrelated issue. Likewise, without the
+    // open check, a post-merge re-run of CI on this SHA would resolve to the
+    // merged PR and revive its comment.
+    const baseFullName = `${context.repo.owner}/${context.repo.repo}`;
+
+    return (
+        associated.find(
+            (pr) =>
+                pr.head.sha === headSha &&
+                pr.state === 'open' &&
+                pr.base.repo.full_name === baseFullName
+        ) || null
+    );
 }
 
 module.exports = async ({ github, context, core }) => {
