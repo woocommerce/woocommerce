@@ -70,12 +70,24 @@ test.describe.serial(
 			await expect(
 				page.locator( 'div.wc-order-refund-items' )
 			).toBeVisible();
+			// Disabled until a refund quantity exists.
 			await expect(
 				page.locator( '#restock_refunded_items' )
-			).toBeChecked();
+			).toBeDisabled();
+			await expect(
+				page.locator( '#restock_refunded_items' )
+			).not.toBeChecked();
 
 			// Initiate a refund
 			await page.locator( '.refund_order_item_qty' ).fill( '1' );
+
+			// Entering a quantity enables it and ticks it.
+			await expect(
+				page.locator( '#restock_refunded_items' )
+			).toBeEnabled();
+			await expect(
+				page.locator( '#restock_refunded_items' )
+			).toBeChecked();
 			await page.locator( '#refund_reason' ).fill( 'No longer wanted' );
 
 			// Confirm values
@@ -232,12 +244,24 @@ test.describe(
 			await expect(
 				page.locator( 'div.wc-order-refund-items' )
 			).toBeVisible();
+			// Disabled until a refund quantity exists.
 			await expect(
 				page.locator( '#restock_refunded_items' )
-			).toBeChecked();
+			).toBeDisabled();
+			await expect(
+				page.locator( '#restock_refunded_items' )
+			).not.toBeChecked();
 
 			// Initiate a refund
 			await page.locator( '.refund_order_item_qty >> nth=1' ).fill( '2' );
+
+			// Entering a quantity enables it and ticks it.
+			await expect(
+				page.locator( '#restock_refunded_items' )
+			).toBeEnabled();
+			await expect(
+				page.locator( '#restock_refunded_items' )
+			).toBeChecked();
 			await page.locator( '#refund_reason' ).fill( 'No longer wanted' );
 			page.on( 'dialog', ( dialog ) => dialog.accept() );
 			await page.locator( '.do-manual-refund' ).click();
