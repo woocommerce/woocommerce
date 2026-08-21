@@ -144,7 +144,7 @@ export default class Merge extends Command {
 		try {
 			await access( destinationPath );
 			exists = true;
-		} catch ( err ) {
+		} catch {
 			exists = false;
 		}
 
@@ -153,6 +153,24 @@ export default class Merge extends Command {
 				'The "destination" argument points to a directory that already exists'
 			);
 		}
+	}
+
+	/**
+	 * Builds the git-filter-repo callback that updates imported references.
+	 *
+	 * Parenthesized references such as `(#123)` become pull request links.
+	 * Bare references such as `#123` are qualified with the source repository.
+	 *
+	 * @param {string} source The GitHub repository we are merging.
+	 */
+	private static createMessageCallback( source: string ): string {
+		const pullRequestPattern = String.raw`rb"\(#(?P<pull_request_number>\d+)\)"`;
+		const pullRequestReplacement = String.raw`rb"(https://github.com/${ source }/pull/\g<pull_request_number>)"`;
+		const issuePattern = String.raw`rb"(?<!\()#(?P<issue_number>\d+)(?!\))"`;
+		const issueReplacement = String.raw`rb"${ source }#\g<issue_number>"`;
+		const issueCallback = `re.sub(${ issuePattern }, ${ issueReplacement }, message)`;
+
+		return `return re.sub(${ pullRequestPattern }, ${ pullRequestReplacement }, ${ issueCallback })`;
 	}
 
 	/**
@@ -189,12 +207,7 @@ export default class Merge extends Command {
 		cloneDir: string,
 		destination: string
 	): Promise< void > {
-		const messageCallback =
-			'return re.sub(b"\\(#(\\d+)\\)", b"(https://github.com/' +
-			source +
-			'/pull/\\\\1)", re.sub(b"(?<!\\()(#\\d+)(?!\\))", b"' +
-			source +
-			'\\\\1", message))';
+		const messageCallback = Merge.createMessageCallback( source );
 
 		ux.action.start( 'Altering repository history' );
 

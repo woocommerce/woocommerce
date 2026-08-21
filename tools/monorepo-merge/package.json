@@ -21,7 +21,8 @@
 		"lint": "eslint .",
 		"prepack": "pnpm build && oclif manifest",
 		"postpack": "shx rm -f oclif.manifest.json",
-		"posttest": "pnpm lint"
+		"posttest": "pnpm lint",
+		"test": "pnpm build && node --test test/merge.test.mjs"
 	},
 	"dependencies": {
 		"@inquirer/confirm": "^6.1.1",
@@ -71,7 +72,22 @@
 			"lint": {
 				"command": "lint",
 				"changes": "src/**/*.ts"
-			}
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test",
+					"changes": [
+						"src/**/*.ts",
+						"test/**/*.mjs",
+						"tsconfig.json"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					]
+				}
+			]
 		}
 	}
 }
