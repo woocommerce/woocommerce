@@ -199,11 +199,11 @@ final class QuantityLimits {
 		 * @return \WP_Error|true
 		 */
 		$valid = apply_filters( 'woocommerce_store_api_validate_cart_item_quantity', true, $quantity, $cart_item );
-		
+
 		if ( true === $valid || is_wp_error( $valid ) ) {
 			return $valid;
 		}
-		
+
 		return new \WP_Error( 'invalid_quantity', __( 'The quantity is invalid.', 'woocommerce' ) );
 	}
 
