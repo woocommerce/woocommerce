@@ -559,9 +559,15 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		if ( is_wp_error( $prepared_args ) ) {
 			return $prepared_args;
 		}
+		if ( ! is_array( $prepared_args ) ) {
+			return new WP_Error( 'woocommerce_rest_comment_failed_edit', __( 'Updating review failed.', 'woocommerce' ), array( 'status' => 500 ) );
+		}
 
-		if ( isset( $prepared_args['comment_post_ID'] ) && 'product' !== get_post_type( (int) $prepared_args['comment_post_ID'] ) ) {
-			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		if ( isset( $prepared_args['comment_post_ID'] ) ) {
+			$product_id = (int) $prepared_args['comment_post_ID'];
+			if ( 0 >= $product_id || 'product' !== get_post_type( $product_id ) ) {
+				return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			}
 		}
 
 		if ( empty( $prepared_args ) && isset( $request['status'] ) ) {
@@ -572,10 +578,6 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 				return new WP_Error( 'woocommerce_rest_review_failed_edit', __( 'Updating review status failed.', 'woocommerce' ), array( 'status' => 500 ) );
 			}
 		} elseif ( ! empty( $prepared_args ) ) {
-			if ( is_wp_error( $prepared_args ) ) {
-				return $prepared_args;
-			}
-
 			if ( isset( $prepared_args['comment_content'] ) && empty( $prepared_args['comment_content'] ) ) {
 				return new WP_Error( 'woocommerce_rest_review_content_invalid', __( 'Invalid review content.', 'woocommerce' ), array( 'status' => 400 ) );
 			}

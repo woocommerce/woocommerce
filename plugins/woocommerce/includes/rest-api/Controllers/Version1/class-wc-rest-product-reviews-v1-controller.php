@@ -362,6 +362,9 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		if ( is_wp_error( $prepared_review ) ) {
 			return $prepared_review;
 		}
+		if ( ! is_array( $prepared_review ) ) {
+			return new WP_Error( 'rest_product_review_failed_edit', __( 'Updating product review failed.', 'woocommerce' ), array( 'status' => 500 ) );
+		}
 
 		/*
 		 * Core stores update-side comment meta before it updates the comment count. Passing the

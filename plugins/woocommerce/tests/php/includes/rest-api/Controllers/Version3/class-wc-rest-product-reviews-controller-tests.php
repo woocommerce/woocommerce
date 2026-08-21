@@ -419,6 +419,35 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A scalar review from the preprocess filter returns an update error.
+	 */
+	public function test_update_item_rejects_scalar_filtered_review() {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+		$review_id  = $this->create_review( $product_id, 'Still five stars.', 5 )->get_data()['id'];
+
+		$return_scalar = static function () {
+			return 'not-an-array';
+		};
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/reviews/' . $review_id );
+		$request->set_param( 'id', $review_id );
+		$request->set_param( 'rating', 3 );
+
+		add_filter( 'woocommerce_rest_preprocess_product_review', $return_scalar );
+		try {
+			$response = $this->sut->update_item( $request );
+		} finally {
+			remove_filter( 'woocommerce_rest_preprocess_product_review', $return_scalar );
+		}
+
+		$this->assertWPError( $response );
+		$this->assertSame( 'woocommerce_rest_comment_failed_edit', $response->get_error_code() );
+		$this->assertSame( 5, (int) get_comment_meta( $review_id, 'rating', true ) );
+		$this->assertEquals( 5, wc_get_product( $product_id )->get_average_rating() );
+	}
+
+	/**
 	 * @testdox Holding and re-approving a review excludes and re-includes its rating.
 	 */
 	public function test_update_item_status_changes_keep_the_aggregates_correct() {
@@ -496,13 +525,22 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @testdox A supplied zero product ID is rejected without moving the review.
 	 */
 	public function test_update_item_rejects_a_zero_product_id() {
+		global $post;
+
 		wp_set_current_user( $this->shop_manager_id );
 		$source_id = ProductHelper::create_simple_product()->get_id();
 		$review_id = $this->create_review( $source_id, 'Stays with its product.', 5 )->get_data()['id'];
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/reviews/' . $review_id );
 		$request->set_body_params( array( 'product_id' => 0 ) );
-		$response = $this->server->dispatch( $request );
+
+		$previous_post = $post;
+		$post          = get_post( $source_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Reproduce get_post_type( 0 ) falling back to the global post.
+		try {
+			$response = $this->server->dispatch( $request );
+		} finally {
+			$post = $previous_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the global after the regression scenario.
+		}
 
 		$this->assertSame( 404, $response->get_status() );
 		$this->assertSame( 'woocommerce_rest_product_invalid_id', $response->get_data()['code'] );

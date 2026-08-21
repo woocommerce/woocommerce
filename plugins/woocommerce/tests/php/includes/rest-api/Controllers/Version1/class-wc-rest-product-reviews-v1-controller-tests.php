@@ -391,6 +391,36 @@ class WC_REST_Product_Reviews_V1_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A scalar review from the preprocess filter returns an update error.
+	 */
+	public function test_update_item_rejects_scalar_filtered_review() {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+		$review_id  = $this->create_review( $product_id, 'Still five stars.', 5 )->get_data()['id'];
+
+		$return_scalar = static function () {
+			return 'not-an-array';
+		};
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v1/products/' . $product_id . '/reviews/' . $review_id );
+		$request->set_param( 'product_id', $product_id );
+		$request->set_param( 'id', $review_id );
+		$request->set_param( 'rating', 3 );
+
+		add_filter( 'rest_preprocess_product_review', $return_scalar );
+		try {
+			$response = $this->sut->update_item( $request );
+		} finally {
+			remove_filter( 'rest_preprocess_product_review', $return_scalar );
+		}
+
+		$this->assertWPError( $response );
+		$this->assertSame( 'rest_product_review_failed_edit', $response->get_error_code() );
+		$this->assertSame( 5, (int) get_comment_meta( $review_id, 'rating', true ) );
+		$this->assertEquals( 5, wc_get_product( $product_id )->get_average_rating() );
+	}
+
+	/**
 	 * @testdox Creating a review updates the aggregates of the product the review was written to.
 	 */
 	public function test_create_item_updates_the_aggregates_of_the_product_the_review_was_written_to() {
