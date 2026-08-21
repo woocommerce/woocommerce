@@ -135,6 +135,17 @@ describe( 'mergeSectionsWithDefaults', () => {
 		expect( charts.title ).toBe( 'My charts' );
 	} );
 
+	it( 'ignores a stored isVisible that is not a boolean', () => {
+		// A non boolean hides the section without listing it under "Add more
+		// sections", so the merchant cannot bring it back.
+		const [ charts ] = mergeSectionsWithDefaults( [
+			{ key: 'charts', title: 'My charts', isVisible: 0 },
+		] );
+
+		expect( charts.isVisible ).toBe( true );
+		expect( charts.title ).toBe( 'My charts' );
+	} );
+
 	it( 'ignores a stored title that is not a string', () => {
 		// The title is rendered as a React child by every section header.
 		const [ charts ] = mergeSectionsWithDefaults( [
@@ -240,11 +251,42 @@ describe( 'CustomizableDashboard', () => {
 		} );
 	} );
 
+	it( 'repairs a preference holding a corrupted isVisible', () => {
+		renderDashboard( [ { key: 'charts', isVisible: 0 } ] );
+
+		expect( updateUserPreferences ).toHaveBeenCalledTimes( 1 );
+		expect( updateUserPreferences ).toHaveBeenCalledWith( {
+			dashboard_sections: expect.arrayContaining( [
+				expect.objectContaining( { key: 'charts', isVisible: true } ),
+			] ),
+		} );
+	} );
+
 	it( 'keeps a stored section the dashboard does not know about', () => {
 		// A section registered by an extension that is currently deactivated.
 		renderDashboard( [
 			null,
 			{ key: 'my-extension', title: 'Mine', isVisible: false },
+		] );
+
+		expect( updateUserPreferences ).toHaveBeenCalledWith( {
+			dashboard_sections: expect.arrayContaining( [
+				{ key: 'my-extension', title: 'Mine', isVisible: false },
+			] ),
+		} );
+	} );
+
+	it( 'keeps an unknown section that holds a corrupted field', () => {
+		// There is no default to patch the field up from, so it is dropped and
+		// the rest of the entry survives.
+		renderDashboard( [
+			null,
+			{
+				key: 'my-extension',
+				title: 'Mine',
+				isVisible: false,
+				hiddenBlocks: null,
+			},
 		] );
 
 		expect( updateUserPreferences ).toHaveBeenCalledWith( {
@@ -291,6 +333,13 @@ describe( 'CustomizableDashboard', () => {
 
 	it( 'does not store anything when the dashboard was never customized', () => {
 		renderDashboard( '' );
+
+		expect( updateUserPreferences ).not.toHaveBeenCalled();
+	} );
+
+	it( 'does not store anything when the stored preference is empty', () => {
+		// An empty list means the defaults are in use, same as no preference.
+		renderDashboard( [] );
 
 		expect( updateUserPreferences ).not.toHaveBeenCalled();
 	} );
