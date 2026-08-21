@@ -403,6 +403,48 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A flush deferred during installing mode stays scoped to the site that raised it.
+	 * @group ms-required
+	 */
+	public function test_deferred_flush_is_scoped_to_the_current_site(): void {
+		$this->skipWithoutMultisite();
+
+		$original_blog_id = get_current_blog_id();
+		$other_blog_id    = $this->factory->blog->create( array( 'path' => '/wc-flush-scope/' ) );
+		$sentinel_rules   = array( '^wc-other-site-sentinel/?$' => 'index.php?wc-other-site-sentinel=1' );
+
+		// Give the neighbouring site its own settled state, read once so both option caches are warm.
+		switch_to_blog( $other_blog_id );
+		update_option( 'woocommerce_queue_flush_rewrite_rules', 'no' );
+		update_option( 'rewrite_rules', $sentinel_rules );
+		get_option( 'woocommerce_queue_flush_rewrite_rules' );
+		get_option( 'rewrite_rules' );
+		restore_current_blog();
+
+		update_option( 'woocommerce_queue_flush_rewrite_rules', 'no' );
+
+		wp_installing( true );
+		WC_Post_Types::flush_rewrite_rules();
+		wp_installing( false );
+
+		$this->assertSame(
+			'yes',
+			get_option( 'woocommerce_queue_flush_rewrite_rules' ),
+			'The site that raised the flush should carry the queue.'
+		);
+		$this->assertSame( $original_blog_id, get_current_blog_id(), 'Queueing the flush should not switch sites.' );
+
+		switch_to_blog( $other_blog_id );
+		$other_queue = get_option( 'woocommerce_queue_flush_rewrite_rules' );
+		$other_rules = get_option( 'rewrite_rules' );
+		restore_current_blog();
+
+		$this->assertSame( 'no', $other_queue, 'A deferred flush should not queue work on a neighbouring site.' );
+		$this->assertSame( $sentinel_rules, $other_rules, 'A deferred flush should not disturb a neighbouring site\'s rules.' );
+		$this->assertSame( $original_blog_id, get_current_blog_id(), 'The original site context should be restored.' );
+	}
+
+	/**
 	 * Register a public post type standing in for one owned by a third-party plugin.
 	 */
 	private function register_third_party_post_type(): void {
