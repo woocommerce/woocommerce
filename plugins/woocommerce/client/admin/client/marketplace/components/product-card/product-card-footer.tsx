@@ -230,7 +230,7 @@ function ProductCardFooter( props: { product: Product } ) {
 				</span>
 			</div>
 			<div className="woocommerce-marketplace__product-card__rating">
-				{ product.averageRating !== null && (
+				{ typeof product.averageRating === 'number' && (
 					<>
 						<span className="woocommerce-marketplace__product-card__rating-icon">
 							<Icon icon={ 'star-filled' } size={ 16 } />
@@ -241,7 +241,7 @@ function ProductCardFooter( props: { product: Product } ) {
 								{ sprintf(
 									// translators: %.1f: average rating
 									__( '%.1f stars', 'woocommerce' ),
-									product.averageRating ?? 0
+									product.averageRating
 								) }
 							</span>
 						</span>
