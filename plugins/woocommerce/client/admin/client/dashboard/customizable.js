@@ -61,7 +61,8 @@ const isValidSection = ( section ) =>
  * rendered as a React child, and a non boolean `isVisible` hides a section
  * without listing it under "Add more sections". Each one is spread over the
  * default section, so a corrupted one wins unless it is caught here.
- * Validation and repair both read this list so they cannot drift apart.
+ * Validation, repair and the defaults all read this list so they cannot drift
+ * apart.
  *
  * @type {Object.<string, function(*): boolean>}
  */
@@ -126,6 +127,22 @@ const isEmptySectionsPreference = ( prefSections ) =>
 const toStorableSection = ( { icon, component, ...section } ) => section;
 
 /**
+ * Drops the fields the dashboard cannot read back, in place.
+ *
+ * @param {Object} section Section to strip.
+ * @return {Object} The same section, holding only usable values.
+ */
+const deleteUnusableFields = ( section ) => {
+	Object.entries( FIELD_CHECKS ).forEach( ( [ field, isUsable ] ) => {
+		if ( ! isUsable( section[ field ] ) ) {
+			delete section[ field ];
+		}
+	} );
+
+	return section;
+};
+
+/**
  * A section to persist, without the fields the dashboard cannot use. There is
  * no default to patch a corrupted field up from at this point, so it is
  * dropped and whichever default section owns the key provides it on the next
@@ -134,21 +151,30 @@ const toStorableSection = ( { icon, component, ...section } ) => section;
  * @param {section} section Section to persist.
  * @return {Object} Section holding only values the dashboard can read back.
  */
-const toUsableSection = ( section ) => {
-	const usable = toStorableSection( section );
+const toUsableSection = ( section ) =>
+	deleteUnusableFields( toStorableSection( section ) );
 
-	Object.entries( FIELD_CHECKS ).forEach( ( [ field, isUsable ] ) => {
-		if ( ! isUsable( usable[ field ] ) ) {
-			delete usable[ field ];
-		}
-	} );
-
-	return usable;
-};
+/**
+ * A default section is the last fallback, so it has to stand on its own. An
+ * entry with no key cannot be matched to a stored one and an entry with no
+ * component cannot be rendered, so neither is a section the dashboard can
+ * build.
+ *
+ * @param {*} section Entry returned by the default sections filter.
+ * @return {boolean} Whether a section can be built from the entry.
+ */
+const isUsableDefaultSection = ( section ) =>
+	isValidSection( section ) && !! section.component;
 
 /**
  * Copy of the default sections, throwing a descriptive error when the
  * `woocommerce_dashboard_default_sections` filter returned something unusable.
+ * The filter is a third party surface, so its entries get the same treatment as
+ * the stored ones: an entry no section can be built from is dropped, and a
+ * corrupted field is dropped so it cannot overwrite a valid stored value.
+ * Nothing sits behind a default to patch a field up from, except `hiddenBlocks`
+ * which every section component dereferences, so that one falls back to an
+ * empty list.
  *
  * @return {Array.<section>} Default sections.
  */
@@ -159,7 +185,17 @@ const getDefaultSections = () => {
 		);
 	}
 
-	return defaultSections.map( ( section ) => ( { ...section } ) );
+	return defaultSections
+		.filter( isUsableDefaultSection )
+		.map( ( section ) => {
+			const usable = deleteUnusableFields( { ...section } );
+
+			if ( ! Array.isArray( usable.hiddenBlocks ) ) {
+				usable.hiddenBlocks = [];
+			}
+
+			return usable;
+		} );
 };
 
 export const mergeSectionsWithDefaults = ( prefSections ) => {
@@ -241,9 +277,12 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 		[ userPrefs.dashboard_sections ]
 	);
 
+	// The update callbacks are handed to the section components, so a third
+	// party one can supply a value the dashboard cannot read back. Sanitizing
+	// here keeps a preference the dashboard wrote from needing a repair.
 	const updateSections = ( newSections ) => {
 		updateUserPreferences( {
-			dashboard_sections: newSections.map( toStorableSection ),
+			dashboard_sections: newSections.map( toUsableSection ),
 		} );
 	};
 

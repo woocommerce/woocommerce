@@ -43,10 +43,14 @@ jest.mock( '../default-sections', () => ( {
 	},
 } ) );
 
-jest.mock( '../section', () => ( { title, onRemove } ) => (
+jest.mock( '../section', () => ( { title, onRemove, onTitleUpdate } ) => (
 	<div>
 		{ title }
 		<button title={ `Hide ${ title }` } onClick={ onRemove } />
+		<button
+			title={ `Rename ${ title }` }
+			onClick={ () => onTitleUpdate( { rendered: 'Renamed' } ) }
+		/>
 	</div>
 ) );
 
@@ -158,6 +162,48 @@ describe( 'mergeSectionsWithDefaults', () => {
 
 		expect( charts.title ).toBe( 'Charts' );
 		expect( charts.isVisible ).toBe( false );
+	} );
+
+	it( 'drops a default section that no section can be built from', () => {
+		// The default sections filter is a third party surface too.
+		mockDefaultSections = [
+			null,
+			'charts',
+			{ component: () => null, title: 'No key', isVisible: true },
+			{ key: 'no-component', title: 'No component', isVisible: true },
+			...DEFAULT_SECTIONS,
+		];
+
+		const sections = mergeSectionsWithDefaults( undefined );
+
+		expect( sections.map( ( section ) => section.key ) ).toEqual( [
+			'store-performance',
+			'charts',
+		] );
+	} );
+
+	it( 'fills in a default hiddenBlocks that is not an array', () => {
+		// Nothing sits behind a default, and every section component calls
+		// `hiddenBlocks.includes()` on it.
+		mockDefaultSections = [
+			{ ...DEFAULT_SECTIONS[ 1 ], hiddenBlocks: null },
+		];
+
+		const [ charts ] = mergeSectionsWithDefaults( [
+			{ key: 'charts', hiddenBlocks: 'coupons_amount' },
+		] );
+
+		expect( charts.hiddenBlocks ).toEqual( [] );
+	} );
+
+	it( 'does not fall back to a corrupted default field', () => {
+		mockDefaultSections = [ { ...DEFAULT_SECTIONS[ 1 ], title: {} } ];
+
+		const [ charts ] = mergeSectionsWithDefaults( [
+			{ key: 'charts', title: { rendered: 'My charts' } },
+		] );
+
+		expect( charts.title ).toBeUndefined();
 	} );
 } );
 
@@ -328,6 +374,25 @@ describe( 'CustomizableDashboard', () => {
 		stored.forEach( ( section ) => {
 			expect( section ).not.toHaveProperty( 'icon' );
 			expect( section ).not.toHaveProperty( 'component' );
+		} );
+	} );
+
+	it( 'sanitizes a value a section component hands back', () => {
+		// The update callbacks are passed to third party section components.
+		const { getByTitle } = renderDashboard( [
+			{ key: 'charts', title: 'Charts', isVisible: true },
+		] );
+
+		fireEvent.click( getByTitle( 'Rename Charts' ) );
+
+		expect( updateUserPreferences ).toHaveBeenCalledWith( {
+			dashboard_sections: expect.arrayContaining( [
+				{
+					key: 'charts',
+					isVisible: true,
+					hiddenBlocks: [ 'coupons_amount' ],
+				},
+			] ),
 		} );
 	} );
 
