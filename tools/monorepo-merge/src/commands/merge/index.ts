@@ -2,14 +2,19 @@
  * External dependencies
  */
 import { Args, Command, Flags, ux } from '@oclif/core';
-import { join } from 'path';
+import { execFile } from 'child_process';
+import { rm } from 'fs/promises';
+import { isAbsolute, join, relative, resolve, sep } from 'path';
 import { tmpdir } from 'os';
+import { promisify } from 'util';
 
 /**
  * Internal dependencies
  */
 import { MONOREPO_ROOT } from '../../const';
 import { access, exec } from '../../node-async';
+
+const execFilePromisified = promisify( execFile );
 
 export default class Merge extends Command {
 	static description =
@@ -73,7 +78,7 @@ export default class Merge extends Command {
 		if ( ! confirmation ) {
 			// Remove the repository we've cloned.
 			try {
-				await exec( 'rm -rf ' + repositoryPath );
+				await rm( repositoryPath, { recursive: true, force: true } );
 			} catch {}
 
 			this.exit( 0 );
@@ -120,10 +125,24 @@ export default class Merge extends Command {
 			);
 		}
 
+		const destinationPath = resolve( MONOREPO_ROOT, destination );
+		const relativeDestination = relative( MONOREPO_ROOT, destinationPath );
+		if (
+			isAbsolute( destination ) ||
+			relativeDestination === '' ||
+			relativeDestination === '..' ||
+			relativeDestination.startsWith( '..' + sep ) ||
+			isAbsolute( relativeDestination )
+		) {
+			this.error(
+				'The "destination" argument must point to a path inside the monorepo'
+			);
+		}
+
 		// We can't merge into a directory that already exists.
 		let exists = false;
 		try {
-			await access( join( MONOREPO_ROOT, destination ) );
+			await access( destinationPath );
 			exists = true;
 		} catch ( err ) {
 			exists = false;
@@ -149,11 +168,10 @@ export default class Merge extends Command {
 		// We need a fresh directory to clone the source into.
 		const cloneDir = join( tmpdir(), 'monorepo-merge', source );
 		try {
-			await access( cloneDir );
-			await exec( 'rm -rf ' + cloneDir );
+			await rm( cloneDir, { recursive: true, force: true } );
 		} catch {}
 
-		await exec( 'git clone ' + gitPath + ' ' + cloneDir );
+		await execFilePromisified( 'git', [ 'clone', gitPath, cloneDir ] );
 
 		ux.action.stop();
 		return cloneDir;
@@ -171,20 +189,25 @@ export default class Merge extends Command {
 		cloneDir: string,
 		destination: string
 	): Promise< void > {
-		const filterCommand = [
-			'git-filter-repo',
-			"--to-subdirectory-filter '" + destination + "'",
-			'--message-callback=\'return re.sub(b"\\(#(\\d+)\\)", b"(https://github.com/' +
-				source +
-				'/pull/\\\\1)", re.sub(b"(?<!\\()(#\\d+)(?!\\))", b"' +
-				source +
-				'\\\\1", message))\'',
-		].join( ' ' );
+		const messageCallback =
+			'return re.sub(b"\\(#(\\d+)\\)", b"(https://github.com/' +
+			source +
+			'/pull/\\\\1)", re.sub(b"(?<!\\()(#\\d+)(?!\\))", b"' +
+			source +
+			'\\\\1", message))';
 
 		ux.action.start( 'Altering repository history' );
 
 		try {
-			await exec( filterCommand, { cwd: cloneDir } );
+			await execFilePromisified(
+				'git-filter-repo',
+				[
+					'--to-subdirectory-filter',
+					destination,
+					'--message-callback=' + messageCallback,
+				],
+				{ cwd: cloneDir }
+			);
 		} catch {
 			this.error( 'Failed to alter the repository history' );
 		} finally {
@@ -208,7 +231,12 @@ export default class Merge extends Command {
 
 		// We need the cloned repository as a remote in order to merge it.
 		try {
-			await exec( 'git remote add ' + source + ' "' + cloneDir + '"' );
+			await execFilePromisified( 'git', [
+				'remote',
+				'add',
+				source,
+				cloneDir,
+			] );
 		} catch {
 			ux.action.stop();
 
@@ -216,7 +244,7 @@ export default class Merge extends Command {
 		}
 
 		try {
-			await exec( 'git fetch ' + source );
+			await execFilePromisified( 'git', [ 'fetch', source ] );
 		} catch {
 			ux.action.stop();
 
@@ -224,12 +252,12 @@ export default class Merge extends Command {
 		}
 
 		try {
-			await exec(
-				'git merge --allow-unrelated-histories ' +
-					source +
-					'/' +
-					branchToMerge
-			);
+			await execFilePromisified( 'git', [
+				'merge',
+				'--allow-unrelated-histories',
+				'--',
+				source + '/' + branchToMerge,
+			] );
 		} catch {
 			ux.action.stop();
 
@@ -238,8 +266,8 @@ export default class Merge extends Command {
 
 		// We don't need the remote anymore.
 		try {
-			await exec( 'git remote remove ' + source );
-			await exec( 'rm -rf ' + cloneDir );
+			await execFilePromisified( 'git', [ 'remote', 'remove', source ] );
+			await rm( cloneDir, { recursive: true, force: true } );
 		} catch {
 			ux.action.stop();
 
