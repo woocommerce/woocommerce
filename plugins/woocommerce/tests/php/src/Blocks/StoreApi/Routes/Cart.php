@@ -34,7 +34,7 @@ class Cart extends ControllerTestCase {
 	private static $coupon_id;
 
 	/**
-	 * Cart instance removed to mimic a REST request, restored on teardown.
+	 * Cart instance restored after a cart session failure.
 	 *
 	 * @var \WC_Cart|null
 	 */
@@ -1568,14 +1568,17 @@ class Cart extends ControllerTestCase {
 		// the counter to put the process back into the state a REST request starts in.
 		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
 
-		add_filter(
-			'woocommerce_get_cart_item_from_session',
-			static function () {
-				throw new \RuntimeException( 'Synthetic Store API cart-session failure.' );
-			}
-		);
+		$this->cart_backup = WC()->cart;
+		$callback          = static function () {
+			throw new \RuntimeException( 'Synthetic Store API cart-session failure.' );
+		};
+		add_filter( 'woocommerce_get_cart_item_from_session', $callback );
 
-		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
+		try {
+			$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
+		} finally {
+			remove_filter( 'woocommerce_get_cart_item_from_session', $callback );
+		}
 
 		$this->assertSame( 500, $response->get_status(), 'A cart session failure should return a Store API error response.' );
 		$this->assertSame( 'woocommerce_rest_unknown_server_error', $response->get_data()['code'] );
