@@ -205,33 +205,17 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		 * @return mixed
 		 */
 		public static function get_option( $option_name, $default = '' ) {
-			// Field definitions supply this name and third-party code can put anything in one, so
-			// bail on values that cannot be parsed rather than letting them reach strstr() below.
-			if ( ! is_scalar( $option_name ) || ! $option_name ) {
+			if ( ! $option_name ) {
 				return $default;
 			}
-
-			$option_name = (string) $option_name;
 
 			// Array value.
 			if ( strstr( $option_name, '[' ) ) {
 
-				$option_name_raw = urldecode( $option_name );
-
 				parse_str( $option_name, $option_array );
 
-				// A name with no parsable base, such as '[key]', names nothing to look up.
-				if ( empty( $option_array ) ) {
-					return $default;
-				}
-
 				// Option name is first key.
-				$option_name = (string) current( array_keys( $option_array ) );
-
-				// A malformed name such as 'foo[' parses to a base with no key path below it.
-				if ( ! is_array( $option_array[ $option_name ] ) ) {
-					return $default;
-				}
+				$option_name = current( array_keys( $option_array ) );
 
 				// Get value.
 				$option_values = get_option( $option_name, '' );
@@ -239,34 +223,18 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				$key = key( $option_array[ $option_name ] );
 
 				/*
-				 * This resolves one level. A deeper name such as 'opt[a][b]' would return the
-				 * sub-array above the value it means, which callers rendering a single value
-				 * cannot use, so fall back to the default.
-				 *
-				 * A trailing '[]' directly after this key is not deeper: it names the whole array
-				 * at this level, which is what a multi-value field stores. Both halves of that
-				 * test are needed. parse_str() renders such a name as array( '' ), but it renders
-				 * 'opt[key][0]' identically, so the parsed node alone would let an indexed name
-				 * through. The raw suffix alone would let 'opt[a][b][]' through, since that ends
-				 * in '[]' too. Together they match only a '[]' that follows this key directly.
+				 * Only index into a container. A string would be read by character offset, and an
+				 * object that does not implement ArrayAccess raises an Error in isset().
 				 */
-				$node     = $option_array[ $option_name ][ $key ];
-				$is_multi = array( '' ) === $node && '[]' === substr( $option_name_raw, -2 );
-
-				if ( is_array( $node ) && ! $is_multi ) {
-					return $default;
-				}
-
-				// Indexing a string would read a character by offset, so require a container.
 				if ( ( is_array( $option_values ) || $option_values instanceof ArrayAccess ) && isset( $option_values[ $key ] ) ) {
 					$option_value = $option_values[ $key ];
 				} else {
 					$option_value = null;
 				}
 
-				// An object stored at this key would reach stripslashes() below and fatal.
+				// An object stored at this key would reach stripslashes() below and fatal there.
 				if ( is_object( $option_value ) ) {
-					return $default;
+					$option_value = null;
 				}
 			} else {
 				// Single value.
@@ -335,9 +303,18 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					$value['suffix'] = '';
 				}
 				if ( ! isset( $value['value'] ) ) {
-					// A 'field_name' that cannot address an option, such as '' or a non-scalar,
-					// is treated as absent here, the way an unset key already falls back to the ID.
-					$read_name = ( is_scalar( $value['field_name'] ) && $value['field_name'] ) ? $value['field_name'] : $value['id'];
+					/*
+					 * Read through 'field_name' only when it is the `option_name[key]` shape this
+					 * fix is about: one bracket group with a non-empty key. Field definitions come
+					 * from third-party code, and every other spelling (deeper paths, explicit or
+					 * empty indexes, unbalanced brackets, non-scalars) either resolves to something
+					 * a field cannot render or is not stored where the name says. Those keep
+					 * reading through the ID, which is what this method did before the fix.
+					 */
+					$field_name = $value['field_name'];
+					$read_name  = ( is_string( $field_name ) && preg_match( '/^[^\[\]]+\[[^\[\]]+\]$/', $field_name ) )
+						? $field_name
+						: $value['id'];
 
 					$value['value'] = self::get_option( $read_name, $value['default'] );
 				}
@@ -993,10 +970,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					continue;
 				}
 
-				// Matches the read path: a name that cannot address an option is treated as absent.
-				$option_name = ( isset( $option['field_name'] ) && is_scalar( $option['field_name'] ) && $option['field_name'] )
-					? $option['field_name']
-					: $option['id'];
+				$option_name = $option['field_name'] ?? $option['id'];
 
 				// Get posted value.
 				if ( strstr( $option_name, '[' ) ) {
