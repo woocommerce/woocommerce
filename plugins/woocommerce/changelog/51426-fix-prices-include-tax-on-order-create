@@ -1,4 +1,4 @@
 Significance: minor
 Type: fix
 
-Record the store's tax entry mode on orders that are created without one, so orders created outside the checkout - for example from WP Admin - are no longer treated as tax exclusive on stores that enter prices inclusive of tax.
+Persist the store's tax entry mode when manual orders are created in WP Admin, and keep historical order values stable when the store setting changes.
