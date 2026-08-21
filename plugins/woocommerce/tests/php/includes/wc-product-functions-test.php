@@ -17,11 +17,24 @@ use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 
 	/**
-	 * Reset the variation gallery feature-flag option after each test so
-	 * individual cases that flip it on don't leak global state.
+	 * Restore settings modified by tests.
 	 */
 	public function tearDown(): void {
+<<<<<<< HEAD
 		delete_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME );
+=======
+		if ( $this->reviews_setting_changed ) {
+			delete_option( 'woocommerce_product_lookup_table_is_generating' );
+			as_unschedule_all_actions( '', array(), 'wc_update_product_lookup_tables' );
+
+			if ( null === $this->original_reviews_setting ) {
+				delete_option( 'woocommerce_enable_reviews' );
+			} else {
+				update_option( 'woocommerce_enable_reviews', $this->original_reviews_setting );
+			}
+		}
+
+>>>>>>> bf74658ba5 (Enable variation galleries for all stores (#67884))
 		parent::tearDown();
 	}
 
@@ -1396,11 +1409,9 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Variable add-to-cart attaches a pristine gallery snapshot to the variation script when the feature is on.
+	 * @testdox Variable add-to-cart attaches a pristine gallery snapshot to the variation script.
 	 */
 	public function test_woocommerce_variable_add_to_cart_attaches_gallery_snapshot() {
-		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'yes' );
-
 		$inline_js = $this->capture_variable_add_to_cart_inline_js();
 
 		$this->assertStringContainsString( 'wc_variation_gallery_defaults', $inline_js );
@@ -1411,21 +1422,6 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		$decoded_snapshot = json_decode( $matches[1] );
 		$this->assertIsString( $decoded_snapshot );
 		$this->assertStringContainsString( 'woocommerce-product-gallery', $decoded_snapshot );
-	}
-
-	/**
-	 * @testdox Variable add-to-cart skips the gallery snapshot when the feature is off.
-	 */
-	public function test_woocommerce_variable_add_to_cart_skips_gallery_snapshot_when_feature_off() {
-		// Set the option to 'no' explicitly rather than deleting it: an empty option makes
-		// Package::is_enabled() fall through to the canary cohort, which reads a separate
-		// option (woocommerce_remote_variant_assignment) that other tests in the same worker
-		// may have left set, non-deterministically re-enabling the feature. 'no' short-circuits.
-		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'no' );
-
-		$inline_js = $this->capture_variable_add_to_cart_inline_js();
-
-		$this->assertStringNotContainsString( 'wc_variation_gallery_defaults', $inline_js );
 	}
 
 	/**
