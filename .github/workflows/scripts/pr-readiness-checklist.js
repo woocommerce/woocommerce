@@ -244,8 +244,10 @@ const TRANSITION_MESSAGES = {
 // `previousState === 'clear' && overallState === 'clear'` guard in
 // manage-pr-readiness-comment.js), so an entry here could never reach a
 // comment. If that guard is ever relaxed, add the message back at the same
-// time - every transition that reaches this point must resolve to an intro
-// line, and there is no fallback.
+// time. A transition missing from both maps falls back to a generic intro
+// in buildCommentBody rather than crashing: an uncaught error here fails
+// the workflow_run job, which attaches to nothing visible on the PR, so
+// the bot would just silently stop from the contributor's point of view.
 const SILENT_STATUS_MESSAGES = {
     'failing->failing': (authorLogin) =>
         `Hi @${authorLogin}, here's the current status — a few things still need attention:`,
@@ -274,7 +276,10 @@ function buildCommentBody({ tasks, previousState, authorLogin, stickyCommentUrl 
     const overallState = computeOverallState(tasks);
     const transitionKey = `${previousState || 'none'}->${overallState}`;
     const mentionMessage = TRANSITION_MESSAGES[transitionKey];
-    const introMessage = mentionMessage || SILENT_STATUS_MESSAGES[transitionKey];
+    const introMessage =
+        mentionMessage ||
+        SILENT_STATUS_MESSAGES[transitionKey] ||
+        ((login) => `Hi @${login}, here's the current readiness status:`);
     const pingMessage = PING_MESSAGES[transitionKey];
 
     const lines = [
@@ -329,6 +334,8 @@ function buildCommentBody({ tasks, previousState, authorLogin, stickyCommentUrl 
 module.exports = {
     MARKER_PREFIX,
     TASKS,
+    TRANSITION_MESSAGES,
+    SILENT_STATUS_MESSAGES,
     CI_WORKFLOW_FILE,
     ciHasProducedResults,
     classifyCheckRuns,

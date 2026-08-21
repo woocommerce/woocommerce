@@ -2,6 +2,8 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 
 const {
+    TRANSITION_MESSAGES,
+    SILENT_STATUS_MESSAGES,
     ciHasProducedResults,
     classifyCheckRuns,
     computeOverallState,
@@ -410,21 +412,28 @@ test('buildCommentBody: fixed from failing to clear mentions the author, no ping
     assert.equal(pingBody, null);
 });
 
-test('buildCommentBody: clear->clear has no message, because the orchestrator never gets here', () => {
+test('clear->clear defines no message, because the orchestrator never gets there', () => {
     // The orchestrator returns before calling buildCommentBody when a clear
     // PR stays clear, so any message defined for that transition would be
-    // unreachable. Assert the absence rather than deleting the case
-    // outright: a message re-added here would look reasonable in review and
-    // silently never render.
-    assert.throws(
-        () =>
-            buildCommentBody({
-                tasks: [{ label: 'Lint', status: 'pass', remediation: 'n/a' }],
-                previousState: 'clear',
-                authorLogin: 'octocat',
-            }),
-        TypeError
-    );
+    // unreachable. Assert the absence directly on the maps: a message
+    // re-added here would look reasonable in review and silently never
+    // render.
+    assert.equal(TRANSITION_MESSAGES['clear->clear'], undefined);
+    assert.equal(SILENT_STATUS_MESSAGES['clear->clear'], undefined);
+});
+
+test('buildCommentBody: an unmapped transition falls back to a generic intro instead of crashing', () => {
+    // An uncaught error would fail a workflow_run job nothing on the PR
+    // links to - the bot would silently stop. The fallback keeps the
+    // checklist rendering with a neutral, author-anchored line.
+    const { body, mentioned } = buildCommentBody({
+        tasks: [{ label: 'Lint', status: 'pass', remediation: 'n/a' }],
+        previousState: 'clear',
+        authorLogin: 'octocat',
+    });
+    assert.equal(mentioned, false);
+    assert.ok(body.includes("Hi @octocat, here's the current readiness status:"));
+    assert.ok(body.includes('🟢 All checks are passing.'));
 });
 
 test('buildCommentBody: a failing task with one job url renders a single Job link on the status line, remediation on its own line', () => {
