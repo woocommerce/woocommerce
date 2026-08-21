@@ -351,17 +351,29 @@ if ( wc_tax_enabled() ) {
 	<table class="wc-order-totals">
 		<?php
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) :
-			$stock_was_reduced = isset( $order ) && $order->get_order_stock_reduced();
+			// Restocking happens per line, so mirror the conditions
+			// wc_restock_refunded_items() applies rather than testing the order as a whole.
+			$restockable_items = 0;
+
+			if ( isset( $order ) ) {
+				foreach ( $order->get_items() as $restock_item ) {
+					$restock_product = $restock_item->get_product();
+
+					if ( $restock_product && $restock_product->managing_stock() && (int) $restock_item->get_meta( '_reduced_stock', true ) > 0 ) {
+						++$restockable_items;
+					}
+				}
+			}
 			?>
-			<tr class="restock-refunded-items" data-stock-reduced="<?php echo esc_attr( $stock_was_reduced ? 'yes' : 'no' ); ?>">
+			<tr class="restock-refunded-items" data-can-restock="<?php echo esc_attr( $restockable_items > 0 ? 'yes' : 'no' ); ?>">
 				<td class="label">
 					<label for="restock_refunded_items"><?php esc_html_e( 'Restock refunded items', 'woocommerce' ); ?>:</label>
 					<p class="description restock-refunded-items__description">
 						<?php
-						if ( $stock_was_reduced ) {
+						if ( $restockable_items > 0 ) {
 							esc_html_e( 'Enter a refund quantity to return items to stock.', 'woocommerce' );
 						} else {
-							esc_html_e( 'Stock was not reduced for this order.', 'woocommerce' );
+							esc_html_e( 'None of these items can be returned to stock.', 'woocommerce' );
 						}
 						?>
 					</p>

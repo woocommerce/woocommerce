@@ -1161,7 +1161,7 @@ jQuery( function ( $ ) {
 			update_restock_state: function() {
 				var $row = $( 'tr.restock-refunded-items' );
 
-				if ( ! $row.length || 'yes' !== $row.data( 'stock-reduced' ) ) {
+				if ( ! $row.length || 'yes' !== $row.data( 'can-restock' ) ) {
 					return;
 				}
 
@@ -1169,7 +1169,8 @@ jQuery( function ( $ ) {
 				var $description = $row.find( '.restock-refunded-items__description' );
 				var total_qty    = 0;
 
-				$( '.woocommerce_order_items input.refund_order_item_qty' ).each( function() {
+				// Only lines that can actually be returned to stock count towards the total.
+				$( '.woocommerce_order_items input.refund_order_item_qty[data-can-restock="yes"]' ).each( function() {
 					total_qty += parseInt( $( this ).val(), 10 ) || 0;
 				});
 

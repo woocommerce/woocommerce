@@ -19,6 +19,10 @@ $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empt
 $wc_price_arg = array( 'currency' => $order->get_currency() );
 $is_visible   = $product && $product->is_visible();
 
+// Mirrors the conditions wc_restock_refunded_items() applies per line, so the
+// refund UI only counts quantities that can actually be returned to stock.
+$can_restock = $product && $product->managing_stock() && (int) $item->get_meta( '_reduced_stock', true ) > 0;
+
 /**
  * Filter the order item name.
  *
@@ -134,7 +138,7 @@ $item_name = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $i
 			<input type="number" step="<?php echo esc_attr( $step_edit ); ?>" min="<?php echo esc_attr( $min_edit ); ?>" autocomplete="off" name="order_item_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" value="<?php echo esc_attr( $item->get_quantity() ); ?>" data-qty="<?php echo esc_attr( $item->get_quantity() ); ?>" size="4" class="quantity" />
 		</div>
 		<div class="refund" style="display: none;">
-			<input type="number" step="<?php echo esc_attr( $step_refund ); ?>" min="<?php echo esc_attr( $min_refund ); ?>" max="<?php echo absint( $item->get_quantity() ); ?>" autocomplete="off" name="refund_order_item_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" size="4" class="refund_order_item_qty" />
+			<input type="number" step="<?php echo esc_attr( $step_refund ); ?>" min="<?php echo esc_attr( $min_refund ); ?>" max="<?php echo absint( $item->get_quantity() ); ?>" autocomplete="off" name="refund_order_item_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" size="4" class="refund_order_item_qty" data-can-restock="<?php echo esc_attr( $can_restock ? 'yes' : 'no' ); ?>" />
 		</div>
 	</td>
 	<td class="line_cost" width="1%" data-sort-value="<?php echo esc_attr( $item->get_total() ); ?>">

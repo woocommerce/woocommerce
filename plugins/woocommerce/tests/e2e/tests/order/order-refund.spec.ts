@@ -81,13 +81,11 @@ test.describe.serial(
 			// Initiate a refund
 			await page.locator( '.refund_order_item_qty' ).fill( '1' );
 
-			// Entering a quantity enables it and ticks it.
+			// This product does not manage stock, so it can never be restocked
+			// and entering a quantity must not enable the checkbox.
 			await expect(
 				page.locator( '#restock_refunded_items' )
-			).toBeEnabled();
-			await expect(
-				page.locator( '#restock_refunded_items' )
-			).toBeChecked();
+			).toBeDisabled();
 			await page.locator( '#refund_reason' ).fill( 'No longer wanted' );
 
 			// Confirm values
