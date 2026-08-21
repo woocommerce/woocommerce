@@ -13,8 +13,14 @@ import {
 	TaskListType,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { Text, List, CollapsibleList } from '@woocommerce/experimental';
+import {
+	Text,
+	List,
+	ListItem,
+	CollapsibleList,
+} from '@woocommerce/experimental';
 import { useLayoutContext } from '@woocommerce/admin-layout';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -35,6 +41,11 @@ export type TaskListProps = TaskListType & {
 };
 
 type DismissedTask = Pick< TaskType, 'id' | 'title' >;
+
+// TaskLists::maybe_add_extended_tasks() treats any list ID beginning with
+// `extended` as an extended list, so the client has to match the same way.
+const isExtendedTaskListId = ( taskListId: string ) =>
+	taskListId.startsWith( 'extended' );
 
 export const TaskList = ( {
 	id,
@@ -63,12 +74,13 @@ export const TaskList = ( {
 	const [ pendingTaskRequests, setPendingTaskRequests ] = useState<
 		Record< string, boolean >
 	>( {} );
+	const isExtendedTaskList = isExtendedTaskListId( id );
 	const visibleTasks = getVisibleTasks( tasks ).filter( ( task ) => {
 		if ( dismissedTasks[ task.id ] ) {
 			return false;
 		}
 
-		return id !== 'extended' || ! task.isComplete;
+		return ! isExtendedTaskList || ! task.isComplete;
 	} );
 	const taskIdsToRender = new Set( [
 		...visibleTasks.map( ( task ) => task.id ),
@@ -79,7 +91,7 @@ export const TaskList = ( {
 	);
 	const dismissedTaskCount = Object.keys( dismissedTasks ).length;
 	const shouldShowEmptyState =
-		id === 'extended' && ! visibleTasks.length && ! dismissedTaskCount;
+		isExtendedTaskList && ! visibleTasks.length && ! dismissedTaskCount;
 	const { layoutString } = useLayoutContext();
 
 	const incompleteTasks = tasks.filter(
@@ -227,8 +239,9 @@ export const TaskList = ( {
 	const taskListItems = displayTasks.map( ( task ) => {
 		if ( dismissedTasks[ task.id ] ) {
 			return (
-				<div
+				<ListItem
 					key={ task.id }
+					disableGutters
 					className="woocommerce-task-list__item woocommerce-task-list__item--dismissed"
 				>
 					<div className="woocommerce-task-list__item-before">
@@ -260,11 +273,14 @@ export const TaskList = ( {
 								event.stopPropagation();
 								void onUndoDismiss( dismissedTasks[ task.id ] );
 							} }
+							onKeyDown={ ( event: React.KeyboardEvent ) =>
+								event.stopPropagation()
+							}
 						>
 							{ __( 'Undo', 'woocommerce' ) }
 						</Button>
 					</div>
-				</div>
+				</ListItem>
 			);
 		}
 
@@ -276,7 +292,7 @@ export const TaskList = ( {
 				task={ task }
 				setExpandedTask={ setExpandedTask }
 				isSkipDisabled={ pendingTaskRequests[ task.id ] }
-				showSkipAction={ id === 'extended' }
+				showSkipAction={ isExtendedTaskList }
 				onTaskSkip={ onTaskSkip }
 				trackClick={ () => trackClick( task ) }
 			/>
@@ -320,10 +336,13 @@ export const TaskList = ( {
 	return (
 		<>
 			<div
-				className={
-					'woocommerce-task-dashboard__container woocommerce-task-list__' +
-					id
-				}
+				className={ clsx(
+					'woocommerce-task-dashboard__container',
+					`woocommerce-task-list__${ id }`,
+					{
+						'woocommerce-task-list--extended': isExtendedTaskList,
+					}
+				) }
 			>
 				{ displayProgressHeader ? (
 					<ProgressHeader taskListId={ id } />

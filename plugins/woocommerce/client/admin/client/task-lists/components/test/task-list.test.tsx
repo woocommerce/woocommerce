@@ -530,6 +530,88 @@ describe( 'TaskList', () => {
 		expect( queryByText( "You're all caught up" ) ).toBeInTheDocument();
 	} );
 
+	it( 'should treat any task list ID starting with extended as an extended list', () => {
+		const completedTask = [ { ...tasks.extension[ 0 ], isComplete: true } ];
+		const { queryByText } = render(
+			<TaskList
+				id="extended_foo"
+				eventPrefix="extended_foo_tasklist_"
+				tasks={ completedTask }
+				title="Things to do next"
+				query={ {} }
+				isVisible={ true }
+				isHidden={ false }
+				isComplete={ true }
+				displayProgressHeader={ false }
+				keepCompletedTaskList="no"
+			/>
+		);
+
+		expect(
+			queryByText( completedTask[ 0 ].title )
+		).not.toBeInTheDocument();
+		expect( queryByText( "You're all caught up" ) ).toBeInTheDocument();
+	} );
+
+	it( 'should offer the skip action on a task list ID starting with extended', () => {
+		const { getByRole } = render(
+			<TaskList
+				id="extended_foo"
+				eventPrefix="extended_foo_tasklist_"
+				tasks={ [ ...tasks.extension ] }
+				title="Things to do next"
+				query={ {} }
+				isVisible={ true }
+				isHidden={ false }
+				isComplete={ false }
+				displayProgressHeader={ false }
+				keepCompletedTaskList="no"
+			/>
+		);
+
+		expect(
+			getByRole( 'button', {
+				name: `Skip ${ tasks.extension[ 0 ].title }`,
+			} )
+		).toBeInTheDocument();
+	} );
+
+	it( 'should render the skipped task placeholder as a list item', async () => {
+		mockDispatch.dismissTask.mockResolvedValueOnce( undefined );
+		const { getByRole, getAllByRole } = render(
+			<TaskList
+				id="extended"
+				eventPrefix="extended_tasklist_"
+				tasks={ [ ...tasks.extension ] }
+				title="Things to do next"
+				query={ {} }
+				isVisible={ true }
+				isHidden={ false }
+				isComplete={ false }
+				displayProgressHeader={ false }
+				keepCompletedTaskList="no"
+			/>
+		);
+
+		await act( async () => {
+			fireEvent.click(
+				getByRole( 'button', {
+					name: `Skip ${ tasks.extension[ 0 ].title }`,
+				} )
+			);
+		} );
+
+		await waitFor( () => {
+			expect(
+				getAllByRole( 'listitem' ).some( ( item ) =>
+					item.classList.contains(
+						'woocommerce-task-list__item--dismissed'
+					)
+				)
+			).toBe( true );
+		} );
+	} );
+
 	it( 'should fire extended tasklist task clicked event when a task is clicked', () => {
 		const { getByRole } = render(
 			<TaskList
