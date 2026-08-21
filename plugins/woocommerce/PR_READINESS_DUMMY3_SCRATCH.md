@@ -1,8 +1,7 @@
 # PR Readiness Dummy Scratch (round 3)
-This file intentionally has bad markdown.
-- item one
-- item two
-Some text right after a list with no blank line.
-```
-code fence with no language
-```
+
+This file is scratch content for manually verifying the `pr-readiness-comment`
+bot (see PR #67081). Its markdown was intentionally broken in the previous
+commit and is fixed here, while other checks keep failing.
+
+This PR is DO NOT MERGE.
