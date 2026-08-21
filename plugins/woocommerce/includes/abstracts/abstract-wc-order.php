@@ -1558,17 +1558,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				continue;
 			}
 
-			if ( (float) $item->get_subtotal() === (float) $item->get_total() && (float) $item->get_subtotal_tax() === (float) $item->get_total_tax() ) {
+			if ( (float) $item->get_subtotal( 'edit' ) === (float) $item->get_total( 'edit' ) && (float) $item->get_subtotal_tax( 'edit' ) === (float) $item->get_total_tax( 'edit' ) ) {
 				continue;
 			}
 
 			$original_subtotals[ $item_id ] = array(
-				'subtotal'     => $item->get_subtotal(),
-				'subtotal_tax' => $item->get_subtotal_tax(),
+				'subtotal'     => $item->get_subtotal( 'edit' ),
+				'subtotal_tax' => $item->get_subtotal_tax( 'edit' ),
 			);
 
-			$item->set_subtotal( $item->get_total() );
-			$item->set_subtotal_tax( $item->get_total_tax() );
+			$item->set_subtotal( $item->get_total( 'edit' ) );
+			$item->set_subtotal_tax( $item->get_total_tax( 'edit' ) );
 		}
 
 		return $original_subtotals;
