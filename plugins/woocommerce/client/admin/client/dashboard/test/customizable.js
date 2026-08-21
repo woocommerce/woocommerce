@@ -11,27 +11,36 @@ import CustomizableDashboard, {
 	mergeSectionsWithDefaults,
 } from '../customizable';
 
+const DEFAULT_SECTIONS = [
+	{
+		key: 'store-performance',
+		component: () => null,
+		title: 'Performance',
+		isVisible: true,
+		icon: 'arrow-right',
+		hiddenBlocks: [ 'taxes/order_tax' ],
+	},
+	{
+		key: 'charts',
+		component: () => null,
+		title: 'Charts',
+		isVisible: true,
+		icon: 'chart-bar',
+		hiddenBlocks: [ 'coupons_amount' ],
+	},
+];
+
+// Reassigned by the tests that need the `woocommerce_dashboard_default_sections`
+// filter to have returned something else. Read through a getter so the mock is
+// resolved when the dashboard dereferences it, not when the module is imported.
+let mockDefaultSections = DEFAULT_SECTIONS;
+
 jest.mock( '../default-sections', () => ( {
 	__esModule: true,
 	DEFAULT_SECTIONS_FILTER: 'woocommerce_dashboard_default_sections',
-	default: [
-		{
-			key: 'store-performance',
-			component: () => null,
-			title: 'Performance',
-			isVisible: true,
-			icon: 'arrow-right',
-			hiddenBlocks: [ 'taxes/order_tax' ],
-		},
-		{
-			key: 'charts',
-			component: () => null,
-			title: 'Charts',
-			isVisible: true,
-			icon: 'chart-bar',
-			hiddenBlocks: [ 'coupons_amount' ],
-		},
-	],
+	get default() {
+		return mockDefaultSections;
+	},
 } ) );
 
 jest.mock( '../section', () => ( { title, onRemove } ) => (
@@ -56,6 +65,10 @@ jest.mock( '@wordpress/data', () => ( {
 		<Component { ...props } defaultDateRange="period=month" />
 	),
 } ) );
+
+afterEach( () => {
+	mockDefaultSections = DEFAULT_SECTIONS;
+} );
 
 describe( 'mergeSectionsWithDefaults', () => {
 	it( 'returns the defaults when nothing is stored', () => {
@@ -120,6 +133,20 @@ describe( 'mergeSectionsWithDefaults', () => {
 
 		expect( charts.hiddenBlocks ).toEqual( [ 'coupons_amount' ] );
 		expect( charts.title ).toBe( 'My charts' );
+	} );
+
+	it( 'ignores a stored title that is not a string', () => {
+		// The title is rendered as a React child by every section header.
+		const [ charts ] = mergeSectionsWithDefaults( [
+			{
+				key: 'charts',
+				title: { rendered: 'My charts' },
+				isVisible: false,
+			},
+		] );
+
+		expect( charts.title ).toBe( 'Charts' );
+		expect( charts.isVisible ).toBe( false );
 	} );
 } );
 
@@ -200,6 +227,40 @@ describe( 'CustomizableDashboard', () => {
 				} ),
 			] ),
 		} );
+	} );
+
+	it( 'repairs a preference holding a corrupted title', () => {
+		renderDashboard( [ { key: 'charts', isVisible: true, title: {} } ] );
+
+		expect( updateUserPreferences ).toHaveBeenCalledTimes( 1 );
+		expect( updateUserPreferences ).toHaveBeenCalledWith( {
+			dashboard_sections: expect.arrayContaining( [
+				expect.objectContaining( { key: 'charts', title: 'Charts' } ),
+			] ),
+		} );
+	} );
+
+	it( 'keeps a stored section the dashboard does not know about', () => {
+		// A section registered by an extension that is currently deactivated.
+		renderDashboard( [
+			null,
+			{ key: 'my-extension', title: 'Mine', isVisible: false },
+		] );
+
+		expect( updateUserPreferences ).toHaveBeenCalledWith( {
+			dashboard_sections: expect.arrayContaining( [
+				{ key: 'my-extension', title: 'Mine', isVisible: false },
+			] ),
+		} );
+	} );
+
+	it( 'does not store anything when there is nothing usable to fall back to', () => {
+		// Storing an empty list would only be repaired again on the next visit.
+		mockDefaultSections = [];
+
+		renderDashboard( [ null, null ] );
+
+		expect( updateUserPreferences ).not.toHaveBeenCalled();
 	} );
 
 	it( 'leaves a well formed preference alone', () => {

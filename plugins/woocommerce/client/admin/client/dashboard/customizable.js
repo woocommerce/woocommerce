@@ -55,15 +55,42 @@ const isValidSection = ( section ) =>
 	typeof section.key === 'string';
 
 /**
- * `hiddenBlocks` is spread over the default one and then dereferenced by every
- * section component, so a stored value that is not an array crashes the
- * dashboard just like a malformed entry does.
+ * Stored fields that take the dashboard down when they hold the wrong type,
+ * mapped to the check a usable value passes. `hiddenBlocks` is dereferenced by
+ * every section component and `title` is rendered as a React child. Both are
+ * spread over the default section, so a corrupted one wins unless it is caught
+ * here. Validation and repair both read this list so they cannot drift apart.
+ *
+ * @type {Object.<string, function(*): boolean>}
+ */
+const FIELD_CHECKS = {
+	hiddenBlocks: Array.isArray,
+	title: ( value ) => typeof value === 'string',
+};
+
+/**
+ * Whether an entry of the stored preference carries usable values for the
+ * fields the dashboard dereferences. A missing field is fine, the default
+ * section provides it.
  *
  * @param {Object} section Well formed entry of the stored preference.
- * @return {boolean} Whether the entry's `hiddenBlocks` can be used as is.
+ * @return {boolean} Whether every field the dashboard reads can be used as is.
  */
-const hasUsableHiddenBlocks = ( section ) =>
-	undefined === section.hiddenBlocks || Array.isArray( section.hiddenBlocks );
+const hasUsableFields = ( section ) =>
+	Object.entries( FIELD_CHECKS ).every(
+		( [ field, isUsable ] ) =>
+			undefined === section[ field ] || isUsable( section[ field ] )
+	);
+
+/**
+ * Whether an entry of the stored preference can be used without patching it up
+ * from a default section.
+ *
+ * @param {*} section Entry of the stored `dashboard_sections` preference.
+ * @return {boolean} Whether the entry can be used as is.
+ */
+const isUsableSection = ( section ) =>
+	isValidSection( section ) && hasUsableFields( section );
 
 /**
  * Whether the stored `dashboard_sections` preference is well formed.
@@ -74,10 +101,7 @@ const hasUsableHiddenBlocks = ( section ) =>
 const isValidSectionsPreference = ( prefSections ) =>
 	Array.isArray( prefSections ) &&
 	prefSections.length > 0 &&
-	prefSections.every(
-		( section ) =>
-			isValidSection( section ) && hasUsableHiddenBlocks( section )
-	);
+	prefSections.every( isUsableSection );
 
 /**
  * `icon` and `component` are React nodes, they must never be persisted.
@@ -136,16 +160,44 @@ export const mergeSectionsWithDefaults = ( prefSections ) => {
 			...( prefSection ? toStorableSection( prefSection ) : {} ),
 		};
 
-		// The same goes for a `hiddenBlocks` that is not an array, which every
-		// section component would blow up on.
-		if ( ! Array.isArray( section.hiddenBlocks ) ) {
-			section.hiddenBlocks = defaultSection.hiddenBlocks;
-		}
+		// The same goes for any field the dashboard would blow up on, so a
+		// single corrupted field costs the merchant that field and not their
+		// whole section.
+		Object.entries( FIELD_CHECKS ).forEach( ( [ field, isUsable ] ) => {
+			if ( ! isUsable( section[ field ] ) ) {
+				section[ field ] = defaultSection[ field ];
+			}
+		} );
 
 		sections.push( section );
 	} );
 
 	return sections;
+};
+
+/**
+ * The preference to store when repairing a corrupted one. Entries for keys the
+ * dashboard does not know about are kept as they are, so an extension that
+ * registers a section does not lose its stored settings while it is
+ * deactivated.
+ *
+ * @param {Array.<section>} sections     Sections the dashboard fell back to.
+ * @param {*}               prefSections Stored `dashboard_sections` preference.
+ * @return {Array.<Object>} Sections to store.
+ */
+const toRepairedPreference = ( sections, prefSections ) => {
+	const knownKeys = sections.map( ( section ) => section.key );
+	const unknownSections = (
+		Array.isArray( prefSections ) ? prefSections : []
+	)
+		.filter(
+			( section ) =>
+				isUsableSection( section ) &&
+				! knownKeys.includes( section.key )
+		)
+		.map( toStorableSection );
+
+	return [ ...sections.map( toStorableSection ), ...unknownSections ];
 };
 
 const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
@@ -165,21 +217,31 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 	// Repair a corrupted `dashboard_sections` preference by storing the sections
 	// the dashboard fell back to. Without this the merchant keeps loading the
 	// broken value on every visit until they happen to customize a section.
-	const hasRepairedSections = useRef( false );
+	const hasAttemptedRepair = useRef( false );
 	useEffect( () => {
 		const prefSections = userPrefs.dashboard_sections;
 
 		// An empty preference means the dashboard was never customized.
 		if (
-			hasRepairedSections.current ||
+			hasAttemptedRepair.current ||
 			! prefSections ||
 			isValidSectionsPreference( prefSections )
 		) {
 			return;
 		}
 
-		hasRepairedSections.current = true;
-		updateSections( sections );
+		hasAttemptedRepair.current = true;
+
+		const repaired = toRepairedPreference( sections, prefSections );
+
+		// Nothing usable to fall back to, for example when the default sections
+		// filter emptied the list. Storing this would only be repaired again on
+		// the next visit, one write per page load and no gain.
+		if ( ! isValidSectionsPreference( repaired ) ) {
+			return;
+		}
+
+		updateUserPreferences( { dashboard_sections: repaired } );
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ userPrefs.dashboard_sections ] );
 
