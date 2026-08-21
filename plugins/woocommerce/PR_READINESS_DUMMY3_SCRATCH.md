@@ -1,9 +1,7 @@
 # PR Readiness Dummy Scratch (round 3)
-This file intentionally has bad markdown again, to re-verify the reworded
-regression ping comment.
-- item one
-- item two
-Some text right after a list with no blank line.
-```
-code fence with no language
-```
+
+This file is scratch content for manually verifying the `pr-readiness-comment`
+bot (see PR #67081). All deliberate failures on this PR have been fixed; round
+3 is complete.
+
+This PR is DO NOT MERGE.
