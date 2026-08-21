@@ -2,7 +2,7 @@
 
 const {
     MARKER_PREFIX,
-    CI_WORKFLOW_NAME,
+    CI_WORKFLOW_FILE,
     ciHasProducedResults,
     classifyCheckRuns,
     computeOverallState,
@@ -31,15 +31,20 @@ async function findExistingComment(github, context, prNumber) {
 // gated on evidence that CI actually ran rather than on check-run absence.
 // Returns undefined when no CI run exists yet, which is itself the answer.
 async function findCiRun(github, context, headSha) {
-    const runs = await github.paginate(github.rest.actions.listWorkflowRunsForRepo, {
+    // One targeted request instead of paginating every workflow's runs for
+    // the SHA. `event: 'pull_request'` excludes a push-event CI run that
+    // could exist for the same commit once the branch lands somewhere.
+    const { data } = await github.rest.actions.listWorkflowRuns({
         owner: context.repo.owner,
         repo: context.repo.repo,
+        workflow_id: CI_WORKFLOW_FILE,
         head_sha: headSha,
+        event: 'pull_request',
         per_page: 100,
     });
 
     // Newest first, so a re-run supersedes the run it replaced.
-    return runs.find((run) => run.name === CI_WORKFLOW_NAME);
+    return data.workflow_runs[0];
 }
 
 async function resolvePullRequest(github, context, core) {

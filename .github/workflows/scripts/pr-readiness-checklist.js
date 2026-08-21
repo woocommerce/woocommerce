@@ -60,8 +60,9 @@ const MAX_JOB_LINKS_PER_TASK = 2;
 
 // The workflow that produces most of the checks above. Reporting an all-clear
 // without it having run is the difference between "everything passed" and
-// "nothing ran yet".
-const CI_WORKFLOW_NAME = 'CI';
+// "nothing ran yet". Keyed on the workflow file rather than its display
+// name, so renaming the workflow can't silently break the lookup.
+const CI_WORKFLOW_FILE = 'ci.yml';
 
 // Whether the CI workflow actually produced results for a SHA, given its
 // workflow run (or undefined if none exists yet).
@@ -290,7 +291,7 @@ function buildCommentBody({ tasks, previousState, authorLogin, stickyCommentUrl 
 module.exports = {
     MARKER_PREFIX,
     TASKS,
-    CI_WORKFLOW_NAME,
+    CI_WORKFLOW_FILE,
     ciHasProducedResults,
     classifyCheckRuns,
     computeOverallState,
