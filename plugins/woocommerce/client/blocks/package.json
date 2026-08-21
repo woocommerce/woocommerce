@@ -198,7 +198,6 @@
 		"knip": "^5.60.2",
 		"lint-staged": "13.2.0",
 		"lodash": "4.18.1",
-		"markdown-it": "13.0.1",
 		"mini-css-extract-plugin": "2.9.x",
 		"msw": "2.10.4",
 		"playwright-ctrf-json-reporter": "0.0.27",
