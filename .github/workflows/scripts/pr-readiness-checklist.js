@@ -225,6 +225,15 @@ function parsePreviousState(commentBody) {
 // is a short tag the orchestrator maps to a log line, and `previousState`
 // is only meaningful when the action is 'create' or 'update'.
 function decideAction({ pr, tasks, hasPending, ciRun, existingComment }) {
+    // Draft PRs are skipped, and the state this leaves behind is handled
+    // asymmetrically on purpose. Draft -> ready self-heals without help:
+    // pr-require-milestone.yml runs on `ready_for_review` (gated on
+    // `draft == false`), and its workflow_run retriggers this bot, so the
+    // checklist appears shortly after the PR is marked ready - that timing
+    // is load-bearing, not luck. Ready -> draft deliberately leaves any
+    // existing comment in place: the checklist is still accurate for the
+    // pushed commits, and deleting/redacting it on a state the author will
+    // likely leave again isn't worth the churn.
     if (pr.draft) {
         return { action: 'skip', reason: 'draft' };
     }
