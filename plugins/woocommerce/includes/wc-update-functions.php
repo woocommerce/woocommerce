@@ -3624,12 +3624,10 @@ function wc_update_1110_flush_product_count_cache() {
 
 /**
  * Migrate the Back in Stock Notifications alpha opt-in from the
- * WOOCOMMERCE_BIS_ALPHA_ENABLED wp-config constant to the
- * 'customer_stock_notifications' feature toggle.
+ * WOOCOMMERCE_BIS_ALPHA_ENABLED constant to the feature toggle.
  *
- * Only stores that explicitly opted in via the constant are touched, and
- * add_option() is a no-op when the feature option already exists, so a choice
- * already made on the Features screen is never overwritten.
+ * Stores that already made a choice on the Features screen keep it: add_option()
+ * is a no-op when the option exists.
  *
  * @since 11.2.0
  *

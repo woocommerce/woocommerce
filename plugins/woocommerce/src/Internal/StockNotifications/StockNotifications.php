@@ -31,13 +31,9 @@ class StockNotifications implements RegisterHooksInterface {
 	/**
 	 * Register the hooks that must exist regardless of the feature's state.
 	 *
-	 * Only the feature-independent listeners live here. The services themselves are
-	 * wired up in `maybe_init_services()`, behind the feature check, following the same
-	 * shape as `ShopperListsController` and `OrderWithdrawalController`.
-	 *
-	 * Listening for the feature change has to happen outside the feature check:
-	 * during the request that turns the feature on it is still off, so a listener
-	 * registered behind the gate would never observe its own activation.
+	 * The services are wired up in `maybe_init_services()`, behind the feature check.
+	 * The feature-change listener cannot live there: during the request that turns the
+	 * feature on it is still off, so it would never observe its own activation.
 	 *
 	 * @internal
 	 */
@@ -48,11 +44,7 @@ class StockNotifications implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Handle the WooCommerce installation event.
-	 *
-	 * This method is called when WooCommerce is installed or updated. When the
-	 * feature is enabled, it initializes the data retention controller to set up
-	 * necessary tasks; otherwise it does nothing.
+	 * Set up the data retention tasks when WooCommerce is installed or updated.
 	 */
 	public function on_install_or_update() {
 		if ( ! FeaturesUtil::feature_is_enabled( self::FEATURE_NAME ) ) {
@@ -65,12 +57,11 @@ class StockNotifications implements RegisterHooksInterface {
 	/**
 	 * Set up or tear down the feature's side effects when it is toggled.
 	 *
-	 * Enabling the feature from the Features screen fires no install event, so the
-	 * daily data retention task and the My Account endpoint rewrite rules have to be
-	 * taken care of here. Disabling it has to undo both.
+	 * Toggling from the Features screen fires no install event, so the daily data
+	 * retention task and the rewrite rules have to be handled here.
 	 *
-	 * Left untyped, and coerced in the body, because this is a public hook callback:
-	 * third-party code firing the action may pass fewer or differently-typed arguments.
+	 * Params are untyped and coerced in the body because any third-party code can
+	 * fire this action with fewer or differently-typed arguments.
 	 *
 	 * @param mixed $feature_id The feature that changed.
 	 * @param mixed $enabled    Whether the feature is now enabled.
@@ -99,9 +90,8 @@ class StockNotifications implements RegisterHooksInterface {
 	/**
 	 * Wire up the services, unless the feature is disabled.
 	 *
-	 * Hooked to `init` priority 1 so the feature check runs after the textdomain is
-	 * loaded, and before `WC_Install::check_version()` (priority 5) fires
-	 * `woocommerce_installed`.
+	 * Runs on `init` priority 1: after the textdomain is loaded, and before
+	 * `WC_Install::check_version()` (priority 5) fires `woocommerce_installed`.
 	 *
 	 * @internal
 	 */
@@ -136,9 +126,8 @@ class StockNotifications implements RegisterHooksInterface {
 	 * @return array
 	 */
 	public function register_data_stores( $data_stores ) {
-		// Check the option directly instead of using FeaturesController::feature_is_enabled()
-		// because the woocommerce_data_stores filter can fire before the 'init' action, and
-		// feature_is_enabled() would trigger translation loading too early, causing
+		// Read the option directly: this filter can fire before `init`, and
+		// feature_is_enabled() would load translations too early, triggering
 		// _load_textdomain_just_in_time warnings.
 		if ( 'yes' !== get_option( 'woocommerce_feature_customer_stock_notifications_enabled', 'no' ) ) {
 			return $data_stores;
