@@ -134,7 +134,7 @@ final class WooCommerce {
 	/**
 	 * Cart instance.
 	 *
-	 * @var WC_Cart|null
+	 * @var WC_Cart
 	 */
 	public $cart = null;
 

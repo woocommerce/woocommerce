@@ -222,6 +222,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 			$this->cart_controller->normalize_cart();
 		} catch ( \Throwable $error ) {
 			// Do not let later Store API batch requests use and persist a partially loaded cart.
+			// @phpstan-ignore-next-line assign.propertyType (The cart is deliberately invalidated after a failed load.).
 			WC()->cart = null;
 			throw $error;
 		}
