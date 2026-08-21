@@ -314,8 +314,17 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	 * @testdox The version check schedules the automatic database update.
 	 */
 	public function test_version_check_schedules_db_auto_update(): void {
-		$update_versions = array_keys( WC_Install::get_db_update_callbacks() );
-		$from_version    = $update_versions[ count( $update_versions ) - 2 ];
+		$older_update_versions = array_filter(
+			array_keys( WC_Install::get_db_update_callbacks() ),
+			fn( $version ) => version_compare( $version, WC()->version, '<' )
+		);
+
+		$this->assertNotEmpty(
+			$older_update_versions,
+			sprintf( 'Expected at least one database update version older than WooCommerce %s.', WC()->version )
+		);
+
+		$from_version = end( $older_update_versions );
 
 		update_option( 'woocommerce_db_version', $from_version );
 		update_option( 'woocommerce_version', $from_version );
