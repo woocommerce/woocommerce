@@ -34,6 +34,13 @@ class Cart extends ControllerTestCase {
 	private static $coupon_id;
 
 	/**
+	 * Cart instance removed to mimic a REST request, restored on teardown.
+	 *
+	 * @var \WC_Cart|null
+	 */
+	private $cart_backup = null;
+
+	/**
 	 * Create immutable catalog rows shared by all test methods.
 	 */
 	public static function wpSetUpBeforeClass(): void {
@@ -1549,5 +1556,65 @@ class Cart extends ControllerTestCase {
 
 		remove_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback );
 		remove_filter( 'woocommerce_store_api_add_to_cart_data', $add_to_cart_data_callback );
+	}
+
+	/**
+	 * @testdox Should return an error response when restoring the cart session throws.
+	 */
+	public function test_cart_session_failure_returns_error_response() {
+		wc()->session->set( 'cart', wc()->cart->get_cart_for_session() );
+
+		// The route restores the cart only when this action has not run yet, so reset
+		// the counter to put the process back into the state a REST request starts in.
+		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
+
+		add_filter(
+			'woocommerce_get_cart_item_from_session',
+			static function () {
+				throw new \RuntimeException( 'Synthetic Store API cart-session failure.' );
+			}
+		);
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
+
+		$this->assertSame( 500, $response->get_status(), 'A cart session failure should return a Store API error response.' );
+		$this->assertSame( 'woocommerce_rest_unknown_server_error', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Should return an error response when the cart session fails before it is restored.
+	 */
+	public function test_cart_session_failure_before_restore_returns_error_response() {
+		// This filter runs before `get_cart_from_session()` fires its action, so nothing
+		// stops the response headers attempting a second load of the failed cart.
+		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
+
+		// A REST request never runs `initialize_cart()`, so the route starts with no
+		// cart at all. The test bootstrap leaves one behind.
+		$this->cart_backup = WC()->cart;
+		WC()->cart         = null;
+
+		add_filter(
+			'woocommerce_session_handler',
+			static function () {
+				throw new \RuntimeException( 'Synthetic session handler failure.' );
+			}
+		);
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
+
+		$this->assertSame( 500, $response->get_status(), 'A cart session failure should return a Store API error response.' );
+	}
+
+	/**
+	 * Restore the cart instance removed by the cart session failure tests.
+	 */
+	public function tearDown(): void {
+		if ( $this->cart_backup instanceof \WC_Cart ) {
+			WC()->cart         = $this->cart_backup;
+			$this->cart_backup = null;
+		}
+
+		parent::tearDown();
 	}
 }

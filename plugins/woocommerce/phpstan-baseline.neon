@@ -4711,12 +4711,6 @@ parameters:
 			path: includes/admin/list-tables/class-wc-admin-list-table-orders.php
 
 		-
-			message: '#^Part \$date_query \(array\|string\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 2
-			path: includes/admin/list-tables/class-wc-admin-list-table-orders.php
-
-		-
 			message: '#^Property WC_Admin_List_Table\:\:\$object \(object\|null\) does not accept WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -14199,18 +14193,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property WC_Register_WP_Admin_Settings\:\:\$title\.$#'
 			identifier: property.notFound
-			count: 1
-			path: includes/class-wc-register-wp-admin-settings.php
-
-		-
-			message: '#^Access to protected property WC_Email\|WC_Settings_Page\:\:\$id\.$#'
-			identifier: property.protected
-			count: 1
-			path: includes/class-wc-register-wp-admin-settings.php
-
-		-
-			message: '#^Call to an undefined method WC_Email\|WC_Settings_Page\:\:get_id\(\)\.$#'
-			identifier: method.notFound
 			count: 1
 			path: includes/class-wc-register-wp-admin-settings.php
 
@@ -41098,12 +41080,6 @@ parameters:
 			path: src/Admin/API/Reports/Customers/Controller.php
 
 		-
-			message: '#^@param object \$export_item does not accept actual type of parameter\: array\{name\: mixed, username\: mixed, last_active\: mixed, registered\: mixed, email\: mixed, orders_count\: mixed, total_spend\: string, avg_order_value\: string, \.\.\.\}\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Admin/API/Reports/Customers/Controller.php
-
-		-
 			message: '#^@param object \$item does not accept actual type of parameter\: array\.$#'
 			identifier: parameter.phpDocType
 			count: 1
@@ -41129,12 +41105,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\Controller\:\:get_item\(\) should return array\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\WP_Error but returns WP_REST_Response\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/Customers/Controller.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\Controller\:\:prepare_item_for_export\(\) should return array but returns object\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Admin/API/Reports/Customers/Controller.php
@@ -46736,42 +46706,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: src/Admin/Features/PaymentGatewaySuggestions/PaymentGatewaysController.php
-
-		-
-			message: '#^Cannot access property \$labels on WP_Post_Type\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: src/Admin/Features/ProductDataViews/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductDataViews\\Init\:\:enqueue_scripts\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductDataViews/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductDataViews\\Init\:\:enqueue_styles\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductDataViews/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductDataViews\\Init\:\:is_product_data_view_page\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductDataViews/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductDataViews\\Init\:\:woocommerce_add_new_products_dashboard\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductDataViews/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductDataViews\\Init\:\:woocommerce_products_dashboard\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductDataViews/Init.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ShippingPartnerSuggestions\\ShippingPartnerSuggestions\:\:get_specs\(\) has no return type specified\.$#'
