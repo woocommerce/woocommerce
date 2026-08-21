@@ -206,6 +206,105 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Applying a coupon to a customerless order preserves per-user usage limits by billing email.
+	 */
+	public function test_apply_coupon_without_get_customer_id_method_checks_usage_by_billing_email(): void {
+		$billing_email = 'customerless-order@example.com';
+		$product       = WC_Helper_Product::create_simple_product( true, array( 'price' => 10 ) );
+		$coupon        = WC_Helper_Coupon::create_coupon();
+		$coupon->set_usage_limit_per_user( 1 );
+		$coupon->save();
+		$coupon->increase_usage_count( $billing_email );
+
+		// phpcs:disable Squiz.Commenting.FunctionComment.Missing -- Test fixture methods are self-explanatory.
+		$order = new class($billing_email) extends WC_Abstract_Order {
+			/**
+			 * Billing email for the test order.
+			 *
+			 * @var string
+			 */
+			private $billing_email;
+
+			public function __construct( $billing_email ) {
+				parent::__construct();
+				$this->billing_email = $billing_email;
+			}
+
+			public function get_billing_email() {
+				return $this->billing_email;
+			}
+
+			public function recalculate_coupons() {
+				return true;
+			}
+
+			public function save() {
+				return 0;
+			}
+
+			protected function get_tax_location( $args = array() ) {
+				return array(
+					'country'  => '',
+					'state'    => '',
+					'postcode' => '',
+					'city'     => '',
+				);
+			}
+		};
+		// phpcs:enable Squiz.Commenting.FunctionComment.Missing
+
+		$order->add_product( $product );
+
+		$result = $order->apply_coupon( $coupon );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'invalid_coupon', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Applying a coupon does not call an inaccessible customer ID method.
+	 */
+	public function test_apply_coupon_with_private_get_customer_id_method(): void {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'price' => 10 ) );
+		$coupon  = WC_Helper_Coupon::create_coupon();
+
+		// phpcs:disable Squiz.Commenting.FunctionComment.Missing -- Test fixture methods are self-explanatory.
+		$order = new class() extends WC_Abstract_Order {
+			private function get_customer_id() {
+				return 0;
+			}
+
+			public function get_billing_email() {
+				return '';
+			}
+
+			public function recalculate_coupons() {
+				return true;
+			}
+
+			public function save() {
+				return 0;
+			}
+
+			protected function get_tax_location( $args = array() ) {
+				return array(
+					'country'  => '',
+					'state'    => '',
+					'postcode' => '',
+					'city'     => '',
+				);
+			}
+		};
+		// phpcs:enable Squiz.Commenting.FunctionComment.Missing
+
+		$order->add_product( $product );
+
+		$result = $order->apply_coupon( $coupon );
+
+		$this->assertTrue( $result, 'Orders with an inaccessible customer ID method should accept valid coupons.' );
+	}
+
+	/**
 	 * @testdox 'add_product' passes the order supplied in '$args' to 'wc_get_price_excluding_tax', and uses the obtained price as total and subtotal for the line item.
 	 */
 	public function test_add_product_passes_order_to_wc_get_price_excluding_tax() {
