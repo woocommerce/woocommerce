@@ -215,25 +215,6 @@ export const resolveFieldComponent = (
 	return undefined;
 };
 
-export const resolveFieldComponentForRendering = (
-	field: SettingsUIField,
-	context: SettingsFieldContext
-): SettingsEditControl | undefined => {
-	const component = resolveFieldComponent( field, context );
-
-	if ( component ) {
-		return component;
-	}
-
-	if ( field.component ) {
-		throw new Error(
-			`Component "${ field.component }" is not registered.`
-		);
-	}
-
-	return undefined;
-};
-
 export const resolveFieldVisibilityPredicate = (
 	fieldId: string,
 	context: SettingsFieldContext
