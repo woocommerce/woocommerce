@@ -145,16 +145,19 @@ module.exports = async ({ github, context, core }) => {
 
     let checkRuns;
     try {
-        checkRuns = await github.paginate(
-            github.rest.checks.listForRef,
-            {
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: pr.head.sha,
-                per_page: 100,
-            },
-            (response) => response.data.check_runs
-        );
+        // No map function: octokit's paginate plugin normalizes this
+        // endpoint's namespaced { total_count, check_runs } payload into a
+        // bare check-run array before any map function runs. A mapper
+        // returning response.data.check_runs therefore returns undefined,
+        // and paginate concat()s that into [undefined] - found live in
+        // round-3 verification (PR #67912), where it crashed the
+        // classifier on every run.
+        checkRuns = await github.paginate(github.rest.checks.listForRef, {
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            ref: pr.head.sha,
+            per_page: 100,
+        });
     } catch (error) {
         core.warning(`Failed to fetch check-runs for ${pr.head.sha}: ${error.message}`);
         return;
