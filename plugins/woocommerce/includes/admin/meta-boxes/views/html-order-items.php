@@ -373,7 +373,7 @@ if ( wc_tax_enabled() ) {
 						if ( $restockable_items > 0 ) {
 							esc_html_e( 'Enter a refund quantity to return items to stock.', 'woocommerce' );
 						} else {
-							esc_html_e( 'None of these items can be returned to stock.', 'woocommerce' );
+							esc_html_e( 'Nothing can be returned to stock.', 'woocommerce' );
 						}
 						?>
 					</p>
