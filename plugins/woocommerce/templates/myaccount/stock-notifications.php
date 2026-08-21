@@ -45,10 +45,10 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 	<table class="woocommerce-customer-stock-notifications-table woocommerce-MyAccount-customerStockNotifications shop_table shop_table_responsive">
 		<thead>
 			<tr>
-				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-product"><?php esc_html_e( 'Product', 'woocommerce' ); ?></th>
-				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-variation"><?php esc_html_e( 'Variation', 'woocommerce' ); ?></th>
-				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-date"><?php esc_html_e( 'Date signed up', 'woocommerce' ); ?></th>
-				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-actions"><?php esc_html_e( 'Actions', 'woocommerce' ); ?></th>
+				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-product"><span class="nobr"><?php esc_html_e( 'Product', 'woocommerce' ); ?></span></th>
+				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-variation"><span class="nobr"><?php esc_html_e( 'Variation', 'woocommerce' ); ?></span></th>
+				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-date"><span class="nobr"><?php esc_html_e( 'Date signed up', 'woocommerce' ); ?></span></th>
+				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-actions"><span class="nobr"><?php esc_html_e( 'Actions', 'woocommerce' ); ?></span></th>
 			</tr>
 		</thead>
 		<tbody>
