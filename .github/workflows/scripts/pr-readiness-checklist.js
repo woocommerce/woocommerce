@@ -58,6 +58,16 @@ const TASKS = [
 
 const MAX_JOB_LINKS_PER_TASK = 2;
 
+// Conclusions that mean the contributor has something to fix. Anything
+// completed with another conclusion is ignored like `skipped`: `cancelled`
+// (a maintainer cancelled the run, or concurrency cancelled it on a
+// re-push), `neutral` ("passed with warnings" for several apps), and
+// `stale` are not the contributor's failures, and reporting them as red -
+// with a ping, on a clear->failing flip - blames the author for something
+// they did not do.
+const FAILING_CONCLUSIONS = ['failure', 'timed_out', 'action_required'];
+const IGNORED_CONCLUSIONS = ['skipped', 'cancelled', 'neutral', 'stale'];
+
 // The workflow that produces most of the checks above. Reporting an all-clear
 // without it having run is the difference between "everything passed" and
 // "nothing ran yet". Keyed on the workflow file rather than its display
@@ -108,7 +118,9 @@ function classifyCheckRuns(checkRuns) {
         const matching = checkRuns.filter(
             (run) => task.matches(run.name) && !run.name.endsWith(' (optional)')
         );
-        const relevant = matching.filter((run) => run.conclusion !== 'skipped');
+        const relevant = matching.filter(
+            (run) => !IGNORED_CONCLUSIONS.includes(run.conclusion)
+        );
 
         if (relevant.length === 0) {
             return null;
@@ -123,7 +135,9 @@ function classifyCheckRuns(checkRuns) {
             // comment will update once all runs settle, but actionable failures
             // are not hidden.
             const completedFailingRuns = relevant.filter(
-                (run) => run.status === 'completed' && run.conclusion !== 'success'
+                (run) =>
+                    run.status === 'completed' &&
+                    FAILING_CONCLUSIONS.includes(run.conclusion)
             );
             if (completedFailingRuns.length > 0) {
                 const result = {
@@ -140,7 +154,9 @@ function classifyCheckRuns(checkRuns) {
             return null;
         }
 
-        const failingRuns = relevant.filter((run) => run.conclusion !== 'success');
+        const failingRuns = relevant.filter((run) =>
+            FAILING_CONCLUSIONS.includes(run.conclusion)
+        );
 
         const failing = failingRuns.length > 0;
 

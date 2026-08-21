@@ -47,6 +47,42 @@ test('classifyCheckRuns: skipped runs are treated as not applicable, not failing
     assert.deepEqual(tasks, []);
 });
 
+test('classifyCheckRuns: cancelled runs are ignored, not blamed on the contributor', () => {
+    // ci.yml runs with cancel-in-progress, and maintainers cancel runs by
+    // hand; neither is the author's failure.
+    const { tasks, hasPending } = classifyCheckRuns([
+        checkRun('Validate markdown', { conclusion: 'cancelled' }),
+    ]);
+    assert.deepEqual(tasks, []);
+    assert.equal(hasPending, false);
+});
+
+test('classifyCheckRuns: a cancelled sibling does not drag down a successful run', () => {
+    const { tasks } = classifyCheckRuns([
+        checkRun('Lint - @woocommerce/plugin-woocommerce'),
+        checkRun('Lint - @woocommerce/blocks', { conclusion: 'cancelled' }),
+    ]);
+    assert.equal(tasks.length, 1);
+    assert.equal(tasks[0].status, 'pass');
+});
+
+test('classifyCheckRuns: neutral and stale conclusions are ignored like skipped', () => {
+    const { tasks } = classifyCheckRuns([
+        checkRun('Validate changelog', { conclusion: 'neutral' }),
+        checkRun('Validate markdown', { conclusion: 'stale' }),
+    ]);
+    assert.deepEqual(tasks, []);
+});
+
+test('classifyCheckRuns: timed_out and action_required count as failures', () => {
+    const { tasks } = classifyCheckRuns([
+        checkRun('Unit Tests - A [unit:php]', { conclusion: 'timed_out' }),
+        checkRun('Validate changelog', { conclusion: 'action_required' }),
+    ]);
+    const statuses = tasks.map((task) => task.status);
+    assert.deepEqual(statuses, ['fail', 'fail']);
+});
+
 test('classifyCheckRuns: still-running matching runs omit the task for this update and flag hasPending', () => {
     const { tasks, hasPending } = classifyCheckRuns([
         checkRun('PHPStan Analysis', { status: 'in_progress', conclusion: null }),
