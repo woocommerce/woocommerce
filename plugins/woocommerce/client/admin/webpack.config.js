@@ -8,16 +8,16 @@ const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const { BundleAnalyzerPlugin } = require( 'webpack-bundle-analyzer' );
 const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin' );
 const webpack = require( 'webpack' );
+const {
+	webpackConfig: styleConfig,
+} = require( '@woocommerce/internal-build/style-build' );
+const WooCommerceDependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin/src/index' );
 
 /**
  * Internal dependencies
  */
 const CustomTemplatedPathPlugin = require( './bin/custom-templated-path-webpack-plugin' );
 const UnminifyWebpackPlugin = require( './bin/unminify-webpack-plugin.js' );
-const {
-	webpackConfig: styleConfig,
-} = require( '@woocommerce/internal-build/style-build' );
-const WooCommerceDependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin/src/index' );
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const WC_ADMIN_PHASE = process.env.WC_ADMIN_PHASE || 'development';
@@ -52,7 +52,6 @@ const wcAdminPackages = [
 	'currency',
 	'customer-effort-score',
 	'date',
-	'experimental-products-app',
 	'experimental',
 	'explat',
 	'navigation',
