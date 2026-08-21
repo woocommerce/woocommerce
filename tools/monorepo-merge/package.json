@@ -78,6 +78,7 @@
 					"name": "JavaScript",
 					"command": "test",
 					"changes": [
+						"bin/**",
 						"src/**/*.ts",
 						"test/**/*.mjs",
 						"tsconfig.json"

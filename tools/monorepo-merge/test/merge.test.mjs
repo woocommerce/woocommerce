@@ -10,6 +10,8 @@ const { default: Merge } = mergeModule;
 const { MONOREPO_ROOT } = constants;
 
 const SOURCE = 'woocommerce/example';
+const DESTINATION_ERROR =
+	'The "destination" argument must point to a path inside the monorepo';
 
 function rewriteMessage( message ) {
 	const script = [
@@ -51,28 +53,27 @@ describe( 'destination validation', () => {
 				SOURCE,
 				join( MONOREPO_ROOT, 'tools/example' )
 			),
-			/inside the monorepo/
+			{ message: DESTINATION_ERROR }
 		);
 	} );
 
 	it( 'rejects the monorepo root', async () => {
-		await assert.rejects(
-			createCommand().validateArgs( SOURCE, '.' ),
-			/inside the monorepo/
-		);
+		await assert.rejects( createCommand().validateArgs( SOURCE, '.' ), {
+			message: DESTINATION_ERROR,
+		} );
 	} );
 
 	it( 'rejects a path that traverses outside the monorepo', async () => {
 		await assert.rejects(
 			createCommand().validateArgs( SOURCE, '../outside' ),
-			/inside the monorepo/
+			{ message: DESTINATION_ERROR }
 		);
 	} );
 
 	it( 'rejects a sibling path with the monorepo name as its prefix', async () => {
 		await assert.rejects(
 			createCommand().validateArgs( SOURCE, '../woocommerce-copy' ),
-			/inside the monorepo/
+			{ message: DESTINATION_ERROR }
 		);
 	} );
 } );
