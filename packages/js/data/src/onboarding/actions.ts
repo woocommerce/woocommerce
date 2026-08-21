@@ -124,47 +124,67 @@ export function undoSnoozeTaskSuccess( task: Partial< TaskType > ) {
 	};
 }
 
-export function dismissTaskError( taskId: string, error: unknown ) {
+export function dismissTaskError(
+	taskId: string,
+	error: unknown,
+	taskListId?: string
+) {
 	return {
 		type: TYPES.DISMISS_TASK_ERROR,
 		taskId,
 		error,
+		taskListId,
 	};
 }
 
-export function dismissTaskRequest( taskId: string ) {
+export function dismissTaskRequest( taskId: string, taskListId?: string ) {
 	return {
 		type: TYPES.DISMISS_TASK_REQUEST,
 		taskId,
+		taskListId,
 	};
 }
 
-export function dismissTaskSuccess( task: Partial< TaskType > ) {
+export function dismissTaskSuccess(
+	task: Partial< TaskType >,
+	taskListId?: string
+) {
 	return {
 		type: TYPES.DISMISS_TASK_SUCCESS,
 		task,
+		taskListId,
 	};
 }
 
-export function undoDismissTaskError( taskId: string, error: unknown ) {
+export function undoDismissTaskError(
+	taskId: string,
+	error: unknown,
+	taskListId?: string
+) {
 	return {
 		type: TYPES.UNDO_DISMISS_TASK_ERROR,
 		taskId,
 		error,
+		taskListId,
 	};
 }
 
-export function undoDismissTaskRequest( taskId: string ) {
+export function undoDismissTaskRequest( taskId: string, taskListId?: string ) {
 	return {
 		type: TYPES.UNDO_DISMISS_TASK_REQUEST,
 		taskId,
+		taskListId,
 	};
 }
 
-export function undoDismissTaskSuccess( task: Partial< TaskType > ) {
+export function undoDismissTaskSuccess(
+	task: Partial< TaskType >,
+	taskListId?: string
+) {
 	return {
 		type: TYPES.UNDO_DISMISS_TASK_SUCCESS,
 		task,
+		taskListId,
 	};
 }
 
@@ -432,7 +452,7 @@ export function* undoSnoozeTask( id: string ) {
 }
 
 export function* dismissTask( id: string, taskListId?: string ) {
-	yield dismissTaskRequest( id );
+	yield dismissTaskRequest( id, taskListId );
 
 	try {
 		const task: TaskType = yield apiFetch( {
@@ -447,16 +467,17 @@ export function* dismissTask( id: string, taskListId?: string ) {
 			DeprecatedTasks.possiblyPruneTaskData( task, [
 				'isDismissed',
 				'isSnoozed',
-			] )
+			] ),
+			taskListId
 		);
 	} catch ( error ) {
-		yield dismissTaskError( id, error );
+		yield dismissTaskError( id, error, taskListId );
 		throw new Error();
 	}
 }
 
 export function* undoDismissTask( id: string, taskListId?: string ) {
-	yield undoDismissTaskRequest( id );
+	yield undoDismissTaskRequest( id, taskListId );
 
 	try {
 		const task: TaskType = yield apiFetch( {
@@ -471,10 +492,11 @@ export function* undoDismissTask( id: string, taskListId?: string ) {
 			DeprecatedTasks.possiblyPruneTaskData( task, [
 				'isDismissed',
 				'isSnoozed',
-			] )
+			] ),
+			taskListId
 		);
 	} catch ( error ) {
-		yield undoDismissTaskError( id, error );
+		yield undoDismissTaskError( id, error, taskListId );
 		throw new Error();
 	}
 }
