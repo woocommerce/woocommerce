@@ -205,24 +205,51 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		 * @return mixed
 		 */
 		public static function get_option( $option_name, $default = '' ) {
-			if ( ! $option_name ) {
+			// Field definitions supply this name and third-party code can put anything in one, so
+			// bail on values that cannot be parsed rather than letting them reach strstr() below.
+			if ( ! is_scalar( $option_name ) || ! $option_name ) {
 				return $default;
 			}
+
+			$option_name = (string) $option_name;
 
 			// Array value.
 			if ( strstr( $option_name, '[' ) ) {
 
+				$option_name_raw = $option_name;
+
 				parse_str( $option_name, $option_array );
 
+				// A name with no parsable base, such as '[key]', names nothing to look up.
+				if ( empty( $option_array ) ) {
+					return $default;
+				}
+
 				// Option name is first key.
-				$option_name = current( array_keys( $option_array ) );
+				$option_name = (string) current( array_keys( $option_array ) );
+
+				// A malformed name such as 'foo[' parses to a base with no key path below it.
+				if ( ! is_array( $option_array[ $option_name ] ) ) {
+					return $default;
+				}
 
 				// Get value.
 				$option_values = get_option( $option_name, '' );
 
 				$key = key( $option_array[ $option_name ] );
 
-				if ( isset( $option_values[ $key ] ) ) {
+				/*
+				 * This resolves one level. A deeper name such as 'opt[a][b]' would return the
+				 * sub-array above the value it means, which callers rendering a single value
+				 * cannot use, so fall back to the default. A trailing '[]' is not deeper: it
+				 * names the whole array at this level, which is what a multi-value field stores.
+				 */
+				if ( is_array( $option_array[ $option_name ][ $key ] ) && '[]' !== substr( urldecode( $option_name_raw ), -2 ) ) {
+					return $default;
+				}
+
+				// Indexing a string would read a character by offset, so require a container.
+				if ( ( is_array( $option_values ) || $option_values instanceof ArrayAccess ) && isset( $option_values[ $key ] ) ) {
 					$option_value = $option_values[ $key ];
 				} else {
 					$option_value = null;
