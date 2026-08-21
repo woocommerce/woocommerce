@@ -203,6 +203,7 @@ overrides:
   '@wordpress/data-controls>@wordpress/api-fetch': 7.33.1
   '@wordpress/private-apis': ^1.33.1
   js-yaml@>=3.0.0 <3.15.1: 3.15.1
+  minimatch@>=3.0.0 <3.1.4: 3.1.5
   react-resize-aware: 3.1.1
   sass: 1.69.5
 
@@ -17030,12 +17031,6 @@ packages:
   minimatch@10.2.5:
     resolution: {integrity: sha512-MULkVLfKGYDFYejP07QOurDLLQpcjk7Fw+7jXS2R2czRQzR56yHRveU5NDJEOviH+hETZKSkIk5c+T23GjFUMg==}
     engines: {node: 18 || 20 || >=22}
-
-  minimatch@3.0.5:
-    resolution: {integrity: sha512-tUpxzX0VAzJHjLu0xUfFv1gwVp9ba3IOuRAVH2EGuRW8a5emA2FlACLqiT/lDVtS1W+TGNwqz3sWaNyLgDJWuw==}
-
-  minimatch@3.0.8:
-    resolution: {integrity: sha512-6FsRAQsxQ61mw+qP1ZzbL9Bc78x2p5OqNgNpnoAFLTrX8n5Kxph0CsnhmKKNXTWjXqU5L0pGPR7hYk+XWZr60Q==, tarball: https://registry.npmjs.org/minimatch/-/minimatch-3.0.8.tgz}
 
   minimatch@3.1.5:
     resolution: {integrity: sha512-VgjWUsnnT6n+NUk6eZq77zeFdpW2LWDzP6zFGrCbHXiYNul5Dzqk2HHQ5uFH2DNW5Xbp8+jVzaeNt94ssEEl4w==, tarball: https://registry.npmjs.org/minimatch/-/minimatch-3.1.5.tgz}
@@ -42573,7 +42568,7 @@ snapshots:
       jsonc-parser: 3.0.0
       markdownlint: 0.25.1
       markdownlint-rule-helpers: 0.16.0
-      minimatch: 3.0.8
+      minimatch: 3.1.5
       run-con: 1.2.12
 
   markdownlint-rule-helpers@0.16.0: {}
@@ -42802,14 +42797,6 @@ snapshots:
   minimatch@10.2.5:
     dependencies:
       brace-expansion: 5.0.9
-
-  minimatch@3.0.5:
-    dependencies:
-      brace-expansion: 1.1.18
-
-  minimatch@3.0.8:
-    dependencies:
-      brace-expansion: 1.1.18
 
   minimatch@3.1.5:
     dependencies:
@@ -45435,7 +45422,7 @@ snapshots:
   replace@1.2.2:
     dependencies:
       chalk: 2.4.2
-      minimatch: 3.0.5
+      minimatch: 3.1.5
       yargs: 15.4.1
 
   requestidlecallback@0.3.0: {}
