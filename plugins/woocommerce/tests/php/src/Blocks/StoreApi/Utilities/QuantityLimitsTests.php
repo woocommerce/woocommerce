@@ -725,9 +725,21 @@ class QuantityLimitsTests extends \WC_Unit_Test_Case {
 		$cart_item = $this->get_validation_cart_item();
 		$sut       = new QuantityLimits();
 
-		add_filter( 'woocommerce_store_api_cart_item_quantity_validation', '__return_true' );
+		$received_args = array();
+		add_filter(
+			'woocommerce_store_api_cart_item_quantity_validation',
+			function ( $valid, $quantity, $product, $filtered_cart_item ) use ( &$received_args ) {
+				$received_args = array( $quantity, $product, $filtered_cart_item );
+				return $valid;
+			},
+			10,
+			4
+		);
 
 		$this->assertTrue( $sut->validate_cart_item_quantity( 3, $cart_item ), 'A true filter return should be accepted' );
+		$this->assertSame( 3, $received_args[0], 'The callback should receive the new quantity' );
+		$this->assertSame( $cart_item['data']->get_id(), $received_args[1]->get_id(), 'The callback should receive the product object' );
+		$this->assertSame( $cart_item, $received_args[2], 'The callback should receive the cart item' );
 	}
 
 	/**

@@ -311,12 +311,13 @@ final class QuantityLimits {
 		 *
 		 * @since 11.2.0
 		 *
-		 * @param true      $valid     Always true; core validation failures bypass this filter.
-		 * @param int|float $quantity  The new quantity, already normalized through wc_stock_amount().
-		 * @param array     $cart_item Cart item.
+		 * @param true        $valid     Always true; core validation failures bypass this filter.
+		 * @param int|float   $quantity  The new quantity, already normalized through wc_stock_amount().
+		 * @param \WC_Product $product   The product object.
+		 * @param array       $cart_item Cart item.
 		 * @return \WP_Error|bool
 		 */
-		$valid = apply_filters( 'woocommerce_store_api_cart_item_quantity_validation', true, $quantity, $cart_item );
+		$valid = apply_filters( 'woocommerce_store_api_cart_item_quantity_validation', true, $quantity, $product, $cart_item );
 
 		if ( true === $valid ) {
 			return true;

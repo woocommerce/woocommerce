@@ -1247,7 +1247,7 @@ apply_filters( 'woocommerce_store_api_rate_limit_id', string $identifier );
 Filters the validation result for a cart item quantity being updated via the Store API. Return a \WP_Error with an informative message, or false, to reject the new quantity; return true to accept it. Any other return value is ignored and the quantity is accepted. This filter does not run when a product is first added to the cart — use the `woocommerce_store_api_validate_add_to_cart` action for that. Core validation failures (min, max, multiple_of, read-only) return early and never reach this filter.
 
 ```php
-apply_filters( 'woocommerce_store_api_cart_item_quantity_validation', true $valid, int|float $quantity, array $cart_item )
+apply_filters( 'woocommerce_store_api_cart_item_quantity_validation', true $valid, int|float $quantity, \WC_Product $product, array $cart_item )
 ```
 
 ### Parameters
@@ -1256,6 +1256,7 @@ apply_filters( 'woocommerce_store_api_cart_item_quantity_validation', true $vali
 | -------- | ---- | ----------- |
 | $valid | true | Always true; core validation failures bypass this filter. |
 | $quantity | int\|float | The new quantity, already normalized through wc_stock_amount(). |
+| $product | \WC_Product | The product object. |
 | $cart_item | array | Cart item. Note: `$cart_item['quantity']` holds the pre-existing quantity, not the new one. |
 
 ### Returns
