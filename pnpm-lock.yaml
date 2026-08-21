@@ -316,7 +316,7 @@ importers:
         specifier: 15.3.3
         version: 15.3.3
       typescript:
-        specifier: 5.7.x
+        specifier: 5.7.3
         version: 5.7.3
       webpack:
         specifier: catalog:tooling
