@@ -81,6 +81,79 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should resolve a nested option name without fataling on ones it cannot resolve.
+	 *
+	 * Switching the render path to 'field_name' newly routes extension-supplied bracket names into
+	 * get_option(), which previously only ever saw bracket-free field IDs on that path.
+	 *
+	 * @dataProvider get_option_name_shape_data
+	 *
+	 * @param mixed $option_name Option name a field definition could supply.
+	 * @param mixed $expected    Expected resolved value.
+	 */
+	public function test_get_option_resolves_nested_names_safely( $option_name, $expected ): void {
+		$this->option_names_to_clean[] = 'test_get_option_nested';
+		$this->option_names_to_clean[] = 'test_get_option_scalar';
+		update_option(
+			'test_get_option_nested',
+			array(
+				'key'  => 'saved nested',
+				'deep' => array( 'leaf' => 'two levels' ),
+				'list' => array( 'x', 'y' ),
+			)
+		);
+		update_option( 'test_get_option_scalar', 'abc' );
+
+		$this->assertSame( $expected, WC_Admin_Settings::get_option( $option_name, 'DEFAULT' ) );
+	}
+
+	/**
+	 * Data provider for test_get_option_resolves_nested_names_safely().
+	 *
+	 * @return array<string, array{mixed, mixed}>
+	 */
+	public static function get_option_name_shape_data(): array {
+		return array(
+			'nested name resolves'  => array( 'test_get_option_nested[key]', 'saved nested' ),
+			'multi value preserved' => array( 'test_get_option_nested[list][]', array( 'x', 'y' ) ),
+			'deeper than one level' => array( 'test_get_option_nested[deep][leaf]', 'DEFAULT' ),
+			'missing key'           => array( 'test_get_option_nested[absent]', 'DEFAULT' ),
+			'missing option'        => array( 'test_get_option_absent[key]', 'DEFAULT' ),
+			'no parsable base'      => array( '[key]', 'DEFAULT' ),
+			'unterminated bracket'  => array( 'test_get_option_nested[', 'DEFAULT' ),
+			'no string offset read' => array( 'test_get_option_scalar[0]', 'DEFAULT' ),
+			'non scalar name'       => array( array( 'unexpected' ), 'DEFAULT' ),
+			'empty name'            => array( '', 'DEFAULT' ),
+		);
+	}
+
+	/**
+	 * @testdox Should render the default rather than fataling when a field name cannot be resolved.
+	 */
+	public function test_output_fields_renders_default_for_an_unresolvable_field_name(): void {
+		$this->option_names_to_clean[] = 'test_output_fields_unresolvable';
+		update_option( 'test_output_fields_unresolvable', array( 'deep' => array( 'leaf' => 'two levels' ) ) );
+
+		ob_start();
+		try {
+			WC_Admin_Settings::output_fields(
+				array(
+					array(
+						'id'         => 'test_output_fields_unresolvable_leaf',
+						'field_name' => 'test_output_fields_unresolvable[deep][leaf]',
+						'type'       => 'text',
+						'default'    => 'default value',
+					),
+				)
+			);
+		} finally {
+			$output = ob_get_clean();
+		}
+
+		$this->assertStringContainsString( 'value="default value"', $output );
+	}
+
+	/**
 	 * Clean up options after each test to ensure test isolation even on assertion failure.
 	 */
 	public function tearDown(): void {
