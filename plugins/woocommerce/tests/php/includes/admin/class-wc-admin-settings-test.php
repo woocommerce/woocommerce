@@ -81,111 +81,36 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should resolve a nested option name without fataling on ones it cannot resolve.
+	 * @testdox Should read through the field name only for a single nested key, and through the ID otherwise.
 	 *
-	 * Switching the render path to 'field_name' newly routes extension-supplied bracket names into
-	 * get_option(), which previously only ever saw bracket-free field IDs on that path.
+	 * The fix reads a field's value through 'field_name'. Definitions come from third-party code,
+	 * so only the `option_name[key]` shape issue #48254 describes is resolved that way; every other
+	 * spelling keeps reading through the ID, which is what this method did before the fix.
 	 *
-	 * @dataProvider get_option_name_shape_data
+	 * @dataProvider field_name_shape_data
 	 *
-	 * @param mixed $option_name Option name a field definition could supply.
-	 * @param mixed $expected    Expected resolved value.
+	 * @param mixed  $field_name Field name supplied by the definition.
+	 * @param string $expected   Value the rendered input should carry.
 	 */
-	public function test_get_option_resolves_nested_names_safely( $option_name, $expected ): void {
-		$this->option_names_to_clean[] = 'test_get_option_nested';
-		$this->option_names_to_clean[] = 'test_get_option_scalar';
-		$this->option_names_to_clean[] = 'test_get_option_object';
-		$this->option_names_to_clean[] = 'test_get_option_member';
+	public function test_output_fields_reads_through_field_name_only_for_a_single_key( $field_name, string $expected ): void {
+		$this->option_names_to_clean[] = 'test_shape_parent';
+		$this->option_names_to_clean[] = 'test_shape_id';
 		update_option(
-			'test_get_option_nested',
+			'test_shape_parent',
 			array(
-				'key'  => 'saved nested',
-				'deep' => array(
-					'leaf' => 'two levels',
-					'sub'  => array( 's' => 1 ),
-				),
+				'key'  => 'nested value',
+				'deep' => array( 'leaf' => 'two levels' ),
 				'list' => array( 'x', 'y' ),
 			)
 		);
-		update_option( 'test_get_option_scalar', 'abc' );
-		update_option( 'test_get_option_object', new stdClass() );
-		update_option( 'test_get_option_member', array( 'obj' => new stdClass() ) );
-
-		$this->assertSame( $expected, WC_Admin_Settings::get_option( $option_name, 'DEFAULT' ) );
-	}
-
-	/**
-	 * Data provider for test_get_option_resolves_nested_names_safely().
-	 *
-	 * @return array<string, array{mixed, mixed}>
-	 */
-	public static function get_option_name_shape_data(): array {
-		return array(
-			'nested name resolves'  => array( 'test_get_option_nested[key]', 'saved nested' ),
-			'multi value preserved' => array( 'test_get_option_nested[list][]', array( 'x', 'y' ) ),
-			'deeper than one level' => array( 'test_get_option_nested[deep][leaf]', 'DEFAULT' ),
-			'deeper ending in []'   => array( 'test_get_option_nested[deep][sub][]', 'DEFAULT' ),
-			'deeper encoded []'     => array( 'test_get_option_nested[deep][sub]%5B%5D', 'DEFAULT' ),
-			'object valued option'  => array( 'test_get_option_object[k]', 'DEFAULT' ),
-			'object valued member'  => array( 'test_get_option_member[obj]', 'DEFAULT' ),
-			'explicit zero index'   => array( 'test_get_option_nested[list][0]', 'DEFAULT' ),
-			'encoded zero index'    => array( 'test_get_option_nested[list]%5B0%5D', 'DEFAULT' ),
-			'space index'           => array( 'test_get_option_nested[list][ ]', 'DEFAULT' ),
-			'plus index'            => array( 'test_get_option_nested[list][+]', 'DEFAULT' ),
-			'encoded multi value'   => array( 'test_get_option_nested[list]%5B%5D', array( 'x', 'y' ) ),
-			'missing key'           => array( 'test_get_option_nested[absent]', 'DEFAULT' ),
-			'missing option'        => array( 'test_get_option_absent[key]', 'DEFAULT' ),
-			'no parsable base'      => array( '[key]', 'DEFAULT' ),
-			'unterminated bracket'  => array( 'test_get_option_nested[', 'DEFAULT' ),
-			'no string offset read' => array( 'test_get_option_scalar[0]', 'DEFAULT' ),
-			'non scalar name'       => array( array( 'unexpected' ), 'DEFAULT' ),
-			'empty name'            => array( '', 'DEFAULT' ),
-		);
-	}
-
-	/**
-	 * @testdox Should render the default rather than fataling when a field name cannot be resolved.
-	 */
-	public function test_output_fields_renders_default_for_an_unresolvable_field_name(): void {
-		$this->option_names_to_clean[] = 'test_output_fields_unresolvable';
-		update_option( 'test_output_fields_unresolvable', array( 'deep' => array( 'leaf' => 'two levels' ) ) );
+		update_option( 'test_shape_id', 'value under the id' );
 
 		ob_start();
 		try {
 			WC_Admin_Settings::output_fields(
 				array(
 					array(
-						'id'         => 'test_output_fields_unresolvable_leaf',
-						'field_name' => 'test_output_fields_unresolvable[deep][leaf]',
-						'type'       => 'text',
-						'default'    => 'default value',
-					),
-				)
-			);
-		} finally {
-			$output = ob_get_clean();
-		}
-
-		$this->assertStringContainsString( 'value="default value"', $output );
-	}
-
-	/**
-	 * @testdox Should read through the field ID when the field name cannot address an option.
-	 *
-	 * @dataProvider unusable_field_name_data
-	 *
-	 * @param mixed $field_name Field name that cannot address an option.
-	 */
-	public function test_output_fields_reads_through_the_id_for_an_unusable_field_name( $field_name ): void {
-		$this->option_names_to_clean[] = 'test_output_fields_falsy_name';
-		update_option( 'test_output_fields_falsy_name', 'saved by id' );
-
-		ob_start();
-		try {
-			WC_Admin_Settings::output_fields(
-				array(
-					array(
-						'id'         => 'test_output_fields_falsy_name',
+						'id'         => 'test_shape_id',
 						'field_name' => $field_name,
 						'type'       => 'text',
 						'default'    => 'default value',
@@ -196,47 +121,75 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 			$output = ob_get_clean();
 		}
 
-		$this->assertStringContainsString( 'value="saved by id"', $output );
+		$this->assertStringContainsString( 'value="' . esc_attr( $expected ) . '"', $output );
 	}
 
 	/**
-	 * Data provider for test_output_fields_reads_through_the_id_for_an_unusable_field_name().
+	 * Data provider for test_output_fields_reads_through_field_name_only_for_a_single_key().
 	 *
-	 * Only falsy scalars are covered. A non-scalar 'field_name' is still rendered into the name
-	 * attribute unnormalised, which warns exactly as it did before this change and fatals in
-	 * save_fields() either way, so normalising it belongs with the save path rather than here.
+	 * Everything other than the first row must fall back to the ID, so each of these renders the
+	 * value stored under 'test_shape_id' rather than anything reached through the field name.
 	 *
-	 * @return array<string, array{mixed}>
+	 * A non-scalar field name is not covered here. The read falls back to the ID as it should,
+	 * but the name is still printed into the input's name attribute unnormalised, which warns
+	 * exactly as it did before this branch, so asserting on the rendered output would assert on
+	 * that pre-existing warning rather than on the read.
+	 *
+	 * @return array<string, array{mixed, string}>
 	 */
-	public static function unusable_field_name_data(): array {
+	public static function field_name_shape_data(): array {
 		return array(
-			'empty string' => array( '' ),
-			'false'        => array( false ),
-			'zero'         => array( 0 ),
+			'single nested key'  => array( 'test_shape_parent[key]', 'nested value' ),
+			'two levels'         => array( 'test_shape_parent[deep][leaf]', 'value under the id' ),
+			'trailing brackets'  => array( 'test_shape_parent[list][]', 'value under the id' ),
+			'explicit index'     => array( 'test_shape_parent[list][0]', 'value under the id' ),
+			'index with junk'    => array( 'test_shape_parent[list][0]x[]', 'value under the id' ),
+			'bare brackets'      => array( 'test_shape_parent[]', 'value under the id' ),
+			'unbalanced bracket' => array( 'test_shape_parent[', 'value under the id' ),
+			'no base name'       => array( '[key]', 'value under the id' ),
+			'empty string'       => array( '', 'value under the id' ),
 		);
 	}
 
 	/**
-	 * @testdox Should save through the field ID when the field name cannot address an option.
+	 * @testdox Should return the default rather than fataling when a nested read hits an object.
 	 *
-	 * The read path falls back to the ID for such a name, so the save path has to agree or the
-	 * posted value lands under one key and is looked for under another.
+	 * Reading through 'field_name' is what first routes a bracketed name into get_option() from the
+	 * render path, so the two shapes that raise there are covered.
+	 *
+	 * @dataProvider object_valued_option_data
+	 *
+	 * @param string $option_name Option to seed.
+	 * @param mixed  $value       Value to store under it.
+	 * @param string $lookup      Bracketed name to resolve.
 	 */
-	public function test_save_fields_writes_through_the_id_for_an_unusable_field_name(): void {
-		$this->option_names_to_clean[] = 'test_save_fields_falsy_name';
+	public function test_get_option_returns_the_default_for_object_values( string $option_name, $value, string $lookup ): void {
+		$this->option_names_to_clean[] = $option_name;
+		update_option( $option_name, $value );
 
-		WC_Admin_Settings::save_fields(
-			array(
-				array(
-					'id'         => 'test_save_fields_falsy_name',
-					'field_name' => '',
-					'type'       => 'text',
-				),
-			),
-			array( 'test_save_fields_falsy_name' => 'posted value' )
+		$this->assertSame( 'DEFAULT', WC_Admin_Settings::get_option( $lookup, 'DEFAULT' ) );
+	}
+
+	/**
+	 * Data provider for test_get_option_returns_the_default_for_object_values().
+	 *
+	 * @return array<string, array{string, mixed, string}>
+	 */
+	public static function object_valued_option_data(): array {
+		return array(
+			'object option' => array( 'test_object_option', new stdClass(), 'test_object_option[key]' ),
+			'object member' => array( 'test_object_member', array( 'key' => new stdClass() ), 'test_object_member[key]' ),
 		);
+	}
 
-		$this->assertSame( 'posted value', get_option( 'test_save_fields_falsy_name' ) );
+	/**
+	 * @testdox Should keep resolving a nested name that an ArrayAccess option carries.
+	 */
+	public function test_get_option_resolves_through_array_access(): void {
+		$this->option_names_to_clean[] = 'test_array_access';
+		update_option( 'test_array_access', new ArrayObject( array( 'key' => 'from array access' ) ) );
+
+		$this->assertSame( 'from array access', WC_Admin_Settings::get_option( 'test_array_access[key]', 'DEFAULT' ) );
 	}
 
 	/**
