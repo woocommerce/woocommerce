@@ -17,6 +17,7 @@ jobs:
         name: "Process a pull request after it's merged"
         if: github.event.pull_request.merged == true
         runs-on: ubuntu-latest
+        timeout-minutes: 5
         permissions:
             pull-requests: write
         steps:
@@ -45,6 +46,7 @@ jobs:
         name: Log the merge of a Feature Freeze exception
         if: ${{ github.event.pull_request.merged && startsWith( github.event.pull_request.base.ref, 'release/' ) && ! contains( github.event.pull_request.labels.*.name, 'Release' ) }}
         runs-on: ubuntu-latest
+        timeout-minutes: 5
         permissions:
             pull-requests: write
         steps:
@@ -58,6 +60,7 @@ jobs:
     process-pull-request-after-close:
         name: "Process a pull request after it's been closed"
         runs-on: ubuntu-latest
+        timeout-minutes: 5
         steps:
             - name: 'Cleanup: GitHub caches associated with the merged branch'
               run: |

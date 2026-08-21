@@ -347,6 +347,9 @@ class WC_Install {
 			'wc_update_1110_cleanup_block_email_posts',
 			'wc_update_1110_flush_product_count_cache',
 		),
+		'11.1.0-1' => array(
+			'wc_update_11101_remove_deprecated_variation_gallery_option',
+		),
 		'11.2.0'   => array(
 			'wc_update_1120_migrate_stock_notifications_alpha_constant',
 		),

@@ -1294,6 +1294,11 @@ jQuery( function ( $ ) {
 								response,
 								$coupon_field.parent()
 							);
+
+							$( document.body ).trigger(
+								'errored_coupon_in_checkout',
+								[ data.coupon_code, response ]
+							);
 						}
 
 						$( document.body ).trigger(

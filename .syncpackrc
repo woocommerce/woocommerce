@@ -486,20 +486,6 @@
 			"isIgnored": true
 		},
 		{
-			"label": "experimental-products-app uses custom WordPress package versions",
-			"dependencies": [
-				"@wordpress/base-styles",
-				"@wordpress/dataviews",
-				"@wordpress/icons",
-				"@wordpress/router",
-				"@wordpress/theme"
-			],
-			"packages": [
-				"@woocommerce/experimental-products-app"
-			],
-			"isIgnored": true
-		},
-		{
 			"label": "settings-ui temporarily pins DataViews 17.1.0 for the DataForm migration",
 			"dependencies": [
 				"@wordpress/dataviews"

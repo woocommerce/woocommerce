@@ -6,6 +6,7 @@ use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
 use Automattic\WooCommerce\Blocks\Utils\ProductAvailabilityUtils;
+use Automattic\WooCommerce\Blocks\Utils\ProductDescriptionUtils;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\StockDisplayFormat;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
@@ -595,8 +596,22 @@ class ProductSchema extends AbstractSchema {
 	public function get_item_response( $product ) {
 		$availability      = ProductAvailabilityUtils::get_product_availability( $product );
 		$password_required = post_password_required( $product->get_id() );
-		$short_description = $password_required ? '' : $this->prepare_html_response( wc_format_content( wp_kses_post( $product->get_short_description() ) ) );
-		$description       = $password_required ? '' : $this->prepare_html_response( wc_format_content( wp_kses_post( $product->get_description() ) ) );
+		$short_description = $password_required ? '' : $this->prepare_html_response(
+			ProductDescriptionUtils::guarded_format(
+				$product,
+				function () use ( $product ) {
+					return wc_format_content( wp_kses_post( $product->get_short_description() ) );
+				}
+			)
+		);
+		$description       = $password_required ? '' : $this->prepare_html_response(
+			ProductDescriptionUtils::guarded_format(
+				$product,
+				function () use ( $product ) {
+					return wc_format_content( wp_kses_post( $product->get_description() ) );
+				}
+			)
+		);
 
 		return [
 			'id'                    => $product->get_id(),

@@ -7,6 +7,7 @@
  */
 
 use Automattic\WooCommerce\Internal\Admin\FeaturePlugin;
+use Automattic\WooCommerce\Internal\VariationGallery\Migration as VariationGalleryMigration;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
@@ -69,6 +70,9 @@ class WC_Unit_Tests_Bootstrap {
 
 		// Set up WC-Admin config.
 		tests_add_filter( 'woocommerce_admin_get_feature_config', array( $this, 'add_development_features' ) );
+
+		// Keep the shared DB update queue clean outside the variation gallery package tests.
+		tests_add_filter( 'init', array( $this, 'cancel_variation_gallery_migration_action' ), 21 );
 
 		// Speed things up by turning down the password hashing cost.
 		tests_add_filter(
@@ -304,6 +308,20 @@ class WC_Unit_Tests_Bootstrap {
 		}
 
 		echo esc_html( 'Installing WooCommerce...' . PHP_EOL );
+	}
+
+	/**
+	 * Cancel the variation gallery migration scheduled during test bootstrap.
+	 *
+	 * The package scheduler is covered directly by its own tests. Leaving its
+	 * bootstrap action pending leaks into unrelated tests of the shared DB update queue.
+	 */
+	public function cancel_variation_gallery_migration_action(): void {
+		WC()->queue()->cancel_all(
+			'woocommerce_run_update_callback',
+			array( 'update_callback' => array( VariationGalleryMigration::class, 'run' ) ),
+			'woocommerce-db-updates'
+		);
 	}
 
 	/**
