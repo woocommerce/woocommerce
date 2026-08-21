@@ -275,6 +275,26 @@ test('parsePreviousState: returns null for a comment with no marker', () => {
     assert.equal(parsePreviousState('just a regular comment'), null);
 });
 
+test('parsePreviousState: round-trips the state buildCommentBody writes', () => {
+    // Writer and reader must agree on the marker; this is the assertion
+    // that catches them drifting apart (e.g. a renamed prefix), which
+    // otherwise fails silently by re-greeting the author on every push.
+    for (const [previousState, tasks] of [
+        [null, [{ label: 'Lint', status: 'fail', remediation: 'x' }]],
+        ['failing', [{ label: 'Lint', status: 'pass', remediation: 'x' }]],
+    ]) {
+        const { body } = buildCommentBody({
+            tasks,
+            previousState,
+            authorLogin: 'octocat',
+        });
+        assert.equal(
+            parsePreviousState(body),
+            tasks[0].status === 'fail' ? 'failing' : 'clear'
+        );
+    }
+});
+
 test('parsePreviousState: returns null for a missing comment', () => {
     assert.equal(parsePreviousState(undefined), null);
     assert.equal(parsePreviousState(null), null);

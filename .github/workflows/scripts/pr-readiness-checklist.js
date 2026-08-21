@@ -2,6 +2,15 @@
 
 const MARKER_PREFIX = '<!-- pr-readiness-summary';
 
+// Derived from MARKER_PREFIX so writer (buildCommentBody) and reader
+// (parsePreviousState) can't drift apart: a hard-coded literal here would
+// silently stop matching if the prefix ever changed, making every run look
+// like a first comment and re-mention the author on each push. None of the
+// prefix's characters are regex metacharacters, so no escaping is needed.
+const STATUS_MARKER_PATTERN = new RegExp(
+    `${MARKER_PREFIX} status=(failing|clear) -->`
+);
+
 // Each remediation duplicates guidance that already lives next to the
 // check it describes; the `// Source:` comment on each names that origin.
 // When the origin changes its guidance, update the remediation with it -
@@ -205,9 +214,7 @@ function parsePreviousState(commentBody) {
     if (!commentBody) {
         return null;
     }
-    const match = commentBody.match(
-        /<!-- pr-readiness-summary status=(failing|clear) -->/
-    );
+    const match = commentBody.match(STATUS_MARKER_PATTERN);
     return match ? match[1] : null;
 }
 
