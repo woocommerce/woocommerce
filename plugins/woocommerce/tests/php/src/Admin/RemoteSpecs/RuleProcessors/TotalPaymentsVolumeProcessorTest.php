@@ -82,29 +82,34 @@ class TotalPaymentsVolumeProcessorTest extends WC_Unit_Test_Case {
 	 * @testdox Should evaluate the timeframe against the site's calendar date, not the UTC date.
 	 */
 	public function test_process_resolves_timeframe_in_site_timezone(): void {
+		$original_timezone = get_option( 'timezone_string' );
 		update_option( 'timezone_string', 'Pacific/Kiritimati' );
 
-		$processor = $this->get_processor_with_frozen_clock();
-		$rule      = (object) array(
-			'timeframe' => 'last_month',
-			'value'     => 50,
-			'operation' => '>',
-		);
+		try {
+			$processor = $this->get_processor_with_frozen_clock();
+			$rule      = (object) array(
+				'timeframe' => 'last_month',
+				'value'     => 50,
+				'operation' => '>',
+			);
 
-		$result = $processor->process( $rule, (object) array() );
+			$result = $processor->process( $rule, (object) array() );
 
-		$this->assertTrue( $result, 'total_sales of 100 should satisfy "> 50"' );
-		// On the frozen instant the site-local date is 2020-09-01 while the UTC date is still
-		// 2020-08-31, so last_month must resolve to August 2020, not July 2020.
-		$this->assertSame( '2020-08-01 00:00:00', $processor->captured_args['after'] );
-		$this->assertSame( '2020-08-31 23:59:59', $processor->captured_args['before'] );
+			$this->assertTrue( $result, 'total_sales of 100 should satisfy "> 50"' );
+			// On the frozen instant the site-local date is 2020-09-01 while the UTC date is still
+			// 2020-08-31, so last_month must resolve to August 2020, not July 2020.
+			$this->assertSame( '2020-08-01 00:00:00', $processor->captured_args['after'] );
+			$this->assertSame( '2020-08-31 23:59:59', $processor->captured_args['before'] );
 
-		// A second evaluation must produce the same window: the date calculations mutate the
-		// reference date in place, and that must not leak into the provider's cached instance.
-		$processor->process( $rule, (object) array() );
+			// A second evaluation must produce the same window: the date calculations mutate the
+			// reference date in place, and that must not leak into the provider's cached instance.
+			$processor->process( $rule, (object) array() );
 
-		$this->assertSame( '2020-08-01 00:00:00', $processor->captured_args['after'], 'Repeated process() calls should not drift the timeframe' );
-		$this->assertSame( '2020-08-31 23:59:59', $processor->captured_args['before'], 'Repeated process() calls should not drift the timeframe' );
+			$this->assertSame( '2020-08-01 00:00:00', $processor->captured_args['after'], 'Repeated process() calls should not drift the timeframe' );
+			$this->assertSame( '2020-08-31 23:59:59', $processor->captured_args['before'], 'Repeated process() calls should not drift the timeframe' );
+		} finally {
+			update_option( 'timezone_string', $original_timezone );
+		}
 	}
 
 	/**
