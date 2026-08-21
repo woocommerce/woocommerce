@@ -762,6 +762,6 @@ test('buildCommentBody: regression from clear to failing mentions the author and
     // to embed directly - GitHub-generated, not PR-author-controlled).
     assert.equal(
         pingBody,
-        '@octocat, the readiness checklist now has failures — see [the checklist above](https://github.com/owner/repo/pull/1#issuecomment-123).'
+        '@octocat, some checks started failing after the latest push. See the [readiness checks above](https://github.com/owner/repo/pull/1#issuecomment-123) for details and how to fix them.'
     );
 });

@@ -354,7 +354,7 @@ const SILENT_STATUS_MESSAGES = {
 // reaches this function at all (see SILENT_STATUS_MESSAGES above).
 const PING_MESSAGES = {
     'clear->failing': (authorLogin, stickyCommentUrl) =>
-        `@${authorLogin}, the readiness checklist now has failures — see [the checklist above](${stickyCommentUrl}).`,
+        `@${authorLogin}, some checks started failing after the latest push. See the [readiness checks above](${stickyCommentUrl}) for details and how to fix them.`,
 };
 
 function buildCommentBody({ tasks, previousState, authorLogin, stickyCommentUrl }) {
