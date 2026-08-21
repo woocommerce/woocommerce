@@ -349,7 +349,12 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	 */
 	private function get_rate_limited_response(): array {
 		return array(
-			'headers'  => array( 'retry-after' => '60' ),
+			// 300 rather than 60: human_time_diff() drops from minutes to seconds
+			// below MINUTE_IN_SECONDS, and get_api_error() recomputes the window
+			// live against the clock, so a boundary value reads back as
+			// "59 seconds" whenever a second elapses between recording the
+			// failure and reading it.
+			'headers'  => array( 'retry-after' => '300' ),
 			'response' => array(
 				'code'    => 429,
 				'message' => 'Too Many Requests',
@@ -381,11 +386,16 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		$this->assertNotNull( $error, 'A 429 should record a surfaceable error' );
 		$this->assertSame( 429, $error['code'], 'The recorded error should carry the HTTP status' );
 		$this->assertSame(
-			'You have exceeded the request limit. Please try again in 1 minute.',
+			'You have exceeded the request limit. Please try again in 5 minutes.',
 			$error['message'],
 			'A 429 should name the wait rather than say "a few minutes"'
 		);
-		$this->assertSame( 60, $error['retry_after'], 'The Retry-After window should be reported' );
+		$this->assertEqualsWithDelta(
+			300,
+			$error['retry_after'],
+			5,
+			'The Retry-After window should be reported'
+		);
 	}
 
 	/**
