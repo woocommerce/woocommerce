@@ -65,6 +65,24 @@
 		}
 	}
 
+	// The stock notifications table promotes its Product cell to a row header
+	// (`<th scope="row">`) so screen readers announce each row by product name.
+	// `shop_table_responsive` hides `tbody th` outright, which suits tables whose
+	// row header repeats a visible column, but Product is the only identifying
+	// column here — so render it like the sibling data cells instead of hiding it.
+	table.woocommerce-customer-stock-notifications-table {
+		tbody th {
+			display: block;
+			text-align: right;
+
+			&::before {
+				content: attr(data-title) ": ";
+				font-weight: 700;
+				float: left;
+			}
+		}
+	}
+
 	table.my_account_orders {
 		tr {
 			td {

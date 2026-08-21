@@ -60,7 +60,7 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 			$date_created = $notification->get_date_created();
 			?>
 			<tr class="woocommerce-customer-stock-notifications-table__row woocommerce-customer-stock-notifications-table__row--status-<?php echo esc_attr( (string) $notification->get_status() ); ?>">
-				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-product" data-title="<?php esc_attr_e( 'Product', 'woocommerce' ); ?>">
+				<th class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-product" data-title="<?php esc_attr_e( 'Product', 'woocommerce' ); ?>" scope="row">
 					<?php if ( '' !== $product_name && '' !== $permalink ) : ?>
 						<a href="<?php echo esc_url( $permalink ); ?>"><?php echo esc_html( $product_name ); ?></a>
 					<?php elseif ( '' !== $product_name ) : ?>
@@ -68,7 +68,7 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 					<?php else : ?>
 						<?php esc_html_e( 'Product unavailable', 'woocommerce' ); ?>
 					<?php endif; ?>
-				</td>
+				</th>
 				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-variation" data-title="<?php esc_attr_e( 'Variation', 'woocommerce' ); ?>">
 					<?php echo '' !== $variation ? esc_html( $variation ) : '&mdash;'; ?>
 				</td>
