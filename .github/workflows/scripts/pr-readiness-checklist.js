@@ -369,9 +369,9 @@ function buildCommentBody({ tasks, previousState, authorLogin, stickyCommentUrl 
                         task.jobUrls && task.jobUrls.length > 0
                             ? ' ' +
                               task.jobUrls
-                                  .map((url, index) =>
+                                  .map((url, jobIndex) =>
                                       task.jobUrls.length > 1
-                                          ? `[Job ${index + 1}](${url})`
+                                          ? `[Job ${jobIndex + 1}](${url})`
                                           : `[Job](${url})`
                                   )
                                   .join(', ')
