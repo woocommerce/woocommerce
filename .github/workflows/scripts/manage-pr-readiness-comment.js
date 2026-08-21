@@ -42,7 +42,7 @@ async function findCiRun(github, context, headSha) {
     return runs.find((run) => run.name === CI_WORKFLOW_NAME);
 }
 
-async function resolvePullRequest(github, context) {
+async function resolvePullRequest(github, context, core) {
     const { head_sha: headSha, head_repository: headRepository } =
         context.payload.workflow_run;
 
@@ -55,12 +55,31 @@ async function resolvePullRequest(github, context) {
     const sourceOwner = headRepository ? headRepository.owner.login : context.repo.owner;
     const sourceRepo = headRepository ? headRepository.name : context.repo.repo;
 
-    const { data: associated } =
-        await github.rest.repos.listPullRequestsAssociatedWithCommit({
-            owner: sourceOwner,
-            repo: sourceRepo,
-            commit_sha: headSha,
-        });
+    // The fork is the contributor's repo, and contributors delete, rename,
+    // or privatize forks while their PR is still open - all of which 404
+    // this call. Degrade to the (possibly lagging) base-repo query instead
+    // of failing the job.
+    let associated;
+    try {
+        ({ data: associated } =
+            await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                owner: sourceOwner,
+                repo: sourceRepo,
+                commit_sha: headSha,
+                per_page: 100,
+            }));
+    } catch (error) {
+        core.warning(
+            `Failed to resolve PR from ${sourceOwner}/${sourceRepo}: ${error.message}; falling back to the base repo.`
+        );
+        ({ data: associated } =
+            await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: headSha,
+                per_page: 100,
+            }));
+    }
 
     // Matching on head.sha also doubles as the stale-event guard: a
     // workflow_run event for a superseded commit matches no PR whose head
@@ -93,7 +112,7 @@ module.exports = async ({ github, context, core }) => {
         return;
     }
 
-    const pr = await resolvePullRequest(github, context);
+    const pr = await resolvePullRequest(github, context, core);
     if (!pr) {
         core.info('No open pull request found for this commit.');
         return;
