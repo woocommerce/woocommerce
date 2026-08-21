@@ -9593,29 +9593,15 @@ table.bar_chart {
 		margin-bottom: .1em;
 	}
 
-	.woocommerce-order-attribution-origin-container {
-		display: flex;
-		justify-content: space-between;
-		align-items: start;
-		gap: 0.5em;
-	}
-
-	.order-attribution-origin {
-		flex-grow: 1;
-		min-width: 0;
+	&:has(.woocommerce-order-attribution-details-toggle[aria-expanded="false"]) .order-attribution-origin {
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
 
-	.woocommerce-order-attribution-origin-container:has(.woocommerce-order-attribution-details-toggle[aria-expanded="true"]) .order-attribution-origin {
-		overflow: visible;
-		white-space: normal;
+	.order-attribution-origin {
+		display: block;
 		overflow-wrap: anywhere;
-	}
-
-	.woocommerce-order-attribution-details-toggle {
-		white-space: nowrap;
 	}
 
 	.woocommerce-order-attribution-details-container {
@@ -9625,11 +9611,12 @@ table.bar_chart {
 
 	.woocommerce-order-attribution-details-toggle {
 		display: block;
+		width: fit-content;
+		margin-top: 1em;
+		white-space: nowrap;
 		text-decoration: none;
 		vertical-align: middle;
-		margin-top: -7px;
 		position: relative;
-		top: 5px;
 
 		.toggle-text {
 			text-decoration: underline;
