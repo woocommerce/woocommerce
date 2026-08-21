@@ -3,7 +3,6 @@
  */
 import { createElement, Component, Fragment } from '@wordpress/element';
 import { SelectControl } from '@wordpress/components';
-import { getIdsFromQuery } from '@woocommerce/navigation';
 import { find, isEqual } from 'lodash';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
@@ -17,8 +16,15 @@ import {
 	textContent,
 } from './utils';
 
+const normalizeFilterValue = ( value ) => {
+	if ( Array.isArray( value ) ) {
+		return value.join( ',' );
+	}
+	return typeof value === 'string' ? value : '';
+};
+
 class SearchFilter extends Component {
-	constructor( { filter, config, query } ) {
+	constructor( { filter, query } ) {
 		super( ...arguments );
 		this.onSearchChange = this.onSearchChange.bind( this );
 		this.state = {
@@ -27,44 +33,57 @@ class SearchFilter extends Component {
 
 		this.updateLabels = this.updateLabels.bind( this );
 
-		if ( filter.value.length ) {
-			config.input
-				.getLabels( filter.value, query )
-				.then( ( selected ) => {
-					const selectedWithKeys = selected.map( ( s ) => ( {
-						key: s.id,
-						...s,
-					} ) );
-
-					this.updateLabels( selectedWithKeys );
-				} );
+		const filterValue = normalizeFilterValue( filter.value );
+		if ( filterValue.length ) {
+			this.loadLabels( filterValue, query );
 		}
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { config, filter, query } = this.props;
+		const { filter, query } = this.props;
 		const { filter: prevFilter } = prevProps;
+		const filterValue = normalizeFilterValue( filter.value );
 
-		if ( filter.value.length && ! isEqual( prevFilter, filter ) ) {
+		if ( filterValue.length && ! isEqual( prevFilter, filter ) ) {
 			const { selected } = this.state;
-			const ids = selected.map( ( item ) => item.key );
-			const filterIds = getIdsFromQuery( filter.value );
-			const hasNewIds = filterIds.every( ( id ) => ! ids.includes( id ) );
+			const selectedIds = selected.map( ( item ) => String( item.key ) );
+			const filterIds = filterValue
+				.split( ',' )
+				.filter( Boolean )
+				.map( String );
+			const haveIdsChanged =
+				filterIds.length !== selectedIds.length ||
+				filterIds.some( ( id ) => ! selectedIds.includes( id ) );
 
-			if ( hasNewIds ) {
-				config.input
-					.getLabels( filter.value, query )
-					.then( this.updateLabels );
+			if ( haveIdsChanged ) {
+				this.loadLabels( filterValue, query );
 			}
 		}
 	}
 
-	updateLabels( selected ) {
-		const prevIds = this.state.selected.map( ( item ) => item.key );
-		const ids = selected.map( ( item ) => item.key );
+	loadLabels( filterValue, query ) {
+		this.props.config.input
+			.getLabels( filterValue, query )
+			.then( ( selected ) => {
+				if (
+					filterValue ===
+					normalizeFilterValue( this.props.filter.value )
+				) {
+					this.updateLabels( selected );
+				}
+			} );
+	}
 
-		if ( ! isEqual( ids.sort(), prevIds.sort() ) ) {
-			this.setState( { selected } );
+	updateLabels( selected ) {
+		const normalizedSelected = selected.map( ( item ) => ( {
+			...item,
+			key: item.key ?? item.id,
+		} ) );
+		const prevIds = this.state.selected.map( ( item ) => item.key );
+		const ids = normalizedSelected.map( ( item ) => item.key );
+
+		if ( ! isEqual( [ ...ids ].sort(), [ ...prevIds ].sort() ) ) {
+			this.setState( { selected: normalizedSelected } );
 		}
 	}
 
@@ -138,7 +157,6 @@ class SearchFilter extends Component {
 
 		const screenReaderText = this.getScreenReaderText( filter, config );
 
-		/*eslint-disable jsx-a11y/no-noninteractive-tabindex*/
 		return (
 			<fieldset
 				className="woocommerce-filters-advanced__line-item"
@@ -164,7 +182,6 @@ class SearchFilter extends Component {
 				) }
 			</fieldset>
 		);
-		/*eslint-enable jsx-a11y/no-noninteractive-tabindex*/
 	}
 }
 
@@ -187,7 +204,7 @@ SearchFilter.propTypes = {
 	filter: PropTypes.shape( {
 		key: PropTypes.string,
 		rule: PropTypes.string,
-		value: PropTypes.string,
+		value: PropTypes.oneOfType( [ PropTypes.string, PropTypes.array ] ),
 	} ).isRequired,
 	/**
 	 * Function to be called on update.

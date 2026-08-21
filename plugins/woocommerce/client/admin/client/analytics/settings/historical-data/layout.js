@@ -90,16 +90,16 @@ class HistoricalDataLayout extends Component {
 							<FailedOrdersNotice />
 						</div>
 					</div>
+					<HistoricalDataActions
+						clearStatusAndTotalsCache={ clearStatusAndTotalsCache }
+						dateFormat={ dateFormat }
+						importDate={ importDate }
+						lastImportStartTimestamp={ lastImportStartTimestamp }
+						onImportStarted={ onImportStarted }
+						stopImport={ stopImport }
+						status={ status }
+					/>
 				</div>
-				<HistoricalDataActions
-					clearStatusAndTotalsCache={ clearStatusAndTotalsCache }
-					dateFormat={ dateFormat }
-					importDate={ importDate }
-					lastImportStartTimestamp={ lastImportStartTimestamp }
-					onImportStarted={ onImportStarted }
-					stopImport={ stopImport }
-					status={ status }
-				/>
 			</Fragment>
 		);
 	}
