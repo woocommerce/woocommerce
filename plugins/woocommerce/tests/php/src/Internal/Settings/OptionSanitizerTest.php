@@ -41,6 +41,7 @@ class OptionSanitizerTest extends WC_Unit_Test_Case {
 	public function stock_threshold_values_provider(): array {
 		return array(
 			'positive integer' => array( '3', 3 ),
+			'zero'             => array( '0', 0 ),
 			'negative integer' => array( '-2', 2 ),
 			'fraction'         => array( '2.9', 2 ),
 			'empty value'      => array( '', 0 ),
