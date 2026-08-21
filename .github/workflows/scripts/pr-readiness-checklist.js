@@ -218,6 +218,73 @@ function parsePreviousState(commentBody) {
     return match ? match[1] : null;
 }
 
+// The whole go/no-go decision for one workflow_run event, as a pure
+// function of already-fetched data, so every branch is unit-testable and
+// the orchestrator reduces to fetch -> decideAction -> dispatch. Returns
+// { action: 'skip' | 'create' | 'update', reason, previousState }; `reason`
+// is a short tag the orchestrator maps to a log line, and `previousState`
+// is only meaningful when the action is 'create' or 'update'.
+function decideAction({ pr, tasks, hasPending, ciRun, existingComment }) {
+    if (pr.draft) {
+        return { action: 'skip', reason: 'draft' };
+    }
+
+    // The bot serves community (fork) PRs only.
+    if (!pr.head.repo || pr.head.repo.full_name === pr.base.repo.full_name) {
+        return { action: 'skip', reason: 'not-a-fork' };
+    }
+
+    // An empty checklist is not an all-clear, it is an empty one. A push
+    // where every tracked check is skipped (a docs- or .github-only commit)
+    // classifies to zero tasks, which computeOverallState calls 'clear' -
+    // and against an existing 'failing' comment that would announce "all
+    // checks are passing now" on a commit where nothing ran. Leave whatever
+    // state the previous push established alone.
+    if (tasks.length === 0) {
+        return { action: 'skip', reason: 'no-applicable-checks' };
+    }
+
+    const overallState = computeOverallState(tasks);
+
+    // Three separate workflows trigger this independently, so it's normal
+    // for some to finish (and pass) while others - e.g. CI's slower
+    // Lint/Unit/E2E/API jobs - are still running. Reporting "clear" from
+    // only the tasks decided so far would be a false all-clear; wait for
+    // a later trigger, once every task has actually settled. A real
+    // failure already found among the decided tasks is reported right
+    // away regardless - that's actionable now and shouldn't wait on
+    // slower jobs.
+    if (hasPending && overallState === 'clear') {
+        return { action: 'skip', reason: 'pending-checks' };
+    }
+
+    // A clear checklist built entirely from checks that never ran is not an
+    // all-clear, it is an empty one - and the two are indistinguishable from
+    // check-run data alone (see ciHasProducedResults). Confirm CI actually
+    // produced results for this SHA before saying everything passed. Only the
+    // clear path is gated: a failure already found is actionable now and is
+    // still reported immediately, even while sibling jobs are running.
+    if (overallState === 'clear' && !ciHasProducedResults(ciRun)) {
+        return { action: 'skip', reason: 'ci-not-run' };
+    }
+
+    const previousState = parsePreviousState(
+        existingComment && existingComment.body
+    );
+
+    // No update on clear->clear, so the comment keeps its original "edited"
+    // timestamp instead of churning on every green re-run.
+    if (existingComment && previousState === 'clear' && overallState === 'clear') {
+        return { action: 'skip', reason: 'still-clear' };
+    }
+
+    return {
+        action: existingComment ? 'update' : 'create',
+        reason: null,
+        previousState,
+    };
+}
+
 const HEADER = '## PR Readiness Checks';
 
 // Mention-worthy transitions: the ones a real state change happened on.
@@ -341,5 +408,6 @@ module.exports = {
     classifyCheckRuns,
     computeOverallState,
     parsePreviousState,
+    decideAction,
     buildCommentBody,
 };

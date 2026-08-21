@@ -8,6 +8,7 @@ const {
     classifyCheckRuns,
     computeOverallState,
     parsePreviousState,
+    decideAction,
     buildCommentBody,
 } = require('./pr-readiness-checklist');
 
@@ -362,6 +363,201 @@ test('ciHasProducedResults: a completed CI run is real evidence', () => {
         ciHasProducedResults({ status: 'completed', conclusion: 'failure' }),
         true
     );
+});
+
+// --- decideAction ---
+// Fixtures mirror the fields the decision actually reads.
+
+function pullRequest(overrides = {}) {
+    return {
+        number: 1,
+        draft: false,
+        head: { sha: 'abc123', repo: { full_name: 'contributor/woocommerce' } },
+        base: { repo: { full_name: 'woocommerce/woocommerce' } },
+        user: { login: 'octocat' },
+        ...overrides,
+    };
+}
+
+const COMPLETED_CI = { status: 'completed', conclusion: 'success' };
+const FAIL_TASK = { label: 'Lint', status: 'fail', remediation: 'x' };
+const PASS_TASK = { label: 'Lint', status: 'pass', remediation: 'x' };
+
+function stickyComment(state) {
+    return {
+        id: 7,
+        body: `<!-- pr-readiness-summary status=${state} -->`,
+        html_url: 'https://example.com/comment/7',
+    };
+}
+
+test('decideAction: skips draft PRs', () => {
+    const decision = decideAction({
+        pr: pullRequest({ draft: true }),
+        tasks: [FAIL_TASK],
+        hasPending: false,
+        ciRun: COMPLETED_CI,
+        existingComment: null,
+    });
+    assert.deepEqual(decision, { action: 'skip', reason: 'draft' });
+});
+
+test('decideAction: skips PRs that are not from a fork', () => {
+    const decision = decideAction({
+        pr: pullRequest({
+            head: {
+                sha: 'abc123',
+                repo: { full_name: 'woocommerce/woocommerce' },
+            },
+        }),
+        tasks: [FAIL_TASK],
+        hasPending: false,
+        ciRun: COMPLETED_CI,
+        existingComment: null,
+    });
+    assert.deepEqual(decision, { action: 'skip', reason: 'not-a-fork' });
+});
+
+test('decideAction: a missing head repo is treated as not-a-fork, not a crash', () => {
+    const decision = decideAction({
+        pr: pullRequest({ head: { sha: 'abc123', repo: null } }),
+        tasks: [FAIL_TASK],
+        hasPending: false,
+        ciRun: COMPLETED_CI,
+        existingComment: null,
+    });
+    assert.deepEqual(decision, { action: 'skip', reason: 'not-a-fork' });
+});
+
+test('decideAction: no applicable checks and no comment is a no-op', () => {
+    const decision = decideAction({
+        pr: pullRequest(),
+        tasks: [],
+        hasPending: false,
+        ciRun: COMPLETED_CI,
+        existingComment: null,
+    });
+    assert.deepEqual(decision, {
+        action: 'skip',
+        reason: 'no-applicable-checks',
+    });
+});
+
+test('decideAction: an all-skipped push never flips an existing failing comment to clear', () => {
+    // The false-all-clear regression: a docs- or .github-only follow-up
+    // commit skips every tracked check, classifying to zero tasks, which
+    // computeOverallState calls 'clear'. Against a failing sticky comment
+    // that must not become "all checks are passing now".
+    const decision = decideAction({
+        pr: pullRequest(),
+        tasks: [],
+        hasPending: false,
+        ciRun: COMPLETED_CI,
+        existingComment: stickyComment('failing'),
+    });
+    assert.deepEqual(decision, {
+        action: 'skip',
+        reason: 'no-applicable-checks',
+    });
+});
+
+test('decideAction: defers a clear verdict while sibling checks are still pending', () => {
+    const decision = decideAction({
+        pr: pullRequest(),
+        tasks: [PASS_TASK],
+        hasPending: true,
+        ciRun: COMPLETED_CI,
+        existingComment: null,
+    });
+    assert.deepEqual(decision, { action: 'skip', reason: 'pending-checks' });
+});
+
+test('decideAction: defers a clear verdict without evidence that CI ran', () => {
+    for (const ciRun of [
+        undefined,
+        { status: 'completed', conclusion: 'action_required' },
+        { status: 'in_progress', conclusion: null },
+    ]) {
+        const decision = decideAction({
+            pr: pullRequest(),
+            tasks: [PASS_TASK],
+            hasPending: false,
+            ciRun,
+            existingComment: null,
+        });
+        assert.deepEqual(decision, { action: 'skip', reason: 'ci-not-run' });
+    }
+});
+
+test('decideAction: a failure is reported immediately, even pending siblings and no CI evidence', () => {
+    const decision = decideAction({
+        pr: pullRequest(),
+        tasks: [FAIL_TASK],
+        hasPending: true,
+        ciRun: undefined,
+        existingComment: null,
+    });
+    assert.deepEqual(decision, {
+        action: 'create',
+        reason: null,
+        previousState: null,
+    });
+});
+
+test('decideAction: clear staying clear leaves the comment untouched', () => {
+    const decision = decideAction({
+        pr: pullRequest(),
+        tasks: [PASS_TASK],
+        hasPending: false,
+        ciRun: COMPLETED_CI,
+        existingComment: stickyComment('clear'),
+    });
+    assert.deepEqual(decision, { action: 'skip', reason: 'still-clear' });
+});
+
+test('decideAction: a clear run with CI evidence creates the first comment', () => {
+    const decision = decideAction({
+        pr: pullRequest(),
+        tasks: [PASS_TASK],
+        hasPending: false,
+        ciRun: COMPLETED_CI,
+        existingComment: null,
+    });
+    assert.deepEqual(decision, {
+        action: 'create',
+        reason: null,
+        previousState: null,
+    });
+});
+
+test('decideAction: fixed failures update the existing comment with the failing previous state', () => {
+    const decision = decideAction({
+        pr: pullRequest(),
+        tasks: [PASS_TASK],
+        hasPending: false,
+        ciRun: COMPLETED_CI,
+        existingComment: stickyComment('failing'),
+    });
+    assert.deepEqual(decision, {
+        action: 'update',
+        reason: null,
+        previousState: 'failing',
+    });
+});
+
+test('decideAction: a regression updates the existing comment with the clear previous state', () => {
+    const decision = decideAction({
+        pr: pullRequest(),
+        tasks: [FAIL_TASK],
+        hasPending: false,
+        ciRun: COMPLETED_CI,
+        existingComment: stickyComment('clear'),
+    });
+    assert.deepEqual(decision, {
+        action: 'update',
+        reason: null,
+        previousState: 'clear',
+    });
 });
 
 test('buildCommentBody: first-ever comment with failures mentions the author, no separate ping', () => {

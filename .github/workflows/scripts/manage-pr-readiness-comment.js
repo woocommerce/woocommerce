@@ -3,10 +3,8 @@
 const {
     MARKER_PREFIX,
     CI_WORKFLOW_FILE,
-    ciHasProducedResults,
     classifyCheckRuns,
-    computeOverallState,
-    parsePreviousState,
+    decideAction,
     buildCommentBody,
 } = require('./pr-readiness-checklist');
 
@@ -110,6 +108,25 @@ async function resolvePullRequest(github, context, core) {
     );
 }
 
+// Human-readable log lines for decideAction's skip reasons. Purely
+// cosmetic: the decision itself is made (and tested) in the pure module.
+const SKIP_LOG_MESSAGES = {
+    draft: () => 'Pull request is a draft, skipping.',
+    'not-a-fork': () => 'Pull request is not from a fork, skipping.',
+    'no-applicable-checks': (pr) =>
+        `No applicable checks for #${pr.number} on ${pr.head.sha}; leaving any existing comment as-is.`,
+    'pending-checks': (pr) =>
+        `Some checks for #${pr.number} are still in progress; deferring instead of reporting a premature all-clear.`,
+    'ci-not-run': (pr, ciRun) =>
+        `CI has not produced results for #${pr.number} yet (${
+            ciRun
+                ? `status=${ciRun.status}, conclusion=${ciRun.conclusion}`
+                : 'no CI run for this SHA'
+        }); deferring instead of reporting an all-clear on checks that never ran.`,
+    'still-clear': (pr) =>
+        `Readiness state unchanged for #${pr.number}; skipping comment update.`,
+};
+
 module.exports = async ({ github, context, core }) => {
     const triggeringEvent = context.payload.workflow_run.event;
     if (!['pull_request', 'pull_request_target'].includes(triggeringEvent)) {
@@ -120,16 +137,6 @@ module.exports = async ({ github, context, core }) => {
     const pr = await resolvePullRequest(github, context, core);
     if (!pr) {
         core.info('No open pull request found for this commit.');
-        return;
-    }
-
-    if (pr.draft) {
-        core.info('Pull request is a draft, skipping.');
-        return;
-    }
-
-    if (!pr.head.repo || pr.head.repo.full_name === pr.base.repo.full_name) {
-        core.info('Pull request is not from a fork, skipping.');
         return;
     }
 
@@ -151,81 +158,32 @@ module.exports = async ({ github, context, core }) => {
     }
 
     const { tasks, hasPending } = classifyCheckRuns(checkRuns);
-
     const existingComment = await findExistingComment(github, context, pr.number);
-    const previousState = parsePreviousState(
-        existingComment && existingComment.body
-    );
 
-    // An empty checklist is not an all-clear, it is an empty one. A push
-    // where every tracked check is skipped (a docs- or .github-only commit)
-    // classifies to zero tasks, which computeOverallState calls 'clear' -
-    // and against an existing 'failing' comment that would announce "all
-    // checks are passing now" on a commit where nothing ran. Leave whatever
-    // state the previous push established alone.
-    if (tasks.length === 0) {
-        core.info(
-            `No applicable checks for #${pr.number} on ${pr.head.sha}; leaving any existing comment as-is.`
+    // A failed lookup leaves ciRun undefined rather than aborting: the
+    // decision then defers the all-clear path (no CI evidence) but still
+    // reports failures already found.
+    let ciRun;
+    try {
+        ciRun = await findCiRun(github, context, pr.head.sha);
+    } catch (error) {
+        core.warning(
+            `Failed to look up CI runs for ${pr.head.sha}: ${error.message}`
         );
-        return;
     }
 
-    const overallState = computeOverallState(tasks);
+    // Everything above is data collection; every reason this event might be
+    // a no-op lives in decideAction, where it's unit-tested.
+    const decision = decideAction({ pr, tasks, hasPending, ciRun, existingComment });
 
-    // Three separate workflows trigger this independently, so it's normal
-    // for some to finish (and pass) while others - e.g. CI's slower
-    // Lint/Unit/E2E/API jobs - are still running. Reporting "clear" from
-    // only the tasks decided so far would be a false all-clear; wait for
-    // a later trigger, once every task has actually settled. A real
-    // failure already found among the decided tasks is reported right
-    // away regardless - that's actionable now and shouldn't wait on
-    // slower jobs.
-    if (hasPending && overallState === 'clear') {
-        core.info(
-            `Some checks for #${pr.number} are still in progress; deferring instead of reporting a premature all-clear.`
-        );
-        return;
-    }
-
-    // A clear checklist built entirely from checks that never ran is not an
-    // all-clear, it is an empty one - and the two are indistinguishable from
-    // check-run data alone (see ciHasProducedResults). Confirm CI actually
-    // produced results for this SHA before saying everything passed. Only the
-    // clear path is gated: a failure already found is actionable now and is
-    // still reported immediately, even while sibling jobs are running.
-    if (overallState === 'clear') {
-        let ciRun;
-        try {
-            ciRun = await findCiRun(github, context, pr.head.sha);
-        } catch (error) {
-            core.warning(
-                `Failed to look up CI runs for ${pr.head.sha}: ${error.message}`
-            );
-            return;
-        }
-
-        if (!ciHasProducedResults(ciRun)) {
-            core.info(
-                `CI has not produced results for #${pr.number} yet (${
-                    ciRun
-                        ? `status=${ciRun.status}, conclusion=${ciRun.conclusion}`
-                        : 'no CI run for this SHA'
-                }); deferring instead of reporting an all-clear on checks that never ran.`
-            );
-            return;
-        }
-    }
-
-    if (existingComment && previousState === 'clear' && overallState === 'clear') {
-        core.info(
-            `Readiness state unchanged for #${pr.number}; skipping comment update.`
-        );
+    if (decision.action === 'skip') {
+        core.info(SKIP_LOG_MESSAGES[decision.reason](pr, ciRun));
         return;
     }
 
     const { body, pingBody } = buildCommentBody({
         tasks,
-        previousState,
+        previousState: decision.previousState,
         authorLogin: pr.user.login,
         // Only relevant when a ping fires, which only happens when a
         // sticky comment already exists (clear->failing requires a prior
@@ -235,7 +193,7 @@ module.exports = async ({ github, context, core }) => {
         stickyCommentUrl: existingComment ? existingComment.html_url : null,
     });
 
-    if (existingComment) {
+    if (decision.action === 'update') {
         await github.rest.issues.updateComment({
             owner: context.repo.owner,
             repo: context.repo.repo,
