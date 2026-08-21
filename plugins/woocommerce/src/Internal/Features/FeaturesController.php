@@ -717,6 +717,7 @@ class FeaturesController {
 					'Allow customers to sign up to receive an email when an out-of-stock product is back in stock.',
 					'woocommerce'
 				),
+				'option_key'                   => StockNotifications::ENABLE_OPTION_NAME,
 				'enabled_by_default'           => false,
 				'is_experimental'              => true,
 				'disable_ui'                   => false,

@@ -38,6 +38,7 @@ use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
+use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
@@ -3638,5 +3639,5 @@ function wc_update_1120_migrate_stock_notifications_alpha_constant() {
 		return;
 	}
 
-	add_option( 'woocommerce_feature_customer_stock_notifications_enabled', 'yes', '', true );
+	add_option( StockNotifications::ENABLE_OPTION_NAME, 'yes', '', true );
 }

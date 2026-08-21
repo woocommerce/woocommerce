@@ -29,6 +29,14 @@ class StockNotifications implements RegisterHooksInterface {
 	public const FEATURE_NAME = 'customer_stock_notifications';
 
 	/**
+	 * The option that stores the feature's on/off state.
+	 *
+	 * Declared as `option_key` in the feature definition, so this constant is the
+	 * single source of truth rather than a copy of a derived name.
+	 */
+	public const ENABLE_OPTION_NAME = 'woocommerce_feature_customer_stock_notifications_enabled';
+
+	/**
 	 * Register the hooks that must exist regardless of the feature's state.
 	 *
 	 * The services are wired up in `maybe_init_services()`, behind the feature check.
@@ -129,7 +137,7 @@ class StockNotifications implements RegisterHooksInterface {
 		// Read the option directly: this filter can fire before `init`, and
 		// feature_is_enabled() would load translations too early, triggering
 		// _load_textdomain_just_in_time warnings.
-		if ( 'yes' !== get_option( 'woocommerce_feature_customer_stock_notifications_enabled', 'no' ) ) {
+		if ( 'yes' !== get_option( self::ENABLE_OPTION_NAME, 'no' ) ) {
 			return $data_stores;
 		}
 
