@@ -466,6 +466,95 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Create a pending order with a 10% tax rate and one $100 product whose line total was
+	 * manually edited to $50.
+	 *
+	 * @return WC_Order
+	 */
+	private function create_taxed_order_with_manually_edited_total() {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_order'    => '1',
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->save();
+
+		$order = wc_create_order();
+		$order->add_product( $product, 1 );
+		$order->set_status( OrderStatus::PENDING );
+		$order->calculate_totals( true );
+
+		foreach ( $order->get_items() as $item ) {
+			$item->set_total( 50 );
+			$item->save();
+		}
+		$order->calculate_totals( true );
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * @testdox Applying a coupon syncs the per-rate subtotal taxes with the manually edited total.
+	 */
+	public function test_apply_coupon_syncs_line_item_taxes_with_manually_edited_total() {
+		$coupon = WC_Helper_Coupon::create_coupon(
+			'percent_coupon_28591_tax',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		$order  = $this->create_taxed_order_with_manually_edited_total();
+
+		$this->assertTrue( $order->apply_coupon( $coupon->get_code() ) );
+
+		$item  = current( $order->get_items() );
+		$taxes = $item->get_taxes();
+		$this->assertEquals( 50, $item->get_subtotal() );
+		$this->assertEquals( 5, $item->get_subtotal_tax(), 'Subtotal tax should follow the edited price' );
+		$this->assertEquals( 5, array_sum( $taxes['subtotal'] ), 'Per-rate subtotal taxes should match the subtotal tax total' );
+		$this->assertEquals( 45, $item->get_total() );
+		$this->assertEquals( 4.5, $item->get_total_tax() );
+		$this->assertEquals( 49.5, $order->get_total() );
+	}
+
+	/**
+	 * @testdox A failed coupon application restores the per-rate taxes of manually edited line items.
+	 */
+	public function test_apply_coupon_failure_keeps_manually_edited_line_item_taxes() {
+		WC_Helper_Coupon::create_coupon(
+			'expired_coupon_28591_tax',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+				'expiry_date'   => gmdate( 'Y-m-d', time() - 2 * DAY_IN_SECONDS ),
+			)
+		);
+		$order = $this->create_taxed_order_with_manually_edited_total();
+
+		$original_taxes = current( $order->get_items() )->get_taxes();
+
+		$this->assertWPError( $order->apply_coupon( 'expired_coupon_28591_tax' ) );
+
+		$item = current( $order->get_items() );
+		$this->assertEquals( 100, $item->get_subtotal() );
+		$this->assertEquals( 10, $item->get_subtotal_tax(), 'Failed coupon application should not change the subtotal tax' );
+		$this->assertEquals( 50, $item->get_total() );
+		$this->assertEquals( 5, $item->get_total_tax(), 'Failed coupon application should not change the total tax' );
+		$this->assertEquals( $original_taxes, $item->get_taxes(), 'Failed coupon application should restore the per-rate taxes' );
+	}
+
+	/**
 	 * Test for get_discount_to_display which must return a value
 	 * with and without tax whatever the setting of the options.
 	 *

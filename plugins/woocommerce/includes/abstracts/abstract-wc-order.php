@@ -1548,7 +1548,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Only called when the order has no coupons applied, since applied coupons make the
 	 * subtotal/total difference ambiguous (coupon discount vs manual adjustment).
 	 *
-	 * @return array Original subtotal and subtotal tax of the changed items, keyed by item ID.
+	 * @return array Original tax and subtotal values of the changed items, keyed by item ID.
 	 */
 	private function sync_subtotals_with_manually_edited_totals() {
 		$original_subtotals = array();
@@ -1562,13 +1562,26 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				continue;
 			}
 
+			$taxes = $item->get_taxes( 'edit' );
+
 			$original_subtotals[ $item_id ] = array(
 				'subtotal'     => $item->get_subtotal( 'edit' ),
 				'subtotal_tax' => $item->get_subtotal_tax( 'edit' ),
+				'total_tax'    => $item->get_total_tax( 'edit' ),
+				'taxes'        => $taxes,
 			);
 
 			$item->set_subtotal( $item->get_total( 'edit' ) );
-			$item->set_subtotal_tax( $item->get_total_tax( 'edit' ) );
+
+			// set_taxes() keeps the per-rate tax array and the subtotal_tax/total_tax totals in
+			// sync, so consumers see the same value whichever one they read. It is skipped when
+			// there is no per-rate data, since it would then zero out the stored tax totals.
+			if ( ! empty( $taxes['total'] ) ) {
+				$taxes['subtotal'] = $taxes['total'];
+				$item->set_taxes( $taxes );
+			} else {
+				$item->set_subtotal_tax( $item->get_total_tax( 'edit' ) );
+			}
 		}
 
 		return $original_subtotals;
@@ -1578,17 +1591,26 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Restore item subtotals changed by sync_subtotals_with_manually_edited_totals(), so
 	 * that a failed coupon application leaves the in-memory order unchanged.
 	 *
-	 * @param array $original_subtotals Original subtotal and subtotal tax, keyed by item ID.
+	 * @param array $original_subtotals Original tax and subtotal values, keyed by item ID.
 	 * @return void
 	 */
 	private function restore_item_subtotals( array $original_subtotals ) {
 		foreach ( $original_subtotals as $item_id => $original ) {
 			$item = $this->get_item( $item_id, false );
 
-			if ( $item instanceof WC_Order_Item_Product ) {
-				$item->set_subtotal( $original['subtotal'] );
-				$item->set_subtotal_tax( $original['subtotal_tax'] );
+			if ( ! $item instanceof WC_Order_Item_Product ) {
+				continue;
 			}
+
+			// Restoring the per-rate taxes recomputes both tax totals, so it runs before the
+			// stored totals are put back.
+			if ( ! empty( $original['taxes']['total'] ) ) {
+				$item->set_taxes( $original['taxes'] );
+			}
+
+			$item->set_subtotal( $original['subtotal'] );
+			$item->set_subtotal_tax( $original['subtotal_tax'] );
+			$item->set_total_tax( $original['total_tax'] );
 		}
 	}
 
