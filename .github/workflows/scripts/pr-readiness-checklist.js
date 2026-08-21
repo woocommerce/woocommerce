@@ -16,6 +16,13 @@ const STATUS_MARKER_PATTERN = new RegExp(
 // When the origin changes its guidance, update the remediation with it -
 // these strings are what community contributors act on, so a drifted one
 // (a command that no longer exists, a moved doc) is worse than none.
+//
+// There is deliberately no "Unit tests (JS)" row. The CI job matrix
+// (tools/monorepo-utils/src/ci-jobs) has no `unit:js` testType; a test
+// job that doesn't declare one defaults to plain `unit`, which is what
+// the JS suites run as (e.g. "JavaScript - @woocommerce/admin-library
+// [unit]"). Those `[unit]` jobs are left untracked here for now - add a
+// row matching `[unit]` to change that.
 const TASKS = [
     {
         label: 'Lint',
