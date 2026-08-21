@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\StockNotifications;
 
 use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailActionController;
 use Automattic\WooCommerce\Internal\StockNotifications\StockSyncController;
 use Automattic\WooCommerce\Internal\StockNotifications\Privacy\PrivacyEraser;
@@ -20,7 +21,7 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
 /**
  * The controller for the stock notifications.
  */
-class StockNotifications {
+class StockNotifications implements RegisterHooksInterface {
 
 	/**
 	 * The feature that gates the whole Back in Stock Notifications experience.
@@ -49,8 +50,9 @@ class StockNotifications {
 	/**
 	 * Handle the WooCommerce installation event.
 	 *
-	 * This method is called when WooCommerce is installed or updated.
-	 * It initializes the data retention controller to set up necessary tasks.
+	 * This method is called when WooCommerce is installed or updated. When the
+	 * feature is enabled, it initializes the data retention controller to set up
+	 * necessary tasks; otherwise it does nothing.
 	 */
 	public function on_install_or_update() {
 		if ( ! FeaturesUtil::feature_is_enabled( self::FEATURE_NAME ) ) {
@@ -67,15 +69,20 @@ class StockNotifications {
 	 * daily data retention task and the My Account endpoint rewrite rules have to be
 	 * taken care of here. Disabling it has to undo both.
 	 *
-	 * @param string $feature_id The feature that changed.
-	 * @param bool   $enabled    Whether the feature is now enabled.
+	 * Left untyped, and coerced in the body, because this is a public hook callback:
+	 * third-party code firing the action may pass fewer or differently-typed arguments.
+	 *
+	 * @param mixed $feature_id The feature that changed.
+	 * @param mixed $enabled    Whether the feature is now enabled.
 	 *
 	 * @internal
 	 */
-	public function on_feature_enabled_changed( string $feature_id, bool $enabled ): void {
+	public function on_feature_enabled_changed( $feature_id, $enabled = false ): void {
 		if ( self::FEATURE_NAME !== $feature_id ) {
 			return;
 		}
+
+		$enabled = filter_var( $enabled, FILTER_VALIDATE_BOOLEAN );
 
 		// The My Account endpoint appears or disappears with the feature.
 		update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
@@ -123,12 +130,20 @@ class StockNotifications {
 	}
 
 	/**
-	 * Register the data stores.
+	 * Register the data stores, unless the feature is disabled.
 	 *
 	 * @param array $data_stores Data stores.
 	 * @return array
 	 */
 	public function register_data_stores( $data_stores ) {
+		// Check the option directly instead of using FeaturesController::feature_is_enabled()
+		// because the woocommerce_data_stores filter can fire before the 'init' action, and
+		// feature_is_enabled() would trigger translation loading too early, causing
+		// _load_textdomain_just_in_time warnings.
+		if ( 'yes' !== get_option( 'woocommerce_feature_customer_stock_notifications_enabled', 'no' ) ) {
+			return $data_stores;
+		}
+
 		if ( ! is_array( $data_stores ) ) {
 			return $data_stores;
 		}

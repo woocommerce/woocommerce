@@ -293,7 +293,7 @@ class WC_Unit_Tests_Bootstrap {
 		// Enable Back In Stock Notifications during tests. Must be set here rather than in
 		// load_wc(): install_wc() includes uninstall.php, which deletes every 'woocommerce_%'
 		// option. install_wc() runs on `setup_theme`, before `init`, so the option is set in
-		// time for WooCommerce::maybe_init_stock_notifications() on `init` priority 1.
+		// time for StockNotifications::maybe_init_services() on `init` priority 1.
 		update_option( 'woocommerce_feature_customer_stock_notifications_enabled', 'yes' );
 
 		// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.
