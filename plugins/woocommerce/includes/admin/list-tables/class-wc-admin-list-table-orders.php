@@ -714,15 +714,20 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			$date_type  = wc_clean( wp_unslash( $_GET['order_date_type'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$date_query = wc_clean( wp_unslash( $_GET['m'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			// date_paid and date_completed are stored in postmeta, so we need to do a meta query.
-			if ( 'date_paid' === $date_type || 'date_completed' === $date_type ) {
-				$date_start = \DateTime::createFromFormat( 'Ymd H:i:s', "$date_query 00:00:00" );
-				$date_end   = \DateTime::createFromFormat( 'Ymd H:i:s', "$date_query 23:59:59" );
+			if ( is_string( $date_query ) && ( 'date_paid' === $date_type || 'date_completed' === $date_type ) ) {
+				// The postmeta values are UTC timestamps, while the requested day is in the site's timezone.
+				$date_start = \DateTime::createFromFormat( 'Ymd H:i:s', "$date_query 00:00:00", wp_timezone() );
 
 				unset( $wp->query_vars['m'] );
 
-				if ( $date_start && $date_end ) {
+				if ( $date_start ) {
+					// Use the next local midnight so the range follows DST-shortened or extended days.
+					// 'tomorrow' resets to midnight; '+1 day' can retain a normalized 01:00 start.
+					// Midnight rollbacks before 2022 may still leave the first repeated hour uncovered.
+					$date_end = ( clone $date_start )->modify( 'tomorrow' );
+
 					$wp->query_vars['meta_key']     = "_$date_type"; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-					$wp->query_vars['meta_value']   = array( strval( $date_start->getTimestamp() ), strval( $date_end->getTimestamp() ) ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+					$wp->query_vars['meta_value']   = array( strval( $date_start->getTimestamp() ), strval( $date_end->getTimestamp() - 1 ) ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 					$wp->query_vars['meta_compare'] = 'BETWEEN';
 				}
 			}
