@@ -471,8 +471,10 @@ class SettingsUISchema {
 	 * @return string
 	 */
 	private static function get_option_name( array $setting ): string {
-		return isset( $setting['field_name'] ) && is_scalar( $setting['field_name'] )
-			? (string) $setting['field_name']
+		$field_name = $setting['field_name'] ?? null;
+
+		return is_scalar( $field_name ) && $field_name
+			? (string) $field_name
 			: (string) $setting['id'];
 	}
 

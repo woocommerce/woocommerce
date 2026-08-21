@@ -216,8 +216,6 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 			// Array value.
 			if ( strstr( $option_name, '[' ) ) {
 
-				$option_name_raw = $option_name;
-
 				parse_str( $option_name, $option_array );
 
 				// A name with no parsable base, such as '[key]', names nothing to look up.
@@ -241,10 +239,16 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				/*
 				 * This resolves one level. A deeper name such as 'opt[a][b]' would return the
 				 * sub-array above the value it means, which callers rendering a single value
-				 * cannot use, so fall back to the default. A trailing '[]' is not deeper: it
-				 * names the whole array at this level, which is what a multi-value field stores.
+				 * cannot use, so fall back to the default.
+				 *
+				 * A trailing '[]' directly after this key is not deeper: it names the whole array
+				 * at this level, which is what a multi-value field stores. parse_str() renders
+				 * exactly that as array( '' ), so the parsed node distinguishes the two. Testing
+				 * the raw name for a '[]' suffix would not: 'opt[a][b][]' also ends in '[]'.
 				 */
-				if ( is_array( $option_array[ $option_name ][ $key ] ) && '[]' !== substr( urldecode( $option_name_raw ), -2 ) ) {
+				$node = $option_array[ $option_name ][ $key ];
+
+				if ( is_array( $node ) && array( '' ) !== $node ) {
 					return $default;
 				}
 
@@ -321,7 +325,11 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					$value['suffix'] = '';
 				}
 				if ( ! isset( $value['value'] ) ) {
-					$value['value'] = self::get_option( $value['field_name'], $value['default'] );
+					// A 'field_name' that cannot address an option, such as '' or a non-scalar,
+					// is treated as absent here, the way an unset key already falls back to the ID.
+					$read_name = ( is_scalar( $value['field_name'] ) && $value['field_name'] ) ? $value['field_name'] : $value['id'];
+
+					$value['value'] = self::get_option( $read_name, $value['default'] );
 				}
 
 				if ( ! is_null( $value['fixed_value'] ?? null ) ) {
