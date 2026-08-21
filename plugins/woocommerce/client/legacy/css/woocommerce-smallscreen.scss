@@ -81,6 +81,22 @@
 				float: left;
 			}
 		}
+
+		// The Actions cell holds a button, not a value, so the `data-title`
+		// pseudo-label `shop_table_responsive` adds to every cell reads as noise.
+		// Matches how `.order-actions` is treated on the orders table.
+		tbody td.woocommerce-customer-stock-notifications-table__cell-actions {
+			text-align: left !important; // Overrides the `!important` cell alignment in shop_table_responsive.
+
+			&::before {
+				display: none;
+			}
+
+			.button {
+				float: none;
+				margin: 0.125em 0.25em 0.125em 0;
+			}
+		}
 	}
 
 	table.my_account_orders {
