@@ -157,9 +157,15 @@ module.exports = async ({ github, context, core }) => {
         existingComment && existingComment.body
     );
 
-    if (tasks.length === 0 && !existingComment) {
+    // An empty checklist is not an all-clear, it is an empty one. A push
+    // where every tracked check is skipped (a docs- or .github-only commit)
+    // classifies to zero tasks, which computeOverallState calls 'clear' -
+    // and against an existing 'failing' comment that would announce "all
+    // checks are passing now" on a commit where nothing ran. Leave whatever
+    // state the previous push established alone.
+    if (tasks.length === 0) {
         core.info(
-            'No applicable checks yet and no existing comment; nothing to do.'
+            `No applicable checks for #${pr.number} on ${pr.head.sha}; leaving any existing comment as-is.`
         );
         return;
     }
