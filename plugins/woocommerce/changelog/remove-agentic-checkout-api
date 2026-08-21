@@ -1,4 +1,4 @@
 Significance: minor
 Type: dev
 
-Remove the experimental Agentic Checkout API: the `wc/agentic/v1` checkout session endpoints, the `agentic_checkout` feature flag, and the related webhook manager. The `PaymentGatewayFeature::AGENTIC_COMMERCE` constant is kept and deprecated so gateways referencing it do not fatal.
+Remove the experimental Agentic Checkout API.
