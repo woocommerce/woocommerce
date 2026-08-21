@@ -252,6 +252,12 @@ class BlockTemplatesController {
 			return $query_result;
 		}
 
+		// Queries for a specific template parts must not inject other WooCommerce templates.
+		// See https://github.com/woocommerce/woocommerce/issues/67862.
+		if ( isset( $query['wp_id'] ) ) {
+			return $query_result;
+		}
+
 		// For templates, we only need to load templates from the database. For
 		// template parts, we also need to load them from the filesystem, as
 		// there is no Template registration API for template parts.
@@ -259,12 +265,6 @@ class BlockTemplatesController {
 		$new_templates  = array();
 
 		foreach ( $template_files as $template_file ) {
-			// Queries for a specific post must not inject other WooCommerce templates.
-			// See https://github.com/woocommerce/woocommerce/issues/67862.
-			if ( isset( $query['wp_id'] ) && (int) ( $template_file->wp_id ?? 0 ) !== (int) $query['wp_id'] ) {
-				continue;
-			}
-
 			// It would be custom if the template was modified in the editor, so if it's not custom we can load it from
 			// the filesystem.
 			if ( 'custom' === $template_file->source ) {
