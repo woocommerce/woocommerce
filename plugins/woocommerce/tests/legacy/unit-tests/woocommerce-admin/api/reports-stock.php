@@ -333,15 +333,99 @@ class WC_Admin_Tests_API_Reports_Stock extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A request naming the rows it wants reports them, mirrored stock and all.
+	 *
+	 * @dataProvider provider_row_narrowing_parameters
+	 *
+	 * @param string $param Collection parameter the request narrows the report with.
+	 */
+	public function test_variations_are_reported_when_the_request_names_them_itself( $param ) {
+		wp_set_current_user( $this->user );
+
+		list( $variable, $variation_ids ) = $this->create_stock_report_variable_product( 'Parent manages stock, variations inherit', array( array(), array() ) );
+
+		$variable->set_manage_stock( true );
+		$variable->set_stock_quantity( 4 );
+		$variable->save();
+
+		$product_ids = array_merge( array( $variable->get_id() ), $variation_ids );
+
+		$this->assertEquals(
+			array( $variable->get_id() ),
+			array_values( array_intersect( $this->get_reported_ids(), $product_ids ) ),
+			'A report over the whole catalogue reports the parent in place of its variations.'
+		);
+
+		$values = array(
+			'parent'  => array( $variable->get_id() ),
+			'include' => $variation_ids,
+			'exclude' => array( $variable->get_id() ),
+		);
+
+		$reported_ids = $this->get_reported_ids( 'all', array( $param => $values[ $param ] ) );
+
+		foreach ( $variation_ids as $variation_id ) {
+			$this->assertContains( $variation_id, $reported_ids, 'The parent is not among the rows this request asked for, so it cannot stand in for them.' );
+		}
+	}
+
+	/**
+	 * Collection parameters that narrow the report down to rows the request named.
+	 *
+	 * @return array[]
+	 */
+	public function provider_row_narrowing_parameters() {
+		return array(
+			'variations of a parent'    => array( 'parent' ),
+			'the variations by ID'      => array( 'include' ),
+			'everything but the parent' => array( 'exclude' ),
+		);
+	}
+
+	/**
+	 * @testdox Variations are reported to a user who cannot read the private parent owning the stock.
+	 */
+	public function test_variations_are_reported_when_the_user_cannot_read_the_private_parent() {
+		wp_set_current_user( $this->user );
+
+		list( $variable, $variation_ids ) = $this->create_stock_report_variable_product( 'Private parent manages stock, variations inherit', array( array(), array() ) );
+
+		$variable->set_manage_stock( true );
+		$variable->set_stock_quantity( 9 );
+		$variable->set_status( ProductStatus::PRIVATE );
+		$variable->save();
+
+		$this->assertContains( $variable->get_id(), $this->get_reported_ids(), 'An administrator reads the private parent, so it stands in for its variations.' );
+
+		// The report answers to view_woocommerce_reports, which carries no access to products.
+		$reporter = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		( new WP_User( $reporter ) )->add_cap( 'view_woocommerce_reports' );
+		wp_set_current_user( $reporter );
+
+		$reported_ids = $this->get_reported_ids();
+
+		$this->assertNotContains( $variable->get_id(), $reported_ids, 'A private product this user cannot read is out of the report.' );
+		foreach ( $variation_ids as $variation_id ) {
+			$this->assertContains( $variation_id, $reported_ids, 'Nothing else reports this stock to them, so the variations have to.' );
+		}
+	}
+
+	/**
 	 * Dispatch the report and return the IDs it reported.
 	 *
-	 * @param string $type Report type to request.
+	 * @param string $type   Report type to request.
+	 * @param array  $params Extra collection parameters to send with the request.
 	 * @return array Reported product and variation IDs.
 	 */
-	private function get_reported_ids( $type = 'all' ) {
+	private function get_reported_ids( $type = 'all', array $params = array() ) {
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_param( 'per_page', 100 );
 		$request->set_param( 'type', $type );
+
+		foreach ( $params as $param => $value ) {
+			$request->set_param( $param, $value );
+		}
+
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 200, $response->get_status() );

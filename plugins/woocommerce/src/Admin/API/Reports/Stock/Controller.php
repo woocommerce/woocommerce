@@ -78,7 +78,9 @@ class Controller extends GenericController implements ExportableInterface {
 			// Low stock matches on a quantity, which only a row owning its stock has. Nothing to exclude.
 			$args['low_in_stock'] = true;
 		} else {
-			$args['exclude_mirrored_stock'] = true;
+			if ( ! self::restricts_rows( $args ) ) {
+				$args['exclude_mirrored_stock'] = true;
+			}
 
 			if ( in_array( $request['type'], array_keys( $this->status_options ), true ) ) {
 				$args['stock_status'] = $request['type'];
@@ -88,6 +90,27 @@ class Controller extends GenericController implements ExportableInterface {
 		$args['ignore_sticky_posts'] = true;
 
 		return $args;
+	}
+
+	/**
+	 * Tell whether the request narrowed the report down to rows it named itself.
+	 *
+	 * Dropping a row that only mirrors another one's stock holds while the query can still return the
+	 * row owning it. A request naming the rows it wants, by ID or by parent, can leave that owner out:
+	 * asking for the variations of a stock managing parent would then report nothing at all. Such a
+	 * request keeps every row it asked for, duplicated stock and all.
+	 *
+	 * @param array $args Query args built from the request.
+	 * @return bool
+	 */
+	private static function restricts_rows( $args ) {
+		foreach ( array( 'post__in', 'post__not_in', 'post_parent__in', 'post_parent__not_in' ) as $arg ) {
+			if ( ! empty( $args[ $arg ] ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -161,7 +184,7 @@ class Controller extends GenericController implements ExportableInterface {
 		global $wpdb;
 
 		if ( $wp_query->get( 'exclude_mirrored_stock' ) ) {
-			$where .= self::get_mirrored_stock_exclusion_clause();
+			$where .= self::get_mirrored_stock_exclusion_clause( '', self::get_reportable_post_statuses() );
 		}
 
 		$stock_status = $wp_query->get( 'stock_status' );

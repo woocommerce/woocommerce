@@ -118,7 +118,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		global $wpdb;
 
 		$mirrored_joins = self::append_mirrored_stock_joins( '', 'posts' );
-		$mirrored_sql   = self::get_mirrored_stock_exclusion_clause( 'posts' );
+
+		// This query names its own statuses below rather than taking the ones the current user reads,
+		// since it counts the whole store. The exclusion is left to match that same list.
+		$mirrored_sql = self::get_mirrored_stock_exclusion_clause( 'posts' );
 
 		return (int) $wpdb->get_var(
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Both fragments are built from hardcoded identifiers.
@@ -167,7 +170,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	public static function add_wp_query_filter( $where, $wp_query ) {
 		if ( $wp_query->get( 'exclude_mirrored_stock' ) ) {
-			$where .= self::get_mirrored_stock_exclusion_clause();
+			$where .= self::get_mirrored_stock_exclusion_clause( '', self::get_reportable_post_statuses() );
 		}
 
 		return $where;
