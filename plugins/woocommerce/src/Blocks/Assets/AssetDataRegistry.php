@@ -87,6 +87,7 @@ class AssetDataRegistry {
 			'adminUrl'               => admin_url(),
 			'countries'              => WC()->countries->get_countries(),
 			'currency'               => $this->get_currency_data(),
+			'currentSiteId'          => get_current_blog_id(),
 			'currentUserId'          => get_current_user_id(),
 			'currentUserIsAdmin'     => current_user_can( 'manage_woocommerce' ),
 			'currentThemeIsFSETheme' => wp_is_block_theme(),
