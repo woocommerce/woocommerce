@@ -11,6 +11,14 @@ use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
  */
 class QuantityLimitsTests extends \WC_Unit_Test_Case {
 	/**
+	 * Clean up filters registered by tests, even when a test fails mid-way.
+	 */
+	public function tearDown(): void {
+		remove_all_filters( 'woocommerce_store_api_cart_item_quantity_validation' );
+		parent::tearDown();
+	}
+
+	/**
 	 * Enable float support for tests.
 	 */
 	private function enable_float_support() {
@@ -690,14 +698,14 @@ class QuantityLimitsTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return the WP_Error produced by a woocommerce_store_api_validate_cart_item_quantity callback.
+	 * @testdox Should return the WP_Error produced by a woocommerce_store_api_cart_item_quantity_validation callback.
 	 */
 	public function test_validate_cart_item_quantity_filter_returns_wp_error(): void {
 		$cart_item = $this->get_validation_cart_item();
 		$sut       = new QuantityLimits();
 
 		add_filter(
-			'woocommerce_store_api_validate_cart_item_quantity',
+			'woocommerce_store_api_cart_item_quantity_validation',
 			function () {
 				return new \WP_Error( 'custom_rejection', 'Rejected by extension' );
 			}
@@ -708,22 +716,34 @@ class QuantityLimitsTests extends \WC_Unit_Test_Case {
 		$this->assertInstanceOf( 'WP_Error', $result, 'A WP_Error returned by the filter should be passed through' );
 		$this->assertSame( 'custom_rejection', $result->get_error_code(), 'The filter callback error code should be preserved' );
 		$this->assertSame( 'Rejected by extension', $result->get_error_message(), 'The filter callback error message should be preserved' );
-
-		remove_all_filters( 'woocommerce_store_api_validate_cart_item_quantity' );
 	}
 
 	/**
-	 * @testdox Should return true when a woocommerce_store_api_validate_cart_item_quantity callback returns true.
+	 * @testdox Should return true when a woocommerce_store_api_cart_item_quantity_validation callback returns true.
 	 */
 	public function test_validate_cart_item_quantity_filter_returns_true(): void {
 		$cart_item = $this->get_validation_cart_item();
 		$sut       = new QuantityLimits();
 
-		add_filter( 'woocommerce_store_api_validate_cart_item_quantity', '__return_true' );
+		add_filter( 'woocommerce_store_api_cart_item_quantity_validation', '__return_true' );
 
 		$this->assertTrue( $sut->validate_cart_item_quantity( 3, $cart_item ), 'A true filter return should be accepted' );
+	}
 
-		remove_all_filters( 'woocommerce_store_api_validate_cart_item_quantity' );
+	/**
+	 * @testdox Should reject the quantity with a generic WP_Error when the filter returns false.
+	 */
+	public function test_validate_cart_item_quantity_filter_returns_false_rejects(): void {
+		$cart_item = $this->get_validation_cart_item();
+		$sut       = new QuantityLimits();
+
+		add_filter( 'woocommerce_store_api_cart_item_quantity_validation', '__return_false' );
+
+		$result = $sut->validate_cart_item_quantity( 3, $cart_item );
+
+		$this->assertInstanceOf( 'WP_Error', $result, 'A false filter return should be treated as a rejection' );
+		$this->assertSame( 'invalid_quantity', $result->get_error_code(), 'The generic rejection should use the invalid_quantity code' );
+		$this->assertStringContainsString( 'Test Product', $result->get_error_message(), 'The generic rejection message should name the product' );
 	}
 
 	/**
@@ -733,7 +753,6 @@ class QuantityLimitsTests extends \WC_Unit_Test_Case {
 	 */
 	public function unexpected_filter_return_values() {
 		return array(
-			'false'       => array( false ),
 			'null'        => array( null ),
 			'string'      => array( 'nope' ),
 			'truthy int'  => array( 1 ),
@@ -742,30 +761,23 @@ class QuantityLimitsTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should reject the quantity with a generic WP_Error when the filter returns an unexpected value.
+	 * @testdox Should ignore unexpected filter return values and accept the quantity.
 	 * @dataProvider unexpected_filter_return_values
 	 *
 	 * @param mixed $filter_return_value Value returned by the filter callback.
 	 */
-	public function test_validate_cart_item_quantity_filter_unexpected_return_fails_closed( $filter_return_value ): void {
+	public function test_validate_cart_item_quantity_filter_unexpected_return_is_ignored( $filter_return_value ): void {
 		$cart_item = $this->get_validation_cart_item();
 		$sut       = new QuantityLimits();
 
 		add_filter(
-			'woocommerce_store_api_validate_cart_item_quantity',
+			'woocommerce_store_api_cart_item_quantity_validation',
 			function () use ( $filter_return_value ) {
 				return $filter_return_value;
 			}
 		);
 
-		$result = $sut->validate_cart_item_quantity( 3, $cart_item );
-
-		$this->assertInstanceOf( 'WP_Error', $result, 'Unexpected filter return values should be treated as a rejection' );
-		$this->assertSame( 'invalid_quantity', $result->get_error_code(), 'The generic rejection should use the invalid_quantity code' );
-		$this->assertIsString( $result->get_error_message(), 'The generic rejection message should be a string' );
-		$this->assertStringContainsString( 'Test Product', $result->get_error_message(), 'The generic rejection message should name the product' );
-
-		remove_all_filters( 'woocommerce_store_api_validate_cart_item_quantity' );
+		$this->assertTrue( $sut->validate_cart_item_quantity( 3, $cart_item ), 'Unexpected filter return values should fall back to the original valid result' );
 	}
 
 	/**
@@ -792,7 +804,7 @@ class QuantityLimitsTests extends \WC_Unit_Test_Case {
 		$sut       = new QuantityLimits();
 
 		add_filter(
-			'woocommerce_store_api_validate_cart_item_quantity',
+			'woocommerce_store_api_cart_item_quantity_validation',
 			function () use ( $malformed_error ) {
 				return $malformed_error;
 			}
@@ -804,8 +816,6 @@ class QuantityLimitsTests extends \WC_Unit_Test_Case {
 		$this->assertSame( 'invalid_quantity', $result->get_error_code(), 'The replacement error should use the invalid_quantity code' );
 		$this->assertIsString( $result->get_error_message(), 'The replacement error message should be a string' );
 		$this->assertNotSame( '', $result->get_error_message(), 'The replacement error message should not be empty' );
-
-		remove_all_filters( 'woocommerce_store_api_validate_cart_item_quantity' );
 	}
 
 	/**
@@ -823,7 +833,7 @@ class QuantityLimitsTests extends \WC_Unit_Test_Case {
 
 		$filter_ran = false;
 		add_filter(
-			'woocommerce_store_api_validate_cart_item_quantity',
+			'woocommerce_store_api_cart_item_quantity_validation',
 			function () use ( &$filter_ran ) {
 				$filter_ran = true;
 				return true;
@@ -835,7 +845,5 @@ class QuantityLimitsTests extends \WC_Unit_Test_Case {
 		$this->assertInstanceOf( 'WP_Error', $result, 'Core limit violations should return WP_Error regardless of filter callbacks' );
 		$this->assertStringContainsString( 'maximum', $result->get_error_message(), 'The core maximum-quantity error should win' );
 		$this->assertFalse( $filter_ran, 'The filter should not run when core validation fails' );
-
-		remove_all_filters( 'woocommerce_store_api_validate_cart_item_quantity' );
 	}
 }
