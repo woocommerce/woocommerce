@@ -3586,19 +3586,18 @@ function wc_update_1100_enable_point_of_sale_feature() {
 }
 
 /**
- * Replace the former variation gallery feature opt-out with the enabled value.
+ * Remove the deprecated variation gallery feature option from the database.
  *
- * The variation gallery is enabled for all stores as of 11.1.0 and no longer supports opting out.
- * Missing and already-enabled options are left untouched.
+ * The variation gallery feature flag is deprecated as of 11.1.0 and is now always enabled.
+ * The option is no longer needed as FeaturesUtil::feature_is_enabled('variation_gallery')
+ * returns the deprecated_value directly without reading from the database.
  *
  * @since 11.1.0
  *
  * @return void
  */
-function wc_update_11101_enable_variation_gallery_feature(): void {
-	if ( 'no' === get_option( VariationGalleryPackage::ENABLE_OPTION_NAME, '' ) ) {
-		update_option( VariationGalleryPackage::ENABLE_OPTION_NAME, 'yes' );
-	}
+function wc_update_11101_remove_deprecated_variation_gallery_option(): void {
+	delete_option( VariationGalleryPackage::ENABLE_OPTION_NAME );
 }
 
 /**
