@@ -8,6 +8,7 @@ import { useDispatch } from '@wordpress/data';
 import { useSlot } from '@woocommerce/experimental';
 import { TaskType } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { navigateTo } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -75,7 +76,18 @@ jest.mock( '@woocommerce/experimental', () => {
 					onClick,
 					secondaryAction,
 				} ) => (
-					<div>
+					// ExperimentalListItem gives the row a button role that
+					// treats Enter as a click, so the mock does the same to
+					// keep keyboard coverage meaningful.
+					<div
+						role="button"
+						tabIndex={ 0 }
+						onKeyDown={ ( event: React.KeyboardEvent ) => {
+							if ( event.key === 'Enter' ) {
+								onClick?.( event );
+							}
+						} }
+					>
 						<button onClick={ onClick }>{ title }</button>
 						{ secondaryAction }
 						{ onSnooze && (
@@ -290,6 +302,26 @@ describe( 'TaskListItem', () => {
 
 		expect( onTaskSkip ).toHaveBeenCalledWith( task );
 		expect( mockDispatch.dismissTask ).not.toHaveBeenCalled();
+	} );
+
+	it( 'should not navigate to the task when Skip is activated with Enter', async () => {
+		const onTaskSkip = jest.fn().mockResolvedValue( undefined );
+		const { getByRole } = render(
+			<TaskListItem
+				task={ { ...task } }
+				isExpandable={ false }
+				isExpanded={ false }
+				setExpandedTask={ () => {} }
+				showSkipAction={ true }
+				onTaskSkip={ onTaskSkip }
+			/>
+		);
+
+		getByRole( 'button', { name: 'Skip' } ).focus();
+		await userEvent.keyboard( '{Enter}' );
+
+		expect( onTaskSkip ).toHaveBeenCalledWith( task );
+		expect( navigateTo ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should disable Skip while a task request is pending', async () => {

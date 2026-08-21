@@ -110,6 +110,12 @@ export const TaskListItem = ( {
 		[ onTaskSkip, task ]
 	);
 
+	// The surrounding list item treats Enter as a click on the row, so the
+	// keydown has to stop here or skipping also navigates to the task.
+	const onSkipKeyDown = useCallback( ( event: React.KeyboardEvent ) => {
+		event.stopPropagation();
+	}, [] );
+
 	const onSnooze = useCallback( () => {
 		void snoozeTask( id );
 		createNotice(
@@ -221,6 +227,7 @@ export const TaskListItem = ( {
 								disabled={ isSkipDisabled }
 								variant="link"
 								onClick={ onSkip }
+								onKeyDown={ onSkipKeyDown }
 							>
 								{ __( 'Skip', 'woocommerce' ) }
 							</Button>
