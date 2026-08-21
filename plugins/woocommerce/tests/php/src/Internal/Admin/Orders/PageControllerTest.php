@@ -198,6 +198,38 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders {
 			$controller->setup();
 			$this->assertFalse( $controller->is_order_screen( 'shop_order', 'new' ) );
 		}
+
+		/**
+		 * @testDox HPOS admin creation persists the store tax-mode setting on the order.
+		 */
+		public function test_new_order_persists_prices_include_tax_setting(): void {
+			global $pagenow, $plugin_page, $theorder;
+
+			$this->toggle_cot_feature_and_usage( true );
+			update_option( 'woocommerce_prices_include_tax', 'yes' );
+			set_current_screen();
+
+			$pagenow        = 'admin.php'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			$plugin_page    = 'wc-orders'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			$_GET['action'] = 'new';
+
+			$controller = new PageController();
+			$controller->setup();
+			$controller->handle_load_page_action();
+
+			$order_id = $theorder->get_id();
+			update_option( 'woocommerce_prices_include_tax', 'no' );
+			wp_cache_flush();
+
+			$read_order = wc_get_order( $order_id );
+
+			$this->assertTrue(
+				$read_order->get_prices_include_tax(),
+				'The saved order should keep its creation-time setting after the store setting changes.'
+			);
+
+			$read_order->delete( true );
+		}
 	}
 }
 

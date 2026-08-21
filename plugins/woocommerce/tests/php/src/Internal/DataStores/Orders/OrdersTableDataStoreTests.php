@@ -2446,9 +2446,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
-	 * @testDox An order created without an explicit prices_include_tax value records the store setting.
+	 * @testDox Generic order persistence keeps the historical false tax-mode default.
 	 */
-	public function test_create_records_store_prices_include_tax_setting() {
+	public function test_create_without_explicit_prices_include_tax_keeps_default() {
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 
 		$order = new WC_Order();
@@ -2462,9 +2462,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->switch_data_store( $r_order, $this->sut );
 		$this->sut->read( $r_order );
 
-		$this->assertTrue(
+		$this->assertFalse(
 			$r_order->get_prices_include_tax(),
-			'An order created on a tax inclusive store should be persisted as tax inclusive.'
+			'Generic persistence should not derive the order value from the store setting.'
 		);
 	}
 
@@ -2489,6 +2489,38 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertFalse(
 			$r_order->get_prices_include_tax(),
 			'An order explicitly created as tax exclusive should stay tax exclusive on a tax inclusive store.'
+		);
+	}
+
+	/**
+	 * @testDox An HPOS order with a null tax-mode column keeps the historical false default.
+	 */
+	public function test_read_with_null_prices_include_tax_uses_false_default(): void {
+		global $wpdb;
+
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+
+		$order = new WC_Order();
+		$this->switch_data_store( $order, $this->sut );
+		$order->save();
+
+		$operational_data_table = $this->sut::get_operational_data_table_name();
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$operational_data_table} SET prices_include_tax = NULL WHERE order_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$order->get_id()
+			)
+		);
+		wp_cache_flush();
+
+		$read_order = new WC_Order();
+		$read_order->set_id( $order->get_id() );
+		$this->switch_data_store( $read_order, $this->sut );
+		$this->sut->read( $read_order );
+
+		$this->assertFalse(
+			$read_order->get_prices_include_tax(),
+			'A null historical value should not derive its value from the current store setting.'
 		);
 	}
 
