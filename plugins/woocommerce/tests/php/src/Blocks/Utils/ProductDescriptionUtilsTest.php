@@ -20,13 +20,22 @@ class ProductDescriptionUtilsTest extends \WC_Unit_Test_Case {
 		$product->save();
 
 		try {
-			$result = ProductDescriptionUtils::guarded_format(
+			$nested_result = null;
+			$result        = ProductDescriptionUtils::guarded_format(
 				$product,
-				function () use ( $product ) {
+				function () use ( $product, &$nested_result ) {
+					$nested_result = ProductDescriptionUtils::guarded_format(
+						$product,
+						function () use ( $product ) {
+							return $product->get_description();
+						}
+					);
+
 					return $product->get_description();
 				}
 			);
 
+			$this->assertSame( '', $nested_result );
 			$this->assertSame( 'A formatted product description.', $result );
 		} finally {
 			WC_Helper_Product::delete_product( $product->get_id() );
