@@ -94,15 +94,20 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	public function test_get_option_resolves_nested_names_safely( $option_name, $expected ): void {
 		$this->option_names_to_clean[] = 'test_get_option_nested';
 		$this->option_names_to_clean[] = 'test_get_option_scalar';
+		$this->option_names_to_clean[] = 'test_get_option_object';
 		update_option(
 			'test_get_option_nested',
 			array(
 				'key'  => 'saved nested',
-				'deep' => array( 'leaf' => 'two levels' ),
+				'deep' => array(
+					'leaf' => 'two levels',
+					'sub'  => array( 's' => 1 ),
+				),
 				'list' => array( 'x', 'y' ),
 			)
 		);
 		update_option( 'test_get_option_scalar', 'abc' );
+		update_option( 'test_get_option_object', new stdClass() );
 
 		$this->assertSame( $expected, WC_Admin_Settings::get_option( $option_name, 'DEFAULT' ) );
 	}
@@ -117,6 +122,9 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 			'nested name resolves'  => array( 'test_get_option_nested[key]', 'saved nested' ),
 			'multi value preserved' => array( 'test_get_option_nested[list][]', array( 'x', 'y' ) ),
 			'deeper than one level' => array( 'test_get_option_nested[deep][leaf]', 'DEFAULT' ),
+			'deeper ending in []'   => array( 'test_get_option_nested[deep][sub][]', 'DEFAULT' ),
+			'deeper encoded []'     => array( 'test_get_option_nested[deep][sub]%5B%5D', 'DEFAULT' ),
+			'object valued option'  => array( 'test_get_option_object[k]', 'DEFAULT' ),
 			'missing key'           => array( 'test_get_option_nested[absent]', 'DEFAULT' ),
 			'missing option'        => array( 'test_get_option_absent[key]', 'DEFAULT' ),
 			'no parsable base'      => array( '[key]', 'DEFAULT' ),
@@ -151,6 +159,53 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 		}
 
 		$this->assertStringContainsString( 'value="default value"', $output );
+	}
+
+	/**
+	 * @testdox Should read through the field ID when the field name cannot address an option.
+	 *
+	 * @dataProvider unusable_field_name_data
+	 *
+	 * @param mixed $field_name Field name that cannot address an option.
+	 */
+	public function test_output_fields_reads_through_the_id_for_an_unusable_field_name( $field_name ): void {
+		$this->option_names_to_clean[] = 'test_output_fields_falsy_name';
+		update_option( 'test_output_fields_falsy_name', 'saved by id' );
+
+		ob_start();
+		try {
+			WC_Admin_Settings::output_fields(
+				array(
+					array(
+						'id'         => 'test_output_fields_falsy_name',
+						'field_name' => $field_name,
+						'type'       => 'text',
+						'default'    => 'default value',
+					),
+				)
+			);
+		} finally {
+			$output = ob_get_clean();
+		}
+
+		$this->assertStringContainsString( 'value="saved by id"', $output );
+	}
+
+	/**
+	 * Data provider for test_output_fields_reads_through_the_id_for_an_unusable_field_name().
+	 *
+	 * Only falsy scalars are covered. A non-scalar 'field_name' is still rendered into the name
+	 * attribute unnormalised, which warns exactly as it did before this change and fatals in
+	 * save_fields() either way, so normalising it belongs with the save path rather than here.
+	 *
+	 * @return array<string, array{mixed}>
+	 */
+	public static function unusable_field_name_data(): array {
+		return array(
+			'empty string' => array( '' ),
+			'false'        => array( false ),
+			'zero'         => array( 0 ),
+		);
 	}
 
 	/**
