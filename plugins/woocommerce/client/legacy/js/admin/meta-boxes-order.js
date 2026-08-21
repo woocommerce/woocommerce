@@ -292,6 +292,7 @@ jQuery( function ( $ ) {
 				.on( 'change', '.refund input.refund_line_total, .refund input.refund_line_tax', this.refunds.input_changed )
 				.on( 'change keyup', '.wc-order-refund-items #refund_amount', this.refunds.amount_changed )
 				.on( 'change', 'input.refund_order_item_qty', this.refunds.refund_quantity_changed )
+				.on( 'change', '#restock_refunded_items', this.refunds.restock_changed )
 
 				// Qty
 				.on( 'change', 'input.quantity', this.quantity_changed )
@@ -584,6 +585,7 @@ jQuery( function ( $ ) {
 			$( 'div.wc-order-totals-items' ).slideUp();
 			$( '#woocommerce-order-items' ).find( 'div.refund' ).show();
 			$( '.wc-order-edit-line-item .wc-order-edit-line-item-actions' ).hide();
+			wc_meta_boxes_order_items.refunds.update_restock_state();
 
 			window.wcTracks.recordEvent( 'order_edit_refund_button_click', {
 				order_id: woocommerce_admin_meta_boxes.post_id,
@@ -1155,6 +1157,54 @@ jQuery( function ( $ ) {
 				} ) );
 			},
 
+			// Apply the restock checkbox state from the current refund quantities.
+			update_restock_state: function() {
+				var $row = $( 'tr.restock-refunded-items' );
+
+				if ( ! $row.length || 'yes' !== $row.data( 'stock-reduced' ) ) {
+					return;
+				}
+
+				var $checkbox    = $row.find( '#restock_refunded_items' );
+				var $description = $row.find( '.restock-refunded-items__description' );
+				var total_qty    = 0;
+
+				$( '.woocommerce_order_items input.refund_order_item_qty' ).each( function() {
+					total_qty += parseInt( $( this ).val(), 10 ) || 0;
+				});
+
+				if ( 0 === total_qty ) {
+					$checkbox.prop( 'disabled', true ).prop( 'checked', false ).removeData( 'user-set' );
+					$description.text( woocommerce_admin_meta_boxes.i18n_restock_enter_qty );
+					return;
+				}
+
+				// First time we have quantities: enable it and apply the filtered default.
+				if ( $checkbox.prop( 'disabled' ) ) {
+					$checkbox.prop( 'disabled', false );
+
+					if ( ! $checkbox.data( 'user-set' ) ) {
+						$checkbox.prop( 'checked', woocommerce_admin_meta_boxes.restock_refunded_items_default );
+					}
+				}
+
+				if ( $checkbox.prop( 'checked' ) ) {
+					$description.text(
+						1 === total_qty
+							? woocommerce_admin_meta_boxes.i18n_restock_will_1
+							: woocommerce_admin_meta_boxes.i18n_restock_will_n.replace( '%qty%', total_qty )
+					);
+				} else {
+					$description.text( woocommerce_admin_meta_boxes.i18n_restock_none );
+				}
+			},
+
+			// The merchant ticked or unticked it themselves; stop auto-setting it.
+			restock_changed: function() {
+				$( this ).data( 'user-set', true );
+				wc_meta_boxes_order_items.refunds.update_restock_state();
+			},
+
 			// When the refund qty is changed, increase or decrease costs
 			refund_quantity_changed: function() {
 				var $row              = $( this ).closest( 'tr.item' );
@@ -1198,17 +1248,7 @@ jQuery( function ( $ ) {
 					}
 				});
 
-				// Restock checkbox
-				if ( refund_qty > 0 ) {
-					$( '#restock_refunded_items' ).closest( 'tr' ).show();
-				} else {
-					$( '#restock_refunded_items' ).closest( 'tr' ).hide();
-					$( '.woocommerce_order_items input.refund_order_item_qty' ).each( function() {
-						if ( $( this ).val() > 0 ) {
-							$( '#restock_refunded_items' ).closest( 'tr' ).show();
-						}
-					});
-				}
+				wc_meta_boxes_order_items.refunds.update_restock_state();
 
 				$( this ).trigger( 'refund_quantity_changed' );
 			}
