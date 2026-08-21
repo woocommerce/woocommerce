@@ -200,11 +200,21 @@ final class QuantityLimits {
 		 */
 		$valid = apply_filters( 'woocommerce_store_api_validate_cart_item_quantity', true, $quantity, $cart_item );
 
-		if ( true === $valid || is_wp_error( $valid ) ) {
-			return $valid;
+		if ( true === $valid ) {
+			return true;
 		}
 
-		return new \WP_Error( 'invalid_quantity', __( 'The quantity is invalid.', 'woocommerce' ) );
+		if ( is_wp_error( $valid ) ) {
+			$code    = $valid->get_error_code();
+			$message = $valid->get_error_message();
+
+			if ( is_string( $code ) && '' !== $code && is_string( $message ) && '' !== $message ) {
+				return $valid;
+			}
+		}
+
+		/* translators: 1: product name */
+		return new \WP_Error( 'invalid_quantity', sprintf( __( 'The quantity of &quot;%1$s&quot; is not valid', 'woocommerce' ), $product->get_name() ) );
 	}
 
 	/**
