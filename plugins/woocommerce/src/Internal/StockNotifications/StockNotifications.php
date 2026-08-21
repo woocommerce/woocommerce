@@ -134,9 +134,10 @@ class StockNotifications implements RegisterHooksInterface {
 	 * @return array
 	 */
 	public function register_data_stores( $data_stores ) {
-		// Read the option directly: this filter can fire before `init`, and
-		// feature_is_enabled() would load translations too early, triggering
-		// _load_textdomain_just_in_time warnings.
+		// WC_Data_Store::__construct() re-applies this filter on every data store load,
+		// so re-check the option: the feature can be switched off after this callback was
+		// attached at `init`. Read the option directly rather than through
+		// feature_is_enabled(), which builds translated feature definitions.
 		if ( 'yes' !== get_option( self::ENABLE_OPTION_NAME, 'no' ) ) {
 			return $data_stores;
 		}
