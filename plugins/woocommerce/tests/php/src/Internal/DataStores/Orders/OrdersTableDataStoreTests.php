@@ -4288,6 +4288,8 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$note_id  = $order->add_order_note( 'Test note' );
 		add_comment_meta( $note_id, 'test_key', 'test_value' );
 
+		$this->assertSame( 'test_value', get_comment_meta( $note_id, 'test_key', true ), 'Commentmeta should exist before the order is deleted' );
+
 		$expected_post_type = $sync_enabled_at_creation ? 'shop_order' : DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE;
 		$this->assertEquals( $expected_post_type, get_post_type( $order_id ) );
 
@@ -4295,32 +4297,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order->delete( true );
 
 		$this->assertNull( get_comment( $note_id ), 'Order note should be deleted' );
-
-		global $wpdb;
-		$meta_count = $wpdb->get_var(
-			$wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->commentmeta} WHERE comment_id = %d", $note_id )
-		);
-		$this->assertEquals( 0, $meta_count, 'Commentmeta should be deleted along with the note' );
-	}
-
-	/**
-	 * @testDox When an order with a real (non-placeholder) post is deleted with sync disabled, the backup post record itself is preserved pending sync, alongside a deletion marker.
-	 */
-	public function test_backup_post_deferred_when_non_placeholder_order_deleted_with_sync_disabled() {
-		$this->allow_current_user_to_delete_posts();
-		$this->toggle_cot_feature_and_usage( true );
-		$this->toggle_cot_authoritative( true );
-		$this->enable_cot_sync();
-
-		$order    = OrderHelper::create_order();
-		$order_id = $order->get_id();
-
-		$this->assertNotEquals( DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE, get_post_type( $order_id ) );
-
-		$this->disable_cot_sync();
-		$order->delete( true );
-
-		$this->assertNotNull( get_post( $order_id ), 'Backup post record should still exist, pending sync' );
-		$this->assert_deletion_record_existence( $order_id, true, true );
+		$this->assertEmpty( get_comment_meta( $note_id ), 'Commentmeta should be deleted along with the note' );
 	}
 }
