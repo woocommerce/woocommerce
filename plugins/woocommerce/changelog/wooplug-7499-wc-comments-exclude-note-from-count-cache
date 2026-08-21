@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Exclude WordPress 7.1 editorial 'note' comment type from WooCommerce's incremental comment count cache to prevent phantom pending counts in wp-admin -> Comments.
