@@ -49,6 +49,25 @@ test('classifyCheckRuns: skipped runs are treated as not applicable, not failing
     assert.deepEqual(tasks, []);
 });
 
+test('classifyCheckRuns: skipped matrix jobs with uninterpolated names are ignored', () => {
+    // When a matrix job is skipped wholesale, GitHub creates its check run
+    // with the un-evaluated expression as the name. The first one below
+    // satisfies startsWith('Lint - ') and does NOT end with ' (optional)',
+    // so only the ignored-conclusion filter keeps it out of the checklist -
+    // this pins that, so reordering the filters (or matching on something
+    // other than conclusion) can't quietly turn it into a phantom red Lint
+    // row on every PR with an empty lint matrix.
+    const { tasks, hasPending } = classifyCheckRuns([
+        checkRun(
+            "Lint - ${{ matrix.projectName }} ${{ (((matrix.optional && ' (optional)')) || '') }}",
+            { conclusion: 'skipped' }
+        ),
+        checkRun('matrix.name', { conclusion: 'skipped' }),
+    ]);
+    assert.deepEqual(tasks, []);
+    assert.equal(hasPending, false);
+});
+
 test('classifyCheckRuns: cancelled runs are ignored, not blamed on the contributor', () => {
     // ci.yml runs with cancel-in-progress, and maintainers cancel runs by
     // hand; neither is the author's failure.
