@@ -161,7 +161,6 @@ module.exports = async ({ github, context, core }) => {
     }
 
     const { tasks, hasPending } = classifyCheckRuns(checkRuns);
-    const existingComment = await findExistingComment(github, context, pr.number);
 
     // A failed lookup leaves ciRun undefined rather than aborting: the
     // decision then defers the all-clear path (no CI evidence) but still
@@ -175,9 +174,21 @@ module.exports = async ({ github, context, core }) => {
         );
     }
 
-    // Everything above is data collection; every reason this event might be
-    // a no-op lives in decideAction, where it's unit-tested.
-    const decision = decideAction({ pr, tasks, hasPending, ciRun, existingComment });
+    // Every reason this event might be a no-op lives in decideAction, where
+    // it's unit-tested. It runs twice so the sticky comment is fetched
+    // lazily: the first pass decides without it, and every skip reason that
+    // doesn't depend on the existing comment (draft, fork, empty checklist,
+    // pending checks, no CI evidence) resolves right there - sparing the
+    // paginated listComments walk on the bot's most common path, the
+    // mid-CI deferral. Only when the first pass would act is the comment
+    // fetched and the decision re-taken with it, which can still land on
+    // the one comment-dependent skip (clear->clear).
+    let existingComment = null;
+    let decision = decideAction({ pr, tasks, hasPending, ciRun, existingComment });
+    if (decision.action !== 'skip') {
+        existingComment = await findExistingComment(github, context, pr.number);
+        decision = decideAction({ pr, tasks, hasPending, ciRun, existingComment });
+    }
 
     if (decision.action === 'skip') {
         core.info(SKIP_LOG_MESSAGES[decision.reason](pr, ciRun));
