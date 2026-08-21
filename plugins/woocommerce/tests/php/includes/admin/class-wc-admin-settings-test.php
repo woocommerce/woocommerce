@@ -95,6 +95,7 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 		$this->option_names_to_clean[] = 'test_get_option_nested';
 		$this->option_names_to_clean[] = 'test_get_option_scalar';
 		$this->option_names_to_clean[] = 'test_get_option_object';
+		$this->option_names_to_clean[] = 'test_get_option_member';
 		update_option(
 			'test_get_option_nested',
 			array(
@@ -108,6 +109,7 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 		);
 		update_option( 'test_get_option_scalar', 'abc' );
 		update_option( 'test_get_option_object', new stdClass() );
+		update_option( 'test_get_option_member', array( 'obj' => new stdClass() ) );
 
 		$this->assertSame( $expected, WC_Admin_Settings::get_option( $option_name, 'DEFAULT' ) );
 	}
@@ -125,6 +127,12 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 			'deeper ending in []'   => array( 'test_get_option_nested[deep][sub][]', 'DEFAULT' ),
 			'deeper encoded []'     => array( 'test_get_option_nested[deep][sub]%5B%5D', 'DEFAULT' ),
 			'object valued option'  => array( 'test_get_option_object[k]', 'DEFAULT' ),
+			'object valued member'  => array( 'test_get_option_member[obj]', 'DEFAULT' ),
+			'explicit zero index'   => array( 'test_get_option_nested[list][0]', 'DEFAULT' ),
+			'encoded zero index'    => array( 'test_get_option_nested[list]%5B0%5D', 'DEFAULT' ),
+			'space index'           => array( 'test_get_option_nested[list][ ]', 'DEFAULT' ),
+			'plus index'            => array( 'test_get_option_nested[list][+]', 'DEFAULT' ),
+			'encoded multi value'   => array( 'test_get_option_nested[list]%5B%5D', array( 'x', 'y' ) ),
 			'missing key'           => array( 'test_get_option_nested[absent]', 'DEFAULT' ),
 			'missing option'        => array( 'test_get_option_absent[key]', 'DEFAULT' ),
 			'no parsable base'      => array( '[key]', 'DEFAULT' ),
@@ -206,6 +214,29 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 			'false'        => array( false ),
 			'zero'         => array( 0 ),
 		);
+	}
+
+	/**
+	 * @testdox Should save through the field ID when the field name cannot address an option.
+	 *
+	 * The read path falls back to the ID for such a name, so the save path has to agree or the
+	 * posted value lands under one key and is looked for under another.
+	 */
+	public function test_save_fields_writes_through_the_id_for_an_unusable_field_name(): void {
+		$this->option_names_to_clean[] = 'test_save_fields_falsy_name';
+
+		WC_Admin_Settings::save_fields(
+			array(
+				array(
+					'id'         => 'test_save_fields_falsy_name',
+					'field_name' => '',
+					'type'       => 'text',
+				),
+			),
+			array( 'test_save_fields_falsy_name' => 'posted value' )
+		);
+
+		$this->assertSame( 'posted value', get_option( 'test_save_fields_falsy_name' ) );
 	}
 
 	/**
