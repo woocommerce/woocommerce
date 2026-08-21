@@ -24,8 +24,8 @@ let mockIncompatibleExtensions: Array< { id: string; title: string } > = [];
 
 jest.mock( '@woocommerce/settings', () => ( {
 	...jest.requireActual( '@woocommerce/settings' ),
-	get HOME_URL() {
-		return 'https://example.com/';
+	get CURRENT_SITE_ID() {
+		return 1;
 	},
 	get IS_MULTISITE() {
 		return false;

@@ -20,10 +20,9 @@ import {
 
 type StoredIncompatibleExtension = { [ k: string ]: string[] };
 
-// This key is shared with older versions and with the storefront banner, and is
-// plain localStorage that anything can overwrite, so nothing about its contents
-// is guaranteed. Reads below are written to tolerate any JSON value rather than
-// take the editor down with a corrupt one.
+// The editor's key is its own, but its contents are not guaranteed: anything
+// can overwrite localStorage, and the first value can come from the pre-scoping
+// key both surfaces shared. Reads below tolerate any JSON value.
 const isPlainObject = ( value: unknown ): value is Record< string, unknown > =>
 	typeof value === 'object' && value !== null && ! Array.isArray( value );
 

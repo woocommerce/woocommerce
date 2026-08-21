@@ -30,7 +30,7 @@ let mockIncompatibleExtensions:
 
 jest.mock( '@woocommerce/settings', () => ( {
 	...jest.requireActual( '@woocommerce/settings' ),
-	HOME_URL: 'https://example.com/',
+	CURRENT_SITE_ID: 1,
 	IS_MULTISITE: false,
 	getSetting: jest.fn().mockImplementation( ( name: string, ...rest ) => {
 		if ( name === 'incompatibleExtensions' ) {

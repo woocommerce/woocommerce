@@ -10,20 +10,25 @@
  */
 
 // Two sites of one subdirectory multisite. Same origin, so they share the
-// browser's localStorage; different home URL, so they must not share a key.
-const SITE_A = 'https://example.com/';
-const SITE_B = 'https://example.com/site-b/';
+// browser's localStorage; different blog IDs, so they must not share a key.
+const SITE_A = 1;
+const SITE_B = 2;
 
-let mockHomeUrl: string | undefined = SITE_A;
+let mockSiteId = SITE_A;
 let mockIsMultisite = false;
+// Exposed only so the tests below can prove the keys ignore it.
+let mockHomeUrl = 'http://example.com/';
 
 jest.mock( '@woocommerce/settings', () => ( {
 	// Getters, not values: the site under test changes between calls.
-	get HOME_URL() {
-		return mockHomeUrl;
+	get CURRENT_SITE_ID() {
+		return mockSiteId;
 	},
 	get IS_MULTISITE() {
 		return mockIsMultisite;
+	},
+	get HOME_URL() {
+		return mockHomeUrl;
 	},
 } ) );
 
@@ -42,8 +47,9 @@ import {
 describe( 'incompatible extension notice storage', () => {
 	beforeEach( () => {
 		window.localStorage.clear();
-		mockHomeUrl = SITE_A;
+		mockSiteId = SITE_A;
 		mockIsMultisite = false;
+		mockHomeUrl = 'http://example.com/';
 	} );
 
 	describe( 'storage keys', () => {
@@ -60,30 +66,34 @@ describe( 'incompatible extension notice storage', () => {
 			const editorOnA = getEditorStorageKey();
 			const frontendOnA = getFrontendStorageKey();
 
-			mockHomeUrl = SITE_B;
+			mockSiteId = SITE_B;
 
 			expect( getEditorStorageKey() ).not.toBe( editorOnA );
 			expect( getFrontendStorageKey() ).not.toBe( frontendOnA );
 		} );
 
-		// `wcSettings` can load without `homeUrl`. Interpolating that straight in
-		// would put the string `undefined` in the key.
-		it.each( [
-			[ 'undefined', undefined ],
-			[ 'empty', '' ],
-		] )(
-			'falls back to the origin when the home URL is %s',
-			( _l, url ) => {
-				mockHomeUrl = url;
+		// The home URL is not an input, so the per-request variation it carries
+		// (here a language directory) cannot orphan a dismissal. Only
+		// same-origin variation matters: an actual move to another origin gets
+		// its own localStorage whatever the key is called.
+		it( 'keeps the same keys when the home URL varies on one origin', () => {
+			const editorBefore = getEditorStorageKey();
+			const frontendBefore = getFrontendStorageKey();
 
-				expect( getFrontendStorageKey() ).toBe(
-					`${ UNSCOPED_STORAGE_KEY }_frontend__${ window.location.origin }`
-				);
-				expect( getEditorStorageKey() ).toBe(
-					`${ UNSCOPED_STORAGE_KEY }__${ window.location.origin }`
-				);
-			}
-		);
+			mockHomeUrl = 'http://example.com/fr/';
+
+			expect( getEditorStorageKey() ).toBe( editorBefore );
+			expect( getFrontendStorageKey() ).toBe( frontendBefore );
+		} );
+
+		it( 'builds both keys from the blog ID', () => {
+			expect( getEditorStorageKey() ).toBe(
+				`${ UNSCOPED_STORAGE_KEY }__${ SITE_A }`
+			);
+			expect( getFrontendStorageKey() ).toBe(
+				`${ UNSCOPED_STORAGE_KEY }_frontend__${ SITE_A }`
+			);
+		} );
 	} );
 
 	describe( 'readDismissalsFromBeforeScoping', () => {

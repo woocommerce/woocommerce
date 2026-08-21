@@ -11,7 +11,7 @@
 /**
  * External dependencies
  */
-import { HOME_URL, IS_MULTISITE } from '@woocommerce/settings';
+import { CURRENT_SITE_ID, IS_MULTISITE } from '@woocommerce/settings';
 
 /**
  * The key both surfaces shared before either of them was scoped to a site. It
@@ -22,14 +22,16 @@ export const UNSCOPED_STORAGE_KEY =
 	'wc-blocks_dismissed_incompatible_extensions_notices';
 
 /**
- * `localStorage` is scoped to the origin, not the path, so every site of a
- * subdirectory multisite shares the same keys; appending the site's home URL
- * gives each its own storage. `HOME_URL` can be absent when `wcSettings` never
- * loaded — the origin fallback keeps the key well-formed (not the string
- * `undefined`), without recovering the site's identity.
+ * `localStorage` is scoped to the origin, so sites of a subdirectory multisite
+ * share it; the blog ID separates them. Blog IDs are network-local, so two
+ * independent installs on one origin still share a key.
+ *
+ * Not the home URL: `home_url()` passes through a public filter, so it varies
+ * per request (a language directory, say) without the site changing.
+ *
+ * `0` is the "site unknown" fallback, and not a blog ID any site can hold.
  */
-const scopeToSite = ( key: string ): string =>
-	`${ key }__${ HOME_URL || window.location.origin }`;
+const scopeToSite = ( key: string ): string => `${ key }__${ CURRENT_SITE_ID }`;
 
 /**
  * The key the editor sidebar notice reads and writes. It holds an array of
