@@ -184,7 +184,7 @@ module.exports = async ({ github, context, core }) => {
         return;
     }
 
-    const { body, pingBody } = buildCommentBody({
+    const { body, pingBody, mentioned } = buildCommentBody({
         tasks,
         previousState: decision.previousState,
         authorLogin: pr.user.login,
@@ -226,4 +226,17 @@ module.exports = async ({ github, context, core }) => {
         });
         core.info(`Posted readiness regression ping on #${pr.number}.`);
     }
+
+    // Whether the author was actually notified is the question every
+    // "did the contributor see this?" debugging session starts with, so
+    // put the answer in the log. Only a *created* comment notifies - the
+    // sticky comment's own creation (which carries a mention exactly on
+    // the transitions that set `mentioned`) or the separate ping - while
+    // an edit never does, whatever its intro line says.
+    const notified = (mentioned && decision.action === 'create') || Boolean(pingBody);
+    core.info(
+        notified
+            ? `Author @${pr.user.login} was notified.`
+            : 'No notification sent for this update (comment edits never notify).'
+    );
 };
