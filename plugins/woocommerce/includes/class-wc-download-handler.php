@@ -438,7 +438,7 @@ class WC_Download_Handler {
 		$download_range['length'] = $file_size;
 
 		if ( isset( $_SERVER['HTTP_RANGE'] ) ) { // @codingStandardsIgnoreLine.
-			$http_range                         = sanitize_text_field( wp_unslash( $_SERVER['HTTP_RANGE'] ) ); // WPCS: input var ok.
+			$http_range                         = sanitize_text_field( wp_unslash( $_SERVER['HTTP_RANGE'] ) );
 			$download_range['is_range_request'] = true;
 
 			$c_start = $start;
@@ -924,7 +924,7 @@ class WC_Download_Handler {
 		if ( ! strstr( $message, '<a ' ) ) {
 			$message .= ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-forward">' . esc_html__( 'Go to shop', 'woocommerce' ) . '</a>';
 		}
-		wp_die( $message, $title, array( 'response' => $status ) ); // WPCS: XSS ok.
+		wp_die( $message, $title, array( 'response' => $status ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_die() accepts HTML; callers pass fixed messages with explicitly escaped links.
 	}
 
 	/**
