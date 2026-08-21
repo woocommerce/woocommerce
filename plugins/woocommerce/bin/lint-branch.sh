@@ -47,7 +47,7 @@ cacheArgs=()
 # phpcs gets its own status besides the shared accumulator: the checkstyle report
 # below must be tied to phpcs itself failing, not to any other check that sets status.
 phpcsStatus=0
-composer exec phpcs-changed -- -s --git --git-base $baseBranch "${cacheArgs[@]}" "${changedFiles[@]}" || phpcsStatus=1
+composer exec phpcs-changed -- -s --git --git-base "$baseBranch" "${cacheArgs[@]}" "${changedFiles[@]}" || phpcsStatus=1
 status=$phpcsStatus
 
 # The readable report above is the log people dig into; this re-runs the same check
@@ -63,7 +63,7 @@ status=$phpcsStatus
 # adding it normalizes both forms to a single prefix.
 if [[ -n $WC_PHPCS_CHECKSTYLE_FILE && $phpcsStatus -eq 1 ]]; then
     prefix=$(git rev-parse --show-prefix)
-    composer exec phpcs-changed -- --git --git-base $baseBranch --report=checkstyle "${cacheArgs[@]}" "${changedFiles[@]}" |
+    composer exec phpcs-changed -- --git --git-base "$baseBranch" --report=checkstyle "${cacheArgs[@]}" "${changedFiles[@]}" |
         sed -e "s|<file name=\"${prefix}|<file name=\"|g" \
             -e "s|<file name=\"|<file name=\"${prefix}|g" > "$WC_PHPCS_CHECKSTYLE_FILE"
 fi
