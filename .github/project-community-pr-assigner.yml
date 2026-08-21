@@ -29,7 +29,7 @@
     - adimoldovan
 
 # Blocks, patterns, products, inventory, search, and storefront (Woo FSE / Kirigami).
-'packages/js/{block-templates,components,experimental,experimental-products-app,expression-evaluation,sanitize}/**/*':
+'packages/js/{block-templates,components,experimental,expression-evaluation,sanitize}/**/*':
     - team: woo-fse
 
 'plugins/woocommerce/{.wordpress-org,i18n}/**/*':
