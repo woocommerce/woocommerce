@@ -31,7 +31,7 @@ class BlockTemplatesControllerTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		switch_theme( 'twentytwentytwo' );
+		switch_theme( 'twentytwentyfour' );
 		$this->sut = new BlockTemplatesController();
 		$this->flush_block_template_caches();
 	}
