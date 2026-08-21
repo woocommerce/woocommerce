@@ -349,10 +349,24 @@ if ( wc_tax_enabled() ) {
 <?php if ( $render_refunds ) : ?>
 <div class="wc-order-data-row wc-order-refund-items wc-order-data-row-toggle" style="display: none;">
 	<table class="wc-order-totals">
-		<?php if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) : ?>
-			<tr>
-				<td class="label"><label for="restock_refunded_items"><?php esc_html_e( 'Restock refunded items', 'woocommerce' ); ?>:</label></td>
-				<td class="total"><input type="checkbox" id="restock_refunded_items" name="restock_refunded_items" <?php checked( apply_filters( 'woocommerce_restock_refunded_items', true ) ); ?> /></td>
+		<?php
+		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) :
+			$stock_was_reduced = isset( $order ) && $order->get_order_stock_reduced();
+			?>
+			<tr class="restock-refunded-items" data-stock-reduced="<?php echo esc_attr( $stock_was_reduced ? 'yes' : 'no' ); ?>">
+				<td class="label">
+					<label for="restock_refunded_items"><?php esc_html_e( 'Restock refunded items', 'woocommerce' ); ?>:</label>
+					<p class="description restock-refunded-items__description">
+						<?php
+						if ( $stock_was_reduced ) {
+							esc_html_e( 'Enter a refund quantity to return items to stock.', 'woocommerce' );
+						} else {
+							esc_html_e( 'Stock was not reduced for this order.', 'woocommerce' );
+						}
+						?>
+					</p>
+				</td>
+				<td class="total"><input type="checkbox" id="restock_refunded_items" name="restock_refunded_items" disabled /></td>
 			</tr>
 		<?php endif; ?>
 		<tr>
