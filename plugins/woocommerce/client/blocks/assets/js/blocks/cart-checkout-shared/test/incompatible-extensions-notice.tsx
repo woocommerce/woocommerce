@@ -22,7 +22,7 @@ jest.mock( '@woocommerce/settings', () => ( {
 	get CURRENT_USER_IS_ADMIN() {
 		return mockIsAdmin;
 	},
-	HOME_URL: 'https://example.com/',
+	CURRENT_SITE_ID: 1,
 	IS_MULTISITE: false,
 } ) );
 
@@ -449,8 +449,30 @@ describe( 'IncompatibleExtensionsFrontendNotice', () => {
 			expect( container ).toBeEmptyDOMElement();
 		} );
 
-		// The control for the two above: with an admin and a list that really is
-		// empty, the lapsed acknowledgement is dropped as it should be.
+		// The banner is split so the storage hooks never mount for a shopper.
+		// Gating only the migration callback would not do: the hook writes its
+		// initial value on mount, so a shopper would leave an empty array under
+		// this site's key and close the one-shot migration for good.
+		it( 'leaves the key absent for a shopper, so an admin can still migrate', () => {
+			seedLegacy( [ 'plugin-one' ] );
+			setIncompatibleExtensions( [
+				{ id: 'plugin-one', title: 'Plugin One' },
+			] );
+
+			mockIsAdmin = false;
+			renderCheckout().unmount();
+
+			expect( window.localStorage.getItem( frontendKey() ) ).toBeNull();
+
+			mockIsAdmin = true;
+			const { container } = renderCheckout();
+
+			expect( container ).toBeEmptyDOMElement();
+			expect( storedSlugs() ).toEqual( [ 'plugin-one' ] );
+		} );
+
+		// The control for the shopper cases above: with an admin and a list that
+		// really is empty, the lapsed acknowledgement is dropped as it should be.
 		it( 'does drop a lapsed acknowledgement for an admin', () => {
 			seedFrontend( [ 'plugin-one', 'plugin-two' ] );
 			setIncompatibleExtensions( [] );

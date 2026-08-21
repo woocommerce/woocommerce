@@ -62,11 +62,11 @@ interface Props {
 }
 
 /**
- * Shows a notice to admin users on the frontend when there are incompatible extensions.
+ * The banner itself, split out so the storage hooks below never mount for a
+ * shopper, who would otherwise persist an empty `[]` under this site's key and
+ * close the one-shot migration for the administrator who comes along later.
  */
-export const IncompatibleExtensionsFrontendNotice = ( {
-	block,
-}: Props ): JSX.Element | null => {
+const IncompatibleExtensionsBanner = ( { block }: Props ) => {
 	const storageKey = getFrontendStorageKey();
 
 	// Seeding the initial value migrates the pre-scoping dismissals in one shot:
@@ -103,20 +103,17 @@ export const IncompatibleExtensionsFrontendNotice = ( {
 	// never-acknowledged extension brings the notice back.
 	const isDismissedAndUpToDate = isSubsetOf( slugs, acknowledgedSlugs );
 
-	const shouldShow =
-		CURRENT_USER_IS_ADMIN && count > 0 && ! isDismissedAndUpToDate;
+	const shouldShow = count > 0 && ! isDismissedAndUpToDate;
 
 	// An acknowledgement only lasts while the extension stays incompatible:
 	// slugs no longer incompatible are dropped, so a reactivated extension
 	// counts as fresh and warns again, while the ones that never left stay
 	// acknowledged. It only ever removes slugs, and only when the list was
-	// actually delivered — to a shopper, and to a payload that lost the
-	// setting, the empty list is indistinguishable from "nothing is
-	// incompatible" and would erase a real acknowledgement.
+	// actually delivered — a payload that lost the setting reports an empty
+	// list, indistinguishable from "nothing is incompatible", and pruning on
+	// that would erase a real acknowledgement.
 	const prunedAcknowledgement =
-		CURRENT_USER_IS_ADMIN &&
-		isKnown &&
-		! isSubsetOf( acknowledgedSlugs, slugs )
+		isKnown && ! isSubsetOf( acknowledgedSlugs, slugs )
 			? acknowledgedSlugs.filter( ( slug ) => slugs.includes( slug ) )
 			: null;
 
@@ -182,4 +179,18 @@ export const IncompatibleExtensionsFrontendNotice = ( {
 			</em>
 		</NoticeBanner>
 	);
+};
+
+/**
+ * Shows a notice to admin users on the frontend when there are incompatible extensions.
+ *
+ * Returns before the banner mounts for anyone else, so a shopper's page view
+ * never reads or writes this site's dismissal storage.
+ */
+export const IncompatibleExtensionsFrontendNotice = ( { block }: Props ) => {
+	if ( ! CURRENT_USER_IS_ADMIN ) {
+		return null;
+	}
+
+	return <IncompatibleExtensionsBanner block={ block } />;
 };
