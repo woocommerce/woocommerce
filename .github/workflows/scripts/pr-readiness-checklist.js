@@ -2,15 +2,22 @@
 
 const MARKER_PREFIX = '<!-- pr-readiness-summary';
 
+// Each remediation duplicates guidance that already lives next to the
+// check it describes; the `// Source:` comment on each names that origin.
+// When the origin changes its guidance, update the remediation with it -
+// these strings are what community contributors act on, so a drifted one
+// (a command that no longer exists, a moved doc) is worse than none.
 const TASKS = [
     {
         label: 'Lint',
         matches: (name) => name.startsWith('Lint - '),
+        // Source: ci.yml lint jobs annotate via cs2pr / problem matchers.
         remediation: 'See the inline annotations on this PR for details.',
     },
     {
         label: 'PHPStan',
         matches: (name) => name === 'PHPStan Analysis' || name.startsWith('PHPStan: PHP'),
+        // Source: phpstan.yml emits inline `::error file=` annotations.
         remediation: 'See the inline annotations on this PR for details.',
     },
     {
@@ -34,20 +41,28 @@ const TASKS = [
     {
         label: 'Changelog entry',
         matches: (name) => name === 'Validate changelog',
+        // Source: .github/CONTRIBUTING.md ("create a change file..."). Lead
+        // with the concrete core command - community contributors don't know
+        // the monorepo's package names, so a bare `--filter=<project>`
+        // placeholder isn't actionable on its own.
         remediation:
-            "Run `pnpm --filter=<project> changelog add`, or check the 'no changelog needed' box in the PR description with a comment.",
+            "Run `pnpm --filter=@woocommerce/plugin-woocommerce changelog add` (for changes to WooCommerce core; for another package, pass its name to `--filter` — see the [contributing guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md)). Alternatively, check the 'no changelog needed' box in the PR description with a comment explaining why.",
     },
     {
         label: 'Milestone',
         matches: (name) => name === 'Ensure milestone is or will be assigned',
+        // Source: pr-require-milestone.yml / the PR template's milestone
+        // section.
         remediation:
             'Check the auto-assign box in the PR description, or select a milestone manually.',
     },
     {
         label: 'Dependency versions',
         matches: (name) => name === 'Validate dependencies version',
+        // Source: ci.yml validate-syncpack's 'Validate - prompt mitigation
+        // on failed validation' step.
         remediation:
-            'Run `pnpm syncpack fix-mismatches` (or update manually) and commit the result.',
+            'Update the pinned version in `.syncpackrc`, then run `pnpm sync-dependencies` and commit the result.',
     },
     {
         label: 'Markdown lint',
