@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 
-# test-env-setup.sh snapshots the database once this returns and restores it
-# before every test, so a step that fails silently here poisons the whole suite
-# rather than failing one spec. Every step must therefore be re-runnable, so
-# that a re-seed of an existing environment is not mistaken for a real failure.
+# The Playwright global setup (tests/e2e/fixtures/blocks-setup.ts) exports the
+# database once this seed has run, and every test restores that snapshot before
+# it starts. So a step that fails silently here does not fail one spec, it hands
+# the whole suite a subtly wrong environment. Every step must therefore be
+# re-runnable, so that a re-seed of an existing environment is not mistaken for
+# a real failure.
 set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
