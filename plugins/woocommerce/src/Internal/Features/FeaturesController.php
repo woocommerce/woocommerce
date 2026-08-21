@@ -539,6 +539,17 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'enabled_by_default'           => false,
 			),
+			\Automattic\WooCommerce\Internal\VariationGallery\Package::FEATURE_ID => array(
+				'name'                         => __( 'Variation gallery', 'woocommerce' ),
+				'description'                  => __( 'Add multiple images per product variation.', 'woocommerce' ),
+				'is_experimental'              => false,
+				'enabled_by_default'           => true,
+				'disable_ui'                   => true,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'deprecated_since'             => '11.1.0',
+				'deprecated_value'             => true,
+			),
 			'wc-visual-attribute'                  => array(
 				'name'                         => __( 'Color swatches for attributes', 'woocommerce' ),
 				'description'                  => __(
