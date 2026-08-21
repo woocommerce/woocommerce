@@ -27,10 +27,18 @@ class BlockTemplatesControllerTest extends WC_Unit_Test_Case {
 	private $created_template_part_ids = array();
 
 	/**
+	 * Active theme before each test, restored in tearDown.
+	 *
+	 * @var string
+	 */
+	private $original_theme;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->original_theme = get_stylesheet();
 		switch_theme( 'twentytwentyfour' );
 		$this->sut = new BlockTemplatesController();
 		$this->flush_block_template_caches();
@@ -45,6 +53,7 @@ class BlockTemplatesControllerTest extends WC_Unit_Test_Case {
 		}
 		$this->created_template_part_ids = array();
 		$this->flush_block_template_caches();
+		switch_theme( $this->original_theme );
 		parent::tearDown();
 	}
 
