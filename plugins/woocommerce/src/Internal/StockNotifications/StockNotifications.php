@@ -24,7 +24,6 @@ class StockNotifications {
 	 * Initialize the controller.
 	 */
 	public function __construct() {
-		add_action( 'plugins_loaded', array( $this, 'init_hooks' ) );
 		add_action( 'woocommerce_installed', array( $this, 'on_install_or_update' ) );
 	}
 
@@ -41,9 +40,12 @@ class StockNotifications {
 	/**
 	 * Register hooks and services.
 	 *
+	 * Called from `WooCommerce::maybe_init_stock_notifications()` on `init` priority 1,
+	 * at which point `plugins_loaded` has already fired.
+	 *
 	 * @internal
 	 */
-	public function init_hooks() {
+	public function register(): void {
 		add_filter( 'woocommerce_data_stores', array( $this, 'register_data_stores' ) );
 
 		$container = wc_get_container();

@@ -67627,12 +67627,6 @@ parameters:
 			path: src/Internal/StockNotifications/Privacy/PrivacyEraser.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\StockNotifications\:\:init_hooks\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/StockNotifications/StockNotifications.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\StockNotifications\:\:on_install_or_update\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1

@@ -256,9 +256,6 @@ class WC_Unit_Tests_Bootstrap {
 		define( 'WC_TAX_ROUNDING_MODE', 'auto' );
 		define( 'WC_USE_TRANSACTIONS', false );
 
-		// Enable Back In Stock Notifications feature during tests.
-		update_option( 'woocommerce_feature_customer_stock_notifications_enabled', 'yes' );
-
 		update_option( 'woocommerce_enable_coupons', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_onboarding_opt_in', 'yes' );
@@ -292,6 +289,12 @@ class WC_Unit_Tests_Bootstrap {
 		// invalidation). install_wc() runs on `setup_theme`, before `init`, so the option is
 		// set in time for ProductCacheController::on_init() to register its invalidation hooks.
 		update_option( 'woocommerce_feature_product_instance_caching_enabled', 'yes' );
+
+		// Enable Back In Stock Notifications during tests. Must be set here rather than in
+		// load_wc(): install_wc() includes uninstall.php, which deletes every 'woocommerce_%'
+		// option. install_wc() runs on `setup_theme`, before `init`, so the option is set in
+		// time for WooCommerce::maybe_init_stock_notifications() on `init` priority 1.
+		update_option( 'woocommerce_feature_customer_stock_notifications_enabled', 'yes' );
 
 		// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.
 		if ( version_compare( $GLOBALS['wp_version'], '4.7', '<' ) ) {

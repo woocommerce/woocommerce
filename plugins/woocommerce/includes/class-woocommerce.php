@@ -342,6 +342,7 @@ final class WooCommerce {
 		add_action( 'init', array( $this, 'maybe_init_order_reviews' ), 1 );
 		add_action( 'init', array( $this, 'maybe_init_abandoned_cart_recovery' ), 1 );
 		add_action( 'init', array( $this, 'init_email_unsubscribes' ), 1 );
+		add_action( 'init', array( $this, 'maybe_init_stock_notifications' ), 1 );
 		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
 		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
 		add_action( 'init', array( $this, 'add_image_sizes' ) );
@@ -410,11 +411,6 @@ final class WooCommerce {
 		$container->get( OrderMilestoneEasterEgg::class );
 		$container->get( CustomerEmailVerification::class );
 		$container->get( OrderLogsCleanupHelper::class );
-
-		// Feature flags.
-		if ( FeaturesUtil::feature_is_enabled( 'customer_stock_notifications' ) ) {
-			$container->get( StockNotifications::class );
-		}
 
 		/**
 		 * These classes have a register method for attaching hooks.
@@ -1064,6 +1060,23 @@ final class WooCommerce {
 		}
 		wc_get_container()->get( \Automattic\WooCommerce\Internal\AbandonedCartRecovery\ManualSendHandler::class );
 		wc_get_container()->get( \Automattic\WooCommerce\Internal\AbandonedCartRecovery\Scheduler::class );
+	}
+
+	/**
+	 * Resolve the Back in Stock Notifications services when the
+	 * `customer_stock_notifications` feature flag is on. Hooked to `init`
+	 * priority 1 from `init_hooks()` so the feature check runs after the
+	 * textdomain is loaded, and before `WC_Install::check_version()` (priority 5)
+	 * fires `woocommerce_installed`.
+	 *
+	 * @since 11.2.0
+	 * @internal
+	 */
+	public function maybe_init_stock_notifications(): void {
+		if ( ! FeaturesUtil::feature_is_enabled( 'customer_stock_notifications' ) ) {
+			return;
+		}
+		wc_get_container()->get( StockNotifications::class )->register();
 	}
 
 	/**
