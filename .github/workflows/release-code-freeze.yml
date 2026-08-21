@@ -175,7 +175,7 @@ jobs:
         with:
           script: |
             const nextTrunkMainVersion = '${{ needs.prepare-for-feature-freeze.outputs.nextTrunkMainVersion }}'; // e.g. '10.5'
-            const minVersionToKeep     = Number( nextTrunkMainVersion ) - 0.2; // e.g. 10.3
+            const minVersionToKeep     = Number( ( nextTrunkMainVersion - 0.2 ).toFixed( 1 ) ); // e.g. 10.3
 
             const { data: latestMilestones } = await github.rest.issues.listMilestones( {
               owner: context.repo.owner,
