@@ -1030,6 +1030,131 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_get_permalink_structure persists missing defaults in the configured site locale.
+	 */
+	public function test_wc_get_permalink_structure_uses_site_locale_for_missing_defaults(): void {
+		global $l10n, $wp_textdomain_registry;
+
+		$site_locale                = 'wc_TEST';
+		$translation_controller     = WP_Translation_Controller::get_instance();
+		$original_controller_locale = $translation_controller->get_locale();
+		$original_controller_path   = $wp_textdomain_registry->get( 'woocommerce', $original_controller_locale );
+		$original_translation_path  = $wp_textdomain_registry->get( 'woocommerce', $site_locale );
+		$original_permalinks        = get_option( 'woocommerce_permalinks', null );
+		$had_original_translations  = isset( $l10n['woocommerce'] );
+		$original_translations      = $l10n['woocommerce'] ?? null;
+		$request_translation_file   = trailingslashit( get_temp_dir() ) . wp_unique_filename( get_temp_dir(), 'woocommerce-request-translations.mo' );
+		$filter_site_locale         = static fn() => $site_locale;
+		$filter_request_locale      = static fn() => 'en_US';
+		$filter_translation_path    = static function ( $path, $domain, $locale ) use ( $site_locale ) {
+			return 'woocommerce' === $domain && $site_locale === $locale ? trailingslashit( __DIR__ . '/fixtures' ) : $path;
+		};
+		$filter_translation_file    = static function ( $file, $domain, $locale ) use ( $site_locale ) {
+			return 'woocommerce' === $domain && $site_locale === $locale ? __DIR__ . '/fixtures/permalink-translations.php' : $file;
+		};
+		$filter_request_translation = static function ( $translation, $text, $context, $domain ) {
+			if ( 'woocommerce' === $domain && 'slug' === $context ) {
+				return determine_locale() . '-' . $text;
+			}
+
+			return $translation;
+		};
+
+		$translation_controller->unload_textdomain( 'woocommerce', $site_locale );
+		delete_option( 'woocommerce_permalinks' );
+		add_filter( 'pre_option_WPLANG', $filter_site_locale );
+		add_filter( 'pre_determine_locale', $filter_request_locale );
+		add_filter( 'lang_dir_for_domain', $filter_translation_path, 10, 3 );
+		add_filter( 'load_translation_file', $filter_translation_file, 10, 3 );
+		add_filter( 'gettext_with_context', $filter_request_translation, 10, 4 );
+
+		try {
+			$request_translation_source = new MO();
+			$request_translation_source->add_entry(
+				array(
+					'singular'     => 'product-tag',
+					'context'      => 'slug',
+					'translations' => array( 'request-product-tag' ),
+				)
+			);
+			$this->assertTrue( $request_translation_source->export_to_file( $request_translation_file ) );
+
+			$request_translations = new MO();
+			$this->assertTrue( $request_translations->import_from_file( $request_translation_file ) );
+			$l10n['woocommerce'] = $request_translations; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulate request-locale legacy translations.
+
+			$permalinks              = wc_get_permalink_structure();
+			$persisted_permalinks    = get_option( 'woocommerce_permalinks' );
+			$controller_locale_after = $translation_controller->get_locale();
+			$determined_locale_after = determine_locale();
+			$translations_after      = $l10n['woocommerce'] ?? null;
+		} finally {
+			remove_filter( 'pre_option_WPLANG', $filter_site_locale );
+			remove_filter( 'pre_determine_locale', $filter_request_locale );
+			remove_filter( 'lang_dir_for_domain', $filter_translation_path, 10 );
+			remove_filter( 'load_translation_file', $filter_translation_file, 10 );
+			remove_filter( 'gettext_with_context', $filter_request_translation, 10 );
+			$translation_controller->unload_textdomain( 'woocommerce', $site_locale );
+			$translation_controller->set_locale( $original_controller_locale );
+			$wp_textdomain_registry->set( 'woocommerce', $site_locale, $original_translation_path );
+			$wp_textdomain_registry->set( 'woocommerce', $original_controller_locale, $original_controller_path );
+			wp_delete_file( $request_translation_file );
+
+			if ( $had_original_translations ) {
+				$l10n['woocommerce'] = $original_translations; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the test's original translations.
+			} else {
+				unset( $l10n['woocommerce'] );
+			}
+
+			if ( null === $original_permalinks ) {
+				delete_option( 'woocommerce_permalinks' );
+			} else {
+				update_option( 'woocommerce_permalinks', $original_permalinks );
+			}
+		}
+
+		$this->assertSame( 'site-product', $permalinks['product_base'], 'The product base should use the site locale.' );
+		$this->assertSame( 'site-product-category', $permalinks['category_base'], 'The category base should use the site locale.' );
+		$this->assertSame( 'product-tag', $permalinks['tag_base'], 'A missing site translation should use the source slug.' );
+		$this->assertSame( 'site-product', $persisted_permalinks['product_base'], 'The localized product base should be persisted.' );
+		$this->assertSame( 'site-product-category', $persisted_permalinks['category_base'], 'The localized category base should be persisted.' );
+		$this->assertSame( 'product-tag', $persisted_permalinks['tag_base'], 'A request-locale legacy translation should not be persisted.' );
+		$this->assertSame( $request_translations, $translations_after, 'The request translations should be restored.' );
+		$this->assertSame( $original_controller_locale, $controller_locale_after, 'The translation controller locale should be restored.' );
+		$this->assertSame( 'en_US', $determined_locale_after, 'The request locale should stay unchanged.' );
+	}
+
+	/**
+	 * @testdox wc_get_permalink_structure preserves existing permalink bases.
+	 */
+	public function test_wc_get_permalink_structure_preserves_existing_bases(): void {
+		$original_permalinks = get_option( 'woocommerce_permalinks', null );
+		$saved_permalinks    = array(
+			'product_base'           => 'custom-product',
+			'category_base'          => 'custom-product-category',
+			'tag_base'               => 'custom-product-tag',
+			'attribute_base'         => '',
+			'use_verbose_page_rules' => false,
+		);
+
+		update_option( 'woocommerce_permalinks', $saved_permalinks );
+
+		try {
+			$permalinks = wc_get_permalink_structure();
+		} finally {
+			if ( null === $original_permalinks ) {
+				delete_option( 'woocommerce_permalinks' );
+			} else {
+				update_option( 'woocommerce_permalinks', $original_permalinks );
+			}
+		}
+
+		$this->assertSame( 'custom-product', $permalinks['product_base'], 'The existing product base should be preserved.' );
+		$this->assertSame( 'custom-product-category', $permalinks['category_base'], 'The existing category base should be preserved.' );
+		$this->assertSame( 'custom-product-tag', $permalinks['tag_base'], 'The existing tag base should be preserved.' );
+	}
+
+	/**
 	 * Test wc_decimal_to_fraction.
 	 *
 	 * @return void
