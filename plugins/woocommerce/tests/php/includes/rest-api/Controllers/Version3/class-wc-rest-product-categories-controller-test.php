@@ -327,4 +327,156 @@ class WC_REST_Product_Categories_Controller_Test extends WC_REST_Unit_Test_Case 
 
 		$this->assertEquals( 201, $response->get_status() );
 	}
+
+	/**
+	 * @testdox hide_empty pagination keeps empty parents that have non-empty children.
+	 */
+	public function test_hide_empty_pagination_includes_empty_parents_with_nonempty_children() {
+		$fixture   = $this->create_empty_parent_with_nonempty_child( '67934 Paginate ' . uniqid() );
+		$parent_id = (int) $fixture['parent']['term_id'];
+		$child_id  = (int) $fixture['child']['term_id'];
+
+		$full_response = $this->make_categories_request(
+			'',
+			array(
+				'hide_empty' => true,
+				'include'    => array( $parent_id, $child_id ),
+				'per_page'   => 100,
+				'page'       => 1,
+			)
+		);
+		$full_data     = $full_response->get_data();
+		$full_headers  = $full_response->get_headers();
+
+		$this->assertEquals( 200, $full_response->get_status() );
+		$this->assertCount( 2, $full_data );
+		$this->assertNotNull( $this->find_category_in_response( $full_data, $parent_id ) );
+		$this->assertNotNull( $this->find_category_in_response( $full_data, $child_id ) );
+		$this->assertSame( 2, (int) $full_headers['X-WP-Total'] );
+		$this->assertSame( 1, (int) $full_headers['X-WP-TotalPages'] );
+
+		$page_one = $this->make_categories_request(
+			'',
+			array(
+				'hide_empty' => true,
+				'include'    => array( $parent_id, $child_id ),
+				'orderby'    => 'name',
+				'order'      => 'asc',
+				'per_page'   => 1,
+				'page'       => 1,
+			)
+		);
+		$page_two = $this->make_categories_request(
+			'',
+			array(
+				'hide_empty' => true,
+				'include'    => array( $parent_id, $child_id ),
+				'orderby'    => 'name',
+				'order'      => 'asc',
+				'per_page'   => 1,
+				'page'       => 2,
+			)
+		);
+
+		$page_one_data = $page_one->get_data();
+		$page_two_data = $page_two->get_data();
+		$returned_ids  = array_map( static fn( $term ) => (int) $term['id'], array_merge( $page_one_data, $page_two_data ) );
+
+		$this->assertEquals( 200, $page_one->get_status() );
+		$this->assertEquals( 200, $page_two->get_status() );
+		$this->assertCount( 1, $page_one_data );
+		$this->assertCount( 1, $page_two_data, 'Page 2 must remain reachable when an empty parent has a non-empty child.' );
+		$this->assertSame( 2, (int) $page_one->get_headers()['X-WP-Total'] );
+		$this->assertSame( 2, (int) $page_one->get_headers()['X-WP-TotalPages'] );
+		$this->assertSame( 2, (int) $page_two->get_headers()['X-WP-Total'] );
+		$this->assertSame( 2, (int) $page_two->get_headers()['X-WP-TotalPages'] );
+		$this->assertEqualsCanonicalizing( array( $parent_id, $child_id ), $returned_ids );
+
+		wp_delete_post( $fixture['product']->get_id(), true );
+		wp_delete_term( $child_id, 'product_cat' );
+		wp_delete_term( $parent_id, 'product_cat' );
+	}
+
+	/**
+	 * @testdox hide_empty parent=0 pagination keeps empty top-level parents that have non-empty children.
+	 */
+	public function test_hide_empty_parent_zero_pagination_includes_empty_parents() {
+		$first      = $this->create_empty_parent_with_nonempty_child( '67934 TopA ' . uniqid() );
+		$second     = $this->create_empty_parent_with_nonempty_child( '67934 TopB ' . uniqid() );
+		$parent_ids = array(
+			(int) $first['parent']['term_id'],
+			(int) $second['parent']['term_id'],
+		);
+
+		$full_response = $this->make_categories_request(
+			'',
+			array(
+				'hide_empty' => true,
+				'parent'     => 0,
+				'include'    => $parent_ids,
+				'per_page'   => 100,
+				'page'       => 1,
+			)
+		);
+		$full_data     = $full_response->get_data();
+
+		$this->assertEquals( 200, $full_response->get_status() );
+		$this->assertCount( 2, $full_data );
+		$this->assertSame( 2, (int) $full_response->get_headers()['X-WP-Total'] );
+		$this->assertSame( 1, (int) $full_response->get_headers()['X-WP-TotalPages'] );
+
+		$page_two = $this->make_categories_request(
+			'',
+			array(
+				'hide_empty' => true,
+				'parent'     => 0,
+				'include'    => $parent_ids,
+				'orderby'    => 'name',
+				'order'      => 'asc',
+				'per_page'   => 1,
+				'page'       => 2,
+			)
+		);
+		$page_two_data = $page_two->get_data();
+
+		$this->assertEquals( 200, $page_two->get_status() );
+		$this->assertCount( 1, $page_two_data, 'Page 2 of parent=0 must return the remaining empty parent.' );
+		$this->assertSame( 2, (int) $page_two->get_headers()['X-WP-Total'] );
+		$this->assertSame( 2, (int) $page_two->get_headers()['X-WP-TotalPages'] );
+		$this->assertContains( (int) $page_two_data[0]['id'], $parent_ids );
+
+		wp_delete_post( $first['product']->get_id(), true );
+		wp_delete_post( $second['product']->get_id(), true );
+		wp_delete_term( (int) $first['child']['term_id'], 'product_cat' );
+		wp_delete_term( (int) $second['child']['term_id'], 'product_cat' );
+		wp_delete_term( $parent_ids[0], 'product_cat' );
+		wp_delete_term( $parent_ids[1], 'product_cat' );
+	}
+
+	/**
+	 * Create an empty parent category whose child has a product assigned.
+	 *
+	 * @param string $prefix Unique name prefix.
+	 * @return array{parent: array, child: array, product: WC_Product_Simple}
+	 */
+	private function create_empty_parent_with_nonempty_child( string $prefix ): array {
+		$parent = wp_insert_term( $prefix . ' Parent', 'product_cat' );
+		$this->assertIsArray( $parent );
+
+		$child = wp_insert_term(
+			$prefix . ' Child',
+			'product_cat',
+			array( 'parent' => $parent['term_id'] )
+		);
+		$this->assertIsArray( $child );
+
+		$product = $this->create_test_product();
+		wp_set_object_terms( $product->get_id(), array( $child['term_id'] ), 'product_cat' );
+
+		return array(
+			'parent'  => $parent,
+			'child'   => $child,
+			'product' => $product,
+		);
+	}
 }

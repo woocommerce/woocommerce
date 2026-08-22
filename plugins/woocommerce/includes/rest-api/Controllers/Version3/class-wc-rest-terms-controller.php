@@ -326,23 +326,8 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 			$query_result = $this->get_terms_for_product( $prepared_args, $request );
 			$total_terms  = $this->total_terms;
 		} else {
-			$query_result = get_terms( $taxonomy, $prepared_args );
-
-			$count_args = $prepared_args;
-			unset( $count_args['number'] );
-			unset( $count_args['offset'] );
-			$total_terms = wp_count_terms( $taxonomy, $count_args );
-
-			// Ensure we don't return results when offset is out of bounds.
-			// See https://core.trac.wordpress.org/ticket/35935.
-			if ( $prepared_args['offset'] && $prepared_args['offset'] >= $total_terms ) {
-				$query_result = array();
-			}
-
-			// wp_count_terms can return a falsy value when the term has no children.
-			if ( ! $total_terms ) {
-				$total_terms = 0;
-			}
+			$query_result = $this->get_terms_for_response( $taxonomy, $prepared_args );
+			$total_terms  = $this->total_terms;
 		}
 		$response = array();
 		if ( is_array( $query_result ) ) {
@@ -633,6 +618,71 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	 */
 	protected function update_term_meta_fields( $term, $request ) {
 		return true;
+	}
+
+	/**
+	 * Query terms for a REST collection using a total that matches the returned population.
+	 *
+	 * Hierarchical taxonomies keep empty parents that have non-empty children.
+	 * `wp_count_terms()` sets `fields=count`, which disables that handling and
+	 * undercounts. Pagination headers and the out-of-bounds guard then hide
+	 * those terms from later pages.
+	 *
+	 * @param string $taxonomy      Taxonomy name.
+	 * @param array  $prepared_args Arguments for `get_terms()`, including number and offset.
+	 * @return array List of term objects for the current page. Total count in `$this->total_terms`.
+	 */
+	protected function get_terms_for_response( $taxonomy, $prepared_args ) {
+		$number = isset( $prepared_args['number'] ) ? (int) $prepared_args['number'] : 0;
+		$offset = isset( $prepared_args['offset'] ) ? (int) $prepared_args['offset'] : 0;
+
+		if ( is_taxonomy_hierarchical( $taxonomy ) ) {
+			$count_args = $prepared_args;
+			unset( $count_args['number'], $count_args['offset'] );
+
+			$terms = get_terms( $taxonomy, $count_args );
+			if ( is_wp_error( $terms ) || ! is_array( $terms ) ) {
+				$this->total_terms = 0;
+				return array();
+			}
+
+			$this->total_terms = count( $terms );
+
+			if ( $number ) {
+				if ( $offset && $offset >= $this->total_terms ) {
+					return array();
+				}
+
+				return array_values( array_slice( $terms, $offset, $number ) );
+			}
+
+			return $terms;
+		}
+
+		$terms = get_terms( $taxonomy, $prepared_args );
+
+		$count_args = $prepared_args;
+		unset( $count_args['number'], $count_args['offset'] );
+		$total_terms = wp_count_terms( $taxonomy, $count_args );
+
+		// Ensure we don't return results when offset is out of bounds.
+		// See https://core.trac.wordpress.org/ticket/35935.
+		if ( $offset && $offset >= $total_terms ) {
+			$terms = array();
+		}
+
+		// wp_count_terms can return a falsy value when the term has no children.
+		if ( ! $total_terms ) {
+			$total_terms = 0;
+		}
+
+		$this->total_terms = (int) $total_terms;
+
+		if ( is_wp_error( $terms ) || ! is_array( $terms ) ) {
+			return array();
+		}
+
+		return $terms;
 	}
 
 	/**
