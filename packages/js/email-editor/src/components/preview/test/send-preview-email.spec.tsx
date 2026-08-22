@@ -209,6 +209,7 @@ describe( 'SendPreviewEmail', () => {
 	it( 'should disable send button and show "Sending…" text when sending', () => {
 		renderWithPreviewState( {
 			isSendingPreviewEmail: true,
+			toEmail: 'test@example.com',
 		} );
 		const sendButton = screen.getByRole( 'button', {
 			name: /sending…/i,
