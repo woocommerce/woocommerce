@@ -31,6 +31,7 @@ const lowStockAmount = '10';
 
 let productId_indivEdit: number,
 	productId_bulkEdit: number,
+	productId_bulkEditAfterSave: number,
 	productId_deleteAll: number,
 	productId_manageStock: number,
 	productId_variationDefaults: number,
@@ -102,6 +103,16 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 				await createVariableProduct( productAttributes );
 
 			await createVariations( productId_bulkEdit, sampleVariations );
+		} );
+
+		await test.step( 'Create variable product for bulk edit after save test', async () => {
+			productId_bulkEditAfterSave =
+				await createVariableProduct( productAttributes );
+
+			await createVariations(
+				productId_bulkEditAfterSave,
+				sampleVariations
+			);
 		} );
 
 		await test.step( 'Create variable product for "delete all" test', async () => {
@@ -373,6 +384,119 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 
 			for ( let i = 0; i < count; i++ ) {
 				await expect( checkBoxes.nth( i ) ).toBeChecked();
+			}
+		} );
+	} );
+
+	test( 'waits for unsaved variation changes before bulk editing', async ( {
+		page,
+	} ) => {
+		const requests: string[] = [];
+		let releaseSaveRequest: () => void = () => {};
+		let markSaveRequestStarted: () => void = () => {};
+		let markBulkRequestStarted: () => void = () => {};
+		const saveRequestReleased = new Promise< void >( ( resolve ) => {
+			releaseSaveRequest = resolve;
+		} );
+		const saveRequestStarted = new Promise< void >( ( resolve ) => {
+			markSaveRequestStarted = resolve;
+		} );
+		const bulkRequestStarted = new Promise< void >( ( resolve ) => {
+			markBulkRequestStarted = resolve;
+		} );
+
+		await page.route( '**/wp-admin/admin-ajax.php', async ( route ) => {
+			const data = new URLSearchParams(
+				route.request().postData() ?? ''
+			);
+			const action = data.get( 'action' );
+
+			if ( action === 'woocommerce_save_variations' ) {
+				requests.push( action );
+				markSaveRequestStarted();
+				await saveRequestReleased;
+			} else if ( action === 'woocommerce_bulk_edit_variations' ) {
+				requests.push( action );
+				markBulkRequestStarted();
+			}
+
+			await route.continue();
+		} );
+
+		await test.step( 'Go to the "Edit product" page.', async () => {
+			await page.goto(
+				`wp-admin/post.php?post=${ productId_bulkEditAfterSave }&action=edit#variable_product_options`
+			);
+		} );
+
+		await gotToVariationsTab( page );
+
+		await test.step( 'Edit a variation without saving.', async () => {
+			const firstVariation = page
+				.locator( '.woocommerce_variation' )
+				.first();
+
+			await page.getByRole( 'link', { name: 'Expand' } ).first().click();
+			await firstVariation
+				.getByRole( 'textbox', { name: 'Regular price' } )
+				.fill( variationTwoPrice );
+			await expect( firstVariation ).toHaveClass(
+				/variation-needs-update/
+			);
+		} );
+
+		await test.step( 'Start a bulk price update.', async () => {
+			page.on( 'dialog', async ( dialog ) => {
+				await dialog.accept(
+					dialog.type() === 'prompt' ? variationThreePrice : undefined
+				);
+			} );
+
+			await page
+				.locator( '#field_to_edit' )
+				.selectOption( 'variable_regular_price' );
+		} );
+
+		await test.step( 'Confirm the bulk request waits for the variation save.', async () => {
+			await saveRequestStarted;
+			await page.evaluate(
+				() =>
+					new Promise( ( resolve ) =>
+						requestAnimationFrame( () =>
+							requestAnimationFrame( resolve )
+						)
+					)
+			);
+
+			expect( requests ).toEqual( [ 'woocommerce_save_variations' ] );
+
+			releaseSaveRequest();
+			await bulkRequestStarted;
+
+			expect( requests ).toEqual( [
+				'woocommerce_save_variations',
+				'woocommerce_bulk_edit_variations',
+			] );
+		} );
+
+		await test.step( 'Confirm the bulk price remains after both requests complete.', async () => {
+			await page.waitForFunction(
+				() =>
+					! document.querySelector(
+						'#woocommerce-product-data .blockUI'
+					)
+			);
+			await page.getByRole( 'link', { name: 'Expand' } ).first().click();
+
+			const priceInputs = page.getByRole( 'textbox', {
+				name: 'Regular price',
+			} );
+			const count = await priceInputs.count();
+
+			for ( let index = 0; index < count; index++ ) {
+				await expect( priceInputs.nth( index ) ).toHaveValue(
+					variationThreePrice
+				);
 			}
 		} );
 	} );
