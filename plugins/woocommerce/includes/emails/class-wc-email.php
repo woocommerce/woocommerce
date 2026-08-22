@@ -1443,7 +1443,7 @@ class WC_Email extends WC_Settings_API {
 			$file  = $this->get_theme_template_file( $template_path );
 			$code  = wp_unslash( $template_code );
 
-			if ( is_writable( $file ) ) { // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_is_writable
+			if ( is_writeable( $file ) ) { // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_is_writeable
 				$f = fopen( $file, 'w+' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fopen
 
 				if ( false !== $f ) {

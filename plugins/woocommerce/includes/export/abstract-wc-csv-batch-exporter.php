@@ -130,7 +130,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 
 		$log_context = array( 'source' => 'wc-csv-exporter' );
 
-		if ( ! file_exists( $this->get_file_path() ) || ! is_writable( $this->get_file_path() ) ) {
+		if ( ! file_exists( $this->get_file_path() ) || ! is_writeable( $this->get_file_path() ) ) {
 			wc_get_logger()->error(
 				sprintf(
 					/* translators: %s is file path. */

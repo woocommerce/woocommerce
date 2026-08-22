@@ -9,7 +9,7 @@ import deepFreeze from 'deep-freeze';
 import { getValueForQueryKey, getValueForQueryContext } from '../selectors';
 
 const testState = deepFreeze( {
-	context: JSON.stringify( {
+	contexta: JSON.stringify( {
 		foo: 'bar',
 		cheese: 'pizza',
 	} ),
@@ -30,12 +30,12 @@ describe( 'getValueForQueryKey', () => {
 			'given context and queryKey',
 		() => {
 			expect(
-				getValueForQueryKey( testState, 'context', 'pizza', 42 )
+				getValueForQueryKey( testState, 'contexta', 'pizza', 42 )
 			).toBe( 42 );
 		}
 	);
 	it( 'returns expected value when context and queryKey exist', () => {
-		expect( getValueForQueryKey( testState, 'context', 'foo', 42 ) ).toBe(
+		expect( getValueForQueryKey( testState, 'contexta', 'foo', 42 ) ).toBe(
 			'bar'
 		);
 	} );
@@ -56,8 +56,8 @@ describe( 'getValueForQueryContext', () => {
 			'state',
 		() => {
 			expect(
-				getValueForQueryContext( testState, 'context', 42 )
-			).toEqual( JSON.parse( testState.context ) );
+				getValueForQueryContext( testState, 'contexta', 42 )
+			).toEqual( JSON.parse( testState.contexta ) );
 		}
 	);
 } );

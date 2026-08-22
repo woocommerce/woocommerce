@@ -308,7 +308,7 @@ class HposLegacyOrderReportQueryBuilder {
 	}
 
 	/**
-	 * Wrap a mapped money column so bare SELECT statements match the legacy meta format.
+	 * Wrap a mapped money column so bare SELECTs match the legacy meta format.
 	 *
 	 * HPOS money columns are DECIMAL(26,8), so selecting one raw yields e.g.
 	 * '50.00000000' where the CPT meta stores '50.00'. Rounding to the store's
