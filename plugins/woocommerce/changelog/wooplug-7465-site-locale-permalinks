@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Store default product permalink bases in the configured site locale.
