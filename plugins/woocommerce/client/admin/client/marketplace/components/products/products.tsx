@@ -69,7 +69,7 @@ export default function Products( props: ProductsProps ) {
 	const baseContainerClass = 'woocommerce-marketplace__search-';
 
 	const containerClassName = clsx( baseContainerClass + labelForClassName );
-	const viewAllButonClassName = clsx(
+	const viewAllButtonClassName = clsx(
 		'woocommerce-marketplace__view-all-button',
 		baseContainerClass + 'button-' + labelForClassName
 	);
@@ -168,7 +168,7 @@ export default function Products( props: ProductsProps ) {
 			) }
 			{ ! isLoading && ! hasNoResults && showAllButton && (
 				<Button
-					className={ viewAllButonClassName }
+					className={ viewAllButtonClassName }
 					variant="secondary"
 					text={ __( 'View all', 'woocommerce' ) }
 					onClick={ () => showSection( props.type ) }

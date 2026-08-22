@@ -1,6 +1,6 @@
 # Dependency Extraction Webpack Plugin
 
-Extends Wordpress [Dependency Extraction Webpack Plugin](https://github.com/WordPress/gutenberg/tree/trunk/packages/dependency-extraction-webpack-plugin) to automatically include WooCommerce dependencies in addition to WordPress dependencies.
+Extends WordPress [Dependency Extraction Webpack Plugin](https://github.com/WordPress/gutenberg/tree/trunk/packages/dependency-extraction-webpack-plugin) to automatically include WooCommerce dependencies in addition to WordPress dependencies.
 
 ## Installation
 
@@ -40,7 +40,7 @@ const webpackConfig = {
 };
 ```
 
-Additional module requests on top of Wordpress [Dependency Extraction Webpack Plugin](https://github.com/WordPress/gutenberg/tree/trunk/packages/dependency-extraction-webpack-plugin) are:
+Additional module requests on top of WordPress [Dependency Extraction Webpack Plugin](https://github.com/WordPress/gutenberg/tree/trunk/packages/dependency-extraction-webpack-plugin) are:
 
 | Request                        | Global                   | Script handle          | Notes                                                   |
 | ------------------------------ | ------------------------ | ---------------------- | --------------------------------------------------------|

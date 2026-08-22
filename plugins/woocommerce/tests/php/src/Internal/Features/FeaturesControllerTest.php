@@ -1349,7 +1349,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$this->simulate_inside_before_woocommerce_init_hook();
 
 		// Goal: Replace $this->sut's ->plugin_util with a mocked version that
-		// doesn't scan the disk, but resolves fake paths for our non-existant plugin.php.
+		// doesn't scan the disk, but resolves fake paths for our non-existent plugin.php.
 		$plugin_util_mock = $this->getMockBuilder( PluginUtil::class )
 			->disableOriginalConstructor()
 			->onlyMethods( array( 'get_wp_plugin_id' ) )
@@ -1393,7 +1393,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$this->simulate_inside_before_woocommerce_init_hook();
 
 		// Goal: Replace $this->sut's ->plugin_util with a mocked version that
-		// doesn't scan the disk, but resolves fake paths for our non-existant plugin.php.
+		// doesn't scan the disk, but resolves fake paths for our non-existent plugin.php.
 		// Also replace get_woocommerce_aware_plugins to simulate deactivation.
 		$plugin_util_mock = $this->getMockBuilder( PluginUtil::class )
 			->disableOriginalConstructor()

@@ -256,7 +256,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			foreach ( $attribute_subqueries['join'] as $attribute_join ) {
 				$attribute_subquery->add_sql_clause( 'join', $attribute_join );
 			}
-			// Add WHEREs for matching attributes.
+			// Add WHERE clauses for matching attributes.
 			$attribute_subquery->add_sql_clause( 'where', 'AND (' . implode( " {$operator} ", $attribute_subqueries['where'] ) . ')' );
 
 			// Generate subquery statement and add to our where filters.

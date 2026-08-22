@@ -1010,7 +1010,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Add a product order item with a given Cost of Goods Sold to an exising order.
+	 * Add a product order item with a given Cost of Goods Sold to an existing order.
 	 *
 	 * @param WC_Order $order The target order.
 	 * @param float    $cogs_value The COGS value of the product.

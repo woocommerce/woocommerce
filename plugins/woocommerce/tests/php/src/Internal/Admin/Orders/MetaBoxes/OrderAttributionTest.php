@@ -125,7 +125,7 @@ class OrderAttributionTest extends WP_UnitTestCase {
 		add_action(
 			'woocommerce_before_template_part',
 			function( $template_name, $template_path, $located, $args ) {
-				$this->assertEquals( 'Referral: Woocommerce.com', $args['meta']['origin'] ?? '' );
+				$this->assertEquals( 'Referral: WooCommerce.com', $args['meta']['origin'] ?? '' );
 				$this->assertEquals( 'Desktop', $args['meta']['device_type'] ?? '' );
 				$this->assertEquals(
 					'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',

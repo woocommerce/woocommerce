@@ -77,7 +77,7 @@ class I18nUtilTest extends \WC_Unit_Test_Case {
 	 * @testdox `get_weight_unit_label` should return the original input string when the input is not a recognized weight unit.
 	 */
 	public function test_get_invalid_weight_unit_label() {
-		$actual   = I18nUtil::get_weight_unit_label( 'chz' ); // Cheezeburgers.
+		$actual   = I18nUtil::get_weight_unit_label( 'chz' ); // Cheeseburgers.
 		$expected = 'chz';
 
 		$this->assertEquals( $expected, $actual );

@@ -184,7 +184,7 @@ class NotificationTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test persistance of the unsubscribe key.
+	 * Test persistence of the unsubscribe key.
 	 */
 	public function test_unsubscribe_key_persistence() {
 		$notification = new Notification();

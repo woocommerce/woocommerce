@@ -85,7 +85,7 @@ The note locales contain the title and content of the note. Having this broken u
 },
 {
 	"locale": "fr_FR",
-	"title": "Annonce pour automatiser woo",
+	"title": "Announce pour automatiser woo",
 	"content": "Salut! Ceci est une publicité pour Automate Woo."
 }
 ```

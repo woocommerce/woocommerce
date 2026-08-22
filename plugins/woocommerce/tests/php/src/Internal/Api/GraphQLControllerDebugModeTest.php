@@ -152,7 +152,7 @@ class GraphQLControllerDebugModeTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox debug mode surfaces the previous-exception chain for wrapped INTERNAL_ERRORs.
+	 * @testdox debug mode surfaces the previous-exception chain for wrapped INTERNAL_ERROR responses.
 	 */
 	public function test_debug_mode_emits_previous_chain_for_wrapped_errors(): void {
 		$response = $this->sut->handle_request(

@@ -37,7 +37,7 @@ function loadPackageFile( packagePath ) {
  * converted to plain JSON to participate in the references sync.
  *
  * @param {string} tsconfigPath Absolute path to the tsconfig.json file.
- * @return {Object|null} Parsed config, or null if missing or unparseable.
+ * @return {Object|null} Parsed config, or null if missing or unparsable.
  */
 function loadTsconfig( tsconfigPath ) {
 	if ( ! fs.existsSync( tsconfigPath ) ) {

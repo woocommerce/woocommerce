@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init as Sugg
 defined( 'ABSPATH' ) || exit;
 
 /**
- * PaymentGatewaySuggetsions Controller.
+ * PaymentGatewaySuggestions Controller.
  *
  * @internal
  * @extends WC_REST_Data_Controller
@@ -184,7 +184,7 @@ class PaymentGatewaySuggestions extends \WC_REST_Data_Controller {
 				'transaction_processors'  => array(
 					'description'         => __( 'Array of transaction processors and their images.', 'woocommerce' ),
 					'type'                => 'object',
-					'addtionalProperties' => array(
+					'additionalProperties' => array(
 						'type'   => 'string',
 						'format' => 'uri',
 					),

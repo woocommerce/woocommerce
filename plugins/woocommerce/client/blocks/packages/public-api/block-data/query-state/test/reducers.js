@@ -11,7 +11,7 @@ import { setQueryValue, setValueForQueryContext } from '../actions';
 
 describe( 'queryStateReducer', () => {
 	const originalState = deepFreeze( {
-		contexta: JSON.stringify( {
+		context: JSON.stringify( {
 			foo: 'bar',
 			cheese: 'pizza',
 		} ),
@@ -33,7 +33,7 @@ describe( 'queryStateReducer', () => {
 				expect(
 					queryStateReducer(
 						originalState,
-						setQueryValue( 'contexta', 'foo', 'bar' )
+						setQueryValue( 'context', 'foo', 'bar' )
 					)
 				).toBe( originalState );
 			}
@@ -44,11 +44,11 @@ describe( 'queryStateReducer', () => {
 			() => {
 				const newState = queryStateReducer(
 					originalState,
-					setQueryValue( 'contexta', 'foo', 'zed' )
+					setQueryValue( 'context', 'foo', 'zed' )
 				);
 				expect( newState ).not.toBe( originalState );
 				expect( newState ).toEqual( {
-					contexta: JSON.stringify( {
+					context: JSON.stringify( {
 						foo: 'zed',
 						cheese: 'pizza',
 					} ),
@@ -61,11 +61,11 @@ describe( 'queryStateReducer', () => {
 			() => {
 				const newState = queryStateReducer(
 					originalState,
-					setQueryValue( 'contexta', 'burger', 'pizza' )
+					setQueryValue( 'context', 'burger', 'pizza' )
 				);
 				expect( newState ).not.toBe( originalState );
 				expect( newState ).toEqual( {
-					contexta: JSON.stringify( {
+					context: JSON.stringify( {
 						foo: 'bar',
 						cheese: 'pizza',
 						burger: 'pizza',
@@ -82,7 +82,7 @@ describe( 'queryStateReducer', () => {
 				expect(
 					queryStateReducer(
 						originalState,
-						setValueForQueryContext( 'contexta', {
+						setValueForQueryContext( 'context', {
 							foo: 'bar',
 							cheese: 'pizza',
 						} )
@@ -96,14 +96,14 @@ describe( 'queryStateReducer', () => {
 			() => {
 				const newState = queryStateReducer(
 					originalState,
-					setValueForQueryContext( 'contexta', {
+					setValueForQueryContext( 'context', {
 						bar: 'foo',
 						pizza: 'cheese',
 					} )
 				);
 				expect( newState ).not.toBe( originalState );
 				expect( newState ).toEqual( {
-					contexta: JSON.stringify( {
+					context: JSON.stringify( {
 						bar: 'foo',
 						pizza: 'cheese',
 					} ),
@@ -122,7 +122,7 @@ describe( 'queryStateReducer', () => {
 				);
 				expect( newState ).not.toBe( originalState );
 				expect( newState ).toEqual( {
-					contexta: JSON.stringify( {
+					context: JSON.stringify( {
 						foo: 'bar',
 						cheese: 'pizza',
 					} ),

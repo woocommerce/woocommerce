@@ -73,7 +73,7 @@ export const readDismissalsFromBeforeScoping = (): unknown[] => {
 			return parsed;
 		}
 	} catch {
-		// Unparseable, handled the same way as a shape we don't recognise.
+		// Unparsable, handled the same way as a shape we don't recognise.
 	}
 
 	// A value we can't read is not a dismissal we can honour; the log gives a
@@ -89,7 +89,7 @@ export const readDismissalsFromBeforeScoping = (): unknown[] => {
  * What a notice should hand `useLocalStorageState` as its initial value.
  *
  * That hook falls back to the initial value both when `key` holds nothing and
- * when it holds something unparseable, and cannot tell the two apart. Only
+ * when it holds something unparsable, and cannot tell the two apart. Only
  * absence may open the migration: seeding a corrupt value from the pre-scoping
  * data would revive a dismissal the merchant has since replaced and hide a
  * warning that is currently owed.

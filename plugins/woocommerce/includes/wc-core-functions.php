@@ -2132,7 +2132,7 @@ function wc_list_pluck( $list, $callback_or_field, $index_key = null ) {
  * Get permalink settings for things like products and taxonomies.
  *
  * As of 3.3.0, the permalink settings are stored to the option instead of
- * being blank and inheritting from the locale. This speeds up page loading
+ * being blank and inheriting from the locale. This speeds up page loading
  * times by negating the need to switch locales on each page load.
  *
  * This is more inline with WP core behavior which does not localize slugs.

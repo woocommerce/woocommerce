@@ -77,7 +77,7 @@ window.addEventListener( 'load', () => {
 // Pushes changes whenever the store is updated.
 subscribe( pushChanges, store );
 
-// Emmits event to sync iAPI store.
+// Emits event to sync iAPI store.
 let previousCart: object | null = null;
 subscribe( () => {
 	const cartData = select( STORE_KEY ).getCartData();

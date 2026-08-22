@@ -63,7 +63,7 @@ Ensure proper test file structure (the below is an example):
 declare( strict_types = 1 );
 
 /**
- * Test class description (this is an exmample)
+ * Test class description (this is an example)
  */
 class WC_REST_Product_Brands_Controller_Test extends WC_Unit_Test_Case {
     // test methods

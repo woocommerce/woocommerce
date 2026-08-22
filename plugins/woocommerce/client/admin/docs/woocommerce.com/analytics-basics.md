@@ -1,5 +1,5 @@
 # Using WooCommerce Analytics Reports
-Most of the new reports in the WooCommerce Analytics section have a set of common tools. This document will introduce you to those features, and how they can be utlized to customize and dive-deeper into the various new analytics reports.
+Most of the new reports in the WooCommerce Analytics section have a set of common tools. This document will introduce you to those features, and how they can be utilized to customize and dive-deeper into the various new analytics reports.
 
 ## Date Range Picker
 ![Analytics Date Range Picker](images/analytics-basics-date-range-picker.png)
@@ -46,7 +46,7 @@ The _Summary Number_ tab gives you a quick view at the total figure for that met
 ### Chart
 ![Analytics Chart](analytics-basics-chart.png)
 
-The charts on report pages offer quite a few options to customize the visualiztion of data. The data legend ( labeled A ) allows you to toggle the visibility of the different data set periods. The _Interval Selector_ ( labeled B ) allows you to adjust the interval displayed in the chart. The options available here are dependent upon the length of the date range selected:
+The charts on report pages offer quite a few options to customize the visualization of data. The data legend ( labeled A ) allows you to toggle the visibility of the different data set periods. The _Interval Selector_ ( labeled B ) allows you to adjust the interval displayed in the chart. The options available here are dependent upon the length of the date range selected:
 
 | Length of Date Range  | Interval Options  |
 |---|---|
@@ -70,7 +70,7 @@ The table which displays the detailed data on Analytics reports also has a numbe
 Many columns in reports will allow you to click on the column header to sort the tabular data by that value, and to either sort by that value in ascending or descending order. Simply click the column header to sort by that value, and click it again to change between ascending and descending sort.
 
 ### Toggle Column Visibility
-![Analytics Table Column Sorting](analytics-table-column-visbility.png)
+![Analytics Table Column Sorting](analytics-table-column-visibility.png)
 
 If a report contains a data column that you don't need to be displayed, you can adjust the visibility of it by using the visibility menu on the right side of the table header. Click the column name in the menu to change the visibility of the column. Your visibility selections are persisted to your user preferences for each report, so on subsequent visits to that report, the columns you have previously toggled off will not be displayed.
 

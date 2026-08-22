@@ -58,7 +58,7 @@ class Segmenter {
 	/**
 	 * Filters definitions for SELECT clauses based on query_args and joins them into one string usable in SELECT clause.
 	 *
-	 * @param array $columns_mapping Column name -> SQL statememt mapping.
+	 * @param array $columns_mapping Column name -> SQL statement mapping.
 	 *
 	 * @return string to be used in SELECT clause statements.
 	 */

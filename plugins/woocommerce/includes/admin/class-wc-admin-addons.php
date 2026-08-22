@@ -138,7 +138,7 @@ class WC_Admin_Addons {
 	 * Add in-app-purchase URL params to link.
 	 *
 	 * Adds various url parameters to a url to support a streamlined
-	 * flow for obtaining and setting up WooCommerce extensons.
+	 * flow for obtaining and setting up WooCommerce extensions.
 	 *
 	 * @param string $url    Destination URL.
 	 */
@@ -212,7 +212,7 @@ class WC_Admin_Addons {
 
 	/**
 	 * We're displaying page=wc-addons and page=wc-addons&section=helper as two separate pages.
-	 * When we're on those pages, add body classes to distinguishe them.
+	 * When we're on those pages, add body classes to distinguish them.
 	 *
 	 * @param string $admin_body_class Unfiltered body class.
 	 *

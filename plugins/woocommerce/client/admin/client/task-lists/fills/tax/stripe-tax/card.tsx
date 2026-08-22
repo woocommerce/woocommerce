@@ -61,7 +61,7 @@ export const Card = ( {
 						redirectToStripeTaxSettings();
 					} }
 				>
-					{ __( 'Continue to setttings', 'woocommerce' ) }
+					{ __( 'Continue to settings', 'woocommerce' ) }
 				</Button>
 			) : (
 				<Plugins
@@ -84,7 +84,7 @@ export const Card = ( {
 						} ).then( () => {
 							createSuccessNotice(
 								__(
-									"Stripe Tax for Woocommerce has been successfully installed. Let's configure it now.",
+									"Stripe Tax for WooCommerce has been successfully installed. Let's configure it now.",
 									'woocommerce'
 								)
 							);
