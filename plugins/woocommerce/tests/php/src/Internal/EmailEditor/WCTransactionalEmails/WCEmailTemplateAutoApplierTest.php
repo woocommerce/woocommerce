@@ -700,10 +700,33 @@ class WCEmailTemplateAutoApplierTest extends \WC_Unit_Test_Case {
 
 		$captured = array();
 		WCEmailTemplateAutoApplier::set_logger( $this->build_recording_logger( $captured ) );
+		$order_candidates_by_id = static function ( \WP_Query $query ): void {
+			$meta_query = $query->get( 'meta_query' );
+			if (
+				Integration::EMAIL_POST_TYPE !== $query->get( 'post_type' )
+				|| 'ids' !== $query->get( 'fields' )
+				|| ! is_array( $meta_query )
+				|| ! in_array(
+					array(
+						'key'   => WCEmailTemplateDivergenceDetector::STATUS_META_KEY,
+						'value' => WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_UNCUSTOMIZED,
+					),
+					$meta_query,
+					true
+				)
+			) {
+				return;
+			}
+
+			$query->set( 'orderby', 'ID' );
+			$query->set( 'order', 'ASC' );
+		};
+		add_action( 'pre_get_posts', $order_candidates_by_id );
 
 		try {
 			WCEmailTemplateAutoApplier::run();
 		} finally {
+			remove_action( 'pre_get_posts', $order_candidates_by_id );
 			remove_all_filters( 'wp_insert_post_empty_content' );
 		}
 
