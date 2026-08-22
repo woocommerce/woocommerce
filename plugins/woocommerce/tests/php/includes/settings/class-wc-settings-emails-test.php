@@ -185,6 +185,7 @@ class WC_Settings_Emails_Test extends WC_Settings_Unit_Test_Case {
 		$this->assertSame( 'Footer text', $setting['title'] );
 		$this->assertSame( 'textarea', $setting['type'] );
 		$this->assertSame( '{site_title}<br />{store_address}', $setting['default'] );
+		$this->assertSame( 'N/A', $setting['placeholder'] );
 		$this->assertStringContainsString( '{store_address}', $setting['desc'] );
 		$this->assertStringContainsString( '{store_email}', $setting['desc'] );
 	}
