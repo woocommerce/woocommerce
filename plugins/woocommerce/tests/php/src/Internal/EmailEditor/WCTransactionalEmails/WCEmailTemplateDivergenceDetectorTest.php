@@ -596,6 +596,10 @@ class WCEmailTemplateDivergenceDetectorTest extends \WC_Unit_Test_Case {
 		$status = WCEmailTemplateDivergenceDetector::reclassify( $post_id );
 
 		$this->assertSame( WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC, $status );
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true )
+		);
 	}
 
 	/**
