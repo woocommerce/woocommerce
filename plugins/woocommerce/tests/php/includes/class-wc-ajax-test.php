@@ -525,6 +525,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$missing_option          = new stdClass();
 		$original_calc_taxes     = get_option( 'woocommerce_calc_taxes', $missing_option );
 		$original_prices_include = get_option( 'woocommerce_prices_include_tax', $missing_option );
+		$original_tax_based_on   = get_option( 'woocommerce_tax_based_on', $missing_option );
 		$suffix                  = strtolower( wp_generate_password( 8, false, false ) );
 		$class_definitions       = array(
 			array( "Slice 064 ten {$suffix}", "slice-064-ten-{$suffix}", '10', "Slice 064 Ten {$suffix}" ),
@@ -542,6 +543,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		try {
 			update_option( 'woocommerce_calc_taxes', 'yes' );
 			update_option( 'woocommerce_prices_include_tax', 'no' );
+			update_option( 'woocommerce_tax_based_on', 'shipping' );
 
 			foreach ( $class_definitions as $definition ) {
 				$tax_class = WC_Tax::create_tax_class( $definition[0], $definition[1] );
@@ -551,8 +553,8 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 				$tax_classes[] = $tax_class['slug'];
 				$tax_rate_id   = WC_Tax::_insert_tax_rate(
 					array(
-						'tax_rate_country'  => '',
-						'tax_rate_state'    => '',
+						'tax_rate_country'  => 'US',
+						'tax_rate_state'    => 'CA',
 						'tax_rate'          => $definition[2],
 						'tax_rate_name'     => $definition[3],
 						'tax_rate_priority' => 1,
@@ -592,6 +594,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			if ( is_wp_error( $order ) ) {
 				throw new RuntimeException( 'Could not create the empty taxed order fixture.' );
 			}
+			$order->set_shipping_country( 'GB' );
 			$order->add_product( $simple_product, 1 );
 			$order->add_product( $variation, 1 );
 			$order->add_product( $external_product, 1 );
@@ -679,6 +682,11 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 				delete_option( 'woocommerce_prices_include_tax' );
 			} else {
 				update_option( 'woocommerce_prices_include_tax', $original_prices_include );
+			}
+			if ( $missing_option === $original_tax_based_on ) {
+				delete_option( 'woocommerce_tax_based_on' );
+			} else {
+				update_option( 'woocommerce_tax_based_on', $original_tax_based_on );
 			}
 		}
 	}
