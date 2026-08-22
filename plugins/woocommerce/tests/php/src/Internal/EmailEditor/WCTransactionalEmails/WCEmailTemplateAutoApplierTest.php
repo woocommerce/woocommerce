@@ -204,6 +204,7 @@ class WCEmailTemplateAutoApplierTest extends \WC_Unit_Test_Case {
 
 		$result = WCEmailTemplateAutoApplier::apply_to_post( $email, $post_id );
 		$this->assertIsArray( $result );
+		$this->assertSame( WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC, $result['status'] );
 
 		$this->assertSame(
 			WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC,
