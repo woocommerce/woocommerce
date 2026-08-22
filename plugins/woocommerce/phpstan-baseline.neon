@@ -45316,12 +45316,6 @@ parameters:
 			path: src/Admin/Features/Blueprint/Exporters/ExportWCPaymentGateways.php
 
 		-
-			message: '#^Argument of an invalid type string supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: src/Admin/Features/Blueprint/Exporters/ExportWCPaymentGateways.php
-
-		-
 			message: '#^Property WooCommerce\:\:\$integrations \(WC_Integrations\) in isset\(\) is not nullable\.$#'
 			identifier: isset.property
 			count: 1
