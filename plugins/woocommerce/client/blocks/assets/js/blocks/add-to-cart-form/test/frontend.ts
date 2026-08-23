@@ -83,20 +83,27 @@ describe( 'Add to Cart Form interactivity store', () => {
 		jest.resetModules();
 	} );
 
-	it( 'ignores increase and decrease events without a quantity input', () => {
-		const actions = loadActions();
-		const button = document.createElement( 'button' );
-		const wrapper = document.createElement( 'div' );
-		wrapper.append( button );
+	it.each( [
+		{ label: 'increase', action: 'increaseQuantity' },
+		{ label: 'decrease', action: 'decreaseQuantity' },
+	] as const )(
+		'ignores $label events without a quantity input',
+		( { action } ) => {
+			const actions = loadActions();
+			const button = document.createElement( 'button' );
+			const wrapper = document.createElement( 'div' );
+			const changeEvents: Event[] = [];
 
-		expect(
-			actions.increaseQuantity( { target: button } )
-		).toBeUndefined();
-		expect(
-			actions.decreaseQuantity( { target: button } )
-		).toBeUndefined();
-		expect( wrapper.querySelector( 'input' ) ).toBeNull();
-	} );
+			wrapper.append( button );
+			wrapper.addEventListener( 'change', ( event ) => {
+				changeEvents.push( event );
+			} );
+
+			expect( actions[ action ]( { target: button } ) ).toBeUndefined();
+			expect( changeEvents ).toHaveLength( 0 );
+			expect( wrapper.querySelector( 'input' ) ).toBeNull();
+		}
+	);
 
 	it.each( [
 		{
