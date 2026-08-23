@@ -229,11 +229,13 @@ describe( 'Add to Cart + Options variation selector store', () => {
 					{ name: 'Type', value: 't-shirt' },
 					{ name: 'Color', value: 'blue' },
 					{ name: 'Size', value: 'xl' },
+					{ name: 'Material', value: 'cotton' },
 				] ),
 				variation( 102, [
 					{ name: 'Type', value: 't-shirt' },
-					{ name: 'Color', value: 'red' },
-					{ name: 'Size', value: 'l' },
+					{ name: 'Color', value: 'blue' },
+					{ name: 'Size', value: 'xl' },
+					{ name: 'Material', value: 'linen' },
 				] ),
 				variation( 103, [
 					{ name: 'Type', value: 't-shirt' },
@@ -251,10 +253,39 @@ describe( 'Add to Cart + Options variation selector store', () => {
 			excludedAttributes: [ 'attribute_pa_color' ],
 		} );
 
+		expect( mockContext.selectedAttributes ).not.toContainEqual( {
+			attribute: 'Material',
+			value: 'cotton',
+		} );
 		expect( mockContext.selectedAttributes ).toEqual( [
 			{ attribute: 'Color', value: 'blue' },
 			{ attribute: 'Type', value: 't-shirt' },
 			{ attribute: 'Size', value: 'xl' },
+		] );
+	} );
+
+	it( 'does not rewrite a changed custom attribute slug when its Store API label is excluded', () => {
+		mockProductsState.mainProductInContext = {
+			id: 100,
+			type: 'variable',
+			variations: [
+				variation( 101, [ { name: 'Color', value: 'blue' } ] ),
+			],
+		};
+		mockContext = {
+			...mockContext,
+			autoselect: true,
+			selectedAttributes: [
+				{ attribute: 'attribute_pa_color', value: 'blue' },
+			],
+		};
+
+		getRegisteredStore().actions.autoselectAttributes( {
+			excludedAttributes: [ 'attribute_pa_color' ],
+		} );
+
+		expect( mockContext.selectedAttributes ).toEqual( [
+			{ attribute: 'attribute_pa_color', value: 'blue' },
 		] );
 	} );
 
