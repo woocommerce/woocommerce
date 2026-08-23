@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix duplicate orders being created when concurrent checkout submissions (double-clicks, load-balancer or proxy retries on timeout) race each other, by serializing order creation per shopper. Applies to both the classic/shortcode checkout and the block-based Checkout block / Store API.
