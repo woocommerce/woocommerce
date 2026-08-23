@@ -66,12 +66,56 @@ class CheckoutOrderLock {
 	const STALE_LOCK_THRESHOLD = 30.0;
 
 	/**
+	 * A staleness threshold calibrated for a lock held through a synchronous payment-gateway call, rather than
+	 * STALE_LOCK_THRESHOLD's order-creation-oriented default. A gateway's own HTTP call to its payment processor
+	 * can legitimately run well past 30 seconds (retries, 3-D Secure round trips, a slow processor) without the
+	 * request having crashed, and taking over a lock still held by a genuinely in-flight call would reintroduce
+	 * the exact double-charge race the lock exists to prevent. Pass to the constructor for a lock instance guarding
+	 * payment processing specifically; resolve it via `new self( ... )`, not the DI container - see the
+	 * constructor for why.
+	 *
+	 * @since 11.2.0
+	 */
+	const PAYMENT_STALE_LOCK_THRESHOLD = 90.0;
+
+	/**
+	 * How long a held lock is allowed to go without being released before this instance presumes it abandoned.
+	 * Defaults to STALE_LOCK_THRESHOLD; overridable via the constructor for a caller whose critical section can
+	 * legitimately run longer than that default reflects (see the constructor).
+	 *
+	 * @since 11.2.0
+	 * @var float
+	 */
+	private float $stale_lock_threshold;
+
+	/**
+	 * Constructor.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param float|null $stale_lock_threshold Overrides STALE_LOCK_THRESHOLD for this instance, in seconds. Pass a
+	 *                                         longer value for a caller whose critical section can legitimately run
+	 *                                         longer than the default reflects - a synchronous payment-gateway
+	 *                                         call, for instance, can take longer than the option-table writes and
+	 *                                         hook calls order creation involves, and using the same short default
+	 *                                         for both would let a contender steal the lock mid-call, reintroducing
+	 *                                         the exact race being guarded against. Resolve such a caller with
+	 *                                         `new self( ... )` rather than the DI container, which always returns
+	 *                                         the same singleton instance and so cannot serve two different
+	 *                                         thresholds at once. Defaults to STALE_LOCK_THRESHOLD.
+	 */
+	public function __construct( ?float $stale_lock_threshold = null ) {
+		$this->stale_lock_threshold = $stale_lock_threshold ?? self::STALE_LOCK_THRESHOLD;
+	}
+
+	/**
 	 * Attempt to acquire the lock for the given key.
 	 *
 	 * Retries with a short delay for up to ACQUIRE_WAIT_BUDGET seconds in total before giving up, so a request
 	 * that loses a tight race gets a real chance to proceed once the winner releases. A held lock is only taken
-	 * over if it is already older than STALE_LOCK_THRESHOLD; otherwise this simply gives up once
-	 * ACQUIRE_WAIT_BUDGET elapses, leaving a possibly-still-active holder's lock alone.
+	 * over if it is already older than this instance's staleness threshold (STALE_LOCK_THRESHOLD unless overridden
+	 * via the constructor); otherwise this simply gives up once ACQUIRE_WAIT_BUDGET elapses, leaving a
+	 * possibly-still-active holder's lock alone.
 	 *
 	 * @since 11.2.0
 	 *
@@ -112,7 +156,7 @@ class CheckoutOrderLock {
 
 					// The lock row exists; take it over only if it was acquired long enough ago to be presumed
 					// abandoned, rather than merely still in use by an active (if slow) holder.
-					$stale_before = number_format( $now - self::STALE_LOCK_THRESHOLD, 6, '.', '' );
+					$stale_before = number_format( $now - $this->stale_lock_threshold, 6, '.', '' );
 					$takeover     = $wpdb->prepare(
 						"UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND option_value < %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 						$token,

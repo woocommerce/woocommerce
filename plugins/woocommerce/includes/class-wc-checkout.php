@@ -1500,7 +1500,7 @@ class WC_Checkout {
 				 * through the gateway call itself, unlike the creation lock, because that call is exactly what
 				 * this is protecting.
 				 */
-				$payment_lock       = wc_get_container()->get( CheckoutOrderLock::class );
+				$payment_lock       = new CheckoutOrderLock( CheckoutOrderLock::PAYMENT_STALE_LOCK_THRESHOLD );
 				$payment_lock_key   = 'order_payment_' . $order_id;
 				$payment_lock_token = $payment_lock->acquire( $payment_lock_key );
 

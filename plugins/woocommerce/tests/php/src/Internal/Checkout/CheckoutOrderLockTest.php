@@ -89,9 +89,11 @@ class CheckoutOrderLockTest extends WC_Unit_Test_Case {
 		$token_a = $this->sut->acquire( 'customer-a' );
 		$token_b = $this->sut->acquire( 'customer-b' );
 
+		// Not asserting token_a !== token_b: tokens are formatted timestamps, and two acquisitions can legitimately
+		// land on the same microtime() value without meaning anything about lock ownership - the option name
+		// (which embeds the key) is what actually keeps these two locks independent, not the token value.
 		$this->assertNotNull( $token_a, 'The first key must acquire its own lock.' );
 		$this->assertNotNull( $token_b, 'A different key must acquire its own lock, unaffected by the first.' );
-		$this->assertNotSame( $token_a, $token_b );
 	}
 
 	/**
@@ -195,5 +197,33 @@ class CheckoutOrderLockTest extends WC_Unit_Test_Case {
 			$this->lock_row_value( 'customer-1' ),
 			'The lock must be released once the shutdown callback runs, even without a normal release() call.'
 		);
+	}
+
+	/**
+	 * @testdox A custom staleness threshold passed to the constructor is honored, distinct from the class default -
+	 *          the mechanism PAYMENT_STALE_LOCK_THRESHOLD relies on to give a lock guarding a synchronous payment-
+	 *          gateway call more headroom than the shorter, order-creation-oriented default.
+	 */
+	public function test_constructor_accepts_a_custom_stale_lock_threshold(): void {
+		global $wpdb;
+
+		// A lock "acquired" 1 second ago is fresh under the class default (30s) but stale under a short custom
+		// threshold - proving it's the constructor argument, not just the class constant, that acquire() honors.
+		$stale_token = number_format( microtime( true ) - 1, 6, '.', '' );
+		$wpdb->insert(
+			$wpdb->options,
+			array(
+				'option_name'  => CheckoutOrderLock::LOCK_OPTION_PREFIX . md5( 'customer-1' ),
+				'option_value' => $stale_token,
+				'autoload'     => 'no',
+			),
+			array( '%s', '%s', '%s' )
+		);
+
+		$short_threshold_lock = new CheckoutOrderLock( 0.5 );
+		$token                = $short_threshold_lock->acquire( 'customer-1' );
+
+		$this->assertNotNull( $token, 'A lock older than this instance\'s custom (shorter) threshold must be takeable over.' );
+		$this->assertNotSame( $stale_token, $token );
 	}
 }
