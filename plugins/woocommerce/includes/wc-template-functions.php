@@ -2714,7 +2714,7 @@ if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
 			array(
 				'cross_sells'    => $cross_sells,
 
-				// Not used now, but used in previous version of up-sells.php.
+				// Not used now, but used in previous version of cross-sells.php.
 				'posts_per_page' => $limit,
 				'orderby'        => $orderby,
 				'columns'        => $columns,
