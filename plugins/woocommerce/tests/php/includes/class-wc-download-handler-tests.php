@@ -576,9 +576,13 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox readfile_chunked() should stop and report failure when a ranged stream read fails.
+	 * @testdox readfile_chunked() should stop and report failure when a stream read fails.
+	 *
+	 * @dataProvider provider_stream_lengths
+	 *
+	 * @param int $length Requested download length, where zero means until EOF.
 	 */
-	public function test_readfile_chunked_reports_ranged_read_failure(): void {
+	public function test_readfile_chunked_reports_read_failure( int $length ): void {
 		$scheme = 'wc-failing-download';
 
 		FakeRemoteStreamWrapper::$fail_reads = true;
@@ -587,7 +591,7 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 		ob_start();
 
 		try {
-			$served = WC_Download_Handler::readfile_chunked( $scheme . '://fixture', 0, 4 );
+			$served = WC_Download_Handler::readfile_chunked( $scheme . '://fixture', 0, $length );
 		} finally {
 			$output = ob_get_clean();
 			stream_wrapper_unregister( $scheme );
@@ -597,6 +601,18 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 		$this->assertFalse( $served, 'A failed fread() call should make the download fail.' );
 		$this->assertSame( '', $output, 'A failed read should not append anything to the download response.' );
 		$this->assertTrue( FakeRemoteStreamWrapper::$closed, 'The failed stream should be closed immediately.' );
+	}
+
+	/**
+	 * Download lengths for failed-stream coverage.
+	 *
+	 * @return array<string, array<int>>
+	 */
+	public function provider_stream_lengths(): array {
+		return array(
+			'requested range'       => array( 4 ),
+			'read until stream EOF' => array( 0 ),
+		);
 	}
 
 	/**
