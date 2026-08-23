@@ -214,6 +214,15 @@ describe( 'Filter by Attribute block', () => {
 					{ term: 25, count: 7 },
 				],
 			},
+			queryState: {
+				attributes: [
+					{
+						attribute: 'pa_size',
+						operator: 'in',
+						slug: [ 'large', 'medium', 'small' ],
+					},
+				],
+			},
 		} );
 
 		[
@@ -221,22 +230,23 @@ describe( 'Filter by Attribute block', () => {
 			{ name: 'Medium', count: 13 },
 			{ name: 'Small', count: 2 },
 		].forEach( ( { name, count } ) => {
-			const checkbox = screen.getByRole( 'checkbox', {
-				name: `${ name } ${ count } products`,
-			} );
-			const label = checkbox.closest( 'label' );
+			const label = screen.getByText( name ).closest( 'label' );
+			const visualCount = label?.querySelector(
+				'.wc-filter-element-label-list-count [aria-hidden="true"]'
+			);
+			const screenReaderCount = label?.querySelector(
+				'.screen-reader-text'
+			);
 
 			expect( label ).not.toBeNull();
 			expect(
-				within( label as HTMLLabelElement ).getByText(
-					count.toString()
-				)
-			).toHaveAttribute( 'aria-hidden', 'true' );
-			expect(
-				within( label as HTMLLabelElement ).getByText(
-					`${ count } products`
-				)
-			).toHaveClass( 'screen-reader-text' );
+				within( label as HTMLLabelElement ).getByRole( 'checkbox' )
+			).toBeInTheDocument();
+			expect( visualCount ).toHaveTextContent( count.toString() );
+			expect( screenReaderCount ).toHaveTextContent(
+				`${ count } products`
+			);
+			expect( screenReaderCount ).toHaveClass( 'screen-reader-text' );
 		} );
 	} );
 
