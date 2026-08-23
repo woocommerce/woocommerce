@@ -10,6 +10,11 @@ import domReady from '@wordpress/dom-ready';
 import { box, plus } from '@wordpress/icons';
 import { addQueryArgs } from '@wordpress/url';
 
+/**
+ * Internal dependencies
+ */
+import { registerCommandWithTracking } from '../register-command-with-tracking';
+
 jest.mock( '@woocommerce/tracks', () => ( {
 	queueRecordEvent: jest.fn(),
 	recordEvent: jest.fn(),
@@ -34,6 +39,33 @@ jest.mock( '@wordpress/url', () => ( {
 		( base, args ) => `#${ base }-${ JSON.stringify( args ) }`
 	),
 } ) );
+
+describe( 'registerCommandWithTracking', () => {
+	it( 'forwards callback arguments exactly once', () => {
+		jest.clearAllMocks();
+		const registerCommand = jest.fn();
+		dispatch.mockReturnValue( { registerCommand } );
+		const callback = jest.fn();
+		const firstArgument = { sentinel: 'first' };
+		const secondArgument = { sentinel: 'second' };
+
+		registerCommandWithTracking( {
+			name: 'woocommerce/test-command',
+			label: 'Test command',
+			icon: 'test-icon',
+			callback,
+		} );
+
+		const registeredCallback = registerCommand.mock.calls[ 0 ][ 0 ].callback;
+		registeredCallback( firstArgument, secondArgument );
+
+		expect( callback ).toHaveBeenCalledTimes( 1 );
+		expect( callback ).toHaveBeenCalledWith(
+			firstArgument,
+			secondArgument
+		);
+	} );
+} );
 
 describe( 'Command Palette', () => {
 	let registeredCommands;
