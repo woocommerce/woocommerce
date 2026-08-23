@@ -67,7 +67,7 @@ describe( 'FrontendBlock', () => {
 		expect( screen.queryByRole( 'checkbox' ) ).not.toBeInTheDocument();
 	} );
 
-	it( 'Renders a checkbox if the checkbox prop is true', async () => {
+	it( 'Renders a checkbox if the checkbox prop is true', () => {
 		const { container } = render(
 			<SlotFillProvider>
 				<FrontendBlock
@@ -78,7 +78,7 @@ describe( 'FrontendBlock', () => {
 			</SlotFillProvider>
 		);
 
-		const checkbox = await findByLabelText(
+		const checkbox = queryByLabelText(
 			container,
 			'I agree to the terms and conditions'
 		);
@@ -107,6 +107,7 @@ describe( 'FrontendBlock', () => {
 
 	it( 'Clears any validation errors when the checkbox is checked', async () => {
 		const user = userEvent.setup();
+		actionCreators.clearValidationError.mockClear();
 		const { container } = render(
 			<SlotFillProvider>
 				<FrontendBlock
@@ -123,7 +124,15 @@ describe( 'FrontendBlock', () => {
 		await act( async () => {
 			await user.click( checkbox );
 		} );
-		expect( actionCreators.clearValidationError ).toHaveBeenLastCalledWith(
+		expect( actionCreators.clearValidationError ).toHaveBeenCalledTimes(
+			2
+		);
+		expect( actionCreators.clearValidationError ).toHaveBeenNthCalledWith(
+			1,
+			expect.stringMatching( /terms-and-conditions-\d/ )
+		);
+		expect( actionCreators.clearValidationError ).toHaveBeenNthCalledWith(
+			2,
 			expect.stringMatching( /terms-and-conditions-\d/ )
 		);
 	} );
