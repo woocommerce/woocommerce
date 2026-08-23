@@ -1436,8 +1436,16 @@ class WC_Checkout {
 					 * otherwise be invisible here. Refresh this one key from the persisted store (not the request's
 					 * stale copy of the rest of the session) so create_order()'s own pending-order check, a few
 					 * lines below, sees it and resumes that order instead of also creating one.
+					 *
+					 * get_session() is itself cache-aware ($wpdb is only queried on a cache miss), and this
+					 * request's own session bootstrap (restore_session_data(), on every request via 'init') already
+					 * called it once for this exact customer before checkout ever ran - the concurrent holder's
+					 * write can easily land after that, leaving a stale cached copy under this key regardless of
+					 * whether the cache is the default per-request store or a shared backend like Redis. Evict it
+					 * first so get_session() is forced to hit the database rather than that stale entry.
 					 */
 					if ( WC()->session instanceof WC_Session_Handler ) {
+						wp_cache_delete( WC_Cache_Helper::get_cache_prefix( WC_SESSION_CACHE_GROUP ) . $lock_key, WC_SESSION_CACHE_GROUP );
 						$persisted_session_data = WC()->session->get_session( $lock_key );
 						if ( is_array( $persisted_session_data ) && array_key_exists( 'order_awaiting_payment', $persisted_session_data ) ) {
 							WC()->session->set( 'order_awaiting_payment', $persisted_session_data['order_awaiting_payment'] );

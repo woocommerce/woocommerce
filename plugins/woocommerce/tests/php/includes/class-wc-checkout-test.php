@@ -830,6 +830,13 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		);
 		$this->assertIsInt( $existing_order_id, 'Test setup: the pre-existing order must be created successfully.' );
 
+		// Simulate this request's own normal session bootstrap: restore_session_data() calls get_session() for
+		// this exact customer on every request (via 'init'), before checkout code ever runs, which warms the
+		// cache-aware get_session() lookup with whatever's in the persisted store at that point (still nothing,
+		// here). Without this, the test wouldn't prove the refresh survives an already-warm cache entry - only
+		// that it works against a key that was never read before, which isn't the real-world timing.
+		WC()->session->get_session( (string) WC()->session->get_customer_id() );
+
 		// This request's own WC()->session already has no 'order_awaiting_payment' in memory (create_order() above
 		// never writes it - only process_checkout() does) - matching a request that loaded its session snapshot
 		// before another request's write. Write directly to the persisted sessions table, bypassing WC()->session's

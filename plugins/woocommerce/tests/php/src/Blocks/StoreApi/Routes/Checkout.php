@@ -3300,10 +3300,19 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$existing_order->set_status( 'checkout-draft' );
 		$existing_order->save();
 
+		// Simulate this request's own normal session bootstrap: restore_session_data() calls the cache-aware
+		// get_session() for this exact customer on every request (via 'init'), before the route ever runs. This
+		// warms the cache with whatever's in the persisted store at that point (still nothing, here) - without
+		// this, the test wouldn't prove the route's refresh survives an already-warm cache entry, only that it
+		// works against a key nothing had read yet, which isn't the real-world timing the fix targets.
+		WC()->session->get_session( (string) WC()->session->get_customer_id() );
+
 		// This request's own in-memory session has no 'store_api_draft_order' yet - matching a request that loaded
 		// its session snapshot before another request's write. Write directly to the persisted sessions table,
 		// bypassing WC()->session's own set()/save_data(), to simulate that other request's write landing in the
-		// shared, persisted store without this request's already-loaded in-memory copy knowing about it.
+		// shared, persisted store without this request's already-loaded in-memory copy - or its now-stale cache
+		// entry from the warm-up above - knowing about it. The route itself is responsible for busting that cache
+		// entry before re-reading; this test deliberately does not do that job for it.
 		global $wpdb;
 		$sessions_table = $wpdb->prefix . 'woocommerce_sessions';
 		$wpdb->query(
@@ -3314,11 +3323,6 @@ class Checkout extends \WP_Test_REST_TestCase {
 				time() + HOUR_IN_SECONDS
 			)
 		);
-		// A real concurrent write from another process would update the shared object cache the same way
-		// save_data() does; this direct SQL write bypasses that, and within a single PHPUnit process the
-		// non-persistent object cache survives across test methods, so a stale cached session would otherwise
-		// mask this write the same way it never would in production.
-		\WC_Cache_Helper::invalidate_cache_group( WC_SESSION_CACHE_GROUP );
 
 		$this->assertSame(
 			0,
