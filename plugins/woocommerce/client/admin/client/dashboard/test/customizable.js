@@ -232,11 +232,6 @@ describe( 'CustomizableDashboard section preferences', () => {
 
 		await invokeSectionAction( 'Performance', 'Move down' );
 
-		expect( await getVisibleSectionTitles() ).toEqual( [
-			'Charts',
-			'Performance',
-			'Leaderboards',
-		] );
 		expect( getLastPreferencePayload() ).toEqual( {
 			dashboard_sections: [
 				{ key: 'charts', isVisible: true },
@@ -246,7 +241,33 @@ describe( 'CustomizableDashboard section preferences', () => {
 		} );
 	} );
 
+	it( 'moves the first section down in the dashboard', async () => {
+		renderDashboard();
+
+		await invokeSectionAction( 'Performance', 'Move down' );
+
+		expect( await getVisibleSectionTitles() ).toEqual( [
+			'Charts',
+			'Performance',
+			'Leaderboards',
+		] );
+	} );
+
 	it( 'moves the second section up and saves the ordered preference payload', async () => {
+		renderDashboard();
+
+		await invokeSectionAction( 'Charts', 'Move up' );
+
+		expect( getLastPreferencePayload() ).toEqual( {
+			dashboard_sections: [
+				{ key: 'charts', isVisible: true },
+				{ key: 'store-performance', isVisible: true },
+				{ key: 'leaderboards', isVisible: true },
+			],
+		} );
+	} );
+
+	it( 'moves the second section up in the dashboard', async () => {
 		renderDashboard();
 
 		await invokeSectionAction( 'Charts', 'Move up' );
@@ -256,16 +277,23 @@ describe( 'CustomizableDashboard section preferences', () => {
 			'Performance',
 			'Leaderboards',
 		] );
+	} );
+
+	it( 'removes Performance and saves it hidden at the end', async () => {
+		renderDashboard();
+
+		await invokeSectionAction( 'Performance', 'Remove section' );
+
 		expect( getLastPreferencePayload() ).toEqual( {
 			dashboard_sections: [
 				{ key: 'charts', isVisible: true },
-				{ key: 'store-performance', isVisible: true },
 				{ key: 'leaderboards', isVisible: true },
+				{ key: 'store-performance', isVisible: false },
 			],
 		} );
 	} );
 
-	it( 'removes Performance and saves it hidden at the end', async () => {
+	it( 'removes Performance from the dashboard', async () => {
 		renderDashboard();
 
 		await invokeSectionAction( 'Performance', 'Remove section' );
@@ -274,16 +302,6 @@ describe( 'CustomizableDashboard section preferences', () => {
 			'Charts',
 			'Leaderboards',
 		] );
-		expect(
-			screen.queryByRole( 'heading', { name: 'Performance' } )
-		).not.toBeInTheDocument();
-		expect( getLastPreferencePayload() ).toEqual( {
-			dashboard_sections: [
-				{ key: 'charts', isVisible: true },
-				{ key: 'leaderboards', isVisible: true },
-				{ key: 'store-performance', isVisible: false },
-			],
-		} );
 	} );
 
 	it( 'adds hidden Performance back and saves it visible at the end', async () => {
@@ -305,11 +323,6 @@ describe( 'CustomizableDashboard section preferences', () => {
 			} )
 		);
 
-		expect( await getVisibleSectionTitles() ).toEqual( [
-			'Charts',
-			'Leaderboards',
-			'Performance',
-		] );
 		expect( getLastPreferencePayload() ).toEqual( {
 			dashboard_sections: [
 				{ key: 'charts', isVisible: true },
@@ -317,5 +330,32 @@ describe( 'CustomizableDashboard section preferences', () => {
 				{ key: 'store-performance', isVisible: true },
 			],
 		} );
+	} );
+
+	it( 'adds hidden Performance back to the dashboard', async () => {
+		renderDashboard( [
+			{ key: 'charts', isVisible: true },
+			{ key: 'leaderboards', isVisible: true },
+			{ key: 'store-performance', isVisible: false },
+		] );
+
+		await userEvent.click(
+			await screen.findByRole( 'button', { name: 'Add more sections' } )
+		);
+		const choices = await screen.findByRole( 'heading', {
+			name: 'Dashboard Sections',
+		} );
+		await userEvent.click(
+			within( choices.parentElement ).getByRole( 'button', {
+				name: 'Performance',
+			} )
+		);
+		await screen.findByRole( 'heading', { name: 'Performance' } );
+
+		expect( await getVisibleSectionTitles() ).toEqual( [
+			'Charts',
+			'Leaderboards',
+			'Performance',
+		] );
 	} );
 } );
