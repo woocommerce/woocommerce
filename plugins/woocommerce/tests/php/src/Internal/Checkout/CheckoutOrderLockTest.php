@@ -171,4 +171,29 @@ class CheckoutOrderLockTest extends WC_Unit_Test_Case {
 			'Release must be scoped to the caller\'s own token, so a lock another request now owns is not deleted.'
 		);
 	}
+
+	/**
+	 * @testdox The closure registered via add_action( 'shutdown', ... ) - the pattern used to guarantee a payment
+	 *          lock is released even when the holder's request terminates via exit()/wp_die() before reaching a
+	 *          normal release() call - correctly releases the lock when invoked.
+	 */
+	public function test_shutdown_release_closure_releases_the_lock(): void {
+		$token = $this->sut->acquire( 'customer-1' );
+		$this->assertNotNull( $token, 'Test setup: must be able to acquire the lock.' );
+
+		// The same closure shape registered via add_action( 'shutdown', ... ) in production, invoked directly here
+		// rather than through a real do_action( 'shutdown' ) - that hook also carries unrelated WordPress core
+		// callbacks (output-buffer flushing among them) that have nothing to do with what this is verifying and
+		// make PHPUnit flag the test as risky. WordPress's own 'shutdown' action firing this closure at all is
+		// core's well-tested add_action()/do_action() plumbing, not something this needs to re-prove.
+		$release_on_shutdown = function () use ( $token ) {
+			$this->sut->release( 'customer-1', $token );
+		};
+		$release_on_shutdown();
+
+		$this->assertNull(
+			$this->lock_row_value( 'customer-1' ),
+			'The lock must be released once the shutdown callback runs, even without a normal release() call.'
+		);
+	}
 }

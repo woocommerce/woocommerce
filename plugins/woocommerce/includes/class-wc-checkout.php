@@ -1508,6 +1508,20 @@ class WC_Checkout {
 					throw new Exception( __( 'Your order is already being processed. Please wait a moment before trying again.', 'woocommerce' ) );
 				}
 
+				// A successful payment ends in wp_safe_redirect()+exit or wp_send_json() (which also terminates
+				// via wp_die()) inside process_order_payment(), neither of which runs a pending finally block - so
+				// on the common, successful path the release() below would never run, leaving this row in
+				// wp_options permanently (STALE_LOCK_THRESHOLD only lets a *future* contender take it over, it
+				// never deletes an abandoned row nobody else ever asks for again). WordPress's own 'shutdown'
+				// action (registered via register_shutdown_function() in core) still fires after exit(), same
+				// pattern WC_Cache_Helper::delete_transients_on_shutdown() already uses elsewhere - hook it as a
+				// guaranteed fallback release. release() is safe to call twice: the finally below, on any path
+				// that returns normally instead, releases first, and this just won't match a row by then.
+				$release_payment_lock_on_shutdown = function () use ( $payment_lock, $payment_lock_key, $payment_lock_token ) {
+					$payment_lock->release( $payment_lock_key, $payment_lock_token );
+				};
+				add_action( 'shutdown', $release_payment_lock_on_shutdown );
+
 				try {
 					/**
 					 * Note that woocommerce_cart_needs_payment is only used in
