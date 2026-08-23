@@ -908,4 +908,97 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			'The pre-existing order must be resumed, not duplicated, once this request refreshes the stale session value.'
 		);
 	}
+
+	/**
+	 * @testdox process_checkout() should not call the payment gateway when another request already holds the payment-processing claim for this exact order - the case where two requests both resumed the same order past the creation lock (which is released before payment) and would otherwise both call the gateway.
+	 */
+	public function test_process_checkout_does_not_process_payment_when_another_request_holds_the_orders_payment_lock() {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
+		WC()->cart->add_to_cart( $product->get_id() );
+
+		$customer_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $customer_id );
+
+		$bacs_gateway          = WC()->payment_gateways()->payment_gateways()[ WC_Gateway_BACS::ID ];
+		$bacs_was_enabled      = $bacs_gateway->enabled;
+		$bacs_gateway->enabled = 'yes';
+
+		add_filter(
+			'woocommerce_countries_allowed_countries',
+			function () {
+				return array( 'US' => 'United States (US)' );
+			}
+		);
+
+		$_POST    = array(
+			'woocommerce-process-checkout-nonce' => wp_create_nonce( 'woocommerce-process_checkout' ),
+			'ship_to_different_address'          => '0',
+			'payment_method'                     => WC_Gateway_BACS::ID,
+			'billing_first_name'                 => 'Jane',
+			'billing_last_name'                  => 'Doe',
+			'billing_address_1'                  => '123 Main St',
+			'billing_city'                       => 'New York',
+			'billing_state'                      => 'NY',
+			'billing_postcode'                   => '10001',
+			'billing_country'                    => 'US',
+			'billing_email'                      => 'jane@example.com',
+			'billing_phone'                      => '5555555555',
+		);
+		$_REQUEST = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Building the request fixture, not processing real input.
+
+		// Claim the payment lock for the order the moment it exists - simulating another request that resumed
+		// this same order past the (already-released) creation lock and reached the payment step first.
+		$payment_lock       = wc_get_container()->get( CheckoutOrderLock::class );
+		$captured_lock      = null;
+		$claim_payment_lock = function ( $order_id ) use ( $payment_lock, &$captured_lock ) {
+			$token         = $payment_lock->acquire( 'order_payment_' . $order_id );
+			$captured_lock = array(
+				'key'   => 'order_payment_' . $order_id,
+				'token' => $token,
+			);
+		};
+		add_action( 'woocommerce_checkout_order_processed', $claim_payment_lock );
+
+		try {
+			$this->sut->process_checkout();
+		} finally {
+			remove_action( 'woocommerce_checkout_order_processed', $claim_payment_lock );
+			remove_all_filters( 'woocommerce_countries_allowed_countries' );
+			$bacs_gateway->enabled = $bacs_was_enabled;
+			$_POST                 = array();
+			$_REQUEST              = array();
+			WC()->cart->empty_cart();
+			if ( $captured_lock ) {
+				$payment_lock->release( $captured_lock['key'], $captured_lock['token'] );
+			}
+		}
+
+		$this->assertNotNull( $captured_lock['token'] ?? null, 'Test setup: must be able to claim the payment lock from the hook.' );
+
+		$orders = wc_get_orders(
+			array(
+				'customer' => $customer_id,
+				'return'   => 'ids',
+			)
+		);
+		$this->assertCount( 1, $orders, 'Test setup: exactly one order must have been created.' );
+
+		$order = wc_get_order( $orders[0] );
+		$this->assertTrue(
+			$order->has_status( array( 'pending', 'failed' ) ),
+			'The gateway must not have been called while another request holds the payment lock for this order - order status should remain unpaid, not ' . $order->get_status()
+		);
+
+		$notices      = wc_get_notices( 'error' );
+		$found_notice = false;
+		foreach ( $notices as $notice ) {
+			if ( false !== strpos( $notice['notice'], 'already being processed' ) ) {
+				$found_notice = true;
+				break;
+			}
+		}
+		$this->assertTrue( $found_notice, 'The concurrent-payment notice must be shown to the shopper.' );
+
+		wc_clear_notices();
+	}
 }

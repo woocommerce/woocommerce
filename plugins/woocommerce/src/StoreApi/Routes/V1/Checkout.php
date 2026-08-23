@@ -699,10 +699,36 @@ class Checkout extends AbstractCartRoute {
 		 */
 		$payment_result = new PaymentResult();
 
-		if ( $this->order->needs_payment() ) {
-			$this->process_payment( $request, $payment_result );
-		} else {
-			$this->process_without_payment( $request, $payment_result );
+		/*
+		 * The order-creation lock in create_or_update_draft_order() is released before this point specifically so
+		 * a slow or off-site gateway can never hold it - but that means a request that was waiting on it, and
+		 * resumed this same order rather than creating a new one, reaches this exact point too. Without a separate
+		 * claim scoped to this order, both requests would independently decide the order needs payment and both
+		 * call the gateway, which can charge a non-idempotent gateway twice for one order. Keyed by order ID (not
+		 * by shopper, like the creation lock) since this is guarding "only one caller may process payment for
+		 * order N", not "only one caller may create shopper X's order". Held through the gateway call itself,
+		 * unlike the creation lock, because that call is exactly what this is protecting.
+		 */
+		$payment_lock       = wc_get_container()->get( CheckoutOrderLock::class );
+		$payment_lock_key   = 'order_payment_' . $this->order->get_id();
+		$payment_lock_token = $payment_lock->acquire( $payment_lock_key );
+
+		if ( null === $payment_lock_token ) {
+			throw new RouteException(
+				'woocommerce_rest_checkout_order_locked',
+				esc_html__( 'Your order is already being processed. Please wait a moment before trying again.', 'woocommerce' ),
+				409
+			);
+		}
+
+		try {
+			if ( $this->order->needs_payment() ) {
+				$this->process_payment( $request, $payment_result );
+			} else {
+				$this->process_without_payment( $request, $payment_result );
+			}
+		} finally {
+			$payment_lock->release( $payment_lock_key, $payment_lock_token );
 		}
 
 		wc_log_order_step(
@@ -850,8 +876,13 @@ class Checkout extends AbstractCartRoute {
 				 */
 				wp_cache_delete( \WC_Cache_Helper::get_cache_prefix( WC_SESSION_CACHE_GROUP ) . $lock_key, WC_SESSION_CACHE_GROUP );
 				$persisted_session_data = WC()->session->get_session( $lock_key );
-				if ( is_array( $persisted_session_data ) && array_key_exists( 'store_api_draft_order', $persisted_session_data ) ) {
-					WC()->session->set( 'store_api_draft_order', $persisted_session_data['store_api_draft_order'] );
+				if ( is_array( $persisted_session_data ) ) {
+					// Absent, not just present-and-different, matters here: with no key at all in the persisted
+					// store, an in-memory value from earlier in this request (or from before an unset elsewhere)
+					// would otherwise survive the refresh unchanged and get_draft_order() could reuse an order the
+					// persisted session no longer references. set( ..., null ) clears it the same way an absent
+					// key already means "no draft order" everywhere else this value is read.
+					WC()->session->set( 'store_api_draft_order', $persisted_session_data['store_api_draft_order'] ?? null );
 				}
 			}
 

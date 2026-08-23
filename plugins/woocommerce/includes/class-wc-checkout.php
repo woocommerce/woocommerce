@@ -1447,17 +1447,23 @@ class WC_Checkout {
 					if ( WC()->session instanceof WC_Session_Handler ) {
 						wp_cache_delete( WC_Cache_Helper::get_cache_prefix( WC_SESSION_CACHE_GROUP ) . $lock_key, WC_SESSION_CACHE_GROUP );
 						$persisted_session_data = WC()->session->get_session( $lock_key );
-						if ( is_array( $persisted_session_data ) && array_key_exists( 'order_awaiting_payment', $persisted_session_data ) ) {
-							WC()->session->set( 'order_awaiting_payment', $persisted_session_data['order_awaiting_payment'] );
+						if ( is_array( $persisted_session_data ) ) {
+							// Absent, not just present-and-different, matters here: with no key at all in the
+							// persisted store, an in-memory value from earlier in this request would otherwise
+							// survive the refresh unchanged and create_order() could resume an order the persisted
+							// session no longer references. set( ..., null ) clears it the same way an absent key
+							// already means "no pending order" everywhere else this value is read.
+							WC()->session->set( 'order_awaiting_payment', $persisted_session_data['order_awaiting_payment'] ?? null );
 						}
 					}
 
 					$order_id = $this->create_order( $posted_data );
-					$order    = wc_get_order( $order_id );
 
 					if ( is_wp_error( $order_id ) ) {
 						throw new Exception( $order_id->get_error_message() );
 					}
+
+					$order = wc_get_order( $order_id );
 
 					if ( ! $order ) {
 						throw new Exception( __( 'Unable to create order.', 'woocommerce' ) );
@@ -1483,20 +1489,44 @@ class WC_Checkout {
 					array( 'order_object' => $order )
 				);
 
-				/**
-				 * Note that woocommerce_cart_needs_payment is only used in
-				 * WC_Checkout::process_checkout() to keep backwards compatibility.
-				 * Use woocommerce_order_needs_payment instead.
-				 *
-				 * Note that at this point you can't rely on the Cart Object anymore,
-				 * since it could be empty see:
-				 * https://github.com/woocommerce/woocommerce/issues/24631
+				/*
+				 * The order-creation lock above is released before this point specifically so a slow or off-site
+				 * gateway can never hold it - but that means a request that was waiting on it, and resumed this
+				 * same order rather than creating a new one, reaches this exact point too. Without a separate
+				 * claim scoped to this order, both requests would independently decide the order needs payment and
+				 * both call the gateway, which can charge a non-idempotent gateway twice for one order. Keyed by
+				 * order ID (not by shopper, like the creation lock above) since this is guarding "only one caller
+				 * may process payment for order N", not "only one caller may create shopper X's order". Held
+				 * through the gateway call itself, unlike the creation lock, because that call is exactly what
+				 * this is protecting.
 				 */
+				$payment_lock       = wc_get_container()->get( CheckoutOrderLock::class );
+				$payment_lock_key   = 'order_payment_' . $order_id;
+				$payment_lock_token = $payment_lock->acquire( $payment_lock_key );
 
-				if ( apply_filters( 'woocommerce_cart_needs_payment', $order->needs_payment(), WC()->cart ) ) {
-					$this->process_order_payment( $order_id, $posted_data['payment_method'] );
-				} else {
-					$this->process_order_without_payment( $order_id );
+				if ( null === $payment_lock_token ) {
+					throw new Exception( __( 'Your order is already being processed. Please wait a moment before trying again.', 'woocommerce' ) );
+				}
+
+				try {
+					/**
+					 * Note that woocommerce_cart_needs_payment is only used in
+					 * WC_Checkout::process_checkout() to keep backwards compatibility.
+					 * Use woocommerce_order_needs_payment instead.
+					 *
+					 * Note that at this point you can't rely on the Cart Object anymore,
+					 * since it could be empty see:
+					 * https://github.com/woocommerce/woocommerce/issues/24631
+					 *
+					 * @since 3.0.0 or earlier
+					 */
+					if ( apply_filters( 'woocommerce_cart_needs_payment', $order->needs_payment(), WC()->cart ) ) {
+						$this->process_order_payment( $order_id, $posted_data['payment_method'] );
+					} else {
+						$this->process_order_without_payment( $order_id );
+					}
+				} finally {
+					$payment_lock->release( $payment_lock_key, $payment_lock_token );
 				}
 			}
 		} catch ( Exception $e ) {
