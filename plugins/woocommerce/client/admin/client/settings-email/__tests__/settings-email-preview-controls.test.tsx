@@ -176,7 +176,6 @@ describe( 'Email preview header', () => {
 			await screen.findByRole( 'heading', {
 				name: 'Updated processing order',
 			} );
-			expect( apiFetchMock ).toHaveBeenCalledTimes( 2 );
 			expect( apiFetchMock ).toHaveBeenLastCalledWith( {
 				path: `wc-admin-email/settings/email/preview-subject?type=${ processingOrderType }&nonce=preview-nonce`,
 			} );
@@ -187,5 +186,22 @@ describe( 'Email preview header', () => {
 				subjectUpdatedListener
 			);
 		}
+	} );
+
+	it( 'requests the preview subject once after a transient save', async () => {
+		apiFetchMock.mockResolvedValue( { subject: 'Processing order' } );
+
+		( { unmount } = render(
+			<EmailPreviewHeader emailType={ processingOrderType } />
+		) );
+
+		await screen.findByRole( 'heading', { name: 'Processing order' } );
+		apiFetchMock.mockClear();
+
+		fireEvent( subjectInput, new Event( 'transient-saved' ) );
+
+		await waitFor( () =>
+			expect( apiFetchMock ).toHaveBeenCalledTimes( 1 )
+		);
 	} );
 } );
