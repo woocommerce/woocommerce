@@ -3352,11 +3352,16 @@ class Checkout extends \WP_Test_REST_TestCase {
 	 * already being processed" error that has nothing to do with what it was actually doing.
 	 */
 	public function test_get_does_not_contend_for_the_checkout_lock_held_by_a_post() {
-		$post_request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
-		$post_request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
-		$post_request->set_body_params( $this->get_minimal_post_data() );
-		$post_response = rest_get_server()->dispatch( $post_request );
-		$this->assertSame( 200, $post_response->get_status(), print_r( $post_response->get_data(), true ) );
+		// 'checkout-draft' is the status create_order_from_cart() gives a freshly-materialised draft order, and
+		// is_valid_draft_order() accepts it unconditionally - established directly (rather than via a real POST
+		// first) so the GET below is guaranteed to take the existing-order path this test actually verifies,
+		// rather than possibly finding no draft order (e.g. because a prior successful POST already completed
+		// and cleared its session reference) and trivially passing without exercising it at all.
+		$existing_order = new \WC_Order();
+		$existing_order->set_status( 'checkout-draft' );
+		$existing_order->save();
+		WC()->session->set( 'store_api_draft_order', $existing_order->get_id() );
+		WC()->session->save_data();
 
 		$checkout_lock = wc_get_container()->get( CheckoutOrderLock::class );
 		$lock_key      = (string) WC()->session->get_customer_id();
@@ -3375,6 +3380,11 @@ class Checkout extends \WP_Test_REST_TestCase {
 			200,
 			$get_response->get_status(),
 			'A GET for an existing draft order must succeed even while a POST holds the lock, not contend for it: ' . print_r( $get_response->get_data(), true )
+		);
+		$this->assertSame(
+			$existing_order->get_id(),
+			$get_response->get_data()['order_id'] ?? null,
+			'The GET must actually return the existing draft order, proving it took the existing-order path this test is verifying.'
 		);
 	}
 }
