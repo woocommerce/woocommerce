@@ -69,7 +69,7 @@ describe( 'Command Palette', () => {
 	} );
 
 	it( 'registers static commands and product loader with exact behavior', () => {
-		expect( dispatch ).toHaveBeenCalledWith( commandsStore );
+		expect( dispatch ).toHaveBeenLastCalledWith( commandsStore );
 		expect(
 			registeredCommands.map( ( command ) => ( {
 				name: command.name,
@@ -208,7 +208,22 @@ describe( 'Command Palette', () => {
 		expect( jest.getTimerCount() ).toBe( 1 );
 		unmount();
 		expect( jest.getTimerCount() ).toBe( 0 );
+	} );
+
+	it( 'does not track a product search after unmount', () => {
+		jest.useFakeTimers();
+		const getEntityRecords = jest.fn( () => [] );
+		const hasFinishedResolution = jest.fn( () => true );
+		useSelect.mockImplementation( ( callback ) =>
+			callback( () => ( { getEntityRecords, hasFinishedResolution } ) )
+		);
+
+		const { unmount } = renderHook( () =>
+			registeredLoader.hook( { search: 'bread' } )
+		);
+
+		unmount();
 		jest.advanceTimersByTime( 300 );
-		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
+		expect( recordEvent ).not.toHaveBeenCalled();
 	} );
 } );
