@@ -137,6 +137,10 @@ describe( 'createMutationQueue', () => {
 					} ) )
 				);
 				global.fetch = mockFetch;
+				const takeSnapshotSpy = jest.spyOn(
+					stateHandler,
+					'takeSnapshot'
+				);
 				const queue = createMutationQueue( {
 					endpoint: '/batch',
 					getHeaders: () => ( {} ),
@@ -157,6 +161,9 @@ describe( 'createMutationQueue', () => {
 							JSON.parse( options.body ).requests.length
 					)
 				).toEqual( expectedBatchSizes );
+				expect( takeSnapshotSpy ).toHaveBeenCalledTimes(
+					requestGroups.length
+				);
 			}
 		);
 
