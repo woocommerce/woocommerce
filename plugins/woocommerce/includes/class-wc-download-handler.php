@@ -497,9 +497,9 @@ class WC_Download_Handler {
 		$parsed_file_path = self::parse_file_path( $file_path );
 		$download_range   = self::get_download_range( @filesize( $parsed_file_path['file_path'] ) ); // @codingStandardsIgnoreLine.
 
-		$start      = isset( $download_range['start'] ) ? $download_range['start'] : 0;
-		$length     = isset( $download_range['length'] ) ? $download_range['length'] : 0;
-		$bytes_sent = 0;
+		$start            = isset( $download_range['start'] ) ? $download_range['start'] : 0;
+		$length           = isset( $download_range['length'] ) ? $download_range['length'] : 0;
+		$response_started = false;
 
 		if ( $parsed_file_path['remote_file'] ) {
 			// Open the remote file before sending our own headers, so the filename announced by
@@ -519,15 +519,15 @@ class WC_Download_Handler {
 				);
 
 				self::download_headers( $parsed_file_path['file_path'], $filename, $download_range, true );
-				$served = self::readfile_from_handle( $handle, $start, $length, $bytes_sent );
+				$served = self::readfile_from_handle( $handle, $start, $length, $response_started );
 			}
 		} else {
 			self::download_headers( $parsed_file_path['file_path'], $filename, $download_range );
-			$served = self::readfile_chunked_with_output_tracking( $parsed_file_path['file_path'], $start, $length, $bytes_sent );
+			$served = self::readfile_chunked_with_response_tracking( $parsed_file_path['file_path'], $start, $length, $response_started );
 		}
 
 		if ( ! $served ) {
-			if ( $bytes_sent > 0 ) {
+			if ( $response_started ) {
 				wc_get_logger()->warning(
 					__( 'A file could not be completely served using the Force Download method because the response had already started.', 'woocommerce' )
 				);
@@ -822,21 +822,21 @@ class WC_Download_Handler {
 	 * @return bool Success or fail
 	 */
 	public static function readfile_chunked( $file, $start = 0, $length = 0 ) {
-		$bytes_sent = 0;
+		$response_started = false;
 
-		return self::readfile_chunked_with_output_tracking( $file, $start, $length, $bytes_sent );
+		return self::readfile_chunked_with_response_tracking( $file, $start, $length, $response_started );
 	}
 
 	/**
-	 * Read a file in chunks while tracking how many bytes were emitted.
+	 * Read a file in chunks while tracking whether the response started.
 	 *
-	 * @param string $file       File.
-	 * @param int    $start      Byte offset/position of the beginning from which to read from the file.
-	 * @param int    $length     Length of the chunk to be read from the file in bytes, 0 means full file.
-	 * @param int    $bytes_sent Number of bytes emitted.
+	 * @param string $file             File.
+	 * @param int    $start            Byte offset/position of the beginning from which to read from the file.
+	 * @param int    $length           Length of the chunk to be read from the file in bytes, 0 means full file.
+	 * @param bool   $response_started Whether any response bytes were emitted.
 	 * @return bool Success or fail
 	 */
-	private static function readfile_chunked_with_output_tracking( $file, $start, $length, &$bytes_sent ) {
+	private static function readfile_chunked_with_response_tracking( $file, $start, $length, &$response_started ) {
 		// Define before attempting to open the file: the constant has always been defined even
 		// when the open fails, and external code may rely on that side effect.
 		if ( ! defined( 'WC_CHUNK_SIZE' ) ) {
@@ -853,19 +853,19 @@ class WC_Download_Handler {
 			$length = (int) @filesize( $file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- Remote paths make filesize error; false is handled by the cast (0 means read until EOF).
 		}
 
-		return self::readfile_from_handle( $handle, $start, $length, $bytes_sent );
+		return self::readfile_from_handle( $handle, $start, $length, $response_started );
 	}
 
 	/**
 	 * Read an already-open file handle in chunks and echo its content.
 	 *
-	 * @param resource $handle     Open file handle, e.g. from `fopen()`.
-	 * @param int      $start      Byte offset/position of the beginning from which to read from the file.
-	 * @param int      $length     Length of the chunk to be read from the file in bytes, 0 means until the end of file.
-	 * @param int      $bytes_sent Number of bytes emitted.
+	 * @param resource $handle           Open file handle, e.g. from `fopen()`.
+	 * @param int      $start            Byte offset/position of the beginning from which to read from the file.
+	 * @param int      $length           Length of the chunk to be read from the file in bytes, 0 means until the end of file.
+	 * @param bool     $response_started Whether any response bytes were emitted.
 	 * @return bool Success or fail
 	 */
-	private static function readfile_from_handle( $handle, $start, $length, &$bytes_sent ) {
+	private static function readfile_from_handle( $handle, $start, $length, &$response_started ) {
 		if ( ! defined( 'WC_CHUNK_SIZE' ) ) {
 			define( 'WC_CHUNK_SIZE', 1024 * 1024 );
 		}
@@ -892,7 +892,9 @@ class WC_Download_Handler {
 				}
 
 				echo $chunk; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Download chunks are raw binary data and must not be HTML-escaped.
-				$bytes_sent += strlen( $chunk );
+				if ( '' !== $chunk ) {
+					$response_started = true;
+				}
 				$p = @ftell( $handle ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
 
 				if ( ob_get_length() ) {
@@ -910,7 +912,9 @@ class WC_Download_Handler {
 				}
 
 				echo $chunk; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Download chunks are raw binary data and must not be HTML-escaped.
-				$bytes_sent += strlen( $chunk );
+				if ( '' !== $chunk ) {
+					$response_started = true;
+				}
 				if ( ob_get_length() ) {
 					ob_flush();
 					flush();
