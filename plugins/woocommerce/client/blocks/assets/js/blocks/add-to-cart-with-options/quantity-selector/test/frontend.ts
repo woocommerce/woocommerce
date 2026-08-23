@@ -96,9 +96,21 @@ describe( 'Add to Cart + Options quantity selector store', () => {
 		expect( state.allowsDecrease ).toBe( false );
 		expect( state.allowsIncrease ).toBe( true );
 
+		mockProductsState.productInContext = {
+			...mockProductsState.productInContext,
+			is_in_stock: false,
+		};
+		expect( state.allowsQuantityChange ).toBe( false );
+
+		mockProductsState.productInContext = {
+			...mockProductsState.productInContext,
+			is_in_stock: true,
+		};
+
 		mockAddToCartStore.state.quantity[ 42 ] = 8;
 		expect( state.allowsIncrease ).toBe( false );
 
+		mockAddToCartStore.state.quantity[ 42 ] = 4;
 		mockContext.allowZero = true;
 		expect( state.allowsDecrease ).toBe( true );
 
