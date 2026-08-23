@@ -874,9 +874,21 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		);
 		$_REQUEST = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Building the request fixture, not processing real input.
 
+		// process_checkout() ends, on success, by redirecting or sending a JSON response and terminating the
+		// script - neither of which a PHPUnit process should be allowed to do. Order creation/resumption (what
+		// this test actually verifies) is fully resolved by the time woocommerce_checkout_order_processed fires,
+		// still well before that terminal response - throw from it to stop process_checkout() right there. The
+		// whole method body is one try/catch, so this is caught and turned into a harmless notice, same as any
+		// other Exception raised during checkout.
+		$stop_before_terminal_response = function () {
+			throw new Exception( 'Stopping before process_checkout() reaches its terminal response, for this test only.' );
+		};
+		add_action( 'woocommerce_checkout_order_processed', $stop_before_terminal_response );
+
 		try {
 			$this->sut->process_checkout();
 		} finally {
+			remove_action( 'woocommerce_checkout_order_processed', $stop_before_terminal_response );
 			remove_all_filters( 'woocommerce_countries_allowed_countries' );
 			$_POST    = array();
 			$_REQUEST = array();

@@ -789,44 +789,65 @@ class Checkout extends AbstractCartRoute {
 	 */
 	private function create_or_update_draft_order( \WP_REST_Request $request ) {
 		/*
+		 * get_route_response() (GET) and get_route_update_response() (PATCH/PUT) both already resolve
+		 * $this->order via get_draft_order() before ever calling this method, and only call it at all when that
+		 * resolved to an existing order - so for either of them $this->order is already set on entry, and the
+		 * line below can only ever take its "update" branch, never "create new". Only process_order() (POST, the
+		 * actual place-order submission) can reach this method with $this->order still unset, since it's the one
+		 * caller that doesn't pre-resolve it - that's the only path that can create a new order, so it's the only
+		 * one that needs the lock below. Determined once, up front, because the "reuse the pending order" line
+		 * itself mutates $this->order.
+		 */
+		$may_create_new_order = ( null === $this->order );
+
+		/*
 		 * Concurrent submissions for the same shopper (double-clicks, proxy/load-balancer retries on timeout)
 		 * would otherwise all read an empty 'store_api_draft_order' session value below and each create their
 		 * own order, since that session value isn't written until the very end of this method. Serialize the
 		 * whole read-decide-create-write sequence per shopper so a request that was waiting resumes the order
 		 * the other request created instead of also creating one. Released before process_payment()/
 		 * process_without_payment() are called back in process_order(), so a slow or off-site gateway can never
-		 * hold the lock.
+		 * hold the lock. Scoped to the POST/create path only (see above) - a GET or PATCH for the same shopper,
+		 * arriving while a POST holds this lock, would otherwise itself block for the full ACQUIRE_WAIT_BUDGET
+		 * and could then fail with a "your order is already being processed" error that has nothing to do with
+		 * what it was actually doing.
 		 */
-		$checkout_lock = wc_get_container()->get( CheckoutOrderLock::class );
-		$lock_key      = (string) WC()->session->get_customer_id();
-		$lock_token    = $checkout_lock->acquire( $lock_key );
+		$checkout_lock = null;
+		$lock_key      = null;
+		$lock_token    = null;
 
-		if ( null === $lock_token ) {
-			throw new RouteException(
-				'woocommerce_rest_checkout_order_locked',
-				esc_html__( 'Your order is already being processed. Please wait a moment before trying again.', 'woocommerce' ),
-				409
-			);
+		if ( $may_create_new_order ) {
+			$checkout_lock = wc_get_container()->get( CheckoutOrderLock::class );
+			$lock_key      = (string) WC()->session->get_customer_id();
+			$lock_token    = $checkout_lock->acquire( $lock_key );
+
+			if ( null === $lock_token ) {
+				throw new RouteException(
+					'woocommerce_rest_checkout_order_locked',
+					esc_html__( 'Your order is already being processed. Please wait a moment before trying again.', 'woocommerce' ),
+					409
+				);
+			}
 		}
 
 		try {
-			/*
-			 * WC_Session only ever reads its own in-memory copy of the session data, loaded once when this
-			 * request started - it is never re-fetched mid-request. If this request was just waiting on the
-			 * lock above, the request that held it may have written a fresh 'store_api_draft_order' to the
-			 * persisted session store after this request's copy was already loaded, so that write would
-			 * otherwise be invisible here. Refresh this one key from the persisted store (not the request's
-			 * stale copy of the rest of the session) so get_draft_order() below sees it and resumes that order
-			 * instead of also creating one.
-			 *
-			 * get_session() is itself cache-aware ($wpdb is only queried on a cache miss), and this request's
-			 * own session bootstrap (restore_session_data(), on every request via 'init') already called it once
-			 * for this exact customer before this route ever ran - the concurrent holder's write can easily land
-			 * after that, leaving a stale cached copy under this key regardless of whether the cache is the
-			 * default per-request store or a shared backend like Redis. Evict it first so get_session() is forced
-			 * to hit the database rather than that stale entry.
-			 */
-			if ( WC()->session instanceof \WC_Session_Handler ) {
+			if ( null !== $lock_key && WC()->session instanceof \WC_Session_Handler ) {
+				/*
+				 * WC_Session only ever reads its own in-memory copy of the session data, loaded once when this
+				 * request started - it is never re-fetched mid-request. If this request was just waiting on the
+				 * lock above, the request that held it may have written a fresh 'store_api_draft_order' to the
+				 * persisted session store after this request's copy was already loaded, so that write would
+				 * otherwise be invisible here. Refresh this one key from the persisted store (not the request's
+				 * stale copy of the rest of the session) so get_draft_order() below sees it and resumes that order
+				 * instead of also creating one.
+				 *
+				 * get_session() is itself cache-aware ($wpdb is only queried on a cache miss), and this request's
+				 * own session bootstrap (restore_session_data(), on every request via 'init') already called it once
+				 * for this exact customer before this route ever ran - the concurrent holder's write can easily land
+				 * after that, leaving a stale cached copy under this key regardless of whether the cache is the
+				 * default per-request store or a shared backend like Redis. Evict it first so get_session() is forced
+				 * to hit the database rather than that stale entry.
+				 */
 				wp_cache_delete( \WC_Cache_Helper::get_cache_prefix( WC_SESSION_CACHE_GROUP ) . $lock_key, WC_SESSION_CACHE_GROUP );
 				$persisted_session_data = WC()->session->get_session( $lock_key );
 				if ( is_array( $persisted_session_data ) && array_key_exists( 'store_api_draft_order', $persisted_session_data ) ) {
@@ -912,12 +933,14 @@ class Checkout extends AbstractCartRoute {
 			// on the lock above depends on being able to read this as soon as it acquires the lock, which may be
 			// well before this request's normal end-of-request session save.
 			$this->set_draft_order_id( $this->order->get_id() );
-			if ( WC()->session instanceof \WC_Session_Handler ) {
+			if ( $may_create_new_order && WC()->session instanceof \WC_Session_Handler ) {
 				WC()->session->save_data();
 			}
 			wc_log_order_step( '[Store API #4::create_or_update_draft_order] Set order draft id', array( 'order_object' => $this->order ) );
 		} finally {
-			$checkout_lock->release( $lock_key, $lock_token );
+			if ( null !== $checkout_lock && null !== $lock_key && null !== $lock_token ) {
+				$checkout_lock->release( $lock_key, $lock_token );
+			}
 		}
 	}
 

@@ -3343,4 +3343,38 @@ class Checkout extends \WP_Test_REST_TestCase {
 			'The pre-existing order must be resumed, not duplicated, once the route refreshes the stale session value.'
 		);
 	}
+
+	/**
+	 * A GET (or PATCH) for a shopper who already has a draft order must not contend for the checkout lock -
+	 * only a POST (the actual place-order submission) can create a new order, so only it needs the lock. Without
+	 * this, a page load or a live totals recalculation happening to overlap with that same shopper's order
+	 * submission would itself block for the lock's full wait budget and could then fail with a "your order is
+	 * already being processed" error that has nothing to do with what it was actually doing.
+	 */
+	public function test_get_does_not_contend_for_the_checkout_lock_held_by_a_post() {
+		$post_request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$post_request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$post_request->set_body_params( $this->get_minimal_post_data() );
+		$post_response = rest_get_server()->dispatch( $post_request );
+		$this->assertSame( 200, $post_response->get_status(), print_r( $post_response->get_data(), true ) );
+
+		$checkout_lock = wc_get_container()->get( CheckoutOrderLock::class );
+		$lock_key      = (string) WC()->session->get_customer_id();
+		$lock_token    = $checkout_lock->acquire( $lock_key );
+		$this->assertNotNull( $lock_token, 'Test setup: must be able to acquire the lock to simulate a POST in progress.' );
+
+		try {
+			$get_request = new \WP_REST_Request( 'GET', '/wc/store/v1/checkout' );
+			$get_request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+			$get_response = rest_get_server()->dispatch( $get_request );
+		} finally {
+			$checkout_lock->release( $lock_key, $lock_token );
+		}
+
+		$this->assertSame(
+			200,
+			$get_response->get_status(),
+			'A GET for an existing draft order must succeed even while a POST holds the lock, not contend for it: ' . print_r( $get_response->get_data(), true )
+		);
+	}
 }
