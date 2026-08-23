@@ -145,6 +145,13 @@ describe( 'Add to Cart + Options interactivity store', () => {
 
 	it( 'validates zero and out-of-range quantities with the configured message', () => {
 		const registeredStore = getRegisteredStore();
+		mockProductsState.productInContext = {
+			...mockProductsState.productInContext,
+			add_to_cart: {
+				minimum: 0,
+				maximum: 5,
+			},
+		};
 
 		registeredStore.actions.validateQuantity( 42, 0 );
 
