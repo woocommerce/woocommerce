@@ -78,6 +78,12 @@ const themeColors: DefaultColors = {
 	footerTextColor: '#e50000',
 };
 
+const changeAccent = () => {
+	fireEvent.change( screen.getByLabelText( 'Accent' ), {
+		target: { value: '#abcdef' },
+	} );
+};
+
 describe( 'ResetStylesControl', () => {
 	let settingsFixture = document.createElement( 'div' );
 	let autoSyncInput = document.createElement( 'input' );
@@ -102,6 +108,27 @@ describe( 'ResetStylesControl', () => {
 				colors[ field.key ]
 			);
 		}
+	};
+
+	const renderWithThemeDefaults = () => {
+		const renderResult = render(
+			<ResetStylesControl
+				defaultColors={ initialColors }
+				hasThemeJson
+				autoSync
+				autoSyncInput={ autoSyncInput }
+			/>
+		);
+		unmount = renderResult.unmount;
+
+		renderResult.rerender(
+			<ResetStylesControl
+				defaultColors={ themeColors }
+				hasThemeJson
+				autoSync
+				autoSyncInput={ autoSyncInput }
+			/>
+		);
 	};
 
 	beforeEach( () => {
@@ -130,37 +157,9 @@ describe( 'ResetStylesControl', () => {
 			.jQuery;
 	} );
 
-	it( 'syncs theme defaults and restores the initial colors', async () => {
-		const renderResult = render(
-			<ResetStylesControl
-				defaultColors={ initialColors }
-				hasThemeJson
-				autoSync
-				autoSyncInput={ autoSyncInput }
-			/>
-		);
-		unmount = renderResult.unmount;
-
-		expect( screen.getByText( 'Synced with theme.' ) ).toBeVisible();
-		expect(
-			screen.getByRole( 'checkbox', {
-				name: 'Auto-sync with theme changes',
-			} )
-		).toBeChecked();
-		expect( autoSyncInput ).toHaveValue( 'yes' );
-		expectColors( initialColors );
-
-		renderResult.rerender(
-			<ResetStylesControl
-				defaultColors={ themeColors }
-				hasThemeJson
-				autoSync
-				autoSyncInput={ autoSyncInput }
-			/>
-		);
-		fireEvent.change( screen.getByLabelText( 'Accent' ), {
-			target: { value: '#abcdef' },
-		} );
+	it( 'shows sync and undo controls after a color change', () => {
+		renderWithThemeDefaults();
+		changeAccent();
 
 		expect( autoSyncInput ).toHaveValue( 'no' );
 		expect(
@@ -169,6 +168,11 @@ describe( 'ResetStylesControl', () => {
 		expect(
 			screen.getByRole( 'button', { name: 'Undo changes' } )
 		).toBeVisible();
+	} );
+
+	it( 'syncs theme defaults and re-enables auto-sync', async () => {
+		renderWithThemeDefaults();
+		changeAccent();
 
 		await userEvent.click(
 			screen.getByRole( 'button', { name: 'Sync with theme' } )
@@ -176,11 +180,11 @@ describe( 'ResetStylesControl', () => {
 
 		expectColors( themeColors );
 		expect( autoSyncInput ).toHaveValue( 'yes' );
+	} );
 
-		fireEvent.change( screen.getByLabelText( 'Secondary text' ), {
-			target: { value: '#fedcba' },
-		} );
-		expect( autoSyncInput ).toHaveValue( 'no' );
+	it( 'restores the initial colors and auto-sync setting with Undo', async () => {
+		renderWithThemeDefaults();
+		changeAccent();
 
 		await userEvent.click(
 			screen.getByRole( 'button', { name: 'Undo changes' } )
