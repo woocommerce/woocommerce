@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests\Checkout.
  */
 
+use Automattic\WooCommerce\Internal\Checkout\CheckoutOrderLock;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 
 /**
@@ -708,5 +709,184 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertInstanceOf( WP_Error::class, $result, 'create_order() should return a WP_Error when line items were not persisted.' );
 		$this->assertSame( 'checkout-error', $result->get_error_code(), 'Error code should come from the checkout try/catch path.' );
 		$this->assertStringContainsString( 'Order items could not be saved', $result->get_error_message(), 'Error message should surface the defense-in-depth guard message.' );
+	}
+
+	/**
+	 * @testdox process_checkout() should fail fast without creating a duplicate order when another request already holds this shopper's checkout lock.
+	 */
+	public function test_process_checkout_fails_fast_when_lock_is_held_by_another_request() {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
+		WC()->cart->add_to_cart( $product->get_id() );
+
+		$customer_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $customer_id );
+
+		// BACS is disabled by default in the test install; force it available regardless of its stored settings.
+		$bacs_gateway          = WC()->payment_gateways()->payment_gateways()[ WC_Gateway_BACS::ID ];
+		$bacs_was_enabled      = $bacs_gateway->enabled;
+		$bacs_gateway->enabled = 'yes';
+
+		add_filter(
+			'woocommerce_countries_allowed_countries',
+			function () {
+				return array( 'US' => 'United States (US)' );
+			}
+		);
+
+		$_POST    = array(
+			'woocommerce-process-checkout-nonce' => wp_create_nonce( 'woocommerce-process_checkout' ),
+			'ship_to_different_address'          => '0',
+			'payment_method'                     => WC_Gateway_BACS::ID,
+			'billing_first_name'                 => 'Jane',
+			'billing_last_name'                  => 'Doe',
+			'billing_address_1'                  => '123 Main St',
+			'billing_city'                       => 'New York',
+			'billing_state'                      => 'NY',
+			'billing_postcode'                   => '10001',
+			'billing_country'                    => 'US',
+			'billing_email'                      => 'jane@example.com',
+			'billing_phone'                      => '5555555555',
+		);
+		$_REQUEST = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Building the request fixture, not processing real input.
+
+		// Simulate another request already in the middle of creating an order for this same shopper.
+		$checkout_lock = wc_get_container()->get( CheckoutOrderLock::class );
+		$lock_key      = (string) WC()->session->get_customer_id();
+		$lock_token    = $checkout_lock->acquire( $lock_key );
+		$this->assertNotNull( $lock_token, 'Test setup: must be able to acquire the lock to simulate a concurrent holder.' );
+
+		$orders_before = wc_get_orders(
+			array(
+				'customer' => $customer_id,
+				'return'   => 'ids',
+			)
+		);
+
+		try {
+			$this->sut->process_checkout();
+		} finally {
+			$checkout_lock->release( $lock_key, $lock_token );
+			remove_all_filters( 'woocommerce_countries_allowed_countries' );
+			$bacs_gateway->enabled = $bacs_was_enabled;
+			$_POST                 = array();
+			$_REQUEST              = array();
+			WC()->cart->empty_cart();
+		}
+
+		$orders_after = wc_get_orders(
+			array(
+				'customer' => $customer_id,
+				'return'   => 'ids',
+			)
+		);
+
+		$this->assertSame( $orders_before, $orders_after, 'No order should be created while another request holds this shopper\'s lock.' );
+
+		$notices      = wc_get_notices( 'error' );
+		$found_notice = false;
+		foreach ( $notices as $notice ) {
+			if ( false !== strpos( $notice['notice'], 'already being processed' ) ) {
+				$found_notice = true;
+				break;
+			}
+		}
+		$this->assertTrue( $found_notice, 'The concurrent-checkout notice must be shown to the shopper.' );
+
+		wc_clear_notices();
+	}
+
+	/**
+	 * @testdox process_checkout() should resume an order another request already durably saved for this shopper, rather than creating a duplicate, even though this request's own session data was loaded before that write happened.
+	 */
+	public function test_process_checkout_resumes_an_order_saved_by_another_request_after_this_requests_session_was_loaded() {
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'virtual'       => true,
+				'regular_price' => 0,
+				'price'         => 0,
+			)
+		);
+		WC()->cart->add_to_cart( $product->get_id() );
+
+		$customer_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $customer_id );
+
+		add_filter(
+			'woocommerce_countries_allowed_countries',
+			function () {
+				return array( 'US' => 'United States (US)' );
+			}
+		);
+
+		// Create the order this test will simulate another, concurrent request having already created and durably
+		// saved. This mirrors what that other request's create_order() call would have produced: same cart, so the
+		// same cart hash create_order()'s own resume check matches on.
+		$existing_order_id = $this->sut->create_order(
+			array(
+				'payment_method' => WC_Gateway_BACS::ID,
+				'billing_email'  => 'jane@example.com',
+			)
+		);
+		$this->assertIsInt( $existing_order_id, 'Test setup: the pre-existing order must be created successfully.' );
+
+		// This request's own WC()->session already has no 'order_awaiting_payment' in memory (create_order() above
+		// never writes it - only process_checkout() does) - matching a request that loaded its session snapshot
+		// before another request's write. Write directly to the persisted sessions table, bypassing WC()->session's
+		// own set()/save_data(), to simulate that other request's write landing in the shared, persisted store
+		// without this request's already-loaded in-memory copy knowing about it.
+		global $wpdb;
+		$sessions_table = $wpdb->prefix . 'woocommerce_sessions';
+		$wpdb->query(
+			$wpdb->prepare(
+				"INSERT INTO {$sessions_table} (session_key, session_value, session_expiry) VALUES (%s, %s, %d) ON DUPLICATE KEY UPDATE session_value = VALUES(session_value), session_expiry = VALUES(session_expiry)", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				(string) WC()->session->get_customer_id(),
+				maybe_serialize( array( 'order_awaiting_payment' => $existing_order_id ) ),
+				time() + HOUR_IN_SECONDS
+			)
+		);
+
+		$this->assertSame(
+			0,
+			absint( WC()->session->get( 'order_awaiting_payment' ) ),
+			'Test setup: this request\'s in-memory session must still show no pending order at this point.'
+		);
+
+		$_POST    = array(
+			'woocommerce-process-checkout-nonce' => wp_create_nonce( 'woocommerce-process_checkout' ),
+			'ship_to_different_address'          => '0',
+			'billing_first_name'                 => 'Jane',
+			'billing_last_name'                  => 'Doe',
+			'billing_address_1'                  => '123 Main St',
+			'billing_city'                       => 'New York',
+			'billing_state'                      => 'NY',
+			'billing_postcode'                   => '10001',
+			'billing_country'                    => 'US',
+			'billing_email'                      => 'jane@example.com',
+			'billing_phone'                      => '5555555555',
+		);
+		$_REQUEST = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Building the request fixture, not processing real input.
+
+		try {
+			$this->sut->process_checkout();
+		} finally {
+			remove_all_filters( 'woocommerce_countries_allowed_countries' );
+			$_POST    = array();
+			$_REQUEST = array();
+			WC()->cart->empty_cart();
+		}
+
+		$orders = wc_get_orders(
+			array(
+				'customer' => $customer_id,
+				'return'   => 'ids',
+			)
+		);
+
+		$this->assertSame(
+			array( $existing_order_id ),
+			$orders,
+			'The pre-existing order must be resumed, not duplicated, once this request refreshes the stale session value.'
+		);
 	}
 }

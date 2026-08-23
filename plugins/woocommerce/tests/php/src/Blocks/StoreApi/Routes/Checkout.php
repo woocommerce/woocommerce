@@ -12,6 +12,7 @@ use Automattic\WooCommerce\StoreApi\Formatters\HtmlFormatter;
 use Automattic\WooCommerce\StoreApi\Formatters\CurrencyFormatter;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\CheckoutSchema;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
+use Automattic\WooCommerce\Internal\Checkout\CheckoutOrderLock;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Checkout as CheckoutRoute;
 use Automattic\WooCommerce\StoreApi\Routes\V1\CheckoutOrder as CheckoutOrderRoute;
 use Automattic\WooCommerce\StoreApi\SchemaController;
@@ -3230,5 +3231,112 @@ class Checkout extends \WP_Test_REST_TestCase {
 
 		$this->assertSame( 500, $response->get_status(), 'A cart session failure should return a Store API error response.' );
 		$this->assertSame( 'woocommerce_rest_unknown_server_error', $response->get_data()['code'] );
+	}
+
+	/**
+	 * Build the minimal valid POST body for the checkout route, matching the fixture cart from setUp().
+	 *
+	 * @return array
+	 */
+	private function get_minimal_post_data(): array {
+		return array(
+			'billing_address' => (object) array(
+				'first_name' => 'test',
+				'last_name'  => 'test',
+				'company'    => '',
+				'address_1'  => 'test',
+				'address_2'  => '',
+				'city'       => 'test',
+				'state'      => '',
+				'postcode'   => 'cb241ab',
+				'country'    => 'GB',
+				'phone'      => '',
+				'email'      => 'testaccount@test.com',
+			),
+			'payment_method'  => WC_Gateway_BACS::ID,
+		);
+	}
+
+	/**
+	 * Ensure the checkout route fails fast, without creating a duplicate order, when another request already
+	 * holds this shopper's checkout lock.
+	 */
+	public function test_post_data_fails_fast_when_lock_is_held_by_another_request() {
+		$checkout_lock = wc_get_container()->get( CheckoutOrderLock::class );
+		$lock_key      = (string) WC()->session->get_customer_id();
+		$lock_token    = $checkout_lock->acquire( $lock_key );
+		$this->assertNotNull( $lock_token, 'Test setup: must be able to acquire the lock to simulate a concurrent holder.' );
+
+		$orders_before = wc_get_orders( array( 'return' => 'ids' ) );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params( $this->get_minimal_post_data() );
+
+		try {
+			$response = rest_get_server()->dispatch( $request );
+		} finally {
+			$checkout_lock->release( $lock_key, $lock_token );
+		}
+
+		$this->assertSame( 409, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 'woocommerce_rest_checkout_order_locked', $response->get_data()['code'] );
+		$this->assertSame(
+			$orders_before,
+			wc_get_orders( array( 'return' => 'ids' ) ),
+			'No order should be created while another request holds this shopper\'s lock.'
+		);
+	}
+
+	/**
+	 * Ensure the checkout route resumes an order another request already durably saved for this shopper, rather
+	 * than creating a duplicate, even though this request's own session data was loaded before that write
+	 * happened - the same staleness gap that had to be closed for the classic/shortcode checkout.
+	 */
+	public function test_post_data_resumes_an_order_saved_by_another_request_after_this_requests_session_was_loaded() {
+		// 'checkout-draft' is the status create_order_from_cart() gives a freshly-materialised draft order, and
+		// is_valid_draft_order() accepts it unconditionally - no cart-hash or total matching required.
+		$existing_order = new \WC_Order();
+		$existing_order->set_status( 'checkout-draft' );
+		$existing_order->save();
+
+		// This request's own in-memory session has no 'store_api_draft_order' yet - matching a request that loaded
+		// its session snapshot before another request's write. Write directly to the persisted sessions table,
+		// bypassing WC()->session's own set()/save_data(), to simulate that other request's write landing in the
+		// shared, persisted store without this request's already-loaded in-memory copy knowing about it.
+		global $wpdb;
+		$sessions_table = $wpdb->prefix . 'woocommerce_sessions';
+		$wpdb->query(
+			$wpdb->prepare(
+				"INSERT INTO {$sessions_table} (session_key, session_value, session_expiry) VALUES (%s, %s, %d) ON DUPLICATE KEY UPDATE session_value = VALUES(session_value), session_expiry = VALUES(session_expiry)", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				(string) WC()->session->get_customer_id(),
+				maybe_serialize( array( 'store_api_draft_order' => $existing_order->get_id() ) ),
+				time() + HOUR_IN_SECONDS
+			)
+		);
+		// A real concurrent write from another process would update the shared object cache the same way
+		// save_data() does; this direct SQL write bypasses that, and within a single PHPUnit process the
+		// non-persistent object cache survives across test methods, so a stale cached session would otherwise
+		// mask this write the same way it never would in production.
+		\WC_Cache_Helper::invalidate_cache_group( WC_SESSION_CACHE_GROUP );
+
+		$this->assertSame(
+			0,
+			WC()->session->get( 'store_api_draft_order', 0 ),
+			'Test setup: this request\'s in-memory session must still show no draft order at this point.'
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params( $this->get_minimal_post_data() );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame(
+			$existing_order->get_id(),
+			$response->get_data()['order_id'] ?? null,
+			'The pre-existing order must be resumed, not duplicated, once the route refreshes the stale session value.'
+		);
 	}
 }

@@ -10,6 +10,7 @@
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Checkout\CheckoutOrderLock;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 
@@ -1408,15 +1409,58 @@ class WC_Checkout {
 
 			if ( empty( $posted_data['woocommerce_checkout_update_totals'] ) && 0 === wc_notice_count( 'error' ) ) {
 				$this->process_customer( $posted_data );
-				$order_id = $this->create_order( $posted_data );
-				$order    = wc_get_order( $order_id );
 
-				if ( is_wp_error( $order_id ) ) {
-					throw new Exception( $order_id->get_error_message() );
+				/*
+				 * Concurrent submissions for the same shopper (double-clicks, proxy/load-balancer retries on
+				 * timeout) would otherwise all read an empty 'order_awaiting_payment' session value and each
+				 * create their own order, since that session value isn't written until process_order_payment()
+				 * runs - after create_order() has already returned. Serialize that whole window per shopper, and
+				 * make the pending-order reference durable before releasing, so a request that was waiting resumes
+				 * this order instead of creating a duplicate. Released well before process_order_payment() calls
+				 * out to the payment gateway, which can hang or redirect off-site.
+				 */
+				$checkout_lock = wc_get_container()->get( CheckoutOrderLock::class );
+				$lock_key      = (string) WC()->session->get_customer_id();
+				$lock_token    = $checkout_lock->acquire( $lock_key );
+
+				if ( null === $lock_token ) {
+					throw new Exception( __( 'Your order is already being processed. Please wait a moment before trying again.', 'woocommerce' ) );
 				}
 
-				if ( ! $order ) {
-					throw new Exception( __( 'Unable to create order.', 'woocommerce' ) );
+				try {
+					/*
+					 * WC_Session only ever reads its own in-memory copy of the session data, loaded once when this
+					 * request started - it is never re-fetched mid-request. If this request was just waiting on the
+					 * lock above, the request that held it may have written a fresh 'order_awaiting_payment' to the
+					 * persisted session store after this request's copy was already loaded, so that write would
+					 * otherwise be invisible here. Refresh this one key from the persisted store (not the request's
+					 * stale copy of the rest of the session) so create_order()'s own pending-order check, a few
+					 * lines below, sees it and resumes that order instead of also creating one.
+					 */
+					if ( WC()->session instanceof WC_Session_Handler ) {
+						$persisted_session_data = WC()->session->get_session( $lock_key );
+						if ( is_array( $persisted_session_data ) && array_key_exists( 'order_awaiting_payment', $persisted_session_data ) ) {
+							WC()->session->set( 'order_awaiting_payment', $persisted_session_data['order_awaiting_payment'] );
+						}
+					}
+
+					$order_id = $this->create_order( $posted_data );
+					$order    = wc_get_order( $order_id );
+
+					if ( is_wp_error( $order_id ) ) {
+						throw new Exception( $order_id->get_error_message() );
+					}
+
+					if ( ! $order ) {
+						throw new Exception( __( 'Unable to create order.', 'woocommerce' ) );
+					}
+
+					WC()->session->set( 'order_awaiting_payment', $order_id );
+					if ( WC()->session instanceof WC_Session_Handler ) {
+						WC()->session->save_data();
+					}
+				} finally {
+					$checkout_lock->release( $lock_key, $lock_token );
 				}
 
 				wc_log_order_step(

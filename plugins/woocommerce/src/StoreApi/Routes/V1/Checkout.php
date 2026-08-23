@@ -8,6 +8,7 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
+use Automattic\WooCommerce\Internal\Checkout\CheckoutOrderLock;
 
 /**
  * Checkout class.
@@ -787,83 +788,129 @@ class Checkout extends AbstractCartRoute {
 	 * @throws RouteException On error.
 	 */
 	private function create_or_update_draft_order( \WP_REST_Request $request ) {
-		// Reuse the failed/pending order from the customer's session if one exists; otherwise the POST flow would orphan it by creating a fresh order on every retry.
-		$this->order = $this->order ?? $this->get_draft_order();
-
-		if ( ! $this->order ) {
-			$this->order = $this->order_controller->create_order_from_cart();
-			wc_log_order_step( '[Store API #4::create_or_update_draft_order] Created order from cart', array( 'order_object' => $this->order ) );
-
-			/**
-			 * Fires once when the Store API checkout draft order is first materialised.
-			 *
-			 * Use this hook for first-touch logic that should only run when the draft
-			 * order is initially created (e.g. analytics, abandoned-cart trackers). As
-			 * of WooCommerce 10.8.0 the Store API defers draft order creation to
-			 * place-order time, so this action fires once at POST rather than on the
-			 * first PATCH.
-			 *
-			 * @since 10.8.0
-			 *
-			 * @param \WC_Order $order Order object.
-			 */
-			do_action( 'woocommerce_store_api_checkout_order_created', $this->order );
-		} else {
-			$this->order_controller->update_order_from_cart( $this->order, true );
-			wc_log_order_step( '[Store API #4::create_or_update_draft_order] Updated order from cart', array( 'order_object' => $this->order ) );
-		}
-
-		wc_do_deprecated_action(
-			'__experimental_woocommerce_blocks_checkout_update_order_meta',
-			array(
-				$this->order,
-			),
-			'6.3.0',
-			'woocommerce_store_api_checkout_update_order_meta',
-			'This action was deprecated in WooCommerce Blocks version 6.3.0. Please use woocommerce_store_api_checkout_update_order_meta instead.'
-		);
-
-		wc_do_deprecated_action(
-			'woocommerce_blocks_checkout_update_order_meta',
-			array(
-				$this->order,
-			),
-			'7.2.0',
-			'woocommerce_store_api_checkout_update_order_meta',
-			'This action was deprecated in WooCommerce Blocks version 7.2.0. Please use woocommerce_store_api_checkout_update_order_meta instead.'
-		);
-
-		/**
-		 * Fires when the Checkout Block/Store API updates an order's meta data.
-		 *
-		 * This hook gives extensions the chance to add or update meta data on the $order.
-		 * Throwing an exception from a callback attached to this action will make the Checkout Block render in a warning state, effectively preventing checkout.
-		 *
-		 * This is similar to existing core hook woocommerce_checkout_update_order_meta.
-		 * We're using a new action:
-		 * - To keep the interface focused (only pass $order, not passing request data).
-		 * - This also explicitly indicates these orders are from checkout block/StoreAPI.
-		 *
-		 * @since 7.2.0
-		 *
-		 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3686
-		 *
-		 * @param \WC_Order $order Order object.
+		/*
+		 * Concurrent submissions for the same shopper (double-clicks, proxy/load-balancer retries on timeout)
+		 * would otherwise all read an empty 'store_api_draft_order' session value below and each create their
+		 * own order, since that session value isn't written until the very end of this method. Serialize the
+		 * whole read-decide-create-write sequence per shopper so a request that was waiting resumes the order
+		 * the other request created instead of also creating one. Released before process_payment()/
+		 * process_without_payment() are called back in process_order(), so a slow or off-site gateway can never
+		 * hold the lock.
 		 */
-		do_action( 'woocommerce_store_api_checkout_update_order_meta', $this->order );
+		$checkout_lock = wc_get_container()->get( CheckoutOrderLock::class );
+		$lock_key      = (string) WC()->session->get_customer_id();
+		$lock_token    = $checkout_lock->acquire( $lock_key );
 
-		// Confirm order is valid before proceeding further.
-		if ( ! $this->order instanceof \WC_Order ) {
+		if ( null === $lock_token ) {
 			throw new RouteException(
-				'woocommerce_rest_checkout_missing_order',
-				esc_html__( 'Unable to create order', 'woocommerce' ),
-				500
+				'woocommerce_rest_checkout_order_locked',
+				esc_html__( 'Your order is already being processed. Please wait a moment before trying again.', 'woocommerce' ),
+				409
 			);
 		}
 
-		// Store order ID to session.
-		$this->set_draft_order_id( $this->order->get_id() );
-		wc_log_order_step( '[Store API #4::create_or_update_draft_order] Set order draft id', array( 'order_object' => $this->order ) );
+		try {
+			/*
+			 * WC_Session only ever reads its own in-memory copy of the session data, loaded once when this
+			 * request started - it is never re-fetched mid-request. If this request was just waiting on the
+			 * lock above, the request that held it may have written a fresh 'store_api_draft_order' to the
+			 * persisted session store after this request's copy was already loaded, so that write would
+			 * otherwise be invisible here. Refresh this one key from the persisted store (not the request's
+			 * stale copy of the rest of the session) so get_draft_order() below sees it and resumes that order
+			 * instead of also creating one.
+			 */
+			if ( WC()->session instanceof \WC_Session_Handler ) {
+				$persisted_session_data = WC()->session->get_session( $lock_key );
+				if ( is_array( $persisted_session_data ) && array_key_exists( 'store_api_draft_order', $persisted_session_data ) ) {
+					WC()->session->set( 'store_api_draft_order', $persisted_session_data['store_api_draft_order'] );
+				}
+			}
+
+			// Reuse the failed/pending order from the customer's session if one exists; otherwise the POST flow would orphan it by creating a fresh order on every retry.
+			$this->order = $this->order ?? $this->get_draft_order();
+
+			if ( ! $this->order ) {
+				$this->order = $this->order_controller->create_order_from_cart();
+				wc_log_order_step( '[Store API #4::create_or_update_draft_order] Created order from cart', array( 'order_object' => $this->order ) );
+
+				/**
+				 * Fires once when the Store API checkout draft order is first materialised.
+				 *
+				 * Use this hook for first-touch logic that should only run when the draft
+				 * order is initially created (e.g. analytics, abandoned-cart trackers). As
+				 * of WooCommerce 10.8.0 the Store API defers draft order creation to
+				 * place-order time, so this action fires once at POST rather than on the
+				 * first PATCH.
+				 *
+				 * @since 10.8.0
+				 *
+				 * @param \WC_Order $order Order object.
+				 */
+				do_action( 'woocommerce_store_api_checkout_order_created', $this->order );
+			} else {
+				$this->order_controller->update_order_from_cart( $this->order, true );
+				wc_log_order_step( '[Store API #4::create_or_update_draft_order] Updated order from cart', array( 'order_object' => $this->order ) );
+			}
+
+			wc_do_deprecated_action(
+				'__experimental_woocommerce_blocks_checkout_update_order_meta',
+				array(
+					$this->order,
+				),
+				'6.3.0',
+				'woocommerce_store_api_checkout_update_order_meta',
+				'This action was deprecated in WooCommerce Blocks version 6.3.0. Please use woocommerce_store_api_checkout_update_order_meta instead.'
+			);
+
+			wc_do_deprecated_action(
+				'woocommerce_blocks_checkout_update_order_meta',
+				array(
+					$this->order,
+				),
+				'7.2.0',
+				'woocommerce_store_api_checkout_update_order_meta',
+				'This action was deprecated in WooCommerce Blocks version 7.2.0. Please use woocommerce_store_api_checkout_update_order_meta instead.'
+			);
+
+			/**
+			 * Fires when the Checkout Block/Store API updates an order's meta data.
+			 *
+			 * This hook gives extensions the chance to add or update meta data on the $order.
+			 * Throwing an exception from a callback attached to this action will make the Checkout Block render in a warning state, effectively preventing checkout.
+			 *
+			 * This is similar to existing core hook woocommerce_checkout_update_order_meta.
+			 * We're using a new action:
+			 * - To keep the interface focused (only pass $order, not passing request data).
+			 * - This also explicitly indicates these orders are from checkout block/StoreAPI.
+			 *
+			 * @since 7.2.0
+			 *
+			 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3686
+			 *
+			 * @param \WC_Order $order Order object.
+			 */
+			do_action( 'woocommerce_store_api_checkout_update_order_meta', $this->order );
+
+			// Confirm order is valid before proceeding further.
+			if ( ! $this->order instanceof \WC_Order ) {
+				throw new RouteException(
+					'woocommerce_rest_checkout_missing_order',
+					esc_html__( 'Unable to create order', 'woocommerce' ),
+					500
+				);
+			}
+
+			// Store order ID to session, and make it durable immediately - a concurrent request that is waiting
+			// on the lock above depends on being able to read this as soon as it acquires the lock, which may be
+			// well before this request's normal end-of-request session save.
+			$this->set_draft_order_id( $this->order->get_id() );
+			if ( WC()->session instanceof \WC_Session_Handler ) {
+				WC()->session->save_data();
+			}
+			wc_log_order_step( '[Store API #4::create_or_update_draft_order] Set order draft id', array( 'order_object' => $this->order ) );
+		} finally {
+			$checkout_lock->release( $lock_key, $lock_token );
+		}
 	}
 
 	/**
