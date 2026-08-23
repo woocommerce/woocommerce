@@ -3,12 +3,13 @@
  */
 import { render, screen } from '@testing-library/react';
 import { registerBlockType } from '@wordpress/blocks';
-import type { ComponentType, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 /**
  * Internal dependencies
  */
 import metadata from '../block.json';
+import Edit from '../edit';
 
 jest.mock( '@wordpress/blocks', () => ( {
 	registerBlockType: jest.fn(),
@@ -33,12 +34,20 @@ jest.mock( '@wordpress/components', () => ( {
 } ) );
 
 type RegisteredBlock = {
-	edit: ComponentType< Record< string, unknown > >;
+	attributes: typeof metadata.attributes;
+	edit: unknown;
 	save: () => null;
 };
 
-const loadRegisteredBlock = (): RegisteredBlock => {
+const loadRegisteredBlock = () => {
+	let isolatedEdit: unknown;
+
 	jest.isolateModules( () => {
+		isolatedEdit = (
+			jest.requireActual( '../edit' ) as {
+				default: unknown;
+			}
+		 ).default;
 		jest.requireActual( '../index' );
 	} );
 
@@ -50,7 +59,11 @@ const loadRegisteredBlock = (): RegisteredBlock => {
 	expect( registeredMetadata.name ).toBe( 'woocommerce/catalog-sorting' );
 	expect( settings.attributes ).toEqual( metadata.attributes );
 
-	return settings as RegisteredBlock;
+	return {
+		registeredMetadata,
+		settings: settings as RegisteredBlock,
+		isolatedEdit,
+	};
 };
 
 describe( 'Catalog Sorting block registration', () => {
@@ -58,9 +71,25 @@ describe( 'Catalog Sorting block registration', () => {
 		jest.clearAllMocks();
 	} );
 
-	it( 'registers its real editor placeholder and dynamic save callback', () => {
-		const { edit: Edit, save } = loadRegisteredBlock();
+	it( 'registers the real editor component', () => {
+		const { registeredMetadata, settings, isolatedEdit } =
+			loadRegisteredBlock();
 
+		expect( registeredMetadata ).toEqual( metadata );
+		expect( registeredMetadata.name ).toBe( 'woocommerce/catalog-sorting' );
+		expect( settings.attributes ).toEqual( metadata.attributes );
+		expect( settings.edit ).toBe( isolatedEdit );
+	} );
+
+	it( 'registers a dynamic save callback that returns null', () => {
+		const { settings } = loadRegisteredBlock();
+
+		expect( settings.save() ).toBeNull();
+	} );
+} );
+
+describe( 'Catalog Sorting editor placeholder', () => {
+	it( 'renders the default sorting option without a visual label', () => {
 		render(
 			<Edit
 				attributes={ { useLabel: false } }
@@ -71,6 +100,5 @@ describe( 'Catalog Sorting block registration', () => {
 		expect(
 			screen.getByRole( 'option', { name: 'Default sorting' } )
 		).toBeInTheDocument();
-		expect( save() ).toBeNull();
 	} );
 } );
