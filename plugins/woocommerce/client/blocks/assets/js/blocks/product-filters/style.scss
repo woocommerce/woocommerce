@@ -36,11 +36,7 @@
 		pointer-events: none;
 		top: var(--top-padding);
 		background-color: transparent;
-		// Generated inline rules override this because Style Engine filters transition declarations.
-		transition: var(
-			--wc-product-filters-overlay-transition,
-			background-color 500ms
-		);
+		transition: background-color 500ms;
 	}
 
 	.wc-block-product-filters__overlay-wrapper {

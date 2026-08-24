@@ -116,88 +116,68 @@ class ProductFilters extends AbstractBlock {
 		$tablet_query           = $viewport_media_queries['@tablet'] ?? null;
 		$mobile_selector        = ':where(.wc-block-product-filters).is-mobile-overlay';
 		$responsive_selector    = ':where(.wc-block-product-filters):is(.is-mobile-overlay,.is-tablet-overlay)';
-		$style_engine_options   = array( 'prettify' => false );
+		$responsive_styles      = '';
 
-		$css_rules = array();
 		if ( null !== $tablet_query ) {
-			$css_rules = $this->get_inline_presentation_rules( $mobile_selector, $tablet_query );
+			$responsive_styles = $this->get_inline_presentation_styles( $mobile_selector, $tablet_query );
 		}
-		$css_rules = array_merge(
-			$css_rules,
-			$this->get_inline_presentation_rules( $responsive_selector, $desktop_query )
-		);
 
-		return wp_style_engine_get_stylesheet_from_css_rules( $css_rules, $style_engine_options );
+		return $responsive_styles . $this->get_inline_presentation_styles( $responsive_selector, $desktop_query );
 	}
 
 	/**
-	 * Build rules for the inline Product Filters presentation.
+	 * Build CSS for the inline Product Filters presentation.
 	 *
 	 * @param string $block_selector Product Filters mode selector.
-	 * @param string $rules_group    Media query wrapping the rules.
-	 * @return array<int, array{rules_group: string, selector: string, declarations: array<string, string>}>
+	 * @param string $media_query    Media query wrapping the styles.
+	 * @return string Responsive CSS.
 	 */
-	private function get_inline_presentation_rules( $block_selector, $rules_group ) {
-		return array(
-			array(
-				'rules_group'  => $rules_group,
-				'selector'     => $block_selector,
-				'declarations' => array( 'display' => 'flex' ),
-			),
-			array(
-				'rules_group'  => $rules_group,
-				'selector'     => "{$block_selector} .wc-block-product-filters__overlay-header,{$block_selector} .wc-block-product-filters__overlay-footer,{$block_selector} .wc-block-product-filters__open-overlay",
-				'declarations' => array( 'display' => 'none' ),
-			),
-			array(
-				'rules_group'  => $rules_group,
-				'selector'     => "{$block_selector} .wc-block-product-filters__overlay",
-				// Style Engine filters inset and transition, so use supported equivalent declarations.
-				'declarations' => array(
-					'position'       => 'relative',
-					'pointer-events' => 'auto',
-					'top'            => '0',
-					'right'          => '0',
-					'bottom'         => '0',
-					'left'           => '0',
-					'background'     => 'inherit',
-					'color'          => 'inherit',
-					'--wc-product-filters-overlay-transition' => 'none',
-					'flex-grow'      => '1',
-				),
-			),
-			array(
-				'rules_group'  => $rules_group,
-				'selector'     => "{$block_selector} .wc-block-product-filters__overlay-wrapper",
-				'declarations' => array(
-					'width'      => 'auto',
-					'height'     => 'auto',
-					'background' => 'inherit',
-					'color'      => 'inherit',
-				),
-			),
-			array(
-				'rules_group'  => $rules_group,
-				'selector'     => "{$block_selector} .wc-block-product-filters__overlay-dialog",
-				'declarations' => array(
-					'position'   => 'relative',
-					'transform'  => 'none',
-					'background' => 'inherit',
-					'color'      => 'inherit',
-				),
-			),
-			array(
-				'rules_group'  => $rules_group,
-				'selector'     => "{$block_selector} .wc-block-product-filters__overlay-content",
-				'declarations' => array(
-					'padding'    => '0',
-					'overflow'   => 'visible',
-					'flex-grow'  => '1',
-					'background' => 'inherit',
-					'color'      => 'inherit',
-				),
-			),
-		);
+	private function get_inline_presentation_styles( $block_selector, $media_query ) {
+		return <<<CSS
+{$media_query} {
+	{$block_selector} {
+		display: flex;
+	}
+
+	{$block_selector} .wc-block-product-filters__overlay-header,
+	{$block_selector} .wc-block-product-filters__overlay-footer,
+	{$block_selector} .wc-block-product-filters__open-overlay {
+		display: none;
+	}
+
+	{$block_selector} .wc-block-product-filters__overlay {
+		position: relative;
+		pointer-events: auto;
+		inset: 0;
+		background: inherit;
+		color: inherit;
+		transition: none;
+		flex-grow: 1;
+	}
+
+	{$block_selector} .wc-block-product-filters__overlay-wrapper {
+		width: auto;
+		height: auto;
+		background: inherit;
+		color: inherit;
+	}
+
+	{$block_selector} .wc-block-product-filters__overlay-dialog {
+		position: relative;
+		transform: none;
+		background: inherit;
+		color: inherit;
+	}
+
+	{$block_selector} .wc-block-product-filters__overlay-content {
+		padding: 0;
+		overflow: visible;
+		flex-grow: 1;
+		background: inherit;
+		color: inherit;
+	}
+}
+CSS;
 	}
 
 	/**
