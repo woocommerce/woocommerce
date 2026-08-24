@@ -324,7 +324,14 @@ const SiteVisibility = () => {
 						'woocommerce'
 					) }
 				</p>
-				<div className="site-visibility-settings-slotfill-section-content">
+				<div
+					className={ clsx(
+						'site-visibility-settings-slotfill-section-content',
+						{
+							'is-hidden': comingSoon === 'yes',
+						}
+					) }
+				>
 					<ToggleControl
 						__nextHasNoMarginBottom
 						label={
@@ -342,7 +349,6 @@ const SiteVisibility = () => {
 							</>
 						}
 						checked={ siteVisibilityBadge === 'yes' }
-						disabled={ comingSoon === 'yes' }
 						onChange={ ( enabled ) => {
 							setSiteVisibilityBadge( enabled ? 'yes' : 'no' );
 							recordEvent( 'site_visibility_badge_toggle', {
