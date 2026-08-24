@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Product CSV importer: fail a variation row whose attributes the parent product does not offer, instead of importing it as a variation that matches every combination and discarding the attributes it already had.
+Fix product CSV import silently blanking variation attributes the parent product does not offer.
