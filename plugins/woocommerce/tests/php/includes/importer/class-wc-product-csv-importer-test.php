@@ -1043,6 +1043,64 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test that a partial update row omitting the Parent column updates the variation instead of failing.
+	 */
+	public function test_import_of_existing_variation_without_a_parent_column_still_updates() {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'S', 'M' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Partial Tee' );
+		$product->set_sku( 'IMPORT-PARTIAL-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_sku( 'IMPORT-PARTIAL-S' );
+		$variation->set_attributes( array( 'size' => 'S' ) );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+
+		// The standard price refresh: SKU plus the columns being changed, no Parent column at all.
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-partial-update.csv';
+		file_put_contents( // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+			$csv_file,
+			"Type,SKU,Regular price\nvariation,IMPORT-PARTIAL-S,25\n"
+		);
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'           => true,
+				'update_existing' => true,
+				'mapping'         => array(
+					'Type'          => 'type',
+					'SKU'           => 'sku',
+					'Regular price' => 'regular_price',
+				),
+			)
+		);
+
+		$data = $importer->import();
+
+		wp_delete_file( $csv_file );
+
+		$this->assertEmpty( $data['failed'], 'Expected the partial update to succeed, got ' . count( $data['failed'] ) . ' failures' );
+		$this->assertCount( 1, $data['updated'], 'Expected the variation to be updated' );
+
+		$stored = wc_get_product( $variation->get_id() );
+		$this->assertSame( '25', $stored->get_regular_price(), 'Expected the price column to be applied' );
+		$this->assertSame( array( 'size' => 'S' ), $stored->get_attributes(), 'Expected the variation to keep its attributes' );
+		$this->assertSame( $product->get_id(), $stored->get_parent_id(), 'Expected the variation to keep its parent' );
+
+		WC_Helper_Product::delete_product( $variation->get_id() );
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
 	 * @testdox Test that a variation row without a parent fails instead of being saved as a parentless variation.
 	 */
 	public function test_import_of_variation_without_a_parent_fails() {

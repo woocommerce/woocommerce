@@ -257,7 +257,11 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			if ( ProductType::VARIATION === ( $data['type'] ?? '' ) && ! empty( $data['parent_id'] ) ) {
 				$variation_parent = wc_get_product( $data['parent_id'] );
 
-				if ( $variation_parent && ! $variation_parent->is_type( ProductType::VARIATION ) ) {
+				if ( $variation_parent && $variation_parent->is_type( ProductType::VARIATION ) ) {
+					throw new Exception( esc_html__( 'Variation cannot be imported: Parent product cannot be a product variation', 'woocommerce' ), 401 );
+				}
+
+				if ( $variation_parent ) {
 					$this->assert_variation_attributes_offered( $data, $variation_parent );
 				}
 			}
@@ -498,6 +502,12 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			}
 		}
 
+		// A partial update need not repeat the Parent column, so fall back to the parent the variation
+		// is already attached to rather than refusing a row that names no new one.
+		if ( ! $parent && $variation->get_parent_id() ) {
+			$parent = wc_get_product( $variation->get_parent_id() );
+		}
+
 		// Stop if parent does not exists.
 		if ( ! $parent ) {
 			throw new Exception( esc_html__( 'Variation cannot be imported: Missing parent ID or parent does not exist yet.', 'woocommerce' ), 401 );
@@ -643,7 +653,6 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			}
 		}
 	}
-
 
 	/**
 	 * Get the message refusing a variation row over an attribute the parent product does not offer.
