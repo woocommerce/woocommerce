@@ -751,6 +751,10 @@ class Controller extends GenericController implements ExportableInterface {
 	 * @return array Key value pair of Column ID => Label.
 	 */
 	public function get_export_columns() {
+		// Appending keeps positional consumers of the released columns working, and
+		// this order must match getHeadersContent() in
+		// client/admin/client/analytics/report/customers/table.js, which produces the
+		// browser-side CSV for single-page reports from the same Download button.
 		$export_columns = array(
 			'name'            => __( 'Name', 'woocommerce' ),
 			'username'        => __( 'Username', 'woocommerce' ),

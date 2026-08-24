@@ -10,7 +10,10 @@ import { createRoot } from 'react-dom/client';
 /**
  * Internal dependencies
  */
-import { NativeSettingsField } from '../native-fields';
+import {
+	isNativeSettingsFieldType,
+	NativeSettingsField,
+} from '../native-fields';
 import type {
 	SettingsFieldComponentProps,
 	SettingsUIField,
@@ -544,5 +547,13 @@ describe( 'NativeSettingsField', () => {
 				container.querySelector( '.wc-settings-ui__number-control' )
 			).toBeNull();
 		} );
+	} );
+
+	it( 'reports which field types have a native renderer', () => {
+		expect( isNativeSettingsFieldType( 'text' ) ).toBe( true );
+		expect( isNativeSettingsFieldType( 'select' ) ).toBe( true );
+		expect( isNativeSettingsFieldType( 'extension_defined' ) ).toBe(
+			false
+		);
 	} );
 } );
