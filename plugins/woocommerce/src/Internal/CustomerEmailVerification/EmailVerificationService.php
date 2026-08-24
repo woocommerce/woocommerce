@@ -77,10 +77,7 @@ class EmailVerificationService {
 	 * @return bool True when the stored verified email matches the user's current email.
 	 */
 	public function is_verified( int $user_id ): bool {
-		$verified_email = (string) Users::get_site_user_meta( $user_id, self::VERIFIED_META );
-
-		// Both sides are lower-cased (stored that way, get_account_email() normalises), so === is exact.
-		$is_verified = '' !== $verified_email && $verified_email === $this->get_account_email( $user_id );
+		$is_verified = $this->has_verified_email( $user_id );
 
 		/**
 		 * Filters whether a customer's current account email address is considered verified.
@@ -97,11 +94,30 @@ class EmailVerificationService {
 	}
 
 	/**
+	 * Return whether the stored verified-email meta matches the user's current account email.
+	 *
+	 * Unlike {@see self::is_verified()} this reflects only the persisted state — the
+	 * 'woocommerce_customer_email_is_verified' filter is not applied — so write paths such as
+	 * {@see self::mark_verified()} stay consistent however extensions filter the reported status.
+	 *
+	 * @param int $user_id WordPress user ID.
+	 * @return bool True when the stored verified email matches the user's current email.
+	 */
+	private function has_verified_email( int $user_id ): bool {
+		$verified_email = (string) Users::get_site_user_meta( $user_id, self::VERIFIED_META );
+
+		// Both sides are lower-cased (stored that way, get_account_email() normalises), so === is exact.
+		return '' !== $verified_email && $verified_email === $this->get_account_email( $user_id );
+	}
+
+	/**
 	 * Mark the given user as having verified their current account email address.
 	 *
 	 * Stores the verified email address, clears any pending key, and fires the
-	 * {@see 'woocommerce_customer_email_verified'} action. No-ops if the user is already
-	 * verified for their current email.
+	 * {@see 'woocommerce_customer_email_verified'} action. No-ops only when the persisted
+	 * verified email already matches the current account email — the
+	 * 'woocommerce_customer_email_is_verified' filter does not gate the write, so an extension
+	 * filtering the reported status can neither block persistence nor cause a duplicate action.
 	 *
 	 * @since 11.0.0
 	 *
@@ -109,7 +125,7 @@ class EmailVerificationService {
 	 * @return void
 	 */
 	public function mark_verified( int $user_id ): void {
-		if ( $this->is_verified( $user_id ) ) {
+		if ( $this->has_verified_email( $user_id ) ) {
 			return;
 		}
 

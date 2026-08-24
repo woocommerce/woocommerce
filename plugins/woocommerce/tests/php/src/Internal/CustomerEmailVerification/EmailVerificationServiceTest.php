@@ -263,4 +263,95 @@ class EmailVerificationServiceTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $received_status, 'The filter should receive the unfiltered verification status' );
 		$this->assertSame( $user_id, $received_user_id, 'The filter should receive the user ID' );
 	}
+
+	/**
+	 * @testdox mark_verified should persist and fire the hook for an unverified user even when the filter reports verified.
+	 */
+	public function test_mark_verified_persists_for_unverified_user_when_filter_forces_verified(): void {
+		$user_id = wc_create_new_customer( 'filter-mark@example.com', 'filtermark', 'pw' );
+		$key     = $this->sut->create_verification_key( $user_id );
+
+		$hook_calls = 0;
+		$listener   = static function () use ( &$hook_calls ) {
+			++$hook_calls;
+		};
+		add_action( 'woocommerce_customer_email_verified', $listener );
+		add_filter( 'woocommerce_customer_email_is_verified', '__return_true' );
+
+		$this->sut->mark_verified( $user_id );
+
+		remove_filter( 'woocommerce_customer_email_is_verified', '__return_true' );
+		remove_action( 'woocommerce_customer_email_verified', $listener );
+
+		$this->assertSame( 1, $hook_calls, 'The filter reporting verified should not block the verified action' );
+		$this->assertTrue( $this->sut->is_verified( $user_id ), 'The filter reporting verified should not block persisting the meta' );
+		$this->assertFalse( $this->sut->check_verification_key( $user_id, $key ), 'The filter reporting verified should not block consuming the pending key' );
+	}
+
+	/**
+	 * @testdox mark_verified should stay a no-op for a verified user even when the filter reports verified.
+	 */
+	public function test_mark_verified_noops_for_verified_user_when_filter_forces_verified(): void {
+		$user_id = wc_create_new_customer( 'filter-mark-verified@example.com', 'filtermarkverified', 'pw' );
+		$this->sut->mark_verified( $user_id );
+
+		$hook_calls = 0;
+		$listener   = static function () use ( &$hook_calls ) {
+			++$hook_calls;
+		};
+		add_action( 'woocommerce_customer_email_verified', $listener );
+		add_filter( 'woocommerce_customer_email_is_verified', '__return_true' );
+
+		$this->sut->mark_verified( $user_id );
+
+		remove_filter( 'woocommerce_customer_email_is_verified', '__return_true' );
+		remove_action( 'woocommerce_customer_email_verified', $listener );
+
+		$this->assertSame( 0, $hook_calls, 'An already persisted verified user should not re-fire the verified action' );
+	}
+
+	/**
+	 * @testdox mark_verified should persist and fire the hook for an unverified user even when the filter reports unverified.
+	 */
+	public function test_mark_verified_persists_for_unverified_user_when_filter_forces_unverified(): void {
+		$user_id = wc_create_new_customer( 'filter-mark-false@example.com', 'filtermarkfalse', 'pw' );
+
+		$hook_calls = 0;
+		$listener   = static function () use ( &$hook_calls ) {
+			++$hook_calls;
+		};
+		add_action( 'woocommerce_customer_email_verified', $listener );
+		add_filter( 'woocommerce_customer_email_is_verified', '__return_false' );
+
+		$this->sut->mark_verified( $user_id );
+
+		remove_filter( 'woocommerce_customer_email_is_verified', '__return_false' );
+		remove_action( 'woocommerce_customer_email_verified', $listener );
+
+		$this->assertSame( 1, $hook_calls, 'The filter reporting unverified should not change a normal mark' );
+		$this->assertTrue( $this->sut->is_verified( $user_id ), 'The user should be persisted as verified' );
+	}
+
+	/**
+	 * @testdox mark_verified should stay a no-op for a verified user even when the filter reports unverified.
+	 */
+	public function test_mark_verified_noops_for_verified_user_when_filter_forces_unverified(): void {
+		$user_id = wc_create_new_customer( 'filter-noop-false@example.com', 'filternoopfalse', 'pw' );
+		$this->sut->mark_verified( $user_id );
+
+		$hook_calls = 0;
+		$listener   = static function () use ( &$hook_calls ) {
+			++$hook_calls;
+		};
+		add_action( 'woocommerce_customer_email_verified', $listener );
+		add_filter( 'woocommerce_customer_email_is_verified', '__return_false' );
+
+		$this->sut->mark_verified( $user_id );
+
+		remove_filter( 'woocommerce_customer_email_is_verified', '__return_false' );
+		remove_action( 'woocommerce_customer_email_verified', $listener );
+
+		$this->assertSame( 0, $hook_calls, 'The filter reporting unverified should not re-fire the verified action for a persisted verified user' );
+		$this->assertTrue( $this->sut->is_verified( $user_id ), 'The persisted verified status should remain' );
+	}
 }
