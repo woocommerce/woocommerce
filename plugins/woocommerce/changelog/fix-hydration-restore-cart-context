@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore the cart context after hydrating a Store API route, so a front-end page render no longer inherits the store-api cart context and its shipping behaviour.

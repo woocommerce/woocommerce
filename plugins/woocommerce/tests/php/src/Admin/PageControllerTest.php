@@ -80,7 +80,7 @@ class PageControllerTest extends WC_Unit_Test_Case {
 		$this->current_screen_backup = $GLOBALS['current_screen'] ?? null;
 		$GLOBALS['current_screen']   = $this->get_screen_mock(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		if ( ! did_action( 'current_screen' ) ) {
-			do_action( 'current_screen', $GLOBALS['current_screen'] ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			do_action( 'current_screen', $GLOBALS['current_screen'] );
 		}
 
 		parent::setUp();
