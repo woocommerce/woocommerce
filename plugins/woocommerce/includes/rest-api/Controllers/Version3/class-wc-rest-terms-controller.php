@@ -633,19 +633,23 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	 * @return array List of term objects for the current page. Total count in `$this->total_terms`.
 	 */
 	protected function get_terms_for_response( $taxonomy, $prepared_args ) {
-		$number = isset( $prepared_args['number'] ) ? (int) $prepared_args['number'] : 0;
-		$offset = isset( $prepared_args['offset'] ) ? (int) $prepared_args['offset'] : 0;
+		$number          = isset( $prepared_args['number'] ) ? (int) $prepared_args['number'] : 0;
+		$offset          = isset( $prepared_args['offset'] ) ? (int) $prepared_args['offset'] : 0;
+		$is_hierarchical = is_taxonomy_hierarchical( $taxonomy );
+		$query_args      = $prepared_args;
 
-		if ( is_taxonomy_hierarchical( $taxonomy ) ) {
-			$count_args = $prepared_args;
-			unset( $count_args['number'], $count_args['offset'] );
+		if ( $is_hierarchical ) {
+			unset( $query_args['number'], $query_args['offset'] );
+		}
 
-			$terms = get_terms( $taxonomy, $count_args );
-			if ( is_wp_error( $terms ) || ! is_array( $terms ) ) {
-				$this->total_terms = 0;
-				return array();
-			}
+		$terms = get_terms( array_merge( $query_args, array( 'taxonomy' => $taxonomy ) ) );
 
+		if ( is_wp_error( $terms ) || ! is_array( $terms ) ) {
+			$this->total_terms = 0;
+			return array();
+		}
+
+		if ( $is_hierarchical ) {
 			$this->total_terms = count( $terms );
 
 			if ( $number ) {
@@ -659,11 +663,9 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 			return $terms;
 		}
 
-		$terms = get_terms( $taxonomy, $prepared_args );
-
 		$count_args = $prepared_args;
 		unset( $count_args['number'], $count_args['offset'] );
-		$total_terms = wp_count_terms( $taxonomy, $count_args );
+		$total_terms = wp_count_terms( array_merge( $count_args, array( 'taxonomy' => $taxonomy ) ) );
 
 		// Ensure we don't return results when offset is out of bounds.
 		// See https://core.trac.wordpress.org/ticket/35935.
@@ -677,10 +679,6 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		}
 
 		$this->total_terms = (int) $total_terms;
-
-		if ( is_wp_error( $terms ) || ! is_array( $terms ) ) {
-			return array();
-		}
 
 		return $terms;
 	}
