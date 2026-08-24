@@ -92,6 +92,13 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	protected $start_time = 0;
 
 	/**
+	 * Global attribute keys already resolved by get_variation_attribute_key(), keyed by raw name.
+	 *
+	 * @var array
+	 */
+	private $variation_attribute_keys = array();
+
+	/**
 	 * Get file raw headers.
 	 *
 	 * @return array
@@ -505,28 +512,24 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 		// Stop if parent is a product variation.
 		if ( $parent->is_type( ProductType::VARIATION ) ) {
-			throw new Exception( esc_html__( 'Variation cannot be imported: Parent product cannot be a product variation.', 'woocommerce' ), 401 );
+			throw new Exception( esc_html__( 'Variation cannot be imported: Parent product cannot be a product variation', 'woocommerce' ), 401 );
 		}
 
 		if ( isset( $data['raw_attributes'] ) ) {
 			$attributes = array();
 
-			// Resolved once and passed down: every consumer below needs the same keys, and resolving
-			// one costs a scan of every global attribute on the site.
-			$attribute_keys = $this->get_variation_attribute_keys( $data );
-
 			// Before get_variation_parent_attributes(), which saves the parent: a row that imports
 			// nothing must not change the product.
-			$this->assert_variation_attributes_offered( $data, $parent, $attribute_keys );
+			$this->assert_variation_attributes_offered( $data, $parent );
 
-			$parent_attributes = $this->get_variation_parent_attributes( $data['raw_attributes'], $parent, $attribute_keys );
+			$parent_attributes = $this->get_variation_parent_attributes( $data['raw_attributes'], $parent );
 
-			foreach ( $data['raw_attributes'] as $index => $attribute ) {
+			foreach ( $data['raw_attributes'] as $attribute ) {
 				if ( empty( $attribute['name'] ) ) {
 					continue;
 				}
 
-				$attribute_name = $attribute_keys[ $index ];
+				$attribute_name = $this->get_variation_attribute_key( $attribute );
 
 				// Every named attribute is on the parent by now; this only fires if promotion failed.
 				if ( ! isset( $parent_attributes[ $attribute_name ] ) || ! $parent_attributes[ $attribute_name ]->get_variation() ) {
@@ -547,17 +550,16 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	/**
 	 * Get variation parent attributes and set "is_variation".
 	 *
-	 * @param  array      $attributes     Attributes list.
-	 * @param  WC_Product $parent_product Parent product data.
-	 * @param  array      $attribute_keys Optional. Keys already resolved by get_variation_attribute_keys(), to save resolving them again.
+	 * @param  array      $attributes Attributes list.
+	 * @param  WC_Product $parent     Parent product data.
 	 * @return array
 	 */
-	protected function get_variation_parent_attributes( $attributes, $parent_product, $attribute_keys = array() ) {
-		$parent_attributes = $parent_product->get_attributes();
+	protected function get_variation_parent_attributes( $attributes, $parent ) {
+		$parent_attributes = $parent->get_attributes();
 		$require_save      = false;
 
-		foreach ( $attributes as $index => $attribute ) {
-			$attribute_name = $attribute_keys[ $index ] ?? $this->get_variation_attribute_key( $attribute );
+		foreach ( $attributes as $attribute ) {
+			$attribute_name = $this->get_variation_attribute_key( $attribute );
 
 			// Check if attribute handle variations.
 			if ( isset( $parent_attributes[ $attribute_name ] ) && ! $parent_attributes[ $attribute_name ]->get_variation() ) {
@@ -571,8 +573,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 		// Save variation attributes.
 		if ( $require_save ) {
-			$parent_product->set_attributes( array_values( $parent_attributes ) );
-			$parent_product->save();
+			$parent->set_attributes( array_values( $parent_attributes ) );
+			$parent->save();
 		}
 
 		return $parent_attributes;
@@ -599,16 +601,25 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			return sanitize_title( $raw_name );
 		}
 
+		// Resolving scans every global attribute on the site, and each row asks for the same handful
+		// of names. A global attribute created part way through an import is created with the slug
+		// this derives anyway, so a cached answer cannot go stale.
+		if ( isset( $this->variation_attribute_keys[ $raw_name ] ) ) {
+			return $this->variation_attribute_keys[ $raw_name ];
+		}
+
 		// get_attribute_taxonomy_id() is not used: it creates the global attribute when the name does
 		// not resolve, and this runs while deciding whether to refuse a row. A subclass that resolves
 		// names its own way has to override this non-creating lookup instead.
 		$attribute_id = $this->get_existing_attribute_taxonomy_id( $raw_name );
 
-		if ( $attribute_id ) {
-			return sanitize_title( wc_attribute_taxonomy_name_by_id( $attribute_id ) );
-		}
+		$key = $attribute_id
+			? sanitize_title( wc_attribute_taxonomy_name_by_id( $attribute_id ) )
+			: sanitize_title( wc_attribute_taxonomy_name( wc_attribute_taxonomy_slug( $this->get_attribute_taxonomy_name_from_raw_name( $raw_name ) ) ) );
 
-		return sanitize_title( wc_attribute_taxonomy_name( wc_attribute_taxonomy_slug( $this->get_attribute_taxonomy_name_from_raw_name( $raw_name ) ) ) );
+		$this->variation_attribute_keys[ $raw_name ] = $key;
+
+		return $key;
 	}
 
 	/**
@@ -621,11 +632,10 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 *
 	 * @param array      $data           Item data.
 	 * @param WC_Product $parent_product Parent product the variation belongs to.
-	 * @param array      $attribute_keys Optional. Keys already resolved by get_variation_attribute_keys(), to save resolving them again.
 	 * @return void
 	 * @throws Exception If the parent does not offer one of the row's attributes.
 	 */
-	protected function assert_variation_attributes_offered( $data, $parent_product, $attribute_keys = array() ) {
+	protected function assert_variation_attributes_offered( $data, $parent_product ) {
 		if ( empty( $data['raw_attributes'] ) ) {
 			return;
 		}
@@ -639,42 +649,17 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 		$declared_attributes = $parent_product->get_attributes();
 
-		foreach ( $data['raw_attributes'] as $index => $attribute ) {
+		foreach ( $data['raw_attributes'] as $attribute ) {
 			if ( empty( $attribute['name'] ) ) {
 				continue;
 			}
 
-			if ( ! isset( $declared_attributes[ $attribute_keys[ $index ] ?? $this->get_variation_attribute_key( $attribute ) ] ) ) {
+			if ( ! isset( $declared_attributes[ $this->get_variation_attribute_key( $attribute ) ] ) ) {
 				throw new Exception( esc_html( $this->get_unmatched_variation_attribute_message( $attribute, $declared_attributes ) ) );
 			}
 		}
 	}
 
-	/**
-	 * Resolve every named attribute of a variation row to its parent attribute key.
-	 *
-	 * @since 11.1.0
-	 *
-	 * @param array $data Item data.
-	 * @return array Keys indexed as the row's raw attributes are, skipping entries that name nothing.
-	 */
-	protected function get_variation_attribute_keys( $data ) {
-		$keys = array();
-
-		if ( empty( $data['raw_attributes'] ) ) {
-			return $keys;
-		}
-
-		foreach ( $data['raw_attributes'] as $index => $attribute ) {
-			if ( empty( $attribute['name'] ) ) {
-				continue;
-			}
-
-			$keys[ $index ] = $this->get_variation_attribute_key( $attribute );
-		}
-
-		return $keys;
-	}
 
 	/**
 	 * Get the message refusing a variation row over an attribute the parent product does not offer.
