@@ -38,11 +38,19 @@ test.describe( 'Product permalink settings', () => {
 
 		await expect( productPermalinkRadios ).toHaveCount( 4 );
 
+		// Every WP-CLI call in this spec is a plain database operation, so plugins and themes are
+		// skipped: earlier specs in the serial suite can leave heavyweight extensions installed
+		// (the onboarding wizard installs the default set), and booting them under WP-CLI can
+		// exhaust the CLI container's memory limit before the command runs.
+		const optionCliFlags = '--skip-plugins --skip-themes';
+
 		// Snapshot the whole option rather than the visible form state: the journey's Shop base
 		// saves also flip the derived `use_verbose_page_rules` flag, which no form field exposes,
 		// so a UI-driven restore could never put it back.
 		const originalPermalinks = (
-			await wpCLI( 'wp option get woocommerce_permalinks --format=json' )
+			await wpCLI(
+				`wp option get woocommerce_permalinks --format=json ${ optionCliFlags }`
+			)
 		).stdout.trim();
 
 		try {
@@ -130,18 +138,22 @@ test.describe( 'Product permalink settings', () => {
 			const storedPermalinks = JSON.parse(
 				(
 					await wpCLI(
-						'wp option get woocommerce_permalinks --format=json'
+						`wp option get woocommerce_permalinks --format=json ${ optionCliFlags }`
 					)
 				).stdout.trim()
 			);
 			expect( storedPermalinks.product_base ).toBe( expectedBareSlug );
 		} finally {
 			await wpCLI(
-				`wp option update woocommerce_permalinks '${ originalPermalinks }' --format=json`
+				`wp option update woocommerce_permalinks '${ originalPermalinks }' --format=json ${ optionCliFlags }`
 			);
 			// The option alone does not rebuild the persisted rewrite rules the front end matches
-			// against; a save on the Permalinks screen would have flushed them, so do the same.
-			await wpCLI( 'wp rewrite flush --hard' );
+			// against. Emptying them makes WordPress regenerate on the next request with every
+			// plugin loaded — `wp rewrite flush` under --skip-plugins would persist a rule set
+			// missing all plugin rewrites.
+			await wpCLI(
+				`wp option update rewrite_rules '' ${ optionCliFlags }`
+			);
 		}
 	} );
 } );
