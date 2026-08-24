@@ -624,6 +624,13 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			return;
 		}
 
+		// A parent still marked 'importing' is the placeholder parse_relative_field() created for a
+		// row further down the file, so it declares no attributes yet and every one of them would
+		// otherwise be reported as missing from a product that does in fact have them.
+		if ( 'importing' === $parent_product->get_status() ) {
+			throw new Exception( esc_html__( 'Variation cannot be imported: the parent product has not been imported yet. List the parent product before its variations.', 'woocommerce' ) );
+		}
+
 		$declared_attributes = $parent_product->get_attributes();
 
 		foreach ( $data['raw_attributes'] as $attribute ) {
@@ -662,17 +669,30 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @return string Sentence naming the mismatch.
 	 */
 	protected function get_unmatched_variation_attribute_reason( $attribute, $parent_attributes ) {
-		$raw_name   = isset( $attribute['name'] ) ? $attribute['name'] : '';
-		$custom_key = sanitize_title( $raw_name );
+		$raw_name = isset( $attribute['name'] ) ? $attribute['name'] : '';
 
-		// The parent does have the attribute here, just not as a global one, so naming it alone would
-		// send the merchant looking for the wrong problem.
-		if ( ! empty( $attribute['taxonomy'] ) && isset( $parent_attributes[ $custom_key ] ) && ! $parent_attributes[ $custom_key ]->is_taxonomy() ) {
-			return sprintf(
-				/* translators: %s: attribute name */
-				__( 'The parent product has a custom "%s" attribute, but the row marks it as a global attribute.', 'woocommerce' ),
-				$raw_name
-			);
+		// The parent does have the attribute in both branches below, just as the other kind, so
+		// naming it alone would send the merchant looking for the wrong problem.
+		if ( empty( $attribute['taxonomy'] ) ) {
+			$global_key = $this->get_variation_attribute_key( array_merge( $attribute, array( 'taxonomy' => true ) ) );
+
+			if ( isset( $parent_attributes[ $global_key ] ) ) {
+				return sprintf(
+					/* translators: %s: attribute name */
+					__( 'The parent product has a global "%s" attribute, but the row does not mark it as global.', 'woocommerce' ),
+					$raw_name
+				);
+			}
+		} else {
+			$custom_key = sanitize_title( $raw_name );
+
+			if ( isset( $parent_attributes[ $custom_key ] ) && ! $parent_attributes[ $custom_key ]->is_taxonomy() ) {
+				return sprintf(
+					/* translators: %s: attribute name */
+					__( 'The parent product has a custom "%s" attribute, but the row marks it as a global attribute.', 'woocommerce' ),
+					$raw_name
+				);
+			}
 		}
 
 		return sprintf(

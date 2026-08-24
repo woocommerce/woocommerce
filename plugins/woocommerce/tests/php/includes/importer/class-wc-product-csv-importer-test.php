@@ -963,6 +963,104 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test that a variation row listed before its parent row says the parent has not been imported yet.
+	 */
+	public function test_import_of_variation_before_its_parent_row_names_the_missing_parent() {
+		// update_existing is off, which is what makes parse_relative_field() stand in an 'importing'
+		// placeholder for the parent row that has not been reached yet.
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-variation-before-parent.csv';
+		file_put_contents( // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+			$csv_file,
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\n"
+			. "variation,IMPORT-ORDER-V,Import Order V,IMPORT-ORDER-PARENT,Size,S,0,12\n"
+			. "variable,IMPORT-ORDER-PARENT,Import Order Parent,,Size,\"S, M\",0,\n"
+		);
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'           => true,
+				'update_existing' => false,
+				'mapping'         => array(
+					'Type'                 => 'type',
+					'SKU'                  => 'sku',
+					'Name'                 => 'name',
+					'Parent'               => 'parent_id',
+					'Attribute 1 name'     => 'attributes:name1',
+					'Attribute 1 value(s)' => 'attributes:value1',
+					'Attribute 1 global'   => 'attributes:taxonomy1',
+					'Regular price'        => 'regular_price',
+				),
+			)
+		);
+
+		$data = $importer->import();
+
+		wp_delete_file( $csv_file );
+
+		$this->assertCount( 1, $data['failed'], 'Expected the variation row to fail' );
+		$this->assertSame(
+			'Variation cannot be imported: the parent product has not been imported yet. List the parent product before its variations.',
+			html_entity_decode( $data['failed'][0]->get_error_message(), ENT_QUOTES ),
+			'Expected the failure to name the row order, not a missing attribute the parent does have'
+		);
+
+		$parent_id = wc_get_product_id_by_sku( 'IMPORT-ORDER-PARENT' );
+		if ( $parent_id ) {
+			WC_Helper_Product::delete_product( $parent_id );
+		}
+		$placeholder_id = wc_get_product_id_by_sku( 'IMPORT-ORDER-V' );
+		if ( $placeholder_id ) {
+			wp_delete_post( $placeholder_id, true );
+		}
+	}
+
+	/**
+	 * @testdox Test that a row naming a global parent attribute without marking it global says so.
+	 */
+	public function test_import_failure_names_the_missing_global_flag() {
+		$attribute_data = WC_Helper_Product::create_attribute( 'colour-airr134', array( 'Red', 'Blue' ) );
+		$taxonomy       = $attribute_data['attribute_taxonomy'];
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_id( $attribute_data['attribute_id'] );
+		$attribute->set_name( $taxonomy );
+		$attribute->set_options( $attribute_data['term_ids'] );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Global Flag Tee' );
+		$product->set_sku( 'IMPORT-GLOBALFLAG-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_sku( 'IMPORT-GLOBALFLAG-RED' );
+		$variation->set_attributes( array( $taxonomy => 'red' ) );
+		$variation->save();
+
+		$data = $this->import_with_update_existing(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-GLOBALFLAG-RED,Import Global Flag Tee,IMPORT-GLOBALFLAG-PARENT,colour-airr134,Red,0,12\n",
+			'import-missing-global-flag.csv'
+		);
+
+		$this->assertCount( 1, $data['failed'], 'Expected the row to fail' );
+		$this->assertSame(
+			'Variation cannot be imported: The parent product has a global "colour-airr134" attribute, but the row does not mark it as global.',
+			html_entity_decode( $data['failed'][0]->get_error_message(), ENT_QUOTES ),
+			'Expected the failure to name the global flag, since the parent does have the attribute'
+		);
+
+		$stored = wc_get_product( $variation->get_id() );
+		$this->assertSame( array( $taxonomy => 'red' ), $stored->get_attributes(), 'Expected the existing variation to keep its attributes' );
+
+		WC_Helper_Product::delete_product( $variation->get_id() );
+		WC_Helper_Product::delete_product( $product->get_id() );
+		WC_Helper_Product::delete_attribute( $attribute_data['attribute_id'] );
+	}
+
+	/**
 	 * @testdox Test that a refused variation row does not convert its import placeholder into a variation post.
 	 */
 	public function test_import_failure_does_not_convert_the_import_placeholder() {
@@ -1050,6 +1148,13 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		$this->assertCount( 1, $data['failed'], 'Expected the row to fail rather than be reported as a successful update' );
 		$this->assertEmpty( $data['updated'], 'Expected the row not to be counted as an update' );
+		// Asserted in full because this row also fails on trunk, there because wc_create_attribute()
+		// rejects the slug length. Only the reason distinguishes the new refusal from that one.
+		$this->assertSame(
+			'Variation cannot be imported: The parent product has a custom "fabric-composition-and-care-notes" attribute, but the row marks it as a global attribute.',
+			html_entity_decode( $data['failed'][0]->get_error_message(), ENT_QUOTES ),
+			'Expected the refusal to name the global flag, not the slug length'
+		);
 
 		$stored = wc_get_product( $variation->get_id() );
 		$this->assertSame( array( 'fabric-composition-and-care-notes' => 'Cotton' ), $stored->get_attributes(), 'Expected the existing variation to keep its attributes' );
