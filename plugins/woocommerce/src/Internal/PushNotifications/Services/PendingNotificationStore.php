@@ -8,7 +8,9 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
+use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
+use Throwable;
 
 /**
  * Store that collects notifications during a request and dispatches them all on
@@ -177,11 +179,16 @@ class PendingNotificationStore {
 	 * (OOM, SIGKILL), the same requests the safety net exists for, and where
 	 * the payload falls back to the current time.
 	 *
-	 * Skips notifications already marked as sent. A repeat trigger for a
-	 * resource that has not been sent (e.g. `woocommerce_low_stock` firing on
-	 * every reduction below the threshold) still refreshes the time, and a
-	 * restock re-arms the notification by clearing the sent marker; see
-	 * {@see StockNotificationRecoveryHandler}.
+	 * The recorded time stays that of the first trigger. Core fires the stock
+	 * hooks on every reduction past the threshold, not only on the crossing, so
+	 * a product that keeps selling while its notification is in flight would
+	 * otherwise drag its own recorded time forward and understate its delivery
+	 * age. The sent marker is checked as well because a send clears the trigger
+	 * time, so a repeat trigger after one would recreate a value that nothing
+	 * clears again.
+	 *
+	 * Failures are caught so that a third-party handler on the resource's save
+	 * hooks cannot stop the dispatch below from running.
 	 *
 	 * @return void
 	 *
@@ -189,14 +196,27 @@ class PendingNotificationStore {
 	 */
 	private function record_trigger_times(): void {
 		foreach ( $this->pending as $notification ) {
-			if ( $notification->has_meta( NotificationProcessor::SENT_META_KEY ) ) {
-				continue;
-			}
+			try {
+				if ( $notification->has_meta( NotificationProcessor::SENT_META_KEY )
+					|| $notification->has_meta( NotificationProcessor::TRIGGERED_META_KEY ) ) {
+					continue;
+				}
 
-			$notification->write_meta(
-				NotificationProcessor::TRIGGERED_META_KEY,
-				$notification->get_triggered_at()
-			);
+				$notification->write_meta(
+					NotificationProcessor::TRIGGERED_META_KEY,
+					$notification->get_triggered_at()
+				);
+			} catch ( Throwable $e ) {
+				wc_get_logger()->warning(
+					sprintf(
+						'Failed to record push notification trigger time (type=%s, resource_id=%d): %s',
+						$notification->get_type(),
+						$notification->get_resource_id(),
+						$e->getMessage()
+					),
+					array( 'source' => PushNotifications::FEATURE_NAME )
+				);
+			}
 		}
 	}
 
