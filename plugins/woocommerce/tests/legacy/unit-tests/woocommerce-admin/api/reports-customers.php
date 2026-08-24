@@ -257,7 +257,6 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$export_columns = $controller->get_export_columns();
 		$this->assertArrayHasKey( 'role', $export_columns, 'CSV export should include a role column' );
 		$this->assertEquals( 'Role', $export_columns['role'] );
-		$this->assertSame( 'role', array_key_last( $export_columns ), 'Role must stay the last CSV column so positional consumers of the pre-existing columns are unaffected' );
 
 		$export_roles_by_user_id = array();
 		foreach ( $reports as $report ) {
@@ -268,6 +267,39 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 'Editor, Shop manager', $export_roles_by_user_id[ $editor_id ], 'CSV export should carry the role value' );
 		$this->assertSame( '', $export_roles_by_user_id[0], 'CSV export should leave the role empty for guests' );
+	}
+
+	/**
+	 * The same Download button exports single-page reports in the browser from the
+	 * table column order and larger ones from here, so the two must not drift.
+	 *
+	 * @testdox Should keep the CSV export column order in sync with the report table.
+	 */
+	public function test_export_column_order_matches_report_table() {
+		// Mirrors getHeadersContent() in
+		// client/admin/client/analytics/report/customers/table.js. Keys differ
+		// between the two, the order must not.
+		$expected_order = array(
+			'name',
+			'username',
+			'last_active',
+			'registered',
+			'email',
+			'orders_count',
+			'total_spend',
+			'avg_order_value',
+			'country',
+			'city',
+			'region',
+			'postcode',
+			'billing_phone',
+			'shipping_phone',
+			'role',
+		);
+
+		$controller = new \Automattic\WooCommerce\Admin\API\Reports\Customers\Controller();
+
+		$this->assertSame( $expected_order, array_keys( $controller->get_export_columns() ), 'New CSV columns must be appended, and table.js must be updated to match' );
 	}
 
 	/**

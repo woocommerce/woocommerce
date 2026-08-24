@@ -4,6 +4,9 @@ inputs:
     php-version:
         description: 'The PHP version that should be installed. Use "false" to skip PHP installation.'
         default: '7.4'
+    php-tools:
+        description: 'Given a comma-separated list, installs setup-php tools (e.g. "cs2pr"). Ignored when the PHP setup step is skipped (php-version "false" or build-type "dependencies").'
+        default: ''
     install:
         description: 'Given a boolean or PNPM filter, runs the install command for monorepo project(s).'
         default: false
@@ -45,6 +48,7 @@ runs:
           with:
               php-version: '${{ inputs.php-version }}'
               coverage: 'none'
+              tools: '${{ inputs.php-tools }}'
         - name: 'Cache: identify pnpm caching directory'
           if: ${{ inputs.pull-package-deps != 'false' }}
           shell: 'bash'
