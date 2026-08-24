@@ -1111,6 +1111,342 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should preserve replacement items saved while bulk deletion is pending.
+	 */
+	public function test_remove_order_items_preserves_replacement_items_saved_before_order_save() {
+		$order          = WC_Helper_Order::create_order();
+		$original_items = $order->get_items();
+		$product        = current( $original_items )->get_product();
+
+		$order->remove_order_items();
+
+		$early_saved_item_ids = array();
+		for ( $index = 1; $index <= 5; $index++ ) {
+			$item = new WC_Order_Item_Product();
+			$item->set_props(
+				array(
+					'product'  => $product,
+					'quantity' => 1,
+					'subtotal' => 10,
+					'total'    => 10,
+				)
+			);
+			$item->set_name( 'Replacement ' . $index );
+			$item->add_meta_data( '_replacement_index', (string) $index, true );
+			$order->add_item( $item );
+
+			if ( $index <= 4 ) {
+				$item->set_order_id( $order->get_id() );
+				$early_saved_item_ids[] = $item->save();
+			}
+		}
+
+		$order->save();
+
+		$persisted_items = wc_get_order( $order->get_id() )->get_items();
+		$this->assertCount( 5, $persisted_items, 'Every replacement line item should survive the deferred deletion.' );
+		foreach ( $early_saved_item_ids as $item_id ) {
+			$this->assertArrayHasKey( $item_id, $persisted_items, 'An early-saved replacement should retain its original item ID.' );
+			$this->assertNotEmpty( $persisted_items[ $item_id ]->get_meta( '_replacement_index' ), 'An early-saved replacement should retain its metadata.' );
+		}
+	}
+
+	/**
+	 * @testdox Item-read filters should not control which persisted rows are deleted.
+	 */
+	public function test_remove_order_items_snapshot_is_not_affected_by_get_items_filter() {
+		$order                      = WC_Helper_Order::create_order();
+		$original_line_item_ids     = array_keys( $order->get_items() );
+		$original_shipping_item_ids = array_keys( $order->get_items( 'shipping' ) );
+		$hide_items                 = static function () {
+			return array();
+		};
+
+		add_filter( 'woocommerce_order_get_items', $hide_items );
+		try {
+			$order->remove_order_items();
+		} finally {
+			remove_filter( 'woocommerce_order_get_items', $hide_items );
+		}
+
+		$order->save();
+
+		$persisted_order = wc_get_order( $order->get_id() );
+		$this->assertNotEmpty( $original_line_item_ids, 'The test order should initially contain line items.' );
+		$this->assertNotEmpty( $original_shipping_item_ids, 'The test order should initially contain shipping items.' );
+		$this->assertCount( 0, $persisted_order->get_items(), 'The read filter should not prevent persisted line items from being deleted.' );
+		$this->assertCount( 0, $persisted_order->get_items( 'shipping' ), 'The read filter should not prevent persisted shipping items from being deleted.' );
+
+		foreach ( array_merge( $original_line_item_ids, $original_shipping_item_ids ) as $item_id ) {
+			$this->assertFalse(
+				WC_Order_Factory::get_order_item( $item_id ),
+				'Deleted items should not remain available from the item cache.'
+			);
+		}
+	}
+
+	/**
+	 * @testdox Should preserve replacement items saved while deletion by type is pending.
+	 */
+	public function test_remove_order_items_by_type_preserves_replacement_items_saved_before_order_save() {
+		$order                 = WC_Helper_Order::create_order();
+		$original_items        = $order->get_items();
+		$product               = current( $original_items )->get_product();
+		$original_shipping_ids = array_keys( $order->get_items( 'shipping' ) );
+
+		$order->remove_order_items( 'line_item' );
+
+		$early_saved_item = new WC_Order_Item_Product();
+		$early_saved_item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 10,
+				'total'    => 10,
+			)
+		);
+		$early_saved_item->set_name( 'Early-saved replacement' );
+		$early_saved_item->add_meta_data( '_typed_removal_test', 'preserved', true );
+		$order->add_item( $early_saved_item );
+		$early_saved_item->set_order_id( $order->get_id() );
+		$early_saved_item_id = $early_saved_item->save();
+
+		$unsaved_item = new WC_Order_Item_Product();
+		$unsaved_item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 10,
+				'total'    => 10,
+			)
+		);
+		$unsaved_item->set_name( 'Unsaved replacement' );
+		$order->add_item( $unsaved_item );
+
+		$order->save();
+
+		$persisted_order = wc_get_order( $order->get_id() );
+		$persisted_items = $persisted_order->get_items();
+		$this->assertCount( 2, $persisted_items, 'Both replacement line items should survive the typed deferred deletion.' );
+		$this->assertArrayHasKey( $early_saved_item_id, $persisted_items, 'The early-saved replacement should retain its item ID.' );
+		$this->assertSame( 'preserved', $persisted_items[ $early_saved_item_id ]->get_meta( '_typed_removal_test' ), 'The early-saved replacement should retain its metadata.' );
+		$this->assertSame( $original_shipping_ids, array_keys( $persisted_order->get_items( 'shipping' ) ), 'Items of other types should remain unchanged.' );
+	}
+
+	/**
+	 * @testdox Should retain every typed deletion snapshot when removal is requested repeatedly.
+	 */
+	public function test_repeated_remove_order_items_by_type_merges_deferred_item_snapshots() {
+		$order                 = WC_Helper_Order::create_order();
+		$original_items        = $order->get_items();
+		$original_item_ids     = array_keys( $original_items );
+		$product               = current( $original_items )->get_product();
+		$original_shipping_ids = array_keys( $order->get_items( 'shipping' ) );
+
+		$order->remove_order_items( 'line_item' );
+
+		$intermediate_item = new WC_Order_Item_Product();
+		$intermediate_item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 10,
+				'total'    => 10,
+			)
+		);
+		$intermediate_item->set_name( 'Intermediate replacement' );
+		$order->add_item( $intermediate_item );
+		$intermediate_item->set_order_id( $order->get_id() );
+		$intermediate_item_id = $intermediate_item->save();
+
+		$order->remove_order_items( 'line_item' );
+
+		$final_item = new WC_Order_Item_Product();
+		$final_item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 10,
+				'total'    => 10,
+			)
+		);
+		$final_item->set_name( 'Final replacement' );
+		$order->add_item( $final_item );
+
+		$order->save();
+
+		$persisted_order = wc_get_order( $order->get_id() );
+		$persisted_items = $persisted_order->get_items();
+		$this->assertCount( 1, $persisted_items, 'Only the replacement added after the final removal should survive.' );
+		$this->assertSame( 'Final replacement', current( $persisted_items )->get_name() );
+		$this->assertArrayNotHasKey( $intermediate_item_id, $persisted_items, 'The item captured by the second removal should be deleted.' );
+		foreach ( $original_item_ids as $original_item_id ) {
+			$this->assertArrayNotHasKey( $original_item_id, $persisted_items, 'Items captured by the first removal should still be deleted.' );
+		}
+		$this->assertSame( $original_shipping_ids, array_keys( $persisted_order->get_items( 'shipping' ) ), 'Items of other types should remain unchanged.' );
+	}
+
+	/**
+	 * @testdox A pending full removal should absorb a later typed removal.
+	 */
+	public function test_full_remove_order_items_followed_by_typed_removal_combines_snapshots() {
+		$order          = WC_Helper_Order::create_order();
+		$original_items = $order->get_items();
+		$product        = current( $original_items )->get_product();
+
+		$order->remove_order_items();
+
+		$intermediate_item = new WC_Order_Item_Product();
+		$intermediate_item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 10,
+				'total'    => 10,
+			)
+		);
+		$intermediate_item->set_name( 'Intermediate replacement' );
+		$order->add_item( $intermediate_item );
+		$intermediate_item->set_order_id( $order->get_id() );
+		$intermediate_item_id = $intermediate_item->save();
+
+		$order->remove_order_items( 'line_item' );
+
+		$final_item = new WC_Order_Item_Product();
+		$final_item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 10,
+				'total'    => 10,
+			)
+		);
+		$final_item->set_name( 'Final replacement' );
+		$order->add_item( $final_item );
+
+		$order->save();
+
+		$persisted_order = wc_get_order( $order->get_id() );
+		$persisted_items = $persisted_order->get_items();
+		$this->assertCount( 1, $persisted_items, 'Only the item added after both removal requests should survive.' );
+		$this->assertSame( 'Final replacement', current( $persisted_items )->get_name() );
+		$this->assertArrayNotHasKey( $intermediate_item_id, $persisted_items, 'The later typed removal should add its snapshot to the pending full removal.' );
+		$this->assertCount( 0, $persisted_order->get_items( 'shipping' ), 'The original full removal should still remove other item types.' );
+	}
+
+	/**
+	 * @testdox A full removal should absorb snapshots from an earlier typed removal.
+	 */
+	public function test_typed_remove_order_items_followed_by_full_removal_combines_snapshots() {
+		$order             = WC_Helper_Order::create_order();
+		$original_items    = $order->get_items();
+		$original_item_ids = array_keys( $original_items );
+		$product           = current( $original_items )->get_product();
+
+		$order->remove_order_items( 'line_item' );
+		$order->remove_order_items();
+
+		$final_item = new WC_Order_Item_Product();
+		$final_item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 10,
+				'total'    => 10,
+			)
+		);
+		$final_item->set_name( 'Final replacement' );
+		$order->add_item( $final_item );
+
+		$order->save();
+
+		$persisted_order = wc_get_order( $order->get_id() );
+		$persisted_items = $persisted_order->get_items();
+		$this->assertCount( 1, $persisted_items, 'Only the item added after the full removal should survive.' );
+		$this->assertSame( 'Final replacement', current( $persisted_items )->get_name() );
+		foreach ( $original_item_ids as $original_item_id ) {
+			$this->assertArrayNotHasKey( $original_item_id, $persisted_items, 'The full removal should retain IDs snapshotted by the earlier typed removal.' );
+		}
+		$this->assertCount( 0, $persisted_order->get_items( 'shipping' ), 'The full removal should remove other item types.' );
+	}
+
+	/**
+	 * @testdox Should preserve replacement items when a custom data store cannot bulk-delete by ID.
+	 */
+	public function test_remove_order_items_preserves_replacements_with_custom_data_store_fallback() {
+		$order          = WC_Helper_Order::create_order();
+		$original_items = $order->get_items();
+		$product        = current( $original_items )->get_product();
+
+		$order->remove_order_items();
+
+		$early_saved_item = new WC_Order_Item_Product();
+		$early_saved_item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 10,
+				'total'    => 10,
+			)
+		);
+		$early_saved_item->set_name( 'Early-saved replacement' );
+		$early_saved_item->add_meta_data( '_fallback_test', 'preserved', true );
+		$order->add_item( $early_saved_item );
+		$early_saved_item->set_order_id( $order->get_id() );
+		$early_saved_item_id = $early_saved_item->save();
+
+		$unsaved_item = new WC_Order_Item_Product();
+		$unsaved_item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 10,
+				'total'    => 10,
+			)
+		);
+		$unsaved_item->set_name( 'Unsaved replacement' );
+		$order->add_item( $unsaved_item );
+
+		$original_data_store = $order->get_data_store();
+		// phpcs:disable Squiz.Commenting -- Anonymous test double methods are self-explanatory.
+		$custom_data_store = new class( $original_data_store ) extends WC_Data_Store {
+			private $delegate;
+
+			public function __construct( $delegate ) {
+				$this->delegate = $delegate;
+			}
+
+			public function has_callable( string $method ): bool {
+				return 'delete_items_by_ids' === $method ? false : $this->delegate->has_callable( $method );
+			}
+
+			public function update( &$data ) {
+				return $this->delegate->update( $data );
+			}
+
+			public function get_current_class_name() {
+				return $this->delegate->get_current_class_name();
+			}
+
+			public function __call( $method, $parameters ) {
+				return $this->delegate->{$method}( ...$parameters );
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+
+		$reflection = new ReflectionProperty( WC_Data::class, 'data_store' );
+		$reflection->setAccessible( true );
+		$reflection->setValue( $order, $custom_data_store );
+
+		$order->save();
+
+		$persisted_items = wc_get_order( $order->get_id() )->get_items();
+		$this->assertCount( 2, $persisted_items, 'Both replacement items should survive the custom data store fallback.' );
+		$this->assertArrayHasKey( $early_saved_item_id, $persisted_items, 'The early-saved replacement should retain its item ID.' );
+		$this->assertSame( 'preserved', $persisted_items[ $early_saved_item_id ]->get_meta( '_fallback_test' ), 'The early-saved replacement should retain its metadata.' );
+	}
+
+	/**
 	 * @testdox Should keep original items in the DB if save() never runs after remove_order_items().
 	 */
 	public function test_remove_order_items_preserves_db_items_if_save_not_called() {
