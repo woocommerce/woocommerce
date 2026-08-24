@@ -257,11 +257,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			if ( ProductType::VARIATION === ( $data['type'] ?? '' ) && ! empty( $data['parent_id'] ) ) {
 				$variation_parent = wc_get_product( $data['parent_id'] );
 
-				if ( $variation_parent && $variation_parent->is_type( ProductType::VARIATION ) ) {
-					throw new Exception( esc_html__( 'Variation cannot be imported: Parent product cannot be a product variation', 'woocommerce' ), 401 );
-				}
-
-				if ( $variation_parent ) {
+				if ( $variation_parent && ! $variation_parent->is_type( ProductType::VARIATION ) ) {
 					$this->assert_variation_attributes_offered( $data, $variation_parent );
 				}
 			}
@@ -487,8 +483,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 *
 	 * @param WC_Product $variation Product instance.
 	 * @param array      $data    Item data.
-	 * @return void
-	 * @throws Exception If data cannot be set. Refusals throw rather than return a WP_Error, which process_item() discards.
+	 * @return WC_Product|WP_Error
+	 * @throws Exception If data cannot be set.
 	 */
 	protected function set_variation_data( &$variation, $data ) {
 		$parent = false;
@@ -502,20 +498,14 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			}
 		}
 
-		// A partial update need not repeat the Parent column, so fall back to the parent the variation
-		// is already attached to rather than refusing a row that names no new one.
-		if ( ! $parent && $variation->get_parent_id() ) {
-			$parent = wc_get_product( $variation->get_parent_id() );
-		}
-
 		// Stop if parent does not exists.
 		if ( ! $parent ) {
-			throw new Exception( esc_html__( 'Variation cannot be imported: Missing parent ID or parent does not exist yet.', 'woocommerce' ), 401 );
+			return new WP_Error( 'woocommerce_product_importer_missing_variation_parent_id', __( 'Variation cannot be imported: Missing parent ID or parent does not exist yet.', 'woocommerce' ), array( 'status' => 401 ) );
 		}
 
 		// Stop if parent is a product variation.
 		if ( $parent->is_type( ProductType::VARIATION ) ) {
-			throw new Exception( esc_html__( 'Variation cannot be imported: Parent product cannot be a product variation', 'woocommerce' ), 401 );
+			return new WP_Error( 'woocommerce_product_importer_parent_set_as_variation', __( 'Variation cannot be imported: Parent product cannot be a product variation', 'woocommerce' ), array( 'status' => 401 ) );
 		}
 
 		if ( isset( $data['raw_attributes'] ) ) {

@@ -20101,6 +20101,12 @@ parameters:
 			path: includes/import/abstract-wc-product-importer.php
 
 		-
+			message: '#^Method WC_Product_Importer\:\:set_variation_data\(\) should return WC_Product\|WP_Error but return statement is missing\.$#'
+			identifier: return.missing
+			count: 2
+			path: includes/import/abstract-wc-product-importer.php
+
+		-
 			message: '#^Parameter \#2 \$array of function array_map expects array, list\<string\>\|false given\.$#'
 			identifier: argument.type
 			count: 1
