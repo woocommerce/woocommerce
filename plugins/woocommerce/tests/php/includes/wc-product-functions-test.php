@@ -1314,6 +1314,43 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product category list breadcrumb ordering follows depth even when term IDs run against it.
+	 */
+	public function test_wc_get_product_category_list_breadcrumb_order_ignores_term_id_sequence(): void {
+		$suffix    = wp_unique_id();
+		$leaf_name = 'Aaa descendant ' . $suffix;
+		$root_name = 'Zzz ancestor ' . $suffix;
+
+		/*
+		 * Create the descendant first, so its term ID is lower than its eventual ancestor's, and
+		 * name it so that alphabetical order also runs against the hierarchy.
+		 */
+		$leaf    = wp_insert_term( $leaf_name, 'product_cat' );
+		$root    = wp_insert_term( $root_name, 'product_cat' );
+		$product = WC_Helper_Product::create_simple_product();
+
+		try {
+			wp_update_term( $leaf['term_id'], 'product_cat', array( 'parent' => $root['term_id'] ) );
+
+			$this->assertGreaterThan(
+				$leaf['term_id'],
+				$root['term_id'],
+				'The fixture is only meaningful while the ancestor carries the higher term ID.'
+			);
+
+			wp_set_object_terms( $product->get_id(), array( $leaf['term_id'], $root['term_id'] ), 'product_cat' );
+
+			$actual = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+
+			$this->assertSame( "{$root_name} > {$leaf_name}", $actual );
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $leaf['term_id'], 'product_cat' );
+			wp_delete_term( $root['term_id'], 'product_cat' );
+		}
+	}
+
+	/**
 	 * @testdox Product category list breadcrumb ordering batches ancestor loading and ignores the order of ancestors it does not render.
 	 */
 	public function test_wc_get_product_category_list_breadcrumb_order_batches_ancestors(): void {
