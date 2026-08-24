@@ -308,6 +308,82 @@ class TranslationsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should remove the combined file when the in-place write leaves it truncated.
+	 */
+	public function test_removes_combined_file_when_fallback_write_is_truncated(): void {
+		$combined = $this->lang_dir . 'woocommerce-de_DE-' . WC_ADMIN_APP . '.json';
+		file_put_contents( $combined, '{"stale":true}' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		$this->create_chunk_json(
+			'gggggggggggggggggggggggggggggggg',
+			WC_ADMIN_DIST_JS_FOLDER . 'app/index.js',
+			array( 'Show' => array( 'Anzeigen' ) )
+		);
+
+		if ( ! function_exists( 'get_filesystem_method' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+		\WP_Filesystem();
+
+		$previous_filesystem = $GLOBALS['wp_filesystem'];
+
+		// Mirrors WP_Filesystem_Direct::put_contents() truncating the file before a short write fails.
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Stub filesystem, restored below.
+		$stub                = new class( null ) extends \WP_Filesystem_Direct {
+			/**
+			 * Path the truncated write is simulated for.
+			 *
+			 * @var string
+			 */
+			public $truncate_path = '';
+
+			/**
+			 * Always reports the move as failed.
+			 *
+			 * @param string $source      Path to the source file.
+			 * @param string $destination Path to the destination file.
+			 * @param bool   $overwrite   Whether to overwrite the destination.
+			 * @return bool Always false.
+			 */
+			public function move( $source, $destination, $overwrite = false ) {
+				return false;
+			}
+
+			/**
+			 * Writes a partial payload and reports failure for the tracked path.
+			 *
+			 * @param string    $file     Path to the file.
+			 * @param string    $contents Contents to write.
+			 * @param int|false $mode     Optional file permissions.
+			 * @return bool Whether the contents were written.
+			 */
+			public function put_contents( $file, $contents, $mode = false ) {
+				if ( $file === $this->truncate_path ) {
+					parent::put_contents( $file, '{"locale_data', $mode );
+					return false;
+				}
+				return parent::put_contents( $file, $contents, $mode );
+			}
+		};
+		$stub->truncate_path = $combined;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Stub filesystem, restored below.
+		$GLOBALS['wp_filesystem'] = $stub;
+		// The direct branch renames outside the filesystem object, so route publishing through move().
+		add_filter( 'filesystem_method', array( $this, 'force_ftpext_filesystem' ), PHP_INT_MAX );
+
+		try {
+			$build = new \ReflectionMethod( Translations::class, 'build_and_save_translations' );
+			$build->setAccessible( true );
+			$build->invoke( $this->sut, $this->lang_dir, 'woocommerce', 'de_DE' );
+		} finally {
+			remove_filter( 'filesystem_method', array( $this, 'force_ftpext_filesystem' ), PHP_INT_MAX );
+			$GLOBALS['wp_filesystem'] = $previous_filesystem; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the real filesystem.
+		}
+
+		$this->assertFileDoesNotExist( $combined, 'A truncated write should not be left behind for readers to parse' );
+		$this->assertSame( array(), glob( $this->lang_dir . '*.tmp' ), 'No temporary files should be left behind after a truncated write' );
+	}
+
+	/**
 	 * @testdox Should fall back to the original file when nothing can be rebuilt.
 	 */
 	public function test_falls_back_to_original_file_when_rebuild_not_possible(): void {

@@ -271,7 +271,18 @@ class Translations {
 			 * replace it: the on-demand rebuild only runs when the file is missing, and never on a
 			 * remote filesystem.
 			 */
-			$wp_filesystem->put_contents( $cache_path, $chunk_translations_json );
+			if ( ! $wp_filesystem->put_contents( $cache_path, $chunk_translations_json ) ) {
+				/*
+				 * An in-place write truncates the file before it can fail, so what survives may be
+				 * invalid JSON. A missing file recovers on its own - the rebuild triggers on it and
+				 * readers fall back to their own translation file - while a corrupt one is served
+				 * as-is forever.
+				 */
+				$leftover = $wp_filesystem->exists( $cache_path ) ? $wp_filesystem->get_contents( $cache_path ) : false;
+				if ( false !== $leftover && null === json_decode( $leftover, true ) ) {
+					$wp_filesystem->delete( $cache_path, false, 'f' );
+				}
+			}
 
 			// Without the type, FTPext::delete() falls through to ftp_rmdir() when the file is absent.
 			$wp_filesystem->delete( $temp_path, false, 'f' );
