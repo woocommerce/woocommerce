@@ -81,6 +81,15 @@ class TranslationsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Forces get_filesystem_method() to report a remote filesystem.
+	 *
+	 * @return string Filesystem method.
+	 */
+	public function force_ftpext_filesystem() {
+		return 'ftpext';
+	}
+
+	/**
 	 * Writes a chunk translation JSON file in the official language pack format.
 	 *
 	 * @param string $md5_name  Fake md5 part of the filename.
@@ -193,6 +202,109 @@ class TranslationsTest extends WC_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'stale', $data, 'The stale combined file should be replaced' );
 		$this->assertSame( array( 'Produkte vergleichen' ), $data['locale_data']['messages']['Compare Products'], 'The replacement should contain the rebuilt translations' );
 		$this->assertSame( array(), glob( $this->lang_dir . '*.tmp' ), 'No temporary files should be left behind after replacing the combined file' );
+	}
+
+	/**
+	 * @testdox Should overwrite the combined file in place when a remote filesystem refuses to move onto it.
+	 */
+	public function test_replaces_existing_combined_file_when_remote_move_fails(): void {
+		$combined = $this->lang_dir . 'woocommerce-de_DE-' . WC_ADMIN_APP . '.json';
+		file_put_contents( $combined, '{"stale":true}' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		$this->create_chunk_json(
+			'dddddddddddddddddddddddddddddddd',
+			WC_ADMIN_DIST_JS_FOLDER . 'app/index.js',
+			array( 'Show' => array( 'Anzeigen' ) )
+		);
+
+		if ( ! function_exists( 'get_filesystem_method' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+		\WP_Filesystem();
+
+		$previous_filesystem = $GLOBALS['wp_filesystem'];
+
+		// Mirrors WP_Filesystem_FTPext against a server that refuses to rename onto an existing path.
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Stub filesystem, restored below.
+		$GLOBALS['wp_filesystem'] = new class( null ) extends \WP_Filesystem_Direct {
+			/**
+			 * Always reports the move as failed.
+			 *
+			 * @param string $source      Path to the source file.
+			 * @param string $destination Path to the destination file.
+			 * @param bool   $overwrite   Whether to overwrite the destination.
+			 * @return bool Always false.
+			 */
+			public function move( $source, $destination, $overwrite = false ) {
+				return false;
+			}
+		};
+		add_filter( 'filesystem_method', array( $this, 'force_ftpext_filesystem' ), PHP_INT_MAX );
+
+		try {
+			$build = new \ReflectionMethod( Translations::class, 'build_and_save_translations' );
+			$build->setAccessible( true );
+			$build->invoke( $this->sut, $this->lang_dir, 'woocommerce', 'de_DE' );
+		} finally {
+			remove_filter( 'filesystem_method', array( $this, 'force_ftpext_filesystem' ), PHP_INT_MAX );
+			$GLOBALS['wp_filesystem'] = $previous_filesystem; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the real filesystem.
+		}
+
+		$data = json_decode( file_get_contents( $combined ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$this->assertArrayNotHasKey( 'stale', $data, 'The previous language pack file should not survive a failed move' );
+		$this->assertSame( array( 'Anzeigen' ), $data['locale_data']['messages']['Show'], 'The refreshed translations should be written in place instead' );
+		$this->assertSame( array(), glob( $this->lang_dir . '*.tmp' ), 'No temporary files should be left behind after the fallback write' );
+	}
+
+	/**
+	 * @testdox Should overwrite the combined file in place when the temp file cannot be written.
+	 */
+	public function test_replaces_existing_combined_file_when_temp_write_fails(): void {
+		$combined = $this->lang_dir . 'woocommerce-de_DE-' . WC_ADMIN_APP . '.json';
+		file_put_contents( $combined, '{"stale":true}' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		$this->create_chunk_json(
+			'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+			WC_ADMIN_DIST_JS_FOLDER . 'app/index.js',
+			array( 'Show' => array( 'Anzeigen' ) )
+		);
+
+		if ( ! function_exists( 'get_filesystem_method' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+		\WP_Filesystem();
+
+		$previous_filesystem = $GLOBALS['wp_filesystem'];
+
+		// Mirrors a language directory that allows writing its existing files but not creating new ones.
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Stub filesystem, restored below.
+		$GLOBALS['wp_filesystem'] = new class( null ) extends \WP_Filesystem_Direct {
+			/**
+			 * Rejects writes to the temp file, allowing every other write through.
+			 *
+			 * @param string    $file     Path to the file.
+			 * @param string    $contents Contents to write.
+			 * @param int|false $mode     Optional file permissions.
+			 * @return bool Whether the contents were written.
+			 */
+			public function put_contents( $file, $contents, $mode = false ) {
+				if ( str_ends_with( $file, '.tmp' ) ) {
+					return false;
+				}
+				return parent::put_contents( $file, $contents, $mode );
+			}
+		};
+
+		try {
+			$build = new \ReflectionMethod( Translations::class, 'build_and_save_translations' );
+			$build->setAccessible( true );
+			$build->invoke( $this->sut, $this->lang_dir, 'woocommerce', 'de_DE' );
+		} finally {
+			$GLOBALS['wp_filesystem'] = $previous_filesystem; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the real filesystem.
+		}
+
+		$data = json_decode( file_get_contents( $combined ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$this->assertArrayNotHasKey( 'stale', $data, 'The previous language pack file should not survive a failed temp write' );
+		$this->assertSame( array( 'Anzeigen' ), $data['locale_data']['messages']['Show'], 'The refreshed translations should be written in place instead' );
+		$this->assertSame( array(), glob( $this->lang_dir . '*.tmp' ), 'No temporary files should be left behind after the fallback write' );
 	}
 
 	/**
