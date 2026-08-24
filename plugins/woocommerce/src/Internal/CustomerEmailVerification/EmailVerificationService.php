@@ -67,6 +67,10 @@ class EmailVerificationService {
 	 * account email, so changing the account email automatically invalidates the
 	 * status — no change event needs to be observed.
 	 *
+	 * The result is filterable via {@see 'woocommerce_customer_email_is_verified'}, so
+	 * extensions that manage their own verification state can mark customers as verified
+	 * (or unverified) without writing the verified-status meta.
+	 *
 	 * @since 11.0.0
 	 *
 	 * @param int $user_id WordPress user ID.
@@ -76,7 +80,20 @@ class EmailVerificationService {
 		$verified_email = (string) Users::get_site_user_meta( $user_id, self::VERIFIED_META );
 
 		// Both sides are lower-cased (stored that way, get_account_email() normalises), so === is exact.
-		return '' !== $verified_email && $verified_email === $this->get_account_email( $user_id );
+		$is_verified = '' !== $verified_email && $verified_email === $this->get_account_email( $user_id );
+
+		/**
+		 * Filters whether a customer's current account email address is considered verified.
+		 *
+		 * Allows extensions that manage their own email-verification state to report a customer
+		 * as verified (or unverified) without writing the verified-status meta.
+		 *
+		 * @param bool $is_verified Whether the customer's current account email is verified.
+		 * @param int  $user_id     WordPress user ID.
+		 *
+		 * @since 11.1.0
+		 */
+		return (bool) apply_filters( 'woocommerce_customer_email_is_verified', $is_verified, $user_id );
 	}
 
 	/**

@@ -206,4 +206,61 @@ class EmailVerificationServiceTest extends WC_Unit_Test_Case {
 
 		$this->assertTrue( $this->sut->is_verified( $user_id ), 'Non-email profile changes must not invalidate verification' );
 	}
+
+	/**
+	 * @testdox The is_verified filter should mark an unverified user as verified.
+	 */
+	public function test_is_verified_filter_marks_unverified_user_verified(): void {
+		$user_id = wc_create_new_customer( 'filter-verify@example.com', 'filterverify', 'pw' );
+
+		add_filter( 'woocommerce_customer_email_is_verified', '__return_true' );
+
+		$filtered = $this->sut->is_verified( $user_id );
+
+		remove_filter( 'woocommerce_customer_email_is_verified', '__return_true' );
+
+		$this->assertTrue( $filtered, 'The filter should be able to mark an unverified user as verified' );
+		$this->assertFalse( $this->sut->is_verified( $user_id ), 'Removing the filter should restore the unfiltered status' );
+	}
+
+	/**
+	 * @testdox The is_verified filter should mark a verified user as unverified.
+	 */
+	public function test_is_verified_filter_marks_verified_user_unverified(): void {
+		$user_id = wc_create_new_customer( 'filter-unverify@example.com', 'filterunverify', 'pw' );
+		$this->sut->mark_verified( $user_id );
+
+		add_filter( 'woocommerce_customer_email_is_verified', '__return_false' );
+
+		$filtered = $this->sut->is_verified( $user_id );
+
+		remove_filter( 'woocommerce_customer_email_is_verified', '__return_false' );
+
+		$this->assertFalse( $filtered, 'The filter should be able to mark a verified user as unverified' );
+		$this->assertTrue( $this->sut->is_verified( $user_id ), 'Removing the filter should restore the unfiltered status' );
+	}
+
+	/**
+	 * @testdox The is_verified filter should receive the unfiltered status and the user ID.
+	 */
+	public function test_is_verified_filter_receives_status_and_user_id(): void {
+		$user_id = wc_create_new_customer( 'filter-args@example.com', 'filterargs', 'pw' );
+		$this->sut->mark_verified( $user_id );
+
+		$received_status  = null;
+		$received_user_id = null;
+		$listener         = static function ( $is_verified, $id ) use ( &$received_status, &$received_user_id ) {
+			$received_status  = $is_verified;
+			$received_user_id = $id;
+			return $is_verified;
+		};
+		add_filter( 'woocommerce_customer_email_is_verified', $listener, 10, 2 );
+
+		$this->sut->is_verified( $user_id );
+
+		remove_filter( 'woocommerce_customer_email_is_verified', $listener );
+
+		$this->assertTrue( $received_status, 'The filter should receive the unfiltered verification status' );
+		$this->assertSame( $user_id, $received_user_id, 'The filter should receive the user ID' );
+	}
 }
