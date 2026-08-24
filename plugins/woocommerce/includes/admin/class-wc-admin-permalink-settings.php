@@ -146,19 +146,6 @@ class WC_Admin_Permalink_Settings {
 		// The index of the predefined structure the stored base corresponds to, or false for a custom one.
 		$selected_structure = array_search( $stored_product_base, $structures_for_comparison, true );
 
-		/*
-		 * The Custom base field is the next tab stop after the radio group, and focusing it selects
-		 * Custom base. Saving from there posts the field's prefilled value through the custom
-		 * branch, which always prepends a slash, so Default comes back as `/product` where the
-		 * Default radio stores a bare `product`. Both describe the same structure -- WordPress
-		 * strips leading slashes when it builds the rewrite rules -- so report the choice the
-		 * merchant made rather than a Custom base they never typed. Saving Default again rewrites
-		 * the stored value to its bare form.
-		 */
-		if ( false === $selected_structure && untrailingslashit( $default_product_structure ) === $stored_product_base ) {
-			$selected_structure = 0;
-		}
-
 		$product_permalink_structure = 0 === $selected_structure
 			? $default_product_structure
 			: ( $stored_product_base ? trailingslashit( $stored_product_base ) : '' );
@@ -245,6 +232,10 @@ class WC_Admin_Permalink_Settings {
 			$posted_product_base = isset( $_POST['product_permalink'] ) && is_scalar( $_POST['product_permalink'] ) ? wp_unslash( $_POST['product_permalink'] ) : '';
 			$product_base        = sanitize_text_field( (string) $posted_product_base );
 
+			// Resolved inside the wc_switch_to_site_locale() window opened above, so every branch
+			// below stores the same site-locale slug settings() compares against.
+			$default_product_base = _x( 'product', 'slug', 'woocommerce' );
+
 			if ( 'custom' === $product_base ) {
 				if ( isset( $_POST['product_permalink_structure'] ) && is_scalar( $_POST['product_permalink_structure'] ) ) {
 					// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized by wc_sanitize_permalink() below.
@@ -256,16 +247,29 @@ class WC_Admin_Permalink_Settings {
 
 				// This is an invalid base structure and breaks pages.
 				if ( '/%product_cat%/' === trailingslashit( $product_base ) ) {
-					$product_base = '/' . _x( 'product', 'slug', 'woocommerce' ) . $product_base;
+					$product_base = '/' . $default_product_base . $product_base;
 				}
 			} elseif ( empty( $product_base ) ) {
-				// The Default radio posts an empty value; store the translated slug settings()
-				// compares against. Both resolve inside a wc_switch_to_site_locale() window, so a
-				// stored base always agrees with what the screen compares it to.
-				$product_base = _x( 'product', 'slug', 'woocommerce' );
+				// The Default radio posts an empty value; store the site-locale slug.
+				$product_base = $default_product_base;
 			}
 
 			$permalinks['product_base'] = wc_sanitize_permalink( $product_base );
+
+			/*
+			 * A custom base describing the Default structure is stored in Default's bare form. The
+			 * Custom base field is the next tab stop after the radio group and focusing it selects
+			 * Custom base, so a single Tab from Default posts the field's prefilled `/product/`
+			 * through the custom branch, which prepends a slash. The two stored forms are not
+			 * interchangeable: under index.php (PATHINFO) permalinks the leading slash reaches
+			 * register_post_type() and produces an `index.php//product/%product%` permastruct whose
+			 * URLs do not resolve, while the bare slug works everywhere. Converging on the bare
+			 * form keeps Default checked after that keystroke and never persists the broken shape.
+			 */
+			$sanitized_default_base = wc_sanitize_permalink( $default_product_base );
+			if ( '/' . $sanitized_default_base === $permalinks['product_base'] ) {
+				$permalinks['product_base'] = $sanitized_default_base;
+			}
 
 			// Shop base may require verbose page rules if nesting pages.
 			$shop_page_id   = wc_get_page_id( 'shop' );

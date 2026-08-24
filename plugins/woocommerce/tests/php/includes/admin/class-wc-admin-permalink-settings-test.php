@@ -309,13 +309,14 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	/**
 	 * The Custom base field is the next tab stop after the radio group, and focusing it selects
 	 * Custom base — so a Tab keystroke is enough to post the field's prefilled Default structure
-	 * through the custom branch. That branch prepends a slash, storing `/product` where the
-	 * Default radio stores `product`. Both describe the same structure, so the screen has to keep
-	 * reporting Default rather than a Custom base the merchant never typed.
+	 * through the custom branch. That branch prepends a slash, and the slash-prefixed form is not
+	 * interchangeable with the bare slug the Default radio stores: under index.php (PATHINFO)
+	 * permalinks it produces an `index.php//product/%product%` permastruct whose URLs do not
+	 * resolve. The save path therefore converges the two, storing Default's bare form.
 	 *
-	 * @testdox Should keep "Default" checked when its own structure is saved through the Custom base field.
+	 * @testdox Should store the bare Default base and keep "Default" checked when its own structure is saved through the Custom base field.
 	 */
-	public function test_default_structure_saved_as_a_custom_base_stays_checked(): void {
+	public function test_default_structure_saved_as_a_custom_base_is_normalized(): void {
 		$this->ensure_shop_page();
 
 		$xpath        = $this->get_xpath( $this->render_settings() );
@@ -324,11 +325,35 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 
 		$html = $this->save_and_render( 'custom', $custom_input->getAttribute( 'value' ) );
 
-		$this->assertSame( '/product', get_option( 'woocommerce_permalinks' )['product_base'], 'The custom branch stores the slash-prefixed form.' );
+		$this->assertSame( 'product', get_option( 'woocommerce_permalinks' )['product_base'], 'The Default-equivalent custom base should be normalized to the bare slug.' );
 		$this->assert_only_radio_checked( $html, 'default' );
+	}
 
-		// Saving Default from there rewrites the stored value to its bare form.
-		$this->assert_only_radio_checked( $this->save_and_render( '' ), 'default' );
+	/**
+	 * A pre-existing slash-prefixed `/product` — persisted by versions that stored the Tab-saved
+	 * Default structure verbatim — is reported honestly as a Custom base rather than as Default:
+	 * under PATHINFO permalinks the stored form genuinely behaves differently, and nothing is
+	 * rewritten on render. Saving any predefined choice from there converges the stored value.
+	 *
+	 * @testdox Should report a legacy slash-prefixed Default base as a Custom base until a save converges it.
+	 */
+	public function test_legacy_slash_prefixed_default_base_shows_as_custom(): void {
+		$this->ensure_shop_page();
+
+		$permalinks                 = (array) get_option( 'woocommerce_permalinks', array() );
+		$permalinks['product_base'] = '/product';
+		update_option( 'woocommerce_permalinks', $permalinks );
+
+		$xpath        = $this->get_xpath( $this->render_settings() );
+		$custom_input = $xpath->query( '//input[@id="woocommerce_permalink_structure"]' )->item( 0 );
+
+		$this->assertSame( '/product', get_option( 'woocommerce_permalinks' )['product_base'], 'The render must not rewrite the stored value.' );
+		$this->assertInstanceOf( DOMElement::class, $custom_input );
+		$this->assertSame( '/product/', $custom_input->getAttribute( 'value' ) );
+		$this->assert_only_radio_checked( $this->render_settings(), 'custom' );
+
+		// A save posting that same value through the custom branch converges it to the bare form.
+		$this->assert_only_radio_checked( $this->save_and_render( 'custom', '/product/' ), 'default' );
 		$this->assertSame( 'product', get_option( 'woocommerce_permalinks' )['product_base'] );
 	}
 
