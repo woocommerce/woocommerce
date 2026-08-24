@@ -1227,27 +1227,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
-	 * Get the ID of an existing global attribute taxonomy, without creating it when it is missing.
-	 *
-	 * @since 11.1.0
-	 *
-	 * @param string $raw_name Attribute name or label as written in the CSV.
-	 * @return int Attribute taxonomy ID, or 0 when no such global attribute exists.
-	 */
-	protected function get_existing_attribute_taxonomy_id( $raw_name ) {
-		// Global attributes are exported as labels, so convert the label back to a name first.
-		$attribute_labels = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_label', 'attribute_name' );
-		$attribute_name   = array_search( $raw_name, $attribute_labels, true );
-
-		if ( ! $attribute_name ) {
-			$attribute_name = wc_sanitize_taxonomy_name( $raw_name );
-		}
-
-		// Cast because a numeric attribute name is returned as an integer array key by array_search().
-		return (int) wc_attribute_taxonomy_id_by_name( (string) $attribute_name );
-	}
-
-	/**
 	 * Check that a new variation's attributes are offered by its parent product.
 	 *
 	 * The storefront variation selector only renders values the parent declares, so a variation
