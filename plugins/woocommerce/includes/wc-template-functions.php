@@ -2211,11 +2211,8 @@ if ( ! function_exists( 'woocommerce_variable_add_to_cart' ) ) {
 		// Enqueue variation scripts.
 		wp_enqueue_script( 'wc-add-to-cart-variation' );
 
-		// Attach a reset snapshot only when variation-gallery swaps are enabled.
-		if (
-			\Automattic\WooCommerce\Internal\VariationGallery\Package::is_enabled() &&
-			! isset( $attached_gallery_defaults[ $product->get_id() ] )
-		) {
+		// Attach the reset snapshot once per product.
+		if ( ! isset( $attached_gallery_defaults[ $product->get_id() ] ) ) {
 			wp_add_inline_script(
 				'wc-add-to-cart-variation',
 				sprintf(
@@ -2717,7 +2714,7 @@ if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
 			array(
 				'cross_sells'    => $cross_sells,
 
-				// Not used now, but used in previous version of up-sells.php.
+				// Not used now, but used in previous version of cross-sells.php.
 				'posts_per_page' => $limit,
 				'orderby'        => $orderby,
 				'columns'        => $columns,

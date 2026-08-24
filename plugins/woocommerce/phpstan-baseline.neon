@@ -4711,12 +4711,6 @@ parameters:
 			path: includes/admin/list-tables/class-wc-admin-list-table-orders.php
 
 		-
-			message: '#^Part \$date_query \(array\|string\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 2
-			path: includes/admin/list-tables/class-wc-admin-list-table-orders.php
-
-		-
 			message: '#^Property WC_Admin_List_Table\:\:\$object \(object\|null\) does not accept WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -41086,12 +41080,6 @@ parameters:
 			path: src/Admin/API/Reports/Customers/Controller.php
 
 		-
-			message: '#^@param object \$export_item does not accept actual type of parameter\: array\{name\: mixed, username\: mixed, last_active\: mixed, registered\: mixed, email\: mixed, orders_count\: mixed, total_spend\: string, avg_order_value\: string, \.\.\.\}\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Admin/API/Reports/Customers/Controller.php
-
-		-
 			message: '#^@param object \$item does not accept actual type of parameter\: array\.$#'
 			identifier: parameter.phpDocType
 			count: 1
@@ -41117,12 +41105,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\Controller\:\:get_item\(\) should return array\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\WP_Error but returns WP_REST_Response\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/Customers/Controller.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\Controller\:\:prepare_item_for_export\(\) should return array but returns object\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Admin/API/Reports/Customers/Controller.php
@@ -44274,19 +44256,13 @@ parameters:
 		-
 			message: '#^Call to method format\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
 			identifier: class.notFound
-			count: 41
+			count: 35
 			path: src/Admin/API/Reports/TimeInterval.php
 
 		-
 			message: '#^Call to method getTimezone\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
 			identifier: class.notFound
 			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Call to method modify\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 4
 			path: src/Admin/API/Reports/TimeInterval.php
 
 		-
@@ -44357,12 +44333,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:default_before\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime but returns WC_DateTime\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:get_timeframe_dates\(\) should return array but returns false\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Admin/API/Reports/TimeInterval.php
@@ -44485,12 +44455,6 @@ parameters:
 			message: '#^Parameter \#2 \$datetime of static method DateTime\:\:createFromFormat\(\) expects string, int given\.$#'
 			identifier: argument.type
 			count: 2
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Parameter \$current_date of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:get_timeframe_dates\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
 			path: src/Admin/API/Reports/TimeInterval.php
 
 		-
@@ -45296,24 +45260,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Admin/DataSourcePoller.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\DateTimeProvider\\CurrentDateTimeProvider\:\:get_now\(\) has invalid return type Automattic\\WooCommerce\\Admin\\DateTimeProvider\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/DateTimeProvider/CurrentDateTimeProvider.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\DateTimeProvider\\CurrentDateTimeProvider\:\:get_now\(\) should return Automattic\\WooCommerce\\Admin\\DateTimeProvider\\DateTime but returns DateTime\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/DateTimeProvider/CurrentDateTimeProvider.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\DateTimeProvider\\DateTimeProviderInterface\:\:get_now\(\) has invalid return type Automattic\\WooCommerce\\Admin\\DateTimeProvider\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/DateTimeProvider/DateTimeProviderInterface.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\DeprecatedClassFacade\:\:__call\(\) has no return type specified\.$#'
@@ -46730,42 +46676,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: src/Admin/Features/PaymentGatewaySuggestions/PaymentGatewaysController.php
-
-		-
-			message: '#^Cannot access property \$labels on WP_Post_Type\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: src/Admin/Features/ProductDataViews/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductDataViews\\Init\:\:enqueue_scripts\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductDataViews/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductDataViews\\Init\:\:enqueue_styles\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductDataViews/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductDataViews\\Init\:\:is_product_data_view_page\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductDataViews/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductDataViews\\Init\:\:woocommerce_add_new_products_dashboard\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductDataViews/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductDataViews\\Init\:\:woocommerce_products_dashboard\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductDataViews/Init.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ShippingPartnerSuggestions\\ShippingPartnerSuggestions\:\:get_specs\(\) has no return type specified\.$#'
