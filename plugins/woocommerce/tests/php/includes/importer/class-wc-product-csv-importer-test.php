@@ -963,6 +963,64 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test that a refused variation row does not convert its import placeholder into a variation post.
+	 */
+	public function test_import_failure_does_not_convert_the_import_placeholder() {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'S', 'M' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Placeholder Guard Tee' );
+		$product->set_sku( 'IMPORT-PLACEHOLDER-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		// An ID that does not exist makes parse_id_field() create a placeholder product for the row.
+		// Refusing the row must leave that placeholder as it was, not converted to a variation.
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-placeholder-guard.csv';
+		file_put_contents( // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+			$csv_file,
+			"ID,Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\n"
+			. "987654,variation,IMPORT-PLACEHOLDER-V,Import Placeholder V,IMPORT-PLACEHOLDER-PARENT,Colour,Red,0,12\n"
+		);
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'           => true,
+				'update_existing' => false,
+				'mapping'         => array(
+					'ID'                   => 'id',
+					'Type'                 => 'type',
+					'SKU'                  => 'sku',
+					'Name'                 => 'name',
+					'Parent'               => 'parent_id',
+					'Attribute 1 name'     => 'attributes:name1',
+					'Attribute 1 value(s)' => 'attributes:value1',
+					'Attribute 1 global'   => 'attributes:taxonomy1',
+					'Regular price'        => 'regular_price',
+				),
+			)
+		);
+
+		$data = $importer->import();
+
+		wp_delete_file( $csv_file );
+
+		$this->assertCount( 1, $data['failed'], 'Expected the row to fail' );
+
+		$placeholder_id = wc_get_product_id_by_sku( 'IMPORT-PLACEHOLDER-V' );
+		$this->assertNotSame( 'product_variation', get_post_type( $placeholder_id ), 'Expected the refused row to leave its import placeholder unconverted' );
+
+		if ( $placeholder_id ) {
+			wp_delete_post( $placeholder_id, true );
+		}
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
 	 * @testdox Test that a row whose global attribute name cannot be created fails without wiping the variation's attributes.
 	 */
 	public function test_import_of_existing_variation_fails_when_the_global_attribute_name_is_unusable() {

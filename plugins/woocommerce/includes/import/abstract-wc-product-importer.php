@@ -252,6 +252,16 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				}
 			}
 
+			// Ahead of get_product_object(), which converts an import placeholder into a variation
+			// post and strips its terms. A row refused after that leaves the placeholder behind.
+			if ( ProductType::VARIATION === ( $data['type'] ?? '' ) && ! empty( $data['parent_id'] ) ) {
+				$variation_parent = wc_get_product( $data['parent_id'] );
+
+				if ( $variation_parent && ! $variation_parent->is_type( ProductType::VARIATION ) ) {
+					$this->assert_variation_attributes_offered( $data, $variation_parent );
+				}
+			}
+
 			$object   = $this->get_product_object( $data );
 			$updating = false;
 
@@ -501,20 +511,9 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		if ( isset( $data['raw_attributes'] ) ) {
 			$attributes = array();
 
-			// Refused before get_variation_parent_attributes(), which saves the parent: a row that
-			// imports nothing must not change the product. Skipping the attribute instead would blank
-			// it into a catch-all matching every value.
-			$declared_attributes = $parent->get_attributes();
-
-			foreach ( $data['raw_attributes'] as $attribute ) {
-				if ( empty( $attribute['name'] ) ) {
-					continue;
-				}
-
-				if ( ! isset( $declared_attributes[ $this->get_variation_attribute_key( $attribute ) ] ) ) {
-					throw new Exception( esc_html( $this->get_unmatched_variation_attribute_message( $attribute, $declared_attributes ) ) );
-				}
-			}
+			// Before get_variation_parent_attributes(), which saves the parent: a row that imports
+			// nothing must not change the product.
+			$this->assert_variation_attributes_offered( $data, $parent );
 
 			$parent_attributes = $this->get_variation_parent_attributes( $data['raw_attributes'], $parent );
 
@@ -605,6 +604,37 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		return sanitize_title( wc_attribute_taxonomy_name( wc_attribute_taxonomy_slug( $this->get_attribute_taxonomy_name_from_raw_name( $raw_name ) ) ) );
+	}
+
+	/**
+	 * Refuse a variation row naming an attribute the parent product does not offer.
+	 *
+	 * Skipping the attribute instead would blank it into a catch-all matching every value, replacing
+	 * whatever the variation already had, with the row still reported as imported.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param array      $data           Item data.
+	 * @param WC_Product $parent_product Parent product the variation belongs to.
+	 * @return void
+	 * @throws Exception If the parent does not offer one of the row's attributes.
+	 */
+	protected function assert_variation_attributes_offered( $data, $parent_product ) {
+		if ( empty( $data['raw_attributes'] ) ) {
+			return;
+		}
+
+		$declared_attributes = $parent_product->get_attributes();
+
+		foreach ( $data['raw_attributes'] as $attribute ) {
+			if ( empty( $attribute['name'] ) ) {
+				continue;
+			}
+
+			if ( ! isset( $declared_attributes[ $this->get_variation_attribute_key( $attribute ) ] ) ) {
+				throw new Exception( esc_html( $this->get_unmatched_variation_attribute_message( $attribute, $declared_attributes ) ) );
+			}
+		}
 	}
 
 	/**
