@@ -158,17 +158,8 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 		wp_set_current_user( $user_id );
 		update_option( 'woocommerce_enable_guest_checkout', 'no' );
 
-		$override = static function ( bool $show ): bool {
-			unset( $show );
-			return true;
-		};
-
-		add_filter( 'woocommerce_customer_email_verification_should_show_prompt', $override );
-		try {
-			$this->assertTrue( $this->sut->should_show_prompt(), 'The prompt default should be overrideable by filter.' );
-		} finally {
-			remove_filter( 'woocommerce_customer_email_verification_should_show_prompt', $override );
-		}
+		add_filter( 'woocommerce_customer_email_verification_should_show_prompt', '__return_true' );
+		$this->assertTrue( $this->sut->should_show_prompt(), 'The prompt default should be overrideable by filter.' );
 	}
 
 	/**
@@ -192,6 +183,18 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 		$this->service->mark_verified( $user_id );
 
 		$this->assertFalse( $this->sut->should_show_prompt(), 'Verified customers should not see the prompt' );
+	}
+
+	/**
+	 * @testdox should_show_prompt never applies the filter for a verified customer.
+	 */
+	public function test_should_show_prompt_ignores_filter_for_verified_customer(): void {
+		$user_id = wc_create_new_customer( 'prompt-verified-filtered@example.com', 'promptverifiedfiltered', 'pw' );
+		wp_set_current_user( $user_id );
+		$this->service->mark_verified( $user_id );
+
+		add_filter( 'woocommerce_customer_email_verification_should_show_prompt', '__return_true' );
+		$this->assertFalse( $this->sut->should_show_prompt(), 'A verified customer should never see the prompt, even if a filter tries to force it on.' );
 	}
 
 	// -------------------------------------------------------------------------

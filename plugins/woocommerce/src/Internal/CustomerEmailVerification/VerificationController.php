@@ -210,33 +210,32 @@ class VerificationController {
 	/**
 	 * Return whether the verification prompt should be shown for the current user.
 	 *
-	 * True for a logged-in, unverified customer, except one still using a temporary password (those
-	 * confirm via their set-password link, so the temporary-password notice already covers it). This
-	 * must not depend on whether matching guest orders exist, because that would disclose order
-	 * existence before the customer proves they control the email address. It can depend on whether
-	 * the store has accepted any guest orders at all, because that is not customer-specific.
+	 * This cannot depend on whether matching guest orders exist, since that would disclose order
+	 * existence before the customer proves they control the email address.
 	 *
 	 * @since 11.0.0
 	 *
 	 * @return bool
 	 */
 	public function should_show_prompt(): bool {
-		$user_id     = get_current_user_id();
-		$should_show = (bool) $user_id;
+		$user_id = get_current_user_id();
 
-		$should_show = $should_show && wc_string_to_bool( get_option( 'woocommerce_enable_guest_checkout' ) );
-		$should_show = $should_show && ! $this->service->is_verified( $user_id );
+		if ( ! $user_id || $this->service->is_verified( $user_id ) ) {
+			return false;
+		}
+
+		$should_show = wc_string_to_bool( get_option( 'woocommerce_enable_guest_checkout' ) );
 
 		// A temporary-password account already has a set-password link (which also verifies on use),
-		// surfaced by the temporary-password notice — don't show a second prompt alongside it.
+		// surfaced by the temporary-password notice, so skip a second prompt alongside it.
 		$should_show = $should_show && ! get_user_option( 'default_password_nag', $user_id );
 
 		/**
-		 * Filter whether to show the verification prompt for a given user.
+		 * Filter whether to show the verification prompt for an unverified user.
 		 *
 		 * @since 11.1.0
 		 *
-		 * @param bool $should_show Whether to show the prompt.
+		 * @param bool $should_show Whether to show the prompt, before this filter runs.
 		 * @param int  $user_id     The WordPress user ID of the customer.
 		 */
 		return (bool) apply_filters( 'woocommerce_customer_email_verification_should_show_prompt', $should_show, $user_id );
