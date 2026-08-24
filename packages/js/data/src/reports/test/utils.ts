@@ -56,7 +56,27 @@ describe( 'getFilterQuery', () => {
 		expect(
 			filterQuery( {
 				endpoint: 'products',
+				query: { search: 'widget' },
+			} )
+		).toEqual( { search: [ 'widget' ] } );
+	} );
+
+	it( 'should keep an active product filter alongside the search term', () => {
+		// Picking a comparison or a single product does not clear the search, and the
+		// endpoint intersects the two, so dropping the IDs would widen the report.
+		expect(
+			filterQuery( {
+				endpoint: 'products',
 				query: { search: 'widget', products: '1,2,3' },
+			} )
+		).toEqual( { search: [ 'widget' ], products: '1,2,3' } );
+	} );
+
+	it( 'should not send an empty product filter alongside the search term', () => {
+		expect(
+			filterQuery( {
+				endpoint: 'products',
+				query: { search: 'widget', products: '' },
 			} )
 		).toEqual( { search: [ 'widget' ] } );
 	} );

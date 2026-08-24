@@ -215,7 +215,17 @@ export function getFilterQuery(
 		const limitProperties = limitBy || [ endpoint ];
 
 		if ( usesServerSideSearch( limitProperties ) ) {
-			return { search: getSearchWords( query ) };
+			const [ limitProperty ] = limitProperties;
+
+			// A filter can still be active alongside the search, since picking one does not
+			// clear the term. Sending both keeps the comparison or the single item selection,
+			// which the endpoint intersects with what the term matches.
+			return {
+				search: getSearchWords( query ),
+				...( query[ limitProperty ]
+					? { [ limitProperty ]: query[ limitProperty ] }
+					: {} ),
+			};
 		}
 
 		return limitProperties.reduce< Record< string, string > >(
