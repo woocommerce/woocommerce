@@ -125,8 +125,8 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 	}
 
 	/**
-	 * Re-sync the orders in the batch, which writes one row per tax order item and drops whatever
-	 * the order no longer carries.
+	 * Re-sync the orders in the batch, which writes one row per tax order item and, once they are
+	 * all written, drops whatever the order no longer carries.
 	 *
 	 * @param array $batch Batch of order ids, as returned by 'get_next_batch_to_process'.
 	 *
@@ -140,7 +140,18 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 		}
 
 		foreach ( $batch as $order_id ) {
-			TaxesDataStore::sync_order_taxes( (int) $order_id );
+			$order_id = (int) $order_id;
+
+			// `-1` is an order `wc_get_order()` could not resolve, which the cursor is here to step
+			// past. `false` is a write that did not land, which leaves the order holding the rows
+			// it came in with: `get_total_pending_count()` goes on counting it, so the tool can
+			// offer another run over it once whatever the database objected to is out of the way.
+			if ( false === TaxesDataStore::sync_order_taxes( $order_id ) ) {
+				wc_get_logger()->error(
+					"Could not rebuild the analytics tax lookup rows of order {$order_id}. The order keeps the rows it had and can be rebuilt again from WooCommerce > Status > Tools.",
+					array( 'source' => 'wc-order-tax-lookup-migration' )
+				);
+			}
 		}
 
 		// Step past every order in the batch, including any that could not be loaded. See

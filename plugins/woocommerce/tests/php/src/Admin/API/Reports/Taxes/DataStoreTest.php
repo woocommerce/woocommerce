@@ -647,6 +647,69 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Sync leaves the rows an order already had alone when one of its writes fails.
+	 */
+	public function test_sync_keeps_existing_rows_when_a_write_fails(): void {
+		global $wpdb;
+
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$order = $this->seed_order_with_tax_lines( $this->tax_lines_on_distinct_rate_ids( 'US-CA', 101 ), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		// The shape the rebuild finds an order in: every row on the column default.
+		$this->unmigrate_lookup_rows( $order->get_id() );
+		$rows_before = $this->lookup_rows( $order->get_id() );
+
+		$suppress = $wpdb->suppress_errors( true );
+		$restore  = $this->break_next_lookup_write();
+		$result   = DataStore::sync_order_taxes( $order->get_id() );
+		$restore();
+		$wpdb->suppress_errors( $suppress );
+
+		$this->assertFalse( $result, 'A write that did not land should be reported as a failed sync.' );
+		$this->assertSame( $rows_before, $this->lookup_rows( $order->get_id() ), 'The rows the order came in with should survive a failed sync.' );
+
+		$sut  = new DataStore();
+		$data = $sut->get_data( $this->all_taxes_query( '2023-02-01 00:00:00', '2023-02-28 23:59:59' ) );
+
+		$this->assertCount( 2, $data->data, 'A failed sync should leave both tax lines reportable.' );
+
+		$amounts = array_column( $data->data, 'total_tax' );
+		sort( $amounts );
+		$this->assertSame( array( 0.25, 6.0 ), $amounts, 'No line should be lost or counted twice because a sync failed.' );
+	}
+
+	/**
+	 * Make the next write to the lookup table fail, the way a database error mid-sync would.
+	 *
+	 * @return callable Removes the filter again.
+	 */
+	private function break_next_lookup_write(): callable {
+		global $wpdb;
+
+		$table_name = $wpdb->prefix . 'wc_order_tax_lookup';
+		$broken     = false;
+
+		$filter = function ( $query ) use ( &$broken, $table_name ) {
+			if ( $broken || 0 !== strpos( $query, "REPLACE INTO `{$table_name}`" ) ) {
+				return $query;
+			}
+
+			$broken = true;
+
+			// A table that does not exist, so the write fails the way a database error would.
+			return "REPLACE INTO `{$table_name}_missing` (order_id) VALUES (1)";
+		};
+
+		add_filter( 'query', $filter );
+
+		return function () use ( $filter ) {
+			remove_filter( 'query', $filter );
+		};
+	}
+
+	/**
 	 * Put an order's lookup rows back into the shape the table held before it held one row per tax
 	 * order item.
 	 *

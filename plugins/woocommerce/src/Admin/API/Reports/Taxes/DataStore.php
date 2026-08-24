@@ -359,23 +359,40 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			// Sum the rows affected. Using REPLACE can affect 2 rows if the row already exists.
 			$num_updated += 2 === intval( $result ) ? 1 : intval( $result );
+
+			// A write that did not land leaves the order needing another sync regardless of what
+			// the remaining lines do, and every line written in the meantime is one more row the
+			// reports add to the ones this order already had. Leave the rest to that next sync.
+			if ( false === $result ) {
+				break;
+			}
 		}
 
+		$synced = count( $tax_items ) === $num_updated;
+
 		// Includes rows written before the lookup was keyed by order item, which sit at zero.
-		if ( ! empty( $existing_items ) ) {
+		//
+		// Prune only once every tax line the order carries has been written. A write that did not
+		// land leaves the order under-represented, and dropping what it used to hold on top of
+		// that turns a gap the next sync would close into a tax line the reports have lost.
+		if ( $synced && ! empty( $existing_items ) ) {
 			$existing_items = array_flip( $existing_items );
 			$format         = implode( ',', array_fill( 0, count( $existing_items ), '%d' ) );
 			array_unshift( $existing_items, $order_id );
-			$wpdb->query(
+			$deleted = $wpdb->query(
 				$wpdb->prepare(
 					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input, placeholders are built above.
 					"DELETE FROM {$table_name} WHERE order_id = %d AND order_item_id IN ({$format})",
 					$existing_items
 				)
 			);
+
+			// A row the order no longer carries goes on being counted by the reports, so a prune
+			// that failed is not a sync that succeeded.
+			$synced = false !== $deleted;
 		}
 
-		return ( count( $tax_items ) === $num_updated );
+		return $synced;
 	}
 
 	/**

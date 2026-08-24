@@ -230,6 +230,59 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Processing a batch carries on past an order whose rebuild fails, and leaves it pending.
+	 */
+	public function test_process_batch_leaves_an_order_it_could_not_rebuild_pending(): void {
+		global $wpdb;
+
+		$failing = $this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
+		$this->unmigrate_lookup_rows( $failing->get_id(), 0, 6.25 );
+
+		$rebuilt = $this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
+		$this->unmigrate_lookup_rows( $rebuilt->get_id(), 0, 6.25 );
+
+		$rows_before = $this->lookup_rows( $failing->get_id() );
+
+		$suppress = $wpdb->suppress_errors( true );
+		$restore  = $this->break_next_lookup_write();
+		$this->sut->process_batch( $this->sut->get_next_batch_to_process( 10 ) );
+		$restore();
+		$wpdb->suppress_errors( $suppress );
+
+		$this->assertSame( $rows_before, $this->lookup_rows( $failing->get_id() ), 'An order whose rebuild failed should keep the rows it had.' );
+		$this->assertCount( 2, $this->lookup_rows( $rebuilt->get_id() ), 'The rest of the batch should still be rebuilt.' );
+		$this->assertSame( $rebuilt->get_id(), (int) get_option( OrderTaxLookupMigrator::CURSOR_OPTION ), 'The cursor should step past the whole batch.' );
+		$this->assertSame( 1, $this->sut->get_total_pending_count(), 'The order that could not be rebuilt should still be counted, so the tool can offer another run.' );
+	}
+
+	/**
+	 * Make the next write to the lookup table fail, the way a database error mid-rebuild would.
+	 *
+	 * @return callable Removes the filter again.
+	 */
+	private function break_next_lookup_write(): callable {
+		$table_name = TaxesDataStore::get_db_table_name();
+		$broken     = false;
+
+		$filter = function ( $query ) use ( &$broken, $table_name ) {
+			if ( $broken || 0 !== strpos( $query, "REPLACE INTO `{$table_name}`" ) ) {
+				return $query;
+			}
+
+			$broken = true;
+
+			// A table that does not exist, so the write fails the way a database error would.
+			return "REPLACE INTO `{$table_name}_missing` (order_id) VALUES (1)";
+		};
+
+		add_filter( 'query', $filter );
+
+		return function () use ( $filter ) {
+			remove_filter( 'query', $filter );
+		};
+	}
+
+	/**
 	 * @testdox Starting the tool by hand revisits the orders an earlier pass stepped past.
 	 */
 	public function test_tool_starts_over_from_the_beginning(): void {
