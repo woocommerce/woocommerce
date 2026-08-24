@@ -92,13 +92,6 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	protected $start_time = 0;
 
 	/**
-	 * Global attribute keys already resolved by get_variation_attribute_key(), keyed by raw name.
-	 *
-	 * @var array
-	 */
-	private $variation_attribute_keys = array();
-
-	/**
 	 * Get file raw headers.
 	 *
 	 * @return array
@@ -601,25 +594,16 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			return sanitize_title( $raw_name );
 		}
 
-		// Resolving scans every global attribute on the site, and each row asks for the same handful
-		// of names. A global attribute created part way through an import is created with the slug
-		// this derives anyway, so a cached answer cannot go stale.
-		if ( isset( $this->variation_attribute_keys[ $raw_name ] ) ) {
-			return $this->variation_attribute_keys[ $raw_name ];
-		}
-
 		// get_attribute_taxonomy_id() is not used: it creates the global attribute when the name does
 		// not resolve, and this runs while deciding whether to refuse a row. A subclass that resolves
 		// names its own way has to override this non-creating lookup instead.
 		$attribute_id = $this->get_existing_attribute_taxonomy_id( $raw_name );
 
-		$key = $attribute_id
-			? sanitize_title( wc_attribute_taxonomy_name_by_id( $attribute_id ) )
-			: sanitize_title( wc_attribute_taxonomy_name( wc_attribute_taxonomy_slug( $this->get_attribute_taxonomy_name_from_raw_name( $raw_name ) ) ) );
+		if ( $attribute_id ) {
+			return sanitize_title( wc_attribute_taxonomy_name_by_id( $attribute_id ) );
+		}
 
-		$this->variation_attribute_keys[ $raw_name ] = $key;
-
-		return $key;
+		return sanitize_title( wc_attribute_taxonomy_name( wc_attribute_taxonomy_slug( $this->get_attribute_taxonomy_name_from_raw_name( $raw_name ) ) ) );
 	}
 
 	/**
