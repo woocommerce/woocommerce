@@ -51,11 +51,13 @@ export type ProductFiltersContext = {
 // ----------------------------------------
 // Block props
 // ----------------------------------------
+export type OverlayMode = 'off' | 'mobile' | 'tablet' | 'always';
+
 export type BlockAttributes = {
 	productId?: string;
 	isPreview: boolean;
 	showFilterDrawer?: boolean;
-	overlayOnDesktop?: boolean;
+	overlayMode?: OverlayMode;
 	overlayPosition?: 'left' | 'right';
 };
 

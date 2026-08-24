@@ -53,7 +53,6 @@
 		position: absolute;
 		/*rtl:ignore*/
 		inset: 0 auto 0 0;
-		width: min(100%, 480px);
 		--wc-product-filters-closed-translate-x: -100%;
 		transform: translateX(var(--wc-product-filters-closed-translate-x));
 		transition: none;
@@ -119,6 +118,7 @@
 		}
 
 		.wc-block-product-filters__overlay-dialog {
+			width: min(100%, 480px);
 			transform: translateX(0);
 			transition: transform 500ms;
 		}

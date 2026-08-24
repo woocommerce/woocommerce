@@ -44,8 +44,9 @@
 			"type": "boolean",
 			"default": true
 		},
-		"overlayOnDesktop": {
-			"type": "boolean"
+		"overlayMode": {
+			"type": "string",
+			"enum": [ "off", "mobile", "tablet", "always" ]
 		},
 		"overlayPosition": {
 			"type": "string",

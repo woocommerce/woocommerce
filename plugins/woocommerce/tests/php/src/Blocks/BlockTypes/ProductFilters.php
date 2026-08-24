@@ -114,27 +114,27 @@ class ProductFilters extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Renders Off, Mobile only, and All devices overlay settings safely.
+	 * @testdox Renders canonical and legacy overlay settings safely.
 	 * @dataProvider overlay_attributes_provider
 	 *
-	 * @param array $attributes Block attributes.
-	 * @param bool  $mobile     Whether mobile overlay is expected.
-	 * @param bool  $desktop    Whether desktop overlay is expected.
-	 * @param bool  $right      Whether the overlay is expected on the right.
+	 * @param array  $attributes    Block attributes.
+	 * @param string $expected_mode Expected overlay mode.
+	 * @param bool   $right         Whether the overlay is expected on the right.
 	 */
-	public function test_overlay_attributes( array $attributes, bool $mobile, bool $desktop, bool $right ): void {
+	public function test_overlay_attributes( array $attributes, string $expected_mode, bool $right ): void {
 		$parsed          = parse_blocks(
 			'<!-- wp:woocommerce/product-filters --><!-- wp:html --><span data-product-filters-test>Inner</span><!-- /wp:html --><!-- /wp:woocommerce/product-filters -->'
 		)[0];
 		$parsed['attrs'] = $attributes;
 		$output          = render_block( $parsed );
-		$has_overlay     = $mobile || $desktop;
+		$has_overlay     = 'off' !== $expected_mode;
 
 		$this->assertSame( 1, substr_count( $output, 'data-product-filters-test' ) );
 		$has_overlay ? $this->assertStringContainsString( '__overlay-dialog', $output ) : $this->assertStringNotContainsString( '__overlay-dialog', $output );
-		$mobile ? $this->assertStringNotContainsString( 'is-filter-drawer-disabled', $output ) : $this->assertStringContainsString( 'is-filter-drawer-disabled', $output );
-		$mobile && ! $desktop ? $this->assertStringContainsString( 'is-responsive-overlay', $output ) : $this->assertStringNotContainsString( 'is-responsive-overlay', $output );
-		$this->assertStringNotContainsString( 'is-mobile-overlay', $output );
+		$has_overlay ? $this->assertStringNotContainsString( 'is-filter-drawer-disabled', $output ) : $this->assertStringContainsString( 'is-filter-drawer-disabled', $output );
+		'mobile' === $expected_mode ? $this->assertStringContainsString( 'is-mobile-overlay', $output ) : $this->assertStringNotContainsString( 'is-mobile-overlay', $output );
+		'tablet' === $expected_mode ? $this->assertStringContainsString( 'is-tablet-overlay', $output ) : $this->assertStringNotContainsString( 'is-tablet-overlay', $output );
+		$this->assertStringNotContainsString( 'is-responsive-overlay', $output );
 		$this->assertStringNotContainsString( 'has-desktop-overlay', $output );
 		$right ? $this->assertStringContainsString( 'is-overlay-right', $output ) : $this->assertStringNotContainsString( 'is-overlay-right', $output );
 		if ( $has_overlay ) {
@@ -145,58 +145,37 @@ class ProductFilters extends \WP_UnitTestCase {
 	/**
 	 * Provides overlay settings.
 	 *
-	 * @return array<string, array{array, bool, bool, bool}>
+	 * @return array<string, array{array, string, bool}>
 	 */
 	public function overlay_attributes_provider(): array {
 		return array(
-			'default mobile'             => array( array(), true, false, false ),
-			'mobile disabled'            => array( array( 'showFilterDrawer' => false ), false, false, false ),
-			'malformed mobile enabled'   => array( array( 'showFilterDrawer' => 'false' ), true, false, false ),
-			'mobile right'               => array(
+			'legacy default tablet'   => array( array(), 'tablet', false ),
+			'legacy off'              => array( array( 'showFilterDrawer' => false ), 'off', false ),
+			'legacy malformed tablet' => array( array( 'showFilterDrawer' => 'false' ), 'tablet', false ),
+			'off'                     => array( array( 'overlayMode' => 'off' ), 'off', false ),
+			'mobile right'            => array(
 				array(
-					'showFilterDrawer' => true,
-					'overlayPosition'  => 'right',
+					'overlayMode'     => 'mobile',
+					'overlayPosition' => 'right',
 				),
-				true,
-				false,
+				'mobile',
 				true,
 			),
-			'mobile invalid position'    => array(
+			'tablet invalid position' => array(
 				array(
-					'showFilterDrawer' => true,
-					'overlayPosition'  => 'start',
+					'overlayMode'     => 'tablet',
+					'overlayPosition' => 'start',
 				),
-				true,
-				false,
+				'tablet',
 				false,
 			),
-			'all devices left'           => array(
+			'always'                  => array( array( 'overlayMode' => 'always' ), 'always', false ),
+			'invalid enum fallback'   => array(
 				array(
-					'showFilterDrawer' => true,
-					'overlayOnDesktop' => true,
-				),
-				true,
-				true,
-				false,
-			),
-			'conflicting all devices'    => array(
-				array(
+					'overlayMode'      => 'desktop',
 					'showFilterDrawer' => false,
-					'overlayOnDesktop' => true,
-					'overlayPosition'  => 'right',
 				),
-				true,
-				true,
-				true,
-			),
-			'malformed desktop disabled' => array(
-				array(
-					'showFilterDrawer' => false,
-					'overlayOnDesktop' => 1,
-					'overlayPosition'  => 'right',
-				),
-				false,
-				false,
+				'off',
 				false,
 			),
 		);
@@ -234,8 +213,8 @@ class ProductFilters extends \WP_UnitTestCase {
 					'@tablet'  => '@media (480px < width <= 782px)',
 					'@desktop' => '@media (width > 782px)',
 				),
-				array( '@media (width > 782px)', '.is-responsive-overlay', 'top:0;right:0;bottom:0;left:0', '--wc-product-filters-overlay-transition:none' ),
-				array( '@media (width <= 480px)', '@media (480px < width <= 782px)', 'is-overlay-opened', 'wp-block-group', '600px', 'is-mobile-overlay', 'has-desktop-overlay' ),
+				array( '@media (480px < width <= 782px)', '@media (width > 782px)', '.is-mobile-overlay', '.is-tablet-overlay', 'top:0;right:0;bottom:0;left:0', '--wc-product-filters-overlay-transition:none' ),
+				array( '@media (width <= 480px)', 'is-responsive-overlay', 'is-overlay-opened', 'wp-block-group', '600px', 'has-desktop-overlay' ),
 			),
 			'custom rem units'  => array(
 				array(
@@ -243,8 +222,8 @@ class ProductFilters extends \WP_UnitTestCase {
 					'@tablet'  => '@media (30rem < width <= 45rem)',
 					'@desktop' => '@media (width > 45rem)',
 				),
-				array( '@media (width > 45rem)' ),
-				array( '@media (width <= 30rem)', '@media (30rem < width <= 45rem)' ),
+				array( '@media (30rem < width <= 45rem)', '@media (width > 45rem)' ),
+				array( '@media (width <= 30rem)' ),
 			),
 			'custom em units'   => array(
 				array(
@@ -252,24 +231,24 @@ class ProductFilters extends \WP_UnitTestCase {
 					'@tablet'  => '@media (32em < width <= 48em)',
 					'@desktop' => '@media (width > 48em)',
 				),
-				array( '@media (width > 48em)' ),
-				array( '@media (width <= 32em)', '@media (32em < width <= 48em)' ),
+				array( '@media (32em < width <= 48em)', '@media (width > 48em)' ),
+				array( '@media (width <= 32em)' ),
 			),
 			'only mobile alias' => array(
 				array(
 					'@mobile'  => '@media (width <= 30rem)',
 					'@desktop' => '@media (width > 30rem)',
 				),
-				array( '@media (width > 30rem)', '.is-responsive-overlay' ),
-				array( '@media (width <= 30rem)', 'is-mobile-overlay' ),
+				array( '@media (width > 30rem)', '.is-mobile-overlay', '.is-tablet-overlay' ),
+				array( '@media (width <= 30rem)', 'is-responsive-overlay' ),
 			),
 			'only tablet alias' => array(
 				array(
 					'@tablet'  => '@media (width <= 45rem)',
 					'@desktop' => '@media (width > 45rem)',
 				),
-				array( '@media (width > 45rem)', '.is-responsive-overlay' ),
-				array( '@media (width <= 45rem)', 'is-mobile-overlay' ),
+				array( '@media (width <= 45rem)', '@media (width > 45rem)', '.is-mobile-overlay', '.is-tablet-overlay' ),
+				array( 'is-responsive-overlay' ),
 			),
 		);
 	}

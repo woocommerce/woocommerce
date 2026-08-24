@@ -28,6 +28,7 @@ import clsx from 'clsx';
 import './editor.scss';
 import { type BlockAttributes } from './types';
 import { getColorsFromBlockSupports } from './utils/get-colors-from-block-supports';
+import { getOverlayMode, isOverlayMode } from './utils/overlay-mode';
 import { presetToCssVariable } from './utils/preset-to-css-variable';
 
 const TEMPLATE: InnerBlockTemplate[] = [
@@ -53,16 +54,8 @@ const TEMPLATE: InnerBlockTemplate[] = [
 export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 	const { attributes, setAttributes } = props;
 	const { isPreview } = attributes;
-	const overlayOnDesktop = attributes.overlayOnDesktop === true;
-	const hasOverlay =
-		overlayOnDesktop || attributes.showFilterDrawer !== false;
-	let overlayMode = 'off';
-	if ( hasOverlay ) {
-		overlayMode = 'responsive';
-	}
-	if ( overlayOnDesktop ) {
-		overlayMode = 'all';
-	}
+	const overlayMode = getOverlayMode( attributes );
+	const hasOverlay = overlayMode !== 'off';
 	const overlayPosition =
 		attributes.overlayPosition === 'right' ? 'right' : 'left';
 	const [ isOpen, setIsOpen ] = useState( false );
@@ -84,7 +77,8 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 		className: clsx( 'wc-block-product-filters', {
 			'is-overlay-opened': isOpen,
 			'is-filter-drawer-disabled': ! hasOverlay,
-			'is-responsive-overlay': overlayMode === 'responsive',
+			'is-mobile-overlay': overlayMode === 'mobile',
+			'is-tablet-overlay': overlayMode === 'tablet',
 			'is-overlay-right': hasOverlay && overlayPosition === 'right',
 		} ),
 		style: {
@@ -175,15 +169,8 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 						) }
 						value={ overlayMode }
 						onChange={ ( value ) => {
-							if (
-								value === 'off' ||
-								value === 'responsive' ||
-								value === 'all'
-							) {
-								setAttributes( {
-									showFilterDrawer: value !== 'off',
-									overlayOnDesktop: value === 'all',
-								} );
+							if ( isOverlayMode( value ) ) {
+								setAttributes( { overlayMode: value } );
 							}
 						} }
 					>
@@ -192,11 +179,15 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 							label={ __( 'Off', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
-							value="responsive"
-							label={ __( 'Mobile + tablet', 'woocommerce' ) }
+							value="mobile"
+							label={ __( 'Mobile', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
-							value="all"
+							value="tablet"
+							label={ __( 'Tablet', 'woocommerce' ) }
+						/>
+						<ToggleGroupControlOption
+							value="always"
 							label={ __( 'Always', 'woocommerce' ) }
 						/>
 					</ToggleGroupControl>

@@ -104,24 +104,51 @@ class ProductFilters extends AbstractBlock {
 	private function get_responsive_styles( $viewport_media_queries = null ) {
 		$viewport_media_queries = $viewport_media_queries ?? $this->get_viewport_media_queries();
 		$desktop_query          = $viewport_media_queries['@desktop'] ?? null;
-		$block_selector         = ':where(.wc-block-product-filters).is-responsive-overlay';
-		$style_engine_options   = array(
-			'optimize' => true,
-			'prettify' => false,
+		$tablet_query           = $viewport_media_queries['@tablet'] ?? null;
+		$mobile_selector        = ':where(.wc-block-product-filters).is-mobile-overlay';
+		$responsive_selector    = ':where(.wc-block-product-filters):is(.is-mobile-overlay,.is-tablet-overlay)';
+		$style_engine_options   = array( 'prettify' => false );
+
+		if ( null === $desktop_query ) {
+			return wp_style_engine_get_stylesheet_from_css_rules(
+				$this->get_inline_presentation_rules( $responsive_selector, '' ),
+				$style_engine_options
+			);
+		}
+
+		$css_rules = array();
+		if ( null !== $tablet_query ) {
+			$css_rules = $this->get_inline_presentation_rules( $mobile_selector, $tablet_query );
+		}
+		$css_rules = array_merge(
+			$css_rules,
+			$this->get_inline_presentation_rules( $responsive_selector, $desktop_query )
 		);
-		$inline_rules           = array(
+
+		return wp_style_engine_get_stylesheet_from_css_rules( $css_rules, $style_engine_options );
+	}
+
+	/**
+	 * Build rules for the inline Product Filters presentation.
+	 *
+	 * @param string $block_selector Product Filters mode selector.
+	 * @param string $rules_group    Media query wrapping the rules.
+	 * @return array<int, array{rules_group: string, selector: string, declarations: array<string, string>}>
+	 */
+	private function get_inline_presentation_rules( $block_selector, $rules_group ) {
+		return array(
 			array(
-				'rules_group'  => '',
+				'rules_group'  => $rules_group,
 				'selector'     => $block_selector,
 				'declarations' => array( 'display' => 'flex' ),
 			),
 			array(
-				'rules_group'  => '',
+				'rules_group'  => $rules_group,
 				'selector'     => "{$block_selector} .wc-block-product-filters__overlay-header,{$block_selector} .wc-block-product-filters__overlay-footer,{$block_selector} .wc-block-product-filters__open-overlay",
 				'declarations' => array( 'display' => 'none' ),
 			),
 			array(
-				'rules_group'  => '',
+				'rules_group'  => $rules_group,
 				'selector'     => "{$block_selector} .wc-block-product-filters__overlay",
 				// Style Engine filters inset and transition, so use supported equivalent declarations.
 				'declarations' => array(
@@ -138,7 +165,7 @@ class ProductFilters extends AbstractBlock {
 				),
 			),
 			array(
-				'rules_group'  => '',
+				'rules_group'  => $rules_group,
 				'selector'     => "{$block_selector} .wc-block-product-filters__overlay-wrapper",
 				'declarations' => array(
 					'width'      => 'auto',
@@ -148,7 +175,7 @@ class ProductFilters extends AbstractBlock {
 				),
 			),
 			array(
-				'rules_group'  => '',
+				'rules_group'  => $rules_group,
 				'selector'     => "{$block_selector} .wc-block-product-filters__overlay-dialog",
 				'declarations' => array(
 					'position'   => 'relative',
@@ -158,7 +185,7 @@ class ProductFilters extends AbstractBlock {
 				),
 			),
 			array(
-				'rules_group'  => '',
+				'rules_group'  => $rules_group,
 				'selector'     => "{$block_selector} .wc-block-product-filters__overlay-content",
 				'declarations' => array(
 					'padding'    => '0',
@@ -169,18 +196,21 @@ class ProductFilters extends AbstractBlock {
 				),
 			),
 		);
+	}
 
-		if ( null === $desktop_query ) {
-			return wp_style_engine_get_stylesheet_from_css_rules( $inline_rules, $style_engine_options );
+	/**
+	 * Resolve the canonical overlay mode with legacy drawer compatibility.
+	 *
+	 * @param array $attributes Block attributes.
+	 * @return string Overlay mode.
+	 */
+	private function get_overlay_mode( $attributes ) {
+		$overlay_mode = $attributes['overlayMode'] ?? null;
+		if ( in_array( $overlay_mode, array( 'off', 'mobile', 'tablet', 'always' ), true ) ) {
+			return $overlay_mode;
 		}
 
-		$css_rules = array();
-		foreach ( $inline_rules as $inline_rule ) {
-			$inline_rule['rules_group'] = $desktop_query;
-			$css_rules[]                = $inline_rule;
-		}
-
-		return wp_style_engine_get_stylesheet_from_css_rules( $css_rules, $style_engine_options );
+		return isset( $attributes['showFilterDrawer'] ) && false === $attributes['showFilterDrawer'] ? 'off' : 'tablet';
 	}
 
 	/**
@@ -240,15 +270,18 @@ class ProductFilters extends AbstractBlock {
 			'forcePageReload' => isset( $block->context['forcePageReload'] ) ? (bool) $block->context['forcePageReload'] : null,
 		);
 
-		$overlay_on_desktop = isset( $attributes['overlayOnDesktop'] ) && true === $attributes['overlayOnDesktop'];
-		$has_overlay        = $overlay_on_desktop || ! isset( $attributes['showFilterDrawer'] ) || false !== $attributes['showFilterDrawer'];
-		$overlay_position   = isset( $attributes['overlayPosition'] ) && 'right' === $attributes['overlayPosition'] ? 'right' : 'left';
-		$wrapper_classes    = array( 'wc-block-product-filters' );
+		$overlay_mode     = $this->get_overlay_mode( $attributes );
+		$has_overlay      = 'off' !== $overlay_mode;
+		$overlay_position = isset( $attributes['overlayPosition'] ) && 'right' === $attributes['overlayPosition'] ? 'right' : 'left';
+		$wrapper_classes  = array( 'wc-block-product-filters' );
 		if ( ! $has_overlay ) {
 			$wrapper_classes[] = 'is-filter-drawer-disabled';
 		}
-		if ( $has_overlay && ! $overlay_on_desktop ) {
-			$wrapper_classes[] = 'is-responsive-overlay';
+		if ( 'mobile' === $overlay_mode ) {
+			$wrapper_classes[] = 'is-mobile-overlay';
+		}
+		if ( 'tablet' === $overlay_mode ) {
+			$wrapper_classes[] = 'is-tablet-overlay';
 		}
 		if ( $has_overlay && 'right' === $overlay_position ) {
 			$wrapper_classes[] = 'is-overlay-right';

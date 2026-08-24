@@ -9,15 +9,14 @@ import clsx from 'clsx';
  */
 import './editor.scss';
 import { type BlockAttributes } from './types';
+import { getOverlayMode } from './utils/overlay-mode';
 
 export const Save = ( {
 	attributes,
 }: {
 	attributes: BlockAttributes;
 } ): JSX.Element => {
-	const hasOverlay =
-		attributes.overlayOnDesktop === true ||
-		attributes.showFilterDrawer !== false;
+	const hasOverlay = getOverlayMode( attributes ) !== 'off';
 	const blockProps = useBlockProps.save( {
 		className: clsx( 'wc-block-product-filters', {
 			'is-filter-drawer-disabled': ! hasOverlay,
