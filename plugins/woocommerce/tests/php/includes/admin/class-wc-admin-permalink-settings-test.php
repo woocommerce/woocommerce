@@ -420,4 +420,30 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 'product', get_option( 'woocommerce_permalinks' )['product_base'] );
 		$this->assert_only_radio_checked( $this->render_settings(), 'default' );
 	}
+
+	/**
+	 * The Custom branch has its own non-scalar path: a scalar 'custom' radio with an array
+	 * structure field. It used to store '/', which wc_sanitize_permalink() collapses to '',
+	 * leaving wc_get_permalink_structure() to refill the option in the next request's locale.
+	 * It now resolves to the default base directly, in the site locale.
+	 *
+	 * @testdox Should fall back to the Default base when only the posted custom structure is not scalar.
+	 */
+	public function test_non_scalar_custom_structure_falls_back_to_the_default_base(): void {
+		$this->ensure_shop_page();
+
+		$_POST['permalink_structure']                = '';
+		$_POST['wc-permalinks-nonce']                = wp_create_nonce( 'wc-permalinks' );
+		$_POST['woocommerce_product_category_slug']  = 'product-category';
+		$_POST['woocommerce_product_tag_slug']       = 'product-tag';
+		$_POST['woocommerce_product_attribute_slug'] = '';
+		$_POST['product_permalink']                  = 'custom';
+		$_POST['product_permalink_structure']        = array( 'widgets' );
+
+		new WC_Admin_Permalink_Settings();
+		$this->reset_permalink_post_data();
+
+		$this->assertSame( 'product', get_option( 'woocommerce_permalinks' )['product_base'] );
+		$this->assert_only_radio_checked( $this->render_settings(), 'default' );
+	}
 }

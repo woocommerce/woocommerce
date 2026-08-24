@@ -233,10 +233,8 @@ class WC_Admin_Permalink_Settings {
 			/*
 			 * Generate product base. The form only ever posts scalars for these two fields, but
 			 * nothing enforces that, and unguarded an array reaches trim() and
-			 * wc_sanitize_permalink(), which both expect a string. Each field falls back
-			 * differently: a non-scalar product_permalink becomes the empty string and is resolved
-			 * by the Default branch further down, while a non-scalar product_permalink_structure is
-			 * treated as an absent field and resolved to '/' inside the custom branch.
+			 * wc_sanitize_permalink(), which both expect a string. A non-scalar value in either
+			 * field resolves to the default product base.
 			 */
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized on the next line.
 			$posted_product_base = isset( $_POST['product_permalink'] ) && is_scalar( $_POST['product_permalink'] ) ? wp_unslash( $_POST['product_permalink'] ) : '';
@@ -252,7 +250,11 @@ class WC_Admin_Permalink_Settings {
 					$posted_structure = trim( (string) wp_unslash( $_POST['product_permalink_structure'] ) );
 					$product_base     = (string) preg_replace( '#/+#', '/', '/' . str_replace( '#', '', $posted_structure ) );
 				} else {
-					$product_base = '/';
+					// A missing or non-scalar field: previously stored '/', which
+					// wc_sanitize_permalink() collapsed to '', leaving the option for
+					// wc_get_permalink_structure() to refill in whatever locale the next request
+					// ran in. Resolve it to the default base here, deterministically.
+					$product_base = $default_product_base;
 				}
 
 				// This is an invalid base structure and breaks pages.
