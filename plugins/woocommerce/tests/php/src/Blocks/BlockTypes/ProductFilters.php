@@ -37,6 +37,13 @@ class ProductFilters extends \WP_UnitTestCase {
 	private $canonical_method;
 
 	/**
+	 * Reflection method used to generate responsive styles with controlled viewport queries.
+	 *
+	 * @var \ReflectionMethod
+	 */
+	private $responsive_styles_method;
+
+	/**
 	 * Set up the test subject and dependencies.
 	 *
 	 * @return void
@@ -58,6 +65,9 @@ class ProductFilters extends \WP_UnitTestCase {
 
 		$this->canonical_method = new \ReflectionMethod( ProductFiltersBlock::class, 'get_canonical_url_no_pagination' );
 		$this->canonical_method->setAccessible( true );
+
+		$this->responsive_styles_method = new \ReflectionMethod( ProductFiltersBlock::class, 'get_responsive_styles' );
+		$this->responsive_styles_method->setAccessible( true );
 	}
 
 	/**
@@ -123,7 +133,9 @@ class ProductFilters extends \WP_UnitTestCase {
 		$this->assertSame( 1, substr_count( $output, 'data-product-filters-test' ) );
 		$has_overlay ? $this->assertStringContainsString( '__overlay-dialog', $output ) : $this->assertStringNotContainsString( '__overlay-dialog', $output );
 		$mobile ? $this->assertStringNotContainsString( 'is-filter-drawer-disabled', $output ) : $this->assertStringContainsString( 'is-filter-drawer-disabled', $output );
-		$desktop ? $this->assertStringContainsString( 'has-desktop-overlay', $output ) : $this->assertStringNotContainsString( 'has-desktop-overlay', $output );
+		$mobile && ! $desktop ? $this->assertStringContainsString( 'is-responsive-overlay', $output ) : $this->assertStringNotContainsString( 'is-responsive-overlay', $output );
+		$this->assertStringNotContainsString( 'is-mobile-overlay', $output );
+		$this->assertStringNotContainsString( 'has-desktop-overlay', $output );
 		$right ? $this->assertStringContainsString( 'is-overlay-right', $output ) : $this->assertStringNotContainsString( 'is-overlay-right', $output );
 		if ( $has_overlay ) {
 			$this->assertStringContainsString( 'overlay-wrapper" data-wp-on--click="actions.closeOverlayOnBackdrop"', $output );
@@ -148,6 +160,15 @@ class ProductFilters extends \WP_UnitTestCase {
 				true,
 				false,
 				true,
+			),
+			'mobile invalid position'    => array(
+				array(
+					'showFilterDrawer' => true,
+					'overlayPosition'  => 'start',
+				),
+				true,
+				false,
+				false,
 			),
 			'all devices left'           => array(
 				array(
@@ -177,6 +198,78 @@ class ProductFilters extends \WP_UnitTestCase {
 				false,
 				false,
 				false,
+			),
+		);
+	}
+
+	/**
+	 * @testdox Generates scoped responsive styles from resolved viewport queries.
+	 * @dataProvider responsive_styles_provider
+	 *
+	 * @param array    $viewport_media_queries Viewport media queries.
+	 * @param string[] $expected                Expected CSS fragments.
+	 * @param string[] $unexpected              Unexpected CSS fragments.
+	 */
+	public function test_responsive_styles( array $viewport_media_queries, array $expected, array $unexpected = array() ): void {
+		$styles = (string) $this->responsive_styles_method->invoke( $this->product_filters, $viewport_media_queries );
+
+		foreach ( $expected as $fragment ) {
+			$this->assertStringContainsString( $fragment, $styles );
+		}
+		foreach ( $unexpected as $fragment ) {
+			$this->assertStringNotContainsString( $fragment, $styles );
+		}
+	}
+
+	/**
+	 * Provides resolved viewport queries and expected scoped output.
+	 *
+	 * @return array<string, array{array<string, string>, string[], string[]}>
+	 */
+	public function responsive_styles_provider(): array {
+		return array(
+			'default viewports' => array(
+				array(
+					'@mobile'  => '@media (width <= 480px)',
+					'@tablet'  => '@media (480px < width <= 782px)',
+					'@desktop' => '@media (width > 782px)',
+				),
+				array( '@media (width > 782px)', '.is-responsive-overlay', 'top:0;right:0;bottom:0;left:0', '--wc-product-filters-overlay-transition:none' ),
+				array( '@media (width <= 480px)', '@media (480px < width <= 782px)', 'is-overlay-opened', 'wp-block-group', '600px', 'is-mobile-overlay', 'has-desktop-overlay' ),
+			),
+			'custom rem units'  => array(
+				array(
+					'@mobile'  => '@media (width <= 30rem)',
+					'@tablet'  => '@media (30rem < width <= 45rem)',
+					'@desktop' => '@media (width > 45rem)',
+				),
+				array( '@media (width > 45rem)' ),
+				array( '@media (width <= 30rem)', '@media (30rem < width <= 45rem)' ),
+			),
+			'custom em units'   => array(
+				array(
+					'@mobile'  => '@media (width <= 32em)',
+					'@tablet'  => '@media (32em < width <= 48em)',
+					'@desktop' => '@media (width > 48em)',
+				),
+				array( '@media (width > 48em)' ),
+				array( '@media (width <= 32em)', '@media (32em < width <= 48em)' ),
+			),
+			'only mobile alias' => array(
+				array(
+					'@mobile'  => '@media (width <= 30rem)',
+					'@desktop' => '@media (width > 30rem)',
+				),
+				array( '@media (width > 30rem)', '.is-responsive-overlay' ),
+				array( '@media (width <= 30rem)', 'is-mobile-overlay' ),
+			),
+			'only tablet alias' => array(
+				array(
+					'@tablet'  => '@media (width <= 45rem)',
+					'@desktop' => '@media (width > 45rem)',
+				),
+				array( '@media (width > 45rem)', '.is-responsive-overlay' ),
+				array( '@media (width <= 45rem)', 'is-mobile-overlay' ),
 			),
 		);
 	}

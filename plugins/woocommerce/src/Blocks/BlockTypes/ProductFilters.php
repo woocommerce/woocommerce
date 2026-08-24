@@ -40,6 +40,11 @@ class ProductFilters extends AbstractBlock {
 	protected function enqueue_data( array $attributes = array() ) {
 		parent::enqueue_data( $attributes );
 
+		wp_add_inline_style(
+			generate_block_asset_handle( $this->get_full_block_name(), 'style' ),
+			$this->get_responsive_styles()
+		);
+
 		if ( is_admin() ) {
 			$this->asset_data_registry->add( 'globalStylesColors', wp_get_global_styles( array( 'color' ) ) );
 		}
@@ -52,6 +57,130 @@ class ProductFilters extends AbstractBlock {
 		if ( ! wp_is_block_theme() && $is_product_archive ) {
 			wp_interactivity_config( 'core/router', array( 'clientNavigationDisabled' => true ) );
 		}
+	}
+
+	/**
+	 * Resolve responsive viewport media queries.
+	 *
+	 * @return array<string, string> Viewport media queries keyed by style state.
+	 */
+	private function get_viewport_media_queries() {
+		$providers = array(
+			array(
+				'class'    => 'WP_Theme_JSON_Gutenberg',
+				'settings' => 'gutenberg_get_global_settings',
+			),
+			array(
+				'class'    => 'WP_Theme_JSON',
+				'settings' => 'wp_get_global_settings',
+			),
+		);
+
+		foreach ( $providers as $provider ) {
+			$theme_json_class = $provider['class'];
+			$settings_getter  = $provider['settings'];
+			if ( method_exists( $theme_json_class, 'get_viewport_media_queries' ) && function_exists( $settings_getter ) ) {
+				$viewport_settings = $settings_getter( array( 'viewport' ) );
+				return $theme_json_class::get_viewport_media_queries(
+					$viewport_settings,
+					array( 'include_desktop' => true )
+				);
+			}
+		}
+
+		return array(
+			'@mobile'  => '@media (width <= 480px)',
+			'@tablet'  => '@media (480px < width <= 782px)',
+			'@desktop' => '@media (width > 782px)',
+		);
+	}
+
+	/**
+	 * Generate viewport-aware Product Filters styles.
+	 *
+	 * @param array<string, string>|null $viewport_media_queries Optional media queries for testing.
+	 * @return string Responsive CSS.
+	 */
+	private function get_responsive_styles( $viewport_media_queries = null ) {
+		$viewport_media_queries = $viewport_media_queries ?? $this->get_viewport_media_queries();
+		$desktop_query          = $viewport_media_queries['@desktop'] ?? null;
+		$block_selector         = ':where(.wc-block-product-filters).is-responsive-overlay';
+		$style_engine_options   = array(
+			'optimize' => true,
+			'prettify' => false,
+		);
+		$inline_rules           = array(
+			array(
+				'rules_group'  => '',
+				'selector'     => $block_selector,
+				'declarations' => array( 'display' => 'flex' ),
+			),
+			array(
+				'rules_group'  => '',
+				'selector'     => "{$block_selector} .wc-block-product-filters__overlay-header,{$block_selector} .wc-block-product-filters__overlay-footer,{$block_selector} .wc-block-product-filters__open-overlay",
+				'declarations' => array( 'display' => 'none' ),
+			),
+			array(
+				'rules_group'  => '',
+				'selector'     => "{$block_selector} .wc-block-product-filters__overlay",
+				// Style Engine filters inset and transition, so use supported equivalent declarations.
+				'declarations' => array(
+					'position'       => 'relative',
+					'pointer-events' => 'auto',
+					'top'            => '0',
+					'right'          => '0',
+					'bottom'         => '0',
+					'left'           => '0',
+					'background'     => 'inherit',
+					'color'          => 'inherit',
+					'--wc-product-filters-overlay-transition' => 'none',
+					'flex-grow'      => '1',
+				),
+			),
+			array(
+				'rules_group'  => '',
+				'selector'     => "{$block_selector} .wc-block-product-filters__overlay-wrapper",
+				'declarations' => array(
+					'width'      => 'auto',
+					'height'     => 'auto',
+					'background' => 'inherit',
+					'color'      => 'inherit',
+				),
+			),
+			array(
+				'rules_group'  => '',
+				'selector'     => "{$block_selector} .wc-block-product-filters__overlay-dialog",
+				'declarations' => array(
+					'position'   => 'relative',
+					'transform'  => 'none',
+					'background' => 'inherit',
+					'color'      => 'inherit',
+				),
+			),
+			array(
+				'rules_group'  => '',
+				'selector'     => "{$block_selector} .wc-block-product-filters__overlay-content",
+				'declarations' => array(
+					'padding'    => '0',
+					'overflow'   => 'visible',
+					'flex-grow'  => '1',
+					'background' => 'inherit',
+					'color'      => 'inherit',
+				),
+			),
+		);
+
+		if ( null === $desktop_query ) {
+			return wp_style_engine_get_stylesheet_from_css_rules( $inline_rules, $style_engine_options );
+		}
+
+		$css_rules = array();
+		foreach ( $inline_rules as $inline_rule ) {
+			$inline_rule['rules_group'] = $desktop_query;
+			$css_rules[]                = $inline_rule;
+		}
+
+		return wp_style_engine_get_stylesheet_from_css_rules( $css_rules, $style_engine_options );
 	}
 
 	/**
@@ -118,8 +247,8 @@ class ProductFilters extends AbstractBlock {
 		if ( ! $has_overlay ) {
 			$wrapper_classes[] = 'is-filter-drawer-disabled';
 		}
-		if ( $overlay_on_desktop ) {
-			$wrapper_classes[] = 'has-desktop-overlay';
+		if ( $has_overlay && ! $overlay_on_desktop ) {
+			$wrapper_classes[] = 'is-responsive-overlay';
 		}
 		if ( $has_overlay && 'right' === $overlay_position ) {
 			$wrapper_classes[] = 'is-overlay-right';

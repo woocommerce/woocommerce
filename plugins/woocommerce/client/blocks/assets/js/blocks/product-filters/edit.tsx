@@ -58,7 +58,7 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 		overlayOnDesktop || attributes.showFilterDrawer !== false;
 	let overlayMode = 'off';
 	if ( hasOverlay ) {
-		overlayMode = 'mobile';
+		overlayMode = 'responsive';
 	}
 	if ( overlayOnDesktop ) {
 		overlayMode = 'all';
@@ -84,7 +84,7 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 		className: clsx( 'wc-block-product-filters', {
 			'is-overlay-opened': isOpen,
 			'is-filter-drawer-disabled': ! hasOverlay,
-			'has-desktop-overlay': overlayOnDesktop,
+			'is-responsive-overlay': overlayMode === 'responsive',
 			'is-overlay-right': hasOverlay && overlayPosition === 'right',
 		} ),
 		style: {
@@ -128,9 +128,6 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 									className="wc-block-product-filters__close-overlay"
 									onClick={ () => setIsOpen( ! isOpen ) }
 								>
-									<span>
-										{ __( 'Close', 'woocommerce' ) }
-									</span>
 									<Icon icon={ close } />
 								</button>
 							</header>
@@ -180,7 +177,7 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 						onChange={ ( value ) => {
 							if (
 								value === 'off' ||
-								value === 'mobile' ||
+								value === 'responsive' ||
 								value === 'all'
 							) {
 								setAttributes( {
@@ -195,8 +192,8 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 							label={ __( 'Off', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
-							value="mobile"
-							label={ __( 'Mobile', 'woocommerce' ) }
+							value="responsive"
+							label={ __( 'Mobile + tablet', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
 							value="all"

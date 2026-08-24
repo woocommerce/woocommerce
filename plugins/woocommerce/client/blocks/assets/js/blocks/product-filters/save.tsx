@@ -15,15 +15,12 @@ export const Save = ( {
 }: {
 	attributes: BlockAttributes;
 } ): JSX.Element => {
-	const overlayOnDesktop = attributes.overlayOnDesktop === true;
 	const hasOverlay =
-		overlayOnDesktop || attributes.showFilterDrawer !== false;
+		attributes.overlayOnDesktop === true ||
+		attributes.showFilterDrawer !== false;
 	const blockProps = useBlockProps.save( {
 		className: clsx( 'wc-block-product-filters', {
 			'is-filter-drawer-disabled': ! hasOverlay,
-			'has-desktop-overlay': overlayOnDesktop,
-			'is-overlay-right':
-				hasOverlay && attributes.overlayPosition === 'right',
 		} ),
 	} );
 	const innerBlocksProps = useInnerBlocksProps.save( blockProps );
