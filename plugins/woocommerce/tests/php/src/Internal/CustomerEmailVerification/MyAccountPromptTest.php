@@ -27,12 +27,21 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	private $service;
 
 	/**
+	 * Previous guest checkout option value.
+	 *
+	 * @var mixed
+	 */
+	private $previous_guest_checkout_option;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->service = wc_get_container()->get( EmailVerificationService::class );
-		$this->sut     = wc_get_container()->get( VerificationController::class );
+		$this->service                        = wc_get_container()->get( EmailVerificationService::class );
+		$this->sut                            = wc_get_container()->get( VerificationController::class );
+		$this->previous_guest_checkout_option = get_option( 'woocommerce_enable_guest_checkout', null );
+		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
 	}
 
 	/**
@@ -41,7 +50,23 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		wp_set_current_user( 0 );
 		wc_clear_notices();
+		$this->restore_option( 'woocommerce_enable_guest_checkout', $this->previous_guest_checkout_option );
 		parent::tearDown();
+	}
+
+	/**
+	 * Restore an option to its previous value.
+	 *
+	 * @param string $option_name    Option name.
+	 * @param mixed  $previous_value Previous option value, or null if it did not exist.
+	 */
+	private function restore_option( string $option_name, $previous_value ): void {
+		if ( null === $previous_value ) {
+			delete_option( $option_name );
+			return;
+		}
+
+		update_option( $option_name, $previous_value );
 	}
 
 	/**
@@ -112,6 +137,38 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 		wp_set_current_user( $user_id );
 
 		$this->assertTrue( $this->sut->should_show_prompt(), 'Prompt visibility must not reveal whether matching guest orders exist' );
+	}
+
+	/**
+	 * @testdox should_show_prompt returns false when guest checkout is disabled.
+	 */
+	public function test_should_show_prompt_returns_false_when_guest_checkout_is_disabled(): void {
+		$user_id = wc_create_new_customer( 'prompt-guest-disabled@example.com', 'promptguestdisabled', 'pw' );
+		wp_set_current_user( $user_id );
+		update_option( 'woocommerce_enable_guest_checkout', 'no' );
+
+		$this->assertFalse( $this->sut->should_show_prompt(), 'The prompt should not show when guest checkout is disabled.' );
+	}
+
+	/**
+	 * @testdox should_show_prompt allows filters to override the guest checkout default.
+	 */
+	public function test_should_show_prompt_allows_filter_to_override_guest_checkout_default(): void {
+		$user_id = wc_create_new_customer( 'prompt-guest-disabled-filtered@example.com', 'promptguestdisabledfiltered', 'pw' );
+		wp_set_current_user( $user_id );
+		update_option( 'woocommerce_enable_guest_checkout', 'no' );
+
+		$override = static function ( bool $show ): bool {
+			unset( $show );
+			return true;
+		};
+
+		add_filter( 'woocommerce_customer_email_verification_should_show_prompt', $override );
+		try {
+			$this->assertTrue( $this->sut->should_show_prompt(), 'The prompt default should be overrideable by filter.' );
+		} finally {
+			remove_filter( 'woocommerce_customer_email_verification_should_show_prompt', $override );
+		}
 	}
 
 	/**
