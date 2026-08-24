@@ -14,6 +14,7 @@ import { useState, useContext, useRef } from '@wordpress/element';
  */
 import './product-card.scss';
 import ProductCardFooter from './product-card-footer';
+import QualityBadge from '../quality-badge/quality-badge';
 import {
 	Product,
 	ProductCardType,
@@ -299,7 +300,10 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 				<div className="woocommerce-marketplace__product-card__price" />
 			) }
 			{ ! isLoading && props.product && (
-				<ProductCardFooter product={ props.product } />
+				<>
+					<ProductCardFooter product={ props.product } />
+					<QualityBadge product={ props.product } />
+				</>
 			) }
 		</footer>
 	) : null;

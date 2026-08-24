@@ -404,7 +404,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						 *     }
 						 *
 						 *     public function apply_user_discount( $price, $variation, $product ) {
-						 *         return $price * $this->get_discount_for_user( get_current_user_id() );
+						 *         return wc_format_decimal( $price * $this->get_discount_for_user( get_current_user_id() ), wc_get_price_decimals() );
 						 *     }
 						 *
 						 *     public function add_user_to_hash( $price_hash, $product, $for_display ) {
@@ -415,7 +415,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						 *
 						 * @since 3.0.0
 						 *
-						 * @param string|float  $price    The variation's active price.
+						 * @param string        $price    The variation's active price.
 						 * @param WC_Product    $variation The variation product object.
 						 * @param WC_Product    $product   The parent variable product object.
 						 */
@@ -433,7 +433,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						 *
 						 * @since 3.0.0
 						 *
-						 * @param string|float  $regular_price The variation's regular price.
+						 * @param string        $regular_price The variation's regular price.
 						 * @param WC_Product    $variation     The variation product object.
 						 * @param WC_Product    $product       The parent variable product object.
 						 */
@@ -446,7 +446,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						 *
 						 * @since 3.0.0
 						 *
-						 * @param string|float  $sale_price The variation's sale price.
+						 * @param string        $sale_price The variation's sale price.
 						 * @param WC_Product    $variation  The variation product object.
 						 * @param WC_Product    $product    The parent variable product object.
 						 */
@@ -573,9 +573,23 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			 * @param bool       $for_display  Whether prices are being retrieved for display.
 			 */
 			$this->prices_array[ $price_hash ] = apply_filters( 'woocommerce_variation_prices', $transient_cached_prices_array[ $price_hash ], $product, $for_display );
+			if ( $this->prices_array[ $price_hash ] !== $transient_cached_prices_array[ $price_hash ] && ! $this->validate_prices_data( array( $price_hash => $this->prices_array[ $price_hash ] ), $transient_version ) ) {
+				wc_doing_it_wrong(
+					__METHOD__,
+					__( '`woocommerce_variation_prices` returned an unsupported data format. The value is currently used as-is but will be ignored in a future release. Ensure your callback returns the expected array structure.', 'woocommerce' ),
+					'11.1'
+				);
+			}
+
 			if ( null !== $opposite_price_hash && $opposite_price_hash !== $price_hash ) {
-				// phpcs:ignore WooCommerce.Commenting.CommentHooks
 				$this->prices_array[ $opposite_price_hash ] = apply_filters( 'woocommerce_variation_prices', $transient_cached_prices_array[ $opposite_price_hash ], $product, ! $for_display );
+				if ( $this->prices_array[ $opposite_price_hash ] !== $transient_cached_prices_array[ $opposite_price_hash ] && ! $this->validate_prices_data( array( $opposite_price_hash => $this->prices_array[ $opposite_price_hash ] ), $transient_version ) ) {
+					wc_doing_it_wrong(
+						__METHOD__,
+						__( '`woocommerce_variation_prices` returned an unsupported data format. The value is currently used as-is but will be ignored in a future release. Ensure your callback returns the expected array structure.', 'woocommerce' ),
+						'11.1'
+					);
+				}
 			}
 		}
 		return $this->prices_array[ $price_hash ];
@@ -923,9 +937,12 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 
 		$product_id = $product->get_id();
 
-		delete_post_meta( $product_id, '_price' );
-		delete_post_meta( $product_id, '_sale_price' );
-		delete_post_meta( $product_id, '_regular_price' );
+		// Performance note: prefilter with metadata_exists, to avoid unnecessary meta cache invalidations and SQLs.
+		$price_metas = array_filter(
+			array( '_price', '_sale_price', '_regular_price' ),
+			static fn( $meta_key ) => metadata_exists( 'post', $product_id, $meta_key )
+		);
+		array_walk( $price_metas, static fn( $meta_key ) => delete_post_meta( $product_id, $meta_key ) );
 
 		if ( $prices ) {
 			sort( $prices, SORT_NUMERIC );

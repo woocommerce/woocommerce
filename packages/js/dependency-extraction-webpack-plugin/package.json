@@ -31,7 +31,7 @@
 		"access": "public"
 	},
 	"devDependencies": {
-		"@babel/core": "7.25.7",
+		"@babel/core": "catalog:tooling",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"eslint": "^10.0.0",
@@ -40,7 +40,7 @@
 		"rimraf": "5.0.5",
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x",
-		"webpack": "5.97.x",
+		"webpack": "catalog:tooling",
 		"webpack-cli": "5.1.x"
 	},
 	"scripts": {

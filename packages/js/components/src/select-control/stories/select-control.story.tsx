@@ -248,6 +248,23 @@ const SelectControlExample = () => {
 
 export const Basic = () => <SelectControlExample />;
 
+export const SingleSelectWithInlineTag = () => {
+	const [ selected, setSelected ] = useState( [ options[ 0 ] ] );
+
+	return (
+		<SelectControl
+			label="Single value with inline tag"
+			isSearchable
+			inlineTags
+			multiple={ false }
+			onChange={ setSelected }
+			options={ options }
+			placeholder="Start typing to filter options..."
+			selected={ selected }
+		/>
+	);
+};
+
 export default {
 	title: 'Components/SelectControl',
 	component: SelectControl,

@@ -3513,7 +3513,7 @@ parameters:
 		-
 			message: '#^Cannot access offset ''local'' on non\-empty\-array\|true\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
+			count: 1
 			path: includes/admin/helper/class-wc-helper-subscriptions-api.php
 
 		-
@@ -4708,12 +4708,6 @@ parameters:
 			message: '#^Parameter \#1 \$term of function wc_order_search expects string, array\|string given\.$#'
 			identifier: argument.type
 			count: 1
-			path: includes/admin/list-tables/class-wc-admin-list-table-orders.php
-
-		-
-			message: '#^Part \$date_query \(array\|string\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 2
 			path: includes/admin/list-tables/class-wc-admin-list-table-orders.php
 
 		-
@@ -9187,12 +9181,6 @@ parameters:
 			path: includes/class-wc-brands.php
 
 		-
-			message: '#^Argument of an invalid type array\<WP_Term\>\|WP_Error supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: includes/class-wc-brands.php
-
-		-
 			message: '#^Argument of an invalid type array\<int, WP_Term\>\|WP_Error supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 2
@@ -9403,19 +9391,7 @@ parameters:
 			path: includes/class-wc-brands.php
 
 		-
-			message: '#^Parameter \#1 \$terms of function _wc_term_recount expects array, array\<int, int\>\|WP_Error given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-brands.php
-
-		-
 			message: '#^Parameter \#2 \$str of function explode expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: includes/class-wc-brands.php
-
-		-
-			message: '#^Parameter \#2 \$taxonomy of function _wc_term_recount expects WP_Taxonomy, WP_Taxonomy\|false given\.$#'
 			identifier: argument.type
 			count: 2
 			path: includes/class-wc-brands.php
@@ -14217,18 +14193,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property WC_Register_WP_Admin_Settings\:\:\$title\.$#'
 			identifier: property.notFound
-			count: 1
-			path: includes/class-wc-register-wp-admin-settings.php
-
-		-
-			message: '#^Access to protected property WC_Email\|WC_Settings_Page\:\:\$id\.$#'
-			identifier: property.protected
-			count: 1
-			path: includes/class-wc-register-wp-admin-settings.php
-
-		-
-			message: '#^Call to an undefined method WC_Email\|WC_Settings_Page\:\:get_id\(\)\.$#'
-			identifier: method.notFound
 			count: 1
 			path: includes/class-wc-register-wp-admin-settings.php
 
@@ -20143,18 +20107,6 @@ parameters:
 			path: includes/import/abstract-wc-product-importer.php
 
 		-
-			message: '#^Parameter \#1 \$attribute_name of function wc_attribute_taxonomy_name expects string, int\<min, \-1\>\|int\<1, max\>\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/import/abstract-wc-product-importer.php
-
-		-
-			message: '#^Parameter \#1 \$name of function wc_attribute_taxonomy_id_by_name expects string, int\<min, \-1\>\|int\<1, max\>\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/import/abstract-wc-product-importer.php
-
-		-
 			message: '#^Parameter \#2 \$array of function array_map expects array, list\<string\>\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -20234,12 +20186,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$value of method WC_Product_Importer\:\:unescape_data\(\) expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/import/class-wc-product-csv-importer.php
-
-		-
-			message: '#^Parameter \#2 \$array of function array_map expects array, list\<string\|null\>\|false\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/import/class-wc-product-csv-importer.php
@@ -30310,12 +30256,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-refunds-controller.php
 
 		-
-			message: '#^Method WC_REST_Refunds_Controller\:\:register_routes\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-refunds-controller.php
-
-		-
 			message: '#^PHPDoc tag @extends has invalid value \(WC_REST_Order_Refunds_Controller\)\: Unexpected token "\\n ", expected ''\<'' at offset 127 on line 5$#'
 			identifier: phpDoc.parseError
 			count: 1
@@ -38866,18 +38806,6 @@ parameters:
 			path: src/Admin/API/OnboardingProfile.php
 
 		-
-			message: '#^Access to offset ''imported'' on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 3
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Access to offset ''imported'' on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response\.$#'
-			identifier: class.notFound
-			count: 3
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
 			message: '#^Call to an undefined method object\:\:dismiss\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -39149,24 +39077,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:import_sample_products\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_Error\|Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response but returns WP_Error\|WP_REST_Response\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:import_sample_products_from_csv\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:import_sample_products_from_csv\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:import_sample_products_from_csv\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_Error\|Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response but returns WP_Error\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Admin/API/OnboardingTasks.php
@@ -41158,12 +41068,6 @@ parameters:
 			path: src/Admin/API/Reports/Customers/Controller.php
 
 		-
-			message: '#^@param object \$export_item does not accept actual type of parameter\: array\{name\: mixed, username\: mixed, last_active\: mixed, registered\: mixed, email\: mixed, orders_count\: mixed, total_spend\: string, avg_order_value\: string, \.\.\.\}\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Admin/API/Reports/Customers/Controller.php
-
-		-
 			message: '#^@param object \$item does not accept actual type of parameter\: array\.$#'
 			identifier: parameter.phpDocType
 			count: 1
@@ -41189,12 +41093,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\Controller\:\:get_item\(\) should return array\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\WP_Error but returns WP_REST_Response\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/Customers/Controller.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\Controller\:\:prepare_item_for_export\(\) should return array but returns object\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Admin/API/Reports/Customers/Controller.php
@@ -44346,19 +44244,13 @@ parameters:
 		-
 			message: '#^Call to method format\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
 			identifier: class.notFound
-			count: 41
+			count: 35
 			path: src/Admin/API/Reports/TimeInterval.php
 
 		-
 			message: '#^Call to method getTimezone\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
 			identifier: class.notFound
 			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Call to method modify\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 4
 			path: src/Admin/API/Reports/TimeInterval.php
 
 		-
@@ -44429,12 +44321,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:default_before\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime but returns WC_DateTime\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:get_timeframe_dates\(\) should return array but returns false\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Admin/API/Reports/TimeInterval.php
@@ -44557,12 +44443,6 @@ parameters:
 			message: '#^Parameter \#2 \$datetime of static method DateTime\:\:createFromFormat\(\) expects string, int given\.$#'
 			identifier: argument.type
 			count: 2
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Parameter \$current_date of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:get_timeframe_dates\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
 			path: src/Admin/API/Reports/TimeInterval.php
 
 		-
@@ -45368,24 +45248,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Admin/DataSourcePoller.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\DateTimeProvider\\CurrentDateTimeProvider\:\:get_now\(\) has invalid return type Automattic\\WooCommerce\\Admin\\DateTimeProvider\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/DateTimeProvider/CurrentDateTimeProvider.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\DateTimeProvider\\CurrentDateTimeProvider\:\:get_now\(\) should return Automattic\\WooCommerce\\Admin\\DateTimeProvider\\DateTime but returns DateTime\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/DateTimeProvider/CurrentDateTimeProvider.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\DateTimeProvider\\DateTimeProviderInterface\:\:get_now\(\) has invalid return type Automattic\\WooCommerce\\Admin\\DateTimeProvider\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/DateTimeProvider/DateTimeProviderInterface.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\DeprecatedClassFacade\:\:__call\(\) has no return type specified\.$#'
@@ -46802,42 +46664,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: src/Admin/Features/PaymentGatewaySuggestions/PaymentGatewaysController.php
-
-		-
-			message: '#^Cannot access property \$labels on WP_Post_Type\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: src/Admin/Features/ProductDataViews/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductDataViews\\Init\:\:enqueue_scripts\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductDataViews/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductDataViews\\Init\:\:enqueue_styles\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductDataViews/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductDataViews\\Init\:\:is_product_data_view_page\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductDataViews/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductDataViews\\Init\:\:woocommerce_add_new_products_dashboard\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductDataViews/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductDataViews\\Init\:\:woocommerce_products_dashboard\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductDataViews/Init.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ShippingPartnerSuggestions\\ShippingPartnerSuggestions\:\:get_specs\(\) has no return type specified\.$#'
@@ -55858,12 +55684,6 @@ parameters:
 			path: src/Internal/Admin/Emails/EmailListingRestController.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Emails\\EmailListingRestController\:\:initialize_template_generator\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Emails/EmailListingRestController.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Emails\\EmailListingRestController\:\:recreate_email_post\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -62137,30 +61957,6 @@ parameters:
 			path: src/Internal/EmailEditor/PersonalizationTags/StoreTagsProvider.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsGenerator\:\:generate_email_templates\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsGenerator.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsGenerator\:\:generate_initial_email_templates\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsGenerator.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsGenerator\:\:init_default_transactional_emails\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsGenerator.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsGenerator\:\:initialize\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsGenerator.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\:\:clear_caches\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -62204,12 +62000,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmails\:\:init\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmails.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmails\:\:init_email_templates\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmails.php
@@ -67849,18 +67639,6 @@ parameters:
 			path: src/Internal/TransientFiles/TransientFilesEngine.php
 
 		-
-			message: '#^Parameter \#1 \$input of function array_slice expects array, list\<string\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/TransientFiles/TransientFilesEngine.php
-
-		-
-			message: '#^Parameter \#1 \$var of function count expects array\|Countable, list\<string\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/TransientFiles/TransientFilesEngine.php
-
-		-
 			message: '#^Parameter \#2 \$timestamp of function gmdate expects int, int\|string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -68247,12 +68025,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Authentication\:\:get_cart_token\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Authentication.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Authentication\:\:get_cart_token\(\) should return string but returns array\|string\.$#'
-			identifier: return.type
 			count: 1
 			path: src/StoreApi/Authentication.php
 
@@ -69901,12 +69673,6 @@ parameters:
 			path: src/StoreApi/Schemas/ExtendSchema.php
 
 		-
-			message: '#^Parameter \#1 \$exception_object of function wc_caught_exception expects Exception, Throwable given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/StoreApi/Schemas/ExtendSchema.php
-
-		-
 			message: '#^Variable \$data might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -70617,12 +70383,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\SessionHandler\:\:init_session_from_token\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/StoreApi/SessionHandler.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\StoreApi\\SessionHandler\:\:\$token \(string\) does not accept array\|string\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: src/StoreApi/SessionHandler.php
 
