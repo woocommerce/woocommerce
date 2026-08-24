@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix the create-post e2e test against Gutenberg nightly, where the default block appender no longer exposes the button role.

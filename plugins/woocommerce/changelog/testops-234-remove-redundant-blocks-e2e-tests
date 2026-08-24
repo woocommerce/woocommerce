@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Remove 4 redundant blocks E2E tests already covered by unit/component/PHPUnit tests.

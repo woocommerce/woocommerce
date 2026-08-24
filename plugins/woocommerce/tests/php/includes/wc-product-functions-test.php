@@ -15,13 +15,35 @@ use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
  * Class WC_Stock_Functions_Tests.
  */
 class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
+	/**
+	 * The original product reviews setting.
+	 *
+	 * @var mixed
+	 */
+	private $original_reviews_setting;
 
 	/**
-	 * Reset the variation gallery feature-flag option after each test so
-	 * individual cases that flip it on don't leak global state.
+	 * Whether the current test changed the product reviews setting.
+	 *
+	 * @var bool
+	 */
+	private $reviews_setting_changed = false;
+
+	/**
+	 * Restore settings modified by tests.
 	 */
 	public function tearDown(): void {
-		delete_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME );
+		if ( $this->reviews_setting_changed ) {
+			delete_option( 'woocommerce_product_lookup_table_is_generating' );
+			as_unschedule_all_actions( '', array(), 'wc_update_product_lookup_tables' );
+
+			if ( null === $this->original_reviews_setting ) {
+				delete_option( 'woocommerce_enable_reviews' );
+			} else {
+				update_option( 'woocommerce_enable_reviews', $this->original_reviews_setting );
+			}
+		}
+
 		parent::tearDown();
 	}
 
@@ -573,6 +595,130 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product lookup table regeneration schedules review data updates only when reviews are enabled.
+	 * @testWith ["yes", true]
+	 *           ["no", false]
+	 *
+	 * @param string $reviews_setting       The product reviews setting.
+	 * @param bool   $expect_review_updates Whether review data updates should be scheduled.
+	 */
+	public function test_wc_update_product_lookup_tables_schedules_review_data_only_when_reviews_are_enabled( string $reviews_setting, bool $expect_review_updates ): void {
+		$this->set_reviews_setting_for_lookup_table_test( $reviews_setting );
+
+		wc_update_product_lookup_tables();
+
+		$average_rating_scheduled = as_has_scheduled_action(
+			'wc_update_product_lookup_tables_column',
+			array( 'column' => 'average_rating' ),
+			'wc_update_product_lookup_tables'
+		);
+		$rating_count_scheduled   = as_has_scheduled_action(
+			'wc_update_product_lookup_tables_rating_count_batch',
+			array(
+				'offset' => 0,
+				'limit'  => 50,
+			),
+			'wc_update_product_lookup_tables'
+		);
+
+		$this->assertSame( $expect_review_updates, (bool) $average_rating_scheduled, 'Average rating regeneration should follow the product reviews setting.' );
+		$this->assertSame( $expect_review_updates, (bool) $rating_count_scheduled, 'Rating count regeneration should follow the product reviews setting.' );
+		$this->assertTrue(
+			(bool) as_has_scheduled_action(
+				'wc_update_product_lookup_tables_column',
+				array( 'column' => 'min_max_price' ),
+				'wc_update_product_lookup_tables'
+			),
+			'Unrelated lookup table columns should still be scheduled.'
+		);
+	}
+
+	/**
+	 * @testdox Queued average rating updates do not run when reviews are disabled.
+	 * @testWith ["yes", 4.5]
+	 *           ["no", 1.0]
+	 *
+	 * @param string $reviews_setting The product reviews setting.
+	 * @param float  $expected_rating The expected lookup table rating.
+	 */
+	public function test_wc_update_product_lookup_tables_column_respects_reviews_setting( string $reviews_setting, float $expected_rating ): void {
+		global $wpdb;
+
+		$product = WC_Helper_Product::create_simple_product();
+		update_post_meta( $product->get_id(), '_wc_average_rating', '4.50' );
+		$wpdb->update(
+			$wpdb->wc_product_meta_lookup,
+			array( 'average_rating' => 1.0 ),
+			array( 'product_id' => $product->get_id() )
+		);
+		$this->set_reviews_setting_for_lookup_table_test( $reviews_setting );
+
+		wc_update_product_lookup_tables_column( 'average_rating' );
+
+		$actual_rating = (float) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT average_rating FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d",
+				$product->get_id()
+			)
+		);
+		$this->assertSame( $expected_rating, $actual_rating, 'Average rating lookup data should only update when reviews are enabled.' );
+	}
+
+	/**
+	 * @testdox Queued rating count batches do not run when reviews are disabled.
+	 * @testWith ["yes", 3, true]
+	 *           ["no", 1, false]
+	 *
+	 * @param string $reviews_setting  The product reviews setting.
+	 * @param int    $expected_count   The expected lookup table rating count.
+	 * @param bool   $expect_follow_up Whether another batch should be scheduled.
+	 */
+	public function test_wc_update_product_lookup_tables_rating_count_batch_respects_reviews_setting( string $reviews_setting, int $expected_count, bool $expect_follow_up ): void {
+		global $wpdb;
+
+		$product = WC_Helper_Product::create_simple_product();
+		update_post_meta( $product->get_id(), '_wc_rating_count', array( 5 => 3 ) );
+		$wpdb->update(
+			$wpdb->wc_product_meta_lookup,
+			array( 'rating_count' => 1 ),
+			array( 'product_id' => $product->get_id() )
+		);
+		$this->set_reviews_setting_for_lookup_table_test( $reviews_setting );
+
+		wc_update_product_lookup_tables_rating_count_batch( 0, 50 );
+
+		$actual_count        = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT rating_count FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d",
+				$product->get_id()
+			)
+		);
+		$follow_up_scheduled = as_has_scheduled_action(
+			'wc_update_product_lookup_tables_rating_count_batch',
+			array(
+				'offset' => 50,
+				'limit'  => 50,
+			),
+			'wc_update_product_lookup_tables'
+		);
+
+		$this->assertSame( $expected_count, $actual_count, 'Rating count lookup data should only update when reviews are enabled.' );
+		$this->assertSame( $expect_follow_up, (bool) $follow_up_scheduled, 'Follow-up rating count batches should only be scheduled when reviews are enabled.' );
+	}
+
+	/**
+	 * Set the product reviews option and reset lookup table actions for a test.
+	 *
+	 * @param string $reviews_setting The product reviews setting.
+	 */
+	private function set_reviews_setting_for_lookup_table_test( string $reviews_setting ): void {
+		$this->original_reviews_setting = get_option( 'woocommerce_enable_reviews', null );
+		$this->reviews_setting_changed  = true;
+		as_unschedule_all_actions( '', array(), 'wc_update_product_lookup_tables' );
+		update_option( 'woocommerce_enable_reviews', $reviews_setting );
+	}
+
+	/**
 	 * @testDox Action Scheduler events are scheduled when product with sale dates is saved.
 	 */
 	public function test_wc_schedule_product_sale_events_on_save() {
@@ -858,7 +1004,6 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		};
 		add_action( 'wc_product_start_scheduled_sale', $writer, 1, 1 );
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'wc_product_start_scheduled_sale', $product->get_id() );
 
 		remove_action( 'wc_product_start_scheduled_sale', $writer, 1 );
@@ -880,7 +1025,6 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		};
 		add_action( 'wc_product_end_scheduled_sale', $writer, 1, 1 );
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'wc_product_end_scheduled_sale', $product->get_id() );
 
 		remove_action( 'wc_product_end_scheduled_sale', $writer, 1 );
@@ -1396,11 +1540,9 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Variable add-to-cart attaches a pristine gallery snapshot to the variation script when the feature is on.
+	 * @testdox Variable add-to-cart attaches a pristine gallery snapshot to the variation script.
 	 */
 	public function test_woocommerce_variable_add_to_cart_attaches_gallery_snapshot() {
-		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'yes' );
-
 		$inline_js = $this->capture_variable_add_to_cart_inline_js();
 
 		$this->assertStringContainsString( 'wc_variation_gallery_defaults', $inline_js );
@@ -1411,21 +1553,6 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		$decoded_snapshot = json_decode( $matches[1] );
 		$this->assertIsString( $decoded_snapshot );
 		$this->assertStringContainsString( 'woocommerce-product-gallery', $decoded_snapshot );
-	}
-
-	/**
-	 * @testdox Variable add-to-cart skips the gallery snapshot when the feature is off.
-	 */
-	public function test_woocommerce_variable_add_to_cart_skips_gallery_snapshot_when_feature_off() {
-		// Set the option to 'no' explicitly rather than deleting it: an empty option makes
-		// Package::is_enabled() fall through to the canary cohort, which reads a separate
-		// option (woocommerce_remote_variant_assignment) that other tests in the same worker
-		// may have left set, non-deterministically re-enabling the feature. 'no' short-circuits.
-		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'no' );
-
-		$inline_js = $this->capture_variable_add_to_cart_inline_js();
-
-		$this->assertStringNotContainsString( 'wc_variation_gallery_defaults', $inline_js );
 	}
 
 	/**

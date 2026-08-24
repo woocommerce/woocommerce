@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Center table header cells in rendered emails when no alignment is set, so they match the editor canvas instead of falling back to left.

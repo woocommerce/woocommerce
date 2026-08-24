@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Report a customer's first order as new in Analytics regardless of the order in which its orders and refunds are imported
