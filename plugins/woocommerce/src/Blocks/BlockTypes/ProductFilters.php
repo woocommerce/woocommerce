@@ -65,34 +65,44 @@ class ProductFilters extends AbstractBlock {
 	 * @return array<string, string> Viewport media queries keyed by style state.
 	 */
 	private function get_viewport_media_queries() {
-		$providers = array(
-			array(
-				'class'    => 'WP_Theme_JSON_Gutenberg',
-				'settings' => 'gutenberg_get_global_settings',
-			),
-			array(
-				'class'    => 'WP_Theme_JSON',
-				'settings' => 'wp_get_global_settings',
-			),
-		);
-
-		foreach ( $providers as $provider ) {
-			$theme_json_class = $provider['class'];
-			$settings_getter  = $provider['settings'];
-			if ( method_exists( $theme_json_class, 'get_viewport_media_queries' ) && function_exists( $settings_getter ) ) {
-				$viewport_settings = $settings_getter( array( 'viewport' ) );
-				return $theme_json_class::get_viewport_media_queries(
-					$viewport_settings,
-					array( 'include_desktop' => true )
-				);
-			}
+		if ( function_exists( 'gutenberg_get_global_settings' ) ) {
+			$viewport_settings = gutenberg_get_global_settings( array( 'viewport' ) );
+		} else {
+			$viewport_settings = wp_get_global_settings( array( 'viewport' ) );
 		}
 
-		return array(
-			'@mobile'  => '@media (width <= 480px)',
-			'@tablet'  => '@media (480px < width <= 782px)',
-			'@desktop' => '@media (width > 782px)',
-		);
+		if ( ! is_array( $viewport_settings ) ) {
+			$viewport_settings = array();
+		}
+
+		$mobile = isset( $viewport_settings['mobile'] ) && is_string( $viewport_settings['mobile'] )
+			? $viewport_settings['mobile']
+			: null;
+		$tablet = isset( $viewport_settings['tablet'] ) && is_string( $viewport_settings['tablet'] )
+			? $viewport_settings['tablet']
+			: null;
+
+		if ( null === $mobile && null === $tablet ) {
+			$mobile = '480px';
+			$tablet = '782px';
+		}
+
+		$media_queries = array();
+
+		if ( null !== $mobile ) {
+			$media_queries['@mobile'] = "@media (width <= {$mobile})";
+		}
+
+		if ( null !== $tablet ) {
+			$media_queries['@tablet'] = null !== $mobile
+				? "@media ({$mobile} < width <= {$tablet})"
+				: "@media (width <= {$tablet})";
+		}
+
+		$desktop                   = $tablet ?? $mobile;
+		$media_queries['@desktop'] = "@media (width > {$desktop})";
+
+		return $media_queries;
 	}
 
 	/**
