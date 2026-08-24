@@ -1178,33 +1178,52 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @since 11.1.0
 	 *
 	 * @param array $parsed_data Parsed row data.
-	 * @return bool
+	 * @return true|WP_Error True when the variation can be created, a WP_Error describing the refusal otherwise.
 	 */
 	protected function can_create_variation( $parsed_data ) {
 		// A row ID cannot be honored when creating a new variation: reusing an existing
 		// post's ID would corrupt that post, and a nonexistent ID cannot be assigned.
 		if ( ! empty( $parsed_data['id'] ) ) {
-			return false;
+			return new WP_Error(
+				'woocommerce_product_importer_variation_has_id',
+				esc_html__( 'A new variation cannot be created for a row that specifies an ID.', 'woocommerce' )
+			);
 		}
 
 		// A CSV ID cannot be assigned to a new variation, so without a SKU the created variation
 		// could never be matched again and every re-import would duplicate it.
 		if ( empty( $parsed_data['sku'] ) ) {
-			return false;
+			return new WP_Error(
+				'woocommerce_product_importer_variation_missing_sku',
+				esc_html__( 'A new variation cannot be created without a SKU.', 'woocommerce' )
+			);
 		}
 
 		if ( empty( $parsed_data['parent_id'] ) ) {
-			return false;
+			return new WP_Error(
+				'woocommerce_product_importer_variation_missing_parent',
+				esc_html__( 'A new variation cannot be created without a parent product.', 'woocommerce' )
+			);
 		}
 
 		$parent = wc_get_product( $parsed_data['parent_id'] );
 
 		if ( ! $parent || ! $parent->is_type( ProductType::VARIABLE ) ) {
-			return false;
+			return new WP_Error(
+				'woocommerce_product_importer_variation_parent_not_variable',
+				esc_html__( 'A new variation can only be created for a variable parent product.', 'woocommerce' )
+			);
 		}
 
 		// A parent with the 'importing' status is a placeholder, meaning the parent does not exist either.
-		return ! in_array( $parent->get_status(), array( 'importing', ProductStatus::TRASH ), true );
+		if ( in_array( $parent->get_status(), array( 'importing', ProductStatus::TRASH ), true ) ) {
+			return new WP_Error(
+				'woocommerce_product_importer_variation_parent_missing',
+				esc_html__( 'A new variation cannot be created for a parent product that does not exist.', 'woocommerce' )
+			);
+		}
+
+		return true;
 	}
 
 	/**
@@ -1273,25 +1292,36 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 			if ( $update_existing && ( isset( $parsed_data['id'] ) || isset( $parsed_data['sku'] ) ) && ! $id_exists && ! $sku_exists ) {
 				$create_variation = false;
+				$refusal          = null;
 
-				if ( ProductType::VARIATION === ( $parsed_data['type'] ?? '' ) && $this->can_create_variation( $parsed_data ) ) {
-					/**
-					 * Filters whether a new variation should be created for an existing variable product when updating existing products.
-					 *
-					 * Only fires for variation rows that passed validation, so it can veto the creation but not force it.
-					 *
-					 * @since 11.1.0
-					 *
-					 * @param bool  $create_variation Whether to create the new variation instead of skipping the row.
-					 * @param array $parsed_data      Parsed row data.
-					 */
-					$create_variation = apply_filters( 'woocommerce_product_import_create_variation_of_existing_product', true, $parsed_data );
+				if ( ProductType::VARIATION === ( $parsed_data['type'] ?? '' ) ) {
+					$can_create_variation = $this->can_create_variation( $parsed_data );
+
+					// Anything other than an explicit pass refuses, so an override still written against
+					// the previous boolean contract cannot turn a refusal into a creation.
+					if ( true !== $can_create_variation ) {
+						$refusal = is_wp_error( $can_create_variation ) ? $can_create_variation : null;
+					} else {
+						/**
+						 * Filters whether a new variation should be created for an existing variable product when updating existing products.
+						 *
+						 * Only fires for variation rows that passed validation, so it can veto the creation but not force it.
+						 *
+						 * @since 11.1.0
+						 *
+						 * @param bool  $create_variation Whether to create the new variation instead of skipping the row.
+						 * @param array $parsed_data      Parsed row data.
+						 */
+						$create_variation = apply_filters( 'woocommerce_product_import_create_variation_of_existing_product', true, $parsed_data );
+					}
 				}
 
 				if ( ! $create_variation ) {
+					// A refused variation row reports why it was refused; anything else is a row whose
+					// ID or SKU simply matches nothing on the site.
 					$data['skipped'][] = new WP_Error(
 						'woocommerce_product_importer_error',
-						esc_html__( 'No matching product exists to update.', 'woocommerce' ),
+						$refusal ? $refusal->get_error_message() : esc_html__( 'No matching product exists to update.', 'woocommerce' ),
 						array(
 							'id'  => $id,
 							'sku' => esc_attr( $sku ),
