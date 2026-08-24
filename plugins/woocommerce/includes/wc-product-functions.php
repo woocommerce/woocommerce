@@ -1776,7 +1776,7 @@ function wc_get_product_category_list( $product_id, $sep = ', ', $before = '', $
 		usort(
 			$terms,
 			function ( $a, $b ) {
-				$name_comparison = strnatcasecmp( $a->name, $b->name );
+				$name_comparison = strnatcasecmp( (string) $a->name, (string) $b->name );
 
 				return 0 !== $name_comparison ? $name_comparison : $a->term_id <=> $b->term_id;
 			}

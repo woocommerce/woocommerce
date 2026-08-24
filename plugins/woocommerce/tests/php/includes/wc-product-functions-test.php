@@ -1677,6 +1677,73 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product category list name ordering tolerates a term with no name.
+	 */
+	public function test_wc_get_product_category_list_name_order_tolerates_missing_names(): void {
+		$suffix         = wp_unique_id();
+		$named          = wp_insert_term( 'Named category ' . $suffix, 'product_cat' );
+		$unnamed        = wp_insert_term( 'Unnamed category ' . $suffix, 'product_cat' );
+		$product        = WC_Helper_Product::create_simple_product();
+		$unnamed_filter = static function ( $terms ) use ( $unnamed ) {
+			if ( ! is_array( $terms ) ) {
+				return $terms;
+			}
+
+			/*
+			 * Clone before mutating: these objects come from the term cache, and blanking a name in
+			 * place would leak into every later test in the run.
+			 */
+			return array_map(
+				static function ( $term ) use ( $unnamed ) {
+					if ( $term instanceof \WP_Term && (int) $unnamed['term_id'] === (int) $term->term_id ) {
+						$term       = clone $term;
+						$term->name = null;
+					}
+
+					return $term;
+				},
+				$terms
+			);
+		};
+
+		try {
+			wp_set_object_terms( $product->get_id(), array( $named['term_id'], $unnamed['term_id'] ), 'product_cat' );
+			add_filter( 'get_the_terms', $unnamed_filter, 99 );
+
+			$comparison_diagnostics = array();
+
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Capturing the diagnostic is the assertion; PHPUnit would otherwise convert it to an exception and hide which operand it came from.
+			set_error_handler(
+				static function ( $errno, $errstr ) use ( &$comparison_diagnostics ) {
+					if ( false !== stripos( $errstr, 'strnatcasecmp' ) ) {
+						$comparison_diagnostics[] = $errstr;
+					}
+
+					return true;
+				},
+				E_DEPRECATED | E_WARNING | E_NOTICE
+			);
+
+			try {
+				wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'name' );
+			} finally {
+				restore_error_handler();
+			}
+
+			$this->assertSame(
+				array(),
+				$comparison_diagnostics,
+				'Name ordering should not raise comparison diagnostics for a term with no name.'
+			);
+		} finally {
+			remove_filter( 'get_the_terms', $unnamed_filter, 99 );
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $named['term_id'], 'product_cat' );
+			wp_delete_term( $unnamed['term_id'], 'product_cat' );
+		}
+	}
+
+	/**
 	 * @testdox Product category list ordered modes validate values returned by the term-links filter.
 	 */
 	public function test_wc_get_product_category_list_ordered_mode_validates_term_links_filter_result(): void {
