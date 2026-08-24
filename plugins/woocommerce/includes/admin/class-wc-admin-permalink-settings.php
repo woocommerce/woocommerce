@@ -180,7 +180,7 @@ class WC_Admin_Permalink_Settings {
 					<th><label><input name="product_permalink" id="woocommerce_custom_selection" type="radio" value="custom" class="tog" <?php checked( false === $selected_structure ); ?> />
 						<?php esc_html_e( 'Custom base', 'woocommerce' ); ?></label></th>
 					<td>
-						<input name="product_permalink_structure" id="woocommerce_permalink_structure" type="text" value="<?php echo esc_attr( $product_permalink_structure ); ?>" class="regular-text code"> <span class="description"><?php esc_html_e( 'Enter a custom base to use. A base must be set or WordPress will use default instead.', 'woocommerce' ); ?></span>
+						<input name="product_permalink_structure" id="woocommerce_permalink_structure" type="text" value="<?php echo esc_attr( $product_permalink_structure ); ?>" class="regular-text code" aria-label="<?php esc_attr_e( 'Custom base', 'woocommerce' ); ?>" aria-describedby="woocommerce_permalink_structure_description"> <span class="description" id="woocommerce_permalink_structure_description"><?php esc_html_e( 'Enter a custom base to use. A base must be set or WordPress will use default instead.', 'woocommerce' ); ?></span>
 					</td>
 				</tr>
 			</tbody>
