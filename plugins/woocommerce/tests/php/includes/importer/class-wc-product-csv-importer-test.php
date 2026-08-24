@@ -570,10 +570,10 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		$this->assertEmpty( $data['imported_variations'], 'Expected 0 imported variations, got ' . count( $data['imported_variations'] ) );
 		$this->assertCount( 1, $data['skipped'], 'Expected 1 skipped product, got ' . count( $data['skipped'] ) );
-		$this->assertStringContainsString(
-			'is not an option of the parent product',
+		$this->assertSame(
+			'A new variation cannot be created because "L" is not an option of the parent product\'s "Size" attribute.',
 			html_entity_decode( $data['skipped'][0]->get_error_message() ),
-			'Expected the skip message to name the unavailable value'
+			'Expected the skip message to name the unavailable value and its attribute'
 		);
 		$this->assertSame( 0, wc_get_product_id_by_sku( 'IMPORT-VALUE-L' ), 'Expected no variation to be created for a value the parent does not offer' );
 
@@ -607,12 +607,15 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		$this->assertEmpty( $data['imported_variations'], 'Expected 0 imported variations, got ' . count( $data['imported_variations'] ) );
 		$this->assertCount( 1, $data['skipped'], 'Expected 1 skipped product, got ' . count( $data['skipped'] ) );
-		// Asserted explicitly so this cannot pass because the global attribute failed to resolve at all,
+		// Asserted in full so this cannot pass because the global attribute failed to resolve at all,
 		// which would report the "parent has no such attribute" refusal instead.
-		$this->assertStringContainsString(
-			'is not an option of the parent product',
+		$this->assertSame(
+			sprintf(
+				'A new variation cannot be created because "L" is not an option of the parent product\'s "%s" attribute.',
+				wc_attribute_label( $taxonomy )
+			),
 			html_entity_decode( $data['skipped'][0]->get_error_message() ),
-			'Expected the refusal to be about the value, not about an unresolved attribute'
+			'Expected the refusal to name the term and the global attribute, not an unresolved attribute'
 		);
 		$this->assertSame( 0, wc_get_product_id_by_sku( 'IMPORT-TAX-L' ), 'Expected no variation to be created for a term the parent does not offer' );
 
@@ -713,8 +716,8 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		$this->assertEmpty( $data['imported_variations'], 'Expected 0 imported variations, got ' . count( $data['imported_variations'] ) );
 		$this->assertCount( 1, $data['skipped'], 'Expected 1 skipped product, got ' . count( $data['skipped'] ) );
-		$this->assertStringContainsString(
-			'has no',
+		$this->assertSame(
+			'A new variation cannot be created because the parent product has no "Colour" attribute.',
 			html_entity_decode( $data['skipped'][0]->get_error_message() ),
 			'Expected the skip message to name the missing attribute'
 		);
