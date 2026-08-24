@@ -889,6 +889,80 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test that a failed variation row does not leave a display-only parent attribute promoted to being used for variations.
+	 */
+	public function test_import_failure_does_not_promote_parent_attributes_for_variations() {
+		$size = new WC_Product_Attribute();
+		$size->set_name( 'Size' );
+		$size->set_options( array( 'S', 'M' ) );
+		$size->set_variation( true );
+
+		$material = new WC_Product_Attribute();
+		$material->set_name( 'Material' );
+		$material->set_options( array( 'Cotton' ) );
+		$material->set_variation( false );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Promote Guard Tee' );
+		$product->set_sku( 'IMPORT-PROMOTE-GUARD-PARENT' );
+		$product->set_attributes( array( $size, $material ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_sku( 'IMPORT-PROMOTE-GUARD-S' );
+		$variation->set_attributes( array( 'size' => 'S' ) );
+		$variation->save();
+
+		// Names the display-only Material, which the parent has, alongside Colour, which it does not.
+		// Material must not be promoted for variations on the way to refusing the row.
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-promote-guard.csv';
+		file_put_contents( // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+			$csv_file,
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Attribute 2 name,Attribute 2 value(s),Attribute 2 global,Regular price\n"
+			. "variation,IMPORT-PROMOTE-GUARD-S,Import Promote Guard Tee,IMPORT-PROMOTE-GUARD-PARENT,Material,Cotton,0,Colour,Red,0,12\n"
+		);
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'           => true,
+				'update_existing' => true,
+				'mapping'         => array(
+					'Type'                 => 'type',
+					'SKU'                  => 'sku',
+					'Name'                 => 'name',
+					'Parent'               => 'parent_id',
+					'Attribute 1 name'     => 'attributes:name1',
+					'Attribute 1 value(s)' => 'attributes:value1',
+					'Attribute 1 global'   => 'attributes:taxonomy1',
+					'Attribute 2 name'     => 'attributes:name2',
+					'Attribute 2 value(s)' => 'attributes:value2',
+					'Attribute 2 global'   => 'attributes:taxonomy2',
+					'Regular price'        => 'regular_price',
+				),
+			)
+		);
+
+		$data = $importer->import();
+
+		wp_delete_file( $csv_file );
+		wp_cache_flush();
+
+		$this->assertCount( 1, $data['failed'], 'Expected the row to fail' );
+
+		$stored_parent     = wc_get_product( $product->get_id() );
+		$stored_attributes = $stored_parent->get_attributes();
+		$this->assertFalse( $stored_attributes['material']->get_variation(), 'Expected the display-only parent attribute to stay display-only after the row failed' );
+
+		$stored_variation = wc_get_product( $variation->get_id() );
+		$this->assertSame( array( 'size' => 'S' ), $stored_variation->get_attributes(), 'Expected the existing variation to keep its attributes' );
+
+		WC_Helper_Product::delete_product( $variation->get_id() );
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
 	 * @testdox Test that a row whose global attribute name cannot be created fails without wiping the variation's attributes.
 	 */
 	public function test_import_of_existing_variation_fails_when_the_global_attribute_name_is_unusable() {

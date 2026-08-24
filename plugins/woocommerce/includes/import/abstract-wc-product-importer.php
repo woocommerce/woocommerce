@@ -499,7 +499,30 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		if ( isset( $data['raw_attributes'] ) ) {
-			$attributes        = array();
+			$attributes = array();
+
+			// Checked against the parent as it stands, before get_variation_parent_attributes()
+			// promotes any matching attribute to "used for variations" and saves the product.
+			// Refusing after that point would leave the parent permanently changed by a row that
+			// went on to import nothing.
+			//
+			// Leaving an unmatched attribute out instead of refusing stores the variation as the CSV
+			// did not describe it: any parent attribute left unspecified becomes a catch-all matching
+			// every value, replacing whatever the variation already had, and the row still reports
+			// success. validate_new_variation_attributes() refuses the same row when the SKU is new,
+			// so refusing here too keeps the two paths from disagreeing.
+			$declared_attributes = $parent->get_attributes();
+
+			foreach ( $data['raw_attributes'] as $attribute ) {
+				if ( empty( $attribute['name'] ) ) {
+					continue;
+				}
+
+				if ( ! isset( $declared_attributes[ $this->get_variation_attribute_key( $attribute ) ] ) ) {
+					throw new Exception( esc_html( $this->get_unmatched_variation_attribute_message( $attribute, $declared_attributes ) ) );
+				}
+			}
+
 			$parent_attributes = $this->get_variation_parent_attributes( $data['raw_attributes'], $parent );
 
 			foreach ( $data['raw_attributes'] as $attribute ) {
@@ -509,21 +532,10 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 				$attribute_name = $this->get_variation_attribute_key( $attribute );
 
-				// Leaving the attribute out instead stores the variation as the CSV did not describe
-				// it: any parent attribute left unspecified becomes a catch-all matching every value,
-				// replacing whatever the variation already had, and the row still reports success.
-				// validate_new_variation_attributes() refuses the same row when the SKU is new, so
-				// refusing here too keeps the two paths from disagreeing.
+				// Every named attribute is on the parent by now, so this only fires if promoting it
+				// for variations did not stick.
 				if ( ! isset( $parent_attributes[ $attribute_name ] ) || ! $parent_attributes[ $attribute_name ]->get_variation() ) {
-					throw new Exception(
-						esc_html(
-							sprintf(
-								/* translators: %s: reason the attribute matches nothing on the parent product */
-								__( 'Variation cannot be imported: %s', 'woocommerce' ),
-								$this->get_unmatched_variation_attribute_reason( $attribute, $parent_attributes )
-							)
-						)
-					);
+					throw new Exception( esc_html( $this->get_unmatched_variation_attribute_message( $attribute, $parent_attributes ) ) );
 				}
 
 				$parent_attribute = $parent_attributes[ $attribute_name ];
@@ -604,6 +616,23 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		return sanitize_title( wc_attribute_taxonomy_name( wc_attribute_taxonomy_slug( $attribute_name ) ) );
+	}
+
+	/**
+	 * Get the message refusing a variation row over an attribute the parent product does not offer.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param array $attribute         Raw attribute data from a parsed row.
+	 * @param array $parent_attributes Parent product attributes, keyed as get_variation_attribute_key() resolves them.
+	 * @return string
+	 */
+	private function get_unmatched_variation_attribute_message( $attribute, $parent_attributes ) {
+		return sprintf(
+			/* translators: %s: reason the attribute matches nothing on the parent product */
+			__( 'Variation cannot be imported: %s', 'woocommerce' ),
+			$this->get_unmatched_variation_attribute_reason( $attribute, $parent_attributes )
+		);
 	}
 
 	/**
