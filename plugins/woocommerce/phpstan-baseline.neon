@@ -529,12 +529,6 @@ parameters:
 			path: includes/abstracts/abstract-wc-order.php
 
 		-
-			message: '#^Call to an undefined method object\:\:delete_items\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: includes/abstracts/abstract-wc-order.php
-
-		-
 			message: '#^Call to an undefined method object\:\:get_order_item_type\(\)\.$#'
 			identifier: method.notFound
 			count: 1
