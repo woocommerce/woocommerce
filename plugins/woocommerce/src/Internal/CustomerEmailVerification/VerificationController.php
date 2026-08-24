@@ -224,19 +224,12 @@ class VerificationController {
 		$user_id     = get_current_user_id();
 		$should_show = (bool) $user_id;
 
-		if ( $should_show && 'no' === get_option( 'woocommerce_enable_guest_checkout' ) ) {
-			$should_show = false;
-		}
+		$should_show = $should_show && wc_string_to_bool( get_option( 'woocommerce_enable_guest_checkout' ) );
+		$should_show = $should_show && ! $this->service->is_verified( $user_id );
 
-		if ( $should_show && $this->service->is_verified( $user_id ) ) {
-			$should_show = false;
-		}
-
-		if ( $should_show ) {
-			// A temporary-password account already has a set-password link (which also verifies on use),
-			// surfaced by the temporary-password notice — don't show a second prompt alongside it.
-			$should_show = ! get_user_option( 'default_password_nag', $user_id );
-		}
+		// A temporary-password account already has a set-password link (which also verifies on use),
+		// surfaced by the temporary-password notice — don't show a second prompt alongside it.
+		$should_show = $should_show && ! get_user_option( 'default_password_nag', $user_id );
 
 		/**
 		 * Filter whether to show the verification prompt for a given user.
@@ -246,7 +239,7 @@ class VerificationController {
 		 * @param bool $should_show Whether to show the prompt.
 		 * @param int  $user_id     The WordPress user ID of the customer.
 		 */
-		return apply_filters( 'woocommerce_customer_email_verification_should_show_prompt', $should_show, $user_id );
+		return (bool) apply_filters( 'woocommerce_customer_email_verification_should_show_prompt', $should_show, $user_id );
 	}
 
 	/**
