@@ -8,7 +8,7 @@ sidebar_position: 5
 
 Every finding against a release gets a verdict - at the readiness review, at the go/no-go, and when weighing whether an already-shipped issue warrants a point release. This page is the criteria for picking that verdict. The decision points themselves are described in [Readiness and Go/No-Go](/docs/contribution/releases/readiness); the criteria apply to Core and Woo-owned extension releases, for all release types.
 
-The matrix guides the people making the call - the release lead and the Product DRI. It gives no automated check blocking power.
+The matrix guides the people making the call - the release lead and the Product DRI. It gives automated checks no power to block a release.
 
 ## Verdicts
 
@@ -19,7 +19,7 @@ The matrix guides the people making the call - the release lead and the Product 
 | **Next release** | Ship. The fix rides the next scheduled release. |
 | **Not a bug** | Expected behavior, or an invalid finding. |
 
-A finding that cannot be reproduced on two independent stacks does not block the release - the issue stays open with a named owner rather than being closed as not a bug.
+A finding no one can reproduce - tried on at least two independent stacks - does not block the release; the issue stays open with a named owner rather than being closed as not a bug. A finding that reproduces anywhere keeps its impact-class verdict.
 
 ## Default verdict by impact class
 
