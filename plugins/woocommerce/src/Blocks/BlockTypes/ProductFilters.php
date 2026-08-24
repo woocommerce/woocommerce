@@ -98,23 +98,15 @@ class ProductFilters extends AbstractBlock {
 	/**
 	 * Generate viewport-aware Product Filters styles.
 	 *
-	 * @param array<string, string>|null $viewport_media_queries Optional media queries for testing.
 	 * @return string Responsive CSS.
 	 */
-	private function get_responsive_styles( $viewport_media_queries = null ) {
-		$viewport_media_queries = $viewport_media_queries ?? $this->get_viewport_media_queries();
-		$desktop_query          = $viewport_media_queries['@desktop'] ?? null;
+	private function get_responsive_styles() {
+		$viewport_media_queries = $this->get_viewport_media_queries();
+		$desktop_query          = $viewport_media_queries['@desktop'];
 		$tablet_query           = $viewport_media_queries['@tablet'] ?? null;
 		$mobile_selector        = ':where(.wc-block-product-filters).is-mobile-overlay';
 		$responsive_selector    = ':where(.wc-block-product-filters):is(.is-mobile-overlay,.is-tablet-overlay)';
 		$style_engine_options   = array( 'prettify' => false );
-
-		if ( null === $desktop_query ) {
-			return wp_style_engine_get_stylesheet_from_css_rules(
-				$this->get_inline_presentation_rules( $responsive_selector, '' ),
-				$style_engine_options
-			);
-		}
 
 		$css_rules = array();
 		if ( null !== $tablet_query ) {
