@@ -728,6 +728,76 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test that a variation row flagged as global is skipped when no such global attribute exists, even though the parent has a same-named custom attribute.
+	 */
+	public function test_import_skips_new_variations_flagged_global_when_only_a_custom_parent_attribute_matches() {
+		$this->assertSame( 0, (int) wc_attribute_taxonomy_id_by_name( 'size-airr133' ), 'This test requires that no global "size-airr133" attribute exists yet' );
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'size-airr133' );
+		$attribute->set_options( array( 'S', 'M' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Custom Tee' );
+		$product->set_sku( 'IMPORT-CUSTOM-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$data = $this->import_with_update_existing(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-CUSTOM-S,Import Custom Tee - S,IMPORT-CUSTOM-PARENT,size-airr133,S,1,12\n",
+			'import-global-flag-without-global-attribute.csv'
+		);
+
+		$this->assertEmpty( $data['imported_variations'], 'Expected the row to be refused rather than saved as a catch-all "any" variation' );
+		$this->assertCount( 1, $data['skipped'], 'Expected 1 skipped product, got ' . count( $data['skipped'] ) );
+		$this->assertSame(
+			'A new variation cannot be created because the parent product has no "size-airr133" attribute.',
+			html_entity_decode( $data['skipped'][0]->get_error_message(), ENT_QUOTES ),
+			'Expected the refusal to name the attribute the row asked for'
+		);
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'IMPORT-CUSTOM-S' ), 'Expected no variation to be created' );
+		$this->assertSame( 0, (int) wc_attribute_taxonomy_id_by_name( 'size-airr133' ), 'Expected no global attribute to be created site-wide while refusing the row' );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Test that importing a variation row flagged as global does not create the global attribute site-wide when the parent does not offer it.
+	 */
+	public function test_import_of_existing_variation_does_not_create_a_missing_global_attribute() {
+		$this->assertSame( 0, (int) wc_attribute_taxonomy_id_by_name( 'colour-airr133' ), 'This test requires that no global "colour-airr133" attribute exists yet' );
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'colour-airr133' );
+		$attribute->set_options( array( 'Red', 'Blue' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Existing Tee' );
+		$product->set_sku( 'IMPORT-EXISTING-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_sku( 'IMPORT-EXISTING-RED' );
+		$variation->set_attributes( array( 'colour-airr133' => 'Red' ) );
+		$variation->save();
+
+		$data = $this->import_with_update_existing(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-EXISTING-RED,Import Existing Tee - Red,IMPORT-EXISTING-PARENT,colour-airr133,Red,1,12\n",
+			'import-existing-variation-global-flag.csv'
+		);
+
+		$this->assertEmpty( $data['failed'], 'Expected the existing variation row to be processed, got ' . count( $data['failed'] ) . ' failures' );
+		$this->assertSame( 0, (int) wc_attribute_taxonomy_id_by_name( 'colour-airr133' ), 'Expected no global attribute to be created site-wide for a row the parent does not offer as a global attribute' );
+
+		WC_Helper_Product::delete_product( $variation->get_id() );
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
 	 * @testdox Test that a variation row is still created when the parent has the attribute but does not yet use it for variations.
 	 */
 	public function test_import_creates_new_variations_when_the_parent_attribute_is_not_yet_used_for_variations() {

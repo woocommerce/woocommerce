@@ -1252,12 +1252,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				continue;
 			}
 
-			// Resolve the row's attribute the same way set_variation_data() does, so a row that would
-			// have been stored correctly is never refused here. get_attribute_taxonomy_id() is deliberately
-			// not used: it creates the global attribute when it is missing, which must not happen for a
-			// row that is about to be refused.
-			$attribute_id   = empty( $attribute['taxonomy'] ) ? 0 : $this->get_existing_attribute_taxonomy_id( $attribute['name'] );
-			$attribute_name = $attribute_id ? sanitize_title( wc_attribute_taxonomy_name_by_id( $attribute_id ) ) : sanitize_title( $attribute['name'] );
+			$attribute_name = $this->get_variation_attribute_key( $attribute );
 
 			// An attribute the parent does not have is dropped on save. An attribute the parent has but
 			// does not use for variations is allowed through: get_variation_parent_attributes() promotes it.
@@ -1280,17 +1275,14 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				continue;
 			}
 
-			if ( $parent_attribute->is_taxonomy() ) {
-				$taxonomy = $parent_attribute->get_name();
-				$term     = get_term_by( 'name', $raw_value, $taxonomy );
-				$value    = ( $term && ! is_wp_error( $term ) ) ? $term->slug : sanitize_title( $raw_value );
+			$value = $this->get_variation_attribute_value( $raw_value, $parent_attribute );
 
+			if ( $parent_attribute->is_taxonomy() ) {
 				// The terms assigned to the parent are the exact set the storefront selector renders.
 				// WC_Product_Attribute::get_terms() is avoided here because it inserts any term that does
 				// not exist yet, which must not happen while deciding whether to refuse a row.
-				$options = wc_get_product_terms( $parent_product->get_id(), $taxonomy, array( 'fields' => 'slugs' ) );
+				$options = wc_get_product_terms( $parent_product->get_id(), $parent_attribute->get_name(), array( 'fields' => 'slugs' ) );
 			} else {
-				$value   = $raw_value;
 				$options = $parent_attribute->get_options();
 			}
 

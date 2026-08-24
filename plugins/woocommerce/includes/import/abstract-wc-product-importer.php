@@ -503,39 +503,17 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			$parent_attributes = $this->get_variation_parent_attributes( $data['raw_attributes'], $parent );
 
 			foreach ( $data['raw_attributes'] as $attribute ) {
-				$attribute_id = 0;
-
-				// Get ID if is a global attribute.
-				if ( ! empty( $attribute['taxonomy'] ) ) {
-					$attribute_id = $this->get_attribute_taxonomy_id( $attribute['name'] );
-				}
-
-				if ( $attribute_id ) {
-					$attribute_name = sanitize_title( wc_attribute_taxonomy_name_by_id( $attribute_id ) );
-				} else {
-					$attribute_name = sanitize_title( $attribute['name'] );
-				}
+				$attribute_name = $this->get_variation_attribute_key( $attribute );
 
 				if ( ! isset( $parent_attributes[ $attribute_name ] ) || ! $parent_attributes[ $attribute_name ]->get_variation() ) {
 					continue;
 				}
 
-				$attribute_key   = sanitize_title( $parent_attributes[ $attribute_name ]->get_name() );
-				$attribute_value = isset( $attribute['value'] ) ? current( $attribute['value'] ) : '';
+				$parent_attribute = $parent_attributes[ $attribute_name ];
+				$attribute_key    = sanitize_title( $parent_attribute->get_name() );
+				$attribute_value  = isset( $attribute['value'] ) ? current( $attribute['value'] ) : '';
 
-				if ( $parent_attributes[ $attribute_name ]->is_taxonomy() ) {
-					// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
-					$taxonomy_name = $parent_attributes[ $attribute_name ]->get_name();
-					$term          = get_term_by( 'name', $attribute_value, $taxonomy_name );
-
-					if ( $term && ! is_wp_error( $term ) ) {
-						$attribute_value = $term->slug;
-					} else {
-						$attribute_value = sanitize_title( $attribute_value );
-					}
-				}
-
-				$attributes[ $attribute_key ] = $attribute_value;
+				$attributes[ $attribute_key ] = $this->get_variation_attribute_value( $attribute_value, $parent_attribute );
 			}
 
 			$variation->set_attributes( $attributes );
@@ -554,18 +532,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		$require_save      = false;
 
 		foreach ( $attributes as $attribute ) {
-			$attribute_id = 0;
-
-			// Get ID if is a global attribute.
-			if ( ! empty( $attribute['taxonomy'] ) ) {
-				$attribute_id = $this->get_attribute_taxonomy_id( $attribute['name'] );
-			}
-
-			if ( $attribute_id ) {
-				$attribute_name = sanitize_title( wc_attribute_taxonomy_name_by_id( $attribute_id ) );
-			} else {
-				$attribute_name = sanitize_title( $attribute['name'] );
-			}
+			$attribute_name = $this->get_variation_attribute_key( $attribute );
 
 			// Check if attribute handle variations.
 			if ( isset( $parent_attributes[ $attribute_name ] ) && ! $parent_attributes[ $attribute_name ]->get_variation() ) {
@@ -584,6 +551,58 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		return $parent_attributes;
+	}
+
+	/**
+	 * Get the parent attribute key a variation row's attribute resolves to.
+	 *
+	 * Every caller that needs this key must go through here. Deciding whether a row can be imported
+	 * and importing it used to resolve the key separately, which silently stored a row as a catch-all
+	 * "any" variation whenever the two disagreed.
+	 *
+	 * The taxonomy ID is deliberately not looked up: get_attribute_taxonomy_id() creates the global
+	 * attribute when it is missing, so a row that is only being inspected would leave a stray
+	 * site-wide attribute behind. The key is derived instead, which is equivalent because
+	 * wc_create_attribute() normalizes the slug it stores exactly as wc_attribute_taxonomy_slug() does.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param array $attribute Raw attribute data from a parsed row.
+	 * @return string Key into the parent product's attributes, empty when the row names no attribute.
+	 */
+	protected function get_variation_attribute_key( $attribute ) {
+		$raw_name = isset( $attribute['name'] ) ? $attribute['name'] : '';
+
+		if ( empty( $attribute['taxonomy'] ) ) {
+			return sanitize_title( $raw_name );
+		}
+
+		$slug = wc_attribute_taxonomy_slug( $this->get_attribute_taxonomy_name_from_raw_name( $raw_name ) );
+
+		return sanitize_title( wc_attribute_taxonomy_name( $slug ) );
+	}
+
+	/**
+	 * Get the value a variation row's attribute is stored as.
+	 *
+	 * Shares the resolution with whatever decides whether the row can be imported, for the same
+	 * reason as get_variation_attribute_key().
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param string               $raw_value        Raw attribute value from a parsed row.
+	 * @param WC_Product_Attribute $parent_attribute Parent attribute the value belongs to.
+	 * @return string Value as it is stored on the variation.
+	 */
+	protected function get_variation_attribute_value( $raw_value, $parent_attribute ) {
+		if ( ! $parent_attribute->is_taxonomy() ) {
+			return $raw_value;
+		}
+
+		// A taxonomy attribute stores term slugs, while the imported row carries term names.
+		$term = get_term_by( 'name', $raw_value, $parent_attribute->get_name() );
+
+		return ( $term && ! is_wp_error( $term ) ) ? $term->slug : sanitize_title( $raw_value );
 	}
 
 	/**
