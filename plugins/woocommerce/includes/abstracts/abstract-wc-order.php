@@ -119,6 +119,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	protected $item_types_to_bulk_delete = array();
 
 	/**
+	 * Item IDs captured for bulk delete by type.
+	 *
+	 * @since 11.0.2
+	 * @var array<string, array<int>>
+	 */
+	protected $item_ids_to_bulk_delete_by_type = array();
+
+	/**
 	 * Whether every order item type should be deleted on the next save().
 	 *
 	 * Set by remove_order_items() when called with no type (so every item type
@@ -128,6 +136,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @var bool
 	 */
 	protected $bulk_delete_all_items_pending = false;
+
+	/**
+	 * IDs of items captured when a full deferred removal is requested.
+	 *
+	 * @since 11.0.2
+	 * @var array<int>
+	 */
+	protected $item_ids_to_bulk_delete = array();
 
 	/**
 	 * Stores meta in cache for future reads.
@@ -313,6 +329,73 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Deletes items in bulk if the data store supports it, otherwise deletes them one by one.
+	 *
+	 * @param array<int> $item_ids IDs of the items to delete.
+	 * @since 11.0.2
+	 * @return void
+	 */
+	private function delete_items_by_ids( array $item_ids ): void {
+		/**
+		 * Data store wrapper.
+		 *
+		 * @var WC_Data_Store $data_store
+		 */
+		$data_store = $this->data_store;
+
+		if ( $data_store->has_callable( 'delete_items_by_ids' ) ) {
+			// @phpstan-ignore-next-line -- Optional data store method checked above.
+			$data_store->delete_items_by_ids( $this, $item_ids );
+		} else {
+			// Custom data stores may not support bulk deletion by IDs, so delete the snapshotted items individually
+			// so that items added *after* remove_order_items() are preserved.
+			foreach ( array_unique( $item_ids ) as $item_id ) {
+				$item = WC_Order_Factory::get_order_item( $item_id );
+
+				if ( $item && $this->get_id() === $item->get_order_id() ) {
+					$item->delete();
+				}
+			}
+		}
+	}
+
+	/**
+	 * Get IDs of items currently persisted for this order.
+	 *
+	 * @since 11.0.2
+	 *
+	 * @param string|null $type Item type, or null for every registered item type.
+	 * @return array<int>
+	 */
+	private function get_persisted_item_ids( $type = null ): array {
+		$types = null === $type
+			? array_keys( $this->get_item_types_to_group() )
+			: array( $type );
+
+		$item_ids = array();
+		foreach ( $types as $item_type ) {
+			if ( ! is_string( $item_type ) || '' === $item_type ) {
+				continue;
+			}
+
+			// @phpstan-ignore-next-line -- Required order data store method forwarded by WC_Data_Store::__call().
+			$items = $this->data_store->read_items( $this, $item_type );
+			foreach ( (array) $items as $item ) {
+				if ( ! $item instanceof WC_Order_Item ) {
+					continue;
+				}
+				$item_id = absint( $item->get_id() );
+
+				if ( $item_id && $this->get_id() === (int) $item->get_order_id() ) {
+					$item_ids[] = $item_id;
+				}
+			}
+		}
+
+		return array_values( array_unique( $item_ids ) );
+	}
+
+	/**
 	 * Save all order items which are part of this order.
 	 *
 	 * @return void
@@ -321,10 +404,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$items_changed = false;
 
 		if ( $this->bulk_delete_all_items_pending ) {
-			$this->data_store->delete_items( $this );
-			$this->bulk_delete_all_items_pending = false;
-			$this->item_types_to_bulk_delete     = array();
-			$items_changed                       = true;
+			$this->delete_items_by_ids( $this->item_ids_to_bulk_delete );
+			$this->bulk_delete_all_items_pending   = false;
+			$this->item_ids_to_bulk_delete_by_type = array();
+			$this->item_ids_to_bulk_delete         = array();
+			$this->item_types_to_bulk_delete       = array();
+			$items_changed                         = true;
 
 			/**
 			 * Trigger action after removing all order line items from the database.
@@ -336,11 +421,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			 */
 			do_action( 'woocommerce_removed_order_items', $this, null );
 		} elseif ( ! empty( $this->item_types_to_bulk_delete ) ) {
-			// Drain the queue one type at a time, dropping each entry only after delete_items() succeeds.
+			// Drain the queue one type at a time, dropping each entry only after item deletion succeeds.
 			// If a delete or hook callback throws, save()'s catch handles it and any types that have not
 			// yet been processed remain queued for the next save() rather than being silently lost.
 			foreach ( array_values( array_unique( $this->item_types_to_bulk_delete ) ) as $type ) {
-				$this->data_store->delete_items( $this, $type );
+				$item_ids = $this->item_ids_to_bulk_delete_by_type[ $type ] ?? array();
+				$this->delete_items_by_ids( $item_ids );
+				unset( $this->item_ids_to_bulk_delete_by_type[ $type ] );
 				$items_changed                   = true;
 				$this->item_types_to_bulk_delete = array_values(
 					array_filter(
@@ -993,7 +1080,25 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		if ( ! empty( $type ) ) {
 			if ( $has_persisted_items ) {
-				$this->item_types_to_bulk_delete[] = $type;
+				$item_ids = $this->get_persisted_item_ids( $type );
+
+				if ( $this->bulk_delete_all_items_pending ) {
+					$this->item_ids_to_bulk_delete = array_values(
+						array_unique(
+							array_merge( $this->item_ids_to_bulk_delete, $item_ids )
+						)
+					);
+				} else {
+					$this->item_types_to_bulk_delete[]              = $type;
+					$this->item_ids_to_bulk_delete_by_type[ $type ] = array_values(
+						array_unique(
+							array_merge(
+								$this->item_ids_to_bulk_delete_by_type[ $type ] ?? array(),
+								$item_ids
+							)
+						)
+					);
+				}
 			}
 
 			$group = $this->type_to_group( $type );
@@ -1006,8 +1111,20 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		} else {
 			if ( $has_persisted_items ) {
-				$this->bulk_delete_all_items_pending = true;
-				$this->item_types_to_bulk_delete     = array();
+				$item_ids = $this->get_persisted_item_ids();
+
+				foreach ( $this->item_ids_to_bulk_delete_by_type as $typed_item_ids ) {
+					$item_ids = array_merge( $item_ids, $typed_item_ids );
+				}
+
+				$this->bulk_delete_all_items_pending   = true;
+				$this->item_ids_to_bulk_delete         = array_values(
+					array_unique(
+						array_merge( $this->item_ids_to_bulk_delete, $item_ids )
+					)
+				);
+				$this->item_types_to_bulk_delete       = array();
+				$this->item_ids_to_bulk_delete_by_type = array();
 			}
 			$type_to_group = $this->get_item_types_to_group();
 			// Union with currently populated keys so any group already loaded into
