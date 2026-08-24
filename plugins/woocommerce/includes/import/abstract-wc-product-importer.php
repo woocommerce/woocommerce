@@ -257,7 +257,14 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			if ( ProductType::VARIATION === ( $data['type'] ?? '' ) && ! empty( $data['parent_id'] ) ) {
 				$variation_parent = wc_get_product( $data['parent_id'] );
 
-				if ( $variation_parent && ! $variation_parent->is_type( ProductType::VARIATION ) ) {
+				// Refused here because set_props() below applies parent_id before set_variation_data()
+				// is reached, leaving the variation attached to nothing and the row reported as
+				// imported. A variation can never parent another variation, so no valid row is lost.
+				if ( $variation_parent && $variation_parent->is_type( ProductType::VARIATION ) ) {
+					throw new Exception( esc_html__( 'Variation cannot be imported: Parent product cannot be a product variation', 'woocommerce' ), 401 );
+				}
+
+				if ( $variation_parent ) {
 					$this->assert_variation_attributes_offered( $data, $variation_parent );
 				}
 			}
