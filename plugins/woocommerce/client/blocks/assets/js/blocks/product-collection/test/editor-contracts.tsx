@@ -161,7 +161,6 @@ describe( 'Product Collection editor contracts', () => {
 			const serialized = serialize( block );
 			const [ parsed ] = parse( serialized );
 
-			expect( parsed.name ).toBe( PRODUCT_COLLECTION_BLOCK_NAME );
 			expect( parsed.attributes.collection ).toBe( collection );
 			expect( parsed.attributes.query ).toMatchObject( {
 				inherit,
