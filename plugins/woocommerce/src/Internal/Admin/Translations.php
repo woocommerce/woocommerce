@@ -272,7 +272,9 @@ class Translations {
 			 * remote filesystem.
 			 */
 			$wp_filesystem->put_contents( $cache_path, $chunk_translations_json );
-			$wp_filesystem->delete( $temp_path );
+
+			// Without the type, FTPext::delete() falls through to ftp_rmdir() when the file is absent.
+			$wp_filesystem->delete( $temp_path, false, 'f' );
 		}
 	}
 
