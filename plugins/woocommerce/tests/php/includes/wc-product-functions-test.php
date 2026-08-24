@@ -722,8 +722,10 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	 * @testDox Action Scheduler events are scheduled when product with sale dates is saved.
 	 */
 	public function test_wc_schedule_product_sale_events_on_save() {
-		$future_start = time() + 3600;  // 1 hour from now.
-		$future_end   = time() + 86400; // 24 hours from now.
+		$future_start = time() + 3600;
+		// 1 hour from now.
+		$future_end = time() + 86400;
+		// 24 hours from now.
 
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_price( 100 );
@@ -771,7 +773,8 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		);
 
 		// Update the sale dates.
-		$new_start = time() + 7200; // 2 hours from now.
+		$new_start = time() + 7200;
+		// 2 hours from now.
 		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', $new_start ) );
 		$product->save();
 
@@ -1113,7 +1116,8 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 
 		// Create a guest order with French billing address.
 		$order = wc_create_order();
-		$order->set_customer_id( 0 ); // Guest order.
+		$order->set_customer_id( 0 );
+		// Guest order.
 		$order->set_billing_country( 'FR' );
 		$order->set_billing_city( 'Paris' );
 		$order->set_billing_postcode( '75001' );
@@ -1481,12 +1485,224 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product category list breadcrumb ordering keeps ancestor loading flat as branch count grows.
+	 */
+	public function test_wc_get_product_category_list_breadcrumb_order_keeps_ancestor_queries_flat(): void {
+		global $wpdb;
+
+		$suffix       = wp_unique_id();
+		$branch_count = 6;
+		$created      = array();
+		$leaves       = array();
+		$ancestor_ids = array();
+		$product      = WC_Helper_Product::create_simple_product();
+		$query_filter = null;
+
+		/*
+		 * Six branches rather than the two the sibling test uses. Ancestor loading is batched per
+		 * hierarchy level, so its cost tracks depth and stays flat as branches are added; resolving
+		 * one ancestor at a time instead would grow with the branch count. Two branches is too few
+		 * to tell those apart -- both cost the same there.
+		 */
+		try {
+			for ( $branch = 0; $branch < $branch_count; $branch++ ) {
+				$parent = 0;
+
+				for ( $depth = 0; $depth < 3; $depth++ ) {
+					$term      = wp_insert_term( "Flat b{$branch} d{$depth} {$suffix}", 'product_cat', $parent ? array( 'parent' => $parent ) : array() );
+					$created[] = $term['term_id'];
+					$parent    = $term['term_id'];
+
+					if ( $depth < 2 ) {
+						$ancestor_ids[] = $term['term_id'];
+					}
+				}
+
+				$leaves[] = $parent;
+			}
+
+			wp_set_object_terms( $product->get_id(), $leaves, 'product_cat' );
+			get_the_terms( $product->get_id(), 'product_cat' );
+
+			foreach ( $ancestor_ids as $ancestor_id ) {
+				wp_cache_delete( $ancestor_id, 'terms' );
+				wp_cache_delete( $ancestor_id, 'term_meta' );
+			}
+
+			$ancestor_id_pattern = '/\b(?:' . implode( '|', $ancestor_ids ) . ')\b/';
+			$term_join_pattern   = '/FROM\s+' . preg_quote( $wpdb->terms, '/' ) . '\s+AS\s+t\s+INNER\s+JOIN\s+' . preg_quote( $wpdb->term_taxonomy, '/' ) . '\s+AS\s+tt/i';
+
+			$ancestor_term_queries = 0;
+			$query_filter          = static function ( $query ) use ( &$ancestor_term_queries, $ancestor_id_pattern, $term_join_pattern ) {
+				if ( preg_match( $ancestor_id_pattern, $query ) && preg_match( $term_join_pattern, $query ) ) {
+					++$ancestor_term_queries;
+				}
+
+				return $query;
+			};
+			add_filter( 'query', $query_filter );
+
+			try {
+				wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' );
+			} finally {
+				remove_filter( 'query', $query_filter );
+				$query_filter = null;
+			}
+
+			/*
+			 * Two levels of ancestors, two queries each. The bound is per level, so it must not move
+			 * when branch_count does -- that is the property under test.
+			 */
+			$this->assertLessThanOrEqual(
+				4,
+				$ancestor_term_queries,
+				"Ancestor loading should stay flat across {$branch_count} branches, not grow with them."
+			);
+		} finally {
+			if ( null !== $query_filter ) {
+				remove_filter( 'query', $query_filter );
+			}
+			WC_Helper_Product::delete_product( $product->get_id() );
+
+			foreach ( array_reverse( $created ) as $term_id ) {
+				wp_delete_term( $term_id, 'product_cat' );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Product category list breadcrumb ordering survives a get_terms filter returning an unexpected shape.
+	 */
+	public function test_wc_get_product_category_list_breadcrumb_order_survives_hostile_get_terms_filter(): void {
+		$suffix     = wp_unique_id();
+		$root_name  = 'Hostile root ' . $suffix;
+		$leaf_name  = 'Hostile alpha leaf ' . $suffix;
+		$other_name = 'Hostile zulu other ' . $suffix;
+		$root       = wp_insert_term( $root_name, 'product_cat' );
+		$leaf       = wp_insert_term( $leaf_name, 'product_cat', array( 'parent' => $root['term_id'] ) );
+		$other      = wp_insert_term( $other_name, 'product_cat' );
+		$product    = WC_Helper_Product::create_simple_product();
+
+		/*
+		 * The prime asks for 'id=>parent'. Any plugin filtering get_terms can hand back WP_Term
+		 * objects instead, and casting one of those to int yields 1, which would build a fabricated
+		 * parent chain out of whatever term happens to hold that ID.
+		 */
+		$object_shape_filter = static function ( $terms, $taxonomies, $args ) use ( $root ) {
+			if ( 'id=>parent' === ( $args['fields'] ?? '' ) ) {
+				return array( get_term( $root['term_id'], 'product_cat' ) );
+			}
+
+			return $terms;
+		};
+
+		try {
+			/*
+			 * The root is deliberately left unassigned. Priming only runs for ancestors that are not
+			 * themselves rendered, so assigning it would leave the frontier empty and skip the code
+			 * under test entirely.
+			 */
+			wp_set_object_terms( $product->get_id(), array( $leaf['term_id'], $other['term_id'] ), 'product_cat' );
+
+			$expected = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+
+			add_filter( 'get_terms', $object_shape_filter, 10, 3 );
+
+			$diagnostics = array();
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- The object-to-int conversion notice is what is being asserted on; PHPUnit would convert it to an exception and hide the ordering result.
+			set_error_handler(
+				static function ( $errno, $errstr ) use ( &$diagnostics ) {
+					$diagnostics[] = $errstr;
+
+					return true;
+				},
+				E_DEPRECATED | E_WARNING | E_NOTICE
+			);
+
+			try {
+				$actual = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+			} finally {
+				restore_error_handler();
+				remove_filter( 'get_terms', $object_shape_filter, 10 );
+			}
+
+			$this->assertSame( "{$leaf_name} > {$other_name}", $expected );
+			$this->assertSame( $expected, $actual, 'A get_terms filter returning term objects must not reorder the rendered categories.' );
+			$this->assertSame( array(), $diagnostics, 'Priming should reject an unexpected get_terms shape rather than trying to convert it.' );
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $leaf['term_id'], 'product_cat' );
+			wp_delete_term( $other['term_id'], 'product_cat' );
+			wp_delete_term( $root['term_id'], 'product_cat' );
+		}
+	}
+
+	/**
+	 * @testdox Product category list breadcrumb ordering terminates when a get_terms filter never stops yielding ancestors.
+	 */
+	public function test_wc_get_product_category_list_breadcrumb_order_terminates_on_endless_ancestry(): void {
+		$suffix       = wp_unique_id();
+		$root_name    = 'Endless root ' . $suffix;
+		$leaf_name    = 'Endless alpha leaf ' . $suffix;
+		$other_name   = 'Endless zulu other ' . $suffix;
+		$root         = wp_insert_term( $root_name, 'product_cat' );
+		$leaf         = wp_insert_term( $leaf_name, 'product_cat', array( 'parent' => $root['term_id'] ) );
+		$other        = wp_insert_term( $other_name, 'product_cat' );
+		$product      = WC_Helper_Product::create_simple_product();
+		$rounds       = 0;
+		$next_term_id = 900000;
+
+		/*
+		 * Yields a parent nobody has seen on every round, so the frontier never empties on its own,
+		 * then gives up well past the implementation's ceiling. The give-up point is what keeps a
+		 * removed ceiling a clean assertion failure instead of a hung test run.
+		 */
+		$endless_filter = static function ( $terms, $taxonomies, $args ) use ( &$rounds, &$next_term_id ) {
+			if ( 'id=>parent' !== ( $args['fields'] ?? '' ) || $rounds >= 500 ) {
+				return $terms;
+			}
+
+			++$rounds;
+			++$next_term_id;
+
+			return array( $next_term_id => $next_term_id + 1 );
+		};
+
+		try {
+			// As above, the root stays unassigned so the walk has an ancestor to chase at all.
+			wp_set_object_terms( $product->get_id(), array( $leaf['term_id'], $other['term_id'] ), 'product_cat' );
+			add_filter( 'get_terms', $endless_filter, 10, 3 );
+
+			try {
+				$actual = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+			} finally {
+				remove_filter( 'get_terms', $endless_filter, 10 );
+			}
+
+			$this->assertGreaterThan( 0, $rounds, 'The fixture is only meaningful while the ancestor walk actually runs.' );
+			$this->assertLessThanOrEqual( 100, $rounds, 'The ancestor walk must be bounded rather than trusting a filter to end it.' );
+			$this->assertSame( "{$leaf_name} > {$other_name}", $actual, 'A bounded walk should still render the rendered terms in order.' );
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $leaf['term_id'], 'product_cat' );
+			wp_delete_term( $other['term_id'], 'product_cat' );
+			wp_delete_term( $root['term_id'], 'product_cat' );
+		}
+	}
+
+	/**
 	 * @testdox Product category list breadcrumb ordering honors filtered category order after priming term metadata.
 	 */
 	public function test_wc_get_product_category_list_breadcrumb_order_honors_filtered_category_order(): void {
-		$suffix                = wp_unique_id();
-		$filtered_first_name   = 'Filtered first ' . $suffix;
-		$filtered_second_name  = 'Filtered second ' . $suffix;
+		$suffix = wp_unique_id();
+
+		/*
+		 * Named so the expected order runs against alphabetical order, and against the stored `order`
+		 * metas below. Without that, an implementation that ignored category order entirely would
+		 * still produce this exact string from the name tiebreak, and the test could not fail.
+		 */
+		$filtered_first_name   = 'Zulu filtered first ' . $suffix;
+		$filtered_second_name  = 'Alpha filtered second ' . $suffix;
 		$filtered_first        = wp_insert_term( $filtered_first_name, 'product_cat' );
 		$filtered_second       = wp_insert_term( $filtered_second_name, 'product_cat' );
 		$product               = WC_Helper_Product::create_simple_product();
@@ -1990,11 +2206,13 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 				}
 				foreach ( $terms as $key => $term ) {
 					if ( $term->term_id === $category1_term['term_id'] ) {
-						unset( $terms[ $key ] ); // Intentionally don't re-index.
+						unset( $terms[ $key ] );
+						// Intentionally don't re-index.
 						break;
 					}
 				}
-				return $terms; // Returns array with non-sequential keys.
+				return $terms;
+				// Returns array with non-sequential keys.
 			};
 			add_filter( 'get_the_terms', $filter_callback, 10, 3 );
 
