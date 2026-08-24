@@ -1926,17 +1926,19 @@ function wc_get_product_category_list( $product_id, $sep = ', ', $before = '', $
 		$links[] = '<a href="' . esc_url( $link ) . '" rel="tag">' . $term->name . '</a>';
 	}
 
-	/**
-	 * Filters the product category links.
-	 *
-	 * This keeps ordered product category list output aligned with WordPress core's `get_the_term_list()` filtering.
-	 *
-	 * @since 2.5.0
-	 *
-	 * @param string[] $links An array of term links.
+	/*
+	 * Fire core's own term_links-{$taxonomy} hook, so that ordered output stays filterable by exactly
+	 * what already filters get_the_term_list().
 	 */
-	$term_links = apply_filters( 'term_links-product_cat', $links ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
+	/** This filter is documented in wp-includes/category-template.php */
+	$term_links = apply_filters( 'term_links-product_cat', $links ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores, WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
+	/*
+	 * Validate what the filter handed back. Core's own path does not, and passing a non-array to
+	 * implode() there raises a TypeError. Returning false keeps this path within the documented
+	 * string|false|WP_Error contract instead; core's behaviour is deliberately left alone, since
+	 * changing it would be a separate compatibility decision.
+	 */
 	if ( is_wp_error( $term_links ) ) {
 		return $term_links;
 	}
