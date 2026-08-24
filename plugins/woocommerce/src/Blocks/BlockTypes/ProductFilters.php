@@ -154,7 +154,9 @@ class ProductFilters extends AbstractBlock {
 					class="wc-block-product-filters__open-overlay"
 					data-wp-on--click="actions.openOverlay"
 				>
-					<?php echo $this->get_svg_icon( 'filter-icon-2' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M10 17.5H14V16H10V17.5ZM6 6V7.5H18V6H6ZM8 12.5H16V11H8V12.5Z" fill="currentColor"/>
+					</svg>
 					<span><?php echo esc_html__( 'Filter products', 'woocommerce' ); ?></span>
 				</button>
 				<div class="wc-block-product-filters__overlay">
@@ -169,9 +171,11 @@ class ProductFilters extends AbstractBlock {
 									type="button"
 									class="wc-block-product-filters__close-overlay"
 									data-wp-on--click="actions.closeOverlay"
+									title="<?php echo esc_attr( __( 'Close', 'woocommerce' ) ); ?>"
 								>
-									<span><?php echo esc_html__( 'Close', 'woocommerce' ); ?></span>
-									<?php echo $this->get_svg_icon( 'close' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+										<path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z"></path>
+									</svg>
 								</button>
 							</header>
 							<div class="wc-block-product-filters__overlay-content">
@@ -200,28 +204,6 @@ class ProductFilters extends AbstractBlock {
 		</div>
 		<?php
 		return ob_get_clean();
-	}
-
-	/**
-	 * Get SVG icon markup for a given icon name.
-	 *
-	 * @param string $name The name of the icon to retrieve.
-	 * @return string SVG markup for the icon, or empty string if icon not found.
-	 */
-	private function get_svg_icon( string $name ) {
-		$icons = array(
-			'close'         => '<path d="M12 13.0607L15.7123 16.773L16.773 15.7123L13.0607 12L16.773 8.28772L15.7123 7.22706L12 10.9394L8.28771 7.22705L7.22705 8.28771L10.9394 12L7.22706 15.7123L8.28772 16.773L12 13.0607Z" fill="currentColor"/>',
-			'filter-icon-2' => '<path d="M10 17.5H14V16H10V17.5ZM6 6V7.5H18V6H6ZM8 12.5H16V11H8V12.5Z" fill="currentColor"/>',
-		);
-
-		if ( ! isset( $icons[ $name ] ) ) {
-			return '';
-		}
-
-		return sprintf(
-			'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">%s</svg>',
-			$icons[ $name ]
-		);
 	}
 
 	/**
