@@ -298,7 +298,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Create or update an entry in the wc_order_tax_lookup table for an order.
 	 *
-	 * Writes one row per tax order item and removes rows left over from a previous sync.
+	 * Writes one row per tax order item, in a single statement so that the order is never left with
+	 * only some of its tax lines rebuilt, and removes rows left over from a previous sync.
 	 *
 	 * @param int $order_id Order ID.
 	 * @return int|bool Returns -1 if order won't be processed, or a boolean indicating processing success.
@@ -321,60 +322,70 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		);
 		$existing_items = array_flip( $existing_items );
 		$tax_items      = $order->get_items( OrderItemType::TAX );
-		$num_updated    = 0;
+		$rows           = array();
+		$values         = array();
+
+		// Read once for the whole order, and only for an order that has a line to write, the way
+		// reading it per line did.
+		$date_created = empty( $tax_items ) ? '' : $order->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format );
 
 		foreach ( $tax_items as $tax_item ) {
 			$order_item_id = $tax_item->get_id();
 			unset( $existing_items[ $order_item_id ] );
 
-			$result = $wpdb->replace(
-				$table_name,
-				array(
-					'order_id'      => $order->get_id(),
-					'date_created'  => $order->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format ),
-					'tax_rate_id'   => $tax_item->get_rate_id(),
-					'order_item_id' => $order_item_id,
-					'shipping_tax'  => $tax_item->get_shipping_tax_total(),
-					'order_tax'     => $tax_item->get_tax_total(),
-					'total_tax'     => (float) $tax_item->get_tax_total() + (float) $tax_item->get_shipping_tax_total(),
-				),
-				array(
-					'%d',
-					'%s',
-					'%d',
-					'%d',
-					'%f',
-					'%f',
-					'%f',
+			$rows[] = '(%d, %s, %d, %d, %f, %f, %f)';
+			array_push(
+				$values,
+				$order->get_id(),
+				$date_created,
+				$tax_item->get_rate_id(),
+				$order_item_id,
+				$tax_item->get_shipping_tax_total(),
+				$tax_item->get_tax_total(),
+				(float) $tax_item->get_tax_total() + (float) $tax_item->get_shipping_tax_total()
+			);
+		}
+
+		$synced = true;
+
+		/*
+		 * One statement for the whole order, so that a write that does not land rebuilds none of
+		 * its tax lines rather than some of them. Rebuilding only some, on top of the rows the
+		 * order came in with, is what would have the reports counting a line twice: a row still on
+		 * the order item column's zero default matches every line of the order that shares its
+		 * rate, so it keeps standing in for the lines that were rebuilt alongside it.
+		 */
+		if ( ! empty( $rows ) ) {
+			$written = $wpdb->query(
+				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table name is not user input, and the value placeholders are built above, one set per tax line.
+					"REPLACE INTO {$table_name} (order_id, date_created, tax_rate_id, order_item_id, shipping_tax, order_tax, total_tax) VALUES " . implode( ', ', $rows ),
+					$values
 				)
 			);
 
-			/**
-			 * Fires when tax's reports are updated.
-			 *
-			 * @param int $tax_rate_id Tax Rate ID.
-			 * @param int $order_id    Order ID.
-			 */
-			do_action( 'woocommerce_analytics_update_tax', $tax_item->get_rate_id(), $order->get_id() );
+			$synced = false !== $written;
+		}
 
-			// Sum the rows affected. Using REPLACE can affect 2 rows if the row already exists.
-			$num_updated += 2 === intval( $result ) ? 1 : intval( $result );
-
-			// A write that did not land leaves the order needing another sync regardless of what
-			// the remaining lines do, and every line written in the meantime is one more row the
-			// reports add to the ones this order already had. Leave the rest to that next sync.
-			if ( false === $result ) {
-				break;
+		if ( $synced ) {
+			foreach ( $tax_items as $tax_item ) {
+				/**
+				 * Fires when tax's reports are updated.
+				 *
+				 * @param int $tax_rate_id Tax Rate ID.
+				 * @param int $order_id    Order ID.
+				 *
+				 * @since 4.0.0.
+				 */
+				do_action( 'woocommerce_analytics_update_tax', $tax_item->get_rate_id(), $order->get_id() );
 			}
 		}
 
-		$synced = count( $tax_items ) === $num_updated;
-
 		// Includes rows written before the lookup was keyed by order item, which sit at zero.
 		//
-		// Prune only once every tax line the order carries has been written. A write that did not
-		// land leaves the order under-represented, and dropping what it used to hold on top of
-		// that turns a gap the next sync would close into a tax line the reports have lost.
+		// Prune only once the order's tax lines have been written. A write that did not land leaves
+		// the order holding nothing but the rows it came in with, and dropping those on top of that
+		// turns a rebuild the next sync would carry out into an order the reports have lost.
 		if ( $synced && ! empty( $existing_items ) ) {
 			$existing_items = array_flip( $existing_items );
 			$format         = implode( ',', array_fill( 0, count( $existing_items ), '%d' ) );

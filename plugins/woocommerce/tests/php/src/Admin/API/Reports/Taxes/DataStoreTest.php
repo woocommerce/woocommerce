@@ -681,18 +681,75 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Make the next write to the lookup table fail, the way a database error mid-sync would.
+	 * @testdox Sync writes every tax line of an order in one statement.
+	 */
+	public function test_sync_writes_every_tax_line_of_an_order_in_one_statement(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$order = $this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$writes  = 0;
+		$counter = $this->count_lookup_writes( $writes );
+
+		DataStore::sync_order_taxes( $order->get_id() );
+
+		$counter();
+
+		$this->assertCount( 4, $this->lookup_rows( $order->get_id() ), 'Every tax line of the order should hold a row.' );
+		$this->assertSame( 1, $writes, 'An order that is rebuilt line by line can be left with only some of its lines rebuilt, so the whole order should go in one write.' );
+	}
+
+	/**
+	 * @testdox Sync does not have a tax line counted twice when a write after the first one fails.
+	 */
+	public function test_sync_does_not_double_count_when_a_write_after_the_first_fails(): void {
+		global $wpdb;
+
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$order = $this->seed_order_with_tax_lines( $this->tax_lines_on_distinct_rate_ids( 'US-CA', 101 ), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		// The shape the rebuild finds an order in: every row on the column default.
+		$this->unmigrate_lookup_rows( $order->get_id() );
+
+		$suppress = $wpdb->suppress_errors( true );
+		$restore  = $this->break_next_lookup_write( 1 );
+		DataStore::sync_order_taxes( $order->get_id() );
+		$restore();
+		$wpdb->suppress_errors( $suppress );
+
+		$sut  = new DataStore();
+		$data = $sut->get_data( $this->all_taxes_query( '2023-02-01 00:00:00', '2023-02-28 23:59:59' ) );
+
+		$this->assertCount( 2, $data->data, 'Both tax lines should still be reportable.' );
+
+		$amounts = array_column( $data->data, 'total_tax' );
+		sort( $amounts );
+		$this->assertSame( array( 0.25, 6.0 ), $amounts, 'A rebuilt line sitting next to the row the order came in with should not be counted twice.' );
+	}
+
+	/**
+	 * Make a write to the lookup table fail, the way a database error mid-sync would.
 	 *
+	 * @param int $let_through Number of writes to let through before breaking the next one.
 	 * @return callable Removes the filter again.
 	 */
-	private function break_next_lookup_write(): callable {
+	private function break_next_lookup_write( int $let_through = 0 ): callable {
 		global $wpdb;
 
 		$table_name = $wpdb->prefix . 'wc_order_tax_lookup';
 		$broken     = false;
+		$seen       = 0;
 
-		$filter = function ( $query ) use ( &$broken, $table_name ) {
-			if ( $broken || 0 !== strpos( $query, "REPLACE INTO `{$table_name}`" ) ) {
+		$filter = function ( $query ) use ( &$broken, &$seen, $let_through, $table_name ) {
+			if ( $broken || 0 !== strpos( $query, "REPLACE INTO {$table_name}" ) ) {
+				return $query;
+			}
+
+			++$seen;
+			if ( $seen <= $let_through ) {
 				return $query;
 			}
 
@@ -700,6 +757,32 @@ class DataStoreTest extends WC_Unit_Test_Case {
 
 			// A table that does not exist, so the write fails the way a database error would.
 			return "REPLACE INTO `{$table_name}_missing` (order_id) VALUES (1)";
+		};
+
+		add_filter( 'query', $filter );
+
+		return function () use ( $filter ) {
+			remove_filter( 'query', $filter );
+		};
+	}
+
+	/**
+	 * Count the writes a sync makes to the lookup table.
+	 *
+	 * @param int $writes Counter to increment, by reference.
+	 * @return callable Removes the filter again.
+	 */
+	private function count_lookup_writes( int &$writes ): callable {
+		global $wpdb;
+
+		$table_name = $wpdb->prefix . 'wc_order_tax_lookup';
+
+		$filter = function ( $query ) use ( &$writes, $table_name ) {
+			if ( 0 === strpos( $query, "REPLACE INTO {$table_name}" ) ) {
+				++$writes;
+			}
+
+			return $query;
 		};
 
 		add_filter( 'query', $filter );

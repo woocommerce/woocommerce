@@ -265,7 +265,7 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 		$broken     = false;
 
 		$filter = function ( $query ) use ( &$broken, $table_name ) {
-			if ( $broken || 0 !== strpos( $query, "REPLACE INTO `{$table_name}`" ) ) {
+			if ( $broken || 0 !== strpos( $query, "REPLACE INTO {$table_name}" ) ) {
 				return $query;
 			}
 
