@@ -434,11 +434,9 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 
 		switch ( $deletion_mechanism ) {
 			case 'wp_trash_post':
-                // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 				do_action( 'wp_trash_post', $product );
 				break;
 			case 'delete_post':
-                // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 				do_action( 'delete_post', $product->get_id() );
 				break;
 			case 'delete_method_in_product':

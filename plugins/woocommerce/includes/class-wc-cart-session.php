@@ -340,7 +340,7 @@ final class WC_Cart_Session {
 		}
 		if ( ! $this->cart->is_empty() ) {
 			$this->set_cart_cookies( true );
-		} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) { // WPCS: input var ok.
+		} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) {
 			$this->set_cart_cookies( false );
 		}
 		$this->dedupe_cookies();

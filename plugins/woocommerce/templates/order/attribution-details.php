@@ -6,7 +6,7 @@
  *
  * @see     Automattic\WooCommerce\Internal\Orders\OrderAttributionController
  * @package WooCommerce\Templates
- * @version 10.3.0
+ * @version 11.2.0
  */
 
 declare( strict_types=1 );
@@ -33,15 +33,6 @@ defined( 'ABSPATH' ) || exit;
 			<span class="order-attribution-origin">
 				<?php echo esc_html( $meta['origin'] ); ?>
 			</span>
-		<?php endif; ?>
-
-		<?php if ( $has_more_details ) : ?>
-
-			<a href="" class="woocommerce-order-attribution-details-toggle" aria-expanded="false">
-				<span class="toggle-text show"><?php esc_html_e( 'Show details', 'woocommerce' ); ?></span>
-				<span class="toggle-text hide" aria-hidden="true"><?php esc_html_e( 'Hide details', 'woocommerce' ); ?></span>
-				<span class="toggle-indicator" aria-hidden="true"></span>
-			</a>
 		<?php endif; ?>
 
 	</div>
@@ -162,6 +153,15 @@ defined( 'ABSPATH' ) || exit;
 			<?php echo esc_html( $meta['session_pages'] ); ?>
 		</span>
 	<?php endif; ?>
+
+	<?php if ( $has_more_details ) : ?>
+		<a href="" class="woocommerce-order-attribution-details-toggle" aria-expanded="false">
+			<span class="toggle-text show"><?php esc_html_e( 'Show details', 'woocommerce' ); ?></span>
+			<span class="toggle-text hide" aria-hidden="true"><?php esc_html_e( 'Hide details', 'woocommerce' ); ?></span>
+			<span class="toggle-indicator" aria-hidden="true"></span>
+		</a>
+	<?php endif; ?>
+
 	<!-- A placeholder for the OA install banner React component. -->
 	<?php if ( class_exists( 'WC_Marketplace_Suggestions' ) && \WC_Marketplace_Suggestions::allow_suggestions() ) : ?>
 		<div id="order-attribution-install-banner-slotfill"></div>
