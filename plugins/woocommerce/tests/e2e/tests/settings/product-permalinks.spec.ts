@@ -3,6 +3,7 @@
  */
 import { expect, test } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { wpCLI } from '../../utils/cli';
 
 test.describe( 'Product permalink settings', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
@@ -36,14 +37,12 @@ test.describe( 'Product permalink settings', () => {
 
 		await expect( productPermalinkRadios ).toHaveCount( 4 );
 
-		const originalCheckedIndex = await productPermalinkRadios.evaluateAll(
-			( radios ) =>
-				radios.findIndex(
-					( radio ) => ( radio as HTMLInputElement ).checked
-				)
-		);
-		const originalCustomBase = await customBase.inputValue();
-		expect( originalCheckedIndex ).toBeGreaterThanOrEqual( 0 );
+		// Snapshot the whole option rather than the visible form state: the journey's Shop base
+		// saves also flip the derived `use_verbose_page_rules` flag, which no form field exposes,
+		// so a UI-driven restore could never put it back.
+		const originalPermalinks = (
+			await wpCLI( 'wp option get woocommerce_permalinks --format=json' )
+		 ).stdout.trim();
 
 		try {
 			const defaultRadio = productPermalinkRadios.nth( 0 );
@@ -105,14 +104,12 @@ test.describe( 'Product permalink settings', () => {
 			await expect( defaultRadio ).toHaveValue( '' );
 			await expect( customBase ).toHaveValue( expectedDefaultBase );
 		} finally {
-			await page.goto( 'wp-admin/options-permalink.php' );
-
-			await productPermalinkRadios.nth( originalCheckedIndex ).check();
-			if ( originalCheckedIndex === 3 ) {
-				await customBase.fill( originalCustomBase );
-			}
-
-			await saveAndReload();
+			await wpCLI(
+				`wp option update woocommerce_permalinks '${ originalPermalinks }' --format=json`
+			);
+			// The option alone does not rebuild the persisted rewrite rules the front end matches
+			// against; a save on the Permalinks screen would have flushed them, so do the same.
+			await wpCLI( 'wp rewrite flush --hard' );
 		}
 	} );
 } );
