@@ -7,6 +7,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Reports;
 
+use WP_Query;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -17,6 +19,20 @@ defined( 'ABSPATH' ) || exit;
  * @since 11.2.0
  */
 class ProductSearchQuery {
+
+	/**
+	 * Query variable carrying the search terms into the WP_Query filters below.
+	 *
+	 * @var string
+	 */
+	private const TERMS_QUERY_VAR = 'wc_analytics_product_search';
+
+	/**
+	 * Alias of the product meta lookup table joined for the SKU comparison.
+	 *
+	 * @var string
+	 */
+	private const LOOKUP_ALIAS = 'wc_analytics_product_search_lookup';
 
 	/**
 	 * Normalizes the `search` REST argument into a list of terms.
@@ -73,50 +89,129 @@ class ProductSearchQuery {
 	 * @return string SQL statement, or an empty string when there is nothing to search for.
 	 */
 	public static function get_ids_subquery( $terms, $restrict_to_ids = array() ) {
-		global $wpdb;
-
 		$terms = self::parse_terms( $terms );
 
 		if ( empty( $terms ) ) {
 			return '';
 		}
 
-		$sku_enabled   = wc_product_sku_enabled();
-		$term_clauses  = array();
-		$where_clauses = array();
+		$args = array(
+			'post_type'           => 'product',
+			// The search box queries products with `status=any`, which covers every status that
+			// is not excluded from search. A drafted product can still have sales to report.
+			'post_status'         => 'any',
+			'posts_per_page'      => -1,
+			'fields'              => 'ids',
+			// The report orders and pages the result itself, so the subquery does not have to.
+			'orderby'             => 'none',
+			'no_found_rows'       => true,
+			// The query is never run, so its empty result would only put an entry nothing
+			// reads back into the post query cache.
+			'cache_results'       => false,
+			self::TERMS_QUERY_VAR => $terms,
+		);
 
-		foreach ( $terms as $term ) {
-			$clause = $wpdb->prepare( 'posts.post_title LIKE %s', '%' . $wpdb->esc_like( $term ) . '%' );
+		$restrict_to_ids = (array) $restrict_to_ids;
+		if ( ! empty( $restrict_to_ids ) ) {
+			$args['post__in'] = array_map( 'intval', $restrict_to_ids );
+		}
+
+		$statement = self::build_statement( $args );
+
+		// A plugin filtering `posts_fields` can add columns to the statement, so name the one
+		// this returns instead of passing the whole row on.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- WP_Query prepares the statement it builds.
+		return "SELECT DISTINCT ID AS product_id FROM ( {$statement} ) AS wc_analytics_product_search_results";
+	}
+
+	/**
+	 * Adds the SKU lookup table to a product search query.
+	 *
+	 * @internal Hooked on `posts_join` for the duration of the search query.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string   $join     Join clause.
+	 * @param WP_Query $wp_query Query being built.
+	 * @return string Join clause.
+	 */
+	public static function add_wp_query_join( $join, $wp_query ) {
+		global $wpdb;
+
+		if ( ! $wp_query->get( self::TERMS_QUERY_VAR ) || ! wc_product_sku_enabled() ) {
+			return $join;
+		}
+
+		$alias = self::LOOKUP_ALIAS;
+
+		return $join . " LEFT JOIN {$wpdb->wc_product_meta_lookup} AS {$alias} ON {$wpdb->posts}.ID = {$alias}.product_id ";
+	}
+
+	/**
+	 * Restricts a product search query to the products matching any of its terms.
+	 *
+	 * @internal Hooked on `posts_where` for the duration of the search query.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string   $where    Where clause.
+	 * @param WP_Query $wp_query Query being built.
+	 * @return string Where clause.
+	 */
+	public static function add_wp_query_filter( $where, $wp_query ) {
+		global $wpdb;
+
+		$terms = $wp_query->get( self::TERMS_QUERY_VAR );
+		if ( ! $terms ) {
+			return $where;
+		}
+
+		$sku_enabled  = wc_product_sku_enabled();
+		$alias        = self::LOOKUP_ALIAS;
+		$term_clauses = array();
+
+		foreach ( (array) $terms as $term ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $wpdb->posts is a table name.
+			$clause = $wpdb->prepare( "{$wpdb->posts}.post_title LIKE %s", '%' . $wpdb->esc_like( $term ) . '%' );
 			if ( $sku_enabled ) {
 				// Matches Admin\API\Products, which compares the SKU against the term unwrapped and
 				// unescaped, so a LIKE wildcard in the term stays a wildcard here. Escaping it would
 				// make the report disagree with the search box on what the term matches.
-				$clause .= $wpdb->prepare( ' OR product_meta_lookup.sku LIKE %s', $term );
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $alias is a class constant.
+				$clause .= $wpdb->prepare( " OR {$alias}.sku LIKE %s", $term );
 			}
 
 			$term_clauses[] = "( {$clause} )";
 		}
 
-		$statuses    = get_post_stati( array( 'exclude_from_search' => false ) );
-		$status_list = implode( ', ', array_fill( 0, count( $statuses ), '%s' ) );
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $status_list is a generated list of %s placeholders.
-		$where_clauses[] = $wpdb->prepare( "posts.post_status IN ( {$status_list} )", $statuses );
-		$where_clauses[] = '( ' . implode( ' OR ', $term_clauses ) . ' )';
+		return $where . ' AND ( ' . implode( ' OR ', $term_clauses ) . ' )';
+	}
 
-		$restrict_to_ids = (array) $restrict_to_ids;
-		if ( ! empty( $restrict_to_ids ) ) {
-			$where_clauses[] = 'posts.ID IN ( ' . implode( ',', array_map( 'intval', $restrict_to_ids ) ) . ' )';
-		}
+	/**
+	 * Returns the statement WP_Query builds for the given arguments, without running it.
+	 *
+	 * The search only has to compose into the report query, so the statement is what is needed
+	 * rather than the rows. Building it through WP_Query keeps `posts_join`, `posts_where` and
+	 * the rest of the query filters in play. Multilingual plugins restrict products to the
+	 * active language through them, and the search box the report has to agree with is a
+	 * WP_Query too, so a hand written statement would answer differently on those sites.
+	 *
+	 * @param array $args Query arguments.
+	 * @return string SQL statement.
+	 */
+	private static function build_statement( array $args ): string {
+		add_filter( 'posts_join', array( __CLASS__, 'add_wp_query_join' ), 10, 2 );
+		add_filter( 'posts_where', array( __CLASS__, 'add_wp_query_filter' ), 10, 2 );
+		// WP_Query builds the statement before it runs it, so short-circuit the results.
+		add_filter( 'posts_pre_query', '__return_empty_array' );
 
-		$join = $sku_enabled
-			? " LEFT JOIN {$wpdb->wc_product_meta_lookup} AS product_meta_lookup ON posts.ID = product_meta_lookup.product_id"
-			: '';
+		$query = new WP_Query();
+		$query->query( $args );
 
-		$where = implode( ' AND ', $where_clauses );
+		remove_filter( 'posts_join', array( __CLASS__, 'add_wp_query_join' ), 10 );
+		remove_filter( 'posts_where', array( __CLASS__, 'add_wp_query_filter' ), 10 );
+		remove_filter( 'posts_pre_query', '__return_empty_array' );
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- All interpolated values are prepared above.
-		return "SELECT DISTINCT posts.ID AS product_id
-			FROM {$wpdb->posts} AS posts{$join}
-			WHERE posts.post_type = 'product' AND {$where}";
+		return $query->request;
 	}
 }

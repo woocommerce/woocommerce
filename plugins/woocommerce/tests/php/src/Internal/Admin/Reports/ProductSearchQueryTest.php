@@ -311,6 +311,76 @@ class ProductSearchQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should honour a posts_where filter, the way the search box does.
+	 *
+	 * Multilingual plugins restrict products to the active language through the WP_Query
+	 * clause filters. The search box the report has to agree with is a WP_Query, so the
+	 * statement built here has to go through the same filters.
+	 */
+	public function test_get_ids_subquery_honours_a_posts_where_filter(): void {
+		$kept    = $this->create_product( 'Kingston Widget' );
+		$hidden  = $this->create_product( 'Kingston Gadget' );
+		$exclude = function ( $where ) use ( $hidden ) {
+			global $wpdb;
+
+			return $where . " AND {$wpdb->posts}.ID != {$hidden} ";
+		};
+
+		add_filter( 'posts_where', $exclude );
+		$found = $this->run_subquery( ProductSearchQuery::get_ids_subquery( array( 'Kingston' ) ) );
+		remove_filter( 'posts_where', $exclude );
+
+		$this->assertContains( $kept, $found );
+		$this->assertNotContains( $hidden, $found );
+	}
+
+	/**
+	 * @testdox Should honour a posts_join filter, the way the search box does.
+	 */
+	public function test_get_ids_subquery_honours_a_posts_join_filter(): void {
+		$translated = $this->create_product( 'Kingston Widget' );
+		update_post_meta( $translated, '_test_language', 'fr' );
+
+		// Not translated, so the join drops it.
+		$this->create_product( 'Kingston Gadget' );
+
+		$join = function ( $clause ) {
+			global $wpdb;
+
+			return $clause . " INNER JOIN {$wpdb->postmeta} AS language_meta ON {$wpdb->posts}.ID = language_meta.post_id AND language_meta.meta_key = '_test_language' ";
+		};
+
+		add_filter( 'posts_join', $join );
+		$found = $this->run_subquery( ProductSearchQuery::get_ids_subquery( array( 'Kingston' ) ) );
+		remove_filter( 'posts_join', $join );
+
+		$this->assertSame( array( $translated ), $found );
+	}
+
+	/**
+	 * @testdox Should leave queries other than its own alone.
+	 */
+	public function test_get_ids_subquery_does_not_affect_later_queries(): void {
+		$product = $this->create_product( 'Kingston Widget' );
+		$other   = $this->create_product( 'Unrelated Thing' );
+
+		ProductSearchQuery::get_ids_subquery( array( 'Kingston' ) );
+
+		$query = new \WP_Query(
+			array(
+				'post_type'      => 'product',
+				'post_status'    => 'any',
+				'fields'         => 'ids',
+				'posts_per_page' => -1,
+				'no_found_rows'  => true,
+			)
+		);
+
+		$this->assertContains( $product, $query->posts );
+		$this->assertContains( $other, $query->posts, 'The search filters should no longer be attached' );
+	}
+
+	/**
 	 * Runs a statement built by the system under test and returns the product IDs it yields.
 	 *
 	 * @param string $sql SQL statement.
