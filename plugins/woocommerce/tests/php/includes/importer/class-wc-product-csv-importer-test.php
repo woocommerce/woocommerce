@@ -1000,7 +1000,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		$this->assertCount( 1, $data['failed'], 'Expected the variation row to fail' );
 		$this->assertSame(
-			'Variation cannot be imported: the parent product has not been imported yet. List the parent product before its variations.',
+			'Variation cannot be imported: The parent product has not been imported yet. List the parent product before its variations.',
 			html_entity_decode( $data['failed'][0]->get_error_message(), ENT_QUOTES ),
 			'Expected the failure to name the row order, not a missing attribute the parent does have'
 		);
@@ -1012,6 +1012,33 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$placeholder_id = wc_get_product_id_by_sku( 'IMPORT-ORDER-V' );
 		if ( $placeholder_id ) {
 			wp_delete_post( $placeholder_id, true );
+		}
+	}
+
+	/**
+	 * @testdox Test that a new variation row whose parent row has not been reached yet names the row order.
+	 */
+	public function test_import_skips_new_variations_whose_parent_row_comes_later() {
+		$data = $this->import_with_update_existing(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\n"
+			. "variation,IMPORT-LATER-V,Import Later V,IMPORT-LATER-PARENT,Size,S,0,12\n"
+			. "variable,IMPORT-LATER-PARENT,Import Later Parent,,Size,\"S, M\",0,\n",
+			'import-new-variation-before-parent.csv'
+		);
+
+		$this->assertEmpty( $data['imported_variations'], 'Expected the variation row to be refused' );
+		// Two skips: the variation row, then the parent row itself, which "update existing products"
+		// does not create because no product matches it yet.
+		$this->assertCount( 2, $data['skipped'], 'Expected 2 skipped products, got ' . count( $data['skipped'] ) );
+		$this->assertSame(
+			'A new variation cannot be created because the parent product has not been imported yet. List the parent product before its variations.',
+			html_entity_decode( $data['skipped'][0]->get_error_message(), ENT_QUOTES ),
+			'Expected the refusal to name the row order rather than a parent that does not exist'
+		);
+
+		$parent_id = wc_get_product_id_by_sku( 'IMPORT-LATER-PARENT' );
+		if ( $parent_id ) {
+			WC_Helper_Product::delete_product( $parent_id );
 		}
 	}
 

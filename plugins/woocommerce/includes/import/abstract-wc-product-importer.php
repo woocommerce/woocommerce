@@ -628,7 +628,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		// row further down the file, so it declares no attributes yet and every one of them would
 		// otherwise be reported as missing from a product that does in fact have them.
 		if ( 'importing' === $parent_product->get_status() ) {
-			throw new Exception( esc_html__( 'Variation cannot be imported: the parent product has not been imported yet. List the parent product before its variations.', 'woocommerce' ) );
+			throw new Exception( esc_html__( 'Variation cannot be imported: The parent product has not been imported yet. List the parent product before its variations.', 'woocommerce' ) );
 		}
 
 		$declared_attributes = $parent_product->get_attributes();
@@ -676,7 +676,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		if ( empty( $attribute['taxonomy'] ) ) {
 			$global_key = $this->get_variation_attribute_key( array_merge( $attribute, array( 'taxonomy' => true ) ) );
 
-			if ( isset( $parent_attributes[ $global_key ] ) ) {
+			if ( isset( $parent_attributes[ $global_key ] ) && $parent_attributes[ $global_key ]->is_taxonomy() ) {
 				return sprintf(
 					/* translators: %s: attribute name */
 					__( 'The parent product has a global "%s" attribute, but the row does not mark it as global.', 'woocommerce' ),

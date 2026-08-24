@@ -1208,6 +1208,16 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 		$parent = wc_get_product( $parsed_data['parent_id'] );
 
+		// Ahead of the variable check: a parent with the 'importing' status is the simple placeholder
+		// standing in for a row further down the file, so reporting it as not variable would point at
+		// the product rather than at the row order, which is what actually needs fixing.
+		if ( $parent && 'importing' === $parent->get_status() ) {
+			return new WP_Error(
+				'woocommerce_product_importer_variation_parent_not_imported',
+				esc_html__( 'A new variation cannot be created because the parent product has not been imported yet. List the parent product before its variations.', 'woocommerce' )
+			);
+		}
+
 		if ( ! $parent || ! $parent->is_type( ProductType::VARIABLE ) ) {
 			return new WP_Error(
 				'woocommerce_product_importer_variation_parent_not_variable',
@@ -1215,8 +1225,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			);
 		}
 
-		// A parent with the 'importing' status is a placeholder, meaning the parent does not exist either.
-		if ( in_array( $parent->get_status(), array( 'importing', ProductStatus::TRASH ), true ) ) {
+		if ( ProductStatus::TRASH === $parent->get_status() ) {
 			return new WP_Error(
 				'woocommerce_product_importer_variation_parent_missing',
 				esc_html__( 'A new variation cannot be created for a parent product that does not exist.', 'woocommerce' )
