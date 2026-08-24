@@ -110,10 +110,9 @@ class WC_Admin_Permalink_Settings {
 		 * window, and the woocommerce_get_shop_page_id filter multilingual plugins attach to can
 		 * return a different page per locale.
 		 *
-		 * This aligns the two paths for a product_base that is already persisted. It cannot align
-		 * one that is not: wc_get_permalink_structure() initializes a missing default in the
-		 * request locale, outside any window, before this screen ever renders. That is pre-existing
-		 * behavior, tracked separately.
+		 * This holds only for a persisted product_base: wc_get_permalink_structure() initializes a
+		 * missing one in the request locale, outside any window, before this screen renders.
+		 * See https://github.com/woocommerce/woocommerce/issues/67507.
 		 */
 		wc_switch_to_site_locale();
 		$shop_page_id         = wc_get_page_id( 'shop' );
@@ -231,10 +230,9 @@ class WC_Admin_Permalink_Settings {
 			$permalinks['attribute_base'] = wc_sanitize_permalink( wp_unslash( $_POST['woocommerce_product_attribute_slug'] ) );
 
 			/*
-			 * Generate product base. The form only ever posts scalars for these two fields, but
-			 * nothing enforces that, and unguarded an array reaches trim() and
-			 * wc_sanitize_permalink(), which both expect a string. A non-string value in either
-			 * field resolves to the default product base.
+			 * Generate product base. The form only ever posts strings for these two fields, but
+			 * nothing enforces that, and trim() and wc_sanitize_permalink() both require one.
+			 * A non-string value in either field resolves to the default product base.
 			 */
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized on the next line.
 			$posted_product_base = isset( $_POST['product_permalink'] ) && is_string( $_POST['product_permalink'] ) ? wp_unslash( $_POST['product_permalink'] ) : '';
@@ -250,10 +248,8 @@ class WC_Admin_Permalink_Settings {
 					$posted_structure = trim( wp_unslash( $_POST['product_permalink_structure'] ) );
 					$product_base     = (string) preg_replace( '#/+#', '/', '/' . str_replace( '#', '', $posted_structure ) );
 				} else {
-					// A missing or non-string field: previously stored '/', which
-					// wc_sanitize_permalink() collapsed to '', leaving the option for
-					// wc_get_permalink_structure() to refill in whatever locale the next request
-					// ran in. Resolve it to the default base here, deterministically.
+					// A missing or non-string field resolves to the default base, so the stored
+					// slug stays deterministic and in the site locale.
 					$product_base = $default_product_base;
 				}
 
@@ -269,7 +265,7 @@ class WC_Admin_Permalink_Settings {
 			$permalinks['product_base'] = wc_sanitize_permalink( $product_base );
 
 			/*
-			 * A custom base describing the Default structure is stored in Default's bare form. The
+			 * A custom base equal to the Default structure is stored in Default's bare form. The
 			 * Custom base field is the next tab stop after the radio group and focusing it selects
 			 * Custom base, so a single Tab from Default posts the field's prefilled `/product/`
 			 * through the custom branch, which prepends a slash. The two stored forms are not
