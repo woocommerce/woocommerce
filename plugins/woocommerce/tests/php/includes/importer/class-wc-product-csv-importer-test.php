@@ -516,13 +516,14 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Import a single variation row against an existing parent, with no parent row in the CSV.
+	 * Run an import with "update existing products" against an already existing parent.
 	 *
-	 * @param string $csv_body  CSV contents, header row included.
+	 * @param string $csv_body  CSV contents, header row included. Usually a lone variation row, but a
+	 *                          parent row can be included to cover ordering between the two.
 	 * @param string $file_name Temp file name to write the CSV to.
 	 * @return array Import results.
 	 */
-	private function import_variation_only_row( $csv_body, $file_name ) {
+	private function import_with_update_existing( $csv_body, $file_name ) {
 		$csv_file = trailingslashit( get_temp_dir() ) . $file_name;
 		file_put_contents( $csv_file, $csv_body ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
 
@@ -563,7 +564,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$product->set_attributes( array( $attribute ) );
 		$product->save();
 
-		$data = $this->import_variation_only_row(
+		$data = $this->import_with_update_existing(
 			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-VALUE-L,Import Tee - L,IMPORT-VALUE-PARENT,Size,L,0,12\n",
 			'import-unknown-value.csv'
 		);
@@ -600,7 +601,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$product->set_attributes( array( $attribute ) );
 		$product->save();
 
-		$data = $this->import_variation_only_row(
+		$data = $this->import_with_update_existing(
 			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-TAX-L,Import Global Tee - L,IMPORT-TAX-PARENT,size-airr19,L,1,12\n",
 			'import-unknown-taxonomy-value.csv'
 		);
@@ -642,7 +643,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$product->set_attributes( array( $attribute ) );
 		$product->save();
 
-		$data = $this->import_variation_only_row(
+		$data = $this->import_with_update_existing(
 			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-TAX-OK-L,Import Global Tee - L,IMPORT-TAX-OK-PARENT,size-airr19-ok,L,1,12\n",
 			'import-known-taxonomy-value.csv'
 		);
@@ -679,7 +680,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$product->save();
 
 		// Parent row first, as WooCommerce exports it: the variation must see the widened term list.
-		$data = $this->import_variation_only_row(
+		$data = $this->import_with_update_existing(
 			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\n"
 			. "variable,IMPORT-WIDEN-PARENT,Import Widen Tee,,size-airr19-widen,\"S, L\",1,\n"
 			. "variation,IMPORT-WIDEN-L,Import Widen Tee - L,IMPORT-WIDEN-PARENT,size-airr19-widen,L,1,12\n",
@@ -709,7 +710,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$product->set_attributes( array( $attribute ) );
 		$product->save();
 
-		$data = $this->import_variation_only_row(
+		$data = $this->import_with_update_existing(
 			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-ATTR-RED,Import Tee - Red,IMPORT-ATTR-PARENT,Colour,Red,0,12\n",
 			'import-unknown-attribute.csv'
 		);
@@ -741,7 +742,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$product->set_attributes( array( $attribute ) );
 		$product->save();
 
-		$data = $this->import_variation_only_row(
+		$data = $this->import_with_update_existing(
 			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-PROMOTE-L,Import Tee - L,IMPORT-PROMOTE-PARENT,Size,L,0,12\n",
 			'import-promoted-attribute.csv'
 		);
@@ -769,7 +770,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$product->save();
 
 		// The variation row comes first, so the parent still offers only S and M when it is validated.
-		$data = $this->import_variation_only_row(
+		$data = $this->import_with_update_existing(
 			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\n"
 			. "variation,IMPORT-ORDER-L,Import Tee - L,IMPORT-ORDER-PARENT,Size,L,0,12\n"
 			. "variable,IMPORT-ORDER-PARENT,Import Tee,,Size,\"S, M, L\",0,\n",
