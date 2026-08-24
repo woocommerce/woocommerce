@@ -57,6 +57,14 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	protected $internal_data_store_key_getters = array();
 
 	/**
+	 * Validated postmeta read during a single hydration, keyed by post ID, so
+	 * the same malformed entry is not re-read and re-logged more than once.
+	 *
+	 * @var array
+	 */
+	private $validated_order_meta = array();
+
+	/**
 	 * Return internal key getters name.
 	 *
 	 * @return string[]
@@ -427,39 +435,116 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	}
 
 	/**
-	 * Read a single value from the raw postmeta array returned by get_post_meta().
+	 * Read the postmeta for an order or refund, self-healing a corrupted object
+	 * cache entry when possible.
 	 *
-	 * Postmeta values are normally arrays of values, the first of which is the
-	 * stored value. When an entry is malformed (for example a corrupted object
-	 * cache entry that leaves a stdClass where the array should be), it is
-	 * treated as missing and the provided default is returned instead of
-	 * fatalling on the illegal array access.
+	 * The values returned by get_post_meta() are normally arrays of values, the
+	 * first of which is the stored value. A corrupted persistent object cache
+	 * entry can leave a non-array (for example a stdClass) where the array
+	 * should be, which fatals on PHP 8 when the entry is dereferenced as an
+	 * array. When that happens this method clears the cached postmeta and
+	 * re-reads it from the database so the real values are used instead of
+	 * falling back to defaults.
 	 *
 	 * @since 11.1.0
-	 * @param array  $meta_data     The full postmeta array for a post.
+	 * @param int $id The post ID.
+	 * @return array The validated postmeta array.
+	 */
+	protected function get_validated_order_meta( int $id ): array {
+		if ( isset( $this->validated_order_meta[ $id ] ) ) {
+			return $this->validated_order_meta[ $id ];
+		}
+
+		$meta_data = get_post_meta( $id );
+
+		if ( ! $this->is_valid_order_meta( $meta_data ) ) {
+			// The cached postmeta is malformed. Clear it and re-read from the database.
+			wp_cache_delete( $id, 'post_meta' );
+			$meta_data = get_post_meta( $id );
+		}
+
+		if ( ! $this->is_valid_order_meta( $meta_data ) ) {
+			$this->log_malformed_order_meta( $id, $meta_data );
+		}
+
+		$meta_data = is_array( $meta_data ) ? $meta_data : array();
+		$this->validated_order_meta[ $id ] = $meta_data;
+
+		return $meta_data;
+	}
+
+	/**
+	 * Whether the raw postmeta array returned by get_post_meta() is well-formed.
+	 *
+	 * @param mixed $meta_data The postmeta to validate.
+	 * @return bool True when every entry is an array containing a value at index 0.
+	 */
+	private function is_valid_order_meta( $meta_data ): bool {
+		if ( ! is_array( $meta_data ) ) {
+			return false;
+		}
+
+		foreach ( $meta_data as $value ) {
+			if ( ! is_array( $value ) || ! array_key_exists( 0, $value ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Log a single warning describing the malformed postmeta entries for a post.
+	 *
+	 * @param int   $id        The post ID.
+	 * @param mixed $meta_data The malformed postmeta.
+	 */
+	private function log_malformed_order_meta( int $id, $meta_data ): void {
+		$malformed = array();
+
+		if ( ! is_array( $meta_data ) ) {
+			$malformed[] = sprintf( 'entire postmeta (got %s, expected array)', gettype( $meta_data ) );
+		} else {
+			foreach ( $meta_data as $key => $value ) {
+				if ( ! is_array( $value ) || ! array_key_exists( 0, $value ) ) {
+					$malformed[] = sprintf(
+						'"%1$s" (got %2$s, expected array)',
+						$key,
+						is_array( $value ) ? 'array without index 0' : gettype( $value )
+					);
+				}
+			}
+		}
+
+		wc_get_logger()->warning(
+			sprintf(
+				'Malformed postmeta data detected for order ID %1$d: %2$s. The affected values will be read with their defaults. This usually indicates corrupted postmeta in the database.',
+				$id,
+				implode( ', ', $malformed )
+			),
+			array(
+				'source'  => 'woocommerce-order-data-store',
+				'post_id' => $id,
+			)
+		);
+	}
+
+	/**
+	 * Read a single value from the validated postmeta array.
+	 *
+	 * Postmeta values are arrays of values, the first of which is the stored
+	 * value. Returns the provided default when the key is missing or the entry
+	 * is malformed.
+	 *
+	 * @since 11.1.0
+	 * @param mixed  $meta_data     The postmeta array for a post.
 	 * @param string $key           The meta key to read.
-	 * @param int    $post_id       The post ID, used for logging when a malformed entry is skipped.
 	 * @param mixed  $default_value The value to return when the key is missing or malformed.
 	 * @return mixed The stored value for the key, or the default value when the key is missing or malformed.
 	 */
-	protected function get_order_meta_value( $meta_data, string $key, int $post_id = 0, $default_value = '' ) {
+	protected function get_order_meta_value( $meta_data, string $key, $default_value = '' ) {
 		if ( is_array( $meta_data ) && isset( $meta_data[ $key ] ) && is_array( $meta_data[ $key ] ) && array_key_exists( 0, $meta_data[ $key ] ) ) {
 			return $meta_data[ $key ][0];
-		}
-
-		if ( is_array( $meta_data ) && isset( $meta_data[ $key ] ) ) {
-			wc_get_logger()->warning(
-				sprintf(
-					'Skipping malformed postmeta entry "%1$s" for post ID %2$d while reading order data.',
-					$key,
-					$post_id
-				),
-				array(
-					'source'  => 'woocommerce-order-data-store',
-					'meta'    => $key,
-					'post_id' => $post_id,
-				)
-			);
 		}
 
 		return $default_value;
@@ -475,21 +560,21 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	protected function read_order_data( &$order, $post_object ) {
 		$id = $order->get_id();
 
-		$meta_data = get_post_meta( $id );
+		$meta_data = $this->get_validated_order_meta( $id );
 
-		$prices_include_tax = $this->get_order_meta_value( $meta_data, '_prices_include_tax', $id, null );
+		$prices_include_tax = $this->get_order_meta_value( $meta_data, '_prices_include_tax', null );
 
 		$this->set_order_props(
 			$order,
 			array(
-				'currency'           => $this->get_order_meta_value( $meta_data, '_order_currency', $id ),
-				'discount_total'     => $this->get_order_meta_value( $meta_data, '_cart_discount', $id ),
-				'discount_tax'       => $this->get_order_meta_value( $meta_data, '_cart_discount_tax', $id ),
-				'shipping_total'     => $this->get_order_meta_value( $meta_data, '_order_shipping', $id ),
-				'shipping_tax'       => $this->get_order_meta_value( $meta_data, '_order_shipping_tax', $id ),
-				'cart_tax'           => $this->get_order_meta_value( $meta_data, '_order_tax', $id ),
-				'total'              => $this->get_order_meta_value( $meta_data, '_order_total', $id ),
-				'version'            => $this->get_order_meta_value( $meta_data, '_order_version', $id ),
+				'currency'           => $this->get_order_meta_value( $meta_data, '_order_currency' ),
+				'discount_total'     => $this->get_order_meta_value( $meta_data, '_cart_discount' ),
+				'discount_tax'       => $this->get_order_meta_value( $meta_data, '_cart_discount_tax' ),
+				'shipping_total'     => $this->get_order_meta_value( $meta_data, '_order_shipping' ),
+				'shipping_tax'       => $this->get_order_meta_value( $meta_data, '_order_shipping_tax' ),
+				'cart_tax'           => $this->get_order_meta_value( $meta_data, '_order_tax' ),
+				'total'              => $this->get_order_meta_value( $meta_data, '_order_total' ),
+				'version'            => $this->get_order_meta_value( $meta_data, '_order_version' ),
 				'prices_include_tax' => null !== $prices_include_tax ? 'yes' === $prices_include_tax : 'yes' === get_option( 'woocommerce_prices_include_tax' ),
 			)
 		);
@@ -498,7 +583,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		foreach ( $order->get_extra_data_keys() as $key ) {
 			$function = 'set_' . $key;
 			if ( is_callable( array( $order, $function ) ) ) {
-				$order->{$function}( $this->get_order_meta_value( $meta_data, '_' . $key, $id ) );
+				$order->{$function}( $this->get_order_meta_value( $meta_data, '_' . $key ) );
 			}
 		}
 	}
