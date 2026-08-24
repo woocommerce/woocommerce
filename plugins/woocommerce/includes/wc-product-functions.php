@@ -1769,23 +1769,33 @@ function wc_get_product_category_list( $product_id, $sep = ', ', $before = '', $
 			}
 		);
 	} elseif ( 'breadcrumb' === $orderby && $should_sort ) {
-		$term_names        = array();
-		$term_parents      = array();
-		$ancestor_frontier = array();
-		$term_paths        = array();
-		$term_orders       = array();
+		$rendered_terms = array();
 
 		foreach ( $terms as $term ) {
-			$term_names[ $term->term_id ]   = (string) $term->name;
-			$term_parents[ $term->term_id ] = (int) $term->parent;
+			$rendered_terms[ (int) $term->term_id ] = $term;
+		}
 
+		/*
+		 * Resolve ancestors one batched query per hierarchy level rather than one query per
+		 * ancestor. The batch is a cache prime, not the ordering data: get_ancestors() below reads
+		 * it, and so does get_term_link() further down, because product_cat is registered with a
+		 * hierarchical rewrite and therefore resolves each category's ancestry to build its
+		 * permalink. Priming here makes the deep leaf-only case cheaper than not ordering at all.
+		 */
+		$known_ids = array_fill_keys( array_keys( $rendered_terms ), true );
+		$frontier  = array();
+
+		foreach ( $terms as $term ) {
 			if ( $term->parent ) {
-				$ancestor_frontier[ $term->parent ] = true;
+				$frontier[ (int) $term->parent ] = true;
 			}
 		}
 
-		while ( $ancestor_frontier ) {
-			$frontier_ids = array_values( array_diff( array_keys( $ancestor_frontier ), array_keys( $term_parents ) ) );
+		// Ancestry is filterable, so bound the walk rather than trusting it to terminate.
+		$remaining_levels = 100;
+
+		while ( $frontier && $remaining_levels-- > 0 ) {
+			$frontier_ids = array_values( array_diff( array_keys( $frontier ), array_keys( $known_ids ) ) );
 
 			if ( ! $frontier_ids ) {
 				break;
@@ -1802,73 +1812,88 @@ function wc_get_product_category_list( $product_id, $sep = ', ', $before = '', $
 				)
 			);
 
-			if ( is_wp_error( $frontier_parents ) ) {
-				return $frontier_parents;
+			/*
+			 * A filtered get_terms() can return any shape. Failing to prime is harmless; the
+			 * get_ancestors() calls below just query for themselves.
+			 */
+			if ( is_wp_error( $frontier_parents ) || ! is_array( $frontier_parents ) ) {
+				break;
 			}
 
-			$ancestor_frontier = array();
+			$frontier = array();
 
 			foreach ( $frontier_parents as $term_id => $parent_id ) {
-				$term_id                  = (int) $term_id;
-				$parent_id                = (int) $parent_id;
-				$term_parents[ $term_id ] = $parent_id;
+				if ( ! is_numeric( $term_id ) || ! is_numeric( $parent_id ) ) {
+					continue;
+				}
 
-				if ( $parent_id ) {
-					$ancestor_frontier[ $parent_id ] = true;
+				$known_ids[ (int) $term_id ] = true;
+
+				if ( (int) $parent_id ) {
+					$frontier[ (int) $parent_id ] = true;
 				}
 			}
 		}
 
-		update_termmeta_cache( array_keys( $term_parents ) );
+		update_termmeta_cache( array_keys( $rendered_terms ) );
 
-		foreach ( array_diff( array_keys( $term_parents ), array_keys( $term_names ) ) as $ancestor_id ) {
-			$ancestor_term = get_term( $ancestor_id, 'product_cat' );
+		$term_orders = array();
+		$term_paths  = array();
 
-			$term_names[ $ancestor_id ] = $ancestor_term instanceof WP_Term ? (string) $ancestor_term->name : '';
-		}
-
-		foreach ( array_keys( $term_parents ) as $term_id ) {
+		foreach ( $terms as $term ) {
+			$term_id    = (int) $term->term_id;
 			$term_order = get_term_meta( $term_id, 'order', true );
 
 			$term_orders[ $term_id ] = is_numeric( $term_order ) ? (int) $term_order : 0;
-		}
 
-		foreach ( $terms as $term ) {
-			$path            = array();
-			$current_term_id = $term->term_id;
+			$ancestor_ids = array_filter( (array) get_ancestors( $term_id, 'product_cat', 'taxonomy' ), 'is_numeric' );
+			$ancestor_ids = array_map( 'intval', $ancestor_ids );
+			// Cyclic ancestry can list the term itself among its own ancestors.
+			$ancestor_ids = array_diff( array_unique( $ancestor_ids ), array( $term_id ) );
 
-			while ( $current_term_id && isset( $term_parents[ $current_term_id ] ) && ! isset( $path[ $current_term_id ] ) ) {
-				$path[ $current_term_id ] = $current_term_id;
-				$current_term_id          = $term_parents[ $current_term_id ];
-			}
+			$path   = array_reverse( array_values( $ancestor_ids ) );
+			$path[] = $term_id;
 
-			$term_paths[ $term->term_id ] = array_reverse( array_values( $path ) );
+			/*
+			 * Rank on rendered terms only. Ancestors establish which term sits under which, but a
+			 * category that is not in the output never contributes a sort key of its own, so the
+			 * reason for the rendered order is always visible on the page.
+			 */
+			$term_paths[ $term_id ] = array_values(
+				array_filter(
+					$path,
+					static function ( $step ) use ( $rendered_terms ) {
+						return isset( $rendered_terms[ $step ] );
+					}
+				)
+			);
 		}
 
 		usort(
 			$terms,
-			static function ( $a, $b ) use ( $term_names, $term_orders, $term_paths ) {
-				$a_path       = $term_paths[ $a->term_id ];
-				$b_path       = $term_paths[ $b->term_id ];
+			static function ( $a, $b ) use ( $rendered_terms, $term_orders, $term_paths ) {
+				$a_path       = $term_paths[ (int) $a->term_id ];
+				$b_path       = $term_paths[ (int) $b->term_id ];
 				$shared_depth = min( count( $a_path ), count( $b_path ) );
 
 				for ( $index = 0; $index < $shared_depth; $index++ ) {
 					$a_term_id = $a_path[ $index ];
 					$b_term_id = $b_path[ $index ];
 
+					if ( $a_term_id === $b_term_id ) {
+						continue;
+					}
+
 					if ( $term_orders[ $a_term_id ] !== $term_orders[ $b_term_id ] ) {
 						return $term_orders[ $a_term_id ] <=> $term_orders[ $b_term_id ];
 					}
 
-					$path_comparison = strnatcasecmp( $term_names[ $a_term_id ], $term_names[ $b_term_id ] );
+					$path_comparison = strnatcasecmp(
+						(string) $rendered_terms[ $a_term_id ]->name,
+						(string) $rendered_terms[ $b_term_id ]->name
+					);
 
-					if ( 0 === $path_comparison ) {
-						$path_comparison = $a_term_id <=> $b_term_id;
-					}
-
-					if ( 0 !== $path_comparison ) {
-						return $path_comparison;
-					}
+					return 0 !== $path_comparison ? $path_comparison : $a_term_id <=> $b_term_id;
 				}
 
 				return count( $a_path ) <=> count( $b_path );

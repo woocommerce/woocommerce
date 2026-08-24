@@ -1286,7 +1286,7 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Product category list breadcrumb ordering batches ancestor loading and respects category order at each level.
+	 * @testdox Product category list breadcrumb ordering batches ancestor loading and ignores the order of ancestors it does not render.
 	 */
 	public function test_wc_get_product_category_list_breadcrumb_order_batches_ancestors(): void {
 		global $wpdb;
@@ -1353,7 +1353,12 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 				$query_filter = null;
 			}
 
-			$this->assertSame( "{$second_sibling_name} > {$third_sibling_name} > {$first_branch_name}", $actual );
+			/*
+			 * The two roots carry deliberately contradictory `order` metas (2 and 1) and neither is
+			 * assigned to the product. The rendered order must come from the three assigned terms'
+			 * own `order` metas -- 0, 1 and 2 -- and never from their invisible roots.
+			 */
+			$this->assertSame( "{$first_branch_name} > {$second_sibling_name} > {$third_sibling_name}", $actual );
 
 			/*
 			 * Two ancestor levels, and core spends two queries on each: one WP_Term_Query for the
@@ -1375,6 +1380,38 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			wp_delete_term( $first_middle['term_id'], 'product_cat' );
 			wp_delete_term( $second_root['term_id'], 'product_cat' );
 			wp_delete_term( $first_root['term_id'], 'product_cat' );
+		}
+	}
+
+	/**
+	 * @testdox Product category list breadcrumb ordering never ranks by a category it does not render.
+	 */
+	public function test_wc_get_product_category_list_breadcrumb_order_ignores_unrendered_ancestors(): void {
+		$suffix       = wp_unique_id();
+		$parent_name  = 'Apparel ' . $suffix;
+		$child_name   = 'Zebra shirts ' . $suffix;
+		$sibling_name = 'Books ' . $suffix;
+		$parent       = wp_insert_term( $parent_name, 'product_cat' );
+		$child        = wp_insert_term( $child_name, 'product_cat', array( 'parent' => $parent['term_id'] ) );
+		$sibling      = wp_insert_term( $sibling_name, 'product_cat' );
+		$product      = WC_Helper_Product::create_simple_product();
+
+		try {
+			// Only the leaf and the independent root are assigned; the parent is never rendered.
+			wp_set_object_terms( $product->get_id(), array( $child['term_id'], $sibling['term_id'] ), 'product_cat' );
+
+			$actual = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+
+			$this->assertSame(
+				"{$sibling_name} > {$child_name}",
+				$actual,
+				'An ancestor that is not rendered must not decide the order of the categories that are.'
+			);
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $child['term_id'], 'product_cat' );
+			wp_delete_term( $sibling['term_id'], 'product_cat' );
+			wp_delete_term( $parent['term_id'], 'product_cat' );
 		}
 	}
 
@@ -1508,25 +1545,25 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		$orphan           = wp_insert_term( $orphan_name, 'product_cat', array( 'parent' => $missing_root['term_id'] ) );
 		$independent      = wp_insert_term( $independent_name, 'product_cat' );
 		$product          = WC_Helper_Product::create_simple_product();
-		$get_terms_filter = static function ( $terms, $taxonomies, $args ) use ( $missing_root ) {
-			if ( 'id=>parent' === ( $args['fields'] ?? '' ) ) {
-				unset( $terms[ $missing_root['term_id'] ] );
-			}
-
-			return $terms;
+		$ancestors_filter = static function ( $ancestors, $object_id, $object_type ) use ( &$orphan ) {
+			return 'product_cat' === $object_type && (int) $orphan['term_id'] === (int) $object_id ? array() : $ancestors;
 		};
 
 		try {
 			update_term_meta( $independent['term_id'], 'order', 1 );
 			update_term_meta( $orphan['term_id'], 'order', 2 );
 			wp_set_object_terms( $product->get_id(), array( $orphan['term_id'], $independent['term_id'] ), 'product_cat' );
-			add_filter( 'get_terms', $get_terms_filter, 10, 3 );
 
-			$actual = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+			$resolved = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
 
-			$this->assertSame( "{$independent_name} > {$orphan_name}", $actual );
+			add_filter( 'get_ancestors', $ancestors_filter, 10, 3 );
+
+			$unresolved = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+
+			$this->assertSame( "{$independent_name} > {$orphan_name}", $resolved );
+			$this->assertSame( $resolved, $unresolved, 'A term whose ancestry cannot be resolved should rank exactly as a root term does.' );
 		} finally {
-			remove_filter( 'get_terms', $get_terms_filter, 10 );
+			remove_filter( 'get_ancestors', $ancestors_filter, 10 );
 			WC_Helper_Product::delete_product( $product->get_id() );
 			wp_delete_term( $orphan['term_id'], 'product_cat' );
 			wp_delete_term( $independent['term_id'], 'product_cat' );
@@ -1545,25 +1582,34 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		$cyclic_child     = wp_insert_term( $cyclic_name, 'product_cat', array( 'parent' => $cyclic_root['term_id'] ) );
 		$independent      = wp_insert_term( $independent_name, 'product_cat' );
 		$product          = WC_Helper_Product::create_simple_product();
-		$get_terms_filter = static function ( $terms, $taxonomies, $args ) use ( $cyclic_child, $cyclic_root ) {
-			if ( 'id=>parent' === ( $args['fields'] ?? '' ) && isset( $terms[ $cyclic_root['term_id'] ] ) ) {
-				$terms[ $cyclic_root['term_id'] ] = $cyclic_child['term_id'];
+		$get_term_filter  = static function ( $term, $taxonomy ) use ( $cyclic_root, $cyclic_child ) {
+			if ( 'product_cat' === $taxonomy && $term instanceof \WP_Term && (int) $cyclic_root['term_id'] === (int) $term->term_id ) {
+				/*
+				 * Clone before mutating: get_term() hands back the cached instance, and mutating it in
+				 * place would corrupt the term cache for every later test in the run.
+				 */
+				$term         = clone $term;
+				$term->parent = (int) $cyclic_child['term_id'];
 			}
 
-			return $terms;
+			return $term;
 		};
 
 		try {
+			/*
+			 * The invisible root is left at order 0 on purpose: if it still steered the sort, the
+			 * cyclic child would render first.
+			 */
 			update_term_meta( $independent['term_id'], 'order', 1 );
-			update_term_meta( $cyclic_root['term_id'], 'order', 2 );
+			update_term_meta( $cyclic_child['term_id'], 'order', 3 );
 			wp_set_object_terms( $product->get_id(), array( $cyclic_child['term_id'], $independent['term_id'] ), 'product_cat' );
-			add_filter( 'get_terms', $get_terms_filter, 10, 3 );
+			add_filter( 'get_term', $get_term_filter, 10, 2 );
 
 			$actual = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
 
 			$this->assertSame( "{$independent_name} > {$cyclic_name}", $actual );
 		} finally {
-			remove_filter( 'get_terms', $get_terms_filter, 10 );
+			remove_filter( 'get_term', $get_term_filter, 10 );
 			WC_Helper_Product::delete_product( $product->get_id() );
 			wp_delete_term( $cyclic_child['term_id'], 'product_cat' );
 			wp_delete_term( $independent['term_id'], 'product_cat' );
