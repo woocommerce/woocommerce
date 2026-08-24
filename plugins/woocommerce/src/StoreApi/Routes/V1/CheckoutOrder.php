@@ -214,18 +214,20 @@ class CheckoutOrder extends AbstractCartRoute {
 		// Billing address is a required field.
 		$billing = $request['billing_address'];
 
-		// If shipping address (optional field) was not provided, set it to the given billing address (required field).
-		$shipping = $request['shipping_address'] ?? $billing;
+		// Shipping is optional. Keep the address the order already holds so a billing-only request does not
+		// re-address it, and fall back to billing when it never had one (set_shipping_address() takes an array).
+		$fallback_shipping = '' !== $this->order->get_shipping_country() ? $this->order->get_address( 'shipping' ) : $billing;
+		$shipping          = $request['shipping_address'] ?? $fallback_shipping;
 
 		// Captured before the request is applied so the guard below compares against the order as priced.
-		$priced_destination  = $this->get_shipping_destination();
-		$priced_tax_location = $this->order->get_taxable_location();
-		$was_addressed       = '' !== $this->order->get_billing_country() || '' !== $priced_destination['country'];
+		$priced_destination      = $this->get_shipping_destination();
+		$priced_tax_location     = $this->order->get_taxable_location();
+		$was_priced_with_address = '' !== $this->order->get_billing_country() || '' !== $priced_destination['country'];
 
 		$this->order->set_billing_address( $billing );
 		$this->order->set_shipping_address( $shipping );
 		$this->order_controller->validate_existing_order_before_update( $this->order );
-		$this->validate_order_is_still_priced( $priced_destination, $priced_tax_location, $was_addressed );
+		$this->validate_order_is_still_priced( $priced_destination, $priced_tax_location, $was_priced_with_address );
 
 		// Update customer object with validated order addresses.
 		foreach ( $billing as $key => $value ) {
@@ -276,12 +278,12 @@ class CheckoutOrder extends AbstractCartRoute {
 	 *
 	 * @param array $priced_destination  Shipping destination the order is priced against.
 	 * @param array $priced_tax_location Tax location the order is priced against.
-	 * @param bool  $was_addressed       Whether the order held an address before the request was applied.
+	 * @param bool  $was_priced_with_address Whether the order held an address before the request was applied.
 	 */
-	private function validate_order_is_still_priced( array $priced_destination, array $priced_tax_location, bool $was_addressed ): void {
+	private function validate_order_is_still_priced( array $priced_destination, array $priced_tax_location, bool $was_priced_with_address ): void {
 		// An order with no address was never priced against one, e.g. a merchant-created order the shopper
 		// is addressing for the first time, so there is nothing to protect.
-		if ( ! $was_addressed ) {
+		if ( ! $was_priced_with_address ) {
 			return;
 		}
 
@@ -291,7 +293,7 @@ class CheckoutOrder extends AbstractCartRoute {
 			&& $this->order->needs_shipping() ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_order_address_change_not_allowed',
-				esc_html__( 'Sorry, the shipping address on this order cannot be changed here because it would change the shipping cost. Please contact us to update it.', 'woocommerce' ),
+				esc_html__( 'Sorry, the shipping address on this order cannot be changed because the shipping cost was calculated for the original address. Please use the original address, or contact us to have the order updated.', 'woocommerce' ),
 				400
 			);
 		}
@@ -302,7 +304,7 @@ class CheckoutOrder extends AbstractCartRoute {
 		if ( wc_tax_enabled() && $this->pricing_fields_differ( self::PRICING_ADDRESS_FIELDS, $priced_tax_location, $this->order->get_taxable_location() ) ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_order_address_change_not_allowed',
-				esc_html__( 'Sorry, the address on this order cannot be changed here because it would change the tax charged. Please contact us to update it.', 'woocommerce' ),
+				esc_html__( 'Sorry, the address on this order cannot be changed because the tax was calculated for the original address. Please use the original address, or contact us to have the order updated.', 'woocommerce' ),
 				400
 			);
 		}
@@ -321,7 +323,15 @@ class CheckoutOrder extends AbstractCartRoute {
 	 */
 	private function pricing_fields_differ( array $fields, array $priced, array $updated ): bool {
 		foreach ( $fields as $field ) {
-			if ( $this->normalize_pricing_address_field( $field, $priced ) !== $this->normalize_pricing_address_field( $field, $updated ) ) {
+			$priced_value = $this->normalize_pricing_address_field( $field, $priced );
+
+			if ( $priced_value !== $this->normalize_pricing_address_field( $field, $updated ) ) {
+				return true;
+			}
+
+			// State is the one field normalized past what the lookups do, so an order holding a state name was
+			// priced against a value that matched no rate. Its code would compare equal and hide the re-price.
+			if ( 'state' === $field && strtoupper( trim( (string) ( $priced[ $field ] ?? '' ) ) ) !== $priced_value ) {
 				return true;
 			}
 		}
@@ -343,7 +353,8 @@ class CheckoutOrder extends AbstractCartRoute {
 			return wc_normalize_postcode( $value );
 		}
 
-		// A state reaches the order as a name or a code depending on how it was created; both lookups key on the code.
+		// A state reaches the order as a name or a code depending on how it was created; the code is the form
+		// a rate is registered under, so compare on it and let pricing_fields_differ() handle a stored name.
 		if ( 'state' === $field ) {
 			$value = ( new ValidationUtils() )->format_state( $value, (string) ( $address['country'] ?? '' ) );
 		}
