@@ -129,16 +129,34 @@ class ProductFilters extends \WP_UnitTestCase {
 		$output          = render_block( $parsed );
 		$has_overlay     = 'off' !== $expected_mode;
 
-		$this->assertSame( 1, substr_count( $output, 'data-product-filters-test' ) );
-		$has_overlay ? $this->assertStringContainsString( '__overlay-dialog', $output ) : $this->assertStringNotContainsString( '__overlay-dialog', $output );
-		$has_overlay ? $this->assertStringNotContainsString( 'is-filter-drawer-disabled', $output ) : $this->assertStringContainsString( 'is-filter-drawer-disabled', $output );
-		'mobile' === $expected_mode ? $this->assertStringContainsString( 'is-mobile-overlay', $output ) : $this->assertStringNotContainsString( 'is-mobile-overlay', $output );
-		'tablet' === $expected_mode ? $this->assertStringContainsString( 'is-tablet-overlay', $output ) : $this->assertStringNotContainsString( 'is-tablet-overlay', $output );
-		$this->assertStringNotContainsString( 'is-responsive-overlay', $output );
-		$this->assertStringNotContainsString( 'has-desktop-overlay', $output );
-		$right ? $this->assertStringContainsString( 'is-overlay-right', $output ) : $this->assertStringNotContainsString( 'is-overlay-right', $output );
+		$this->assertSame( 1, substr_count( $output, 'data-product-filters-test' ), 'Inner blocks should render exactly once.' );
 		if ( $has_overlay ) {
-			$this->assertStringContainsString( 'overlay-wrapper" data-wp-on--click="actions.closeOverlayOnBackdrop"', $output );
+			$this->assertStringContainsString( '__overlay-dialog', $output, 'Overlay modes should render the overlay dialog.' );
+			$this->assertStringNotContainsString( 'is-filter-drawer-disabled', $output, 'Overlay modes should not render the disabled class.' );
+			$this->assertStringContainsString( 'overlay-wrapper" data-wp-on--click="actions.closeOverlayOnBackdrop"', $output, 'Overlay modes should retain backdrop closing behavior.' );
+		} else {
+			$this->assertStringNotContainsString( '__overlay-dialog', $output, 'Off mode should not render the overlay dialog.' );
+			$this->assertStringContainsString( 'is-filter-drawer-disabled', $output, 'Off mode should render the disabled class.' );
+		}
+
+		if ( 'mobile' === $expected_mode ) {
+			$this->assertStringContainsString( 'is-mobile-overlay', $output, 'Mobile mode should render its runtime marker.' );
+		} else {
+			$this->assertStringNotContainsString( 'is-mobile-overlay', $output, 'Non-mobile modes should not render the mobile marker.' );
+		}
+
+		if ( 'tablet' === $expected_mode ) {
+			$this->assertStringContainsString( 'is-tablet-overlay', $output, 'Tablet mode should render its runtime marker.' );
+		} else {
+			$this->assertStringNotContainsString( 'is-tablet-overlay', $output, 'Non-tablet modes should not render the tablet marker.' );
+		}
+
+		$this->assertStringNotContainsString( 'is-responsive-overlay', $output, 'Deprecated responsive marker should not be rendered.' );
+		$this->assertStringNotContainsString( 'has-desktop-overlay', $output, 'Deprecated desktop marker should not be rendered.' );
+		if ( $right ) {
+			$this->assertStringContainsString( 'is-overlay-right', $output, 'Right position should render its runtime marker.' );
+		} else {
+			$this->assertStringNotContainsString( 'is-overlay-right', $output, 'Left position should not render the right marker.' );
 		}
 	}
 
@@ -193,10 +211,10 @@ class ProductFilters extends \WP_UnitTestCase {
 		$styles = (string) $this->responsive_styles_method->invoke( $this->product_filters, $viewport_media_queries );
 
 		foreach ( $expected as $fragment ) {
-			$this->assertStringContainsString( $fragment, $styles );
+			$this->assertStringContainsString( $fragment, $styles, "Responsive CSS should contain: {$fragment}" );
 		}
 		foreach ( $unexpected as $fragment ) {
-			$this->assertStringNotContainsString( $fragment, $styles );
+			$this->assertStringNotContainsString( $fragment, $styles, "Responsive CSS should not contain: {$fragment}" );
 		}
 	}
 
