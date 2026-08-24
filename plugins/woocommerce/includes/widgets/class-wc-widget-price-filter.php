@@ -9,6 +9,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -80,7 +81,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		}
 
 		// If there are not posts and we're not filtering, hide the widget.
-		if ( ! WC()->query->get_main_query()->post_count && ! isset( $_GET['min_price'] ) && ! isset( $_GET['max_price'] ) ) { // WPCS: input var ok, CSRF ok.
+		if ( ! WC()->query->get_main_query()->post_count && ! isset( $_GET['min_price'] ) && ! isset( $_GET['max_price'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public read-only filter; values are unslashed and converted to numbers.
 			return;
 		}
 
@@ -97,7 +98,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		// Check to see if we should add taxes to the prices if store are excl tax but display incl.
 		$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
 
-		if ( wc_tax_enabled() && ! wc_prices_include_tax() && 'incl' === $tax_display_mode ) {
+		if ( wc_tax_enabled() && ! wc_prices_include_tax() && TaxDisplayMode::INCLUSIVE === $tax_display_mode ) {
 			$tax_class = apply_filters( 'woocommerce_price_filter_widget_tax_class', '' ); // Uses standard tax class.
 			$tax_rates = WC_Tax::get_rates( $tax_class );
 
@@ -115,8 +116,8 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			return;
 		}
 
-		$current_min_price = isset( $_GET['min_price'] ) ? floor( floatval( wp_unslash( $_GET['min_price'] ) ) / $step ) * $step : $min_price; // WPCS: input var ok, CSRF ok.
-		$current_max_price = isset( $_GET['max_price'] ) ? ceil( floatval( wp_unslash( $_GET['max_price'] ) ) / $step ) * $step : $max_price; // WPCS: input var ok, CSRF ok.
+		$current_min_price = isset( $_GET['min_price'] ) ? floor( floatval( wp_unslash( $_GET['min_price'] ) ) / $step ) * $step : $min_price; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public read-only filter; values are unslashed and converted to numbers.
+		$current_max_price = isset( $_GET['max_price'] ) ? ceil( floatval( wp_unslash( $_GET['max_price'] ) ) / $step ) * $step : $max_price; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public read-only filter; values are unslashed and converted to numbers.
 
 		$this->widget_start( $args, $instance );
 

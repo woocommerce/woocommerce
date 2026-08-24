@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent REST order updates from failing when a line item's variation is deleted mid-update and the posted product resolves to the parent product.

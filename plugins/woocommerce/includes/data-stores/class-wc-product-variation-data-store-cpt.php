@@ -345,12 +345,21 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	/**
 	 * Make sure we store the product version (to track data changes).
 	 *
-	 * @param WC_Product $product Product object.
+	 * @since 11.2.0 Skips wp_set_object_terms() when the product type is unchanged to avoid unnecessary term cache invalidation.
 	 * @since 3.0.0
+	 *
+	 * @param WC_Product $product Product object.
+	 * @return void
 	 */
 	protected function update_version_and_type( &$product ) {
-		wp_set_object_terms( $product->get_id(), '', 'product_type' );
-		update_post_meta( $product->get_id(), '_product_version', Constants::get_constant( 'WC_VERSION' ) );
+		$product_id = $product->get_id();
+		// Skip wp_set_object_terms() when the type is unchanged — it always clears the term cache even on no-op writes.
+		$stored_type_terms = get_the_terms( $product_id, 'product_type' );
+		if ( ! empty( $stored_type_terms ) ) {
+			wp_set_object_terms( $product_id, '', 'product_type' );
+		}
+
+		update_post_meta( $product_id, '_product_version', Constants::get_constant( 'WC_VERSION' ) );
 	}
 
 	/**
@@ -645,15 +654,20 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	protected function update_guid( $product ) {
 		global $wpdb;
 
-		$guid = home_url(
+		$product_id = $product->get_id();
+		$guid       = home_url(
 			add_query_arg(
 				array(
 					'post_type' => 'product_variation',
-					'p'         => $product->get_id(),
+					'p'         => $product_id,
 				),
 				''
 			)
 		);
-		$wpdb->update( $wpdb->posts, array( 'guid' => $guid ), array( 'ID' => $product->get_id() ) );
+
+		$updated = (bool) $wpdb->update( $wpdb->posts, array( 'guid' => $guid ), array( 'ID' => $product_id ) );
+		if ( $updated ) {
+			clean_post_cache( $product_id );
+		}
 	}
 }

@@ -529,7 +529,6 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		);
 		$this->assertEquals( $expected, $result );
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'deactivated_plugin', 'the_plugin' );
 		$this->fake_plugin_util->set_active_plugins( array( 'the_plugin_2', 'the_plugin_3', 'the_plugin_4' ) );
 
@@ -984,11 +983,9 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		);
 		$this->assertEquals( $expected, $result );
 
-		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'deactivated_plugin', 'the_plugin_2' );
 		do_action( 'deactivated_plugin', 'the_plugin_4' );
 		do_action( 'deactivated_plugin', 'the_plugin_6' );
-		// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 		$this->fake_plugin_util->set_active_plugins( array( 'the_plugin', 'the_plugin_3', 'the_plugin_5' ) );
 		$result             = $this->sut->get_compatible_plugins_for_feature( 'mature1', $active_only );
@@ -1455,11 +1452,40 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		// Simulate deactivation: set flag (for mock callback) and trigger action (to unset compatibility).
 		$deactivated = true;
-		do_action( 'deactivated_plugin', 'plugin/plugin.php' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'deactivated_plugin', 'plugin/plugin.php' );
 
 		// Check after: compatibility unset, so moves to 'uncertain' (still in aware list when ! active_only).
 		$compat_after = $this->sut->get_compatible_plugins_for_feature( 'mature1' );
 		$this->assertNotContains( 'plugin/plugin.php', $compat_after['compatible'] );
 		$this->assertContains( 'plugin/plugin.php', $compat_after['uncertain'] );
+	}
+
+	/**
+	 * @testdox The point_of_sale feature is always enabled regardless of the stored option value.
+	 */
+	public function test_point_of_sale_feature_is_always_enabled(): void {
+		remove_action( 'woocommerce_register_feature_definitions', array( $this, 'register_dummy_features' ), 11 );
+
+		$sut = new FeaturesController();
+		$sut->init( wc_get_container()->get( LegacyProxy::class ), $this->fake_plugin_util );
+
+		update_option( 'woocommerce_feature_point_of_sale_enabled', 'no' );
+		$this->assertTrue( $sut->feature_is_enabled( 'point_of_sale' ), 'point_of_sale should be enabled even when the stored option is no' );
+
+		delete_option( 'woocommerce_feature_point_of_sale_enabled' );
+		$this->assertTrue( $sut->feature_is_enabled( 'point_of_sale' ), 'point_of_sale should be enabled when the stored option is absent' );
+	}
+
+	/**
+	 * @testdox The point_of_sale feature flag setting is exposed in the REST API advanced settings group for mobile app compatibility.
+	 */
+	public function test_point_of_sale_setting_is_added_for_rest_api(): void {
+		$settings = $this->sut->add_point_of_sale_setting_for_rest_api( array() );
+
+		$this->assertCount( 1, $settings );
+		$this->assertSame( 'woocommerce_feature_point_of_sale_enabled', $settings[0]['id'] );
+		$this->assertSame( 'woocommerce_feature_point_of_sale_enabled', $settings[0]['option_key'] );
+		$this->assertSame( 'checkbox', $settings[0]['type'] );
+		$this->assertSame( 'yes', $settings[0]['default'], 'The setting should default to yes so unset options read as enabled' );
 	}
 }

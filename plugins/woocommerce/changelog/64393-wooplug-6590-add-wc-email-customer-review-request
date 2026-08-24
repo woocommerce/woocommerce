@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add a new "Review request" transactional email that invites customers to review the products they purchased. Disabled by default and configurable under WooCommerce → Settings → Emails.

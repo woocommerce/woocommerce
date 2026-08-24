@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use Automattic\WooCommerce\Admin\Overrides\Order as OverridesOrder;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
@@ -83,6 +84,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'city'             => 'city',
 			'state'            => 'state',
 			'postcode'         => 'postcode',
+			'billing_phone'    => 'billing_phone',
+			'shipping_phone'   => 'shipping_phone',
 			'date_registered'  => 'date_registered',
 			// Use single quotes for string literals to ensure compatibility with sql_mode=ANSI_QUOTES.
 			'date_last_active' => "IF( date_last_active <= '0000-00-00 00:00:00', NULL, date_last_active ) AS date_last_active",
@@ -191,7 +194,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return -1;
 		}
 
-		$order       = wc_get_order( $post_id );
+		$order = wc_get_order( $post_id );
+		if ( ! $order instanceof \WC_Order ) {
+			return -1;
+		}
 		$customer_id = self::get_existing_customer_id_from_order( $order );
 		if ( false === $customer_id ) {
 			return -1;
@@ -652,7 +658,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Get or create a customer from a given order.
 	 *
-	 * @param object $order WC Order.
+	 * A plain WC_Order will be converted to an Overrides\Order internally
+	 * to ensure consistent name resolution (user meta → billing → shipping fallback).
+	 *
+	 * @param \WC_Order $order WC Order.
 	 * @return int|bool
 	 */
 	public static function get_or_create_customer_from_order( $order ) {
@@ -664,6 +673,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		if ( ! is_a( $order, 'WC_Order' ) ) {
 			return false;
+		}
+
+		if ( ! $order instanceof OverridesOrder ) {
+			if ( ! $order->get_id() ) {
+				return false;
+			}
+			$order = new OverridesOrder( $order->get_id() );
 		}
 
 		$returning_customer_id = self::get_existing_customer_id_from_order( $order );
@@ -691,11 +707,29 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Returns a data object and format object of the customers data coming from the order.
 	 *
-	 * @param object      $order         WC_Order where we get customer info from.
-	 * @param object|null $customer_user WC_Customer registered customer WP user.
+	 * A plain WC_Order will be converted to an Overrides\Order internally
+	 * to ensure consistent name resolution (user meta → billing → shipping fallback).
+	 *
+	 * @param \WC_Order         $order         WC_Order where we get customer info from.
+	 * @param \WC_Customer|null $customer_user WC_Customer registered customer WP user.
 	 * @return array ($data, $format)
 	 */
 	public static function get_customer_order_data_and_format( $order, $customer_user = null ) {
+		if ( ! is_a( $order, 'WC_Order' ) ) {
+			return array( array(), array() );
+		}
+
+		if ( ! $order instanceof OverridesOrder ) {
+			if ( ! $order->get_id() ) {
+				return array( array(), array() );
+			}
+			$order = new OverridesOrder( $order->get_id() );
+		}
+
+		$date_created = $order->get_date_created( 'edit' )
+			?? $order->get_date_modified( 'edit' )
+			?? $order->get_date_paid( 'edit' );
+
 		$data   = array(
 			'first_name'       => $order->get_customer_first_name(),
 			'last_name'        => $order->get_customer_last_name(),
@@ -704,9 +738,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'state'            => $order->get_billing_state( 'edit' ),
 			'postcode'         => $order->get_billing_postcode( 'edit' ),
 			'country'          => $order->get_billing_country( 'edit' ),
-			'date_last_active' => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+			'billing_phone'    => $order->get_billing_phone( 'edit' ),
+			'shipping_phone'   => $order->get_shipping_phone( 'edit' ),
+			'date_last_active' => $date_created ? gmdate( 'Y-m-d H:i:s', $date_created->getTimestamp() ) : null,
 		);
 		$format = array(
+			'%s',
+			'%s',
 			'%s',
 			'%s',
 			'%s',
@@ -835,6 +873,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Retrieve the oldest orders made by a customer.
 	 *
+	 * Refunds share the customer of the order they refund, but they are not orders of that
+	 * customer and must not be returned here. They are the only rows written with a NULL
+	 * returning_customer, and they always carry the ID of the refunded order in parent_id;
+	 * both are required so that an order given a parent through set_parent_id() keeps
+	 * counting as one of the customer's orders.
+	 *
 	 * @param int $customer_id Customer ID.
 	 * @return array Orders.
 	 */
@@ -844,14 +888,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$excluded_statuses           = array_map( array( __CLASS__, 'normalize_order_status' ), self::get_excluded_report_order_statuses() );
 		$excluded_statuses_condition = '';
 		if ( ! empty( $excluded_statuses ) ) {
-			$excluded_statuses_str       = implode( "','", $excluded_statuses );
+			$excluded_statuses_str       = implode( "','", array_map( 'esc_sql', $excluded_statuses ) );
 			$excluded_statuses_condition = "AND status NOT IN ('{$excluded_statuses_str}')";
 		}
 
 		return $wpdb->get_results(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				"SELECT order_id, date_created FROM {$orders_table} WHERE customer_id = %d {$excluded_statuses_condition} ORDER BY date_created, order_id ASC LIMIT 2",
+				"SELECT order_id, date_created FROM {$orders_table} WHERE customer_id = %d AND ( parent_id = 0 OR returning_customer IS NOT NULL ) {$excluded_statuses_condition} ORDER BY date_created, order_id ASC LIMIT 2",
 				$customer_id
 			)
 		);
@@ -921,11 +965,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'state'            => $customer->get_billing_state( 'edit' ),
 			'postcode'         => $customer->get_billing_postcode( 'edit' ),
 			'country'          => $customer->get_billing_country( 'edit' ),
+			'billing_phone'    => $customer->get_billing_phone( 'edit' ),
+			'shipping_phone'   => $customer->get_shipping_phone( 'edit' ),
 			'date_registered'  => $customer->get_date_created( 'edit' ) ? $customer->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format ) : null,
 			'date_last_active' => $last_active ? gmdate( 'Y-m-d H:i:s', $last_active ) : null,
 		);
 		$format      = array(
 			'%d',
+			'%s',
 			'%s',
 			'%s',
 			'%s',
@@ -1088,7 +1135,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 						country = '',
 						postcode = %s,
 						city = %s,
-						state = %s
+						state = %s,
+						billing_phone = %s,
+						shipping_phone = %s
 					WHERE
 						customer_id = %d",
 				array(
@@ -1096,6 +1145,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					$deleted_text,
 					$deleted_text,
 					'deleted@site.invalid',
+					$deleted_text,
+					$deleted_text,
 					$deleted_text,
 					$deleted_text,
 					$deleted_text,

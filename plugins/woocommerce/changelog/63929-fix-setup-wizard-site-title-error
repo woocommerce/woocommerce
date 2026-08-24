@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix setup wizard TypeError on first site load by reading site title from wcSettings instead of core-data entity record.

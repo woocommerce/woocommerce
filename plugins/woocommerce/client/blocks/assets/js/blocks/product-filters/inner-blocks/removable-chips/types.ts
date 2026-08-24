@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { BlockEditProps } from '@wordpress/blocks';
-
-/**
- * Internal dependencies
- */
-import { FilterBlockContext } from '../../types';
+import type { RemovableItemsBlockContext } from '@woocommerce/types';
 
 export type Color = {
 	slug?: string;
@@ -30,7 +26,7 @@ export type BlockAttributes = {
 
 export type EditProps = BlockEditProps< BlockAttributes > & {
 	style: Record< string, string >;
-	context: FilterBlockContext;
+	context: RemovableItemsBlockContext;
 	chipText: Color;
 	setChipText: ( value: string ) => void;
 	chipBackground: Color;

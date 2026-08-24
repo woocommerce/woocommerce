@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Reverts PR #67056 before release because its equal-height Product Collection layout causes the dynamic View cart link to shift product content.

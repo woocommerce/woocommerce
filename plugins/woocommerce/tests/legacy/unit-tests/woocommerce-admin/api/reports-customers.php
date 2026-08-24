@@ -13,9 +13,6 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 
 /**
  * Reports Customers REST API Test Class
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
- * @group run-in-separate-process
  * @package WooCommerce\Admin\Tests\API
  * @since 3.5.0
  */
@@ -82,10 +79,13 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'last_name', $schema );
 		$this->assertArrayHasKey( 'email', $schema );
 		$this->assertArrayHasKey( 'username', $schema );
+		$this->assertArrayHasKey( 'role', $schema );
 		$this->assertArrayHasKey( 'country', $schema );
 		$this->assertArrayHasKey( 'city', $schema );
 		$this->assertArrayHasKey( 'state', $schema );
 		$this->assertArrayHasKey( 'postcode', $schema );
+		$this->assertArrayHasKey( 'billing_phone', $schema );
+		$this->assertArrayHasKey( 'shipping_phone', $schema );
 		$this->assertArrayHasKey( 'date_registered', $schema );
 		$this->assertArrayHasKey( 'date_registered_gmt', $schema );
 		$this->assertArrayHasKey( 'date_last_active', $schema );
@@ -108,7 +108,7 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertCount( 18, $properties );
+		$this->assertCount( 21, $properties );
 		$this->assert_report_item_schema( $properties );
 	}
 
@@ -205,6 +205,104 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should include localized user roles in the response and an empty role for guests.
+	 */
+	public function test_customer_role_in_response() {
+		wp_set_current_user( $this->user );
+
+		$customer = WC_Helper_Customer::create_customer( 'rolecustomer', 'password', 'role-customer@example.com' );
+
+		$editor_id = wp_insert_user(
+			array(
+				'user_login' => 'roleeditor',
+				'user_pass'  => 'password',
+				'user_email' => 'role-editor@example.com',
+				'role'       => 'editor',
+			)
+		);
+		$editor    = new WP_User( $editor_id );
+		$editor->add_role( 'shop_manager' );
+
+		// Editors are not synced as registered customers, so they enter the report via an order.
+		$editor_order = WC_Helper_Order::create_order( $editor_id );
+
+		// Order with guest customer (no account).
+		$guest_order = WC_Helper_Order::create_order( 0 );
+		$guest_order->set_billing_email( 'role-guest@example.com' );
+		$guest_order->save();
+
+		// Sync the lookup table directly to keep the test independent of the queue.
+		$this->assertNotFalse( CustomersDataStore::update_registered_customer( $customer->get_id() ) );
+		$this->assertGreaterThan( 0, CustomersDataStore::get_or_create_customer_from_order( $editor_order ) );
+		$this->assertGreaterThan( 0, CustomersDataStore::get_or_create_customer_from_order( $guest_order ) );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params( array( 'per_page' => 10 ) );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 3, $reports );
+
+		$roles_by_user_id = array();
+		foreach ( $reports as $report ) {
+			$roles_by_user_id[ (int) $report['user_id'] ] = $report['role'];
+		}
+
+		$this->assertEquals( 'Customer', $roles_by_user_id[ $customer->get_id() ], 'Registered customers should report their role' );
+		$this->assertEquals( 'Editor, Shop manager', $roles_by_user_id[ $editor_id ], 'Users with multiple roles should report all of them' );
+		$this->assertSame( '', $roles_by_user_id[0], 'Guest customers should report an empty role' );
+
+		$controller     = new \Automattic\WooCommerce\Admin\API\Reports\Customers\Controller();
+		$export_columns = $controller->get_export_columns();
+		$this->assertArrayHasKey( 'role', $export_columns, 'CSV export should include a role column' );
+		$this->assertEquals( 'Role', $export_columns['role'] );
+
+		$export_roles_by_user_id = array();
+		foreach ( $reports as $report ) {
+			$export_item = $controller->prepare_item_for_export( $report );
+			$export_roles_by_user_id[ (int) $report['user_id'] ] = $export_item['role'];
+			$this->assertSame( 'role', array_key_last( $export_item ), 'Role must stay the last column in prepared export rows, matching the header order' );
+		}
+
+		$this->assertEquals( 'Editor, Shop manager', $export_roles_by_user_id[ $editor_id ], 'CSV export should carry the role value' );
+		$this->assertSame( '', $export_roles_by_user_id[0], 'CSV export should leave the role empty for guests' );
+	}
+
+	/**
+	 * The same Download button exports single-page reports in the browser from the
+	 * table column order and larger ones from here, so the two must not drift.
+	 *
+	 * @testdox Should keep the CSV export column order in sync with the report table.
+	 */
+	public function test_export_column_order_matches_report_table() {
+		// Mirrors getHeadersContent() in
+		// client/admin/client/analytics/report/customers/table.js. Keys differ
+		// between the two, the order must not.
+		$expected_order = array(
+			'name',
+			'username',
+			'last_active',
+			'registered',
+			'email',
+			'orders_count',
+			'total_spend',
+			'avg_order_value',
+			'country',
+			'city',
+			'region',
+			'postcode',
+			'billing_phone',
+			'shipping_phone',
+			'role',
+		);
+
+		$controller = new \Automattic\WooCommerce\Admin\API\Reports\Customers\Controller();
+
+		$this->assertSame( $expected_order, array_keys( $controller->get_export_columns() ), 'New CSV columns must be appended, and table.js must be updated to match' );
+	}
+
+	/**
 	 * Test getting reports.
 	 *
 	 * @since 3.5.0
@@ -213,7 +311,11 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		global $wpdb;
 
 		wp_set_current_user( $this->user );
+		$stale_customer = WC_Helper_Customer::create_customer( 'stale_report_customer', 'password', 'stale-report@example.com' );
+		$this->assertNotFalse( CustomersDataStore::update_registered_customer( $stale_customer->get_id() ) );
+		$this->assertNotFalse( CustomersDataStore::get_customer_id_by_user_id( $stale_customer->get_id() ) );
 		WC_Helper_Reports::reset_stats_dbs();
+		$this->assertFalse( CustomersDataStore::get_customer_id_by_user_id( $stale_customer->get_id() ) );
 
 		$test_customers = array();
 
@@ -656,6 +758,8 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$order->set_billing_city( 'Random' );
 		$order->set_billing_state( 'FL' );
 		$order->set_billing_postcode( '54321' );
+		$order->set_billing_phone( '555-32123' );
+		$order->set_shipping_phone( '555-99887' );
 		$order->save();
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
@@ -674,6 +778,115 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertTrue( 'Random' === $reports[0]['city'] );
 		$this->assertTrue( 'FL' === $reports[0]['state'] );
 		$this->assertTrue( '54321' === $reports[0]['postcode'] );
+		$this->assertTrue( '555-32123' === $reports[0]['billing_phone'] );
+		$this->assertTrue( '555-99887' === $reports[0]['shipping_phone'] );
+	}
+
+	/**
+	 * @testdox Registered customer sync should populate billing and shipping phone from customer meta.
+	 */
+	public function test_update_registered_customer_syncs_phone_numbers() {
+		wp_set_current_user( $this->user );
+
+		$customer = WC_Helper_Customer::create_customer( 'phonecustomer', 'password', 'phone-customer@example.com' );
+		$customer->set_billing_phone( '555-11223' );
+		$customer->set_shipping_phone( '555-44556' );
+		$customer->save();
+
+		$this->assertNotFalse( CustomersDataStore::update_registered_customer( $customer->get_id() ) );
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'search'   => 'phonecustomer',
+				'searchby' => 'username',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports );
+		$this->assertEquals( '555-11223', $reports[0]['billing_phone'] );
+		$this->assertEquals( '555-44556', $reports[0]['shipping_phone'] );
+	}
+
+	/**
+	 * @testdox Removing order personal data should anonymize the customer's phone numbers in the lookup table.
+	 */
+	public function test_anonymize_customer_erases_phone_numbers() {
+		wp_set_current_user( $this->user );
+
+		$order = WC_Helper_Order::create_order( 0 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->set_total( 100 );
+		$order->set_billing_phone( '555-32123' );
+		$order->set_shipping_phone( '555-99887' );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		// Fire the personal-data eraser hook the analytics anonymizer is attached to.
+		do_action( 'woocommerce_privacy_remove_order_personal_data', $order );
+
+		$request  = new WP_REST_Request( 'GET', $this->endpoint );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports );
+		$this->assertEquals( '[deleted]', $reports[0]['billing_phone'] );
+		$this->assertEquals( '[deleted]', $reports[0]['shipping_phone'] );
+	}
+
+	/**
+	 * @testdox CSV export should carry the phone columns, and fall back to an empty string for rows cached before the columns existed.
+	 */
+	public function test_export_includes_phone_numbers() {
+		$controller = new \Automattic\WooCommerce\Admin\API\Reports\Customers\Controller();
+
+		$this->assertArrayHasKey( 'billing_phone', $controller->get_export_columns() );
+		$this->assertArrayHasKey( 'shipping_phone', $controller->get_export_columns() );
+
+		$item = array(
+			'name'             => 'Phone Customer',
+			'username'         => 'phonecustomer',
+			'date_last_active' => null,
+			'date_registered'  => null,
+			'email'            => 'phone-customer@example.com',
+			'orders_count'     => 0,
+			'total_spend'      => 0,
+			'avg_order_value'  => 0,
+			'country'          => 'US',
+			'city'             => 'Random',
+			'state'            => 'FL',
+			'postcode'         => '54321',
+		);
+
+		$with_phones = array_merge(
+			$item,
+			array(
+				'billing_phone'  => '555-32123',
+				'shipping_phone' => '555-99887',
+			)
+		);
+
+		$exported = $controller->prepare_item_for_export( $with_phones );
+		$this->assertEquals( '555-32123', $exported['billing_phone'] );
+		$this->assertEquals( '555-99887', $exported['shipping_phone'] );
+
+		// A row served from a report cache written before the columns existed has no phone keys at all.
+		$stale = $controller->prepare_item_for_export( $item );
+		$this->assertSame( '', $stale['billing_phone'] );
+		$this->assertSame( '', $stale['shipping_phone'] );
+
+		// The REST response must still carry the properties its schema declares.
+		$response = $controller->prepare_item_for_response( $item, new WP_REST_Request( 'GET', $this->endpoint ) );
+		$data     = $response->get_data();
+		$this->assertSame( '', $data['billing_phone'] );
+		$this->assertSame( '', $data['shipping_phone'] );
 	}
 
 	/**
@@ -779,6 +992,222 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'Random', $reports[ $second_customer_index ]['city'] );
 		$this->assertEquals( 'FL', $reports[ $second_customer_index ]['state'] );
 		$this->assertEquals( '54321', $reports[ $second_customer_index ]['postcode'] );
+	}
+
+	/**
+	 * Test that get_or_create_customer_from_order works with a plain WC_Order (not Overrides\Order).
+	 *
+	 * Bug condition: When a plain WC_Order is passed, get_customer_first_name() does not exist,
+	 * causing a fatal error. The fix should convert to Overrides\Order internally.
+	 *
+	 * Validates: Requirements 1.1, 1.2
+	 */
+	public function test_get_or_create_customer_from_plain_wc_order() {
+		// Remove the filter that converts WC_Order to Overrides\Order so we get a plain WC_Order.
+		remove_filter( 'woocommerce_order_class', array( \Automattic\WooCommerce\Admin\Overrides\Order::class, 'order_class_name' ), 10 );
+
+		$order = new \WC_Order();
+		$order->set_billing_first_name( 'Plain' );
+		$order->set_billing_last_name( 'Order' );
+		$order->set_billing_email( 'plain.order@example.com' );
+		$order->set_date_created( time() );
+		$order->save();
+
+		// Restore the filter.
+		add_filter( 'woocommerce_order_class', array( \Automattic\WooCommerce\Admin\Overrides\Order::class, 'order_class_name' ), 10, 3 );
+
+		$customer_id = CustomersDataStore::get_or_create_customer_from_order( $order );
+
+		$this->assertIsInt( $customer_id );
+		$this->assertGreaterThan( 0, $customer_id );
+
+		// Verify the converted order resolved billing names via Overrides\Order.
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'wc_customer_lookup';
+		$record     = $wpdb->get_row(
+			$wpdb->prepare( "SELECT * FROM {$table_name} WHERE customer_id = %d", $customer_id ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		);
+
+		$this->assertEquals( 'Plain', $record->first_name );
+		$this->assertEquals( 'Order', $record->last_name );
+		$this->assertEquals( 'plain.order@example.com', $record->email );
+		$this->assertNotNull( $record->date_last_active );
+	}
+
+	/**
+	 * Test that get_or_create_customer_from_order returns false for unsaved orders.
+	 *
+	 * Bug condition: An unsaved order has get_id() === 0. Constructing
+	 * new OverridesOrder( 0 ) returns an empty order, which would write
+	 * a blank customer row.
+	 */
+	public function test_get_or_create_customer_from_unsaved_order() {
+		// Remove the filter that converts WC_Order to Overrides\Order so we get a plain WC_Order.
+		remove_filter( 'woocommerce_order_class', array( \Automattic\WooCommerce\Admin\Overrides\Order::class, 'order_class_name' ), 10 );
+
+		$order = new \WC_Order();
+		$order->set_billing_first_name( 'Unsaved' );
+		$order->set_billing_last_name( 'Order' );
+		$order->set_billing_email( 'unsaved@example.com' );
+		// Do NOT call save() — order has no ID yet.
+
+		$result = CustomersDataStore::get_or_create_customer_from_order( $order );
+
+		$this->assertFalse( $result );
+
+		// Restore the filter.
+		add_filter( 'woocommerce_order_class', array( \Automattic\WooCommerce\Admin\Overrides\Order::class, 'order_class_name' ), 10, 3 );
+	}
+
+	/**
+	 * Test that get_customer_order_data_and_format handles null date_created without fatal.
+	 *
+	 * Bug condition: When get_date_created('edit') returns null, calling ->getTimestamp() on null
+	 * causes a fatal error. The fix should handle null dates gracefully.
+	 *
+	 * Validates: Requirements 1.3
+	 */
+	public function test_get_customer_order_data_with_null_date_created() {
+		$order = new \Automattic\WooCommerce\Admin\Overrides\Order();
+		$order->set_billing_first_name( 'NullDate' );
+		$order->set_billing_last_name( 'Test' );
+		$order->set_billing_email( 'nulldate@example.com' );
+		$order->save();
+
+		// Force all date fields to null after save (simulates edge case / corrupted data).
+		// Since the order is already an OverridesOrder, the instanceof check passes
+		// and no re-instantiation from DB occurs.
+		$order->set_date_created( null );
+		$order->set_date_modified( null );
+
+		// This should not fatal — date_last_active should be null when all dates are null.
+		list( $data, $format ) = CustomersDataStore::get_customer_order_data_and_format( $order );
+
+		$this->assertNull( $data['date_last_active'] );
+	}
+
+	/**
+	 * Test that sync_order_customer handles a non-existent order ID without fatal.
+	 *
+	 * Bug condition: When wc_get_order() returns false for a non-existent order,
+	 * the code proceeds to call methods on false, causing a fatal error.
+	 * The fix should return -1 gracefully.
+	 *
+	 * Validates: Requirements 1.2
+	 */
+	public function test_sync_order_customer_with_nonexistent_order() {
+		// Use a very high order ID that doesn't exist.
+		$result = CustomersDataStore::sync_order_customer( 999999 );
+
+		$this->assertEquals( -1, $result );
+	}
+
+	/**
+	 * Test that get_or_create_customer_from_order preserves correct behavior with Overrides\Order.
+	 *
+	 * Preservation: Overrides\Order with billing name and valid date_created produces
+	 * a customer record with correct first_name, last_name, and date_last_active.
+	 *
+	 * Validates: Requirements 3.1, 3.2
+	 */
+	public function test_overrides_order_customer_creation_preserved() {
+		$order = new \Automattic\WooCommerce\Admin\Overrides\Order();
+		$order->set_billing_first_name( 'Preserved' );
+		$order->set_billing_last_name( 'Customer' );
+		$order->set_billing_email( 'preserved.customer@example.com' );
+		$order->set_date_created( time() );
+		$order->save();
+
+		$customer_id = CustomersDataStore::get_or_create_customer_from_order( $order );
+
+		// Returns an int customer ID.
+		$this->assertIsInt( $customer_id );
+		$this->assertGreaterThan( 0, $customer_id );
+
+		// Verify customer record has correct first_name/last_name (from billing since no user_id).
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'wc_customer_lookup';
+		$record     = $wpdb->get_row(
+			$wpdb->prepare( "SELECT * FROM {$table_name} WHERE customer_id = %d", $customer_id ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		);
+
+		$this->assertEquals( 'Preserved', $record->first_name );
+		$this->assertEquals( 'Customer', $record->last_name );
+
+		// date_last_active matches the order's date_created formatted as Y-m-d H:i:s.
+		$expected_date = gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() );
+		$this->assertEquals( $expected_date, $record->date_last_active );
+	}
+
+	/**
+	 * Test that get_or_create_customer_from_order preserves correct behavior with a registered user.
+	 *
+	 * Preservation: Overrides\Order with a registered user produces a customer record
+	 * with correct user_id and username from the WC_Customer.
+	 *
+	 * Validates: Requirements 3.3
+	 */
+	public function test_overrides_order_registered_user_preserved() {
+		// Create a WordPress user to associate with the order.
+		$user_id = wp_insert_user(
+			array(
+				'user_login' => 'preserveduser',
+				'user_pass'  => 'password',
+				'user_email' => 'preserveduser@example.com',
+				'first_name' => 'RegFirst',
+				'last_name'  => 'RegLast',
+				'role'       => 'customer',
+			)
+		);
+
+		$order = new \Automattic\WooCommerce\Admin\Overrides\Order();
+		$order->set_customer_id( $user_id );
+		$order->set_billing_first_name( 'BillingFirst' );
+		$order->set_billing_last_name( 'BillingLast' );
+		$order->set_billing_email( 'preserveduser@example.com' );
+		$order->set_date_created( time() );
+		$order->save();
+
+		$customer_id = CustomersDataStore::get_or_create_customer_from_order( $order );
+
+		// Returns an int customer ID.
+		$this->assertIsInt( $customer_id );
+		$this->assertGreaterThan( 0, $customer_id );
+
+		// Verify customer record has correct user_id and username from WC_Customer.
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'wc_customer_lookup';
+		$record     = $wpdb->get_row(
+			$wpdb->prepare( "SELECT * FROM {$table_name} WHERE customer_id = %d", $customer_id ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		);
+
+		$this->assertEquals( $user_id, (int) $record->user_id );
+		$this->assertEquals( 'preserveduser', $record->username );
+	}
+
+	/**
+	 * Test that calling get_or_create_customer_from_order twice for the same order
+	 * returns the same customer_id without creating a duplicate.
+	 *
+	 * Preservation: Existing customer record for same order returns existing customer_id.
+	 *
+	 * Validates: Requirements 3.4
+	 */
+	public function test_existing_customer_not_duplicated() {
+		$order = new \Automattic\WooCommerce\Admin\Overrides\Order();
+		$order->set_billing_first_name( 'NoDupe' );
+		$order->set_billing_last_name( 'Test' );
+		$order->set_billing_email( 'nodupe@example.com' );
+		$order->set_date_created( time() );
+		$order->save();
+
+		$customer_id_first  = CustomersDataStore::get_or_create_customer_from_order( $order );
+		$customer_id_second = CustomersDataStore::get_or_create_customer_from_order( $order );
+
+		// Both calls return the same customer_id (no duplicate created).
+		$this->assertIsInt( $customer_id_first );
+		$this->assertIsInt( $customer_id_second );
+		$this->assertEquals( $customer_id_first, $customer_id_second );
 	}
 
 	/**

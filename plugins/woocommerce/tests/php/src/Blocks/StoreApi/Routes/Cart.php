@@ -19,6 +19,86 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
  */
 class Cart extends ControllerTestCase {
 
+	/**
+	 * Product IDs shared by the class.
+	 *
+	 * @var int[]
+	 */
+	private static $product_ids = array();
+
+	/**
+	 * Coupon ID shared by the class.
+	 *
+	 * @var int
+	 */
+	private static $coupon_id;
+
+	/**
+	 * Cart instance removed to mimic a REST request, restored on teardown.
+	 *
+	 * @var \WC_Cart|null
+	 */
+	private $cart_backup = null;
+
+	/**
+	 * Create immutable catalog rows shared by all test methods.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		$fixtures = new FixtureData();
+		$products = self::create_class_fixture_products(
+			array(
+				array(
+					'name'          => 'Test Product 1',
+					'stock_status'  => ProductStockStatus::IN_STOCK,
+					'regular_price' => 10,
+					'weight'        => 10,
+				),
+				array(
+					'name'          => 'Test Product 2',
+					'stock_status'  => ProductStockStatus::IN_STOCK,
+					'regular_price' => 10,
+					'weight'        => 10,
+				),
+				array(
+					'name'          => 'Test Product 3',
+					'stock_status'  => ProductStockStatus::IN_STOCK,
+					'regular_price' => 10,
+					'weight'        => 10,
+				),
+				array(
+					'name'          => 'Test Product 4',
+					'stock_status'  => ProductStockStatus::IN_STOCK,
+					'regular_price' => 10,
+					'weight'        => 10,
+					'virtual'       => true,
+				),
+			),
+		);
+
+		$products[0]->set_cross_sell_ids( array( $products[2]->get_id() ) );
+		$products[0]->save();
+
+		self::$product_ids = array_map( fn( $product ) => $product->get_id(), $products );
+		self::$coupon_id   = $fixtures->get_coupon(
+			array(
+				'code'          => 'test_coupon',
+				'discount_type' => 'fixed_cart',
+				'amount'        => 1,
+			)
+		)->get_id();
+	}
+
+	/**
+	 * Delete class products through WooCommerce data stores.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		try {
+			self::delete_class_fixture_products( self::$product_ids );
+		} finally {
+			$coupon = new \WC_Coupon( self::$coupon_id );
+			$coupon->delete( true );
+		}
+	}
 
 	/**
 	 * Setup test product data. Called before every test.
@@ -29,56 +109,12 @@ class Cart extends ControllerTestCase {
 		$fixtures = new FixtureData();
 		$fixtures->shipping_add_flat_rate();
 
-		$this->products = array(
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 1',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 2',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 3',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 4',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-					'virtual'       => true,
-				)
-			),
-		);
-
-		// Add product #3 as a cross-sell for product #1.
-		$this->products[0]->set_cross_sell_ids( array( $this->products[2]->get_id() ) );
-		$this->products[0]->save();
-
-		$this->coupon = $fixtures->get_coupon(
-			array(
-				'code'          => 'test_coupon',
-				'discount_type' => 'fixed_cart',
-				'amount'        => 1,
-			)
-		);
+		$this->products = array_map( 'wc_get_product', self::$product_ids );
+		$this->coupon   = new \WC_Coupon( self::$coupon_id );
 
 		wc_empty_cart();
 		$this->reset_customer_state();
+		wc()->session->set( 'wc_notices', null );
 		$this->keys   = array();
 		$this->keys[] = wc()->cart->add_to_cart( $this->products[0]->get_id(), 2 );
 		$this->keys[] = wc()->cart->add_to_cart( $this->products[1]->get_id() );
@@ -95,16 +131,26 @@ class Cart extends ControllerTestCase {
 	 * Resets customer state and remove any existing data from previous tests.
 	 */
 	private function reset_customer_state() {
-		wc()->customer->set_billing_country( 'US' );
-		wc()->customer->set_shipping_country( 'US' );
-		wc()->customer->set_billing_state( '' );
-		wc()->customer->set_shipping_state( '' );
-		wc()->customer->set_billing_postcode( '' );
-		wc()->customer->set_shipping_postcode( '' );
-		wc()->customer->set_shipping_city( '' );
-		wc()->customer->set_billing_city( '' );
-		wc()->customer->set_shipping_address_1( '' );
+		wc()->customer->set_billing_first_name( '' );
+		wc()->customer->set_billing_last_name( '' );
+		wc()->customer->set_billing_company( '' );
 		wc()->customer->set_billing_address_1( '' );
+		wc()->customer->set_billing_address_2( '' );
+		wc()->customer->set_billing_city( '' );
+		wc()->customer->set_billing_state( '' );
+		wc()->customer->set_billing_postcode( '' );
+		wc()->customer->set_billing_country( 'US' );
+		wc()->customer->set_billing_email( '' );
+		wc()->customer->set_billing_phone( '' );
+		wc()->customer->set_shipping_first_name( '' );
+		wc()->customer->set_shipping_last_name( '' );
+		wc()->customer->set_shipping_company( '' );
+		wc()->customer->set_shipping_address_1( '' );
+		wc()->customer->set_shipping_address_2( '' );
+		wc()->customer->set_shipping_city( '' );
+		wc()->customer->set_shipping_state( '' );
+		wc()->customer->set_shipping_postcode( '' );
+		wc()->customer->set_shipping_country( 'US' );
 	}
 
 	/**
@@ -687,6 +733,46 @@ class Cart extends ControllerTestCase {
 
 			// Should return the default handler for non-Store API routes.
 			$this->assertSame( 'WC_Session_Handler', $result );
+		} finally {
+			// Restore globals.
+			$_SERVER = $old_server;
+		}
+	}
+
+	/**
+	 * Nested Cart-Token should be ignored in a batch request.
+	 */
+	public function test_batch_sub_request_cart_token_does_not_waive_nonce() {
+		$token = CartTokenUtils::get_cart_token( (string) wc()->session->get_customer_id() );
+
+		// Preserve globals.
+		$old_server = $_SERVER;
+
+		try {
+			$_SERVER['REQUEST_URI'] = '/' . rest_get_url_prefix() . '/wc/store/v1/batch';
+			unset( $_SERVER['HTTP_CART_TOKEN'] );
+
+			$request = new \WP_REST_Request( 'POST', '/wc/store/v1/batch' );
+			$request->set_header( 'Content-Type', 'application/json' );
+			$request->set_body(
+				wp_json_encode(
+					array(
+						'requests' => array(
+							array(
+								'method'  => 'POST',
+								'path'    => '/wc/store/v1/cart/update-customer',
+								'headers' => array( 'Cart-Token' => $token ),
+								'body'    => array( 'billing_address' => array( 'first_name' => 'Nonce-free' ) ),
+							),
+						),
+					)
+				)
+			);
+
+			$response = rest_get_server()->dispatch( $request );
+			$data     = $response->get_data();
+
+			$this->assertSame( 401, $data['responses'][0]['status'] ?? null, 'A sub-request token must not waive the nonce check.' );
 		} finally {
 			// Restore globals.
 			$_SERVER = $old_server;
@@ -1314,5 +1400,221 @@ class Cart extends ControllerTestCase {
 		$this->assertFalse( $action_fired, 'The update action should not fire when quantity is not set' );
 
 		remove_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback );
+	}
+
+	/**
+	 * @testdox Should fire internal_woocommerce_cart_item_updated_from_user_request with untruncated quantities on stores with decimal quantities.
+	 */
+	public function test_update_item_fires_update_action_with_float_quantity(): void {
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
+		add_filter( 'woocommerce_stock_amount', 'floatval' );
+		$multiple_of_callback = function () {
+			return 0.5;
+		};
+		add_filter( 'woocommerce_store_api_product_quantity_multiple_of', $multiple_of_callback );
+
+		wc()->cart->set_quantity( $this->keys[0], 1.5 );
+
+		$captured_args = array();
+		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		$callback = function ( $cart_item_key, $quantity, $old_quantity, $cart ) use ( &$captured_args ) {
+			$captured_args = compact( 'cart_item_key', 'quantity', 'old_quantity', 'cart' );
+		};
+
+		add_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback, 10, 4 );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'key'      => $this->keys[0],
+				'quantity' => 2.5,
+			)
+		);
+
+		$this->assertAPIResponse( $request, 200 );
+
+		$this->assertNotEmpty( $captured_args, 'The update action should have been fired' );
+		$this->assertSame( 2.5, $captured_args['quantity'], 'The new quantity should not be truncated' );
+		$this->assertSame( 1.5, $captured_args['old_quantity'], 'The old quantity should not be truncated' );
+		$this->assertSame( 2.5, wc()->cart->get_cart_item( $this->keys[0] )['quantity'], 'The cart item quantity should be the untruncated value' );
+
+		remove_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback );
+		remove_filter( 'woocommerce_store_api_product_quantity_multiple_of', $multiple_of_callback );
+		remove_filter( 'woocommerce_stock_amount', 'floatval' );
+		add_filter( 'woocommerce_stock_amount', 'intval' );
+	}
+
+	/**
+	 * @testdox Should not fire internal_woocommerce_cart_item_updated_from_user_request when a decimal quantity is unchanged.
+	 */
+	public function test_update_item_with_same_float_quantity_does_not_fire_update_action(): void {
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
+		add_filter( 'woocommerce_stock_amount', 'floatval' );
+		$multiple_of_callback = function () {
+			return 0.5;
+		};
+		add_filter( 'woocommerce_store_api_product_quantity_multiple_of', $multiple_of_callback );
+
+		wc()->cart->set_quantity( $this->keys[0], 1.5 );
+
+		$action_fired = false;
+		$callback     = function () use ( &$action_fired ) {
+			$action_fired = true;
+		};
+
+		add_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'key'      => $this->keys[0],
+				'quantity' => 1.5,
+			)
+		);
+
+		$this->assertAPIResponse( $request, 200 );
+
+		$this->assertFalse( $action_fired, 'The update action should not fire when a decimal quantity is unchanged' );
+
+		remove_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback );
+		remove_filter( 'woocommerce_store_api_product_quantity_multiple_of', $multiple_of_callback );
+		remove_filter( 'woocommerce_stock_amount', 'floatval' );
+		add_filter( 'woocommerce_stock_amount', 'intval' );
+	}
+
+	/**
+	 * @testdox Should fire internal_woocommerce_cart_item_updated_from_user_request with numeric quantities when the cart contains a string quantity.
+	 */
+	public function test_update_item_fires_update_action_with_numeric_quantities_for_string_cart_quantity(): void {
+		$cart_contents                               = wc()->cart->get_cart_contents();
+		$cart_contents[ $this->keys[0] ]['quantity'] = '2';
+		wc()->cart->set_cart_contents( $cart_contents );
+
+		$captured_args = array();
+		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		$callback = function ( $cart_item_key, $quantity, $old_quantity, $cart ) use ( &$captured_args ) {
+			$captured_args = compact( 'cart_item_key', 'quantity', 'old_quantity', 'cart' );
+		};
+
+		add_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback, 10, 4 );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'key'      => $this->keys[0],
+				'quantity' => 3,
+			)
+		);
+
+		$this->assertAPIResponse( $request, 200 );
+
+		$this->assertNotEmpty( $captured_args, 'The update action should have been fired' );
+		$this->assertSame( 3, $captured_args['quantity'], 'The new quantity should be a numeric value' );
+		$this->assertSame( 2, $captured_args['old_quantity'], 'The old quantity should be normalized to a numeric value' );
+
+		remove_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback );
+	}
+
+	/**
+	 * @testdox Should fire internal_woocommerce_cart_item_added_from_user_request with a numeric quantity when a filter sets a string quantity.
+	 */
+	public function test_add_item_fires_add_action_with_numeric_quantity_for_string_quantity(): void {
+		wc_empty_cart();
+
+		$add_to_cart_data_callback = function ( $add_to_cart_data ) {
+			$add_to_cart_data['quantity'] = '2';
+			return $add_to_cart_data;
+		};
+		add_filter( 'woocommerce_store_api_add_to_cart_data', $add_to_cart_data_callback );
+
+		$captured_args = array();
+		$callback      = function ( $product_id, $quantity ) use ( &$captured_args ) {
+			$captured_args = array(
+				'product_id' => $product_id,
+				'quantity'   => $quantity,
+			);
+		};
+
+		add_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback, 10, 2 );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'id'       => $this->products[0]->get_id(),
+				'quantity' => 1,
+			)
+		);
+
+		$this->assertAPIResponse( $request, 201 );
+
+		$this->assertNotEmpty( $captured_args, 'The add action should have been fired' );
+		$this->assertSame( 2, $captured_args['quantity'], 'The quantity should be normalized to a numeric value' );
+
+		remove_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback );
+		remove_filter( 'woocommerce_store_api_add_to_cart_data', $add_to_cart_data_callback );
+	}
+
+	/**
+	 * @testdox Should return an error response when restoring the cart session throws.
+	 */
+	public function test_cart_session_failure_returns_error_response() {
+		wc()->session->set( 'cart', wc()->cart->get_cart_for_session() );
+
+		// The route restores the cart only when this action has not run yet, so reset
+		// the counter to put the process back into the state a REST request starts in.
+		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
+
+		add_filter(
+			'woocommerce_get_cart_item_from_session',
+			static function () {
+				throw new \RuntimeException( 'Synthetic Store API cart-session failure.' );
+			}
+		);
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
+
+		$this->assertSame( 500, $response->get_status(), 'A cart session failure should return a Store API error response.' );
+		$this->assertSame( 'woocommerce_rest_unknown_server_error', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Should return an error response when the cart session fails before it is restored.
+	 */
+	public function test_cart_session_failure_before_restore_returns_error_response() {
+		// This filter runs before `get_cart_from_session()` fires its action, so nothing
+		// stops the response headers attempting a second load of the failed cart.
+		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
+
+		// A REST request never runs `initialize_cart()`, so the route starts with no
+		// cart at all. The test bootstrap leaves one behind.
+		$this->cart_backup = WC()->cart;
+		WC()->cart         = null;
+
+		add_filter(
+			'woocommerce_session_handler',
+			static function () {
+				throw new \RuntimeException( 'Synthetic session handler failure.' );
+			}
+		);
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
+
+		$this->assertSame( 500, $response->get_status(), 'A cart session failure should return a Store API error response.' );
+	}
+
+	/**
+	 * Restore the cart instance removed by the cart session failure tests.
+	 */
+	public function tearDown(): void {
+		if ( $this->cart_backup instanceof \WC_Cart ) {
+			WC()->cart         = $this->cart_backup;
+			$this->cart_backup = null;
+		}
+
+		parent::tearDown();
 	}
 }

@@ -188,4 +188,33 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$this->product->set_manage_stock( 'no' );
 		$this->assertFalse( $this->product->backorders_require_notification() );
 	}
+
+	/**
+	 * Ensure set_global_unique_id() preserves the 'X' check digit in ISBN-10 identifiers.
+	 *
+	 * @testdox set_global_unique_id() preserves the X check digit in ISBN-10 values.
+	 */
+	public function test_set_global_unique_id_preserves_isbn10_x() {
+		$this->product->set_global_unique_id( '157249042X' );
+		$this->assertEquals( '157249042X', $this->product->get_global_unique_id() );
+
+		$this->product->set_global_unique_id( '125010856x' );
+		$this->assertEquals( '125010856x', $this->product->get_global_unique_id() );
+
+		// Characters other than digits, hyphens, and X/x are still stripped.
+		$this->product->set_global_unique_id( '978-3-16-148410-A' );
+		$this->assertEquals( '978-3-16-148410-', $this->product->get_global_unique_id() );
+	}
+
+	/**
+	 * Ensure set_global_unique_id() rejects values with X in non-final positions.
+	 *
+	 * Per ISO 2108, X is only valid as the ISBN-10 check digit (final character).
+	 *
+	 * @testdox set_global_unique_id() rejects X anywhere other than the final character.
+	 */
+	public function test_set_global_unique_id_rejects_x_mid_string() {
+		$this->expectException( WC_Data_Exception::class );
+		$this->product->set_global_unique_id( '15724X9042' );
+	}
 }

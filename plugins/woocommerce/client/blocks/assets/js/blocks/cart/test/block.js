@@ -11,8 +11,8 @@ import { registerCheckoutFilters } from '@woocommerce/blocks-checkout';
 /**
  * Internal dependencies
  */
-import { defaultCartState } from '../../../data/cart/default-state';
-import { allSettings } from '../../../settings/shared/settings-init';
+import { defaultCartState } from '@woocommerce/block-data/cart/default-state';
+import { allSettings } from '@woocommerce/settings';
 
 import Cart from '../block';
 
@@ -211,9 +211,9 @@ describe( 'Testing cart', () => {
 		render( <CartBlock /> );
 
 		await waitFor( () =>
-			expect( screen.getAllByRole( 'cell' )[ 1 ] ).toHaveTextContent(
-				'16€'
-			)
+			expect(
+				document.querySelector( '.wc-block-cart-item__total' )
+			).toHaveTextContent( '16€' )
 		);
 	} );
 

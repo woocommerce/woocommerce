@@ -202,4 +202,29 @@ class POSProductVisibilitySyncTest extends \WC_Unit_Test_Case {
 		$this->sut->set_product_pos_visibility( $product->get_id(), false );
 		remove_action( 'woocommerce_update_product_variation', array( $mock_callback, 'save' ) );
 	}
+
+	/**
+	 * @testdox Should report simple and variable products as supported for POS visibility.
+	 */
+	public function test_is_product_supported_returns_true_for_simple_and_variable_products(): void {
+		$simple   = WC_Helper_Product::create_simple_product();
+		$variable = WC_Helper_Product::create_variation_product();
+
+		$this->assertTrue( $this->sut->is_product_supported( $simple ), 'Simple products should be supported' );
+		$this->assertTrue( $this->sut->is_product_supported( $variable ), 'Variable products should be supported' );
+	}
+
+	/**
+	 * @testdox Should report downloadable, external and grouped products as not supported for POS visibility.
+	 */
+	public function test_is_product_supported_returns_false_for_unsupported_products(): void {
+		$downloadable = WC_Helper_Product::create_simple_product();
+		$downloadable->set_downloadable( true );
+		$external = WC_Helper_Product::create_external_product();
+		$grouped  = WC_Helper_Product::create_grouped_product();
+
+		$this->assertFalse( $this->sut->is_product_supported( $downloadable ), 'Downloadable products should not be supported' );
+		$this->assertFalse( $this->sut->is_product_supported( $external ), 'External products should not be supported' );
+		$this->assertFalse( $this->sut->is_product_supported( $grouped ), 'Grouped products should not be supported' );
+	}
 }

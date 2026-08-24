@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add X-Wc-From-Product-Editor HTTP header for REST requests made by the product editor.

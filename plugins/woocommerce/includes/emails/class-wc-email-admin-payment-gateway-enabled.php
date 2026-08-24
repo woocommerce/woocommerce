@@ -144,9 +144,7 @@ if ( ! class_exists( 'WC_Email_Admin_Payment_Gateway_Enabled', false ) ) :
 				$this->placeholders['{site_title}']    = $this->get_blogname();
 			}
 
-			if ( $this->is_enabled() && $this->get_recipient() ) {
-				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
-			}
+			$this->send_notification();
 
 			$this->restore_locale();
 		}

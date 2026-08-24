@@ -28,7 +28,8 @@ class Quote extends Abstract_Block_Renderer {
 	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		$dom_helper = new Dom_Document_Helper( $block_content );
 
-		// Extract citation if present.
+		// Extract citation if present, then remove it from the DOM so it isn't
+		// also rendered inline as part of the quote content below.
 		$citation_content = '';
 		$cite_element     = $dom_helper->find_element( 'cite' );
 		if ( $cite_element ) {
@@ -37,71 +38,27 @@ class Quote extends Abstract_Block_Renderer {
 				$parsed_block,
 				$rendering_context
 			);
+			if ( $cite_element->parentNode ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+				$cite_element->parentNode->removeChild( $cite_element ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+			}
 		}
+
+		// Strip the <blockquote> tag and keep its children. The visual quote indent
+		// comes from the email-block-quote table built in get_block_wrapper(); keeping
+		// the original blockquote would render a double-bordered quote-within-a-quote.
+		// Children have already been re-wrapped in <table>…<div class="email-block-layout">…</div>…</table>
+		// by the email editor's per-block render filter, so passing 'div' (the previous default)
+		// would only return the first child's inner HTML and drop the rest.
+		$blockquote_element = $dom_helper->find_element( 'blockquote' );
+		$quote_content      = $blockquote_element
+			? $dom_helper->get_element_inner_html( $blockquote_element )
+			: $block_content;
 
 		return str_replace(
 			array( '{quote_content}', '{citation_content}' ),
-			array( $this->get_quote_content( $block_content, $parsed_block, $rendering_context ), $citation_content ),
+			array( $quote_content, $citation_content ),
 			$this->get_block_wrapper( $block_content, $parsed_block, $rendering_context )
 		);
-	}
-
-	/**
-	 * Get quote content with direction-aware default border overrides.
-	 *
-	 * @param string            $block_content Block content.
-	 * @param array             $parsed_block Parsed block.
-	 * @param Rendering_Context $rendering_context Rendering context.
-	 * @return string
-	 */
-	private function get_quote_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
-		$quote_content = $this->get_inner_content( $block_content );
-
-		$original_classname = ( new Dom_Document_Helper( $block_content ) )->get_attribute_value_by_tag_name( 'blockquote', 'class' ) ?? '';
-		$block_attributes   = wp_parse_args(
-			$parsed_block['attrs'] ?? array(),
-			array(
-				'style'       => array(),
-				'borderColor' => '',
-			)
-		);
-
-		if ( ! $rendering_context->is_rtl() || $this->has_authored_border( $block_attributes ) ) {
-			return $quote_content;
-		}
-
-		$authored_alignment = $this->get_authored_alignment( $block_attributes, $original_classname );
-		if ( 'left' === $authored_alignment ) {
-			return $quote_content;
-		}
-
-		$processor = new \WP_HTML_Tag_Processor( $quote_content );
-		if ( ! $processor->next_tag( array( 'tag_name' => 'blockquote' ) ) ) {
-			return $quote_content;
-		}
-
-		$style  = $processor->get_attribute( 'style' );
-		$style  = is_string( $style ) ? rtrim( $style, ';' ) . ';' : '';
-		$style .= \WP_Style_Engine::compile_css(
-			'center' === $authored_alignment
-				? array(
-					'border-left-style'  => 'none',
-					'border-left-width'  => '0',
-					'border-right-style' => 'none',
-					'border-right-width' => '0',
-				)
-				: array(
-					'border-left-style'  => 'none',
-					'border-left-width'  => '0',
-					'border-right-color' => 'currentColor',
-					'border-right-style' => 'solid',
-					'border-right-width' => '1px',
-				),
-			''
-		);
-		$processor->set_attribute( 'style', $style );
-
-		return $processor->get_updated_html();
 	}
 
 	/**

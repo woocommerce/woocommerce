@@ -29,8 +29,9 @@ import { initialize } from './editor';
 export {
 	storeName,
 	createStore,
-	TemplatePreview,
-	EmailBuiltStyles,
+	type TemplatePreview,
+	type EmailBuiltStyles,
+	type RecentEmailsQuery,
 } from './store';
 
 /**

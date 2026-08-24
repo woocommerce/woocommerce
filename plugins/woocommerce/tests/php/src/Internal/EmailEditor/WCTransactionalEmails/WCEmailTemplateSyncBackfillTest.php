@@ -112,6 +112,32 @@ class WCEmailTemplateSyncBackfillTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should seed _wc_email_template_last_core_render meta with the current canonical render during backfill.
+	 */
+	public function test_backfill_seeds_last_core_render(): void {
+		$email_id = 'wc_test_backfill_last_core_render';
+		$email    = $this->register_fixture_email( $email_id );
+
+		$canonical = WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $email );
+
+		$post_id = $this->create_unstamped_post( $email_id, $canonical, true );
+
+		WCEmailTemplateSyncBackfill::run();
+
+		$stored_render = (string) get_post_meta(
+			$post_id,
+			WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY,
+			true
+		);
+
+		$this->assertSame(
+			$canonical,
+			$stored_render,
+			'Backfill must seed last_core_render with the current canonical render.'
+		);
+	}
+
+	/**
 	 * Case B: content diverges from canonical but the post has never been edited.
 	 * Expectation: post_content rewritten to canonical, status = in_sync.
 	 */

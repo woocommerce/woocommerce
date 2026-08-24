@@ -10,6 +10,7 @@ on:
       - 'release/*'
 
 env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
   GIT_COMMITTER_NAME: 'woocommercebot'
   GIT_COMMITTER_EMAIL: 'woocommercebot@users.noreply.github.com'
   GIT_AUTHOR_NAME: 'woocommercebot'
@@ -27,6 +28,7 @@ jobs:
        github.event.pull_request.merged == true && 
        github.event.label.name == 'cherry pick to frozen release')
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       pr_number: ${{ steps.set-vars.outputs.pr_number }}
       base_branch: ${{ steps.set-vars.outputs.base_branch }}
@@ -92,12 +94,13 @@ jobs:
   cherry-pick-to-trunk-check:
     needs: [prepare, cherry-pick]
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       add_cp_to_trunk_nag: ${{ steps.check.outputs.add_cp_to_trunk_nag }}
     steps:
       - name: Check frozen release conditions
         id: check
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
           BASE_BRANCH: ${{ needs.prepare.outputs.base_branch }}
         with:
@@ -119,12 +122,13 @@ jobs:
     needs: [prepare, cherry-pick, cherry-pick-to-trunk-check]
     if: ${{ always() && needs.cherry-pick.outputs.status == 'success' && needs.cherry-pick.outputs.cherry_pick_pr_number }}
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
 
       # We set the milestone of the new PR to the milestone of the source PR since they should all be merged in preperation for the same release.
       - name: Add milestone
         if: github.event.pull_request.milestone.number != null
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
@@ -137,7 +141,7 @@ jobs:
 
       - name: Comment on original PR about cherry-pick success
         if: always()
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
           CHERRY_PICK_PR_NUMBER: ${{ needs.cherry-pick.outputs.cherry_pick_pr_number }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -201,10 +205,11 @@ jobs:
   handle-skipped:
     needs: [prepare, cherry-pick, cherry-pick-to-trunk-check]
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     if: ${{ always() && needs.cherry-pick.outputs.status == 'skipped' }}
     steps:
       - name: Comment on original PR about skip
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
           ERROR_MESSAGE: ${{ needs.cherry-pick.outputs.error_message }}
         with:
@@ -223,11 +228,12 @@ jobs:
   handle-failures:
     needs: [prepare, cherry-pick, cherry-pick-to-trunk-check]
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     if: ${{ always() && needs.cherry-pick.outputs.status == 'failed' }}
     steps:
       - name: Add "cherry pick failed" label
         if: always()
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
@@ -240,7 +246,7 @@ jobs:
 
       - name: Comment on original PR
         if: always()
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
           ERROR_MESSAGE: ${{ needs.cherry-pick.outputs.error_message || 'Unknown error' }}
           GITHUB_RUN_ID: ${{ github.run_id }}

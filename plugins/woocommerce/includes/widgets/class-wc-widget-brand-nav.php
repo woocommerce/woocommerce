@@ -1,6 +1,8 @@
 <?php
 
-declare( strict_types = 1);
+declare( strict_types = 1 );
+
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
 
 /**
  * Layered Navigation Widget for brands WC 2.6 version
@@ -542,6 +544,7 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 			$counts                       = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
 			$cached_counts[ $query_hash ] = $counts;
 			if ( true === $cache ) {
+				$cached_counts = Filterer::limit_layered_nav_count_cache_entries( $cached_counts, $query_hash );
 				set_transient( 'wc_layered_nav_counts_' . sanitize_title( $taxonomy ), $cached_counts, HOUR_IN_SECONDS );
 			}
 		}

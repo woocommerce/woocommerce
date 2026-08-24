@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Reduced the frequency of wc_get_product and wc_get_order calls during checkout to improve performance.
