@@ -233,24 +233,24 @@ class WC_Admin_Permalink_Settings {
 			/*
 			 * Generate product base. The form only ever posts scalars for these two fields, but
 			 * nothing enforces that, and unguarded an array reaches trim() and
-			 * wc_sanitize_permalink(), which both expect a string. A non-scalar value in either
+			 * wc_sanitize_permalink(), which both expect a string. A non-string value in either
 			 * field resolves to the default product base.
 			 */
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized on the next line.
-			$posted_product_base = isset( $_POST['product_permalink'] ) && is_scalar( $_POST['product_permalink'] ) ? wp_unslash( $_POST['product_permalink'] ) : '';
-			$product_base        = sanitize_text_field( (string) $posted_product_base );
+			$posted_product_base = isset( $_POST['product_permalink'] ) && is_string( $_POST['product_permalink'] ) ? wp_unslash( $_POST['product_permalink'] ) : '';
+			$product_base        = sanitize_text_field( $posted_product_base );
 
 			// Resolved inside the wc_switch_to_site_locale() window opened above, so every branch
 			// below stores the same site-locale slug settings() compares against.
 			$default_product_base = _x( 'product', 'slug', 'woocommerce' );
 
 			if ( 'custom' === $product_base ) {
-				if ( isset( $_POST['product_permalink_structure'] ) && is_scalar( $_POST['product_permalink_structure'] ) ) {
+				if ( isset( $_POST['product_permalink_structure'] ) && is_string( $_POST['product_permalink_structure'] ) ) {
 					// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized by wc_sanitize_permalink() below.
-					$posted_structure = trim( (string) wp_unslash( $_POST['product_permalink_structure'] ) );
+					$posted_structure = trim( wp_unslash( $_POST['product_permalink_structure'] ) );
 					$product_base     = (string) preg_replace( '#/+#', '/', '/' . str_replace( '#', '', $posted_structure ) );
 				} else {
-					// A missing or non-scalar field: previously stored '/', which
+					// A missing or non-string field: previously stored '/', which
 					// wc_sanitize_permalink() collapsed to '', leaving the option for
 					// wc_get_permalink_structure() to refill in whatever locale the next request
 					// ran in. Resolve it to the default base here, deterministically.
