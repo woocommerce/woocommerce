@@ -4,6 +4,7 @@
 
 - [Code Clarity and Comments](#code-clarity-and-comments)
 - [WordPress Coding Standards](#wordpress-coding-standards)
+- [Enum Constants Instead of Magic Strings](#enum-constants-instead-of-magic-strings)
 - [Null Coalescing Operator](#null-coalescing-operator)
 - [Ternary Operator](#ternary-operator)
 - [call_user_func_array() Usage](#call_user_func_array-usage)
@@ -52,6 +53,33 @@ Follow [WordPress Coding Standards](https://developer.wordpress.org/coding-stand
 - **Spacing**: Spaces around operators, inside parentheses
 - **Braces**: Opening on same line, closing on new line
 - **Naming**: snake_case for functions and variables
+
+## Enum Constants Instead of Magic Strings
+
+Enumerated string vocabularies (order statuses, product types, stock statuses, settings option values...) have constants in `final` classes under `Automattic\WooCommerce\Enums` (`plugins/woocommerce/src/Enums/`, see its `README.md`). Reference the constant, not the raw string literal.
+
+**Good:**
+
+```php
+use Automattic\WooCommerce\Enums\OrderStatus;
+
+if ( OrderStatus::COMPLETED === $order->get_status() ) {
+```
+
+**Avoid:**
+
+```php
+if ( 'completed' === $order->get_status() ) {
+```
+
+Rules:
+
+- When a constant exists for a value, use it. Mind near-duplicate vocabularies: `OrderStatus` holds unprefixed values (`completed`), `OrderInternalStatus` the `wc-`-prefixed database variants (`wc-completed`).
+- New fixed sets of string values get a new class in `src/Enums/` (one `final` class per concept, `public const` with docblocks, no behavior), listed in `src/Enums/README.md`.
+- Never change, rename, or remove a constant or its value — the strings are a persisted, externally consumed contract and the constants are public API.
+- Exception: code that can run during install or upgrade (some REST controllers, report queries) may execute before the autoloader resolves `src/` classes; it keeps string literals to avoid fatals.
+
+See the "Enum-Style Constants" section in the repository root `AGENTS.md` for full context.
 
 ## Null Coalescing Operator
 
