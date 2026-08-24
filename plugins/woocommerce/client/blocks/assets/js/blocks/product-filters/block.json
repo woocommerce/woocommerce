@@ -47,7 +47,7 @@
 		"overlayOnDesktop": {
 			"type": "boolean"
 		},
-		"desktopOverlayPosition": {
+		"overlayPosition": {
 			"type": "string",
 			"enum": [ "left", "right" ]
 		}

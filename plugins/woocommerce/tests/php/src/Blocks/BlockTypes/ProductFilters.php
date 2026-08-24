@@ -110,7 +110,7 @@ class ProductFilters extends \WP_UnitTestCase {
 	 * @param array $attributes Block attributes.
 	 * @param bool  $mobile     Whether mobile overlay is expected.
 	 * @param bool  $desktop    Whether desktop overlay is expected.
-	 * @param bool  $right      Whether the desktop overlay is expected on the right.
+	 * @param bool  $right      Whether the overlay is expected on the right.
 	 */
 	public function test_overlay_attributes( array $attributes, bool $mobile, bool $desktop, bool $right ): void {
 		$parsed          = parse_blocks(
@@ -124,14 +124,14 @@ class ProductFilters extends \WP_UnitTestCase {
 		$has_overlay ? $this->assertStringContainsString( '__overlay-dialog', $output ) : $this->assertStringNotContainsString( '__overlay-dialog', $output );
 		$mobile ? $this->assertStringNotContainsString( 'is-filter-drawer-disabled', $output ) : $this->assertStringContainsString( 'is-filter-drawer-disabled', $output );
 		$desktop ? $this->assertStringContainsString( 'has-desktop-overlay', $output ) : $this->assertStringNotContainsString( 'has-desktop-overlay', $output );
-		$right ? $this->assertStringContainsString( 'is-desktop-overlay-right', $output ) : $this->assertStringNotContainsString( 'is-desktop-overlay-right', $output );
+		$right ? $this->assertStringContainsString( 'is-overlay-right', $output ) : $this->assertStringNotContainsString( 'is-overlay-right', $output );
 		if ( $has_overlay ) {
 			$this->assertStringContainsString( 'overlay-wrapper" data-wp-on--click="actions.closeOverlayOnBackdrop"', $output );
 		}
 	}
 
 	/**
-	 * Provides legacy and desktop overlay settings.
+	 * Provides overlay settings.
 	 *
 	 * @return array<string, array{array, bool, bool, bool}>
 	 */
@@ -140,6 +140,15 @@ class ProductFilters extends \WP_UnitTestCase {
 			'default mobile'             => array( array(), true, false, false ),
 			'mobile disabled'            => array( array( 'showFilterDrawer' => false ), false, false, false ),
 			'malformed mobile enabled'   => array( array( 'showFilterDrawer' => 'false' ), true, false, false ),
+			'mobile right'               => array(
+				array(
+					'showFilterDrawer' => true,
+					'overlayPosition'  => 'right',
+				),
+				true,
+				false,
+				true,
+			),
 			'all devices left'           => array(
 				array(
 					'showFilterDrawer' => true,
@@ -151,9 +160,9 @@ class ProductFilters extends \WP_UnitTestCase {
 			),
 			'conflicting all devices'    => array(
 				array(
-					'showFilterDrawer'       => false,
-					'overlayOnDesktop'       => true,
-					'desktopOverlayPosition' => 'right',
+					'showFilterDrawer' => false,
+					'overlayOnDesktop' => true,
+					'overlayPosition'  => 'right',
 				),
 				true,
 				true,
@@ -161,9 +170,9 @@ class ProductFilters extends \WP_UnitTestCase {
 			),
 			'malformed desktop disabled' => array(
 				array(
-					'showFilterDrawer'       => false,
-					'overlayOnDesktop'       => 1,
-					'desktopOverlayPosition' => 'right',
+					'showFilterDrawer' => false,
+					'overlayOnDesktop' => 1,
+					'overlayPosition'  => 'right',
 				),
 				false,
 				false,

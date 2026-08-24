@@ -63,8 +63,8 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 	if ( overlayOnDesktop ) {
 		overlayMode = 'all';
 	}
-	const desktopOverlayPosition =
-		attributes.desktopOverlayPosition === 'right' ? 'right' : 'left';
+	const overlayPosition =
+		attributes.overlayPosition === 'right' ? 'right' : 'left';
 	const [ isOpen, setIsOpen ] = useState( false );
 
 	const globalColors = getSetting< { background?: string; text?: string } >(
@@ -85,8 +85,7 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 			'is-overlay-opened': isOpen,
 			'is-filter-drawer-disabled': ! hasOverlay,
 			'has-desktop-overlay': overlayOnDesktop,
-			'is-desktop-overlay-right':
-				overlayOnDesktop && desktopOverlayPosition === 'right',
+			'is-overlay-right': hasOverlay && overlayPosition === 'right',
 		} ),
 		style: {
 			'--wc-product-filters-background-color':
@@ -204,20 +203,17 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 							label={ __( 'Always', 'woocommerce' ) }
 						/>
 					</ToggleGroupControl>
-					{ overlayMode === 'all' && (
+					{ overlayMode !== 'off' && (
 						<ToggleGroupControl
 							__nextHasNoMarginBottom
 							__next40pxDefaultSize
 							isBlock
-							label={ __(
-								'Desktop overlay position',
-								'woocommerce'
-							) }
-							value={ desktopOverlayPosition }
+							label={ __( 'Overlay position', 'woocommerce' ) }
+							value={ overlayPosition }
 							onChange={ ( value ) => {
 								if ( value === 'left' || value === 'right' ) {
 									setAttributes( {
-										desktopOverlayPosition: value,
+										overlayPosition: value,
 									} );
 								}
 							} }

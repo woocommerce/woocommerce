@@ -56,7 +56,7 @@ export type BlockAttributes = {
 	isPreview: boolean;
 	showFilterDrawer?: boolean;
 	overlayOnDesktop?: boolean;
-	desktopOverlayPosition?: 'left' | 'right';
+	overlayPosition?: 'left' | 'right';
 };
 
 export type EditProps = BlockEditProps< BlockAttributes >;

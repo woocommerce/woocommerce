@@ -22,9 +22,8 @@ export const Save = ( {
 		className: clsx( 'wc-block-product-filters', {
 			'is-filter-drawer-disabled': ! hasOverlay,
 			'has-desktop-overlay': overlayOnDesktop,
-			'is-desktop-overlay-right':
-				overlayOnDesktop &&
-				attributes.desktopOverlayPosition === 'right',
+			'is-overlay-right':
+				hasOverlay && attributes.overlayPosition === 'right',
 		} ),
 	} );
 	const innerBlocksProps = useInnerBlocksProps.save( blockProps );
