@@ -573,7 +573,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertCount( 1, $data['skipped'], 'Expected 1 skipped product, got ' . count( $data['skipped'] ) );
 		$this->assertSame(
 			'A new variation cannot be created because "L" is not an option of the parent product\'s "Size" attribute.',
-			html_entity_decode( $data['skipped'][0]->get_error_message() ),
+			html_entity_decode( $data['skipped'][0]->get_error_message(), ENT_QUOTES ),
 			'Expected the skip message to name the unavailable value and its attribute'
 		);
 		$this->assertSame( 0, wc_get_product_id_by_sku( 'IMPORT-VALUE-L' ), 'Expected no variation to be created for a value the parent does not offer' );
@@ -615,7 +615,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 				'A new variation cannot be created because "L" is not an option of the parent product\'s "%s" attribute.',
 				wc_attribute_label( $taxonomy )
 			),
-			html_entity_decode( $data['skipped'][0]->get_error_message() ),
+			html_entity_decode( $data['skipped'][0]->get_error_message(), ENT_QUOTES ),
 			'Expected the refusal to name the term and the global attribute, not an unresolved attribute'
 		);
 		$this->assertSame( 0, wc_get_product_id_by_sku( 'IMPORT-TAX-L' ), 'Expected no variation to be created for a term the parent does not offer' );
@@ -719,7 +719,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertCount( 1, $data['skipped'], 'Expected 1 skipped product, got ' . count( $data['skipped'] ) );
 		$this->assertSame(
 			'A new variation cannot be created because the parent product has no "Colour" attribute.',
-			html_entity_decode( $data['skipped'][0]->get_error_message() ),
+			html_entity_decode( $data['skipped'][0]->get_error_message(), ENT_QUOTES ),
 			'Expected the skip message to name the missing attribute'
 		);
 		$this->assertSame( 0, wc_get_product_id_by_sku( 'IMPORT-ATTR-RED' ), 'Expected no variation to be created for an attribute the parent does not have' );
