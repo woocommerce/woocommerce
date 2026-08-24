@@ -503,17 +503,32 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			$parent_attributes = $this->get_variation_parent_attributes( $data['raw_attributes'], $parent );
 
 			foreach ( $data['raw_attributes'] as $attribute ) {
+				if ( empty( $attribute['name'] ) ) {
+					continue;
+				}
+
 				$attribute_name = $this->get_variation_attribute_key( $attribute );
 
+				// Skipping the attribute instead would store the variation with whatever did match,
+				// wiping every attribute it already had and leaving a catch-all "any" variation that
+				// matches every combination, all reported as a successful import.
 				if ( ! isset( $parent_attributes[ $attribute_name ] ) || ! $parent_attributes[ $attribute_name ]->get_variation() ) {
-					continue;
+					throw new Exception(
+						esc_html(
+							sprintf(
+								/* translators: %s: reason the attribute matches nothing on the parent product */
+								__( 'Variation cannot be imported: %s', 'woocommerce' ),
+								$this->get_unmatched_variation_attribute_reason( $attribute, $parent_attributes )
+							)
+						)
+					);
 				}
 
 				$parent_attribute = $parent_attributes[ $attribute_name ];
 				$attribute_key    = sanitize_title( $parent_attribute->get_name() );
-				$attribute_value  = isset( $attribute['value'] ) ? current( $attribute['value'] ) : '';
+				$raw_value        = isset( $attribute['value'] ) ? current( (array) $attribute['value'] ) : '';
 
-				$attributes[ $attribute_key ] = $this->get_variation_attribute_value( $attribute_value, $parent_attribute );
+				$attributes[ $attribute_key ] = $this->get_variation_attribute_value( false === $raw_value ? '' : $raw_value, $parent_attribute );
 			}
 
 			$variation->set_attributes( $attributes );
@@ -560,10 +575,10 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * and importing it used to resolve the key separately, which silently stored a row as a catch-all
 	 * "any" variation whenever the two disagreed.
 	 *
-	 * The taxonomy ID is deliberately not looked up: get_attribute_taxonomy_id() creates the global
-	 * attribute when it is missing, so a row that is only being inspected would leave a stray
-	 * site-wide attribute behind. The key is derived instead, which is equivalent because
-	 * wc_create_attribute() normalizes the slug it stores exactly as wc_attribute_taxonomy_slug() does.
+	 * When the global attribute is missing, the key is derived rather than looked up, because
+	 * get_attribute_taxonomy_id() creates it: a row that is only being inspected would leave a stray
+	 * site-wide attribute behind. Deriving is equivalent because wc_create_attribute() normalizes the
+	 * slug it stores exactly as wc_attribute_taxonomy_slug() does.
 	 *
 	 * @since 11.1.0
 	 *
@@ -577,9 +592,47 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			return sanitize_title( $raw_name );
 		}
 
+		// Resolve through the overridable lookup when the global attribute already exists, so
+		// extensions that customize it keep applying. It only creates an attribute when none exists,
+		// which is the side effect this method must never cause.
+		if ( $this->get_existing_attribute_taxonomy_id( $raw_name ) ) {
+			return sanitize_title( wc_attribute_taxonomy_name_by_id( $this->get_attribute_taxonomy_id( $raw_name ) ) );
+		}
+
 		$slug = wc_attribute_taxonomy_slug( $this->get_attribute_taxonomy_name_from_raw_name( $raw_name ) );
 
 		return sanitize_title( wc_attribute_taxonomy_name( $slug ) );
+	}
+
+	/**
+	 * Get the reason a variation row's attribute matches nothing the parent product offers.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param array $attribute         Raw attribute data from a parsed row.
+	 * @param array $parent_attributes Parent product attributes, keyed as get_variation_attribute_key() resolves them.
+	 * @return string Sentence naming the mismatch.
+	 */
+	protected function get_unmatched_variation_attribute_reason( $attribute, $parent_attributes ) {
+		$raw_name   = isset( $attribute['name'] ) ? $attribute['name'] : '';
+		$custom_key = sanitize_title( $raw_name );
+
+		// A row marking an attribute as global when the parent stores it as a custom attribute is the
+		// common cause. Naming only the attribute would send the merchant looking for the wrong
+		// problem, since the parent does have it, just not as a global attribute.
+		if ( ! empty( $attribute['taxonomy'] ) && isset( $parent_attributes[ $custom_key ] ) && ! $parent_attributes[ $custom_key ]->is_taxonomy() ) {
+			return sprintf(
+				/* translators: %s: attribute name */
+				__( 'The parent product has a custom "%s" attribute, but the row marks it as a global attribute.', 'woocommerce' ),
+				$raw_name
+			);
+		}
+
+		return sprintf(
+			/* translators: %s: attribute name */
+			__( 'The parent product has no "%s" attribute.', 'woocommerce' ),
+			$raw_name
+		);
 	}
 
 	/**

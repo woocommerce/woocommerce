@@ -718,7 +718,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertEmpty( $data['imported_variations'], 'Expected 0 imported variations, got ' . count( $data['imported_variations'] ) );
 		$this->assertCount( 1, $data['skipped'], 'Expected 1 skipped product, got ' . count( $data['skipped'] ) );
 		$this->assertSame(
-			'A new variation cannot be created because the parent product has no "Colour" attribute.',
+			'A new variation cannot be created. The parent product has no "Colour" attribute.',
 			html_entity_decode( $data['skipped'][0]->get_error_message(), ENT_QUOTES ),
 			'Expected the skip message to name the missing attribute'
 		);
@@ -752,9 +752,9 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertEmpty( $data['imported_variations'], 'Expected the row to be refused rather than saved as a catch-all "any" variation' );
 		$this->assertCount( 1, $data['skipped'], 'Expected 1 skipped product, got ' . count( $data['skipped'] ) );
 		$this->assertSame(
-			'A new variation cannot be created because the parent product has no "size-airr133" attribute.',
+			'A new variation cannot be created. The parent product has a custom "size-airr133" attribute, but the row marks it as a global attribute.',
 			html_entity_decode( $data['skipped'][0]->get_error_message(), ENT_QUOTES ),
-			'Expected the refusal to name the attribute the row asked for'
+			'Expected the refusal to point at the global flag, since the parent does have the attribute as a custom one'
 		);
 		$this->assertSame( 0, wc_get_product_id_by_sku( 'IMPORT-CUSTOM-S' ), 'Expected no variation to be created' );
 		$this->assertSame( 0, (int) wc_attribute_taxonomy_id_by_name( 'size-airr133' ), 'Expected no global attribute to be created site-wide while refusing the row' );
@@ -763,9 +763,9 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test that importing a variation row flagged as global does not create the global attribute site-wide when the parent does not offer it.
+	 * @testdox Test that a row whose attribute the parent does not offer fails instead of wiping the attributes of the variation it updates.
 	 */
-	public function test_import_of_existing_variation_does_not_create_a_missing_global_attribute() {
+	public function test_import_of_existing_variation_fails_instead_of_wiping_its_attributes() {
 		$this->assertSame( 0, (int) wc_attribute_taxonomy_id_by_name( 'colour-airr133' ), 'This test requires that no global "colour-airr133" attribute exists yet' );
 
 		$attribute = new WC_Product_Attribute();
@@ -790,8 +790,55 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 			'import-existing-variation-global-flag.csv'
 		);
 
-		$this->assertEmpty( $data['failed'], 'Expected the existing variation row to be processed, got ' . count( $data['failed'] ) . ' failures' );
+		$this->assertCount( 1, $data['failed'], 'Expected the row to fail rather than be reported as a successful update' );
+		$this->assertSame(
+			'Variation cannot be imported: The parent product has a custom "colour-airr133" attribute, but the row marks it as a global attribute.',
+			html_entity_decode( $data['failed'][0]->get_error_message(), ENT_QUOTES ),
+			'Expected the failure to point at the global flag'
+		);
+		$this->assertEmpty( $data['updated'], 'Expected the row not to be counted as an update' );
 		$this->assertSame( 0, (int) wc_attribute_taxonomy_id_by_name( 'colour-airr133' ), 'Expected no global attribute to be created site-wide for a row the parent does not offer as a global attribute' );
+
+		$stored = wc_get_product( $variation->get_id() );
+		$this->assertSame( array( 'colour-airr133' => 'Red' ), $stored->get_attributes(), 'Expected the existing variation to keep its attributes' );
+
+		WC_Helper_Product::delete_product( $variation->get_id() );
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Test that a row whose global attribute name cannot be created still fails loudly instead of wiping the variation's attributes.
+	 */
+	public function test_import_of_existing_variation_fails_when_the_global_attribute_name_is_unusable() {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'fabric-composition-and-care-notes' );
+		$attribute->set_options( array( 'Cotton', 'Wool' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Long Attr Tee' );
+		$product->set_sku( 'IMPORT-LONGATTR-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_sku( 'IMPORT-LONGATTR-COTTON' );
+		$variation->set_attributes( array( 'fabric-composition-and-care-notes' => 'Cotton' ) );
+		$variation->save();
+
+		// The slug exceeds wc_get_attribute_slug_max_byte_length(), so wc_create_attribute() would
+		// reject it. That rejection used to be the only thing failing this row.
+		$data = $this->import_with_update_existing(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-LONGATTR-COTTON,Import Long Attr Tee - Cotton,IMPORT-LONGATTR-PARENT,fabric-composition-and-care-notes,Cotton,1,12\n",
+			'import-existing-variation-unusable-global-name.csv'
+		);
+
+		$this->assertCount( 1, $data['failed'], 'Expected the row to fail rather than be reported as a successful update' );
+		$this->assertEmpty( $data['updated'], 'Expected the row not to be counted as an update' );
+
+		$stored = wc_get_product( $variation->get_id() );
+		$this->assertSame( array( 'fabric-composition-and-care-notes' => 'Cotton' ), $stored->get_attributes(), 'Expected the existing variation to keep its attributes' );
 
 		WC_Helper_Product::delete_product( $variation->get_id() );
 		WC_Helper_Product::delete_product( $product->get_id() );

@@ -1260,9 +1260,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				return new WP_Error(
 					'woocommerce_product_importer_variation_unknown_attribute',
 					sprintf(
-						/* translators: %s: attribute name */
-						esc_html__( 'A new variation cannot be created because the parent product has no "%s" attribute.', 'woocommerce' ),
-						esc_html( $attribute['name'] )
+						/* translators: %s: reason the attribute matches nothing on the parent product */
+						esc_html__( 'A new variation cannot be created. %s', 'woocommerce' ),
+						esc_html( $this->get_unmatched_variation_attribute_reason( $attribute, $parent_attributes ) )
 					)
 				);
 			}
