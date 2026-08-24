@@ -50,7 +50,6 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		// Validate input and at the same time store the processed coupon codes to apply.
 
 		$coupon_codes = array();
-		$discounts    = new WC_Discounts( $order );
 
 		$current_order_coupons      = array_values( $order->get_coupons() );
 		$current_order_coupon_codes = array_map(
@@ -70,19 +69,16 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 				throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
 			}
 
-			$coupon_code = wc_format_coupon_code( wc_clean( $coupon_code ) );
-			$coupon      = new WC_Coupon( $coupon_code );
-
-			// Skip check if the coupon is already applied to the order, as this could wrongly throw an error for single-use coupons.
-			if ( ! in_array( wc_strtolower( $coupon_code ), $current_order_coupon_codes, true ) ) {
-				$check_result = $discounts->is_coupon_valid( $coupon );
-				if ( is_wp_error( $check_result ) ) {
-					throw new WC_REST_Exception( 'woocommerce_rest_' . $check_result->get_error_code(), $check_result->get_error_message(), 400 );
-				}
-			}
-
-			$coupon_codes[] = $coupon_code;
+			$coupon_codes[] = wc_format_coupon_code( wc_clean( $coupon_code ) );
 		}
+
+		// apply_coupon() rejects a code that is already applied, so a duplicated code would
+		// fail only after its first copy was applied and saved.
+		if ( count( array_unique( array_map( 'wc_strtolower', $coupon_codes ) ) ) !== count( $coupon_codes ) ) {
+			throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon', esc_html__( 'Coupon codes must be unique.', 'woocommerce' ), 400 );
+		}
+
+		$this->validate_coupons_before_replacement( $order, $coupon_codes, $current_order_coupon_codes );
 
 		// Remove all coupons first to ensure calculation is correct.
 		foreach ( $order->get_items( 'coupon' ) as $existing_coupon ) {
@@ -99,6 +95,87 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Validate the requested coupon codes against a throwaway copy of the order mirroring the
+	 * state apply_coupon() will validate against, before anything is persisted.
+	 *
+	 * Both remove_coupon() and apply_coupon() save the order immediately, so a coupon rejected
+	 * halfway through the replacement sequence would otherwise leave the order changed despite
+	 * the request failing.
+	 *
+	 * @since 11.2.0
+	 * @param WC_Order $order                      Order the coupons will be applied to.
+	 * @param string[] $coupon_codes               Formatted coupon codes requested.
+	 * @param string[] $current_order_coupon_codes Lowercase codes of the coupons already on the order.
+	 * @return void
+	 * @throws WC_REST_Exception When a coupon fails validation.
+	 */
+	protected function validate_coupons_before_replacement( $order, $coupon_codes, $current_order_coupon_codes ) {
+		try {
+			// Not wc_get_order(): the factory can hand out an OrderCache-shared instance, and
+			// the fabricated subtotals below must never leak beyond this method.
+			$staged = new WC_Order( $order->get_id() );
+		} catch ( Exception $e ) {
+			throw new WC_REST_Exception( 'woocommerce_rest_invalid_order', esc_html__( 'Invalid order ID.', 'woocommerce' ), 400 );
+		}
+
+		// When no coupons are applied, apply_coupon() adopts manually edited line totals as the
+		// new subtotals before validating; mirror that (in memory only, never saved) so spend
+		// limits are checked against the same amounts. With coupons applied the subtotals are
+		// not changed by the replacement sequence.
+		if ( empty( $staged->get_items( 'coupon' ) ) ) {
+			foreach ( $staged->get_items() as $staged_item ) {
+				if ( ! $staged_item instanceof WC_Order_Item_Product ) {
+					continue;
+				}
+
+				if ( (float) $staged_item->get_subtotal( 'edit' ) === (float) $staged_item->get_total( 'edit' ) && (float) $staged_item->get_subtotal_tax( 'edit' ) === (float) $staged_item->get_total_tax( 'edit' ) ) {
+					continue;
+				}
+
+				$staged_item->set_subtotal( $staged_item->get_total( 'edit' ) );
+				$staged_item->set_subtotal_tax( $staged_item->get_total_tax( 'edit' ) );
+			}
+		}
+
+		$discounts = new WC_Discounts( $staged );
+
+		foreach ( $coupon_codes as $coupon_code ) {
+			$already_applied = in_array( wc_strtolower( $coupon_code ), $current_order_coupon_codes, true );
+
+			$coupon = new WC_Coupon( $coupon_code );
+
+			// Skip check if the coupon is already applied to the order, as this could wrongly throw an error for single-use coupons.
+			if ( ! $already_applied ) {
+				$check_result = $discounts->is_coupon_valid( $coupon );
+				if ( is_wp_error( $check_result ) ) {
+					// Coupon error messages are already escaped and may carry markup from wc_price(); esc_html() would double-encode them.
+					throw new WC_REST_Exception( 'woocommerce_rest_' . esc_html( (string) $check_result->get_error_code() ), wp_kses_post( $check_result->get_error_message() ), 400 );
+				}
+			}
+
+			// is_coupon_valid() skips the per-user usage limit for guest customers, while
+			// apply_coupon() enforces it by billing email; check it here too or the coupon
+			// only fails after earlier coupon removals were already saved. Unlike the check
+			// above, this covers already-applied codes as well: removing a guest's coupon does
+			// not release its billing-email usage, so re-applying it fails the same limit
+			// inside apply_coupon().
+
+			/**
+			 * Resolved through WC_Data_Store's magic __call proxy.
+			 *
+			 * @var WC_Coupon_Data_Store_CPT $data_store
+			 */
+			$data_store = $coupon->get_data_store();
+			if ( 0 === $staged->get_customer_id() && 0 < $coupon->get_usage_limit_per_user() && $data_store ) {
+				$usage_count = $data_store->get_usage_by_email( $coupon, $staged->get_billing_email() );
+				if ( $usage_count >= $coupon->get_usage_limit_per_user() ) {
+					throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon', wp_kses_post( $coupon->get_coupon_error( 106 ) ), 400 );
+				}
+			}
+		}
 	}
 
 	/**

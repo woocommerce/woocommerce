@@ -1584,4 +1584,247 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 0, $reloaded->get_variation_id(), 'Switching to a simple product by SKU should clear variation_id.' );
 		$this->assertSame( $simple->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the product selected by SKU.' );
 	}
+
+	/**
+	 * Create a pending order with one $100 product, optionally with its line total manually edited.
+	 *
+	 * @param string $billing_email Billing email (the order stays a guest order).
+	 * @param float  $edited_total  Manually edited line total, 0 to keep the original price.
+	 * @return WC_Order
+	 */
+	private function create_order_for_coupon_replacement( string $billing_email, float $edited_total = 0 ): WC_Order {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->save();
+
+		$order = wc_create_order();
+		$order->set_billing_email( $billing_email );
+		$order->add_product( $product, 1 );
+		$order->calculate_totals();
+
+		if ( $edited_total > 0 ) {
+			foreach ( $order->get_items() as $item ) {
+				$item->set_total( $edited_total );
+				$item->save();
+			}
+			$order->calculate_totals();
+		}
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * Dispatch a PUT request replacing the order's coupons with the given codes.
+	 *
+	 * @param int      $order_id Order ID.
+	 * @param string[] $codes    Coupon codes for the request's coupon_lines.
+	 * @return WP_REST_Response
+	 */
+	private function put_coupon_lines( int $order_id, array $codes ): WP_REST_Response {
+		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order_id );
+		$request->set_body_params(
+			array(
+				'coupon_lines' => array_map(
+					function ( $code ) {
+						return array( 'code' => $code );
+					},
+					$codes
+				),
+			)
+		);
+
+		return $this->server->dispatch( $request );
+	}
+
+	/**
+	 * Get the coupon codes currently applied to an order, freshly loaded from the database.
+	 *
+	 * @param int $order_id Order ID.
+	 * @return string[]
+	 */
+	private function get_reloaded_coupon_codes( int $order_id ): array {
+		return array_values(
+			array_map(
+				function ( $coupon ) {
+					return $coupon->get_code();
+				},
+				wc_get_order( $order_id )->get_items( 'coupon' )
+			)
+		);
+	}
+
+	/**
+	 * @testdox A coupon replacement rejected by the guest usage limit keeps the order's existing coupon.
+	 */
+	public function test_rejected_guest_usage_limit_replacement_keeps_existing_coupon(): void {
+		$guest_email = 'coupon-guest@example.com';
+		WC_Helper_Coupon::create_coupon(
+			'replacement-plain',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		$limited = WC_Helper_Coupon::create_coupon(
+			'replacement-limited',
+			array(
+				'discount_type'        => 'percent',
+				'coupon_amount'        => '10',
+				'usage_limit_per_user' => '1',
+			)
+		);
+		$limited->increase_usage_count( $guest_email );
+
+		$order = $this->create_order_for_coupon_replacement( $guest_email );
+		$this->assertTrue( $order->apply_coupon( 'replacement-plain' ) );
+
+		$response = $this->put_coupon_lines( $order->get_id(), array( 'replacement-limited' ) );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( array( 'replacement-plain' ), $this->get_reloaded_coupon_codes( $order->get_id() ), 'The rejected replacement should keep the existing coupon applied' );
+		$this->assertEquals( 90, wc_get_order( $order->get_id() )->get_total(), 'The rejected replacement should not change the order total' );
+	}
+
+	/**
+	 * @testdox A batch with one invalid coupon applies none of them and leaves the order unchanged.
+	 */
+	public function test_batch_with_invalid_coupon_leaves_order_unchanged(): void {
+		WC_Helper_Coupon::create_coupon(
+			'batch-percent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		WC_Helper_Coupon::create_coupon(
+			'batch-minspend',
+			array(
+				'discount_type'  => 'fixed_cart',
+				'coupon_amount'  => '5',
+				'minimum_amount' => '75',
+			)
+		);
+
+		$order = $this->create_order_for_coupon_replacement( 'batch-customer@example.com', 50 );
+
+		$response = $this->put_coupon_lines( $order->get_id(), array( 'batch-percent', 'batch-minspend' ) );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( array(), $this->get_reloaded_coupon_codes( $order->get_id() ), 'No coupon from the failed batch should remain applied' );
+		$item = current( wc_get_order( $order->get_id() )->get_items() );
+		$this->assertEquals( 100, $item->get_subtotal(), 'The failed batch should not sync the edited total into the subtotal' );
+		$this->assertEquals( 50, $item->get_total(), 'The failed batch should not change the edited line total' );
+	}
+
+	/**
+	 * @testdox Spend limits are validated against manually edited line totals, matching what applying would use.
+	 */
+	public function test_min_spend_validated_against_manually_edited_total(): void {
+		WC_Helper_Coupon::create_coupon(
+			'edited-minspend',
+			array(
+				'discount_type'  => 'fixed_cart',
+				'coupon_amount'  => '5',
+				'minimum_amount' => '75',
+			)
+		);
+
+		$order = $this->create_order_for_coupon_replacement( 'edited-customer@example.com', 50 );
+
+		$response = $this->put_coupon_lines( $order->get_id(), array( 'edited-minspend' ) );
+
+		$this->assertSame( 400, $response->get_status(), 'The minimum spend should be checked against the edited price the discount would use' );
+		$this->assertSame( array(), $this->get_reloaded_coupon_codes( $order->get_id() ) );
+	}
+
+	/**
+	 * @testdox A valid coupon still applies to an order with manually edited line totals.
+	 */
+	public function test_valid_coupon_applies_to_manually_edited_order(): void {
+		WC_Helper_Coupon::create_coupon(
+			'edited-percent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+
+		$order = $this->create_order_for_coupon_replacement( 'edited-ok-customer@example.com', 50 );
+
+		$response = $this->put_coupon_lines( $order->get_id(), array( 'edited-percent' ) );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( array( 'edited-percent' ), $this->get_reloaded_coupon_codes( $order->get_id() ) );
+		$this->assertEquals( 45, wc_get_order( $order->get_id() )->get_total(), 'The discount should be taken off the edited price' );
+	}
+
+	/**
+	 * @testdox Duplicate coupon codes in one request are rejected before any coupon is applied.
+	 */
+	public function test_duplicate_coupon_codes_rejected_before_applying(): void {
+		WC_Helper_Coupon::create_coupon(
+			'duplicate-percent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+
+		$order = $this->create_order_for_coupon_replacement( 'duplicate-customer@example.com' );
+
+		$response = $this->put_coupon_lines( $order->get_id(), array( 'duplicate-percent', 'duplicate-percent' ) );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( array(), $this->get_reloaded_coupon_codes( $order->get_id() ), 'Neither copy of the duplicated code should remain applied' );
+	}
+
+	/**
+	 * @testdox An already-applied single-use coupon can be sent again in coupon_lines without failing its usage limit.
+	 */
+	public function test_single_use_coupon_can_be_resent_in_coupon_lines(): void {
+		WC_Helper_Coupon::create_coupon(
+			'single-use',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+				'usage_limit'   => '1',
+			)
+		);
+
+		$order = $this->create_order_for_coupon_replacement( 'single-use-customer@example.com' );
+		$this->assertTrue( $order->apply_coupon( 'single-use' ) );
+		wc_update_coupon_usage_counts( $order->get_id() );
+
+		$response = $this->put_coupon_lines( $order->get_id(), array( 'single-use' ) );
+
+		$this->assertSame( 200, $response->get_status(), 'Re-sending an applied single-use coupon should not trip its own usage limit' );
+		$this->assertSame( array( 'single-use' ), $this->get_reloaded_coupon_codes( $order->get_id() ) );
+	}
+
+	/**
+	 * @testdox A guest re-sending an applied coupon whose per-user limit their email has reached gets a 400 with the coupon kept.
+	 */
+	public function test_guest_echo_of_per_user_limited_coupon_is_rejected_without_changes(): void {
+		WC_Helper_Coupon::create_coupon(
+			'echo-limited',
+			array(
+				'discount_type'        => 'percent',
+				'coupon_amount'        => '10',
+				'usage_limit_per_user' => '1',
+			)
+		);
+
+		$order = $this->create_order_for_coupon_replacement( 'echo-guest@example.com' );
+		$this->assertTrue( $order->apply_coupon( 'echo-limited' ) );
+		wc_update_coupon_usage_counts( $order->get_id() );
+
+		$response = $this->put_coupon_lines( $order->get_id(), array( 'echo-limited' ) );
+
+		// Removing a guest's coupon does not release its billing-email usage, so the re-apply
+		// can never succeed; it must fail before the removal is persisted.
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( array( 'echo-limited' ), $this->get_reloaded_coupon_codes( $order->get_id() ), 'The coupon should remain applied when its re-application is rejected' );
+		$this->assertEquals( 90, wc_get_order( $order->get_id() )->get_total() );
+	}
 }
