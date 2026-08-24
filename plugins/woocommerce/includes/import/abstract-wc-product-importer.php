@@ -595,21 +595,19 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			return sanitize_title( $raw_name );
 		}
 
-		$attribute_name = $this->get_attribute_taxonomy_name_from_raw_name( $raw_name );
+		// The non-creating half of get_attribute_taxonomy_id(), so a subclass resolving names its own
+		// way is still consulted without a lookup being able to create the attribute.
+		$attribute_id = $this->get_existing_attribute_taxonomy_id( $raw_name );
 
-		// Safe to use the overridable lookup once the attribute exists, and it keeps extensions that
-		// customize it working.
-		if ( wc_attribute_taxonomy_id_by_name( $attribute_name ) ) {
-			return sanitize_title( wc_attribute_taxonomy_name_by_id( $this->get_attribute_taxonomy_id( $raw_name ) ) );
+		if ( $attribute_id ) {
+			return sanitize_title( wc_attribute_taxonomy_name_by_id( $attribute_id ) );
 		}
 
-		return sanitize_title( wc_attribute_taxonomy_name( wc_attribute_taxonomy_slug( $attribute_name ) ) );
+		return sanitize_title( wc_attribute_taxonomy_name( wc_attribute_taxonomy_slug( $this->get_attribute_taxonomy_name_from_raw_name( $raw_name ) ) ) );
 	}
 
 	/**
 	 * Get the message refusing a variation row over an attribute the parent product does not offer.
-	 *
-	 * @since 11.1.0
 	 *
 	 * @param array $attribute         Raw attribute data from a parsed row.
 	 * @param array $parent_attributes Parent product attributes, keyed as get_variation_attribute_key() resolves them.
