@@ -18,5 +18,5 @@ export const getOverlayMode = ( attributes: BlockAttributes ): OverlayMode => {
 		return attributes.overlayMode;
 	}
 
-	return attributes.showFilterDrawer === false ? 'off' : 'tablet';
+	return 'tablet';
 };
