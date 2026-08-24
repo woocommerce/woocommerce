@@ -595,8 +595,9 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			return sanitize_title( $raw_name );
 		}
 
-		// The non-creating half of get_attribute_taxonomy_id(), so a subclass resolving names its own
-		// way is still consulted without a lookup being able to create the attribute.
+		// get_attribute_taxonomy_id() is not used: it creates the global attribute when the name does
+		// not resolve, and this runs while deciding whether to refuse a row. A subclass that resolves
+		// names its own way has to override this non-creating lookup instead.
 		$attribute_id = $this->get_existing_attribute_taxonomy_id( $raw_name );
 
 		if ( $attribute_id ) {
