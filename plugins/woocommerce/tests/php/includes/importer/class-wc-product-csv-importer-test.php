@@ -1043,6 +1043,53 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test that a variation row without a parent fails instead of being saved as a parentless variation.
+	 */
+	public function test_import_of_variation_without_a_parent_fails() {
+		// update_existing off, since can_create_variation() refuses a parentless row before it ever
+		// reaches set_variation_data().
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-variation-without-parent.csv';
+		file_put_contents( // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+			$csv_file,
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-NOPARENT-V,Import No Parent V,,Size,S,0,12\n"
+		);
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'           => true,
+				'update_existing' => false,
+				'mapping'         => array(
+					'Type'                 => 'type',
+					'SKU'                  => 'sku',
+					'Name'                 => 'name',
+					'Parent'               => 'parent_id',
+					'Attribute 1 name'     => 'attributes:name1',
+					'Attribute 1 value(s)' => 'attributes:value1',
+					'Attribute 1 global'   => 'attributes:taxonomy1',
+					'Regular price'        => 'regular_price',
+				),
+			)
+		);
+
+		$data = $importer->import();
+
+		wp_delete_file( $csv_file );
+
+		$this->assertCount( 1, $data['failed'], 'Expected the row to fail rather than save a variation with no parent' );
+		$this->assertSame(
+			'Variation cannot be imported: Missing parent ID or parent does not exist yet.',
+			html_entity_decode( $data['failed'][0]->get_error_message(), ENT_QUOTES ),
+			'Expected the missing parent to surface as the failure reason'
+		);
+
+		$orphan_id = wc_get_product_id_by_sku( 'IMPORT-NOPARENT-V' );
+		if ( $orphan_id ) {
+			wp_delete_post( $orphan_id, true );
+		}
+	}
+
+	/**
 	 * @testdox Test that a row naming a global parent attribute without marking it global says so.
 	 */
 	public function test_import_failure_names_the_missing_global_flag() {
