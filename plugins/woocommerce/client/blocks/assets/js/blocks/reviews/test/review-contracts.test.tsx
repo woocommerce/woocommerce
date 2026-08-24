@@ -315,14 +315,18 @@ describe( 'Product Reviews contracts', () => {
 			'wp-block-woocommerce-reviews-by-category',
 			'wp-block-woocommerce-reviews-by-product',
 		] )( 'does not request reviews for an empty %s', ( className ) => {
+			mockGetReviews.mockResolvedValue( {
+				reviews: [],
+				totalReviews: 0,
+			} );
 			const element = createFrontendElement( className );
 			const { container } = render(
 				<FrontendContainerBlock
-					attributes={
+					attributes={ createAttributes(
 						getHydratedAttributes(
 							element
-						) as ReviewBlockAttributes
-					}
+						) as Partial< ReviewBlockAttributes >
+					) }
 				/>
 			);
 
@@ -331,6 +335,10 @@ describe( 'Product Reviews contracts', () => {
 		} );
 
 		it( 'does not request reviews for a saved empty category selection', () => {
+			mockGetReviews.mockResolvedValue( {
+				reviews: [],
+				totalReviews: 0,
+			} );
 			const attributes = createAttributes( { categoryIds: [] } );
 			const element = createFrontendElement(
 				'wp-block-woocommerce-reviews-by-category',
@@ -338,11 +346,11 @@ describe( 'Product Reviews contracts', () => {
 			);
 			const { container } = render(
 				<FrontendContainerBlock
-					attributes={
+					attributes={ createAttributes(
 						getHydratedAttributes(
 							element
-						) as ReviewBlockAttributes
-					}
+						) as Partial< ReviewBlockAttributes >
+					) }
 				/>
 			);
 
