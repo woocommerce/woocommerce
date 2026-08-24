@@ -1827,4 +1827,80 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( array( 'echo-limited' ), $this->get_reloaded_coupon_codes( $order->get_id() ), 'The coupon should remain applied when its re-application is rejected' );
 		$this->assertEquals( 90, wc_get_order( $order->get_id() )->get_total() );
 	}
+
+	/**
+	 * @testdox Creating an order with explicitly posted line totals and a coupon keeps the posted subtotal as the pre-discount price.
+	 */
+	public function test_create_with_posted_line_totals_and_coupon_does_not_double_discount(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->save();
+		WC_Helper_Coupon::create_coupon(
+			'created-percent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params(
+			array(
+				'billing'      => array( 'email' => 'create-coupon-customer@example.com' ),
+				'line_items'   => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 1,
+						'subtotal'   => '100',
+						'total'      => '90',
+					),
+				),
+				'coupon_lines' => array( array( 'code' => 'created-percent' ) ),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 201, $response->get_status() );
+		$this->assertEquals( 100, $data['line_items'][0]['subtotal'], 'The posted subtotal should stay the pre-discount price' );
+		$this->assertEquals( 90, $data['line_items'][0]['total'], 'The discount should be calculated from the posted subtotal, not stacked on the posted total' );
+		$this->assertEquals( 10, $data['discount_total'] );
+	}
+
+	/**
+	 * @testdox Updating an order with explicitly posted line totals and a coupon keeps the posted subtotal as the pre-discount price.
+	 */
+	public function test_update_with_posted_line_totals_and_coupon_does_not_double_discount(): void {
+		WC_Helper_Coupon::create_coupon(
+			'updated-percent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+
+		$order   = $this->create_order_for_coupon_replacement( 'update-coupon-customer@example.com' );
+		$item_id = key( $order->get_items() );
+
+		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'line_items'   => array(
+					array(
+						'id'       => $item_id,
+						'subtotal' => '100',
+						'total'    => '90',
+					),
+				),
+				'coupon_lines' => array( array( 'code' => 'updated-percent' ) ),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertEquals( 100, $data['line_items'][0]['subtotal'], 'The posted subtotal should stay the pre-discount price' );
+		$this->assertEquals( 90, $data['line_items'][0]['total'], 'The discount should be calculated from the posted subtotal, not stacked on the posted total' );
+		$this->assertEquals( 10, $data['discount_total'] );
+	}
 }

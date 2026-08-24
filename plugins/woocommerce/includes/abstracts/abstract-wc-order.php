@@ -1481,7 +1481,21 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		// calculated from the original price and recalculations would discard the adjustment.
 		// With coupons already applied this is skipped: the difference also contains their
 		// discounts and the manual portion cannot be separated out.
-		$original_subtotals = empty( $applied_coupons ) ? $this->sync_subtotals_with_manually_edited_totals() : array();
+
+		/**
+		 * Filter whether applying a coupon to an order without coupons adopts manually edited
+		 * line totals as the new pre-discount subtotals.
+		 *
+		 * Return false when a line total differing from its subtotal is not a manual price
+		 * edit, e.g. when it represents a discount recorded by an extension that keeps the
+		 * original price in the subtotal, or totals supplied explicitly through an API.
+		 *
+		 * @since 11.2.0
+		 * @param bool              $sync_edited_totals Whether to sync subtotals with edited totals.
+		 * @param WC_Abstract_Order $order              The order the coupon is applied to.
+		 */
+		$sync_edited_totals = empty( $applied_coupons ) && apply_filters( 'woocommerce_order_apply_coupon_sync_edited_totals', true, $this );
+		$original_subtotals = $sync_edited_totals ? $this->sync_subtotals_with_manually_edited_totals() : array();
 
 		$discounts = new WC_Discounts( $this );
 		$applied   = $discounts->apply_coupon( $coupon );

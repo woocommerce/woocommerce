@@ -367,6 +367,32 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The woocommerce_order_apply_coupon_sync_edited_totals filter disables adopting edited totals as new subtotals.
+	 */
+	public function test_apply_coupon_sync_of_edited_totals_can_be_disabled_via_filter() {
+		$coupon = WC_Helper_Coupon::create_coupon(
+			'percent_coupon_no_sync',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		$order  = $this->create_order_with_manually_edited_total();
+
+		add_filter( 'woocommerce_order_apply_coupon_sync_edited_totals', '__return_false' );
+		try {
+			$this->assertTrue( $order->apply_coupon( $coupon->get_code() ) );
+		} finally {
+			remove_filter( 'woocommerce_order_apply_coupon_sync_edited_totals', '__return_false' );
+		}
+
+		$item = current( $order->get_items() );
+		$this->assertEquals( 100, $item->get_subtotal(), 'The original subtotal should be kept when the sync is disabled' );
+		$this->assertEquals( 90, $item->get_total(), 'The discount should be calculated from the original subtotal' );
+		$this->assertEquals( 10, $order->get_discount_total() );
+	}
+
+	/**
 	 * @testdox A failed coupon application leaves manually edited line items unchanged.
 	 */
 	public function test_apply_coupon_failure_keeps_manually_edited_line_items() {

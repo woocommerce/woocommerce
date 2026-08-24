@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix double discounts when orders are created or updated via the REST API with explicit line totals and coupon codes.

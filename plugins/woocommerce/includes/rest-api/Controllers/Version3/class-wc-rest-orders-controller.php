@@ -125,7 +125,13 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		// new subtotals before validating; mirror that (in memory only, never saved) so spend
 		// limits are checked against the same amounts. With coupons applied the subtotals are
 		// not changed by the replacement sequence.
-		if ( empty( $staged->get_items( 'coupon' ) ) ) {
+
+		/**
+		 * This filter is documented in includes/abstracts/abstract-wc-order.php.
+		 *
+		 * @since 11.2.0
+		 */
+		if ( empty( $staged->get_items( 'coupon' ) ) && apply_filters( 'woocommerce_order_apply_coupon_sync_edited_totals', true, $staged ) ) {
 			foreach ( $staged->get_items() as $staged_item ) {
 				if ( ! $staged_item instanceof WC_Order_Item_Product ) {
 					continue;
@@ -363,8 +369,29 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 				}
 			}
 
-			// Set coupons.
-			$this->calculate_coupons( $request, $object );
+			// Posted line totals are explicit request input rather than manual edits of a
+			// stored order, so adopting them as new subtotals would double-discount orders
+			// sent with pre-discounted totals and their coupon codes. That applies on create
+			// and whenever the request posts line_items; only a request without line_items
+			// operates on stored, admin-edited totals. A unique callback rather than
+			// '__return_false': WordPress keys string callbacks by name, so removing that
+			// would also unhook a third party's identical opt-out.
+			$posted_line_totals = $creating || isset( $request['line_items'] );
+			$disable_sync       = function () {
+				return false;
+			};
+			if ( $posted_line_totals ) {
+				add_filter( 'woocommerce_order_apply_coupon_sync_edited_totals', $disable_sync );
+			}
+
+			try {
+				// Set coupons.
+				$this->calculate_coupons( $request, $object );
+			} finally {
+				if ( $posted_line_totals ) {
+					remove_filter( 'woocommerce_order_apply_coupon_sync_edited_totals', $disable_sync );
+				}
+			}
 
 			// Set status.
 			if ( ! empty( $request['status'] ) ) {
