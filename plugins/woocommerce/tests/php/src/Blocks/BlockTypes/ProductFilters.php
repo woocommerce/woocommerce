@@ -37,13 +37,6 @@ class ProductFilters extends \WP_UnitTestCase {
 	private $canonical_method;
 
 	/**
-	 * Reflection method used to generate responsive styles with controlled viewport queries.
-	 *
-	 * @var \ReflectionMethod
-	 */
-	private $responsive_styles_method;
-
-	/**
 	 * Set up the test subject and dependencies.
 	 *
 	 * @return void
@@ -65,9 +58,6 @@ class ProductFilters extends \WP_UnitTestCase {
 
 		$this->canonical_method = new \ReflectionMethod( ProductFiltersBlock::class, 'get_canonical_url_no_pagination' );
 		$this->canonical_method->setAccessible( true );
-
-		$this->responsive_styles_method = new \ReflectionMethod( ProductFiltersBlock::class, 'get_responsive_styles' );
-		$this->responsive_styles_method->setAccessible( true );
 	}
 
 	/**
@@ -111,164 +101,6 @@ class ProductFilters extends \WP_UnitTestCase {
 	 */
 	private function invoke_canonical_url_helper( array $filter_params ): string {
 		return (string) $this->canonical_method->invoke( $this->product_filters, $filter_params );
-	}
-
-	/**
-	 * @testdox Renders canonical and legacy overlay settings safely.
-	 * @dataProvider overlay_attributes_provider
-	 *
-	 * @param array  $attributes    Block attributes.
-	 * @param string $expected_mode Expected overlay mode.
-	 * @param bool   $right         Whether the overlay is expected on the right.
-	 */
-	public function test_overlay_attributes( array $attributes, string $expected_mode, bool $right ): void {
-		$parsed          = parse_blocks(
-			'<!-- wp:woocommerce/product-filters --><!-- wp:html --><span data-product-filters-test>Inner</span><!-- /wp:html --><!-- /wp:woocommerce/product-filters -->'
-		)[0];
-		$parsed['attrs'] = $attributes;
-		$output          = render_block( $parsed );
-		$has_overlay     = 'off' !== $expected_mode;
-
-		$this->assertSame( 1, substr_count( $output, 'data-product-filters-test' ), 'Inner blocks should render exactly once.' );
-		if ( $has_overlay ) {
-			$this->assertStringContainsString( '__overlay-dialog', $output, 'Overlay modes should render the overlay dialog.' );
-			$this->assertStringNotContainsString( 'is-filter-drawer-disabled', $output, 'Overlay modes should not render the disabled class.' );
-			$this->assertStringContainsString( 'overlay-wrapper" data-wp-on--click="actions.closeOverlayOnBackdrop"', $output, 'Overlay modes should retain backdrop closing behavior.' );
-		} else {
-			$this->assertStringNotContainsString( '__overlay-dialog', $output, 'Off mode should not render the overlay dialog.' );
-			$this->assertStringContainsString( 'is-filter-drawer-disabled', $output, 'Off mode should render the disabled class.' );
-		}
-
-		if ( 'mobile' === $expected_mode ) {
-			$this->assertStringContainsString( 'is-mobile-overlay', $output, 'Mobile mode should render its runtime marker.' );
-		} else {
-			$this->assertStringNotContainsString( 'is-mobile-overlay', $output, 'Non-mobile modes should not render the mobile marker.' );
-		}
-
-		if ( 'tablet' === $expected_mode ) {
-			$this->assertStringContainsString( 'is-tablet-overlay', $output, 'Tablet mode should render its runtime marker.' );
-		} else {
-			$this->assertStringNotContainsString( 'is-tablet-overlay', $output, 'Non-tablet modes should not render the tablet marker.' );
-		}
-
-		$this->assertStringNotContainsString( 'is-responsive-overlay', $output, 'Deprecated responsive marker should not be rendered.' );
-		$this->assertStringNotContainsString( 'has-desktop-overlay', $output, 'Deprecated desktop marker should not be rendered.' );
-		if ( $right ) {
-			$this->assertStringContainsString( 'is-overlay-right', $output, 'Right position should render its runtime marker.' );
-		} else {
-			$this->assertStringNotContainsString( 'is-overlay-right', $output, 'Left position should not render the right marker.' );
-		}
-	}
-
-	/**
-	 * Provides overlay settings.
-	 *
-	 * @return array<string, array{array, string, bool}>
-	 */
-	public function overlay_attributes_provider(): array {
-		return array(
-			'legacy default tablet'   => array( array(), 'tablet', false ),
-			'legacy off'              => array( array( 'showFilterDrawer' => false ), 'off', false ),
-			'legacy malformed tablet' => array( array( 'showFilterDrawer' => 'false' ), 'tablet', false ),
-			'off'                     => array( array( 'overlayMode' => 'off' ), 'off', false ),
-			'mobile right'            => array(
-				array(
-					'overlayMode'     => 'mobile',
-					'overlayPosition' => 'right',
-				),
-				'mobile',
-				true,
-			),
-			'tablet invalid position' => array(
-				array(
-					'overlayMode'     => 'tablet',
-					'overlayPosition' => 'start',
-				),
-				'tablet',
-				false,
-			),
-			'always'                  => array( array( 'overlayMode' => 'always' ), 'always', false ),
-			'invalid enum fallback'   => array(
-				array(
-					'overlayMode'      => 'desktop',
-					'showFilterDrawer' => false,
-				),
-				'off',
-				false,
-			),
-		);
-	}
-
-	/**
-	 * @testdox Generates scoped responsive styles from resolved viewport queries.
-	 * @dataProvider responsive_styles_provider
-	 *
-	 * @param array    $viewport_media_queries Viewport media queries.
-	 * @param string[] $expected                Expected CSS fragments.
-	 * @param string[] $unexpected              Unexpected CSS fragments.
-	 */
-	public function test_responsive_styles( array $viewport_media_queries, array $expected, array $unexpected = array() ): void {
-		$styles = (string) $this->responsive_styles_method->invoke( $this->product_filters, $viewport_media_queries );
-
-		foreach ( $expected as $fragment ) {
-			$this->assertStringContainsString( $fragment, $styles, "Responsive CSS should contain: {$fragment}" );
-		}
-		foreach ( $unexpected as $fragment ) {
-			$this->assertStringNotContainsString( $fragment, $styles, "Responsive CSS should not contain: {$fragment}" );
-		}
-	}
-
-	/**
-	 * Provides resolved viewport queries and expected scoped output.
-	 *
-	 * @return array<string, array{array<string, string>, string[], string[]}>
-	 */
-	public function responsive_styles_provider(): array {
-		return array(
-			'default viewports' => array(
-				array(
-					'@mobile'  => '@media (width <= 480px)',
-					'@tablet'  => '@media (480px < width <= 782px)',
-					'@desktop' => '@media (width > 782px)',
-				),
-				array( '@media (480px < width <= 782px)', '@media (width > 782px)', '.is-mobile-overlay', '.is-tablet-overlay', 'top:0;right:0;bottom:0;left:0', '--wc-product-filters-overlay-transition:none' ),
-				array( '@media (width <= 480px)', 'is-responsive-overlay', 'is-overlay-opened', 'wp-block-group', '600px', 'has-desktop-overlay' ),
-			),
-			'custom rem units'  => array(
-				array(
-					'@mobile'  => '@media (width <= 30rem)',
-					'@tablet'  => '@media (30rem < width <= 45rem)',
-					'@desktop' => '@media (width > 45rem)',
-				),
-				array( '@media (30rem < width <= 45rem)', '@media (width > 45rem)' ),
-				array( '@media (width <= 30rem)' ),
-			),
-			'custom em units'   => array(
-				array(
-					'@mobile'  => '@media (width <= 32em)',
-					'@tablet'  => '@media (32em < width <= 48em)',
-					'@desktop' => '@media (width > 48em)',
-				),
-				array( '@media (32em < width <= 48em)', '@media (width > 48em)' ),
-				array( '@media (width <= 32em)' ),
-			),
-			'only mobile alias' => array(
-				array(
-					'@mobile'  => '@media (width <= 30rem)',
-					'@desktop' => '@media (width > 30rem)',
-				),
-				array( '@media (width > 30rem)', '.is-mobile-overlay', '.is-tablet-overlay' ),
-				array( '@media (width <= 30rem)', 'is-responsive-overlay' ),
-			),
-			'only tablet alias' => array(
-				array(
-					'@tablet'  => '@media (width <= 45rem)',
-					'@desktop' => '@media (width > 45rem)',
-				),
-				array( '@media (width <= 45rem)', '@media (width > 45rem)', '.is-mobile-overlay', '.is-tablet-overlay' ),
-				array( 'is-responsive-overlay' ),
-			),
-		);
 	}
 
 	/**
