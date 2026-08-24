@@ -1205,6 +1205,66 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should delete persisted items whose types are not registered with the order object.
+	 * @dataProvider provide_unregistered_item_removal_types
+	 *
+	 * @param string|null $type Item type to remove, or null for every type.
+	 */
+	public function test_remove_order_items_deletes_unregistered_persisted_item_types( $type ) {
+		global $wpdb;
+
+		$order = WC_Helper_Order::create_order();
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_order_items',
+			array(
+				'order_item_name' => 'Extension item',
+				'order_item_type' => 'extension_item',
+				'order_id'        => $order->get_id(),
+			),
+			array( '%s', '%s', '%d' )
+		);
+		$extension_item_id = (int) $wpdb->insert_id;
+		wc_add_order_item_meta( $extension_item_id, '_extension_item_test', 'present' );
+
+		$this->assertGreaterThan( 0, $extension_item_id, 'Precondition: an extension item should be persisted.' );
+		$this->assertSame( 'present', wc_get_order_item_meta( $extension_item_id, '_extension_item_test', true ), 'Precondition: extension item metadata should be persisted.' );
+
+		$order->remove_order_items( $type );
+		$order->save();
+
+		$this->assertNull(
+			$wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d",
+					$extension_item_id
+				)
+			),
+			'An unregistered persisted item should be deleted.'
+		);
+		$this->assertNull(
+			$wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT meta_id FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d",
+					$extension_item_id
+				)
+			),
+			'Metadata for an unregistered persisted item should be deleted.'
+		);
+	}
+
+	/**
+	 * Provide full and typed removal requests for unregistered persisted items.
+	 *
+	 * @return array<string, array{string|null}>
+	 */
+	public static function provide_unregistered_item_removal_types(): array {
+		return array(
+			'full removal'  => array( null ),
+			'typed removal' => array( 'extension_item' ),
+		);
+	}
+
+	/**
 	 * @testdox Should preserve replacement items saved while deletion by type is pending.
 	 */
 	public function test_remove_order_items_by_type_preserves_replacement_items_saved_before_order_save() {
@@ -1323,6 +1383,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 			private $delegate;
 
 			public function __construct( $delegate ) {
+				parent::__construct( 'order' );
 				$this->delegate = $delegate;
 			}
 

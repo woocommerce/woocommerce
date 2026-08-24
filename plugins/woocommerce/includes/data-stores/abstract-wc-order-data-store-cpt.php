@@ -781,6 +781,42 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	}
 
 	/**
+	 * Get persisted order item IDs, optionally limited to an item type.
+	 *
+	 * @since 11.0.2
+	 *
+	 * @param WC_Order    $order Order object.
+	 * @param string|null $type Order item type, or null for every type.
+	 * @return int[]
+	 */
+	public function get_order_item_ids( $order, $type = null ) {
+		global $wpdb;
+
+		if ( ! $order->get_id() ) {
+			return array();
+		}
+
+		if ( null === $type ) {
+			$item_ids = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d",
+					$order->get_id()
+				)
+			);
+		} else {
+			$item_ids = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s",
+					$order->get_id(),
+					$type
+				)
+			);
+		}
+
+		return array_map( 'intval', $item_ids );
+	}
+
+	/**
 	 * Delete selected order items by ID.
 	 *
 	 * @since 11.0.2

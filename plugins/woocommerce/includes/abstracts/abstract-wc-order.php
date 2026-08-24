@@ -368,6 +368,24 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return array<int>
 	 */
 	private function get_persisted_item_ids( $type = null ): array {
+		/**
+		 * Data store wrapper.
+		 *
+		 * @var WC_Data_Store $data_store
+		 */
+		$data_store = $this->data_store;
+
+		if ( $data_store->has_callable( 'get_order_item_ids' ) ) {
+			// @phpstan-ignore-next-line -- Optional data store method checked above.
+			$item_ids = $data_store->get_order_item_ids( $this, $type );
+
+			return array_values(
+				array_unique(
+					array_filter( array_map( 'absint', (array) $item_ids ) )
+				)
+			);
+		}
+
 		$types = null === $type
 			? array_keys( $this->get_item_types_to_group() )
 			: array( $type );
