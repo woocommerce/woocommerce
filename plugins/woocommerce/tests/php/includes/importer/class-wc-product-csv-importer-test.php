@@ -39,7 +39,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	 * @testdox variations need to set the status back to published if parent product is a draft
 	 */
 	public function test_expand_data_with_draft_variable() {
-		$csv_file = dirname( __FILE__ ) . '/sample.csv';
+		$csv_file = __DIR__ . '/sample.csv';
 		$raw_data = array(
 			array(
 				'type'      => ProductType::VARIABLE,
@@ -101,7 +101,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	 * @testdox Test that the importer calculates the percent complete as 99 when it's >= 99.5% through the file.
 	 */
 	public function test_import_completion_issue_36618_lines_remaining() {
-		$csv_file = dirname( __FILE__ ) . '/sample2.csv';
+		$csv_file = __DIR__ . '/sample2.csv';
 		$args     = array(
 			'lines' => 200,
 		);
@@ -115,7 +115,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	 * @testdox Test that the importer calculates the percent complete as 100 when it's at the end of the file.
 	 */
 	public function test_import_completion_issue_36618_end_of_file() {
-		$csv_file = dirname( __FILE__ ) . '/sample2.csv';
+		$csv_file = __DIR__ . '/sample2.csv';
 		$args     = array(
 			'lines' => 201,
 		);
@@ -845,6 +845,67 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test that a row carrying an extra attribute the parent does not offer still imports on the attributes that do match.
+	 */
+	public function test_import_of_existing_variation_keeps_importing_when_only_some_attributes_match() {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'S', 'M' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Partial Tee' );
+		$product->set_sku( 'IMPORT-PARTIAL-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_sku( 'IMPORT-PARTIAL-S' );
+		$variation->set_attributes( array( 'size' => 'S' ) );
+		$variation->save();
+
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-partial-attribute-match.csv';
+		file_put_contents( // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+			$csv_file,
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Attribute 2 name,Attribute 2 value(s),Attribute 2 global,Regular price\n"
+			. "variation,IMPORT-PARTIAL-S,Import Partial Tee - S,IMPORT-PARTIAL-PARENT,Size,S,0,Colour,Red,0,12\n"
+		);
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'           => true,
+				'update_existing' => true,
+				'mapping'         => array(
+					'Type'                 => 'type',
+					'SKU'                  => 'sku',
+					'Name'                 => 'name',
+					'Parent'               => 'parent_id',
+					'Attribute 1 name'     => 'attributes:name1',
+					'Attribute 1 value(s)' => 'attributes:value1',
+					'Attribute 1 global'   => 'attributes:taxonomy1',
+					'Attribute 2 name'     => 'attributes:name2',
+					'Attribute 2 value(s)' => 'attributes:value2',
+					'Attribute 2 global'   => 'attributes:taxonomy2',
+					'Regular price'        => 'regular_price',
+				),
+			)
+		);
+		$data     = $importer->import();
+
+		wp_delete_file( $csv_file );
+
+		$this->assertEmpty( $data['failed'], 'Expected the row to import on the attribute the parent does offer' );
+
+		$stored = wc_get_product( $variation->get_id() );
+		$this->assertSame( array( 'size' => 'S' ), $stored->get_attributes(), 'Expected the matching attribute to be stored and the unknown one ignored' );
+
+		WC_Helper_Product::delete_product( $variation->get_id() );
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
 	 * @testdox Test that a variation row is still created when the parent has the attribute but does not yet use it for variations.
 	 */
 	public function test_import_creates_new_variations_when_the_parent_attribute_is_not_yet_used_for_variations() {
@@ -969,14 +1030,16 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$color_attribute->set_name( $color_taxonomy );
 		$color_attribute->set_options( array( '红色', '绿色' ) );
 		$color_attribute->set_visible( true );
-		$color_attribute->set_variation( false ); // Initially false.
+		$color_attribute->set_variation( false );
+		// Initially false.
 
 		$size_attribute = new WC_Product_Attribute();
 		$size_attribute->set_id( $size_attr_id );
 		$size_attribute->set_name( $size_taxonomy );
 		$size_attribute->set_options( array( '大码', '小码' ) );
 		$size_attribute->set_visible( true );
-		$size_attribute->set_variation( false ); // Initially false.
+		$size_attribute->set_variation( false );
+		// Initially false.
 
 		$product->set_attributes( array( $color_attribute, $size_attribute ) );
 		$product->save();
