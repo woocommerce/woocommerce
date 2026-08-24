@@ -49,8 +49,7 @@
 		position: absolute;
 		/*rtl:ignore*/
 		inset: 0 auto 0 0;
-		width: 100%;
-		max-width: 100%;
+		width: min(100%, 480px);
 		--wc-product-filters-closed-translate-x: -100%;
 		transform: translateX(var(--wc-product-filters-closed-translate-x));
 		transition: none;
@@ -126,8 +125,7 @@
 	}
 
 	@include breakpoint(">600px") {
-		&:not(.has-desktop-overlay),
-		&.is-overlay-opened:not(.has-desktop-overlay) {
+		&:not(.has-desktop-overlay) {
 			display: flex;
 
 			.wc-block-product-filters__overlay-header,
@@ -166,12 +164,6 @@
 				flex-grow: 1;
 				background: inherit;
 				color: inherit;
-			}
-		}
-
-		&.has-desktop-overlay {
-			.wc-block-product-filters__overlay-dialog {
-				width: 480px;
 			}
 		}
 	}
