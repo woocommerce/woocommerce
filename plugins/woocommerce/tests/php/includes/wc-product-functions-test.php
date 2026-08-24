@@ -1239,6 +1239,8 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			};
 			add_filter( 'get_the_terms', $get_the_terms_filter, 10, 3 );
 
+			$this->setExpectedIncorrectUsage( 'wc_get_product_category_list' );
+
 			$this->assertSame(
 				$expected,
 				wc_get_product_category_list( $product->get_id(), ' > ', 'Before ', ' After', 'hierarchy' ),
@@ -1255,6 +1257,32 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			WC_Helper_Product::delete_product( $product->get_id() );
 			wp_delete_term( $child['term_id'], 'product_cat' );
 			wp_delete_term( $root['term_id'], 'product_cat' );
+		}
+	}
+
+	/**
+	 * @testdox Product category list warns about an unsupported ordering mode and still falls back to WordPress order.
+	 */
+	public function test_wc_get_product_category_list_warns_on_unsupported_orderby(): void {
+		$suffix   = wp_unique_id();
+		$category = wp_insert_term( 'Unsupported orderby ' . $suffix, 'product_cat' );
+		$product  = WC_Helper_Product::create_simple_product();
+
+		try {
+			wp_set_object_terms( $product->get_id(), array( $category['term_id'] ), 'product_cat' );
+
+			$expected = get_the_term_list( $product->get_id(), 'product_cat', '', ', ', '' );
+
+			$this->setExpectedIncorrectUsage( 'wc_get_product_category_list' );
+
+			$this->assertSame(
+				$expected,
+				wc_get_product_category_list( $product->get_id(), ', ', '', '', 'menu_order' ),
+				'An unsupported ordering mode should still return the WordPress term-list output.'
+			);
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $category['term_id'], 'product_cat' );
 		}
 	}
 
