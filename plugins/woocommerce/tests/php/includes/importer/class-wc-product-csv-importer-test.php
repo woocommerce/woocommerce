@@ -575,7 +575,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 			html_entity_decode( $data['skipped'][0]->get_error_message() ),
 			'Expected the skip message to name the unavailable value'
 		);
-		$this->assertFalse( wc_get_product_id_by_sku( 'IMPORT-VALUE-L' ) > 0, 'Expected no variation to be created for a value the parent does not offer' );
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'IMPORT-VALUE-L' ), 'Expected no variation to be created for a value the parent does not offer' );
 
 		WC_Helper_Product::delete_product( $product->get_id() );
 	}
@@ -614,7 +614,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 			html_entity_decode( $data['skipped'][0]->get_error_message() ),
 			'Expected the refusal to be about the value, not about an unresolved attribute'
 		);
-		$this->assertFalse( wc_get_product_id_by_sku( 'IMPORT-TAX-L' ) > 0, 'Expected no variation to be created for a term the parent does not offer' );
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'IMPORT-TAX-L' ), 'Expected no variation to be created for a term the parent does not offer' );
 
 		WC_Helper_Product::delete_product( $product->get_id() );
 		WC_Helper_Product::delete_attribute( $attribute_data['attribute_id'] );
@@ -718,7 +718,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 			html_entity_decode( $data['skipped'][0]->get_error_message() ),
 			'Expected the skip message to name the missing attribute'
 		);
-		$this->assertFalse( wc_get_product_id_by_sku( 'IMPORT-ATTR-RED' ) > 0, 'Expected no variation to be created for an attribute the parent does not have' );
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'IMPORT-ATTR-RED' ), 'Expected no variation to be created for an attribute the parent does not have' );
 
 		WC_Helper_Product::delete_product( $product->get_id() );
 	}
