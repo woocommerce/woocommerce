@@ -324,9 +324,6 @@ class WC_Comments {
 	 * Determines whether the given comment should be included in the core WP comment counts that are displayed in the
 	 * WordPress admin.
 	 *
-	 * The 'note' type covers the editorial notes introduced in WordPress 7.1, which core itself excludes from the
-	 * comment counts.
-	 *
 	 * @param WP_Comment $comment Comment object.
 	 *
 	 * @return bool

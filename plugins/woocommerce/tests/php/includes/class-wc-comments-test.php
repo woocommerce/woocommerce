@@ -154,9 +154,6 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Should not increment the cached comment count for comment types excluded from the counts.
 	 *
-	 * The 'note' type is the editorial note introduced in WordPress 7.1. Core excludes it from the comment counts, so
-	 * incrementing the cached count for it makes wp-admin report pending comments that the moderation table cannot show.
-	 *
 	 * @testWith ["action_log"]
 	 *           ["note"]
 	 *           ["order_note"]
@@ -185,7 +182,7 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 
 		$this->assertSame(
 			0,
-			(int) wp_cache_get( 'wc_count_comments_unapproved', 'wc_comment_counts' ),
+			wp_cache_get( 'wc_count_comments_unapproved', 'wc_comment_counts' ),
 			"Inserting a '{$comment_type}' comment should leave the cached unapproved count untouched"
 		);
 
@@ -220,7 +217,7 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 
 		$this->assertSame(
 			1,
-			(int) wp_cache_get( 'wc_count_comments_unapproved', 'wc_comment_counts' ),
+			wp_cache_get( 'wc_count_comments_unapproved', 'wc_comment_counts' ),
 			'A regular comment should increment the cached unapproved count'
 		);
 
