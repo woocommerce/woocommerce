@@ -146,6 +146,16 @@ class WC_Admin_Permalink_Settings {
 		// The index of the predefined structure the stored base corresponds to, or false for a custom one.
 		$selected_structure = array_search( $stored_product_base, $structures_for_comparison, true );
 
+		/*
+		 * The Shop rows below render only when a Shop page resolves, yet the stored base can still
+		 * match one of them -- wc_get_page_id() returns 0 when the woocommerce_get_shop_page_id
+		 * filter yields a truthy non-numeric value. Report such a base as Custom so exactly one
+		 * rendered radio is always checked.
+		 */
+		if ( ! $shop_page_id && in_array( $selected_structure, array( 1, 2 ), true ) ) {
+			$selected_structure = false;
+		}
+
 		$product_permalink_structure = 0 === $selected_structure
 			? $default_product_structure
 			: ( $stored_product_base ? trailingslashit( $stored_product_base ) : '' );

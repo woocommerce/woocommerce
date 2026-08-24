@@ -371,6 +371,33 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The Shop rows are gated on wc_get_page_id( 'shop' ), which returns 0 when the
+	 * woocommerce_get_shop_page_id filter yields a truthy non-numeric value. A stored base
+	 * matching a hidden Shop row must fall back to Custom base — otherwise no rendered radio is
+	 * checked at all.
+	 *
+	 * @testdox Should check "Custom base" when the stored structure's Shop row is not rendered.
+	 */
+	public function test_shop_structure_falls_back_to_custom_when_shop_rows_are_hidden(): void {
+		$permalinks                 = (array) get_option( 'woocommerce_permalinks', array() );
+		$permalinks['product_base'] = '/shop';
+		update_option( 'woocommerce_permalinks', $permalinks );
+
+		$non_numeric_shop_page       = static fn() => 'abc';
+		$this->registered_cleanups[] = static function () use ( $non_numeric_shop_page ): void {
+			remove_filter( 'woocommerce_get_shop_page_id', $non_numeric_shop_page, 10 );
+		};
+		add_filter( 'woocommerce_get_shop_page_id', $non_numeric_shop_page );
+
+		$xpath  = $this->get_xpath( $this->render_settings() );
+		$radios = $xpath->query( '//input[@name="product_permalink"]' );
+
+		$this->assertSame( 2, $radios->length, 'Only the Default and Custom base radios should render without a Shop page.' );
+		$this->assertFalse( $radios->item( 0 )->hasAttribute( 'checked' ), 'Default must not be checked for a stored Shop-style base.' );
+		$this->assertTrue( $radios->item( 1 )->hasAttribute( 'checked' ), 'Custom base should be checked when the matching Shop row is not rendered.' );
+	}
+
+	/**
 	 * Both permalink fields are free-form request input; an array reaching trim() or
 	 * wc_sanitize_permalink() is a fatal, since both are declared to take a string.
 	 *
