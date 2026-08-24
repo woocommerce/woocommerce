@@ -29,7 +29,16 @@ register( store );
 
 export const ITEMS_STORE_NAME = STORE_NAME;
 
-// We need to provide those types to support type parameters in the selectors.
+/**
+ * Public items store selectors.
+ *
+ * `getItems` maps records by `ItemID` (`number | string`). Consumers that
+ * previously annotated its result as `Map< number, ... >` should migrate to
+ * `Map< ItemID, ... >` and narrow keys before numeric-only operations.
+ *
+ * The explicit `getItems` type preserves its generic item inference, which
+ * `SelectFromMap` removes.
+ */
 export type ItemsSelector = Omit<
 	// SelectFromMap removes type parameters, so we need to explicitly provide the generic type.
 	SelectFromMap< typeof selectors >,

@@ -11,6 +11,14 @@ import { getTotalCountResourceName } from './utils';
 
 import { ItemType, ItemsState, Query, ItemID, ItemInfer } from './types';
 
+/**
+ * Public type for the `getItems` selector.
+ *
+ * Map keys are `ItemID` (`number | string`), rather than the previously
+ * declared `number`. TypeScript consumers assigning the result to a numeric-
+ * keyed map should use `Map< ItemID, ... >` and narrow string keys where a
+ * numeric ID is required.
+ */
 export type getItemsType = < T extends ItemType >(
 	itemType: T,
 	query: Query,
