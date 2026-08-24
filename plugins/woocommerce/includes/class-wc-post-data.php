@@ -608,13 +608,16 @@ class WC_Post_Data {
 			do_action( 'woocommerce_delete_order_items', $postid );
 
 			$wpdb->query(
-				"
+				$wpdb->prepare(
+					"
 				DELETE {$wpdb->prefix}woocommerce_order_items, {$wpdb->prefix}woocommerce_order_itemmeta
 				FROM {$wpdb->prefix}woocommerce_order_items
 				JOIN {$wpdb->prefix}woocommerce_order_itemmeta ON {$wpdb->prefix}woocommerce_order_items.order_item_id = {$wpdb->prefix}woocommerce_order_itemmeta.order_item_id
-				WHERE {$wpdb->prefix}woocommerce_order_items.order_id = '{$postid}';
-				"
-			); // WPCS: unprepared SQL ok.
+				WHERE {$wpdb->prefix}woocommerce_order_items.order_id = %d;
+					",
+					$postid
+				)
+			);
 
 			do_action( 'woocommerce_deleted_order_items', $postid );
 		}
@@ -686,12 +689,12 @@ class WC_Post_Data {
 	 * @param array  $old_tt_ids  The old array of term taxonomy IDs.
 	 *
 	 * @since 10.4.0
-	 * @deprecated 11.1.0 Product term-count consistency is now handled by the TermCount service.
+	 * @deprecated 11.2.0 Product term-count consistency is now handled by the TermCount service.
 	 *
 	 * @return void
 	 */
 	public static function recount_terms_for_product_visibility_change( $object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids ) {
-		wc_deprecated_function( __FUNCTION__, '11.1.0' );
+		wc_deprecated_function( __FUNCTION__, '11.2.0' );
 
 		if ( 'product_visibility' !== $taxonomy ) {
 			return;

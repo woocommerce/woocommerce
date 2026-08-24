@@ -8,6 +8,7 @@
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
 
 /**
  * Class WC_Core_Functions_Test
@@ -338,6 +339,29 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		delete_option( 'woocommerce_feature_point_of_sale_enabled' );
 		wc_update_1100_enable_point_of_sale_feature();
 		$this->assertSame( 'yes', get_option( 'woocommerce_feature_point_of_sale_enabled' ) );
+	}
+
+	/**
+	 * @testdox Migration registers and removes the deprecated variation gallery feature option.
+	 */
+	public function test_wc_update_11101_remove_deprecated_variation_gallery_option(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$db_updates = WC_Install::get_db_update_callbacks();
+		$this->assertArrayHasKey( '11.1.0-1', $db_updates );
+		$this->assertContains( 'wc_update_11101_remove_deprecated_variation_gallery_option', $db_updates['11.1.0-1'] );
+
+		delete_option( VariationGalleryPackage::ENABLE_OPTION_NAME );
+		wc_update_11101_remove_deprecated_variation_gallery_option();
+		$this->assertFalse( get_option( VariationGalleryPackage::ENABLE_OPTION_NAME ) );
+
+		update_option( VariationGalleryPackage::ENABLE_OPTION_NAME, 'no' );
+		wc_update_11101_remove_deprecated_variation_gallery_option();
+		$this->assertFalse( get_option( VariationGalleryPackage::ENABLE_OPTION_NAME ) );
+
+		update_option( VariationGalleryPackage::ENABLE_OPTION_NAME, 'yes' );
+		wc_update_11101_remove_deprecated_variation_gallery_option();
+		$this->assertFalse( get_option( VariationGalleryPackage::ENABLE_OPTION_NAME ) );
 	}
 
 	/**
