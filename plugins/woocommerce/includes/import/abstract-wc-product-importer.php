@@ -501,16 +501,9 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		if ( isset( $data['raw_attributes'] ) ) {
 			$attributes = array();
 
-			// Checked against the parent as it stands, before get_variation_parent_attributes()
-			// promotes any matching attribute to "used for variations" and saves the product.
-			// Refusing after that point would leave the parent permanently changed by a row that
-			// went on to import nothing.
-			//
-			// Leaving an unmatched attribute out instead of refusing stores the variation as the CSV
-			// did not describe it: any parent attribute left unspecified becomes a catch-all matching
-			// every value, replacing whatever the variation already had, and the row still reports
-			// success. validate_new_variation_attributes() refuses the same row when the SKU is new,
-			// so refusing here too keeps the two paths from disagreeing.
+			// Refused before get_variation_parent_attributes(), which saves the parent: a row that
+			// imports nothing must not change the product. Skipping the attribute instead would blank
+			// it into a catch-all matching every value.
 			$declared_attributes = $parent->get_attributes();
 
 			foreach ( $data['raw_attributes'] as $attribute ) {
@@ -532,8 +525,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 				$attribute_name = $this->get_variation_attribute_key( $attribute );
 
-				// Every named attribute is on the parent by now, so this only fires if promoting it
-				// for variations did not stick.
+				// Every named attribute is on the parent by now; this only fires if promotion failed.
 				if ( ! isset( $parent_attributes[ $attribute_name ] ) || ! $parent_attributes[ $attribute_name ]->get_variation() ) {
 					throw new Exception( esc_html( $this->get_unmatched_variation_attribute_message( $attribute, $parent_attributes ) ) );
 				}
@@ -585,14 +577,11 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	/**
 	 * Get the parent attribute key a variation row's attribute resolves to.
 	 *
-	 * Every caller that needs this key must go through here. Deciding whether a row can be imported
-	 * and importing it used to resolve the key separately, which silently stored a row as a catch-all
-	 * "any" variation whenever the two disagreed.
-	 *
-	 * When the global attribute is missing, the key is derived rather than looked up, because
-	 * get_attribute_taxonomy_id() creates it: a row that is only being inspected would leave a stray
-	 * site-wide attribute behind. Deriving is equivalent because wc_create_attribute() normalizes the
-	 * slug it stores exactly as wc_attribute_taxonomy_slug() does.
+	 * Deciding whether a row can be imported and importing it must resolve the key the same way, or a
+	 * row passes one and is stored as a catch-all "any" variation by the other. When the global
+	 * attribute is missing the key is derived rather than looked up, since get_attribute_taxonomy_id()
+	 * would create it. Deriving matches, because wc_create_attribute() normalizes the slug it stores
+	 * exactly as wc_attribute_taxonomy_slug() does.
 	 *
 	 * @since 11.1.0
 	 *
@@ -608,9 +597,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 		$attribute_name = $this->get_attribute_taxonomy_name_from_raw_name( $raw_name );
 
-		// Resolve through the overridable lookup when the global attribute already exists, so
-		// extensions that customize it keep applying. It only creates an attribute when none exists,
-		// which is the side effect this method must never cause.
+		// Safe to use the overridable lookup once the attribute exists, and it keeps extensions that
+		// customize it working.
 		if ( wc_attribute_taxonomy_id_by_name( $attribute_name ) ) {
 			return sanitize_title( wc_attribute_taxonomy_name_by_id( $this->get_attribute_taxonomy_id( $raw_name ) ) );
 		}
@@ -648,9 +636,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		$raw_name   = isset( $attribute['name'] ) ? $attribute['name'] : '';
 		$custom_key = sanitize_title( $raw_name );
 
-		// A row marking an attribute as global when the parent stores it as a custom attribute is the
-		// common cause. Naming only the attribute would send the merchant looking for the wrong
-		// problem, since the parent does have it, just not as a global attribute.
+		// The parent does have the attribute here, just not as a global one, so naming it alone would
+		// send the merchant looking for the wrong problem.
 		if ( ! empty( $attribute['taxonomy'] ) && isset( $parent_attributes[ $custom_key ] ) && ! $parent_attributes[ $custom_key ]->is_taxonomy() ) {
 			return sprintf(
 				/* translators: %s: attribute name */
@@ -669,8 +656,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	/**
 	 * Get the value a variation row's attribute is stored as.
 	 *
-	 * Shares the resolution with whatever decides whether the row can be imported, for the same
-	 * reason as get_variation_attribute_key().
+	 * Shared with the import check for the same reason as get_variation_attribute_key().
 	 *
 	 * @since 11.1.0
 	 *
