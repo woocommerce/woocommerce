@@ -1729,7 +1729,7 @@ function wc_get_price_to_display( $product, $args = array() ) {
 /**
  * Returns the product categories in a list.
  *
- * @since 11.1.0 Added the `$orderby` argument.
+ * @since 11.2.0 Added the `$orderby` argument.
  *
  * @param int    $product_id Product ID.
  * @param string $sep (default: ', ').

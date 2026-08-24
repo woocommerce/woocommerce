@@ -12,7 +12,7 @@
  *
  * @see         https://woocommerce.com/document/template-structure/
  * @package     WooCommerce\Templates
- * @version     11.1.0
+ * @version     11.2.0
  */
 
 use Automattic\WooCommerce\Enums\ProductType;
@@ -40,7 +40,7 @@ global $product;
 	 * @param string     $orderby Ordering mode passed to wc_get_product_category_list().
 	 * @param WC_Product $product Product object.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 */
 	$product_category_orderby = apply_filters( 'woocommerce_product_meta_category_orderby', 'breadcrumb', $product );
 
