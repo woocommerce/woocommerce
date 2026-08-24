@@ -24,22 +24,35 @@ const reducer: Reducer< ItemsState, Action > = (
 	action
 ) => {
 	switch ( action.type ) {
-		case TYPES.SET_ITEM:
+		case TYPES.SET_ITEM: {
 			const itemData = state.data[ action.itemType ] || {};
+			// Leaderboards are query-scoped. Update every cached query containing
+			// the public ID, or retain the raw-ID behavior when none exists yet.
+			const matchingIds =
+				action.itemType === 'leaderboards'
+					? Object.keys( itemData ).filter(
+							( id ) => itemData[ id ].id === action.id
+					  )
+					: [];
+			const ids = matchingIds.length ? matchingIds : [ action.id ];
 			return {
 				...state,
 				data: {
 					...state.data,
-					[ action.itemType ]: {
-						...itemData,
-						[ action.id ]: {
-							...( itemData[ action.id ] || {} ),
-							...action.item,
-						},
-					},
+					[ action.itemType ]: ids.reduce(
+						( data, id ) => ( {
+							...data,
+							[ id ]: {
+								...( itemData[ id ] || {} ),
+								...action.item,
+							},
+						} ),
+						itemData
+					),
 				},
 			};
-		case TYPES.SET_ITEMS:
+		}
+		case TYPES.SET_ITEMS: {
 			const ids: Array< ItemID > = [];
 			const resourceName = getResourceName(
 				action.itemType,
@@ -71,6 +84,7 @@ const reducer: Reducer< ItemsState, Action > = (
 					},
 				},
 			};
+		}
 		case TYPES.SET_ITEMS_TOTAL_COUNT:
 			const totalResourceName = getTotalCountResourceName(
 				action.itemType,

@@ -9,20 +9,20 @@ import createSelector from 'rememo';
 import { getResourceName } from '../utils';
 import { getTotalCountResourceName } from './utils';
 
-import { ItemType, ItemsState, Query, ItemInfer } from './types';
+import { ItemType, ItemsState, Query, ItemID, ItemInfer } from './types';
 
 export type getItemsType = < T extends ItemType >(
 	itemType: T,
 	query: Query,
-	defaultValue?: Map< number, ItemInfer< T > | undefined >
-) => Map< number, ItemInfer< T > | undefined >;
+	defaultValue?: Map< ItemID, ItemInfer< T > | undefined >
+) => Map< ItemID, ItemInfer< T > | undefined >;
 
 type getItemsSelectorType = < T extends ItemType >(
 	state: ItemsState,
 	itemType: T,
 	query: Query,
-	defaultValue?: Map< number, ItemInfer< T > | undefined >
-) => Map< number, Map< number, ItemInfer< T > | undefined > >;
+	defaultValue?: Map< ItemID, ItemInfer< T > | undefined >
+) => Map< ItemID, ItemInfer< T > | undefined >;
 
 export const getItems = createSelector< getItemsSelectorType >(
 	( state, itemType, query, defaultValue = new Map() ) => {
@@ -40,9 +40,9 @@ export const getItems = createSelector< getItemsSelectorType >(
 		if ( ! ids ) {
 			return defaultValue;
 		}
-		return ids.reduce( ( map, id: number ) => {
+		return ids.reduce( ( map, id: ItemID ) => {
 			const item = state.data[ itemType ]?.[ id ];
-			map.set( ( item?.id ?? id ) as number, item );
+			map.set( item?.id ?? id, item );
 			return map;
 		}, new Map() );
 	},

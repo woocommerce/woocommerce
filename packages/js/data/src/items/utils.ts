@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import { getResourceName } from '../utils';
-import { ItemInfer, ItemType, Query } from './types';
+import { ItemID, ItemInfer, ItemType, Query } from './types';
 import { ItemsSelector } from './';
 
 /**
@@ -22,7 +22,7 @@ export function searchItemsByString< T extends ItemType >(
 ) {
 	const { getItems, getItemsError, isResolving } = selector;
 
-	const items: Record< number, ItemInfer< T > | undefined > = {};
+	const items: Record< ItemID, ItemInfer< T > | undefined > = {};
 	let isRequesting = false;
 	let isError = false;
 	search.forEach( ( searchWord ) => {
