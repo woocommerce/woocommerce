@@ -502,8 +502,6 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			$attributes        = array();
 			$parent_attributes = $this->get_variation_parent_attributes( $data['raw_attributes'], $parent );
 
-			$unmatched = null;
-
 			foreach ( $data['raw_attributes'] as $attribute ) {
 				if ( empty( $attribute['name'] ) ) {
 					continue;
@@ -511,11 +509,21 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 				$attribute_name = $this->get_variation_attribute_key( $attribute );
 
-				// An attribute the parent does not offer is left out, which is how a row carrying an
-				// extra attribute still imports on the ones that do match.
+				// Leaving the attribute out instead stores the variation as the CSV did not describe
+				// it: any parent attribute left unspecified becomes a catch-all matching every value,
+				// replacing whatever the variation already had, and the row still reports success.
+				// validate_new_variation_attributes() refuses the same row when the SKU is new, so
+				// refusing here too keeps the two paths from disagreeing.
 				if ( ! isset( $parent_attributes[ $attribute_name ] ) || ! $parent_attributes[ $attribute_name ]->get_variation() ) {
-					$unmatched = null === $unmatched ? $attribute : $unmatched;
-					continue;
+					throw new Exception(
+						esc_html(
+							sprintf(
+								/* translators: %s: reason the attribute matches nothing on the parent product */
+								__( 'Variation cannot be imported: %s', 'woocommerce' ),
+								$this->get_unmatched_variation_attribute_reason( $attribute, $parent_attributes )
+							)
+						)
+					);
 				}
 
 				$parent_attribute = $parent_attributes[ $attribute_name ];
@@ -523,21 +531,6 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				$raw_value        = isset( $attribute['value'] ) ? current( (array) $attribute['value'] ) : '';
 
 				$attributes[ $attribute_key ] = $this->get_variation_attribute_value( false === $raw_value ? '' : $raw_value, $parent_attribute );
-			}
-
-			// Storing nothing for a row that did name attributes turns the variation into a catch-all
-			// that matches every combination, and deletes the attributes it already had, all reported
-			// as a successful import. Fail the row instead so the reason reaches the merchant.
-			if ( null !== $unmatched && ! $attributes ) {
-				throw new Exception(
-					esc_html(
-						sprintf(
-							/* translators: %s: reason the attribute matches nothing on the parent product */
-							__( 'Variation cannot be imported: %s', 'woocommerce' ),
-							$this->get_unmatched_variation_attribute_reason( $unmatched, $parent_attributes )
-						)
-					)
-				);
 			}
 
 			$variation->set_attributes( $attributes );
@@ -601,16 +594,16 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			return sanitize_title( $raw_name );
 		}
 
+		$attribute_name = $this->get_attribute_taxonomy_name_from_raw_name( $raw_name );
+
 		// Resolve through the overridable lookup when the global attribute already exists, so
 		// extensions that customize it keep applying. It only creates an attribute when none exists,
 		// which is the side effect this method must never cause.
-		if ( $this->get_existing_attribute_taxonomy_id( $raw_name ) ) {
+		if ( wc_attribute_taxonomy_id_by_name( $attribute_name ) ) {
 			return sanitize_title( wc_attribute_taxonomy_name_by_id( $this->get_attribute_taxonomy_id( $raw_name ) ) );
 		}
 
-		$slug = wc_attribute_taxonomy_slug( $this->get_attribute_taxonomy_name_from_raw_name( $raw_name ) );
-
-		return sanitize_title( wc_attribute_taxonomy_name( $slug ) );
+		return sanitize_title( wc_attribute_taxonomy_name( wc_attribute_taxonomy_slug( $attribute_name ) ) );
 	}
 
 	/**

@@ -39,7 +39,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	 * @testdox variations need to set the status back to published if parent product is a draft
 	 */
 	public function test_expand_data_with_draft_variable() {
-		$csv_file = __DIR__ . '/sample.csv';
+		$csv_file = dirname( __FILE__ ) . '/sample.csv';
 		$raw_data = array(
 			array(
 				'type'      => ProductType::VARIABLE,
@@ -101,7 +101,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	 * @testdox Test that the importer calculates the percent complete as 99 when it's >= 99.5% through the file.
 	 */
 	public function test_import_completion_issue_36618_lines_remaining() {
-		$csv_file = __DIR__ . '/sample2.csv';
+		$csv_file = dirname( __FILE__ ) . '/sample2.csv';
 		$args     = array(
 			'lines' => 200,
 		);
@@ -115,7 +115,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	 * @testdox Test that the importer calculates the percent complete as 100 when it's at the end of the file.
 	 */
 	public function test_import_completion_issue_36618_end_of_file() {
-		$csv_file = __DIR__ . '/sample2.csv';
+		$csv_file = dirname( __FILE__ ) . '/sample2.csv';
 		$args     = array(
 			'lines' => 201,
 		);
@@ -797,7 +797,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 			'Expected the failure to point at the global flag'
 		);
 		$this->assertEmpty( $data['updated'], 'Expected the row not to be counted as an update' );
-		$this->assertSame( 0, (int) wc_attribute_taxonomy_id_by_name( 'colour-airr133' ), 'Expected no global attribute to be created site-wide for a row the parent does not offer as a global attribute' );
+		$this->assertSame( 0, (int) wc_attribute_taxonomy_id_by_name( 'colour-airr133' ), 'Expected no global attribute to be created site-wide' );
 
 		$stored = wc_get_product( $variation->get_id() );
 		$this->assertSame( array( 'colour-airr133' => 'Red' ), $stored->get_attributes(), 'Expected the existing variation to keep its attributes' );
@@ -807,69 +807,43 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test that a row whose global attribute name cannot be created still fails loudly instead of wiping the variation's attributes.
+	 * @testdox Test that a row where only one of several attributes is unmatched fails instead of blanking that attribute into a catch-all.
 	 */
-	public function test_import_of_existing_variation_fails_when_the_global_attribute_name_is_unusable() {
-		$attribute = new WC_Product_Attribute();
-		$attribute->set_name( 'fabric-composition-and-care-notes' );
-		$attribute->set_options( array( 'Cotton', 'Wool' ) );
-		$attribute->set_variation( true );
+	public function test_import_of_existing_variation_fails_when_only_one_attribute_is_unmatched() {
+		$size = new WC_Product_Attribute();
+		$size->set_name( 'Size' );
+		$size->set_options( array( 'S', 'M' ) );
+		$size->set_variation( true );
+
+		$colour = new WC_Product_Attribute();
+		$colour->set_name( 'Colour' );
+		$colour->set_options( array( 'Red', 'Blue' ) );
+		$colour->set_variation( true );
 
 		$product = new WC_Product_Variable();
-		$product->set_name( 'Import Long Attr Tee' );
-		$product->set_sku( 'IMPORT-LONGATTR-PARENT' );
-		$product->set_attributes( array( $attribute ) );
+		$product->set_name( 'Import Two Attr Tee' );
+		$product->set_sku( 'IMPORT-TWOATTR-PARENT' );
+		$product->set_attributes( array( $size, $colour ) );
 		$product->save();
 
 		$variation = new WC_Product_Variation();
 		$variation->set_parent_id( $product->get_id() );
-		$variation->set_sku( 'IMPORT-LONGATTR-COTTON' );
-		$variation->set_attributes( array( 'fabric-composition-and-care-notes' => 'Cotton' ) );
-		$variation->save();
-
-		// The slug exceeds wc_get_attribute_slug_max_byte_length(), so wc_create_attribute() would
-		// reject it. That rejection used to be the only thing failing this row.
-		$data = $this->import_with_update_existing(
-			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-LONGATTR-COTTON,Import Long Attr Tee - Cotton,IMPORT-LONGATTR-PARENT,fabric-composition-and-care-notes,Cotton,1,12\n",
-			'import-existing-variation-unusable-global-name.csv'
+		$variation->set_sku( 'IMPORT-TWOATTR-S-RED' );
+		$variation->set_attributes(
+			array(
+				'size'   => 'S',
+				'colour' => 'Red',
+			)
 		);
-
-		$this->assertCount( 1, $data['failed'], 'Expected the row to fail rather than be reported as a successful update' );
-		$this->assertEmpty( $data['updated'], 'Expected the row not to be counted as an update' );
-
-		$stored = wc_get_product( $variation->get_id() );
-		$this->assertSame( array( 'fabric-composition-and-care-notes' => 'Cotton' ), $stored->get_attributes(), 'Expected the existing variation to keep its attributes' );
-
-		WC_Helper_Product::delete_product( $variation->get_id() );
-		WC_Helper_Product::delete_product( $product->get_id() );
-	}
-
-	/**
-	 * @testdox Test that a row carrying an extra attribute the parent does not offer still imports on the attributes that do match.
-	 */
-	public function test_import_of_existing_variation_keeps_importing_when_only_some_attributes_match() {
-		$attribute = new WC_Product_Attribute();
-		$attribute->set_name( 'Size' );
-		$attribute->set_options( array( 'S', 'M' ) );
-		$attribute->set_variation( true );
-
-		$product = new WC_Product_Variable();
-		$product->set_name( 'Import Partial Tee' );
-		$product->set_sku( 'IMPORT-PARTIAL-PARENT' );
-		$product->set_attributes( array( $attribute ) );
-		$product->save();
-
-		$variation = new WC_Product_Variation();
-		$variation->set_parent_id( $product->get_id() );
-		$variation->set_sku( 'IMPORT-PARTIAL-S' );
-		$variation->set_attributes( array( 'size' => 'S' ) );
 		$variation->save();
 
-		$csv_file = trailingslashit( get_temp_dir() ) . 'import-partial-attribute-match.csv';
+		// Only the second column is mis-flagged as global. The first still matches, which used to be
+		// enough for the row to import and blank the second attribute into "any colour".
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-one-unmatched-attribute.csv';
 		file_put_contents( // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
 			$csv_file,
 			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Attribute 2 name,Attribute 2 value(s),Attribute 2 global,Regular price\n"
-			. "variation,IMPORT-PARTIAL-S,Import Partial Tee - S,IMPORT-PARTIAL-PARENT,Size,S,0,Colour,Red,0,12\n"
+			. "variation,IMPORT-TWOATTR-S-RED,Import Two Attr Tee,IMPORT-TWOATTR-PARENT,Size,S,0,Colour,Red,1,12\n"
 		);
 
 		$importer = new WC_Product_CSV_Importer(
@@ -892,14 +866,61 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 				),
 			)
 		);
-		$data     = $importer->import();
+
+		$data = $importer->import();
 
 		wp_delete_file( $csv_file );
 
-		$this->assertEmpty( $data['failed'], 'Expected the row to import on the attribute the parent does offer' );
+		$this->assertCount( 1, $data['failed'], 'Expected the row to fail rather than be reported as a successful update' );
+		$this->assertEmpty( $data['updated'], 'Expected the row not to be counted as an update' );
 
 		$stored = wc_get_product( $variation->get_id() );
-		$this->assertSame( array( 'size' => 'S' ), $stored->get_attributes(), 'Expected the matching attribute to be stored and the unknown one ignored' );
+		$this->assertSame(
+			array(
+				'size'   => 'S',
+				'colour' => 'Red',
+			),
+			$stored->get_attributes(),
+			'Expected the variation to keep both attributes instead of matching every colour'
+		);
+
+		WC_Helper_Product::delete_product( $variation->get_id() );
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Test that a row whose global attribute name cannot be created fails without wiping the variation's attributes.
+	 */
+	public function test_import_of_existing_variation_fails_when_the_global_attribute_name_is_unusable() {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'fabric-composition-and-care-notes' );
+		$attribute->set_options( array( 'Cotton', 'Wool' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Long Attr Tee' );
+		$product->set_sku( 'IMPORT-LONGATTR-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_sku( 'IMPORT-LONGATTR-COTTON' );
+		$variation->set_attributes( array( 'fabric-composition-and-care-notes' => 'Cotton' ) );
+		$variation->save();
+
+		// The slug exceeds wc_get_attribute_slug_max_byte_length(), so wc_create_attribute() would
+		// reject it. That rejection used to be the only thing failing this row.
+		$data = $this->import_with_update_existing(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-LONGATTR-COTTON,Import Long Attr Tee,IMPORT-LONGATTR-PARENT,fabric-composition-and-care-notes,Cotton,1,12\n",
+			'import-existing-variation-unusable-global-name.csv'
+		);
+
+		$this->assertCount( 1, $data['failed'], 'Expected the row to fail rather than be reported as a successful update' );
+		$this->assertEmpty( $data['updated'], 'Expected the row not to be counted as an update' );
+
+		$stored = wc_get_product( $variation->get_id() );
+		$this->assertSame( array( 'fabric-composition-and-care-notes' => 'Cotton' ), $stored->get_attributes(), 'Expected the existing variation to keep its attributes' );
 
 		WC_Helper_Product::delete_product( $variation->get_id() );
 		WC_Helper_Product::delete_product( $product->get_id() );
@@ -1030,16 +1051,14 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$color_attribute->set_name( $color_taxonomy );
 		$color_attribute->set_options( array( '红色', '绿色' ) );
 		$color_attribute->set_visible( true );
-		$color_attribute->set_variation( false );
-		// Initially false.
+		$color_attribute->set_variation( false ); // Initially false.
 
 		$size_attribute = new WC_Product_Attribute();
 		$size_attribute->set_id( $size_attr_id );
 		$size_attribute->set_name( $size_taxonomy );
 		$size_attribute->set_options( array( '大码', '小码' ) );
 		$size_attribute->set_visible( true );
-		$size_attribute->set_variation( false );
-		// Initially false.
+		$size_attribute->set_variation( false ); // Initially false.
 
 		$product->set_attributes( array( $color_attribute, $size_attribute ) );
 		$product->save();
