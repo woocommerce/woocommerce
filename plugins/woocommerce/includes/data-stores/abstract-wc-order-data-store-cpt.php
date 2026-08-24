@@ -781,6 +781,58 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	}
 
 	/**
+	 * Delete selected order items by ID.
+	 *
+	 * @since 11.0.2
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param int[]    $ids   Order item IDs to delete.
+	 * @return void
+	 */
+	public function delete_items_by_ids( $order, $ids ) {
+		global $wpdb;
+
+		if ( ! $order->get_id() || empty( $ids ) ) {
+			return;
+		}
+
+		$sanitized_ids = array_values(
+			array_unique(
+				array_filter(
+					array_map( 'intval', (array) $ids ),
+					static fn( $id ) => $id > 0
+				)
+			)
+		);
+		if ( empty( $sanitized_ids ) ) {
+			return;
+		}
+
+		$ids_placeholders = implode( ', ', array_fill( 0, count( $sanitized_ids ), '%d' ) );
+
+		$wpdb->query(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $ids_placeholders is generated above.
+				"DELETE itemmeta FROM {$wpdb->prefix}woocommerce_order_itemmeta as itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items as items WHERE itemmeta.order_item_id = items.order_item_id AND items.order_id = %d AND items.order_item_id IN ($ids_placeholders)",
+				array_merge( array( $order->get_id() ), $sanitized_ids )
+			)
+		);
+		$wpdb->query(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $ids_placeholders is generated above.
+				"DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_id IN ($ids_placeholders)",
+				array_merge( array( $order->get_id() ), $sanitized_ids )
+			)
+		);
+
+		foreach ( $sanitized_ids as $item_id ) {
+			wp_cache_delete( 'item-' . $item_id, 'order-items' );
+		}
+
+		$this->clear_caches( $order );
+	}
+
+	/**
 	 * Remove all line items (products, coupons, shipping, taxes) from the order.
 	 *
 	 * @param WC_Order $order Order object.
