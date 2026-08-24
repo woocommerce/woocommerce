@@ -1043,6 +1043,57 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test that a row whose Parent names another variation is refused without detaching the variation.
+	 */
+	public function test_import_of_variation_whose_parent_is_a_variation_is_refused() {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'S', 'M' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Bad Parent Tee' );
+		$product->set_sku( 'IMPORT-BADPARENT-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$sibling = new WC_Product_Variation();
+		$sibling->set_parent_id( $product->get_id() );
+		$sibling->set_sku( 'IMPORT-BADPARENT-M' );
+		$sibling->set_attributes( array( 'size' => 'M' ) );
+		$sibling->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_sku( 'IMPORT-BADPARENT-S' );
+		$variation->set_attributes( array( 'size' => 'S' ) );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+
+		// Parent names a variation. set_props() applies parent_id before set_variation_data() is
+		// reached, so the row has to be refused earlier or the variation is left attached to nothing.
+		$data = $this->import_with_update_existing(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-BADPARENT-S,Import Bad Parent Tee,IMPORT-BADPARENT-M,Size,S,0,25\n",
+			'import-parent-is-a-variation.csv'
+		);
+
+		$this->assertCount( 1, $data['failed'], 'Expected the row to fail' );
+		$this->assertSame(
+			'Variation cannot be imported: Parent product cannot be a product variation',
+			html_entity_decode( $data['failed'][0]->get_error_message(), ENT_QUOTES ),
+			'Expected the failure to name the invalid parent'
+		);
+
+		$stored = wc_get_product( $variation->get_id() );
+		$this->assertSame( $product->get_id(), $stored->get_parent_id(), 'Expected the variation to keep its real parent' );
+		$this->assertSame( array( 'size' => 'S' ), $stored->get_attributes(), 'Expected the variation to keep its attributes' );
+
+		WC_Helper_Product::delete_product( $variation->get_id() );
+		WC_Helper_Product::delete_product( $sibling->get_id() );
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
 	 * @testdox Test that a partial update row omitting the Parent column updates the variation instead of failing.
 	 */
 	public function test_import_of_existing_variation_without_a_parent_column_still_updates() {
