@@ -103,6 +103,34 @@ test.describe( 'Product permalink settings', () => {
 			await expect( defaultRadio ).toBeChecked();
 			await expect( defaultRadio ).toHaveValue( '' );
 			await expect( customBase ).toHaveValue( expectedDefaultBase );
+
+			// A single Tab from the checked radio lands on the Custom base field — the radios
+			// share one tab stop — and focusing the field selects Custom base. Saving from there
+			// posts the prefilled Default structure through the custom branch, which the save
+			// path normalizes back to Default's bare slug: the slash-prefixed form it would
+			// otherwise store builds broken rewrite rules under index.php (PATHINFO) permalinks.
+			await customBase.focus();
+			await expect(
+				page.locator( '#woocommerce_custom_selection' )
+			).toBeChecked();
+
+			await saveAndReload();
+
+			await expect( defaultRadio ).toBeChecked();
+			await expect( customBase ).toHaveValue( expectedDefaultBase );
+
+			const expectedBareSlug = expectedDefaultBase.replace(
+				/^\/|\/$/g,
+				''
+			);
+			const storedPermalinks = JSON.parse(
+				(
+					await wpCLI(
+						'wp option get woocommerce_permalinks --format=json'
+					)
+				 ).stdout.trim()
+			);
+			expect( storedPermalinks.product_base ).toBe( expectedBareSlug );
 		} finally {
 			await wpCLI(
 				`wp option update woocommerce_permalinks '${ originalPermalinks }' --format=json`
