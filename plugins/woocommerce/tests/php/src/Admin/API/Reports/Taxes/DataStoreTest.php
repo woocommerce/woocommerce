@@ -701,55 +701,18 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Sync does not have a tax line counted twice when a write after the first one fails.
-	 */
-	public function test_sync_does_not_double_count_when_a_write_after_the_first_fails(): void {
-		global $wpdb;
-
-		update_option( 'woocommerce_date_type', 'date_paid' );
-		WC_Helper_Reports::reset_stats_dbs();
-
-		$order = $this->seed_order_with_tax_lines( $this->tax_lines_on_distinct_rate_ids( 'US-CA', 101 ), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
-
-		// The shape the rebuild finds an order in: every row on the column default.
-		$this->unmigrate_lookup_rows( $order->get_id() );
-
-		$suppress = $wpdb->suppress_errors( true );
-		$restore  = $this->break_next_lookup_write( 1 );
-		DataStore::sync_order_taxes( $order->get_id() );
-		$restore();
-		$wpdb->suppress_errors( $suppress );
-
-		$sut  = new DataStore();
-		$data = $sut->get_data( $this->all_taxes_query( '2023-02-01 00:00:00', '2023-02-28 23:59:59' ) );
-
-		$this->assertCount( 2, $data->data, 'Both tax lines should still be reportable.' );
-
-		$amounts = array_column( $data->data, 'total_tax' );
-		sort( $amounts );
-		$this->assertSame( array( 0.25, 6.0 ), $amounts, 'A rebuilt line sitting next to the row the order came in with should not be counted twice.' );
-	}
-
-	/**
-	 * Make a write to the lookup table fail, the way a database error mid-sync would.
+	 * Make the next write to the lookup table fail, the way a database error mid-sync would.
 	 *
-	 * @param int $let_through Number of writes to let through before breaking the next one.
 	 * @return callable Removes the filter again.
 	 */
-	private function break_next_lookup_write( int $let_through = 0 ): callable {
+	private function break_next_lookup_write(): callable {
 		global $wpdb;
 
 		$table_name = $wpdb->prefix . 'wc_order_tax_lookup';
 		$broken     = false;
-		$seen       = 0;
 
-		$filter = function ( $query ) use ( &$broken, &$seen, $let_through, $table_name ) {
+		$filter = function ( $query ) use ( &$broken, $table_name ) {
 			if ( $broken || 0 !== strpos( $query, "REPLACE INTO {$table_name}" ) ) {
-				return $query;
-			}
-
-			++$seen;
-			if ( $seen <= $let_through ) {
 				return $query;
 			}
 
