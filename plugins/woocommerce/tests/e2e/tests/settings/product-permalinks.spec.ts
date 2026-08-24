@@ -12,9 +12,10 @@ test.describe( 'Product permalink settings', () => {
 		page,
 		baseURL,
 	} ) => {
-		if ( ! baseURL ) {
-			throw new Error( 'Playwright baseURL is required.' );
-		}
+		const resolvedBaseURL = baseURL ?? '';
+		expect( resolvedBaseURL, 'Playwright baseURL is required.' ).not.toBe(
+			''
+		);
 
 		await page.goto( 'wp-admin/options-permalink.php' );
 
@@ -42,7 +43,7 @@ test.describe( 'Product permalink settings', () => {
 		// so a UI-driven restore could never put it back.
 		const originalPermalinks = (
 			await wpCLI( 'wp option get woocommerce_permalinks --format=json' )
-		 ).stdout.trim();
+		).stdout.trim();
 
 		try {
 			const defaultRadio = productPermalinkRadios.nth( 0 );
@@ -61,7 +62,10 @@ test.describe( 'Product permalink settings', () => {
 			// Derive the canonical `/base/` from the preview rather than hardcoding a translated
 			// product slug. `/\/$/` drops the trailing slash so a root install contributes an
 			// empty prefix and a subdirectory install (`/wp/`) contributes `/wp`.
-			const sitePath = new URL( baseURL ).pathname.replace( /\/$/, '' );
+			const sitePath = new URL( resolvedBaseURL ).pathname.replace(
+				/\/$/,
+				''
+			);
 			// Assert the example segment first, so a changed preview fails here instead of
 			// silently yielding a wrong base.
 			expect( defaultPreview.pathname ).toMatch( /\/sample-product\/$/ );
@@ -128,7 +132,7 @@ test.describe( 'Product permalink settings', () => {
 					await wpCLI(
 						'wp option get woocommerce_permalinks --format=json'
 					)
-				 ).stdout.trim()
+				).stdout.trim()
 			);
 			expect( storedPermalinks.product_base ).toBe( expectedBareSlug );
 		} finally {
