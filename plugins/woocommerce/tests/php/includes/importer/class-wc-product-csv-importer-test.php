@@ -516,6 +516,275 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Import a single variation row against an existing parent, with no parent row in the CSV.
+	 *
+	 * @param string $csv_body  CSV contents, header row included.
+	 * @param string $file_name Temp file name to write the CSV to.
+	 * @return array Import results.
+	 */
+	private function import_variation_only_row( $csv_body, $file_name ) {
+		$csv_file = trailingslashit( get_temp_dir() ) . $file_name;
+		file_put_contents( $csv_file, $csv_body ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$args = array(
+			'parse'           => true,
+			'update_existing' => true,
+			'mapping'         => array(
+				'Type'                 => 'type',
+				'SKU'                  => 'sku',
+				'Name'                 => 'name',
+				'Parent'               => 'parent_id',
+				'Attribute 1 name'     => 'attributes:name1',
+				'Attribute 1 value(s)' => 'attributes:value1',
+				'Attribute 1 global'   => 'attributes:taxonomy1',
+				'Regular price'        => 'regular_price',
+			),
+		);
+
+		$importer = new WC_Product_CSV_Importer( $csv_file, $args );
+		$data     = $importer->import();
+		wp_delete_file( $csv_file );
+
+		return $data;
+	}
+
+	/**
+	 * @testdox Test that a variation row carrying an attribute value the parent does not offer is skipped, since the storefront could never select it.
+	 */
+	public function test_import_skips_new_variations_with_a_value_the_parent_does_not_offer() {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'S', 'M' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Tee' );
+		$product->set_sku( 'IMPORT-VALUE-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$data = $this->import_variation_only_row(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-VALUE-L,Import Tee - L,IMPORT-VALUE-PARENT,Size,L,0,12\n",
+			'import-unknown-value.csv'
+		);
+
+		$this->assertEmpty( $data['imported_variations'], 'Expected 0 imported variations, got ' . count( $data['imported_variations'] ) );
+		$this->assertCount( 1, $data['skipped'], 'Expected 1 skipped product, got ' . count( $data['skipped'] ) );
+		$this->assertStringContainsString(
+			'is not an option of the parent product',
+			html_entity_decode( $data['skipped'][0]->get_error_message() ),
+			'Expected the skip message to name the unavailable value'
+		);
+		$this->assertFalse( wc_get_product_id_by_sku( 'IMPORT-VALUE-L' ) > 0, 'Expected no variation to be created for a value the parent does not offer' );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Test that a variation row carrying a global attribute term the parent does not offer is skipped.
+	 */
+	public function test_import_skips_new_variations_with_a_taxonomy_value_the_parent_does_not_offer() {
+		$attribute_data = WC_Helper_Product::create_attribute( 'size-airr19', array( 'S', 'M', 'L' ) );
+		$taxonomy       = $attribute_data['attribute_taxonomy'];
+		$small          = get_term_by( 'name', 'S', $taxonomy );
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_id( $attribute_data['attribute_id'] );
+		$attribute->set_name( $taxonomy );
+		$attribute->set_options( array( $small->term_id ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Global Tee' );
+		$product->set_sku( 'IMPORT-TAX-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$data = $this->import_variation_only_row(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-TAX-L,Import Global Tee - L,IMPORT-TAX-PARENT,size-airr19,L,1,12\n",
+			'import-unknown-taxonomy-value.csv'
+		);
+
+		$this->assertEmpty( $data['imported_variations'], 'Expected 0 imported variations, got ' . count( $data['imported_variations'] ) );
+		$this->assertCount( 1, $data['skipped'], 'Expected 1 skipped product, got ' . count( $data['skipped'] ) );
+		// Asserted explicitly so this cannot pass because the global attribute failed to resolve at all,
+		// which would report the "parent has no such attribute" refusal instead.
+		$this->assertStringContainsString(
+			'is not an option of the parent product',
+			html_entity_decode( $data['skipped'][0]->get_error_message() ),
+			'Expected the refusal to be about the value, not about an unresolved attribute'
+		);
+		$this->assertFalse( wc_get_product_id_by_sku( 'IMPORT-TAX-L' ) > 0, 'Expected no variation to be created for a term the parent does not offer' );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+		WC_Helper_Product::delete_attribute( $attribute_data['attribute_id'] );
+	}
+
+	/**
+	 * @testdox Test that a variation row using a global attribute term the parent already offers is still created.
+	 */
+	public function test_import_creates_new_variations_with_a_taxonomy_value_the_parent_offers() {
+		$attribute_data = WC_Helper_Product::create_attribute( 'size-airr19-ok', array( 'S', 'L' ) );
+		$taxonomy       = $attribute_data['attribute_taxonomy'];
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_id( $attribute_data['attribute_id'] );
+		$attribute->set_name( $taxonomy );
+		$attribute->set_options( $attribute_data['term_ids'] );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Global Tee' );
+		$product->set_sku( 'IMPORT-TAX-OK-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$data = $this->import_variation_only_row(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-TAX-OK-L,Import Global Tee - L,IMPORT-TAX-OK-PARENT,size-airr19-ok,L,1,12\n",
+			'import-known-taxonomy-value.csv'
+		);
+
+		$this->assertCount( 1, $data['imported_variations'], 'Expected 1 imported variation, got ' . count( $data['imported_variations'] ) );
+		$this->assertEmpty( $data['skipped'], 'Expected 0 skipped products, got ' . count( $data['skipped'] ) );
+
+		$variation = wc_get_product( $data['imported_variations'][0] );
+		$this->assertEquals( array( $taxonomy => 'l' ), $variation->get_attributes() );
+
+		WC_Helper_Product::delete_product( $variation->get_id() );
+		WC_Helper_Product::delete_product( $product->get_id() );
+		WC_Helper_Product::delete_attribute( $attribute_data['attribute_id'] );
+	}
+
+	/**
+	 * @testdox Test that a variation row is created when an earlier parent row in the same CSV adds the global attribute term it uses.
+	 */
+	public function test_import_creates_new_variations_when_an_earlier_parent_row_adds_the_taxonomy_value() {
+		$attribute_data = WC_Helper_Product::create_attribute( 'size-airr19-widen', array( 'S', 'L' ) );
+		$taxonomy       = $attribute_data['attribute_taxonomy'];
+		$small          = get_term_by( 'name', 'S', $taxonomy );
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_id( $attribute_data['attribute_id'] );
+		$attribute->set_name( $taxonomy );
+		$attribute->set_options( array( $small->term_id ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Widen Tee' );
+		$product->set_sku( 'IMPORT-WIDEN-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		// Parent row first, as WooCommerce exports it: the variation must see the widened term list.
+		$data = $this->import_variation_only_row(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\n"
+			. "variable,IMPORT-WIDEN-PARENT,Import Widen Tee,,size-airr19-widen,\"S, L\",1,\n"
+			. "variation,IMPORT-WIDEN-L,Import Widen Tee - L,IMPORT-WIDEN-PARENT,size-airr19-widen,L,1,12\n",
+			'import-parent-widens-taxonomy.csv'
+		);
+
+		$this->assertCount( 1, $data['imported_variations'], 'Expected the variation to be created after the parent row added the term' );
+		$this->assertEmpty( $data['skipped'], 'Expected 0 skipped products, got ' . count( $data['skipped'] ) );
+
+		WC_Helper_Product::delete_product( $data['imported_variations'][0] );
+		WC_Helper_Product::delete_product( $product->get_id() );
+		WC_Helper_Product::delete_attribute( $attribute_data['attribute_id'] );
+	}
+
+	/**
+	 * @testdox Test that a variation row naming an attribute the parent does not have is skipped, instead of being saved as an "any" variation.
+	 */
+	public function test_import_skips_new_variations_with_an_attribute_the_parent_does_not_have() {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'S', 'M' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Tee' );
+		$product->set_sku( 'IMPORT-ATTR-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$data = $this->import_variation_only_row(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-ATTR-RED,Import Tee - Red,IMPORT-ATTR-PARENT,Colour,Red,0,12\n",
+			'import-unknown-attribute.csv'
+		);
+
+		$this->assertEmpty( $data['imported_variations'], 'Expected 0 imported variations, got ' . count( $data['imported_variations'] ) );
+		$this->assertCount( 1, $data['skipped'], 'Expected 1 skipped product, got ' . count( $data['skipped'] ) );
+		$this->assertStringContainsString(
+			'has no',
+			html_entity_decode( $data['skipped'][0]->get_error_message() ),
+			'Expected the skip message to name the missing attribute'
+		);
+		$this->assertFalse( wc_get_product_id_by_sku( 'IMPORT-ATTR-RED' ) > 0, 'Expected no variation to be created for an attribute the parent does not have' );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Test that a variation row is still created when the parent has the attribute but does not yet use it for variations.
+	 */
+	public function test_import_creates_new_variations_when_the_parent_attribute_is_not_yet_used_for_variations() {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'S', 'M', 'L' ) );
+		$attribute->set_variation( false );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Tee' );
+		$product->set_sku( 'IMPORT-PROMOTE-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$data = $this->import_variation_only_row(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-PROMOTE-L,Import Tee - L,IMPORT-PROMOTE-PARENT,Size,L,0,12\n",
+			'import-promoted-attribute.csv'
+		);
+
+		$this->assertCount( 1, $data['imported_variations'], 'Expected the row to be created once the parent attribute is promoted for variations' );
+		$this->assertEmpty( $data['skipped'], 'Expected 0 skipped products, got ' . count( $data['skipped'] ) );
+
+		WC_Helper_Product::delete_product( $data['imported_variations'][0] );
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Test that a variation row listed before the parent row that would widen the attribute is skipped, since rows are validated against the parent as it stands when the row is reached.
+	 */
+	public function test_import_skips_new_variations_listed_before_the_parent_row_that_adds_their_value() {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'S', 'M' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Tee' );
+		$product->set_sku( 'IMPORT-ORDER-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		// The variation row comes first, so the parent still offers only S and M when it is validated.
+		$data = $this->import_variation_only_row(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\n"
+			. "variation,IMPORT-ORDER-L,Import Tee - L,IMPORT-ORDER-PARENT,Size,L,0,12\n"
+			. "variable,IMPORT-ORDER-PARENT,Import Tee,,Size,\"S, M, L\",0,\n",
+			'import-variation-before-parent.csv'
+		);
+
+		$this->assertEmpty( $data['imported_variations'], 'Expected the variation row to be skipped, got ' . count( $data['imported_variations'] ) );
+		$this->assertCount( 1, $data['skipped'], 'Expected 1 skipped product, got ' . count( $data['skipped'] ) );
+		$this->assertCount( 1, $data['updated'], 'Expected the parent row to still be updated' );
+
+		// The parent row widens the options, so re-running the same import creates the variation.
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( array( 'S', 'M', 'L' ), $product->get_attributes()['size']->get_options() );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
 	 * @testdox Test that attributes with non-ASCII characters are correctly set to "Used for Variations" during import.
 	 */
 	public function test_variable_product_attributes_with_non_ascii_characters_set_to_used_for_variations() {

@@ -1223,6 +1223,111 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			);
 		}
 
+		return $this->validate_new_variation_attributes( $parsed_data, $parent );
+	}
+
+	/**
+	 * Get the ID of an existing global attribute taxonomy, without creating it when it is missing.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param string $raw_name Attribute name or label as written in the CSV.
+	 * @return int Attribute taxonomy ID, or 0 when no such global attribute exists.
+	 */
+	protected function get_existing_attribute_taxonomy_id( $raw_name ) {
+		// Global attributes are exported as labels, so convert the label back to a name first.
+		$attribute_labels = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_label', 'attribute_name' );
+		$attribute_name   = array_search( $raw_name, $attribute_labels, true );
+
+		if ( ! $attribute_name ) {
+			$attribute_name = wc_sanitize_taxonomy_name( $raw_name );
+		}
+
+		// Cast because a numeric attribute name is returned as an integer array key by array_search().
+		return (int) wc_attribute_taxonomy_id_by_name( (string) $attribute_name );
+	}
+
+	/**
+	 * Check that a new variation's attributes are offered by its parent product.
+	 *
+	 * The storefront variation selector only renders values the parent declares, so a variation
+	 * carrying a value the parent does not offer would be created but never selectable. Likewise,
+	 * an attribute the parent does not have at all is dropped on save, silently turning the row
+	 * into an "any" variation that matches every combination.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param array      $parsed_data    Parsed row data.
+	 * @param WC_Product $parent_product Parent product the variation would be created under.
+	 * @return true|WP_Error True when every attribute is offered by the parent, a WP_Error describing the refusal otherwise.
+	 */
+	protected function validate_new_variation_attributes( $parsed_data, $parent_product ) {
+		if ( empty( $parsed_data['raw_attributes'] ) ) {
+			return true;
+		}
+
+		$parent_attributes = $parent_product->get_attributes();
+
+		foreach ( $parsed_data['raw_attributes'] as $attribute ) {
+			if ( empty( $attribute['name'] ) ) {
+				continue;
+			}
+
+			// Resolve the row's attribute the same way set_variation_data() does, so a row that would
+			// have been stored correctly is never refused here. get_attribute_taxonomy_id() is deliberately
+			// not used: it creates the global attribute when it is missing, which must not happen for a
+			// row that is about to be refused.
+			$attribute_id   = empty( $attribute['taxonomy'] ) ? 0 : $this->get_existing_attribute_taxonomy_id( $attribute['name'] );
+			$attribute_name = $attribute_id ? sanitize_title( wc_attribute_taxonomy_name_by_id( $attribute_id ) ) : sanitize_title( $attribute['name'] );
+
+			// An attribute the parent does not have is dropped on save. An attribute the parent has but
+			// does not use for variations is allowed through: get_variation_parent_attributes() promotes it.
+			if ( ! isset( $parent_attributes[ $attribute_name ] ) ) {
+				return new WP_Error(
+					'woocommerce_product_importer_variation_unknown_attribute',
+					sprintf(
+						/* translators: %s: attribute name */
+						esc_html__( 'A new variation cannot be created because the parent product has no "%s" attribute.', 'woocommerce' ),
+						esc_html( $attribute['name'] )
+					)
+				);
+			}
+
+			$parent_attribute = $parent_attributes[ $attribute_name ];
+			$raw_value        = isset( $attribute['value'] ) ? current( (array) $attribute['value'] ) : '';
+
+			// An empty value is a valid "any" variation.
+			if ( '' === $raw_value || false === $raw_value ) {
+				continue;
+			}
+
+			if ( $parent_attribute->is_taxonomy() ) {
+				$taxonomy = $parent_attribute->get_name();
+				$term     = get_term_by( 'name', $raw_value, $taxonomy );
+				$value    = ( $term && ! is_wp_error( $term ) ) ? $term->slug : sanitize_title( $raw_value );
+
+				// The terms assigned to the parent are the exact set the storefront selector renders.
+				// WC_Product_Attribute::get_terms() is avoided here because it inserts any term that does
+				// not exist yet, which must not happen while deciding whether to refuse a row.
+				$options = wc_get_product_terms( $parent_product->get_id(), $taxonomy, array( 'fields' => 'slugs' ) );
+			} else {
+				$value   = $raw_value;
+				$options = $parent_attribute->get_options();
+			}
+
+			if ( ! in_array( $value, $options, true ) ) {
+				return new WP_Error(
+					'woocommerce_product_importer_variation_unknown_attribute_value',
+					sprintf(
+						/* translators: 1: attribute value, 2: attribute name */
+						esc_html__( 'A new variation cannot be created because "%1$s" is not an option of the parent product\'s "%2$s" attribute.', 'woocommerce' ),
+						esc_html( $raw_value ),
+						esc_html( wc_attribute_label( $parent_attribute->get_name(), $parent_product ) )
+					)
+				);
+			}
+		}
+
 		return true;
 	}
 
