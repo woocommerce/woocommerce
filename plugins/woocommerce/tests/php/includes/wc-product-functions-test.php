@@ -1321,12 +1321,21 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			}
 
 			// Match ancestor term IDs in captured SQL. Word boundaries avoid partial matches within larger numeric IDs.
-			$ancestor_id_pattern   = '/\b(?:' . implode( '|', $ancestor_ids ) . ')\b/';
+			$ancestor_id_pattern = '/\b(?:' . implode( '|', $ancestor_ids ) . ')\b/';
+
+			/*
+			 * Match the term-join clause regardless of run-length whitespace. WP_Term_Query builds
+			 * "FROM $wpdb->terms AS t $join" and $join already opens with a space, so core emits
+			 * this clause with both one and two spaces. A literal single-space match silently sees
+			 * only half of the queries.
+			 */
+			$term_join_pattern = '/FROM\s+' . preg_quote( $wpdb->terms, '/' ) . '\s+AS\s+t\s+INNER\s+JOIN\s+' . preg_quote( $wpdb->term_taxonomy, '/' ) . '\s+AS\s+tt/i';
+
 			$ancestor_term_queries = 0;
 			$ancestor_meta_queries = 0;
-			$query_filter          = static function ( $query ) use ( &$ancestor_meta_queries, &$ancestor_term_queries, $ancestor_id_pattern, $wpdb ) {
+			$query_filter          = static function ( $query ) use ( &$ancestor_meta_queries, &$ancestor_term_queries, $ancestor_id_pattern, $term_join_pattern, $wpdb ) {
 				if ( preg_match( $ancestor_id_pattern, $query ) ) {
-					if ( false !== strpos( $query, "FROM {$wpdb->terms} AS t INNER JOIN {$wpdb->term_taxonomy} AS tt" ) ) {
+					if ( preg_match( $term_join_pattern, $query ) ) {
 						++$ancestor_term_queries;
 					} elseif ( false !== strpos( $query, "FROM {$wpdb->termmeta}" ) ) {
 						++$ancestor_meta_queries;
@@ -1345,7 +1354,14 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			}
 
 			$this->assertSame( "{$second_sibling_name} > {$third_sibling_name} > {$first_branch_name}", $actual );
-			$this->assertLessThanOrEqual( 2, $ancestor_term_queries, 'Ancestor terms should be loaded in one query per hierarchy level.' );
+
+			/*
+			 * Two ancestor levels, and core spends two queries on each: one WP_Term_Query for the
+			 * ids and one _prime_term_caches() follow-up for the rows. The bound is what guards
+			 * against regressing to one query per ancestor; it is deliberately not assertSame(),
+			 * because the 2-per-level split is a core implementation detail.
+			 */
+			$this->assertLessThanOrEqual( 4, $ancestor_term_queries, 'Ancestor terms should be loaded in a bounded number of batched queries per hierarchy level, not one query per ancestor.' );
 			$this->assertLessThanOrEqual( 1, $ancestor_meta_queries, 'Ancestor metadata should be primed in one query.' );
 		} finally {
 			if ( null !== $query_filter ) {
