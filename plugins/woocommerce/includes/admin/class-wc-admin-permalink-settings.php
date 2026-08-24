@@ -246,7 +246,10 @@ class WC_Admin_Permalink_Settings {
 				if ( isset( $_POST['product_permalink_structure'] ) && is_string( $_POST['product_permalink_structure'] ) ) {
 					// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized by wc_sanitize_permalink() below.
 					$posted_structure = trim( wp_unslash( $_POST['product_permalink_structure'] ) );
-					$product_base     = (string) preg_replace( '#/+#', '/', '/' . str_replace( '#', '', $posted_structure ) );
+					// Remove every `#` so the base cannot open a URL fragment, prepend the leading
+					// slash, then collapse each run of slashes into one. The pattern is `/+`; the
+					// `#` around it is only the regex delimiter.
+					$product_base = (string) preg_replace( '#/+#', '/', '/' . str_replace( '#', '', $posted_structure ) );
 				} else {
 					// A missing or non-string field resolves to the default base, so the stored
 					// slug stays deterministic and in the site locale.
