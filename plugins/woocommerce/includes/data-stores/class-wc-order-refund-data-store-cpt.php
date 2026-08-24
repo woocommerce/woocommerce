@@ -78,16 +78,16 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 		parent::read_order_data( $refund, $post_object );
 		$id = $refund->get_id();
 
-		$post_meta = get_post_meta( $id );
+		$post_meta = $this->get_validated_order_meta( $id );
 
-		$refunded_by = $this->get_order_meta_value( $post_meta, '_refunded_by', $id, null );
-		$reason      = $this->get_order_meta_value( $post_meta, '_refund_reason', $id, null );
+		$refunded_by = $this->get_order_meta_value( $post_meta, '_refunded_by', null );
+		$reason      = $this->get_order_meta_value( $post_meta, '_refund_reason', null );
 
 		$refund->set_props(
 			array(
-				'amount'           => $this->get_order_meta_value( $post_meta, '_refund_amount', $id, 0 ),
+				'amount'           => $this->get_order_meta_value( $post_meta, '_refund_amount', 0 ),
 				'refunded_by'      => null !== $refunded_by ? $refunded_by : absint( $post_object->post_author ),
-				'refunded_payment' => wc_string_to_bool( $this->get_order_meta_value( $post_meta, '_refunded_payment', $id, false ) ),
+				'refunded_payment' => wc_string_to_bool( $this->get_order_meta_value( $post_meta, '_refunded_payment', false ) ),
 				'reason'           => null !== $reason ? $reason : $post_object->post_excerpt,
 			)
 		);
