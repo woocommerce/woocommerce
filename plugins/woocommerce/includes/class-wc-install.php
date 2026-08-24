@@ -350,8 +350,8 @@ class WC_Install {
 		'11.1.0-1' => array(
 			'wc_update_11101_remove_deprecated_variation_gallery_option',
 		),
-		'11.1.0-2' => array(
-			'wc_update_11102_remove_abandoned_cart_recovery',
+		'11.2.0'   => array(
+			'wc_update_1120_remove_abandoned_cart_recovery',
 		),
 	);
 
@@ -2178,6 +2178,13 @@ $stock_notifications_table_schema;
 			"{$wpdb->prefix}wc_product_attributes_lookup",
 			"{$wpdb->prefix}wc_stock_notifications",
 			"{$wpdb->prefix}wc_stock_notificationmeta",
+
+			/*
+			 * No longer created: the abandoned cart recovery feature that owned this table was
+			 * removed in 11.2.0. It stays listed here so that a site which uninstalls before the
+			 * removal migration has run is not left with an orphaned table.
+			 */
+			"{$wpdb->prefix}wc_email_unsubscribes",
 
 			// WCA Tables.
 			"{$wpdb->prefix}wc_order_stats",

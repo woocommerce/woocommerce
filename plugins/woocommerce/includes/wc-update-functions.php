@@ -3644,17 +3644,21 @@ function wc_update_1110_flush_product_count_cache() {
  * `abandoned_cart_recovery` flag and has now been removed in full: the email, its
  * settings, the manual-send order action, the settings-page recommendations, and the
  * email-unsubscribe endpoint and table. Sites that opted in can be left holding
- * queued Action Scheduler sends, order meta, options and unsubscribe rows that no
- * remaining code reads, so clear them here rather than orphaning them.
+ * queued Action Scheduler sends, options and unsubscribe rows that no remaining code
+ * reads, so clear them here rather than orphaning them.
+ *
+ * The `_abandoned_cart_recovery_*` order meta is deliberately left in place: scanning
+ * every order to delete it is expensive on large stores, and the stale keys are inert
+ * once nothing reads them.
  *
  * Names are hardcoded rather than referenced through the classes that used to own
  * them, because those classes no longer exist.
  *
- * @since 11.1.0
+ * @since 11.2.0
  *
  * @return void
  */
-function wc_update_11102_remove_abandoned_cart_recovery() {
+function wc_update_1120_remove_abandoned_cart_recovery() {
 	global $wpdb;
 
 	// Cancel queued automated sends. Nothing listens to the hook any more, so a
@@ -3664,32 +3668,6 @@ function wc_update_11102_remove_abandoned_cart_recovery() {
 		as_unschedule_all_actions( 'woocommerce_send_abandoned_cart_recovery_notification' );
 	}
 
-	// Order meta: the scheduled-send timestamp and the sent-at dedup marker.
-	$meta_keys = array( '_abandoned_cart_recovery_scheduled_at', '_abandoned_cart_recovery_email_sent_at' );
-
-	$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
-	$hpos_meta_table   = $data_synchronizer->get_table_exists() ? OrdersTableDataStore::get_meta_table_name() : '';
-
-	foreach ( $meta_keys as $meta_key ) {
-		$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => $meta_key ), array( '%s' ) );
-
-		if ( '' !== $hpos_meta_table ) {
-			$wpdb->delete( $hpos_meta_table, array( 'meta_key' => $meta_key ), array( '%s' ) );
-		}
-	}
-
-	// The email editor lazily creates a `woo_email` post per email type and maps it
-	// through this option. With the email gone the post is unreachable, so drop both.
-	$email_post_id_option = 'woocommerce_email_templates_customer_abandoned_cart_recovery_post_id';
-	$email_post_id        = (int) get_option( $email_post_id_option, 0 );
-	if ( $email_post_id > 0 ) {
-		$email_post = get_post( $email_post_id );
-		if ( $email_post && 'woo_email' === $email_post->post_type ) {
-			wp_delete_post( $email_post_id, true );
-		}
-	}
-
-	delete_option( $email_post_id_option );
 	delete_option( 'woocommerce_feature_abandoned_cart_recovery_enabled' );
 	delete_option( 'woocommerce_customer_abandoned_cart_recovery_settings' );
 	delete_option( 'woocommerce_abandoned_cart_recovery_recommendations_hidden' );
