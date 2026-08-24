@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Suppress the customer email verification prompt when guest checkout is disabled.
