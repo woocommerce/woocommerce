@@ -90,6 +90,15 @@ class TranslationsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Forces get_filesystem_method() to report an SSH2 filesystem.
+	 *
+	 * @return string Filesystem method.
+	 */
+	public function force_ssh2_filesystem() {
+		return 'ssh2';
+	}
+
+	/**
 	 * Writes a chunk translation JSON file in the official language pack format.
 	 *
 	 * @param string $md5_name  Fake md5 part of the filename.
@@ -305,6 +314,57 @@ class TranslationsTest extends WC_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'stale', $data, 'The previous language pack file should not survive a failed temp write' );
 		$this->assertSame( array( 'Anzeigen' ), $data['locale_data']['messages']['Show'], 'The refreshed translations should be written in place instead' );
 		$this->assertSame( array(), glob( $this->lang_dir . '*.tmp' ), 'No temporary files should be left behind after the fallback write' );
+	}
+
+	/**
+	 * @testdox Should recreate the combined file when a remote move removes it before failing.
+	 */
+	public function test_recreates_combined_file_when_remote_move_destroys_it(): void {
+		$combined = $this->lang_dir . 'woocommerce-de_DE-' . WC_ADMIN_APP . '.json';
+		file_put_contents( $combined, '{"stale":true}' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		$this->create_chunk_json(
+			'ffffffffffffffffffffffffffffffff',
+			WC_ADMIN_DIST_JS_FOLDER . 'app/index.js',
+			array( 'Show' => array( 'Anzeigen' ) )
+		);
+
+		if ( ! function_exists( 'get_filesystem_method' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+		\WP_Filesystem();
+
+		$previous_filesystem = $GLOBALS['wp_filesystem'];
+
+		// Mirrors WP_Filesystem_SSH2::move(), which removes the destination before renaming onto it.
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Stub filesystem, restored below.
+		$GLOBALS['wp_filesystem'] = new class( null ) extends \WP_Filesystem_Direct {
+			/**
+			 * Removes the destination, then reports the move as failed.
+			 *
+			 * @param string $source      Path to the source file.
+			 * @param string $destination Path to the destination file.
+			 * @param bool   $overwrite   Whether to overwrite the destination.
+			 * @return bool Always false.
+			 */
+			public function move( $source, $destination, $overwrite = false ) {
+				$this->delete( $destination, false, 'f' );
+				return false;
+			}
+		};
+		add_filter( 'filesystem_method', array( $this, 'force_ssh2_filesystem' ), PHP_INT_MAX );
+
+		try {
+			$build = new \ReflectionMethod( Translations::class, 'build_and_save_translations' );
+			$build->setAccessible( true );
+			$build->invoke( $this->sut, $this->lang_dir, 'woocommerce', 'de_DE' );
+		} finally {
+			remove_filter( 'filesystem_method', array( $this, 'force_ssh2_filesystem' ), PHP_INT_MAX );
+			$GLOBALS['wp_filesystem'] = $previous_filesystem; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the real filesystem.
+		}
+
+		$this->assertFileExists( $combined, 'A move that removes the destination should not leave the site without a combined file' );
+		$data = json_decode( file_get_contents( $combined ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$this->assertSame( array( 'Anzeigen' ), $data['locale_data']['messages']['Show'], 'The recreated file should contain the rebuilt translations' );
 	}
 
 	/**
