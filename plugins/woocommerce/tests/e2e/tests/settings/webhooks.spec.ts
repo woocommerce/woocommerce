@@ -75,7 +75,6 @@ test.describe( 'Manage webhooks', () => {
 
 	test(
 		'Webhooks can be activated, paused, and deactivated in bulk',
-		{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
 		async ( { page, restApi } ) => {
 			const response = await restApi.post( `${ WC_API_PATH }/webhooks`, {
 				name: 'Bulk status webhook',
