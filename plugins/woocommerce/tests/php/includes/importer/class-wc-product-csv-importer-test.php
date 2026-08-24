@@ -781,10 +781,21 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertCount( 1, $data['skipped'], 'Expected 1 skipped product, got ' . count( $data['skipped'] ) );
 		$this->assertCount( 1, $data['updated'], 'Expected the parent row to still be updated' );
 
-		// The parent row widens the options, so re-running the same import creates the variation.
+		// The parent row widened the options, so the same import creates the variation on a second run.
 		$product = wc_get_product( $product->get_id() );
 		$this->assertEquals( array( 'S', 'M', 'L' ), $product->get_attributes()['size']->get_options() );
 
+		$rerun = $this->import_with_update_existing(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\n"
+			. "variation,IMPORT-ORDER-L,Import Tee - L,IMPORT-ORDER-PARENT,Size,L,0,12\n"
+			. "variable,IMPORT-ORDER-PARENT,Import Tee,,Size,\"S, M, L\",0,\n",
+			'import-variation-before-parent-rerun.csv'
+		);
+
+		$this->assertCount( 1, $rerun['imported_variations'], 'Expected the variation to be created on the second run' );
+		$this->assertEmpty( $rerun['skipped'], 'Expected 0 skipped products on the second run, got ' . count( $rerun['skipped'] ) );
+
+		WC_Helper_Product::delete_product( $rerun['imported_variations'][0] );
 		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
