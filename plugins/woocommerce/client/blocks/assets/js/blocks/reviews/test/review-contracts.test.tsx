@@ -352,6 +352,22 @@ describe( 'Product Reviews contracts', () => {
 	} );
 
 	describe( 'Offset control', () => {
+		it( 'renders a zero default offset', () => {
+			render(
+				<>
+					{ getSharedReviewListControls(
+						createAttributes(),
+						jest.fn(),
+						{ showOffset: true }
+					) }
+				</>
+			);
+
+			expect(
+				screen.getByRole( 'spinbutton', { name: 'Offset' } )
+			).toHaveValue( 0 );
+		} );
+
 		it.each( [
 			[ 'zero', '0', { offset: 0 } ],
 			[ 'a positive integer', '8', { offset: 8 } ],
