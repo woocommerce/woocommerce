@@ -1359,7 +1359,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should preserve replacement items when a custom data store cannot bulk-delete by ID.
+	 * @testdox Should preserve replacement items with a legacy custom data store lacking ID snapshot and deletion methods.
 	 */
 	public function test_remove_order_items_preserves_replacements_with_custom_data_store_fallback() {
 		$order          = WC_Helper_Order::create_order();
@@ -1388,7 +1388,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 			}
 
 			public function has_callable( string $method ): bool {
-				return 'delete_items_by_ids' === $method ? false : $this->delegate->has_callable( $method );
+				return in_array( $method, array( 'get_order_item_ids', 'delete_items_by_ids' ), true ) ? false : $this->delegate->has_callable( $method );
 			}
 
 			public function update( &$data ) {
