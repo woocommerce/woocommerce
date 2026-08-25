@@ -44,13 +44,13 @@ const CANONICAL_LINE_FILTER_PLUGIN =
  *    computes whether a line's stored cart key matches the key a
  *    configuration-free add of that product (or product + variation) would
  *    produce
- *  - An additive readonly `is_canonical_line` boolean on the Store API
+ *  - An additive readonly `is_canonical_product_line` boolean on the Store API
  *    cart-item response, resolved from that default through the
- *    `woocommerce_store_api_cart_item_is_canonical_line` filter, which lets
+ *    `woocommerce_store_api_cart_item_is_canonical_product_line` filter, which lets
  *    an extension flag its own lines (e.g. a bundle stamping its container
  *    line) as canonical or not regardless of cart-key identity
  *  - A meta-exclusion guard in the iAPI cart store's keyless `findItemInCart`
- *    branch that excludes a line only on strict `is_canonical_line === false`
+ *    branch that excludes a line only on strict `is_canonical_product_line === false`
  *  - `ProductButton.php`'s server seed, which reads the same hydrated,
  *    filter-applied `/wc/store/v1/cart` payload the client hydrates from and
  *    mirrors the client's match rule over that array, instead of deriving
@@ -367,7 +367,7 @@ test.describe( 'With no canonical-line callback attached, in-cart count reflects
 		// made the returned line non-standalone), then verify reconciliation:
 		// the committed server cart excludes the meta line from the keyless
 		// match, so the button settles back to "Add to cart".
-		expect( returnedLine?.is_canonical_line ).toBe( false );
+		expect( returnedLine?.is_canonical_product_line ).toBe( false );
 		await expect( btn ).toHaveText( 'Add to cart' );
 	} );
 

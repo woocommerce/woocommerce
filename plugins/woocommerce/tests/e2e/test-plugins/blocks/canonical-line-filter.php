@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: WooCommerce Blocks Test Canonical Line Filter
- * Description: Marks cart-line-identity-marked lines canonical via the woocommerce_store_api_cart_item_is_canonical_line filter, for blocks e2e tests.
+ * Description: Marks cart-line-identity-marked lines canonical via the woocommerce_store_api_cart_item_is_canonical_product_line filter, for blocks e2e tests.
  * Plugin URI: https://github.com/woocommerce/woocommerce
  * Author: WooCommerce
  *
@@ -11,7 +11,7 @@
 /**
  * What this simulates.
  *
- * Real callers of woocommerce_store_api_cart_item_is_canonical_line are
+ * Real callers of woocommerce_store_api_cart_item_is_canonical_product_line are
  * extensions that flag their own meta-differentiated lines as canonical for
  * their own purposes (e.g. a bundle stamping its container line with
  * cart_item_data, then marking that line canonical so it still counts toward
@@ -39,7 +39,7 @@
 declare( strict_types = 1 );
 
 add_filter(
-	'woocommerce_store_api_cart_item_is_canonical_line',
+	'woocommerce_store_api_cart_item_is_canonical_product_line',
 	/**
 	 * Mark a cart-line-identity-marked line canonical; leave others untouched.
 	 *
