@@ -40,10 +40,18 @@ const htmlToMarkdown = ( html ) => {
 		.replace(
 			/<pre><code(?:\s+class="language-([^"]*)")?>([\s\S]*?)<\/code><\/pre>/g,
 			( _, language, code ) => {
+				const decoded = decodeEntities( code ).trim();
+				// Make the fence longer than any backtick run inside the
+				// code, so the block cannot close early.
+				const longestRun = Math.max(
+					2,
+					...[ ...decoded.matchAll( /`+/g ) ].map(
+						( m ) => m[ 0 ].length
+					)
+				);
+				const fence = '`'.repeat( longestRun + 1 );
 				blocks.push(
-					`\`\`\`${ language || '' }\n${ decodeEntities(
-						code
-					).trim() }\n\`\`\``
+					`${ fence }${ language || '' }\n${ decoded }\n${ fence }`
 				);
 				return `@@CODE_BLOCK_${ blocks.length - 1 }@@`;
 			}
