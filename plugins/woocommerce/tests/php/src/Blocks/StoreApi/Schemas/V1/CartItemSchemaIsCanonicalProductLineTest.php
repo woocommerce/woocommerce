@@ -13,23 +13,23 @@ use Automattic\WooCommerce\StoreApi\Formatters\CurrencyFormatter;
 use WC_Unit_Test_Case;
 
 /**
- * Tests for the is_canonical_line boolean added to CartItemSchema.
+ * Tests for the is_canonical_product_line boolean added to CartItemSchema.
  *
- * Covers: get_item_response() returning is_canonical_line=true for plain canonical lines,
- * is_canonical_line=false for meta-differentiated lines, the
- * woocommerce_store_api_cart_item_is_canonical_line filter overriding the computed value,
+ * Covers: get_item_response() returning is_canonical_product_line=true for plain canonical lines,
+ * is_canonical_product_line=false for meta-differentiated lines, the
+ * woocommerce_store_api_cart_item_is_canonical_product_line filter overriding the computed value,
  * a non-boolean filter return being discarded in favor of the core-computed default, and
- * get_properties() returning a correctly-shaped is_canonical_line definition while still
+ * get_properties() returning a correctly-shaped is_canonical_product_line definition while still
  * inheriting all parent properties.
  */
-class CartItemSchemaIsCanonicalLineTest extends WC_Unit_Test_Case {
+class CartItemSchemaIsCanonicalProductLineTest extends WC_Unit_Test_Case {
 
 	/**
 	 * The name of the filter under test.
 	 *
 	 * @var string
 	 */
-	private const FILTER_HOOK = 'woocommerce_store_api_cart_item_is_canonical_line';
+	private const FILTER_HOOK = 'woocommerce_store_api_cart_item_is_canonical_product_line';
 
 	/**
 	 * The System Under Test.
@@ -88,7 +88,7 @@ class CartItemSchemaIsCanonicalLineTest extends WC_Unit_Test_Case {
 	}
 
 	// -------------------------------------------------------------------------
-	// get_item_response() — is_canonical_line field presence and value
+	// get_item_response() — is_canonical_product_line field presence and value
 	// -------------------------------------------------------------------------
 
 	/**
@@ -116,7 +116,7 @@ class CartItemSchemaIsCanonicalLineTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should include is_canonical_line=true in the response for a plain canonical line.
+	 * @testdox Should include is_canonical_product_line=true in the response for a plain canonical line.
 	 */
 	public function test_get_item_response_returns_true_for_plain_line(): void {
 		$product_id = $this->product->get_id();
@@ -126,13 +126,13 @@ class CartItemSchemaIsCanonicalLineTest extends WC_Unit_Test_Case {
 		$response = $this->sut->get_item_response( $cart_item );
 
 		$this->assertArrayHasKey(
-			'is_canonical_line',
+			'is_canonical_product_line',
 			$response,
-			'get_item_response() must include is_canonical_line for plain lines.'
+			'get_item_response() must include is_canonical_product_line for plain lines.'
 		);
 		$this->assertTrue(
-			$response['is_canonical_line'],
-			'A plain canonical line must have is_canonical_line=true.'
+			$response['is_canonical_product_line'],
+			'A plain canonical line must have is_canonical_product_line=true.'
 		);
 		$this->assertArrayNotHasKey(
 			'is_standalone_line',
@@ -142,7 +142,7 @@ class CartItemSchemaIsCanonicalLineTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should include is_canonical_line=false in the response for a meta-differentiated line.
+	 * @testdox Should include is_canonical_product_line=false in the response for a meta-differentiated line.
 	 */
 	public function test_get_item_response_returns_false_for_meta_differentiated_line(): void {
 		$product_id     = $this->product->get_id();
@@ -153,13 +153,13 @@ class CartItemSchemaIsCanonicalLineTest extends WC_Unit_Test_Case {
 		$response = $this->sut->get_item_response( $cart_item );
 
 		$this->assertArrayHasKey(
-			'is_canonical_line',
+			'is_canonical_product_line',
 			$response,
-			'get_item_response() must include is_canonical_line for meta-differentiated lines.'
+			'get_item_response() must include is_canonical_product_line for meta-differentiated lines.'
 		);
 		$this->assertFalse(
-			$response['is_canonical_line'],
-			'A meta-differentiated line must have is_canonical_line=false.'
+			$response['is_canonical_product_line'],
+			'A meta-differentiated line must have is_canonical_product_line=false.'
 		);
 	}
 
@@ -182,7 +182,7 @@ class CartItemSchemaIsCanonicalLineTest extends WC_Unit_Test_Case {
 		$response = $this->sut->get_item_response( $cart_item );
 
 		$this->assertTrue(
-			$response['is_canonical_line'],
+			$response['is_canonical_product_line'],
 			'A filter returning true must override a default-false line.'
 		);
 	}
@@ -205,7 +205,7 @@ class CartItemSchemaIsCanonicalLineTest extends WC_Unit_Test_Case {
 		$response = $this->sut->get_item_response( $cart_item );
 
 		$this->assertFalse(
-			$response['is_canonical_line'],
+			$response['is_canonical_product_line'],
 			'A filter returning false must override a default-true line.'
 		);
 	}
@@ -231,11 +231,11 @@ class CartItemSchemaIsCanonicalLineTest extends WC_Unit_Test_Case {
 		$response = $this->sut->get_item_response( $cart_item );
 
 		$this->assertTrue(
-			is_bool( $response['is_canonical_line'] ),
+			is_bool( $response['is_canonical_product_line'] ),
 			'A non-boolean filter return must be discarded in favor of a genuine boolean default.'
 		);
 		$this->assertTrue(
-			$response['is_canonical_line'],
+			$response['is_canonical_product_line'],
 			'A non-boolean filter return must not override the core-computed default (true for a plain line).'
 		);
 	}
@@ -255,40 +255,40 @@ class CartItemSchemaIsCanonicalLineTest extends WC_Unit_Test_Case {
 	}
 
 	// -------------------------------------------------------------------------
-	// get_properties() — schema definition for is_canonical_line
+	// get_properties() — schema definition for is_canonical_product_line
 	// -------------------------------------------------------------------------
 
 	/**
-	 * @testdox Should define is_canonical_line as a readonly boolean with view and edit context in get_properties().
+	 * @testdox Should define is_canonical_product_line as a readonly boolean with view and edit context in get_properties().
 	 */
-	public function test_get_properties_defines_is_canonical_line_as_readonly_boolean(): void {
+	public function test_get_properties_defines_is_canonical_product_line_as_readonly_boolean(): void {
 		$properties = $this->sut->get_properties();
 
 		$this->assertArrayHasKey(
-			'is_canonical_line',
+			'is_canonical_product_line',
 			$properties,
-			'get_properties() must include is_canonical_line.'
+			'get_properties() must include is_canonical_product_line.'
 		);
 
-		$definition = $properties['is_canonical_line'];
+		$definition = $properties['is_canonical_product_line'];
 
 		$this->assertSame(
 			'boolean',
 			$definition['type'],
-			'is_canonical_line must be declared as type boolean.'
+			'is_canonical_product_line must be declared as type boolean.'
 		);
 		$this->assertSame(
 			array( 'view', 'edit' ),
 			$definition['context'],
-			'is_canonical_line must have context [view, edit].'
+			'is_canonical_product_line must have context [view, edit].'
 		);
 		$this->assertTrue(
 			$definition['readonly'],
-			'is_canonical_line must be readonly.'
+			'is_canonical_product_line must be readonly.'
 		);
 		$this->assertNotEmpty(
 			$definition['description'],
-			'is_canonical_line must have a description.'
+			'is_canonical_product_line must have a description.'
 		);
 
 		$this->assertArrayNotHasKey(
@@ -316,17 +316,17 @@ class CartItemSchemaIsCanonicalLineTest extends WC_Unit_Test_Case {
 	}
 
 	// -------------------------------------------------------------------------
-	// get_is_canonical_line() — filter application site
+	// get_is_canonical_product_line() — filter application site
 	// -------------------------------------------------------------------------
 
 	/**
 	 * @testdox The apply_filters() call must still use the same hook name, the same two arguments in the same order, and the same surrounding boolean-integrity guard.
 	 */
 	public function test_apply_filters_call_is_unchanged(): void {
-		$source = $this->get_get_is_canonical_line_source();
+		$source = $this->get_get_is_canonical_product_line_source();
 
 		$this->assertStringContainsString(
-			"apply_filters( 'woocommerce_store_api_cart_item_is_canonical_line', \$default, \$cart_item );",
+			"apply_filters( 'woocommerce_store_api_cart_item_is_canonical_product_line', \$default, \$cart_item );",
 			$source,
 			'The apply_filters() call must keep the same hook name and the same two arguments ($default, $cart_item) in the same order.'
 		);
@@ -338,13 +338,13 @@ class CartItemSchemaIsCanonicalLineTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Read get_is_canonical_line()'s exact source text (signature through
+	 * Read get_is_canonical_product_line()'s exact source text (signature through
 	 * closing brace) from its declaring file.
 	 *
 	 * @return string
 	 */
-	private function get_get_is_canonical_line_source(): string {
-		$reflection = new \ReflectionMethod( CartItemSchema::class, 'get_is_canonical_line' );
+	private function get_get_is_canonical_product_line_source(): string {
+		$reflection = new \ReflectionMethod( CartItemSchema::class, 'get_is_canonical_product_line' );
 		$filename   = $reflection->getFileName();
 
 		$this->assertIsString( $filename, 'The declaring file must be resolvable.' );

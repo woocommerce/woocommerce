@@ -33,9 +33,9 @@ class CartItemSchema extends ItemSchema {
 
 	/**
 	 * Returns the cart-item schema properties, merging the parent item
-	 * properties with the cart-only is_canonical_line boolean.
+	 * properties with the cart-only is_canonical_product_line boolean.
 	 *
-	 * The is_canonical_line field is intentionally placed here (not in the
+	 * The is_canonical_product_line field is intentionally placed here (not in the
 	 * shared ItemSchema base) because it depends on the live cart's
 	 * generate_cart_id() method, which is not available on order line items
 	 * served by OrderItemSchema.
@@ -48,7 +48,7 @@ class CartItemSchema extends ItemSchema {
 		return array_merge(
 			parent::get_properties(),
 			array(
-				'is_canonical_line' => array(
+				'is_canonical_product_line' => array(
 					'description' => __( 'True when this cart line is the canonical line for its product — the single line a configuration-free add of the product (or product + variation) would be merged into; false when the line\'s identity was differentiated by extra cart-item data.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
@@ -64,7 +64,7 @@ class CartItemSchema extends ItemSchema {
 	 * Returns an array whose keys match the properties declared in
 	 * {@see CartItemSchema::get_properties()}.
 	 *
-	 * @since 11.1.0 Added is_canonical_line field.
+	 * @since 11.1.0 Added is_canonical_product_line field.
 	 *
 	 * @param array $cart_item Cart item array from WC()->cart->cart_contents.
 	 *                         Required keys: 'key', 'data' (WC_Product), 'product_id',
@@ -122,7 +122,7 @@ class CartItemSchema extends ItemSchema {
 				]
 			),
 			'catalog_visibility'   => $product->get_catalog_visibility(),
-			'is_canonical_line'    => $this->get_is_canonical_line( $cart_item ),
+			'is_canonical_product_line'    => $this->get_is_canonical_product_line( $cart_item ),
 			self::EXTENDING_KEY    => $this->get_extended_data( self::IDENTIFIER, $cart_item ),
 		];
 	}
@@ -132,14 +132,14 @@ class CartItemSchema extends ItemSchema {
 	 *
 	 * Computes the core default from cart-key identity via
 	 * {@see CartItemUtils::is_standalone_line()}, then applies the
-	 * woocommerce_store_api_cart_item_is_canonical_line filter so an extension
+	 * woocommerce_store_api_cart_item_is_canonical_product_line filter so an extension
 	 * can override the value for lines it manages. A non-boolean filter return
 	 * is discarded in favor of the core-computed default.
 	 *
 	 * @param array $cart_item Cart item array.
 	 * @return bool True when the line is canonical for its product; false otherwise.
 	 */
-	protected function get_is_canonical_line( array $cart_item ): bool {
+	protected function get_is_canonical_product_line( array $cart_item ): bool {
 		$default = CartItemUtils::is_standalone_line( $cart_item );
 
 		/**
@@ -161,7 +161,7 @@ class CartItemSchema extends ItemSchema {
 		 * @param bool  $is_canonical Whether the line is canonical for its product (core-computed default).
 		 * @param array $cart_item    Cart item array.
 		 */
-		$filtered = apply_filters( 'woocommerce_store_api_cart_item_is_canonical_line', $default, $cart_item );
+		$filtered = apply_filters( 'woocommerce_store_api_cart_item_is_canonical_product_line', $default, $cart_item );
 
 		return is_bool( $filtered ) ? $filtered : $default;
 	}
