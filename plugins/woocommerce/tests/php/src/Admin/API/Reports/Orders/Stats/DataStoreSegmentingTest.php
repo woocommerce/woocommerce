@@ -84,7 +84,9 @@ class DataStoreSegmentingTest extends OrdersStatsTestCase {
 
 		// The mixed order: 4 x the simple product & 3 x variation 1.
 		$mixed_order = WC_Helper_Order::create_order( $customer_1->get_id(), $simple_product );
-		$item        = new WC_Order_Item_Product();
+		$mixed_order->set_date_created( $latest_orders_time );
+		$mixed_order->set_date_paid( $latest_orders_time );
+		$item = new WC_Order_Item_Product();
 		$item->set_props(
 			array(
 				'product_id'   => $variable_product->get_id(),
@@ -102,7 +104,9 @@ class DataStoreSegmentingTest extends OrdersStatsTestCase {
 
 		// The variations order: 4 x variation 1 & 1 x variation 2.
 		$variations_order = WC_Helper_Order::create_order( $customer_1->get_id(), $variation_1 );
-		$item             = new WC_Order_Item_Product();
+		$variations_order->set_date_created( $latest_orders_time );
+		$variations_order->set_date_paid( $latest_orders_time );
+		$item = new WC_Order_Item_Product();
 		$item->set_props(
 			array(
 				'product_id'   => $variable_product->get_id(),
