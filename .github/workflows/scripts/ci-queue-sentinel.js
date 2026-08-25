@@ -376,9 +376,10 @@ const main = async () => {
 		...( forced ? [ '- Probe skipped (forced mode)' ] : [
 			`- Active runs attempted: ${ probeAttempts } of ${ runs.length }${ dropped ? ` (${ dropped } dropped by age window)` : '' }${ escalated ? ` (escalated: +${ escalated } runs to verify switch-off)` : '' }${ failedProbes ? ` (${ failedProbes } unreadable — API errors)` : '' }${ probeComplete ? '' : ' (probe incomplete — switch-off suppressed)' }`,
 			`- Queued jobs found: ${ queuedJobs.length } (hosted pool${ ignoredPools ? `; ${ ignoredPools } in runner groups ignored` : '' })`,
-			// An incomplete probe has not established a clear queue, so it must not
-			// be reported as one.
-			`- Oldest queued job age: ${ oldestAgeMin === null ? ( probeComplete ? 'n/a (queue clear)' : 'unknown (probe incomplete)' ) : `${ oldestAgeMin.toFixed( 1 ) } min` } (threshold ${ QUEUE_AGE_THRESHOLD_MIN } min)`,
+			// An incomplete probe establishes neither a clear queue nor the true
+			// oldest job: an unread run can hold an older one, so the figure is a
+			// lower bound and is reported as such.
+			`- Oldest queued job age: ${ oldestAgeMin === null ? ( probeComplete ? 'n/a (queue clear)' : 'unknown (probe incomplete)' ) : `${ probeComplete ? '' : '≥ ' }${ oldestAgeMin.toFixed( 1 ) } min${ probeComplete ? '' : ' (probe incomplete)' }` } (threshold ${ QUEUE_AGE_THRESHOLD_MIN } min)`,
 		] ),
 		`- ${ VARIABLE_NAME }: \`${ rawValue }\` -> \`${ value }\`${ value === rawValue ? ' (no change)' : '' }`,
 	] );
