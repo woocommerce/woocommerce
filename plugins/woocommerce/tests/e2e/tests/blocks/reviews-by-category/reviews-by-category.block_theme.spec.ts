@@ -24,7 +24,7 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 			name: 'Clothing',
 			exact: true,
 		} );
-		await categoryCheckbox.check();
+		await categoryCheckbox.click();
 		await expect( categoryCheckbox ).toBeChecked();
 
 		await blockLocator.getByRole( 'button', { name: 'Done' } ).click();
