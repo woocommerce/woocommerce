@@ -125,14 +125,16 @@ class RestController extends \WC_REST_Controller {
 	 * GET /timeseries
 	 *
 	 * @param \WP_REST_Request $request Request.
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 * @return \WP_REST_Response
 	 */
 	public function get_timeseries( \WP_REST_Request $request ): \WP_REST_Response {
 		$days = (int) $request->get_param( 'days' );
 		$days = $days > 0 ? $days : 30;
 
+		$start_ts  = time() - ( ( $days - 1 ) * DAY_IN_SECONDS );
 		$end_gmt   = gmdate( 'Y-m-d' );
-		$start_gmt = gmdate( 'Y-m-d', time() - ( ( $days - 1 ) * DAY_IN_SECONDS ) );
+		$start_gmt = gmdate( 'Y-m-d', $start_ts );
 
 		$rows = NotificationQuery::get_timeseries( $start_gmt, $end_gmt );
 
@@ -144,7 +146,7 @@ class RestController extends \WC_REST_Controller {
 
 		$dense = array();
 		for ( $i = 0; $i < $days; $i++ ) {
-			$date    = gmdate( 'Y-m-d', strtotime( $start_gmt . ' +' . $i . ' day' ) );
+			$date    = gmdate( 'Y-m-d', $start_ts + ( $i * DAY_IN_SECONDS ) );
 			$dense[] = $by_date[ $date ] ?? array(
 				'date'               => $date,
 				'signups'            => 0,
@@ -166,6 +168,7 @@ class RestController extends \WC_REST_Controller {
 	 * GET /top-demand
 	 *
 	 * @param \WP_REST_Request $request Request.
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 * @return \WP_REST_Response
 	 */
 	public function get_top_demand( \WP_REST_Request $request ): \WP_REST_Response {
