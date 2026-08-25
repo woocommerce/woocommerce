@@ -157,17 +157,14 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 		$user_id = wc_create_new_customer( 'prompt-email-disabled@example.com', 'promptemaildisabled', 'pw' );
 		wp_set_current_user( $user_id );
 
-		$option_name    = 'woocommerce_customer_verify_email_settings';
-		$previous_value = get_option( $option_name, null );
-		$email_settings = is_array( $previous_value ) ? $previous_value : array();
-
-		$email_settings['enabled'] = 'no';
-		update_option( $option_name, $email_settings );
+		$email                  = WC()->mailer()->get_emails()['WC_Email_Customer_Verify_Email'];
+		$previous_email_enabled = $email->enabled;
+		$email->enabled         = 'no';
 
 		try {
 			$this->assertSame( '', $this->render_prompt(), 'The prompt should not render when its email is disabled.' );
 		} finally {
-			$this->restore_option( $option_name, $previous_value );
+			$email->enabled = $previous_email_enabled;
 		}
 	}
 
