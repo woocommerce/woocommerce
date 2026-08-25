@@ -219,7 +219,7 @@ class WC_Regenerate_Images {
 			return $image;
 		}
 
-		if ( ! has_image_size( $size ) ) {
+		if ( ! is_string( $size ) || ! has_image_size( $size ) ) {
 			return $image;
 		}
 
