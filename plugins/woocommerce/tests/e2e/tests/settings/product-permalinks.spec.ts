@@ -25,14 +25,28 @@ test.describe( 'Product permalink settings', () => {
 
 	test( 'saved product permalink structures stay selected after a reload', async ( {
 		page,
-		baseURL,
 	} ) => {
-		const resolvedBaseURL = baseURL ?? '';
-		expect( resolvedBaseURL, 'Playwright baseURL is required.' ).not.toBe(
-			''
-		);
+		// Every WP-CLI call in this spec is a plain database operation, so plugins and themes are
+		// skipped: earlier specs in the serial suite can leave heavyweight extensions installed
+		// (the onboarding wizard installs the default set), and booting them under WP-CLI can
+		// exhaust the CLI container's memory limit before the command runs.
+		const optionCliFlags = '--skip-plugins --skip-themes';
+		// Snapshot the whole option rather than the visible form state: the journey's Shop base
+		// saves also flip the derived `use_verbose_page_rules` flag, which no form field exposes,
+		// so a UI-driven restore could never put it back.
+		const readPermalinks = async () =>
+			(
+				await wpCLI(
+					`wp option get woocommerce_permalinks --format=json ${ optionCliFlags }`
+				)
+			).stdout.trim();
 
-		await page.goto( 'wp-admin/options-permalink.php' );
+		// The snapshot only has to precede the first save, and spawning the WP-CLI container costs
+		// seconds, so overlap it with the page load rather than queueing behind it.
+		const [ , originalPermalinks ] = await Promise.all( [
+			page.goto( 'wp-admin/options-permalink.php' ),
+			readPermalinks(),
+		] );
 
 		const productPermalinkRadios = page.locator(
 			'input[name="product_permalink"]'
@@ -53,21 +67,6 @@ test.describe( 'Product permalink settings', () => {
 
 		await expect( productPermalinkRadios ).toHaveCount( 4 );
 
-		// Every WP-CLI call in this spec is a plain database operation, so plugins and themes are
-		// skipped: earlier specs in the serial suite can leave heavyweight extensions installed
-		// (the onboarding wizard installs the default set), and booting them under WP-CLI can
-		// exhaust the CLI container's memory limit before the command runs.
-		const optionCliFlags = '--skip-plugins --skip-themes';
-
-		// Snapshot the whole option rather than the visible form state: the journey's Shop base
-		// saves also flip the derived `use_verbose_page_rules` flag, which no form field exposes,
-		// so a UI-driven restore could never put it back.
-		const originalPermalinks = (
-			await wpCLI(
-				`wp option get woocommerce_permalinks --format=json ${ optionCliFlags }`
-			)
-		).stdout.trim();
-
 		try {
 			const defaultRadio = productPermalinkRadios.nth( 0 );
 			const shopBaseRadio = productPermalinkRadios.nth( 1 );
@@ -75,29 +74,25 @@ test.describe( 'Product permalink settings', () => {
 			const defaultRow = page
 				.getByRole( 'row' )
 				.filter( { has: defaultRadio } );
-			const defaultPreview = new URL(
+			// Derive the base from the rendered preview rather than hardcoding a translated
+			// product slug. Matching the segment before `sample-product` off the end of the URL
+			// keeps this independent of the install layout, so a subdirectory install needs no
+			// separate site-path arithmetic.
+			const defaultPreview =
 				(
 					await defaultRow
 						.locator( 'code.non-default-example' )
 						.textContent()
-				)?.trim() ?? ''
+				)?.trim() ?? '';
+			const previewBase = defaultPreview.match(
+				/\/([^/]+)\/sample-product\/$/
 			);
-			// Derive the canonical `/base/` from the preview rather than hardcoding a translated
-			// product slug. `/\/$/` drops the trailing slash so a root install contributes an
-			// empty prefix and a subdirectory install (`/wp/`) contributes `/wp`.
-			const sitePath = new URL( resolvedBaseURL ).pathname.replace(
-				/\/$/,
-				''
-			);
-			// Assert the example segment first, so a changed preview fails here instead of
-			// silently yielding a wrong base.
-			expect( defaultPreview.pathname ).toMatch( /\/sample-product\/$/ );
-			const expectedDefaultBase = defaultPreview.pathname
-				.slice( sitePath.length )
-				.replace( /sample-product\/$/, '' );
-
-			// A non-empty, slash-delimited path such as `/product/`.
-			expect( expectedDefaultBase ).toMatch( /^\/.+\/$/ );
+			expect(
+				previewBase,
+				`Unexpected Default preview: ${ defaultPreview }`
+			).not.toBeNull();
+			const expectedBareSlug = previewBase?.[ 1 ] ?? '';
+			const expectedDefaultBase = `/${ expectedBareSlug }/`;
 
 			// Establish Default as the starting point rather than assuming the store already uses
 			// it — the preceding assertion about the Custom field only holds from a known state.
@@ -146,17 +141,7 @@ test.describe( 'Product permalink settings', () => {
 			await expect( defaultRadio ).toBeChecked();
 			await expect( customBase ).toHaveValue( expectedDefaultBase );
 
-			const expectedBareSlug = expectedDefaultBase.replace(
-				/^\/|\/$/g,
-				''
-			);
-			const storedPermalinks = JSON.parse(
-				(
-					await wpCLI(
-						`wp option get woocommerce_permalinks --format=json ${ optionCliFlags }`
-					)
-				).stdout.trim()
-			);
+			const storedPermalinks = JSON.parse( await readPermalinks() );
 			expect( storedPermalinks.product_base ).toBe( expectedBareSlug );
 		} finally {
 			await wpCLI(
