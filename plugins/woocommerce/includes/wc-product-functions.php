@@ -1735,7 +1735,7 @@ function wc_get_price_to_display( $product, $args = array() ) {
  * @param string $sep (default: ', ').
  * @param string $before (default: '').
  * @param string $after (default: '').
- * @param string $orderby Optional ordering mode. Accepts 'name' to naturally order assigned terms by name, or
+ * @param string $orderby Optional ordering mode. Accepts 'name' to naturally order assigned terms by name, ignoring the category order termmeta that the default path honor, or
  *                        'breadcrumb' to order assigned terms by ancestry path, comparing category order,
  *                        natural name, and term ID at each level of the rendered hierarchy. Any other value
  *                        preserves WordPress term-list order; a non-empty unsupported value also triggers a
