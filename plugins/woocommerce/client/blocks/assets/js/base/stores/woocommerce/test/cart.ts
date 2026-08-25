@@ -46,9 +46,13 @@ jest.mock(
 	{ virtual: true }
 );
 
-jest.mock( '../legacy-events', () => ( {
-	triggerAddedToCartEvent: jest.fn(),
-} ) );
+jest.mock( '../legacy-events', () => {
+	const actual = jest.requireActual( '../legacy-events' );
+	return {
+		...actual,
+		triggerAddedToCartEvent: jest.fn( actual.triggerAddedToCartEvent ),
+	};
+} );
 
 jest.mock( '@wordpress/a11y', () => ( {
 	speak: jest.fn(),
@@ -455,6 +459,66 @@ function captureSyncEvents(): {
 				'wc-blocks_store_sync_required',
 				listener
 			),
+	};
+}
+
+/**
+ * A native cart event observed at its public DOM dispatch boundary.
+ */
+type NativeCartEventObservation = {
+	/** A short name identifying which cart event was observed. */
+	name: 'added' | 'sync';
+	/** The event target at the point of dispatch. */
+	target: EventTarget | null;
+	/** Whether the event bubbles through the DOM. */
+	bubbles: boolean;
+	/** Whether a listener can cancel the event. */
+	cancelable: boolean;
+	/** The native custom-event detail payload. */
+	detail: unknown;
+};
+
+/**
+ * Captures native added-to-cart and store-sync events at their documented DOM
+ * targets, preserving their dispatch order and event envelopes.
+ *
+ * @param onAdded Optional callback invoked synchronously from the added-event
+ *                listener.
+ * @return The observations and a cleanup callback that removes both listeners.
+ */
+function captureNativeCartEvents( onAdded?: () => void ): {
+	events: NativeCartEventObservation[];
+	cleanup: () => void;
+} {
+	const events: NativeCartEventObservation[] = [];
+	const capture = ( name: 'added' | 'sync' ) => ( event: Event ) => {
+		events.push( {
+			name,
+			target: event.target,
+			bubbles: event.bubbles,
+			cancelable: event.cancelable,
+			detail: ( event as CustomEvent< unknown > ).detail,
+		} );
+		if ( name === 'added' ) {
+			onAdded?.();
+		}
+	};
+	const addedListener = capture( 'added' );
+	const syncListener = capture( 'sync' );
+	document.body.addEventListener( 'wc-blocks_added_to_cart', addedListener );
+	window.addEventListener( 'wc-blocks_store_sync_required', syncListener );
+	return {
+		events,
+		cleanup: () => {
+			document.body.removeEventListener(
+				'wc-blocks_added_to_cart',
+				addedListener
+			);
+			window.removeEventListener(
+				'wc-blocks_store_sync_required',
+				syncListener
+			);
+		},
 	};
 }
 
@@ -1803,10 +1867,15 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			await flushMicrotasks();
 
 			expect( acceptedOutcome ).toEqual( { success: true } );
-			expect( ( rejectedOutcome as AddCartItemOutcome ).success ).toBe(
-				false
-			);
+			expect( rejectedOutcome ).toEqual( {
+				success: false,
+				error: {
+					code: 'woocommerce_rest_cart_product_no_stock',
+					message: 'You cannot add that amount to the cart.',
+				},
+			} );
 			expect( events ).toHaveLength( 1 );
+			expect( triggerAddedToCartEvent ).toHaveBeenCalledTimes( 1 );
 			expect( errors ).toHaveLength( 1 );
 
 			cleanup();
@@ -1842,9 +1911,9 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			cleanup();
 		} );
 
-		it( 'unions quantityChanges across successful add, keyed-update, and remove mutations in the same cycle', async () => {
+		it( 'unions and deduplicates only successful quantityChanges across add, keyed-update, and remove mutations in the same cycle', async () => {
 			( getConfig as jest.Mock ).mockReturnValue( {} );
-			mockBatchFetch();
+			mockBatchFetchFailingProduct( { failForId: 100 } );
 			const actions = await loadCartStore();
 			seedCart( [
 				makeKeyedLine( {
@@ -1859,11 +1928,26 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				} ),
 			] );
 			const { events, cleanup } = captureSyncEvents();
+			spyOnShowNoticeError();
 
-			await Promise.all( [
+			const outcomes = await Promise.all( [
 				runAction(
 					actions.addCartItem( {
 						id: 99,
+						quantityToAdd: 1,
+						type: 'simple',
+					} )
+				),
+				runAction(
+					actions.addCartItem( {
+						id: 99,
+						quantityToAdd: 1,
+						type: 'simple',
+					} )
+				),
+				runAction(
+					actions.addCartItem( {
+						id: 100,
 						quantityToAdd: 1,
 						type: 'simple',
 					} )
@@ -1876,10 +1960,25 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 						type: 'simple',
 					} )
 				),
+				runAction(
+					actions.addCartItem( {
+						id: 42,
+						key: 'server-key-abc',
+						quantity: 6,
+						type: 'simple',
+					} )
+				),
+				runAction( actions.removeCartItem( 'server-key-gone' ) ),
 				runAction( actions.removeCartItem( 'server-key-gone' ) ),
 			] );
-			await flushMicrotasks();
 
+			expect( outcomes.slice( 0, 2 ) ).toEqual( [
+				{ success: true },
+				{ success: true },
+			] );
+			expect( ( outcomes[ 2 ] as AddCartItemOutcome ).success ).toBe(
+				false
+			);
 			expect( events ).toHaveLength( 1 );
 			expect( events[ 0 ].quantityChanges ).toEqual( {
 				productsPendingAdd: [ 99 ],
@@ -1889,6 +1988,127 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			expect( triggerAddedToCartEvent ).toHaveBeenCalledTimes( 1 );
 
 			cleanup();
+		} );
+
+		it( 'treats a successful keyed quantity update as add-origin while reporting only its cart-item key', async () => {
+			( getConfig as jest.Mock ).mockReturnValue( {} );
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { key: 'quantity-key', id: 42 } ) ] );
+			const { events, cleanup } = captureSyncEvents();
+
+			await runAction(
+				actions.addCartItem( {
+					id: 42,
+					key: 'quantity-key',
+					quantity: 4,
+					type: 'simple',
+				} )
+			);
+
+			expect( triggerAddedToCartEvent ).toHaveBeenCalledTimes( 1 );
+			expect( events ).toHaveLength( 1 );
+			expect( events[ 0 ].quantityChanges ).toEqual( {
+				cartItemsPendingQuantity: [ 'quantity-key' ],
+			} );
+			expect(
+				events[ 0 ].quantityChanges.productsPendingAdd
+			).toBeUndefined();
+
+			cleanup();
+		} );
+
+		it( 'preserves submitted simple and selected-variation identities in requests and successful sync metadata', async () => {
+			( getConfig as jest.Mock ).mockReturnValue( {} );
+			const captured = mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [] );
+			const { events, cleanup } = captureSyncEvents();
+			const selection = [
+				{ attribute: 'Color', value: 'Blue' },
+				{ attribute: 'Size', value: 'Large' },
+			];
+
+			await Promise.all( [
+				runAction(
+					actions.addCartItem( {
+						id: 501,
+						quantityToAdd: 1,
+						type: 'variation',
+						variation: selection,
+					} )
+				),
+				runAction(
+					actions.addCartItem( {
+						id: 77,
+						quantityToAdd: 1,
+						type: 'simple',
+					} )
+				),
+			] );
+
+			expect( captured[ 0 ].body ).toEqual( {
+				id: 501,
+				quantity: 1,
+				variation: selection,
+			} );
+			expect( captured[ 1 ].body ).toEqual( { id: 77, quantity: 1 } );
+			expect( events[ 0 ].quantityChanges ).toEqual( {
+				productsPendingAdd: [ 501, 77 ],
+			} );
+
+			cleanup();
+		} );
+
+		it( 'dispatches native added then sync events synchronously with their public envelopes', async () => {
+			( getConfig as jest.Mock ).mockReturnValue( {} );
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [] );
+			let syncCountSeenByAdded = -1;
+			const native = captureNativeCartEvents( () => {
+				syncCountSeenByAdded = native.events.filter(
+					( event ) => event.name === 'sync'
+				).length;
+			} );
+
+			await runAction(
+				actions.addCartItem( {
+					id: 42,
+					quantityToAdd: 1,
+					type: 'simple',
+				} )
+			);
+			const orderImmediatelyAfterSettlement = [
+				...native.events.map( ( event ) => event.name ),
+				'after-settlement',
+			];
+
+			expect( orderImmediatelyAfterSettlement ).toEqual( [
+				'added',
+				'sync',
+				'after-settlement',
+			] );
+			expect( syncCountSeenByAdded ).toBe( 0 );
+			expect( native.events[ 0 ] ).toEqual( {
+				name: 'added',
+				target: document.body,
+				bubbles: true,
+				cancelable: true,
+				detail: { preserveCartData: true },
+			} );
+			expect( native.events[ 1 ] ).toEqual( {
+				name: 'sync',
+				target: window,
+				bubbles: false,
+				cancelable: false,
+				detail: {
+					type: 'from_iAPI',
+					quantityChanges: { productsPendingAdd: [ 42 ] },
+				},
+			} );
+
+			native.cleanup();
 		} );
 
 		it( 'dedupes a repeated product id in the sync event quantityChanges when the same product succeeds twice in one cycle', async () => {
