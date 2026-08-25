@@ -2365,12 +2365,6 @@ parameters:
 			path: includes/admin/class-wc-admin-permalink-settings.php
 
 		-
-			message: '#^Parameter \#1 \$str of function urldecode expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/admin/class-wc-admin-permalink-settings.php
-
-		-
 			message: '#^Method WC_Admin_Pointers\:\:create_product_tutorial\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
