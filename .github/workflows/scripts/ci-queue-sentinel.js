@@ -162,11 +162,14 @@ const fetchJobsForRun = async ( runId ) => {
 const isHostedPoolJob = ( job ) =>
 	( job.labels || [] ).some( ( label ) => label.toLowerCase().startsWith( 'ubuntu-' ) );
 
+const jobAgeMin = ( job, refMs ) => ( refMs - new Date( job.created_at ) ) / 60000;
+
 const collectQueuedJobs = async ( runList ) => {
 	const queued = [];
 	let ignoredPools = 0;
 	let failed = 0;
 	let attempted = 0;
+	let stoppedEarly = false;
 	for ( const run of runList ) {
 		let jobs;
 		attempted++;
@@ -194,8 +197,16 @@ const collectQueuedJobs = async ( runList ) => {
 				ignoredPools++;
 			}
 		}
+		// decide() only asks WHETHER a job is over the threshold, never how many
+		// or by how much, so the first one settles the switch-ON decision and no
+		// further probing can change the outcome. The caller reports the age as a
+		// lower bound once this fires.
+		if ( queued.some( ( job ) => jobAgeMin( job, Date.now() ) > thresholdMin ) ) {
+			stoppedEarly = true;
+			break;
+		}
 	}
-	return { queued, ignoredPools, failed, attempted };
+	return { queued, ignoredPools, failed, attempted, stoppedEarly };
 };
 
 const fetchQueuedJobs = async ( runs ) => {
@@ -209,25 +220,32 @@ const fetchQueuedJobs = async ( runs ) => {
 	const skippedYoung = runs.length - eligible.length;
 	const allQueued = eligible.filter( ( run ) => run.status === 'queued' );
 	const allInProgress = eligible.filter( ( run ) => run.status !== 'queued' );
+	// Caps are applied per status, then the list is re-sorted oldest-first:
+	// stopping at the first over-threshold job only pays off if the run most
+	// likely to hold one is opened first.
 	const probeList = [
 		...allQueued.slice( 0, MAX_QUEUED_RUNS_TO_PROBE ),
 		...allInProgress.slice( 0, MAX_IN_PROGRESS_RUNS_TO_PROBE ),
-	];
+	].sort( ( a, b ) => new Date( a.created_at ) - new Date( b.created_at ) );
 	// Runs beyond the caps are returned unprobed so the switch-off path can
 	// escalate and probe them when it matters (see main()).
 	const remainder = [
 		...allQueued.slice( MAX_QUEUED_RUNS_TO_PROBE ),
 		...allInProgress.slice( MAX_IN_PROGRESS_RUNS_TO_PROBE ),
 	];
-	const { queued, ignoredPools, failed, attempted } = await collectQueuedJobs( probeList );
+	const { queued, ignoredPools, failed, attempted, stoppedEarly } = await collectQueuedJobs( probeList );
 	return {
 		queued,
-		complete: remainder.length === 0 && failed === 0,
+		// Stopping early leaves runs unopened, so the probe is not complete. That
+		// costs nothing: it only happens once an over-threshold job is found, and
+		// decide() then returns '1' without consulting probeComplete.
+		complete: remainder.length === 0 && failed === 0 && ! stoppedEarly,
 		ignoredPools,
 		remainder,
 		failed,
 		attempted,
 		skippedYoung,
+		stoppedEarly,
 	};
 };
 
@@ -305,7 +323,7 @@ const main = async () => {
 	// the queue API is failing, and needs no queue data to decide.
 	const forced = MODE === 'on' || MODE === 'off';
 	let runs = [], queuedJobs = [], dropped = 0, ignoredPools = 0, remainder = [], failedProbes = 0, probeAttempts = 0, skippedYoung = 0;
-	let runsListComplete = true, probeComplete = true;
+	let runsListComplete = true, probeComplete = true, stoppedEarly = false;
 	if ( ! forced ) {
 		const runsResult = await fetchActiveRuns();
 		const jobsResult = await fetchQueuedJobs( runsResult.runs );
@@ -319,11 +337,12 @@ const main = async () => {
 		failedProbes = jobsResult.failed;
 		probeAttempts = jobsResult.attempted;
 		skippedYoung = jobsResult.skippedYoung;
+		stoppedEarly = jobsResult.stoppedEarly;
 	}
 	// Measure ages after the probe; retries can stretch it by minutes.
 	let nowMs = Date.now();
 	const oldestAge = ( jobs, refMs ) => jobs.length
-		? Math.max( ...jobs.map( ( job ) => ( refMs - new Date( job.created_at ) ) / 60000 ) )
+		? Math.max( ...jobs.map( ( job ) => jobAgeMin( job, refMs ) ) )
 		: null;
 	let oldestAgeMin = oldestAge( queuedJobs, nowMs );
 
@@ -352,12 +371,14 @@ const main = async () => {
 		ignoredPools += extra.ignoredPools;
 		failedProbes += extra.failed;
 		probeAttempts += extra.attempted;
+		stoppedEarly = stoppedEarly || extra.stoppedEarly;
 		escalated = extra.attempted;
 		nowMs = Date.now();
 		oldestAgeMin = oldestAge( queuedJobs, nowMs );
-		// Every listed run has now been attempted; run-list page truncation and
-		// unreadable runs are the only things that can still leave it incomplete.
-		probeComplete = runsListComplete && failedProbes === 0;
+		// Every listed run has now been attempted; run-list page truncation,
+		// unreadable runs and an early stop are the only things that can still
+		// leave it incomplete.
+		probeComplete = runsListComplete && failedProbes === 0 && ! stoppedEarly;
 	}
 
 	// A blind tick is deliberately not an alert: most ticks see a single active
@@ -391,7 +412,7 @@ const main = async () => {
 		...( forced ? [ '- Probe skipped (forced mode)' ] : [
 			`- Active runs attempted: ${ probeAttempts } of ${ runs.length }${ dropped ? ` (${ dropped } dropped by age window)` : '' }${ skippedYoung ? ` (${ skippedYoung } too new to hold an over-threshold job)` : '' }${ escalated ? ` (escalated: +${ escalated } runs to verify switch-off)` : '' }${ failedProbes ? ` (${ failedProbes } unreadable — API errors)` : '' }${ probeComplete ? '' : ' (probe incomplete — switch-off suppressed)' }`,
 			`- Queued jobs found: ${ queuedJobs.length } (hosted pool${ ignoredPools ? `; ${ ignoredPools } in runner groups ignored` : '' })`,
-			`- Oldest queued job age: ${ oldestAgeMin === null ? 'n/a (queue clear)' : `${ oldestAgeMin.toFixed( 1 ) } min` } (threshold ${ QUEUE_AGE_THRESHOLD_MIN } min)`,
+			`- Oldest queued job age: ${ oldestAgeMin === null ? 'n/a (queue clear)' : `${ stoppedEarly ? '≥ ' : '' }${ oldestAgeMin.toFixed( 1 ) } min` } (threshold ${ QUEUE_AGE_THRESHOLD_MIN } min)${ stoppedEarly ? ' — probe stopped at the first job over the threshold' : '' }`,
 		] ),
 		`- ${ VARIABLE_NAME }: \`${ rawValue }\` -> \`${ value }\`${ value === rawValue ? ' (no change)' : '' }`,
 	] );
@@ -400,8 +421,12 @@ const main = async () => {
 	// only rings the alarm, so a switch nobody can turn off cannot bill quietly.
 	// Requires an incomplete probe: a long window backed by a healthy probe is
 	// real congestion doing its job, not a stuck switch, and must stay quiet.
+	// It also requires the probe to have found nothing over the threshold — an
+	// early stop leaves probeComplete false precisely BECAUSE it proved real
+	// queuing, and that evidence means the switch is busy rather than stuck.
 	const onForMin = ( nowMs - updatedAtMs ) / 60000;
-	if ( value === '1' && rawValue === '1' && ! probeComplete && onForMin > MAX_ON_MINUTES ) {
+	const provenCongested = oldestAgeMin !== null && oldestAgeMin > thresholdMin;
+	if ( value === '1' && rawValue === '1' && ! probeComplete && ! provenCongested && onForMin > MAX_ON_MINUTES ) {
 		throw new Error(
 			`${ VARIABLE_NAME } has been ON for ${ Math.round( onForMin ) } min with an incomplete queue probe — the switch cannot be proven safe to turn off`
 		);
