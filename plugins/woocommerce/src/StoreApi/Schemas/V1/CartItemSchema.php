@@ -95,25 +95,25 @@ class CartItemSchema extends ItemSchema {
 		$price_decimals    = wc_get_price_decimals();
 
 		return [
-			'key'                  => $cart_item['key'],
-			'id'                   => $product->get_id(),
-			'type'                 => $product->get_type(),
-			'quantity'             => wc_stock_amount( $cart_item['quantity'] ),
-			'quantity_limits'      => (object) ( new QuantityLimits() )->get_cart_item_quantity_limits( $cart_item ),
-			'name'                 => $this->prepare_html_response( $product->get_title() ),
-			'short_description'    => $this->prepare_html_response( wc_format_content( wp_kses_post( $product->get_short_description() ) ) ),
-			'description'          => $this->prepare_html_response( wc_format_content( wp_kses_post( $product->get_description() ) ) ),
-			'sku'                  => $this->prepare_html_response( $product->get_sku() ),
-			'low_stock_remaining'  => $this->get_low_stock_remaining( $product ),
-			'backorders_allowed'   => (bool) $product->backorders_allowed(),
-			'show_backorder_badge' => (bool) $product->backorders_require_notification() && $product->is_on_backorder( $cart_item['quantity'] ),
-			'sold_individually'    => $product->is_sold_individually(),
-			'permalink'            => $product_permalink,
-			'images'               => $this->get_cart_images( $product, $cart_item, $cart_item['key'] ),
-			'variation'            => $this->format_variation_data( $cart_item['variation'], $product ),
-			'item_data'            => $this->get_item_data( $cart_item ),
-			'prices'               => (object) $this->prepare_product_price_response( $product, get_option( 'woocommerce_tax_display_cart' ) ),
-			'totals'               => (object) $this->prepare_currency_response(
+			'key'                       => $cart_item['key'],
+			'id'                        => $product->get_id(),
+			'type'                      => $product->get_type(),
+			'quantity'                  => wc_stock_amount( $cart_item['quantity'] ),
+			'quantity_limits'           => (object) ( new QuantityLimits() )->get_cart_item_quantity_limits( $cart_item ),
+			'name'                      => $this->prepare_html_response( $product->get_title() ),
+			'short_description'         => $this->prepare_html_response( wc_format_content( wp_kses_post( $product->get_short_description() ) ) ),
+			'description'               => $this->prepare_html_response( wc_format_content( wp_kses_post( $product->get_description() ) ) ),
+			'sku'                       => $this->prepare_html_response( $product->get_sku() ),
+			'low_stock_remaining'       => $this->get_low_stock_remaining( $product ),
+			'backorders_allowed'        => (bool) $product->backorders_allowed(),
+			'show_backorder_badge'      => (bool) $product->backorders_require_notification() && $product->is_on_backorder( $cart_item['quantity'] ),
+			'sold_individually'         => $product->is_sold_individually(),
+			'permalink'                 => $product_permalink,
+			'images'                    => $this->get_cart_images( $product, $cart_item, $cart_item['key'] ),
+			'variation'                 => $this->format_variation_data( $cart_item['variation'], $product ),
+			'item_data'                 => $this->get_item_data( $cart_item ),
+			'prices'                    => (object) $this->prepare_product_price_response( $product, get_option( 'woocommerce_tax_display_cart' ) ),
+			'totals'                    => (object) $this->prepare_currency_response(
 				[
 					'line_subtotal'     => $this->prepare_money_response( $cart_item['line_subtotal'], $price_decimals ),
 					'line_subtotal_tax' => $this->prepare_money_response( $cart_item['line_subtotal_tax'], $price_decimals ),
@@ -121,9 +121,9 @@ class CartItemSchema extends ItemSchema {
 					'line_total_tax'    => $this->prepare_money_response( $cart_item['line_tax'], $price_decimals ),
 				]
 			),
-			'catalog_visibility'   => $product->get_catalog_visibility(),
-			'is_canonical_product_line'    => $this->get_is_canonical_product_line( $cart_item ),
-			self::EXTENDING_KEY    => $this->get_extended_data( self::IDENTIFIER, $cart_item ),
+			'catalog_visibility'        => $product->get_catalog_visibility(),
+			'is_canonical_product_line' => $this->get_is_canonical_product_line( $cart_item ),
+			self::EXTENDING_KEY         => $this->get_extended_data( self::IDENTIFIER, $cart_item ),
 		];
 	}
 
