@@ -45,7 +45,7 @@
 - [woocommerce_store_api_add_to_cart_data](#woocommerce_store_api_add_to_cart_data)
 - [woocommerce_store_api_disable_nonce_check](#woocommerce_store_api_disable_nonce_check)
 - [woocommerce_store_api_cart_item_images](#woocommerce_store_api_cart_item_images)
-- [woocommerce_store_api_cart_item_is_canonical_line](#woocommerce_store_api_cart_item_is_canonical_line)
+- [woocommerce_store_api_cart_item_is_canonical_product_line](#woocommerce_store_api_cart_item_is_canonical_product_line)
 - [woocommerce_store_api_product_quantity_limit](#woocommerce_store_api_product_quantity_limit)
 - [woocommerce_store_api_product_quantity_{$value_type}](#woocommerce_store_api_product_quantity_value_type)
 - [woocommerce_store_api_rate_limit_options](#woocommerce_store_api_rate_limit_options)
@@ -1123,13 +1123,13 @@ This hook allows the cart item images to be changed. This is specific to the car
 
 ---
 
-## woocommerce_store_api_cart_item_is_canonical_line
+## woocommerce_store_api_cart_item_is_canonical_product_line
 
 
 Filters whether a cart line is the canonical line for its product.
 
 ```php
-apply_filters( 'woocommerce_store_api_cart_item_is_canonical_line', boolean $is_canonical, array $cart_item )
+apply_filters( 'woocommerce_store_api_cart_item_is_canonical_product_line', boolean $is_canonical, array $cart_item )
 ```
 
 ### Description
