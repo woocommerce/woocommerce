@@ -312,6 +312,48 @@ describe( 'CustomizableDashboard', () => {
 		expect( getByText( 'Mine' ) ).toBeInTheDocument();
 	} );
 
+	it( 'offers a hidden section the filter registered without an icon', () => {
+		// `Icon` clones the icon it is handed, so anything but a React element
+		// throws where the merchant goes to bring the section back.
+		mockDefaultSections = [
+			...DEFAULT_SECTIONS,
+			{
+				key: 'my-extension',
+				component: () => null,
+				title: 'Mine',
+				isVisible: 0,
+				hiddenBlocks: [],
+			},
+		];
+
+		const { getByTitle } = renderDashboard( undefined );
+		fireEvent.click( getByTitle( 'Add more sections' ) );
+
+		expect( getByTitle( 'Add Mine section' ) ).toBeInTheDocument();
+	} );
+
+	it( 'renders the icon of a hidden section that provides one', () => {
+		mockDefaultSections = [
+			...DEFAULT_SECTIONS,
+			{
+				key: 'my-extension',
+				component: () => null,
+				title: 'Mine',
+				isVisible: false,
+				icon: <svg />,
+				hiddenBlocks: [],
+			},
+		];
+
+		// The dropdown renders in a popover, so it lands outside `container`.
+		const { baseElement, getByTitle } = renderDashboard( undefined );
+		fireEvent.click( getByTitle( 'Add more sections' ) );
+
+		expect(
+			baseElement.querySelector( '.my-extension__icon' )
+		).toBeInTheDocument();
+	} );
+
 	it( 'repairs a corrupted preference once, without the React nodes', () => {
 		const { rerender } = renderDashboard( [ null, null ] );
 

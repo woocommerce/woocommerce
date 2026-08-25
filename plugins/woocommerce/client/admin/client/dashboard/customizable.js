@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useEffect, useMemo, useRef } from '@wordpress/element';
+import { isValidElement, useEffect, useMemo, useRef } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { partial } from 'lodash';
 import { Dropdown, Button } from '@wordpress/components';
@@ -470,11 +470,15 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 											section.title
 										) }
 									>
-										<Icon
-											className={ section.key + '__icon' }
-											icon={ section.icon }
-											size={ 30 }
-										/>
+										{ isValidElement( section.icon ) && (
+											<Icon
+												className={
+													section.key + '__icon'
+												}
+												icon={ section.icon }
+												size={ 30 }
+											/>
+										) }
 										<span className="woocommerce-dashboard-section__add-more-btn-title">
 											{ section.title }
 										</span>
