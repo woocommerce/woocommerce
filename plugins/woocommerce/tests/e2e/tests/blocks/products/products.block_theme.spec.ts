@@ -129,8 +129,8 @@ for ( const {
 			const productQueryProducts =
 				await getProductsNameFromProductQuery( page );
 
-			expect( classicProducts ).not.toHaveLength( 0 );
-			expect( productQueryProducts ).not.toHaveLength( 0 );
+			expect( classicProducts.length ).toBeGreaterThan( 1 );
+			expect( productQueryProducts.length ).toBeGreaterThan( 1 );
 			expect( classicProducts ).toEqual( productQueryProducts );
 		} );
 	} );
