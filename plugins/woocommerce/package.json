@@ -77,6 +77,7 @@
 		"test:e2e:core-parallel": "pnpm test:e2e:default --project=core-parallel",
 		"test:e2e:default": "pnpm test:e2e:install && pnpm test:e2e:with-env default",
 		"test:e2e:install": "pnpm playwright install chromium",
+		"test:e2e:blocks:ab-baseline": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/e2e/utils/blocks/*.test.mjs && pnpm playwright test --config=tests/e2e/playwright.config.ts --project=blocks-chromium",
 		"test:e2e:blocks": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/e2e/utils/blocks/*.test.mjs && node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tests/e2e/bin/run-blocks-shard.mjs",
 		"test:e2e:blocks:unified-editor-assets": "pnpm wp-env:e2e run cli wp option update woocommerce_feature_block_editor_unified_assets_enabled yes && pnpm test:e2e:blocks",
 		"test:e2e:blocks:performance": "pnpm playwright test --config=tests/e2e/playwright.performance.config.ts --project=blocks-performance",
@@ -882,6 +883,62 @@
 						"resultsPath": "tests/e2e/test-results",
 						"allure": true
 					}
+				},
+				{
+					"name": "Blocks e2e tests (A/B baseline)",
+					"testType": "e2e",
+					"usesSharedPluginBuild": true,
+					"command": "test:e2e:blocks:ab-baseline",
+					"shardingArguments": [
+						"--shard=1/10",
+						"--shard=2/10",
+						"--shard=3/10",
+						"--shard=4/10",
+						"--shard=5/10",
+						"--shard=6/10",
+						"--shard=7/10",
+						"--shard=8/10",
+						"--shard=9/10",
+						"--shard=10/10"
+					],
+					"changes": [
+						"patterns/**/*.php",
+						"includes/**/*.php",
+						"src/Blocks/**/*.php",
+						"templates/**/*.php",
+						"templates/**/*.html",
+						"sample-data/sample_products.xml",
+						"tests/e2e/bin/**",
+						"tests/e2e/fixtures/blocks-setup.ts",
+						"tests/e2e/blocks-shard-durations.json",
+						"tests/e2e/playwright.config.ts",
+						"tests/e2e/content-templates/blocks/**",
+						"tests/e2e/test-data/blocks/**",
+						"tests/e2e/test-data/images/**",
+						"tests/e2e/test-plugins/**",
+						"tests/e2e/tests/blocks/**",
+						"tests/e2e/themes/blocks/**",
+						"tests/e2e/utils/blocks/**",
+						".wp-env.e2e.json"
+					],
+					"onlyForDependencies": [
+						"@woocommerce/block-library"
+					],
+					"testEnv": {
+						"start": "env:start:blocks",
+						"config": {
+							"phpVersion": "7.4"
+						}
+					},
+					"events": [
+						"pull_request"
+					],
+					"report": {
+						"resultsBlobName": "blocks-e2e-report-ab-baseline",
+						"resultsPath": "tests/e2e/test-results",
+						"allure": false
+					},
+					"optional": true
 				},
 				{
 					"name": "Blocks e2e tests - unified editor assets",
