@@ -144,6 +144,8 @@ class WC_Helper {
 	/**
 	 * The last failed Helper API subscriptions response, if one is still current.
 	 *
+	 * @since 11.2.0
+	 *
 	 * @return array{code:int, message:string, retry_after:int|null}|null Null when the last fetch succeeded.
 	 */
 	public static function get_api_error(): ?array {

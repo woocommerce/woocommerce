@@ -188,6 +188,8 @@ class WC_Helper_API_Backoff {
 	 * actually observing, so a rate-limit notice stays visible for exactly as
 	 * long as requests are being suppressed.
 	 *
+	 * @since 11.2.0
+	 *
 	 * @param string $request_type The Helper API request type (e.g. 'update-check').
 	 * @return int|null Seconds until the window expires, or null when not rate limited.
 	 */
