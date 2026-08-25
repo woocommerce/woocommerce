@@ -11,7 +11,12 @@ import {
 } from '@wordpress/components';
 import { Fragment, useState } from '@wordpress/element';
 import PropTypes from 'prop-types';
-import { Chart, Link, TableCard } from '@woocommerce/components';
+import {
+	AnalyticsError,
+	Chart,
+	Link,
+	TableCard,
+} from '@woocommerce/components';
 import { Text } from '@woocommerce/experimental';
 
 /**
@@ -146,7 +151,12 @@ export default function NoticesReport() {
 		mostOverdue,
 		mostSignedUp,
 		isLoading,
+		isError,
 	} = data;
+
+	if ( isError ) {
+		return <AnalyticsError />;
+	}
 
 	const notificationsTotals = summary?.totals || {};
 	const signupsTotals = summary?.totals || {};
