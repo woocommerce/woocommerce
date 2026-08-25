@@ -14,8 +14,10 @@
 
 const isListItem = ( line ) => /^([-*+]|\d+[.)])\s/.test( line );
 
-const isFenceMarker = ( line ) =>
-	line.startsWith( '```' ) || line.startsWith( '~~~' );
+const getFenceMarker = ( line ) => {
+	const match = line.match( /^(`{3,}|~{3,})/ );
+	return match ? match[ 1 ] : null;
+};
 
 const docblockToMarkdown = ( text ) => {
 	if ( ! text ) {
@@ -26,20 +28,36 @@ const docblockToMarkdown = ( text ) => {
 	// Whether the last emitted line is prose that a soft-wrapped
 	// continuation line should be joined onto.
 	let joinable = false;
-	let inFence = false;
+	// The delimiter run that opened the current code fence, if any.
+	let openFence = null;
 
 	for ( const rawLine of String( text ).split( '\n' ) ) {
 		const line = rawLine.trimEnd();
 		const trimmed = line.trim();
 
-		if ( isFenceMarker( trimmed ) ) {
-			inFence = ! inFence;
-			out.push( trimmed );
-			joinable = false;
+		if ( openFence ) {
+			// Per CommonMark, only a bare marker of the same character
+			// with at least the opening length closes the fence; any
+			// other line is code-block content.
+			const closeMarker = getFenceMarker( trimmed );
+			if (
+				closeMarker === trimmed &&
+				closeMarker[ 0 ] === openFence[ 0 ] &&
+				closeMarker.length >= openFence.length
+			) {
+				openFence = null;
+				out.push( trimmed );
+				joinable = false;
+			} else {
+				out.push( line );
+			}
 			continue;
 		}
-		if ( inFence ) {
-			out.push( line );
+		const fenceMarker = getFenceMarker( trimmed );
+		if ( fenceMarker ) {
+			openFence = fenceMarker;
+			out.push( trimmed );
+			joinable = false;
 			continue;
 		}
 		if ( ! trimmed ) {
