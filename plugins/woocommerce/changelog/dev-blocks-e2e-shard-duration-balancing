@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Balance Blocks e2e shards by measured duration instead of file count; CI-only, no merchant-facing change.
