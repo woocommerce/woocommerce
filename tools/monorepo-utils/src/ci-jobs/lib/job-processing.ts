@@ -21,6 +21,68 @@ const SHARED_ESLINT_PROJECTS = [
 ];
 
 /**
+ * The change facts collected for a dependency while traversing the graph.
+ * The decision whether these count as "changes" is made per job, because
+ * each job can ignore a different set of files.
+ */
+interface DependencyChangeInfo {
+	name: string;
+
+	/**
+	 * Dependency-relative changed paths, empty when all projects are forced.
+	 */
+	changedFiles: string[];
+
+	/**
+	 * Whether this visit's recursion spawned jobs for the dependency.
+	 */
+	spawnsJobs: boolean;
+}
+
+/**
+ * Removes the files a job ignores from a changed-file list.
+ *
+ * @param {Array.<string>} files  The changed files to filter.
+ * @param {Array.<RegExp>} ignore The job's compiled ignore patterns.
+ * @return {Array.<string>} The files the job should see.
+ */
+function filterIgnoredFiles( files: string[], ignore: RegExp[] ): string[] {
+	if ( ignore.length === 0 ) {
+		return files;
+	}
+
+	return files.filter(
+		( file ) =>
+			! ignore.some( ( pattern ) => {
+				// Guard against stateful patterns keeping a lastIndex.
+				pattern.lastIndex = 0;
+				return pattern.test( file );
+			} )
+	);
+}
+
+/**
+ * Names the dependencies a job should consider changed: those that spawned
+ * their own jobs, or have changed files the job does not ignore.
+ *
+ * @param {Array.<Object>} dependencyInfos The change facts for each dependency.
+ * @param {Array.<RegExp>} ignore          The job's compiled ignore patterns.
+ * @return {Array.<string>} The names of the changed dependencies.
+ */
+function dependenciesWithChangesForJob(
+	dependencyInfos: DependencyChangeInfo[],
+	ignore: RegExp[]
+): string[] {
+	return dependencyInfos
+		.filter(
+			( dependency ) =>
+				dependency.spawnsJobs ||
+				filterIgnoredFiles( dependency.changedFiles, ignore ).length > 0
+		)
+		.map( ( dependency ) => dependency.name );
+}
+
+/**
  * A linting job.
  */
 interface LintJob {
@@ -299,7 +361,7 @@ async function createJobsForProject(
 		test: [],
 	};
 
-	const dependenciesWithChanges = [];
+	const dependencyInfos: DependencyChangeInfo[] = [];
 
 	for ( const dependency of node.dependencies ) {
 		const dependencyJobs = await createJobsForProject(
@@ -311,16 +373,15 @@ async function createJobsForProject(
 		newJobs.lint.push( ...dependencyJobs.lint );
 		newJobs.test.push( ...dependencyJobs.test );
 
-		// First line of detection: implicit changes list points to the dependency.
-		const dependencyHasChanges =
-			( changes[ dependency.name ] || [] ).length > 0;
-		// Second line of detection: the dependency spawns jobs.
-		const dependencySpawnsJobs =
-			dependencyJobs.test.length + dependencyJobs.lint.length > 0;
-
-		if ( dependencyHasChanges || dependencySpawnsJobs ) {
-			dependenciesWithChanges.push( dependency.name );
-		}
+		// Whether these facts amount to a changed dependency is decided per
+		// job below, since each job can ignore a different set of files.
+		dependencyInfos.push( {
+			name: dependency.name,
+			changedFiles:
+				changes === true ? [] : changes[ dependency.name ] ?? [],
+			spawnsJobs:
+				dependencyJobs.test.length + dependencyJobs.lint.length > 0,
+		} );
 	}
 
 	// Projects that don't have any CI configuration don't have any potential jobs for us to check for.
@@ -351,13 +412,23 @@ async function createJobsForProject(
 		// Jobs will check to see whether or not they should trigger based on the files
 		// that have been changed in the project. When "true" is given, however, it
 		// means that we should consider ALL files to have been changed and
-		// trigger any jobs for the project.
+		// trigger any jobs for the project. Files the job ignores are invisible
+		// to it, both here and in the dependency checks below.
+		const ignore = jobConfig.ignore ?? [];
 		let projectChanges;
 		if ( changes === true ) {
 			projectChanges = true;
 		} else {
-			projectChanges = changes[ node.name ] ?? [];
+			projectChanges = filterIgnoredFiles(
+				changes[ node.name ] ?? [],
+				ignore
+			);
 		}
+
+		const dependenciesWithChanges = dependenciesWithChangesForJob(
+			dependencyInfos,
+			ignore
+		);
 
 		switch ( jobConfig.type ) {
 			case JobType.Lint: {

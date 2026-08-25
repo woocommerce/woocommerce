@@ -12,13 +12,13 @@ Keep the _[Release Troubleshooting & Recovery](https://developer.woocommerce.com
 
 ### 1. Go/no-go
 
-For scheduled stable releases, hold this 24-48 hours before the release date, with the Product DRI (named on the parent tracking issue). Bring in QualityOps and the Atomic contact when staging or monitoring left open questions. See the [readiness guide](https://developer.woocommerce.com/docs/contribution/releases/readiness/) for details.
+For scheduled stable releases, hold this 24-48 hours before the release date with the Product DRIs named on the parent tracking issue - ping `@woo-core-release` in Slack if you need to reach them or aren't sure who's available. Bring in QualityOps and the Atomic contact when staging or monitoring left open questions. See the [readiness guide](https://developer.woocommerce.com/docs/contribution/releases/readiness/) for details.
 
 - [ ] The readiness review is complete and its verdicts still hold.
 - [ ] No new blocking findings since the readiness review (check `#woo-core-releases` threads and the [newest issues]({repository_url}/issues?q=is%3Aissue%20state%3Aopen%20sort%3Acreated-desc)).
 - [ ] Decision recorded as a comment on this issue - **go**, **no-go**, or **go with conditions** - with the names behind it.
 
-For scheduled releases, the readiness review is the one in the RC sub-issue. Point releases have no RC: run the [readiness criteria](https://developer.woocommerce.com/docs/contribution/releases/readiness/) over the changes being shipped as part of this go/no-go. For unscheduled point releases shipping an urgent fix, a quick go/no-go with the Product DRI in `#woo-core-releases` is enough - record the outcome here all the same.
+For scheduled releases, the readiness review is the one in the RC sub-issue. Point releases have no RC: run the [readiness criteria](https://developer.woocommerce.com/docs/contribution/releases/readiness/) over the changes being shipped as part of this go/no-go. For unscheduled point releases shipping an urgent fix, a quick go/no-go with `@woo-core-release` in `#woo-core-releases` is enough - record the outcome here all the same.
 
 
 ### 2. Pre-build checks

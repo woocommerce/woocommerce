@@ -50,9 +50,6 @@ class Telemetry implements RegisterHooksInterface {
 	public static function collect_snapshot(): array {
 		global $wpdb;
 
-		$option_value         = get_option( Package::ENABLE_OPTION_NAME, '' );
-		$variant_assignment   = (int) get_option( 'woocommerce_remote_variant_assignment', 0 );
-		$cohort               = Package::is_in_canary_cohort() ? 'treatment' : 'control';
 		$legacy_plugin_active = self::is_legacy_plugin_active();
 		$legacy_plugin_file   = WP_PLUGIN_DIR . '/' . self::LEGACY_PLUGIN_FILE;
 
@@ -105,10 +102,7 @@ class Telemetry implements RegisterHooksInterface {
 		);
 
 		return array(
-			'feature_enabled'               => Package::is_enabled() ? 'yes' : 'no',
-			'feature_option_explicit'       => '' === $option_value ? 'no' : 'yes',
-			'remote_variant_assignment'     => $variant_assignment,
-			'remote_variant_cohort'         => $cohort,
+			'feature_enabled'               => 'yes',
 			'legacy_avi_plugin_active'      => $legacy_plugin_active ? 'yes' : 'no',
 			'legacy_avi_plugin_installed'   => file_exists( $legacy_plugin_file ) ? 'yes' : 'no',
 			'migrated_variation_count'      => $migrated_variation_count,

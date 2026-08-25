@@ -345,6 +345,10 @@ class WC_Install {
 		'11.1.0'   => array(
 			'wc_update_1110_delete_dashboard_outofstock_count_transient',
 			'wc_update_1110_cleanup_block_email_posts',
+			'wc_update_1110_flush_product_count_cache',
+		),
+		'11.1.0-1' => array(
+			'wc_update_11101_remove_deprecated_variation_gallery_option',
 		),
 	);
 
@@ -598,7 +602,6 @@ class WC_Install {
 	 */
 	public static function install_actions() {
 		if ( ! empty( $_GET['do_update_woocommerce'] ) ) {
-			// WPCS: input var ok.
 			check_admin_referer( 'wc_db_update', 'wc_db_update_nonce' );
 			wc_get_logger()->info( 'Manual database update triggered.', array( 'source' => 'wc-updater' ) );
 			self::update();
@@ -622,7 +625,6 @@ class WC_Install {
 
 				$return_url = esc_url_raw( wp_unslash( $return_url ) );
 				wp_safe_redirect( $return_url );
-				// WPCS: input var ok.
 				exit;
 			}
 		}
@@ -2123,6 +2125,8 @@ CREATE TABLE {$wpdb->prefix}wc_customer_lookup (
 	postcode varchar(20) DEFAULT '' NOT NULL,
 	city varchar(100) DEFAULT '' NOT NULL,
 	state varchar(100) DEFAULT '' NOT NULL,
+	billing_phone varchar(100) DEFAULT '' NOT NULL,
+	shipping_phone varchar(100) DEFAULT '' NOT NULL,
 	PRIMARY KEY (customer_id),
 	UNIQUE KEY user_id (user_id),
 	KEY email (email)

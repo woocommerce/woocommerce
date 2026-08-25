@@ -40,6 +40,7 @@ use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchro
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
+use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
 use Automattic\WooCommerce\Utilities\StringUtil;
 use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
@@ -3585,6 +3586,21 @@ function wc_update_1100_enable_point_of_sale_feature() {
 }
 
 /**
+ * Remove the deprecated variation gallery feature option from the database.
+ *
+ * The variation gallery feature flag is deprecated as of 11.1.0 and is now always enabled.
+ * The option is no longer needed as FeaturesUtil::feature_is_enabled('variation_gallery')
+ * returns the deprecated_value directly without reading from the database.
+ *
+ * @since 11.1.0
+ *
+ * @return void
+ */
+function wc_update_11101_remove_deprecated_variation_gallery_option(): void {
+	delete_option( VariationGalleryPackage::ENABLE_OPTION_NAME );
+}
+
+/**
  * Delete the cached dashboard out-of-stock product count.
  *
  * @since 11.1.0
@@ -3606,4 +3622,17 @@ function wc_update_1110_delete_dashboard_outofstock_count_transient() {
  */
 function wc_update_1110_cleanup_block_email_posts(): bool {
 	return WCEmailPostsCleanup::run();
+}
+
+/**
+ * Flush the persistent product count cache to purge potentially drifted counter values from v11.0-RC1.
+ *
+ * @since 11.1.0
+ *
+ * @return void
+ */
+function wc_update_1110_flush_product_count_cache() {
+	if ( class_exists( \Automattic\WooCommerce\Caches\ProductCountCache::class ) ) {
+		( new \Automattic\WooCommerce\Caches\ProductCountCache() )->flush( 'product' );
+	}
 }
