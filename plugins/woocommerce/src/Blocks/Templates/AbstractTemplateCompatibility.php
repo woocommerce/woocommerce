@@ -110,11 +110,11 @@ abstract class AbstractTemplateCompatibility {
 	 *
 	 * The array format:
 	 * [
-	 *   <hook-name> => [
-	 *     block_names => [ <block-name>, ... ],
+	 *   `<hook-name>` => [
+	 *     block_names => [ `<block-name>`, ... ],
 	 *     position => before|after,
 	 *     hooked => [
-	 *       <function-name> => <priority>,
+	 *       `<function-name>` => `<priority>`,
 	 *        ...
 	 *     ],
 	 *  ],
@@ -156,9 +156,9 @@ abstract class AbstractTemplateCompatibility {
 		 * format:
 		 * [
 		 *   [
-		 *     hook => <hook-name>,
-		 *     function => <function-name>,
-		 *     priority => <priority>,
+		 *     hook => `<hook-name>`,
+		 *     function => `<function-name>`,
+		 *     priority => `<priority>`,
 		 *  ],
 		 *  ...
 		 * ]
