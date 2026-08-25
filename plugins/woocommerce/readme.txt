@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 11.1.0-beta.2 2026-XX-XX =
+= 11.1.0-beta.2 2026-08-25 =
 
 **WooCommerce**
 
@@ -363,6 +363,15 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - WC_Order_Item_Product::set_product() now resets variation_id to 0 when passed a non-variation product, so reassigning a line item's product no longer leaves a stale variation ID that made get_product() return the previous variation. [#66734](https://github.com/woocommerce/woocommerce/pull/66734)
 * Fix - WP-CLI's blueprint command no longer risks a fatal error from loading its class twice. [#67074](https://github.com/woocommerce/woocommerce/pull/67074)
 * Fix - WP-CLI no longer exits the whole process when the optional wp-cli/extension-command package isn't installed. [#67074](https://github.com/woocommerce/woocommerce/pull/67074)
+* Fix - Exclude WordPress editorial notes from the WooCommerce comment count cache, so adding a note no longer inflates the pending comment count shown in wp-admin. [#67985](https://github.com/woocommerce/woocommerce/pull/67985)
+* Fix - Fix Add to Cart + Options redirect when a plugin modifies the form and WooCommerce is installed in a subdirectory [#67798](https://github.com/woocommerce/woocommerce/pull/67798)
+* Fix - Fix CSV variation import saving a catch-all variation and a stray global attribute when a global-flagged row matches a custom parent attribute. [#68002](https://github.com/woocommerce/woocommerce/pull/68002)
+* Fix - Fix dropdown text and the clear icon running under the chevron in admin single selects on WP 7.0+, including the Order edit Country, State and Customer fields. [#67969](https://github.com/woocommerce/woocommerce/pull/67969)
+* Fix - Fix has_orders_pending_sync() incorrectly returning false when an order changes after a full HPOS backfill [#67838](https://github.com/woocommerce/woocommerce/pull/67838)
+* Fix - Hide the customer email verification prompt when its email notification is disabled. [#67994](https://github.com/woocommerce/woocommerce/pull/67994)
+* Fix - Prevent REST order updates from failing when a line item's variation is deleted mid-update and the posted product resolves to the parent product. [#67860](https://github.com/woocommerce/woocommerce/pull/67860)
+* Fix - Restore the wc_product_meta_lookup join when the Products list is filtered by "Out of stock", so posts_clauses callbacks registered after WooCommerce can still reference the alias. [#67890](https://github.com/woocommerce/woocommerce/pull/67890)
+* Fix - Suppress the customer email verification prompt when guest checkout is disabled. [#67968](https://github.com/woocommerce/woocommerce/pull/67968)
 * Add - Add a "Send test email" action to the emails listing page (block email editor). [#66405](https://github.com/woocommerce/woocommerce/pull/66405)
 * Add - Add a feature-gated public order withdrawal endpoint. [#66538](https://github.com/woocommerce/woocommerce/pull/66538)
 * Add - Add a filter for product attribute taxonomy row actions in the Attributes admin table. [#66633](https://github.com/woocommerce/woocommerce/pull/66633)
@@ -411,6 +420,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Move the order withdrawal feature out of experimental status. [#67391](https://github.com/woocommerce/woocommerce/pull/67391)
 * Update - Rename the amount field to total in the wc/v4/refunds creation endpoint request and response so it matches the refund preview endpoint. The v4 REST API is behind the rest-api-v4 feature flag. [#66799](https://github.com/woocommerce/woocommerce/pull/66799)
 * Update - Update product brand taxonomy labels to clarify they apply to products. [#66725](https://github.com/woocommerce/woocommerce/pull/66725)
+* Update - Enable variation galleries for all stores and remove the experimental feature toggle. [#67915](https://github.com/woocommerce/woocommerce/pull/67915)
+* Update - Update version requirements to WordPress 7.0. [#67866](https://github.com/woocommerce/woocommerce/pull/67866)
 * Dev - Add a structured outcome to the cart store addCartItem action so consumers can read add success/failure directly instead of counting cart lines. [#66687](https://github.com/woocommerce/woocommerce/pull/66687)
 * Dev - Add deprecated compatibility shims for retired WooCommerce Admin feature flags. [#65472](https://github.com/woocommerce/woocommerce/pull/65472)
 * Dev - Add editor asset count and network transfer size performance metrics. [#66606](https://github.com/woocommerce/woocommerce/pull/66606)
@@ -461,6 +472,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Update Blocks E2E Site Editor content locators for WordPress 7.1. [#66711](https://github.com/woocommerce/woocommerce/pull/66711)
 * Dev - Update bundled WordPress UI packages for theme API compatibility. [#66361](https://github.com/woocommerce/woocommerce/pull/66361)
 * Dev - Update wp-coding-standards/wpcs to 3.4.1 (security release) in the phpcs lint tooling. [#67033](https://github.com/woocommerce/woocommerce/pull/67033)
+* Dev - Fix the create-post e2e test against Gutenberg nightly, where the default block appender no longer exposes the button role. [#67917](https://github.com/woocommerce/woocommerce/pull/67917)
+* Dev - Remove the experimental product DataViews and classic variations redesign features. [#67909](https://github.com/woocommerce/woocommerce/pull/67909)
 * Tweak - Add a translators comment for the cron interval placeholder to give translators context. [#65734](https://github.com/woocommerce/woocommerce/pull/65734)
 * Tweak - Add class to payment link on the customer order details and update the template title to "Customer order details email" [#66544](https://github.com/woocommerce/woocommerce/pull/66544)
 * Tweak - Hide the Downloadable product permissions meta box by default on the order edit screen. Merchants can re-enable it via Screen Options. [#66119](https://github.com/woocommerce/woocommerce/pull/66119)
