@@ -215,37 +215,37 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 	 */
 	public function filter_scenarios(): array {
 		return array(
-			'no filters, all orders'                   => array(
+			'no filters matches all 36 orders'             => array(
 				array(),
 				array( 6, 6, 6, 6, 6, 6 ),
 				array( 12, 12 ),
 				4,
 			),
-			'status_is both statuses'                  => array(
+			'status_is with both statuses matches all orders' => array(
 				array( 'status_is' => array( OrderStatus::COMPLETED, OrderStatus::PROCESSING ) ),
 				array( 6, 6, 6, 6, 6, 6 ),
 				array( 12, 12 ),
 				4,
 			),
-			'status_is one status'                     => array(
+			'status_is completed matches the completed half' => array(
 				array( 'status_is' => array( OrderStatus::COMPLETED ) ),
 				array( 3, 3, 3, 3, 3, 3 ),
 				array( 6, 6 ),
 				4,
 			),
-			'status_is_not one status'                 => array(
+			'status_is_not processing matches the completed half' => array(
 				array( 'status_is_not' => array( OrderStatus::PROCESSING ) ),
 				array( 3, 3, 3, 3, 3, 3 ),
 				array( 6, 6 ),
 				4,
 			),
-			'status_is_not both statuses, no orders'   => array(
+			'status_is_not with both statuses matches nothing' => array(
 				array( 'status_is_not' => array( OrderStatus::COMPLETED, OrderStatus::PROCESSING ) ),
 				array( 0, 0, 0, 0, 0, 0 ),
 				array( 0, 0 ),
 				0,
 			),
-			'status_is with status_is_not'             => array(
+			'status_is both minus processing matches the completed half' => array(
 				array(
 					'status_is'     => array( OrderStatus::COMPLETED, OrderStatus::PROCESSING ),
 					'status_is_not' => array( OrderStatus::PROCESSING ),
@@ -254,31 +254,31 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 				array( 6, 6 ),
 				4,
 			),
-			'product_includes two products'            => array(
+			'product_includes products 1 and 2 matches two thirds' => array(
 				array( 'product_includes' => array( 'product_1', 'product_2' ) ),
 				array( 6, 6, 0, 6, 6, 0 ),
 				array( 8, 8 ),
 				3,
 			),
-			'product_includes one product'             => array(
+			'product_includes product 3 matches its third of orders' => array(
 				array( 'product_includes' => array( 'product_3' ) ),
 				array( 0, 0, 6, 0, 0, 6 ),
 				array( 4, 4 ),
 				2,
 			),
-			'product_excludes one product'             => array(
+			'product_excludes product 1 matches the other two thirds' => array(
 				array( 'product_excludes' => array( 'product_1' ) ),
 				array( 0, 6, 6, 0, 6, 6 ),
 				array( 8, 8 ),
 				3,
 			),
-			'product_excludes two products'            => array(
+			'product_excludes products 1 and 2 matches the remaining third' => array(
 				array( 'product_excludes' => array( 'product_1', 'product_2' ) ),
 				array( 0, 0, 6, 0, 0, 6 ),
 				array( 4, 4 ),
 				2,
 			),
-			'product_includes with product_excludes'   => array(
+			'include products 1 and 2 minus product 1 leaves product 2 orders' => array(
 				array(
 					'product_includes' => array( 'product_1', 'product_2' ),
 					'product_excludes' => array( 'product_1' ),
@@ -287,31 +287,31 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 				array( 4, 4 ),
 				2,
 			),
-			'coupon_includes both coupons'             => array(
+			'coupon_includes both matches the couponed two thirds' => array(
 				array( 'coupon_includes' => array( 'small_coupon', 'large_coupon' ) ),
 				array( 4, 4, 4, 4, 4, 4 ),
 				array( 12, 12 ),
 				4,
 			),
-			'coupon_includes one coupon'               => array(
+			'coupon_includes the small coupon matches its third' => array(
 				array( 'coupon_includes' => array( 'small_coupon' ) ),
 				array( 2, 2, 2, 2, 2, 2 ),
 				array( 12, 0 ),
 				4,
 			),
-			'coupon_excludes one coupon'               => array(
+			'coupon_excludes small matches uncouponed and large-coupon orders' => array(
 				array( 'coupon_excludes' => array( 'small_coupon' ) ),
 				array( 4, 4, 4, 4, 4, 4 ),
 				array( 0, 12 ),
 				4,
 			),
-			'coupon_excludes both coupons'             => array(
+			'coupon_excludes both matches the uncouponed third' => array(
 				array( 'coupon_excludes' => array( 'small_coupon', 'large_coupon' ) ),
 				array( 2, 2, 2, 2, 2, 2 ),
 				array( 0, 0 ),
 				4,
 			),
-			'coupon_includes with coupon_excludes'     => array(
+			'coupon_includes both minus the large leaves the small third' => array(
 				array(
 					'coupon_includes' => array( 'small_coupon', 'large_coupon' ),
 					'coupon_excludes' => array( 'large_coupon' ),
@@ -320,13 +320,13 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 				array( 12, 0 ),
 				4,
 			),
-			'customer_type new'                        => array(
+			'customer_type new matches only the very first order' => array(
 				array( 'customer_type' => 'new' ),
 				array( 1, 0, 0, 0, 0, 0 ),
 				array( 0, 0 ),
 				1,
 			),
-			'match all: status_is + product_includes'  => array(
+			'match all: completed orders containing product 1' => array(
 				array(
 					'status_is'        => array( OrderStatus::COMPLETED ),
 					'product_includes' => array( 'product_1' ),
@@ -335,7 +335,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 				array( 2, 2 ),
 				2,
 			),
-			'match all: status_is + coupon_includes'   => array(
+			'match all: completed orders using the small coupon' => array(
 				array(
 					'status_is'       => array( OrderStatus::COMPLETED ),
 					'coupon_includes' => array( 'small_coupon' ),
@@ -344,7 +344,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 				array( 6, 0 ),
 				4,
 			),
-			'match all: product_includes + coupon_includes' => array(
+			'match all: product 1 orders using the small coupon' => array(
 				array(
 					'product_includes' => array( 'product_1' ),
 					'coupon_includes'  => array( 'small_coupon' ),
@@ -353,7 +353,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 				array( 4, 0 ),
 				2,
 			),
-			'match all: status + product + coupon'     => array(
+			'match all: completed product 1 orders using the small coupon' => array(
 				array(
 					'status_is'        => array( OrderStatus::COMPLETED ),
 					'product_includes' => array( 'product_1' ),
@@ -363,7 +363,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 				array( 2, 0 ),
 				2,
 			),
-			'match all: status_is + status_is_not + product + coupon' => array(
+			'match all: status_is_not processing keeps the same orders' => array(
 				array(
 					'status_is'        => array( OrderStatus::COMPLETED, OrderStatus::PROCESSING ),
 					'status_is_not'    => array( OrderStatus::PROCESSING ),
@@ -374,7 +374,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 				array( 2, 0 ),
 				2,
 			),
-			'match all: statuses + product_includes + product_excludes' => array(
+			'match all: excluding the add-on leaves single-product orders' => array(
 				array(
 					'status_is'        => array( OrderStatus::COMPLETED, OrderStatus::PROCESSING ),
 					'status_is_not'    => array( OrderStatus::PROCESSING ),
@@ -385,7 +385,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 				array( 2, 2 ),
 				2,
 			),
-			'match all: five filters'                  => array(
+			'match all: five filters leave two small-coupon orders' => array(
 				array(
 					'status_is'        => array( OrderStatus::COMPLETED, OrderStatus::PROCESSING ),
 					'status_is_not'    => array( OrderStatus::PROCESSING ),
@@ -397,7 +397,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 				array( 2, 0 ),
 				2,
 			),
-			'match all: six filters'                   => array(
+			'match all: six filters keep the same two orders' => array(
 				array(
 					'status_is'        => array( OrderStatus::COMPLETED, OrderStatus::PROCESSING ),
 					'status_is_not'    => array( OrderStatus::PROCESSING ),
@@ -410,7 +410,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 				array( 2, 0 ),
 				2,
 			),
-			'match any: status_is or status_is_not, all orders' => array(
+			'match any: a status and its negation together match all orders' => array(
 				array(
 					'match'         => 'any',
 					'status_is'     => array( OrderStatus::COMPLETED ),
@@ -420,7 +420,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 				array( 12, 12 ),
 				4,
 			),
-			'match any: status_is or product_includes' => array(
+			'match any: completed or containing product 1' => array(
 				array(
 					'match'            => 'any',
 					'status_is'        => array( OrderStatus::COMPLETED ),
@@ -430,7 +430,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 				array( 8, 8 ),
 				4,
 			),
-			'match any: status_is or coupon_includes'  => array(
+			'match any: completed or using the small coupon' => array(
 				array(
 					'match'           => 'any',
 					'status_is'       => array( OrderStatus::COMPLETED ),
@@ -440,7 +440,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 				array( 12, 6 ),
 				4,
 			),
-			'match any: status_is or coupon_excludes'  => array(
+			'match any: completed or not using the small coupon' => array(
 				array(
 					'match'           => 'any',
 					'status_is'       => array( OrderStatus::COMPLETED ),
@@ -450,7 +450,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 				array( 6, 12 ),
 				4,
 			),
-			'match any: product_includes or coupon_includes' => array(
+			'match any: product 1 orders or small-coupon orders' => array(
 				array(
 					'match'            => 'any',
 					'product_includes' => array( 'product_1' ),
@@ -460,7 +460,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 				array( 12, 4 ),
 				4,
 			),
-			'match any: status or product or coupon'   => array(
+			'match any: completed, product 1 or small-coupon orders' => array(
 				array(
 					'match'            => 'any',
 					'status_is'        => array( OrderStatus::COMPLETED ),
@@ -471,7 +471,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 				array( 12, 8 ),
 				4,
 			),
-			'match any: status_is or status_is_not or product or coupon' => array(
+			'match any: status_is_not processing adds no new orders' => array(
 				array(
 					'match'            => 'any',
 					'status_is'        => array( OrderStatus::COMPLETED ),
@@ -483,7 +483,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 				array( 12, 8 ),
 				4,
 			),
-			'match any: statuses or product_includes or product_excludes' => array(
+			'match any: orders without product 2 widen the union' => array(
 				array(
 					'match'            => 'any',
 					'status_is'        => array( OrderStatus::COMPLETED ),
@@ -495,7 +495,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 				array( 10, 10 ),
 				4,
 			),
-			'match any: five filters'                  => array(
+			'match any: adding the small coupon widens the union further' => array(
 				array(
 					'match'            => 'any',
 					'status_is'        => array( OrderStatus::COMPLETED ),
@@ -508,7 +508,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 				array( 12, 10 ),
 				4,
 			),
-			'match any: six filters'                   => array(
+			'match any: excluding the large coupon widens the union again' => array(
 				array(
 					'match'            => 'any',
 					'status_is'        => array( OrderStatus::COMPLETED ),
