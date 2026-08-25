@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { fixupConfigRules } from '@eslint/compat';
 import { globalIgnores } from 'eslint/config';
 import globals from 'globals';
 import storybook from 'eslint-plugin-storybook';
@@ -204,7 +205,7 @@ export default [
 	 * "Cannot redefine plugin", so those rules are set on the inherited plugins.
 	 */
 	...woocommerce,
-	...storybook.configs[ 'flat/recommended' ],
+	...fixupConfigRules( storybook.configs[ 'flat/recommended' ] ),
 	{
 		/*
 		 * This plugin ships only eslintrc-style configs, whose `plugins` is an

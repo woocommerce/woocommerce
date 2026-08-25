@@ -12,26 +12,19 @@ module.exports = {
 		'../packages/**/*.mdx',
 	],
 	addons: [
-		'@storybook/addon-essentials',
 		'@storybook/addon-docs',
 		'@storybook/addon-a11y',
 		'@storybook/addon-links',
-		'storybook-addon-react-docgen',
-		'@storybook/addon-styling-webpack',
 	],
 	typescript: {
-		reactDocgen: 'react-docgen-typescript-plugin',
+		reactDocgen: 'react-docgen-typescript',
 	},
 	docs: {
-		autodocs: true,
 		defaultName: 'Docs',
 	},
 	features: {
 		babelModeV7: true,
 		emotionAlias: false,
-	},
-	core: {
-		builder: 'webpack5',
 	},
 	// webpackFinal field was added in following PR: https://github.com/woocommerce/woocommerce-blocks/pull/7514
 	// This fixes "storybook build issue" related to framer-motion library.
