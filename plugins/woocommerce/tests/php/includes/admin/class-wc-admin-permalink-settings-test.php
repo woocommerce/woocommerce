@@ -9,13 +9,6 @@ declare( strict_types = 1 );
 class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 
 	/**
-	 * Cleanup callbacks registered by test helpers, run in tearDown() even when assertions fail.
-	 *
-	 * @var Closure[]
-	 */
-	private $registered_cleanups = array();
-
-	/**
 	 * Set up the admin context and load the class under test.
 	 */
 	public function setUp(): void {
@@ -23,38 +16,6 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 		set_current_screen( 'options-permalink' );
 		require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
 		require_once WC_ABSPATH . 'includes/admin/class-wc-admin-permalink-settings.php';
-	}
-
-	/**
-	 * Reset superglobals after each test.
-	 *
-	 * Options changed during a test need no manual restoration: WC_Unit_Test_Case wraps each test
-	 * in a DB transaction and flushes the object cache, so option state reverts on its own.
-	 */
-	public function tearDown(): void {
-		foreach ( array_reverse( $this->registered_cleanups ) as $cleanup ) {
-			$cleanup();
-		}
-		$this->registered_cleanups = array();
-
-		wp_set_current_user( 0 );
-		$this->reset_permalink_post_data();
-		parent::tearDown();
-	}
-
-	/**
-	 * Remove every permalink field this test class writes to $_POST.
-	 */
-	private function reset_permalink_post_data(): void {
-		unset(
-			$_POST['permalink_structure'],
-			$_POST['wc-permalinks-nonce'],
-			$_POST['woocommerce_product_category_slug'],
-			$_POST['woocommerce_product_tag_slug'],
-			$_POST['woocommerce_product_attribute_slug'],
-			$_POST['product_permalink'],
-			$_POST['product_permalink_structure']
-		);
 	}
 
 	/**
@@ -106,7 +67,6 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	 *
 	 * Lets a test tell the two locales apart: the site-locale value stays `product`, so any
 	 * `produit` that reaches the stored option or the comparison came from the request locale.
-	 * Removal runs from the cleanup registry, so call sites need no try/finally unwinding.
 	 */
 	private function activate_french_product_slug_translation(): void {
 		$translate_product_slug = static function ( string $translation, string $text, string $context, string $domain ): string {
@@ -118,9 +78,6 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 		};
 
 		add_filter( 'gettext_with_context', $translate_product_slug, 10, 4 );
-		$this->registered_cleanups[] = static function () use ( $translate_product_slug ): void {
-			remove_filter( 'gettext_with_context', $translate_product_slug, 10 );
-		};
 	}
 
 	/**
@@ -151,11 +108,14 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	 * same `WC_Admin_Permalink_Settings` instance in production. Mirror that with two separate
 	 * instantiations rather than reusing one.
 	 *
-	 * @param string      $product_permalink           Posted `product_permalink` radio value.
-	 * @param string|null $product_permalink_structure Posted `product_permalink_structure` text value, if any.
+	 * Both posted values are typed loosely on purpose: the fields are free-form request input, and
+	 * some tests post arrays to exercise the non-string fallbacks.
+	 *
+	 * @param mixed $product_permalink           Posted `product_permalink` radio value.
+	 * @param mixed $product_permalink_structure Posted `product_permalink_structure` value, or null to leave the field out.
 	 * @return string Rendered settings HTML.
 	 */
-	private function save_and_render( string $product_permalink, ?string $product_permalink_structure = null ): string {
+	private function save_and_render( $product_permalink, $product_permalink_structure = null ): string {
 		$_POST['permalink_structure']                = '';
 		$_POST['wc-permalinks-nonce']                = wp_create_nonce( 'wc-permalinks' );
 		$_POST['woocommerce_product_category_slug']  = 'product-category';
@@ -172,7 +132,7 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 		// First request: the save-time instance persists the new structure and is discarded.
 		new WC_Admin_Permalink_Settings();
 
-		$this->reset_permalink_post_data();
+		$_POST = array();
 
 		// Second request (post-redirect): a fresh instance reads back the now-persisted value.
 		return $this->render_settings();
@@ -210,16 +170,16 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	/**
 	 * Assert that exactly one of the four product permalink radios is checked, and that it's the expected one.
 	 *
-	 * @param string $html        Rendered settings HTML.
-	 * @param string $expected_id Either 'default', 'shop_base', 'shop_base_category', or 'custom'.
+	 * @param string   $html        Rendered settings HTML.
+	 * @param string   $expected_id One of the $labels entries.
+	 * @param string[] $labels      Rows expected to render, in document order. Defaults to all four.
 	 */
-	private function assert_only_radio_checked( string $html, string $expected_id ): void {
+	private function assert_only_radio_checked( string $html, string $expected_id, array $labels = array( 'default', 'shop_base', 'shop_base_category', 'custom' ) ): void {
 		$xpath  = $this->get_xpath( $html );
 		$radios = $xpath->query( '//input[@name="product_permalink"]' );
 
-		$this->assertSame( 4, $radios->length, 'Expected exactly 4 product_permalink radios in the rendered markup.' );
+		$this->assertSame( count( $labels ), $radios->length, 'Unexpected number of product_permalink radios in the rendered markup.' );
 
-		$labels         = array( 'default', 'shop_base', 'shop_base_category', 'custom' );
 		$checked_labels = array();
 
 		foreach ( $radios as $index => $radio ) {
@@ -344,13 +304,13 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 		$permalinks['product_base'] = '/product';
 		update_option( 'woocommerce_permalinks', $permalinks );
 
-		$xpath        = $this->get_xpath( $this->render_settings() );
-		$custom_input = $xpath->query( '//input[@id="woocommerce_permalink_structure"]' )->item( 0 );
+		$html         = $this->render_settings();
+		$custom_input = $this->get_xpath( $html )->query( '//input[@id="woocommerce_permalink_structure"]' )->item( 0 );
 
 		$this->assertSame( '/product', get_option( 'woocommerce_permalinks' )['product_base'], 'The render must not rewrite the stored value.' );
 		$this->assertInstanceOf( DOMElement::class, $custom_input );
 		$this->assertSame( '/product/', $custom_input->getAttribute( 'value' ) );
-		$this->assert_only_radio_checked( $this->render_settings(), 'custom' );
+		$this->assert_only_radio_checked( $html, 'custom' );
 
 		// A save posting that same value through the custom branch converges it to the bare form.
 		$this->assert_only_radio_checked( $this->save_and_render( 'custom', '/product/' ), 'default' );
@@ -398,67 +358,34 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 		$permalinks['product_base'] = '/shop';
 		update_option( 'woocommerce_permalinks', $permalinks );
 
-		$non_numeric_shop_page       = static fn() => 'abc';
-		$this->registered_cleanups[] = static function () use ( $non_numeric_shop_page ): void {
-			remove_filter( 'woocommerce_get_shop_page_id', $non_numeric_shop_page, 10 );
-		};
-		add_filter( 'woocommerce_get_shop_page_id', $non_numeric_shop_page );
+		add_filter( 'woocommerce_get_shop_page_id', static fn() => 'abc' );
 
-		$xpath  = $this->get_xpath( $this->render_settings() );
-		$radios = $xpath->query( '//input[@name="product_permalink"]' );
-
-		$this->assertSame( 2, $radios->length, 'Only the Default and Custom base radios should render without a Shop page.' );
-		$this->assertFalse( $radios->item( 0 )->hasAttribute( 'checked' ), 'Default must not be checked for a stored Shop-style base.' );
-		$this->assertTrue( $radios->item( 1 )->hasAttribute( 'checked' ), 'Custom base should be checked when the matching Shop row is not rendered.' );
+		// Only the Default and Custom base rows render without a Shop page.
+		$this->assert_only_radio_checked( $this->render_settings(), 'custom', array( 'default', 'custom' ) );
 	}
 
 	/**
 	 * Both permalink fields are free-form request input; an array reaching trim() or
-	 * wc_sanitize_permalink() is a fatal, since both are declared to take a string.
+	 * wc_sanitize_permalink() is a fatal, since both are declared to take a string. The custom
+	 * branch has its own path: a scalar 'custom' radio with an array structure field used to store
+	 * '/', which wc_sanitize_permalink() collapses to '', leaving wc_get_permalink_structure() to
+	 * refill the option in the next request's locale. Both now resolve to the default base
+	 * directly, in the site locale.
 	 *
-	 * @testdox Should fall back to the Default base when the posted permalink fields are not scalar.
+	 * @testdox Should fall back to the Default base when a posted permalink field is not a string.
+	 *
+	 * @testWith [["custom"], ["widgets"]]
+	 *           ["custom", ["widgets"]]
+	 *
+	 * @param mixed $product_permalink           Posted `product_permalink` value.
+	 * @param mixed $product_permalink_structure Posted `product_permalink_structure` value.
 	 */
-	public function test_non_scalar_posted_fields_fall_back_to_the_default_base(): void {
+	public function test_non_string_posted_fields_fall_back_to_the_default_base( $product_permalink, $product_permalink_structure ): void {
 		$this->ensure_shop_page();
 
-		$_POST['permalink_structure']                = '';
-		$_POST['wc-permalinks-nonce']                = wp_create_nonce( 'wc-permalinks' );
-		$_POST['woocommerce_product_category_slug']  = 'product-category';
-		$_POST['woocommerce_product_tag_slug']       = 'product-tag';
-		$_POST['woocommerce_product_attribute_slug'] = '';
-		$_POST['product_permalink']                  = array( 'custom' );
-		$_POST['product_permalink_structure']        = array( 'widgets' );
-
-		new WC_Admin_Permalink_Settings();
-		$this->reset_permalink_post_data();
+		$html = $this->save_and_render( $product_permalink, $product_permalink_structure );
 
 		$this->assertSame( 'product', get_option( 'woocommerce_permalinks' )['product_base'] );
-		$this->assert_only_radio_checked( $this->render_settings(), 'default' );
-	}
-
-	/**
-	 * The Custom branch has its own non-scalar path: a scalar 'custom' radio with an array
-	 * structure field. It used to store '/', which wc_sanitize_permalink() collapses to '',
-	 * leaving wc_get_permalink_structure() to refill the option in the next request's locale.
-	 * It now resolves to the default base directly, in the site locale.
-	 *
-	 * @testdox Should fall back to the Default base when only the posted custom structure is not scalar.
-	 */
-	public function test_non_scalar_custom_structure_falls_back_to_the_default_base(): void {
-		$this->ensure_shop_page();
-
-		$_POST['permalink_structure']                = '';
-		$_POST['wc-permalinks-nonce']                = wp_create_nonce( 'wc-permalinks' );
-		$_POST['woocommerce_product_category_slug']  = 'product-category';
-		$_POST['woocommerce_product_tag_slug']       = 'product-tag';
-		$_POST['woocommerce_product_attribute_slug'] = '';
-		$_POST['product_permalink']                  = 'custom';
-		$_POST['product_permalink_structure']        = array( 'widgets' );
-
-		new WC_Admin_Permalink_Settings();
-		$this->reset_permalink_post_data();
-
-		$this->assertSame( 'product', get_option( 'woocommerce_permalinks' )['product_base'] );
-		$this->assert_only_radio_checked( $this->render_settings(), 'default' );
+		$this->assert_only_radio_checked( $html, 'default' );
 	}
 }
