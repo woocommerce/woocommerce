@@ -11,7 +11,10 @@ namespace Automattic\WooCommerce\Tests\Internal\Caches;
 
 use Automattic\WooCommerce\Internal\Caches\ProductTermCacheInvalidator;
 use WC_Cache_Helper;
+use WC_Helper_Product;
+use WC_Product;
 use WC_Unit_Test_Case;
+use WP_Term;
 
 /**
  * Tests for ProductTermCacheInvalidator.
@@ -34,39 +37,57 @@ final class ProductTermCacheInvalidatorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Registers taxonomy cache invalidation.
+	 * @testdox Reordering product terms invalidates cached results.
 	 */
-	public function test_registers_taxonomy_cache_invalidation(): void {
-		$this->assertSame(
-			10,
-			has_action( 'clean_taxonomy_cache', array( $this->sut, 'handle_clean_taxonomy_cache' ) ),
-			'The product term cache invalidator should register its taxonomy cache callback.'
-		);
-	}
+	public function test_reordering_product_terms_invalidates_cached_results(): void {
+		$taxonomy = 'product_tag';
+		$suffix   = (string) wp_rand( 1000, 9999 );
+		$names    = array( 'First tag ' . $suffix, 'Second tag ' . $suffix );
+		$term_ids = array();
+		$product  = null;
 
-	/**
-	 * @testdox Invalidates cached product terms for product taxonomies.
-	 */
-	public function test_invalidates_product_taxonomy_cache_group(): void {
-		$cache_group   = 'product_terms_product_cat';
-		$prefix_before = WC_Cache_Helper::get_cache_prefix( $cache_group );
+		try {
+			foreach ( $names as $index => $name ) {
+				$term = wp_insert_term( $name, $taxonomy );
+				$this->assertIsArray( $term, "The {$name} term should be created." );
 
-		$this->sut->handle_clean_taxonomy_cache( 'product_cat' );
+				$term_ids[] = $term['term_id'];
+				update_term_meta( $term['term_id'], 'order', $index + 1 );
+			}
 
-		$prefix_after = WC_Cache_Helper::get_cache_prefix( $cache_group );
-		$this->assertNotSame( $prefix_before, $prefix_after, 'Product taxonomy cache prefixes should be invalidated.' );
-	}
+			$product = WC_Helper_Product::create_simple_product();
+			wp_set_object_terms( $product->get_id(), $term_ids, $taxonomy );
 
-	/**
-	 * @testdox Does not invalidate cached product terms for non-product taxonomies.
-	 */
-	public function test_does_not_invalidate_non_product_taxonomy_cache_group(): void {
-		$cache_group   = 'product_terms_category';
-		$prefix_before = WC_Cache_Helper::get_cache_prefix( $cache_group );
+			$args         = array(
+				'fields'     => 'all',
+				'menu_order' => 'ASC',
+			);
+			$cached_terms = wc_get_product_terms( $product->get_id(), $taxonomy, $args );
+			$this->assertSame(
+				$names,
+				wp_list_pluck( $cached_terms, 'name' ),
+				'Product terms should initially use the configured order.'
+			);
 
-		$this->sut->handle_clean_taxonomy_cache( 'category' );
+			$term_to_move = get_term( $term_ids[1], $taxonomy );
+			$this->assertInstanceOf( WP_Term::class, $term_to_move );
 
-		$prefix_after = WC_Cache_Helper::get_cache_prefix( $cache_group );
-		$this->assertSame( $prefix_before, $prefix_after, 'Non-product taxonomy cache prefixes should remain unchanged.' );
+			wc_reorder_terms( $term_to_move, $term_ids[0], $taxonomy );
+
+			$reordered_terms = wc_get_product_terms( $product->get_id(), $taxonomy, $args );
+			$this->assertSame(
+				array_reverse( $names ),
+				wp_list_pluck( $reordered_terms, 'name' ),
+				'Product terms should use the new order without saving the product.'
+			);
+		} finally {
+			if ( $product instanceof WC_Product ) {
+				$product->delete( true );
+			}
+
+			foreach ( $term_ids as $term_id ) {
+				wp_delete_term( $term_id, $taxonomy );
+			}
+		}
 	}
 }
