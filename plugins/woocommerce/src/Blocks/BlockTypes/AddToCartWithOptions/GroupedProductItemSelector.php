@@ -143,7 +143,10 @@ class GroupedProductItemSelector extends AbstractBlock {
 		while ( $processor->next_tag() ) {
 			if ( 'DIV' === $processor->get_tag() && $processor->has_class( 'wc-block-components-quantity-selector' ) ) {
 				$existing_style = $processor->get_attribute( 'style' );
-				$style          = is_string( $existing_style ) ? $existing_style : '';
+				$style          = '';
+				if ( is_string( $existing_style ) && '' !== $existing_style ) {
+					$style = rtrim( $existing_style, ';' ) . ';';
+				}
 				$processor->set_attribute( 'style', $style . $styles );
 				break;
 			}
