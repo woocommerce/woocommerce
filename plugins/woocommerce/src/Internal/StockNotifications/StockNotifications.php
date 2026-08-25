@@ -14,6 +14,8 @@ use Automattic\WooCommerce\Internal\StockNotifications\Admin\AdminManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\ProductPageIntegration;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\FormHandlerService;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\NotificationManagementService;
+use Automattic\WooCommerce\Internal\StockNotifications\Admin\Analytics\RestController as AnalyticsRestController;
+use Automattic\Jetpack\Constants;
 
 /**
  * The controller for the stock notifications.
@@ -61,6 +63,42 @@ class StockNotifications {
 		if ( is_admin() ) {
 			$container->get( AdminManager::class );
 		}
+
+		// Register analytics REST controller (alpha-gated).
+		add_action( 'rest_api_init', array( $this, 'register_analytics_rest_controller' ) );
+
+		// Surface the analytics page in the WooCommerce Admin client.
+		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'register_admin_settings' ) );
+	}
+
+	/**
+	 * Register the analytics REST controller when the BIS alpha is enabled.
+	 *
+	 * @internal
+	 * @return void
+	 */
+	public function register_analytics_rest_controller(): void {
+		if ( ! Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
+			return;
+		}
+		( new AnalyticsRestController() )->register_routes();
+	}
+
+	/**
+	 * Expose BIS flags to the admin client for conditional UI registration.
+	 *
+	 * @internal
+	 * @param array $settings Shared admin settings.
+	 * @return array
+	 */
+	public function register_admin_settings( $settings ) {
+		if ( ! is_array( $settings ) ) {
+			return $settings;
+		}
+		$settings['stockNotifications'] = array(
+			'alphaEnabled' => Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ),
+		);
+		return $settings;
 	}
 
 	/**

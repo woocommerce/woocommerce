@@ -49,4 +49,51 @@ class NotificationQuery {
 	public static function notification_exists_by_user_id( int $product_id, int $user_id ): bool {
 		return \WC_Data_Store::load( 'stock_notification' )->notification_exists_by_user_id( $product_id, $user_id );
 	}
+
+	/**
+	 * Daily counts of signups and notifications_sent over a window.
+	 *
+	 * @param string $start_gmt Y-m-d inclusive lower bound.
+	 * @param string $end_gmt   Y-m-d inclusive upper bound.
+	 * @return array<int,array{date:string,signups:int,notifications_sent:int}>
+	 */
+	public static function get_timeseries( string $start_gmt, string $end_gmt ): array {
+		return \WC_Data_Store::load( 'stock_notification' )->get_timeseries( $start_gmt, $end_gmt );
+	}
+
+	/**
+	 * Top-demand products by active signups.
+	 *
+	 * @param int $limit Maximum rows to return (1-50).
+	 * @return array<int,array{product_id:int,active_signups:int,total_signups:int}>
+	 */
+	public static function get_top_demand( int $limit = 10 ): array {
+		return \WC_Data_Store::load( 'stock_notification' )->get_top_demand( $limit );
+	}
+
+	/**
+	 * Top products by sign-ups created within a window.
+	 *
+	 * Drives the "Most signed-up" leaderboard's Week / Month / Quarter toggle.
+	 *
+	 * @param int    $limit     Maximum rows to return (1-50).
+	 * @param string $since_gmt Lower bound for date_created_gmt (Y-m-d H:i:s GMT).
+	 * @return array<int,array{product_id:int,signups:int}>
+	 */
+	public static function get_top_signups_in_window( int $limit, string $since_gmt ): array {
+		return \WC_Data_Store::load( 'stock_notification' )->get_top_signups_in_window( $limit, $since_gmt );
+	}
+
+	/**
+	 * Products ranked by oldest active sign-up (i.e. how long customers
+	 * have been waiting for restock).
+	 *
+	 * Drives the "Most overdue" leaderboard.
+	 *
+	 * @param int $limit Maximum rows to return (1-50).
+	 * @return array<int,array{product_id:int,days_overdue:int,active_signups:int}>
+	 */
+	public static function get_most_overdue( int $limit = 10 ): array {
+		return \WC_Data_Store::load( 'stock_notification' )->get_most_overdue( $limit );
+	}
 }

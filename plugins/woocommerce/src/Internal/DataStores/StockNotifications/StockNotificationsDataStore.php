@@ -623,4 +623,201 @@ CREATE TABLE $meta_table_name (
 
 		return $results;
 	}
+
+	/**
+	 * Get daily counts of signups and notifications sent over a window.
+	 *
+	 * @param string $start_gmt Start date (inclusive), GMT, Y-m-d.
+	 * @param string $end_gmt   End date (inclusive), GMT, Y-m-d.
+	 * @return array<int,array{date:string,signups:int,notifications_sent:int}>
+	 *         Sparse array of dated rows; caller can fill zero-days if needed.
+	 */
+	public function get_timeseries( string $start_gmt, string $end_gmt ): array {
+		global $wpdb;
+
+		$table = $this->get_table_name();
+
+		// Signups per day.
+		$signups_sql = $wpdb->prepare(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table is a trusted identifier from get_table_name().
+			"SELECT DATE(date_created_gmt) AS d, COUNT(id) AS c
+			FROM {$table}
+			WHERE date_created_gmt >= %s AND date_created_gmt < DATE_ADD(%s, INTERVAL 1 DAY)
+			GROUP BY DATE(date_created_gmt)",
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			array( $start_gmt . ' 00:00:00', $end_gmt )
+		);
+		$signup_rows = $wpdb->get_results( $signups_sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
+		// Notifications sent per day (date_notified_gmt populated once status -> sent).
+		$sent_sql = $wpdb->prepare(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table is a trusted identifier from get_table_name().
+			"SELECT DATE(date_notified_gmt) AS d, COUNT(id) AS c
+			FROM {$table}
+			WHERE date_notified_gmt IS NOT NULL
+				AND date_notified_gmt >= %s
+				AND date_notified_gmt < DATE_ADD(%s, INTERVAL 1 DAY)
+			GROUP BY DATE(date_notified_gmt)",
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			array( $start_gmt . ' 00:00:00', $end_gmt )
+		);
+		$sent_rows = $wpdb->get_results( $sent_sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
+		$buckets = array();
+		foreach ( (array) $signup_rows as $row ) {
+			$date                        = (string) $row['d'];
+			$buckets[ $date ]            = $buckets[ $date ] ?? array(
+				'date'               => $date,
+				'signups'            => 0,
+				'notifications_sent' => 0,
+			);
+			$buckets[ $date ]['signups'] = (int) $row['c'];
+		}
+		foreach ( (array) $sent_rows as $row ) {
+			$date                                   = (string) $row['d'];
+			$buckets[ $date ]                       = $buckets[ $date ] ?? array(
+				'date'               => $date,
+				'signups'            => 0,
+				'notifications_sent' => 0,
+			);
+			$buckets[ $date ]['notifications_sent'] = (int) $row['c'];
+		}
+
+		ksort( $buckets );
+		return array_values( $buckets );
+	}
+
+	/**
+	 * Get top-demand products by active signups.
+	 *
+	 * @param int $limit Maximum number of rows to return (1-50).
+	 * @return array<int,array{product_id:int,active_signups:int,total_signups:int}>
+	 */
+	public function get_top_demand( int $limit = 10 ): array {
+		global $wpdb;
+
+		$limit = max( 1, min( 50, $limit ) );
+		$table = $this->get_table_name();
+
+		$sql = $wpdb->prepare(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table is a trusted identifier from get_table_name().
+			"SELECT
+				product_id,
+				SUM(CASE WHEN status = %s THEN 1 ELSE 0 END) AS active_signups,
+				COUNT(id) AS total_signups
+			FROM {$table}
+			GROUP BY product_id
+			HAVING active_signups > 0
+			ORDER BY active_signups DESC, total_signups DESC, product_id ASC
+			LIMIT %d",
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			array( NotificationStatus::ACTIVE, $limit )
+		);
+
+		$results = $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$rows    = array();
+		if ( is_array( $results ) ) {
+			foreach ( $results as $row ) {
+				$rows[] = array(
+					'product_id'     => (int) $row['product_id'],
+					'active_signups' => (int) $row['active_signups'],
+					'total_signups'  => (int) $row['total_signups'],
+				);
+			}
+		}
+
+		return $rows;
+	}
+
+	/**
+	 * Top products by sign-ups created within a window.
+	 *
+	 * Counts every sign-up (any status) whose `date_created_gmt` falls inside
+	 * `[since_gmt, now)`. Drives "Most signed-up" with the Week/Month/Quarter
+	 * toggle.
+	 *
+	 * @param int    $limit     Maximum number of rows to return (1-50).
+	 * @param string $since_gmt Lower bound `date_created_gmt` (Y-m-d H:i:s GMT).
+	 * @return array<int,array{product_id:int,signups:int}>
+	 */
+	public function get_top_signups_in_window( int $limit, string $since_gmt ): array {
+		global $wpdb;
+
+		$limit = max( 1, min( 50, $limit ) );
+		$table = $this->get_table_name();
+
+		$sql = $wpdb->prepare(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table is a trusted identifier from get_table_name().
+			"SELECT product_id, COUNT(id) AS signups
+			FROM {$table}
+			WHERE date_created_gmt >= %s
+			GROUP BY product_id
+			ORDER BY signups DESC, product_id ASC
+			LIMIT %d",
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			array( $since_gmt, $limit )
+		);
+
+		$results = $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$rows    = array();
+		if ( is_array( $results ) ) {
+			foreach ( $results as $row ) {
+				$rows[] = array(
+					'product_id' => (int) $row['product_id'],
+					'signups'    => (int) $row['signups'],
+				);
+			}
+		}
+
+		return $rows;
+	}
+
+	/**
+	 * Products ranked by their oldest unfulfilled sign-up.
+	 *
+	 * Active + pending sign-ups are considered "waiting"; the oldest one per
+	 * product determines that product's days-overdue. Drives "Most overdue".
+	 *
+	 * @param int $limit Maximum number of rows to return (1-50).
+	 * @return array<int,array{product_id:int,days_overdue:int,active_signups:int}>
+	 */
+	public function get_most_overdue( int $limit = 10 ): array {
+		global $wpdb;
+
+		$limit = max( 1, min( 50, $limit ) );
+		$table = $this->get_table_name();
+
+		$sql = $wpdb->prepare(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table is a trusted identifier from get_table_name().
+			"SELECT
+				product_id,
+				DATEDIFF(UTC_TIMESTAMP(), MIN(date_created_gmt)) AS days_overdue,
+				COUNT(id) AS active_signups
+			FROM {$table}
+			WHERE status IN (%s, %s)
+			GROUP BY product_id
+			ORDER BY days_overdue DESC, product_id ASC
+			LIMIT %d",
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			array(
+				NotificationStatus::ACTIVE,
+				NotificationStatus::PENDING,
+				$limit,
+			)
+		);
+
+		$results = $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$rows    = array();
+		if ( is_array( $results ) ) {
+			foreach ( $results as $row ) {
+				$rows[] = array(
+					'product_id'     => (int) $row['product_id'],
+					'days_overdue'   => (int) $row['days_overdue'],
+					'active_signups' => (int) $row['active_signups'],
+				);
+			}
+		}
+
+		return $rows;
+	}
 }
