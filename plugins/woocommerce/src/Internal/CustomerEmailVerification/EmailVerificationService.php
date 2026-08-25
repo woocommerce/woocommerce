@@ -99,6 +99,8 @@ class EmailVerificationService {
 	 * Unlike {@see self::is_verified()} this reflects only the persisted state — the
 	 * 'woocommerce_customer_email_is_verified' filter is not applied — so write paths such as
 	 * {@see self::mark_verified()} stay consistent however extensions filter the reported status.
+	 * This method is public for WooCommerce internal use only; extensions should use the
+	 * 'is_verified' method instead.
 	 *
 	 * @since 11.1.0
 	 *
