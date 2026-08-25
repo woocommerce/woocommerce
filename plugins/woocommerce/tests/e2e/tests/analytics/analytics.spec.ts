@@ -436,6 +436,17 @@ test(
 			);
 		} );
 		await page.getByRole( 'button', { name: 'Update' } ).click();
+		await expect( page ).toHaveURL( ( url ) => {
+			const query = url.searchParams;
+
+			return (
+				query.get( 'path' ) === '/analytics/products' &&
+				query.get( 'filter' ) === 'single_product' &&
+				query.get( 'products' ) === String( variableProductId ) &&
+				query.get( 'period' ) === 'last_month' &&
+				query.get( 'compare' ) === 'previous_year'
+			);
+		} );
 
 		const statsResponse = await statsResponsePromise;
 		expect( statsResponse.ok() ).toBeTruthy();
@@ -458,17 +469,6 @@ test(
 			.padStart( 2, '0' );
 		expect( before ).toBe( `${ month }-${ finalDay }T23:59:59` );
 
-		await expect( page ).toHaveURL( ( url ) => {
-			const query = url.searchParams;
-
-			return (
-				query.get( 'path' ) === '/analytics/products' &&
-				query.get( 'filter' ) === 'single_product' &&
-				query.get( 'products' ) === String( variableProductId ) &&
-				query.get( 'period' ) === 'last_month' &&
-				query.get( 'compare' ) === 'previous_year'
-			);
-		} );
 		await expect( summaryTile( page, 'Items sold', '0' ) ).toBeVisible();
 		await expect( summaryTile( page, 'Net sales', '$0.00' ) ).toBeVisible();
 	}
