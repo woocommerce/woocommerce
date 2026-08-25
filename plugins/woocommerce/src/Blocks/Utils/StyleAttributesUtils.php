@@ -208,10 +208,6 @@ class StyleAttributesUtils {
 		} elseif ( is_array( $custom_border ) ) {
 			// Unlinked.
 			foreach ( $custom_border as $border_color_key => $border_color_value ) {
-				if ( 'radius' === $border_color_key ) {
-					continue;
-				}
-
 				if ( is_array( $border_color_value ) && array_key_exists( 'color', ( $border_color_value ) ) ) {
 					$style .= 'border-' . $border_color_key . '-color:' . self::get_color_value( $border_color_value['color'] ) . ';';
 				}
