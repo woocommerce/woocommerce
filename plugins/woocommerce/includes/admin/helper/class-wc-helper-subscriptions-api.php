@@ -174,6 +174,12 @@ class WC_Helper_Subscriptions_API {
 				wp_send_json_error(
 					array(
 						'message' => $api_error['message'],
+						// The upstream WooCommerce.com status, carried in the body
+						// rather than used as the response status. The failure is
+						// between this store and WooCommerce.com, so relaying it
+						// would have this endpoint claim the caller was rate
+						// limited or unauthorized when neither is true.
+						'code'    => $api_error['code'],
 					),
 					400
 				);
