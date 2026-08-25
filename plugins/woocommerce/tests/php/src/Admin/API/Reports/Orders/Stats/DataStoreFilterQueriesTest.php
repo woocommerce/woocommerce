@@ -19,48 +19,59 @@ use WC_Product_Simple;
  *
  * Migrated from the legacy WC_Admin_Tests_Reports_Orders_Stats::test_populate_and_query_multiple_intervals().
  *
- * A shared fixture of 36 orders is created once for the class: for each of 3 products,
- * 3 coupon options (none, coupon 1, coupon 2) and 2 order statuses (completed, processing),
- * one order with just that product and one order with that product plus product 4.
- * Each order contains 4 items of each of its products and $10 shipping.
+ * A shared fixture of 36 orders is created once for the class: for each of 3 primary
+ * products, 3 coupon options (none, coupon 1, coupon 2) and 2 order statuses (completed,
+ * processing), one order with just that product and one order with that product plus a
+ * shared add-on product. Each order contains 4 items of each of its products and $10
+ * shipping.
  *
  * Every filter scenario describes the orders it matches as per-product-mix order counts
- * (the 6 "mixes" are: product 1 alone, 2 alone, 3 alone, 1+4, 2+4, 3+4), from which all
- * expected totals derive.
+ * (the 6 "mixes" are: each primary product alone, then each with the add-on product),
+ * from which all expected totals derive.
  */
 class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 
 	// The coupon 1 amount is the WC_Helper_Coupon::create_coupon default.
 	const COUPON_1_AMOUNT = 1;
 	const COUPON_2_AMOUNT = 2;
-	const ORDER_STATUS_1  = OrderStatus::COMPLETED;
-	const ORDER_STATUS_2  = OrderStatus::PROCESSING;
+
+	// The add-on product is the second product in every two-product order.
+	const ADD_ON_PRODUCT_PRICE = 1;
 
 	/**
-	 * Prices of the 4 fixture products, keyed 1-4.
+	 * Prices of the three primary products.
 	 *
 	 * @var array
 	 */
-	private static $product_prices = array(
-		1 => 25,
-		2 => 10,
-		3 => 13,
-		4 => 1,
-	);
+	private static $primary_product_prices = array( 25, 10, 13 );
 
 	/**
-	 * IDs of the 4 fixture products, keyed 1-4.
+	 * IDs of the three primary products.
 	 *
 	 * @var array
 	 */
-	private static $product_ids = array();
+	private static $primary_product_ids = array();
 
 	/**
-	 * IDs of the 2 fixture coupons, keyed 1-2.
+	 * ID of the add-on product.
 	 *
-	 * @var array
+	 * @var int
 	 */
-	private static $coupon_ids = array();
+	private static $add_on_product_id;
+
+	/**
+	 * ID of the fixture coupon with amount 1.
+	 *
+	 * @var int
+	 */
+	private static $coupon_1_id;
+
+	/**
+	 * ID of the fixture coupon with amount 2.
+	 *
+	 * @var int
+	 */
+	private static $coupon_2_id;
 
 	/**
 	 * Start of the hour all fixture orders were created in.
@@ -82,15 +93,21 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 	public static function wpSetUpBeforeClass(): void {
 		WC_Helper_Reports::reset_stats_dbs();
 
-		$products = array();
-		foreach ( self::$product_prices as $number => $price ) {
+		$primary_products = array();
+		foreach ( self::$primary_product_prices as $index => $price ) {
 			$product = new WC_Product_Simple();
-			$product->set_name( "Test Product {$number}" );
+			$product->set_name( 'Test Product ' . ( $index + 1 ) );
 			$product->set_regular_price( $price );
 			$product->save();
-			$products[ $number ]          = $product;
-			self::$product_ids[ $number ] = $product->get_id();
+			$primary_products[]          = $product;
+			self::$primary_product_ids[] = $product->get_id();
 		}
+
+		$add_on_product = new WC_Product_Simple();
+		$add_on_product->set_name( 'Test Add-on Product' );
+		$add_on_product->set_regular_price( self::ADD_ON_PRODUCT_PRICE );
+		$add_on_product->save();
+		self::$add_on_product_id = $add_on_product->get_id();
 
 		$coupon_1 = WC_Helper_Coupon::create_coupon( 'coupon_1' );
 
@@ -98,10 +115,8 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 		$coupon_2->set_amount( self::COUPON_2_AMOUNT );
 		$coupon_2->save();
 
-		self::$coupon_ids = array(
-			1 => $coupon_1->get_id(),
-			2 => $coupon_2->get_id(),
-		);
+		self::$coupon_1_id = $coupon_1->get_id();
+		self::$coupon_2_id = $coupon_2->get_id();
 
 		$customer = WC_Helper_Customer::create_customer( 'cust_1', 'pwd_1', 'user_1@mail.com' );
 
@@ -111,9 +126,9 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 		$order_time = (int) $order_datetime->format( 'U' );
 
 		$iterations = 1;
-		foreach ( array( $products[1], $products[2], $products[3] ) as $product ) {
+		foreach ( $primary_products as $product ) {
 			foreach ( array( null, $coupon_1, $coupon_2 ) as $coupon ) {
-				foreach ( array( self::ORDER_STATUS_1, self::ORDER_STATUS_2 ) as $order_status ) {
+				foreach ( array( OrderStatus::COMPLETED, OrderStatus::PROCESSING ) as $order_status ) {
 					$single_product_order = WC_Helper_Order::create_order( $customer->get_id(), $product );
 					// Offset each order by 1 second.
 					$single_product_order->set_date_created( $order_time + $iterations++ );
@@ -125,7 +140,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 						$single_product_order->calculate_totals();
 					}
 
-					$two_product_order = WC_Helper_Order::create_order( $customer->get_id(), $products[4] );
+					$two_product_order = WC_Helper_Order::create_order( $customer->get_id(), $add_on_product );
 
 					$item = new WC_Order_Item_Product();
 					$item->set_props(
@@ -190,9 +205,9 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 	/**
 	 * Filter scenarios, as migrated from the legacy multiple-intervals test.
 	 *
-	 * In filter args, statuses are given as 'status_1' / 'status_2', products as
-	 * 'product_1' ... 'product_4', and coupons as 'coupon_1' / 'coupon_2'; these are
-	 * resolved to real fixture values by resolve_filter_args().
+	 * In filter args, products are given as 'product_1' ... 'product_3' or
+	 * 'add_on_product', and coupons as 'coupon_1' / 'coupon_2'; these placeholders are
+	 * resolved to the fixture IDs by resolve_filter_args().
 	 *
 	 * @return array
 	 */
@@ -205,33 +220,33 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 				4,
 			),
 			'status_is both statuses'                  => array(
-				array( 'status_is' => array( 'status_1', 'status_2' ) ),
+				array( 'status_is' => array( OrderStatus::COMPLETED, OrderStatus::PROCESSING ) ),
 				array( 6, 6, 6, 6, 6, 6 ),
 				array( 12, 12 ),
 				4,
 			),
 			'status_is one status'                     => array(
-				array( 'status_is' => array( 'status_1' ) ),
+				array( 'status_is' => array( OrderStatus::COMPLETED ) ),
 				array( 3, 3, 3, 3, 3, 3 ),
 				array( 6, 6 ),
 				4,
 			),
 			'status_is_not one status'                 => array(
-				array( 'status_is_not' => array( 'status_2' ) ),
+				array( 'status_is_not' => array( OrderStatus::PROCESSING ) ),
 				array( 3, 3, 3, 3, 3, 3 ),
 				array( 6, 6 ),
 				4,
 			),
 			'status_is_not both statuses, no orders'   => array(
-				array( 'status_is_not' => array( 'status_1', 'status_2' ) ),
+				array( 'status_is_not' => array( OrderStatus::COMPLETED, OrderStatus::PROCESSING ) ),
 				array( 0, 0, 0, 0, 0, 0 ),
 				array( 0, 0 ),
 				0,
 			),
 			'status_is with status_is_not'             => array(
 				array(
-					'status_is'     => array( 'status_1', 'status_2' ),
-					'status_is_not' => array( 'status_2' ),
+					'status_is'     => array( OrderStatus::COMPLETED, OrderStatus::PROCESSING ),
+					'status_is_not' => array( OrderStatus::PROCESSING ),
 				),
 				array( 3, 3, 3, 3, 3, 3 ),
 				array( 6, 6 ),
@@ -311,7 +326,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 			),
 			'match all: status_is + product_includes'  => array(
 				array(
-					'status_is'        => array( 'status_1' ),
+					'status_is'        => array( OrderStatus::COMPLETED ),
 					'product_includes' => array( 'product_1' ),
 				),
 				array( 3, 0, 0, 3, 0, 0 ),
@@ -320,7 +335,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 			),
 			'match all: status_is + coupon_includes'   => array(
 				array(
-					'status_is'       => array( 'status_1' ),
+					'status_is'       => array( OrderStatus::COMPLETED ),
 					'coupon_includes' => array( 'coupon_1' ),
 				),
 				array( 1, 1, 1, 1, 1, 1 ),
@@ -338,7 +353,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 			),
 			'match all: status + product + coupon'     => array(
 				array(
-					'status_is'        => array( 'status_1' ),
+					'status_is'        => array( OrderStatus::COMPLETED ),
 					'product_includes' => array( 'product_1' ),
 					'coupon_includes'  => array( 'coupon_1' ),
 				),
@@ -348,8 +363,8 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 			),
 			'match all: status_is + status_is_not + product + coupon' => array(
 				array(
-					'status_is'        => array( 'status_1', 'status_2' ),
-					'status_is_not'    => array( 'status_2' ),
+					'status_is'        => array( OrderStatus::COMPLETED, OrderStatus::PROCESSING ),
+					'status_is_not'    => array( OrderStatus::PROCESSING ),
 					'product_includes' => array( 'product_1' ),
 					'coupon_includes'  => array( 'coupon_1' ),
 				),
@@ -359,10 +374,10 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 			),
 			'match all: statuses + product_includes + product_excludes' => array(
 				array(
-					'status_is'        => array( 'status_1', 'status_2' ),
-					'status_is_not'    => array( 'status_2' ),
+					'status_is'        => array( OrderStatus::COMPLETED, OrderStatus::PROCESSING ),
+					'status_is_not'    => array( OrderStatus::PROCESSING ),
 					'product_includes' => array( 'product_1', 'product_2' ),
-					'product_excludes' => array( 'product_4' ),
+					'product_excludes' => array( 'add_on_product' ),
 				),
 				array( 3, 3, 0, 0, 0, 0 ),
 				array( 2, 2 ),
@@ -370,10 +385,10 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 			),
 			'match all: five filters'                  => array(
 				array(
-					'status_is'        => array( 'status_1', 'status_2' ),
-					'status_is_not'    => array( 'status_2' ),
+					'status_is'        => array( OrderStatus::COMPLETED, OrderStatus::PROCESSING ),
+					'status_is_not'    => array( OrderStatus::PROCESSING ),
 					'product_includes' => array( 'product_1', 'product_2' ),
-					'product_excludes' => array( 'product_4' ),
+					'product_excludes' => array( 'add_on_product' ),
 					'coupon_includes'  => array( 'coupon_1' ),
 				),
 				array( 1, 1, 0, 0, 0, 0 ),
@@ -382,10 +397,10 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 			),
 			'match all: six filters'                   => array(
 				array(
-					'status_is'        => array( 'status_1', 'status_2' ),
-					'status_is_not'    => array( 'status_2' ),
+					'status_is'        => array( OrderStatus::COMPLETED, OrderStatus::PROCESSING ),
+					'status_is_not'    => array( OrderStatus::PROCESSING ),
 					'product_includes' => array( 'product_1', 'product_2' ),
-					'product_excludes' => array( 'product_4' ),
+					'product_excludes' => array( 'add_on_product' ),
 					'coupon_includes'  => array( 'coupon_1', 'coupon_2' ),
 					'coupon_excludes'  => array( 'coupon_2' ),
 				),
@@ -396,8 +411,8 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 			'match any: status_is or status_is_not, all orders' => array(
 				array(
 					'match'         => 'any',
-					'status_is'     => array( 'status_1' ),
-					'status_is_not' => array( 'status_1' ),
+					'status_is'     => array( OrderStatus::COMPLETED ),
+					'status_is_not' => array( OrderStatus::COMPLETED ),
 				),
 				array( 6, 6, 6, 6, 6, 6 ),
 				array( 12, 12 ),
@@ -406,7 +421,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 			'match any: status_is or product_includes' => array(
 				array(
 					'match'            => 'any',
-					'status_is'        => array( 'status_1' ),
+					'status_is'        => array( OrderStatus::COMPLETED ),
 					'product_includes' => array( 'product_1' ),
 				),
 				array( 6, 3, 3, 6, 3, 3 ),
@@ -416,7 +431,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 			'match any: status_is or coupon_includes'  => array(
 				array(
 					'match'           => 'any',
-					'status_is'       => array( 'status_1' ),
+					'status_is'       => array( OrderStatus::COMPLETED ),
 					'coupon_includes' => array( 'coupon_1' ),
 				),
 				array( 4, 4, 4, 4, 4, 4 ),
@@ -426,7 +441,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 			'match any: status_is or coupon_excludes'  => array(
 				array(
 					'match'           => 'any',
-					'status_is'       => array( 'status_1' ),
+					'status_is'       => array( OrderStatus::COMPLETED ),
 					'coupon_excludes' => array( 'coupon_1' ),
 				),
 				array( 5, 5, 5, 5, 5, 5 ),
@@ -446,7 +461,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 			'match any: status or product or coupon'   => array(
 				array(
 					'match'            => 'any',
-					'status_is'        => array( 'status_1' ),
+					'status_is'        => array( OrderStatus::COMPLETED ),
 					'product_includes' => array( 'product_1' ),
 					'coupon_includes'  => array( 'coupon_1' ),
 				),
@@ -457,8 +472,8 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 			'match any: status_is or status_is_not or product or coupon' => array(
 				array(
 					'match'            => 'any',
-					'status_is'        => array( 'status_1' ),
-					'status_is_not'    => array( 'status_2' ),
+					'status_is'        => array( OrderStatus::COMPLETED ),
+					'status_is_not'    => array( OrderStatus::PROCESSING ),
 					'product_includes' => array( 'product_1' ),
 					'coupon_includes'  => array( 'coupon_1' ),
 				),
@@ -469,8 +484,8 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 			'match any: statuses or product_includes or product_excludes' => array(
 				array(
 					'match'            => 'any',
-					'status_is'        => array( 'status_1' ),
-					'status_is_not'    => array( 'status_2' ),
+					'status_is'        => array( OrderStatus::COMPLETED ),
+					'status_is_not'    => array( OrderStatus::PROCESSING ),
 					'product_includes' => array( 'product_1' ),
 					'product_excludes' => array( 'product_2' ),
 				),
@@ -481,8 +496,8 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 			'match any: five filters'                  => array(
 				array(
 					'match'            => 'any',
-					'status_is'        => array( 'status_1' ),
-					'status_is_not'    => array( 'status_2' ),
+					'status_is'        => array( OrderStatus::COMPLETED ),
+					'status_is_not'    => array( OrderStatus::PROCESSING ),
 					'product_includes' => array( 'product_1' ),
 					'product_excludes' => array( 'product_2' ),
 					'coupon_includes'  => array( 'coupon_1' ),
@@ -494,8 +509,8 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 			'match any: six filters'                   => array(
 				array(
 					'match'            => 'any',
-					'status_is'        => array( 'status_1' ),
-					'status_is_not'    => array( 'status_2' ),
+					'status_is'        => array( OrderStatus::COMPLETED ),
+					'status_is_not'    => array( OrderStatus::PROCESSING ),
 					'product_includes' => array( 'product_1' ),
 					'product_excludes' => array( 'product_2' ),
 					'coupon_includes'  => array( 'coupon_1' ),
@@ -528,7 +543,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 		$coupons        = 12 * self::COUPON_1_AMOUNT + 12 * self::COUPON_2_AMOUNT;
 		$shipping       = $orders_count * self::SHIPPING_AMOUNT;
 		$net_revenue    = $this->net_revenue_for_mix_counts( array( 6, 6, 6, 6, 6, 6 ) )
-						- self::$product_prices[1] * self::QTY_PER_PRODUCT * $returning_orders_count
+						- self::$primary_product_prices[0] * self::QTY_PER_PRODUCT * $returning_orders_count
 						- $coupons;
 
 		$expected_stats = $this->expected_stats_single_interval(
@@ -539,8 +554,9 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 					'total_sales'         => $net_revenue + $shipping,
 					'gross_sales'         => $net_revenue + $coupons,
 					'coupons'             => $coupons,
-					'coupons_count'       => count( self::$coupon_ids ),
-					'shipping'            => $shipping,
+					'coupons_count'       => 2,
+					// Both fixture coupons appear across the matched orders.
+																			'shipping' => $shipping,
 					'net_revenue'         => $net_revenue,
 					'avg_items_per_order' => round( $num_items_sold / $orders_count, 4 ),
 					'avg_order_value'     => $net_revenue / $orders_count,
@@ -576,14 +592,12 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 	 */
 	private function resolve_filter_args( array $filter_args ): array {
 		$map = array(
-			'status_1'  => self::ORDER_STATUS_1,
-			'status_2'  => self::ORDER_STATUS_2,
-			'product_1' => self::$product_ids[1] ?? null,
-			'product_2' => self::$product_ids[2] ?? null,
-			'product_3' => self::$product_ids[3] ?? null,
-			'product_4' => self::$product_ids[4] ?? null,
-			'coupon_1'  => self::$coupon_ids[1] ?? null,
-			'coupon_2'  => self::$coupon_ids[2] ?? null,
+			'product_1'      => self::$primary_product_ids[0] ?? null,
+			'product_2'      => self::$primary_product_ids[1] ?? null,
+			'product_3'      => self::$primary_product_ids[2] ?? null,
+			'add_on_product' => self::$add_on_product_id,
+			'coupon_1'       => self::$coupon_1_id,
+			'coupon_2'       => self::$coupon_2_id,
 		);
 
 		$resolved = array();
@@ -591,7 +605,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 			if ( is_array( $value ) ) {
 				$resolved[ $key ] = array_map(
 					function ( $placeholder ) use ( $map ) {
-						return $map[ $placeholder ];
+						return $map[ $placeholder ] ?? $placeholder;
 					},
 					$value
 				);
@@ -610,14 +624,14 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 	 * @return float
 	 */
 	private function net_revenue_for_mix_counts( array $mix_counts ): float {
-		$prices        = self::$product_prices;
+		$prices        = self::$primary_product_prices;
 		$mix_prices    = array(
+			$prices[0],
 			$prices[1],
 			$prices[2],
-			$prices[3],
-			$prices[1] + $prices[4],
-			$prices[2] + $prices[4],
-			$prices[3] + $prices[4],
+			$prices[0] + self::ADD_ON_PRODUCT_PRICE,
+			$prices[1] + self::ADD_ON_PRODUCT_PRICE,
+			$prices[2] + self::ADD_ON_PRODUCT_PRICE,
 		);
 		$total_revenue = 0;
 		foreach ( $mix_prices as $index => $price ) {
