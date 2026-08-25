@@ -365,6 +365,37 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A custom base carrying no usable characters sanitizes down to the empty string, and an empty
+	 * product_base never survives: wc_get_permalink_structure() drops it and refills the option
+	 * from the request locale, outside any locale window, then writes it back. An administrator
+	 * browsing in their own language therefore persisted that language's slug. Resolving to the
+	 * site-locale default at save time keeps the stored value deterministic.
+	 *
+	 * The locales have to diverge for this to be observable: when they agree, the refill produces
+	 * the same slug the fix stores and nothing looks wrong.
+	 *
+	 * @testdox Should store the site-locale Default base when the posted custom structure sanitizes to nothing.
+	 *
+	 * @testWith [""]
+	 *           ["   "]
+	 *           ["###"]
+	 *           ["/"]
+	 *           ["///"]
+	 *
+	 * @param string $posted_structure Posted `product_permalink_structure` value.
+	 */
+	public function test_custom_base_that_sanitizes_to_nothing_falls_back_to_the_default_base( string $posted_structure ): void {
+		$this->ensure_shop_page();
+		$this->set_up_french_admin_user();
+		$this->activate_french_product_slug_translation();
+
+		$html = $this->save_and_render( 'custom', $posted_structure );
+
+		$this->assertSame( 'product', get_option( 'woocommerce_permalinks' )['product_base'], 'An empty base must never reach the option, where the request locale would refill it.' );
+		$this->assert_only_radio_checked( $html, 'default' );
+	}
+
+	/**
 	 * Both permalink fields are free-form request input; an array reaching trim() or
 	 * wc_sanitize_permalink() is a fatal, since both are declared to take a string. The custom
 	 * branch has its own path: a scalar 'custom' radio with an array structure field used to store

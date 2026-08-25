@@ -147,6 +147,16 @@ class WC_Admin_Permalink_Settings {
 		$base = wc_sanitize_permalink( $base );
 
 		/*
+		 * An empty base is never stored. wc_get_permalink_structure() drops it and refills the
+		 * option from the request locale, outside any locale window, persisting a slug the site
+		 * locale never chose -- the same divergence this resolver exists to prevent. A custom base
+		 * that is blank, whitespace, or nothing but hashes and slashes all sanitize down to this.
+		 */
+		if ( '' === $base ) {
+			$base = $default_base;
+		}
+
+		/*
 		 * A base equal to the Default structure is reported in Default's bare form. The Custom
 		 * base field is the next tab stop after the radio group and focusing it selects Custom
 		 * base, so a single Tab from Default posts the field's prefilled `/product/` through the
