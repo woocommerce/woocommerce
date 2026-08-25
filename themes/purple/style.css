@@ -315,15 +315,8 @@ a.wc-block-components-product-name:hover {
 
 /* ==========================================================================
    WooCommerce — Catalog
+   @todo remove once https://github.com/woocommerce/woocommerce/pull/68024 ships.
    ========================================================================== */
-
-/* The block renders its own "Sort by" label beside the select; as inline
- * content the label sits on the baseline while the select is middle-aligned,
- * so their text drifts apart vertically. Center both in a flex row. */
-/* The frontend nests label + select in form.woocommerce-ordering; the
- * editor preview renders them inside a Disabled wrapper instead
- * (.components-disabled). Flex every possible parent so the pair centers
- * and gaps identically in either context. */
 .woocommerce.wc-block-catalog-sorting,
 .woocommerce.wc-block-catalog-sorting .components-disabled,
 .woocommerce.wc-block-catalog-sorting form.woocommerce-ordering {
@@ -332,11 +325,6 @@ a.wc-block-components-product-name:hover {
 	gap: 0.3em;
 	margin-bottom: 0;
 }
-
-/* WooCommerce's label rules add bottom and right margins that push the
- * label off-center and double the gap; the flex gap handles spacing. The
- * doubled-class selector beats WooCommerce's editor-only
- * label.orderby-label margin-right rule. */
 .woocommerce.wc-block-catalog-sorting label,
 .woocommerce.wc-block-catalog-sorting.wc-block-catalog-sorting label.orderby-label {
 	margin: 0;
