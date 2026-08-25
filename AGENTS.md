@@ -225,6 +225,16 @@ When writing a comment or docblock description:
 - **Don't force-wrap at a fixed column.** This repo has no enforced 80- or 120-column limit on comment prose (`.markdownlint.json` disables `MD013`, and there's no PHPCS `LineLength` override), and plenty of existing docblocks already run past both. Match the wrap width already used in the surrounding file instead of imposing your own.
 - **Decorative comments are worse than none.** A comment that restates the next line, marks an obvious section (`// Loop over items`), or pads a docblock out to look thorough adds noise a future reader has to read past to find the comments that actually matter.
 
+## Enum-Style Constants (`src/Enums/`)
+
+WooCommerce names its enumerated string vocabularies — order statuses, product types, stock statuses, settings option values, and more — as `final` classes of `public const` strings under `Automattic\WooCommerce\Enums` (`plugins/woocommerce/src/Enums/`, see its `README.md` for the full list). Native PHP enums are not an option: the minimum supported PHP version is 7.4, and the raw string values are the contract persisted in databases and consumed by extensions.
+
+- **Use the existing constants.** When writing code that compares or assigns one of these values, reference the constant (e.g. `OrderStatus::COMPLETED`, `ProductType::SIMPLE`), not the raw string literal. During review, flag new raw literals for which a constant already exists.
+- **New vocabularies get a class by default.** When introducing a new fixed set of string values (including new settings option values), add a class in `src/Enums/`: one `final` class per concept, explicit `public` visibility on every constant, a docblock on every value, no behavior. List it in `src/Enums/README.md`. For large adoptions, introduce the class and adopt it in separate PRs to keep diffs reviewable.
+- **Constants name values; they never change them.** The string is the contract and the constant is a permanent alias for it. Never change a constant's value, and never rename or remove one — deprecate instead (see Backward Compatibility). These constants are public API that extensions may rely on.
+- **Respect the plugin lifecycle.** Some code paths (REST controllers, report queries) can run during install or upgrade, before the autoloader resolves classes under `src/`; referencing an enum class there is a fatal (`Class ... not found`). Code that can execute mid-install or mid-upgrade keeps its string literals.
+- **Near-duplicate vocabularies are distinct classes on purpose.** `OrderStatus` holds the unprefixed values (`completed`) most WooCommerce APIs expect; `OrderInternalStatus` holds the `wc-`-prefixed variants (`wc-completed`) WordPress stores. Reach for the class that matches what the consuming API expects.
+
 ## Block Development
 
 ### `block.json` Attribute Defaults

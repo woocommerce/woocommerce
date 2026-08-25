@@ -199,6 +199,120 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A lump-sum refund of a never-paid order stores no paid or completed date, so date-filtered reports exclude it with its parent.
+	 *
+	 * Regression test for https://github.com/woocommerce/woocommerce/issues/37065: a failed
+	 * (never-paid) order manually set to "refunded" produced a refund stats row with
+	 * date_paid and date_completed backfilled from its own creation date. The parent row
+	 * (both dates NULL) was excluded from date-filtered Revenue reports while the refund row
+	 * was included, so the pair no longer cancelled out: Returns, Net sales and Taxes all
+	 * showed amounts for money that was never collected.
+	 */
+	public function test_refund_of_never_paid_order_has_null_date_paid(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( 'failed' );
+		$order->save();
+		$this->assertNull( $order->get_date_paid(), 'Fixture order must never have been paid.' );
+
+		// Setting the status to "refunded" fires wc_order_fully_refunded(), creating the lump-sum refund.
+		$order->update_status( 'refunded' );
+		$refunds = $order->get_refunds();
+		$this->assertCount( 1, $refunds, 'Marking the order refunded should create one lump-sum refund.' );
+		$refund = reset( $refunds );
+
+		OrdersStatsDataStore::sync_order( $order->get_id() );
+		OrdersStatsDataStore::sync_order( $refund->get_id() );
+
+		global $wpdb;
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT order_id, date_paid, date_completed FROM {$wpdb->prefix}wc_order_stats WHERE order_id IN (%d, %d)",
+				$order->get_id(),
+				$refund->get_id()
+			),
+			OBJECT_K
+		);
+
+		$this->assertCount( 2, $rows, 'Both the order and its refund should have stats rows.' );
+		$this->assertNull( $rows[ $order->get_id() ]->date_paid, 'A never-paid order should carry no paid date.' );
+		$this->assertNull( $rows[ $refund->get_id() ]->date_paid, 'A refund of a never-paid order should carry no paid date.' );
+		$this->assertNull( $rows[ $refund->get_id() ]->date_completed, 'A refund of a never-completed order should carry no completed date.' );
+
+		WC_Helper_Order::delete_order( $order->get_id() );
+	}
+
+	/**
+	 * @testdox A refund of a paid order keeps its own creation date as the stats row paid and completed dates.
+	 */
+	public function test_refund_of_paid_order_keeps_own_date_paid(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->update_status( 'completed' );
+		$this->assertNotNull( $order->get_date_paid(), 'Fixture order must have been paid.' );
+
+		$refund = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => (float) wc_format_decimal( $order->get_total() - $order->get_total_refunded() ),
+				'line_items' => array(),
+			)
+		);
+		$this->assertNotInstanceOf( WP_Error::class, $refund );
+
+		OrdersStatsDataStore::sync_order( $refund->get_id() );
+
+		global $wpdb;
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT date_paid, date_completed, date_created FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d",
+				$refund->get_id()
+			)
+		);
+
+		$this->assertNotNull( $row, 'The refund should have a stats row.' );
+		$this->assertSame( $row->date_created, $row->date_paid, 'A refund of a paid order should keep its creation date as the paid date.' );
+		$this->assertSame( $row->date_created, $row->date_completed, 'A refund of a completed order should keep its creation date as the completed date.' );
+
+		WC_Helper_Order::delete_order( $order->get_id() );
+	}
+
+	/**
+	 * @testdox A refund of a paid-but-never-completed order backfills only the paid date and keeps the completed date empty.
+	 */
+	public function test_refund_of_paid_uncompleted_order_backfills_only_date_paid(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->set_date_paid( time() );
+		$order->set_status( 'processing' );
+		$order->save();
+		$this->assertNotNull( $order->get_date_paid(), 'Fixture order must have been paid.' );
+		$this->assertNull( $order->get_date_completed(), 'Fixture order must never have been completed.' );
+
+		$refund = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => (float) wc_format_decimal( $order->get_total() - $order->get_total_refunded() ),
+				'line_items' => array(),
+			)
+		);
+		$this->assertNotInstanceOf( WP_Error::class, $refund );
+
+		OrdersStatsDataStore::sync_order( $refund->get_id() );
+
+		global $wpdb;
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT date_paid, date_completed, date_created FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d",
+				$refund->get_id()
+			)
+		);
+
+		$this->assertNotNull( $row, 'The refund should have a stats row.' );
+		$this->assertSame( $row->date_created, $row->date_paid, 'A refund of a paid order should keep its creation date as the paid date.' );
+		$this->assertNull( $row->date_completed, 'A refund of a never-completed order should carry no completed date.' );
+
+		WC_Helper_Order::delete_order( $order->get_id() );
+	}
+
+	/**
 	 * @testdox Deleting a refund removes its analytics rows while keeping the parent order's rows.
 	 *
 	 * Regression test for HPOS refund deletion leaving orphaned analytics rows:
@@ -448,5 +562,66 @@ class DataStoreTest extends WC_Unit_Test_Case {
 		);
 
 		WC_Helper_Order::delete_order( $order_id );
+	}
+
+	/**
+	 * @testdox Changing the first order to an excluded custom status longer than the 20-char storage limit reassigns the first-order role and marks the customer as returning.
+	 */
+	public function test_returning_customer_recalculated_for_long_excluded_status(): void {
+		global $wpdb;
+
+		$long_status = 'competition-completed';
+		register_post_status( 'wc-' . $long_status, array( 'public' => true ) );
+		$add_status = function ( $statuses ) use ( $long_status ) {
+			$statuses[ 'wc-' . $long_status ] = 'Competition Completed';
+			return $statuses;
+		};
+		add_filter( 'wc_order_statuses', $add_status );
+		update_option( 'woocommerce_excluded_report_order_statuses', array( 'pending', 'failed', 'cancelled', $long_status ) );
+
+		$customer = \WC_Helper_Customer::create_customer( 'cust_long_status', 'pwd', 'long_status_customer@mail.com' );
+
+		$order_1 = WC_Helper_Order::create_order( $customer->get_id() );
+		$order_1->set_date_created( time() - 2 * HOUR_IN_SECONDS );
+		$order_1->set_status( 'processing' );
+		$order_1->save();
+
+		$order_2 = WC_Helper_Order::create_order( $customer->get_id() );
+		$order_2->set_date_created( time() - HOUR_IN_SECONDS );
+		$order_2->set_status( 'processing' );
+		$order_2->save();
+
+		OrdersStatsDataStore::sync_order( $order_1->get_id() );
+		OrdersStatsDataStore::sync_order( $order_2->get_id() );
+
+		$returning_flag = static function ( $id ) use ( $wpdb ) {
+			return $wpdb->get_var(
+				$wpdb->prepare( "SELECT returning_customer FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $id )
+			);
+		};
+		$this->assertSame( '0', $returning_flag( $order_1->get_id() ), 'Oldest order should start as the non-returning first order.' );
+		$this->assertSame( '1', $returning_flag( $order_2->get_id() ), 'Second order should start as returning.' );
+
+		// Core warns when saving a status longer than the 20-char column; that
+		// truncated storage is the exact scenario under test.
+		$this->setExpectedIncorrectUsage( 'Abstract_WC_Order_Data_Store_CPT::get_post_status' );
+		$order_1->set_status( $long_status );
+		$order_1->save();
+
+		// Reload so the order reports the truncated status actually stored in the database.
+		$order_1 = wc_get_order( $order_1->get_id() );
+
+		$this->assertTrue(
+			OrdersStatsDataStore::is_returning_customer( $order_1 ),
+			'An order moved to an excluded long custom status should be reported as returning.'
+		);
+		$this->assertSame(
+			'0',
+			$returning_flag( $order_2->get_id() ),
+			'The next oldest order should be reassigned as the customer\'s first order.'
+		);
+
+		remove_filter( 'wc_order_statuses', $add_status );
+		unset( $GLOBALS['wp_post_statuses'][ 'wc-' . $long_status ] );
 	}
 }

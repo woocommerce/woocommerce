@@ -547,7 +547,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		global $wpdb;
 		return $wpdb->get_var(
 			$this->get_tentative_usage_query_for_user( $coupon_id, $user_aliases )
-		); // WPCS: unprepared SQL ok.
+		); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The interpolated subquery is returned by a helper that prepares all values.
 	}
 
 	/**
@@ -630,14 +630,14 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			$coupon_usage_key,
 			'',
 			$usage_limit
-		); // WPCS: unprepared SQL ok.
+		); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The embedded subqueries and outer values are prepared before interpolation.
 
 		/**
 		 * In some cases, specifically when there is a combined index on post_id,meta_key, the insert statement above could end up in a deadlock.
 		 * We will try to insert 3 times before giving up to recover from deadlock.
 		 */
 		for ( $count = 0; $count < 3; $count++ ) {
-			$result = $wpdb->query( $insert_statement ); // WPCS: unprepared SQL ok.
+			$result = $wpdb->query( $insert_statement ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The statement is prepared before entering the deadlock-retry loop.
 			if ( false !== $result ) {
 				// Clear meta cache.
 				$this->refresh_coupon_data( $coupon );
@@ -670,7 +670,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				'_coupon_held_' . time(),
 				$coupon_id,
 			)
-		);  // WPCS: unprepared SQL ok.
+		);  // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The coupon ID and aliases are prepared; only the trusted postmeta table name is interpolated.
 	}
 
 	/**
@@ -712,7 +712,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				$user_aliases,
 				array( $coupon->get_id() )
 			)
-		); // WPCS: unprepared SQL ok.
+		); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The placeholder list is generated locally and all values are prepared.
 
 		$query_for_tentative_usages = $this->get_tentative_usage_query_for_user( $coupon->get_id(), $user_aliases );
 		$db_timestamp               = $wpdb->get_var( 'SELECT UNIX_TIMESTAMP() FROM ' . $wpdb->posts . ' LIMIT 1' );
@@ -728,13 +728,13 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			$coupon_used_by_meta_key,
 			$user_alias,
 			$limit_per_user
-		); // WPCS: unprepared SQL ok.
+		); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The embedded subqueries and outer values are prepared before interpolation.
 
 		// This query can potentially be deadlocked if a combined index on post_id and meta_key is present and there is
 		// high concurrency, in which case DB will abort the query which has done less work to resolve deadlock.
 		// We will try up to 3 times before giving up.
 		for ( $count = 0; $count < 3; $count++ ) {
-			$result = $wpdb->query( $insert_statement ); // WPCS: unprepared SQL ok.
+			$result = $wpdb->query( $insert_statement ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The statement is prepared before entering the deadlock-retry loop.
 			if ( false !== $result ) {
 				// Clear meta cache.
 				$this->refresh_coupon_data( $coupon );
@@ -776,7 +776,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				),
 				$user_aliases
 			)
-		); // WPCS: unprepared SQL ok.
+		); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The placeholder list is generated locally and all values are prepared.
 	}
 
 	/**

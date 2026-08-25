@@ -27,7 +27,6 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
-		WC()->cart->empty_cart();
 		WC()->shipping()->enabled = $this->shipping_was_enabled;
 	}
 
