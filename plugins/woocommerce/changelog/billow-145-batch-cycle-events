@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Document and test the existing cart DOM event cycle contract without changing runtime event semantics.
