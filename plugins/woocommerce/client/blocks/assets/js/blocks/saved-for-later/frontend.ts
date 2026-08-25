@@ -18,7 +18,13 @@ import type {
 	AddCartItemOutcome,
 	Store as WooCommerce,
 } from '@woocommerce/stores/woocommerce/cart';
-import { sanitizeHTML } from '@woocommerce/sanitize';
+/**
+ * Internal dependencies
+ */
+import {
+	swapPreformattedHtml,
+	LIST_ITEM_HTML_CONFIG,
+} from '../../base/utils/preformatted-html';
 
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
@@ -63,44 +69,6 @@ type BlockStore = {
 		trackShownItems: () => void;
 	};
 };
-
-// Allow-list for sanitizing the schema's preformatted strings on innerHTML
-// swap. Covers what `wc_price` (sale/discount markup, currency symbol) and
-// `wp_get_attachment_image` / `wc_placeholder_img` emit (responsive image
-// + dimensions + lazy loading).
-const ALLOWED_TAGS = [
-	'a',
-	'b',
-	'em',
-	'i',
-	'strong',
-	'p',
-	'br',
-	'span',
-	'bdi',
-	'del',
-	'ins',
-	'img',
-	'picture',
-	'source',
-];
-const ALLOWED_ATTR = [
-	'class',
-	'target',
-	'href',
-	'rel',
-	'name',
-	'download',
-	'aria-hidden',
-	'src',
-	'srcset',
-	'sizes',
-	'alt',
-	'width',
-	'height',
-	'loading',
-	'decoding',
-];
 
 const { state: shopperListsState, actions: shopperListsActions } =
 	store< ShopperListsStore >(
@@ -321,18 +289,15 @@ store< BlockStore >(
 			// and a clean swap when it has (e.g. after Remove shifts the
 			// next item into this slot).
 			updateInnerHtml: () => {
-				const { ref } = getElement();
 				const { listItem, htmlField } = getContext< BlockContext >();
-				if ( ! ref || ! listItem || ! htmlField ) {
+				if ( ! listItem || ! htmlField ) {
 					return;
 				}
-				const html = listItem[ htmlField ];
-				if ( typeof html === 'string' ) {
-					ref.innerHTML = sanitizeHTML( html, {
-						tags: ALLOWED_TAGS,
-						attr: ALLOWED_ATTR,
-					} );
-				}
+				swapPreformattedHtml(
+					getElement().ref,
+					listItem[ htmlField ],
+					LIST_ITEM_HTML_CONFIG
+				);
 			},
 		},
 	},
