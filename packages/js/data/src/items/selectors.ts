@@ -36,21 +36,23 @@ export const getItems = createSelector< getItemsSelectorType >(
 	( state, itemType, query, defaultValue = new Map() ) => {
 		const resourceName = getResourceName( itemType, query );
 
-		let ids;
+		let entries;
 		if (
 			state.items[ resourceName ] &&
 			typeof state.items[ resourceName ] === 'object'
 		) {
-			ids = ( state.items[ resourceName ] as Record< string, number[] > )
-				.data;
+			entries = state.items[ resourceName ].data;
 		}
 
-		if ( ! ids ) {
+		if ( ! entries ) {
 			return defaultValue;
 		}
-		return ids.reduce( ( map, id: ItemID ) => {
-			const item = state.data[ itemType ]?.[ id ];
-			map.set( item?.id ?? id, item );
+		return entries.reduce( ( map, entry ) => {
+			const isCachedItem = typeof entry === 'object';
+			const item = isCachedItem
+				? entry
+				: state.data[ itemType ]?.[ entry ];
+			map.set( isCachedItem ? entry.id : entry, item );
 			return map;
 		}, new Map() );
 	},

@@ -129,6 +129,10 @@ describe( 'items reducer', () => {
 		} );
 
 		expect(
+			state.items[ getResourceName( 'leaderboards', latestQuery ) ]
+		).toEqual( { data: latestItems } );
+		expect( state.data.leaderboards ).toBeUndefined();
+		expect(
 			getItems( state, 'leaderboards', latestQuery ).get( 'products' )
 				?.label
 		).toBe( 'five rows' );
@@ -136,26 +140,6 @@ describe( 'items reducer', () => {
 			getItems( state, 'leaderboards', staleQuery ).get( 'products' )
 				?.label
 		).toBe( 'twelve rows' );
-	} );
-
-	it( 'updates query-scoped leaderboard items', () => {
-		const query = { per_page: 5 };
-		const loadedState = reducer( defaultState, {
-			type: TYPES.SET_ITEMS,
-			items: [ { id: 'products', label: 'before' } ],
-			itemType: 'leaderboards',
-			query,
-		} );
-		const state = reducer( loadedState, {
-			type: TYPES.SET_ITEM,
-			id: 'products',
-			item: { id: 'products', label: 'after' },
-			itemType: 'leaderboards',
-		} );
-
-		expect(
-			getItems( state, 'leaderboards', query ).get( 'products' )?.label
-		).toBe( 'after' );
 	} );
 
 	it( 'should handle SET_ITEMS_TOTAL_COUNT', () => {

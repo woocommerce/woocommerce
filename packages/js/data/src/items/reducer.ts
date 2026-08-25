@@ -26,46 +26,40 @@ const reducer: Reducer< ItemsState, Action > = (
 	switch ( action.type ) {
 		case TYPES.SET_ITEM: {
 			const itemData = state.data[ action.itemType ] || {};
-			// Leaderboards are query-scoped. Update every cached query containing
-			// the public ID, or retain the raw-ID behavior when none exists yet.
-			const matchingIds =
-				action.itemType === 'leaderboards'
-					? Object.keys( itemData ).filter(
-							( id ) => itemData[ id ].id === action.id
-					  )
-					: [];
-			const ids = matchingIds.length ? matchingIds : [ action.id ];
 			return {
 				...state,
 				data: {
 					...state.data,
-					[ action.itemType ]: ids.reduce(
-						( data, id ) => ( {
-							...data,
-							[ id ]: {
-								...( itemData[ id ] || {} ),
-								...action.item,
-							},
-						} ),
-						itemData
-					),
+					[ action.itemType ]: {
+						...itemData,
+						[ action.id ]: {
+							...( itemData[ action.id ] || {} ),
+							...action.item,
+						},
+					},
 				},
 			};
 		}
 		case TYPES.SET_ITEMS: {
-			const ids: Array< ItemID > = [];
 			const resourceName = getResourceName(
 				action.itemType,
 				action.query
 			);
+			if ( action.itemType === 'leaderboards' ) {
+				return {
+					...state,
+					items: {
+						...state.items,
+						[ resourceName ]: { data: action.items },
+					},
+				};
+			}
+
+			const ids: Array< ItemID > = [];
 			const nextItems = action.items.reduce< Record< ItemID, Item > >(
 				( result, theItem ) => {
-					const id =
-						action.itemType === 'leaderboards'
-							? `${ resourceName }:${ theItem.id }`
-							: theItem.id;
-					ids.push( id );
-					result[ id ] = theItem;
+					ids.push( theItem.id );
+					result[ theItem.id ] = theItem;
 					return result;
 				},
 				{}

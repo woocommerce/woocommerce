@@ -217,9 +217,7 @@ export type ItemInfer< T > = Partial<
 };
 
 export type ItemsState = {
-	items:
-		| Record< string, { data: ItemID[] } | number >
-		| Record< string, never >;
+	items: Record< string, { data: Array< ItemID | Item > } | number >;
 	data: Partial< Record< ItemType, Record< ItemID, Item > > >;
 	errors: {
 		[ key: string ]: unknown;
