@@ -51,7 +51,7 @@
 	}
 	.wc-block-components-product-price,
 	.wc-block-components-product-metadata,
-	.wc-block-components-quantity-selector {
+	.wc-block-components-product-badge {
 		@include skeleton-animation();
 	}
 	.wc-block-components-product-name {
@@ -64,8 +64,25 @@
 		margin-top: 0.25em;
 		min-width: 8em;
 	}
+	// The quantity selector's real +/- buttons and input have their own borders/backgrounds
+	// that stay visible on top of a skeleton background alone, so it doesn't read as a
+	// placeholder. Hide those real controls and shimmer the wrapper itself instead - same
+	// approach as the remove-link button below.
+	.wc-block-components-quantity-selector {
+		@include skeleton-animation();
+		pointer-events: none;
+
+		> * {
+			visibility: hidden;
+		}
+	}
 	.wc-block-cart-item__remove-link {
-		visibility: hidden;
+		@include skeleton-animation();
+		pointer-events: none;
+
+		svg {
+			visibility: hidden;
+		}
 	}
 	.wc-block-cart-item__image > a {
 		@include skeleton-animation();
