@@ -42,10 +42,8 @@ const MAX_PROBE_FAILURES = 3;
 // a probe that cannot prove the queue is healthy, the switch is stuck rather than
 // busy, and it bills the paid group for as long as nobody notices.
 const MAX_ON_MINUTES = 240;
-// A run created less than the queue-age threshold ago cannot hold a job that has
-// waited past it, so probing it can neither trip the switch ON nor refute a clear
-// queue (see fetchQueuedJobs). The grace covers a run that crosses the threshold
-// while the probe is still running — retries can stretch a tick by minutes.
+// Widens the skip window's safety margin slightly; a run that crosses the
+// threshold mid-probe is caught by the post-probe re-check in main(), not here.
 const AGE_FILTER_GRACE_MIN = 1;
 
 const thresholdMin = Number( QUEUE_AGE_THRESHOLD_MIN );
@@ -56,11 +54,19 @@ if ( ! Number.isFinite( thresholdMin ) || ! Number.isFinite( hysteresisMin ) ) {
 	throw new Error( 'QUEUE_AGE_THRESHOLD_MIN and HYSTERESIS_MIN must be numeric' );
 }
 
+// Reported in the step summary so the real per-tick draw on the shared 1,000/hr
+// repository budget is visible once the workflow_run trigger is live.
+let apiRequests = 0;
+
 const sleep = ( seconds ) => new Promise( ( resolve ) => setTimeout( resolve, seconds * 1000 ) );
 
-const ghFetch = async ( url, { token, method = 'GET', body } = {} ) => {
+const ghFetch = async ( url, { token, method = 'GET', body, counted = false } = {} ) => {
 	for ( let attempt = 0; ; attempt++ ) {
 		let response;
+		if ( counted ) {
+			// Retries draw on the same budget.
+			apiRequests++;
+		}
 		try {
 			response = await fetch( url, {
 				method,
@@ -114,7 +120,7 @@ const fetchActiveRuns = async () => {
 		for ( let page = 1; ; page++ ) {
 			const data = await ghJson(
 				`${ API_BASE }/repos/${ REPOSITORY }/actions/runs?status=${ status }&per_page=100&page=${ page }`,
-				{ token: GITHUB_TOKEN }
+				{ token: GITHUB_TOKEN, counted: true }
 			);
 			const runs = data.workflow_runs || [];
 			for ( const run of runs ) {
@@ -147,7 +153,7 @@ const fetchJobsForRun = async ( runId ) => {
 	while ( true ) {
 		const data = await ghJson(
 			`${ API_BASE }/repos/${ REPOSITORY }/actions/runs/${ runId }/jobs?per_page=100&page=${ page }`,
-			{ token: GITHUB_TOKEN }
+			{ token: GITHUB_TOKEN, counted: true }
 		);
 		jobs.push( ...( data.jobs || [] ) );
 		if ( jobs.length >= ( data.total_count || 0 ) || ( data.jobs || [] ).length === 0 ) {
@@ -217,9 +223,8 @@ const collectQueuedJobs = async ( runList ) => {
 const fetchQueuedJobs = async ( runs ) => {
 	// A job is never older than the run holding it, so a run younger than the
 	// threshold cannot contain a job that has waited past it. Skipping those is
-	// not a truncation: they are proven irrelevant to both decisions — they
-	// cannot trip the switch ON, and they cannot refute a clear queue for
-	// switch-OFF either. They must therefore NOT mark the probe incomplete.
+	// not a truncation while they stay young: they can neither trip the switch ON
+	// nor refute a clear queue, so they do not mark the probe incomplete here.
 	const cutoffMs = Date.now() - Math.max( thresholdMin - AGE_FILTER_GRACE_MIN, 0 ) * 60 * 1000;
 	const eligible = [], skipped = [];
 	for ( const run of runs ) {
@@ -434,9 +439,12 @@ const main = async () => {
 		...( forced ? [ '- Probe skipped (forced mode)' ] : [
 			`- Active runs attempted: ${ probeAttempts } of ${ runs.length }${ dropped ? ` (${ dropped } dropped by age window)` : '' }${ skippedYoung ? ` (${ skippedYoung } too new to hold an over-threshold job)` : '' }${ escalated ? ` (escalated: +${ escalated } runs to verify switch-off)` : '' }${ failedProbes ? ` (${ failedProbes } unreadable — API errors)` : '' }${ probeComplete ? '' : ' (probe incomplete — switch-off suppressed)' }`,
 			`- Queued jobs found: ${ queuedJobs.length } (hosted pool${ ignoredPools ? `; ${ ignoredPools } in runner groups ignored` : '' })`,
-			`- Oldest queued job age: ${ oldestAgeMin === null ? 'n/a (queue clear)' : `${ stoppedEarly ? '≥ ' : '' }${ oldestAgeMin.toFixed( 1 ) } min` } (threshold ${ QUEUE_AGE_THRESHOLD_MIN } min)${ stoppedEarly ? ' — probe stopped at the first job over the threshold' : '' }`,
+			// An incomplete probe has not established a clear queue, so it must not
+			// be reported as one.
+			`- Oldest queued job age: ${ oldestAgeMin === null ? ( probeComplete ? 'n/a (queue clear)' : 'unknown (probe incomplete)' ) : `${ stoppedEarly ? '≥ ' : '' }${ oldestAgeMin.toFixed( 1 ) } min` } (threshold ${ QUEUE_AGE_THRESHOLD_MIN } min)${ stoppedEarly ? ' — stopped at the first job over the threshold' : '' }`,
 		] ),
 		`- ${ VARIABLE_NAME }: \`${ rawValue }\` -> \`${ value }\`${ value === rawValue ? ' (no change)' : '' }`,
+		`- GITHUB_TOKEN requests used: ${ apiRequests }`,
 	] );
 
 	// Checked last: the decision above still stands and is recorded. Failing here
