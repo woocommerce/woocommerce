@@ -97,8 +97,8 @@ class RestControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_timeseries_returns_dense_window(): void {
 		wp_set_current_user( $this->admin_user );
 
-		$today            = gmdate( 'Y-m-d H:i:s' );
-		$three_days_ago   = gmdate( 'Y-m-d H:i:s', time() - ( 3 * DAY_IN_SECONDS ) );
+		$today          = gmdate( 'Y-m-d H:i:s' );
+		$three_days_ago = gmdate( 'Y-m-d H:i:s', time() - ( 3 * DAY_IN_SECONDS ) );
 
 		$this->seed_notification(
 			array(

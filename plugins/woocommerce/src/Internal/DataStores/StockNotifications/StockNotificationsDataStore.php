@@ -639,23 +639,27 @@ CREATE TABLE $meta_table_name (
 
 		// Signups per day.
 		$signups_sql = $wpdb->prepare(
-			'SELECT DATE(date_created_gmt) AS d, COUNT(id) AS c
-			FROM %i
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table is a trusted identifier from get_table_name().
+			"SELECT DATE(date_created_gmt) AS d, COUNT(id) AS c
+			FROM {$table}
 			WHERE date_created_gmt >= %s AND date_created_gmt < DATE_ADD(%s, INTERVAL 1 DAY)
-			GROUP BY DATE(date_created_gmt)',
-			array( $table, $start_gmt . ' 00:00:00', $end_gmt )
+			GROUP BY DATE(date_created_gmt)",
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			array( $start_gmt . ' 00:00:00', $end_gmt )
 		);
 		$signup_rows = $wpdb->get_results( $signups_sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
 		// Notifications sent per day (date_notified_gmt populated once status -> sent).
-		$sent_sql  = $wpdb->prepare(
-			'SELECT DATE(date_notified_gmt) AS d, COUNT(id) AS c
-			FROM %i
+		$sent_sql = $wpdb->prepare(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table is a trusted identifier from get_table_name().
+			"SELECT DATE(date_notified_gmt) AS d, COUNT(id) AS c
+			FROM {$table}
 			WHERE date_notified_gmt IS NOT NULL
 				AND date_notified_gmt >= %s
 				AND date_notified_gmt < DATE_ADD(%s, INTERVAL 1 DAY)
-			GROUP BY DATE(date_notified_gmt)',
-			array( $table, $start_gmt . ' 00:00:00', $end_gmt )
+			GROUP BY DATE(date_notified_gmt)",
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			array( $start_gmt . ' 00:00:00', $end_gmt )
 		);
 		$sent_rows = $wpdb->get_results( $sent_sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
@@ -696,16 +700,18 @@ CREATE TABLE $meta_table_name (
 		$table = $this->get_table_name();
 
 		$sql = $wpdb->prepare(
-			'SELECT
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table is a trusted identifier from get_table_name().
+			"SELECT
 				product_id,
 				SUM(CASE WHEN status = %s THEN 1 ELSE 0 END) AS active_signups,
 				COUNT(id) AS total_signups
-			FROM %i
+			FROM {$table}
 			GROUP BY product_id
 			HAVING active_signups > 0
 			ORDER BY active_signups DESC, total_signups DESC, product_id ASC
-			LIMIT %d',
-			array( NotificationStatus::ACTIVE, $table, $limit )
+			LIMIT %d",
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			array( NotificationStatus::ACTIVE, $limit )
 		);
 
 		$results = $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
@@ -741,13 +747,15 @@ CREATE TABLE $meta_table_name (
 		$table = $this->get_table_name();
 
 		$sql = $wpdb->prepare(
-			'SELECT product_id, COUNT(id) AS signups
-			FROM %i
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table is a trusted identifier from get_table_name().
+			"SELECT product_id, COUNT(id) AS signups
+			FROM {$table}
 			WHERE date_created_gmt >= %s
 			GROUP BY product_id
 			ORDER BY signups DESC, product_id ASC
-			LIMIT %d',
-			array( $table, $since_gmt, $limit )
+			LIMIT %d",
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			array( $since_gmt, $limit )
 		);
 
 		$results = $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
@@ -780,17 +788,18 @@ CREATE TABLE $meta_table_name (
 		$table = $this->get_table_name();
 
 		$sql = $wpdb->prepare(
-			'SELECT
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table is a trusted identifier from get_table_name().
+			"SELECT
 				product_id,
 				DATEDIFF(UTC_TIMESTAMP(), MIN(date_created_gmt)) AS days_overdue,
 				COUNT(id) AS active_signups
-			FROM %i
+			FROM {$table}
 			WHERE status IN (%s, %s)
 			GROUP BY product_id
 			ORDER BY days_overdue DESC, product_id ASC
-			LIMIT %d',
+			LIMIT %d",
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			array(
-				$table,
 				NotificationStatus::ACTIVE,
 				NotificationStatus::PENDING,
 				$limit,
