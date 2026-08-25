@@ -109,9 +109,14 @@ class WC_Admin_Permalink_Settings {
 	 * Resolve a posted product permalink choice to the value that gets persisted for it.
 	 *
 	 * The render path checks a radio by comparing the stored base against this, and the save path
-	 * stores what this returns, so the two agree by construction. Restating either side's rules
-	 * separately is what made every predefined structure revert to "Custom base".
+	 * stores what this returns, so both derive the base from one set of rules instead of restating
+	 * them separately -- which is what made every predefined structure revert to "Custom base".
 	 * See https://github.com/woocommerce/woocommerce/issues/29050.
+	 *
+	 * Sharing the rules is not the same as receiving identical input: the save path runs the
+	 * posted value through sanitize_text_field() first, which strips percent-encoded octets, so a
+	 * Shop page whose slug carries a literal percent-escape can still resolve differently on the
+	 * two sides.
 	 *
 	 * Must run inside a wc_switch_to_site_locale() window: the Default base is a translated slug,
 	 * and an administrator whose profile language differs from the site language would otherwise
