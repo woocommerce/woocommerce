@@ -46,13 +46,9 @@ jest.mock(
 	{ virtual: true }
 );
 
-jest.mock( '../legacy-events', () => {
-	const actual = jest.requireActual( '../legacy-events' );
-	return {
-		...actual,
-		triggerAddedToCartEvent: jest.fn( actual.triggerAddedToCartEvent ),
-	};
-} );
+jest.mock( '../legacy-events', () => ( {
+	triggerAddedToCartEvent: jest.fn(),
+} ) );
 
 jest.mock( '@wordpress/a11y', () => ( {
 	speak: jest.fn(),
@@ -484,9 +480,14 @@ type NativeCartEventObservation = {
  *
  * @param onAdded Optional callback invoked synchronously from the added-event
  *                listener.
+ * @param onSync  Optional callback invoked synchronously from the sync-event
+ *                listener.
  * @return The observations and a cleanup callback that removes both listeners.
  */
-function captureNativeCartEvents( onAdded?: () => void ): {
+function captureNativeCartEvents(
+	onAdded?: () => void,
+	onSync?: () => void
+): {
 	events: NativeCartEventObservation[];
 	cleanup: () => void;
 } {
@@ -501,6 +502,8 @@ function captureNativeCartEvents( onAdded?: () => void ): {
 		} );
 		if ( name === 'added' ) {
 			onAdded?.();
+		} else {
+			onSync?.();
 		}
 	};
 	const addedListener = capture( 'added' );
@@ -2065,50 +2068,84 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			mockBatchFetch();
 			const actions = await loadCartStore();
 			seedCart( [] );
-			let syncCountSeenByAdded = -1;
-			const native = captureNativeCartEvents( () => {
-				syncCountSeenByAdded = native.events.filter(
-					( event ) => event.name === 'sync'
-				).length;
-			} );
-
-			await runAction(
-				actions.addCartItem( {
-					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
-				} )
+			const triggerAddedToCartEventMock =
+				triggerAddedToCartEvent as jest.MockedFunction<
+					typeof triggerAddedToCartEvent
+				>;
+			const priorImplementation =
+				triggerAddedToCartEventMock.getMockImplementation();
+			const realTriggerAddedToCartEvent =
+				jest.requireActual< typeof import('../legacy-events') >(
+					'../legacy-events'
+				).triggerAddedToCartEvent;
+			triggerAddedToCartEventMock.mockImplementation(
+				realTriggerAddedToCartEvent
 			);
-			const orderImmediatelyAfterSettlement = [
-				...native.events.map( ( event ) => event.name ),
-				'after-settlement',
-			];
-
-			expect( orderImmediatelyAfterSettlement ).toEqual( [
-				'added',
-				'sync',
-				'after-settlement',
-			] );
-			expect( syncCountSeenByAdded ).toBe( 0 );
-			expect( native.events[ 0 ] ).toEqual( {
-				name: 'added',
-				target: document.body,
-				bubbles: true,
-				cancelable: true,
-				detail: { preserveCartData: true },
-			} );
-			expect( native.events[ 1 ] ).toEqual( {
-				name: 'sync',
-				target: window,
-				bubbles: false,
-				cancelable: false,
-				detail: {
-					type: 'from_iAPI',
-					quantityChanges: { productsPendingAdd: [ 42 ] },
+			let syncCountSeenByAdded = -1;
+			let addedListenerMicrotaskHasRun = false;
+			let microtaskStateSeenBySync: boolean | undefined;
+			const native = captureNativeCartEvents(
+				() => {
+					syncCountSeenByAdded = native.events.filter(
+						( event ) => event.name === 'sync'
+					).length;
+					Promise.resolve().then( () => {
+						addedListenerMicrotaskHasRun = true;
+					} );
 				},
-			} );
+				() => {
+					microtaskStateSeenBySync = addedListenerMicrotaskHasRun;
+				}
+			);
 
-			native.cleanup();
+			try {
+				await runAction(
+					actions.addCartItem( {
+						id: 42,
+						quantityToAdd: 1,
+						type: 'simple',
+					} )
+				);
+				const orderImmediatelyAfterSettlement = [
+					...native.events.map( ( event ) => event.name ),
+					'after-settlement',
+				];
+
+				expect( orderImmediatelyAfterSettlement ).toEqual( [
+					'added',
+					'sync',
+					'after-settlement',
+				] );
+				expect( syncCountSeenByAdded ).toBe( 0 );
+				expect( microtaskStateSeenBySync ).toBe( false );
+				expect( addedListenerMicrotaskHasRun ).toBe( true );
+				expect( native.events[ 0 ] ).toEqual( {
+					name: 'added',
+					target: document.body,
+					bubbles: true,
+					cancelable: true,
+					detail: { preserveCartData: true },
+				} );
+				expect( native.events[ 1 ] ).toEqual( {
+					name: 'sync',
+					target: window,
+					bubbles: false,
+					cancelable: false,
+					detail: {
+						type: 'from_iAPI',
+						quantityChanges: { productsPendingAdd: [ 42 ] },
+					},
+				} );
+			} finally {
+				native.cleanup();
+				if ( priorImplementation ) {
+					triggerAddedToCartEventMock.mockImplementation(
+						priorImplementation
+					);
+				} else {
+					triggerAddedToCartEventMock.mockReset();
+				}
+			}
 		} );
 
 		it( 'dedupes a repeated product id in the sync event quantityChanges when the same product succeeds twice in one cycle', async () => {
