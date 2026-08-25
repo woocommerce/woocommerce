@@ -8,7 +8,7 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Enums\ProductType;
-use Automattic\WooCommerce\StoreApi\Utilities\CartItemUtils;
+use Automattic\WooCommerce\Blocks\Utils\CanonicalCartLineUtils;
 
 /**
  * ProductButton class.
@@ -360,7 +360,7 @@ class ProductButton extends AbstractBlock {
 	 * off the published Interactivity API state (`state.cart.items` in the
 	 * `woocommerce` store) — the same value the client hydrates from, so the
 	 * two cannot describe different carts. The matching rule itself lives in
-	 * {@see CartItemUtils::build_canonical_quantity_index()}, which this
+	 * {@see CanonicalCartLineUtils::get_first_canonical_line_quantities()}, which this
 	 * method delegates to; the memo guard and the per-product answer live in
 	 * get_cart_item_quantity_by_product_id(). BlocksSharedState::load_cart_state()
 	 * is memoized, so calling it here is free when render() already did.
@@ -374,7 +374,7 @@ class ProductButton extends AbstractBlock {
 		$cart_state = wp_interactivity_state( 'woocommerce' );
 		$items      = $cart_state['cart']['items'] ?? array();
 
-		return CartItemUtils::build_canonical_quantity_index( $items );
+		return CanonicalCartLineUtils::get_first_canonical_line_quantities( $items );
 	}
 
 	/**
