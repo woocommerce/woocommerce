@@ -891,13 +891,28 @@ function wc_scheduled_sales() {
 				$product_util->delete_product_specific_transients( $product ? $product : $product_id );
 			}
 
+			// These IDs become array keys below, where a non-scalar is a fatal, and the data
+			// store is replaceable through woocommerce_product_data_store. Screening on the
+			// same rule _get_non_cached_ids() applied when priming keeps the release set to
+			// entries this batch could have created, so one malformed row neither ends the
+			// run nor evicts an unrelated post.
+			$release_ids = array_values(
+				array_map(
+					'intval',
+					array_filter(
+						$chunk,
+						static fn( $id ) => is_int( $id ) || ( is_string( $id ) && (string) (int) $id === $id )
+					)
+				)
+			);
+
 			// Release what this batch primed, so peak memory stays flat across a large
 			// backlog. These groups key on the object ID, so only this batch's own entries
 			// go: posts and post_meta are shared with every other post type and every other
 			// job in the same WP-Cron request, and must not be flushed whole.
-			wp_cache_delete_multiple( $chunk, 'posts' );
-			wp_cache_delete_multiple( $chunk, 'post_meta' );
-			clean_object_term_cache( $chunk, 'product' );
+			wp_cache_delete_multiple( $release_ids, 'posts' );
+			wp_cache_delete_multiple( $release_ids, 'post_meta' );
+			clean_object_term_cache( $release_ids, 'product' );
 
 			// The product caches namespace their keys with a random prefix, so there is no
 			// key to delete per ID and the group has to go as a whole. product_objects is

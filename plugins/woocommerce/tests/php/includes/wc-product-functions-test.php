@@ -2826,6 +2826,17 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 
 		wc_scheduled_sales();
 
+		// Assert the release before anything below re-primes the product: get_post_meta()
+		// in the processing check would repopulate post_meta and mask a missing release.
+		$this->assertFalse(
+			wp_cache_get( $product->get_id(), 'posts' ),
+			'The batch did not release its own post cache entry.'
+		);
+		$this->assertFalse(
+			wp_cache_get( $product->get_id(), 'post_meta' ),
+			'The batch did not release its own post meta cache entry.'
+		);
+
 		$this->assertEquals(
 			100,
 			get_post_meta( $product->get_id(), '_price', true ),
@@ -2838,6 +2849,91 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		$this->assertNotFalse(
 			wp_cache_get( $page_id, 'post_meta' ),
 			'The cron released unrelated meta from the shared post_meta cache.'
+		);
+	}
+
+	/**
+	 * @testdox A data store returning malformed IDs does not fatal the run or evict unrelated posts.
+	 */
+	public function test_wc_scheduled_sales_survives_malformed_ids_from_a_replaced_data_store(): void {
+		// woocommerce_product_data_store accepts an object, and nothing enforces the int[]
+		// the query methods document. A malformed row must not end a run that has already
+		// saved work, and must not take an unrelated post's cache down with it.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->save();
+		update_post_meta( $product->get_id(), '_price', 50 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
+
+		// A cast would turn "<id>abc" into this page's own id, so priming it here makes a
+		// looser release predicate show up as a real eviction rather than a harmless no-op.
+		$decoy_id  = self::factory()->post->create( array( 'post_type' => 'page' ) );
+		$malformed = $decoy_id . 'abc';
+		get_post( $decoy_id );
+		$this->assertNotFalse(
+			wp_cache_get( $decoy_id, 'posts' ),
+			'Fixture precondition: the decoy page should be primed before the cron runs.'
+		);
+
+		$store = new class( $product->get_id(), $malformed ) extends WC_Product_Data_Store_CPT {
+			/**
+			 * Real product id to report alongside the malformed rows.
+			 *
+			 * @var int
+			 */
+			private $real_id;
+
+			/**
+			 * Malformed row that casts onto an unrelated post id.
+			 *
+			 * @var string
+			 */
+			private $malformed;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param int    $real_id   Real product id.
+			 * @param string $malformed Malformed row.
+			 */
+			public function __construct( $real_id, $malformed ) {
+				$this->real_id   = $real_id;
+				$this->malformed = $malformed;
+			}
+
+			/**
+			 * Return a mix of one real id and rows that violate the int[] contract.
+			 *
+			 * @return array
+			 */
+			public function get_ending_sales() {
+				// No object here on purpose: intval() warns on one, and _prime_post_caches()
+				// hits that before the release step, identically to trunk. That is a
+				// pre-existing priming behaviour, not what this guard covers.
+				return array( $this->real_id, array( 9 ), true, $this->malformed, null );
+			}
+		};
+
+		add_filter( 'woocommerce_product_data_store', fn() => $store );
+		WC_Data_Store::load( 'product' );
+
+		// Core screens the posts group through _validate_cache_id(), which reports the
+		// malformed rows. That notice is the expected outcome, not a failure.
+		$this->setExpectedIncorrectUsage( '_get_non_cached_ids' );
+
+		wc_scheduled_sales();
+
+		$this->assertEquals(
+			100,
+			get_post_meta( $product->get_id(), '_price', true ),
+			'A malformed id stopped the run before the real product settled.'
+		);
+
+		$this->assertNotFalse(
+			wp_cache_get( $decoy_id, 'posts' ),
+			"The release cast '{$malformed}' onto post {$decoy_id} and evicted an unrelated page."
 		);
 	}
 }
