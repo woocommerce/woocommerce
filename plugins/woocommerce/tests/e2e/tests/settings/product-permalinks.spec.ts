@@ -5,6 +5,21 @@ import { expect, test } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { wpCLI } from '../../utils/cli';
 
+/**
+ * Wrap a value as a single shell argument.
+ *
+ * `wpCLI()` builds one command string and runs it through `exec()`, which hands it to a shell, so
+ * an interpolated value has to survive shell parsing. A permalink base can legitimately contain a
+ * single quote — `wc_sanitize_permalink()` leaves them intact, so a custom base of `shop's` is
+ * stored verbatim — and an unquoted one would break the command. `'\''` ends the quoted run,
+ * emits a literal quote, and opens the next one.
+ *
+ * @param value Value to pass as a single argument.
+ * @return The value quoted for the shell.
+ */
+const asShellArgument = ( value: string ) =>
+	`'${ value.replaceAll( "'", `'\\''` ) }'`;
+
 test.describe( 'Product permalink settings', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
@@ -145,7 +160,9 @@ test.describe( 'Product permalink settings', () => {
 			expect( storedPermalinks.product_base ).toBe( expectedBareSlug );
 		} finally {
 			await wpCLI(
-				`wp option update woocommerce_permalinks '${ originalPermalinks }' --format=json ${ optionCliFlags }`
+				`wp option update woocommerce_permalinks ${ asShellArgument(
+					originalPermalinks
+				) } --format=json ${ optionCliFlags }`
 			);
 			// The option alone does not rebuild the persisted rewrite rules the front end matches
 			// against. Emptying them makes WordPress regenerate on the next request with every
