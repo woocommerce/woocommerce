@@ -123,9 +123,9 @@ describe( 'CartItem TypeScript interface', () => {
 			// This is both a runtime check and a compile-time guard: if the field
 			// were added to the type declaration, this test would remain green —
 			// but the TypeScript interface check enforces it is not required.
-			expect( 'is_canonical_product_line' in minimalOptimisticCartItem ).toBe(
-				false
-			);
+			expect(
+				'is_canonical_product_line' in minimalOptimisticCartItem
+			).toBe( false );
 		} );
 
 		it( 'accessing a missing is_canonical_product_line yields undefined (falsy-safe)', () => {

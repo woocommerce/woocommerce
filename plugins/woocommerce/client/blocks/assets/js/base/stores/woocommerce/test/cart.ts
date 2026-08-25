@@ -88,7 +88,6 @@ async function runAction( action: unknown ): Promise< unknown > {
 	let next = iterator.next();
 	while ( ! next.done ) {
 		try {
-			// eslint-disable-next-line no-await-in-loop
 			const resolved = await next.value;
 			next = iterator.next( resolved );
 		} catch ( error ) {
@@ -1677,7 +1676,8 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				id: 42,
 				quantity: 2,
 			} );
-			delete ( legacyLine as Partial< CartItem > ).is_canonical_product_line;
+			delete ( legacyLine as Partial< CartItem > )
+				.is_canonical_product_line;
 			await loadCartStore();
 			seedCart( [ legacyLine ] );
 
