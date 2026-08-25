@@ -17,6 +17,13 @@
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Fires before the shipping calculator is rendered.
+ *
+ * @since 1.4.0
+ */
+do_action( 'woocommerce_before_shipping_calculator' );
+
 $shipping_countries          = WC()->countries->get_shipping_countries();
 $has_single_shipping_country = 1 === count( $shipping_countries );
 
@@ -26,9 +33,8 @@ $has_single_shipping_country = 1 === count( $shipping_countries );
  * @since 3.4.0
  * @param bool $enabled Whether the country field is enabled.
  */
-$show_country_field = apply_filters( 'woocommerce_shipping_calculator_enable_country', true ) || $has_single_shipping_country;
-
-do_action( 'woocommerce_before_shipping_calculator' ); ?>
+$show_country_field = apply_filters( 'woocommerce_shipping_calculator_enable_country', true );
+?>
 
 <form class="woocommerce-shipping-calculator" action="<?php echo esc_url( wc_get_cart_url() ); ?>" method="post">
 
@@ -39,7 +45,7 @@ do_action( 'woocommerce_before_shipping_calculator' ); ?>
 		<?php if ( $show_country_field ) : ?>
 			<p class="form-row form-row-wide" id="calc_shipping_country_field">
 				<label for="calc_shipping_country"><?php esc_html_e( 'Country / region', 'woocommerce' ); ?></label>
-				<select name="calc_shipping_country" id="calc_shipping_country" class="country_to_state country_select" rel="calc_shipping_state" <?php disabled( $has_single_shipping_country ); ?>>
+				<select name="calc_shipping_country" id="calc_shipping_country" class="country_to_state country_select<?php echo $has_single_shipping_country ? ' country_to_state--single' : ''; ?>" rel="calc_shipping_state">
 					<?php if ( ! $has_single_shipping_country ) : ?>
 						<option value="default"><?php esc_html_e( 'Select a country / region&hellip;', 'woocommerce' ); ?></option>
 					<?php endif; ?>
@@ -49,10 +55,9 @@ do_action( 'woocommerce_before_shipping_calculator' ); ?>
 					}
 					?>
 				</select>
-				<?php if ( $has_single_shipping_country ) : ?>
-					<input type="hidden" name="calc_shipping_country" value="<?php echo esc_attr( array_key_first( $shipping_countries ) ); ?>" />
-				<?php endif; ?>
 			</p>
+		<?php elseif ( $has_single_shipping_country ) : ?>
+			<input type="hidden" name="calc_shipping_country" value="<?php echo esc_attr( array_key_first( $shipping_countries ) ); ?>" />
 		<?php endif; ?>
 
 		<?php if ( apply_filters( 'woocommerce_shipping_calculator_enable_state', true ) ) : ?>

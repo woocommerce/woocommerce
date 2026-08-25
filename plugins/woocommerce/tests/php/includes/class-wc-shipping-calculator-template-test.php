@@ -44,6 +44,7 @@ class WC_Shipping_Calculator_Template_Test extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		remove_filter( 'woocommerce_shipping_calculator_enable_country', '__return_false' );
+		remove_action( 'woocommerce_before_shipping_calculator', array( $this, 'disable_country_field_before_calculator' ) );
 
 		foreach ( $this->original_options as $option_name => $option_value ) {
 			if ( null === $option_value ) {
@@ -59,30 +60,44 @@ class WC_Shipping_Calculator_Template_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * A single available country should remain visible and be submitted by the calculator.
+	 * A single available country should remain visible and be submitted by the calculator's select.
 	 */
-	public function test_single_shipping_country_is_read_only_and_submitted() {
+	public function test_single_shipping_country_uses_single_country_select() {
 		$this->set_shipping_countries( array( 'GR' ) );
 		WC()->customer->set_shipping_country( 'GR' );
 
 		$output = wc_get_template_html( 'cart/shipping-calculator.php' );
 
-		$this->assertMatchesRegularExpression( '/<select[^>]+name="calc_shipping_country"[^>]+disabled=[\'\"]disabled[\'\"]/', $output );
+		$this->assertMatchesRegularExpression( '/<select[^>]+name="calc_shipping_country"[^>]+class="[^"]*country_to_state--single[^"]*"/', $output );
+		$this->assertDoesNotMatchRegularExpression( '/<select[^>]+name="calc_shipping_country"[^>]+disabled=/', $output );
 		$this->assertStringContainsString( '<option value="GR" selected=\'selected\'>Greece</option>', $output );
-		$this->assertStringContainsString( '<input type="hidden" name="calc_shipping_country" value="GR" />', $output );
+		$this->assertStringNotContainsString( '<input type="hidden" name="calc_shipping_country"', $output );
 		$this->assertStringNotContainsString( 'Select a country / region', $output );
 	}
 
 	/**
-	 * Hiding the country filter should not remove the required value for a single-country store.
+	 * Hiding the country filter should hide the field without removing the required submitted value.
 	 */
-	public function test_single_shipping_country_remains_visible_when_filter_is_disabled() {
+	public function test_single_shipping_country_is_submitted_when_filter_hides_field() {
 		$this->set_shipping_countries( array( 'GR' ) );
 		add_filter( 'woocommerce_shipping_calculator_enable_country', '__return_false' );
 
 		$output = wc_get_template_html( 'cart/shipping-calculator.php' );
 
-		$this->assertStringContainsString( 'id="calc_shipping_country_field"', $output );
+		$this->assertStringNotContainsString( 'id="calc_shipping_country_field"', $output );
+		$this->assertStringContainsString( '<input type="hidden" name="calc_shipping_country" value="GR" />', $output );
+	}
+
+	/**
+	 * Extensions should still be able to register the country filter from the before-calculator hook.
+	 */
+	public function test_country_filter_runs_after_before_calculator_hook() {
+		$this->set_shipping_countries( array( 'GR' ) );
+		add_action( 'woocommerce_before_shipping_calculator', array( $this, 'disable_country_field_before_calculator' ) );
+
+		$output = wc_get_template_html( 'cart/shipping-calculator.php' );
+
+		$this->assertStringNotContainsString( 'id="calc_shipping_country_field"', $output );
 		$this->assertStringContainsString( '<input type="hidden" name="calc_shipping_country" value="GR" />', $output );
 	}
 
@@ -116,9 +131,16 @@ class WC_Shipping_Calculator_Template_Test extends WC_Unit_Test_Case {
 	 *
 	 * @param string[] $countries Country codes.
 	 */
-	private function set_shipping_countries( array $countries ) {
+	private function set_shipping_countries( array $countries ): void {
 		update_option( 'woocommerce_allowed_countries', 'specific' );
 		update_option( 'woocommerce_specific_allowed_countries', $countries );
 		update_option( 'woocommerce_ship_to_countries', '' );
+	}
+
+	/**
+	 * Disable the country field from the before-calculator hook.
+	 */
+	public function disable_country_field_before_calculator(): void {
+		add_filter( 'woocommerce_shipping_calculator_enable_country', '__return_false' );
 	}
 }
