@@ -15,9 +15,9 @@ export type PreformattedHtmlConfig = {
 	attr: readonly string[];
 };
 
-// Bidi isolation (dir, PR #67686) and no-translate (translate, PR #62037)
-// attributes wc_price() puts on the currency symbol. Stripping them lets the
-// bidi algorithm move an RTL-script symbol to the wrong side of the amount.
+// Bidi isolation (dir) and no-translate (translate) attributes wc_price()
+// puts on the currency symbol. Stripping them lets the bidi algorithm move
+// an RTL-script symbol to the wrong side of the amount.
 const CURRENCY_SYMBOL_ATTR = [ 'dir', 'translate' ] as const;
 
 // Covers what wc_price() (sale/discount markup, currency symbol) and product

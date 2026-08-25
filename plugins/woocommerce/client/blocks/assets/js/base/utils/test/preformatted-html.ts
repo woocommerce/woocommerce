@@ -8,9 +8,8 @@ import {
 } from '../preformatted-html';
 
 // Markup wc_price() produces for an RTL-script currency symbol (Lebanese
-// pound). The dir="auto" bidi isolation (PR #67686) and translate="no"
-// (PR #62037) must survive the sanitizer, or the first client-side price
-// swap silently undoes those fixes.
+// pound). The dir="auto" bidi isolation and translate="no" must survive the
+// sanitizer, or the first client-side price swap silently undoes them.
 const RTL_PRICE_HTML =
 	'<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">ل.ل</span>&nbsp;2.00</bdi></span>';
 
