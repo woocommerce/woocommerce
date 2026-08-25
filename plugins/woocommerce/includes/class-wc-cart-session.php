@@ -579,7 +579,7 @@ final class WC_Cart_Session {
 		}
 
 		$initial_cart_size = count( $cart );
-		$order_items      = $order->get_items();
+		$order_items       = $order->get_items();
 
 		foreach ( $order_items as $item ) {
 			$product_id     = (int) apply_filters( 'woocommerce_add_to_cart_product_id', $item->get_product_id() );
