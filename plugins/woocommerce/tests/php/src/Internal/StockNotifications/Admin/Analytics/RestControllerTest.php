@@ -48,18 +48,22 @@ class RestControllerTest extends WC_REST_Unit_Test_Case {
 			array( 'role' => 'customer' )
 		);
 
+		// DELETE rather than TRUNCATE so the outer WP_UnitTestCase transaction can still roll back.
+		// TRUNCATE is DDL and implicitly commits the surrounding transaction.
 		global $wpdb;
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_stock_notifications" );
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_stock_notificationmeta" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notifications" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notificationmeta" );
 	}
 
 	/**
 	 * Tear down.
 	 */
 	public function tearDown(): void {
+		// DELETE rather than TRUNCATE so the outer WP_UnitTestCase transaction can still roll back.
+		// TRUNCATE is DDL and implicitly commits the surrounding transaction.
 		global $wpdb;
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_stock_notifications" );
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_stock_notificationmeta" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notifications" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notificationmeta" );
 		parent::tearDown();
 	}
 
