@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent failed Store API cart requests from syncing cart data to pending orders.
