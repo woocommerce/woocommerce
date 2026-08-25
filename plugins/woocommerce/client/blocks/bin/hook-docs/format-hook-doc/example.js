@@ -13,18 +13,15 @@ const example = ( hookDoc ) => {
 		return null;
 	}
 
-	const exampleSource = exampleDoc.content.startsWith( 'See ' )
-		? exampleDoc.content.slice( 4 ).trimStart()
-		: exampleDoc.content;
-
-	// Example files must live under docs/examples. Anything else (a missing
-	// file, a directory, or a path resolving outside the examples dir) is
-	// skipped with a warning instead of aborting the docs build with the
-	// generated files already deleted by prebuild:docs.
+	// The @example content is the path of a Markdown file under
+	// docs/examples. Anything else (a missing file, a directory, or a path
+	// resolving outside the examples dir) is skipped with a warning instead
+	// of aborting the docs build with the generated files already deleted by
+	// prebuild:docs.
 	let exampleContent;
 	try {
 		const examplesRoot = fs.realpathSync( 'docs/examples' ) + path.sep;
-		const resolvedSource = fs.realpathSync( exampleSource );
+		const resolvedSource = fs.realpathSync( exampleDoc.content );
 		if ( ! resolvedSource.startsWith( examplesRoot ) ) {
 			throw new Error( 'path is outside docs/examples' );
 		}
