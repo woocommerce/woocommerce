@@ -219,9 +219,9 @@ describe( 'dataform adapter', () => {
 			);
 		} );
 
-		it( 'fails open with a warning when a predicate throws', () => {
-			const warnSpy = jest
-				.spyOn( console, 'warn' )
+		it( 'fails open and logs an error when a predicate throws', () => {
+			const errorSpy = jest
+				.spyOn( console, 'error' )
 				.mockImplementation( () => undefined );
 			registerSettingsExtension( {
 				scope: { page: 'test-page' },
@@ -237,7 +237,7 @@ describe( 'dataform adapter', () => {
 			);
 
 			expect( field.isVisible?.( {} ) ).toBe( true );
-			expect( warnSpy ).toHaveBeenCalledWith(
+			expect( errorSpy ).toHaveBeenCalledWith(
 				expect.stringContaining(
 					'Visibility predicate for field "test_field" failed.'
 				),
@@ -348,6 +348,36 @@ describe( 'dataform adapter', () => {
 
 			const hidden = adapter.getForm( { show: 'no', toggle: 'off' } );
 			expect( hidden.fields ).toEqual( [] );
+		} );
+
+		it( 'fails open and logs an error when a group predicate throws', () => {
+			const errorSpy = jest
+				.spyOn( console, 'error' )
+				.mockImplementation( () => undefined );
+			const adapter = createDataFormAdapter( {
+				schema: createSchema( [ textField ] ),
+				context,
+				initialValues: {},
+			} );
+			registerSettingsExtension( {
+				scope: { page: 'test-page' },
+				groupVisibility: {
+					general: () => {
+						throw new Error( 'broken predicate' );
+					},
+				},
+			} );
+
+			const form = adapter.getForm( {} );
+			expect(
+				form.fields?.map( ( f ) => ( f as { id: string } ).id )
+			).toEqual( [ 'general' ] );
+			expect( errorSpy ).toHaveBeenCalledWith(
+				expect.stringContaining(
+					'Visibility predicate for group "general" failed.'
+				),
+				expect.any( Object )
+			);
 		} );
 	} );
 

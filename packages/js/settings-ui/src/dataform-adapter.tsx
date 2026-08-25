@@ -12,7 +12,7 @@ import type {
 /**
  * Internal dependencies
  */
-import { warn } from './diagnostics';
+import { error, warn } from './diagnostics';
 import { NativeSettingsField } from './native-fields';
 import {
 	resolveFieldVisibilityPredicate,
@@ -93,7 +93,8 @@ const settingsTypeDescriptors: Record< string, SettingsTypeDescriptor > = {
 };
 
 // Predicates fail open: a broken visibility callback renders the field or
-// group rather than hiding it.
+// group rather than hiding it. The failure logs unconditionally because
+// failing open can expose a field that was meant to stay hidden.
 const runVisibilityPredicate = (
 	predicate: SettingsVisibilityPredicate,
 	kind: 'field' | 'group',
@@ -109,7 +110,7 @@ const runVisibilityPredicate = (
 			schema: options.schema,
 		} );
 	} catch ( predicateError ) {
-		warn(
+		error(
 			`Visibility predicate for ${ kind } "${ id }" failed. Rendering it visible.`,
 			{ error: predicateError, context: options.context }
 		);
