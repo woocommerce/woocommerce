@@ -35,6 +35,13 @@ const MAX_IN_PROGRESS_RUNS_TO_PROBE = 30;
 const MAX_ESCALATION_RUNS_TO_PROBE = 60;
 const MAX_RUN_LIST_PAGES = 3;
 const MAX_FETCH_RETRIES = 2;
+// Each unreadable run costs ~45s of retry sleep. Probing 60 of them would burn
+// the job timeout without producing an answer, so give up early instead.
+const MAX_PROBE_FAILURES = 3;
+// The longest real overflow window observed is 102 min. Past this, combined with
+// a probe that cannot prove the queue is healthy, the switch is stuck rather than
+// busy, and it bills the paid group for as long as nobody notices.
+const MAX_ON_MINUTES = 240;
 
 const sleep = ( seconds ) => new Promise( ( resolve ) => setTimeout( resolve, seconds * 1000 ) );
 
@@ -150,8 +157,25 @@ const isHostedPoolJob = ( job ) =>
 const collectQueuedJobs = async ( runList ) => {
 	const queued = [];
 	let ignoredPools = 0;
+	let failed = 0;
+	let attempted = 0;
 	for ( const run of runList ) {
-		const jobs = await fetchJobsForRun( run.id );
+		let jobs;
+		attempted++;
+		try {
+			jobs = await fetchJobsForRun( run.id );
+		} catch ( error ) {
+			// Any error outliving the retries used to abort the tick and alert.
+			// Missing one run's jobs can only understate the queue, so record it
+			// and let the incomplete probe suppress switch-off instead.
+			failed++;
+			console.log( `Probe skipped run ${ run.id }: ${ error.message }` );
+			if ( failed >= MAX_PROBE_FAILURES ) {
+				console.log( 'Probe abandoned: too many unreadable runs' );
+				break;
+			}
+			continue;
+		}
 		for ( const job of jobs ) {
 			if ( job.status !== 'queued' ) {
 				continue;
@@ -163,7 +187,7 @@ const collectQueuedJobs = async ( runList ) => {
 			}
 		}
 	}
-	return { queued, ignoredPools };
+	return { queued, ignoredPools, failed, attempted };
 };
 
 const fetchQueuedJobs = async ( runs ) => {
@@ -179,8 +203,15 @@ const fetchQueuedJobs = async ( runs ) => {
 		...allQueued.slice( MAX_QUEUED_RUNS_TO_PROBE ),
 		...allInProgress.slice( MAX_IN_PROGRESS_RUNS_TO_PROBE ),
 	];
-	const { queued, ignoredPools } = await collectQueuedJobs( probeList );
-	return { queued, complete: remainder.length === 0, ignoredPools, remainder };
+	const { queued, ignoredPools, failed, attempted } = await collectQueuedJobs( probeList );
+	return {
+		queued,
+		complete: remainder.length === 0 && failed === 0,
+		ignoredPools,
+		remainder,
+		failed,
+		attempted,
+	};
 };
 
 const fetchVariable = async () => {
@@ -256,7 +287,7 @@ const main = async () => {
 	// Forced modes skip the probe: a manual override must succeed even when
 	// the queue API is failing, and needs no queue data to decide.
 	const forced = MODE === 'on' || MODE === 'off';
-	let runs = [], queuedJobs = [], dropped = 0, ignoredPools = 0, remainder = [];
+	let runs = [], queuedJobs = [], dropped = 0, ignoredPools = 0, remainder = [], failedProbes = 0, probeAttempts = 0;
 	let runsListComplete = true, probeComplete = true;
 	if ( ! forced ) {
 		const runsResult = await fetchActiveRuns();
@@ -268,6 +299,8 @@ const main = async () => {
 		dropped = runsResult.dropped;
 		ignoredPools = jobsResult.ignoredPools;
 		remainder = jobsResult.remainder;
+		failedProbes = jobsResult.failed;
+		probeAttempts = jobsResult.attempted;
 	}
 	// Measure ages after the probe; retries can stretch it by minutes.
 	let nowMs = Date.now();
@@ -289,10 +322,12 @@ const main = async () => {
 	// is ON and the probed hosted queue looks healthy, that suppression may
 	// rest only on unprobed runs — probe them so the off decision is proven
 	// rather than dependent on the run count fitting the caps. Runs only in
-	// that narrow state, so normal ticks pay nothing extra.
+	// that narrow state, so normal ticks pay nothing extra. Skipped once any probe
+	// has failed: probeComplete can no longer become true, so it could not change
+	// the outcome, and the failure allowance stays global to the tick.
 	let escalated = 0;
 	if (
-		! forced && ! probeComplete && current === '1' &&
+		! forced && ! probeComplete && failedProbes === 0 && current === '1' &&
 		! ( oldestAgeMin !== null && oldestAgeMin > thresholdMin ) &&
 		nowMs - updatedAtMs >= hysteresisMin * 60 * 1000 &&
 		remainder.length > 0 && remainder.length <= MAX_ESCALATION_RUNS_TO_PROBE
@@ -300,12 +335,24 @@ const main = async () => {
 		const extra = await collectQueuedJobs( remainder );
 		queuedJobs = [ ...queuedJobs, ...extra.queued ];
 		ignoredPools += extra.ignoredPools;
-		escalated = remainder.length;
+		failedProbes += extra.failed;
+		probeAttempts += extra.attempted;
+		escalated = extra.attempted;
 		nowMs = Date.now();
 		oldestAgeMin = oldestAge( queuedJobs, nowMs );
-		// Every listed run is now probed; only run-list page truncation can
-		// still leave the probe incomplete.
-		probeComplete = runsListComplete;
+		// Every listed run has now been attempted; run-list page truncation and
+		// unreadable runs are the only things that can still leave it incomplete.
+		probeComplete = runsListComplete && failedProbes === 0;
+	}
+
+	// A blind tick is deliberately not an alert: most ticks see a single active
+	// run, so one transient error would page constantly for a state that
+	// self-heals on the next tick and costs nothing while the switch is off.
+	// Sustained blindness that is actually costing money is caught at the end.
+	if ( failedProbes > 0 ) {
+		console.log(
+			`::warning::Queue probe could not read ${ failedProbes } of ${ probeAttempts } active runs; switch-off is suppressed this tick.`
+		);
 	}
 
 	const value = decide( {
@@ -323,19 +370,29 @@ const main = async () => {
 		await writeVariable( value, !! variable );
 	}
 
-	const probed = escalated +
-		Math.min( runs.filter( ( run ) => run.status === 'queued' ).length, MAX_QUEUED_RUNS_TO_PROBE ) +
-		Math.min( runs.filter( ( run ) => run.status !== 'queued' ).length, MAX_IN_PROGRESS_RUNS_TO_PROBE );
 	summarize( [
 		'### CI Queue Sentinel',
 		`- Mode: \`${ MODE }\``,
 		...( forced ? [ '- Probe skipped (forced mode)' ] : [
-			`- Active runs probed: ${ probed } of ${ runs.length }${ dropped ? ` (${ dropped } dropped by age window)` : '' }${ escalated ? ` (escalated: +${ escalated } runs to verify switch-off)` : '' }${ probeComplete ? '' : ' (probe truncated — switch-off suppressed)' }`,
+			`- Active runs attempted: ${ probeAttempts } of ${ runs.length }${ dropped ? ` (${ dropped } dropped by age window)` : '' }${ escalated ? ` (escalated: +${ escalated } runs to verify switch-off)` : '' }${ failedProbes ? ` (${ failedProbes } unreadable — API errors)` : '' }${ probeComplete ? '' : ' (probe incomplete — switch-off suppressed)' }`,
 			`- Queued jobs found: ${ queuedJobs.length } (hosted pool${ ignoredPools ? `; ${ ignoredPools } in runner groups ignored` : '' })`,
-			`- Oldest queued job age: ${ oldestAgeMin === null ? 'n/a (queue clear)' : `${ oldestAgeMin.toFixed( 1 ) } min` } (threshold ${ QUEUE_AGE_THRESHOLD_MIN } min)`,
+			// An incomplete probe has not established a clear queue, so it must not
+			// be reported as one.
+			`- Oldest queued job age: ${ oldestAgeMin === null ? ( probeComplete ? 'n/a (queue clear)' : 'unknown (probe incomplete)' ) : `${ oldestAgeMin.toFixed( 1 ) } min` } (threshold ${ QUEUE_AGE_THRESHOLD_MIN } min)`,
 		] ),
 		`- ${ VARIABLE_NAME }: \`${ rawValue }\` -> \`${ value }\`${ value === rawValue ? ' (no change)' : '' }`,
 	] );
+
+	// Checked last: the decision above still stands and is recorded. Failing here
+	// only rings the alarm, so a switch nobody can turn off cannot bill quietly.
+	// Requires an incomplete probe: a long window backed by a healthy probe is
+	// real congestion doing its job, not a stuck switch, and must stay quiet.
+	const onForMin = ( nowMs - updatedAtMs ) / 60000;
+	if ( value === '1' && rawValue === '1' && ! probeComplete && onForMin > MAX_ON_MINUTES ) {
+		throw new Error(
+			`${ VARIABLE_NAME } has been ON for ${ Math.round( onForMin ) } min with an incomplete queue probe — the switch cannot be proven safe to turn off`
+		);
+	}
 };
 
 main().catch( ( error ) => {
