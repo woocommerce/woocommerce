@@ -173,9 +173,7 @@ a.wc-block-components-product-name:hover {
 .wc-block-components-radio-control--highlight-checked label.wc-block-components-radio-control__option--checked-option-highlighted.wc-block-components-radio-control__option--checked-option-highlighted,
 .wc-block-components-address-card.wc-block-components-address-card,
 .wc-block-components-local-pickup-select--multiple.wc-block-components-local-pickup-select--multiple,
-.wc-block-components-address-autocomplete-suggestions.wc-block-components-address-autocomplete-suggestions,
-.wc-block-components-quantity-selector > .wc-block-components-quantity-selector__button--minus.wc-block-components-quantity-selector__button--minus,
-.wc-block-components-quantity-selector > .wc-block-components-quantity-selector__button--plus.wc-block-components-quantity-selector__button--plus {
+.wc-block-components-address-autocomplete-suggestions.wc-block-components-address-autocomplete-suggestions {
 	border-radius: 0;
 }
 
@@ -341,78 +339,6 @@ a.wc-block-components-product-name:hover {
 /* Checkbox alignment for reviews form */
 .wp-block-woocommerce-product-review-form .comment-form-cookies-consent {
 	align-items: flex-start;
-}
-
-/* Fixed #fff — form control surface; not theme-1 (page background shifts per style variation). */
-.wc-block-components-quantity-selector {
-	background-color: #fff;
-	border-color: var(--wp--preset--color--theme-6);
-	border-radius: 0;
-	min-height: 44px;
-}
-
-/* WooCommerce unsets the stepper width inside add-to-cart-with-options,
- * so grouped-product steppers are content-sized, and a number input's
- * intrinsic width varies with its max attribute: rows with and without
- * managed stock rendered uneven widths (WOOTHME-413). Pin the input to
- * the same 40px floor the workaround below uses so every stepper sizes
- * identically, and keep the selector from being squeezed by long titles
- * in its nowrap row; those wrap inside the label instead. */
-.wp-block-woocommerce-add-to-cart-with-options-grouped-product-item .wc-block-add-to-cart-with-options-grouped-product-item-selector {
-	/* WooCommerce reserves min-width: 6.8em and end-aligns the stepper
-	 * inside it; with the steppers pinned uniform that just indents them
-	 * off the content edge. Let the wrapper hug the stepper instead. */
-	flex-shrink: 0;
-	min-width: 0;
-}
-
-/* The doubled class outranks the width: auto in the stepper workaround
- * below, which ties this rule's specificity otherwise and loads later. */
-.wp-block-woocommerce-add-to-cart-with-options-grouped-product-item .wc-block-components-quantity-selector input.wc-block-components-quantity-selector__input.wc-block-components-quantity-selector__input {
-	width: 40px;
-}
-
-/* Editor preview uses legacy .qty classes; frontend adds __input. */
-.woocommerce .wc-block-components-quantity-selector input.qty,
-.wc-block-components-quantity-selector input.qty,
-.wc-block-components-quantity-selector input.wc-block-components-quantity-selector__input {
-	-webkit-appearance: textfield;
-	appearance: textfield;
-	background-color: #fff;
-	border: 0;
-	box-shadow: none;
-	color: #111111;
-	flex: 1 1 auto;
-	font-weight: 400;
-	margin: 0;
-	min-width: 40px;
-	order: 2;
-	text-align: center;
-	width: auto;
-}
-
-.wc-block-components-quantity-selector input.qty::-webkit-inner-spin-button,
-.wc-block-components-quantity-selector input.qty::-webkit-outer-spin-button,
-.wc-block-components-quantity-selector input.wc-block-components-quantity-selector__input::-webkit-inner-spin-button,
-.wc-block-components-quantity-selector input.wc-block-components-quantity-selector__input::-webkit-outer-spin-button {
-	-webkit-appearance: none;
-	margin: 0;
-}
-
-.wc-block-components-quantity-selector > .wc-block-components-quantity-selector__button--minus {
-	background-color: #fff;
-	color: #111111;
-	order: 1;
-}
-
-.wc-block-components-quantity-selector > .wc-block-components-quantity-selector__button--plus {
-	background-color: #fff;
-	color: #111111;
-	order: 3;
-}
-
-.woocommerce-page label.wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-name {
-	margin-bottom: 0;
 }
 
 :where(.wc-block-product-filter-chips__items) {
