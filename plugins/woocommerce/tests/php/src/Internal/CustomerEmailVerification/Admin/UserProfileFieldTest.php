@@ -116,11 +116,15 @@ class UserProfileFieldTest extends WC_Unit_Test_Case {
 		$filter = '__return_true';
 		add_filter( 'woocommerce_customer_email_is_verified', $filter );
 
+		$buffer_level = ob_get_level();
 		try {
 			ob_start();
 			$this->sut->render( $user );
 			$output = ob_get_clean();
 		} finally {
+			while ( ob_get_level() > $buffer_level ) {
+				ob_end_clean();
+			}
 			remove_filter( 'woocommerce_customer_email_is_verified', $filter );
 		}
 
@@ -139,11 +143,15 @@ class UserProfileFieldTest extends WC_Unit_Test_Case {
 		$filter = '__return_false';
 		add_filter( 'woocommerce_customer_email_is_verified', $filter );
 
+		$buffer_level = ob_get_level();
 		try {
 			ob_start();
 			$this->sut->render( $user );
 			$output = ob_get_clean();
 		} finally {
+			while ( ob_get_level() > $buffer_level ) {
+				ob_end_clean();
+			}
 			remove_filter( 'woocommerce_customer_email_is_verified', $filter );
 		}
 
