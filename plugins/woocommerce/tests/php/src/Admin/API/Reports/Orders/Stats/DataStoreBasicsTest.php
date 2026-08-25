@@ -234,7 +234,7 @@ class DataStoreBasicsTest extends OrdersStatsTestCase {
 			$coupons[ $amount ] = $coupon;
 		}
 
-		// Create 3 orders with 1, 2, 3 coupons applied respectively.
+		// Create 3 orders with 3, 2, 1 coupons applied respectively.
 		$minute_ago        = time() - MINUTE_IN_SECONDS;
 		$report_start_time = $minute_ago - ( $minute_ago % HOUR_IN_SECONDS );
 		$order_time        = $report_start_time + 1;
@@ -451,8 +451,8 @@ class DataStoreBasicsTest extends OrdersStatsTestCase {
 		}
 
 		// Reset taxes settings.
-		update_option( 'woocommerce_calc_taxes', $default_customer_address );
-		update_option( 'woocommerce_default_customer_address', $default_calc_taxes );
+		update_option( 'woocommerce_calc_taxes', $default_calc_taxes );
+		update_option( 'woocommerce_default_customer_address', $default_customer_address );
 		update_option( 'woocommerce_tax_based_on', $default_tax_based_on );
 	}
 }

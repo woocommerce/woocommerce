@@ -113,10 +113,9 @@ class DataStoreReturningCustomersTest extends OrdersStatsTestCase {
 		$start_time  = gmdate( 'Y-m-d H:i:s', $first_order_time + 1 );
 		$end_time    = gmdate( 'Y-m-d H:59:59', $third_order->get_date_created()->getOffsetTimestamp() );
 		$query_args  = array(
-			'interval'              => 'day',
-			// To skip cache.
-							'after' => $start_time,
-			'before'                => $end_time,
+			'interval' => 'day',
+			'after'    => $start_time,
+			'before'   => $end_time,
 		);
 		$actual_data = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ) );
 

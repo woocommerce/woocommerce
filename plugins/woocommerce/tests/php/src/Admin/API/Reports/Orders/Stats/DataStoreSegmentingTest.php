@@ -29,6 +29,8 @@ class DataStoreSegmentingTest extends OrdersStatsTestCase {
 	 * @testdox Segmenting by product id reports per-product subtotals in totals and intervals.
 	 */
 	public function test_segmenting_by_product_and_variation(): void {
+		WC_Helper_Reports::reset_stats_dbs();
+
 		// Simple product.
 		$simple_product_price = 25;
 		$simple_product       = new WC_Product_Simple();

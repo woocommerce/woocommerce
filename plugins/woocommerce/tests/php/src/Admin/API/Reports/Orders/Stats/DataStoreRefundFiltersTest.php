@@ -18,6 +18,14 @@ use WC_Product_Simple;
 class DataStoreRefundFiltersTest extends OrdersStatsTestCase {
 
 	/**
+	 * Remove the full-refund data format option after each test, including failed ones.
+	 */
+	public function tearDown(): void {
+		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
+		parent::tearDown();
+	}
+
+	/**
 	 * @testdox The refunds filter distinguishes all, none, partial and full refunds.
 	 */
 	public function test_populate_and_query_refunds(): void {
@@ -56,23 +64,20 @@ class DataStoreRefundFiltersTest extends OrdersStatsTestCase {
 			$order->save();
 		}
 
-		// Add a partial refund on the last order.
-		foreach ( $order->get_items() as $item_values ) {
-			$item_data = $item_values->get_data();
-			wc_create_refund(
-				array(
-					'amount'     => 10,
-					'order_id'   => $order->get_id(),
-					'line_items' => array(
-						$item_data['id'] => array(
-							'qty'          => 0,
-							'refund_total' => 10,
-						),
+		// Add a partial refund on the first item of the last order.
+		$item_id = current( $order->get_items() )->get_id();
+		wc_create_refund(
+			array(
+				'amount'     => 10,
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					$item_id => array(
+						'qty'          => 0,
+						'refund_total' => 10,
 					),
-				)
-			);
-			break;
-		}
+				),
+			)
+		);
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
@@ -193,8 +198,6 @@ class DataStoreRefundFiltersTest extends OrdersStatsTestCase {
 		);
 
 		$this->assertEquals( $expected_totals, json_decode( wp_json_encode( $data_store->get_data( $args ) ), true )['totals'] );
-
-		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
 	}
 
 	/**
@@ -255,8 +258,6 @@ class DataStoreRefundFiltersTest extends OrdersStatsTestCase {
 		);
 
 		$this->assertEquals( $expected_totals, json_decode( wp_json_encode( $data_store->get_data( $args ) ), true )['totals'] );
-
-		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
 	}
 
 	/**

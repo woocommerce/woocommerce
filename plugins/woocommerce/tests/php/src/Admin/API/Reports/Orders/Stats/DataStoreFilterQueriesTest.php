@@ -88,6 +88,13 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 	private static $current_hour_end;
 
 	/**
+	 * IDs of the fixture orders.
+	 *
+	 * @var array
+	 */
+	private static $fixture_order_ids = array();
+
+	/**
 	 * Create the shared order fixture once for the whole class.
 	 */
 	public static function wpSetUpBeforeClass(): void {
@@ -164,6 +171,9 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 					} else {
 						$two_product_order->calculate_totals();
 					}
+
+					self::$fixture_order_ids[] = $single_product_order->get_id();
+					self::$fixture_order_ids[] = $two_product_order->get_id();
 				}
 			}
 		}
@@ -181,9 +191,13 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 	 * Remove the persistent class fixture data.
 	 */
 	public static function wpTearDownAfterClass(): void {
-		foreach ( wc_get_orders( array( 'limit' => -1 ) ) as $order ) {
-			$order->delete( true );
+		foreach ( self::$fixture_order_ids as $order_id ) {
+			$order = wc_get_order( $order_id );
+			if ( $order ) {
+				$order->delete( true );
+			}
 		}
+		self::$fixture_order_ids = array();
 		WC_Helper_Reports::reset_stats_dbs();
 	}
 
@@ -556,13 +570,14 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 					'total_sales'         => $net_revenue + $shipping,
 					'gross_sales'         => $net_revenue + $coupons,
 					'coupons'             => $coupons,
-					'coupons_count'       => 2,
 					// Both fixture coupons appear across the matched orders.
-																			'shipping' => $shipping,
+					'coupons_count'       => 2,
+					'shipping'            => $shipping,
 					'net_revenue'         => $net_revenue,
 					'avg_items_per_order' => round( $num_items_sold / $orders_count, 4 ),
 					'avg_order_value'     => $net_revenue / $orders_count,
-					'total_customers'     => $returning_orders_count,
+					// All fixture orders belong to the one fixture customer.
+					'total_customers'     => 1,
 					'products'            => 4,
 				)
 			),

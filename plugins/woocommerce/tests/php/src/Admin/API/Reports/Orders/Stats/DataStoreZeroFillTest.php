@@ -30,7 +30,10 @@ class DataStoreZeroFillTest extends OrdersStatsTestCase {
 	const ORDERS_PREVIOUS_HOUR = 3;
 
 	/**
-	 * Start of the hour the newest fixture order was created in.
+	 * Query start inside the hour the newest fixture order was created in.
+	 *
+	 * Keeps the seconds-of-minute part of the order time; the data store clamps the
+	 * first interval's date_start to it.
 	 *
 	 * @var DateTime
 	 */
@@ -42,6 +45,13 @@ class DataStoreZeroFillTest extends OrdersStatsTestCase {
 	 * @var DateTime
 	 */
 	private static $current_hour_end;
+
+	/**
+	 * IDs of the fixture orders.
+	 *
+	 * @var array
+	 */
+	private static $fixture_order_ids = array();
 
 	/**
 	 * Create the fixture orders once for the whole class.
@@ -79,6 +89,8 @@ class DataStoreZeroFillTest extends OrdersStatsTestCase {
 			$order->set_status( OrderStatus::COMPLETED );
 			$order->calculate_totals();
 			$order->save();
+
+			self::$fixture_order_ids[] = $order->get_id();
 		}
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
@@ -94,9 +106,13 @@ class DataStoreZeroFillTest extends OrdersStatsTestCase {
 	 * Remove the persistent class fixture data.
 	 */
 	public static function wpTearDownAfterClass(): void {
-		foreach ( wc_get_orders( array( 'limit' => -1 ) ) as $order ) {
-			$order->delete( true );
+		foreach ( self::$fixture_order_ids as $order_id ) {
+			$order = wc_get_order( $order_id );
+			if ( $order ) {
+				$order->delete( true );
+			}
 		}
+		self::$fixture_order_ids = array();
 		WC_Helper_Reports::reset_stats_dbs();
 	}
 
