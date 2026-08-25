@@ -13,7 +13,8 @@ import {
  */
 import {
 	getProductsNameFromClassicTemplate,
-	getProductsNameFromProductQuery,
+	getProductCollectionQuery,
+	getProductsNameFromProductCollection,
 	insertProductsQuery,
 } from './utils';
 
@@ -103,7 +104,7 @@ for ( const {
 	legacyBlockName,
 } of Object.values( templates ) ) {
 	test.describe( `${ templateTitle } template`, () => {
-		test( 'Products block matches with classic template block', async ( {
+		test( 'Product Collection matches with classic template block', async ( {
 			admin,
 			editor,
 			page,
@@ -115,23 +116,38 @@ for ( const {
 			} );
 			await editor.setContent( '' );
 			await insertProductsQuery( editor );
+			await page
+				.getByRole( 'button', {
+					name: 'Upgrade to Product Collection',
+				} )
+				.click();
+			const expectProductCollectionQuery = async () => {
+				const query = await getProductCollectionQuery( page );
+				expect( query.isProductCollectionBlock ).toBe( true );
+				expect( query.perPage ).toBeGreaterThan( 1 );
+			};
+			await expectProductCollectionQuery();
+
 			await editor.insertBlock( { name: legacyBlockName } );
 			await editor.canvas.locator( 'body' ).click();
 
 			await editor.saveSiteEditorEntities( {
 				isOnlyCurrentEntityDirty: true,
 			} );
+			await page.reload();
+			await editor.canvas.locator( 'body' ).waitFor();
+			await expectProductCollectionQuery();
 
 			await page.goto( frontendPage );
 
 			const classicProducts =
 				await getProductsNameFromClassicTemplate( page );
-			const productQueryProducts =
-				await getProductsNameFromProductQuery( page );
+			const productCollectionProducts =
+				await getProductsNameFromProductCollection( page );
 
 			expect( classicProducts.length ).toBeGreaterThan( 1 );
-			expect( productQueryProducts.length ).toBeGreaterThan( 1 );
-			expect( classicProducts ).toEqual( productQueryProducts );
+			expect( productCollectionProducts.length ).toBeGreaterThan( 1 );
+			expect( classicProducts ).toEqual( productCollectionProducts );
 		} );
 	} );
 }
