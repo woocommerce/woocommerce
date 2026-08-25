@@ -117,34 +117,36 @@ const runVisibilityPredicate = (
 	}
 };
 
+// Predicates resolve on every evaluation, so an extension that registers a
+// predicate after the adapter is built still takes effect.
 const createIsVisible = (
 	settingsField: SettingsUIField,
 	options: DataFormAdapterOptions
 ): Field< SettingsValues >[ 'isVisible' ] => {
-	const predicate = resolveFieldVisibilityPredicate(
-		settingsField.id,
-		options.context
-	);
+	return ( item ) => {
+		const predicate = resolveFieldVisibilityPredicate(
+			settingsField.id,
+			options.context
+		);
 
-	if ( predicate ) {
-		return ( item ) =>
-			runVisibilityPredicate(
+		if ( predicate ) {
+			return runVisibilityPredicate(
 				predicate,
 				'field',
 				settingsField.id,
 				item,
 				options
 			);
-	}
+		}
 
-	const visibility = settingsField.visibility;
-	return visibility
-		? ( item ) =>
-				valueMatchesVisibilityRule(
+		const visibility = settingsField.visibility;
+		return visibility
+			? valueMatchesVisibilityRule(
 					item[ visibility.controller ],
 					visibility.value
-				)
-		: undefined;
+			  )
+			: true;
+	};
 };
 
 const createInfoRender = (
@@ -236,12 +238,6 @@ export const createDataFormAdapter = (
 	const fieldsById = new Map(
 		fields.map( ( field ) => [ field.id, field ] )
 	);
-	const groupPredicates = new Map(
-		groups.map( ( group ) => [
-			group.id,
-			resolveGroupVisibilityPredicate( group.id, options.context ),
-		] )
-	);
 
 	const isFieldVisible = ( fieldId: string, values: SettingsValues ) =>
 		fieldsById.get( fieldId )?.isVisible?.( values ) !== false;
@@ -250,7 +246,10 @@ export const createDataFormAdapter = (
 		group: SettingsUIGroup,
 		values: SettingsValues
 	) => {
-		const predicate = groupPredicates.get( group.id );
+		const predicate = resolveGroupVisibilityPredicate(
+			group.id,
+			options.context
+		);
 		if (
 			predicate &&
 			! runVisibilityPredicate(

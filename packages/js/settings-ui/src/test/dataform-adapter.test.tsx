@@ -244,6 +244,24 @@ describe( 'dataform adapter', () => {
 				expect.any( Object )
 			);
 		} );
+
+		it( 'applies a predicate registered after the field is built', () => {
+			const field = buildDataFormField(
+				textField,
+				createOptions( [ textField ] )
+			);
+			expect( field.isVisible?.( { other: 'hide' } ) ).toBe( true );
+
+			registerSettingsExtension( {
+				scope: { page: 'test-page' },
+				fieldVisibility: {
+					test_field: ( { values } ) => values.other === 'show',
+				},
+			} );
+
+			expect( field.isVisible?.( { other: 'hide' } ) ).toBe( false );
+			expect( field.isVisible?.( { other: 'show' } ) ).toBe( true );
+		} );
 	} );
 
 	describe( 'form configuration', () => {
