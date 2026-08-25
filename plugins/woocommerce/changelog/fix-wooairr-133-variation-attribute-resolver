@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix CSV variation import saving a catch-all variation and a stray global attribute when a global-flagged row matches a custom parent attribute.

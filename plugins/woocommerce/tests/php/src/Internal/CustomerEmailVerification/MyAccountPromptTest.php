@@ -151,6 +151,39 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The prompt does not render when the verification email is disabled.
+	 */
+	public function test_prompt_does_not_render_when_verification_email_is_disabled(): void {
+		$user_id = wc_create_new_customer( 'prompt-email-disabled@example.com', 'promptemaildisabled', 'pw' );
+		wp_set_current_user( $user_id );
+
+		$email                  = WC()->mailer()->get_emails()['WC_Email_Customer_Verify_Email'];
+		$previous_email_enabled = $email->enabled;
+		$email->enabled         = 'no';
+
+		try {
+			$this->assertSame( '', $this->render_prompt(), 'The prompt should not render when its email is disabled.' );
+		} finally {
+			$email->enabled = $previous_email_enabled;
+		}
+	}
+
+	/**
+	 * @testdox should_show_prompt returns false when the verification email is disabled by a filter.
+	 */
+	public function test_should_show_prompt_returns_false_when_verification_email_is_filtered_off(): void {
+		$user_id = wc_create_new_customer( 'prompt-email-filtered@example.com', 'promptemailfiltered', 'pw' );
+		wp_set_current_user( $user_id );
+
+		add_filter( 'woocommerce_email_enabled_customer_verify_email', '__return_false' );
+		try {
+			$this->assertFalse( $this->sut->should_show_prompt(), 'The prompt should not show when its email is disabled.' );
+		} finally {
+			remove_filter( 'woocommerce_email_enabled_customer_verify_email', '__return_false' );
+		}
+	}
+
+	/**
 	 * @testdox should_show_prompt allows filters to override the guest checkout default.
 	 */
 	public function test_should_show_prompt_allows_filter_to_override_guest_checkout_default(): void {
