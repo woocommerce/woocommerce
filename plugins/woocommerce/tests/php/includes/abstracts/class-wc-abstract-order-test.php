@@ -1366,17 +1366,6 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$original_items = $order->get_items();
 		$product        = current( $original_items )->get_product();
 
-		$order->remove_order_items();
-
-		$early_saved_item = $this->create_deferred_deletion_test_item( $product, 'Early-saved replacement' );
-		$early_saved_item->add_meta_data( '_fallback_test', 'preserved', true );
-		$order->add_item( $early_saved_item );
-		$early_saved_item->set_order_id( $order->get_id() );
-		$early_saved_item_id = $early_saved_item->save();
-
-		$unsaved_item = $this->create_deferred_deletion_test_item( $product, 'Unsaved replacement' );
-		$order->add_item( $unsaved_item );
-
 		$original_data_store = $order->get_data_store();
 		// phpcs:disable Squiz.Commenting -- Anonymous test double methods are self-explanatory.
 		$custom_data_store = new class( $original_data_store ) extends WC_Data_Store {
@@ -1409,6 +1398,16 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$reflection->setAccessible( true );
 		$reflection->setValue( $order, $custom_data_store );
 
+		$order->remove_order_items();
+
+		$early_saved_item = $this->create_deferred_deletion_test_item( $product, 'Early-saved replacement' );
+		$early_saved_item->add_meta_data( '_fallback_test', 'preserved', true );
+		$order->add_item( $early_saved_item );
+		$early_saved_item->set_order_id( $order->get_id() );
+		$early_saved_item_id = $early_saved_item->save();
+
+		$unsaved_item = $this->create_deferred_deletion_test_item( $product, 'Unsaved replacement' );
+		$order->add_item( $unsaved_item );
 		$order->save();
 
 		$persisted_items = wc_get_order( $order->get_id() )->get_items();
