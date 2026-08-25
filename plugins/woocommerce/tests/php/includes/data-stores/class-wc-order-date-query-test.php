@@ -2,6 +2,11 @@
 /**
  * Tests that day-precision date queries behave identically on both order storage backends.
  *
+ * Parity is asserted for ordinary 24-hour days only. HPOS derives its upper bound as
+ * `$date1 + DAY_IN_SECONDS` in `OrdersTableQuery::local_time_to_gmt_date_query()`, so on a day
+ * that runs 23 or 25 hours across a DST transition the two backends still disagree by an hour.
+ * Post storage is the correct side there; closing the gap means fixing `OrdersTableQuery`.
+ *
  * @package WooCommerce\Tests\DataStores
  */
 
@@ -72,11 +77,12 @@ class WC_Order_Date_Query_Test extends WC_Unit_Test_Case {
 			'a range ending before the local day'  => array( '2026-07-18...2026-07-19', false ),
 			'a range starting on the local day'    => array( '2026-07-20...2026-07-21', true ),
 			'a range starting after the local day' => array( '2026-07-21...2026-07-22', false ),
+			'a single-day range on the local day'  => array( '2026-07-20...2026-07-20', true ),
 		);
 	}
 
 	/**
-	 * @testdox Day-precision date_paid queries should match on the local day the order was paid, on both order storage backends.
+	 * @testdox Day-precision date_paid queries should match on the local day the order was paid, and agree across order storage backends on an ordinary 24-hour day.
 	 *
 	 * @dataProvider date_paid_query_provider
 	 *

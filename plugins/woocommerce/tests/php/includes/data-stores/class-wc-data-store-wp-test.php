@@ -191,6 +191,19 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 					),
 				),
 			),
+			'single-day range'       => array(
+				'2026-07-20...2026-07-20',
+				array(
+					array(
+						'value'   => self::NY_JUL_20_MIDNIGHT,
+						'compare' => '>=',
+					),
+					array(
+						'value'   => self::NY_JUL_21_MIDNIGHT,
+						'compare' => '<',
+					),
+				),
+			),
 		);
 	}
 
