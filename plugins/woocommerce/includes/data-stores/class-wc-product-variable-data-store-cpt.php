@@ -404,7 +404,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						 *     }
 						 *
 						 *     public function apply_user_discount( $price, $variation, $product ) {
-						 *         return $price * $this->get_discount_for_user( get_current_user_id() );
+						 *         return wc_format_decimal( $price * $this->get_discount_for_user( get_current_user_id() ), wc_get_price_decimals() );
 						 *     }
 						 *
 						 *     public function add_user_to_hash( $price_hash, $product, $for_display ) {
@@ -415,7 +415,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						 *
 						 * @since 3.0.0
 						 *
-						 * @param string|float  $price    The variation's active price.
+						 * @param string        $price    The variation's active price.
 						 * @param WC_Product    $variation The variation product object.
 						 * @param WC_Product    $product   The parent variable product object.
 						 */
@@ -433,7 +433,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						 *
 						 * @since 3.0.0
 						 *
-						 * @param string|float  $regular_price The variation's regular price.
+						 * @param string        $regular_price The variation's regular price.
 						 * @param WC_Product    $variation     The variation product object.
 						 * @param WC_Product    $product       The parent variable product object.
 						 */
@@ -446,7 +446,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						 *
 						 * @since 3.0.0
 						 *
-						 * @param string|float  $sale_price The variation's sale price.
+						 * @param string        $sale_price The variation's sale price.
 						 * @param WC_Product    $variation  The variation product object.
 						 * @param WC_Product    $product    The parent variable product object.
 						 */

@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-Blueprint: list what an imported Blueprint will do before it runs, including how many database queries it executes and which plugins and themes it installs or activates, and state that a Blueprint should only be imported from a trusted source.

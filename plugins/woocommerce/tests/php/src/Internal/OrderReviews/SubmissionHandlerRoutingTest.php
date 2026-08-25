@@ -120,7 +120,7 @@ class SubmissionHandlerRoutingTest extends WC_Unit_Test_Case {
 
 		ob_start();
 		try {
-			do_action( 'wp_ajax_nopriv_' . SubmissionHandler::ACTION ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			do_action( 'wp_ajax_nopriv_' . SubmissionHandler::ACTION );
 		} catch ( WPAjaxDieContinueException $e ) {
 			// Expected: wp_send_json_* always calls wp_die().
 			unset( $e );

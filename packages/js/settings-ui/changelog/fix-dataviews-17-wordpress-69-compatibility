@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Bundle DataForm 17.1.0 without private UI API dependencies so Settings UI loads on WordPress 6.9.

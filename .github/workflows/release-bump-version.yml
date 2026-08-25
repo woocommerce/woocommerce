@@ -42,6 +42,7 @@ jobs:
   bump-version:
     name: Bump WooCommerce Version
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 5
     steps:
       - name: Normalize branch input
         id: normalize-branch
@@ -62,7 +63,12 @@ jobs:
           BRANCH: ${{ steps.normalize-branch.outputs.branch }}
         run: |
           if ! git ls-remote --exit-code --heads https://github.com/${GITHUB_REPOSITORY} "$BRANCH" > /dev/null; then
-            echo "::error::Source branch '$BRANCH' does not exist."
+            error="Source branch '$BRANCH' does not exist."
+            if [[ "$BRANCH" =~ ^(release/)?([0-9]+\.[0-9]+)\..+$ ]]; then
+              minor="${BASH_REMATCH[2]}"
+              error="$error Try 'release/$minor' or '$minor' instead."
+            fi
+            echo "::error::$error"
             exit 1
           fi
 
@@ -70,6 +76,7 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: ${{ steps.normalize-branch.outputs.branch }}
+          token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Get current version
         id: get-current-version
