@@ -482,19 +482,23 @@ function addNotice(
  * REST errors put it at the top level. Reading only one shape renders
  * "undefined" to the merchant.
  *
+ * Both candidates are typed `unknown` and checked rather than asserted: they
+ * come off the wire, and a `message` that wasn't a string would be handed
+ * straight to sprintf and reach the merchant as "[object Object]".
+ *
  * @param error The rejection value from apiFetch.
  * @return The best available message.
  */
 const getRefreshErrorMessage = ( error: unknown ): string => {
 	const candidate = error as
-		| { data?: { message?: string }; message?: string }
+		| { data?: { message?: unknown }; message?: unknown }
 		| undefined;
 
-	return (
-		candidate?.data?.message ||
-		candidate?.message ||
-		__( 'Unexpected error.', 'woocommerce' )
+	const message = [ candidate?.data?.message, candidate?.message ].find(
+		( value ): value is string => typeof value === 'string' && value !== ''
 	);
+
+	return message ?? __( 'Unexpected error.', 'woocommerce' );
 };
 
 const removeNotice = ( productKey: string ) => {
