@@ -854,25 +854,79 @@ function wc_scheduled_sales() {
 	$product_util           = wc_get_container()->get( ProductUtil::class );
 	$must_refresh_transient = false;
 
+	/**
+	 * Apply a sale state to a list of products, priming caches in batches.
+	 *
+	 * Priming the whole result set up front is what exhausts memory on a store with a
+	 * large backlog: the request can die before a single product is saved, leaving no
+	 * progress at all. Priming and releasing per batch holds this loop's own memory flat
+	 * instead, so it no longer scales with the size of the backlog.
+	 *
+	 * Variations are the exception: saving one queues its parent for a deferred sync that
+	 * WC_Post_Data::do_deferred_product_sync() drains at shutdown, outside this loop and
+	 * without batching, so a large variation backlog still grows there.
+	 *
+	 * @param int[]  $product_ids Products to process, in query order.
+	 * @param string $mode        'start' or 'end'.
+	 */
+	// Computed once: neither depends on the batch or the mode.
+	$supports_flush_group  = wp_cache_supports( 'flush_group' );
+	$flush_product_objects = $supports_flush_group;
+	$flush_shared_groups   = $supports_flush_group && ! wp_using_ext_object_cache();
+
+	$process_products = static function ( array $product_ids, string $mode ) use ( $product_util, $flush_product_objects, $flush_shared_groups ): void {
+		foreach ( array_chunk( $product_ids, 50 ) as $chunk ) {
+			_prime_post_caches( $chunk );
+
+			foreach ( $chunk as $product_id ) {
+				$product = wc_get_product( $product_id );
+
+				if ( $product ) {
+					// Note: for 'start', wc_apply_sale_state_for_product() calls save(), which
+					// writes sale date meta and triggers
+					// wc_maybe_schedule_sale_events_on_meta_change(), scheduling the end AS event.
+					wc_apply_sale_state_for_product( $product, $mode );
+				}
+
+				$product_util->delete_product_specific_transients( $product ? $product : $product_id );
+			}
+
+			// Release what this batch primed, so peak memory stays flat across a large
+			// backlog. These groups key on the object ID, so only this batch's own entries
+			// go: posts and post_meta are shared with every other post type and every other
+			// job in the same WP-Cron request, and must not be flushed whole.
+			wp_cache_delete_multiple( $chunk, 'posts' );
+			wp_cache_delete_multiple( $chunk, 'post_meta' );
+			clean_object_term_cache( $chunk, 'product' );
+
+			// The product caches namespace their keys with a random prefix, so there is no
+			// key to delete per ID and the group has to go as a whole. product_objects is
+			// registered non-persistent, so flushing it only ever touches this request.
+			if ( $flush_product_objects ) {
+				wp_cache_flush_group( 'product_objects' );
+			}
+
+			// These are persistent-capable, so only release them when the cache lives in
+			// this request rather than evicting entries other requests are using. Term
+			// queries are the bulk of it: priming a batch caches a term result set per
+			// product, and clean_object_term_cache() only invalidates them by salt, which
+			// leaves the entries resident.
+			if ( $flush_shared_groups ) {
+				wp_cache_flush_group( 'products' );
+				wp_cache_flush_group( 'term-queries' );
+				wp_cache_flush_group( 'terms' );
+			}
+		}
+	};
+
 	// Sales which are due to start.
 	$product_ids = $data_store->get_starting_sales();
 	if ( $product_ids ) {
-		_prime_post_caches( $product_ids );
 		$must_refresh_transient = true;
 		do_action( 'wc_before_products_starting_sales', $product_ids );
 
-		foreach ( $product_ids as $product_id ) {
-			$product = wc_get_product( $product_id );
+		$process_products( $product_ids, 'start' );
 
-			if ( $product ) {
-				wc_apply_sale_state_for_product( $product, 'start' );
-				// Note: wc_apply_sale_state_for_product() calls save(), which writes sale
-				// date meta and triggers wc_maybe_schedule_sale_events_on_meta_change(),
-				// which schedules the end AS event.
-			}
-
-			$product_util->delete_product_specific_transients( $product ? $product : $product_id );
-		}
 		do_action( 'wc_after_products_starting_sales', $product_ids );
 		delete_transient( 'wc_products_onsale' );
 	}
@@ -880,19 +934,11 @@ function wc_scheduled_sales() {
 	// Sales which are due to end.
 	$product_ids = $data_store->get_ending_sales();
 	if ( $product_ids ) {
-		_prime_post_caches( $product_ids );
 		$must_refresh_transient = true;
 		do_action( 'wc_before_products_ending_sales', $product_ids );
 
-		foreach ( $product_ids as $product_id ) {
-			$product = wc_get_product( $product_id );
+		$process_products( $product_ids, 'end' );
 
-			if ( $product ) {
-				wc_apply_sale_state_for_product( $product, 'end' );
-			}
-
-			$product_util->delete_product_specific_transients( $product ? $product : $product_id );
-		}
 		do_action( 'wc_after_products_ending_sales', $product_ids );
 		delete_transient( 'wc_products_onsale' );
 	}

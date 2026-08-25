@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Process scheduled-sale products in batches so stores with a large backlog make progress instead of exhausting memory before the first product is saved.
