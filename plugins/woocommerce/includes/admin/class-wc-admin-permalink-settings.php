@@ -96,7 +96,10 @@ class WC_Admin_Permalink_Settings {
 	/**
 	 * Resolve the Shop page URI that serves as the Shop base, or the default slug.
 	 *
-	 * Shared by the render and the save paths so both describe the same base.
+	 * Shared by the render and the save paths so both resolve the base the same way.
+	 *
+	 * wc_get_page_id() returns -1 when no page is set, so the ID is tested against zero rather
+	 * than for truthiness -- and the page it names can still be gone, which get_post() catches.
 	 *
 	 * @param int $shop_page_id Shop page ID, as resolved by wc_get_page_id( 'shop' ).
 	 * @return string Shop base slug.
@@ -113,14 +116,14 @@ class WC_Admin_Permalink_Settings {
 	 * them separately -- which is what made every predefined structure revert to "Custom base".
 	 * See https://github.com/woocommerce/woocommerce/issues/29050.
 	 *
+	 * Must run inside a wc_switch_to_site_locale() window: the Default base is a translated slug,
+	 * and an administrator whose profile language differs from the site language would otherwise
+	 * store one translation and compare against another.
+	 *
 	 * Sharing the rules is not the same as receiving identical input: the save path runs the
 	 * posted value through sanitize_text_field() first, which strips percent-encoded octets, so a
 	 * Shop page whose slug carries a literal percent-escape can still resolve differently on the
 	 * two sides.
-	 *
-	 * Must run inside a wc_switch_to_site_locale() window: the Default base is a translated slug,
-	 * and an administrator whose profile language differs from the site language would otherwise
-	 * store one translation and compare against another.
 	 *
 	 * @param string      $posted_base      Posted `product_permalink` radio value.
 	 * @param string|null $posted_structure Posted `product_permalink_structure` value, or null when that field is absent or not a string.
@@ -140,7 +143,8 @@ class WC_Admin_Permalink_Settings {
 				$base = (string) preg_replace( '~/+~', '/', '/' . str_replace( '#', '', trim( $posted_structure ) ) );
 			}
 
-			// This is an invalid base structure and breaks pages.
+			// A base of nothing but the category token gives products the same URL shape as the
+			// category archives they sit under, so the two collide. Prefix the default base.
 			if ( '/%product_cat%/' === trailingslashit( $base ) ) {
 				$base = '/' . $default_base . $base;
 			}
@@ -152,10 +156,16 @@ class WC_Admin_Permalink_Settings {
 		$base = wc_sanitize_permalink( $base );
 
 		/*
-		 * An empty base is never stored. wc_get_permalink_structure() drops it and refills the
-		 * option from the request locale, outside any locale window, persisting a slug the site
-		 * locale never chose -- the same divergence this resolver exists to prevent. A custom base
-		 * that is blank, whitespace, or nothing but hashes and slashes all sanitize down to this.
+		 * Resolve an empty base to the default one. A custom base that is blank, whitespace, or
+		 * nothing but hashes and slashes sanitizes down to empty, and an empty base does not
+		 * survive: wc_get_permalink_structure() drops it and refills the option from the request
+		 * locale, outside any locale window, persisting a slug the site locale never chose -- the
+		 * same divergence this resolver exists to prevent.
+		 *
+		 * This narrows that window rather than closing it. The default base is itself a translated
+		 * slug run through wc_sanitize_permalink(), so a translation or a gettext filter that
+		 * resolves it to something sanitizing away -- `/` untrailingslashits to nothing -- leaves
+		 * this assigning empty to empty.
 		 */
 		if ( '' === $base ) {
 			$base = $default_base;
@@ -290,9 +300,10 @@ class WC_Admin_Permalink_Settings {
 			$permalinks['attribute_base'] = wc_sanitize_permalink( wp_unslash( $_POST['woocommerce_product_attribute_slug'] ) );
 
 			/*
-			 * Generate product base. The form only ever posts strings for these two fields, but
-			 * nothing enforces that, and the resolver requires one. A non-string value in either
-			 * field resolves to the default product base.
+			 * The form only ever posts strings for these two fields, but nothing enforces that,
+			 * and the resolver requires one. A non-string radio value resolves to the default
+			 * product base; a non-string structure is passed as null, which resolves to the
+			 * default base only when the radio selects the custom branch that reads it.
 			 */
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized by sanitize_text_field().
 			$product_base = sanitize_text_field( isset( $_POST['product_permalink'] ) && is_string( $_POST['product_permalink'] ) ? wp_unslash( $_POST['product_permalink'] ) : '' );
