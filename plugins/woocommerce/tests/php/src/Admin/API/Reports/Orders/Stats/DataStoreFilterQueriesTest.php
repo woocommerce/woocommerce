@@ -198,6 +198,16 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 			}
 		}
 		self::$fixture_order_ids = array();
+
+		// Delete the products through CRUD so their wc_product_meta_lookup rows go too.
+		foreach ( array_merge( self::$primary_product_ids, array( self::$add_on_product_id ) ) as $product_id ) {
+			$product = wc_get_product( $product_id );
+			if ( $product ) {
+				$product->delete( true );
+			}
+		}
+		self::$primary_product_ids = array();
+
 		WC_Helper_Reports::reset_stats_dbs();
 	}
 

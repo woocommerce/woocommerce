@@ -54,6 +54,13 @@ class DataStoreZeroFillTest extends OrdersStatsTestCase {
 	private static $fixture_order_ids = array();
 
 	/**
+	 * ID of the fixture product.
+	 *
+	 * @var int
+	 */
+	private static $fixture_product_id;
+
+	/**
 	 * Create the fixture orders once for the whole class.
 	 *
 	 * Besides the orders in the current and previous hour, one order each is created in
@@ -66,6 +73,7 @@ class DataStoreZeroFillTest extends OrdersStatsTestCase {
 		$product->set_name( 'Test Product' );
 		$product->set_regular_price( self::PRODUCT_PRICE );
 		$product->save();
+		self::$fixture_product_id = $product->get_id();
 
 		$customer = WC_Helper_Customer::create_customer( 'cust_1', 'pwd_1', 'user_1@mail.com' );
 
@@ -113,6 +121,13 @@ class DataStoreZeroFillTest extends OrdersStatsTestCase {
 			}
 		}
 		self::$fixture_order_ids = array();
+
+		// Delete the product through CRUD so its wc_product_meta_lookup row goes too.
+		$product = wc_get_product( self::$fixture_product_id );
+		if ( $product ) {
+			$product->delete( true );
+		}
+
 		WC_Helper_Reports::reset_stats_dbs();
 	}
 
