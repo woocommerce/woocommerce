@@ -711,10 +711,10 @@ class Analytics {
 				'path'   => '/analytics/stock',
 			) : null,
 			Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ? array(
-				'id'     => 'woocommerce-analytics-notices',
+				'id'     => 'woocommerce-analytics-stock-notifications',
 				'title'  => __( 'Stock Notifications', 'woocommerce' ),
 				'parent' => 'woocommerce-analytics',
-				'path'   => '/analytics/notices',
+				'path'   => '/analytics/stock-notifications',
 			) : null,
 			array(
 				'id'     => 'woocommerce-analytics-customers',

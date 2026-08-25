@@ -118,7 +118,7 @@ class RestControllerTest extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$request = new WP_REST_Request( 'GET', '/wc-analytics/back-in-stock/timeseries' );
+		$request = new WP_REST_Request( 'GET', '/wc-analytics/stock-notifications/timeseries' );
 		$request->set_param( 'days', 7 );
 		$response = $this->server->dispatch( $request );
 
@@ -160,7 +160,7 @@ class RestControllerTest extends WC_REST_Unit_Test_Case {
 			);
 		}
 
-		$request  = new WP_REST_Request( 'GET', '/wc-analytics/back-in-stock/top-demand' );
+		$request  = new WP_REST_Request( 'GET', '/wc-analytics/stock-notifications/top-demand' );
 		$response = $this->server->dispatch( $request );
 
 		$this->assertSame( 200, $response->get_status() );
@@ -182,7 +182,7 @@ class RestControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_non_admin_cannot_view_timeseries(): void {
 		wp_set_current_user( $this->customer_user );
 
-		$request  = new WP_REST_Request( 'GET', '/wc-analytics/back-in-stock/timeseries' );
+		$request  = new WP_REST_Request( 'GET', '/wc-analytics/stock-notifications/timeseries' );
 		$response = $this->server->dispatch( $request );
 
 		$this->assertContains( $response->get_status(), array( 401, 403 ) );
@@ -194,7 +194,7 @@ class RestControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_unauthenticated_cannot_view_top_demand(): void {
 		wp_set_current_user( 0 );
 
-		$request  = new WP_REST_Request( 'GET', '/wc-analytics/back-in-stock/top-demand' );
+		$request  = new WP_REST_Request( 'GET', '/wc-analytics/stock-notifications/top-demand' );
 		$response = $this->server->dispatch( $request );
 
 		$this->assertContains( $response->get_status(), array( 401, 403 ) );
@@ -229,7 +229,7 @@ class RestControllerTest extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$request = new WP_REST_Request( 'GET', '/wc-analytics/back-in-stock/top-demand' );
+		$request = new WP_REST_Request( 'GET', '/wc-analytics/stock-notifications/top-demand' );
 		$request->set_param( 'sort_by', 'most_overdue' );
 
 		$response = $this->server->dispatch( $request );
@@ -287,7 +287,7 @@ class RestControllerTest extends WC_REST_Unit_Test_Case {
 			);
 		}
 
-		$request = new WP_REST_Request( 'GET', '/wc-analytics/back-in-stock/top-demand' );
+		$request = new WP_REST_Request( 'GET', '/wc-analytics/stock-notifications/top-demand' );
 		$request->set_param( 'sort_by', 'period_signups' );
 		$request->set_param( 'window', 'week' );
 

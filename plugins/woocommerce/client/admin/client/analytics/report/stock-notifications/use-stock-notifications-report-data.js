@@ -4,7 +4,7 @@
 import { useEffect, useState, useCallback, useMemo } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
-const NAMESPACE = '/wc-analytics/back-in-stock';
+const NAMESPACE = '/wc-analytics/stock-notifications';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -107,7 +107,10 @@ function shapeChartData( rows, days ) {
  * @param {number}                   args.timeseriesDays Number of trailing days to plot.
  * @return {Object} { isLoading, isError, summary, charts, mostWanted, mostOverdue, mostSignedUp }
  */
-export function useNoticesData( { signupsWindow, timeseriesDays = 15 } ) {
+export function useStockNotificationsReportData( {
+	signupsWindow,
+	timeseriesDays = 15,
+} ) {
 	const fetchDays = Math.max( timeseriesDays, TRAILING_WINDOW_DAYS );
 	const [ rawTimeseries, setRawTimeseries ] = useState( null );
 	const [ mostWanted, setMostWanted ] = useState( null );

@@ -22,7 +22,7 @@ import { Text } from '@woocommerce/experimental';
 /**
  * Internal dependencies
  */
-import { useNoticesData } from './use-notices-data';
+import { useStockNotificationsReportData } from './use-stock-notifications-report-data';
 import './style.scss';
 
 const NUMBER_FORMATTER = new Intl.NumberFormat();
@@ -43,7 +43,7 @@ function formatNumber( value ) {
  */
 function SummaryCard( { title, metrics, chartData, itemsLabel, isLoading } ) {
 	return (
-		<Card className="bis-notices-report__summary-card">
+		<Card className="woocommerce-stock-notifications-report__summary-card">
 			<CardHeader>
 				<Text
 					as="h2"
@@ -56,14 +56,14 @@ function SummaryCard( { title, metrics, chartData, itemsLabel, isLoading } ) {
 				</Text>
 			</CardHeader>
 			<CardBody size="none">
-				<ul className="bis-notices-report__metrics">
+				<ul className="woocommerce-stock-notifications-report__metrics">
 					{ metrics.map( ( metric ) => (
 						<li
-							className="bis-notices-report__metric"
+							className="woocommerce-stock-notifications-report__metric"
 							key={ metric.key }
 						>
 							<Text
-								className="bis-notices-report__metric-label"
+								className="woocommerce-stock-notifications-report__metric-label"
 								variant="body.small"
 								size="18"
 								lineHeight="26px"
@@ -71,7 +71,7 @@ function SummaryCard( { title, metrics, chartData, itemsLabel, isLoading } ) {
 								{ metric.label }
 							</Text>
 							<Text
-								className="bis-notices-report__metric-value"
+								className="woocommerce-stock-notifications-report__metric-value"
 								variant="title.medium"
 								size="40"
 								lineHeight="48px"
@@ -82,7 +82,7 @@ function SummaryCard( { title, metrics, chartData, itemsLabel, isLoading } ) {
 						</li>
 					) ) }
 				</ul>
-				<div className="bis-notices-report__chart-wrap">
+				<div className="woocommerce-stock-notifications-report__chart-wrap">
 					<Chart
 						chartType="bar"
 						data={ chartData }
@@ -141,9 +141,12 @@ function leaderboardRow( product, valueKey ) {
 	];
 }
 
-export default function NoticesReport() {
+export default function StockNotificationsReport() {
 	const [ signupsWindow, setSignupsWindow ] = useState( 'month' );
-	const data = useNoticesData( { signupsWindow, timeseriesDays: 15 } );
+	const data = useStockNotificationsReportData( {
+		signupsWindow,
+		timeseriesDays: 15,
+	} );
 	const {
 		summary,
 		charts,
@@ -163,7 +166,7 @@ export default function NoticesReport() {
 
 	return (
 		<Fragment>
-			<div className="bis-notices-report__row is-summary">
+			<div className="woocommerce-stock-notifications-report__row is-summary">
 				<SummaryCard
 					title={ __( 'Notifications', 'woocommerce' ) }
 					itemsLabel={ __( 'Notifications sent', 'woocommerce' ) }
@@ -204,11 +207,11 @@ export default function NoticesReport() {
 				/>
 			</div>
 
-			<h2 className="bis-notices-report__section-title">
+			<h2 className="woocommerce-stock-notifications-report__section-title">
 				{ __( 'Product Leaderboards', 'woocommerce' ) }
 			</h2>
 
-			<div className="bis-notices-report__row is-leaderboards">
+			<div className="woocommerce-stock-notifications-report__row is-leaderboards">
 				<TableCard
 					title={ __( 'Most wanted', 'woocommerce' ) }
 					isLoading={ isLoading }
@@ -295,7 +298,7 @@ export default function NoticesReport() {
 	);
 }
 
-NoticesReport.propTypes = {
+StockNotificationsReport.propTypes = {
 	path: PropTypes.string,
 	query: PropTypes.object,
 };

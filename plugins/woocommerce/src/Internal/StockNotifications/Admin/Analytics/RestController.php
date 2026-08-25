@@ -33,7 +33,7 @@ class RestController extends \WC_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'back-in-stock';
+	protected $rest_base = 'stock-notifications';
 
 	/**
 	 * Register the routes.

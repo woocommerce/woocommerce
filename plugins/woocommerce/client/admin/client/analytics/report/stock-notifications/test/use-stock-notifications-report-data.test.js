@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { deriveSummary } from '../use-notices-data';
+import { deriveSummary } from '../use-stock-notifications-report-data';
 
 /**
  * Pin the system clock to a fixed UTC instant so `deriveSummary`'s

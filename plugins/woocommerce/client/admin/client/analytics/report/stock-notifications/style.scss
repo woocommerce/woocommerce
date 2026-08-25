@@ -1,4 +1,4 @@
-.bis-notices-report__row {
+.woocommerce-stock-notifications-report__row {
 	display: grid;
 	gap: $gap;
 	margin-bottom: $gap-large;
@@ -19,7 +19,7 @@
 	}
 }
 
-.bis-notices-report__summary-card {
+.woocommerce-stock-notifications-report__summary-card {
 	// Reset the h2 default margin so vertical title spacing comes purely from
 	// the CardHeader padding — avoids fighting two layers of spacing.
 	.components-card__header {
@@ -31,7 +31,7 @@
 		}
 	}
 
-	.bis-notices-report__chart-wrap {
+	.woocommerce-stock-notifications-report__chart-wrap {
 		padding: 0 $gap-large $gap-large;
 		// Outer clip catches anything the inner override misses.
 		overflow: hidden;
@@ -51,7 +51,7 @@
 		}
 	}
 
-	.bis-notices-report__metrics {
+	.woocommerce-stock-notifications-report__metrics {
 		display: flex;
 		// Off-scale (75px); $gap-largest (40px) is the nearest on-scale step.
 		gap: 75px;
@@ -61,7 +61,7 @@
 		padding: $gap-large $gap-large $gap;
 	}
 
-	.bis-notices-report__metric {
+	.woocommerce-stock-notifications-report__metric {
 		display: flex;
 		flex-direction: column;
 		min-width: 0;
@@ -69,16 +69,16 @@
 		gap: 6px;
 	}
 
-	.bis-notices-report__metric-label {
+	.woocommerce-stock-notifications-report__metric-label {
 		color: $gray-700;
 	}
 
-	.bis-notices-report__metric-value {
+	.woocommerce-stock-notifications-report__metric-value {
 		color: $gray-900;
 	}
 }
 
-.bis-notices-report__section-title {
+.woocommerce-stock-notifications-report__section-title {
 	font-size: 16px;
 	font-weight: 600;
 	margin: 0 0 $gap;
@@ -93,7 +93,7 @@
 // it inset from the right edge by whatever padding the inline-flex container
 // adds. Pin it to column 3 (the auto-sized rightmost column) so it sits flush
 // against the CardHeader's right padding.
-.bis-notices-report__row.is-leaderboards .woocommerce-table__actions {
+.woocommerce-stock-notifications-report__row.is-leaderboards .woocommerce-table__actions {
 	grid-column: 3;
 
 	> div {
@@ -104,6 +104,6 @@
 // TableCard always renders a CardFooter (with Pagination, even when all rows
 // fit on one page). For these fixed-size leaderboards we don't need it, and
 // the empty footer just adds dead space below the last row.
-.bis-notices-report__row.is-leaderboards .components-card__footer {
+.woocommerce-stock-notifications-report__row.is-leaderboards .components-card__footer {
 	display: none;
 }
