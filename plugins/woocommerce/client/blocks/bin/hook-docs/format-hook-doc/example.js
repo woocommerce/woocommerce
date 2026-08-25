@@ -2,6 +2,7 @@
  * External dependencies
  */
 const fs = require( 'fs' );
+const path = require( 'path' );
 
 const example = ( hookDoc ) => {
 	const tags = hookDoc.tags || [];
@@ -16,15 +17,22 @@ const example = ( hookDoc ) => {
 		? exampleDoc.content.slice( 4 ).trimStart()
 		: exampleDoc.content;
 
-	// An @example tag that isn't a readable file path would otherwise abort the
-	// whole docs build with the generated files already deleted by prebuild:docs.
+	// Example files must live under docs/examples. Anything else (a missing
+	// file, a directory, or a path resolving outside the examples dir) is
+	// skipped with a warning instead of aborting the docs build with the
+	// generated files already deleted by prebuild:docs.
 	let exampleContent;
 	try {
-		exampleContent = fs.readFileSync( exampleSource, 'utf8' );
+		const examplesRoot = fs.realpathSync( 'docs/examples' ) + path.sep;
+		const resolvedSource = fs.realpathSync( exampleSource );
+		if ( ! resolvedSource.startsWith( examplesRoot ) ) {
+			throw new Error( 'path is outside docs/examples' );
+		}
+		exampleContent = fs.readFileSync( resolvedSource, 'utf8' );
 	} catch {
 		// eslint-disable-next-line no-console
 		console.warn(
-			`Skipping @example "${ exampleDoc.content }": not a readable file path.`
+			`Skipping @example "${ exampleDoc.content }": not a readable file under docs/examples.`
 		);
 		return null;
 	}
