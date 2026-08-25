@@ -22,7 +22,11 @@ function update_footer {
 	# Replace everything after <!-- FEEDBACK -->
 	if grep -q "$STARTTAG" "$1"; then
 		tmp="$(mktemp)"
-		awk '/<!-- FEEDBACK -->/ {exit} {print}' "$1" > "$tmp" && mv "$tmp" "$1"
+		# Overwrite the target's contents instead of mv-ing the temp file
+		# over it: mktemp creates 0600, and a rename would carry that
+		# restrictive mode onto the generated doc.
+		awk '/<!-- FEEDBACK -->/ {exit} {print}' "$1" > "$tmp" && cat "$tmp" > "$1"
+		rm -f "$tmp"
 	fi
 
 	# Append feedback section.
