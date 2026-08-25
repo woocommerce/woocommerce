@@ -320,6 +320,241 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Create a pending order with one $100 product whose line total was manually edited to $50.
+	 *
+	 * @return WC_Order
+	 */
+	private function create_order_with_manually_edited_total() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->save();
+
+		$order = wc_create_order();
+		$order->add_product( $product, 1 );
+		$order->set_status( OrderStatus::PENDING );
+		$order->calculate_totals();
+
+		foreach ( $order->get_items() as $item ) {
+			$item->set_total( 50 );
+			$item->save();
+		}
+		$order->calculate_totals();
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * @testdox Applying a coupon calculates the discount from a manually edited line total instead of the original price.
+	 */
+	public function test_apply_coupon_uses_manually_edited_line_total() {
+		$coupon = WC_Helper_Coupon::create_coupon(
+			'percent_coupon_28591',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		$order  = $this->create_order_with_manually_edited_total();
+
+		$this->assertTrue( $order->apply_coupon( $coupon->get_code() ) );
+
+		$item = current( $order->get_items() );
+		$this->assertEquals( 50, $item->get_subtotal(), 'Edited line total should become the new pre-discount price' );
+		$this->assertEquals( 45, $item->get_total(), 'Discount should be taken off the edited price' );
+		$this->assertEquals( 5, $order->get_discount_total(), 'Discount should be 10% of the edited price' );
+		$this->assertEquals( 45, $order->get_total() );
+	}
+
+	/**
+	 * @testdox A failed coupon application leaves manually edited line items unchanged.
+	 */
+	public function test_apply_coupon_failure_keeps_manually_edited_line_items() {
+		WC_Helper_Coupon::create_coupon(
+			'expired_coupon_28591',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+				'expiry_date'   => gmdate( 'Y-m-d', time() - 2 * DAY_IN_SECONDS ),
+			)
+		);
+		$order = $this->create_order_with_manually_edited_total();
+
+		$this->assertWPError( $order->apply_coupon( 'expired_coupon_28591' ) );
+
+		$item = current( $order->get_items() );
+		$this->assertEquals( 100, $item->get_subtotal(), 'Failed coupon application should not change the subtotal' );
+		$this->assertEquals( 50, $item->get_total(), 'Failed coupon application should not change the total' );
+	}
+
+	/**
+	 * @testdox Removing a coupon restores the manually edited line total, not the original price.
+	 */
+	public function test_remove_coupon_restores_manually_edited_line_total() {
+		$coupon = WC_Helper_Coupon::create_coupon(
+			'percent_coupon_28591_remove',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		$order  = $this->create_order_with_manually_edited_total();
+
+		$this->assertTrue( $order->apply_coupon( $coupon->get_code() ) );
+		$this->assertTrue( $order->remove_coupon( $coupon->get_code() ) );
+
+		$item = current( $order->get_items() );
+		$this->assertEquals( 50, $item->get_subtotal() );
+		$this->assertEquals( 50, $item->get_total(), 'Removing the coupon should restore the edited price, not the original one' );
+		$this->assertEquals( 50, $order->get_total() );
+	}
+
+	/**
+	 * @testdox A guest usage-limit rejection leaves manually edited line items unchanged.
+	 */
+	public function test_apply_coupon_usage_limit_rejection_keeps_manually_edited_line_items() {
+		$guest_email = 'guest28591@example.com';
+		$coupon      = WC_Helper_Coupon::create_coupon(
+			'limited_coupon_28591',
+			array(
+				'discount_type'        => 'percent',
+				'coupon_amount'        => '10',
+				'usage_limit_per_user' => '1',
+			)
+		);
+		$coupon->increase_usage_count( $guest_email );
+
+		$order = $this->create_order_with_manually_edited_total();
+		$order->set_billing_email( $guest_email );
+		$order->save();
+
+		$this->assertWPError( $order->apply_coupon( $coupon->get_code() ) );
+
+		$item = current( $order->get_items() );
+		$this->assertEquals( 100, $item->get_subtotal(), 'Usage-limit rejection should not change the subtotal' );
+		$this->assertEquals( 50, $item->get_total(), 'Usage-limit rejection should not change the total' );
+	}
+
+	/**
+	 * @testdox A second coupon stacks on the manually edited price without re-syncing subtotals.
+	 */
+	public function test_apply_second_coupon_stacks_on_manually_edited_line_total() {
+		$percent_coupon = WC_Helper_Coupon::create_coupon(
+			'percent_coupon_28591_stack',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		$fixed_coupon   = WC_Helper_Coupon::create_coupon(
+			'fixed_coupon_28591_stack',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '5',
+			)
+		);
+		$order          = $this->create_order_with_manually_edited_total();
+
+		$this->assertTrue( $order->apply_coupon( $percent_coupon->get_code() ) );
+		$this->assertTrue( $order->apply_coupon( $fixed_coupon->get_code() ) );
+
+		$item = current( $order->get_items() );
+		$this->assertEquals( 50, $item->get_subtotal(), 'Second coupon application should not re-sync the subtotal' );
+		$this->assertEquals( 40, $item->get_total(), 'Both discounts should be taken off the edited price' );
+		$this->assertEquals( 10, $order->get_discount_total() );
+		$this->assertEquals( 40, $order->get_total() );
+	}
+
+	/**
+	 * Create a pending order with a 10% tax rate and one $100 product whose line total was
+	 * manually edited to $50.
+	 *
+	 * @return WC_Order
+	 */
+	private function create_taxed_order_with_manually_edited_total() {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_order'    => '1',
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->save();
+
+		$order = wc_create_order();
+		$order->add_product( $product, 1 );
+		$order->set_status( OrderStatus::PENDING );
+		$order->calculate_totals( true );
+
+		foreach ( $order->get_items() as $item ) {
+			$item->set_total( 50 );
+			$item->save();
+		}
+		$order->calculate_totals( true );
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * @testdox Applying a coupon syncs the per-rate subtotal taxes with the manually edited total.
+	 */
+	public function test_apply_coupon_syncs_line_item_taxes_with_manually_edited_total() {
+		$coupon = WC_Helper_Coupon::create_coupon(
+			'percent_coupon_28591_tax',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		$order  = $this->create_taxed_order_with_manually_edited_total();
+
+		$this->assertTrue( $order->apply_coupon( $coupon->get_code() ) );
+
+		$item  = current( $order->get_items() );
+		$taxes = $item->get_taxes();
+		$this->assertEquals( 50, $item->get_subtotal() );
+		$this->assertEquals( 5, $item->get_subtotal_tax(), 'Subtotal tax should follow the edited price' );
+		$this->assertEquals( 5, array_sum( $taxes['subtotal'] ), 'Per-rate subtotal taxes should match the subtotal tax total' );
+		$this->assertEquals( 45, $item->get_total() );
+		$this->assertEquals( 4.5, $item->get_total_tax() );
+		$this->assertEquals( 49.5, $order->get_total() );
+	}
+
+	/**
+	 * @testdox A failed coupon application restores the per-rate taxes of manually edited line items.
+	 */
+	public function test_apply_coupon_failure_keeps_manually_edited_line_item_taxes() {
+		WC_Helper_Coupon::create_coupon(
+			'expired_coupon_28591_tax',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+				'expiry_date'   => gmdate( 'Y-m-d', time() - 2 * DAY_IN_SECONDS ),
+			)
+		);
+		$order = $this->create_taxed_order_with_manually_edited_total();
+
+		$original_taxes = current( $order->get_items() )->get_taxes();
+
+		$this->assertWPError( $order->apply_coupon( 'expired_coupon_28591_tax' ) );
+
+		$item = current( $order->get_items() );
+		$this->assertEquals( 100, $item->get_subtotal() );
+		$this->assertEquals( 10, $item->get_subtotal_tax(), 'Failed coupon application should not change the subtotal tax' );
+		$this->assertEquals( 50, $item->get_total() );
+		$this->assertEquals( 5, $item->get_total_tax(), 'Failed coupon application should not change the total tax' );
+		$this->assertEquals( $original_taxes, $item->get_taxes(), 'Failed coupon application should restore the per-rate taxes' );
+	}
+
+	/**
 	 * Test for get_discount_to_display which must return a value
 	 * with and without tax whatever the setting of the options.
 	 *
