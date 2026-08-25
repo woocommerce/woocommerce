@@ -70,7 +70,7 @@ class UserProfileField {
 				<th scope="row"><?php esc_html_e( 'Email address confirmed', 'woocommerce' ); ?></th>
 				<td>
 					<label for="<?php echo esc_attr( self::FIELD ); ?>">
-						<input type="checkbox" name="<?php echo esc_attr( self::FIELD ); ?>" id="<?php echo esc_attr( self::FIELD ); ?>" value="1" <?php checked( $this->service->is_verified( $user->ID ) ); ?> />
+						<input type="checkbox" name="<?php echo esc_attr( self::FIELD ); ?>" id="<?php echo esc_attr( self::FIELD ); ?>" value="1" <?php checked( $this->service->has_verified_email( $user->ID ) ); ?> />
 						<?php esc_html_e( 'The customer has confirmed they own this email address.', 'woocommerce' ); ?>
 					</label>
 					<p class="description"><?php esc_html_e( 'Confirming the email address also links any past guest orders placed with it to this account.', 'woocommerce' ); ?></p>

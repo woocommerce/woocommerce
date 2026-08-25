@@ -107,6 +107,47 @@ class UserProfileFieldTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The profile checkbox ignores filters that force an unpersisted user to verified.
+	 */
+	public function test_render_uses_persisted_state_when_filter_forces_verified(): void {
+		$user_id = wc_create_new_customer( 'filtered-verified@example.com', 'filteredverified', 'pw' );
+		$user    = get_user_by( 'id', $user_id );
+
+		$filter = '__return_true';
+		add_filter( 'woocommerce_customer_email_is_verified', $filter );
+
+		ob_start();
+		$this->sut->render( $user );
+		$output = ob_get_clean();
+
+		remove_filter( 'woocommerce_customer_email_is_verified', $filter );
+
+		$this->assertFalse( $this->service->has_verified_email( $user_id ) );
+		$this->assertStringNotContainsString( 'checked=\'checked\'', $output );
+	}
+
+	/**
+	 * @testdox The profile checkbox ignores filters that force a persisted user to unverified.
+	 */
+	public function test_render_uses_persisted_state_when_filter_forces_unverified(): void {
+		$user_id = wc_create_new_customer( 'filtered-unverified@example.com', 'filteredunverified', 'pw' );
+		$user    = get_user_by( 'id', $user_id );
+		$this->service->mark_verified( $user_id );
+
+		$filter = '__return_false';
+		add_filter( 'woocommerce_customer_email_is_verified', $filter );
+
+		ob_start();
+		$this->sut->render( $user );
+		$output = ob_get_clean();
+
+		remove_filter( 'woocommerce_customer_email_is_verified', $filter );
+
+		$this->assertTrue( $this->service->has_verified_email( $user_id ) );
+		$this->assertStringContainsString( 'checked=\'checked\'', $output );
+	}
+
+	/**
 	 * @testdox Changing the email and ticking verify in the same save verifies the new address.
 	 */
 	public function test_save_verifies_new_email_when_changed_and_checked_together(): void {

@@ -100,10 +100,12 @@ class EmailVerificationService {
 	 * 'woocommerce_customer_email_is_verified' filter is not applied — so write paths such as
 	 * {@see self::mark_verified()} stay consistent however extensions filter the reported status.
 	 *
+	 * @since 11.1.0
+	 *
 	 * @param int $user_id WordPress user ID.
 	 * @return bool True when the stored verified email matches the user's current email.
 	 */
-	private function has_verified_email( int $user_id ): bool {
+	public function has_verified_email( int $user_id ): bool {
 		$verified_email = (string) Users::get_site_user_meta( $user_id, self::VERIFIED_META );
 
 		// Both sides are lower-cased (stored that way, get_account_email() normalises), so === is exact.
