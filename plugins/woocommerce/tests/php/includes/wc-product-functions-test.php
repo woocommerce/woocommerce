@@ -2750,4 +2750,94 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			delete_option( 'woocommerce_product_match_featured_image_by_sku' );
 		}
 	}
+
+	/**
+	 * @testdox Every product is processed when the backlog spans more than one batch.
+	 */
+	public function test_wc_scheduled_sales_processes_every_product_across_batches(): void {
+		// One more than the chunk size, so the backlog spans two batches and a product
+		// dropped at the boundary would show up as an unprocessed price.
+		$ids = array();
+		for ( $i = 0; $i < 51; $i++ ) {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_regular_price( 100 );
+			$product->set_sale_price( 50 );
+			$product->save();
+
+			// A missed end: the window closed but _price still holds the sale price.
+			update_post_meta( $product->get_id(), '_price', 50 );
+			update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+			update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
+
+			$ids[] = $product->get_id();
+		}
+
+		$payloads = array();
+		add_action(
+			'wc_before_products_ending_sales',
+			function ( $hook_ids ) use ( &$payloads ) {
+				$payloads[] = $hook_ids;
+			}
+		);
+
+		wc_scheduled_sales();
+
+		foreach ( $ids as $id ) {
+			$this->assertEquals(
+				100,
+				get_post_meta( $id, '_price', true ),
+				"Product {$id} was not processed, so a batch boundary dropped it."
+			);
+		}
+
+		// Batching must not fragment the hook payload: extensions receive the whole set
+		// once, exactly as they did before the loop was chunked.
+		$this->assertCount( 1, $payloads, 'The ending hook must fire once, not once per batch.' );
+		$this->assertCount( 51, $payloads[0], 'The hook payload must carry the whole backlog.' );
+	}
+
+	/**
+	 * @testdox Releasing a batch does not evict cache entries belonging to other posts.
+	 */
+	public function test_wc_scheduled_sales_leaves_unrelated_post_caches_intact(): void {
+		// The loop shares `posts` and `post_meta` with every other post type and every
+		// other job in the same WP-Cron request, so it releases its own IDs rather than
+		// flushing those groups whole. A page primed before the run must survive it.
+		$page_id = self::factory()->post->create( array( 'post_type' => 'page' ) );
+		update_post_meta( $page_id, '_unrelated', 'keep me' );
+		get_post( $page_id );
+		get_post_meta( $page_id );
+		$this->assertNotFalse(
+			wp_cache_get( $page_id, 'posts' ),
+			'Fixture precondition: the page should be primed before the cron runs.'
+		);
+		$this->assertNotFalse(
+			wp_cache_get( $page_id, 'post_meta' ),
+			'Fixture precondition: the page meta should be primed before the cron runs.'
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->save();
+		update_post_meta( $product->get_id(), '_price', 50 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
+
+		wc_scheduled_sales();
+
+		$this->assertEquals(
+			100,
+			get_post_meta( $product->get_id(), '_price', true ),
+			'Fixture precondition: the product should have been processed.'
+		);
+		$this->assertNotFalse(
+			wp_cache_get( $page_id, 'posts' ),
+			'The cron released an unrelated post from the shared posts cache.'
+		);
+		$this->assertNotFalse(
+			wp_cache_get( $page_id, 'post_meta' ),
+			'The cron released unrelated meta from the shared post_meta cache.'
+		);
+	}
 }
