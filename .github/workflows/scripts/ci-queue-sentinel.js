@@ -38,10 +38,11 @@ const MAX_FETCH_RETRIES = 2;
 // Each unreadable run costs ~45s of retry sleep. Probing 60 of them would burn
 // the job timeout without producing an answer, so give up early instead.
 const MAX_PROBE_FAILURES = 3;
-// The longest real overflow window observed is 102 min. Past this, combined with
-// a probe that cannot prove the queue is healthy, the switch is stuck rather than
-// busy, and it bills the paid group for as long as nobody notices.
-const MAX_ON_MINUTES = 240;
+// Real overflow windows run 26-42 min (20 of that is the hysteresis floor); the
+// longest observed is 102. Past this, with a probe that can neither prove the
+// queue healthy nor show any over-threshold work, the switch is stuck rather
+// than busy, and it bills the paid group for as long as nobody notices.
+const MAX_ON_MINUTES = 120;
 
 const sleep = ( seconds ) => new Promise( ( resolve ) => setTimeout( resolve, seconds * 1000 ) );
 
@@ -386,12 +387,16 @@ const main = async () => {
 
 	// Checked last: the decision above still stands and is recorded. Failing here
 	// only rings the alarm, so a switch nobody can turn off cannot bill quietly.
-	// Requires an incomplete probe: a long window backed by a healthy probe is
-	// real congestion doing its job, not a stuck switch, and must stay quiet.
+	// Fires only when the probe can say nothing either way. A probe that found
+	// over-threshold work has explained the ON state, and heavy congestion is
+	// itself a common reason for an incomplete probe — it overruns the run caps,
+	// leaving a non-empty remainder that escalation declines to touch while the
+	// queue reads busy. Without this clause a long real backlog would page.
 	const onForMin = ( nowMs - updatedAtMs ) / 60000;
-	if ( value === '1' && rawValue === '1' && ! probeComplete && onForMin > MAX_ON_MINUTES ) {
+	const provenCongested = oldestAgeMin !== null && oldestAgeMin > thresholdMin;
+	if ( value === '1' && rawValue === '1' && ! probeComplete && ! provenCongested && onForMin > MAX_ON_MINUTES ) {
 		throw new Error(
-			`${ VARIABLE_NAME } has been ON for ${ Math.round( onForMin ) } min with an incomplete queue probe — the switch cannot be proven safe to turn off`
+			`${ VARIABLE_NAME } has been ON for ${ Math.round( onForMin ) } min; the probe is incomplete and found no queued work over the threshold, so the switch cannot be proven safe to turn off`
 		);
 	}
 };
