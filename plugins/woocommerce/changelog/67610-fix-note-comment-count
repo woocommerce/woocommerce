@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Exclude WordPress editorial notes from the WooCommerce comment count cache, so adding a note no longer inflates the pending comment count shown in wp-admin.
