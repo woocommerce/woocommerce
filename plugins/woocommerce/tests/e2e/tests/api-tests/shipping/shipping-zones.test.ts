@@ -3,7 +3,7 @@ import { expect, test } from '../../../fixtures/api-tests-fixtures';
 /* eslint-disable playwright/no-conditional-in-test, playwright/no-conditional-expect -- Failure-safe cleanup must preserve primary and cleanup errors independently. */
 
 const { BASE_URL } = process.env;
-const shouldSkipDeletedRead = BASE_URL !== undefined;
+const shouldSkipDeletedRead = ! /^https?:\/\/localhost/.test( BASE_URL ?? '' );
 
 test.describe( 'Shipping zones API tests', () => {
 	test( 'can round-trip a shipping zone and its locations through authenticated installed V3 HTTP', async ( {
