@@ -92,58 +92,6 @@ class RestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Summary endpoint returns correct totals and per-product rows for a seeded store.
-	 */
-	public function test_summary_returns_expected_shape_and_counts(): void {
-		wp_set_current_user( $this->admin_user );
-
-		// Seed: product 101 (3 active, 1 sent), product 202 (1 active), product 303 (1 cancelled).
-		$this->seed_notification( array( 'product_id' => 101, 'user_id' => 11, 'status' => NotificationStatus::ACTIVE ) );
-		$this->seed_notification( array( 'product_id' => 101, 'user_id' => 12, 'status' => NotificationStatus::ACTIVE ) );
-		$this->seed_notification( array( 'product_id' => 101, 'user_id' => 13, 'status' => NotificationStatus::ACTIVE ) );
-		$this->seed_notification(
-			array(
-				'product_id'    => 101,
-				'user_id'       => 14,
-				'status'        => NotificationStatus::SENT,
-				'date_notified' => gmdate( 'Y-m-d H:i:s' ),
-			)
-		);
-		$this->seed_notification( array( 'product_id' => 202, 'user_id' => 21, 'status' => NotificationStatus::ACTIVE ) );
-		$this->seed_notification( array( 'product_id' => 303, 'user_id' => 31, 'status' => NotificationStatus::CANCELLED ) );
-
-		$request  = new WP_REST_Request( 'GET', '/wc-analytics/back-in-stock/summary' );
-		$response = $this->server->dispatch( $request );
-		$this->assertSame( 200, $response->get_status() );
-
-		$data = $response->get_data();
-
-		$this->assertArrayHasKey( 'totals', $data );
-		$this->assertArrayHasKey( 'all_time', $data['totals'] );
-		$this->assertArrayHasKey( 'this_week', $data['totals'] );
-
-		$this->assertSame( 6, $data['totals']['all_time']['total_signups'] );
-		$this->assertSame( 4, $data['totals']['all_time']['active_signups'] );
-		$this->assertSame( 1, $data['totals']['all_time']['notifications_sent'] );
-		$this->assertSame( 1, $data['totals']['all_time']['cancelled'] );
-
-		$this->assertArrayHasKey( 'products', $data );
-		$this->assertIsArray( $data['products'] );
-		$this->assertGreaterThanOrEqual( 3, count( $data['products'] ) );
-
-		// First product should be 101 (most active).
-		$this->assertSame( 101, $data['products'][0]['product_id'] );
-		$this->assertSame( 3, $data['products'][0]['active_signups'] );
-		$this->assertSame( 4, $data['products'][0]['total_signups'] );
-		$this->assertSame( 1, $data['products'][0]['notifications_sent'] );
-		$this->assertArrayHasKey( 'product_name', $data['products'][0] );
-		$this->assertArrayHasKey( 'product_edit_link', $data['products'][0] );
-
-		$this->assertArrayHasKey( 'total', $data );
-		$this->assertSame( 3, $data['total'] );
-	}
-
-	/**
 	 * Timeseries endpoint returns dense dated rows spanning the requested window.
 	 */
 	public function test_timeseries_returns_dense_window(): void {
@@ -229,18 +177,6 @@ class RestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Non-admin (customer) hitting the summary endpoint is rejected.
-	 */
-	public function test_non_admin_cannot_view_summary(): void {
-		wp_set_current_user( $this->customer_user );
-
-		$request  = new WP_REST_Request( 'GET', '/wc-analytics/back-in-stock/summary' );
-		$response = $this->server->dispatch( $request );
-
-		$this->assertContains( $response->get_status(), array( 401, 403 ) );
-	}
-
-	/**
 	 * Non-admin hitting the timeseries endpoint is rejected.
 	 */
 	public function test_non_admin_cannot_view_timeseries(): void {
@@ -262,55 +198,6 @@ class RestControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		$this->assertContains( $response->get_status(), array( 401, 403 ) );
-	}
-
-	/**
-	 * Summary endpoint exposes today and this_month windows alongside the
-	 * existing all_time and this_week buckets.
-	 */
-	public function test_summary_exposes_today_and_this_month_buckets(): void {
-		wp_set_current_user( $this->admin_user );
-
-		// One signup today, one 10 days ago, one 60 days ago.
-		$now = time();
-		$this->seed_notification(
-			array(
-				'product_id'   => 401,
-				'user_id'      => 41,
-				'status'       => NotificationStatus::ACTIVE,
-				'date_created' => gmdate( 'Y-m-d H:i:s', $now ),
-			)
-		);
-		$this->seed_notification(
-			array(
-				'product_id'   => 401,
-				'user_id'      => 42,
-				'status'       => NotificationStatus::ACTIVE,
-				'date_created' => gmdate( 'Y-m-d H:i:s', $now - ( 10 * DAY_IN_SECONDS ) ),
-			)
-		);
-		$this->seed_notification(
-			array(
-				'product_id'   => 401,
-				'user_id'      => 43,
-				'status'       => NotificationStatus::ACTIVE,
-				'date_created' => gmdate( 'Y-m-d H:i:s', $now - ( 60 * DAY_IN_SECONDS ) ),
-			)
-		);
-
-		$request  = new WP_REST_Request( 'GET', '/wc-analytics/back-in-stock/summary' );
-		$response = $this->server->dispatch( $request );
-		$this->assertSame( 200, $response->get_status() );
-
-		$totals = $response->get_data()['totals'];
-		$this->assertArrayHasKey( 'today', $totals );
-		$this->assertArrayHasKey( 'this_month', $totals );
-		$this->assertArrayHasKey( 'this_week', $totals );
-		$this->assertArrayHasKey( 'all_time', $totals );
-
-		$this->assertSame( 1, $totals['today']['total_signups'] );
-		$this->assertSame( 2, $totals['this_month']['total_signups'] );
-		$this->assertSame( 3, $totals['all_time']['total_signups'] );
 	}
 
 	/**

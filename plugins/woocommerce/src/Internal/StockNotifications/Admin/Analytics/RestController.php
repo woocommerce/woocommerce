@@ -43,34 +43,6 @@ class RestController extends \WC_REST_Controller {
 	public function register_routes(): void {
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/summary',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_summary' ),
-					'permission_callback' => array( $this, 'check_permission' ),
-					'args'                => array(
-						'page'     => array(
-							'description' => __( 'Current page of the collection.', 'woocommerce' ),
-							'type'        => 'integer',
-							'default'     => 1,
-							'minimum'     => 1,
-						),
-						'per_page' => array(
-							'description' => __( 'Maximum number of items to return per page.', 'woocommerce' ),
-							'type'        => 'integer',
-							'default'     => 25,
-							'minimum'     => 1,
-							'maximum'     => 100,
-						),
-					),
-				),
-				'schema' => array( $this, 'get_summary_schema' ),
-			)
-		);
-
-		register_rest_route(
-			$this->namespace,
 			'/' . $this->rest_base . '/timeseries',
 			array(
 				array(
@@ -147,49 +119,6 @@ class RestController extends \WC_REST_Controller {
 			);
 		}
 		return true;
-	}
-
-	/**
-	 * GET /summary
-	 *
-	 * @param \WP_REST_Request $request Request.
-	 * @return \WP_REST_Response
-	 */
-	public function get_summary( \WP_REST_Request $request ): \WP_REST_Response {
-		$per_page = (int) $request->get_param( 'per_page' );
-		$page     = (int) $request->get_param( 'page' );
-
-		$now           = time();
-		$today_gmt     = gmdate( 'Y-m-d 00:00:00', $now );
-		$one_week_ago  = gmdate( 'Y-m-d H:i:s', $now - ( 7 * DAY_IN_SECONDS ) );
-		$one_month_ago = gmdate( 'Y-m-d H:i:s', $now - ( 30 * DAY_IN_SECONDS ) );
-
-		$all_time    = NotificationQuery::get_totals();
-		$this_month  = NotificationQuery::get_totals( $one_month_ago );
-		$this_week   = NotificationQuery::get_totals( $one_week_ago );
-		$today       = NotificationQuery::get_totals( $today_gmt );
-		$per_product = NotificationQuery::get_per_product_summary( $per_page, $page );
-
-		$response = rest_ensure_response(
-			array(
-				'totals'   => array(
-					'all_time'   => $all_time,
-					'this_month' => $this_month,
-					'this_week'  => $this_week,
-					'today'      => $today,
-				),
-				'products' => $this->prepare_product_rows( $per_product['rows'] ),
-				'page'     => $page,
-				'per_page' => $per_page,
-				'total'    => $per_product['total'],
-			)
-		);
-
-		$total_pages = $per_page > 0 ? (int) ceil( $per_product['total'] / $per_page ) : 0;
-		$response->header( 'X-WP-Total', (string) $per_product['total'] );
-		$response->header( 'X-WP-TotalPages', (string) $total_pages );
-
-		return $response;
 	}
 
 	/**
@@ -337,32 +266,6 @@ class RestController extends \WC_REST_Controller {
 			return '';
 		}
 		return admin_url( 'post.php?post=' . $product_id . '&action=edit' );
-	}
-
-	/**
-	 * Schema for /summary.
-	 *
-	 * @return array
-	 */
-	public function get_summary_schema(): array {
-		return array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'bis_summary',
-			'type'       => 'object',
-			'properties' => array(
-				'totals'   => array(
-					'type'       => 'object',
-					'properties' => array(
-						'all_time'  => array( 'type' => 'object' ),
-						'this_week' => array( 'type' => 'object' ),
-					),
-				),
-				'products' => array( 'type' => 'array' ),
-				'page'     => array( 'type' => 'integer' ),
-				'per_page' => array( 'type' => 'integer' ),
-				'total'    => array( 'type' => 'integer' ),
-			),
-		);
 	}
 
 	/**

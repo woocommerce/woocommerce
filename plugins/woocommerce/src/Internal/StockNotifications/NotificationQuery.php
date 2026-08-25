@@ -51,27 +51,6 @@ class NotificationQuery {
 	}
 
 	/**
-	 * Get aggregated totals for all notifications.
-	 *
-	 * @param string $since_gmt Optional lower bound for date_created_gmt (Y-m-d H:i:s GMT). Empty = all-time.
-	 * @return array{total_signups:int,active_signups:int,pending_signups:int,notifications_sent:int,cancelled:int}
-	 */
-	public static function get_totals( string $since_gmt = '' ): array {
-		return \WC_Data_Store::load( 'stock_notification' )->get_totals( $since_gmt );
-	}
-
-	/**
-	 * Per-product aggregated counts, paginated.
-	 *
-	 * @param int $per_page Items per page (1-100).
-	 * @param int $page     1-based page number.
-	 * @return array{rows:array<int,array<string,int>>,total:int}
-	 */
-	public static function get_per_product_summary( int $per_page = 25, int $page = 1 ): array {
-		return \WC_Data_Store::load( 'stock_notification' )->get_per_product_summary( $per_page, $page );
-	}
-
-	/**
 	 * Daily counts of signups and notifications_sent over a window.
 	 *
 	 * @param string $start_gmt Y-m-d inclusive lower bound.

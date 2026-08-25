@@ -1,12 +1,57 @@
 /**
  * External dependencies
  */
-import { useEffect, useState, useCallback } from '@wordpress/element';
+import { useEffect, useState, useCallback, useMemo } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
 const NAMESPACE = '/wc-analytics/back-in-stock';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+
+const TRAILING_WINDOW_DAYS = 30;
+
+/**
+ * Derive the `summary` totals the dashboard needs from `/timeseries` rows,
+ * reproducing the semantics of the old `/summary` PHP endpoint: `today` is
+ * the current UTC day, and `this_month` is a trailing 30-day window (not a
+ * calendar month).
+ *
+ * @param {Array<{date:string,signups:number,notifications_sent:number}>} rows API rows.
+ * @return {{totals:{today:Object,this_month:Object}}} Derived summary shape.
+ */
+function deriveSummary( rows ) {
+	const byDate = Object.fromEntries(
+		( rows || [] ).map( ( r ) => [ r.date, r ] )
+	);
+
+	const todayDate = new Date();
+	todayDate.setUTCHours( 0, 0, 0, 0 );
+	const todayIso = todayDate.toISOString().slice( 0, 10 );
+	const todayRow = byDate[ todayIso ] || {};
+
+	let monthNotifications = 0;
+	let monthSignups = 0;
+	for ( let i = 0; i < TRAILING_WINDOW_DAYS; i++ ) {
+		const d = new Date( todayDate.getTime() - i * DAY_MS );
+		const iso = d.toISOString().slice( 0, 10 );
+		const row = byDate[ iso ] || {};
+		monthNotifications += Number( row.notifications_sent || 0 );
+		monthSignups += Number( row.signups || 0 );
+	}
+
+	return {
+		totals: {
+			today: {
+				notifications_sent: Number( todayRow.notifications_sent || 0 ),
+				total_signups: Number( todayRow.signups || 0 ),
+			},
+			this_month: {
+				notifications_sent: monthNotifications,
+				total_signups: monthSignups,
+			},
+		},
+	};
+}
 
 /**
  * Reshape `/timeseries` API rows into the per-date object shape `<Chart>`
@@ -63,7 +108,7 @@ function shapeChartData( rows, days ) {
  * @return {Object} { isLoading, isError, summary, charts, mostWanted, mostOverdue, mostSignedUp }
  */
 export function useNoticesData( { signupsWindow, timeseriesDays = 15 } ) {
-	const [ summary, setSummary ] = useState( null );
+	const fetchDays = Math.max( timeseriesDays, TRAILING_WINDOW_DAYS );
 	const [ rawTimeseries, setRawTimeseries ] = useState( null );
 	const [ mostWanted, setMostWanted ] = useState( null );
 	const [ mostOverdue, setMostOverdue ] = useState( null );
@@ -81,12 +126,8 @@ export function useNoticesData( { signupsWindow, timeseriesDays = 15 } ) {
 	}, [] );
 
 	useEffect( () => {
-		apiFetch( { path: `${ NAMESPACE }/summary` } )
-			.then( setSummary )
-			.catch( () => setIsError( true ) );
-
 		apiFetch( {
-			path: `${ NAMESPACE }/timeseries?days=${ timeseriesDays }`,
+			path: `${ NAMESPACE }/timeseries?days=${ fetchDays }`,
 		} )
 			.then( ( res ) => setRawTimeseries( res.rows || [] ) )
 			.catch( () => setIsError( true ) );
@@ -96,7 +137,7 @@ export function useNoticesData( { signupsWindow, timeseriesDays = 15 } ) {
 			setMostWanted
 		);
 		fetchTopDemand( { sort_by: 'most_overdue', limit: 5 }, setMostOverdue );
-	}, [ timeseriesDays, fetchTopDemand ] );
+	}, [ fetchDays, fetchTopDemand ] );
 
 	useEffect( () => {
 		fetchTopDemand(
@@ -106,11 +147,15 @@ export function useNoticesData( { signupsWindow, timeseriesDays = 15 } ) {
 	}, [ signupsWindow, fetchTopDemand ] );
 
 	const isLoading =
-		summary === null ||
 		rawTimeseries === null ||
 		mostWanted === null ||
 		mostOverdue === null ||
 		mostSignedUp === null;
+
+	const summary = useMemo(
+		() => deriveSummary( rawTimeseries || [] ),
+		[ rawTimeseries ]
+	);
 
 	const charts = rawTimeseries
 		? shapeChartData( rawTimeseries, timeseriesDays )
