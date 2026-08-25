@@ -53,12 +53,7 @@ module.exports = {
 	},
 	addons: [
 		'@storybook/addon-docs',
-		'@storybook/addon-controls',
-		// This package has been deprecated, in favor of @storybook/addon-controls
-		// However, it is still needed for the <Timeline /> story because changing the values with @storybook/addon-controls makes it crash. It seems that we cannot have jsx elements in props.
-		'@storybook/addon-viewport',
 		'@storybook/addon-a11y',
-		'@storybook/addon-actions',
 		'@storybook/addon-links',
 	],
 
@@ -94,7 +89,4 @@ module.exports = {
 		options: {},
 	},
 
-	docs: {
-		autodocs: true,
-	},
 };
