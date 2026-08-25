@@ -3,8 +3,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\CustomerEmailVerification;
 
-use WC_Email;
-
 /**
  * Drives the customer email-verification UI on My Account and processes its verify-links.
  *
@@ -226,8 +224,10 @@ class VerificationController {
 			return false;
 		}
 
-		$email       = WC()->mailer()->get_emails()['WC_Email_Customer_Verify_Email'] ?? null;
-		$should_show = $email instanceof WC_Email && $email->is_enabled() && wc_string_to_bool( get_option( 'woocommerce_enable_guest_checkout' ) );
+		$email_setting = get_option( 'woocommerce_customer_verify_email_settings', array() );
+		$email_enabled = 'yes' === ( $email_setting['enabled'] ?? 'yes' );
+
+		$should_show = $email_enabled && wc_string_to_bool( get_option( 'woocommerce_enable_guest_checkout' ) );
 
 		// A temporary-password account already has a set-password link (which also verifies on use),
 		// surfaced by the temporary-password notice, so skip a second prompt alongside it.
