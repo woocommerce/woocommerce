@@ -35014,12 +35014,6 @@ parameters:
 			path: includes/wc-product-functions.php
 
 		-
-			message: '#^Function wc_get_product_category_list\(\) should return string but returns string\|WP_Error\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/wc-product-functions.php
-
-		-
 			message: '#^Function wc_get_product_object\(\) should return WC_Product but returns object\.$#'
 			identifier: return.type
 			count: 1
