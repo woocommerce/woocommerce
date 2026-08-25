@@ -116,11 +116,13 @@ class UserProfileFieldTest extends WC_Unit_Test_Case {
 		$filter = '__return_true';
 		add_filter( 'woocommerce_customer_email_is_verified', $filter );
 
-		ob_start();
-		$this->sut->render( $user );
-		$output = ob_get_clean();
-
-		remove_filter( 'woocommerce_customer_email_is_verified', $filter );
+		try {
+			ob_start();
+			$this->sut->render( $user );
+			$output = ob_get_clean();
+		} finally {
+			remove_filter( 'woocommerce_customer_email_is_verified', $filter );
+		}
 
 		$this->assertFalse( $this->service->has_verified_email( $user_id ) );
 		$this->assertStringNotContainsString( 'checked=\'checked\'', $output );
@@ -137,11 +139,13 @@ class UserProfileFieldTest extends WC_Unit_Test_Case {
 		$filter = '__return_false';
 		add_filter( 'woocommerce_customer_email_is_verified', $filter );
 
-		ob_start();
-		$this->sut->render( $user );
-		$output = ob_get_clean();
-
-		remove_filter( 'woocommerce_customer_email_is_verified', $filter );
+		try {
+			ob_start();
+			$this->sut->render( $user );
+			$output = ob_get_clean();
+		} finally {
+			remove_filter( 'woocommerce_customer_email_is_verified', $filter );
+		}
 
 		$this->assertTrue( $this->service->has_verified_email( $user_id ) );
 		$this->assertStringContainsString( 'checked=\'checked\'', $output );
