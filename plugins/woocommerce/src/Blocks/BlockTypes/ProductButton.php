@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\StoreApi\Utilities\CartItemUtils;
 
 /**
  * ProductButton class.
@@ -26,13 +27,14 @@ class ProductButton extends AbstractBlock {
 	/**
 	 * Memoized index of the first canonical cart line's quantity per product ID.
 	 *
-	 * Built once, on first use, from the hydrated cart snapshot, and reused for
-	 * every product ID asked about for the lifetime of this block instance.
+	 * Built once per request, on first use, from the hydrated cart snapshot,
+	 * and reused for every product ID asked about for the lifetime of this
+	 * block instance. `null` means the index has not been built yet.
 	 *
 	 * @var array|null
 	 * @phpstan-var array<int, int|float>|null
 	 */
-	private $cart_item_quantity_index = null;
+	private ?array $cart_item_quantity_index = null;
 
 	/**
 	 * Register the context.
@@ -334,7 +336,7 @@ class ProductButton extends AbstractBlock {
 	 *
 	 * Resolved from the same hydrated, filter-applied cart snapshot the client
 	 * hydrates its own state from (the Store API cart response's `items`,
-	 * subject to the `woocommerce_store_api_cart_item_is_canonical_line`
+	 * subject to the `woocommerce_store_api_cart_item_is_canonical_product_line`
 	 * filter), via a per-request index built once, on first use, and reused
 	 * for every product ID asked about afterwards. Returns 0 when the product
 	 * has no canonical cart line, or when the cart is unavailable.
@@ -353,53 +355,26 @@ class ProductButton extends AbstractBlock {
 	/**
 	 * Build a one-pass index of the first canonical cart line's quantity per product ID.
 	 *
-	 * Reads the cart lines straight off the published Interactivity API state
-	 * (`state.cart.items` in the `woocommerce` store), which is the same value
-	 * the client hydrates from — so the two cannot describe different carts.
-	 * BlocksSharedState::load_cart_state() is what publishes it, and is
-	 * memoized, so calling it here is free when render() already did.
-	 *
-	 * Mirrors the client's canonical-line matching over those lines: an entry
-	 * with no `id` key (the schema's empty-array placeholder for a line whose
-	 * product no longer resolves) is skipped; an entry whose
-	 * `is_canonical_line` is present and strictly `false` is skipped, while a
-	 * missing field counts, matching the client; an entry whose `type` is
-	 * `variation` is never matched by product ID alone and is skipped; and
-	 * among the entries that survive for a given product ID, only the first
-	 * one in cart order is kept.
+	 * Owns the acquisition half of the seed: loads the hydrated cart snapshot
+	 * via BlocksSharedState::load_cart_state() and reads its `items` straight
+	 * off the published Interactivity API state (`state.cart.items` in the
+	 * `woocommerce` store) — the same value the client hydrates from, so the
+	 * two cannot describe different carts. The matching rule itself lives in
+	 * {@see CartItemUtils::build_canonical_quantity_index()}, which this
+	 * method delegates to; the memo guard and the per-product answer live in
+	 * get_cart_item_quantity_by_product_id(). BlocksSharedState::load_cart_state()
+	 * is memoized, so calling it here is free when render() already did.
 	 *
 	 * @return array Quantity keyed by product ID.
 	 * @phpstan-return array<int, int|float>
 	 */
 	private function build_cart_item_quantity_index() {
-		$index = array();
-
 		BlocksSharedState::load_cart_state( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 
 		$cart_state = wp_interactivity_state( 'woocommerce' );
 		$items      = $cart_state['cart']['items'] ?? array();
 
-		foreach ( $items as $item ) {
-			if ( ! isset( $item['id'] ) ) {
-				continue;
-			}
-
-			if ( false === ( $item['is_canonical_line'] ?? true ) ) {
-				continue;
-			}
-
-			if ( 'variation' === ( $item['type'] ?? null ) ) {
-				continue;
-			}
-
-			if ( isset( $index[ $item['id'] ] ) ) {
-				continue;
-			}
-
-			$index[ $item['id'] ] = $item['quantity'] ?? 0;
-		}
-
-		return $index;
+		return CartItemUtils::build_canonical_quantity_index( $items );
 	}
 
 	/**

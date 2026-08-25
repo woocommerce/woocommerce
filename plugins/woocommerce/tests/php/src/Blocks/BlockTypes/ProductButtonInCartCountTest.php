@@ -25,7 +25,7 @@ class ProductButtonInCartCountTest extends \WC_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	private const CANONICAL_LINE_FILTER = 'woocommerce_store_api_cart_item_is_canonical_line';
+	private const CANONICAL_LINE_FILTER = 'woocommerce_store_api_cart_item_is_canonical_product_line';
 
 	/**
 	 * The System Under Test.
@@ -98,7 +98,7 @@ class ProductButtonInCartCountTest extends \WC_Unit_Test_Case {
 	 *
 	 * @param int       $id        The product ID.
 	 * @param int|float $quantity  The line quantity.
-	 * @param array     $overrides Additional or overriding keys, e.g. 'is_canonical_line', 'type'.
+	 * @param array     $overrides Additional or overriding keys, e.g. 'is_canonical_product_line', 'type'.
 	 * @return array
 	 */
 	private function item( int $id, $quantity, array $overrides = array() ): array {
@@ -257,36 +257,36 @@ class ProductButtonInCartCountTest extends \WC_Unit_Test_Case {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * @testdox Should not count a line whose is_canonical_line is strictly false.
+	 * @testdox Should not count a line whose is_canonical_product_line is strictly false.
 	 */
-	public function test_skips_line_with_is_canonical_line_strictly_false(): void {
-		$fake = $this->create_counting_hydration( $this->cart_response( array( $this->item( 10, 2, array( 'is_canonical_line' => false ) ) ) ) );
+	public function test_skips_line_with_is_canonical_product_line_strictly_false(): void {
+		$fake = $this->create_counting_hydration( $this->cart_response( array( $this->item( 10, 2, array( 'is_canonical_product_line' => false ) ) ) ) );
 		$this->inject_hydration( $fake );
 
 		$result = $this->sut->call_get_cart_item_quantity_by_product_id( 10 );
 
-		$this->assertSame( 0, $result, 'A line with is_canonical_line strictly false must not be counted.' );
+		$this->assertSame( 0, $result, 'A line with is_canonical_product_line strictly false must not be counted.' );
 	}
 
 	/**
-	 * @testdox Should count a line with no is_canonical_line key at all.
+	 * @testdox Should count a line with no is_canonical_product_line key at all.
 	 */
-	public function test_counts_line_with_missing_is_canonical_line_key(): void {
+	public function test_counts_line_with_missing_is_canonical_product_line_key(): void {
 		$fake = $this->create_counting_hydration( $this->cart_response( array( $this->item( 10, 2 ) ) ) );
 		$this->inject_hydration( $fake );
 
 		$result = $this->sut->call_get_cart_item_quantity_by_product_id( 10 );
 
-		$this->assertSame( 2, $result, 'A missing is_canonical_line field must degrade to counted, matching the client.' );
+		$this->assertSame( 2, $result, 'A missing is_canonical_product_line field must degrade to counted, matching the client.' );
 	}
 
 	/**
-	 * @testdox Should never count a variation-typed line, whatever its is_canonical_line value.
+	 * @testdox Should never count a variation-typed line, whatever its is_canonical_product_line value.
 	 * @dataProvider provider_variation_typed_line_overrides
 	 *
 	 * @param array $overrides Overrides merged into the item, in addition to `type => variation`.
 	 */
-	public function test_skips_variation_typed_line_regardless_of_is_canonical_line( array $overrides ): void {
+	public function test_skips_variation_typed_line_regardless_of_is_canonical_product_line( array $overrides ): void {
 		$overrides['type'] = 'variation';
 		$fake              = $this->create_counting_hydration( $this->cart_response( array( $this->item( 10, 2, $overrides ) ) ) );
 		$this->inject_hydration( $fake );
@@ -297,14 +297,14 @@ class ProductButtonInCartCountTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Data provider of is_canonical_line overrides for variation-typed lines.
+	 * Data provider of is_canonical_product_line overrides for variation-typed lines.
 	 *
 	 * @return array
 	 */
 	public function provider_variation_typed_line_overrides(): array {
 		return array(
-			'is_canonical_line true'    => array( array( 'is_canonical_line' => true ) ),
-			'is_canonical_line missing' => array( array() ),
+			'is_canonical_product_line true'    => array( array( 'is_canonical_product_line' => true ) ),
+			'is_canonical_product_line missing' => array( array() ),
 		);
 	}
 
@@ -627,7 +627,7 @@ class ProductButtonInCartCountTest extends \WC_Unit_Test_Case {
 		add_filter( 'woocommerce_cart_id', $counter );
 
 		// The first call may hydrate the cart, which itself computes
-		// is_canonical_line per line via generate_cart_id(); that one-time
+		// is_canonical_product_line per line via generate_cart_id(); that one-time
 		// cost is the "cart setup" this criterion allows for.
 		$this->sut->call_get_cart_item_quantity_by_product_id( $product->get_id() );
 		$after_first_call = $filter_calls;
