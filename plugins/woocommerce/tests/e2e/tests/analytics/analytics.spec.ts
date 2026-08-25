@@ -424,31 +424,39 @@ test(
 		await page.getByRole( 'button', { name: 'Month to date' } ).click();
 		await page.getByText( 'Last month' ).click();
 
-		const statsResponsePromise = page.waitForResponse( ( response ) => {
-			const requestUrl = new URL( response.url() );
+		const statsResponsePromise = page.waitForResponse(
+			( response ) => {
+				const requestUrl = new URL( response.url() );
 
-			return (
-				requestUrl.pathname.endsWith(
-					'/wc-analytics/reports/products/stats'
-				) &&
-				requestUrl.searchParams.get( 'products' ) ===
-					String( variableProductId )
-			);
-		} );
+				return (
+					requestUrl.pathname.endsWith(
+						'/wc-analytics/reports/products/stats'
+					) &&
+					requestUrl.searchParams.get( 'products' ) ===
+						String( variableProductId )
+				);
+			},
+			{ timeout: 15_000 }
+		);
 		await page.getByRole( 'button', { name: 'Update' } ).click();
-		await expect( page ).toHaveURL( ( url ) => {
-			const query = url.searchParams;
+		const [ statsResponse ] = await Promise.all( [
+			statsResponsePromise,
+			expect( page ).toHaveURL(
+				( url ) => {
+					const query = url.searchParams;
 
-			return (
-				query.get( 'path' ) === '/analytics/products' &&
-				query.get( 'filter' ) === 'single_product' &&
-				query.get( 'products' ) === String( variableProductId ) &&
-				query.get( 'period' ) === 'last_month' &&
-				query.get( 'compare' ) === 'previous_year'
-			);
-		} );
-
-		const statsResponse = await statsResponsePromise;
+					return (
+						query.get( 'path' ) === '/analytics/products' &&
+						query.get( 'filter' ) === 'single_product' &&
+						query.get( 'products' ) ===
+							String( variableProductId ) &&
+						query.get( 'period' ) === 'last_month' &&
+						query.get( 'compare' ) === 'previous_year'
+					);
+				},
+				{ timeout: 5_000 }
+			),
+		] );
 		expect( statsResponse.ok() ).toBeTruthy();
 
 		const requestQuery = new URL( statsResponse.url() ).searchParams;
