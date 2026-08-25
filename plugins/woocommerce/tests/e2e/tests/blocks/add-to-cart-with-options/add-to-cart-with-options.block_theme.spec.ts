@@ -1049,6 +1049,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 				} )
 				.click();
 
+			await expect( page ).toHaveURL( /\/cart\/?$/ );
 			await expect(
 				page.getByLabel( 'Quantity of Beanie in your cart.' )
 			).toHaveValue( '1' );
@@ -1071,6 +1072,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await page.getByRole( 'button', { name: 'Add to cart' } ).click();
 
+			await expect( page ).toHaveURL( /\/cart\/?$/ );
 			await expect(
 				page.getByLabel( 'Quantity of V-Neck T-Shirt in your cart.' )
 			).toHaveValue( '1' );
@@ -1082,6 +1084,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await page.getByLabel( 'Increase quantity of T-Shirt' ).click();
 			await page.getByRole( 'button', { name: 'Add to cart' } ).click();
 
+			await expect( page ).toHaveURL( /\/cart\/?$/ );
 			await expect(
 				page.getByLabel( 'Quantity of T-Shirt in your cart.' )
 			).toHaveValue( '1' );
