@@ -50,7 +50,7 @@ Most products already meet several of the requirements, so there's no starting f
 
 **Declare HPOS compatibility honestly.** Validation also checks the HPOS compatibility declaration, and this one is not a metadata edit. If a product handles orders, declare compatibility only once the order code supports HPOS. The declaration tells merchants what the product does, so setting it to true without the support behind it hides the warning WooCommerce would otherwise show them. Test order flows with HPOS enabled first — QIT accepts `--optional_features=hpos` — then declare. The [HPOS recipe book](/docs/features/orders/high-performance-order-storage/recipe-book/) covers what to check.
 
-**Add a test package.** The check confirms that a product's own end-to-end suite runs and passes. The value goes beyond the badge: a real suite catches regressions before they reach merchants and makes it safer to ship updates as WordPress and WooCommerce evolve. A suite that genuinely exercises the product is worth far more than a placeholder.
+**Add a test package.** The check confirms that a product's own end-to-end suite runs and passes. Test packages are published to the QIT registry through the QIT CLI and stored there, never inside the zip your customers download, so there is no download bloat and no change to your product's code. The value goes beyond the badge: a real suite catches regressions before they reach merchants and makes it safer to ship updates as WordPress and WooCommerce evolve. A suite that genuinely exercises the product is worth far more than a placeholder. The [test package quickstart](https://qit.woo.com/docs/test-packages/tutorials/quickstart/) covers the setup.
 
 **Keep compatibility headers current**. The recent-work check looks for recent WordPress and WooCommerce versions in the "tested up to" headers. Update these with each release.
 
@@ -66,20 +66,20 @@ Status is re-checked automatically as new versions ship and as ratings change. I
 
 ## Timeline and what to expect
 
-The badge rolls out in stages, leaving time to prepare.
+The badge is live on the Marketplace, and it arrived in stages that left time to prepare.
 
-Vendors will first get visibility into their status through the dashboard. An adjustment window of at least two weeks will follow before the thresholds are locked, allowing time for metadata and test-package fixes. Pass rates will then be measured, and the final thresholds set before the badge goes live.
+Vendors got visibility into their status through the dashboard first. An adjustment window followed before the thresholds were locked, leaving time for metadata and test-package fixes, and pass rates were measured before the final thresholds were set and the badge went live.
 
-The checks are automated and run continuously, so launch day isn't the only chance to qualify. A product that misses the badge at launch can earn it at any point after: every new version is a fresh opportunity.
+The checks are automated and run continuously, so launch was never the only chance to qualify. A product that missed the badge at launch can earn it at any point after: every new version is a fresh opportunity.
 
-Exact dates and the steps for each stage will follow in vendor comms ahead of launch.
+Changes to the program and its criteria will continue to be announced in vendor comms before they take effect.
 
 ## Frequently asked questions
 
 <details>
 <summary>How many products will have the badge at launch?</summary>
 
-Only a limited share of products will qualify at launch. Many are only a few targeted fixes away, so that number is expected to grow as vendors make improvements.
+Only a limited share of products qualified at launch. Many are only a few targeted fixes away, so that number is expected to grow as vendors make improvements.
 
 </details>
 
