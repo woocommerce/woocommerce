@@ -350,6 +350,9 @@ class WC_Install {
 		'11.1.0-1' => array(
 			'wc_update_11101_remove_deprecated_variation_gallery_option',
 		),
+		'11.2.0'   => array(
+			'wc_update_1120_disable_site_visibility_badge',
+		),
 	);
 
 	/**

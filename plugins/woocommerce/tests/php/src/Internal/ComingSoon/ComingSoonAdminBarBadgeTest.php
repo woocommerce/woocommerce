@@ -51,6 +51,19 @@ class ComingSoonAdminBarBadgeTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should hide the badge when the store is live and the Live badge option is missing.
+	 */
+	public function test_hides_badge_when_store_is_live_and_option_is_missing(): void {
+		update_option( 'woocommerce_coming_soon', 'no' );
+		delete_option( 'woocommerce_feature_site_visibility_badge_enabled' );
+		$admin_bar = new WP_Admin_Bar();
+
+		$this->sut->site_visibility_badge( $admin_bar );
+
+		$this->assertNull( $admin_bar->get_node( 'woocommerce-site-visibility-badge' ) );
+	}
+
+	/**
 	 * @testdox Should hide the badge when the store is live and the Live badge option is disabled.
 	 */
 	public function test_hides_badge_when_store_is_live_and_option_is_disabled(): void {

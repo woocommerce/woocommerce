@@ -48,7 +48,7 @@ const SiteVisibility = () => {
 		setting?.woocommerce_private_link || 'no'
 	);
 	const [ siteVisibilityBadge, setSiteVisibilityBadge ] = useState(
-		setting?.woocommerce_feature_site_visibility_badge_enabled || 'yes'
+		setting?.woocommerce_feature_site_visibility_badge_enabled || 'no'
 	);
 	const formRef = useRef( null );
 	const saveButtonRef = useRef( null );
@@ -79,7 +79,7 @@ const SiteVisibility = () => {
 			privateLink: setting.woocommerce_private_link || 'no',
 			siteVisibilityBadge:
 				setting.woocommerce_feature_site_visibility_badge_enabled ||
-				'yes',
+				'no',
 		};
 
 		const currentValues = {

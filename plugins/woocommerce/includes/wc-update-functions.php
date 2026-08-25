@@ -3636,3 +3636,14 @@ function wc_update_1110_flush_product_count_cache() {
 		( new \Automattic\WooCommerce\Caches\ProductCountCache() )->flush( 'product' );
 	}
 }
+
+/**
+ * Disable the site visibility badge by default for existing stores.
+ *
+ * @since 11.2.0
+ *
+ * @return void
+ */
+function wc_update_1120_disable_site_visibility_badge(): void {
+	update_option( 'woocommerce_feature_site_visibility_badge_enabled', 'no' );
+}
