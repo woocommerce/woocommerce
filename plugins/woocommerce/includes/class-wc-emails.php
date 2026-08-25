@@ -1050,7 +1050,7 @@ class WC_Emails {
 		 * @param WC_Product $product Product instance.
 		 * @param null $null Unused.
 		 */
-			apply_filters( 'woocommerce_email_recipient_low_stock', get_option( 'woocommerce_stock_email_recipient' ), $product, null ),
+			apply_filters( 'woocommerce_email_recipient_low_stock', get_option( 'woocommerce_stock_email_recipient', get_option( 'admin_email' ) ), $product, null ),
 			/**
 			* Filter the subject of the low stock notification email.
 			*
@@ -1138,7 +1138,7 @@ class WC_Emails {
 		 * @param WC_Product $product Product instance.
 		 * @param null $null Unused.
 		 */
-			apply_filters( 'woocommerce_email_recipient_no_stock', get_option( 'woocommerce_stock_email_recipient' ), $product, null ),
+			apply_filters( 'woocommerce_email_recipient_no_stock', get_option( 'woocommerce_stock_email_recipient', get_option( 'admin_email' ) ), $product, null ),
 			/**
 			* Filter the subject of the no stock notification email.
 			*
@@ -1240,7 +1240,7 @@ class WC_Emails {
 		 * @param array $args Arguments.
 		 * @param null $null Unused.
 		 */
-			apply_filters( 'woocommerce_email_recipient_backorder', get_option( 'woocommerce_stock_email_recipient' ), $args, null ),
+			apply_filters( 'woocommerce_email_recipient_backorder', get_option( 'woocommerce_stock_email_recipient', get_option( 'admin_email' ) ), $args, null ),
 			/**
 			* Filter the subject of the backorder notification email.
 			*
