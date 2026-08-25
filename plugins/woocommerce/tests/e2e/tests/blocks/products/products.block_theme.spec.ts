@@ -124,6 +124,7 @@ for ( const {
 			const expectProductCollectionQuery = async () => {
 				const query = await getProductCollectionQuery( page );
 				expect( query.isProductCollectionBlock ).toBe( true );
+				expect( query.inherit ).toBe( true );
 				expect( query.perPage ).toBeGreaterThan( 1 );
 			};
 			await expectProductCollectionQuery();
