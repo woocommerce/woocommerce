@@ -942,6 +942,18 @@ class WC_Form_Handler {
 
 		// If we added the product to the cart we can now optionally do a redirect.
 		if ( $was_added_to_cart ) {
+			$quantity = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+			/**
+			 * Fires when an item is added to the cart from a user request.
+			 *
+			 * @param int       $product_id Product ID.
+			 * @param int|float $quantity   Quantity added to the cart.
+			 *
+			 * @since 10.6.0
+			 */
+			do_action( 'internal_woocommerce_cart_item_added_from_user_request', $product_id, $quantity );
+
 			/**
 			 * Filters whether to redirect after a product is added to the cart.
 			 *
@@ -950,6 +962,9 @@ class WC_Form_Handler {
 			 * (for example, stale session notices from a previous request). This
 			 * filter lets developers override that decision.
 			 *
+			 * Note that this also controls whether the `woocommerce_add_to_cart_redirect`
+			 * filter runs: when the redirect is prevented, that filter is not invoked.
+			 *
 			 * @since 11.1.0
 			 *
 			 * @param bool        $should_redirect Whether to redirect after the product is added to the cart.
@@ -957,19 +972,8 @@ class WC_Form_Handler {
 			 */
 			$should_redirect = apply_filters( 'woocommerce_add_to_cart_should_redirect', 0 === wc_notice_count( 'error' ), $adding_to_cart );
 
-			if ( $should_redirect ) {
-				$quantity = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-
-				/**
-				 * Fires when an item is added to the cart from a user request.
-				 *
-				 * @param int       $product_id Product ID.
-				 * @param int|float $quantity   Quantity added to the cart.
-				 *
-				 * @since 10.6.0
-				 */
-				do_action( 'internal_woocommerce_cart_item_added_from_user_request', $product_id, $quantity );
-
+			// Only redirect when the filter allows it, treating any non-boolean value as false.
+			if ( true === $should_redirect ) {
 				/**
 				 * Filters the add to cart redirect URL.
 				 *
