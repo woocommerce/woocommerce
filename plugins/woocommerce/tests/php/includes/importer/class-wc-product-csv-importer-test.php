@@ -126,6 +126,67 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Resolved original IDs are reused consistently without repeated lookups
+	 */
+	public function test_original_id_mapping_is_reused_within_an_import() {
+		$original_id = 987654321;
+		$importer    = new WC_Product_CSV_Importer( __DIR__ . '/sample.csv' );
+		$query_count = 0;
+		$count_query = static function ( $query ) use ( &$query_count ) {
+			if ( false !== strpos( $query, 'SELECT post_id' ) && false !== strpos( $query, "meta_key = '_original_id'" ) ) {
+				++$query_count;
+			}
+
+			return $query;
+		};
+
+		add_filter( 'query', $count_query );
+
+		try {
+			$referenced_product_id = $importer->parse_relative_field( 'id:' . $original_id );
+			$row_product_id        = $importer->parse_id_field( (string) $original_id );
+			$duplicate_product_id  = $importer->parse_id_field( (string) $original_id );
+
+			$existing_product          = WC_Helper_Product::create_simple_product();
+			$first_existing_product_id = $importer->parse_relative_field( 'id:' . $existing_product->get_id() );
+			$next_existing_product_id  = $importer->parse_relative_field( 'id:' . $existing_product->get_id() );
+		} finally {
+			remove_filter( 'query', $count_query );
+		}
+
+		$this->assertGreaterThan( 0, $referenced_product_id );
+		$this->assertSame( $referenced_product_id, $row_product_id );
+		$this->assertSame( $referenced_product_id, $duplicate_product_id );
+		$this->assertSame( $existing_product->get_id(), $first_existing_product_id );
+		$this->assertSame( $existing_product->get_id(), $next_existing_product_id );
+		$this->assertSame( 2, $query_count, 'Each resolved CSV ID should query the original-ID mapping at most once.' );
+
+		WC_Helper_Product::delete_product( $referenced_product_id );
+		WC_Helper_Product::delete_product( $existing_product->get_id() );
+	}
+
+	/**
+	 * @testdox An original-ID lookup that initially misses can resolve a mapping created later in the import
+	 */
+	public function test_original_id_lookup_does_not_cache_misses() {
+		$original_id = 987654322;
+		$importer    = new WC_Product_CSV_Importer(
+			__DIR__ . '/sample.csv',
+			array( 'update_existing' => true )
+		);
+
+		$this->assertSame( $original_id, $importer->parse_relative_field( 'id:' . $original_id ) );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->add_meta_data( '_original_id', $original_id, true );
+		$product->save();
+
+		$this->assertSame( $product->get_id(), $importer->parse_id_field( (string) $original_id ) );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
 	 * @testdox Test that the importer skips updating products with the same SKU.
 	 */
 	public function test_import_skipping_existing_product_sku_46505() {

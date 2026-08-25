@@ -48,6 +48,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	private $cogs_is_enabled = false;
 
 	/**
+	 * Product IDs keyed by their original CSV IDs for this import request.
+	 *
+	 * @var array<string, int>
+	 */
+	private $original_id_map = array();
+
+	/**
 	 * Initialize importer.
 	 *
 	 * @param string $file   File to read.
@@ -196,6 +203,49 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Find a product previously mapped from an original CSV ID.
+	 *
+	 * Only successful lookups are cached. A miss can become a match later in the
+	 * same import when a placeholder is created by another row or by a hook.
+	 *
+	 * @param int $original_id Original product ID from the CSV file.
+	 * @return int Mapped product ID, or 0 when no mapping exists.
+	 */
+	private function get_product_id_by_original_id( $original_id ): int {
+		global $wpdb;
+
+		$original_id = absint( $original_id );
+		$cache_key   = get_current_blog_id() . ':' . $original_id;
+		if ( isset( $this->original_id_map[ $cache_key ] ) ) {
+			return $this->original_id_map[ $cache_key ];
+		}
+
+		$product_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_original_id' AND meta_value = %s;", $original_id ) );
+
+		if ( $product_id ) {
+			$this->original_id_map[ $cache_key ] = absint( $product_id );
+		}
+
+		return $product_id ? absint( $product_id ) : 0;
+	}
+
+	/**
+	 * Remember a product mapping created during this import request.
+	 *
+	 * @param int $original_id Original product ID from the CSV file.
+	 * @param int $product_id  Mapped product ID.
+	 */
+	private function remember_original_id_mapping( $original_id, $product_id ): void {
+		$original_id = absint( $original_id );
+		$product_id  = absint( $product_id );
+
+		if ( $original_id && $product_id ) {
+			$cache_key                           = get_current_blog_id() . ':' . $original_id;
+			$this->original_id_map[ $cache_key ] = $product_id;
+		}
+	}
+
+	/**
 	 * Parse relative field and return product ID.
 	 *
 	 * Handles `id:xx` and SKUs.
@@ -222,16 +272,17 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$id = intval( $matches[1] );
 
 			// If original_id is found, use that instead of the given ID since a new placeholder must have been created already.
-			$original_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_original_id' AND meta_value = %s;", $id ) ); // WPCS: db call ok, cache ok.
+			$mapped_product_id = $this->get_product_id_by_original_id( $id );
 
-			if ( $original_id ) {
-				return absint( $original_id );
+			if ( $mapped_product_id ) {
+				return $mapped_product_id;
 			}
 
 			// See if the given ID maps to a valid product already.
 			$existing_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation' ) AND ID = %d;", $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- The importer requires a fresh indexed ID lookup that may include newly created placeholders.
 
 			if ( $existing_id ) {
+				$this->remember_original_id_mapping( $id, $existing_id );
 				return absint( $existing_id );
 			}
 
@@ -241,7 +292,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				$product->set_name( 'Import placeholder for ' . $id );
 				$product->set_status( 'importing' );
 				$product->add_meta_data( '_original_id', $id, true );
-				$id = $product->save();
+				$original_id = $id;
+				$id          = $product->save();
+				$this->remember_original_id_mapping( $original_id, $id );
 			}
 
 			return $id;
@@ -281,8 +334,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @return int
 	 */
 	public function parse_id_field( $value ) {
-		global $wpdb;
-
 		$id = absint( $value );
 
 		if ( ! $id ) {
@@ -290,10 +341,11 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		}
 
 		// See if this maps to an ID placeholder already.
-		$original_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_original_id' AND meta_value = %s;", $id ) ); // WPCS: db call ok, cache ok.
+		$original_id       = $id;
+		$mapped_product_id = $this->get_product_id_by_original_id( $original_id );
 
-		if ( $original_id ) {
-			return absint( $original_id );
+		if ( $mapped_product_id ) {
+			return $mapped_product_id;
 		}
 
 		// Not updating? Make sure we have a new placeholder for this ID.
@@ -305,6 +357,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 			// If row has a SKU, make sure placeholder was not made already.
 			if ( $id_from_sku ) {
+				$this->remember_original_id_mapping( $original_id, $id_from_sku );
 				return $id_from_sku;
 			}
 
@@ -318,6 +371,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				$product->set_sku( $row_sku );
 			}
 			$id = $product->save();
+			$this->remember_original_id_mapping( $original_id, $id );
 		}
 
 		return $id && ! is_wp_error( $id ) ? $id : 0;
