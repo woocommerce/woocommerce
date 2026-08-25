@@ -14,6 +14,10 @@ use WC_Unit_Test_Case;
  */
 abstract class OrdersStatsTestCase extends WC_Unit_Test_Case {
 
+	// Per-product item quantity and per-order shipping hardcoded in WC_Helper_Order::create_order.
+	const QTY_PER_PRODUCT = 4;
+	const SHIPPING_AMOUNT = 10;
+
 	/**
 	 * Don't cache report data during these tests.
 	 */
@@ -71,7 +75,7 @@ abstract class OrdersStatsTestCase extends WC_Unit_Test_Case {
 			'totals'    => $totals,
 			'intervals' => array(
 				array(
-					'interval'       => substr( $date_start, 0, 13 ),
+					'interval'       => substr( $date_start, 0, strlen( 'YYYY-MM-DD HH' ) ),
 					'date_start'     => $date_start,
 					'date_start_gmt' => $date_start,
 					'date_end'       => $date_end,

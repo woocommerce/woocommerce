@@ -277,13 +277,10 @@ class DataStoreBasicsTest extends OrdersStatsTestCase {
 			'interval' => 'hour',
 		);
 
-		// Quantity and shipping per order are hardcoded in WC_Helper_Order::create_order.
-		$order_shipping  = 10;
-		$qty_per_product = 4;
-		$orders_count    = count( $orders );
-		$num_items_sold  = $orders_count * $qty_per_product;
-		$shipping        = $orders_count * $order_shipping;
-		$net_revenue     = $orders_total - $shipping;
+		$orders_count   = count( $orders );
+		$num_items_sold = $orders_count * self::QTY_PER_PRODUCT;
+		$shipping       = $orders_count * self::SHIPPING_AMOUNT;
+		$net_revenue    = $orders_total - $shipping;
 
 		$expected_stats = $this->expected_stats_single_interval(
 			$this->expected_totals(
@@ -324,22 +321,22 @@ class DataStoreBasicsTest extends OrdersStatsTestCase {
 		$order_datetime->setTime( (int) $order_datetime->format( 'H' ), 10, 0 );
 		$order_time = (int) $order_datetime->format( 'U' );
 
-		$order_1 = WC_Helper_Order::create_order( $customer_1->get_id() );
-		$order_1->set_date_created( $order_time );
-		$order_1->set_status( OrderStatus::COMPLETED );
-		$order_1->save();
+		$customer_1_order = WC_Helper_Order::create_order( $customer_1->get_id() );
+		$customer_1_order->set_date_created( $order_time );
+		$customer_1_order->set_status( OrderStatus::COMPLETED );
+		$customer_1_order->save();
 
 		// Offset by 1 second to keep both orders in the same hour but distinct.
-		$order_2 = WC_Helper_Order::create_order( $customer_2->get_id() );
-		$order_2->set_date_created( $order_time + 1 );
-		$order_2->set_status( OrderStatus::COMPLETED );
-		$order_2->save();
+		$customer_2_order = WC_Helper_Order::create_order( $customer_2->get_id() );
+		$customer_2_order->set_date_created( $order_time + 1 );
+		$customer_2_order->set_status( OrderStatus::COMPLETED );
+		$customer_2_order->save();
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new OrdersStatsDataStore();
-		$start_time = gmdate( 'Y-m-d H:00:00', $order_1->get_date_created()->getOffsetTimestamp() );
-		$end_time   = gmdate( 'Y-m-d H:59:59', $order_1->get_date_created()->getOffsetTimestamp() );
+		$start_time = gmdate( 'Y-m-d H:00:00', $customer_1_order->get_date_created()->getOffsetTimestamp() );
+		$end_time   = gmdate( 'Y-m-d H:59:59', $customer_1_order->get_date_created()->getOffsetTimestamp() );
 
 		$data = json_decode(
 			wp_json_encode(

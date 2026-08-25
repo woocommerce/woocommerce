@@ -24,10 +24,6 @@ use WC_Product_Simple;
  */
 class DataStoreZeroFillTest extends OrdersStatsTestCase {
 
-	const QTY_PER_PRODUCT = 4;
-	// Hardcoded in WC_Helper_Order::create_order.
-	const SHIPPING_AMOUNT = 10;
-	// Hardcoded in WC_Helper_Order::create_order.
 	const PRODUCT_PRICE = 11;
 
 	/**
@@ -226,17 +222,17 @@ class DataStoreZeroFillTest extends OrdersStatsTestCase {
 
 		$customer = WC_Helper_Customer::create_customer( 'cust_1', 'pwd_1', 'user_1@mail.com' );
 
-		$order_1_time = time();
+		$newest_order_time = time();
 
 		$order_times = array_merge(
 			array(
-				$order_1_time - YEAR_IN_SECONDS,
-				$order_1_time - MONTH_IN_SECONDS,
-				$order_1_time - WEEK_IN_SECONDS,
-				$order_1_time - DAY_IN_SECONDS,
+				$newest_order_time - YEAR_IN_SECONDS,
+				$newest_order_time - MONTH_IN_SECONDS,
+				$newest_order_time - WEEK_IN_SECONDS,
+				$newest_order_time - DAY_IN_SECONDS,
 			),
-			array_fill( 0, $orders_previous_hour, $order_1_time - HOUR_IN_SECONDS ),
-			array_fill( 0, $orders_this_hour, $order_1_time )
+			array_fill( 0, $orders_previous_hour, $newest_order_time - HOUR_IN_SECONDS ),
+			array_fill( 0, $orders_this_hour, $newest_order_time )
 		);
 
 		foreach ( $order_times as $order_time ) {
@@ -251,10 +247,10 @@ class DataStoreZeroFillTest extends OrdersStatsTestCase {
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$this->current_hour_start = new DateTime();
-		$this->current_hour_start->setTimestamp( $order_1_time - ( ( $order_1_time % HOUR_IN_SECONDS ) - ( $order_1_time % MINUTE_IN_SECONDS ) ) );
+		$this->current_hour_start->setTimestamp( $newest_order_time - ( ( $newest_order_time % HOUR_IN_SECONDS ) - ( $newest_order_time % MINUTE_IN_SECONDS ) ) );
 
 		$this->current_hour_end = new DateTime();
-		$this->current_hour_end->setTimestamp( $order_1_time + ( HOUR_IN_SECONDS - ( $order_1_time % HOUR_IN_SECONDS ) ) - 1 );
+		$this->current_hour_end->setTimestamp( $newest_order_time + ( HOUR_IN_SECONDS - ( $newest_order_time % HOUR_IN_SECONDS ) ) - 1 );
 	}
 
 	/**

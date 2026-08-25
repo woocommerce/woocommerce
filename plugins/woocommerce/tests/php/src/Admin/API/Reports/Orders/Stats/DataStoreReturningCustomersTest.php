@@ -56,16 +56,16 @@ class DataStoreReturningCustomersTest extends OrdersStatsTestCase {
 		$actual_data = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ) );
 		$this->assertEquals( 0, $actual_data->totals->total_customers );
 
-		// Create an order an hour before order 1, so that the customer will become a returning customer later.
-		$order_1_time = time();
-		$order_0_time = $order_1_time - HOUR_IN_SECONDS;
+		// The first order lands an hour before the later ones, so its customer becomes a returning customer.
+		$later_orders_time = time();
+		$first_order_time  = $later_orders_time - HOUR_IN_SECONDS;
 
-		$order_0 = $this->create_order_at( $customer_id, $product, $order_0_time );
+		$first_order = $this->create_order_at( $customer_id, $product, $first_order_time );
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
-		$start_time  = gmdate( 'Y-m-d H:00:00', $order_0->get_date_created()->getOffsetTimestamp() );
-		$end_time    = gmdate( 'Y-m-d H:59:59', $order_0->get_date_created()->getOffsetTimestamp() );
+		$start_time  = gmdate( 'Y-m-d H:00:00', $first_order->get_date_created()->getOffsetTimestamp() );
+		$end_time    = gmdate( 'Y-m-d H:59:59', $first_order->get_date_created()->getOffsetTimestamp() );
 		$query_args  = array(
 			'interval' => 'hour',
 			'after'    => $start_time,
@@ -74,14 +74,14 @@ class DataStoreReturningCustomersTest extends OrdersStatsTestCase {
 		$actual_data = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ) );
 		$this->assertEquals( 1, $actual_data->totals->total_customers );
 
-		// Place an order 'one hour later', 2 orders, but still just one customer.
-		$order_1 = $this->create_order_at( $customer_id, $product, $order_1_time );
+		// Place a second order an hour later: 2 orders, but still just one customer.
+		$second_order = $this->create_order_at( $customer_id, $product, $later_orders_time );
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		// Time frame includes both orders -> customer is a new customer.
-		$start_time = gmdate( 'Y-m-d H:00:00', $order_0->get_date_created()->getOffsetTimestamp() );
-		$end_time   = gmdate( 'Y-m-d H:59:59', $order_1->get_date_created()->getOffsetTimestamp() );
+		$start_time = gmdate( 'Y-m-d H:00:00', $first_order->get_date_created()->getOffsetTimestamp() );
+		$end_time   = gmdate( 'Y-m-d H:59:59', $second_order->get_date_created()->getOffsetTimestamp() );
 		$query_args = array(
 			'interval' => 'hour',
 			'after'    => $start_time,
@@ -92,8 +92,8 @@ class DataStoreReturningCustomersTest extends OrdersStatsTestCase {
 		$this->assertEquals( 1, $actual_data->totals->total_customers );
 
 		// Time frame includes only the second order -> customer is a returning customer.
-		$start_time = gmdate( 'Y-m-d H:i:s', $order_0_time + 1 );
-		$end_time   = gmdate( 'Y-m-d H:59:59', $order_1->get_date_created()->getOffsetTimestamp() );
+		$start_time = gmdate( 'Y-m-d H:i:s', $first_order_time + 1 );
+		$end_time   = gmdate( 'Y-m-d H:59:59', $second_order->get_date_created()->getOffsetTimestamp() );
 		$query_args = array(
 			'interval' => 'hour',
 			'after'    => $start_time,
@@ -103,15 +103,15 @@ class DataStoreReturningCustomersTest extends OrdersStatsTestCase {
 		$actual_data = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ) );
 		$this->assertEquals( 1, $actual_data->totals->total_customers );
 
-		$order_2 = $this->create_order_at( $customer_id, $product, $order_1_time );
-		$order_2->set_date_modified( $order_1_time + 1 );
-		$order_2->save();
+		$third_order = $this->create_order_at( $customer_id, $product, $later_orders_time );
+		$third_order->set_date_modified( $later_orders_time + 1 );
+		$third_order->save();
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		// Time frame includes the second and third order -> there is one returning customer.
-		$start_time  = gmdate( 'Y-m-d H:i:s', $order_0_time + 1 );
-		$end_time    = gmdate( 'Y-m-d H:59:59', $order_2->get_date_created()->getOffsetTimestamp() );
+		$start_time  = gmdate( 'Y-m-d H:i:s', $first_order_time + 1 );
+		$end_time    = gmdate( 'Y-m-d H:59:59', $third_order->get_date_created()->getOffsetTimestamp() );
 		$query_args  = array(
 			'interval'              => 'day',
 			// To skip cache.

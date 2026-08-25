@@ -30,12 +30,9 @@ use WC_Product_Simple;
  */
 class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 
-	// Item quantity and shipping amount are hardcoded in WC_Helper_Order::create_order,
-	// the coupon 1 amount is the WC_Helper_Coupon::create_coupon default.
-	const QTY_PER_PRODUCT = 4;
+	// The coupon 1 amount is the WC_Helper_Coupon::create_coupon default.
 	const COUPON_1_AMOUNT = 1;
 	const COUPON_2_AMOUNT = 2;
-	const SHIPPING_AMOUNT = 10;
 	const ORDER_STATUS_1  = OrderStatus::COMPLETED;
 	const ORDER_STATUS_2  = OrderStatus::PROCESSING;
 
@@ -117,20 +114,18 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 		foreach ( array( $products[1], $products[2], $products[3] ) as $product ) {
 			foreach ( array( null, $coupon_1, $coupon_2 ) as $coupon ) {
 				foreach ( array( self::ORDER_STATUS_1, self::ORDER_STATUS_2 ) as $order_status ) {
-					// One order with only 1 product.
-					$order = WC_Helper_Order::create_order( $customer->get_id(), $product );
+					$single_product_order = WC_Helper_Order::create_order( $customer->get_id(), $product );
 					// Offset each order by 1 second.
-					$order->set_date_created( $order_time + $iterations++ );
-					$order->set_status( $order_status );
+					$single_product_order->set_date_created( $order_time + $iterations++ );
+					$single_product_order->set_status( $order_status );
 
 					if ( $coupon ) {
-						$order->apply_coupon( $coupon );
+						$single_product_order->apply_coupon( $coupon );
 					} else {
-						$order->calculate_totals();
+						$single_product_order->calculate_totals();
 					}
 
-					// One order with 2 products: product 4 and the selected product.
-					$order_2 = WC_Helper_Order::create_order( $customer->get_id(), $products[4] );
+					$two_product_order = WC_Helper_Order::create_order( $customer->get_id(), $products[4] );
 
 					$item = new WC_Order_Item_Product();
 					$item->set_props(
@@ -142,15 +137,15 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 						)
 					);
 					$item->save();
-					$order_2->add_item( $item );
+					$two_product_order->add_item( $item );
 					// Offset each order by 1 second.
-					$order_2->set_date_created( $order_time + $iterations++ );
-					$order_2->set_status( $order_status );
+					$two_product_order->set_date_created( $order_time + $iterations++ );
+					$two_product_order->set_status( $order_status );
 
 					if ( $coupon ) {
-						$order_2->apply_coupon( $coupon );
+						$two_product_order->apply_coupon( $coupon );
 					} else {
-						$order_2->calculate_totals();
+						$two_product_order->calculate_totals();
 					}
 				}
 			}
@@ -522,11 +517,14 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 			array( 'customer_type' => 'returning' )
 		);
 
+		// All 36 fixture orders match except the customer's first: half hold one product, half hold two.
 		$total_orders_count     = 36;
 		$returning_orders_count = 1;
 
 		$orders_count   = $total_orders_count - $returning_orders_count;
-		$num_items_sold = $total_orders_count * 6 - ( $returning_orders_count * self::QTY_PER_PRODUCT );
+		$num_items_sold = ( $total_orders_count / 2 ) * self::QTY_PER_PRODUCT
+						+ ( $total_orders_count / 2 ) * self::QTY_PER_PRODUCT * 2
+						- $returning_orders_count * self::QTY_PER_PRODUCT;
 		$coupons        = 12 * self::COUPON_1_AMOUNT + 12 * self::COUPON_2_AMOUNT;
 		$shipping       = $orders_count * self::SHIPPING_AMOUNT;
 		$net_revenue    = $this->net_revenue_for_mix_counts( array( 6, 6, 6, 6, 6, 6 ) )
@@ -541,7 +539,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 					'total_sales'         => $net_revenue + $shipping,
 					'gross_sales'         => $net_revenue + $coupons,
 					'coupons'             => $coupons,
-					'coupons_count'       => 2,
+					'coupons_count'       => count( self::$coupon_ids ),
 					'shipping'            => $shipping,
 					'net_revenue'         => $net_revenue,
 					'avg_items_per_order' => round( $num_items_sold / $orders_count, 4 ),

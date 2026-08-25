@@ -62,19 +62,17 @@ class DataStoreFulfillmentsTest extends OrdersStatsTestCase {
 
 			$product = WC_Helper_Product::create_simple_product();
 
-			$order_1 = WC_Helper_Order::create_order( get_current_user_id(), $product );
-			$order_2 = WC_Helper_Order::create_order( get_current_user_id(), $product );
-			$order_3 = WC_Helper_Order::create_order( get_current_user_id(), $product );
-			$order_4 = WC_Helper_Order::create_order( get_current_user_id(), $product );
-			$order_5 = WC_Helper_Order::create_order( get_current_user_id(), $product );
+			$fulfilled_order           = WC_Helper_Order::create_order( get_current_user_id(), $product );
+			$partially_fulfilled_order = WC_Helper_Order::create_order( get_current_user_id(), $product );
+			$unfulfilled_order         = WC_Helper_Order::create_order( get_current_user_id(), $product );
+			$no_fulfillment_order_1    = WC_Helper_Order::create_order( get_current_user_id(), $product );
+			$no_fulfillment_order_2    = WC_Helper_Order::create_order( get_current_user_id(), $product );
 
 			WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
-			// Add fulfillments for only orders 1, 2, 3.
-			$this->add_fulfillment_to_order( $order_1, 'fulfilled', $product );
-			$this->add_fulfillment_to_order( $order_2, 'partially_fulfilled', $product );
-			$this->add_fulfillment_to_order( $order_3, 'unfulfilled', $product );
-			// Orders 4 and 5 have no fulfillments.
+			$this->add_fulfillment_to_order( $fulfilled_order, 'fulfilled', $product );
+			$this->add_fulfillment_to_order( $partially_fulfilled_order, 'partially_fulfilled', $product );
+			$this->add_fulfillment_to_order( $unfulfilled_order, 'unfulfilled', $product );
 
 			Analytics::get_instance()->run_regenerate_order_fulfillment_status_tool();
 
@@ -85,23 +83,23 @@ class DataStoreFulfillmentsTest extends OrdersStatsTestCase {
 					FROM {$wpdb->prefix}wc_order_stats
 					WHERE order_id IN (%d, %d, %d, %d, %d)
 					ORDER BY order_id ASC",
-					$order_1->get_id(),
-					$order_2->get_id(),
-					$order_3->get_id(),
-					$order_4->get_id(),
-					$order_5->get_id()
+					$fulfilled_order->get_id(),
+					$partially_fulfilled_order->get_id(),
+					$unfulfilled_order->get_id(),
+					$no_fulfillment_order_1->get_id(),
+					$no_fulfillment_order_2->get_id()
 				),
 				OBJECT_K
 			);
 
 			// Verify orders with fulfillments.
-			$this->assertEquals( 'fulfilled', $statuses[ $order_1->get_id() ]->fulfillment_status, 'Order 1 should have fulfilled status' );
-			$this->assertEquals( 'partially_fulfilled', $statuses[ $order_2->get_id() ]->fulfillment_status, 'Order 2 should have partially_fulfilled status' );
-			$this->assertEquals( 'unfulfilled', $statuses[ $order_3->get_id() ]->fulfillment_status, 'Order 3 should have unfulfilled status' );
+			$this->assertEquals( 'fulfilled', $statuses[ $fulfilled_order->get_id() ]->fulfillment_status, 'The fulfilled order should have fulfilled status' );
+			$this->assertEquals( 'partially_fulfilled', $statuses[ $partially_fulfilled_order->get_id() ]->fulfillment_status, 'The partially fulfilled order should have partially_fulfilled status' );
+			$this->assertEquals( 'unfulfilled', $statuses[ $unfulfilled_order->get_id() ]->fulfillment_status, 'The unfulfilled order should have unfulfilled status' );
 
 			// Verify orders without fulfillments remain NULL.
-			$this->assertNull( $statuses[ $order_4->get_id() ]->fulfillment_status, 'Order 4 should have NULL fulfillment_status' );
-			$this->assertNull( $statuses[ $order_5->get_id() ]->fulfillment_status, 'Order 5 should have NULL fulfillment_status' );
+			$this->assertNull( $statuses[ $no_fulfillment_order_1->get_id() ]->fulfillment_status, 'Orders without fulfillments should have a NULL fulfillment_status' );
+			$this->assertNull( $statuses[ $no_fulfillment_order_2->get_id() ]->fulfillment_status, 'Orders without fulfillments should have a NULL fulfillment_status' );
 
 			// Verify completion.
 			$regenerated = get_option( 'woocommerce_analytics_order_fulfillment_status_regenerated' );
