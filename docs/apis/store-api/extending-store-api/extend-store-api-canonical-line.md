@@ -8,7 +8,7 @@ If your extension intercepts a product's plain adds — for example, a bundle th
 
 ## The solution
 
-The `woocommerce_store_api_cart_item_is_canonical_product_line` filter lets an extension override that default for the lines it manages. It fires once per line, after core has computed the default, with two arguments: the core-computed default — derived from cart-key identity via `CartItemUtils::is_standalone_line()` — and the cart item array.
+The `woocommerce_store_api_cart_item_is_canonical_product_line` filter lets an extension override that default for the lines it manages. It fires once per line, after core has computed the default, with two arguments: the core-computed default — derived from cart-key identity — and the cart item array.
 
 Return `true` to mark the line canonical for your own purposes; return the incoming `$is_canonical` value to leave the default untouched. A non-boolean return is discarded in favor of the core-computed default. The field itself is readonly: it is computed server-side per response, clients cannot write it, and the filter is the only way to change it.
 
@@ -102,5 +102,3 @@ add_filter(
 ```
 
 The `woocommerce_add_cart_item_data` filter's own [hooks reference entry](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/hooks/filters.md#woocommerce_add_cart_item_data) documents its parameters, so they are not repeated here; the only part of the snippet you need to adapt is the placeholder bundle condition.
-
-This pattern is covered end-to-end by the blocks e2e suite via the `canonical-line-filter` test plugin (`plugins/woocommerce/tests/e2e/test-plugins/blocks/canonical-line-filter.php`), which stands in for an extension in the tests.
