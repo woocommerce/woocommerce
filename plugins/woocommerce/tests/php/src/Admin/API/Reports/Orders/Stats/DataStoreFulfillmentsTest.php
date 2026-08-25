@@ -13,14 +13,13 @@ use WC_Helper_Queue;
 use WC_Helper_Reports;
 use WC_Order;
 use WC_Product;
-use WC_Unit_Test_Case;
 
 /**
  * Tests for the order fulfillment status regeneration tool of the Orders Stats DataStore.
  *
  * Migrated from the legacy WC_Admin_Tests_Reports_Orders_Stats class.
  */
-class DataStoreFulfillmentsTest extends WC_Unit_Test_Case {
+class DataStoreFulfillmentsTest extends OrdersStatsTestCase {
 
 	/**
 	 * Set the database version and clear the fulfillment-status column flag for this class.

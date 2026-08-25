@@ -3,7 +3,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Admin\API\Reports\Orders\Stats;
 
-use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use DateTime;
@@ -14,7 +13,6 @@ use WC_Helper_Queue;
 use WC_Helper_Reports;
 use WC_Order_Item_Product;
 use WC_Product_Simple;
-use WC_Unit_Test_Case;
 
 /**
  * Tests for the Orders Stats DataStore filter handling ({@see OrdersStatsDataStore::get_data()}).
@@ -30,17 +28,16 @@ use WC_Unit_Test_Case;
  * (the 6 "mixes" are: product 1 alone, 2 alone, 3 alone, 1+4, 2+4, 3+4), from which all
  * expected totals derive.
  */
-class DataStoreFilterQueriesTest extends WC_Unit_Test_Case {
+class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 
+	// Item quantity and shipping amount are hardcoded in WC_Helper_Order::create_order,
+	// the coupon 1 amount is the WC_Helper_Coupon::create_coupon default.
 	const QTY_PER_PRODUCT = 4;
-	// Hardcoded in WC_Helper_Order::create_order.
 	const COUPON_1_AMOUNT = 1;
-	// Default in WC_Helper_Coupon::create_coupon.
 	const COUPON_2_AMOUNT = 2;
 	const SHIPPING_AMOUNT = 10;
-	// Hardcoded in WC_Helper_Order::create_order.
-	const ORDER_STATUS_1 = OrderStatus::COMPLETED;
-	const ORDER_STATUS_2 = OrderStatus::PROCESSING;
+	const ORDER_STATUS_1  = OrderStatus::COMPLETED;
+	const ORDER_STATUS_2  = OrderStatus::PROCESSING;
 
 	/**
 	 * Prices of the 4 fixture products, keyed 1-4.
@@ -112,8 +109,8 @@ class DataStoreFilterQueriesTest extends WC_Unit_Test_Case {
 		$customer = WC_Helper_Customer::create_customer( 'cust_1', 'pwd_1', 'user_1@mail.com' );
 
 		$order_datetime = new DateTime();
-		$order_datetime->setTime( (int) $order_datetime->format( 'H' ), 10, 0 );
 		// Time near the top of the hour, so the +1s offsets below stay within it.
+		$order_datetime->setTime( (int) $order_datetime->format( 'H' ), 10, 0 );
 		$order_time = (int) $order_datetime->format( 'U' );
 
 		$iterations = 1;
@@ -122,8 +119,8 @@ class DataStoreFilterQueriesTest extends WC_Unit_Test_Case {
 				foreach ( array( self::ORDER_STATUS_1, self::ORDER_STATUS_2 ) as $order_status ) {
 					// One order with only 1 product.
 					$order = WC_Helper_Order::create_order( $customer->get_id(), $product );
-					$order->set_date_created( $order_time + $iterations++ );
 					// Offset each order by 1 second.
+					$order->set_date_created( $order_time + $iterations++ );
 					$order->set_status( $order_status );
 
 					if ( $coupon ) {
@@ -146,8 +143,8 @@ class DataStoreFilterQueriesTest extends WC_Unit_Test_Case {
 					);
 					$item->save();
 					$order_2->add_item( $item );
-					$order_2->set_date_created( $order_time + $iterations++ );
 					// Offset each order by 1 second.
+					$order_2->set_date_created( $order_time + $iterations++ );
 					$order_2->set_status( $order_status );
 
 					if ( $coupon ) {
@@ -176,15 +173,6 @@ class DataStoreFilterQueriesTest extends WC_Unit_Test_Case {
 			$order->delete( true );
 		}
 		WC_Helper_Reports::reset_stats_dbs();
-	}
-
-	/**
-	 * Don't cache report data during these tests.
-	 */
-	public function setUp(): void {
-		parent::setUp();
-
-		add_filter( 'woocommerce_analytics_report_should_use_cache', '__return_false' );
 	}
 
 	/**
@@ -545,21 +533,25 @@ class DataStoreFilterQueriesTest extends WC_Unit_Test_Case {
 						- self::$product_prices[1] * self::QTY_PER_PRODUCT * $returning_orders_count
 						- $coupons;
 
-		$expected_stats = $this->build_expected_stats_from_totals(
-			array(
-				'orders_count'        => $orders_count,
-				'num_items_sold'      => $num_items_sold,
-				'total_sales'         => $net_revenue + $shipping,
-				'gross_sales'         => $net_revenue + $coupons,
-				'coupons'             => $coupons,
-				'coupons_count'       => 2,
-				'shipping'            => $shipping,
-				'net_revenue'         => $net_revenue,
-				'avg_items_per_order' => round( $num_items_sold / $orders_count, 4 ),
-				'avg_order_value'     => $net_revenue / $orders_count,
-				'total_customers'     => $returning_orders_count,
+		$expected_stats = $this->expected_stats_single_interval(
+			$this->expected_totals(
+				array(
+					'orders_count'        => $orders_count,
+					'num_items_sold'      => $num_items_sold,
+					'total_sales'         => $net_revenue + $shipping,
+					'gross_sales'         => $net_revenue + $coupons,
+					'coupons'             => $coupons,
+					'coupons_count'       => 2,
+					'shipping'            => $shipping,
+					'net_revenue'         => $net_revenue,
+					'avg_items_per_order' => round( $num_items_sold / $orders_count, 4 ),
+					'avg_order_value'     => $net_revenue / $orders_count,
+					'total_customers'     => $returning_orders_count,
+					'products'            => 4,
+				)
 			),
-			4
+			self::$current_hour_start->format( 'Y-m-d H:i:s' ),
+			self::$current_hour_end->format( 'Y-m-d H:i:s' )
 		);
 
 		$this->assert_report_data( $expected_stats, $query_args );
@@ -655,79 +647,25 @@ class DataStoreFilterQueriesTest extends WC_Unit_Test_Case {
 		$shipping           = $orders_count * self::SHIPPING_AMOUNT;
 		$net_revenue        = $orders_count ? $this->net_revenue_for_mix_counts( $mix_counts ) - $coupons : 0;
 
-		return $this->build_expected_stats_from_totals(
-			array(
-				'orders_count'        => $orders_count,
-				'num_items_sold'      => $num_items_sold,
-				'total_sales'         => $net_revenue + $shipping,
-				'gross_sales'         => $net_revenue + $coupons,
-				'coupons'             => $coupons,
-				'coupons_count'       => $coupons_count,
-				'shipping'            => $shipping,
-				'net_revenue'         => $net_revenue,
-				'avg_items_per_order' => $orders_count ? $num_items_sold / $orders_count : 0,
-				'avg_order_value'     => $orders_count ? $net_revenue / $orders_count : 0,
-				'total_customers'     => $orders_count ? 1 : 0,
-			),
-			$products_count
-		);
-	}
-
-	/**
-	 * Wrap a set of totals into the full expected get_data() result shape.
-	 *
-	 * @param array $totals         The scenario's totals, without the keys shared by every scenario.
-	 * @param int   $products_count Expected count of distinct products in the matched orders.
-	 * @return array
-	 */
-	private function build_expected_stats_from_totals( array $totals, int $products_count ): array {
-		$totals = array_merge(
-			$totals,
-			array(
-				'refunds'  => 0,
-				'taxes'    => 0,
-				'segments' => array(),
-			)
-		);
-
-		$subtotals = $totals;
-
-		$totals['products'] = $products_count;
-
-		return array(
-			'totals'    => $totals,
-			'intervals' => array(
+		return $this->expected_stats_single_interval(
+			$this->expected_totals(
 				array(
-					'interval'       => self::$current_hour_start->format( 'Y-m-d H' ),
-					'date_start'     => self::$current_hour_start->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => self::$current_hour_start->format( 'Y-m-d H:i:s' ),
-					'date_end'       => self::$current_hour_end->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => self::$current_hour_end->format( 'Y-m-d H:i:s' ),
-					'subtotals'      => $subtotals,
-				),
+					'orders_count'        => $orders_count,
+					'num_items_sold'      => $num_items_sold,
+					'total_sales'         => $net_revenue + $shipping,
+					'gross_sales'         => $net_revenue + $coupons,
+					'coupons'             => $coupons,
+					'coupons_count'       => $coupons_count,
+					'shipping'            => $shipping,
+					'net_revenue'         => $net_revenue,
+					'avg_items_per_order' => $orders_count ? $num_items_sold / $orders_count : 0,
+					'avg_order_value'     => $orders_count ? $net_revenue / $orders_count : 0,
+					'total_customers'     => $orders_count ? 1 : 0,
+					'products'            => $products_count,
+				)
 			),
-			'total'     => 1,
-			'pages'     => 1,
-			'page_no'   => 1,
-		);
-	}
-
-	/**
-	 * Assert that get_data() returns the expected result for the query args.
-	 *
-	 * @param array $expected_stats Expected get_data() result.
-	 * @param array $query_args     Query arguments passed to get_data().
-	 */
-	private function assert_report_data( array $expected_stats, array $query_args ): void {
-		global $wpdb;
-
-		$data_store = new OrdersStatsDataStore();
-		$actual     = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true );
-
-		$this->assertEquals(
-			$expected_stats,
-			$actual,
-			'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
+			self::$current_hour_start->format( 'Y-m-d H:i:s' ),
+			self::$current_hour_end->format( 'Y-m-d H:i:s' )
 		);
 	}
 }

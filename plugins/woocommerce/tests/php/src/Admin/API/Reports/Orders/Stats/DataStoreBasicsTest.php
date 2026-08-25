@@ -16,23 +16,13 @@ use WC_Helper_Queue;
 use WC_Helper_Reports;
 use WC_Product_Simple;
 use WC_Tax;
-use WC_Unit_Test_Case;
 
 /**
  * Tests for the basic querying behavior of the Orders Stats DataStore.
  *
  * Migrated from the legacy WC_Admin_Tests_Reports_Orders_Stats class.
  */
-class DataStoreBasicsTest extends WC_Unit_Test_Case {
-
-	/**
-	 * Don't cache report data during these tests.
-	 */
-	public function setUp(): void {
-		parent::setUp();
-
-		add_filter( 'woocommerce_analytics_report_should_use_cache', '__return_false' );
-	}
+class DataStoreBasicsTest extends OrdersStatsTestCase {
 
 	/**
 	 * @testdox Stats for a single order are calculated correctly, both through the data store and the query class.
@@ -68,8 +58,6 @@ class DataStoreBasicsTest extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
-		$data_store = new OrdersStatsDataStore();
-
 		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
 		$end_time   = gmdate( 'Y-m-d H:59:59', $order->get_date_created()->getOffsetTimestamp() );
 
@@ -78,59 +66,35 @@ class DataStoreBasicsTest extends WC_Unit_Test_Case {
 			'after'    => $start_time,
 			'before'   => $end_time,
 		);
-		$expected_stats = array(
-			'totals'    => array(
-				'orders_count'        => 1,
-				'num_items_sold'      => 4,
-				'avg_items_per_order' => 4,
-				'avg_order_value'     => 80,
-				'total_sales'         => 85,
-				'gross_sales'         => 100,
-				'coupons'             => 20,
-				'coupons_count'       => 1,
-				'refunds'             => 12,
-				'taxes'               => 7,
-				'shipping'            => 10,
-				'net_revenue'         => 68,
-				'total_customers'     => 1,
-				'products'            => 1,
-				'segments'            => array(),
-			),
-			'intervals' => array(
+		$expected_stats = $this->expected_stats_single_interval(
+			$this->expected_totals(
 				array(
-					'interval'       => gmdate( 'Y-m-d H', $order->get_date_created()->getOffsetTimestamp() ),
-					'date_start'     => $start_time,
-					'date_start_gmt' => $start_time,
-					'date_end'       => $end_time,
-					'date_end_gmt'   => $end_time,
-					'subtotals'      => array(
-						'total_sales'         => 85,
-						'gross_sales'         => 100,
-						'net_revenue'         => 68,
-						'coupons'             => 20,
-						'coupons_count'       => 1,
-						'shipping'            => 10,
-						'taxes'               => 7,
-						'refunds'             => 12,
-						'orders_count'        => 1,
-						'num_items_sold'      => 4,
-						'avg_items_per_order' => 4,
-						'avg_order_value'     => 80,
-						'total_customers'     => 1,
-						'segments'            => array(),
-					),
-				),
+					'orders_count'        => 1,
+					'num_items_sold'      => 4,
+					'avg_items_per_order' => 4,
+					'avg_order_value'     => 80,
+					'total_sales'         => 85,
+					'gross_sales'         => 100,
+					'coupons'             => 20,
+					'coupons_count'       => 1,
+					'refunds'             => 12,
+					'taxes'               => 7,
+					'shipping'            => 10,
+					'net_revenue'         => 68,
+					'total_customers'     => 1,
+					'products'            => 1,
+				)
 			),
-			'total'     => 1,
-			'pages'     => 1,
-			'page_no'   => 1,
+			$start_time,
+			$end_time
 		);
 
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $args ) ), true ) );
+		$this->assert_report_data( $expected_stats, $args );
 
+		// The query class returns a reduced set of totals keys.
 		$query          = new OrdersStatsQuery( $args );
-		$expected_stats = array(
-			'totals'    => array(
+		$expected_stats = $this->expected_stats_single_interval(
+			array(
 				'net_revenue'         => 68,
 				'avg_order_value'     => 80,
 				'orders_count'        => 1,
@@ -142,29 +106,8 @@ class DataStoreBasicsTest extends WC_Unit_Test_Case {
 				'products'            => 1,
 				'segments'            => array(),
 			),
-			'intervals' => array(
-				array(
-					'interval'       => gmdate( 'Y-m-d H', $order->get_date_created()->getOffsetTimestamp() ),
-					'date_start'     => $start_time,
-					'date_start_gmt' => $start_time,
-					'date_end'       => $end_time,
-					'date_end_gmt'   => $end_time,
-					'subtotals'      => array(
-						'net_revenue'         => 68,
-						'avg_order_value'     => 80,
-						'orders_count'        => 1,
-						'avg_items_per_order' => 4,
-						'num_items_sold'      => 4,
-						'coupons'             => 20,
-						'coupons_count'       => 1,
-						'total_customers'     => 1,
-						'segments'            => array(),
-					),
-				),
-			),
-			'total'     => 1,
-			'pages'     => 1,
-			'page_no'   => 1,
+			$start_time,
+			$end_time
 		);
 		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $query->get_data() ), true ) );
 	}
@@ -210,8 +153,6 @@ class DataStoreBasicsTest extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
-		$data_store = new OrdersStatsDataStore();
-
 		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
 		$end_time   = gmdate( 'Y-m-d H:59:59', $order->get_date_created()->getOffsetTimestamp() );
 
@@ -221,56 +162,27 @@ class DataStoreBasicsTest extends WC_Unit_Test_Case {
 			'after'    => $start_time,
 			'before'   => $end_time,
 		);
-		$expected_stats = array(
-			'totals'    => array(
-				'orders_count'        => 2,
-				// 4 items sold in the completed order, none in failed and refunded.
-				'num_items_sold'      => 4,
-				'avg_items_per_order' => 4,
-				'avg_order_value'     => 75,
-				'total_sales'         => 100,
-				'gross_sales'         => 150,
-				'coupons'             => 0,
-				'coupons_count'       => 0,
-				'refunds'             => 50,
-				'taxes'               => 0,
-				'shipping'            => 0,
-				'net_revenue'         => 100,
-				'total_customers'     => 1,
-				'products'            => 1,
-				'segments'            => array(),
-			),
-			'intervals' => array(
+		$expected_stats = $this->expected_stats_single_interval(
+			$this->expected_totals(
 				array(
-					'interval'       => gmdate( 'Y-m-d H', $order->get_date_created()->getOffsetTimestamp() ),
-					'date_start'     => $start_time,
-					'date_start_gmt' => $start_time,
-					'date_end'       => $end_time,
-					'date_end_gmt'   => $end_time,
-					'subtotals'      => array(
-						'total_sales'         => 100,
-						'gross_sales'         => 150,
-						'net_revenue'         => 100,
-						'coupons'             => 0,
-						'coupons_count'       => 0,
-						'shipping'            => 0,
-						'taxes'               => 0,
-						'refunds'             => 50,
-						'orders_count'        => 2,
-						'num_items_sold'      => 4,
-						'avg_items_per_order' => 4,
-						'avg_order_value'     => 75,
-						'total_customers'     => 1,
-						'segments'            => array(),
-					),
-				),
+					'orders_count'        => 2,
+					// 4 items sold in the completed order, none in failed and refunded.
+					'num_items_sold'      => 4,
+					'avg_items_per_order' => 4,
+					'avg_order_value'     => 75,
+					'total_sales'         => 100,
+					'gross_sales'         => 150,
+					'refunds'             => 50,
+					'net_revenue'         => 100,
+					'total_customers'     => 1,
+					'products'            => 1,
+				)
 			),
-			'total'     => 1,
-			'pages'     => 1,
-			'page_no'   => 1,
+			$start_time,
+			$end_time
 		);
 
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $args ) ), true ) );
+		$this->assert_report_data( $expected_stats, $args );
 
 		// Query an excluded status which should still return orders with the queried status.
 		$args           = array(
@@ -279,62 +191,31 @@ class DataStoreBasicsTest extends WC_Unit_Test_Case {
 			'before'    => $end_time,
 			'status_is' => array( OrderStatus::FAILED ),
 		);
-		$expected_stats = array(
-			'totals'    => array(
-				'orders_count'        => 1,
-				'num_items_sold'      => 4,
-				'avg_items_per_order' => 4,
-				'avg_order_value'     => 75,
-				'total_sales'         => 75,
-				'gross_sales'         => 75,
-				'coupons'             => 0,
-				'coupons_count'       => 0,
-				'refunds'             => 0,
-				'taxes'               => 0,
-				'shipping'            => 0,
-				'net_revenue'         => 75,
-				'total_customers'     => 1,
-				'products'            => 1,
-				'segments'            => array(),
-			),
-			'intervals' => array(
+		$expected_stats = $this->expected_stats_single_interval(
+			$this->expected_totals(
 				array(
-					'interval'       => gmdate( 'Y-m-d H', $order->get_date_created()->getOffsetTimestamp() ),
-					'date_start'     => $start_time,
-					'date_start_gmt' => $start_time,
-					'date_end'       => $end_time,
-					'date_end_gmt'   => $end_time,
-					'subtotals'      => array(
-						'total_sales'         => 75,
-						'gross_sales'         => 75,
-						'net_revenue'         => 75,
-						'coupons'             => 0,
-						'coupons_count'       => 0,
-						'shipping'            => 0,
-						'taxes'               => 0,
-						'refunds'             => 0,
-						'orders_count'        => 1,
-						'num_items_sold'      => 4,
-						'avg_items_per_order' => 4,
-						'avg_order_value'     => 75,
-						'total_customers'     => 1,
-						'segments'            => array(),
-					),
-				),
+					'orders_count'        => 1,
+					'num_items_sold'      => 4,
+					'avg_items_per_order' => 4,
+					'avg_order_value'     => 75,
+					'total_sales'         => 75,
+					'gross_sales'         => 75,
+					'net_revenue'         => 75,
+					'total_customers'     => 1,
+					'products'            => 1,
+				)
 			),
-			'total'     => 1,
-			'pages'     => 1,
-			'page_no'   => 1,
+			$start_time,
+			$end_time
 		);
 
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $args ) ), true ) );
+		$this->assert_report_data( $expected_stats, $args );
 	}
 
 	/**
 	 * @testdox Multiple coupons on orders are all included in the totals.
 	 */
 	public function test_populate_and_query_multiple_coupons(): void {
-		global $wpdb;
 		WC_Helper_Reports::reset_stats_dbs();
 
 		$customer      = WC_Helper_Customer::create_customer( 'cust_1', 'pwd_1', 'user_1@mail.com' );
@@ -384,8 +265,6 @@ class DataStoreBasicsTest extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
-		$data_store = new OrdersStatsDataStore();
-
 		$current_hour_start = new DateTime();
 		$current_hour_start->setTimestamp( $report_start_time );
 
@@ -398,54 +277,36 @@ class DataStoreBasicsTest extends WC_Unit_Test_Case {
 			'interval' => 'hour',
 		);
 
-		$order_shipping = 10;
-		// Hardcoded in WC_Helper_Order::create_order.
+		// Quantity and shipping per order are hardcoded in WC_Helper_Order::create_order.
+		$order_shipping  = 10;
 		$qty_per_product = 4;
-		// Hardcoded in WC_Helper_Order::create_order.
-		$orders_count   = count( $orders );
-		$num_items_sold = $orders_count * $qty_per_product;
-		$shipping       = $orders_count * $order_shipping;
-		$net_revenue    = $orders_total - $shipping;
-		$subtotals      = array(
-			'orders_count'        => $orders_count,
-			'num_items_sold'      => $num_items_sold,
-			'total_sales'         => $orders_total,
-			'gross_sales'         => $product_price * $num_items_sold,
-			'coupons'             => $applied_amount,
-			'coupons_count'       => count( $coupons ),
-			'refunds'             => 0,
-			'taxes'               => 0,
-			'shipping'            => $shipping,
-			'net_revenue'         => $net_revenue,
-			'avg_items_per_order' => $num_items_sold / $orders_count,
-			'avg_order_value'     => $net_revenue / $orders_count,
-			'total_customers'     => 1,
-			'segments'            => array(),
-		);
-		$totals         = array_merge( $subtotals, array( 'products' => 1 ) );
+		$orders_count    = count( $orders );
+		$num_items_sold  = $orders_count * $qty_per_product;
+		$shipping        = $orders_count * $order_shipping;
+		$net_revenue     = $orders_total - $shipping;
 
-		$expected_stats = array(
-			'totals'    => $totals,
-			'intervals' => array(
+		$expected_stats = $this->expected_stats_single_interval(
+			$this->expected_totals(
 				array(
-					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
-					'subtotals'      => $subtotals,
-				),
+					'orders_count'        => $orders_count,
+					'num_items_sold'      => $num_items_sold,
+					'total_sales'         => $orders_total,
+					'gross_sales'         => $product_price * $num_items_sold,
+					'coupons'             => $applied_amount,
+					'coupons_count'       => count( $coupons ),
+					'shipping'            => $shipping,
+					'net_revenue'         => $net_revenue,
+					'avg_items_per_order' => $num_items_sold / $orders_count,
+					'avg_order_value'     => $net_revenue / $orders_count,
+					'total_customers'     => 1,
+					'products'            => 1,
+				)
 			),
-			'total'     => 1,
-			'pages'     => 1,
-			'page_no'   => 1,
+			$current_hour_start->format( 'Y-m-d H:i:s' ),
+			$current_hour_end->format( 'Y-m-d H:i:s' )
 		);
 
-		$this->assertEquals(
-			$expected_stats,
-			json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ),
-			'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
-		);
+		$this->assert_report_data( $expected_stats, $query_args );
 	}
 
 	/**

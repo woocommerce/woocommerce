@@ -17,23 +17,13 @@ use WC_Product;
 use WC_Product_Simple;
 use WC_Product_Variable;
 use WC_Product_Variation;
-use WC_Unit_Test_Case;
 
 /**
  * Tests for product segmentation in the Orders Stats DataStore.
  *
  * Migrated from the legacy WC_Admin_Tests_Reports_Orders_Stats class.
  */
-class DataStoreSegmentingTest extends WC_Unit_Test_Case {
-
-	/**
-	 * Don't cache report data during these tests.
-	 */
-	public function setUp(): void {
-		parent::setUp();
-
-		add_filter( 'woocommerce_analytics_report_should_use_cache', '__return_false' );
-	}
+class DataStoreSegmentingTest extends OrdersStatsTestCase {
 
 	/**
 	 * @testdox Segmenting by product id reports per-product subtotals in totals and intervals.
@@ -206,50 +196,48 @@ class DataStoreSegmentingTest extends WC_Unit_Test_Case {
 		$i2_tot_net_revenue  = 4 * $product_1_price;
 
 		$expected_stats = array(
-			'totals'    => array(
-				'orders_count'        => $orders_count,
-				'num_items_sold'      => $num_items_sold,
-				'total_sales'         => $net_revenue + $shipping,
-				'gross_sales'         => $net_revenue,
-				'coupons'             => 0,
-				'coupons_count'       => 0,
-				'refunds'             => 0,
-				'taxes'               => 0,
-				'shipping'            => $shipping,
-				'net_revenue'         => $net_revenue,
-				'avg_items_per_order' => round( $num_items_sold / $orders_count, 4 ),
-				'avg_order_value'     => $net_revenue / $orders_count,
-				'total_customers'     => $total_customers,
-				'products'            => 2,
-				'segments'            => array(
-					$this->build_segment(
-						$product_1,
-						array(
-							'orders_count'        => $p1_orders_count,
-							'num_items_sold'      => 8,
-							'total_sales'         => $p1_net_revenue + $p1_shipping,
-							'shipping'            => $p1_shipping,
-							'net_revenue'         => $p1_net_revenue,
-							'avg_items_per_order' => ( $o1_num_items + $o3_num_items ) / $p1_orders_count,
-							'avg_order_value'     => ( $o1_net_revenue + $o3_net_revenue ) / $p1_orders_count,
-							'total_customers'     => $total_customers,
-						)
+			'totals'    => $this->expected_totals(
+				array(
+					'orders_count'        => $orders_count,
+					'num_items_sold'      => $num_items_sold,
+					'total_sales'         => $net_revenue + $shipping,
+					'gross_sales'         => $net_revenue,
+					'shipping'            => $shipping,
+					'net_revenue'         => $net_revenue,
+					'avg_items_per_order' => round( $num_items_sold / $orders_count, 4 ),
+					'avg_order_value'     => $net_revenue / $orders_count,
+					'total_customers'     => $total_customers,
+					'products'            => 2,
+					'segments'            => array(
+						$this->build_segment(
+							$product_1,
+							array(
+								'orders_count'        => $p1_orders_count,
+								'num_items_sold'      => 8,
+								'total_sales'         => $p1_net_revenue + $p1_shipping,
+								'shipping'            => $p1_shipping,
+								'net_revenue'         => $p1_net_revenue,
+								'avg_items_per_order' => ( $o1_num_items + $o3_num_items ) / $p1_orders_count,
+								'avg_order_value'     => ( $o1_net_revenue + $o3_net_revenue ) / $p1_orders_count,
+								'total_customers'     => $total_customers,
+							)
+						),
+						$this->build_segment(
+							$product_2,
+							array(
+								'orders_count'        => $p2_orders_count,
+								'num_items_sold'      => 8,
+								'total_sales'         => $p2_net_revenue + $p2_shipping,
+								'shipping'            => $p2_shipping,
+								'net_revenue'         => $p2_net_revenue,
+								'avg_items_per_order' => ( $o1_num_items + $o2_num_items ) / $p2_orders_count,
+								'avg_order_value'     => ( $o1_net_revenue + $o2_net_revenue ) / $p2_orders_count,
+								'total_customers'     => $total_customers,
+							)
+						),
+						$this->build_segment( $product_3, array() ),
 					),
-					$this->build_segment(
-						$product_2,
-						array(
-							'orders_count'        => $p2_orders_count,
-							'num_items_sold'      => 8,
-							'total_sales'         => $p2_net_revenue + $p2_shipping,
-							'shipping'            => $p2_shipping,
-							'net_revenue'         => $p2_net_revenue,
-							'avg_items_per_order' => ( $o1_num_items + $o2_num_items ) / $p2_orders_count,
-							'avg_order_value'     => ( $o1_net_revenue + $o2_net_revenue ) / $p2_orders_count,
-							'total_customers'     => $total_customers,
-						)
-					),
-					$this->build_segment( $product_3, array() ),
-				),
+				)
 			),
 			'intervals' => array(
 				array(
@@ -258,50 +246,47 @@ class DataStoreSegmentingTest extends WC_Unit_Test_Case {
 					'date_start_gmt' => $i3_start->format( 'Y-m-d H:i:s' ),
 					'date_end'       => $i3_end->format( 'Y-m-d H:i:s' ),
 					'date_end_gmt'   => $i3_end->format( 'Y-m-d H:i:s' ),
-					'subtotals'      => array(
-						'orders_count'        => $i3_tot_orders_count,
-						'num_items_sold'      => $i3_tot_num_items_sold,
-						'total_sales'         => $i3_tot_net_revenue + $i3_tot_shipping,
-						'gross_sales'         => $i3_tot_net_revenue,
-						// No coupons or refunds.
-																'coupons' => 0,
-						'coupons_count'       => 0,
-						'refunds'             => 0,
-						'taxes'               => 0,
-						'shipping'            => $i3_tot_shipping,
-						'net_revenue'         => $i3_tot_net_revenue,
-						'avg_items_per_order' => $i3_tot_num_items_sold / $i3_tot_orders_count,
-						'avg_order_value'     => $i3_tot_net_revenue / $i3_tot_orders_count,
-						'total_customers'     => $total_customers,
-						'segments'            => array(
-							$this->build_segment(
-								$product_1,
-								array(
-									'orders_count'        => 1,
-									'num_items_sold'      => 4,
-									'total_sales'         => $i3_p1_net_revenue + $i3_p1_shipping,
-									'shipping'            => $i3_p1_shipping,
-									'net_revenue'         => $i3_p1_net_revenue,
-									'avg_items_per_order' => $o1_num_items,
-									'avg_order_value'     => $o1_net_revenue,
-									'total_customers'     => $total_customers,
-								)
+					'subtotals'      => $this->expected_totals(
+						array(
+							'orders_count'        => $i3_tot_orders_count,
+							'num_items_sold'      => $i3_tot_num_items_sold,
+							'total_sales'         => $i3_tot_net_revenue + $i3_tot_shipping,
+							'gross_sales'         => $i3_tot_net_revenue,
+							'shipping'            => $i3_tot_shipping,
+							'net_revenue'         => $i3_tot_net_revenue,
+							'avg_items_per_order' => $i3_tot_num_items_sold / $i3_tot_orders_count,
+							'avg_order_value'     => $i3_tot_net_revenue / $i3_tot_orders_count,
+							'total_customers'     => $total_customers,
+							'segments'            => array(
+								$this->build_segment(
+									$product_1,
+									array(
+										'orders_count'    => 1,
+										'num_items_sold'  => 4,
+										'total_sales'     => $i3_p1_net_revenue + $i3_p1_shipping,
+										'shipping'        => $i3_p1_shipping,
+										'net_revenue'     => $i3_p1_net_revenue,
+										'avg_items_per_order' => $o1_num_items,
+										'avg_order_value' => $o1_net_revenue,
+										'total_customers' => $total_customers,
+									)
+								),
+								$this->build_segment(
+									$product_2,
+									array(
+										'orders_count'    => $i3_p2_orders_count,
+										'num_items_sold'  => 8,
+										'total_sales'     => $i3_p2_net_revenue + $i3_p2_shipping,
+										'shipping'        => $i3_p2_shipping,
+										'net_revenue'     => $i3_p2_net_revenue,
+										'avg_items_per_order' => ( $o1_num_items + $o2_num_items ) / $i3_p2_orders_count,
+										'avg_order_value' => ( $o1_net_revenue + $o2_net_revenue ) / $i3_p2_orders_count,
+										'total_customers' => $total_customers,
+									)
+								),
+								$this->build_segment( $product_3, array() ),
 							),
-							$this->build_segment(
-								$product_2,
-								array(
-									'orders_count'        => $i3_p2_orders_count,
-									'num_items_sold'      => 8,
-									'total_sales'         => $i3_p2_net_revenue + $i3_p2_shipping,
-									'shipping'            => $i3_p2_shipping,
-									'net_revenue'         => $i3_p2_net_revenue,
-									'avg_items_per_order' => ( $o1_num_items + $o2_num_items ) / $i3_p2_orders_count,
-									'avg_order_value'     => ( $o1_net_revenue + $o2_net_revenue ) / $i3_p2_orders_count,
-									'total_customers'     => $total_customers,
-								)
-							),
-							$this->build_segment( $product_3, array() ),
-						),
+						)
 					),
 				),
 				array(
@@ -310,38 +295,35 @@ class DataStoreSegmentingTest extends WC_Unit_Test_Case {
 					'date_start_gmt' => $i2_start->format( 'Y-m-d H:i:s' ),
 					'date_end'       => $i2_end->format( 'Y-m-d H:i:s' ),
 					'date_end_gmt'   => $i2_end->format( 'Y-m-d H:i:s' ),
-					'subtotals'      => array(
-						'orders_count'        => $i2_tot_orders_count,
-						'num_items_sold'      => 4,
-						'total_sales'         => $i2_tot_net_revenue + $shipping_amnt,
-						'gross_sales'         => $i2_tot_net_revenue,
-						// No coupons or refunds.
-															'coupons' => 0,
-						'coupons_count'       => 0,
-						'refunds'             => 0,
-						'taxes'               => 0,
-						'shipping'            => $shipping_amnt,
-						'net_revenue'         => $i2_tot_net_revenue,
-						'avg_items_per_order' => 4,
-						'avg_order_value'     => $i2_tot_net_revenue,
-						'total_customers'     => $total_customers,
-						'segments'            => array(
-							$this->build_segment(
-								$product_1,
-								array(
-									'orders_count'        => 1,
-									'num_items_sold'      => 4,
-									'total_sales'         => 4 * $product_1_price + $shipping_amnt,
-									'shipping'            => $shipping_amnt,
-									'net_revenue'         => 4 * $product_1_price,
-									'avg_items_per_order' => $o3_num_items,
-									'avg_order_value'     => $o3_net_revenue,
-									'total_customers'     => $total_customers,
-								)
+					'subtotals'      => $this->expected_totals(
+						array(
+							'orders_count'        => $i2_tot_orders_count,
+							'num_items_sold'      => 4,
+							'total_sales'         => $i2_tot_net_revenue + $shipping_amnt,
+							'gross_sales'         => $i2_tot_net_revenue,
+							'shipping'            => $shipping_amnt,
+							'net_revenue'         => $i2_tot_net_revenue,
+							'avg_items_per_order' => 4,
+							'avg_order_value'     => $i2_tot_net_revenue,
+							'total_customers'     => $total_customers,
+							'segments'            => array(
+								$this->build_segment(
+									$product_1,
+									array(
+										'orders_count'    => 1,
+										'num_items_sold'  => 4,
+										'total_sales'     => 4 * $product_1_price + $shipping_amnt,
+										'shipping'        => $shipping_amnt,
+										'net_revenue'     => 4 * $product_1_price,
+										'avg_items_per_order' => $o3_num_items,
+										'avg_order_value' => $o3_net_revenue,
+										'total_customers' => $total_customers,
+									)
+								),
+								$this->build_segment( $product_2, array() ),
+								$this->build_segment( $product_3, array() ),
 							),
-							$this->build_segment( $product_2, array() ),
-							$this->build_segment( $product_3, array() ),
-						),
+						)
 					),
 				),
 				array(
@@ -350,25 +332,14 @@ class DataStoreSegmentingTest extends WC_Unit_Test_Case {
 					'date_start_gmt' => $i1_start->format( 'Y-m-d H:i:s' ),
 					'date_end'       => $i1_end->format( 'Y-m-d H:i:s' ),
 					'date_end_gmt'   => $i1_end->format( 'Y-m-d H:i:s' ),
-					'subtotals'      => array(
-						'orders_count'        => 0,
-						'num_items_sold'      => 0,
-						'total_sales'         => 0,
-						'gross_sales'         => 0,
-						'coupons'             => 0,
-						'coupons_count'       => 0,
-						'refunds'             => 0,
-						'taxes'               => 0,
-						'shipping'            => 0,
-						'net_revenue'         => 0,
-						'avg_items_per_order' => 0,
-						'avg_order_value'     => 0,
-						'total_customers'     => 0,
-						'segments'            => array(
-							$this->build_segment( $product_1, array() ),
-							$this->build_segment( $product_2, array() ),
-							$this->build_segment( $product_3, array() ),
-						),
+					'subtotals'      => $this->expected_totals(
+						array(
+							'segments' => array(
+								$this->build_segment( $product_1, array() ),
+								$this->build_segment( $product_2, array() ),
+								$this->build_segment( $product_3, array() ),
+							),
+						)
 					),
 				),
 			),

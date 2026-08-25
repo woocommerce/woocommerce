@@ -3,7 +3,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Admin\API\Reports\Orders\Stats;
 
-use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use DateTime;
@@ -12,7 +11,6 @@ use WC_Helper_Order;
 use WC_Helper_Queue;
 use WC_Helper_Reports;
 use WC_Product_Simple;
-use WC_Unit_Test_Case;
 
 /**
  * Tests for zero-filling of empty intervals in the Orders Stats DataStore.
@@ -24,7 +22,7 @@ use WC_Unit_Test_Case;
  * windows of the last 1, 6, 10 and 11 hours, so all intervals beyond the two busy
  * hours must be zero-filled, in the position the ordering demands.
  */
-class DataStoreZeroFillTest extends WC_Unit_Test_Case {
+class DataStoreZeroFillTest extends OrdersStatsTestCase {
 
 	const QTY_PER_PRODUCT = 4;
 	// Hardcoded in WC_Helper_Order::create_order.
@@ -59,15 +57,6 @@ class DataStoreZeroFillTest extends WC_Unit_Test_Case {
 	 * @var DateTime
 	 */
 	private $current_hour_end;
-
-	/**
-	 * Don't cache report data during these tests.
-	 */
-	public function setUp(): void {
-		parent::setUp();
-
-		add_filter( 'woocommerce_analytics_report_should_use_cache', '__return_false' );
-	}
 
 	/**
 	 * @testdox A single-hour window returns one interval, identically for both sort directions.
@@ -368,21 +357,18 @@ class DataStoreZeroFillTest extends WC_Unit_Test_Case {
 		$shipping       = $orders_count * self::SHIPPING_AMOUNT;
 		$net_revenue    = self::PRODUCT_PRICE * self::QTY_PER_PRODUCT * $orders_count;
 
-		$totals = array(
-			'orders_count'        => $orders_count,
-			'num_items_sold'      => $num_items_sold,
-			'total_sales'         => $net_revenue + $shipping,
-			'gross_sales'         => $net_revenue,
-			'coupons'             => 0,
-			'coupons_count'       => 0,
-			'refunds'             => 0,
-			'taxes'               => 0,
-			'shipping'            => $shipping,
-			'net_revenue'         => $net_revenue,
-			'avg_items_per_order' => $orders_count ? $num_items_sold / $orders_count : 0,
-			'avg_order_value'     => $orders_count ? $net_revenue / $orders_count : 0,
-			'total_customers'     => $orders_count ? 1 : 0,
-			'segments'            => array(),
+		$totals = $this->expected_totals(
+			array(
+				'orders_count'        => $orders_count,
+				'num_items_sold'      => $num_items_sold,
+				'total_sales'         => $net_revenue + $shipping,
+				'gross_sales'         => $net_revenue,
+				'shipping'            => $shipping,
+				'net_revenue'         => $net_revenue,
+				'avg_items_per_order' => $orders_count ? $num_items_sold / $orders_count : 0,
+				'avg_order_value'     => $orders_count ? $net_revenue / $orders_count : 0,
+				'total_customers'     => $orders_count ? 1 : 0,
+			)
 		);
 
 		if ( $include_products ) {
@@ -390,24 +376,5 @@ class DataStoreZeroFillTest extends WC_Unit_Test_Case {
 		}
 
 		return $totals;
-	}
-
-	/**
-	 * Assert that get_data() returns the expected result for the query args.
-	 *
-	 * @param array $expected_stats Expected get_data() result.
-	 * @param array $query_args     Query arguments passed to get_data().
-	 */
-	private function assert_report_data( array $expected_stats, array $query_args ): void {
-		global $wpdb;
-
-		$data_store = new OrdersStatsDataStore();
-		$actual     = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true );
-
-		$this->assertEquals(
-			$expected_stats,
-			$actual,
-			'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
-		);
 	}
 }

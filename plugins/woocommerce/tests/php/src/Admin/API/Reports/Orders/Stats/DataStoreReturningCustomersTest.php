@@ -10,23 +10,13 @@ use WC_Helper_Order;
 use WC_Helper_Queue;
 use WC_Helper_Reports;
 use WC_Product_Simple;
-use WC_Unit_Test_Case;
 
 /**
  * Tests for new vs returning customer counting in the Orders Stats DataStore.
  *
  * Migrated from the legacy WC_Admin_Tests_Reports_Orders_Stats class.
  */
-class DataStoreReturningCustomersTest extends WC_Unit_Test_Case {
-
-	/**
-	 * Don't cache report data during these tests.
-	 */
-	public function setUp(): void {
-		parent::setUp();
-
-		add_filter( 'woocommerce_analytics_report_should_use_cache', '__return_false' );
-	}
+class DataStoreReturningCustomersTest extends OrdersStatsTestCase {
 
 	/**
 	 * @testdox A guest customer with multiple orders is counted once, as new or returning depending on the time frame.

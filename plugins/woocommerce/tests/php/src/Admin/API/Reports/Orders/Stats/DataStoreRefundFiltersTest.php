@@ -9,23 +9,13 @@ use WC_Helper_Order;
 use WC_Helper_Queue;
 use WC_Helper_Reports;
 use WC_Product_Simple;
-use WC_Unit_Test_Case;
 
 /**
  * Tests for the refunds filter of the Orders Stats DataStore.
  *
  * Migrated from the legacy WC_Admin_Tests_Reports_Orders_Stats class.
  */
-class DataStoreRefundFiltersTest extends WC_Unit_Test_Case {
-
-	/**
-	 * Don't cache report data during these tests.
-	 */
-	public function setUp(): void {
-		parent::setUp();
-
-		add_filter( 'woocommerce_analytics_report_should_use_cache', '__return_false' );
-	}
+class DataStoreRefundFiltersTest extends OrdersStatsTestCase {
 
 	/**
 	 * @testdox The refunds filter distinguishes all, none, partial and full refunds.
@@ -90,23 +80,14 @@ class DataStoreRefundFiltersTest extends WC_Unit_Test_Case {
 
 		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
 		$end_time   = gmdate( 'Y-m-d H:59:59', $order->get_date_created()->getOffsetTimestamp() );
-		$interval   = gmdate( 'Y-m-d H', $order->get_date_created()->getOffsetTimestamp() );
 
 		$refund_filter_expectations = array(
 			'all'     => array(
-				'orders_count'        => 0,
-				'num_items_sold'      => -4,
-				'avg_items_per_order' => 0,
-				'avg_order_value'     => 0,
-				'total_sales'         => -60,
-				'gross_sales'         => 0,
-				'coupons'             => 0,
-				'coupons_count'       => 0,
-				'refunds'             => 60,
-				'taxes'               => 0,
-				'shipping'            => 0,
-				'net_revenue'         => -60,
-				'total_customers'     => 1,
+				'num_items_sold'  => -4,
+				'total_sales'     => -60,
+				'refunds'         => 60,
+				'net_revenue'     => -60,
+				'total_customers' => 1,
 			),
 			'none'    => array(
 				'orders_count'        => 3,
@@ -115,43 +96,21 @@ class DataStoreRefundFiltersTest extends WC_Unit_Test_Case {
 				'avg_order_value'     => 75,
 				'total_sales'         => 225,
 				'gross_sales'         => 225,
-				'coupons'             => 0,
-				'coupons_count'       => 0,
-				'refunds'             => 0,
-				'taxes'               => 0,
-				'shipping'            => 0,
 				'net_revenue'         => 225,
 				'total_customers'     => 1,
 			),
 			'partial' => array(
-				'orders_count'        => 0,
-				'num_items_sold'      => 0,
-				'avg_items_per_order' => 0,
-				'avg_order_value'     => 0,
-				'total_sales'         => -10,
-				'gross_sales'         => 0,
-				'coupons'             => 0,
-				'coupons_count'       => 0,
-				'refunds'             => 10,
-				'taxes'               => 0,
-				'shipping'            => 0,
-				'net_revenue'         => -10,
-				'total_customers'     => 1,
+				'total_sales'     => -10,
+				'refunds'         => 10,
+				'net_revenue'     => -10,
+				'total_customers' => 1,
 			),
 			'full'    => array(
-				'orders_count'        => 0,
-				'num_items_sold'      => -4,
-				'avg_items_per_order' => 0,
-				'avg_order_value'     => 0,
-				'total_sales'         => -50,
-				'gross_sales'         => 0,
-				'coupons'             => 0,
-				'coupons_count'       => 0,
-				'refunds'             => 50,
-				'taxes'               => 0,
-				'shipping'            => 0,
-				'net_revenue'         => -50,
-				'total_customers'     => 1,
+				'num_items_sold'  => -4,
+				'total_sales'     => -50,
+				'refunds'         => 50,
+				'net_revenue'     => -50,
+				'total_customers' => 1,
 			),
 		);
 
@@ -163,23 +122,10 @@ class DataStoreRefundFiltersTest extends WC_Unit_Test_Case {
 				'refunds'  => $refund_filter,
 			);
 
-			$subtotals = array_merge( $expected_values, array( 'segments' => array() ) );
-
-			$expected_stats = array(
-				'totals'    => array_merge( $subtotals, array( 'products' => 1 ) ),
-				'intervals' => array(
-					array(
-						'interval'       => $interval,
-						'date_start'     => $start_time,
-						'date_start_gmt' => $start_time,
-						'date_end'       => $end_time,
-						'date_end_gmt'   => $end_time,
-						'subtotals'      => $subtotals,
-					),
-				),
-				'total'     => 1,
-				'pages'     => 1,
-				'page_no'   => 1,
+			$expected_stats = $this->expected_stats_single_interval(
+				$this->expected_totals( array_merge( $expected_values, array( 'products' => 1 ) ) ),
+				$start_time,
+				$end_time
 			);
 
 			$this->assertEquals(
@@ -209,22 +155,21 @@ class DataStoreRefundFiltersTest extends WC_Unit_Test_Case {
 			'after'    => $start_time,
 			'before'   => $end_time,
 		);
-		$expected_totals = array(
-			'orders_count'        => 2,
-			'num_items_sold'      => 8,
-			'avg_items_per_order' => 4,
-			'avg_order_value'     => 55,
-			'total_sales'         => 50,
-			'gross_sales'         => 110,
-			'coupons'             => 0,
-			'coupons_count'       => 0,
-			'refunds'             => 100,
-			'taxes'               => 20,
-			'shipping'            => 20,
-			'net_revenue'         => 10,
-			'total_customers'     => 1,
-			'products'            => 1,
-			'segments'            => array(),
+		$expected_totals = $this->expected_totals(
+			array(
+				'orders_count'        => 2,
+				'num_items_sold'      => 8,
+				'avg_items_per_order' => 4,
+				'avg_order_value'     => 55,
+				'total_sales'         => 50,
+				'gross_sales'         => 110,
+				'refunds'             => 100,
+				'taxes'               => 20,
+				'shipping'            => 20,
+				'net_revenue'         => 10,
+				'total_customers'     => 1,
+				'products'            => 1,
+			)
 		);
 
 		$this->assertEquals( $expected_totals, json_decode( wp_json_encode( $data_store->get_data( $args ) ), true )['totals'] );
@@ -237,22 +182,14 @@ class DataStoreRefundFiltersTest extends WC_Unit_Test_Case {
 			'refunds'  => 'full',
 		);
 		// num_items_sold, refunds and products expectations reflect the bug fixed by PR #58744.
-		$expected_totals = array(
-			'orders_count'        => 0,
-			'num_items_sold'      => 0,
-			'avg_items_per_order' => 0,
-			'avg_order_value'     => 0,
-			'total_sales'         => -100,
-			'gross_sales'         => 0,
-			'coupons'             => 0,
-			'coupons_count'       => 0,
-			'refunds'             => 100,
-			'taxes'               => 0,
-			'shipping'            => 0,
-			'net_revenue'         => -100,
-			'total_customers'     => 1,
-			'products'            => 0,
-			'segments'            => array(),
+		$expected_totals = $this->expected_totals(
+			array(
+				'total_sales'     => -100,
+				'refunds'         => 100,
+				'net_revenue'     => -100,
+				'total_customers' => 1,
+				'products'        => 0,
+			)
 		);
 
 		$this->assertEquals( $expected_totals, json_decode( wp_json_encode( $data_store->get_data( $args ) ), true )['totals'] );
@@ -278,22 +215,21 @@ class DataStoreRefundFiltersTest extends WC_Unit_Test_Case {
 			'after'    => $start_time,
 			'before'   => $end_time,
 		);
-		$expected_totals = array(
-			'orders_count'        => 2,
-			'num_items_sold'      => 4,
-			'avg_items_per_order' => 4,
-			'avg_order_value'     => 55,
-			'total_sales'         => 50,
-			'gross_sales'         => 110,
-			'coupons'             => 0,
-			'coupons_count'       => 0,
-			'refunds'             => 100,
-			'taxes'               => 10,
-			'shipping'            => 10,
-			'net_revenue'         => 30,
-			'total_customers'     => 1,
-			'products'            => 1,
-			'segments'            => array(),
+		$expected_totals = $this->expected_totals(
+			array(
+				'orders_count'        => 2,
+				'num_items_sold'      => 4,
+				'avg_items_per_order' => 4,
+				'avg_order_value'     => 55,
+				'total_sales'         => 50,
+				'gross_sales'         => 110,
+				'refunds'             => 100,
+				'taxes'               => 10,
+				'shipping'            => 10,
+				'net_revenue'         => 30,
+				'total_customers'     => 1,
+				'products'            => 1,
+			)
 		);
 
 		$this->assertEquals( $expected_totals, json_decode( wp_json_encode( $data_store->get_data( $args ) ), true )['totals'] );
@@ -305,22 +241,17 @@ class DataStoreRefundFiltersTest extends WC_Unit_Test_Case {
 			'before'   => $end_time,
 			'refunds'  => 'full',
 		);
-		$expected_totals = array(
-			'orders_count'        => 0,
-			'num_items_sold'      => -4,
-			'avg_items_per_order' => 0,
-			'avg_order_value'     => 0,
-			'total_sales'         => -100,
-			'gross_sales'         => 0,
-			'coupons'             => 0,
-			'coupons_count'       => 0,
-			'refunds'             => 100,
-			'taxes'               => -10,
-			'shipping'            => -10,
-			'net_revenue'         => -80,
-			'total_customers'     => 1,
-			'products'            => 1,
-			'segments'            => array(),
+		$expected_totals = $this->expected_totals(
+			array(
+				'num_items_sold'  => -4,
+				'total_sales'     => -100,
+				'refunds'         => 100,
+				'taxes'           => -10,
+				'shipping'        => -10,
+				'net_revenue'     => -80,
+				'total_customers' => 1,
+				'products'        => 1,
+			)
 		);
 
 		$this->assertEquals( $expected_totals, json_decode( wp_json_encode( $data_store->get_data( $args ) ), true )['totals'] );
