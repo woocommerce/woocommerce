@@ -331,6 +331,43 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A Shop page slug equal to the default product slug makes "Default" and "Shop base"
+	 * indistinguishable once stored: both persist the bare default base, so the checked-state
+	 * search — which maps a stored base back to whichever predefined choice would persist it —
+	 * has two valid answers and reports the first.
+	 *
+	 * Reporting "Shop base" instead would only move the wrong label to the merchant who picked
+	 * Default. The two forms cannot be told apart at storage either: the slashed `/product` that
+	 * would distinguish them is the shape that breaks PATHINFO permalinks, which is why the base
+	 * is normalized to the bare form in the first place.
+	 *
+	 * Nothing downstream depends on which label renders — the stored base is byte-identical, so
+	 * the product URLs and the derived `use_verbose_page_rules` flag are too.
+	 *
+	 * @testdox Should report "Default" when the Shop slug makes both choices store the same base.
+	 */
+	public function test_shop_base_equal_to_the_default_base_reports_as_default(): void {
+		$shop_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_title'  => 'Product',
+				'post_name'   => 'product',
+				'post_status' => 'publish',
+			)
+		);
+		update_option( 'woocommerce_shop_page_id', $shop_id );
+
+		$base_slug = urldecode( get_page_uri( $shop_id ) );
+		$this->assertSame( 'product', $base_slug, 'The fixture Shop page should share the default product slug.' );
+
+		$html = $this->save_and_render( '/' . trailingslashit( $base_slug ) );
+
+		$this->assertSame( 'product', get_option( 'woocommerce_permalinks' )['product_base'], 'Both choices store the bare default base.' );
+		$this->assert_only_radio_checked( $html, 'default' );
+	}
+
+
+	/**
 	 * A custom base is normalized before it is stored: every `#` is removed so the base cannot
 	 * open a URL fragment, and each run of slashes collapses into one.
 	 *
