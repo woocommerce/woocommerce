@@ -122,7 +122,7 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 			};
 
 			await expect( productTitles ).toHaveText( INITIAL_PRODUCT_TITLES );
-			await expect( clearButton ).toBeHidden();
+			await expect( clearButton ).toHaveCount( 0 );
 			await expect( grayCheckbox ).not.toBeChecked();
 
 			await grayCheckbox.click();
@@ -135,7 +135,7 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 			await expectFilterParams( null );
 			await expect( productTitles ).toHaveText( INITIAL_PRODUCT_TITLES );
 			await expect( grayCheckbox ).not.toBeChecked();
-			await expect( clearButton ).toBeHidden();
+			await expect( clearButton ).toHaveCount( 0 );
 
 			await grayCheckbox.click();
 			await expectFilterParams( 'gray' );
@@ -145,7 +145,7 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 			await expectFilterParams( null );
 			await expect( productTitles ).toHaveText( INITIAL_PRODUCT_TITLES );
 			await expect( grayCheckbox ).not.toBeChecked();
-			await expect( clearButton ).toBeHidden();
+			await expect( clearButton ).toHaveCount( 0 );
 		} );
 	} );
 
