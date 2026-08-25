@@ -101,6 +101,10 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 			const clearButton = page.getByRole( 'button', {
 				name: 'Clear filters',
 			} );
+			const clearButtonIncludingHidden = page.getByRole( 'button', {
+				name: 'Clear filters',
+				includeHidden: true,
+			} );
 			const productTitles = page.locator(
 				'.wp-block-woocommerce-product-template .wp-block-post-title'
 			);
@@ -122,7 +126,7 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 			};
 
 			await expect( productTitles ).toHaveText( INITIAL_PRODUCT_TITLES );
-			await expect( clearButton ).toHaveCount( 0 );
+			await expect( clearButton ).toBeHidden();
 			await expect( grayCheckbox ).not.toBeChecked();
 
 			await grayCheckbox.click();
@@ -135,7 +139,7 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 			await expectFilterParams( null );
 			await expect( productTitles ).toHaveText( INITIAL_PRODUCT_TITLES );
 			await expect( grayCheckbox ).not.toBeChecked();
-			await expect( clearButton ).toHaveCount( 0 );
+			await expect( clearButtonIncludingHidden ).toHaveCount( 0 );
 
 			await grayCheckbox.click();
 			await expectFilterParams( 'gray' );
@@ -145,7 +149,7 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 			await expectFilterParams( null );
 			await expect( productTitles ).toHaveText( INITIAL_PRODUCT_TITLES );
 			await expect( grayCheckbox ).not.toBeChecked();
-			await expect( clearButton ).toHaveCount( 0 );
+			await expect( clearButtonIncludingHidden ).toHaveCount( 0 );
 		} );
 	} );
 
