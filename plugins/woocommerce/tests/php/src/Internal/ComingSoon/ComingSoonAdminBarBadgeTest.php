@@ -27,6 +27,7 @@ class ComingSoonAdminBarBadgeTest extends WC_Unit_Test_Case {
 		require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
 		$this->sut = new ComingSoonAdminBarBadge();
 		update_option( 'woocommerce_feature_site_visibility_badge_enabled', 'yes' );
+		update_option( 'woocommerce_store_pages_only', 'no' );
 	}
 
 	/**
@@ -35,6 +36,7 @@ class ComingSoonAdminBarBadgeTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		delete_option( 'woocommerce_feature_site_visibility_badge_enabled' );
 		delete_option( 'woocommerce_coming_soon' );
+		delete_option( 'woocommerce_store_pages_only' );
 		parent::tearDown();
 	}
 
