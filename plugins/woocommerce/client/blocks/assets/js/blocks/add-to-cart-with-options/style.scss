@@ -11,11 +11,21 @@
 	display: none;
 }
 
+// Default radius lives on the block wrapper so user/theme border-radius
+// styles (inline or global) override it, then inner elements inherit.
+:where(.wc-block-add-to-cart-with-options__quantity-selector) {
+	border-radius: $universal-border-radius;
+}
+
 // Set the height to 100% so when the quantity selector is inside a flex
 // container with `verticalAlignment: stretch` (that's the default in WC core
 // templates), the quantity selector will stretch to the height of the container.
 :where(.wc-block-add-to-cart-with-options__quantity-selector .wc-block-components-quantity-selector) {
 	height: 100%;
+}
+
+.wc-block-add-to-cart-with-options__quantity-selector .wc-block-components-quantity-selector:where(:has(input:not([type="hidden"]))) {
+	border-radius: inherit;
 }
 
 :where(.wc-block-add-to-cart-with-options),

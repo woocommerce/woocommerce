@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils as AddToCartWithOptionsUtils;
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use WP_Block;
 
 /**
@@ -81,6 +82,7 @@ class GroupedProductItemSelector extends AbstractBlock {
 
 		$quantity_html = AddToCartWithOptionsUtils::add_quantity_steppers( $quantity_html, $product_name );
 		$quantity_html = AddToCartWithOptionsUtils::add_quantity_stepper_classes( $quantity_html );
+		$quantity_html = $this->apply_product_quantity_border_radius( $quantity_html );
 
 		$context = array(
 			'allowZero' => true, // The item is optional in grouped products.
@@ -92,6 +94,62 @@ class GroupedProductItemSelector extends AbstractBlock {
 		$quantity_html = AddToCartWithOptionsUtils::make_quantity_input_interactive( $quantity_html, array(), array(), $context, true );
 
 		return $quantity_html;
+	}
+
+	/**
+	 * Apply Product Quantity global/theme.json border radius to the grouped quantity selector.
+	 *
+	 * @param string $quantity_html Quantity selector HTML.
+	 * @return string Quantity selector HTML with Product Quantity border radius styles.
+	 */
+	private function apply_product_quantity_border_radius( string $quantity_html ): string {
+		if ( ! function_exists( 'wp_get_global_styles' ) ) {
+			return $quantity_html;
+		}
+
+		$radius = wp_get_global_styles(
+			array( 'border', 'radius' ),
+			array(
+				'block_name' => 'woocommerce/add-to-cart-with-options-quantity-selector',
+			)
+		);
+
+		if ( is_string( $radius ) && ( '' === $radius || 'null' === $radius ) ) {
+			return $quantity_html;
+		}
+
+		if ( ! is_string( $radius ) && ! is_array( $radius ) ) {
+			return $quantity_html;
+		}
+
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes(
+			array(
+				'style' => array(
+					'border' => array(
+						'radius' => $radius,
+					),
+				),
+			),
+			array( 'border_radius' )
+		);
+		$styles             = $classes_and_styles['styles'] ?? '';
+
+		if ( '' === $styles ) {
+			return $quantity_html;
+		}
+
+		$processor = new \WP_HTML_Tag_Processor( $quantity_html );
+
+		while ( $processor->next_tag() ) {
+			if ( 'DIV' === $processor->get_tag() && $processor->has_class( 'wc-block-components-quantity-selector' ) ) {
+				$existing_style = $processor->get_attribute( 'style' );
+				$style          = is_string( $existing_style ) ? $existing_style : '';
+				$processor->set_attribute( 'style', $style . $styles );
+				break;
+			}
+		}
+
+		return $processor->get_updated_html();
 	}
 
 	/**

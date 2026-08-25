@@ -32,6 +32,10 @@
 
 // It allows the `.wc-block-components-quantity-selector` height: 100% to work
 // when the block contents are wrapped in a <Disabled> component.
+// `border-radius: inherit` keeps the radius chain intact: inherit uses the
+// parent element, not the parent box, so display: contents would otherwise
+// resolve to 0 instead of the block wrapper's radius.
 :where(.wc-block-add-to-cart-with-options__quantity-selector .components-disabled) {
 	display: contents;
+	border-radius: inherit;
 }
