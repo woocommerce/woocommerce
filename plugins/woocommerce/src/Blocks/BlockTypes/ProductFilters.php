@@ -236,7 +236,7 @@ class ProductFilters extends AbstractBlock {
 		}
 
 		$block_gap = $attributes['style']['spacing']['blockGap'] ?? '';
-		if ( '' !== $block_gap ) {
+		if ( is_string( $block_gap ) && '' !== $block_gap ) {
 			$styles[] = sprintf( '--wc-product-filter-block-spacing: %s', StyleAttributesUtils::get_spacing_value( $block_gap ) );
 		}
 

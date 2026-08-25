@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Hide the customer email verification prompt when its email notification is disabled.
