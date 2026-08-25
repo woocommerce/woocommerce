@@ -42,6 +42,14 @@ const MAX_PROBE_FAILURES = 3;
 // a probe that cannot prove the queue is healthy, the switch is stuck rather than
 // busy, and it bills the paid group for as long as nobody notices.
 const MAX_ON_MINUTES = 240;
+// A run created less than the queue-age threshold ago cannot hold a job that has
+// waited past it, so probing it can neither trip the switch ON nor refute a clear
+// queue (see fetchQueuedJobs). The grace covers a run that crosses the threshold
+// while the probe is still running — retries can stretch a tick by minutes.
+const AGE_FILTER_GRACE_MIN = 1;
+
+const thresholdMin = Number( QUEUE_AGE_THRESHOLD_MIN );
+const hysteresisMin = Number( HYSTERESIS_MIN );
 
 const sleep = ( seconds ) => new Promise( ( resolve ) => setTimeout( resolve, seconds * 1000 ) );
 
@@ -191,8 +199,16 @@ const collectQueuedJobs = async ( runList ) => {
 };
 
 const fetchQueuedJobs = async ( runs ) => {
-	const allQueued = runs.filter( ( run ) => run.status === 'queued' );
-	const allInProgress = runs.filter( ( run ) => run.status !== 'queued' );
+	// A job is never older than the run holding it, so a run younger than the
+	// threshold cannot contain a job that has waited past it. Skipping those is
+	// not a truncation: they are proven irrelevant to both decisions — they
+	// cannot trip the switch ON, and they cannot refute a clear queue for
+	// switch-OFF either. They must therefore NOT mark the probe incomplete.
+	const cutoffMs = Date.now() - Math.max( thresholdMin - AGE_FILTER_GRACE_MIN, 0 ) * 60 * 1000;
+	const eligible = runs.filter( ( run ) => new Date( run.created_at ).getTime() <= cutoffMs );
+	const skippedYoung = runs.length - eligible.length;
+	const allQueued = eligible.filter( ( run ) => run.status === 'queued' );
+	const allInProgress = eligible.filter( ( run ) => run.status !== 'queued' );
 	const probeList = [
 		...allQueued.slice( 0, MAX_QUEUED_RUNS_TO_PROBE ),
 		...allInProgress.slice( 0, MAX_IN_PROGRESS_RUNS_TO_PROBE ),
@@ -211,6 +227,7 @@ const fetchQueuedJobs = async ( runs ) => {
 		remainder,
 		failed,
 		attempted,
+		skippedYoung,
 	};
 };
 
@@ -287,7 +304,7 @@ const main = async () => {
 	// Forced modes skip the probe: a manual override must succeed even when
 	// the queue API is failing, and needs no queue data to decide.
 	const forced = MODE === 'on' || MODE === 'off';
-	let runs = [], queuedJobs = [], dropped = 0, ignoredPools = 0, remainder = [], failedProbes = 0, probeAttempts = 0;
+	let runs = [], queuedJobs = [], dropped = 0, ignoredPools = 0, remainder = [], failedProbes = 0, probeAttempts = 0, skippedYoung = 0;
 	let runsListComplete = true, probeComplete = true;
 	if ( ! forced ) {
 		const runsResult = await fetchActiveRuns();
@@ -301,6 +318,7 @@ const main = async () => {
 		remainder = jobsResult.remainder;
 		failedProbes = jobsResult.failed;
 		probeAttempts = jobsResult.attempted;
+		skippedYoung = jobsResult.skippedYoung;
 	}
 	// Measure ages after the probe; retries can stretch it by minutes.
 	let nowMs = Date.now();
@@ -314,9 +332,6 @@ const main = async () => {
 	const rawValue = variable ? variable.value : null;
 	const current = rawValue === '1' ? '1' : '0';
 	const updatedAtMs = variable ? new Date( variable.updated_at ).getTime() : 0;
-
-	const thresholdMin = Number( QUEUE_AGE_THRESHOLD_MIN );
-	const hysteresisMin = Number( HYSTERESIS_MIN );
 
 	// Escalation: a truncated probe suppresses switch-off, but when the switch
 	// is ON and the probed hosted queue looks healthy, that suppression may
@@ -374,7 +389,7 @@ const main = async () => {
 		'### CI Queue Sentinel',
 		`- Mode: \`${ MODE }\``,
 		...( forced ? [ '- Probe skipped (forced mode)' ] : [
-			`- Active runs attempted: ${ probeAttempts } of ${ runs.length }${ dropped ? ` (${ dropped } dropped by age window)` : '' }${ escalated ? ` (escalated: +${ escalated } runs to verify switch-off)` : '' }${ failedProbes ? ` (${ failedProbes } unreadable — API errors)` : '' }${ probeComplete ? '' : ' (probe incomplete — switch-off suppressed)' }`,
+			`- Active runs attempted: ${ probeAttempts } of ${ runs.length }${ dropped ? ` (${ dropped } dropped by age window)` : '' }${ skippedYoung ? ` (${ skippedYoung } too new to hold an over-threshold job)` : '' }${ escalated ? ` (escalated: +${ escalated } runs to verify switch-off)` : '' }${ failedProbes ? ` (${ failedProbes } unreadable — API errors)` : '' }${ probeComplete ? '' : ' (probe incomplete — switch-off suppressed)' }`,
 			`- Queued jobs found: ${ queuedJobs.length } (hosted pool${ ignoredPools ? `; ${ ignoredPools } in runner groups ignored` : '' })`,
 			`- Oldest queued job age: ${ oldestAgeMin === null ? 'n/a (queue clear)' : `${ oldestAgeMin.toFixed( 1 ) } min` } (threshold ${ QUEUE_AGE_THRESHOLD_MIN } min)`,
 		] ),
