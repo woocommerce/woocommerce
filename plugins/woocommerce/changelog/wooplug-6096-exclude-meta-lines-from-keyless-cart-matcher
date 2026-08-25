@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Block add to cart: the product button in-cart count now shows the quantity of the product's canonical cart line. By default, lines differentiated by extra cart-item data (bundle children, bookings, add-on configurations) are not counted; an extension can mark such a line canonical via the woocommerce_store_api_cart_item_is_canonical_line filter, and both the server-rendered and the hydrated count honor it.
+Block add to cart: the product button in-cart count now shows the quantity of the product's canonical cart line. By default, lines differentiated by extra cart-item data (bundle children, bookings, add-on configurations) are not counted; an extension can mark such a line canonical via the woocommerce_store_api_cart_item_is_canonical_product_line filter, and both the server-rendered and the hydrated count honor it.
