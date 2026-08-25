@@ -17,58 +17,100 @@ use WC_Product_Simple;
  *
  * Migrated from the legacy WC_Admin_Tests_Reports_Orders_Stats zero-fill tests.
  *
- * The fixture spreads single-product orders over the current hour, the previous hour,
- * and one order each in the previous day, week, month and year. Queries then cover
- * windows of the last 1, 6, 10 and 11 hours, so all intervals beyond the two busy
- * hours must be zero-filled, in the position the ordering demands.
+ * A shared fixture is created once for the class: two orders in the current hour, three
+ * in the previous hour (so ordering by orders_count differs from ordering by date), and
+ * one order each in the previous day, week, month and year. Queries then cover windows of
+ * the last 1, 6, 10 and 11 hours, so all intervals beyond the two busy hours must be
+ * zero-filled, in the position the ordering demands.
  */
 class DataStoreZeroFillTest extends OrdersStatsTestCase {
 
-	const PRODUCT_PRICE = 11;
-
-	/**
-	 * Orders created in the current hour.
-	 *
-	 * @var int
-	 */
-	private $orders_this_hour;
-
-	/**
-	 * Orders created in the previous hour.
-	 *
-	 * @var int
-	 */
-	private $orders_previous_hour;
+	const PRODUCT_PRICE        = 11;
+	const ORDERS_THIS_HOUR     = 2;
+	const ORDERS_PREVIOUS_HOUR = 3;
 
 	/**
 	 * Start of the hour the newest fixture order was created in.
 	 *
 	 * @var DateTime
 	 */
-	private $current_hour_start;
+	private static $current_hour_start;
 
 	/**
 	 * End of the hour the newest fixture order was created in.
 	 *
 	 * @var DateTime
 	 */
-	private $current_hour_end;
+	private static $current_hour_end;
+
+	/**
+	 * Create the fixture orders once for the whole class.
+	 *
+	 * Besides the orders in the current and previous hour, one order each is created in
+	 * the previous day, week, month and year, all outside every window these tests query.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( self::PRODUCT_PRICE );
+		$product->save();
+
+		$customer = WC_Helper_Customer::create_customer( 'cust_1', 'pwd_1', 'user_1@mail.com' );
+
+		$newest_order_time = time();
+
+		$order_times = array_merge(
+			array(
+				$newest_order_time - YEAR_IN_SECONDS,
+				$newest_order_time - MONTH_IN_SECONDS,
+				$newest_order_time - WEEK_IN_SECONDS,
+				$newest_order_time - DAY_IN_SECONDS,
+			),
+			array_fill( 0, self::ORDERS_PREVIOUS_HOUR, $newest_order_time - HOUR_IN_SECONDS ),
+			array_fill( 0, self::ORDERS_THIS_HOUR, $newest_order_time )
+		);
+
+		foreach ( $order_times as $order_time ) {
+			$order = WC_Helper_Order::create_order( $customer->get_id(), $product );
+			$order->set_date_created( $order_time );
+			$order->set_date_paid( $order_time );
+			$order->set_status( OrderStatus::COMPLETED );
+			$order->calculate_totals();
+			$order->save();
+		}
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		self::$current_hour_start = new DateTime();
+		self::$current_hour_start->setTimestamp( $newest_order_time - ( ( $newest_order_time % HOUR_IN_SECONDS ) - ( $newest_order_time % MINUTE_IN_SECONDS ) ) );
+
+		self::$current_hour_end = new DateTime();
+		self::$current_hour_end->setTimestamp( $newest_order_time + ( HOUR_IN_SECONDS - ( $newest_order_time % HOUR_IN_SECONDS ) ) - 1 );
+	}
+
+	/**
+	 * Remove the persistent class fixture data.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		foreach ( wc_get_orders( array( 'limit' => -1 ) ) as $order ) {
+			$order->delete( true );
+		}
+		WC_Helper_Reports::reset_stats_dbs();
+	}
 
 	/**
 	 * @testdox A single-hour window returns one interval, identically for both sort directions.
 	 * @dataProvider orderby_variants
 	 *
-	 * @param string $orderby              Report orderby argument.
-	 * @param int    $orders_this_hour     Orders to create in the current hour.
-	 * @param int    $orders_previous_hour Orders to create in the previous hour.
+	 * @param string $orderby Report orderby argument.
 	 */
-	public function test_single_hour_window( string $orderby, int $orders_this_hour, int $orders_previous_hour ): void {
-		$this->create_fixture_orders( $orders_this_hour, $orders_previous_hour );
-
+	public function test_single_hour_window( string $orderby ): void {
 		$expected_stats = array(
-			'totals'    => $this->build_totals( $orders_this_hour, true ),
+			'totals'    => $this->build_totals( self::ORDERS_THIS_HOUR, true ),
 			'intervals' => array(
-				$this->build_interval( $this->current_hour_start, $this->current_hour_end, $orders_this_hour ),
+				$this->build_interval( self::$current_hour_start, self::$current_hour_end, self::ORDERS_THIS_HOUR ),
 			),
 			'total'     => 1,
 			'pages'     => 1,
@@ -77,8 +119,8 @@ class DataStoreZeroFillTest extends OrdersStatsTestCase {
 
 		foreach ( array( 'desc', 'asc' ) as $order ) {
 			$query_args = array(
-				'after'    => $this->current_hour_start->format( TimeInterval::$sql_datetime_format ),
-				'before'   => $this->current_hour_end->format( TimeInterval::$sql_datetime_format ),
+				'after'    => self::$current_hour_start->format( TimeInterval::$sql_datetime_format ),
+				'before'   => self::$current_hour_end->format( TimeInterval::$sql_datetime_format ),
 				'interval' => 'hour',
 				'orderby'  => $orderby,
 				'order'    => $order,
@@ -91,12 +133,9 @@ class DataStoreZeroFillTest extends OrdersStatsTestCase {
 	 * @testdox A partial-page window zero-fills the empty hours in the position the ordering demands.
 	 * @dataProvider orderby_variants
 	 *
-	 * @param string $orderby              Report orderby argument.
-	 * @param int    $orders_this_hour     Orders to create in the current hour.
-	 * @param int    $orders_previous_hour Orders to create in the previous hour.
+	 * @param string $orderby Report orderby argument.
 	 */
-	public function test_five_hour_window( string $orderby, int $orders_this_hour, int $orders_previous_hour ): void {
-		$this->create_fixture_orders( $orders_this_hour, $orders_previous_hour );
+	public function test_five_hour_window( string $orderby ): void {
 		$this->assert_windowed_report( $orderby, 5 );
 	}
 
@@ -104,12 +143,9 @@ class DataStoreZeroFillTest extends OrdersStatsTestCase {
 	 * @testdox A window that exactly fills one page zero-fills the empty hours in the position the ordering demands.
 	 * @dataProvider orderby_variants
 	 *
-	 * @param string $orderby              Report orderby argument.
-	 * @param int    $orders_this_hour     Orders to create in the current hour.
-	 * @param int    $orders_previous_hour Orders to create in the previous hour.
+	 * @param string $orderby Report orderby argument.
 	 */
-	public function test_nine_hour_window( string $orderby, int $orders_this_hour, int $orders_previous_hour ): void {
-		$this->create_fixture_orders( $orders_this_hour, $orders_previous_hour );
+	public function test_nine_hour_window( string $orderby ): void {
 		$this->assert_windowed_report( $orderby, 9 );
 	}
 
@@ -117,16 +153,12 @@ class DataStoreZeroFillTest extends OrdersStatsTestCase {
 	 * @testdox Zero-filled intervals paginate correctly in both sort directions.
 	 * @dataProvider orderby_variants
 	 *
-	 * @param string $orderby              Report orderby argument.
-	 * @param int    $orders_this_hour     Orders to create in the current hour.
-	 * @param int    $orders_previous_hour Orders to create in the previous hour.
+	 * @param string $orderby Report orderby argument.
 	 */
-	public function test_pagination( string $orderby, int $orders_this_hour, int $orders_previous_hour ): void {
-		$this->create_fixture_orders( $orders_this_hour, $orders_previous_hour );
-
+	public function test_pagination( string $orderby ): void {
 		$hour_offset = 10;
 		$per_page    = 10;
-		$totals      = $this->build_totals( $orders_this_hour + $orders_previous_hour, true );
+		$totals      = $this->build_totals( self::ORDERS_THIS_HOUR + self::ORDERS_PREVIOUS_HOUR, true );
 
 		foreach ( array( 'desc', 'asc' ) as $order ) {
 			$expected_intervals = $this->build_expected_intervals( $hour_offset, $orderby, $order );
@@ -134,7 +166,7 @@ class DataStoreZeroFillTest extends OrdersStatsTestCase {
 			foreach ( array( 1, 2 ) as $page ) {
 				$query_args = array(
 					'after'    => $this->window_start( $hour_offset )->format( TimeInterval::$sql_datetime_format ),
-					'before'   => $this->current_hour_end->format( TimeInterval::$sql_datetime_format ),
+					'before'   => self::$current_hour_end->format( TimeInterval::$sql_datetime_format ),
 					'interval' => 'hour',
 					'orderby'  => $orderby,
 					'order'    => $order,
@@ -156,17 +188,14 @@ class DataStoreZeroFillTest extends OrdersStatsTestCase {
 	}
 
 	/**
-	 * The orderby variants under test, with the fixture order distribution each expects.
-	 *
-	 * The orders_count variant puts 2 orders in the previous hour so ordering by count
-	 * differs from ordering by date.
+	 * The orderby variants under test.
 	 *
 	 * @return array
 	 */
 	public function orderby_variants(): array {
 		return array(
-			'order by date'         => array( 'date', 2, 1 ),
-			'order by orders_count' => array( 'orders_count', 1, 2 ),
+			'order by date'         => array( 'date' ),
+			'order by orders_count' => array( 'orders_count' ),
 		);
 	}
 
@@ -177,12 +206,12 @@ class DataStoreZeroFillTest extends OrdersStatsTestCase {
 	 * @param int    $hour_offset Hours before the current hour's end the window starts at.
 	 */
 	private function assert_windowed_report( string $orderby, int $hour_offset ): void {
-		$totals = $this->build_totals( $this->orders_this_hour + $this->orders_previous_hour, true );
+		$totals = $this->build_totals( self::ORDERS_THIS_HOUR + self::ORDERS_PREVIOUS_HOUR, true );
 
 		foreach ( array( 'desc', 'asc' ) as $order ) {
 			$query_args = array(
 				'after'    => $this->window_start( $hour_offset )->format( TimeInterval::$sql_datetime_format ),
-				'before'   => $this->current_hour_end->format( TimeInterval::$sql_datetime_format ),
+				'before'   => self::$current_hour_end->format( TimeInterval::$sql_datetime_format ),
 				'interval' => 'hour',
 				'orderby'  => $orderby,
 				'order'    => $order,
@@ -201,59 +230,6 @@ class DataStoreZeroFillTest extends OrdersStatsTestCase {
 	}
 
 	/**
-	 * Create the fixture orders and compute the hour window boundaries.
-	 *
-	 * Besides the orders in the current and previous hour, one order each is created in the
-	 * previous day, week, month and year, all outside every window these tests query.
-	 *
-	 * @param int $orders_this_hour     Orders to create in the current hour.
-	 * @param int $orders_previous_hour Orders to create in the previous hour.
-	 */
-	private function create_fixture_orders( int $orders_this_hour, int $orders_previous_hour ): void {
-		WC_Helper_Reports::reset_stats_dbs();
-
-		$this->orders_this_hour     = $orders_this_hour;
-		$this->orders_previous_hour = $orders_previous_hour;
-
-		$product = new WC_Product_Simple();
-		$product->set_name( 'Test Product' );
-		$product->set_regular_price( self::PRODUCT_PRICE );
-		$product->save();
-
-		$customer = WC_Helper_Customer::create_customer( 'cust_1', 'pwd_1', 'user_1@mail.com' );
-
-		$newest_order_time = time();
-
-		$order_times = array_merge(
-			array(
-				$newest_order_time - YEAR_IN_SECONDS,
-				$newest_order_time - MONTH_IN_SECONDS,
-				$newest_order_time - WEEK_IN_SECONDS,
-				$newest_order_time - DAY_IN_SECONDS,
-			),
-			array_fill( 0, $orders_previous_hour, $newest_order_time - HOUR_IN_SECONDS ),
-			array_fill( 0, $orders_this_hour, $newest_order_time )
-		);
-
-		foreach ( $order_times as $order_time ) {
-			$order = WC_Helper_Order::create_order( $customer->get_id(), $product );
-			$order->set_date_created( $order_time );
-			$order->set_date_paid( $order_time );
-			$order->set_status( OrderStatus::COMPLETED );
-			$order->calculate_totals();
-			$order->save();
-		}
-
-		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
-
-		$this->current_hour_start = new DateTime();
-		$this->current_hour_start->setTimestamp( $newest_order_time - ( ( $newest_order_time % HOUR_IN_SECONDS ) - ( $newest_order_time % MINUTE_IN_SECONDS ) ) );
-
-		$this->current_hour_end = new DateTime();
-		$this->current_hour_end->setTimestamp( $newest_order_time + ( HOUR_IN_SECONDS - ( $newest_order_time % HOUR_IN_SECONDS ) ) - 1 );
-	}
-
-	/**
 	 * The start of an N-hours-before-window-end query window.
 	 *
 	 * @param int $hour_offset Hours before the current hour's end the window starts at.
@@ -261,7 +237,7 @@ class DataStoreZeroFillTest extends OrdersStatsTestCase {
 	 */
 	private function window_start( int $hour_offset ): DateTime {
 		$window_start = new DateTime();
-		$window_start->setTimestamp( (int) $this->current_hour_end->format( 'U' ) - $hour_offset * HOUR_IN_SECONDS );
+		$window_start->setTimestamp( (int) self::$current_hour_end->format( 'U' ) - $hour_offset * HOUR_IN_SECONDS );
 
 		return $window_start;
 	}
@@ -279,14 +255,14 @@ class DataStoreZeroFillTest extends OrdersStatsTestCase {
 	 * @return array
 	 */
 	private function build_expected_intervals( int $hour_offset, string $orderby, string $order ): array {
-		$now_timestamp = (int) $this->current_hour_end->format( 'U' );
+		$now_timestamp = (int) self::$current_hour_end->format( 'U' );
 
 		// Time-descending: index 0 is the current hour, index $hour_offset the partial oldest hour.
 		$intervals_by_recency = array();
 		for ( $i = 0; $i <= $hour_offset; $i++ ) {
 			if ( 0 === $i ) {
-				$date_start = new DateTime( $this->current_hour_end->format( 'Y-m-d H:00:00' ) );
-				$date_end   = $this->current_hour_end;
+				$date_start = new DateTime( self::$current_hour_end->format( 'Y-m-d H:00:00' ) );
+				$date_end   = self::$current_hour_end;
 			} elseif ( $hour_offset === $i ) {
 				$date_start = $this->window_start( $hour_offset );
 				$date_end   = new DateTime( $date_start->format( 'Y-m-d H:59:59' ) );
@@ -298,9 +274,9 @@ class DataStoreZeroFillTest extends OrdersStatsTestCase {
 			}
 
 			if ( 0 === $i ) {
-				$orders_count = $this->orders_this_hour;
+				$orders_count = self::ORDERS_THIS_HOUR;
 			} elseif ( 1 === $i ) {
-				$orders_count = $this->orders_previous_hour;
+				$orders_count = self::ORDERS_PREVIOUS_HOUR;
 			} else {
 				$orders_count = 0;
 			}
@@ -344,7 +320,7 @@ class DataStoreZeroFillTest extends OrdersStatsTestCase {
 	/**
 	 * Build a totals (or subtotals) block for a number of single-product orders.
 	 *
-	 * @param int  $orders_count   Orders included.
+	 * @param int  $orders_count     Orders included.
 	 * @param bool $include_products Whether to include the totals-only 'products' key.
 	 * @return array
 	 */

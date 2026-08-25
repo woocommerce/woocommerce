@@ -20,6 +20,10 @@ abstract class OrdersStatsTestCase extends WC_Unit_Test_Case {
 
 	/**
 	 * Don't cache report data during these tests.
+	 *
+	 * The filter must be added after parent::setUp(): WordPress snapshots the hook
+	 * globals per test and restores that snapshot afterwards, which both removes the
+	 * filter again and would drop one registered any earlier.
 	 */
 	public function setUp(): void {
 		parent::setUp();
