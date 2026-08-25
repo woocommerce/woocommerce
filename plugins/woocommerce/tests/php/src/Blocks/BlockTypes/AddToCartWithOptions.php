@@ -17,7 +17,6 @@ use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelec
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeNameMock;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
-use WP_Theme_JSON_Data;
 
 /**
  * Tests for the AddToCartWithOptions block type
