@@ -91,6 +91,63 @@ class CartExtensions extends ControllerTestCase {
 	 * @see https://github.com/woocommerce/woocommerce/issues/68007
 	 */
 	public function test_rejected_cart_update_does_not_remove_shipping_from_pending_order() {
+		$order = $this->create_pending_order_with_shipping();
+		$this->reset_shipping_calculation();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/extensions' );
+		$request->set_header( 'Nonce', 'invalid' );
+		$request->set_body_params(
+			array(
+				'namespace' => 'valid-test-plugin',
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 403, $response->get_status() );
+		$this->assertPendingOrderRetainsShipping( $order );
+	}
+
+	/**
+	 * A successful no-op cart update must not sync uncalculated shipping to a pending order.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/68007
+	 */
+	public function test_successful_no_op_cart_update_does_not_remove_shipping_from_pending_order() {
+		$fixtures = new FixtureData();
+		$fixtures->shipping_add_flat_rate();
+
+		$order = $this->create_pending_order_with_shipping();
+		$this->reset_shipping_calculation();
+
+		$this->assertTrue( wc()->cart->needs_shipping() );
+		$this->assertFalse( wc()->cart->has_calculated_shipping() );
+		$this->assertNull( wc()->cart->get_shipping_methods() );
+		$this->assertSame( array(), wc()->shipping()->get_packages() );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'key' => array_key_first( wc()->cart->get_cart() ),
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertFalse( wc()->cart->has_calculated_shipping() );
+		$this->assertSame( array(), wc()->shipping()->get_packages() );
+
+		$reloaded_order = wc_get_order( $order->get_id() );
+		$this->assertSame( 'hash-from-calculated-shipping', $reloaded_order->get_meta( '_shipping_hash' ) );
+		$this->assertPendingOrderRetainsShipping( $order );
+	}
+
+	/**
+	 * Create a pending order that matches the current cart and contains shipping.
+	 *
+	 * @return \WC_Order
+	 */
+	private function create_pending_order_with_shipping() {
 		$order = wc_create_order();
 		$order->add_product( $this->product, 1 );
 
@@ -110,23 +167,25 @@ class CartExtensions extends ControllerTestCase {
 		wc()->session->set( 'store_api_draft_order', $order->get_id() );
 		wc()->session->set( 'chosen_shipping_methods', array( 'flat_rate:1' ) );
 
-		// Match a new request in which shipping has not been calculated yet.
+		return $order;
+	}
+
+	/**
+	 * Reset shipping state to match a new request that has not calculated shipping.
+	 */
+	private function reset_shipping_calculation() {
 		$shipping_methods = new \ReflectionProperty( \WC_Cart::class, 'shipping_methods' );
 		$shipping_methods->setAccessible( true );
 		$shipping_methods->setValue( wc()->cart, null );
 		wc()->shipping()->reset_shipping();
+	}
 
-		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/extensions' );
-		$request->set_header( 'Nonce', 'invalid' );
-		$request->set_body_params(
-			array(
-				'namespace' => 'valid-test-plugin',
-			)
-		);
-
-		$response = rest_get_server()->dispatch( $request );
-		$this->assertSame( 403, $response->get_status() );
-
+	/**
+	 * Assert that a pending order retains its shipping line and total.
+	 *
+	 * @param \WC_Order $order Order to reload and inspect.
+	 */
+	private function assertPendingOrderRetainsShipping( $order ) {
 		$reloaded_order = wc_get_order( $order->get_id() );
 		$this->assertCount( 1, $reloaded_order->get_items( 'shipping' ) );
 		$this->assertEquals( 20.0, (float) $reloaded_order->get_total() );
