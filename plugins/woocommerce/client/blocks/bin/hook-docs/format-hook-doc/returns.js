@@ -1,8 +1,3 @@
-/**
- * Internal dependencies
- */
-const { htmlToMarkdown } = require( '../utilities/html-to-markdown' );
-
 const returns = ( hookDoc ) => {
 	const tags = hookDoc.tags || [];
 	const returnDoc =
@@ -11,9 +6,9 @@ const returns = ( hookDoc ) => {
 
 	return returnDoc
 		? {
-				p: `\`${ returnDoc.types.join( ', ' ) }\` ${ htmlToMarkdown(
+				p: `\`${ returnDoc.types.join( ', ' ) }\` ${
 					returnDoc.content
-				) }`.trim(),
+				}`.trim(),
 		  }
 		: null;
 };
