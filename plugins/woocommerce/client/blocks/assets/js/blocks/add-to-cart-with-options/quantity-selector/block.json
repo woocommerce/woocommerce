@@ -11,14 +11,8 @@
 	"supports": {
 		"interactivity": true,
 		"__experimentalBorder": {
-			"radius": true,
-			"__experimentalDefaultControls": {
-				"radius": true
-			}
+			"radius": true
 		}
-	},
-	"selectors": {
-		"border": ".wc-block-add-to-cart-with-options__quantity-selector, .wc-block-add-to-cart-with-options-grouped-product-item-selector .wc-block-components-quantity-selector"
 	},
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"viewScriptModule": "woocommerce/add-to-cart-with-options-quantity-selector"
