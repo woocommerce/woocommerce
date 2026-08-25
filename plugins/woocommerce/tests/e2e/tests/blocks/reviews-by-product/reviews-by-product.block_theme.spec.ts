@@ -22,7 +22,7 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 		const productCheckbox = editor.canvas.getByLabel(
 			'Hoodie, has 3 reviews'
 		);
-		await productCheckbox.check();
+		await productCheckbox.click();
 		await expect( productCheckbox ).toBeChecked();
 
 		await editor.canvas.getByRole( 'button', { name: 'Done' } ).click();
