@@ -296,10 +296,13 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Run get_subscriptions() against a mocked Helper API response.
 	 *
-	 * @param array|WP_Error $response The response pre_http_request should return.
+	 * @param array|WP_Error $response    The response pre_http_request should return.
+	 * @param bool           $reset_error Whether to clear any recorded API error first.
+	 *                                    Pass false to measure what the fetch itself
+	 *                                    does to an error recorded by an earlier call.
 	 * @return array The value get_subscriptions() returned.
 	 */
-	private function fetch_subscriptions_with_response( $response ): array {
+	private function fetch_subscriptions_with_response( $response, bool $reset_error = true ): array {
 		$previous_auth = WC_Helper_Options::get( 'auth', array() );
 		$previous_log  = WC_Helper::$log;
 		$http_mock     = static function () use ( $response ) {
@@ -329,7 +332,9 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 			// Whatever those hooks recorded, start the measured call from a clean
 			// slate so the assertions describe this response and nothing else.
 			delete_transient( '_woocommerce_helper_subscriptions' );
-			delete_transient( '_woocommerce_helper_subscriptions_api_error' );
+			if ( $reset_error ) {
+				delete_transient( '_woocommerce_helper_subscriptions_api_error' );
+			}
 			WC_Helper_API_Backoff::clear( WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS );
 
 			return WC_Helper::get_subscriptions();
@@ -505,11 +510,14 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 
 		$this->assertNotNull( WC_Helper::get_api_error(), 'Precondition: an error is recorded' );
 
+		// Keep the recorded error in place, so what clears it is the successful
+		// fetch rather than the harness resetting state ahead of the call.
 		$this->fetch_subscriptions_with_response(
 			array(
 				'response' => array( 'code' => 200 ),
 				'body'     => wp_json_encode( $this->get_valid_subscription_data() ),
-			)
+			),
+			false
 		);
 
 		$this->assertNull(
