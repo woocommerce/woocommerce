@@ -167,9 +167,9 @@ export interface CartItem {
 	 * object.
 	 *
 	 * An extension can override the server-computed default via the
-	 * `woocommerce_store_api_cart_item_is_canonical_line` filter.
+	 * `woocommerce_store_api_cart_item_is_canonical_product_line` filter.
 	 */
-	is_canonical_line: boolean;
+	is_canonical_product_line: boolean;
 	permalink: string;
 	images: Array< CartImageItem >;
 	variation: Array< CartVariationItem >;

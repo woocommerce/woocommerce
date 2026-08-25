@@ -597,7 +597,7 @@ const { actions } = store< Store >(
 			 * With a `key`, returns the line for that exact key. Without a
 			 * key, returns the canonical per-product line matched by `id`
 			 * (and `variation` for variations), excluding a line only on
-			 * strict server-confirmed `is_canonical_line === false` (e.g. a
+			 * strict server-confirmed `is_canonical_product_line === false` (e.g. a
 			 * bundle child, booking, or add-on configuration) so the keyless
 			 * match resolves only the canonical line the product-button count
 			 * reflects.
@@ -616,10 +616,10 @@ const { actions } = store< Store >(
 						return key === cartItem.key;
 					}
 					// Exclusion requires positive server evidence: only an
-					// explicit `is_canonical_line: false` excludes a line.
+					// explicit `is_canonical_product_line: false` excludes a line.
 					// `isCartItem` narrows to server-confirmed lines; for
 					// optimistic lines the guard short-circuits the `&&` before
-					// `is_canonical_line` is read, so rapid-click compounding
+					// `is_canonical_product_line` is read, so rapid-click compounding
 					// on canonical lines is preserved. The strict `=== false`
 					// (never a falsy check) makes a server line *missing* the
 					// field — deploy skew, or an extension rebuilding item
@@ -628,7 +628,7 @@ const { actions } = store< Store >(
 					// on the `key` check above and never reach this guard.
 					if (
 						isCartItem( cartItem ) &&
-						cartItem.is_canonical_line === false
+						cartItem.is_canonical_product_line === false
 					) {
 						return false;
 					}
