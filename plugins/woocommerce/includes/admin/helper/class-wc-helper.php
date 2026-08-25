@@ -114,6 +114,13 @@ class WC_Helper {
 	 * @return void
 	 */
 	private static function record_api_error( int $code, string $message ): void {
+		if ( $code < 100 ) {
+			// get_api_error() replaces this with merchant-facing guidance, and the
+			// catch in get_subscriptions() only logs failures from 404 up, so
+			// without this the transport detail would be lost entirely.
+			self::log( 'Could not reach the WooCommerce.com API: ' . $message, 'error' );
+		}
+
 		$ttl = 15 * MINUTE_IN_SECONDS;
 
 		if ( 429 === $code ) {
@@ -168,14 +175,22 @@ class WC_Helper {
 			// We have copy written for this status, so rebuilding it costs nothing
 			// and gains the viewer's locale.
 			$message = self::get_message_for_response_code( $code );
+		} elseif ( $code < 100 ) {
+			// No HTTP status means the request never completed, so the recorded
+			// message is raw transport text ("cURL error 28: Operation timed
+			// out...") — untranslated developer detail that tells a merchant
+			// nothing. record_api_error() logs the specifics instead. The copy
+			// points at the store's own connectivity because that is the
+			// overwhelmingly likelier cause of a failed connection.
+			$message = __( 'Your store could not connect to WooCommerce.com. Please try again after a few minutes. If the issue persists, check whether your server can make outgoing requests.', 'woocommerce' );
 		} elseif ( '' !== $stored_message ) {
 			// Otherwise the recorded message wins. Rebuilding from the status
 			// would replace real guidance — the reconnect instructions on a 401,
-			// the invalid-response explanation on a 422, a transport error's
-			// detail — with a bare "HTTP status code %d".
+			// the invalid-response explanation on a 422 — with a bare
+			// "HTTP status code %d".
 			$message = $stored_message;
 		} else {
-			$message = $code >= 100 ? self::get_message_for_response_code( $code ) : '';
+			$message = self::get_message_for_response_code( $code );
 		}
 
 		if ( '' === $message ) {

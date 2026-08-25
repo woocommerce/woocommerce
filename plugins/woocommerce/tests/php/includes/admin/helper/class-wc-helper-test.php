@@ -444,6 +444,34 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A failure with no HTTP status carries raw wp_remote_request text, which is
+	 * untranslated developer detail. The merchant gets guidance aimed at their own
+	 * server instead, since that is the likelier end of a failed connection.
+	 *
+	 * @testdox get_api_error should replace raw transport detail with merchant-facing guidance.
+	 */
+	public function test_get_api_error_replaces_raw_transport_detail(): void {
+		$raw = 'cURL error 28: Operation timed out after 10001 milliseconds with 0 bytes received';
+
+		$this->fetch_subscriptions_with_response( new WP_Error( 'http_request_failed', $raw ) );
+
+		$error = WC_Helper::get_api_error();
+
+		$this->assertNotNull( $error, 'A transport failure should record a surfaceable error' );
+		$this->assertSame( 0, $error['code'], 'A transport failure carries no HTTP status' );
+		$this->assertStringNotContainsString(
+			'cURL',
+			$error['message'],
+			'Raw transport detail should never reach the merchant'
+		);
+		$this->assertSame(
+			'Your store could not connect to WooCommerce.com. Please try again after a few minutes. If the issue persists, check whether your server can make outgoing requests.',
+			$error['message'],
+			'A transport failure should point at the store\'s own connectivity'
+		);
+	}
+
+	/**
 	 * A 429 suppresses further requests for the whole backoff window. The error has
 	 * to outlive the request that received it, or the screen silently reverts to
 	 * looking like an empty account while requests are still being held back.
