@@ -20,10 +20,10 @@ use WC_Product_Simple;
  * Migrated from the legacy WC_Admin_Tests_Reports_Orders_Stats::test_populate_and_query_multiple_intervals().
  *
  * A shared fixture of 36 orders is created once for the class: for each of 3 primary
- * products, 3 coupon options (none, coupon 1, coupon 2) and 2 order statuses (completed,
- * processing), one order with just that product and one order with that product plus a
- * shared add-on product. Each order contains 4 items of each of its products and $10
- * shipping.
+ * products, 3 coupon options (none, the small coupon, the large coupon) and 2 order
+ * statuses (completed, processing), one order with just that product and one order with
+ * that product plus a shared add-on product. Each order contains 4 items of each of its
+ * products and $10 shipping.
  *
  * Every filter scenario describes the orders it matches as per-product-mix order counts
  * (the 6 "mixes" are: each primary product alone, then each with the add-on product),
@@ -31,9 +31,9 @@ use WC_Product_Simple;
  */
 class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 
-	// The coupon 1 amount is the WC_Helper_Coupon::create_coupon default.
-	const COUPON_1_AMOUNT = 1;
-	const COUPON_2_AMOUNT = 2;
+	// The two fixture coupons differ only in their fixed discount amount.
+	const SMALL_COUPON_AMOUNT = 1;
+	const LARGE_COUPON_AMOUNT = 2;
 
 	// The add-on product is the second product in every two-product order.
 	const ADD_ON_PRODUCT_PRICE = 1;
@@ -60,18 +60,18 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 	private static $add_on_product_id;
 
 	/**
-	 * ID of the fixture coupon with amount 1.
+	 * ID of the small fixture coupon.
 	 *
 	 * @var int
 	 */
-	private static $coupon_1_id;
+	private static $small_coupon_id;
 
 	/**
-	 * ID of the fixture coupon with amount 2.
+	 * ID of the large fixture coupon.
 	 *
 	 * @var int
 	 */
-	private static $coupon_2_id;
+	private static $large_coupon_id;
 
 	/**
 	 * Start of the hour all fixture orders were created in.
@@ -109,14 +109,16 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 		$add_on_product->save();
 		self::$add_on_product_id = $add_on_product->get_id();
 
-		$coupon_1 = WC_Helper_Coupon::create_coupon( 'coupon_1' );
+		$small_coupon = WC_Helper_Coupon::create_coupon( 'small_coupon' );
+		$small_coupon->set_amount( self::SMALL_COUPON_AMOUNT );
+		$small_coupon->save();
 
-		$coupon_2 = WC_Helper_Coupon::create_coupon( 'coupon_2' );
-		$coupon_2->set_amount( self::COUPON_2_AMOUNT );
-		$coupon_2->save();
+		$large_coupon = WC_Helper_Coupon::create_coupon( 'large_coupon' );
+		$large_coupon->set_amount( self::LARGE_COUPON_AMOUNT );
+		$large_coupon->save();
 
-		self::$coupon_1_id = $coupon_1->get_id();
-		self::$coupon_2_id = $coupon_2->get_id();
+		self::$small_coupon_id = $small_coupon->get_id();
+		self::$large_coupon_id = $large_coupon->get_id();
 
 		$customer = WC_Helper_Customer::create_customer( 'cust_1', 'pwd_1', 'user_1@mail.com' );
 
@@ -127,7 +129,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 
 		$iterations = 1;
 		foreach ( $primary_products as $product ) {
-			foreach ( array( null, $coupon_1, $coupon_2 ) as $coupon ) {
+			foreach ( array( null, $small_coupon, $large_coupon ) as $coupon ) {
 				foreach ( array( OrderStatus::COMPLETED, OrderStatus::PROCESSING ) as $order_status ) {
 					$single_product_order = WC_Helper_Order::create_order( $customer->get_id(), $product );
 					// Offset each order by 1 second.
@@ -191,7 +193,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 	 *
 	 * @param array $filter_args    Filter arguments added to the query, with placeholder values resolved by resolve_filter_args().
 	 * @param array $mix_counts     Matched-order counts per product mix: ( p1, p2, p3, p1+p4, p2+p4, p3+p4 ).
-	 * @param array $coupon_counts  Matched-order counts using coupon 1 and coupon 2, respectively.
+	 * @param array $coupon_counts  Matched-order counts using the small and large coupon, respectively.
 	 * @param int   $products_count Expected count of distinct products in the matched orders.
 	 */
 	public function test_filter_scenario( array $filter_args, array $mix_counts, array $coupon_counts, int $products_count ): void {
@@ -206,7 +208,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 	 * Filter scenarios, as migrated from the legacy multiple-intervals test.
 	 *
 	 * In filter args, products are given as 'product_1' ... 'product_3' or
-	 * 'add_on_product', and coupons as 'coupon_1' / 'coupon_2'; these placeholders are
+	 * 'add_on_product', and coupons as 'small_coupon' / 'large_coupon'; these placeholders are
 	 * resolved to the fixture IDs by resolve_filter_args().
 	 *
 	 * @return array
@@ -286,33 +288,33 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 				2,
 			),
 			'coupon_includes both coupons'             => array(
-				array( 'coupon_includes' => array( 'coupon_1', 'coupon_2' ) ),
+				array( 'coupon_includes' => array( 'small_coupon', 'large_coupon' ) ),
 				array( 4, 4, 4, 4, 4, 4 ),
 				array( 12, 12 ),
 				4,
 			),
 			'coupon_includes one coupon'               => array(
-				array( 'coupon_includes' => array( 'coupon_1' ) ),
+				array( 'coupon_includes' => array( 'small_coupon' ) ),
 				array( 2, 2, 2, 2, 2, 2 ),
 				array( 12, 0 ),
 				4,
 			),
 			'coupon_excludes one coupon'               => array(
-				array( 'coupon_excludes' => array( 'coupon_1' ) ),
+				array( 'coupon_excludes' => array( 'small_coupon' ) ),
 				array( 4, 4, 4, 4, 4, 4 ),
 				array( 0, 12 ),
 				4,
 			),
 			'coupon_excludes both coupons'             => array(
-				array( 'coupon_excludes' => array( 'coupon_1', 'coupon_2' ) ),
+				array( 'coupon_excludes' => array( 'small_coupon', 'large_coupon' ) ),
 				array( 2, 2, 2, 2, 2, 2 ),
 				array( 0, 0 ),
 				4,
 			),
 			'coupon_includes with coupon_excludes'     => array(
 				array(
-					'coupon_includes' => array( 'coupon_1', 'coupon_2' ),
-					'coupon_excludes' => array( 'coupon_2' ),
+					'coupon_includes' => array( 'small_coupon', 'large_coupon' ),
+					'coupon_excludes' => array( 'large_coupon' ),
 				),
 				array( 2, 2, 2, 2, 2, 2 ),
 				array( 12, 0 ),
@@ -336,7 +338,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 			'match all: status_is + coupon_includes'   => array(
 				array(
 					'status_is'       => array( OrderStatus::COMPLETED ),
-					'coupon_includes' => array( 'coupon_1' ),
+					'coupon_includes' => array( 'small_coupon' ),
 				),
 				array( 1, 1, 1, 1, 1, 1 ),
 				array( 6, 0 ),
@@ -345,7 +347,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 			'match all: product_includes + coupon_includes' => array(
 				array(
 					'product_includes' => array( 'product_1' ),
-					'coupon_includes'  => array( 'coupon_1' ),
+					'coupon_includes'  => array( 'small_coupon' ),
 				),
 				array( 2, 0, 0, 2, 0, 0 ),
 				array( 4, 0 ),
@@ -355,7 +357,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 				array(
 					'status_is'        => array( OrderStatus::COMPLETED ),
 					'product_includes' => array( 'product_1' ),
-					'coupon_includes'  => array( 'coupon_1' ),
+					'coupon_includes'  => array( 'small_coupon' ),
 				),
 				array( 1, 0, 0, 1, 0, 0 ),
 				array( 2, 0 ),
@@ -366,7 +368,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 					'status_is'        => array( OrderStatus::COMPLETED, OrderStatus::PROCESSING ),
 					'status_is_not'    => array( OrderStatus::PROCESSING ),
 					'product_includes' => array( 'product_1' ),
-					'coupon_includes'  => array( 'coupon_1' ),
+					'coupon_includes'  => array( 'small_coupon' ),
 				),
 				array( 1, 0, 0, 1, 0, 0 ),
 				array( 2, 0 ),
@@ -389,7 +391,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 					'status_is_not'    => array( OrderStatus::PROCESSING ),
 					'product_includes' => array( 'product_1', 'product_2' ),
 					'product_excludes' => array( 'add_on_product' ),
-					'coupon_includes'  => array( 'coupon_1' ),
+					'coupon_includes'  => array( 'small_coupon' ),
 				),
 				array( 1, 1, 0, 0, 0, 0 ),
 				array( 2, 0 ),
@@ -401,8 +403,8 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 					'status_is_not'    => array( OrderStatus::PROCESSING ),
 					'product_includes' => array( 'product_1', 'product_2' ),
 					'product_excludes' => array( 'add_on_product' ),
-					'coupon_includes'  => array( 'coupon_1', 'coupon_2' ),
-					'coupon_excludes'  => array( 'coupon_2' ),
+					'coupon_includes'  => array( 'small_coupon', 'large_coupon' ),
+					'coupon_excludes'  => array( 'large_coupon' ),
 				),
 				array( 1, 1, 0, 0, 0, 0 ),
 				array( 2, 0 ),
@@ -432,7 +434,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 				array(
 					'match'           => 'any',
 					'status_is'       => array( OrderStatus::COMPLETED ),
-					'coupon_includes' => array( 'coupon_1' ),
+					'coupon_includes' => array( 'small_coupon' ),
 				),
 				array( 4, 4, 4, 4, 4, 4 ),
 				array( 12, 6 ),
@@ -442,7 +444,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 				array(
 					'match'           => 'any',
 					'status_is'       => array( OrderStatus::COMPLETED ),
-					'coupon_excludes' => array( 'coupon_1' ),
+					'coupon_excludes' => array( 'small_coupon' ),
 				),
 				array( 5, 5, 5, 5, 5, 5 ),
 				array( 6, 12 ),
@@ -452,7 +454,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 				array(
 					'match'            => 'any',
 					'product_includes' => array( 'product_1' ),
-					'coupon_includes'  => array( 'coupon_1' ),
+					'coupon_includes'  => array( 'small_coupon' ),
 				),
 				array( 6, 2, 2, 6, 2, 2 ),
 				array( 12, 4 ),
@@ -463,7 +465,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 					'match'            => 'any',
 					'status_is'        => array( OrderStatus::COMPLETED ),
 					'product_includes' => array( 'product_1' ),
-					'coupon_includes'  => array( 'coupon_1' ),
+					'coupon_includes'  => array( 'small_coupon' ),
 				),
 				array( 6, 4, 4, 6, 4, 4 ),
 				array( 12, 8 ),
@@ -475,7 +477,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 					'status_is'        => array( OrderStatus::COMPLETED ),
 					'status_is_not'    => array( OrderStatus::PROCESSING ),
 					'product_includes' => array( 'product_1' ),
-					'coupon_includes'  => array( 'coupon_1' ),
+					'coupon_includes'  => array( 'small_coupon' ),
 				),
 				array( 6, 4, 4, 6, 4, 4 ),
 				array( 12, 8 ),
@@ -500,7 +502,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 					'status_is_not'    => array( OrderStatus::PROCESSING ),
 					'product_includes' => array( 'product_1' ),
 					'product_excludes' => array( 'product_2' ),
-					'coupon_includes'  => array( 'coupon_1' ),
+					'coupon_includes'  => array( 'small_coupon' ),
 				),
 				array( 6, 4, 6, 6, 4, 6 ),
 				array( 12, 10 ),
@@ -513,8 +515,8 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 					'status_is_not'    => array( OrderStatus::PROCESSING ),
 					'product_includes' => array( 'product_1' ),
 					'product_excludes' => array( 'product_2' ),
-					'coupon_includes'  => array( 'coupon_1' ),
-					'coupon_excludes'  => array( 'coupon_2' ),
+					'coupon_includes'  => array( 'small_coupon' ),
+					'coupon_excludes'  => array( 'large_coupon' ),
 				),
 				array( 6, 5, 6, 6, 5, 6 ),
 				array( 12, 10 ),
@@ -540,7 +542,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 		$num_items_sold = ( $total_orders_count / 2 ) * self::QTY_PER_PRODUCT
 						+ ( $total_orders_count / 2 ) * self::QTY_PER_PRODUCT * 2
 						- $returning_orders_count * self::QTY_PER_PRODUCT;
-		$coupons        = 12 * self::COUPON_1_AMOUNT + 12 * self::COUPON_2_AMOUNT;
+		$coupons        = 12 * self::SMALL_COUPON_AMOUNT + 12 * self::LARGE_COUPON_AMOUNT;
 		$shipping       = $orders_count * self::SHIPPING_AMOUNT;
 		$net_revenue    = $this->net_revenue_for_mix_counts( array( 6, 6, 6, 6, 6, 6 ) )
 						- self::$primary_product_prices[0] * self::QTY_PER_PRODUCT * $returning_orders_count
@@ -596,8 +598,8 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 			'product_2'      => self::$primary_product_ids[1] ?? null,
 			'product_3'      => self::$primary_product_ids[2] ?? null,
 			'add_on_product' => self::$add_on_product_id,
-			'coupon_1'       => self::$coupon_1_id,
-			'coupon_2'       => self::$coupon_2_id,
+			'small_coupon'   => self::$small_coupon_id,
+			'large_coupon'   => self::$large_coupon_id,
 		);
 
 		$resolved = array();
@@ -645,7 +647,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 	 * Build the full expected get_data() result from a scenario description.
 	 *
 	 * @param array $mix_counts     Matched-order counts per product mix: ( p1, p2, p3, p1+p4, p2+p4, p3+p4 ).
-	 * @param array $coupon_counts  Matched-order counts using coupon 1 and coupon 2, respectively.
+	 * @param array $coupon_counts  Matched-order counts using the small and large coupon, respectively.
 	 * @param int   $products_count Expected count of distinct products in the matched orders.
 	 * @return array
 	 */
@@ -654,7 +656,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 		$single_item_orders = $mix_counts[0] + $mix_counts[1] + $mix_counts[2];
 		$two_item_orders    = $mix_counts[3] + $mix_counts[4] + $mix_counts[5];
 		$num_items_sold     = $single_item_orders * self::QTY_PER_PRODUCT + $two_item_orders * self::QTY_PER_PRODUCT * 2;
-		$coupons            = $coupon_counts[0] * self::COUPON_1_AMOUNT + $coupon_counts[1] * self::COUPON_2_AMOUNT;
+		$coupons            = $coupon_counts[0] * self::SMALL_COUPON_AMOUNT + $coupon_counts[1] * self::LARGE_COUPON_AMOUNT;
 		$coupons_count      = ( $coupon_counts[0] ? 1 : 0 ) + ( $coupon_counts[1] ? 1 : 0 );
 		$shipping           = $orders_count * self::SHIPPING_AMOUNT;
 		$net_revenue        = $orders_count ? $this->net_revenue_for_mix_counts( $mix_counts ) - $coupons : 0;
