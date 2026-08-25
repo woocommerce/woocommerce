@@ -91,6 +91,7 @@ try {
 	generateActionDocs( Object.values( actions ).sort( byName ) );
 	generateFilterDocs( Object.values( filters ).sort( byName ) );
 } catch ( error ) {
-	console.log( chalk.red( error.message ) );
+	// Full error on stderr, so CI logs get the stack trace.
+	console.error( error );
 	process.exitCode = 1;
 }
