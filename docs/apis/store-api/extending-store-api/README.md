@@ -15,4 +15,5 @@ The documents listed below contain further details on how to achieve the above.
 | [Available extensible endpoints](./available-endpoints-to-extend/) | A list of all available endpoints to extend. |
 | [Available Formatters](./extend-store-api-formatters/) | Available `Formatters` to format data for use in the Store API. |
 | [Updating the cart on-demand](./extend-store-api-update-cart/) | Update the server-side cart following an action from the front-end. |
+| [Marking a differentiated cart line as canonical](./extend-store-api-canonical-line/) | Mark an extension's differentiated cart line as the canonical line for its product. |
 | [Adding fields and passing values](./extend-store-api-add-custom-fields/) | How to add custom fields to Store API endpoints. | 

@@ -1148,6 +1148,10 @@ The canonical line is the single line a configuration-free add of the product (o
 
 `boolean`
 
+### See also
+
+- [Marking a differentiated cart line as canonical](https://github.com/woocommerce/woocommerce/tree/trunk/docs/apis/store-api/extending-store-api/extend-store-api-canonical-line.md)
+
 ### Source
 
 
