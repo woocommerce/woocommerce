@@ -21,7 +21,7 @@
 		"composer-exit-on-patch-failure": true,
 		"patches": {
 			"wp-hooks/generator": {
-				"Keep @return/@throws tag types and warn instead of fatal on unknown hook doc tags": "bin/hook-docs/wp-hooks-generator.patch"
+				"Keep @return/@throws tag types, warn instead of fatal on unknown hook doc tags, and emit raw docblock Markdown instead of Parsedown HTML": "bin/hook-docs/wp-hooks-generator.patch"
 			}
 		},
 		"wp-hooks": {
