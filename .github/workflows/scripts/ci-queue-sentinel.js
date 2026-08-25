@@ -35,13 +35,10 @@ const MAX_IN_PROGRESS_RUNS_TO_PROBE = 30;
 const MAX_ESCALATION_RUNS_TO_PROBE = 60;
 const MAX_RUN_LIST_PAGES = 3;
 const MAX_FETCH_RETRIES = 2;
-// Each unreadable run costs ~45s of retry sleep. Probing 60 of them would burn
-// the job timeout without producing an answer, so give up early instead.
+// Each unreadable run costs ~45s of retry sleep; 60 would burn the job timeout.
 const MAX_PROBE_FAILURES = 3;
-// Real overflow windows run 26-42 min (20 of that is the hysteresis floor); the
-// longest observed is 102. Past this, with a probe that can neither prove the
-// queue healthy nor show any over-threshold work, the switch is stuck rather
-// than busy, and it bills the paid group for as long as nobody notices.
+// Observed overflow windows run 26-42 min; the longest ever recorded is 102.
+// Past this with nothing to explain the ON state, the switch is stuck, not busy.
 const MAX_ON_MINUTES = 120;
 
 const sleep = ( seconds ) => new Promise( ( resolve ) => setTimeout( resolve, seconds * 1000 ) );
@@ -166,9 +163,8 @@ const collectQueuedJobs = async ( runList ) => {
 		try {
 			jobs = await fetchJobsForRun( run.id );
 		} catch ( error ) {
-			// Any error outliving the retries used to abort the tick and alert.
 			// Missing one run's jobs can only understate the queue, so record it
-			// and let the incomplete probe suppress switch-off instead.
+			// and let the incomplete probe suppress switch-off instead of aborting.
 			failed++;
 			console.log( `Probe skipped run ${ run.id }: ${ error.message }` );
 			if ( failed >= MAX_PROBE_FAILURES ) {
@@ -323,9 +319,9 @@ const main = async () => {
 	// is ON and the probed hosted queue looks healthy, that suppression may
 	// rest only on unprobed runs — probe them so the off decision is proven
 	// rather than dependent on the run count fitting the caps. Runs only in
-	// that narrow state, so normal ticks pay nothing extra. Skipped once any probe
-	// has failed: probeComplete can no longer become true, so it could not change
-	// the outcome, and the failure allowance stays global to the tick.
+	// that narrow state, so normal ticks pay nothing extra. Skipped once a probe
+	// has failed: probeComplete can no longer become true, so it would change
+	// nothing, and the failure allowance stays global to the tick.
 	let escalated = 0;
 	if (
 		! forced && ! probeComplete && failedProbes === 0 && current === '1' &&
@@ -341,15 +337,11 @@ const main = async () => {
 		escalated = extra.attempted;
 		nowMs = Date.now();
 		oldestAgeMin = oldestAge( queuedJobs, nowMs );
-		// Every listed run has now been attempted; run-list page truncation and
-		// unreadable runs are the only things that can still leave it incomplete.
 		probeComplete = runsListComplete && failedProbes === 0;
 	}
 
-	// A blind tick is deliberately not an alert: most ticks see a single active
-	// run, so one transient error would page constantly for a state that
-	// self-heals on the next tick and costs nothing while the switch is off.
-	// Sustained blindness that is actually costing money is caught at the end.
+	// Not an alert: this self-heals next tick and costs nothing while the switch
+	// is off. Blindness that is actually costing money is caught at the end.
 	if ( failedProbes > 0 ) {
 		console.log(
 			`::warning::Queue probe could not read ${ failedProbes } of ${ probeAttempts } active runs; switch-off is suppressed this tick.`
@@ -377,21 +369,17 @@ const main = async () => {
 		...( forced ? [ '- Probe skipped (forced mode)' ] : [
 			`- Active runs attempted: ${ probeAttempts } of ${ runs.length }${ dropped ? ` (${ dropped } dropped by age window)` : '' }${ escalated ? ` (escalated: +${ escalated } runs to verify switch-off)` : '' }${ failedProbes ? ` (${ failedProbes } unreadable — API errors)` : '' }${ probeComplete ? '' : ' (probe incomplete — switch-off suppressed)' }`,
 			`- Queued jobs found: ${ queuedJobs.length } (hosted pool${ ignoredPools ? `; ${ ignoredPools } in runner groups ignored` : '' })`,
-			// An incomplete probe establishes neither a clear queue nor the true
-			// oldest job: an unread run can hold an older one, so the figure is a
-			// lower bound and is reported as such.
+			// An unread run can hold an older job, so an incomplete probe gives a
+			// lower bound, never a clear queue.
 			`- Oldest queued job age: ${ oldestAgeMin === null ? ( probeComplete ? 'n/a (queue clear)' : 'unknown (probe incomplete)' ) : `${ probeComplete ? '' : '≥ ' }${ oldestAgeMin.toFixed( 1 ) } min${ probeComplete ? '' : ' (probe incomplete)' }` } (threshold ${ QUEUE_AGE_THRESHOLD_MIN } min)`,
 		] ),
 		`- ${ VARIABLE_NAME }: \`${ rawValue }\` -> \`${ value }\`${ value === rawValue ? ' (no change)' : '' }`,
 	] );
 
-	// Checked last: the decision above still stands and is recorded. Failing here
-	// only rings the alarm, so a switch nobody can turn off cannot bill quietly.
-	// Fires only when the probe can say nothing either way. A probe that found
-	// over-threshold work has explained the ON state, and heavy congestion is
-	// itself a common reason for an incomplete probe — it overruns the run caps,
-	// leaving a non-empty remainder that escalation declines to touch while the
-	// queue reads busy. Without this clause a long real backlog would page.
+	// Checked after the decision is recorded, so ringing the alarm cannot strand
+	// the switch. Fires only when the probe explains nothing: congestion itself
+	// overruns the run caps and leaves the probe incomplete, so without the
+	// provenCongested clause a long real backlog would page.
 	const onForMin = ( nowMs - updatedAtMs ) / 60000;
 	const provenCongested = oldestAgeMin !== null && oldestAgeMin > thresholdMin;
 	if ( value === '1' && rawValue === '1' && ! probeComplete && ! provenCongested && onForMin > MAX_ON_MINUTES ) {
