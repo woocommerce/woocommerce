@@ -15,6 +15,7 @@ const {
 	QUEUE_AGE_THRESHOLD_MIN = '5',
 	HYSTERESIS_MIN = '20',
 	GITHUB_STEP_SUMMARY,
+	GITHUB_ENV,
 } = process.env;
 
 const VARIABLE_NAME = 'CI_QUEUE_OVERFLOW';
@@ -391,5 +392,11 @@ const main = async () => {
 
 main().catch( ( error ) => {
 	summarize( [ '### CI Queue Sentinel', `- FAILED: ${ error.message }` ] );
+	// Hand the reason to the Slack step, which otherwise reports every cause
+	// identically. Stripped of characters the shell would act on inside quotes.
+	if ( GITHUB_ENV ) {
+		const reason = error.message.replace( /[\r\n]+/g, ' ' ).replace( /[`$\\"]/g, '' );
+		fs.appendFileSync( GITHUB_ENV, `SENTINEL_FAILURE=${ reason }\n` );
+	}
 	process.exit( 1 );
 } );
