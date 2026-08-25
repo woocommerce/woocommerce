@@ -19,7 +19,7 @@ const TRAILING_WINDOW_DAYS = 30;
  * @param {Array<{date:string,signups:number,notifications_sent:number}>} rows API rows.
  * @return {{totals:{today:Object,this_month:Object}}} Derived summary shape.
  */
-function deriveSummary( rows ) {
+export function deriveSummary( rows ) {
 	const byDate = Object.fromEntries(
 		( rows || [] ).map( ( r ) => [ r.date, r ] )
 	);
