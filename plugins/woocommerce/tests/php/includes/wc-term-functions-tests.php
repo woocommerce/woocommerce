@@ -215,6 +215,40 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Reordering terms invalidates cached product terms.
+	 */
+	public function test_reordering_terms_invalidates_cached_product_terms(): void {
+		$taxonomy = 'product_tag';
+		$tag_1_id = $this->terms['tag1']['term_id'];
+		$tag_2_id = $this->terms['tag2']['term_id'];
+		$product  = $this->products['product1'];
+		$args     = array(
+			'fields'     => 'all',
+			'menu_order' => 'ASC',
+		);
+
+		update_term_meta( $tag_1_id, 'order', 1 );
+		update_term_meta( $tag_2_id, 'order', 2 );
+		wp_set_object_terms( $product->get_id(), array( $tag_1_id, $tag_2_id ), $taxonomy );
+
+		$cached_terms = wc_get_product_terms( $product->get_id(), $taxonomy, $args );
+		$this->assertSame(
+			array( 'Tag 1', 'Tag 2' ),
+			wp_list_pluck( $cached_terms, 'name' ),
+			'Product terms should initially use the configured order.'
+		);
+
+		wc_reorder_terms( get_term( $tag_2_id, $taxonomy ), $tag_1_id, $taxonomy );
+
+		$reordered_terms = wc_get_product_terms( $product->get_id(), $taxonomy, $args );
+		$this->assertSame(
+			array( 'Tag 2', 'Tag 1' ),
+			wp_list_pluck( $reordered_terms, 'name' ),
+			'Product terms should use the new order without saving the product.'
+		);
+	}
+
+	/**
 	 * @testdox Featured term ID matches current site.
 	 */
 	public function test_get_product_visibility_term_ids_includes_featured(): void {
