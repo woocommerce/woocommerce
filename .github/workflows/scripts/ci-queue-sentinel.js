@@ -50,6 +50,11 @@ const AGE_FILTER_GRACE_MIN = 1;
 
 const thresholdMin = Number( QUEUE_AGE_THRESHOLD_MIN );
 const hysteresisMin = Number( HYSTERESIS_MIN );
+// A non-numeric threshold makes every age comparison false, emptying the probe
+// and reporting a clear queue on no evidence. Fail loudly instead.
+if ( ! Number.isFinite( thresholdMin ) || ! Number.isFinite( hysteresisMin ) ) {
+	throw new Error( 'QUEUE_AGE_THRESHOLD_MIN and HYSTERESIS_MIN must be numeric' );
+}
 
 const sleep = ( seconds ) => new Promise( ( resolve ) => setTimeout( resolve, seconds * 1000 ) );
 
@@ -216,17 +221,25 @@ const fetchQueuedJobs = async ( runs ) => {
 	// cannot trip the switch ON, and they cannot refute a clear queue for
 	// switch-OFF either. They must therefore NOT mark the probe incomplete.
 	const cutoffMs = Date.now() - Math.max( thresholdMin - AGE_FILTER_GRACE_MIN, 0 ) * 60 * 1000;
-	const eligible = runs.filter( ( run ) => new Date( run.created_at ).getTime() <= cutoffMs );
-	const skippedYoung = runs.length - eligible.length;
+	const eligible = [], skipped = [];
+	for ( const run of runs ) {
+		( new Date( run.created_at ).getTime() <= cutoffMs ? eligible : skipped ).push( run );
+	}
+	// This cutoff is fixed here, but the decision is made after the probe, which
+	// retries can stretch by minutes. main() re-checks the oldest skipped run
+	// against the post-probe clock before any clear queue is believed.
+	const oldestSkippedMs = skipped.length
+		? Math.min( ...skipped.map( ( run ) => new Date( run.created_at ).getTime() ) )
+		: null;
 	const allQueued = eligible.filter( ( run ) => run.status === 'queued' );
 	const allInProgress = eligible.filter( ( run ) => run.status !== 'queued' );
-	// Caps are applied per status, then the list is re-sorted oldest-first:
-	// stopping at the first over-threshold job only pays off if the run most
-	// likely to hold one is opened first.
+	// Queued runs first, each group already oldest-first from fetchActiveRuns. A
+	// merged sort would let the wider in_progress age window (480 min vs 120) put
+	// hours-old runs ahead of every queued one.
 	const probeList = [
 		...allQueued.slice( 0, MAX_QUEUED_RUNS_TO_PROBE ),
 		...allInProgress.slice( 0, MAX_IN_PROGRESS_RUNS_TO_PROBE ),
-	].sort( ( a, b ) => new Date( a.created_at ) - new Date( b.created_at ) );
+	];
 	// Runs beyond the caps are returned unprobed so the switch-off path can
 	// escalate and probe them when it matters (see main()).
 	const remainder = [
@@ -244,7 +257,8 @@ const fetchQueuedJobs = async ( runs ) => {
 		remainder,
 		failed,
 		attempted,
-		skippedYoung,
+		skippedYoung: skipped.length,
+		oldestSkippedMs,
 		stoppedEarly,
 	};
 };
@@ -322,7 +336,7 @@ const main = async () => {
 	// Forced modes skip the probe: a manual override must succeed even when
 	// the queue API is failing, and needs no queue data to decide.
 	const forced = MODE === 'on' || MODE === 'off';
-	let runs = [], queuedJobs = [], dropped = 0, ignoredPools = 0, remainder = [], failedProbes = 0, probeAttempts = 0, skippedYoung = 0;
+	let runs = [], queuedJobs = [], dropped = 0, ignoredPools = 0, remainder = [], failedProbes = 0, probeAttempts = 0, skippedYoung = 0, oldestSkippedMs = null;
 	let runsListComplete = true, probeComplete = true, stoppedEarly = false;
 	if ( ! forced ) {
 		const runsResult = await fetchActiveRuns();
@@ -337,6 +351,7 @@ const main = async () => {
 		failedProbes = jobsResult.failed;
 		probeAttempts = jobsResult.attempted;
 		skippedYoung = jobsResult.skippedYoung;
+		oldestSkippedMs = jobsResult.oldestSkippedMs;
 		stoppedEarly = jobsResult.stoppedEarly;
 	}
 	// Measure ages after the probe; retries can stretch it by minutes.
@@ -379,6 +394,13 @@ const main = async () => {
 		// unreadable runs and an early stop are the only things that can still
 		// leave it incomplete.
 		probeComplete = runsListComplete && failedProbes === 0 && ! stoppedEarly;
+	}
+
+	// A run skipped as too young is only irrelevant while it stays too young. If
+	// the probe ran long enough for the oldest of them to cross the threshold, its
+	// jobs were never counted and a clear queue can no longer be claimed.
+	if ( oldestSkippedMs !== null && ( nowMs - oldestSkippedMs ) / 60000 > thresholdMin ) {
+		probeComplete = false;
 	}
 
 	// A blind tick is deliberately not an alert: most ticks see a single active
