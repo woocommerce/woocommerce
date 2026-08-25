@@ -229,66 +229,6 @@ class RestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Recent-activity endpoint returns sent notifications sorted newest-first.
-	 */
-	public function test_recent_activity_returns_dispatched_notifications(): void {
-		wp_set_current_user( $this->admin_user );
-
-		$now = time();
-		// Three sent notifications and one still active (should be excluded).
-		$this->seed_notification(
-			array(
-				'product_id'    => 701,
-				'user_id'       => 71,
-				'status'        => NotificationStatus::SENT,
-				'date_notified' => gmdate( 'Y-m-d H:i:s', $now - 300 ),
-			)
-		);
-		$this->seed_notification(
-			array(
-				'product_id'    => 702,
-				'user_id'       => 72,
-				'status'        => NotificationStatus::SENT,
-				'date_notified' => gmdate( 'Y-m-d H:i:s', $now - 100 ),
-			)
-		);
-		$this->seed_notification(
-			array(
-				'product_id'    => 703,
-				'user_id'       => 73,
-				'status'        => NotificationStatus::SENT,
-				'date_notified' => gmdate( 'Y-m-d H:i:s', $now - 200 ),
-			)
-		);
-		$this->seed_notification(
-			array(
-				'product_id' => 704,
-				'user_id'    => 74,
-				'status'     => NotificationStatus::ACTIVE,
-			)
-		);
-
-		$request  = new WP_REST_Request( 'GET', '/wc-analytics/back-in-stock/recent' );
-		$response = $this->server->dispatch( $request );
-
-		$this->assertSame( 200, $response->get_status() );
-		$data = $response->get_data();
-		$this->assertArrayHasKey( 'rows', $data );
-		$this->assertCount( 3, $data['rows'] );
-
-		// Sorted newest first.
-		$this->assertSame( 702, $data['rows'][0]['product_id'] );
-		$this->assertSame( 703, $data['rows'][1]['product_id'] );
-		$this->assertSame( 701, $data['rows'][2]['product_id'] );
-
-		foreach ( $data['rows'] as $row ) {
-			$this->assertArrayHasKey( 'product_name', $row );
-			$this->assertArrayHasKey( 'product_edit_link', $row );
-			$this->assertArrayHasKey( 'date_notified', $row );
-		}
-	}
-
-	/**
 	 * Non-admin (customer) hitting the summary endpoint is rejected.
 	 */
 	public function test_non_admin_cannot_view_summary(): void {

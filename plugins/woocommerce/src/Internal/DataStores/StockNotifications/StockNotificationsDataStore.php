@@ -855,43 +855,6 @@ CREATE TABLE $meta_table_name (
 	}
 
 	/**
-	 * Get the most recently dispatched notifications.
-	 *
-	 * @param int $limit Maximum rows to return (1-50).
-	 * @return array<int,array{id:int,product_id:int,user_email:string,date_notified_gmt:string}>
-	 */
-	public function get_recent_activity( int $limit = 10 ): array {
-		global $wpdb;
-
-		$limit = max( 1, min( 50, $limit ) );
-		$table = $this->get_table_name();
-
-		$sql = $wpdb->prepare(
-			'SELECT id, product_id, user_email, date_notified_gmt
-			FROM %i
-			WHERE date_notified_gmt IS NOT NULL
-			ORDER BY date_notified_gmt DESC, id DESC
-			LIMIT %d',
-			array( $table, $limit )
-		);
-
-		$results = $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$rows    = array();
-		if ( is_array( $results ) ) {
-			foreach ( $results as $row ) {
-				$rows[] = array(
-					'id'                => (int) $row['id'],
-					'product_id'        => (int) $row['product_id'],
-					'user_email'        => (string) $row['user_email'],
-					'date_notified_gmt' => (string) $row['date_notified_gmt'],
-				);
-			}
-		}
-
-		return $rows;
-	}
-
-	/**
 	 * Top products by sign-ups created within a window.
 	 *
 	 * Counts every sign-up (any status) whose `date_created_gmt` falls inside

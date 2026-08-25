@@ -93,16 +93,6 @@ class NotificationQuery {
 	}
 
 	/**
-	 * Most recently dispatched notifications.
-	 *
-	 * @param int $limit Maximum rows to return (1-50).
-	 * @return array<int,array{id:int,product_id:int,user_email:string,date_notified_gmt:string}>
-	 */
-	public static function get_recent_activity( int $limit = 10 ): array {
-		return \WC_Data_Store::load( 'stock_notification' )->get_recent_activity( $limit );
-	}
-
-	/**
 	 * Top products by sign-ups created within a window.
 	 *
 	 * Drives the "Most signed-up" leaderboard's Week / Month / Quarter toggle.

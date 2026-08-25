@@ -124,28 +124,6 @@ class RestController extends \WC_REST_Controller {
 				'schema' => array( $this, 'get_top_demand_schema' ),
 			)
 		);
-
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/recent',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_recent' ),
-					'permission_callback' => array( $this, 'check_permission' ),
-					'args'                => array(
-						'limit' => array(
-							'description' => __( 'Maximum number of recent notifications to return.', 'woocommerce' ),
-							'type'        => 'integer',
-							'default'     => 10,
-							'minimum'     => 1,
-							'maximum'     => 50,
-						),
-					),
-				),
-				'schema' => array( $this, 'get_recent_schema' ),
-			)
-		);
 	}
 
 	/**
@@ -310,36 +288,6 @@ class RestController extends \WC_REST_Controller {
 	}
 
 	/**
-	 * GET /recent
-	 *
-	 * @param \WP_REST_Request $request Request.
-	 * @return \WP_REST_Response
-	 */
-	public function get_recent( \WP_REST_Request $request ): \WP_REST_Response {
-		$limit = (int) $request->get_param( 'limit' );
-		$rows  = NotificationQuery::get_recent_activity( $limit );
-
-		$prepared = array();
-		foreach ( $rows as $row ) {
-			$product_id = (int) $row['product_id'];
-			$prepared[] = array_merge(
-				$row,
-				array(
-					'product_name'      => $this->get_product_name( $product_id ),
-					'product_edit_link' => $this->get_product_edit_link( $product_id ),
-					'date_notified'     => $row['date_notified_gmt'] ? mysql_to_rfc3339( $row['date_notified_gmt'] ) : null,
-				)
-			);
-		}
-
-		return rest_ensure_response(
-			array(
-				'rows' => $prepared,
-			)
-		);
-	}
-
-	/**
 	 * Hydrate product display fields onto the aggregation rows.
 	 *
 	 * @param array $rows Rows keyed by product_id and integer counts.
@@ -445,22 +393,6 @@ class RestController extends \WC_REST_Controller {
 		return array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => 'bis_top_demand',
-			'type'       => 'object',
-			'properties' => array(
-				'rows' => array( 'type' => 'array' ),
-			),
-		);
-	}
-
-	/**
-	 * Schema for /recent.
-	 *
-	 * @return array
-	 */
-	public function get_recent_schema(): array {
-		return array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'bis_recent',
 			'type'       => 'object',
 			'properties' => array(
 				'rows' => array( 'type' => 'array' ),
