@@ -71,10 +71,13 @@ export const attach = ( block: HTMLElement ): void => {
 	panel.className = PANEL_CLASS;
 	panel.id = `${ PANEL_CLASS }-${ ++panelId }`;
 	panel.hidden = true;
+	input.setAttribute( 'role', 'combobox' );
 	input.setAttribute( 'aria-autocomplete', 'list' );
 	input.setAttribute( 'aria-controls', panel.id );
 	input.setAttribute( 'aria-expanded', 'false' );
-	block.style.position = 'relative';
+	if ( window.getComputedStyle( block ).position === 'static' ) {
+		block.style.position = 'relative';
+	}
 	block.appendChild( panel );
 
 	let timer: ReturnType< typeof setTimeout > | undefined;
@@ -83,6 +86,10 @@ export const attach = ( block: HTMLElement ): void => {
 	let active = -1;
 
 	const close = (): void => {
+		// Dismissal also invalidates any in-flight request, so a late
+		// response can never reopen the panel.
+		controller?.abort();
+		requestId++;
 		panel.hidden = true;
 		panel.innerHTML = '';
 		input.setAttribute( 'aria-expanded', 'false' );
@@ -160,12 +167,15 @@ export const attach = ( block: HTMLElement ): void => {
 
 	input.addEventListener( 'input', () => {
 		window.clearTimeout( timer );
-		controller?.abort();
-		requestId++;
 		close();
 		timer = window.setTimeout( search, DEBOUNCE_MS );
 	} );
 	input.addEventListener( 'keydown', ( event: KeyboardEvent ) => {
+		if ( event.key === 'Escape' ) {
+			window.clearTimeout( timer );
+			close();
+			return;
+		}
 		if ( panel.hidden ) {
 			return;
 		}
@@ -185,8 +195,6 @@ export const attach = ( block: HTMLElement ): void => {
 		} else if ( event.key === 'Enter' && active >= 0 && links[ active ] ) {
 			event.preventDefault();
 			window.location.href = links[ active ].href;
-		} else if ( event.key === 'Escape' ) {
-			close();
 		}
 	} );
 	document.addEventListener( 'click', ( event ) => {

@@ -22,6 +22,11 @@ class ProductSearchTest extends WC_Unit_Test_Case {
 	private const LIVE_RESULTS_SCRIPT_HANDLE = 'wc-product-search-block-frontend';
 
 	/**
+	 * The block stylesheet handle enqueued alongside live results.
+	 */
+	private const LIVE_RESULTS_STYLE_HANDLE = 'wc-blocks-style-product-search';
+
+	/**
 	 * Create a Product Search instance without registering the deprecated block.
 	 *
 	 * @return ProductSearch
@@ -41,10 +46,11 @@ class ProductSearchTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Reset global script state between tests.
+	 * Reset global asset state between tests.
 	 */
 	public function tearDown(): void {
 		wp_dequeue_script( self::LIVE_RESULTS_SCRIPT_HANDLE );
+		wp_dequeue_style( self::LIVE_RESULTS_STYLE_HANDLE );
 		parent::tearDown();
 	}
 
@@ -67,25 +73,27 @@ class ProductSearchTest extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'wc-block-product-search--live', $result );
 		$this->assertTrue( wp_script_is( self::LIVE_RESULTS_SCRIPT_HANDLE, 'enqueued' ) );
+		$this->assertTrue( wp_style_is( self::LIVE_RESULTS_STYLE_HANDLE, 'enqueued' ) );
 	}
 
 	/**
 	 * @testdox Leaves core Search blocks and opt-out Product Search blocks unchanged.
+	 *
+	 * @testWith [{"namespace": "woocommerce/product-search"}]
+	 *           [{"namespace": "woocommerce/product-search", "liveResults": false}]
+	 *           [{"namespace": "woocommerce/product-search", "liveResults": "false"}]
+	 *           [{"liveResults": true}]
+	 *
+	 * @param array $attrs Parsed block attributes without a valid opt-in.
 	 */
-	public function test_add_live_results_skips_blocks_without_the_opt_in(): void {
+	public function test_add_live_results_skips_blocks_without_the_opt_in( array $attrs ): void {
 		$block   = $this->create_block();
 		$content = '<form class="wp-block-search"><input type="search" /></form>';
 
-		$result = $block->add_live_results(
-			$content,
-			array(
-				'attrs' => array(
-					'namespace' => 'woocommerce/product-search',
-				),
-			)
-		);
+		$result = $block->add_live_results( $content, array( 'attrs' => $attrs ) );
 
 		$this->assertSame( $content, $result );
 		$this->assertFalse( wp_script_is( self::LIVE_RESULTS_SCRIPT_HANDLE, 'enqueued' ) );
+		$this->assertFalse( wp_style_is( self::LIVE_RESULTS_STYLE_HANDLE, 'enqueued' ) );
 	}
 }

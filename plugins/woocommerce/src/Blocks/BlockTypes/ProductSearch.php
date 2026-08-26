@@ -51,10 +51,16 @@ class ProductSearch extends AbstractBlock {
 		$attributes = $block['attrs'] ?? array();
 		if (
 			'woocommerce/product-search' !== ( $attributes['namespace'] ?? '' )
-			|| empty( $attributes['liveResults'] )
+			|| true !== ( $attributes['liveResults'] ?? false )
 		) {
 			return $block_content;
 		}
+
+		$processor = new \WP_HTML_Tag_Processor( $block_content );
+		if ( ! $processor->next_tag( array( 'class_name' => 'wp-block-search' ) ) ) {
+			return $block_content;
+		}
+		$processor->add_class( 'wc-block-product-search--live' );
 
 		$handle = 'wc-' . $this->block_name . '-block-frontend';
 		if ( ! wp_script_is( $handle, 'registered' ) ) {
@@ -67,12 +73,7 @@ class ProductSearch extends AbstractBlock {
 		wp_enqueue_script( $handle );
 		wp_enqueue_style( 'wc-blocks-style-' . $this->block_name );
 
-		return preg_replace(
-			'/\bwp-block-search\b/',
-			'wp-block-search wc-block-product-search--live',
-			$block_content,
-			1
-		) ?? $block_content;
+		return $processor->get_updated_html();
 	}
 
 	/**

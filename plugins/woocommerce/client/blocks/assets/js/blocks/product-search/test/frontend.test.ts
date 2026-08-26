@@ -103,6 +103,25 @@ describe( 'Product Search live results', () => {
 		expect( block ).toHaveTextContent( '1.234,56 €' );
 	} );
 
+	it( 'does not reopen results after the shopper dismisses them', async () => {
+		const response = createDeferred< Product[] >();
+		apiFetchMock.mockReturnValueOnce( response.promise );
+
+		const block = getBlock();
+		const input = getInput( block );
+		attach( block );
+
+		fireEvent.input( input, { target: { value: 'shoes' } } );
+		act( () => jest.advanceTimersByTime( 250 ) );
+
+		fireEvent.keyDown( input, { key: 'Escape' } );
+
+		await act( async () => response.resolve( [ product( 'Shoes' ) ] ) );
+
+		expect( block ).not.toHaveTextContent( 'Shoes' );
+		expect( input ).toHaveAttribute( 'aria-expanded', 'false' );
+	} );
+
 	it( 'exposes results and keyboard selection to assistive technology', async () => {
 		apiFetchMock.mockResolvedValue( [ product( 'Shoes' ) ] );
 		const block = getBlock();
@@ -113,6 +132,7 @@ describe( 'Product Search live results', () => {
 		act( () => jest.advanceTimersByTime( 250 ) );
 		await act( async () => Promise.resolve() );
 
+		expect( input ).toHaveAttribute( 'role', 'combobox' );
 		expect( input ).toHaveAttribute( 'aria-expanded', 'true' );
 		fireEvent.keyDown( input, { key: 'ArrowDown' } );
 		expect( input ).toHaveAttribute( 'aria-activedescendant' );
