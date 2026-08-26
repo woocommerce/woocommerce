@@ -109,6 +109,16 @@
 			$( document.body ).trigger( 'wc_backbone_modal_removed', this._target );
 		},
 		addButton: function( e ) {
+			var validation = { valid: true };
+
+			// Allow listeners to veto the response, e.g. to validate inputs
+			// and keep the modal open. Covers click, touch and keyboard paths.
+			$( document.body ).trigger( 'wc_backbone_modal_before_response', [ this._target, this.$el, validation ] );
+
+			if ( ! validation.valid ) {
+				return;
+			}
+
 			$( document.body ).trigger( 'wc_backbone_modal_response', [ this._target, this.getFormData() ] );
 			this.closeButton( e, true );
 		},
