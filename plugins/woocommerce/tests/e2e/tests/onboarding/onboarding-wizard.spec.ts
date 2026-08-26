@@ -29,6 +29,12 @@ test.describe(
 					'woocommerce_remote_variant_assignment',
 					'60'
 				);
+				await setOption(
+					request,
+					baseURL,
+					'woocommerce_default_country',
+					'US:CA'
+				);
 			} catch ( error ) {
 				console.log( error );
 			}
