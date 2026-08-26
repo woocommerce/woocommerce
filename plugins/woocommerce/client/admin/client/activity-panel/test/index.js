@@ -9,13 +9,7 @@ import {
 	createEvent,
 } from '@testing-library/react';
 import { useSelect } from '@wordpress/data';
-import {
-	activityPanelStore,
-	notesStore,
-	optionsStore,
-	userStore,
-	useUser,
-} from '@woocommerce/data';
+import { useUser } from '@woocommerce/data';
 import { useState } from '@wordpress/element';
 
 /**
@@ -86,7 +80,6 @@ jest.mock( '../panel', () => {
 describe( 'Activity Panel', () => {
 	beforeEach( () => {
 		useSelect.mockImplementation( () => ( {
-			hasUnreadNotifications: false,
 			requestingTaskListOptions: false,
 			setupTaskListComplete: false,
 			setupTaskListHidden: false,
@@ -98,25 +91,22 @@ describe( 'Activity Panel', () => {
 		} ) );
 	} );
 
-	it( 'should render inbox tab on embedded pages', () => {
-		render( <ActivityPanel isEmbedded query={ {} } /> );
+	it.each( [
+		[ 'embedded pages', true, {} ],
+		[ 'WooCommerce Admin pages', false, { path: '/customers' } ],
+		[ 'the home screen', false, { page: 'wc-admin' } ],
+	] )(
+		'should not render the activity tab on %s',
+		( _, isEmbedded, query ) => {
+			render(
+				<ActivityPanel isEmbedded={ isEmbedded } query={ query } />
+			);
 
-		expect( screen.getByRole( 'tab', { name: 'Activity' } ) ).toBeDefined();
-	} );
-
-	it( 'should render inbox tab if not on home screen', () => {
-		render(
-			<ActivityPanel query={ { page: 'wc-admin', path: '/customers' } } />
-		);
-
-		expect( screen.getByRole( 'tab', { name: 'Activity' } ) ).toBeDefined();
-	} );
-
-	it( 'should not render inbox tab on home screen', () => {
-		render( <ActivityPanel query={ { page: 'wc-admin' } } /> );
-
-		expect( screen.queryByRole( 'tab', { name: 'Inbox' } ) ).toBeNull();
-	} );
+			expect(
+				screen.queryByRole( 'tab', { name: 'Activity' } )
+			).not.toBeInTheDocument();
+		}
+	);
 
 	it( 'should render preview store tab on home screen', () => {
 		render( <ActivityPanel query={ { page: 'wc-admin' } } /> );
@@ -255,61 +245,6 @@ describe( 'Activity Panel', () => {
 		);
 
 		expect( queryByRole( 'tab', { name: 'Finish setup' } ) ).toBeDefined();
-	} );
-
-	it.each( [
-		{
-			description:
-				'does not request Activity Panel counts without permission',
-			canManageWooCommerce: false,
-			expectedCalls: 0,
-		},
-		{
-			description: 'requests Activity Panel counts with permission',
-			canManageWooCommerce: true,
-			expectedCalls: 1,
-		},
-	] )( '$description', ( { canManageWooCommerce, expectedCalls } ) => {
-		const getActivityPanelCounts = jest.fn().mockReturnValue( {} );
-		const select = jest.fn( ( store ) => {
-			if ( store === activityPanelStore ) {
-				return { getActivityPanelCounts };
-			}
-
-			if ( store === notesStore ) {
-				return {
-					getNotes: jest.fn(),
-					getNotesError: jest.fn(),
-					isResolving: jest.fn(),
-				};
-			}
-
-			if ( store === optionsStore ) {
-				return { getOption: jest.fn() };
-			}
-
-			if ( store === userStore ) {
-				return { getCurrentUser: jest.fn().mockReturnValue( {} ) };
-			}
-
-			return {
-				getTaskList: jest.fn(),
-				hasFinishedResolution: jest.fn().mockReturnValue( true ),
-			};
-		} );
-
-		useUser.mockReturnValue( {
-			currentUserCan: () => canManageWooCommerce,
-		} );
-		useSelect.mockImplementation( ( mapSelect ) => mapSelect( select ) );
-
-		render(
-			<ActivityPanel
-				query={ { page: 'wc-admin', path: '/analytics/overview' } }
-			/>
-		);
-
-		expect( getActivityPanelCounts ).toHaveBeenCalledTimes( expectedCalls );
 	} );
 
 	describe( 'panel', () => {

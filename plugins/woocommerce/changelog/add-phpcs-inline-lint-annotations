@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Surface PHPCS findings as inline annotations on a pull request's Files changed tab.

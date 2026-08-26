@@ -349,6 +349,15 @@ class FeaturesController {
 				'deprecated_since'             => '10.5.0',
 				'deprecated_value'             => true,
 			),
+			'order_withdrawal'                     => array(
+				'name'                         => __( 'Order withdrawal', 'woocommerce' ),
+				'description'                  => __( 'Enable the public order withdrawal feature for customer requests.', 'woocommerce' ),
+				'learn_more_url'               => 'https://woocommerce.com/document/customer-order-withdrawal/',
+				'enabled_by_default'           => false,
+				'disable_ui'                   => false,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'is_experimental'              => false,
+			),
 			// Marked as a legacy feature to avoid compatibility checks, which aren't really relevant to this feature.
 			// https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959.
 			'order_attribution'                    => array(
@@ -458,14 +467,6 @@ class FeaturesController {
 				'enabled_by_default'           => false,
 				'is_experimental'              => false,
 			),
-			'order_withdrawal'                     => array(
-				'name'                         => __( 'Order withdrawal', 'woocommerce' ),
-				'description'                  => __( 'Enable the public order withdrawal endpoint for stakeholder testing.', 'woocommerce' ),
-				'enabled_by_default'           => false,
-				'disable_ui'                   => false,
-				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
-				'is_experimental'              => true,
-			),
 			'abandoned_cart_recovery'              => array(
 				'name'                         => __( 'Abandoned cart recovery', 'woocommerce' ),
 				'description'                  => __(
@@ -540,15 +541,14 @@ class FeaturesController {
 			),
 			\Automattic\WooCommerce\Internal\VariationGallery\Package::FEATURE_ID => array(
 				'name'                         => __( 'Variation gallery', 'woocommerce' ),
-				'description'                  => __(
-					'Add multiple images per product variation. Once enabled, the Additional Variation Images extension will be deactivated and its data migrated.',
-					'woocommerce'
-				),
-				'option_key'                   => \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME,
-				'is_experimental'              => true,
-				'enabled_by_default'           => \Automattic\WooCommerce\Internal\VariationGallery\Package::is_in_canary_cohort(),
+				'description'                  => __( 'Add multiple images per product variation.', 'woocommerce' ),
+				'is_experimental'              => false,
+				'enabled_by_default'           => true,
+				'disable_ui'                   => true,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'deprecated_since'             => '11.1.0',
+				'deprecated_value'             => true,
 			),
 			'wc-visual-attribute'                  => array(
 				'name'                         => __( 'Color swatches for attributes', 'woocommerce' ),

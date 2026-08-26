@@ -9,23 +9,15 @@ import {
 	Icon,
 	help as helpIcon,
 	external,
-	bell,
-	bellUnread,
 	listView,
 	comment,
 	store,
 } from '@wordpress/icons';
 import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
 import { H, Section } from '@woocommerce/components';
-import {
-	activityPanelStore,
-	onboardingStore,
-	optionsStore,
-	useUser,
-} from '@woocommerce/data';
+import { onboardingStore, optionsStore, useUser } from '@woocommerce/data';
 import { addHistoryListener } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
-import { useSlot } from '@woocommerce/experimental';
 import {
 	LayoutContextProvider,
 	useExtendLayout,
@@ -35,11 +27,9 @@ import {
  * Internal dependencies
  */
 import './style.scss';
-import { hasUnreadNotes as checkIfHasUnreadNotes } from './unread-indicators';
 import { Tabs } from './tabs';
 import { DisplayOptions } from './display-options';
 import { Panel } from './panel';
-import { ABBREVIATED_NOTIFICATION_SLOT_NAME } from './panels/inbox/abbreviated-notifications-panel';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { getUrlParams } from '~/utils';
 import { getSegmentsFromPath } from '~/utils/url-helpers';
@@ -51,32 +41,19 @@ const HelpPanel = lazy( () =>
 	import( /* webpackChunkName: "activity-panels-help" */ './panels/help' )
 );
 
-const InboxPanel = lazy( () =>
-	import(
-		/* webpackChunkName: "activity-panels-inbox" */ './panels/inbox/inbox-panel'
-	)
-);
-
 const SetupTasksPanel = lazy( () =>
 	import(
 		/* webpackChunkName: "activity-panels-setup" */ './panels/setup-tasks/setup-tasks-panel.tsx'
 	)
 );
 
-const ActivityPanelContent = ( {
-	activityPanelCounts,
-	canManageWooCommerce,
-	isEmbedded,
-	query,
-} ) => {
+export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const isHomescreen = query.page === 'wc-admin' && ! query.path;
 
 	const [ currentTab, setCurrentTab ] = useState( '' );
 	const [ isPanelClosing, setIsPanelClosing ] = useState( false );
 	const [ isPanelOpen, setIsPanelOpen ] = useState( false );
 	const [ isPanelSwitching, setIsPanelSwitching ] = useState( false );
-	const { fills } = useSlot( ABBREVIATED_NOTIFICATION_SLOT_NAME );
-	const hasExtendedNotifications = Boolean( fills?.length );
 	const { comingSoon } = useLaunchYourStore( {
 		enabled: isHomescreen,
 	} );
@@ -131,65 +108,32 @@ const ActivityPanelContent = ( {
 		[ query.page, query.task ]
 	);
 
-	const checkIfHasAbbreviatedNotifications = useCallback(
-		( setupTaskListHidden, thingsToDoNextCount ) => {
-			const isOrdersCardVisible = setupTaskListHidden
-				? ( activityPanelCounts?.orders_to_fulfill_count ?? 0 ) > 0
-				: false;
-			const isReviewsCardVisible = setupTaskListHidden
-				? ( activityPanelCounts?.reviews_to_moderate_count ?? 0 ) > 0
-				: false;
-			const isLowStockCardVisible = setupTaskListHidden
-				? ( activityPanelCounts?.products_low_in_stock_count ?? 0 ) > 0
-				: false;
-
-			return (
-				thingsToDoNextCount > 0 ||
-				isOrdersCardVisible ||
-				isReviewsCardVisible ||
-				isLowStockCardVisible ||
-				hasExtendedNotifications
-			);
-		},
-		[ activityPanelCounts, hasExtendedNotifications ]
-	);
-
 	const {
 		requestingTaskListOptions,
 		setupTaskListComplete,
 		setupTaskListHidden,
-		thingsToDoNextCount,
-	} = useTaskListsState();
+	} = useTaskListsState( {
+		setupTasklist: true,
+		extendedTaskList: false,
+	} );
 
-	const {
-		hasUnreadNotes,
-		hasAbbreviatedNotifications,
-		previewSiteBtnTrackData,
-	} = useSelect(
+	const { previewSiteBtnTrackData } = useSelect(
 		( select ) => {
 			const { getOption } = select( optionsStore );
 
 			return {
-				hasUnreadNotes: checkIfHasUnreadNotes( select ),
-				hasAbbreviatedNotifications: checkIfHasAbbreviatedNotifications(
-					setupTaskListHidden,
-					thingsToDoNextCount
-				),
 				previewSiteBtnTrackData: getPreviewSiteBtnTrackData(
 					select,
 					getOption
 				),
 			};
 		},
-		[
-			checkIfHasAbbreviatedNotifications,
-			thingsToDoNextCount,
-			setupTaskListHidden,
-			getPreviewSiteBtnTrackData,
-		]
+		[ getPreviewSiteBtnTrackData ]
 	);
 
 	const { showCesModal } = useDispatch( CES_STORE_KEY );
+
+	const { currentUserCan } = useUser();
 
 	// Single decision point for a tab click. Side-effect tabs (Preview store,
 	// Feedback CES modal) bail out before any panel state is touched. The
@@ -254,33 +198,7 @@ const ActivityPanelContent = ( {
 		);
 	};
 
-	// @todo Pull in dynamic unread status/count
 	const getTabs = () => {
-		const activity = {
-			name: 'activity',
-			title: __( 'Activity', 'woocommerce' ),
-			// Use bellUnread (bell + dot baked into the SVG) when there is
-			// unread activity so the unread state lives in one source of truth
-			// inside @wordpress/icons rather than a separately-positioned CSS
-			// pseudo-element on top of the plain bell.
-			icon: (
-				<Icon
-					icon={
-						hasUnreadNotes || hasAbbreviatedNotifications
-							? bellUnread
-							: bell
-					}
-					size={ 18 }
-				/>
-			),
-			unread: hasUnreadNotes || hasAbbreviatedNotifications,
-			visible:
-				( isEmbedded || ! isHomescreen ) &&
-				! isPerformingSetupTask() &&
-				! isProductScreen() &&
-				canManageWooCommerce,
-		};
-
 		const feedback = {
 			name: 'feedback',
 			title: __( 'Feedback', 'woocommerce' ),
@@ -328,7 +246,7 @@ const ActivityPanelContent = ( {
 			title: __( 'Finish setup', 'woocommerce' ),
 			icon: <Icon icon={ listView } size={ 18 } />,
 			visible:
-				canManageWooCommerce &&
+				currentUserCan( 'manage_woocommerce' ) &&
 				! requestingTaskListOptions &&
 				! setupTaskListHidden &&
 				! setupTaskListComplete &&
@@ -340,14 +258,14 @@ const ActivityPanelContent = ( {
 			name: 'help',
 			icon: <Icon icon={ helpIcon } />,
 			visible:
-				canManageWooCommerce &&
+				currentUserCan( 'manage_woocommerce' ) &&
 				( ( isHomescreen && ! isEmbedded ) || isPerformingSetupTask() ),
 		};
 
 		const displayOptions = {
 			component: DisplayOptions,
 			visible:
-				canManageWooCommerce &&
+				currentUserCan( 'manage_woocommerce' ) &&
 				! isEmbedded &&
 				isHomescreen &&
 				! isPerformingSetupTask(),
@@ -400,7 +318,6 @@ const ActivityPanelContent = ( {
 		};
 
 		return [
-			activity,
 			feedback,
 			setup,
 			previewSite,
@@ -415,15 +332,6 @@ const ActivityPanelContent = ( {
 		const { task } = query;
 
 		switch ( tab ) {
-			case 'activity':
-				return (
-					<InboxPanel
-						hasAbbreviatedNotifications={
-							hasAbbreviatedNotifications
-						}
-						thingsToDoNextCount={ thingsToDoNextCount }
-					/>
-				);
 			case 'help':
 				return <HelpPanel taskName={ task } />;
 			case 'setup':
@@ -466,31 +374,6 @@ const ActivityPanelContent = ( {
 				</Section>
 			</div>
 		</LayoutContextProvider>
-	);
-};
-
-const ActivityPanelWithCounts = ( props ) => {
-	const activityPanelCounts = useSelect(
-		( select ) => select( activityPanelStore ).getActivityPanelCounts(),
-		[]
-	);
-
-	return (
-		<ActivityPanelContent
-			{ ...props }
-			activityPanelCounts={ activityPanelCounts }
-			canManageWooCommerce
-		/>
-	);
-};
-
-export const ActivityPanel = ( props ) => {
-	const { currentUserCan } = useUser();
-
-	return currentUserCan( 'manage_woocommerce' ) ? (
-		<ActivityPanelWithCounts { ...props } />
-	) : (
-		<ActivityPanelContent { ...props } canManageWooCommerce={ false } />
 	);
 };
 

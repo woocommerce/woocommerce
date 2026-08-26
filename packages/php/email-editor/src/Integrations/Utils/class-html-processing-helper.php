@@ -59,6 +59,58 @@ class Html_Processing_Helper {
 	}
 
 	/**
+	 * Remove from an element the class names whose styles the renderer applies to the wrapping table cell.
+	 *
+	 * Background and border classes are resolved by the CSS inliner wherever they appear. The wrapping
+	 * cell keeps the block's original class list *and* receives the same styles inline, so leaving these
+	 * classes on the inner element paints them a second time. For an opaque color that is invisible, but
+	 * a translucent palette color composites over itself and renders as a visibly darker band inside the
+	 * cell's padding.
+	 *
+	 * @param \WP_HTML_Tag_Processor $html Tag processor positioned on the element to clean.
+	 */
+	public static function remove_wrapper_handled_classes( \WP_HTML_Tag_Processor $html ): void {
+		$class_attribute = $html->get_attribute( 'class' );
+		if ( ! is_string( $class_attribute ) ) {
+			return;
+		}
+
+		$class_names = preg_split( '/\s+/', trim( $class_attribute ) );
+		if ( ! is_array( $class_names ) ) {
+			return;
+		}
+
+		// Whole class names are compared and removed, so a class that merely contains one of these
+		// names as a substring is left intact instead of being reduced to a fragment.
+		foreach ( $class_names as $class_name ) {
+			if ( '' !== $class_name && self::is_wrapper_handled_class( $class_name ) ) {
+				$html->remove_class( $class_name );
+			}
+		}
+	}
+
+	/**
+	 * Whether a single class name applies a background or border that the wrapping table cell already renders.
+	 *
+	 * @param string $class_name Class name to test.
+	 * @return bool True when the class should not stay on the inner element.
+	 */
+	private static function is_wrapper_handled_class( string $class_name ): bool {
+		// `has-background` is added for any background. Preset palette backgrounds add
+		// `has-<slug>-background-color` on top of it, which is why matching the bare name is not enough.
+		if ( 'has-background' === $class_name ) {
+			return true;
+		}
+
+		if ( str_starts_with( $class_name, 'has-' ) && str_ends_with( $class_name, '-background-color' ) ) {
+			return true;
+		}
+
+		// Border classes, e.g. `has-border-color`, `has-<slug>-border-color`.
+		return false !== strpos( $class_name, '-border-' );
+	}
+
+	/**
 	 * Sanitize CSS value to prevent injection attacks.
 	 *
 	 * @param string $value CSS value to sanitize.

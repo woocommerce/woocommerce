@@ -165,16 +165,18 @@ const serialRunSpecs = [
 	// Imports a fixed-content CSV (fixed SKUs/names) and asserts the imported rows
 	// on the store-wide product list — collides with concurrently created products.
 	'**/tests/product/product-import-csv.spec.ts',
+	// Toggles the global out-of-stock catalog visibility setting while verifying
+	// that converted external products remain visible on the storefront.
+	'**/tests/product/product-grouped-stock-status.spec.ts',
 	// Mutate global WooCommerce settings (store address/currency/country, tax)
 	// that other workers' cart/checkout/storefront specs depend on.
 	'**/tests/settings/settings-general.spec.ts',
+	// Mutates the global woocommerce_permalinks option (product base and the
+	// derived use_verbose_page_rules flag) and restores it in teardown.
+	'**/tests/settings/product-permalinks.spec.ts',
 	'**/tests/settings/settings-tax.spec.ts',
-	// Unchecks and saves `woocommerce_enable_reviews`, flipping that global option
-	// to `no` mid-run (restored only in afterAll). While off, the front-end Reviews
-	// tab and admin review management disappear — proven to deterministically fail 3
-	// `product/product-reviews.spec.ts` tests (shopper post + the edit/reply Reviews
-	// tab assertions). Also toggles the global `settings-ui` feature flag and resets
-	// ALL e2e feature flags in afterAll.
+	// Toggles the global `settings-ui` feature flag and resets all e2e feature flags
+	// in afterAll.
 	'**/tests/settings/settings-ui-feature-flag.spec.ts',
 	// Toggles the global `woocommerce_cart_redirect_after_add` setting, which
 	// changes add-to-cart behavior for every other worker — not parallel-safe.
