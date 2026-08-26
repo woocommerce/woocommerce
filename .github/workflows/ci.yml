@@ -70,7 +70,7 @@ jobs:
   identify-jobs-to-run:
     name: 'Analyze changes'
     if: ${{ !cancelled() && github.event_name == 'pull_request' }}
-    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-24.04-arm' }}
     timeout-minutes: 5
     outputs:
       needs-code-validation: ${{ steps.target-changes.outputs.needs-code-validation }}
@@ -103,7 +103,7 @@ jobs:
     name: 'Build Project Jobs'
     if: ${{ !cancelled() }}
     needs: 'identify-jobs-to-run'
-    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-24.04-arm' }}
     timeout-minutes: 5
     outputs:
       lint-jobs: ${{ steps.project-jobs.outputs.lint-jobs }}
@@ -155,7 +155,7 @@ jobs:
 
   project-lint-jobs:
     name: "Lint - ${{ matrix.projectName }} ${{ ( matrix.optional && ' (optional)' ) || '' }}"
-    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-24.04-arm' }}
     timeout-minutes: 10
     needs: [ 'identify-jobs-to-run', 'project-jobs' ]
     if: ${{ !cancelled() && github.event_name == 'pull_request' && needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' && needs.project-jobs.outputs.lint-jobs != '[]' }}
@@ -229,7 +229,7 @@ jobs:
 
   woocommerce-plugin-build-artifact:
     name: "Build WooCommerce plugin artifact${{ needs.project-jobs.outputs.shared-plugin-build-has-required-consumers != 'true' && ' (optional)' || '' }}"
-    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-24.04-arm' }}
     timeout-minutes: 10
     needs: [ 'identify-jobs-to-run', 'project-jobs' ]
     # The `needs-code-validation` clause mirrors `project-test-jobs`: without it this job builds a
@@ -276,7 +276,7 @@ jobs:
     name: '${{ matrix.name }}'
     # While the CI_QUEUE_OVERFLOW repository variable is '1', e2e jobs route to the
     # dedicated group. Fork PRs are excluded.
-    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || ( vars.CI_QUEUE_OVERFLOW == '1' && matrix.testType == 'e2e' && ( github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository ) ) && fromJSON('{"group":"Woo Core Dedicated CI"}') || 'ubuntu-latest' }}
+    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || ( vars.CI_QUEUE_OVERFLOW == '1' && matrix.testType == 'e2e' && ( github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository ) ) && fromJSON('{"group":"Woo Core Dedicated CI"}') || 'ubuntu-24.04-arm' }}
     timeout-minutes: 35
     needs: [ 'identify-jobs-to-run', 'project-jobs', 'woocommerce-plugin-build-artifact' ]
     if: ${{ !cancelled() && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' ) && needs.project-jobs.outputs.test-jobs != '[]' && ( needs.woocommerce-plugin-build-artifact.result == 'success' || needs.woocommerce-plugin-build-artifact.result == 'skipped' || needs.project-jobs.outputs.shared-plugin-build-has-required-consumers != 'true' ) }}
@@ -481,7 +481,7 @@ jobs:
     # using a job that runs after all the others and either passes or fails based
     # on the results of the other jobs in the workflow.
     name: 'Evaluate Project Job Statuses'
-    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-24.04-arm' }}
     timeout-minutes: 5
     needs: [ 'project-jobs', 'woocommerce-plugin-build-artifact', 'project-lint-jobs', 'project-test-jobs', 'validate-changelog', 'validate-markdown', 'validate-syncpack' ]
     # This job must run for all trigger types (not just PRs) so that alert-on-failure can access its outputs
@@ -514,7 +514,7 @@ jobs:
 
   alert-on-failure:
     name: 'Report results on Slack'
-    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-24.04-arm' }}
     timeout-minutes: 5
     needs: ['project-jobs', 'woocommerce-plugin-build-artifact', 'project-lint-jobs', 'project-test-jobs', 'evaluate-project-jobs']
     if: ${{ !cancelled() && github.event_name != 'pull_request' && github.repository == 'woocommerce/woocommerce' }}
@@ -571,7 +571,7 @@ jobs:
       max-parallel: 1
       matrix:
         report: ${{ fromJSON( needs.project-jobs.outputs.report-jobs ) }}
-    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-24.04-arm' }}
     timeout-minutes: 5
     env:
       ARTIFACT_NAME: ${{ matrix.report }}-attempt-${{ github.run_attempt }}
@@ -654,7 +654,7 @@ jobs:
     name: 'Validate dependencies version'
     if: ${{ !cancelled() && github.event_name == 'pull_request' && needs.identify-jobs-to-run.outputs.needs-syncpack-validation == 'true' }}
     needs: [ 'identify-jobs-to-run' ]
-    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-24.04-arm' }}
     timeout-minutes: 5
     permissions:
       contents: read
@@ -692,7 +692,7 @@ jobs:
         ! contains( github.event.pull_request.body, '[x] This Pull Request does not require a changelog' )
       }}
     needs: [ 'identify-jobs-to-run' ]
-    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-24.04-arm' }}
     timeout-minutes: 5
     permissions:
       contents: read
@@ -749,7 +749,7 @@ jobs:
     name: 'Validate markdown'
     if: ${{ !cancelled() && github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'trunk' && needs.identify-jobs-to-run.outputs.needs-markdown-validation == 'true' }}
     needs: [ 'identify-jobs-to-run' ]
-    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-24.04-arm' }}
     timeout-minutes: 5
     permissions:
       contents: read

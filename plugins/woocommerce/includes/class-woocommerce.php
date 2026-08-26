@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce setup
+ * WooCommerce setup.
  *
  * @package WooCommerce
  * @since   3.2.0
