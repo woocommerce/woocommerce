@@ -882,9 +882,11 @@ function wc_scheduled_sales() {
 				$product = wc_get_product( $product_id );
 
 				if ( $product ) {
-					// Note: for 'start', wc_apply_sale_state_for_product() calls save(), which
-					// writes sale date meta and triggers
-					// wc_maybe_schedule_sale_events_on_meta_change(), scheduling the end AS event.
+					// Note: this does not schedule the matching end event. Both modes change
+					// only the price prop, and handle_updated_props() syncs sale date meta
+					// only when a date, regular_price, sale_price or product_type prop
+					// changed, so wc_maybe_schedule_sale_events_on_meta_change() never sees
+					// a sale date key and returns early. Ending relies on this daily run.
 					wc_apply_sale_state_for_product( $product, $mode );
 				}
 
