@@ -140,21 +140,11 @@ public function test_behavior( string $country, $expected ): void {
 
 ## Setup and Teardown
 
-```php
-public function setUp(): void {
-    parent::setUp();
-    $this->admin_id = $this->factory->user->create(
-        array( 'role' => 'administrator' )
-    );
-    $this->service = new ServiceClass();
-}
+Cleanup depends on the selected base class. Follow the [fixture lifecycle rules](../../README.md#performance-and-isolation-principles).
 
-public function tearDown(): void {
-    wp_delete_user( $this->admin_id );
-    unset( $GLOBALS['some_global'] );
-    parent::tearDown();
-}
-```
+- When overriding setup or teardown, always call the parent implementation.
+- Do not delete per-test database fixtures merely as teardown cleanup when an inherited `WP_UnitTestCase` transaction covers their writes.
+- Explicitly restore only class-level, external, or process state that the base class does not reset.
 
 ## Integration Tests
 
@@ -251,7 +241,7 @@ Failed asserting that two arrays are identical.
 2. **Test behavior, not implementation** - Avoid testing internals
 3. **Resilient assertions** - Won't break when adjacent code changes
 4. **Mock externals** - No real API calls or external plugins
-5. **Clean up** - Use tearDown() to reset state
+5. **Match cleanup to the base lifecycle** - Do not duplicate rollback or base teardown; restore state the base does not own
 
 ## File Organization
 
@@ -278,6 +268,7 @@ tests/php/src/
 
 ## Related Docs
 
-- `plugins/woocommerce/CLAUDE.md` - Test commands, linting, workflow
+- [`plugins/woocommerce/tests/README.md`](../../README.md) - Test environment, fixture lifecycle, and performance
+- [`woocommerce-backend-dev/unit-tests.md`](../../../../../.ai/skills/woocommerce-backend-dev/unit-tests.md) - Unit-test conventions
 - `src/Internal/Admin/Settings/CLAUDE.md` - Settings backend patterns
 - PHPUnit: <https://phpunit.de/manual/9.6/en/index.html>

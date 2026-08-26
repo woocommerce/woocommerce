@@ -3,6 +3,7 @@
 ## Table of Contents
 
 - [Complete Test File Template](#complete-test-file-template)
+- [Fixture Lifecycle and Cleanup](#fixture-lifecycle-and-cleanup)
 - [Test File Naming and Location](#test-file-naming-and-location)
 - [System Under Test Variable](#system-under-test-variable)
 - [Test Method Documentation](#test-method-documentation)
@@ -48,13 +49,6 @@ class OrderProcessorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-	}
-
-	/**
 	 * @testdox Should return true when order is valid.
 	 */
 	public function test_returns_true_for_valid_order(): void {
@@ -87,6 +81,26 @@ class OrderProcessorTest extends WC_Unit_Test_Case {
 | Test docblock | Use `@testdox` with sentence ending in `.` |
 | Return type | Use `void` for test methods |
 | Assertion messages | Include helpful context for failures |
+
+## Fixture Lifecycle and Cleanup
+
+Choose cleanup from the test's base class; PHPUnit alone provides no database isolation.
+
+| Base class | Automatic isolation when parent setup/teardown runs |
+| --- | --- |
+| `WP_UnitTestCase` descendants, including `WP_HTTP_TestCase` and `WP_Test_REST_TestCase` | `$wpdb` transaction rollback, reset of the WordPress globals managed by the base, and hook snapshot restoration; the next setup flushes the object cache |
+| `WC_Unit_Test_Case` | All `WP_UnitTestCase` behavior plus WooCommerce cart/context, notices, and country-locale singleton cleanup |
+| `PHPUnit\Framework\TestCase` | No WordPress transaction, hook restoration, or global cleanup |
+| Other custom base | Inspect its implementation; do not infer cleanup from PHPUnit or its name |
+
+For a `WP_UnitTestCase` descendant, do not manually delete per-test products, coupons, orders, users, options, metadata, or other rows as post-assertion cleanup when its transaction covers them. Rollback does not cover class fixtures, explicit commits or DDL, non-transactional tables, other database connections, files, external services, or process state that the selected base does not reset.
+
+- Create persistent class fixtures in `wpSetUpBeforeClass()` and delete them in `wpTearDownAfterClass()`.
+- Remove a hook before the test ends only when later work in that test must not run it; WordPress parent teardown restores the hook snapshot.
+- An arrangement-time reset is valid when `setUp()` or the base class preloads state. Do not repeat cleanup already performed by the base.
+- If custom cleanup is required, guarantee `parent::tearDown()` runs. In a `WP_UnitTestCase` descendant, perform cleanup that can write through `$wpdb` before the parent rollback.
+
+See [Performance and isolation principles](../../../plugins/woocommerce/tests/README.md#performance-and-isolation-principles) for fixture sizing and database constraints.
 
 ## Test File Naming and Location
 
@@ -373,32 +387,30 @@ The fake logger must implement `WC_Logger_Interface`. Create an anonymous class 
 
 ```php
 public function test_logs_warning_for_invalid_input(): void {
-    $fake_logger = $this->create_fake_logger();
+	$fake_logger = $this->create_fake_logger();
 
-    // Inject via filter - passing object bypasses cache.
-    add_filter(
-        'woocommerce_logging_class',
-        function () use ( $fake_logger ) {
-            return $fake_logger;
-        }
-    );
+	// Inject via filter - passing object bypasses cache.
+	add_filter(
+		'woocommerce_logging_class',
+		static function () use ( $fake_logger ) {
+			return $fake_logger;
+		}
+	);
 
-    $this->sut->process_input( 'invalid-value' );
+	$this->sut->process_input( 'invalid-value' );
 
-    $this->assertCount( 1, $fake_logger->warning_calls );
-
-    remove_all_filters( 'woocommerce_logging_class' ); // Always clean up.
+	$this->assertCount( 1, $fake_logger->warning_calls );
 }
 ```
 
 ### Key Points
 
-| Aspect       | Detail                                          |
-| ------------ | ----------------------------------------------- |
-| Filter name  | `woocommerce_logging_class`                     |
-| Return value | Object instance (not class name string)         |
-| Interface    | Must implement `WC_Logger_Interface`            |
-| Cleanup      | Always call `remove_all_filters()` after test   |
+| Aspect       | Detail                                                        |
+| ------------ | ------------------------------------------------------------- |
+| Filter name  | `woocommerce_logging_class`                                   |
+| Return value | Object instance (not class name string)                       |
+| Interface    | Must implement `WC_Logger_Interface`                          |
+| Isolation    | `WP_UnitTestCase` parent teardown restores the filter snapshot |
 
 ### Reference
 
