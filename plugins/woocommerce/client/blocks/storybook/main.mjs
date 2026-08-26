@@ -1,9 +1,12 @@
 /**
  * External dependencies
  */
-const path = require( 'path' );
+import { createRequire } from 'node:module';
+import path from 'node:path';
 
-module.exports = {
+const require = createRequire( import.meta.url );
+
+export default {
 	stories: [
 		// WooCommerce Blocks stuff (anywhere in repo!)
 		'../assets/js/**/stories/*.stories.@(js|jsx|ts|tsx)',
@@ -39,8 +42,10 @@ module.exports = {
 		config.resolve.alias = {
 			...config.resolve.alias,
 			'react/jsx-runtime': require.resolve( 'react/jsx-runtime' ),
-			react: path.resolve( __dirname, '../node_modules/react' ),
-			'react-dom': path.resolve( __dirname, '../node_modules/react-dom' ),
+			react: path.dirname( require.resolve( 'react/package.json' ) ),
+			'react-dom': path.dirname(
+				require.resolve( 'react-dom/package.json' )
+			),
 		};
 		return config;
 	},

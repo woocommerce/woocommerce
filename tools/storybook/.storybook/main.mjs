@@ -1,4 +1,4 @@
-const webpackOverride = require( '../webpack.config' );
+import webpackOverride from '../webpack.config.js';
 
 const staticDirs = [
 	{
@@ -13,7 +13,7 @@ if ( process.env.NODE_ENV && process.env.NODE_ENV === 'production' ) {
 		to: '/assets/woocommerce-blocks',
 	} );
 }
-module.exports = {
+export default {
 	stories: [
 		// Introductory documentation
 		'../stories/**/*.mdx',
@@ -88,5 +88,4 @@ module.exports = {
 		name: '@storybook/react-webpack5',
 		options: {},
 	},
-
 };
