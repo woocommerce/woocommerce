@@ -46,10 +46,10 @@ trait ProductRequestPreparationTrait {
 
 			if ( ! $classname || ! class_exists( $classname ) ) {
 				// Fall back to the stored type rather than silently converting the product to simple.
-				// get_product_classname() resolves through woocommerce_product_class, so a class
-				// registered only by that filter still wins. The string check is needed because
-				// woocommerce_product_type_query can return any truthy value, and a non-string one
-				// would fatal while the class name is built.
+				// get_product_classname() resolves it through woocommerce_product_class, so a stored
+				// class registered only by that filter still wins. The requested type is not resolved
+				// that way. The string check guards woocommerce_product_type_query, which can return
+				// any truthy value, and a non-string one would fatal while the class name is built.
 				$classname = is_string( $existing_product_type ) && '' !== $existing_product_type
 					? \WC_Product_Factory::get_product_classname( $id, $existing_product_type )
 					: 'WC_Product_Simple';
