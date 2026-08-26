@@ -8,12 +8,15 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
+import orderReceivedMetadata from './order-confirmation-status-order-received/block.json';
 import cancelledMetadata from './order-confirmation-status-cancelled/block.json';
 import refundedMetadata from './order-confirmation-status-refunded/block.json';
 import completedMetadata from './order-confirmation-status-completed/block.json';
 import failedMetadata from './order-confirmation-status-failed/block.json';
 import { Edit, Save } from './edit';
 
+export const ORDER_RECEIVED_STATUS_BLOCK =
+	'woocommerce/order-confirmation-status-order-received';
 export const CANCELLED_STATUS_BLOCK =
 	'woocommerce/order-confirmation-status-cancelled';
 export const REFUNDED_STATUS_BLOCK =
@@ -24,10 +27,27 @@ export const FAILED_STATUS_BLOCK =
 	'woocommerce/order-confirmation-status-failed';
 
 export const ORDER_STATUS_BLOCKS = [
-	COMPLETED_STATUS_BLOCK,
+	ORDER_RECEIVED_STATUS_BLOCK,
 	CANCELLED_STATUS_BLOCK,
 	REFUNDED_STATUS_BLOCK,
+	COMPLETED_STATUS_BLOCK,
 	FAILED_STATUS_BLOCK,
+];
+
+const orderReceivedTemplate: TemplateArray = [
+	[
+		'core/heading',
+		{ content: __( 'Order received', 'woocommerce' ), level: 1 },
+	],
+	[
+		'core/paragraph',
+		{
+			content: __(
+				'Thank you. Your order has been received',
+				'woocommerce'
+			),
+		},
+	],
 ];
 
 const cancelledTemplate: TemplateArray = [
@@ -87,13 +107,24 @@ const failedTemplate: TemplateArray = [
 ];
 
 export const ORDER_STATUS_TEMPLATE = [
-	[ COMPLETED_STATUS_BLOCK, {}, completedTemplate ],
+	[ ORDER_RECEIVED_STATUS_BLOCK, {}, orderReceivedTemplate ],
 	[ CANCELLED_STATUS_BLOCK, {}, cancelledTemplate ],
 	[ REFUNDED_STATUS_BLOCK, {}, refundedTemplate ],
+	[ COMPLETED_STATUS_BLOCK, {}, completedTemplate ],
 	[ FAILED_STATUS_BLOCK, {}, failedTemplate ],
 ] as TemplateArray;
 
 export const registerOrderStatusBlocks = (): void => {
+	registerBlockType( orderReceivedMetadata.name, {
+		...orderReceivedMetadata,
+		edit: () => (
+			<Edit
+				view={ ORDER_RECEIVED_STATUS_BLOCK }
+				template={ orderReceivedTemplate }
+			/>
+		),
+		save: Save,
+	} as unknown as BlockConfiguration );
 	registerBlockType( cancelledMetadata.name, {
 		...cancelledMetadata,
 		edit: () => (

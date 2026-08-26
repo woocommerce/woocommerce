@@ -1143,6 +1143,15 @@ Contains the message shown for failed orders.
 - **Parent:** woocommerce/order-confirmation-status
 - **Supports:** ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 
+## Order received - woocommerce/order-confirmation-status-order-received
+
+Contains the message shown for processing and on-hold orders.
+
+- **Name:** woocommerce/order-confirmation-status-order-received
+- **Category:** woocommerce
+- **Parent:** woocommerce/order-confirmation-status
+- **Supports:** ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
+
 ## Refunded order status - woocommerce/order-confirmation-status-refunded
 
 Contains the message shown for refunded orders.

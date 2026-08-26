@@ -147,6 +147,9 @@ class Status extends AbstractOrderConfirmationBlock {
 	 */
 	private function get_status_block_name( $status ) {
 		switch ( $status ) {
+			case OrderStatus::ON_HOLD:
+			case OrderStatus::PROCESSING:
+				return 'woocommerce/order-confirmation-status-order-received';
 			case OrderStatus::CANCELLED:
 				return 'woocommerce/order-confirmation-status-cancelled';
 			case OrderStatus::REFUNDED:

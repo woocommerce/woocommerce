@@ -10,21 +10,22 @@ import {
 	CANCELLED_STATUS_BLOCK,
 	COMPLETED_STATUS_BLOCK,
 	FAILED_STATUS_BLOCK,
+	ORDER_RECEIVED_STATUS_BLOCK,
 	REFUNDED_STATUS_BLOCK,
 } from './inner-blocks';
 
 export const attributes = {
 	currentView: {
 		type: 'string',
-		default: COMPLETED_STATUS_BLOCK,
+		default: ORDER_RECEIVED_STATUS_BLOCK,
 		source: 'readonly',
 	},
 	editorViews: {
 		type: 'object',
 		default: [
 			{
-				view: COMPLETED_STATUS_BLOCK,
-				label: __( 'Completed', 'woocommerce' ),
+				view: ORDER_RECEIVED_STATUS_BLOCK,
+				label: __( 'Order received', 'woocommerce' ),
 				icon: 'info',
 			},
 			{
@@ -35,6 +36,11 @@ export const attributes = {
 			{
 				view: REFUNDED_STATUS_BLOCK,
 				label: __( 'Refunded', 'woocommerce' ),
+				icon: 'info',
+			},
+			{
+				view: COMPLETED_STATUS_BLOCK,
+				label: __( 'Completed', 'woocommerce' ),
 				icon: 'info',
 			},
 			{
