@@ -8,8 +8,9 @@ Covers the scenarios from the original plugin test plan that have a target in co
 - `managing-notifications.spec.ts` — admin list rendering + Resend on PENDING + Resend guard on ACTIVE + admin Cancel.
 - `variations.spec.ts` — variable products: the form following the selected
   variation, signup against a variation, the variation's attributes in the
-  emails, and the back-in-stock email linking back to the variation
-  pre-selected. Covers both fixed-value and `Any <attribute>` variations.
+  emails, the back-in-stock email linking back to the variation pre-selected,
+  and the parent-level signup opt-out that variations inherit. Covers both
+  fixed-value and `Any <attribute>` variations.
 
 ## Variation notes
 

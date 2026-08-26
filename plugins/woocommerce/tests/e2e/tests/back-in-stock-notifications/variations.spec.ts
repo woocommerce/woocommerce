@@ -16,6 +16,7 @@ import {
 	restockVariation,
 	selectVariation,
 	setBISOptions,
+	setProductSignupsAllowed,
 	signUpAsGuest,
 	signUpOnProductPage,
 	test,
@@ -191,6 +192,38 @@ test.describe(
 				expect( linkUrl.toString() ).toBe(
 					new URL( variableProduct.permalink ).toString()
 				);
+
+				// Following it has to leave the variation picked, which is what
+				// makes the attribute in the URL worth carrying.
+				await page.goto( productLink );
+				await expect(
+					page.locator(
+						`.variations select[name="${ variableProduct.attributeSelect }"]`
+					)
+				).toHaveValue( outOfStockVariation.option );
+			} );
+
+			test( 'a parent opted out of signups renders no form for its variations', async ( {
+				page,
+				restApi,
+				variableProduct,
+			} ) => {
+				await setProductSignupsAllowed(
+					restApi,
+					variableProduct.id,
+					false
+				);
+
+				await page.goto( variableProduct.permalink );
+				await selectVariation(
+					page,
+					variableProduct,
+					variableProduct.outOfStockVariation.option
+				);
+
+				// A variation has no opt-out of its own — the parent's meta is
+				// what decides, through `product_allows_signups()`.
+				await expect( bisFormLocator( page ) ).toHaveCount( 0 );
 			} );
 		} );
 

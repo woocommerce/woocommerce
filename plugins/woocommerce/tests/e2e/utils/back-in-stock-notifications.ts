@@ -334,6 +334,40 @@ export async function createOutOfStockVariableProduct(
 }
 
 /**
+ * Per-product meta that opts a product out of stock notification signups.
+ *
+ * Set on the parent product: `EligibilityService::product_allows_signups()`
+ * resolves a variation by recursing up to its parent, so a variation has no
+ * opt-out of its own.
+ *
+ * @see Config::get_product_signups_meta_key()
+ */
+export const BIS_PRODUCT_SIGNUPS_META =
+	'customer_stock_notifications_enable_signups';
+
+/**
+ * Opt a product out of (or back into) stock notification signups.
+ *
+ * @param {ApiClient} restApi   WP REST client.
+ * @param {number}    productId Product id.
+ * @param {boolean}   allowed   Whether signups are allowed for the product.
+ */
+export async function setProductSignupsAllowed(
+	restApi: ApiClient,
+	productId: number,
+	allowed: boolean
+): Promise< void > {
+	await restApi.put( `${ WC_API_PATH }/products/${ productId }`, {
+		meta_data: [
+			{
+				key: BIS_PRODUCT_SIGNUPS_META,
+				value: allowed ? 'yes' : 'no',
+			},
+		],
+	} );
+}
+
+/**
  * Restock a single variation via REST, leaving the rest of the product untouched.
  *
  * @param {ApiClient} restApi     WP REST client.
