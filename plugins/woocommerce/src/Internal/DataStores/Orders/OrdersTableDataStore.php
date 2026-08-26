@@ -2710,6 +2710,18 @@ FROM $order_meta_table
 	protected function handle_order_deletion_with_sync_disabled( $order_id ): void {
 		global $wpdb;
 
+		// Notes are the order's own data, not the backup post's, so they shouldn't wait on a deferred post record.
+		$comments = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT comment_ID FROM {$wpdb->comments} WHERE comment_post_ID = %d",
+				$order_id
+			)
+		);
+
+		foreach ( $comments as $comment_id ) {
+			wp_delete_comment( $comment_id, true );
+		}
+
 		$post_type = $wpdb->get_var(
 			$wpdb->prepare( "SELECT post_type FROM {$wpdb->posts} WHERE ID=%d", $order_id )
 		);
