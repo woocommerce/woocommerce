@@ -3643,8 +3643,14 @@ function wc_update_1110_flush_product_count_cache() {
  * Migrate the Back in Stock Notifications alpha opt-in from the
  * WOOCOMMERCE_BIS_ALPHA_ENABLED constant to the feature toggle.
  *
- * Stores that already made a choice on the Features screen keep it: add_option()
- * is a no-op when the option exists.
+ * The option is written with update_option() rather than add_option() because
+ * WC_Install::create_options() runs first and has already seeded every Features
+ * screen checkbox with its default. No store can have chosen 'no' deliberately:
+ * the toggle does not exist before this release.
+ *
+ * Writing the option fires 'updated_option', which FeaturesController turns into
+ * FEATURE_ENABLED_CHANGED_ACTION, so the feature's own activation side effects
+ * (the data retention task and the rewrite rules flush) run from there.
  *
  * @since 11.2.0
  *
@@ -3655,5 +3661,5 @@ function wc_update_1120_migrate_stock_notifications_alpha_constant() {
 		return;
 	}
 
-	add_option( StockNotifications::ENABLE_OPTION_NAME, 'yes', '', true );
+	update_option( StockNotifications::ENABLE_OPTION_NAME, 'yes', true );
 }

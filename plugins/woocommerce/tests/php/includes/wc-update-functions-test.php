@@ -8,6 +8,7 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
 
 /**
@@ -20,6 +21,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		Constants::clear_single_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' );
+		delete_option( 'woocommerce_feature_customer_stock_notifications_enabled' );
 		parent::tearDown();
 	}
 
@@ -428,9 +430,9 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Migration never overwrites a choice already made on the Features screen.
+	 * @testdox Migration overwrites the 'no' that WC_Install::create_options() seeds before the update callbacks run.
 	 */
-	public function test_wc_update_1120_migrate_stock_notifications_alpha_constant_keeps_existing_option(): void {
+	public function test_wc_update_1120_migrate_stock_notifications_alpha_constant_overwrites_seeded_option(): void {
 		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
 
 		update_option( 'woocommerce_feature_customer_stock_notifications_enabled', 'no' );
@@ -438,6 +440,32 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		wc_update_1120_migrate_stock_notifications_alpha_constant();
 
-		$this->assertSame( 'no', get_option( 'woocommerce_feature_customer_stock_notifications_enabled' ) );
+		$this->assertSame( 'yes', get_option( 'woocommerce_feature_customer_stock_notifications_enabled' ) );
+	}
+
+	/**
+	 * @testdox Migration lets FeaturesController announce the change, so the feature runs its own activation side effects.
+	 */
+	public function test_wc_update_1120_migrate_stock_notifications_alpha_constant_fires_feature_enabled_changed(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		update_option( 'woocommerce_feature_customer_stock_notifications_enabled', 'no' );
+		Constants::set_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
+
+		$changes  = array();
+		$listener = function ( $feature_id, $enabled ) use ( &$changes ) {
+			$changes[ $feature_id ] = $enabled;
+		};
+
+		add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, $listener, 10, 2 );
+
+		try {
+			wc_update_1120_migrate_stock_notifications_alpha_constant();
+		} finally {
+			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, $listener, 10 );
+		}
+
+		$this->assertArrayHasKey( 'customer_stock_notifications', $changes );
+		$this->assertTrue( $changes['customer_stock_notifications'] );
 	}
 }
