@@ -2,7 +2,11 @@
  * External dependencies
  */
 import type { APIRequest, Browser, Page } from '@playwright/test';
-import { WC_API_PATH, type ApiClient } from '@woocommerce/e2e-utils-playwright';
+import {
+	createClient,
+	WC_API_PATH,
+	type ApiClient,
+} from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
@@ -10,6 +14,7 @@ import { WC_API_PATH, type ApiClient } from '@woocommerce/e2e-utils-playwright';
 import { deleteOption, setOption } from './options';
 import { wpCLI } from './cli';
 import { expect, test as baseTest } from '../fixtures/fixtures';
+import { admin } from '../test-data/data';
 
 /**
  * Names of the Back in Stock Notifications options in core.
@@ -257,8 +262,37 @@ export function bisAdminListUrl( productId: number ): string {
 }
 
 /**
- * Shared `product` fixture for the Back in Stock Notifications specs: an
- * out-of-stock simple product created before the test and cleaned up after.
+ * Ids of products created by the `product` fixture, deleted in one batch when
+ * the worker finishes. A per-test DELETE costs ~0.45s, which is pure overhead
+ * on a suite where every test needs its own product.
+ */
+const productsToReap: number[] = [];
+
+/**
+ * Delete every product the `product` fixture created, in a single request.
+ */
+async function reapProducts(): Promise< void > {
+	if ( productsToReap.length === 0 ) {
+		return;
+	}
+
+	const restApi = createClient( process.env.BASE_URL as string, {
+		type: 'basic',
+		username: admin.username,
+		password: admin.password,
+	} );
+
+	await restApi
+		.post( `${ WC_API_PATH }/products/batch`, {
+			delete: productsToReap.splice( 0 ),
+		} )
+		.catch( () => {
+			/* best-effort cleanup */
+		} );
+}
+
+/**
+ * Shared fixtures for the Back in Stock Notifications specs.
  */
 export const test = baseTest.extend<
 	{
@@ -273,22 +307,28 @@ export const test = baseTest.extend<
 >( {
 	/**
 	 * Verify the env can run these specs at all, once per worker rather than
-	 * once per file — each check shells out through `wp-env run cli`.
+	 * once per file — each check shells out through `wp-env run cli`. Doubles as
+	 * the worker-scoped teardown that reaps the products the specs created.
 	 */
 	bisEnvReady: [
 		async ( {}, use ) => {
 			await assertBISFeatureEnabled();
 			await assertBISTestHelperActive();
 			await use();
+			await reapProducts();
 		},
 		{ scope: 'worker', auto: true },
 	],
 
+	/**
+	 * An out-of-stock simple product, created before the test. Its deletion is
+	 * deferred to the worker-scoped batch above rather than awaited here.
+	 */
 	product: async ( { restApi }, use ) => {
 		const product = await createOutOfStockProduct( restApi );
 		// eslint-disable-next-line react-hooks/rules-of-hooks -- Playwright's fixture `use`, not a React hook.
 		await use( product );
-		await product.cleanup();
+		productsToReap.push( product.id );
 	},
 } );
 

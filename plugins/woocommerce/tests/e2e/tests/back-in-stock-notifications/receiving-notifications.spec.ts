@@ -24,7 +24,7 @@ test.describe(
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
-		test.beforeEach( async ( { baseURL } ) => {
+		test.beforeAll( async ( { baseURL } ) => {
 			// Single opt-in so the notification becomes ACTIVE immediately
 			// (no verify step), which is what the back-in-stock dispatch needs.
 			await setBISOptions( request, baseURL!, {
@@ -34,7 +34,7 @@ test.describe(
 			} );
 		} );
 
-		test.afterEach( async ( { baseURL } ) => {
+		test.afterAll( async ( { baseURL } ) => {
 			await resetBISOptions( request, baseURL! );
 		} );
 

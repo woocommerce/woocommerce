@@ -17,17 +17,18 @@ test.describe(
 	'Back in Stock Notifications — signing up',
 	{ tag: [ tags.SERVICES ] },
 	() => {
-		test.afterEach( async ( { baseURL } ) => {
+		test.afterAll( async ( { baseURL } ) => {
 			await resetBISOptions( request, baseURL! );
 		} );
 
 		test.describe( 'Logged-in customer, single opt-in', () => {
 			test.use( { storageState: CUSTOMER_STATE_PATH } );
 
-			test.beforeEach( async ( { baseURL } ) => {
+			test.beforeAll( async ( { baseURL } ) => {
 				await setBISOptions( request, baseURL!, {
 					allowSignups: true,
 					doubleOptIn: false,
+					requireAccount: false,
 				} );
 			} );
 
@@ -94,7 +95,7 @@ test.describe(
 		} );
 
 		test.describe( 'Guest — single opt-in', () => {
-			test.beforeEach( async ( { baseURL } ) => {
+			test.beforeAll( async ( { baseURL } ) => {
 				await setBISOptions( request, baseURL!, {
 					allowSignups: true,
 					doubleOptIn: false,
@@ -120,7 +121,7 @@ test.describe(
 		} );
 
 		test.describe( 'Guest — double opt-in', () => {
-			test.beforeEach( async ( { baseURL } ) => {
+			test.beforeAll( async ( { baseURL } ) => {
 				await setBISOptions( request, baseURL!, {
 					allowSignups: true,
 					doubleOptIn: true,
@@ -155,9 +156,10 @@ test.describe(
 		} );
 
 		test.describe( 'Guest — requires account', () => {
-			test.beforeEach( async ( { baseURL } ) => {
+			test.beforeAll( async ( { baseURL } ) => {
 				await setBISOptions( request, baseURL!, {
 					allowSignups: true,
+					doubleOptIn: false,
 					requireAccount: true,
 				} );
 			} );

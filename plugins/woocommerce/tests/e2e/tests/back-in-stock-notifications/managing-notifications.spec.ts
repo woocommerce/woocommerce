@@ -40,7 +40,7 @@ test.describe(
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
-		test.beforeEach( async ( { baseURL } ) => {
+		test.beforeAll( async ( { baseURL } ) => {
 			await setBISOptions( request, baseURL!, {
 				allowSignups: true,
 				doubleOptIn: true,
@@ -48,7 +48,7 @@ test.describe(
 			} );
 		} );
 
-		test.afterEach( async ( { baseURL } ) => {
+		test.afterAll( async ( { baseURL } ) => {
 			await resetBISOptions( request, baseURL! );
 		} );
 
