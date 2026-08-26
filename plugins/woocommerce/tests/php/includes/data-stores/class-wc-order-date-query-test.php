@@ -36,6 +36,11 @@ class WC_Order_Date_Query_Test extends WC_Unit_Test_Case {
 	private const PAID_AT = 1784595600;
 
 	/**
+	 * Timestamp of 1960-01-01 00:00:00 UTC, a date WooCommerce stores as a negative number.
+	 */
+	private const PAID_BEFORE_EPOCH = -315619200;
+
+	/**
 	 * The order storage state before the test.
 	 *
 	 * @var bool
@@ -94,6 +99,45 @@ class WC_Order_Date_Query_Test extends WC_Unit_Test_Case {
 			'an explicit UTC instant on the day'   => array( '2026-07-20T02:00:00Z', true ),
 			'a date the calendar cannot represent' => array( '+8000 years', false ),
 		);
+	}
+
+	/**
+	 * @testdox An unrepresentable date should match no orders on either storage backend, including orders paid before 1970.
+	 */
+	public function test_an_unrepresentable_date_matches_nothing_on_both_backends(): void {
+		$results = array();
+
+		foreach ( array( 'posts' => false, 'hpos' => true ) as $storage => $use_hpos ) {
+			OrderHelper::toggle_cot_feature_and_usage( $use_hpos );
+
+			$this->assertSame(
+				$use_hpos,
+				OrderUtil::custom_orders_table_usage_is_enabled(),
+				"Could not switch order storage to {$storage}"
+			);
+
+			// A negative timestamp, which a one-sided lower bound would still match.
+			$order = new WC_Order();
+			$order->set_date_paid( self::PAID_BEFORE_EPOCH );
+			$order->save();
+
+			$results[ $storage ] = in_array(
+				$order->get_id(),
+				wc_get_orders(
+					array(
+						'date_paid' => '+8000 years',
+						'limit'     => -1,
+						'return'    => 'ids',
+					)
+				),
+				true
+			);
+
+			$order->delete( true );
+		}
+
+		$this->assertSame( $results['posts'], $results['hpos'], 'Post and HPOS storage disagree on an unrepresentable date' );
+		$this->assertFalse( $results['posts'], 'An unrepresentable date should match no orders' );
 	}
 
 	/**

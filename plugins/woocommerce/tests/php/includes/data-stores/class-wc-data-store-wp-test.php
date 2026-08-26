@@ -297,13 +297,13 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 			array(
 				array(
 					'key'     => '_date_paid',
-					'value'   => 0,
+					'value'   => array( 1, 0 ),
 					'type'    => 'NUMERIC',
-					'compare' => '<',
+					'compare' => 'BETWEEN',
 				),
 			),
 			$result['meta_query'],
-			'An unrepresentable date should constrain the query to nothing rather than dropping the date filter'
+			'An unrepresentable date should constrain the query to an empty range rather than dropping the date filter'
 		);
 	}
 

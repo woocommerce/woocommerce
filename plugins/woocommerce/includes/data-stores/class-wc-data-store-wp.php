@@ -476,11 +476,16 @@ class WC_Data_Store_WP {
 					? new DateTime( gmdate( 'Y-m-d', (int) wc_string_to_timestamp( $raw_end ) ) . ' 00:00:00', $timezone )
 					: clone $start;
 			} catch ( Exception $e ) {
+				/*
+				 * An empty range: no value can be both at least 1 and at most 0. A one-sided bound
+				 * would not do, because these keys can legitimately hold a negative timestamp for a
+				 * date before 1970.
+				 */
 				$wp_query_args['meta_query'][] = array(
 					'key'     => $key,
-					'value'   => 0,
+					'value'   => array( 1, 0 ),
 					'type'    => 'NUMERIC',
-					'compare' => '<',
+					'compare' => 'BETWEEN',
 				);
 
 				return $wp_query_args;
