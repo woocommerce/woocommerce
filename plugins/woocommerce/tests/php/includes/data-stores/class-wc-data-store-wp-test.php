@@ -285,6 +285,22 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A day-precision date the calendar cannot represent should drop the date constraint rather than throw.
+	 */
+	public function test_day_precision_meta_boundaries_survive_an_unrepresentable_date(): void {
+		update_option( 'timezone_string', 'America/New_York' );
+
+		// Resolves to the year 10026, which DateTime refuses to parse.
+		$result = $this->sut->parse_date_for_wp_query( '+8000 years', '_date_paid' );
+
+		$this->assertSame(
+			array(),
+			$result['meta_query'],
+			'An unrepresentable date should leave the query unconstrained instead of raising an exception'
+		);
+	}
+
+	/**
 	 * @testdox Day-precision meta date queries should anchor on local midnight on sites using a manual UTC offset.
 	 */
 	public function test_day_precision_meta_boundaries_use_manual_utc_offset(): void {
