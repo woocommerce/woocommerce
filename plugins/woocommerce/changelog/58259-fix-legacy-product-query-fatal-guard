@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent malformed date and status arguments to wc_get_products() from raising an uncaught fatal error on legacy post storage, so an invalid query returns an empty result set instead of taking down the request.

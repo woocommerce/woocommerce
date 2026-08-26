@@ -735,4 +735,142 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$store->update_product_sales( $product_id, 30.5, 'set' );
 		$this->assertSame( '30.500000', get_post_meta( $product_id, 'total_sales', true ) );
 	}
+
+	/**
+	 * Product date query args whose clause compares as a string when it survives.
+	 *
+	 * @return array<string, array{0: string}>
+	 */
+	public function provider_malformed_product_date_keys(): array {
+		return array(
+			'date_created'      => array( 'date_created' ),
+			'date_modified'     => array( 'date_modified' ),
+			'date_on_sale_from' => array( 'date_on_sale_from' ),
+			'date_on_sale_to'   => array( 'date_on_sale_to' ),
+		);
+	}
+
+	/**
+	 * @testdox A malformed product date arg fails the query closed instead of returning every product.
+	 *
+	 * @dataProvider provider_malformed_product_date_keys
+	 *
+	 * @param string $date_key The date query arg to set.
+	 */
+	public function test_malformed_product_date_args_match_no_products( string $date_key ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_date_on_sale_from( '2024-01-01' );
+		$product->save();
+
+		$captured = null;
+		$capture  = static function ( $args ) use ( &$captured ) {
+			$captured = $args;
+			return $args;
+		};
+		add_filter( 'woocommerce_product_data_store_cpt_get_products_query', $capture, 1 );
+
+		try {
+			$result = wc_get_products(
+				array(
+					$date_key => array( 'foo' ),
+					'return'  => 'ids',
+					'limit'   => -1,
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_product_data_store_cpt_get_products_query', $capture, 1 );
+		}
+
+		$this->assertSame( array(), $result, 'An unusable date filter must fail closed rather than returning every product with a sale date.' );
+		$this->assertNotEmpty( $captured['errors'] ?? array(), 'The query must be marked unsatisfiable via the errors mechanism.' );
+		$this->assertSame( array( 0 ), $captured['post__in'] ?? null, 'post__in must pin the query closed in case a filter drops the errors key.' );
+	}
+
+	/**
+	 * @testdox An unusable product status fails the query closed instead of fatalling in WP_Query.
+	 */
+	public function test_unusable_product_status_matches_no_products(): void {
+		WC_Helper_Product::create_simple_product();
+
+		$result = wc_get_products(
+			array(
+				'status' => new stdClass(),
+				'return' => 'ids',
+				'limit'  => -1,
+			)
+		);
+
+		$this->assertSame( array(), $result, 'An unusable status must fail the query closed.' );
+	}
+
+	/**
+	 * @testdox An unusable product status entry is dropped while a usable sibling keeps filtering.
+	 */
+	public function test_partially_usable_product_status_list_keeps_working(): void {
+		$published = WC_Helper_Product::create_simple_product();
+
+		$draft = WC_Helper_Product::create_simple_product();
+		$draft->set_status( 'draft' );
+		$draft->save();
+
+		$result = wc_get_products(
+			array(
+				'status' => array( 'publish', new stdClass() ),
+				'return' => 'ids',
+				'limit'  => -1,
+			)
+		);
+
+		$this->assertContains( $published->get_id(), $result, 'A usable sibling must keep filtering.' );
+		$this->assertNotContains( $draft->get_id(), $result, 'The surviving status must still restrict the query.' );
+	}
+
+	/**
+	 * @testdox An unusable product status whose only sibling filters nothing fails the query closed.
+	 */
+	public function test_unusable_product_status_with_non_filtering_sibling_fails_closed(): void {
+		$published = WC_Helper_Product::create_simple_product();
+
+		$trashed = WC_Helper_Product::create_simple_product();
+		wp_trash_post( $trashed->get_id() );
+
+		$result = wc_get_products(
+			array(
+				'status' => array( new stdClass(), 'bogus-not-a-status' ),
+				'return' => 'ids',
+				'limit'  => -1,
+			)
+		);
+
+		$this->assertSame( array(), $result, 'The query must match no products.' );
+		$this->assertNotContains( $trashed->get_id(), $result, 'A trashed product must never leak through a failed-closed status query.' );
+		$this->assertNotContains( $published->get_id(), $result, 'The query must not fall back to an unfiltered result set.' );
+	}
+
+	/**
+	 * @testdox Valid product date and status args still match products.
+	 */
+	public function test_valid_product_query_args_still_match_products(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_date_on_sale_from( '2024-01-01' );
+		$product->save();
+
+		$by_date = wc_get_products(
+			array(
+				'date_on_sale_from' => '>2023-01-01',
+				'return'            => 'ids',
+				'limit'             => -1,
+			)
+		);
+		$this->assertContains( $product->get_id(), $by_date, 'A valid sale-date filter must still match.' );
+
+		$by_status = wc_get_products(
+			array(
+				'status' => 'publish',
+				'return' => 'ids',
+				'limit'  => -1,
+			)
+		);
+		$this->assertContains( $product->get_id(), $by_status, 'A valid status filter must still match.' );
+	}
 }

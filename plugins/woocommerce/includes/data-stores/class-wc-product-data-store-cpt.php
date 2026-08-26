@@ -2286,7 +2286,61 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
+		// 'status' is mapped to 'post_status' above and passed to WP_Query untouched, where a
+		// non-stringable value reaches array_unique() and fatals. Only an object without
+		// __toString() is rejected, because arrays and null merely degrade to an empty status
+		// clause, which is pre-existing behaviour.
+		$has_unusable_status   = false;
+		$unusable_status_value = null;
+
+		if ( ! empty( $query_vars['post_status'] ) ) {
+			if ( is_array( $query_vars['post_status'] ) ) {
+				$usable_statuses = array();
+
+				foreach ( $query_vars['post_status'] as $status ) {
+					if ( $this->is_unusable_status( $status ) ) {
+						$has_unusable_status   = true;
+						$unusable_status_value = $status;
+						continue;
+					}
+
+					$usable_statuses[] = $status;
+				}
+
+				// Keep usable siblings and drop only the offending entries, but only when a
+				// survivor still narrows the query. A survivor that names no registered status
+				// contributes no clause at all, so counting it would drop the status filter
+				// entirely and return every product, including trashed and draft ones.
+				$query_vars['post_status'] = $usable_statuses;
+				$has_unusable_status       = $has_unusable_status
+					&& ! array_filter( $usable_statuses, array( $this, 'status_narrows_query' ) );
+
+				if ( $has_unusable_status ) {
+					unset( $query_vars['post_status'] );
+				}
+			} elseif ( $this->is_unusable_status( $query_vars['post_status'] ) ) {
+				$has_unusable_status   = true;
+				$unusable_status_value = $query_vars['post_status'];
+				unset( $query_vars['post_status'] );
+			}
+		}
+
 		$wp_query_args = parent::get_wp_query_args( $query_vars );
+
+		if ( $has_unusable_status ) {
+			unset( $wp_query_args['post_status'] );
+			$this->fail_query_closed(
+				$wp_query_args,
+				'woocommerce_product_query_invalid_status',
+				__( 'Invalid product status.', 'woocommerce' ),
+				array(
+					'key'      => 'status',
+					'value'    => $unusable_status_value,
+					'function' => 'wc_get_products',
+					'source'   => 'legacy-product-query',
+				)
+			);
+		}
 
 		if ( ! isset( $wp_query_args['date_query'] ) ) {
 			$wp_query_args['date_query'] = array();
@@ -2468,6 +2522,27 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		);
 		foreach ( $date_queries as $query_var_key => $db_key ) {
 			if ( isset( $query_vars[ $query_var_key ] ) && '' !== $query_vars[ $query_var_key ] ) {
+				// Fail closed rather than run without the filter. That matters most for the two
+				// meta-backed sale-date keys, whose clause compares as a string, so dropping it
+				// returns every product that has a sale date; date_created and date_modified are
+				// post columns and are treated the same way for consistency.
+				//
+				// The value still goes through parse_date_for_wp_query() below, because that
+				// method is public and overridable and skipping it would silently disable an
+				// extension's override. It normalises an unusable value on its own.
+				if ( ! $this->is_usable_as_string( $query_vars[ $query_var_key ] ) ) {
+					$this->fail_query_closed(
+						$wp_query_args,
+						'woocommerce_product_query_invalid_date',
+						__( 'Invalid date query.', 'woocommerce' ),
+						array(
+							'key'      => $query_var_key,
+							'value'    => $query_vars[ $query_var_key ],
+							'function' => 'wc_get_products',
+							'source'   => 'legacy-product-query',
+						)
+					);
+				}
 
 				// Remove any existing meta queries for the same keys to prevent conflicts.
 				$existing_queries = wp_list_pluck( $wp_query_args['meta_query'], 'key', true );
