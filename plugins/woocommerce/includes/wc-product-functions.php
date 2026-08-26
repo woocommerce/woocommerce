@@ -925,12 +925,18 @@ function wc_scheduled_sales() {
 			}
 
 			// These are persistent-capable, so only release them when the cache lives in
-			// this request rather than evicting entries other requests are using. Term
-			// queries are the bulk of it: priming a batch caches its term lookup under one
-			// entry, and clean_object_term_cache() only invalidates it by salt, which
-			// leaves the entry resident. The terms group is left alone on purpose: it
-			// keys by term ID and is bounded by the size of the taxonomy rather than the
-			// backlog, so flushing it per batch would re-query the same terms for nothing.
+			// this request rather than evicting entries other requests are using. products
+			// goes whole rather than per ID like posts above, because it is WooCommerce's
+			// own group, it is only reached here when the cache is request-local, and its
+			// keys carry a per-product random prefix a scoped delete would have to rebuild
+			// for every ID to find them.
+			//
+			// term-queries is the bulk of what this releases: priming a batch caches its
+			// term lookup under one entry, and clean_object_term_cache() only invalidates
+			// it by salt, which leaves the entry resident. The terms group is left alone on
+			// purpose: it keys by term ID and is bounded by the size of the taxonomy rather
+			// than the backlog, so flushing it per batch would re-query the same terms for
+			// nothing.
 			if ( $flush_shared_groups ) {
 				wp_cache_flush_group( 'products' );
 				wp_cache_flush_group( 'term-queries' );
