@@ -37,8 +37,8 @@
 		top: var(--top-padding);
 		z-index: 9999;
 		background-color: transparent;
-		// Keep the backdrop until the drawer finishes sliding out, then remove it without fading.
-		transition: background-color 0s 500ms;
+		// Delay the 200ms backdrop fade so it finishes with the 500ms drawer transition.
+		transition: background-color 200ms 300ms;
 	}
 
 	.wc-block-product-filters__overlay-wrapper {
