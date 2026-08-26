@@ -29,7 +29,13 @@ import { ValidatedTextInputProps } from './types';
  * Input types whose value the browser parses rather than storing verbatim. Assigning to `value` on these
  * clears anything the shopper has partially entered, so their value is left untouched before validating.
  */
-const PARSED_INPUT_TYPES = [ 'date', 'datetime-local', 'month', 'time', 'week' ];
+const PARSED_INPUT_TYPES = [
+	'date',
+	'datetime-local',
+	'month',
+	'time',
+	'week',
+];
 
 export type ValidatedTextInputHandle = {
 	focus?: () => void;
