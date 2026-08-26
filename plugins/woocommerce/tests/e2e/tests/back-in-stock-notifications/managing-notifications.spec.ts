@@ -40,166 +40,173 @@ test.describe(
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
-		test.beforeAll( async ( { baseURL } ) => {
-			await setBISOptions( request, baseURL!, {
-				allowSignups: true,
-				doubleOptIn: true,
-				requireAccount: false,
-			} );
-		} );
-
 		test.afterAll( async ( { baseURL } ) => {
 			await resetBISOptions( request, baseURL! );
 		} );
 
-		test( 'notifications list renders a signup row filtered by product', async ( {
-			page,
-			product,
-			browser,
-		} ) => {
-			const email = uniqueGuestEmail( 'bis-admin-list' );
+		// Grouped by opt-in mode rather than flipping the option inside a test:
+		// these options are global, so a mid-test write leaks into every test
+		// declared after it.
+		test.describe( 'Double opt-in — signups land PENDING', () => {
+			test.beforeAll( async ( { baseURL } ) => {
+				await setBISOptions( request, baseURL!, {
+					allowSignups: true,
+					doubleOptIn: true,
+					requireAccount: false,
+				} );
+			} );
 
-			await signUpAsGuest( browser, product.permalink, email );
-
-			await page.goto( bisAdminListUrl( product.id ) );
-			await expect(
-				page.getByRole( 'cell', { name: email, exact: true } )
-			).toBeVisible();
-		} );
-
-		test( 'Resend verification email on a pending notification dispatches a new verify email', async ( {
-			page,
-			product,
-			browser,
-		} ) => {
-			const email = uniqueGuestEmail( 'bis-admin-resend-pending' );
-
-			await signUpAsGuest( browser, product.permalink, email );
-
-			// Wait for the initial verify email so we can count a new one later.
-			await expectEmail(
+			test( 'notifications list renders a signup row filtered by product', async ( {
 				page,
-				email,
-				bisEmailSubject.verify( product.name )
-			);
+				product,
+				browser,
+			} ) => {
+				const email = uniqueGuestEmail( 'bis-admin-list' );
 
-			await page.goto( bisAdminListUrl( product.id ) );
-			// Surface cross-test bleed (duplicate rows for the same email/product)
-			// as an explicit failure instead of silently picking one via .first().
-			const row = page
-				.getByRole( 'row' )
-				.filter( { has: page.getByText( email, { exact: true } ) } );
-			await expect( row ).toHaveCount( 1 );
-			// Click the title-column link instead of the row-actions "Edit"
-			// anchor — the row-actions div is visibility:hidden until hover,
-			// and the title link leads to the same edit page.
-			await row.locator( 'a.row-title' ).click();
+				await signUpAsGuest( browser, product.permalink, email );
 
-			await page
-				.locator(
-					'select[name="wc_customer_stock_notification_action"]'
-				)
-				.selectOption( 'send_verification_email' );
-			await submitNotificationEditForm( page );
+				await page.goto( bisAdminListUrl( product.id ) );
+				await expect(
+					page.getByRole( 'cell', { name: email, exact: true } )
+				).toBeVisible();
+			} );
 
-			await expect(
-				page.getByText( `Verification email sent to "${ email }"` )
-			).toBeVisible();
-
-			// Assert a second verify email actually landed in the log — the
-			// admin success notice alone would pass even if dispatch regressed.
-			await expectEmail(
+			test( 'Resend verification email on a pending notification dispatches a new verify email', async ( {
 				page,
-				email,
-				bisEmailSubject.verify( product.name ),
-				2
-			);
+				product,
+				browser,
+			} ) => {
+				const email = uniqueGuestEmail( 'bis-admin-resend-pending' );
+
+				await signUpAsGuest( browser, product.permalink, email );
+
+				// Wait for the initial verify email so we can count a new one later.
+				await expectEmail(
+					page,
+					email,
+					bisEmailSubject.verify( product.name )
+				);
+
+				await page.goto( bisAdminListUrl( product.id ) );
+				// Surface cross-test bleed (duplicate rows for the same email/product)
+				// as an explicit failure instead of silently picking one via .first().
+				const row = page.getByRole( 'row' ).filter( {
+					has: page.getByText( email, { exact: true } ),
+				} );
+				await expect( row ).toHaveCount( 1 );
+				// Click the title-column link instead of the row-actions "Edit"
+				// anchor — the row-actions div is visibility:hidden until hover,
+				// and the title link leads to the same edit page.
+				await row.locator( 'a.row-title' ).click();
+
+				await page
+					.locator(
+						'select[name="wc_customer_stock_notification_action"]'
+					)
+					.selectOption( 'send_verification_email' );
+				await submitNotificationEditForm( page );
+
+				await expect(
+					page.getByText( `Verification email sent to "${ email }"` )
+				).toBeVisible();
+
+				// Assert a second verify email actually landed in the log — the
+				// admin success notice alone would pass even if dispatch regressed.
+				await expectEmail(
+					page,
+					email,
+					bisEmailSubject.verify( product.name ),
+					2
+				);
+			} );
 		} );
 
-		test( 'Resend verification is not offered for notifications that are already active', async ( {
-			page,
-			product,
-			baseURL,
-			browser,
-		} ) => {
-			// Flip to single opt-in so the signup goes straight to ACTIVE.
-			await setBISOptions( request, baseURL!, { doubleOptIn: false } );
+		test.describe( 'Single opt-in — signups land ACTIVE', () => {
+			test.beforeAll( async ( { baseURL } ) => {
+				await setBISOptions( request, baseURL!, {
+					allowSignups: true,
+					doubleOptIn: false,
+					requireAccount: false,
+				} );
+			} );
 
-			const email = uniqueGuestEmail( 'bis-admin-active' );
+			test( 'Resend verification is not offered for notifications that are already active', async ( {
+				page,
+				product,
+				browser,
+			} ) => {
+				const email = uniqueGuestEmail( 'bis-admin-active' );
 
-			await signUpAsGuest( browser, product.permalink, email );
+				await signUpAsGuest( browser, product.permalink, email );
 
-			await page.goto( bisAdminListUrl( product.id ) );
-			const row = page
-				.getByRole( 'row' )
-				.filter( { has: page.getByText( email, { exact: true } ) } );
-			await expect( row ).toHaveCount( 1 );
-			// Click the title-column link instead of the row-actions "Edit"
-			// anchor — the row-actions div is visibility:hidden until hover,
-			// and the title link leads to the same edit page.
-			await row.locator( 'a.row-title' ).click();
+				await page.goto( bisAdminListUrl( product.id ) );
+				const row = page.getByRole( 'row' ).filter( {
+					has: page.getByText( email, { exact: true } ),
+				} );
+				await expect( row ).toHaveCount( 1 );
+				// Click the title-column link instead of the row-actions "Edit"
+				// anchor — the row-actions div is visibility:hidden until hover,
+				// and the title link leads to the same edit page.
+				await row.locator( 'a.row-title' ).click();
 
-			const options = await page
-				.locator(
-					'select[name="wc_customer_stock_notification_action"] option'
-				)
-				.allTextContents();
+				const options = await page
+					.locator(
+						'select[name="wc_customer_stock_notification_action"] option'
+					)
+					.allTextContents();
 
-			// UI-layer guard: the Resend action is not offered for non-pending rows.
-			expect(
-				options.some( ( text ) =>
-					/Resend verification email/i.test( text )
-				)
-			).toBe( false );
-		} );
+				// UI-layer guard: the Resend action is not offered for non-pending rows.
+				expect(
+					options.some( ( text ) =>
+						/Resend verification email/i.test( text )
+					)
+				).toBe( false );
+			} );
 
-		test( 'admin Cancel action marks an active notification as Cancelled', async ( {
-			page,
-			product,
-			baseURL,
-			browser,
-		} ) => {
-			// Flip to single opt-in so the signup goes straight to ACTIVE.
 			// The Cancel action is only available on ACTIVE / SENT rows.
-			await setBISOptions( request, baseURL!, { doubleOptIn: false } );
+			test( 'admin Cancel action marks an active notification as Cancelled', async ( {
+				page,
+				product,
+				browser,
+			} ) => {
+				const email = uniqueGuestEmail( 'bis-admin-cancel' );
 
-			const email = uniqueGuestEmail( 'bis-admin-cancel' );
+				await signUpAsGuest( browser, product.permalink, email );
 
-			await signUpAsGuest( browser, product.permalink, email );
+				await page.goto( bisAdminListUrl( product.id ) );
+				const row = page.getByRole( 'row' ).filter( {
+					has: page.getByText( email, { exact: true } ),
+				} );
+				await expect( row ).toHaveCount( 1 );
+				// Click the title-column link instead of the row-actions "Edit"
+				// anchor — the row-actions div is visibility:hidden until hover,
+				// and the title link leads to the same edit page.
+				await row.locator( 'a.row-title' ).click();
 
-			await page.goto( bisAdminListUrl( product.id ) );
-			const row = page
-				.getByRole( 'row' )
-				.filter( { has: page.getByText( email, { exact: true } ) } );
-			await expect( row ).toHaveCount( 1 );
-			// Click the title-column link instead of the row-actions "Edit"
-			// anchor — the row-actions div is visibility:hidden until hover,
-			// and the title link leads to the same edit page.
-			await row.locator( 'a.row-title' ).click();
+				await page
+					.locator(
+						'select[name="wc_customer_stock_notification_action"]'
+					)
+					.selectOption( 'cancel_notification' );
+				await submitNotificationEditForm( page );
 
-			await page
-				.locator(
-					'select[name="wc_customer_stock_notification_action"]'
-				)
-				.selectOption( 'cancel_notification' );
-			await submitNotificationEditForm( page );
+				// Wait for the success notice before navigating away —
+				// `submitNotificationEditForm` only awaits the click event, not
+				// the resulting POST round-trip, so on slower CI runners the
+				// next `page.goto()` was racing the submit and the row was
+				// still ACTIVE by the time the list view loaded.
+				await expect(
+					page.getByText( 'Notification updated.' )
+				).toBeVisible();
 
-			// Wait for the success notice before navigating away —
-			// `submitNotificationEditForm` only awaits the click event, not
-			// the resulting POST round-trip, so on slower CI runners the
-			// next `page.goto()` was racing the submit and the row was
-			// still ACTIVE by the time the list view loaded.
-			await expect(
-				page.getByText( 'Notification updated.' )
-			).toBeVisible();
-
-			await page.goto( bisAdminListUrl( product.id ) );
-			const refreshedRow = page
-				.getByRole( 'row' )
-				.filter( { has: page.getByText( email, { exact: true } ) } );
-			await expect(
-				refreshedRow.getByText( /Cancelled/i )
-			).toBeVisible();
+				await page.goto( bisAdminListUrl( product.id ) );
+				const refreshedRow = page.getByRole( 'row' ).filter( {
+					has: page.getByText( email, { exact: true } ),
+				} );
+				await expect(
+					refreshedRow.getByText( /Cancelled/i )
+				).toBeVisible();
+			} );
 		} );
 	}
 );
