@@ -917,7 +917,9 @@ function wc_scheduled_sales() {
 			// wc_get_product() caches every product it reads. Saving one already releases
 			// its own entry through ProductCacheController, but a product this loop reads
 			// without saving keeps its entry, so release the group. It is registered
-			// non-persistent, so this only ever touches the current request.
+			// non-persistent, so this only ever touches the current request. A drop-in
+			// without flush_group support releases none of it: this is the one group with
+			// no other release path, so the relief does not reach that configuration.
 			if ( $flush_product_objects ) {
 				wp_cache_flush_group( 'product_objects' );
 			}
