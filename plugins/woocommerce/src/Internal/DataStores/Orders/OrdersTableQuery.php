@@ -602,8 +602,8 @@ class OrdersTableQuery {
 			return;
 		}
 
-		// WP_Date_Query::$time_keys, plus the clause args it reads alongside them.
-		$consumed_keys = array(
+		// WP_Date_Query::$time_keys.
+		$time_keys = array(
 			'after',
 			'before',
 			'year',
@@ -618,9 +618,6 @@ class OrdersTableQuery {
 			'hour',
 			'minute',
 			'second',
-			'column',
-			'compare',
-			'relation',
 		);
 
 		foreach ( $query as $key => $value ) {
@@ -630,7 +627,18 @@ class OrdersTableQuery {
 				continue;
 			}
 
-			if ( ! in_array( $key, $consumed_keys, true ) ) {
+			// 'column', 'compare' and 'relation' are single values. An array is not merely unusable
+			// for the last two: WP_Date_Query reads it as another clause and recurses on it until
+			// memory runs out, so this must be checked before the array-aware branch below.
+			if ( in_array( $key, array( 'column', 'compare', 'relation' ), true ) ) {
+				if ( ! $this->is_stringable( $value ) ) {
+					throw $this->invalid_query_arg( esc_html__( 'Invalid date_query value.', 'woocommerce' ) );
+				}
+
+				continue;
+			}
+
+			if ( ! in_array( $key, $time_keys, true ) ) {
 				continue;
 			}
 

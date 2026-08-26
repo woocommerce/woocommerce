@@ -1917,4 +1917,49 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 
 		$this->assertSame( array(), $result, 'An unusable element must still fail the query closed.' );
 	}
+
+	/**
+	 * Clause args that are single values, where an array is not just unusable.
+	 *
+	 * WP_Date_Query reads an array under 'compare' or 'relation' as another clause and recurses on
+	 * it until memory runs out, so an empty array must be rejected rather than iterated.
+	 *
+	 * @return array<string, array{0: array}>
+	 */
+	public function provider_unusable_date_query_clause_args(): array {
+		return array(
+			'relation empty array' => array( array( 'relation' => array(), array( 'year' => 2024 ) ) ),
+			'relation object'      => array( array( 'relation' => new \stdClass(), array( 'year' => 2024 ) ) ),
+			'compare empty array'  => array( array( array( 'compare' => array(), 'year' => 2024 ) ) ),
+			'compare object'       => array( array( array( 'compare' => new \stdClass(), 'year' => 2024 ) ) ),
+			'column object'        => array( array( array( 'column' => new \stdClass(), 'year' => 2024 ) ) ),
+		);
+	}
+
+	/**
+	 * @testDox An unusable date_query clause arg fails the query closed rather than reaching WP_Date_Query.
+	 *
+	 * @dataProvider provider_unusable_date_query_clause_args
+	 *
+	 * @param array $date_query The malformed date_query arg.
+	 */
+	public function test_unusable_date_query_clause_arg_fails_closed( array $date_query ): void {
+		// Also asserts the notice fires: WP fails the test both if an undeclared
+		// incorrect-usage notice is raised and if a declared one never is.
+		$this->setExpectedIncorrectUsage( 'wc_get_orders' );
+
+		$order = OrderHelper::create_order();
+		$order->set_date_created( '2024-06-01' );
+		$order->save();
+
+		$result = wc_get_orders(
+			array(
+				'date_query' => $date_query,
+				'return'     => 'ids',
+				'limit'      => -1,
+			)
+		);
+
+		$this->assertSame( array(), $result, 'An unusable clause arg must fail the query closed.' );
+	}
 }
