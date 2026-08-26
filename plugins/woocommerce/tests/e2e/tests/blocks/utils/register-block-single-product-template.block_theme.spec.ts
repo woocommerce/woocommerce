@@ -55,7 +55,13 @@ test.describe( 'registerProductBlockType registers', () => {
 			await editor.setContent( '' );
 
 			// Product Price is available in the global inserter. For some reason, using await editor.insertBlock( { name: blockName } ); does not work here.
-			await editor.insertBlockUsingGlobalInserter( blockTitle );
+			await editor.openGlobalBlockInserter();
+			await page.getByPlaceholder( 'Search' ).fill( blockTitle );
+			const productPriceOption = page
+				.getByRole( 'option', { name: blockTitle, exact: true } )
+				.first();
+			await expect( productPriceOption ).toBeVisible();
+			await productPriceOption.click();
 
 			await expect(
 				await editor.getBlockByName( blockName )
