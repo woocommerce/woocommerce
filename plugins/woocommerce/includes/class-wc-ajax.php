@@ -1214,14 +1214,20 @@ class WC_AJAX {
 				}
 				if ( ProductType::VARIABLE === $product->get_type() ) {
 					/* translators: %s product name */
-					throw new Exception( sprintf( __( '%s is a variable product parent and cannot be added.', 'woocommerce' ), $product->get_name() ) );
+					$message = sprintf( __( '%s is a variable product parent and cannot be added.', 'woocommerce' ), $product->get_name() );
+
+					// The message is shown in a JS alert, not rendered as HTML.
+					throw new Exception( wp_strip_all_tags( html_entity_decode( $message, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ) ) );
 				}
 				$validation_error = new WP_Error();
 				$validation_error = apply_filters( 'woocommerce_ajax_add_order_item_validation', $validation_error, $product, $order, $qty );
 
 				if ( $validation_error->get_error_code() ) {
 					/* translators: %s: error message */
-					throw new Exception( sprintf( __( 'Error: %s', 'woocommerce' ), $validation_error->get_error_message() ) );
+					$message = sprintf( __( 'Error: %s', 'woocommerce' ), $validation_error->get_error_message() );
+
+					// The message is shown in a JS alert, not rendered as HTML.
+					throw new Exception( wp_strip_all_tags( html_entity_decode( $message, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ) ) );
 				}
 				$item_id                 = $order->add_product( $product, $qty, array( 'order' => $order ) );
 				$item                    = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id, $order, $product );
