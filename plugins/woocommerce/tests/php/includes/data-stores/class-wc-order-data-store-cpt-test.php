@@ -1532,4 +1532,540 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			$this->assertGreaterThan( 0, $item->get_product_id(), 'Item should have a product ID from cached meta' );
 		}
 	}
+
+	/**
+	 * Malformed `wc_get_orders()` args that used to raise an uncaught TypeError on the CPT data store.
+	 *
+	 * @return array<string, array{0: array<string, mixed>}>
+	 */
+	public function provider_malformed_legacy_query_args(): array {
+		return array(
+			'date_created as array'       => array( array( 'date_created' => array( 'foo' ) ) ),
+			'date_created as object'      => array( array( 'date_created' => new stdClass() ) ),
+			'date_paid as array'          => array( array( 'date_paid' => array( 'foo' ) ) ),
+			'date_modified as array'      => array( array( 'date_modified' => array( 'foo' ) ) ),
+			'status as object'            => array( array( 'status' => new stdClass() ) ),
+			'status as array with object' => array( array( 'status' => array( new stdClass() ) ) ),
+		);
+	}
+
+	/**
+	 * @dataProvider provider_malformed_legacy_query_args
+	 * @testdox Malformed query args do not raise a fatal error on the CPT order data store.
+	 *
+	 * @param array $args Malformed args to pass to `wc_get_orders()`.
+	 */
+	public function test_malformed_query_args_do_not_fatal( array $args ): void {
+		OrderHelper::create_order();
+
+		$args['return'] = 'ids';
+		$args['limit']  = -1;
+
+		$result = wc_get_orders( $args );
+
+		// assertSame( array() ), not assertIsArray(): a type-only check would pass even if the
+		// arg were dropped and the query widened.
+		$this->assertSame( array(), $result, 'A malformed restricting arg must match no orders.' );
+	}
+
+	/**
+	 * Status values that are not usable but never raised a fatal error.
+	 *
+	 * @return array<string, array{0: mixed}>
+	 */
+	public function provider_inert_status_values(): array {
+		return array(
+			'array entry' => array( array( array() ) ),
+			'null entry'  => array( array( null ) ),
+		);
+	}
+
+	/**
+	 * @testdox Status values that were inert before the guard still return every order.
+	 *
+	 * @dataProvider provider_inert_status_values
+	 *
+	 * @param mixed $status The status value to query with.
+	 */
+	public function test_inert_status_values_still_return_every_order( $status ): void {
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		// WP_Query reduces these to '' and drops the status clause, so they match every order.
+		// Rejecting them would turn a working query into an empty one. The handler swallows the
+		// array-to-string notice, which phpunit would otherwise convert into an exception.
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Test-only: keeps a pre-existing PHP notice from failing the assertion.
+		set_error_handler( static fn() => true, E_WARNING | E_NOTICE );
+
+		try {
+			$result = wc_get_orders(
+				array(
+					'status' => $status,
+					'return' => 'ids',
+					'limit'  => -1,
+				)
+			);
+		} finally {
+			restore_error_handler();
+		}
+
+		$this->assertContains( $order->get_id(), $result, 'An inert status value must not empty the result set.' );
+	}
+
+	/**
+	 * WP_Query vars that resolve to 'p', which takes precedence over post__in.
+	 *
+	 * @return array<string, array{0: string}>
+	 */
+	public function provider_post_id_query_vars(): array {
+		return array(
+			'p'             => array( 'p' ),
+			'page_id'       => array( 'page_id' ),
+			'attachment_id' => array( 'attachment_id' ),
+			'subpost_id'    => array( 'subpost_id' ),
+		);
+	}
+
+	/**
+	 * @testdox A failed-closed query stays closed even if a filter drops the errors key.
+	 *
+	 * @dataProvider provider_post_id_query_vars
+	 *
+	 * @param string $id_var The WP_Query var carrying the order ID.
+	 */
+	public function test_fail_closed_query_survives_a_filter_dropping_errors( string $id_var ): void {
+		$order = OrderHelper::create_order();
+
+		$drop_errors = static function ( $args ) {
+			unset( $args['errors'] );
+			return $args;
+		};
+
+		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $drop_errors, 99 );
+
+		try {
+			// WP_Query honours 'p' over post__in, so the backstop only holds if 'p' is removed.
+			$result = wc_get_orders(
+				array(
+					'status' => new stdClass(),
+					$id_var  => $order->get_id(),
+					'return' => 'ids',
+					'limit'  => -1,
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $drop_errors, 99 );
+		}
+
+		$this->assertSame( array(), $result, 'post__in must not be bypassed by a caller-supplied p.' );
+	}
+
+	/**
+	 * @testdox Malformed date args match no orders rather than returning every order.
+	 *
+	 * @dataProvider provider_malformed_date_keys
+	 *
+	 * @param string $date_key The date query arg to set.
+	 */
+	public function test_malformed_date_args_match_no_orders( string $date_key ): void {
+		OrderHelper::create_order();
+
+		// A result count cannot distinguish the guard from incidental misses, since an unguarded
+		// value normalises to the Unix epoch. Assert on the fail-closed markers instead.
+		$captured = null;
+		$capture  = static function ( $args ) use ( &$captured ) {
+			$captured = $args;
+			return $args;
+		};
+		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 1 );
+
+		$result = wc_get_orders(
+			array(
+				$date_key => array( 'foo' ),
+				'return'  => 'ids',
+				'limit'   => -1,
+				'status'  => 'any',
+			)
+		);
+
+		remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 1 );
+
+		$this->assertSame(
+			array(),
+			$result,
+			'An unusable date filter must fail closed rather than dropping the filter and returning every order.'
+		);
+		$this->assertNotEmpty( $captured['errors'] ?? array(), 'The query must be marked unsatisfiable via the errors mechanism.' );
+		$this->assertSame( array( 0 ), $captured['post__in'] ?? null, 'post__in must pin the query closed in case a filter drops the errors key.' );
+	}
+
+	/**
+	 * @testdox An unusable customer fails the query closed instead of fatalling in WP core.
+	 */
+	public function test_unusable_customer_matches_no_orders(): void {
+		OrderHelper::create_order();
+
+		$captured = null;
+		$capture  = static function ( $args ) use ( &$captured ) {
+			$captured = $args;
+			return $args;
+		};
+		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 1 );
+
+		$result = wc_get_orders(
+			array(
+				'customer' => new stdClass(),
+				'return'   => 'ids',
+				'limit'    => -1,
+				'status'   => 'any',
+			)
+		);
+
+		remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 1 );
+
+		$this->assertSame( array(), $result, 'An unusable customer must not return orders.' );
+		$this->assertNotEmpty( $captured['errors'] ?? array(), 'The query must be marked unsatisfiable via the errors mechanism.' );
+		$this->assertSame( array( 0 ), $captured['post__in'] ?? null, 'post__in must pin the query closed.' );
+	}
+
+	/**
+	 * @testdox A nested customer array still builds an AND group rather than failing closed.
+	 *
+	 * Nested arrays are a supported grouping shape that get_orders_generate_customer_meta_query()
+	 * recurses into, so the guard must only reject unusable leaves. Mirrors the HPOS coverage in
+	 * OrdersTableDataStoreTests.
+	 */
+	public function test_nested_customer_array_still_matches_orders(): void {
+		$order = OrderHelper::create_order();
+		$order->set_billing_email( 'nested-probe@example.com' );
+		$order->set_customer_id( 0 );
+		$order->save();
+
+		$matched = wc_get_orders(
+			array(
+				'customer' => array( array( 'nested-probe@example.com', 0 ) ),
+				'return'   => 'ids',
+				'limit'    => -1,
+				'status'   => 'any',
+			)
+		);
+
+		$this->assertContains(
+			$order->get_id(),
+			$matched,
+			'A nested customer array must build an AND group, not fail the query closed.'
+		);
+	}
+
+
+	/**
+	 * Date query args, covering both the post-column and the meta-backed keys.
+	 *
+	 * @return array<string, array{0: string}>
+	 */
+	public function provider_malformed_date_keys(): array {
+		return array(
+			'date_created (post column)'  => array( 'date_created' ),
+			'date_modified (post column)' => array( 'date_modified' ),
+			'date_paid (meta)'            => array( 'date_paid' ),
+			'date_completed (meta)'       => array( 'date_completed' ),
+		);
+	}
+
+
+	/**
+	 * @testdox An unusable status fails closed, matching no orders rather than every order.
+	 */
+	public function test_unusable_status_matches_no_orders(): void {
+		OrderHelper::create_order();
+
+		// A result count would pass with the guard removed: unsetting post_status leaves
+		// WP_Query's 'publish' default, which no wc-* order matches. Capture the
+		// built args so the fail-closed markers themselves are what the test depends on.
+		$captured = null;
+		$capture  = static function ( $args ) use ( &$captured ) {
+			$captured = $args;
+			return $args;
+		};
+		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 1 );
+
+		$result = wc_get_orders(
+			array(
+				'status' => new stdClass(),
+				'return' => 'ids',
+				'limit'  => -1,
+			)
+		);
+
+		remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 1 );
+
+		$this->assertSame(
+			array(),
+			$result,
+			'A status that cannot be used as a string must not fall back to querying every order.'
+		);
+		$this->assertNotEmpty( $captured['errors'] ?? array(), 'The query must be marked unsatisfiable via the errors mechanism.' );
+		$this->assertSame( array( 0 ), $captured['post__in'] ?? null, 'post__in must pin the query closed in case a filter drops the errors key.' );
+	}
+
+
+	/**
+	 * Valid query args, paired with the order property they must match on.
+	 *
+	 * @return array<string, array{0: string, 1: mixed, 2: string, 3: mixed}>
+	 */
+	public function provider_valid_query_args(): array {
+		return array(
+			'date range'     => array( 'set_date_created', '2024-07-04T12:00:00', 'date_created', '2024-01-01...2024-12-31' ),
+			'customer email' => array( 'set_billing_email', 'guard-probe@example.com', 'customer', 'guard-probe@example.com' ),
+			'status'         => array( 'set_status', OrderStatus::COMPLETED, 'status', OrderStatus::COMPLETED ),
+		);
+	}
+
+	/**
+	 * @testdox Valid query args still match the orders they should on the CPT data store.
+	 *
+	 * @dataProvider provider_valid_query_args
+	 *
+	 * @param string $setter    Order setter for the property being queried.
+	 * @param mixed  $value     Value to set on the order.
+	 * @param string $query_key Query arg to filter by.
+	 * @param mixed  $query_val Value for that query arg.
+	 */
+	public function test_valid_query_args_still_match_orders( string $setter, $value, string $query_key, $query_val ): void {
+		$order = OrderHelper::create_order();
+		$order->{$setter}( $value );
+		$order->save();
+
+		// A second order that the arg must NOT match, so the assertion depends on the filter
+		// actually being applied rather than on there being only one order.
+		$other = OrderHelper::create_order();
+		$other->set_status( OrderStatus::ON_HOLD );
+		$other->set_billing_email( 'other@example.com' );
+		$other->set_date_created( '2019-01-01T00:00:00' );
+		$other->save();
+
+		// 'status' is a default and goes FIRST: a later key wins in a literal, and one provider
+		// row queries by status, which this would otherwise overwrite with 'any'.
+		$matched = wc_get_orders(
+			array_merge(
+				array( 'status' => 'any' ),
+				array(
+					$query_key => $query_val,
+					'return'   => 'ids',
+					'limit'    => -1,
+				)
+			)
+		);
+
+		$this->assertContains( $order->get_id(), $matched, 'A valid query arg must still match its order.' );
+		$this->assertNotContains( $other->get_id(), $matched, 'The arg must still exclude a non-matching order.' );
+	}
+
+	/**
+	 * Status lists whose only surviving entry filters nothing.
+	 *
+	 * @return array<string, array{0: array}>
+	 */
+	public function provider_unusable_status_with_inert_sibling(): array {
+		return array(
+			'object and empty string' => array( array( new stdClass(), '' ) ),
+			'object and null'         => array( array( new stdClass(), null ) ),
+			'object and array'        => array( array( new stdClass(), array() ) ),
+		);
+	}
+
+	/**
+	 * @testdox An unusable status fails closed even when an inert entry sits beside it.
+	 *
+	 * The inert entry survives the usability loop but filters no status, so treating it as a
+	 * usable sibling would drop the clause and return every order, trashed ones included. Trunk
+	 * fatalled on this input, so nothing depends on it returning rows.
+	 *
+	 * @dataProvider provider_unusable_status_with_inert_sibling
+	 *
+	 * @param array $status Status list mixing an unusable entry with an inert one.
+	 */
+	public function test_unusable_status_with_inert_sibling_fails_closed( array $status ): void {
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$captured = null;
+		$capture  = function ( $args ) use ( &$captured ) {
+			$captured = $args;
+			return $args;
+		};
+
+		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 99 );
+
+		// An array entry warns on the 'wc-' concatenation exactly as it did before this change.
+		// Swallow it and continue, as production does, rather than let phpunit convert it.
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Test-only: reproduces production error semantics.
+		set_error_handler( static fn() => true );
+
+		try {
+			$result = wc_get_orders(
+				array(
+					'status' => $status,
+					'return' => 'ids',
+					'limit'  => -1,
+				)
+			);
+		} finally {
+			restore_error_handler();
+			remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 99 );
+		}
+
+		$this->assertSame( array(), $result, 'The query must match no orders.' );
+		$this->assertNotEmpty( $captured['errors'] ?? array(), 'The query must be marked unsatisfiable.' );
+		$this->assertSame( array( 0 ), $captured['post__in'] ?? null, 'post__in must pin the query closed.' );
+	}
+
+	/**
+	 * @testdox A status list keeps its usable entries and only the unusable ones are dropped.
+	 */
+	public function test_partially_usable_status_list_keeps_working(): void {
+		$completed = OrderHelper::create_order();
+		$completed->set_status( OrderStatus::COMPLETED );
+		$completed->save();
+
+		$pending = OrderHelper::create_order();
+		$pending->set_status( OrderStatus::PENDING );
+		$pending->save();
+
+		$result = wc_get_orders(
+			array(
+				// An object is the only entry that would raise an Error, so it is the only one the
+				// guard drops. An array entry is left to WP_Query, exactly as before this change.
+				'status' => array( OrderStatus::COMPLETED, new stdClass() ),
+				'return' => 'ids',
+				'limit'  => -1,
+			)
+		);
+
+		$this->assertContains( $completed->get_id(), $result, 'The usable status must still be applied.' );
+		$this->assertNotContains( $pending->get_id(), $result, 'Dropping an unusable entry must not drop the whole status filter.' );
+	}
+
+	/**
+	 * @testdox The 'all' and 'any' status shorthands are unaffected by the status guard.
+	 *
+	 * @dataProvider provider_status_shorthands
+	 *
+	 * @param mixed $status The status shorthand.
+	 */
+	public function test_status_shorthands_still_match_orders( $status ): void {
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$result = wc_get_orders(
+			array(
+				'status' => $status,
+				'return' => 'ids',
+				'limit'  => -1,
+			)
+		);
+
+		$this->assertContains( $order->get_id(), $result, 'Status shorthands must keep matching orders.' );
+	}
+
+	/**
+	 * Status shorthands that resolve to an empty or full status list internally.
+	 *
+	 * @return array<string, array{0: mixed}>
+	 */
+	public function provider_status_shorthands(): array {
+		return array(
+			"'all'"        => array( 'all' ),
+			"'any'"        => array( 'any' ),
+			"array('all')" => array( array( 'all' ) ),
+			"array('any')" => array( array( 'any' ) ),
+		);
+	}
+
+	/**
+	 * Status lists pairing an unusable entry with a truthy sibling that names no status.
+	 *
+	 * Truthiness alone does not make a survivor useful: WP_Query keeps only entries that match a
+	 * registered status, so these narrow nothing and the clause would vanish.
+	 *
+	 * @return array<string, array{0: array}>
+	 */
+	public function provider_unusable_status_with_non_filtering_sibling(): array {
+		return array(
+			'unregistered string sibling' => array( array( new stdClass(), 'bogus-not-a-status' ) ),
+			'non-empty array sibling'     => array( array( new stdClass(), array( 'x' ) ) ),
+			'zero string sibling'         => array( array( new stdClass(), '0' ) ),
+		);
+	}
+
+	/**
+	 * @testdox An unusable status whose only siblings filter nothing fails the query closed.
+	 *
+	 * @dataProvider provider_unusable_status_with_non_filtering_sibling
+	 *
+	 * @param array $status Status list mixing an unusable entry with a non-filtering one.
+	 */
+	public function test_unusable_status_with_non_filtering_sibling_fails_closed( array $status ): void {
+		$completed = OrderHelper::create_order();
+		$completed->set_status( OrderStatus::COMPLETED );
+		$completed->save();
+
+		$trashed = OrderHelper::create_order();
+		$trashed->set_status( OrderStatus::COMPLETED );
+		$trashed->save();
+		wp_trash_post( $trashed->get_id() );
+
+		// A non-empty array entry warns on the 'wc-' concatenation. Swallow it and continue, as
+		// production does, rather than let phpunit convert it.
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Test-only: reproduces production error semantics.
+		set_error_handler( static fn() => true, E_WARNING | E_NOTICE );
+
+		try {
+			$result = wc_get_orders(
+				array(
+					'status' => $status,
+					'return' => 'ids',
+					'limit'  => -1,
+				)
+			);
+		} finally {
+			restore_error_handler();
+		}
+
+		// Dropping the clause here would return more than an unfiltered query does, because
+		// WC_Order_Query's default status list excludes trash.
+		$this->assertSame( array(), $result, 'The query must match no orders.' );
+		$this->assertNotContains( $trashed->get_id(), $result, 'A trashed order must never leak through a failed-closed status query.' );
+	}
+
+	/**
+	 * @testdox An unregistered status string does not poison its siblings.
+	 */
+	public function test_unregistered_status_string_keeps_sibling(): void {
+		$completed = OrderHelper::create_order();
+		$completed->set_status( OrderStatus::COMPLETED );
+		$completed->save();
+
+		$pending = OrderHelper::create_order();
+		$pending->set_status( OrderStatus::PENDING );
+		$pending->save();
+
+		// The pre-existing contract the unusable-object case is aligned with: a status naming
+		// nothing is carried into the clause and matches no rows, leaving a valid sibling
+		// filtering as the caller asked.
+		$result = wc_get_orders(
+			array(
+				'status' => array( OrderStatus::COMPLETED, 'bogus-not-a-status' ),
+				'return' => 'ids',
+				'limit'  => -1,
+			)
+		);
+
+		$this->assertContains( $completed->get_id(), $result, 'An unregistered status must not drop a valid sibling.' );
+		$this->assertNotContains( $pending->get_id(), $result, 'The valid status must still restrict the query.' );
+	}
 }

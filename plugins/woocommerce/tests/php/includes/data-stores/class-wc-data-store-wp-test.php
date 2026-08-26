@@ -47,4 +47,63 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 
 		$product->delete();
 	}
+
+	/**
+	 * Values that cannot be used as a string and used to raise an uncaught TypeError.
+	 *
+	 * `parse_date_for_wp_query()` guards its parsing with `catch ( Exception )`, but PHP 8 raises a
+	 * `TypeError` when such a value reaches `preg_match()`. `TypeError` extends `Error`, so it
+	 * escaped that guard and surfaced as a fatal error.
+	 *
+	 * @return array<string, array{0: mixed}>
+	 */
+	public function provider_unusable_date_query_vars(): array {
+		return array(
+			'array'        => array( array( 'foo' ) ),
+			'nested array' => array( array( array() ) ),
+			'empty array'  => array( array() ),
+			'object'       => array( new stdClass() ),
+		);
+	}
+
+	/**
+	 * @dataProvider provider_unusable_date_query_vars
+	 * @testdox parse_date_for_wp_query treats values that cannot be used as a string like an unparseable date.
+	 *
+	 * @param mixed $query_var The malformed date value.
+	 */
+	public function test_parse_date_for_wp_query_handles_unusable_values( $query_var ): void {
+		$store = new WC_Order_Data_Store_CPT();
+
+		$expected = $store->parse_date_for_wp_query( 'not-a-date', 'post_date', array() );
+		$actual   = $store->parse_date_for_wp_query( $query_var, 'post_date', array() );
+
+		$this->assertSame(
+			$expected,
+			$actual,
+			'Unusable date values should produce the same query as any other unparseable date.'
+		);
+	}
+
+	/**
+	 * @testdox parse_date_for_wp_query keeps working for values it already accepted.
+	 */
+	public function test_parse_date_for_wp_query_accepts_valid_values(): void {
+		$store = new WC_Order_Data_Store_CPT();
+
+		$from_string = $store->parse_date_for_wp_query( '2024-07-04', 'post_date', array() );
+		$this->assertSame( '2024', $from_string['date_query'][0]['year'] );
+		$this->assertSame( '7', $from_string['date_query'][0]['month'] );
+		$this->assertSame( '4', $from_string['date_query'][0]['day'] );
+
+		$from_datetime = $store->parse_date_for_wp_query(
+			new WC_DateTime( '2024-07-04 12:00:00', new DateTimeZone( 'UTC' ) ),
+			'post_date',
+			array()
+		);
+		$this->assertNotEmpty( $from_datetime['date_query'], 'WC_DateTime values must still build a date query.' );
+
+		$from_shorthand = $store->parse_date_for_wp_query( '>=2024-07-04', 'post_date', array() );
+		$this->assertArrayHasKey( 'after', $from_shorthand['date_query'][0], 'Shorthand operators must still be honoured.' );
+	}
 }
