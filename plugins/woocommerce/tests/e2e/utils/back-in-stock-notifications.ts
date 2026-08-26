@@ -181,6 +181,182 @@ export async function createOutOfStockProduct(
 }
 
 /**
+ * A variation of an out-of-stock variable product created for a spec.
+ */
+export type BISVariation = {
+	id: number;
+	option: string;
+	/**
+	 * The name core interpolates into notices and email subjects for this
+	 * variation — `Notification::get_product_name()` returns the variation's
+	 * post title, which `WC_Product_Variation_Data_Store_CPT::generate_product_title()`
+	 * builds as the parent title plus an attribute suffix, or the bare parent
+	 * title when the variation has no attribute values of its own.
+	 *
+	 * The REST API's own `name` field is the formatted attribute list ("White"),
+	 * not this, so it cannot stand in for it.
+	 */
+	notificationName: string;
+};
+
+/**
+ * An out-of-stock variable product created for a spec.
+ */
+export type BISVariableProduct = BISProduct & {
+	/** Label of the (product-level) variation attribute, e.g. `Color`. */
+	attributeLabel: string;
+	/** Name of the front-end variation `select`, e.g. `attribute_color`. */
+	attributeSelect: string;
+	/** Only set for the two-variation fixture; an "Any Color" product has no in-stock variation. */
+	inStockVariation?: BISVariation;
+	outOfStockVariation: BISVariation;
+};
+
+/**
+ * Label of the variation attribute used by the variable-product fixtures.
+ *
+ * A product-level (not global) attribute, so parallel workers can reuse the
+ * same label without colliding on a shared taxonomy term.
+ */
+const BIS_VARIATION_ATTRIBUTE = 'Color';
+
+/**
+ * Return a handle to a variable product with one in-stock and one out-of-stock variation.
+ *
+ * With `anyAttribute`, the product gets a single "Any Color" variation instead —
+ * the variation carries no attribute value, so the chosen one is only known from
+ * what the shopper submitted. Core stores it as the notification's
+ * `posted_attributes` meta and renders it as a list in the emails.
+ *
+ * Deletion is not the caller's job: the fixtures below queue the parent id for
+ * the worker-scoped batch in `reapProducts()`, and deleting the parent takes
+ * its variations with it.
+ *
+ * @param {ApiClient} restApi             WP REST client.
+ * @param {Object}    [opts]              Creation options.
+ * @param {boolean}   [opts.anyAttribute] Create a single attribute-less ("Any Color") variation.
+ */
+export async function createOutOfStockVariableProduct(
+	restApi: ApiClient,
+	opts: { anyAttribute?: boolean } = {}
+): Promise< BISVariableProduct > {
+	const name = `BIS Test Variable Product ${ Date.now() }-${ Math.floor(
+		Math.random() * 1e6
+	) }`;
+
+	const { data: product } = await restApi.post< {
+		id: number;
+		name: string;
+		permalink: string;
+	} >( `${ WC_API_PATH }/products`, {
+		name,
+		type: 'variable',
+		attributes: [
+			{
+				name: BIS_VARIATION_ATTRIBUTE,
+				visible: true,
+				variation: true,
+				options: [ 'Blue', 'White' ],
+			},
+		],
+	} );
+
+	// One request for both variations: the fixture runs before every test in
+	// these specs, so a second round trip here is per-test overhead.
+	const create = opts.anyAttribute
+		? [
+				{
+					regular_price: '9.99',
+					manage_stock: false,
+					stock_status: 'outofstock',
+					attributes: [],
+				},
+		  ]
+		: [
+				{
+					regular_price: '9.99',
+					manage_stock: false,
+					stock_status: 'instock',
+					attributes: [
+						{ name: BIS_VARIATION_ATTRIBUTE, option: 'Blue' },
+					],
+				},
+				{
+					regular_price: '9.99',
+					manage_stock: false,
+					stock_status: 'outofstock',
+					attributes: [
+						{ name: BIS_VARIATION_ATTRIBUTE, option: 'White' },
+					],
+				},
+		  ];
+
+	const { data: batch } = await restApi.post< {
+		create: Array< { id: number; stock_status: string } >;
+	} >( `${ WC_API_PATH }/products/${ product.id }/variations/batch`, {
+		create,
+	} );
+
+	const created = batch.create;
+
+	// A variation that came back with the stock status we didn't ask for would
+	// otherwise surface much later, as a form that never appears or an email
+	// that never arrives.
+	created.forEach( ( variation: { stock_status: string }, index: number ) => {
+		expect( variation.stock_status ).toBe( create[ index ].stock_status );
+	} );
+
+	const notificationName = ( option: string ): string =>
+		opts.anyAttribute ? product.name : `${ product.name } - ${ option }`;
+
+	const outOfStock = {
+		id: created[ opts.anyAttribute ? 0 : 1 ].id,
+		option: 'White',
+		notificationName: notificationName( 'White' ),
+	};
+	const inStock = opts.anyAttribute
+		? undefined
+		: {
+				id: created[ 0 ].id,
+				option: 'Blue',
+				notificationName: notificationName( 'Blue' ),
+		  };
+
+	return {
+		id: product.id,
+		name: product.name,
+		permalink: product.permalink,
+		attributeLabel: BIS_VARIATION_ATTRIBUTE,
+		attributeSelect: `attribute_${ BIS_VARIATION_ATTRIBUTE.toLowerCase() }`,
+		inStockVariation: inStock,
+		outOfStockVariation: outOfStock,
+	};
+}
+
+/**
+ * Restock a single variation via REST, leaving the rest of the product untouched.
+ *
+ * @param {ApiClient} restApi     WP REST client.
+ * @param {number}    productId   Parent product id.
+ * @param {number}    variationId Variation id.
+ */
+export async function restockVariation(
+	restApi: ApiClient,
+	productId: number,
+	variationId: number
+): Promise< void > {
+	const response = await restApi.put< { stock_status: string } >(
+		`${ WC_API_PATH }/products/${ productId }/variations/${ variationId }`,
+		{
+			stock_status: 'instock',
+			manage_stock: false,
+		}
+	);
+
+	expect( response.data.stock_status ).toBe( 'instock' );
+}
+
+/**
  * Restock a product via REST (used by receiving-notifications.spec.ts to trigger the stock-sync action).
  *
  * @param {ApiClient} restApi   WP REST client.
@@ -201,6 +377,55 @@ export async function restockProduct(
 	// A 200 whose body doesn't reflect the requested stock change would
 	// otherwise only surface ~20s later as an email timeout.
 	expect( response.data.stock_status ).toBe( 'instock' );
+}
+
+/**
+ * Locator for the PDP sign-up form wrapper.
+ *
+ * On a variable product the wrapper is always rendered and core's
+ * `back-in-stock-form.js` toggles its `hidden` class from the `show_variation`
+ * event, so visibility — not presence — is what the variation specs assert.
+ *
+ * @param {Page} page Playwright page on the product detail.
+ */
+export function bisFormLocator( page: Page ) {
+	return page.locator( '.wc_bis_form' );
+}
+
+/**
+ * Locator for the hidden input carrying the product the sign-up targets.
+ *
+ * Starts out holding the parent id and is swapped to the variation id by
+ * `found_variation`, so it is the assertion that the form targets the variation
+ * the shopper picked rather than the product they landed on.
+ *
+ * @param {Page} page Playwright page on the product detail.
+ */
+export function bisTargetProductInput( page: Page ) {
+	return page.locator( 'input[name="wc_bis_product_id"]' );
+}
+
+/**
+ * Pick a variation on a variable product page and wait for core's variation AJAX to settle.
+ *
+ * The BIS form only reacts once WooCommerce has fetched the variation and fired
+ * `show_variation`, so waiting on the rendered variation panel — rather than the
+ * select's own value — is what keeps the assertions that follow deterministic.
+ *
+ * @param {Page}   page    Playwright page on the product detail.
+ * @param {Object} product The variable product handle.
+ * @param {string} option  Attribute option to select, e.g. `White`.
+ */
+export async function selectVariation(
+	page: Page,
+	product: BISVariableProduct,
+	option: string
+): Promise< void > {
+	await page
+		.locator( `.variations select[name="${ product.attributeSelect }"]` )
+		.selectOption( option );
+
+	await expect( page.locator( '.single_variation_wrap' ) ).toBeVisible();
 }
 
 /**
@@ -230,20 +455,36 @@ export async function signUpOnProductPage(
 /**
  * Submit the PDP signup form as a logged-out guest, regardless of the test's storageState.
  *
- * @param {Browser} browser   The test's browser fixture.
- * @param {string}  permalink The product permalink.
- * @param {string}  email     The guest's email address.
+ * @param {Browser} browser                        The test's browser fixture.
+ * @param {string}  permalink                      The product permalink.
+ * @param {string}  email                          The guest's email address.
+ * @param {Object}  [opts]                         Signup options.
+ * @param {Object}  [opts.selectVariation]         Variation to pick before submitting, for variable products.
+ * @param {Object}  [opts.selectVariation.product] The variable product handle.
+ * @param {string}  [opts.selectVariation.option]  Attribute option to select.
  */
 export async function signUpAsGuest(
 	browser: Browser,
 	permalink: string,
-	email: string
+	email: string,
+	opts: {
+		selectVariation?: { product: BISVariableProduct; option: string };
+	} = {}
 ): Promise< void > {
 	const guestContext = await browser.newContext( {
 		storageState: { cookies: [], origins: [] },
 	} );
 	const guestPage = await guestContext.newPage();
 	await guestPage.goto( permalink );
+
+	if ( opts.selectVariation ) {
+		await selectVariation(
+			guestPage,
+			opts.selectVariation.product,
+			opts.selectVariation.option
+		);
+	}
+
 	await signUpOnProductPage( guestPage, { email } );
 
 	// The form posts and reloads the PDP with a notice. Wait for that notice
@@ -304,7 +545,11 @@ async function reapProducts(): Promise< void > {
  * Shared fixtures for the Back in Stock Notifications specs.
  */
 export const test = baseTest.extend<
-	{ product: BISProduct },
+	{
+		product: BISProduct;
+		variableProduct: BISVariableProduct;
+		anyAttributeVariableProduct: BISVariableProduct;
+	},
 	{ bisEnvReady: void }
 >( {
 	/**
@@ -331,6 +576,32 @@ export const test = baseTest.extend<
 		await use( product );
 		productsToReap.push( product.id );
 	},
+
+	/**
+	 * A variable product with one in-stock and one out-of-stock variation.
+	 *
+	 * Fixtures are lazy, so a spec that never references this pays nothing for it.
+	 */
+	variableProduct: async ( { restApi }, use ) => {
+		const product = await createOutOfStockVariableProduct( restApi );
+		// eslint-disable-next-line react-hooks/rules-of-hooks -- Playwright's fixture `use`, not a React hook.
+		await use( product );
+		// Deleting the parent takes its variations with it, so the worker-scoped
+		// batch still needs only the one id.
+		productsToReap.push( product.id );
+	},
+
+	/**
+	 * A variable product whose single out-of-stock variation accepts any attribute value.
+	 */
+	anyAttributeVariableProduct: async ( { restApi }, use ) => {
+		const product = await createOutOfStockVariableProduct( restApi, {
+			anyAttribute: true,
+		} );
+		// eslint-disable-next-line react-hooks/rules-of-hooks -- Playwright's fixture `use`, not a React hook.
+		await use( product );
+		productsToReap.push( product.id );
+	},
 } );
 
 /**
@@ -351,11 +622,34 @@ export const BIS_EMAIL_LINKS = {
 } as const;
 
 /**
+ * Element ids rendered inside the Back in Stock Notifications email templates.
+ *
+ * @see EmailTemplatesController::register_template_hooks()
+ */
+export const BIS_EMAIL_ELEMENTS = {
+	productTitle: '#notification__product__title',
+	// Only rendered when the notification has a variation attribute list, so
+	// absent from a simple product's email.
+	productAttributes: '#notification__product__attributes',
+} as const;
+
+/**
+ * Frame locator for the email body inside an open WP Mail Logging modal.
+ *
+ * @param {Page} page Playwright page with the mail-log modal open.
+ */
+export function bisEmailBody( page: Page ) {
+	return page.frameLocator(
+		'#wp-mail-logging-modal-content-body-content iframe'
+	);
+}
+
+/**
  * Escape a string for literal use inside a regular expression.
  *
  * @param {string} value The string to escape.
  */
-function escapeRegExp( value: string ): string {
+export function escapeRegExp( value: string ): string {
 	return value.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
 }
 
