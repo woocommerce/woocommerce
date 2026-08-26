@@ -38,37 +38,37 @@ export const BIS_FEATURE_OPTION =
 	'woocommerce_feature_customer_stock_notifications_enabled';
 
 /**
- * Fail early, and with a fix, when the BIS feature flag is off.
+ * Fail early, with the fix, when the env can't run these specs.
  *
- * `bin/test-env-setup.sh` sets it, but only runs on env create or `--update`,
- * so an env predating the feature reports every spec as an unexplained timeout.
+ * Both are provisioned by `bin/test-env-setup.sh`, which only runs on env
+ * create or `--update`. On a stale env the feature UI simply never renders and
+ * notification batches keep their one-minute delay, so every spec fails as an
+ * unexplained timeout.
  */
-export async function assertBISFeatureEnabled(): Promise< void > {
-	const { stdout } = await wpCLI( `wp option get ${ BIS_FEATURE_OPTION }` );
-
+export async function assertBISEnvReady(): Promise< void > {
 	// wp-env prefixes its own lines onto stdout, so match rather than compare.
-	if ( ! /^yes$/m.test( stdout ) ) {
-		throw new Error(
-			`The "${ BIS_FEATURE_OPTION }" feature flag is not enabled, so none of the Back in Stock Notifications UI renders. Run \`pnpm env:e2e:start\` to re-provision the tests env.`
-		);
-	}
-}
+	const checks = [
+		{
+			command: `wp option get ${ BIS_FEATURE_OPTION }`,
+			expected: /^yes$/m,
+			problem: `the "${ BIS_FEATURE_OPTION }" feature flag is not enabled, so none of the Back in Stock Notifications UI renders`,
+		},
+		{
+			command: 'wp plugin list --status=active --field=name',
+			expected: /^woocommerce-e2e-test-helper$/m,
+			problem:
+				'the "woocommerce-e2e-test-helper" plugin is not active, so the notifications batch delay is not zeroed',
+		},
+	];
 
-/**
- * Fail early when the BIS e2e helper plugin is missing.
- *
- * Without it the first notifications batch keeps its one-minute delay, so
- * draining the queue produces no email and the spec times out with no clue why.
- */
-export async function assertBISTestHelperActive(): Promise< void > {
-	const { stdout } = await wpCLI(
-		'wp plugin list --status=active --field=name'
-	);
+	for ( const { command, expected, problem } of checks ) {
+		const { stdout } = await wpCLI( command );
 
-	if ( ! /^woocommerce-bis-test-helper$/m.test( stdout ) ) {
-		throw new Error(
-			'The "woocommerce-bis-test-helper" plugin is not active, so the notifications batch delay is not zeroed. Run `pnpm env:e2e:start` to re-provision the tests env.'
-		);
+		if ( ! expected.test( stdout ) ) {
+			throw new Error(
+				`Cannot run the Back in Stock Notifications specs: ${ problem }. Run \`pnpm env:e2e:start\` to re-provision the tests env.`
+			);
+		}
 	}
 }
 
@@ -127,16 +127,25 @@ export async function resetBISOptions(
 }
 
 /**
- * Return a handle to an out-of-stock simple product. Caller is responsible for calling cleanup().
- *
- * @param {ApiClient} restApi WP REST client.
+ * An out-of-stock simple product created for a spec.
  */
-export async function createOutOfStockProduct( restApi: ApiClient ): Promise< {
+export type BISProduct = {
 	id: number;
 	name: string;
 	permalink: string;
-	cleanup: () => Promise< void >;
-} > {
+};
+
+/**
+ * Return a handle to an out-of-stock simple product.
+ *
+ * Deletion is not the caller's job: the `product` fixture queues the id for the
+ * worker-scoped batch in `reapProducts()`.
+ *
+ * @param {ApiClient} restApi WP REST client.
+ */
+export async function createOutOfStockProduct(
+	restApi: ApiClient
+): Promise< BISProduct > {
 	// Append a random suffix so parallel workers don't collide on the product name,
 	// which would break the row-scoped selectors in the admin list-table specs.
 	const name = `BIS Test Product ${ Date.now() }-${ Math.floor(
@@ -160,15 +169,6 @@ export async function createOutOfStockProduct( restApi: ApiClient ): Promise< {
 		id: product.id,
 		name: product.name,
 		permalink: product.permalink,
-		async cleanup() {
-			await restApi
-				.delete( `${ WC_API_PATH }/products/${ product.id }`, {
-					force: true,
-				} )
-				.catch( () => {
-					/* best-effort cleanup */
-				} );
-		},
 	};
 }
 
@@ -296,14 +296,7 @@ async function reapProducts(): Promise< void > {
  * Shared fixtures for the Back in Stock Notifications specs.
  */
 export const test = baseTest.extend<
-	{
-		product: {
-			id: number;
-			name: string;
-			permalink: string;
-			cleanup: () => Promise< void >;
-		};
-	},
+	{ product: BISProduct },
 	{ bisEnvReady: void }
 >( {
 	/**
@@ -313,8 +306,7 @@ export const test = baseTest.extend<
 	 */
 	bisEnvReady: [
 		async ( {}, use ) => {
-			await assertBISFeatureEnabled();
-			await assertBISTestHelperActive();
+			await assertBISEnvReady();
 			await use();
 			await reapProducts();
 		},

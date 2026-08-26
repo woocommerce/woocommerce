@@ -7,7 +7,6 @@
 		".",
 		"./tests/e2e/test-plugins/wc-email-template-sync-test-helper",
 		"./tests/e2e/test-plugins/woocommerce-e2e-test-helper",
-		"./tests/e2e/test-plugins/woocommerce-bis-test-helper",
 		"https://downloads.wordpress.org/plugin/akismet.zip",
 		"https://github.com/WP-API/Basic-Auth/archive/master.zip",
 		"https://downloads.wordpress.org/plugin/wp-mail-logging.zip",

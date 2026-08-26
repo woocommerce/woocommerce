@@ -31,3 +31,9 @@ respective feature tickets:
   to `'yes'`.
 - The tests assume the WP Mail Logging plugin is installed and active (it is,
   via the `.wp-env.e2e.json` plugins list).
+- `woocommerce-e2e-test-helper` zeroes
+  `woocommerce_customer_stock_notifications_first_batch_delay`, so a restock
+  dispatches its batch immediately instead of a minute later. Without it the
+  back-in-stock specs time out with no email.
+- Run these under `core-serial` (`--project=core-serial`). They set global
+  options, so `playwright.config.ts` excludes them from `core-parallel`.
