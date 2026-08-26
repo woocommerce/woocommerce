@@ -372,9 +372,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		 */
 		$data_store = $this->data_store;
 
-		if ( $data_store->has_callable( 'get_item_ids' ) ) {
+		if ( $data_store->has_callable( 'get_order_item_ids' ) ) {
 			// @phpstan-ignore-next-line -- Optional data store method checked above.
-			$item_ids = $data_store->get_item_ids( $this, $type );
+			$item_ids = $data_store->get_order_item_ids( $this, $type );
 
 			return array_values(
 				array_unique(
