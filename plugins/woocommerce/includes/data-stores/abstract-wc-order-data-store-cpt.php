@@ -789,7 +789,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * @param string|null $type Order item type, or null for every type.
 	 * @return int[]
 	 */
-	public function get_order_item_ids( $order, $type = null ) {
+	public function get_item_ids( $order, $type = null ) {
 		global $wpdb;
 
 		if ( ! $order->get_id() ) {
