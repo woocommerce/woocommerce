@@ -79,10 +79,10 @@ jQuery(
 				setTimeout( function() {
 					init_sale_datepickers( $( '#edit-' + post_id ) );
 				}, 0 );
-				$( 'input[name="_weight"]', '.inline-edit-row' ).val( weight );
-				$( 'input[name="_length"]', '.inline-edit-row' ).val( length );
-				$( 'input[name="_width"]', '.inline-edit-row' ).val( width );
-				$( 'input[name="_height"]', '.inline-edit-row' ).val( height );
+				$( 'input[name="_weight"]', '.inline-edit-row' ).val( weight.replace( '.', woocommerce_admin.decimal_point ) );
+				$( 'input[name="_length"]', '.inline-edit-row' ).val( length.replace( '.', woocommerce_admin.decimal_point ) );
+				$( 'input[name="_width"]', '.inline-edit-row' ).val( width.replace( '.', woocommerce_admin.decimal_point ) );
+				$( 'input[name="_height"]', '.inline-edit-row' ).val( height.replace( '.', woocommerce_admin.decimal_point ) );
 
 				$( 'select[name="_shipping_class"] option:selected', '.inline-edit-row' ).attr( 'selected', false ).trigger( 'change' );
 				$( 'select[name="_shipping_class"] option[value="' + shipping_class + '"]' ).attr( 'selected', 'selected' )
