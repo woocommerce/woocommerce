@@ -6,11 +6,11 @@ import { select as wpSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { ItemID, Query } from './types';
+import { LeaderboardItem, Query } from './types';
 import { store as itemsStore } from './';
 
 type Options = {
-	id: ItemID;
+	id: LeaderboardItem[ 'id' ];
 	per_page: number;
 	persisted_query: Query;
 	filterQuery: Query;

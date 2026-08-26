@@ -9,28 +9,20 @@ import createSelector from 'rememo';
 import { getResourceName } from '../utils';
 import { getTotalCountResourceName } from './utils';
 
-import { ItemType, ItemsState, Query, ItemID, ItemInfer } from './types';
+import { ItemType, ItemsState, Query, ItemIDOf, ItemInfer } from './types';
 
-/**
- * Public type for the `getItems` selector.
- *
- * Map keys are `ItemID` (`number | string`), rather than the previously
- * declared `number`. TypeScript consumers assigning the result to a numeric-
- * keyed map should use `Map< ItemID, ... >` and narrow string keys where a
- * numeric ID is required.
- */
 export type getItemsType = < T extends ItemType >(
 	itemType: T,
 	query: Query,
-	defaultValue?: Map< ItemID, ItemInfer< T > | undefined >
-) => Map< ItemID, ItemInfer< T > | undefined >;
+	defaultValue?: Map< ItemIDOf< T >, ItemInfer< T > | undefined >
+) => Map< ItemIDOf< T >, ItemInfer< T > | undefined >;
 
 type getItemsSelectorType = < T extends ItemType >(
 	state: ItemsState,
 	itemType: T,
 	query: Query,
-	defaultValue?: Map< ItemID, ItemInfer< T > | undefined >
-) => Map< ItemID, ItemInfer< T > | undefined >;
+	defaultValue?: Map< ItemIDOf< T >, ItemInfer< T > | undefined >
+) => Map< ItemIDOf< T >, ItemInfer< T > | undefined >;
 
 export const getItems = createSelector< getItemsSelectorType >(
 	( state, itemType, query, defaultValue = new Map() ) => {

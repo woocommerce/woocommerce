@@ -107,6 +107,9 @@ describe( 'items reducer', () => {
 
 		expect( ( state.data[ itemType ] || {} )[ '1' ] ).toBe( items[ 0 ] );
 		expect( ( state.data[ itemType ] || {} )[ '2' ] ).toBe( items[ 1 ] );
+		expect( getItems( state, itemType, query ).get( 1 ) ).toBe(
+			items[ 0 ]
+		);
 	} );
 
 	it( 'keeps leaderboard responses isolated by query', () => {
@@ -120,12 +123,14 @@ describe( 'items reducer', () => {
 			items: latestItems,
 			itemType: 'leaderboards',
 			query: latestQuery,
+			totalCount: undefined,
 		} );
 		const state = reducer( latestState, {
 			type: TYPES.SET_ITEMS,
 			items: staleItems,
 			itemType: 'leaderboards',
 			query: staleQuery,
+			totalCount: undefined,
 		} );
 
 		expect(

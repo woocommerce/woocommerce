@@ -7,10 +7,13 @@ type Link = {
 	href: string;
 };
 
-// Category, Product, Customer item id is a number, and leaderboards item is a string.
-export type ItemID = number | string;
-
 export type ItemType = 'categories' | 'products' | 'customers' | 'leaderboards';
+
+export type ItemIDOf< T extends ItemType > = T extends 'leaderboards'
+	? LeaderboardItem[ 'id' ]
+	: number;
+
+export type ItemID = ItemIDOf< ItemType >;
 
 export type ItemImage = {
 	id: number;
