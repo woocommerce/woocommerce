@@ -1592,7 +1592,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @param float  $edited_total  Manually edited line total, 0 to keep the original price.
 	 * @return WC_Order
 	 */
-	private function create_order_for_coupon_replacement( string $billing_email, float $edited_total = 0 ): WC_Order {
+	private function create_guest_order_with_product( string $billing_email, float $edited_total = 0 ): WC_Order {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_regular_price( 100 );
 		$product->save();
@@ -1666,7 +1666,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$order = $this->create_order_for_coupon_replacement( 'edited-ok-customer@example.com', 50 );
+		$order = $this->create_guest_order_with_product( 'edited-ok-customer@example.com', 50 );
 
 		$response = $this->put_coupon_lines( $order->get_id(), array( 'edited-percent' ) );
 
@@ -1726,7 +1726,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$order   = $this->create_order_for_coupon_replacement( 'update-coupon-customer@example.com' );
+		$order   = $this->create_guest_order_with_product( 'update-coupon-customer@example.com' );
 		$item_id = key( $order->get_items() );
 
 		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
