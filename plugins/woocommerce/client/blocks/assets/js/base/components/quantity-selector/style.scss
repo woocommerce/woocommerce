@@ -74,11 +74,13 @@
 	}
 
 	> .wc-block-components-quantity-selector__button--minus {
-		border-radius: $universal-border-radius 0 0 $universal-border-radius;
+		border-start-start-radius: inherit;
+		border-end-start-radius: inherit;
 	}
 
 	> .wc-block-components-quantity-selector__button--plus {
-		border-radius: 0 $universal-border-radius $universal-border-radius 0;
+		border-start-end-radius: inherit;
+		border-end-end-radius: inherit;
 	}
 	&[hidden] {
 		display: none;
