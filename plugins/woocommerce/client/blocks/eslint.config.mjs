@@ -266,18 +266,14 @@ export default [
 			'no-restricted-imports': [
 				'error',
 				{
-					paths: restrictedImports,
-				},
-			],
-			'@typescript-eslint/no-restricted-imports': [
-				'error',
-				{
 					paths: [
+						...restrictedImports,
 						{
 							name: 'react',
-							message:
-								'Please use React API through `@wordpress/element` instead.',
+							allowImportNames: [ 'default' ],
 							allowTypeImports: true,
+							message:
+								'Please use React API through `@wordpress/element` instead. Only the default `React` import is allowed directly from `react`.',
 						},
 					],
 				},

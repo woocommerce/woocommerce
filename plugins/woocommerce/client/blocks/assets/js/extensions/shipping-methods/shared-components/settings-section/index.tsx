@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React from '@wordpress/element';
+import type { ReactNode } from 'react';
 import styled from '@emotion/styled';
 
 const StyledSectionWrapper = styled.div`
@@ -54,7 +54,7 @@ const SettingsSection = ( {
 }: {
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	Description?: () => JSX.Element | null;
-	children: React.ReactNode;
+	children: ReactNode;
 } ): JSX.Element => (
 	<StyledSectionWrapper { ...props }>
 		<StyledDescriptionWrapper>

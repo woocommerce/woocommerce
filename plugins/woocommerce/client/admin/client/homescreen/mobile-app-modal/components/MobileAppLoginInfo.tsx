@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { QRCodeSVG } from 'qrcode.react';
-import React from '@wordpress/element';
+import React from 'react';
 import interpolateComponents from '@automattic/interpolate-components';
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Resolve incorrect React default imports from @wordpress/element across the monorepo.

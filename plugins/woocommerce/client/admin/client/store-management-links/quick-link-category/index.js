@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React from '@wordpress/element';
+import React from 'react';
 
 /**
  * Internal dependencies

@@ -5,7 +5,6 @@
 /**
  * External dependencies
  */
-import React from '@wordpress/element';
 import {
 	act,
 	cleanup,

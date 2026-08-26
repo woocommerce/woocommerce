@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React from '@wordpress/element';
+import React from 'react';
 import { external, Icon } from '@wordpress/icons';
 import { Link } from '@woocommerce/components';
 import { Text } from '@woocommerce/experimental';
