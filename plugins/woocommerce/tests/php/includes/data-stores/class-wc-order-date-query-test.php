@@ -107,7 +107,12 @@ class WC_Order_Date_Query_Test extends WC_Unit_Test_Case {
 	public function test_an_unrepresentable_date_matches_nothing_on_both_backends(): void {
 		$results = array();
 
-		foreach ( array( 'posts' => false, 'hpos' => true ) as $storage => $use_hpos ) {
+		$storage_backends = array(
+			'posts' => false,
+			'hpos'  => true,
+		);
+
+		foreach ( $storage_backends as $storage => $use_hpos ) {
 			OrderHelper::toggle_cot_feature_and_usage( $use_hpos );
 
 			$this->assertSame(
