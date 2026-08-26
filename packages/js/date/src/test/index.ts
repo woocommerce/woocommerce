@@ -1071,6 +1071,12 @@ describe( 'getRangeLabel', () => {
 		expect(
 			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
 		).toBe( 'DD Oct 1 - 31, 2024' );
+
+		( __ as jest.Mock ).mockReturnValueOnce( '\\DDDo MMM D, YYYY' );
+
+		expect(
+			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+		).toBe( 'DDDo Oct 1 - 31, 2024' );
 	} );
 
 	it( 'should render a weekday from the start of the range', () => {

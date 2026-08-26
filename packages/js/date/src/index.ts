@@ -237,9 +237,10 @@ function replaceDayToken(
 	let replaced = false;
 	// Backslash escapes and bracketed sections are moment's literals, so a "D"
 	// inside one is text. A backslash escapes the whole token that follows it,
-	// not just its first character.
+	// not just its first character; the escaped alternatives mirror moment's
+	// own day tokens, so a longer run of "D"s leaves the rest live.
 	const dayRangeFormat = format.replace(
-		/\\D+o?|\\.|\[[^\]]*\]|D+o?/g,
+		/\\(?:Do|DDDo|DD?D?D?)|\\.|\[[^\]]*\]|D+o?/g,
 		( token ) => {
 			// Runs longer than "DD" are day of year tokens, not day of month.
 			const dayDigits = token.endsWith( 'o' )
