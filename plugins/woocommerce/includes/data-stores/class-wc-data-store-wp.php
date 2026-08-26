@@ -619,21 +619,56 @@ class WC_Data_Store_WP {
 		// 'p' would return that order despite the query being failed closed.
 		unset( $wp_query_args['p'], $wp_query_args['page_id'], $wp_query_args['attachment_id'], $wp_query_args['subpost_id'] );
 
+		unset( $context['recovered'] );
+		$this->report_invalid_query_arg( $code, $context );
+	}
+
+	/**
+	 * Reports a malformed query arg, which otherwise degrades the query silently.
+	 *
+	 * Separate from {@see self::fail_query_closed()} so that a caller which recovered from the bad
+	 * value, by dropping it and keeping a filter that still narrows the query, can still say so.
+	 * Locating the code that passed the value is the point, and that code is just as wrong when
+	 * the query happened to survive.
+	 *
+	 * Not wc_doing_it_wrong(): that writes to error_log() unconditionally on REST and AJAX
+	 * requests, which a loop over stored bad data would flood. _doing_it_wrong() only outputs
+	 * under WP_DEBUG, and carries the backtrace that locates the offending caller.
+	 *
+	 * @since 11.2.0
+	 * @param string $code    Error code.
+	 * @param array  $context Reporting context, see {@see self::fail_query_closed()}, plus
+	 *                        'recovered' true when the query still runs.
+	 * @return void
+	 */
+	protected function report_invalid_query_arg( $code, $context = array() ) {
 		$key      = isset( $context['key'] ) ? $context['key'] : '';
 		$type     = array_key_exists( 'value', $context ) ? gettype( $context['value'] ) : 'unknown';
 		$function = isset( $context['function'] ) ? $context['function'] : 'wc_get_objects';
 		$source   = isset( $context['source'] ) ? $context['source'] : 'legacy-query';
 
-		$detail = sprintf(
-			/* translators: 1: query argument name, 2: PHP type of the value passed. */
-			__( 'The "%1$s" argument was passed a %2$s, which cannot be used here. Returning an empty result set.', 'woocommerce' ),
-			esc_html( $key ),
-			esc_html( $type )
-		);
+		if ( empty( $context['recovered'] ) ) {
+			$detail = sprintf(
+				/* translators: 1: query argument name, 2: PHP type of the value passed. */
+				__( 'The "%1$s" argument was passed a %2$s, which cannot be used here. Returning an empty result set.', 'woocommerce' ),
+				esc_html( $key ),
+				esc_html( $type )
+			);
+		} else {
+			$detail = sprintf(
+				/* translators: 1: query argument name, 2: PHP type of the value passed. */
+				__( 'The "%1$s" argument was passed a %2$s, which cannot be used here. It was ignored and the rest of the argument still applies.', 'woocommerce' ),
+				esc_html( $key ),
+				esc_html( $type )
+			);
+		}
+
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Translated literal; the two interpolated values are escaped above.
+		_doing_it_wrong( esc_html( $function ), $detail, '11.2.0' );
 
 		// One log line per distinct failure per process, keyed by code and query var so that a
 		// second, different bad arg is still reported. Later occurrences of the same one in a
-		// long-running process (WP-CLI, cron) are not logged, though the query still fails closed.
+		// long-running process (WP-CLI, cron) are not logged, though the guard still applies.
 		$dedup_key = $code . '|' . $key;
 
 		if ( isset( self::$logged_query_failures[ $dedup_key ] ) ) {

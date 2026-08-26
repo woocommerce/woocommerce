@@ -2290,8 +2290,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		// non-stringable value reaches array_unique() and fatals. Only an object without
 		// __toString() is rejected, because arrays and null merely degrade to an empty status
 		// clause, which is pre-existing behaviour.
-		$has_unusable_status   = false;
-		$unusable_status_value = null;
+		$has_unusable_status     = false;
+		$dropped_unusable_status = false;
+		$unusable_status_value   = null;
 
 		if ( ! empty( $query_vars['post_status'] ) ) {
 			if ( is_array( $query_vars['post_status'] ) ) {
@@ -2299,8 +2300,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 				foreach ( $query_vars['post_status'] as $status ) {
 					if ( $this->is_unusable_status( $status ) ) {
-						$has_unusable_status   = true;
-						$unusable_status_value = $status;
+						$has_unusable_status     = true;
+						$dropped_unusable_status = true;
+						$unusable_status_value   = $status;
 						continue;
 					}
 
@@ -2319,8 +2321,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					unset( $query_vars['post_status'] );
 				}
 			} elseif ( $this->is_unusable_status( $query_vars['post_status'] ) ) {
-				$has_unusable_status   = true;
-				$unusable_status_value = $query_vars['post_status'];
+				$has_unusable_status     = true;
+				$dropped_unusable_status = true;
+				$unusable_status_value   = $query_vars['post_status'];
 				unset( $query_vars['post_status'] );
 			}
 		}
@@ -2338,6 +2341,19 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					'value'    => $unusable_status_value,
 					'function' => 'wc_get_products',
 					'source'   => 'legacy-product-query',
+				)
+			);
+		} elseif ( $dropped_unusable_status ) {
+			// The query still runs, on a narrower filter than the caller wrote. Say so anyway:
+			// locating the code that passes the bad value is the point of the report.
+			$this->report_invalid_query_arg(
+				'woocommerce_product_query_invalid_status',
+				array(
+					'key'       => 'status',
+					'value'     => $unusable_status_value,
+					'function'  => 'wc_get_products',
+					'source'    => 'legacy-product-query',
+					'recovered' => true,
 				)
 			);
 		}
