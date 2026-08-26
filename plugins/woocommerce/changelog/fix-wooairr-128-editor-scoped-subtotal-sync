@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Same-cycle regression from #67731, never present in a stable release; REST orders with posted line totals and coupon codes were double-discounted.
