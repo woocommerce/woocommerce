@@ -109,6 +109,7 @@ class ProductFilters extends AbstractBlock {
 		z-index: auto;
 		background: inherit;
 		color: inherit;
+		transition: none;
 		flex-grow: 1;
 	}
 
