@@ -1189,6 +1189,29 @@ describe( 'getRangeLabel', () => {
 			).toBe( '1 - 31 short10-genitive 2024' );
 		} );
 
+		it( 'should keep the genitive month name behind a localized format token', () => {
+			// The WOOAIRR-105 shape itself: the translation resolves to a
+			// localized token, and only its expansion reveals the day sitting
+			// next to the month.
+			moment.defineLocale( 'inflected-months-localized', {
+				months: { format: genitive, standalone: nominative },
+				monthsShort: { format: genitive, standalone: nominative },
+				longDateFormat: {
+					LT: 'HH:mm',
+					LTS: 'HH:mm:ss',
+					L: 'DD/MM/YYYY',
+					LL: 'D MMMM YYYY',
+					LLL: 'D MMMM YYYY HH:mm',
+					LLLL: 'dddd, D MMMM YYYY HH:mm',
+				},
+			} );
+			( __ as jest.Mock ).mockReturnValueOnce( 'LL' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( '1 - 31 month10-genitive 2024' );
+		} );
+
 		it( 'should keep the nominative month name when the format holds no day token', () => {
 			moment.defineLocale( 'inflected-months-standalone', {
 				months: { format: genitive, standalone: nominative },
