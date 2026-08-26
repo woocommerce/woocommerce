@@ -871,8 +871,10 @@ function wc_scheduled_sales() {
 	 * parent for the deferred sync WC_Post_Data::do_deferred_product_sync() drains
 	 * unbatched at shutdown.
 	 *
-	 * @param int[]  $product_ids Products to process, in query order.
-	 * @param string $mode        'start' or 'end'.
+	 * @param string[]|int[] $product_ids Products to process, in query order. The core data
+	 *                                    store returns numeric strings from $wpdb->get_col();
+	 *                                    a replaced store may return anything.
+	 * @param string          $mode        'start' or 'end'.
 	 */
 	$process_products = static function ( array $product_ids, string $mode ) use ( $product_util, $flush_product_objects, $flush_shared_groups ): void {
 		foreach ( array_chunk( $product_ids, 50 ) as $chunk ) {
