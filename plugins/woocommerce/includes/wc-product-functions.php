@@ -925,11 +925,12 @@ function wc_scheduled_sales() {
 			// this request rather than evicting entries other requests are using. Term
 			// queries are the bulk of it: priming a batch caches a term result set per
 			// product, and clean_object_term_cache() only invalidates them by salt, which
-			// leaves the entries resident.
+			// leaves the entries resident. The terms group is left alone on purpose: it
+			// keys by term ID and is bounded by the size of the taxonomy rather than the
+			// backlog, so flushing it per batch would re-query the same terms for nothing.
 			if ( $flush_shared_groups ) {
 				wp_cache_flush_group( 'products' );
 				wp_cache_flush_group( 'term-queries' );
-				wp_cache_flush_group( 'terms' );
 			}
 		}
 	};
