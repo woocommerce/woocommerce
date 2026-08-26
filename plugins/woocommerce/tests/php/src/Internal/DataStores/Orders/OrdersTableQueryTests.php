@@ -1733,6 +1733,10 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	 * @testDox An unusable status entry is dropped while a usable sibling keeps filtering.
 	 */
 	public function test_partially_usable_status_list_keeps_working(): void {
+		// The dropped entry is still reported even though the query runs; declaring this also
+		// asserts the notice fires, since WP fails the test if a declared one never does.
+		$this->setExpectedIncorrectUsage( 'wc_get_orders' );
+
 		$completed = OrderHelper::create_order();
 		$completed->set_status( OrderStatus::COMPLETED );
 		$completed->save();
@@ -1779,5 +1783,65 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 
 		$this->assertContains( $completed->get_id(), $result, 'An unregistered status must not drop a valid sibling.' );
 		$this->assertNotContains( $pending->get_id(), $result, 'The valid status must still restrict the query.' );
+	}
+
+	/**
+	 * @testDox A date_query key WP_Date_Query ignores does not reject the clause it does build.
+	 */
+	public function test_unknown_date_query_key_does_not_reject_the_clause(): void {
+		$order = OrderHelper::create_order();
+		$order->set_date_created( '2020-06-01' );
+		$order->save();
+
+		// WP_Date_Query ignores keys it does not recognise, so an extension carrying its own data
+		// in a clause must not lose the year filter that clause actually expresses.
+		$result = wc_get_orders(
+			array(
+				'date_query' => array(
+					array(
+						'year'              => 2020,
+						'extension_context' => new \stdClass(),
+					),
+				),
+				'return'     => 'ids',
+				'limit'      => -1,
+			)
+		);
+
+		$this->assertContains( $order->get_id(), $result, 'An unrecognised date_query key must not discard the clause.' );
+	}
+
+	/**
+	 * @testDox An unusable date_query value that does reach a string function is still rejected.
+	 */
+	public function test_unusable_date_query_string_value_is_still_rejected(): void {
+		$this->setExpectedIncorrectUsage( 'wc_get_orders' );
+
+		OrderHelper::create_order();
+
+		$result = wc_get_orders(
+			array(
+				'date_query' => array( array( 'after' => new \stdClass() ) ),
+				'return'     => 'ids',
+				'limit'      => -1,
+			)
+		);
+
+		$this->assertSame( array(), $result, 'An unusable "after" value must fail the query closed.' );
+	}
+
+	/**
+	 * @testDox An unsupported operator still returns an empty clause rather than throwing.
+	 */
+	public function test_unsupported_operator_returns_empty_clause(): void {
+		$query = new OrdersTableQuery( array( 'limit' => 1 ) );
+
+		// where() is public. An unsupported operator short-circuits before the value is used, and
+		// callers rely on the empty clause rather than an exception.
+		$this->assertSame(
+			'',
+			$query->where( 't', 'f', 'BOGUS', new \stdClass(), 'string' ),
+			'An unsupported operator must not throw on an unusable value it never reaches.'
+		);
 	}
 }

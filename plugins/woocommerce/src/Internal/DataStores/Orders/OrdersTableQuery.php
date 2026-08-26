@@ -585,6 +585,66 @@ class OrdersTableQuery {
 	}
 
 	/**
+	 * Validates the date_query values WP_Date_Query actually consumes, and only those.
+	 *
+	 * WP_Date_Query ignores keys it does not recognise, so an extension is free to carry its own
+	 * data in a clause. Validating every leaf would reject those queries even though the clause
+	 * WP_Date_Query does build is fine. The keys it consumes are its own `$time_keys`, plus the
+	 * `column`, `compare` and `relation` args, all of which reach a string function or mktime()
+	 * and fatal on a value that cannot be used as one.
+	 *
+	 * @param mixed $query Date query argument.
+	 * @return void
+	 * @throws \Exception When a consumed value cannot be used where WP_Date_Query needs it.
+	 */
+	private function validate_date_query_values( $query ): void {
+		if ( ! is_array( $query ) ) {
+			return;
+		}
+
+		// WP_Date_Query::$time_keys, plus the clause args it reads alongside them.
+		$consumed_keys = array(
+			'after',
+			'before',
+			'year',
+			'month',
+			'monthnum',
+			'week',
+			'w',
+			'dayofyear',
+			'day',
+			'dayofweek',
+			'dayofweek_iso',
+			'hour',
+			'minute',
+			'second',
+			'column',
+			'compare',
+			'relation',
+		);
+
+		foreach ( $query as $key => $value ) {
+			// A numeric key is a nested clause, not an argument.
+			if ( is_int( $key ) ) {
+				$this->validate_date_query_values( $value );
+				continue;
+			}
+
+			if ( ! in_array( $key, $consumed_keys, true ) ) {
+				continue;
+			}
+
+			// 'before' and 'after' also accept an array of date parts; the rest are single values
+			// there, so an array is as unusable as an object.
+			foreach ( is_array( $value ) && in_array( $key, array( 'before', 'after' ), true ) ? $value : array( $value ) as $part ) {
+				if ( ! $this->is_stringable( $part ) ) {
+					throw $this->invalid_query_arg( esc_html__( 'Invalid date_query value.', 'woocommerce' ) );
+				}
+			}
+		}
+	}
+
+	/**
 	 * Helper function to map posts and gmt based keys to HPOS keys.
 	 *
 	 * @param array $query Date query argument.
@@ -615,18 +675,7 @@ class OrdersTableQuery {
 			'date_completed' => 'date_completed_gmt',
 		);
 
-		// Every leaf, not just the ones converted below: the rest go to WP_Date_Query, which
-		// feeds them to preg_match() unchecked. This only rejects values that cannot be used as a
-		// string; WP_Date_Query's own numeric args (year, monthnum and so on) reach mktime(),
-		// which wants ?int, and are not covered here.
-		array_walk_recursive(
-			$query,
-			function ( $leaf ) {
-				if ( ! $this->is_stringable( $leaf ) ) {
-					throw $this->invalid_query_arg( esc_html__( 'Invalid date_query value.', 'woocommerce' ) );
-				}
-			}
-		);
+		$this->validate_date_query_values( $query );
 
 		array_walk(
 			$query,
@@ -779,6 +828,13 @@ class OrdersTableQuery {
 		// would drop the clause entirely and return every order, including trashed ones.
 		if ( $dropped_unusable && ! $this->args['status'] ) {
 			throw $this->invalid_query_arg( esc_html__( 'Invalid order status.', 'woocommerce' ) );
+		}
+
+		// The query still runs, on a narrower filter than the caller wrote. Report it anyway:
+		// the code that passed the value is just as wrong when the query happened to survive,
+		// and this would otherwise be the one silent path.
+		if ( $dropped_unusable ) {
+			$this->report_invalid_query_arg( esc_html__( 'Invalid order status.', 'woocommerce' ) );
 		}
 	}
 
@@ -1266,13 +1322,6 @@ class OrdersTableQuery {
 	public function where( string $table, string $field, string $operator, $value, string $type ): string {
 		global $wpdb;
 
-		// The single point where a caller value reaches format_object_value_for_db().
-		foreach ( is_array( $value ) ? $value : array( $value ) as $single_value ) {
-			if ( $this->value_fails_conversion( $single_value, $type ) ) {
-				throw $this->invalid_query_arg( esc_html__( 'Invalid order query value.', 'woocommerce' ) );
-			}
-		}
-
 		$db_util  = wc_get_container()->get( DatabaseUtil::class );
 		$operator = strtoupper( '' !== $operator ? $operator : '=' );
 
@@ -1291,6 +1340,16 @@ class OrdersTableQuery {
 
 		if ( ! in_array( $operator, array( '=', '!=', 'IN', 'NOT IN', '>', '>=', '<', '<=' ), true ) ) {
 			return false;
+		}
+
+		// After the operator allowlist, not before it: an unsupported operator already returned
+		// without touching the value, and callers rely on that empty clause rather than an
+		// exception. This is the single point where a caller value reaches
+		// format_object_value_for_db().
+		foreach ( is_array( $value ) ? $value : array( $value ) as $single_value ) {
+			if ( $this->value_fails_conversion( $single_value, $type ) ) {
+				throw $this->invalid_query_arg( esc_html__( 'Invalid order query value.', 'woocommerce' ) );
+			}
 		}
 
 		if ( is_array( $value ) ) {
