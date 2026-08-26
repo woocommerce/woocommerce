@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 use Automattic\WooCommerce\Internal\Orders\CouponsController;
 use Automattic\WooCommerce\Internal\Orders\TaxesController;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
+use Automattic\WooCommerce\Internal\Admin\Orders\ItemQuantityLimits;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
 use Automattic\WooCommerce\Internal\Products\ProductsOrderingMoveService;
 use Automattic\WooCommerce\Internal\Utilities\Users;
@@ -1191,9 +1192,13 @@ class WC_AJAX {
 				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
 			}
 
+			// Unsaved edits from the items panel ride along with the add request;
+			// validate and save them first so they are neither lost nor able to
+			// bypass the quantity minimum.
 			if ( ! empty( $items ) ) {
 				$save_items = array();
 				parse_str( $items, $save_items );
+				wc_get_container()->get( ItemQuantityLimits::class )->validate_posted_item_quantities( $order, $save_items );
 				wc_save_order_items( $order->get_id(), $save_items );
 			}
 
@@ -1219,6 +1224,9 @@ class WC_AJAX {
 					// The message is shown in a JS alert, not rendered as HTML.
 					throw new Exception( wp_strip_all_tags( html_entity_decode( $message, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ) ) );
 				}
+
+				wc_get_container()->get( ItemQuantityLimits::class )->validate_new_item_quantity( (float) $qty, $product );
+
 				$validation_error = new WP_Error();
 				$validation_error = apply_filters( 'woocommerce_ajax_add_order_item_validation', $validation_error, $product, $order, $qty );
 
@@ -1543,6 +1551,7 @@ class WC_AJAX {
 			if ( ! empty( $items ) ) {
 				$save_items = array();
 				parse_str( $items, $save_items );
+				wc_get_container()->get( ItemQuantityLimits::class )->validate_posted_item_quantities( $order, $save_items );
 				wc_save_order_items( $order->get_id(), $save_items );
 			}
 
@@ -1682,6 +1691,16 @@ class WC_AJAX {
 			// Parse the jQuery serialized items.
 			$items = array();
 			parse_str( wp_unslash( $_POST['items'] ), $items ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+			$order = wc_get_order( $order_id );
+
+			try {
+				if ( $order instanceof WC_Order ) {
+					wc_get_container()->get( ItemQuantityLimits::class )->validate_posted_item_quantities( $order, $items );
+				}
+			} catch ( Exception $e ) {
+				wp_send_json_error( array( 'error' => $e->getMessage() ) );
+			}
 
 			// Save order items.
 			wc_save_order_items( $order_id, $items );
