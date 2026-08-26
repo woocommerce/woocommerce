@@ -505,6 +505,156 @@ class WC_Data_Store_WP {
 	}
 
 	/**
+	 * Query failures already logged this request, keyed by error code and query var.
+	 *
+	 * A malformed query no longer stops the caller, so a loop over bad data would otherwise write
+	 * one log line per iteration.
+	 *
+	 * @var array
+	 */
+	private static $logged_query_failures = array();
+
+	/**
+	 * Checks whether a query arg value can safely be used where a string is expected.
+	 *
+	 * PHP 8 raises a TypeError when an array or non-stringable object reaches a string-typed
+	 * parameter or an internal string function, and an Error when a non-stringable object is
+	 * concatenated. An array concatenated only warns. None is an Exception, so none is caught by
+	 * the try/catch blocks on this path.
+	 *
+	 * @since 11.2.0
+	 * @param mixed $value The value to check.
+	 * @return bool True if the value can be used as a string, false otherwise.
+	 */
+	protected function is_usable_as_string( $value ) {
+		return is_scalar( $value ) || ( is_object( $value ) && method_exists( $value, '__toString' ) );
+	}
+
+	/**
+	 * Checks whether an order status value would raise an Error when the 'wc-' prefix is concatenated.
+	 *
+	 * Only objects without a __toString() method qualify. Arrays and null merely warn or convert
+	 * silently and are then reduced to '' by WP_Query's sanitize_key(), so they must keep their
+	 * pre-existing behaviour of dropping the status clause rather than emptying the result set.
+	 *
+	 * @since 11.2.0
+	 * @param mixed $status The status value to check.
+	 * @return bool True if concatenating the value would raise an Error.
+	 */
+	protected function is_unusable_status( $status ) {
+		return is_object( $status ) && ! method_exists( $status, '__toString' );
+	}
+
+	/**
+	 * Checks whether a status value would actually narrow the query.
+	 *
+	 * WP_Query builds its status clause by intersecting the requested list with get_post_stati(),
+	 * so a value naming no registered status contributes nothing and the clause disappears.
+	 * Truthiness is not the test: 'not-a-status' is truthy and still filters nothing. 'any' is the
+	 * exception, since WP_Query turns it into exclusion clauses instead.
+	 *
+	 * @since 11.2.0
+	 * @param mixed $status The status value to check.
+	 * @return bool True if the value narrows the query, false otherwise.
+	 */
+	protected function status_narrows_query( $status ) {
+		if ( 'any' === $status ) {
+			return true;
+		}
+
+		return in_array( sanitize_key( $status ), get_post_stati(), true );
+	}
+
+	/**
+	 * Checks whether any leaf of a query arg value cannot be used where a string is expected.
+	 *
+	 * Recurses because a nested array is a supported grouping construct for some args, so an array
+	 * is only unusable when something inside it is.
+	 *
+	 * @since 11.2.0
+	 * @param mixed $value The value to check.
+	 * @return bool True if any leaf cannot be used as a string, false otherwise.
+	 */
+	protected function contains_unusable_value( $value ) {
+		if ( is_array( $value ) ) {
+			foreach ( $value as $item ) {
+				if ( $this->contains_unusable_value( $item ) ) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		return ! $this->is_usable_as_string( $value );
+	}
+
+	/**
+	 * Marks a query as unsatisfiable, so it returns nothing rather than running without the
+	 * filter the caller asked for.
+	 *
+	 * Two mechanisms are used together. `errors` is what the calling store's query() checks to skip
+	 * WP_Query entirely, but it is only reachable if the args survive the
+	 * the store's get_..._query filter that fires afterwards, and a
+	 * callback that rebuilds the array can drop it. `post__in => array( 0 )` is a normal query arg
+	 * that such a callback carries forward, and no post has ID 0, so the query still matches
+	 * nothing if `errors` is lost. Any caller-supplied `p` is removed alongside it, because
+	 * WP_Query honours `p` in preference to `post__in`.
+	 *
+	 * @since 11.2.0
+	 * @param array  $wp_query_args WP_Query args, passed by reference.
+	 * @param string $code          Error code.
+	 * @param string $message       Error message.
+	 * @param array  $context       Reporting context: 'key' the offending query var, 'value' its
+	 *                              value, 'function' the entry point to name, 'source' the log
+	 *                              source. Supplied by the calling store, which knows which of
+	 *                              its args failed and what to call itself.
+	 * @return void
+	 */
+	protected function fail_query_closed( &$wp_query_args, $code, $message, $context = array() ) {
+		$wp_query_args['errors'][] = new WP_Error( $code, $message );
+		$wp_query_args['post__in'] = array( 0 );
+
+		// WP_Query honours 'p' and its aliases in preference to post__in, so a caller-supplied
+		// 'p' would return that order despite the query being failed closed.
+		unset( $wp_query_args['p'], $wp_query_args['page_id'], $wp_query_args['attachment_id'], $wp_query_args['subpost_id'] );
+
+		$key      = isset( $context['key'] ) ? $context['key'] : '';
+		$type     = array_key_exists( 'value', $context ) ? gettype( $context['value'] ) : 'unknown';
+		$function = isset( $context['function'] ) ? $context['function'] : 'wc_get_objects';
+		$source   = isset( $context['source'] ) ? $context['source'] : 'legacy-query';
+
+		$detail = sprintf(
+			/* translators: 1: query argument name, 2: PHP type of the value passed. */
+			__( 'The "%1$s" argument was passed a %2$s, which cannot be used here. Returning an empty result set.', 'woocommerce' ),
+			esc_html( $key ),
+			esc_html( $type )
+		);
+
+		// One log line per distinct failure per process, keyed by code and query var so that a
+		// second, different bad arg is still reported. Later occurrences of the same one in a
+		// long-running process (WP-CLI, cron) are not logged, though the query still fails closed.
+		$dedup_key = $code . '|' . $key;
+
+		if ( isset( self::$logged_query_failures[ $dedup_key ] ) ) {
+			return;
+		}
+
+		self::$logged_query_failures[ $dedup_key ] = true;
+
+		wc_get_logger()->warning(
+			$detail,
+			array(
+				'code'   => $code,
+				'key'    => $key,
+				'type'   => $type,
+				'origin' => $function,
+				'source' => $source,
+			)
+		);
+	}
+
+	/**
 	 * Return list of internal meta keys.
 	 *
 	 * @since 3.2.0

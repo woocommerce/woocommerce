@@ -911,136 +911,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	}
 
 	/**
-	 * Query failures already logged this request, keyed by error code.
-	 *
-	 * A malformed query no longer stops the caller, so a loop over bad data would otherwise write
-	 * one log line per iteration.
-	 *
-	 * @var array
-	 */
-	private static $logged_query_failures = array();
-
-	/**
-	 * Checks whether a query arg value can safely be used where a string is expected.
-	 *
-	 * PHP 8 raises a TypeError when an array or non-stringable object reaches a string-typed
-	 * parameter or an internal string function, and an Error when a non-stringable object is
-	 * concatenated. An array concatenated only warns. None is an Exception, so none is caught by
-	 * the try/catch blocks on this path.
-	 *
-	 * @since 11.2.0
-	 * @param mixed $value The value to check.
-	 * @return bool True if the value can be used as a string, false otherwise.
-	 */
-	private function is_usable_as_string( $value ) {
-		return is_scalar( $value ) || ( is_object( $value ) && method_exists( $value, '__toString' ) );
-	}
-
-	/**
-	 * Checks whether an order status value would raise an Error when the 'wc-' prefix is concatenated.
-	 *
-	 * Only objects without a __toString() method qualify. Arrays and null merely warn or convert
-	 * silently and are then reduced to '' by WP_Query's sanitize_key(), so they must keep their
-	 * pre-existing behaviour of dropping the status clause rather than emptying the result set.
-	 *
-	 * @since 11.2.0
-	 * @param mixed $status The status value to check.
-	 * @return bool True if concatenating the value would raise an Error.
-	 */
-	private function is_unusable_status( $status ) {
-		return is_object( $status ) && ! method_exists( $status, '__toString' );
-	}
-
-	/**
-	 * Checks whether a status value would actually narrow the query.
-	 *
-	 * WP_Query builds its status clause by intersecting the requested list with get_post_stati(),
-	 * so a value naming no registered status contributes nothing and the clause disappears.
-	 * Truthiness is not the test: 'not-a-status' is truthy and still filters nothing. 'any' is the
-	 * exception, since WP_Query turns it into exclusion clauses instead.
-	 *
-	 * @since 11.2.0
-	 * @param mixed $status The status value to check.
-	 * @return bool True if the value narrows the query, false otherwise.
-	 */
-	private function status_narrows_query( $status ) {
-		if ( 'any' === $status ) {
-			return true;
-		}
-
-		return in_array( sanitize_key( $status ), get_post_stati(), true );
-	}
-
-	/**
-	 * Checks whether any leaf of a query arg value cannot be used where a string is expected.
-	 *
-	 * Recurses because a nested array is a supported grouping construct for some args, so an array
-	 * is only unusable when something inside it is.
-	 *
-	 * @since 11.2.0
-	 * @param mixed $value The value to check.
-	 * @return bool True if any leaf cannot be used as a string, false otherwise.
-	 */
-	private function contains_unusable_value( $value ) {
-		if ( is_array( $value ) ) {
-			foreach ( $value as $item ) {
-				if ( $this->contains_unusable_value( $item ) ) {
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		return ! $this->is_usable_as_string( $value );
-	}
-
-	/**
-	 * Marks a query as unsatisfiable, so it returns no orders rather than running without the
-	 * filter the caller asked for.
-	 *
-	 * Two mechanisms are used together. `errors` is what {@see self::query()} checks to skip
-	 * WP_Query entirely, but it is only reachable if the args survive the
-	 * `woocommerce_order_data_store_cpt_get_orders_query` filter that fires afterwards, and a
-	 * callback that rebuilds the array can drop it. `post__in => array( 0 )` is a normal query arg
-	 * that such a callback carries forward, and no post has ID 0, so the query still matches
-	 * nothing if `errors` is lost. Any caller-supplied `p` is removed alongside it, because
-	 * WP_Query honours `p` in preference to `post__in`.
-	 *
-	 * @since 11.2.0
-	 * @param array  $wp_query_args WP_Query args, passed by reference.
-	 * @param string $code          Error code.
-	 * @param string $message       Error message.
-	 * @return void
-	 */
-	private function fail_query_closed( &$wp_query_args, $code, $message ) {
-		$wp_query_args['errors'][] = new WP_Error( $code, $message );
-		$wp_query_args['post__in'] = array( 0 );
-
-		// WP_Query honours 'p' and its aliases in preference to post__in, so a caller-supplied
-		// 'p' would return that order despite the query being failed closed.
-		unset( $wp_query_args['p'], $wp_query_args['page_id'], $wp_query_args['attachment_id'], $wp_query_args['subpost_id'] );
-
-		// One line per distinct failure per process, since a loop over stored bad data would
-		// otherwise log every iteration. Later occurrences in a long-running process (WP-CLI,
-		// cron) are not logged, though the query still fails closed each time.
-		if ( isset( self::$logged_query_failures[ $code ] ) ) {
-			return;
-		}
-
-		self::$logged_query_failures[ $code ] = true;
-
-		wc_get_logger()->warning(
-			__( 'Malformed order query args. Returning no orders.', 'woocommerce' ),
-			array(
-				'code'   => $code,
-				'origin' => __METHOD__,
-				'source' => 'legacy-order-query',
-			)
-		);
-	}
-
-	/**
 	 * Get valid WP_Query args from a WC_Order_Query's query variables.
 	 *
 	 * @since 3.1.0
@@ -1073,7 +943,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		// rejected, because only that raises an Error on the concatenation. Arrays and null are
 		// reduced to '' by WP_Query's sanitize_key(), which drops the status clause, so rejecting
 		// them would turn a working query into an empty one.
-		$has_unusable_status = false;
+		$has_unusable_status   = false;
+		$unusable_status_value = null;
 
 		if ( ! empty( $query_vars['post_status'] ) ) {
 			if ( is_array( $query_vars['post_status'] ) ) {
@@ -1081,7 +952,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 				foreach ( $query_vars['post_status'] as $status ) {
 					if ( $this->is_unusable_status( $status ) ) {
-						$has_unusable_status = true;
+						$has_unusable_status   = true;
+						$unusable_status_value = $status;
 						continue;
 					}
 
@@ -1100,7 +972,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 					unset( $query_vars['post_status'] );
 				}
 			} elseif ( $this->is_unusable_status( $query_vars['post_status'] ) ) {
-				$has_unusable_status = true;
+				$has_unusable_status   = true;
+				$unusable_status_value = $query_vars['post_status'];
 				unset( $query_vars['post_status'] );
 			} else {
 				$query_vars['post_status'] = wc_is_order_status( 'wc-' . $query_vars['post_status'] ) ? 'wc-' . $query_vars['post_status'] : $query_vars['post_status'];
@@ -1114,7 +987,13 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$this->fail_query_closed(
 				$wp_query_args,
 				'woocommerce_order_query_invalid_status',
-				__( 'Invalid order status.', 'woocommerce' )
+				__( 'Invalid order status.', 'woocommerce' ),
+				array(
+					'key'      => 'status',
+					'value'    => $unusable_status_value,
+					'function' => 'wc_get_orders',
+					'source'   => 'legacy-order-query',
+				)
 			);
 		}
 
@@ -1153,7 +1032,13 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 					$this->fail_query_closed(
 						$wp_query_args,
 						'woocommerce_order_query_invalid_date',
-						__( 'Invalid date query.', 'woocommerce' )
+						__( 'Invalid date query.', 'woocommerce' ),
+						array(
+							'key'      => $query_var_key,
+							'value'    => $date_value,
+							'function' => 'wc_get_orders',
+							'source'   => 'legacy-order-query',
+						)
 					);
 				}
 
@@ -1178,7 +1063,13 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				$this->fail_query_closed(
 					$wp_query_args,
 					'woocommerce_order_query_invalid_customer',
-					__( 'Invalid customer query.', 'woocommerce' )
+					__( 'Invalid customer query.', 'woocommerce' ),
+					array(
+						'key'      => 'customer',
+						'value'    => $query_vars['customer'],
+						'function' => 'wc_get_orders',
+						'source'   => 'legacy-order-query',
+					)
 				);
 			} else {
 				$customer_query = $this->get_orders_generate_customer_meta_query( $values );
