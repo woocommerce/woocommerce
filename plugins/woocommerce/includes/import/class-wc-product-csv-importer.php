@@ -1452,7 +1452,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				continue;
 			}
 
-			if ( $update_existing && ( isset( $parsed_data['id'] ) || isset( $parsed_data['sku'] ) || '' !== $global_unique_id ) && ! $id_exists && ! $sku_exists ) {
+			if ( $update_existing && ( isset( $parsed_data['id'] ) || isset( $parsed_data['sku'] ) || isset( $parsed_data['global_unique_id'] ) ) && ! $id_exists && ! $sku_exists ) {
 				$create_variation = false;
 				$refusal          = null;
 

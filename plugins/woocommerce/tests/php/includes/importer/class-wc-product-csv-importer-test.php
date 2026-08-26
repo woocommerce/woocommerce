@@ -333,7 +333,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_import_skips_invalid_global_unique_id_when_updating_existing_products() {
 		$csv_file = trailingslashit( get_temp_dir() ) . 'import-invalid-global-unique-id.csv';
-		file_put_contents( $csv_file, "GTIN,Name\nABC-123,Product that should not be created\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+		file_put_contents( $csv_file, "GTIN,Name\nABC,Product that should not be created\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
 
 		$importer = new WC_Product_CSV_Importer(
 			$csv_file,
