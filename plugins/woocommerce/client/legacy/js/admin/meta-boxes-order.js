@@ -318,6 +318,7 @@ jQuery( function ( $ ) {
 
 			$( document.body )
 				.on( 'wc_backbone_modal_loaded', this.backbone.init )
+				.on( 'wc_backbone_modal_before_response', this.backbone.validate_response )
 				.on( 'wc_backbone_modal_response', this.backbone.response );
 		},
 
@@ -709,6 +710,43 @@ jQuery( function ( $ ) {
 			return false;
 		},
 
+		/**
+		 * Return the first of the given inputs whose value is below its min
+		 * attribute, or null when none is. Only the minimum (rangeUnderflow)
+		 * is checked; other constraints are deliberately ignored so they keep
+		 * their previous behaviour.
+		 *
+		 * @param {NodeList|jQuery} inputs Quantity inputs to check.
+		 * @return {HTMLInputElement|null} First input below its minimum.
+		 */
+		find_input_with_qty_below_min: function( inputs ) {
+			return Array.prototype.find.call( inputs, function( input ) {
+				return input.validity.rangeUnderflow;
+			} ) || null;
+		},
+
+		/**
+		 * Check the quantity inputs in the items panel against their minimum,
+		 * revealing and reporting the first one below it.
+		 *
+		 * @return {boolean} True when every quantity input meets its minimum.
+		 */
+		validate_quantity_inputs: function() {
+			var input = wc_meta_boxes_order_items.find_input_with_qty_below_min(
+				document.querySelectorAll( '#woocommerce-order-items input.quantity' )
+			);
+
+			if ( ! input ) {
+				return true;
+			}
+
+			var row = $( input ).closest( 'tr' );
+			row.find( '.view' ).hide();
+			row.find( '.edit' ).show();
+			input.reportValidity();
+			return false;
+		},
+
 		edit_item: function() {
 			$( this ).closest( 'tr' ).find( '.view' ).hide();
 			$( this ).closest( 'tr' ).find( '.edit' ).show();
@@ -909,6 +947,10 @@ jQuery( function ( $ ) {
 		},
 
 		save_line_items: function() {
+			if ( ! wc_meta_boxes_order_items.validate_quantity_inputs() ) {
+				return false;
+			}
+
 			var data = {
 				order_id: woocommerce_admin_meta_boxes.post_id,
 				items:    $( 'table.woocommerce_order_items :input[name], .wc-order-totals-items :input[name]' ).serialize(),
@@ -1211,6 +1253,25 @@ jQuery( function ( $ ) {
 		},
 
 		backbone: {
+
+			/**
+			 * Veto the add products modal response when a quantity is below its
+			 * minimum, reporting it on the input so the modal stays open.
+			 */
+			validate_response: function( e, target, $modal, validation ) {
+				if ( 'wc-modal-add-products' !== target || ! $modal || ! $modal.length ) {
+					return;
+				}
+
+				var qtyInputBelowMin = wc_meta_boxes_order_items.find_input_with_qty_below_min(
+					$modal[ 0 ].querySelectorAll( 'input[name="item_qty"]' )
+				);
+
+				if ( qtyInputBelowMin ) {
+					qtyInputBelowMin.reportValidity();
+					validation.valid = false;
+				}
+			},
 
 			init: function( e, target ) {
 				if ( 'wc-modal-add-products' === target ) {
