@@ -7,6 +7,11 @@
  * that runs 23 or 25 hours across a DST transition the two backends still disagree by an hour.
  * Post storage is the correct side there; closing the gap means fixing `OrdersTableQuery`.
  *
+ * It is also asserted for `date_paid` only, which stands in for the meta-backed date fields.
+ * `date_created` and `date_modified` map to `post_date`/`post_modified` and take a different
+ * branch that still names the day in the site timezone, so they can disagree with HPOS on a
+ * query var carrying an explicit UTC designator. That is pre-existing and out of scope here.
+ *
  * @package WooCommerce\Tests\DataStores
  */
 

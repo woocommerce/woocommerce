@@ -330,30 +330,6 @@ class WC_Data_Store_WP {
 	}
 
 	/**
-	 * Resolve the calendar day that a day-precision date query var names.
-	 *
-	 * A bare date or a naive datetime names a day in the site's timezone, so the local calendar date
-	 * is the one to use. A string carrying an explicit UTC designator or offset names an instant
-	 * instead, and HPOS buckets those by their UTC calendar date; matching that here is what keeps
-	 * the two order storage backends from resolving the same query to different days.
-	 *
-	 * @param WC_DateTime $date The parsed date.
-	 * @param string|null $raw  The raw query var section this date was parsed from, or null when it
-	 *                          did not come from a string.
-	 * @return string The named calendar day, as YYYY-MM-DD.
-	 */
-	private function get_date_query_day( $date, $raw ) {
-		// The same pattern wc_string_to_datetime() uses to decide a string carries its own timezone.
-		$iso8601_with_timezone = '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(Z|[+-]\d{2}:\d{2})$/';
-
-		if ( is_string( $raw ) && 1 === preg_match( $iso8601_with_timezone, $raw ) ) {
-			return gmdate( 'Y-m-d', $date->getTimestamp() );
-		}
-
-		return $date->date( 'Y-m-d' );
-	}
-
-	/**
 	 * Map a valid date query var to WP_Query arguments.
 	 * Valid date formats: YYYY-MM-DD or timestamp, possibly combined with an operator from $valid_operators.
 	 * Also accepts a WC_DateTime object.
@@ -375,9 +351,9 @@ class WC_Data_Store_WP {
 		$operator = '=';
 
 		// The raw strings $dates[0] and $dates[1] were parsed from, so the day they name can be
-		// resolved later. Null when the date did not come from a string.
-		$raw_start = null;
-		$raw_end   = null;
+		// resolved later. Only day precision reads these, and only string input reaches it.
+		$raw_start = '';
+		$raw_end   = '';
 
 		try {
 			// Specific time query with a WC_DateTime.
@@ -478,13 +454,15 @@ class WC_Data_Store_WP {
 		if ( 'day' === $precision ) {
 			/*
 			 * The meta values are UTC timestamps, while a day-precision query var names a calendar day,
-			 * so both boundaries have to be anchored on that day's local midnight. Building them from the
-			 * named date keeps that anchor even when the local day starts on a different UTC date.
+			 * so both boundaries have to be anchored on that day's local midnight. The day itself is
+			 * named the same way HPOS names it in OrdersTableQuery::local_time_to_gmt_date_query(): the
+			 * UTC calendar date of the parsed instant. Deriving it identically is what keeps the two
+			 * order storage backends from resolving one query var to different days on these meta keys.
 			 */
 			$timezone = wp_timezone();
-			$start    = new DateTime( $this->get_date_query_day( $dates[0], $raw_start ) . ' 00:00:00', $timezone );
+			$start    = new DateTime( gmdate( 'Y-m-d', (int) wc_string_to_timestamp( $raw_start ) ) . ' 00:00:00', $timezone );
 			$end      = '...' === $operator
-				? new DateTime( $this->get_date_query_day( $dates[1], $raw_end ) . ' 00:00:00', $timezone )
+				? new DateTime( gmdate( 'Y-m-d', (int) wc_string_to_timestamp( $raw_end ) ) . ' 00:00:00', $timezone )
 				: clone $start;
 
 			/*

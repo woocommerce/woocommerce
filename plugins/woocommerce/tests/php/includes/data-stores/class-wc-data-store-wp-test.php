@@ -57,12 +57,6 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 	private const BEIRUT_MAR_30_MIDNIGHT = 1774818000;
 
 	/**
-	 * Timestamp of 2026-07-20 02:00:00 UTC, which is 2026-07-19 22:00 in America/New_York. A query
-	 * var naming this instant with an explicit designator names 2026-07-20, the way HPOS reads it.
-	 */
-	private const UTC_JUL_20_0200 = 1784512800;
-
-	/**
 	 * The System Under Test.
 	 *
 	 * @var WC_Data_Store_WP
