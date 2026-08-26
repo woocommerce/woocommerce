@@ -19,7 +19,7 @@ class ProductSearch extends AbstractBlock {
 	/**
 	 * Initialize this block type.
 	 */
-	protected function initialize() {
+	protected function initialize(): void {
 		parent::initialize();
 		add_filter( 'render_block_core/search', array( $this, 'add_live_results' ), 10, 2 );
 	}

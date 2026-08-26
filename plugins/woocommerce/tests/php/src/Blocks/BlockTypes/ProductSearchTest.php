@@ -35,7 +35,7 @@ class ProductSearchTest extends WC_Unit_Test_Case {
 			/**
 			 * Registration is already handled by WooCommerce during test bootstrap.
 			 */
-			protected function initialize() {
+			protected function initialize(): void {
 			}
 		};
 	}
@@ -43,7 +43,7 @@ class ProductSearchTest extends WC_Unit_Test_Case {
 	/**
 	 * Reset global script state between tests.
 	 */
-	protected function tearDown(): void {
+	public function tearDown(): void {
 		wp_dequeue_script( self::LIVE_RESULTS_SCRIPT_HANDLE );
 		parent::tearDown();
 	}
