@@ -914,9 +914,10 @@ function wc_scheduled_sales() {
 			wp_cache_delete_multiple( $release_ids, 'post_meta' );
 			clean_object_term_cache( $release_ids, 'product' );
 
-			// wc_get_product() caches every product it reads. Saving one already releases
-			// its own entry through ProductCacheController, but a product this loop reads
-			// without saving keeps its entry, so release the group. It is registered
+			// With product_instance_caching on, wc_get_product() caches every product it
+			// reads. Saving one already releases its own entry through
+			// ProductCacheController, but a product this loop reads without saving keeps
+			// its entry, so release the group. With the feature off this flush is a no-op. It is registered
 			// non-persistent, so this only ever touches the current request. A drop-in
 			// without flush_group support releases none of it: this is the one group with
 			// no other release path, so the relief does not reach that configuration.
