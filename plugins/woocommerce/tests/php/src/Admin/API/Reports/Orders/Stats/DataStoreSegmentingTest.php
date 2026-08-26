@@ -124,8 +124,10 @@ class DataStoreSegmentingTest extends OrdersStatsTestCase {
 
 		$data_store = new OrdersStatsDataStore();
 
-		// Three hourly intervals: the partial hour two hours back, one full hour, and the partial current hour.
+		// Three hourly intervals ending at the captured order time; reading the clock here
+		// could cross an hour boundary and add a fourth.
 		$now = new DateTime();
+		$now->setTimestamp( $latest_orders_time );
 
 		$two_hours_back                  = new DateTime();
 		$oldest_interval_start_timestamp = $latest_orders_time - 2 * HOUR_IN_SECONDS;
