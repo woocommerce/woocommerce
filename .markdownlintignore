@@ -4,3 +4,5 @@ plugins/woocommerce/lib/packages/*
 packages/php/email-editor/vendor-prefixed/*
 plugins/woocommerce/src/Internal/StockNotifications/CODERABBIT-TRIAGE-RAW.md
 packages/php/woocommerce-analytics/CHANGELOG.md
+# Agent instruction shims: a single "@AGENTS.md" import, not prose (MD041).
+plugins/woocommerce/tests/php/src/CLAUDE.md
