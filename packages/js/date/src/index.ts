@@ -186,6 +186,9 @@ function expandLocalizedFormat( format: string, localeData: moment.Locale ) {
  * received it, resolves that choice before the day token is substituted, so
  * whatever shape the substitution leaves behind can no longer change it.
  *
+ * Weekday names can be format-sensitive the same way, but no shipped locale
+ * keys that choice on the day token, so they are left for moment to render.
+ *
  * @param {string}        format     - localized date string format
  * @param {moment.Moment} date       - date whose month name to render
  * @param {moment.Locale} localeData - locale the format will be rendered with
