@@ -35,8 +35,8 @@ jQuery( function ( $ ) {
 			$( 'a.load_customer_shipping' ).on( 'click', this.load_shipping );
 			$( document.body )
 				.on( 'click', '.wc-copy-shipping-address', this.copy_shipping_address )
-				.on( 'aftercopy', '.wc-copy-shipping-address', this.copy_shipping_success )
-				.on( 'aftercopyfailure', '.wc-copy-shipping-address', this.copy_shipping_failure );
+				.on( 'aftercopy', '.wc-copy-shipping-address', this.copy_success )
+				.on( 'aftercopyfailure', '.wc-copy-shipping-address', this.copy_fail );
 			$( '#customer_user' ).on( 'change', this.change_customer_user );
 		},
 
@@ -279,39 +279,34 @@ jQuery( function ( $ ) {
 				return;
 			}
 
-			$button.addClass( 'is-copying' );
 			wcClearClipboard();
 			wcSetClipboard( shippingAddress, $button );
 		},
 
 		/**
-		 * Display copied feedback.
+		 * Display a "Copied!" tip when success copying.
 		 */
-		copy_shipping_success: function() {
-			var $button = $( this ),
-				originalText = $button.data( 'copy-text' ) || '',
-				copiedText = $button.data( 'copied-text' ) || originalText;
-
-			$button.addClass( 'is-copied' );
-			if ( copiedText ) {
-				$button.attr( 'title', copiedText );
-			}
-
-			window.setTimeout( function() {
-				$button.removeClass( 'is-copied is-copying' );
-				if ( originalText ) {
-					$button.attr( 'title', originalText );
-				} else {
-					$button.removeAttr( 'title' );
-				}
-			}, 2000 );
+		copy_success: function() {
+			$( this ).tipTip( {
+				'attribute':  'data-tip',
+				'activation': 'focus',
+				'fadeIn':     50,
+				'fadeOut':    50,
+				'delay':      0
+			} ).trigger( 'focus' );
 		},
 
 		/**
-		 * Reset UI on copy failure.
+		 * Display a failure tip when copy fails.
 		 */
-		copy_shipping_failure: function() {
-			$( this ).removeClass( 'is-copying' );
+		copy_fail: function() {
+			$( this ).tipTip( {
+				'attribute':  'data-tip-failed',
+				'activation': 'focus',
+				'fadeIn':     50,
+				'fadeOut':    50,
+				'delay':      0
+			} ).trigger( 'focus' );
 		}
 	};
 

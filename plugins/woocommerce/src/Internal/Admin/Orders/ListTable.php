@@ -1746,10 +1746,12 @@ class ListTable extends WP_List_Table {
 								<div class="wc-order-preview-address">
 									<h2>
 										<?php esc_html_e( 'Shipping details', 'woocommerce' ); ?>
-										<a href="#" class="wc-copy-shipping-address" data-shipping-address="{{ data.shipping_address_plain }}" data-copy-text="<?php esc_attr_e( 'Copy', 'woocommerce' ); ?>" data-copied-text="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>">
+										<# if ( data.shipping_address_plain ) { #>
+										<a href="#" class="wc-copy-shipping-address" data-shipping-address="{{ data.shipping_address_plain }}" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>" data-tip-failed="<?php esc_attr_e( 'Unable to copy.', 'woocommerce' ); ?>">
 											<span class="dashicons dashicons-admin-page" aria-hidden="true"></span>
 											<span class="screen-reader-text"><?php esc_html_e( 'Copy', 'woocommerce' ); ?></span>
 										</a>
+										<# } #>
 									</h2>
 										<# if ( data.ship_to_billing ) { #>
 											{{{ data.formatted_billing_address }}}

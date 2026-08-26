@@ -1974,21 +1974,7 @@ ul.wc_coupon_list_block {
 			&:focus {
 				color: #000;
 			}
-
-			&::after {
-				font-family: "Dashicons";
-				content: "\f105";
-				position: absolute;
-				top: 0;
-				left: 0;
-				text-align: center;
-				vertical-align: top;
-				line-height: 14px;
-				font-size: 14px;
-				font-weight: 400;
-			}
 		}
-
 
 		&:last-child {
 			padding-right: 0;

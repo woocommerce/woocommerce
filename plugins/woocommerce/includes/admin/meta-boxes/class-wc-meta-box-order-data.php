@@ -648,17 +648,47 @@ class WC_Meta_Box_Order_Data {
 					</div>
 					<div class="order_data_column order_data_column_shipping">
 					<?php
-					$shipping_address_plain = $order->get_formatted_shipping_address();
-					$shipping_address_plain = $shipping_address_plain
-						? wp_strip_all_tags( preg_replace( '/<br\s*\/\?\s*>/i', "\n", $shipping_address_plain ) )
-						: '';
+					$show_copy_button    = false;
+					$shipping_raw        = '';
+					$shipping_plain_text = '';
+
+					if ( $order->get_user_id() !== 0 && is_wp_error( $user ) ) {
+						// User not available on this site — suppress details.
+						$hide_core_shipping_details = false;
+					} else {
+						$hide_core_shipping_details = 'store-api' === $order->get_created_via()
+							&& self::order_has_no_shipping( $order )
+							&& self::order_has_only_virtual_products( $order )
+							&& self::order_shipping_matches_billing( $order );
+
+						/**
+						 * Filters whether billing-derived shipping details are hidden in the order admin summary.
+						 *
+						 * @param bool     $hide_core_shipping_details Whether core shipping details are hidden.
+						 * @param WC_Order $order                      Order object.
+						 *
+						 * @since 11.1.0
+						 */
+						$hide_core_shipping_details = apply_filters( 'woocommerce_hide_order_admin_shipping_details', $hide_core_shipping_details, $order );
+
+						if ( ! $hide_core_shipping_details && $order->has_shipping_address() ) {
+							$user_check = Users::get_user_in_current_site( $order->get_user_id() );
+							if ( $order->get_user_id() === 0 || ! is_wp_error( $user_check ) ) {
+								$shipping_raw        = $order->get_formatted_shipping_address();
+								$shipping_plain_text = self::normalize_address_to_plain_text( $shipping_raw );
+								$show_copy_button    = (bool) $shipping_plain_text;
+							}
+						}
+					}
 					?>
 					<h3>
 						<?php esc_html_e( 'Shipping', 'woocommerce' ); ?>
-						<a href="#" class="wc-copy-shipping-address" data-shipping-address="<?php echo esc_attr( $shipping_address_plain ); ?>">
+						<?php if ( $show_copy_button ) : ?>
+						<a href="#" class="wc-copy-shipping-address" data-shipping-address="<?php echo esc_attr( $shipping_plain_text ); ?>" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>" data-tip-failed="<?php esc_attr_e( 'Unable to copy.', 'woocommerce' ); ?>">
 							<span class="dashicons dashicons-admin-page" aria-hidden="true"></span>
 							<span class="screen-reader-text"><?php esc_html_e( 'Copy', 'woocommerce' ); ?></span>
 						</a>
+						<?php endif; ?>
 						<a href="#" class="edit_address"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
 						<span>
 							<a href="#" class="load_customer_shipping" style="display:none;"><?php esc_html_e( 'Load shipping address', 'woocommerce' ); ?></a>
@@ -672,21 +702,7 @@ class WC_Meta_Box_Order_Data {
 							if ( $order->get_user_id() !== 0 && is_wp_error( $user ) ) {
 								echo '<p>' . esc_html( $details_not_available_message ) . '</p>';
 							} else {
-								$hide_core_shipping_details = 'store-api' === $order->get_created_via()
-									&& self::order_has_no_shipping( $order )
-									&& self::order_has_only_virtual_products( $order )
-									&& self::order_shipping_matches_billing( $order );
-
-								/**
-								 * Filters whether billing-derived shipping details are hidden in the order admin summary.
-								 *
-								 * @param bool     $hide_core_shipping_details Whether core shipping details are hidden.
-								 * @param WC_Order $order                      Order object.
-								 *
-								 * @since 11.1.0
-								 */
-								$hide_core_shipping_details = apply_filters( 'woocommerce_hide_order_admin_shipping_details', $hide_core_shipping_details, $order );
-								$shipping_address           = $hide_core_shipping_details ? '' : $order->get_formatted_shipping_address();
+								$shipping_address = $hide_core_shipping_details ? '' : $shipping_raw;
 
 								if ( $shipping_address ) {
 									echo '<p>' . wp_kses( $shipping_address, array( 'br' => array() ) ) . '</p>';
@@ -952,5 +968,18 @@ class WC_Meta_Box_Order_Data {
 		$order->save();
 
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
+	}
+
+	/**
+	 * Normalize formatted address HTML to plain text by converting <br> variants to newlines.
+	 *
+	 * Handles <br>, <br/>, <br />, and <br> with attributes (e.g. <br class="foo">).
+	 *
+	 * @param string $formatted_address HTML string from get_formatted_*_address().
+	 * @return string Plain text with newlines preserving line breaks.
+	 */
+	public static function normalize_address_to_plain_text( $formatted_address ) {
+		$with_newlines = preg_replace( '/<br\s*[^>]*>/i', "\n", $formatted_address );
+		return wp_specialchars_decode( wp_strip_all_tags( $with_newlines ), ENT_QUOTES );
 	}
 }

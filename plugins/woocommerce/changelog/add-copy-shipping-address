@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a copy icon next to the shipping address on the order edit screen and order preview, allowing admins to quickly copy the full shipping address to the clipboard.
