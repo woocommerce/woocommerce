@@ -815,7 +815,15 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		}
 
 		if ( '' !== $wpdb->last_error ) {
-			throw new Exception( esc_html( 'Failed to retrieve persisted order item IDs: ' . $wpdb->last_error ) );
+			wc_get_logger()->error(
+				'Failed to retrieve persisted order item IDs.',
+				array(
+					'source'   => 'order-data-store',
+					'order_id' => $order->get_id(),
+					'error'    => $wpdb->last_error,
+				)
+			);
+			throw new Exception( esc_html__( 'Unable to retrieve persisted order item IDs.', 'woocommerce' ) );
 		}
 
 		return array_map( 'intval', $item_ids );
@@ -860,7 +868,15 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			)
 		);
 		if ( false === $result ) {
-			throw new Exception( esc_html( 'Failed to delete order item meta: ' . $wpdb->last_error ) );
+			wc_get_logger()->error(
+				'Failed to delete order item metadata.',
+				array(
+					'source'   => 'order-data-store',
+					'order_id' => $order->get_id(),
+					'error'    => $wpdb->last_error,
+				)
+			);
+			throw new Exception( esc_html__( 'Unable to delete order item metadata.', 'woocommerce' ) );
 		}
 		$result = $wpdb->query(
 			$wpdb->prepare(
@@ -870,7 +886,15 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			)
 		);
 		if ( false === $result ) {
-			throw new Exception( esc_html( 'Failed to delete order items: ' . $wpdb->last_error ) );
+			wc_get_logger()->error(
+				'Failed to delete order items.',
+				array(
+					'source'   => 'order-data-store',
+					'order_id' => $order->get_id(),
+					'error'    => $wpdb->last_error,
+				)
+			);
+			throw new Exception( esc_html__( 'Unable to delete order items.', 'woocommerce' ) );
 		}
 
 		foreach ( $sanitized_ids as $item_id ) {

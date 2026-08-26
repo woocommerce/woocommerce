@@ -1094,7 +1094,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		}
 
 		$this->assertInstanceOf( Exception::class, $caught_exception );
-		$this->assertStringContainsString( 'Failed to retrieve persisted order item IDs', $caught_exception->getMessage() );
+		$this->assertSame( 'Unable to retrieve persisted order item IDs.', $caught_exception->getMessage() );
 		$this->assertNotEmpty( wc_get_order( $order->get_id() )->get_items(), 'A failed snapshot must leave persisted items unchanged.' );
 	}
 
