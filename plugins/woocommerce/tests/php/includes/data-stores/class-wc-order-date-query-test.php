@@ -43,6 +43,13 @@ class WC_Order_Date_Query_Test extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
+		/*
+		 * Toggling the authoritative order storage throws when any order is pending sync, and the
+		 * HPOS tables outlive the per-test transaction, so a row left by an earlier test would make
+		 * this suite fail for a reason unrelated to what it asserts.
+		 */
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+
 		$this->previous_cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
 		OrderHelper::create_order_custom_table_if_not_exist();
 
@@ -54,6 +61,7 @@ class WC_Order_Date_Query_Test extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		OrderHelper::toggle_cot_feature_and_usage( $this->previous_cot_state );
+		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		update_option( 'timezone_string', '' );
 
 		parent::tearDown();
@@ -100,6 +108,12 @@ class WC_Order_Date_Query_Test extends WC_Unit_Test_Case {
 
 		foreach ( $storage_backends as $storage => $use_hpos ) {
 			OrderHelper::toggle_cot_feature_and_usage( $use_hpos );
+
+			$this->assertSame(
+				$use_hpos,
+				OrderUtil::custom_orders_table_usage_is_enabled(),
+				"Could not switch order storage to {$storage}"
+			);
 
 			$order = new WC_Order();
 			$order->set_date_paid( self::PAID_AT );
