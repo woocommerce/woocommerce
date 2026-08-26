@@ -13,8 +13,6 @@ use WC_Product_Simple;
 
 /**
  * Tests for new vs returning customer counting in the Orders Stats DataStore.
- *
- * Migrated from the legacy WC_Admin_Tests_Reports_Orders_Stats class.
  */
 class DataStoreReturningCustomersTest extends OrdersStatsTestCase {
 

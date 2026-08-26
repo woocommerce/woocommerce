@@ -12,8 +12,6 @@ use WC_Product_Simple;
 
 /**
  * Tests for the refunds filter of the Orders Stats DataStore.
- *
- * Migrated from the legacy WC_Admin_Tests_Reports_Orders_Stats class.
  */
 class DataStoreRefundFiltersTest extends OrdersStatsTestCase {
 

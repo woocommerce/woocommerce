@@ -15,8 +15,6 @@ use WC_Product_Simple;
 /**
  * Tests for zero-filling of empty intervals in the Orders Stats DataStore.
  *
- * Migrated from the legacy WC_Admin_Tests_Reports_Orders_Stats zero-fill tests.
- *
  * A shared fixture is created once for the class: two orders in the current hour, three
  * in the previous hour (so ordering by orders_count differs from ordering by date), and
  * one order each in the previous day, week, month and year. Queries then cover windows of

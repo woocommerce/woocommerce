@@ -16,8 +16,6 @@ use WC_Product;
 
 /**
  * Tests for the order fulfillment status regeneration tool of the Orders Stats DataStore.
- *
- * Migrated from the legacy WC_Admin_Tests_Reports_Orders_Stats class.
  */
 class DataStoreFulfillmentsTest extends OrdersStatsTestCase {
 

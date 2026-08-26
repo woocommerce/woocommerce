@@ -20,8 +20,6 @@ use WC_Product_Variation;
 
 /**
  * Tests for product segmentation in the Orders Stats DataStore.
- *
- * Migrated from the legacy WC_Admin_Tests_Reports_Orders_Stats class.
  */
 class DataStoreSegmentingTest extends OrdersStatsTestCase {
 

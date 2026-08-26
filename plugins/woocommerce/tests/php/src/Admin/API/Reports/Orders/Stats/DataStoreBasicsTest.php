@@ -19,8 +19,6 @@ use WC_Tax;
 
 /**
  * Tests for the basic querying behavior of the Orders Stats DataStore.
- *
- * Migrated from the legacy WC_Admin_Tests_Reports_Orders_Stats class.
  */
 class DataStoreBasicsTest extends OrdersStatsTestCase {
 

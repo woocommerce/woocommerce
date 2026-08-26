@@ -17,8 +17,6 @@ use WC_Product_Simple;
 /**
  * Tests for the Orders Stats DataStore filter handling ({@see OrdersStatsDataStore::get_data()}).
  *
- * Migrated from the legacy WC_Admin_Tests_Reports_Orders_Stats::test_populate_and_query_multiple_intervals().
- *
  * A shared fixture of 36 orders is created once for the class: for each of 3 primary
  * products, 3 coupon options (none, the small coupon, the large coupon) and 2 order
  * statuses (completed, processing), one order with just that product and one order with
