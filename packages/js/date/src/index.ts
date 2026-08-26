@@ -176,28 +176,58 @@ function expandLocalizedFormat( format: string, localeData: moment.Locale ) {
 }
 
 /**
- * Prefixes the day of month token of a moment format string with an escaped literal.
+ * Renders the month name of a moment format string into an escaped literal.
+ *
+ * Moment picks between the genitive and the nominative month name by testing
+ * the format string for a day token next to the month one, and locales disagree
+ * on what may sit between the two: the default `MONTHS_IN_FORMAT` accepts a
+ * bracketed literal, Catalan accepts only whitespace, and Polish matches
+ * "D MMMM" outright. Rendering the name here, against the format as the locale
+ * received it, resolves that choice before the day token is substituted, so
+ * whatever shape the substitution leaves behind can no longer change it.
+ *
+ * @param {string}        format     - localized date string format
+ * @param {moment.Moment} date       - date whose month name to render
+ * @param {moment.Locale} localeData - locale the format will be rendered with
+ * @return {string} - format string with its month name tokens escaped
+ */
+function escapeMonthName(
+	format: string,
+	date: moment.Moment,
+	localeData: moment.Locale
+) {
+	// Backslash escapes and bracketed sections are moment's literals, so an "M"
+	// inside one is text. "MM" and "M" render digits, which carry no grammar.
+	return format.replace( /\\.|\[[^\]]*\]|M{3,4}/g, ( token ) => {
+		if ( ! token.startsWith( 'M' ) ) {
+			return token;
+		}
+
+		const name =
+			token.length === 4
+				? localeData.months( date, format )
+				: localeData.monthsShort( date, format );
+
+		return `[${ name }]`;
+	} );
+}
+
+/**
+ * Swaps the day of month token of a moment format string for an escaped literal.
  *
  * Substituting in the format instead of in the formatted date keeps the value
  * away from the rest of the localized output: Japanese renders October as
  * "10月", where replacing the day "1" lands on the month instead, and locales
  * with non-Latin digits never match a Latin day number at all.
  *
- * The token is kept rather than consumed because moment picks the genitive or
- * the nominative month name by testing the format string for a day token next
- * to the month one. Locales disagree on what may sit between the two: the
- * default `MONTHS_IN_FORMAT` accepts a bracketed literal, Catalan accepts only
- * whitespace, and Polish matches "D MMMM" outright. Leaving the day token and
- * its separator untouched is what every one of them recognizes.
- *
- * @param {string}   format - localized date string format
- * @param {Function} prefix - builds the literal text to render before the day,
- *                          from the token it precedes
+ * @param {string}   format      - localized date string format
+ * @param {Function} replacement - builds the literal text to render in place of
+ *                               the day, from the token it replaces
  * @return {string|null} - format string, or null when it holds no day token
  */
-function prefixDayToken(
+function replaceDayToken(
 	format: string,
-	prefix: ( dayToken: string ) => string
+	replacement: ( dayToken: string ) => string
 ) {
 	let replaced = false;
 	// Backslash escapes and bracketed sections are moment's literals, so a "D"
@@ -220,7 +250,7 @@ function prefixDayToken(
 			}
 
 			replaced = true;
-			return `[${ prefix( token ) }]${ token }`;
+			return `[${ replacement( token ) }]`;
 		}
 	);
 
@@ -244,23 +274,28 @@ export function getRangeLabel( after: moment.Moment, before: moment.Moment ) {
 	if ( isSameDay ) {
 		return after.format( fullDateFormat );
 	} else if ( isSameMonth ) {
-		// Formatting the start day through the token it precedes keeps whatever
-		// the format asked for, such as the zero padding of "DD" or the ordinal
-		// of "Do". The token itself renders the end day, so the range is
-		// formatted through `before`; both dates share the month and the year
-		// here, so nothing else in the label moves.
-		const dayRangeFormat = prefixDayToken(
-			expandLocalizedFormat( fullDateFormat, after.localeData() ),
-			( dayToken ) => `${ after.format( dayToken ) } - `
+		// Formatting each day through the token it replaces keeps whatever the
+		// format asked for, such as the zero padding of "DD" or the ordinal of "Do".
+		// Everything else still renders from `after`, so a weekday, week number
+		// or time in the format stays the one the range starts on.
+		const localeData = after.localeData();
+		const dayRangeFormat = replaceDayToken(
+			escapeMonthName(
+				expandLocalizedFormat( fullDateFormat, localeData ),
+				after,
+				localeData
+			),
+			( dayToken ) =>
+				`${ after.format( dayToken ) } - ${ before.format( dayToken ) }`
 		);
 
-		// No day of month token to prefix: the format omits the day altogether,
+		// No day of month token to swap: the format omits the day altogether,
 		// so the shared month is as much of the range as it can carry.
 		if ( dayRangeFormat === null ) {
 			return after.format( fullDateFormat );
 		}
 
-		return before.format( dayRangeFormat );
+		return after.format( dayRangeFormat );
 	} else if ( isSameYear ) {
 		const monthDayFormat = __( 'MMM D', 'woocommerce' );
 		return `${ after.format( monthDayFormat ) } - ${ before.format(

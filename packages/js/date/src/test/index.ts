@@ -1059,6 +1059,23 @@ describe( 'getRangeLabel', () => {
 			expect( label ).toBe( 'أكتوبر ١, ٢٠٢٤' );
 		} );
 	} );
+	it( 'should render a weekday from the start of the range', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( 'ddd, MMM D, YYYY' );
+
+		// Oct 1 2024 is a Tuesday, Oct 31 a Thursday.
+		expect(
+			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+		).toBe( 'Tue, Oct 1 - 31, 2024' );
+	} );
+
+	it( 'should render a week number from the start of the range', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( 'MMM D, YYYY [w]w' );
+
+		expect(
+			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+		).toBe( 'Oct 1 - 31, 2024 w40' );
+	} );
+
 	describe( 'with a locale that inflects the month name', () => {
 		// Moment picks the genitive month name over the nominative one by
 		// testing the format string for a day token next to the month one, and
