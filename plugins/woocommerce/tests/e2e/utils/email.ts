@@ -19,6 +19,15 @@ import { expect } from '../fixtures/fixtures';
 const MAIL_LOG_POLL_TIMEOUT = 30 * 1000;
 
 /**
+ * How long a single mail log lookup may take before the poll re-navigates.
+ *
+ * Set explicitly: without it the inner assertion inherits the project's
+ * `expect` timeout (20s on CI), which would leave the budget above room for
+ * about two attempts instead of a steady poll.
+ */
+const MAIL_LOG_ATTEMPT_TIMEOUT = 1000;
+
+/**
  * Check that an email exists in the WP Mail Logging plugin Email Log page. WP Mail Logging plugin must be installed.
  *
  * Polls by re-navigating to the log on every attempt, not just re-querying the
@@ -61,7 +70,9 @@ export async function expectEmail(
 	await expect( async () => {
 		await page.goto( mailLogUrl );
 
-		await expect( row ).toHaveCount( expectedCount );
+		await expect( row ).toHaveCount( expectedCount, {
+			timeout: MAIL_LOG_ATTEMPT_TIMEOUT,
+		} );
 	} ).toPass( { timeout: MAIL_LOG_POLL_TIMEOUT } );
 
 	return row;

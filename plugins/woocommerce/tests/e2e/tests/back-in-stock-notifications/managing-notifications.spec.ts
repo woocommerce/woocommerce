@@ -149,10 +149,17 @@ test.describe(
 				// and the title link leads to the same edit page.
 				await row.locator( 'a.row-title' ).click();
 
-				const options = await page
-					.locator(
-						'select[name="wc_customer_stock_notification_action"] option'
-					)
+				const actionSelect = page.locator(
+					'select[name="wc_customer_stock_notification_action"]'
+				);
+
+				// `allTextContents()` does not auto-wait, so wait for the select
+				// itself first. Otherwise a slow edit page reads zero options and
+				// fails as a missing action rather than a timeout.
+				await expect( actionSelect ).toBeVisible();
+
+				const options = await actionSelect
+					.locator( 'option' )
 					.allTextContents();
 
 				// The select renders for every status, so an empty option list
