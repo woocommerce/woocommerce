@@ -859,8 +859,14 @@ function wc_scheduled_sales() {
 	 *
 	 * Priming the whole result set up front is what exhausts memory on a store with a
 	 * large backlog: the request can die before a single product is saved, leaving no
-	 * progress at all. Priming and releasing per batch holds this loop's own memory flat
-	 * instead, so it no longer scales with the size of the backlog.
+	 * progress at all. Priming and releasing per batch keeps the post and product caches
+	 * this loop fills from growing with the backlog, so a run that cannot finish still
+	 * gets somewhere.
+	 *
+	 * The relief is partial. Reading a product also caches its type under a per-product
+	 * group of its own that nothing here releases, and the shared groups below are only
+	 * released when the object cache lives in this request; a backend without flush_group
+	 * support releases none of them.
 	 *
 	 * Variations are the exception: saving one queues its parent for a deferred sync that
 	 * WC_Post_Data::do_deferred_product_sync() drains at shutdown, outside this loop and
