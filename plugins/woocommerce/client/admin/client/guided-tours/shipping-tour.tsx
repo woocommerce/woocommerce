@@ -326,7 +326,7 @@ export const ShippingTour = ( {
 					}
 				);
 				// Fire-and-forget retry — failure only means the tour replays next visit.
-				updateOptions( {
+				void updateOptions( {
 					[ REVIEWED_DEFAULTS_OPTION ]: 'yes',
 				} );
 			}

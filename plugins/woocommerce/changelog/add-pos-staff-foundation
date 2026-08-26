@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add the foundation for POS staff management: an experimental `point_of_sale_staff` feature flag (off by default), a flag-gated orchestrator, and the `pos_*` capability access model that keys POS access on holding any `pos_*` WP capability. No runtime surface yet; the staff endpoint, attribution, and admin UI register behind the flag in follow-up changes.

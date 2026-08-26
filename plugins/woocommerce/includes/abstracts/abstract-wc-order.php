@@ -91,6 +91,21 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	protected $items_to_delete = array();
 
 	/**
+	 * Monotonic counter used to build collision-free temporary array keys for
+	 * not-yet-persisted items.
+	 *
+	 * Using count() is not safe for this: when items are removed and re-added before
+	 * save(), the count repeats a previous value, so two distinct unsaved items
+	 * map to the same 'new:<type><N>' key and the second silently overwrites the
+	 * first (it is then lost on save()). A never-reused counter guarantees a
+	 * unique key for every unsaved item for the lifetime of the object.
+	 *
+	 * @since 11.1.0
+	 * @var int
+	 */
+	protected $temp_item_id_counter = 0;
+
+	/**
 	 * Bulk order item types scheduled for deletion on save().
 	 *
 	 * Populated by remove_order_items() with a specific item type and processed by
@@ -98,7 +113,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * replacement items. Superseded by $bulk_delete_all_items_pending, which removes
 	 * every item type.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 * @var array<string>
 	 */
 	protected $item_types_to_bulk_delete = array();
@@ -109,7 +124,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Set by remove_order_items() when called with no type (so every item type
 	 * should be removed). Processed and reset in save_items().
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 * @var bool
 	 */
 	protected $bulk_delete_all_items_pending = false;
@@ -958,7 +973,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				__METHOD__,
 				/* translators: %s: PHP type that was passed instead of a string. */
 				sprintf( esc_html__( 'remove_order_items() expects a string item type or null; received %s.', 'woocommerce' ), esc_html( gettype( $type ) ) ),
-				'10.9.0'
+				'11.0.0'
 			);
 			return;
 		}
@@ -1024,7 +1039,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * woocommerce_order_type_to_group filter so extension-registered types are
 	 * included.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 * @return array<string, string>
 	 */
 	protected function get_item_types_to_group() {
@@ -1298,7 +1313,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( $item_id ) {
 			$this->items[ $items_key ][ $item_id ] = $item;
 		} else {
-			$this->items[ $items_key ][ 'new:' . $items_key . count( $this->items[ $items_key ] ) ] = $item;
+			$this->items[ $items_key ][ 'new:' . $items_key . $this->temp_item_id_counter++ ] = $item;
 		}
 	}
 
@@ -1426,6 +1441,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Apply a coupon to the order and recalculate totals.
 	 *
 	 * @since 3.2.0
+	 * @since 11.2.0 When no coupons are applied yet, line items whose totals were manually
+	 *               edited have their subtotals synced to those totals first, so discounts
+	 *               are calculated from the edited prices rather than the original ones.
 	 * @param string|WC_Coupon $raw_coupon Coupon code or object.
 	 * @return true|WP_Error True if applied, error if not.
 	 */
@@ -1458,10 +1476,18 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
+		// With no coupons applied, a line total differing from its subtotal is a manual price
+		// adjustment. Adopt it as the new pre-discount price, otherwise discounts would be
+		// calculated from the original price and recalculations would discard the adjustment.
+		// With coupons already applied this is skipped: the difference also contains their
+		// discounts and the manual portion cannot be separated out.
+		$original_subtotals = empty( $applied_coupons ) ? $this->sync_subtotals_with_manually_edited_totals() : array();
+
 		$discounts = new WC_Discounts( $this );
 		$applied   = $discounts->apply_coupon( $coupon );
 
 		if ( is_wp_error( $applied ) ) {
+			$this->restore_item_subtotals( $original_subtotals );
 			return $applied;
 		}
 
@@ -1471,6 +1497,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( $data_store && 0 === $this->get_customer_id() ) {
 			$usage_count = $data_store->get_usage_by_email( $coupon, $this->get_billing_email() );
 			if ( 0 < $coupon->get_usage_limit_per_user() && $usage_count >= $coupon->get_usage_limit_per_user() ) {
+				$this->restore_item_subtotals( $original_subtotals );
 				return new WP_Error(
 					'invalid_coupon',
 					$coupon->get_coupon_error( 106 ),
@@ -1512,6 +1539,79 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		wc_update_coupon_usage_counts( $this->get_id() );
 
 		return true;
+	}
+
+	/**
+	 * Sync the subtotal of line items whose total was manually edited, adopting the edited
+	 * total as the new pre-discount price that discounts are calculated from.
+	 *
+	 * Only called when the order has no coupons applied, since applied coupons make the
+	 * subtotal/total difference ambiguous (coupon discount vs manual adjustment).
+	 *
+	 * @return array Original tax and subtotal values of the changed items, keyed by item ID.
+	 */
+	private function sync_subtotals_with_manually_edited_totals() {
+		$original_subtotals = array();
+
+		foreach ( $this->get_items() as $item_id => $item ) {
+			if ( ! $item instanceof WC_Order_Item_Product ) {
+				continue;
+			}
+
+			if ( (float) $item->get_subtotal( 'edit' ) === (float) $item->get_total( 'edit' ) && (float) $item->get_subtotal_tax( 'edit' ) === (float) $item->get_total_tax( 'edit' ) ) {
+				continue;
+			}
+
+			$taxes = $item->get_taxes( 'edit' );
+
+			$original_subtotals[ $item_id ] = array(
+				'subtotal'     => $item->get_subtotal( 'edit' ),
+				'subtotal_tax' => $item->get_subtotal_tax( 'edit' ),
+				'total_tax'    => $item->get_total_tax( 'edit' ),
+				'taxes'        => $taxes,
+			);
+
+			$item->set_subtotal( $item->get_total( 'edit' ) );
+
+			// set_taxes() keeps the per-rate tax array and the subtotal_tax/total_tax totals in
+			// sync, so consumers see the same value whichever one they read. It is skipped when
+			// there is no per-rate data, since it would then zero out the stored tax totals.
+			if ( ! empty( $taxes['total'] ) ) {
+				$taxes['subtotal'] = $taxes['total'];
+				$item->set_taxes( $taxes );
+			} else {
+				$item->set_subtotal_tax( $item->get_total_tax( 'edit' ) );
+			}
+		}
+
+		return $original_subtotals;
+	}
+
+	/**
+	 * Restore item subtotals changed by sync_subtotals_with_manually_edited_totals(), so
+	 * that a failed coupon application leaves the in-memory order unchanged.
+	 *
+	 * @param array $original_subtotals Original tax and subtotal values, keyed by item ID.
+	 * @return void
+	 */
+	private function restore_item_subtotals( array $original_subtotals ) {
+		foreach ( $original_subtotals as $item_id => $original ) {
+			$item = $this->get_item( $item_id, false );
+
+			if ( ! $item instanceof WC_Order_Item_Product ) {
+				continue;
+			}
+
+			// Restoring the per-rate taxes recomputes both tax totals, so it runs before the
+			// stored totals are put back.
+			if ( ! empty( $original['taxes']['total'] ) ) {
+				$item->set_taxes( $original['taxes'] );
+			}
+
+			$item->set_subtotal( $original['subtotal'] );
+			$item->set_subtotal_tax( $original['subtotal_tax'] );
+			$item->set_total_tax( $original['total_tax'] );
+		}
 	}
 
 	/**
@@ -1750,22 +1850,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function add_product( $product, $qty = 1, $args = array() ) {
 		if ( $product ) {
 			$order = ArrayUtil::get_value_or_default( $args, 'order' );
-
-			if ( $this->has_fixed_end_prices() ) {
-				// Note: storing inclusive price as-is relies on the filter being a
-				// code-level constant. If the filter changes at runtime, existing
-				// line totals will be misinterpreted on recalculate since the gross
-				// price is reused without re-deriving from the product.
-				$total = (float) $product->get_price() * $qty;
-			} else {
-				$total = wc_get_price_excluding_tax(
-					$product,
-					array(
-						'qty'   => $qty,
-						'order' => $order,
-					)
-				);
-			}
+			$total = wc_get_price_excluding_tax(
+				$product,
+				array(
+					'qty'   => $qty,
+					'order' => $order,
+				)
+			);
 
 			$default_args = array(
 				'name'         => $product->get_name(),
@@ -1998,13 +2089,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( 'inherit' === $shipping_tax_class ) {
 			$found_classes      = array_intersect( array_merge( array( '' ), WC_Tax::get_tax_class_slugs() ), $this->get_items_tax_classes() );
 			$shipping_tax_class = count( $found_classes ) ? current( $found_classes ) : false;
+
+			// Orders without product line items have no tax class to inherit, so use the standard class.
+			if ( false === $shipping_tax_class && 0 === count( $this->get_items() ) ) {
+				$shipping_tax_class = '';
+			}
 		}
 
 		$is_vat_exempt = apply_filters( 'woocommerce_order_is_vat_exempt', 'yes' === $this->get_meta( 'is_vat_exempt' ), $this );
 
-		if ( $this->has_fixed_end_prices() ) {
-			$calculate_tax_for['prices_include_tax'] = true;
-		}
+		// Trigger tax recalculation for all items.
 		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
 			if ( ! $is_vat_exempt ) {
 				$item->calculate_taxes( $calculate_tax_for );
@@ -2148,30 +2242,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Whether this store uses fixed end-prices across tax jurisdictions.
-	 * True when prices include tax and woocommerce_adjust_non_base_location_prices is false.
-	 *
-	 * @return bool
-	 */
-	private function has_fixed_end_prices(): bool {
-		/**
-		 * Filters if taxes should be removed from locations outside the store base location.
-		 *
-		 * The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing
-		 * with out of base locations. e.g. If a product costs 10 including tax, all users will pay 10
-		 * regardless of location and taxes.
-		 *
-		 * @since 2.4.7
-		 *
-		 * @param bool $adjust_non_base_location_prices True by default.
-		 */
-		$adjust_non_base_location_prices = apply_filters( 'woocommerce_adjust_non_base_location_prices', true );
-
-		return 'yes' === get_option( 'woocommerce_prices_include_tax' )
-			&& ! $adjust_non_base_location_prices;
-	}
-
-	/**
 	 * Calculate totals by looking at the contents of the order. Stores the totals and returns the orders final total.
 	 *
 	 * @since 2.2
@@ -2216,11 +2286,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->calculate_taxes();
 		}
 
-		// Re-read cart totals after calculate_taxes().
-		// Negative fees may have been capped while calculating totals.
-		$cart_subtotal = $this->get_cart_subtotal_for_order();
-		$cart_total    = (float) $this->get_cart_total_for_order();
-
 		// Sum taxes again so we can work out how much tax was discounted. This uses original values, not those possibly rounded to 2dp.
 		foreach ( $this->get_items() as $item ) {
 			$taxes = $item->get_taxes();
@@ -2232,12 +2297,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			foreach ( $taxes['subtotal'] as $tax_rate_id => $tax ) {
 				$cart_subtotal_tax += (float) $tax;
 			}
-		}
-
-		// Fixed end-price orders keep inclusive item totals; compare net values and add tax back below.
-		if ( $this->has_fixed_end_prices() ) {
-			$cart_subtotal = $cart_subtotal - $cart_subtotal_tax;
-			$cart_total    = $cart_total - $cart_total_tax;
 		}
 
 		$this->set_discount_total( NumberUtil::round( $cart_subtotal - $cart_total, $price_decimals ) );
@@ -2277,48 +2336,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		return apply_filters( 'woocommerce_order_amount_item_subtotal', $subtotal, $this, $item, $inc_tax, $round );
-	}
-
-	/**
-	 * Get the items subtotal amount to display in the admin order screen.
-	 *
-	 * For stores with fixed end-prices (prices entered including tax with the
-	 * woocommerce_adjust_non_base_location_prices adjustment disabled), the
-	 * line-item subtotal tax is removed so the displayed subtotal matches the
-	 * ex-tax cart display. Only line-item taxes are subtracted, not the fee tax
-	 * that get_cart_tax() would also include.
-	 *
-	 * @return float
-	 */
-	public function get_subtotal_amount_to_display() {
-		if ( ! $this->has_fixed_end_prices() ) {
-			return (float) $this->get_subtotal();
-		}
-
-		$subtotal_tax = 0;
-		foreach ( $this->get_items() as $item ) {
-			if ( $item instanceof WC_Order_Item_Product ) {
-				$subtotal_tax += self::round_line_tax( (float) $item->get_subtotal_tax(), false );
-			}
-		}
-
-		return (float) $this->get_subtotal() - wc_round_tax_total( $subtotal_tax );
-	}
-
-	/**
-	 * Get the per-unit item subtotal amount to display in the admin order screen.
-	 *
-	 * For stores with fixed end-prices (prices entered including tax with the
-	 * woocommerce_adjust_non_base_location_prices adjustment disabled), the item
-	 * tax is removed so the displayed amount matches the ex-tax cart display.
-	 *
-	 * @param object $item Item to get the subtotal from.
-	 * @return float
-	 */
-	public function get_item_subtotal_to_display( $item ) {
-		return ( $this->has_fixed_end_prices() && $item instanceof WC_Order_Item_Product && $item->get_quantity() )
-			? NumberUtil::round( ( (float) $item->get_subtotal() - (float) $item->get_subtotal_tax() ) / $item->get_quantity(), wc_get_price_decimals() )
-			: $this->get_item_subtotal( $item, false, true );
 	}
 
 	/**
