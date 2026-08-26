@@ -790,7 +790,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * @throws Exception If the database query fails.
 	 * @return int[]
 	 */
-	public function get_order_item_ids( $order, $type = null ) {
+	public function get_item_ids( $order, $type = null ) {
 		global $wpdb;
 
 		if ( ! $order->get_id() ) {

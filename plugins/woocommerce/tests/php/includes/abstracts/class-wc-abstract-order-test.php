@@ -1504,7 +1504,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 			}
 
 			public function has_callable( string $method ): bool {
-				return in_array( $method, array( 'get_order_item_ids', 'delete_items_by_ids' ), true ) ? false : $this->delegate->has_callable( $method );
+				return in_array( $method, array( 'get_item_ids', 'delete_items_by_ids' ), true ) ? false : $this->delegate->has_callable( $method );
 			}
 
 			public function update( &$data ) {
