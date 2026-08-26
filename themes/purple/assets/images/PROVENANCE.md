@@ -36,6 +36,7 @@ To tag a newly added AI-generated image:
 - pink-sweater-man-1.webp
 - pink-sweater-man-cropped-2.webp
 - pink-sweater-man-cropped.webp
+- pink-sweater-woman-seated.webp
 - pink-sweater-woman.webp
 - product-beanie-lavander-purple-theme-3.webp
 - product-socks-gray-purple-theme-2.webp
