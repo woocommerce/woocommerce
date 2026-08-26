@@ -874,6 +874,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'weight'            => array( $this, 'parse_float_field' ),
 			'reviews_allowed'   => array( $this, 'parse_bool_field' ),
 			'purchase_note'     => 'wp_filter_post_kses',
+			'global_unique_id'  => static function ( $value ) {
+				// Keep matching values in the same form stored by WC_Product::set_global_unique_id().
+				return preg_replace( '/[^0-9Xx\-]/', '', (string) $value );
+			},
 			'price'             => 'wc_format_decimal',
 			'regular_price'     => 'wc_format_decimal',
 			'stock_quantity'    => array( $this, 'parse_stock_quantity_field' ),
@@ -1206,10 +1210,11 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @return string
 	 */
 	protected function get_row_id( $parsed_data ) {
-		$id       = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0;
-		$sku      = isset( $parsed_data['sku'] ) ? esc_attr( $parsed_data['sku'] ) : '';
-		$name     = isset( $parsed_data['name'] ) ? esc_attr( $parsed_data['name'] ) : '';
-		$row_data = array();
+		$id               = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0;
+		$sku              = isset( $parsed_data['sku'] ) ? esc_attr( $parsed_data['sku'] ) : '';
+		$global_unique_id = isset( $parsed_data['global_unique_id'] ) ? esc_attr( $parsed_data['global_unique_id'] ) : '';
+		$name             = isset( $parsed_data['name'] ) ? esc_attr( $parsed_data['name'] ) : '';
+		$row_data         = array();
 
 		if ( $name ) {
 			$row_data[] = $name;
@@ -1221,6 +1226,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		if ( $sku ) {
 			/* translators: %s: product SKU */
 			$row_data[] = sprintf( __( 'SKU %s', 'woocommerce' ), $sku );
+		}
+		if ( $global_unique_id ) {
+			/* translators: %s: product GTIN, UPC, EAN, or ISBN */
+			$row_data[] = sprintf( __( 'GTIN, UPC, EAN, or ISBN %s', 'woocommerce' ), $global_unique_id );
 		}
 
 		return implode( ', ', $row_data );
@@ -1369,7 +1378,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 *
 	 * Do not import products with IDs or SKUs that already exist if option
 	 * update existing is false, and likewise, if updating products, do not
-	 * process rows which do not exist if an ID/SKU is provided.
+	 * process rows which do not exist if an ID, SKU, or Global Unique ID is provided.
 	 *
 	 * @return array
 	 */
@@ -1388,10 +1397,25 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		foreach ( $this->parsed_data as $parsed_data_key => $parsed_data ) {
 			do_action( 'woocommerce_product_import_before_import', $parsed_data );
 
-			$id         = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0;
-			$sku        = isset( $parsed_data['sku'] ) ? $parsed_data['sku'] : '';
-			$id_exists  = false;
-			$sku_exists = false;
+			$id               = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0;
+			$sku              = isset( $parsed_data['sku'] ) ? $parsed_data['sku'] : '';
+			$global_unique_id = isset( $parsed_data['global_unique_id'] ) ? $parsed_data['global_unique_id'] : '';
+			$id_exists        = false;
+			$sku_exists       = false;
+
+			if ( $update_existing && ! $id && ! $sku && $global_unique_id ) {
+				$id = $this->match_product_id_by_global_unique_id( $global_unique_id, $parsed_data['type'] ?? '' );
+
+				if ( is_wp_error( $id ) ) {
+					$id->add_data( array( 'row' => $this->get_row_id( $parsed_data ) ) );
+					$data['failed'][] = $id;
+					continue;
+				}
+
+				if ( $id ) {
+					$parsed_data['id'] = $id;
+				}
+			}
 
 			if ( $id ) {
 				$product   = wc_get_product( $id );
@@ -1428,7 +1452,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				continue;
 			}
 
-			if ( $update_existing && ( isset( $parsed_data['id'] ) || isset( $parsed_data['sku'] ) ) && ! $id_exists && ! $sku_exists ) {
+			if ( $update_existing && ( isset( $parsed_data['id'] ) || isset( $parsed_data['sku'] ) || '' !== $global_unique_id ) && ! $id_exists && ! $sku_exists ) {
 				$create_variation = false;
 				$refusal          = null;
 
@@ -1461,9 +1485,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 						'woocommerce_product_importer_error',
 						$refusal ? $refusal->get_error_message() : esc_html__( 'No matching product exists to update.', 'woocommerce' ),
 						array(
-							'id'  => $id,
-							'sku' => esc_attr( $sku ),
-							'row' => $this->get_row_id( $parsed_data ),
+							'id'               => $id,
+							'sku'              => esc_attr( $sku ),
+							'global_unique_id' => esc_attr( $global_unique_id ),
+							'row'              => $this->get_row_id( $parsed_data ),
 						)
 					);
 					continue;

@@ -2005,7 +2005,8 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   KEY `stock_quantity` (`stock_quantity`),
   KEY `onsale` (`onsale`),
   KEY min_max_price (`min_price`, `max_price`),
-  KEY sku (sku(50))
+  KEY sku (sku(50)),
+  KEY global_unique_id (global_unique_id(50))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
   tax_rate_class_id bigint(20) unsigned NOT NULL auto_increment,

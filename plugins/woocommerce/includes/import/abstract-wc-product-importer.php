@@ -232,6 +232,41 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	}
 
 	/**
+	 * Find the product a row refers to by its Global Unique ID.
+	 *
+	 * A match whose post type disagrees with the row type is refused, because
+	 * get_product_object() would otherwise convert the matched post to that type.
+	 *
+	 * @param string $global_unique_id Normalized Global Unique ID.
+	 * @param string $type             Row product type, or an empty string when the row has none.
+	 * @return int|WP_Error Product ID, 0 when nothing matches, or WP_Error for a type mismatch.
+	 */
+	protected function match_product_id_by_global_unique_id( $global_unique_id, $type ) {
+		$product_id = (int) wc_get_product_id_by_global_unique_id( $global_unique_id );
+
+		if ( ! $product_id || '' === $type ) {
+			return $product_id;
+		}
+
+		$row_is_variation   = ProductType::VARIATION === $type;
+		$match_is_variation = 'product_variation' === get_post_type( $product_id );
+
+		if ( $row_is_variation !== $match_is_variation ) {
+			return new WP_Error(
+				'woocommerce_product_importer_global_unique_id_type_mismatch',
+				esc_html__( 'The Global Unique ID matches a product of a different type.', 'woocommerce' ),
+				array(
+					'id'               => $product_id,
+					'global_unique_id' => esc_attr( $global_unique_id ),
+					'status'           => 401,
+				)
+			);
+		}
+
+		return $product_id;
+	}
+
+	/**
 	 * Process a single item and save.
 	 *
 	 * @throws Exception If item cannot be processed.
