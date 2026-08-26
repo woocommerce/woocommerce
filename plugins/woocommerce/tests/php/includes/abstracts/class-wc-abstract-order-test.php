@@ -409,6 +409,19 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A nonexistent coupon code is rejected before validation and leaves manually edited line items unchanged.
+	 */
+	public function test_apply_coupon_unknown_code_keeps_manually_edited_line_items() {
+		$order = $this->create_order_with_manually_edited_total();
+
+		$this->assertWPError( $order->apply_coupon_using_edited_totals( 'no_such_coupon_28591' ) );
+
+		$item = current( $order->get_items() );
+		$this->assertEquals( 100, $item->get_subtotal(), 'A rejected unknown code should not change the subtotal' );
+		$this->assertEquals( 50, $item->get_total(), 'A rejected unknown code should not change the total' );
+	}
+
+	/**
 	 * @testdox Removing a coupon restores the manually edited line total, not the original price.
 	 */
 	public function test_remove_coupon_restores_manually_edited_line_total() {
