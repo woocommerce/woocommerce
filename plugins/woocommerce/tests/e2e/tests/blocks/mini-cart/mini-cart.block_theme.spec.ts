@@ -254,7 +254,7 @@ test.describe( `${ blockData.name } Block`, () => {
 
 		await expect(
 			miniCartDialog.getByRole( 'link', {
-				name: 'Proceed to checkout',
+				name: 'Go to checkout',
 			} )
 		).toBeVisible();
 	} );
@@ -347,7 +347,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		await miniCartUtils.openMiniCart();
 		await page
 			.getByRole( 'dialog' )
-			.getByRole( 'link', { name: 'Proceed to checkout' } )
+			.getByRole( 'link', { name: 'Go to checkout' } )
 			.click();
 		await expect( page ).toHaveURL( /\/checkout\/?$/ );
 	} );
