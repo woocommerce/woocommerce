@@ -383,6 +383,28 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A base of nothing but the category token gives products the same URL shape as the category
+	 * archives they sit under, so the two collide. The save path prefixes the default base rather
+	 * than storing the token alone. Guard carried unchanged from #13374.
+	 *
+	 * @testdox Should prefix the default base when a custom base is nothing but the category token.
+	 *
+	 * @testWith ["%product_cat%"]
+	 *           ["/%product_cat%/"]
+	 *           ["//%product_cat%//"]
+	 *
+	 * @param string $posted_structure Custom base as posted by the form.
+	 */
+	public function test_custom_base_of_only_the_category_token_is_prefixed( string $posted_structure ): void {
+		$this->ensure_shop_page();
+
+		$html = $this->save_and_render( 'custom', $posted_structure );
+
+		$this->assertSame( '/product/%product_cat%', get_option( 'woocommerce_permalinks' )['product_base'] );
+		$this->assert_only_radio_checked( $html, 'custom' );
+	}
+
+	/**
 	 * The Shop rows are gated on wc_get_page_id( 'shop' ), which returns 0 when the
 	 * woocommerce_get_shop_page_id filter yields a truthy non-numeric value. A stored base
 	 * matching a hidden Shop row must fall back to Custom base — otherwise no rendered radio is
