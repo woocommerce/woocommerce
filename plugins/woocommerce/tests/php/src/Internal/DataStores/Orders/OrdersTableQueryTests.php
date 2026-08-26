@@ -1678,4 +1678,106 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 		$this->assertNotEmpty( $complement, 'A valid NOT IN must still match the other orders.' );
 		$this->assertSame( array(), $malformed, 'An unusable comparison must not silently invert the predicate.' );
 	}
+
+	/**
+	 * Status lists pairing an unusable object with a sibling that filters nothing on its own.
+	 *
+	 * @return array<string, array{0: array}>
+	 */
+	public function provider_unusable_status_with_inert_sibling(): array {
+		return array(
+			'empty string sibling' => array( array( '', new \stdClass() ) ),
+			'null sibling'         => array( array( null, new \stdClass() ) ),
+			'empty array sibling'  => array( array( array(), new \stdClass() ) ),
+		);
+	}
+
+	/**
+	 * @testDox An unusable status whose only siblings are inert fails the query closed.
+	 *
+	 * @dataProvider provider_unusable_status_with_inert_sibling
+	 *
+	 * @param array $status Status list mixing an unusable entry with an inert one.
+	 */
+	public function test_unusable_status_with_inert_sibling_fails_closed( array $status ): void {
+		// Also asserts the notice fires: WP fails if a declared one never is.
+		$this->setExpectedIncorrectUsage( 'wc_get_orders' );
+
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		// An array entry warns on the 'wc-' concatenation exactly as it did before this change.
+		// Swallow it and continue, as production does, rather than let phpunit convert it.
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Test-only: reproduces production error semantics.
+		set_error_handler( static fn() => true, E_WARNING | E_NOTICE );
+
+		try {
+			// An inert entry constrains no status, so keeping it as a survivor would drop the
+			// clause and return every order, including trashed ones.
+			$result = wc_get_orders(
+				array(
+					'status' => $status,
+					'return' => 'ids',
+					'limit'  => -1,
+				)
+			);
+		} finally {
+			restore_error_handler();
+		}
+
+		$this->assertSame( array(), $result, 'The query must match no orders.' );
+	}
+
+	/**
+	 * @testDox An unusable status entry is dropped while a usable sibling keeps filtering.
+	 */
+	public function test_partially_usable_status_list_keeps_working(): void {
+		$completed = OrderHelper::create_order();
+		$completed->set_status( OrderStatus::COMPLETED );
+		$completed->save();
+
+		$pending = OrderHelper::create_order();
+		$pending->set_status( OrderStatus::PENDING );
+		$pending->save();
+
+		// An unregistered string sibling is already carried into the IN clause and simply matches
+		// nothing, leaving 'completed' filtering. An unusable object gets the same treatment, so
+		// the result must not depend on which kind of junk the caller passed.
+		$result = wc_get_orders(
+			array(
+				'status' => array( OrderStatus::COMPLETED, new \stdClass() ),
+				'return' => 'ids',
+				'limit'  => -1,
+			)
+		);
+
+		$this->assertContains( $completed->get_id(), $result, 'A usable sibling must keep filtering.' );
+		$this->assertNotContains( $pending->get_id(), $result, 'The surviving status must still restrict the query.' );
+	}
+
+	/**
+	 * @testDox An unregistered status string does not poison its siblings.
+	 */
+	public function test_unregistered_status_string_keeps_sibling(): void {
+		$completed = OrderHelper::create_order();
+		$completed->set_status( OrderStatus::COMPLETED );
+		$completed->save();
+
+		$pending = OrderHelper::create_order();
+		$pending->set_status( OrderStatus::PENDING );
+		$pending->save();
+
+		// This is the pre-existing contract the object case above is aligned with.
+		$result = wc_get_orders(
+			array(
+				'status' => array( OrderStatus::COMPLETED, 'bogus-not-a-status' ),
+				'return' => 'ids',
+				'limit'  => -1,
+			)
+		);
+
+		$this->assertContains( $completed->get_id(), $result, 'An unregistered status must not drop a valid sibling.' );
+		$this->assertNotContains( $pending->get_id(), $result, 'The valid status must still restrict the query.' );
+	}
 }

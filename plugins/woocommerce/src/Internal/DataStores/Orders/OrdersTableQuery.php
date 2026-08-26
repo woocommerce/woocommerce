@@ -725,7 +725,7 @@ class OrdersTableQuery {
 	 * Sanitizes the 'status' query var.
 	 *
 	 * @return void
-	 * @throws \Exception When a status cannot be used as a string.
+	 * @throws \Exception When no status is left to filter on after dropping unusable entries.
 	 */
 	private function sanitize_status(): void {
 		$valid_statuses = array_keys( wc_get_order_statuses() );
@@ -748,20 +748,38 @@ class OrdersTableQuery {
 			$this->args['status'] = array();
 		}
 
-		foreach ( $this->args['status'] as &$status ) {
+		$usable           = array();
+		$dropped_unusable = false;
+
+		foreach ( $this->args['status'] as $status ) {
 			// Only an object raises an Error on the concatenation below. An array merely warns,
 			// and what it degrades to depends on the entry: an empty one is dropped by
 			// array_filter() and leaves the clause unrestricted, a non-empty one becomes the
 			// literal 'Array' and matches nothing. Neither fatalled, so rejecting them here would
 			// change a query that previously worked.
+			//
+			// Drop the offending entry rather than reject the whole query, because a status that
+			// names nothing already does not poison its siblings: an unregistered string such as
+			// 'bogus' is carried into the IN clause and simply matches no rows, leaving a valid
+			// sibling filtering as the caller asked. An object is the same kind of value and gets
+			// the same treatment; only the concatenation, not the caller's intent, differs.
 			if ( is_object( $status ) && ! method_exists( $status, '__toString' ) ) {
-				throw $this->invalid_query_arg( esc_html__( 'Invalid order status.', 'woocommerce' ) );
+				$dropped_unusable = true;
+				continue;
 			}
 
-			$status = in_array( 'wc-' . $status, $valid_statuses, true ) ? 'wc-' . $status : $status;
+			$usable[] = in_array( 'wc-' . $status, $valid_statuses, true ) ? 'wc-' . $status : $status;
 		}
 
-		$this->args['status'] = array_unique( array_filter( $this->args['status'] ) );
+		$this->args['status'] = array_unique( array_filter( $usable ) );
+
+		// Fail the query closed only when nothing is left to filter on. array_filter() is what
+		// decides that: an inert entry ( '', null, an empty array ) is reduced to nothing and
+		// constrains no status, and an empty status list is in SKIPPED_VALUES, so arg_isset()
+		// would drop the clause entirely and return every order, including trashed ones.
+		if ( $dropped_unusable && ! $this->args['status'] ) {
+			throw $this->invalid_query_arg( esc_html__( 'Invalid order status.', 'woocommerce' ) );
+		}
 	}
 
 	/**
