@@ -292,11 +292,38 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 	 * @param int    $expected_end   Expected next-midnight timestamp.
 	 */
 	public function test_day_precision_meta_boundaries_follow_dst_transitions( string $timezone, string $date, int $expected_start, int $expected_end ): void {
+		$this->skip_if_day_has_no_dst_transition( $timezone, $date );
+
 		update_option( 'timezone_string', $timezone );
 
 		$result = $this->sut->parse_date_for_wp_query( $date, '_date_paid' );
 
 		$this->assertSame( $expected_start, $result['meta_query'][0]['value'], "Wrong start of day for {$date} in {$timezone}" );
 		$this->assertSame( $expected_end, $result['meta_query'][1]['value'], "Wrong end of day for {$date} in {$timezone}" );
+	}
+
+	/**
+	 * Skip a DST case when the runtime's timezone database puts no transition on that day.
+	 *
+	 * PHP resolves timezones against the tz database compiled into the binary, not the one the OS
+	 * ships, and DST policy changes over time. Egypt reinstated DST in tzdata 2023a, so on PHP 7.4
+	 * (tzdata 2022.1) 2026-04-24 in Cairo is an ordinary 24-hour day and the case has no transition
+	 * to assert against. The expected timestamps stay hard-coded, which is the stronger assertion;
+	 * this only skips the runtimes that cannot exercise them.
+	 *
+	 * @param string $timezone Site timezone.
+	 * @param string $date     The queried day.
+	 */
+	private function skip_if_day_has_no_dst_transition( string $timezone, string $date ): void {
+		$zone  = new DateTimeZone( $timezone );
+		$start = new DateTime( $date . ' 00:00:00', $zone );
+		$end   = new DateTime( $date . ' 00:00:00', $zone );
+		$end->modify( 'tomorrow' );
+
+		if ( DAY_IN_SECONDS === $end->getTimestamp() - $start->getTimestamp() ) {
+			$this->markTestSkipped(
+				"Timezone database " . timezone_version_get() . " puts no DST transition on {$date} in {$timezone}."
+			);
+		}
 	}
 }
