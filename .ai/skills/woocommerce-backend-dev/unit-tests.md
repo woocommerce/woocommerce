@@ -89,7 +89,7 @@ Choose cleanup from the test's base class; PHPUnit alone provides no database is
 | Base class | Automatic isolation when parent setup/teardown runs |
 | --- | --- |
 | `WP_UnitTestCase` descendants, including `WP_HTTP_TestCase` and `WP_Test_REST_TestCase` | `$wpdb` transaction rollback, reset of the WordPress globals managed by the base, and hook snapshot restoration; the next setup flushes the object cache |
-| `WC_Unit_Test_Case` | All `WP_UnitTestCase` behavior plus WooCommerce cart/context, notices, and country-locale singleton cleanup |
+| `WC_Unit_Test_Case` descendants, including `WC_REST_Unit_Test_Case` | All `WP_UnitTestCase` behavior plus WooCommerce cart/context, notices, and country-locale singleton cleanup |
 | `PHPUnit\Framework\TestCase` | No WordPress transaction, hook restoration, or global cleanup |
 | Other custom base | Inspect its implementation; do not infer cleanup from PHPUnit or its name |
 
