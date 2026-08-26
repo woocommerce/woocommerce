@@ -41,7 +41,7 @@ async function addProductToOrder( page: Page, product, quantity: number ) {
 		.getByRole( 'combobox', { name: 'Search for a product…' } )
 		.click();
 	await page
-		.locator( 'input[role="combobox"][aria-owns^="select2-item_id-"]' )
+		.locator( '.select2-container--open input.select2-search__field' )
 		.fill( product.name );
 	await page.getByRole( 'option', { name: product.name } ).first().click();
 

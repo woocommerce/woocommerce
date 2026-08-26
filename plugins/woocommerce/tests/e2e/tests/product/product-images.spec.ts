@@ -206,10 +206,18 @@ test.describe( 'Products > Product Images', () => {
 				.click();
 			await expect( page.getByText( 'Product updated.' ) ).toBeVisible();
 
-			await page.goto( product.permalink );
+			await page.goto(
+				`wp-admin/post.php?post=${ product.id }&action=edit`
+			);
 			await expect(
-				page.getByAltText( 'Awaiting product image' )
+				page.getByRole( 'link', { name: 'Set product image' } ).or(
+					page.getByRole( 'button', {
+						name: 'Set product image',
+					} )
+				)
 			).toBeVisible();
+
+			await page.goto( product.permalink );
 			await expect(
 				page.locator(
 					'.woocommerce-product-gallery__wrapper img[src*="image-"]'

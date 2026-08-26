@@ -61,10 +61,14 @@ test.describe(
 			);
 			await expect( currentProcessingLink ).toBeVisible();
 			await expect(
-				page.locator( `#order-${ processingOrderId }` )
+				page.locator(
+					`#order-${ processingOrderId }, #post-${ processingOrderId }`
+				)
 			).toBeVisible();
 			await expect(
-				page.locator( `#order-${ failedOrderId }` )
+				page.locator(
+					`#order-${ failedOrderId }, #post-${ failedOrderId }`
+				)
 			).toHaveCount( 0 );
 
 			const statusMarks = page.locator( 'mark.order-status:visible' );
