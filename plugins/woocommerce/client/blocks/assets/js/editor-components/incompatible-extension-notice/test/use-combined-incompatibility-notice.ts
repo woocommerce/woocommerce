@@ -28,10 +28,20 @@ let mockIncompatibleExtensions:
 	| Array< { id: string; title: string } >
 	| undefined = [];
 
+const SITE_A = 1;
+const SITE_B = 2;
+
+let mockSiteId = SITE_A;
+let mockIsMultisite = false;
+
 jest.mock( '@woocommerce/settings', () => ( {
 	...jest.requireActual( '@woocommerce/settings' ),
-	CURRENT_SITE_ID: 1,
-	IS_MULTISITE: false,
+	get CURRENT_SITE_ID() {
+		return mockSiteId;
+	},
+	get IS_MULTISITE() {
+		return mockIsMultisite;
+	},
 	getSetting: jest.fn().mockImplementation( ( name: string, ...rest ) => {
 		if ( name === 'incompatibleExtensions' ) {
 			return mockIncompatibleExtensions;
@@ -93,6 +103,8 @@ describe( 'useCombinedIncompatibilityNotice', () => {
 		mockIncompatiblePaymentMethods = {};
 		mockIncompatibleExtensions = [];
 		mockPaymentMethodsLoaded = true;
+		mockSiteId = SITE_A;
+		mockIsMultisite = false;
 	} );
 
 	it( 'shows the notice when there is an incompatible gateway', () => {
@@ -395,11 +407,26 @@ describe( 'useCombinedIncompatibilityNotice', () => {
 		} );
 	} );
 
+	// Sites on a subdirectory multisite share one localStorage origin, so the
+	// editor hook must use the current site's key rather than another site's
+	// acknowledgement.
+	describe( 'site scoping', () => {
+		it( 'does not carry a dismissal to another site on the same origin', () => {
+			mockIsMultisite = true;
+			mockIncompatiblePaymentMethods = { gw_a: 'Gateway A' };
+			mountAndDismiss( CHECKOUT );
+			expect( mountVisibility( CHECKOUT ) ).toBe( false );
+
+			mockSiteId = SITE_B;
+
+			expect( mountVisibility( CHECKOUT ) ).toBe( true );
+		} );
+	} );
+
 	// The dismissals merchants already made live under the unscoped key, so
 	// without a migration every one of them would see the notice one more time.
-	// Site scoping, the multisite refusal, and the corrupt-value rules are the
-	// storage contract's and are pinned in test/storage.ts; these two pin this
-	// surface's wiring to it.
+	// The storage contract's full matrix is pinned in test/storage.ts; these
+	// cases pin the editor hook's wiring to it.
 	describe( 'migration from before site scoping', () => {
 		const seedUnscoped = ( value: unknown ) =>
 			window.localStorage.setItem(
@@ -428,6 +455,17 @@ describe( 'useCombinedIncompatibilityNotice', () => {
 			expect( window.localStorage.getItem( UNSCOPED_STORAGE_KEY ) ).toBe(
 				before
 			);
+		} );
+
+		// Only an absent scoped key may open migration. Otherwise a corrupt value
+		// would revive a dismissal the merchant has since replaced.
+		it( 'does not migrate over a scoped value it cannot parse', () => {
+			window.localStorage.setItem( storageKey(), '{not valid json' );
+			seedUnscoped( [ { [ CHECKOUT ]: [ 'gw_a' ] } ] );
+			mockIncompatiblePaymentMethods = { gw_a: 'Gateway A' };
+
+			expect( mountVisibility( CHECKOUT ) ).toBe( true );
+			expect( console ).toHaveErrored();
 		} );
 	} );
 } );

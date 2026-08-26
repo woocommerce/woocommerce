@@ -7,6 +7,7 @@
  */
 
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
+use Automattic\WooCommerce\Internal\ProductFilters\Params;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
@@ -314,7 +315,7 @@ class WC_Query {
 	 */
 	private function is_query_var_valid_on_front_page( $query_var ) {
 		return in_array( $query_var, array( 'preview', 'page', 'paged', 'cpage', 'orderby' ), true )
-			|| in_array( $query_var, array( 'min_price', 'max_price', 'rating_filter' ), true )
+			|| in_array( $query_var, wc_get_container()->get( Params::class )->get_param_keys(), true )
 			|| 0 === strpos( $query_var, 'filter_' )
 			|| 0 === strpos( $query_var, 'query_type_' );
 	}

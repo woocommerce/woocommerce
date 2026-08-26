@@ -248,7 +248,7 @@ jobs:
           fetch-depth: 0
           sparse-checkout: |
             plugins/woocommerce/readme.txt
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Configure Git
         run: |

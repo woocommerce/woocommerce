@@ -240,7 +240,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * Render column: thumb.
 	 */
 	protected function render_thumb_column() {
-		echo '<a href="' . esc_url( get_edit_post_link( $this->object->get_id() ) ) . '">' . $this->object->get_image( 'thumbnail' ) . '</a>'; // WPCS: XSS ok.
+		echo '<a href="' . esc_url( get_edit_post_link( $this->object->get_id() ) ) . '">' . $this->object->get_image( 'thumbnail' ) . '</a>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_image() returns HTML, including output from the public product image filter.
 	}
 
 	/**

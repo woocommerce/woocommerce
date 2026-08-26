@@ -608,13 +608,16 @@ class WC_Post_Data {
 			do_action( 'woocommerce_delete_order_items', $postid );
 
 			$wpdb->query(
-				"
+				$wpdb->prepare(
+					"
 				DELETE {$wpdb->prefix}woocommerce_order_items, {$wpdb->prefix}woocommerce_order_itemmeta
 				FROM {$wpdb->prefix}woocommerce_order_items
 				JOIN {$wpdb->prefix}woocommerce_order_itemmeta ON {$wpdb->prefix}woocommerce_order_items.order_item_id = {$wpdb->prefix}woocommerce_order_itemmeta.order_item_id
-				WHERE {$wpdb->prefix}woocommerce_order_items.order_id = '{$postid}';
-				"
-			); // WPCS: unprepared SQL ok.
+				WHERE {$wpdb->prefix}woocommerce_order_items.order_id = %d;
+					",
+					$postid
+				)
+			);
 
 			do_action( 'woocommerce_deleted_order_items', $postid );
 		}
