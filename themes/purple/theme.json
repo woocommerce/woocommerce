@@ -454,6 +454,10 @@
 				}
 			},
 			"woocommerce/add-to-cart-with-options-quantity-selector": {
+				"color": {
+					"background": "#FFFFFF",
+					"text": "#111111"
+				},
 				"border": {
 					"radius": "0"
 				}
