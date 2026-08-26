@@ -566,6 +566,76 @@ class WC_Data_Store_WP {
 	}
 
 	/**
+	 * Checks whether a caller-supplied date_query contains a value WP_Date_Query cannot use.
+	 *
+	 * WP_Date_Query ignores keys it does not recognise, so an extension is free to carry its own
+	 * data in a clause and checking every leaf would reject queries that work today. The keys it
+	 * consumes are its own $time_keys plus 'compare' and 'relation', which reach mktime(),
+	 * preg_match() or strtoupper() and fail on a value that cannot be used there. 'column' is not
+	 * included: an unusable column is ignored rather than fatal.
+	 *
+	 * A nested array under any key other than a time key is another clause, which is how
+	 * WP_Date_Query itself walks the structure, so this recurses the same way.
+	 *
+	 * @since 11.2.0
+	 * @param mixed $date_query The caller-supplied date_query arg.
+	 * @return bool True if some consumed value cannot be used, false otherwise.
+	 */
+	protected function date_query_contains_unusable_value( $date_query ) {
+		if ( ! is_array( $date_query ) ) {
+			return false;
+		}
+
+		$time_keys = array(
+			'after',
+			'before',
+			'year',
+			'month',
+			'monthnum',
+			'week',
+			'w',
+			'dayofyear',
+			'day',
+			'dayofweek',
+			'dayofweek_iso',
+			'hour',
+			'minute',
+			'second',
+		);
+
+		foreach ( $date_query as $key => $value ) {
+			// 'compare' and 'relation' are single values. An array is not merely unusable there:
+			// WP_Date_Query treats it as another clause and recurses until memory runs out.
+			if ( in_array( $key, array( 'compare', 'relation' ), true ) ) {
+				if ( ! $this->is_usable_as_string( $value ) ) {
+					return true;
+				}
+
+				continue;
+			}
+
+			// A time key is consumed here. 'before' and 'after' also accept an array of parts.
+			if ( in_array( $key, $time_keys, true ) ) {
+				foreach ( is_array( $value ) ? $value : array( $value ) as $part ) {
+					if ( ! $this->is_usable_as_string( $part ) ) {
+						return true;
+					}
+				}
+
+				continue;
+			}
+
+			// Anything else that is an array is another clause, which is how WP_Date_Query walks
+			// the structure. A non-array under an unrecognised key is ignored by it entirely.
+			if ( is_array( $value ) && $this->date_query_contains_unusable_value( $value ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Checks whether any leaf of a query arg value cannot be used where a string is expected.
 	 *
 	 * Recurses because a nested array is a supported grouping construct for some args, so an array

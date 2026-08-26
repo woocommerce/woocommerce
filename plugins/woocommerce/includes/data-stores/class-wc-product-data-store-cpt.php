@@ -2328,7 +2328,34 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
+		// A caller-supplied date_query goes to WP_Date_Query untouched, where an unusable value
+		// reaches mktime(), preg_match() or strtoupper(). An unusable 'compare' is worse than a
+		// fatal: WP_Date_Query recurses on it until memory is exhausted.
+		$unusable_date_query     = null;
+		$has_unusable_date_query = isset( $query_vars['date_query'] )
+			&& $this->date_query_contains_unusable_value( $query_vars['date_query'] );
+
+		if ( $has_unusable_date_query ) {
+			$unusable_date_query = $query_vars['date_query'];
+			unset( $query_vars['date_query'] );
+		}
+
 		$wp_query_args = parent::get_wp_query_args( $query_vars );
+
+		if ( $has_unusable_date_query ) {
+			unset( $wp_query_args['date_query'] );
+			$this->fail_query_closed(
+				$wp_query_args,
+				'woocommerce_product_query_invalid_date_query',
+				__( 'Invalid date query.', 'woocommerce' ),
+				array(
+					'key'      => 'date_query',
+					'value'    => $unusable_date_query,
+					'function' => 'wc_get_products',
+					'source'   => 'legacy-product-query',
+				)
+			);
+		}
 
 		if ( $has_unusable_status ) {
 			unset( $wp_query_args['post_status'] );

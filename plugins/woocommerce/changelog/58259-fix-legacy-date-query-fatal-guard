@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent a malformed date_query argument to wc_get_orders() or wc_get_products() from raising an uncaught fatal error, or exhausting memory, on legacy post storage.
