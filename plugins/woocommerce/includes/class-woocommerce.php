@@ -37,7 +37,7 @@ use Automattic\WooCommerce\Internal\Email\EmailLogger;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Internal\Admin\OrderMilestoneEasterEgg;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
-use Automattic\WooCommerce\Utilities\{FeaturesUtil, LoggingUtil, TimeUtil};
+use Automattic\WooCommerce\Utilities\{LoggingUtil, TimeUtil};
 use Automattic\WooCommerce\Internal\Logging\OrderLogsCleanupHelper;
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 use Automattic\WooCommerce\Caches\OrderCountCacheService;
@@ -46,7 +46,6 @@ use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\OrdersVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\TaxRateVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\CustomerEmailVerification\CustomerEmailVerification;
-use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 
 /**
  * Main WooCommerce Class.
@@ -411,11 +410,6 @@ final class WooCommerce {
 		$container->get( CustomerEmailVerification::class );
 		$container->get( OrderLogsCleanupHelper::class );
 
-		// Feature flags.
-		if ( FeaturesUtil::feature_is_enabled( 'customer_stock_notifications' ) ) {
-			$container->get( StockNotifications::class );
-		}
-
 		/**
 		 * These classes have a register method for attaching hooks.
 		 */
@@ -439,6 +433,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Orders\PointOfSaleEmailHandler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\POS\POSController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\StockNotifications\StockNotifications::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ScheduledSalePriceReconciler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController::class )->register();
 

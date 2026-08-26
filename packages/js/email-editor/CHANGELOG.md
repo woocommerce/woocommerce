@@ -2,6 +2,11 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/2.4.0) - 2026-08-21 
+
+-   Minor - Add the `woocommerce_email_editor_recent_emails_query` filter so integrations can change which emails the "Recent" category of the template selection modal lists. [#67859]
+-   Patch - Update npm dependencies that resolve high-severity security advisories. [#67844]
+
 ## [2.3.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/2.3.0) - 2026-08-12 
 
 -   Minor - Add optional customSaveButton prop to Editor/ExperimentalEmailEditor (threaded to the Gutenberg editor header, skipped in template mode) and extend the editor-save notice override to also match "Post published." and "Draft saved." for integrations whose save button publishes in the background. [#67025]

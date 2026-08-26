@@ -26,6 +26,7 @@ jobs:
   get-and-validate-release-asset:
     name: Get intended release details
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 5
     permissions:
       contents: write # Required to fetch draft releases for some reason. See https://github.com/cli/cli/issues/9076#issuecomment-2146148572.
     outputs:
@@ -161,6 +162,7 @@ jobs:
   commit:
     name: Commit release to WordPress.org
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 10
     needs: [get-and-validate-release-asset]
     if: ${{ github.repository == 'woocommerce/woocommerce' }}
     permissions:
@@ -290,6 +292,7 @@ jobs:
   handle-failure:
     name: Report SVN state
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [get-and-validate-release-asset, commit]
     if: failure() && github.repository == 'woocommerce/woocommerce' && github.event.inputs.confirm-update == 'true' && needs.get-and-validate-release-asset.outputs.release_tag != ''
     permissions: {}
