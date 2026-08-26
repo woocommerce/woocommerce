@@ -102,6 +102,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	private $search_subqueries = array();
 
 	/**
+	 * Whether the query currently being served carries a `search` argument.
+	 *
+	 * @var bool
+	 */
+	private $is_search = false;
+
+	/**
 	 * Assign report columns once full table name has been assigned.
 	 *
 	 * @override ReportsDataStore::assign_report_columns()
@@ -256,7 +263,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @param array $query_args Query arguments supplied by the user.
 	 * @return string SQL statement, or an empty string when no search was requested.
 	 */
-	protected function get_product_search_subquery( $query_args ) {
+	private function get_product_search_subquery( $query_args ) {
 		if ( empty( $query_args['search'] ) ) {
 			return '';
 		}
@@ -285,21 +292,44 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Whether the result of a query may be read from and written to the report cache.
+	 * Returns the cache key for a query, and records whether it carries a search.
 	 *
-	 * @override ReportsDataStore::is_cacheable_query()
+	 * `should_use_cache()` decides whether the response is cached, and it only receives the key,
+	 * so the search has to be noted here, where the query arguments are still around. The parent
+	 * latches `force_cache_refresh` off the same arguments for the same reason.
+	 *
+	 * @override ReportsDataStore::get_cache_key()
 	 *
 	 * @since 11.2.0
 	 *
-	 * @param array $query_args Query parameters.
+	 * @param array $params Query parameters.
+	 * @return string Cache key.
+	 */
+	protected function get_cache_key( $params ) {
+		$this->is_search = ! empty( $params['search'] );
+
+		return parent::get_cache_key( $params );
+	}
+
+	/**
+	 * Whether the report should be read from and written to the report cache.
+	 *
+	 * @override ReportsDataStore::should_use_cache()
+	 *
+	 * @since 11.2.0
+	 *
 	 * @return bool
 	 */
-	protected function is_cacheable_query( $query_args ) {
+	protected function should_use_cache() {
 		// A `search` argument is resolved against product titles and SKUs while the report runs, so
 		// the response records which products matched at that moment. Nothing invalidates the report
 		// cache when a product is renamed or its SKU changes, so a cached response would keep
 		// answering with the old matches for up to a week.
-		return empty( $query_args['search'] ) && parent::is_cacheable_query( $query_args );
+		if ( $this->is_search ) {
+			return false;
+		}
+
+		return parent::should_use_cache();
 	}
 
 	/**
