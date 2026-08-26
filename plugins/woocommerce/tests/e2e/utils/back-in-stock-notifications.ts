@@ -62,7 +62,15 @@ export async function assertBISEnvReady(): Promise< void > {
 	];
 
 	for ( const { command, expected, problem } of checks ) {
-		const { stdout } = await wpCLI( command );
+		// `wpCLI` rejects on a non-zero exit, and WP-CLI exits 1 when an option
+		// is missing entirely — the stale-env case this guard exists to explain.
+		// Treat a failed command as "not provisioned" so the message below wins.
+		let stdout = '';
+		try {
+			( { stdout } = await wpCLI( command ) );
+		} catch {
+			stdout = '';
+		}
 
 		if ( ! expected.test( stdout ) ) {
 			throw new Error(

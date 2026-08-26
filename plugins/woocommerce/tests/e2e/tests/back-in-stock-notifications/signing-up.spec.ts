@@ -175,6 +175,14 @@ test.describe(
 						name: /Email address to be notified/i,
 					} )
 				).toHaveCount( 0 );
+
+				// Pair the absence with the prompt core renders in its place,
+				// so a 404 or a failed render can't pass as account gating.
+				await expect(
+					page.getByText(
+						/Please log in to sign up for stock notifications/i
+					)
+				).toBeVisible();
 			} );
 		} );
 	}

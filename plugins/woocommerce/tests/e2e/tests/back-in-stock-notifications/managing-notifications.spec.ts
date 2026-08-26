@@ -155,6 +155,13 @@ test.describe(
 					)
 					.allTextContents();
 
+				// The select renders for every status, so an empty option list
+				// would make the check below pass without proving anything.
+				// Anchor on an ACTIVE-only action first.
+				expect(
+					options.some( ( text ) => /^Cancel$/i.test( text.trim() ) )
+				).toBe( true );
+
 				// UI-layer guard: the Resend action is not offered for non-pending rows.
 				expect(
 					options.some( ( text ) =>
