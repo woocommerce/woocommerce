@@ -1069,6 +1069,93 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox remove_order_items() should surface a failed item ID snapshot query.
+	 */
+	public function test_remove_order_items_throws_when_snapshot_query_fails() {
+		global $wpdb;
+
+		$order          = WC_Helper_Order::create_order();
+		$query_fragment = "SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items";
+		$query_filter   = static function ( $query ) use ( $query_fragment ) {
+			return false !== strpos( $query, $query_fragment ) ? 'INVALID SQL' : $query;
+		};
+
+		$previous_suppress_errors = $wpdb->suppress_errors( true );
+		$caught_exception         = null;
+
+		add_filter( 'query', $query_filter );
+		try {
+			$order->remove_order_items();
+		} catch ( Exception $exception ) {
+			$caught_exception = $exception;
+		} finally {
+			remove_filter( 'query', $query_filter );
+			$wpdb->suppress_errors( $previous_suppress_errors );
+		}
+
+		$this->assertInstanceOf( Exception::class, $caught_exception );
+		$this->assertStringContainsString( 'Failed to retrieve persisted order item IDs', $caught_exception->getMessage() );
+		$this->assertNotEmpty( wc_get_order( $order->get_id() )->get_items(), 'A failed snapshot must leave persisted items unchanged.' );
+	}
+
+	/**
+	 * @testdox save() should retain the deferred deletion queue after a database delete fails.
+	 * @dataProvider provide_failed_order_item_delete_queries
+	 *
+	 * @param string $query_fragment SQL fragment identifying the query to fail.
+	 */
+	public function test_remove_order_items_retries_after_delete_query_fails( $query_fragment ) {
+		global $wpdb;
+
+		$order          = WC_Helper_Order::create_order();
+		$query_fragment = str_replace( '{prefix}', $wpdb->prefix, $query_fragment );
+		$query_filter   = static function ( $query ) use ( $query_fragment ) {
+			return false !== strpos( $query, $query_fragment ) ? 'INVALID SQL' : $query;
+		};
+
+		$order->remove_order_items( 'line_item' );
+
+		$previous_suppress_errors = $wpdb->suppress_errors( true );
+		add_filter( 'query', $query_filter );
+		try {
+			$order->save();
+		} finally {
+			remove_filter( 'query', $query_filter );
+			$wpdb->suppress_errors( $previous_suppress_errors );
+		}
+
+		$persisted_item_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = 'line_item'",
+				$order->get_id()
+			)
+		);
+		$this->assertGreaterThan( 0, $persisted_item_count, 'A failed delete must leave the item row available for retry.' );
+
+		$order->save();
+
+		$persisted_item_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = 'line_item'",
+				$order->get_id()
+			)
+		);
+		$this->assertSame( 0, $persisted_item_count, 'A subsequent save should retry and complete the queued deletion.' );
+	}
+
+	/**
+	 * Provides metadata and item-row deletion queries to fail.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public static function provide_failed_order_item_delete_queries(): array {
+		return array(
+			'item metadata delete' => array( 'DELETE itemmeta FROM' ),
+			'item row delete'      => array( 'DELETE FROM {prefix}woocommerce_order_items' ),
+		);
+	}
+
+	/**
 	 * @testdox add_item() must not overwrite an earlier unsaved item when items are removed and re-added before save().
 	 */
 	public function test_add_item_keeps_unsaved_items_after_remove_and_readd() {

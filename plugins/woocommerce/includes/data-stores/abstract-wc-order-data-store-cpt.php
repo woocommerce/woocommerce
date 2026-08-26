@@ -787,6 +787,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 *
 	 * @param WC_Order    $order Order object.
 	 * @param string|null $type Order item type, or null for every type.
+	 * @throws Exception If the database query fails.
 	 * @return int[]
 	 */
 	public function get_order_item_ids( $order, $type = null ) {
@@ -813,6 +814,10 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			);
 		}
 
+		if ( '' !== $wpdb->last_error ) {
+			throw new Exception( esc_html( 'Failed to retrieve persisted order item IDs: ' . $wpdb->last_error ) );
+		}
+
 		return array_map( 'intval', $item_ids );
 	}
 
@@ -823,6 +828,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 *
 	 * @param WC_Order $order Order object.
 	 * @param int[]    $ids   Order item IDs to delete.
+	 * @throws Exception If the database query fails.
 	 * @return void
 	 */
 	public function delete_items_by_ids( $order, $ids ) {
@@ -846,20 +852,26 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 		$ids_placeholders = implode( ', ', array_fill( 0, count( $sanitized_ids ), '%d' ) );
 
-		$wpdb->query(
+		$result = $wpdb->query(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $ids_placeholders is generated above.
 				"DELETE itemmeta FROM {$wpdb->prefix}woocommerce_order_itemmeta as itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items as items WHERE itemmeta.order_item_id = items.order_item_id AND items.order_id = %d AND items.order_item_id IN ($ids_placeholders)",
 				array_merge( array( $order->get_id() ), $sanitized_ids )
 			)
 		);
-		$wpdb->query(
+		if ( false === $result ) {
+			throw new Exception( esc_html( 'Failed to delete order item meta: ' . $wpdb->last_error ) );
+		}
+		$result = $wpdb->query(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $ids_placeholders is generated above.
 				"DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_id IN ($ids_placeholders)",
 				array_merge( array( $order->get_id() ), $sanitized_ids )
 			)
 		);
+		if ( false === $result ) {
+			throw new Exception( esc_html( 'Failed to delete order items: ' . $wpdb->last_error ) );
+		}
 
 		foreach ( $sanitized_ids as $item_id ) {
 			wp_cache_delete( 'item-' . $item_id, 'order-items' );
