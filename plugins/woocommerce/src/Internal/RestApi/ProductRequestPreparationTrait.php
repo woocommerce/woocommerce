@@ -21,7 +21,7 @@ trait ProductRequestPreparationTrait {
 	 *
 	 * @param \WP_REST_Request<array<string, mixed>> $request Request object.
 	 * @return \WC_Product|\WP_Error
-	 * @throws \Exception When construction fails for a product that still exists, or a store reports a typed WC_Data_Exception failure (rethrown with its code intact).
+	 * @throws \Exception When construction fails for any reason other than the core data store's invalid-product failure for an ID that no longer resolves to a product post.
 	 */
 	private function get_product_for_rest_request( $request ) {
 		$id = isset( $request['id'] ) ? absint( $request['id'] ) : 0;
@@ -46,11 +46,13 @@ trait ProductRequestPreparationTrait {
 
 			if ( ! $classname || ! class_exists( $classname ) ) {
 				// Fall back to the stored type rather than silently converting the product to simple.
-				$classname = $existing_product_type ? \WC_Product_Factory::get_classname_from_product_type( $existing_product_type ) : false;
-
-				if ( ! $classname || ! class_exists( $classname ) ) {
-					$classname = 'WC_Product_Simple';
-				}
+				// get_product_classname() resolves through woocommerce_product_class, so a class
+				// registered only by that filter still wins. The string check is needed because
+				// woocommerce_product_type_query can return any truthy value, and a non-string one
+				// would fatal while the class name is built.
+				$classname = is_string( $existing_product_type ) && '' !== $existing_product_type
+					? \WC_Product_Factory::get_product_classname( $id, $existing_product_type )
+					: 'WC_Product_Simple';
 			}
 
 			try {

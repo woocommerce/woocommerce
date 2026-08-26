@@ -2537,6 +2537,63 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A stored type whose class is registered only through woocommerce_product_class keeps that class.
+	 */
+	public function test_falsy_type_preserves_filter_registered_product_class(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		add_filter(
+			'woocommerce_product_type_query',
+			static function ( $override, $product_id ) use ( $product ) {
+				return $product->get_id() === $product_id ? 'acme-widget' : $override;
+			},
+			10,
+			2
+		);
+		add_filter(
+			'woocommerce_product_class',
+			static function ( $classname, $product_type ) {
+				return 'acme-widget' === $product_type ? WC_Product_Grouped::class : $classname;
+			},
+			10,
+			2
+		);
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+		$request->set_url_params( array( 'id' => $product->get_id() ) );
+		$request->set_body_params( array( 'type' => '' ) );
+
+		$result = $this->invoke_prepare( $request, false );
+
+		$this->assertInstanceOf( WC_Product_Grouped::class, $result, 'The filter-registered class must win over the WC_Product_Simple fallback' );
+	}
+
+	/**
+	 * @testdox A non-string stored product type falls back to a simple product instead of causing a fatal error.
+	 */
+	public function test_non_string_stored_product_type_does_not_fatal(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		add_filter(
+			'woocommerce_product_type_query',
+			static function ( $override, $product_id ) use ( $product ) {
+				return $product->get_id() === $product_id ? array( ProductType::SIMPLE ) : $override;
+			},
+			10,
+			2
+		);
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+		$request->set_url_params( array( 'id' => $product->get_id() ) );
+		$request->set_body_params( array( 'type' => '' ) );
+
+		$result = $this->invoke_prepare( $request, false );
+
+		$this->assertInstanceOf( WC_Product_Simple::class, $result );
+		$this->assertSame( $product->get_id(), $result->get_id() );
+	}
+
+	/**
 	 * @testdox Product constructor exceptions are rethrown when the product still exists.
 	 */
 	public function test_prepare_object_rethrows_unexpected_constructor_exception(): void {
