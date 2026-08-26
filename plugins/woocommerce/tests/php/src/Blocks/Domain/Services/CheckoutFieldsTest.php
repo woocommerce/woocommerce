@@ -92,6 +92,12 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 				'type'     => 'checkbox',
 			),
 			array(
+				'id'       => 'plugin-namespace/delivery-date',
+				'label'    => 'Preferred delivery date',
+				'location' => 'order',
+				'type'     => 'date',
+			),
+			array(
 				'id'         => 'namespace/vat-number',
 				'label'      => 'VAT Number',
 				'location'   => 'address',
@@ -187,6 +193,57 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 		$fields = $this->controller->get_contextual_fields_for_location( 'address', $document_object );
 		$this->assertArrayHasKey( 'plugin-namespace/gov-id', $fields );
 		$this->assertArrayNotHasKey( 'namespace/vat-number', $fields );
+	}
+
+	/**
+	 * @testdox Date fields can be registered.
+	 */
+	public function test_date_fields_can_be_registered() {
+		$fields = $this->controller->get_additional_fields();
+
+		$this->assertArrayHasKey( 'plugin-namespace/delivery-date', $fields, 'Date fields should be a supported field type.' );
+		$this->assertSame( 'date', $fields['plugin-namespace/delivery-date']['type'] );
+	}
+
+	/**
+	 * @testdox Date fields only accept a real calendar date in Y-m-d format.
+	 *
+	 * @testWith ["2026-08-26", false]
+	 *           ["", false]
+	 *           ["2026-02-31", true]
+	 *           ["2026-8-6", true]
+	 *           ["26-08-2026", true]
+	 *           ["not-a-date", true]
+	 *
+	 * @param string $value       The submitted value.
+	 * @param bool   $has_errors  Whether the value should be rejected.
+	 */
+	public function test_date_field_validation( string $value, bool $has_errors ) {
+		$fields = $this->controller->get_additional_fields();
+		$errors = $this->controller->validate_field( $fields['plugin-namespace/delivery-date'], $value );
+
+		$this->assertSame( $has_errors, $errors->has_errors(), sprintf( 'Unexpected validation result for "%s".', $value ) );
+	}
+
+	/**
+	 * @testdox Date field values are displayed using the site date format, in the site timezone.
+	 *
+	 * @testWith ["UTC", "F j, Y", "August 26, 2026"]
+	 *           ["America/New_York", "Y-m-d", "2026-08-26"]
+	 *           ["Pacific/Auckland", "Y-m-d", "2026-08-26"]
+	 *
+	 * @param string $timezone    The site timezone.
+	 * @param string $date_format The site date format.
+	 * @param string $expected    The expected formatted value.
+	 */
+	public function test_date_field_value_formatting( string $timezone, string $date_format, string $expected ) {
+		update_option( 'timezone_string', $timezone );
+		update_option( 'date_format', $date_format );
+
+		$fields = $this->controller->get_additional_fields();
+		$value  = $this->controller->format_additional_field_value( '2026-08-26', $fields['plugin-namespace/delivery-date'] );
+
+		$this->assertSame( $expected, $value, 'The stored calendar date should never shift when it is formatted.' );
 	}
 
 	/**

@@ -28,7 +28,7 @@ add_action( 'woocommerce_init', function() {
             'id'       => 'your-namespace/field-name',
             'label'    => __( 'Your Field Label', 'your-text-domain'),
             'location' => 'contact', // or 'address' or 'order'
-            'type'     => 'text',    // or 'select' or 'checkbox'
+            'type'     => 'text',    // or 'select', 'checkbox' or 'date'
             'required' => false,
         )
     );
@@ -100,7 +100,7 @@ woocommerce_register_additional_checkout_field(
 
 ## Supported Field Types
 
-The API supports three field types:
+The API supports four field types:
 
 ### Text Fields
 
@@ -163,6 +163,24 @@ woocommerce_register_additional_checkout_field(
     )
 );
 ```
+
+### Date Fields
+
+Ideal for non-time-zone-sensitive dates like delivery dates, birthdays, and specific dates:
+
+```php
+woocommerce_register_additional_checkout_field(
+    array(
+        'id'       => 'my-plugin/delivery-date',
+        'label'    => __('Preferred delivery date', 'your-text-domain'),
+        'location' => 'order',
+        'type'     => 'date',
+        'required' => true,
+    )
+);
+```
+
+The field will render the browser default date picker. The value is stored in `Y-m-d` format and rendered using the site rendering format in emails and other places.
 
 ## Adding Field Attributes
 
