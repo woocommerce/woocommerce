@@ -16,6 +16,7 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { ActivityPanel } from '../';
+import { getAllPanels } from '../panels';
 
 jest.mock( '@wordpress/data', () => {
 	const originalModule = jest.requireActual( '@wordpress/data' );
@@ -69,6 +70,7 @@ jest.mock( '../orders/utils', () => {
 
 describe( 'ActivityPanel', () => {
 	beforeEach( () => {
+		getAllPanels.mockClear();
 		useSelect.mockReturnValue( {
 			isTaskListHidden: false,
 		} );
@@ -169,15 +171,19 @@ describe( 'ActivityPanel', () => {
 			description: 'an order manager only requests the orders count',
 			capabilities: [ 'read_private_shop_orders' ],
 			expectedCountsCalls: 0,
+			expectsManageReviews: false,
 			expectsOrders: true,
 			expectsProducts: false,
+			expectsUpdateStock: false,
 		},
 		{
 			description: 'a manage-only role only requests the panel counts',
 			capabilities: [ 'manage_woocommerce' ],
 			expectedCountsCalls: 1,
+			expectsManageReviews: false,
 			expectsOrders: false,
 			expectsProducts: false,
+			expectsUpdateStock: false,
 		},
 		{
 			description:
@@ -187,16 +193,68 @@ describe( 'ActivityPanel', () => {
 				'read_private_products',
 			],
 			expectedCountsCalls: 0,
+			expectsManageReviews: false,
 			expectsOrders: true,
 			expectsProducts: false,
+			expectsUpdateStock: false,
 		},
 		{
 			description:
-				'a manage role with product read access requests counts and products',
+				'a manage role with product read access skips products when it cannot use their panels',
 			capabilities: [ 'manage_woocommerce', 'read_private_products' ],
 			expectedCountsCalls: 1,
+			expectsManageReviews: false,
+			expectsOrders: false,
+			expectsProducts: false,
+			expectsUpdateStock: false,
+		},
+		{
+			description:
+				'a review manager requests counts and products without order access',
+			capabilities: [
+				'manage_woocommerce',
+				'read_private_products',
+				'moderate_comments',
+				'edit_products',
+			],
+			expectedCountsCalls: 1,
+			expectsManageReviews: true,
 			expectsOrders: false,
 			expectsProducts: true,
+			expectsUpdateStock: false,
+		},
+		{
+			description:
+				'a stock manager requests counts, orders, and products',
+			capabilities: [
+				'manage_woocommerce',
+				'read_private_shop_orders',
+				'read_private_products',
+				'edit_product',
+				'edit_others_products',
+				'edit_published_products',
+			],
+			expectedCountsCalls: 1,
+			expectsManageReviews: false,
+			expectsOrders: true,
+			expectsProducts: true,
+			expectsUpdateStock: true,
+		},
+		{
+			description:
+				'a stock manager without variation edit access skips products',
+			capabilities: [
+				'manage_woocommerce',
+				'read_private_shop_orders',
+				'read_private_products',
+				'edit_others_products',
+				'edit_published_products',
+			],
+			expectedCountsCalls: 1,
+			expectsManageReviews: false,
+			expectsOrders: true,
+			expectsProducts: false,
+			expectsUpdateStock: false,
 		},
 		{
 			description: 'a full merchant role requests everything',
@@ -204,18 +262,27 @@ describe( 'ActivityPanel', () => {
 				'manage_woocommerce',
 				'read_private_shop_orders',
 				'read_private_products',
+				'moderate_comments',
+				'edit_products',
+				'edit_product',
+				'edit_others_products',
+				'edit_published_products',
 			],
 			expectedCountsCalls: 1,
+			expectsManageReviews: true,
 			expectsOrders: true,
 			expectsProducts: true,
+			expectsUpdateStock: true,
 		},
 	] )(
 		'$description',
 		( {
 			capabilities,
 			expectedCountsCalls,
+			expectsManageReviews,
 			expectsOrders,
 			expectsProducts,
+			expectsUpdateStock,
 		} ) => {
 			const getActivityPanelCounts = jest.fn().mockReturnValue( {} );
 			const getOrdersTotalCount = jest.fn().mockReturnValue( 1 );
@@ -264,6 +331,12 @@ describe( 'ActivityPanel', () => {
 			);
 			expect( getProductsTotalCount.mock.calls.length > 0 ).toBe(
 				expectsProducts
+			);
+			expect( getAllPanels ).toHaveBeenCalledWith(
+				expect.objectContaining( {
+					canManageReviews: expectsManageReviews,
+					canUpdateStock: expectsUpdateStock,
+				} )
 			);
 		}
 	);

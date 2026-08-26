@@ -12,7 +12,9 @@ import StockPanel from './stock';
 import ReviewsPanel from './reviews';
 
 export function getAllPanels( {
+	canManageReviews,
 	countsEnabled = true,
+	canUpdateStock,
 	lowStockProductsCount,
 	unapprovedReviewsCount,
 	unreadOrdersCount,
@@ -60,7 +62,8 @@ export function getAllPanels( {
 			),
 			title: __( 'Orders', 'woocommerce' ),
 		},
-		totalOrderCount > 0 &&
+		canUpdateStock &&
+			totalOrderCount > 0 &&
 			publishedProductCount > 0 &&
 			manageStock === 'yes' && {
 				className: 'woocommerce-homescreen-card',
@@ -88,7 +91,8 @@ export function getAllPanels( {
 				),
 				title: __( 'Stock', 'woocommerce' ),
 			},
-		publishedProductCount > 0 &&
+		canManageReviews &&
+			publishedProductCount > 0 &&
 			unapprovedReviewsCount > 0 &&
 			reviewsEnabled === 'yes' && {
 				className: 'woocommerce-homescreen-card',

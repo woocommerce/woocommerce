@@ -37,23 +37,22 @@ const PUBLISHED_PRODUCTS_QUERY_PARAMS = {
 };
 
 const ActivityPanelContent = ( {
+	canManageReviews,
 	canManageWooCommerce,
+	canUpdateStock,
 	canViewOrders,
-	canViewProducts,
 } ) => {
 	const panelsData = useSelect(
 		( select ) => {
 			// Each lookup runs only with the capability its endpoint checks:
-			// the wc/v3 orders and products counts need the respective
-			// read_private_* capability and the Activity Panel counts need
-			// manage_woocommerce, so a role holding any subset of them never
-			// triggers a 403. The products count additionally requires
-			// manage_woocommerce because its only consumers, the Stock and
-			// Reviews panels, need the counts endpoint and product edit
-			// access to work; mounting them read-only would offer an Update
-			// stock action that can only fail.
+			// the wc/v3 orders count needs read_private_shop_orders and the
+			// Activity Panel counts need manage_woocommerce. The products count
+			// only runs when at least one of its Stock or Reviews consumers can
+			// perform every request and action that panel exposes.
 			const data = {
+				canManageReviews,
 				countsEnabled: canManageWooCommerce,
+				canUpdateStock,
 				loadingOrderAndProductCount: false,
 				lowStockProductsCount: null,
 				unapprovedReviewsCount: null,
@@ -83,7 +82,10 @@ const ActivityPanelContent = ( {
 					] );
 			}
 
-			if ( canManageWooCommerce && canViewProducts ) {
+			if (
+				canManageWooCommerce &&
+				( canManageReviews || ( canUpdateStock && canViewOrders ) )
+			) {
 				const {
 					getProductsTotalCount,
 					hasFinishedResolution: hasFinishedProductsResolution,
@@ -113,7 +115,12 @@ const ActivityPanelContent = ( {
 
 			return data;
 		},
-		[ canManageWooCommerce, canViewOrders, canViewProducts ]
+		[
+			canManageReviews,
+			canManageWooCommerce,
+			canUpdateStock,
+			canViewOrders,
+		]
 	);
 
 	const panels = panelsData.loadingOrderAndProductCount
@@ -221,18 +228,29 @@ export const ActivityPanel = () => {
 	const { currentUserCan } = useUser();
 	const canManageWooCommerce = currentUserCan( 'manage_woocommerce' );
 	const canViewOrders = currentUserCan( 'read_private_shop_orders' );
+	const canViewProducts = currentUserCan( 'read_private_products' );
+	const canManageReviews =
+		canViewProducts &&
+		currentUserCan( 'moderate_comments' ) &&
+		currentUserCan( 'edit_products' );
+	const canUpdateStock =
+		canViewProducts &&
+		currentUserCan( 'edit_product' ) &&
+		currentUserCan( 'edit_others_products' ) &&
+		currentUserCan( 'edit_published_products' );
 
-	// Every panel requires the order count, so without manage_woocommerce or
-	// order read access nothing could ever render.
+	// Without manage_woocommerce only the Orders panel can render, and it
+	// requires order read access.
 	if ( ! canManageWooCommerce && ! canViewOrders ) {
 		return null;
 	}
 
 	return (
 		<ActivityPanelContent
+			canManageReviews={ canManageReviews }
 			canManageWooCommerce={ canManageWooCommerce }
+			canUpdateStock={ canUpdateStock }
 			canViewOrders={ canViewOrders }
-			canViewProducts={ currentUserCan( 'read_private_products' ) }
 		/>
 	);
 };

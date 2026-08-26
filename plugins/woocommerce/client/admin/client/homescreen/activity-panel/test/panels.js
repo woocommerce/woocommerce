@@ -6,6 +6,7 @@ import { getAllPanels } from '../panels';
 describe( 'ActivityPanel', () => {
 	it( 'should exclude the orders and stock panels when there are no orders', () => {
 		const panels = getAllPanels( {
+			canUpdateStock: true,
 			unreadOrdersCount: 0,
 			orderStatuses: [],
 			totalOrderCount: 0,
@@ -28,6 +29,8 @@ describe( 'ActivityPanel', () => {
 
 	it( 'should exclude the reviews and stock panels when there are no published products', () => {
 		const panels = getAllPanels( {
+			canManageReviews: true,
+			canUpdateStock: true,
 			unreadOrdersCount: 0,
 			orderStatuses: [],
 			totalOrderCount: 1, // Yes, I realize this isn't "possible".
@@ -94,6 +97,7 @@ describe( 'ActivityPanel', () => {
 
 	it( 'should include the stock panel when there are orders, products, and inventory management is enabled', () => {
 		const panels = getAllPanels( {
+			canUpdateStock: true,
 			unreadOrdersCount: 1,
 			orderStatuses: [],
 			totalOrderCount: 10,
@@ -125,6 +129,7 @@ describe( 'ActivityPanel', () => {
 
 	it( 'should include the reviews panel when they are enabled, there are products and reviews', () => {
 		const panels = getAllPanels( {
+			canManageReviews: true,
 			publishedProductCount: 5,
 			reviewsEnabled: 'yes',
 			isTaskListHidden: 'yes',
@@ -133,6 +138,25 @@ describe( 'ActivityPanel', () => {
 
 		expect( panels ).toEqual(
 			expect.arrayContaining( [
+				expect.objectContaining( { id: 'reviews-panel' } ),
+			] )
+		);
+	} );
+
+	it( 'should exclude product panels when the user cannot perform their actions', () => {
+		const panels = getAllPanels( {
+			lowStockProductsCount: 2,
+			manageStock: 'yes',
+			publishedProductCount: 5,
+			reviewsEnabled: 'yes',
+			isTaskListHidden: 'yes',
+			totalOrderCount: 10,
+			unapprovedReviewsCount: 3,
+		} );
+
+		expect( panels ).toEqual(
+			expect.not.arrayContaining( [
+				expect.objectContaining( { id: 'stock-panel' } ),
 				expect.objectContaining( { id: 'reviews-panel' } ),
 			] )
 		);
