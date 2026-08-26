@@ -41,15 +41,15 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 	private const NY_MAR_09_MIDNIGHT = 1773028800;
 
 	/**
-	 * Timestamp of the first instant of 2026-04-24 in Africa/Cairo. DST starts at 00:00 that day,
+	 * Timestamp of the first instant of 2026-03-29 in Asia/Beirut. DST starts at 00:00 that day,
 	 * so local midnight never happens and the day starts at 01:00:00 +03:00 instead.
 	 */
-	private const CAIRO_APR_24_START = 1776981600;
+	private const BEIRUT_MAR_29_START = 1774735200;
 
 	/**
-	 * Timestamp of 2026-04-25 00:00:00 +03:00, 23 hours after the start of 2026-04-24.
+	 * Timestamp of 2026-03-30 00:00:00 +03:00, 23 hours after the start of 2026-03-29.
 	 */
-	private const CAIRO_APR_25_MIDNIGHT = 1777064400;
+	private const BEIRUT_MAR_30_MIDNIGHT = 1774818000;
 
 	/**
 	 * The System Under Test.
@@ -273,10 +273,10 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 				self::NY_MAR_09_MIDNIGHT,
 			),
 			'DST starts at midnight, 23-hour day' => array(
-				'Africa/Cairo',
-				'2026-04-24',
-				self::CAIRO_APR_24_START,
-				self::CAIRO_APR_25_MIDNIGHT,
+				'Asia/Beirut',
+				'2026-03-29',
+				self::BEIRUT_MAR_29_START,
+				self::BEIRUT_MAR_30_MIDNIGHT,
 			),
 		);
 	}
@@ -306,10 +306,15 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 	 * Skip a DST case when the runtime's timezone database puts no transition on that day.
 	 *
 	 * PHP resolves timezones against the tz database compiled into the binary, not the one the OS
-	 * ships, and DST policy changes over time. Egypt reinstated DST in tzdata 2023a, so on PHP 7.4
-	 * (tzdata 2022.1) 2026-04-24 in Cairo is an ordinary 24-hour day and the case has no transition
-	 * to assert against. The expected timestamps stay hard-coded, which is the stronger assertion;
-	 * this only skips the runtimes that cannot exercise them.
+	 * ships, so a case is only meaningful on a runtime whose database still places a transition
+	 * where the case expects one. The zones above were picked because their rules hold across the
+	 * tzdata versions this suite runs under, but DST policy is set by governments and does change:
+	 * Egypt, for one, has reinstated and repealed it repeatedly. This is the backstop that turns a
+	 * future policy change into a skip rather than a failure that reads like a real regression.
+	 *
+	 * The expected timestamps stay hard-coded on purpose. Recomputing them through the same
+	 * DateTime API the production code uses would make the assertion tautological; this guard only
+	 * reads the environment, never the code under test.
 	 *
 	 * @param string $timezone Site timezone.
 	 * @param string $date     The queried day.
@@ -322,7 +327,7 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 
 		if ( DAY_IN_SECONDS === $end->getTimestamp() - $start->getTimestamp() ) {
 			$this->markTestSkipped(
-				"Timezone database " . timezone_version_get() . " puts no DST transition on {$date} in {$timezone}."
+				'Timezone database ' . timezone_version_get() . " puts no DST transition on {$date} in {$timezone}."
 			);
 		}
 	}
