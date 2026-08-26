@@ -378,7 +378,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 			return array_values(
 				array_unique(
-					array_filter( array_map( 'absint', (array) $item_ids ) )
+					array_filter(
+						array_map( 'intval', (array) $item_ids ),
+						static fn( $item_id ) => $item_id > 0
+					)
 				)
 			);
 		}
