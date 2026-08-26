@@ -2365,24 +2365,6 @@ parameters:
 			path: includes/admin/class-wc-admin-permalink-settings.php
 
 		-
-			message: '#^Parameter \#1 \$str of function urldecode expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/admin/class-wc-admin-permalink-settings.php
-
-		-
-			message: '#^Parameter \#1 \$value of function trailingslashit expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/admin/class-wc-admin-permalink-settings.php
-
-		-
-			message: '#^Parameter \#1 \$value of function wc_sanitize_permalink expects string, array\|string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/admin/class-wc-admin-permalink-settings.php
-
-		-
 			message: '#^Method WC_Admin_Pointers\:\:create_product_tutorial\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -14167,12 +14149,6 @@ parameters:
 			path: includes/class-wc-regenerate-images.php
 
 		-
-			message: '#^Parameter \#3 \$size of static method WC_Regenerate_Images\:\:resize_and_return_image\(\) expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-regenerate-images.php
-
-		-
 			message: '#^Access to an undefined property WC_Register_WP_Admin_Settings\:\:\$description\.$#'
 			identifier: property.notFound
 			count: 1
@@ -20104,18 +20080,6 @@ parameters:
 			message: '#^Method WC_Product_Importer\:\:set_variation_data\(\) should return WC_Product\|WP_Error but return statement is missing\.$#'
 			identifier: return.missing
 			count: 2
-			path: includes/import/abstract-wc-product-importer.php
-
-		-
-			message: '#^Parameter \#1 \$attribute_name of function wc_attribute_taxonomy_name expects string, int\<min, \-1\>\|int\<1, max\>\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/import/abstract-wc-product-importer.php
-
-		-
-			message: '#^Parameter \#1 \$name of function wc_attribute_taxonomy_id_by_name expects string, int\<min, \-1\>\|int\<1, max\>\|string given\.$#'
-			identifier: argument.type
-			count: 1
 			path: includes/import/abstract-wc-product-importer.php
 
 		-
@@ -35026,12 +34990,6 @@ parameters:
 			path: includes/wc-product-functions.php
 
 		-
-			message: '#^Function wc_get_product_category_list\(\) should return string but returns string\|WP_Error\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/wc-product-functions.php
-
-		-
 			message: '#^Function wc_get_product_object\(\) should return WC_Product but returns object\.$#'
 			identifier: return.type
 			count: 1
@@ -44256,19 +44214,13 @@ parameters:
 		-
 			message: '#^Call to method format\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
 			identifier: class.notFound
-			count: 41
+			count: 35
 			path: src/Admin/API/Reports/TimeInterval.php
 
 		-
 			message: '#^Call to method getTimezone\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
 			identifier: class.notFound
 			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Call to method modify\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 4
 			path: src/Admin/API/Reports/TimeInterval.php
 
 		-
@@ -44339,12 +44291,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:default_before\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime but returns WC_DateTime\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:get_timeframe_dates\(\) should return array but returns false\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Admin/API/Reports/TimeInterval.php
@@ -44467,12 +44413,6 @@ parameters:
 			message: '#^Parameter \#2 \$datetime of static method DateTime\:\:createFromFormat\(\) expects string, int given\.$#'
 			identifier: argument.type
 			count: 2
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Parameter \$current_date of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:get_timeframe_dates\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
 			path: src/Admin/API/Reports/TimeInterval.php
 
 		-
@@ -45280,24 +45220,6 @@ parameters:
 			path: src/Admin/DataSourcePoller.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\DateTimeProvider\\CurrentDateTimeProvider\:\:get_now\(\) has invalid return type Automattic\\WooCommerce\\Admin\\DateTimeProvider\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/DateTimeProvider/CurrentDateTimeProvider.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\DateTimeProvider\\CurrentDateTimeProvider\:\:get_now\(\) should return Automattic\\WooCommerce\\Admin\\DateTimeProvider\\DateTime but returns DateTime\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/DateTimeProvider/CurrentDateTimeProvider.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\DateTimeProvider\\DateTimeProviderInterface\:\:get_now\(\) has invalid return type Automattic\\WooCommerce\\Admin\\DateTimeProvider\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/DateTimeProvider/DateTimeProviderInterface.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\DeprecatedClassFacade\:\:__call\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -45348,12 +45270,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property WooCommerce\:\:\$payment_gateways\.$#'
 			identifier: property.notFound
-			count: 1
-			path: src/Admin/Features/Blueprint/Exporters/ExportWCPaymentGateways.php
-
-		-
-			message: '#^Argument of an invalid type string supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
 			count: 1
 			path: src/Admin/Features/Blueprint/Exporters/ExportWCPaymentGateways.php
 
@@ -46712,42 +46628,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: src/Admin/Features/PaymentGatewaySuggestions/PaymentGatewaysController.php
-
-		-
-			message: '#^Cannot access property \$labels on WP_Post_Type\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: src/Admin/Features/ProductDataViews/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductDataViews\\Init\:\:enqueue_scripts\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductDataViews/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductDataViews\\Init\:\:enqueue_styles\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductDataViews/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductDataViews\\Init\:\:is_product_data_view_page\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductDataViews/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductDataViews\\Init\:\:woocommerce_add_new_products_dashboard\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductDataViews/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductDataViews\\Init\:\:woocommerce_products_dashboard\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductDataViews/Init.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ShippingPartnerSuggestions\\ShippingPartnerSuggestions\:\:get_specs\(\) has no return type specified\.$#'
@@ -67619,12 +67499,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/StockNotifications/Privacy/PrivacyEraser.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\StockNotifications\:\:init_hooks\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/StockNotifications/StockNotifications.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\StockNotifications\:\:on_install_or_update\(\) has no return type specified\.$#'
