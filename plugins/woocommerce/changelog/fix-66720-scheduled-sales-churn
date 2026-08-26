@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Developer advisory: get_starting_sales() no longer returns sales that have already ended, so wc_before/after_products_starting_sales fire for fewer products. Both cron loops are wrapped in `if ( $product_ids )`, so on a store whose only matches were completed sales the two starting hooks stop firing rather than firing with a shorter list, and a listener treating the daily call as a heartbeat is no longer called.
+
+Stop the daily scheduled-sales cron reprocessing every completed scheduled sale as both a starting and an ending sale.
