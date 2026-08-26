@@ -197,8 +197,10 @@ function escapeMonthName(
 	localeData: moment.Locale
 ) {
 	// Backslash escapes and bracketed sections are moment's literals, so an "M"
-	// inside one is text. "MM" and "M" render digits, which carry no grammar.
-	return format.replace( /\\.|\[[^\]]*\]|M{3,4}/g, ( token ) => {
+	// inside one is text. A backslash escapes the whole token that follows it,
+	// not just its first character. "MM" and "M" render digits, which carry no
+	// grammar.
+	return format.replace( /\\M{1,4}|\\.|\[[^\]]*\]|M{3,4}/g, ( token ) => {
 		if ( ! token.startsWith( 'M' ) ) {
 			return token;
 		}
@@ -231,9 +233,10 @@ function replaceDayToken(
 ) {
 	let replaced = false;
 	// Backslash escapes and bracketed sections are moment's literals, so a "D"
-	// inside one is text.
+	// inside one is text. A backslash escapes the whole token that follows it,
+	// not just its first character.
 	const dayRangeFormat = format.replace(
-		/\\.|\[[^\]]*\]|D+o?/g,
+		/\\D+o?|\\.|\[[^\]]*\]|D+o?/g,
 		( token ) => {
 			// Runs longer than "DD" are day of year tokens, not day of month.
 			const dayDigits = token.endsWith( 'o' )

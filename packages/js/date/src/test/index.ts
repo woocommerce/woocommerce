@@ -1059,6 +1059,20 @@ describe( 'getRangeLabel', () => {
 			expect( label ).toBe( 'أكتوبر ١, ٢٠٢٤' );
 		} );
 	} );
+	it( 'should leave a whole backslash escaped token alone', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( '\\MMMM MMM D, YYYY' );
+
+		expect(
+			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+		).toBe( 'MMMM Oct 1 - 31, 2024' );
+
+		( __ as jest.Mock ).mockReturnValueOnce( '\\DD MMM D, YYYY' );
+
+		expect(
+			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+		).toBe( 'DD Oct 1 - 31, 2024' );
+	} );
+
 	it( 'should render a weekday from the start of the range', () => {
 		( __ as jest.Mock ).mockReturnValueOnce( 'ddd, MMM D, YYYY' );
 
