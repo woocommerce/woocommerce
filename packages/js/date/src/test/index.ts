@@ -1079,6 +1079,16 @@ describe( 'getRangeLabel', () => {
 		).toBe( 'DDDo Oct 1 - 31, 2024' );
 	} );
 
+	it( 'should escape no more of a backslashed day run than moment does', () => {
+		// Moment reads "\DDDDD" as an escaped "DDDD" and a live day of month
+		// token, so the fifth "D" still carries the range.
+		( __ as jest.Mock ).mockReturnValueOnce( '\\DDDDD MMM YYYY' );
+
+		expect(
+			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+		).toBe( 'DDDD1 - 31 Oct 2024' );
+	} );
+
 	it( 'should render a weekday from the start of the range', () => {
 		( __ as jest.Mock ).mockReturnValueOnce( 'ddd, MMM D, YYYY' );
 
