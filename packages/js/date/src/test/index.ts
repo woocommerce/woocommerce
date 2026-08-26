@@ -1246,6 +1246,60 @@ describe( 'getRangeLabel', () => {
 		} );
 	} );
 
+	describe( 'with a locale that inflects the weekday name', () => {
+		// Mirrors the Ukrainian locale, which renders the genitive weekday
+		// whenever a bracketed literal precedes "dddd" - exactly the shape the
+		// month and day substitutions leave behind.
+		const weekdayGenitive = Array.from(
+			{ length: 7 },
+			( _, index ) => `weekday${ index }-genitive`
+		);
+		const weekdayNominative = Array.from(
+			{ length: 7 },
+			( _, index ) => `weekday${ index }-nominative`
+		);
+		const weekdays = ( dayMoment: moment.Moment, format?: string ) =>
+			( /\] ?dddd/.test( format || '' )
+				? weekdayGenitive
+				: weekdayNominative )[ dayMoment.day() ];
+		let originalLocale: string;
+
+		beforeAll( () => {
+			originalLocale = moment.locale();
+		} );
+
+		afterEach( () => {
+			moment.locale( originalLocale );
+		} );
+
+		it( 'should keep the nominative weekday after the month name', () => {
+			moment.defineLocale( 'inflected-weekdays', { weekdays } );
+			( __ as jest.Mock ).mockReturnValueOnce( 'MMM dddd D YYYY' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( 'Oct weekday2-nominative 1 - 31 2024' );
+		} );
+
+		it( 'should keep the nominative weekday after the day of month', () => {
+			moment.defineLocale( 'inflected-weekdays-after-day', { weekdays } );
+			( __ as jest.Mock ).mockReturnValueOnce( 'D dddd MMM YYYY' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( '1 - 31 weekday2-nominative Oct 2024' );
+		} );
+
+		it( 'should keep the genitive weekday of a format that asks for it', () => {
+			moment.defineLocale( 'inflected-weekdays-literal', { weekdays } );
+			( __ as jest.Mock ).mockReturnValueOnce( '[у] dddd, MMM D, YYYY' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( 'у weekday2-genitive, Oct 1 - 31, 2024' );
+		} );
+	} );
+
 	describe( 'with a locale that nests localized format tokens', () => {
 		// `loadLocaleData` below builds "LLL" from a translation that still
 		// holds "LT", so on a real site an expansion can itself hold a

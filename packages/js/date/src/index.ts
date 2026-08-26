@@ -176,45 +176,60 @@ function expandLocalizedFormat( format: string, localeData: moment.Locale ) {
 }
 
 /**
- * Renders the month name of a moment format string into an escaped literal.
+ * Renders the month and weekday names of a moment format string into escaped
+ * literals.
  *
- * Moment picks between the genitive and the nominative month name by testing
- * the format string for a day token next to the month one, and locales disagree
- * on what may sit between the two: the default `MONTHS_IN_FORMAT` accepts a
- * bracketed literal, Catalan accepts only whitespace, and Polish matches
- * "D MMMM" outright. Rendering the name here, against the format as the locale
- * received it, resolves that choice before the day token is substituted, so
- * whatever shape the substitution leaves behind can no longer change it.
- *
- * Weekday names can be format-sensitive the same way, but no shipped locale
- * keys that choice on the day token, so they are left for moment to render.
+ * Moment picks the grammatical form of both names by pattern-testing the
+ * format string while rendering: month choosers look for a day token next to
+ * the month one, and Ukrainian renders the genitive weekday whenever a
+ * bracketed literal sits before "dddd" - exactly the shape the substitutions
+ * here leave behind. Months and weekdays are the only tokens moment resolves
+ * against the format, so rendering every name in one pass, against the format
+ * as the locale received it, settles each choice before any substitution can
+ * flip one.
  *
  * @param {string}        format     - localized date string format
- * @param {moment.Moment} date       - date whose month name to render
+ * @param {moment.Moment} date       - date whose month and weekday to render
  * @param {moment.Locale} localeData - locale the format will be rendered with
- * @return {string} - format string with its month name tokens escaped
+ * @return {string} - format string with its month and weekday tokens escaped
  */
-function escapeMonthName(
+function escapeNameTokens(
 	format: string,
 	date: moment.Moment,
 	localeData: moment.Locale
 ) {
-	// Backslash escapes and bracketed sections are moment's literals, so an "M"
-	// inside one is text. A backslash escapes the whole token that follows it,
-	// not just its first character. "MM" and "M" render digits, which carry no
-	// grammar.
-	return format.replace( /\\M{1,4}|\\.|\[[^\]]*\]|M{3,4}/g, ( token ) => {
-		if ( ! token.startsWith( 'M' ) ) {
-			return token;
+	// Backslash escapes and bracketed sections are moment's literals, so an
+	// "M" or "d" inside one is text. A backslash escapes the whole token that
+	// follows it; the escaped alternatives mirror moment's own tokens. "MM",
+	// "M", "Mo", "do" and "d" render digits, which carry no grammar.
+	return format.replace(
+		/\\(?:Mo|MM?M?M?|ddd?d?|do?)|\\.|\[[^\]]*\]|M{3,4}|d{2,4}/g,
+		( token ) => {
+			if ( token.startsWith( 'M' ) ) {
+				const name =
+					token.length === 4
+						? localeData.months( date, format )
+						: localeData.monthsShort( date, format );
+
+				return `[${ name }]`;
+			}
+
+			if ( ! token.startsWith( 'd' ) ) {
+				return token;
+			}
+
+			if ( token.length === 4 ) {
+				return `[${ localeData.weekdays( date, format ) }]`;
+			}
+
+			const name =
+				token.length === 3
+					? localeData.weekdaysShort( date )
+					: localeData.weekdaysMin( date );
+
+			return `[${ name }]`;
 		}
-
-		const name =
-			token.length === 4
-				? localeData.months( date, format )
-				: localeData.monthsShort( date, format );
-
-		return `[${ name }]`;
-	} );
+	);
 }
 
 /**
@@ -287,7 +302,7 @@ export function getRangeLabel( after: moment.Moment, before: moment.Moment ) {
 		// or time in the format stays the one the range starts on.
 		const localeData = after.localeData();
 		const dayRangeFormat = replaceDayToken(
-			escapeMonthName(
+			escapeNameTokens(
 				expandLocalizedFormat( fullDateFormat, localeData ),
 				after,
 				localeData
