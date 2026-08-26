@@ -49,6 +49,18 @@ class OrderProcessorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		try {
+			// A static cache on the SUT, which no base class resets.
+			OrderProcessor::reset_cache();
+		} finally {
+			parent::tearDown();
+		}
+	}
+
+	/**
 	 * @testdox Should return true when order is valid.
 	 */
 	public function test_returns_true_for_valid_order(): void {
@@ -81,6 +93,7 @@ class OrderProcessorTest extends WC_Unit_Test_Case {
 | Test docblock | Use `@testdox` with sentence ending in `.` |
 | Return type | Use `void` for test methods |
 | Assertion messages | Include helpful context for failures |
+| Teardown | Only for state the base does not own; guarantee `parent::tearDown()` runs |
 
 ## Fixture Lifecycle and Cleanup
 
@@ -99,7 +112,7 @@ For a `WP_UnitTestCase` descendant, do not manually delete per-test products, co
 - Create persistent class fixtures in `wpSetUpBeforeClass()` and delete them in `wpTearDownAfterClass()`.
 - Remove a hook before the test ends only when later work in that test must not run it; WordPress parent teardown restores the hook snapshot.
 - An arrangement-time reset is valid when `setUp()` or the base class preloads state. Do not repeat cleanup already performed by the base.
-- If custom cleanup is required, guarantee `parent::tearDown()` runs. In a `WP_UnitTestCase` descendant, perform cleanup that can write through `$wpdb` before the parent rollback.
+- If custom cleanup is required, guarantee `parent::tearDown()` runs. In a `WP_UnitTestCase` descendant, perform cleanup that can write through `$wpdb` before the parent rollback. Do not add an override that only calls the parent: `Generic.CodeAnalysis.UselessOverridingMethod` flags it, and the Lint job treats that warning as a failure.
 
 See [Performance and isolation principles](../../../plugins/woocommerce/tests/README.md#performance-and-isolation-principles) for fixture sizing and database constraints.
 
