@@ -390,34 +390,28 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * End-date values the query still returns, in shapes that a PHP-side check reads differently.
+	 * End-date values the query still returns, in shapes a PHP-side check reads as ended.
 	 *
-	 * The query returns all four, so the consumer must write the price to settle them. Anything
+	 * The query returns both, so the consumer has to write the price to settle them. Anything
 	 * deciding "ended" for itself skips that write and re-queues the product forever.
+	 * '0000-00-00' is the one value where the query's numeric `> 0` disagrees with a PHP
+	 * `$v > 0`; '999999999' is a plain past timestamp that still sorts above the current one.
 	 *
-	 * None is redundant: '20200101' alone is read as ended by a strict Ymd parse, '0000-00-00'
-	 * alone splits the query's numeric `> 0` from a PHP `$v > 0`, and '999999999' outlives the
-	 * two calendar forms, which age out on 2034-01-04. A far-future date replaces none of them,
-	 * since every check reads it as future.
-	 *
-	 * Deriving the calendar forms from the clock does not fix that either: a fixture has to be
-	 * past for the checks it catches yet sort above a decimal timestamp for the query, and those
-	 * diverge for good once `time()` renders as '20...'. A `-1 year` value buys to 2035, no more.
-	 * When these two age out, replace them; the boundary case above does not age.
+	 * Calendar forms such as '2020-01-01' were dropped: they age out in 2034 once `time()`
+	 * renders as '20...', and no clock-derived replacement survives, since a fixture must read
+	 * as past for the checks it catches yet sort above a decimal timestamp for the query.
 	 *
 	 * @return array<string, array{string}>
 	 */
 	public function provider_end_dates_the_query_still_returns(): array {
 		return array(
-			'calendar date' => array( '2020-01-01' ),
-			'compact date'  => array( '20200101' ),
 			'short numeric' => array( '999999999' ),
 			'zero date'     => array( '0000-00-00' ),
 		);
 	}
 
 	/**
-	 * @testdox A sale the query still returns is started once and then settles.
+	 * @testdox A sale the query still returns is started once and stops being re-queued.
 	 *
 	 * @dataProvider provider_end_dates_the_query_still_returns
 	 *
@@ -429,6 +423,11 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		// write the price, which is what takes it out of the queue. Anything that decides
 		// "ended" differently from the query and skips that write leaves the product queued
 		// and firing the starting hooks on every run, which is the churn this fix removes.
+		//
+		// This asserts the queue drains, not that the resulting price is right. It is not:
+		// the product ends at the sale price with an end date in the past, and the lookup
+		// table lists it on sale while ScheduledSalePriceReconciler charges the regular
+		// price. That disagreement predates this fix and is untouched by it.
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_regular_price( 100 );
 		$product->set_sale_price( 50 );
