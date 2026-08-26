@@ -6,7 +6,8 @@ import path from 'node:path';
 
 const require = createRequire( import.meta.url );
 
-export default {
+/** @type {import('@storybook/react-webpack5').StorybookConfig} */
+const storybookConfig = {
 	stories: [
 		// WooCommerce Blocks stuff (anywhere in repo!)
 		'../assets/js/**/stories/*.stories.@(js|jsx|ts|tsx)',
@@ -25,20 +26,19 @@ export default {
 	docs: {
 		defaultName: 'Docs',
 	},
-	features: {
-		babelModeV7: true,
-		emotionAlias: false,
-	},
 	// webpackFinal field was added in following PR: https://github.com/woocommerce/woocommerce-blocks/pull/7514
 	// This fixes "storybook build issue" related to framer-motion library.
 	// Solution is from this comment: https://github.com/storybookjs/storybook/issues/16690#issuecomment-971579785
 	webpackFinal: async ( config ) => {
+		config.module ??= {};
+		config.module.rules ??= [];
 		config.module.rules.push( {
 			test: /\.mjs$/,
 			include: /node_modules/,
 			type: 'javascript/auto',
 		} );
 		// https://github.com/storybookjs/storybook/discussions/22650#discussioncomment-6414161
+		config.resolve ??= {};
 		config.resolve.alias = {
 			...config.resolve.alias,
 			'react/jsx-runtime': require.resolve( 'react/jsx-runtime' ),
@@ -54,3 +54,5 @@ export default {
 		options: {},
 	},
 };
+
+export default storybookConfig;
