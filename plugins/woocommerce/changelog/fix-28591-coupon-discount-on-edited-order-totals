@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Calculate coupon discounts from manually edited order line item totals instead of the original prices, and stop coupon application from discarding those manual edits.
+In the admin order editor, calculate coupon discounts from manually edited order line item totals instead of the original prices, and stop coupon application from discarding those manual edits.
