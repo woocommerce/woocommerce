@@ -25,6 +25,12 @@ import { ValidationInputError } from '../validation-input-error';
 import { getValidityMessageForInput } from '../../blocks-checkout/utils';
 import { ValidatedTextInputProps } from './types';
 
+/**
+ * Input types whose value the browser parses rather than storing verbatim. Assigning to `value` on these
+ * clears anything the shopper has partially entered, so their value is left untouched before validating.
+ */
+const PARSED_INPUT_TYPES = [ 'date', 'datetime-local', 'month', 'time', 'week' ];
+
 export type ValidatedTextInputHandle = {
 	focus?: () => void;
 	revalidate: () => void;
@@ -118,7 +124,9 @@ const ValidatedTextInput = forwardRef<
 				}
 
 				// Trim white space before validation.
-				inputObject.value = inputObject.value.trim();
+				if ( ! PARSED_INPUT_TYPES.includes( inputObject.type ) ) {
+					inputObject.value = inputObject.value.trim();
+				}
 				inputObject.setCustomValidity( '' );
 
 				if (
