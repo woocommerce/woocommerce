@@ -220,6 +220,7 @@ jobs:
               --body "$pr_body" \
               --base trunk \
               --head "$branch_name" \
+              --reviewer "${{ github.actor }}" \
               --label "Release" \
               --milestone "$RELEASE_TAG"
           fi
