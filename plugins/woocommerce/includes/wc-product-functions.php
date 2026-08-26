@@ -854,6 +854,11 @@ function wc_scheduled_sales() {
 	$product_util           = wc_get_container()->get( ProductUtil::class );
 	$must_refresh_transient = false;
 
+	// Computed once: neither depends on the batch or the mode.
+	$supports_flush_group  = wp_cache_supports( 'flush_group' );
+	$flush_product_objects = $supports_flush_group;
+	$flush_shared_groups   = $supports_flush_group && ! wp_using_ext_object_cache();
+
 	/**
 	 * Apply a sale state to a list of products, priming caches in batches.
 	 *
@@ -875,11 +880,6 @@ function wc_scheduled_sales() {
 	 * @param int[]  $product_ids Products to process, in query order.
 	 * @param string $mode        'start' or 'end'.
 	 */
-	// Computed once: neither depends on the batch or the mode.
-	$supports_flush_group  = wp_cache_supports( 'flush_group' );
-	$flush_product_objects = $supports_flush_group;
-	$flush_shared_groups   = $supports_flush_group && ! wp_using_ext_object_cache();
-
 	$process_products = static function ( array $product_ids, string $mode ) use ( $product_util, $flush_product_objects, $flush_shared_groups ): void {
 		foreach ( array_chunk( $product_ids, 50 ) as $chunk ) {
 			_prime_post_caches( $chunk );
