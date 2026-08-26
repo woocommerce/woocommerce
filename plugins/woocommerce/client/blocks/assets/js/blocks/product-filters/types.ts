@@ -51,7 +51,7 @@ export type ProductFiltersContext = {
 // ----------------------------------------
 // Block props
 // ----------------------------------------
-export type OverlayMode = 'off' | 'mobile' | 'tablet' | 'always';
+export type OverlayMode = 'off' | 'mobile' | 'always';
 
 export type BlockAttributes = {
 	productId?: string;

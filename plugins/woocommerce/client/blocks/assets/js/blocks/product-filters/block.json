@@ -42,7 +42,7 @@
 		},
 		"overlayMode": {
 			"type": "string",
-			"enum": [ "off", "mobile", "tablet", "always" ]
+			"enum": [ "off", "mobile", "always" ]
 		},
 		"overlayPosition": {
 			"type": "string",

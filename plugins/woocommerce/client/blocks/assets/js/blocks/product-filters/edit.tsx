@@ -78,7 +78,6 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 			'is-overlay-opened': isOpen,
 			'is-filter-drawer-disabled': ! hasOverlay,
 			'is-mobile-overlay': overlayMode === 'mobile',
-			'is-tablet-overlay': overlayMode === 'tablet',
 			'is-overlay-right': hasOverlay && overlayPosition === 'right',
 		} ),
 		style: {
@@ -181,10 +180,6 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 						<ToggleGroupControlOption
 							value="mobile"
 							label={ __( 'Mobile', 'woocommerce' ) }
-						/>
-						<ToggleGroupControlOption
-							value="tablet"
-							label={ __( 'Tablet', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
 							value="always"

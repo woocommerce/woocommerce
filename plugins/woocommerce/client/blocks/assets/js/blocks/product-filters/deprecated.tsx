@@ -76,7 +76,7 @@ const v2 = {
 
 		return {
 			...currentAttributes,
-			overlayMode: showFilterDrawer === false ? 'off' : 'tablet',
+			overlayMode: showFilterDrawer === false ? 'off' : 'mobile',
 		};
 	},
 };
