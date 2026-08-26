@@ -37,8 +37,12 @@ async function getOrderIdFromPage( page: Page ) {
 async function addProductToOrder( page: Page, product, quantity: number ) {
 	await page.getByRole( 'button', { name: 'Add item(s)' } ).click();
 	await page.getByRole( 'button', { name: 'Add product(s)' } ).click();
-	await page.getByText( 'Search for a product…' ).click();
-	await page.locator( 'span > .select2-search__field' ).fill( product.name );
+	await page
+		.getByRole( 'combobox', { name: 'Search for a product…' } )
+		.click();
+	await page
+		.locator( 'input[role="combobox"][aria-owns^="select2-item_id-"]' )
+		.fill( product.name );
 	await page.getByRole( 'option', { name: product.name } ).first().click();
 
 	const quantityField = page

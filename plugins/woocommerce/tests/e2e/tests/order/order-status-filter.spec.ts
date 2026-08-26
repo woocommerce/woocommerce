@@ -53,7 +53,9 @@ test.describe(
 			await page.goto( 'wp-admin/admin.php?page=wc-orders' );
 			await page.getByRole( 'link', { name: /^Processing \(/ } ).click();
 
-			await expect( page ).toHaveURL( /[?&]status=wc-processing(?:&|$)/ );
+			await expect( page ).toHaveURL(
+				/[?&](?:status|post_status)=wc-processing(?:&|$)/
+			);
 			const currentProcessingLink = page.locator(
 				'li.wc-processing > a.current'
 			);

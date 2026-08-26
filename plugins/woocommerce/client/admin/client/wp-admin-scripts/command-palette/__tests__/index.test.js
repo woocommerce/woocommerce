@@ -56,7 +56,8 @@ describe( 'registerCommandWithTracking', () => {
 			callback,
 		} );
 
-		const registeredCallback = registerCommand.mock.calls[ 0 ][ 0 ].callback;
+		const registeredCallback =
+			registerCommand.mock.calls[ 0 ][ 0 ].callback;
 		registeredCallback( firstArgument, secondArgument );
 
 		expect( callback ).toHaveBeenCalledTimes( 1 );

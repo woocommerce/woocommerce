@@ -21,6 +21,7 @@ import {
 } from '../../utils/pages';
 import { logInFromMyAccount } from '../../utils/login';
 import { setGatewayEnabled } from '../../utils/payment-gateways';
+import { acceptClassicCheckoutTerms } from '../../utils/checkout';
 import { updateIfNeeded, resetValue } from '../../utils/settings';
 import {
 	assertTaxCalculationEnabled,
@@ -87,10 +88,7 @@ async function addProductToCartAndProceedToCheckout(
 
 async function placeOrder( page: Page ) {
 	if ( isClassicCheckout( page ) ) {
-		await page
-			.locator( '.woocommerce-terms-and-conditions-checkbox-text' )
-			.click();
-		await expect( page.locator( '#terms' ) ).toBeChecked();
+		await acceptClassicCheckoutTerms( page );
 	} else {
 		await page.getByLabel( 'Add a note to your order' ).check();
 		// this helps with flakiness on clicking the Place order button

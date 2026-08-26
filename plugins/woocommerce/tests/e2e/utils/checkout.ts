@@ -5,7 +5,8 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 /**
- * Accept the classic checkout terms through its backing form control.
+ * Accept the classic checkout terms through its backing form control when the
+ * checkout has terms configured. Otherwise, this is a no-op.
  *
  * Some test themes hide the native checkbox and render a separate visual
  * control. Setting the backing input keeps the submitted checkout state
@@ -15,6 +16,10 @@ import { expect } from '@playwright/test';
  */
 export const acceptClassicCheckoutTerms = async ( page: Page ) => {
 	const termsCheckbox = page.locator( '#terms' );
+	if ( ( await termsCheckbox.count() ) === 0 ) {
+		return;
+	}
+
 	await termsCheckbox.waitFor( { state: 'attached' } );
 	await termsCheckbox.evaluate( ( checkbox: HTMLInputElement ) => {
 		checkbox.checked = true;
