@@ -1535,8 +1535,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * When the order has no coupons yet, line items whose total differs from their subtotal
 	 * adopt that total as the new subtotal, so the discount is calculated from the edited
 	 * price and recalculations keep the manual adjustment. On failure the original subtotals
-	 * are restored. Only call this when the difference is known to be a manual edit;
-	 * otherwise use apply_coupon().
+	 * are restored. Call this only where a subtotal/total difference is meant to be treated
+	 * as a manual edit, such as the admin order editor; otherwise use apply_coupon().
 	 *
 	 * @since 11.2.0
 	 * @param string|WC_Coupon $raw_coupon Coupon code or object.
