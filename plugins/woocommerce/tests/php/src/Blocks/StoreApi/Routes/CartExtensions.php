@@ -110,36 +110,63 @@ class CartExtensions extends ControllerTestCase {
 	/**
 	 * A successful no-op cart update must not sync uncalculated shipping to a pending order.
 	 *
+	 * @dataProvider needs_shipping_filter_provider
 	 * @see https://github.com/woocommerce/woocommerce/issues/68007
+	 *
+	 * @param bool $filter_needs_shipping Whether to filter the cart to not need shipping.
 	 */
-	public function test_successful_no_op_cart_update_does_not_remove_shipping_from_pending_order() {
+	public function test_successful_no_op_cart_update_does_not_remove_shipping_from_pending_order( $filter_needs_shipping ) {
 		$fixtures = new FixtureData();
 		$fixtures->shipping_add_flat_rate();
 
 		$order = $this->create_pending_order_with_shipping();
 		$this->reset_shipping_calculation();
 
-		$this->assertTrue( wc()->cart->needs_shipping() );
-		$this->assertFalse( wc()->cart->has_calculated_shipping() );
-		$this->assertNull( wc()->cart->get_shipping_methods() );
-		$this->assertSame( array(), wc()->shipping()->get_packages() );
+		$needs_shipping_filter = static function () {
+			return false;
+		};
 
-		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-item' );
-		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
-		$request->set_body_params(
-			array(
-				'key' => array_key_first( wc()->cart->get_cart() ),
-			)
-		);
+		if ( $filter_needs_shipping ) {
+			add_filter( 'woocommerce_cart_needs_shipping', $needs_shipping_filter, 999 );
+		}
 
-		$response = rest_get_server()->dispatch( $request );
-		$this->assertSame( 200, $response->get_status() );
-		$this->assertFalse( wc()->cart->has_calculated_shipping() );
-		$this->assertSame( array(), wc()->shipping()->get_packages() );
+		try {
+			$this->assertSame( ! $filter_needs_shipping, wc()->cart->needs_shipping() );
+			$this->assertFalse( wc()->cart->has_calculated_shipping() );
+			$this->assertNull( wc()->cart->get_shipping_methods() );
+			$this->assertSame( array(), wc()->shipping()->get_packages() );
+
+			$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-item' );
+			$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+			$request->set_body_params(
+				array(
+					'key' => array_key_first( wc()->cart->get_cart() ),
+				)
+			);
+
+			$response = rest_get_server()->dispatch( $request );
+			$this->assertSame( 200, $response->get_status() );
+			$this->assertFalse( wc()->cart->has_calculated_shipping() );
+			$this->assertSame( array(), wc()->shipping()->get_packages() );
+		} finally {
+			remove_filter( 'woocommerce_cart_needs_shipping', $needs_shipping_filter, 999 );
+		}
 
 		$reloaded_order = wc_get_order( $order->get_id() );
 		$this->assertSame( 'hash-from-calculated-shipping', $reloaded_order->get_meta( '_shipping_hash' ) );
 		$this->assertPendingOrderRetainsShipping( $order );
+	}
+
+	/**
+	 * Data provider for carts whose shipping requirement may be filtered.
+	 *
+	 * @return array
+	 */
+	public function needs_shipping_filter_provider() {
+		return array(
+			'cart needs shipping'          => array( false ),
+			'needs shipping filtered false' => array( true ),
+		);
 	}
 
 	/**
@@ -177,6 +204,11 @@ class CartExtensions extends ControllerTestCase {
 		$shipping_methods = new \ReflectionProperty( \WC_Cart::class, 'shipping_methods' );
 		$shipping_methods->setAccessible( true );
 		$shipping_methods->setValue( wc()->cart, null );
+
+		$has_calculated_shipping = new \ReflectionProperty( \WC_Cart::class, 'has_calculated_shipping' );
+		$has_calculated_shipping->setAccessible( true );
+		$has_calculated_shipping->setValue( wc()->cart, false );
+
 		wc()->shipping()->reset_shipping();
 	}
 

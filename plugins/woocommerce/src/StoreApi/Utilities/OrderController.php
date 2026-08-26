@@ -839,10 +839,9 @@ class OrderController {
 			wc()->checkout->create_order_line_items( $order, $cart );
 		}
 
-		if (
-			( ! $cart->needs_shipping() || $cart->has_calculated_shipping() )
-			&& $order->get_meta( '_shipping_hash' ) !== $cart_hashes['shipping']
-		) {
+		$shipping_evaluated = $cart->has_calculated_shipping() || ( ! $cart->needs_shipping() && null !== $cart->get_shipping_methods() );
+
+		if ( $shipping_evaluated && $order->get_meta( '_shipping_hash' ) !== $cart_hashes['shipping'] ) {
 			$order->remove_order_items( OrderItemType::SHIPPING );
 			wc()->checkout->create_order_shipping_lines( $order, wc()->session->get( 'chosen_shipping_methods' ), wc()->shipping()->get_packages() );
 			$order->update_meta_data( '_shipping_hash', $cart_hashes['shipping'] );
