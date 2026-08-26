@@ -276,7 +276,9 @@ jobs:
     name: '${{ matrix.name }}'
     # While the CI_QUEUE_OVERFLOW repository variable is '1', e2e jobs route to the
     # dedicated group. Fork PRs are excluded.
-    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || ( vars.CI_QUEUE_OVERFLOW == '1' && matrix.testType == 'e2e' && ( github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository ) ) && fromJSON('{"group":"Woo Core Dedicated CI"}') || 'ubuntu-latest' }}
+    # Split-pool experiment: browser-heavy job types run on arm64 (faster per job), the
+    # rest stay on x64, so one PR draws from two runner pools and queues less on each.
+    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || ( vars.CI_QUEUE_OVERFLOW == '1' && matrix.testType == 'e2e' && ( github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository ) ) && fromJSON('{"group":"Woo Core Dedicated CI"}') || ( ( matrix.testType == 'e2e' || matrix.testType == 'performance' ) && 'ubuntu-24.04-arm' ) || 'ubuntu-latest' }}
     timeout-minutes: 35
     needs: [ 'identify-jobs-to-run', 'project-jobs', 'woocommerce-plugin-build-artifact' ]
     if: ${{ !cancelled() && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' ) && needs.project-jobs.outputs.test-jobs != '[]' && ( needs.woocommerce-plugin-build-artifact.result == 'success' || needs.woocommerce-plugin-build-artifact.result == 'skipped' || needs.project-jobs.outputs.shared-plugin-build-has-required-consumers != 'true' ) }}
