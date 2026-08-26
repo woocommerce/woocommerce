@@ -78,29 +78,24 @@
 
 	&:not(.is-active) input[type="date"] {
 		// Hide browser default mask (dd/mm/YYYY) when a date field is not active (no value, not focused).
-		color: transparent;
-		// Hidden instantly, so nothing is still on its way out when the label drops back over it.
-		transition: none;
+		// text-indent rather than a transparent color, because Firefox paints its calendar icon with currentColor.
+		text-indent: -9999px;
+
 		&::-webkit-datetime-edit {
 			// Focusing the input would cause browsers to highlight the dd before it's done animating, so we hide it as well.
 			opacity: 0;
+			// Hidden instantly, so nothing is still on its way out when the label drops back over it.
 			transition: none;
 		}
 	}
 
-	// We delay the animation out so that it doesn't sit behind.
-	input[type="date"] {
-		transition: color 150ms ease 150ms;
-		&::-webkit-datetime-edit {
-			transition: opacity 150ms ease 150ms;
-		}
+	// We delay the reveal so the mask doesn't sit behind the label while it floats up.
+	input[type="date"]::-webkit-datetime-edit {
+		transition: opacity 150ms ease 150ms;
 	}
 
 	@media screen and (prefers-reduced-motion: reduce) {
-		input[type="date"],
-		&:not(.is-active) input[type="date"],
-		input[type="date"]::-webkit-datetime-edit,
-		&:not(.is-active) input[type="date"]::-webkit-datetime-edit {
+		input[type="date"]::-webkit-datetime-edit {
 			transition: none;
 		}
 	}
@@ -122,16 +117,70 @@
 		}
 	}
 
-	// Reposition the date input calendar input so that it sits
-	// vertically centered to the div, not the input.
+	// The native webkit indicator is hidden but kept in place as the click target that opens the picker.
+	// The visible icon is our own (.wc-block-components-text-input__date-icon), identical in every browser.
 	input[type="date"]::-webkit-calendar-picker-indicator {
 		position: absolute;
-		top: 50%;
+		top: 25px;
 		inset-inline-end: $gap-small;
 		transform: translateY(-50%);
+		width: 24px;
+		height: 24px;
 		margin: 0;
 		padding: 0;
+		opacity: 0;
 		cursor: pointer;
+	}
+
+	// Firefox paints its native calendar icon with currentColor and exposes no pseudo-element to hide it,
+	// so we make the color transparent (hiding the icon) and repaint the text via -webkit-text-fill-color.
+	// The focus border also uses currentColor, so it gets an explicit color instead.
+	@supports (-moz-appearance: none) {
+		input[type="date"] {
+			&,
+			&:focus {
+				color: transparent;
+				-webkit-text-fill-color: $input-text-light;
+			}
+
+			&:focus {
+				border-color: $input-text-light;
+			}
+
+			.has-dark-controls & {
+				&,
+				&:focus {
+					color: transparent;
+					-webkit-text-fill-color: $input-text-dark;
+				}
+
+				&:focus {
+					border-color: $input-text-dark;
+				}
+			}
+		}
+	}
+
+	// Our own calendar icon for date fields. Purely decorative: clicks pass through to the native picker
+	// click target underneath (the invisible webkit indicator, or Firefox's hidden native button).
+	.wc-block-components-text-input__date-icon {
+		position: absolute;
+		top: 25px;
+		inset-inline-end: $gap-small;
+		transform: translateY(-50%);
+		width: 24px;
+		height: 24px;
+		pointer-events: none;
+		color: $input-text-light;
+
+		svg {
+			display: block;
+			fill: currentColor;
+		}
+
+		.has-dark-controls & {
+			color: $input-text-dark;
+		}
 	}
 
 	input[type="number"] {
