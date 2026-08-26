@@ -130,7 +130,7 @@ class Endpoint {
 				$needs_save = true;
 			}
 			if ( $needs_save ) {
-				update_option( 'woocommerce_review_order_flush_rewrite_pending', 'yes' );
+				$this->queue_pending_rewrite_flush();
 			}
 			return;
 		}
@@ -146,7 +146,7 @@ class Endpoint {
 						'post_status' => 'publish',
 					)
 				);
-				update_option( 'woocommerce_review_order_flush_rewrite_pending', 'yes' );
+				$this->queue_pending_rewrite_flush();
 			}
 			return;
 		}
@@ -169,7 +169,7 @@ class Endpoint {
 		}
 
 		// Defer the rewrite flush to wp_loaded; rewrite_rule fires later on init.
-		update_option( 'woocommerce_review_order_flush_rewrite_pending', 'yes' );
+		$this->queue_pending_rewrite_flush();
 	}
 
 	/**
@@ -405,14 +405,34 @@ class Endpoint {
 	 * flush by setting `woocommerce_review_order_flush_rewrite_pending`;
 	 * `add_rewrite_rule()` doesn't fire until `init` priority 10, so the
 	 * flush has to happen later. `wp_loaded` runs after every `init`
-	 * callback, which is the earliest safe moment.
+	 * callback, which is the earliest safe moment. Installing requests leave
+	 * the endpoint-specific queue intact for the next normal request, when the
+	 * complete rewrite graph is available.
 	 */
 	public function maybe_flush_pending_rewrite(): void {
-		if ( 'yes' !== get_option( 'woocommerce_review_order_flush_rewrite_pending' ) ) {
+		if ( wp_installing() || 'yes' !== get_option( 'woocommerce_review_order_flush_rewrite_pending' ) ) {
 			return;
 		}
+
 		flush_rewrite_rules( false );
 		delete_option( 'woocommerce_review_order_flush_rewrite_pending' );
+	}
+
+	/**
+	 * Queue the endpoint-specific soft flush for `maybe_flush_pending_rewrite()`.
+	 *
+	 * While WordPress is installing, `update_option()` writes the row but skips every
+	 * cache update, so a persistent object cache keeps serving the previous value and
+	 * the next request never sees the queued flush. Evict both places the option can
+	 * be cached, mirroring `WC_Post_Types::flush_rewrite_rules()`.
+	 */
+	private function queue_pending_rewrite_flush(): void {
+		update_option( 'woocommerce_review_order_flush_rewrite_pending', 'yes' );
+
+		if ( wp_installing() ) {
+			wp_cache_delete( 'woocommerce_review_order_flush_rewrite_pending', 'options' );
+			wp_cache_delete( 'alloptions', 'options' );
+		}
 	}
 
 	/**

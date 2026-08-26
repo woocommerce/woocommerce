@@ -727,6 +727,111 @@ class EndpointTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Installing-mode requests defer the rewrite flush until the next normal request registers the endpoint.
+	 * @dataProvider provide_pending_rewrite_option_autoload_cases
+	 *
+	 * @param bool $autoload Whether the pending option is autoloaded.
+	 */
+	public function test_pending_rewrite_flush_is_deferred_during_installing_mode( bool $autoload ): void {
+		global $wp_actions, $wp_rewrite;
+
+		$this->reset_review_order_pages();
+		$page_id = (int) wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'draft',
+				'post_title'   => 'Review your order',
+				'post_name'    => 'review-order',
+				'post_content' => '<!-- wp:shortcode -->[woocommerce_review_order]<!-- /wp:shortcode -->',
+			)
+		);
+		update_option( 'woocommerce_review_order_page_id', $page_id );
+
+		$original_installing = wp_installing();
+		$original_pending    = get_option( 'woocommerce_review_order_flush_rewrite_pending', null );
+		$original_queue      = get_option( 'woocommerce_queue_flush_rewrite_rules', null );
+		$original_rules      = get_option( 'rewrite_rules', null );
+		$original_extra      = $wp_rewrite->extra_rules_top;
+		$original_generated  = $wp_rewrite->rules;
+		$original_permalink  = $wp_rewrite->permalink_structure;
+		$original_wp_loaded  = $wp_actions['wp_loaded'] ?? null;
+
+		$original_alloptions = wp_load_alloptions();
+
+		delete_option( 'woocommerce_review_order_flush_rewrite_pending' );
+		add_option( 'woocommerce_review_order_flush_rewrite_pending', 'no', '', $autoload );
+		$this->assertSame( 'no', get_option( 'woocommerce_review_order_flush_rewrite_pending' ), 'Prime the option cache before the install-mode write.' );
+		update_option( 'woocommerce_queue_flush_rewrite_rules', 'no' );
+		update_option( 'rewrite_rules', array() );
+		$wp_rewrite->set_permalink_structure( '/%postname%/' );
+		$wp_rewrite->extra_rules_top = array();
+		add_filter( 'flush_rewrite_rules_hard', '__return_false' );
+		$wp_actions['wp_loaded'] = 1; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulate wp_loaded so WP_Rewrite::flush_rules() would write rules if the install guard did not return early.
+		wp_installing( true );
+
+		try {
+			// Republishing the draft host page queues the flush through the install-mode write path.
+			$this->endpoint->maybe_create_host_page();
+			$this->endpoint->maybe_flush_pending_rewrite();
+
+			$this->assertSame( array(), (array) get_option( 'rewrite_rules' ), 'Installing mode should not persist rewrite rules.' );
+			$this->assertSame( 'no', get_option( 'woocommerce_queue_flush_rewrite_rules' ), 'A soft endpoint flush should not use the shared hard-flush queue.' );
+
+			wp_installing( false );
+			$this->assertSame( 'yes', get_option( 'woocommerce_review_order_flush_rewrite_pending' ), 'The next normal request should see the queued flush through the option cache.' );
+			$this->endpoint->add_rewrite_rule();
+			$this->endpoint->maybe_flush_pending_rewrite();
+
+			$review_order_rules = array_filter(
+				(array) get_option( 'rewrite_rules' ),
+				static function ( $query ): bool {
+					return str_contains( $query, Endpoint::QUERY_VAR . '=' );
+				}
+			);
+
+			$this->assertNotEmpty( $review_order_rules, 'The next normal request should persist the endpoint registered on init.' );
+			$this->assertFalse( get_option( 'woocommerce_review_order_flush_rewrite_pending', false ), 'The normal request should consume the endpoint trigger.' );
+		} finally {
+			wp_installing( false );
+			remove_action( 'wp_loaded', array( $wp_rewrite, 'flush_rules' ) );
+			remove_filter( 'flush_rewrite_rules_hard', '__return_false' );
+			delete_option( 'woocommerce_review_order_flush_rewrite_pending' );
+			delete_option( 'woocommerce_queue_flush_rewrite_rules' );
+			delete_option( 'rewrite_rules' );
+			if ( null !== $original_pending ) {
+				add_option( 'woocommerce_review_order_flush_rewrite_pending', $original_pending, '', array_key_exists( 'woocommerce_review_order_flush_rewrite_pending', $original_alloptions ) );
+			}
+			if ( null !== $original_queue ) {
+				add_option( 'woocommerce_queue_flush_rewrite_rules', $original_queue, '', array_key_exists( 'woocommerce_queue_flush_rewrite_rules', $original_alloptions ) );
+			}
+			if ( null !== $original_rules ) {
+				add_option( 'rewrite_rules', $original_rules, '', array_key_exists( 'rewrite_rules', $original_alloptions ) );
+			}
+			$wp_rewrite->set_permalink_structure( $original_permalink );
+			$wp_rewrite->extra_rules_top = $original_extra;
+			$wp_rewrite->rules           = $original_generated;
+			if ( null === $original_wp_loaded ) {
+				unset( $wp_actions['wp_loaded'] );
+			} else {
+				$wp_actions['wp_loaded'] = $original_wp_loaded; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the original action count.
+			}
+			wp_installing( $original_installing );
+		}
+	}
+
+	/**
+	 * Pending rewrite option cache locations.
+	 *
+	 * @return array<string, array{bool}>
+	 */
+	public function provide_pending_rewrite_option_autoload_cases(): array {
+		return array(
+			'autoloaded in alloptions' => array( true ),
+			'cached by option name'    => array( false ),
+		);
+	}
+
+	/**
 	 * @testdox maybe_create_host_page() republishes a draft host page and queues a rewrite flush.
 	 */
 	public function test_maybe_create_host_page_republishes_draft_host_page(): void {
