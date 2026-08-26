@@ -48,6 +48,9 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		$this->cleanup_transients();
 
+		wp_cache_delete( 'plugins', 'plugins' );
+		remove_all_filters( 'update_woo_com_subscription_details' );
+
 		parent::tearDown();
 	}
 
@@ -572,6 +575,99 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		$this->assertTrue(
 			$this->call_should_use_cached_update_data( $data, $hash ),
 			'Should accept valid data with extra keys'
+		);
+	}
+
+	/**
+	 * @testdox A forced auto-update flag reaches the plugin update item only when the package can be installed.
+	 * @testWith [true, "https://woocommerce.com/package.zip", true]
+	 *           [true, "", false]
+	 *           [true, "woocommerce-com-expired-123", false]
+	 *           [false, "https://woocommerce.com/package.zip", false]
+	 *
+	 * @param bool   $forced   Whether the update-check response flags the product for a forced auto-update.
+	 * @param string $package  Package the update_woo_com_subscription_details filter supplies, as Woo Update Manager does.
+	 * @param bool   $expected Whether the update item should carry the autoupdate flag.
+	 */
+	public function test_transient_update_plugins_forced_autoupdate( bool $forced, string $package, bool $expected ): void {
+		$filename = $this->mock_local_woo_plugin();
+		$this->mock_update_check_products( 123, $forced );
+		$this->mock_update_package( $package );
+
+		add_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ), 10, 3 );
+		$transient = WC_Helper_Updater::transient_update_plugins(
+			(object) array(
+				'response'  => array(),
+				'no_update' => array(),
+			)
+		);
+		remove_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ) );
+
+		$item = (array) $transient->response[ $filename ];
+
+		$this->assertSame( $expected, ! empty( $item['autoupdate'] ), 'The plugin update item carries the wrong forced auto-update state' );
+	}
+
+	/**
+	 * Makes WC_Helper::get_local_woo_plugins() report a single Woo plugin, without touching the filesystem.
+	 *
+	 * @return string The plugin file name.
+	 */
+	private function mock_local_woo_plugin(): string {
+		$filename = 'woo-test-plugin/woo-test-plugin.php';
+
+		wp_cache_set(
+			'plugins',
+			array(
+				'' => array(
+					$filename => array(
+						'Name'    => 'Woo Test Plugin',
+						'Version' => '1.0.0',
+						'Woo'     => '123:abc123',
+					),
+				),
+			),
+			'plugins'
+		);
+
+		return $filename;
+	}
+
+	/**
+	 * Sets the products the mocked update-check response returns.
+	 *
+	 * @param int  $product_id The Woo product id to return an update for.
+	 * @param bool $forced     Whether the product is flagged for a forced auto-update.
+	 */
+	private function mock_update_check_products( int $product_id, bool $forced ): void {
+		$product = array(
+			'version'        => '2.0.0',
+			'url'            => 'https://woocommerce.com/products/test',
+			'package'        => '',
+			'slug'           => 'test-plugin',
+			'upgrade_notice' => '',
+		);
+
+		if ( $forced ) {
+			$product['autoupdate'] = true;
+		}
+
+		$this->mocked_updates = array( $product_id => $product );
+	}
+
+	/**
+	 * Sets the package on the update item, the way the Woo Update Manager plugin does.
+	 *
+	 * @param string $package The package to set.
+	 */
+	private function mock_update_package( string $package ): void {
+		add_filter(
+			'update_woo_com_subscription_details',
+			function ( $item ) use ( $package ) {
+				$item['package'] = $package;
+
+				return $item;
+			}
 		);
 	}
 
