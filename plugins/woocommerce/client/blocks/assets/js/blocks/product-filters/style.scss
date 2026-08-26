@@ -35,8 +35,8 @@
 		inset: 0;
 		pointer-events: none;
 		top: var(--top-padding);
+		z-index: 9999;
 		background-color: transparent;
-		transition: background-color 500ms;
 	}
 
 	.wc-block-product-filters__overlay-wrapper {
@@ -50,8 +50,9 @@
 		/*rtl:ignore*/
 		inset: 0 auto 0 0;
 		--wc-product-filters-closed-translate-x: -100%;
+		width: min(100%, 480px);
 		transform: translateX(var(--wc-product-filters-closed-translate-x));
-		transition: none;
+		transition: transform 500ms;
 		background-color: var(
 			--wc-product-filters-overlay-background-color,
 			var(--wc-product-filters-background-color, Canvas)
@@ -108,15 +109,12 @@
 
 	&.is-overlay-opened {
 		.wc-block-product-filters__overlay {
-			z-index: 9999;
 			pointer-events: auto;
 			background-color: rgba(95, 95, 95, 0.35);
 		}
 
 		.wc-block-product-filters__overlay-dialog {
-			width: min(100%, 480px);
 			transform: translateX(0);
-			transition: transform 500ms;
 		}
 
 		.wc-block-product-filters__overlay-content .wp-block-group {

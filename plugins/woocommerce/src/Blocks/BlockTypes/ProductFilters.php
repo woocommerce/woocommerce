@@ -106,9 +106,9 @@ class ProductFilters extends AbstractBlock {
 		position: relative;
 		pointer-events: auto;
 		inset: 0;
+		z-index: auto;
 		background: inherit;
 		color: inherit;
-		transition: none;
 		flex-grow: 1;
 	}
 
@@ -121,7 +121,9 @@ class ProductFilters extends AbstractBlock {
 
 	:where(.wc-block-product-filters).is-mobile-overlay .wc-block-product-filters__overlay-dialog {
 		position: relative;
+		width: auto;
 		transform: none;
+		transition: none;
 		background: inherit;
 		color: inherit;
 	}
