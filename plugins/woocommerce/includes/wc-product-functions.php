@@ -1729,14 +1729,226 @@ function wc_get_price_to_display( $product, $args = array() ) {
 /**
  * Returns the product categories in a list.
  *
+ * @since 11.2.0 Added the `$orderby` argument.
+ *
  * @param int    $product_id Product ID.
  * @param string $sep (default: ', ').
  * @param string $before (default: '').
  * @param string $after (default: '').
- * @return string
+ * @param string $orderby Optional ordering mode. Accepts 'name' to naturally order assigned terms by name,
+ *                        ignoring the category order termmeta that the default path honors, or 'breadcrumb'
+ *                        to order assigned terms by ancestry path, comparing category order, natural name,
+ *                        and term ID at each level of the rendered hierarchy. Any other value preserves
+ *                        WordPress term-list order; a non-empty unsupported value also triggers a
+ *                        `_doing_it_wrong()` notice. Default empty string.
+ * @return string|false|WP_Error
  */
-function wc_get_product_category_list( $product_id, $sep = ', ', $before = '', $after = '' ) {
-	return get_the_term_list( $product_id, 'product_cat', $before, $sep, $after );
+function wc_get_product_category_list( $product_id, $sep = ', ', $before = '', $after = '', $orderby = '' ) {
+	if ( ! in_array( $orderby, array( 'name', 'breadcrumb' ), true ) ) {
+		if ( '' !== $orderby ) {
+			wc_doing_it_wrong(
+				__FUNCTION__,
+				sprintf(
+					/* translators: 1: the unsupported ordering mode that was passed. */
+					__( 'Unsupported $orderby value "%1$s". Use "name", "breadcrumb", or an empty string for WordPress term-list order.', 'woocommerce' ),
+					is_scalar( $orderby ) ? (string) $orderby : gettype( $orderby )
+				),
+				'11.2.0'
+			);
+		}
+
+		return get_the_term_list( $product_id, 'product_cat', $before, $sep, $after );
+	}
+
+	$terms = get_the_terms( $product_id, 'product_cat' );
+
+	if ( is_wp_error( $terms ) ) {
+		return $terms;
+	}
+
+	if ( empty( $terms ) || ! is_array( $terms ) ) {
+		return false;
+	}
+
+	$terms       = array_values( $terms );
+	$should_sort = 1 < count( $terms );
+
+	if ( 'name' === $orderby && $should_sort ) {
+		usort(
+			$terms,
+			function ( $a, $b ) {
+				$name_comparison = strnatcasecmp( (string) $a->name, (string) $b->name );
+
+				return 0 !== $name_comparison ? $name_comparison : $a->term_id <=> $b->term_id;
+			}
+		);
+	} elseif ( 'breadcrumb' === $orderby && $should_sort ) {
+		$rendered_terms = array();
+
+		foreach ( $terms as $term ) {
+			$rendered_terms[ (int) $term->term_id ] = $term;
+		}
+
+		/*
+		 * Resolve ancestors one batched query per hierarchy level rather than one query per
+		 * ancestor. The batch is a cache prime, not the ordering data: get_ancestors() below reads
+		 * it, and so does get_term_link() further down, because product_cat is registered with a
+		 * hierarchical rewrite and therefore resolves each category's ancestry to build its
+		 * permalink. Priming here makes the deep leaf-only case cheaper than not ordering at all.
+		 */
+		$known_ids = array_fill_keys( array_keys( $rendered_terms ), true );
+		$frontier  = array();
+
+		foreach ( $terms as $term ) {
+			if ( $term->parent ) {
+				$frontier[ (int) $term->parent ] = true;
+			}
+		}
+
+		// Ancestry is filterable, so bound the walk rather than trusting it to terminate.
+		$remaining_levels = 100;
+
+		while ( $frontier && $remaining_levels-- > 0 ) {
+			$frontier_ids = array_values( array_diff( array_keys( $frontier ), array_keys( $known_ids ) ) );
+
+			if ( ! $frontier_ids ) {
+				break;
+			}
+
+			$frontier_parents = get_terms(
+				array(
+					'taxonomy'               => 'product_cat',
+					'include'                => $frontier_ids,
+					'hide_empty'             => false,
+					'fields'                 => 'id=>parent',
+					'orderby'                => 'include',
+					'update_term_meta_cache' => false,
+				)
+			);
+
+			/*
+			 * A filtered get_terms() can return any shape. Failing to prime is harmless; the
+			 * get_ancestors() calls below just query for themselves.
+			 */
+			if ( is_wp_error( $frontier_parents ) || ! is_array( $frontier_parents ) ) {
+				break;
+			}
+
+			$frontier = array();
+
+			foreach ( $frontier_parents as $term_id => $parent_id ) {
+				if ( ! is_numeric( $term_id ) || ! is_numeric( $parent_id ) ) {
+					continue;
+				}
+
+				$known_ids[ (int) $term_id ] = true;
+
+				if ( (int) $parent_id ) {
+					$frontier[ (int) $parent_id ] = true;
+				}
+			}
+		}
+
+		update_termmeta_cache( array_keys( $rendered_terms ) );
+
+		$term_orders = array();
+		$term_paths  = array();
+
+		foreach ( $terms as $term ) {
+			$term_id    = (int) $term->term_id;
+			$term_order = get_term_meta( $term_id, 'order', true );
+
+			$term_orders[ $term_id ] = is_numeric( $term_order ) ? (int) $term_order : 0;
+
+			$ancestor_ids = array_filter( (array) get_ancestors( $term_id, 'product_cat', 'taxonomy' ), 'is_numeric' );
+			$ancestor_ids = array_map( 'intval', $ancestor_ids );
+			// Cyclic ancestry can list the term itself among its own ancestors.
+			$ancestor_ids = array_diff( array_unique( $ancestor_ids ), array( $term_id ) );
+
+			$path   = array_reverse( array_values( $ancestor_ids ) );
+			$path[] = $term_id;
+
+			/*
+			 * Rank on rendered terms only. Ancestors establish which term sits under which, but a
+			 * category that is not in the output never contributes a sort key of its own, so the
+			 * reason for the rendered order is always visible on the page.
+			 */
+			$term_paths[ $term_id ] = array_values(
+				array_filter(
+					$path,
+					static function ( $step ) use ( $rendered_terms ) {
+						return isset( $rendered_terms[ $step ] );
+					}
+				)
+			);
+		}
+
+		usort(
+			$terms,
+			static function ( $a, $b ) use ( $rendered_terms, $term_orders, $term_paths ) {
+				$a_path       = $term_paths[ (int) $a->term_id ];
+				$b_path       = $term_paths[ (int) $b->term_id ];
+				$shared_depth = min( count( $a_path ), count( $b_path ) );
+
+				for ( $index = 0; $index < $shared_depth; $index++ ) {
+					$a_term_id = $a_path[ $index ];
+					$b_term_id = $b_path[ $index ];
+
+					if ( $a_term_id === $b_term_id ) {
+						continue;
+					}
+
+					if ( $term_orders[ $a_term_id ] !== $term_orders[ $b_term_id ] ) {
+						return $term_orders[ $a_term_id ] <=> $term_orders[ $b_term_id ];
+					}
+
+					$path_comparison = strnatcasecmp(
+						(string) $rendered_terms[ $a_term_id ]->name,
+						(string) $rendered_terms[ $b_term_id ]->name
+					);
+
+					return 0 !== $path_comparison ? $path_comparison : $a_term_id <=> $b_term_id;
+				}
+
+				return count( $a_path ) <=> count( $b_path );
+			}
+		);
+	}
+
+	$links = array();
+
+	foreach ( $terms as $term ) {
+		$link = get_term_link( $term, 'product_cat' );
+
+		if ( is_wp_error( $link ) ) {
+			return $link;
+		}
+
+		$links[] = '<a href="' . esc_url( $link ) . '" rel="tag">' . $term->name . '</a>';
+	}
+
+	/*
+	 * Fire core's own term_links-{$taxonomy} hook, so that ordered output stays filterable by exactly
+	 * what already filters get_the_term_list().
+	 */
+	/** This filter is documented in wp-includes/category-template.php */
+	$term_links = apply_filters( 'term_links-product_cat', $links ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores, WooCommerce.Commenting.CommentHooks.MissingSinceComment
+
+	/*
+	 * Validate what the filter handed back. Core's own path does not, and passing a non-array to
+	 * implode() there raises a TypeError. Returning false keeps this path within the documented
+	 * string|false|WP_Error contract instead; core's behaviour is deliberately left alone, since
+	 * changing it would be a separate compatibility decision.
+	 */
+	if ( is_wp_error( $term_links ) ) {
+		return $term_links;
+	}
+
+	if ( ! is_array( $term_links ) ) {
+		return false;
+	}
+
+	return $before . implode( $sep, $term_links ) . $after;
 }
 
 /**

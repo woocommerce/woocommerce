@@ -23,6 +23,7 @@ Consult the `woocommerce-backend-dev` skill for detailed standards. Using these 
 
 - ❌ **camelCase naming** - Must use snake_case for methods/variables/hooks ([code-entities.md](../woocommerce-backend-dev/code-entities.md))
 - ❌ **Yoda condition violations** - Must follow WordPress Coding Standards ([coding-conventions.md](../woocommerce-backend-dev/coding-conventions.md))
+- ❌ **Magic strings with an existing enum constant** - New code comparing or assigning enumerated values (order statuses, product types, ...) must use the `Automattic\WooCommerce\Enums` constants, not raw literals — except in code that can run during install/upgrade ([coding-conventions.md](../woocommerce-backend-dev/coding-conventions.md))
 
 **Documentation:**
 
