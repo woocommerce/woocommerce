@@ -132,7 +132,7 @@ const serialRunSpecs = [
 	// parallel one.)
 	'**/tests/analytics/analytics-settings.spec.ts',
 	// Every spec sets the global `woocommerce_customer_stock_notifications_*`
-	// options in beforeEach (allow_signups / double_opt_in / require_account) and
+	// options in beforeAll (allow_signups / double_opt_in / require_account) and
 	// deletes them in afterAll. Run in parallel the files demand conflicting global
 	// config and race on those options: concurrent identical writes make
 	// `update_option` return false (`e2e-options/update` 400 "Update option FAILED"),

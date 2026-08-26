@@ -53,12 +53,11 @@ test.describe(
 			// StockSyncController schedules an AS job; drain it synchronously.
 			await triggerStockNotificationsBatch( page );
 
-			const emailRow = await expectEmail(
+			await expectEmail(
 				page,
 				email,
 				bisEmailSubject.backInStock( product.name )
 			);
-			await emailRow.getByRole( 'button', { name: 'View log' } ).click();
 
 			const productLink = await getEmailLinkById(
 				page,
