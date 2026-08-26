@@ -274,7 +274,11 @@ class WC_Admin_Permalink_Settings {
 					}
 				});
 				jQuery('.permalink-structure input:checked').trigger( 'change' );
-				jQuery('#woocommerce_permalink_structure').on( 'focus', function(){
+				// Selecting Custom base takes a click or a typed character, the pair core binds to
+				// its own structure field. Focus alone must not: the radios share one tab stop, so
+				// tabbing forward lands here, and flipping on focus would move the checked radio
+				// off the structure the store actually uses.
+				jQuery('#woocommerce_permalink_structure').on( 'click input', function(){
 					jQuery('#woocommerce_custom_selection').trigger( 'click' );
 				} );
 			} );

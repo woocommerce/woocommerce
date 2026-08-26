@@ -126,15 +126,29 @@ test.describe( 'Product permalink settings', () => {
 			await expect( defaultRadio ).toHaveValue( '' );
 			await expect( customBase ).toHaveValue( expectedDefaultBase );
 
-			// A single Tab from the checked radio lands on the Custom base field — the radios
-			// share one tab stop — and focusing the field selects Custom base. Saving from there
-			// posts the prefilled Default structure through the custom branch, which the save
-			// path normalizes back to Default's bare slug: the slash-prefixed form it would
-			// otherwise store builds broken rewrite rules under index.php (PATHINFO) permalinks.
+			// A single Tab from the checked radio lands on the Custom base field, because the
+			// radios share one tab stop. Focus alone must leave the checked radio where it is:
+			// flipping it there would move a keyboard user off the structure the store uses,
+			// undoing what this screen was fixed to report.
+			const customSelection = page.locator(
+				'#woocommerce_custom_selection'
+			);
+
 			await customBase.focus();
-			await expect(
-				page.locator( '#woocommerce_custom_selection' )
-			).toBeChecked();
+
+			await expect( defaultRadio ).toBeChecked();
+			await expect( customSelection ).not.toBeChecked();
+			await expect( customBase ).toHaveValue( expectedDefaultBase );
+
+			// A real click does select Custom base, and leaves the prefilled Default structure in
+			// the field. Saving from there posts that structure through the custom branch, which
+			// the save path normalizes back to Default's bare slug: the slash-prefixed form it
+			// would otherwise store builds broken rewrite rules under index.php (PATHINFO)
+			// permalinks.
+			await customBase.click();
+
+			await expect( customSelection ).toBeChecked();
+			await expect( customBase ).toHaveValue( expectedDefaultBase );
 
 			await saveAndReload();
 
