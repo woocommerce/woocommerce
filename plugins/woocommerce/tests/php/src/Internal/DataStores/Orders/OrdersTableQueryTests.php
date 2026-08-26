@@ -1844,4 +1844,77 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 			'An unsupported operator must not throw on an unusable value it never reaches.'
 		);
 	}
+
+	/**
+	 * Time keys that take a list of values for the set comparisons.
+	 *
+	 * @return array<string, array{0: array, 1: bool}>
+	 */
+	public function provider_array_valued_time_keys(): array {
+		// Order under test is created 2024-06-01.
+		return array(
+			'year IN'           => array( array( 'year' => array( 2024, 2025 ), 'compare' => 'IN' ), true ),
+			'year NOT IN'       => array( array( 'year' => array( 2019, 2020 ), 'compare' => 'NOT IN' ), true ),
+			'year BETWEEN'      => array( array( 'year' => array( 2023, 2025 ), 'compare' => 'BETWEEN' ), true ),
+			'year NOT BETWEEN'  => array( array( 'year' => array( 2018, 2019 ), 'compare' => 'NOT BETWEEN' ), true ),
+			'month IN'          => array( array( 'month' => array( 5, 6 ), 'compare' => 'IN' ), true ),
+			'day NOT IN'        => array( array( 'day' => array( 9, 10 ), 'compare' => 'NOT IN' ), true ),
+			'year IN, no match' => array( array( 'year' => array( 2019, 2020 ), 'compare' => 'IN' ), false ),
+		);
+	}
+
+	/**
+	 * @testDox A time key holding a list of values is not rejected as an unusable value.
+	 *
+	 * @dataProvider provider_array_valued_time_keys
+	 *
+	 * @param array $clause         The date_query clause, without its column.
+	 * @param bool  $should_match   Whether the order under test should be returned.
+	 */
+	public function test_array_valued_time_keys_are_not_rejected( array $clause, bool $should_match ): void {
+		$order = OrderHelper::create_order();
+		$order->set_date_created( '2024-06-01' );
+		$order->save();
+
+		$result = wc_get_orders(
+			array(
+				'date_query' => array( array_merge( array( 'column' => 'date_created_gmt' ), $clause ) ),
+				'return'     => 'ids',
+				'limit'      => -1,
+			)
+		);
+
+		if ( $should_match ) {
+			$this->assertContains( $order->get_id(), $result, 'A list of values for a time key must not fail the query closed.' );
+		} else {
+			$this->assertNotContains( $order->get_id(), $result, 'The clause must still restrict the query.' );
+		}
+	}
+
+	/**
+	 * @testDox An unusable element inside a time key list is still rejected.
+	 */
+	public function test_unusable_element_in_a_time_key_list_is_rejected(): void {
+		$this->setExpectedIncorrectUsage( 'wc_get_orders' );
+
+		$order = OrderHelper::create_order();
+		$order->set_date_created( '2024-06-01' );
+		$order->save();
+
+		$result = wc_get_orders(
+			array(
+				'date_query' => array(
+					array(
+						'column'  => 'date_created_gmt',
+						'year'    => array( 2024, new \stdClass() ),
+						'compare' => 'IN',
+					),
+				),
+				'return'     => 'ids',
+				'limit'      => -1,
+			)
+		);
+
+		$this->assertSame( array(), $result, 'An unusable element must still fail the query closed.' );
+	}
 }

@@ -634,9 +634,10 @@ class OrdersTableQuery {
 				continue;
 			}
 
-			// 'before' and 'after' also accept an array of date parts; the rest are single values
-			// there, so an array is as unusable as an object.
-			foreach ( is_array( $value ) && in_array( $key, array( 'before', 'after' ), true ) ? $value : array( $value ) as $part ) {
+			// Every time key accepts an array: 'before' and 'after' take date parts, and the rest
+			// take a list for the IN, NOT IN, BETWEEN and NOT BETWEEN comparisons. Validate the
+			// elements, not the array itself.
+			foreach ( is_array( $value ) ? $value : array( $value ) as $part ) {
 				if ( ! $this->is_stringable( $part ) ) {
 					throw $this->invalid_query_arg( esc_html__( 'Invalid date_query value.', 'woocommerce' ) );
 				}
