@@ -86,7 +86,8 @@ class CouponsController {
 
 		$code = wc_format_coupon_code( wp_unslash( $coupon ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
-		// In the order editor a line total differing from its subtotal is a manual price edit.
+		// A line total differing from its subtotal is treated as a manual price edit here. That is
+		// the editor's best guess: a difference recorded by REST or an extension is adopted the same way.
 		$result = $order->apply_coupon_using_edited_totals( $code );
 
 		if ( is_wp_error( $result ) ) {
