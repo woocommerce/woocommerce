@@ -332,7 +332,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Deletes items in bulk if the data store supports it, otherwise deletes them one by one.
 	 *
 	 * @param array<int> $item_ids IDs of the items to delete.
-	 * @since 11.0.2
 	 * @return void
 	 */
 	private function delete_items_by_ids( array $item_ids ): void {
@@ -361,8 +360,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Get IDs of items currently persisted for this order.
-	 *
-	 * @since 11.0.2
 	 *
 	 * @param string|null $type Item type, or null for every registered item type.
 	 * @return array<int>
