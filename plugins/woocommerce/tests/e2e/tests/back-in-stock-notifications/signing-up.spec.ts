@@ -4,7 +4,6 @@
 import { expect, request, tags } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH, CUSTOMER_STATE_PATH } from '../../playwright.config';
 import {
-	assertBISFeatureEnabled,
 	bisEmailSubject,
 	resetBISOptions,
 	setBISOptions,
@@ -18,10 +17,6 @@ test.describe(
 	'Back in Stock Notifications — signing up',
 	{ tag: [ tags.SERVICES ] },
 	() => {
-		test.beforeAll( async () => {
-			await assertBISFeatureEnabled();
-		} );
-
 		test.afterEach( async ( { baseURL } ) => {
 			await resetBISOptions( request, baseURL! );
 		} );
@@ -133,6 +128,7 @@ test.describe(
 				} );
 			} );
 
+			// eslint-disable-next-line playwright/expect-expect -- `expectEmail()` asserts on the mail log.
 			test( 'submitting signup dispatches a verification email', async ( {
 				page,
 				product,

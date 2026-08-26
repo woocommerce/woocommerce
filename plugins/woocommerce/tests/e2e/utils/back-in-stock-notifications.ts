@@ -231,6 +231,16 @@ export async function signUpAsGuest(
 	const guestPage = await guestContext.newPage();
 	await guestPage.goto( permalink );
 	await signUpOnProductPage( guestPage, { email } );
+
+	// The form posts and reloads the PDP with a notice. Wait for that notice
+	// before closing the context, or the submission can be aborted mid-flight
+	// and the spec fails later, looking like a missing email.
+	await expect(
+		guestPage.getByText(
+			/You have successfully signed up|Thanks for signing up/i
+		)
+	).toBeVisible();
+
 	await guestContext.close();
 }
 
@@ -250,16 +260,33 @@ export function bisAdminListUrl( productId: number ): string {
  * Shared `product` fixture for the Back in Stock Notifications specs: an
  * out-of-stock simple product created before the test and cleaned up after.
  */
-export const test = baseTest.extend< {
-	product: {
-		id: number;
-		name: string;
-		permalink: string;
-		cleanup: () => Promise< void >;
-	};
-} >( {
+export const test = baseTest.extend<
+	{
+		product: {
+			id: number;
+			name: string;
+			permalink: string;
+			cleanup: () => Promise< void >;
+		};
+	},
+	{ bisEnvReady: void }
+>( {
+	/**
+	 * Verify the env can run these specs at all, once per worker rather than
+	 * once per file — each check shells out through `wp-env run cli`.
+	 */
+	bisEnvReady: [
+		async ( {}, use ) => {
+			await assertBISFeatureEnabled();
+			await assertBISTestHelperActive();
+			await use();
+		},
+		{ scope: 'worker', auto: true },
+	],
+
 	product: async ( { restApi }, use ) => {
 		const product = await createOutOfStockProduct( restApi );
+		// eslint-disable-next-line react-hooks/rules-of-hooks -- Playwright's fixture `use`, not a React hook.
 		await use( product );
 		await product.cleanup();
 	},
@@ -299,32 +326,33 @@ function escapeRegExp( value: string ): string {
  *
  * @see src/Internal/StockNotifications/Emails/
  */
+const subjectMatcher = ( subject: string ): RegExp =>
+	new RegExp( escapeRegExp( subject ) );
+
 export const bisEmailSubject = {
 	/**
-	 * Verify email — `Join the "{product_name}" waitlist.`
+	 * Verify email.
 	 *
 	 * @param {string} productName The product name.
 	 */
 	verify: ( productName: string ): RegExp =>
-		new RegExp( `Join the "${ escapeRegExp( productName ) }" waitlist\\.` ),
+		subjectMatcher( `Join the "${ productName }" waitlist.` ),
 
 	/**
-	 * Verified email — `You have joined the "{product_name}" waitlist.`
+	 * Verified email.
 	 *
 	 * @param {string} productName The product name.
 	 */
 	verified: ( productName: string ): RegExp =>
-		new RegExp(
-			`You have joined the "${ escapeRegExp( productName ) }" waitlist\\.`
-		),
+		subjectMatcher( `You have joined the "${ productName }" waitlist.` ),
 
 	/**
-	 * Back-in-stock email — `"{product_name}" is back in stock!`
+	 * Back-in-stock email.
 	 *
 	 * @param {string} productName The product name.
 	 */
 	backInStock: ( productName: string ): RegExp =>
-		new RegExp( `"${ escapeRegExp( productName ) }" is back in stock!` ),
+		subjectMatcher( `"${ productName }" is back in stock!` ),
 } as const;
 
 /**
@@ -407,10 +435,10 @@ export async function getEmailLinkById(
 	const iframe = page.frameLocator(
 		'#wp-mail-logging-modal-content-body-content iframe'
 	);
-	const anchor = iframe.locator( `a${ anchorId }` );
+	const anchor = iframe.locator( `a${ anchorId }` ).first();
 	await anchor.waitFor( { state: 'attached' } );
 
-	const href = await anchor.first().getAttribute( 'href' );
+	const href = await anchor.getAttribute( 'href' );
 
 	if ( ! href ) {
 		throw new Error(

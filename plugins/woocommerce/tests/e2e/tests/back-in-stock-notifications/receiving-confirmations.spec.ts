@@ -4,7 +4,6 @@
 import { expect, request, tags } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import {
-	assertBISFeatureEnabled,
 	BIS_EMAIL_LINKS,
 	bisAdminListUrl,
 	bisEmailSubject,
@@ -22,10 +21,6 @@ test.describe(
 	{ tag: [ tags.SERVICES ] },
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
-
-		test.beforeAll( async () => {
-			await assertBISFeatureEnabled();
-		} );
 
 		test.beforeEach( async ( { baseURL } ) => {
 			await setBISOptions( request, baseURL!, {
