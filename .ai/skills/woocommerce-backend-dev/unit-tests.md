@@ -93,9 +93,9 @@ Choose cleanup from the test's base class; PHPUnit alone provides no database is
 | `PHPUnit\Framework\TestCase` | No WordPress transaction, hook restoration, or global cleanup |
 | Other custom base | Inspect its implementation; do not infer cleanup from PHPUnit or its name |
 
-For a `WP_UnitTestCase` descendant, do not manually delete per-test products, coupons, orders, users, options, metadata, or other rows as post-assertion cleanup when its transaction covers them. Rollback does not cover writes made before `parent::set_up()` starts the transaction, class fixtures, explicit commits or DDL, non-transactional tables, other database connections, files, external services, or process state that the selected base does not reset.
+For a `WP_UnitTestCase` descendant, do not manually delete per-test products, coupons, orders, users, options, metadata, or other rows as post-assertion cleanup when its transaction covers them. Rollback does not cover writes made before the parent setup starts the transaction, class fixtures, explicit commits or DDL, non-transactional tables, other database connections, files, external services, or process state that the selected base does not reset.
 
-- Call `parent::set_up()` before any write the rollback must cover. The parent starts the transaction at the end of its own setup, so writes made earlier in an overriding `set_up()` are committed and outlive the test.
+- Call the parent setup before any write the rollback must cover, matching the method you override: `parent::setUp()` from a camelCase override, `parent::set_up()` from a snake_case one. Both reach `WP_UnitTestCase_Base::set_up()`, which starts the transaction as its last step, so writes made earlier in the override are committed and outlive the test.
 - Create persistent class fixtures in `wpSetUpBeforeClass()` and delete them in `wpTearDownAfterClass()`.
 - Remove a hook before the test ends only when later work in that test must not run it; WordPress parent teardown restores the hook snapshot.
 - An arrangement-time reset is valid when `setUp()` or the base class preloads state. Do not repeat cleanup already performed by the base.
