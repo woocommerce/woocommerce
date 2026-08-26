@@ -89,33 +89,20 @@ class ProductFilters extends AbstractBlock {
 	 */
 	private function get_responsive_styles() {
 		$overlay_breakpoint = $this->get_overlay_breakpoint();
-		$desktop_query      = "@media (width > {$overlay_breakpoint})";
-		$mobile_selector    = ':where(.wc-block-product-filters).is-mobile-overlay';
 
-		return $this->get_inline_presentation_styles( $mobile_selector, $desktop_query );
-	}
-
-	/**
-	 * Build CSS for the inline Product Filters presentation.
-	 *
-	 * @param string $block_selector Product Filters mode selector.
-	 * @param string $media_query    Media query wrapping the styles.
-	 * @return string Responsive CSS.
-	 */
-	private function get_inline_presentation_styles( $block_selector, $media_query ) {
 		return <<<CSS
-{$media_query} {
-	{$block_selector} {
+@media (width > {$overlay_breakpoint}) {
+	:where(.wc-block-product-filters).is-mobile-overlay {
 		display: flex;
 	}
 
-	{$block_selector} .wc-block-product-filters__overlay-header,
-	{$block_selector} .wc-block-product-filters__overlay-footer,
-	{$block_selector} .wc-block-product-filters__open-overlay {
+	:where(.wc-block-product-filters).is-mobile-overlay .wc-block-product-filters__overlay-header,
+	:where(.wc-block-product-filters).is-mobile-overlay .wc-block-product-filters__overlay-footer,
+	:where(.wc-block-product-filters).is-mobile-overlay .wc-block-product-filters__open-overlay {
 		display: none;
 	}
 
-	{$block_selector} .wc-block-product-filters__overlay {
+	:where(.wc-block-product-filters).is-mobile-overlay .wc-block-product-filters__overlay {
 		position: relative;
 		pointer-events: auto;
 		inset: 0;
@@ -125,21 +112,21 @@ class ProductFilters extends AbstractBlock {
 		flex-grow: 1;
 	}
 
-	{$block_selector} .wc-block-product-filters__overlay-wrapper {
+	:where(.wc-block-product-filters).is-mobile-overlay .wc-block-product-filters__overlay-wrapper {
 		width: auto;
 		height: auto;
 		background: inherit;
 		color: inherit;
 	}
 
-	{$block_selector} .wc-block-product-filters__overlay-dialog {
+	:where(.wc-block-product-filters).is-mobile-overlay .wc-block-product-filters__overlay-dialog {
 		position: relative;
 		transform: none;
 		background: inherit;
 		color: inherit;
 	}
 
-	{$block_selector} .wc-block-product-filters__overlay-content {
+	:where(.wc-block-product-filters).is-mobile-overlay .wc-block-product-filters__overlay-content {
 		padding: 0;
 		overflow: visible;
 		flex-grow: 1;
