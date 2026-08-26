@@ -6,6 +6,11 @@
 final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 
 	/**
+	 * Timestamp of 2026-07-19 00:00:00 -04:00, in America/New_York.
+	 */
+	private const NY_JUL_19_MIDNIGHT = 1784433600;
+
+	/**
 	 * Timestamp of 2026-07-20 00:00:00 -04:00, in America/New_York.
 	 */
 	private const NY_JUL_20_MIDNIGHT = 1784520000;
@@ -50,6 +55,12 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 	 * Timestamp of 2026-03-30 00:00:00 +03:00, 23 hours after the start of 2026-03-29.
 	 */
 	private const BEIRUT_MAR_30_MIDNIGHT = 1774818000;
+
+	/**
+	 * Timestamp of 2026-07-20 02:00:00 UTC, which is 2026-07-19 22:00 in America/New_York. A query
+	 * var naming this instant with an explicit designator names 2026-07-20, the way HPOS reads it.
+	 */
+	private const UTC_JUL_20_0200 = 1784512800;
 
 	/**
 	 * The System Under Test.
@@ -129,7 +140,7 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 	 */
 	public function day_precision_meta_boundary_provider(): array {
 		return array(
-			'equals'                 => array(
+			'equals'                  => array(
 				'2026-07-20',
 				array(
 					array(
@@ -142,7 +153,7 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 					),
 				),
 			),
-			'greater than'           => array(
+			'greater than'            => array(
 				'>2026-07-20',
 				array(
 					array(
@@ -151,7 +162,7 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 					),
 				),
 			),
-			'greater than or equals' => array(
+			'greater than or equals'  => array(
 				'>=2026-07-20',
 				array(
 					array(
@@ -160,7 +171,7 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 					),
 				),
 			),
-			'less than'              => array(
+			'less than'               => array(
 				'<2026-07-20',
 				array(
 					array(
@@ -169,7 +180,7 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 					),
 				),
 			),
-			'less than or equals'    => array(
+			'less than or equals'     => array(
 				'<=2026-07-20',
 				array(
 					array(
@@ -178,7 +189,7 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 					),
 				),
 			),
-			'range'                  => array(
+			'range'                   => array(
 				'2026-07-20...2026-07-25',
 				array(
 					array(
@@ -191,7 +202,46 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 					),
 				),
 			),
-			'single-day range'       => array(
+			'explicit UTC instant'    => array(
+				'2026-07-20T02:00:00Z',
+				array(
+					array(
+						'value'   => self::NY_JUL_20_MIDNIGHT,
+						'compare' => '>=',
+					),
+					array(
+						'value'   => self::NY_JUL_21_MIDNIGHT,
+						'compare' => '<',
+					),
+				),
+			),
+			'explicit offset instant' => array(
+				'2026-07-20T02:00:00+05:00',
+				array(
+					array(
+						'value'   => self::NY_JUL_19_MIDNIGHT,
+						'compare' => '>=',
+					),
+					array(
+						'value'   => self::NY_JUL_20_MIDNIGHT,
+						'compare' => '<',
+					),
+				),
+			),
+			'naive datetime'          => array(
+				'2026-07-20 22:00:00',
+				array(
+					array(
+						'value'   => self::NY_JUL_20_MIDNIGHT,
+						'compare' => '>=',
+					),
+					array(
+						'value'   => self::NY_JUL_21_MIDNIGHT,
+						'compare' => '<',
+					),
+				),
+			),
+			'single-day range'        => array(
 				'2026-07-20...2026-07-20',
 				array(
 					array(

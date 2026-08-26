@@ -78,6 +78,7 @@ class WC_Order_Date_Query_Test extends WC_Unit_Test_Case {
 			'a range starting on the local day'    => array( '2026-07-20...2026-07-21', true ),
 			'a range starting after the local day' => array( '2026-07-21...2026-07-22', false ),
 			'a single-day range on the local day'  => array( '2026-07-20...2026-07-20', true ),
+			'an explicit UTC instant on the day'   => array( '2026-07-20T02:00:00Z', true ),
 		);
 	}
 
