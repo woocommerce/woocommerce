@@ -3793,9 +3793,6 @@ importers:
       grunt:
         specifier: 1.6.3
         version: 1.6.3
-      grunt-contrib-clean:
-        specifier: 2.0.0
-        version: 2.0.0(grunt@1.6.3)
       grunt-contrib-concat:
         specifier: 1.0.1
         version: 1.0.1(grunt@1.6.3)
@@ -3814,9 +3811,6 @@ importers:
       grunt-newer:
         specifier: 1.3.0
         version: 1.3.0(grunt@1.6.3)
-      grunt-phpcs:
-        specifier: 0.4.0
-        version: 0.4.0
       grunt-postcss:
         specifier: 0.9.0
         version: 0.9.0(grunt@1.6.3)
@@ -10753,9 +10747,6 @@ packages:
   async@1.5.2:
     resolution: {integrity: sha512-nSVgobk4rv61R9PUSDtYt7mPVB2olxNR5RWJcAsH676/ef11bUZwvu7+RGYrYauVdDPcO519v68wRhXQtxsV9w==}
 
-  async@2.6.4:
-    resolution: {integrity: sha512-mzo5dfJYwAn29PeiJ0zvwTo04zj8HDJj0Mn8TD7sno7q12prdbnasKJHhkm2c1LgrhlJ0teaea8860oxi51mGA==}
-
   async@3.1.1:
     resolution: {integrity: sha512-X5Dj8hK1pJNC2Wzo2Rcp9FBVdJMGRR/S7V+lH46s8GVFhtbo5O4Le5GECCF/8PISVdkUA6mMPvgz7qTTD1rf1g==}
 
@@ -13492,12 +13483,6 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
-  grunt-contrib-clean@2.0.0:
-    resolution: {integrity: sha512-g5ZD3ORk6gMa5ugZosLDQl3dZO7cI3R14U75hTM+dVLVxdMNJCPVmwf9OUt4v4eWgpKKWWoVK9DZc1amJp4nQw==}
-    engines: {node: '>=6'}
-    peerDependencies:
-      grunt: '>=0.4.5'
-
   grunt-contrib-concat@1.0.1:
     resolution: {integrity: sha512-QdTmcxe8aim2Z0dFeuSJ+f7fHIeY7PZaTMZxgvosjXwyMhpy2GUR5WHkr12lksHfZVE80v2wUwqF56wyfPUwoQ==}
     engines: {node: '>=0.10.0'}
@@ -13542,10 +13527,6 @@ packages:
     engines: {node: '>= 0.8.0'}
     peerDependencies:
       grunt: '>=0.4.1'
-
-  grunt-phpcs@0.4.0:
-    resolution: {integrity: sha512-WNcmqwAcYe76Muz3crbhPHElVZg/fCkWEo2A3sNKztN/82/UkaoiqujAAtgkpEBiWtLA6gk1oB1CHaE+5lB/JA==}
-    engines: {node: 0.10.x}
 
   grunt-postcss@0.9.0:
     resolution: {integrity: sha512-lglLcVaoOIqH0sFv7RqwUKkEFGQwnlqyAKbatxZderwZGV1nDyKHN7gZS9LUiTx1t5GOvRBx0BEalHMyVwFAIA==}
@@ -32464,10 +32445,6 @@ snapshots:
 
   async@1.5.2: {}
 
-  async@2.6.4:
-    dependencies:
-      lodash: 4.18.1
-
   async@3.1.1: {}
 
   async@3.2.6: {}
@@ -35887,12 +35864,6 @@ snapshots:
       nopt: 5.0.0
       v8flags: 4.0.1
 
-  grunt-contrib-clean@2.0.0(grunt@1.6.3):
-    dependencies:
-      async: 2.6.4
-      grunt: 1.6.3
-      rimraf: 2.7.1
-
   grunt-contrib-concat@1.0.1(grunt@1.6.3):
     dependencies:
       chalk: 1.1.3
@@ -35950,8 +35921,6 @@ snapshots:
       async: 1.5.2
       grunt: 1.6.3
       rimraf: 2.7.1
-
-  grunt-phpcs@0.4.0: {}
 
   grunt-postcss@0.9.0(grunt@1.6.3):
     dependencies:
