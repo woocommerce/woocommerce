@@ -1234,7 +1234,7 @@ class WC_AJAX {
 			}
 
 			/* translators: %s item name. */
-			$order->add_order_note( sprintf( __( 'Added line items: %s', 'woocommerce' ), implode( ', ', $order_notes ) ), false, true, array( 'note_group' => OrderNoteGroup::ORDER_UPDATE ) );
+			$order->add_order_note( sprintf( __( 'Added line items: %s', 'woocommerce' ), implode( ', ', $order_notes ) ), 0, true, array( 'note_group' => OrderNoteGroup::ORDER_UPDATE ) );
 
 			do_action( 'woocommerce_ajax_order_items_added', $added_items, $order );
 
@@ -1556,10 +1556,10 @@ class WC_AJAX {
 
 						if ( $changed_stock && ! is_wp_error( $changed_stock ) ) {
 							/* translators: %1$s: item name %2$s: stock change */
-							$order->add_order_note( sprintf( __( 'Deleted %1$s and adjusted stock (%2$s)', 'woocommerce' ), $item->get_name(), $changed_stock['from'] . '&rarr;' . $changed_stock['to'] ), false, true, array( 'note_group' => OrderNoteGroup::PRODUCT_STOCK ) );
+							$order->add_order_note( sprintf( __( 'Deleted %1$s and adjusted stock (%2$s)', 'woocommerce' ), $item->get_name(), $changed_stock['from'] . '&rarr;' . $changed_stock['to'] ), 0, true, array( 'note_group' => OrderNoteGroup::PRODUCT_STOCK ) );
 						} else {
 							/* translators: %s item name. */
-							$order->add_order_note( sprintf( __( 'Deleted %s', 'woocommerce' ), $item->get_name() ), false, true, array( 'note_group' => OrderNoteGroup::ORDER_UPDATE ) );
+							$order->add_order_note( sprintf( __( 'Deleted %s', 'woocommerce' ), $item->get_name() ), 0, true, array( 'note_group' => OrderNoteGroup::ORDER_UPDATE ) );
 						}
 					}
 
