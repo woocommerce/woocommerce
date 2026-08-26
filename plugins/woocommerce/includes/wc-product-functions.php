@@ -887,21 +887,6 @@ function wc_scheduled_sales() {
 
 			_prime_post_caches( $chunk );
 
-			foreach ( $chunk as $product_id ) {
-				$product = wc_get_product( $product_id );
-
-				if ( $product ) {
-					// Note: this does not schedule the matching end event. Both modes change
-					// only the price prop, and handle_updated_props() syncs sale date meta
-					// only when a date, regular_price, sale_price or product_type prop
-					// changed, so wc_maybe_schedule_sale_events_on_meta_change() never sees
-					// a sale date key and returns early. Ending relies on this daily run.
-					wc_apply_sale_state_for_product( $product, $mode );
-				}
-
-				$product_util->delete_product_specific_transients( $product ? $product : $product_id );
-			}
-
 			// These IDs become array keys below, where a non-scalar is a fatal, and the data
 			// store is replaceable through woocommerce_product_data_store. Screening on the
 			// same rule _get_non_cached_ids() applied when priming keeps the release set to
@@ -917,13 +902,46 @@ function wc_scheduled_sales() {
 				)
 			);
 
+			// Group by real post type while the prime above is still warm, so get_post_type()
+			// is a cache hit rather than a query. It has to happen here: saving inside the
+			// loop evicts the very entries this reads. Priming keyed the term relationships
+			// on each ID's actual type, so releasing them all as 'product' would strand any
+			// taxonomy the other types carry and hand the wrong type to callbacks on the
+			// public clean_object_term_cache hook. An ID with no type primed nothing.
+			$release_ids_by_type = array();
+
+			foreach ( $release_ids as $release_id ) {
+				$release_type = get_post_type( $release_id );
+
+				if ( $release_type ) {
+					$release_ids_by_type[ $release_type ][] = $release_id;
+				}
+			}
+
+			foreach ( $chunk as $product_id ) {
+				$product = wc_get_product( $product_id );
+
+				if ( $product ) {
+					// Note: this does not schedule the matching end event. Both modes change
+					// only the price prop, and handle_updated_props() syncs sale date meta
+					// only when a date, regular_price, sale_price or product_type prop
+					// changed, so wc_maybe_schedule_sale_events_on_meta_change() never sees
+					// a sale date key and returns early. Ending relies on this daily run.
+					wc_apply_sale_state_for_product( $product, $mode );
+				}
+
+				$product_util->delete_product_specific_transients( $product ? $product : $product_id );
+			}
+
 			// Release what this batch primed, so peak memory stays flat across a large
 			// backlog. These groups key on the object ID, so only this batch's own entries
 			// go: posts and post_meta are shared with every other post type and every other
 			// job in the same WP-Cron request, and must not be flushed whole.
 			wp_cache_delete_multiple( $release_ids, 'posts' );
 			wp_cache_delete_multiple( $release_ids, 'post_meta' );
-			clean_object_term_cache( $release_ids, 'product' );
+			foreach ( $release_ids_by_type as $release_type => $type_ids ) {
+				clean_object_term_cache( $type_ids, $release_type );
+			}
 
 			// With product_instance_caching on, wc_get_product() caches every product it
 			// reads. Saving one already releases its own entry through
