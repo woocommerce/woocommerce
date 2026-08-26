@@ -943,8 +943,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		// rejected, because only that raises an Error on the concatenation. Arrays and null are
 		// reduced to '' by WP_Query's sanitize_key(), which drops the status clause, so rejecting
 		// them would turn a working query into an empty one.
-		$has_unusable_status   = false;
-		$unusable_status_value = null;
+		$has_unusable_status     = false;
+		$dropped_unusable_status = false;
+		$unusable_status_value   = null;
 
 		if ( ! empty( $query_vars['post_status'] ) ) {
 			if ( is_array( $query_vars['post_status'] ) ) {
@@ -952,8 +953,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 				foreach ( $query_vars['post_status'] as $status ) {
 					if ( $this->is_unusable_status( $status ) ) {
-						$has_unusable_status   = true;
-						$unusable_status_value = $status;
+						$has_unusable_status     = true;
+						$dropped_unusable_status = true;
+						$unusable_status_value   = $status;
 						continue;
 					}
 
@@ -972,8 +974,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 					unset( $query_vars['post_status'] );
 				}
 			} elseif ( $this->is_unusable_status( $query_vars['post_status'] ) ) {
-				$has_unusable_status   = true;
-				$unusable_status_value = $query_vars['post_status'];
+				$has_unusable_status     = true;
+				$dropped_unusable_status = true;
+				$unusable_status_value   = $query_vars['post_status'];
 				unset( $query_vars['post_status'] );
 			} else {
 				$query_vars['post_status'] = wc_is_order_status( 'wc-' . $query_vars['post_status'] ) ? 'wc-' . $query_vars['post_status'] : $query_vars['post_status'];
@@ -993,6 +996,19 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 					'value'    => $unusable_status_value,
 					'function' => 'wc_get_orders',
 					'source'   => 'legacy-order-query',
+				)
+			);
+		} elseif ( $dropped_unusable_status ) {
+			// The query still runs, on a narrower filter than the caller wrote. Say so anyway:
+			// locating the code that passes the bad value is the point of the report.
+			$this->report_invalid_query_arg(
+				'woocommerce_order_query_invalid_status',
+				array(
+					'key'       => 'status',
+					'value'     => $unusable_status_value,
+					'function'  => 'wc_get_orders',
+					'source'    => 'legacy-order-query',
+					'recovered' => true,
 				)
 			);
 		}

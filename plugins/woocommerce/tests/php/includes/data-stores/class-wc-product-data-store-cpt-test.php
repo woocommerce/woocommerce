@@ -758,6 +758,10 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @param string $date_key The date query arg to set.
 	 */
 	public function test_malformed_product_date_args_match_no_products( string $date_key ): void {
+		// Also asserts the notice fires: WP fails the test both if an undeclared
+		// incorrect-usage notice is raised and if a declared one never is.
+		$this->setExpectedIncorrectUsage( 'wc_get_products' );
+
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_date_on_sale_from( '2024-01-01' );
 		$product->save();
@@ -790,6 +794,10 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @testdox An unusable product status fails the query closed instead of fatalling in WP_Query.
 	 */
 	public function test_unusable_product_status_matches_no_products(): void {
+		// Also asserts the notice fires: WP fails the test both if an undeclared
+		// incorrect-usage notice is raised and if a declared one never is.
+		$this->setExpectedIncorrectUsage( 'wc_get_products' );
+
 		WC_Helper_Product::create_simple_product();
 
 		$result = wc_get_products(
@@ -807,6 +815,10 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @testdox An unusable product status entry is dropped while a usable sibling keeps filtering.
 	 */
 	public function test_partially_usable_product_status_list_keeps_working(): void {
+		// Also asserts the notice fires: WP fails the test both if an undeclared
+		// incorrect-usage notice is raised and if a declared one never is.
+		$this->setExpectedIncorrectUsage( 'wc_get_products' );
+
 		$published = WC_Helper_Product::create_simple_product();
 
 		$draft = WC_Helper_Product::create_simple_product();
@@ -829,6 +841,10 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @testdox An unusable product status whose only sibling filters nothing fails the query closed.
 	 */
 	public function test_unusable_product_status_with_non_filtering_sibling_fails_closed(): void {
+		// Also asserts the notice fires: WP fails the test both if an undeclared
+		// incorrect-usage notice is raised and if a declared one never is.
+		$this->setExpectedIncorrectUsage( 'wc_get_products' );
+
 		$published = WC_Helper_Product::create_simple_product();
 
 		$trashed = WC_Helper_Product::create_simple_product();

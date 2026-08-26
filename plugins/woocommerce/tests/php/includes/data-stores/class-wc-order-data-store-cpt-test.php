@@ -1556,6 +1556,10 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @param array $args Malformed args to pass to `wc_get_orders()`.
 	 */
 	public function test_malformed_query_args_do_not_fatal( array $args ): void {
+		// Also asserts the notice fires: WP fails the test both if an undeclared
+		// incorrect-usage notice is raised and if a declared one never is.
+		$this->setExpectedIncorrectUsage( 'wc_get_orders' );
+
 		OrderHelper::create_order();
 
 		$args['return'] = 'ids';
@@ -1635,6 +1639,10 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @param string $id_var The WP_Query var carrying the order ID.
 	 */
 	public function test_fail_closed_query_survives_a_filter_dropping_errors( string $id_var ): void {
+		// Also asserts the notice fires: WP fails the test both if an undeclared
+		// incorrect-usage notice is raised and if a declared one never is.
+		$this->setExpectedIncorrectUsage( 'wc_get_orders' );
+
 		$order = OrderHelper::create_order();
 
 		$drop_errors = static function ( $args ) {
@@ -1669,6 +1677,10 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @param string $date_key The date query arg to set.
 	 */
 	public function test_malformed_date_args_match_no_orders( string $date_key ): void {
+		// Also asserts the notice fires: WP fails the test both if an undeclared
+		// incorrect-usage notice is raised and if a declared one never is.
+		$this->setExpectedIncorrectUsage( 'wc_get_orders' );
+
 		OrderHelper::create_order();
 
 		// A result count cannot distinguish the guard from incidental misses, since an unguarded
@@ -1704,6 +1716,10 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @testdox An unusable customer fails the query closed instead of fatalling in WP core.
 	 */
 	public function test_unusable_customer_matches_no_orders(): void {
+		// Also asserts the notice fires: WP fails the test both if an undeclared
+		// incorrect-usage notice is raised and if a declared one never is.
+		$this->setExpectedIncorrectUsage( 'wc_get_orders' );
+
 		OrderHelper::create_order();
 
 		$captured = null;
@@ -1778,6 +1794,10 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @testdox An unusable status fails closed, matching no orders rather than every order.
 	 */
 	public function test_unusable_status_matches_no_orders(): void {
+		// Also asserts the notice fires: WP fails the test both if an undeclared
+		// incorrect-usage notice is raised and if a declared one never is.
+		$this->setExpectedIncorrectUsage( 'wc_get_orders' );
+
 		OrderHelper::create_order();
 
 		// A result count would pass with the guard removed: unsetting post_status leaves
@@ -1888,6 +1908,10 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @param array $status Status list mixing an unusable entry with an inert one.
 	 */
 	public function test_unusable_status_with_inert_sibling_fails_closed( array $status ): void {
+		// Also asserts the notice fires: WP fails the test both if an undeclared
+		// incorrect-usage notice is raised and if a declared one never is.
+		$this->setExpectedIncorrectUsage( 'wc_get_orders' );
+
 		$order = OrderHelper::create_order();
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
@@ -1927,6 +1951,10 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @testdox A status list keeps its usable entries and only the unusable ones are dropped.
 	 */
 	public function test_partially_usable_status_list_keeps_working(): void {
+		// Also asserts the notice fires: WP fails the test both if an undeclared
+		// incorrect-usage notice is raised and if a declared one never is.
+		$this->setExpectedIncorrectUsage( 'wc_get_orders' );
+
 		$completed = OrderHelper::create_order();
 		$completed->set_status( OrderStatus::COMPLETED );
 		$completed->save();
@@ -2010,6 +2038,10 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @param array $status Status list mixing an unusable entry with a non-filtering one.
 	 */
 	public function test_unusable_status_with_non_filtering_sibling_fails_closed( array $status ): void {
+		// Also asserts the notice fires: WP fails the test both if an undeclared
+		// incorrect-usage notice is raised and if a declared one never is.
+		$this->setExpectedIncorrectUsage( 'wc_get_orders' );
+
 		$completed = OrderHelper::create_order();
 		$completed->set_status( OrderStatus::COMPLETED );
 		$completed->save();

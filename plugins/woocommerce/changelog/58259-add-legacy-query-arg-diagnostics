@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Report the offending argument and its type when a malformed argument to wc_get_orders() or wc_get_products() degrades a legacy query, so the calling code can be located instead of the query silently returning nothing.
