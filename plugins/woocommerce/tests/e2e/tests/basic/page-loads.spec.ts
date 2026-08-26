@@ -260,14 +260,16 @@ for ( const currentPage of wcPages ) {
 			await test.step( currentSubpage.name, async () => {
 				// needs a Regexp on link name to match exact text and also match the possible counter
 				// E.g. should match "Orders 3" or "Orders", but should not match "Quick Orders"
-				await page
+				const subpageLink = page
 					.locator( 'li.wp-menu-open > ul.wp-submenu' )
 					.getByRole( 'link', {
 						name: new RegExp(
 							`^${ currentSubpage.name }( \\d+)?$`
 						),
-					} )
-					.click();
+					} );
+
+				await expect( subpageLink ).toBeVisible();
+				await subpageLink.click();
 
 				await expect(
 					page
