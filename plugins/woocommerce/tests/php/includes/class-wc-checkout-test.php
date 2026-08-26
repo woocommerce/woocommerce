@@ -293,13 +293,14 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox create_order_fee_lines sets tax status to 'none' for non-taxable cart fees and 'taxable' for taxable ones.
 	 *
-	 * @testWith [true, "taxable"]
-	 *           [false, "none"]
+	 * @testWith [true, "taxable", ""]
+	 *           [false, "none", ""]
 	 *
 	 * @param bool   $taxable Whether the cart fee is taxable.
 	 * @param string $expected_tax_status The expected tax status for the created fee order item.
+	 * @param string $expected_tax_class The expected tax class for the created fee order item.
 	 */
-	public function test_create_order_fee_lines_sets_correct_tax_status( $taxable, $expected_tax_status ): void {
+	public function test_create_order_fee_lines_sets_correct_tax_status( $taxable, $expected_tax_status, $expected_tax_class ): void {
 		$product = WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
@@ -322,6 +323,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		/** @var WC_Order_Item_Fee $fee_item */
 		$fee_item = array_values( $fee_items )[0];
 		$this->assertSame( $expected_tax_status, $fee_item->get_tax_status() );
+		$this->assertSame( $expected_tax_class, $fee_item->get_tax_class() );
 	}
 
 	/**
