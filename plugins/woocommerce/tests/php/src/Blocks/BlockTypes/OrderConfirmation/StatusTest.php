@@ -34,7 +34,7 @@ class StatusTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( ucfirst( $state ) . ' custom paragraph', $content, 'The matching status paragraph should render.' );
 		$this->assertStringNotContainsString( 'wp-block-woocommerce-order-confirmation-status-' . $state, $content, 'State wrappers should not change the public frontend hierarchy.' );
 
-		foreach ( array( 'default', 'cancelled', 'refunded', 'completed', 'failed' ) as $other_state ) {
+		foreach ( array( 'successful', 'cancelled', 'refunded', 'completed', 'failed' ) as $other_state ) {
 			if ( $state !== $other_state ) {
 				$this->assertStringNotContainsString( ucfirst( $other_state ) . ' custom heading', $content, 'Other status states should not render.' );
 			}
@@ -219,37 +219,37 @@ class StatusTest extends WC_Unit_Test_Case {
 	 */
 	public function provider_status_content(): array {
 		return array(
-			'processing uses default' => array(
+			'processing uses successful' => array(
 				OrderStatus::PROCESSING,
-				'default',
+				'successful',
 				'Order received',
 				'Thank you. Your order has been received.',
 			),
-			'on hold uses default'    => array(
+			'on hold uses successful'    => array(
 				OrderStatus::ON_HOLD,
-				'default',
+				'successful',
 				'Order received',
 				'Thank you. Your order has been received.',
 			),
-			'cancelled'               => array(
+			'cancelled'                  => array(
 				OrderStatus::CANCELLED,
 				'cancelled',
 				'Order cancelled',
 				'Your order has been cancelled.',
 			),
-			'refunded'                => array(
+			'refunded'                   => array(
 				OrderStatus::REFUNDED,
 				'refunded',
 				'Order refunded',
 				'Your order was refunded %s.',
 			),
-			'completed'               => array(
+			'completed'                  => array(
 				OrderStatus::COMPLETED,
 				'completed',
 				'Order completed',
 				'Thank you. Your order has been fulfilled.',
 			),
-			'failed'                  => array(
+			'failed'                     => array(
 				OrderStatus::FAILED,
 				'failed',
 				'Order failed',
@@ -321,7 +321,7 @@ class StatusTest extends WC_Unit_Test_Case {
 	 * @return WP_Block
 	 */
 	private function create_parent_block_with_status_states(): WP_Block {
-		$states = array( 'default', 'cancelled', 'refunded', 'completed', 'failed' );
+		$states = array( 'successful', 'cancelled', 'refunded', 'completed', 'failed' );
 		$blocks = array_map(
 			function ( $state ) {
 				return $this->create_status_state_block( $state );

@@ -9,23 +9,23 @@ import { __ } from '@wordpress/i18n';
 import {
 	CANCELLED_STATUS_BLOCK,
 	COMPLETED_STATUS_BLOCK,
-	DEFAULT_STATUS_BLOCK,
 	FAILED_STATUS_BLOCK,
 	REFUNDED_STATUS_BLOCK,
+	SUCCESSFUL_STATUS_BLOCK,
 } from './inner-blocks';
 
 export const attributes = {
 	currentView: {
 		type: 'string',
-		default: DEFAULT_STATUS_BLOCK,
+		default: SUCCESSFUL_STATUS_BLOCK,
 		source: 'readonly',
 	},
 	editorViews: {
 		type: 'object',
 		default: [
 			{
-				view: DEFAULT_STATUS_BLOCK,
-				label: __( 'Default', 'woocommerce' ),
+				view: SUCCESSFUL_STATUS_BLOCK,
+				label: __( 'Successful', 'woocommerce' ),
 				icon: 'info',
 			},
 			{

@@ -156,7 +156,7 @@ class Status extends AbstractOrderConfirmationBlock {
 			case OrderStatus::FAILED:
 				return 'woocommerce/order-confirmation-status-failed';
 			default:
-				return 'woocommerce/order-confirmation-status-default';
+				return 'woocommerce/order-confirmation-status-successful';
 		}
 	}
 

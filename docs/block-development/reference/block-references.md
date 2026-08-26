@@ -1134,15 +1134,6 @@ Contains the message shown for completed orders.
 - **Parent:** woocommerce/order-confirmation-status
 - **Supports:** ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 
-## Default order status - woocommerce/order-confirmation-status-default
-
-Contains the message shown for the default order status.
-
-- **Name:** woocommerce/order-confirmation-status-default
-- **Category:** woocommerce
-- **Parent:** woocommerce/order-confirmation-status
-- **Supports:** ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
-
 ## Failed order status - woocommerce/order-confirmation-status-failed
 
 Contains the message shown for failed orders.
@@ -1157,6 +1148,15 @@ Contains the message shown for failed orders.
 Contains the message shown for refunded orders.
 
 - **Name:** woocommerce/order-confirmation-status-refunded
+- **Category:** woocommerce
+- **Parent:** woocommerce/order-confirmation-status
+- **Supports:** ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
+
+## Successful order status - woocommerce/order-confirmation-status-successful
+
+Contains the message shown for a successful order.
+
+- **Name:** woocommerce/order-confirmation-status-successful
 - **Category:** woocommerce
 - **Parent:** woocommerce/order-confirmation-status
 - **Supports:** ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~

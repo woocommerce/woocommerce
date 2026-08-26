@@ -485,7 +485,7 @@ final class BlockTypesController {
 			'StockFilter',
 			'PageContentWrapper',
 			'OrderConfirmation\Status',
-			'OrderConfirmation\StatusDefaultBlock',
+			'OrderConfirmation\StatusSuccessfulBlock',
 			'OrderConfirmation\StatusCancelledBlock',
 			'OrderConfirmation\StatusRefundedBlock',
 			'OrderConfirmation\StatusCompletedBlock',

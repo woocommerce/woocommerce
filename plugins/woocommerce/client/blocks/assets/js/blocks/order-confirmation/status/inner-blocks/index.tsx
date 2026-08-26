@@ -8,15 +8,15 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import defaultMetadata from './order-confirmation-status-default/block.json';
+import successfulMetadata from './order-confirmation-status-successful/block.json';
 import cancelledMetadata from './order-confirmation-status-cancelled/block.json';
 import refundedMetadata from './order-confirmation-status-refunded/block.json';
 import completedMetadata from './order-confirmation-status-completed/block.json';
 import failedMetadata from './order-confirmation-status-failed/block.json';
 import { Edit, Save } from './edit';
 
-export const DEFAULT_STATUS_BLOCK =
-	'woocommerce/order-confirmation-status-default';
+export const SUCCESSFUL_STATUS_BLOCK =
+	'woocommerce/order-confirmation-status-successful';
 export const CANCELLED_STATUS_BLOCK =
 	'woocommerce/order-confirmation-status-cancelled';
 export const REFUNDED_STATUS_BLOCK =
@@ -27,14 +27,14 @@ export const FAILED_STATUS_BLOCK =
 	'woocommerce/order-confirmation-status-failed';
 
 export const ORDER_STATUS_BLOCKS = [
-	DEFAULT_STATUS_BLOCK,
+	SUCCESSFUL_STATUS_BLOCK,
 	CANCELLED_STATUS_BLOCK,
 	REFUNDED_STATUS_BLOCK,
 	COMPLETED_STATUS_BLOCK,
 	FAILED_STATUS_BLOCK,
 ];
 
-const defaultTemplate: TemplateArray = [
+const successfulTemplate: TemplateArray = [
 	[
 		'core/heading',
 		{ content: __( 'Order received', 'woocommerce' ), level: 1 },
@@ -107,7 +107,7 @@ const failedTemplate: TemplateArray = [
 ];
 
 export const ORDER_STATUS_TEMPLATE = [
-	[ DEFAULT_STATUS_BLOCK, {}, defaultTemplate ],
+	[ SUCCESSFUL_STATUS_BLOCK, {}, successfulTemplate ],
 	[ CANCELLED_STATUS_BLOCK, {}, cancelledTemplate ],
 	[ REFUNDED_STATUS_BLOCK, {}, refundedTemplate ],
 	[ COMPLETED_STATUS_BLOCK, {}, completedTemplate ],
@@ -115,10 +115,13 @@ export const ORDER_STATUS_TEMPLATE = [
 ] as TemplateArray;
 
 export const registerOrderStatusBlocks = (): void => {
-	registerBlockType( defaultMetadata.name, {
-		...defaultMetadata,
+	registerBlockType( successfulMetadata.name, {
+		...successfulMetadata,
 		edit: () => (
-			<Edit view={ DEFAULT_STATUS_BLOCK } template={ defaultTemplate } />
+			<Edit
+				view={ SUCCESSFUL_STATUS_BLOCK }
+				template={ successfulTemplate }
+			/>
 		),
 		save: Save,
 	} as unknown as BlockConfiguration );
