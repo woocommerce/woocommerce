@@ -862,20 +862,14 @@ function wc_scheduled_sales() {
 	/**
 	 * Apply a sale state to a list of products, priming caches in batches.
 	 *
-	 * Priming the whole result set up front is what exhausts memory on a store with a
-	 * large backlog: the request can die before a single product is saved, leaving no
-	 * progress at all. Priming and releasing per batch keeps the post and product caches
-	 * this loop fills from growing with the backlog, so a run that cannot finish still
-	 * gets somewhere.
+	 * Priming the whole result set up front is what exhausts memory on a large backlog:
+	 * the request can die before a single product is saved. Priming and releasing per
+	 * batch lets a run that cannot finish still get somewhere.
 	 *
-	 * The relief is partial. Reading a product also caches its type under a per-product
-	 * group of its own that nothing here releases, and the shared groups below are only
-	 * released when the object cache lives in this request; a backend without flush_group
-	 * support releases none of them.
-	 *
-	 * Variations are the exception: saving one queues its parent for a deferred sync that
-	 * WC_Post_Data::do_deferred_product_sync() drains at shutdown, outside this loop and
-	 * without batching, so a large variation backlog still grows there.
+	 * The relief is partial. Every product read leaves a cache-prefix entry in a group
+	 * named for that product, which nothing releases, and saving a variation queues its
+	 * parent for the deferred sync WC_Post_Data::do_deferred_product_sync() drains
+	 * unbatched at shutdown.
 	 *
 	 * @param int[]  $product_ids Products to process, in query order.
 	 * @param string $mode        'start' or 'end'.
@@ -930,9 +924,9 @@ function wc_scheduled_sales() {
 
 			// These are persistent-capable, so only release them when the cache lives in
 			// this request rather than evicting entries other requests are using. Term
-			// queries are the bulk of it: priming a batch caches a term result set per
-			// product, and clean_object_term_cache() only invalidates them by salt, which
-			// leaves the entries resident. The terms group is left alone on purpose: it
+			// queries are the bulk of it: priming a batch caches its term lookup under one
+			// entry, and clean_object_term_cache() only invalidates it by salt, which
+			// leaves the entry resident. The terms group is left alone on purpose: it
 			// keys by term ID and is bounded by the size of the taxonomy rather than the
 			// backlog, so flushing it per batch would re-query the same terms for nothing.
 			if ( $flush_shared_groups ) {
