@@ -8,15 +8,12 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import successfulMetadata from './order-confirmation-status-successful/block.json';
 import cancelledMetadata from './order-confirmation-status-cancelled/block.json';
 import refundedMetadata from './order-confirmation-status-refunded/block.json';
 import completedMetadata from './order-confirmation-status-completed/block.json';
 import failedMetadata from './order-confirmation-status-failed/block.json';
 import { Edit, Save } from './edit';
 
-export const SUCCESSFUL_STATUS_BLOCK =
-	'woocommerce/order-confirmation-status-successful';
 export const CANCELLED_STATUS_BLOCK =
 	'woocommerce/order-confirmation-status-cancelled';
 export const REFUNDED_STATUS_BLOCK =
@@ -27,27 +24,10 @@ export const FAILED_STATUS_BLOCK =
 	'woocommerce/order-confirmation-status-failed';
 
 export const ORDER_STATUS_BLOCKS = [
-	SUCCESSFUL_STATUS_BLOCK,
+	COMPLETED_STATUS_BLOCK,
 	CANCELLED_STATUS_BLOCK,
 	REFUNDED_STATUS_BLOCK,
-	COMPLETED_STATUS_BLOCK,
 	FAILED_STATUS_BLOCK,
-];
-
-const successfulTemplate: TemplateArray = [
-	[
-		'core/heading',
-		{ content: __( 'Order received', 'woocommerce' ), level: 1 },
-	],
-	[
-		'core/paragraph',
-		{
-			content: __(
-				'Thank you. Your order has been received.',
-				'woocommerce'
-			),
-		},
-	],
 ];
 
 const cancelledTemplate: TemplateArray = [
@@ -107,24 +87,13 @@ const failedTemplate: TemplateArray = [
 ];
 
 export const ORDER_STATUS_TEMPLATE = [
-	[ SUCCESSFUL_STATUS_BLOCK, {}, successfulTemplate ],
+	[ COMPLETED_STATUS_BLOCK, {}, completedTemplate ],
 	[ CANCELLED_STATUS_BLOCK, {}, cancelledTemplate ],
 	[ REFUNDED_STATUS_BLOCK, {}, refundedTemplate ],
-	[ COMPLETED_STATUS_BLOCK, {}, completedTemplate ],
 	[ FAILED_STATUS_BLOCK, {}, failedTemplate ],
 ] as TemplateArray;
 
 export const registerOrderStatusBlocks = (): void => {
-	registerBlockType( successfulMetadata.name, {
-		...successfulMetadata,
-		edit: () => (
-			<Edit
-				view={ SUCCESSFUL_STATUS_BLOCK }
-				template={ successfulTemplate }
-			/>
-		),
-		save: Save,
-	} as unknown as BlockConfiguration );
 	registerBlockType( cancelledMetadata.name, {
 		...cancelledMetadata,
 		edit: () => (

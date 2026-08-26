@@ -1152,15 +1152,6 @@ Contains the message shown for refunded orders.
 - **Parent:** woocommerce/order-confirmation-status
 - **Supports:** ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 
-## Successful order status - woocommerce/order-confirmation-status-successful
-
-Contains the message shown for a successful order.
-
-- **Name:** woocommerce/order-confirmation-status-successful
-- **Category:** woocommerce
-- **Parent:** woocommerce/order-confirmation-status
-- **Supports:** ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
-
 ## Order Summary - woocommerce/order-confirmation-summary
 
 Display the order summary on the order confirmation page.

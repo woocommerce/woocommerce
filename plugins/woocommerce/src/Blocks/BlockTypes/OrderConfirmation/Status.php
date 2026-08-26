@@ -151,12 +151,10 @@ class Status extends AbstractOrderConfirmationBlock {
 				return 'woocommerce/order-confirmation-status-cancelled';
 			case OrderStatus::REFUNDED:
 				return 'woocommerce/order-confirmation-status-refunded';
-			case OrderStatus::COMPLETED:
-				return 'woocommerce/order-confirmation-status-completed';
 			case OrderStatus::FAILED:
 				return 'woocommerce/order-confirmation-status-failed';
 			default:
-				return 'woocommerce/order-confirmation-status-successful';
+				return 'woocommerce/order-confirmation-status-completed';
 		}
 	}
 
