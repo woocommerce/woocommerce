@@ -758,11 +758,9 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_get_page_children function.
-	 *
-	 * @return void
+	 * @testdox wc_get_page_children ignores the current language while rewrite rules are generated.
 	 */
-	public function test_wc_get_page_children() {
+	public function test_wc_get_page_children(): void {
 		$page_id = wp_insert_post(
 			array(
 				'post_title'  => 'Parent Page',
@@ -777,19 +775,213 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		$child_page_id = wp_insert_post(
 			array(
 				'post_parent' => $page_id,
-				'post_title'  => 'Parent Page',
+				'post_title'  => 'Child Page',
 				'post_type'   => 'page',
-				'post_name'   => 'parent-page',
+				'post_name'   => 'child-page',
 				'post_status' => 'publish',
 				'post_author' => 1,
 				'menu_order'  => 0,
 			)
 		);
-		$children      = wc_get_page_children( $page_id );
-		$this->assertEquals( $child_page_id, $children[0] );
 
-		wp_delete_post( $page_id, true );
-		wp_delete_post( $child_page_id, true );
+		$grandchild_page_id = wp_insert_post(
+			array(
+				'post_parent' => $child_page_id,
+				'post_title'  => 'Grandchild Page',
+				'post_type'   => 'page',
+				'post_name'   => 'grandchild-page',
+				'post_status' => 'publish',
+				'post_author' => 1,
+				'menu_order'  => 0,
+			)
+		);
+
+		$filter_by_current_language = static function ( $query ) {
+			if ( 'page' === $query->get( 'post_type' ) && ( ! isset( $query->query_vars['lang'] ) || '' !== $query->query_vars['lang'] ) ) {
+				$query->set( 'post__in', array( 0 ) );
+			}
+		};
+
+		$rewrite_children = array();
+
+		$get_rewrite_children = static function ( $rules ) use ( $page_id, &$rewrite_children ) {
+			$rewrite_children = wc_get_page_children( $page_id );
+
+			return $rules;
+		};
+
+		$filtered_rewrite_children = array();
+
+		$get_filtered_rewrite_children = static function ( $rules ) use ( $page_id, &$filtered_rewrite_children ) {
+			$filtered_rewrite_children = wc_get_page_children( $page_id, false );
+
+			return $rules;
+		};
+
+		$unfiltered_children = wc_get_page_children( $page_id );
+
+		add_action( 'parse_query', $filter_by_current_language );
+		remove_filter( 'rewrite_rules_array', 'wc_fix_rewrite_rules' );
+		add_filter( 'rewrite_rules_array', $get_rewrite_children, 20 );
+		add_filter( 'rewrite_rules_array', $get_filtered_rewrite_children, 20 );
+		try {
+			$current_language_children = wc_get_page_children( $page_id );
+			$all_language_children     = wc_get_page_children( $page_id, true );
+			apply_filters( 'rewrite_rules_array', array() );
+		} finally {
+			add_filter( 'rewrite_rules_array', 'wc_fix_rewrite_rules' );
+			remove_filter( 'rewrite_rules_array', $get_filtered_rewrite_children, 20 );
+			remove_filter( 'rewrite_rules_array', $get_rewrite_children, 20 );
+			remove_action( 'parse_query', $filter_by_current_language );
+			wp_delete_post( $grandchild_page_id, true );
+			wp_delete_post( $child_page_id, true );
+			wp_delete_post( $page_id, true );
+		}
+
+		$this->assertEqualsCanonicalizing(
+			array( $child_page_id, $grandchild_page_id ),
+			$unfiltered_children,
+			'Single-language sites should keep returning every descendant.'
+		);
+		$this->assertSame( array(), $current_language_children, 'Existing callers should retain the current-language query behavior.' );
+		$this->assertSame( array(), $filtered_rewrite_children, 'Callers should be able to retain current-language queries during rewrite generation.' );
+		$this->assertEqualsCanonicalizing(
+			array( $child_page_id, $grandchild_page_id ),
+			$all_language_children,
+			'Callers should be able to query every language outside rewrite generation.'
+		);
+		$this->assertEqualsCanonicalizing(
+			array( $child_page_id, $grandchild_page_id ),
+			$rewrite_children,
+			'Page descendants used for rewrite rules should not depend on the current request language.'
+		);
+	}
+
+	/**
+	 * @testdox wc_fix_rewrite_rules uses stored, filtered, and supplied Shop pages.
+	 */
+	public function test_wc_fix_rewrite_rules_uses_stored_shop_page(): void {
+		$original_shop_page_id = get_option( 'woocommerce_shop_page_id', null );
+		$original_permalinks   = get_option( 'woocommerce_permalinks', null );
+		$shop_page_id          = wp_insert_post(
+			array(
+				'post_title'  => 'Shop',
+				'post_type'   => 'page',
+				'post_name'   => 'shop',
+				'post_status' => 'publish',
+			)
+		);
+		$child_page_id         = wp_insert_post(
+			array(
+				'post_parent' => $shop_page_id,
+				'post_title'  => 'Collection',
+				'post_type'   => 'page',
+				'post_name'   => 'collection',
+				'post_status' => 'publish',
+			)
+		);
+		$translated_shop_id    = wp_insert_post(
+			array(
+				'post_title'  => 'Boutique',
+				'post_type'   => 'page',
+				'post_name'   => 'boutique',
+				'post_status' => 'publish',
+			)
+		);
+		$translated_child_id   = wp_insert_post(
+			array(
+				'post_parent' => $translated_shop_id,
+				'post_title'  => 'Collection FR',
+				'post_type'   => 'page',
+				'post_name'   => 'collection-fr',
+				'post_status' => 'publish',
+			)
+		);
+		$additional_shop_id    = wp_insert_post(
+			array(
+				'post_title'  => 'Tienda',
+				'post_type'   => 'page',
+				'post_name'   => 'tienda',
+				'post_status' => 'publish',
+			)
+		);
+		$additional_child_id   = wp_insert_post(
+			array(
+				'post_parent' => $additional_shop_id,
+				'post_title'  => 'Collection ES',
+				'post_type'   => 'page',
+				'post_name'   => 'collection-es',
+				'post_status' => 'publish',
+			)
+		);
+		$unrelated_child_id    = wp_insert_post(
+			array(
+				'post_parent' => 1,
+				'post_title'  => 'Unrelated child',
+				'post_type'   => 'page',
+				'post_name'   => 'unrelated-child',
+				'post_status' => 'publish',
+			)
+		);
+		$unrelated_child_rule  = get_page_uri( $unrelated_child_id ) . '/?$';
+
+		update_option( 'woocommerce_shop_page_id', $shop_page_id );
+		update_option(
+			'woocommerce_permalinks',
+			array(
+				'product_base'           => 'shop/%product_cat%',
+				'use_verbose_page_rules' => true,
+			)
+		);
+
+		$translate_shop_page   = static fn() => $translated_shop_id;
+		$add_shop_page         = static function ( $shop_page_ids ) use ( $additional_shop_id ) {
+			$shop_page_ids[] = $additional_shop_id;
+
+			return $shop_page_ids;
+		};
+		$add_invalid_shop_page = static function ( $shop_page_ids ) {
+			$shop_page_ids[] = 'invalid';
+			$shop_page_ids[] = true;
+
+			return $shop_page_ids;
+		};
+		add_filter( 'woocommerce_get_shop_page_id', $translate_shop_page );
+		add_filter( 'woocommerce_rewrite_rules_shop_page_ids', $add_shop_page );
+
+		try {
+			$rules = wc_fix_rewrite_rules( array() );
+
+			delete_option( 'woocommerce_shop_page_id' );
+			remove_filter( 'woocommerce_get_shop_page_id', $translate_shop_page );
+			remove_filter( 'woocommerce_rewrite_rules_shop_page_ids', $add_shop_page );
+			add_filter( 'woocommerce_rewrite_rules_shop_page_ids', $add_invalid_shop_page );
+			$missing_shop_rules = wc_fix_rewrite_rules( array() );
+		} finally {
+			remove_filter( 'woocommerce_rewrite_rules_shop_page_ids', $add_invalid_shop_page );
+			remove_filter( 'woocommerce_rewrite_rules_shop_page_ids', $add_shop_page );
+			remove_filter( 'woocommerce_get_shop_page_id', $translate_shop_page );
+			delete_option( 'woocommerce_shop_page_id' );
+			delete_option( 'woocommerce_permalinks' );
+			if ( null !== $original_shop_page_id ) {
+				add_option( 'woocommerce_shop_page_id', $original_shop_page_id );
+			}
+			if ( null !== $original_permalinks ) {
+				add_option( 'woocommerce_permalinks', $original_permalinks );
+			}
+			wp_delete_post( $unrelated_child_id, true );
+			wp_delete_post( $additional_child_id, true );
+			wp_delete_post( $additional_shop_id, true );
+			wp_delete_post( $translated_child_id, true );
+			wp_delete_post( $translated_shop_id, true );
+			wp_delete_post( $child_page_id, true );
+			wp_delete_post( $shop_page_id, true );
+		}
+
+		$this->assertArrayHasKey( 'shop/collection/?$', $rules, 'Persisted rules should include descendants of the canonical Shop page.' );
+		$this->assertArrayHasKey( 'boutique/collection-fr/?$', $rules, 'Persisted rules should continue to honor the filtered Shop page.' );
+		$this->assertArrayHasKey( 'tienda/collection-es/?$', $rules, 'Persisted rules should include descendants of additional translated Shop pages supplied by integrations.' );
+		$this->assertArrayNotHasKey( $unrelated_child_rule, $missing_shop_rules, 'Missing and invalid Shop page IDs should not be converted into page ID 1.' );
 	}
 
 	/**

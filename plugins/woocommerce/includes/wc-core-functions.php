@@ -982,23 +982,32 @@ function wc_setcookie( $name, $value, $expire = 0, $secure = false, $httponly = 
 /**
  * Recursively get page children.
  *
- * @param  int $page_id Page ID.
+ * @param int       $page_id       Page ID.
+ * @param bool|null $all_languages Whether to query across all languages. Defaults to true while rewrite rules are generated.
  * @return int[]
  */
-function wc_get_page_children( $page_id ) {
-	$page_ids = get_posts(
-		array(
-			'post_parent' => $page_id,
-			'post_type'   => 'page',
-			'numberposts' => -1, // @codingStandardsIgnoreLine
-			'post_status' => 'any',
-			'fields'      => 'ids',
-		)
+function wc_get_page_children( $page_id, $all_languages = null ) {
+	if ( null === $all_languages ) {
+		$all_languages = doing_filter( 'rewrite_rules_array' );
+	}
+
+	$query_args = array(
+		'post_parent' => $page_id,
+		'post_type'   => 'page',
+		'numberposts' => -1, // @codingStandardsIgnoreLine
+		'post_status' => 'any',
+		'fields'      => 'ids',
 	);
+	if ( $all_languages ) {
+		// Persisted rewrite rules must include every language when this query variable is supported.
+		$query_args['lang'] = '';
+	}
+
+	$page_ids = get_posts( $query_args );
 
 	if ( ! empty( $page_ids ) ) {
 		foreach ( $page_ids as $page_id ) {
-			$page_ids = array_merge( $page_ids, wc_get_page_children( $page_id ) );
+			$page_ids = array_merge( $page_ids, wc_get_page_children( $page_id, $all_languages ) );
 		}
 	}
 
@@ -1059,13 +1068,49 @@ function wc_fix_rewrite_rules( $rules ) {
 		return $rules;
 	}
 
-	$shop_page_id = wc_get_page_id( 'shop' );
-	if ( $shop_page_id ) {
-		$page_rewrite_rules = array();
-		$subpages           = wc_get_page_children( $shop_page_id );
+	$shop_page_ids = array(
+		get_option( 'woocommerce_shop_page_id' ),
+		wc_get_page_id( 'shop' ),
+	);
+	/**
+	 * Filters the Shop page IDs used to generate subpage rewrite rules.
+	 *
+	 * The stored `woocommerce_shop_page_id` option is not language-independent under WCML or Polylang for WooCommerce,
+	 * which translate WooCommerce page options at the option level. Multilingual integrations should add the IDs of
+	 * translated Shop pages here so persisted rewrite rules cover every language.
+	 *
+	 * @since 11.2.0
+	 * @param int[] $shop_page_ids Shop page IDs.
+	 */
+	$filtered_shop_page_ids = apply_filters( 'woocommerce_rewrite_rules_shop_page_ids', $shop_page_ids );
+	/**
+	 * Filter callbacks can return anything, so validate each value before use.
+	 *
+	 * @var mixed[] $shop_page_ids
+	 */
+	$shop_page_ids = (array) $filtered_shop_page_ids;
+	$shop_page_ids = array_filter(
+		$shop_page_ids,
+		static function ( $shop_page_id ) {
+			// Booleans pass FILTER_VALIDATE_INT, so they are rejected first.
+			if ( ! is_int( $shop_page_id ) && ! is_string( $shop_page_id ) ) {
+				return false;
+			}
 
+			return false !== filter_var(
+				$shop_page_id,
+				FILTER_VALIDATE_INT,
+				array( 'options' => array( 'min_range' => 1 ) )
+			);
+		}
+	);
+	$shop_page_ids = array_unique( array_map( 'absint', $shop_page_ids ) );
+
+	$page_rewrite_rules = array();
+
+	foreach ( $shop_page_ids as $shop_page_id ) {
 		// Subpage rules.
-		foreach ( $subpages as $subpage ) {
+		foreach ( wc_get_page_children( $shop_page_id, true ) as $subpage ) {
 			$uri                                = get_page_uri( $subpage );
 			$page_rewrite_rules[ $uri . '/?$' ] = 'index.php?pagename=' . $uri;
 			$wp_generated_rewrite_rules         = $wp_rewrite->generate_rewrite_rules( $uri, EP_PAGES, true, true, false, false );
@@ -1074,10 +1119,10 @@ function wc_fix_rewrite_rules( $rules ) {
 			}
 			$page_rewrite_rules = array_merge( $page_rewrite_rules, $wp_generated_rewrite_rules );
 		}
-
-		// Merge with rules.
-		$rules = array_merge( $page_rewrite_rules, $rules );
 	}
+
+	// Merge with rules.
+	$rules = array_merge( $page_rewrite_rules, $rules );
 
 	return $rules;
 }
