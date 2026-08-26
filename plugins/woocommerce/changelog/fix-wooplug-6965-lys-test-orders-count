@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the Launch Your Store test-order count and cleanup stopping at the first page of orders.
