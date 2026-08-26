@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add a calendar icon to date-type additional checkout fields and fix native date input styling on Firefox.
