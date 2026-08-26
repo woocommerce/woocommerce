@@ -60,20 +60,26 @@ class ProductFilters extends AbstractBlock {
 	}
 
 	/**
-	 * Resolve the tablet viewport setting.
+	 * Resolve the responsive overlay breakpoint.
 	 *
-	 * @return string Tablet viewport setting.
+	 * @return string Responsive overlay breakpoint.
 	 */
-	private function get_tablet_viewport() {
+	private function get_overlay_breakpoint() {
 		if ( function_exists( 'gutenberg_get_global_settings' ) ) {
 			$viewport_settings = gutenberg_get_global_settings( array( 'viewport' ) );
 		} else {
 			$viewport_settings = wp_get_global_settings( array( 'viewport' ) );
 		}
 
-		return is_array( $viewport_settings ) && isset( $viewport_settings['tablet'] ) && is_string( $viewport_settings['tablet'] )
-			? $viewport_settings['tablet']
-			: '782px';
+		if ( is_array( $viewport_settings ) ) {
+			foreach ( array( 'tablet', 'mobile' ) as $viewport ) {
+				if ( isset( $viewport_settings[ $viewport ] ) && is_string( $viewport_settings[ $viewport ] ) ) {
+					return $viewport_settings[ $viewport ];
+				}
+			}
+		}
+
+		return '782px';
 	}
 
 	/**
@@ -82,9 +88,9 @@ class ProductFilters extends AbstractBlock {
 	 * @return string Responsive CSS.
 	 */
 	private function get_responsive_styles() {
-		$tablet_viewport = $this->get_tablet_viewport();
-		$desktop_query   = "@media (width > {$tablet_viewport})";
-		$mobile_selector = ':where(.wc-block-product-filters).is-mobile-overlay';
+		$overlay_breakpoint = $this->get_overlay_breakpoint();
+		$desktop_query      = "@media (width > {$overlay_breakpoint})";
+		$mobile_selector    = ':where(.wc-block-product-filters).is-mobile-overlay';
 
 		return $this->get_inline_presentation_styles( $mobile_selector, $desktop_query );
 	}
