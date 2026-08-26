@@ -296,8 +296,9 @@ export function getRangeLabel( after: moment.Moment, before: moment.Moment ) {
 				`${ after.format( dayToken ) } - ${ before.format( dayToken ) }`
 		);
 
-		// No day of month token to swap: the format omits the day altogether,
-		// so the shared month is as much of the range as it can carry.
+		// No day of month token to swap: the format either omits the day or
+		// holds only a day of year token, which is left alone. Either way the
+		// shared month is as much of the range as this format can carry.
 		if ( dayRangeFormat === null ) {
 			return after.format( fullDateFormat );
 		}
