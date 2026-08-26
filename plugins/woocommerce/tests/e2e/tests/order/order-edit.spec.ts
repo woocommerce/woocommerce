@@ -18,10 +18,10 @@ const orderEditUrl = ( id: number ) =>
 	process.env.DISABLE_HPOS === '1'
 		? `wp-admin/post.php?post=${ id }&action=edit`
 		: `wp-admin/admin.php?page=wc-orders&action=edit&id=${ id }`;
-const ordersListUrl = () =>
+const ordersListUrl = ( id: number ) =>
 	process.env.DISABLE_HPOS === '1'
-		? 'wp-admin/edit.php?post_type=shop_order'
-		: 'wp-admin/admin.php?page=wc-orders';
+		? `wp-admin/edit.php?post_type=shop_order&s=${ id }`
+		: `wp-admin/admin.php?page=wc-orders&s=${ id }`;
 
 test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 	let orderId: number, secondOrderId: number, customerId: number;
@@ -107,7 +107,7 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 			page.locator( '#woocommerce-order-notes .note_content >> nth=0' )
 		).toContainText( 'Order status changed from Processing to Completed.' );
 
-		await page.goto( ordersListUrl() );
+		await page.goto( ordersListUrl( orderId ) );
 
 		await expect(
 			page
