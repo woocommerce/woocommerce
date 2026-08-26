@@ -294,9 +294,16 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 		$result = $this->sut->parse_date_for_wp_query( '+8000 years', '_date_paid' );
 
 		$this->assertSame(
-			array(),
+			array(
+				array(
+					'key'     => '_date_paid',
+					'value'   => 0,
+					'type'    => 'NUMERIC',
+					'compare' => '<',
+				),
+			),
 			$result['meta_query'],
-			'An unrepresentable date should leave the query unconstrained instead of raising an exception'
+			'An unrepresentable date should constrain the query to nothing rather than dropping the date filter'
 		);
 	}
 

@@ -463,9 +463,11 @@ class WC_Data_Store_WP {
 			 * Deriving it identically is what keeps the two order storage backends from resolving one
 			 * query var to different days on these meta keys.
 			 *
-			 * Constructing the bounds can still throw on a date beyond year 9999, which the caller's
-			 * date parsing above also guards against, so keep the same "unparseable means no date
-			 * constraint" contract rather than letting it surface as a fatal.
+			 * Constructing the bounds can still throw on a date beyond year 9999. Returning here with
+			 * no clause is not an option: both callers strip their own clause for this key before
+			 * calling, so an empty meta_query drops the date filter entirely and widens the query to
+			 * every record. A day that cannot be represented matches nothing instead, which is what
+			 * HPOS also does with the same input.
 			 */
 			try {
 				$timezone = wp_timezone();
@@ -474,6 +476,13 @@ class WC_Data_Store_WP {
 					? new DateTime( gmdate( 'Y-m-d', (int) wc_string_to_timestamp( $raw_end ) ) . ' 00:00:00', $timezone )
 					: clone $start;
 			} catch ( Exception $e ) {
+				$wp_query_args['meta_query'][] = array(
+					'key'     => $key,
+					'value'   => 0,
+					'type'    => 'NUMERIC',
+					'compare' => '<',
+				);
+
 				return $wp_query_args;
 			}
 
