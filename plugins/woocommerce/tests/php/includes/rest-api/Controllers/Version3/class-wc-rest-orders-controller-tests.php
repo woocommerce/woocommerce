@@ -1699,7 +1699,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 						'product_id' => $product->get_id(),
 						'quantity'   => 1,
 						'subtotal'   => '100',
-						'total'      => '90',
+						'total'      => '95',
 					),
 				),
 				'coupon_lines' => array( array( 'code' => 'created-percent' ) ),
@@ -1710,7 +1710,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertSame( 201, $response->get_status() );
 		$this->assertEquals( 100, $data['line_items'][0]['subtotal'], 'The posted subtotal should stay the pre-discount price' );
-		$this->assertEquals( 90, $data['line_items'][0]['total'], 'The discount should be calculated from the posted subtotal, not stacked on the posted total' );
+		$this->assertEquals( 90, $data['line_items'][0]['total'], 'The total should be recalculated from the posted subtotal, not from or on top of the posted total' );
 		$this->assertEquals( 10, $data['discount_total'] );
 	}
 
@@ -1736,7 +1736,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 					array(
 						'id'       => $item_id,
 						'subtotal' => '100',
-						'total'    => '90',
+						'total'    => '95',
 					),
 				),
 				'coupon_lines' => array( array( 'code' => 'updated-percent' ) ),
@@ -1747,7 +1747,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertEquals( 100, $data['line_items'][0]['subtotal'], 'The posted subtotal should stay the pre-discount price' );
-		$this->assertEquals( 90, $data['line_items'][0]['total'], 'The discount should be calculated from the posted subtotal, not stacked on the posted total' );
+		$this->assertEquals( 90, $data['line_items'][0]['total'], 'The total should be recalculated from the posted subtotal, not from or on top of the posted total' );
 		$this->assertEquals( 10, $data['discount_total'] );
 	}
 }
