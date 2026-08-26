@@ -2365,24 +2365,6 @@ parameters:
 			path: includes/admin/class-wc-admin-permalink-settings.php
 
 		-
-			message: '#^Parameter \#1 \$str of function urldecode expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/admin/class-wc-admin-permalink-settings.php
-
-		-
-			message: '#^Parameter \#1 \$value of function trailingslashit expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/admin/class-wc-admin-permalink-settings.php
-
-		-
-			message: '#^Parameter \#1 \$value of function wc_sanitize_permalink expects string, array\|string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/admin/class-wc-admin-permalink-settings.php
-
-		-
 			message: '#^Method WC_Admin_Pointers\:\:create_product_tutorial\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -14167,12 +14149,6 @@ parameters:
 			path: includes/class-wc-regenerate-images.php
 
 		-
-			message: '#^Parameter \#3 \$size of static method WC_Regenerate_Images\:\:resize_and_return_image\(\) expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-regenerate-images.php
-
-		-
 			message: '#^Access to an undefined property WC_Register_WP_Admin_Settings\:\:\$description\.$#'
 			identifier: property.notFound
 			count: 1
@@ -20104,18 +20080,6 @@ parameters:
 			message: '#^Method WC_Product_Importer\:\:set_variation_data\(\) should return WC_Product\|WP_Error but return statement is missing\.$#'
 			identifier: return.missing
 			count: 2
-			path: includes/import/abstract-wc-product-importer.php
-
-		-
-			message: '#^Parameter \#1 \$attribute_name of function wc_attribute_taxonomy_name expects string, int\<min, \-1\>\|int\<1, max\>\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/import/abstract-wc-product-importer.php
-
-		-
-			message: '#^Parameter \#1 \$name of function wc_attribute_taxonomy_id_by_name expects string, int\<min, \-1\>\|int\<1, max\>\|string given\.$#'
-			identifier: argument.type
-			count: 1
 			path: includes/import/abstract-wc-product-importer.php
 
 		-
@@ -35026,12 +34990,6 @@ parameters:
 			path: includes/wc-product-functions.php
 
 		-
-			message: '#^Function wc_get_product_category_list\(\) should return string but returns string\|WP_Error\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/wc-product-functions.php
-
-		-
 			message: '#^Function wc_get_product_object\(\) should return WC_Product but returns object\.$#'
 			identifier: return.type
 			count: 1
@@ -45312,12 +45270,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property WooCommerce\:\:\$payment_gateways\.$#'
 			identifier: property.notFound
-			count: 1
-			path: src/Admin/Features/Blueprint/Exporters/ExportWCPaymentGateways.php
-
-		-
-			message: '#^Argument of an invalid type string supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
 			count: 1
 			path: src/Admin/Features/Blueprint/Exporters/ExportWCPaymentGateways.php
 
@@ -67547,12 +67499,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/StockNotifications/Privacy/PrivacyEraser.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\StockNotifications\:\:init_hooks\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/StockNotifications/StockNotifications.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\StockNotifications\:\:on_install_or_update\(\) has no return type specified\.$#'

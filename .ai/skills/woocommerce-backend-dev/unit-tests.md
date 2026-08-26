@@ -7,6 +7,8 @@
 - [System Under Test Variable](#system-under-test-variable)
 - [Test Method Documentation](#test-method-documentation)
 - [Comments in Tests](#comments-in-tests)
+- [Avoid Performative Tests](#avoid-performative-tests)
+- [Group Similar Tests with @testWith or a Data Provider](#group-similar-tests-with-testwith-or-a-data-provider)
 - [Test Configuration](#test-configuration)
 - [Example: Payment Extension Suggestions Tests](#example-payment-extension-suggestions-tests)
 - [Mocking the WooCommerce Logger](#mocking-the-woocommerce-logger)
@@ -189,6 +191,57 @@ Use blank lines for visual separation instead. The test structure should be self
 - Documenting known issues: `// Workaround for WordPress core bug #12345`
 - Clarifying business rules: `// Payment processor requires 24h hold`
 
+## Avoid Performative Tests
+
+Tests exist to catch regressions, not to raise a coverage number. A test that passes no matter what the implementation does isn't providing value.
+
+**Signs a test is performative:**
+
+- Asserting something PHP or WordPress already guarantees (e.g. a setter stored the exact value passed in, with no transformation or validation involved)
+- Weak assertions (`assertNotNull`, unqualified `assertTrue`) where a specific expected value would actually catch a regression
+- Mocking so many of the SUT's related helpers or classes that you end up checking the mock's pre-set return value, not the SUT's own logic
+- A near-duplicate of another test, added just to "cover one more case," that doesn't touch any new code path
+
+**Before adding a test, ask:** if the implementation had a bug, would this test actually fail? If you can't think of a bug this test would catch, it isn't worth adding.
+
+## Group Similar Tests with `@testWith` or a Data Provider
+
+When several tests call the same method with different inputs but the same assertion logic, don't write many near-identical test methods with copy-pasted setup. Collapse them into one test.
+
+- Prefer **`@testWith`** when the inputs are simple values (strings, numbers, booleans) or arrays written directly in the annotation (see real examples in `wc-core-functions-test.php`).
+- Use a **`dataProvider`** method only when the dataset needs to be built with logic (loops, constants, fixtures) rather than written out literally.
+
+**Avoid - Repeated tests, same shape:**
+
+```php
+public function test_get_shipping_cost_us() {
+    $this->assertSame( 5.00, $this->sut->get_shipping_cost( 'US' ) );
+}
+
+public function test_get_shipping_cost_ca() {
+    $this->assertSame( 7.50, $this->sut->get_shipping_cost( 'CA' ) );
+}
+
+public function test_get_shipping_cost_mx() {
+    $this->assertSame( 12.00, $this->sut->get_shipping_cost( 'MX' ) );
+}
+```
+
+**Prefer - One test with `@testWith`:**
+
+```php
+/**
+ * @testWith ["US", 5.00]
+ *           ["CA", 7.50]
+ *           ["MX", 12.00]
+ */
+public function test_get_shipping_cost( string $country, float $expected ) {
+    $this->assertSame( $expected, $this->sut->get_shipping_cost( $country ) );
+}
+```
+
+Never recompute the expected value inside the test or provider by reimplementing the system under test's own logic. Hardcode the expected literal instead. A provider that recalculates the answer the same way the SUT does will pass even when both are wrong.
+
 ## Test Configuration
 
 Test configuration file: `phpunit.xml`
@@ -356,7 +409,8 @@ See `PaymentGatewayTest.php:create_fake_logger()` for a complete implementation.
 1. **Always run tests after making changes** to verify functionality
 2. **Use specific test filters** during development (see running-tests.md in the woocommerce-dev-cycle skill)
 3. **Write descriptive test names** that explain what is being tested
-4. **Use data providers** for testing multiple scenarios with the same logic
+4. **Use `@testWith` or a data provider** instead of several near-identical tests for the same logic
 5. **Include helpful assertion messages** for debugging when tests fail
 6. **Test both success and failure cases**
 7. **Mock external dependencies** (database, API calls, etc.)
+8. **Only add tests that can fail on a real bug**
