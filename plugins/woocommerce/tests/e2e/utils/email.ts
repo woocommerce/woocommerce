@@ -9,6 +9,16 @@ import type { Page } from '@playwright/test';
 import { expect } from '../fixtures/fixtures';
 
 /**
+ * How long to keep re-navigating to the mail log while waiting for an email.
+ *
+ * Comfortably covers an Action Scheduler-backed dispatch, while keeping a
+ * genuine miss from eating a quarter of the 120s per-test budget. Every caller
+ * of `expectEmail()` pays this on the failure path, not just the ones that wait
+ * on an async email.
+ */
+const MAIL_LOG_POLL_TIMEOUT = 30 * 1000;
+
+/**
  * Check that an email exists in the WP Mail Logging plugin Email Log page. WP Mail Logging plugin must be installed.
  *
  * Polls by re-navigating to the log on every attempt, not just re-querying the
@@ -19,7 +29,7 @@ import { expect } from '../fixtures/fixtures';
  * @param {string}                           receiverEmailAddress The email address of the email receiver.
  * @param {RegExp}                           subject              The subject of the email, in regular expression format.
  * @param {number}                           [expectedCount]      Expected number of matching rows. Defaults to 1.
- * @return {Promise<*>} Returns the row element of the email in the Email Log page.
+ * @return {Promise<*>} Returns the row locator for the matching email(s) in the Email Log page. Resolves to `expectedCount` rows, so callers that want a single row must narrow it themselves.
  */
 export async function expectEmail(
 	page: Page,
@@ -52,7 +62,7 @@ export async function expectEmail(
 		await page.goto( mailLogUrl );
 
 		await expect( row ).toHaveCount( expectedCount );
-	} ).toPass( { timeout: 60 * 1000 } );
+	} ).toPass( { timeout: MAIL_LOG_POLL_TIMEOUT } );
 
 	return row;
 }

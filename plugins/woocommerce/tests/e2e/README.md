@@ -185,6 +185,7 @@ How a helper is wired up depends on when it needs to be active:
         - **Process waiting actions** — runs the Action Scheduler queue synchronously when a request carries the `?process-waiting-actions` query param (used by the analytics suite so order data lands in reports immediately).
         - **Test helper REST API** — endpoints (`e2e-feature-flags`, `e2e-options`, `e2e-environment`, `e2e-theme`) for toggling feature flags, setting/deleting options, reading environment info and switching themes during a test.
     - `wc-email-template-sync-test-helper` — see below (email template sync fixtures for RSM-146).
+    - `woocommerce-bis-test-helper` — zeroes the `woocommerce_customer_stock_notifications_first_batch_delay` filter, so the Back in Stock Notifications specs can assert the back-in-stock email immediately after triggering `?process-waiting-actions` instead of waiting out the 1-minute restock delay.
 - **Per-test block plugins** live in `tests/e2e/test-plugins/blocks/`, mounted (not auto-activated) via the `woocommerce-blocks-test-plugins` mapping. Each is activated and deactivated by the spec that needs it (e.g. `wp plugin activate woocommerce-blocks-test-plugins/<file>.php`), because they change store behavior globally and must not be on for every test.
 
 `woocommerce-cleanup` also lives under `test-plugins/`, but it is **not** in the wp-env `plugins` array — it's an on-demand site-reset tool installed only by the external (non-wp-env) setup path, `bin/test-env-setup-external.sh`.

@@ -12,6 +12,7 @@ import {
  * Internal dependencies
  */
 import { deleteOption, setOption } from './options';
+import { expectEmail } from './email';
 import { wpCLI } from './cli';
 import { expect, test as baseTest } from '../fixtures/fixtures';
 import { admin } from '../test-data/data';
@@ -398,34 +399,30 @@ export const bisEmailSubject = {
 /**
  * Open the WP Mail Logging entry for a given recipient and subject, leaving its modal open.
  *
+ * Finds the row through `expectEmail()` so this shares its re-navigating poll
+ * rather than reading the log once — an email dispatched after the first
+ * navigation is still found.
+ *
  * @param {Page}   page                 Playwright page.
  * @param {string} receiverEmailAddress The recipient email address.
  * @param {RegExp} subject              The email subject (regular expression).
+ * @param {number} [expectedCount]      Expected number of matching rows. Defaults to 1.
  */
 async function openEmailInMailLog(
 	page: Page,
 	receiverEmailAddress: string,
-	subject: RegExp
+	subject: RegExp,
+	expectedCount = 1
 ): Promise< void > {
-	await page.goto(
-		`wp-admin/tools.php?page=wpml_plugin_log&search[place]=receiver&search[term]=${ encodeURIComponent(
-			receiverEmailAddress
-		) }&orderby=timestamp&order=desc`
+	const rows = await expectEmail(
+		page,
+		receiverEmailAddress,
+		subject,
+		expectedCount
 	);
 
-	const row = page
-		.getByRole( 'row' )
-		.filter( {
-			has: page.getByRole( 'cell', {
-				name: receiverEmailAddress,
-				exact: true,
-			} ),
-		} )
-		.filter( { has: page.getByText( subject ) } )
-		.first();
-
-	await expect( row ).toBeVisible();
-	await row.getByRole( 'button', { name: 'View log' } ).click();
+	// The log is sorted newest first, so the first row is the latest email.
+	await rows.first().getByRole( 'button', { name: 'View log' } ).click();
 
 	await expect(
 		page.locator( '#wp-mail-logging-modal-content-body-content' )
@@ -463,14 +460,21 @@ async function closeMailLogModal( page: Page ): Promise< void > {
  * @param {string} receiverEmailAddress The recipient email address.
  * @param {RegExp} subject              The email subject (regular expression).
  * @param {string} anchorId             CSS id selector, e.g. `BIS_EMAIL_LINKS.actionButton`.
+ * @param {number} [expectedCount]      Expected number of matching rows. Defaults to 1.
  */
 export async function getEmailLinkById(
 	page: Page,
 	receiverEmailAddress: string,
 	subject: RegExp,
-	anchorId: string
+	anchorId: string,
+	expectedCount = 1
 ): Promise< string > {
-	await openEmailInMailLog( page, receiverEmailAddress, subject );
+	await openEmailInMailLog(
+		page,
+		receiverEmailAddress,
+		subject,
+		expectedCount
+	);
 
 	const iframe = page.frameLocator(
 		'#wp-mail-logging-modal-content-body-content iframe'
