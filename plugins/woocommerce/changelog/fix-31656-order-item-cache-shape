@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure the cached order item data always includes the item type and item ID, so the cache shape is consistent between the order data store and the order item data store.

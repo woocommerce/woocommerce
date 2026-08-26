@@ -14167,12 +14167,6 @@ parameters:
 			path: includes/class-wc-regenerate-images.php
 
 		-
-			message: '#^Parameter \#3 \$size of static method WC_Regenerate_Images\:\:resize_and_return_image\(\) expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-regenerate-images.php
-
-		-
 			message: '#^Access to an undefined property WC_Register_WP_Admin_Settings\:\:\$description\.$#'
 			identifier: property.notFound
 			count: 1
@@ -45294,12 +45288,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property WooCommerce\:\:\$payment_gateways\.$#'
 			identifier: property.notFound
-			count: 1
-			path: src/Admin/Features/Blueprint/Exporters/ExportWCPaymentGateways.php
-
-		-
-			message: '#^Argument of an invalid type string supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
 			count: 1
 			path: src/Admin/Features/Blueprint/Exporters/ExportWCPaymentGateways.php
 

@@ -197,12 +197,33 @@ WordPress exposes more contracts than class and function signatures. The followi
 4. State the impact in the PR description: what changed, who could consume it, and why it is safe or what the deprecation path is.
 5. If you cannot establish the impact, stop and flag it to the user as needing review.
 
+## Country and State (Region) Data
+
+Country and state/province lists live in `plugins/woocommerce/i18n/countries.php` and `plugins/woocommerce/i18n/states.php` (see `plugins/woocommerce/i18n/README.md`).
+
+**Follow the CLDR standard.** Codes and names should match the [Unicode CLDR](https://cldr.unicode.org/) project. CLDR is the actively maintained, widely used source for this kind of data, so following it keeps WooCommerce consistent with the wider ecosystem and avoids the drift and upkeep of a homegrown list. If CLDR doesn't yet have the code or name a region needs, propose the change to CLDR first rather than diverging from it.
+
+**Adding new codes is safe. Renaming or removing existing ones is not.** Do that only when CLDR itself has changed, and expect it to need a migration. State/country codes are stored in orders, shipping zones, tax rates, and store settings. Editing `states.php`/`countries.php` only changes what new data looks like. Every already-stored old code is left behind, no longer matching the dropdown or validation that now expects the new one.
+
+To rename subdivision codes, use `Automattic\WooCommerce\Database\Migrations\MigrationHelper::migrate_country_states()` from a `wc_update_*` function in `wc-update-functions.php`, passing a map of old codes to new ones. See `wc_update_721_adjust_new_zealand_states()` for the pattern. Use the helper rather than writing your own partial migration, since it's easy to miss one of the places a code is stored. The helper only covers subdivision codes, so country or other changes might need a custom migration routine. Purely additive changes (new codes, no renames) don't need a migration.
+
 ## Database Migrations
 
 Database migrations live in `WC_Install::$db_updates`; read that class for the current mechanics before adding one. Two invariants have broken real releases when violated:
 
 - Migration keys are one-shot: sites that updated past a key never re-run it. A migration added after a prerelease of the same version has shipped needs a new suffixed key (see existing examples in `$db_updates`), and a key must never be ahead of the version it ships in.
 - Feature flag defaults are persisted, so changing `enabled_by_default` alone doesn't change behavior on existing sites; ship a migration or remove the flag.
+
+## Comments and Docblocks
+
+Docblocks are expected on methods, classes, and hooks (see the `woocommerce-backend-dev` skill for exact requirements). Inline comments are the exception, not the default: add one only when the code can't explain itself, for example a non-obvious "why", a hidden constraint, or a workaround for a specific bug. Either way, don't add a comment that just restates what the identifier names already say.
+
+When writing a comment or docblock description:
+
+- **Keep it short.** 3-4 lines is the target for a docblock description (`@param`/`@return`/`@since` lines are separate and don't count against this). If it's running longer, the comment is likely explaining something the code itself should make obvious. Simplify the code first.
+- **Use plain language.** Say what the code does or why in ordinary words. Avoid dense or clever phrasing, and avoid vague jargon for guard conditions (e.g. "gates", "gating"). Say "guard", "check", "only when" instead.
+- **Don't force-wrap at a fixed column.** This repo has no enforced 80- or 120-column limit on comment prose (`.markdownlint.json` disables `MD013`, and there's no PHPCS `LineLength` override), and plenty of existing docblocks already run past both. Match the wrap width already used in the surrounding file instead of imposing your own.
+- **Decorative comments are worse than none.** A comment that restates the next line, marks an obvious section (`// Loop over items`), or pads a docblock out to look thorough adds noise a future reader has to read past to find the comments that actually matter.
 
 ## Enum-Style Constants (`src/Enums/`)
 
