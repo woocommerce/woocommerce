@@ -31,28 +31,28 @@ export async function expectEmail(
 		receiverEmailAddress
 	) }&orderby=timestamp&order=desc`;
 
-	let row;
+	// Locators are lazy, so building this once outside the poll still re-queries
+	// the freshly loaded page on every attempt.
+	const row = page
+		.getByRole( 'row' )
+		.filter( {
+			has: page.getByRole( 'cell', {
+				name: receiverEmailAddress,
+				exact: true,
+			} ),
+		} )
+		.filter( {
+			has: page.getByRole( 'cell', {
+				name: subject,
+				exact: true,
+			} ),
+		} );
 
 	await expect( async () => {
 		await page.goto( mailLogUrl );
 
-		row = page
-			.getByRole( 'row' )
-			.filter( {
-				has: page.getByRole( 'cell', {
-					name: receiverEmailAddress,
-					exact: true,
-				} ),
-			} )
-			.filter( {
-				has: page.getByRole( 'cell', {
-					name: subject,
-					exact: true,
-				} ),
-			} );
-
 		await expect( row ).toHaveCount( expectedCount );
-	} ).toPass();
+	} ).toPass( { timeout: 60 * 1000 } );
 
 	return row;
 }

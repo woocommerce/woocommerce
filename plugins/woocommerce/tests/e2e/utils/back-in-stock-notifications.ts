@@ -38,7 +38,7 @@ export const BIS_FEATURE_OPTION =
  * so an env predating the feature reports every spec as an unexplained timeout.
  */
 export async function assertBISFeatureEnabled(): Promise< void > {
-	const { stdout } = await wpCLI( `option get ${ BIS_FEATURE_OPTION }` );
+	const { stdout } = await wpCLI( `wp option get ${ BIS_FEATURE_OPTION }` );
 
 	// wp-env prefixes its own lines onto stdout, so match rather than compare.
 	if ( ! /^yes$/m.test( stdout ) ) {
@@ -56,7 +56,7 @@ export async function assertBISFeatureEnabled(): Promise< void > {
  */
 export async function assertBISTestHelperActive(): Promise< void > {
 	const { stdout } = await wpCLI(
-		'plugin list --status=active --field=name'
+		'wp plugin list --status=active --field=name'
 	);
 
 	if ( ! /^woocommerce-bis-test-helper$/m.test( stdout ) ) {
