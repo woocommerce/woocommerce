@@ -2,6 +2,9 @@
 /**
  * Plugin Name: Back in Stock Notifications — e2e test helpers
  * Description: Small utilities scoped to the BIS Playwright specs.
+ * Version: 1.0.0
+ * Author: WooCommerce
+ * Requires PHP: 7.4
  *
  * Intended to function as a (mu-)plugin while tests are running. Removes the
  * 1-minute delay between a product restock and the first notifications batch,
@@ -12,6 +15,8 @@
  */
 
 declare( strict_types=1 );
+
+defined( 'ABSPATH' ) || exit;
 
 add_filter(
 	'woocommerce_customer_stock_notifications_first_batch_delay',

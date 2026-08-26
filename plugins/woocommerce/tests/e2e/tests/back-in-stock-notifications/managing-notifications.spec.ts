@@ -1,57 +1,24 @@
 /**
  * External dependencies
  */
-import type { Browser, Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 /**
  * Internal dependencies
  */
-import {
-	expect,
-	request,
-	tags,
-	test as baseTest,
-} from '../../fixtures/fixtures';
+import { expect, request, tags } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import {
-	BIS_OPTIONS,
+	assertBISFeatureEnabled,
+	bisAdminListUrl,
 	bisEmailSubject,
-	createOutOfStockProduct,
+	resetBISOptions,
 	setBISOptions,
-	signUpOnProductPage,
+	signUpAsGuest,
+	test,
 	uniqueGuestEmail,
 } from '../../utils/back-in-stock-notifications';
 import { expectEmail } from '../../utils/email';
-import { deleteOption } from '../../utils/options';
-
-const test = baseTest.extend( {
-	product: async ( { restApi }, use ) => {
-		const product = await createOutOfStockProduct( restApi );
-		await use( product );
-		await product.cleanup();
-	},
-} );
-
-/**
- * Submit the PDP signup form as a logged-out guest, regardless of the test's storageState.
- *
- * @param {Browser} browser   The test's browser fixture.
- * @param {string}  permalink The product permalink.
- * @param {string}  email     The guest's email address.
- */
-async function signUpAsGuest(
-	browser: Browser,
-	permalink: string,
-	email: string
-): Promise< void > {
-	const guestContext = await browser.newContext( {
-		storageState: { cookies: [], origins: [] },
-	} );
-	const guestPage = await guestContext.newPage();
-	await guestPage.goto( permalink );
-	await signUpOnProductPage( guestPage, { email } );
-	await guestContext.close();
-}
 
 /**
  * Click the notification edit-form "Update" button.
@@ -74,6 +41,10 @@ test.describe(
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
+		test.beforeAll( async () => {
+			await assertBISFeatureEnabled();
+		} );
+
 		test.beforeEach( async ( { baseURL } ) => {
 			await setBISOptions( request, baseURL!, {
 				allowSignups: true,
@@ -83,9 +54,7 @@ test.describe(
 		} );
 
 		test.afterEach( async ( { baseURL } ) => {
-			for ( const option of Object.values( BIS_OPTIONS ) ) {
-				await deleteOption( request, baseURL!, option );
-			}
+			await resetBISOptions( request, baseURL! );
 		} );
 
 		test( 'notifications list renders a signup row filtered by product', async ( {
@@ -97,9 +66,7 @@ test.describe(
 
 			await signUpAsGuest( browser, product.permalink, email );
 
-			await page.goto(
-				`/wp-admin/admin.php?page=wc-customer-stock-notifications&customer_stock_notifications_product_filter=${ product.id }`
-			);
+			await page.goto( bisAdminListUrl( product.id ) );
 			await expect(
 				page.getByRole( 'cell', { name: email, exact: true } )
 			).toBeVisible();
@@ -121,9 +88,7 @@ test.describe(
 				bisEmailSubject.verify( product.name )
 			);
 
-			await page.goto(
-				`/wp-admin/admin.php?page=wc-customer-stock-notifications&customer_stock_notifications_product_filter=${ product.id }`
-			);
+			await page.goto( bisAdminListUrl( product.id ) );
 			// Surface cross-test bleed (duplicate rows for the same email/product)
 			// as an explicit failure instead of silently picking one via .first().
 			const row = page
@@ -148,32 +113,12 @@ test.describe(
 
 			// Assert a second verify email actually landed in the log — the
 			// admin success notice alone would pass even if dispatch regressed.
-			// Poll across reloads because expectEmail() only does a single
-			// page.goto(); Playwright's auto-retry re-queries the already
-			// loaded DOM instead of re-fetching the page.
-			const mailLogUrl = `wp-admin/tools.php?page=wpml_plugin_log&search[place]=receiver&search[term]=${ encodeURIComponent(
-				email
-			) }&orderby=timestamp&order=desc`;
-			await expect( async () => {
-				await page.goto( mailLogUrl );
-				await expect(
-					page
-						.getByRole( 'row' )
-						.filter( {
-							has: page.getByRole( 'cell', {
-								name: email,
-								exact: true,
-							} ),
-						} )
-						.filter( {
-							// `exact: true` is a no-op when `name` is a RegExp — Playwright
-							// only applies it to string matchers.
-							has: page.getByRole( 'cell', {
-								name: bisEmailSubject.verify( product.name ),
-							} ),
-						} )
-				).toHaveCount( 2 );
-			} ).toPass();
+			await expectEmail(
+				page,
+				email,
+				bisEmailSubject.verify( product.name ),
+				2
+			);
 		} );
 
 		test( 'Resend verification is not offered for notifications that are already active', async ( {
@@ -189,9 +134,7 @@ test.describe(
 
 			await signUpAsGuest( browser, product.permalink, email );
 
-			await page.goto(
-				`/wp-admin/admin.php?page=wc-customer-stock-notifications&customer_stock_notifications_product_filter=${ product.id }`
-			);
+			await page.goto( bisAdminListUrl( product.id ) );
 			const row = page
 				.getByRole( 'row' )
 				.filter( { has: page.getByText( email, { exact: true } ) } );
@@ -229,9 +172,7 @@ test.describe(
 
 			await signUpAsGuest( browser, product.permalink, email );
 
-			await page.goto(
-				`/wp-admin/admin.php?page=wc-customer-stock-notifications&customer_stock_notifications_product_filter=${ product.id }`
-			);
+			await page.goto( bisAdminListUrl( product.id ) );
 			const row = page
 				.getByRole( 'row' )
 				.filter( { has: page.getByText( email, { exact: true } ) } );
@@ -257,9 +198,7 @@ test.describe(
 				page.getByText( 'Notification updated.' )
 			).toBeVisible();
 
-			await page.goto(
-				`/wp-admin/admin.php?page=wc-customer-stock-notifications&customer_stock_notifications_product_filter=${ product.id }`
-			);
+			await page.goto( bisAdminListUrl( product.id ) );
 			const refreshedRow = page
 				.getByRole( 'row' )
 				.filter( { has: page.getByText( email, { exact: true } ) } );

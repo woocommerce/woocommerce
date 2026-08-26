@@ -1,40 +1,29 @@
 /**
  * Internal dependencies
  */
-import {
-	expect,
-	request,
-	tags,
-	test as baseTest,
-} from '../../fixtures/fixtures';
+import { expect, request, tags } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH, CUSTOMER_STATE_PATH } from '../../playwright.config';
 import {
-	BIS_OPTIONS,
+	assertBISFeatureEnabled,
 	bisEmailSubject,
-	createOutOfStockProduct,
+	resetBISOptions,
 	setBISOptions,
 	signUpOnProductPage,
+	test,
 	uniqueGuestEmail,
 } from '../../utils/back-in-stock-notifications';
 import { expectEmail } from '../../utils/email';
-import { deleteOption } from '../../utils/options';
-
-const test = baseTest.extend( {
-	product: async ( { restApi }, use ) => {
-		const product = await createOutOfStockProduct( restApi );
-		await use( product );
-		await product.cleanup();
-	},
-} );
 
 test.describe(
 	'Back in Stock Notifications — signing up',
 	{ tag: [ tags.SERVICES ] },
 	() => {
+		test.beforeAll( async () => {
+			await assertBISFeatureEnabled();
+		} );
+
 		test.afterEach( async ( { baseURL } ) => {
-			for ( const option of Object.values( BIS_OPTIONS ) ) {
-				await deleteOption( request, baseURL!, option );
-			}
+			await resetBISOptions( request, baseURL! );
 		} );
 
 		test.describe( 'Logged-in customer, single opt-in', () => {
@@ -61,7 +50,9 @@ test.describe(
 
 				// A logged-in customer does not see the email field — email is derived server-side.
 				await expect(
-					page.locator( 'input[name="wc_bis_email"]' )
+					page.getByRole( 'textbox', {
+						name: /Email address to be notified/i,
+					} )
 				).toHaveCount( 0 );
 				await expect(
 					page.getByRole( 'button', { name: /Notify me/i } )
@@ -123,7 +114,9 @@ test.describe(
 				await page.goto( product.permalink );
 
 				await expect(
-					page.locator( 'input[name="wc_bis_email"]' )
+					page.getByRole( 'textbox', {
+						name: /Email address to be notified/i,
+					} )
 				).toBeVisible();
 				await expect(
 					page.getByRole( 'button', { name: /Notify me/i } )
@@ -180,7 +173,9 @@ test.describe(
 				await page.goto( product.permalink );
 
 				await expect(
-					page.locator( 'input[name="wc_bis_email"]' )
+					page.getByRole( 'textbox', {
+						name: /Email address to be notified/i,
+					} )
 				).toHaveCount( 0 );
 			} );
 		} );

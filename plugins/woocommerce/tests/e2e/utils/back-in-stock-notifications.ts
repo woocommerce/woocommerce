@@ -1,14 +1,15 @@
 /**
  * External dependencies
  */
-import type { APIRequest, Page } from '@playwright/test';
+import type { APIRequest, Browser, Page } from '@playwright/test';
 import { WC_API_PATH, type ApiClient } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
  */
-import { setOption } from './options';
-import { expect } from '../fixtures/fixtures';
+import { deleteOption, setOption } from './options';
+import { wpCLI } from './cli';
+import { expect, test as baseTest } from '../fixtures/fixtures';
 
 /**
  * Names of the Back in Stock Notifications options in core.
@@ -20,20 +21,60 @@ export const BIS_OPTIONS = {
 	doubleOptIn:
 		'woocommerce_customer_stock_notifications_require_double_opt_in',
 	requireAccount: 'woocommerce_customer_stock_notifications_require_account',
-	createAccountOnSignup:
-		'woocommerce_customer_stock_notifications_create_account_on_signup',
 } as const;
+
+/**
+ * Option that gates the whole Back in Stock Notifications feature.
+ *
+ * @see src/Internal/Features/FeaturesController.php
+ */
+export const BIS_FEATURE_OPTION =
+	'woocommerce_feature_customer_stock_notifications_enabled';
+
+/**
+ * Fail early, and with a fix, when the BIS feature flag is off.
+ *
+ * `bin/test-env-setup.sh` sets it, but only runs on env create or `--update`,
+ * so an env predating the feature reports every spec as an unexplained timeout.
+ */
+export async function assertBISFeatureEnabled(): Promise< void > {
+	const { stdout } = await wpCLI( `option get ${ BIS_FEATURE_OPTION }` );
+
+	// wp-env prefixes its own lines onto stdout, so match rather than compare.
+	if ( ! /^yes$/m.test( stdout ) ) {
+		throw new Error(
+			`The "${ BIS_FEATURE_OPTION }" feature flag is not enabled, so none of the Back in Stock Notifications UI renders. Run \`pnpm env:e2e:start\` to re-provision the tests env.`
+		);
+	}
+}
+
+/**
+ * Fail early when the BIS e2e helper plugin is missing.
+ *
+ * Without it the first notifications batch keeps its one-minute delay, so
+ * draining the queue produces no email and the spec times out with no clue why.
+ */
+export async function assertBISTestHelperActive(): Promise< void > {
+	const { stdout } = await wpCLI(
+		'plugin list --status=active --field=name'
+	);
+
+	if ( ! /^woocommerce-bis-test-helper$/m.test( stdout ) ) {
+		throw new Error(
+			'The "woocommerce-bis-test-helper" plugin is not active, so the notifications batch delay is not zeroed. Run `pnpm env:e2e:start` to re-provision the tests env.'
+		);
+	}
+}
 
 /**
  * Configure the BIS feature options for a test. Omitted keys are left untouched.
  *
- * @param {APIRequest} request                       Playwright request fixture.
- * @param {string}     baseURL                       Test site base URL.
- * @param {Object}     options                       BIS option toggles.
- * @param {boolean}    [options.allowSignups]        Whether the signup form is rendered on product pages.
- * @param {boolean}    [options.doubleOptIn]         Whether signups require email verification before activating.
- * @param {boolean}    [options.requireAccount]      Whether signups are limited to logged-in users.
- * @param {boolean}    [options.createAccountOnSignup] Whether a new account is created for guest signups.
+ * @param {APIRequest} request                  Playwright request fixture.
+ * @param {string}     baseURL                  Test site base URL.
+ * @param {Object}     options                  BIS option toggles.
+ * @param {boolean}    [options.allowSignups]   Whether the signup form is rendered on product pages.
+ * @param {boolean}    [options.doubleOptIn]    Whether signups require email verification before activating.
+ * @param {boolean}    [options.requireAccount] Whether signups are limited to logged-in users.
  */
 export async function setBISOptions(
 	request: APIRequest,
@@ -42,7 +83,6 @@ export async function setBISOptions(
 		allowSignups?: boolean;
 		doubleOptIn?: boolean;
 		requireAccount?: boolean;
-		createAccountOnSignup?: boolean;
 	}
 ): Promise< void > {
 	const toYesNo = ( v: boolean | undefined ): string | undefined => {
@@ -56,10 +96,6 @@ export async function setBISOptions(
 		[ BIS_OPTIONS.allowSignups, toYesNo( options.allowSignups ) ],
 		[ BIS_OPTIONS.doubleOptIn, toYesNo( options.doubleOptIn ) ],
 		[ BIS_OPTIONS.requireAccount, toYesNo( options.requireAccount ) ],
-		[
-			BIS_OPTIONS.createAccountOnSignup,
-			toYesNo( options.createAccountOnSignup ),
-		],
 	];
 
 	for ( const [ name, value ] of entries ) {
@@ -70,29 +106,34 @@ export async function setBISOptions(
 }
 
 /**
- * Return a handle to an out-of-stock product. Caller is responsible for calling cleanup().
+ * Delete all BIS feature options, restoring core defaults. Mirrors `setBISOptions()`.
  *
- * @param {ApiClient} restApi        WP REST client.
- * @param {Object}    [opts]         Product shape.
- * @param {string}    [opts.type]    Product type (`simple` or `variable`). Defaults to `simple`.
- * @param {string}    [opts.namePrefix] Prefix used to build a unique product name.
+ * @param {APIRequest} request Playwright request fixture.
+ * @param {string}     baseURL Test site base URL.
  */
-export async function createOutOfStockProduct(
-	restApi: ApiClient,
-	opts: {
-		type?: 'simple' | 'variable';
-		namePrefix?: string;
-	} = {}
-): Promise< {
+export async function resetBISOptions(
+	request: APIRequest,
+	baseURL: string
+): Promise< void > {
+	for ( const option of Object.values( BIS_OPTIONS ) ) {
+		await deleteOption( request, baseURL, option );
+	}
+}
+
+/**
+ * Return a handle to an out-of-stock simple product. Caller is responsible for calling cleanup().
+ *
+ * @param {ApiClient} restApi WP REST client.
+ */
+export async function createOutOfStockProduct( restApi: ApiClient ): Promise< {
 	id: number;
 	name: string;
 	permalink: string;
 	cleanup: () => Promise< void >;
 } > {
-	const { type = 'simple', namePrefix = 'BIS Test Product' } = opts;
 	// Append a random suffix so parallel workers don't collide on the product name,
 	// which would break the row-scoped selectors in the admin list-table specs.
-	const name = `${ namePrefix } ${ Date.now() }-${ Math.floor(
+	const name = `BIS Test Product ${ Date.now() }-${ Math.floor(
 		Math.random() * 1e6
 	) }`;
 
@@ -102,7 +143,7 @@ export async function createOutOfStockProduct(
 		permalink: string;
 	} >( `${ WC_API_PATH }/products`, {
 		name,
-		type,
+		type: 'simple',
 		regular_price: '9.99',
 		manage_stock: false,
 		stock_status: 'outofstock',
@@ -135,25 +176,30 @@ export async function restockProduct(
 	restApi: ApiClient,
 	productId: number
 ): Promise< void > {
-	await restApi.put( `${ WC_API_PATH }/products/${ productId }`, {
-		stock_status: 'instock',
-		manage_stock: false,
-	} );
+	const response = await restApi.put< { stock_status: string } >(
+		`${ WC_API_PATH }/products/${ productId }`,
+		{
+			stock_status: 'instock',
+			manage_stock: false,
+		}
+	);
+
+	// A 200 whose body doesn't reflect the requested stock change would
+	// otherwise only surface ~20s later as an email timeout.
+	expect( response.data.stock_status ).toBe( 'instock' );
 }
 
 /**
  * Submit the PDP sign-up form. Caller must already have the product page loaded.
  *
- * @param {Page}    page                    Playwright page on the product detail.
- * @param {Object}  [opts]                  Fill options.
- * @param {string}  [opts.email]            Email address to enter (guest flow only; logged-in PDP hides the field).
- * @param {boolean} [opts.tickOptInCheckbox] Tick the privacy opt-in checkbox before submitting.
+ * @param {Page}   page         Playwright page on the product detail.
+ * @param {Object} [opts]       Fill options.
+ * @param {string} [opts.email] Email address to enter (guest flow only; logged-in PDP hides the field).
  */
 export async function signUpOnProductPage(
 	page: Page,
 	opts: {
 		email?: string;
-		tickOptInCheckbox?: boolean;
 	} = {}
 ): Promise< void > {
 	if ( opts.email !== undefined ) {
@@ -164,12 +210,60 @@ export async function signUpOnProductPage(
 			.fill( opts.email );
 	}
 
-	if ( opts.tickOptInCheckbox ) {
-		await page.locator( 'input[name="wc_bis_opt_in"]' ).check();
-	}
-
 	await page.getByRole( 'button', { name: /Notify me/i } ).click();
 }
+
+/**
+ * Submit the PDP signup form as a logged-out guest, regardless of the test's storageState.
+ *
+ * @param {Browser} browser   The test's browser fixture.
+ * @param {string}  permalink The product permalink.
+ * @param {string}  email     The guest's email address.
+ */
+export async function signUpAsGuest(
+	browser: Browser,
+	permalink: string,
+	email: string
+): Promise< void > {
+	const guestContext = await browser.newContext( {
+		storageState: { cookies: [], origins: [] },
+	} );
+	const guestPage = await guestContext.newPage();
+	await guestPage.goto( permalink );
+	await signUpOnProductPage( guestPage, { email } );
+	await guestContext.close();
+}
+
+/**
+ * Build the admin notifications-list URL, optionally filtered to one product.
+ *
+ * Relative (no leading slash) so it resolves under any `baseURL` subdirectory,
+ * matching the rest of the suite's navigation convention.
+ *
+ * @param {number} productId Product id to filter the list by.
+ */
+export function bisAdminListUrl( productId: number ): string {
+	return `wp-admin/admin.php?page=wc-customer-stock-notifications&customer_stock_notifications_product_filter=${ productId }`;
+}
+
+/**
+ * Shared `product` fixture for the Back in Stock Notifications specs: an
+ * out-of-stock simple product created before the test and cleaned up after.
+ */
+export const test = baseTest.extend< {
+	product: {
+		id: number;
+		name: string;
+		permalink: string;
+		cleanup: () => Promise< void >;
+	};
+} >( {
+	product: async ( { restApi }, use ) => {
+		const product = await createOutOfStockProduct( restApi );
+		await use( product );
+		await product.cleanup();
+	},
+} );
 
 /**
  * Anchor ids rendered by the Back in Stock Notifications email templates.
@@ -293,9 +387,9 @@ async function closeMailLogModal( page: Page ): Promise< void > {
 /**
  * Open an email in WP Mail Logging and return the href of a specific anchor, selected by its id.
  *
- * Prefer this over `getLinkFromEmailBody` when the template gives the link a
- * stable id: it names the link you mean instead of inferring it from the URL,
- * so the assertion can then check the URL without circularity.
+ * Selecting the anchor by its stable template id names the link you mean
+ * instead of inferring it from the URL, so the assertion can then check the
+ * URL without circularity.
  *
  * @param {Page}   page                 Playwright page.
  * @param {string} receiverEmailAddress The recipient email address.
@@ -325,86 +419,6 @@ export async function getEmailLinkById(
 	}
 
 	await closeMailLogModal( page );
-
-	return href;
-}
-
-/**
- * Open an email in WP Mail Logging and extract the first href matching a regular expression from its HTML body.
- *
- * Use this for follow-through flows where a subsequent step needs the URL embedded in the email.
- *
- * @param {Page}   page                 Playwright page.
- * @param {string} receiverEmailAddress The recipient email address.
- * @param {RegExp} subject              The email subject (regular expression).
- * @param {RegExp} hrefPattern          Pattern the target href should match (e.g. /email_link_action=verify/).
- */
-export async function getLinkFromEmailBody(
-	page: Page,
-	receiverEmailAddress: string,
-	subject: RegExp,
-	hrefPattern: RegExp
-): Promise< string > {
-	await page.goto(
-		`wp-admin/tools.php?page=wpml_plugin_log&search[place]=receiver&search[term]=${ encodeURIComponent(
-			receiverEmailAddress
-		) }&orderby=timestamp&order=desc`
-	);
-
-	const row = page
-		.getByRole( 'row' )
-		.filter( {
-			has: page.getByRole( 'cell', {
-				name: receiverEmailAddress,
-				exact: true,
-			} ),
-		} )
-		.filter( { has: page.getByText( subject ) } )
-		.first();
-
-	await expect( row ).toBeVisible();
-	await row.getByRole( 'button', { name: 'View log' } ).click();
-
-	const modalContent = page.locator(
-		'#wp-mail-logging-modal-content-body-content'
-	);
-	await expect( modalContent ).toBeVisible();
-
-	const iframe = page.frameLocator(
-		'#wp-mail-logging-modal-content-body-content iframe'
-	);
-	// Wait until iframe content is attached and has anchors rendered.
-	await iframe.locator( 'a' ).first().waitFor( { state: 'attached' } );
-
-	const href = await iframe.locator( 'a' ).evaluateAll(
-		( anchors, { source, flags } ) => {
-			const regex = new RegExp( source, flags );
-			for ( const a of anchors as HTMLAnchorElement[] ) {
-				if ( regex.test( a.href ) ) {
-					return a.href;
-				}
-			}
-			return null;
-		},
-		{ source: hrefPattern.source, flags: hrefPattern.flags }
-	);
-
-	if ( ! href ) {
-		throw new Error(
-			`No link matching ${ hrefPattern } found in email to ${ receiverEmailAddress } with subject ${ subject }`
-		);
-	}
-
-	// Close the modal for clean state.
-	await page
-		.locator(
-			'#wp-mail-logging-modal-content-header-close, .wp-mail-logging-modal-close'
-		)
-		.first()
-		.click()
-		.catch( () => {
-			/* Some wp-mail-logging versions don't surface an explicit close button — fine. */
-		} );
 
 	return href;
 }

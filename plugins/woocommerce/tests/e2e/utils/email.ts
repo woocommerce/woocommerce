@@ -11,38 +11,48 @@ import { expect } from '../fixtures/fixtures';
 /**
  * Check that an email exists in the WP Mail Logging plugin Email Log page. WP Mail Logging plugin must be installed.
  *
+ * Polls by re-navigating to the log on every attempt, not just re-querying the
+ * already-loaded DOM, so an email that lands after the first navigation is
+ * still found instead of timing out.
+ *
  * @param {import('@playwright/test').Page } page                 The Playwright page.
  * @param {string}                           receiverEmailAddress The email address of the email receiver.
  * @param {RegExp}                           subject              The subject of the email, in regular expression format.
+ * @param {number}                           [expectedCount]      Expected number of matching rows. Defaults to 1.
  * @return {Promise<*>} Returns the row element of the email in the Email Log page.
  */
 export async function expectEmail(
 	page: Page,
 	receiverEmailAddress: string,
-	subject: RegExp
+	subject: RegExp,
+	expectedCount = 1
 ) {
-	await page.goto(
-		`wp-admin/tools.php?page=wpml_plugin_log&search[place]=receiver&search[term]=${ encodeURIComponent(
-			receiverEmailAddress
-		) }&orderby=timestamp&order=desc`
-	);
+	const mailLogUrl = `wp-admin/tools.php?page=wpml_plugin_log&search[place]=receiver&search[term]=${ encodeURIComponent(
+		receiverEmailAddress
+	) }&orderby=timestamp&order=desc`;
 
-	const row = page
-		.getByRole( 'row' )
-		.filter( {
-			has: page.getByRole( 'cell', {
-				name: receiverEmailAddress,
-				exact: true,
-			} ),
-		} )
-		.filter( {
-			has: page.getByRole( 'cell', {
-				name: subject,
-				exact: true,
-			} ),
-		} );
+	let row;
 
-	await expect( row ).toBeVisible();
+	await expect( async () => {
+		await page.goto( mailLogUrl );
+
+		row = page
+			.getByRole( 'row' )
+			.filter( {
+				has: page.getByRole( 'cell', {
+					name: receiverEmailAddress,
+					exact: true,
+				} ),
+			} )
+			.filter( {
+				has: page.getByRole( 'cell', {
+					name: subject,
+					exact: true,
+				} ),
+			} );
+
+		await expect( row ).toHaveCount( expectedCount );
+	} ).toPass();
 
 	return row;
 }

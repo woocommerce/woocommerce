@@ -1,67 +1,35 @@
 /**
- * External dependencies
- */
-import type { Browser } from '@playwright/test';
-
-/**
  * Internal dependencies
  */
-import {
-	expect,
-	request,
-	tags,
-	test as baseTest,
-} from '../../fixtures/fixtures';
+import { expect, request, tags } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import {
+	assertBISFeatureEnabled,
+	assertBISTestHelperActive,
 	BIS_EMAIL_LINKS,
-	BIS_OPTIONS,
+	bisAdminListUrl,
 	bisEmailSubject,
-	createOutOfStockProduct,
 	getEmailLinkById,
+	resetBISOptions,
 	restockProduct,
 	setBISOptions,
-	signUpOnProductPage,
+	signUpAsGuest,
+	test,
 	triggerStockNotificationsBatch,
 	uniqueGuestEmail,
 } from '../../utils/back-in-stock-notifications';
 import { expectEmail } from '../../utils/email';
-import { deleteOption } from '../../utils/options';
-
-const test = baseTest.extend( {
-	product: async ( { restApi }, use ) => {
-		const product = await createOutOfStockProduct( restApi );
-		await use( product );
-		await product.cleanup();
-	},
-} );
-
-/**
- * Submit the PDP signup form as a logged-out guest, regardless of the test's storageState.
- *
- * @param {Browser} browser   The test's browser fixture.
- * @param {string}  permalink The product permalink.
- * @param {string}  email     The guest's email address.
- */
-async function signUpAsGuest(
-	browser: Browser,
-	permalink: string,
-	email: string
-): Promise< void > {
-	const guestContext = await browser.newContext( {
-		storageState: { cookies: [], origins: [] },
-	} );
-	const guestPage = await guestContext.newPage();
-	await guestPage.goto( permalink );
-	await signUpOnProductPage( guestPage, { email } );
-	await guestContext.close();
-}
 
 test.describe(
 	'Back in Stock Notifications — receiving back-in-stock emails',
 	{ tag: [ tags.SERVICES ] },
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
+
+		test.beforeAll( async () => {
+			await assertBISFeatureEnabled();
+			await assertBISTestHelperActive();
+		} );
 
 		test.beforeEach( async ( { baseURL } ) => {
 			// Single opt-in so the notification becomes ACTIVE immediately
@@ -74,9 +42,7 @@ test.describe(
 		} );
 
 		test.afterEach( async ( { baseURL } ) => {
-			for ( const option of Object.values( BIS_OPTIONS ) ) {
-				await deleteOption( request, baseURL!, option );
-			}
+			await resetBISOptions( request, baseURL! );
 		} );
 
 		test( 'restocking a product dispatches the back-in-stock email with UTM params', async ( {
@@ -153,9 +119,7 @@ test.describe(
 			);
 			await page.goto( unsubscribeLink );
 
-			await page.goto(
-				`/wp-admin/admin.php?page=wc-customer-stock-notifications&customer_stock_notifications_product_filter=${ product.id }`
-			);
+			await page.goto( bisAdminListUrl( product.id ) );
 			const row = page
 				.getByRole( 'row' )
 				.filter( { has: page.getByText( email, { exact: true } ) } );
