@@ -314,7 +314,6 @@ class WC_Meta_Box_Product_Data {
 						$value = sanitize_title( $value );
 					} else {
 						$value = html_entity_decode( wc_clean( $value ), ENT_QUOTES, get_bloginfo( 'charset' ) );
-						// WPCS: sanitization ok.
 					}
 
 					$attributes[ $attribute_key ] = $value;
@@ -467,8 +466,8 @@ class WC_Meta_Box_Product_Data {
 	 * Persist the stock data enforced by the external product class.
 	 *
 	 * External product setters normalize stock values while the existing product data is read. The submitted
-	 * values therefore match the in-memory values and are not detected as changes, leaving stale post meta and
-	 * lookup data behind unless they are synchronized explicitly.
+	 * values therefore match the in-memory values and are not detected as changes, leaving stale stock meta,
+	 * lookup, and visibility data behind unless they are synchronized explicitly.
 	 *
 	 * @param WC_Product $product External product object.
 	 */
@@ -476,6 +475,7 @@ class WC_Meta_Box_Product_Data {
 		update_post_meta( $product->get_id(), '_manage_stock', 'no' );
 		update_post_meta( $product->get_id(), '_stock_status', ProductStockStatus::IN_STOCK );
 		update_post_meta( $product->get_id(), '_backorders', 'no' );
+		wp_remove_object_terms( $product->get_id(), ProductStockStatus::OUT_OF_STOCK, 'product_visibility' );
 
 		/**
 		 * Product data store.

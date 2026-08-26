@@ -1216,6 +1216,14 @@ jQuery( function ( $ ) {
 				if ( 'wc-modal-add-products' === target ) {
 					$( document.body ).trigger( 'wc-enhanced-select-init' );
 
+					var $productSearch = $( '#wc-backbone-modal-dialog' )
+						.find( '.wc-product-search' )
+						.first();
+
+					if ( $productSearch.length ) {
+						$productSearch.selectWoo( 'open' );
+					}
+
 					$( this ).on( 'change', '.wc-product-search', function() {
 						if ( ! $( this ).closest( 'tr' ).is( ':last-child' ) ) {
 							return;

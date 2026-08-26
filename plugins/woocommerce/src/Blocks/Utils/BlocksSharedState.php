@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Blocks\Utils;
 use InvalidArgumentException;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
+use Automattic\WooCommerce\Internal\Utilities\PriceSeparators;
 
 /**
  * Manages the registration of interactivity config and state that is commonly shared by WooCommerce blocks.
@@ -143,8 +144,8 @@ class BlocksSharedState {
 				'precision'         => wc_get_price_decimals(),
 				'symbol'            => html_entity_decode( get_woocommerce_currency_symbol( $currency ) ),
 				'symbolPosition'    => get_option( 'woocommerce_currency_pos' ),
-				'decimalSeparator'  => wc_get_price_decimal_separator(),
-				'thousandSeparator' => wc_get_price_thousand_separator(),
+				'decimalSeparator'  => PriceSeparators::get_decimal(),
+				'thousandSeparator' => PriceSeparators::get_thousand(),
 				'priceFormat'       => html_entity_decode( get_woocommerce_price_format() ),
 			),
 		);

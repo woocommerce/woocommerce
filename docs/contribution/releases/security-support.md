@@ -6,19 +6,19 @@ sidebar_position: 10
 
 # Security Patch Support Policy
 
-WooCommerce provides security patches for the **last 21 major versions**. If the current stable WooCommerce version is 11.0, that means version **9.0 and newer**.
+When a security fix warrants it (CVSS score >=9), WooCommerce will provide security patches for the **last 21 major versions**. If the current stable WooCommerce version is 11.0, that means version **9.0 and newer**. Otherwise, we publish fixes for the latest version.
 
 "Major version" follows WooCommerce's release numbering (`10.8`, `10.9`, `11.0`, ...), not semantic versioning. At the current release cadence, 21 major versions correspond to roughly two years of releases.
 
 ## What this means
 
-- Security fixes are backported to every supported major version affected by the vulnerability, and ship as [point releases](/docs/contribution/releases/point-releases).
+- When the impact of a security issue warrants it (CVSS score >=9) - security fixes are backported to every supported major version affected by the vulnerability (within the established support window), and ship as [point releases](/docs/contribution/releases/point-releases).
 - Versions older than the support window do not receive security patches. Stores on unsupported versions must update to a supported version to receive fixes.
 - The window is a rolling count: each new major release moves the floor up by one version.
 
 ## Exceptions
 
-For critical vulnerabilities - actively exploited, or with severe impact (for example CVSS 9.0+) - the security team may patch versions beyond the standard window. How far back to patch is at the security team's discretion, weighing exploitation risk against the affected install base.
+For some classes of critical vulnerabilities, we may as a courtesy, backport outside the established policy.
 
 ## Reporting
 
@@ -26,4 +26,4 @@ Security vulnerabilities must be reported privately through Automattic's HackerO
 
 ## Keeping this page current
 
-The release run-book's publish steps include moving the supported-version floor forward when the stable release of a new major version ships.
+When the stable release of a new major version is published, an automated workflow opens a pull request that bumps the minimum supported version on this page. The release DRI reviews and merges it as part of the post-release tasks.
