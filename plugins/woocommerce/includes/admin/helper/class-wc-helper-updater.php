@@ -104,6 +104,10 @@ class WC_Helper_Updater {
 			 */
 			$item = apply_filters( 'update_woo_com_subscription_details', $item, $data, $plugin['_product_id'] );
 
+			if ( self::is_autoupdate_forced( $data, $item ) ) {
+				$item['autoupdate'] = true;
+			}
+
 			if ( isset( $data['requires_php'] ) ) {
 				$item['requires_php'] = $data['requires_php'];
 			}
@@ -172,6 +176,10 @@ class WC_Helper_Updater {
 			 */
 			$item = apply_filters( 'update_woo_com_subscription_details', $item, $data, $theme['_product_id'] );
 
+			if ( self::is_autoupdate_forced( $data, $item ) ) {
+				$item['autoupdate'] = true;
+			}
+
 			if ( version_compare( $theme['Version'], $data['version'], '<' ) ) {
 				$transient->response[ $slug ] = $item;
 			} else {
@@ -181,6 +189,31 @@ class WC_Helper_Updater {
 		}
 
 		return $transient;
+	}
+
+	/**
+	 * Checks whether WooCommerce.com flagged this update to be installed automatically,
+	 * regardless of the merchant's per-plugin or per-theme auto-update setting.
+	 *
+	 * The package checks are required: forcing an update that cannot be installed, either
+	 * because no package was supplied or because the subscription expired, only produces a
+	 * failed update email to every admin on the site.
+	 *
+	 * @since 11.2.0
+	 * @param array $data Product data returned by the Helper API update check.
+	 * @param array $item Update item built for the update transient.
+	 * @return bool
+	 */
+	private static function is_autoupdate_forced( $data, $item ) {
+		if ( empty( $data['autoupdate'] ) ) {
+			return false;
+		}
+
+		if ( empty( $item['package'] ) || ! is_string( $item['package'] ) ) {
+			return false;
+		}
+
+		return 0 !== strpos( $item['package'], 'woocommerce-com-expired-' );
 	}
 
 	/**
