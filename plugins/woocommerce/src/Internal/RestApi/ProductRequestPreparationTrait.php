@@ -61,10 +61,12 @@ trait ProductRequestPreparationTrait {
 				// Convert only the core data store's own invalid-product failure for a nonzero
 				// target that is no longer a product post; absence of a post proves deletion
 				// there because wp_delete_post() invalidates the posts cache (unlike
-				// WooCommerce's products cache group). The throw site identifies that failure:
-				// stores for other backends or post types must override read() and so throw
-				// from their own files. Everything else is rethrown unchanged, since typed
-				// exceptions carry their own codes and extension-backed stores may fail
+				// WooCommerce's products cache group). The throw site stands in for that
+				// failure: a store that reads its own backend throws from its own file, so it
+				// is rethrown. A store that delegates to parent::read() throws from the core
+				// file instead and is converted, which is why the post-type check below has to
+				// carry the decision on its own. Everything else is rethrown unchanged, since
+				// typed exceptions carry their own codes and extension-backed stores may fail
 				// transiently for IDs that never had a post.
 				$is_core_invalid_product = ! ( $e instanceof \WC_Data_Exception )
 					&& ( new \ReflectionClass( \WC_Product_Data_Store_CPT::class ) )->getFileName() === $e->getFile();
