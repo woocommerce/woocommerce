@@ -920,6 +920,17 @@ describe( 'getRangeLabel', () => {
 		expect( label ).toBe( 'Day Apr 1 - 15, 2018' );
 	} );
 
+	it( 'should leave a bracketed month literal alone', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( '[MMMM] MMM D, YYYY' );
+
+		const label = getRangeLabel(
+			moment( '2018-04-01' ),
+			moment( '2018-04-15' )
+		);
+
+		expect( label ).toBe( 'MMMM Apr 1 - 15, 2018' );
+	} );
+
 	it( 'should leave a backslash escaped day literal alone', () => {
 		( __ as jest.Mock ).mockReturnValueOnce( '\\D MMM D, YYYY' );
 
