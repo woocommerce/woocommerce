@@ -20,6 +20,13 @@ class WC_Tests_Report_Sales_By_Date extends WC_Unit_Test_Case {
 	private $original_thousands_sep = null;
 
 	/**
+	 * Counts to give the report through the woocommerce_admin_report_data filter.
+	 *
+	 * @var array
+	 */
+	private $report_counts = array();
+
+	/**
 	 * Load the necessary files, as they're not automatically loaded by WooCommerce.
 	 */
 	public static function setUpBeforeClass(): void {
@@ -177,14 +184,20 @@ class WC_Tests_Report_Sales_By_Date extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Should format chart legend counts with the locale thousands separator.
+	 *
+	 * @dataProvider provide_legend_counts
+	 *
+	 * @param array    $counts   Counts to give the report.
+	 * @param string[] $expected Strings the legend should contain.
 	 */
-	public function test_get_chart_legend_formats_counts_with_locale_separator() {
+	public function test_get_chart_legend_formats_counts_with_locale_separator( $counts, $expected ) {
 		global $wp_locale;
 
 		$this->original_thousands_sep              = $wp_locale->number_format['thousands_sep'];
 		$wp_locale->number_format['thousands_sep'] = '.';
 
-		add_filter( 'woocommerce_admin_report_data', array( $this, 'inflate_report_counts' ) );
+		$this->report_counts = $counts;
+		add_filter( 'woocommerce_admin_report_data', array( $this, 'set_report_counts' ) );
 
 		$report                 = new WC_Report_Sales_By_Date();
 		$report->chart_colours  = array_fill_keys(
@@ -198,22 +211,59 @@ class WC_Tests_Report_Sales_By_Date extends WC_Unit_Test_Case {
 
 		$legend = implode( ' ', wp_list_pluck( $report->get_chart_legend(), 'title' ) );
 
-		$this->assertStringContainsString( '<strong>12.345</strong> orders placed', $legend, 'Orders placed should use the locale thousands separator.' );
-		$this->assertStringContainsString( '<strong>67.890</strong> items purchased', $legend, 'Items purchased should use the locale thousands separator.' );
-		$this->assertStringContainsString( 'refunded 1.234 orders (5.678 items)', $legend, 'Refunded orders and items should use the locale thousands separator.' );
+		foreach ( $expected as $needle ) {
+			$this->assertStringContainsString( $needle, $legend, 'Legend counts should use the locale thousands separator.' );
+		}
 	}
 
 	/**
-	 * Give the report counts that are large enough to be grouped.
+	 * Counts to render the legend with, and the strings they should produce.
+	 *
+	 * The refund line is a _n() string, so it needs a case for each form.
+	 *
+	 * @return array[]
+	 */
+	public function provide_legend_counts() {
+		return array(
+			'plural refunds'  => array(
+				array(
+					'total_orders'          => 12345,
+					'total_items'           => 67890,
+					'total_refunded_orders' => 1234,
+					'refunded_order_items'  => 5678,
+				),
+				array(
+					'<strong>12.345</strong> orders placed',
+					'<strong>67.890</strong> items purchased',
+					'refunded 1.234 orders (5.678 items)',
+				),
+			),
+			'singular refund' => array(
+				array(
+					'total_orders'          => 1000,
+					'total_items'           => 2000,
+					'total_refunded_orders' => 1,
+					'refunded_order_items'  => 1500,
+				),
+				array(
+					'<strong>1.000</strong> orders placed',
+					'<strong>2.000</strong> items purchased',
+					'refunded 1 order (1.500 item)',
+				),
+			),
+		);
+	}
+
+	/**
+	 * Give the report the counts the running test needs.
 	 *
 	 * @param stdClass $data Report data.
 	 * @return stdClass
 	 */
-	public function inflate_report_counts( $data ) {
-		$data->total_orders          = 12345;
-		$data->total_items           = 67890;
-		$data->total_refunded_orders = 1234;
-		$data->refunded_order_items  = 5678;
+	public function set_report_counts( $data ) {
+		foreach ( $this->report_counts as $key => $value ) {
+			$data->$key = $value;
+		}
 
 		return $data;
 	}

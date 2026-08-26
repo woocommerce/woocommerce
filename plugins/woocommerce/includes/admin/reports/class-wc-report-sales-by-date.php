@@ -519,6 +519,8 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			);
 		}
 
+		// The counts below are already absint()'d in query_report_data(), but a woocommerce_admin_report_data
+		// callback can replace them with anything, and number_format() fatals on a non-numeric string.
 		$legend[] = array(
 			'title'            => sprintf(
 				/* translators: %s: total orders */
