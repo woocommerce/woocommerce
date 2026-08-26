@@ -104,14 +104,21 @@ jQuery( function( $ ) {
 	};
 
 	/**
-	 * Initialize.
+	 * Initialize tokenization forms for all saved payment method lists in the DOM.
+	 * Guards against double-initialization on the same element.
 	 */
-	$( document.body ).on( 'updated_checkout wc-credit-card-form-init', function() {
-		// Loop over gateways with saved payment methods
-		var $saved_payment_methods = $( 'ul.woocommerce-SavedPaymentMethods' );
-
-		$saved_payment_methods.each( function() {
-			$( this ).wc_tokenization_form();
+	function initForms() {
+		$( 'ul.woocommerce-SavedPaymentMethods' ).each( function() {
+			if ( ! $( this ).data( 'wc-tokenization-form' ) ) {
+				$( this ).data( 'wc-tokenization-form', true ).wc_tokenization_form();
+			}
 		} );
+	}
+
+	$( document.body ).on( 'updated_checkout wc-credit-card-form-init', function() {
+		$( 'ul.woocommerce-SavedPaymentMethods' ).data( 'wc-tokenization-form', null );
+		initForms();
 	} );
+
+	initForms();
 } );
