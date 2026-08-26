@@ -178,12 +178,29 @@ export const TaskListItem = ( {
 		navigateTo( { url: getNewPath( { task: id }, '/', {} ) } );
 	}, [ id, isComplete, actionUrl ] );
 
+	// Extended lists trade the ellipsis Dismiss for a row-level Skip. Keeping
+	// the skip action alongside the props it replaces means a fill that
+	// composes its own TaskItem receives it too, instead of losing both.
+	const skipAction =
+		showSkipAction && isDismissable && ! isComplete ? (
+			<Button
+				className="woocommerce-task-list__item-skip"
+				disabled={ isSkipDisabled }
+				variant="link"
+				onClick={ onSkip }
+				onKeyDown={ onSkipKeyDown }
+			>
+				{ __( 'Skip', 'woocommerce' ) }
+			</Button>
+		) : undefined;
+
 	const taskItemProps = {
 		expandable: isExpandable,
 		expanded: isExpandable && isExpanded,
 		completed: isComplete,
 		onSnooze: isSnoozeable ? onSnooze : undefined,
 		onDismiss: isDismissable && ! showSkipAction ? onDismiss : undefined,
+		secondaryAction: skipAction,
 	};
 
 	const DefaultTaskItem = useCallback(
@@ -220,19 +237,6 @@ export const TaskListItem = ( {
 					content={ content }
 					additionalInfo={ additionalInfo }
 					time={ time }
-					secondaryAction={
-						showSkipAction && isDismissable && ! isComplete ? (
-							<Button
-								className="woocommerce-task-list__item-skip"
-								disabled={ isSkipDisabled }
-								variant="link"
-								onClick={ onSkip }
-								onKeyDown={ onSkipKeyDown }
-							>
-								{ __( 'Skip', 'woocommerce' ) }
-							</Button>
-						) : undefined
-					}
 					action={ onClickActions }
 					level={ level }
 					actionLabel={ actionLabel }

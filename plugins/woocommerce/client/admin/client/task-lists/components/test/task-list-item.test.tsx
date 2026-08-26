@@ -5,7 +5,8 @@ import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SlotFillProvider } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
-import { useSlot } from '@woocommerce/experimental';
+import { TaskItem, useSlot } from '@woocommerce/experimental';
+import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
 import { TaskType } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { navigateTo } from '@woocommerce/navigation';
@@ -396,5 +397,37 @@ describe( 'TaskListItem', () => {
 			</SlotFillProvider>
 		);
 		expect( queryByText( task.title ) ).not.toBeInTheDocument();
+	} );
+
+	it( 'should hand the skip action to a fill that composes its own TaskItem', async () => {
+		( useSlot as jest.Mock ).mockReturnValue( { fills: [ 'test' ] } );
+		const onTaskSkip = jest.fn().mockResolvedValue( undefined );
+		const extendedTask = { ...task, id: 'test' };
+
+		const { getByRole, queryByRole } = render(
+			<SlotFillProvider>
+				<WooOnboardingTaskListItem id="test">
+					{ (
+						fillProps: React.ComponentProps< typeof TaskItem >
+					) => <TaskItem { ...fillProps } title={ task.title } /> }
+				</WooOnboardingTaskListItem>
+				<TaskListItem
+					task={ extendedTask }
+					isExpandable={ false }
+					isExpanded={ false }
+					setExpandedTask={ () => {} }
+					showSkipAction={ true }
+					onTaskSkip={ onTaskSkip }
+				/>
+			</SlotFillProvider>
+		);
+
+		// Extended lists drop Dismiss, so the fill has to receive Skip in its
+		// place rather than losing both actions.
+		expect( queryByRole( 'button', { name: 'Dismiss' } ) ).toBeNull();
+
+		await userEvent.click( getByRole( 'button', { name: 'Skip' } ) );
+
+		expect( onTaskSkip ).toHaveBeenCalledWith( extendedTask );
 	} );
 } );
