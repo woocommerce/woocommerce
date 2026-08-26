@@ -1,30 +1,48 @@
 /**
  * External dependencies
  */
-import { useBlockProps } from '@wordpress/block-editor';
-import { __ } from '@wordpress/i18n';
+import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
+import { EditorProvider } from '@woocommerce/base-context';
+import type { ReactElement } from 'react';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
+import { useForcedLayout } from '../../cart-checkout-shared';
+import { ORDER_STATUS_BLOCKS, ORDER_STATUS_TEMPLATE } from './inner-blocks';
 
-const Edit = (): JSX.Element => {
+interface Props {
+	attributes: {
+		currentView: string;
+	};
+	clientId: string;
+}
+
+const Edit = ( { attributes, clientId }: Props ): ReactElement => {
 	const blockProps = useBlockProps( {
 		className: 'wc-block-order-confirmation-status',
 	} );
 
+	useForcedLayout( {
+		clientId,
+		registeredBlocks: ORDER_STATUS_BLOCKS,
+		defaultTemplate: ORDER_STATUS_TEMPLATE,
+	} );
+
 	return (
 		<div { ...blockProps }>
-			<h1>{ __( 'Order received', 'woocommerce' ) }</h1>
-			<p>
-				{ __(
-					'Thank you. Your order has been received.',
-					'woocommerce'
-				) }
-			</p>
+			<EditorProvider currentView={ attributes.currentView }>
+				<InnerBlocks
+					allowedBlocks={ ORDER_STATUS_BLOCKS }
+					template={ ORDER_STATUS_TEMPLATE }
+					templateLock="all"
+				/>
+			</EditorProvider>
 		</div>
 	);
 };
 
 export default Edit;
+
+export const Save = (): ReactElement => <InnerBlocks.Content />;

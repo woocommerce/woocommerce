@@ -1,0 +1,19 @@
+{
+	"name": "woocommerce/order-confirmation-status-default",
+	"version": "1.0.0",
+	"title": "Default order status",
+	"description": "Contains the message shown for the default order status.",
+	"category": "woocommerce",
+	"attributes": {},
+	"supports": {
+		"html": false,
+		"multiple": false,
+		"reusable": false,
+		"inserter": false,
+		"lock": false
+	},
+	"parent": [ "woocommerce/order-confirmation-status" ],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}

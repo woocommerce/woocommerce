@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
@@ -26,9 +28,9 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 	/**
 	 * Render the block.
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content Block content.
-	 * @param WP_Block $block Block instance.
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content Block content.
+	 * @param \WP_Block $block Block instance.
 	 *
 	 * @return string | void Rendered block output.
 	 */
@@ -93,7 +95,8 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 	 */
 	protected function get_view_order_permissions( $order ) {
 		if ( ! $order || ! $this->has_valid_order_key( $order ) ) {
-			return false; // Always disallow access to invalid orders and those without a valid key.
+			// Always disallow access to invalid orders and those without a valid key.
+			return false;
 		}
 
 		// For customers with accounts, verify the order belongs to the current user or disallow access.
