@@ -172,6 +172,164 @@ export async function signUpOnProductPage(
 }
 
 /**
+ * Anchor ids rendered by the Back in Stock Notifications email templates.
+ *
+ * Targeting these is more precise than scanning every href in the body: the
+ * back-in-stock email carries both a product CTA and an unsubscribe link, and
+ * a pattern loose enough to match one can match the other.
+ *
+ * @see templates/emails/customer-stock-notification.php
+ * @see templates/emails/customer-stock-notification-verify.php
+ * @see templates/emails/customer-stock-notification-verified.php
+ */
+export const BIS_EMAIL_LINKS = {
+	// Product CTA in the back-in-stock email; verification link in the verify email.
+	actionButton: '#notification__action_button',
+	unsubscribe: '#notification__unsubscribe_link',
+} as const;
+
+/**
+ * Escape a string for literal use inside a regular expression.
+ *
+ * @param {string} value The string to escape.
+ */
+function escapeRegExp( value: string ): string {
+	return value.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
+}
+
+/**
+ * Subject matchers for the three BIS emails, bound to a specific product.
+ *
+ * The product name is interpolated rather than wildcarded so a notification for
+ * the wrong product fails the test instead of passing it.
+ *
+ * @see src/Internal/StockNotifications/Emails/
+ */
+export const bisEmailSubject = {
+	/**
+	 * Verify email — `Join the "{product_name}" waitlist.`
+	 *
+	 * @param {string} productName The product name.
+	 */
+	verify: ( productName: string ): RegExp =>
+		new RegExp( `Join the "${ escapeRegExp( productName ) }" waitlist\\.` ),
+
+	/**
+	 * Verified email — `You have joined the "{product_name}" waitlist.`
+	 *
+	 * @param {string} productName The product name.
+	 */
+	verified: ( productName: string ): RegExp =>
+		new RegExp(
+			`You have joined the "${ escapeRegExp( productName ) }" waitlist\\.`
+		),
+
+	/**
+	 * Back-in-stock email — `"{product_name}" is back in stock!`
+	 *
+	 * @param {string} productName The product name.
+	 */
+	backInStock: ( productName: string ): RegExp =>
+		new RegExp( `"${ escapeRegExp( productName ) }" is back in stock!` ),
+} as const;
+
+/**
+ * Open the WP Mail Logging entry for a given recipient and subject, leaving its modal open.
+ *
+ * @param {Page}   page                 Playwright page.
+ * @param {string} receiverEmailAddress The recipient email address.
+ * @param {RegExp} subject              The email subject (regular expression).
+ */
+async function openEmailInMailLog(
+	page: Page,
+	receiverEmailAddress: string,
+	subject: RegExp
+): Promise< void > {
+	await page.goto(
+		`wp-admin/tools.php?page=wpml_plugin_log&search[place]=receiver&search[term]=${ encodeURIComponent(
+			receiverEmailAddress
+		) }&orderby=timestamp&order=desc`
+	);
+
+	const row = page
+		.getByRole( 'row' )
+		.filter( {
+			has: page.getByRole( 'cell', {
+				name: receiverEmailAddress,
+				exact: true,
+			} ),
+		} )
+		.filter( { has: page.getByText( subject ) } )
+		.first();
+
+	await expect( row ).toBeVisible();
+	await row.getByRole( 'button', { name: 'View log' } ).click();
+
+	await expect(
+		page.locator( '#wp-mail-logging-modal-content-body-content' )
+	).toBeVisible();
+}
+
+/**
+ * Close the WP Mail Logging modal, if this version of the plugin renders a close control.
+ *
+ * @param {Page} page Playwright page.
+ */
+async function closeMailLogModal( page: Page ): Promise< void > {
+	const closeButton = page
+		.locator(
+			'#wp-mail-logging-modal-content-header-close, .wp-mail-logging-modal-close'
+		)
+		.first();
+
+	// Some wp-mail-logging versions don't surface an explicit close button.
+	// Check rather than swallowing a click failure, which would otherwise burn
+	// the full action timeout on every call.
+	if ( ( await closeButton.count() ) > 0 ) {
+		await closeButton.click( { timeout: 2000 } ).catch( () => {} );
+	}
+}
+
+/**
+ * Open an email in WP Mail Logging and return the href of a specific anchor, selected by its id.
+ *
+ * Prefer this over `getLinkFromEmailBody` when the template gives the link a
+ * stable id: it names the link you mean instead of inferring it from the URL,
+ * so the assertion can then check the URL without circularity.
+ *
+ * @param {Page}   page                 Playwright page.
+ * @param {string} receiverEmailAddress The recipient email address.
+ * @param {RegExp} subject              The email subject (regular expression).
+ * @param {string} anchorId             CSS id selector, e.g. `BIS_EMAIL_LINKS.actionButton`.
+ */
+export async function getEmailLinkById(
+	page: Page,
+	receiverEmailAddress: string,
+	subject: RegExp,
+	anchorId: string
+): Promise< string > {
+	await openEmailInMailLog( page, receiverEmailAddress, subject );
+
+	const iframe = page.frameLocator(
+		'#wp-mail-logging-modal-content-body-content iframe'
+	);
+	const anchor = iframe.locator( `a${ anchorId }` );
+	await anchor.waitFor( { state: 'attached' } );
+
+	const href = await anchor.first().getAttribute( 'href' );
+
+	if ( ! href ) {
+		throw new Error(
+			`No anchor ${ anchorId } with an href found in email to ${ receiverEmailAddress } with subject ${ subject }`
+		);
+	}
+
+	await closeMailLogModal( page );
+
+	return href;
+}
+
+/**
  * Open an email in WP Mail Logging and extract the first href matching a regular expression from its HTML body.
  *
  * Use this for follow-through flows where a subsequent step needs the URL embedded in the email.

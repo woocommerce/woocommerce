@@ -15,6 +15,7 @@ import {
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import {
 	BIS_OPTIONS,
+	bisEmailSubject,
 	createOutOfStockProduct,
 	setBISOptions,
 	signUpOnProductPage,
@@ -114,7 +115,11 @@ test.describe(
 			await signUpAsGuest( browser, product.permalink, email );
 
 			// Wait for the initial verify email so we can count a new one later.
-			await expectEmail( page, email, /Join the "[^"]+" waitlist\./ );
+			await expectEmail(
+				page,
+				email,
+				bisEmailSubject.verify( product.name )
+			);
 
 			await page.goto(
 				`/wp-admin/admin.php?page=wc-customer-stock-notifications&customer_stock_notifications_product_filter=${ product.id }`
@@ -143,9 +148,9 @@ test.describe(
 
 			// Assert a second verify email actually landed in the log — the
 			// admin success notice alone would pass even if dispatch regressed.
-			// Poll across reloads because Playwright's auto-retry doesn't
-			// refresh the mail-log page and the second email lands
-			// asynchronously via Action Scheduler.
+			// Poll across reloads because expectEmail() only does a single
+			// page.goto(); Playwright's auto-retry re-queries the already
+			// loaded DOM instead of re-fetching the page.
 			const mailLogUrl = `wp-admin/tools.php?page=wpml_plugin_log&search[place]=receiver&search[term]=${ encodeURIComponent(
 				email
 			) }&orderby=timestamp&order=desc`;
@@ -164,7 +169,7 @@ test.describe(
 							// `exact: true` is a no-op when `name` is a RegExp — Playwright
 							// only applies it to string matchers.
 							has: page.getByRole( 'cell', {
-								name: /Join the "[^"]+" waitlist\./,
+								name: bisEmailSubject.verify( product.name ),
 							} ),
 						} )
 				).toHaveCount( 2 );

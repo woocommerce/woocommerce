@@ -10,6 +10,7 @@ import {
 import { ADMIN_STATE_PATH, CUSTOMER_STATE_PATH } from '../../playwright.config';
 import {
 	BIS_OPTIONS,
+	bisEmailSubject,
 	createOutOfStockProduct,
 	setBISOptions,
 	signUpOnProductPage,
@@ -75,9 +76,7 @@ test.describe(
 				await signUpOnProductPage( page );
 
 				await expect(
-					page.getByText(
-						/You have successfully signed up|You have already joined this waitlist/i
-					)
+					page.getByText( /You have successfully signed up/i )
 				).toBeVisible();
 			} );
 
@@ -89,11 +88,10 @@ test.describe(
 				await signUpOnProductPage( page );
 
 				// Wait for the first submission to finish so the re-navigation
-				// below can't race it.
+				// below can't race it. This is the first signup for a freshly
+				// created product, so it always succeeds.
 				await expect(
-					page.getByText(
-						/You have successfully signed up|You have already joined this waitlist/i
-					)
+					page.getByText( /You have successfully signed up/i )
 				).toBeVisible();
 
 				// Submitting the form a second time (the "already joined"
@@ -161,7 +159,7 @@ test.describe(
 				await expectEmail(
 					adminPage,
 					email,
-					/Join the "[^"]+" waitlist\./
+					bisEmailSubject.verify( product.name )
 				);
 				await adminContext.close();
 			} );

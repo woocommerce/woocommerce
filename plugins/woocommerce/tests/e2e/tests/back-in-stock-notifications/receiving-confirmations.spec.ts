@@ -14,9 +14,11 @@ import {
 } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import {
+	BIS_EMAIL_LINKS,
 	BIS_OPTIONS,
+	bisEmailSubject,
 	createOutOfStockProduct,
-	getLinkFromEmailBody,
+	getEmailLinkById,
 	setBISOptions,
 	signUpOnProductPage,
 	uniqueGuestEmail,
@@ -85,24 +87,24 @@ test.describe(
 			const emailRow = await expectEmail(
 				page,
 				email,
-				/Join the "[^"]+" waitlist\./
+				bisEmailSubject.verify( product.name )
 			);
 			await emailRow.getByRole( 'button', { name: 'View log' } ).click();
 
 			await expectEmailContent(
 				page,
 				email,
-				/Join the "[^"]+" waitlist\./,
+				bisEmailSubject.verify( product.name ),
 				// Confirm button text is in the rendered email body.
 				/Confirm/
 			);
 
-			// Asserting the verify link shape + UTM params via body inspection.
-			const verifyLink = await getLinkFromEmailBody(
+			// Link is selected by its role in the template, then checked for the params it must carry.
+			const verifyLink = await getEmailLinkById(
 				page,
 				email,
-				/Join the "[^"]+" waitlist\./,
-				/email_link_action=verify/
+				bisEmailSubject.verify( product.name ),
+				BIS_EMAIL_LINKS.actionButton
 			);
 
 			expect( verifyLink ).toMatch( /email_link_action=verify/ );
@@ -122,11 +124,11 @@ test.describe(
 
 			await signUpAsGuest( browser, product.permalink, email );
 
-			const verifyLink = await getLinkFromEmailBody(
+			const verifyLink = await getEmailLinkById(
 				page,
 				email,
-				/Join the "[^"]+" waitlist\./,
-				/email_link_action=verify/
+				bisEmailSubject.verify( product.name ),
+				BIS_EMAIL_LINKS.actionButton
 			);
 
 			await page.goto( verifyLink );
@@ -135,14 +137,14 @@ test.describe(
 			await expectEmail(
 				page,
 				email,
-				/You have joined the "[^"]+" waitlist\./
+				bisEmailSubject.verified( product.name )
 			);
 
-			const unsubscribeLink = await getLinkFromEmailBody(
+			const unsubscribeLink = await getEmailLinkById(
 				page,
 				email,
-				/You have joined the "[^"]+" waitlist\./,
-				/email_link_action=unsubscribe/
+				bisEmailSubject.verified( product.name ),
+				BIS_EMAIL_LINKS.unsubscribe
 			);
 
 			expect( unsubscribeLink ).toMatch(
@@ -164,19 +166,19 @@ test.describe(
 
 			await signUpAsGuest( browser, product.permalink, email );
 
-			const verifyLink = await getLinkFromEmailBody(
+			const verifyLink = await getEmailLinkById(
 				page,
 				email,
-				/Join the "[^"]+" waitlist\./,
-				/email_link_action=verify/
+				bisEmailSubject.verify( product.name ),
+				BIS_EMAIL_LINKS.actionButton
 			);
 			await page.goto( verifyLink );
 
-			const unsubscribeLink = await getLinkFromEmailBody(
+			const unsubscribeLink = await getEmailLinkById(
 				page,
 				email,
-				/You have joined the "[^"]+" waitlist\./,
-				/email_link_action=unsubscribe/
+				bisEmailSubject.verified( product.name ),
+				BIS_EMAIL_LINKS.unsubscribe
 			);
 			await page.goto( unsubscribeLink );
 

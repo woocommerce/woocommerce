@@ -14,9 +14,11 @@ import {
 } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import {
+	BIS_EMAIL_LINKS,
 	BIS_OPTIONS,
+	bisEmailSubject,
 	createOutOfStockProduct,
-	getLinkFromEmailBody,
+	getEmailLinkById,
 	restockProduct,
 	setBISOptions,
 	signUpOnProductPage,
@@ -95,21 +97,33 @@ test.describe(
 			const emailRow = await expectEmail(
 				page,
 				email,
-				/is back in stock!/
+				bisEmailSubject.backInStock( product.name )
 			);
 			await emailRow.getByRole( 'button', { name: 'View log' } ).click();
 
-			const productLink = await getLinkFromEmailBody(
+			const productLink = await getEmailLinkById(
 				page,
 				email,
-				/is back in stock!/,
-				/utm_source=back-in-stock-notifications/
+				bisEmailSubject.backInStock( product.name ),
+				BIS_EMAIL_LINKS.actionButton
 			);
 
-			expect( productLink ).toMatch(
-				/utm_source=back-in-stock-notifications/
+			// The CTA is the product permalink with exactly utm_source and
+			// utm_medium appended (UtmHelper::add_email_utm_params), so the
+			// tracking params must be right and stripping them must leave the
+			// product page — the link has to actually go somewhere useful.
+			const linkUrl = new URL( productLink );
+
+			expect( linkUrl.searchParams.get( 'utm_source' ) ).toBe(
+				'back-in-stock-notifications'
 			);
-			expect( productLink ).toMatch( /utm_medium=email/ );
+			expect( linkUrl.searchParams.get( 'utm_medium' ) ).toBe( 'email' );
+
+			linkUrl.searchParams.delete( 'utm_source' );
+			linkUrl.searchParams.delete( 'utm_medium' );
+			expect( linkUrl.toString() ).toBe(
+				new URL( product.permalink ).toString()
+			);
 		} );
 
 		test( 'unsubscribe link in the back-in-stock email cancels the notification', async ( {
@@ -125,13 +139,17 @@ test.describe(
 			await restockProduct( restApi, product.id );
 			await triggerStockNotificationsBatch( page );
 
-			await expectEmail( page, email, /is back in stock!/ );
-
-			const unsubscribeLink = await getLinkFromEmailBody(
+			await expectEmail(
 				page,
 				email,
-				/is back in stock!/,
-				/email_link_action=unsubscribe/
+				bisEmailSubject.backInStock( product.name )
+			);
+
+			const unsubscribeLink = await getEmailLinkById(
+				page,
+				email,
+				bisEmailSubject.backInStock( product.name ),
+				BIS_EMAIL_LINKS.unsubscribe
 			);
 			await page.goto( unsubscribeLink );
 
