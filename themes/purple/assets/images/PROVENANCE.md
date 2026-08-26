@@ -26,17 +26,21 @@ To tag a newly added AI-generated image:
 
 ## AI-generated (tagged)
 
+- black-scarf-woman.webp
 - blue-sweater-cut.webp
+- blue-sweater-man-standing.webp
 - blue-sweater-man.webp
 - green-sweater-hands.webp
 - green-sweater-woman.webp
 - orange-sweater-woman-cropped-2.webp
 - orange-sweater-woman-cropped.webp
+- orange-sweater-woman-seated.webp
 - orange-sweater.webp
 - pink-sweater-man-1.webp
 - pink-sweater-man-cropped-2.webp
 - pink-sweater-man-cropped.webp
 - pink-sweater-woman-seated.webp
+- pink-sweater-woman-wall.webp
 - pink-sweater-woman.webp
 - product-beanie-lavander-purple-theme-3.webp
 - product-socks-gray-purple-theme-2.webp
@@ -48,6 +52,14 @@ To tag a newly added AI-generated image:
 - storytelling-store.webp
 - storytelling-wool.webp
 - sweaters.webp
+- yellow-knit-closeup.webp
+
+> Added 2026-08-26: six section-refresh images exported from the demo site
+> (pink-sweater-woman-seated, black-scarf-woman, blue-sweater-man-standing,
+> orange-sweater-woman-seated, pink-sweater-woman-wall, yellow-knit-closeup).
+> Provenance pending studio confirmation; pink-sweater-woman-wall.webp came
+> from a Replicate prediction export, not the Gemini pipeline, so it needs
+> review before release. Originals should be added to the studio Drive.
 
 ## Human-designed (not AI-generated, untagged)
 
