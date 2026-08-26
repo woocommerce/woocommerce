@@ -1145,6 +1145,28 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should remove an unsaved item using its temporary key.
+	 */
+	public function test_remove_item_removes_unsaved_item(): void {
+		$order = new WC_Order();
+		$fee   = new WC_Order_Item_Fee();
+		$fee->set_name( 'Unsaved fee' );
+		$fee->set_amount( '1' );
+		$fee->set_total( '1' );
+		$fee->set_tax_status( 'none' );
+		$order->add_item( $fee );
+
+		$item_id = array_key_first( $order->get_items( 'fee' ) );
+		$order->remove_item( $item_id );
+
+		$this->assertEmpty( $order->get_items( 'fee' ), 'The unsaved item should be removed from the order immediately.' );
+
+		$order->save();
+
+		$this->assertEmpty( wc_get_order( $order->get_id() )->get_items( 'fee' ), 'The removed item should not be persisted when the order is saved.' );
+	}
+
+	/**
 	 * @testdox Should keep original items in the DB if save() never runs after remove_order_items().
 	 */
 	public function test_remove_order_items_preserves_db_items_if_save_not_called() {

@@ -1270,10 +1270,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Remove item from the order.
 	 *
-	 * @param int $item_id Item ID to delete.
+	 * @param int|string $item_id Item ID to delete.
 	 * @return false|void
 	 */
 	public function remove_item( $item_id ) {
+		// @phpstan-ignore-next-line argument.type (temporary item keys are supported when loading from local items)
 		$item      = $this->get_item( $item_id, false );
 		$items_key = $item ? $this->get_items_key( $item ) : false;
 
@@ -1283,7 +1284,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Unset and remove later.
 		$this->items_to_delete[] = $item;
-		unset( $this->items[ $items_key ][ $item->get_id() ] );
+		unset( $this->items[ $items_key ][ $item_id ] );
 	}
 
 	/**
