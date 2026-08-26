@@ -914,9 +914,10 @@ function wc_scheduled_sales() {
 			wp_cache_delete_multiple( $release_ids, 'post_meta' );
 			clean_object_term_cache( $release_ids, 'product' );
 
-			// The product caches namespace their keys with a random prefix, so there is no
-			// key to delete per ID and the group has to go as a whole. product_objects is
-			// registered non-persistent, so flushing it only ever touches this request.
+			// wc_get_product() caches every product it reads. Saving one already releases
+			// its own entry through ProductCacheController, but a product this loop reads
+			// without saving keeps its entry, so release the group. It is registered
+			// non-persistent, so this only ever touches the current request.
 			if ( $flush_product_objects ) {
 				wp_cache_flush_group( 'product_objects' );
 			}
