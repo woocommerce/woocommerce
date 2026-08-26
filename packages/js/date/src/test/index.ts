@@ -1160,6 +1160,29 @@ describe( 'getRangeLabel', () => {
 			).toBe( '1 - 31 month10-genitive 2024' );
 		} );
 
+		it( 'should keep the genitive short month name of a "MMM" format', () => {
+			const shortGenitive = Array.from(
+				{ length: 12 },
+				( _, index ) => `short${ index + 1 }-genitive`
+			);
+			const shortNominative = Array.from(
+				{ length: 12 },
+				( _, index ) => `short${ index + 1 }-nominative`
+			);
+			moment.defineLocale( 'inflected-months-abbreviated', {
+				months: { format: genitive, standalone: nominative },
+				monthsShort: {
+					format: shortGenitive,
+					standalone: shortNominative,
+				},
+			} );
+			( __ as jest.Mock ).mockReturnValueOnce( 'D MMM YYYY' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( '1 - 31 short10-genitive 2024' );
+		} );
+
 		it( 'should keep the nominative month name when the format holds no day token', () => {
 			moment.defineLocale( 'inflected-months-standalone', {
 				months: { format: genitive, standalone: nominative },
