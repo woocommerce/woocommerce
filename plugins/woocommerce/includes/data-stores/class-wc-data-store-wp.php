@@ -454,16 +454,28 @@ class WC_Data_Store_WP {
 		if ( 'day' === $precision ) {
 			/*
 			 * The meta values are UTC timestamps, while a day-precision query var names a calendar day,
-			 * so both boundaries have to be anchored on that day's local midnight. The day itself is
-			 * named the same way HPOS names it in OrdersTableQuery::local_time_to_gmt_date_query(): the
-			 * UTC calendar date of the parsed instant. Deriving it identically is what keeps the two
-			 * order storage backends from resolving one query var to different days on these meta keys.
+			 * so both boundaries have to be anchored on that day's local midnight.
+			 *
+			 * The day is named the same way OrdersTableQuery::local_time_to_gmt_date_query() names it:
+			 * the UTC calendar date of a bare strtotime() of the raw string, not of the timezone-aware
+			 * WC_DateTime in $dates. Deriving it from $dates instead would diverge for a naive datetime
+			 * such as '2026-07-20 22:00:00', which wc_string_to_datetime() reads as local time first.
+			 * Deriving it identically is what keeps the two order storage backends from resolving one
+			 * query var to different days on these meta keys.
+			 *
+			 * Constructing the bounds can still throw on a date beyond year 9999, which the caller's
+			 * date parsing above also guards against, so keep the same "unparseable means no date
+			 * constraint" contract rather than letting it surface as a fatal.
 			 */
-			$timezone = wp_timezone();
-			$start    = new DateTime( gmdate( 'Y-m-d', (int) wc_string_to_timestamp( $raw_start ) ) . ' 00:00:00', $timezone );
-			$end      = '...' === $operator
-				? new DateTime( gmdate( 'Y-m-d', (int) wc_string_to_timestamp( $raw_end ) ) . ' 00:00:00', $timezone )
-				: clone $start;
+			try {
+				$timezone = wp_timezone();
+				$start    = new DateTime( gmdate( 'Y-m-d', (int) wc_string_to_timestamp( $raw_start ) ) . ' 00:00:00', $timezone );
+				$end      = '...' === $operator
+					? new DateTime( gmdate( 'Y-m-d', (int) wc_string_to_timestamp( $raw_end ) ) . ' 00:00:00', $timezone )
+					: clone $start;
+			} catch ( Exception $e ) {
+				return $wp_query_args;
+			}
 
 			/*
 			 * Derive the upper bound from the next local midnight rather than adding a fixed 86400 seconds,
