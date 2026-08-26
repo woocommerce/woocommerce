@@ -1443,10 +1443,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * The exclusion must keep reading `_sale_price_dates_to` exactly the way
 	 * get_ending_sales() does, or a product ends up in neither queue. See the note there.
 	 *
-	 * Keep the exclusion as NOT EXISTS. The equivalent LEFT JOIN ... IS NULL anti-join
-	 * benchmarks faster on MariaDB and materially slower on MySQL, which transforms
-	 * NOT EXISTS into an antijoin but not that form. The penalties are asymmetric, so this
-	 * is the portable choice rather than the fastest one on any single engine.
+	 * Keep the exclusion as NOT EXISTS: the LEFT JOIN ... IS NULL rewrite is faster on MariaDB
+	 * but materially slower on MySQL.
 	 *
 	 * @since 3.0.0
 	 * @return array
