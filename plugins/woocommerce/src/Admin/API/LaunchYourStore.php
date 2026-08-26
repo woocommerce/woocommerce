@@ -160,6 +160,8 @@ class LaunchYourStore {
 			return new \WP_REST_Response( array( 'count' => $count ) );
 		};
 
+		// A paginated query counts every matching order in the database; fetching
+		// ids would cap the count at the query's limit (posts_per_page by default).
 		$orders = wc_get_orders(
 			array(
 				// phpcs:ignore
@@ -167,10 +169,12 @@ class LaunchYourStore {
 				// phpcs:ignore
 				'meta_value' => 'test',
 				'return'     => 'ids',
+				'limit'      => 1,
+				'paginate'   => true,
 			)
 		);
 
-		return $return( count( $orders ) );
+		return $return( is_object( $orders ) ? (int) $orders->total : count( $orders ) );
 	}
 
 	/**
@@ -183,18 +187,33 @@ class LaunchYourStore {
 			return new \WP_REST_Response( null, $status );
 		};
 
-		$orders = wc_get_orders(
-			array(
-				// phpcs:ignore
-				'meta_key'   => '_wcpay_mode',
-				// phpcs:ignore
-				'meta_value' => 'test',
-			)
-		);
+		$batch_size = 100;
 
-		foreach ( $orders as $order ) {
-			$order->delete();
-		}
+		// Delete in batches so a large store never loads every test order at once.
+		// Trashed orders drop out of the query's default statuses, so refetching the
+		// first page walks the whole set; a full batch that deletes nothing means the
+		// remaining orders are undeletable, so stop rather than loop on them.
+		do {
+			$order_ids = wc_get_orders(
+				array(
+					// phpcs:ignore
+					'meta_key'   => '_wcpay_mode',
+					// phpcs:ignore
+					'meta_value' => 'test',
+					'return'     => 'ids',
+					'limit'      => $batch_size,
+				)
+			);
+
+			$fetched = count( $order_ids );
+			$deleted = 0;
+			foreach ( $order_ids as $order_id ) {
+				$order = wc_get_order( $order_id );
+				if ( $order && $order->delete() ) {
+					++$deleted;
+				}
+			}
+		} while ( $fetched === $batch_size && $deleted > 0 );
 
 		return $return();
 	}
