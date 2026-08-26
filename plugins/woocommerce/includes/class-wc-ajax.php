@@ -1187,7 +1187,7 @@ class WC_AJAX {
 		try {
 			$order = wc_get_order( $order_id );
 
-			if ( ! $order ) {
+			if ( ! $order instanceof WC_Order ) {
 				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
 			}
 
@@ -1512,7 +1512,7 @@ class WC_AJAX {
 			$order_id = absint( $_POST['order_id'] );
 			$order    = wc_get_order( $order_id );
 
-			if ( ! $order ) {
+			if ( ! $order instanceof WC_Order ) {
 				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
 			}
 
