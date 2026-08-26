@@ -1195,6 +1195,39 @@ describe( 'getRangeLabel', () => {
 			).toBe( 'month10-nominative 2024' );
 		} );
 	} );
+
+	describe( 'with a locale that nests localized format tokens', () => {
+		// `loadLocaleData` below builds "LLL" from a translation that still
+		// holds "LT", so on a real site an expansion can itself hold a
+		// localized token and a single pass is not enough.
+		let originalLocale: string;
+
+		beforeAll( () => {
+			originalLocale = moment.locale();
+		} );
+
+		afterEach( () => {
+			moment.locale( originalLocale );
+		} );
+
+		it( 'should expand a localized format token that expands to another', () => {
+			moment.defineLocale( 'nested-long-formats', {
+				longDateFormat: {
+					LT: 'HH:mm',
+					LTS: 'HH:mm:ss',
+					L: 'MM/DD/YYYY',
+					LL: 'LLL',
+					LLL: 'MMMM D, YYYY',
+					LLLL: 'dddd, MMMM D, YYYY',
+				},
+			} );
+			( __ as jest.Mock ).mockReturnValueOnce( 'LL' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( 'October 1 - 31, 2024' );
+		} );
+	} );
 } );
 
 describe( 'loadLocaleData', () => {
