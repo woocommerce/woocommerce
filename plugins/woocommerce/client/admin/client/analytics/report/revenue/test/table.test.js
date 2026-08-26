@@ -1,14 +1,13 @@
 /**
  * External dependencies
  */
-import { render } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
+import { memoize } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import RevenueReportTable from '../table';
-
-const mockCaptured = { tableData: null };
 
 // Report filter registered the way an extension would, through
 // woocommerce_admin_revenue_report_filters.
@@ -64,6 +63,22 @@ const mockFiltered = {
 	},
 };
 
+// table.js memoizes at module scope, so those caches outlive each test. Hand
+// the tests a way to reset them by tracking every function memoize() returns.
+jest.mock( 'lodash', () => {
+	const actual = jest.requireActual( 'lodash' );
+	const memoized = [];
+
+	const mockMemoize = ( ...args ) => {
+		const fn = actual.memoize( ...args );
+		memoized.push( fn );
+		return fn;
+	};
+	mockMemoize.clearAll = () => memoized.forEach( ( fn ) => fn.cache.clear() );
+
+	return { ...actual, memoize: mockMemoize };
+} );
+
 jest.mock( '@wordpress/data', () => {
 	const actual = jest.requireActual( '@wordpress/data' );
 	const { createElement } = jest.requireActual( '@wordpress/element' );
@@ -78,17 +93,40 @@ jest.mock( '@wordpress/data', () => {
 	};
 } );
 
-jest.mock( '../../../components/report-table', () => ( {
-	__esModule: true,
-	default: ( props ) => {
-		mockCaptured.tableData = props.tableData;
-		return null;
-	},
-} ) );
+// Stand-in for ReportTable rendering a row per interval, so the assertions can
+// read the dates and order counts back off the rendered table.
+jest.mock( '../../../components/report-table', () => {
+	const { createElement } = jest.requireActual( '@wordpress/element' );
+
+	return {
+		__esModule: true,
+		default: ( { tableData } ) =>
+			createElement(
+				'table',
+				null,
+				createElement(
+					'tbody',
+					null,
+					tableData.items.data.map( ( row ) =>
+						createElement(
+							'tr',
+							{ key: row.interval },
+							createElement( 'td', null, row.interval ),
+							createElement(
+								'td',
+								null,
+								row.subtotals.orders_count
+							)
+						)
+					)
+				)
+			),
+	};
+} );
 
 describe( 'RevenueReportTable', () => {
 	beforeEach( () => {
-		mockCaptured.tableData = null;
+		memoize.clearAll();
 
 		global.mockSelect = () => ( {
 			getSetting: () => ( {
@@ -103,19 +141,20 @@ describe( 'RevenueReportTable', () => {
 		} );
 	} );
 
-	const renderWithQuery = ( query ) => {
-		render(
-			<RevenueReportTable
-				query={ query }
-				filters={ mockFilters }
-				advancedFilters={ {} }
-			/>
-		);
+	const revenueTable = ( query ) => (
+		<RevenueReportTable
+			query={ query }
+			filters={ mockFilters }
+			advancedFilters={ {} }
+		/>
+	);
 
-		return mockCaptured.tableData.items.data.map(
-			( row ) => row.subtotals.orders_count
-		);
-	};
+	const getRenderedOrderCounts = () =>
+		screen
+			.getAllByRole( 'row' )
+			.map(
+				( row ) => within( row ).getAllByRole( 'cell' )[ 1 ].textContent
+			);
 
 	it( 'renders the rows for the active report filter', () => {
 		const baseQuery = {
@@ -125,14 +164,15 @@ describe( 'RevenueReportTable', () => {
 			before: '2023-01-02',
 		};
 
-		expect( renderWithQuery( baseQuery ) ).toEqual( [ 2, 2 ] );
+		const { rerender } = render( revenueTable( baseQuery ) );
+		expect( getRenderedOrderCounts() ).toEqual( [ '2', '2' ] );
 
 		// Same date range, same row count, only the filter param changes. The
 		// rows have to follow it instead of coming back from a stale cache.
-		expect( renderWithQuery( { ...baseQuery, big_only: '1' } ) ).toEqual( [
-			1, 1,
-		] );
+		rerender( revenueTable( { ...baseQuery, big_only: '1' } ) );
+		expect( getRenderedOrderCounts() ).toEqual( [ '1', '1' ] );
 
-		expect( renderWithQuery( baseQuery ) ).toEqual( [ 2, 2 ] );
+		rerender( revenueTable( baseQuery ) );
+		expect( getRenderedOrderCounts() ).toEqual( [ '2', '2' ] );
 	} );
 } );
