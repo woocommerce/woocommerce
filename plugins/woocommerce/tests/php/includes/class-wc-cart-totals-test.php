@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 
 /**
  * Class WC_Cart_Totals_Tests. Tests for WC_Cart_Total class.
@@ -266,84 +267,155 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 	 */
 	public function data_provider_test_coupon_sorting_preserves_priority_contract(): array {
 		return array(
-			'sequential 20% then 10%' => array(
+			'sequential 20% then 10%'        => array(
 				'100.00',
 				'yes',
 				array(
-					'high' => array( 'discount_type' => 'percent', 'coupon_amount' => '20' ),
-					'low'  => array( 'discount_type' => 'percent', 'coupon_amount' => '10' ),
+					'high' => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '20',
+					),
+					'low'  => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '10',
+					),
 				),
 				array( 'high', 'low' ),
-				array( 'high' => '20.00', 'low' => '8.00' ),
+				array(
+					'high' => '20.00',
+					'low'  => '8.00',
+				),
 				'72.00',
 			),
-			'sequential 10% then 20%' => array(
+			'sequential 10% then 20%'        => array(
 				'100.00',
 				'yes',
 				array(
-					'high' => array( 'discount_type' => 'percent', 'coupon_amount' => '20' ),
-					'low'  => array( 'discount_type' => 'percent', 'coupon_amount' => '10' ),
+					'high' => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '20',
+					),
+					'low'  => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '10',
+					),
 				),
 				array( 'low', 'high' ),
-				array( 'high' => '18.00', 'low' => '10.00' ),
+				array(
+					'high' => '18.00',
+					'low'  => '10.00',
+				),
 				'72.00',
 			),
 			'non-sequential amount fallback' => array(
 				'100.00',
 				'no',
 				array(
-					'large' => array( 'discount_type' => 'fixed_cart', 'coupon_amount' => '80' ),
-					'small' => array( 'discount_type' => 'fixed_cart', 'coupon_amount' => '30' ),
+					'large' => array(
+						'discount_type' => 'fixed_cart',
+						'coupon_amount' => '80',
+					),
+					'small' => array(
+						'discount_type' => 'fixed_cart',
+						'coupon_amount' => '30',
+					),
 				),
 				array( 'large', 'small' ),
-				array( 'large' => '70.00', 'small' => '30.00' ),
+				array(
+					'large' => '70.00',
+					'small' => '30.00',
+				),
 				'0.00',
 			),
-			'standard coupon type priority' => array(
+			'standard coupon type priority'  => array(
 				'100.00',
 				'yes',
 				array(
-					'fixed'   => array( 'discount_type' => 'fixed_cart', 'coupon_amount' => '30' ),
-					'percent' => array( 'discount_type' => 'percent', 'coupon_amount' => '10' ),
+					'fixed'   => array(
+						'discount_type' => 'fixed_cart',
+						'coupon_amount' => '30',
+					),
+					'percent' => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '10',
+					),
 				),
 				array( 'fixed', 'percent' ),
-				array( 'fixed' => '30.00', 'percent' => '10.00' ),
+				array(
+					'fixed'   => '30.00',
+					'percent' => '10.00',
+				),
 				'60.00',
 			),
-			'usage-limit priority' => array(
+			'usage-limit priority'           => array(
 				'100.00',
 				'yes',
 				array(
-					'broad'  => array( 'discount_type' => 'percent', 'coupon_amount' => '20', 'limit_usage_to_x_items' => 2 ),
-					'narrow' => array( 'discount_type' => 'percent', 'coupon_amount' => '10', 'limit_usage_to_x_items' => 1 ),
+					'broad'  => array(
+						'discount_type'          => 'percent',
+						'coupon_amount'          => '20',
+						'limit_usage_to_x_items' => 2,
+					),
+					'narrow' => array(
+						'discount_type'          => 'percent',
+						'coupon_amount'          => '10',
+						'limit_usage_to_x_items' => 1,
+					),
 				),
 				array( 'broad', 'narrow' ),
-				array( 'broad' => '18.00', 'narrow' => '10.00' ),
+				array(
+					'broad'  => '18.00',
+					'narrow' => '10.00',
+				),
 				'72.00',
 			),
-			'distinct filtered priorities' => array(
+			'distinct filtered priorities'   => array(
 				'100.00',
 				'yes',
 				array(
-					'percent' => array( 'discount_type' => 'percent', 'coupon_amount' => '10' ),
-					'fixed'   => array( 'discount_type' => 'fixed_cart', 'coupon_amount' => '30' ),
+					'percent' => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '10',
+					),
+					'fixed'   => array(
+						'discount_type' => 'fixed_cart',
+						'coupon_amount' => '30',
+					),
 				),
 				array( 'percent', 'fixed' ),
-				array( 'percent' => '7.00', 'fixed' => '30.00' ),
+				array(
+					'percent' => '7.00',
+					'fixed'   => '30.00',
+				),
 				'63.00',
-				array( 'fixed_cart' => 1, 'percent' => 2 ),
+				array(
+					'fixed_cart' => 1,
+					'percent'    => 2,
+				),
 			),
-			'equal filtered priorities' => array(
+			'equal filtered priorities'      => array(
 				'100.00',
 				'yes',
 				array(
-					'fixed'   => array( 'discount_type' => 'fixed_cart', 'coupon_amount' => '30' ),
-					'percent' => array( 'discount_type' => 'percent', 'coupon_amount' => '10' ),
+					'fixed'   => array(
+						'discount_type' => 'fixed_cart',
+						'coupon_amount' => '30',
+					),
+					'percent' => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '10',
+					),
 				),
 				array( 'fixed', 'percent' ),
-				array( 'fixed' => '30.00', 'percent' => '7.00' ),
+				array(
+					'fixed'   => '30.00',
+					'percent' => '7.00',
+				),
 				'63.00',
-				array( 'fixed_cart' => 5, 'percent' => 5 ),
+				array(
+					'fixed_cart' => 5,
+					'percent'    => 5,
+				),
 			),
 		);
 	}
