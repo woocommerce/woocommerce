@@ -1111,6 +1111,46 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox add_item() should preserve a persisted item re-added after deferred removal.
+	 * @dataProvider provide_deferred_removal_types
+	 *
+	 * @param string|null $type Item type to remove, or null to remove every type.
+	 */
+	public function test_add_item_keeps_persisted_item_after_remove_and_readd( $type ) {
+		$order            = WC_Helper_Order::create_order();
+		$item             = current( $order->get_items() );
+		$item_id          = $item->get_id();
+		$updated_quantity = 5;
+
+		$order->add_product( $item->get_product(), 1 );
+		$order->save();
+
+		$order->remove_order_items( $type );
+		$item->set_quantity( $updated_quantity );
+		$item->add_meta_data( '_readded_item', 'preserved', true );
+		$order->add_item( $item );
+		$order->save();
+
+		$persisted_items = wc_get_order( $order->get_id() )->get_items();
+		$this->assertCount( 1, $persisted_items, 'Only the explicitly re-added line item should remain.' );
+		$this->assertArrayHasKey( $item_id, $persisted_items, 'The re-added item should retain its ID.' );
+		$this->assertSame( $updated_quantity, $persisted_items[ $item_id ]->get_quantity(), 'The re-added item should retain its updated quantity.' );
+		$this->assertSame( 'preserved', $persisted_items[ $item_id ]->get_meta( '_readded_item' ), 'The re-added item should retain its metadata.' );
+	}
+
+	/**
+	 * Provides full and typed deferred removal cases.
+	 *
+	 * @return array<string, array{string|null}>
+	 */
+	public static function provide_deferred_removal_types(): array {
+		return array(
+			'all item types' => array( null ),
+			'line items'     => array( 'line_item' ),
+		);
+	}
+
+	/**
 	 * Create a product item for deferred deletion tests.
 	 *
 	 * @param WC_Product $product Product object.
