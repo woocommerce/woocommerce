@@ -1584,4 +1584,170 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 0, $reloaded->get_variation_id(), 'Switching to a simple product by SKU should clear variation_id.' );
 		$this->assertSame( $simple->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the product selected by SKU.' );
 	}
+
+	/**
+	 * Create a pending order with one $100 product, optionally with its line total manually edited.
+	 *
+	 * @param string $billing_email Billing email (the order stays a guest order).
+	 * @param float  $edited_total  Manually edited line total, 0 to keep the original price.
+	 * @return WC_Order
+	 */
+	private function create_guest_order_with_product( string $billing_email, float $edited_total = 0 ): WC_Order {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->save();
+
+		$order = wc_create_order();
+		$order->set_billing_email( $billing_email );
+		$order->add_product( $product, 1 );
+		$order->calculate_totals();
+
+		if ( $edited_total > 0 ) {
+			foreach ( $order->get_items() as $item ) {
+				$item->set_total( $edited_total );
+				$item->save();
+			}
+			$order->calculate_totals();
+		}
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * Dispatch a PUT request replacing the order's coupons with the given codes.
+	 *
+	 * @param int      $order_id Order ID.
+	 * @param string[] $codes    Coupon codes for the request's coupon_lines.
+	 * @return WP_REST_Response
+	 */
+	private function put_coupon_lines( int $order_id, array $codes ): WP_REST_Response {
+		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order_id );
+		$request->set_body_params(
+			array(
+				'coupon_lines' => array_map(
+					function ( $code ) {
+						return array( 'code' => $code );
+					},
+					$codes
+				),
+			)
+		);
+
+		return $this->server->dispatch( $request );
+	}
+
+	/**
+	 * Get the coupon codes currently applied to an order, freshly loaded from the database.
+	 *
+	 * @param int $order_id Order ID.
+	 * @return string[]
+	 */
+	private function get_reloaded_coupon_codes( int $order_id ): array {
+		return array_values(
+			array_map(
+				function ( $coupon ) {
+					return $coupon->get_code();
+				},
+				wc_get_order( $order_id )->get_items( 'coupon' )
+			)
+		);
+	}
+
+	/**
+	 * @testdox A coupon applied via REST calculates the discount from the stored subtotal, not a manually edited total.
+	 */
+	public function test_valid_coupon_applies_to_manually_edited_order(): void {
+		WC_Helper_Coupon::create_coupon(
+			'edited-percent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+
+		$order = $this->create_guest_order_with_product( 'edited-ok-customer@example.com', 50 );
+
+		$response = $this->put_coupon_lines( $order->get_id(), array( 'edited-percent' ) );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( array( 'edited-percent' ), $this->get_reloaded_coupon_codes( $order->get_id() ) );
+		$this->assertEquals( 90, wc_get_order( $order->get_id() )->get_total(), 'The discount should be taken off the stored subtotal, not the edited total' );
+	}
+
+	/**
+	 * @testdox Creating an order with explicitly posted line totals and a coupon keeps the posted subtotal as the pre-discount price.
+	 */
+	public function test_create_with_posted_line_totals_and_coupon_does_not_double_discount(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->save();
+		WC_Helper_Coupon::create_coupon(
+			'created-percent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params(
+			array(
+				'billing'      => array( 'email' => 'create-coupon-customer@example.com' ),
+				'line_items'   => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 1,
+						'subtotal'   => '100',
+						'total'      => '95',
+					),
+				),
+				'coupon_lines' => array( array( 'code' => 'created-percent' ) ),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 201, $response->get_status() );
+		$this->assertEquals( 100, $data['line_items'][0]['subtotal'], 'The posted subtotal should stay the pre-discount price' );
+		$this->assertEquals( 90, $data['line_items'][0]['total'], 'The total should be recalculated from the posted subtotal, not from or on top of the posted total' );
+		$this->assertEquals( 10, $data['discount_total'] );
+	}
+
+	/**
+	 * @testdox Updating an order with explicitly posted line totals and a coupon keeps the posted subtotal as the pre-discount price.
+	 */
+	public function test_update_with_posted_line_totals_and_coupon_does_not_double_discount(): void {
+		WC_Helper_Coupon::create_coupon(
+			'updated-percent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+
+		$order   = $this->create_guest_order_with_product( 'update-coupon-customer@example.com' );
+		$item_id = key( $order->get_items() );
+
+		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'line_items'   => array(
+					array(
+						'id'       => $item_id,
+						'subtotal' => '100',
+						'total'    => '95',
+					),
+				),
+				'coupon_lines' => array( array( 'code' => 'updated-percent' ) ),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertEquals( 100, $data['line_items'][0]['subtotal'], 'The posted subtotal should stay the pre-discount price' );
+		$this->assertEquals( 90, $data['line_items'][0]['total'], 'The total should be recalculated from the posted subtotal, not from or on top of the posted total' );
+		$this->assertEquals( 10, $data['discount_total'] );
+	}
 }
