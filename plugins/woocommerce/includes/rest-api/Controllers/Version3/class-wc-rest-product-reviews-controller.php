@@ -570,6 +570,8 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 			}
 		}
 
+		$core_counted_product_id = (int) ( $prepared_args['comment_post_ID'] ?? $original_product_id );
+
 		if ( empty( $prepared_args ) && isset( $request['status'] ) ) {
 			// Only the comment status is being changed.
 			$change = $this->handle_status_param( $request['status'], $id );
@@ -618,12 +620,15 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		$current_product_id = $updated_review instanceof WP_Comment ? (int) $updated_review->comment_post_ID : 0;
 
 		/*
-		 * When the review moves to another product, wp_update_comment() only recomputes the product it
-		 * moved to, leaving the one it left still counting it. This is not limited to rating changes,
-		 * so it sits outside the check above.
+		 * Core chooses its count target before wp_update_comment_data can redirect the persisted review.
+		 * Refresh each affected product that Core did not count.
 		 */
-		if ( $updated_review instanceof WP_Comment && $original_product_id !== $current_product_id ) {
-			wp_update_comment_count( $original_product_id );
+		if ( $updated_review instanceof WP_Comment ) {
+			foreach ( array_unique( array( $original_product_id, $current_product_id ) ) as $product_id_to_count ) {
+				if ( $product_id_to_count !== $core_counted_product_id ) {
+					wp_update_comment_count( $product_id_to_count );
+				}
+			}
 		}
 
 		if ( isset( $request['verified'] ) && ! empty( $request['verified'] ) ) {

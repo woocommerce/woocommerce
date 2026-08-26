@@ -378,6 +378,8 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 			$prepared_review['comment_meta']['rating'] = (int) $request['rating'];
 		}
 
+		$core_counted_product_id = (int) ( $prepared_review['comment_post_ID'] ?? $original_product_id );
+
 		/*
 		 * Zero means no comment-table row changed; false is the actual update failure. A rating-only
 		 * request legitimately returns zero while still storing comment_meta and refreshing counts.
@@ -391,11 +393,15 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		$current_product_id = $product_review instanceof WP_Comment ? (int) $product_review->comment_post_ID : 0;
 
 		/*
-		 * Core updates the destination count after a move, but not the source. Use the full count
-		 * primitive for the source so wp_posts.comment_count and WooCommerce aggregates agree.
+		 * Core chooses its count target before wp_update_comment_data can redirect the persisted review.
+		 * Refresh each affected product that Core did not count.
 		 */
-		if ( $product_review instanceof WP_Comment && $original_product_id !== $current_product_id ) {
-			wp_update_comment_count( $original_product_id );
+		if ( $product_review instanceof WP_Comment ) {
+			foreach ( array_unique( array( $original_product_id, $current_product_id ) ) as $product_id_to_count ) {
+				if ( $product_id_to_count !== $core_counted_product_id ) {
+					wp_update_comment_count( $product_id_to_count );
+				}
+			}
 		}
 
 		$this->update_additional_fields_for_object( $product_review, $request );

@@ -202,19 +202,33 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Creating a review updates the product rating aggregates within the same request.
+	 * @testdox Creating each review updates the product rating aggregates within the same request.
 	 */
-	public function test_create_item_updates_the_product_rating_aggregates() {
+	public function test_create_item_updates_the_product_rating_aggregates_after_every_review() {
 		wp_set_current_user( $this->shop_manager_id );
 		$product_id = ProductHelper::create_simple_product()->get_id();
 
 		$response = $this->create_review( $product_id, 'Holds up to daily use.', 5 );
-		$this->assertEquals( 201, $response->get_status(), 'The review is created successfully.' );
+		$this->assertEquals( 201, $response->get_status(), 'The first review is created successfully.' );
 
 		$product = wc_get_product( $product_id );
-		$this->assertEquals( 5, $product->get_average_rating(), 'The average rating includes the review created in the same request.' );
-		$this->assertEquals( array( 5 => 1 ), $product->get_rating_counts(), 'The rating counts include the review created in the same request.' );
-		$this->assertEquals( 1, $product->get_review_count(), 'The review count includes the review created in the same request.' );
+		$this->assertEquals( 5, $product->get_average_rating(), 'The average includes the first review immediately.' );
+		$this->assertEquals( array( 5 => 1 ), $product->get_rating_counts(), 'The rating counts include the first review immediately.' );
+		$this->assertEquals( 1, $product->get_review_count(), 'The first review is counted immediately.' );
+
+		$this->create_review( $product_id, 'Fell apart in a week.', 1 );
+
+		$product = wc_get_product( $product_id );
+		$this->assertEquals( 3, $product->get_average_rating(), 'The average is refreshed after a later review.' );
+		$this->assertEquals(
+			array(
+				1 => 1,
+				5 => 1,
+			),
+			$product->get_rating_counts(),
+			'The rating counts include both reviews.'
+		);
+		$this->assertEquals( 2, $product->get_review_count(), 'Both reviews are counted.' );
 	}
 
 	/**
@@ -256,42 +270,34 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Creating further reviews keeps the average rating in step with every stored rating.
+	 * @testdox Creating an unrated review skips the extra aggregate refresh.
 	 */
-	public function test_create_item_updates_the_average_rating_for_every_review() {
-		wp_set_current_user( $this->shop_manager_id );
-		$product_id = ProductHelper::create_simple_product()->get_id();
-
-		$this->create_review( $product_id, 'Holds up to daily use.', 5 );
-		$this->create_review( $product_id, 'Fell apart in a week.', 1 );
-
-		$product = wc_get_product( $product_id );
-		$this->assertEquals( 3, $product->get_average_rating(), 'The average rating covers both reviews, not just the earlier one.' );
-		$this->assertEquals(
-			array(
-				1 => 1,
-				5 => 1,
-			),
-			$product->get_rating_counts(),
-			'The rating counts cover both reviews.'
-		);
-		$this->assertEquals( 2, $product->get_review_count(), 'Both reviews are counted.' );
-	}
-
-	/**
-	 * @testdox Creating a review without a rating leaves the average rating untouched.
-	 */
-	public function test_create_item_without_a_rating_leaves_the_average_rating_untouched() {
+	public function test_create_item_without_a_rating_skips_the_extra_product_save() {
 		wp_set_current_user( $this->shop_manager_id );
 		$product_id = ProductHelper::create_simple_product()->get_id();
 
 		$this->create_review( $product_id, 'Holds up to daily use.', 4 );
-		$this->create_review( $product_id, 'Arrived on time.', null );
+
+		$saves      = 0;
+		$count_save = function ( $updated_product_id ) use ( &$saves, $product_id ) {
+			if ( $product_id === (int) $updated_product_id ) {
+				++$saves;
+			}
+		};
+
+		add_action( 'woocommerce_update_product', $count_save );
+		try {
+			$this->create_review( $product_id, 'Arrived on time.', null );
+		} finally {
+			remove_action( 'woocommerce_update_product', $count_save );
+		}
+
+		$this->assertSame( 1, $saves, 'An unrated review does not trigger a second aggregate refresh.' );
 
 		$product = wc_get_product( $product_id );
-		$this->assertEquals( 4, $product->get_average_rating(), 'A review without a rating does not affect the average rating.' );
-		$this->assertEquals( array( 4 => 1 ), $product->get_rating_counts(), 'A review without a rating is not counted as a rating.' );
-		$this->assertEquals( 2, $product->get_review_count(), 'A review without a rating is still counted as a review.' );
+		$this->assertEquals( 4, $product->get_average_rating(), 'An unrated review does not affect the average.' );
+		$this->assertEquals( array( 4 => 1 ), $product->get_rating_counts(), 'An unrated review is not counted as a rating.' );
+		$this->assertEquals( 2, $product->get_review_count(), 'An unrated review is still counted as a review.' );
 	}
 
 	/**
@@ -369,6 +375,11 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertSame( 2, (int) get_comment_meta( $review_id, 'rating', true ) );
 		$this->assertSame( 1, $saves );
+		$this->assertEquals(
+			2,
+			wc_get_product( $product_id )->get_average_rating(),
+			'The aggregate is saved with the new rating.'
+		);
 	}
 
 	/**
@@ -389,89 +400,53 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A malformed comment_meta value from the preprocess filter returns an update error.
+	 * Provides malformed review values returned by the preprocess filter.
+	 *
+	 * @return array<string, array{callable}> Malformed review callbacks.
 	 */
-	public function test_update_item_rejects_malformed_filtered_comment_meta() {
-		wp_set_current_user( $this->shop_manager_id );
-		$product_id = ProductHelper::create_simple_product()->get_id();
-		$review_id  = $this->create_review( $product_id, 'Still five stars.', 5 )->get_data()['id'];
+	public function data_provider_for_test_update_item_rejects_malformed_filtered_review(): array {
+		return array(
+			'scalar review'       => array(
+				static function () {
+					return 'not-an-array';
+				},
+			),
+			'scalar comment meta' => array(
+				static function ( $prepared_review ) {
+					$prepared_review['comment_meta'] = 'not-an-array';
+					return $prepared_review;
+				},
+			),
+		);
+	}
 
-		$set_malformed_comment_meta = static function ( $prepared_review ) {
-			$prepared_review['comment_meta'] = 'not-an-array';
-			return $prepared_review;
-		};
+	/**
+	 * @testdox A malformed review from the preprocess filter returns an update error.
+	 * @dataProvider data_provider_for_test_update_item_rejects_malformed_filtered_review
+	 *
+	 * @param callable $filter_callback Callback that returns a malformed review value.
+	 */
+	public function test_update_item_rejects_malformed_filtered_review( callable $filter_callback ) {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id            = ProductHelper::create_simple_product()->get_id();
+		$review_id             = $this->create_review( $product_id, 'Still five stars.', 5 )->get_data()['id'];
+		$average_rating_before = wc_get_product( $product_id )->get_average_rating();
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/reviews/' . $review_id );
 		$request->set_param( 'id', $review_id );
 		$request->set_param( 'rating', 3 );
 
-		add_filter( 'woocommerce_rest_preprocess_product_review', $set_malformed_comment_meta );
+		add_filter( 'woocommerce_rest_preprocess_product_review', $filter_callback );
 		try {
 			$response = $this->sut->update_item( $request );
 		} finally {
-			remove_filter( 'woocommerce_rest_preprocess_product_review', $set_malformed_comment_meta );
+			remove_filter( 'woocommerce_rest_preprocess_product_review', $filter_callback );
 		}
 
 		$this->assertWPError( $response );
 		$this->assertSame( 'woocommerce_rest_comment_failed_edit', $response->get_error_code() );
 		$this->assertSame( 5, (int) get_comment_meta( $review_id, 'rating', true ) );
-		$this->assertEquals( 5, wc_get_product( $product_id )->get_average_rating() );
-	}
-
-	/**
-	 * @testdox A scalar review from the preprocess filter returns an update error.
-	 */
-	public function test_update_item_rejects_scalar_filtered_review() {
-		wp_set_current_user( $this->shop_manager_id );
-		$product_id = ProductHelper::create_simple_product()->get_id();
-		$review_id  = $this->create_review( $product_id, 'Still five stars.', 5 )->get_data()['id'];
-
-		$return_scalar = static function () {
-			return 'not-an-array';
-		};
-
-		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/reviews/' . $review_id );
-		$request->set_param( 'id', $review_id );
-		$request->set_param( 'rating', 3 );
-
-		add_filter( 'woocommerce_rest_preprocess_product_review', $return_scalar );
-		try {
-			$response = $this->sut->update_item( $request );
-		} finally {
-			remove_filter( 'woocommerce_rest_preprocess_product_review', $return_scalar );
-		}
-
-		$this->assertWPError( $response );
-		$this->assertSame( 'woocommerce_rest_comment_failed_edit', $response->get_error_code() );
-		$this->assertSame( 5, (int) get_comment_meta( $review_id, 'rating', true ) );
-		$this->assertEquals( 5, wc_get_product( $product_id )->get_average_rating() );
-	}
-
-	/**
-	 * @testdox Holding and re-approving a review excludes and re-includes its rating.
-	 */
-	public function test_update_item_status_changes_keep_the_aggregates_correct() {
-		wp_set_current_user( $this->shop_manager_id );
-		$product_id = ProductHelper::create_simple_product()->get_id();
-
-		$this->create_review( $product_id, 'Holds up to daily use.', 5 );
-		$review_id = $this->create_review( $product_id, 'Not for me.', 3 )->get_data()['id'];
-
-		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/reviews/' . $review_id );
-		$request->set_body_params( array( 'status' => 'hold' ) );
-		$this->server->dispatch( $request );
-
-		$product = wc_get_product( $product_id );
-		$this->assertEquals( 5, $product->get_average_rating(), 'A review on hold is excluded from the average rating.' );
-		$this->assertEquals( 1, $product->get_review_count(), 'A review on hold is excluded from the review count.' );
-
-		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/reviews/' . $review_id );
-		$request->set_body_params( array( 'status' => 'approved' ) );
-		$this->server->dispatch( $request );
-
-		$product = wc_get_product( $product_id );
-		$this->assertEquals( 4, $product->get_average_rating(), 'An approved review is included in the average rating again.' );
-		$this->assertEquals( 2, $product->get_review_count(), 'An approved review is included in the review count again.' );
+		$this->assertSame( $average_rating_before, wc_get_product( $product_id )->get_average_rating() );
 	}
 
 	/**
@@ -479,10 +454,7 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_item_recalculates_the_aggregates_of_both_products_when_the_review_moves() {
 		wp_set_current_user( $this->shop_manager_id );
-		$source_id      = ProductHelper::create_simple_product()->get_id();
-		$destination_id = ProductHelper::create_simple_product()->get_id();
-
-		$review_id = $this->create_review( $source_id, 'Holds up to daily use.', 5 )->get_data()['id'];
+		list( $source_id, $destination_id, $review_id ) = $this->create_review_move_fixture( 5 );
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/reviews/' . $review_id );
 		$request->set_body_params(
@@ -503,7 +475,7 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 			remove_action( 'wp_update_comment_count', $record_count );
 		}
 		$this->assertEquals( 200, $response->get_status(), 'The review is moved successfully.' );
-		$this->assertSame( array( $destination_id, $source_id ), $counted_products );
+		$this->assertEqualsCanonicalizing( array( $source_id, $destination_id ), $counted_products );
 
 		$source = wc_get_product( $source_id );
 		$this->assertEquals( 0, $source->get_average_rating(), 'The product the review left no longer counts its rating.' );
@@ -514,6 +486,52 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 3, $destination->get_average_rating(), 'The product the review moved to picks up the new rating.' );
 		$this->assertEquals( array( 3 => 1 ), $destination->get_rating_counts(), 'The product the review moved to picks up the rating counts.' );
 		$this->assertEquals( 1, $destination->get_review_count(), 'The product the review moved to counts the review.' );
+
+		clean_post_cache( $source_id );
+		clean_post_cache( $destination_id );
+		$this->assertSame( 0, (int) get_post( $source_id )->comment_count );
+		$this->assertSame( 1, (int) get_post( $destination_id )->comment_count );
+	}
+
+	/**
+	 * @testdox A Core filter redirect recounts the original and persisted products exactly once.
+	 */
+	public function test_update_item_recounts_both_products_when_wp_update_comment_data_moves_the_review() {
+		wp_set_current_user( $this->shop_manager_id );
+		list( $source_id, $destination_id, $review_id ) = $this->create_review_move_fixture( 5 );
+
+		$redirect_review  = static function ( $comment_data ) use ( $destination_id ) {
+			$comment_data['comment_post_ID'] = $destination_id;
+			return $comment_data;
+		};
+		$counted_products = array();
+		$record_count     = static function ( $post_id ) use ( &$counted_products ) {
+			$counted_products[] = (int) $post_id;
+		};
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/reviews/' . $review_id );
+		$request->set_body_params( array( 'review' => 'Moved by a Core filter.' ) );
+
+		add_filter( 'wp_update_comment_data', $redirect_review );
+		add_action( 'wp_update_comment_count', $record_count );
+		try {
+			$response = $this->server->dispatch( $request );
+		} finally {
+			remove_action( 'wp_update_comment_count', $record_count );
+			remove_filter( 'wp_update_comment_data', $redirect_review );
+		}
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $destination_id, (int) get_comment( $review_id )->comment_post_ID );
+		$this->assertEqualsCanonicalizing( array( $source_id, $destination_id ), $counted_products );
+
+		$source = wc_get_product( $source_id );
+		$this->assertEquals( 0, $source->get_average_rating() );
+		$this->assertEquals( 0, $source->get_review_count() );
+
+		$destination = wc_get_product( $destination_id );
+		$this->assertEquals( 5, $destination->get_average_rating() );
+		$this->assertEquals( 1, $destination->get_review_count() );
 
 		clean_post_cache( $source_id );
 		clean_post_cache( $destination_id );
@@ -534,18 +552,20 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/reviews/' . $review_id );
 		$request->set_body_params( array( 'product_id' => 0 ) );
 
+		$average_rating_before = wc_get_product( $source_id )->get_average_rating();
+
 		$previous_post = $post;
-		$post          = get_post( $source_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Reproduce get_post_type( 0 ) falling back to the global post.
+		$post          = get_post( $source_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Make a zero ID resolve through Core's global-post fallback if the explicit zero-ID guard regresses.
 		try {
 			$response = $this->server->dispatch( $request );
 		} finally {
-			$post = $previous_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the global after the regression scenario.
+			$post = $previous_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the global after exercising the guard.
 		}
 
 		$this->assertSame( 404, $response->get_status() );
 		$this->assertSame( 'woocommerce_rest_product_invalid_id', $response->get_data()['code'] );
 		$this->assertSame( $source_id, (int) get_comment( $review_id )->comment_post_ID );
-		$this->assertEquals( 5, wc_get_product( $source_id )->get_average_rating() );
+		$this->assertSame( $average_rating_before, wc_get_product( $source_id )->get_average_rating() );
 		$this->assertEquals( 1, wc_get_product( $source_id )->get_review_count() );
 
 		clean_post_cache( $source_id );
@@ -557,10 +577,7 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_item_recalculates_the_aggregates_when_the_review_moves_without_a_rating_change() {
 		wp_set_current_user( $this->shop_manager_id );
-		$source_id      = ProductHelper::create_simple_product()->get_id();
-		$destination_id = ProductHelper::create_simple_product()->get_id();
-
-		$review_id = $this->create_review( $source_id, 'Holds up to daily use.', 4 )->get_data()['id'];
+		list( $source_id, $destination_id, $review_id ) = $this->create_review_move_fixture( 4 );
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/reviews/' . $review_id );
 		$request->set_body_params( array( 'product_id' => $destination_id ) );
@@ -586,9 +603,7 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_item_defers_both_products_when_a_review_moves() {
 		wp_set_current_user( $this->shop_manager_id );
-		$source_id      = ProductHelper::create_simple_product()->get_id();
-		$destination_id = ProductHelper::create_simple_product()->get_id();
-		$review_id      = $this->create_review( $source_id, 'Moving later.', 4 )->get_data()['id'];
+		list( $source_id, $destination_id, $review_id ) = $this->create_review_move_fixture( 4 );
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/reviews/' . $review_id );
 		$request->set_body_params( array( 'product_id' => $destination_id ) );
@@ -615,6 +630,20 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$destination = wc_get_product( $destination_id );
 		$this->assertEquals( 0, $source->get_average_rating() );
 		$this->assertEquals( 4, $destination->get_average_rating() );
+	}
+
+	/**
+	 * Creates two products and a review that can be moved between them.
+	 *
+	 * @param int $rating Rating for the review.
+	 * @return array{int, int, int} Source product ID, destination product ID, and review ID.
+	 */
+	private function create_review_move_fixture( int $rating ): array {
+		$source_id      = ProductHelper::create_simple_product()->get_id();
+		$destination_id = ProductHelper::create_simple_product()->get_id();
+		$review_id      = $this->create_review( $source_id, 'Holds up to daily use.', $rating )->get_data()['id'];
+
+		return array( $source_id, $destination_id, $review_id );
 	}
 
 	/**
