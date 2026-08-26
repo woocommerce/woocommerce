@@ -1059,6 +1059,88 @@ describe( 'getRangeLabel', () => {
 			expect( label ).toBe( 'أكتوبر ١, ٢٠٢٤' );
 		} );
 	} );
+	describe( 'with a locale that inflects the month name', () => {
+		// Moment picks the genitive month name over the nominative one by
+		// testing the format string for a day token next to the month one, and
+		// locales disagree on how: some rely on moment's own regex, some ship a
+		// stricter one, and some replace the month names with a function that
+		// tests the format itself. Each is covered here because a format string
+		// that stops matching renders the wrong grammatical form.
+		const genitive = Array.from(
+			{ length: 12 },
+			( _, index ) => `month${ index + 1 }-genitive`
+		);
+		const nominative = Array.from(
+			{ length: 12 },
+			( _, index ) => `month${ index + 1 }-nominative`
+		);
+		let originalLocale: string;
+
+		beforeAll( () => {
+			originalLocale = moment.locale();
+		} );
+
+		afterEach( () => {
+			moment.locale( originalLocale );
+		} );
+
+		it( "should keep the genitive month name of moment's own format test", () => {
+			moment.defineLocale( 'inflected-months', {
+				months: { format: genitive, standalone: nominative },
+				monthsShort: { format: genitive, standalone: nominative },
+			} );
+			( __ as jest.Mock ).mockReturnValueOnce( 'D MMMM YYYY' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( '1 - 31 month10-genitive 2024' );
+		} );
+
+		it( 'should keep the genitive month name of a locale that allows only whitespace before the month', () => {
+			// Mirrors the Catalan locale's stricter `isFormat`.
+			moment.defineLocale( 'inflected-months-strict', {
+				months: {
+					format: genitive,
+					standalone: nominative,
+					isFormat: /D[oD]?(\s)+MMMM/,
+				},
+				monthsShort: { format: genitive, standalone: nominative },
+			} );
+			( __ as jest.Mock ).mockReturnValueOnce( 'D MMMM YYYY' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( '1 - 31 month10-genitive 2024' );
+		} );
+
+		it( 'should keep the genitive month name of a locale that tests the format itself', () => {
+			// Mirrors the Polish locale, which resolves month names in code.
+			moment.defineLocale( 'inflected-months-fn', {
+				months: ( monthMoment, format ) =>
+					( /D MMMM/.test( format || '' ) ? genitive : nominative )[
+						monthMoment.month()
+					],
+				monthsShort: { format: genitive, standalone: nominative },
+			} );
+			( __ as jest.Mock ).mockReturnValueOnce( 'D MMMM YYYY' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( '1 - 31 month10-genitive 2024' );
+		} );
+
+		it( 'should keep the nominative month name when the format holds no day token', () => {
+			moment.defineLocale( 'inflected-months-standalone', {
+				months: { format: genitive, standalone: nominative },
+				monthsShort: { format: genitive, standalone: nominative },
+			} );
+			( __ as jest.Mock ).mockReturnValueOnce( 'MMMM YYYY' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( 'month10-nominative 2024' );
+		} );
+	} );
 } );
 
 describe( 'loadLocaleData', () => {
