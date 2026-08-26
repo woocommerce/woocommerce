@@ -458,6 +458,7 @@ class WC_Helper_Updater {
 			$payload[ $product_id ] = array(
 				'product_id' => $product_id,
 				'file_id'    => '',
+				'version'    => '',
 			);
 		}
 
@@ -470,6 +471,7 @@ class WC_Helper_Updater {
 			}
 
 			$payload[ $data['_product_id'] ]['file_id'] = $data['_file_id'];
+			$payload[ $data['_product_id'] ]['version'] = (string) ( $data['Version'] ?? '' );
 		}
 
 		return self::_update_check( $payload );
@@ -496,6 +498,7 @@ class WC_Helper_Updater {
 			$payload[ $product_id ] = array(
 				'product_id' => $product_id,
 				'file_id'    => '',
+				'version'    => '',
 			);
 		}
 
@@ -508,6 +511,7 @@ class WC_Helper_Updater {
 			}
 
 			$payload[ $data['_product_id'] ]['file_id'] = $data['_file_id'];
+			$payload[ $data['_product_id'] ]['version'] = (string) ( $data['Version'] ?? '' );
 		}
 
 		// Scan local themes.
@@ -519,6 +523,7 @@ class WC_Helper_Updater {
 			}
 
 			$payload[ $data['_product_id'] ]['file_id'] = $data['_file_id'];
+			$payload[ $data['_product_id'] ]['version'] = (string) ( $data['Version'] ?? '' );
 		}
 
 		return self::_update_check( $payload );
