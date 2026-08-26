@@ -299,7 +299,7 @@ As well as the options above, checkbox field support showing an error message if
 
 ### Attributes
 
-Adding additional attributes to checkbox and text fields is supported. Adding them to select fields is **not possible for now**.
+Adding additional attributes to checkbox, text, and date fields is supported. Adding them to select fields is **not possible for now**.
 
 These attributes have a 1:1 mapping to the HTML attributes on `input` elements (except `pattern` on checkbox).
 
