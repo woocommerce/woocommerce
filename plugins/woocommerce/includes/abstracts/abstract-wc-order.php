@@ -1434,7 +1434,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( ! $items_key ) {
 			return false;
 		}
-
 		// Make sure existing items are loaded so we can append this new one.
 		if ( ! isset( $this->items[ $items_key ] ) ) {
 			$this->items[ $items_key ] = $this->get_items( $item->get_type() );
@@ -1445,8 +1444,26 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Append new row with generated temporary ID.
 		$item_id = $item->get_id();
+
 		if ( $item_id ) {
 			$this->items[ $items_key ][ $item_id ] = $item;
+
+			// Scrub this item from deferred bulk deletion snapshots, in case it was removed and then re-added before save().
+			$this->item_ids_to_bulk_delete = array_values(
+				array_filter(
+					$this->item_ids_to_bulk_delete,
+					static fn( $deleted_item_id ) => $deleted_item_id !== $item_id
+				)
+			);
+
+			foreach ( $this->item_ids_to_bulk_delete_by_type as $type => $item_ids ) {
+				$this->item_ids_to_bulk_delete_by_type[ $type ] = array_values(
+					array_filter(
+						$item_ids,
+						static fn( $deleted_item_id ) => $deleted_item_id !== $item_id
+					)
+				);
+			}
 		} else {
 			$this->items[ $items_key ][ 'new:' . $items_key . $this->temp_item_id_counter++ ] = $item;
 		}
