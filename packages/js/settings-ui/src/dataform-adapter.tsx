@@ -192,6 +192,8 @@ export const buildDataFormField = (
 	return field;
 };
 
+// Group descriptions and actions are HTML chrome that stays with the
+// renderer; FormField.description only accepts a plain string.
 const buildGroupFormField = ( group: SettingsUIGroup ): FormField => ( {
 	id: group.id,
 	label: group.title || undefined,
