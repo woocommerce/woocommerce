@@ -931,8 +931,14 @@ function wc_scheduled_sales() {
 			// job in the same WP-Cron request, and must not be flushed whole.
 			wp_cache_delete_multiple( $release_ids, 'posts' );
 			wp_cache_delete_multiple( $release_ids, 'post_meta' );
-			if ( $release_types ) {
-				clean_object_term_cache( $release_ids, $release_types );
+			// Every ID against every type, one type per call. clean_object_term_cache()
+			// would take the whole list at once, but it passes the value straight to the
+			// public clean_object_term_cache action, whose signature is a single string, and
+			// a callback that type hints it would fatal on an array. Looping keeps that
+			// contract and still covers the union, since each pass clears one type's
+			// taxonomies for the whole batch.
+			foreach ( $release_types as $release_type ) {
+				clean_object_term_cache( $release_ids, $release_type );
 			}
 
 			// With product_instance_caching on, wc_get_product() caches every product it
