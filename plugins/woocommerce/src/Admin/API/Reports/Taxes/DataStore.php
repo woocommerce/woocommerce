@@ -298,8 +298,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Create or update an entry in the wc_order_tax_lookup table for an order.
 	 *
-	 * Writes one row per tax order item, in a single statement so that the order is never left with
-	 * only some of its tax lines rebuilt, and removes rows left over from a previous sync.
+	 * Writes one row per tax order item, in a single statement so that a write that does not land
+	 * rebuilds none of the order's tax lines rather than some of them, then drops the rows the
+	 * order no longer carries.
 	 *
 	 * @param int $order_id Order ID.
 	 * @return int|bool Returns -1 if order won't be processed, or a boolean indicating processing success.
@@ -323,13 +324,15 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$rows         = array();
 		$values       = array();
 		$keys         = array();
-		$key_values   = array();
+		$key_values   = array( $order->get_id() );
 
 		foreach ( $tax_items as $tax_item ) {
 			$order_item_id = $tax_item->get_id();
 			$tax_rate_id   = $tax_item->get_rate_id();
 
 			$rows[] = '(%d, %s, %d, %d, %f, %f, %f)';
+			$keys[] = '(%d, %d)';
+
 			array_push(
 				$values,
 				$order->get_id(),
@@ -340,21 +343,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$tax_item->get_tax_total(),
 				(float) $tax_item->get_tax_total() + (float) $tax_item->get_shipping_tax_total()
 			);
-
-			$keys[] = '(%d, %d)';
 			array_push( $key_values, $tax_rate_id, $order_item_id );
 		}
 
-		$synced = true;
-
-		/*
-		 * One statement for the whole order, so that a write that does not land rebuilds none of
-		 * its tax lines rather than some of them. Rebuilding only some, on top of the rows the
-		 * order came in with, is what would have the reports counting a line twice: a row still on
-		 * the order item column's zero default matches every line of the order that shares its
-		 * rate, so it keeps standing in for the lines that were rebuilt alongside it.
-		 */
-		if ( ! empty( $rows ) ) {
+		// One statement for the whole order. Rebuilding only some of its lines would leave a row
+		// still on the order item column's zero default beside the rows written next to it, and
+		// that row stands in for every line of the order sharing its rate, so the reports would
+		// count those lines twice.
+		if ( $rows ) {
 			$written = $wpdb->query(
 				$wpdb->prepare(
 					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table name is not user input, and the value placeholders are built above, one set per tax line.
@@ -363,57 +359,44 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				)
 			);
 
-			$synced = false !== $written;
-		}
-
-		if ( $synced ) {
-			foreach ( $tax_items as $tax_item ) {
-				/**
-				 * Fires when tax's reports are updated.
-				 *
-				 * @param int $tax_rate_id Tax Rate ID.
-				 * @param int $order_id    Order ID.
-				 *
-				 * @since 4.0.0.
-				 */
-				do_action( 'woocommerce_analytics_update_tax', $tax_item->get_rate_id(), $order->get_id() );
+			if ( false === $written ) {
+				return false;
 			}
 		}
 
-		// Keep only the rows just written. A row is keyed by tax rate as well as by tax order item,
-		// so matching on the item alone would leave behind the old row of a line whose rate id has
-		// changed since the last sync. This also drops the rows of lines the order no longer
-		// carries, and the rows written before the order item column existed, which sit at zero.
-		//
-		// Prune only once the order's tax lines have been written. A write that did not land leaves
-		// the order holding nothing but the rows it came in with, and dropping those on top of that
-		// turns a rebuild the next sync would carry out into an order the reports have lost.
-		if ( $synced ) {
-			if ( empty( $keys ) ) {
-				$deleted = $wpdb->query(
-					$wpdb->prepare(
-						// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
-						"DELETE FROM {$table_name} WHERE order_id = %d",
-						$order->get_id()
-					)
-				);
-			} else {
-				array_unshift( $key_values, $order->get_id() );
-				$deleted = $wpdb->query(
-					$wpdb->prepare(
-						// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table name is not user input, and the key placeholders are built above, one pair per tax line.
-						"DELETE FROM {$table_name} WHERE order_id = %d AND (tax_rate_id, order_item_id) NOT IN (" . implode( ', ', $keys ) . ')',
-						$key_values
-					)
-				);
-			}
+		// Keep only the rows just written, which drops the rows of lines the order no longer
+		// carries and the rows written before the order item column existed, which sit at zero. The
+		// key is the rate and the item together, so matching on the item alone would leave behind
+		// the old row of a line whose rate id has changed. Prune only once the writes have landed,
+		// so a failure leaves the order with the rows it came in with.
+		$stale_keys = $keys ? ' AND (tax_rate_id, order_item_id) NOT IN (' . implode( ', ', $keys ) . ')' : '';
+		$deleted    = $wpdb->query(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table name is not user input, and the key placeholders are built above, one pair per tax line.
+				"DELETE FROM {$table_name} WHERE order_id = %d" . $stale_keys,
+				$key_values
+			)
+		);
 
-			// A row the order no longer carries goes on being counted by the reports, so a prune
-			// that failed is not a sync that succeeded.
-			$synced = false !== $deleted;
+		// A row the order no longer carries goes on being counted by the reports, so a prune that
+		// failed is not a sync that succeeded.
+		if ( false === $deleted ) {
+			return false;
 		}
 
-		return $synced;
+		foreach ( $tax_items as $tax_item ) {
+			/**
+			 * Fires when tax's reports are updated.
+			 *
+			 * @param int $tax_rate_id Tax Rate ID.
+			 * @param int $order_id    Order ID.
+			 *
+			 * @since 4.0.0
+			 */
+			do_action( 'woocommerce_analytics_update_tax', $tax_item->get_rate_id(), $order->get_id() );
+		}
+
+		return true;
 	}
 
 	/**
