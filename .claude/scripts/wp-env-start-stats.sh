@@ -32,7 +32,9 @@ START_DATE="2026-07-15"
 # Causes outside this project's control: a third-party outage, or a branch that does not
 # build. Losses from these are excluded from the adjusted recovery rate, so a bad
 # afternoon upstream does not read as wp-env instability. Keep in step with classify().
-NOT_OURS="github-api plugin-code workspace-eacces"
+# `workspace-eacces` is deliberately absent: it reads like a broken branch, but it is our
+# own wp-env mapping left root-owned by Docker, which our retry then cannot clean.
+NOT_OURS="github-api plugin-code"
 # Workflows that call the reusable ci.yml and therefore run the wp-env start step.
 WORKFLOWS=".github/workflows/ci.yml .github/workflows/tests-on-release.yml .github/workflows/tests-on-demand.yml"
 PARALLEL=6
