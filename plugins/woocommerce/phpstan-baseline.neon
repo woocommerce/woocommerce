@@ -62683,12 +62683,6 @@ parameters:
 			path: src/Internal/ProductAttributesLookup/LookupDataStore.php
 
 		-
-			message: '#^Call to method get_id\(\) on an unknown class Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/ProductAttributesLookup/LookupDataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\LookupDataStore\:\:create_data_for\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -62815,12 +62809,6 @@ parameters:
 			path: src/Internal/ProductAttributesLookup/LookupDataStore.php
 
 		-
-			message: '#^Parameter \#1 \$object_or_string of function is_a expects object, Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\WC_Product\|int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/ProductAttributesLookup/LookupDataStore.php
-
-		-
 			message: '#^Parameter \#1 \$object_or_string of function is_a expects object, int\|WC_Product given\.$#'
 			identifier: argument.type
 			count: 2
@@ -62833,20 +62821,8 @@ parameters:
 			path: src/Internal/ProductAttributesLookup/LookupDataStore.php
 
 		-
-			message: '#^Parameter \#1 \$var of function intval expects array\|bool\|float\|int\|resource\|string\|null, Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\WC_Product\|int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/ProductAttributesLookup/LookupDataStore.php
-
-		-
 			message: '#^Parameter \#1 \$variation of method Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\LookupDataStore\:\:create_data_for_variation\(\) expects WC_Product_Variation, WC_Product given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Internal/ProductAttributesLookup/LookupDataStore.php
-
-		-
-			message: '#^Parameter \$product of method Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\LookupDataStore\:\:create_data_for_product\(\) has invalid type Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\WC_Product\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Internal/ProductAttributesLookup/LookupDataStore.php
 

@@ -212,6 +212,37 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox `create_data_for_product` removes stale data for variations that no longer exist.
+	 *
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $use_optimized_db_access 'true' to use optimized db access for the table update.
+	 */
+	public function test_create_data_for_product_removes_data_for_deleted_variation( bool $use_optimized_db_access ): void {
+		$parent = new \WC_Product_Variable();
+		$this->save( $parent );
+		$parent_id = $parent->get_id();
+
+		$variation = new \WC_Product_Variation();
+		$variation->set_parent_id( $parent_id );
+		$this->save( $variation );
+		$variation_id = $variation->get_id();
+
+		// Variation rows are keyed by the parent id in 'product_or_parent_id'.
+		$this->insert_lookup_table_data( $variation_id, $parent_id, self::$attributes[0]['name'], self::$attributes[0]['term_ids'][0], true, true );
+		$variation->delete( true );
+
+		$this->assertFalse( wc_get_product( $variation_id ) );
+		$this->assertCount( 1, $this->get_lookup_table_data() );
+
+		$this->sut->create_data_for_product( $variation_id, $use_optimized_db_access );
+
+		$this->assertFalse( $this->sut->get_last_create_operation_failed() );
+		$this->assertEmpty( $this->get_lookup_table_data() );
+	}
+
+	/**
 	 * @testdox `create_data_for_product` creates the appropriate entries for variable products.
 	 *
 	 * @testWith [false]
@@ -869,7 +900,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox `on_product_changed` skips products that no longer exist.
+	 * @testdox `on_product_changed` schedules nothing for products that no longer exist.
 	 */
 	public function test_on_product_changed_skips_deleted_product(): void {
 		$this->set_direct_update_option( false );
@@ -881,13 +912,13 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->assertFalse( wc_get_product( $product_id ) );
 
+		// Deleting the product schedules a lookup data deletion, that's not what's being tested here.
 		$queue = WC()->get_instance_of( \WC_Queue::class );
+		$queue->clear_methods_called();
 
 		$this->sut->on_product_changed( $product_id );
 
-		$queue_calls = $queue->get_methods_called();
-		$this->assertCount( 1, $queue_calls );
-		$this->assertSame( array( $product_id, LookupDataStore::ACTION_DELETE ), $queue_calls[0]['args'] );
+		$this->assertEmpty( $queue->get_methods_called(), 'No lookup table update should be scheduled for a deleted product.' );
 	}
 
 	/**
