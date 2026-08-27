@@ -428,6 +428,89 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The resolve-order filter can map a non-numeric order number onto an order.
+	 */
+	public function test_resolve_order_filter_handles_custom_order_numbers(): void {
+		$order  = $this->make_order();
+		$filter = function ( $resolved, $order_number ) use ( $order ) {
+			return 'INV-100' === $order_number ? $order : $resolved;
+		};
+		add_filter( 'woocommerce_fulfillments_csv_importer_resolve_order', $filter, 10, 2 );
+
+		try {
+			$csv     = "order_number,tracking_number,shipment_provider\nINV-100,CUSTOM-1,ups\n";
+			$summary = $this->run_import( new FulfillmentsCsvImporter( $this->make_csv( $csv ) ) );
+		} finally {
+			remove_filter( 'woocommerce_fulfillments_csv_importer_resolve_order', $filter, 10 );
+		}
+
+		$this->assertSame( 1, $summary['created'] );
+		$this->assertSame( $order->get_id(), $summary['rows'][0]['order_id'] );
+	}
+
+	/**
+	 * @testdox The resolve-order filter still runs for rows whose order was loaded by chunk priming.
+	 */
+	public function test_resolve_order_filter_runs_for_primed_orders(): void {
+		$first  = $this->make_order();
+		$second = $this->make_order();
+		$seen   = array();
+		$filter = function ( $resolved, $order_number ) use ( &$seen, $second ) {
+			$seen[] = $order_number;
+			// Redirect every row onto the second order to prove the filter wins over priming.
+			return $second;
+		};
+		add_filter( 'woocommerce_fulfillments_csv_importer_resolve_order', $filter, 10, 2 );
+
+		try {
+			$csv     = "order_number,tracking_number,shipment_provider\n{$first->get_id()},PRIMED-1,ups\n";
+			$summary = $this->run_import( new FulfillmentsCsvImporter( $this->make_csv( $csv ) ) );
+		} finally {
+			remove_filter( 'woocommerce_fulfillments_csv_importer_resolve_order', $filter, 10 );
+		}
+
+		$this->assertSame( array( (string) $first->get_id() ), $seen, 'The filter must run for a primed order number' );
+		$this->assertSame( 1, $summary['created'] );
+		$this->assertSame( $second->get_id(), $summary['rows'][0]['order_id'] );
+	}
+
+	/**
+	 * @testdox A resolve-order filter returning a non-order fails the row instead of fataling.
+	 */
+	public function test_resolve_order_filter_junk_return_fails_the_row(): void {
+		$order  = $this->make_order();
+		$filter = fn() => 'not-an-order';
+		add_filter( 'woocommerce_fulfillments_csv_importer_resolve_order', $filter );
+
+		try {
+			$csv     = "order_number,tracking_number,shipment_provider\n{$order->get_id()},JUNK-1,ups\n";
+			$summary = $this->run_import( new FulfillmentsCsvImporter( $this->make_csv( $csv ) ) );
+		} finally {
+			remove_filter( 'woocommerce_fulfillments_csv_importer_resolve_order', $filter );
+		}
+
+		$this->assertSame( 0, $summary['created'] );
+		$this->assertSame( 1, $summary['failed'] );
+		$this->assertSame( 'order_not_found', $summary['rows'][0]['code'] );
+	}
+
+	/**
+	 * @testdox Chunk priming loads the orders the rows name, not the most recent ones.
+	 */
+	public function test_chunk_priming_targets_the_rows_own_orders(): void {
+		$target = $this->make_order();
+		// Newer orders would win a query that ignored the ID filter.
+		$this->make_order();
+		$this->make_order();
+
+		$csv     = "order_number,tracking_number,shipment_provider\n{$target->get_id()},PRIME-TARGET,ups\n";
+		$summary = $this->run_import( new FulfillmentsCsvImporter( $this->make_csv( $csv ) ) );
+
+		$this->assertSame( 1, $summary['created'] );
+		$this->assertSame( $target->get_id(), $summary['rows'][0]['order_id'] );
+	}
+
+	/**
 	 * @testdox Malformed values from the column-aliases filter are dropped instead of fataling the import.
 	 */
 	public function test_malformed_alias_filter_output_is_tolerated(): void {

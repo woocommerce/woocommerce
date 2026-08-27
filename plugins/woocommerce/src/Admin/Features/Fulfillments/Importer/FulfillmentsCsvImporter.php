@@ -56,6 +56,16 @@ class FulfillmentsCsvImporter {
 	private array $order_cache = array();
 
 	/**
+	 * Orders loaded in one batch for the current chunk, keyed by order ID.
+	 *
+	 * Kept apart from the resolution cache so priming stays a lookup shortcut and never
+	 * skips the woocommerce_fulfillments_csv_importer_resolve_order filter.
+	 *
+	 * @var array<int, WC_Order>
+	 */
+	private array $primed_orders = array();
+
+	/**
 	 * Per-run cache of non-deleted fulfillments keyed by order ID.
 	 *
 	 * @var array<int, array<int, Fulfillment>>
@@ -410,7 +420,7 @@ class FulfillmentsCsvImporter {
 				}
 
 				// A fresh importer is constructed per chunked REST request, so the per-row order
-				// cache starts cold each chunk. Prime it in one batch to avoid N+1 wc_get_order calls.
+				// cache starts cold each chunk. Load the chunk's orders in one batch instead.
 				$this->prime_chunk_caches( $batch, $header_map );
 
 				foreach ( $batch as $entry ) {
@@ -907,15 +917,17 @@ class FulfillmentsCsvImporter {
 	}
 
 	/**
-	 * Warm the per-row order cache for an entire chunk in one batch.
+	 * Load every order a chunk references in one batch.
 	 *
-	 * REST callers build a fresh importer per chunk, so without this priming step each
-	 * row would issue its own wc_get_order() call before the in-memory cache fills up.
+	 * REST callers build a fresh importer per chunk, so without this each row would issue
+	 * its own wc_get_order() call.
 	 *
 	 * @param array<int, array{row_number:int, row:array<int, string|null>, blank:bool}> $batch The chunk's raw rows.
 	 * @param array<string, int>                                                         $header_map Canonical column => CSV column index.
 	 */
 	private function prime_chunk_caches( array $batch, array $header_map ): void {
+		$this->primed_orders = array();
+
 		if ( ! isset( $header_map[ self::COL_ORDER_NUMBER ] ) || empty( $batch ) ) {
 			return;
 		}
@@ -939,11 +951,13 @@ class FulfillmentsCsvImporter {
 		}
 
 		$numeric_ids = array_values( array_unique( $numeric_ids ) );
-		$orders      = wc_get_orders(
+		// post__in is the ID filter both order data stores understand; HPOS maps it onto the
+		// orders table and the posts store passes it straight to WP_Query.
+		$orders = wc_get_orders(
 			array(
-				'limit'   => count( $numeric_ids ),
-				'include' => $numeric_ids,
-				'type'    => 'shop_order',
+				'limit'    => count( $numeric_ids ),
+				'post__in' => $numeric_ids,
+				'type'     => 'shop_order',
 			)
 		);
 
@@ -955,8 +969,7 @@ class FulfillmentsCsvImporter {
 			if ( ! $order instanceof WC_Order ) {
 				continue;
 			}
-			$key                       = (string) $order->get_id();
-			$this->order_cache[ $key ] = $order;
+			$this->primed_orders[ $order->get_id() ] = $order;
 		}
 	}
 
@@ -977,7 +990,8 @@ class FulfillmentsCsvImporter {
 		$order = null;
 
 		if ( ctype_digit( $order_number ) ) {
-			$candidate = wc_get_order( (int) $order_number );
+			$order_id  = (int) $order_number;
+			$candidate = $this->primed_orders[ $order_id ] ?? wc_get_order( $order_id );
 			if ( $candidate instanceof WC_Order ) {
 				$order = $candidate;
 			}
