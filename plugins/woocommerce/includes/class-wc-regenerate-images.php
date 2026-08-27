@@ -219,6 +219,10 @@ class WC_Regenerate_Images {
 			return $image;
 		}
 
+		if ( ! is_string( $size ) || ! has_image_size( $size ) ) {
+			return $image;
+		}
+
 		$target_size      = wc_get_image_size( $size );
 		$image_width      = $image[1];
 		$image_height     = $image[2];

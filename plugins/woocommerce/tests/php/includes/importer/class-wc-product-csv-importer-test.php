@@ -755,6 +755,105 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test that a global-flagged variation row whose global attribute does not exist resolves to the parent's same-named custom attribute, instead of being saved as an "any" variation alongside a stray global attribute.
+	 */
+	public function test_import_creates_new_variations_when_a_global_flagged_row_matches_a_custom_parent_attribute() {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'S', 'M' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Tee' );
+		$product->set_sku( 'IMPORT-GLBFLAG-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$data = $this->import_with_update_existing(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-GLBFLAG-S,Import Tee - S,IMPORT-GLBFLAG-PARENT,Size,S,1,12\n",
+			'import-global-flagged-custom-attribute.csv'
+		);
+
+		$this->assertCount( 1, $data['imported_variations'], 'Expected the row to be created against the parent\'s custom attribute' );
+		$this->assertEmpty( $data['skipped'], 'Expected 0 skipped products, got ' . count( $data['skipped'] ) );
+
+		$variation = wc_get_product( $data['imported_variations'][0] );
+		$this->assertSame( array( 'size' => 'S' ), $variation->get_attributes(), 'Expected the variation to store the custom attribute value instead of matching any value' );
+		$this->assertSame( 0, (int) wc_attribute_taxonomy_id_by_name( 'size' ), 'Expected no global "size" attribute to be created by the import' );
+
+		WC_Helper_Product::delete_product( $variation->get_id() );
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Test that a global-flagged variation row whose global attribute does not exist still promotes the parent's same-named custom attribute for variations.
+	 */
+	public function test_import_promotes_a_custom_parent_attribute_matched_by_a_global_flagged_row() {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'S', 'M' ) );
+		$attribute->set_variation( false );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Tee' );
+		$product->set_sku( 'IMPORT-GLBPROMOTE-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$data = $this->import_with_update_existing(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-GLBPROMOTE-S,Import Tee - S,IMPORT-GLBPROMOTE-PARENT,Size,S,1,12\n",
+			'import-global-flagged-promoted-attribute.csv'
+		);
+
+		$this->assertCount( 1, $data['imported_variations'], 'Expected the row to be created once the parent attribute is promoted for variations' );
+		$this->assertEmpty( $data['skipped'], 'Expected 0 skipped products, got ' . count( $data['skipped'] ) );
+
+		$variation         = wc_get_product( $data['imported_variations'][0] );
+		$parent_attributes = wc_get_product( $product->get_id() )->get_attributes();
+		$this->assertSame( array( 'size' => 'S' ), $variation->get_attributes(), 'Expected the variation to store the custom attribute value instead of matching any value' );
+		$this->assertTrue( $parent_attributes['size']->get_variation(), 'Expected the parent\'s custom attribute to be promoted for variations' );
+		$this->assertSame( 0, (int) wc_attribute_taxonomy_id_by_name( 'size' ), 'Expected no global "size" attribute to be created by the import' );
+
+		WC_Helper_Product::delete_product( $variation->get_id() );
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Test that re-importing an existing variation with a global-flagged row whose global attribute does not exist keeps the stored custom attribute, instead of wiping it into an "any" variation.
+	 */
+	public function test_import_updates_an_existing_variation_from_a_global_flagged_row_without_wiping_its_attribute() {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'S', 'M' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Tee' );
+		$product->set_sku( 'IMPORT-GLBUPDATE-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_sku( 'IMPORT-GLBUPDATE-S' );
+		$variation->set_attributes( array( 'size' => 'S' ) );
+		$variation->save();
+
+		$data = $this->import_with_update_existing(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-GLBUPDATE-S,Import Tee - M,IMPORT-GLBUPDATE-PARENT,Size,M,1,15\n",
+			'import-global-flagged-update-existing.csv'
+		);
+
+		$this->assertContains( $variation->get_id(), $data['updated'], 'Expected the existing variation to be updated' );
+		$this->assertEmpty( $data['skipped'], 'Expected 0 skipped products, got ' . count( $data['skipped'] ) );
+		$this->assertSame( array( 'size' => 'M' ), wc_get_product( $variation->get_id() )->get_attributes(), 'Expected the row\'s value to be stored instead of the attribute being wiped into matching any value' );
+		$this->assertSame( 0, (int) wc_attribute_taxonomy_id_by_name( 'size' ), 'Expected no global "size" attribute to be created by the import' );
+
+		WC_Helper_Product::delete_product( $variation->get_id() );
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
 	 * @testdox Test that a variation row listed before the parent row that would widen the attribute is skipped, since rows are validated against the parent as it stands when the row is reached.
 	 */
 	public function test_import_skips_new_variations_listed_before_the_parent_row_that_adds_their_value() {
