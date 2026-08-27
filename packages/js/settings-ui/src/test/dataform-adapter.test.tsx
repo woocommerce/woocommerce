@@ -120,12 +120,13 @@ describe( 'dataform adapter', () => {
 			expect( field.elements ).toEqual( options );
 		} );
 
-		it( 'renders info fields read-only through the native renderer', () => {
+		it( 'renders info fields read-only with only the sanitized description', () => {
 			const infoField: SettingsUIField = {
 				id: 'info_field',
 				label: 'Read this',
 				type: 'info',
-				description: 'Useful <strong>information</strong>.',
+				description:
+					'Useful <strong>information</strong>.<script>alert(1)</script>',
 			};
 			const field = buildDataFormField(
 				infoField,
@@ -142,7 +143,10 @@ describe( 'dataform adapter', () => {
 			expect(
 				container.querySelector( '.wc-settings-ui__info' )
 			).not.toBeNull();
-			expect( container.textContent ).toContain( 'Read this' );
+			expect( container.textContent ).toContain( 'Useful information.' );
+			expect( container.querySelector( 'script' ) ).toBeNull();
+			// DataForm owns the label for read-only fields.
+			expect( container.textContent ).not.toContain( 'Read this' );
 		} );
 
 		it( 'maps field descriptions to sanitized help elements', () => {
@@ -463,6 +467,32 @@ describe( 'dataform adapter', () => {
 					( input ) => input.value === 'b' && input.disabled
 				)
 			).toBe( true );
+		} );
+
+		it( 'shows an info field title exactly once', () => {
+			const infoField: SettingsUIField = {
+				id: 'info_field',
+				label: 'Read this',
+				type: 'info',
+				description: 'Useful <strong>information</strong>.',
+			};
+			const options = createOptions( [ infoField ] );
+			const adapter = createDataFormAdapter( options );
+			const data = {};
+
+			const { container } = renderElement(
+				<DataForm
+					data={ data }
+					fields={ adapter.fields }
+					form={ adapter.getForm( data ) }
+					onChange={ () => undefined }
+				/>
+			);
+
+			expect( container.textContent?.match( /Read this/g ) ).toHaveLength(
+				1
+			);
+			expect( container.textContent ).toContain( 'Useful information.' );
 		} );
 
 		it( 'surfaces grouped validity through FieldValidity children', () => {

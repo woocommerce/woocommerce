@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createElement } from '@wordpress/element';
+import { createElement, RawHTML } from '@wordpress/element';
 import type {
 	Field,
 	FieldTypeName,
@@ -13,8 +13,7 @@ import type {
  * Internal dependencies
  */
 import { error, warn } from './diagnostics';
-import { createSettingsHelpElement } from './html';
-import { NativeSettingsField } from './native-fields';
+import { createSettingsHelpElement, sanitizeSettingsHtml } from './html';
 import {
 	resolveFieldVisibilityPredicate,
 	resolveGroupVisibilityPredicate,
@@ -125,23 +124,15 @@ const createIsVisible = (
 	};
 };
 
-const createInfoRender = (
-	settingsField: SettingsUIField,
-	options: DataFormAdapterOptions
-) => {
-	return function InfoSettingsField( { item }: { item: SettingsValues } ) {
-		return (
-			<NativeSettingsField
-				field={ settingsField }
-				value={ item[ settingsField.id ] ?? null }
-				onChange={ () => undefined }
-				values={ item }
-				initialValues={ options.initialValues }
-				setValue={ () => undefined }
-				setValues={ () => undefined }
-				context={ options.context }
-			/>
-		);
+// DataForm renders the label for read-only fields itself, so the info
+// renderer paints only the sanitized description.
+const createInfoRender = ( settingsField: SettingsUIField ) => {
+	return function InfoSettingsField() {
+		return settingsField.description ? (
+			<RawHTML className="wc-settings-ui__info">
+				{ sanitizeSettingsHtml( settingsField.description ) }
+			</RawHTML>
+		) : null;
 	};
 };
 
@@ -177,7 +168,7 @@ export const buildDataFormField = (
 
 	if ( settingsField.type === 'info' ) {
 		field.readOnly = true;
-		field.render = createInfoRender( settingsField, options );
+		field.render = createInfoRender( settingsField );
 		return field;
 	}
 
