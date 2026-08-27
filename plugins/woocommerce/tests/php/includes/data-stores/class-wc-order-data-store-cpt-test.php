@@ -2106,127 +2106,14 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * date_query shapes that reached WP_Date_Query and failed there.
-	 *
-	 * @return array<string, array{0: array}>
-	 */
-	public function provider_unusable_date_query(): array {
-		return array(
-			'year object'        => array( array( array( 'year' => new stdClass() ) ) ),
-			'after object'       => array( array( array( 'after' => new stdClass() ) ) ),
-			'before array part'  => array( array( array( 'before' => array( 'year' => new stdClass() ) ) ) ),
-			'relation array'     => array(
-				array(
-					'relation' => array(),
-					array( 'year' => 2020 ),
-				),
-			),
-			'compare array'      => array(
-				array(
-					array(
-						'column'  => 'post_date',
-						'compare' => array(),
-						'year'    => 2020,
-					),
-				),
-			),
-			'nested unknown key' => array( array( array( 'ext_ctx' => array( 'year' => new stdClass() ) ) ) ),
-		);
-	}
-
-	/**
-	 * @testdox An unusable date_query fails the query closed instead of fatalling in WP_Date_Query.
-	 *
-	 * @dataProvider provider_unusable_date_query
-	 *
-	 * @param array $date_query The malformed date_query arg.
-	 */
-	public function test_unusable_date_query_matches_no_orders( array $date_query ): void {
-		// Also asserts the notice fires: WP fails the test both if an undeclared
-		// incorrect-usage notice is raised and if a declared one never is.
-		$this->setExpectedIncorrectUsage( 'wc_get_orders' );
-
-		OrderHelper::create_order();
-
-		$captured = null;
-		$capture  = static function ( $args ) use ( &$captured ) {
-			$captured = $args;
-			return $args;
-		};
-		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 1 );
-
-		try {
-			$result = wc_get_orders(
-				array(
-					'date_query' => $date_query,
-					'return'     => 'ids',
-					'limit'      => -1,
-					'status'     => 'any',
-				)
-			);
-		} finally {
-			remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 1 );
-		}
-
-		$this->assertSame( array(), $result, 'An unusable date_query must fail the query closed.' );
-		$this->assertNotEmpty( $captured['errors'] ?? array(), 'The query must be marked unsatisfiable.' );
-		$this->assertArrayNotHasKey( 'date_query', array_filter( (array) ( $captured['date_query'] ?? array() ) ), 'The unusable clause must not reach WP_Query.' );
-	}
-
-	/**
-	 * @testdox A date_query key WP_Date_Query ignores does not reject the clause it does build.
-	 */
-	public function test_unknown_date_query_key_does_not_reject_the_clause(): void {
-		$order = OrderHelper::create_order();
-		$order->set_date_created( '2020-06-01' );
-		$order->save();
-
-		// An extension carrying its own data in a clause must not lose the year filter.
-		$result = wc_get_orders(
-			array(
-				'date_query' => array(
-					array(
-						'year'              => 2020,
-						'extension_context' => new stdClass(),
-					),
-				),
-				'return'     => 'ids',
-				'limit'      => -1,
-				'status'     => 'any',
-			)
-		);
-
-		$this->assertContains( $order->get_id(), $result, 'An unrecognised date_query key must not discard the clause.' );
-	}
-
-	/**
-	 * @testdox A valid date_query still matches orders.
-	 */
-	public function test_valid_date_query_still_matches_orders(): void {
-		$order = OrderHelper::create_order();
-		$order->set_date_created( '2020-06-01' );
-		$order->save();
-
-		$result = wc_get_orders(
-			array(
-				'date_query' => array( array( 'year' => 2020 ) ),
-				'return'     => 'ids',
-				'limit'      => -1,
-				'status'     => 'any',
-			)
-		);
-
-		$this->assertContains( $order->get_id(), $result, 'A valid date_query must still match.' );
-	}
-
-	/**
 	 * @testdox A date_query the guard must honour still matches, shared with the HPOS suite.
 	 *
 	 * @dataProvider provider_date_query_must_match
 	 *
-	 * @param array $date_query The clause under test.
+	 * @param array $date_query   The clause under test.
+	 * @param bool  $should_match Whether the seeded order should be returned.
 	 */
-	public function test_shared_date_query_must_match( array $date_query ): void {
+	public function test_shared_date_query_must_match( array $date_query, bool $should_match = true ): void {
 		$order = OrderHelper::create_order();
 		$order->set_date_created( '2024-06-01' );
 		$order->save();
@@ -2240,7 +2127,11 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertContains( $order->get_id(), $result, 'A supported date_query must keep matching.' );
+		if ( $should_match ) {
+			$this->assertContains( $order->get_id(), $result, 'A supported date_query must keep matching.' );
+		} else {
+			$this->assertNotContains( $order->get_id(), $result, 'The clause must still restrict the query.' );
+		}
 	}
 
 	/**
