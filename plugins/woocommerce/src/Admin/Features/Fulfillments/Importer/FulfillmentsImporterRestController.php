@@ -487,7 +487,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		$file_missing = '' === $session_file || ! file_exists( $session_file );
 
 		// The path comes from persisted transient state, so refuse anything outside the
-		// allowed upload locations, mirroring the abandoned-file cleanup. Unreadable files
+		// uploads directory, mirroring the abandoned-file cleanup. Unreadable files
 		// are left for the chunk abort path, which is retriable and keeps the session.
 		$file_invalid = ! $file_missing
 			&& is_readable( $session_file )
@@ -831,18 +831,13 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Whether a persisted staged-file path resolves inside an allowed upload location.
+	 * Whether a persisted staged-file path resolves inside the uploads directory.
 	 *
 	 * @param string $path Absolute path from session state.
 	 * @return bool
 	 */
 	private function is_valid_staged_path( string $path ): bool {
-		try {
-			FilesystemUtil::validate_upload_file_path( $path );
-			return true;
-		} catch ( \Exception $e ) {
-			return false;
-		}
+		return ImportSession::is_staged_path( $path );
 	}
 
 	/**

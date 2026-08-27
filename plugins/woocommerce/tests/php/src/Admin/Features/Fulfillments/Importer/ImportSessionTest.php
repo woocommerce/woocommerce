@@ -227,6 +227,21 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox cleanup_abandoned_file() refuses a readable path outside the uploads directory.
+	 */
+	public function test_cleanup_abandoned_file_refuses_path_outside_uploads(): void {
+		$file = ABSPATH . 'wc-fulfillments-import-' . wp_generate_uuid4() . '.csv';
+		file_put_contents( $file, "a,b,c\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture write.
+
+		try {
+			ImportSession::cleanup_abandoned_file( 75, 'ghost', $file );
+			$this->assertFileExists( $file, 'Only files staged in the uploads directory may be cleaned up' );
+		} finally {
+			wp_delete_file( $file );
+		}
+	}
+
+	/**
 	 * @testdox The cleanup hook callback coerces loosely typed arguments instead of fataling.
 	 */
 	public function test_cleanup_hook_callback_coerces_arguments(): void {

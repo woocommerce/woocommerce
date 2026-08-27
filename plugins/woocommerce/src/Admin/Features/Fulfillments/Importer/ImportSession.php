@@ -244,17 +244,13 @@ final class ImportSession {
 		}
 
 		// The Action Scheduler payload is persisted, so refuse to delete anything that does not
-		// resolve inside an allowed upload location even if the args were tampered with.
-		if ( $file_exists ) {
-			try {
-				FilesystemUtil::validate_upload_file_path( $file );
-			} catch ( \Exception $e ) {
-				wc_get_logger()->warning(
-					sprintf( 'Refusing to clean up staged fulfillments import file outside the uploads directory: %s', $file ),
-					array( 'source' => 'fulfillments-csv-importer' )
-				);
-				return;
-			}
+		// resolve inside the uploads directory even if the args were tampered with.
+		if ( $file_exists && ! self::is_staged_path( $file ) ) {
+			wc_get_logger()->warning(
+				sprintf( 'Refusing to clean up staged fulfillments import file outside the uploads directory: %s', $file ),
+				array( 'source' => 'fulfillments-csv-importer' )
+			);
+			return;
 		}
 
 		// Deleting the attachment also removes its file; only honor IDs that still
@@ -265,6 +261,42 @@ final class ImportSession {
 		if ( file_exists( $file ) ) {
 			wp_delete_file( $file );
 		}
+	}
+
+	/**
+	 * Whether a path resolves inside the uploads directory the importer stages files in.
+	 *
+	 * FilesystemUtil::validate_upload_file_path() also accepts anything readable under
+	 * ABSPATH, which is far wider than anything this importer ever writes.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $path Absolute path to check.
+	 * @return bool
+	 */
+	public static function is_staged_path( string $path ): bool {
+		if ( '' === $path ) {
+			return false;
+		}
+
+		try {
+			FilesystemUtil::validate_upload_file_path( $path );
+		} catch ( \Exception $e ) {
+			return false;
+		}
+
+		$upload_dir = wp_get_upload_dir();
+		if ( ! empty( $upload_dir['error'] ) ) {
+			return false;
+		}
+
+		$resolved = realpath( $path );
+		$basedir  = realpath( $upload_dir['basedir'] );
+		if ( false === $resolved || false === $basedir ) {
+			return false;
+		}
+
+		return 0 === strpos( wp_normalize_path( $resolved ), trailingslashit( wp_normalize_path( $basedir ) ) );
 	}
 
 	/**
