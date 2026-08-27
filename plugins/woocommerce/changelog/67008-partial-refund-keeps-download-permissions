@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep a customer's download permissions when a downloadable line item is only partially refunded; permissions are now revoked only once no unrefunded quantity of the product remains on the order.

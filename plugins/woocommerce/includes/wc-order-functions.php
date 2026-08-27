@@ -580,6 +580,7 @@ function wc_create_refund( $args = array() ) {
 		$refund_item_count           = 0;
 		$refund                      = new WC_Order_Refund( $args['refund_id'] );
 		$refunded_order_and_products = array();
+		$refund_quantities           = array();
 
 		if ( 0 > $args['amount'] || $args['amount'] > $remaining_refund_amount ) {
 			throw new Exception( __( 'Invalid refund amount.', 'woocommerce' ) );
@@ -627,6 +628,8 @@ function wc_create_refund( $args = array() ) {
 						'order_id'   => $order->get_id(),
 						'product_id' => $item->get_product_id(),
 					);
+
+					$refund_quantities[ $item_id ] = abs( (float) $qty );
 				}
 
 				$class         = get_class( $item );
@@ -651,6 +654,23 @@ function wc_create_refund( $args = array() ) {
 
 				$refund->add_item( $refunded_item );
 				$refund_item_count += $qty;
+			}
+		}
+
+		// Determine which refunded products still have unrefunded quantity left on the order,
+		// so download permissions are only revoked once no purchased quantity remains (#67008).
+		// The refund is not saved yet, so get_qty_refunded_for_item() covers previous refunds only;
+		// the quantities of the refund being created are added from $refund_quantities.
+		$products_with_remaining_qty = array();
+		if ( ! empty( $refunded_order_and_products ) ) {
+			foreach ( $order->get_items() as $order_item_id => $order_item ) {
+				$remaining_qty = $order_item->get_quantity()
+					- abs( (float) $order->get_qty_refunded_for_item( $order_item_id ) )
+					- ( isset( $refund_quantities[ $order_item_id ] ) ? $refund_quantities[ $order_item_id ] : 0 );
+
+				if ( $remaining_qty > 0 ) {
+					$products_with_remaining_qty[ $order_item->get_product_id() ] = true;
+				}
 			}
 		}
 
@@ -692,6 +712,11 @@ function wc_create_refund( $args = array() ) {
 			if ( ! empty( $refunded_order_and_products ) ) {
 				$download_data_store = WC_Data_Store::load( 'customer-download' );
 				foreach ( $refunded_order_and_products as $refunded_order_and_product ) {
+					// A partially refunded product keeps its download permissions while unrefunded quantity remains (#67008).
+					if ( isset( $products_with_remaining_qty[ $refunded_order_and_product['product_id'] ] ) ) {
+						continue;
+					}
+
 					$downloads = $download_data_store->get_downloads( $refunded_order_and_product );
 					if ( ! empty( $downloads ) ) {
 						foreach ( $downloads as $download ) {
