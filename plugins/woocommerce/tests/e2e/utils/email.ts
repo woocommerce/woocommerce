@@ -61,10 +61,9 @@ export async function expectEmail(
 			} ),
 		} )
 		.filter( {
-			has: page.getByRole( 'cell', {
-				name: subject,
-				exact: true,
-			} ),
+			// No `exact` here: Playwright ignores it when `name` is a RegExp,
+			// so passing it would only imply a guarantee the matcher doesn't give.
+			has: page.getByRole( 'cell', { name: subject } ),
 		} );
 
 	await expect( async () => {
