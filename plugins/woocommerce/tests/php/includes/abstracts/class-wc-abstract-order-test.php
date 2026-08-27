@@ -1546,56 +1546,57 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	 * @param string|null $type Item type, or null for every type.
 	 */
 	public function test_remove_order_items_invokes_custom_data_store_delete_items( $type ) {
-		$order               = WC_Helper_Order::create_order();
-		$original_data_store = $order->get_data_store();
+		$order                 = WC_Helper_Order::create_order();
+		$original_data_store   = $order->get_data_store();
+		$line_item_ids         = array_keys( $order->get_items() );
+		$shipping_item_ids     = array_keys( $order->get_items( 'shipping' ) );
+		$expected_deleted_ids  = null === $type ? array_merge( $line_item_ids, $shipping_item_ids ) : $line_item_ids;
+		$expected_retained_ids = null === $type ? array() : $shipping_item_ids;
 
 		// phpcs:disable Squiz.Commenting -- Anonymous test double methods are self-explanatory.
-		$overriding_data_store_class = get_class(
-			new class() extends WC_Order_Data_Store_CPT {
-				public $delete_items_call_count = 0;
-
-				public function delete_items( $order, $type = null ) {
-					++$this->delete_items_call_count;
-					parent::delete_items( $order, $type );
-				}
-			}
-		);
-		$custom_data_store           = new class( $original_data_store, $overriding_data_store_class ) extends WC_Data_Store {
+		$custom_data_store = new class( $original_data_store ) extends WC_Order_Data_Store_CPT {
 			public $deleted_item_types = array();
 
 			private $delegate;
 
-			private $overriding_data_store_class;
-
-			public function __construct( $delegate, $overriding_data_store_class ) {
-				parent::__construct( 'order' );
-				$this->delegate                    = $delegate;
-				$this->overriding_data_store_class = $overriding_data_store_class;
+			public function __construct( $delegate ) {
+				$this->delegate = $delegate;
 			}
 
-			public function get_current_class_name() {
-				return $this->overriding_data_store_class;
+			public function update( &$order ) {
+				return $this->delegate->update( $order );
 			}
 
 			public function delete_items( $order, $type = null ) {
 				$this->deleted_item_types[] = $type;
 				return $this->delegate->delete_items( $order, $type );
 			}
-
-			public function __call( $method, $parameters ) {
-				return $this->delegate->{$method}( ...$parameters );
-			}
 		};
 		// phpcs:enable Squiz.Commenting
 
-		$reflection = new ReflectionProperty( WC_Data::class, 'data_store' );
-		$reflection->setAccessible( true );
-		$reflection->setValue( $order, $custom_data_store );
+		$data_store_filter = static function () use ( $custom_data_store ) {
+			return $custom_data_store;
+		};
+		add_filter( 'woocommerce_order_data_store', $data_store_filter, PHP_INT_MAX );
 
-		$order->remove_order_items( $type );
-		$order->save();
+		try {
+			$reflection = new ReflectionProperty( WC_Data::class, 'data_store' );
+			$reflection->setAccessible( true );
+			$reflection->setValue( $order, new WC_Data_Store( 'order' ) );
+
+			$order->remove_order_items( $type );
+			$order->save();
+		} finally {
+			remove_filter( 'woocommerce_order_data_store', $data_store_filter, PHP_INT_MAX );
+		}
 
 		$this->assertSame( array( $type ), $custom_data_store->deleted_item_types, 'The custom delete_items() implementation should be invoked once with the requested type.' );
+		foreach ( $expected_deleted_ids as $item_id ) {
+			$this->assertFalse( WC_Order_Factory::get_order_item( $item_id ), 'Items selected for removal should be deleted.' );
+		}
+		foreach ( $expected_retained_ids as $item_id ) {
+			$this->assertInstanceOf( WC_Order_Item::class, WC_Order_Factory::get_order_item( $item_id ), 'Items of other types should be retained.' );
+		}
 	}
 
 	/**
