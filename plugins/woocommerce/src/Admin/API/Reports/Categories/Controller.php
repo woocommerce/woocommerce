@@ -65,6 +65,8 @@ class Controller extends GenericController implements ExportableInterface {
 		$args['status_is_not']       = (array) $request['status_is_not'];
 		$args['force_cache_refresh'] = $request['force_cache_refresh'];
 
+		$args['free_orders'] = $request['free_orders'];
+
 		return $args;
 	}
 

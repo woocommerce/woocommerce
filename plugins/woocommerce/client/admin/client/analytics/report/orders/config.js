@@ -7,6 +7,7 @@ import { applyFilters } from '@wordpress/hooks';
 /**
  * Internal dependencies
  */
+import { getFreeOrdersFilter } from '../free-orders-filter';
 import {
 	getCouponLabels,
 	getProductLabels,
@@ -81,9 +82,8 @@ export const filters = applyFilters( ORDERS_REPORT_FILTERS_FILTER, [
 			},
 		],
 	},
+	getFreeOrdersFilter(),
 ] );
-
-/*eslint-disable max-len*/
 
 /**
  * Orders Report Advanced Filters.
@@ -377,4 +377,3 @@ export const advancedFilters = applyFilters(
 		},
 	}
 );
-/*eslint-enable max-len*/

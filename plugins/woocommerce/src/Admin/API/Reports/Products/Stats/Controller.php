@@ -88,6 +88,8 @@ class Controller extends GenericStatsController {
 			}
 		}
 
+		$query_args['free_orders'] = $request['free_orders'];
+
 		return $query_args;
 	}
 

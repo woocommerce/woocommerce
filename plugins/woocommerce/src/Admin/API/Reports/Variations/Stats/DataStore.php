@@ -97,9 +97,15 @@ class DataStore extends VariationsDataStore implements DataStoreInterface {
 		}
 
 		$order_status_filter = $this->get_status_subquery( $query_args );
+		$free_orders_filter  = $this->get_free_orders_subquery( $query_args );
+		if ( $order_status_filter || $free_orders_filter ) {
+			$products_from_clause .= " JOIN {$wpdb->prefix}wc_order_stats ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id";
+		}
 		if ( $order_status_filter ) {
-			$products_from_clause  .= " JOIN {$wpdb->prefix}wc_order_stats ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id";
 			$products_where_clause .= " AND ( {$order_status_filter} )";
+		}
+		if ( $free_orders_filter ) {
+			$products_where_clause .= " AND ( {$free_orders_filter} )";
 		}
 
 		$attribute_order_items_subquery = $this->get_order_item_by_attribute_subquery( $query_args );

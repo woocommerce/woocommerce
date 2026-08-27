@@ -10,6 +10,7 @@ import { dispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
+import { getFreeOrdersFilter } from '../free-orders-filter';
 import { getRequestByIdString } from '../../../lib/async-requests';
 import { getTaxCode } from './utils';
 
@@ -140,4 +141,5 @@ export const filters = applyFilters( TAXES_REPORT_FILTERS_FILTER, [
 		showFilters: () => true,
 		filters: filterValues,
 	},
+	getFreeOrdersFilter(),
 ] );

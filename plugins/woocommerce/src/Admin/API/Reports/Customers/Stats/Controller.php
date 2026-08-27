@@ -78,6 +78,8 @@ class Controller extends \WC_REST_Reports_Controller {
 
 		$args = CustomersController::consolidate_customer_id_filters( $args );
 
+		$args['free_orders'] = $request['free_orders'];
+
 		return $args;
 	}
 

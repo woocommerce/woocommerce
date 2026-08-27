@@ -848,6 +848,70 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	}
 
 	/**
+	 * Report contexts that keep counting free orders unless asked otherwise.
+	 *
+	 * A coupon that discounts an order to nothing is the subject of the Coupons
+	 * report, not noise in it: leaving those orders out would remove the record
+	 * of the coupon that created them.
+	 *
+	 * @return array
+	 */
+	protected static function get_free_order_including_contexts() {
+		/**
+		 * Filters the report contexts that include free orders by default.
+		 *
+		 * @since 11.2.0
+		 * @param array $contexts Report context prefixes.
+		 */
+		return apply_filters( 'woocommerce_analytics_free_order_including_contexts', array( 'coupons' ) );
+	}
+
+	/**
+	 * Whether free orders are left out of the report being built.
+	 *
+	 * A report asking for a specific treatment wins; otherwise the store-wide
+	 * setting applies, except on the reports listed above.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return bool
+	 */
+	protected function should_exclude_free_orders( $query_args ) {
+		if ( isset( $query_args['free_orders'] ) && '' !== $query_args['free_orders'] ) {
+			return 'exclude' === $query_args['free_orders'];
+		}
+
+		foreach ( self::get_free_order_including_contexts() as $context ) {
+			if ( 0 === strpos( (string) $this->context, $context ) ) {
+				return false;
+			}
+		}
+
+		$excluded = \WC_Admin_Settings::get_option( 'woocommerce_analytics_excluded_orders', array() );
+
+		return is_array( $excluded ) && in_array( 'zero_total', $excluded, true );
+	}
+
+	/**
+	 * Returns the free order subquery to be used in a WHERE clause, or an empty
+	 * string when free orders are being counted.
+	 *
+	 * The order total is used rather than the net total so that an order the
+	 * customer paid anything for - postage on a free sample, say - still counts.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return string
+	 */
+	protected function get_free_orders_subquery( $query_args ) {
+		global $wpdb;
+
+		if ( ! $this->should_exclude_free_orders( $query_args ) ) {
+			return '';
+		}
+
+		return "{$wpdb->prefix}wc_order_stats.total_sales <> 0";
+	}
+
+	/**
 	 * Maps order status provided by the user to the one used in the database.
 	 *
 	 * @param string $status Order status.
@@ -1423,9 +1487,15 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	protected function add_order_status_clause( $query_args, $table_name, &$sql_query ) {
 		global $wpdb;
 		$order_status_filter = $this->get_status_subquery( $query_args );
-		if ( $order_status_filter ) {
+		$free_orders_filter  = $this->get_free_orders_subquery( $query_args );
+		if ( $order_status_filter || $free_orders_filter ) {
 			$sql_query->add_sql_clause( 'join', "JOIN {$wpdb->prefix}wc_order_stats ON {$table_name}.order_id = {$wpdb->prefix}wc_order_stats.order_id" );
+		}
+		if ( $order_status_filter ) {
 			$sql_query->add_sql_clause( 'where', "AND ( {$order_status_filter} )" );
+		}
+		if ( $free_orders_filter ) {
+			$sql_query->add_sql_clause( 'where', "AND ( {$free_orders_filter} )" );
 		}
 	}
 

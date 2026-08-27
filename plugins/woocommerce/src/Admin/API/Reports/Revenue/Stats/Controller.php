@@ -55,6 +55,8 @@ class Controller extends GenericStatsController implements ExportableInterface {
 		$args['force_cache_refresh'] = $request['force_cache_refresh'];
 		$args['date_type']           = $request['date_type'];
 
+		$args['free_orders'] = $request['free_orders'];
+
 		return $args;
 	}
 
@@ -245,11 +247,12 @@ class Controller extends GenericStatsController implements ExportableInterface {
 				'category',
 				'variation',
 				'coupon',
-				'customer_type', // new vs returning.
+				'customer_type',
+		// new vs returning.
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['date_type']       = array(
+		$params['date_type'] = array(
 			'description'       => __( 'Override the "woocommerce_date_type" option that is used for the database date field considered for revenue reports.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => array(

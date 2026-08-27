@@ -513,6 +513,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$this->subquery->add_sql_clause( 'left_join', "AND ( {$order_status_filter} )" );
 		}
 
+		// Rides the LEFT JOIN rather than the WHERE so that a customer whose
+		// orders were all free keeps their row instead of vanishing entirely.
+		$free_orders_filter = $this->get_free_orders_subquery( $query_args );
+		if ( $free_orders_filter ) {
+			$this->subquery->add_sql_clause( 'left_join', "AND ( {$free_orders_filter} )" );
+		}
+
 		if ( $having_clauses ) {
 			$preceding_match = empty( $this->get_sql_clause( 'having' ) ) ? ' AND ' : " {$match_operator} ";
 			$this->subquery->add_sql_clause( 'having', $preceding_match . implode( " {$match_operator} ", $having_clauses ) );

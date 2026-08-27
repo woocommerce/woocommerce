@@ -124,6 +124,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$taxes_where_clause .= " AND ( {$order_status_filter} )";
 		}
 
+		$free_orders_filter = $this->get_free_orders_subquery( $query_args );
+		if ( $free_orders_filter ) {
+			$taxes_where_clause .= " AND ( {$free_orders_filter} )";
+		}
+
 		$this->total_query->add_sql_clause( 'where', $taxes_where_clause );
 
 		$this->add_intervals_sql_params( $query_args, $order_stats_table );

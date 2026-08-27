@@ -120,6 +120,8 @@ class Controller extends GenericController implements ExportableInterface {
 				}
 			}
 		}
+		$args['free_orders'] = $request['free_orders'];
+
 		return $args;
 	}
 
