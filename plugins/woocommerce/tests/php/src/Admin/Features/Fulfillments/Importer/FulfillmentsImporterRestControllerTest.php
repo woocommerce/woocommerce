@@ -423,6 +423,12 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 		$session = ImportSession::load( get_current_user_id(), (string) $response['token'] );
 		$this->assertNotNull( $session );
 		$this->sessions[] = $session;
+
+		// Contiguous 0-based column indexes would encode as a JSON array without the cast.
+		$this->assertJsonStringEqualsJsonString(
+			'{"0":"order_number","1":"tracking_number","2":"shipment_provider"}',
+			(string) wp_json_encode( $response['detected_mapping'] )
+		);
 	}
 
 	/**

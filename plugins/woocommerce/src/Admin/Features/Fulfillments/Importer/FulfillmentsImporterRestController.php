@@ -870,17 +870,21 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Stringify mapping keys so JSON-encoded CSV column indexes round-trip back to the client.
+	 * Shape the detected mapping so it always serializes as a JSON object.
+	 *
+	 * PHP canonicalizes numeric string keys back to int, so a mapping over contiguous
+	 * columns starting at 0 would otherwise encode as a JSON array and break the object
+	 * shape declared in the response schema.
 	 *
 	 * @param array<int, string> $mapping CSV column index => canonical key.
-	 * @return array<int|string, string> Stringified keys; PHP canonicalizes numeric strings back to int.
+	 * @return \stdClass Column index => canonical key.
 	 */
-	private function mapping_for_response( array $mapping ): array {
+	private function mapping_for_response( array $mapping ): \stdClass {
 		$out = array();
 		foreach ( $mapping as $col => $canonical ) {
 			$out[ (string) $col ] = (string) $canonical;
 		}
-		return $out;
+		return (object) $out;
 	}
 
 	/**

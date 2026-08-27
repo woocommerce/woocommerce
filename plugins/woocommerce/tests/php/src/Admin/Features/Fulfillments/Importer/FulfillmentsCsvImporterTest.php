@@ -511,6 +511,29 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Canonical keys the importer does not know are dropped from the column-aliases filter.
+	 */
+	public function test_alias_filter_ignores_unknown_canonical_keys(): void {
+		$order  = $this->make_order();
+		$filter = function ( $aliases ) {
+			$aliases['warehouse_bay'] = array( 'bay' );
+			return $aliases;
+		};
+		add_filter( 'woocommerce_fulfillments_csv_importer_column_aliases', $filter );
+
+		try {
+			$csv    = "order_number,tracking_number,shipment_provider,bay\n{$order->get_id()},UNKNOWN-KEY,ups,A1\n";
+			$sut    = new FulfillmentsCsvImporter( $this->make_csv( $csv ) );
+			$parsed = $sut->parse_headers();
+		} finally {
+			remove_filter( 'woocommerce_fulfillments_csv_importer_column_aliases', $filter );
+		}
+
+		// An unknown key would be auto-detected here and then rejected by the /run schema.
+		$this->assertNotContains( 'warehouse_bay', $parsed['detected_mapping'] );
+	}
+
+	/**
 	 * @testdox Malformed values from the column-aliases filter are dropped instead of fataling the import.
 	 */
 	public function test_malformed_alias_filter_output_is_tolerated(): void {

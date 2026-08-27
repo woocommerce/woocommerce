@@ -34,6 +34,21 @@ class FulfillmentsCsvImporter {
 	public const COL_ITEMS           = 'items';
 
 	/**
+	 * Every canonical column key, in the order the wizard lists them.
+	 *
+	 * @return array<int, string>
+	 */
+	public static function canonical_columns(): array {
+		return array(
+			self::COL_ORDER_NUMBER,
+			self::COL_TRACKING_NUMBER,
+			self::COL_PROVIDER,
+			self::COL_TRACKING_URL,
+			self::COL_ITEMS,
+		);
+	}
+
+	/**
 	 * Absolute path to the CSV file.
 	 *
 	 * @var string
@@ -905,7 +920,9 @@ class FulfillmentsCsvImporter {
 		 *
 		 * Lets stores accept additional header names from third-party WMS/3PL exports.
 		 * Keys are canonical column identifiers; values are arrays of accepted (lowercase,
-		 * snake-cased) aliases.
+		 * snake-cased) aliases. Only the importer's own canonical keys are honoured: the
+		 * wizard and the /run route both work from that fixed set, so a new key here would
+		 * be detected and then rejected.
 		 *
 		 * @since 11.2.0
 		 *
@@ -919,9 +936,10 @@ class FulfillmentsCsvImporter {
 			return $defaults;
 		}
 
-		$sanitized = array();
+		$canonical_columns = self::canonical_columns();
+		$sanitized         = array();
 		foreach ( $aliases as $canonical => $alias_list ) {
-			if ( ! is_string( $canonical ) || '' === $canonical || ! is_array( $alias_list ) ) {
+			if ( ! is_string( $canonical ) || ! in_array( $canonical, $canonical_columns, true ) || ! is_array( $alias_list ) ) {
 				continue;
 			}
 			$clean = array();
