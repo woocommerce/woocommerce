@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fail closed while rendering a missing declared settings component without changing the public component resolver contract.

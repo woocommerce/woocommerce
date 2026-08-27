@@ -3,6 +3,10 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\EmailEditor;
 
+use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
+use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
+use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag;
+use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
 use Automattic\WooCommerce\Internal\EmailEditor\TransactionalEmailPersonalizer;
 use WC_Unit_Test_Case;
 
@@ -31,7 +35,45 @@ class TransactionalEmailPersonalizerTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		remove_all_filters( 'woocommerce_email_editor_integration_personalizer_context_data' );
+		Email_Editor_Container::container()->get( Personalization_Tags_Registry::class )->unregister( '[test/text-tag]' );
 		parent::tearDown();
+	}
+
+	/**
+	 * @testdox Should pass the rendering context through so text-typed tag values stay raw in text context and are escaped in the HTML default.
+	 */
+	public function test_rendering_context_is_passed_through(): void {
+		Email_Editor_Container::container()->get( Personalization_Tags_Registry::class )->register(
+			new Personalization_Tag(
+				'Text Tag',
+				'test/text-tag',
+				'Test',
+				function () {
+					return 'Tom & Jerry';
+				},
+				array(),
+				null,
+				array(),
+				Personalization_Tag::VALUE_TYPE_TEXT
+			)
+		);
+
+		$mock_email = $this->createMock( \WC_Email::class );
+		$mock_email->method( 'get_recipient' )->willReturn( 'test@example.com' );
+		$mock_email->object = new \stdClass();
+
+		$content = 'Hi <!--[test/text-tag]-->';
+
+		$this->assertSame(
+			'Hi Tom & Jerry',
+			$this->sut->personalize_transactional_content( $content, $mock_email, Personalizer::RENDERING_CONTEXT_TEXT ),
+			'Text context should keep the raw value'
+		);
+		$this->assertSame(
+			'Hi Tom &amp; Jerry',
+			$this->sut->personalize_transactional_content( $content, $mock_email ),
+			'HTML default should escape text-typed values'
+		);
 	}
 
 	/**

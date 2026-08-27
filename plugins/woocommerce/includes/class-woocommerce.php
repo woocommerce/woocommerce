@@ -10,6 +10,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
+use Automattic\WooCommerce\Internal\TermCount;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonAdminBarBadge;
@@ -18,6 +19,7 @@ use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonRequestHandler;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\LegacyAssets\LegacySelect2UsageTracker;
 use Automattic\WooCommerce\Internal\MCP\MCPAdapterProvider;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesRegistry;
 use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermAdmin;
@@ -36,6 +38,7 @@ use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Internal\Admin\OrderMilestoneEasterEgg;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, TimeUtil};
+use Automattic\WooCommerce\Internal\Logging\OrderLogsCleanupHelper;
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 use Automattic\WooCommerce\Caches\OrderCountCacheService;
 use Automattic\WooCommerce\Caches\ProductCountCacheService;
@@ -43,8 +46,6 @@ use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\OrdersVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\TaxRateVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\CustomerEmailVerification\CustomerEmailVerification;
-use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
-use Automattic\Jetpack\Constants;
 
 /**
  * Main WooCommerce Class.
@@ -58,7 +59,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '11.1.0-dev';
+	public $version = '11.2.0-dev';
 
 	/**
 	 * WooCommerce Schema version.
@@ -99,6 +100,15 @@ final class WooCommerce {
 	 * @var WC_API
 	 */
 	private $api;
+
+	/**
+	 * WP admin settings registrars created by register_wp_admin_settings(), memoized per
+	 * settings page or email object (keyed by spl_object_id) so that repeat registrations
+	 * reuse the same callback identities instead of stacking duplicate filters.
+	 *
+	 * @var WC_Register_WP_Admin_Settings[]
+	 */
+	private $wp_admin_settings_registrars = array();
 
 	/**
 	 * Product factory instance.
@@ -343,7 +353,16 @@ final class WooCommerce {
 		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin' ) );
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_inbox_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_inbox_variant' ) );
+
+		// Originating from https://github.com/woocommerce/woocommerce/pull/11082 (WC_API::register_wp_admin_settings(), July 2016),
+		// the settings were intended for REST context only. By chance, admin pages relied on unconditional rest_preload_api_request calls,
+		// that triggered rest_api_init as a side effect, and over time admin code bound to these settings as well.
+		// Registration runs late on admin_init because it latches woocommerce_get_settings_pages and
+		// woocommerce_email_classes on first use: extensions adding their callbacks from their own
+		// admin_init handlers would otherwise be silently dropped for the whole request.
+		add_action( 'admin_init', array( $this, 'register_wp_admin_settings' ), 999 );
 		add_action( 'rest_api_init', array( $this, 'register_wp_admin_settings' ) );
+
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_newly_installed', 'wc_set_hooked_blocks_version', 10 );
@@ -361,6 +380,7 @@ final class WooCommerce {
 		$container->get( ProductDownloadDirectories::class );
 		$container->get( DownloadPermissionsAdjuster::class );
 		$container->get( AssignDefaultCategory::class );
+		$container->get( TermCount::class );
 		$container->get( DataRegenerator::class );
 		$container->get( LookupDataStore::class );
 		$container->get( MatchImageBySKU::class );
@@ -388,11 +408,7 @@ final class WooCommerce {
 		$container->get( TaxRateVersionStringInvalidator::class );
 		$container->get( OrderMilestoneEasterEgg::class );
 		$container->get( CustomerEmailVerification::class );
-
-		// Feature flags.
-		if ( Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
-			$container->get( StockNotifications::class );
-		}
+		$container->get( OrderLogsCleanupHelper::class );
 
 		/**
 		 * These classes have a register method for attaching hooks.
@@ -405,6 +421,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub::class )->register();
+		$container->get( LegacySelect2UsageTracker::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\VariationGallery\Telemetry::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Email\EmailStyleSync::class )->register();
 		$container->get( EmailLogger::class )->register();
@@ -416,6 +433,9 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Orders\PointOfSaleEmailHandler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\POS\POSController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\StockNotifications\StockNotifications::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\ScheduledSalePriceReconciler::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController::class )->register();
 
 		// Classes inheriting from RestApiControllerBase.
 		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
@@ -608,7 +628,12 @@ final class WooCommerce {
 	 *
 	 * Legacy REST requests should still run some extra code for backwards compatibility.
 	 *
-	 * @todo: replace this function once core WP function is available: https://core.trac.wordpress.org/ticket/42061.
+	 * This method cannot be replaced with core's wp_is_serving_rest_request(): that function reads the
+	 * REST_REQUEST constant, which is only defined once rest_api_loaded() runs on parse_request — long
+	 * after this method is first called during plugin bootstrap (e.g. to decide whether to load the
+	 * frontend includes). Sniffing the request URI is the only signal available that early. Code that
+	 * runs after parse_request should prefer wp_is_serving_rest_request(), or wp_is_rest_endpoint(),
+	 * which also covers internal REST requests dispatched during a regular page load.
 	 *
 	 * @return bool
 	 */
@@ -617,8 +642,13 @@ final class WooCommerce {
 			return false;
 		}
 
+		// Pretty permalinks: the REST prefix is part of the path, e.g. /wp-json/wc/v3/products.
+		// Plain permalinks: the route is passed as a query parameter instead, e.g. ?rest_route=/wc/v3/products
+		// (also used by Jetpack-signed REST requests regardless of the permalink structure).
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended
 		$rest_prefix         = trailingslashit( rest_get_url_prefix() );
-		$is_rest_api_request = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix ) ); // phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$is_rest_api_request = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix ) ) || ! empty( $_GET['rest_route'] );
+		// phpcs:enable
 
 		/**
 		 * Whether this is a REST API request.
@@ -1278,8 +1308,9 @@ final class WooCommerce {
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
 	public function robots_txt( $output ) {
-		$site_url = wp_parse_url( site_url() );
-		$path     = ( ! empty( $site_url['path'] ) ) ? $site_url['path'] : '';
+		$upload_dir   = wp_get_upload_dir();
+		$upload_url   = wp_parse_url( $upload_dir['baseurl'] );
+		$uploads_path = ( is_array( $upload_url ) && ! empty( $upload_url['path'] ) ) ? rtrim( $upload_url['path'], '/' ) : '/wp-content/uploads';
 
 		$lines       = preg_split( '/\r\n|\r|\n/', $output );
 		$agent_index = array_search( 'User-agent: *', $lines, true );
@@ -1295,9 +1326,9 @@ final class WooCommerce {
 			$above[] = 'User-agent: *';
 		}
 
-		$above[] = "Disallow: $path/wp-content/uploads/wc-logs/";
-		$above[] = "Disallow: $path/wp-content/uploads/woocommerce_transient_files/";
-		$above[] = "Disallow: $path/wp-content/uploads/woocommerce_uploads/";
+		$above[] = "Disallow: $uploads_path/wc-logs/";
+		$above[] = "Disallow: $uploads_path/woocommerce_transient_files/";
+		$above[] = "Disallow: $uploads_path/woocommerce_uploads/";
 		$above[] = 'Disallow: /*?add-to-cart=';
 		$above[] = 'Disallow: /*?*add-to-cart=';
 
@@ -1512,6 +1543,12 @@ final class WooCommerce {
 	 *
 	 * This method used to be part of the now removed Legacy REST API.
 	 *
+	 * It is idempotent and independent of the hook it runs from: it fires on whichever of
+	 * admin_init / rest_api_init comes first and is safe to run again on the other, or on
+	 * any repeat invocation (plugins can boot the REST server at any point of an admin
+	 * request). Repeat calls re-attach the same registrar callbacks, which WordPress
+	 * deduplicates, so settings groups and settings are never registered twice.
+	 *
 	 * @since 9.0.0
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
@@ -1521,13 +1558,46 @@ final class WooCommerce {
 	public function register_wp_admin_settings() {
 		$pages = WC_Admin_Settings::get_settings_pages();
 		foreach ( $pages as $page ) {
-			new WC_Register_WP_Admin_Settings( $page, 'page' );
+			$this->register_wp_admin_settings_for( $page, 'page' );
 		}
 
 		$emails = WC_Emails::instance();
 		foreach ( $emails->get_emails() as $email ) {
-			new WC_Register_WP_Admin_Settings( $email, 'email' );
+			$this->register_wp_admin_settings_for( $email, 'email' );
 		}
+	}
+
+	/**
+	 * Creates (or re-attaches) the settings registrar for one settings page or email.
+	 *
+	 * The registrar is memoized per settings object so that every registration pass reuses
+	 * the same callback identities: add_filter() then overwrites instead of stacking
+	 * duplicates, which is what makes register_wp_admin_settings() idempotent.
+	 *
+	 * @param WC_Settings_Page|WC_Email $settings_source The object holding the settings to register.
+	 *                                                   Non-objects are ignored, matching the guard
+	 *                                                   WC_Register_WP_Admin_Settings has held since 3.0.
+	 * @param string                    $type            Type of settings to register ('page' or 'email').
+	 * @return void
+	 */
+	private function register_wp_admin_settings_for( $settings_source, $type ) {
+		// woocommerce_get_settings_pages and woocommerce_email_classes are third-party writable, and
+		// non-object entries have been skipped rather than fatal since 3.0. Check before keying:
+		// spl_object_id() throws a TypeError, which here would take down every admin and REST request.
+		if ( ! is_object( $settings_source ) ) {
+			return;
+		}
+
+		$key = spl_object_id( $settings_source );
+
+		if ( isset( $this->wp_admin_settings_registrars[ $key ] ) ) {
+			// Re-attach in case hook state was reset since the first registration (e.g. between tests).
+			$this->wp_admin_settings_registrars[ $key ]->register();
+			return;
+		}
+
+		// The constructor attaches the filters.
+		$this->wp_admin_settings_registrars[ $key ] = new WC_Register_WP_Admin_Settings( $settings_source, $type );
 	}
 
 	/**

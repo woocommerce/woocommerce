@@ -241,6 +241,10 @@ class OrderController {
 		$validators    = array( 'validate_coupon_email_restriction', 'validate_coupon_usage_limit' );
 		$coupon_errors = array();
 
+		if ( $use_order_data ) {
+			$validators[] = 'validate_coupon_global_usage_limit';
+		}
+
 		foreach ( $coupons as $coupon ) {
 			try {
 				array_walk(
@@ -260,8 +264,18 @@ class OrderController {
 			if ( $use_order_data ) {
 				$error_code = 'woocommerce_rest_order_coupon_errors';
 
-				foreach ( $coupon_errors as $coupon_code => $message ) {
-					$order->remove_coupon( $coupon_code );
+				if ( $order->get_recorded_coupon_usage_counts() ) {
+					foreach ( $coupon_errors as $coupon_code => $message ) {
+						$order->remove_coupon( $coupon_code );
+					}
+				} else {
+					// Remove directly. `remove_coupon()` would decrement `usage_count` this order never recorded.
+					foreach ( $order->get_items( 'coupon' ) as $item_id => $coupon_item ) {
+						if ( $coupon_item instanceof \WC_Order_Item_Coupon && isset( $coupon_errors[ $coupon_item->get_code() ] ) ) {
+							$order->remove_item( $item_id );
+						}
+					}
+					$order->recalculate_coupons();
 				}
 
 				// Recalculate totals.
@@ -595,6 +609,34 @@ class OrderController {
 		}
 
 		if ( $usage_count >= $coupon_usage_limit ) {
+			throw new Exception( $coupon->get_coupon_error( \WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED ) );
+		}
+	}
+
+	/**
+	 * Check the coupon's global usage limit against the order.
+	 *
+	 * Skipped once the order has recorded its own usage, so it is not counted against itself.
+	 *
+	 * @throws Exception Exception if the global usage limit has been reached.
+	 * @param \WC_Coupon $coupon Coupon object applied to the order.
+	 * @param \WC_Order  $order Order object.
+	 */
+	protected function validate_coupon_global_usage_limit( \WC_Coupon $coupon, \WC_Order $order ): void {
+		$usage_limit = $coupon->get_usage_limit();
+
+		if ( ! $usage_limit || $order->get_recorded_coupon_usage_counts() ) {
+			return;
+		}
+
+		// Include tentative holds, matching WC_Discounts::validate_coupon_usage_limit().
+		$data_store      = $coupon->get_data_store();
+		$tentative_usage = is_callable( array( $data_store, 'get_tentative_usage_count' ) )
+			? (int) $data_store->get_tentative_usage_count( $coupon->get_id() )
+			: 0;
+
+		if ( $coupon->get_usage_count() + $tentative_usage >= $usage_limit ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			throw new Exception( $coupon->get_coupon_error( \WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED ) );
 		}
 	}

@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Internal\RestApi\ProductRequestPreparationTrait;
 use Automattic\WooCommerce\Internal\Traits\RestApiCache;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 use Automattic\WooCommerce\Utilities\MetaDataUtil;
@@ -27,6 +28,7 @@ defined( 'ABSPATH' ) || exit;
  */
 class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 
+	use ProductRequestPreparationTrait;
 	use RestApiCache;
 
 	/**
@@ -396,7 +398,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		if ( ! empty( $tax_query ) ) {
-			$args['tax_query'] = $tax_query; // WPCS: slow query ok.
+			$args['tax_query'] = $tax_query; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Product taxonomy filters use WordPress's canonical indexed taxonomy tables.
 		}
 
 		// Filter featured.
@@ -1079,31 +1081,10 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return WP_Error|WC_Data
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
-		$id = isset( $request['id'] ) ? absint( $request['id'] ) : 0;
+		$product = $this->get_product_for_rest_request( $request );
 
-		// Type is the most important part here because we need to be using the correct class and methods.
-		if ( isset( $request['type'] ) ) {
-			$classname = WC_Product_Factory::get_classname_from_product_type( $request['type'] );
-
-			if ( ! class_exists( $classname ) ) {
-				$classname = 'WC_Product_Simple';
-			}
-
-			$product = new $classname( $id );
-		} elseif ( isset( $request['id'] ) ) {
-			$product = wc_get_product( $id );
-		} else {
-			$product = new WC_Product_Simple();
-		}
-
-		if ( ProductType::VARIATION === $product->get_type() ) {
-			return new WP_Error(
-				"woocommerce_rest_invalid_{$this->post_type}_id",
-				__( 'To manipulate product variations you should use the /products/&lt;product_id&gt;/variations/&lt;id&gt; endpoint.', 'woocommerce' ),
-				array(
-					'status' => 404,
-				)
-			);
+		if ( is_wp_error( $product ) ) {
+			return $product;
 		}
 
 		// Post title.
@@ -1416,7 +1397,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 			}
 
 			if ( isset( $request['button_text'] ) ) {
-				$product->set_button_text( $request['button_text'] );
+				$product->set_button_text( sanitize_text_field( $request['button_text'] ) );
 			}
 		}
 

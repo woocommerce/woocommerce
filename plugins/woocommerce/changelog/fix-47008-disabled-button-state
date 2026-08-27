@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fade the whole button rather than only its label when a cart or checkout button is disabled, and stop disabled outlined buttons from taking on the dark hover styling.

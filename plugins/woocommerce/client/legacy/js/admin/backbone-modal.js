@@ -149,14 +149,22 @@
 			var button = e.keyCode || e.which;
 
 			// Enter key
-			if (
-				13 === button &&
-				! ( e.target.tagName && ( e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'textarea' ) )
-			) {
-				if ( $( '#btn-ok' ).length ) {
-					this.addButton( e );
-				}	else if ( $( '#btn-next' ).length ) {
-					this.nextButton( e );
+			if ( 13 === button ) {
+				var isFormField = e.target.tagName &&
+					( e.target.tagName.toLowerCase() === 'input' ||
+						e.target.tagName.toLowerCase() === 'textarea' );
+
+				// Let selectWoo handle Enter on an enhanced-select control instead of submitting the modal.
+				var inEnhancedSelect = $( e.target ).closest(
+					'.select2-container, .select2-selection, .select2-search__field, [role="combobox"]'
+				).length > 0;
+
+				if ( ! isFormField && ! inEnhancedSelect ) {
+					if ( $( '#btn-ok' ).length ) {
+						this.addButton( e );
+					}	else if ( $( '#btn-next' ).length ) {
+						this.nextButton( e );
+					}
 				}
 			}
 

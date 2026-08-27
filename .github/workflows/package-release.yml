@@ -19,6 +19,7 @@ jobs:
   release:
     name: Run packages release script
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
@@ -34,5 +35,8 @@ jobs:
 
       - name: Execute script
         run: |
-          npm install -g npm@latest # Need NPM 11.5.1+ for OIDC support. pnpm publish passes through to npm.
+          # Need NPM 11.5.1+ for OIDC support: pnpm publish passes through to npm.
+          # Pinned to 11 because npm 12 hard-errors (EUNKNOWNCONFIG) on the pnpm-only
+          # flags (e.g. --publish-branch) that pnpm <11 forwards to npm.
+          npm install -g npm@11
           ./tools/package-release/bin/dev publish ${{ github.event.inputs.packages }} --branch=${{ github.ref_name }} ${{ ( github.event.inputs.dry_run == 'true' && '--dry-run' ) || '' }} --skip-install

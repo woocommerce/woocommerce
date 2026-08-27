@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { faker } from '@faker-js/faker';
-import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+import { ApiClient, WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
@@ -12,6 +12,16 @@ import { expect, test as baseTest } from '../../fixtures/fixtures';
 
 function rand() {
 	return faker.string.alphanumeric( 5 );
+}
+
+async function deleteZoneById( restApi: ApiClient, zoneId?: number ) {
+	if ( zoneId === undefined ) {
+		return;
+	}
+
+	await restApi.delete( `${ WC_API_PATH }/shipping/zones/${ zoneId }`, {
+		force: true,
+	} );
 }
 
 const test = baseTest.extend( {
@@ -109,4 +119,75 @@ test( 'can delete the shipping zone method', async ( { page, zone } ) => {
 	).toHaveText(
 		/You can add multiple shipping methods within this zone. Only customers within the zone will see them.*/
 	);
+} );
+
+test( 'saves an unsaved shipping zone when adding a method', async ( {
+	page,
+	restApi,
+} ) => {
+	const zoneName = `Unsaved zone ${ rand() }`;
+	let createdZoneId: number | undefined;
+
+	try {
+		await page.goto(
+			'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new'
+		);
+		await page.getByLabel( 'Zone name' ).fill( zoneName );
+		await page
+			.getByRole( 'combobox', { name: 'Start typing to filter zones' } )
+			.fill( 'United States' );
+		await page
+			.getByRole( 'checkbox', {
+				name: 'United States (US)',
+				exact: true,
+			} )
+			.click();
+		await page.keyboard.press( 'Escape' );
+		await expect( page.locator( '.select2-container--open' ) ).toBeHidden();
+
+		await expect( page.locator( '#submit' ) ).toBeEnabled();
+
+		await page
+			.getByRole( 'button', { name: 'Add shipping method' } )
+			.click();
+		await page.getByText( 'Flat rate' ).click();
+		const addMethodResponsePromise = page.waitForResponse( ( response ) => {
+			return response
+				.url()
+				.includes( 'action=woocommerce_shipping_zone_add_method' );
+		} );
+		await page.getByRole( 'button', { name: 'Continue' } ).click();
+		const addMethodResponse = await addMethodResponsePromise;
+		const addMethodResponseBody = await addMethodResponse.json();
+		createdZoneId = addMethodResponseBody.data.zone_id;
+
+		const dialogMessages: string[] = [];
+		page.on( 'dialog', async ( dialog ) => {
+			dialogMessages.push( dialog.message() );
+			await dialog.accept();
+		} );
+
+		await page
+			.getByRole( 'button', { name: 'Save zone and method' } )
+			.click();
+
+		await expect(
+			page.locator( '.wc-shipping-zone-method-title', {
+				hasText: 'Flat rate',
+			} )
+		).toBeVisible();
+		await expect( page.locator( '#submit' ) ).toBeDisabled();
+		await expect( page.locator( '.blockUI' ) ).toHaveCount( 0 );
+
+		await page.reload();
+		await expect( page.getByLabel( 'Zone name' ) ).toHaveValue( zoneName );
+		await expect(
+			page.locator( '.wc-shipping-zone-method-title', {
+				hasText: 'Flat rate',
+			} )
+		).toBeVisible();
+		expect( dialogMessages ).toEqual( [] );
+	} finally {
+		await deleteZoneById( restApi, createdZoneId );
+	}
 } );

@@ -76,77 +76,8 @@ class WC_Validation {
 			return false;
 		}
 
-		switch ( $country ) {
-			case 'AT':
-			case 'BE':
-			case 'CH':
-			case 'HU':
-			case 'NO':
-				$valid = (bool) preg_match( '/^([0-9]{4})$/', $postcode );
-				break;
-			case 'BA':
-				$valid = (bool) preg_match( '/^([7-8]{1})([0-9]{4})$/', $postcode );
-				break;
-			case 'BR':
-				$valid = (bool) preg_match( '/^([0-9]{5})([-])?([0-9]{3})$/', $postcode );
-				break;
-			case 'DE':
-				$valid = (bool) preg_match( '/^([0]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{3}$/', $postcode );
-				break;
-			case 'DK':
-				$valid = (bool) preg_match( '/^(DK-)?([1-24-9]\d{3}|3[0-8]\d{2})$/', $postcode );
-				break;
-			case 'ES':
-			case 'FI':
-			case 'EE':
-			case 'FR':
-			case 'IT':
-				$valid = (bool) preg_match( '/^([0-9]{5})$/i', $postcode );
-				break;
-			case 'GB':
-				$valid = self::is_gb_postcode( $postcode );
-				break;
-			case 'IE':
-				$valid = (bool) preg_match( '/([AC-FHKNPRTV-Y]\d{2}|D6W)[0-9AC-FHKNPRTV-Y]{4}/', wc_normalize_postcode( $postcode ) );
-				break;
-			case 'IN':
-				$valid = (bool) preg_match( '/^[1-9]{1}[0-9]{2}\s{0,1}[0-9]{3}$/', $postcode );
-				break;
-			case 'JP':
-				$valid = (bool) preg_match( '/^([0-9]{3})([-]?)([0-9]{4})$/', $postcode );
-				break;
-			case 'PT':
-				$valid = (bool) preg_match( '/^([0-9]{4})([-])([0-9]{3})$/', $postcode );
-				break;
-			case 'PR':
-			case 'US':
-				$valid = (bool) preg_match( '/^([0-9]{5})(-[0-9]{4})?$/i', $postcode );
-				break;
-			case 'CA':
-				// CA Postal codes cannot contain D,F,I,O,Q,U and cannot start with W or Z. https://en.wikipedia.org/wiki/Postal_codes_in_Canada#Number_of_possible_postal_codes.
-				$valid = (bool) preg_match( '/^([ABCEGHJKLMNPRSTVXY]\d[ABCEGHJKLMNPRSTVWXYZ])([\ ])?(\d[ABCEGHJKLMNPRSTVWXYZ]\d)$/i', $postcode );
-				break;
-			case 'PL':
-				$valid = (bool) preg_match( '/^([0-9]{2})([-])([0-9]{3})$/', $postcode );
-				break;
-			case 'CZ':
-			case 'SE':
-			case 'SK':
-				$valid = (bool) preg_match( "/^($country-)?([0-9]{3})(\s?)([0-9]{2})$/", $postcode );
-				break;
-			case 'NL':
-				$valid = (bool) preg_match( '/^([1-9][0-9]{3})(\s?)(?!SA|SD|SS)[A-Z]{2}$/i', $postcode );
-				break;
-			case 'SI':
-				$valid = (bool) preg_match( '/^([1-9][0-9]{3})$/', $postcode );
-				break;
-			case 'LI':
-				$valid = (bool) preg_match( '/^(94[8-9][0-9])$/', $postcode );
-				break;
-			default:
-				$valid = true;
-				break;
-		}
+		$valid = Automattic\WooCommerce\Internal\Utilities\PostcodeValidation::validate( (string) $postcode, (string) $country );
+		$valid = null === $valid ? true : $valid;
 
 		return apply_filters( 'woocommerce_validate_postcode', $valid, $postcode, $country );
 	}
