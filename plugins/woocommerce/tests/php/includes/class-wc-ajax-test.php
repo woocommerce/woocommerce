@@ -571,6 +571,12 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 						case 'number_non_finite':
 							$args['number'] = 'INF';
 							break;
+						case 'number_fractional':
+							$args['number'] = '3.5';
+							break;
+						case 'offset_fractional_zero':
+							$args['offset'] = '0.0';
+							break;
 						case 'invalid_taxonomy':
 							$args['taxonomy'] = 'not_a_registered_taxonomy';
 							break;
@@ -607,6 +613,10 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 				case 'number_non_finite':
 					$this->assertSame( $term_names, wp_list_pluck( $response, 'name' ), 'An absent or non-finite limit should retain the unbounded broad response.' );
 					break;
+				case 'number_fractional':
+				case 'offset_fractional_zero':
+					$this->assertSame( array_slice( $term_names, 0, 3 ), wp_list_pluck( $response, 'name' ), 'Ambiguous pagination values should retain the broad response.' );
+					break;
 				case 'invalid_taxonomy':
 					$this->assertArrayHasKey( 'invalid_taxonomy', $response['errors'], 'A term-query error should pass through unchanged.' );
 					break;
@@ -634,6 +644,8 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			'nonzero offset'   => array( 'offset' ),
 			'absent limit'     => array( 'number_absent' ),
 			'non-finite limit' => array( 'number_non_finite' ),
+			'decimal limit'    => array( 'number_fractional' ),
+			'decimal offset'   => array( 'offset_fractional_zero' ),
 			'term query error' => array( 'invalid_taxonomy' ),
 			'competing search' => array( 'search_selector' ),
 		);

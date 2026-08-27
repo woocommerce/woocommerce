@@ -2224,23 +2224,28 @@ class WC_AJAX {
 	 * @return mixed
 	 */
 	private static function maybe_include_exact_taxonomy_term( $terms, $args, $search_text, $taxonomy ) {
-		if ( ! is_array( $args ) || ! is_string( $search_text ) || ! is_string( $taxonomy ) ) {
+		if ( ! is_array( $args ) || ! is_array( $terms ) || ! is_string( $search_text ) || ! is_string( $taxonomy ) ) {
 			return $terms;
 		}
 
 		$filtered_number = $args['number'] ?? null;
 		$filtered_offset = $args['offset'] ?? 0;
+		$number          = false;
+
+		if ( is_int( $filtered_number ) || is_string( $filtered_number ) ) {
+			$number = filter_var( $filtered_number, FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) );
+		}
+
+		if (
+			false === $number ||
+			! in_array( $filtered_offset, array( 0, '0' ), true ) ||
+			count( $terms ) !== $number
+		) {
+			return $terms;
+		}
 
 		if (
 			'' === $search_text ||
-			is_wp_error( $terms ) ||
-			! is_array( $terms ) ||
-			! is_numeric( $filtered_number ) ||
-			! is_finite( (float) $filtered_number ) ||
-			0.0 >= (float) $filtered_number ||
-			! is_numeric( $filtered_offset ) ||
-			! is_finite( (float) $filtered_offset ) ||
-			0.0 !== (float) $filtered_offset ||
 			'all' !== ( $args['fields'] ?? null ) ||
 			( $args['taxonomy'] ?? null ) !== $taxonomy ||
 			( $args['name__like'] ?? null ) !== $search_text ||
@@ -2249,11 +2254,6 @@ class WC_AJAX {
 			! taxonomy_is_product_attribute( $taxonomy ) ||
 			is_taxonomy_hierarchical( $taxonomy )
 		) {
-			return $terms;
-		}
-
-		$number = absint( $filtered_number );
-		if ( 0 === $number || count( $terms ) !== $number ) {
 			return $terms;
 		}
 
@@ -2279,7 +2279,7 @@ class WC_AJAX {
 		$exact_args['orderby'] = 'none';
 
 		$exact_terms = get_terms( $exact_args );
-		if ( is_wp_error( $exact_terms ) || ! is_array( $exact_terms ) || 1 !== count( $exact_terms ) ) {
+		if ( ! is_array( $exact_terms ) || 1 !== count( $exact_terms ) ) {
 			return $terms;
 		}
 
