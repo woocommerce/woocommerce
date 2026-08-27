@@ -10,6 +10,8 @@ use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats\DataStore as StatsDataStore;
 use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Helper_Order;
 use WC_Helper_Queue;
 use WC_Helper_Reports;
@@ -644,6 +646,52 @@ class DataStoreTest extends WC_Unit_Test_Case {
 
 		$this->assertCount( 3, $rows, 'Removing a tax line from an order should remove its lookup row.' );
 		$this->assertNotContains( (string) $removed->get_id(), array_column( $rows, 'order_item_id' ), 'The removed line should leave no lookup row behind.' );
+	}
+
+	/**
+	 * @testdox Sync passes over an order with no creation date instead of failing on it.
+	 */
+	public function test_sync_passes_over_an_order_with_no_creation_date(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$order       = $this->seed_order_with_tax_lines( $this->tax_lines_on_distinct_rate_ids( 'US-CA', 101 ), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+		$rows_before = $this->lookup_rows( $order->get_id() );
+
+		$this->clear_order_date_created( $order->get_id() );
+
+		$this->assertSame( -1, DataStore::sync_order_taxes( $order->get_id() ), 'An order with no creation date has nothing to date its rows by, so it should be passed over.' );
+		$this->assertSame( $rows_before, $this->lookup_rows( $order->get_id() ), 'An order that was passed over should keep its rows.' );
+	}
+
+	/**
+	 * Take an order's creation date away, the way a store holding a zero datetime has.
+	 *
+	 * `WC_Data::set_date_prop()` reads '0000-00-00 00:00:00' as no date at all.
+	 *
+	 * @param int $order_id Order id.
+	 */
+	private function clear_order_date_created( int $order_id ): void {
+		global $wpdb;
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$wpdb->update(
+				OrdersTableDataStore::get_orders_table_name(),
+				array( 'date_created_gmt' => null ),
+				array( 'id' => $order_id )
+			);
+		} else {
+			$wpdb->update(
+				$wpdb->posts,
+				array(
+					'post_date'     => '0000-00-00 00:00:00',
+					'post_date_gmt' => '0000-00-00 00:00:00',
+				),
+				array( 'ID' => $order_id )
+			);
+		}
+
+		wp_cache_flush();
 	}
 
 	/**

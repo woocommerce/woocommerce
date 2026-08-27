@@ -308,7 +308,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		global $wpdb;
 
 		$order = wc_get_order( $order_id );
-		if ( ! $order ) {
+
+		// An order with no creation date has nothing to date its lookup rows by, and
+		// `WC_Data::set_date_prop()` leaves the date null for a zero datetime, not only for a
+		// missing one. `OrdersScheduler::import()` leaves such an order out of the reports for the
+		// same reason.
+		if ( ! $order || ! $order->get_date_created( 'edit' ) ) {
 			return -1;
 		}
 
@@ -321,13 +326,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			)
 		);
 		$existing_items = array_flip( $existing_items );
+		$date_created   = $order->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format );
 		$tax_items      = $order->get_items( OrderItemType::TAX );
 		$rows           = array();
 		$values         = array();
-
-		// Read once for the whole order, and only for an order that has a line to write, the way
-		// reading it per line did.
-		$date_created = empty( $tax_items ) ? '' : $order->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format );
 
 		foreach ( $tax_items as $tax_item ) {
 			$order_item_id = $tax_item->get_id();

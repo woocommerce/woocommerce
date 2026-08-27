@@ -8,6 +8,8 @@ use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Helper_Order;
 use WC_Helper_Queue;
 use WC_Helper_Reports;
@@ -276,6 +278,45 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 			$this->sut->get_total_pending_count(),
 			'Nothing indexes the column the count reads, so it should stop counting once it has enough to report.'
 		);
+	}
+
+	/**
+	 * @testdox Processing a batch passes over an order with no creation date.
+	 */
+	public function test_process_batch_passes_over_an_order_with_no_creation_date(): void {
+		global $wpdb;
+
+		$order = $this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
+		$this->unmigrate_lookup_rows( $order->get_id(), 0, 0.25 );
+
+		// '0000-00-00 00:00:00' reads as no date at all, which is what `WC_Data::set_date_prop()`
+		// makes of it.
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$wpdb->update(
+				OrdersTableDataStore::get_orders_table_name(),
+				array( 'date_created_gmt' => null ),
+				array( 'id' => $order->get_id() )
+			);
+		} else {
+			$wpdb->update(
+				$wpdb->posts,
+				array(
+					'post_date'     => '0000-00-00 00:00:00',
+					'post_date_gmt' => '0000-00-00 00:00:00',
+				),
+				array( 'ID' => $order->get_id() )
+			);
+		}
+		wp_cache_flush();
+
+		$this->sut->process_batch( array( $order->get_id() ) );
+
+		$this->assertSame(
+			$order->get_id(),
+			(int) get_option( OrderTaxLookupMigrator::CURSOR_OPTION ),
+			'An order with no creation date should be stepped past. A batch that raises never reaches the cursor write, and is handed out again forever.'
+		);
+		$this->assertNotEmpty( $this->lookup_rows( $order->get_id() ), 'An order that was stepped past should keep its rows.' );
 	}
 
 	/**
