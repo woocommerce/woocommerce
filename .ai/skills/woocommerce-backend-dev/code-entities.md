@@ -88,7 +88,7 @@ public function calculate_with_tax( float $amount ) {
 
 ## Docblock Requirements
 
-Add concise docblocks to all hooks and methods. One line is ideal.
+Add concise docblocks to all hooks and methods. One line is ideal. The description should rarely need more than 3-4 lines.
 
 ### Public, Protected Methods, and Hooks
 

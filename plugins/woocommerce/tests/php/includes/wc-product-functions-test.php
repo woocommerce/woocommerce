@@ -277,6 +277,293 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A completed scheduled sale is not returned by get_starting_sales().
+	 */
+	public function test_get_starting_sales_excludes_completed_sales(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->save();
+
+		update_post_meta( $product->get_id(), '_price', 100 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
+
+		$data_store = WC_Data_Store::load( 'product' );
+
+		$this->assertNotContains(
+			(string) $product->get_id(),
+			$data_store->get_starting_sales(),
+			'A sale that already ended must never be started by the daily safety net.'
+		);
+		$this->assertNotContains(
+			(string) $product->get_id(),
+			$data_store->get_ending_sales(),
+			'A completed sale already at the regular price has nothing left to end.'
+		);
+	}
+
+	/**
+	 * @testdox get_starting_sales() still returns sales that have started and not yet ended.
+	 */
+	public function test_get_starting_sales_includes_open_and_future_ending_sales(): void {
+		$data_store = WC_Data_Store::load( 'product' );
+
+		$open_ended = WC_Helper_Product::create_simple_product();
+		$open_ended->set_regular_price( 100 );
+		$open_ended->set_sale_price( 50 );
+		$open_ended->save();
+		update_post_meta( $open_ended->get_id(), '_price', 100 );
+		update_post_meta( $open_ended->get_id(), '_sale_price_dates_from', time() - 100 );
+		delete_post_meta( $open_ended->get_id(), '_sale_price_dates_to' );
+
+		$still_running = WC_Helper_Product::create_simple_product();
+		$still_running->set_regular_price( 100 );
+		$still_running->set_sale_price( 50 );
+		$still_running->save();
+		update_post_meta( $still_running->get_id(), '_price', 100 );
+		update_post_meta( $still_running->get_id(), '_sale_price_dates_from', time() - 100 );
+		update_post_meta( $still_running->get_id(), '_sale_price_dates_to', time() + 3600 );
+
+		// A direct writer leaves the row present but empty, which the `> 0` term tolerates.
+		$empty_end_date = WC_Helper_Product::create_simple_product();
+		$empty_end_date->set_regular_price( 100 );
+		$empty_end_date->set_sale_price( 50 );
+		$empty_end_date->save();
+		update_post_meta( $empty_end_date->get_id(), '_price', 100 );
+		update_post_meta( $empty_end_date->get_id(), '_sale_price_dates_from', time() - 100 );
+		update_post_meta( $empty_end_date->get_id(), '_sale_price_dates_to', '' );
+
+		$starting = $data_store->get_starting_sales();
+
+		$this->assertContains( (string) $open_ended->get_id(), $starting, 'An open-ended sale must still start.' );
+		$this->assertContains( (string) $still_running->get_id(), $starting, 'A sale whose end is in the future must still start.' );
+		$this->assertContains( (string) $empty_end_date->get_id(), $starting, 'An empty end-date row means no end date, so the sale must still start.' );
+	}
+
+	/**
+	 * @testdox The new exclusion reads date meta the same way get_ending_sales() does.
+	 */
+	public function test_get_starting_sales_matches_ending_sales_on_non_numeric_dates(): void {
+		// A date string from an importer. Year 9999 sorts above any timestamp this code sees,
+		// so both queries must read it as not-yet-ended.
+		$far_future = '9999-12-31';
+
+		// At the regular price, so only the date can exclude it from starting.
+		$not_started = WC_Helper_Product::create_simple_product();
+		$not_started->set_regular_price( 100 );
+		$not_started->set_sale_price( 50 );
+		$not_started->save();
+		update_post_meta( $not_started->get_id(), '_price', 100 );
+		update_post_meta( $not_started->get_id(), '_sale_price_dates_from', time() - 300 );
+		update_post_meta( $not_started->get_id(), '_sale_price_dates_to', $far_future );
+
+		// At the sale price, so it clears the ending query's price predicate and only the date
+		// can exclude it. Without that the assertion would pass either way.
+		$not_ended = WC_Helper_Product::create_simple_product();
+		$not_ended->set_regular_price( 100 );
+		$not_ended->set_sale_price( 50 );
+		$not_ended->save();
+		update_post_meta( $not_ended->get_id(), '_price', 50 );
+		update_post_meta( $not_ended->get_id(), '_sale_price_dates_from', time() - 300 );
+		update_post_meta( $not_ended->get_id(), '_sale_price_dates_to', $far_future );
+
+		$data_store = WC_Data_Store::load( 'product' );
+
+		$this->assertContains(
+			(string) $not_started->get_id(),
+			$data_store->get_starting_sales(),
+			'A non-numeric end date must not read as ended in the starting query.'
+		);
+		$this->assertNotContains(
+			(string) $not_ended->get_id(),
+			$data_store->get_ending_sales(),
+			'The ending query must read the same value the same way, or the two disagree.'
+		);
+	}
+
+	/**
+	 * End-date values the query still returns, in shapes a PHP-side check reads as ended.
+	 *
+	 * The query returns both, so the consumer has to write the price to settle them. Anything
+	 * deciding "ended" for itself skips that write and re-queues the product forever.
+	 * '0000-00-00' is the one value where the query's numeric `> 0` disagrees with a PHP
+	 * `$v > 0`; '999999999' is a plain past timestamp that still sorts above the current one.
+	 *
+	 * Calendar forms such as '2020-01-01' were dropped: they age out in 2034 once `time()`
+	 * renders as '20...', and no clock-derived replacement survives, since a fixture must read
+	 * as past for the checks it catches yet sort above a decimal timestamp for the query.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function provider_end_dates_the_query_still_returns(): array {
+		return array(
+			'short numeric' => array( '999999999' ),
+			'zero date'     => array( '0000-00-00' ),
+		);
+	}
+
+	/**
+	 * @testdox A sale the query still returns is started once and stops being re-queued.
+	 *
+	 * @dataProvider provider_end_dates_the_query_still_returns
+	 *
+	 * @param string $date_to Stored `_sale_price_dates_to` value.
+	 */
+	public function test_wc_scheduled_sales_settles_a_sale_the_query_still_returns( string $date_to ): void {
+		// A full cycle, not just the query: the consumer's price write is what drains the queue.
+		// This shows it drains, not that the price is right. It is not, the product ends at the
+		// sale price with a past end date, which predates this fix.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->save();
+		update_post_meta( $product->get_id(), '_price', 100 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', $date_to );
+
+		$data_store = WC_Data_Store::load( 'product' );
+
+		// Precondition, not a result: the rest only means anything while the query returns it.
+		$this->assertContains(
+			(string) $product->get_id(),
+			$data_store->get_starting_sales(),
+			"get_starting_sales() no longer returns the fixture '{$date_to}'. Either the query "
+				. 'changed, or this value aged out and needs replacing (see the provider docblock).'
+		);
+
+		$started = array();
+		add_action(
+			'wc_before_products_starting_sales',
+			function ( $ids ) use ( &$started ) {
+				$started = array_merge( $started, $ids );
+			}
+		);
+
+		wc_scheduled_sales();
+		$this->assertContains( (string) $product->get_id(), $started, "The first run should start the sale: {$date_to}." );
+
+		$started = array();
+		wc_scheduled_sales();
+		$this->assertNotContains( (string) $product->get_id(), $started, "The product must settle instead of being queued again: {$date_to}." );
+
+		$this->assertNotContains( (string) $product->get_id(), $data_store->get_starting_sales() );
+	}
+
+	/**
+	 * @testdox An end date of exactly now still leaves the product in one of the two queues.
+	 */
+	public function test_an_end_date_of_exactly_now_lands_in_one_queue(): void {
+		// Asserting that some queue claims it, rather than which one, keeps this deterministic
+		// without freezing the clock. Neither queue is the failure, and a `<=` on one side alone
+		// is what produces it, which nothing else here catches.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->save();
+
+		// A third price, so neither query's price predicate can be what excludes it.
+		update_post_meta( $product->get_id(), '_price', 75 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() );
+
+		$data_store = WC_Data_Store::load( 'product' );
+		$id         = (string) $product->get_id();
+
+		$starting = in_array( $id, $data_store->get_starting_sales(), true );
+		$ending   = in_array( $id, $data_store->get_ending_sales(), true );
+
+		$this->assertTrue(
+			$starting || $ending,
+			'An end date of exactly now left the product in neither queue, so nothing will ever '
+				. 'settle its price. The two queries have stopped reading the date the same way.'
+		);
+	}
+
+	/**
+	 * @testdox Duplicate end-date rows exclude on the ended one and never duplicate the product.
+	 */
+	public function test_duplicate_end_date_rows_are_handled(): void {
+		// add_post_meta(): direct writers can leave several rows for one key.
+		$expired_and_open = WC_Helper_Product::create_simple_product();
+		$expired_and_open->set_regular_price( 100 );
+		$expired_and_open->set_sale_price( 50 );
+		$expired_and_open->save();
+		update_post_meta( $expired_and_open->get_id(), '_price', 100 );
+		update_post_meta( $expired_and_open->get_id(), '_sale_price_dates_from', time() - 300 );
+		delete_post_meta( $expired_and_open->get_id(), '_sale_price_dates_to' );
+		add_post_meta( $expired_and_open->get_id(), '_sale_price_dates_to', time() - 100 );
+		add_post_meta( $expired_and_open->get_id(), '_sale_price_dates_to', time() + 3600 );
+
+		$both_open = WC_Helper_Product::create_simple_product();
+		$both_open->set_regular_price( 100 );
+		$both_open->set_sale_price( 50 );
+		$both_open->save();
+		update_post_meta( $both_open->get_id(), '_price', 100 );
+		update_post_meta( $both_open->get_id(), '_sale_price_dates_from', time() - 300 );
+		delete_post_meta( $both_open->get_id(), '_sale_price_dates_to' );
+		add_post_meta( $both_open->get_id(), '_sale_price_dates_to', time() + 3600 );
+		add_post_meta( $both_open->get_id(), '_sale_price_dates_to', time() + 7200 );
+
+		$starting = WC_Data_Store::load( 'product' )->get_starting_sales();
+
+		$this->assertNotContains(
+			(string) $expired_and_open->get_id(),
+			$starting,
+			'One ended row is enough to exclude, however many other rows sit beside it.'
+		);
+		$this->assertSame(
+			1,
+			count( array_keys( $starting, (string) $both_open->get_id(), true ) ),
+			'Two open rows must not multiply the product into the result set.'
+		);
+	}
+
+	/**
+	 * @testdox A product left at an expired sale price is repaired once and then goes inert.
+	 */
+	public function test_wc_scheduled_sales_repairs_expired_price_once(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->save();
+
+		// A missed end: _price still holds the sale price after the window closed.
+		update_post_meta( $product->get_id(), '_price', 50 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
+
+		$started = array();
+		$ended   = array();
+		add_action(
+			'wc_before_products_starting_sales',
+			function ( $ids ) use ( &$started ) {
+				$started = array_merge( $started, $ids );
+			}
+		);
+		add_action(
+			'wc_before_products_ending_sales',
+			function ( $ids ) use ( &$ended ) {
+				$ended = array_merge( $ended, $ids );
+			}
+		);
+
+		wc_scheduled_sales();
+
+		$this->assertNotContains( (string) $product->get_id(), $started, 'An expired sale must not be reported as starting.' );
+		$this->assertContains( (string) $product->get_id(), $ended, 'The safety net should end it once.' );
+		$this->assertEquals( 100, get_post_meta( $product->get_id(), '_price', true ) );
+
+		$started = array();
+		$ended   = array();
+		wc_scheduled_sales();
+
+		$this->assertNotContains( (string) $product->get_id(), $started, 'The churn must not resume on the next run.' );
+		$this->assertNotContains( (string) $product->get_id(), $ended, 'The churn must not resume on the next run.' );
+		$this->assertEquals( 100, get_post_meta( $product->get_id(), '_price', true ) );
+	}
+
+	/**
 	 * @testdox An ended scheduled sale displays the regular price before the AS event runs.
 	 */
 	public function test_scheduled_sale_active_price_heals_ended_sale_to_regular(): void {
@@ -722,8 +1009,10 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	 * @testDox Action Scheduler events are scheduled when product with sale dates is saved.
 	 */
 	public function test_wc_schedule_product_sale_events_on_save() {
-		$future_start = time() + 3600;  // 1 hour from now.
-		$future_end   = time() + 86400; // 24 hours from now.
+		$future_start = time() + 3600;
+		// 1 hour from now.
+		$future_end = time() + 86400;
+		// 24 hours from now.
 
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_price( 100 );
@@ -771,7 +1060,8 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		);
 
 		// Update the sale dates.
-		$new_start = time() + 7200; // 2 hours from now.
+		$new_start = time() + 7200;
+		// 2 hours from now.
 		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', $new_start ) );
 		$product->save();
 
@@ -1113,7 +1403,8 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 
 		// Create a guest order with French billing address.
 		$order = wc_create_order();
-		$order->set_customer_id( 0 ); // Guest order.
+		$order->set_customer_id( 0 );
+		// Guest order.
 		$order->set_billing_country( 'FR' );
 		$order->set_billing_city( 'Paris' );
 		$order->set_billing_postcode( '75001' );
@@ -1192,6 +1483,839 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		WC_Helper_Product::delete_product( $related_product1->get_id() );
 		WC_Helper_Product::delete_product( $related_product2->get_id() );
 		WC_Helper_Product::delete_product( $related_product3->get_id() );
+	}
+
+	/**
+	 * @testdox Product category list preserves WordPress term-list order by default.
+	 */
+	public function test_wc_get_product_category_list_preserves_default_order(): void {
+		$suffix               = wp_unique_id();
+		$root                 = wp_insert_term( 'Default Root ' . $suffix, 'product_cat' );
+		$child                = wp_insert_term( 'Default Child ' . $suffix, 'product_cat', array( 'parent' => $root['term_id'] ) );
+		$product              = WC_Helper_Product::create_simple_product();
+		$get_the_terms_filter = null;
+		$sanitize_key_filter  = null;
+
+		try {
+			wp_set_object_terms( $product->get_id(), array( $root['term_id'], $child['term_id'] ), 'product_cat' );
+
+			$expected            = get_the_term_list( $product->get_id(), 'product_cat', 'Before ', ' > ', ' After' );
+			$sanitize_key_calls  = 0;
+			$sanitize_key_filter = static function ( $sanitized_key, $key ) use ( &$sanitize_key_calls ) {
+				if ( '' === $key ) {
+					++$sanitize_key_calls;
+
+					return 'breadcrumb';
+				}
+
+				return $sanitized_key;
+			};
+			add_filter( 'sanitize_key', $sanitize_key_filter, 10, 2 );
+
+			$actual = wc_get_product_category_list( $product->get_id(), ' > ', 'Before ', ' After' );
+
+			remove_filter( 'sanitize_key', $sanitize_key_filter );
+			$sanitize_key_filter = null;
+
+			$this->assertSame( $expected, $actual, 'Default helper output should remain identical to WordPress term-list output.' );
+			$this->assertSame( 0, $sanitize_key_calls, 'Default helper calls should not introduce ordering-mode sanitization hooks.' );
+
+			$get_the_terms_calls  = 0;
+			$get_the_terms_filter = static function ( $terms, $post_id, $taxonomy ) use ( &$get_the_terms_calls, $product ) {
+				if ( $product->get_id() === $post_id && 'product_cat' === $taxonomy ) {
+					++$get_the_terms_calls;
+				}
+
+				return $terms;
+			};
+			add_filter( 'get_the_terms', $get_the_terms_filter, 10, 3 );
+
+			$this->setExpectedIncorrectUsage( 'wc_get_product_category_list' );
+
+			$this->assertSame(
+				$expected,
+				wc_get_product_category_list( $product->get_id(), ' > ', 'Before ', ' After', 'hierarchy' ),
+				'Unsupported ordering modes should fall back to WordPress term-list output.'
+			);
+			$this->assertSame( 1, $get_the_terms_calls, 'Unsupported ordering modes should invoke the WordPress term-list path only once.' );
+		} finally {
+			if ( null !== $sanitize_key_filter ) {
+				remove_filter( 'sanitize_key', $sanitize_key_filter );
+			}
+			if ( null !== $get_the_terms_filter ) {
+				remove_filter( 'get_the_terms', $get_the_terms_filter );
+			}
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $child['term_id'], 'product_cat' );
+			wp_delete_term( $root['term_id'], 'product_cat' );
+		}
+	}
+
+	/**
+	 * @testdox Product category list warns about an unsupported ordering mode and still falls back to WordPress order.
+	 */
+	public function test_wc_get_product_category_list_warns_on_unsupported_orderby(): void {
+		$suffix   = wp_unique_id();
+		$category = wp_insert_term( 'Unsupported orderby ' . $suffix, 'product_cat' );
+		$product  = WC_Helper_Product::create_simple_product();
+
+		try {
+			wp_set_object_terms( $product->get_id(), array( $category['term_id'] ), 'product_cat' );
+
+			$expected = get_the_term_list( $product->get_id(), 'product_cat', '', ', ', '' );
+
+			$this->setExpectedIncorrectUsage( 'wc_get_product_category_list' );
+
+			$this->assertSame(
+				$expected,
+				wc_get_product_category_list( $product->get_id(), ', ', '', '', 'menu_order' ),
+				'An unsupported ordering mode should still return the WordPress term-list output.'
+			);
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $category['term_id'], 'product_cat' );
+		}
+	}
+
+	/**
+	 * @testdox Product category list can render assigned terms in breadcrumb order.
+	 */
+	public function test_wc_get_product_category_list_can_render_breadcrumb_order(): void {
+		$suffix    = wp_unique_id();
+		$root_name = 'Breadcrumb Root ' . $suffix;
+		$mid_name  = 'Breadcrumb Mid ' . $suffix;
+		$leaf_name = 'Breadcrumb Leaf ' . $suffix;
+		$root      = wp_insert_term( $root_name, 'product_cat' );
+		$mid       = wp_insert_term( $mid_name, 'product_cat', array( 'parent' => $root['term_id'] ) );
+		$leaf      = wp_insert_term( $leaf_name, 'product_cat', array( 'parent' => $mid['term_id'] ) );
+		$product   = WC_Helper_Product::create_simple_product();
+
+		try {
+			wp_set_object_terms( $product->get_id(), array( $leaf['term_id'], $root['term_id'], $mid['term_id'] ), 'product_cat' );
+
+			$actual = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+
+			$this->assertSame( "{$root_name} > {$mid_name} > {$leaf_name}", $actual );
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $leaf['term_id'], 'product_cat' );
+			wp_delete_term( $mid['term_id'], 'product_cat' );
+			wp_delete_term( $root['term_id'], 'product_cat' );
+		}
+	}
+
+	/**
+	 * @testdox Product category list breadcrumb ordering follows depth even when term IDs run against it.
+	 */
+	public function test_wc_get_product_category_list_breadcrumb_order_ignores_term_id_sequence(): void {
+		$suffix    = wp_unique_id();
+		$leaf_name = 'Aaa descendant ' . $suffix;
+		$root_name = 'Zzz ancestor ' . $suffix;
+
+		/*
+		 * Create the descendant first, so its term ID is lower than its eventual ancestor's, and
+		 * name it so that alphabetical order also runs against the hierarchy.
+		 */
+		$leaf    = wp_insert_term( $leaf_name, 'product_cat' );
+		$root    = wp_insert_term( $root_name, 'product_cat' );
+		$product = WC_Helper_Product::create_simple_product();
+
+		try {
+			wp_update_term( $leaf['term_id'], 'product_cat', array( 'parent' => $root['term_id'] ) );
+
+			$this->assertGreaterThan(
+				$leaf['term_id'],
+				$root['term_id'],
+				'The fixture is only meaningful while the ancestor carries the higher term ID.'
+			);
+
+			wp_set_object_terms( $product->get_id(), array( $leaf['term_id'], $root['term_id'] ), 'product_cat' );
+
+			$actual = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+
+			$this->assertSame( "{$root_name} > {$leaf_name}", $actual );
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $leaf['term_id'], 'product_cat' );
+			wp_delete_term( $root['term_id'], 'product_cat' );
+		}
+	}
+
+	/**
+	 * @testdox Product category list breadcrumb ordering batches ancestor loading and ignores the order of ancestors it does not render.
+	 */
+	public function test_wc_get_product_category_list_breadcrumb_order_batches_ancestors(): void {
+		global $wpdb;
+
+		$suffix              = wp_unique_id();
+		$first_branch_name   = 'First branch child ' . $suffix;
+		$second_sibling_name = 'Zulu ordered first ' . $suffix;
+		$third_sibling_name  = 'Alpha ordered second ' . $suffix;
+		$first_root          = wp_insert_term( 'First branch root ' . $suffix, 'product_cat' );
+		$second_root         = wp_insert_term( 'Second branch root ' . $suffix, 'product_cat' );
+		$first_middle        = wp_insert_term( 'First branch middle ' . $suffix, 'product_cat', array( 'parent' => $first_root['term_id'] ) );
+		$second_middle       = wp_insert_term( 'Second branch middle ' . $suffix, 'product_cat', array( 'parent' => $second_root['term_id'] ) );
+		$first_branch        = wp_insert_term( $first_branch_name, 'product_cat', array( 'parent' => $first_middle['term_id'] ) );
+		$third_sibling       = wp_insert_term( $third_sibling_name, 'product_cat', array( 'parent' => $second_middle['term_id'] ) );
+		$second_sibling      = wp_insert_term( $second_sibling_name, 'product_cat', array( 'parent' => $second_middle['term_id'] ) );
+		$product             = WC_Helper_Product::create_simple_product();
+		$query_filter        = null;
+
+		try {
+			update_term_meta( $first_root['term_id'], 'order', 2 );
+			update_term_meta( $second_root['term_id'], 'order', 1 );
+			update_term_meta( $second_sibling['term_id'], 'order', 1 );
+			update_term_meta( $third_sibling['term_id'], 'order', 2 );
+			wp_set_object_terms( $product->get_id(), array( $first_branch['term_id'], $third_sibling['term_id'], $second_sibling['term_id'] ), 'product_cat' );
+
+			get_the_terms( $product->get_id(), 'product_cat' );
+			$ancestor_ids = array( $first_root['term_id'], $second_root['term_id'], $first_middle['term_id'], $second_middle['term_id'] );
+
+			foreach ( $ancestor_ids as $ancestor_id ) {
+				wp_cache_delete( $ancestor_id, 'terms' );
+				wp_cache_delete( $ancestor_id, 'term_meta' );
+			}
+
+			// Match ancestor term IDs in captured SQL. Word boundaries avoid partial matches within larger numeric IDs.
+			$ancestor_id_pattern = '/\b(?:' . implode( '|', $ancestor_ids ) . ')\b/';
+
+			/*
+			 * Match the term-join clause regardless of run-length whitespace. WP_Term_Query builds
+			 * "FROM $wpdb->terms AS t $join" and $join already opens with a space, so core emits
+			 * this clause with both one and two spaces. A literal single-space match silently sees
+			 * only half of the queries.
+			 */
+			$term_join_pattern = '/FROM\s+' . preg_quote( $wpdb->terms, '/' ) . '\s+AS\s+t\s+INNER\s+JOIN\s+' . preg_quote( $wpdb->term_taxonomy, '/' ) . '\s+AS\s+tt/i';
+
+			$ancestor_term_queries = 0;
+			$ancestor_meta_queries = 0;
+			$query_filter          = static function ( $query ) use ( &$ancestor_meta_queries, &$ancestor_term_queries, $ancestor_id_pattern, $term_join_pattern, $wpdb ) {
+				if ( preg_match( $ancestor_id_pattern, $query ) ) {
+					if ( preg_match( $term_join_pattern, $query ) ) {
+						++$ancestor_term_queries;
+					} elseif ( false !== strpos( $query, "FROM {$wpdb->termmeta}" ) ) {
+						++$ancestor_meta_queries;
+					}
+				}
+
+				return $query;
+			};
+			add_filter( 'query', $query_filter );
+
+			try {
+				$actual = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+			} finally {
+				remove_filter( 'query', $query_filter );
+				$query_filter = null;
+			}
+
+			/*
+			 * The two roots carry deliberately contradictory `order` metas (2 and 1) and neither is
+			 * assigned to the product. The rendered order must come from the three assigned terms'
+			 * own `order` metas -- 0, 1 and 2 -- and never from their invisible roots.
+			 */
+			$this->assertSame( "{$first_branch_name} > {$second_sibling_name} > {$third_sibling_name}", $actual );
+
+			/*
+			 * Two ancestor levels, and core spends two queries on each: one WP_Term_Query for the
+			 * ids and one _prime_term_caches() follow-up for the rows. The bound is what guards
+			 * against regressing to one query per ancestor; it is deliberately not assertSame(),
+			 * because the 2-per-level split is a core implementation detail.
+			 */
+			$this->assertLessThanOrEqual( 4, $ancestor_term_queries, 'Ancestor terms should be loaded in a bounded number of batched queries per hierarchy level, not one query per ancestor.' );
+			$this->assertLessThanOrEqual( 1, $ancestor_meta_queries, 'Ancestor metadata should be primed in one query.' );
+		} finally {
+			if ( null !== $query_filter ) {
+				remove_filter( 'query', $query_filter );
+			}
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $second_sibling['term_id'], 'product_cat' );
+			wp_delete_term( $third_sibling['term_id'], 'product_cat' );
+			wp_delete_term( $first_branch['term_id'], 'product_cat' );
+			wp_delete_term( $second_middle['term_id'], 'product_cat' );
+			wp_delete_term( $first_middle['term_id'], 'product_cat' );
+			wp_delete_term( $second_root['term_id'], 'product_cat' );
+			wp_delete_term( $first_root['term_id'], 'product_cat' );
+		}
+	}
+
+	/**
+	 * @testdox Product category list breadcrumb ordering never ranks by a category it does not render.
+	 */
+	public function test_wc_get_product_category_list_breadcrumb_order_ignores_unrendered_ancestors(): void {
+		$suffix       = wp_unique_id();
+		$parent_name  = 'Apparel ' . $suffix;
+		$child_name   = 'Zebra shirts ' . $suffix;
+		$sibling_name = 'Books ' . $suffix;
+		$parent       = wp_insert_term( $parent_name, 'product_cat' );
+		$child        = wp_insert_term( $child_name, 'product_cat', array( 'parent' => $parent['term_id'] ) );
+		$sibling      = wp_insert_term( $sibling_name, 'product_cat' );
+		$product      = WC_Helper_Product::create_simple_product();
+
+		try {
+			// Only the leaf and the independent root are assigned; the parent is never rendered.
+			wp_set_object_terms( $product->get_id(), array( $child['term_id'], $sibling['term_id'] ), 'product_cat' );
+
+			$actual = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+
+			$this->assertSame(
+				"{$sibling_name} > {$child_name}",
+				$actual,
+				'An ancestor that is not rendered must not decide the order of the categories that are.'
+			);
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $child['term_id'], 'product_cat' );
+			wp_delete_term( $sibling['term_id'], 'product_cat' );
+			wp_delete_term( $parent['term_id'], 'product_cat' );
+		}
+	}
+
+	/**
+	 * @testdox Product category list breadcrumb ordering keeps ancestor loading flat as branch count grows.
+	 */
+	public function test_wc_get_product_category_list_breadcrumb_order_keeps_ancestor_queries_flat(): void {
+		global $wpdb;
+
+		$suffix       = wp_unique_id();
+		$branch_count = 6;
+		$created      = array();
+		$leaves       = array();
+		$ancestor_ids = array();
+		$product      = WC_Helper_Product::create_simple_product();
+		$query_filter = null;
+
+		/*
+		 * Six branches rather than the two the sibling test uses. Ancestor loading is batched per
+		 * hierarchy level, so its cost tracks depth and stays flat as branches are added; resolving
+		 * one ancestor at a time instead would grow with the branch count. Two branches is too few
+		 * to tell those apart -- both cost the same there.
+		 */
+		try {
+			for ( $branch = 0; $branch < $branch_count; $branch++ ) {
+				$parent = 0;
+
+				for ( $depth = 0; $depth < 3; $depth++ ) {
+					$term      = wp_insert_term( "Flat b{$branch} d{$depth} {$suffix}", 'product_cat', $parent ? array( 'parent' => $parent ) : array() );
+					$created[] = $term['term_id'];
+					$parent    = $term['term_id'];
+
+					if ( $depth < 2 ) {
+						$ancestor_ids[] = $term['term_id'];
+					}
+				}
+
+				$leaves[] = $parent;
+			}
+
+			wp_set_object_terms( $product->get_id(), $leaves, 'product_cat' );
+			get_the_terms( $product->get_id(), 'product_cat' );
+
+			foreach ( $ancestor_ids as $ancestor_id ) {
+				wp_cache_delete( $ancestor_id, 'terms' );
+				wp_cache_delete( $ancestor_id, 'term_meta' );
+			}
+
+			$ancestor_id_pattern = '/\b(?:' . implode( '|', $ancestor_ids ) . ')\b/';
+			$term_join_pattern   = '/FROM\s+' . preg_quote( $wpdb->terms, '/' ) . '\s+AS\s+t\s+INNER\s+JOIN\s+' . preg_quote( $wpdb->term_taxonomy, '/' ) . '\s+AS\s+tt/i';
+
+			$ancestor_term_queries = 0;
+			$query_filter          = static function ( $query ) use ( &$ancestor_term_queries, $ancestor_id_pattern, $term_join_pattern ) {
+				if ( preg_match( $ancestor_id_pattern, $query ) && preg_match( $term_join_pattern, $query ) ) {
+					++$ancestor_term_queries;
+				}
+
+				return $query;
+			};
+			add_filter( 'query', $query_filter );
+
+			try {
+				wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' );
+			} finally {
+				remove_filter( 'query', $query_filter );
+				$query_filter = null;
+			}
+
+			/*
+			 * Two levels of ancestors, two queries each. The bound is per level, so it must not move
+			 * when branch_count does -- that is the property under test.
+			 */
+			$this->assertLessThanOrEqual(
+				4,
+				$ancestor_term_queries,
+				"Ancestor loading should stay flat across {$branch_count} branches, not grow with them."
+			);
+		} finally {
+			if ( null !== $query_filter ) {
+				remove_filter( 'query', $query_filter );
+			}
+			WC_Helper_Product::delete_product( $product->get_id() );
+
+			foreach ( array_reverse( $created ) as $term_id ) {
+				wp_delete_term( $term_id, 'product_cat' );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Product category list breadcrumb ordering survives a get_terms filter returning an unexpected shape.
+	 */
+	public function test_wc_get_product_category_list_breadcrumb_order_survives_hostile_get_terms_filter(): void {
+		$suffix     = wp_unique_id();
+		$root_name  = 'Hostile root ' . $suffix;
+		$leaf_name  = 'Hostile alpha leaf ' . $suffix;
+		$other_name = 'Hostile zulu other ' . $suffix;
+		$root       = wp_insert_term( $root_name, 'product_cat' );
+		$leaf       = wp_insert_term( $leaf_name, 'product_cat', array( 'parent' => $root['term_id'] ) );
+		$other      = wp_insert_term( $other_name, 'product_cat' );
+		$product    = WC_Helper_Product::create_simple_product();
+
+		/*
+		 * The prime asks for 'id=>parent'. Any plugin filtering get_terms can hand back WP_Term
+		 * objects instead, and casting one of those to int yields 1, which would build a fabricated
+		 * parent chain out of whatever term happens to hold that ID.
+		 */
+		$object_shape_filter = static function ( $terms, $taxonomies, $args ) use ( $root ) {
+			if ( 'id=>parent' === ( $args['fields'] ?? '' ) ) {
+				return array( get_term( $root['term_id'], 'product_cat' ) );
+			}
+
+			return $terms;
+		};
+
+		try {
+			/*
+			 * The root is deliberately left unassigned. Priming only runs for ancestors that are not
+			 * themselves rendered, so assigning it would leave the frontier empty and skip the code
+			 * under test entirely.
+			 */
+			wp_set_object_terms( $product->get_id(), array( $leaf['term_id'], $other['term_id'] ), 'product_cat' );
+
+			$expected = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+
+			add_filter( 'get_terms', $object_shape_filter, 10, 3 );
+
+			$diagnostics = array();
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- The object-to-int conversion notice is what is being asserted on; PHPUnit would convert it to an exception and hide the ordering result.
+			set_error_handler(
+				static function ( $errno, $errstr ) use ( &$diagnostics ) {
+					$diagnostics[] = $errstr;
+
+					return true;
+				},
+				E_DEPRECATED | E_WARNING | E_NOTICE
+			);
+
+			try {
+				$actual = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+			} finally {
+				restore_error_handler();
+				remove_filter( 'get_terms', $object_shape_filter, 10 );
+			}
+
+			$this->assertSame( "{$leaf_name} > {$other_name}", $expected );
+			$this->assertSame( $expected, $actual, 'A get_terms filter returning term objects must not reorder the rendered categories.' );
+			$this->assertSame( array(), $diagnostics, 'Priming should reject an unexpected get_terms shape rather than trying to convert it.' );
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $leaf['term_id'], 'product_cat' );
+			wp_delete_term( $other['term_id'], 'product_cat' );
+			wp_delete_term( $root['term_id'], 'product_cat' );
+		}
+	}
+
+	/**
+	 * @testdox Product category list breadcrumb ordering terminates when a get_terms filter never stops yielding ancestors.
+	 */
+	public function test_wc_get_product_category_list_breadcrumb_order_terminates_on_endless_ancestry(): void {
+		$suffix       = wp_unique_id();
+		$root_name    = 'Endless root ' . $suffix;
+		$leaf_name    = 'Endless alpha leaf ' . $suffix;
+		$other_name   = 'Endless zulu other ' . $suffix;
+		$root         = wp_insert_term( $root_name, 'product_cat' );
+		$leaf         = wp_insert_term( $leaf_name, 'product_cat', array( 'parent' => $root['term_id'] ) );
+		$other        = wp_insert_term( $other_name, 'product_cat' );
+		$product      = WC_Helper_Product::create_simple_product();
+		$rounds       = 0;
+		$next_term_id = 900000;
+
+		/*
+		 * Yields a parent nobody has seen on every round, so the frontier never empties on its own,
+		 * then gives up well past the implementation's ceiling. The give-up point is what keeps a
+		 * removed ceiling a clean assertion failure instead of a hung test run.
+		 */
+		$endless_filter = static function ( $terms, $taxonomies, $args ) use ( &$rounds, &$next_term_id ) {
+			if ( 'id=>parent' !== ( $args['fields'] ?? '' ) || $rounds >= 500 ) {
+				return $terms;
+			}
+
+			++$rounds;
+			++$next_term_id;
+
+			return array( $next_term_id => $next_term_id + 1 );
+		};
+
+		try {
+			// As above, the root stays unassigned so the walk has an ancestor to chase at all.
+			wp_set_object_terms( $product->get_id(), array( $leaf['term_id'], $other['term_id'] ), 'product_cat' );
+			add_filter( 'get_terms', $endless_filter, 10, 3 );
+
+			try {
+				$actual = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+			} finally {
+				remove_filter( 'get_terms', $endless_filter, 10 );
+			}
+
+			$this->assertGreaterThan( 0, $rounds, 'The fixture is only meaningful while the ancestor walk actually runs.' );
+			$this->assertLessThanOrEqual( 100, $rounds, 'The ancestor walk must be bounded rather than trusting a filter to end it.' );
+			$this->assertSame( "{$leaf_name} > {$other_name}", $actual, 'A bounded walk should still render the rendered terms in order.' );
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $leaf['term_id'], 'product_cat' );
+			wp_delete_term( $other['term_id'], 'product_cat' );
+			wp_delete_term( $root['term_id'], 'product_cat' );
+		}
+	}
+
+	/**
+	 * @testdox Product category list breadcrumb ordering honors filtered category order after priming term metadata.
+	 */
+	public function test_wc_get_product_category_list_breadcrumb_order_honors_filtered_category_order(): void {
+		$suffix = wp_unique_id();
+
+		/*
+		 * Named so the expected order runs against alphabetical order, and against the stored `order`
+		 * metas below. Without that, an implementation that ignored category order entirely would
+		 * still produce this exact string from the name tiebreak, and the test could not fail.
+		 */
+		$filtered_first_name   = 'Zulu filtered first ' . $suffix;
+		$filtered_second_name  = 'Alpha filtered second ' . $suffix;
+		$filtered_first        = wp_insert_term( $filtered_first_name, 'product_cat' );
+		$filtered_second       = wp_insert_term( $filtered_second_name, 'product_cat' );
+		$product               = WC_Helper_Product::create_simple_product();
+		$metadata_cache_filter = static function () {
+			return true;
+		};
+		$term_metadata_filter  = static function ( $value, $object_id, $meta_key ) use ( $filtered_first, $filtered_second ) {
+			if ( 'order' !== $meta_key ) {
+				return $value;
+			}
+
+			if ( $filtered_first['term_id'] === $object_id ) {
+				return 1;
+			}
+
+			return $filtered_second['term_id'] === $object_id ? 2 : $value;
+		};
+
+		try {
+			update_term_meta( $filtered_first['term_id'], 'order', 2 );
+			update_term_meta( $filtered_second['term_id'], 'order', 1 );
+			wp_set_object_terms( $product->get_id(), array( $filtered_second['term_id'], $filtered_first['term_id'] ), 'product_cat' );
+			add_filter( 'get_term_metadata', $term_metadata_filter, 10, 3 );
+
+			$actual = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+
+			$this->assertSame( "{$filtered_first_name} > {$filtered_second_name}", $actual );
+
+			wp_cache_delete( $filtered_first['term_id'], 'term_meta' );
+			wp_cache_delete( $filtered_second['term_id'], 'term_meta' );
+			add_filter( 'update_term_metadata_cache', $metadata_cache_filter );
+
+			$actual = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+
+			$this->assertSame( "{$filtered_first_name} > {$filtered_second_name}", $actual, 'Filtered category order should remain authoritative when cache priming is short-circuited.' );
+		} finally {
+			remove_filter( 'update_term_metadata_cache', $metadata_cache_filter );
+			remove_filter( 'get_term_metadata', $term_metadata_filter );
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $filtered_second['term_id'], 'product_cat' );
+			wp_delete_term( $filtered_first['term_id'], 'product_cat' );
+		}
+	}
+
+	/**
+	 * @testdox Product category list breadcrumb ordering reflects category order updates after term metadata is primed.
+	 */
+	public function test_wc_get_product_category_list_breadcrumb_order_reflects_category_order_updates(): void {
+		$first_name  = 'Cache order first ' . wp_unique_id();
+		$second_name = 'Cache order second ' . wp_unique_id();
+		$first       = wp_insert_term( $first_name, 'product_cat' );
+		$second      = wp_insert_term( $second_name, 'product_cat' );
+		$product     = WC_Helper_Product::create_simple_product();
+
+		try {
+			update_term_meta( $first['term_id'], 'order', 1 );
+			update_term_meta( $second['term_id'], 'order', 2 );
+			wp_set_object_terms( $product->get_id(), array( $second['term_id'], $first['term_id'] ), 'product_cat' );
+
+			$initial = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+
+			update_term_meta( $first['term_id'], 'order', 2 );
+			update_term_meta( $second['term_id'], 'order', 1 );
+
+			$updated = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+
+			$this->assertSame( "{$first_name} > {$second_name}", $initial );
+			$this->assertSame( "{$second_name} > {$first_name}", $updated );
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $second['term_id'], 'product_cat' );
+			wp_delete_term( $first['term_id'], 'product_cat' );
+		}
+	}
+
+	/**
+	 * @testdox Product category list breadcrumb ordering treats invalid filtered category order as zero.
+	 */
+	public function test_wc_get_product_category_list_breadcrumb_order_handles_invalid_filtered_category_order(): void {
+		$suffix               = wp_unique_id();
+		$invalid_order_name   = 'Alpha invalid order ' . $suffix;
+		$zero_order_name      = 'Zulu zero order ' . $suffix;
+		$invalid_order        = wp_insert_term( $invalid_order_name, 'product_cat' );
+		$zero_order           = wp_insert_term( $zero_order_name, 'product_cat' );
+		$product              = WC_Helper_Product::create_simple_product();
+		$term_metadata_filter = static function ( $value, $object_id, $meta_key ) use ( $invalid_order, $zero_order ) {
+			if ( 'order' !== $meta_key ) {
+				return $value;
+			}
+
+			if ( $invalid_order['term_id'] === $object_id ) {
+				return new stdClass();
+			}
+
+			return $zero_order['term_id'] === $object_id ? 0 : $value;
+		};
+
+		try {
+			wp_set_object_terms( $product->get_id(), array( $zero_order['term_id'], $invalid_order['term_id'] ), 'product_cat' );
+			add_filter( 'get_term_metadata', $term_metadata_filter, 10, 3 );
+
+			$actual = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+
+			$this->assertSame( "{$invalid_order_name} > {$zero_order_name}", $actual );
+		} finally {
+			remove_filter( 'get_term_metadata', $term_metadata_filter );
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $zero_order['term_id'], 'product_cat' );
+			wp_delete_term( $invalid_order['term_id'], 'product_cat' );
+		}
+	}
+
+	/**
+	 * @testdox Product category list breadcrumb ordering treats a term with a missing ancestor as a root term.
+	 */
+	public function test_wc_get_product_category_list_breadcrumb_order_handles_missing_ancestor(): void {
+		$suffix           = wp_unique_id();
+		$missing_root     = wp_insert_term( 'Missing root ' . $suffix, 'product_cat' );
+		$orphan_name      = 'Zulu orphan ' . $suffix;
+		$independent_name = 'Alpha independent ' . $suffix;
+		$orphan           = wp_insert_term( $orphan_name, 'product_cat', array( 'parent' => $missing_root['term_id'] ) );
+		$independent      = wp_insert_term( $independent_name, 'product_cat' );
+		$product          = WC_Helper_Product::create_simple_product();
+		$ancestors_filter = static function ( $ancestors, $object_id, $object_type ) use ( &$orphan ) {
+			return 'product_cat' === $object_type && (int) $orphan['term_id'] === (int) $object_id ? array() : $ancestors;
+		};
+
+		try {
+			update_term_meta( $independent['term_id'], 'order', 1 );
+			update_term_meta( $orphan['term_id'], 'order', 2 );
+			wp_set_object_terms( $product->get_id(), array( $orphan['term_id'], $independent['term_id'] ), 'product_cat' );
+
+			$resolved = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+
+			add_filter( 'get_ancestors', $ancestors_filter, 10, 3 );
+
+			$unresolved = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+
+			$this->assertSame( "{$independent_name} > {$orphan_name}", $resolved );
+			$this->assertSame( $resolved, $unresolved, 'A term whose ancestry cannot be resolved should rank exactly as a root term does.' );
+		} finally {
+			remove_filter( 'get_ancestors', $ancestors_filter, 10 );
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $orphan['term_id'], 'product_cat' );
+			wp_delete_term( $independent['term_id'], 'product_cat' );
+			wp_delete_term( $missing_root['term_id'], 'product_cat' );
+		}
+	}
+
+	/**
+	 * @testdox Product category list breadcrumb ordering terminates safely when ancestry is cyclic.
+	 */
+	public function test_wc_get_product_category_list_breadcrumb_order_handles_cyclic_ancestry(): void {
+		$suffix           = wp_unique_id();
+		$cyclic_root      = wp_insert_term( 'Cyclic root ' . $suffix, 'product_cat' );
+		$cyclic_name      = 'Cyclic child ' . $suffix;
+		$independent_name = 'Independent root ' . $suffix;
+		$cyclic_child     = wp_insert_term( $cyclic_name, 'product_cat', array( 'parent' => $cyclic_root['term_id'] ) );
+		$independent      = wp_insert_term( $independent_name, 'product_cat' );
+		$product          = WC_Helper_Product::create_simple_product();
+		$get_term_filter  = static function ( $term, $taxonomy ) use ( $cyclic_root, $cyclic_child ) {
+			if ( 'product_cat' === $taxonomy && $term instanceof \WP_Term && (int) $cyclic_root['term_id'] === (int) $term->term_id ) {
+				/*
+				 * Clone before mutating: get_term() hands back the cached instance, and mutating it in
+				 * place would corrupt the term cache for every later test in the run.
+				 */
+				$term         = clone $term;
+				$term->parent = (int) $cyclic_child['term_id'];
+			}
+
+			return $term;
+		};
+
+		try {
+			/*
+			 * The invisible root is left at order 0 on purpose: if it still steered the sort, the
+			 * cyclic child would render first.
+			 */
+			update_term_meta( $independent['term_id'], 'order', 1 );
+			update_term_meta( $cyclic_child['term_id'], 'order', 3 );
+			wp_set_object_terms( $product->get_id(), array( $cyclic_child['term_id'], $independent['term_id'] ), 'product_cat' );
+			add_filter( 'get_term', $get_term_filter, 10, 2 );
+
+			$actual = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+
+			$this->assertSame( "{$independent_name} > {$cyclic_name}", $actual );
+		} finally {
+			remove_filter( 'get_term', $get_term_filter, 10 );
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $cyclic_child['term_id'], 'product_cat' );
+			wp_delete_term( $independent['term_id'], 'product_cat' );
+			wp_delete_term( $cyclic_root['term_id'], 'product_cat' );
+		}
+	}
+
+	/**
+	 * @testdox Product category list can render assigned terms alphabetically by name.
+	 */
+	public function test_wc_get_product_category_list_can_render_name_order(): void {
+		$suffix            = wp_unique_id();
+		$second_name       = 'Natural Category 2 ' . $suffix;
+		$tenth_name        = 'Natural Category 10 ' . $suffix;
+		$tenth             = wp_insert_term( $tenth_name, 'product_cat' );
+		$second            = wp_insert_term( $second_name, 'product_cat' );
+		$product           = WC_Helper_Product::create_simple_product();
+		$term_links_filter = static function ( $links ) {
+			return array_map( static fn( $link ) => 'Filtered ' . $link, $links );
+		};
+
+		try {
+			update_term_meta( $second['term_id'], 'order', 2 );
+			update_term_meta( $tenth['term_id'], 'order', 1 );
+			wp_set_object_terms( $product->get_id(), array( $tenth['term_id'], $second['term_id'] ), 'product_cat' );
+			add_filter( 'term_links-product_cat', $term_links_filter );
+
+			$actual = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'name' ) );
+
+			$this->assertSame( "Filtered {$second_name} > Filtered {$tenth_name}", $actual );
+		} finally {
+			remove_filter( 'term_links-product_cat', $term_links_filter );
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $second['term_id'], 'product_cat' );
+			wp_delete_term( $tenth['term_id'], 'product_cat' );
+		}
+	}
+
+	/**
+	 * @testdox Product category list name ordering tolerates a term with no name.
+	 */
+	public function test_wc_get_product_category_list_name_order_tolerates_missing_names(): void {
+		$suffix         = wp_unique_id();
+		$named          = wp_insert_term( 'Named category ' . $suffix, 'product_cat' );
+		$unnamed        = wp_insert_term( 'Unnamed category ' . $suffix, 'product_cat' );
+		$product        = WC_Helper_Product::create_simple_product();
+		$unnamed_filter = static function ( $terms ) use ( $unnamed ) {
+			if ( ! is_array( $terms ) ) {
+				return $terms;
+			}
+
+			/*
+			 * Clone before mutating: these objects come from the term cache, and blanking a name in
+			 * place would leak into every later test in the run.
+			 */
+			return array_map(
+				static function ( $term ) use ( $unnamed ) {
+					if ( $term instanceof \WP_Term && (int) $unnamed['term_id'] === (int) $term->term_id ) {
+						$term       = clone $term;
+						$term->name = null;
+					}
+
+					return $term;
+				},
+				$terms
+			);
+		};
+
+		try {
+			wp_set_object_terms( $product->get_id(), array( $named['term_id'], $unnamed['term_id'] ), 'product_cat' );
+			add_filter( 'get_the_terms', $unnamed_filter, 99 );
+
+			$comparison_diagnostics = array();
+
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Capturing the diagnostic is the assertion; PHPUnit would otherwise convert it to an exception and hide which operand it came from.
+			set_error_handler(
+				static function ( $errno, $errstr ) use ( &$comparison_diagnostics ) {
+					if ( false !== stripos( $errstr, 'strnatcasecmp' ) ) {
+						$comparison_diagnostics[] = $errstr;
+					}
+
+					return true;
+				},
+				E_DEPRECATED | E_WARNING | E_NOTICE
+			);
+
+			try {
+				wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'name' );
+			} finally {
+				restore_error_handler();
+			}
+
+			$this->assertSame(
+				array(),
+				$comparison_diagnostics,
+				'Name ordering should not raise comparison diagnostics for a term with no name.'
+			);
+		} finally {
+			remove_filter( 'get_the_terms', $unnamed_filter, 99 );
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $named['term_id'], 'product_cat' );
+			wp_delete_term( $unnamed['term_id'], 'product_cat' );
+		}
+	}
+
+	/**
+	 * @testdox Product category list ordered modes validate values returned by the term-links filter.
+	 */
+	public function test_wc_get_product_category_list_ordered_mode_validates_term_links_filter_result(): void {
+		$suffix                    = wp_unique_id();
+		$category                  = wp_insert_term( 'Filter result category ' . $suffix, 'product_cat' );
+		$product                   = WC_Helper_Product::create_simple_product();
+		$filter_error              = new WP_Error( 'category-link-filter-error' );
+		$term_links_error_filter   = static function () use ( $filter_error ) {
+			return $filter_error;
+		};
+		$term_links_invalid_filter = static function () {
+			return 'invalid-filter-result';
+		};
+
+		try {
+			wp_set_object_terms( $product->get_id(), array( $category['term_id'] ), 'product_cat' );
+			add_filter( 'term_links-product_cat', $term_links_error_filter );
+
+			$this->assertSame( $filter_error, wc_get_product_category_list( $product->get_id(), ', ', '', '', 'name' ) );
+
+			remove_filter( 'term_links-product_cat', $term_links_error_filter );
+			add_filter( 'term_links-product_cat', $term_links_invalid_filter );
+
+			$actual = wc_get_product_category_list( $product->get_id(), ', ', '', '', 'name' );
+
+			$this->assertFalse( $actual );
+		} finally {
+			remove_filter( 'term_links-product_cat', $term_links_error_filter );
+			remove_filter( 'term_links-product_cat', $term_links_invalid_filter );
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $category['term_id'], 'product_cat' );
+		}
 	}
 
 	/**
@@ -1369,11 +2493,13 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 				}
 				foreach ( $terms as $key => $term ) {
 					if ( $term->term_id === $category1_term['term_id'] ) {
-						unset( $terms[ $key ] ); // Intentionally don't re-index.
+						unset( $terms[ $key ] );
+						// Intentionally don't re-index.
 						break;
 					}
 				}
-				return $terms; // Returns array with non-sequential keys.
+				return $terms;
+				// Returns array with non-sequential keys.
 			};
 			add_filter( 'get_the_terms', $filter_callback, 10, 3 );
 

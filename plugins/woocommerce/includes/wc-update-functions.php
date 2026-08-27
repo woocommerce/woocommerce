@@ -18,6 +18,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
@@ -37,6 +38,7 @@ use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
+use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
@@ -3647,9 +3649,6 @@ function wc_update_1110_flush_product_count_cache() {
  * queued Action Scheduler sends, options and unsubscribe rows that no remaining code
  * reads, so clear them here rather than orphaning them.
  *
- * The `_abandoned_cart_recovery_*` order meta is deliberately left in place: scanning
- * every order to delete it is expensive on large stores, and the stale keys are inert
- * once nothing reads them.
  *
  * Names are hardcoded rather than referenced through the classes that used to own
  * them, because those classes no longer exist.
@@ -3679,4 +3678,29 @@ function wc_update_1120_remove_abandoned_cart_recovery() {
 	$unsubscribes_table = $wpdb->prefix . 'wc_email_unsubscribes';
 	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name built from the wpdb prefix.
 	$wpdb->query( "DROP TABLE IF EXISTS {$unsubscribes_table}" );
+}
+
+/**
+ * Migrate the Back in Stock Notifications alpha opt-in from the
+ * WOOCOMMERCE_BIS_ALPHA_ENABLED constant to the feature toggle.
+ *
+ * The option is written with update_option() rather than add_option() because
+ * WC_Install::create_options() runs first and has already seeded every Features
+ * screen checkbox with its default. No store can have chosen 'no' deliberately:
+ * the toggle does not exist before this release.
+ *
+ * Writing the option fires 'updated_option', which FeaturesController turns into
+ * FEATURE_ENABLED_CHANGED_ACTION, so the feature's own activation side effects
+ * (the data retention task and the rewrite rules flush) run from there.
+ *
+ * @since 11.2.0
+ *
+ * @return void
+ */
+function wc_update_1120_migrate_stock_notifications_alpha_constant() {
+	if ( ! Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
+		return;
+	}
+
+	update_option( StockNotifications::ENABLE_OPTION_NAME, 'yes', true );
 }
