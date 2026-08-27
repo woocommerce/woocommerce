@@ -12,7 +12,7 @@
 	gap: $gap-smallest;
 }
 
-:where(.wc-block-product-filter-chips__item) {
+.wc-block-product-filter-chips__item {
 	border: 1px solid color-mix(in srgb, currentColor 40%, transparent);
 	padding: 0.4em 0.75em;
 	appearance: none;
