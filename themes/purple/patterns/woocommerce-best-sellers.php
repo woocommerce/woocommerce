@@ -16,7 +16,7 @@
 <!-- wp:group {"metadata":{"categories":["woo-commerce","purple"],"name":"Best sellers collection, 4 columns","description":"A best sellers section with a heading and 4 column product carousel.","patternName":"purple/woocommerce-best-sellers"},"align":"full","className":"is-style-default","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"blockGap":"0","padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70","left":"var:preset|spacing|50","right":"var:preset|spacing|50"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull is-style-default" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--70);padding-right:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--70);padding-left:var(--wp--preset--spacing--50)"><!-- wp:woocommerce/product-collection {"queryId":56,"query":{"perPage":12,"pages":1,"offset":0,"postType":"product","order":"desc","orderBy":"popularity","search":"","exclude":[],"inherit":false,"taxQuery":[],"isProductCollectionBlock":true,"featured":false,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[],"filterable":false,"relatedBy":{"categories":true,"tags":true}},"tagName":"div","displayLayout":{"type":"carousel","columns":4,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"collection":"woocommerce/product-collection/best-sellers","hideControls":["inherit","order","filterable"],"queryContextIncludes":["collection"],"__privatePreviewState":{"isPreview":false,"previewMessage":"Actual products will vary depending on the page being viewed."},"align":"wide"} -->
 <div class="wp-block-woocommerce-product-collection alignwide"><!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between","verticalAlignment":"center"}} -->
-<div class="wp-block-group"><!-- wp:heading {"style":{"typography":{"textAlign":"center","lineHeight":"1.21"},"spacing":{"margin":{"top":"0","bottom":"0"}}},"fontSize":"x-large"} --><h2 class="wp-block-heading has-text-align-center has-x-large-font-size" style="margin-top:0;margin-bottom:0;line-height:1.21"><?php esc_html_e( 'Best sellers', 'purple' );?></h2>
+<div class="wp-block-group"><!-- wp:heading {"style":{"typography":{"lineHeight":"1.21"},"spacing":{"margin":{"top":"0","bottom":"0"}}},"fontSize":"x-large"} --><h2 class="wp-block-heading has-x-large-font-size" style="margin-top:0;margin-bottom:0;line-height:1.21"><?php esc_html_e( 'Best sellers', 'purple' );?></h2>
 <!-- /wp:heading -->
 
 <!-- wp:woocommerce/product-gallery-large-image-next-previous {"layout":{"type":"flex","flexWrap":"nowrap"}} -->
@@ -35,8 +35,8 @@
 <!-- /wp:woocommerce/product-template -->
 
 <!-- wp:woocommerce/product-collection-no-results -->
-<!-- wp:paragraph {"style":{"typography":{"textAlign":"center"},"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
-<p class="has-text-align-center" style="margin-top:0;margin-bottom:0"><?php esc_html_e( 'Our most popular products will appear here soon.', 'purple' ); ?></p>
+<!-- wp:paragraph {"style":{"typography":{"textAlign":"left"},"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
+<p class="has-text-align-left" style="margin-top:0;margin-bottom:0"><?php esc_html_e( 'Our most popular products will appear here soon.', 'purple' ); ?></p>
 <!-- /wp:paragraph -->
 <!-- /wp:woocommerce/product-collection-no-results --></div>
 <!-- /wp:woocommerce/product-collection --></div>
