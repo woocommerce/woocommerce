@@ -2,6 +2,7 @@
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\Tests\Helpers\DateQueryGuardTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 
@@ -12,6 +13,8 @@ use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
  * @group order-query-tests
  */
 class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
+	use DateQueryGuardTrait;
+
 	use CogsAwareUnitTestSuiteTrait;
 
 	/**
@@ -672,7 +675,8 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			$current_status = $order->get_status( 'edit' );
 			$order->set_status( $status );
 			$order_data_store_cpt->update( $order );
-			$order->set_status( 'checkout-draft' ); // Revert back to draft.
+			$order->set_status( 'checkout-draft' );
+			// Revert back to draft.
 			$order->save();
 			$this->assertEquals(
 				$k + 1,
@@ -2099,5 +2103,62 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$this->assertContains( $completed->get_id(), $result, 'An unregistered status must not drop a valid sibling.' );
 		$this->assertNotContains( $pending->get_id(), $result, 'The valid status must still restrict the query.' );
+	}
+
+	/**
+	 * @testdox A date_query the guard must honour still matches, shared with the HPOS suite.
+	 *
+	 * @dataProvider provider_date_query_must_match
+	 *
+	 * @param array $date_query   The clause under test.
+	 * @param bool  $should_match Whether the seeded order should be returned.
+	 */
+	public function test_shared_date_query_must_match( array $date_query, bool $should_match = true ): void {
+		$order = OrderHelper::create_order();
+		$order->set_date_created( '2024-06-01' );
+		$order->save();
+
+		$result = wc_get_orders(
+			array(
+				'date_query' => $date_query,
+				'return'     => 'ids',
+				'limit'      => -1,
+				'status'     => 'any',
+			)
+		);
+
+		if ( $should_match ) {
+			$this->assertContains( $order->get_id(), $result, 'A supported date_query must keep matching.' );
+		} else {
+			$this->assertNotContains( $order->get_id(), $result, 'The clause must still restrict the query.' );
+		}
+	}
+
+	/**
+	 * @testdox A date_query the guard must reject returns nothing, shared with the HPOS suite.
+	 *
+	 * @dataProvider provider_date_query_must_fail_closed
+	 *
+	 * @param array $date_query The clause under test.
+	 */
+	public function test_shared_date_query_must_fail_closed( array $date_query ): void {
+		// Also asserts the notice fires: WP fails the test both if an undeclared
+		// incorrect-usage notice is raised and if a declared one never is.
+		$this->setExpectedIncorrectUsage( 'wc_get_orders' );
+
+		$order = OrderHelper::create_order();
+		$order->set_date_created( '2024-06-01' );
+		$order->save();
+
+		$result = wc_get_orders(
+			array(
+				'date_query' => $date_query,
+				'return'     => 'ids',
+				'limit'      => -1,
+				'status'     => 'any',
+			)
+		);
+
+		$this->assertSame( array(), $result, 'An unusable date_query must fail closed rather than widen the query.' );
 	}
 }
