@@ -24,14 +24,17 @@ const generateToc = ( hooks ) => {
 					.replace( /\-+$/, '' );
 				if ( usedHeaders.indexOf( anchor ) !== -1 ) {
 					let i = 1;
-					while (
-						usedHeaders.indexOf( anchor + '-' + i ) !== -1 &&
-						i++ <= 10
-					);
+					while ( usedHeaders.indexOf( anchor + '-' + i ) !== -1 ) {
+						i++;
+					}
 					anchor = anchor + '-' + i;
 				}
 				usedHeaders.push( anchor );
-				return `[${ hook.name }](#${ anchor })`;
+				// Match generate-hook-name: dynamic names render as code spans.
+				const displayName = hookName.includes( '{$' )
+					? `\`${ hookName }\``
+					: hookName;
+				return `[${ displayName }](#${ anchor })`;
 			} ),
 		},
 	];
