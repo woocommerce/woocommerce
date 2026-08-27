@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the new-order push notification so the order total keeps its currency symbol (e.g. $71.94) instead of showing a bare amount.
