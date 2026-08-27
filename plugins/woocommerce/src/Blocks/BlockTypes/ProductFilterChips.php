@@ -64,10 +64,6 @@ final class ProductFilterChips extends AbstractBlock {
 			$style         = is_string( $saved_style ) ? $saved_style : '';
 		}
 
-		if ( ! str_contains( $classes, 'wc-block-product-filter-chips' ) ) {
-			$classes = trim( $classes . ' wc-block-product-filter-chips' );
-		}
-
 		$has_visual_swatches  = self::has_visual_swatches( $items );
 		$chip_item_attributes = self::get_chip_item_attributes(
 			is_array( $attributes ) ? $attributes : array(),
