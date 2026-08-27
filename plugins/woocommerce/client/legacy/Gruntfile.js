@@ -30,7 +30,6 @@ module.exports = function ( grunt ) {
 		// Minify .js files.
 		uglify: {
 			options: {
-				ie8: true,
 				parse: {
 					strict: false,
 				},

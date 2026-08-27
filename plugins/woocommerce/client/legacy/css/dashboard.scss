@@ -277,7 +277,6 @@ ul.woocommerce_stats {
 			left: 0;
 			position: absolute;
 			letter-spacing: 0.1em;
-			letter-spacing: 0\9; // IE8 & below hack ;-(
 		}
 
 		span {
@@ -295,7 +294,6 @@ ul.woocommerce_stats {
 			position: absolute;
 			left: 0;
 			letter-spacing: 0.1em;
-			letter-spacing: 0\9; // IE8 & below hack ;-(
 			color: $wp-admin-text-gray;
 		}
 	}

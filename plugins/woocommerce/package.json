@@ -1137,9 +1137,7 @@
 		"node": "^24.15.0"
 	},
 	"browserslist": [
-		"> 0.1%",
-		"ie 8",
-		"ie 9"
+		"> 0.1%"
 	],
 	"dependencies": {
 		"@woocommerce/admin-library": "workspace:*",
