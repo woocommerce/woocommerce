@@ -1212,7 +1212,7 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test the schema is correctly formatted.
+	 * @testdox Test the schema describes a push token as the index returns it.
 	 */
 	public function test_get_schema_returns_correct_structure() {
 		$controller = new PushTokenRestController();
@@ -1222,32 +1222,33 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'properties', $schema );
 		$this->assertEquals( PushToken::POST_TYPE, $schema['title'] );
 
-		$this->assertArrayHasKey( 'token', $schema['properties'] );
-		$this->assertArrayHasKey( 'platform', $schema['properties'] );
-		$this->assertArrayHasKey( 'device_uuid', $schema['properties'] );
-		$this->assertArrayHasKey( 'origin', $schema['properties'] );
-		$this->assertArrayHasKey( 'enum', $schema['properties']['platform'] );
-		$this->assertArrayHasKey( 'enum', $schema['properties']['origin'] );
+		$this->assertEqualsCanonicalizing(
+			array(
+				'id',
+				'user_id',
+				'token',
+				'platform',
+				'origin',
+				'device_uuid',
+				'device_locale',
+				'metadata',
+				'created_at_gmt',
+				'last_confirmed_at_gmt',
+			),
+			array_keys( $schema['properties'] )
+		);
 
-		$this->assertArrayNotHasKey( 'validate_callback', $schema['properties']['token'] );
-		$this->assertArrayNotHasKey( 'validate_callback', $schema['properties']['platform'] );
-		$this->assertArrayNotHasKey( 'validate_callback', $schema['properties']['device_uuid'] );
-		$this->assertArrayNotHasKey( 'validate_callback', $schema['properties']['origin'] );
-
+		$this->assertEquals( PushToken::PLATFORMS, $schema['properties']['platform']['enum'] );
+		$this->assertEquals( PushToken::ORIGINS, $schema['properties']['origin']['enum'] );
 		$this->assertEquals( 'string', $schema['properties']['token']['type'] );
-		$this->assertEquals( 'string', $schema['properties']['platform']['type'] );
-		$this->assertEquals( 'string', $schema['properties']['device_uuid']['type'] );
-		$this->assertEquals( 'string', $schema['properties']['origin']['type'] );
 
-		$this->assertEquals(
-			PushToken::PLATFORMS,
-			$schema['properties']['platform']['enum']
-		);
-
-		$this->assertEquals(
-			PushToken::ORIGINS,
-			$schema['properties']['origin']['enum']
-		);
+		foreach ( $schema['properties'] as $field => $definition ) {
+			$this->assertArrayNotHasKey(
+				'validate_callback',
+				$definition,
+				sprintf( 'Schema property "%s" leaked a validate_callback.', $field )
+			);
+		}
 	}
 
 	/**
@@ -1474,6 +1475,78 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertNotEmpty( $response->get_headers()['X-WP-Total'] );
 		$this->assertNotEmpty( $response->get_headers()['X-WP-TotalPages'] );
+	}
+
+	/**
+	 * @testdox Should publish a schema on the index route describing every returned field.
+	 *
+	 * Asserted through an OPTIONS request rather than the registered callback,
+	 * because that is how the consumer reads it, and because a schema declared
+	 * inside a handler rather than alongside them never reaches OPTIONS at all.
+	 */
+	public function test_index_route_publishes_a_schema(): void {
+		$this->mock_jetpack_connection_manager_is_connected();
+		wc_get_container()->get( PushNotifications::class )->on_init();
+
+		$route   = '/wc-push-notifications/push-tokens';
+		$options = rest_do_request( new WP_REST_Request( 'OPTIONS', $route ) );
+
+		$this->assertSame( WP_Http::OK, $options->get_status() );
+		$this->assertArrayHasKey( 'schema', $options->get_data() );
+
+		$fields = $options->get_data()['schema']['properties']['tokens']['items']['properties'];
+
+		$this->assertEqualsCanonicalizing(
+			array(
+				'id',
+				'user_id',
+				'token',
+				'platform',
+				'origin',
+				'device_uuid',
+				'device_locale',
+				'metadata',
+				'created_at_gmt',
+				'last_confirmed_at_gmt',
+			),
+			array_keys( $fields )
+		);
+	}
+
+	/**
+	 * @testdox Should describe every field the index actually returns.
+	 *
+	 * A schema that drifts from the response is worse than no schema, because
+	 * the consumer codes against a field that is not there, or misses one that
+	 * is. Key order is not compared, because it carries no meaning in JSON.
+	 */
+	public function test_index_schema_matches_the_fields_the_index_returns(): void {
+		$this->mock_jetpack_connection_manager_is_connected();
+		wc_get_container()->get( PushNotifications::class )->on_init();
+
+		$data_store = wc_get_container()->get( PushTokensDataStore::class );
+
+		$data_store->create(
+			array(
+				'user_id'       => $this->user_id,
+				'token'         => 'schema-test-token',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'schema-test-uuid',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+			)
+		);
+
+		$controller = new PushTokenRestController();
+		$request    = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'page', 1 );
+		$request->set_param( 'per_page', 100 );
+		$response = $controller->index( $request );
+
+		$this->assertEqualsCanonicalizing(
+			array_keys( $controller->get_schema()['properties'] ),
+			array_keys( $response->get_data()['tokens'][0] )
+		);
 	}
 
 	/**
