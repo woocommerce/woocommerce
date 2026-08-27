@@ -267,7 +267,7 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 	 */
 	public function data_provider_test_coupon_sorting_preserves_priority_contract(): array {
 		return array(
-			'sequential 20% then 10%'        => array(
+			'sequential 20% then 10%'          => array(
 				'100.00',
 				'yes',
 				array(
@@ -287,7 +287,7 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 				),
 				'72.00',
 			),
-			'sequential 10% then 20%'        => array(
+			'sequential 10% then 20%'          => array(
 				'100.00',
 				'yes',
 				array(
@@ -307,7 +307,49 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 				),
 				'72.00',
 			),
-			'non-sequential amount fallback' => array(
+			// The 100.00 fixtures above hold the cart total steady in both orders, so these two prove
+			// the calculation order also moves the total once intermediate rounding is in play.
+			'sequential rounding 20% then 10%' => array(
+				'12.34',
+				'yes',
+				array(
+					'high' => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '20',
+					),
+					'low'  => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '10',
+					),
+				),
+				array( 'high', 'low' ),
+				array(
+					'high' => '2.47',
+					'low'  => '0.99',
+				),
+				'8.88',
+			),
+			'sequential rounding 10% then 20%' => array(
+				'12.34',
+				'yes',
+				array(
+					'high' => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '20',
+					),
+					'low'  => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '10',
+					),
+				),
+				array( 'low', 'high' ),
+				array(
+					'high' => '2.22',
+					'low'  => '1.23',
+				),
+				'8.89',
+			),
+			'non-sequential amount fallback'   => array(
 				'100.00',
 				'no',
 				array(
@@ -327,7 +369,7 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 				),
 				'0.00',
 			),
-			'standard coupon type priority'  => array(
+			'standard coupon type priority'    => array(
 				'100.00',
 				'yes',
 				array(
@@ -347,7 +389,7 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 				),
 				'60.00',
 			),
-			'usage-limit priority'           => array(
+			'usage-limit priority'             => array(
 				'100.00',
 				'yes',
 				array(
@@ -369,7 +411,7 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 				),
 				'72.00',
 			),
-			'distinct filtered priorities'   => array(
+			'distinct filtered priorities'     => array(
 				'100.00',
 				'yes',
 				array(
@@ -393,7 +435,7 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 					'percent'    => 2,
 				),
 			),
-			'equal filtered priorities'      => array(
+			'equal filtered priorities'        => array(
 				'100.00',
 				'yes',
 				array(
