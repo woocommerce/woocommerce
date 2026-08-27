@@ -262,7 +262,7 @@ Display an input field customers can use to select the number of products to add
 - **Name:** woocommerce/add-to-cart-with-options-quantity-selector
 - **Category:** woocommerce-product-elements
 - **Ancestor:** woocommerce/add-to-cart-with-options
-- **Supports:** interactivity
+- **Supports:** color (background, text), interactivity
 
 ## Variation Description (Beta) - woocommerce/add-to-cart-with-options-variation-description
 

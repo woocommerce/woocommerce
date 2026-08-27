@@ -40,6 +40,7 @@ Consult the `woocommerce-backend-dev` skill for detailed standards. Using these 
 - ❌ **Using `$instance` in tests** - Must use `$sut` variable name ([unit-tests.md](../woocommerce-backend-dev/unit-tests.md))
 - ❌ **Missing `@testdox`** - Required in test method docblocks ([unit-tests.md](../woocommerce-backend-dev/unit-tests.md))
 - ❌ **Test file naming** - Must follow convention for `includes/` vs `src/` ([unit-tests.md](../woocommerce-backend-dev/unit-tests.md))
+- ❌ **Cleanup that duplicates the base lifecycle** - Identify the test's base class before requesting post-assertion fixture deletion or state restoration; flag cleanup already covered by its transaction or teardown ([unit-tests.md](../woocommerce-backend-dev/unit-tests.md#fixture-lifecycle-and-cleanup))
 
 ### Frontend JS/TS Code
 
