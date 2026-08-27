@@ -104,21 +104,26 @@ const Edit = ( props: EditProps ): JSX.Element => {
 		},
 	} );
 
-	const loadingState = useMemo( () => {
-		return [ ...Array( 10 ) ].map( ( _, i ) => (
-			<div
-				className={ chipItemClassName }
-				key={ i }
-				style={ {
-					...chipItemStyle,
-					/* stylelint-disable */
-					width: Math.floor( Math.random() * ( 100 - 25 ) ) + '%',
-				} }
-			>
-				&nbsp;
-			</div>
-		) );
-	}, [ chipItemStyle, chipItemClassName ] );
+	const loadingWidths = useMemo(
+		() =>
+			[ ...Array( 10 ) ].map(
+				() => Math.floor( Math.random() * ( 100 - 25 ) ) + '%'
+			),
+		[]
+	);
+	const loadingState = loadingWidths.map( ( width, i ) => (
+		<div
+			className={ chipItemClassName }
+			key={ i }
+			style={ {
+				...chipItemStyle,
+				/* stylelint-disable */
+				width,
+			} }
+		>
+			&nbsp;
+		</div>
+	) );
 
 	if ( ! items ) {
 		return <></>;
