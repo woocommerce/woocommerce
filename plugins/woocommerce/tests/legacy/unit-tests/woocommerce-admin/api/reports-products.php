@@ -180,8 +180,8 @@ class WC_Admin_Tests_API_Reports_Products extends WC_REST_Unit_Test_Case {
 	/**
 	 * @testdox Should not cap the `search` param at the first 100 matching products.
 	 *
-	 * The client used to resolve the search itself and pass at most 100 product IDs back as
-	 * the `products` param, so any match past that was missing from the report.
+	 * The client used to resolve the search itself and pass back at most 100 product IDs, so any
+	 * match past that was missing from the report.
 	 *
 	 * @see https://github.com/woocommerce/woocommerce/issues/50786
 	 */
@@ -240,10 +240,9 @@ class WC_Admin_Tests_API_Reports_Products extends WC_REST_Unit_Test_Case {
 	/**
 	 * @testdox Should order products tied on the sorting column by ID, so paging stays stable.
 	 *
-	 * A product without sales ties with every other one on every column the report can be
-	 * ordered by, and most matches of a broad search have no sales. A tie leaves the order up
-	 * to the database, which is free to resolve it differently for each page, so a product
-	 * comes back on two pages while another is never reached.
+	 * A product without sales ties with every other one on every column the report can be ordered
+	 * by, and the database is free to resolve a tie differently for each page, so a product comes
+	 * back on two pages while another is never reached.
 	 */
 	public function test_get_reports_orders_products_tied_on_the_sorting_column_by_id() {
 		wp_set_current_user( $this->user );
@@ -332,8 +331,8 @@ class WC_Admin_Tests_API_Reports_Products extends WC_REST_Unit_Test_Case {
 	/**
 	 * @testdox Should treat a multi word `search` term as a single term.
 	 *
-	 * The default array coercion WordPress applies to a string argument also splits on
-	 * whitespace, which would turn one multi word search into several single word searches.
+	 * WordPress splits a string argument on whitespace as well as commas, which would turn one
+	 * multi word search into several single word ones.
 	 */
 	public function test_get_reports_search_param_keeps_multi_word_terms_intact() {
 		wp_set_current_user( $this->user );
@@ -402,6 +401,47 @@ class WC_Admin_Tests_API_Reports_Products extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should report nothing when the `search` param is combined with a filter no product satisfies.
+	 */
+	public function test_get_reports_search_param_with_a_filter_no_product_satisfies() {
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$match = $this->create_product_with_id_1( 'Kingston Widget' );
+		$this->create_completed_order( $match );
+
+		$empty_category = wp_insert_term( 'Empty Category', 'product_cat' );
+		$other_category = wp_insert_term( 'Other Category', 'product_cat' );
+
+		$other_product = $this->create_product( 'Unrelated Thing' );
+		wp_set_object_terms( $other_product->get_id(), array( $other_category['term_id'] ), 'product_cat' );
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$empty_category_report = $this->dispatch_report(
+			array(
+				'search'     => 'Kingston',
+				'categories' => (string) $empty_category['term_id'],
+			)
+		);
+
+		$this->assertEquals( 200, $empty_category_report->get_status() );
+		$this->assertSame( array(), $empty_category_report->get_data(), 'A category holding no product leaves the search nothing to match' );
+
+		$disjoint_filters_report = $this->dispatch_report(
+			array(
+				'search'     => 'Kingston',
+				'categories' => (string) $other_category['term_id'],
+				'products'   => (string) $match->get_id(),
+				'match'      => 'all',
+			)
+		);
+
+		$this->assertEquals( 200, $disjoint_filters_report->get_status() );
+		$this->assertSame( array(), $disjoint_filters_report->get_data(), 'A category and a product filter with no product in common leave the search nothing to match' );
+	}
+
+	/**
 	 * @testdox Should register the `search` collection param.
 	 */
 	public function test_search_collection_param_is_registered() {
@@ -462,6 +502,37 @@ class WC_Admin_Tests_API_Reports_Products extends WC_REST_Unit_Test_Case {
 			$product->set_sku( $sku );
 		}
 
+		$product->save();
+
+		return $product;
+	}
+
+	/**
+	 * Creates a simple product with product ID 1.
+	 *
+	 * The filters resolve to `-1` when no product satisfies them and `absint()` reads that as
+	 * product ID 1, so the wrong product is only reported when one has that ID.
+	 *
+	 * @param string $name Product name.
+	 * @return WC_Product_Simple
+	 */
+	private function create_product_with_id_1( $name ) {
+		wp_delete_post( 1, true );
+
+		$this->assertSame(
+			1,
+			wp_insert_post(
+				array(
+					'import_id'   => 1,
+					'post_title'  => $name,
+					'post_type'   => 'product',
+					'post_status' => 'publish',
+				)
+			)
+		);
+
+		$product = wc_get_product( 1 );
+		$product->set_regular_price( 25 );
 		$product->save();
 
 		return $product;

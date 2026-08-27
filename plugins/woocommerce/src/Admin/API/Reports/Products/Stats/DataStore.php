@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\StatsDataStoreTrait;
+use Automattic\WooCommerce\Internal\Admin\Reports\ProductIdFilter;
 
 /**
  * API\Reports\Products\Stats\DataStore.
@@ -83,7 +84,11 @@ class DataStore extends ProductsDataStore implements DataStoreInterface {
 		$products_from_clause       = '';
 		$order_product_lookup_table = self::get_db_table_name();
 
-		$product_id_filter = $this->get_product_id_filter( $query_args );
+		$product_id_filter = ProductIdFilter::get_condition(
+			"{$order_product_lookup_table}.product_id",
+			$query_args['search'],
+			$this->get_included_products_array( $query_args )
+		);
 		if ( $product_id_filter ) {
 			$products_where_clause .= " AND {$product_id_filter}";
 		}

@@ -220,6 +220,19 @@ class ProductSearchQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not read a negative product ID as the product with the matching positive ID.
+	 *
+	 * WP_Query runs `post__in` through `absint()`, which turns the report filters' `-1` into 1.
+	 */
+	public function test_get_ids_subquery_does_not_flip_negative_product_ids(): void {
+		$product = $this->create_product( 'Kingston Widget' );
+
+		$found = $this->run_subquery( ProductSearchQuery::get_ids_subquery( array( 'Kingston' ), array( -$product ) ) );
+
+		$this->assertSame( array(), $found );
+	}
+
+	/**
 	 * @testdox Should not match products in a status that is hidden from search.
 	 */
 	public function test_get_ids_subquery_excludes_products_hidden_from_search(): void {
@@ -243,8 +256,7 @@ class ProductSearchQueryTest extends WC_Unit_Test_Case {
 
 		$found = $this->run_subquery( ProductSearchQuery::get_ids_subquery( array( 'Kingston' ) ) );
 
-		// The search box queries products with `status=any`, which covers every status that is
-		// not excluded from search. A drafted product can still have sales worth reporting.
+		// Matches the search box, and a drafted product can still have sales worth reporting.
 		$this->assertContains( $draft, $found );
 		$this->assertContains( $private, $found );
 	}
@@ -296,9 +308,8 @@ class ProductSearchQueryTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should compare the SKU against the raw term, LIKE wildcards included.
 	 *
-	 * Admin\API\Products passes the term to the SKU comparison unwrapped and unescaped, so a
-	 * wildcard there is a pattern rather than a literal. The report mirrors that deliberately:
-	 * escaping it here would make the report disagree with the search box on what a term matches.
+	 * Admin\API\Products leaves the term unescaped, so a wildcard in it is a pattern rather than a
+	 * literal. Escaping it here would make the report disagree with the search box.
 	 */
 	public function test_get_ids_subquery_does_not_escape_wildcards_in_the_sku_clause(): void {
 		$match    = $this->create_product( 'Unrelated Gadget', 'A-100' );
@@ -313,9 +324,8 @@ class ProductSearchQueryTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should honour a posts_where filter, the way the search box does.
 	 *
-	 * Multilingual plugins restrict products to the active language through the WP_Query
-	 * clause filters. The search box the report has to agree with is a WP_Query, so the
-	 * statement built here has to go through the same filters.
+	 * Multilingual plugins restrict products to the active language through the WP_Query clause
+	 * filters, and so does the search box the report has to agree with.
 	 */
 	public function test_get_ids_subquery_honours_a_posts_where_filter(): void {
 		$kept    = $this->create_product( 'Kingston Widget' );

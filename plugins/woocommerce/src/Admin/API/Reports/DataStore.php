@@ -1230,9 +1230,8 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 					// AND results in an intersection between products from selected categories and manually included products.
 					$included_products = array_intersect( $included_products, $query_args['product_includes'] );
 
-					// Nothing satisfies both filters. Force an empty set the same way an empty
-					// category does, since callers cannot tell an empty list apart from an
-					// absent product filter and would drop both filters instead.
+					// Force an empty set the same way an empty category does. Callers cannot tell an
+					// empty list apart from an absent product filter, and would drop both filters.
 					if ( empty( $included_products ) ) {
 						$included_products = array( '-1' );
 					}

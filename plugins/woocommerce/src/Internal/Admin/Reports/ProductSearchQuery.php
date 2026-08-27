@@ -43,8 +43,7 @@ class ProductSearchQuery {
 	 * @return string[] Search terms.
 	 */
 	public static function parse_terms( $value ) {
-		// Split on commas only. The array coercion WordPress applies to a string argument
-		// (`wp_parse_list()`) also splits on whitespace, which would break multi-word terms.
+		// Not `wp_parse_list()`, which also splits on whitespace and would break multi-word terms.
 		$terms = is_array( $value ) ? $value : explode( ',', (string) $value );
 
 		return array_values(
@@ -79,13 +78,13 @@ class ProductSearchQuery {
 	/**
 	 * Returns a SELECT statement resolving the given search terms to product IDs.
 	 *
-	 * The statement yields a single `product_id` column, for use as a derived table or as the
-	 * right-hand side of an `IN (...)` clause.
+	 * The statement yields a single `product_id` column, for use as a derived table or in an `IN (...)` clause.
 	 *
 	 * @since 11.2.0
 	 *
-	 * @param string[] $terms           Search terms. A product matches if it matches any term.
-	 * @param int[]    $restrict_to_ids Optional. Product IDs to intersect the results with.
+	 * @param string|string[] $terms           Search terms. A product matches if it matches any term.
+	 * @param int[]           $restrict_to_ids Optional. Product IDs to intersect the results with. An ID
+	 *                                         that cannot belong to a product matches nothing.
 	 * @return string SQL statement, or an empty string when there is nothing to search for.
 	 */
 	public static function get_ids_subquery( $terms, $restrict_to_ids = array() ) {
@@ -97,29 +96,28 @@ class ProductSearchQuery {
 
 		$args = array(
 			'post_type'           => 'product',
-			// The search box queries products with `status=any`, which covers every status that
-			// is not excluded from search. A drafted product can still have sales to report.
+			// Matches the search box, and a drafted product can still have sales to report.
 			'post_status'         => 'any',
 			'posts_per_page'      => -1,
 			'fields'              => 'ids',
 			// The report orders and pages the result itself, so the subquery does not have to.
 			'orderby'             => 'none',
 			'no_found_rows'       => true,
-			// The query is never run, so its empty result would only put an entry nothing
-			// reads back into the post query cache.
+			// The query is never run, so its empty result is not worth caching.
 			'cache_results'       => false,
 			self::TERMS_QUERY_VAR => $terms,
 		);
 
 		$restrict_to_ids = (array) $restrict_to_ids;
 		if ( ! empty( $restrict_to_ids ) ) {
-			$args['post__in'] = array_map( 'intval', $restrict_to_ids );
+			// WP_Query runs `post__in` through `absint()`, which would read the `-1` the report
+			// filters use for an empty set as product ID 1. Clamp to 0, which matches nothing.
+			$args['post__in'] = array_map( static fn( $id ) => max( 0, (int) $id ), $restrict_to_ids );
 		}
 
 		$statement = self::build_statement( $args );
 
-		// A plugin filtering `posts_fields` can add columns to the statement, so name the one
-		// this returns instead of passing the whole row on.
+		// A plugin filtering `posts_fields` can add columns, so name the one this returns.
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- WP_Query prepares the statement it builds.
 		return "SELECT DISTINCT ID AS product_id FROM ( {$statement} ) AS wc_analytics_product_search_results";
 	}
@@ -174,9 +172,8 @@ class ProductSearchQuery {
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $wpdb->posts is a table name.
 			$clause = $wpdb->prepare( "{$wpdb->posts}.post_title LIKE %s", '%' . $wpdb->esc_like( $term ) . '%' );
 			if ( $sku_enabled ) {
-				// Matches Admin\API\Products, which compares the SKU against the term unwrapped and
-				// unescaped, so a LIKE wildcard in the term stays a wildcard here. Escaping it would
-				// make the report disagree with the search box on what the term matches.
+				// Matches Admin\API\Products, which leaves the term unescaped, so a LIKE wildcard stays
+				// one. Escaping it would make the report disagree with the search box on what matches.
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $alias is a class constant.
 				$clause .= $wpdb->prepare( " OR {$alias}.sku LIKE %s", $term );
 			}
@@ -190,11 +187,9 @@ class ProductSearchQuery {
 	/**
 	 * Returns the statement WP_Query builds for the given arguments, without running it.
 	 *
-	 * The search only has to compose into the report query, so the statement is what is needed
-	 * rather than the rows. Building it through WP_Query keeps `posts_join`, `posts_where` and
-	 * the rest of the query filters in play. Multilingual plugins restrict products to the
-	 * active language through them, and the search box the report has to agree with is a
-	 * WP_Query too, so a hand written statement would answer differently on those sites.
+	 * The search composes into the report query, so the statement is what is needed rather than the
+	 * rows. Going through WP_Query keeps the query filters in play, which is how multilingual plugins
+	 * restrict products to the active language and how the search box itself resolves a term.
 	 *
 	 * @param array $args Query arguments.
 	 * @return string SQL statement.

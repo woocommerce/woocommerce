@@ -782,8 +782,8 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should report nothing when the category and product filters have no product in common.
 	 *
-	 * An empty intersection used to be indistinguishable from an absent product filter, so both
-	 * filters were dropped and the report covered every product instead of none.
+	 * An empty intersection was indistinguishable from an absent product filter, so both filters
+	 * were dropped and the report covered every product instead of none.
 	 */
 	public function test_disjoint_category_and_product_filters() {
 		WC_Helper_Reports::reset_stats_dbs();
@@ -823,7 +823,6 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$this->assertEquals( 0, $data->total, 'A product filter that excludes every product in the category should report nothing' );
 		$this->assertSame( array(), $data->data );
 
-		// The same pair of filters still reports the product they do have in common.
 		$args['product_includes'] = array( $in_category->get_id() );
 
 		$data = $data_store->get_data( $args );
@@ -917,6 +916,49 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$stats = ( new ProductsStatsDataStore() )->get_data( array_merge( $args, array( 'interval' => 'year' ) ) );
 
 		$this->assertEquals( 2, $stats->totals->products_count, 'The stats endpoint should see the same matches' );
+	}
+
+	/**
+	 * @testdox Should still run the cache opt out filter when the report carries a search.
+	 *
+	 * The parent implementation is what applies it, so returning before that runs would take the
+	 * report out of the cache without telling the plugins listening.
+	 */
+	public function test_the_cache_opt_out_filter_runs_for_a_searched_report() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Filtered Widget' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->set_total( 100 );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$cache_keys = array();
+		$record     = function ( $use_cache, $cache_key ) use ( &$cache_keys ) {
+			$cache_keys[] = $cache_key;
+
+			return $use_cache;
+		};
+
+		add_filter( 'woocommerce_analytics_report_should_use_cache', $record, 10, 2 );
+
+		( new ProductsDataStore() )->get_data(
+			array(
+				'after'  => '2000-01-01 00:00:00',
+				'before' => '2100-01-01 00:00:00',
+				'search' => array( 'Widget' ),
+			)
+		);
+
+		remove_filter( 'woocommerce_analytics_report_should_use_cache', $record, 10 );
+
+		$this->assertSame( array( 'products' ), array_unique( $cache_keys ), 'A searched report should reach the filter under its own cache key' );
 	}
 
 	/**

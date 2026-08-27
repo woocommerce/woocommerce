@@ -9,6 +9,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use Automattic\WooCommerce\Internal\Admin\Reports\ProductIdFilter;
 use Automattic\WooCommerce\Internal\Admin\Reports\ProductSearchQuery;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
@@ -93,13 +94,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @var string
 	 */
 	protected $context = 'products';
-
-	/**
-	 * Search subqueries built during this request, keyed by the query arguments behind them.
-	 *
-	 * @var array
-	 */
-	private $search_subqueries = array();
 
 	/**
 	 * Whether the query currently being served carries a `search` argument.
@@ -213,7 +207,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$this->get_limit_sql_params( $query_args );
 		$this->add_order_by_sql_params( $query_args );
 
-		$product_id_filter = $this->get_product_id_filter( $query_args );
+		$product_id_filter = ProductIdFilter::get_condition(
+			"{$order_product_lookup_table}.product_id",
+			$query_args['search'],
+			$this->get_included_products_array( $query_args )
+		);
 		if ( $product_id_filter ) {
 			$this->add_from_sql_params( $query_args, 'outer', 'default_results.product_id' );
 			$this->subquery->add_sql_clause( 'where', "AND {$product_id_filter}" );
@@ -234,69 +232,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Returns the condition restricting the report to a set of products.
-	 *
-	 * A `search` argument resolves to a subquery, the `categories` and `products` filters to an ID list.
-	 *
-	 * @since 11.2.0
-	 *
-	 * @param array $query_args Query arguments supplied by the user.
-	 * @return string SQL condition, or an empty string when the report is not restricted.
-	 */
-	protected function get_product_id_filter( $query_args ) {
-		$column          = self::get_db_table_name() . '.product_id';
-		$search_subquery = $this->get_product_search_subquery( $query_args );
-		if ( $search_subquery ) {
-			return "{$column} IN ( {$search_subquery} )";
-		}
-
-		$included_products = $this->get_included_products( $query_args );
-
-		return $included_products ? "{$column} IN ( {$included_products} )" : '';
-	}
-
-	/**
-	 * Returns a SELECT statement resolving the `search` query argument to product IDs.
-	 *
-	 * @since 11.2.0
-	 *
-	 * @param array $query_args Query arguments supplied by the user.
-	 * @return string SQL statement, or an empty string when no search was requested.
-	 */
-	private function get_product_search_subquery( $query_args ) {
-		if ( empty( $query_args['search'] ) ) {
-			return '';
-		}
-
-		// Built once to count the matches and once to filter the report, so keep the result.
-		// An unencodable argument set skips the cache rather than share a key with another one.
-		$encoded_args = wp_json_encode( $query_args );
-		$cache_key    = false === $encoded_args ? null : md5( $encoded_args );
-
-		if ( null !== $cache_key && isset( $this->search_subqueries[ $cache_key ] ) ) {
-			return $this->search_subqueries[ $cache_key ];
-		}
-
-		$included_products = (string) $this->get_included_products( $query_args );
-		$restrict_to_ids   = '' === $included_products
-			? array()
-			: array_map( 'intval', explode( ',', $included_products ) );
-
-		$subquery = ProductSearchQuery::get_ids_subquery( $query_args['search'], $restrict_to_ids );
-
-		if ( null !== $cache_key ) {
-			$this->search_subqueries[ $cache_key ] = $subquery;
-		}
-
-		return $subquery;
-	}
-
-	/**
 	 * Returns the cache key for a query, and records whether it carries a search.
 	 *
-	 * `should_use_cache()` decides whether the response is cached, and it only receives the key,
-	 * so the search has to be noted here, where the query arguments are still around. The parent
-	 * latches `force_cache_refresh` off the same arguments for the same reason.
+	 * `should_use_cache()` decides whether the response is cached but only receives the key, so the
+	 * search has to be noted here, where the query arguments are still around.
 	 *
 	 * @override ReportsDataStore::get_cache_key()
 	 *
@@ -321,15 +260,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return bool
 	 */
 	protected function should_use_cache() {
-		// A `search` argument is resolved against product titles and SKUs while the report runs, so
-		// the response records which products matched at that moment. Nothing invalidates the report
-		// cache when a product is renamed or its SKU changes, so a cached response would keep
-		// answering with the old matches for up to a week.
-		if ( $this->is_search ) {
-			return false;
-		}
+		// Run the parent first, since it applies the filter plugins opt out of the cache through.
+		$use_cache = parent::should_use_cache();
 
-		return parent::should_use_cache();
+		// A search is resolved against product titles and SKUs while the report runs, and nothing
+		// invalidates the report cache when one is renamed, so a cached response would keep
+		// answering with the old matches for up to a week.
+		return $this->is_search ? false : $use_cache;
 	}
 
 	/**
@@ -485,8 +422,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		);
 
 		$selections        = $this->selected_columns( $query_args );
-		$search_subquery   = $this->get_product_search_subquery( $query_args );
-		$included_products = $search_subquery ? array() : $this->get_included_products_array( $query_args );
+		$included_products = $this->get_included_products_array( $query_args );
+		$search_subquery   = ProductSearchQuery::get_ids_subquery( $query_args['search'], $included_products );
 		$params            = $this->get_limit_params( $query_args );
 		$this->add_sql_query_params( $query_args );
 
@@ -524,10 +461,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			);
 			$this->add_sql_clause( 'where', 'AND default_results.product_id != -1' );
 
-			// Products tied on the ordering column are left in whatever order the database
-			// returns them, which can differ between pages, so the same product shows up on
-			// two of them while another is never reached. Every product without sales ties on
-			// every column the report can order by, so a filtered report is mostly ties.
+			// The database is free to resolve a tie differently for each page, so a product comes
+			// back on two of them while another is never reached. A product without sales ties on
+			// every column the report can order by, and a filtered report is mostly those.
 			$order_by = $this->get_sql_clause( 'order_by' );
 			$this->clear_sql_clause( 'order_by' );
 			$this->add_sql_clause( 'order_by', "{$order_by}, default_results.product_id" );

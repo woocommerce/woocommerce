@@ -174,6 +174,56 @@ class WC_Admin_Tests_API_Reports_Products_Stats extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should report no totals when the `search` param is combined with a filter no product satisfies.
+	 */
+	public function test_get_reports_search_param_with_a_filter_no_product_satisfies() {
+		WC_Helper_Reports::reset_stats_dbs();
+		wp_set_current_user( $this->user );
+
+		$time = time();
+
+		$match = $this->create_product_with_id_1( 'Kingston Widget' );
+
+		$order = WC_Helper_Order::create_order( 1, $match );
+		$order->set_status( OrderStatus::COMPLETED );
+		// $25 x 4.
+		$order->set_total( 100 );
+		$order->save();
+
+		$empty_category = wp_insert_term( 'Empty Category', 'product_cat' );
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'before'     => gmdate( 'Y-m-d 23:59:59', $time ),
+				'after'      => gmdate( 'Y-m-d 00:00:00', $time ),
+				'interval'   => 'day',
+				'search'     => 'Kingston',
+				'categories' => (string) $empty_category['term_id'],
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals(
+			array(
+				'items_sold'       => 0,
+				'net_revenue'      => 0.0,
+				'orders_count'     => 0,
+				'products_count'   => 0,
+				'variations_count' => 0,
+				'segments'         => array(),
+			),
+			$reports['totals'],
+			'A category holding no product leaves the search nothing to match'
+		);
+	}
+
+	/**
 	 * @testdox Should register the `search` collection param.
 	 */
 	public function test_search_collection_param_is_registered() {
@@ -236,5 +286,36 @@ class WC_Admin_Tests_API_Reports_Products_Stats extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'items_sold', $subtotals );
 		$this->assertArrayHasKey( 'orders_count', $subtotals );
 		$this->assertArrayHasKey( 'segments', $subtotals );
+	}
+
+	/**
+	 * Creates a simple product with product ID 1.
+	 *
+	 * The filters resolve to `-1` when no product satisfies them and `absint()` reads that as
+	 * product ID 1, so the wrong product is only aggregated when one has that ID.
+	 *
+	 * @param string $name Product name.
+	 * @return WC_Product_Simple
+	 */
+	private function create_product_with_id_1( $name ) {
+		wp_delete_post( 1, true );
+
+		$this->assertSame(
+			1,
+			wp_insert_post(
+				array(
+					'import_id'   => 1,
+					'post_title'  => $name,
+					'post_type'   => 'product',
+					'post_status' => 'publish',
+				)
+			)
+		);
+
+		$product = wc_get_product( 1 );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		return $product;
 	}
 }
