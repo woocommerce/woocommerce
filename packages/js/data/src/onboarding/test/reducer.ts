@@ -65,7 +65,7 @@ const task = ( id: string, overrides = {} ) =>
 		level: 3,
 		recordViewEvent: false,
 		...overrides,
-	} as TaskType );
+	} ) as TaskType;
 
 const taskList = ( id: string, tasks: TaskType[] ) =>
 	( {
@@ -78,7 +78,7 @@ const taskList = ( id: string, tasks: TaskType[] ) =>
 		eventPrefix: '',
 		displayProgressHeader: false,
 		keepCompletedTaskList: 'no',
-	} as TaskListType );
+	} ) as TaskListType;
 
 // `payments` exists in both the setup and extended lists, so an unscoped
 // update would dismiss the setup task too.
