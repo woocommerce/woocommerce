@@ -151,6 +151,27 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The prompt does not render when the verification email is disabled.
+	 */
+	public function test_prompt_does_not_render_when_verification_email_is_disabled(): void {
+		$user_id = wc_create_new_customer( 'prompt-email-disabled@example.com', 'promptemaildisabled', 'pw' );
+		wp_set_current_user( $user_id );
+
+		$option_name    = 'woocommerce_customer_verify_email_settings';
+		$previous_value = get_option( $option_name, null );
+		$email_settings = is_array( $previous_value ) ? $previous_value : array();
+
+		$email_settings['enabled'] = 'no';
+		update_option( $option_name, $email_settings );
+
+		try {
+			$this->assertSame( '', $this->render_prompt(), 'The prompt should not render when its email is disabled.' );
+		} finally {
+			$this->restore_option( $option_name, $previous_value );
+		}
+	}
+
+	/**
 	 * @testdox should_show_prompt allows filters to override the guest checkout default.
 	 */
 	public function test_should_show_prompt_allows_filter_to_override_guest_checkout_default(): void {

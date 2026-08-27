@@ -2,16 +2,14 @@
  * External dependencies
  */
 import Gridicon from 'gridicons';
-import { withConsole } from '@storybook/addon-console';
 import {
 	Title,
 	Subtitle,
 	Description,
 	Primary,
-	ArgsTable,
+	Controls,
 	Stories,
-	PRIMARY_STORY,
-} from '@storybook/addon-docs';
+} from '@storybook/addon-docs/blocks';
 import { withLinks } from '@storybook/addon-links';
 import { createElement } from '@wordpress/element';
 
@@ -41,10 +39,7 @@ function logItemClick( event ) {
 export default {
 	title: 'Components/List',
 	component: List,
-	decorators: [
-		( storyFn, context ) => withConsole()( storyFn )( context ),
-		withLinks,
-	],
+	decorators: [ withLinks ],
 	parameters: {
 		docs: {
 			page: () => (
@@ -61,7 +56,7 @@ export default {
 						</a>` }
 					/>
 					<Primary />
-					<ArgsTable story={ PRIMARY_STORY } />
+					<Controls />
 					<Stories />
 				</>
 			),
