@@ -307,8 +307,9 @@ class LookupDataStore {
 	 * the information is created for all of its variations.
 	 * This method is intended to be called from the data regenerator.
 	 *
-	 * If the product no longer exists, any stale lookup data for it is removed
-	 * and the operation is not considered failed (see 'get_last_create_operation_failed').
+	 * If a product id is passed and it no longer resolves to a product, any stale lookup
+	 * data for that id is removed and the operation is not considered failed
+	 * (see 'get_last_create_operation_failed'). Product objects are used as-is.
 	 *
 	 * @param int|\WC_Product $product Product object or id.
 	 * @param bool            $use_optimized_db_access Use direct database access for data retrieval if possible.
