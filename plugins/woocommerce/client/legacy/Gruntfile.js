@@ -14,7 +14,6 @@ module.exports = function ( grunt ) {
 			js: 'js',
 			// See `cssDest`. The plugin enqueues from `assets/js`.
 			jsDest: '../../assets/js',
-			php: 'includes',
 		},
 
 
@@ -136,24 +135,6 @@ module.exports = function ( grunt ) {
 			},
 		},
 
-		// PHP Code Sniffer.
-		phpcs: {
-			options: {
-				bin: 'vendor/bin/phpcs',
-			},
-			dist: {
-				src: [
-					'**/*.php', // Include all php files.
-					'!includes/api/legacy/**',
-					'!includes/libraries/**',
-					'!node_modules/**',
-					'!tests/cli/**',
-					'!tmp/**',
-					'!vendor/**',
-				],
-			},
-		},
-
 		// The css tasks process files in place, so move them
 		// to their final location afterwards.
 		move: {
@@ -219,14 +200,12 @@ module.exports = function ( grunt ) {
 
 	// Load NPM tasks to be used here.
 	grunt.loadNpmTasks( 'grunt-sass' );
-	grunt.loadNpmTasks( 'grunt-phpcs' );
 	grunt.loadNpmTasks( 'grunt-rtlcss' );
 	grunt.loadNpmTasks( 'grunt-stylelint' );
 	grunt.loadNpmTasks( 'grunt-contrib-uglify-es' );
 	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
 	grunt.loadNpmTasks( 'grunt-contrib-concat' );
 	grunt.loadNpmTasks( 'grunt-contrib-copy' );
-	grunt.loadNpmTasks( 'grunt-contrib-clean' );
 	grunt.loadNpmTasks( 'grunt-newer' );
 	grunt.loadNpmTasks( 'grunt-move' );
 
