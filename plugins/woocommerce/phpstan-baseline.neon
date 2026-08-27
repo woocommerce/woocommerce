@@ -17181,7 +17181,7 @@ parameters:
 		-
 			message: '#^Offset 1 might not exist on array\{0\: WC_DateTime, 1\?\: WC_DateTime\}\.$#'
 			identifier: offsetAccess.notFound
-			count: 2
+			count: 1
 			path: includes/data-stores/class-wc-data-store-wp.php
 
 		-
