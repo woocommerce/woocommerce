@@ -1856,13 +1856,55 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	public function provider_array_valued_time_keys(): array {
 		// Order under test is created 2024-06-01.
 		return array(
-			'year IN'           => array( array( 'year' => array( 2024, 2025 ), 'compare' => 'IN' ), true ),
-			'year NOT IN'       => array( array( 'year' => array( 2019, 2020 ), 'compare' => 'NOT IN' ), true ),
-			'year BETWEEN'      => array( array( 'year' => array( 2023, 2025 ), 'compare' => 'BETWEEN' ), true ),
-			'year NOT BETWEEN'  => array( array( 'year' => array( 2018, 2019 ), 'compare' => 'NOT BETWEEN' ), true ),
-			'month IN'          => array( array( 'month' => array( 5, 6 ), 'compare' => 'IN' ), true ),
-			'day NOT IN'        => array( array( 'day' => array( 9, 10 ), 'compare' => 'NOT IN' ), true ),
-			'year IN, no match' => array( array( 'year' => array( 2019, 2020 ), 'compare' => 'IN' ), false ),
+			'year IN'           => array(
+				array(
+					'year'    => array( 2024, 2025 ),
+					'compare' => 'IN',
+				),
+				true,
+			),
+			'year NOT IN'       => array(
+				array(
+					'year'    => array( 2019, 2020 ),
+					'compare' => 'NOT IN',
+				),
+				true,
+			),
+			'year BETWEEN'      => array(
+				array(
+					'year'    => array( 2023, 2025 ),
+					'compare' => 'BETWEEN',
+				),
+				true,
+			),
+			'year NOT BETWEEN'  => array(
+				array(
+					'year'    => array( 2018, 2019 ),
+					'compare' => 'NOT BETWEEN',
+				),
+				true,
+			),
+			'month IN'          => array(
+				array(
+					'month'   => array( 5, 6 ),
+					'compare' => 'IN',
+				),
+				true,
+			),
+			'day NOT IN'        => array(
+				array(
+					'day'     => array( 9, 10 ),
+					'compare' => 'NOT IN',
+				),
+				true,
+			),
+			'year IN, no match' => array(
+				array(
+					'year'    => array( 2019, 2020 ),
+					'compare' => 'IN',
+				),
+				false,
+			),
 		);
 	}
 
@@ -1931,11 +1973,42 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	 */
 	public function provider_unusable_date_query_clause_args(): array {
 		return array(
-			'relation empty array' => array( array( 'relation' => array(), array( 'year' => 2024 ) ) ),
-			'relation object'      => array( array( 'relation' => new \stdClass(), array( 'year' => 2024 ) ) ),
-			'compare empty array'  => array( array( array( 'compare' => array(), 'year' => 2024 ) ) ),
-			'compare object'       => array( array( array( 'compare' => new \stdClass(), 'year' => 2024 ) ) ),
-			'column object'        => array( array( array( 'column' => new \stdClass(), 'year' => 2024 ) ) ),
+			'relation empty array' => array(
+				array(
+					'relation' => array(),
+					array( 'year' => 2024 ),
+				),
+			),
+			'relation object'      => array(
+				array(
+					'relation' => new \stdClass(),
+					array( 'year' => 2024 ),
+				),
+			),
+			'compare empty array'  => array(
+				array(
+					array(
+						'compare' => array(),
+						'year'    => 2024,
+					),
+				),
+			),
+			'compare object'       => array(
+				array(
+					array(
+						'compare' => new \stdClass(),
+						'year'    => 2024,
+					),
+				),
+			),
+			'column object'        => array(
+				array(
+					array(
+						'column' => new \stdClass(),
+						'year'   => 2024,
+					),
+				),
+			),
 		);
 	}
 

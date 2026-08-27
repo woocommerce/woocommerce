@@ -602,7 +602,7 @@ class OrdersTableQuery {
 			return;
 		}
 
-		// WP_Date_Query::$time_keys.
+		// The time keys WP_Date_Query recognises, copied from its own list.
 		$time_keys = array(
 			'after',
 			'before',

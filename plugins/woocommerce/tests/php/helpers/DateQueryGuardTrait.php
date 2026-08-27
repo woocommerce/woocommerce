@@ -32,15 +32,64 @@ trait DateQueryGuardTrait {
 	public function provider_date_query_must_match(): array {
 		return array(
 			'year scalar'      => array( array( array( 'year' => 2024 ) ) ),
-			'year IN'          => array( array( array( 'year' => array( 2024, 2025 ), 'compare' => 'IN' ) ) ),
-			'year NOT IN'      => array( array( array( 'year' => array( 2019, 2020 ), 'compare' => 'NOT IN' ) ) ),
-			'year BETWEEN'     => array( array( array( 'year' => array( 2023, 2025 ), 'compare' => 'BETWEEN' ) ) ),
-			'month IN'         => array( array( array( 'month' => array( 5, 6 ), 'compare' => 'IN' ) ) ),
-			'day NOT IN'       => array( array( array( 'day' => array( 9, 10 ), 'compare' => 'NOT IN' ) ) ),
+			'year IN'          => array(
+				array(
+					array(
+						'year'    => array( 2024, 2025 ),
+						'compare' => 'IN',
+					),
+				),
+			),
+			'year NOT IN'      => array(
+				array(
+					array(
+						'year'    => array( 2019, 2020 ),
+						'compare' => 'NOT IN',
+					),
+				),
+			),
+			'year BETWEEN'     => array(
+				array(
+					array(
+						'year'    => array( 2023, 2025 ),
+						'compare' => 'BETWEEN',
+					),
+				),
+			),
+			'month IN'         => array(
+				array(
+					array(
+						'month'   => array( 5, 6 ),
+						'compare' => 'IN',
+					),
+				),
+			),
+			'day NOT IN'       => array(
+				array(
+					array(
+						'day'     => array( 9, 10 ),
+						'compare' => 'NOT IN',
+					),
+				),
+			),
 			'after date parts' => array( array( array( 'after' => array( 'year' => 2023 ) ) ) ),
-			'year empty list'  => array( array( array( 'year' => array(), 'compare' => 'IN' ) ) ),
+			'year empty list'  => array(
+				array(
+					array(
+						'year'    => array(),
+						'compare' => 'IN',
+					),
+				),
+			),
 			'after empty list' => array( array( array( 'after' => array() ) ) ),
-			'unrecognised key' => array( array( array( 'year' => 2024, 'ext_ctx' => 'anything' ) ) ),
+			'unrecognised key' => array(
+				array(
+					array(
+						'year'    => 2024,
+						'ext_ctx' => 'anything',
+					),
+				),
+			),
 		);
 	}
 
@@ -56,13 +105,44 @@ trait DateQueryGuardTrait {
 	public function provider_date_query_must_fail_closed(): array {
 		return array(
 			'year object'          => array( array( array( 'year' => new \stdClass() ) ) ),
-			'year list w/ object'  => array( array( array( 'year' => array( 2024, new \stdClass() ), 'compare' => 'IN' ) ) ),
+			'year list w/ object'  => array(
+				array(
+					array(
+						'year'    => array( 2024, new \stdClass() ),
+						'compare' => 'IN',
+					),
+				),
+			),
 			'after object'         => array( array( array( 'after' => new \stdClass() ) ) ),
 			'before parts object'  => array( array( array( 'before' => array( 'year' => new \stdClass() ) ) ) ),
-			'relation empty array' => array( array( 'relation' => array(), array( 'year' => 2024 ) ) ),
-			'relation object'      => array( array( 'relation' => new \stdClass(), array( 'year' => 2024 ) ) ),
-			'compare empty array'  => array( array( array( 'compare' => array(), 'year' => 2024 ) ) ),
-			'compare object'       => array( array( array( 'compare' => new \stdClass(), 'year' => 2024 ) ) ),
+			'relation empty array' => array(
+				array(
+					'relation' => array(),
+					array( 'year' => 2024 ),
+				),
+			),
+			'relation object'      => array(
+				array(
+					'relation' => new \stdClass(),
+					array( 'year' => 2024 ),
+				),
+			),
+			'compare empty array'  => array(
+				array(
+					array(
+						'compare' => array(),
+						'year'    => 2024,
+					),
+				),
+			),
+			'compare object'       => array(
+				array(
+					array(
+						'compare' => new \stdClass(),
+						'year'    => 2024,
+					),
+				),
+			),
 			'nested unknown key'   => array( array( array( 'ext_ctx' => array( 'year' => new \stdClass() ) ) ) ),
 		);
 	}
