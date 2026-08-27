@@ -88,7 +88,6 @@ async function runAction( action: unknown ): Promise< unknown > {
 	let next = iterator.next();
 	while ( ! next.done ) {
 		try {
-			// eslint-disable-next-line no-await-in-loop
 			const resolved = await next.value;
 			next = iterator.next( resolved );
 		} catch ( error ) {
@@ -471,6 +470,38 @@ function captureSyncEvents(): {
  */
 function flushMicrotasks(): Promise< void > {
 	return new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
+}
+
+/**
+ * The mutation count of every batch POST issued through the current `fetch`
+ * mock, in call order.
+ *
+ * The mutation queue sends one POST per cycle carrying that cycle's mutations,
+ * so the returned array's length is the number of batches and each entry is
+ * that batch's size. The captured-request lists the mock helpers return
+ * flatten every mutation into one array, which cannot tell three mutations in
+ * one batch apart from three separate batches; this can.
+ *
+ * Only POSTs to the batch endpoint are counted, so a mutation that stopped
+ * going through the batcher shows up as a missing batch rather than being
+ * silently counted as one.
+ *
+ * @return One entry per batch POST, each the number of mutations it carried.
+ */
+function batchRequestSizes(): number[] {
+	return ( global.fetch as unknown as jest.Mock ).mock.calls
+		.filter(
+			( [ url, init ] ) =>
+				init?.body && String( url ).endsWith( '/wc/store/v1/batch' )
+		)
+		.map(
+			( [ , init ] ) =>
+				(
+					JSON.parse( init.body as string ) as {
+						requests: unknown[];
+					}
+				 ).requests.length
+		);
 }
 
 /**
@@ -1699,6 +1730,107 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		} );
 	} );
 
+	describe( 'batch grouping across microticks', () => {
+		// The mutation queue collects submissions with `queueMicrotask()`, so
+		// what ends up in one batch is decided by the microtick boundaries the
+		// caller creates: mutations issued without an intervening `await` share
+		// a batch, and every `await` starts a new one. These tests lock that
+		// grouping in through the cart store's own actions.
+
+		it( 'sends one single-mutation batch per add when adds are awaited sequentially', async () => {
+			( getConfig as jest.Mock ).mockReturnValue( {} );
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [] );
+
+			// Each await breaks the microtick, so each add is its own cycle.
+			await runAction(
+				actions.addCartItem( {
+					id: 1,
+					quantityToAdd: 1,
+					type: 'simple',
+				} )
+			);
+			await runAction(
+				actions.addCartItem( {
+					id: 2,
+					quantityToAdd: 1,
+					type: 'simple',
+				} )
+			);
+			await runAction(
+				actions.addCartItem( {
+					id: 3,
+					quantityToAdd: 1,
+					type: 'simple',
+				} )
+			);
+
+			expect( batchRequestSizes() ).toEqual( [ 1, 1, 1 ] );
+		} );
+
+		it( 'groups each microtick of concurrent adds into its own batch', async () => {
+			( getConfig as jest.Mock ).mockReturnValue( {} );
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [] );
+
+			// Batch 1: two adds in one microtick.
+			await Promise.all( [
+				runAction(
+					actions.addCartItem( {
+						id: 1,
+						quantityToAdd: 1,
+						type: 'simple',
+					} )
+				),
+				runAction(
+					actions.addCartItem( {
+						id: 2,
+						quantityToAdd: 1,
+						type: 'simple',
+					} )
+				),
+			] );
+
+			// Batch 2: a single add after an await.
+			await runAction(
+				actions.addCartItem( {
+					id: 3,
+					quantityToAdd: 1,
+					type: 'simple',
+				} )
+			);
+
+			// Batch 3: three adds in one microtick.
+			await Promise.all( [
+				runAction(
+					actions.addCartItem( {
+						id: 4,
+						quantityToAdd: 1,
+						type: 'simple',
+					} )
+				),
+				runAction(
+					actions.addCartItem( {
+						id: 5,
+						quantityToAdd: 1,
+						type: 'simple',
+					} )
+				),
+				runAction(
+					actions.addCartItem( {
+						id: 6,
+						quantityToAdd: 1,
+						type: 'simple',
+					} )
+				),
+			] );
+
+			expect( batchRequestSizes() ).toEqual( [ 2, 1, 3 ] );
+		} );
+	} );
+
 	describe( 'onCycleSettled cross-cutting effects', () => {
 		it( 'dispatches exactly one sync event, one legacy event, and one announcement for a single successful addCartItem call', async () => {
 			( getConfig as jest.Mock ).mockReturnValue( {
@@ -1767,11 +1899,18 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			] );
 			await flushMicrotasks();
 
-			// Sanity check: all three mutations landed in the same cycle/batch.
+			// All three mutations landed in one cycle, carried by a single
+			// batch request rather than three separate ones.
 			expect( captured ).toHaveLength( 3 );
+			expect( batchRequestSizes() ).toEqual( [ 3 ] );
 			expect( events ).toHaveLength( 1 );
 			expect( triggerAddedToCartEvent ).toHaveBeenCalledTimes( 1 );
 			expect( speak ).toHaveBeenCalledTimes( 1 );
+
+			// Every product the cycle added is in the cart.
+			expect( mockState.cart.items.map( ( item ) => item.id ) ).toEqual( [
+				1, 2, 3,
+			] );
 
 			cleanup();
 		} );
@@ -1806,7 +1945,11 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			expect( ( rejectedOutcome as AddCartItemOutcome ).success ).toBe(
 				false
 			);
+			// Both mutations shared one batch, and the partial failure still
+			// fires each cross-cutting effect exactly once for the cycle.
+			expect( batchRequestSizes() ).toEqual( [ 2 ] );
 			expect( events ).toHaveLength( 1 );
+			expect( triggerAddedToCartEvent ).toHaveBeenCalledTimes( 1 );
 			expect( errors ).toHaveLength( 1 );
 
 			cleanup();
@@ -1948,6 +2091,45 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			} );
 			expect( triggerAddedToCartEvent ).not.toHaveBeenCalled();
 			expect( speak ).not.toHaveBeenCalled();
+
+			cleanup();
+		} );
+
+		it( 'dispatches one sync event and no legacy event for a cycle of concurrent removes carried in a single batch', async () => {
+			( getConfig as jest.Mock ).mockReturnValue( {
+				messages: { addedToCartText: 'Added to your cart.' },
+			} );
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			const keys = [ 'server-key-1', 'server-key-2', 'server-key-3' ];
+			seedCart(
+				keys.map( ( key, index ) =>
+					makeKeyedLine( { key, id: 15 + index, quantity: 1 } )
+				)
+			);
+			const { events, cleanup } = captureSyncEvents();
+
+			await Promise.all(
+				keys.map( ( key ) =>
+					runAction( actions.removeCartItem( key ) )
+				)
+			);
+			await flushMicrotasks();
+
+			// One batch carrying every removal, not one batch per removal.
+			expect( batchRequestSizes() ).toEqual( [ 3 ] );
+
+			// A remove-only cycle syncs once and never fires the legacy
+			// added-to-cart event or the announcement.
+			expect( events ).toHaveLength( 1 );
+			expect( events[ 0 ].quantityChanges ).toEqual( {
+				cartItemsPendingDelete: keys,
+			} );
+			expect( triggerAddedToCartEvent ).not.toHaveBeenCalled();
+			expect( speak ).not.toHaveBeenCalled();
+
+			// Every targeted line is gone from the cart.
+			expect( mockState.cart.items ).toHaveLength( 0 );
 
 			cleanup();
 		} );
