@@ -188,6 +188,23 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox `create_data_for_product` skips products that no longer exist.
+	 */
+	public function test_create_data_for_product_skips_deleted_product(): void {
+		$product = new \WC_Product_Simple();
+		$this->save( $product );
+		$product_id = $product->get_id();
+		$product->delete( true );
+
+		$this->assertFalse( wc_get_product( $product_id ) );
+
+		$this->sut->create_data_for_product( $product_id );
+
+		$this->assertFalse( $this->sut->get_last_create_operation_failed() );
+		$this->assertEmpty( $this->get_lookup_table_data() );
+	}
+
+	/**
 	 * @testdox `create_data_for_product` creates the appropriate entries for variable products.
 	 *
 	 * @testWith [false]
@@ -842,6 +859,28 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( 'no', get_option( 'woocommerce_attribute_lookup_direct_updates' ) );
+	}
+
+	/**
+	 * @testdox `on_product_changed` skips products that no longer exist.
+	 */
+	public function test_on_product_changed_skips_deleted_product(): void {
+		$this->set_direct_update_option( false );
+
+		$product = new \WC_Product_Simple();
+		$this->save( $product );
+		$product_id = $product->get_id();
+		$product->delete( true );
+
+		$this->assertFalse( wc_get_product( $product_id ) );
+
+		$queue = WC()->get_instance_of( \WC_Queue::class );
+
+		$this->sut->on_product_changed( $product_id );
+
+		$queue_calls = $queue->get_methods_called();
+		$this->assertCount( 1, $queue_calls );
+		$this->assertSame( array( $product_id, LookupDataStore::ACTION_DELETE ), $queue_calls[0]['args'] );
 	}
 
 	/**

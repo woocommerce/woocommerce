@@ -133,6 +133,9 @@ class LookupDataStore {
 		if ( ! is_a( $product, \WC_Product::class ) ) {
 			$product = WC()->call_function( 'wc_get_product', $product );
 		}
+		if ( ! $product ) {
+			return;
+		}
 
 		$action = $this->get_update_action( $changeset );
 		if ( self::ACTION_NONE !== $action ) {
@@ -311,6 +314,10 @@ class LookupDataStore {
 		} else {
 			if ( ! is_a( $product, \WC_Product::class ) ) {
 				$product = WC()->call_function( 'wc_get_product', $product );
+			}
+			if ( ! $product ) {
+				$this->last_create_operation_failed = false;
+				return;
 			}
 
 			$this->delete_data_for( $product->get_id() );
