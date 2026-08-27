@@ -507,7 +507,8 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 		$this->mock_jetpack_connection_manager_is_connected( true );
 
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
-		$request->set_param( 'token', str_repeat( 'a', 32 ) ); // Only 32 characters instead of 64.
+		$request->set_param( 'token', str_repeat( 'a', 32 ) );
+		// Only 32 characters instead of 64.
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
 		$request->set_param( 'device_uuid', 'test-device-uuid-short' );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
@@ -1473,6 +1474,160 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertNotEmpty( $response->get_headers()['X-WP-Total'] );
 		$this->assertNotEmpty( $response->get_headers()['X-WP-TotalPages'] );
+	}
+
+	/**
+	 * @testdox Should return registration and confirmation timestamps for each token.
+	 */
+	public function test_index_returns_token_timestamps(): void {
+		$this->mock_jetpack_connection_manager_is_connected();
+		wc_get_container()->get( PushNotifications::class )->on_init();
+
+		$data_store = wc_get_container()->get( PushTokensDataStore::class );
+
+		$push_token = $data_store->create(
+			array(
+				'user_id'       => $this->user_id,
+				'token'         => 'timestamps-test-token',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'timestamps-test-uuid',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+			)
+		);
+
+		$controller = new PushTokenRestController();
+		$request    = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'page', 1 );
+		$request->set_param( 'per_page', 100 );
+		$response = $controller->index( $request );
+
+		$this->assertEquals( WP_Http::OK, $response->get_status() );
+
+		$token_data = $response->get_data()['tokens'][0];
+		$post       = get_post( $push_token->get_id() );
+
+		$this->assertArrayHasKey( 'created_at_gmt', $token_data );
+		$this->assertArrayHasKey( 'last_confirmed_at_gmt', $token_data );
+		$this->assertSame( wc_rest_prepare_date_response( $post->post_date_gmt ), $token_data['created_at_gmt'] );
+		$this->assertSame( wc_rest_prepare_date_response( $post->post_modified_gmt ), $token_data['last_confirmed_at_gmt'] );
+	}
+
+	/**
+	 * @testdox Should return the fields needed to describe the device a token belongs to.
+	 */
+	public function test_index_returns_device_identifying_fields(): void {
+		$this->mock_jetpack_connection_manager_is_connected();
+		wc_get_container()->get( PushNotifications::class )->on_init();
+
+		$data_store = wc_get_container()->get( PushTokensDataStore::class );
+
+		$push_token = $data_store->create(
+			array(
+				'user_id'       => $this->user_id,
+				'token'         => 'device-fields-test-token',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'device-fields-test-uuid',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '21.1' ),
+			)
+		);
+
+		$controller = new PushTokenRestController();
+		$request    = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'page', 1 );
+		$request->set_param( 'per_page', 100 );
+
+		$token_data = $controller->index( $request )->get_data()['tokens'][0];
+
+		$this->assertSame( $push_token->get_id(), $token_data['id'] );
+		$this->assertSame( 'device-fields-test-uuid', $token_data['device_uuid'] );
+		$this->assertSame( PushToken::PLATFORM_APPLE, $token_data['platform'] );
+		$this->assertSame( array( 'app_version' => '21.1' ), $token_data['metadata'] );
+	}
+
+	/**
+	 * @testdox Should return an empty array for a token registered without metadata.
+	 *
+	 * Metadata is optional on registration, and browser tokens and anything
+	 * registered before metadata existed have none. The tooling should not have
+	 * to handle both an array and null for the same field.
+	 */
+	public function test_index_returns_an_empty_array_for_a_token_without_metadata(): void {
+		$this->mock_jetpack_connection_manager_is_connected();
+		wc_get_container()->get( PushNotifications::class )->on_init();
+
+		wc_get_container()->get( PushTokensDataStore::class )->create(
+			array(
+				'user_id'       => $this->user_id,
+				'token'         => 'no-metadata-test-token',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'no-metadata-test-uuid',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+			)
+		);
+
+		$controller = new PushTokenRestController();
+		$request    = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'page', 1 );
+		$request->set_param( 'per_page', 100 );
+
+		$token_data = $controller->index( $request )->get_data()['tokens'][0];
+
+		$this->assertArrayHasKey( 'metadata', $token_data );
+		$this->assertSame( array(), $token_data['metadata'] );
+	}
+
+	/**
+	 * @testdox Should return null timestamps for a token whose post record has no dates.
+	 *
+	 * WordPress populates both date columns for a private post, so the endpoint
+	 * cannot produce this state on its own. The dates are zeroed directly to
+	 * prove a corrupt record serializes as null rather than as an invented date
+	 * or a fatal.
+	 */
+	public function test_index_returns_null_timestamps_for_a_record_without_dates(): void {
+		global $wpdb;
+
+		$this->mock_jetpack_connection_manager_is_connected();
+		wc_get_container()->get( PushNotifications::class )->on_init();
+
+		$push_token = wc_get_container()->get( PushTokensDataStore::class )->create(
+			array(
+				'user_id'       => $this->user_id,
+				'token'         => 'no-dates-test-token',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'no-dates-test-uuid',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+			)
+		);
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_date_gmt'     => '0000-00-00 00:00:00',
+				'post_modified_gmt' => '0000-00-00 00:00:00',
+			),
+			array( 'ID' => $push_token->get_id() )
+		);
+
+		clean_post_cache( $push_token->get_id() );
+
+		$controller = new PushTokenRestController();
+		$request    = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'page', 1 );
+		$request->set_param( 'per_page', 100 );
+
+		$token_data = $controller->index( $request )->get_data()['tokens'][0];
+
+		$this->assertArrayHasKey( 'created_at_gmt', $token_data );
+		$this->assertArrayHasKey( 'last_confirmed_at_gmt', $token_data );
+		$this->assertNull( $token_data['created_at_gmt'] );
+		$this->assertNull( $token_data['last_confirmed_at_gmt'] );
 	}
 
 	/**
