@@ -242,7 +242,7 @@ final class ProductFilterChips extends AbstractBlock {
 	/**
 	 * Get class and style attributes for individual chip items.
 	 *
-	 * Visual swatches stay circular, so border radius is not applied to them.
+	 * Visual swatches stay circular, so padding and border radius are not applied to them.
 	 *
 	 * @param array $attributes          Block attributes.
 	 * @param bool  $has_visual_swatches Whether items use the swatch style.
@@ -256,14 +256,14 @@ final class ProductFilterChips extends AbstractBlock {
 			);
 		}
 
-		$border_classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes(
+		$item_classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes(
 			$attributes,
-			array( 'border_radius' )
+			array( 'border_radius', 'padding' )
 		);
 
 		return array(
-			'class' => trim( 'wc-block-product-filter-chips__item ' . $border_classes_and_styles['classes'] ),
-			'style' => $border_classes_and_styles['styles'],
+			'class' => trim( 'wc-block-product-filter-chips__item ' . $item_classes_and_styles['classes'] ),
+			'style' => $item_classes_and_styles['styles'],
 		);
 	}
 

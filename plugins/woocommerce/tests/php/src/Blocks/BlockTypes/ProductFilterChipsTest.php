@@ -45,15 +45,23 @@ class ProductFilterChipsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Border radius is not applied to visual swatch chip items.
+	 * @testdox Padding and border radius are not applied to visual swatch chip items.
 	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\ProductFilterChips::render
 	 */
-	public function test_does_not_apply_border_radius_to_swatch_items(): void {
+	public function test_does_not_apply_padding_or_border_radius_to_swatch_items(): void {
 		$markup = $this->render_chips(
 			array(
 				'style' => array(
-					'border' => array(
+					'border'  => array(
 						'radius' => '0px',
+					),
+					'spacing' => array(
+						'padding' => array(
+							'top'    => '8px',
+							'right'  => '16px',
+							'bottom' => '8px',
+							'left'   => '16px',
+						),
 					),
 				),
 			),
@@ -75,6 +83,7 @@ class ProductFilterChipsTest extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'is-style-swatch', $markup, 'Visual items should use the swatch style.' );
 		$this->assertStringNotContainsString( 'border-radius', $item_style, 'Swatch items should not get an inline border radius.' );
+		$this->assertStringNotContainsString( 'padding-top', $item_style, 'Swatch items should not get inline padding.' );
 	}
 
 	/**
