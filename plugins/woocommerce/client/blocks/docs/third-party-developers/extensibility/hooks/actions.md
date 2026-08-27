@@ -546,7 +546,7 @@ do_action( 'woocommerce_blocks_validate_location_{$location}_fields', \WP_Error 
 Fires when the IntegrationRegistry is initialized.
 
 ```php
-do_action( 'woocommerce_blocks_{$this->registry_identifier}_registration', \IntegrationRegistry $this )
+do_action( 'woocommerce_blocks_{$this->registry_identifier}_registration', \IntegrationRegistry $registry )
 ```
 
 ### Description
@@ -557,7 +557,7 @@ Runs before integrations are initialized allowing new integration to be register
 
 | Argument | Type | Description |
 | -------- | ---- | ----------- |
-| $this | \IntegrationRegistry | Instance of the IntegrationRegistry class which exposes the IntegrationRegistry::register() method. |
+| $registry | \IntegrationRegistry | Instance of the IntegrationRegistry class which exposes the IntegrationRegistry::register() method. |
 
 ### Source
 

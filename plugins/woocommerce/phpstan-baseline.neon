@@ -53290,12 +53290,6 @@ parameters:
 			path: src/Blocks/Integrations/IntegrationInterface.php
 
 		-
-			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Blocks/Integrations/IntegrationRegistry.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Integrations\\IntegrationRegistry\:\:initialize\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
