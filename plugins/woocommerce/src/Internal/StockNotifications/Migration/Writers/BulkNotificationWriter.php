@@ -131,17 +131,33 @@ class BulkNotificationWriter {
 	private function insert_notification_rows( string $table, array $chunk ): int {
 		global $wpdb;
 
-		$columns      = array_keys( self::COLUMN_FORMATS );
-		$placeholders = '(' . implode( ', ', array_values( self::COLUMN_FORMATS ) ) . ')';
-		$values       = array();
+		$columns          = array_keys( self::COLUMN_FORMATS );
+		$values           = array();
+		$row_placeholders = array();
 
 		foreach ( $chunk as $row ) {
+			$placeholders = array();
+
 			foreach ( $columns as $column ) {
-				$values[] = $row['columns'][ $column ] ?? null;
+				$value = $row['columns'][ $column ] ?? null;
+
+				// A null column is written as a SQL NULL literal rather than through a
+				// placeholder: $wpdb->prepare() renders null as an empty string, which MySQL
+				// stores in a datetime column as '0000-00-00 00:00:00'. Core reads these
+				// columns with `IS NULL`, so a zero date would read as "already attempted".
+				if ( null === $value ) {
+					$placeholders[] = 'NULL';
+					continue;
+				}
+
+				$placeholders[] = self::COLUMN_FORMATS[ $column ];
+				$values[]       = $value;
 			}
+
+			$row_placeholders[] = '(' . implode( ', ', $placeholders ) . ')';
 		}
 
-		$row_placeholders = implode( ', ', array_fill( 0, count( $chunk ), $placeholders ) );
+		$row_placeholders = implode( ', ', $row_placeholders );
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $table and $columns are a fixed internal list, never user input; values are prepared via $wpdb->prepare().
 		$sql = $wpdb->prepare(

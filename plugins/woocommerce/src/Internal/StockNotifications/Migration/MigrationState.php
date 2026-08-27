@@ -291,13 +291,19 @@ class MigrationState {
 	 *                            derived from, used later to detect a changed source.
 	 * @param string $target_hash Fingerprint of the value actually written, used later
 	 *                            to detect a merchant edit.
+	 * @param bool   $skipped     Whether this records a merchant-modified option that was
+	 *                            reported and left alone, rather than one that was written.
+	 *                            Recording it is what drains the section: an option that
+	 *                            keeps deciding `skipped_user_modified` is otherwise
+	 *                            outstanding forever and the run never terminates.
 	 * @return void
 	 */
-	public function record_option_fingerprint( string $option_key, string $source_hash, string $target_hash ): void {
+	public function record_option_fingerprint( string $option_key, string $source_hash, string $target_hash, bool $skipped = false ): void {
 		$state                           = $this->get_state();
 		$state['options'][ $option_key ] = array(
 			'written' => $source_hash,
 			'hash'    => $target_hash,
+			'skipped' => $skipped,
 			'at'      => time(),
 		);
 		$this->save_state( $state );
@@ -306,11 +312,16 @@ class MigrationState {
 	/**
 	 * Fingerprint a value for comparison, stable across arrays and scalars.
 	 *
+	 * Serializes unconditionally rather than through maybe_serialize(): that returns
+	 * scalars untouched, so an integer option value reaches hash() as an int and
+	 * fatals on PHP 8. Serializing everything also keeps `false`, `null` and `''`
+	 * distinct, which a string cast would collapse into one fingerprint.
+	 *
 	 * @param mixed $value The value to fingerprint.
 	 * @return string
 	 */
 	public function fingerprint_value( $value ): string {
-		return hash( 'sha256', maybe_serialize( $value ) );
+		return hash( 'sha256', serialize( $value ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Hashed for comparison only, never stored or unserialized.
 	}
 
 	/**
@@ -321,6 +332,10 @@ class MigrationState {
 	 * | Absent                     | Write                                            |
 	 * | Present, hash matches      | We wrote it; rewrite only if the source changed  |
 	 * | Present, hash differs      | Merchant edited it; skip, unless $force          |
+	 *
+	 * A recorded skip keeps its own entry, so a merchant-modified option reports once and
+	 * then stops being outstanding. `$force` still overrides it: without that, an option
+	 * skipped by an earlier run could never be forced again.
 	 *
 	 * @param string $option_key         The option name.
 	 * @param string $source_hash        Fingerprint of the current legacy source data.
@@ -334,6 +349,10 @@ class MigrationState {
 		$fingerprint = $this->get_option_fingerprint( $option_key );
 
 		if ( null === $fingerprint ) {
+			return self::OPTION_ACTION_WRITE;
+		}
+
+		if ( $force && ! empty( $fingerprint['skipped'] ) ) {
 			return self::OPTION_ACTION_WRITE;
 		}
 

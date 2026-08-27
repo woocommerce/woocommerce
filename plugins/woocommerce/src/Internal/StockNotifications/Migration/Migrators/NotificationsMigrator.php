@@ -172,11 +172,9 @@ class NotificationsMigrator implements MigratorInterface {
 	public function count_remaining(): int {
 		global $wpdb;
 
-		// predicate_sql() returns a fixed literal built by this class, never user input.
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$sql = $wpdb->prepare( 'SELECT COUNT(*) ' . $this->predicate_sql() );
+		$sql = 'SELECT COUNT(*) ' . $this->predicate_sql();
 
-		return (int) $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql was built with $wpdb->prepare() above.
+		return (int) $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is a fixed literal built by this class, never user input.
 	}
 
 	/**
@@ -192,17 +190,11 @@ class NotificationsMigrator implements MigratorInterface {
 	public function get_batch( int $cursor, int $size ): array {
 		global $wpdb;
 
-		// predicate_sql() returns a fixed literal built by this class, never user input;
-		// $cursor and $size are bound via $wpdb->prepare() below.
-		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-		$sql = $wpdb->prepare(
-			'SELECT n.id ' . $this->predicate_sql() . ' AND n.id > %d ORDER BY n.id ASC LIMIT %d',
-			$cursor,
-			$size
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+		// predicate_sql() returns a fixed literal built by this class, never user input; only
+		// the cursor and size are bound, so only that tail goes through $wpdb->prepare().
+		$sql = 'SELECT n.id ' . $this->predicate_sql() . $wpdb->prepare( ' AND n.id > %d ORDER BY n.id ASC LIMIT %d', $cursor, $size );
 
-		return array_map( 'intval', (array) $wpdb->get_col( $sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql was built with $wpdb->prepare() above.
+		return array_map( 'intval', (array) $wpdb->get_col( $sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- see above.
 	}
 
 	/**
@@ -319,14 +311,9 @@ class NotificationsMigrator implements MigratorInterface {
 	public function count_unverified_excluded(): int {
 		global $wpdb;
 
-		// base_sql() returns a fixed literal built by this class, never user input.
-		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-		$sql = $wpdb->prepare(
-			'SELECT COUNT(*) ' . $this->base_sql() . " AND ( n.is_verified = 'no' OR ( av.meta_value IS NOT NULL AND av.meta_value = 'yes' ) )"
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+		$sql = 'SELECT COUNT(*) ' . $this->base_sql() . " AND ( n.is_verified = 'no' OR ( av.meta_value IS NOT NULL AND av.meta_value = 'yes' ) )";
 
-		return (int) $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql was built with $wpdb->prepare() above.
+		return (int) $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is a fixed literal built by this class, never user input.
 	}
 
 	/**
@@ -337,14 +324,9 @@ class NotificationsMigrator implements MigratorInterface {
 	public function count_email_too_long(): int {
 		global $wpdb;
 
-		// base_sql()/verified_clause() return fixed literals built by this class, never user input.
-		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-		$sql = $wpdb->prepare(
-			'SELECT COUNT(*) ' . $this->base_sql() . $this->verified_clause() . ' AND CHAR_LENGTH( n.user_email ) > 100'
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+		$sql = 'SELECT COUNT(*) ' . $this->base_sql() . $this->verified_clause() . ' AND CHAR_LENGTH( n.user_email ) > 100';
 
-		return (int) $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql was built with $wpdb->prepare() above.
+		return (int) $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is a fixed literal built by this class, never user input.
 	}
 
 	/**
@@ -355,16 +337,11 @@ class NotificationsMigrator implements MigratorInterface {
 	public function count_invalid_email(): int {
 		global $wpdb;
 
-		// Every fragment here is a fixed literal built by this class, never user input;
-		// the LIKE wildcards are part of that literal, not a bound value.
-		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery
-		$sql = $wpdb->prepare(
-			'SELECT COUNT(*) ' . $this->base_sql() . $this->verified_clause()
-			. " AND CHAR_LENGTH( n.user_email ) <= 100 AND ( n.user_email = '' OR n.user_email NOT LIKE '%%_@_%%' )"
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery
+		// The LIKE wildcards are part of this class's own literal, not a bound value.
+		$sql = 'SELECT COUNT(*) ' . $this->base_sql() . $this->verified_clause()
+			. " AND CHAR_LENGTH( n.user_email ) <= 100 AND ( n.user_email = '' OR n.user_email NOT LIKE '%_@_%' )";
 
-		return (int) $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql was built with $wpdb->prepare() above.
+		return (int) $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is a fixed literal built by this class, never user input.
 	}
 
 	/**
@@ -379,16 +356,14 @@ class NotificationsMigrator implements MigratorInterface {
 
 		// $posts_table is $wpdb->prefix-based, never user input; every other fragment is a
 		// fixed literal built by this class, including the LIKE wildcards.
-		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery
-		$sql = $wpdb->prepare(
-			'SELECT COUNT(*) ' . $this->base_sql() . $this->verified_clause()
-			. " AND CHAR_LENGTH( n.user_email ) <= 100 AND n.user_email <> '' AND n.user_email LIKE '%%_@_%%'"
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$sql = 'SELECT COUNT(*) ' . $this->base_sql() . $this->verified_clause()
+			. " AND CHAR_LENGTH( n.user_email ) <= 100 AND n.user_email <> '' AND n.user_email LIKE '%_@_%'"
 			. " AND NOT EXISTS ( SELECT 1 FROM {$posts_table} p"
-			. " WHERE p.ID = n.product_id AND p.post_type IN ( 'product', 'product_variation' ) AND p.post_status <> 'trash' )"
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery
+			. " WHERE p.ID = n.product_id AND p.post_type IN ( 'product', 'product_variation' ) AND p.post_status <> 'trash' )";
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-		return (int) $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql was built with $wpdb->prepare() above.
+		return (int) $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is a fixed literal built by this class, never user input.
 	}
 
 	/**
@@ -396,8 +371,9 @@ class NotificationsMigrator implements MigratorInterface {
 	 * verbatim in shape. Reused by count_remaining() and get_batch(), which append
 	 * only a cursor bound and a LIMIT.
 	 *
-	 * Literal `%` characters are doubled, since this fragment is always passed through
-	 * $wpdb->prepare() by its callers.
+	 * Never passed through $wpdb->prepare(): it binds no values, and prepare() on a
+	 * placeholder-free query is a `_doing_it_wrong()` notice. Callers that do bind
+	 * values prepare only their own tail and concatenate it onto this fragment.
 	 *
 	 * @return string
 	 */
@@ -407,7 +383,7 @@ class NotificationsMigrator implements MigratorInterface {
 		$posts_table = $wpdb->prefix . 'posts';
 
 		return $this->base_sql() . $this->verified_clause()
-			. " AND CHAR_LENGTH( n.user_email ) <= 100 AND n.user_email <> '' AND n.user_email LIKE '%%_@_%%'"
+			. " AND CHAR_LENGTH( n.user_email ) <= 100 AND n.user_email <> '' AND n.user_email LIKE '%_@_%'"
 			. " AND EXISTS ( SELECT 1 FROM {$posts_table} p" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $posts_table is $wpdb->prefix-based, never user input.
 			. " WHERE p.ID = n.product_id AND p.post_type IN ( 'product', 'product_variation' ) AND p.post_status <> 'trash' )";
 	}
@@ -415,7 +391,8 @@ class NotificationsMigrator implements MigratorInterface {
 	/**
 	 * The shared FROM/JOIN/WHERE base every predicate variant starts from: the two
 	 * anti-joins against the migrated set and the permanently-failed set. Callers append
-	 * their own conditions.
+	 * their own conditions. Binds no values; see predicate_sql() on why it is never
+	 * passed through $wpdb->prepare().
 	 *
 	 * @return string
 	 */
@@ -426,8 +403,7 @@ class NotificationsMigrator implements MigratorInterface {
 		$core_meta_table     = $wpdb->prefix . 'wc_stock_notificationmeta';
 		$legacy_meta_table   = $wpdb->prefix . 'woocommerce_bis_notificationsmeta';
 
-		// Table names are $wpdb->prefix-based, never user input; every caller runs the
-		// resulting fragment through $wpdb->prepare().
+		// Table names are $wpdb->prefix-based, never user input.
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		return "
 			FROM {$notifications_table} n
@@ -523,8 +499,10 @@ class NotificationsMigrator implements MigratorInterface {
 	/**
 	 * Find an existing Core notification carrying this legacy row's natural key, if any.
 	 *
-	 * Natural key: product_id, plus user_id when non-zero and user_email (lowercased,
-	 * trimmed) otherwise, plus posted_attributes in maybe_serialize() form. Restricted to
+	 * Natural key: product_id, plus user_id when non-zero and, for a guest row, a zero
+	 * user_id with a matching user_email (lowercased, trimmed), plus posted_attributes in
+	 * maybe_serialize() form. A guest row and a registered row never adopt each other, in
+	 * either direction. Restricted to
 	 * `active` and `pending` targets, ordered active before pending then by ascending id,
 	 * so the same legacy row adopts the same target on every run.
 	 *
@@ -546,6 +524,10 @@ class NotificationsMigrator implements MigratorInterface {
 			$conditions[] = 'n.user_id = %d';
 			$params[]     = $user_id;
 		} else {
+			// A guest legacy row only ever adopts a guest Core row. Matching a registered
+			// Core row on the address alone would hand one person's subscription to a row
+			// that belongs to their account, which is a different subscription.
+			$conditions[] = 'n.user_id = 0';
 			$conditions[] = 'LOWER( TRIM( n.user_email ) ) = %s';
 			$params[]     = strtolower( trim( (string) ( $legacy_row['user_email'] ?? '' ) ) );
 		}

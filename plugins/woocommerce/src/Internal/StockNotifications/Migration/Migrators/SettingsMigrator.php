@@ -121,6 +121,15 @@ class SettingsMigrator implements MigratorInterface {
 	private bool $known_losses_reported = false;
 
 	/**
+	 * Legacy option keys already visited by this instance, so they leave the outstanding
+	 * list even when nothing was persisted - a dry run records no state at all, and
+	 * without this its section would never drain.
+	 *
+	 * @var array<string,bool>
+	 */
+	private array $handled = array();
+
+	/**
 	 * Constructor.
 	 *
 	 * @param MigrationState $state    Migration run state.
@@ -175,6 +184,10 @@ class SettingsMigrator implements MigratorInterface {
 		$outstanding = array();
 
 		foreach ( array_keys( self::OPTION_MAP ) as $legacy_key ) {
+			if ( isset( $this->handled[ $legacy_key ] ) ) {
+				continue;
+			}
+
 			$action = $this->decide( $legacy_key );
 
 			if ( MigrationState::OPTION_ACTION_SKIP_UNCHANGED !== $action ) {
@@ -209,9 +222,19 @@ class SettingsMigrator implements MigratorInterface {
 			$source_hash = $this->state->fingerprint_value( $value );
 			$action      = $this->decide( $legacy_key );
 
+			$this->handled[ $legacy_key ] = true;
+
 			if ( MigrationState::OPTION_ACTION_SKIP_USER_MODIFIED === $action ) {
 				$this->reporter->record( self::SLUG, Reporter::OUTCOME_SKIPPED_USER_MODIFIED, $row_id );
 				$counts[ Reporter::OUTCOME_SKIPPED_USER_MODIFIED ] = ( $counts[ Reporter::OUTCOME_SKIPPED_USER_MODIFIED ] ?? 0 ) + 1;
+
+				if ( ! $writer->is_dry_run() ) {
+					// Record what the merchant's value is now, so it reports once rather than
+					// staying outstanding on every later run.
+					$current_target_hash = $this->state->fingerprint_value( get_option( $core_key, $mapping['default'] ) );
+					$this->state->record_option_fingerprint( $core_key, $source_hash, $current_target_hash, true );
+				}
+
 				continue;
 			}
 
@@ -222,7 +245,11 @@ class SettingsMigrator implements MigratorInterface {
 			$writer->write_option( $core_key, $value );
 
 			if ( ! $writer->is_dry_run() ) {
-				$this->state->record_option_fingerprint( $core_key, $source_hash, $source_hash );
+				// Fingerprint the value as it reads back, not as it was handed over: options
+				// round-trip through the database as strings, so an int written here would
+				// never match its own stored form and would report as merchant-edited.
+				$stored_hash = $this->state->fingerprint_value( get_option( $core_key, $mapping['default'] ) );
+				$this->state->record_option_fingerprint( $core_key, $source_hash, $stored_hash );
 			}
 
 			$counts[ Reporter::OUTCOME_MIGRATED ] = ( $counts[ Reporter::OUTCOME_MIGRATED ] ?? 0 ) + 1;

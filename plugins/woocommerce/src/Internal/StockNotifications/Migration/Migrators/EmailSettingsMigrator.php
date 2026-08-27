@@ -102,6 +102,15 @@ class EmailSettingsMigrator implements MigratorInterface {
 	private bool $force;
 
 	/**
+	 * Identifiers already visited by this instance, so they leave the outstanding list
+	 * even when nothing was persisted - a dry run records no state at all, and without
+	 * this its section would never drain.
+	 *
+	 * @var array<string,bool>
+	 */
+	private array $handled = array();
+
+	/**
 	 * Constructor.
 	 *
 	 * @param MigrationState $state    Migration run state.
@@ -156,6 +165,10 @@ class EmailSettingsMigrator implements MigratorInterface {
 		$outstanding = array();
 
 		foreach ( $this->all_ids() as $id ) {
+			if ( isset( $this->handled[ $id ] ) ) {
+				continue;
+			}
+
 			if ( MigrationState::OPTION_ACTION_SKIP_UNCHANGED !== $this->decide( $id ) ) {
 				$outstanding[] = $id;
 			}
@@ -191,9 +204,28 @@ class EmailSettingsMigrator implements MigratorInterface {
 
 			$action = $this->decide( $id );
 
+			$this->handled[ $id ] = true;
+
 			if ( MigrationState::OPTION_ACTION_SKIP_USER_MODIFIED === $action ) {
 				$this->reporter->record( self::SLUG, Reporter::OUTCOME_SKIPPED_USER_MODIFIED, $row_id );
 				$counts[ Reporter::OUTCOME_SKIPPED_USER_MODIFIED ] = ( $counts[ Reporter::OUTCOME_SKIPPED_USER_MODIFIED ] ?? 0 ) + 1;
+
+				if ( ! $writer->is_dry_run() ) {
+					// Record what the merchant's value is now, so it reports once rather than
+					// staying outstanding on every later run.
+					$core_settings       = (array) get_option( $core_key, array() );
+					$current_target_hash = $this->state->fingerprint_value( $core_settings[ $sub_key ] ?? '' );
+					$source_settings     = (array) get_option( $legacy_key, array() );
+					$source_hash         = $this->state->fingerprint_value( $source_settings[ $sub_key ] ?? '' );
+
+					$this->state->record_option_fingerprint(
+						$this->fingerprint_key( $core_key, $sub_key ),
+						$source_hash,
+						$current_target_hash,
+						true
+					);
+				}
+
 				continue;
 			}
 
