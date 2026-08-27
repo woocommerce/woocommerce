@@ -1712,16 +1712,15 @@ class WC_Install {
 		}
 
 		/**
-		 * Re-key wc_order_tax_lookup by tax order item. The new column has to join the primary
-		 * key, which dbDelta cannot do, so both changes run here as one table rebuild.
+		 * Re-key wc_order_tax_lookup by tax order item. The new column has to join the primary key,
+		 * which dbDelta cannot do, so both changes run here as one table rebuild. Rows already in
+		 * the table land on the column's zero default and keep reporting on their tax rate id alone
+		 * until OrderTaxLookupMigrator has been through them.
 		 */
 		if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}wc_order_tax_lookup';" ) ) {
 			$tax_lookup_alterations = array();
 
 			if ( ! $wpdb->get_var( "SHOW COLUMNS FROM `{$wpdb->prefix}wc_order_tax_lookup` LIKE 'order_item_id';" ) ) {
-				// Every row already in the table lands on the new column's zero default. The Taxes
-				// report goes on matching those on their tax rate id alone until
-				// OrderTaxLookupMigrator has been through them.
 				$tax_lookup_alterations[] = 'ADD COLUMN order_item_id bigint(20) unsigned NOT NULL DEFAULT 0 AFTER tax_rate_id';
 			}
 
@@ -1730,28 +1729,7 @@ class WC_Install {
 			}
 
 			if ( $tax_lookup_alterations ) {
-				$tax_lookup_alter = "ALTER TABLE {$wpdb->prefix}wc_order_tax_lookup " . implode( ', ', $tax_lookup_alterations );
-
-				// Changing a primary key rebuilds the table. Ask for the rebuild to happen in place
-				// and without a lock first, so a large store keeps serving reads and writes while it
-				// runs; servers that cannot do that for this change refuse the statement outright
-				// rather than falling back, so run it again on their terms.
-				$suppress_alter_errors = $wpdb->suppress_errors( true );
-				$tax_lookup_altered    = $wpdb->query( $tax_lookup_alter . ', ALGORITHM=INPLACE, LOCK=NONE' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- No user input, the fragments are hardcoded above.
-
-				if ( false === $tax_lookup_altered ) {
-					$tax_lookup_altered = $wpdb->query( $tax_lookup_alter ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- No user input, the fragments are hardcoded above.
-				}
-
-				$tax_lookup_alter_error = $wpdb->last_error;
-				$wpdb->suppress_errors( $suppress_alter_errors );
-
-				if ( false === $tax_lookup_altered ) {
-					wc_get_logger()->error(
-						"Could not re-key {$wpdb->prefix}wc_order_tax_lookup by tax order item: {$tax_lookup_alter_error}. Analytics tax reports will keep collapsing the tax lines of an order that share a tax rate until this statement runs: {$tax_lookup_alter}",
-						array( 'source' => 'wc-updater' )
-					);
-				}
+				$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_order_tax_lookup " . implode( ', ', $tax_lookup_alterations ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- No user input, the fragments are hardcoded above.
 			}
 		}
 
