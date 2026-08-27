@@ -872,10 +872,11 @@ function wc_scheduled_sales() {
 	 */
 	$process_products = static function ( array $product_ids, string $mode ) use ( $product_util, $flush_product_objects, $flush_shared_groups ): void {
 		// Sliced per iteration: array_chunk() would build every batch before the first runs.
-		$total = count( $product_ids );
+		$batch_size = 50;
+		$total      = count( $product_ids );
 
-		for ( $offset = 0; $offset < $total; $offset += 50 ) {
-			$chunk = array_slice( $product_ids, $offset, 50 );
+		for ( $offset = 0; $offset < $total; $offset += $batch_size ) {
+			$chunk = array_slice( $product_ids, $offset, $batch_size );
 
 			_prime_post_caches( $chunk );
 
