@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Blocks\Utils\CanonicalCartLineUtils;
 
 /**
  * ProductButton class.
@@ -24,11 +25,16 @@ class ProductButton extends AbstractBlock {
 
 
 	/**
-	 * Cart.
+	 * Memoized index of the first canonical cart line's quantity per product ID.
 	 *
-	 * @var array
+	 * Built once per request, on first use, from the hydrated cart snapshot,
+	 * and reused for every product ID asked about for the lifetime of this
+	 * block instance. `null` means the index has not been built yet.
+	 *
+	 * @var array|null
+	 * @phpstan-var array<int, int|float>|null
 	 */
-	private static $cart = null;
+	private ?array $cart_item_quantity_index = null;
 
 	/**
 	 * Register the context.
@@ -100,7 +106,7 @@ class ProductButton extends AbstractBlock {
 
 		BlocksSharedState::load_cart_state( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 
-		$number_of_items_in_cart  = $this->get_cart_item_quantities_by_product_id( $product->get_id() );
+		$number_of_items_in_cart  = $this->get_cart_item_quantity_by_product_id( $product->get_id() );
 		$is_product_purchasable   = $this->is_product_purchasable( $product );
 		$cart_redirect_after_add  = get_option( 'woocommerce_cart_redirect_after_add' ) === 'yes';
 		$ajax_add_to_cart_enabled = get_option( 'woocommerce_enable_ajax_add_to_cart' ) === 'yes';
@@ -326,18 +332,49 @@ class ProductButton extends AbstractBlock {
 	}
 
 	/**
-	 * Get the number of items in the cart for a given product id.
+	 * Get the quantity of the product's first canonical cart line, in cart order.
 	 *
-	 * @param number $product_id The product id.
-	 * @return number The number of items in the cart.
+	 * Resolved from the same hydrated, filter-applied cart snapshot the client
+	 * hydrates its own state from (the Store API cart response's `items`,
+	 * subject to the `woocommerce_store_api_cart_item_is_canonical_product_line`
+	 * filter), via a per-request index built once, on first use, and reused
+	 * for every product ID asked about afterwards. Returns 0 when the product
+	 * has no canonical cart line, or when the cart is unavailable.
+	 *
+	 * @param int $product_id The product ID.
+	 * @return int|float The quantity of the product's first canonical cart line, or 0.
 	 */
-	private function get_cart_item_quantities_by_product_id( $product_id ) {
-		if ( ! isset( WC()->cart ) ) {
-			return 0;
+	private function get_cart_item_quantity_by_product_id( $product_id ) {
+		if ( null === $this->cart_item_quantity_index ) {
+			$this->cart_item_quantity_index = $this->build_cart_item_quantity_index();
 		}
 
-		$cart = WC()->cart->get_cart_item_quantities();
-		return isset( $cart[ $product_id ] ) ? $cart[ $product_id ] : 0;
+		return $this->cart_item_quantity_index[ $product_id ] ?? 0;
+	}
+
+	/**
+	 * Build a one-pass index of the first canonical cart line's quantity per product ID.
+	 *
+	 * Owns the acquisition half of the seed: loads the hydrated cart snapshot
+	 * via BlocksSharedState::load_cart_state() and reads its `items` straight
+	 * off the published Interactivity API state (`state.cart.items` in the
+	 * `woocommerce` store) — the same value the client hydrates from, so the
+	 * two cannot describe different carts. The matching rule itself lives in
+	 * {@see CanonicalCartLineUtils::get_first_canonical_line_quantities()}, which this
+	 * method delegates to; the memo guard and the per-product answer live in
+	 * get_cart_item_quantity_by_product_id(). BlocksSharedState::load_cart_state()
+	 * is memoized, so calling it here is free when render() already did.
+	 *
+	 * @return array Quantity keyed by product ID.
+	 * @phpstan-return array<int, int|float>
+	 */
+	private function build_cart_item_quantity_index() {
+		BlocksSharedState::load_cart_state( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
+
+		$cart_state = wp_interactivity_state( 'woocommerce' );
+		$items      = $cart_state['cart']['items'] ?? array();
+
+		return CanonicalCartLineUtils::get_first_canonical_line_quantities( $items );
 	}
 
 	/**

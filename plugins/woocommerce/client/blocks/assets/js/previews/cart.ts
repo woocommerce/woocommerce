@@ -57,6 +57,7 @@ export const previewCart: CartResponse = {
 			backorders_allowed: false,
 			show_backorder_badge: false,
 			sold_individually: false,
+			is_canonical_product_line: true,
 			quantity_limits: {
 				minimum: 1,
 				maximum: 99,
@@ -130,6 +131,7 @@ export const previewCart: CartResponse = {
 			backorders_allowed: false,
 			show_backorder_badge: false,
 			sold_individually: false,
+			is_canonical_product_line: true,
 			quantity_limits: {
 				minimum: 1,
 				maximum: 99,

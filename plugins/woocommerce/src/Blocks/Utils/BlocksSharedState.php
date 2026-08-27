@@ -93,6 +93,29 @@ class BlocksSharedState {
 	/**
 	 * Load cart state into interactivity state.
 	 *
+	 * Hydrates the Store API cart response once per request and publishes it,
+	 * untransformed, as `state.cart` in the `woocommerce` Interactivity API
+	 * store. That published state is the single read surface for the hydrated
+	 * cart: server-side code that needs it reads
+	 * `wp_interactivity_state( 'woocommerce' )['cart']` — the same value the
+	 * client hydrates from — rather than a parallel copy.
+	 *
+	 * This matters because the cart is rendered twice, on the server for the
+	 * first paint and on the client after hydration, and the two must agree.
+	 * Reading the published state makes them agree by construction; a second
+	 * accessor returning an internal copy would only agree by coincidence, and
+	 * would silently diverge the moment anything transformed the state on its
+	 * way out. Callers are responsible for calling this method first; it is
+	 * memoized, so calling it when another block already did costs nothing.
+	 *
+	 * Note that entries in `state.cart.items` may be a literal empty array
+	 * (`[]`) — the Store API cart-item schema emits one for a line whose
+	 * `data` property is not a `WC_Product`, for example a line referencing a
+	 * deleted product. Consumers must skip such entries.
+	 *
+	 * See `client/blocks/assets/js/base/stores/woocommerce/README.md` for the
+	 * store-level view of this contract.
+	 *
 	 * @param string $consent_statement The consent statement string.
 	 * @return void
 	 * @throws InvalidArgumentException If consent statement doesn't match.

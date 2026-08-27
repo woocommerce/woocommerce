@@ -117,7 +117,6 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 						id: Number( childProductId ),
 						quantityToAdd: quantity[ childProductId ],
 						variation: selectedAttributes,
-						type: product.type,
 					} );
 				}
 

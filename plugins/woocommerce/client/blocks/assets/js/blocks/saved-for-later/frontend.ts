@@ -242,7 +242,6 @@ store< BlockStore >(
 					const outcome = ( yield cartActions.addCartItem( {
 						id: listItem.id,
 						quantityToAdd: listItem.quantity,
-						type: isVariation ? 'variation' : 'simple',
 						...( isVariation && { variation } ),
 					} ) ) as AddCartItemOutcome;
 

@@ -1,11 +1,18 @@
 <?php
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
+use Automattic\WooCommerce\StoreApi\Utilities\CartItemUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\ProductItemTrait;
 use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
 
 /**
  * CartItemSchema class.
+ *
+ * Defines the schema and serialisation for a single cart line item in the
+ * Store API. Extends ItemSchema with cart-specific fields such as
+ * quantity limits, totals, etc.
  */
 class CartItemSchema extends ItemSchema {
 	use ProductItemTrait;
@@ -25,10 +32,45 @@ class CartItemSchema extends ItemSchema {
 	const IDENTIFIER = 'cart-item';
 
 	/**
+	 * Returns the cart-item schema properties, merging the parent item
+	 * properties with the cart-only is_canonical_product_line boolean.
+	 *
+	 * The is_canonical_product_line field is intentionally placed here (not in the
+	 * shared ItemSchema base) because it depends on the live cart's
+	 * generate_cart_id() method, which is not available on order line items
+	 * served by OrderItemSchema.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @return array Schema properties array keyed by property name.
+	 */
+	public function get_properties() {
+		return array_merge(
+			parent::get_properties(),
+			array(
+				'is_canonical_product_line' => array(
+					'description' => __( 'True when this cart line is the canonical line for its product — the single line a configuration-free add of the product (or product + variation) would be merged into; false when the line\'s identity was differentiated by extra cart-item data.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+			)
+		);
+	}
+
+	/**
 	 * Convert a WooCommerce cart item to an object suitable for the response.
 	 *
-	 * @param array $cart_item Cart item array.
-	 * @return array
+	 * Returns an array whose keys match the properties declared in
+	 * {@see CartItemSchema::get_properties()}.
+	 *
+	 * @since 11.1.0 Added is_canonical_product_line field.
+	 *
+	 * @param array $cart_item Cart item array from WC()->cart->cart_contents.
+	 *                         Required keys: 'key', 'data' (WC_Product), 'product_id',
+	 *                         'variation_id', 'variation', 'quantity', 'line_subtotal',
+	 *                         'line_subtotal_tax', 'line_total', 'line_tax'.
+	 * @return array Response array, or an empty array when $cart_item carries no valid WC_Product.
 	 */
 	public function get_item_response( $cart_item ) {
 		$product = $cart_item['data'] ?? false;
@@ -53,25 +95,25 @@ class CartItemSchema extends ItemSchema {
 		$price_decimals    = wc_get_price_decimals();
 
 		return [
-			'key'                  => $cart_item['key'],
-			'id'                   => $product->get_id(),
-			'type'                 => $product->get_type(),
-			'quantity'             => wc_stock_amount( $cart_item['quantity'] ),
-			'quantity_limits'      => (object) ( new QuantityLimits() )->get_cart_item_quantity_limits( $cart_item ),
-			'name'                 => $this->prepare_html_response( $product->get_title() ),
-			'short_description'    => $this->prepare_html_response( wc_format_content( wp_kses_post( $product->get_short_description() ) ) ),
-			'description'          => $this->prepare_html_response( wc_format_content( wp_kses_post( $product->get_description() ) ) ),
-			'sku'                  => $this->prepare_html_response( $product->get_sku() ),
-			'low_stock_remaining'  => $this->get_low_stock_remaining( $product ),
-			'backorders_allowed'   => (bool) $product->backorders_allowed(),
-			'show_backorder_badge' => (bool) $product->backorders_require_notification() && $product->is_on_backorder( $cart_item['quantity'] ),
-			'sold_individually'    => $product->is_sold_individually(),
-			'permalink'            => $product_permalink,
-			'images'               => $this->get_cart_images( $product, $cart_item, $cart_item['key'] ),
-			'variation'            => $this->format_variation_data( $cart_item['variation'], $product ),
-			'item_data'            => $this->get_item_data( $cart_item ),
-			'prices'               => (object) $this->prepare_product_price_response( $product, get_option( 'woocommerce_tax_display_cart' ) ),
-			'totals'               => (object) $this->prepare_currency_response(
+			'key'                       => $cart_item['key'],
+			'id'                        => $product->get_id(),
+			'type'                      => $product->get_type(),
+			'quantity'                  => wc_stock_amount( $cart_item['quantity'] ),
+			'quantity_limits'           => (object) ( new QuantityLimits() )->get_cart_item_quantity_limits( $cart_item ),
+			'name'                      => $this->prepare_html_response( $product->get_title() ),
+			'short_description'         => $this->prepare_html_response( wc_format_content( wp_kses_post( $product->get_short_description() ) ) ),
+			'description'               => $this->prepare_html_response( wc_format_content( wp_kses_post( $product->get_description() ) ) ),
+			'sku'                       => $this->prepare_html_response( $product->get_sku() ),
+			'low_stock_remaining'       => $this->get_low_stock_remaining( $product ),
+			'backorders_allowed'        => (bool) $product->backorders_allowed(),
+			'show_backorder_badge'      => (bool) $product->backorders_require_notification() && $product->is_on_backorder( $cart_item['quantity'] ),
+			'sold_individually'         => $product->is_sold_individually(),
+			'permalink'                 => $product_permalink,
+			'images'                    => $this->get_cart_images( $product, $cart_item, $cart_item['key'] ),
+			'variation'                 => $this->format_variation_data( $cart_item['variation'], $product ),
+			'item_data'                 => $this->get_item_data( $cart_item ),
+			'prices'                    => (object) $this->prepare_product_price_response( $product, get_option( 'woocommerce_tax_display_cart' ) ),
+			'totals'                    => (object) $this->prepare_currency_response(
 				[
 					'line_subtotal'     => $this->prepare_money_response( $cart_item['line_subtotal'], $price_decimals ),
 					'line_subtotal_tax' => $this->prepare_money_response( $cart_item['line_subtotal_tax'], $price_decimals ),
@@ -79,9 +121,49 @@ class CartItemSchema extends ItemSchema {
 					'line_total_tax'    => $this->prepare_money_response( $cart_item['line_tax'], $price_decimals ),
 				]
 			),
-			'catalog_visibility'   => $product->get_catalog_visibility(),
-			self::EXTENDING_KEY    => $this->get_extended_data( self::IDENTIFIER, $cart_item ),
+			'catalog_visibility'        => $product->get_catalog_visibility(),
+			'is_canonical_product_line' => $this->get_is_canonical_product_line( $cart_item ),
+			self::EXTENDING_KEY         => $this->get_extended_data( self::IDENTIFIER, $cart_item ),
 		];
+	}
+
+	/**
+	 * Determine whether a cart line is the canonical line for its product.
+	 *
+	 * Computes the core default from cart-key identity via
+	 * {@see CartItemUtils::is_standalone_line()}, then applies the
+	 * woocommerce_store_api_cart_item_is_canonical_product_line filter so an extension
+	 * can override the value for lines it manages. A non-boolean filter return
+	 * is discarded in favor of the core-computed default.
+	 *
+	 * @param array $cart_item Cart item array.
+	 * @return bool True when the line is canonical for its product; false otherwise.
+	 */
+	protected function get_is_canonical_product_line( array $cart_item ): bool {
+		$default = CartItemUtils::is_standalone_line( $cart_item );
+
+		/**
+		 * Filters whether a cart line is the canonical line for its product.
+		 *
+		 * The canonical line is the single line a configuration-free add of the
+		 * product (or product + variation) would be merged into; at most one
+		 * such line can exist per product + variation. Core computes the
+		 * default from cart-key identity: a line is canonical when its stored
+		 * key matches the key a plain add (no extra cart_item_data) would
+		 * produce. An extension that intercepts a product's plain adds — for
+		 * example, a bundle that stamps its container line with cart_item_data
+		 * so the line is never cart-key-identical to a plain add — can use
+		 * this filter to mark that line as canonical for its own purposes. A
+		 * non-boolean return is ignored in favor of the core-computed default.
+		 *
+		 * @since 11.1.0
+		 *
+		 * @param bool  $is_canonical Whether the line is canonical for its product (core-computed default).
+		 * @param array $cart_item    Cart item array.
+		 */
+		$filtered = apply_filters( 'woocommerce_store_api_cart_item_is_canonical_product_line', $default, $cart_item );
+
+		return is_bool( $filtered ) ? $filtered : $default;
 	}
 
 	/**

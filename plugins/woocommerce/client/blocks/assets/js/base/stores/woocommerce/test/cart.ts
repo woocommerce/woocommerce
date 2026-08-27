@@ -88,7 +88,6 @@ async function runAction( action: unknown ): Promise< unknown > {
 	let next = iterator.next();
 	while ( ! next.done ) {
 		try {
-			// eslint-disable-next-line no-await-in-loop
 			const resolved = await next.value;
 			next = iterator.next( resolved );
 		} catch ( error ) {
@@ -476,6 +475,12 @@ function flushMicrotasks(): Promise< void > {
 /**
  * Builds a minimal server-confirmed cart line carrying a key.
  *
+ * Defaults `is_canonical_product_line` to `true` so a plain call produces a
+ * canonical line — the line `findItemInCart` matches on a keyless
+ * lookup. Callers that need a meta-differentiated line (a bundle
+ * child, booking, or add-on) must pass `is_canonical_product_line: false`
+ * explicitly as an override.
+ *
  * @param overrides Partial cart-line fields to override the defaults.
  * @return A cart line suitable for seeding `state.cart.items`.
  */
@@ -489,6 +494,7 @@ function makeKeyedLine( overrides: Partial< CartItem > = {} ): CartItem {
 		sold_individually: false,
 		variation: [],
 		item_data: [],
+		is_canonical_product_line: true,
 		...overrides,
 	} as CartItem;
 }
@@ -540,7 +546,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 
@@ -558,7 +563,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 
@@ -579,14 +583,12 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					actions.addCartItem( {
 						id: 42,
 						quantityToAdd: 1,
-						type: 'simple',
 					} )
 				),
 				runAction(
 					actions.addCartItem( {
 						id: 42,
 						quantityToAdd: 1,
-						type: 'simple',
 					} )
 				),
 			] );
@@ -610,7 +612,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 
@@ -629,7 +630,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					id: 42,
 					key: 'server-key-abc',
 					quantity: 5,
-					type: 'simple',
 				} )
 			);
 
@@ -649,7 +649,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 
@@ -666,7 +665,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.addCartItem( {
 					id: 99,
 					quantityToAdd: 2,
-					type: 'simple',
 				} )
 			);
 
@@ -696,7 +694,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				withEmptyItemData.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 
@@ -712,7 +709,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				withRichItemData.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 
@@ -734,7 +730,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					actions.addCartItem( {
 						id: 42,
 						quantity: 5,
-						type: 'simple',
 					} )
 				)
 			).rejects.toThrow();
@@ -750,7 +745,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					actions.addCartItem( {
 						id: 42,
 						quantityToAdd: 1,
-						type: 'simple',
 					} )
 				)
 			).resolves.toEqual( { success: true } );
@@ -772,7 +766,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 						id: 42,
 						key: 'server-key-abc',
 						quantity: 5,
-						type: 'simple',
 					} )
 				)
 			).resolves.toEqual( { success: true } );
@@ -789,7 +782,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 						id: 42,
 						quantity: 5,
 						quantityToAdd: 1,
-						type: 'simple',
 					} )
 				)
 			).rejects.toThrow();
@@ -962,7 +954,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					{
 						id: 42,
 						quantityToAdd: 1,
-						type: 'simple',
 					},
 				] )
 			);
@@ -982,7 +973,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					{
 						id: 42,
 						quantityToAdd: 1,
-						type: 'simple',
 					},
 				] )
 			);
@@ -1003,7 +993,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					{
 						id: 42,
 						quantityToAdd: 1,
-						type: 'simple',
 					},
 				] )
 			);
@@ -1024,7 +1013,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 						id: 42,
 						key: 'server-key-abc',
 						quantity: 5,
-						type: 'simple',
 					},
 				] )
 			);
@@ -1046,7 +1034,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				singleActions.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 
@@ -1058,7 +1045,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					{
 						id: 42,
 						quantityToAdd: 1,
-						type: 'simple',
 					},
 				] )
 			);
@@ -1084,7 +1070,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					{
 						id: 42,
 						quantityToAdd: 1,
-						type: 'simple',
 					},
 				] )
 			);
@@ -1103,7 +1088,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					{
 						id: 99,
 						quantityToAdd: 2,
-						type: 'simple',
 					},
 				] )
 			);
@@ -1122,17 +1106,21 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		const QUANTITY_CHANGED = 'was changed to';
 
 		it( 'emits no quantity-changed notice for a keyless add resolved server-side as a new standalone line', async () => {
-			// The product is present only as a single keyed meta line at qty 3.
-			// A keyless add optimistically bumps that line to 4, but the server
-			// keeps the meta line at 3 and adds a separate standalone line. The
-			// keyless-scoped baseline (3) must be compared against the server
-			// quantity (3) so no spurious "quantity changed" notice fires.
+			// The product is present only as a single keyed meta line (qty 3,
+			// is_canonical_product_line: false). findItemInCart excludes meta lines on a
+			// keyless lookup, so it returns undefined — the optimistic update pushes
+			// a brand-new plain line instead of bumping the meta line. The server
+			// keeps the meta line at qty 3 and adds a separate standalone line
+			// (qty 1). lineMatchesProduct is meta-inclusive, so the pre-add total
+			// captures the meta line's qty 3; expectedTotal = 3+1 = 4. The server
+			// total (3+1=4) equals expectedTotal (4) → no spurious notice fires.
 			mockBatchFetchReturning(
 				makeServerCart( [
 					makeKeyedLine( {
 						key: 'server-key-abc',
 						id: 42,
 						quantity: 3,
+						is_canonical_product_line: false,
 					} ),
 					makeKeyedLine( {
 						key: 'server-key-new',
@@ -1143,7 +1131,12 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			);
 			const actions = await loadCartStore();
 			seedCart( [
-				makeKeyedLine( { key: 'server-key-abc', id: 42, quantity: 3 } ),
+				makeKeyedLine( {
+					key: 'server-key-abc',
+					id: 42,
+					quantity: 3,
+					is_canonical_product_line: false,
+				} ),
 			] );
 			const notices = spyOnUpdateNotices();
 
@@ -1151,7 +1144,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 
@@ -1162,23 +1154,28 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 		it( 'emits no quantity-changed notice when only the first of two meta lines for the same product is bumped optimistically', async () => {
 			// The product is present as two distinct keyed meta lines (qty 3 and
-			// qty 2). A keyless add matches and optimistically bumps only the
-			// first line (server-key-1) to 4. The server keeps both meta lines at
-			// their pre-add quantities and adds a separate standalone line. The
-			// bumped line's pre-optimistic baseline (3) must be diffed against the
-			// server quantity (3) so no spurious notice fires; the untouched
-			// second line (still 2 in both snapshots) must not notify either.
+			// qty 2, both is_canonical_product_line: false). findItemInCart excludes both
+			// meta lines on a keyless lookup, so it returns undefined — the
+			// optimistic update pushes a brand-new plain line instead of bumping
+			// either meta line. The server keeps both meta lines at their pre-add
+			// quantities (3 and 2) and adds a separate standalone line (qty 1).
+			// lineMatchesProduct is meta-inclusive, so the pre-add total captures
+			// both meta lines: preAddTotal = 3+2 = 5, deltaTotal = 1,
+			// expectedTotal = 6. The server total (3+2+1=6) equals expectedTotal
+			// (6) → no spurious notice fires for any of the three lines.
 			mockBatchFetchReturning(
 				makeServerCart( [
 					makeKeyedLine( {
 						key: 'server-key-1',
 						id: 42,
 						quantity: 3,
+						is_canonical_product_line: false,
 					} ),
 					makeKeyedLine( {
 						key: 'server-key-2',
 						id: 42,
 						quantity: 2,
+						is_canonical_product_line: false,
 					} ),
 					makeKeyedLine( {
 						key: 'server-key-new',
@@ -1189,8 +1186,18 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			);
 			const actions = await loadCartStore();
 			seedCart( [
-				makeKeyedLine( { key: 'server-key-1', id: 42, quantity: 3 } ),
-				makeKeyedLine( { key: 'server-key-2', id: 42, quantity: 2 } ),
+				makeKeyedLine( {
+					key: 'server-key-1',
+					id: 42,
+					quantity: 3,
+					is_canonical_product_line: false,
+				} ),
+				makeKeyedLine( {
+					key: 'server-key-2',
+					id: 42,
+					quantity: 2,
+					is_canonical_product_line: false,
+				} ),
 			] );
 			const notices = spyOnUpdateNotices();
 
@@ -1198,7 +1205,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 
@@ -1232,7 +1238,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					id: 42,
 					key: 'server-key-abc',
 					quantity: 5,
-					type: 'simple',
 				} )
 			);
 
@@ -1264,7 +1269,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 
@@ -1278,16 +1282,20 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		} );
 
 		it( 'suppresses the notice for a keyless batch add resolved server-side as a new standalone line', async () => {
-			// Same meta-only scenario through the batch path: the matched keyed
-			// line is bumped optimistically to 4, the server keeps it at 3 and
-			// adds a standalone line. The batch must capture the baseline (3) and
-			// suppress the spurious notice.
+			// Same meta-only scenario through the batch path: the cart has only a
+			// single meta line (qty 3, is_canonical_product_line: false). findItemInCart
+			// excludes it, so the optimistic update pushes a brand-new plain line.
+			// The server keeps the meta line at 3 and adds a standalone line (qty 1).
+			// lineMatchesProduct is meta-inclusive → preAddTotal = 3, deltaTotal = 1,
+			// expectedTotal = 4; serverTotal = 3+1 = 4 → suppress, no spurious
+			// notice.
 			mockBatchFetchReturning(
 				makeServerCart( [
 					makeKeyedLine( {
 						key: 'server-key-abc',
 						id: 42,
 						quantity: 3,
+						is_canonical_product_line: false,
 					} ),
 					makeKeyedLine( {
 						key: 'server-key-new',
@@ -1298,7 +1306,12 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			);
 			const actions = await loadCartStore();
 			seedCart( [
-				makeKeyedLine( { key: 'server-key-abc', id: 42, quantity: 3 } ),
+				makeKeyedLine( {
+					key: 'server-key-abc',
+					id: 42,
+					quantity: 3,
+					is_canonical_product_line: false,
+				} ),
 			] );
 			const notices = spyOnUpdateNotices();
 
@@ -1307,7 +1320,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					{
 						id: 42,
 						quantityToAdd: 1,
-						type: 'simple',
 					},
 				] )
 			);
@@ -1346,7 +1358,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 
@@ -1381,8 +1392,8 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 			await runAction(
 				actions.batchAddCartItems( [
-					{ id: 42, quantityToAdd: 1, type: 'simple' },
-					{ id: 42, quantityToAdd: 1, type: 'simple' },
+					{ id: 42, quantityToAdd: 1 },
+					{ id: 42, quantityToAdd: 1 },
 				] )
 			);
 
@@ -1415,8 +1426,8 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 			await runAction(
 				actions.batchAddCartItems( [
-					{ id: 42, quantityToAdd: 1, type: 'simple' },
-					{ id: 42, quantityToAdd: 1, type: 'simple' },
+					{ id: 42, quantityToAdd: 1 },
+					{ id: 42, quantityToAdd: 1 },
 				] )
 			);
 
@@ -1430,14 +1441,16 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		} );
 
 		it( 'suppresses the notice for a keyless add when the client bumps a meta line but the server grows the standalone line', async () => {
-			// Product 42 occupies two lines: a meta-differentiated line ordered
-			// first (server-key-meta, qty 1) and a plain standalone line second
-			// (server-key-standalone, qty 1). findItemInCart matches the meta line
-			// first, so addCartItem bumps it optimistically. The server, however,
-			// grows the standalone line instead and leaves the meta line unchanged.
-			// Pre-add total: 1+1=2. Delta: +1. Expected total: 3.
-			// Server returns meta(1) + standalone(2) = 3 === expected → suppress
-			// for both pre-existing keys. No "quantity changed" notice must fire.
+			// Product 42 occupies two lines: a meta-differentiated line (server-key-
+			// meta, qty 1, is_canonical_product_line: false) and a plain standalone line
+			// (server-key-standalone, qty 1). findItemInCart excludes the meta line
+			// on a keyless lookup and returns the standalone line directly, so the
+			// optimistic update bumps the standalone line from 1 to 2. The server
+			// also grows the standalone line to 2 and keeps the meta line at 1.
+			// lineMatchesProduct is meta-inclusive → preAddTotal = 1+1 = 2,
+			// deltaTotal = 1, expectedTotal = 3. Server total: meta(1)+standalone(2)
+			// = 3 === expected → suppress for both pre-existing keys. No "quantity
+			// changed" notice must fire.
 			mockBatchFetchReturning(
 				makeServerCart( [
 					makeKeyedLine( {
@@ -1445,6 +1458,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 						id: 42,
 						quantity: 1,
 						name: 'Test Product',
+						is_canonical_product_line: false,
 					} ),
 					makeKeyedLine( {
 						key: 'server-key-standalone',
@@ -1460,6 +1474,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					key: 'server-key-meta',
 					id: 42,
 					quantity: 1,
+					is_canonical_product_line: false,
 				} ),
 				makeKeyedLine( {
 					key: 'server-key-standalone',
@@ -1473,7 +1488,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 
@@ -1485,11 +1499,13 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 		it( 'suppresses the notice for a keyless batch add when the client bumps a meta line but the server grows the standalone line, through the batch path', async () => {
 			// Same meta-line/standalone-line scenario through the batch path.
-			// Product 42 occupies two
-			// lines: meta first (qty 1) then standalone (qty 1). The batch item
-			// bumps the meta line optimistically; the server grows the standalone
-			// line. Pre-add total: 1+1=2. Delta: +1. Expected total: 3.
-			// Server returns meta(1)+standalone(2)=3 === expected → suppress.
+			// Product 42 occupies two lines: meta first (qty 1, is_canonical_product_line:
+			// false) then standalone (qty 1). findItemInCart excludes the meta line
+			// and returns the standalone line, so the batch item bumps the standalone
+			// line optimistically. The server also grows the standalone line to 2 and
+			// keeps the meta line at 1. lineMatchesProduct is meta-inclusive →
+			// preAddTotal = 1+1 = 2, deltaTotal = 1, expectedTotal = 3. Server total:
+			// meta(1)+standalone(2)=3 === expected → suppress.
 			mockBatchFetchReturning(
 				makeServerCart( [
 					makeKeyedLine( {
@@ -1497,6 +1513,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 						id: 42,
 						quantity: 1,
 						name: 'Test Product',
+						is_canonical_product_line: false,
 					} ),
 					makeKeyedLine( {
 						key: 'server-key-standalone',
@@ -1512,6 +1529,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					key: 'server-key-meta',
 					id: 42,
 					quantity: 1,
+					is_canonical_product_line: false,
 				} ),
 				makeKeyedLine( {
 					key: 'server-key-standalone',
@@ -1522,9 +1540,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			const notices = spyOnUpdateNotices();
 
 			await runAction(
-				actions.batchAddCartItems( [
-					{ id: 42, quantityToAdd: 1, type: 'simple' },
-				] )
+				actions.batchAddCartItems( [ { id: 42, quantityToAdd: 1 } ] )
 			);
 
 			// Server total (1+2=3) === expected total (1+1+1=3) → suppress.
@@ -1572,7 +1588,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'variation',
 					variation: colorRedVariation,
 				} )
 			);
@@ -1626,6 +1641,285 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		} );
 	} );
 
+	describe( 'findItemInCart meta-exclusion guard', () => {
+		it( 'returns undefined (no match) for a keyless lookup when the cart contains only a meta line for that product', async () => {
+			// A line with is_canonical_product_line: false is a meta-differentiated line
+			// (e.g. a bundle child or add-on). The keyless matcher must not return
+			// it as the standalone line for the product. The derived count should
+			// be 0 (undefined match).
+			await loadCartStore();
+			seedCart( [
+				makeKeyedLine( {
+					key: 'meta-key-1',
+					id: 42,
+					quantity: 2,
+					is_canonical_product_line: false,
+				} ),
+			] );
+
+			const result = mockState.findItemInCart( { id: 42 } );
+
+			expect( result ).toBeUndefined();
+		} );
+
+		it( 'still matches a server line that lacks the is_canonical_product_line field (degrades to counted, never excluded)', async () => {
+			// Exclusion requires positive server evidence: only an explicit
+			// `is_canonical_product_line: false` excludes a line. A server-confirmed
+			// line without the field — an older server during deploy skew, or
+			// an extension that rebuilds Store API item payloads — must degrade
+			// to the pre-field behavior (matched/counted), never to exclusion.
+			// A falsy guard would exclude such lines forever: every add would
+			// blip optimistically and reconcile back to "Add to cart", with the
+			// count never reflecting the server-confirmed line.
+			const legacyLine = makeKeyedLine( {
+				key: 'legacy-key',
+				id: 42,
+				quantity: 2,
+			} );
+			delete ( legacyLine as Partial< CartItem > )
+				.is_canonical_product_line;
+			await loadCartStore();
+			seedCart( [ legacyLine ] );
+
+			const result = mockState.findItemInCart( { id: 42 } );
+
+			expect( result ).toBe( legacyLine );
+			expect( result?.key ).toBe( 'legacy-key' );
+		} );
+
+		it( 'returns only the standalone line when the cart has both a standalone and a meta line for the same product', async () => {
+			// When a product has two lines — one standalone (is_canonical_product_line:
+			// true) and one meta (is_canonical_product_line: false) — the keyless matcher
+			// must return only the standalone line.
+			const standaloneLine = makeKeyedLine( {
+				key: 'standalone-key',
+				id: 42,
+				quantity: 1,
+				is_canonical_product_line: true,
+			} );
+			await loadCartStore();
+			seedCart( [
+				standaloneLine,
+				makeKeyedLine( {
+					key: 'meta-key',
+					id: 42,
+					quantity: 3,
+					is_canonical_product_line: false,
+				} ),
+			] );
+
+			const result = mockState.findItemInCart( { id: 42 } );
+
+			expect( result ).toBe( standaloneLine );
+			expect( result?.key ).toBe( 'standalone-key' );
+		} );
+
+		it( 'returns only the standalone line when the meta line appears before the standalone line in the cart', async () => {
+			// Order must not matter: even when the meta line is first in the
+			// array, the matcher must skip it and return the standalone line.
+			const standaloneLine = makeKeyedLine( {
+				key: 'standalone-key',
+				id: 42,
+				quantity: 1,
+				is_canonical_product_line: true,
+			} );
+			await loadCartStore();
+			seedCart( [
+				makeKeyedLine( {
+					key: 'meta-key',
+					id: 42,
+					quantity: 3,
+					is_canonical_product_line: false,
+				} ),
+				standaloneLine,
+			] );
+
+			const result = mockState.findItemInCart( { id: 42 } );
+
+			expect( result ).toBe( standaloneLine );
+			expect( result?.key ).toBe( 'standalone-key' );
+		} );
+
+		it( 'continues to match the correct variation standalone line and excludes a same-product meta line', async () => {
+			// For variation products, the meta-exclusion guard must AND with the
+			// attribute check: only the variation line that matches both attributes
+			// and is_canonical_product_line: true should be returned. A meta line with
+			// matching attributes must be excluded.
+			const colorRedVariation = [
+				{ attribute: 'Color', value: 'Red' },
+			] as CartItem[ 'variation' ];
+			const standaloneLine = {
+				...makeKeyedLine( {
+					key: 'var-standalone',
+					id: 42,
+					quantity: 2,
+					is_canonical_product_line: true,
+				} ),
+				type: 'variation',
+				variation: colorRedVariation,
+			} as CartItem;
+			await loadCartStore();
+			seedCart( [
+				{
+					...makeKeyedLine( {
+						key: 'var-meta',
+						id: 42,
+						quantity: 5,
+						is_canonical_product_line: false,
+					} ),
+					type: 'variation',
+					variation: colorRedVariation,
+				} as CartItem,
+				standaloneLine,
+			] );
+
+			const result = mockState.findItemInCart( {
+				id: 42,
+				type: 'variation',
+				variation: colorRedVariation,
+			} );
+
+			expect( result ).toBe( standaloneLine );
+			expect( result?.key ).toBe( 'var-standalone' );
+		} );
+
+		it( 'returns undefined when no variation in the cart matches the requested attributes', async () => {
+			// A request for a variation that is not in the cart at all must
+			// return undefined, even if other variations exist.
+			const colorRedVariation = [
+				{ attribute: 'Color', value: 'Red' },
+			] as CartItem[ 'variation' ];
+			const colorBlueVariation = [
+				{ attribute: 'Color', value: 'Blue' },
+			] as CartItem[ 'variation' ];
+			await loadCartStore();
+			seedCart( [
+				{
+					...makeKeyedLine( {
+						key: 'var-blue',
+						id: 42,
+						quantity: 1,
+						is_canonical_product_line: true,
+					} ),
+					type: 'variation',
+					variation: colorBlueVariation,
+				} as CartItem,
+			] );
+
+			const result = mockState.findItemInCart( {
+				id: 42,
+				type: 'variation',
+				variation: colorRedVariation,
+			} );
+
+			expect( result ).toBeUndefined();
+		} );
+
+		it( 'returns the line for a keyed lookup regardless of is_canonical_product_line (keyed lookups unaffected)', async () => {
+			// The key short-circuit runs before the meta-exclusion guard, so
+			// keyed lookups — e.g. the mini-cart stepper — always return the
+			// exact line with that key, whether it is a meta line or not.
+			const metaLine = makeKeyedLine( {
+				key: 'meta-key',
+				id: 42,
+				quantity: 2,
+				is_canonical_product_line: false,
+			} );
+			await loadCartStore();
+			seedCart( [ metaLine ] );
+
+			const result = mockState.findItemInCart( {
+				id: 42,
+				key: 'meta-key',
+			} );
+
+			expect( result ).toBe( metaLine );
+		} );
+
+		it( 'treats an optimistic line without is_canonical_product_line as plain and returns it from a keyless lookup', async () => {
+			// OptimisticCartItem does not carry is_canonical_product_line (the field is
+			// absent — undefined). The isCartItem() guard short-circuits the &&
+			// before the field is read, so the optimistic line IS matched. This
+			// preserves rapid-click compounding and the common re-add count.
+			const optimisticLine: OptimisticCartItem = {
+				id: 42,
+				quantity: 1,
+			};
+			await loadCartStore();
+			seedCart( [ optimisticLine ] );
+
+			const result = mockState.findItemInCart( { id: 42 } );
+
+			expect( result ).toBe( optimisticLine );
+		} );
+
+		it( 'lineMatchesProduct still includes meta lines when summing the pre-add total (meta-inclusive, unchanged)', async () => {
+			// lineMatchesProduct is intentionally meta-inclusive. It sums ALL
+			// lines of a product — including meta lines — for the pre-add total
+			// and the keyless-add suppress-keys baseline. This diverges from
+			// findItemInCart on purpose.
+			//
+			// Verification: the cart holds a meta line (qty 2) and a standalone
+			// line (qty 1) for product 42. A keyless add (+1) computes its
+			// suppress-key baseline using lineMatchesProduct, which counts both
+			// lines → preAddTotal = 3, deltaTotal = 1, expectedTotal = 4.
+			// The server returns the standalone line at 2 and the meta line
+			// unchanged at 2 → serverTotal = 4. Because serverTotal (4) ===
+			// expectedTotal (4), the pre-existing keys are suppressed and no
+			// spurious "quantity changed" notice fires.
+			//
+			// If lineMatchesProduct had been changed to skip meta lines it would
+			// compute preAddTotal = 1 (standalone only), expectedTotal = 2, and
+			// compare against serverTotal = 4 → mismatch → notice fires, failing
+			// the assertion below.
+			const QUANTITY_CHANGED = 'was changed to';
+			mockBatchFetchReturning(
+				makeServerCart( [
+					makeKeyedLine( {
+						key: 'standalone-key',
+						id: 42,
+						quantity: 2,
+					} ),
+					makeKeyedLine( {
+						key: 'meta-key',
+						id: 42,
+						quantity: 2,
+						is_canonical_product_line: false,
+					} ),
+				] )
+			);
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( {
+					key: 'standalone-key',
+					id: 42,
+					quantity: 1,
+					is_canonical_product_line: true,
+				} ),
+				makeKeyedLine( {
+					key: 'meta-key',
+					id: 42,
+					quantity: 2,
+					is_canonical_product_line: false,
+				} ),
+			] );
+			const notices = spyOnUpdateNotices();
+
+			await runAction(
+				actions.addCartItem( {
+					id: 42,
+					quantityToAdd: 1,
+				} )
+			);
+
+			// Server total (2+2=4) === expected total (3+1=4) → suppress.
+			// No "quantity changed" notice must fire.
+			expect(
+				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
+			).toBe( false );
+		} );
+	} );
+
 	describe( 'genuine add-path cap surfaces as an error notice (not an auto-update notice)', () => {
 		// The quantity-changed info notice template the auto-UPDATE branch emits.
 		const QUANTITY_CHANGED = 'was changed to';
@@ -1651,7 +1945,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 
@@ -1690,7 +1983,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 

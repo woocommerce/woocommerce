@@ -313,3 +313,35 @@ Per-item error notices and each action's own info-notice update (including its `
 **`batchAddCartItems`.** A single `batchAddCartItems` call is just a cycle whose requests all originate from one call, so it goes through the exact same `onCycleSettled` mechanism as `addCartItem`/`removeCartItem`: each item submits its own `meta` (all `origin: 'add'`), and the call still produces one sync event, one legacy event, and one announcement when at least one item succeeds. Its merged sync `quantityChanges` is the union of only the *successful* items' entries — a failed item contributes nothing, since it made no server change.
 
 **Stays internal.** This is purely store-side wiring: no new option, export, or event was added for consumers to orchestrate or suppress these effects. `addCartItem` and `batchAddCartItems` still expose only their existing `showCartUpdatesNotices` option, which does not touch these three effects, and the `woocommerce` store remains private — see the note at the top of this file.
+
+### Populating `state.cart` from PHP
+
+The cart lives at `state.cart`, in Store API cart-response shape. Note that the iAPI namespace is literally `woocommerce` — `store< Store >( 'woocommerce', … )` in `cart.ts`, and the same string on the PHP side — even though this section is titled for the store's role.
+
+`BlocksSharedState::load_cart_state()` hydrates `/wc/store/v1/cart` once per request and publishes the response body, untransformed, as `state.cart`. It is memoized, so any number of blocks may call it and only the first pays for the hydration:
+
+```php
+BlocksSharedState::load_cart_state( $consent_statement );
+```
+
+### Reading `state.cart` from PHP
+
+**Read the published state. Do not add a parallel accessor.**
+
+```php
+$state = wp_interactivity_state( 'woocommerce' );
+$items = $state['cart']['items'] ?? array();
+```
+
+This matters more here than it looks. The cart is rendered twice — once on the server for the first paint and the no-JS render, once on the client after hydration — and the two must agree, or the user sees a value flash and change. Reading the published state makes them agree **by construction**: there is one array, and both sides read it.
+
+An accessor that returned an internal copy of the same data would agree only **by coincidence**. It would keep agreeing right up until something transformed the state on its way out, at which point the server and client would quietly describe different carts — which is exactly the class of bug this arrangement exists to prevent.
+
+Committed examples: `ProductButton::build_cart_item_quantity_index()` (the in-cart count seed) and `MiniCartProductsTableBlock` both read the cart this way.
+
+**Pitfalls:**
+
+-   **Load before you read.** `load_cart_state()` is what populates `state.cart`; a block that reads without ensuring it ran sees nothing. Calling it defensively is free.
+-   **Some items are empty arrays.** The Store API cart-item schema emits a literal `[]` for a line whose `data` is not a `WC_Product` — a line referencing a deleted product, for example. Skip entries with no `id`, exactly as the JS matcher does.
+-   **`items` can be missing entirely.** If the cart route returns an error response, the published body is `{ code, message, data }` with no `items` key. Read it defensively (`?? array()`) rather than assuming the key exists.
+-   **State merges recursively in tests.** `wp_interactivity_state()` merges rather than replaces, so a PHP test that publishes a cart must clear `WP_Interactivity_API`'s `state_data` between tests or carts will blend into each other. See `BlocksSharedStateTest::reset_shared_state()`.

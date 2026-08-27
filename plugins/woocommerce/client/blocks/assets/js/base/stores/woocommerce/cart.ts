@@ -45,7 +45,6 @@ export type OptimisticCartItem = {
 	id: number;
 	quantity: number;
 	variation?: CartVariationItem[];
-	type: string;
 };
 
 export type ClientCartItem = Omit<
@@ -178,16 +177,16 @@ const generateInfoNotice = ( message: string ): Notice => ( {
 } );
 
 /**
- * Computes the canonical product token for accumulating per-product totals
+ * Computes a stable product token for accumulating per-product totals
  * across a batch.
  *
- * The token is stable: simple items produce `"<id>"` and variation items
+ * The token is normalized: simple items produce `"<id>"` and variation items
  * produce `"<id>|<attr1>=<val1>&..."` with attributes sorted alphabetically
  * by name so insertion order differences do not produce different tokens.
  *
  * @param id        The product id.
  * @param variation The variation attributes, if any.
- * @return A canonical string token that uniquely identifies this product.
+ * @return A stable string token that uniquely identifies this product.
  */
 function productToken(
 	id: number,
@@ -220,7 +219,7 @@ function lineMatchesProduct(
 	id: number,
 	variation?: CartVariationItem[] | SelectedAttributes[]
 ): boolean {
-	if ( item.type === 'variation' ) {
+	if ( isCartItem( item ) && item.type === 'variation' ) {
 		if (
 			id !== item.id ||
 			! item.variation ||
@@ -592,6 +591,17 @@ const { actions } = store< Store >(
 	'woocommerce',
 	{
 		state: {
+			/**
+			 * Finds the cart line for a product.
+			 *
+			 * With a `key`, returns the line for that exact key. Without a
+			 * key, returns the canonical per-product line matched by `id`
+			 * (and `variation` for variations), excluding a line only on
+			 * strict server-confirmed `is_canonical_product_line === false` (e.g. a
+			 * bundle child, booking, or add-on configuration) so the keyless
+			 * match resolves only the canonical line the product-button count
+			 * reflects.
+			 */
 			findItemInCart( {
 				id,
 				key,
@@ -605,7 +615,27 @@ const { actions } = store< Store >(
 					if ( key ) {
 						return key === cartItem.key;
 					}
-					if ( cartItem.type === 'variation' ) {
+					// Exclusion requires positive server evidence: only an
+					// explicit `is_canonical_product_line: false` excludes a line.
+					// `isCartItem` narrows to server-confirmed lines; for
+					// optimistic lines the guard short-circuits the `&&` before
+					// `is_canonical_product_line` is read, so rapid-click compounding
+					// on canonical lines is preserved. The strict `=== false`
+					// (never a falsy check) makes a server line *missing* the
+					// field — deploy skew, or an extension rebuilding item
+					// payloads — degrade to the pre-field behavior (counted),
+					// never to permanent exclusion. Keyed lookups short-circuit
+					// on the `key` check above and never reach this guard.
+					if (
+						isCartItem( cartItem ) &&
+						cartItem.is_canonical_product_line === false
+					) {
+						return false;
+					}
+					if (
+						isCartItem( cartItem ) &&
+						cartItem.type === 'variation'
+					) {
 						if (
 							id !== cartItem.id ||
 							! cartItem.variation ||
