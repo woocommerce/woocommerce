@@ -915,10 +915,11 @@ function wc_scheduled_sales() {
 
 				if ( $product ) {
 					// Note: this does not schedule the matching end event. Both modes change
-					// only the price prop, and handle_updated_props() syncs sale date meta
-					// only when a date, regular_price, sale_price or product_type prop
-					// changed, so wc_maybe_schedule_sale_events_on_meta_change() never sees
-					// a sale date key and returns early. Ending relies on this daily run.
+					// only the price prop, and get_props_to_update() queues a meta key only
+					// when its prop is in get_changes() or the key is missing entirely, so
+					// the sale date keys are never written for a product the sale queries
+					// matched. wc_maybe_schedule_sale_events_on_meta_change() gates on that
+					// key and returns early, leaving the ending to this daily run.
 					wc_apply_sale_state_for_product( $product, $mode );
 				}
 
