@@ -317,35 +317,32 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return -1;
 		}
 
-		$table_name     = self::get_db_table_name();
-		$existing_items = $wpdb->get_col(
-			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
-				"SELECT order_item_id FROM {$table_name} WHERE order_id = %d",
-				$order_id
-			)
-		);
-		$existing_items = array_flip( $existing_items );
-		$date_created   = $order->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format );
-		$tax_items      = $order->get_items( OrderItemType::TAX );
-		$rows           = array();
-		$values         = array();
+		$table_name   = self::get_db_table_name();
+		$date_created = $order->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format );
+		$tax_items    = $order->get_items( OrderItemType::TAX );
+		$rows         = array();
+		$values       = array();
+		$keys         = array();
+		$key_values   = array();
 
 		foreach ( $tax_items as $tax_item ) {
 			$order_item_id = $tax_item->get_id();
-			unset( $existing_items[ $order_item_id ] );
+			$tax_rate_id   = $tax_item->get_rate_id();
 
 			$rows[] = '(%d, %s, %d, %d, %f, %f, %f)';
 			array_push(
 				$values,
 				$order->get_id(),
 				$date_created,
-				$tax_item->get_rate_id(),
+				$tax_rate_id,
 				$order_item_id,
 				$tax_item->get_shipping_tax_total(),
 				$tax_item->get_tax_total(),
 				(float) $tax_item->get_tax_total() + (float) $tax_item->get_shipping_tax_total()
 			);
+
+			$keys[] = '(%d, %d)';
+			array_push( $key_values, $tax_rate_id, $order_item_id );
 		}
 
 		$synced = true;
@@ -383,22 +380,33 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			}
 		}
 
-		// Includes rows written before the lookup was keyed by order item, which sit at zero.
+		// Keep only the rows just written. A row is keyed by tax rate as well as by tax order item,
+		// so matching on the item alone would leave behind the old row of a line whose rate id has
+		// changed since the last sync. This also drops the rows of lines the order no longer
+		// carries, and the rows written before the order item column existed, which sit at zero.
 		//
 		// Prune only once the order's tax lines have been written. A write that did not land leaves
 		// the order holding nothing but the rows it came in with, and dropping those on top of that
 		// turns a rebuild the next sync would carry out into an order the reports have lost.
-		if ( $synced && ! empty( $existing_items ) ) {
-			$existing_items = array_flip( $existing_items );
-			$format         = implode( ',', array_fill( 0, count( $existing_items ), '%d' ) );
-			array_unshift( $existing_items, $order_id );
-			$deleted = $wpdb->query(
-				$wpdb->prepare(
-					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input, placeholders are built above.
-					"DELETE FROM {$table_name} WHERE order_id = %d AND order_item_id IN ({$format})",
-					$existing_items
-				)
-			);
+		if ( $synced ) {
+			if ( empty( $keys ) ) {
+				$deleted = $wpdb->query(
+					$wpdb->prepare(
+						// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
+						"DELETE FROM {$table_name} WHERE order_id = %d",
+						$order->get_id()
+					)
+				);
+			} else {
+				array_unshift( $key_values, $order->get_id() );
+				$deleted = $wpdb->query(
+					$wpdb->prepare(
+						// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table name is not user input, and the key placeholders are built above, one pair per tax line.
+						"DELETE FROM {$table_name} WHERE order_id = %d AND (tax_rate_id, order_item_id) NOT IN (" . implode( ', ', $keys ) . ')',
+						$key_values
+					)
+				);
+			}
 
 			// A row the order no longer carries goes on being counted by the reports, so a prune
 			// that failed is not a sync that succeeded.

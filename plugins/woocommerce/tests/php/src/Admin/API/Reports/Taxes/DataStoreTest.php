@@ -649,6 +649,35 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Sync removes the lookup row a tax line left behind when its rate id changed.
+	 */
+	public function test_sync_removes_the_lookup_row_of_a_tax_line_whose_rate_id_changed(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$order = $this->seed_order_with_tax_lines( $this->tax_lines_on_distinct_rate_ids( 'US-CA', 101 ), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$this->assertCount( 2, $this->lookup_rows( $order->get_id() ) );
+
+		$tax_items = $order->get_items( OrderItemType::TAX );
+		$moved     = array_shift( $tax_items );
+		$moved->set_rate_id( 999 );
+		$order->save();
+
+		DataStore::sync_order_taxes( $order->get_id() );
+
+		$rows = $this->lookup_rows( $order->get_id() );
+
+		$this->assertCount( 2, $rows, 'A tax line that changed rate id should hold one row, not one on each rate id.' );
+		$this->assertNotContains( '101', array_column( $rows, 'tax_rate_id' ), 'The row on the rate id the line carried before should be gone.' );
+
+		$sut  = new DataStore();
+		$data = $sut->get_data( $this->all_taxes_query( '2023-02-01 00:00:00', '2023-02-28 23:59:59' ) );
+
+		$this->assertSame( 6.25, array_sum( array_column( $data->data, 'total_tax' ) ), 'The order should not be counted twice because one of its lines changed rate id.' );
+	}
+
+	/**
 	 * @testdox Sync passes over an order with no creation date instead of failing on it.
 	 */
 	public function test_sync_passes_over_an_order_with_no_creation_date(): void {
