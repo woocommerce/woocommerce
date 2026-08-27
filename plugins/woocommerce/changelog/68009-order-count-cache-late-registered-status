@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Rebuild the cached order counts when an order status is registered after the cache was primed, so custom statuses added by a just-activated plugin appear in the Orders screen filter row immediately instead of after cache expiry.

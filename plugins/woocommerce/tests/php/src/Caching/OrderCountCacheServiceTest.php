@@ -215,4 +215,34 @@ class OrderCountCacheServiceTest extends \WC_Unit_Test_Case {
 
 		$this->assertNull( $this->order_cache->get( 'shop_order', array( OrderInternalStatus::PENDING ) ) );
 	}
+	/**
+	 * Test that a status registered after the cache was primed invalidates the cached counts.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/68009
+	 */
+	public function test_count_includes_status_registered_after_cache_was_primed(): void {
+		// Prime the cache while only the default statuses are registered.
+		OrderUtil::get_count_for_type( 'shop_order' );
+
+		// Register a custom status, as a just-activated plugin would.
+		$add_custom_status = function ( $statuses ) {
+			$statuses['wc-partially-paid'] = 'Partially Paid';
+			return $statuses;
+		};
+		add_filter( 'wc_order_statuses', $add_custom_status );
+
+		// Put an order into the custom status; the incremental cache updates skip
+		// unknown statuses, so the primed cache does not track this order.
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( 'partially-paid' );
+		$order->save();
+
+		$counts = OrderUtil::get_count_for_type( 'shop_order' );
+
+		remove_filter( 'wc_order_statuses', $add_custom_status );
+
+		$this->assertArrayHasKey( 'wc-partially-paid', $counts );
+		$this->assertEquals( 1, $counts['wc-partially-paid'] );
+		$this->assertEquals( 0, $counts[ OrderInternalStatus::PENDING ] );
+	}
 }
