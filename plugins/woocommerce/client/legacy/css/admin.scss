@@ -21,7 +21,8 @@
 
 $font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
 	"Helvetica Neue", sans-serif;
-$font-sf-pro-display: "SF Pro Text", -apple-system, blinkmacsystemfont, "Segoe UI", roboto, oxygen-sans, ubuntu, cantarell, "Helvetica Neue", sans-serif;
+// stylelint-disable-next-line value-keyword-case -- font names in a Sass variable; stylelint can't tell them from keywords and lowercases them.
+$font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 
 .wc-addons-wrap {
 
