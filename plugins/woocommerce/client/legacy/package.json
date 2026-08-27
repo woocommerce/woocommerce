@@ -47,6 +47,14 @@
 	},
 	"config": {
 		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": [
+					"css/**/*.scss",
+					"js/**/*.js",
+					".stylelintrc"
+				]
+			},
 			"tests": [
 				{
 					"name": "JavaScript",
