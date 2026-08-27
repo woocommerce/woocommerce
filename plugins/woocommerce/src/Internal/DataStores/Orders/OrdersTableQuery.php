@@ -643,8 +643,18 @@ class OrdersTableQuery {
 			// Every time key accepts an array: 'before' and 'after' take date parts, and the rest
 			// take a list for the IN, NOT IN, BETWEEN and NOT BETWEEN comparisons. Validate the
 			// elements, not the array itself.
+			//
+			// 'before' and 'after' given a single value reach a string consumer, so stringable is
+			// the test there. Everything else is a date component that reaches mktime(), which
+			// declares ?int: a Stringable object or a non-numeric string fatals on it.
+			$is_string_consumer = in_array( $key, array( 'before', 'after' ), true ) && ! is_array( $value );
+
 			foreach ( is_array( $value ) ? $value : array( $value ) as $part ) {
-				if ( ! $this->is_stringable( $part ) ) {
+				$usable = $is_string_consumer
+					? $this->is_stringable( $part )
+					: $this->is_usable_as_date_component( $part );
+
+				if ( ! $usable ) {
 					throw $this->invalid_query_arg( esc_html__( 'Invalid date_query value.', 'woocommerce' ) );
 				}
 			}
@@ -1261,6 +1271,21 @@ class OrdersTableQuery {
 
 		// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Escaped by the caller, which phpcs cannot see through this indirection.
 		return new \Exception( $message );
+	}
+
+	/**
+	 * Checks whether a value can be used as one of WP_Date_Query's numeric date components.
+	 *
+	 * They reach mktime(), which declares ?int, so a Stringable object or a non-numeric string
+	 * fatals there even though both are usable as strings. null, booleans and arrays are left
+	 * alone: WP_Date_Query tolerates them today and the clause simply carries no restriction.
+	 *
+	 * @since 11.2.0
+	 * @param mixed $value The value to check.
+	 * @return bool True if the value is safe to pass to mktime(), false otherwise.
+	 */
+	private function is_usable_as_date_component( $value ): bool {
+		return is_null( $value ) || is_bool( $value ) || is_array( $value ) || is_numeric( $value );
 	}
 
 	/**
