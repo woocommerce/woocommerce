@@ -213,7 +213,7 @@ final class BlockTypesController {
 			)
 		);
 		// Referenced from the default Cart page content created at install; registration must not depend on the Cart block type being enabled, or the page renders nothing for the reference.
-		$shop_permalink = wc_get_page_permalink( 'shop' );
+		$shop_permalink = WC()->call_function( 'wc_get_page_permalink', 'shop' );
 		register_block_pattern(
 			'woocommerce/cart-empty-message',
 			array(
