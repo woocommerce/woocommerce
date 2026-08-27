@@ -57,9 +57,11 @@ To tag a newly added AI-generated image:
 > Added 2026-08-26: six section-refresh images exported from the demo site
 > (pink-sweater-woman-seated, black-scarf-woman, blue-sweater-man-standing,
 > orange-sweater-woman-seated, pink-sweater-woman-wall, yellow-knit-closeup).
-> Provenance pending studio confirmation; pink-sweater-woman-wall.webp came
-> from a Replicate prediction export, not the Gemini pipeline, so it needs
-> review before release. Originals should be added to the studio Drive.
+> Provenance confirmed by Ana Dovgal on the studio P2 (2026-08-26): the whole
+> batch is Nano Banana (Gemini) text-to-image generated from scratch and
+> upscaled in Replicate; pink-sweater-woman-wall.webp had simply kept the raw
+> upscaler filename when uploaded to the demo, since renamed. Originals with
+> C2PA manifests to be added to the studio Drive.
 
 ## Human-designed (not AI-generated, untagged)
 
