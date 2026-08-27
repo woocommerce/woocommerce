@@ -866,6 +866,26 @@ class FulfillmentsCsvImporter {
 	}
 
 	/**
+	 * Index an order's line items by SKU.
+	 *
+	 * @param array<int, \WC_Order_Item> $order_items Order line items.
+	 * @return array<string, \WC_Order_Item> Lowercased SKU => line item.
+	 */
+	private function index_items_by_sku( array $order_items ): array {
+		$by_sku = array();
+		foreach ( $order_items as $order_item ) {
+			if ( ! method_exists( $order_item, 'get_product' ) ) {
+				continue;
+			}
+			$product = $order_item->get_product();
+			if ( $product && $product->get_sku() ) {
+				$by_sku[ strtolower( $product->get_sku() ) ] = $order_item;
+			}
+		}
+		return $by_sku;
+	}
+
+	/**
 	 * Fire the customer shipment notification for a saved row.
 	 *
 	 * The row is already in the database by this point, so a listener that throws must not
@@ -1154,17 +1174,13 @@ class FulfillmentsCsvImporter {
 
 		$order_items = $order->get_items( 'line_item' );
 		$by_id       = array();
-		$by_sku      = array();
 		foreach ( $order_items as $order_item ) {
 			$by_id[ (int) $order_item->get_id() ] = $order_item;
-			if ( method_exists( $order_item, 'get_product' ) ) {
-				$product = $order_item->get_product();
-				if ( $product && $product->get_sku() ) {
-					$by_sku[ strtolower( $product->get_sku() ) ] = $order_item;
-				}
-			}
 		}
 
+		// Built on first use: indexing by SKU loads every line item's product, which most
+		// rows never need because they address items by ID.
+		$by_sku   = null;
 		$resolved = array();
 		foreach ( $entries as $entry ) {
 			$entry = trim( $entry );
@@ -1175,8 +1191,9 @@ class FulfillmentsCsvImporter {
 			$parts = array_map( 'trim', explode( ':', $entry ) );
 
 			if ( count( $parts ) === 3 && 'sku' === strtolower( $parts[0] ) ) {
-				$sku = strtolower( $parts[1] );
-				$qty = $parts[2];
+				$sku    = strtolower( $parts[1] );
+				$qty    = $parts[2];
+				$by_sku = $by_sku ?? $this->index_items_by_sku( $order_items );
 				if ( ! isset( $by_sku[ $sku ] ) ) {
 					throw new \Exception(
 						esc_html(
