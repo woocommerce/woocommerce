@@ -182,7 +182,7 @@ woocommerce_register_additional_checkout_field(
 
 The field input value will follows the shopper's browser and OS locale. The value is always stored as `YYYY-MM-DD`, and it is displayed using the site's date format (**Settings → General**) in emails, order screens, and other places the value is rendered.
 
-Use `min` and `max` to limit the range of dates a shopper can pick. Both accept an absolute date in `YYYY-MM-DD` format or an ISO 8601-2 duration relative to today, such as `P1D`, `-P5D` or `-P18Y`. Pass the duration rather than resolving it yourself — WooCommerce resolves it against the current date every time the field is rendered or validated, so it stays correct behind a page cache and across midnight:
+Use `min` and `max` to limit the range of dates a shopper can pick. Both accept an absolute date in `Y-m-d` format, or a duration relative to today in the [ISO 8601-2 duration format](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal/Duration#iso_8601_duration_format), such as `P1D`, `-P5D` or `-P18Y`:
 
 ```php
 woocommerce_register_additional_checkout_field(
@@ -198,7 +198,7 @@ woocommerce_register_additional_checkout_field(
 );
 ```
 
-If you'd rather write a relative date string, `DateInterval::createFromDateString( '-18 years' )` is accepted too.
+Pass the duration rather than resolving it yourself with `strtotime()` or `date()`. WooCommerce resolves it against the current date each time the field is rendered or validated, so it stays correct behind a page cache and across midnight.
 
 ## Adding Field Attributes
 

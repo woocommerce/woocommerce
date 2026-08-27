@@ -255,62 +255,43 @@ Text fields don't have any additional options beyond the general options listed 
 As well as the options above, date fields support `min` and `max` options to limit the range of dates a shopper can pick.
 
 | Option name | Description | Required? | Example | Default value |
-|-------------|-------------|-----------|---------|---------------|
+| --- | --- | --- | --- | --- |
 | `min` | The earliest date the shopper can select. | No | `2026-01-01`, `P0D`, `P1D` | No minimum. |
-| `max` | The latest date the shopper can select. | No | `2026-12-31`, `-P18Y`, `P30D` | No maximum. |
+| `max` | The latest date the shopper can select. | No | `2026-12-31`, `P30D`, `-P18Y` | No maximum. |
 
-Each takes one of:
+Each one takes either:
 
-- An **absolute** date in `YYYY-MM-DD` format, e.g. `2026-01-01`. This is the same format the HTML `min`/`max` attributes use.
-- An **[ISO 8601-2 duration](https://en.wikipedia.org/wiki/ISO_8601#Durations)** relative to today, optionally signed: `P1D` (tomorrow), `-P5D` (five days ago), `P2W`, `P3M`, `-P18Y`. `P0D` means today.
-- A **`DateInterval`**, including one built with `DateInterval::createFromDateString()` — see below.
-
-Only the date components `Y`, `M`, `W` and `D` are meaningful. A duration with a time component, such as `PT1H`, is rejected, as is one mixing directions like `+1 month -3 days`, since ISO 8601-2 signs the whole duration.
+- An **absolute** date in `YYYY-MM-DD` format, such as `2026-01-01`. This is the same format the HTML `min` and `max` attributes use.
+- A **duration relative to today**, written in the [ISO 8601-2 duration format](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal/Duration#iso_8601_duration_format), optionally signed: `P1D` (tomorrow), `-P5D` (five days ago), `P2W`, `P3M`, `-P18Y`. `P0D` means today.
 
 ```php
 woocommerce_register_additional_checkout_field(
-    array(
-        'id'       => 'my-plugin/delivery-date',
-        'label'    => 'Preferred delivery date',
-        'location' => 'order',
-        'type'     => 'date',
-        'required' => true,
-        'min'      => 'P1D',   // From tomorrow,
-        'max'      => 'P30D',  // up to 30 days out.
-    )
+	array(
+		'id'       => 'my-plugin/delivery-date',
+		'label'    => 'Preferred delivery date',
+		'location' => 'order',
+		'type'     => 'date',
+		'required' => true,
+		'min'      => 'P1D',   // From tomorrow,
+		'max'      => 'P30D',  // up to 30 days out.
+	)
 );
 ```
 
-##### Using relative date strings instead
+##### Dates only, not times
 
-If you would rather write PHP's relative date syntax than an ISO duration, `DateInterval::createFromDateString()` converts one into a `DateInterval`, which is accepted directly:
+A date field holds a calendar date with no time component, so only the `Y`, `M`, `W` and `D` parts of a duration are meaningful. A duration carrying a time component, such as `PT1H` or `P1DT12H`, is rejected at registration.
 
-```php
-'min' => DateInterval::createFromDateString( '1 day' ),
-'max' => DateInterval::createFromDateString( '-18 years' ),
-```
-
-Two things to know about `createFromDateString()`:
-
-- It returns a zero-length interval for anything it can't interpret as a duration, including expressions like `next thursday`, so `'min' => DateInterval::createFromDateString( 'next thursday' )` silently means *today* rather than failing.
-- It reports negative amounts as negative fields rather than by setting `invert`. WooCommerce handles both, so you don't need to normalize it yourself.
-
-##### Don't resolve the date yourself
+##### Pass the duration, don't resolve it yourself
 
 ```php
 // Don't do this.
 'min' => date( 'Y-m-d', strtotime( '+1 day' ) ),
 ```
 
-That resolves in UTC rather than the store's timezone, and freezes the value at registration, so a full-page cache or a tab left open across midnight will keep offering yesterday's boundary. Pass `P1D` and let WooCommerce resolve it: durations are resolved against the current date every time they're used, on the client when the field renders and on the server when the value is validated.
+This ends up resolving to a date that may not always be up to date between registration, field rendering, and value submission. Instead, pass P1D, which will be evaluated at input time and submission time.
 
-Registration fails with a `_doing_it_wrong` notice if a constraint can't be parsed, or if `min` and `max` are both absolute or both durations and `min` resolves later than `max` on the day the field is registered. Express both bounds in the same unit: a pair mixing months and days, such as `min => 'P30D'`, `max => 'P1M'`, is only out of order when a short February is in the range, so it registers on most days and fails validation in February. A pair mixing an absolute date and a duration is not checked at registration, since such a range can legitimately empty over time (for example from today until a fixed promotion end date); it is enforced per request instead.
-
-The resolved constraints are set as the `min` and `max` attributes on the input so the browser's date picker enforces them, and they are checked again on the server, so a value outside the range is rejected even if the request bypasses the form.
-
-Month and year arithmetic clamps to the end of the target month, so `P1M` on 31 January resolves to 28 February rather than rolling forward into March. This matches [`Temporal`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal/Duration)'s default `constrain` behaviour, which is what the browser uses.
-
-Constraints are not applied when an admin edits the field on the order screen, so a store can still correct an order with a date that a shopper could not have picked.
+Registration fails with a `_doing_it_wrong` notice if a constraint can't be parsed, or if `min` resolves to a date later than `max`. Express both bounds in the same unit, i.e. avoid `'min' => 'P30D'`, `'max' => 'P1M'` as it would fail in February for example. Avoid mixing absolute and durations unless you're sure they won't overlap at some point in the future.
 
 The input value will follow the browser's locale settings, the DB value will be in YYYY-MM-DD, and the final rendered value (in pages and emails) will follow the site's date format, set in **Settings -> General**.
 
