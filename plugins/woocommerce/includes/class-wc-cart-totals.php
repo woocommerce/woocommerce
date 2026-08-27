@@ -369,8 +369,11 @@ final class WC_Cart_Totals {
 	protected function get_coupons_from_cart() {
 		$this->coupons                      = $this->cart->get_coupons();
 		$this->coupon_application_positions = array();
-		$sequential_discounts               = 'yes' === get_option( 'woocommerce_calc_discounts_sequentially' );
-		$position                           = 0;
+
+		// The position tie-break only applies once two coupons can tie, and this setting is not autoloaded,
+		// so skip the option read for coupon-free and single-coupon carts.
+		$sequential_discounts = count( $this->coupons ) > 1 && 'yes' === get_option( 'woocommerce_calc_discounts_sequentially' );
+		$position             = 0;
 
 		foreach ( $this->coupons as $coupon ) {
 			if ( $sequential_discounts ) {
