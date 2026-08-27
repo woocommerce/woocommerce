@@ -224,9 +224,9 @@ const BIS_VARIATION_ATTRIBUTE = 'Color';
  * Return a handle to a variable product with one in-stock and one out-of-stock variation.
  *
  * With `anyAttribute`, the product gets a single "Any Color" variation instead —
- * the variation carries no attribute value, so the chosen one is only known from
- * what the shopper submitted. Core stores it as the notification's
- * `posted_attributes` meta and renders it as a list in the emails.
+ * the variation is stored with an empty attribute value, so the chosen one is
+ * only known from what the shopper submitted. Core keeps it as the
+ * notification's `posted_attributes` meta and renders it as a list in the emails.
  *
  * Deletion is not the caller's job: the fixtures below queue the parent id for
  * the worker-scoped batch in `reapProducts()`, and deleting the parent takes
@@ -269,7 +269,14 @@ export async function createOutOfStockVariableProduct(
 					regular_price: '9.99',
 					manage_stock: false,
 					stock_status: 'outofstock',
-					attributes: [],
+					// An empty `option` is what makes this "Any Color": the
+					// REST controller stores it as an empty `attribute_color`
+					// meta value, the same shape the admin writes. Omitting the
+					// attribute entirely would store no meta row at all, which
+					// `find_matching_product_variation()` cannot match.
+					attributes: [
+						{ name: BIS_VARIATION_ATTRIBUTE, option: '' },
+					],
 				},
 		  ]
 		: [
