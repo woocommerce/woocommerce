@@ -2797,9 +2797,6 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Releasing a batch does not evict cache entries belonging to other posts.
-	 */
-	/**
 	 * @testdox A batch holding both a product and a variation leaves no term relationship cached.
 	 */
 	public function test_wc_scheduled_sales_releases_term_caches_for_a_mixed_batch(): void {
@@ -2841,6 +2838,9 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		}
 	}
 
+	/**
+	 * @testdox Releasing a batch does not evict cache entries belonging to other posts.
+	 */
 	public function test_wc_scheduled_sales_leaves_unrelated_post_caches_intact(): void {
 		// The loop shares `posts` and `post_meta` with every other post type and every
 		// other job in the same WP-Cron request, so it releases its own IDs rather than
