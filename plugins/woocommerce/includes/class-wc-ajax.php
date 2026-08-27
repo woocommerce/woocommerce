@@ -2302,8 +2302,18 @@ class WC_AJAX {
 		}
 
 		$exact_term = reset( $exact_terms );
+		// A non-term exact result cannot be safely combined with the broad term objects.
+		if ( ! $exact_term instanceof WP_Term ) {
+			return $terms;
+		}
+
+		// Query hooks may change the taxonomy after the exact-query arguments are validated.
+		if ( $taxonomy !== $exact_term->taxonomy ) {
+			return $terms;
+		}
+
 		// Database collation may resolve to an already-visible case- or accent-equivalent term.
-		if ( ! $exact_term instanceof WP_Term || in_array( (int) $exact_term->term_id, $term_ids, true ) ) {
+		if ( in_array( (int) $exact_term->term_id, $term_ids, true ) ) {
 			return $terms;
 		}
 

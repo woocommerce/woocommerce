@@ -503,6 +503,50 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should reject an exact taxonomy term returned from another taxonomy.
+	 */
+	public function test_json_search_taxonomy_terms_rejects_exact_name_from_other_taxonomy(): void {
+		$requested_fixture = null;
+		$foreign_fixture   = null;
+
+		try {
+			$term_names = array(
+				'Candidate 6 first',
+				'Candidate 6 second',
+				'Candidate 6 third',
+			);
+
+			$requested_fixture = $this->create_attribute_taxonomy_fixture_for_test( $term_names );
+			$foreign_fixture   = $this->create_attribute_taxonomy_fixture_for_test( array( '6' ) );
+
+			add_action(
+				'pre_get_terms',
+				static function ( $query ) use ( $requested_fixture, $foreign_fixture ) {
+					$query_taxonomies = (array) ( $query->query_vars['taxonomy'] ?? array() );
+					$query_names      = (array) ( $query->query_vars['name'] ?? array() );
+
+					if ( in_array( $requested_fixture['taxonomy'], $query_taxonomies, true ) && in_array( '6', $query_names, true ) ) {
+						$query->query_vars['taxonomy'] = array( $foreign_fixture['taxonomy'] );
+					}
+				}
+			);
+
+			$response = $this->search_taxonomy_terms_via_ajax_for_test( $requested_fixture['taxonomy'], '6', 3, 'menu_order' );
+
+			$this->assertSame( $term_names, wp_list_pluck( $response, 'name' ), 'A foreign exact term should not displace the requested taxonomy results.' );
+			$this->assertNotContains( $foreign_fixture['term_ids']['6'], wp_list_pluck( $response, 'term_id' ), 'The response should not contain a term from another taxonomy.' );
+		} finally {
+			if ( null !== $foreign_fixture ) {
+				$this->unregister_attribute_taxonomy_fixture_for_test( $foreign_fixture );
+			}
+
+			if ( null !== $requested_fixture ) {
+				$this->unregister_attribute_taxonomy_fixture_for_test( $requested_fixture );
+			}
+		}
+	}
+
+	/**
 	 * @testdox Should treat the search string zero as a valid exact taxonomy term name.
 	 */
 	public function test_json_search_taxonomy_terms_includes_exact_zero_name(): void {
