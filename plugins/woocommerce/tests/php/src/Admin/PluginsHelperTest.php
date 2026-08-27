@@ -1,0 +1,83 @@
+<?php
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Admin;
+
+use Automattic\WooCommerce\Admin\PluginsHelper;
+use WC_Unit_Test_Case;
+use WP_Error;
+
+/**
+ * Tests for the PluginsHelper class.
+ */
+class PluginsHelperTest extends WC_Unit_Test_Case {
+
+	/**
+	 * @testdox Should join the error message and its string data into one reason.
+	 */
+	public function test_get_error_reason_uses_message_and_string_data(): void {
+		$error = new WP_Error(
+			'incompatible_php_required_version',
+			'The package could not be installed.',
+			'The PHP version on your server is 8.1.34, however the uploaded plugin requires 8.2.0.'
+		);
+
+		$reason = PluginsHelper::get_error_reason( $error );
+
+		$this->assertSame(
+			'The package could not be installed. The PHP version on your server is 8.1.34, however the uploaded plugin requires 8.2.0.',
+			$reason,
+			'Message and string data should be joined by a single space.'
+		);
+	}
+
+	/**
+	 * @testdox Should return only the message when the error data is not a string.
+	 */
+	public function test_get_error_reason_ignores_non_string_data(): void {
+		$error = new WP_Error( 'fs_error', 'Could not create directory.', array( 'path' => '/tmp' ) );
+
+		$this->assertSame(
+			'Could not create directory.',
+			PluginsHelper::get_error_reason( $error ),
+			'Array error data must not be rendered.'
+		);
+	}
+
+	/**
+	 * @testdox Should skip non-error candidates and use the first WP_Error.
+	 */
+	public function test_get_error_reason_uses_first_wp_error_candidate(): void {
+		$second = new WP_Error( 'download_failed', 'Download failed.' );
+
+		$this->assertSame(
+			'Download failed.',
+			PluginsHelper::get_error_reason( false, null, $second ),
+			'Non-error candidates (false, null) should be skipped.'
+		);
+	}
+
+	/**
+	 * @testdox Should return an empty string when no candidate is a WP_Error.
+	 */
+	public function test_get_error_reason_returns_empty_without_wp_error(): void {
+		$this->assertSame( '', PluginsHelper::get_error_reason( false, null, true ) );
+		$this->assertSame( '', PluginsHelper::get_error_reason() );
+	}
+
+	/**
+	 * @testdox Should strip HTML and trim whitespace from the reason.
+	 */
+	public function test_get_error_reason_strips_html_and_trims(): void {
+		$error = new WP_Error( 'x', ' <strong>Boom.</strong> ', '<a href="#">Details.</a>' );
+
+		$this->assertSame( 'Boom. Details.', PluginsHelper::get_error_reason( $error ) );
+	}
+
+	/**
+	 * @testdox Should return an empty string for a WP_Error with an empty message and no data.
+	 */
+	public function test_get_error_reason_returns_empty_for_empty_error(): void {
+		$this->assertSame( '', PluginsHelper::get_error_reason( new WP_Error( 'x', '' ) ) );
+	}
+}

@@ -220,6 +220,36 @@ class PluginsHelper {
 	}
 
 	/**
+	 * Build a merchant-readable reason from the first WP_Error among the given candidates.
+	 *
+	 * WordPress's upgrader reports the real failure (unmet PHP/WP version, filesystem, download)
+	 * as a WP_Error whose message is a short sentence and whose data is often the detail sentence.
+	 * Non-error candidates (false, null, true) are skipped.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param mixed ...$candidates Values that may be WP_Error instances, in order of preference.
+	 * @return string The reason, HTML-stripped and trimmed, or an empty string when none is available.
+	 */
+	public static function get_error_reason( ...$candidates ): string {
+		foreach ( $candidates as $candidate ) {
+			if ( ! is_wp_error( $candidate ) ) {
+				continue;
+			}
+
+			$parts = array( $candidate->get_error_message() );
+			$data  = $candidate->get_error_data();
+			if ( is_string( $data ) ) {
+				$parts[] = $data;
+			}
+
+			return trim( wp_strip_all_tags( implode( ' ', array_map( 'trim', $parts ) ) ) );
+		}
+
+		return '';
+	}
+
+	/**
 	 * Install an array of plugins.
 	 *
 	 * @param array                     $plugins Plugins to install.
