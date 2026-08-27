@@ -331,16 +331,23 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Deletes items in bulk if the data store supports it, otherwise deletes them one by one.
 	 *
-	 * @param array<int> $item_ids IDs of the items to delete.
+	 * @param array<int>  $item_ids IDs of the items to delete.
+	 * @param string|null $type     Item type, or null for every type.
 	 * @return void
 	 */
-	private function delete_items_by_ids( array $item_ids ): void {
+	private function delete_items_by_ids( array $item_ids, $type = null ): void {
 		/**
 		 * Data store wrapper.
 		 *
 		 * @var WC_Data_Store $data_store
 		 */
 		$data_store = $this->data_store;
+
+		if ( $this->data_store_overrides_delete_items() ) {
+			// @phpstan-ignore-next-line -- Required order data store method forwarded by WC_Data_Store::__call().
+			$data_store->delete_items( $this, $type );
+			return;
+		}
 
 		if ( $data_store->has_callable( 'delete_items_by_ids' ) ) {
 			// @phpstan-ignore-next-line -- Optional data store method checked above.
@@ -356,6 +363,29 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Determine whether the data store provides custom item deletion behavior.
+	 *
+	 * @return bool
+	 */
+	private function data_store_overrides_delete_items(): bool {
+		/**
+		 * Data store wrapper.
+		 *
+		 * @var WC_Data_Store $data_store
+		 */
+		$data_store       = $this->data_store;
+		$data_store_class = $data_store->get_current_class_name();
+
+		if ( ! is_a( $data_store_class, Abstract_WC_Order_Data_Store_CPT::class, true ) ) {
+			return true;
+		}
+
+		$method = new ReflectionMethod( $data_store_class, 'delete_items' );
+
+		return Abstract_WC_Order_Data_Store_CPT::class !== $method->getDeclaringClass()->getName();
 	}
 
 	/**
@@ -444,7 +474,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			// yet been processed remain queued for the next save() rather than being silently lost.
 			foreach ( array_values( array_unique( $this->item_types_to_bulk_delete ) ) as $type ) {
 				$item_ids = $this->item_ids_to_bulk_delete_by_type[ $type ] ?? array();
-				$this->delete_items_by_ids( $item_ids );
+				$this->delete_items_by_ids( $item_ids, $type );
 				unset( $this->item_ids_to_bulk_delete_by_type[ $type ] );
 				$items_changed                   = true;
 				$this->item_types_to_bulk_delete = array_values(

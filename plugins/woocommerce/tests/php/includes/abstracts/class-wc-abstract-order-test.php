@@ -1539,6 +1539,66 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should invoke custom data store item deletion behavior.
+	 * @testWith [null]
+	 *           ["line_item"]
+	 *
+	 * @param string|null $type Item type, or null for every type.
+	 */
+	public function test_remove_order_items_invokes_custom_data_store_delete_items( $type ) {
+		$order               = WC_Helper_Order::create_order();
+		$original_data_store = $order->get_data_store();
+
+		// phpcs:disable Squiz.Commenting -- Anonymous test double methods are self-explanatory.
+		$overriding_data_store_class = get_class(
+			new class() extends WC_Order_Data_Store_CPT {
+				public $delete_items_call_count = 0;
+
+				public function delete_items( $order, $type = null ) {
+					++$this->delete_items_call_count;
+					parent::delete_items( $order, $type );
+				}
+			}
+		);
+		$custom_data_store           = new class( $original_data_store, $overriding_data_store_class ) extends WC_Data_Store {
+			public $deleted_item_types = array();
+
+			private $delegate;
+
+			private $overriding_data_store_class;
+
+			public function __construct( $delegate, $overriding_data_store_class ) {
+				parent::__construct( 'order' );
+				$this->delegate                    = $delegate;
+				$this->overriding_data_store_class = $overriding_data_store_class;
+			}
+
+			public function get_current_class_name() {
+				return $this->overriding_data_store_class;
+			}
+
+			public function delete_items( $order, $type = null ) {
+				$this->deleted_item_types[] = $type;
+				return $this->delegate->delete_items( $order, $type );
+			}
+
+			public function __call( $method, $parameters ) {
+				return $this->delegate->{$method}( ...$parameters );
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+
+		$reflection = new ReflectionProperty( WC_Data::class, 'data_store' );
+		$reflection->setAccessible( true );
+		$reflection->setValue( $order, $custom_data_store );
+
+		$order->remove_order_items( $type );
+		$order->save();
+
+		$this->assertSame( array( $type ), $custom_data_store->deleted_item_types, 'The custom delete_items() implementation should be invoked once with the requested type.' );
+	}
+
+	/**
 	 * @testdox Should preserve replacement items with a legacy custom data store lacking ID snapshot and deletion methods.
 	 */
 	public function test_remove_order_items_preserves_replacements_with_custom_data_store_fallback() {
