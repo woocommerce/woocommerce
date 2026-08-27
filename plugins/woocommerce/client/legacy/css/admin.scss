@@ -1802,7 +1802,6 @@ ul.wc_coupon_list {
 			padding: 0 0.5em;
 			background-color: #fff;
 			border: 1px solid #aaa;
-			-webkit-box-shadow: 0 1px 0 #dfdfdf;
 			box-shadow: 0 1px 0 #dfdfdf;
 
 			border-radius: 4px;
@@ -2459,10 +2458,6 @@ body.woocommerce_page_wc-orders {
 				color: $gray-900;
 				background: #f8f8f8;
 				-webkit-touch-callout: none;
-				-webkit-user-select: none;
-				-khtml-user-select: none;
-				-moz-user-select: none;
-				-ms-user-select: none;
 				user-select: none;
 
 				&.sortable {
@@ -7744,13 +7739,9 @@ table.bar_chart {
 		height: 32px;
 		margin: 0 auto 12px;
 		background-color: $gray-400;
-		-webkit-mask-image: var(--wc-blank-state-icon);
 		mask-image: var(--wc-blank-state-icon);
-		-webkit-mask-position: center;
 		mask-position: center;
-		-webkit-mask-repeat: no-repeat;
 		mask-repeat: no-repeat;
-		-webkit-mask-size: contain;
 		mask-size: contain;
 	}
 }
@@ -9071,8 +9062,6 @@ table.bar_chart {
 		overflow: hidden;
 		color: #ccc;
 		width: 100%;
-		display: -webkit-inline-flex;
-		display: -ms-inline-flexbox;
 		display: inline-flex;
 
 		li {
@@ -9219,7 +9208,6 @@ table.bar_chart {
 
 			.woocommerce-importer-file-url-field-wrapper {
 				border: 1px solid #ddd;
-				-webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.07);
 				box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.07);
 				background-color: #fff;
 				color: #32373c;
@@ -9282,6 +9270,7 @@ table.bar_chart {
 			border-radius: 3px;
 			box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.4);
 			background: var(--wp-admin-theme-color, $woocommerce);
+			-webkit-transition: width 1s ease;
 			transition: width 1s ease;
 		}
 
@@ -9289,6 +9278,7 @@ table.bar_chart {
 			border-radius: 3px;
 			box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.4);
 			background: var(--wp-admin-theme-color, $woocommerce);
+			-moz-transition: width 1s ease;
 			transition: width 1s ease;
 		}
 
@@ -9296,6 +9286,7 @@ table.bar_chart {
 			border-radius: 3px;
 			box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.4);
 			background: var(--wp-admin-theme-color, $woocommerce);
+			-ms-transition: width 1s ease;
 			transition: width 1s ease;
 		}
 
