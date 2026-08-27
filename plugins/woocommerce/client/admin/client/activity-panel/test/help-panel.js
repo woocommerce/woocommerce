@@ -23,7 +23,7 @@ describe( 'Activity Panels', () => {
 				},
 				{
 					id: 'kco',
-					text: 'Klarna',
+					text: 'Kustom',
 				},
 				{
 					id: 'klarna_payments',
