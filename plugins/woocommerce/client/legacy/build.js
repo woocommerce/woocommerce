@@ -108,22 +108,20 @@ function isStale( src, dest ) {
 
 // Copy js/** (minus the concat-only utils and tests) into assets/js,
 // plus the sourcebuster dist files. When stale === true, only files
-// newer than their copy are written. Returns the copied relative paths.
+// newer than their copy are written.
 function copyJs( { stale = false } = {} ) {
-	const copied = [];
-	const copy = ( src, dest, rel ) => {
+	const copy = ( src, dest ) => {
 		if ( ! stale || isStale( src, dest ) ) {
 			copyFile( src, dest );
-			copied.push( rel );
 		}
 	};
 
 	for ( const rel of walk( JS_SRC ) ) {
-		const segments = rel.split( '/' );
-		if ( rel.startsWith( 'admin/utils/' ) || segments.includes( 'test' ) ) {
+		const dirs = rel.split( '/' ).slice( 0, -1 );
+		if ( rel.startsWith( 'admin/utils/' ) || dirs.includes( 'test' ) ) {
 			continue;
 		}
-		copy( path.join( JS_SRC, rel ), path.join( JS_DEST, rel ), rel );
+		copy( path.join( JS_SRC, rel ), path.join( JS_DEST, rel ) );
 	}
 
 	const sourcebuster = path.join( __dirname, 'node_modules', 'sourcebuster' );
@@ -131,43 +129,31 @@ function copyJs( { stale = false } = {} ) {
 		if ( name.startsWith( 'sourcebuster' ) ) {
 			copy(
 				path.join( sourcebuster, 'dist', name ),
-				path.join( JS_DEST, 'sourcebuster', name ),
-				'sourcebuster/' + name
+				path.join( JS_DEST, 'sourcebuster', name )
 			);
 		}
 	}
 	copy(
 		path.join( sourcebuster, 'LICENSE' ),
-		path.join( JS_DEST, 'sourcebuster', 'LICENSE' ),
-		'sourcebuster/LICENSE'
+		path.join( JS_DEST, 'sourcebuster', 'LICENSE' )
 	);
-	return copied;
 }
 
-// Prepend the number validation and maybe-modify-decimal utils onto the
-// copied wc-shipping-zone-methods.js. Runs whenever that copy was just
-// refreshed (raw source is sitting at dest) or a util is newer than dest.
-function concatJs( copied ) {
+// Prepend the number validation and maybe-modify-decimal utils onto
+// wc-shipping-zone-methods.js. Always rebuilt from the source, so its
+// .min.js is re-minified on every watch pass (cheap: one small file).
+function concatJs() {
 	const dest = path.join( JS_DEST, 'admin', 'wc-shipping-zone-methods.js' );
-	const utils = [
+	copyFile(
+		path.join( JS_SRC, 'admin', 'wc-shipping-zone-methods.js' ),
+		dest
+	);
+	const parts = [
 		path.join( JS_SRC, 'admin', 'utils', 'number-validation.js' ),
 		path.join( JS_SRC, 'admin', 'utils', 'maybe-modify-decimal.js' ),
+		dest,
 	];
-	if (
-		! copied.includes( 'admin/wc-shipping-zone-methods.js' ) &&
-		! utils.some( ( util ) => isStale( util, dest ) )
-	) {
-		return;
-	}
-	// A skipped copy means dest already holds the previous concat output,
-	// so refresh it from the source before prepending the utils.
-	if ( ! copied.includes( 'admin/wc-shipping-zone-methods.js' ) ) {
-		copyFile(
-			path.join( JS_SRC, 'admin', 'wc-shipping-zone-methods.js' ),
-			dest
-		);
-	}
-	write( dest, [ ...utils, dest ].map( read ).join( '\n' ) );
+	write( dest, parts.map( read ).join( '\n' ) );
 }
 
 function minifyJsFile( src, dest ) {
@@ -243,8 +229,8 @@ async function minifyJs( { stale = false } = {} ) {
 
 async function buildJs( options = {} ) {
 	const started = Date.now();
-	const copied = copyJs( options );
-	concatJs( copied );
+	copyJs( options );
+	concatJs();
 	await minifyJs( options );
 	console.log( `js built in ${ Date.now() - started }ms` );
 }
@@ -308,9 +294,7 @@ function generateRtl() {
 // string input would be treated differently (no source directory context).
 function minifyCssFile( src, dest ) {
 	const CleanCSS = require( 'clean-css' );
-	const result = new CleanCSS( { report: 'min', sourceMap: false } ).minify( [
-		src,
-	] );
+	const result = new CleanCSS( { sourceMap: false } ).minify( [ src ] );
 	if ( result.errors.length ) {
 		throw new Error( `Minifying ${ src } failed: ${ result.errors }` );
 	}
