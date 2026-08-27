@@ -1,4 +1,4 @@
-Significance: patch
+Significance: minor
 Type: fix
 
 Fix Form setValue reporting every field as changed and dropping earlier writes made in the same synchronous stack.
