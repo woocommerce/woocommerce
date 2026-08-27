@@ -433,9 +433,11 @@ export const removeOriginFromURL = ( url: string ) => {
 /**
  * Build the notice text for a failed provider extension install or activation.
  *
- * `@woocommerce/data` frames errors with the plugin slug. When the rejection carries the
- * per-plugin server response, re-frame it with the provider title the merchant clicked;
- * otherwise (permission or connection errors) keep the already-framed message.
+ * `@woocommerce/data` frames errors with the plugin slug and only exposes the finished
+ * sentence. Re-frame with the provider title the merchant clicked, taking the reason from
+ * the original rejection kept in `error.data`: the per-plugin server response, a plugin
+ * permission error, or any other error carrying a message. Keep the already-framed
+ * message only when none of those is available.
  *
  * @param actionType Whether the extension was being installed or activated.
  * @param title      The provider title shown in the UI.
@@ -473,6 +475,31 @@ export const getPluginActionErrorMessage = (
 
 	if ( Array.isArray( perPlugin ) && perPlugin.length ) {
 		return `${ frame } ${ perPlugin.join( ' ' ) }`;
+	}
+
+	const restError =
+		typeof data === 'object' && data !== null
+			? ( data as {
+					code?: unknown;
+					message?: unknown;
+					data?: { status?: unknown };
+			  } )
+			: undefined;
+
+	// Same check as @woocommerce/data's handlePluginAPIError, whose copy this repeats
+	// because that package only exposes it glued to the slug-framed message.
+	if (
+		restError?.code === 'woocommerce_rest_cannot_update' &&
+		restError.data?.status === 403
+	) {
+		return `${ frame } ${ __(
+			'You do not have permissions to manage plugins. Please contact your site administrator.',
+			'woocommerce'
+		) }`;
+	}
+
+	if ( typeof restError?.message === 'string' && restError.message ) {
+		return `${ frame } ${ restError.message }`;
 	}
 
 	const message =
