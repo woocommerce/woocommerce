@@ -666,24 +666,7 @@ class FulfillmentsCsvImporter {
 
 				$notified = false;
 				if ( $this->options['notify_customer'] ) {
-					if ( ! $previous_state ) {
-						/**
-						 * This action is documented in OrderFulfillmentsRestController.php.
-						 *
-						 * @since 10.1.0
-						 */
-						do_action( 'woocommerce_fulfillment_created_notification', $order->get_id(), $existing, $order );
-						FulfillmentsTracker::track_fulfillment_notification_sent( 'fulfillment_created', $existing->get_id(), $order->get_id() );
-					} else {
-						/**
-						 * This action is documented in OrderFulfillmentsRestController.php.
-						 *
-						 * @since 10.1.0
-						 */
-						do_action( 'woocommerce_fulfillment_updated_notification', $order->get_id(), $existing, $order, '' );
-						FulfillmentsTracker::track_fulfillment_notification_sent( 'fulfillment_updated', $existing->get_id(), $order->get_id() );
-					}
-					$notified = true;
+					$notified = $this->notify_customer( $order, $existing, $previous_state, $row_number );
 				}
 
 				FulfillmentsTracker::track_fulfillment_update(
@@ -720,14 +703,7 @@ class FulfillmentsCsvImporter {
 
 			$notified = false;
 			if ( $this->options['notify_customer'] && $fulfillment->get_is_fulfilled() ) {
-				/**
-				 * This action is documented in OrderFulfillmentsRestController.php.
-				 *
-				 * @since 10.1.0
-				 */
-				do_action( 'woocommerce_fulfillment_created_notification', $order->get_id(), $fulfillment, $order );
-				FulfillmentsTracker::track_fulfillment_notification_sent( 'fulfillment_created', $fulfillment->get_id(), $order->get_id() );
-				$notified = true;
+				$notified = $this->notify_customer( $order, $fulfillment, false, $row_number );
 			}
 
 			FulfillmentsTracker::track_fulfillment_creation(
@@ -864,6 +840,47 @@ class FulfillmentsCsvImporter {
 		$name = strtolower( trim( $name ) );
 		$name = preg_replace( '/[^a-z0-9]+/', '_', $name );
 		return trim( (string) $name, '_' );
+	}
+
+	/**
+	 * Fire the customer shipment notification for a saved row.
+	 *
+	 * The row is already in the database by this point, so a listener that throws must not
+	 * turn it into a failed row or leave the dedupe pair unrecorded.
+	 *
+	 * @param WC_Order    $order            Order the fulfillment belongs to.
+	 * @param Fulfillment $fulfillment      Saved fulfillment.
+	 * @param bool        $was_fulfilled    Whether the fulfillment was already fulfilled before this row.
+	 * @param int         $row_number       Row being processed, for the log line.
+	 * @return bool Whether the notification was dispatched.
+	 */
+	private function notify_customer( WC_Order $order, Fulfillment $fulfillment, bool $was_fulfilled, int $row_number ): bool {
+		try {
+			if ( $was_fulfilled ) {
+				/**
+				 * This action is documented in OrderFulfillmentsRestController.php.
+				 *
+				 * @since 10.1.0
+				 */
+				do_action( 'woocommerce_fulfillment_updated_notification', $order->get_id(), $fulfillment, $order, '' );
+				FulfillmentsTracker::track_fulfillment_notification_sent( 'fulfillment_updated', $fulfillment->get_id(), $order->get_id() );
+			} else {
+				/**
+				 * This action is documented in OrderFulfillmentsRestController.php.
+				 *
+				 * @since 10.1.0
+				 */
+				do_action( 'woocommerce_fulfillment_created_notification', $order->get_id(), $fulfillment, $order );
+				FulfillmentsTracker::track_fulfillment_notification_sent( 'fulfillment_created', $fulfillment->get_id(), $order->get_id() );
+			}
+			return true;
+		} catch ( \Throwable $e ) {
+			wc_get_logger()->error(
+				sprintf( 'Fulfillment import notification failed on row %1$d for order %2$d: %3$s', $row_number, $order->get_id(), $e->getMessage() ),
+				array( 'source' => 'fulfillments-csv-importer' )
+			);
+			return false;
+		}
 	}
 
 	/**
