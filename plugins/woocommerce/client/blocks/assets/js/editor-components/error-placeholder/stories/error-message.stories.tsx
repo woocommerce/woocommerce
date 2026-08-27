@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Story, Meta } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react-webpack5';
 
 /**
  * Internal dependencies
@@ -13,7 +13,7 @@ export default {
 	component: ErrorMessage,
 } as Meta< ErrorMessageProps >;
 
-const Template: Story< ErrorMessageProps > = ( args ) => (
+const Template: StoryFn< ErrorMessageProps > = ( args ) => (
 	<ErrorMessage { ...args } />
 );
 

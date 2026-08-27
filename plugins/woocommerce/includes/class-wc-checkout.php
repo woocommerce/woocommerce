@@ -9,6 +9,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
@@ -615,12 +616,13 @@ class WC_Checkout {
 			$item->legacy_fee_key = $fee_key; // @deprecated 4.4.0 For legacy actions.
 			$item->set_props(
 				array(
-					'name'      => $fee->name,
-					'tax_class' => $fee->taxable ? $fee->tax_class : 0,
-					'amount'    => $fee->amount,
-					'total'     => $fee->total,
-					'total_tax' => $fee->tax,
-					'taxes'     => array(
+					'name'       => $fee->name,
+					'tax_class'  => $fee->taxable ? $fee->tax_class : '',
+					'tax_status' => $fee->taxable ? ProductTaxStatus::TAXABLE : ProductTaxStatus::NONE,
+					'amount'     => $fee->amount,
+					'total'      => $fee->total,
+					'total_tax'  => $fee->tax,
+					'taxes'      => array(
 						'total' => $fee->tax_data,
 					),
 				)
@@ -907,7 +909,7 @@ class WC_Checkout {
 				if ( ! isset( $data[ $key ] ) ) {
 					continue;
 				}
-				$required    = ! empty( $field['required'] );
+				$required    = ! empty( $field['required'] ) && empty( $field['hidden'] );
 				$format      = array_filter( isset( $field['validate'] ) ? (array) $field['validate'] : array() );
 				$field_label = isset( $field['label'] ) ? $field['label'] : '';
 

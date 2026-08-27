@@ -644,7 +644,8 @@ function wc_price( $price, $args = array() ) {
 	}
 
 	if ( $args['in_span'] ) {
-		$formatted_price = ( $negative ? '-' : '' ) . sprintf( $args['price_format'], '<span class="woocommerce-Price-currencySymbol" translate="no">' . get_woocommerce_currency_symbol( $args['currency'] ) . '</span>', $price );
+		// dir="auto" isolates the symbol so RTL-script symbols (e.g. Lebanese Pound) can't flip the visual order of the price or bleed into surrounding text; it must stay "auto" (not "ltr") so those symbols' glyphs keep rendering in their native right-to-left order.
+		$formatted_price = ( $negative ? '-' : '' ) . sprintf( $args['price_format'], '<span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">' . get_woocommerce_currency_symbol( $args['currency'] ) . '</span>', $price );
 		$aria_hidden     = $args['aria-hidden'] ? ' aria-hidden="true"' : '';
 		$return          = '<span class="woocommerce-Price-amount amount"' . $aria_hidden . '><bdi>' . $formatted_price . '</bdi></span>';
 	} else {

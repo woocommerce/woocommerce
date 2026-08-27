@@ -18,6 +18,7 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableControlle
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
+use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\PluginUtil;
@@ -541,15 +542,14 @@ class FeaturesController {
 			),
 			\Automattic\WooCommerce\Internal\VariationGallery\Package::FEATURE_ID => array(
 				'name'                         => __( 'Variation gallery', 'woocommerce' ),
-				'description'                  => __(
-					'Add multiple images per product variation. Once enabled, the Additional Variation Images extension will be deactivated and its data migrated.',
-					'woocommerce'
-				),
-				'option_key'                   => \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME,
-				'is_experimental'              => true,
-				'enabled_by_default'           => \Automattic\WooCommerce\Internal\VariationGallery\Package::is_in_canary_cohort(),
+				'description'                  => __( 'Add multiple images per product variation.', 'woocommerce' ),
+				'is_experimental'              => false,
+				'enabled_by_default'           => true,
+				'disable_ui'                   => true,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'deprecated_since'             => '11.1.0',
+				'deprecated_value'             => true,
 			),
 			'wc-visual-attribute'                  => array(
 				'name'                         => __( 'Color swatches for attributes', 'woocommerce' ),
@@ -621,18 +621,6 @@ class FeaturesController {
 				'enabled_by_default'           => false,
 				'is_experimental'              => true,
 				'disable_ui'                   => false,
-				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
-			),
-			'agentic_checkout'                     => array(
-				'name'                         => __( 'Agentic Checkout API', 'woocommerce' ),
-				'description'                  => __(
-					'Enable the Agentic Checkout API for AI-powered checkout experiences (e.g., ChatGPT). This adds REST API endpoints that allow AI agents to create and manage checkout sessions.',
-					'woocommerce'
-				),
-				'enabled_by_default'           => false,
-				'is_experimental'              => true,
-				'disable_ui'                   => true,
-				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			'dual_code_graphql_api'                => array(
@@ -709,6 +697,18 @@ class FeaturesController {
 				'enabled_by_default'           => false,
 				'is_experimental'              => true,
 				'disable_ui'                   => false,
+			),
+			StockNotifications::FEATURE_NAME       => array(
+				'name'                         => __( 'Back in Stock Notifications', 'woocommerce' ),
+				'description'                  => __(
+					'Allow customers to sign up to receive an email when an out-of-stock product is back in stock.',
+					'woocommerce'
+				),
+				'option_key'                   => StockNotifications::ENABLE_OPTION_NAME,
+				'enabled_by_default'           => false,
+				'is_experimental'              => true,
+				'disable_ui'                   => false,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			BlockEditorUnifiedAssets::FEATURE_NAME => array(
 				'name'                         => __( 'Unified block editor assets', 'woocommerce' ),

@@ -137,7 +137,7 @@ abstract class WC_Settings_API {
 	public function get_field_value( $key, $field, $post_data = array() ) {
 		$type      = $this->get_field_type( $field );
 		$field_key = $this->get_field_key( $key );
-		$post_data = empty( $post_data ) ? $_POST : $post_data; // WPCS: CSRF ok, input var ok.
+		$post_data = empty( $post_data ) ? $_POST : $post_data; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Raw settings values are passed to field-specific validators; authorization belongs to the caller.
 		$value     = isset( $post_data[ $field_key ] ) ? $post_data[ $field_key ] : null;
 
 		if ( isset( $field['sanitize_callback'] ) && is_callable( $field['sanitize_callback'] ) ) {
@@ -176,7 +176,7 @@ abstract class WC_Settings_API {
 		if ( ! empty( $this->data ) && is_array( $this->data ) ) {
 			return $this->data;
 		}
-		return $_POST; // WPCS: CSRF ok, input var ok.
+		return $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Raw settings values are returned for field-specific validation; authorization belongs to the caller.
 	}
 
 	/**
