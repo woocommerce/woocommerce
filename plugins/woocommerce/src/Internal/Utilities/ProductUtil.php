@@ -145,6 +145,27 @@ class ProductUtil {
 	}
 
 	/**
+	 * Append a join to the product meta lookup table, aliased as wc_product_meta_lookup, unless the
+	 * clause already defines that alias. Callers reference the alias, so the check looks for the alias
+	 * rather than the table name, and it stays a no-op when the alias exists because defining it twice
+	 * is a SQL error.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $join SQL JOIN clause.
+	 * @return string
+	 */
+	public function append_product_sorting_table_join( string $join ): string {
+		global $wpdb;
+
+		// The word boundary cannot match inside the prefixed table name because wpdb prefixes contain only word characters.
+		if ( ! preg_match( '/\bwc_product_meta_lookup\b/', $join ) ) {
+			$join .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
+		}
+		return $join;
+	}
+
+	/**
 	 * Counts per-status number of products of a given post type.
 	 *
 	 * @since 11.0.0

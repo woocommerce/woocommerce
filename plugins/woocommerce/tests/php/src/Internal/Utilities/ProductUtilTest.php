@@ -168,4 +168,71 @@ class ProductUtilTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( 1, $delete_attempts );
 	}
+
+	/**
+	 * Join clauses that do not contain the wc_product_meta_lookup alias.
+	 *
+	 * %1$s is the prefixed lookup table name and %2$s is the posts table name.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function provider_joins_without_the_lookup_alias(): array {
+		return array(
+			'empty clause'                     => array( '' ),
+			'unrelated table join'             => array( ' LEFT JOIN unrelated_table unrelated ON %2$s.ID = unrelated.post_id ' ),
+			'lookup table under another alias' => array( ' LEFT JOIN %1$s extension_lookup ON %2$s.ID = extension_lookup.product_id ' ),
+		);
+	}
+
+	/**
+	 * @testdox append_product_sorting_table_join appends the aliased lookup join when the clause does not contain the alias.
+	 * @dataProvider provider_joins_without_the_lookup_alias
+	 *
+	 * @param string $join_template Join clause template.
+	 */
+	public function test_append_product_sorting_table_join_appends_when_the_alias_is_missing( string $join_template ): void {
+		global $wpdb;
+		$join = sprintf( $join_template, $wpdb->wc_product_meta_lookup, $wpdb->posts );
+
+		$result = wc_get_container()->get( ProductUtil::class )->append_product_sorting_table_join( $join );
+
+		if ( '' !== $join ) {
+			$this->assertStringStartsWith( $join, $result, 'Existing joins should be preserved.' );
+		}
+		$this->assertStringContainsString(
+			"LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON {$wpdb->posts}.ID = wc_product_meta_lookup.product_id",
+			$result,
+			'The wc_product_meta_lookup alias should be joined whenever the clause does not already define it, even when other joins to the table exist.'
+		);
+	}
+
+	/**
+	 * Join clauses that already define the wc_product_meta_lookup alias.
+	 *
+	 * %1$s is the prefixed lookup table name and %2$s is the posts table name.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function provider_joins_with_the_lookup_alias(): array {
+		return array(
+			'implicit alias'   => array( ' LEFT JOIN %1$s wc_product_meta_lookup ON %2$s.ID = wc_product_meta_lookup.product_id ' ),
+			'AS keyword'       => array( ' LEFT JOIN %1$s AS wc_product_meta_lookup ON %2$s.ID = wc_product_meta_lookup.product_id ' ),
+			'backticked alias' => array( ' LEFT JOIN %1$s `wc_product_meta_lookup` ON %2$s.ID = `wc_product_meta_lookup`.product_id ' ),
+		);
+	}
+
+	/**
+	 * @testdox append_product_sorting_table_join leaves the clause alone when it already defines the alias.
+	 * @dataProvider provider_joins_with_the_lookup_alias
+	 *
+	 * @param string $join_template Join clause template.
+	 */
+	public function test_append_product_sorting_table_join_is_a_noop_when_the_alias_exists( string $join_template ): void {
+		global $wpdb;
+		$join = sprintf( $join_template, $wpdb->wc_product_meta_lookup, $wpdb->posts );
+
+		$result = wc_get_container()->get( ProductUtil::class )->append_product_sorting_table_join( $join );
+
+		$this->assertSame( $join, $result, 'A clause that already defines the wc_product_meta_lookup alias must be left alone; a second definition is a duplicate-alias SQL error.' );
+	}
 }
