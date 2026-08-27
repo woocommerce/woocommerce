@@ -51,6 +51,8 @@ const textField: SettingsUIField = {
 	type: 'text',
 };
 
+const mountedRoots: Array< () => void > = [];
+
 const renderElement = ( element: JSX.Element ) => {
 	const container = document.createElement( 'div' );
 	document.body.appendChild( container );
@@ -58,17 +60,18 @@ const renderElement = ( element: JSX.Element ) => {
 	act( () => {
 		root.render( element );
 	} );
-	return {
-		container,
-		unmount: () => {
-			act( () => root.unmount() );
-			container.remove();
-		},
-	};
+	mountedRoots.push( () => {
+		act( () => root.unmount() );
+		container.remove();
+	} );
+	return { container };
 };
 
 describe( 'dataform adapter', () => {
 	afterEach( () => {
+		while ( mountedRoots.length > 0 ) {
+			mountedRoots.pop()?.();
+		}
 		__resetRegistry();
 		jest.restoreAllMocks();
 	} );
@@ -135,14 +138,11 @@ describe( 'dataform adapter', () => {
 			const Render = field.render as ( props: {
 				item: SettingsValues;
 			} ) => JSX.Element;
-			const { container, unmount } = renderElement(
-				<Render item={ {} } />
-			);
+			const { container } = renderElement( <Render item={ {} } /> );
 			expect(
 				container.querySelector( '.wc-settings-ui__info' )
 			).not.toBeNull();
 			expect( container.textContent ).toContain( 'Read this' );
-			unmount();
 		} );
 
 		it( 'warns and maps an unknown type to a read-only field rendering nothing', () => {
@@ -426,7 +426,7 @@ describe( 'dataform adapter', () => {
 			const adapter = createDataFormAdapter( options );
 			const data = { enabled_field: 'a', disabled_field: 'b' };
 
-			const { container, unmount } = renderElement(
+			const { container } = renderElement(
 				<DataForm
 					data={ data }
 					fields={ adapter.fields }
@@ -447,7 +447,6 @@ describe( 'dataform adapter', () => {
 					( input ) => input.value === 'b' && input.disabled
 				)
 			).toBe( true );
-			unmount();
 		} );
 
 		it( 'surfaces grouped validity through FieldValidity children', () => {
@@ -455,7 +454,7 @@ describe( 'dataform adapter', () => {
 			const adapter = createDataFormAdapter( options );
 			const data = { test_field: 'value' };
 
-			const { container, unmount } = renderElement(
+			const { container } = renderElement(
 				<DataForm
 					data={ data }
 					fields={ adapter.fields }
@@ -490,7 +489,6 @@ describe( 'dataform adapter', () => {
 			expect( container.textContent ).toContain(
 				'This value is not allowed.'
 			);
-			unmount();
 		} );
 	} );
 } );
