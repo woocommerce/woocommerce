@@ -99,4 +99,30 @@ describe( 'ImportStep', () => {
 			screen.getByRole( 'button', { name: /retry/i } )
 		).toBeInTheDocument();
 	} );
+
+	it( 'offers Start over instead of Retry once the session has ended', () => {
+		const dispatch = jest.fn();
+		const state = createInitialState();
+		state.step = 'import';
+		state.total = 100;
+		state.processed = 10;
+		state.token = 'tok';
+		state.error = 'Import session is missing or has expired.';
+		state.sessionEnded = true;
+
+		render(
+			<ImportStep
+				state={ state }
+				dispatch={ dispatch }
+				onClose={ jest.fn() }
+			/>
+		);
+
+		expect(
+			screen.queryByRole( 'button', { name: /retry/i } )
+		).not.toBeInTheDocument();
+
+		screen.getByRole( 'button', { name: /start over/i } ).click();
+		expect( dispatch ).toHaveBeenCalledWith( { type: 'RESET' } );
+	} );
 } );

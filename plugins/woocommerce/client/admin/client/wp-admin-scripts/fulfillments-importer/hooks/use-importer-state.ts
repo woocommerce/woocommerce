@@ -44,6 +44,8 @@ export interface ImporterState {
 	summary: ImporterSummary | null;
 	// Ambient.
 	error: string | null;
+	// True when the error ended the server-side session, so retrying cannot succeed.
+	sessionEnded: boolean;
 	isBusy: boolean;
 }
 
@@ -59,7 +61,7 @@ export type ImporterAction =
 	| { type: 'GO_IMPORT' }
 	| { type: 'CHUNK_OK'; payload: RunChunkResponse }
 	| { type: 'FINISH'; summary: ImporterSummary }
-	| { type: 'ERROR'; message: string }
+	| { type: 'ERROR'; message: string; sessionEnded?: boolean }
 	| { type: 'CLEAR_ERROR' }
 	| { type: 'RESET' };
 
@@ -101,6 +103,7 @@ export function createInitialState(): ImporterState {
 		rows: [],
 		summary: null,
 		error: null,
+		sessionEnded: false,
 		isBusy: false,
 	};
 }
@@ -263,9 +266,14 @@ export function importerReducer(
 				error: null,
 			};
 		case 'ERROR':
-			return { ...state, error: action.message, isBusy: false };
+			return {
+				...state,
+				error: action.message,
+				sessionEnded: action.sessionEnded === true,
+				isBusy: false,
+			};
 		case 'CLEAR_ERROR':
-			return { ...state, error: null };
+			return { ...state, error: null, sessionEnded: false };
 		case 'RESET':
 			return createInitialState();
 		default:

@@ -23,7 +23,7 @@ export interface UseChunkedImportArgs {
 	chunkSize?: number;
 	onChunk?: ( response: RunChunkResponse ) => void;
 	onFinish?: ( summary: ImporterSummary ) => void;
-	onError?: ( message: string ) => void;
+	onError?: ( message: string, sessionEnded?: boolean ) => void;
 }
 
 const FALLBACK_CHUNK_SIZE = 200;
@@ -126,6 +126,23 @@ function isRetriable( error: unknown ): boolean {
 		return true;
 	}
 	return status >= 500;
+}
+
+/**
+ * REST error codes the server returns after it has destroyed the import session.
+ * Retrying these can never succeed; the wizard has to start from the upload step.
+ */
+const SESSION_ENDED_CODES = [
+	'woocommerce_fulfillments_import_token_invalid',
+	'woocommerce_fulfillments_import_file_changed',
+];
+
+/**
+ * True when the error means the import session no longer exists.
+ */
+export function isSessionEnded( error: unknown ): boolean {
+	const code = errorCode( error );
+	return code !== null && SESSION_ENDED_CODES.includes( code );
 }
 
 /**
@@ -289,7 +306,10 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 			if ( ( error as DOMException )?.name === 'AbortError' ) {
 				return;
 			}
-			callbacksRef.current.onError?.( errorMessage( error ) );
+			callbacksRef.current.onError?.(
+				errorMessage( error ),
+				isSessionEnded( error )
+			);
 		} finally {
 			abortRef.current = null;
 			runningRef.current = false;

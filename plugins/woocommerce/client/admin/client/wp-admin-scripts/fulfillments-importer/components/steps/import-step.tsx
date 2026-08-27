@@ -24,8 +24,8 @@ const ImportStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 		onFinish: ( summary ) => {
 			dispatch( { type: 'FINISH', summary } );
 		},
-		onError: ( message ) => {
-			dispatch( { type: 'ERROR', message } );
+		onError: ( message, sessionEnded ) => {
+			dispatch( { type: 'ERROR', message, sessionEnded } );
 		},
 	} );
 
@@ -47,9 +47,10 @@ const ImportStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 			  )
 			: 0;
 
+	// Processed, not imported: the count includes failed and skipped rows.
 	const statusLabel = sprintf(
 		/* translators: 1: processed rows, 2: total rows. */
-		__( 'Imported %1$d of %2$d rows', 'woocommerce' ),
+		__( 'Processed %1$d of %2$d rows', 'woocommerce' ),
 		state.processed,
 		state.total
 	);
@@ -60,7 +61,9 @@ const ImportStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 			aria-busy={ isRunning }
 		>
 			<h2>{ __( 'Importing fulfillments', 'woocommerce' ) }</h2>
-			<p>{ statusLabel }</p>
+			<p role="status" aria-live="polite">
+				{ statusLabel }
+			</p>
 
 			<div
 				role="progressbar"
@@ -101,17 +104,28 @@ const ImportStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 			{ state.error ? (
 				<Notice status="error" isDismissible={ false }>
 					<p>{ state.error }</p>
-					<Button
-						variant="secondary"
-						onClick={ () => {
-							dispatch( { type: 'CLEAR_ERROR' } );
-							retry();
-						} }
-						isBusy={ isRunning }
-						disabled={ isRunning }
-					>
-						{ __( 'Retry', 'woocommerce' ) }
-					</Button>
+					{ state.sessionEnded ? (
+						// The session is gone server-side, so retrying the chunk
+						// would fail the same way. Send the user back to upload.
+						<Button
+							variant="secondary"
+							onClick={ () => dispatch( { type: 'RESET' } ) }
+						>
+							{ __( 'Start over', 'woocommerce' ) }
+						</Button>
+					) : (
+						<Button
+							variant="secondary"
+							onClick={ () => {
+								dispatch( { type: 'CLEAR_ERROR' } );
+								retry();
+							} }
+							isBusy={ isRunning }
+							disabled={ isRunning }
+						>
+							{ __( 'Retry', 'woocommerce' ) }
+						</Button>
+					) }
 				</Notice>
 			) : null }
 		</div>

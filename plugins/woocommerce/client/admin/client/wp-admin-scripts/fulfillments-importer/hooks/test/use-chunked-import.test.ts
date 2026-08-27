@@ -154,7 +154,7 @@ describe( 'useChunkedImport', () => {
 
 		// One initial attempt + two retries.
 		expect( mockedRunChunk ).toHaveBeenCalledTimes( 3 );
-		expect( onError ).toHaveBeenCalledWith( 'persistent failure' );
+		expect( onError ).toHaveBeenCalledWith( 'persistent failure', false );
 	} );
 
 	it( 'fails immediately without retrying on a 4xx response', async () => {
@@ -184,7 +184,40 @@ describe( 'useChunkedImport', () => {
 
 		expect( mockedRunChunk ).toHaveBeenCalledTimes( 1 );
 		expect( onError ).toHaveBeenCalledWith(
-			'Mapping is missing required column(s).'
+			'Mapping is missing required column(s).',
+			false
+		);
+	} );
+
+	it( 'flags an expired session so the caller can stop offering a retry', async () => {
+		mockedRunChunk.mockRejectedValue( {
+			code: 'woocommerce_fulfillments_import_token_invalid',
+			message: 'Import session is missing or has expired.',
+			data: { status: 400 },
+		} );
+
+		const onError = jest.fn();
+
+		const { result } = renderHook( () =>
+			useChunkedImport( {
+				token: 'tok',
+				total: 2,
+				mapping: {},
+				notifyCustomer: false,
+				updateExisting: true,
+				chunkSize: 2,
+				onError,
+			} )
+		);
+
+		await act( async () => {
+			await result.current.run();
+		} );
+
+		expect( mockedRunChunk ).toHaveBeenCalledTimes( 1 );
+		expect( onError ).toHaveBeenCalledWith(
+			'Import session is missing or has expired.',
+			true
 		);
 	} );
 
