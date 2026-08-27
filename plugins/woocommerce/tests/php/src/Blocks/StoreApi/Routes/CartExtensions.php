@@ -164,7 +164,7 @@ class CartExtensions extends ControllerTestCase {
 	 */
 	public function needs_shipping_filter_provider() {
 		return array(
-			'cart needs shipping'          => array( false ),
+			'cart needs shipping'           => array( false ),
 			'needs shipping filtered false' => array( true ),
 		);
 	}
