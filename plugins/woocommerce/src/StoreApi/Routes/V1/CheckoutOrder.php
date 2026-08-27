@@ -140,9 +140,10 @@ class CheckoutOrder extends AbstractCartRoute {
 		$this->order_controller->validate_existing_order_before_payment( $this->order );
 
 		/**
-		 * Fires before an order is processed by the Checkout Block/Store API.
+		 * Fires when an order has been built from the Checkout Block/Store API request.
 		 *
-		 * This hook informs extensions that $order has completed processing and is ready for payment.
+		 * $order is fully populated and validated at this point. The action runs before payment
+		 * is processed, so callbacks can still act on the order on its way to the gateway.
 		 *
 		 * This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action:
 		 * - To keep the interface focused (only pass $order, not passing request data).
@@ -152,7 +153,7 @@ class CheckoutOrder extends AbstractCartRoute {
 		 *
 		 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3238
 		 * @example docs/examples/checkout-order-processed.md
-
+		 *
 		 * @param \WC_Order $order Order object.
 		 */
 		do_action( 'woocommerce_store_api_checkout_order_processed', $this->order );
