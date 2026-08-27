@@ -77,9 +77,29 @@ class NewOrderNotificationTest extends WC_Unit_Test_Case {
 		$this->assertSame( get_bloginfo( 'name' ), $payload['message']['args'][1] );
 
 		$this->assertSame(
-			wp_strip_all_tags( $order->get_formatted_order_total() ),
+			wp_strip_all_tags( html_entity_decode( $order->get_formatted_order_total(), ENT_QUOTES, 'UTF-8' ) ),
 			$payload['message']['args'][0]
 		);
+	}
+
+	/**
+	 * @testdox Should include the decoded currency symbol in the order total, not an HTML entity.
+	 */
+	public function test_to_payload_message_order_total_contains_decoded_currency_symbol(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->set_currency( 'USD' );
+		$order->set_total( '71.94' );
+		$order->save();
+
+		$notification = new NewOrderNotification( $order->get_id() );
+
+		$payload = $notification->to_payload();
+		$total   = $payload['message']['args'][0];
+
+		$this->assertStringContainsString( '$', $total, 'The order total should contain the decoded currency symbol.' );
+		$this->assertStringContainsString( '71.94', $total, 'The order total should contain the amount.' );
+		$this->assertStringNotContainsString( '&#', $total, 'The order total should not contain an undecoded HTML entity.' );
+		$this->assertStringNotContainsString( '<', $total, 'The order total should not contain HTML tags.' );
 	}
 
 	/**

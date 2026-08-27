@@ -67,7 +67,9 @@ class NewOrderNotification extends Notification {
 				 */
 				'format' => 'New order for %1$s on %2$s',
 				'args'   => array(
-					wp_strip_all_tags( $order->get_formatted_order_total() ),
+					// Decode entities first (the currency symbol is an HTML entity such as &#36;), then strip
+					// tags last so no markup can survive in the plain-text payload.
+					wp_strip_all_tags( html_entity_decode( $order->get_formatted_order_total(), ENT_QUOTES, 'UTF-8' ) ),
 					wp_strip_all_tags( get_bloginfo( 'name' ) ),
 				),
 			),
