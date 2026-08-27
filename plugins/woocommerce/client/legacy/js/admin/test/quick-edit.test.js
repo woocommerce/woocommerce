@@ -38,6 +38,13 @@ describe( 'Product Quick Edit measurements', () => {
 		inlineValues = {};
 		editButton = {};
 
+		const measurementFields = new Map( [
+			[ 'input[name="_weight"]', '_weight' ],
+			[ 'input[name="_length"]', '_length' ],
+			[ 'input[name="_width"]', '_width' ],
+			[ 'input[name="_height"]', '_height' ],
+		] );
+
 		const jQueryMock = ( selector, context ) => {
 			if ( 'function' === typeof selector ) {
 				selector( jQueryMock );
@@ -67,11 +74,11 @@ describe( 'Product Quick Edit measurements', () => {
 				};
 			}
 
-			const field = 'string' === typeof selector && selector.match( /input\[name="(_(?:weight|length|width|height))"\]/ );
+			const field = measurementFields.get( selector );
 			if ( field && '.inline-edit-row' === context ) {
 				return {
 					val: ( value ) => {
-						fieldValues[ field[ 1 ] ] = value;
+						fieldValues[ field ] = value;
 					},
 				};
 			}
