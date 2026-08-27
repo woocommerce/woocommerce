@@ -1,15 +1,35 @@
+# Legacy SCSS lives here, so this config deliberately diverges from the sibling
+# configs in client/blocks and packages/js/email-editor. Read the notes before
+# "aligning" any of these with the preset.
 {
 	"extends": "@wordpress/stylelint-config/scss",
 	"rules": {
+		# The icon fonts have no generic fallback by design.
 		"font-family-no-missing-generic-family-keyword": [
 			true,
 			{
 				"ignoreFontFamilies": [ "WooCommerce", "Dashicons", "dashicons" ]
 			}
 		],
-		"declaration-property-unit-allowed-list": null,
+
+		# The preset says "never", but several backgrounds here are base64/SVG
+		# data URIs containing spaces, quotes and "<". Unquoting those produces
+		# invalid CSS, and --fix would happily do it. Keep this as "always".
 		"function-url-quotes": "always",
+
+		# The preset allows only px for line-height. This code uses px, em, rem
+		# and %, so any list that passes today would have to allow all of them,
+		# which is what null already does. Changing the values is a behavior
+		# change and belongs in its own PR.
+		"declaration-property-unit-allowed-list": null,
+
+		# The preset applies this to comments only, and AGENTS.md tells us not to
+		# wrap comment prose at a fixed column.
 		"max-line-length": null,
+
+		# Legacy-hostile rules. The selectors are a theming contract third-party
+		# themes override, and the cascade order is load-bearing, so these can't
+		# be satisfied without changing behavior.
 		"no-descending-specificity": null,
 		"no-duplicate-selectors": null,
 		"scss/no-global-function-names": null,

@@ -98,7 +98,7 @@
  */
 @mixin vertical_gradient($from: #000, $to: #fff) {
 	background-color: $from;
-	/* stylelint-disable-next-line declaration-block-no-shorthand-property-overrides -- background-color is the fallback for browsers without gradient support. */
+	// stylelint-disable-next-line declaration-block-no-shorthand-property-overrides -- background-color is the fallback for browsers without gradient support.
 	background: -webkit-linear-gradient($from, $to);
 }
 
