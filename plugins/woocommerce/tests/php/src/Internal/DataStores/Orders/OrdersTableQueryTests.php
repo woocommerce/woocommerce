@@ -1789,51 +1789,6 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testDox A date_query key WP_Date_Query ignores does not reject the clause it does build.
-	 */
-	public function test_unknown_date_query_key_does_not_reject_the_clause(): void {
-		$order = OrderHelper::create_order();
-		$order->set_date_created( '2020-06-01' );
-		$order->save();
-
-		// WP_Date_Query ignores keys it does not recognise, so an extension carrying its own data
-		// in a clause must not lose the year filter that clause actually expresses.
-		$result = wc_get_orders(
-			array(
-				'date_query' => array(
-					array(
-						'year'              => 2020,
-						'extension_context' => new \stdClass(),
-					),
-				),
-				'return'     => 'ids',
-				'limit'      => -1,
-			)
-		);
-
-		$this->assertContains( $order->get_id(), $result, 'An unrecognised date_query key must not discard the clause.' );
-	}
-
-	/**
-	 * @testDox An unusable date_query value that does reach a string function is still rejected.
-	 */
-	public function test_unusable_date_query_string_value_is_still_rejected(): void {
-		$this->setExpectedIncorrectUsage( 'wc_get_orders' );
-
-		OrderHelper::create_order();
-
-		$result = wc_get_orders(
-			array(
-				'date_query' => array( array( 'after' => new \stdClass() ) ),
-				'return'     => 'ids',
-				'limit'      => -1,
-			)
-		);
-
-		$this->assertSame( array(), $result, 'An unusable "after" value must fail the query closed.' );
-	}
-
-	/**
 	 * @testDox An unsupported operator still returns an empty clause rather than throwing.
 	 */
 	public function test_unsupported_operator_returns_empty_clause(): void {
@@ -1849,204 +1804,14 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Time keys that take a list of values for the set comparisons.
-	 *
-	 * @return array<string, array{0: array, 1: bool}>
-	 */
-	public function provider_array_valued_time_keys(): array {
-		// Order under test is created 2024-06-01.
-		return array(
-			'year IN'           => array(
-				array(
-					'year'    => array( 2024, 2025 ),
-					'compare' => 'IN',
-				),
-				true,
-			),
-			'year NOT IN'       => array(
-				array(
-					'year'    => array( 2019, 2020 ),
-					'compare' => 'NOT IN',
-				),
-				true,
-			),
-			'year BETWEEN'      => array(
-				array(
-					'year'    => array( 2023, 2025 ),
-					'compare' => 'BETWEEN',
-				),
-				true,
-			),
-			'year NOT BETWEEN'  => array(
-				array(
-					'year'    => array( 2018, 2019 ),
-					'compare' => 'NOT BETWEEN',
-				),
-				true,
-			),
-			'month IN'          => array(
-				array(
-					'month'   => array( 5, 6 ),
-					'compare' => 'IN',
-				),
-				true,
-			),
-			'day NOT IN'        => array(
-				array(
-					'day'     => array( 9, 10 ),
-					'compare' => 'NOT IN',
-				),
-				true,
-			),
-			'year IN, no match' => array(
-				array(
-					'year'    => array( 2019, 2020 ),
-					'compare' => 'IN',
-				),
-				false,
-			),
-		);
-	}
-
-	/**
-	 * @testDox A time key holding a list of values is not rejected as an unusable value.
-	 *
-	 * @dataProvider provider_array_valued_time_keys
-	 *
-	 * @param array $clause         The date_query clause, without its column.
-	 * @param bool  $should_match   Whether the order under test should be returned.
-	 */
-	public function test_array_valued_time_keys_are_not_rejected( array $clause, bool $should_match ): void {
-		$order = OrderHelper::create_order();
-		$order->set_date_created( '2024-06-01' );
-		$order->save();
-
-		$result = wc_get_orders(
-			array(
-				'date_query' => array( array_merge( array( 'column' => 'date_created_gmt' ), $clause ) ),
-				'return'     => 'ids',
-				'limit'      => -1,
-			)
-		);
-
-		if ( $should_match ) {
-			$this->assertContains( $order->get_id(), $result, 'A list of values for a time key must not fail the query closed.' );
-		} else {
-			$this->assertNotContains( $order->get_id(), $result, 'The clause must still restrict the query.' );
-		}
-	}
-
-	/**
-	 * @testDox An unusable element inside a time key list is still rejected.
-	 */
-	public function test_unusable_element_in_a_time_key_list_is_rejected(): void {
-		$this->setExpectedIncorrectUsage( 'wc_get_orders' );
-
-		$order = OrderHelper::create_order();
-		$order->set_date_created( '2024-06-01' );
-		$order->save();
-
-		$result = wc_get_orders(
-			array(
-				'date_query' => array(
-					array(
-						'column'  => 'date_created_gmt',
-						'year'    => array( 2024, new \stdClass() ),
-						'compare' => 'IN',
-					),
-				),
-				'return'     => 'ids',
-				'limit'      => -1,
-			)
-		);
-
-		$this->assertSame( array(), $result, 'An unusable element must still fail the query closed.' );
-	}
-
-	/**
-	 * Clause args that are single values, where an array is not just unusable.
-	 *
-	 * WP_Date_Query reads an array under 'compare' or 'relation' as another clause and recurses on
-	 * it until memory runs out, so an empty array must be rejected rather than iterated.
-	 *
-	 * @return array<string, array{0: array}>
-	 */
-	public function provider_unusable_date_query_clause_args(): array {
-		return array(
-			'relation empty array' => array(
-				array(
-					'relation' => array(),
-					array( 'year' => 2024 ),
-				),
-			),
-			'relation object'      => array(
-				array(
-					'relation' => new \stdClass(),
-					array( 'year' => 2024 ),
-				),
-			),
-			'compare empty array'  => array(
-				array(
-					array(
-						'compare' => array(),
-						'year'    => 2024,
-					),
-				),
-			),
-			'compare object'       => array(
-				array(
-					array(
-						'compare' => new \stdClass(),
-						'year'    => 2024,
-					),
-				),
-			),
-			'column object'        => array(
-				array(
-					array(
-						'column' => new \stdClass(),
-						'year'   => 2024,
-					),
-				),
-			),
-		);
-	}
-
-	/**
-	 * @testDox An unusable date_query clause arg fails the query closed rather than reaching WP_Date_Query.
-	 *
-	 * @dataProvider provider_unusable_date_query_clause_args
-	 *
-	 * @param array $date_query The malformed date_query arg.
-	 */
-	public function test_unusable_date_query_clause_arg_fails_closed( array $date_query ): void {
-		// Also asserts the notice fires: WP fails the test both if an undeclared
-		// incorrect-usage notice is raised and if a declared one never is.
-		$this->setExpectedIncorrectUsage( 'wc_get_orders' );
-
-		$order = OrderHelper::create_order();
-		$order->set_date_created( '2024-06-01' );
-		$order->save();
-
-		$result = wc_get_orders(
-			array(
-				'date_query' => $date_query,
-				'return'     => 'ids',
-				'limit'      => -1,
-			)
-		);
-
-		$this->assertSame( array(), $result, 'An unusable clause arg must fail the query closed.' );
-	}
-
-	/**
 	 * @testDox A date_query the guard must honour still matches, shared with the legacy suite.
 	 *
 	 * @dataProvider provider_date_query_must_match
 	 *
-	 * @param array $date_query The clause under test.
+	 * @param array $date_query   The clause under test.
+	 * @param bool  $should_match Whether the seeded order should be returned.
 	 */
-	public function test_shared_date_query_must_match( array $date_query ): void {
+	public function test_shared_date_query_must_match( array $date_query, bool $should_match = true ): void {
 		$order = OrderHelper::create_order();
 		$order->set_date_created( '2024-06-01' );
 		$order->save();
@@ -2060,7 +1825,33 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertContains( $order->get_id(), $result, 'A supported date_query must keep matching.' );
+		if ( $should_match ) {
+			$this->assertContains( $order->get_id(), $result, 'A supported date_query must keep matching.' );
+		} else {
+			$this->assertNotContains( $order->get_id(), $result, 'The clause must still restrict the query.' );
+		}
+	}
+
+	/**
+	 * @testDox An unusable date_query column fails the query closed.
+	 *
+	 * Not in the shared set: WP_Query ignores an unusable column, so the legacy store answers this
+	 * differently and correctly.
+	 */
+	public function test_unusable_date_query_column_fails_closed(): void {
+		$this->setExpectedIncorrectUsage( 'wc_get_orders' );
+
+		OrderHelper::create_order();
+
+		$result = wc_get_orders(
+			array(
+				'date_query' => array( array( 'column' => new \stdClass(), 'year' => 2024 ) ),
+				'return'     => 'ids',
+				'limit'      => -1,
+			)
+		);
+
+		$this->assertSame( array(), $result, 'An unusable column must fail the query closed.' );
 	}
 
 	/**

@@ -464,8 +464,6 @@ class OrdersTableQuery {
 				}
 
 				// Falsy values carried no restriction before, so normalise rather than reject.
-				// arg_isset() does not treat them as unset, so without this they reach the
-				// array_merge() below as soon as another date arg is present.
 				$this->args['date_query'] = array();
 			}
 
@@ -602,7 +600,7 @@ class OrdersTableQuery {
 			return;
 		}
 
-		// The time keys WP_Date_Query recognises, copied from its own list.
+		// Copied from WP_Date_Query::$time_keys.
 		$time_keys = array(
 			'after',
 			'before',
@@ -697,7 +695,6 @@ class OrdersTableQuery {
 			return $query;
 		}
 
-		// Used as an array offset below.
 		if ( ! is_string( $query['column'] ) && ! is_int( $query['column'] ) ) {
 			throw $this->invalid_query_arg( esc_html__( 'Invalid date_query column.', 'woocommerce' ) );
 		}
@@ -810,17 +807,10 @@ class OrdersTableQuery {
 		$dropped_unusable = false;
 
 		foreach ( $this->args['status'] as $status ) {
-			// Only an object raises an Error on the concatenation below. An array merely warns,
-			// and what it degrades to depends on the entry: an empty one is dropped by
-			// array_filter() and leaves the clause unrestricted, a non-empty one becomes the
-			// literal 'Array' and matches nothing. Neither fatalled, so rejecting them here would
-			// change a query that previously worked.
-			//
-			// Drop the offending entry rather than reject the whole query, because a status that
-			// names nothing already does not poison its siblings: an unregistered string such as
-			// 'bogus' is carried into the IN clause and simply matches no rows, leaving a valid
-			// sibling filtering as the caller asked. An object is the same kind of value and gets
-			// the same treatment; only the concatenation, not the caller's intent, differs.
+			// Only an object raises an Error on the concatenation below; an array warns and
+			// degrades, which never fatalled. Drop the offending entry rather than the whole
+			// query: an unregistered string already fails to poison its siblings, and an object
+			// is the same kind of value.
 			if ( is_object( $status ) && ! method_exists( $status, '__toString' ) ) {
 				$dropped_unusable = true;
 				continue;
@@ -981,7 +971,6 @@ class OrdersTableQuery {
 		if ( ! empty( $this->args['date_query'] ) ) {
 			$this->date_query = new \WP_Date_Query( $this->args['date_query'], "{$this->tables['orders']}.date_created_gmt" );
 			$this->where[]    = substr( trim( $this->date_query->get_sql() ), 3 );
-			// WP_Date_Query includes "AND".
 		}
 
 		$this->process_orderby();
@@ -1303,7 +1292,6 @@ class OrdersTableQuery {
 	 * @return bool True if converting the value would raise an Error.
 	 */
 	private function value_fails_conversion( $value, string $type ): bool {
-		// The int cast accepts anything.
 		if ( 'int' === $type ) {
 			return false;
 		}

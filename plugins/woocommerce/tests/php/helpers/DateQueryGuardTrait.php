@@ -25,9 +25,10 @@ trait DateQueryGuardTrait {
 	 * documented as supported, so a guard must validate their elements rather than the list. An
 	 * empty list is included because it is the shape that broke twice: a guard that iterates the
 	 * elements sees nothing to reject, which is correct here and wrong for 'compare' and
-	 * 'relation' below.
+	 * 'relation' below. The unrecognised key carries an object rather than a string, so that a
+	 * guard checking every leaf instead of the consumed keys fails here.
 	 *
-	 * @return array<string, array{0: array}>
+	 * @return array<string, array{0: array, 1: bool}>
 	 */
 	public function provider_date_query_must_match(): array {
 		return array(
@@ -82,11 +83,20 @@ trait DateQueryGuardTrait {
 				),
 			),
 			'after empty list' => array( array( array( 'after' => array() ) ) ),
+			'year IN no match' => array(
+				array(
+					array(
+						'year'    => array( 2019, 2020 ),
+						'compare' => 'IN',
+					),
+				),
+				false,
+			),
 			'unrecognised key' => array(
 				array(
 					array(
 						'year'    => 2024,
-						'ext_ctx' => 'anything',
+						'ext_ctx' => new \stdClass(),
 					),
 				),
 			),
