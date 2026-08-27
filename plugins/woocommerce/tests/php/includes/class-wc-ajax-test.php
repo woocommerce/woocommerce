@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\WC_AJAX.
  */
 
+declare( strict_types = 1 );
+
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Orders\CouponsController;
 use Automattic\WooCommerce\Internal\Orders\TaxesController;
