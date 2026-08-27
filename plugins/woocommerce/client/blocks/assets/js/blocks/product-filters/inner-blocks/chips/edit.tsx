@@ -20,6 +20,9 @@ import {
 	// @ts-expect-error - no types.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalUseBorderProps as useBorderProps,
+	// @ts-expect-error - no types.
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalGetSpacingClassesAndStyles as useSpacingProps,
 } from '@wordpress/block-editor';
 
 /**
@@ -72,11 +75,15 @@ const Edit = ( props: EditProps ): JSX.Element => {
 	);
 	const colorVars = getColorVars( attributes );
 	const borderProps = useBorderProps( attributes );
+	const spacingProps = useSpacingProps( attributes );
 	const chipItemClassName = clsx(
 		'wc-block-product-filter-chips__item',
-		! hasVisualSwatches && borderProps.className
+		! hasVisualSwatches && borderProps.className,
+		! hasVisualSwatches && spacingProps.className
 	);
-	const chipItemStyle = hasVisualSwatches ? undefined : borderProps.style;
+	const chipItemStyle = hasVisualSwatches
+		? undefined
+		: { ...borderProps.style, ...spacingProps.style };
 
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filter-chips', {
