@@ -615,4 +615,74 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 			'A custom merchant placeholder attachment should not be deleted.'
 		);
 	}
+
+	/**
+	 * @testdox Should reference block patterns instead of baking translated empty cart strings into the Cart page content.
+	 */
+	public function test_cart_block_content_references_empty_cart_patterns(): void {
+		$method = new ReflectionMethod( WC_Install::class, 'get_cart_block_content' );
+		$method->setAccessible( true );
+		$content = $method->invoke( null );
+
+		$this->assertStringContainsString(
+			'<!-- wp:pattern {"slug":"woocommerce/cart-empty-message"} /-->',
+			$content,
+			'The empty cart title should be stored as a pattern reference so it is translated at render time.'
+		);
+		$this->assertStringContainsString(
+			'<!-- wp:pattern {"slug":"woocommerce/cart-new-in-store-message"} /-->',
+			$content,
+			'The "New in store" heading should be stored as a pattern reference so it is translated at render time.'
+		);
+		$this->assertStringNotContainsString(
+			'Your cart is currently empty!',
+			$content,
+			'The empty cart title must not be frozen into the page content in the install-time locale.'
+		);
+		$this->assertStringNotContainsString(
+			'New in store',
+			$content,
+			'The "New in store" heading must not be frozen into the page content in the install-time locale.'
+		);
+	}
+
+	/**
+	 * @testdox Should render the empty cart title, the Browse store link, and the New in store heading from the referenced patterns.
+	 */
+	public function test_empty_cart_message_patterns_render_expected_markup(): void {
+		$registry = WP_Block_Patterns_Registry::get_instance();
+		$this->assertTrue(
+			$registry->is_registered( 'woocommerce/cart-empty-message' ),
+			'The cart-empty-message pattern must be registered during bootstrap; the installed Cart page renders nothing for it otherwise.'
+		);
+		$this->assertTrue(
+			$registry->is_registered( 'woocommerce/cart-new-in-store-message' ),
+			'The cart-new-in-store-message pattern must be registered during bootstrap; the installed Cart page renders nothing for it otherwise.'
+		);
+
+		$rendered = do_blocks(
+			'<!-- wp:pattern {"slug":"woocommerce/cart-empty-message"} /--><!-- wp:pattern {"slug":"woocommerce/cart-new-in-store-message"} /-->'
+		);
+
+		$this->assertStringContainsString(
+			'Your cart is currently empty!',
+			$rendered,
+			'The cart-empty-message pattern should render the empty cart title.'
+		);
+		$this->assertStringContainsString(
+			'wc-block-cart__empty-cart__title',
+			$rendered,
+			'The rendered empty cart title should keep the markup the installer previously inlined.'
+		);
+		$this->assertStringContainsString(
+			'New in store',
+			$rendered,
+			'The cart-new-in-store-message pattern should render the "New in store" heading.'
+		);
+		$this->assertStringContainsString(
+			'Browse store',
+			$rendered,
+			'The cart-empty-message pattern should render the Browse store link that the default Cart page lost when it moved to installer-generated content in 8.3.0.'
+		);
+	}
 }
