@@ -135,18 +135,8 @@ module.exports = function ( grunt ) {
 			},
 		},
 
-		// Autoprefixer.
-		postcss: {
-			options: {
-				processors: [ require( 'autoprefixer' ) ],
-			},
-			dist: {
-				src: [ '<%= dirs.css %>/*.css' ],
-			},
-		},
-
-		// Specifying different src/dest for postcss broke everything,
-		// so we'll just move files to their new location afterwards.
+		// The css tasks process files in place, so move them
+		// to their final location afterwards.
 		move: {
 			css: {
 				files: [
@@ -211,7 +201,6 @@ module.exports = function ( grunt ) {
 	// Load NPM tasks to be used here.
 	grunt.loadNpmTasks( 'grunt-sass' );
 	grunt.loadNpmTasks( 'grunt-rtlcss' );
-	grunt.loadNpmTasks( 'grunt-postcss' );
 	grunt.loadNpmTasks( 'grunt-stylelint' );
 	grunt.loadNpmTasks( 'grunt-contrib-uglify-es' );
 	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
@@ -228,7 +217,6 @@ module.exports = function ( grunt ) {
 	grunt.registerTask( 'css', [
 		'sass',
 		'rtlcss',
-		'postcss',
 		'cssmin',
 		'concat:css',
 		'move:css',
@@ -281,7 +269,6 @@ module.exports = function ( grunt ) {
 					runQueued( [
 						'sass',
 						'rtlcss',
-						'postcss',
 						'cssmin',
 						'concat:css',
 						'move:css',

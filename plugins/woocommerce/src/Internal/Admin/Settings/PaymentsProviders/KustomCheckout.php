@@ -10,11 +10,11 @@ use WC_Payment_Gateway;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * KlarnaCheckout payment gateway provider class.
+ * KustomCheckout payment gateway provider class.
  *
- * This class handles all the custom logic for the KlarnaCheckout payment gateway provider.
+ * This class handles all the custom logic for the KustomCheckout payment gateway provider.
  */
-class KlarnaCheckout extends PaymentGateway {
+class KustomCheckout extends PaymentGateway {
 
 	/**
 	 * Check if the payment gateway needs setup.
@@ -71,7 +71,7 @@ class KlarnaCheckout extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode onboarding, false otherwise.
 	 */
 	public function is_in_test_mode_onboarding( WC_Payment_Gateway $payment_gateway ): bool {
-		// Test mode is actually sandbox mode for KlarnaCheckout, affecting the API details used.
+		// Test mode is actually sandbox mode for KustomCheckout, affecting the API details used.
 		return $this->is_in_test_mode( $payment_gateway );
 	}
 }
