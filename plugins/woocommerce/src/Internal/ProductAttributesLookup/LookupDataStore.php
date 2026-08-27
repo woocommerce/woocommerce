@@ -308,14 +308,18 @@ class LookupDataStore {
 	 * @param bool           $use_optimized_db_access Use direct database access for data retrieval if possible.
 	 */
 	public function create_data_for_product( $product, $use_optimized_db_access = false ) {
+		$product_id = intval( ( $product instanceof \WC_Product ) ? $product->get_id() : $product );
+
 		if ( $use_optimized_db_access ) {
-			$product_id = intval( ( $product instanceof \WC_Product ) ? $product->get_id() : $product );
 			$this->create_data_for_product_cpt( $product_id );
 		} else {
 			if ( ! is_a( $product, \WC_Product::class ) ) {
 				$product = WC()->call_function( 'wc_get_product', $product );
 			}
+
+			// A product can be deleted after its lookup table update has been scheduled.
 			if ( ! $product ) {
+				$this->delete_data_for( $product_id );
 				$this->last_create_operation_failed = false;
 				return;
 			}
@@ -895,6 +899,10 @@ class LookupDataStore {
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$product_ids_with_stock_status = $wpdb->get_results( $sql, ARRAY_A );
+		if ( empty( $product_ids_with_stock_status ) ) {
+			$this->delete_data_for( $product_id );
+			return;
+		}
 
 		$main_product_row = array_filter( $product_ids_with_stock_status, fn( $item ) => ProductType::VARIATION !== $item['product_type'] );
 		$is_variation     = empty( $main_product_row );

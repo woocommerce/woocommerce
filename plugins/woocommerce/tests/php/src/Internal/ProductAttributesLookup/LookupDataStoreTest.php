@@ -188,17 +188,24 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox `create_data_for_product` skips products that no longer exist.
+	 * @testdox `create_data_for_product` removes stale data for products that no longer exist.
+	 *
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $use_optimized_db_access 'true' to use optimized db access for the table update.
 	 */
-	public function test_create_data_for_product_skips_deleted_product(): void {
+	public function test_create_data_for_product_removes_data_for_deleted_product( bool $use_optimized_db_access ): void {
 		$product = new \WC_Product_Simple();
 		$this->save( $product );
 		$product_id = $product->get_id();
+		$this->insert_lookup_table_data( $product_id, $product_id, self::$attributes[0]['name'], self::$attributes[0]['term_ids'][0], false, true );
 		$product->delete( true );
 
 		$this->assertFalse( wc_get_product( $product_id ) );
+		$this->assertCount( 1, $this->get_lookup_table_data() );
 
-		$this->sut->create_data_for_product( $product_id );
+		$this->sut->create_data_for_product( $product_id, $use_optimized_db_access );
 
 		$this->assertFalse( $this->sut->get_last_create_operation_failed() );
 		$this->assertEmpty( $this->get_lookup_table_data() );
