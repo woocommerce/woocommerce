@@ -450,23 +450,28 @@ export function bisTargetProductInput( page: Page ) {
  * Pick a variation on a variable product page and wait for core's variation AJAX to settle.
  *
  * The BIS form only reacts once WooCommerce has fetched the variation and fired
- * `show_variation`, so waiting on the rendered variation panel — rather than the
- * select's own value — is what keeps the assertions that follow deterministic.
+ * `found_variation`, so the wait is on core's own hidden `variation_id` input.
+ * `.single_variation_wrap` cannot stand in for it — `VariationForm` shows that
+ * wrapper at init, before any variation is picked — and waiting on core's state
+ * rather than on `.wc_bis_form` keeps the helper usable in the tests that
+ * assert the form's own visibility or absence.
  *
- * @param {Page}   page    Playwright page on the product detail.
- * @param {Object} product The variable product handle.
- * @param {string} option  Attribute option to select, e.g. `White`.
+ * @param {Page}   page      Playwright page on the product detail.
+ * @param {Object} product   The variable product handle.
+ * @param {Object} variation The variation to select.
  */
 export async function selectVariation(
 	page: Page,
 	product: BISVariableProduct,
-	option: string
+	variation: BISVariation
 ): Promise< void > {
 	await page
 		.locator( `.variations select[name="${ product.attributeSelect }"]` )
-		.selectOption( option );
+		.selectOption( variation.option );
 
-	await expect( page.locator( '.single_variation_wrap' ) ).toBeVisible();
+	await expect( page.locator( 'input[name="variation_id"]' ) ).toHaveValue(
+		String( variation.id )
+	);
 }
 
 /**
@@ -496,20 +501,23 @@ export async function signUpOnProductPage(
 /**
  * Submit the PDP signup form as a logged-out guest, regardless of the test's storageState.
  *
- * @param {Browser} browser                        The test's browser fixture.
- * @param {string}  permalink                      The product permalink.
- * @param {string}  email                          The guest's email address.
- * @param {Object}  [opts]                         Signup options.
- * @param {Object}  [opts.selectVariation]         Variation to pick before submitting, for variable products.
- * @param {Object}  [opts.selectVariation.product] The variable product handle.
- * @param {string}  [opts.selectVariation.option]  Attribute option to select.
+ * @param {Browser} browser                          The test's browser fixture.
+ * @param {string}  permalink                        The product permalink.
+ * @param {string}  email                            The guest's email address.
+ * @param {Object}  [opts]                           Signup options.
+ * @param {Object}  [opts.selectVariation]           Variation to pick before submitting, for variable products.
+ * @param {Object}  [opts.selectVariation.product]   The variable product handle.
+ * @param {Object}  [opts.selectVariation.variation] The variation to select.
  */
 export async function signUpAsGuest(
 	browser: Browser,
 	permalink: string,
 	email: string,
 	opts: {
-		selectVariation?: { product: BISVariableProduct; option: string };
+		selectVariation?: {
+			product: BISVariableProduct;
+			variation: BISVariation;
+		};
 	} = {}
 ): Promise< void > {
 	const guestContext = await browser.newContext( {
@@ -522,7 +530,7 @@ export async function signUpAsGuest(
 		await selectVariation(
 			guestPage,
 			opts.selectVariation.product,
-			opts.selectVariation.option
+			opts.selectVariation.variation
 		);
 	}
 

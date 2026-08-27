@@ -60,7 +60,7 @@ test.describe(
 				// that class is the contract `back-in-stock-form.js` drives,
 				// while whether it actually hides the form depends on the
 				// theme's stylesheet.
-				await expect( form ).toHaveClass( /(^|\s)hidden(\s|$)/ );
+				await expect( form ).toContainClass( 'hidden' );
 				await expect( targetProduct ).toHaveValue(
 					String( variableProduct.id )
 				);
@@ -68,10 +68,10 @@ test.describe(
 				await selectVariation(
 					page,
 					variableProduct,
-					variableProduct.outOfStockVariation.option
+					variableProduct.outOfStockVariation
 				);
 
-				await expect( form ).not.toHaveClass( /(^|\s)hidden(\s|$)/ );
+				await expect( form ).not.toContainClass( 'hidden' );
 				await expect(
 					form.getByRole( 'button', { name: /Notify me/i } )
 				).toBeVisible();
@@ -85,10 +85,10 @@ test.describe(
 				await selectVariation(
 					page,
 					variableProduct,
-					variableProduct.inStockVariation!.option
+					variableProduct.inStockVariation!
 				);
 
-				await expect( form ).toHaveClass( /(^|\s)hidden(\s|$)/ );
+				await expect( form ).toContainClass( 'hidden' );
 			} );
 
 			test( 'signing up for an out-of-stock variation confirms the variation by name', async ( {
@@ -109,7 +109,7 @@ test.describe(
 				await selectVariation(
 					guestPage,
 					variableProduct,
-					outOfStockVariation.option
+					outOfStockVariation
 				);
 				await signUpOnProductPage( guestPage, { email } );
 
@@ -150,7 +150,7 @@ test.describe(
 					{
 						selectVariation: {
 							product: variableProduct,
-							option: outOfStockVariation.option,
+							variation: outOfStockVariation,
 						},
 					}
 				);
@@ -218,7 +218,7 @@ test.describe(
 				await selectVariation(
 					page,
 					variableProduct,
-					variableProduct.outOfStockVariation.option
+					variableProduct.outOfStockVariation
 				);
 
 				// A variation has no opt-out of its own — the parent's meta is
@@ -251,7 +251,7 @@ test.describe(
 					{
 						selectVariation: {
 							product: variableProduct,
-							option: outOfStockVariation.option,
+							variation: outOfStockVariation,
 						},
 					}
 				);
@@ -296,7 +296,7 @@ test.describe(
 					{
 						selectVariation: {
 							product: anyAttributeVariableProduct,
-							option: outOfStockVariation.option,
+							variation: outOfStockVariation,
 						},
 					}
 				);
