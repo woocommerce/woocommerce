@@ -579,11 +579,14 @@ class FulfillmentsCsvImporter {
 			return $this->fail( $row_number, 'missing_provider', __( 'Missing carrier/provider.', 'woocommerce' ) );
 		}
 
-		// The stored URL is rendered as a clickable link in the admin, and CSV files
-		// typically come from third parties, so only accept http(s) URLs.
+		// The stored URL is rendered as a clickable link in the admin and in customer emails,
+		// and CSV files typically come from third parties, so only accept http(s) URLs.
+		// esc_url_raw() applies its protocol allowlist only when a scheme is present, so a
+		// scheme-relative "//example.com/track" would otherwise survive; check the scheme too.
 		if ( '' !== $tracking_url ) {
 			$tracking_url = esc_url_raw( $tracking_url, array( 'http', 'https' ) );
-			if ( '' === $tracking_url ) {
+			$scheme       = '' === $tracking_url ? '' : (string) wp_parse_url( $tracking_url, PHP_URL_SCHEME );
+			if ( ! in_array( strtolower( $scheme ), array( 'http', 'https' ), true ) ) {
 				return $this->fail( $row_number, 'invalid_tracking_url', __( 'Tracking URL must be a valid http or https URL.', 'woocommerce' ) );
 			}
 		}

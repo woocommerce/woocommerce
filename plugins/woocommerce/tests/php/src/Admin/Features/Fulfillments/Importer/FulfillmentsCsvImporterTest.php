@@ -1205,6 +1205,26 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Rows with a scheme-less tracking URL fail instead of storing the value.
+	 *
+	 * @testWith ["//example.test/track"]
+	 *           ["/wp-admin/index.php"]
+	 *
+	 * @param string $tracking_url Tracking URL cell under test.
+	 */
+	public function test_tracking_url_without_http_scheme_fails_row( string $tracking_url ): void {
+		$order = $this->make_order();
+		$csv   = "order_number,tracking_number,shipment_provider,tracking_url\n"
+			. "{$order->get_id()},TRK-NOSCHEME,ups,{$tracking_url}\n";
+
+		$summary = $this->run_import( new FulfillmentsCsvImporter( $this->make_csv( $csv ) ) );
+
+		$this->assertSame( 0, $summary['created'] );
+		$this->assertSame( 1, $summary['failed'] );
+		$this->assertSame( 'invalid_tracking_url', $summary['rows'][0]['code'] );
+	}
+
+	/**
 	 * @testdox Rows with a non-http tracking URL fail instead of storing the value.
 	 */
 	public function test_tracking_url_with_disallowed_scheme_fails_row(): void {
