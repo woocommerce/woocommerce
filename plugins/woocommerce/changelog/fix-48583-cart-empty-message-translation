@@ -1,5 +1,4 @@
 Significance: patch
 Type: fix
-Comment: Fixes #48583.
 
-Store the empty cart headings of the default Cart page as block pattern references so they are translated at render time instead of being frozen in the locale active at install time, and restore the "Browse store" link that the empty cart lost when the default Cart page moved to installer-generated content in 8.3.0.
+Store the default Cart page empty cart headings as block pattern references so they follow the site language instead of the install language, and restore the missing "Browse store" link.
