@@ -47,10 +47,10 @@ const formatErrorMessage = (
 	rawErrorMessage: string
 ) => {
 	return sprintf(
-		/* translators: %(actionType): install or activate (the plugin). %(pluginName): a plugin slug (e.g. woocommerce-services). %(error): a single error message or in plural a comma separated error message list.*/
+		/* translators: %(actionType)s: install or activate (the plugin). %(pluginName)s: a plugin slug (e.g. woocommerce-services) or, in plural, a comma separated list of slugs. %(error)s: a complete sentence describing the reason, or in plural a comma separated list of such sentences. */
 		_n(
-			'Could not %(actionType)s %(pluginName)s plugin, %(error)s',
-			'Could not %(actionType)s the following plugins: %(pluginName)s with these Errors: %(error)s',
+			'Could not %(actionType)s %(pluginName)s. %(error)s',
+			'Could not %(actionType)s the following plugins: %(pluginName)s. %(error)s',
 			Object.keys( plugins ).length || 1,
 			'woocommerce'
 		),

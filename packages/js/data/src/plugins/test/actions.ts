@@ -17,6 +17,7 @@ jest.mock( '@wordpress/data', () => ( {
  * External dependencies
  */
 import { controls } from '@wordpress/data';
+import { apiFetch } from '@wordpress/data-controls';
 
 /**
  * Internal dependencies
@@ -24,6 +25,7 @@ import { controls } from '@wordpress/data';
 import {
 	installJetpackAndConnect,
 	connectToJetpackWithFailureRedirect,
+	installPlugins,
 } from '../actions';
 import { STORE_NAME } from '../constants';
 
@@ -147,5 +149,116 @@ describe( 'connectToJetpack', () => {
 		connect.throw( new Error( 'Failed!' ) );
 
 		expect( errorHandler ).toHaveBeenCalledWith( 'Failed!' );
+	} );
+} );
+
+/**
+ * Drives a redux-routine generator to completion the way the runtime would:
+ * the `apiFetch` yield resolves to (or throws) `apiResult`, yielded generators
+ * are run in turn, every other yield resolves to undefined. Returns the error
+ * the generator threw, or null when it completed.
+ */
+function runUntilThrow(
+	generator: Generator< unknown, unknown, unknown >,
+	apiResult: unknown,
+	apiThrows = false
+): Error | null {
+	const drive = ( gen: Generator< unknown, unknown, unknown > ) => {
+		let step = gen.next();
+		while ( ! step.done ) {
+			const value = step.value as
+				| { type?: string; next?: unknown }
+				| undefined;
+			if ( value?.type === 'API_FETCH' ) {
+				step = apiThrows
+					? gen.throw( apiResult )
+					: gen.next( apiResult );
+			} else if ( typeof value?.next === 'function' ) {
+				drive( value as Generator< unknown, unknown, unknown > );
+				step = gen.next();
+			} else {
+				step = gen.next();
+			}
+		}
+	};
+
+	try {
+		drive( generator );
+		return null;
+	} catch ( e ) {
+		return e as Error;
+	}
+}
+
+describe( 'installPlugins error message', () => {
+	beforeEach( () => {
+		( apiFetch as jest.Mock ).mockReset();
+		( apiFetch as jest.Mock ).mockImplementation( () => ( {
+			type: 'API_FETCH',
+		} ) );
+	} );
+
+	it( 'frames a single server reason as one sentence, naming the plugin once', () => {
+		const error = runUntilThrow(
+			installPlugins( [ 'visa-acceptance-solutions' ] ),
+			{
+				data: { installed: [], results: {} },
+				errors: {
+					errors: {
+						'visa-acceptance-solutions': [
+							'The package could not be installed. The PHP version on your server is 8.1.34, however the uploaded plugin requires 8.2.0.',
+						],
+					},
+				},
+				success: false,
+				message: '',
+			}
+		);
+
+		expect( error?.message ).toBe(
+			'Could not install visa-acceptance-solutions. The package could not be installed. The PHP version on your server is 8.1.34, however the uploaded plugin requires 8.2.0.'
+		);
+		expect( error?.message ).not.toContain( 'plugin, ' );
+	} );
+
+	it( 'frames a permission error without repeating the plugin name', () => {
+		const error = runUntilThrow(
+			installPlugins( [ 'woocommerce-payments' ] ),
+			{
+				code: 'woocommerce_rest_cannot_update',
+				message: 'Sorry',
+				data: { status: 403 },
+			},
+			true
+		);
+
+		expect( error?.message ).toBe(
+			'Could not install woocommerce-payments. You do not have permissions to manage plugins. Please contact your site administrator.'
+		);
+	} );
+
+	it( 'frames a connection error message', () => {
+		const error = runUntilThrow(
+			installPlugins( [ 'woocommerce-payments' ] ),
+			new Error( 'Failed to fetch' ),
+			true
+		);
+
+		expect( error?.message ).toBe(
+			'Could not install woocommerce-payments. Failed to fetch'
+		);
+	} );
+
+	it( 'uses the plural frame for several plugins', () => {
+		const error = runUntilThrow( installPlugins( [ 'a', 'b' ] ), {
+			data: { installed: [], results: {} },
+			errors: { errors: { a: [ 'Reason A.' ], b: [ 'Reason B.' ] } },
+			success: false,
+			message: '',
+		} );
+
+		expect( error?.message ).toBe(
+			'Could not install the following plugins: a, b. Reason A., \nReason B.'
+		);
 	} );
 } );
