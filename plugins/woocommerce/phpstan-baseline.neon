@@ -51304,24 +51304,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductDetails.php
 
 		-
-			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Blocks/BlockTypes/ProductDetails.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(\{array\} \$hooked_blocks The blocks that are hooked into the Product Details block\.\)\: Unexpected token "\{", expected type at offset 169 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Blocks/BlockTypes/ProductDetails.php
-
-		-
-			message: '#^PHPDoc tag @return has invalid value \(\{array\} The blocks that are hooked into the Product Details block\.\)\: Unexpected token "\{", expected type at offset 264 on line 8$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Blocks/BlockTypes/ProductDetails.php
-
-		-
 			message: '#^Parameter \#1 \$query of method WP_HTML_Tag_Processor\:\:next_tag\(\) expects array\{tag_name\?\: string\|null, match_offset\?\: int\|null, class_name\?\: string\|null, tag_closers\?\: string\|null\}\|null, ''h2'' given\.$#'
 			identifier: argument.type
 			count: 1
@@ -70149,24 +70131,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Utilities\\OrderController\:\:validate_selected_shipping_methods\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/StoreApi/Utilities/OrderController.php
-
-		-
-			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
-			identifier: phpDoc.parseError
-			count: 2
-			path: src/StoreApi/Utilities/OrderController.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(boolean True if has enough stock\.\)\: Unexpected token "True", expected variable at offset 99 on line 4$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/StoreApi/Utilities/OrderController.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(boolean True if in stock\.\)\: Unexpected token "True", expected variable at offset 117 on line 4$#'
-			identifier: phpDoc.parseError
 			count: 1
 			path: src/StoreApi/Utilities/OrderController.php
 
