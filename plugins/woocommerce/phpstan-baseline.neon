@@ -57136,12 +57136,6 @@ parameters:
 			path: src/Internal/Admin/Orders/EditLock.php
 
 		-
-			message: '#^Access to property \$cap on an unknown class Automattic\\WooCommerce\\Internal\\Admin\\Orders\\WP_Post_Type\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/Admin/Orders/ListTable.php
-
-		-
 			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:update_status\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -57151,12 +57145,6 @@ parameters:
 			message: '#^Cannot access property \$ID on WP_User\|false\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: src/Internal/Admin/Orders/ListTable.php
-
-		-
-			message: '#^Cannot access property \$cap on Automattic\\WooCommerce\\Internal\\Admin\\Orders\\WP_Post_Type\|null\.$#'
-			identifier: property.nonObject
-			count: 2
 			path: src/Internal/Admin/Orders/ListTable.php
 
 		-
@@ -57220,12 +57208,6 @@ parameters:
 			path: src/Internal/Admin/Orders/ListTable.php
 
 		-
-			message: '#^Cannot call method delete\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Orders/ListTable.php
-
-		-
 			message: '#^Cannot call method format\(\) on DateTime\|false\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -57233,12 +57215,6 @@ parameters:
 
 		-
 			message: '#^Cannot call method getTimestamp\(\) on WC_DateTime\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Orders/ListTable.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: src/Internal/Admin/Orders/ListTable.php
@@ -57420,18 +57396,6 @@ parameters:
 		-
 			message: '#^Property Automattic\\WooCommerce\\Internal\\Admin\\Orders\\ListTable\:\:\$status_count_cache is never read, only written\.$#'
 			identifier: property.onlyWritten
-			count: 1
-			path: src/Internal/Admin/Orders/ListTable.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\Admin\\Orders\\ListTable\:\:\$wp_post_type \(Automattic\\WooCommerce\\Internal\\Admin\\Orders\\WP_Post_Type\|null\) does not accept WP_Post_Type\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/Admin/Orders/ListTable.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\Admin\\Orders\\ListTable\:\:\$wp_post_type has unknown class Automattic\\WooCommerce\\Internal\\Admin\\Orders\\WP_Post_Type as its type\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Internal/Admin/Orders/ListTable.php
 
