@@ -889,9 +889,11 @@ function wc_scheduled_sales() {
 
 			// These IDs become array keys below, where a non-scalar is a fatal, and the data
 			// store is replaceable through woocommerce_product_data_store. Screening on the
-			// same rule _get_non_cached_ids() applied when priming keeps the release set to
+			// rule _get_non_cached_ids() applied to the posts prime keeps the release set to
 			// entries this batch could have created, so one malformed row neither ends the
-			// run nor evicts an unrelated post.
+			// run nor evicts an unrelated post. Only that prime is screened this way: the
+			// meta and term primes intval() the raw chunk instead, so a malformed row can
+			// leave those two behind. Bounded by the malformed rows, not by the backlog.
 			$release_ids = array_values(
 				array_map(
 					'intval',
