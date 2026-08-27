@@ -327,9 +327,8 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			return new WP_Error(
 				'woocommerce_fulfillments_import_too_many_rows',
 				sprintf(
-					/* translators: 1: number of rows in the uploaded CSV, 2: maximum supported rows. */
-					__( 'The CSV contains %1$s rows; the importer supports up to %2$s rows per file. Please split the file and import it in parts.', 'woocommerce' ),
-					number_format_i18n( $total ),
+					/* translators: %s: maximum supported rows. */
+					__( 'The importer supports up to %s rows per file. Please split the file and import it in parts.', 'woocommerce' ),
 					number_format_i18n( FulfillmentsCsvImporter::MAX_IMPORT_ROWS )
 				),
 				array( 'status' => WP_Http::REQUEST_ENTITY_TOO_LARGE )

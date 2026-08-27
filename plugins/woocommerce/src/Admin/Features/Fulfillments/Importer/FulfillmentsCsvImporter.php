@@ -240,6 +240,11 @@ class FulfillmentsCsvImporter {
 						$sample[] = is_scalar( $value ) ? (string) $value : '';
 					}
 				}
+				// One row past the cap is enough for the caller to reject the file; counting
+				// the rest of a very large upload only burns request time.
+				if ( $total > self::MAX_IMPORT_ROWS ) {
+					break;
+				}
 			}
 
 			return array(
