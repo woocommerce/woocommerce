@@ -111,6 +111,59 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * dbDelta cannot change a primary key, so wc_order_tax_lookup is re-keyed by a guarded ALTER in
+	 * create_tables(). The rows a store carries into it have to survive, and since create_tables()
+	 * runs again on every update, the second pass has to leave everything alone.
+	 *
+	 * @testdox create_tables() re-keys the tax lookup by tax order item, keeps its rows, and runs once.
+	 */
+	public function test_create_tables_rekeys_the_order_tax_lookup_by_tax_order_item(): void {
+		global $wpdb;
+
+		// The lookup tables are real rather than temporary, so let this test alter them.
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+
+		$table = "{$wpdb->prefix}wc_order_tax_lookup";
+		$key   = function () use ( $wpdb, $table ) {
+			return $wpdb->get_var( "SHOW KEYS FROM `{$table}` WHERE Key_name = 'PRIMARY' AND Column_name = 'order_item_id'" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		};
+		$rows  = function () use ( $wpdb, $table ) {
+			return $wpdb->get_results( "SELECT * FROM `{$table}` WHERE order_id = 4242", ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		};
+
+		// Put the table back in the shape it held before it was keyed by tax order item.
+		$wpdb->query( "ALTER TABLE `{$table}` DROP PRIMARY KEY, DROP COLUMN order_item_id, ADD PRIMARY KEY (order_id, tax_rate_id)" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->insert(
+			$table,
+			array(
+				'order_id'     => 4242,
+				'tax_rate_id'  => 7,
+				'date_created' => '2023-02-10 10:00:00',
+				'total_tax'    => 6.0,
+			)
+		);
+
+		$this->assertEmpty( $key(), 'The table should start out on the released key.' );
+
+		WC_Install::create_tables();
+
+		$this->assertNotEmpty( $key(), 'The primary key should gain the tax order item column.' );
+		$this->assertCount( 1, $rows(), 'The rows a store carried into the re-key should survive it.' );
+		$this->assertSame( 0, (int) $rows()[0]['order_item_id'], 'Rows that predate the column should land on its default and keep reporting on their rate id alone.' );
+
+		$before = $rows();
+		WC_Install::create_tables();
+
+		$this->assertNotEmpty( $key(), 'The second pass should leave the key alone.' );
+		$this->assertSame( $before, $rows(), 'The second pass should leave the rows alone.' );
+
+		$wpdb->delete( $table, array( 'order_id' => 4242 ), array( '%d' ) );
+		add_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+	}
+
+	/**
 	 * Test that delete_obsolete_notes deletes notes.
 	 */
 	public function test_delete_obsolete_notes_deletes_notes() {
