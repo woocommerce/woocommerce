@@ -464,8 +464,13 @@ class WC_Data_Store_WP {
 					: clone $start;
 			} catch ( Exception $e ) {
 				/*
-				 * A year past 9999 throws here. Match nothing: no clause would drop the filter and
-				 * return everything, and a one-sided bound would still match a pre-1970 negative.
+				 * The date could not be constructed, which a year past 9999 does. Match nothing, by
+				 * asking for a value that is both at least 1 and at most 0.
+				 *
+				 * Returning without a clause would not do that: the callers have already dropped
+				 * their own date clause, so the query would come back unfiltered. Nor would a single
+				 * bound like "below 0", since these keys hold a negative timestamp for a date before
+				 * 1970.
 				 */
 				$wp_query_args['meta_query'][] = array(
 					'key'     => $key,
@@ -478,8 +483,10 @@ class WC_Data_Store_WP {
 			}
 
 			/*
-			 * Not a fixed 86400: a local day runs 23 or 25 hours across a DST transition. '+1 day'
-			 * would carry over the start time, which is not midnight when DST begins at 00:00.
+			 * The end of the day is the next local midnight, not the start plus 24 hours: a local day
+			 * runs 23 or 25 hours across a DST transition. '+1 day' would not do either, because it
+			 * keeps the start's time of day, and that is not midnight in a timezone where DST begins
+			 * at 00:00 and the constructor above had to move the start forward.
 			 */
 			$end->modify( 'tomorrow' );
 
