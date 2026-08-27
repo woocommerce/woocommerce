@@ -296,6 +296,30 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
+	 * Whether the lookup's primary key includes the tax order item.
+	 *
+	 * The re-key in `WC_Install::create_tables()` can fail on a large store, and dbDelta adds the
+	 * `order_item_id` column either way. Writing a real tax order item id into a table still keyed
+	 * on (order_id, tax_rate_id) collapses the lines sharing a rate into one row that the report
+	 * then matches to a single line, which reads worse than it did before the column existed.
+	 *
+	 * @return bool
+	 */
+	private static function lookup_is_keyed_by_order_item(): bool {
+		global $wpdb;
+
+		static $keyed_by_order_item = null;
+
+		if ( null === $keyed_by_order_item ) {
+			$table_name = self::get_db_table_name();
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
+			$keyed_by_order_item = (bool) $wpdb->get_var( "SHOW KEYS FROM `{$table_name}` WHERE Key_name = 'PRIMARY' AND Column_name = 'order_item_id'" );
+		}
+
+		return $keyed_by_order_item;
+	}
+
+	/**
 	 * Create or update an entry in the wc_order_tax_lookup table for an order.
 	 *
 	 * Writes one row per tax order item, in a single statement so that a write that does not land
@@ -318,16 +342,20 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return -1;
 		}
 
-		$table_name   = self::get_db_table_name();
-		$date_created = $order->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format );
-		$tax_items    = $order->get_items( OrderItemType::TAX );
-		$rows         = array();
-		$values       = array();
-		$keys         = array();
-		$key_values   = array( $order->get_id() );
+		$table_name    = self::get_db_table_name();
+		$date_created  = $order->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format );
+		$tax_items     = $order->get_items( OrderItemType::TAX );
+		$keyed_by_item = self::lookup_is_keyed_by_order_item();
+		$rows          = array();
+		$values        = array();
+		$keys          = array();
+		$key_values    = array( $order->get_id() );
 
 		foreach ( $tax_items as $tax_item ) {
-			$order_item_id = $tax_item->get_id();
+			// Leaving the column at zero on a table the re-key never reached keeps the row in the
+			// shape the released report reads, rather than collapsing the order's tax lines into
+			// one row the report matches to a single line.
+			$order_item_id = $keyed_by_item ? $tax_item->get_id() : 0;
 			$tax_rate_id   = $tax_item->get_rate_id();
 
 			$rows[] = '(%d, %s, %d, %d, %f, %f, %f)';
@@ -368,7 +396,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		// carries and the rows written before the order item column existed, which sit at zero. The
 		// key is the rate and the item together, so matching on the item alone would leave behind
 		// the old row of a line whose rate id has changed. Prune only once the writes have landed,
-		// so a failure leaves the order with the rows it came in with.
+		// so a write that did not land leaves the order with the rows it came in with. The two
+		// statements are not one transaction, so a prune that never runs at all leaves the order's
+		// old rows beside its new ones until the order is synced again.
 		$stale_keys = $keys ? ' AND (tax_rate_id, order_item_id) NOT IN (' . implode( ', ', $keys ) . ')' : '';
 		$deleted    = $wpdb->query(
 			$wpdb->prepare(
