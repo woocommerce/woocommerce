@@ -73,6 +73,27 @@ class PushTokenValidator {
 	const TOKEN_MAXIMUM_LENGTH = 4096;
 
 	/**
+	 * The maximum number of items metadata may contain.
+	 *
+	 * @since 11.2.0
+	 */
+	const METADATA_MAXIMUM_ITEMS = 50;
+
+	/**
+	 * The maximum length of a metadata key.
+	 *
+	 * @since 11.2.0
+	 */
+	const METADATA_KEY_MAXIMUM_LENGTH = 64;
+
+	/**
+	 * The maximum length of a metadata value.
+	 *
+	 * @since 11.2.0
+	 */
+	const METADATA_VALUE_MAXIMUM_LENGTH = 512;
+
+	/**
 	 * The regex to use when validating Apple token format.
 	 *
 	 * @since 10.6.0
@@ -421,9 +442,30 @@ class PushTokenValidator {
 			return new WP_Error( self::ERROR_CODE, 'Metadata must be an array.' );
 		}
 
+		if ( count( $value ) > self::METADATA_MAXIMUM_ITEMS ) {
+			return new WP_Error(
+				self::ERROR_CODE,
+				sprintf( 'Metadata exceeds the maximum of %s items.', self::METADATA_MAXIMUM_ITEMS )
+			);
+		}
+
 		foreach ( $value as $key => $item ) {
 			if ( ! is_scalar( $item ) ) {
 				return new WP_Error( self::ERROR_CODE, 'Metadata items must be scalar values.' );
+			}
+
+			if ( strlen( (string) $key ) > self::METADATA_KEY_MAXIMUM_LENGTH ) {
+				return new WP_Error(
+					self::ERROR_CODE,
+					sprintf( 'Metadata key exceeds maximum length of %s.', self::METADATA_KEY_MAXIMUM_LENGTH )
+				);
+			}
+
+			if ( strlen( (string) $item ) > self::METADATA_VALUE_MAXIMUM_LENGTH ) {
+				return new WP_Error(
+					self::ERROR_CODE,
+					sprintf( 'Metadata value exceeds maximum length of %s.', self::METADATA_VALUE_MAXIMUM_LENGTH )
+				);
 			}
 		}
 
