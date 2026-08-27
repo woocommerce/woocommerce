@@ -452,9 +452,8 @@ class WC_Data_Store_WP {
 		// Check against beginning/end-of-day timestamps when using 'day' precision.
 		if ( 'day' === $precision ) {
 			/*
-			 * Anchor both bounds on the named day's local midnight. The day is named from the raw
-			 * string the way OrdersTableQuery::local_time_to_gmt_date_query() names it, never from
-			 * the timezone-aware $dates, or the two storage backends resolve one query var to
+			 * Name the day from the raw string the way OrdersTableQuery::local_time_to_gmt_date_query()
+			 * does, never from the timezone-aware $dates, or posts and HPOS resolve one query var to
 			 * different days.
 			 */
 			try {
@@ -465,9 +464,8 @@ class WC_Data_Store_WP {
 					: clone $start;
 			} catch ( Exception $e ) {
 				/*
-				 * A date beyond year 9999 matches nothing. Adding no clause would instead drop the
-				 * filter and return everything, and a one-sided bound would still match the negative
-				 * timestamp of a pre-1970 date.
+				 * A year past 9999 throws here. Match nothing: no clause would drop the filter and
+				 * return everything, and a one-sided bound would still match a pre-1970 negative.
 				 */
 				$wp_query_args['meta_query'][] = array(
 					'key'     => $key,
@@ -480,9 +478,8 @@ class WC_Data_Store_WP {
 			}
 
 			/*
-			 * Next local midnight, not a fixed 86400: a local day runs 23 or 25 hours across a DST
-			 * transition. '+1 day' would carry over the start time, which is not midnight on days
-			 * where DST begins at 00:00.
+			 * Not a fixed 86400: a local day runs 23 or 25 hours across a DST transition. '+1 day'
+			 * would carry over the start time, which is not midnight when DST begins at 00:00.
 			 */
 			$end->modify( 'tomorrow' );
 
