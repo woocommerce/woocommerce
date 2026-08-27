@@ -172,13 +172,13 @@
 'packages/php/email-editor/**/*':
     - team: ballade
 
-'plugins/woocommerce/client/admin/client/{abandoned-cart-recovery,marketing,settings-email}/**/*':
+'plugins/woocommerce/client/admin/client/{marketing,settings-email}/**/*':
     - team: ballade
 
 'plugins/woocommerce/src/Admin/Marketing/**/*':
     - team: ballade
 
-'plugins/woocommerce/src/Internal/{AbandonedCartRecovery,Email,EmailEditor}/**/*':
+'plugins/woocommerce/src/Internal/{Email,EmailEditor}/**/*':
     - team: ballade
 
 'plugins/woocommerce/src/Internal/Admin/{EmailImprovements,EmailPreview,Emails,Marketing}/**/*':
@@ -196,7 +196,7 @@
 'plugins/woocommerce/tests/**/*{coupon,email,mailer,marketing}*':
     - team: ballade
 
-'plugins/woocommerce/tests/php/src/Internal/{AbandonedCartRecovery,Email,EmailEditor}/**/*':
+'plugins/woocommerce/tests/php/src/Internal/{Email,EmailEditor}/**/*':
     - team: ballade
 
 'plugins/woocommerce/tests/php/src/Internal/Admin/{EmailImprovements,EmailPreview,Emails,Marketing}/**/*':
