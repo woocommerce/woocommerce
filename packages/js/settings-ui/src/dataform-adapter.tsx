@@ -23,10 +23,10 @@ import type {
 	SettingsUIField,
 	SettingsUIGroup,
 	SettingsUISchema,
-	SettingsValue,
 	SettingsValues,
 	SettingsVisibilityPredicate,
 } from './types';
+import { valueMatchesVisibilityRule } from './values';
 
 // The adapter assumes the canonical value vocabulary from the PHP schema
 // builder and how extension components attach is a renderer concern, so
@@ -41,32 +41,6 @@ export type DataFormAdapterOptions = {
 export type DataFormAdapter = {
 	fields: Field< SettingsValues >[];
 	getForm: ( values: SettingsValues ) => Form;
-};
-
-const areValuesEqual = ( a: SettingsValue, b: SettingsValue ) => {
-	if ( Array.isArray( a ) || Array.isArray( b ) ) {
-		return (
-			Array.isArray( a ) &&
-			Array.isArray( b ) &&
-			a.length === b.length &&
-			a.every( ( value, index ) => value === b[ index ] )
-		);
-	}
-
-	return a === b;
-};
-
-const valueMatchesVisibilityRule = (
-	value: SettingsValue,
-	expected: SettingsValue | SettingsValue[] | undefined
-) => {
-	const expectedValues = Array.isArray( expected )
-		? expected
-		: [ expected ?? true ];
-
-	return expectedValues.some( ( expectedValue ) =>
-		areValuesEqual( value, expectedValue )
-	);
 };
 
 type SettingsTypeDescriptor = {
