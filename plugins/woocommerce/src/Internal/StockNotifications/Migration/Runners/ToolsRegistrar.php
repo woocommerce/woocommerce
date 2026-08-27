@@ -134,8 +134,11 @@ class ToolsRegistrar {
 		// possibly killed, run left behind - otherwise it resumes behind a stale cursor
 		// and strands every row below it.
 		$migration_state->reset_all_cursors();
-		$this->refresh_cached_counts( $migration_state );
-		$this->cache_known_losses( $migration_state );
+
+		$notifications_migrator = new NotificationsMigrator( new Reporter() );
+
+		$this->refresh_cached_counts( $migration_state, $notifications_migrator );
+		$this->cache_known_losses( $migration_state, $notifications_migrator );
 
 		$batch_processor->enqueue_processor( MigrationBatchProcessor::class );
 
@@ -149,11 +152,13 @@ class ToolsRegistrar {
 	 * "computed at run start" half of that contract has to happen here, in the callback
 	 * that actually starts a run.
 	 *
-	 * @param MigrationState $migration_state Run state to write the refreshed counts into.
+	 * @param MigrationState        $migration_state        Run state to write the refreshed counts into.
+	 * @param NotificationsMigrator $notifications_migrator The notifications section, shared with
+	 *                                                       cache_known_losses().
 	 * @return void
 	 */
-	private function refresh_cached_counts( MigrationState $migration_state ): void {
-		foreach ( $this->get_migrators() as $migrator ) {
+	private function refresh_cached_counts( MigrationState $migration_state, NotificationsMigrator $notifications_migrator ): void {
+		foreach ( $this->build_migrators( $migration_state, $notifications_migrator ) as $migrator ) {
 			$migration_state->set_count( $migrator->get_slug(), $migrator->count_remaining() );
 		}
 	}
@@ -164,30 +169,35 @@ class ToolsRegistrar {
 	 * These are one `COUNT(*)` each, so they are computed here, where a merchant has just
 	 * asked for a run, and never while rendering the Tools list.
 	 *
-	 * @param MigrationState $migration_state Run state to write the counts into.
+	 * @param MigrationState        $migration_state        Run state to write the counts into.
+	 * @param NotificationsMigrator $notifications_migrator The notifications section, already built.
 	 * @return void
 	 */
-	private function cache_known_losses( MigrationState $migration_state ): void {
-		$container = wc_get_container();
-
+	private function cache_known_losses( MigrationState $migration_state, NotificationsMigrator $notifications_migrator ): void {
 		$migration_state->set_losses(
-			$container->get( Reporter::class )->collect_known_losses( $container->get( NotificationsMigrator::class ) )
+			wc_get_container()->get( Reporter::class )->collect_known_losses( $notifications_migrator )
 		);
 	}
 
 	/**
-	 * Resolve the four section migrators from the container.
+	 * Build the four section migrators.
 	 *
+	 * Built here rather than resolved from the container, which cannot reflect over their
+	 * constructor arguments - the same reason `MigrationBatchProcessor` builds its own.
+	 *
+	 * @param MigrationState        $migration_state        Run state the option-backed sections read.
+	 * @param NotificationsMigrator $notifications_migrator The notifications section, built by the caller
+	 *                                                       so its run-level counters are shared.
 	 * @return MigratorInterface[]
 	 */
-	private function get_migrators(): array {
-		$container = wc_get_container();
+	private function build_migrators( MigrationState $migration_state, NotificationsMigrator $notifications_migrator ): array {
+		$reporter = new Reporter();
 
 		return array(
-			$container->get( NotificationsMigrator::class ),
-			$container->get( ProductMetaMigrator::class ),
-			$container->get( EmailSettingsMigrator::class ),
-			$container->get( SettingsMigrator::class ),
+			$notifications_migrator,
+			new ProductMetaMigrator( $reporter, $migration_state ),
+			new EmailSettingsMigrator( $migration_state, $reporter ),
+			new SettingsMigrator( $migration_state, $reporter ),
 		);
 	}
 

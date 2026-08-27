@@ -1,0 +1,187 @@
+<?php
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration;
+
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Compat\LegacyUnsubscribeShim;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationController;
+use Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Helpers\LegacyStore;
+use WC_Unit_Test_Case;
+
+/**
+ * Tests for the registration gates: what a store that never had the legacy extension pays
+ * for the migration existing, and what the shim's own flag controls.
+ */
+class MigrationControllerTests extends WC_Unit_Test_Case {
+
+	/**
+	 * Controller under test.
+	 *
+	 * @var MigrationController
+	 */
+	private MigrationController $controller;
+
+	/**
+	 * Set up a clean option state.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		$this->clear_options();
+
+		$this->controller = new MigrationController();
+	}
+
+	/**
+	 * Clear the options and the hooks registration may have added.
+	 */
+	public function tearDown(): void {
+		remove_all_filters( 'woocommerce_debug_tools' );
+		remove_all_actions( 'admin_notices' );
+		remove_all_actions( 'template_redirect' );
+
+		$this->clear_options();
+
+		parent::tearDown();
+	}
+
+	/**
+	 * @testdox a store that never installed the legacy extension should register nothing.
+	 */
+	public function test_clean_store_registers_nothing(): void {
+		$this->controller->register();
+
+		$this->assertFalse( has_filter( 'woocommerce_debug_tools', array( $this->controller, 'handle_woocommerce_debug_tools' ) ) );
+		$this->assertFalse( has_action( 'admin_notices', array( $this->controller, 'maybe_render_double_send_notice' ) ) );
+		$this->assertFalse( $this->shim_is_hooked(), 'The shim must not register on a clean store.' );
+	}
+
+	/**
+	 * @testdox registration should issue no queries on a clean store.
+	 */
+	public function test_clean_store_registration_issues_no_queries(): void {
+		$queries = array();
+
+		$recorder = function ( $query ) use ( &$queries ) {
+			$queries[] = $query;
+
+			return $query;
+		};
+
+		add_filter( 'query', $recorder );
+		$this->controller->register();
+		remove_filter( 'query', $recorder );
+
+		$table_probes = array_filter(
+			$queries,
+			static function ( $query ) {
+				return false !== stripos( $query, 'SHOW TABLES LIKE' ) || false !== stripos( $query, 'woocommerce_bis_' );
+			}
+		);
+
+		$this->assertSame( array(), array_values( $table_probes ), 'Registration must not probe for the legacy tables.' );
+	}
+
+	/**
+	 * @testdox a store that once had the legacy extension should get the Tools entry.
+	 */
+	public function test_store_with_legacy_history_registers_the_tools_entry(): void {
+		update_option( 'wc_bis_db_version', '1.2.0' );
+
+		$this->controller->register();
+
+		$this->assertNotFalse( has_filter( 'woocommerce_debug_tools', array( $this->controller, 'handle_woocommerce_debug_tools' ) ) );
+		$this->assertFalse( $this->shim_is_hooked(), 'The shim needs its own flag, not just legacy history.' );
+	}
+
+	/**
+	 * @testdox the shim should register only while the legacy-links flag is set.
+	 */
+	public function test_shim_registers_only_with_the_legacy_links_flag(): void {
+		update_option( 'wc_bis_db_version', '1.2.0' );
+		update_option( 'wc_bis_migration_has_legacy_links', 'yes' );
+
+		$this->controller->register();
+
+		$this->assertTrue( $this->shim_is_hooked() );
+	}
+
+	/**
+	 * @testdox the Tools entry should be absent for a user without manage_woocommerce.
+	 */
+	public function test_tools_entry_is_absent_without_the_capability(): void {
+		update_option( 'wc_bis_db_version', '1.2.0' );
+
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'customer' ) ) );
+
+		$this->assertSame( array(), $this->controller->handle_woocommerce_debug_tools( array() ) );
+
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		$this->assertNotEmpty( $this->controller->handle_woocommerce_debug_tools( array() ) );
+	}
+
+	/**
+	 * @testdox the double-send notice should only render for a capable user with migrated rows.
+	 */
+	public function test_double_send_notice_needs_the_capability_and_migrated_rows(): void {
+		update_option( 'wc_bis_db_version', '1.2.0' );
+
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'customer' ) ) );
+		$this->assertSame( '', $this->render_double_send_notice() );
+
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$this->assertSame( '', $this->render_double_send_notice(), 'Nothing migrated yet, so nothing to warn about.' );
+	}
+
+	/**
+	 * Whether the legacy unsubscribe shim has hooked itself into the request lifecycle.
+	 *
+	 * Checked by walking the hook's callbacks rather than by resolving the shim from the
+	 * container, since resolving it is what registers it.
+	 *
+	 * @return bool
+	 */
+	private function shim_is_hooked(): bool {
+		global $wp_filter;
+
+		if ( ! isset( $wp_filter['template_redirect'] ) ) {
+			return false;
+		}
+
+		foreach ( $wp_filter['template_redirect']->callbacks as $callbacks ) {
+			foreach ( $callbacks as $callback ) {
+				if ( is_array( $callback['function'] ) && $callback['function'][0] instanceof LegacyUnsubscribeShim ) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Capture whatever the double-send notice renders.
+	 *
+	 * @return string
+	 */
+	private function render_double_send_notice(): string {
+		ob_start();
+		$this->controller->maybe_render_double_send_notice();
+
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Delete every option registration reads, and drop any legacy tables left behind.
+	 *
+	 * @return void
+	 */
+	private function clear_options(): void {
+		LegacyStore::drop_tables();
+
+		delete_option( 'wc_bis_db_version' );
+		delete_option( 'wc_bis_migration_has_legacy_links' );
+		delete_option( 'wc_bis_migration_has_migrated_rows' );
+	}
+}

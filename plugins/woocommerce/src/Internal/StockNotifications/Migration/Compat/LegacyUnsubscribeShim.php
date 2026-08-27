@@ -359,7 +359,8 @@ class LegacyUnsubscribeShim {
 	 */
 	private function respond_generic_stale_link(): void {
 		$this->start_session();
-		wc_add_notice( esc_html__( 'This unsubscribe link is invalid or has expired.', 'woocommerce' ) );
+		// Notice, not the default success type: an expired link is not something that worked.
+		wc_add_notice( esc_html__( 'This unsubscribe link is invalid or has expired.', 'woocommerce' ), 'notice' );
 		$this->redirect();
 	}
 
