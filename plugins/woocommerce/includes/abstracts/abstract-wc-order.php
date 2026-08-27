@@ -1441,9 +1441,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Apply a coupon to the order and recalculate totals.
 	 *
 	 * @since 3.2.0
-	 * @since 11.2.0 When no coupons are applied yet, line items whose totals were manually
-	 *               edited have their subtotals synced to those totals first, so discounts
-	 *               are calculated from the edited prices rather than the original ones.
 	 * @param string|WC_Coupon $raw_coupon Coupon code or object.
 	 * @return true|WP_Error True if applied, error if not.
 	 */
@@ -1476,18 +1473,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
-		// With no coupons applied, a line total differing from its subtotal is a manual price
-		// adjustment. Adopt it as the new pre-discount price, otherwise discounts would be
-		// calculated from the original price and recalculations would discard the adjustment.
-		// With coupons already applied this is skipped: the difference also contains their
-		// discounts and the manual portion cannot be separated out.
-		$original_subtotals = empty( $applied_coupons ) ? $this->sync_subtotals_with_manually_edited_totals() : array();
-
 		$discounts = new WC_Discounts( $this );
 		$applied   = $discounts->apply_coupon( $coupon );
 
 		if ( is_wp_error( $applied ) ) {
-			$this->restore_item_subtotals( $original_subtotals );
 			return $applied;
 		}
 
@@ -1497,7 +1486,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( $data_store && 0 === $this->get_customer_id() ) {
 			$usage_count = $data_store->get_usage_by_email( $coupon, $this->get_billing_email() );
 			if ( 0 < $coupon->get_usage_limit_per_user() && $usage_count >= $coupon->get_usage_limit_per_user() ) {
-				$this->restore_item_subtotals( $original_subtotals );
 				return new WP_Error(
 					'invalid_coupon',
 					$coupon->get_coupon_error( 106 ),
@@ -1539,6 +1527,33 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		wc_update_coupon_usage_counts( $this->get_id() );
 
 		return true;
+	}
+
+	/**
+	 * Apply a coupon treating manually edited line item totals as the pre-discount price.
+	 *
+	 * When the order has no coupons yet, line items whose total differs from their subtotal
+	 * adopt that total as the new subtotal, so the discount is calculated from the edited
+	 * price and recalculations keep the manual adjustment. On failure the original subtotals
+	 * are restored. Call this only where a subtotal/total difference is meant to be treated
+	 * as a manual edit, such as the admin order editor; otherwise use apply_coupon().
+	 *
+	 * @since 11.2.0
+	 * @param string|WC_Coupon $raw_coupon Coupon code or object.
+	 * @return true|WP_Error True if applied, error if not.
+	 */
+	public function apply_coupon_using_edited_totals( $raw_coupon ) {
+		// With coupons already applied the subtotal/total difference also contains their
+		// discounts and the manual portion cannot be separated out, so it is left alone.
+		$original_subtotals = empty( $this->get_items( 'coupon' ) ) ? $this->sync_subtotals_with_manually_edited_totals() : array();
+
+		$applied = $this->apply_coupon( $raw_coupon );
+
+		if ( is_wp_error( $applied ) ) {
+			$this->restore_item_subtotals( $original_subtotals );
+		}
+
+		return $applied;
 	}
 
 	/**

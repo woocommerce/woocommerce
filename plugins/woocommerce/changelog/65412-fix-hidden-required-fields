@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Skip required validation for hidden address fields on the classic checkout and My Account address form.
