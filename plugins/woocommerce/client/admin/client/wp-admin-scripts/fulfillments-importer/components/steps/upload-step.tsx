@@ -22,13 +22,16 @@ import type { StepComponentProps } from './types';
 
 function formatBytes( bytes: number ): string {
 	if ( bytes < 1024 ) {
-		return `${ bytes } B`;
+		/* translators: %s: file size in bytes. */
+		return sprintf( __( '%s B', 'woocommerce' ), String( bytes ) );
 	}
 	const kb = bytes / 1024;
 	if ( kb < 1024 ) {
-		return `${ kb.toFixed( 1 ) } KB`;
+		/* translators: %s: file size in kilobytes. */
+		return sprintf( __( '%s KB', 'woocommerce' ), kb.toFixed( 1 ) );
 	}
-	return `${ ( kb / 1024 ).toFixed( 1 ) } MB`;
+	/* translators: %s: file size in megabytes. */
+	return sprintf( __( '%s MB', 'woocommerce' ), ( kb / 1024 ).toFixed( 1 ) );
 }
 
 const UploadStep: React.FC< StepComponentProps > = ( {
@@ -78,12 +81,7 @@ const UploadStep: React.FC< StepComponentProps > = ( {
 	] );
 
 	const fileLabel = state.file
-		? sprintf(
-				/* translators: 1: file name, 2: human-readable file size. */
-				__( '%1$s · %2$s', 'woocommerce' ),
-				state.file.name,
-				formatBytes( state.file.size )
-		  )
+		? `${ state.file.name } · ${ formatBytes( state.file.size ) }`
 		: __( 'No file selected.', 'woocommerce' );
 
 	return (
@@ -128,6 +126,7 @@ const UploadStep: React.FC< StepComponentProps > = ( {
 
 			<TextControl
 				__next40pxDefaultSize
+				__nextHasNoMarginBottom
 				label={ __( 'CSV delimiter', 'woocommerce' ) }
 				help={ __(
 					'Single character used to separate columns in the CSV. Defaults to comma.',
@@ -145,6 +144,7 @@ const UploadStep: React.FC< StepComponentProps > = ( {
 			/>
 
 			<CheckboxControl
+				__nextHasNoMarginBottom
 				label={ __(
 					'Send shipment notification emails to customers.',
 					'woocommerce'
@@ -156,6 +156,7 @@ const UploadStep: React.FC< StepComponentProps > = ( {
 			/>
 
 			<CheckboxControl
+				__nextHasNoMarginBottom
 				label={ __(
 					'Update existing fulfillments when the tracking number matches.',
 					'woocommerce'

@@ -46,6 +46,7 @@ const ModalHeader: React.FC< ModalHeaderProps > = ( {
 				label={ __( 'Close', 'woocommerce' ) }
 				onClick={ onClose }
 				disabled={ ! canClose }
+				accessibleWhenDisabled
 			/>
 		</div>
 		<Stepper currentStep={ currentStep } />
