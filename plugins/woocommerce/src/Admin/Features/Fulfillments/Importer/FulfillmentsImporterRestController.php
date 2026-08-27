@@ -401,26 +401,63 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	/**
 	 * Acquire the per-session run lock.
 	 *
-	 * Uses add_option() as an atomic take; a stale lock older than the takeover
-	 * threshold is claimed so a fatally interrupted chunk cannot wedge the import.
+	 * add_option() checks for an existing row in PHP before inserting, so two concurrent
+	 * requests can both pass that check. The lock is taken with INSERT IGNORE instead and
+	 * let the unique index decide, the same way WP_Upgrader::create_lock() does. A lock
+	 * older than the takeover threshold is claimed so a fatally interrupted chunk cannot
+	 * wedge the import.
 	 *
 	 * @param string $lock_key Option name used as the lock.
 	 * @return bool Whether the lock was acquired.
 	 */
 	private function acquire_run_lock( string $lock_key ): bool {
-		if ( add_option( $lock_key, (string) time(), '', false ) ) {
+		global $wpdb;
+
+		$now = (string) time();
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- The option API cannot express an atomic take.
+		$inserted = $wpdb->query(
+			$wpdb->prepare(
+				"INSERT IGNORE INTO {$wpdb->options} ( option_name, option_value, autoload ) VALUES ( %s, %s, 'no' )",
+				$lock_key,
+				$now
+			)
+		);
+		$this->flush_run_lock_cache( $lock_key );
+
+		if ( 1 === (int) $inserted ) {
 			return true;
 		}
 
-		$held_since = (int) get_option( $lock_key );
-		if ( $held_since > 0 && ( time() - $held_since ) < MINUTE_IN_SECONDS ) {
+		$held_since = (string) get_option( $lock_key, '' );
+		if ( '' === $held_since || ( time() - (int) $held_since ) < MINUTE_IN_SECONDS ) {
 			return false;
 		}
 
-		// Stale lock: delete then re-add so concurrent takeover attempts race on
-		// add_option() and only one of them can win.
-		delete_option( $lock_key );
-		return add_option( $lock_key, (string) time(), '', false );
+		// Stale lock. Matching on the value we just read means only one of several racing
+		// takeovers updates a row, so only one of them proceeds.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- See above.
+		$claimed = $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND option_value = %s",
+				$now,
+				$lock_key,
+				$held_since
+			)
+		);
+		$this->flush_run_lock_cache( $lock_key );
+
+		return 1 === (int) $claimed;
+	}
+
+	/**
+	 * Drop the cached option value after writing the lock row directly.
+	 *
+	 * @param string $lock_key Option name used as the lock.
+	 */
+	private function flush_run_lock_cache( string $lock_key ): void {
+		wp_cache_delete( $lock_key, 'options' );
+		wp_cache_delete( 'notoptions', 'options' );
 	}
 
 	/**
