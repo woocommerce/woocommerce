@@ -724,6 +724,57 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The Orders list joins the tax lookup for its rate filter, so one row per tax line is one
+	 * joined row per tax line. What keeps the order out of the list twice is the DISTINCT the
+	 * report selects with, and the count above the list being over distinct order ids.
+	 *
+	 * @testdox Orders report lists an order once when several of its tax lines share the filtered rate.
+	 */
+	public function test_orders_report_lists_an_order_once_when_its_tax_lines_share_the_filtered_rate(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$rate_id = $this->insert_tax_rate();
+		$lines   = array_map(
+			function ( $line ) use ( $rate_id ) {
+				$line['rate_id'] = $rate_id;
+				return $line;
+			},
+			$this->tax_lines_sharing_a_rate_id()
+		);
+
+		$order = $this->seed_order_with_tax_lines( $lines, '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$this->assertCount( 4, $this->lookup_rows( $order->get_id() ), 'The order should hold a row per tax line to begin with.' );
+
+		$orders   = new OrdersDataStore();
+		$included = $orders->get_data(
+			array(
+				'after'             => '2023-02-01 00:00:00',
+				'before'            => '2023-02-28 23:59:59',
+				'tax_rate_includes' => array( $rate_id ),
+				'per_page'          => 100,
+				'page'              => 1,
+			)
+		);
+
+		$this->assertCount( 1, $included->data, 'An order carrying several tax lines on one rate should be listed once, not once per line.' );
+		$this->assertSame( 1, (int) $included->total, 'The list and the count above it should agree.' );
+
+		$excluded = $orders->get_data(
+			array(
+				'after'             => '2023-02-01 00:00:00',
+				'before'            => '2023-02-28 23:59:59',
+				'tax_rate_excludes' => array( $rate_id ),
+				'per_page'          => 100,
+				'page'              => 1,
+			)
+		);
+
+		$this->assertCount( 0, $excluded->data, 'Excluding the rate the order carries should leave it out of the list.' );
+	}
+
+	/**
 	 * @testdox Sync leaves the rows an order already had alone when one of its writes fails.
 	 */
 	public function test_sync_keeps_existing_rows_when_a_write_fails(): void {
