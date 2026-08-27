@@ -174,7 +174,7 @@ class PushToken {
 	private ?string $last_confirmed_at_gmt = null;
 
 	/**
-	 * The date the token was last sent to WPCOM, as an RFC3339 string in UTC (offset `+00:00`).
+	 * The date the token was last sent to WPCOM, as a GMT `Y-m-d H:i:s` string.
 	 *
 	 * @var string|null
 	 */
@@ -661,8 +661,8 @@ class PushToken {
 	}
 
 	/**
-	 * Gets the date this token was last sent to WPCOM, as an RFC3339 string in
-	 * UTC (offset `+00:00`), or null if it has never been sent.
+	 * Gets the date this token was last sent to WPCOM, as a GMT `Y-m-d H:i:s`
+	 * string, or null if it has never been sent.
 	 *
 	 * This records that WPCOM accepted a payload containing the token. It is
 	 * not a delivery receipt: what happens between WPCOM and the device is
