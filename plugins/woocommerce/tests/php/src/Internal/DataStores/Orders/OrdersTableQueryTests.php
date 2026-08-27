@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Caches\OrderCountCache;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableQuery;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\Tests\Helpers\DateQueryGuardTrait;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Helper_Product;
@@ -18,6 +19,8 @@ use WC_Order;
  * @group order-query-tests
  */
 class OrdersTableQueryTests extends \WC_Unit_Test_Case {
+	use DateQueryGuardTrait;
+
 	use HPOSToggleTrait;
 
 	/**
@@ -1961,5 +1964,57 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( array(), $result, 'An unusable clause arg must fail the query closed.' );
+	}
+
+	/**
+	 * @testDox A date_query the guard must honour still matches, shared with the legacy suite.
+	 *
+	 * @dataProvider provider_date_query_must_match
+	 *
+	 * @param array $date_query The clause under test.
+	 */
+	public function test_shared_date_query_must_match( array $date_query ): void {
+		$order = OrderHelper::create_order();
+		$order->set_date_created( '2024-06-01' );
+		$order->save();
+
+		$result = wc_get_orders(
+			array(
+				'date_query' => $date_query,
+				'return'     => 'ids',
+				'limit'      => -1,
+				'status'     => 'any',
+			)
+		);
+
+		$this->assertContains( $order->get_id(), $result, 'A supported date_query must keep matching.' );
+	}
+
+	/**
+	 * @testDox A date_query the guard must reject returns nothing, shared with the legacy suite.
+	 *
+	 * @dataProvider provider_date_query_must_fail_closed
+	 *
+	 * @param array $date_query The clause under test.
+	 */
+	public function test_shared_date_query_must_fail_closed( array $date_query ): void {
+		// Also asserts the notice fires: WP fails the test both if an undeclared
+		// incorrect-usage notice is raised and if a declared one never is.
+		$this->setExpectedIncorrectUsage( 'wc_get_orders' );
+
+		$order = OrderHelper::create_order();
+		$order->set_date_created( '2024-06-01' );
+		$order->save();
+
+		$result = wc_get_orders(
+			array(
+				'date_query' => $date_query,
+				'return'     => 'ids',
+				'limit'      => -1,
+				'status'     => 'any',
+			)
+		);
+
+		$this->assertSame( array(), $result, 'An unusable date_query must fail closed rather than widen the query.' );
 	}
 }
