@@ -488,9 +488,6 @@ class CheckoutFields {
 	/**
 	 * Returns an array of all additional fields.
 	 *
-	 * Date field min/max constraints are returned as registered, not resolved to a date. Resolving them here
-	 * would freeze a duration such as "P1D" into whatever markup a page cache stored.
-	 *
 	 * @return array An array of fields.
 	 */
 	public function get_additional_fields() {

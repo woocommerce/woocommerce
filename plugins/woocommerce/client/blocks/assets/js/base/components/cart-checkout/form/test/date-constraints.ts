@@ -42,8 +42,9 @@ describe( 'resolveDateConstraint', () => {
 		expect( resolveDateConstraint( constraint ) ).toBe( expected );
 	} );
 
-	// PHP's own DateInterval arithmetic would roll these forward into the next month. DateFieldType
-	// reimplements Temporal's clamp so the server agrees with what the picker offers here.
+	// Edge cases in which adding a period to a date should resolve based on the period, not number of dates.
+	// For example, adding 1 month to Jan 31 should resolve to Feb 28, not Mar 3. This is a bug in PHP that
+	// we had to fix, and we test for here regardless.
 	it.each( [
 		[ '2026-01-31', 'P1M', '2026-02-28' ],
 		[ '2026-03-31', '-P1M', '2026-02-28' ],

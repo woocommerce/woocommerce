@@ -8,9 +8,9 @@ use WP_Error;
 /**
  * The "date" additional checkout field type.
  *
- * Values are calendar dates in YYYY-MM-DD format with no time or timezone component. The optional
- * min/max constraints are either absolute dates or ISO 8601-2 durations relative to today, which
- * are resolved every time they are read so they stay correct behind a page cache.
+ * Values are calendar dates in YYYY-MM-DD format with no time or timezone component. Field
+ * also accept min/max constraints as absolute dates (i.e. YYYY-MM-DD) or relative
+ * ISO 8601-2 periods (e.g. -P2Y, P1M).
  */
 class DateFieldType extends AbstractFieldType {
 
@@ -18,11 +18,6 @@ class DateFieldType extends AbstractFieldType {
 	 * Matches a date in YYYY-MM-DD format.
 	 */
 	private const ABSOLUTE_DATE = '/^\d{4}-\d{2}-\d{2}$/';
-
-	/**
-	 * Matches a canonical signed ISO 8601-2 duration, capturing its sign, years, months and days.
-	 */
-	private const DURATION = '/^(-?)P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?$/';
 
 	/**
 	 * Processes the options for a date field and returns the new field_options array.
@@ -41,28 +36,74 @@ class DateFieldType extends AbstractFieldType {
 				continue;
 			}
 
-			$normalized = $this->normalize_constraint( $options[ $constraint ] );
+			$value = $options[ $constraint ];
 
-			if ( null === $normalized ) {
+			if ( ! is_string( $value ) ) {
 				return $this->registration_error(
 					$id,
-					sprintf( 'The "%s" property of a "date" field must be a date in YYYY-MM-DD format, an ISO 8601-2 duration such as "P1D" or "-P18Y", or a DateInterval.', $constraint ),
+					sprintf( 'The "%s" property of a "date" field must be a date in YYYY-MM-DD format or an ISO 8601-2 duration such as "P1D" or "-P18Y".', $constraint ),
 					'11.2.0'
 				);
 			}
 
-			$field_data[ $constraint ] = $normalized;
+			$value = trim( $value );
+
+			if ( $this->is_absolute_date( $value ) ) {
+				if ( null === $this->parse_date( $value ) ) {
+					return $this->registration_error(
+						$id,
+						sprintf( 'The "%s" property of a "date" field must be a real calendar date, and "%s" is not.', $constraint, $value ),
+						'11.2.0'
+					);
+				}
+
+				$field_data[ $constraint ] = $value;
+				continue;
+			}
+
+			// DateInterval implements ISO 8601-1, which has no sign, so the ISO 8601-2 sign is peeled off first.
+			$sign = 1;
+			$body = $value;
+
+			if ( '' !== $body && in_array( $body[0], array( '+', '-' ), true ) ) {
+				$sign = '-' === $body[0] ? -1 : 1;
+				$body = substr( $body, 1 );
+			}
+
+			try {
+				$interval = new \DateInterval( $body );
+			} catch ( \Exception $e ) {
+				return $this->registration_error(
+					$id,
+					sprintf( 'The "%s" property of a "date" field must be a date in YYYY-MM-DD format or an ISO 8601-2 duration such as "P1D" or "-P18Y", and "%s" is neither.', $constraint, $value ),
+					'11.2.0'
+				);
+			}
+
+			// A date field has no sub-day precision, so a time component means the caller meant something else.
+			if ( $interval->h || $interval->i || $interval->s || $interval->f ) {
+				return $this->registration_error(
+					$id,
+					sprintf( 'The "%s" property of a "date" field must be a duration in whole days, but "%s" includes a time component.', $constraint, $value ),
+					'11.2.0'
+				);
+			}
+
+			// The body parsed as-is, so re-attaching the sign (dropping an explicit "+") makes it canonical
+			// ISO 8601-2: at most one leading "-", which is all resolve_constraint() and the client expect.
+			$field_data[ $constraint ] = ( -1 === $sign ? '-' : '' ) . $body;
 		}
 
-		// Two constraints of the same kind usually keep their order whenever they are resolved, so an impossible
-		// range can be caught here. A mix of absolute and duration can be valid today and not tomorrow, so it is
-		// left to per-request validation, as is a duration pair that only inverts when a short February is in the way.
-		if ( isset( $field_data['min'], $field_data['max'] )
-			&& $this->is_absolute_date( $field_data['min'] ) === $this->is_absolute_date( $field_data['max'] )
-			&& $this->resolve_constraint( $field_data['min'] ) > $this->resolve_constraint( $field_data['max'] ) ) {
+		$min = $field_data['min'] ?? null;
+		$max = $field_data['max'] ?? null;
+
+		// When having 2 constraints, we can end up in impossible cases, in which the min is later than the max.
+		if ( isset( $min, $max )
+			&& $this->is_absolute_date( $min ) === $this->is_absolute_date( $max )
+			&& $this->resolve_constraint( $min ) > $this->resolve_constraint( $max ) ) {
 			return $this->registration_error(
 				$id,
-				sprintf( 'The "min" constraint (%s) must not resolve to a date later than the "max" constraint (%s).', $field_data['min'], $field_data['max'] ),
+				sprintf( 'The "min" constraint (%s) must not resolve to a date later than the "max" constraint (%s).', $min, $max ),
 				'11.2.0'
 			);
 		}
@@ -105,29 +146,29 @@ class DateFieldType extends AbstractFieldType {
 			);
 		}
 
-		$constraints = $this->get_constraints( $field );
+		[ 'min' => $min, 'max' => $max ] = $this->get_constraints( $field );
 
 		// Both sides are YYYY-MM-DD, so a string comparison orders them correctly.
-		if ( $constraints['min'] && $value < $constraints['min'] ) {
+		if ( $min && $value < $min ) {
 			return new WP_Error(
 				'woocommerce_invalid_checkout_field',
 				sprintf(
 					/* translators: 1: is the field label, 2: is the earliest date allowed */
 					__( 'Please provide a %1$s on or after %2$s.', 'woocommerce' ),
 					$field['label'],
-					$this->format_value( $constraints['min'], $field )
+					$this->format_value( $min, $field )
 				)
 			);
 		}
 
-		if ( $constraints['max'] && $value > $constraints['max'] ) {
+		if ( $max && $value > $max ) {
 			return new WP_Error(
 				'woocommerce_invalid_checkout_field',
 				sprintf(
 					/* translators: 1: is the field label, 2: is the latest date allowed */
 					__( 'Please provide a %1$s on or before %2$s.', 'woocommerce' ),
 					$field['label'],
-					$this->format_value( $constraints['max'], $field )
+					$this->format_value( $max, $field )
 				)
 			);
 		}
@@ -174,7 +215,7 @@ class DateFieldType extends AbstractFieldType {
 	 * @param array $field The field.
 	 * @return array Array with "min" and "max" keys, each a YYYY-MM-DD date or null when unconstrained.
 	 */
-	public function get_constraints( array $field ): array {
+	private function get_constraints( array $field ): array {
 		return array(
 			'min' => isset( $field['min'] ) ? $this->resolve_constraint( $field['min'] ) : null,
 			'max' => isset( $field['max'] ) ? $this->resolve_constraint( $field['max'] ) : null,
@@ -184,110 +225,45 @@ class DateFieldType extends AbstractFieldType {
 	/**
 	 * Resolves a date field min/max constraint to a YYYY-MM-DD date in the store's timezone.
 	 *
-	 * Durations are resolved every time they are read, never at registration, so they follow the current
-	 * date rather than freezing into whatever markup a page cache stored.
+	 * Durations are resolved at read time, so they follow the current date rather
+	 * than freezing into whatever markup a page cache stored.
 	 *
-	 * @param mixed                   $value     The constraint to resolve.
+	 * We use DateInterval to resolve durations but it has 2 issues that we must solve here:
+	 * 1. Negative constraints are not supported with this version, so we must account for them ourselves.
+	 * 2. DateInterval has an inconsistent behavior compared to ISO 8601-2 in which adding
+	 * a month to a date equals adding 31 days instead of a calendar month,
+	 * resulting in P1M after Jan 31 giving you Mar 3 instead of Feb 28.
+	 *
+	 * @param string                  $value     The constraint, as validated and normalized at registration.
 	 * @param \DateTimeInterface|null $reference Date a duration is relative to. Defaults to today in the store timezone.
-	 * @return string|null The resolved date, or null if the constraint could not be parsed.
+	 * @return string The resolved date.
 	 */
-	public function resolve_constraint( $value, $reference = null ) {
-		$constraint = $this->normalize_constraint( $value );
-
-		if ( null === $constraint || $this->is_absolute_date( $constraint ) ) {
-			return $constraint;
+	private function resolve_constraint( string $value, $reference = null ): string {
+		if ( $this->is_absolute_date( $value ) ) {
+			return $value;
 		}
 
-		preg_match( self::DURATION, $constraint, $matches );
+		$sign     = '-' === $value[0] ? -1 : 1;
+		$interval = new \DateInterval( ltrim( $value, '-' ) );
+		$today    = new \DateTimeImmutable( $reference ? $reference->format( 'Y-m-d' ) : 'today', wp_timezone() );
 
-		$sign   = '-' === $matches[1] ? -1 : 1;
-		$months = $sign * ( (int) ( $matches[2] ?? 0 ) * 12 + (int) ( $matches[3] ?? 0 ) );
-		$days   = $sign * (int) ( $matches[4] ?? 0 );
-		$today  = new \DateTimeImmutable( $reference ? $reference->format( 'Y-m-d' ) : 'today', wp_timezone() );
-
-		// Months are applied with the day clamped to the target month, then days are added. This is Temporal's
-		// default "constrain" overflow, which the client uses; PHP would instead roll 31 January + P1M into March.
-		$target   = $today->modify( 'first day of this month' )->modify( sprintf( '%+d months', $months ) );
-		$resolved = $target->setDate(
-			(int) $target->format( 'Y' ),
-			(int) $target->format( 'n' ),
-			min( (int) $today->format( 'j' ), (int) $target->format( 't' ) )
+		// Handles the DateInterval bug in which months days overflow to the next month instead of staying in the current month.
+		// P1M to Jan 31 gives you Mar 3 instead of Feb 28.
+		// So we deconstruct the period into years, months, and days, and then add them back separately.
+		$months = $sign * ( $interval->y * 12 + $interval->m );
+		$days   = $sign * $interval->d;
+		// Adding x months to today and asking for the last day of that month, then clamping the day to today if it exceeds it.
+		$end_of_month = $today->modify( sprintf( 'last day of %+d months', $months ) );
+		$resolved     = $end_of_month->setDate(
+			(int) $end_of_month->format( 'Y' ),
+			(int) $end_of_month->format( 'n' ),
+			// Asking for min will get us the correct end of month if we're about to overflow, or the actual date.
+			// Because adding P1M to Jan 17 should give you Feb 17 but adding P1M to Jan 28-31 should give you Feb 28 (or Feb 29 on leap years).
+			min( (int) $today->format( 'j' ), (int) $end_of_month->format( 'j' ) )
 		);
 
+		// Add the days back from the original interval.
 		return $resolved->modify( sprintf( '%+d days', $days ) )->format( 'Y-m-d' );
-	}
-
-	/**
-	 * Normalizes a date field min/max constraint to the form stored on the field and sent to the client.
-	 *
-	 * A constraint is either an absolute YYYY-MM-DD date, an ISO 8601-2 duration relative to today ("P1D",
-	 * "-P18Y"), or a DateInterval. Durations are normalized to a canonical signed ISO 8601-2 string, which
-	 * is what the client parses.
-	 *
-	 * @param mixed $value The constraint as supplied at registration.
-	 * @return string|null The normalized constraint, or null if it could not be parsed.
-	 */
-	private function normalize_constraint( $value ) {
-		$sign = 1;
-
-		if ( is_string( $value ) ) {
-			$value = trim( $value );
-
-			if ( $this->is_absolute_date( $value ) ) {
-				return null === $this->parse_date( $value ) ? null : $value;
-			}
-
-			// DateInterval implements ISO 8601-1, which has no sign, so the ISO 8601-2 sign is peeled off first.
-			$sign = '-' === substr( $value, 0, 1 ) ? -1 : 1;
-
-			try {
-				$value = new \DateInterval( ltrim( $value, '+-' ) );
-			} catch ( \Exception $e ) {
-				return null;
-			}
-		}
-
-		if ( ! $value instanceof \DateInterval ) {
-			return null;
-		}
-
-		// A date field has no sub-day precision, so a time component means the caller meant something else.
-		if ( $value->h || $value->i || $value->s || $value->f ) {
-			return null;
-		}
-
-		if ( $value->invert ) {
-			$sign = -$sign;
-		}
-
-		$units = array_filter(
-			array(
-				'Y' => $value->y,
-				'M' => $value->m,
-				'D' => $value->d,
-			)
-		);
-
-		// DateInterval::createFromDateString() reports "-5 days" as a negative field rather than by setting invert,
-		// so the sign is read off the values. ISO 8601-2 signs the whole duration, so a mix of directions such as
-		// "+1 month -3 days" has no equivalent.
-		$negative = count( array_filter( $units, fn( $amount ) => 0 > $amount ) );
-
-		if ( $negative && count( $units ) !== $negative ) {
-			return null;
-		}
-
-		if ( ! $units ) {
-			return 'P0D';
-		}
-
-		$duration = '';
-
-		foreach ( $units as $symbol => $amount ) {
-			$duration .= abs( $amount ) . $symbol;
-		}
-
-		return 0 > ( $negative ? -$sign : $sign ) ? '-P' . $duration : 'P' . $duration;
 	}
 
 	/**
