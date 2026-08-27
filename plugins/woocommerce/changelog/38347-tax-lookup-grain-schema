@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+wc_order_tax_lookup gains an order_item_id column and is re-keyed on (order_id, tax_rate_id, order_item_id), so it now holds one row per tax line instead of one row per tax rate. Code summing the table is unaffected, code counting rows will see more of them, and code writing to the table with $wpdb->replace() on (order_id, tax_rate_id) will insert rather than replace. Existing rows are rebuilt in the background, and can be rebuilt by hand from WooCommerce > Status > Tools.
