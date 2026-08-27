@@ -70,6 +70,16 @@ final class ImportSession {
 	private array $data;
 
 	/**
+	 * Payload as it was last read from or written to the transient.
+	 *
+	 * Lets persist() skip a no-op write without re-reading the transient, which would move
+	 * the whole dedupe set across the object cache on every chunk.
+	 *
+	 * @var array<string, mixed>|null
+	 */
+	private ?array $stored_data = null;
+
+	/**
 	 * Whether the last write of the payload transient succeeded.
 	 *
 	 * @var bool
@@ -332,7 +342,9 @@ final class ImportSession {
 		if ( ! is_array( $payload ) ) {
 			return null;
 		}
-		return new self( $user_id, $token, $payload );
+		$session              = new self( $user_id, $token, $payload );
+		$session->stored_data = $payload;
+		return $session;
 	}
 
 	/**
@@ -661,22 +673,24 @@ final class ImportSession {
 	/**
 	 * Persist the current payload back to its transient.
 	 *
-	 * The set_transient() call returns false when the stored value is unchanged, so both
-	 * writes compare first; otherwise every no-op chunk would be reported as a lost write.
+	 * set_transient() returns false when the stored value is unchanged, so an unchanged
+	 * payload is treated as already stored rather than as a lost write. The index pointer is
+	 * rewritten every time so its TTL slides with the payload's.
 	 *
 	 * @return bool Whether the payload is stored.
 	 */
 	private function persist(): bool {
 		$payload_key = self::PREFIX . $this->user_id . '_' . $this->token;
 
-		$stored = get_transient( $payload_key ) === $this->data;
+		$stored = $this->data === $this->stored_data;
 		if ( ! $stored ) {
 			$stored = set_transient( $payload_key, $this->data, self::TTL );
+			if ( $stored ) {
+				$this->stored_data = $this->data;
+			}
 		}
 
-		if ( get_transient( self::INDEX_PREFIX . $this->user_id ) !== $this->token ) {
-			set_transient( self::INDEX_PREFIX . $this->user_id, $this->token, self::TTL );
-		}
+		set_transient( self::INDEX_PREFIX . $this->user_id, $this->token, self::TTL );
 
 		if ( ! $stored ) {
 			wc_get_logger()->error(
