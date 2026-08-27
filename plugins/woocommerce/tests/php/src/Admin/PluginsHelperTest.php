@@ -96,4 +96,45 @@ class PluginsHelperTest extends WC_Unit_Test_Case {
 			'Activation errors should state only the reason; the client adds the plugin name.'
 		);
 	}
+
+	/**
+	 * @testdox Should compose its own sentence for an unmet PHP requirement.
+	 */
+	public function test_get_requirements_error_reason_for_php(): void {
+		$error = new WP_Error( 'incompatible_php_required_version', 'The package could not be installed.', 'core detail' );
+		$api   = (object) array( 'requires_php' => '8.2.0' );
+
+		$this->assertSame(
+			sprintf( 'It requires PHP 8.2.0 or newer, but this site runs PHP %s.', PHP_VERSION ),
+			PluginsHelper::get_requirements_error_reason( $error, $api )
+		);
+	}
+
+	/**
+	 * @testdox Should compose its own sentence for an unmet WordPress requirement.
+	 */
+	public function test_get_requirements_error_reason_for_wordpress(): void {
+		$error = new WP_Error( 'incompatible_wp_required_version', 'The package could not be installed.', 'core detail' );
+		$api   = (object) array( 'requires' => '9.9' );
+
+		$this->assertSame(
+			sprintf( 'It requires WordPress 9.9 or newer, but this site runs WordPress %s.', get_bloginfo( 'version' ) ),
+			PluginsHelper::get_requirements_error_reason( $error, $api )
+		);
+	}
+
+	/**
+	 * @testdox Should return an empty string for other error codes, non-errors, or a missing requirement value.
+	 */
+	public function test_get_requirements_error_reason_returns_empty_otherwise(): void {
+		$api = (object) array( 'requires_php' => '8.2.0' );
+
+		$this->assertSame( '', PluginsHelper::get_requirements_error_reason( new WP_Error( 'download_failed', 'x' ), $api ) );
+		$this->assertSame( '', PluginsHelper::get_requirements_error_reason( null, $api ) );
+		$this->assertSame(
+			'',
+			PluginsHelper::get_requirements_error_reason( new WP_Error( 'incompatible_php_required_version', 'x' ), (object) array() ),
+			'Without the required version from the API there is nothing accurate to say.'
+		);
+	}
 }

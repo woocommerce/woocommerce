@@ -250,6 +250,49 @@ class PluginsHelper {
 	}
 
 	/**
+	 * Compose a reason for an install that failed an unmet PHP or WordPress version requirement.
+	 *
+	 * WordPress reports these with copy written for the zip-upload flow ("the uploaded plugin requires"),
+	 * so build our own sentence from the versions the wp.org API and the runtime already provide.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param mixed $error The WP_Error from the upgrader skin, or any non-error value.
+	 * @param mixed $api   The plugins_api() response for the plugin being installed (an object on success).
+	 * @return string The reason, or an empty string when the error is not a requirement failure.
+	 */
+	public static function get_requirements_error_reason( $error, $api ): string {
+		if ( ! is_wp_error( $error ) || ! is_object( $api ) ) {
+			return '';
+		}
+
+		switch ( $error->get_error_code() ) {
+			case 'incompatible_php_required_version':
+				if ( empty( $api->requires_php ) ) {
+					return '';
+				}
+				return sprintf(
+					/* translators: 1: PHP version the plugin requires, 2: PHP version this site runs. */
+					__( 'It requires PHP %1$s or newer, but this site runs PHP %2$s.', 'woocommerce' ),
+					$api->requires_php,
+					PHP_VERSION
+				);
+			case 'incompatible_wp_required_version':
+				if ( empty( $api->requires ) ) {
+					return '';
+				}
+				return sprintf(
+					/* translators: 1: WordPress version the plugin requires, 2: WordPress version this site runs. */
+					__( 'It requires WordPress %1$s or newer, but this site runs WordPress %2$s.', 'woocommerce' ),
+					$api->requires,
+					get_bloginfo( 'version' )
+				);
+		}
+
+		return '';
+	}
+
+	/**
 	 * Install an array of plugins.
 	 *
 	 * @param array                     $plugins Plugins to install.
@@ -387,7 +430,10 @@ class PluginsHelper {
 				 */
 				do_action( 'woocommerce_plugins_install_error', $slug, $api, $result, $upgrader );
 
-				$install_error_message = self::get_error_reason( $upgrader->skin->result, $result );
+				$install_error_message = self::get_requirements_error_reason( $upgrader->skin->result, $api );
+				if ( '' === $install_error_message ) {
+					$install_error_message = self::get_error_reason( $upgrader->skin->result, $result );
+				}
 				if ( '' === $install_error_message ) {
 					$install_error_message = __( 'Try again, or install it manually. If it keeps failing, contact your host.', 'woocommerce' );
 				}
