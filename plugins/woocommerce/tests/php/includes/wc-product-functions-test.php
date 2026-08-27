@@ -2799,6 +2799,48 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Releasing a batch does not evict cache entries belonging to other posts.
 	 */
+	/**
+	 * @testdox A batch holding both a product and a variation leaves no term relationship cached.
+	 */
+	public function test_wc_scheduled_sales_releases_term_caches_for_a_mixed_batch(): void {
+		// _prime_post_caches() resolves the batch's post types, then caches every ID against
+		// the union of their taxonomies, writing an empty entry where an ID has no terms in
+		// one. A variation therefore gets the product-only groups too, and releasing each ID
+		// under only its own type would strand exactly those.
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Mixed batch parent' );
+		$parent->set_regular_price( 100 );
+		$parent->set_sale_price( 50 );
+		$parent->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $parent->get_id() );
+		$variation->set_regular_price( 100 );
+		$variation->set_sale_price( 50 );
+		$variation->save();
+
+		foreach ( array( $parent->get_id(), $variation->get_id() ) as $id ) {
+			update_post_meta( $id, '_price', 50 );
+			update_post_meta( $id, '_sale_price_dates_from', time() - 300 );
+			update_post_meta( $id, '_sale_price_dates_to', time() - 100 );
+		}
+
+		$taxonomies = array_unique(
+			array_merge( get_object_taxonomies( 'product' ), get_object_taxonomies( 'product_variation' ) )
+		);
+
+		wc_scheduled_sales();
+
+		foreach ( array( $parent->get_id(), $variation->get_id() ) as $id ) {
+			foreach ( $taxonomies as $taxonomy ) {
+				$this->assertFalse(
+					wp_cache_get( $id, "{$taxonomy}_relationships" ),
+					"Post {$id} should hold no {$taxonomy} relationship cache after the run."
+				);
+			}
+		}
+	}
+
 	public function test_wc_scheduled_sales_leaves_unrelated_post_caches_intact(): void {
 		// The loop shares `posts` and `post_meta` with every other post type and every
 		// other job in the same WP-Cron request, so it releases its own IDs rather than

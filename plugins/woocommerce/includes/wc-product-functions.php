@@ -902,21 +902,13 @@ function wc_scheduled_sales() {
 				)
 			);
 
-			// Group by real post type while the prime above is still warm, so get_post_type()
-			// is a cache hit rather than a query. It has to happen here: saving inside the
-			// loop evicts the very entries this reads. Priming keyed the term relationships
-			// on each ID's actual type, so releasing them all as 'product' would strand any
-			// taxonomy the other types carry and hand the wrong type to callbacks on the
-			// public clean_object_term_cache hook. An ID with no type primed nothing.
-			$release_ids_by_type = array();
-
-			foreach ( $release_ids as $release_id ) {
-				$release_type = get_post_type( $release_id );
-
-				if ( $release_type ) {
-					$release_ids_by_type[ $release_type ][] = $release_id;
-				}
-			}
+			// Collected the way _prime_post_caches() collects them, so the release below can
+			// mirror it exactly. Priming resolves the batch's post types, then caches every
+			// ID against the union of their taxonomies, empty relationships included, so
+			// only the same union clears what it wrote. Reading the types here keeps
+			// get_post_type() a cache hit off that prime: saving inside the loop evicts the
+			// entries it reads, and a type that resolves to nothing primed nothing.
+			$release_types = array_values( array_unique( array_filter( array_map( 'get_post_type', $release_ids ) ) ) );
 
 			foreach ( $chunk as $product_id ) {
 				$product = wc_get_product( $product_id );
@@ -939,8 +931,8 @@ function wc_scheduled_sales() {
 			// job in the same WP-Cron request, and must not be flushed whole.
 			wp_cache_delete_multiple( $release_ids, 'posts' );
 			wp_cache_delete_multiple( $release_ids, 'post_meta' );
-			foreach ( $release_ids_by_type as $release_type => $type_ids ) {
-				clean_object_term_cache( $type_ids, $release_type );
+			if ( $release_types ) {
+				clean_object_term_cache( $release_ids, $release_types );
 			}
 
 			// With product_instance_caching on, wc_get_product() caches every product it
