@@ -35,9 +35,9 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 	/**
 	 * Option holding the highest order id the processor has been through.
 	 *
-	 * The cursor is what bounds progress, so it outlives the run. An order that `wc_get_order()`
-	 * cannot resolve keeps its rows at zero; without the cursor every later batch would pick that
-	 * order up again and the processor would never reach the end of the table.
+	 * The cursor is what bounds progress, so it outlives the run. An order the processor could not
+	 * rebuild keeps its rows at zero; without the cursor every later batch would pick that order up
+	 * again and the processor would never reach the end of the table.
 	 *
 	 * @var string
 	 */
@@ -83,13 +83,12 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 	}
 
 	/**
-	 * Get the number of orders still holding rows in the shape that predates the tax order item
-	 * column, up to PENDING_COUNT_LIMIT.
+	 * Get the number of orders left to go through that still hold rows in the shape that predates
+	 * the tax order item column, up to PENDING_COUNT_LIMIT.
 	 *
-	 * Deliberately blind to the cursor, unlike the batch itself: an order a pass could not rebuild
-	 * is still an order in the old shape, and the tool has to be able to say so and offer another
-	 * run. `BatchProcessingController` decides when a processor is finished from
-	 * `get_next_batch_to_process()`, not from this count, so it cannot be kept alive by one.
+	 * Counts from the cursor, the same place `get_next_batch_to_process()` reads from, so the
+	 * number the tool shows is the number the rebuild will actually get through. Counting the whole
+	 * table instead would leave the tool offering a run over orders every pass steps past.
 	 *
 	 * @return int Number of orders pending processing, at most PENDING_COUNT_LIMIT.
 	 */
@@ -101,7 +100,8 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 		return (int) $wpdb->get_var(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
-				"SELECT COUNT(*) FROM ( SELECT DISTINCT order_id FROM {$table_name} WHERE order_item_id = 0 LIMIT %d ) AS pending",
+				"SELECT COUNT(*) FROM ( SELECT DISTINCT order_id FROM {$table_name} WHERE order_id > %d AND order_item_id = 0 LIMIT %d ) AS pending",
+				$this->get_cursor(),
 				self::PENDING_COUNT_LIMIT
 			)
 		);
@@ -147,8 +147,6 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 	 *
 	 * @param array $batch Batch of order ids, as returned by 'get_next_batch_to_process'.
 	 *
-	 * @throws Exception On a database error while looking for further work.
-	 *
 	 * @return void
 	 */
 	public function process_batch( array $batch ): void {
@@ -184,9 +182,7 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 		// CURSOR_OPTION.
 		update_option( self::CURSOR_OPTION, max( array_map( 'absint', $batch ) ), false );
 
-		if ( ! $this->has_pending_orders() ) {
-			ReportsCache::invalidate();
-		}
+		ReportsCache::invalidate();
 	}
 
 	/**
@@ -278,10 +274,6 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 			return __( 'Background process for rebuilding analytics tax data already started, nothing done.', 'woocommerce' );
 		}
 
-		// Start over, so that a run started by hand revisits the orders an earlier pass stepped
-		// past. Reaching an order a second time costs one re-sync and nothing else.
-		delete_option( self::CURSOR_OPTION );
-
 		$batch_processor->enqueue_processor( self::class );
 
 		return __( 'Background process for rebuilding analytics tax data started.', 'woocommerce' );
@@ -304,25 +296,6 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 		$batch_processor->remove_processor( self::class );
 
 		return __( 'Background process for rebuilding analytics tax data stopped.', 'woocommerce' );
-	}
-
-	/**
-	 * Whether the current pass has any order left to go through.
-	 *
-	 * @return bool
-	 */
-	private function has_pending_orders(): bool {
-		global $wpdb;
-
-		$table_name = TaxesDataStore::get_db_table_name();
-
-		return null !== $wpdb->get_var(
-			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
-				"SELECT order_id FROM {$table_name} WHERE order_id > %d AND order_item_id = 0 LIMIT 1",
-				$this->get_cursor()
-			)
-		);
 	}
 
 	/**

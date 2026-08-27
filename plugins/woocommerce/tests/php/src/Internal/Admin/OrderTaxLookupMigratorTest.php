@@ -233,9 +233,9 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Processing a batch carries on past an order whose rebuild fails, and leaves it pending.
+	 * @testdox Processing a batch carries on past an order whose rebuild fails, and leaves its rows alone.
 	 */
-	public function test_process_batch_leaves_an_order_it_could_not_rebuild_pending(): void {
+	public function test_process_batch_carries_on_past_an_order_it_could_not_rebuild(): void {
 		global $wpdb;
 
 		$failing = $this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
@@ -255,7 +255,7 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 		$this->assertSame( $rows_before, $this->lookup_rows( $failing->get_id() ), 'An order whose rebuild failed should keep the rows it had.' );
 		$this->assertCount( 2, $this->lookup_rows( $rebuilt->get_id() ), 'The rest of the batch should still be rebuilt.' );
 		$this->assertSame( $rebuilt->get_id(), (int) get_option( OrderTaxLookupMigrator::CURSOR_OPTION ), 'The cursor should step past the whole batch.' );
-		$this->assertSame( 1, $this->sut->get_total_pending_count(), 'The order that could not be rebuilt should still be counted, so the tool can offer another run.' );
+		$this->assertSame( array(), $this->sut->get_next_batch_to_process( 10 ), 'An order that could not be rebuilt should not hold the pass up.' );
 	}
 
 	/**
@@ -348,18 +348,23 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Starting the tool by hand revisits the orders an earlier pass stepped past.
+	 * @testdox The tool reports and rebuilds what is left of the pass, not what an earlier one went through.
 	 */
-	public function test_tool_starts_over_from_the_beginning(): void {
-		$order = $this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
-		$this->unmigrate_lookup_rows( $order->get_id(), 0, 0.25 );
+	public function test_tool_resumes_from_where_the_last_pass_stopped(): void {
+		$stepped_past = $this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
+		$this->unmigrate_lookup_rows( $stepped_past->get_id(), 0, 0.25 );
 
-		update_option( OrderTaxLookupMigrator::CURSOR_OPTION, $order->get_id() + 1000 );
-		$this->assertSame( array(), $this->sut->get_next_batch_to_process( 10 ), 'The cursor should be past the order to begin with.' );
+		$left = $this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
+		$this->unmigrate_lookup_rows( $left->get_id(), 0, 0.25 );
+
+		update_option( OrderTaxLookupMigrator::CURSOR_OPTION, $stepped_past->get_id() );
+
+		$this->assertSame( 1, $this->sut->get_total_pending_count(), 'The count should hold what is left of the pass.' );
 
 		$this->sut->enqueue();
 
-		$this->assertSame( array( $order->get_id() ), $this->sut->get_next_batch_to_process( 10 ), 'The order should be handed out again.' );
+		$this->assertSame( array( $left->get_id() ), $this->sut->get_next_batch_to_process( 10 ), 'The rebuild should pick up where it stopped.' );
+		$this->assertSame( $stepped_past->get_id(), (int) get_option( OrderTaxLookupMigrator::CURSOR_OPTION ), 'Starting the tool should not rewind the pass.' );
 	}
 
 	/**
