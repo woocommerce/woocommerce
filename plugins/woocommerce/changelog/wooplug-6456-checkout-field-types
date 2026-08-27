@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Move additional checkout field type behavior into per-type classes, and field value storage into a trait, with no change in behavior.
