@@ -151,7 +151,7 @@ class CheckoutOrder extends AbstractCartRoute {
 		 * @since 7.2.0
 		 *
 		 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3238
-		 * @example See docs/examples/checkout-order-processed.md
+		 * @example docs/examples/checkout-order-processed.md
 
 		 * @param \WC_Order $order Order object.
 		 */
