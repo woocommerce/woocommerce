@@ -534,9 +534,12 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 *
 	 * @dataProvider unsupported_taxonomy_term_search_argument_provider
 	 *
-	 * @param string $shape Filtered argument shape to exercise.
+	 * @param Closure $filter_callback         Applies the unsupported filtered argument shape.
+	 * @param Closure $project_response        Projects the AJAX response into the value under assertion.
+	 * @param Closure $resolve_expected        Resolves the expected value from the runtime fixture.
+	 * @param string  $response_assertion_text Explains the expected pass-through behavior.
 	 */
-	public function test_json_search_taxonomy_terms_leaves_unsupported_filtered_shapes_unchanged( string $shape ): void {
+	public function test_json_search_taxonomy_terms_leaves_unsupported_filtered_shapes_unchanged( Closure $filter_callback, Closure $project_response, Closure $resolve_expected, string $response_assertion_text ): void {
 		$fixture = null;
 
 		try {
@@ -552,41 +555,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 			add_filter(
 				'woocommerce_product_attribute_terms',
-				function ( $args ) use ( $shape ) {
-					switch ( $shape ) {
-						case 'args_string':
-							return http_build_query( $args );
-						case 'fields_ids':
-							$args['fields'] = 'ids';
-							break;
-						case 'taxonomy_array':
-							$args['taxonomy'] = array( $args['taxonomy'] );
-							break;
-						case 'offset':
-							$args['offset'] = 1;
-							break;
-						case 'number_absent':
-							unset( $args['number'] );
-							break;
-						case 'number_non_finite':
-							$args['number'] = 'INF';
-							break;
-						case 'number_fractional':
-							$args['number'] = '3.5';
-							break;
-						case 'offset_fractional_zero':
-							$args['offset'] = '0.0';
-							break;
-						case 'invalid_taxonomy':
-							$args['taxonomy'] = 'not_a_registered_taxonomy';
-							break;
-						case 'search_selector':
-							$args['search'] = 'Candidate';
-							break;
-					}
-
-					return $args;
-				}
+				$filter_callback
 			);
 
 			$exact_query_count = 0;
@@ -595,35 +564,16 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			$response = $this->search_taxonomy_terms_via_ajax_for_test( $fixture['taxonomy'], '6', 3, 'menu_order' );
 
 			$this->assertSame( 0, $exact_query_count, 'Unsupported filtered argument shapes should not trigger the exact-name term query.' );
-
-			switch ( $shape ) {
-				case 'args_string':
-					$this->assertSame( array_slice( $term_names, 0, 3 ), wp_list_pluck( $response, 'name' ), 'A string argument shape should retain the broad response.' );
-					break;
-				case 'fields_ids':
-					$this->assertSame( array_slice( array_values( $fixture['term_ids'] ), 0, 3 ), $response, 'Alternate field shapes should pass through unchanged.' );
-					break;
-				case 'taxonomy_array':
-					$this->assertSame( array_slice( $term_names, 0, 3 ), wp_list_pluck( $response, 'name' ), 'A taxonomy array should retain the broad response.' );
-					break;
-				case 'offset':
-					$this->assertSame( array_slice( $term_names, 1, 3 ), wp_list_pluck( $response, 'name' ), 'A nonzero offset should retain the requested broad window.' );
-					break;
-				case 'number_absent':
-				case 'number_non_finite':
-					$this->assertSame( $term_names, wp_list_pluck( $response, 'name' ), 'An absent or non-finite limit should retain the unbounded broad response.' );
-					break;
-				case 'number_fractional':
-				case 'offset_fractional_zero':
-					$this->assertSame( array_slice( $term_names, 0, 3 ), wp_list_pluck( $response, 'name' ), 'Ambiguous pagination values should retain the broad response.' );
-					break;
-				case 'invalid_taxonomy':
-					$this->assertArrayHasKey( 'invalid_taxonomy', $response['errors'], 'A term-query error should pass through unchanged.' );
-					break;
-				case 'search_selector':
-					$this->assertSame( array_slice( $term_names, 0, 3 ), wp_list_pluck( $response, 'name' ), 'A competing filtered search selector should retain the broad response.' );
-					break;
-			}
+			$this->assertSame(
+				$resolve_expected(
+					array(
+						'fixture'    => $fixture,
+						'term_names' => $term_names,
+					)
+				),
+				$project_response( $response ),
+				$response_assertion_text
+			);
 		} finally {
 			if ( null !== $fixture ) {
 				$this->unregister_attribute_taxonomy_fixture_for_test( $fixture );
@@ -634,20 +584,114 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	/**
 	 * Unsupported filtered taxonomy search argument shapes.
 	 *
-	 * @return array<string, array{string}>
+	 * @return array<string, array{Closure, Closure, Closure, string}>
 	 */
 	public function unsupported_taxonomy_term_search_argument_provider(): array {
+		$pluck_names = static fn( $response ) => wp_list_pluck( $response, 'name' );
+		$unchanged   = static fn( $response ) => $response;
+
+		$first_three_names = static fn( $context ) => array_slice( $context['term_names'], 0, 3 );
+		$offset_names      = static fn( $context ) => array_slice( $context['term_names'], 1, 3 );
+		$all_names         = static fn( $context ) => $context['term_names'];
+		$first_three_ids   = static fn( $context ) => array_slice( array_values( $context['fixture']['term_ids'] ), 0, 3 );
+
 		return array(
-			'string arguments' => array( 'args_string' ),
-			'alternate fields' => array( 'fields_ids' ),
-			'taxonomy array'   => array( 'taxonomy_array' ),
-			'nonzero offset'   => array( 'offset' ),
-			'absent limit'     => array( 'number_absent' ),
-			'non-finite limit' => array( 'number_non_finite' ),
-			'decimal limit'    => array( 'number_fractional' ),
-			'decimal offset'   => array( 'offset_fractional_zero' ),
-			'term query error' => array( 'invalid_taxonomy' ),
-			'competing search' => array( 'search_selector' ),
+			'string arguments' => array(
+				static fn( $args ) => http_build_query( $args ),
+				$pluck_names,
+				$first_three_names,
+				'A string argument shape should retain the broad response.',
+			),
+			'alternate fields' => array(
+				static function ( $args ) {
+					$args['fields'] = 'ids';
+
+					return $args;
+				},
+				$unchanged,
+				$first_three_ids,
+				'Alternate field shapes should pass through unchanged.',
+			),
+			'taxonomy array'   => array(
+				static function ( $args ) {
+					$args['taxonomy'] = array( $args['taxonomy'] );
+
+					return $args;
+				},
+				$pluck_names,
+				$first_three_names,
+				'A taxonomy array should retain the broad response.',
+			),
+			'nonzero offset'   => array(
+				static function ( $args ) {
+					$args['offset'] = 1;
+
+					return $args;
+				},
+				$pluck_names,
+				$offset_names,
+				'A nonzero offset should retain the requested broad window.',
+			),
+			'absent limit'     => array(
+				static function ( $args ) {
+					unset( $args['number'] );
+
+					return $args;
+				},
+				$pluck_names,
+				$all_names,
+				'An absent limit should retain the unbounded broad response.',
+			),
+			'non-finite limit' => array(
+				static function ( $args ) {
+					$args['number'] = 'INF';
+
+					return $args;
+				},
+				$pluck_names,
+				$all_names,
+				'A non-finite limit should retain the unbounded broad response.',
+			),
+			'decimal limit'    => array(
+				static function ( $args ) {
+					$args['number'] = '3.5';
+
+					return $args;
+				},
+				$pluck_names,
+				$first_three_names,
+				'A decimal limit should retain the broad response.',
+			),
+			'decimal offset'   => array(
+				static function ( $args ) {
+					$args['offset'] = '0.0';
+
+					return $args;
+				},
+				$pluck_names,
+				$first_three_names,
+				'A decimal offset should retain the broad response.',
+			),
+			'term query error' => array(
+				static function ( $args ) {
+					$args['taxonomy'] = 'not_a_registered_taxonomy';
+
+					return $args;
+				},
+				static fn( $response ) => isset( $response['errors']['invalid_taxonomy'] ),
+				static fn() => true,
+				'A term-query error should pass through unchanged.',
+			),
+			'competing search' => array(
+				static function ( $args ) {
+					$args['search'] = 'Candidate';
+
+					return $args;
+				},
+				$pluck_names,
+				$first_three_names,
+				'A competing filtered search selector should retain the broad response.',
+			),
 		);
 	}
 

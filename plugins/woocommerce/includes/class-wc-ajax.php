@@ -2224,6 +2224,7 @@ class WC_AJAX {
 	 * @return mixed
 	 */
 	private static function maybe_include_exact_taxonomy_term( $terms, $args, $search_text, $taxonomy ) {
+		// Public filters may change argument and result shapes, so compose only the expected representations.
 		if ( ! is_array( $args ) || ! is_array( $terms ) || ! is_string( $search_text ) || ! is_string( $taxonomy ) ) {
 			return $terms;
 		}
@@ -2232,10 +2233,12 @@ class WC_AJAX {
 		$filtered_offset = $args['offset'] ?? 0;
 		$number          = false;
 
+		// Normalize only integer limits; ambiguous filtered values fail closed without coercion.
 		if ( is_int( $filtered_number ) || is_string( $filtered_number ) ) {
 			$number = filter_var( $filtered_number, FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) );
 		}
 
+		// Recovery applies only to a full, finite first result window.
 		if (
 			false === $number ||
 			! in_array( $filtered_offset, array( 0, '0' ), true ) ||
@@ -2244,6 +2247,7 @@ class WC_AJAX {
 			return $terms;
 		}
 
+		// Replacing the broad selector is safe only for the standard nonhierarchical global-attribute search.
 		if (
 			'' === $search_text ||
 			'all' !== ( $args['fields'] ?? null ) ||
@@ -2259,10 +2263,12 @@ class WC_AJAX {
 
 		$term_ids = array();
 		foreach ( $terms as $term ) {
+			// A non-term result cannot be safely combined with an exact term object.
 			if ( ! $term instanceof WP_Term ) {
 				return $terms;
 			}
 
+			// Keep an already-visible exact term in its configured position.
 			if ( $search_text === $term->name ) {
 				return $terms;
 			}
@@ -2270,6 +2276,7 @@ class WC_AJAX {
 			$term_ids[] = (int) $term->term_id;
 		}
 
+		// Preserve filtered eligibility constraints while replacing only the broad selector and bounding the lookup.
 		$exact_args = $args;
 		unset( $exact_args['name__like'] );
 		$exact_args['name']    = $search_text;
@@ -2279,11 +2286,13 @@ class WC_AJAX {
 		$exact_args['orderby'] = 'none';
 
 		$exact_terms = get_terms( $exact_args );
+		// Query hooks may return an error or alter the exact-query result shape.
 		if ( ! is_array( $exact_terms ) || 1 !== count( $exact_terms ) ) {
 			return $terms;
 		}
 
 		$exact_term = reset( $exact_terms );
+		// Database collation may resolve to an already-visible case- or accent-equivalent term.
 		if ( ! $exact_term instanceof WP_Term || in_array( (int) $exact_term->term_id, $term_ids, true ) ) {
 			return $terms;
 		}
