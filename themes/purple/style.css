@@ -345,17 +345,6 @@ a.wc-block-components-product-name:hover {
 	gap: var(--wp--preset--spacing--10);
 }
 
-/* Product filter chips expose no typography UI and WooCommerce hardcodes .8em. */
-.wc-block-product-filter-chips__item {
-	border-radius: 0;
-	color: var(--wp--preset--color--theme-2);
-	font-size: var(--wp--preset--font-size--small);
-	letter-spacing: 0.06em;
-	line-height: 1.28;
-	padding: 0.625rem 1.25rem;
-	text-transform: uppercase;
-}
-
 /* Closed accordion panels are server-rendered without [hidden] (the
  * Interactivity API only applies it after hydration), so they flash open
  * on load. Collapse them from first paint via the server-rendered

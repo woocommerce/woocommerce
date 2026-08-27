@@ -526,6 +526,24 @@
 					"text": "var(--wp--preset--color--theme-2)"
 				}
 			},
+			"woocommerce/product-filter-chips": {
+				"typography": {
+					"fontSize": "var(--wp--preset--font-size--small)",
+					"letterSpacing": "0.06em",
+					"textTransform": "uppercase"
+				},
+				"border": {
+					"radius": "0"
+				},
+				"spacing": {
+					"padding": {
+						"bottom": "0.625rem",
+						"left": "1.25rem",
+						"right": "1.25rem",
+						"top": "0.625rem"
+					}
+				}
+			},
 			"woocommerce/product-filters": {
 				"css": "--wc-product-filter-block-spacing: 0;"
 			},
