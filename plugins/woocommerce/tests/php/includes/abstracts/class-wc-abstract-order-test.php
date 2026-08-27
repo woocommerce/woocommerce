@@ -1114,16 +1114,35 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 			return false !== strpos( $query, $query_fragment ) ? 'INVALID SQL' : $query;
 		};
 
+		$logger = $this->createMock( WC_Logger_Interface::class );
+		$logger->expects( $this->once() )
+			->method( 'error' )
+			->with(
+				'Failed to retrieve persisted order item IDs.',
+				$this->callback(
+					static function ( $context ) use ( $order ) {
+						return 'order-data-store' === ( $context['source'] ?? null )
+							&& $order->get_id() === ( $context['order_id'] ?? null )
+							&& ! empty( $context['error'] );
+					}
+				)
+			);
+		$logger_filter = static function () use ( $logger ) {
+			return $logger;
+		};
+
 		$previous_suppress_errors = $wpdb->suppress_errors( true );
 		$caught_exception         = null;
 
 		add_filter( 'query', $query_filter );
+		add_filter( 'woocommerce_logging_class', $logger_filter );
 		try {
 			$order->remove_order_items();
 		} catch ( Exception $exception ) {
 			$caught_exception = $exception;
 		} finally {
 			remove_filter( 'query', $query_filter );
+			remove_filter( 'woocommerce_logging_class', $logger_filter );
 			$wpdb->suppress_errors( $previous_suppress_errors );
 		}
 
