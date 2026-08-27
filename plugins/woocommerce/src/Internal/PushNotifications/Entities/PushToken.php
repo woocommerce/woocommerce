@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Entities;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenInvalidDataException;
+use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use DateTimeImmutable;
 use DateTimeZone;
 use Automattic\WooCommerce\Internal\PushNotifications\Validators\PushTokenValidator;
@@ -496,16 +497,16 @@ class PushToken {
 	 * @return DateTimeImmutable|null
 	 */
 	private function parse_gmt_datetime( ?string $datetime ): ?DateTimeImmutable {
-		$datetime = null === $datetime ? '' : trim( $datetime );
+		$original = null === $datetime ? '' : trim( $datetime );
 
-		if ( '' === $datetime || '0000-00-00 00:00:00' === $datetime ) {
+		if ( '' === $original || '0000-00-00 00:00:00' === $original ) {
 			return null;
 		}
 
 		$datetime = (string) preg_replace(
 			'/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2})$/',
 			'$1 $2',
-			$datetime
+			$original
 		);
 
 		// The leading `!` resets fields the format does not set, so a short
@@ -517,6 +518,27 @@ class PushToken {
 		// method's `?DateTimeImmutable`, and TypeError extends Error, so no
 		// catch block on the send path would stop it becoming a fatal.
 		if ( false === $parsed || ( $errors && ( $errors['warning_count'] || $errors['error_count'] ) ) ) {
+			/**
+			 * A value that does not parse is reported rather than only
+			 * returned as null. If this starts failing across the board, from
+			 * a filter rewriting `post_date_gmt` or a database variant storing
+			 * a different format, every token reports null for both timestamps
+			 * and the diagnostic tooling loses the fields it exists to show.
+			 * Without this there would be nothing recording why.
+			 *
+			 * The empty and zero-date returns above are left unlogged. Those
+			 * are expected states meaning the date is unknown, and reporting
+			 * them would bury this.
+			 */
+			wc_get_logger()->warning(
+				'Unparseable push token timestamp.',
+				array(
+					'source'   => PushNotifications::FEATURE_NAME,
+					'token_id' => $this->id,
+					'value'    => $original,
+				)
+			);
+
 			return null;
 		}
 

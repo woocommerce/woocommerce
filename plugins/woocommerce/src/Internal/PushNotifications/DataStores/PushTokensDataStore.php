@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenInvalidDataException;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
+use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Exception;
 use WC_Data_Exception;
 use WP_Http;
@@ -280,6 +281,7 @@ class PushTokensDataStore {
 				wc_get_logger()->warning(
 					'Failed to load meta for push token.',
 					array(
+						'source'   => PushNotifications::FEATURE_NAME,
 						'token_id' => $post_id,
 						'error'    => $e->getMessage(),
 					)
@@ -422,6 +424,7 @@ class PushTokensDataStore {
 				wc_get_logger()->warning(
 					'Skipping malformed push token during role-based query.',
 					array(
+						'source'   => PushNotifications::FEATURE_NAME,
 						'token_id' => $post_id,
 						'error'    => $e->getMessage(),
 					)
