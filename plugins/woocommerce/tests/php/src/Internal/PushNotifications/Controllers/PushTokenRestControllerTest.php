@@ -1236,6 +1236,7 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 				'metadata',
 				'created_at_gmt',
 				'last_confirmed_at_gmt',
+				'last_send_at_gmt',
 			),
 			array_keys( $schema['properties'] )
 		);
@@ -1613,6 +1614,7 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 				'metadata',
 				'created_at_gmt',
 				'last_confirmed_at_gmt',
+				'last_send_at_gmt',
 			),
 			array_keys( $fields )
 		);
