@@ -2229,35 +2229,45 @@ class WC_AJAX {
 			return $terms;
 		}
 
-		$filtered_number = $args['number'] ?? null;
-		$filtered_offset = $args['offset'] ?? 0;
-		$number          = false;
-
-		// Normalize only integer limits; ambiguous filtered values fail closed without coercion.
-		if ( is_int( $filtered_number ) || is_string( $filtered_number ) ) {
-			$number = filter_var( $filtered_number, FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) );
-		}
-
-		// Recovery applies only to a full, finite first result window.
-		if (
-			false === $number ||
-			! in_array( $filtered_offset, array( 0, '0' ), true ) ||
-			count( $terms ) !== $number
-		) {
+		// An empty request or broad response cannot hide an exact term beyond a positive cap.
+		if ( '' === $search_text || empty( $terms ) ) {
 			return $terms;
 		}
 
-		// Replacing the broad selector is safe only for the standard nonhierarchical global-attribute search.
+		$filtered_offset = $args['offset'] ?? 0;
+
+		// Recovery applies only to the first result window.
+		if ( ! in_array( $filtered_offset, array( 0, '0' ), true ) ) {
+			return $terms;
+		}
+
+		$filtered_number = $args['number'] ?? null;
+
+		// Public filters may replace the cap with an unsupported type, which should fail closed without coercion.
+		if ( ! is_int( $filtered_number ) && ! is_string( $filtered_number ) ) {
+			return $terms;
+		}
+
+		$number = filter_var( $filtered_number, FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) );
+
+		// Recovery applies only when a positive finite cap is completely filled.
+		if ( false === $number || count( $terms ) !== $number ) {
+			return $terms;
+		}
+
+		// Replacing the broad selector is safe only for the standard query shape.
 		if (
-			'' === $search_text ||
 			'all' !== ( $args['fields'] ?? null ) ||
 			( $args['taxonomy'] ?? null ) !== $taxonomy ||
 			( $args['name__like'] ?? null ) !== $search_text ||
 			array_key_exists( 'name', $args ) ||
-			array_key_exists( 'search', $args ) ||
-			! taxonomy_is_product_attribute( $taxonomy ) ||
-			is_taxonomy_hierarchical( $taxonomy )
+			array_key_exists( 'search', $args )
 		) {
+			return $terms;
+		}
+
+		// Exact recovery is limited to nonhierarchical global attributes.
+		if ( ! taxonomy_is_product_attribute( $taxonomy ) || is_taxonomy_hierarchical( $taxonomy ) ) {
 			return $terms;
 		}
 
