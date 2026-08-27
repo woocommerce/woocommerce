@@ -211,11 +211,9 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Processing a batch steps past an order that can no longer be loaded.
+	 * @testdox Processing a batch drops the rows of an order that can no longer be loaded.
 	 */
-	public function test_process_batch_passes_over_an_order_it_cannot_load(): void {
-		global $wpdb;
-
+	public function test_process_batch_drops_the_rows_of_an_order_it_cannot_load(): void {
 		$order = $this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
 		$this->unmigrate_lookup_rows( $order->get_id(), 0, 0.25 );
 
@@ -225,10 +223,13 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 		$this->sut->process_batch( $this->sut->get_next_batch_to_process( 10 ) );
 
 		$this->assertSame( $missing_order_id, (int) get_option( OrderTaxLookupMigrator::CURSOR_OPTION ), 'The cursor should step past the whole batch.' );
+		$this->assertSame( array(), $this->lookup_rows( $missing_order_id ), 'No report can read the rows of an order that is gone, so they should be dropped.' );
+		$this->assertCount( 2, $this->lookup_rows( $order->get_id() ), 'The rest of the batch should still be rebuilt.' );
 		$this->assertSame( array(), $this->sut->get_next_batch_to_process( 10 ), 'An order that cannot be loaded should not hold the pass up.' );
-		$this->assertSame( 1, $this->sut->get_total_pending_count(), 'An order that could not be rebuilt should still be counted.' );
+		$this->assertSame( 0, $this->sut->get_total_pending_count(), 'Nothing should be left pending once the pass is through.' );
 
-		$wpdb->delete( TaxesDataStore::get_db_table_name(), array( 'order_id' => $missing_order_id ) );
+		$tools = $this->sut->handle_woocommerce_debug_tools( array() );
+		$this->assertTrue( $tools['rebuild_analytics_tax_data']['disabled'], 'The tool should not go on offering a run that cannot change anything.' );
 	}
 
 	/**

@@ -23,7 +23,7 @@ defined( 'ABSPATH' ) || exit;
  * Rows written before then carry the zero default of the `order_item_id` column, and the Taxes
  * report keeps matching those on their tax rate id alone, the way it did before the column
  * existed. So reporting stays as it was while this runs, and an order the processor cannot rebuild
- * costs nothing beyond staying as it was.
+ * keeps reporting the way it did.
  *
  * Additionally, this class manages the "Rebuild analytics tax data" tool.
  *
@@ -152,26 +152,35 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 	 * @return void
 	 */
 	public function process_batch( array $batch ): void {
+		global $wpdb;
+
 		if ( empty( $batch ) ) {
 			return;
 		}
 
 		foreach ( $batch as $order_id ) {
 			$order_id = (int) $order_id;
+			$synced   = TaxesDataStore::sync_order_taxes( $order_id );
 
-			// `-1` is an order `wc_get_order()` could not resolve, which the cursor is here to step
-			// past. `false` is a write that did not land, which leaves the order holding the rows
-			// it came in with: `get_total_pending_count()` goes on counting it, so the tool can
-			// offer another run over it once whatever the database objected to is out of the way.
-			if ( false === TaxesDataStore::sync_order_taxes( $order_id ) ) {
+			// Rows left behind by an order `wc_get_order()` cannot resolve are rows no report can
+			// read: the Taxes report and its stats both join `wc_order_stats`, which an order that
+			// is gone has no row in. Drop them rather than carrying them for good.
+			if ( -1 === $synced && ! wc_get_order( $order_id ) ) {
+				$wpdb->delete( TaxesDataStore::get_db_table_name(), array( 'order_id' => $order_id ), array( '%d' ) );
+				continue;
+			}
+
+			// A write that did not land leaves the order holding the rows it came in with, which
+			// report the way they did before. Log the order id so the failure can be looked at.
+			if ( false === $synced ) {
 				wc_get_logger()->error(
-					"Could not rebuild the analytics tax lookup rows of order {$order_id}. The order keeps the rows it had and can be rebuilt again from WooCommerce > Status > Tools.",
+					"Could not rebuild the analytics tax lookup rows of order {$order_id}. The order keeps the rows it had and reports the way it did before.",
 					array( 'source' => 'wc-order-tax-lookup-migration' )
 				);
 			}
 		}
 
-		// Step past every order in the batch, including any that could not be loaded. See
+		// Step past every order in the batch, including any that could not be rebuilt. See
 		// CURSOR_OPTION.
 		update_option( self::CURSOR_OPTION, max( array_map( 'absint', $batch ) ), false );
 
