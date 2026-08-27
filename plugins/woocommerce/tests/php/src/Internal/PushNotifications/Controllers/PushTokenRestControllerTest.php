@@ -1236,7 +1236,7 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 				'metadata',
 				'created_at_gmt',
 				'last_confirmed_at_gmt',
-				'last_send_at_gmt',
+				'last_sent_at_gmt',
 			),
 			array_keys( $schema['properties'] )
 		);
@@ -1614,7 +1614,7 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 				'metadata',
 				'created_at_gmt',
 				'last_confirmed_at_gmt',
-				'last_send_at_gmt',
+				'last_sent_at_gmt',
 			),
 			array_keys( $fields )
 		);
@@ -1811,9 +1811,9 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return the last send time for a sent token and null for an unsent one.
+	 * @testdox Should return the last sent time for a sent token and null for an unsent one.
 	 */
-	public function test_index_returns_token_last_send_time(): void {
+	public function test_index_returns_token_last_sent_at_time(): void {
 		$this->mock_jetpack_connection_manager_is_connected();
 		wc_get_container()->get( PushNotifications::class )->on_init();
 
@@ -1841,8 +1841,8 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$data_store->record_last_send( array( $sent ) );
-		$data_store->flush_last_send();
+		$data_store->record_last_sent_at( array( $sent ) );
+		$data_store->flush_last_sent_at();
 
 		$request = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
 		$request->set_param( 'page', 1 );
@@ -1850,9 +1850,9 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 
 		$by_token = array_column( ( new PushTokenRestController() )->index( $request )->get_data()['tokens'], null, 'token' );
 
-		$this->assertArrayHasKey( 'last_send_at_gmt', $by_token['last-send-unsent-token'] );
-		$this->assertNull( $by_token['last-send-unsent-token']['last_send_at_gmt'] );
-		$this->assertNotNull( $by_token['last-send-sent-token']['last_send_at_gmt'] );
+		$this->assertArrayHasKey( 'last_sent_at_gmt', $by_token['last-send-unsent-token'] );
+		$this->assertNull( $by_token['last-send-unsent-token']['last_sent_at_gmt'] );
+		$this->assertNotNull( $by_token['last-send-sent-token']['last_sent_at_gmt'] );
 	}
 
 	/**
