@@ -7,6 +7,7 @@ import {
 	RecommendedPaymentMethod,
 } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/settings';
+import { __, sprintf } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 import { parseAdminUrl } from '@woocommerce/navigation';
 
@@ -427,4 +428,57 @@ export const recordPaymentsOnboardingEvent = (
 export const removeOriginFromURL = ( url: string ) => {
 	const parsedUrl = parseAdminUrl( url );
 	return parsedUrl.href?.replace( parsedUrl.origin, '' ) ?? url;
+};
+
+/**
+ * Build the notice text for a failed provider extension install or activation.
+ *
+ * `@woocommerce/data` frames errors with the plugin slug. When the rejection carries the
+ * per-plugin server response, re-frame it with the provider title the merchant clicked;
+ * otherwise (permission or connection errors) keep the already-framed message.
+ *
+ * @param actionType Whether the extension was being installed or activated.
+ * @param title      The provider title shown in the UI.
+ * @param slug       The extension slug.
+ * @param error      The rejection value from installAndActivatePlugins.
+ * @return The notice text.
+ */
+export const getPluginActionErrorMessage = (
+	actionType: 'install' | 'activate',
+	title: string,
+	slug: string,
+	error: unknown
+): string => {
+	const data =
+		typeof error === 'object' && error !== null && 'data' in error
+			? ( error as { data: unknown } ).data
+			: undefined;
+	const perPlugin =
+		typeof data === 'object' && data !== null && slug in data
+			? ( data as Record< string, unknown > )[ slug ]
+			: undefined;
+
+	const frame =
+		actionType === 'install'
+			? sprintf(
+					/* translators: %s: payment provider name (e.g. Visa Acceptance Solutions) */
+					__( 'Could not install %s.', 'woocommerce' ),
+					title
+			  )
+			: sprintf(
+					/* translators: %s: payment provider name (e.g. Visa Acceptance Solutions) */
+					__( 'Could not activate %s.', 'woocommerce' ),
+					title
+			  );
+
+	if ( Array.isArray( perPlugin ) && perPlugin.length ) {
+		return `${ frame } ${ perPlugin.join( ' ' ) }`;
+	}
+
+	const message =
+		typeof error === 'object' && error !== null && 'message' in error
+			? String( ( error as { message: unknown } ).message )
+			: '';
+
+	return message || frame;
 };
