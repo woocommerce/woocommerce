@@ -884,6 +884,78 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return true when metadata contains the maximum number of items.
+	 */
+	public function test_validate_accepts_metadata_at_the_item_limit(): void {
+		$metadata = array();
+
+		for ( $i = 0; $i < PushTokenValidator::METADATA_MAXIMUM_ITEMS; $i++ ) {
+			$metadata[ 'key_' . $i ] = 'value';
+		}
+
+		$this->assertTrue( PushTokenValidator::validate( array( 'metadata' => $metadata ), array( 'metadata' ) ) );
+	}
+
+	/**
+	 * @testdox Should return WP_Error when metadata contains more than the maximum number of items.
+	 */
+	public function test_validate_rejects_metadata_over_the_item_limit(): void {
+		$metadata = array();
+
+		for ( $i = 0; $i <= PushTokenValidator::METADATA_MAXIMUM_ITEMS; $i++ ) {
+			$metadata[ 'key_' . $i ] = 'value';
+		}
+
+		$result = PushTokenValidator::validate( array( 'metadata' => $metadata ), array( 'metadata' ) );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'Metadata exceeds the maximum of 50 items.', $result->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should return WP_Error when a metadata key exceeds the maximum length.
+	 */
+	public function test_validate_rejects_metadata_key_over_the_length_limit(): void {
+		$key    = str_repeat( 'a', PushTokenValidator::METADATA_KEY_MAXIMUM_LENGTH + 1 );
+		$result = PushTokenValidator::validate(
+			array( 'metadata' => array( $key => 'value' ) ),
+			array( 'metadata' )
+		);
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'Metadata key exceeds maximum length of 64.', $result->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should return WP_Error when a metadata value exceeds the maximum length.
+	 */
+	public function test_validate_rejects_metadata_value_over_the_length_limit(): void {
+		$result = PushTokenValidator::validate(
+			array(
+				'metadata' => array(
+					'app_version' => str_repeat( 'a', PushTokenValidator::METADATA_VALUE_MAXIMUM_LENGTH + 1 ),
+				),
+			),
+			array( 'metadata' )
+		);
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'Metadata value exceeds maximum length of 512.', $result->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should return true when metadata keys and values are exactly at their length limits.
+	 */
+	public function test_validate_accepts_metadata_at_the_length_limits(): void {
+		$key   = str_repeat( 'a', PushTokenValidator::METADATA_KEY_MAXIMUM_LENGTH );
+		$value = str_repeat( 'b', PushTokenValidator::METADATA_VALUE_MAXIMUM_LENGTH );
+
+		$this->assertTrue(
+			PushTokenValidator::validate( array( 'metadata' => array( $key => $value ) ), array( 'metadata' ) )
+		);
+	}
+
+	/**
 	 * @testdox Should use the standard error code for all validation errors.
 	 * @dataProvider validatable_fields_provider
 	 * @param string $field The field to validate.

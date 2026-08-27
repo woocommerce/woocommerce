@@ -281,12 +281,14 @@ class PushTokenRestController extends RestApiControllerBase {
 					fn ( $item ) => array_intersect_key(
 						$item,
 						array(
-							'description' => null,
-							'type'        => null,
-							'enum'        => null,
-							'minimum'     => null,
-							'default'     => null,
-							'required'    => null,
+							'description'          => null,
+							'type'                 => null,
+							'enum'                 => null,
+							'minimum'              => null,
+							'default'              => null,
+							'required'             => null,
+							'maxProperties'        => null,
+							'additionalProperties' => null,
 						)
 					),
 					$this->get_args()
@@ -384,11 +386,16 @@ class PushTokenRestController extends RestApiControllerBase {
 				'sanitize_callback' => 'wp_unslash',
 			),
 			'metadata'      => array(
-				'description'       => __( 'Metadata', 'woocommerce' ),
-				'type'              => 'object',
-				'context'           => array( 'create' ),
-				'validate_callback' => array( $this, 'validate_argument' ),
-				'sanitize_callback' => 'wp_unslash',
+				'description'          => __( 'Metadata', 'woocommerce' ),
+				'type'                 => 'object',
+				'context'              => array( 'create' ),
+				'maxProperties'        => PushTokenValidator::METADATA_MAXIMUM_ITEMS,
+				'additionalProperties' => array(
+					'type'      => array( 'string', 'number', 'boolean' ),
+					'maxLength' => PushTokenValidator::METADATA_VALUE_MAXIMUM_LENGTH,
+				),
+				'validate_callback'    => array( $this, 'validate_argument' ),
+				'sanitize_callback'    => 'wp_unslash',
 			),
 		);
 
