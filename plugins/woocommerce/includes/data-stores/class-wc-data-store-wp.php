@@ -335,7 +335,8 @@ class WC_Data_Store_WP {
 	 * Also accepts a WC_DateTime object.
 	 *
 	 * @since 3.2.0
-	 * @param mixed  $query_var A valid date format.
+	 * @param mixed  $query_var A valid date format. Values that cannot be used as a string are
+	 *                          treated as an unparseable date.
 	 * @param string $key meta or db column key.
 	 * @param array  $wp_query_args WP_Query args.
 	 * @return array Modified $wp_query_args
@@ -350,13 +351,21 @@ class WC_Data_Store_WP {
 		$dates    = array();
 		$operator = '=';
 
+		// Reaches preg_match() below, which raises a TypeError that escapes the catch. Treated as
+		// an unparseable date, like other malformed values. Note this is fail-open for meta-backed
+		// keys, whose clause compares as a string: callers needing to fail closed must check first.
+		if ( ! is_scalar( $query_var ) && ! ( is_object( $query_var ) && method_exists( $query_var, '__toString' ) ) ) {
+			$query_var = '';
+		}
+
 		try {
 			// Specific time query with a WC_DateTime.
-			if ( is_a( $query_var, 'WC_DateTime' ) ) {
+			if ( $query_var instanceof WC_DateTime ) {
 				$dates[] = $query_var;
 			} elseif ( is_numeric( $query_var ) ) { // Specific time query with a timestamp.
 				$dates[] = new WC_DateTime( "@{$query_var}", new DateTimeZone( 'UTC' ) );
-			} elseif ( preg_match( $query_parse_regex, $query_var, $sections ) ) { // Query with operators and possible range of dates.
+			} elseif ( preg_match( $query_parse_regex, (string) $query_var, $sections ) ) {
+				// Query with operators and possible range of dates.
 				if ( ! empty( $sections[1] ) ) {
 					$dates[] = is_numeric( $sections[1] ) ? new WC_DateTime( "@{$sections[1]}", new DateTimeZone( 'UTC' ) ) : wc_string_to_datetime( $sections[1] );
 				}
@@ -368,7 +377,7 @@ class WC_Data_Store_WP {
 					$precision = 'day';
 				}
 			} else { // Specific time query with a string.
-				$dates[]   = wc_string_to_datetime( $query_var );
+				$dates[]   = wc_string_to_datetime( (string) $query_var );
 				$precision = 'day';
 			}
 		} catch ( Exception $e ) {
