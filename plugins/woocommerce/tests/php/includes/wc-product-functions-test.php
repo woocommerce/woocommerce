@@ -285,7 +285,6 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		$product->set_sale_price( 50 );
 		$product->save();
 
-		// The durable post-sale state: _price back at regular, sale price and both dates kept.
 		update_post_meta( $product->get_id(), '_price', 100 );
 		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
 		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
@@ -310,7 +309,6 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	public function test_get_starting_sales_includes_open_and_future_ending_sales(): void {
 		$data_store = WC_Data_Store::load( 'product' );
 
-		// Open-ended: started, no end date at all.
 		$open_ended = WC_Helper_Product::create_simple_product();
 		$open_ended->set_regular_price( 100 );
 		$open_ended->set_sale_price( 50 );
@@ -319,7 +317,6 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		update_post_meta( $open_ended->get_id(), '_sale_price_dates_from', time() - 100 );
 		delete_post_meta( $open_ended->get_id(), '_sale_price_dates_to' );
 
-		// Started, ends in the future.
 		$still_running = WC_Helper_Product::create_simple_product();
 		$still_running->set_regular_price( 100 );
 		$still_running->set_sale_price( 50 );
@@ -328,8 +325,7 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		update_post_meta( $still_running->get_id(), '_sale_price_dates_from', time() - 100 );
 		update_post_meta( $still_running->get_id(), '_sale_price_dates_to', time() + 3600 );
 
-		// An importer or ERP writing meta directly leaves the row present but empty, rather
-		// than deleting it as the CRUD path does. That is what the `> 0` term tolerates.
+		// A direct writer leaves the row present but empty, which the `> 0` term tolerates.
 		$empty_end_date = WC_Helper_Product::create_simple_product();
 		$empty_end_date->set_regular_price( 100 );
 		$empty_end_date->set_sale_price( 50 );
@@ -349,14 +345,11 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	 * @testdox The new exclusion reads date meta the same way get_ending_sales() does.
 	 */
 	public function test_get_starting_sales_matches_ending_sales_on_non_numeric_dates(): void {
-		// Importers can write a date string instead of a timestamp. Both queries bind the
-		// comparison as a string, so they read such a value the same way; binding either one
-		// as an integer alone would make them disagree and strand the product between them.
-		// The year is 9999 so the string sorts above the decimal rendering of any timestamp
-		// this code will see, which is what "not yet ended" depends on here.
+		// A date string from an importer. Year 9999 sorts above any timestamp this code sees,
+		// so both queries must read it as not-yet-ended.
 		$far_future = '9999-12-31';
 
-		// Priced at the regular price, so only the date can keep it out of get_starting_sales().
+		// At the regular price, so only the date can exclude it from starting.
 		$not_started = WC_Helper_Product::create_simple_product();
 		$not_started->set_regular_price( 100 );
 		$not_started->set_sale_price( 50 );
@@ -365,8 +358,8 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		update_post_meta( $not_started->get_id(), '_sale_price_dates_from', time() - 300 );
 		update_post_meta( $not_started->get_id(), '_sale_price_dates_to', $far_future );
 
-		// Left at the sale price, so it clears get_ending_sales()' price predicate and only
-		// the date can keep it out. Without this the ending assertion would pass either way.
+		// At the sale price, so it clears the ending query's price predicate and only the date
+		// can exclude it. Without that the assertion would pass either way.
 		$not_ended = WC_Helper_Product::create_simple_product();
 		$not_ended->set_regular_price( 100 );
 		$not_ended->set_sale_price( 50 );
@@ -418,16 +411,9 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	 * @param string $date_to Stored `_sale_price_dates_to` value.
 	 */
 	public function test_wc_scheduled_sales_settles_a_sale_the_query_still_returns( string $date_to ): void {
-		// A full cycle through wc_scheduled_sales(), not just the query. The clause treats
-		// the stored value as not ended, so the product is returned. The consumer must then
-		// write the price, which is what takes it out of the queue. Anything that decides
-		// "ended" differently from the query and skips that write leaves the product queued
-		// and firing the starting hooks on every run, which is the churn this fix removes.
-		//
-		// This asserts the queue drains, not that the resulting price is right. It is not:
-		// the product ends at the sale price with an end date in the past, and the lookup
-		// table lists it on sale while ScheduledSalePriceReconciler charges the regular
-		// price. That disagreement predates this fix and is untouched by it.
+		// A full cycle, not just the query: the consumer's price write is what drains the queue.
+		// This shows it drains, not that the price is right. It is not, the product ends at the
+		// sale price with a past end date, which predates this fix.
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_regular_price( 100 );
 		$product->set_sale_price( 50 );
@@ -438,9 +424,7 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 
 		$data_store = WC_Data_Store::load( 'product' );
 
-		// Precondition, not a result. The rest of this test only means anything while the query
-		// still returns the product, and two fixtures stop qualifying on 2034-01-04 as their
-		// stored text loses the string comparison against the decimal rendering of time().
+		// Precondition, not a result: the rest only means anything while the query returns it.
 		$this->assertContains(
 			(string) $product->get_id(),
 			$data_store->get_starting_sales(),
@@ -470,13 +454,9 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	 * @testdox An end date of exactly now still leaves the product in one of the two queues.
 	 */
 	public function test_an_end_date_of_exactly_now_lands_in_one_queue(): void {
-		// The boundary the two queries must not disagree on. Asserting that some queue claims
-		// the product, rather than which one, is what makes this deterministic without freezing
-		// the clock: whichever side of the comparison the value falls on, one query takes it.
-		//
-		// The reverse, neither queue, cannot happen while both read the date the same way and
-		// the ending query runs second with the later clock. It is what a `<=` on one side alone
-		// produces, which is the mutation nothing else here catches.
+		// Asserting that some queue claims it, rather than which one, keeps this deterministic
+		// without freezing the clock. Neither queue is the failure, and a `<=` on one side alone
+		// is what produces it, which nothing else here catches.
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_regular_price( 100 );
 		$product->set_sale_price( 50 );
@@ -504,8 +484,7 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	 * @testdox Duplicate end-date rows exclude on the ended one and never duplicate the product.
 	 */
 	public function test_duplicate_end_date_rows_are_handled(): void {
-		// add_post_meta() rather than update_post_meta(): direct writers can leave more than one
-		// row for the same key, which the correlated subquery has to tolerate on both counts.
+		// add_post_meta(): direct writers can leave several rows for one key.
 		$expired_and_open = WC_Helper_Product::create_simple_product();
 		$expired_and_open->set_regular_price( 100 );
 		$expired_and_open->set_sale_price( 50 );
@@ -575,7 +554,6 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		$this->assertContains( (string) $product->get_id(), $ended, 'The safety net should end it once.' );
 		$this->assertEquals( 100, get_post_meta( $product->get_id(), '_price', true ) );
 
-		// Second run: the product must now be inert, with neither hook reporting it again.
 		$started = array();
 		$ended   = array();
 		wc_scheduled_sales();
