@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Move mutation batcher grouping and per-cycle side-effect coverage from blocks E2E to cart store unit tests; keep the E2E rollback check on the rendered product button.
