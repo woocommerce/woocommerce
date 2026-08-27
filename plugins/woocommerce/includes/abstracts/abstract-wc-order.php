@@ -331,23 +331,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Deletes items in bulk if the data store supports it, otherwise deletes them one by one.
 	 *
-	 * @param array<int>  $item_ids IDs of the items to delete.
-	 * @param string|null $type     Item type, or null for every type.
+	 * @param array<int> $item_ids IDs of the items to delete.
 	 * @return void
 	 */
-	private function delete_items_by_ids( array $item_ids, $type = null ): void {
+	private function delete_items_by_ids( array $item_ids ): void {
 		/**
 		 * Data store wrapper.
 		 *
 		 * @var WC_Data_Store $data_store
 		 */
 		$data_store = $this->data_store;
-
-		if ( $this->data_store_overrides_delete_items() ) {
-			// @phpstan-ignore-next-line -- Required order data store method forwarded by WC_Data_Store::__call().
-			$data_store->delete_items( $this, $type );
-			return;
-		}
 
 		if ( $data_store->has_callable( 'delete_items_by_ids' ) ) {
 			// @phpstan-ignore-next-line -- Optional data store method checked above.
@@ -384,6 +377,33 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		$method = new ReflectionMethod( $data_store_class, 'delete_items' );
+
+		return Abstract_WC_Order_Data_Store_CPT::class !== $method->getDeclaringClass()->getName();
+	}
+
+	/**
+	 * Determine whether the data store provides custom ID-based item deletion behavior.
+	 *
+	 * @return bool
+	 */
+	private function data_store_overrides_delete_items_by_ids(): bool {
+		/**
+		 * Data store wrapper.
+		 *
+		 * @var WC_Data_Store $data_store
+		 */
+		$data_store = $this->data_store;
+
+		if ( ! $data_store->has_callable( 'delete_items_by_ids' ) ) {
+			return false;
+		}
+
+		$data_store_class = $data_store->get_current_class_name();
+		if ( ! is_a( $data_store_class, Abstract_WC_Order_Data_Store_CPT::class, true ) ) {
+			return true;
+		}
+
+		$method = new ReflectionMethod( $data_store_class, 'delete_items_by_ids' );
 
 		return Abstract_WC_Order_Data_Store_CPT::class !== $method->getDeclaringClass()->getName();
 	}
@@ -474,7 +494,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			// yet been processed remain queued for the next save() rather than being silently lost.
 			foreach ( array_values( array_unique( $this->item_types_to_bulk_delete ) ) as $type ) {
 				$item_ids = $this->item_ids_to_bulk_delete_by_type[ $type ] ?? array();
-				$this->delete_items_by_ids( $item_ids, $type );
+				$this->delete_items_by_ids( $item_ids );
 				unset( $this->item_ids_to_bulk_delete_by_type[ $type ] );
 				$items_changed                   = true;
 				$this->item_types_to_bulk_delete = array_values(
@@ -1085,15 +1105,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Remove all line items (products, coupons, shipping, taxes) from the order.
 	 *
-	 * The items are cleared from the in-memory order immediately, but the database
-	 * deletion is deferred until the next call to save(). This keeps the checkout
-	 * "resume order" flow atomic: if anything between here and save() throws, the
-	 * previously persisted items remain intact in the database. As a consequence,
-	 * the `woocommerce_removed_order_items` action now fires from save_items()
-	 * (after the actual DB delete completes) rather than synchronously from this
-	 * method — listeners that observe the persisted state continue to see it as
-	 * before, but listeners pairing pre/post on the same call stack will see
-	 * the post-hook fire at save() time.
+	 * The items are cleared from the in-memory order immediately, but core data stores defer
+	 * database deletion until the next call to save(). Custom stores overriding `delete_items()`
+	 * without also overriding `delete_items_by_ids()` retain the historical synchronous behavior.
 	 *
 	 * @param string|null $type Order item type. Default null (remove every type).
 	 * @throws Exception If persisted item IDs cannot be read.
@@ -1125,10 +1139,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		do_action( 'woocommerce_remove_order_items', $this, $type );
 
 		// Unsaved orders (id 0) have no persisted items — there's nothing to defer for deletion.
-		$has_persisted_items = $this->get_id() > 0;
+		$has_persisted_items  = $this->get_id() > 0;
+		$delete_synchronously = $this->data_store_overrides_delete_items() && ! $this->data_store_overrides_delete_items_by_ids();
+
+		if ( $delete_synchronously && $has_persisted_items ) {
+			// @phpstan-ignore-next-line -- Required order data store method forwarded by WC_Data_Store::__call().
+			$this->data_store->delete_items( $this, $type );
+		}
 
 		if ( ! empty( $type ) ) {
-			if ( $has_persisted_items ) {
+			if ( $has_persisted_items && ! $delete_synchronously ) {
 				$item_ids = $this->get_persisted_item_ids( $type );
 
 				if ( $this->bulk_delete_all_items_pending ) {
@@ -1159,7 +1179,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$this->items[ $group ] = array();
 			}
 		} else {
-			if ( $has_persisted_items ) {
+			if ( $has_persisted_items && ! $delete_synchronously ) {
 				$item_ids = $this->get_persisted_item_ids();
 
 				foreach ( $this->item_ids_to_bulk_delete_by_type as $typed_item_ids ) {
@@ -1186,6 +1206,15 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			foreach ( $groups as $group ) {
 				$this->items[ $group ] = array();
 			}
+		}
+
+		if ( $delete_synchronously ) {
+			/**
+			 * This action is documented in save_items().
+			 *
+			 * @since 7.8.0
+			 */
+			do_action( 'woocommerce_removed_order_items', $this, $type );
 		}
 	}
 
