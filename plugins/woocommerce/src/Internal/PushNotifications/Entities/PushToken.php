@@ -111,7 +111,11 @@ class PushToken {
 	private ?string $token = null;
 
 	/**
-	 * The UUID of the device that generated the token.
+	 * An identifier the app generates for its own install, so a re-registration
+	 * matches the existing record after the OS issues a new token.
+	 *
+	 * Not derived from the device, not stable across reinstalls, and matched
+	 * only within one user. Browser tokens do not have one.
 	 *
 	 * @var string|null
 	 */
@@ -148,10 +152,8 @@ class PushToken {
 	/**
 	 * The date the token was registered, as a GMT `Y-m-d H:i:s` string.
 	 *
-	 * Held in the shape WordPress stores in `post_date_gmt`, so the property
-	 * matches what its `_gmt` name implies and a value read back out can be set
-	 * again without being rejected. {@see self::to_rest_datetime()} converts it
-	 * for the response.
+	 * Stored as WordPress stores it, so a value read back out can be set again.
+	 * {@see self::to_rest_datetime()} converts it for the response.
 	 *
 	 * @var string|null
 	 */
@@ -159,9 +161,6 @@ class PushToken {
 
 	/**
 	 * The date the app last confirmed this token, as a GMT `Y-m-d H:i:s` string.
-	 *
-	 * See {@see self::$created_at_gmt} for why this is held in the shape
-	 * WordPress stores rather than the shape the response uses.
 	 *
 	 * The app re-sends the token periodically, not only when the token value
 	 * changes, and `post_modified_gmt` advances on each of those writes. This
@@ -287,7 +286,7 @@ class PushToken {
 	/**
 	 * Validates and sets the device UUID, normalize empty (non-null) values to null.
 	 *
-	 * @param string|null $device_uuid The UUID of the device that generated the token.
+	 * @param string|null $device_uuid The identifier the app generated for its own install.
 	 * @throws PushTokenInvalidDataException If device UUID is not valid.
 	 * @return void
 	 *
@@ -435,10 +434,6 @@ class PushToken {
 	/**
 	 * Returns a GMT datetime as `Y-m-d H:i:s`, or null if it is not one.
 	 *
-	 * Holding the value in the shape WordPress stores, rather than the shape
-	 * the response uses, is what lets a token be rebuilt from its own
-	 * serialised output.
-	 *
 	 * @param string|null $datetime The GMT datetime string.
 	 * @return string|null
 	 */
@@ -449,13 +444,9 @@ class PushToken {
 	}
 
 	/**
-	 * Converts a GMT `Y-m-d H:i:s` datetime to the shape the Woo REST API uses
-	 * for its `_gmt` fields, `Y-m-d\TH:i:s`.
-	 *
-	 * This is what `wc_rest_prepare_date_response()` emits, so `created_at_gmt`
-	 * and `last_confirmed_at_gmt` read the same way as `date_created_gmt` and
-	 * `date_modified_gmt` on every other Woo endpoint the consumer already
-	 * parses.
+	 * Converts a GMT `Y-m-d H:i:s` datetime to `Y-m-d\TH:i:s`, the format
+	 * `wc_rest_prepare_date_response()` gives every other `_gmt` field in the
+	 * Woo REST API.
 	 *
 	 * That function is not called directly because its string branch hands the
 	 * value to `WC_DateTime`, which accepts the input this contract refuses.
@@ -488,10 +479,8 @@ class PushToken {
 	 * `createFromFormat()` rejects the offset, but performs the rollover and
 	 * only reports it, so the warning check is needed too.
 	 *
-	 * The `T` separator {@see self::to_rest_datetime()} emits is accepted, which
-	 * is what makes a token rebuildable from its own output. An offset is
-	 * refused whatever its value, because it would override the timezone the
-	 * parser is given and report a different instant.
+	 * The `T` separator {@see self::to_rest_datetime()} emits is accepted, so a
+	 * token can be rebuilt from its own output. An offset is always refused.
 	 *
 	 * @param string|null $datetime The GMT datetime string.
 	 * @return DateTimeImmutable|null
@@ -518,18 +507,9 @@ class PushToken {
 		// method's `?DateTimeImmutable`, and TypeError extends Error, so no
 		// catch block on the send path would stop it becoming a fatal.
 		if ( false === $parsed || ( $errors && ( $errors['warning_count'] || $errors['error_count'] ) ) ) {
-			/**
-			 * A value that does not parse is reported rather than only
-			 * returned as null. If this starts failing across the board, from
-			 * a filter rewriting `post_date_gmt` or a database variant storing
-			 * a different format, every token reports null for both timestamps
-			 * and the diagnostic tooling loses the fields it exists to show.
-			 * Without this there would be nothing recording why.
-			 *
-			 * The empty and zero-date returns above are left unlogged. Those
-			 * are expected states meaning the date is unknown, and reporting
-			 * them would bury this.
-			 */
+			// The empty and zero-date returns above stay unlogged. Both mean
+			// the date is unknown, which is expected, and reporting them would
+			// bury this.
 			wc_get_logger()->warning(
 				'Unparseable push token timestamp.',
 				array(
@@ -647,8 +627,6 @@ class PushToken {
 	/**
 	 * Gets the date the app last confirmed this token, as a GMT `Y-m-d H:i:s` string.
 	 *
-	 * See {@see self::$last_confirmed_at_gmt} for what this does and does not mean.
-	 *
 	 * @return string|null
 	 *
 	 * @since 11.2.0
@@ -676,16 +654,9 @@ class PushToken {
 	/**
 	 * Returns this token formatted for the push tokens REST index response.
 	 *
-	 * Deliberately separate from {@see self::to_wpcom_format()}: that method is
+	 * Deliberately separate from {@see self::to_wpcom_format()}. That method is
 	 * also the per-token payload the dispatcher POSTs to the WPCOM send
-	 * endpoint, so adding fields to it would change what every notification
-	 * sends over the wire.
-	 *
-	 * Carries the fields the diagnostic tooling needs to describe a device that
-	 * the send payload has no use for. `id` gives each token a stable handle to
-	 * link to, `device_uuid` is what lets several tokens be recognised as the
-	 * same physical device across different users, and `platform` and
-	 * `metadata` supply the app, OS and version a device is identified by.
+	 * endpoint, so adding fields to it would change every notification request.
 	 *
 	 * @return array{user_id: int|null, token: string|null, origin: string|null, device_locale: string|null, id: int|null, device_uuid: string|null, platform: string|null, metadata: array, created_at_gmt: string|null, last_confirmed_at_gmt: string|null}
 	 *
