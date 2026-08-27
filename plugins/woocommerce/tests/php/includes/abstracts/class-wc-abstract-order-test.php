@@ -1615,8 +1615,10 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_remove_order_items_defers_custom_data_store_id_deletion() {
 		$order               = WC_Helper_Order::create_order();
+		$original_items      = $order->get_items();
+		$product             = current( $original_items )->get_product();
 		$original_data_store = $order->get_data_store();
-		$original_item_ids   = array_merge( array_keys( $order->get_items() ), array_keys( $order->get_items( 'shipping' ) ) );
+		$original_item_ids   = array_merge( array_keys( $original_items ), array_keys( $order->get_items( 'shipping' ) ) );
 
 		// phpcs:disable Squiz.Commenting -- Anonymous test double methods are self-explanatory.
 		$custom_data_store = new class( $original_data_store ) extends WC_Order_Data_Store_CPT {
@@ -1664,6 +1666,12 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 				$this->assertInstanceOf( WC_Order_Item::class, WC_Order_Factory::get_order_item( $item_id ), 'Items should remain persisted until save().' );
 			}
 
+			$replacement_item = $this->create_deferred_deletion_test_item( $product, 'Early-saved replacement' );
+			$replacement_item->add_meta_data( '_custom_id_deletion_test', 'preserved', true );
+			$order->add_item( $replacement_item );
+			$replacement_item->set_order_id( $order->get_id() );
+			$replacement_item_id = $replacement_item->save();
+
 			$order->save();
 		} finally {
 			remove_filter( 'woocommerce_order_data_store', $data_store_filter, PHP_INT_MAX );
@@ -1675,6 +1683,9 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		foreach ( $original_item_ids as $item_id ) {
 			$this->assertFalse( WC_Order_Factory::get_order_item( $item_id ), 'Snapshotted items should be deleted during save().' );
 		}
+		$persisted_replacement = WC_Order_Factory::get_order_item( $replacement_item_id );
+		$this->assertInstanceOf( WC_Order_Item::class, $persisted_replacement, 'An item saved after removal should not be deleted during save().' );
+		$this->assertSame( 'preserved', $persisted_replacement->get_meta( '_custom_id_deletion_test' ), 'The replacement item metadata should be preserved.' );
 	}
 
 	/**

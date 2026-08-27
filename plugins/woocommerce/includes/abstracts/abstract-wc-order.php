@@ -1110,7 +1110,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * without also overriding `delete_items_by_ids()` retain the historical synchronous behavior.
 	 *
 	 * @param string|null $type Order item type. Default null (remove every type).
-	 * @throws Exception If persisted item IDs cannot be read.
+	 * @throws Exception If persisted item IDs cannot be read or synchronous item deletion fails.
 	 * @return void
 	 */
 	public function remove_order_items( $type = null ) {
