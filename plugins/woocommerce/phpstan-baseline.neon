@@ -50668,12 +50668,6 @@ parameters:
 			path: src/Blocks/BlockTypes/OrderConfirmation/Downloads.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\OrderConfirmation\\Downloads\:\:render_order_downloads_column_headers\(\) invoked with 1 parameter, 0 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: src/Blocks/BlockTypes/OrderConfirmation/Downloads.php
-
-		-
 			message: '#^Parameter \#1 \$text of function esc_attr expects string, \(int\|false\) given\.$#'
 			identifier: argument.type
 			count: 1
