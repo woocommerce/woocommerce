@@ -130,6 +130,14 @@ class PushTokensDataStore {
 		$push_token->set_device_locale( $meta['device_locale'] ?? PushToken::DEFAULT_DEVICE_LOCALE );
 		$push_token->set_metadata( $meta['metadata'] ?? array() );
 
+		/**
+		 * Both timestamps come from the post record rather than meta, because
+		 * WordPress already maintains them. See {@see PushToken::$last_confirmed_at_gmt}
+		 * for what `post_modified_gmt` means for a push token.
+		 */
+		$push_token->set_created_at_gmt( $post->post_date_gmt );
+		$push_token->set_last_confirmed_at_gmt( $post->post_modified_gmt );
+
 		return $push_token;
 	}
 
