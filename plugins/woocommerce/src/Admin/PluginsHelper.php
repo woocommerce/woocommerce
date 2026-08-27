@@ -336,11 +336,7 @@ class PluginsHelper {
 				 */
 				do_action( 'woocommerce_plugins_install_api_error', $slug, $api );
 
-				$error_message = sprintf(
-				/* translators: %s: plugin slug (example: woocommerce-services) */
-					__( 'We couldn\'t install `%s`. Try again in a few minutes, or install it later from the Extensions page.', 'woocommerce' ),
-					$slug
-				);
+				$error_message = __( 'Try again in a few minutes, or install it later from the Extensions page.', 'woocommerce' );
 
 				$errors->add( $plugin, $error_message );
 				$logger && $logger->add_error( $plugin, $error_message );
@@ -391,11 +387,10 @@ class PluginsHelper {
 				 */
 				do_action( 'woocommerce_plugins_install_error', $slug, $api, $result, $upgrader );
 
-				$install_error_message = sprintf(
-				/* translators: %s: plugin slug (example: woocommerce-services) */
-					__( 'We couldn\'t install `%s`. Try again, or install it manually. If it keeps failing, contact your host.', 'woocommerce' ),
-					$slug
-				);
+				$install_error_message = self::get_error_reason( $upgrader->skin->result, $result );
+				if ( '' === $install_error_message ) {
+					$install_error_message = __( 'Try again, or install it manually. If it keeps failing, contact your host.', 'woocommerce' );
+				}
 				$errors->add(
 					$plugin,
 					$install_error_message
@@ -509,8 +504,7 @@ class PluginsHelper {
 			$path = isset( $plugin_paths[ $slug ] ) ? $plugin_paths[ $slug ] : false;
 
 			if ( ! $path ) {
-				/* translators: %s: plugin slug (example: woocommerce-services) */
-				$message = sprintf( __( 'The requested plugin `%s`. is not yet installed.', 'woocommerce' ), $slug );
+				$message = __( 'The plugin is not installed yet.', 'woocommerce' );
 				$errors->add(
 					$plugin,
 					$message
@@ -531,8 +525,10 @@ class PluginsHelper {
 				 */
 				do_action( 'woocommerce_plugins_activate_error', $slug, $result );
 
-				/* translators: %s: plugin slug (example: woocommerce-services) */
-				$message = sprintf( __( 'The requested plugin `%s` could not be activated.', 'woocommerce' ), $slug );
+				$message = self::get_error_reason( $result );
+				if ( '' === $message ) {
+					$message = __( 'The plugin could not be activated.', 'woocommerce' );
+				}
 				$errors->add(
 					$plugin,
 					$message

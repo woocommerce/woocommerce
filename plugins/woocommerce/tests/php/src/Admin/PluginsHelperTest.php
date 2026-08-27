@@ -80,4 +80,20 @@ class PluginsHelperTest extends WC_Unit_Test_Case {
 	public function test_get_error_reason_returns_empty_for_empty_error(): void {
 		$this->assertSame( '', PluginsHelper::get_error_reason( new WP_Error( 'x', '' ) ) );
 	}
+
+	/**
+	 * @testdox Should report a not-installed plugin without repeating its slug.
+	 */
+	public function test_activate_plugins_error_does_not_contain_slug(): void {
+		$result = PluginsHelper::activate_plugins( array( 'definitely-not-installed-plugin' ) );
+
+		$this->assertIsArray( $result );
+		$messages = $result['errors']->get_error_messages( 'definitely-not-installed-plugin' );
+
+		$this->assertSame(
+			array( 'The plugin is not installed yet.' ),
+			$messages,
+			'Activation errors should state only the reason; the client adds the plugin name.'
+		);
+	}
 }
