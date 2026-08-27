@@ -962,7 +962,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests an empty last send time is never reported as the current time.
+	 * @testdox Tests an empty last sent time is never reported as the current time.
 	 *
 	 * `date_create_immutable()` rejects only genuinely unparseable strings. It
 	 * reads an empty string as the current time and the MySQL zero date as year
@@ -970,12 +970,12 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	 * Folding them away would make an unsent token report as sent right now,
 	 * the precise opposite of what this field is for.
 	 */
-	public function test_an_empty_last_send_time_is_not_reported_as_now() {
+	public function test_an_empty_last_sent_at_is_not_reported_as_now() {
 		foreach ( array( '', '0000-00-00 00:00:00', '   ' ) as $stored ) {
-			$push_token = new PushToken( array( 'last_send_at_gmt' => $stored ) );
+			$push_token = new PushToken( array( 'last_sent_at_gmt' => $stored ) );
 
 			$this->assertNull(
-				$push_token->get_last_send_at_gmt(),
+				$push_token->get_last_sent_at_gmt(),
 				sprintf( 'Expected null for stored value "%s".', $stored )
 			);
 		}
@@ -1037,15 +1037,15 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the last send time defaults to null and is exposed in the response.
+	 * @testdox Tests the last sent time defaults to null and is exposed in the response.
 	 */
-	public function test_it_exposes_the_last_send_time() {
-		$this->assertNull( ( new PushToken() )->get_last_send_at_gmt() );
+	public function test_it_exposes_the_last_sent_at_time() {
+		$this->assertNull( ( new PushToken() )->get_last_sent_at_gmt() );
 
-		$push_token = new PushToken( array( 'last_send_at_gmt' => '2026-08-11 16:00:00' ) );
+		$push_token = new PushToken( array( 'last_sent_at_gmt' => '2026-08-11 16:00:00' ) );
 
-		$this->assertSame( '2026-08-11 16:00:00', $push_token->get_last_send_at_gmt() );
-		$this->assertSame( '2026-08-11T16:00:00', $push_token->to_rest_format()['last_send_at_gmt'] );
-		$this->assertArrayNotHasKey( 'last_send_at_gmt', $push_token->to_wpcom_format() );
+		$this->assertSame( '2026-08-11 16:00:00', $push_token->get_last_sent_at_gmt() );
+		$this->assertSame( '2026-08-11T16:00:00', $push_token->to_rest_format()['last_sent_at_gmt'] );
+		$this->assertArrayNotHasKey( 'last_sent_at_gmt', $push_token->to_wpcom_format() );
 	}
 }

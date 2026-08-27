@@ -185,7 +185,7 @@ class PushToken {
 	 *
 	 * @var string|null
 	 */
-	private ?string $last_send_at_gmt = null;
+	private ?string $last_sent_at_gmt = null;
 
 	/**
 	 * Creates a new PushToken instance with the given data.
@@ -236,8 +236,8 @@ class PushToken {
 			$this->set_last_confirmed_at_gmt( null === $data['last_confirmed_at_gmt'] ? null : (string) $data['last_confirmed_at_gmt'] );
 		}
 
-		if ( array_key_exists( 'last_send_at_gmt', $data ) ) {
-			$this->set_last_send_at_gmt( null === $data['last_send_at_gmt'] ? null : (string) $data['last_send_at_gmt'] );
+		if ( array_key_exists( 'last_sent_at_gmt', $data ) ) {
+			$this->set_last_sent_at_gmt( null === $data['last_sent_at_gmt'] ? null : (string) $data['last_sent_at_gmt'] );
 		}
 	}
 
@@ -454,13 +454,13 @@ class PushToken {
 	 *
 	 * See {@see self::set_created_at_gmt()} for why this bypasses validation.
 	 *
-	 * @param string|null $last_send_at_gmt A GMT `Y-m-d H:i:s` datetime, or null if never sent.
+	 * @param string|null $last_sent_at_gmt A GMT `Y-m-d H:i:s` datetime, or null if never sent.
 	 * @return void
 	 *
 	 * @since 11.2.0
 	 */
-	public function set_last_send_at_gmt( ?string $last_send_at_gmt ): void {
-		$this->last_send_at_gmt = $this->validate_gmt_datetime( $last_send_at_gmt );
+	public function set_last_sent_at_gmt( ?string $last_sent_at_gmt ): void {
+		$this->last_sent_at_gmt = $this->validate_gmt_datetime( $last_sent_at_gmt );
 	}
 
 	/**
@@ -628,8 +628,8 @@ class PushToken {
 	 *
 	 * @since 11.2.0
 	 */
-	public function get_last_send_at_gmt(): ?string {
-		return $this->last_send_at_gmt;
+	public function get_last_sent_at_gmt(): ?string {
+		return $this->last_sent_at_gmt;
 	}
 
 	/**
@@ -658,7 +658,7 @@ class PushToken {
 	 * Metadata is cast to an object so that an empty value encodes as `{}` rather
 	 * than `[]`, matching the `object` type the schema declares for it.
 	 *
-	 * @return array{user_id: int|null, token: string|null, origin: string|null, device_locale: string|null, id: int|null, device_uuid: string|null, platform: string|null, metadata: stdClass, created_at_gmt: string|null, last_confirmed_at_gmt: string|null, last_send_at_gmt: string|null}
+	 * @return array{user_id: int|null, token: string|null, origin: string|null, device_locale: string|null, id: int|null, device_uuid: string|null, platform: string|null, metadata: stdClass, created_at_gmt: string|null, last_confirmed_at_gmt: string|null, last_sent_at_gmt: string|null}
 	 *
 	 * @since 11.2.0
 	 */
@@ -672,7 +672,7 @@ class PushToken {
 				'metadata'              => (object) ( $this->metadata ?? array() ),
 				'created_at_gmt'        => $this->to_rest_datetime( $this->created_at_gmt ),
 				'last_confirmed_at_gmt' => $this->to_rest_datetime( $this->last_confirmed_at_gmt ),
-				'last_send_at_gmt'      => $this->to_rest_datetime( $this->last_send_at_gmt ),
+				'last_sent_at_gmt'      => $this->to_rest_datetime( $this->last_sent_at_gmt ),
 			)
 		);
 	}

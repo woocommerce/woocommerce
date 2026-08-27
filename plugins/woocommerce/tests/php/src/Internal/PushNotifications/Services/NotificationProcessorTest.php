@@ -143,9 +143,9 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should record the last send time against the dispatched tokens on success.
+	 * @testdox Should record the last sent time against the dispatched tokens on success.
 	 */
-	public function test_process_records_last_send_on_success(): void {
+	public function test_process_records_last_sent_at_on_success(): void {
 		$this->dispatcher->method( 'dispatch' )->willReturn(
 			array(
 				'success'     => true,
@@ -155,7 +155,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 
 		$this->data_store
 			->expects( $this->once() )
-			->method( 'record_last_send' )
+			->method( 'record_last_sent_at' )
 			->with(
 				$this->callback(
 					function ( array $tokens ) {
@@ -168,13 +168,13 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not record a last send time when the dispatch fails.
+	 * @testdox Should not record a last sent time when the dispatch fails.
 	 *
 	 * The stamp means "WPCOM accepted a payload containing this token", so
 	 * recording it on a failed send would make a device that has never been
 	 * successfully targeted look as though it had.
 	 */
-	public function test_process_does_not_record_last_send_on_failure(): void {
+	public function test_process_does_not_record_last_sent_at_on_failure(): void {
 		$this->dispatcher->method( 'dispatch' )->willReturn(
 			array(
 				'success'     => false,
@@ -182,7 +182,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->data_store->expects( $this->never() )->method( 'record_last_send' );
+		$this->data_store->expects( $this->never() )->method( 'record_last_sent_at' );
 
 		$this->sut->process( new NewOrderNotification( $this->order_id ) );
 	}

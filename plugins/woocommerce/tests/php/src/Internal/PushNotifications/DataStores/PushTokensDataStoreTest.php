@@ -1004,28 +1004,28 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests a token has no last send time until it has actually been sent.
+	 * @testdox Tests a token has no last sent time until it has actually been sent.
 	 */
-	public function test_last_send_at_is_null_for_a_token_that_has_never_been_sent() {
+	public function test_last_sent_at_is_null_for_a_token_that_has_never_been_sent() {
 		$data_store = new PushTokensDataStore();
 		$push_token = $this->create_test_push_token();
 
-		$this->assertNull( $data_store->read( $push_token->get_id() )->get_last_send_at_gmt() );
+		$this->assertNull( $data_store->read( $push_token->get_id() )->get_last_sent_at_gmt() );
 	}
 
 	/**
 	 * @testdox Tests recording a send stamps every supplied token with the same time.
 	 */
-	public function test_record_last_send_stamps_all_supplied_tokens() {
+	public function test_record_last_sent_at_stamps_all_supplied_tokens() {
 		$data_store = new PushTokensDataStore();
 		$first      = $this->create_test_push_token();
 		$second     = $this->create_test_push_token();
 
-		$data_store->record_last_send( array( $first, $second ) );
-		$data_store->flush_last_send();
+		$data_store->record_last_sent_at( array( $first, $second ) );
+		$data_store->flush_last_sent_at();
 
-		$first_send_at  = $data_store->read( $first->get_id() )->get_last_send_at_gmt();
-		$second_send_at = $data_store->read( $second->get_id() )->get_last_send_at_gmt();
+		$first_send_at  = $data_store->read( $first->get_id() )->get_last_sent_at_gmt();
+		$second_send_at = $data_store->read( $second->get_id() )->get_last_sent_at_gmt();
 
 		$this->assertNotNull( $first_send_at );
 		$this->assertSame( $first_send_at, $second_send_at );
@@ -1038,22 +1038,22 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	 * row per token behind — a duplicate would make `get_post_meta( …, true )`
 	 * return an arbitrary one of them.
 	 */
-	public function test_record_last_send_replaces_the_previous_stamp() {
+	public function test_record_last_sent_at_replaces_the_previous_stamp() {
 		global $wpdb;
 
 		$data_store = new PushTokensDataStore();
 		$push_token = $this->create_test_push_token();
 
-		$data_store->record_last_send( array( $push_token ) );
-		$data_store->flush_last_send();
-		$data_store->record_last_send( array( $push_token ) );
-		$data_store->flush_last_send();
+		$data_store->record_last_sent_at( array( $push_token ) );
+		$data_store->flush_last_sent_at();
+		$data_store->record_last_sent_at( array( $push_token ) );
+		$data_store->flush_last_sent_at();
 
 		$row_count = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s",
 				$push_token->get_id(),
-				PushTokensDataStore::LAST_SEND_AT_META_KEY
+				PushTokensDataStore::LAST_SENT_AT_META_KEY
 			)
 		);
 
@@ -1063,12 +1063,12 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Tests recording a send leaves the rest of the token record untouched.
 	 */
-	public function test_record_last_send_does_not_disturb_other_token_data() {
+	public function test_record_last_sent_at_does_not_disturb_other_token_data() {
 		$data_store = new PushTokensDataStore();
 		$push_token = $this->create_test_push_token();
 
-		$data_store->record_last_send( array( $push_token ) );
-		$data_store->flush_last_send();
+		$data_store->record_last_sent_at( array( $push_token ) );
+		$data_store->flush_last_sent_at();
 		$read = $data_store->read( $push_token->get_id() );
 
 		$this->assertSame( $push_token->get_token(), $read->get_token() );
@@ -1078,23 +1078,23 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests updating a token preserves its last send time.
+	 * @testdox Tests updating a token preserves its last sent time.
 	 *
 	 * The app re-registers a device whenever its locale or metadata changes,
 	 * which must not wipe the send history that update path knows nothing about.
 	 */
-	public function test_updating_a_token_preserves_its_last_send_time() {
+	public function test_updating_a_token_preserves_its_last_sent_at_time() {
 		$data_store = new PushTokensDataStore();
 		$push_token = $this->create_test_push_token();
 
-		$data_store->record_last_send( array( $push_token ) );
-		$data_store->flush_last_send();
-		$recorded = $data_store->read( $push_token->get_id() )->get_last_send_at_gmt();
+		$data_store->record_last_sent_at( array( $push_token ) );
+		$data_store->flush_last_sent_at();
+		$recorded = $data_store->read( $push_token->get_id() )->get_last_sent_at_gmt();
 
 		$push_token->set_device_locale( 'fr_FR' );
 		$data_store->update( $push_token );
 
-		$this->assertSame( $recorded, $data_store->read( $push_token->get_id() )->get_last_send_at_gmt() );
+		$this->assertSame( $recorded, $data_store->read( $push_token->get_id() )->get_last_sent_at_gmt() );
 	}
 
 	/**
@@ -1103,17 +1103,17 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	 * A request can process many notifications against the same few tokens, so
 	 * the write is buffered and happens once rather than once per notification.
 	 */
-	public function test_record_last_send_defers_the_write_until_flushed() {
+	public function test_record_last_sent_at_defers_the_write_until_flushed() {
 		$data_store = new PushTokensDataStore();
 		$push_token = $this->create_test_push_token();
 
-		$data_store->record_last_send( array( $push_token ) );
+		$data_store->record_last_sent_at( array( $push_token ) );
 
-		$this->assertNull( $data_store->read( $push_token->get_id() )->get_last_send_at_gmt() );
+		$this->assertNull( $data_store->read( $push_token->get_id() )->get_last_sent_at_gmt() );
 
-		$data_store->flush_last_send();
+		$data_store->flush_last_sent_at();
 
-		$this->assertNotNull( $data_store->read( $push_token->get_id() )->get_last_send_at_gmt() );
+		$this->assertNotNull( $data_store->read( $push_token->get_id() )->get_last_sent_at_gmt() );
 	}
 
 	/**
@@ -1126,16 +1126,16 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$push_token = $this->create_test_push_token();
 
 		for ( $i = 0; $i < 5; $i++ ) {
-			$data_store->record_last_send( array( $push_token ) );
+			$data_store->record_last_sent_at( array( $push_token ) );
 		}
 
-		$data_store->flush_last_send();
+		$data_store->flush_last_sent_at();
 
 		$row_count = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s",
 				$push_token->get_id(),
-				PushTokensDataStore::LAST_SEND_AT_META_KEY
+				PushTokensDataStore::LAST_SENT_AT_META_KEY
 			)
 		);
 
@@ -1149,14 +1149,14 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$data_store = new PushTokensDataStore();
 		$push_token = $this->create_test_push_token();
 
-		$data_store->record_last_send( array( $push_token ) );
-		$data_store->flush_last_send();
+		$data_store->record_last_sent_at( array( $push_token ) );
+		$data_store->flush_last_sent_at();
 
-		$recorded = $data_store->read( $push_token->get_id() )->get_last_send_at_gmt();
+		$recorded = $data_store->read( $push_token->get_id() )->get_last_sent_at_gmt();
 
-		$data_store->flush_last_send();
+		$data_store->flush_last_sent_at();
 
-		$this->assertSame( $recorded, $data_store->read( $push_token->get_id() )->get_last_send_at_gmt() );
+		$this->assertSame( $recorded, $data_store->read( $push_token->get_id() )->get_last_sent_at_gmt() );
 	}
 
 	/**
@@ -1172,19 +1172,19 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$data_store = new PushTokensDataStore();
 		$push_token = $this->create_test_push_token();
 
-		$data_store->record_last_send( array( $push_token ) );
-		$data_store->flush_last_send();
+		$data_store->record_last_sent_at( array( $push_token ) );
+		$data_store->flush_last_sent_at();
 
 		$meta_id = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT meta_id FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s",
 				$push_token->get_id(),
-				PushTokensDataStore::LAST_SEND_AT_META_KEY
+				PushTokensDataStore::LAST_SENT_AT_META_KEY
 			)
 		);
 
-		$data_store->record_last_send( array( $push_token ) );
-		$data_store->flush_last_send();
+		$data_store->record_last_sent_at( array( $push_token ) );
+		$data_store->flush_last_sent_at();
 
 		$this->assertSame(
 			$meta_id,
@@ -1192,7 +1192,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 				$wpdb->prepare(
 					"SELECT meta_id FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s",
 					$push_token->get_id(),
-					PushTokensDataStore::LAST_SEND_AT_META_KEY
+					PushTokensDataStore::LAST_SENT_AT_META_KEY
 				)
 			)
 		);
@@ -1205,15 +1205,15 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$data_store = new PushTokensDataStore();
 		$tokens     = array();
 
-		for ( $i = 0; $i < PushTokensDataStore::LAST_SEND_CHUNK_SIZE + 5; $i++ ) {
+		for ( $i = 0; $i < PushTokensDataStore::LAST_SENT_AT_CHUNK_SIZE + 5; $i++ ) {
 			$tokens[] = $this->create_test_push_token();
 		}
 
-		$data_store->record_last_send( $tokens );
-		$data_store->flush_last_send();
+		$data_store->record_last_sent_at( $tokens );
+		$data_store->flush_last_sent_at();
 
 		foreach ( $tokens as $token ) {
-			$this->assertNotNull( $data_store->read( $token->get_id() )->get_last_send_at_gmt() );
+			$this->assertNotNull( $data_store->read( $token->get_id() )->get_last_sent_at_gmt() );
 		}
 	}
 
@@ -1229,12 +1229,12 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$data_store = new PushTokensDataStore();
 		$push_token = $this->create_test_push_token();
 
-		$data_store->record_last_send( array( $push_token ) );
+		$data_store->record_last_sent_at( array( $push_token ) );
 
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Firing Action Scheduler's hook, not declaring one.
 		do_action( 'action_scheduler_after_execute', 1, null, '' );
 
-		$this->assertNotNull( $data_store->read( $push_token->get_id() )->get_last_send_at_gmt() );
+		$this->assertNotNull( $data_store->read( $push_token->get_id() )->get_last_sent_at_gmt() );
 	}
 
 	/**
@@ -1251,25 +1251,25 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$data_store = new PushTokensDataStore();
 		$push_token = $this->create_test_push_token();
 
-		$data_store->record_last_send( array( $push_token ) );
-		$data_store->flush_last_send();
+		$data_store->record_last_sent_at( array( $push_token ) );
+		$data_store->flush_last_sent_at();
 
 		$empty_the_select = function ( $query ) {
-			return false !== strpos( $query, 'SELECT post_id' ) && false !== strpos( $query, 'last_send_at_gmt' )
+			return false !== strpos( $query, 'SELECT post_id' ) && false !== strpos( $query, 'last_sent_at_gmt' )
 				? ''
 				: $query;
 		};
 
 		add_filter( 'query', $empty_the_select );
-		$data_store->record_last_send( array( $push_token ) );
-		$data_store->flush_last_send();
+		$data_store->record_last_sent_at( array( $push_token ) );
+		$data_store->flush_last_sent_at();
 		remove_filter( 'query', $empty_the_select );
 
 		$row_count = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s",
 				$push_token->get_id(),
-				PushTokensDataStore::LAST_SEND_AT_META_KEY
+				PushTokensDataStore::LAST_SENT_AT_META_KEY
 			)
 		);
 
@@ -1289,7 +1289,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$push_token = $this->create_test_push_token();
 
 		$raise_an_error = function ( $query ) {
-			if ( false !== strpos( $query, 'last_send_at_gmt' ) ) {
+			if ( false !== strpos( $query, 'last_sent_at_gmt' ) ) {
 				throw new \Error( 'Raised for testing.' );
 			}
 
@@ -1299,29 +1299,29 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		add_filter( 'query', $raise_an_error );
 
 		try {
-			$data_store->record_last_send( array( $push_token ) );
-			$data_store->flush_last_send();
+			$data_store->record_last_sent_at( array( $push_token ) );
+			$data_store->flush_last_sent_at();
 		} finally {
 			remove_filter( 'query', $raise_an_error );
 		}
 
-		$this->assertNull( $data_store->read( $push_token->get_id() )->get_last_send_at_gmt() );
+		$this->assertNull( $data_store->read( $push_token->get_id() )->get_last_sent_at_gmt() );
 	}
 
 	/**
 	 * @testdox Tests recording a send with no tokens is a no-op.
 	 */
-	public function test_record_last_send_ignores_an_empty_token_list() {
+	public function test_record_last_sent_at_ignores_an_empty_token_list() {
 		global $wpdb;
 
 		$data_store = new PushTokensDataStore();
-		$data_store->record_last_send( array() );
-		$data_store->flush_last_send();
+		$data_store->record_last_sent_at( array() );
+		$data_store->flush_last_sent_at();
 
 		$row_count = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = %s",
-				PushTokensDataStore::LAST_SEND_AT_META_KEY
+				PushTokensDataStore::LAST_SENT_AT_META_KEY
 			)
 		);
 

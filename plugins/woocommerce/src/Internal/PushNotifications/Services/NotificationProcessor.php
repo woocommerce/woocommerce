@@ -184,7 +184,7 @@ class NotificationProcessor {
 			 * from "we targeted it and it didn't arrive" when diagnosing a
 			 * missing notification.
 			 */
-			$this->data_store->record_last_send( $tokens );
+			$this->data_store->record_last_sent_at( $tokens );
 
 			$notification->write_meta( self::SENT_META_KEY );
 			$notification->delete_meta( self::CLAIMED_META_KEY );

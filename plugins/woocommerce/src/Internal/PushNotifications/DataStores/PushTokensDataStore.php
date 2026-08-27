@@ -37,32 +37,32 @@ class PushTokensDataStore {
 	/**
 	 * Buffered last-send stamps awaiting a write, as token post ID => GMT
 	 * datetime. Holds the most recent time recorded for each token this
-	 * request. Flushed by {@see self::flush_last_send()} on shutdown.
+	 * request. Flushed by {@see self::flush_last_sent_at()} on shutdown.
 	 *
 	 * @var array<int, string>
 	 */
-	private array $pending_last_send = array();
+	private array $pending_last_sent_at = array();
 
 	/**
-	 * Whether the shutdown flush for `$pending_last_send` has been registered.
+	 * Whether the shutdown flush for `$pending_last_sent_at` has been registered.
 	 *
 	 * @var bool
 	 */
-	private bool $last_send_flush_registered = false;
+	private bool $last_sent_at_flush_registered = false;
 
 	/**
 	 * How many tokens to write per statement when flushing last-send stamps.
 	 */
-	const LAST_SEND_CHUNK_SIZE = 100;
+	const LAST_SENT_AT_CHUNK_SIZE = 100;
 
 	/**
 	 * Meta key holding the GMT datetime of the last successful send to WPCOM.
 	 *
 	 * Deliberately absent from `build_meta_array_from_token()`: it is written
-	 * only by `record_last_send()`, so an unrelated token update (e.g. the app
+	 * only by `record_last_sent_at()`, so an unrelated token update (e.g. the app
 	 * re-registering with a new locale) cannot clobber it.
 	 */
-	const LAST_SEND_AT_META_KEY = 'last_send_at_gmt';
+	const LAST_SENT_AT_META_KEY = 'last_sent_at_gmt';
 
 	const SUPPORTED_META = array(
 		'origin',
@@ -71,7 +71,7 @@ class PushTokensDataStore {
 		'platform',
 		'device_locale',
 		'metadata',
-		self::LAST_SEND_AT_META_KEY,
+		self::LAST_SENT_AT_META_KEY,
 	);
 
 	/**
@@ -162,7 +162,7 @@ class PushTokensDataStore {
 		 */
 		$push_token->set_device_locale( $meta['device_locale'] ?? PushToken::DEFAULT_DEVICE_LOCALE );
 		$push_token->set_metadata( $meta['metadata'] ?? array() );
-		$push_token->set_last_send_at_gmt( $meta[ self::LAST_SEND_AT_META_KEY ] ?? null );
+		$push_token->set_last_sent_at_gmt( $meta[ self::LAST_SENT_AT_META_KEY ] ?? null );
 
 		/**
 		 * Both timestamps come from the post record rather than meta, because
@@ -346,7 +346,7 @@ class PushTokensDataStore {
 						 */
 						'device_locale'    => $meta['device_locale'] ?? PushToken::DEFAULT_DEVICE_LOCALE,
 						'metadata'         => $meta['metadata'] ?? array(),
-						'last_send_at_gmt' => $meta[ self::LAST_SEND_AT_META_KEY ] ?? null,
+						'last_sent_at_gmt' => $meta[ self::LAST_SENT_AT_META_KEY ] ?? null,
 					)
 				);
 			}
@@ -494,29 +494,29 @@ class PushTokensDataStore {
 	 * @param PushToken[] $push_tokens The tokens WPCOM accepted.
 	 * @return void
 	 */
-	public function record_last_send( array $push_tokens ): void {
+	public function record_last_sent_at( array $push_tokens ): void {
 		$timestamp = gmdate( 'Y-m-d H:i:s' );
 
 		foreach ( $push_tokens as $push_token ) {
 			$id = $push_token->get_id();
 
 			if ( $id ) {
-				$this->pending_last_send[ $id ] = $timestamp;
+				$this->pending_last_sent_at[ $id ] = $timestamp;
 			}
 		}
 
-		if ( empty( $this->pending_last_send ) || $this->last_send_flush_registered ) {
+		if ( empty( $this->pending_last_sent_at ) || $this->last_sent_at_flush_registered ) {
 			return;
 		}
 
-		add_action( 'shutdown', array( $this, 'flush_last_send' ) );
+		add_action( 'shutdown', array( $this, 'flush_last_sent_at' ) );
 
 		// The safety net and retry jobs run under an Action Scheduler queue
 		// runner, which is routinely killed on a time limit. Shutdown functions
 		// do not run on a kill, so flush after each action as well.
-		add_action( 'action_scheduler_after_execute', array( $this, 'flush_last_send' ) );
+		add_action( 'action_scheduler_after_execute', array( $this, 'flush_last_sent_at' ) );
 
-		$this->last_send_flush_registered = true;
+		$this->last_sent_at_flush_registered = true;
 	}
 
 	/**
@@ -533,32 +533,33 @@ class PushTokensDataStore {
 	 *
 	 * @return void
 	 */
-	public function flush_last_send(): void {
-		// Lets a later `record_last_send()` re-assert both hooks. They stay
+	public function flush_last_sent_at(): void {
+		// Lets a later `record_last_sent_at()` re-assert both hooks. They stay
 		// registered either way, and `add_action()` is idempotent here.
-		$this->last_send_flush_registered = false;
+		$this->last_sent_at_flush_registered = false;
 
-		if ( empty( $this->pending_last_send ) ) {
+		if ( empty( $this->pending_last_sent_at ) ) {
 			return;
 		}
 
-		$pending                 = $this->pending_last_send;
-		$this->pending_last_send = array();
+		$pending                    = $this->pending_last_sent_at;
+		$this->pending_last_sent_at = array();
 
 		// Chunked so neither the `IN` list nor the number of placeholders handed
 		// to `$wpdb->prepare()` grows with the number of registered devices. A
 		// large `IN` list can also push the optimizer off the `post_id` index.
-		foreach ( array_chunk( $pending, self::LAST_SEND_CHUNK_SIZE, true ) as $chunk ) {
+		foreach ( array_chunk( $pending, self::LAST_SENT_AT_CHUNK_SIZE, true ) as $chunk ) {
 			try {
-				$this->write_last_send_chunk( $chunk );
+				$this->write_last_sent_at_chunk( $chunk );
 			} catch ( Throwable $e ) {
 				// Throwable, not Exception. `action_scheduler_after_execute`
 				// fires between the action running and `mark_complete()`, inside
 				// the runner's own Throwable catch, so an Error escaping here
 				// would record a delivered notification's action as failed.
 				wc_get_logger()->warning(
-					'Failed to record last send time for push tokens.',
+					'Failed to record last sent time for push tokens.',
 					array(
+						'source'    => PushNotifications::FEATURE_NAME,
 						'token_ids' => array_keys( $chunk ),
 						'error'     => $e->getMessage(),
 					)
@@ -580,7 +581,7 @@ class PushTokensDataStore {
 	 * @param array<int, string> $chunk Map of token post ID to GMT datetime.
 	 * @return void
 	 */
-	private function write_last_send_chunk( array $chunk ): void {
+	private function write_last_sent_at_chunk( array $chunk ): void {
 		global $wpdb;
 
 		$post_ids = array_keys( $chunk );
@@ -598,14 +599,14 @@ class PushTokensDataStore {
 				"SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = %%s AND post_id IN ( %s )",
 				implode( ', ', array_fill( 0, count( $post_ids ), '%d' ) )
 			),
-			array_merge( array( self::LAST_SEND_AT_META_KEY ), $post_ids )
+			array_merge( array( self::LAST_SENT_AT_META_KEY ), $post_ids )
 		);
 
 		// `prepare()` returns null on a placeholder mismatch, and `get_col()`
 		// would then skip the query and read `last_result` from whatever ran
 		// before, so the check cannot wait until after the read.
 		if ( ! is_string( $select ) || '' === $select ) {
-			$this->warn_last_send_not_recorded( $post_ids, 'Could not build the query to read existing stamps, skipping chunk.' );
+			$this->warn_last_sent_at_not_recorded( $post_ids, 'Could not build the query to read existing stamps, skipping chunk.' );
 
 			return;
 		}
@@ -619,7 +620,7 @@ class PushTokensDataStore {
 		$rows = $wpdb->query( $select );
 
 		if ( false === $rows ) {
-			$this->warn_last_send_not_recorded(
+			$this->warn_last_sent_at_not_recorded(
 				$post_ids,
 				sprintf(
 					'Could not read existing stamps, skipping chunk. %s',
@@ -652,7 +653,7 @@ class PushTokensDataStore {
 							"UPDATE {$wpdb->postmeta} SET meta_value = %%s WHERE meta_key = %%s AND post_id IN ( %s )",
 							implode( ', ', array_fill( 0, count( $update_ids ), '%d' ) )
 						),
-						array_merge( array( $timestamp, self::LAST_SEND_AT_META_KEY ), $update_ids )
+						array_merge( array( $timestamp, self::LAST_SENT_AT_META_KEY ), $update_ids )
 					),
 					$update_ids
 				);
@@ -663,7 +664,7 @@ class PushTokensDataStore {
 
 				foreach ( $insert_ids as $post_id ) {
 					$insert_args[] = $post_id;
-					$insert_args[] = self::LAST_SEND_AT_META_KEY;
+					$insert_args[] = self::LAST_SENT_AT_META_KEY;
 					$insert_args[] = $timestamp;
 				}
 
@@ -693,10 +694,11 @@ class PushTokensDataStore {
 	 * @param string $error    What went wrong, and what was skipped as a result.
 	 * @return void
 	 */
-	private function warn_last_send_not_recorded( array $post_ids, string $error ): void {
+	private function warn_last_sent_at_not_recorded( array $post_ids, string $error ): void {
 		wc_get_logger()->warning(
-			'Could not record last send time for push tokens.',
+			'Could not record last sent time for push tokens.',
 			array(
+				'source'    => PushNotifications::FEATURE_NAME,
 				'token_ids' => $post_ids,
 				'error'     => $error,
 			)
@@ -714,7 +716,7 @@ class PushTokensDataStore {
 		global $wpdb;
 
 		if ( ! is_string( $query ) || '' === $query ) {
-			$this->warn_last_send_not_recorded( $post_ids, 'Could not build the query to write stamps.' );
+			$this->warn_last_sent_at_not_recorded( $post_ids, 'Could not build the query to write stamps.' );
 
 			return;
 		}
@@ -725,8 +727,9 @@ class PushTokensDataStore {
 		}
 
 		wc_get_logger()->warning(
-			'Failed to record last send time for push tokens.',
+			'Failed to record last sent time for push tokens.',
 			array(
+				'source'    => PushNotifications::FEATURE_NAME,
 				'token_ids' => $post_ids,
 				'error'     => $wpdb->last_error,
 			)
