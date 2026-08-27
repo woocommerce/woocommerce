@@ -19,6 +19,27 @@ namespace Automattic\WooCommerce\Tests\Helpers;
 trait DateQueryGuardTrait {
 
 	/**
+	 * A value usable as a string but not as a date component.
+	 *
+	 * WP_Date_Query hands numeric components to mktime(), which declares ?int, so this fatals
+	 * there while passing any stringability check.
+	 *
+	 * @return object
+	 */
+	private static function stringable_date_component() {
+		return new class() {
+			/**
+			 * Renders as a plausible year.
+			 *
+			 * @return string
+			 */
+			public function __toString(): string {
+				return '2024';
+			}
+		};
+	}
+
+	/**
 	 * date_query clauses that must keep matching, seeded against an order created 2024-06-01.
 	 *
 	 * The list forms are how WP_Date_Query expresses IN, NOT IN, BETWEEN and NOT BETWEEN, and are
@@ -92,6 +113,7 @@ trait DateQueryGuardTrait {
 				),
 				false,
 			),
+			'numeric string'   => array( array( array( 'year' => '2024' ) ) ),
 			'unrecognised key' => array(
 				array(
 					array(
@@ -153,6 +175,17 @@ trait DateQueryGuardTrait {
 					),
 				),
 			),
+			'stringable year'      => array(
+				array(
+					array( 'year' => self::stringable_date_component() ),
+				),
+			),
+			'stringable before'    => array(
+				array(
+					array( 'before' => array( 'year' => self::stringable_date_component() ) ),
+				),
+			),
+			'non-numeric year'     => array( array( array( 'year' => 'abc' ) ) ),
 			'nested unknown key'   => array( array( array( 'ext_ctx' => array( 'year' => new \stdClass() ) ) ) ),
 		);
 	}

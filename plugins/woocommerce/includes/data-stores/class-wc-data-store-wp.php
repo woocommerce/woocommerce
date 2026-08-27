@@ -566,6 +566,21 @@ class WC_Data_Store_WP {
 	}
 
 	/**
+	 * Checks whether a value can be used as one of WP_Date_Query's numeric date components.
+	 *
+	 * They reach mktime(), which declares ?int, so a Stringable object or a non-numeric string
+	 * fatals there even though both are usable as strings. null, booleans and arrays are left
+	 * alone: WP_Date_Query tolerates them today and the clause simply carries no restriction.
+	 *
+	 * @since 11.2.0
+	 * @param mixed $value The value to check.
+	 * @return bool True if the value is safe to pass to mktime(), false otherwise.
+	 */
+	protected function is_usable_as_date_component( $value ) {
+		return is_null( $value ) || is_bool( $value ) || is_array( $value ) || is_numeric( $value );
+	}
+
+	/**
 	 * Checks whether a caller-supplied date_query contains a value WP_Date_Query cannot use.
 	 *
 	 * WP_Date_Query ignores keys it does not recognise, so an extension is free to carry its own
@@ -615,9 +630,19 @@ class WC_Data_Store_WP {
 			}
 
 			// A time key is consumed here. 'before' and 'after' also accept an array of parts.
+			//
+			// Only 'before' and 'after' given a single value reach a string consumer. Everything
+			// else is a date component that reaches mktime(), which declares ?int: a Stringable
+			// object or a non-numeric string fatals there despite being usable as a string.
 			if ( in_array( $key, $time_keys, true ) ) {
+				$is_string_consumer = in_array( $key, array( 'before', 'after' ), true ) && ! is_array( $value );
+
 				foreach ( is_array( $value ) ? $value : array( $value ) as $part ) {
-					if ( ! $this->is_usable_as_string( $part ) ) {
+					$usable = $is_string_consumer
+						? $this->is_usable_as_string( $part )
+						: $this->is_usable_as_date_component( $part );
+
+					if ( ! $usable ) {
 						return true;
 					}
 				}
