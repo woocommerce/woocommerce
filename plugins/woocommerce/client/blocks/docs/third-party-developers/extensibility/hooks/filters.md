@@ -1175,8 +1175,15 @@ Allows backward compatibility with the `rest_request_after_callbacks` filter by 
 Allow filtering of the add to cart button arguments.
 
 ```php
-apply_filters( 'woocommerce_loop_add_to_cart_args' )
+apply_filters( 'woocommerce_loop_add_to_cart_args', array $args, \WC_Product $product )
 ```
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $args | array | Button arguments, with a `class` string and an `attributes` array. |
+| $product | \WC_Product | Product the button is rendered for. |
 
 ### Source
 
