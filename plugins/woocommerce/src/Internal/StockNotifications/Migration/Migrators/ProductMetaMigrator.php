@@ -49,6 +49,12 @@ class ProductMetaMigrator implements MigratorInterface {
 	private const LEGACY_DISABLED_VALUE = 'yes';
 
 	/**
+	 * The value written to the Core meta key for a legacy-disabled product. Polarity is
+	 * inverted: legacy `_wc_bis_disabled = 'yes'` means Core signups are off.
+	 */
+	private const TARGET_DISABLED_VALUE = 'no';
+
+	/**
 	 * Product meta key holding this migrator's per-product fingerprint.
 	 *
 	 * Stored as `{source hash}:{target hash}:{timestamp}` rather than as an array, so the
@@ -180,6 +186,13 @@ class ProductMetaMigrator implements MigratorInterface {
 
 		$separator = self::FINGERPRINT_SEPARATOR;
 
+		// With --force, a row a previous run recorded as merchant-edited is settled as far as
+		// the fingerprint is concerned, so it is re-admitted on the value itself instead. The
+		// test still terminates: once the row holds the migrated value it stops matching.
+		$force_clause = $this->force
+			? "OR COALESCE( target_meta.meta_value, '' ) <> '" . self::TARGET_DISABLED_VALUE . "'"
+			: '';
+
 		$sql = "SELECT {$select}
 			FROM {$wpdb->posts} p
 			INNER JOIN {$wpdb->postmeta} legacy_meta
@@ -199,6 +212,7 @@ class ProductMetaMigrator implements MigratorInterface {
 					OR SUBSTRING_INDEX( fingerprint_meta.meta_value, '{$separator}', 1 ) <> %s
 					OR CAST( SUBSTRING_INDEX( SUBSTRING_INDEX( fingerprint_meta.meta_value, '{$separator}', 2 ), '{$separator}', -1 ) AS BINARY )
 						<> CAST( SHA2( COALESCE( target_meta.meta_value, '' ), 256 ) AS BINARY )
+					{$force_clause}
 				)
 				{$suffix}";
 
@@ -288,13 +302,13 @@ class ProductMetaMigrator implements MigratorInterface {
 			return MigrationState::OPTION_ACTION_SKIP_UNCHANGED;
 		}
 
-		if ( ! $writer->write_product_meta( $product_id, $target_meta_key, 'no' ) ) {
+		if ( ! $writer->write_product_meta( $product_id, $target_meta_key, self::TARGET_DISABLED_VALUE ) ) {
 			$this->mark_terminal_failure( $product_id, $writer );
 
 			return Reporter::OUTCOME_FAILED;
 		}
 
-		$new_target_hash = $this->migration_state->fingerprint_value( 'no' );
+		$new_target_hash = $this->get_target_hash();
 
 		$writer->write_product_meta(
 			$product_id,
@@ -315,6 +329,15 @@ class ProductMetaMigrator implements MigratorInterface {
 	 */
 	private function get_source_hash(): string {
 		return $this->migration_state->fingerprint_value( self::LEGACY_DISABLED_VALUE );
+	}
+
+	/**
+	 * Fingerprint of the value this section writes.
+	 *
+	 * @return string
+	 */
+	private function get_target_hash(): string {
+		return $this->migration_state->fingerprint_value( self::TARGET_DISABLED_VALUE );
 	}
 
 	/**
@@ -373,6 +396,13 @@ class ProductMetaMigrator implements MigratorInterface {
 	 */
 	private function decide_action( ?array $fingerprint, string $source_hash, string $current_target_hash ): string {
 		if ( null === $fingerprint || ! isset( $fingerprint['hash'], $fingerprint['written'] ) ) {
+			return MigrationState::OPTION_ACTION_WRITE;
+		}
+
+		// A skip recorded by an earlier run makes the fingerprint match the merchant's own
+		// value, so the "hash differs" case below can no longer see it. `--force` therefore
+		// asks the plainer question: is the stored value already the one this section writes?
+		if ( $this->force && $current_target_hash !== $this->get_target_hash() ) {
 			return MigrationState::OPTION_ACTION_WRITE;
 		}
 

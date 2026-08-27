@@ -312,16 +312,16 @@ class MigrationState {
 	/**
 	 * Fingerprint a value for comparison, stable across arrays and scalars.
 	 *
-	 * Serializes unconditionally rather than through maybe_serialize(): that returns
-	 * scalars untouched, so an integer option value reaches hash() as an int and
-	 * fatals on PHP 8. Serializing everything also keeps `false`, `null` and `''`
-	 * distinct, which a string cast would collapse into one fingerprint.
+	 * The string cast is required: maybe_serialize() returns scalars untouched, so an
+	 * integer value reaches hash() as an int and fatals on PHP 8. Casting also matches
+	 * how the value reads back out of the database, where everything is a string, and
+	 * keeps this in step with ProductMetaMigrator's SQL-side `SHA2()` comparison.
 	 *
 	 * @param mixed $value The value to fingerprint.
 	 * @return string
 	 */
 	public function fingerprint_value( $value ): string {
-		return hash( 'sha256', serialize( $value ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Hashed for comparison only, never stored or unserialized.
+		return hash( 'sha256', (string) maybe_serialize( $value ) );
 	}
 
 	/**
