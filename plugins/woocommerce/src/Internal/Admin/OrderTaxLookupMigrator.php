@@ -37,7 +37,9 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 	 *
 	 * The cursor is what bounds progress, so it outlives the run. An order the processor could not
 	 * rebuild keeps its rows at zero; without the cursor every later batch would pick that order up
-	 * again and the processor would never reach the end of the table.
+	 * again and the processor would never reach the end of the table. That is also why the option
+	 * is left behind once the pass is done: clearing it would put those orders back in front of the
+	 * next pass. Delete it by hand to run the rebuild over the whole table again.
 	 *
 	 * @var string
 	 */
@@ -133,8 +135,10 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 
 		if ( $wpdb->last_error ) {
 			// An empty batch reads as "nothing left to do" and retires the processor, which would
-			// leave the rest of the table behind. Report the failure instead: the controller
-			// counts it, and its watchdog schedules another attempt.
+			// leave the rest of the table behind. Report the failure instead, which fails the
+			// scheduled action and leaves the controller's watchdog to schedule another attempt.
+			// The controller only counts failures its process_batch() call throws, so a database
+			// that stays broken is retried rather than retired.
 			throw new Exception( $wpdb->last_error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
