@@ -63,6 +63,20 @@ class MockWPCLI {
 	public static $all_success_messages = array();
 
 	/**
+	 * Rows passed to the last `WP_CLI\Utils\format_items()` call.
+	 *
+	 * @var array
+	 */
+	public static $last_table = array();
+
+	/**
+	 * Exit code passed to the last `halt()` call, or null when it was never called.
+	 *
+	 * @var int|null
+	 */
+	public static $last_halt_code = null;
+
+	/**
 	 * Simulated user input for STDIN reading in tests.
 	 *
 	 * @var string
@@ -149,6 +163,30 @@ class MockWPCLI {
 	}
 
 	/**
+	 * Mock halt method. Records the exit code instead of terminating the process.
+	 *
+	 * @param int $code Exit code.
+	 */
+	public static function halt( $code ): void {
+		self::$last_halt_code = $code;
+	}
+
+	/**
+	 * Clear every recorded message so one test cannot read another's output.
+	 */
+	public static function reset(): void {
+		self::$last_debug_message   = '';
+		self::$last_warning_message = '';
+		self::$last_log_message     = '';
+		self::$last_error_message   = '';
+		self::$last_success_message = '';
+		self::$all_log_messages     = array();
+		self::$all_success_messages = array();
+		self::$last_halt_code       = null;
+		self::$last_table           = array();
+	}
+
+	/**
 	 * Mock confirm method.
 	 *
 	 * @param string $question Question to confirm.
@@ -164,3 +202,5 @@ class MockWPCLI {
 if ( ! class_exists( 'WP_CLI' ) ) {
 	class_alias( MockWPCLI::class, 'WP_CLI' );
 }
+
+require_once __DIR__ . '/wp-cli-utils.php';

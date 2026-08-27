@@ -29,6 +29,10 @@ class MigrationControllerTests extends WC_Unit_Test_Case {
 
 		$this->clear_options();
 
+		// The shim hooks itself in its constructor, so a cached resolution from an earlier
+		// test would make registration look like a no-op here.
+		$this->reset_container_resolutions();
+
 		$this->controller = new MigrationController();
 	}
 

@@ -450,9 +450,12 @@ class Cli {
 					$ids    = $migrator->get_batch( $cursor, $batch_size );
 
 					if ( empty( $ids ) ) {
-						if ( 0 === $cursor ) {
+						if ( 0 === $cursor || $writer->is_dry_run() ) {
+							// Under a dry run nothing is written, so no row ever leaves the
+							// candidate set; a reset-and-retry pass would just fetch the same
+							// rows forever. Only a real run needs the reset pass, to pick up
+							// rows that re-entered the candidate set below an advancing cursor.
 							break;
-							// Query right after a reset came back empty: this section is drained.
 						}
 
 						$this->state->reset_cursor( $slug );
@@ -460,7 +463,8 @@ class Cli {
 					}
 
 					$migrator->migrate_batch( $ids, $writer );
-					$this->state->set_cursor( $slug, max( $ids ) );
+					// get_batch() returns ids as strings, as $wpdb hands them over.
+					$this->state->set_cursor( $slug, (int) max( $ids ) );
 					$progress->tick( count( $ids ) );
 					++$batches_run;
 				}

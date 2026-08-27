@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Com
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Compat\LegacyUnsubscribeShim;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Mapping\LegacyHash;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\NotificationsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\DbWriter;
@@ -271,6 +272,119 @@ class LegacyUnsubscribeShimTests extends WC_Unit_Test_Case {
 
 		$this->assertTrue( $this->request_raw( $legacy_id, $round_tripped, 'notification' ) );
 		$this->assertSame( NotificationStatus::CANCELLED, LegacyStore::get_core_rows()[0]['status'] );
+	}
+
+	/**
+	 * @testdox a real legacy token should never encode to a + or / that URL parsing could mangle.
+	 */
+	public function test_a_real_token_never_encodes_to_plus_or_slash(): void {
+		// The legacy token is a sha256 hex digest, so its base64 form is drawn from a
+		// 16-character input alphabet that cannot reach base64 indices 62 (+) and 63 (/).
+		// The plan asks for a + and / round trip; this asserts why no real link can carry
+		// one, so a future reader does not add URL-safe base64 handling for a case that
+		// cannot occur. The synthetic double-encoded token below covers the escaping path.
+		$legacy_ids = array();
+
+		for ( $i = 0; $i < 10; $i++ ) {
+			$legacy_ids[] = $this->seed_legacy_row( "shopper{$i}@example.com" );
+		}
+
+		foreach ( $legacy_ids as $legacy_id ) {
+			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- reproducing the legacy link format.
+			$encoded = base64_encode( $this->legacy_token( $legacy_id ) );
+
+			$this->assertMatchesRegularExpression( '/^[A-Za-z0-9=]+$/', $encoded );
+		}
+
+		$this->migrate();
+
+		$first = $legacy_ids[0];
+		$this->assertTrue( $this->request( $first, $this->legacy_token( $first ), 'notification' ) );
+		$this->assertSame( NotificationStatus::CANCELLED, $this->statuses_by_legacy_id()[ $first ] );
+	}
+
+	/**
+	 * @testdox the second urldecode() after base64_decode() should not be deletable as redundant.
+	 */
+	public function test_second_urldecode_after_base64_decode_is_required(): void {
+		global $wpdb;
+
+		$legacy_id       = 555555;
+		$notification_id = LegacyStore::add_core_notification(
+			array(
+				'product_id' => $this->product_id,
+				'user_email' => 'shopper@example.com',
+			)
+		);
+		$meta_table      = $wpdb->prefix . 'wc_stock_notificationmeta';
+
+		// A token containing characters urlencode() must percent-escape, reproducing legacy's
+		// own double-encoding of the `bis_unsub` parameter (plan: "Input handling").
+		$token = 'legacy token/value+needs escaping';
+
+		$wpdb->insert(
+			$meta_table,
+			array(
+				'notification_id' => $notification_id,
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_key'        => '_wc_bis_legacy_id',
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				'meta_value'      => (string) $legacy_id,
+			)
+		);
+		$wpdb->insert(
+			$meta_table,
+			array(
+				'notification_id' => $notification_id,
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_key'        => '_wc_bis_legacy_unsub_hash',
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				'meta_value'      => LegacyHash::to_meta_value( $legacy_id, $token ),
+			)
+		);
+
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode, WordPress.PHP.DiscouragedPHPFunctions.urlencode_urlencode -- reproducing the legacy link's own double-encoding.
+		$token_raw = base64_encode( urlencode( $token ) );
+
+		// Prove the fixture actually needs the second urldecode(): base64_decode() alone -
+		// what the shim would produce if that line were deleted - does not recover the token.
+		$this->assertNotSame( $token, base64_decode( $token_raw ), 'Fixture must require urldecode() to recover the real token.' ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- asserting against the shim's own decode step.
+
+		$this->assertTrue( $this->request_raw( $legacy_id, $token_raw, 'notification' ) );
+		$this->assertSame( NotificationStatus::CANCELLED, LegacyStore::get_core_rows()[0]['status'] );
+	}
+
+	/**
+	 * @testdox the feature toggle being off should get the generic notice, never a fatal out of Notification::__construct().
+	 */
+	public function test_feature_toggle_off_gets_the_generic_notice(): void {
+		$legacy_id = $this->seed_legacy_row( 'shopper@example.com' );
+		$this->migrate();
+
+		update_option( 'woocommerce_feature_customer_stock_notifications_enabled', 'no' );
+
+		$this->assertTrue( $this->request( $legacy_id, $this->legacy_token( $legacy_id ), 'notification' ) );
+
+		$this->assert_stale_link_notice();
+		$this->assertSame( NotificationStatus::ACTIVE, LegacyStore::get_core_rows()[0]['status'] );
+	}
+
+	/**
+	 * @testdox a `bis_unsub` link should still get the generic notice once the legacy links flag and hash meta are gone.
+	 */
+	public function test_generic_notice_survives_the_legacy_meta_being_removed(): void {
+		$legacy_id = $this->seed_legacy_row( 'shopper@example.com' );
+		$this->migrate();
+
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		$wpdb->delete( $wpdb->prefix . 'wc_stock_notificationmeta', array( 'meta_key' => '_wc_bis_legacy_unsub_hash' ) );
+		delete_option( 'wc_bis_migration_has_legacy_links' );
+
+		$this->assertTrue( $this->request( $legacy_id, $this->legacy_token( $legacy_id ), 'notification' ) );
+
+		$this->assert_stale_link_notice();
+		$this->assertSame( NotificationStatus::ACTIVE, LegacyStore::get_core_rows()[0]['status'], 'Nothing should be cancelled once resolution is impossible.' );
 	}
 
 	/**

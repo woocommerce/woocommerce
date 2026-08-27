@@ -76,6 +76,25 @@ class LegacyStore {
 	}
 
 	/**
+	 * Create the Core stock notification tables for the current site.
+	 *
+	 * WooCommerce installs these once, so a blog created mid-test never gets them. Cloning
+	 * the main site's definitions keeps this in step with the real schema without
+	 * duplicating it here.
+	 *
+	 * @return void
+	 */
+	public static function create_core_tables(): void {
+		global $wpdb;
+
+		foreach ( array( 'wc_stock_notifications', 'wc_stock_notificationmeta' ) as $table ) {
+			// Table names are $wpdb->prefix-based, never user input.
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery
+			$wpdb->query( "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}{$table} LIKE {$wpdb->base_prefix}{$table}" );
+		}
+	}
+
+	/**
 	 * Drop the three legacy tables.
 	 *
 	 * @return void
