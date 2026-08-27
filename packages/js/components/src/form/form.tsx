@@ -16,6 +16,7 @@ import { ChangeEvent, useRef } from 'react';
 import _setWith from 'lodash/setWith';
 import _get from 'lodash/get';
 import _clone from 'lodash/clone';
+import _toPath from 'lodash/toPath';
 import _isEqual from 'lodash/isEqual';
 import _omit from 'lodash/omit';
 
@@ -49,6 +50,9 @@ function FormComponent< Values extends Record< string, any > = any >(
 	{
 		children,
 		onSubmit = () => {},
+		// Keep these defaults inline: setValues depends on them, so hoisting them
+		// to module constants would make setValue/setValues referentially stable
+		// for consumers that omit the props and change when dependent effects run.
 		onChange = () => {},
 		onChanges = () => {},
 		...props
@@ -59,8 +63,11 @@ function FormComponent< Values extends Record< string, any > = any >(
 	ref: React.Ref< FormRef< Values > >
 ): React.ReactElement | null {
 	const initialValues = useRef( props.initialValues ?? ( {} as Values ) );
+	// The latest logical values, advanced synchronously on every write so
+	// same-stack writes build on each other instead of on the last render.
+	const pendingValuesRef = useRef( initialValues.current );
 	const [ values, setValuesInternal ] = useState< Values >(
-		props.initialValues ?? ( {} as Values )
+		initialValues.current
 	);
 	const [ errors, setErrors ] = useState< FormErrors< Values > >(
 		props.errors || {}
@@ -94,6 +101,7 @@ function FormComponent< Values extends Record< string, any > = any >(
 	) => void = ( newInitialValues, newTouchedFields = {}, newErrors = {} ) => {
 		const newValues = newInitialValues ?? initialValues.current ?? {};
 		initialValues.current = newValues;
+		pendingValuesRef.current = newValues;
 		setValuesInternal( newValues );
 		setTouched( newTouchedFields );
 		setErrors( newErrors );
@@ -110,7 +118,8 @@ function FormComponent< Values extends Record< string, any > = any >(
 
 	const setValues = useCallback(
 		( valuesToSet: Values ) => {
-			const newValues = { ...values, ...valuesToSet };
+			const newValues = { ...pendingValuesRef.current, ...valuesToSet };
+			pendingValuesRef.current = newValues;
 			setValuesInternal( newValues );
 
 			validate( newValues, ( newErrors ) => {
@@ -158,15 +167,27 @@ function FormComponent< Values extends Record< string, any > = any >(
 				}
 			} );
 		},
-		[ values, validate, onChange, props.onChangeCallback ]
+		[ validate, onChange, onChanges, props.onChangeCallback ]
 	);
 
 	const setValue = useCallback(
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		( name: keyof Values, value: any ) => {
-			setValues( _setWith( { ...values }, name, value, _clone ) );
+			const newValues = _setWith(
+				{ ...pendingValuesRef.current },
+				name,
+				value,
+				_clone
+			);
+			// Hand setValues only the entry this write touched so it reports one
+			// change. lodash writes an existing literal key such as 'a.b' in place
+			// rather than as a path, so mirror that when picking the entry.
+			const key = Object.prototype.hasOwnProperty.call( newValues, name )
+				? name
+				: _toPath( name )[ 0 ];
+			setValues( { [ key ]: newValues[ key ] } as Values );
 		},
-		[ values, validate, onChange, props.onChangeCallback ]
+		[ setValues ]
 	);
 
 	const handleChange = useCallback(
@@ -177,7 +198,7 @@ function FormComponent< Values extends Record< string, any > = any >(
 			// Handle native events.
 			if ( isChangeEvent( value ) && value.target ) {
 				if ( value.target.type === 'checkbox' ) {
-					setValue( name, ! _get( values, name ) );
+					setValue( name, ! _get( pendingValuesRef.current, name ) );
 				} else {
 					setValue( name, value.target.value );
 				}
