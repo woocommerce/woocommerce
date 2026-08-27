@@ -145,6 +145,22 @@ describe( 'dataform adapter', () => {
 			expect( container.textContent ).toContain( 'Read this' );
 		} );
 
+		it( 'maps field descriptions to sanitized help elements', () => {
+			const field = buildDataFormField(
+				{
+					...textField,
+					description:
+						'See the <a href="https://woocommerce.com">docs</a>.',
+				},
+				createOptions( [] )
+			);
+
+			const { container } = renderElement( <>{ field.description }</> );
+			const link = container.querySelector( 'a' );
+			expect( link?.textContent ).toBe( 'docs' );
+			expect( container.textContent ).toBe( 'See the docs.' );
+		} );
+
 		it( 'warns and maps an unknown type to a read-only field rendering nothing', () => {
 			const warnSpy = jest
 				.spyOn( console, 'warn' )

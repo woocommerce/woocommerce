@@ -13,6 +13,7 @@ import type {
  * Internal dependencies
  */
 import { error, warn } from './diagnostics';
+import { createSettingsHelpElement } from './html';
 import { NativeSettingsField } from './native-fields';
 import {
 	resolveFieldVisibilityPredicate,
@@ -166,7 +167,7 @@ export const buildDataFormField = (
 	const field: Field< SettingsValues > = {
 		id: settingsField.id,
 		label: settingsField.label,
-		description: settingsField.description,
+		description: createSettingsHelpElement( settingsField.description ),
 		placeholder: settingsField.placeholder,
 		type: descriptor?.type ?? 'text',
 		elements: settingsField.options,
